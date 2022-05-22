@@ -8,7 +8,7 @@ rsync              \
   --verbose        \
   --exclude=".*/"  \
   --delete         \
-  . root@bubelov.com:/var/www/btcmap.org
+  . root@btcmap.org:/var/www/btcmap.org
 
 if [ $? != 0 ]; then
   echo 'Failed to deploy website'
