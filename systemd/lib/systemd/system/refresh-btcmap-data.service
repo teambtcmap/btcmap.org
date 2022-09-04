@@ -1,5 +1,0 @@
-[Unit]
-Description=Refresh BTC Map data
-
-[Service]
-ExecStart=/usr/local/bin/refresh-btcmap-data
