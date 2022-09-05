@@ -8,7 +8,7 @@
 - prettier
 - fontawesome
 - openlayers
-- openstreetmaps
+- openstreetmap
 
 ## Getting started
 

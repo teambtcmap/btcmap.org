@@ -37,7 +37,7 @@
 				<h2 class="text-primary text-2xl">
 					Our apps and the underlying data are free and open source.
 					<br /><br />
-					We use OpenStreetMaps to properly tag places where you can spend Bitcoin and then we show you
+					We use OpenStreetMap to properly tag places where you can spend Bitcoin and then we show you
 					that data in our beautiful apps.
 				</h2>
 			</div>
