@@ -6,7 +6,7 @@
 
 <div class="mb-20">
 	<div
-		class="bg-offwhite rounded-2xl p-5 mb-5 w-full md:w-80 h-60 flex justify-center items-center"
+		class="bg-offwhite rounded-2xl p-5 mb-5 w-full md:w-[22rem] h-60 flex justify-center items-center"
 	>
 		<img src="/images/{image}.png" alt={image} />
 	</div>
