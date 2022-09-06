@@ -4,5 +4,5 @@ COPY package.json /app
 COPY yarn.lock /app
 RUN yarn
 COPY . /app
-CMD yarn build 
+CMD yarn dev 
 EXPOSE 5173

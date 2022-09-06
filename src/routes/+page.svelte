@@ -13,28 +13,25 @@
 </script>
 
 <div class="bg-teal">
-	<img src="/images/street-map.svg" alt="roads" class="absolute top-0 right-0" />
-	<div class="w-10/12 mx-auto relative">
+	<img src="/images/street-map.svg" alt="roads" class="absolute top-0 right-0 2xl:w-1/2" />
+	<div class="w-10/12 xl:w-[1200px] mx-auto relative">
 		<Header />
 
-		<section id="hero" class="pt-10 xl:pt-0 xl:flex justify-center items-center xl:space-x-10">
-			<div class="space-y-10 md:w-[700px] mx-auto">
-				<h2 class="text-3xl md:text-3xl text-highlight">"One map to rule them all!"</h2>
-				<h1 class="text-4xl md:text-6xl text-heading">
+		<section id="hero" class="pt-10 xl:pt-0 xl:flex justify-center items-center xl:space-x-20">
+			<div class="w-full md:w-[700px] xl:w-full mx-auto">
+				<h1 class="text-4xl md:text-5xl font-semibold text-heading">
 					We're on a mission to enable Bitcoiners to easily <span class="gradient"
 						>find places to</span
 					> <span class="gradient">spends sats</span> wherever they are on the planet.
 				</h1>
-
 				<a
 					href="https://wiki.openstreetmap.org/wiki/How_to_contribute"
 					target="_blank"
 					rel="noreferrer"
-					class="block text-link hover:text-hover text-2xl"
+					class="my-16 block text-link hover:text-hover text-2xl"
 					>Add a location <i class="ml-2 fa-solid fa-arrow-right" /></a
 				>
-
-				<h2 class="text-primary text-2xl">
+				<h2 class="text-primary text-2xl font-semibold">
 					Our apps and the underlying data are free and open source.
 					<br /><br />
 					We use OpenStreetMap to properly tag places where you can spend Bitcoin and then we show you
@@ -48,8 +45,8 @@
 			/>
 		</section>
 
-		<section id="cards" class="pb-10 pt-10 md:pb-20 flex justify-center">
-			<div class="lg:flex flex-wrap justify-center items-center lg:space-x-20">
+		<section id="cards" class="pb-10 pt-10 md:pb-20 flex xl:block justify-center">
+			<div class="lg:flex flex-wrap justify-center items-center lg:space-x-10 xl:space-x-0 xl:grid grid-cols-3 gap-5">
 				{#each landingCards as card}
 					<LandingCard image={card.image} text={card.text} link={card.link} />
 				{/each}
