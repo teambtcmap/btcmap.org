@@ -30,7 +30,7 @@
 					href="https://wiki.openstreetmap.org/wiki/How_to_contribute"
 					target="_blank"
 					rel="noreferrer"
-					class="block text-link text-2xl"
+					class="block text-link hover:text-hover text-2xl"
 					>Add a location <i class="ml-2 fa-solid fa-arrow-right" /></a
 				>
 

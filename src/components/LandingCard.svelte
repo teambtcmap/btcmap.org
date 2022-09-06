@@ -12,7 +12,9 @@
 	</div>
 
 	{#if link}
-		<a href={link} target="_blank" rel="noreferrer" class="text-link text-2xl">{text}</a>
+		<a href={link} target="_blank" rel="noreferrer" class="text-link hover:text-hover text-2xl"
+			>{text}</a
+		>
 	{:else}
 		<p class="text-primary text-2xl">{text}</p>
 	{/if}
