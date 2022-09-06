@@ -28,7 +28,7 @@
 					href="https://wiki.openstreetmap.org/wiki/How_to_contribute"
 					target="_blank"
 					rel="noreferrer"
-					class="my-16 block text-link hover:text-hover text-2xl"
+					class="my-16 block text-link hover:text-hover text-2xl font-semibold"
 					>Add a location <i class="ml-2 fa-solid fa-arrow-right" /></a
 				>
 				<h2 class="text-primary text-2xl font-semibold">
@@ -46,7 +46,9 @@
 		</section>
 
 		<section id="cards" class="pb-10 pt-10 md:pb-20 flex xl:block justify-center">
-			<div class="lg:flex flex-wrap justify-center items-center lg:space-x-10 xl:space-x-0 xl:grid grid-cols-3 gap-5">
+			<div
+				class="lg:flex flex-wrap justify-center items-center lg:space-x-10 xl:space-x-0 xl:grid grid-cols-3 gap-5"
+			>
 				{#each landingCards as card}
 					<LandingCard image={card.image} text={card.text} link={card.link} />
 				{/each}
