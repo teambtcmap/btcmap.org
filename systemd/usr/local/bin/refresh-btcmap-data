@@ -1,3 +1,0 @@
-#!/bin/bash
-
-curl --location --output /var/www/btcmap.org/data.json 'https://github.com/bubelov/btcmap-data/raw/main/data.json'
