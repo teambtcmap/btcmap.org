@@ -1,13 +1,14 @@
 <script>
 	import { Header, LandingCard, Footer } from '$comp';
+	import { socials, fdroid } from '$lib/store';
 
 	const landingCards = [
 		{
 			image: 'fdroid',
 			text: 'Get our Android app on F-Droid',
-			link: 'https://f-droid.org/en/packages/org.btcmap/'
+			link: $fdroid
 		},
-		{ image: 'openlayers', text: 'Join as a contributor', link: 'https://github.com/teambtcmap' },
+		{ image: 'openlayers', text: 'Join as a contributor', link: $socials.discord },
 		{ image: 'web-app', text: 'Web app coming soon!' }
 	];
 </script>
@@ -22,7 +23,7 @@
 				<h1 class="text-4xl md:text-5xl font-semibold text-heading">
 					We're on a mission to enable Bitcoiners to easily <span class="gradient"
 						>find places to</span
-					> <span class="gradient">spend sats</span> wherever they are on the planet.
+					> <span class="gradient">spend sats</span>.
 				</h1>
 				<a
 					href="https://wiki.openstreetmap.org/wiki/How_to_contribute"
