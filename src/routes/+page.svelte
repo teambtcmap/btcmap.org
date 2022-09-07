@@ -13,7 +13,7 @@
 </script>
 
 <div class="bg-teal">
-	<img src="/images/street-map.svg" alt="roads" class="absolute top-0 right-0 2xl:w-1/2" />
+	<img src="/images/street-map.svg" alt="roads" class="absolute top-0 right-0 2xl:w-2/3" />
 	<div class="w-10/12 xl:w-[1200px] mx-auto relative">
 		<Header />
 
