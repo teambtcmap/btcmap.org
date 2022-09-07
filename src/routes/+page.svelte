@@ -17,8 +17,8 @@
 	<div class="w-10/12 xl:w-[1200px] mx-auto relative">
 		<Header />
 
-		<section id="hero" class="pt-10 xl:pt-0 xl:flex justify-center items-center xl:space-x-20">
-			<div class="w-full md:w-[700px] xl:w-full mx-auto">
+		<section id="hero" class="pb-20 pt-10 xl:pt-0 xl:flex justify-between items-center">
+			<div class="w-full xl:w-[500px] mx-auto xl:mx-0">
 				<h1 class="text-4xl md:text-5xl font-semibold text-heading">
 					We're on a mission to enable Bitcoiners to easily <span class="gradient"
 						>find places to</span
@@ -41,7 +41,7 @@
 			<img
 				src="/images/hero-mobile-example.png"
 				alt="mobile example"
-				class="mx-auto mt-10 xl:mt-0"
+				class="mx-auto xl:mx-0 mt-10 xl:mt-0 w-96"
 			/>
 		</section>
 
