@@ -4,5 +4,6 @@ COPY package.json /app
 COPY yarn.lock /app
 RUN yarn
 COPY . /app
-CMD yarn dev 
-EXPOSE 5173
+RUN yarn build
+CMD node /app/build/index.js 
+EXPOSE 3000
