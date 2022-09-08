@@ -26,7 +26,7 @@
 					> <span class="gradient">spend sats</span>.
 				</h1>
 				<a
-					href="https://wiki.openstreetmap.org/wiki/How_to_contribute"
+					href="https://github.com/teambtcmap/btcmap.org/wiki/Tagging-Instructions"
 					target="_blank"
 					rel="noreferrer"
 					class="my-16 block text-link hover:text-hover text-2xl font-semibold"
@@ -42,7 +42,7 @@
 			<img
 				src="/images/hero-mobile-example.png"
 				alt="mobile example"
-				class="mx-auto xl:mx-0 mt-10 xl:mt-0 w-96"
+				class="drop-shadow-2xl mx-auto xl:mx-0 mt-10 xl:mt-0 w-96"
 			/>
 		</section>
 

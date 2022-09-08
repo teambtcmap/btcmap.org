@@ -2,7 +2,7 @@ import { writable, readable } from 'svelte/store';
 
 export const socials = readable({
 	twitter: 'https://twitter.com/BTCMapDotOrg',
-	discord: 'https://discord.gg/9mHeTgX2zb',
+	discord: 'https://discord.gg/wPqva83uzq',
 	github: 'https://github.com/teambtcmap'
 });
 
