@@ -2,8 +2,6 @@
 
 git pull
 
-sudo docker build -t btcmap .
+sudo docker-compose build
 
-sudo docker container rm -f btcmap
-
-sudo docker run -d -p 3333:3000 --name btcmap btcmap
+sudo docker-compose up -d
