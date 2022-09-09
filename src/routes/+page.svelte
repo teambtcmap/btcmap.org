@@ -1,5 +1,5 @@
 <script>
-	import { Header, LandingCard, Footer } from '$comp';
+	import { Header, LandingCard, Footer, PrimaryButton } from '$comp';
 	import { socials, fdroid } from '$lib/store';
 
 	const landingCards = [
@@ -25,13 +25,11 @@
 						>find places to</span
 					> <span class="gradient">spend sats</span>.
 				</h1>
-				<a
-					href="https://github.com/teambtcmap/btcmap.org/wiki/Tagging-Instructions"
-					target="_blank"
-					rel="noreferrer"
-					class="my-16 block text-link hover:text-hover text-2xl font-semibold"
-					>Add a location <i class="ml-2 fa-solid fa-arrow-right" /></a
-				>
+				<PrimaryButton
+					text="Add a location"
+					link="https://github.com/teambtcmap/btcmap.org/wiki/Tagging-Instructions"
+					style="my-16 w-52"
+				/>
 				<h2 class="text-primary text-2xl font-semibold">
 					Our apps and the underlying data are free and open source.
 					<br /><br />
