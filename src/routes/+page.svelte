@@ -20,10 +20,8 @@
 
 		<section id="hero" class="pb-20 pt-10 xl:pt-0 xl:flex justify-between items-center">
 			<div class="w-full xl:w-[500px] mx-auto xl:mx-0">
-				<h1 class="text-4xl md:text-5xl font-semibold text-heading">
-					We're on a mission to enable Bitcoiners to easily <span class="gradient"
-						>find places to</span
-					> <span class="gradient">spend sats</span>.
+				<h1 class="text-4xl md:text-5xl font-semibold text-heading gradient">
+					Easily find places to spend sats anywhere on the planet.
 				</h1>
 				<PrimaryButton
 					text="Add a location"
