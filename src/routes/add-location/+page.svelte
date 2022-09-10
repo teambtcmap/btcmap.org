@@ -1,7 +1,22 @@
 <script>
 	import { Header, Footer, PrimaryButton } from '$comp';
 
-	const submitForm = () => {};
+	let onchain;
+	let lightning;
+	let nfc;
+	let noMethodSelected = false;
+
+	const handleCheckboxClick = () => {
+		noMethodSelected = false;
+	};
+
+	const submitForm = (e) => {
+		e.preventDefault();
+
+		if (!onchain.checked && !lightning.checked && !nfc.checked) {
+			noMethodSelected = true;
+		}
+	};
 </script>
 
 <div class="bg-teal">
@@ -75,18 +90,31 @@
 
 					<fieldset>
 						<legend class="mb-2 block font-semibold">Select one or more options</legend>
+						{#if noMethodSelected}
+							<span class="text-error">Please fix this...</span>
+						{/if}
 						<div class="md:space-x-5 space-y-2 md:space-y-0">
 							<div class="md:inline">
-								<input type="checkbox" name="onchain" />
+								<input
+									type="checkbox"
+									name="onchain"
+									bind:this={onchain}
+									on:click={handleCheckboxClick}
+								/>
 								<label for="onchain" class="ml-1"><i class="fa-brands fa-bitcoin" /> On-chain</label
 								>
 							</div>
 							<div class="md:inline">
-								<input type="checkbox" name="lightning" />
+								<input
+									type="checkbox"
+									name="lightning"
+									bind:this={lightning}
+									on:click={handleCheckboxClick}
+								/>
 								<label for="lightning" class="ml-1"><i class="fa-solid fa-bolt" /> Lightning</label>
 							</div>
 							<div class="md:inline">
-								<input type="checkbox" name="nfc" />
+								<input type="checkbox" name="nfc" bind:this={nfc} on:click={handleCheckboxClick} />
 								<label for="nfc" class="ml-1"><i class="fa-solid fa-credit-card" /> NFC</label>
 							</div>
 						</div>
