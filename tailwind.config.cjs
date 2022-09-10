@@ -10,7 +10,9 @@ module.exports = {
 				teal: '#E4EBEC',
 				offwhite: '#F0F6F6',
 				heading: '#144046',
-				hover: '#00B7D2'
+				hover: '#00B7D2',
+				grey: '#9FB4B6',
+				input: '#BDD2D4'
 			}
 		}
 	},

@@ -23,11 +23,7 @@
 				<h1 class="text-4xl md:text-5xl font-semibold text-heading gradient">
 					Easily find places to spend sats anywhere on the planet.
 				</h1>
-				<PrimaryButton
-					text="Add a location"
-					link="https://github.com/teambtcmap/btcmap.org/wiki/Tagging-Instructions"
-					style="my-16 w-52"
-				/>
+				<PrimaryButton text="Add a location" link="/add-location" style="my-16 w-52 text-2xl p-4" />
 				<h2 class="text-primary text-2xl font-semibold">
 					Our apps and the underlying data are free and open source.
 					<br /><br />

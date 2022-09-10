@@ -1,12 +1,27 @@
 <script>
 	export let text;
-	export let link;
+	export let link = undefined;
 	export let style;
+	export let click = undefined;
+	export let type = undefined;
+	export let external = undefined;
 </script>
 
-<a
-	href={link}
-	class="block bg-link hover:bg-hover text-2xl text-white text-center font-semibold rounded-xl p-4 {style}"
->
-	{text}
-</a>
+{#if link}
+	<a
+		href={link}
+		target={external ? '_blank' : '_self'}
+		rel={external ? 'noreferrer' : ''}
+		class="block bg-link hover:bg-hover text-white text-center font-semibold rounded-xl {style}"
+	>
+		{text}
+	</a>
+{:else}
+	<button
+		on:click={click}
+		{type}
+		class="block bg-link hover:bg-hover text-white text-center font-semibold rounded-xl {style}"
+	>
+		{text}
+	</button>
+{/if}
