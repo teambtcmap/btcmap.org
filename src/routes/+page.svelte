@@ -20,11 +20,11 @@
 
 		<section id="hero" class="pb-20 pt-10 xl:pt-0 xl:flex justify-between items-center">
 			<div class="w-full xl:w-[500px] mx-auto xl:mx-0">
-				<h1 class="text-4xl md:text-5xl font-semibold text-heading gradient">
+				<h1 class="text-4xl md:text-5xl font-semibold text-heading gradient !leading-tight">
 					Easily find places to spend sats anywhere on the planet.
 				</h1>
 				<PrimaryButton text="Add a location" link="/add-location" style="my-16 w-52 text-2xl p-4" />
-				<h2 class="text-primary text-2xl font-semibold">
+				<h2 class="text-primary text-xl font-semibold">
 					Our apps and the underlying data are free and open source.
 					<br /><br />
 					We use OpenStreetMap to properly tag places where you can spend Bitcoin and then we show you
@@ -34,7 +34,7 @@
 			<img
 				src="/images/hero-mobile-example.png"
 				alt="mobile example"
-				class="drop-shadow-2xl mx-auto xl:mx-0 mt-10 xl:mt-0 w-96"
+				class="drop-shadow-2xl mx-auto xl:mx-0 mt-10 xl:mt-0 w-80"
 			/>
 		</section>
 
