@@ -122,7 +122,6 @@
 								type="url"
 								name="location"
 								placeholder="e.g. https://google.com/maps/..."
-								required
 								class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
 								bind:this={url}
 							/>
@@ -130,7 +129,12 @@
 
 						<div>
 							<label for="type" class="mb-2 block font-semibold">Business Type</label>
-							<select name="type" required class="focus:outline-link py-1 w-full" bind:this={type}>
+							<select
+								name="type"
+								required
+								class="focus:outline-link bg-white border-2 border-input rounded-2xl py-3 w-full"
+								bind:this={type}
+							>
 								<option value="">Please select an option</option>
 								<option value="Cafe">Cafe</option>
 								<option value="Restaurant">Restaurant</option>
@@ -151,10 +155,11 @@
 									<input
 										type="checkbox"
 										name="onchain"
+										id="onchain"
 										bind:this={onchain}
 										on:click={handleCheckboxClick}
 									/>
-									<label for="onchain" class="ml-1"
+									<label for="onchain" class="ml-1 cursor-pointer"
 										><i class="fa-brands fa-bitcoin" /> On-chain</label
 									>
 								</div>
@@ -162,10 +167,11 @@
 									<input
 										type="checkbox"
 										name="lightning"
+										id="lightning"
 										bind:this={lightning}
 										on:click={handleCheckboxClick}
 									/>
-									<label for="lightning" class="ml-1"
+									<label for="lightning" class="ml-1 cursor-pointer"
 										><i class="fa-solid fa-bolt" /> Lightning</label
 									>
 								</div>
@@ -173,10 +179,13 @@
 									<input
 										type="checkbox"
 										name="nfc"
+										id="nfc"
 										bind:this={nfc}
 										on:click={handleCheckboxClick}
 									/>
-									<label for="nfc" class="ml-1"><i class="fa-solid fa-credit-card" /> NFC</label>
+									<label for="nfc" class="ml-1 cursor-pointer"
+										><i class="fa-solid fa-credit-card" /> NFC</label
+									>
 								</div>
 							</div>
 						</fieldset>
@@ -222,7 +231,7 @@
 							<p class="w-full md:w-[325px] mb-10">
 								Contribute changes directly to OSM - like a 😎 boss. Who needs forms anyway.
 							</p>
-							<img src="/images/supercoder.png" alt="shadowy supercoder" class="mb-10 mx-auto" />
+							<img src="/images/supercoder.svg" alt="shadowy supercoder" class="mb-10 mx-auto" />
 							<PrimaryButton
 								text="See Wiki for instructions"
 								link="https://github.com/teambtcmap/btcmap.org/wiki/Tagging-Instructions"
