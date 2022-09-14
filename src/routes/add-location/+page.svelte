@@ -209,7 +209,7 @@
 				<section id="supercoder" class="mx-auto w-full md:w-2/3 lg:w-1/2 pt-14 lg:pt-0">
 					<div class="lg:flex justify-end">
 						<div>
-							<h2 class="text-3xl font-semibold mb-5">Shadowy supercoder?</h2>
+							<h2 class="text-3xl font-semibold mb-5">Shadowy supertagger?</h2>
 							<p class="w-full md:w-[325px] mb-10">
 								Contribute changes directly to OSM - like a 😎 boss. Who needs forms anyway.
 							</p>
