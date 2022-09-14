@@ -85,132 +85,135 @@
 					id="noob"
 					class="mx-auto w-full md:w-2/3 lg:w-1/2 border-b lg:border-b-0 pb-14 lg:pb-0 lg:border-r border-input"
 				>
-					<h2 class="text-3xl font-semibold mb-5">Noob?</h2>
-					<p class="w-full md:w-[300px] mb-10">
-						Fill out the following form and one of our volunteer community members will add your
-						location to the map.
-					</p>
+					<div class="lg:w-10/12 xl:w-3/4">
+						<h2 class="text-3xl font-semibold mb-5">Noob?</h2>
 
-					<form on:submit={submitForm} class="space-y-5 w-full lg:w-10/12 xl:w-3/4">
-						<div>
-							<label for="name" class="mb-2 block font-semibold">Merchant Name</label>
-							<input
-								type="text"
-								name="name"
-								placeholder="Satoshi's Comics"
-								required
-								class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
-								bind:this={name}
-							/>
-						</div>
-						<div>
-							<label for="address" class="mb-2 block font-semibold">Address</label>
-							<input
-								type="text"
-								name="address"
-								placeholder="2100 Freedom Drive..."
-								required
-								class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
-								bind:this={address}
-							/>
-						</div>
-						<div>
-							<label for="location" class="mb-2 block font-semibold"
-								>Location URL <span class="font-normal">(optional)</span></label
-							>
-							<input
-								type="url"
-								name="location"
-								placeholder="e.g. https://google.com/maps/..."
-								class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
-								bind:this={url}
-							/>
-						</div>
+						<p class="w-full mb-10">
+							Fill out the following form and one of our volunteer community members will add your
+							location to the map.
+						</p>
 
-						<fieldset>
-							<legend class="mb-2 block font-semibold">Select one or more options</legend>
-							{#if noMethodSelected}
-								<span class="text-error">Please fix this...</span>
-							{/if}
-							<div class="md:space-x-5 space-y-2 md:space-y-0">
-								<div class="md:inline">
-									<input
-										type="checkbox"
-										name="onchain"
-										id="onchain"
-										bind:this={onchain}
-										on:click={handleCheckboxClick}
-									/>
-									<label for="onchain" class="ml-1 cursor-pointer"
-										><i class="fa-brands fa-bitcoin" /> On-chain</label
-									>
-								</div>
-								<div class="md:inline">
-									<input
-										type="checkbox"
-										name="lightning"
-										id="lightning"
-										bind:this={lightning}
-										on:click={handleCheckboxClick}
-									/>
-									<label for="lightning" class="ml-1 cursor-pointer"
-										><i class="fa-solid fa-bolt" /> Lightning</label
-									>
-								</div>
-								<div class="md:inline">
-									<input
-										type="checkbox"
-										name="nfc"
-										id="nfc"
-										bind:this={nfc}
-										on:click={handleCheckboxClick}
-									/>
-									<label for="nfc" class="ml-1 cursor-pointer"
-										><i class="fa-solid fa-credit-card" /> NFC</label
-									>
-								</div>
+						<form on:submit={submitForm} class="space-y-5 w-full">
+							<div>
+								<label for="name" class="mb-2 block font-semibold">Merchant Name</label>
+								<input
+									type="text"
+									name="name"
+									placeholder="Satoshi's Comics"
+									required
+									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+									bind:this={name}
+								/>
 							</div>
-						</fieldset>
+							<div>
+								<label for="address" class="mb-2 block font-semibold">Address</label>
+								<input
+									type="text"
+									name="address"
+									placeholder="2100 Freedom Drive..."
+									required
+									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+									bind:this={address}
+								/>
+							</div>
+							<div>
+								<label for="location" class="mb-2 block font-semibold"
+									>Location URL <span class="font-normal">(optional)</span></label
+								>
+								<input
+									type="url"
+									name="location"
+									placeholder="e.g. https://google.com/maps/..."
+									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+									bind:this={url}
+								/>
+							</div>
 
-						<div>
-							<label for="email" class="mb-2 block font-semibold"
-								>Twitter handle <span class="font-normal">(optional)</span></label
-							>
-							<input
-								type="type"
-								name="twitter"
-								placeholder="@BTCMapDotOrg"
-								class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
-								bind:this={twitter}
-							/>
-						</div>
-						<div>
-							<label for="notes" class="mb-2 block font-semibold"
-								>Notes <span class="font-normal">(optional)</span></label
-							>
-							<textarea
-								name="notes"
-								placeholder="Any other relevant details? Website URL, business type etc."
-								rows="5"
-								class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
-								bind:this={notes}
-							/>
-						</div>
+							<fieldset>
+								<legend class="mb-2 block font-semibold">Select one or more options</legend>
+								{#if noMethodSelected}
+									<span class="text-error">Please fix this...</span>
+								{/if}
+								<div class="md:space-x-5 space-y-2 md:space-y-0">
+									<div class="md:inline">
+										<input
+											type="checkbox"
+											name="onchain"
+											id="onchain"
+											bind:this={onchain}
+											on:click={handleCheckboxClick}
+										/>
+										<label for="onchain" class="ml-1 cursor-pointer"
+											><i class="fa-brands fa-bitcoin" /> On-chain</label
+										>
+									</div>
+									<div class="md:inline">
+										<input
+											type="checkbox"
+											name="lightning"
+											id="lightning"
+											bind:this={lightning}
+											on:click={handleCheckboxClick}
+										/>
+										<label for="lightning" class="ml-1 cursor-pointer"
+											><i class="fa-solid fa-bolt" /> Lightning</label
+										>
+									</div>
+									<div class="md:inline">
+										<input
+											type="checkbox"
+											name="nfc"
+											id="nfc"
+											bind:this={nfc}
+											on:click={handleCheckboxClick}
+										/>
+										<label for="nfc" class="ml-1 cursor-pointer"
+											><i class="fa-solid fa-credit-card" /> NFC</label
+										>
+									</div>
+								</div>
+							</fieldset>
 
-						<PrimaryButton
-							loading={submitting}
-							disabled={submitting}
-							text="Submit Location"
-							style="w-full py-3"
-						/>
-					</form>
+							<div>
+								<label for="email" class="mb-2 block font-semibold"
+									>Twitter handle <span class="font-normal">(optional)</span></label
+								>
+								<input
+									type="type"
+									name="twitter"
+									placeholder="@BTCMapDotOrg"
+									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+									bind:this={twitter}
+								/>
+							</div>
+							<div>
+								<label for="notes" class="mb-2 block font-semibold"
+									>Notes <span class="font-normal">(optional)</span></label
+								>
+								<textarea
+									name="notes"
+									placeholder="Any other relevant details? Website URL, business type etc."
+									rows="5"
+									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+									bind:this={notes}
+								/>
+							</div>
+
+							<PrimaryButton
+								loading={submitting}
+								disabled={submitting}
+								text="Submit Location"
+								style="w-full py-3"
+							/>
+						</form>
+					</div>
 				</section>
 
 				<section id="supercoder" class="mx-auto w-full md:w-2/3 lg:w-1/2 pt-14 lg:pt-0">
 					<div class="lg:flex justify-end">
-						<div>
-							<h2 class="text-3xl font-semibold mb-5">Shadowy supertagger?</h2>
-							<p class="w-full md:w-[325px] mb-10">
+						<div class="lg:w-10/12 xl:w-3/4">
+							<h2 class="text-3xl font-semibold mb-5 lg:text-right">Shadowy supertagger?</h2>
+							<p class="w-full mb-10">
 								Contribute changes directly to OSM - like a 😎 boss. Who needs forms anyway.
 							</p>
 							<img src="/images/supercoder.svg" alt="shadowy supercoder" class="mb-10 mx-auto" />
