@@ -7,7 +7,6 @@
 	let name;
 	let address;
 	let url;
-	let type;
 	let methods = [];
 	let onchain;
 	let lightning;
@@ -44,7 +43,6 @@
 					name: name.value,
 					address: address.value,
 					url: url.value,
-					type: type.value,
 					methods: methods,
 					twitter: twitter.value
 						? twitter.value.startsWith('@')
@@ -117,7 +115,9 @@
 							/>
 						</div>
 						<div>
-							<label for="location" class="mb-2 block font-semibold">Location URL</label>
+							<label for="location" class="mb-2 block font-semibold"
+								>Location URL <span class="font-normal">(optional)</span></label
+							>
 							<input
 								type="url"
 								name="location"
@@ -125,24 +125,6 @@
 								class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
 								bind:this={url}
 							/>
-						</div>
-
-						<div>
-							<label for="type" class="mb-2 block font-semibold">Business Type</label>
-							<select
-								name="type"
-								required
-								class="focus:outline-link bg-white border-2 border-input rounded-2xl py-3 w-full"
-								bind:this={type}
-							>
-								<option value="">Please select an option</option>
-								<option value="Cafe">Cafe</option>
-								<option value="Restaurant">Restaurant</option>
-								<option value="Fast Food">Fast Food</option>
-								<option value="Bar">Bar</option>
-								<option value="Supermarket">Supermarket</option>
-								<option value="Other">Other</option>
-							</select>
 						</div>
 
 						<fieldset>
@@ -208,7 +190,7 @@
 							>
 							<textarea
 								name="notes"
-								placeholder="Any other relevant details? Website URL etc."
+								placeholder="Any other relevant details? Website URL, business type etc."
 								rows="5"
 								class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
 								bind:this={notes}
