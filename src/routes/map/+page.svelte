@@ -20,7 +20,7 @@
 				.addTo(map);
 
 			// change broken marker image path in prod
-			L.Icon.Default.prototype.ImagePath = '/icons';
+      L.Icon.Default.prototype.options.imagePath = '/icons/';
 
 			// adds locate button to map
 			L.control.locate().addTo(map);
