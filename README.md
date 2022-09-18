@@ -7,7 +7,7 @@
 - yarn
 - prettier
 - fontawesome
-- openlayers
+- leafletjs
 - openstreetmap
 
 ## Getting started
