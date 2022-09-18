@@ -73,7 +73,7 @@
 				<a href="/" class="text-link hover:text-hover font-semibold"
 					><i class="fa-solid fa-house mr-2" /> Home</a
 				> <i class="fa-solid fa-chevron-right text-grey" />
-				<span class="font-semibold">Add a location</span>
+				<span class="font-semibold">Add location</span>
 			</div>
 
 			<h1 class="text-4xl md:text-5xl font-semibold mt-8 text-center lg:text-left">
