@@ -6,7 +6,7 @@
 		{ title: 'APK', link: $apps.direct, icon: 'fa-solid fa-download' },
 		{ title: 'F-Droid', link: $apps.fdroid, icon: 'fa-brands fa-android' },
 		{ title: 'iOS', link: '', icon: 'fa-brands fa-apple', disabled: true },
-		{ title: 'Web', link: '', icon: 'fa-solid fa-globe', disabled: true }
+		{ title: 'Web', link: $apps.web, icon: 'fa-solid fa-globe' }
 	];
 </script>
 
