@@ -36,19 +36,11 @@
 			fullscreenButton.innerHTML = '<i class="w-[16px] h-[16px] fa-solid fa-expand"></i>';
 			fullscreenButton.onclick = function toggleFullscreen() {
 				if (!document.fullscreenElement) {
-					mapElement
-						.requestFullscreen()
-						.then(
-							() =>
-								(fullscreenButton.innerHTML =
-									'<i class="w-[16px] h-[16px] fa-solid fa-compress"></i>')
-						)
-						.catch((err) => {
-							alert(`Error attempting to enable fullscreen mode: ${err.message} (${err.name})`);
-						});
+					mapElement.requestFullscreen().catch((err) => {
+						alert(`Error attempting to enable fullscreen mode: ${err.message} (${err.name})`);
+					});
 				} else {
 					document.exitFullscreen();
-					fullscreenButton.innerHTML = '<i class="w-[16px] h-[16px] fa-solid fa-expand"></i>';
 				}
 			};
 			document.querySelector('.leaflet-control-zoom').append(fullscreenButton);
