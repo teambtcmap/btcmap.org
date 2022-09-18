@@ -29,7 +29,11 @@
 						<div class="space-y-1 text-body font-semibold text-center my-2 md:my-0 mx-2">
 							<p>{app.title}</p>
 							{#if !app.disabled}
-								<a href={app.link} target="_blank" rel="noreferrer" class="block"
+								<a
+									href={app.link}
+									target={app.title === 'Web' ? '_self' : '_blank'}
+									rel="noreferrer"
+									class="block"
 									><i
 										class="bg-link hover:bg-hover p-3 rounded-full w-8 h-8 text-white {app.icon}"
 									/></a
