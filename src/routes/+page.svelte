@@ -24,7 +24,6 @@
 				<h1 class="text-4xl md:text-5xl font-semibold text-heading gradient !leading-tight">
 					Easily find places to spend sats anywhere on the planet.
 				</h1>
-				<span />
 				<div class="bg-white/30 rounded-2xl py-6 flex flex-wrap justify-center my-16">
 					{#each appOptions as app}
 						<div class="space-y-1 text-body font-semibold text-center my-2 md:my-0 mx-2">
