@@ -19,6 +19,9 @@
 				.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 })
 				.addTo(map);
 
+			// change broken marker image path in prod
+			L.Icon.Default.ImagePath = '/icons';
+
 			// adds locate button to map
 			L.control.locate().addTo(map);
 
