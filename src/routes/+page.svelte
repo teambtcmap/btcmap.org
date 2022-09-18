@@ -45,7 +45,7 @@
 					<div class="space-y-1 my-2 mx-2 md:my-0 md:mx-0 md:ml-3 md:mr-2">
 						<p class="text-body font-semibold text-center">Contribute</p>
 						<PrimaryButton
-							text="Add a location"
+							text="Add location"
 							style="py-3 px-4 rounded-full"
 							link="/add-location"
 						/>
