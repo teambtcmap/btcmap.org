@@ -1,20 +1,21 @@
 <script>
-	import { Header, LandingCard, Footer, PrimaryButton } from '$comp';
-	import { socials, fdroid } from '$lib/store';
+	import { Header, Footer, PrimaryButton } from '$comp';
+	import { socials, apps } from '$lib/store';
 
-	const landingCards = [
-		{
-			image: 'fdroid',
-			text: 'Get our Android app on F-Droid',
-			link: $fdroid
-		},
-		{ image: 'openlayers', text: 'Join as a contributor', link: $socials.discord },
-		{ image: 'web-app', text: 'Web app coming soon!' }
+	const appOptions = [
+		{ title: 'Direct', link: $apps.direct, icon: 'fa-solid fa-download' },
+		{ title: 'F-Droid', link: $apps.fdroid, icon: 'fa-brands fa-android' },
+		{ title: 'iOS', link: '', icon: 'fa-brands fa-apple', disabled: true },
+		{ title: 'Web app', link: '', icon: 'fa-solid fa-globe', disabled: true }
 	];
 </script>
 
-<div class="bg-teal">
-	<img src="/images/street-map.svg" alt="roads" class="absolute top-0 right-0 2xl:w-[1200px]" />
+<div class="bg-teal street-map">
+	<img
+		src="/images/street-map.svg"
+		alt="roads"
+		class="xl:hidden absolute top-0 right-0 2xl:w-[1200px]"
+	/>
 	<div class="w-10/12 xl:w-[1200px] mx-auto relative">
 		<Header />
 
@@ -23,7 +24,33 @@
 				<h1 class="text-4xl md:text-5xl font-semibold text-heading gradient !leading-tight">
 					Easily find places to spend sats anywhere on the planet.
 				</h1>
-				<PrimaryButton text="Add a location" link="/add-location" style="my-16 w-52 text-2xl p-4" />
+				<div class="bg-white/30 rounded-2xl py-6 flex flex-wrap justify-center my-16">
+					{#each appOptions as app}
+						<div class="space-y-1 text-body font-semibold text-center my-2 md:my-0 mx-2">
+							<p>{app.title}</p>
+							{#if !app.disabled}
+								<a href={app.link} target="_blank" rel="noreferrer" class="block"
+									><i
+										class="bg-link hover:bg-hover p-3 rounded-full w-8 h-8 text-white {app.icon}"
+									/></a
+								>
+							{:else}
+								<span class="block"
+									><i class="bg-link/30 p-3 rounded-full w-8 h-8 text-white {app.icon}" /></span
+								>
+								<p>Soon!</p>
+							{/if}
+						</div>
+					{/each}
+					<div class="space-y-1 my-2 mx-2 md:my-0 md:mx-0 md:ml-3 md:mr-2">
+						<p class="text-body font-semibold text-center">Contribute</p>
+						<PrimaryButton
+							text="Add a location"
+							style="py-3 px-4 rounded-full"
+							link="/add-location"
+						/>
+					</div>
+				</div>
 				<h2 class="text-primary text-xl font-semibold">
 					Our apps and the underlying data are free and open source.
 					<br /><br />
@@ -38,16 +65,6 @@
 			/>
 		</section>
 
-		<section id="cards" class="pb-10 pt-10 md:pb-20 flex xl:block justify-center">
-			<div
-				class="lg:flex flex-wrap justify-center items-center lg:space-x-10 xl:space-x-0 xl:grid grid-cols-3 gap-5"
-			>
-				{#each landingCards as card}
-					<LandingCard image={card.image} text={card.text} link={card.link} />
-				{/each}
-			</div>
-		</section>
-
 		<Footer />
 	</div>
 </div>
@@ -57,5 +74,14 @@
 		background: -webkit-linear-gradient(45deg, #0ecd71, #040273);
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
+	}
+
+	@media (min-width: 1280px) {
+		.street-map {
+			background-image: url(/images/street-map.svg);
+			background-position: right;
+			background-repeat: no-repeat;
+			background-size: 65%;
+		}
 	}
 </style>

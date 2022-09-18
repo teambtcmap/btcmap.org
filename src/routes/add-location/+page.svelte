@@ -203,7 +203,7 @@
 								loading={submitting}
 								disabled={submitting}
 								text="Submit Location"
-								style="w-full py-3"
+								style="w-full py-3 rounded-xl"
 							/>
 						</form>
 					</div>
@@ -220,7 +220,7 @@
 							<PrimaryButton
 								text="See Wiki for instructions"
 								link="https://github.com/teambtcmap/btcmap.org/wiki/Tagging-Instructions"
-								style="w-full py-3"
+								style="w-full py-3 rounded-xl"
 								external
 							/>
 						</div>
@@ -255,7 +255,7 @@
 					<PrimaryButton
 						text="Submit another location"
 						link="/add-location"
-						style="w-52 py-3 mx-auto mt-10"
+						style="w-52 py-3 mx-auto mt-10 rounded-xl"
 					/>
 				</div>
 			</div>

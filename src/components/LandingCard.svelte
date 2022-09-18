@@ -1,3 +1,4 @@
+<!-- this component is no longer used but could be used again in the future -->
 <script>
 	export let image;
 	export let text;

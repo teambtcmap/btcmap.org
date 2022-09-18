@@ -6,4 +6,7 @@ export const socials = readable({
 	github: 'https://github.com/teambtcmap'
 });
 
-export const fdroid = readable('https://f-droid.org/en/packages/org.btcmap/');
+export const apps = readable({
+	fdroid: 'https://f-droid.org/en/packages/org.btcmap/',
+	direct: 'https://github.com/teambtcmap/btcmap-android/releases/latest'
+});
