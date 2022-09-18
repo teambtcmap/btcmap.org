@@ -240,16 +240,18 @@
 							class="text-link hover:text-hover">Discord channel</a
 						>.
 					</p>
-					<!-- <LottiePlayer
-            src="/lottie/fist-bump.json"
-            autoplay="{true}"
-            loop="{true}"
-            controls="{false}"
-            renderer="svg"
-            background="transparent"
-            width="{600}"
-          /> -->
-					<img src="/lottie/fistbump.png" alt="success" />
+					{#if typeof window !== 'undefined'}
+						<div class="w-full md:w-96 mx-auto">
+							<LottiePlayer
+								src="/lottie/lightning-bolt.json"
+								autoplay={true}
+								loop={true}
+								controls={false}
+								renderer="svg"
+								background="transparent"
+							/>
+						</div>
+					{/if}
 					<PrimaryButton
 						text="Submit another location"
 						link="/add-location"
