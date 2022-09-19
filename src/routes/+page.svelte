@@ -21,7 +21,7 @@
 
 		<section id="hero" class="pb-20 pt-10 xl:pt-0 xl:flex justify-between items-center">
 			<div class="w-full xl:w-[500px] mx-auto xl:mx-0">
-				<h1 class="text-4xl md:text-5xl font-semibold text-heading gradient !leading-tight">
+				<h1 class="text-4xl md:text-5xl font-semibold text-primary gradient !leading-tight">
 					Easily find places to spend sats anywhere on the planet.
 				</h1>
 				<div class="bg-white/30 rounded-2xl py-6 flex flex-wrap justify-center my-16">
