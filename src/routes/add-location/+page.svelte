@@ -192,7 +192,7 @@
 								>
 								<textarea
 									name="notes"
-									placeholder="Any other relevant details? Website URL, business type etc."
+									placeholder="Any other relevant details? Website URL, phone number, business type etc."
 									rows="5"
 									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
 									bind:this={notes}
