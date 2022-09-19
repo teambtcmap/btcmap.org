@@ -34,6 +34,7 @@ If you would like to embed the map on your own website, simply add the following
     height="300"
 		allowfullscreen="true"
     src="https://btcmap.org/map">
+
 </iframe>`
 
 You can adjust the `width` and `height` attributes to fit your page.
