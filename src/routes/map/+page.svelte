@@ -16,7 +16,10 @@
 			// add map and tiles
 			map = leaflet.map(mapElement).setView([0, 0], 3);
 			leaflet
-				.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 })
+				.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+					noWrap: true,
+					maxZoom: 19
+				})
 				.addTo(map);
 
 			// change broken marker image path in prod
@@ -27,7 +30,7 @@
 
 			// add support attribution
 			document.querySelector('.leaflet-control-attribution').innerHTML =
-				'<a href="bitcoin:bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d" class="text-link hover:text-hover">Support</a> BTC Map';
+				'Support BTC Map <a href="bitcoin:bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d" class="text-link hover:text-hover"><span class="fa-brands fa-bitcoin"/></a> | <a href="lightning:btcmap@zbd.gg" class="text-link hover:text-hover"><span class="fa-solid fa-bolt"/></a>';
 
 			// adds fullscreen button to map
 			const fullscreenButton = document.createElement('a');
