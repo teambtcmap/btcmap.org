@@ -4,13 +4,13 @@
 
 - sveltekit
 - tailwindcss
-- yarn
-- prettier
-- fontawesome
 - leafletjs
 - openstreetmap
+- yarn
+- prettier
 - axios
 - vite
+- fontawesome
 - lottie
 
 ## Getting started
