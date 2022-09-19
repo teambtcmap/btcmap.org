@@ -28,13 +28,15 @@ This website is a progressive web app, meaning you can install it on your mobile
 
 If you would like to embed the map on your own website, simply add the following code to your HTML:
 
-`<iframe id="btcmap"
-    title="BTC Map"
-    width="600"
-    height="300"
-		allowfullscreen="true"
-    src="https://btcmap.org/map">
-
-</iframe>`
+```html
+<iframe
+	id="btcmap"
+	title="BTC Map"
+	width="600"
+	height="300"
+	allowfullscreen="true"
+	src="https://btcmap.org/map">
+</iframe>
+```
 
 You can adjust the `width` and `height` attributes to fit your page.
