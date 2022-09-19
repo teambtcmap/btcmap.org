@@ -27,7 +27,7 @@
 
 			// add support attribution
 			document.querySelector('.leaflet-control-attribution').innerHTML =
-				'<a href="bitcoin:bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d" class="text-link hover:text-hover">Support</a> BTC Map development';
+				'<a href="bitcoin:bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d" class="text-link hover:text-hover">Support</a> BTC Map';
 
 			// adds fullscreen button to map
 			const fullscreenButton = document.createElement('a');
