@@ -61,11 +61,11 @@
 								element['addr:street'] +
 								', ' +
 								element['addr:city']
-							} <br>`;
+							}`;
 						} else if (element['addr:street'] && element['addr:city']) {
-							return `${element['addr:street'] + ', ' + element['addr:city']} <br>`;
+							return `${element['addr:street'] + ', ' + element['addr:city']}`;
 						} else if (element['addr:city']) {
-							return `${element['addr:city']} <br>`;
+							return `${element['addr:city']}`;
 						} else {
 							return '';
 						}
@@ -105,25 +105,29 @@
 					response.data.elements.forEach((element) => {
 						if (element.type == 'node') {
 							let marker = L.marker([element.lat, element.lon]).bindPopup(
-								`${element.tags.name ? `<strong>${element.tags.name}</strong>  <br>` : ''}
-                ${checkAddress(element.tags)}
-                <div class='space-y-1 mt-1'>
-                ${
-									element.tags.phone
-										? `Tel: <a href='tel:${element.tags.phone}' class='text-link hover:text-hover'>${element.tags.phone}</a>`
+								`${
+									element.tags.name
+										? `<span class='block font-bold text-lg text-primary'>${element.tags.name}</span>`
 										: ''
 								}
-                ${
-									element.tags.website
-										? `<a href=${element.tags.website} target="_blank" rel="noreferrer" class='block text-link hover:text-hover'>${element.tags.website}</a>`
-										: ''
-								}
-                <a href='https://www.openstreetmap.org/edit?node=${
-									element.id
-								}' target="_blank" rel="noreferrer" class='block text-link hover:text-hover'>Edit</a>
-                <div class='w-full flex items-center space-x-1'>
-                ${checkPaymentMethods(element.tags)}
+                <span class='block text-body'>${checkAddress(element.tags)}</span>
+                <div class='w-full flex space-x-2 my-1'>
+                  ${
+										element.tags.phone
+											? `<a href='tel:${element.tags.phone}'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-phone" /></a>`
+											: ''
+									}
+                  ${
+										element.tags.website
+											? `<a href=${element.tags.website} target="_blank" rel="noreferrer"><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-globe" /></a>`
+											: ''
+									}
+                  <a href='https://www.openstreetmap.org/edit?node=${
+										element.id
+									}' target="_blank" rel="noreferrer"><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-pen-to-square" /></a>
                 </div>
+                <div class='w-full flex space-x-2'>
+                  ${checkPaymentMethods(element.tags)}
                 </div>`
 							);
 
