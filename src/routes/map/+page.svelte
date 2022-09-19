@@ -121,7 +121,7 @@
                 <a href='https://www.openstreetmap.org/edit?node=${
 									element.id
 								}' target="_blank" rel="noreferrer" class='block text-link hover:text-hover'>Edit</a>
-                <div class='w-full flex justify-center items-center space-x-1'>
+                <div class='w-full flex items-center space-x-1'>
                 ${checkPaymentMethods(element.tags)}
                 </div>
                 </div>`
