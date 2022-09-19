@@ -94,13 +94,17 @@
 							methods.push('nfc');
 						}
 						if (methods.includes('onchain')) {
-							symbols = '<img src="/icons/btc.svg" alt="bitcoin" class="w-6 h-6"/>';
+							symbols =
+								'<img src="/icons/btc.svg" alt="bitcoin" class="w-6 h-6" title="On-chain"/>';
 						}
 						if (methods.includes('lightning')) {
-							symbols = symbols + '<img src="/icons/ln.svg" alt="lightning" class="w-6 h-6"/>';
+							symbols =
+								symbols +
+								'<img src="/icons/ln.svg" alt="lightning" class="w-6 h-6" title="Lightning"/>';
 						}
 						if (methods.includes('nfc')) {
-							symbols = symbols + '<img src="/icons/nfc.svg" alt="nfc" class="w-6 h-6"/>';
+							symbols =
+								symbols + '<img src="/icons/nfc.svg" alt="nfc" class="w-6 h-6" title="NFC"/>';
 						}
 						return symbols;
 					};
@@ -118,17 +122,17 @@
                 <div class='w-full flex space-x-2 my-1'>
                   ${
 										element.tags.phone
-											? `<a href='tel:${element.tags.phone}'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-phone" /></a>`
+											? `<a href='tel:${element.tags.phone}' title='Phone'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-phone" /></a>`
 											: ''
 									}
                   ${
 										element.tags.website
-											? `<a href=${element.tags.website} target="_blank" rel="noreferrer"><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-globe" /></a>`
+											? `<a href=${element.tags.website} target="_blank" rel="noreferrer" title='Website'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-globe" /></a>`
 											: ''
 									}
                   <a href='https://www.openstreetmap.org/edit?node=${
 										element.id
-									}' target="_blank" rel="noreferrer"><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-pen-to-square" /></a>
+									}' target="_blank" rel="noreferrer" title='Edit'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-pen-to-square" /></a>
                 </div>
                 <div class='w-full flex space-x-2'>
                   ${checkPaymentMethods(element.tags)}
