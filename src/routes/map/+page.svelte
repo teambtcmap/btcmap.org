@@ -90,14 +90,13 @@
 							methods.push('nfc');
 						}
 						if (methods.includes('onchain')) {
-							symbols = '<img src="/icons/btc.svg" alt="bitcoin" class="w-6 h-6 inline"/> ';
+							symbols = '<img src="/icons/btc.svg" alt="bitcoin" class="w-6 h-6"/> ';
 						}
 						if (methods.includes('lightning')) {
-							symbols =
-								symbols + '<img src="/icons/ln.svg" alt="lightning" class="w-6 h-6 inline"/> ';
+							symbols = symbols + '<img src="/icons/ln.svg" alt="lightning" class="w-6 h-6"/> ';
 						}
 						if (methods.includes('nfc')) {
-							symbols = symbols + '<img src="/icons/nfc.svg" alt="nfc" class="w-6 h-6 inline"/>';
+							symbols = symbols + '<img src="/icons/nfc.svg" alt="nfc" class="w-6 h-6"/>';
 						}
 						return symbols;
 					};
@@ -122,7 +121,9 @@
                 <a href='https://www.openstreetmap.org/edit?node=${
 									element.id
 								}' target="_blank" rel="noreferrer" class='block text-link hover:text-hover'>Edit</a>
+                <div class='w-full flex justify-center items-center space-x-1'>
                 ${checkPaymentMethods(element.tags)}
+                </div>
                 </div>`
 							);
 
