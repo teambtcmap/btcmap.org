@@ -14,7 +14,7 @@
 			const axios = await import('axios');
 
 			// add map and tiles
-			map = leaflet.map(mapElement, { attributionControl: false }).setView([0, 0], 3);
+			map = leaflet.map(mapElement).setView([0, 0], 3);
 			leaflet
 				.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 })
 				.addTo(map);
@@ -24,6 +24,10 @@
 
 			// adds locate button to map
 			L.control.locate().addTo(map);
+
+			// add support attribution
+			document.querySelector('.leaflet-control-attribution').innerHTML =
+				'<a href="bitcoin:bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d" class="text-link hover:text-hover">Support</a> BTC Map development';
 
 			// adds fullscreen button to map
 			const fullscreenButton = document.createElement('a');
