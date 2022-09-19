@@ -35,17 +35,17 @@
 	"display": "standalone",
 	"shortcuts": [
 		{
-			"name": "Add location",
-			"short_name": "Add",
-			"description": "Add a locaion to OSM",
-			"url": "/add-location",
-			"icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
-		},
-		{
 			"name": "Map",
 			"short_name": "Map",
 			"description": "Bitcoin merchant locations",
 			"url": "/map",
+			"icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+		},
+		{
+			"name": "Add location",
+			"short_name": "Add",
+			"description": "Add a locaion to OSM",
+			"url": "/add-location",
 			"icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
 		},
 		{
