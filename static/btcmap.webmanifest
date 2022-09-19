@@ -1,0 +1,63 @@
+{
+	"name": "BTC Map",
+	"short_name": "BTC Map",
+	"start_url": "/map",
+	"icons": [
+		{
+			"src": "/android-chrome-192x192.png",
+			"sizes": "192x192",
+			"type": "image/png"
+		},
+		{
+			"src": "/android-chrome-512x512.png",
+			"sizes": "512x512",
+			"type": "image/png"
+		},
+		{
+			"src": "/apple-touch-icon.png",
+			"sizes": "180x180",
+			"type": "image/png"
+		},
+		{
+			"src": "/mstile-150x150.png",
+			"sizes": "150x150",
+			"type": "image/png"
+		},
+		{
+			"src": "/safari-pinned-tab.svg",
+			"sizes": "860x860",
+			"type": "image/svg"
+		}
+	],
+	"theme_color": "#0B9072",
+	"background_color": "#E4EBEC",
+	"scope": "/",
+	"display": "standalone",
+	"shortcuts": [
+		{
+			"name": "Add location",
+			"short_name": "Add",
+			"description": "Add a locaion to OSM",
+			"url": "/add-location",
+			"icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+		},
+		{
+			"name": "Map",
+			"short_name": "Map",
+			"description": "Bitcoin merchant locations",
+			"url": "/map",
+			"icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+		},
+		{
+			"name": "Home",
+			"short_name": "Home",
+			"description": "Home page",
+			"url": "/",
+			"icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+		}
+	],
+	"developer": {
+		"name": "secondl1ght",
+		"url": "https://secondl1ght.site"
+	}
+}
