@@ -90,10 +90,10 @@
 							methods.push('nfc');
 						}
 						if (methods.includes('onchain')) {
-							symbols = '<img src="/icons/btc.svg" alt="bitcoin" class="w-6 h-6"/> ';
+							symbols = '<img src="/icons/btc.svg" alt="bitcoin" class="w-6 h-6"/>';
 						}
 						if (methods.includes('lightning')) {
-							symbols = symbols + '<img src="/icons/ln.svg" alt="lightning" class="w-6 h-6"/> ';
+							symbols = symbols + '<img src="/icons/ln.svg" alt="lightning" class="w-6 h-6"/>';
 						}
 						if (methods.includes('nfc')) {
 							symbols = symbols + '<img src="/icons/nfc.svg" alt="nfc" class="w-6 h-6"/>';
