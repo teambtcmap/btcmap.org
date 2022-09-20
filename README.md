@@ -50,8 +50,8 @@ If you would like the map the initialize on a specific location there are a coup
 2. Click anywhere on the map and open up the `console` in `DevTools` for your browser
 3. An iframe `src` attribute URL will be generated for you like this:
 
-```
-Here is your iframe embed URL: `https://btcmap.org/map?lat=47.502358951968596&long=39.58374023437501&lat=40.63896734381725&long=24.587402343750004`
+```console
+Here is your iframe embed URL: https://btcmap.org/map?lat=47.502358951968596&long=39.58374023437501&lat=40.63896734381725&long=24.587402343750004
 Thanks for using BTC Map!
 ```
 
