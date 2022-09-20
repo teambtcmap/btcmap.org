@@ -49,6 +49,7 @@ If you would like the map the initialize on a specific location there are a coup
 1. Visit [btcmap.org/map](https://btcmap.org/map) and zoom the map to your desired location
 2. Click anywhere on the map and open up the `console` in `DevTools` for your browser
 3. Open the `R` object, it will look like this:
+
    ![Example object](/static/images/object-example.png 'Example object')
 4. Add `URLSearchParams` to the `src` attribute of your `iframe` populating the `lat=` and `long=` fields with the data from the `R` object as follows:
 
