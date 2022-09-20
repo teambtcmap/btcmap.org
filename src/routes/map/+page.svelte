@@ -1,9 +1,14 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
+	import { page } from '$app/stores';
 
 	let mapElement;
 	let map;
+
+	// allows for users to set initial view in a URL query
+	const urlLat = $page.url.searchParams.getAll('lat');
+	const urlLong = $page.url.searchParams.getAll('long');
 
 	onMount(async () => {
 		if (browser) {
@@ -15,10 +20,33 @@
 
 			// add map and tiles
 			map = leaflet.map(mapElement).setView([0, 0], 3);
+
+			// set URL lat/long query view if it exists and is valid
+			if (urlLat && urlLong) {
+				try {
+					if (urlLat.length > 1 && urlLong.length > 1)
+						map.fitBounds([
+							[urlLat[0], urlLong[0]],
+							[urlLat[1], urlLong[1]]
+						]);
+					else {
+						map.fitBounds([[urlLat[0], urlLong[0]]]);
+					}
+				} catch (error) {
+					console.log(error);
+				}
+			}
+
+			// add click event to help devs find lat/long of desired location for iframe embeds
+			map.on('click', () => {
+				console.log(map.getBounds());
+			});
+
 			leaflet
 				.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 					noWrap: true,
-					maxZoom: 19
+					maxZoom: 19,
+					minZoom: 1
 				})
 				.addTo(map);
 
@@ -78,67 +106,67 @@
 						}
 					};
 
-					// check payment methods
-					const checkPaymentMethods = (element) => {
-						let methods = [];
-						let symbols = '';
-						if (
-							element['payment:bitcoin'] === 'yes' ||
-							element['payment:onchain'] === 'yes' ||
-							element['currency:BTC'] === 'yes' ||
-							element['currency:XBT'] === 'yes'
-						) {
-							methods.push('onchain');
-						}
-						if (element['payment:lightning'] === 'yes') {
-							methods.push('lightning');
-						}
-						if (element['payment:lightning_contactless'] === 'yes') {
-							methods.push('nfc');
-						}
-						if (methods.includes('onchain')) {
-							symbols =
-								'<img src="/icons/btc.svg" alt="bitcoin" class="w-6 h-6" title="On-chain"/>';
-						}
-						if (methods.includes('lightning')) {
-							symbols =
-								symbols +
-								'<img src="/icons/ln.svg" alt="lightning" class="w-6 h-6" title="Lightning"/>';
-						}
-						if (methods.includes('nfc')) {
-							symbols =
-								symbols + '<img src="/icons/nfc.svg" alt="nfc" class="w-6 h-6" title="NFC"/>';
-						}
-						return symbols;
-					};
-
 					// add location information to popup
 					response.data.elements.forEach((element) => {
 						if (element.type == 'node') {
 							let marker = L.marker([element.lat, element.lon]).bindPopup(
+								// marker popup component
 								`${
 									element.tags.name
 										? `<span class='block font-bold text-lg text-primary'>${element.tags.name}</span>`
 										: ''
 								}
+
                 <span class='block text-body'>${checkAddress(element.tags)}</span>
-                <div class='w-36 flex space-x-2 my-1'>
+
+                <div class='w-[192px] flex space-x-2 my-1'>
                   ${
 										element.tags.phone
 											? `<a href='tel:${element.tags.phone}' title='Phone'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-phone" /></a>`
 											: ''
 									}
+
                   ${
 										element.tags.website
 											? `<a href=${element.tags.website} target="_blank" rel="noreferrer" title='Website'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-globe" /></a>`
 											: ''
 									}
+
                   <a href='https://www.openstreetmap.org/edit?node=${
 										element.id
 									}' target="_blank" rel="noreferrer" title='Edit'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-pen-to-square" /></a>
+
+                  <a href='https://btcmap.org/map?lat=${element.lat}&long=${
+									element.lon
+								}' target="_blank" rel="noreferrer" title='Share'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-share-nodes" /></a>
                 </div>
+
                 <div class='w-full flex space-x-2'>
-                  ${checkPaymentMethods(element.tags)}
+                  <img src=${
+										element.tags['payment:onchain'] === 'yes'
+											? '/icons/btc-highlight.svg'
+											: '/icons/btc.svg'
+									} alt="bitcoin" class="w-6 h-6 ${
+									element.tags['payment:onchain'] === 'yes' ? 'opacity-100' : 'opacity-75'
+								}" title="On-chain"/>
+
+                  <img src=${
+										element.tags['payment:lightning'] === 'yes'
+											? '/icons/ln-highlight.svg'
+											: '/icons/ln.svg'
+									} alt="lightning" class="w-6 h-6 ${
+									element.tags['payment:lightning'] === 'yes' ? 'opacity-100' : 'opacity-75'
+								}" title="Lightning"/>
+
+                  <img src=${
+										element.tags['payment:lightning_contactless'] === 'yes'
+											? '/icons/nfc-highlight.svg'
+											: '/icons/nfc.svg'
+									} alt="nfc" class="w-6 h-6 ${
+									element.tags['payment:lightning_contactless'] === 'yes'
+										? 'opacity-100'
+										: 'opacity-75'
+								}" title="NFC"/>
                 </div>`
 							);
 

@@ -144,7 +144,7 @@
 											on:click={handleCheckboxClick}
 										/>
 										<label for="onchain" class="ml-1 cursor-pointer"
-											><i class="fa-brands fa-bitcoin" /> On-chain</label
+											><i class="fa-brands fa-bitcoin align-middle" /> On-chain</label
 										>
 									</div>
 									<div class="md:inline">
@@ -156,7 +156,7 @@
 											on:click={handleCheckboxClick}
 										/>
 										<label for="lightning" class="ml-1 cursor-pointer"
-											><i class="fa-solid fa-bolt" /> Lightning</label
+											><i class="fa-solid fa-bolt align-middle" /> Lightning</label
 										>
 									</div>
 									<div class="md:inline">
@@ -168,7 +168,7 @@
 											on:click={handleCheckboxClick}
 										/>
 										<label for="nfc" class="ml-1 cursor-pointer"
-											><i class="fa-solid fa-credit-card" /> NFC</label
+											><img src="/icons/nfc.svg" alt="nfc" class="inline align-middle" /> NFC</label
 										>
 									</div>
 								</div>
