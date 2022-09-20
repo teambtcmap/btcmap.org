@@ -47,7 +47,7 @@ If you would like the map the initialize on a specific location there are a coup
 1. Visit btcmap.org/map and zoom the map to your desired location
 2. Click anywhere on the map and open up the console in DevTools for your browser
 3. Open the `LatLngBounds` object, it will look like this:
-   ![image](/images/object-example.png)
+   ![Example object](/images/object-example.png 'Example object')
 4. Add `URLSearchParams` to the `src` attribute of your `iframe` populating the `lat=` and `long=` fields with the data from the `LatLngBounds` object as follows:
    `?lat=53.173119202640635&long=5.844726562500001&lat=47.04766864046083&long=-9.151611328125002`
 5. Your complete source attribute for your iframe embed will look like this:
