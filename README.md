@@ -48,15 +48,13 @@ If you would like the map the initialize on a specific location there are a coup
 
 1. Visit [btcmap.org/map](https://btcmap.org/map) and zoom the map to your desired location
 2. Click anywhere on the map and open up the `console` in `DevTools` for your browser
-3. Open the `R` object, it will look like this:
+3. An iframe `src` attribute URL will be generated for you like this:
 
-   ![Example object](/static/images/object-example.png 'Example object')
-4. Add `URLSearchParams` to the `src` attribute of your `iframe` populating the `lat=` and `long=` fields with the data from the `R` object as follows:
+```
+Here is your iframe embed URL: `https://btcmap.org/map?lat=47.502358951968596&long=39.58374023437501&lat=40.63896734381725&long=24.587402343750004`
+Thanks for using BTC Map!
+```
 
-   `?lat=53.173119202640635&long=5.844726562500001&lat=47.04766864046083&long=-9.151611328125002`
+4. Add this URL to your `iframe` embed code
 
-5. Your complete source attribute for your iframe embed will look like this:
-
-   [https://btcmap.org/map?lat=`53.173119202640635`&long=`5.844726562500001`&lat=`47.04766864046083`&long=`-9.151611328125002`](https://btcmap.org/map?lat=53.173119202640635&long=5.844726562500001&lat=47.04766864046083&long=-9.151611328125002)
-
-That's it! Make sure you copy the values in the same order as they are in the `object`.
+That's it!

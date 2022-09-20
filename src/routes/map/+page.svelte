@@ -39,7 +39,9 @@
 
 			// add click event to help devs find lat/long of desired location for iframe embeds
 			map.on('click', () => {
-				console.log(map.getBounds());
+				const coords = map.getBounds();
+				console.log(`Here is your iframe embed URL: https://btcmap.org/map?lat=${coords._northEast.lat}&long=${coords._northEast.lng}&lat=${coords._southWest.lat}&long=${coords._southWest.lng}
+Thanks for using BTC Map!`);
 			});
 
 			leaflet
@@ -141,13 +143,13 @@
 								}' target="_blank" rel="noreferrer" title='Share'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-share-nodes" /></a>
                 </div>
 
-                <div class='w-full flex space-x-2'>
+                <div class='w-full flex justify-end space-x-2'>
                   <img src=${
 										element.tags['payment:onchain'] === 'yes'
 											? '/icons/btc-highlight.svg'
 											: '/icons/btc.svg'
 									} alt="bitcoin" class="w-6 h-6 ${
-									element.tags['payment:onchain'] === 'yes' ? 'opacity-100' : 'opacity-75'
+									element.tags['payment:onchain'] === 'yes' ? 'opacity-100' : 'opacity-50'
 								}" title="On-chain"/>
 
                   <img src=${
@@ -155,17 +157,17 @@
 											? '/icons/ln-highlight.svg'
 											: '/icons/ln.svg'
 									} alt="lightning" class="w-6 h-6 ${
-									element.tags['payment:lightning'] === 'yes' ? 'opacity-100' : 'opacity-75'
+									element.tags['payment:lightning'] === 'yes' ? 'opacity-100' : 'opacity-50'
 								}" title="Lightning"/>
 
                   <img src=${
 										element.tags['payment:lightning_contactless'] === 'yes'
 											? '/icons/nfc-highlight.svg'
-											: '/icons/nfc.svg'
+											: '/icons/nfc-map.svg'
 									} alt="nfc" class="w-6 h-6 ${
 									element.tags['payment:lightning_contactless'] === 'yes'
 										? 'opacity-100'
-										: 'opacity-75'
+										: 'opacity-50'
 								}" title="NFC"/>
                 </div>`
 							);
