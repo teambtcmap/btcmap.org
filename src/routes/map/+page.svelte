@@ -22,7 +22,7 @@
 			map = leaflet.map(mapElement).setView([0, 0], 3);
 
 			// set URL lat/long query view if it exists and is valid
-			if (urlLat && urlLong) {
+			if (urlLat.length && urlLong.length) {
 				try {
 					if (urlLat.length > 1 && urlLong.length > 1)
 						map.fitBounds([
