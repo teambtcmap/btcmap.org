@@ -69,8 +69,8 @@ Thanks for using BTC Map!`);
 			fullscreenButton.title = 'Full screen';
 			fullscreenButton.role = 'button';
 			fullscreenButton.ariaLabel = 'Full screen';
-			fullscreenButton.ariaDisabled = 'Full screen';
-			fullscreenButton.innerHTML = '<i class="w-[16px] h-[16px] fa-solid fa-expand"></i>';
+			fullscreenButton.ariaDisabled = 'false';
+			fullscreenButton.innerHTML = '<span class="w-[16px] h-[16px] fa-solid fa-expand"></span>';
 			fullscreenButton.onclick = function toggleFullscreen() {
 				if (!document.fullscreenElement) {
 					mapElement.requestFullscreen().catch((err) => {
@@ -81,6 +81,27 @@ Thanks for using BTC Map!`);
 				}
 			};
 			document.querySelector('.leaflet-control-zoom').append(fullscreenButton);
+
+			// add location button to map
+			const addLocationDiv = document.createElement('div');
+			const addLocationButton = document.createElement('a');
+			addLocationDiv.classList.add(
+				'leaflet-control-add-location',
+				'leaflet-bar',
+				'leaflet-control'
+			);
+			addLocationButton.classList.add('leaflet-bar-part', 'leaflet-bar-part-single');
+			addLocationButton.href = '/add-location';
+			addLocationButton.target = '_blank';
+			addLocationButton.rel = 'noreferrer';
+			addLocationButton.title = 'Add location';
+			addLocationButton.role = 'button';
+			addLocationButton.ariaLabel = 'Add location';
+			addLocationButton.ariaDisabled = 'false';
+			addLocationButton.innerHTML =
+				'<span class="w-[16px] h-[16px] fa-solid fa-location-dot"></span>';
+			addLocationDiv.append(addLocationButton);
+			document.querySelector('.leaflet-top.leaflet-left').append(addLocationDiv);
 
 			// fetch bitcoin locations from our api
 			axios
