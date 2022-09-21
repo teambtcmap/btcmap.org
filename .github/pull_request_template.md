@@ -16,5 +16,5 @@
 
 **Code is formatted**
 
-- [] Yes
+- [ ] Yes
 <!-- Please run `yarn format` after making any changes and before submitting a PR -->
