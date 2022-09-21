@@ -1,11 +1,15 @@
 **Does this PR address a related issue?**
-Issue #
+
+<!-- Issue # -->
 
 **A description of the changes proposed in the pull request**
-Include all the details relevant to this PR
+
+<!-- Include all the details relevant to this PR -->
 
 **Screenshots**
-If applicable
+
+<!-- If applicable -->
 
 **Additional context**
-Anything else you would like to add
+
+<!-- Anything else you would like to add -->
