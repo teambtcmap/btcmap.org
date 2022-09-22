@@ -11,7 +11,8 @@
 	let onchain;
 	let lightning;
 	let nfc;
-	let twitter;
+	let twitterMerchant;
+	let twitterSubmitter;
 	let notes;
 	let noMethodSelected = false;
 	let submitted = false;
@@ -44,10 +45,15 @@
 					address: address.value,
 					url: url.value,
 					methods: methods,
-					twitter: twitter.value
-						? twitter.value.startsWith('@')
-							? twitter.value
-							: '@' + twitter.value
+					twitterMerchant: twitterMerchant.value
+						? twitterMerchant.value.startsWith('@')
+							? twitterMerchant.value
+							: '@' + twitterMerchant.value
+						: '',
+					twitterSubmitter: twitterSubmitter.value
+						? twitterSubmitter.value.startsWith('@')
+							? twitterSubmitter.value
+							: '@' + twitterSubmitter.value
 						: '',
 					notes: notes.value
 				})
@@ -175,16 +181,25 @@
 							</fieldset>
 
 							<div>
-								<label for="email" class="mb-2 block font-semibold"
+								<label for="twitter" class="mb-2 block font-semibold"
 									>Twitter handle <span class="font-normal">(optional)</span></label
 								>
-								<input
-									type="type"
-									name="twitter"
-									placeholder="@BTCMapDotOrg"
-									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
-									bind:this={twitter}
-								/>
+								<div class="flex space-x-2">
+									<input
+										type="text"
+										name="twitter"
+										placeholder="Merchant"
+										class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+										bind:this={twitterMerchant}
+									/>
+									<input
+										type="text"
+										name="twitter"
+										placeholder="Submitter"
+										class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+										bind:this={twitterSubmitter}
+									/>
+								</div>
 							</div>
 							<div>
 								<label for="notes" class="mb-2 block font-semibold"
