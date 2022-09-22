@@ -1,4 +1,4 @@
-<footer class="pb-5 break-all">
+<footer class="pb-5 break-all text-center">
 	<p class="text-primary font-semibold">
 		Help us improve BTC Map <a
 			href="bitcoin:bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d"

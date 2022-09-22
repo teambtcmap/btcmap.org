@@ -134,8 +134,8 @@
 								{#if noMethodSelected}
 									<span class="text-error">Please fix this...</span>
 								{/if}
-								<div class="md:space-x-5 space-y-2 md:space-y-0">
-									<div class="md:inline">
+								<div class="space-y-4">
+									<div>
 										<input
 											type="checkbox"
 											name="onchain"
@@ -144,10 +144,10 @@
 											on:click={handleCheckboxClick}
 										/>
 										<label for="onchain" class="ml-1 cursor-pointer"
-											><i class="fa-brands fa-bitcoin align-middle" /> On-chain</label
+											><img src="/icons/btc-black.svg" alt="onchain" class="inline" /> On-chain</label
 										>
 									</div>
-									<div class="md:inline">
+									<div>
 										<input
 											type="checkbox"
 											name="lightning"
@@ -156,10 +156,10 @@
 											on:click={handleCheckboxClick}
 										/>
 										<label for="lightning" class="ml-1 cursor-pointer"
-											><i class="fa-solid fa-bolt align-middle" /> Lightning</label
+											><img src="/icons/ln-black.svg" alt="lightning" class="inline" /> Lightning</label
 										>
 									</div>
-									<div class="md:inline">
+									<div>
 										<input
 											type="checkbox"
 											name="nfc"
@@ -168,7 +168,7 @@
 											on:click={handleCheckboxClick}
 										/>
 										<label for="nfc" class="ml-1 cursor-pointer"
-											><img src="/icons/nfc-black.svg" alt="nfc" class="inline align-middle" /> NFC</label
+											><img src="/icons/nfc-black.svg" alt="nfc" class="inline" /> Lightning Contactless</label
 										>
 									</div>
 								</div>
@@ -212,7 +212,7 @@
 				<section id="supercoder" class="mx-auto w-full md:w-2/3 lg:w-1/2 pt-14 lg:pt-0">
 					<div class="lg:flex justify-end">
 						<div class="lg:w-10/12 xl:w-3/4">
-							<h2 class="text-3xl font-semibold mb-5 lg:text-right">Shadowy supertagger?</h2>
+							<h2 class="text-3xl font-semibold mb-5">Shadowy supertagger?</h2>
 							<p class="w-full mb-10">
 								Contribute changes directly to OSM - like a 😎 boss. Who needs forms anyway.
 							</p>
