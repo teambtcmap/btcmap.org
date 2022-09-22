@@ -69,6 +69,6 @@ The available options are:
 - lightning
 - nfc
 
-Example: https://btcmap.org/map`?onchain&lightning`
+Example: `/map?onchain&lightning`
 
 That's it!
