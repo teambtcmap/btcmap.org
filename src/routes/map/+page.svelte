@@ -10,6 +10,11 @@
 	const urlLat = $page.url.searchParams.getAll('lat');
 	const urlLong = $page.url.searchParams.getAll('long');
 
+	// alow for users to query by payment method with URL search params
+	const onchain = $page.url.searchParams.has('onchain');
+	const lightning = $page.url.searchParams.has('lightning');
+	const nfc = $page.url.searchParams.has('nfc');
+
 	onMount(async () => {
 		if (browser) {
 			//import packages
@@ -131,7 +136,12 @@ Thanks for using BTC Map!`);
 
 					// add location information to popup
 					response.data.elements.forEach((element) => {
-						if (element.type == 'node') {
+						if (
+							element.type == 'node' &&
+							(onchain ? element.tags['payment:onchain'] === 'yes' : true) &&
+							(lightning ? element.tags['payment:lightning'] === 'yes' : true) &&
+							(nfc ? element.tags['payment:lightning_contactless'] === 'yes' : true)
+						) {
 							let marker = L.marker([element.lat, element.lon]).bindPopup(
 								// marker popup component
 								`${

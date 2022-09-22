@@ -46,7 +46,7 @@ If you would like to embed the map on your own website, simply add the following
 
 You can adjust the `width` and `height` attributes to fit your page.
 
-If you would like the map the initialize on a specific location there are a couple more steps to complete.
+### If you would like the map the initialize on a specific location there are a couple more steps to complete
 
 1. Visit [btcmap.org/map](https://btcmap.org/map) and zoom the map to your desired location
 2. Click anywhere on the map and open up the `console` in `DevTools` for your browser
@@ -58,5 +58,17 @@ Thanks for using BTC Map!
 ```
 
 4. Add this URL to your `iframe` embed code
+
+### If you would like to filter by payment method
+
+Add the preferred payment method(s) as `URLSearchParams` to the `src` attribute of your `iframe`. These can be added in addition to the location params above.
+
+The available options are:
+
+- onchain
+- lightning
+- nfc
+
+Example: https://btcmap.org/map`?onchain&lightning`
 
 That's it!
