@@ -137,12 +137,18 @@ Thanks for using BTC Map!`);
 					// add location information to popup
 					response.data.elements.forEach((element) => {
 						if (
-							element.type == 'node' &&
 							(onchain ? element.tags['payment:onchain'] === 'yes' : true) &&
 							(lightning ? element.tags['payment:lightning'] === 'yes' : true) &&
 							(nfc ? element.tags['payment:lightning_contactless'] === 'yes' : true)
 						) {
-							let marker = L.marker([element.lat, element.lon]).bindPopup(
+							let marker = L.marker(
+								element.type == 'node'
+									? [element.lat, element.lon]
+									: [
+											(element.bounds.minlat + element.bounds.maxlat) / 2,
+											(element.bounds.minlon + element.bounds.maxlon) / 2
+									  ]
+							).bindPopup(
 								// marker popup component
 								`${
 									element.tags.name
