@@ -164,32 +164,24 @@ Thanks for using BTC Map!`);
 								}' target="_blank" rel="noreferrer" title='Share'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-share-nodes" /></a>
                 </div>
 
-                <div class='w-full flex justify-end space-x-2'>
+                <div class='w-full flex space-x-2'>
                   <img src=${
 										element.tags['payment:onchain'] === 'yes'
 											? '/icons/btc-highlight.svg'
 											: '/icons/btc.svg'
-									} alt="bitcoin" class="w-6 h-6 ${
-									element.tags['payment:onchain'] === 'yes' ? 'opacity-100' : 'opacity-50'
-								}" title="On-chain"/>
+									} alt="bitcoin" class="w-6 h-6" title="On-chain"/>
 
                   <img src=${
 										element.tags['payment:lightning'] === 'yes'
 											? '/icons/ln-highlight.svg'
 											: '/icons/ln.svg'
-									} alt="lightning" class="w-6 h-6 ${
-									element.tags['payment:lightning'] === 'yes' ? 'opacity-100' : 'opacity-50'
-								}" title="Lightning"/>
+									} alt="lightning" class="w-6 h-6" title="Lightning"/>
 
                   <img src=${
 										element.tags['payment:lightning_contactless'] === 'yes'
 											? '/icons/nfc-highlight.svg'
-											: '/icons/nfc-map.svg'
-									} alt="nfc" class="w-6 h-6 ${
-									element.tags['payment:lightning_contactless'] === 'yes'
-										? 'opacity-100'
-										: 'opacity-50'
-								}" title="NFC"/>
+											: '/icons/nfc.svg'
+									} alt="nfc" class="w-6 h-6" title="NFC"/>
                 </div>`
 							);
 

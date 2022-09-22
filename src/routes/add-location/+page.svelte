@@ -168,7 +168,7 @@
 											on:click={handleCheckboxClick}
 										/>
 										<label for="nfc" class="ml-1 cursor-pointer"
-											><img src="/icons/nfc.svg" alt="nfc" class="inline align-middle" /> NFC</label
+											><img src="/icons/nfc-black.svg" alt="nfc" class="inline align-middle" /> NFC</label
 										>
 									</div>
 								</div>
