@@ -72,3 +72,7 @@ The available options are:
 Example: `/map?onchain&lightning`
 
 That's it!
+
+---
+
+Thanks to [Stamen](http://maps.stamen.com/) for providing free to use additional basemap tiles

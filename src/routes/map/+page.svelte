@@ -74,10 +74,10 @@
 
 			const baseMaps = {
 				OpenStreetMap: osm,
-				'Toner (Stamen)': toner,
-				'Toner Lite (Stamen)': tonerLite,
-				'Watercolor (Stamen)': watercolor,
-				'Terrain (Stamen)': terrain
+				Toner: toner,
+				'Toner Lite': tonerLite,
+				Watercolor: watercolor,
+				Terrain: terrain
 			};
 
 			const layerControl = L.control.layers(baseMaps).addTo(map);
