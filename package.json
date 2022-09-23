@@ -7,13 +7,15 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"lint": "prettier --check .",
-		"format": "prettier --write ."
+		"format": "prettier --write .",
+		"prepare": "husky install"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^1.0.0-next.80",
 		"@sveltejs/adapter-node": "^1.0.0-next.96",
 		"@sveltejs/kit": "1.0.0-next.504",
 		"autoprefixer": "^10.4.12",
+		"husky": "^8.0.1",
 		"postcss": "^8.4.16",
 		"prettier": "^2.6.2",
 		"prettier-plugin-svelte": "^2.7.1",
