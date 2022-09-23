@@ -135,7 +135,7 @@ Thanks for using BTC Map!`);
 
 			// add support attribution
 			document.querySelector('.leaflet-control-attribution').innerHTML =
-				'Support BTC Map <a href="bitcoin:bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d" class="text-link hover:text-hover"><span class="fa-brands fa-bitcoin"/></a> | <a href="lightning:btcmap@zbd.gg" class="text-link hover:text-hover"><span class="fa-solid fa-bolt"/></a>';
+				'Support BTC Map <a href="bitcoin:bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d" class="text-link hover:text-hover" title="On-chain"><span class="fa-brands fa-bitcoin"/></a> | <a href="lightning:btcmap@zbd.gg" class="text-link hover:text-hover" title="Lightning"><span class="fa-solid fa-bolt"/></a>';
 
 			// adds fullscreen button to map
 			const fullscreenButton = document.createElement('a');
@@ -222,11 +222,13 @@ Thanks for using BTC Map!`);
 								// marker popup component
 								`${
 									element.tags.name
-										? `<span class='block font-bold text-lg text-primary'>${element.tags.name}</span>`
+										? `<span class='block font-bold text-lg text-primary' title='Merchant Name'>${element.tags.name}</span>`
 										: ''
 								}
 
-                <span class='block text-body font-bold'>${checkAddress(element.tags)}</span>
+                <span class='block text-body font-bold' title='Address'>${checkAddress(
+									element.tags
+								)}</span>
 
                 <div class='w-[192px] flex space-x-2 my-1'>
                   ${
@@ -281,11 +283,11 @@ Thanks for using BTC Map!`);
 										: 'Lightning Contactless unknown'
 								}"/>
                 </div>
-								<span class='text-body'>Survey date:
+								<span class='text-body' title="Surveys are completed by BTC Map community members.">Survey date:
 								${
 									element.tags['survey:date']
 										? `${element.tags['survey:date']}`
-										: '<span class="fa-solid fa-question" title="This place hasn&#39;t been checked by our community in a while."></span>'
+										: '<span class="fa-solid fa-question"></span>'
 								}
 								</span>`
 							);
