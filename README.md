@@ -39,12 +39,21 @@ If you would like to embed the map on your own website, simply add the following
 	width="600"
 	height="300"
 	allowfullscreen="true"
+	allow="geolocation"
 	src="https://btcmap.org/map"
 >
 </iframe>
 ```
 
 You can adjust the `width` and `height` attributes to fit your page.
+
+**NOTE:** If you want the geolocation feature to work you must also allow this in the `Permissions Policy HTTP Header` on the server of your website.
+
+```
+Permissions-Policy: geolocation=("https://btcmap.org")
+```
+
+For more information see this [article](https://developer.chrome.com/docs/privacy-sandbox/permissions-policy/).
 
 ### If you would like the map the initialize on a specific location there are a couple more steps to complete
 
