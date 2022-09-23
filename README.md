@@ -84,4 +84,11 @@ That's it!
 
 ---
 
-Thanks to [Stamen](http://maps.stamen.com/) for providing free to use additional basemap tiles
+## Basemap tile attributions
+
+Thanks to:
+
+- [OpenStreetMap](https://www.openstreetmap.org) (OpenStreetMap, OpenStreetMapDE, OpenStreetMapFR)
+- [OpenTopoMap](https://opentopomap.org) (Topo)
+- [ESRI](https://www.esri.com/en-us) (Imagery)
+- [Stamen](http://maps.stamen.com) (Terrain, Toner, Toner Lite, Watercolor)

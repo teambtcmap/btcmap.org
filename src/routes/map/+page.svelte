@@ -31,6 +31,27 @@
 				maxZoom: 19
 			});
 
+			const osmDE = leaflet.tileLayer('https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png', {
+				noWrap: true,
+				maxZoom: 18
+			});
+
+			const osmFR = leaflet.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+				noWrap: true,
+				maxZoom: 20
+			});
+			const topo = leaflet.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+				noWrap: true,
+				maxZoom: 17
+			});
+
+			const imagery = leaflet.tileLayer(
+				'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+				{
+					noWrap: true
+				}
+			);
+
 			const toner = leaflet.tileLayer(
 				'https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}{r}.{ext}',
 				{
@@ -69,10 +90,14 @@
 
 			const baseMaps = {
 				OpenStreetMap: osm,
+				Imagery: imagery,
+				Terrain: terrain,
+				Topo: topo,
 				Toner: toner,
 				'Toner Lite': tonerLite,
 				Watercolor: watercolor,
-				Terrain: terrain
+				OpenStreetMapDE: osmDE,
+				OpenStreetMapFR: osmFR
 			};
 
 			const layerControl = L.control.layers(baseMaps).addTo(map);
