@@ -26,6 +26,30 @@
 			// add map and tiles
 			map = leaflet.map(mapElement).setView([0, 0], 3);
 
+			const osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				noWrap: true,
+				maxZoom: 19,
+				minZoom: 1
+			});
+
+			const dark = leaflet.tileLayer(
+				'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
+				{
+					noWrap: true,
+					maxZoom: 19,
+					minZoom: 1
+				}
+			);
+
+			const baseMaps = {
+				'Light (OpenStreetMap)': osm,
+				'Dark (Stadia Maps)': dark
+			};
+
+			const layerControl = L.control.layers(baseMaps).addTo(map);
+
+			osm.addTo(map);
+
 			// set URL lat/long query view if it exists and is valid
 			if (urlLat.length && urlLong.length) {
 				try {
@@ -48,14 +72,6 @@
 				console.log(`Here is your iframe embed URL: https://btcmap.org/map?lat=${coords._northEast.lat}&long=${coords._northEast.lng}&lat=${coords._southWest.lat}&long=${coords._southWest.lng}
 Thanks for using BTC Map!`);
 			});
-
-			leaflet
-				.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-					noWrap: true,
-					maxZoom: 19,
-					minZoom: 1
-				})
-				.addTo(map);
 
 			// change broken marker image path in prod
 			L.Icon.Default.prototype.options.imagePath = '/icons/';
