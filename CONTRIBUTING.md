@@ -1,6 +1,8 @@
 # Contributing Guidelines
 
-Please create an issue if there is a new feature, enhancement or bug you would like to see worked on. If you are taking on an open issue please comment on the issue saying that you would like to work on it to avoid multiple people taking on the same issue.
+Please create an issue if there is a new feature, enhancement or bug you would like to see worked on.
+
+If you are taking on an open issue please comment on the issue saying that you would like to work on it to avoid multiple people taking on the same issue.
 
 ## Fork the repo and submit a pull request
 
