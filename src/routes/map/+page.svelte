@@ -283,7 +283,7 @@ Thanks for using BTC Map!`);
 										: 'Lightning Contactless unknown'
 								}"/>
                 </div>
-								<span class='text-body' title="Surveys are completed by BTC Map community members.">Survey date:
+								<span class='text-body' title="Surveys are completed by BTC Map community members.">Survey Date:
 								${
 									element.tags['survey:date']
 										? `${element.tags['survey:date']}`
