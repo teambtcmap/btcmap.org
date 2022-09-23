@@ -28,7 +28,6 @@
 
 			const osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				noWrap: true,
-				minZoom: 1,
 				maxZoom: 19
 			});
 
@@ -36,7 +35,6 @@
 				'https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}{r}.{ext}',
 				{
 					noWrap: true,
-					minZoom: 1,
 					maxZoom: 20,
 					ext: 'png'
 				}
@@ -46,7 +44,6 @@
 				'https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.{ext}',
 				{
 					noWrap: true,
-					minZoom: 1,
 					maxZoom: 20,
 					ext: 'png'
 				}
@@ -56,7 +53,6 @@
 				'https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.{ext}',
 				{
 					noWrap: true,
-					minZoom: 1,
 					maxZoom: 16,
 					ext: 'jpg'
 				}
@@ -66,7 +62,6 @@
 				'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.{ext}',
 				{
 					noWrap: true,
-					minZoom: 1,
 					maxZoom: 18,
 					ext: 'png'
 				}
