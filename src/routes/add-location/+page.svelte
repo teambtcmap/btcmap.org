@@ -1,4 +1,6 @@
 <script>
+	import { onMount, onDestroy } from 'svelte';
+	import { browser } from '$app/environment';
 	import axios from 'axios';
 	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
 	import { Header, Footer, PrimaryButton } from '$comp';
@@ -6,6 +8,9 @@
 
 	let name;
 	let address;
+	let lat;
+	let long;
+	let selected = false;
 	let url;
 	let methods = [];
 	let onchain;
@@ -43,6 +48,9 @@
 				.post('/add-location/endpoint', {
 					name: name.value,
 					address: address.value,
+					lat: lat ? lat.toString() : '',
+					long: long ? long.toString() : '',
+					osm: lat && long ? `https://www.openstreetmap.org/#map=19/${lat}/${long}` : '',
 					url: url.value,
 					methods: methods,
 					twitterMerchant: twitterMerchant.value
@@ -69,6 +77,48 @@
 				});
 		}
 	};
+
+	// location picker map
+	let mapElement;
+	let map;
+
+	onMount(async () => {
+		if (browser) {
+			//import packages
+			const leaflet = await import('leaflet');
+			const leafletLocateControl = await import('leaflet.locatecontrol');
+
+			// add map and tiles
+			map = leaflet.map(mapElement, { attributionControl: false }).setView([0, 0], 2);
+
+			const osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				noWrap: true,
+				maxZoom: 19
+			});
+
+			osm.addTo(map);
+
+			// add click event to help devs find lat/long of desired location for iframe embeds
+			map.on('click', (e) => {
+				lat = e.latlng.lat;
+				long = e.latlng.lng;
+				selected = true;
+			});
+
+			// change broken marker image path in prod
+			L.Icon.Default.prototype.options.imagePath = '/icons/';
+
+			// adds locate button to map
+			L.control.locate().addTo(map);
+		}
+	});
+
+	onDestroy(async () => {
+		if (map) {
+			console.log('Unloading Leaflet map.');
+			map.remove();
+		}
+	});
 </script>
 
 <div class="bg-teal">
@@ -123,6 +173,38 @@
 								/>
 							</div>
 							<div>
+								<label for="location-picker" class="mb-2 block font-semibold"
+									>Select Location <span class="font-normal">(optional)</span></label
+								>
+								{#if selected}
+									<span class="text-green-500 font-semibold">Location selected!</span>
+								{/if}
+								<div class="flex space-x-2">
+									<input
+										disabled
+										bind:value={lat}
+										readonly
+										type="number"
+										name="lat"
+										placeholder="Latitude"
+										class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+									/>
+									<input
+										disabled
+										bind:value={long}
+										readonly
+										type="number"
+										name="long"
+										placeholder="Longitude"
+										class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+									/>
+								</div>
+								<div
+									bind:this={mapElement}
+									class="!cursor-crosshair focus:outline-link border-2 border-input mt-2 rounded-2xl h-[300px]"
+								/>
+							</div>
+							<div>
 								<label for="location" class="mb-2 block font-semibold"
 									>Location URL <span class="font-normal">(optional)</span></label
 								>
@@ -138,7 +220,7 @@
 							<fieldset>
 								<legend class="mb-2 block font-semibold">Select one or more options</legend>
 								{#if noMethodSelected}
-									<span class="text-error">Please fix this...</span>
+									<span class="text-error font-semibold">Please fix this...</span>
 								{/if}
 								<div class="space-y-4">
 									<div>
@@ -279,3 +361,8 @@
 		<Footer />
 	</div>
 </div>
+
+<style>
+	@import 'leaflet/dist/leaflet.css';
+	@import 'leaflet.locatecontrol/dist/L.Control.Locate.min.css';
+</style>
