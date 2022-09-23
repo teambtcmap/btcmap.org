@@ -222,7 +222,7 @@ Thanks for using BTC Map!`);
 								// marker popup component
 								`${
 									element.tags.name
-										? `<span class='block font-bold text-lg text-primary' title='Merchant Name'>${element.tags.name}</span>`
+										? `<span class='block font-bold text-lg text-primary' title='Merchant name'>${element.tags.name}</span>`
 										: ''
 								}
 
@@ -283,7 +283,7 @@ Thanks for using BTC Map!`);
 										: 'Lightning Contactless unknown'
 								}"/>
                 </div>
-								<span class='text-body' title="Surveys are completed by BTC Map community members.">Survey Date:
+								<span class='text-body' title="Surveys are completed by BTC Map community members.">Survey date:
 								${
 									element.tags['survey:date']
 										? `${element.tags['survey:date']}`
