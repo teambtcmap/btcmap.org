@@ -42,8 +42,7 @@
 			);
 
 			const baseMaps = {
-				'Light (OpenStreetMap)': osm,
-				'Dark (Stadia Maps)': dark
+				'Light (OpenStreetMap)': osm
 			};
 
 			const layerControl = L.control.layers(baseMaps).addTo(map);
