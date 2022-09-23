@@ -28,21 +28,56 @@
 
 			const osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				noWrap: true,
-				maxZoom: 19,
-				minZoom: 1
+				minZoom: 1,
+				maxZoom: 19
 			});
 
-			const dark = leaflet.tileLayer(
-				'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
+			const toner = leaflet.tileLayer(
+				'https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}{r}.{ext}',
 				{
 					noWrap: true,
-					maxZoom: 19,
-					minZoom: 1
+					minZoom: 1,
+					maxZoom: 20,
+					ext: 'png'
+				}
+			);
+
+			const tonerLite = leaflet.tileLayer(
+				'https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.{ext}',
+				{
+					noWrap: true,
+					minZoom: 1,
+					maxZoom: 20,
+					ext: 'png'
+				}
+			);
+
+			const watercolor = leaflet.tileLayer(
+				'https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.{ext}',
+				{
+					noWrap: true,
+					minZoom: 1,
+					maxZoom: 16,
+					ext: 'jpg'
+				}
+			);
+
+			const terrain = leaflet.tileLayer(
+				'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.{ext}',
+				{
+					noWrap: true,
+					minZoom: 1,
+					maxZoom: 18,
+					ext: 'png'
 				}
 			);
 
 			const baseMaps = {
-				'Light (OpenStreetMap)': osm
+				OpenStreetMap: osm,
+				'Toner (Stamen)': toner,
+				'Toner Lite (Stamen)': tonerLite,
+				'Watercolor (Stamen)': watercolor,
+				'Terrain (Stamen)': terrain
 			};
 
 			const layerControl = L.control.layers(baseMaps).addTo(map);
