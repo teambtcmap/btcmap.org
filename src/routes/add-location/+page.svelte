@@ -27,8 +27,8 @@
 		noMethodSelected = false;
 	};
 
-	$: latFixed = lat && lat.toFixed(6);
-	$: longFixed = long && long.toFixed(6);
+	$: latFixed = lat && lat.toFixed(5);
+	$: longFixed = long && long.toFixed(5);
 
 	const submitForm = (e) => {
 		e.preventDefault();
