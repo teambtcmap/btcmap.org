@@ -261,11 +261,13 @@ Thanks for using BTC Map!`);
 										: 'Lightning Contactless unknown'
 								}"/>
                 </div>
+								<span class='text-body'>Survey date:
 								${
 									element.tags['survey:date']
-										? `<span class='text-body'>Survey date: ${element.tags['survey:date']}</span>`
-										: ''
-								}`
+										? `${element.tags['survey:date']}`
+										: '<span class="fa-solid fa-question" title="This place hasn&#39;t been checked by our community in a while."></span>'
+								}
+								</span>`
 							);
 
 							markers.addLayer(marker);

@@ -179,6 +179,10 @@
 								{#if selected}
 									<span class="text-green-500 font-semibold">Location selected!</span>
 								{/if}
+								<div
+									bind:this={mapElement}
+									class="!cursor-crosshair focus:outline-link border-2 border-input mb-2 rounded-2xl h-[300px]"
+								/>
 								<div class="flex space-x-2">
 									<input
 										disabled
@@ -199,10 +203,6 @@
 										class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
 									/>
 								</div>
-								<div
-									bind:this={mapElement}
-									class="!cursor-crosshair focus:outline-link border-2 border-input mt-2 rounded-2xl h-[300px]"
-								/>
 							</div>
 							<div>
 								<label for="location" class="mb-2 block font-semibold"
