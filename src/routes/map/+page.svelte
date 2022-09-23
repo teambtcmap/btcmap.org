@@ -206,7 +206,7 @@ Thanks for using BTC Map!`);
 										: ''
 								}
 
-                <span class='block text-body'>${checkAddress(element.tags)}</span>
+                <span class='block text-body font-bold'>${checkAddress(element.tags)}</span>
 
                 <div class='w-[192px] flex space-x-2 my-1'>
                   ${
@@ -230,7 +230,7 @@ Thanks for using BTC Map!`);
 								}' target="_blank" rel="noreferrer" title='Share'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-share-nodes" /></a>
                 </div>
 
-                <div class='w-full flex space-x-2'>
+                <div class='w-full flex space-x-2 my-1'>
                   <img src=${
 										element.tags['payment:onchain'] === 'yes'
 											? '/icons/btc-highlight.svg'
@@ -260,7 +260,12 @@ Thanks for using BTC Map!`);
 										? 'Lightning Contactless accepted'
 										: 'Lightning Contactless unknown'
 								}"/>
-                </div>`
+                </div>
+								${
+									element.tags['survey:date']
+										? `<span class='text-body'>Survey date: ${element.tags['survey:date']}</span>`
+										: ''
+								}`
 							);
 
 							markers.addLayer(marker);
