@@ -90,5 +90,5 @@ Thanks to:
 
 - [OpenStreetMap](https://www.openstreetmap.org) (OpenStreetMap, OpenStreetMapDE, OpenStreetMapFR)
 - [OpenTopoMap](https://opentopomap.org) (Topo)
-- [ESRI](https://www.esri.com/en-us) (Imagery)
+- [ESRI](https://www.esri.com) (Imagery)
 - [Stamen](http://maps.stamen.com) (Terrain, Toner, Toner Lite, Watercolor)
