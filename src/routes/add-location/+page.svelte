@@ -27,6 +27,9 @@
 		noMethodSelected = false;
 	};
 
+	$: latFixed = lat && lat.toFixed(6);
+	$: longFixed = long && long.toFixed(6);
+
 	const submitForm = (e) => {
 		e.preventDefault();
 
@@ -195,7 +198,7 @@
 								<div class="flex space-x-2">
 									<input
 										disabled
-										bind:value={lat}
+										bind:value={latFixed}
 										readonly
 										type="number"
 										name="lat"
@@ -204,7 +207,7 @@
 									/>
 									<input
 										disabled
-										bind:value={long}
+										bind:value={longFixed}
 										readonly
 										type="number"
 										name="long"
