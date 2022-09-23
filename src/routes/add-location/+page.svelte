@@ -98,10 +98,19 @@
 
 			osm.addTo(map);
 
-			// add click event to help devs find lat/long of desired location for iframe embeds
+			// add marker on click
+			let marker;
+
 			map.on('click', (e) => {
 				lat = e.latlng.lat;
 				long = e.latlng.lng;
+
+				if (marker) {
+					map.removeLayer(marker);
+				}
+
+				marker = L.marker([lat, long]).addTo(map);
+
 				selected = true;
 			});
 
