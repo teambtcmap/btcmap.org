@@ -328,7 +328,7 @@
 							<img src="/images/supercoder.svg" alt="shadowy supercoder" class="mb-10 mx-auto" />
 							<PrimaryButton
 								text="See Wiki for instructions"
-								link="https://github.com/teambtcmap/btcmap.org/wiki/Tagging-Instructions"
+								link="https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions"
 								style="w-full py-3 rounded-xl"
 								external
 							/>
