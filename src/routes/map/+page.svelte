@@ -157,15 +157,25 @@ Thanks for using BTC Map!`);
 			};
 			document.querySelector('.leaflet-control-zoom').append(fullscreenButton);
 
+			// add home button to map
+			const addControlDiv = document.createElement('div');
+			const addHomeButton = document.createElement('a');
+			addControlDiv.classList.add('leaflet-control-site-links', 'leaflet-bar', 'leaflet-control');
+			addHomeButton.classList.add('leaflet-bar-part');
+			addHomeButton.href = '/';
+			addHomeButton.target = '_blank';
+			addHomeButton.rel = 'noreferrer';
+			addHomeButton.title = 'Go to home page';
+			addHomeButton.role = 'button';
+			addHomeButton.ariaLabel = 'Go to home page';
+			addHomeButton.ariaDisabled = 'false';
+			addHomeButton.innerHTML = '<span class="w-[16px] h-[16px] fa-solid fa-house"></span>';
+			addControlDiv.append(addHomeButton);
+			document.querySelector('.leaflet-top.leaflet-left').append(addControlDiv);
+
 			// add location button to map
-			const addLocationDiv = document.createElement('div');
 			const addLocationButton = document.createElement('a');
-			addLocationDiv.classList.add(
-				'leaflet-control-add-location',
-				'leaflet-bar',
-				'leaflet-control'
-			);
-			addLocationButton.classList.add('leaflet-bar-part', 'leaflet-bar-part-single');
+			addLocationButton.classList.add('leaflet-bar-part');
 			addLocationButton.href = '/add-location';
 			addLocationButton.target = '_blank';
 			addLocationButton.rel = 'noreferrer';
@@ -175,8 +185,7 @@ Thanks for using BTC Map!`);
 			addLocationButton.ariaDisabled = 'false';
 			addLocationButton.innerHTML =
 				'<span class="w-[16px] h-[16px] fa-solid fa-location-dot"></span>';
-			addLocationDiv.append(addLocationButton);
-			document.querySelector('.leaflet-top.leaflet-left').append(addLocationDiv);
+			addControlDiv.append(addLocationButton);
 
 			// fetch bitcoin locations from our api
 			axios
