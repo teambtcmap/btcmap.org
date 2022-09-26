@@ -50,7 +50,7 @@ You can adjust the `width` and `height` attributes to fit your page.
 **NOTE:** If you want the geolocation feature to work you must also allow this in the `Permissions Policy HTTP Header` on the server of your website.
 
 ```
-Permissions-Policy: geolocation=(self "https://www.btcmap.org")
+Permissions-Policy: geolocation=(self "https://btcmap.org")
 ```
 
 For more information see this [article](https://developer.chrome.com/docs/privacy-sandbox/permissions-policy/).
