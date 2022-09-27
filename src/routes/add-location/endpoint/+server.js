@@ -7,8 +7,18 @@ export async function POST({ request }) {
 		'Content-Type': 'application/json'
 	};
 
-	let { name, address, lat, long, osm, url, methods, twitterMerchant, twitterSubmitter, notes } =
-		await request.json();
+	let {
+		name,
+		address,
+		lat,
+		long,
+		osm,
+		category,
+		methods,
+		twitterMerchant,
+		twitterSubmitter,
+		notes
+	} = await request.json();
 
 	let airtable = await axios
 		.post(
@@ -20,7 +30,7 @@ export async function POST({ request }) {
 					lat: lat,
 					long: long,
 					osm: osm,
-					URL: url,
+					Category: category,
 					fldsVjrsPyMKV7ro1: methods,
 					fldfXqVj05zgONpHv: twitterMerchant,
 					fldDN1WtilxEgixeT: twitterSubmitter,

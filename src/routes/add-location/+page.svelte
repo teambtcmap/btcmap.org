@@ -11,7 +11,7 @@
 	let lat;
 	let long;
 	let selected = false;
-	let url;
+	let category;
 	let methods = [];
 	let onchain;
 	let lightning;
@@ -19,6 +19,7 @@
 	let twitterMerchant;
 	let twitterSubmitter;
 	let notes;
+	let noLocationSelected = false;
 	let noMethodSelected = false;
 	let submitted = false;
 	let submitting = false;
@@ -32,8 +33,9 @@
 
 	const submitForm = (e) => {
 		e.preventDefault();
-
-		if (!onchain.checked && !lightning.checked && !nfc.checked) {
+		if (!selected) {
+			noLocationSelected = true;
+		} else if (!onchain.checked && !lightning.checked && !nfc.checked) {
 			noMethodSelected = true;
 		} else {
 			submitting = true;
@@ -54,7 +56,7 @@
 					lat: lat ? lat.toString() : '',
 					long: long ? long.toString() : '',
 					osm: lat && long ? `https://www.openstreetmap.org/edit#map=19/${lat}/${long}` : '',
-					url: url.value,
+					category: category.value,
 					methods: methods,
 					twitterMerchant: twitterMerchant.value
 						? twitterMerchant.value.startsWith('@')
@@ -185,11 +187,12 @@
 								/>
 							</div>
 							<div>
-								<label for="location-picker" class="mb-2 block font-semibold"
-									>Select Location <span class="font-normal">(optional)</span></label
+								<label for="location-picker" class="mb-2 block font-semibold">Select Location</label
 								>
 								{#if selected}
 									<span class="text-green-500 font-semibold">Location selected!</span>
+								{:else if noLocationSelected}
+									<span class="text-error font-semibold">Please select a location...</span>
 								{/if}
 								<div
 									bind:this={mapElement}
@@ -197,6 +200,7 @@
 								/>
 								<div class="flex space-x-2">
 									<input
+										required
 										disabled
 										bind:value={latFixed}
 										readonly
@@ -206,6 +210,7 @@
 										class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
 									/>
 									<input
+										required
 										disabled
 										bind:value={longFixed}
 										readonly
@@ -217,15 +222,14 @@
 								</div>
 							</div>
 							<div>
-								<label for="location" class="mb-2 block font-semibold"
-									>Location URL <span class="font-normal">(optional)</span></label
-								>
+								<label for="category" class="mb-2 block font-semibold">Category</label>
 								<input
-									type="url"
-									name="location"
-									placeholder="e.g. https://google.com/maps/..."
+									required
+									type="text"
+									name="category"
+									placeholder="Restaurant etc."
 									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
-									bind:this={url}
+									bind:this={category}
 								/>
 							</div>
 
@@ -301,7 +305,7 @@
 								>
 								<textarea
 									name="notes"
-									placeholder="Any other relevant details? Website URL, phone number, business type etc."
+									placeholder="Any other relevant details? Website URL, phone number etc."
 									rows="5"
 									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
 									bind:this={notes}
