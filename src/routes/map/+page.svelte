@@ -135,7 +135,7 @@ Thanks for using BTC Map!`);
 
 			// add support attribution
 			document.querySelector('.leaflet-control-attribution').innerHTML =
-				'Support BTC Map <a href="bitcoin:bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d" class="text-link hover:text-hover" title="On-chain"><span class="fa-brands fa-bitcoin"/></a> | <a href="lightning:btcmap@zbd.gg" class="text-link hover:text-hover" title="Lightning"><span class="fa-solid fa-bolt"/></a>';
+				'<a href="/support-us" target="_blank" rel="noreferrer" class="text-link hover:text-hover" title="Support with sats">Support</a> BTC Map';
 
 			// adds fullscreen button to map
 			const fullscreenButton = document.createElement('a');
