@@ -13,8 +13,3 @@
 **Additional context**
 
 <!-- Anything else you would like to add -->
-
-**Code is formatted**
-
-- [ ] Yes
-<!-- Please run `yarn format` after making any changes and before submitting a PR -->
