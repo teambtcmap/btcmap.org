@@ -13,7 +13,9 @@ module.exports = {
 				grey: '#9FB4B6',
 				input: '#BDD2D4',
 				error: '#DF3C3C',
-				body: '#3E6267'
+				body: '#3E6267',
+				supporter: '#095D73',
+				lightBlue: '#D4E1E2'
 			}
 		}
 	},

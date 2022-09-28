@@ -1,10 +1,11 @@
-<footer class="pb-5 break-all text-center">
-	<p class="text-primary font-semibold">
-		Help us improve BTC Map <a
-			href="bitcoin:bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d"
-			class="text-link hover:text-hover">bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d</a
-		>
-		|
-		<a href="lightning:btcmap@zbd.gg" class="text-link hover:text-hover">btcmap@zbd.gg</a>
-	</p>
+<script>
+	export let justify;
+	import { SocialLink } from '$comp';
+	import { socials } from '$lib/store';
+</script>
+
+<footer class="w-full pb-5 flex justify-{justify} space-x-5">
+	<SocialLink url={$socials.twitter} social="twitter" />
+	<SocialLink url={$socials.discord} social="discord" />
+	<SocialLink url={$socials.github} social="github" />
 </footer>

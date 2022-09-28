@@ -3,10 +3,9 @@
 	import { socials, apps } from '$lib/store';
 
 	const appOptions = [
-		{ title: 'APK', link: $apps.direct, icon: 'fa-solid fa-download' },
-		{ title: 'F-Droid', link: $apps.fdroid, icon: 'fa-brands fa-android' },
-		{ title: 'iOS', link: '', icon: 'fa-brands fa-apple', disabled: true },
-		{ title: 'Web', link: $apps.web, icon: 'fa-solid fa-globe' }
+		{ title: 'APK', link: $apps.direct, icon: 'fa-brands fa-android' },
+		{ title: 'F-Droid', link: $apps.fdroid, icon: 'fa-solid fa-robot' },
+		{ title: 'Web', link: $apps.web, icon: 'fa-solid fa-earth-americas' }
 	];
 </script>
 
@@ -28,22 +27,15 @@
 					{#each appOptions as app}
 						<div class="space-y-1 text-body font-semibold text-center my-2 md:my-0 mx-2">
 							<p>{app.title}</p>
-							{#if !app.disabled}
-								<a
-									href={app.link}
-									target={app.title === 'Web' ? '_self' : '_blank'}
-									rel="noreferrer"
-									class="block"
-									><i
-										class="bg-link hover:bg-hover p-3 rounded-full w-8 h-8 text-white {app.icon}"
-									/></a
-								>
-							{:else}
-								<span class="block"
-									><i class="bg-link/30 p-3 rounded-full w-8 h-8 text-white {app.icon}" /></span
-								>
-								<p>Soon!</p>
-							{/if}
+							<a
+								href={app.link}
+								target={app.title === 'Web' ? '_self' : '_blank'}
+								rel="noreferrer"
+								class="block"
+								><i
+									class="bg-link hover:bg-hover p-3 rounded-full w-8 h-8 text-white {app.icon}"
+								/></a
+							>
 						</div>
 					{/each}
 					<div class="space-y-1 my-2 mx-2 md:my-0 md:mx-0 md:ml-3 md:mr-2">
@@ -69,17 +61,11 @@
 			/>
 		</section>
 
-		<Footer />
+		<Footer justify="start" />
 	</div>
 </div>
 
 <style>
-	.gradient {
-		background: -webkit-linear-gradient(45deg, #0ecd71, #040273);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-	}
-
 	@media (min-width: 1280px) {
 		.street-map {
 			background-image: url(/images/street-map.svg);

@@ -15,3 +15,9 @@ html {
 	color: white;
 	background: #53c5d5;
 }
+
+.gradient {
+	background: -webkit-linear-gradient(45deg, #0ecd71, #040273);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+}
