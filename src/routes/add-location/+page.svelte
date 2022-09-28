@@ -137,15 +137,8 @@
 	<div class="w-10/12 xl:w-[1200px] mx-auto">
 		<Header />
 		{#if !submitted}
-			<div class="space-x-4 mt-10">
-				<a href="/" class="text-link hover:text-hover font-semibold"
-					><i class="fa-solid fa-house mr-2" /> Home</a
-				> <i class="fa-solid fa-chevron-right text-grey" />
-				<span class="font-semibold">Add location</span>
-			</div>
-
-			<h1 class="text-4xl md:text-5xl font-semibold mt-8 text-center lg:text-left">
-				Add a location
+			<h1 class="text-4xl md:text-5xl gradient font-semibold mt-10 text-center lg:text-left">
+				Join the bitcoin map community.
 			</h1>
 
 			<div class="mt-16 pb-20 md:pb-32 lg:flex justify-between">
@@ -154,14 +147,14 @@
 					class="mx-auto w-full md:w-2/3 lg:w-1/2 border-b lg:border-b-0 pb-14 lg:pb-0 lg:border-r border-input"
 				>
 					<div class="lg:w-10/12 xl:w-3/4">
-						<h2 class="text-3xl font-semibold mb-5">Noob?</h2>
+						<h2 class="text-primary text-3xl font-semibold mb-5">Noob?</h2>
 
-						<p class="w-full mb-10">
+						<p class="text-primary w-full mb-10">
 							Fill out the following form and one of our volunteer community members will add your
 							location to the map.
 						</p>
 
-						<form on:submit={submitForm} class="space-y-5 w-full">
+						<form on:submit={submitForm} class="text-primary space-y-5 w-full">
 							<div>
 								<label for="name" class="mb-2 block font-semibold">Merchant Name</label>
 								<input
@@ -244,7 +237,7 @@
 											on:click={handleCheckboxClick}
 										/>
 										<label for="onchain" class="ml-1 cursor-pointer"
-											><img src="/icons/btc-black.svg" alt="onchain" class="inline" /> On-chain</label
+											><img src="/icons/btc-primary.svg" alt="onchain" class="inline" /> On-chain</label
 										>
 									</div>
 									<div>
@@ -256,7 +249,7 @@
 											on:click={handleCheckboxClick}
 										/>
 										<label for="lightning" class="ml-1 cursor-pointer"
-											><img src="/icons/ln-black.svg" alt="lightning" class="inline" /> Lightning</label
+											><img src="/icons/ln-primary.svg" alt="lightning" class="inline" /> Lightning</label
 										>
 									</div>
 									<div>
@@ -268,7 +261,7 @@
 											on:click={handleCheckboxClick}
 										/>
 										<label for="nfc" class="ml-1 cursor-pointer"
-											><img src="/icons/nfc-black.svg" alt="nfc" class="inline" /> Lightning Contactless</label
+											><img src="/icons/nfc-primary.svg" alt="nfc" class="inline" /> Lightning Contactless</label
 										>
 									</div>
 								</div>
@@ -321,8 +314,8 @@
 				<section id="supercoder" class="mx-auto w-full md:w-2/3 lg:w-1/2 pt-14 lg:pt-0">
 					<div class="lg:flex justify-end">
 						<div class="lg:w-10/12 xl:w-3/4">
-							<h2 class="text-3xl font-semibold mb-5">Shadowy Supertagger?</h2>
-							<p class="w-full mb-10">
+							<h2 class="text-primary text-3xl font-semibold mb-5">Shadowy Supertagger?</h2>
+							<p class="text-primary w-full mb-10">
 								Contribute changes directly to OSM - like a 😎 boss. Who needs forms anyway.
 							</p>
 							<img src="/images/supercoder.svg" alt="shadowy supercoder" class="mb-10 mx-auto" />
@@ -339,8 +332,8 @@
 		{:else}
 			<div class="flex justify-center items-center text-center pb-20 md:pb-32 mt-10">
 				<div>
-					<h2 class="text-4xl font-semibold mb-5">Location Submitted!</h2>
-					<p class="w-full md:w-[500px] mb-5">
+					<h2 class="gradient text-4xl font-semibold mb-5">Location Submitted!</h2>
+					<p class="text-primary w-full md:w-[500px] mb-5">
 						We’ll review your information and add it asap. If you wish to know the status of your
 						contribution, join our <a
 							href={$socials.discord}
@@ -370,7 +363,7 @@
 			</div>
 		{/if}
 
-		<Footer />
+		<Footer justify="start" />
 	</div>
 </div>
 
