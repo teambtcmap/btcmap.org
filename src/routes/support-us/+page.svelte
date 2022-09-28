@@ -107,9 +107,21 @@
 					class="mt-8 space-y-10 md:space-y-0 md:grid grid-cols-3 gap-10 w-full lg:w-[800px] mx-auto"
 				>
 					<!-- supporter placeholders -->
-					<div class="bg-supporter h-[100px] opacity-50 drop-shadow-xl rounded-xl" />
-					<div class="bg-supporter h-[100px] opacity-50 drop-shadow-xl rounded-xl" />
-					<div class="bg-supporter h-[100px] opacity-50 drop-shadow-xl rounded-xl" />
+					<div
+						class="bg-supporter/50 h-[100px] drop-shadow-xl rounded-xl flex justify-center items-center"
+					>
+						<a href="mailto:hello@btcmap.org" class="text-white uppercase">Apply here</a>
+					</div>
+					<div
+						class="bg-supporter/50 h-[100px] drop-shadow-xl rounded-xl flex justify-center items-center"
+					>
+						<a href="mailto:hello@btcmap.org" class="text-white uppercase">Apply here</a>
+					</div>
+					<div
+						class="bg-supporter/50 h-[100px] drop-shadow-xl rounded-xl flex justify-center items-center"
+					>
+						<a href="mailto:hello@btcmap.org" class="text-white uppercase">Apply here</a>
+					</div>
 				</div>
 			</section>
 		</main>
