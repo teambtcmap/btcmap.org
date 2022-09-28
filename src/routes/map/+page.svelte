@@ -320,6 +320,7 @@ Thanks for using BTC Map!`);
 				})
 				.catch(function (error) {
 					// handle error
+					alert('Could not load map markers, please try again or contact BTC Map.');
 					throw new Error(error.message);
 				});
 		}
