@@ -135,7 +135,7 @@ Thanks for using BTC Map!`);
 
 			// add support attribution
 			document.querySelector('.leaflet-control-attribution').innerHTML =
-				'<a href="/support-us" target="_blank" rel="noreferrer" class="text-link hover:text-hover" title="Support with sats">Support</a> BTC Map';
+				'<a href="/support-us" class="text-link hover:text-hover" title="Support with sats">Support</a> BTC Map';
 
 			// adds fullscreen button to map
 			const fullscreenButton = document.createElement('a');
@@ -163,8 +163,6 @@ Thanks for using BTC Map!`);
 			addControlDiv.classList.add('leaflet-control-site-links', 'leaflet-bar', 'leaflet-control');
 			addHomeButton.classList.add('leaflet-bar-part');
 			addHomeButton.href = '/';
-			addHomeButton.target = '_blank';
-			addHomeButton.rel = 'noreferrer';
 			addHomeButton.title = 'Go to home page';
 			addHomeButton.role = 'button';
 			addHomeButton.ariaLabel = 'Go to home page';
@@ -177,8 +175,6 @@ Thanks for using BTC Map!`);
 			const addLocationButton = document.createElement('a');
 			addLocationButton.classList.add('leaflet-bar-part');
 			addLocationButton.href = '/add-location';
-			addLocationButton.target = '_blank';
-			addLocationButton.rel = 'noreferrer';
 			addLocationButton.title = 'Add location';
 			addLocationButton.role = 'button';
 			addLocationButton.ariaLabel = 'Add location';
