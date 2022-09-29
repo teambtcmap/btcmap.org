@@ -15,7 +15,8 @@ module.exports = {
 				error: '#DF3C3C',
 				body: '#3E6267',
 				supporter: '#095D73',
-				lightBlue: '#D4E1E2'
+				lightBlue: '#D4E1E2',
+				mapButton: '#5F5F5F'
 			}
 		}
 	},
