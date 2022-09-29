@@ -4,9 +4,8 @@
 </script>
 
 <div class="bg-teal">
+	<Header />
 	<div class="w-10/12 xl:w-[1200px] mx-auto">
-		<Header />
-
 		<main class="text-center space-y-10 my-10 md:my-20">
 			<h1 class="text-4xl md:text-5xl font-semibold text-primary gradient !leading-tight">
 				Find merchants on any platform.

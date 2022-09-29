@@ -136,8 +136,8 @@
 </script>
 
 <div class="bg-teal">
+	<Header />
 	<div class="w-10/12 xl:w-[1200px] mx-auto">
-		<Header />
 		{#if !submitted}
 			<h1 class="text-4xl md:text-5xl gradient font-semibold mt-10 text-center lg:text-left">
 				Join the bitcoin map community.
@@ -189,7 +189,7 @@
 								{/if}
 								<div
 									bind:this={mapElement}
-									class="!cursor-crosshair focus:outline-link border-2 border-input mb-2 rounded-2xl h-[300px]"
+									class="z-10 !cursor-crosshair focus:outline-link border-2 border-input mb-2 rounded-2xl h-[300px]"
 								/>
 								<div class="flex space-x-2">
 									<input
