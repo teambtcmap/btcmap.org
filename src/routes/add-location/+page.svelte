@@ -55,7 +55,7 @@
 					address: address.value,
 					lat: lat ? lat.toString() : '',
 					long: long ? long.toString() : '',
-					osm: lat && long ? `https://www.openstreetmap.org/edit#map=19/${lat}/${long}` : '',
+					osm: lat && long ? `https://www.openstreetmap.org/edit#map=21/${lat}/${long}` : '',
 					category: category.value,
 					methods: methods,
 					twitterMerchant: twitterMerchant.value
