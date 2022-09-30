@@ -133,18 +133,122 @@ Thanks for using BTC Map!`);
 			L.Icon.Default.prototype.options.imagePath = '/icons/';
 
 			// add scale
-			L.control.scale({ position: 'topleft' }).addTo(map);
+			L.control.scale({ position: 'bottomleft' }).addTo(map);
 
 			// add support attribution
-			L.control.attribution({ position: 'bottomleft' }).addTo(map);
+			L.control.attribution({ position: 'bottomright' }).addTo(map);
 
 			document.querySelector('.leaflet-control-attribution').innerHTML =
 				'<a href="/support-us" class="text-link hover:text-hover" title="Support with sats">Support</a> BTC Map';
 
+			// add in zoom control to custom location
+			L.control.zoom({ position: 'topleft' }).addTo(map);
+
+			// change default icons
+			const layers = document.querySelector('.leaflet-control-layers');
+			layers.style.border = 'none';
+			layers.style.borderRadius = '8px';
+			layers.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+
+			const attribution = document.querySelector('.leaflet-control-attribution');
+			attribution.style.borderRadius = '8px 0 0 0';
+			attribution.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+
+			const leafletBar = document.querySelector('.leaflet-bar');
+			leafletBar.style.border = 'none';
+			leafletBar.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+
+			const zoomIn = document.querySelector('.leaflet-control-zoom-in');
+			zoomIn.style.borderRadius = '8px 8px 0 0';
+			zoomIn.innerHTML = `<img src='/icons/plus.svg' alt='zoomin' class='inline' id='zoomin'/>`;
+			zoomIn.onmouseenter = () => {
+				document.querySelector('#zoomin').src = '/icons/plus-black.svg';
+			};
+			zoomIn.onmouseleave = () => {
+				document.querySelector('#zoomin').src = '/icons/plus.svg';
+			};
+
+			const zoomOut = document.querySelector('.leaflet-control-zoom-out');
+			zoomOut.style.borderRadius = '0 0 8px 8px';
+			zoomOut.innerHTML = `<img src='/icons/minus.svg' alt='zoomout' class='inline' id='zoomout'/>`;
+			zoomOut.onmouseenter = () => {
+				document.querySelector('#zoomout').src = '/icons/minus-black.svg';
+			};
+			zoomOut.onmouseleave = () => {
+				document.querySelector('#zoomout').src = '/icons/minus.svg';
+			};
+
+			// add fullscreen button to map
+			const customFullScreenButton = L.Control.extend({
+				options: {
+					position: 'topleft'
+				},
+				onAdd: () => {
+					const fullscreenDiv = L.DomUtil.create('div');
+					fullscreenDiv.classList.add('leaflet-bar', 'leafet-control');
+					fullscreenDiv.style.border = 'none';
+					fullscreenDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+
+					const fullscreenButton = L.DomUtil.create('a');
+					fullscreenButton.classList.add('leaflet-control-full-screen');
+					fullscreenButton.href = '#';
+					fullscreenButton.title = 'Full screen';
+					fullscreenButton.role = 'button';
+					fullscreenButton.ariaLabel = 'Full screen';
+					fullscreenButton.ariaDisabled = 'false';
+					fullscreenButton.innerHTML = `<img src='/icons/expand.svg' alt='fullscreen' class='inline' id='fullscreen'/>`;
+					fullscreenButton.style.borderRadius = '8px';
+					fullscreenButton.onclick = function toggleFullscreen() {
+						if (!document.fullscreenElement) {
+							mapElement.requestFullscreen().catch((err) => {
+								alert(`Error attempting to enable fullscreen mode: ${err.message} (${err.name})`);
+							});
+						} else {
+							document.exitFullscreen();
+						}
+					};
+					fullscreenButton.onmouseenter = () => {
+						document.querySelector('#fullscreen').src = '/icons/expand-black.svg';
+					};
+					fullscreenButton.onmouseleave = () => {
+						document.querySelector('#fullscreen').src = '/icons/expand.svg';
+					};
+
+					fullscreenDiv.append(fullscreenButton);
+
+					return fullscreenDiv;
+				}
+			});
+
+			map.addControl(new customFullScreenButton());
+
+			// add locate button to map
+			L.control.locate({ position: 'topleft' }).addTo(map);
+
+			const newLocateIcon = L.DomUtil.create('img');
+			newLocateIcon.src = '/icons/locate.svg';
+			newLocateIcon.alt = 'locate';
+			newLocateIcon.classList.add('inline');
+			newLocateIcon.id = 'locatebutton';
+			document.querySelector('.leaflet-control-locate-location-arrow').replaceWith(newLocateIcon);
+
+			const locateDiv = document.querySelector('.leaflet-control-locate');
+			locateDiv.style.border = 'none';
+			locateDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+
+			const locateButton = document.querySelector('.leaflet-bar-part.leaflet-bar-part-single');
+			locateButton.style.borderRadius = '8px';
+			locateButton.onmouseenter = () => {
+				document.querySelector('#locatebutton').src = '/icons/locate-black.svg';
+			};
+			locateButton.onmouseleave = () => {
+				document.querySelector('#locatebutton').src = '/icons/locate.svg';
+			};
+
 			// add home and marker buttons to map
 			const customControls = L.Control.extend({
 				options: {
-					position: 'bottomright'
+					position: 'topleft'
 				},
 				onAdd: () => {
 					const addControlDiv = L.DomUtil.create('div');
@@ -197,110 +301,6 @@ Thanks for using BTC Map!`);
 			});
 
 			map.addControl(new customControls());
-
-			// add locate button to map
-			L.control.locate({ position: 'bottomright' }).addTo(map);
-
-			const newLocateIcon = L.DomUtil.create('img');
-			newLocateIcon.src = '/icons/locate.svg';
-			newLocateIcon.alt = 'locate';
-			newLocateIcon.classList.add('inline');
-			newLocateIcon.id = 'locatebutton';
-			document.querySelector('.leaflet-control-locate-location-arrow').replaceWith(newLocateIcon);
-
-			const locateDiv = document.querySelector('.leaflet-control-locate');
-			locateDiv.style.border = 'none';
-			locateDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
-
-			const locateButton = document.querySelector('.leaflet-bar-part.leaflet-bar-part-single');
-			locateButton.style.borderRadius = '8px';
-			locateButton.onmouseenter = () => {
-				document.querySelector('#locatebutton').src = '/icons/locate-black.svg';
-			};
-			locateButton.onmouseleave = () => {
-				document.querySelector('#locatebutton').src = '/icons/locate.svg';
-			};
-
-			// add fullscreen button to map
-			const customFullScreenButton = L.Control.extend({
-				options: {
-					position: 'bottomright'
-				},
-				onAdd: () => {
-					const fullscreenDiv = L.DomUtil.create('div');
-					fullscreenDiv.classList.add('leaflet-bar', 'leafet-control');
-					fullscreenDiv.style.border = 'none';
-					fullscreenDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
-
-					const fullscreenButton = L.DomUtil.create('a');
-					fullscreenButton.classList.add('leaflet-control-full-screen');
-					fullscreenButton.href = '#';
-					fullscreenButton.title = 'Full screen';
-					fullscreenButton.role = 'button';
-					fullscreenButton.ariaLabel = 'Full screen';
-					fullscreenButton.ariaDisabled = 'false';
-					fullscreenButton.innerHTML = `<img src='/icons/expand.svg' alt='fullscreen' class='inline' id='fullscreen'/>`;
-					fullscreenButton.style.borderRadius = '8px';
-					fullscreenButton.onclick = function toggleFullscreen() {
-						if (!document.fullscreenElement) {
-							mapElement.requestFullscreen().catch((err) => {
-								alert(`Error attempting to enable fullscreen mode: ${err.message} (${err.name})`);
-							});
-						} else {
-							document.exitFullscreen();
-						}
-					};
-					fullscreenButton.onmouseenter = () => {
-						document.querySelector('#fullscreen').src = '/icons/expand-black.svg';
-					};
-					fullscreenButton.onmouseleave = () => {
-						document.querySelector('#fullscreen').src = '/icons/expand.svg';
-					};
-
-					fullscreenDiv.append(fullscreenButton);
-
-					return fullscreenDiv;
-				}
-			});
-
-			map.addControl(new customFullScreenButton());
-
-			// add in zoom control to custom location
-			L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-			// change default icons
-			const layers = document.querySelector('.leaflet-control-layers');
-			layers.style.border = 'none';
-			layers.style.borderRadius = '8px';
-			layers.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
-
-			const attribution = document.querySelector('.leaflet-control-attribution');
-			attribution.style.borderRadius = '0 8px 0 0';
-			attribution.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
-
-			const leafletBar = document.querySelector('.leaflet-bar');
-			leafletBar.style.border = 'none';
-			leafletBar.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
-
-			const zoomIn = document.querySelector('.leaflet-control-zoom-in');
-			zoomIn.style.borderRadius = '8px 8px 0 0';
-			zoomIn.innerHTML = `<img src='/icons/plus.svg' alt='zoomin' class='inline' id='zoomin'/>`;
-			zoomIn.onmouseenter = () => {
-				document.querySelector('#zoomin').src = '/icons/plus-black.svg';
-			};
-			zoomIn.onmouseleave = () => {
-				document.querySelector('#zoomin').src = '/icons/plus.svg';
-			};
-
-			const zoomOut = document.querySelector('.leaflet-control-zoom-out');
-			zoomOut.style.borderRadius = '0 0 8px 8px';
-			zoomOut.innerHTML = `<img src='/icons/minus.svg' alt='zoomout' class='inline' id='zoomout'/>`;
-			zoomOut.onmouseenter = () => {
-				document.querySelector('#zoomout').src = '/icons/minus-black.svg';
-			};
-			zoomOut.onmouseleave = () => {
-				document.querySelector('#zoomout').src = '/icons/minus.svg';
-			};
 
 			// fetch bitcoin locations from our api
 			axios
