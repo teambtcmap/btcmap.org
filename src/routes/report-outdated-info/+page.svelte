@@ -295,7 +295,10 @@
 
 			<section id="report" class="mx-auto w-full md:w-[600px] mt-16 pb-20 md:pb-32">
 				<h2 class="text-primary text-3xl font-semibold mb-5 text-center">
-					Report outdated information
+					Report outdated information<br />
+					<span class="text-base font-normal"
+						>(Merchant no longer accepts bitcoin or other data is incorrect.)</span
+					>
 				</h2>
 
 				<p class="text-primary w-full mb-10 text-center">
@@ -386,8 +389,8 @@
 				<div>
 					<h2 class="gradient text-4xl font-semibold mb-5">Report Submitted!</h2>
 					<p class="text-primary w-full md:w-[500px] mb-5">
-						We’ll review your information and update it ASAP. If you wish to know the status of your
-						contribution, join our <a
+						Thanks for taking the time to fill out this report. We’ll review your information and
+						update it ASAP. If you wish to know the status of your contribution, join our <a
 							href={$socials.discord}
 							target="_blank"
 							rel="noreferrer"
