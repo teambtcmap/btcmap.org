@@ -1,10 +1,10 @@
 import axios from 'axios';
-import { AIRTABLE_API_KEY } from '$env/static/private';
+import { GITHUB_API_KEY } from '$env/static/private';
 
 export async function POST({ request }) {
 	const headers = {
-		Authorization: `Bearer ${AIRTABLE_API_KEY}`,
-		'Content-Type': 'application/json'
+		Authorization: `Bearer ${GITHUB_API_KEY}`,
+		Accept: 'application/vnd.github+json'
 	};
 
 	let {
@@ -20,24 +20,24 @@ export async function POST({ request }) {
 		notes
 	} = await request.json();
 
-	let airtable = await axios
+	let github = await axios
 		.post(
-			'https://api.airtable.com/v0/app4wIiES4dsRLIrH/Locations',
+			'https://api.github.com/repos/teambtcmap/btcmap-data/issues',
 			{
-				fields: {
-					Name: name,
-					Address: address,
-					lat: lat,
-					long: long,
-					osm: osm,
-					Category: category,
-					fldsVjrsPyMKV7ro1: methods,
-					fldfXqVj05zgONpHv: twitterMerchant,
-					fldDN1WtilxEgixeT: twitterSubmitter,
-					Notes: notes,
-					Status: 'Todo',
-					fldgbuR3ugA8K46uJ: new Date(Date.now()).toISOString()
-				}
+				title: name,
+				body: `Merchant name: ${name}
+Address: ${address}
+Lat: ${lat}
+Long: ${long}
+OSM: ${osm}
+Category: ${category}
+Payment methods: ${methods}
+Twitter merchant: ${twitterMerchant}
+Twitter submitter: ${twitterSubmitter}
+Notes: ${notes}
+Status: Todo
+Created at: ${new Date(Date.now()).toISOString()}`,
+				labels: ['good first issue', 'help wanted', 'location-submission']
 			},
 			{ headers }
 		)
@@ -49,5 +49,5 @@ export async function POST({ request }) {
 			throw new Error(error);
 		});
 
-	return new Response(JSON.stringify(airtable));
+	return new Response(JSON.stringify(github));
 }

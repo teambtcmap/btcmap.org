@@ -23,6 +23,7 @@
 	let noMethodSelected = false;
 	let submitted = false;
 	let submitting = false;
+	let submissionIssueNumber;
 
 	const handleCheckboxClick = () => {
 		noMethodSelected = false;
@@ -57,7 +58,7 @@
 					long: long ? long.toString() : '',
 					osm: lat && long ? `https://www.openstreetmap.org/edit#map=21/${lat}/${long}` : '',
 					category: category.value,
-					methods: methods,
+					methods: methods.toString(),
 					twitterMerchant: twitterMerchant.value
 						? twitterMerchant.value.startsWith('@')
 							? twitterMerchant.value
@@ -71,7 +72,7 @@
 					notes: notes.value
 				})
 				.then(function (response) {
-					console.log(response);
+					submissionIssueNumber = response.data.number;
 					submitted = true;
 				})
 				.catch(function (error) {
@@ -387,12 +388,18 @@
 				<div>
 					<h2 class="gradient text-4xl font-semibold mb-5">Location Submitted!</h2>
 					<p class="text-primary w-full md:w-[500px] mb-5">
-						We’ll review your information and add it asap. If you wish to know the status of your
+						We’ll review your information and add it ASAP. If you wish to know the status of your
 						contribution, join our <a
 							href={$socials.discord}
 							target="_blank"
 							rel="noreferrer"
 							class="text-link hover:text-hover">Discord channel</a
+						>. You can also monitor the progress on
+						<a
+							href="https://github.com/teambtcmap/btcmap-data/issues/{submissionIssueNumber}"
+							target="_blank"
+							rel="noreferrer"
+							class="text-link hover:text-hover">GitHub</a
 						>.
 					</p>
 					{#if typeof window !== 'undefined'}
