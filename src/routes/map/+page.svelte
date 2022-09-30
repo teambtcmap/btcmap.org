@@ -369,9 +369,9 @@ Thanks for using BTC Map!`);
 											: ''
 									}
 
-                  <a href='https://www.openstreetmap.org/edit?node=${
-										element.id
-									}' target="_blank" rel="noreferrer" title='Edit'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-pen-to-square" /></a>
+                  <a href='https://www.openstreetmap.org/edit?${element.type}=${
+									element.id
+								}' target="_blank" rel="noreferrer" title='Edit'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-pen-to-square" /></a>
 
                   <a href='https://btcmap.org/map?lat=${latCalc}&long=${longCalc}' target="_blank" rel="noreferrer" title='Share'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-share-nodes" /></a>
                 </div>
@@ -430,7 +430,7 @@ Thanks for using BTC Map!`);
 
 								<a href="/report-outdated-info?${
 									element.tags.name ? `&name=${element.tags.name}` : ''
-								}&lat=${latCalc}&long=${longCalc}&node=${
+								}&lat=${latCalc}&long=${longCalc}&${element.type}=${
 									element.id
 								}" class='text-link hover:text-hover text-xs block' title="Reporting helps improve the data for everyone">Report outdated info</a>`
 							);

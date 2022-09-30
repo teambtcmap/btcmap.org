@@ -13,6 +13,10 @@
 	let location = lat && long ? `https://btcmap.org/map?lat=${lat}&long=${long}` : '';
 	let edit = $page.url.searchParams.has('node')
 		? `https://www.openstreetmap.org/edit?node=${$page.url.searchParams.get('node')}`
+		: $page.url.searchParams.has('way')
+		? `https://www.openstreetmap.org/edit?way=${$page.url.searchParams.get('way')}`
+		: $page.url.searchParams.has('relation')
+		? `https://www.openstreetmap.org/edit?relation=${$page.url.searchParams.get('relation')}`
 		: '';
 
 	let outdated;
@@ -200,9 +204,9 @@
 											: ''
 									}
 
-                  <a href='https://www.openstreetmap.org/edit?node=${
-										element.id
-									}' target="_blank" rel="noreferrer" title='Edit'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-pen-to-square" /></a>
+                  <a href='https://www.openstreetmap.org/edit?${element.type}=${
+									element.id
+								}' target="_blank" rel="noreferrer" title='Edit'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-pen-to-square" /></a>
 
                   <a href='https://btcmap.org/map?lat=${
 										element.type == 'node' ? element.lat : latCalc
@@ -259,7 +263,7 @@
 								lat = latCalc;
 								long = longCalc;
 								location = lat && long ? `https://btcmap.org/map?lat=${lat}&long=${long}` : '';
-								edit = `https://www.openstreetmap.org/edit?node=${element.id}`;
+								edit = `https://www.openstreetmap.org/edit?${element.type}=${element.id}`;
 								selected = true;
 							});
 
@@ -319,7 +323,7 @@
 
 				<form on:submit={submitForm} class="text-primary space-y-5 w-full">
 					<div>
-						{#if !$page.url.searchParams.has('name') || !$page.url.searchParams.has('lat') || !$page.url.searchParams.has('long') || !$page.url.searchParams.has('node')}
+						{#if !$page.url.searchParams.has('name') || !$page.url.searchParams.has('lat') || !$page.url.searchParams.has('long') || (!$page.url.searchParams.has('node') && !$page.url.searchParams.has('way') && !$page.url.searchParams.has('relation'))}
 							<label for="location-picker" class="mb-2 block font-semibold">Select Location</label>
 							{#if selected}
 								<span class="text-green-500 font-semibold">Location selected!</span>
