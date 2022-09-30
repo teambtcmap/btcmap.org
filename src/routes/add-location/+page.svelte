@@ -124,6 +124,51 @@
 
 			// adds locate button to map
 			L.control.locate().addTo(map);
+
+			const newLocateIcon = L.DomUtil.create('img');
+			newLocateIcon.src = '/icons/locate.svg';
+			newLocateIcon.alt = 'locate';
+			newLocateIcon.classList.add('inline');
+			newLocateIcon.id = 'locatebutton';
+			document.querySelector('.leaflet-control-locate-location-arrow').replaceWith(newLocateIcon);
+
+			const locateDiv = document.querySelector('.leaflet-control-locate');
+			locateDiv.style.border = 'none';
+			locateDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+
+			const locateButton = document.querySelector('.leaflet-bar-part.leaflet-bar-part-single');
+			locateButton.style.borderRadius = '8px';
+			locateButton.onmouseenter = () => {
+				document.querySelector('#locatebutton').src = '/icons/locate-black.svg';
+			};
+			locateButton.onmouseleave = () => {
+				document.querySelector('#locatebutton').src = '/icons/locate.svg';
+			};
+
+			// change default icons
+			const leafletBar = document.querySelector('.leaflet-bar');
+			leafletBar.style.border = 'none';
+			leafletBar.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+
+			const zoomIn = document.querySelector('.leaflet-control-zoom-in');
+			zoomIn.style.borderRadius = '8px 8px 0 0';
+			zoomIn.innerHTML = `<img src='/icons/plus.svg' alt='zoomin' class='inline' id='zoomin'/>`;
+			zoomIn.onmouseenter = () => {
+				document.querySelector('#zoomin').src = '/icons/plus-black.svg';
+			};
+			zoomIn.onmouseleave = () => {
+				document.querySelector('#zoomin').src = '/icons/plus.svg';
+			};
+
+			const zoomOut = document.querySelector('.leaflet-control-zoom-out');
+			zoomOut.style.borderRadius = '0 0 8px 8px';
+			zoomOut.innerHTML = `<img src='/icons/minus.svg' alt='zoomout' class='inline' id='zoomout'/>`;
+			zoomOut.onmouseenter = () => {
+				document.querySelector('#zoomout').src = '/icons/minus-black.svg';
+			};
+			zoomOut.onmouseleave = () => {
+				document.querySelector('#zoomout').src = '/icons/minus.svg';
+			};
 		}
 	});
 
@@ -371,7 +416,7 @@
 			</div>
 		{/if}
 
-		<Footer justify="start" />
+		<Footer style="justify-center lg:justify-start" />
 	</div>
 </div>
 

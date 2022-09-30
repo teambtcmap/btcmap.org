@@ -39,6 +39,6 @@
 			</section>
 		</main>
 
-		<Footer justify="center" />
+		<Footer style="justify-center" />
 	</div>
 </div>
