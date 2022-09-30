@@ -380,30 +380,42 @@ Thanks for using BTC Map!`);
                   <img src=${
 										element.tags['payment:onchain'] === 'yes'
 											? '/icons/btc-highlight.svg'
+											: element.tags['payment:onchain'] === 'no'
+											? '/icons/btc-no.svg'
 											: '/icons/btc.svg'
 									} alt="bitcoin" class="w-6 h-6" title="${
 									element.tags['payment:onchain'] === 'yes'
 										? 'On-chain accepted'
+										: element.tags['payment:onchain'] === 'no'
+										? 'On-chain not accepted'
 										: 'On-chain unknown'
 								}"/>
 
                   <img src=${
 										element.tags['payment:lightning'] === 'yes'
 											? '/icons/ln-highlight.svg'
+											: element.tags['payment:lightning'] === 'no'
+											? '/icons/ln-no.svg'
 											: '/icons/ln.svg'
 									} alt="lightning" class="w-6 h-6" title="${
 									element.tags['payment:lightning'] === 'yes'
 										? 'Lightning accepted'
+										: element.tags['payment:lightning'] === 'no'
+										? 'Lightning not accepted'
 										: 'Lightning unknown'
 								}"/>
 
                   <img src=${
 										element.tags['payment:lightning_contactless'] === 'yes'
 											? '/icons/nfc-highlight.svg'
+											: element.tags['payment:lightning_contactless'] === 'no'
+											? '/icons/nfc-no.svg'
 											: '/icons/nfc.svg'
 									} alt="nfc" class="w-6 h-6" title="${
 									element.tags['payment:lightning_contactless'] === 'yes'
 										? 'Lightning Contactless accepted'
+										: element.tags['payment:lightning_contactless'] === 'no'
+										? 'Lightning contactless not accepted'
 										: 'Lightning Contactless unknown'
 								}"/>
                 </div>
