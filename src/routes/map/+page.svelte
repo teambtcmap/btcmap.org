@@ -328,7 +328,7 @@ Thanks for using BTC Map!`);
 						}
 					};
 
-					// add location information to popup
+					// add location information
 					response.data.elements.forEach((element) => {
 						if (
 							(onchain ? element.tags['payment:onchain'] === 'yes' : true) &&
@@ -336,13 +336,15 @@ Thanks for using BTC Map!`);
 							(nfc ? element.tags['payment:lightning_contactless'] === 'yes' : true)
 						) {
 							const latCalc =
-								element.type == 'node' ? null : (element.bounds.minlat + element.bounds.maxlat) / 2;
+								element.type == 'node'
+									? element.lat
+									: (element.bounds.minlat + element.bounds.maxlat) / 2;
 							const longCalc =
-								element.type == 'node' ? null : (element.bounds.minlon + element.bounds.maxlon) / 2;
+								element.type == 'node'
+									? element.lon
+									: (element.bounds.minlon + element.bounds.maxlon) / 2;
 
-							let marker = L.marker(
-								element.type == 'node' ? [element.lat, element.lon] : [latCalc, longCalc]
-							).bindPopup(
+							let marker = L.marker([latCalc, longCalc]).bindPopup(
 								// marker popup component
 								`${
 									element.tags.name
@@ -371,11 +373,7 @@ Thanks for using BTC Map!`);
 										element.id
 									}' target="_blank" rel="noreferrer" title='Edit'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-pen-to-square" /></a>
 
-                  <a href='https://btcmap.org/map?lat=${
-										element.type == 'node' ? element.lat : latCalc
-									}&long=${
-									element.type == 'node' ? element.lon : longCalc
-								}' target="_blank" rel="noreferrer" title='Share'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-share-nodes" /></a>
+                  <a href='https://btcmap.org/map?lat=${latCalc}&long=${longCalc}' target="_blank" rel="noreferrer" title='Share'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-share-nodes" /></a>
                 </div>
 
                 <div class='w-full flex space-x-2 my-1'>
@@ -409,6 +407,7 @@ Thanks for using BTC Map!`);
 										: 'Lightning Contactless unknown'
 								}"/>
                 </div>
+
 								<span class='text-body my-1' title="Surveys are completed by BTC Map community members">Survey date:
 								${
 									element.tags['survey:date']
@@ -416,15 +415,12 @@ Thanks for using BTC Map!`);
 										: '<span class="fa-solid fa-question"></span>'
 								}
 								</span>
-								<a href="https://github.com/teambtcmap/btcmap-data/issues/new?assignees=&labels=good+first+issue%2Chelp+wanted%2Coutdated+info&template=REPORT-OUTDATED-INFO.yml${
-									element.tags.name ? `&title=${element.tags.name}` : ''
-								}&location=https://btcmap.org/map?lat=${
-									element.type == 'node' ? element.lat : latCalc
-								}%26long=${
-									element.type == 'node' ? element.lon : longCalc
-								}&edit=https://www.openstreetmap.org/edit?node=${
+
+								<a href="/report-outdated-info?${
+									element.tags.name ? `&name=${element.tags.name}` : ''
+								}&lat=${latCalc}&long=${longCalc}&node=${
 									element.id
-								}" target="_blank" rel="noreferrer" class='text-link hover:text-hover text-xs block' title="Reporting helps improve the data for everyone">Report outdated info</a>`
+								}" class='text-link hover:text-hover text-xs block' title="Reporting helps improve the data for everyone">Report outdated info</a>`
 							);
 
 							markers.addLayer(marker);
