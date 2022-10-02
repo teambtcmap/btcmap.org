@@ -330,6 +330,9 @@ Thanks for using BTC Map!`);
 
 					// add location information
 					response.data.forEach((element) => {
+						if (element['deleted_at']) {
+							return;
+						}
 						element = element.data;
 						if (
 							(onchain ? element.tags['payment:onchain'] === 'yes' : true) &&
