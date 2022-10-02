@@ -14,7 +14,12 @@
 
 <div>
 	<h3 class="hidden md:block uppercase text-body text-lg">
-		{text === 'Lightning' ? text + ' ⚡' : text + ' 🔗'}
+		{text}
+		<img
+			src={text === 'Lightning' ? '/icons/ln-highlight.svg' : '/icons/btc-highlight.svg'}
+			alt="protocol"
+			class="inline mb-1"
+		/>
 	</h3>
 	<div
 		class="bg-lightBlue text-body rounded-xl py-4 md:py-3 px-4 md:px-0 flex justify-between md:justify-center items-center md:space-x-4 w-full md:w-[475px] mx-auto"
@@ -24,8 +29,13 @@
 			>{text === 'Lightning' ? `${value.slice(0, 41)}...` : value}</span
 		>
 		<span class="block md:hidden uppercase"
-			>{text === 'Lightning' ? text + ' ⚡' : text + ' 🔗'}</span
-		>
+			>{text}
+			<img
+				src={text === 'Lightning' ? '/icons/ln-highlight.svg' : '/icons/btc-highlight.svg'}
+				alt="protocol"
+				class="inline mb-1"
+			/>
+		</span>
 
 		<div class="space-x-4">
 			<!-- qr button -->

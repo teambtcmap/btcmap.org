@@ -73,7 +73,13 @@
 								Scan or click to donate <br class="block md:hidden" /><strong class="lowercase"
 									>{network}</strong
 								>
-								{network === 'Lightning' ? ' ⚡' : ' 🔗'}
+								<img
+									src={network === 'Lightning'
+										? '/icons/ln-highlight.svg'
+										: '/icons/btc-highlight.svg'}
+									alt="protocol"
+									class="inline mb-1"
+								/>
 							</p>
 						</div>
 					</div>
