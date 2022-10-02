@@ -304,7 +304,7 @@ Thanks for using BTC Map!`);
 
 			// fetch bitcoin locations from our api
 			axios
-				.get('https://data.btcmap.org/elements.json')
+				.get('https://api.btcmap.org/elements')
 				.then(function (response) {
 					// handle success
 					let markers = L.markerClusterGroup();
@@ -329,7 +329,8 @@ Thanks for using BTC Map!`);
 					};
 
 					// add location information
-					response.data.elements.forEach((element) => {
+					response.data.forEach((element) => {
+						element = element.data;
 						if (
 							(onchain ? element.tags['payment:onchain'] === 'yes' : true) &&
 							(lightning ? element.tags['payment:lightning'] === 'yes' : true) &&
