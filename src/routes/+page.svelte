@@ -3,9 +3,9 @@
 	import { socials, apps } from '$lib/store';
 
 	const appOptions = [
+		{ title: 'Web', link: $apps.web, icon: 'fa-solid fa-earth-americas' },
 		{ title: 'APK', link: $apps.direct, icon: 'fa-brands fa-android' },
-		{ title: 'F-Droid', link: $apps.fdroid, icon: 'fa-solid fa-robot' },
-		{ title: 'Web', link: $apps.web, icon: 'fa-solid fa-earth-americas' }
+		{ title: 'F-Droid', link: $apps.fdroid, icon: 'fa-solid fa-robot' }
 	];
 </script>
 
