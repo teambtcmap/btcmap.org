@@ -4,3 +4,6 @@ export { default as SocialLink } from './SocialLink.svelte';
 export { default as Footer } from './Footer.svelte';
 export { default as PrimaryButton } from './PrimaryButton.svelte';
 export { default as DonationOption } from './DonationOption.svelte';
+export { default as DashboardStat } from './DashboardStat.svelte';
+export { default as LatestTagger } from './LatestTagger.svelte';
+export { default as TaggerSkeleton } from './TaggerSkeleton.svelte';

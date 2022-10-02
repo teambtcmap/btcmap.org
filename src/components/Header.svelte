@@ -3,6 +3,7 @@
 		{ title: 'Map', url: '/map', icon: 'map' },
 		{ title: 'Apps', url: '/apps', icon: 'apps' },
 		{ title: 'Add Location', url: '/add-location', icon: 'add' },
+		{ title: 'Dashboard', url: '/dashboard', icon: 'dash' },
 		{
 			title: 'Wiki',
 			url: 'https://github.com/teambtcmap/btcmap-data/wiki',
@@ -17,13 +18,13 @@
 
 <!-- desktop header -->
 <header
-	class="w-10/12 xl:w-[1200px] mx-auto relative hidden md:flex justify-between items-center w-full py-5"
+	class="w-10/12 xl:w-[1200px] mx-auto relative hidden lg:flex justify-between items-center w-full py-5"
 >
 	<a href="/">
 		<img src="/images/logo.svg" alt="logo" class="w-16" />
 	</a>
 
-	<nav class="flex flex-wrap md:space-x-8 lg:space-x-16">
+	<nav class="flex flex-wrap lg:space-x-14 xl:space-x-16">
 		{#each navLinks as link}
 			<a
 				href={link.url}
@@ -41,7 +42,7 @@
 
 <!-- mobile header -->
 <header
-	class="px-4 sticky top-0 z-30 flex md:hidden justify-between items-center w-full py-5 {showMobileMenu
+	class="px-4 sticky top-0 z-30 flex lg:hidden justify-between items-center w-full py-5 {showMobileMenu
 		? 'bg-teal'
 		: 'bg-teal/90'}"
 >
@@ -68,7 +69,7 @@
 				href={link.url}
 				target={link.external ? '_blank' : '_self'}
 				rel="noreferrer"
-				class="bg-mobileButtons active:bg-mobileButtonsActive rounded-2xl w-full px-8 py-4 text-link text-2xl flex items-center"
+				class="bg-mobileButtons active:bg-mobileButtonsActive rounded-2xl w-full p-4 text-link text-xl flex items-center"
 			>
 				<img src="/icons/mobile-nav/{link.icon}.svg" alt={link.icon} class="mr-4" />
 				<span>{link.title}</span>

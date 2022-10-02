@@ -19,7 +19,13 @@ module.exports = {
 				mapButton: '#5F5F5F',
 				mobileMenu: '#085D69',
 				mobileButtons: '#D6E4E6',
-				mobileButtonsActive: '#C3DCDF'
+				mobileButtonsActive: '#C3DCDF',
+				statPositive: '#0B9072',
+				statNegative: '#EB5757',
+				statBorder: '#C8DCDF',
+				taggerTime: '#7C9CA0',
+				created: '#10B791',
+				deleted: '#EB5757'
 			}
 		}
 	},
