@@ -100,7 +100,7 @@
 					});
 			};
 			statsAPI();
-			statsAPIInterval = setInterval(statsAPI, 900000);
+			statsAPIInterval = setInterval(statsAPI, 600000);
 
 			const communitiesAPI = () => {
 				axios
@@ -116,7 +116,7 @@
 					});
 			};
 			communitiesAPI();
-			communitiesAPIInterval = setInterval(communitiesAPI, 900000);
+			communitiesAPIInterval = setInterval(communitiesAPI, 600000);
 
 			const supertaggersAPI = () => {
 				axios
@@ -133,7 +133,7 @@
 			};
 
 			supertaggersAPI();
-			supertaggersAPIInterval = setInterval(supertaggersAPI, 900000);
+			supertaggersAPIInterval = setInterval(supertaggersAPI, 600000);
 		}
 	});
 
@@ -211,7 +211,7 @@
 					/>
 				</div>
 				<p class="text-sm text-body">
-					*Data updated every 15 minutes, percentages based on previous 24 hours.
+					*Data updated every 10 minutes, percentages based on previous 24 hours.
 				</p>
 			</section>
 
@@ -250,7 +250,7 @@
 						{/if}
 					</div>
 				</div>
-				<p class="text-sm text-body">*Data updated every 15 minutes</p>
+				<p class="text-sm text-body">*Data updated every 10 minutes</p>
 			</section>
 		</main>
 
