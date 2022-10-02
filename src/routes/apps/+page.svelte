@@ -17,6 +17,12 @@
 
 			<section id="apps" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
 				<AppCard
+					image="fa-solid fa-earth-americas"
+					text="Web"
+					desc="Progressive Web App"
+					link={$apps.web}
+				/>
+				<AppCard
 					image="fa-brands fa-android"
 					text="APK"
 					desc="Direct Download"
@@ -27,12 +33,6 @@
 					text="F-Droid"
 					desc="FOSS App Store"
 					link={$apps.fdroid}
-				/>
-				<AppCard
-					image="fa-solid fa-earth-americas"
-					text="Web"
-					desc="Progressive Web App"
-					link={$apps.web}
 				/>
 				<AppCard image="fa-brands fa-app-store-ios" text="iOS" link="" desc="" />
 				<AppCard image="fa-brands fa-google-play" text="Play" link="" desc="" />
