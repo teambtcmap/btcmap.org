@@ -7,6 +7,10 @@
 	let communitiesAPIInterval;
 	let supertaggersAPIInterval;
 
+	let statsLoading;
+	let communitiesLoading;
+	let supertaggersLoading;
+
 	let stats;
 	let communities;
 	let supertaggers;
@@ -86,8 +90,13 @@
 	onMount(async () => {
 		if (browser) {
 			const axios = await import('axios');
-			const statsAPI = () => {
-				axios
+
+			const statsAPI = async () => {
+				if (stats) {
+					statsLoading = true;
+				}
+
+				await axios
 					.get('https://api.btcmap.org/daily_reports')
 					.then(function (response) {
 						// handle success
@@ -98,12 +107,18 @@
 						alert('Could not fetch stats data, please try again or contact BTC Map.');
 						console.log(error);
 					});
+
+				statsLoading = false;
 			};
 			statsAPI();
 			statsAPIInterval = setInterval(statsAPI, 600000);
 
-			const communitiesAPI = () => {
-				axios
+			const communitiesAPI = async () => {
+				if (communities) {
+					communitiesLoading = true;
+				}
+
+				await axios
 					.get('https://api.btcmap.org/areas')
 					.then(function (response) {
 						// handle success
@@ -114,12 +129,18 @@
 						alert('Could not fetch communities data, please try again or contact BTC Map.');
 						console.log(error);
 					});
+
+				communitiesLoading = false;
 			};
 			communitiesAPI();
 			communitiesAPIInterval = setInterval(communitiesAPI, 600000);
 
-			const supertaggersAPI = () => {
-				axios
+			const supertaggersAPI = async () => {
+				if (supertaggers) {
+					supertaggersLoading = true;
+				}
+
+				await axios
 					.get('https://api.btcmap.org/element_events')
 					.then(function (response) {
 						// handle success
@@ -130,8 +151,9 @@
 						alert('Could not fetch latest supertaggers data, please try again or contact BTC Map.');
 						console.log(error);
 					});
-			};
 
+				supertaggersLoading = false;
+			};
 			supertaggersAPI();
 			supertaggersAPIInterval = setInterval(supertaggersAPI, 600000);
 		}
@@ -166,48 +188,56 @@
 						stat={total}
 						percent={totalPercentChange}
 						border="border-b md:border-r border-statBorder"
+						loading={statsLoading}
 					/>
 					<DashboardStat
 						title="Created in last 24 hours"
 						stat={created}
 						percent={createdPercentChange}
 						border="border-b xl:border-r border-statBorder"
+						loading={statsLoading}
 					/>
 					<DashboardStat
 						title="Updated in last 24 hours"
 						stat={updated}
 						percent={updatedPercentChange}
 						border="border-b md:border-r border-statBorder"
+						loading={statsLoading}
 					/>
 					<DashboardStat
 						title="Deleted in last 24 hours"
 						stat={deleted}
 						percent={deletedPercentChange}
 						border="border-b border-statBorder"
+						loading={statsLoading}
 					/>
 					<DashboardStat
 						title="Merchants accepting on-chain"
 						stat={onchain}
 						percent={onchainPercentChange}
 						border="border-b xl:border-b-0 md:border-r border-statBorder"
+						loading={statsLoading}
 					/>
 					<DashboardStat
 						title="Merchants accepting lightning"
 						stat={lightning}
 						percent={lightningPercentChange}
 						border="border-b xl:border-b-0 xl:border-r border-statBorder"
+						loading={statsLoading}
 					/>
 					<DashboardStat
 						title="Merchants accepting contactless"
 						stat={nfc}
 						percent={nfcPercentChange}
 						border="border-b md:border-b-0 md:border-r border-statBorder"
+						loading={statsLoading}
 					/>
 					<DashboardStat
 						title="Number of communities"
 						stat={communities && communities.length}
 						percent=""
 						border=""
+						loading={communitiesLoading}
 					/>
 				</div>
 				<p class="text-sm text-body">
@@ -228,6 +258,28 @@
 						class="text-center md:text-left text-primary text-2xl border-b border-statBorder p-5 font-semibold"
 					>
 						Latest Supertaggers
+						{#if supertaggersLoading}
+							<svg
+								class="inline animate-spin h-6 w-6 text-statPositive"
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+							>
+								<circle
+									class="opacity-25"
+									cx="12"
+									cy="12"
+									r="10"
+									stroke="currentColor"
+									stroke-width="4"
+								/>
+								<path
+									class="opacity-75"
+									fill="currentColor"
+									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+								/>
+							</svg>
+						{/if}
 					</h3>
 
 					<div class="space-y-5">
