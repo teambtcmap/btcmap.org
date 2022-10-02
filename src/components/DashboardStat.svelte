@@ -12,9 +12,12 @@
 			<span class="text-5xl text-primary font-semibold">{stat}</span>
 			{#if percent}
 				<span
-					class="{percent.startsWith('+')
+					class="{percent === '+0'
+						? 'text-primary'
+						: percent.startsWith('+')
 						? 'text-statPositive'
-						: 'text-statNegative'} ml-1 font-semibold text-lg">{percent}%</span
+						: 'text-statNegative'} ml-1 font-semibold text-lg"
+					>{percent === '+0' ? percent.slice(1) : percent}%</span
 				>
 			{/if}
 		{:else}
