@@ -1,5 +1,5 @@
 <script>
-	import { render } from 'timeago.js';
+	import Time from 'svelte-time';
 
 	export let location;
 	export let action;
@@ -8,9 +8,6 @@
 	export let latest;
 	export let lat;
 	export let long;
-
-	let timeElement;
-	$: timeElement && render(timeElement, 'en_US', { minInterval: 3 });
 </script>
 
 <div class="text-center md:text-left space-y-2 md:space-y-0 text-xl md:flex items-center p-5">
@@ -37,7 +34,7 @@
 		<span class="break-all md:mx-5 text-primary">
 			<a href="/map?lat={lat}&long={long}" class="text-link hover:text-hover">{location}</a> was
 			<strong>{action}d</strong>
-			{#if action !== 'delete'}
+			{#if user.length}
 				by <a
 					href="https://www.openstreetmap.org/user/{user}"
 					target="_blank"
@@ -64,10 +61,8 @@
 			{/if}
 		</span>
 
-		<span
-			bind:this={timeElement}
-			datetime={time}
-			class="text-center block md:inline text-taggerTime font-semibold"
-		/>
+		<span class="text-center block md:inline text-taggerTime font-semibold">
+			<Time live={3000} relative timestamp={time} />
+		</span>
 	</div>
 </div>
