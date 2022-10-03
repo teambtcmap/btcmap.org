@@ -123,6 +123,7 @@
 					.then(function (response) {
 						// handle success
 						communities = response.data.filter((area) => area['area_type'] !== 'country');
+						communities = communities;
 					})
 					.catch(function (error) {
 						// handle error
@@ -145,6 +146,7 @@
 					.then(function (response) {
 						// handle success
 						supertaggers = response.data.slice(0, 21);
+						supertaggers = supertaggers;
 					})
 					.catch(function (error) {
 						// handle error
