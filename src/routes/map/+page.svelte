@@ -139,7 +139,7 @@ Thanks for using BTC Map!`);
 			L.control.attribution({ position: 'bottomright' }).addTo(map);
 
 			document.querySelector('.leaflet-control-attribution').innerHTML =
-				'<a href="/support-us" class="text-link hover:text-hover" title="Support with sats">Support</a> BTC Map';
+				'<a href="/support-us" class="text-link hover:text-hover" title="Support with sats">Support</a> BTC Map © OpenStreetMap contributors';
 
 			// add in zoom control to custom location
 			L.control.zoom({ position: 'topleft' }).addTo(map);
