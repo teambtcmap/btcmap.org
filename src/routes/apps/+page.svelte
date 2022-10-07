@@ -34,8 +34,13 @@
 					desc="FOSS App Store"
 					link={$apps.fdroid}
 				/>
+				<AppCard
+					image="fa-brands fa-google-play"
+					text="Play"
+					link={$apps.play}
+					desc="Not Recommended"
+				/>
 				<AppCard image="fa-brands fa-app-store-ios" text="iOS" link="" desc="" />
-				<AppCard image="fa-brands fa-google-play" text="Play" link="" desc="" />
 			</section>
 		</main>
 

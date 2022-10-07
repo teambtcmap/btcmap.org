@@ -9,5 +9,6 @@ export const socials = readable({
 export const apps = readable({
 	fdroid: 'https://f-droid.org/en/packages/org.btcmap/',
 	direct: 'https://github.com/teambtcmap/btcmap-android/releases/latest',
-	web: '/map'
+	web: '/map',
+	play: 'https://play.google.com/store/apps/details?id=org.btcmap.app'
 });
