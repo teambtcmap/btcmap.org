@@ -15,6 +15,8 @@
 		showQr = true;
 	};
 
+	const supporters = [{ url: 'https://coinos.io/', title: 'coinos' }];
+
 	/* onMount(() => {
 		axios
 			.get('/support-us/endpoint')
@@ -109,14 +111,14 @@
 				<a href="mailto:hello@btcmap.org" class="text-link hover:text-hover">Become a Sponsor</a>
 
 				<div
-					class="mt-8 space-y-10 md:space-y-0 md:grid grid-cols-3 gap-10 w-full lg:w-[800px] mx-auto"
+					class="mt-8 space-y-10 lg:space-y-0 lg:grid grid-cols-3 gap-10 w-full lg:w-[800px] mx-auto"
 				>
+					{#each supporters as supporter}
+						<a href={supporter.url} target="_blank" rel="noreferrer" class="self-center">
+							<img src="/images/{supporter.title}.svg" alt={supporter.title} class="mx-auto" />
+						</a>
+					{/each}
 					<!-- supporter placeholders -->
-					<div
-						class="bg-supporter/50 h-[100px] drop-shadow-xl rounded-xl flex justify-center items-center"
-					>
-						<a href="mailto:hello@btcmap.org" class="text-white uppercase">Apply here</a>
-					</div>
 					<div
 						class="bg-supporter/50 h-[100px] drop-shadow-xl rounded-xl flex justify-center items-center"
 					>
