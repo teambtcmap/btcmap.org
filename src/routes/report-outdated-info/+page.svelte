@@ -144,7 +144,7 @@
 
 				// fetch bitcoin locations from our api
 				axios
-					.get('https://data.btcmap.org/elements.json')
+					.get('https://api.btcmap.org/elements')
 					.then(function (response) {
 						// handle success
 						let markers = L.markerClusterGroup();
@@ -169,7 +169,8 @@
 						};
 
 						// add location information
-						response.data.elements.forEach((element) => {
+						response.data.forEach((element) => {
+							element = element.data;
 							const latCalc =
 								element.type == 'node'
 									? element.lat
