@@ -29,7 +29,7 @@
 				</p>
 				<ol class="list-decimal space-y-2 ml-5">
 					<li>
-						An issue is automatically created on our <a
+						An issue is automatically created in our <a
 							href="https://github.com/teambtcmap/btcmap-data/issues"
 							class="text-link hover:text-hover">btcmap-data</a
 						> repo on GitHub containing the form information.
