@@ -24,9 +24,7 @@
 			const axios = await import('axios');
 
 			// add map and tiles
-			map = leaflet
-				.map(mapElement, { zoomControl: false, attributionControl: false })
-				.setView([0, 0], 3);
+			map = leaflet.map(mapElement).setView([0, 0], 3);
 
 			const osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				noWrap: true,
@@ -132,17 +130,21 @@ Thanks for using BTC Map!`);
 			// change broken marker image path in prod
 			L.Icon.Default.prototype.options.imagePath = '/icons/';
 
-			// add scale
-			L.control.scale({ position: 'bottomleft' }).addTo(map);
-
 			// add support attribution
-			L.control.attribution({ position: 'bottomright' }).addTo(map);
-
-			document.querySelector('.leaflet-control-attribution').innerHTML =
+			document.querySelector(
+				'.leaflet-bottom.leaflet-right > .leaflet-control-attribution'
+			).innerHTML =
 				'<a href="/support-us" class="text-link hover:text-hover" title="Support with sats">Support</a> BTC Map';
 
-			// add in zoom control to custom location
-			L.control.zoom({ position: 'topleft' }).addTo(map);
+			// add OSM attribution
+			L.control.attribution({ position: 'bottomleft' }).addTo(map);
+			document.querySelector(
+				'.leaflet-bottom.leaflet-left > .leaflet-control-attribution'
+			).innerHTML =
+				'&copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors';
+
+			// add scale
+			L.control.scale({ position: 'bottomleft' }).addTo(map);
 
 			// change default icons
 			const layers = document.querySelector('.leaflet-control-layers');
@@ -150,9 +152,17 @@ Thanks for using BTC Map!`);
 			layers.style.borderRadius = '8px';
 			layers.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 
-			const attribution = document.querySelector('.leaflet-control-attribution');
-			attribution.style.borderRadius = '8px 0 0 0';
-			attribution.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+			const supportAttribution = document.querySelector(
+				'.leaflet-bottom.leaflet-right > .leaflet-control-attribution'
+			);
+			supportAttribution.style.borderRadius = '8px 0 0 0';
+			supportAttribution.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+
+			const OSMAttribution = document.querySelector(
+				'.leaflet-bottom.leaflet-left > .leaflet-control-attribution'
+			);
+			OSMAttribution.style.borderRadius = '0 8px 0 0';
+			OSMAttribution.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 
 			const leafletBar = document.querySelector('.leaflet-bar');
 			leafletBar.style.border = 'none';
