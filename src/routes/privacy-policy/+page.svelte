@@ -129,9 +129,9 @@
 			<div class="text-body text-xl space-y-5">
 				<h2 class="text-primary text-3xl font-semibold">(Don't Use) Google</h2>
 				<p>
-					Our Android app is available to download via the <a
+					Our Android app is available to download via the Google <a
 						href={$apps.play}
-						class="text-link hover:text-hover">Google Play Store</a
+						class="text-link hover:text-hover">Play Store</a
 					>. However, we <strong>do not</strong> recommend using this method. God only knows what
 					information is collected about you when using Google services. Instead, we have our
 					Android app available for download directly from our GitHub repo as an
