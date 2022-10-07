@@ -95,7 +95,7 @@
 			const leafletLocateControl = await import('leaflet.locatecontrol');
 
 			// add map and tiles
-			map = leaflet.map(mapElement, { attributionControl: false }).setView([0, 0], 2);
+			map = leaflet.map(mapElement).setView([0, 0], 2);
 
 			const osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				noWrap: true,
@@ -122,6 +122,18 @@
 
 			// change broken marker image path in prod
 			L.Icon.Default.prototype.options.imagePath = '/icons/';
+
+			// add OSM attribution
+			document.querySelector(
+				'.leaflet-bottom.leaflet-right > .leaflet-control-attribution'
+			).innerHTML =
+				'&copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors';
+
+			const attribution = document.querySelector(
+				'.leaflet-bottom.leaflet-right > .leaflet-control-attribution'
+			);
+			attribution.style.borderRadius = '8px 0 0 0';
+			attribution.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 
 			// adds locate button to map
 			L.control.locate().addTo(map);
