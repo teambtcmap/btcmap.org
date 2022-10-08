@@ -152,6 +152,18 @@
 				}
 
 				await axios
+					.get('https://api.btcmap.org/users')
+					.then(function (response) {
+						// handle success
+						users = response.data;
+					})
+					.catch(function (error) {
+						// handle error
+						alert('Could not fetch user profile data, please try again or contact BTC Map.');
+						console.log(error);
+					});
+
+				await axios
 					.get('https://api.btcmap.org/element_events')
 					.then(function (response) {
 						// handle success
@@ -161,19 +173,6 @@
 					.catch(function (error) {
 						// handle error
 						alert('Could not fetch latest supertaggers data, please try again or contact BTC Map.');
-						console.log(error);
-					});
-
-				await axios
-					.get('https://api.btcmap.org/users')
-					.then(function (response) {
-						// handle success
-						users = response.data;
-						users = users;
-					})
-					.catch(function (error) {
-						// handle error
-						alert('Could not fetch user profile data, please try again or contact BTC Map.');
 						console.log(error);
 					});
 
