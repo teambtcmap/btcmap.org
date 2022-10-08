@@ -10,11 +10,11 @@
 	export let lat;
 	export let long;
 
-	const profile = user.data && user.data;
-	const regexMatch = profile && profile.description.match('(lightning:[^)]+)');
-	const lightning = regexMatch && regexMatch[0].slice(10);
+	$: profile = user.data && user.data;
+	$: regexMatch = profile && profile.description.match('(lightning:[^)]+)');
+	$: lightning = regexMatch && regexMatch[0].slice(10);
 
-	const username = profile ? profile['display_name'] : user;
+	$: username = profile ? profile['display_name'] : user;
 </script>
 
 <div

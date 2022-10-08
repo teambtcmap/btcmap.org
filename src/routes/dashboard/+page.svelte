@@ -16,6 +16,8 @@
 	let supertaggers;
 	let users;
 
+	$: latestTaggers = supertaggers && users ? true : false;
+
 	const findUser = (tagger) => {
 		const foundUser = users.find((user) => user.id == tagger['user_id']);
 		if (foundUser) {
@@ -156,6 +158,7 @@
 					.then(function (response) {
 						// handle success
 						users = response.data;
+						users = users;
 					})
 					.catch(function (error) {
 						// handle error
@@ -307,7 +310,7 @@
 					</h3>
 
 					<div class="space-y-5">
-						{#if supertaggers && users}
+						{#if latestTaggers}
 							{#each supertaggers as tagger}
 								<LatestTagger
 									location={tagger['element_name']}
