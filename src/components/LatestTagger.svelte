@@ -1,5 +1,6 @@
 <script>
 	import Time from 'svelte-time';
+	import { Tip } from '$comp';
 
 	export let location;
 	export let action;
@@ -8,10 +9,19 @@
 	export let latest;
 	export let lat;
 	export let long;
+
+	const profile = user.data && user.data;
+	const regexMatch = profile && profile.description.match('(lightning:[^)]+)');
+	const lightning = regexMatch && regexMatch[0].slice(10);
+
+	const username = profile ? profile['display_name'] : user;
 </script>
 
-<div class="text-center md:text-left space-y-2 md:space-y-0 text-xl md:flex items-center p-5">
-	<span class="mx-auto md:mx-0 mb-2 md:mb-0 relative flex h-3 w-3">
+<div
+	class="text-center lg:text-left space-y-2 lg:space-y-0 lg:space-x-5 text-xl lg:flex items-center p-5"
+>
+	<!-- dot -->
+	<span class="mx-auto lg:mx-0 mb-2 lg:mb-0 relative flex h-3 w-3">
 		<span
 			class="{latest
 				? 'animate-ping'
@@ -30,39 +40,84 @@
 		/>
 	</span>
 
-	<div class="space-y-2 md:space-y-0 md:flex w-full justify-between items-center">
-		<span class="break-all md:mx-5 text-primary">
-			<a href="/map?lat={lat}&long={long}" class="text-link hover:text-hover">{location}</a> was
-			<strong>{action}d</strong>
-			{#if user.length}
-				by <a
-					href="https://www.openstreetmap.org/user/{user}"
-					target="_blank"
+	<div class="space-y-2 lg:flex flex-wrap w-full justify-between items-center">
+		<!-- event information -->
+		<div class="space-y-2 lg:space-y-0">
+			<span class="text-primary lg:mr-5">
+				<!-- location -->
+				<a
+					href={action === 'delete'
+						? `https://www.openstreetmap.org/#map=21/${lat}/${long}`
+						: `/map?lat=${lat}&long=${long}`}
+					target={action === 'delete' ? '_blank' : '_self'}
 					rel="noreferrer"
-					class="text-link hover:text-hover"
-					>{user}
-					<svg
-						class="inline"
-						width="16"
-						height="16"
-						viewBox="0 0 16 16"
-						fill="none"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							d="M3 13L13 3M13 3H5.5M13 3V10.5"
-							stroke="currentColor"
-							stroke-width="1.5"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						/>
-					</svg></a
-				>
-			{/if}
-		</span>
+					class="text-link hover:text-hover break-all"
+					>{location}
+					{#if action === 'delete'}
+						<svg
+							class="inline"
+							width="16"
+							height="16"
+							viewBox="0 0 16 16"
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path
+								d="M3 13L13 3M13 3H5.5M13 3V10.5"
+								stroke="currentColor"
+								stroke-width="1.5"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+						</svg>
+					{/if}
+				</a>
 
-		<span class="text-center block md:inline text-taggerTime font-semibold">
-			<Time live={3000} relative timestamp={time} />
-		</span>
+				<!-- action -->
+				was
+				<strong>{action}d</strong>
+
+				<!-- user -->
+				{#if username.length}
+					by <a
+						href="https://www.openstreetmap.org/user/{username}"
+						target="_blank"
+						rel="noreferrer"
+						class="text-link hover:text-hover break-all"
+						>{username}
+						<svg
+							class="inline"
+							width="16"
+							height="16"
+							viewBox="0 0 16 16"
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path
+								d="M3 13L13 3M13 3H5.5M13 3V10.5"
+								stroke="currentColor"
+								stroke-width="1.5"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+						</svg></a
+					>
+				{/if}
+			</span>
+
+			<!-- time ago -->
+			<span
+				class="text-center block lg:inline text-taggerTime font-semibold {lightning
+					? 'lg:mr-5'
+					: ''}"
+			>
+				<Time live={3000} relative timestamp={time} />
+			</span>
+		</div>
+
+		<!-- lightning tip button -->
+		{#if lightning}
+			<Tip destination={lightning} style="block lg:inline mx-auto lg:mx-0" />
+		{/if}
 	</div>
 </div>

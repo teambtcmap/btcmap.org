@@ -7,3 +7,4 @@ export { default as DonationOption } from './DonationOption.svelte';
 export { default as DashboardStat } from './DashboardStat.svelte';
 export { default as LatestTagger } from './LatestTagger.svelte';
 export { default as TaggerSkeleton } from './TaggerSkeleton.svelte';
+export { default as Tip } from './Tip.svelte';

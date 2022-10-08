@@ -14,6 +14,16 @@
 	let stats;
 	let communities;
 	let supertaggers;
+	let users;
+
+	const findUser = (tagger) => {
+		const foundUser = users.find((user) => user.id == tagger['user_id']);
+		if (foundUser) {
+			return foundUser;
+		} else {
+			return tagger.user;
+		}
+	};
 
 	$: total = stats && stats[0].total_elements;
 	$: created = stats && stats[1].elements_created;
@@ -154,6 +164,19 @@
 						console.log(error);
 					});
 
+				await axios
+					.get('https://api.btcmap.org/users')
+					.then(function (response) {
+						// handle success
+						users = response.data;
+						users = users;
+					})
+					.catch(function (error) {
+						// handle error
+						alert('Could not fetch user profile data, please try again or contact BTC Map.');
+						console.log(error);
+					});
+
 				supertaggersLoading = false;
 			};
 			supertaggersAPI();
@@ -285,12 +308,12 @@
 					</h3>
 
 					<div class="space-y-5">
-						{#if supertaggers}
+						{#if supertaggers && users}
 							{#each supertaggers as tagger}
 								<LatestTagger
 									location={tagger['element_name']}
 									action={tagger['event_type']}
-									user={tagger.user}
+									user={findUser(tagger)}
 									time={tagger.date}
 									latest={tagger === supertaggers[0] ? true : false}
 									lat={tagger['element_lat']}
