@@ -145,6 +145,7 @@ Thanks for using BTC Map!`);
 
 			// add scale
 			L.control.scale({ position: 'bottomleft' }).addTo(map);
+			document.querySelector('.leaflet-control-scale').style.fontSize = '10px';
 
 			// change default icons
 			const layers = document.querySelector('.leaflet-control-layers');
