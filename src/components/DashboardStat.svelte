@@ -9,6 +9,13 @@
 <div class="space-y-5 p-5 {border}">
 	<h3 class="text-center md:text-left text-primary text-2xl md:h-[64px]">
 		{title}
+		{#if title === 'Number of communities'}
+			<a
+				href="https://github.com/teambtcmap/btcmap-data/wiki/Communities"
+				target="_blank"
+				rel="noreferrer"><i class="fa-solid fa-circle-info text-base" /></a
+			>
+		{/if}
 		{#if loading}
 			<svg
 				class="inline animate-spin h-6 w-6 text-statPositive"

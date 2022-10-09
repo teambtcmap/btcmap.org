@@ -443,11 +443,21 @@ Thanks for using BTC Map!`);
 								}
 								</span>
 
-								<a href="/report-outdated-info?${
-									element.tags.name ? `&name=${element.tags.name}` : ''
-								}&lat=${latCalc}&long=${longCalc}&${element.type}=${
+								<div class='flex justify-between items-center'>
+									<a href="/report-outdated-info?${
+										element.tags.name ? `&name=${element.tags.name}` : ''
+									}&lat=${latCalc}&long=${longCalc}&${element.type}=${
 									element.id
-								}" class='text-link hover:text-hover text-xs block' title="Reporting helps improve the data for everyone">Report outdated info</a>`
+								}" class='text-link hover:text-hover text-xs' title="Reporting helps improve the data for everyone">Report outdated info</a>
+
+									<a
+										href="https://github.com/teambtcmap/btcmap-data/wiki/Map-Legend"
+										target="_blank"
+										rel="noreferrer"
+										title="Map legend">
+										<span class="fa-solid fa-circle-info text-xs text-link hover:text-hover"></span>
+									</a>
+								</div>`
 							);
 
 							markers.addLayer(marker);
