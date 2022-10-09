@@ -40,7 +40,7 @@
 		/>
 	</span>
 
-	<div class="space-y-2 lg:flex flex-wrap w-full justify-between items-center">
+	<div class="space-y-2 lg:space-y-0 lg:flex flex-wrap w-full justify-between items-center">
 		<!-- event information -->
 		<div class="space-y-2 lg:space-y-0">
 			<span class="text-primary lg:mr-5">
