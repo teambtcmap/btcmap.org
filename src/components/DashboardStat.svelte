@@ -33,7 +33,7 @@
 		{/if}
 	</h3>
 	<div class="flex justify-center md:justify-start">
-		{#if stat}
+		{#if stat >= 0}
 			<span class="text-5xl text-primary font-semibold">{stat}</span>
 			{#if percent}
 				<span
