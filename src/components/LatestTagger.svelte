@@ -10,7 +10,7 @@
 	export let lat;
 	export let long;
 
-	$: profile = user.data && user.data;
+	$: profile = user['osm_json'] && user['osm_json'];
 	$: regexMatch = profile && profile.description.match('(lightning:[^)]+)');
 	$: lightning = regexMatch && regexMatch[0].slice(10);
 

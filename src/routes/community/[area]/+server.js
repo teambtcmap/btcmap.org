@@ -4,7 +4,7 @@ import axios from 'axios';
 export async function GET({ params }) {
 	let { area } = params;
 
-	const response = await axios.get(`https://api.btcmap.org/areas/${area}`);
+	const response = await axios.get(`https://api.btcmap.org/v2/areas/${area}`);
 
 	const data = response.data;
 

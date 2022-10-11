@@ -10,20 +10,25 @@
 	let statsLoading;
 	let communitiesLoading;
 	let supertaggersLoading;
+	let elementsLoading;
+	let elementFailure;
 
 	let stats;
 	let communities;
 	let supertaggers;
 	let users;
 
-	$: latestTaggers = supertaggers && users ? true : false;
+	$: latestTaggers =
+		supertaggers && supertaggers.find((tagger) => tagger.location) && !elementsLoading && users
+			? true
+			: false;
 
 	const findUser = (tagger) => {
 		const foundUser = users.find((user) => user.id == tagger['user_id']);
 		if (foundUser) {
 			return foundUser;
 		} else {
-			return tagger.user;
+			return '';
 		}
 	};
 
@@ -109,7 +114,7 @@
 				}
 
 				await axios
-					.get('https://api.btcmap.org/daily_reports')
+					.get('https://api.btcmap.org/v2/reports')
 					.then(function (response) {
 						// handle success
 						stats = response.data;
@@ -131,10 +136,10 @@
 				}
 
 				await axios
-					.get('https://api.btcmap.org/areas')
+					.get('https://api.btcmap.org/v2/areas')
 					.then(function (response) {
 						// handle success
-						communities = response.data.filter((area) => area['area_type'] !== 'country');
+						communities = response.data.filter((area) => area.type !== 'country');
 						communities = communities;
 					})
 					.catch(function (error) {
@@ -151,10 +156,11 @@
 			const supertaggersAPI = async () => {
 				if (supertaggers) {
 					supertaggersLoading = true;
+					elementFailure = false;
 				}
 
 				await axios
-					.get('https://api.btcmap.org/users')
+					.get('https://api.btcmap.org/v2/users')
 					.then(function (response) {
 						// handle success
 						users = response.data;
@@ -167,11 +173,31 @@
 					});
 
 				await axios
-					.get('https://api.btcmap.org/element_events')
+					.get('https://api.btcmap.org/v2/events')
 					.then(function (response) {
 						// handle success
 						supertaggers = response.data.slice(0, 21);
-						supertaggers = supertaggers;
+
+						elementsLoading = true;
+						for (let i of supertaggers.keys()) {
+							axios
+								.get(`https://api.btcmap.org/v2/elements/${supertaggers[i]['element_id']}`)
+								.then(function (response) {
+									// handle success
+									let location = response.data['osm_json'].tags.name;
+									supertaggers[i].location = location ? location : 'Unnamed element';
+
+									if (i === supertaggers.length - 1) {
+										supertaggers = supertaggers;
+										elementsLoading = false;
+									}
+								})
+								.catch(function (error) {
+									// handle error
+									elementFailure = true;
+									console.log(error);
+								});
+						}
 					})
 					.catch(function (error) {
 						// handle error
@@ -307,25 +333,32 @@
 								/>
 							</svg>
 						{/if}
+						{#if elementFailure}
+							<span class="block text-error text-sm font-normal"
+								>Could not fetch element data, please try again or contact BTC Map.</span
+							>
+						{/if}
 					</h3>
 
 					<div class="space-y-5">
 						{#if latestTaggers}
 							{#each supertaggers as tagger}
-								<LatestTagger
-									location={tagger['element_name']}
-									action={tagger['event_type']}
-									user={findUser(tagger)}
-									time={tagger.date}
-									latest={tagger === supertaggers[0] ? true : false}
-									lat={tagger['element_lat']}
-									long={tagger['element_lon']}
-								/>
+								{#if tagger.location}
+									<LatestTagger
+										location={tagger.location}
+										action={tagger.type}
+										user={findUser(tagger)}
+										time={tagger.date}
+										latest={tagger === supertaggers[0] ? true : false}
+										lat={tagger['element_lat']}
+										long={tagger['element_lon']}
+									/>
+								{/if}
 							{/each}
 						{:else}
-							<TaggerSkeleton />
-							<TaggerSkeleton />
-							<TaggerSkeleton />
+							{#each Array(21) as skeleton}
+								<TaggerSkeleton />
+							{/each}
 						{/if}
 					</div>
 				</div>
