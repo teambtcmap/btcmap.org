@@ -83,7 +83,7 @@
 						href="https://www.openstreetmap.org/user/{username}"
 						target="_blank"
 						rel="noreferrer"
-						class="text-link hover:text-hover break-all"
+						class="block lg:inline text-link hover:text-hover break-all"
 						>{username}
 						<svg
 							class="inline"
