@@ -83,14 +83,20 @@ That's it!
 
 ---
 
-## Basemap tile attributions
+## Attributions
 
 Thanks to:
+
+### Base map tiles
 
 - [OpenStreetMap](https://www.openstreetmap.org) (OpenStreetMap, OpenStreetMapDE, OpenStreetMapFR)
 - [OpenTopoMap](https://opentopomap.org) (Topo)
 - [ESRI](https://www.esri.com) (Imagery)
 - [Stamen](http://maps.stamen.com) (Terrain, Toner, Toner Lite, Watercolor)
+
+### Icon
+
+<a href="https://www.flaticon.com/free-icons/satoshi-nakamoto" title="satoshi nakamoto icons">Satoshi nakamoto icons created by Vitaly Gorbachev - Flaticon</a>
 
 ---
 
