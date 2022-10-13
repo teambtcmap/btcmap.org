@@ -61,8 +61,14 @@
 						leaderboard.push({
 							avatar: avatar,
 							tagger: profile['display_name'],
-							created: profile['display_name'] === 'Bill on Bitcoin Island' ? created.length + 100 : created.length,
-							updated: profile['display_name'] === 'Bill on Bitcoin Island' ? updated.length + 20 : updated.length,
+							created:
+								profile['display_name'] === 'Bill on Bitcoin Island'
+									? created.length + 100
+									: created.length,
+							updated:
+								profile['display_name'] === 'Bill on Bitcoin Island'
+									? updated.length + 20
+									: updated.length,
 							deleted: deleted.length,
 							tip: profile.description
 						});
