@@ -405,13 +405,13 @@
 							href={$socials.discord}
 							target="_blank"
 							rel="noreferrer"
-							class="text-link hover:text-hover">Discord channel</a
-						>. You can also monitor the progress on
+							class="text-link hover:text-hover">Discord</a
+						>. You can also monitor the progress on GitHub
 						<a
 							href="https://github.com/teambtcmap/btcmap-data/issues/{submissionIssueNumber}"
 							target="_blank"
 							rel="noreferrer"
-							class="text-link hover:text-hover">GitHub</a
+							class="text-link hover:text-hover">issue #{submissionIssueNumber}</a
 						>.
 					</p>
 					{#if typeof window !== 'undefined'}
