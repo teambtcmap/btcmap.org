@@ -8,3 +8,7 @@ export { default as DashboardStat } from './DashboardStat.svelte';
 export { default as LatestTagger } from './LatestTagger.svelte';
 export { default as TaggerSkeleton } from './TaggerSkeleton.svelte';
 export { default as Tip } from './Tip.svelte';
+export { default as LeaderboardItem } from './LeaderboardItem.svelte';
+export { default as LeaderboardSkeleton } from './LeaderboardSkeleton.svelte';
+export { default as TopButton } from './TopButton.svelte';
+export { default as OutClick } from './OutClick.svelte';
