@@ -127,7 +127,16 @@
 			<section id="leaderboard">
 				<div class="hidden lg:grid text-center grid-cols-6 mb-5">
 					{#each headings as heading}
-						<h3 class="text-lg font-semibold text-primary">{heading}</h3>
+						<h3 class="text-lg font-semibold text-primary">
+							{heading}
+							{#if heading === 'Tip'}
+								<a
+									href="https://github.com/teambtcmap/btcmap-data/wiki/Lightning-Tips"
+									target="_blank"
+									rel="noreferrer"><i class="fa-solid fa-circle-info text-sm" /></a
+								>
+							{/if}
+						</h3>
 					{/each}
 				</div>
 
