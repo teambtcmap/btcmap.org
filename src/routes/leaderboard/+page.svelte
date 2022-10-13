@@ -102,7 +102,7 @@
 			<h1
 				class="text-center text-4xl md:text-5xl font-semibold text-primary gradient !leading-tight"
 			>
-				Top Shadowy Supertaggers
+				Top Supertaggers
 			</h1>
 
 			<h2 class="text-center text-primary text-xl font-semibold w-full lg:w-[800px] mx-auto">
