@@ -5,7 +5,7 @@
 	import axios from 'axios';
 	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
 	import { Header, Footer, PrimaryButton } from '$comp';
-	import { socials } from '$lib/store';
+	import { socials, elements, mapError, reportShowMap } from '$lib/store';
 
 	let name = $page.url.searchParams.has('name') ? $page.url.searchParams.get('name') : '';
 	let lat = $page.url.searchParams.has('lat') ? $page.url.searchParams.get('lat') : '';
@@ -62,15 +62,19 @@
 	// location picker map if not accessing page from webapp
 	let mapElement;
 	let map;
+	let showMap = !name || !lat || !long || !edit ? true : false;
+	$reportShowMap = showMap;
 
-	if (!name || !lat || !long || !edit) {
+	// alert for map errors
+	$: $mapError && showMap && alert($mapError);
+
+	if (showMap) {
 		onMount(async () => {
 			if (browser) {
 				//import packages
 				const leaflet = await import('leaflet');
 				const leafletLocateControl = await import('leaflet.locatecontrol');
 				const leafletMarkerCluster = await import('leaflet.markercluster');
-				const axios = await import('axios');
 
 				// add map and tiles
 				map = leaflet.map(mapElement).setView([0, 0], 2);
@@ -154,51 +158,50 @@
 					document.querySelector('#zoomout').src = '/icons/minus.svg';
 				};
 
-				// fetch bitcoin locations from our api
-				axios
-					.get('https://api.btcmap.org/v2/elements')
-					.then(function (response) {
-						// handle success
-						let markers = L.markerClusterGroup();
+				// handle success
+				let markers = L.markerClusterGroup();
 
-						// check address data
-						const checkAddress = (element) => {
-							if (element['addr:housenumber'] && element['addr:street'] && element['addr:city']) {
-								return `${
-									element['addr:housenumber'] +
-									' ' +
-									element['addr:street'] +
-									', ' +
-									element['addr:city']
-								}`;
-							} else if (element['addr:street'] && element['addr:city']) {
-								return `${element['addr:street'] + ', ' + element['addr:city']}`;
-							} else if (element['addr:city']) {
-								return `${element['addr:city']}`;
-							} else {
-								return '';
-							}
-						};
+				// check address data
+				const checkAddress = (element) => {
+					if (element['addr:housenumber'] && element['addr:street'] && element['addr:city']) {
+						return `${
+							element['addr:housenumber'] +
+							' ' +
+							element['addr:street'] +
+							', ' +
+							element['addr:city']
+						}`;
+					} else if (element['addr:street'] && element['addr:city']) {
+						return `${element['addr:street'] + ', ' + element['addr:city']}`;
+					} else if (element['addr:city']) {
+						return `${element['addr:city']}`;
+					} else {
+						return '';
+					}
+				};
 
-						// add location information
-						response.data.forEach((element) => {
-							element = element['osm_json'];
-							const latCalc =
-								element.type == 'node'
-									? element.lat
-									: (element.bounds.minlat + element.bounds.maxlat) / 2;
-							const longCalc =
-								element.type == 'node'
-									? element.lon
-									: (element.bounds.minlon + element.bounds.maxlon) / 2;
+				// add location information
+				$elements.forEach((element) => {
+					if (element['deleted_at']) {
+						return;
+					}
+					element = element['osm_json'];
+					const latCalc =
+						element.type == 'node'
+							? element.lat
+							: (element.bounds.minlat + element.bounds.maxlat) / 2;
+					const longCalc =
+						element.type == 'node'
+							? element.lon
+							: (element.bounds.minlon + element.bounds.maxlon) / 2;
 
-							let marker = L.marker([latCalc, longCalc]).bindPopup(
-								// marker popup component
-								`${
-									element.tags.name
-										? `<span class='block font-bold text-lg text-primary' title='Merchant name'>${element.tags.name}</span>`
-										: ''
-								}
+					let marker = L.marker([latCalc, longCalc]).bindPopup(
+						// marker popup component
+						`${
+							element.tags.name
+								? `<span class='block font-bold text-lg text-primary' title='Merchant name'>${element.tags.name}</span>`
+								: ''
+						}
 
                 <span class='block text-body font-bold' title='Address'>${checkAddress(
 									element.tags
@@ -218,14 +221,14 @@
 									}
 
                   <a href='https://www.openstreetmap.org/edit?${element.type}=${
-									element.id
-								}' target="_blank" rel="noreferrer" title='Edit'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-pen-to-square" /></a>
+							element.id
+						}' target="_blank" rel="noreferrer" title='Edit'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-pen-to-square" /></a>
 
                   <a href='https://btcmap.org/map?lat=${
 										element.type == 'node' ? element.lat : latCalc
 									}&long=${
-									element.type == 'node' ? element.lon : longCalc
-								}' target="_blank" rel="noreferrer" title='Share'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-share-nodes" /></a>
+							element.type == 'node' ? element.lon : longCalc
+						}' target="_blank" rel="noreferrer" title='Share'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-share-nodes" /></a>
                 </div>
 
                 <div class='w-full flex space-x-2 my-1'>
@@ -234,30 +237,28 @@
 											? '/icons/btc-highlight.svg'
 											: '/icons/btc.svg'
 									} alt="bitcoin" class="w-6 h-6" title="${
-									element.tags['payment:onchain'] === 'yes'
-										? 'On-chain accepted'
-										: 'On-chain unknown'
-								}"/>
+							element.tags['payment:onchain'] === 'yes' ? 'On-chain accepted' : 'On-chain unknown'
+						}"/>
 
                   <img src=${
 										element.tags['payment:lightning'] === 'yes'
 											? '/icons/ln-highlight.svg'
 											: '/icons/ln.svg'
 									} alt="lightning" class="w-6 h-6" title="${
-									element.tags['payment:lightning'] === 'yes'
-										? 'Lightning accepted'
-										: 'Lightning unknown'
-								}"/>
+							element.tags['payment:lightning'] === 'yes'
+								? 'Lightning accepted'
+								: 'Lightning unknown'
+						}"/>
 
                   <img src=${
 										element.tags['payment:lightning_contactless'] === 'yes'
 											? '/icons/nfc-highlight.svg'
 											: '/icons/nfc.svg'
 									} alt="nfc" class="w-6 h-6" title="${
-									element.tags['payment:lightning_contactless'] === 'yes'
-										? 'Lightning Contactless accepted'
-										: 'Lightning Contactless unknown'
-								}"/>
+							element.tags['payment:lightning_contactless'] === 'yes'
+								? 'Lightning Contactless accepted'
+								: 'Lightning Contactless unknown'
+						}"/>
                 </div>
 
 								<span class='text-body my-1' title="Surveys are completed by BTC Map community members">Survey date:
@@ -267,29 +268,23 @@
 										: '<span class="fa-solid fa-question"></span>'
 								}
 								</span>`
-							);
+					);
 
-							// add marker click event
-							marker.on('click', (e) => {
-								map.setView(e.latlng, 19);
-								name = element.tags.name ? element.tags.name : '';
-								lat = latCalc;
-								long = longCalc;
-								location = lat && long ? `https://btcmap.org/map?lat=${lat}&long=${long}` : '';
-								edit = `https://www.openstreetmap.org/edit?${element.type}=${element.id}`;
-								selected = true;
-							});
-
-							markers.addLayer(marker);
-						});
-
-						map.addLayer(markers);
-					})
-					.catch(function (error) {
-						// handle error
-						alert('Could not load map markers, please try again or contact BTC Map.');
-						throw new Error(error.message);
+					// add marker click event
+					marker.on('click', (e) => {
+						map.setView(e.latlng, 19);
+						name = element.tags.name ? element.tags.name : '';
+						lat = latCalc;
+						long = longCalc;
+						location = lat && long ? `https://btcmap.org/map?lat=${lat}&long=${long}` : '';
+						edit = `https://www.openstreetmap.org/edit?${element.type}=${element.id}`;
+						selected = true;
 					});
+
+					markers.addLayer(marker);
+				});
+
+				map.addLayer(markers);
 			}
 		});
 

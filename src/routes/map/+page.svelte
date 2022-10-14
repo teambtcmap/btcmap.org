@@ -2,9 +2,11 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
+	import { elements, mapUpdates, mapError } from '$lib/store';
 
 	let mapElement;
 	let map;
+	let mapLoaded;
 
 	// allows for users to set initial view in a URL query
 	const urlLat = $page.url.searchParams.getAll('lat');
@@ -15,13 +17,22 @@
 	const lightning = $page.url.searchParams.has('lightning');
 	const nfc = $page.url.searchParams.has('nfc');
 
+	// displays a button in controls if there is new data available
+	const showDataRefresh = () => {
+		document.querySelector('.data-refresh-div').style.display = 'block';
+	};
+
+	$: map && mapLoaded && $mapUpdates && showDataRefresh();
+
+	// alert for map errors
+	$: $mapError && alert($mapError);
+
 	onMount(async () => {
 		if (browser) {
 			//import packages
 			const leaflet = await import('leaflet');
 			const leafletLocateControl = await import('leaflet.locatecontrol');
 			const leafletMarkerCluster = await import('leaflet.markercluster');
-			const axios = await import('axios');
 
 			// add map and tiles
 			map = leaflet.map(mapElement).setView([0, 0], 3);
@@ -196,7 +207,7 @@ Thanks for using BTC Map!`);
 				},
 				onAdd: () => {
 					const fullscreenDiv = L.DomUtil.create('div');
-					fullscreenDiv.classList.add('leaflet-bar', 'leafet-control');
+					fullscreenDiv.classList.add('leaflet-bar');
 					fullscreenDiv.style.border = 'none';
 					fullscreenDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 
@@ -313,59 +324,90 @@ Thanks for using BTC Map!`);
 
 			map.addControl(new customControls());
 
-			// fetch bitcoin locations from our api
-			axios
-				.get('https://api.btcmap.org/v2/elements')
-				.then(function (response) {
-					// handle success
-					let markers = L.markerClusterGroup();
+			// add data refresh button to map
+			const customDataRefreshButton = L.Control.extend({
+				options: {
+					position: 'topleft'
+				},
+				onAdd: () => {
+					const dataRefreshDiv = L.DomUtil.create('div');
+					dataRefreshDiv.classList.add('leaflet-bar', 'leafet-control', 'data-refresh-div');
+					dataRefreshDiv.style.border = 'none';
+					dataRefreshDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+					dataRefreshDiv.style.display = 'none';
 
-					// check address data
-					const checkAddress = (element) => {
-						if (element['addr:housenumber'] && element['addr:street'] && element['addr:city']) {
-							return `${
-								element['addr:housenumber'] +
-								' ' +
-								element['addr:street'] +
-								', ' +
-								element['addr:city']
-							}`;
-						} else if (element['addr:street'] && element['addr:city']) {
-							return `${element['addr:street'] + ', ' + element['addr:city']}`;
-						} else if (element['addr:city']) {
-							return `${element['addr:city']}`;
-						} else {
-							return '';
-						}
+					const dataRefreshButton = L.DomUtil.create('a');
+					dataRefreshButton.classList.add('leaflet-control-data-refresh');
+					dataRefreshButton.href = '#';
+					dataRefreshButton.title = 'Data refresh available';
+					dataRefreshButton.role = 'button';
+					dataRefreshButton.ariaLabel = 'Data refresh available';
+					dataRefreshButton.ariaDisabled = 'false';
+					dataRefreshButton.innerHTML = `<img src='/icons/refresh.svg' alt='refresh' class='inline' id='refresh'/>`;
+					dataRefreshButton.style.borderRadius = '8px';
+					dataRefreshButton.onclick = () => {
+						location.reload();
+					};
+					dataRefreshButton.onmouseenter = () => {
+						document.querySelector('#refresh').src = '/icons/refresh-black.svg';
+					};
+					dataRefreshButton.onmouseleave = () => {
+						document.querySelector('#refresh').src = '/icons/refresh.svg';
 					};
 
-					// add location information
-					response.data.forEach((element) => {
-						if (element['deleted_at']) {
-							return;
-						}
-						element = element['osm_json'];
-						if (
-							(onchain ? element.tags['payment:onchain'] === 'yes' : true) &&
-							(lightning ? element.tags['payment:lightning'] === 'yes' : true) &&
-							(nfc ? element.tags['payment:lightning_contactless'] === 'yes' : true)
-						) {
-							const latCalc =
-								element.type == 'node'
-									? element.lat
-									: (element.bounds.minlat + element.bounds.maxlat) / 2;
-							const longCalc =
-								element.type == 'node'
-									? element.lon
-									: (element.bounds.minlon + element.bounds.maxlon) / 2;
+					dataRefreshDiv.append(dataRefreshButton);
 
-							let marker = L.marker([latCalc, longCalc]).bindPopup(
-								// marker popup component
-								`${
-									element.tags.name
-										? `<span class='block font-bold text-lg text-primary' title='Merchant name'>${element.tags.name}</span>`
-										: ''
-								}
+					return dataRefreshDiv;
+				}
+			});
+
+			map.addControl(new customDataRefreshButton());
+
+			// create marker cluster group
+			let markers = L.markerClusterGroup();
+
+			// check address data
+			const checkAddress = (element) => {
+				if (element['addr:housenumber'] && element['addr:street'] && element['addr:city']) {
+					return `${
+						element['addr:housenumber'] + ' ' + element['addr:street'] + ', ' + element['addr:city']
+					}`;
+				} else if (element['addr:street'] && element['addr:city']) {
+					return `${element['addr:street'] + ', ' + element['addr:city']}`;
+				} else if (element['addr:city']) {
+					return `${element['addr:city']}`;
+				} else {
+					return '';
+				}
+			};
+
+			// add location information
+			$elements.forEach((element) => {
+				if (element['deleted_at']) {
+					return;
+				}
+				element = element['osm_json'];
+				if (
+					(onchain ? element.tags['payment:onchain'] === 'yes' : true) &&
+					(lightning ? element.tags['payment:lightning'] === 'yes' : true) &&
+					(nfc ? element.tags['payment:lightning_contactless'] === 'yes' : true)
+				) {
+					const latCalc =
+						element.type == 'node'
+							? element.lat
+							: (element.bounds.minlat + element.bounds.maxlat) / 2;
+					const longCalc =
+						element.type == 'node'
+							? element.lon
+							: (element.bounds.minlon + element.bounds.maxlon) / 2;
+
+					let marker = L.marker([latCalc, longCalc]).bindPopup(
+						// marker popup component
+						`${
+							element.tags.name
+								? `<span class='block font-bold text-lg text-primary' title='Merchant name'>${element.tags.name}</span>`
+								: ''
+						}
 
                 <span class='block text-body font-bold' title='Address'>${checkAddress(
 									element.tags
@@ -385,8 +427,8 @@ Thanks for using BTC Map!`);
 									}
 
                   <a href='https://www.openstreetmap.org/edit?${element.type}=${
-									element.id
-								}' target="_blank" rel="noreferrer" title='Edit'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-pen-to-square" /></a>
+							element.id
+						}' target="_blank" rel="noreferrer" title='Edit'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-pen-to-square" /></a>
 
                   <a href='https://btcmap.org/map?lat=${latCalc}&long=${longCalc}' target="_blank" rel="noreferrer" title='Share'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-share-nodes" /></a>
                 </div>
@@ -399,12 +441,12 @@ Thanks for using BTC Map!`);
 											? '/icons/btc-no.svg'
 											: '/icons/btc.svg'
 									} alt="bitcoin" class="w-6 h-6" title="${
-									element.tags['payment:onchain'] === 'yes'
-										? 'On-chain accepted'
-										: element.tags['payment:onchain'] === 'no'
-										? 'On-chain not accepted'
-										: 'On-chain unknown'
-								}"/>
+							element.tags['payment:onchain'] === 'yes'
+								? 'On-chain accepted'
+								: element.tags['payment:onchain'] === 'no'
+								? 'On-chain not accepted'
+								: 'On-chain unknown'
+						}"/>
 
                   <img src=${
 										element.tags['payment:lightning'] === 'yes'
@@ -413,12 +455,12 @@ Thanks for using BTC Map!`);
 											? '/icons/ln-no.svg'
 											: '/icons/ln.svg'
 									} alt="lightning" class="w-6 h-6" title="${
-									element.tags['payment:lightning'] === 'yes'
-										? 'Lightning accepted'
-										: element.tags['payment:lightning'] === 'no'
-										? 'Lightning not accepted'
-										: 'Lightning unknown'
-								}"/>
+							element.tags['payment:lightning'] === 'yes'
+								? 'Lightning accepted'
+								: element.tags['payment:lightning'] === 'no'
+								? 'Lightning not accepted'
+								: 'Lightning unknown'
+						}"/>
 
                   <img src=${
 										element.tags['payment:lightning_contactless'] === 'yes'
@@ -427,12 +469,12 @@ Thanks for using BTC Map!`);
 											? '/icons/nfc-no.svg'
 											: '/icons/nfc.svg'
 									} alt="nfc" class="w-6 h-6" title="${
-									element.tags['payment:lightning_contactless'] === 'yes'
-										? 'Lightning Contactless accepted'
-										: element.tags['payment:lightning_contactless'] === 'no'
-										? 'Lightning contactless not accepted'
-										: 'Lightning Contactless unknown'
-								}"/>
+							element.tags['payment:lightning_contactless'] === 'yes'
+								? 'Lightning Contactless accepted'
+								: element.tags['payment:lightning_contactless'] === 'no'
+								? 'Lightning contactless not accepted'
+								: 'Lightning Contactless unknown'
+						}"/>
                 </div>
 
 								<span class='text-body my-1' title="Surveys are completed by BTC Map community members">Survey date:
@@ -447,8 +489,8 @@ Thanks for using BTC Map!`);
 									<a href="/report-outdated-info?${
 										element.tags.name ? `&name=${element.tags.name}` : ''
 									}&lat=${latCalc}&long=${longCalc}&${element.type}=${
-									element.id
-								}" class='text-link hover:text-hover text-xs' title="Reporting helps improve the data for everyone">Report outdated info</a>
+							element.id
+						}" class='text-link hover:text-hover text-xs' title="Reporting helps improve the data for everyone">Report outdated info</a>
 
 									<a
 										href="https://github.com/teambtcmap/btcmap-data/wiki/Map-Legend"
@@ -458,19 +500,14 @@ Thanks for using BTC Map!`);
 										<span class="fa-solid fa-circle-info text-xs text-link hover:text-hover"></span>
 									</a>
 								</div>`
-							);
+					);
 
-							markers.addLayer(marker);
-						}
-					});
+					markers.addLayer(marker);
+				}
+			});
 
-					map.addLayer(markers);
-				})
-				.catch(function (error) {
-					// handle error
-					alert('Could not load map markers, please try again or contact BTC Map.');
-					throw new Error(error.message);
-				});
+			map.addLayer(markers);
+			mapLoaded = true;
 		}
 	});
 

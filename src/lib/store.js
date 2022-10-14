@@ -12,3 +12,8 @@ export const apps = readable({
 	web: '/map',
 	play: 'https://play.google.com/store/apps/details?id=org.btcmap.app'
 });
+
+export const elements = writable([]);
+export const mapUpdates = writable(false);
+export const mapError = writable('');
+export const reportShowMap = writable();
