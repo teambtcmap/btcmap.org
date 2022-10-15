@@ -49,10 +49,31 @@
 			"icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
 		},
 		{
-			"name": "Home",
-			"short_name": "Home",
-			"description": "Home page",
-			"url": "/",
+			"name": "Report outdated info",
+			"short_name": "Report",
+			"description": "Report outdated map information to be updated",
+			"url": "/report-outdated-info",
+			"icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+		},
+		{
+			"name": "Dashboard",
+			"short_name": "Dash",
+			"description": "Map stats",
+			"url": "/dashboard",
+			"icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+		},
+		{
+			"name": "Leaderboard",
+			"short_name": "Leaderboard",
+			"description": "Top Supertaggers",
+			"url": "/leaderboard",
+			"icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+		},
+		{
+			"name": "Support Us",
+			"short_name": "Support",
+			"description": "Support BTC Map development",
+			"url": "/support-us",
 			"icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
 		}
 	],
