@@ -1,7 +1,7 @@
 <script>
-	import { elements, mapError } from '$lib/store';
+	import { elements, elementError } from '$lib/store';
 </script>
 
-{#if ($elements && $elements.length) || $mapError}
+{#if ($elements && $elements.length) || $elementError}
 	<slot />
 {/if}

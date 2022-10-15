@@ -2,7 +2,9 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
-	import { elements, mapUpdates, mapError } from '$lib/store';
+	import { elements, mapUpdates, elementError } from '$lib/store';
+	import { checkAddress } from '$lib/map/setup';
+	import { errToast } from '$lib/utils';
 
 	let mapElement;
 	let map;
@@ -25,7 +27,7 @@
 	$: map && mapLoaded && $mapUpdates && showDataRefresh();
 
 	// alert for map errors
-	$: $mapError && alert($mapError);
+	$: $elementError && errToast($elementError);
 
 	onMount(async () => {
 		if (browser) {
@@ -223,7 +225,9 @@ Thanks for using BTC Map!`);
 					fullscreenButton.onclick = function toggleFullscreen() {
 						if (!document.fullscreenElement) {
 							mapElement.requestFullscreen().catch((err) => {
-								alert(`Error attempting to enable fullscreen mode: ${err.message} (${err.name})`);
+								errToast(
+									`Error attempting to enable fullscreen mode: ${err.message} (${err.name})`
+								);
 							});
 						} else {
 							document.exitFullscreen();
@@ -365,21 +369,6 @@ Thanks for using BTC Map!`);
 
 			// create marker cluster group
 			let markers = L.markerClusterGroup();
-
-			// check address data
-			const checkAddress = (element) => {
-				if (element['addr:housenumber'] && element['addr:street'] && element['addr:city']) {
-					return `${
-						element['addr:housenumber'] + ' ' + element['addr:street'] + ', ' + element['addr:city']
-					}`;
-				} else if (element['addr:street'] && element['addr:city']) {
-					return `${element['addr:street'] + ', ' + element['addr:city']}`;
-				} else if (element['addr:city']) {
-					return `${element['addr:city']}`;
-				} else {
-					return '';
-				}
-			};
 
 			// add location information
 			$elements.forEach((element) => {

@@ -5,7 +5,9 @@
 	import axios from 'axios';
 	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
 	import { Header, Footer, PrimaryButton } from '$comp';
-	import { socials, elements, mapError, reportShowMap } from '$lib/store';
+	import { socials, elements, elementError, reportShowMap } from '$lib/store';
+	import { checkAddress } from '$lib/map/setup';
+	import { errToast } from '$lib/utils';
 
 	let name = $page.url.searchParams.has('name') ? $page.url.searchParams.get('name') : '';
 	let lat = $page.url.searchParams.has('lat') ? $page.url.searchParams.get('lat') : '';
@@ -52,7 +54,7 @@
 					submitted = true;
 				})
 				.catch(function (error) {
-					alert('Form submission failed, please try again or contact the BTC Map team.');
+					errToast('Form submission failed, please try again or contact the BTC Map team.');
 					console.log(error);
 					submitting = false;
 				});
@@ -66,7 +68,7 @@
 	$reportShowMap = showMap;
 
 	// alert for map errors
-	$: $mapError && showMap && alert($mapError);
+	$: $elementError && showMap && errToast($elementError);
 
 	if (showMap) {
 		onMount(async () => {
@@ -160,25 +162,6 @@
 
 				// handle success
 				let markers = L.markerClusterGroup();
-
-				// check address data
-				const checkAddress = (element) => {
-					if (element['addr:housenumber'] && element['addr:street'] && element['addr:city']) {
-						return `${
-							element['addr:housenumber'] +
-							' ' +
-							element['addr:street'] +
-							', ' +
-							element['addr:city']
-						}`;
-					} else if (element['addr:street'] && element['addr:city']) {
-						return `${element['addr:street'] + ', ' + element['addr:city']}`;
-					} else if (element['addr:city']) {
-						return `${element['addr:city']}`;
-					} else {
-						return '';
-					}
-				};
 
 				// add location information
 				$elements.forEach((element) => {
