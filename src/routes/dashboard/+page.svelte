@@ -2,29 +2,76 @@
 	import { browser } from '$app/environment';
 	import { onMount, onDestroy } from 'svelte';
 	import { Header, Footer, DashboardStat, LatestTagger, TaggerSkeleton } from '$comp';
+	import {
+		users,
+		userError,
+		events,
+		eventError,
+		elements,
+		elementError,
+		syncStatus
+	} from '$lib/store';
+	import { errToast } from '$lib/utils';
+
+	// alert for user errors
+	$: $userError && errToast($userError);
+	// alert for event errors
+	$: $eventError && errToast($eventError);
+	// alert for element errors
+	$: $elementError && errToast($elementError);
 
 	let statsAPIInterval;
 	let communitiesAPIInterval;
-	let supertaggersAPIInterval;
 
 	let statsLoading;
 	let communitiesLoading;
-	let supertaggersLoading;
 	let elementsLoading;
-	let elementFailure;
 
 	let stats;
 	let communities;
 	let supertaggers;
-	let users;
+
+	const supertaggerSync = (status, elements, events, users) => {
+		if (elements.length && events.length && users.length && !status) {
+			let recentEvents = events.slice(0, 21);
+
+			elementsLoading = true;
+			supertaggers = [];
+
+			recentEvents.forEach((event) => {
+				let elementMatch = elements.find((element) => element.id === event['element_id']);
+
+				if (elementMatch) {
+					let location =
+						elementMatch['osm_json'].tags && elementMatch['osm_json'].tags.name
+							? elementMatch['osm_json'].tags.name
+							: undefined;
+
+					event.location = location ? location : 'Unnamed element';
+
+					supertaggers.push(event);
+				}
+
+				if (event === recentEvents[recentEvents.length - 1]) {
+					supertaggers = supertaggers;
+					elementsLoading = false;
+				}
+			});
+		}
+	};
+
+	$: supertaggerSync($syncStatus, $elements, $events, $users);
 
 	$: latestTaggers =
-		supertaggers && supertaggers.find((tagger) => tagger.location) && !elementsLoading && users
+		supertaggers &&
+		supertaggers.length &&
+		!elementsLoading &&
+		supertaggers.find((tagger) => tagger.location)
 			? true
 			: false;
 
 	const findUser = (tagger) => {
-		const foundUser = users.find((user) => user.id == tagger['user_id']);
+		let foundUser = $users.find((user) => user.id == tagger['user_id']);
 		if (foundUser) {
 			return foundUser;
 		} else {
@@ -117,11 +164,11 @@
 					.get('https://api.btcmap.org/v2/reports')
 					.then(function (response) {
 						// handle success
-						stats = response.data;
+						stats = response.data.filter((report) => report['area_id'] === '');
 					})
 					.catch(function (error) {
 						// handle error
-						alert('Could not fetch stats data, please try again or contact BTC Map.');
+						errToast('Could not fetch stats data, please try again or contact BTC Map.');
 						console.log(error);
 					});
 
@@ -144,7 +191,7 @@
 					})
 					.catch(function (error) {
 						// handle error
-						alert('Could not fetch communities data, please try again or contact BTC Map.');
+						errToast('Could not fetch communities data, please try again or contact BTC Map.');
 						console.log(error);
 					});
 
@@ -152,70 +199,12 @@
 			};
 			communitiesAPI();
 			communitiesAPIInterval = setInterval(communitiesAPI, 600000);
-
-			const supertaggersAPI = async () => {
-				if (supertaggers) {
-					supertaggersLoading = true;
-					elementFailure = false;
-				}
-
-				await axios
-					.get('https://api.btcmap.org/v2/users')
-					.then(function (response) {
-						// handle success
-						users = response.data;
-						users = users;
-					})
-					.catch(function (error) {
-						// handle error
-						alert('Could not fetch user profile data, please try again or contact BTC Map.');
-						console.log(error);
-					});
-
-				await axios
-					.get('https://api.btcmap.org/v2/events')
-					.then(function (response) {
-						// handle success
-						supertaggers = response.data.slice(0, 21);
-
-						elementsLoading = true;
-						for (let i of supertaggers.keys()) {
-							axios
-								.get(`https://api.btcmap.org/v2/elements/${supertaggers[i]['element_id']}`)
-								.then(function (response) {
-									// handle success
-									let location = response.data['osm_json'].tags.name;
-									supertaggers[i].location = location ? location : 'Unnamed element';
-
-									if (i === supertaggers.length - 1) {
-										supertaggers = supertaggers;
-										elementsLoading = false;
-									}
-								})
-								.catch(function (error) {
-									// handle error
-									elementFailure = true;
-									console.log(error);
-								});
-						}
-					})
-					.catch(function (error) {
-						// handle error
-						alert('Could not fetch latest supertaggers data, please try again or contact BTC Map.');
-						console.log(error);
-					});
-
-				supertaggersLoading = false;
-			};
-			supertaggersAPI();
-			supertaggersAPIInterval = setInterval(supertaggersAPI, 600000);
 		}
 	});
 
 	onDestroy(() => {
 		clearInterval(statsAPIInterval);
 		clearInterval(communitiesAPIInterval);
-		clearInterval(supertaggersAPIInterval);
 	});
 </script>
 
@@ -311,49 +300,20 @@
 						class="text-center md:text-left text-primary text-2xl border-b border-statBorder p-5 font-semibold"
 					>
 						Latest Supertaggers
-						{#if supertaggersLoading}
-							<svg
-								class="inline animate-spin h-6 w-6 text-statPositive"
-								xmlns="http://www.w3.org/2000/svg"
-								fill="none"
-								viewBox="0 0 24 24"
-							>
-								<circle
-									class="opacity-25"
-									cx="12"
-									cy="12"
-									r="10"
-									stroke="currentColor"
-									stroke-width="4"
-								/>
-								<path
-									class="opacity-75"
-									fill="currentColor"
-									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-								/>
-							</svg>
-						{/if}
-						{#if elementFailure}
-							<span class="block text-error text-sm font-normal"
-								>Could not fetch element data, please try again or contact BTC Map.</span
-							>
-						{/if}
 					</h3>
 
 					<div class="space-y-5">
 						{#if latestTaggers}
 							{#each supertaggers as tagger}
-								{#if tagger.location}
-									<LatestTagger
-										location={tagger.location}
-										action={tagger.type}
-										user={findUser(tagger)}
-										time={tagger.date}
-										latest={tagger === supertaggers[0] ? true : false}
-										lat={tagger['element_lat']}
-										long={tagger['element_lon']}
-									/>
-								{/if}
+								<LatestTagger
+									location={tagger.location}
+									action={tagger.type}
+									user={findUser(tagger)}
+									time={tagger.date}
+									latest={tagger === supertaggers[0] ? true : false}
+									lat={tagger['element_lat']}
+									long={tagger['element_lon']}
+								/>
 							{/each}
 						{:else}
 							{#each Array(21) as skeleton}
