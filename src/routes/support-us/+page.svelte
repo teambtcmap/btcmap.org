@@ -2,6 +2,7 @@
 	import axios from 'axios';
 	import { onMount } from 'svelte';
 	import { Header, Footer, DonationOption } from '$comp';
+	import { errToast } from '$lib/utils';
 
 	let onchain = 'bc1qyyr7g9tew6sfa57mv2r6rvgj2ucakcmqnqzqjj';
 	const lnurlp =
@@ -24,7 +25,7 @@
 				console.log(response);
 			})
 			.catch(function (error) {
-				alert('Could not fetch new on-chain address, please use lightning.');
+				errToast('Could not fetch new on-chain address, please use lightning.');
 				console.log(error);
 			});
 	}); */

@@ -9,6 +9,7 @@
 		LeaderboardSkeleton,
 		TopButton
 	} from '$comp';
+	import { errToast } from '$lib/utils';
 
 	let leaderboardAPIInterval;
 	let loading;
@@ -33,7 +34,7 @@
 					})
 					.catch(function (error) {
 						// handle error
-						alert('Could not fetch users data, please try again or contact BTC Map.');
+						errToast('Could not fetch users data, please try again or contact BTC Map.');
 						console.log(error);
 					});
 
@@ -45,7 +46,7 @@
 					})
 					.catch(function (error) {
 						// handle error
-						alert('Could not fetch events data, please try again or contact BTC Map.');
+						errToast('Could not fetch events data, please try again or contact BTC Map.');
 						console.log(error);
 					});
 

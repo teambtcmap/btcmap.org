@@ -5,6 +5,7 @@
 	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
 	import { Header, Footer, PrimaryButton } from '$comp';
 	import { socials } from '$lib/store';
+	import { errToast } from '$lib/utils';
 
 	let name;
 	let address;
@@ -77,7 +78,7 @@
 				})
 				.catch(function (error) {
 					methods = [];
-					alert('Form submission failed, please try again or contact the BTC Map team.');
+					errToast('Form submission failed, please try again or contact the BTC Map team.');
 					console.log(error);
 					submitting = false;
 				});

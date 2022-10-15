@@ -256,6 +256,11 @@
     resolve-from "^5.0.0"
     rollup-pluginutils "^2.8.2"
 
+"@zerodevx/svelte-toast@^0.8.0":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@zerodevx/svelte-toast/-/svelte-toast-0.8.0.tgz#50fd85ff51ebe6e67642e840ae3959ed28a1448d"
+  integrity sha512-PAcQQGhGYkdZJqPY7obnGIdlBoeoMteogYoN/nJn87CI5LYgRz6X9ST4AA65jyGlybWnniYzlrTT/dFepvuC/g==
+
 abbrev@1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-1.1.1.tgz#f8f2c887ad10bf67f634f005b6987fed3179aac8"
