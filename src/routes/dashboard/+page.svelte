@@ -31,7 +31,7 @@
 	let communities;
 	let supertaggers;
 
-	const supertaggerSync = (status, elements, events, users) => {
+	const supertaggerSync = (status, users, events, elements) => {
 		if (elements.length && events.length && users.length && !status) {
 			let recentEvents = events.slice(0, 21);
 
@@ -51,16 +51,14 @@
 
 					supertaggers.push(event);
 				}
-
-				if (event === recentEvents[recentEvents.length - 1]) {
-					supertaggers = supertaggers;
-					elementsLoading = false;
-				}
 			});
+
+			supertaggers = supertaggers;
+			elementsLoading = false;
 		}
 	};
 
-	$: supertaggerSync($syncStatus, $elements, $events, $users);
+	$: supertaggerSync($syncStatus, $users, $events, $elements);
 
 	$: latestTaggers =
 		supertaggers &&

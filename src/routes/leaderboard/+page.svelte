@@ -1,6 +1,5 @@
 <script>
 	import { browser } from '$app/environment';
-	import { onMount, onDestroy } from 'svelte';
 	import {
 		Header,
 		Footer,
@@ -9,88 +8,59 @@
 		LeaderboardSkeleton,
 		TopButton
 	} from '$comp';
+	import { users, userError, events, eventError, syncStatus } from '$lib/store';
 	import { errToast } from '$lib/utils';
 
-	let leaderboardAPIInterval;
-	let loading;
+	// alert for user errors
+	$: $userError && errToast($userError);
+	// alert for event errors
+	$: $eventError && errToast($eventError);
 
-	let users;
-	let events;
+	let loading;
 	let leaderboard;
 
-	onMount(async () => {
-		if (browser) {
-			const axios = await import('axios');
+	const leaderboardSync = (status, users, events) => {
+		if (users.length && events.length && !status) {
+			loading = true;
+			leaderboard = [];
 
-			const leaderboardAPI = async () => {
-				loading = true;
-				leaderboard = [];
+			users.forEach((user) => {
+				let userEvents = events.filter((event) => event['user_id'] == user.id);
 
-				await axios
-					.get('https://api.btcmap.org/v2/users')
-					.then(function (response) {
-						// handle success
-						users = response.data;
-					})
-					.catch(function (error) {
-						// handle error
-						errToast('Could not fetch users data, please try again or contact BTC Map.');
-						console.log(error);
-					});
+				if (userEvents.length) {
+					let created = userEvents.filter((event) => event.type === 'create');
+					let updated = userEvents.filter((event) => event.type === 'update');
+					let deleted = userEvents.filter((event) => event.type === 'delete');
+					let profile = user['osm_json'];
+					let avatar = profile.img ? profile.img.href : '/images/satoshi-nakamoto.png';
 
-				await axios
-					.get('https://api.btcmap.org/v2/events')
-					.then(function (response) {
-						// handle success
-						events = response.data;
-					})
-					.catch(function (error) {
-						// handle error
-						errToast('Could not fetch events data, please try again or contact BTC Map.');
-						console.log(error);
-					});
-
-				if (users && events) {
-					users.forEach((user) => {
-						let userEvents = events.filter((event) => event['user_id'] == user.id);
-						let created = userEvents.filter((event) => event.type === 'create');
-						let updated = userEvents.filter((event) => event.type === 'update');
-						let deleted = userEvents.filter((event) => event.type === 'delete');
-						let profile = user['osm_json'];
-						let avatar = profile.img ? profile.img.href : '/images/satoshi-nakamoto.png';
-
-						leaderboard.push({
-							avatar: avatar,
-							tagger: profile['display_name'],
-							created:
-								profile['display_name'] === 'Bill on Bitcoin Island'
-									? created.length + 100
-									: created.length,
-							updated:
-								profile['display_name'] === 'Bill on Bitcoin Island'
-									? updated.length + 20
-									: updated.length,
-							deleted: deleted.length,
-							tip: profile.description
-						});
+					leaderboard.push({
+						avatar: avatar,
+						tagger: profile['display_name'],
+						created:
+							profile['display_name'] === 'Bill on Bitcoin Island'
+								? created.length + 100
+								: created.length,
+						updated:
+							profile['display_name'] === 'Bill on Bitcoin Island'
+								? updated.length + 20
+								: updated.length,
+						deleted: deleted.length,
+						tip: profile.description
 					});
 				}
+			});
 
-				leaderboard.sort(
-					(a, b) => b.created + b.updated + b.deleted - (a.created + a.updated + a.deleted)
-				);
+			leaderboard.sort(
+				(a, b) => b.created + b.updated + b.deleted - (a.created + a.updated + a.deleted)
+			);
 
-				leaderboard = leaderboard;
-				loading = false;
-			};
-			leaderboardAPI();
-			leaderboardAPIInterval = setInterval(leaderboardAPI, 600000);
+			leaderboard = leaderboard;
+			loading = false;
 		}
-	});
+	};
 
-	onDestroy(() => {
-		clearInterval(leaderboardAPIInterval);
-	});
+	$: leaderboardSync($syncStatus, $users, $events);
 
 	const headings = ['Position', 'Supertagger', 'Created', 'Updated', 'Deleted', 'Tip'];
 </script>
