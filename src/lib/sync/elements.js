@@ -21,18 +21,10 @@ export const elementsSync = async () => {
 								elements.set(response.data);
 							})
 							.catch(function (err) {
-								axios
-									.get('https://api.btcmap.org/v2/elements')
-									.then(function (response) {
-										elements.set(response.data);
-									})
-									.catch(function (error) {
-										elementError.set(
-											'Could not store elements locally, please try again or contact BTC Map.'
-										);
-										console.log(error);
-									});
-
+								elements.set(response.data);
+								elementError.set(
+									'Could not store elements locally, please try again or contact BTC Map.'
+								);
 								console.log(err);
 							});
 					} else {

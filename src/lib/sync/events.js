@@ -21,18 +21,10 @@ export const eventsSync = async () => {
 								events.set(response.data);
 							})
 							.catch(function (err) {
-								axios
-									.get('https://api.btcmap.org/v2/events')
-									.then(function (response) {
-										events.set(response.data);
-									})
-									.catch(function (error) {
-										eventError.set(
-											'Could not store events locally, please try again or contact BTC Map.'
-										);
-										console.log(error);
-									});
-
+								events.set(response.data);
+								eventError.set(
+									'Could not store events locally, please try again or contact BTC Map.'
+								);
 								console.log(err);
 							});
 					} else {

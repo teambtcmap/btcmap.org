@@ -21,18 +21,10 @@ export const usersSync = async () => {
 								users.set(response.data);
 							})
 							.catch(function (err) {
-								axios
-									.get('https://api.btcmap.org/v2/users')
-									.then(function (response) {
-										users.set(response.data);
-									})
-									.catch(function (error) {
-										userError.set(
-											'Could not store users locally, please try again or contact BTC Map.'
-										);
-										console.log(error);
-									});
-
+								users.set(response.data);
+								userError.set(
+									'Could not store users locally, please try again or contact BTC Map.'
+								);
 								console.log(err);
 							});
 					} else {
