@@ -1,8 +1,9 @@
 import localforage from 'localforage';
 import axios from 'axios';
-import { elements, mapUpdates, elementError } from '$lib/store';
+import { elements, mapUpdates, elementError, mapLoading } from '$lib/store';
 
 export const elementsSync = async () => {
+	mapLoading.set('Checking local cache...');
 	// get elements from local
 	await localforage
 		.getItem('elements')
@@ -10,17 +11,21 @@ export const elementsSync = async () => {
 			// get elements from API if initial sync
 			if (!value) {
 				try {
+					mapLoading.set('Fetching elements from API...');
 					const response = await axios.get('https://api.btcmap.org/v2/elements');
 
 					if (response.data.length) {
+						mapLoading.set('Map elements loaded, storing data...');
 						// set response to local
 						localforage
 							.setItem('elements', response.data)
 							.then(function (value) {
+								mapLoading.set('Initial sync complete!');
 								// set response to store
 								elements.set(response.data);
 							})
 							.catch(function (err) {
+								mapLoading.set('Map loading complete!');
 								elements.set(response.data);
 								elementError.set(
 									'Could not store elements locally, please try again or contact BTC Map.'
@@ -39,6 +44,7 @@ export const elementsSync = async () => {
 					console.log(error);
 				}
 			} else {
+				mapLoading.set('Local cache found!');
 				// load elements locally first
 				elements.set(value);
 

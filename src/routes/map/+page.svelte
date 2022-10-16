@@ -5,6 +5,7 @@
 	import { elements, mapUpdates, elementError } from '$lib/store';
 	import { checkAddress } from '$lib/map/setup';
 	import { errToast } from '$lib/utils';
+	import { MapLoading } from '$comp';
 
 	let mapElement;
 	let map;
@@ -509,6 +510,9 @@ Thanks for using BTC Map!`);
 </script>
 
 <main>
+	{#if !mapLoaded}
+		<MapLoading message="Rendering map..." style="absolute top-0 left-0 z-[10000]" />
+	{/if}
 	<div bind:this={mapElement} class="h-[100vh]" />
 </main>
 

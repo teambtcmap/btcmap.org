@@ -12,3 +12,4 @@ export { default as LeaderboardItem } from './LeaderboardItem.svelte';
 export { default as LeaderboardSkeleton } from './LeaderboardSkeleton.svelte';
 export { default as TopButton } from './TopButton.svelte';
 export { default as OutClick } from './OutClick.svelte';
+export { default as MapLoading } from './MapLoading.svelte';

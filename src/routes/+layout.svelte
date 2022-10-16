@@ -6,7 +6,7 @@
 	import { elementsSync } from '$lib/sync/elements';
 	import { eventsSync } from '$lib/sync/events';
 	import { usersSync } from '$lib/sync/users';
-	import { syncStatus } from '$lib/store';
+	import { syncStatus, mapLoading } from '$lib/store';
 
 	const options = {
 		reversed: true,
@@ -23,6 +23,7 @@
 		});
 
 		const dataSync = async () => {
+			$mapLoading = 'Starting data sync...';
 			$syncStatus = true;
 			await elementsSync();
 			await eventsSync();
