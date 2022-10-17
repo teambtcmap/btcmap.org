@@ -10,6 +10,7 @@
 - tailwindcss
 - leafletjs
 - openstreetmap
+- localforage
 - yarn
 - prettier
 - axios
