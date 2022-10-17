@@ -54,7 +54,7 @@
 			leaderboard.sort(
 				(a, b) => b.created + b.updated + b.deleted - (a.created + a.updated + a.deleted)
 			);
-
+			leaderboard = leaderboard.slice(0, 50);
 			leaderboard = leaderboard;
 			loading = false;
 		}

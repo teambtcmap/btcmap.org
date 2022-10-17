@@ -13,15 +13,18 @@ export const usersSync = async () => {
 					const response = await axios.get('https://api.btcmap.org/v2/users');
 
 					if (response.data.length) {
+						// filter out deleted users
+						const usersFiltered = response.data.filter((user) => !user['deleted_at']);
+
 						// set response to local
 						localforage
 							.setItem('users', response.data)
 							.then(function (value) {
 								// set response to store
-								users.set(response.data);
+								users.set(usersFiltered);
 							})
 							.catch(function (err) {
-								users.set(response.data);
+								users.set(usersFiltered);
 								userError.set(
 									'Could not store users locally, please try again or contact BTC Map.'
 								);
@@ -37,8 +40,11 @@ export const usersSync = async () => {
 					console.log(error);
 				}
 			} else {
+				// filter out deleted users
+				const usersFiltered = value.filter((user) => !user['deleted_at']);
+
 				// load users locally first
-				users.set(value);
+				users.set(usersFiltered);
 
 				// start update sync from API
 				try {
@@ -64,12 +70,15 @@ export const usersSync = async () => {
 							newUsers.push(user);
 						});
 
+						// filter out deleted users
+						const newUsersFiltered = newUsers.filter((user) => !user['deleted_at']);
+
 						// set updated users locally
 						localforage
 							.setItem('users', newUsers)
 							.then(function (value) {
 								// set updated users to store
-								users.set(newUsers);
+								users.set(newUsersFiltered);
 							})
 							.catch(function (err) {
 								userError.set(

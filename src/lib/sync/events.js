@@ -13,15 +13,18 @@ export const eventsSync = async () => {
 					const response = await axios.get('https://api.btcmap.org/v2/events');
 
 					if (response.data.length) {
+						// filter out deleted events
+						const eventsFiltered = response.data.filter((event) => event['deleted_at'] === '');
+
 						// set response to local
 						localforage
 							.setItem('events', response.data)
 							.then(function (value) {
 								// set response to store
-								events.set(response.data);
+								events.set(eventsFiltered);
 							})
 							.catch(function (err) {
-								events.set(response.data);
+								events.set(eventsFiltered);
 								eventError.set(
 									'Could not store events locally, please try again or contact BTC Map.'
 								);
@@ -37,8 +40,11 @@ export const eventsSync = async () => {
 					console.log(error);
 				}
 			} else {
+				// filter out deleted events
+				const eventsFiltered = value.filter((event) => event['deleted_at'] === '');
+
 				// load events locally first
-				events.set(value);
+				events.set(eventsFiltered);
 
 				// start update sync from API
 				try {
@@ -64,12 +70,15 @@ export const eventsSync = async () => {
 							newEvents.push(event);
 						});
 
+						// filter out deleted events
+						const newEventsFiltered = newEvents.filter((event) => event['deleted_at'] === '');
+
 						// set updated events locally
 						localforage
 							.setItem('events', newEvents)
 							.then(function (value) {
 								// set updated events to store
-								events.set(newEvents);
+								events.set(newEventsFiltered);
 							})
 							.catch(function (err) {
 								eventError.set(
