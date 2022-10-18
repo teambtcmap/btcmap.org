@@ -217,6 +217,10 @@
 							</div>
 							<div>
 								<label for="address" class="mb-2 block font-semibold">Address</label>
+								<div class="tooltip"> ⓘ
+									<span class="tooltiptext">All locations are required to have a physical 
+										address. Service industries can not place a general point.</span>
+								</div>	
 								<input
 									type="text"
 									name="address"
