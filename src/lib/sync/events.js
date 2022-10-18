@@ -14,7 +14,7 @@ export const eventsSync = async () => {
 
 					if (response.data.length) {
 						// filter out deleted events
-						const eventsFiltered = response.data.filter((event) => event['deleted_at'] === '');
+						const eventsFiltered = response.data.filter((event) => !event['deleted_at']);
 
 						// set response to local
 						localforage
@@ -41,7 +41,7 @@ export const eventsSync = async () => {
 				}
 			} else {
 				// filter out deleted events
-				const eventsFiltered = value.filter((event) => event['deleted_at'] === '');
+				const eventsFiltered = value.filter((event) => !event['deleted_at']);
 
 				// load events locally first
 				events.set(eventsFiltered);
@@ -71,7 +71,7 @@ export const eventsSync = async () => {
 						});
 
 						// filter out deleted events
-						const newEventsFiltered = newEvents.filter((event) => event['deleted_at'] === '');
+						const newEventsFiltered = newEvents.filter((event) => !event['deleted_at']);
 
 						// set updated events locally
 						localforage
