@@ -1,4 +1,5 @@
 <script>
+	import axios from 'axios';
 	import { browser } from '$app/environment';
 	import { onMount, onDestroy } from 'svelte';
 	import { Header, Footer, DashboardStat, LatestTagger, TaggerSkeleton } from '$comp';
@@ -151,8 +152,6 @@
 
 	onMount(async () => {
 		if (browser) {
-			const axios = await import('axios');
-
 			const statsAPI = async () => {
 				if (stats) {
 					statsLoading = true;
