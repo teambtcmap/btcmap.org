@@ -12,17 +12,16 @@
 </script>
 
 <div class="border border-statBorder rounded-3xl shadow hover:shadow-2xl transition-shadow">
-	<div class="space-y-2 my-4 p-4">
-		<img
-			src={image ? image : '/images/communities/bitcoin.svg'}
-			alt={name}
-			class="w-20 h-20 object-cover rounded-full mx-auto"
-		/>
+	<div class="my-4 p-4">
+		<a href="/community/{id}" class="text-link hover:text-hover space-y-2">
+			<img
+				src={image ? image : '/images/communities/bitcoin.svg'}
+				alt={name}
+				class="w-20 h-20 object-cover rounded-full mx-auto"
+			/>
 
-		<a
-			href="/community/{id}"
-			class="text-center text-link hover:text-hover text-lg font-semibold block">{name}</a
-		>
+			<span class="text-center text-lg font-semibold block">{name}</span>
+		</a>
 	</div>
 
 	<div class="p-4 w-full flex flex-wrap justify-center items-center border-t border-t-statBorder">
