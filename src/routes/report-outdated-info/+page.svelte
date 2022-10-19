@@ -21,6 +21,26 @@
 		? `https://www.openstreetmap.org/edit?relation=${$page.url.searchParams.get('relation')}`
 		: '';
 
+	let captcha;
+	let captchaSecret;
+	let captchaInput;
+	let honeyInput;
+
+	const fetchCaptcha = () => {
+		axios
+			.get('/captcha')
+			.then(function (response) {
+				// handle success
+				captchaSecret = response.data.captchaSecret;
+				captcha.innerHTML = response.data.captcha;
+			})
+			.catch(function (error) {
+				// handle error
+				errToast('Could not fetch captcha, please try again or contact BTC Map.');
+				console.log(error);
+			});
+	};
+
 	let outdated;
 	let current;
 	let verify;
@@ -35,17 +55,21 @@
 		e.preventDefault();
 		if (!selected) {
 			noLocationSelected = true;
+			errToast('Please select a location...');
 		} else {
 			submitting = true;
 
 			axios
 				.post('/report-outdated-info/endpoint', {
+					captchaSecret,
+					captchaTest: captchaInput.value,
+					honey: honeyInput.value,
 					name: name,
 					location: location,
 					edit: edit,
 					outdated: outdated.value,
 					current: current.value,
-					verify: verify.value,
+					verified: verify.value,
 					lat: lat ? lat.toString() : '',
 					long: long ? long.toString() : ''
 				})
@@ -54,7 +78,12 @@
 					submitted = true;
 				})
 				.catch(function (error) {
-					errToast('Form submission failed, please try again or contact the BTC Map team.');
+					if (error.response.data.message.includes('Captcha')) {
+						errToast(error.response.data.message);
+					} else {
+						errToast('Form submission failed, please try again or contact BTC Map.');
+					}
+
 					console.log(error);
 					submitting = false;
 				});
@@ -70,9 +99,12 @@
 	// alert for map errors
 	$: $elementError && showMap && errToast($elementError);
 
-	if (showMap) {
-		onMount(async () => {
-			if (browser) {
+	onMount(async () => {
+		if (browser) {
+			// fetch and add captcha
+			fetchCaptcha();
+
+			if (showMap) {
 				//import packages
 				const leaflet = await import('leaflet');
 				const leafletLocateControl = await import('leaflet.locatecontrol');
@@ -255,13 +287,15 @@
 
 					// add marker click event
 					marker.on('click', (e) => {
-						map.setView(e.latlng, 19);
-						name = element.tags.name ? element.tags.name : '';
-						lat = latCalc;
-						long = longCalc;
-						location = lat && long ? `https://btcmap.org/map?lat=${lat}&long=${long}` : '';
-						edit = `https://www.openstreetmap.org/edit?${element.type}=${element.id}`;
-						selected = true;
+						if (captchaSecret) {
+							map.setView(e.latlng, 19);
+							name = element.tags.name ? element.tags.name : '';
+							lat = latCalc;
+							long = longCalc;
+							location = lat && long ? `https://btcmap.org/map?lat=${lat}&long=${long}` : '';
+							edit = `https://www.openstreetmap.org/edit?${element.type}=${element.id}`;
+							selected = true;
+						}
 					});
 
 					markers.addLayer(marker);
@@ -269,8 +303,10 @@
 
 				map.addLayer(markers);
 			}
-		});
+		}
+	});
 
+	if (showMap) {
 		onDestroy(async () => {
 			if (map) {
 				console.log('Unloading Leaflet map.');
@@ -314,7 +350,7 @@
 
 				<form on:submit={submitForm} class="text-primary space-y-5 w-full">
 					<div>
-						{#if !$page.url.searchParams.has('name') || !$page.url.searchParams.has('lat') || !$page.url.searchParams.has('long') || (!$page.url.searchParams.has('node') && !$page.url.searchParams.has('way') && !$page.url.searchParams.has('relation'))}
+						<div class={showMap ? 'block' : 'hidden'}>
 							<label for="location-picker" class="mb-2 block font-semibold">Select Location</label>
 							{#if selected}
 								<span class="text-green-500 font-semibold">Location selected!</span>
@@ -323,9 +359,9 @@
 							{/if}
 							<div
 								bind:this={mapElement}
-								class="z-10 !cursor-crosshair focus:outline-link border-2 border-input mb-2 rounded-2xl h-[450px]"
+								class="z-10 !cursor-crosshair border-2 border-input mb-2 rounded-2xl h-[450px]"
 							/>
-						{/if}
+						</div>
 						<input
 							required
 							disabled
@@ -337,9 +373,11 @@
 							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full font-semibold text-center"
 						/>
 					</div>
+
 					<div>
 						<label for="outdated" class="mb-2 block font-semibold">Outdated information</label>
 						<textarea
+							disabled={!captchaSecret}
 							required
 							name="outdated"
 							placeholder="Provide what info is incorrect"
@@ -348,9 +386,11 @@
 							bind:this={outdated}
 						/>
 					</div>
+
 					<div>
 						<label for="current" class="mb-2 block font-semibold">Current information</label>
 						<textarea
+							disabled={!captchaSecret}
 							required
 							name="current"
 							placeholder="Provide the updated info on this location"
@@ -359,9 +399,11 @@
 							bind:this={current}
 						/>
 					</div>
+
 					<div>
 						<label for="verify" class="mb-2 block font-semibold">How did you verify this?</label>
 						<textarea
+							disabled={!captchaSecret}
 							required
 							name="verify"
 							placeholder="Please provide additional info here"
@@ -371,9 +413,47 @@
 						/>
 					</div>
 
+					<div>
+						<div class="flex items-center mb-2 space-x-2">
+							<label for="captcha" class="font-semibold"
+								>Bot protection <span class="font-normal">(case-sensitive)</span></label
+							>
+							{#if captchaSecret}
+								<button type="button" on:click={fetchCaptcha}>
+									<i class="fa-solid fa-arrows-rotate" />
+								</button>
+							{/if}
+						</div>
+						<div class="space-y-2">
+							<div
+								bind:this={captcha}
+								class="border-2 border-input rounded-2xl flex justify-center items-center py-1"
+							>
+								<div class="w-[275px] h-[100px] bg-link/50 animate-pulse rounded-xl" />
+							</div>
+							<input
+								disabled={!captchaSecret}
+								required
+								type="text"
+								name="captcha"
+								placeholder="Please enter the captcha text."
+								class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+								bind:this={captchaInput}
+							/>
+						</div>
+					</div>
+
+					<input
+						type="text"
+						name="honey"
+						placeholder="A nice pot of honey."
+						class="hidden"
+						bind:this={honeyInput}
+					/>
+
 					<PrimaryButton
 						loading={submitting}
-						disabled={submitting}
+						disabled={submitting || !captchaSecret}
 						text="Submit Report"
 						style="w-full py-3 rounded-xl"
 					/>

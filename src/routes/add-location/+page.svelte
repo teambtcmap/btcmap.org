@@ -7,6 +7,26 @@
 	import { socials } from '$lib/store';
 	import { errToast } from '$lib/utils';
 
+	let captcha;
+	let captchaSecret;
+	let captchaInput;
+	let honeyInput;
+
+	const fetchCaptcha = () => {
+		axios
+			.get('/captcha')
+			.then(function (response) {
+				// handle success
+				captchaSecret = response.data.captchaSecret;
+				captcha.innerHTML = response.data.captcha;
+			})
+			.catch(function (error) {
+				// handle error
+				errToast('Could not fetch captcha, please try again or contact BTC Map.');
+				console.log(error);
+			});
+	};
+
 	let name;
 	let address;
 	let lat;
@@ -37,8 +57,10 @@
 		e.preventDefault();
 		if (!selected) {
 			noLocationSelected = true;
+			errToast('Please select a location...');
 		} else if (!onchain.checked && !lightning.checked && !nfc.checked) {
 			noMethodSelected = true;
+			errToast('Please select at least one payment method...');
 		} else {
 			submitting = true;
 			if (onchain.checked) {
@@ -53,6 +75,9 @@
 
 			axios
 				.post('/add-location/endpoint', {
+					captchaSecret,
+					captchaTest: captchaInput.value,
+					honey: honeyInput.value,
 					name: name.value,
 					address: address.value,
 					lat: lat ? lat.toString() : '',
@@ -78,7 +103,11 @@
 				})
 				.catch(function (error) {
 					methods = [];
-					errToast('Form submission failed, please try again or contact the BTC Map team.');
+					if (error.response.data.message.includes('Captcha')) {
+						errToast(error.response.data.message);
+					} else {
+						errToast('Form submission failed, please try again or contact BTC Map.');
+					}
 					console.log(error);
 					submitting = false;
 				});
@@ -91,6 +120,9 @@
 
 	onMount(async () => {
 		if (browser) {
+			// fetch and add captcha
+			fetchCaptcha();
+
 			//import packages
 			const leaflet = await import('leaflet');
 			const leafletLocateControl = await import('leaflet.locatecontrol');
@@ -109,16 +141,18 @@
 			let marker;
 
 			map.on('click', (e) => {
-				lat = e.latlng.lat;
-				long = e.latlng.lng;
+				if (captchaSecret) {
+					lat = e.latlng.lat;
+					long = e.latlng.lng;
 
-				if (marker) {
-					map.removeLayer(marker);
+					if (marker) {
+						map.removeLayer(marker);
+					}
+
+					marker = L.marker([lat, long]).addTo(map);
+
+					selected = true;
 				}
-
-				marker = L.marker([lat, long]).addTo(map);
-
-				selected = true;
 			});
 
 			// change broken marker image path in prod
@@ -207,6 +241,7 @@
 							<div>
 								<label for="name" class="mb-2 block font-semibold">Merchant Name</label>
 								<input
+									disabled={!captchaSecret}
 									type="text"
 									name="name"
 									placeholder="Satoshi's Comics"
@@ -215,9 +250,11 @@
 									bind:this={name}
 								/>
 							</div>
+
 							<div>
 								<label for="address" class="mb-2 block font-semibold">Address</label>
 								<input
+									disabled={!captchaSecret}
 									type="text"
 									name="address"
 									placeholder="2100 Freedom Drive..."
@@ -226,6 +263,7 @@
 									bind:this={address}
 								/>
 							</div>
+
 							<div>
 								<label for="location-picker" class="mb-2 block font-semibold">Select Location</label
 								>
@@ -236,7 +274,7 @@
 								{/if}
 								<div
 									bind:this={mapElement}
-									class="z-10 !cursor-crosshair focus:outline-link border-2 border-input mb-2 rounded-2xl h-[300px]"
+									class="z-10 !cursor-crosshair border-2 border-input mb-2 rounded-2xl h-[300px]"
 								/>
 								<div class="flex space-x-2">
 									<input
@@ -261,9 +299,11 @@
 									/>
 								</div>
 							</div>
+
 							<div>
 								<label for="category" class="mb-2 block font-semibold">Category</label>
 								<input
+									disabled={!captchaSecret}
 									required
 									type="text"
 									name="category"
@@ -281,6 +321,7 @@
 								<div class="space-y-4">
 									<div>
 										<input
+											disabled={!captchaSecret}
 											type="checkbox"
 											name="onchain"
 											id="onchain"
@@ -293,6 +334,7 @@
 									</div>
 									<div>
 										<input
+											disabled={!captchaSecret}
 											type="checkbox"
 											name="lightning"
 											id="lightning"
@@ -305,6 +347,7 @@
 									</div>
 									<div>
 										<input
+											disabled={!captchaSecret}
 											type="checkbox"
 											name="nfc"
 											id="nfc"
@@ -324,6 +367,7 @@
 								>
 								<div class="flex space-x-2">
 									<input
+										disabled={!captchaSecret}
 										type="text"
 										name="twitter"
 										placeholder="Merchant"
@@ -331,6 +375,7 @@
 										bind:this={twitterMerchant}
 									/>
 									<input
+										disabled={!captchaSecret}
 										type="text"
 										name="twitter"
 										placeholder="Submitter"
@@ -339,11 +384,13 @@
 									/>
 								</div>
 							</div>
+
 							<div>
 								<label for="notes" class="mb-2 block font-semibold"
 									>Notes <span class="font-normal">(optional)</span></label
 								>
 								<textarea
+									disabled={!captchaSecret}
 									name="notes"
 									placeholder="Any other relevant details? Website URL, phone number etc."
 									rows="5"
@@ -352,9 +399,47 @@
 								/>
 							</div>
 
+							<div>
+								<div class="flex items-center mb-2 space-x-2">
+									<label for="captcha" class="font-semibold"
+										>Bot protection <span class="font-normal">(case-sensitive)</span></label
+									>
+									{#if captchaSecret}
+										<button type="button" on:click={fetchCaptcha}>
+											<i class="fa-solid fa-arrows-rotate" />
+										</button>
+									{/if}
+								</div>
+								<div class="space-y-2">
+									<div
+										bind:this={captcha}
+										class="border-2 border-input rounded-2xl flex justify-center items-center py-1"
+									>
+										<div class="w-[275px] h-[100px] bg-link/50 animate-pulse rounded-xl" />
+									</div>
+									<input
+										disabled={!captchaSecret}
+										required
+										type="text"
+										name="captcha"
+										placeholder="Please enter the captcha text."
+										class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+										bind:this={captchaInput}
+									/>
+								</div>
+							</div>
+
+							<input
+								type="text"
+								name="honey"
+								placeholder="A nice pot of honey."
+								class="hidden"
+								bind:this={honeyInput}
+							/>
+
 							<PrimaryButton
 								loading={submitting}
-								disabled={submitting}
+								disabled={submitting || !captchaSecret}
 								text="Submit Location"
 								style="w-full py-3 rounded-xl"
 							/>

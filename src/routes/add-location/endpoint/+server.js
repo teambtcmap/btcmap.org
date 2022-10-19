@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { GITHUB_API_KEY } from '$env/static/private';
+import { verify } from '$lib/captcha';
 
 export async function POST({ request }) {
 	const headers = {
@@ -8,6 +9,9 @@ export async function POST({ request }) {
 	};
 
 	let {
+		captchaSecret,
+		captchaTest,
+		honey,
 		name,
 		address,
 		lat,
@@ -19,6 +23,14 @@ export async function POST({ request }) {
 		twitterSubmitter,
 		notes
 	} = await request.json();
+
+	// if honey field has value return
+	if (honey) {
+		return;
+	}
+
+	// verify that captcha is correct
+	verify(captchaSecret, captchaTest);
 
 	let github = await axios
 		.post(

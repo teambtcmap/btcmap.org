@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { GITHUB_API_KEY } from '$env/static/private';
+import { verify } from '$lib/captcha';
 
 export async function POST({ request }) {
 	const headers = {
@@ -7,7 +8,27 @@ export async function POST({ request }) {
 		Accept: 'application/vnd.github+json'
 	};
 
-	let { name, location, edit, outdated, current, verify, lat, long } = await request.json();
+	let {
+		captchaSecret,
+		captchaTest,
+		honey,
+		name,
+		location,
+		edit,
+		outdated,
+		current,
+		verified,
+		lat,
+		long
+	} = await request.json();
+
+	// if honey field has value return
+	if (honey) {
+		return;
+	}
+
+	// verify that captcha is correct
+	verify(captchaSecret, captchaTest);
 
 	let github = await axios
 		.post(
@@ -19,7 +40,7 @@ Merchant location: ${location}
 Edit link: ${edit}
 Outdated information: ${outdated}
 Current information: ${current}
-How did you verify this?: ${verify}
+How did you verify this?: ${verified}
 Lat: ${lat}
 Long: ${long}
 Status: Todo
