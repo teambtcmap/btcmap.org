@@ -59,9 +59,9 @@
 			</h1>
 
 			<h2 class="text-primary text-xl font-semibold w-full lg:w-[800px] mx-auto">
-				If 3.5% of your country’s businesses accepted Bitcoin, the adoption path to 100% is
-				inevitable. Bitcoin communities are the spark that ignites the movement. Join your friends,
-				onboard businesses and have fun! The party is just getting started.
+				Take ownership of your local bitcoin mapping data and help drive adoption. Bitcoin
+				communities are the spark that ignites the movement. Join your friends, onboard businesses
+				and have fun!
 			</h2>
 
 			<PrimaryButton
