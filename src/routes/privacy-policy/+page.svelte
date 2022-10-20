@@ -19,14 +19,7 @@
 
 			<div class="text-body text-xl space-y-5">
 				<h2 class="text-primary text-3xl font-semibold">Forms</h2>
-				<p>
-					What happens when you submit an <a href="/add-location" class="text-link hover:text-hover"
-						>Add Location</a
-					>
-					or
-					<a href="/report-outdated-info" class="text-link hover:text-hover">Report Outdated Info</a
-					> form:
-				</p>
+				<p>What happens when you submit a form on our website:</p>
 				<ol class="list-decimal space-y-2 ml-5">
 					<li>
 						An issue is automatically created in our <a
@@ -44,7 +37,7 @@
 						If the submission is valid, it is added to <a
 							href="https://www.openstreetmap.org"
 							class="text-link hover:text-hover">OpenStreetMap</a
-						> by a BTC Map contributor.
+						> by a BTC Map contributor and will appear in our apps.
 					</li>
 				</ol>
 				<p>
@@ -71,8 +64,8 @@
 					</li>
 				</ul>
 				<p>
-					By submitting information through one of the above mentioned forms you are agreeing to
-					this information being used publicly.
+					By submitting information through one of our forms you are agreeing that this information
+					will be used publicly.
 				</p>
 				<p><strong>Do not</strong> submit any personal or private information.</p>
 				<p>
@@ -162,7 +155,7 @@
 
 			<div class="text-body text-xl space-y-5">
 				<h2 class="text-primary text-3xl font-semibold">Changes to this Privacy Policy</h2>
-				<p>This privacy policy was last updated: October 7, 2022.</p>
+				<p>This privacy policy was last updated: October 20, 2022.</p>
 			</div>
 
 			<div class="text-body text-xl space-y-5">
