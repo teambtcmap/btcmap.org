@@ -7,7 +7,7 @@
 	import { Header, Footer, PrimaryButton } from '$comp';
 	import { socials, elements, elementError, reportShowMap } from '$lib/store';
 	import { checkAddress } from '$lib/map/setup';
-	import { errToast } from '$lib/utils';
+	import { errToast, successToast } from '$lib/utils';
 
 	let name = $page.url.searchParams.has('name') ? $page.url.searchParams.get('name') : '';
 	let lat = $page.url.searchParams.has('lat') ? $page.url.searchParams.get('lat') : '';
@@ -192,7 +192,7 @@
 					document.querySelector('#zoomout').src = '/icons/minus.svg';
 				};
 
-				// handle success
+				// create marker cluster group
 				let markers = L.markerClusterGroup();
 
 				// add location information
@@ -295,6 +295,7 @@
 							location = lat && long ? `https://btcmap.org/map?lat=${lat}&long=${long}` : '';
 							edit = `https://www.openstreetmap.org/edit?${element.type}=${element.id}`;
 							selected = true;
+							successToast('Location selected!');
 						}
 					});
 
@@ -326,7 +327,7 @@
 
 			<section id="report" class="mx-auto w-full md:w-[600px] mt-16 pb-20 md:pb-32">
 				<h2 class="text-primary text-3xl font-semibold mb-5 text-center">
-					Report outdated information<br />
+					Report Outdated Information<br />
 					<span class="text-base font-normal"
 						>(Merchant no longer accepts bitcoin or other data is incorrect.)</span
 					>

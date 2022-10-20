@@ -4,10 +4,10 @@
 	export let tags;
 
 	$: image = tags['icon:square'] && tags['icon:square'];
-	$: discord = tags['contact:discord'] && tags['contact:discord'];
-	$: telegram = tags['contact:telegram'] && tags['contact:telegram'];
-	$: twitter = tags['contact:twitter'] && tags['contact:twitter'];
 	$: website = tags['contact:website'] && tags['contact:website'];
+	$: twitter = tags['contact:twitter'] && tags['contact:twitter'];
+	$: telegram = tags['contact:telegram'] && tags['contact:telegram'];
+	$: discord = tags['contact:discord'] && tags['contact:discord'];
 	$: youtube = tags['contact:youtube'] && tags['contact:youtube'];
 </script>
 

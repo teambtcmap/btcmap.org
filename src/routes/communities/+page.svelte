@@ -67,8 +67,7 @@
 			<PrimaryButton
 				text="Add a local community"
 				style="w-[200px] mx-auto py-3 rounded-xl"
-				link={$socials.discord}
-				external
+				link="/communities/add"
 			/>
 
 			<section id="communities" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">

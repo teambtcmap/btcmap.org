@@ -9,3 +9,13 @@ export const errToast = (m) => {
 		}
 	});
 };
+
+export const successToast = (m) => {
+	toast.pop();
+
+	toast.push(m, {
+		theme: {
+			'--toastBarBackground': '#22C55E'
+		}
+	});
+};
