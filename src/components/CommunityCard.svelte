@@ -6,6 +6,7 @@
 	$: image = tags['icon:square'] && tags['icon:square'];
 	$: website = tags['contact:website'] && tags['contact:website'];
 	$: twitter = tags['contact:twitter'] && tags['contact:twitter'];
+	$: secondTwitter = tags['contact:second_twitter'] && tags['contact:second_twitter'];
 	$: telegram = tags['contact:telegram'] && tags['contact:telegram'];
 	$: discord = tags['contact:discord'] && tags['contact:discord'];
 	$: youtube = tags['contact:youtube'] && tags['contact:youtube'];
@@ -34,6 +35,11 @@
 		{/if}
 		{#if twitter}
 			<a href={twitter} target="_blank" rel="noreferrer" class="m-1">
+				<img src="/icons/socials/twitter.svg" alt="twitter" />
+			</a>
+		{/if}
+		{#if secondTwitter}
+			<a href={secondTwitter} target="_blank" rel="noreferrer" class="m-1">
 				<img src="/icons/socials/twitter.svg" alt="twitter" />
 			</a>
 		{/if}
