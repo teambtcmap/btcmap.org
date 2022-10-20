@@ -41,7 +41,7 @@
 					});
 			};
 			communitiesAPI();
-			communitiesAPIInterval = setInterval(communitiesAPI, 10000);
+			communitiesAPIInterval = setInterval(communitiesAPI, 600000);
 		}
 	});
 
