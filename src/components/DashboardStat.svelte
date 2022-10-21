@@ -9,7 +9,7 @@
 </script>
 
 <div class="space-y-5 p-5 {border}">
-	<h3 class="text-center md:text-left text-primary text-2xl md:h-[64px]">
+	<h3 class="text-center md:text-left text-primary text-xl md:h-[56px]">
 		{title}
 		{#if title === 'Number of communities'}
 			<a href="/communities"><i class="fa-solid fa-circle-info text-base" /></a>
