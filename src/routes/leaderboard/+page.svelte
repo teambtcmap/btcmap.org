@@ -137,10 +137,10 @@
 					<TopButton />
 				</div>
 			</section>
+
+			<Footer />
 		</div>
 	</main>
-
-	<Footer />
 </div>
 
 <style>
