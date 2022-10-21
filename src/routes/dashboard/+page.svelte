@@ -185,7 +185,7 @@
 					.get('https://api.btcmap.org/v2/areas')
 					.then(function (response) {
 						// handle success
-						communities = response.data.filter((area) => area.tags.type !== 'country');
+						communities = response.data.filter((area) => area.tags.type === 'community');
 						communities = communities;
 					})
 					.catch(function (error) {

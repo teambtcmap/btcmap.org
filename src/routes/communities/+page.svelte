@@ -17,7 +17,14 @@
 					.then(function (response) {
 						// handle success
 						communities = response.data.filter(
-							(area) => area.tags.type && area.tags.type !== 'country'
+							(area) =>
+								area.tags.type === 'community' &&
+								area.tags['box:east'] &&
+								area.tags['box:north'] &&
+								area.tags['box:south'] &&
+								area.tags['box:west'] &&
+								area.tags.name &&
+								area.tags['contact:discord']
 						);
 
 						communities.sort((a, b) => {
