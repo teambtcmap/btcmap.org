@@ -214,7 +214,7 @@
 						// marker popup component
 						`${
 							element.tags.name
-								? `<span class='block font-bold text-lg text-primary' title='Merchant name'>${element.tags.name}</span>`
+								? `<span class='block font-bold text-lg text-primary break-all leading-snug' title='Merchant name'>${element.tags.name}</span>`
 								: ''
 						}
 
@@ -251,7 +251,7 @@
 										element.tags['payment:onchain'] === 'yes'
 											? '/icons/btc-highlight.svg'
 											: '/icons/btc.svg'
-									} alt="bitcoin" class="w-6 h-6" title="${
+									} alt="bitcoin" class="w-7 h-7" title="${
 							element.tags['payment:onchain'] === 'yes' ? 'On-chain accepted' : 'On-chain unknown'
 						}"/>
 
@@ -259,7 +259,7 @@
 										element.tags['payment:lightning'] === 'yes'
 											? '/icons/ln-highlight.svg'
 											: '/icons/ln.svg'
-									} alt="lightning" class="w-6 h-6" title="${
+									} alt="lightning" class="w-7 h-7" title="${
 							element.tags['payment:lightning'] === 'yes'
 								? 'Lightning accepted'
 								: 'Lightning unknown'
@@ -269,7 +269,7 @@
 										element.tags['payment:lightning_contactless'] === 'yes'
 											? '/icons/nfc-highlight.svg'
 											: '/icons/nfc.svg'
-									} alt="nfc" class="w-6 h-6" title="${
+									} alt="nfc" class="w-7 h-7" title="${
 							element.tags['payment:lightning_contactless'] === 'yes'
 								? 'Lightning Contactless accepted'
 								: 'Lightning Contactless unknown'
@@ -282,7 +282,8 @@
 										? `${element.tags['survey:date']}`
 										: '<span class="fa-solid fa-question"></span>'
 								}
-								</span>`
+								</span>`,
+						{ closeButton: false }
 					);
 
 					// add marker click event

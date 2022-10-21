@@ -395,7 +395,7 @@ Thanks for using BTC Map!`);
 						// marker popup component
 						`${
 							element.tags.name
-								? `<span class='block font-bold text-lg text-primary' title='Merchant name'>${element.tags.name}</span>`
+								? `<span class='block font-bold text-lg text-primary break-all leading-snug' title='Merchant name'>${element.tags.name}</span>`
 								: ''
 						}
 
@@ -430,7 +430,7 @@ Thanks for using BTC Map!`);
 											: element.tags['payment:onchain'] === 'no'
 											? '/icons/btc-no.svg'
 											: '/icons/btc.svg'
-									} alt="bitcoin" class="w-6 h-6" title="${
+									} alt="bitcoin" class="w-7 h-7" title="${
 							element.tags['payment:onchain'] === 'yes'
 								? 'On-chain accepted'
 								: element.tags['payment:onchain'] === 'no'
@@ -444,7 +444,7 @@ Thanks for using BTC Map!`);
 											: element.tags['payment:lightning'] === 'no'
 											? '/icons/ln-no.svg'
 											: '/icons/ln.svg'
-									} alt="lightning" class="w-6 h-6" title="${
+									} alt="lightning" class="w-7 h-7" title="${
 							element.tags['payment:lightning'] === 'yes'
 								? 'Lightning accepted'
 								: element.tags['payment:lightning'] === 'no'
@@ -458,7 +458,7 @@ Thanks for using BTC Map!`);
 											: element.tags['payment:lightning_contactless'] === 'no'
 											? '/icons/nfc-no.svg'
 											: '/icons/nfc.svg'
-									} alt="nfc" class="w-6 h-6" title="${
+									} alt="nfc" class="w-7 h-7" title="${
 							element.tags['payment:lightning_contactless'] === 'yes'
 								? 'Lightning Contactless accepted'
 								: element.tags['payment:lightning_contactless'] === 'no'
@@ -487,9 +487,10 @@ Thanks for using BTC Map!`);
 										target="_blank"
 										rel="noreferrer"
 										title="Map legend">
-										<span class="fa-solid fa-circle-info text-xs text-link hover:text-hover"></span>
+										<span class="fa-solid fa-circle-info text-sm text-link hover:text-hover"></span>
 									</a>
-								</div>`
+								</div>`,
+						{ closeButton: false }
 					);
 
 					markers.addLayer(marker);
