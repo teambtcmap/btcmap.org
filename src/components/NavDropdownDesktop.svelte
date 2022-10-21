@@ -2,7 +2,6 @@
 	import { OutClick } from '$comp';
 
 	export let title;
-	export let width;
 	export let links;
 	export let top;
 
@@ -25,15 +24,22 @@
 			excludeByQuerySelector={[`#dropdown-${title.toLowerCase()}`]}
 			on:outclick={() => (show = false)}
 		>
-			<div class="{width} absolute top-8 right-0 rounded-2xl shadow-lg">
+			<div class="w-[155px] absolute top-8 right-0 rounded-2xl shadow-lg">
 				{#each links as link}
 					<a
 						href={link.url}
-						class="text-center p-4 block bg-link hover:bg-hover text-white text-xl font-semibold {link.icon ===
+						target={link.external ? '_blank' : '_self'}
+						rel="noreferrer"
+						class="p-4 block bg-link hover:bg-hover text-white text-xl font-semibold flex justify-center items-center {link.icon ===
 						top
 							? 'rounded-t-2xl'
-							: 'rounded-b-2xl'}">{link.title}</a
+							: 'rounded-b-2xl'}"
 					>
+						{link.title}
+						{#if link.external}
+							<i class="ml-1 w-4 h-4 fa-solid fa-arrow-up-right-from-square" />
+						{/if}
+					</a>
 				{/each}
 			</div>
 		</OutClick>

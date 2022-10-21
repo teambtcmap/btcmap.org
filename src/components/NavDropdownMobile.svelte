@@ -30,13 +30,21 @@
 	>
 		<div class="ml-7 space-y-2">
 			{#each links as link}
-				<a href={link.url} class="w-full text-link text-xl flex items-center">
+				<a
+					href={link.url}
+					target={link.external ? '_blank' : '_self'}
+					rel="noreferrer"
+					class="w-full text-link text-xl flex items-center"
+				>
 					<img
 						src="/icons/mobile-nav/{link.icon}.svg"
 						alt={link.icon}
 						class="mr-4 bg-mobileButtons active:bg-mobileButtonsActive rounded-full p-3"
 					/>
 					<span>{link.title}</span>
+					{#if link.external}
+						<i class="ml-1 w-4 h-4 fa-solid fa-arrow-up-right-from-square" />
+					{/if}
 				</a>
 			{/each}
 		</div>

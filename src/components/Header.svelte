@@ -9,8 +9,7 @@
 		{ title: 'Communities', url: '/communities', icon: 'communities' },
 		{
 			title: 'Wiki',
-			url: 'https://github.com/teambtcmap/btcmap-data/wiki',
-			external: true,
+			url: '',
 			icon: 'wiki'
 		},
 		{ title: 'Support Us', url: '/support-us', icon: 'support' }
@@ -24,6 +23,21 @@
 	const statsDropdownLinks = [
 		{ title: 'Dashboard', url: '/dashboard', icon: 'dash' },
 		{ title: 'Leaderboard', url: '/leaderboard', icon: 'leader' }
+	];
+
+	const wikiDropdownLinks = [
+		{
+			title: 'General',
+			url: 'https://github.com/teambtcmap/btcmap-data/wiki',
+			icon: 'general',
+			external: true
+		},
+		{
+			title: 'API',
+			url: 'https://github.com/teambtcmap/btcmap-api/wiki',
+			icon: 'api',
+			external: true
+		}
 	];
 
 	let showMobileMenu = false;
@@ -41,27 +55,19 @@
 		{#each navLinks as link}
 			<!-- dropdown menu -->
 			{#if link.title === 'Contribute'}
-				<NavDropdownDesktop
-					title={link.title}
-					width="w-[153px]"
-					links={contributeDropdownLinks}
-					top="add"
-				/>
+				<NavDropdownDesktop title={link.title} links={contributeDropdownLinks} top="add" />
 
 				<!-- dropdown menu -->
 			{:else if link.title === 'Stats'}
 				<NavDropdownDesktop title={link.title} links={statsDropdownLinks} top="dash" />
+
+				<!-- dropdown menu -->
+			{:else if link.title === 'Wiki'}
+				<NavDropdownDesktop title={link.title} links={wikiDropdownLinks} top="general" />
 			{:else}
 				<!-- regular links -->
-				<a
-					href={link.url}
-					target={link.external ? '_blank' : '_self'}
-					rel="noreferrer"
-					class="mr-4 mt-4 md:mr-0 md:mt-0 text-link hover:text-hover text-xl font-semibold flex items-center"
+				<a href={link.url} class="text-link hover:text-hover text-xl font-semibold"
 					>{link.title}
-					{#if link.external}
-						<i class="ml-1 w-4 h-4 fa-solid fa-arrow-up-right-from-square" />
-					{/if}
 				</a>
 			{/if}
 		{/each}
@@ -103,23 +109,19 @@
 			{:else if link.title === 'Stats'}
 				<NavDropdownMobile title={link.title} icon={link.icon} links={statsDropdownLinks} />
 
+				<!-- dropdown menu -->
+			{:else if link.title === 'Wiki'}
+				<NavDropdownMobile title={link.title} icon={link.icon} links={wikiDropdownLinks} />
+
 				<!-- regular links -->
 			{:else}
-				<a
-					href={link.url}
-					target={link.external ? '_blank' : '_self'}
-					rel="noreferrer"
-					class="w-full text-link text-xl flex items-center"
-				>
+				<a href={link.url} class="w-full text-link text-xl flex items-center">
 					<img
 						src="/icons/mobile-nav/{link.icon}.svg"
 						alt={link.icon}
 						class="mr-4 bg-mobileButtons active:bg-mobileButtonsActive rounded-full p-3"
 					/>
 					<span>{link.title}</span>
-					{#if link.external}
-						<i class="ml-1 w-4 h-4 fa-solid fa-arrow-up-right-from-square" />
-					{/if}
 				</a>
 			{/if}
 		{/each}
