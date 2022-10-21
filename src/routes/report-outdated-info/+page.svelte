@@ -4,7 +4,7 @@
 	import { page } from '$app/stores';
 	import axios from 'axios';
 	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
-	import { Header, Footer, PrimaryButton } from '$comp';
+	import { Header, Footer, PrimaryButton, MapLoading } from '$comp';
 	import { socials, elements, elementError, reportShowMap } from '$lib/store';
 	import { checkAddress } from '$lib/map/setup';
 	import { errToast } from '$lib/utils';
@@ -95,6 +95,7 @@
 	let map;
 	let showMap = !name || !lat || !long || !edit ? true : false;
 	$reportShowMap = showMap;
+	let mapLoaded;
 
 	// alert for map errors
 	$: $elementError && showMap && errToast($elementError);
@@ -303,6 +304,8 @@
 				});
 
 				map.addLayer(markers);
+
+				mapLoaded = true;
 			}
 		}
 	});
@@ -358,11 +361,17 @@
 							{:else if noLocationSelected}
 								<span class="text-error font-semibold">Please select a location...</span>
 							{/if}
-							<div
-								bind:this={mapElement}
-								class="z-10 !cursor-crosshair border-2 border-input mb-2 rounded-2xl h-[300px] md:h-[450px]"
-							/>
+							<div class="relative mb-2">
+								<div
+									bind:this={mapElement}
+									class="z-10 !cursor-crosshair border-2 border-input rounded-2xl h-[300px] md:h-[450px]"
+								/>
+								{#if !mapLoaded}
+									<MapLoading type="embed" style="h-[300px] md:h-[450px]" />
+								{/if}
+							</div>
 						</div>
+
 						<input
 							required
 							disabled
@@ -378,7 +387,7 @@
 					<div>
 						<label for="outdated" class="mb-2 block font-semibold">Outdated information</label>
 						<textarea
-							disabled={!captchaSecret}
+							disabled={!captchaSecret || (showMap && !mapLoaded)}
 							required
 							name="outdated"
 							placeholder="Provide what info is incorrect"
@@ -391,7 +400,7 @@
 					<div>
 						<label for="current" class="mb-2 block font-semibold">Current information</label>
 						<textarea
-							disabled={!captchaSecret}
+							disabled={!captchaSecret || (showMap && !mapLoaded)}
 							required
 							name="current"
 							placeholder="Provide the updated info on this location"
@@ -404,7 +413,7 @@
 					<div>
 						<label for="verify" class="mb-2 block font-semibold">How did you verify this?</label>
 						<textarea
-							disabled={!captchaSecret}
+							disabled={!captchaSecret || (showMap && !mapLoaded)}
 							required
 							name="verify"
 							placeholder="Please provide additional info here"
@@ -430,10 +439,10 @@
 								bind:this={captcha}
 								class="border-2 border-input rounded-2xl flex justify-center items-center py-1"
 							>
-								<div class="w-[275px] h-[100px] bg-link/50 animate-pulse rounded-xl" />
+								<div class="w-[275px] h-[100px] bg-link/50 animate-pulse" />
 							</div>
 							<input
-								disabled={!captchaSecret}
+								disabled={!captchaSecret || (showMap && !mapLoaded)}
 								required
 								type="text"
 								name="captcha"
@@ -454,7 +463,7 @@
 
 					<PrimaryButton
 						loading={submitting}
-						disabled={submitting || !captchaSecret}
+						disabled={submitting || !captchaSecret || (showMap && !mapLoaded)}
 						text="Submit Report"
 						style="w-full py-3 rounded-xl"
 					/>

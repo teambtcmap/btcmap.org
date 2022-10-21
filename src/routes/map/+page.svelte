@@ -512,7 +512,7 @@ Thanks for using BTC Map!`);
 
 <main>
 	{#if !mapLoaded}
-		<MapLoading message="Rendering map..." style="absolute top-0 left-0 z-[10000]" />
+		<MapLoading type="main" message="Rendering map..." style="absolute top-0 left-0 z-[10000]" />
 	{/if}
 	<div bind:this={mapElement} class="h-[100vh]" />
 </main>

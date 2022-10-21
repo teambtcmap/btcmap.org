@@ -3,7 +3,7 @@
 	import { browser } from '$app/environment';
 	import axios from 'axios';
 	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
-	import { Header, Footer, PrimaryButton } from '$comp';
+	import { Header, Footer, PrimaryButton, MapLoading } from '$comp';
 	import { socials } from '$lib/store';
 	import { errToast, successToast } from '$lib/utils';
 
@@ -88,6 +88,7 @@
 	// location picker map
 	let mapElement;
 	let map;
+	let mapLoaded;
 
 	onMount(async () => {
 		if (browser) {
@@ -204,6 +205,8 @@
 			});
 
 			map.addControl(new customFullScreenButton());
+
+			mapLoaded = true;
 		}
 	});
 
@@ -251,16 +254,21 @@
 							{:else if noLocationSelected}
 								<span class="text-error font-semibold">Please set a location...</span>
 							{/if}
-							<div
-								bind:this={mapElement}
-								class="z-10 border-2 border-input mb-2 rounded-2xl h-[300px] md:h-[450px]"
-							/>
+							<div class="relative mb-2">
+								<div
+									bind:this={mapElement}
+									class="z-10 border-2 border-input rounded-2xl h-[300px] md:h-[450px]"
+								/>
+								{#if !mapLoaded}
+									<MapLoading type="embed" style="h-[300px] md:h-[450px]" />
+								{/if}
+							</div>
 						</div>
 
 						<PrimaryButton
 							type="button"
 							click={setLocation}
-							disabled={!captchaSecret}
+							disabled={!captchaSecret || !mapLoaded}
 							text="Set Location"
 							style="w-full py-3 rounded-xl"
 						/>
@@ -269,7 +277,7 @@
 					<div>
 						<label for="name" class="mb-2 block font-semibold">Community Name</label>
 						<input
-							disabled={!captchaSecret}
+							disabled={!captchaSecret || !mapLoaded}
 							type="text"
 							name="name"
 							placeholder="Bitcoin Island Philippines"
@@ -288,7 +296,7 @@
 							provided.
 						</p>
 						<input
-							disabled={!captchaSecret}
+							disabled={!captchaSecret || !mapLoaded}
 							type="url"
 							name="icon"
 							placeholder="https://btcmap.org/images/communities/iom.svg"
@@ -305,7 +313,7 @@
 							We will create your very own Discord channel on our server for community discussions.
 						</p>
 						<textarea
-							disabled={!captchaSecret}
+							disabled={!captchaSecret || !mapLoaded}
 							name="socials"
 							placeholder="Website, Twitter, Telegram, Matrix etc."
 							rows="5"
@@ -321,7 +329,7 @@
 						</p>
 						<input
 							required
-							disabled={!captchaSecret}
+							disabled={!captchaSecret || !mapLoaded}
 							type="text"
 							name="contact"
 							placeholder="hello@btcmap.org"
@@ -346,10 +354,10 @@
 								bind:this={captcha}
 								class="border-2 border-input rounded-2xl flex justify-center items-center py-1"
 							>
-								<div class="w-[275px] h-[100px] bg-link/50 animate-pulse rounded-xl" />
+								<div class="w-[275px] h-[100px] bg-link/50 animate-pulse" />
 							</div>
 							<input
-								disabled={!captchaSecret}
+								disabled={!captchaSecret || !mapLoaded}
 								required
 								type="text"
 								name="captcha"
@@ -370,7 +378,7 @@
 
 					<PrimaryButton
 						loading={submitting}
-						disabled={submitting || !captchaSecret}
+						disabled={submitting || !captchaSecret || !mapLoaded}
 						text="Submit Community"
 						style="w-full py-3 rounded-xl"
 					/>

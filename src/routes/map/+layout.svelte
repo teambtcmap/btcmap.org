@@ -13,5 +13,5 @@
 {#if ($elements && $elements.length) || $elementError}
 	<slot />
 {:else}
-	<MapLoading message={$mapLoading} />
+	<MapLoading type="main" message={$mapLoading} />
 {/if}

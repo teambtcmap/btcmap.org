@@ -3,7 +3,7 @@
 	import { browser } from '$app/environment';
 	import axios from 'axios';
 	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
-	import { Header, Footer, PrimaryButton } from '$comp';
+	import { Header, Footer, PrimaryButton, MapLoading } from '$comp';
 	import { socials } from '$lib/store';
 	import { errToast } from '$lib/utils';
 
@@ -117,6 +117,7 @@
 	// location picker map
 	let mapElement;
 	let map;
+	let mapLoaded;
 
 	onMount(async () => {
 		if (browser) {
@@ -205,6 +206,8 @@
 			zoomOut.onmouseleave = () => {
 				document.querySelector('#zoomout').src = '/icons/minus.svg';
 			};
+
+			mapLoaded = true;
 		}
 	});
 
@@ -248,7 +251,7 @@
 							<div>
 								<label for="name" class="mb-2 block font-semibold">Merchant Name</label>
 								<input
-									disabled={!captchaSecret}
+									disabled={!captchaSecret || !mapLoaded}
 									type="text"
 									name="name"
 									placeholder="Satoshi's Comics"
@@ -261,7 +264,7 @@
 							<div>
 								<label for="address" class="mb-2 block font-semibold">Address</label>
 								<input
-									disabled={!captchaSecret}
+									disabled={!captchaSecret || !mapLoaded}
 									type="text"
 									name="address"
 									placeholder="2100 Freedom Drive..."
@@ -279,10 +282,15 @@
 								{:else if noLocationSelected}
 									<span class="text-error font-semibold">Please select a location...</span>
 								{/if}
-								<div
-									bind:this={mapElement}
-									class="z-10 !cursor-crosshair border-2 border-input mb-2 rounded-2xl h-[300px]"
-								/>
+								<div class="relative mb-2">
+									<div
+										bind:this={mapElement}
+										class="z-10 !cursor-crosshair border-2 border-input rounded-2xl h-[300px]"
+									/>
+									{#if !mapLoaded}
+										<MapLoading type="embed" style="h-[300px]" />
+									{/if}
+								</div>
 								<div class="flex space-x-2">
 									<input
 										required
@@ -310,7 +318,7 @@
 							<div>
 								<label for="category" class="mb-2 block font-semibold">Category</label>
 								<input
-									disabled={!captchaSecret}
+									disabled={!captchaSecret || !mapLoaded}
 									required
 									type="text"
 									name="category"
@@ -328,7 +336,7 @@
 								<div class="space-y-4">
 									<div>
 										<input
-											disabled={!captchaSecret}
+											disabled={!captchaSecret || !mapLoaded}
 											type="checkbox"
 											name="onchain"
 											id="onchain"
@@ -341,7 +349,7 @@
 									</div>
 									<div>
 										<input
-											disabled={!captchaSecret}
+											disabled={!captchaSecret || !mapLoaded}
 											type="checkbox"
 											name="lightning"
 											id="lightning"
@@ -354,7 +362,7 @@
 									</div>
 									<div>
 										<input
-											disabled={!captchaSecret}
+											disabled={!captchaSecret || !mapLoaded}
 											type="checkbox"
 											name="nfc"
 											id="nfc"
@@ -374,7 +382,7 @@
 								>
 								<div class="flex space-x-2">
 									<input
-										disabled={!captchaSecret}
+										disabled={!captchaSecret || !mapLoaded}
 										type="text"
 										name="twitter"
 										placeholder="Merchant"
@@ -382,7 +390,7 @@
 										bind:this={twitterMerchant}
 									/>
 									<input
-										disabled={!captchaSecret}
+										disabled={!captchaSecret || !mapLoaded}
 										type="text"
 										name="twitter"
 										placeholder="Submitter"
@@ -397,7 +405,7 @@
 									>Notes <span class="font-normal">(optional)</span></label
 								>
 								<textarea
-									disabled={!captchaSecret}
+									disabled={!captchaSecret || !mapLoaded}
 									name="notes"
 									placeholder="Any other relevant details? Website URL, phone number etc."
 									rows="5"
@@ -422,10 +430,10 @@
 										bind:this={captcha}
 										class="border-2 border-input rounded-2xl flex justify-center items-center py-1"
 									>
-										<div class="w-[275px] h-[100px] bg-link/50 animate-pulse rounded-xl" />
+										<div class="w-[275px] h-[100px] bg-link/50 animate-pulse" />
 									</div>
 									<input
-										disabled={!captchaSecret}
+										disabled={!captchaSecret || !mapLoaded}
 										required
 										type="text"
 										name="captcha"
@@ -446,7 +454,7 @@
 
 							<PrimaryButton
 								loading={submitting}
-								disabled={submitting || !captchaSecret}
+								disabled={submitting || !captchaSecret || !mapLoaded}
 								text="Submit Location"
 								style="w-full py-3 rounded-xl"
 							/>

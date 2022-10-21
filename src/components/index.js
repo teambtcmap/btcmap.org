@@ -17,3 +17,4 @@ export { default as CommunityCard } from './CommunityCard.svelte';
 export { default as CommunitySkeleton } from './CommunitySkeleton.svelte';
 export { default as NavDropdownDesktop } from './NavDropdownDesktop.svelte';
 export { default as NavDropdownMobile } from './NavDropdownMobile.svelte';
+export { default as LoadingSpinner } from './LoadingSpinner.svelte';
