@@ -16,7 +16,9 @@
 					.get('https://api.btcmap.org/v2/areas')
 					.then(function (response) {
 						// handle success
-						communities = response.data.filter((area) => area.tags.type !== 'country');
+						communities = response.data.filter(
+							(area) => area.tags.type && area.tags.type !== 'country'
+						);
 
 						communities.sort((a, b) => {
 							const nameA = a.tags.name.toUpperCase(); // ignore upper and lowercase
