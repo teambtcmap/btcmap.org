@@ -11,7 +11,7 @@ export async function GET({ params }) {
 	if (data) {
 		throw redirect(
 			302,
-			`/map?lat=${data['min_lat']}&long=${data['min_lon']}&lat=${data['max_lat']}&long=${data['max_lon']}`
+			`/map?lat=${data.tags['box:south']}&long=${data.tags['box:west']}&lat=${data.tags['box:north']}&long=${data.tags['box:east']}`
 		);
 	}
 

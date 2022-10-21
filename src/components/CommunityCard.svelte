@@ -1,5 +1,4 @@
 <script>
-	export let name;
 	export let id;
 	export let tags;
 
@@ -17,11 +16,11 @@
 		<a href="/community/{id}" class="text-link hover:text-hover space-y-2">
 			<img
 				src={image ? image : '/images/communities/bitcoin.svg'}
-				alt={name}
+				alt={tags.name}
 				class="w-20 h-20 object-cover rounded-full mx-auto"
 			/>
 
-			<span class="text-center text-lg font-semibold block">{name}</span>
+			<span class="text-center text-lg font-semibold block">{tags.name}</span>
 		</a>
 	</div>
 

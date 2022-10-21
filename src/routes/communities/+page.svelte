@@ -16,11 +16,11 @@
 					.get('https://api.btcmap.org/v2/areas')
 					.then(function (response) {
 						// handle success
-						communities = response.data.filter((area) => area.type !== 'country');
+						communities = response.data.filter((area) => area.tags.type !== 'country');
 
 						communities.sort((a, b) => {
-							const nameA = a.name.toUpperCase(); // ignore upper and lowercase
-							const nameB = b.name.toUpperCase(); // ignore upper and lowercase
+							const nameA = a.tags.name.toUpperCase(); // ignore upper and lowercase
+							const nameB = b.tags.name.toUpperCase(); // ignore upper and lowercase
 							if (nameA < nameB) {
 								return -1;
 							}
@@ -73,7 +73,7 @@
 			<section id="communities" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
 				{#if communities && communities.length}
 					{#each communities as community}
-						<CommunityCard name={community.name} id={community.id} tags={community.tags} />
+						<CommunityCard id={community.id} tags={community.tags} />
 					{/each}
 				{:else}
 					{#each Array(10) as skeleton}

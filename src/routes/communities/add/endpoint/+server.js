@@ -45,10 +45,10 @@ export async function POST({ request }) {
 			{
 				title: name,
 				body: `Community name: ${name}
-Min lat: ${location.minLat}
-Min long: ${location.minLong}
-Max lat: ${location.maxLat}
-Max long: ${location.maxLong}
+South: ${location.minLat}
+West: ${location.minLong}
+North: ${location.maxLat}
+East: ${location.maxLong}
 Icon URL: ${icon}
 Social links: ${socialLinks}
 Community leader contact: ${contact}

@@ -49,6 +49,8 @@
 							: undefined;
 
 					event.location = location ? location : 'Unnamed element';
+					event.lat = elementMatch['osm_json'].lat;
+					event.long = elementMatch['osm_json'].lon;
 
 					supertaggers.push(event);
 				}
@@ -183,7 +185,7 @@
 					.get('https://api.btcmap.org/v2/areas')
 					.then(function (response) {
 						// handle success
-						communities = response.data.filter((area) => area.type !== 'country');
+						communities = response.data.filter((area) => area.tags.type !== 'country');
 						communities = communities;
 					})
 					.catch(function (error) {
@@ -308,8 +310,8 @@
 									user={findUser(tagger)}
 									time={tagger.date}
 									latest={tagger === supertaggers[0] ? true : false}
-									lat={tagger['element_lat']}
-									long={tagger['element_lon']}
+									lat={tagger.lat}
+									long={tagger.long}
 								/>
 							{/each}
 						{:else}
