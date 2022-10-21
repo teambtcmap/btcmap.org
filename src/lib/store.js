@@ -16,7 +16,6 @@ export const apps = readable({
 export const elements = writable([]);
 export const mapUpdates = writable(false);
 export const elementError = writable('');
-export const reportShowMap = writable();
 export const mapLoading = writable('Loading map...');
 
 export const users = writable([]);

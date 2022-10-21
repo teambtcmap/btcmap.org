@@ -1,5 +1,5 @@
 <script>
-	import { elements, elementError, reportShowMap } from '$lib/store';
+	import { elements, elementError } from '$lib/store';
 </script>
 
 <svelte:head>
@@ -9,6 +9,6 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/edit.png" />
 </svelte:head>
 
-{#if ($elements && $elements.length) || $elementError || !$reportShowMap}
+{#if ($elements && $elements.length) || $elementError}
 	<slot />
 {/if}

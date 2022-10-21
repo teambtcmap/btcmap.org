@@ -5,7 +5,7 @@
 	import axios from 'axios';
 	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
 	import { Header, Footer, PrimaryButton, MapLoading } from '$comp';
-	import { socials, elements, elementError, reportShowMap } from '$lib/store';
+	import { socials, elements, elementError } from '$lib/store';
 	import { checkAddress } from '$lib/map/setup';
 	import { errToast } from '$lib/utils';
 
@@ -94,7 +94,6 @@
 	let mapElement;
 	let map;
 	let showMap = !name || !lat || !long || !edit ? true : false;
-	$reportShowMap = showMap;
 	let mapLoaded;
 
 	// alert for map errors
