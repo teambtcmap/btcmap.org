@@ -44,6 +44,6 @@
 			</section>
 		</main>
 
-		<Footer style="justify-center" />
+		<Footer />
 	</div>
 </div>

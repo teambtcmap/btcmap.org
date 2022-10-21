@@ -1,6 +1,6 @@
 <script>
 	import { page } from '$app/stores';
-	import { SocialLink } from '$comp';
+	import { Footer } from '$comp';
 	import { socials } from '$lib/store';
 </script>
 
@@ -20,10 +20,6 @@
 			<h2 class="text-xl text-primary font-semibold">Please try again or contact BTC Map.</h2>
 		</div>
 
-		<footer class="space-x-5 pb-5 flex justify-center">
-			<SocialLink url={$socials.twitter} social="twitter" />
-			<SocialLink url={$socials.discord} social="discord" />
-			<SocialLink url={$socials.github} social="github" />
-		</footer>
+		<Footer />
 	</div>
 </div>

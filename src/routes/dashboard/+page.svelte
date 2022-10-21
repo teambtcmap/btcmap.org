@@ -323,6 +323,6 @@
 			</section>
 		</main>
 
-		<Footer style="justify-center md:justify-start" />
+		<Footer />
 	</div>
 </div>

@@ -410,7 +410,7 @@
 			</div>
 		{/if}
 
-		<Footer style="justify-center" />
+		<Footer />
 	</div>
 </div>
 

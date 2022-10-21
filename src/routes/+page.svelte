@@ -56,7 +56,7 @@
 			/>
 		</section>
 
-		<Footer style="justify-center xl:justify-start" />
+		<Footer />
 	</div>
 </div>
 

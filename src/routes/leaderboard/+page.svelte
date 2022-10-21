@@ -140,7 +140,7 @@
 		</div>
 	</main>
 
-	<Footer style="justify-center" />
+	<Footer />
 </div>
 
 <style>

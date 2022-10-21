@@ -509,7 +509,7 @@
 			</div>
 		{/if}
 
-		<Footer style="justify-center lg:justify-start" />
+		<Footer />
 	</div>
 </div>
 
