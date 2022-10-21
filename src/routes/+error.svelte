@@ -1,8 +1,15 @@
 <script>
 	import { page } from '$app/stores';
-	import { Footer } from '$comp';
+	import { SocialLink } from '$comp';
 	import { socials } from '$lib/store';
 </script>
+
+<svelte:head>
+	<title>BTC Map</title>
+	<meta property="og:image" content="https://btcmap.org/images/og/home.png" />
+	<meta property="twitter:title" content="BTC Map" />
+	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
+</svelte:head>
 
 <div class="bg-teal">
 	<div class="w-10/12 xl:w-[1200px] mx-auto relative">
@@ -20,6 +27,10 @@
 			<h2 class="text-xl text-primary font-semibold">Please try again or contact BTC Map.</h2>
 		</div>
 
-		<Footer />
+		<footer class="space-x-5 pb-5 flex justify-center">
+			<SocialLink url={$socials.twitter} social="twitter" />
+			<SocialLink url={$socials.discord} social="discord" />
+			<SocialLink url={$socials.github} social="github" />
+		</footer>
 	</div>
 </div>

@@ -216,6 +216,13 @@
 	});
 </script>
 
+<svelte:head>
+	<title>BTC Map - Add Location</title>
+	<meta property="og:image" content="https://btcmap.org/images/og/add.png" />
+	<meta property="twitter:title" content="BTC Map - Add Location" />
+	<meta property="twitter:image" content="https://btcmap.org/images/og/add.png" />
+</svelte:head>
+
 <div class="bg-teal">
 	<Header />
 	<div class="w-10/12 xl:w-[1200px] mx-auto">

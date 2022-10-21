@@ -9,6 +9,13 @@
 	];
 </script>
 
+<svelte:head>
+	<title>BTC Map</title>
+	<meta property="og:image" content="https://btcmap.org/images/og/home.png" />
+	<meta property="twitter:title" content="BTC Map" />
+	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
+</svelte:head>
+
 <div class="bg-teal street-map">
 	<img src="/images/street-map.svg" alt="roads" class="xl:hidden absolute top-0 right-0" />
 	<Header />
