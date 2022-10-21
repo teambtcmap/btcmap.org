@@ -510,13 +510,6 @@ Thanks for using BTC Map!`);
 	});
 </script>
 
-<svelte:head>
-	<title>BTC Map</title>
-	<meta property="og:image" content="https://btcmap.org/images/og/map.png" />
-	<meta property="twitter:title" content="BTC Map" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/map.png" />
-</svelte:head>
-
 <main>
 	{#if !mapLoaded}
 		<MapLoading message="Rendering map..." style="absolute top-0 left-0 z-[10000]" />
