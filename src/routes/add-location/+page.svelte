@@ -5,7 +5,7 @@
 	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
 	import { Header, Footer, PrimaryButton } from '$comp';
 	import { socials } from '$lib/store';
-	import { errToast, successToast } from '$lib/utils';
+	import { errToast } from '$lib/utils';
 
 	let captcha;
 	let captchaSecret;
@@ -152,7 +152,6 @@
 					marker = L.marker([lat, long]).addTo(map);
 
 					selected = true;
-					successToast('Location selected!');
 				}
 			});
 

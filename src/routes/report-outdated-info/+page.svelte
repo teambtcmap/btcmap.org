@@ -7,7 +7,7 @@
 	import { Header, Footer, PrimaryButton } from '$comp';
 	import { socials, elements, elementError, reportShowMap } from '$lib/store';
 	import { checkAddress } from '$lib/map/setup';
-	import { errToast, successToast } from '$lib/utils';
+	import { errToast } from '$lib/utils';
 
 	let name = $page.url.searchParams.has('name') ? $page.url.searchParams.get('name') : '';
 	let lat = $page.url.searchParams.has('lat') ? $page.url.searchParams.get('lat') : '';
@@ -295,7 +295,6 @@
 							location = lat && long ? `https://btcmap.org/map?lat=${lat}&long=${long}` : '';
 							edit = `https://www.openstreetmap.org/edit?${element.type}=${element.id}`;
 							selected = true;
-							successToast('Location selected!');
 						}
 					});
 
@@ -360,7 +359,7 @@
 							{/if}
 							<div
 								bind:this={mapElement}
-								class="z-10 !cursor-crosshair border-2 border-input mb-2 rounded-2xl h-[450px]"
+								class="z-10 !cursor-crosshair border-2 border-input mb-2 rounded-2xl h-[300px] md:h-[450px]"
 							/>
 						</div>
 						<input

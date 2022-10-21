@@ -235,14 +235,14 @@
 				<form on:submit={submitForm} class="text-primary space-y-5 w-full">
 					<div>
 						<div>
-							<label for="location-picker" class="mb-2 block font-semibold">Select Location</label>
+							<label for="location-picker" class="mb-2 block font-semibold">Set Location</label>
 							<p class="text-sm mb-2">
 								Zoom and pan the map to the extent you want included in your community.
 							</p>
 							{#if selected}
 								<span class="text-green-500 font-semibold">Location set!</span>
 							{:else if noLocationSelected}
-								<span class="text-error font-semibold">Please select a location...</span>
+								<span class="text-error font-semibold">Please set a location...</span>
 							{/if}
 							<div
 								bind:this={mapElement}
