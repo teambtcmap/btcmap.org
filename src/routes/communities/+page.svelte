@@ -24,6 +24,7 @@
 								area.tags['box:south'] &&
 								area.tags['box:west'] &&
 								area.tags.name &&
+								area.tags['icon:square'] &&
 								area.tags['contact:discord']
 						);
 
