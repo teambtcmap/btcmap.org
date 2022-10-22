@@ -240,6 +240,12 @@
 											: ''
 									}
 
+						      ${
+										element.tags['contact:twitter']
+											? `<a href=https://twitter.com/${element.tags['contact:twitter']} target="_blank" rel="noreferrer" title='Twitter'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-brands fa-twitter" /></a>`
+											: ''
+									}
+
                   <a href='https://www.openstreetmap.org/edit?${element.type}=${
 							element.id
 						}' target="_blank" rel="noreferrer" title='Edit'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-pen-to-square" /></a>
