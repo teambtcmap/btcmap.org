@@ -242,7 +242,11 @@
 
 						      ${
 										element.tags['contact:twitter']
-											? `<a href=https://twitter.com/${element.tags['contact:twitter']} target="_blank" rel="noreferrer" title='Twitter'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-brands fa-twitter" /></a>`
+											? `<a href=${
+													element.tags['contact:twitter'].startsWith('http')
+														? element.tags['contact:twitter']
+														: `https://twitter.com/${element.tags['contact:twitter']}`
+											  } target="_blank" rel="noreferrer" title='Twitter'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-brands fa-twitter" /></a>`
 											: ''
 									}
 
