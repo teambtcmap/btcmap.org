@@ -1,4 +1,6 @@
 <script>
+	import { Tip } from '$comp';
+
 	export let id;
 	export let tags;
 
@@ -9,6 +11,7 @@
 	$: telegram = tags['contact:telegram'] && tags['contact:telegram'];
 	$: discord = tags['contact:discord'] && tags['contact:discord'];
 	$: youtube = tags['contact:youtube'] && tags['contact:youtube'];
+	$: tip = tags['tips:lightning_address'] && tags['tips:lightning_address'];
 </script>
 
 <div class="border border-statBorder rounded-3xl shadow hover:shadow-2xl transition-shadow">
@@ -20,7 +23,13 @@
 				class="w-20 h-20 object-cover rounded-full mx-auto"
 			/>
 
-			<span class="text-center text-lg font-semibold block">{tags.name}</span>
+			<span class="{!tip ? 'pb-[38px]' : ''} text-center text-lg font-semibold block"
+				>{tags.name}</span
+			>
+
+			{#if tip}
+				<Tip destination={tip} style="mx-auto block" />
+			{/if}
 		</a>
 	</div>
 
