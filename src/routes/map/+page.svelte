@@ -39,7 +39,50 @@
 			const leafletMarkerCluster = await import('leaflet.markercluster');
 
 			// add map and tiles
-			map = leaflet.map(mapElement).setView([0, 0], 3);
+			map = leaflet.map(mapElement);
+
+			// set URL lat/long query view if it exists and is valid
+			if (urlLat.length && urlLong.length) {
+				try {
+					if (urlLat.length > 1 && urlLong.length > 1)
+						map.fitBounds([
+							[urlLat[0], urlLong[0]],
+							[urlLat[1], urlLong[1]]
+						]);
+					else {
+						map.fitBounds([[urlLat[0], urlLong[0]]]);
+					}
+				} catch (error) {
+					map.setView([0, 0], 3);
+					errToast(
+						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
+					);
+					console.log(error);
+				}
+			}
+
+			// set view to last location if it is present in the cache
+			else {
+				localforage
+					.getItem('coords')
+					.then(function (value) {
+						if (value) {
+							map.fitBounds([
+								[value._northEast.lat, value._northEast.lng],
+								[value._southWest.lat, value._southWest.lng]
+							]);
+						} else {
+							map.setView([0, 0], 3);
+						}
+					})
+					.catch(function (err) {
+						map.setView([0, 0], 3);
+						errToast(
+							'Could not set map view to cached coords, please try again or contact BTC Map.'
+						);
+						console.log(err);
+					});
+			}
 
 			const osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				noWrap: true,
@@ -118,45 +161,6 @@
 			const layerControl = L.control.layers(baseMaps).addTo(map);
 
 			osm.addTo(map);
-
-			// set URL lat/long query view if it exists and is valid
-			if (urlLat.length && urlLong.length) {
-				try {
-					if (urlLat.length > 1 && urlLong.length > 1)
-						map.fitBounds([
-							[urlLat[0], urlLong[0]],
-							[urlLat[1], urlLong[1]]
-						]);
-					else {
-						map.fitBounds([[urlLat[0], urlLong[0]]]);
-					}
-				} catch (error) {
-					errToast(
-						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
-					);
-					console.log(error);
-				}
-			}
-
-			// set view to last location if it is present in the cache
-			else {
-				localforage
-					.getItem('coords')
-					.then(function (value) {
-						if (value) {
-							map.fitBounds([
-								[value._northEast.lat, value._northEast.lng],
-								[value._southWest.lat, value._southWest.lng]
-							]);
-						}
-					})
-					.catch(function (err) {
-						errToast(
-							'Could not set map view to cached coords, please try again or contact BTC Map.'
-						);
-						console.log(err);
-					});
-			}
 
 			// add click event to help devs find lat/long of desired location for iframe embeds
 			map.on('click', () => {
