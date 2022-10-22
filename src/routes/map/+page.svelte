@@ -1,4 +1,5 @@
 <script>
+	import localforage from 'localforage';
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
@@ -130,8 +131,31 @@
 						map.fitBounds([[urlLat[0], urlLong[0]]]);
 					}
 				} catch (error) {
+					errToast(
+						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
+					);
 					console.log(error);
 				}
+			}
+
+			// set view to last location if it is present in the cache
+			else {
+				localforage
+					.getItem('coords')
+					.then(function (value) {
+						if (value) {
+							map.fitBounds([
+								[value._northEast.lat, value._northEast.lng],
+								[value._southWest.lat, value._southWest.lng]
+							]);
+						}
+					})
+					.catch(function (err) {
+						errToast(
+							'Could not set map view to cached coords, please try again or contact BTC Map.'
+						);
+						console.log(err);
+					});
 			}
 
 			// add click event to help devs find lat/long of desired location for iframe embeds
@@ -139,6 +163,29 @@
 				const coords = map.getBounds();
 				console.log(`Here is your iframe embed URL: https://btcmap.org/map?lat=${coords._northEast.lat}&long=${coords._northEast.lng}&lat=${coords._southWest.lat}&long=${coords._southWest.lng}
 Thanks for using BTC Map!`);
+			});
+
+			// add events to cache last viewed location so it can be used on next map launch
+			map.on('zoomend', () => {
+				const coords = map.getBounds();
+
+				localforage
+					.setItem('coords', coords)
+					.then(function (value) {})
+					.catch(function (err) {
+						console.log(err);
+					});
+			});
+
+			map.on('moveend', () => {
+				const coords = map.getBounds();
+
+				localforage
+					.setItem('coords', coords)
+					.then(function (value) {})
+					.catch(function (err) {
+						console.log(err);
+					});
 			});
 
 			// change broken marker image path in prod
