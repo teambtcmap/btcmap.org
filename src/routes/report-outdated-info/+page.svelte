@@ -227,7 +227,7 @@
 									element.tags
 								)}</span>
 
-                <div class='w-[192px] flex space-x-2 my-1'>
+                <div class='w-[211px] flex space-x-2 my-1'>
                   ${
 										element.tags.phone
 											? `<a href='tel:${element.tags.phone}' title='Phone'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-phone" /></a>`
