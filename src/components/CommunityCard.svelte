@@ -15,7 +15,7 @@
 </script>
 
 <div class="border border-statBorder rounded-3xl shadow hover:shadow-2xl transition-shadow">
-	<div class="my-4 p-4">
+	<div class="my-4 p-4 space-y-2">
 		<a href="/community/{id}" class="text-link hover:text-hover space-y-2">
 			<img
 				src={image ? image : '/images/communities/bitcoin.svg'}
@@ -26,11 +26,10 @@
 			<span class="{!tip ? 'pb-[38px]' : ''} text-center text-lg font-semibold block"
 				>{tags.name}</span
 			>
-
-			{#if tip}
-				<Tip destination={tip} style="mx-auto block" />
-			{/if}
 		</a>
+		{#if tip}
+			<Tip destination={tip} style="mx-auto block" />
+		{/if}
 	</div>
 
 	<div class="p-4 w-full flex flex-wrap justify-center items-center border-t border-t-statBorder">
