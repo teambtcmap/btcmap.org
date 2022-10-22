@@ -371,6 +371,11 @@ Thanks for using BTC Map!`);
 			// create marker cluster group
 			let markers = L.markerClusterGroup();
 
+			// get date from 1 year ago to add verified check if survey is current
+			let verifiedDate = new Date();
+			const previousYear = verifiedDate.getFullYear() - 1;
+			verifiedDate.setFullYear(previousYear);
+
 			// add location information
 			$elements.forEach((element) => {
 				if (element['deleted_at']) {
@@ -470,8 +475,12 @@ Thanks for using BTC Map!`);
 								<span class='text-body my-1' title="Surveys are completed by BTC Map community members">Survey date:
 								${
 									element.tags['survey:date']
-										? `${element.tags['survey:date']}`
-										: '<span class="fa-solid fa-question"></span>'
+										? `${element.tags['survey:date']} ${
+												Date.parse(element.tags['survey:date']) > verifiedDate
+													? '<img src="/icons/verified.svg" alt="verified" class="inline w-5 h-5" title="Verified within the last year"/>'
+													: ''
+										  }`
+										: '<span class="fa-solid fa-question" title="Not verified"></span>'
 								}
 								</span>
 
