@@ -18,3 +18,7 @@ export { default as CommunitySkeleton } from './CommunitySkeleton.svelte';
 export { default as NavDropdownDesktop } from './NavDropdownDesktop.svelte';
 export { default as NavDropdownMobile } from './NavDropdownMobile.svelte';
 export { default as LoadingSpinner } from './LoadingSpinner.svelte';
+export { default as ProfileLoading } from './ProfileLoading.svelte';
+export { default as ProfileStat } from './ProfileStat.svelte';
+export { default as ProfileActivity } from './ProfileActivity.svelte';
+export { default as ProfileActivitySkeleton } from './ProfileActivitySkeleton.svelte';

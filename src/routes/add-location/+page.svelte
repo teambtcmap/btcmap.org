@@ -285,10 +285,10 @@
 								<div class="relative mb-2">
 									<div
 										bind:this={mapElement}
-										class="z-10 !cursor-crosshair border-2 border-input rounded-2xl h-[300px]"
+										class="!bg-teal z-10 !cursor-crosshair border-2 border-input rounded-2xl h-[300px]"
 									/>
 									{#if !mapLoaded}
-										<MapLoading type="embed" style="h-[300px]" />
+										<MapLoading type="embed" style="h-[300px] border-2 border-input rounded-2xl" />
 									{/if}
 								</div>
 								<div class="flex space-x-2">

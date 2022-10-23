@@ -2,6 +2,7 @@
 	export let position;
 	export let avatar;
 	export let tagger;
+	export let id;
 	export let created;
 	export let updated;
 	export let deleted;
@@ -34,9 +35,7 @@
 		/>
 
 		<a
-			href="https://www.openstreetmap.org/user/{tagger}"
-			target="_blank"
-			rel="noreferrer"
+			href="/tagger/{id}"
 			class="lg:text-left text-link hover:text-hover {tagger.match('([^ ]{12})')
 				? 'break-all'
 				: ''}">{tagger}</a

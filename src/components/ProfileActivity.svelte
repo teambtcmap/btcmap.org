@@ -1,20 +1,16 @@
 <script>
 	import Time from 'svelte-time';
-	import { Tip } from '$comp';
 
 	export let location;
 	export let action;
-	export let user;
 	export let time;
 	export let latest;
 	export let lat;
 	export let long;
 
-	$: profile = user['osm_json'] && user['osm_json'];
-	$: regexMatch = profile && profile.description.match('(lightning:[^)]+)');
-	$: lightning = regexMatch && regexMatch[0].slice(10);
-
-	$: username = profile ? profile['display_name'] : user;
+	const capitalizeFirstLetter = (string) => {
+		return string.charAt(0).toUpperCase() + string.slice(1);
+	};
 </script>
 
 <div
@@ -44,6 +40,9 @@
 		<!-- event information -->
 		<div class="space-y-2 lg:space-y-0">
 			<span class="text-primary lg:mr-5">
+				<!-- action -->
+				<span>{capitalizeFirstLetter(action)}d</span>
+
 				<!-- location -->
 				<a
 					href={action === 'delete'
@@ -72,34 +71,12 @@
 						</svg>
 					{/if}
 				</a>
-
-				<!-- action -->
-				was
-				<strong>{action}d</strong>
-
-				<!-- user -->
-				{#if username.length}
-					by <a
-						href="/tagger/{user.id}"
-						class="block lg:inline text-link hover:text-hover break-all"
-						>{username}
-					</a>
-				{/if}
-			</span>
-
-			<!-- time ago -->
-			<span
-				class="text-center block lg:inline text-taggerTime font-semibold {lightning
-					? 'lg:mr-5'
-					: ''}"
-			>
-				<Time live={3000} relative timestamp={time} />
 			</span>
 		</div>
 
-		<!-- lightning tip button -->
-		{#if lightning}
-			<Tip destination={lightning} style="block lg:inline mx-auto lg:mx-0" />
-		{/if}
+		<!-- time ago -->
+		<span class="text-center block lg:inline text-taggerTime">
+			<Time live={3000} relative timestamp={time} />
+		</span>
 	</div>
 </div>

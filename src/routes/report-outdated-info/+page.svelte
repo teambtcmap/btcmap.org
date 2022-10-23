@@ -218,30 +218,30 @@
 					let marker = L.marker([latCalc, longCalc]).bindPopup(
 						// marker popup component
 						`${
-							element.tags.name
+							element.tags && element.tags.name
 								? `<span class='block font-bold text-lg text-primary break-all leading-snug' title='Merchant name'>${element.tags.name}</span>`
 								: ''
 						}
 
-                <span class='block text-body font-bold' title='Address'>${checkAddress(
-									element.tags
-								)}</span>
+                <span class='block text-body font-bold' title='Address'>${
+									element.tags && checkAddress(element.tags)
+								}</span>
 
                 <div class='w-[211px] flex space-x-2 my-1'>
                   ${
-										element.tags.phone
+										element.tags && element.tags.phone
 											? `<a href='tel:${element.tags.phone}' title='Phone'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-phone" /></a>`
 											: ''
 									}
 
                   ${
-										element.tags.website
+										element.tags && element.tags.website
 											? `<a href=${element.tags.website} target="_blank" rel="noreferrer" title='Website'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-globe" /></a>`
 											: ''
 									}
 
 						      ${
-										element.tags['contact:twitter']
+										element.tags && element.tags['contact:twitter']
 											? `<a href=${
 													element.tags['contact:twitter'].startsWith('http')
 														? element.tags['contact:twitter']
@@ -261,39 +261,53 @@
 						}' target="_blank" rel="noreferrer" title='Share'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-share-nodes" /></a>
                 </div>
 
-                <div class='w-full flex space-x-2 my-1'>
-                  <img src=${
-										element.tags['payment:onchain'] === 'yes'
-											? '/icons/btc-highlight.svg'
-											: '/icons/btc.svg'
-									} alt="bitcoin" class="w-7 h-7" title="${
-							element.tags['payment:onchain'] === 'yes' ? 'On-chain accepted' : 'On-chain unknown'
+                  <div class='w-full flex space-x-2 my-1'>
+	                  <img src=${
+											element.tags && element.tags['payment:onchain'] === 'yes'
+												? '/icons/btc-highlight.svg'
+												: element.tags && element.tags['payment:onchain'] === 'no'
+												? '/icons/btc-no.svg'
+												: '/icons/btc.svg'
+										} alt="bitcoin" class="w-7 h-7" title="${
+							element.tags && element.tags['payment:onchain'] === 'yes'
+								? 'On-chain accepted'
+								: element.tags && element.tags['payment:onchain'] === 'no'
+								? 'On-chain not accepted'
+								: 'On-chain unknown'
 						}"/>
 
-                  <img src=${
-										element.tags['payment:lightning'] === 'yes'
-											? '/icons/ln-highlight.svg'
-											: '/icons/ln.svg'
-									} alt="lightning" class="w-7 h-7" title="${
-							element.tags['payment:lightning'] === 'yes'
+	                  <img src=${
+											element.tags && element.tags['payment:lightning'] === 'yes'
+												? '/icons/ln-highlight.svg'
+												: element.tags && element.tags['payment:lightning'] === 'no'
+												? '/icons/ln-no.svg'
+												: '/icons/ln.svg'
+										} alt="lightning" class="w-7 h-7" title="${
+							element.tags && element.tags['payment:lightning'] === 'yes'
 								? 'Lightning accepted'
+								: element.tags && element.tags['payment:lightning'] === 'no'
+								? 'Lightning not accepted'
 								: 'Lightning unknown'
 						}"/>
 
-                  <img src=${
-										element.tags['payment:lightning_contactless'] === 'yes'
-											? '/icons/nfc-highlight.svg'
-											: '/icons/nfc.svg'
-									} alt="nfc" class="w-7 h-7" title="${
-							element.tags['payment:lightning_contactless'] === 'yes'
+	                  <img src=${
+											element.tags && element.tags['payment:lightning_contactless'] === 'yes'
+												? '/icons/nfc-highlight.svg'
+												: element.tags && element.tags['payment:lightning_contactless'] === 'no'
+												? '/icons/nfc-no.svg'
+												: '/icons/nfc.svg'
+										} alt="nfc" class="w-7 h-7" title="${
+							element.tags && element.tags['payment:lightning_contactless'] === 'yes'
 								? 'Lightning Contactless accepted'
+								: element.tags && element.tags['payment:lightning_contactless'] === 'no'
+								? 'Lightning contactless not accepted'
 								: 'Lightning Contactless unknown'
 						}"/>
-                </div>
+	                </div>
 
 								<span class='text-body my-1' title="Surveys are completed by BTC Map community members">Survey date:
 								${
-									element.tags['survey:date']
+									element.tags && element.tags['survey:date']
 										? `${element.tags['survey:date']} ${
 												Date.parse(element.tags['survey:date']) > verifiedDate
 													? '<img src="/icons/verified.svg" alt="verified" class="inline w-5 h-5" title="Verified within the last year"/>'
@@ -309,7 +323,7 @@
 					marker.on('click', (e) => {
 						if (captchaSecret) {
 							map.setView(e.latlng, 19);
-							name = element.tags.name ? element.tags.name : '';
+							name = element.tags && element.tags.name ? element.tags.name : '';
 							lat = latCalc;
 							long = longCalc;
 							location = lat && long ? `https://btcmap.org/map?lat=${lat}&long=${long}` : '';
@@ -382,10 +396,13 @@
 							<div class="relative mb-2">
 								<div
 									bind:this={mapElement}
-									class="z-10 !cursor-crosshair border-2 border-input rounded-2xl h-[300px] md:h-[450px]"
+									class="!bg-teal z-10 !cursor-crosshair border-2 border-input rounded-2xl h-[300px] md:h-[450px]"
 								/>
 								{#if !mapLoaded}
-									<MapLoading type="embed" style="h-[300px] md:h-[450px]" />
+									<MapLoading
+										type="embed"
+										style="h-[300px] md:h-[450px] border-2 border-input rounded-2xl"
+									/>
 								{/if}
 							</div>
 						</div>

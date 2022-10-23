@@ -1,5 +1,4 @@
 <script>
-	import { browser } from '$app/environment';
 	import {
 		Header,
 		Footer,
@@ -37,6 +36,7 @@
 					leaderboard.push({
 						avatar: avatar,
 						tagger: profile['display_name'],
+						id: user.id,
 						created:
 							profile['display_name'] === 'Bill on Bitcoin Island'
 								? created.length + 100
@@ -125,6 +125,7 @@
 								position={index + 1}
 								avatar={item.avatar}
 								tagger={item.tagger}
+								id={item.id}
 								created={item.created}
 								updated={item.updated}
 								deleted={item.deleted}

@@ -434,9 +434,9 @@ Thanks for using BTC Map!`);
 				}
 				element = element['osm_json'];
 				if (
-					(onchain ? element.tags['payment:onchain'] === 'yes' : true) &&
-					(lightning ? element.tags['payment:lightning'] === 'yes' : true) &&
-					(nfc ? element.tags['payment:lightning_contactless'] === 'yes' : true)
+					(onchain ? element.tags && element.tags['payment:onchain'] === 'yes' : true) &&
+					(lightning ? element.tags && element.tags['payment:lightning'] === 'yes' : true) &&
+					(nfc ? element.tags && element.tags['payment:lightning_contactless'] === 'yes' : true)
 				) {
 					const latCalc =
 						element.type == 'node'
@@ -450,30 +450,30 @@ Thanks for using BTC Map!`);
 					let marker = L.marker([latCalc, longCalc]).bindPopup(
 						// marker popup component
 						`${
-							element.tags.name
+							element.tags && element.tags.name
 								? `<span class='block font-bold text-lg text-primary break-all leading-snug' title='Merchant name'>${element.tags.name}</span>`
 								: ''
 						}
 
-                <span class='block text-body font-bold' title='Address'>${checkAddress(
-									element.tags
-								)}</span>
+                <span class='block text-body font-bold' title='Address'>${
+									element.tags && checkAddress(element.tags)
+								}</span>
 
                 <div class='w-[211px] flex space-x-2 my-1'>
                   ${
-										element.tags.phone
+										element.tags && element.tags.phone
 											? `<a href='tel:${element.tags.phone}' title='Phone'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-phone" /></a>`
 											: ''
 									}
 
                   ${
-										element.tags.website
+										element.tags && element.tags.website
 											? `<a href=${element.tags.website} target="_blank" rel="noreferrer" title='Website'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-globe" /></a>`
 											: ''
 									}
 
 					        ${
-										element.tags['contact:twitter']
+										element.tags && element.tags['contact:twitter']
 											? `<a href=${
 													element.tags['contact:twitter'].startsWith('http')
 														? element.tags['contact:twitter']
@@ -491,43 +491,43 @@ Thanks for using BTC Map!`);
 
                 <div class='w-full flex space-x-2 my-1'>
                   <img src=${
-										element.tags['payment:onchain'] === 'yes'
+										element.tags && element.tags['payment:onchain'] === 'yes'
 											? '/icons/btc-highlight.svg'
-											: element.tags['payment:onchain'] === 'no'
+											: element.tags && element.tags['payment:onchain'] === 'no'
 											? '/icons/btc-no.svg'
 											: '/icons/btc.svg'
 									} alt="bitcoin" class="w-7 h-7" title="${
-							element.tags['payment:onchain'] === 'yes'
+							element.tags && element.tags['payment:onchain'] === 'yes'
 								? 'On-chain accepted'
-								: element.tags['payment:onchain'] === 'no'
+								: element.tags && element.tags['payment:onchain'] === 'no'
 								? 'On-chain not accepted'
 								: 'On-chain unknown'
 						}"/>
 
                   <img src=${
-										element.tags['payment:lightning'] === 'yes'
+										element.tags && element.tags['payment:lightning'] === 'yes'
 											? '/icons/ln-highlight.svg'
-											: element.tags['payment:lightning'] === 'no'
+											: element.tags && element.tags['payment:lightning'] === 'no'
 											? '/icons/ln-no.svg'
 											: '/icons/ln.svg'
 									} alt="lightning" class="w-7 h-7" title="${
-							element.tags['payment:lightning'] === 'yes'
+							element.tags && element.tags['payment:lightning'] === 'yes'
 								? 'Lightning accepted'
-								: element.tags['payment:lightning'] === 'no'
+								: element.tags && element.tags['payment:lightning'] === 'no'
 								? 'Lightning not accepted'
 								: 'Lightning unknown'
 						}"/>
 
                   <img src=${
-										element.tags['payment:lightning_contactless'] === 'yes'
+										element.tags && element.tags['payment:lightning_contactless'] === 'yes'
 											? '/icons/nfc-highlight.svg'
-											: element.tags['payment:lightning_contactless'] === 'no'
+											: element.tags && element.tags['payment:lightning_contactless'] === 'no'
 											? '/icons/nfc-no.svg'
 											: '/icons/nfc.svg'
 									} alt="nfc" class="w-7 h-7" title="${
-							element.tags['payment:lightning_contactless'] === 'yes'
+							element.tags && element.tags['payment:lightning_contactless'] === 'yes'
 								? 'Lightning Contactless accepted'
-								: element.tags['payment:lightning_contactless'] === 'no'
+								: element.tags && element.tags['payment:lightning_contactless'] === 'no'
 								? 'Lightning contactless not accepted'
 								: 'Lightning Contactless unknown'
 						}"/>
@@ -535,7 +535,7 @@ Thanks for using BTC Map!`);
 
 								<span class='text-body my-1' title="Surveys are completed by BTC Map community members">Survey date:
 								${
-									element.tags['survey:date']
+									element.tags && element.tags['survey:date']
 										? `${element.tags['survey:date']} ${
 												Date.parse(element.tags['survey:date']) > verifiedDate
 													? '<img src="/icons/verified.svg" alt="verified" class="inline w-5 h-5" title="Verified within the last year"/>'
@@ -547,7 +547,7 @@ Thanks for using BTC Map!`);
 
 								<div class='flex justify-between items-center'>
 									<a href="/report-outdated-info?${
-										element.tags.name ? `&name=${element.tags.name}` : ''
+										element.tags && element.tags.name ? `&name=${element.tags.name}` : ''
 									}&lat=${latCalc}&long=${longCalc}&${element.type}=${
 							element.id
 						}" class='text-link hover:text-hover text-xs' title="Reporting helps improve the data for everyone">Report outdated info</a>
@@ -584,7 +584,7 @@ Thanks for using BTC Map!`);
 	{#if !mapLoaded}
 		<MapLoading type="main" message="Rendering map..." style="absolute top-0 left-0 z-[10000]" />
 	{/if}
-	<div bind:this={mapElement} class="h-[100vh]" />
+	<div bind:this={mapElement} class="!bg-teal h-[100vh]" />
 </main>
 
 <style>

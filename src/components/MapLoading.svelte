@@ -27,7 +27,7 @@
 	</div>
 {:else if type === 'embed'}
 	<div
-		class="w-full {style} absolute top-0 left-0 z-[10000] bg-teal border-2 border-input rounded-2xl flex justify-center items-center"
+		class="w-full {style} absolute top-0 left-0 z-[10000] bg-teal flex justify-center items-center"
 	>
 		<div class="space-y-6">
 			<LoadingSpinner color="text-link" />

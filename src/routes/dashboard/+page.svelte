@@ -63,13 +63,7 @@
 
 	$: supertaggerSync($syncStatus, $users, $events, $elements);
 
-	$: latestTaggers =
-		supertaggers &&
-		supertaggers.length &&
-		!elementsLoading &&
-		supertaggers.find((tagger) => tagger.location)
-			? true
-			: false;
+	$: latestTaggers = supertaggers && supertaggers.length && !elementsLoading ? true : false;
 
 	const findUser = (tagger) => {
 		let foundUser = $users.find((user) => user.id == tagger['user_id']);
