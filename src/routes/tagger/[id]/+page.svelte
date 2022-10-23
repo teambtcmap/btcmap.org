@@ -3,6 +3,7 @@
 
 	import { marked } from 'marked';
 	import DOMPurify from 'dompurify';
+	import Chart from 'chart.js/dist/chart.min.js';
 	import { browser } from '$app/environment';
 	import { onMount, onDestroy } from 'svelte';
 	import { users, events, elements } from '$lib/store';
@@ -52,6 +53,9 @@
 		.format((deleted / (total / 100)).toFixed(0))
 		.toString();
 
+	let tagTypeChartCanvas;
+	let tagTypeChart;
+
 	let loading = true;
 	let hideArrow = false;
 	let activityDiv;
@@ -84,6 +88,27 @@
 		if (browser) {
 			// add markdown support for profile description
 			profileDesc.innerHTML = DOMPurify.sanitize(marked.parse(filteredDesc));
+
+			// setup chart
+			tagTypeChartCanvas.getContext('2d');
+
+			let tagTypeChart = new Chart(tagTypeChartCanvas, {
+				type: 'doughnut',
+				data: {
+					labels: ['Created', 'Updated', 'Deleted'],
+					datasets: [
+						{
+							label: 'Tag Types',
+							data: [created, updated, deleted],
+							backgroundColor: ['rgb(16, 183, 145)', 'rgb(0, 153, 175)', 'rgb(235, 87, 87)'],
+							hoverOffset: 4
+						}
+					]
+				},
+				options: {
+					maintainAspectRatio: false
+				}
+			});
 
 			//import packages
 			const leaflet = await import('leaflet');
@@ -359,7 +384,7 @@
 			<section id="badges" class="" />
 
 			<section id="stats" class="my-16">
-				<div class="border border-statBorder rounded-3xl grid md:grid-cols-2 xl:grid-cols-4">
+				<div class="border border-statBorder rounded-t-3xl grid md:grid-cols-2 xl:grid-cols-4">
 					<ProfileStat
 						title="Total Tags"
 						stat={total}
@@ -380,6 +405,10 @@
 					/>
 					<ProfileStat title="Deleted" stat={deleted} percent={deletedPercent} border="" />
 				</div>
+
+				<div class="border border-statBorder border-t-0 rounded-b-3xl p-5">
+					<canvas bind:this={tagTypeChartCanvas} width="250" height="250" />
+				</div>
 			</section>
 
 			<section id="activity" class="my-16">
@@ -393,8 +422,8 @@
 					<div
 						bind:this={activityDiv}
 						id="activity-div"
-						class="space-y-2 {eventElements.length > 4
-							? 'h-[300px]'
+						class="space-y-2 {eventElements.length > 5
+							? 'h-[375px]'
 							: ''} overflow-y-scroll relative"
 						on:scroll={() => {
 							if (!loading && !hideArrow) {
@@ -418,7 +447,7 @@
 								<TopButton scroll={activityDiv} style="!mb-5" />
 							{/if}
 
-							{#if !hideArrow && eventElements.length > 4}
+							{#if !hideArrow && eventElements.length > 5}
 								<svg
 									class="z-20 w-4 h-4 animate-bounce text-primary absolute bottom-4 left-[calc(50%-8px)]"
 									fill="currentColor"
@@ -430,7 +459,7 @@
 								>
 							{/if}
 						{:else}
-							{#each Array(4) as skeleton}
+							{#each Array(5) as skeleton}
 								<ProfileActivitySkeleton />
 							{/each}
 						{/if}
