@@ -8,7 +8,7 @@
 	<div class="!my-12">
 		<a
 			href="lightning:{destination}"
-			class="text-center text-lg font-semibold text-white w-full p-4 bg-link hover:bg-hover rounded-xl"
+			class="text-center text-lg font-semibold text-white w-full p-3 bg-link hover:bg-hover rounded-xl"
 		>
 			<!--  lightning icon -->
 			<svg
