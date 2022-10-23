@@ -1,6 +1,6 @@
 <script>
 	import axios from 'axios';
-	import Chart from 'chart.js/auto';
+	import Chart from 'chart.js/dist/chart.min.js';
 	import { browser } from '$app/environment';
 	import { onMount, onDestroy } from 'svelte';
 	import { Header, Footer, DashboardStat } from '$comp';
