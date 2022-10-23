@@ -22,6 +22,7 @@
 
 	const statsDropdownLinks = [
 		{ title: 'Dashboard', url: '/dashboard', icon: 'dash' },
+		{ title: 'Activity', url: '/activity', icon: 'activity' },
 		{ title: 'Leaderboard', url: '/leaderboard', icon: 'leader' }
 	];
 
@@ -55,15 +56,30 @@
 		{#each navLinks as link}
 			<!-- dropdown menu -->
 			{#if link.title === 'Contribute'}
-				<NavDropdownDesktop title={link.title} links={contributeDropdownLinks} top="add" />
+				<NavDropdownDesktop
+					title={link.title}
+					links={contributeDropdownLinks}
+					top="add"
+					bottom="report"
+				/>
 
 				<!-- dropdown menu -->
 			{:else if link.title === 'Stats'}
-				<NavDropdownDesktop title={link.title} links={statsDropdownLinks} top="dash" />
+				<NavDropdownDesktop
+					title={link.title}
+					links={statsDropdownLinks}
+					top="dash"
+					bottom="leader"
+				/>
 
 				<!-- dropdown menu -->
 			{:else if link.title === 'Wiki'}
-				<NavDropdownDesktop title={link.title} links={wikiDropdownLinks} top="general" />
+				<NavDropdownDesktop
+					title={link.title}
+					links={wikiDropdownLinks}
+					top="general"
+					bottom="api"
+				/>
 			{:else}
 				<!-- regular links -->
 				<a href={link.url} class="text-link hover:text-hover text-xl font-semibold"

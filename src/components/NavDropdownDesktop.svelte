@@ -4,6 +4,7 @@
 	export let title;
 	export let links;
 	export let top;
+	export let bottom;
 
 	let show = false;
 </script>
@@ -33,7 +34,9 @@
 						class="p-4 block bg-link hover:bg-hover text-white text-xl font-semibold flex justify-center items-center {link.icon ===
 						top
 							? 'rounded-t-2xl'
-							: 'rounded-b-2xl'}"
+							: link.icon === bottom
+							? 'rounded-b-2xl'
+							: ''}"
 					>
 						{link.title}
 						{#if link.external}

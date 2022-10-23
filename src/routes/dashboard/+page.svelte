@@ -1,78 +1,20 @@
 <script>
 	import axios from 'axios';
+	import Chart from 'chart.js/auto';
 	import { browser } from '$app/environment';
 	import { onMount, onDestroy } from 'svelte';
-	import { Header, Footer, DashboardStat, LatestTagger, TaggerSkeleton } from '$comp';
-	import {
-		users,
-		userError,
-		events,
-		eventError,
-		elements,
-		elementError,
-		syncStatus
-	} from '$lib/store';
-	import { errToast } from '$lib/utils';
+	import { Header, Footer, DashboardStat } from '$comp';
 
-	// alert for user errors
-	$: $userError && errToast($userError);
-	// alert for event errors
-	$: $eventError && errToast($eventError);
-	// alert for element errors
-	$: $elementError && errToast($elementError);
+	import { errToast } from '$lib/utils';
 
 	let statsAPIInterval;
 	let communitiesAPIInterval;
 
-	let statsLoading;
-	let communitiesLoading;
-	let elementsLoading;
+	let statsLoading = true;
+	let communitiesLoading = true;
 
 	let stats;
 	let communities;
-	let supertaggers;
-
-	const supertaggerSync = (status, users, events, elements) => {
-		if (elements.length && events.length && users.length && !status) {
-			let recentEvents = events.slice(0, 21);
-
-			elementsLoading = true;
-			supertaggers = [];
-
-			recentEvents.forEach((event) => {
-				let elementMatch = elements.find((element) => element.id === event['element_id']);
-
-				if (elementMatch) {
-					let location =
-						elementMatch['osm_json'].tags && elementMatch['osm_json'].tags.name
-							? elementMatch['osm_json'].tags.name
-							: undefined;
-
-					event.location = location ? location : 'Unnamed element';
-					event.lat = elementMatch['osm_json'].lat;
-					event.long = elementMatch['osm_json'].lon;
-
-					supertaggers.push(event);
-				}
-			});
-
-			supertaggers = supertaggers;
-			elementsLoading = false;
-		}
-	};
-
-	$: supertaggerSync($syncStatus, $users, $events, $elements);
-
-	$: latestTaggers = supertaggers && supertaggers.length && !elementsLoading ? true : false;
-
-	const findUser = (tagger) => {
-		let foundUser = $users.find((user) => user.id == tagger['user_id']);
-		if (foundUser) {
-			return foundUser;
-		} else {
-			return '';
-		}
-	};
 
 	$: total = stats && stats[0].total_elements;
 	$: created = stats && stats[1].elements_created;
@@ -146,18 +88,108 @@
 			)
 			.toString();
 
+	let totalChartCanvas;
+	let totalChart;
+	let upToDateChartCanvas;
+	let upToDateChart;
+	let legacyChartCanvas;
+	let legacyChart;
+
 	onMount(async () => {
 		if (browser) {
+			totalChartCanvas.getContext('2d');
+			upToDateChartCanvas.getContext('2d');
+			legacyChartCanvas.getContext('2d');
+
 			const statsAPI = async () => {
-				if (stats) {
-					statsLoading = true;
-				}
+				statsLoading = true;
 
 				await axios
 					.get('https://api.btcmap.org/v2/reports')
 					.then(function (response) {
 						// handle success
 						stats = response.data.filter((report) => report['area_id'] === '');
+
+						let statsCopy = [...stats];
+						let statsSorted = statsCopy.sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+
+						let totalChart = new Chart(totalChartCanvas, {
+							type: 'line',
+							data: {
+								labels: statsSorted.map(({ date }) => date),
+								datasets: [
+									{
+										label: 'Total Locations',
+										data: statsSorted.map(({ total_elements }) => total_elements),
+										fill: false,
+										borderColor: 'rgb(0, 153, 175)',
+										tension: 0.1
+									}
+								]
+							},
+							options: {
+								maintainAspectRatio: false,
+								scales: {
+									x: {
+										ticks: {
+											maxTicksLimit: 5
+										}
+									}
+								}
+							}
+						});
+
+						let upToDateChart = new Chart(upToDateChartCanvas, {
+							type: 'line',
+							data: {
+								labels: statsSorted.map(({ date }) => date),
+								datasets: [
+									{
+										label: 'Up-to-date Locations',
+										data: statsSorted.map(({ up_to_date_elements }) => up_to_date_elements),
+										fill: false,
+										borderColor: 'rgb(0, 153, 175)',
+										tension: 0.1
+									}
+								]
+							},
+							options: {
+								maintainAspectRatio: false,
+								scales: {
+									x: {
+										ticks: {
+											maxTicksLimit: 5
+										}
+									}
+								}
+							}
+						});
+
+						let legacyChart = new Chart(legacyChartCanvas, {
+							type: 'line',
+							data: {
+								labels: statsSorted.map(({ date }) => date),
+								datasets: [
+									{
+										label: 'Legacy Locations',
+										data: statsSorted.map(({ legacy_elements }) => legacy_elements),
+										fill: false,
+										borderColor: 'rgb(0, 153, 175)',
+										tension: 0.1
+									}
+								]
+							},
+							options: {
+								maintainAspectRatio: false,
+								scales: {
+									x: {
+										ticks: {
+											maxTicksLimit: 5
+										}
+									}
+								}
+							}
+						});
 					})
 					.catch(function (error) {
 						// handle error
@@ -171,9 +203,7 @@
 			statsAPIInterval = setInterval(statsAPI, 600000);
 
 			const communitiesAPI = async () => {
-				if (communities) {
-					communitiesLoading = true;
-				}
+				communitiesLoading = true;
 
 				await axios
 					.get('https://api.btcmap.org/v2/areas')
@@ -215,12 +245,11 @@
 			<h1
 				class="text-center md:text-left text-4xl md:text-5xl font-semibold text-primary gradient !leading-tight"
 			>
-				Map Stats
+				Dashboard
 			</h1>
 
 			<h2 class="text-center md:text-left text-primary text-xl font-semibold w-full lg:w-[675px]">
-				Shadowy Supertaggers don’t sleep. They are up all night, tagging away. The world we want is
-				a tag away. Here are some stats for the MATH nerds.
+				Here are some stats and charts for the MATH nerds.
 			</h2>
 
 			<section id="stats">
@@ -287,43 +316,60 @@
 				</p>
 			</section>
 
-			<p class="text-center md:text-left text-xl text-primary">
-				You too can be a shadowy supertagging legend! What are you waiting for? <a
-					href="https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions#shadowy-supertaggers"
-					class="text-link hover:text-hover">Get taggin’!</a
-				>
-			</p>
-
-			<section id="taggers">
-				<div class="w-full border border-statBorder rounded-3xl">
-					<h3
-						class="text-center md:text-left text-primary text-2xl border-b border-statBorder p-5 font-semibold"
-					>
-						Latest Supertaggers
-					</h3>
-
-					<div class="space-y-5">
-						{#if latestTaggers}
-							{#each supertaggers as tagger}
-								<LatestTagger
-									location={tagger.location}
-									action={tagger.type}
-									user={findUser(tagger)}
-									time={tagger.date}
-									latest={tagger === supertaggers[0] ? true : false}
-									lat={tagger.lat}
-									long={tagger.long}
-								/>
-							{/each}
-						{:else}
-							{#each Array(21) as skeleton}
-								<TaggerSkeleton />
-							{/each}
+			<section id="charts" class="space-y-10">
+				<div>
+					<div class="relative">
+						{#if statsLoading}
+							<div
+								class="absolute top-0 left-0 border border-link/50 rounded-3xl animate-pulse w-full h-[400px]"
+							/>
 						{/if}
+						<canvas bind:this={totalChartCanvas} width="400" height="400" />
 					</div>
+					<p class="text-sm text-body text-center mt-1">
+						*Elements accepting any bitcoin payment method (on-chain, lightning, contactless).
+					</p>
 				</div>
-				<p class="text-sm text-body">*Data updated every 10 minutes</p>
+
+				<div>
+					<div class="relative">
+						{#if statsLoading}
+							<div
+								class="absolute top-0 left-0 border border-link/50 rounded-3xl animate-pulse w-full h-[400px]"
+							/>
+						{/if}
+						<canvas bind:this={upToDateChartCanvas} width="400" height="400" />
+					</div>
+					<p class="text-sm text-body text-center mt-1">
+						*Elements with a <strong>survey:date</strong> or <strong>check_date</strong> tag less than
+						one year old.
+					</p>
+				</div>
+
+				<div>
+					<div class="relative">
+						{#if statsLoading}
+							<div
+								class="absolute top-0 left-0 border border-link/50 rounded-3xl animate-pulse w-full h-[400px]"
+							/>
+						{/if}
+						<canvas bind:this={legacyChartCanvas} width="400" height="400" />
+					</div>
+					<p class="text-sm text-body text-center mt-1">
+						*Elements with a <strong>payment:bitcoin</strong> tag instead of the
+						<strong>currency:XBT</strong> tag.
+					</p>
+				</div>
 			</section>
+
+			<p class="text-sm text-body">
+				*More information on bitcoin mapping tags can be found <a
+					href="https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions#tagging-guidance"
+					target="_blank"
+					rel="noreferrer"
+					class="text-link hover:text-hover">here</a
+				>.
+			</p>
 		</main>
 
 		<Footer />
