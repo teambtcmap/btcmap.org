@@ -11,6 +11,9 @@
 - leafletjs
 - openstreetmap
 - localforage
+- chartjs
+- marked
+- dompurify
 - yarn
 - prettier
 - axios
