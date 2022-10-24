@@ -375,7 +375,22 @@
 						<canvas bind:this={totalChartCanvas} width="400" height="400" />
 					</div>
 					<p class="text-sm text-body text-center mt-1">
-						*Elements accepting any bitcoin payment method (on-chain, lightning, contactless).
+						*Elements accepting any bitcoin payment method.
+					</p>
+				</div>
+
+				<div>
+					<div class="relative">
+						{#if statsLoading}
+							<div
+								class="absolute top-0 left-0 border border-link/50 rounded-3xl animate-pulse w-full h-[400px]"
+							/>
+						{/if}
+						<canvas bind:this={paymentMethodChartCanvas} width="400" height="400" />
+					</div>
+					<p class="text-sm text-body text-center mt-1">
+						*Elements with <strong>payment:onchain</strong>, <strong>payment:lightning</strong> and
+						<strong>payment:lightning_contactless</strong> tags.
 					</p>
 				</div>
 
@@ -406,21 +421,6 @@
 					<p class="text-sm text-body text-center mt-1">
 						*Elements with a <strong>payment:bitcoin</strong> tag instead of the
 						<strong>currency:XBT</strong> tag.
-					</p>
-				</div>
-
-				<div>
-					<div class="relative">
-						{#if statsLoading}
-							<div
-								class="absolute top-0 left-0 border border-link/50 rounded-3xl animate-pulse w-full h-[400px]"
-							/>
-						{/if}
-						<canvas bind:this={paymentMethodChartCanvas} width="400" height="400" />
-					</div>
-					<p class="text-sm text-body text-center mt-1">
-						*Elements with <strong>payment:onchain</strong>, <strong>payment:lightning</strong> and
-						<strong>payment:lightning_contactless</strong> tags.
 					</p>
 				</div>
 			</section>
