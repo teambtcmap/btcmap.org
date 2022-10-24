@@ -90,19 +90,19 @@
 
 	let totalChartCanvas;
 	let totalChart;
+	let paymentMethodChartCanvas;
+	let paymentMethodChart;
 	let upToDateChartCanvas;
 	let upToDateChart;
 	let legacyChartCanvas;
 	let legacyChart;
-	let paymentMethodChartCanvas;
-	let paymentMethodChart;
 
 	onMount(async () => {
 		if (browser) {
 			totalChartCanvas.getContext('2d');
+			paymentMethodChartCanvas.getContext('2d');
 			upToDateChartCanvas.getContext('2d');
 			legacyChartCanvas.getContext('2d');
-			paymentMethodChartCanvas.getContext('2d');
 
 			const statsAPI = async () => {
 				statsLoading = true;
@@ -124,58 +124,6 @@
 									{
 										label: 'Total Locations',
 										data: statsSorted.map(({ total_elements }) => total_elements),
-										fill: false,
-										borderColor: 'rgb(0, 153, 175)',
-										tension: 0.1
-									}
-								]
-							},
-							options: {
-								maintainAspectRatio: false,
-								scales: {
-									x: {
-										ticks: {
-											maxTicksLimit: 5
-										}
-									}
-								}
-							}
-						});
-
-						upToDateChart = new Chart(upToDateChartCanvas, {
-							type: 'line',
-							data: {
-								labels: statsSorted.map(({ date }) => date),
-								datasets: [
-									{
-										label: 'Up-to-date Locations',
-										data: statsSorted.map(({ up_to_date_elements }) => up_to_date_elements),
-										fill: false,
-										borderColor: 'rgb(0, 153, 175)',
-										tension: 0.1
-									}
-								]
-							},
-							options: {
-								maintainAspectRatio: false,
-								scales: {
-									x: {
-										ticks: {
-											maxTicksLimit: 5
-										}
-									}
-								}
-							}
-						});
-
-						legacyChart = new Chart(legacyChartCanvas, {
-							type: 'line',
-							data: {
-								labels: statsSorted.map(({ date }) => date),
-								datasets: [
-									{
-										label: 'Legacy Locations',
-										data: statsSorted.map(({ legacy_elements }) => legacy_elements),
 										fill: false,
 										borderColor: 'rgb(0, 153, 175)',
 										tension: 0.1
@@ -223,6 +171,58 @@
 										),
 										fill: false,
 										borderColor: 'rgb(102, 16, 242)',
+										tension: 0.1
+									}
+								]
+							},
+							options: {
+								maintainAspectRatio: false,
+								scales: {
+									x: {
+										ticks: {
+											maxTicksLimit: 5
+										}
+									}
+								}
+							}
+						});
+
+						upToDateChart = new Chart(upToDateChartCanvas, {
+							type: 'line',
+							data: {
+								labels: statsSorted.map(({ date }) => date),
+								datasets: [
+									{
+										label: 'Up-to-date Locations',
+										data: statsSorted.map(({ up_to_date_elements }) => up_to_date_elements),
+										fill: false,
+										borderColor: 'rgb(11, 144, 114)',
+										tension: 0.1
+									}
+								]
+							},
+							options: {
+								maintainAspectRatio: false,
+								scales: {
+									x: {
+										ticks: {
+											maxTicksLimit: 5
+										}
+									}
+								}
+							}
+						});
+
+						legacyChart = new Chart(legacyChartCanvas, {
+							type: 'line',
+							data: {
+								labels: statsSorted.map(({ date }) => date),
+								datasets: [
+									{
+										label: 'Legacy Locations',
+										data: statsSorted.map(({ legacy_elements }) => legacy_elements),
+										fill: false,
+										borderColor: 'rgb(235, 87, 87)',
 										tension: 0.1
 									}
 								]
