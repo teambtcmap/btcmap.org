@@ -1,4 +1,7 @@
 <script>
+	import Chart from 'chart.js/dist/chart.min.js';
+	import { browser } from '$app/environment';
+	import { onMount } from 'svelte';
 	import {
 		Header,
 		Footer,
@@ -18,59 +21,103 @@
 	let loading;
 	let leaderboard;
 
+	let topTenChartCanvas;
+	let topTenChart;
+
+	let initialRenderComplete = false;
+
+	const populateLeaderboard = () => {
+		loading = true;
+		leaderboard = [];
+
+		$users.forEach((user) => {
+			let userEvents = $events.filter((event) => event['user_id'] == user.id);
+
+			if (userEvents.length) {
+				let created = userEvents.filter((event) => event.type === 'create').length;
+				let updated = userEvents.filter((event) => event.type === 'update').length;
+				let deleted = userEvents.filter((event) => event.type === 'delete').length;
+				let profile = user['osm_json'];
+				let avatar = profile.img ? profile.img.href : '/images/satoshi-nakamoto.png';
+
+				leaderboard.push({
+					avatar: avatar,
+					tagger: profile['display_name'],
+					id: user.id,
+					created: profile['display_name'] === 'Bill on Bitcoin Island' ? created + 100 : created,
+					updated: profile['display_name'] === 'Bill on Bitcoin Island' ? updated + 20 : updated,
+					deleted: deleted,
+					total:
+						profile['display_name'] === 'Bill on Bitcoin Island'
+							? created + updated + deleted + 120
+							: created + updated + deleted,
+					tip: profile.description
+				});
+			}
+		});
+
+		leaderboard.sort((a, b) => b.total - a.total);
+		leaderboard = leaderboard.slice(0, 50);
+		leaderboard = leaderboard;
+
+		loading = false;
+	};
+
 	const leaderboardSync = (status, users, events) => {
-		if (users.length && events.length && !status) {
-			loading = true;
-			leaderboard = [];
+		if (users.length && events.length && !status && initialRenderComplete) {
+			populateLeaderboard();
 
-			users.forEach((user) => {
-				let userEvents = events.filter((event) => event['user_id'] == user.id);
-
-				if (userEvents.length) {
-					let created = userEvents.filter((event) => event.type === 'create');
-					let updated = userEvents.filter((event) => event.type === 'update');
-					let deleted = userEvents.filter((event) => event.type === 'delete');
-					let profile = user['osm_json'];
-					let avatar = profile.img ? profile.img.href : '/images/satoshi-nakamoto.png';
-
-					leaderboard.push({
-						avatar: avatar,
-						tagger: profile['display_name'],
-						id: user.id,
-						created:
-							profile['display_name'] === 'Bill on Bitcoin Island'
-								? created.length + 100
-								: created.length,
-						updated:
-							profile['display_name'] === 'Bill on Bitcoin Island'
-								? updated.length + 20
-								: updated.length,
-						deleted: deleted.length,
-						tip: profile.description
-					});
-				}
-			});
-
-			leaderboard.sort(
-				(a, b) => b.created + b.updated + b.deleted - (a.created + a.updated + a.deleted)
-			);
-			leaderboard = leaderboard.slice(0, 50);
-			leaderboard = leaderboard;
-			loading = false;
+			let leaderboardCopy = [...leaderboard];
+			leaderboardCopy = leaderboardCopy.slice(0, 10);
+			topTenChart.data.labels = leaderboardCopy.map(({ tagger }) => tagger);
+			topTenChart.data.datasets[0].data = leaderboardCopy.map(({ total }) => total);
+			topTenChart.update();
 		}
 	};
 
 	$: leaderboardSync($syncStatus, $users, $events);
 
+	onMount(() => {
+		if (browser) {
+			// setup leaderboard
+			populateLeaderboard();
+
+			// setup chart
+			topTenChartCanvas.getContext('2d');
+
+			let leaderboardCopy = [...leaderboard];
+			leaderboardCopy = leaderboardCopy.slice(0, 10);
+
+			topTenChart = new Chart(topTenChartCanvas, {
+				type: 'bar',
+				data: {
+					labels: leaderboardCopy.map(({ tagger }) => tagger),
+					datasets: [
+						{
+							label: 'Top Ten',
+							data: leaderboardCopy.map(({ total }) => total),
+							backgroundColor: 'rgba(0, 153, 175, 0.2)',
+							borderColor: 'rgb(0, 153, 175)',
+							borderWidth: 1
+						}
+					]
+				},
+				options: {
+					maintainAspectRatio: false,
+					scales: {
+						y: {
+							beginAtZero: true
+						}
+					}
+				}
+			});
+
+			initialRenderComplete = true;
+		}
+	});
+
 	const headings = ['Position', 'Supertagger', 'Created', 'Updated', 'Deleted', 'Tip'];
 </script>
-
-<svelte:head>
-	<title>BTC Map - Leaderboard</title>
-	<meta property="og:image" content="https://btcmap.org/images/og/leader.png" />
-	<meta property="twitter:title" content="BTC Map - Leaderboard" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/leader.png" />
-</svelte:head>
 
 <div class="bg-teal">
 	<Header />
@@ -94,6 +141,13 @@
 				check this leaderboard to make sure they’re on top. Are you going to stand by and let them
 				claim the top spot?! Get taggin’!
 			</h2>
+
+			<section id="chart" class="relative">
+				{#if leaderboard && leaderboard.length && !loading}{:else}
+					<div class="absolute top-0 left-0 border border-link/50 animate-pulse w-full h-[400px]" />
+				{/if}
+				<canvas bind:this={topTenChartCanvas} width="400" height="400" />
+			</section>
 
 			<PrimaryButton
 				text="Smash these numbers"

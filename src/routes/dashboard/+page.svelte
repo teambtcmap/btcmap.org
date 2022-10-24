@@ -113,7 +113,7 @@
 						let statsCopy = [...stats];
 						let statsSorted = statsCopy.sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
 
-						let totalChart = new Chart(totalChartCanvas, {
+						totalChart = new Chart(totalChartCanvas, {
 							type: 'line',
 							data: {
 								labels: statsSorted.map(({ date }) => date),
@@ -139,7 +139,7 @@
 							}
 						});
 
-						let upToDateChart = new Chart(upToDateChartCanvas, {
+						upToDateChart = new Chart(upToDateChartCanvas, {
 							type: 'line',
 							data: {
 								labels: statsSorted.map(({ date }) => date),
@@ -165,7 +165,7 @@
 							}
 						});
 
-						let legacyChart = new Chart(legacyChartCanvas, {
+						legacyChart = new Chart(legacyChartCanvas, {
 							type: 'line',
 							data: {
 								labels: statsSorted.map(({ date }) => date),

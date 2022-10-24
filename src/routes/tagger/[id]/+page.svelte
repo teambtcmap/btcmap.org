@@ -92,7 +92,7 @@
 			// setup chart
 			tagTypeChartCanvas.getContext('2d');
 
-			let tagTypeChart = new Chart(tagTypeChartCanvas, {
+			tagTypeChart = new Chart(tagTypeChartCanvas, {
 				type: 'pie',
 				data: {
 					labels: ['Created', 'Updated', 'Deleted'],

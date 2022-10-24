@@ -1,7 +1,7 @@
 <script>
 	import { users, userError, events, eventError, elements, elementError } from '$lib/store';
 	import { errToast } from '$lib/utils';
-	import { ProfileLoading } from '$comp';
+	import { TaggerLoading } from '$comp';
 
 	// alert for user errors
 	$: $userError && errToast($userError);
@@ -21,5 +21,5 @@
 {#if $users && $users.length && $events && $events.length && $elements && $elements.length}
 	<slot />
 {:else}
-	<ProfileLoading />
+	<TaggerLoading page="profile" />
 {/if}

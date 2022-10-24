@@ -1,3 +1,7 @@
+<script>
+	export let page;
+</script>
+
 <div class="bg-teal w-full">
 	<div class="w-10/12 xl:w-[1200px] mx-auto">
 		<div class="h-[100vh] w-full flex justify-center items-center">
@@ -12,7 +16,7 @@
 					/>
 				</a>
 				<h1 class="text-primary font-semibold text-4xl md:text-5xl text-center">
-					Loading profile...
+					Loading {page}...
 				</h1>
 			</main>
 		</div>
