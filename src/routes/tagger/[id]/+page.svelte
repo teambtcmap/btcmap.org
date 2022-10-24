@@ -367,9 +367,33 @@
 			<section id="profile" class="space-y-8">
 				<img src={avatar} alt="avatar" class="rounded-full w-32 h-32 object-cover mx-auto" />
 
-				<h1 class="text-4xl font-semibold text-primary !leading-tight">
-					{username}
-				</h1>
+				<div>
+					<h1 class="text-4xl font-semibold text-primary !leading-tight">
+						{username}
+					</h1>
+					<a
+						href="https://www.openstreetmap.org/user/{username}"
+						target="_blank"
+						rel="noreferrer"
+						class="w-24 mx-auto mt-1 text-xs text-link hover:text-hover flex justify-center items-center"
+						>OSM Profile <svg
+							class="ml-1 w-3"
+							width="16"
+							height="16"
+							viewBox="0 0 16 16"
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path
+								d="M3 13L13 3M13 3H5.5M13 3V10.5"
+								stroke="currentColor"
+								stroke-width="1.5"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+						</svg></a
+					>
+				</div>
 
 				<h2
 					bind:this={profileDesc}
