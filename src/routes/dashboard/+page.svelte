@@ -94,12 +94,15 @@
 	let upToDateChart;
 	let legacyChartCanvas;
 	let legacyChart;
+	let paymentMethodChartCanvas;
+	let paymentMethodChart;
 
 	onMount(async () => {
 		if (browser) {
 			totalChartCanvas.getContext('2d');
 			upToDateChartCanvas.getContext('2d');
 			legacyChartCanvas.getContext('2d');
+			paymentMethodChartCanvas.getContext('2d');
 
 			const statsAPI = async () => {
 				statsLoading = true;
@@ -175,6 +178,51 @@
 										data: statsSorted.map(({ legacy_elements }) => legacy_elements),
 										fill: false,
 										borderColor: 'rgb(0, 153, 175)',
+										tension: 0.1
+									}
+								]
+							},
+							options: {
+								maintainAspectRatio: false,
+								scales: {
+									x: {
+										ticks: {
+											maxTicksLimit: 5
+										}
+									}
+								}
+							}
+						});
+
+						paymentMethodChart = new Chart(paymentMethodChartCanvas, {
+							type: 'line',
+							data: {
+								labels: statsSorted.map(({ date }) => date),
+								datasets: [
+									{
+										label: 'On-chain',
+										data: statsSorted.map(({ total_elements_onchain }) => total_elements_onchain),
+										fill: false,
+										borderColor: 'rgb(247, 147, 26)',
+										tension: 0.1
+									},
+									{
+										label: 'Lightning',
+										data: statsSorted.map(
+											({ total_elements_lightning }) => total_elements_lightning
+										),
+										fill: false,
+										borderColor: 'rgb(249, 193, 50)',
+										tension: 0.1
+									},
+									{
+										label: 'Contactless',
+										data: statsSorted.map(
+											({ total_elements_lightning_contactless }) =>
+												total_elements_lightning_contactless
+										),
+										fill: false,
+										borderColor: 'rgb(102, 16, 242)',
 										tension: 0.1
 									}
 								]
@@ -358,6 +406,21 @@
 					<p class="text-sm text-body text-center mt-1">
 						*Elements with a <strong>payment:bitcoin</strong> tag instead of the
 						<strong>currency:XBT</strong> tag.
+					</p>
+				</div>
+
+				<div>
+					<div class="relative">
+						{#if statsLoading}
+							<div
+								class="absolute top-0 left-0 border border-link/50 rounded-3xl animate-pulse w-full h-[400px]"
+							/>
+						{/if}
+						<canvas bind:this={paymentMethodChartCanvas} width="400" height="400" />
+					</div>
+					<p class="text-sm text-body text-center mt-1">
+						*Elements with <strong>payment:onchain</strong>, <strong>payment:lightning</strong> and
+						<strong>payment:lightning_contactless</strong> tags.
 					</p>
 				</div>
 			</section>
