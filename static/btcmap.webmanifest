@@ -58,8 +58,15 @@
 		{
 			"name": "Dashboard",
 			"short_name": "Dash",
-			"description": "Map stats",
+			"description": "Map stats and charts",
 			"url": "/dashboard",
+			"icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+		},
+		{
+			"name": "Activity",
+			"short_name": "Activity",
+			"description": "Latest Supertaggers",
+			"url": "/activity",
 			"icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
 		},
 		{
@@ -67,6 +74,13 @@
 			"short_name": "Leaderboard",
 			"description": "Top Supertaggers",
 			"url": "/leaderboard",
+			"icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+		},
+		{
+			"name": "Communities",
+			"short_name": "Communities",
+			"description": "Local bitcoin communities",
+			"url": "/communities",
 			"icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
 		},
 		{
