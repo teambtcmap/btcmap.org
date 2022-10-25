@@ -10,7 +10,7 @@
 
 	import { Tip } from '$comp';
 
-	let stats = [
+	$: stats = [
 		{ stat: created, title: 'C' },
 		{ stat: updated, title: 'U' },
 		{ stat: deleted, title: 'D' }
