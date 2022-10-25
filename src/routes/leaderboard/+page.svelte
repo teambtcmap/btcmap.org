@@ -96,8 +96,8 @@
 						{
 							label: 'Top Ten',
 							data: leaderboardCopy.map(({ total }) => total),
-							backgroundColor: 'rgba(0, 153, 175, 0.2)',
-							borderColor: 'rgb(0, 153, 175)',
+							backgroundColor: 'rgba(247, 147, 26, 0.2)',
+							borderColor: 'rgb(247, 147, 26)',
 							borderWidth: 1
 						}
 					]
