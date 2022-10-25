@@ -12,6 +12,7 @@
 
 	let statsLoading = true;
 	let communitiesLoading = true;
+	let initialRenderComplete = false;
 
 	let stats;
 	let communities;
@@ -116,128 +117,160 @@
 						let statsCopy = [...stats];
 						let statsSorted = statsCopy.sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
 
-						totalChart = new Chart(totalChartCanvas, {
-							type: 'line',
-							data: {
-								labels: statsSorted.map(({ date }) => date),
-								datasets: [
-									{
-										label: 'Total Locations',
-										data: statsSorted.map(({ total_elements }) => total_elements),
-										fill: false,
-										borderColor: 'rgb(0, 153, 175)',
-										tension: 0.1
-									}
-								]
-							},
-							options: {
-								maintainAspectRatio: false,
-								scales: {
-									x: {
-										ticks: {
-											maxTicksLimit: 5
-										}
-									}
-								}
-							}
-						});
+						if (initialRenderComplete) {
+							totalChart.data.labels = statsSorted.map(({ date }) => date);
+							totalChart.data.datasets[0].data = statsSorted.map(
+								({ total_elements }) => total_elements
+							);
+							totalChart.update();
 
-						paymentMethodChart = new Chart(paymentMethodChartCanvas, {
-							type: 'line',
-							data: {
-								labels: statsSorted.map(({ date }) => date),
-								datasets: [
-									{
-										label: 'On-chain',
-										data: statsSorted.map(({ total_elements_onchain }) => total_elements_onchain),
-										fill: false,
-										borderColor: 'rgb(247, 147, 26)',
-										tension: 0.1
-									},
-									{
-										label: 'Lightning',
-										data: statsSorted.map(
-											({ total_elements_lightning }) => total_elements_lightning
-										),
-										fill: false,
-										borderColor: 'rgb(249, 193, 50)',
-										tension: 0.1
-									},
-									{
-										label: 'Contactless',
-										data: statsSorted.map(
-											({ total_elements_lightning_contactless }) =>
-												total_elements_lightning_contactless
-										),
-										fill: false,
-										borderColor: 'rgb(102, 16, 242)',
-										tension: 0.1
-									}
-								]
-							},
-							options: {
-								maintainAspectRatio: false,
-								scales: {
-									x: {
-										ticks: {
-											maxTicksLimit: 5
-										}
-									}
-								}
-							}
-						});
+							paymentMethodChart.data.labels = statsSorted.map(({ date }) => date);
+							paymentMethodChart.data.datasets[0].data = statsSorted.map(
+								({ total_elements_onchain }) => total_elements_onchain
+							);
+							paymentMethodChart.data.datasets[1].data = statsSorted.map(
+								({ total_elements_lightning }) => total_elements_lightning
+							);
+							paymentMethodChart.data.datasets[2].data = statsSorted.map(
+								({ total_elements_lightning_contactless }) => total_elements_lightning_contactless
+							);
+							paymentMethodChart.update();
 
-						upToDateChart = new Chart(upToDateChartCanvas, {
-							type: 'line',
-							data: {
-								labels: statsSorted.map(({ date }) => date),
-								datasets: [
-									{
-										label: 'Up-to-date Locations',
-										data: statsSorted.map(({ up_to_date_elements }) => up_to_date_elements),
-										fill: false,
-										borderColor: 'rgb(11, 144, 114)',
-										tension: 0.1
-									}
-								]
-							},
-							options: {
-								maintainAspectRatio: false,
-								scales: {
-									x: {
-										ticks: {
-											maxTicksLimit: 5
-										}
-									}
-								}
-							}
-						});
+							upToDateChart.data.labels = statsSorted.map(({ date }) => date);
+							upToDateChart.data.datasets[0].data = statsSorted.map(
+								({ up_to_date_elements }) => up_to_date_elements
+							);
+							upToDateChart.update();
 
-						legacyChart = new Chart(legacyChartCanvas, {
-							type: 'line',
-							data: {
-								labels: statsSorted.map(({ date }) => date),
-								datasets: [
-									{
-										label: 'Legacy Locations',
-										data: statsSorted.map(({ legacy_elements }) => legacy_elements),
-										fill: false,
-										borderColor: 'rgb(235, 87, 87)',
-										tension: 0.1
-									}
-								]
-							},
-							options: {
-								maintainAspectRatio: false,
-								scales: {
-									x: {
-										ticks: {
-											maxTicksLimit: 5
+							legacyChart.data.labels = statsSorted.map(({ date }) => date);
+							legacyChart.data.datasets[0].data = statsSorted.map(
+								({ legacy_elements }) => legacy_elements
+							);
+							legacyChart.update();
+						} else {
+							totalChart = new Chart(totalChartCanvas, {
+								type: 'line',
+								data: {
+									labels: statsSorted.map(({ date }) => date),
+									datasets: [
+										{
+											label: 'Total Locations',
+											data: statsSorted.map(({ total_elements }) => total_elements),
+											fill: false,
+											borderColor: 'rgb(0, 153, 175)',
+											tension: 0.1
+										}
+									]
+								},
+								options: {
+									maintainAspectRatio: false,
+									scales: {
+										x: {
+											ticks: {
+												maxTicksLimit: 5
+											}
 										}
 									}
 								}
-							}
-						});
+							});
+
+							paymentMethodChart = new Chart(paymentMethodChartCanvas, {
+								type: 'line',
+								data: {
+									labels: statsSorted.map(({ date }) => date),
+									datasets: [
+										{
+											label: 'On-chain',
+											data: statsSorted.map(({ total_elements_onchain }) => total_elements_onchain),
+											fill: false,
+											borderColor: 'rgb(247, 147, 26)',
+											tension: 0.1
+										},
+										{
+											label: 'Lightning',
+											data: statsSorted.map(
+												({ total_elements_lightning }) => total_elements_lightning
+											),
+											fill: false,
+											borderColor: 'rgb(249, 193, 50)',
+											tension: 0.1
+										},
+										{
+											label: 'Contactless',
+											data: statsSorted.map(
+												({ total_elements_lightning_contactless }) =>
+													total_elements_lightning_contactless
+											),
+											fill: false,
+											borderColor: 'rgb(102, 16, 242)',
+											tension: 0.1
+										}
+									]
+								},
+								options: {
+									maintainAspectRatio: false,
+									scales: {
+										x: {
+											ticks: {
+												maxTicksLimit: 5
+											}
+										}
+									}
+								}
+							});
+
+							upToDateChart = new Chart(upToDateChartCanvas, {
+								type: 'line',
+								data: {
+									labels: statsSorted.map(({ date }) => date),
+									datasets: [
+										{
+											label: 'Up-to-date Locations',
+											data: statsSorted.map(({ up_to_date_elements }) => up_to_date_elements),
+											fill: false,
+											borderColor: 'rgb(11, 144, 114)',
+											tension: 0.1
+										}
+									]
+								},
+								options: {
+									maintainAspectRatio: false,
+									scales: {
+										x: {
+											ticks: {
+												maxTicksLimit: 5
+											}
+										}
+									}
+								}
+							});
+
+							legacyChart = new Chart(legacyChartCanvas, {
+								type: 'line',
+								data: {
+									labels: statsSorted.map(({ date }) => date),
+									datasets: [
+										{
+											label: 'Legacy Locations',
+											data: statsSorted.map(({ legacy_elements }) => legacy_elements),
+											fill: false,
+											borderColor: 'rgb(235, 87, 87)',
+											tension: 0.1
+										}
+									]
+								},
+								options: {
+									maintainAspectRatio: false,
+									scales: {
+										x: {
+											ticks: {
+												maxTicksLimit: 5
+											}
+										}
+									}
+								}
+							});
+						}
 					})
 					.catch(function (error) {
 						// handle error
@@ -247,7 +280,7 @@
 
 				statsLoading = false;
 			};
-			statsAPI();
+			await statsAPI();
 			statsAPIInterval = setInterval(statsAPI, 600000);
 
 			const communitiesAPI = async () => {
@@ -270,6 +303,8 @@
 			};
 			communitiesAPI();
 			communitiesAPIInterval = setInterval(communitiesAPI, 600000);
+
+			initialRenderComplete = true;
 		}
 	});
 
