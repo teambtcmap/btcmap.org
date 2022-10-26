@@ -104,9 +104,30 @@
 				},
 				options: {
 					maintainAspectRatio: false,
+					plugins: {
+						legend: {
+							labels: {
+								font: {
+									weight: 600
+								}
+							}
+						}
+					},
 					scales: {
+						x: {
+							ticks: {
+								font: {
+									weight: 600
+								}
+							}
+						},
 						y: {
-							beginAtZero: true
+							beginAtZero: true,
+							ticks: {
+								font: {
+									weight: 600
+								}
+							}
 						}
 					}
 				}

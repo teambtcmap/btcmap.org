@@ -106,7 +106,16 @@
 					]
 				},
 				options: {
-					maintainAspectRatio: false
+					maintainAspectRatio: false,
+					plugins: {
+						legend: {
+							labels: {
+								font: {
+									weight: 600
+								}
+							}
+						}
+					}
 				}
 			});
 

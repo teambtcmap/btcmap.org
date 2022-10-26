@@ -91,19 +91,19 @@
 
 	let totalChartCanvas;
 	let totalChart;
-	let paymentMethodChartCanvas;
-	let paymentMethodChart;
 	let upToDateChartCanvas;
 	let upToDateChart;
 	let legacyChartCanvas;
 	let legacyChart;
+	let paymentMethodChartCanvas;
+	let paymentMethodChart;
 
 	onMount(async () => {
 		if (browser) {
 			totalChartCanvas.getContext('2d');
-			paymentMethodChartCanvas.getContext('2d');
 			upToDateChartCanvas.getContext('2d');
 			legacyChartCanvas.getContext('2d');
+			paymentMethodChartCanvas.getContext('2d');
 
 			const statsAPI = async () => {
 				statsLoading = true;
@@ -124,18 +124,6 @@
 							);
 							totalChart.update();
 
-							paymentMethodChart.data.labels = statsSorted.map(({ date }) => date);
-							paymentMethodChart.data.datasets[0].data = statsSorted.map(
-								({ total_elements_onchain }) => total_elements_onchain
-							);
-							paymentMethodChart.data.datasets[1].data = statsSorted.map(
-								({ total_elements_lightning }) => total_elements_lightning
-							);
-							paymentMethodChart.data.datasets[2].data = statsSorted.map(
-								({ total_elements_lightning_contactless }) => total_elements_lightning_contactless
-							);
-							paymentMethodChart.update();
-
 							upToDateChart.data.labels = statsSorted.map(({ date }) => date);
 							upToDateChart.data.datasets[0].data = statsSorted.map(
 								({ up_to_date_elements }) => up_to_date_elements
@@ -147,6 +135,18 @@
 								({ legacy_elements }) => legacy_elements
 							);
 							legacyChart.update();
+
+							paymentMethodChart.data.labels = statsSorted.map(({ date }) => date);
+							paymentMethodChart.data.datasets[0].data = statsSorted.map(
+								({ total_elements_onchain }) => total_elements_onchain
+							);
+							paymentMethodChart.data.datasets[1].data = statsSorted.map(
+								({ total_elements_lightning }) => total_elements_lightning
+							);
+							paymentMethodChart.data.datasets[2].data = statsSorted.map(
+								({ total_elements_lightning_contactless }) => total_elements_lightning_contactless
+							);
+							paymentMethodChart.update();
 						} else {
 							totalChart = new Chart(totalChartCanvas, {
 								type: 'line',
@@ -164,10 +164,119 @@
 								},
 								options: {
 									maintainAspectRatio: false,
+									plugins: {
+										legend: {
+											labels: {
+												font: {
+													weight: 600
+												}
+											}
+										}
+									},
 									scales: {
 										x: {
 											ticks: {
-												maxTicksLimit: 5
+												maxTicksLimit: 5,
+												font: {
+													weight: 600
+												}
+											}
+										},
+										y: {
+											ticks: {
+												font: {
+													weight: 600
+												}
+											}
+										}
+									}
+								}
+							});
+
+							upToDateChart = new Chart(upToDateChartCanvas, {
+								type: 'line',
+								data: {
+									labels: statsSorted.map(({ date }) => date),
+									datasets: [
+										{
+											label: 'Up-to-date Locations',
+											data: statsSorted.map(({ up_to_date_elements }) => up_to_date_elements),
+											fill: false,
+											borderColor: 'rgb(11, 144, 114)',
+											tension: 0.1
+										}
+									]
+								},
+								options: {
+									maintainAspectRatio: false,
+									plugins: {
+										legend: {
+											labels: {
+												font: {
+													weight: 600
+												}
+											}
+										}
+									},
+									scales: {
+										x: {
+											ticks: {
+												maxTicksLimit: 5,
+												font: {
+													weight: 600
+												}
+											}
+										},
+										y: {
+											ticks: {
+												font: {
+													weight: 600
+												}
+											}
+										}
+									}
+								}
+							});
+
+							legacyChart = new Chart(legacyChartCanvas, {
+								type: 'line',
+								data: {
+									labels: statsSorted.map(({ date }) => date),
+									datasets: [
+										{
+											label: 'Legacy Locations',
+											data: statsSorted.map(({ legacy_elements }) => legacy_elements),
+											fill: false,
+											borderColor: 'rgb(235, 87, 87)',
+											tension: 0.1
+										}
+									]
+								},
+								options: {
+									maintainAspectRatio: false,
+									plugins: {
+										legend: {
+											labels: {
+												font: {
+													weight: 600
+												}
+											}
+										}
+									},
+									scales: {
+										x: {
+											ticks: {
+												maxTicksLimit: 5,
+												font: {
+													weight: 600
+												}
+											}
+										},
+										y: {
+											ticks: {
+												font: {
+													weight: 600
+												}
 											}
 										}
 									}
@@ -209,62 +318,29 @@
 								},
 								options: {
 									maintainAspectRatio: false,
-									scales: {
-										x: {
-											ticks: {
-												maxTicksLimit: 5
+									plugins: {
+										legend: {
+											labels: {
+												font: {
+													weight: 600
+												}
 											}
 										}
-									}
-								}
-							});
-
-							upToDateChart = new Chart(upToDateChartCanvas, {
-								type: 'line',
-								data: {
-									labels: statsSorted.map(({ date }) => date),
-									datasets: [
-										{
-											label: 'Up-to-date Locations',
-											data: statsSorted.map(({ up_to_date_elements }) => up_to_date_elements),
-											fill: false,
-											borderColor: 'rgb(11, 144, 114)',
-											tension: 0.1
-										}
-									]
-								},
-								options: {
-									maintainAspectRatio: false,
+									},
 									scales: {
 										x: {
 											ticks: {
-												maxTicksLimit: 5
+												maxTicksLimit: 5,
+												font: {
+													weight: 600
+												}
 											}
-										}
-									}
-								}
-							});
-
-							legacyChart = new Chart(legacyChartCanvas, {
-								type: 'line',
-								data: {
-									labels: statsSorted.map(({ date }) => date),
-									datasets: [
-										{
-											label: 'Legacy Locations',
-											data: statsSorted.map(({ legacy_elements }) => legacy_elements),
-											fill: false,
-											borderColor: 'rgb(235, 87, 87)',
-											tension: 0.1
-										}
-									]
-								},
-								options: {
-									maintainAspectRatio: false,
-									scales: {
-										x: {
+										},
+										y: {
 											ticks: {
-												maxTicksLimit: 5
+												font: {
+													weight: 600
+												}
 											}
 										}
 									}
@@ -421,26 +497,10 @@
 								class="absolute top-0 left-0 border border-link/50 rounded-3xl animate-pulse w-full h-[400px]"
 							/>
 						{/if}
-						<canvas bind:this={paymentMethodChartCanvas} width="400" height="400" />
-					</div>
-					<p class="text-sm text-body text-center mt-1">
-						*Elements with <strong>payment:onchain</strong>, <strong>payment:lightning</strong> and
-						<strong>payment:lightning_contactless</strong> tags.
-					</p>
-				</div>
-
-				<div>
-					<div class="relative">
-						{#if statsLoading}
-							<div
-								class="absolute top-0 left-0 border border-link/50 rounded-3xl animate-pulse w-full h-[400px]"
-							/>
-						{/if}
 						<canvas bind:this={upToDateChartCanvas} width="400" height="400" />
 					</div>
 					<p class="text-sm text-body text-center mt-1">
-						*Elements with a <strong>survey:date</strong> or <strong>check_date</strong> tag less than
-						one year old.
+						*Elements with a <em>survey:date</em> or <em>check_date</em> tag less than one year old.
 					</p>
 				</div>
 
@@ -454,8 +514,23 @@
 						<canvas bind:this={legacyChartCanvas} width="400" height="400" />
 					</div>
 					<p class="text-sm text-body text-center mt-1">
-						*Elements with a <strong>payment:bitcoin</strong> tag instead of the
-						<strong>currency:XBT</strong> tag.
+						*Elements with a <em>payment:bitcoin</em> tag instead of the
+						<em>currency:XBT</em> tag.
+					</p>
+				</div>
+
+				<div>
+					<div class="relative">
+						{#if statsLoading}
+							<div
+								class="absolute top-0 left-0 border border-link/50 rounded-3xl animate-pulse w-full h-[400px]"
+							/>
+						{/if}
+						<canvas bind:this={paymentMethodChartCanvas} width="400" height="400" />
+					</div>
+					<p class="text-sm text-body text-center mt-1">
+						*Elements with <em>payment:onchain</em>, <em>payment:lightning</em> and
+						<em>payment:lightning_contactless</em> tags.
 					</p>
 				</div>
 			</section>
