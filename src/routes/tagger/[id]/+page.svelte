@@ -121,6 +121,7 @@
 
 			//import packages
 			const leaflet = await import('leaflet');
+			const DomEvent = await import('leaflet/src/dom/DomEvent');
 			const leafletMarkerCluster = await import('leaflet.markercluster');
 
 			// add map and tiles
@@ -356,6 +357,8 @@
 
 			map.addLayer(markers);
 			map.fitBounds(bounds.map(({ latCalc, longCalc }) => [latCalc, longCalc]));
+
+			DomEvent.disableClickPropagation(document.querySelector('.leaflet-control-full-screen'));
 
 			mapLoaded = true;
 		}
