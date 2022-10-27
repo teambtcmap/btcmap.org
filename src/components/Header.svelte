@@ -1,5 +1,5 @@
 <script>
-	import { OutClick, NavDropdownDesktop, NavDropdownMobile } from '$comp';
+	import { NavDropdownDesktop, NavDropdownMobile } from '$comp';
 
 	const navLinks = [
 		{ title: 'Map', url: '/map', icon: 'map' },

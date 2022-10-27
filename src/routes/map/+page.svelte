@@ -1,16 +1,82 @@
 <script>
 	import localforage from 'localforage';
+	import { tick } from 'svelte';
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import { elements, mapUpdates, elementError } from '$lib/store';
 	import { checkAddress } from '$lib/map/setup';
 	import { errToast } from '$lib/utils';
-	import { MapLoading } from '$comp';
+	import { MapLoading, OutClick } from '$comp';
 
 	let mapElement;
 	let map;
 	let mapLoaded;
+
+	let mapCenter;
+	let elementsCopy = [];
+
+	let customSearchBar;
+	let showSearch;
+	let search;
+	let searchResults = [];
+
+	function debounce(func, timeout = 500) {
+		let timer;
+		return (...args) => {
+			clearTimeout(timer);
+			timer = setTimeout(() => {
+				func.apply(this, args);
+			}, timeout);
+		};
+	}
+
+	const elementSearch = (e) => {
+		if (!e.target.value) {
+			searchResults = [];
+			return;
+		}
+
+		let filter = elementsCopy.filter((element) => {
+			let tags = element.tags;
+
+			if (tags && tags.name) {
+				let splitWords = e.target.value.split(' ').filter((word) => word);
+
+				let values = Object.values(tags);
+
+				return values.some((value) =>
+					splitWords.some((word) => value.toLowerCase().includes(word.toLowerCase()))
+				);
+			}
+		});
+
+		let distance = [];
+		filter.forEach((element) => {
+			element.distanceKm = (mapCenter.distanceTo(element.latLng) / 1000).toFixed(1);
+			element.distanceMi = (element.distanceKm * 0.6213712).toFixed(1);
+			distance.push(element);
+		});
+
+		let sorted = distance.sort((a, b) => a.distanceKm - b.distanceKm);
+
+		searchResults = sorted.slice(0, 50);
+	};
+
+	const searchDebounce = debounce((e) => elementSearch(e));
+
+	const clearSearch = () => {
+		search = '';
+		searchResults = [];
+	};
+
+	const searchSelect = (result) => {
+		clearSearch();
+		map.flyTo(result.latLng, 19);
+		map.once('moveend', () => {
+			result.marker.openPopup();
+		});
+	};
 
 	// allows for users to set initial view in a URL query
 	const urlLat = $page.url.searchParams.getAll('lat');
@@ -35,6 +101,7 @@
 		if (browser) {
 			//import packages
 			const leaflet = await import('leaflet');
+			const DomEvent = await import('leaflet/src/dom/DomEvent');
 			const leafletLocateControl = await import('leaflet.locatecontrol');
 			const leafletMarkerCluster = await import('leaflet.markercluster');
 
@@ -173,6 +240,8 @@ Thanks for using BTC Map!`);
 			map.on('zoomend', () => {
 				const coords = map.getBounds();
 
+				mapCenter = map.getCenter();
+
 				localforage
 					.setItem('coords', coords)
 					.then(function (value) {})
@@ -183,6 +252,8 @@ Thanks for using BTC Map!`);
 
 			map.on('moveend', () => {
 				const coords = map.getBounds();
+
+				mapCenter = map.getCenter();
 
 				localforage
 					.setItem('coords', coords)
@@ -322,6 +393,74 @@ Thanks for using BTC Map!`);
 			locateButton.onmouseleave = () => {
 				document.querySelector('#locatebutton').src = '/icons/locate.svg';
 			};
+
+			// add search button to map
+			const customSearchButton = L.Control.extend({
+				options: {
+					position: 'topleft'
+				},
+				onAdd: () => {
+					const searchButtonDiv = L.DomUtil.create('div');
+					searchButtonDiv.classList.add('leaflet-bar');
+					searchButtonDiv.style.border = 'none';
+					searchButtonDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+
+					const searchButton = L.DomUtil.create('a');
+					searchButton.classList.add('leaflet-control-search-toggle');
+					searchButton.href = '#';
+					searchButton.title = 'Search toggle';
+					searchButton.role = 'button';
+					searchButton.ariaLabel = 'Search toggle';
+					searchButton.ariaDisabled = 'false';
+					searchButton.innerHTML = `<img src='/icons/search.svg' alt='search' class='inline w-[16px] h-[16px]' id='search-button'/>`;
+					searchButton.style.borderRadius = '8px';
+					searchButton.onclick = async function toggleSearch() {
+						showSearch = !showSearch;
+						if (showSearch) {
+							await tick();
+							document.querySelector('#search-input').focus();
+						} else {
+							search = '';
+							searchResults = [];
+						}
+					};
+					searchButton.onmouseenter = () => {
+						document.querySelector('#search-button').src = '/icons/search-black.svg';
+					};
+					searchButton.onmouseleave = () => {
+						document.querySelector('#search-button').src = '/icons/search.svg';
+					};
+
+					searchButtonDiv.append(searchButton);
+
+					return searchButtonDiv;
+				}
+			});
+
+			map.addControl(new customSearchButton());
+
+			// add search bar to map
+			map._controlCorners['topcenter'] = L.DomUtil.create(
+				'div',
+				'leaflet-top leaflet-center',
+				map._controlContainer
+			);
+
+			L.Control.Search = L.Control.extend({
+				options: {
+					position: 'topcenter'
+				},
+				onAdd: () => {
+					const searchBarDiv = L.DomUtil.create('div');
+					searchBarDiv.classList.add('leafet-control', 'search-bar-div');
+
+					searchBarDiv.append(customSearchBar);
+
+					return searchBarDiv;
+				}
+			});
+
+			new L.Control.Search().addTo(map);
 
 			// add home and marker buttons to map
 			const customControls = L.Control.extend({
@@ -564,10 +703,19 @@ Thanks for using BTC Map!`);
 					);
 
 					markers.addLayer(marker);
+
+					element.latLng = L.latLng(latCalc, longCalc);
+					element.marker = marker;
+					elementsCopy.push(element);
 				}
 			});
 
 			map.addLayer(markers);
+
+			DomEvent.disableScrollPropagation(customSearchBar);
+			DomEvent.disableClickPropagation(customSearchBar);
+			DomEvent.disableClickPropagation(document.querySelector('.leaflet-control-search-toggle'));
+
 			mapLoaded = true;
 		}
 	});
@@ -584,6 +732,54 @@ Thanks for using BTC Map!`);
 	{#if !mapLoaded}
 		<MapLoading type="main" message="Rendering map..." style="absolute top-0 left-0 z-[10000]" />
 	{/if}
+
+	<div
+		bind:this={customSearchBar}
+		class="w-[150px] md:w-[300px] absolute top-0 left-[calc(50vw-75px)] md:left-[calc(50vw-150px)] {showSearch
+			? 'block'
+			: 'hidden'}"
+	>
+		<input
+			id="search-input"
+			type="text"
+			class="w-full drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] rounded-full py-3 px-2 focus:outline-statBorder text-map text-center"
+			placeholder="Search..."
+			on:input={searchDebounce}
+			bind:value={search}
+		/>
+
+		{#if search}
+			<OutClick
+				excludeByQuerySelector={['#search-input', '#search-button']}
+				on:outclick={clearSearch}
+			>
+				<div
+					class="w-full drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] bg-white text-map rounded-lg mt-2 space-y-2 max-h-[200px] md:max-h-[300px] overflow-y-scroll hide-scroll"
+				>
+					{#each searchResults as result}
+						<button
+							on:click={() => searchSelect(result)}
+							class="hover:text-black text-sm block w-full p-2 border-t-2 border-statBorder {result ===
+							searchResults[0]
+								? 'border-none'
+								: ''} {result.tags.name.match('([^ ]{19})') ? 'break-all' : ''}"
+							>{result.tags.name}
+							<div class="text-xs text-mapButton">
+								<span>{result.distanceKm} km | {result.distanceMi} mi</span>
+							</div>
+						</button>
+					{/each}
+
+					{#if searchResults.length === 0}
+						<span class="text-sm text-mapButton text-center block w-full p-2"
+							>No results found.</span
+						>
+					{/if}
+				</div>
+			</OutClick>
+		{/if}
+	</div>
+
 	<div bind:this={mapElement} class="!bg-teal h-[100vh]" />
 </main>
 

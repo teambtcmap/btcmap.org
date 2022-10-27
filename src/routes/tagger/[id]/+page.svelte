@@ -454,8 +454,7 @@
 
 					<div
 						bind:this={activityDiv}
-						id="activity-div"
-						class="space-y-2 {eventElements.length > 5
+						class="hide-scroll space-y-2 {eventElements.length > 5
 							? 'h-[375px]'
 							: ''} overflow-y-scroll relative"
 						on:scroll={() => {
@@ -530,15 +529,4 @@
 	@import 'leaflet/dist/leaflet.css';
 	@import 'leaflet.markercluster/dist/MarkerCluster.css';
 	@import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
-
-	/* Hide scrollbar for Chrome, Safari and Opera */
-	#activity-div::-webkit-scrollbar {
-		display: none;
-	}
-
-	/* Hide scrollbar for IE, Edge and Firefox */
-	#activity-div {
-		-ms-overflow-style: none; /* IE and Edge */
-		scrollbar-width: none; /* Firefox */
-	}
 </style>
