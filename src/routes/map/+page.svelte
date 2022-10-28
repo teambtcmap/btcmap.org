@@ -724,6 +724,10 @@ Thanks for using BTC Map!`);
 			DomEvent.disableClickPropagation(document.querySelector('.leaflet-control-full-screen'));
 			DomEvent.disableClickPropagation(document.querySelector('.leaflet-control-site-links'));
 
+			map.on('load', () => {
+				mapCenter = map.getCenter();
+			});
+
 			mapLoaded = true;
 		}
 	});
