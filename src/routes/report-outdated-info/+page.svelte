@@ -107,6 +107,7 @@
 			if (showMap) {
 				//import packages
 				const leaflet = await import('leaflet');
+				const DomEvent = await import('leaflet/src/dom/DomEvent');
 				const leafletLocateControl = await import('leaflet.locatecontrol');
 				const leafletMarkerCluster = await import('leaflet.markercluster');
 
@@ -143,6 +144,52 @@
 				);
 				attribution.style.borderRadius = '8px 0 0 0';
 				attribution.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+
+				// add fullscreen button to map
+				const customFullScreenButton = L.Control.extend({
+					options: {
+						position: 'topleft'
+					},
+					onAdd: () => {
+						const fullscreenDiv = L.DomUtil.create('div');
+						fullscreenDiv.classList.add('leaflet-bar');
+						fullscreenDiv.style.border = 'none';
+						fullscreenDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+
+						const fullscreenButton = L.DomUtil.create('a');
+						fullscreenButton.classList.add('leaflet-control-full-screen');
+						fullscreenButton.href = '#';
+						fullscreenButton.title = 'Full screen';
+						fullscreenButton.role = 'button';
+						fullscreenButton.ariaLabel = 'Full screen';
+						fullscreenButton.ariaDisabled = 'false';
+						fullscreenButton.innerHTML = `<img src='/icons/expand.svg' alt='fullscreen' class='inline' id='fullscreen'/>`;
+						fullscreenButton.style.borderRadius = '8px';
+						fullscreenButton.onclick = function toggleFullscreen() {
+							if (!document.fullscreenElement) {
+								mapElement.requestFullscreen().catch((err) => {
+									errToast(
+										`Error attempting to enable fullscreen mode: ${err.message} (${err.name})`
+									);
+								});
+							} else {
+								document.exitFullscreen();
+							}
+						};
+						fullscreenButton.onmouseenter = () => {
+							document.querySelector('#fullscreen').src = '/icons/expand-black.svg';
+						};
+						fullscreenButton.onmouseleave = () => {
+							document.querySelector('#fullscreen').src = '/icons/expand.svg';
+						};
+
+						fullscreenDiv.append(fullscreenButton);
+
+						return fullscreenDiv;
+					}
+				});
+
+				map.addControl(new customFullScreenButton());
 
 				// adds locate button to map
 				L.control.locate().addTo(map);
@@ -336,6 +383,8 @@
 				});
 
 				map.addLayer(markers);
+
+				DomEvent.disableClickPropagation(document.querySelector('.leaflet-control-full-screen'));
 
 				mapLoaded = true;
 			}
