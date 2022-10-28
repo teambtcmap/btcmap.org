@@ -17,8 +17,10 @@
 	let elementsCopy = [];
 
 	let customSearchBar;
+	let clearSearchButton;
 	let showSearch;
 	let search;
+	let searchStatus;
 	let searchResults = [];
 
 	function debounce(func, timeout = 500) {
@@ -31,9 +33,10 @@
 		};
 	}
 
-	const elementSearch = (e) => {
-		if (!e.target.value) {
+	const elementSearch = () => {
+		if (search.length < 3) {
 			searchResults = [];
+			searchStatus = false;
 			return;
 		}
 
@@ -41,7 +44,7 @@
 			let tags = element.tags;
 
 			if (tags && tags.name) {
-				let splitWords = e.target.value.split(' ').filter((word) => word);
+				let splitWords = search.split(' ').filter((word) => word);
 
 				let values = Object.values(tags);
 
@@ -61,9 +64,11 @@
 		let sorted = distance.sort((a, b) => a.distanceKm - b.distanceKm);
 
 		searchResults = sorted.slice(0, 50);
+
+		searchStatus = false;
 	};
 
-	const searchDebounce = debounce((e) => elementSearch(e));
+	const searchDebounce = debounce(() => elementSearch());
 
 	const clearSearch = () => {
 		search = '';
@@ -412,7 +417,7 @@ Thanks for using BTC Map!`);
 					searchButton.role = 'button';
 					searchButton.ariaLabel = 'Search toggle';
 					searchButton.ariaDisabled = 'false';
-					searchButton.innerHTML = `<img src='/icons/search.svg' alt='search' class='inline w-[16px] h-[16px]' id='search-button'/>`;
+					searchButton.innerHTML = `<img src='/icons/search.svg' alt='search' class='inline' id='search-button'/>`;
 					searchButton.style.borderRadius = '8px';
 					searchButton.onclick = async function toggleSearch() {
 						showSearch = !showSearch;
@@ -715,6 +720,7 @@ Thanks for using BTC Map!`);
 			DomEvent.disableScrollPropagation(customSearchBar);
 			DomEvent.disableClickPropagation(customSearchBar);
 			DomEvent.disableClickPropagation(document.querySelector('.leaflet-control-search-toggle'));
+			DomEvent.disableClickPropagation(clearSearchButton);
 			DomEvent.disableClickPropagation(document.querySelector('.leaflet-control-full-screen'));
 			DomEvent.disableClickPropagation(document.querySelector('.leaflet-control-site-links'));
 
@@ -736,46 +742,82 @@ Thanks for using BTC Map!`);
 	{/if}
 
 	<div
+		id="search-div"
 		bind:this={customSearchBar}
-		class="w-[150px] md:w-[300px] absolute top-0 left-[calc(50vw-75px)] md:left-[calc(50vw-150px)] {showSearch
-			? 'block'
-			: 'hidden'}"
+		class="w-[50vw] md:w-[350px] absolute top-0 left-[60px] {showSearch ? 'block' : 'hidden'}"
 	>
-		<input
-			id="search-input"
-			type="text"
-			class="w-full drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] rounded-full py-3 px-2 focus:outline-statBorder text-map text-center"
-			placeholder="Search..."
-			on:input={searchDebounce}
-			bind:value={search}
-		/>
+		<div class="relative">
+			<input
+				id="search-input"
+				type="text"
+				class="w-full drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] rounded-lg p-2 focus:outline-none text-mapButton text-[16px]"
+				placeholder="Search..."
+				on:keyup={searchDebounce}
+				on:keydown={() => (searchStatus = true)}
+				bind:value={search}
+			/>
 
-		{#if search}
+			<button
+				bind:this={clearSearchButton}
+				on:click={clearSearch}
+				class="text-mapButton hover:text-black absolute top-[10px] right-[8px] bg-white {search
+					? 'block'
+					: 'hidden'}"
+			>
+				<svg
+					width="20"
+					height="20"
+					viewBox="0 0 20 20"
+					fill="none"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<path
+						d="M14.1668 5.8335L5.8335 14.1668M5.8335 5.8335L14.1668 14.1668"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					/>
+				</svg>
+			</button>
+		</div>
+
+		{#if search && search.length > 2}
 			<OutClick
-				excludeByQuerySelector={['#search-input', '#search-button']}
+				excludeByQuerySelector={['#search-button', '#search-div']}
 				on:outclick={clearSearch}
 			>
 				<div
-					class="w-full drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] bg-white text-map rounded-lg mt-2 space-y-2 max-h-[200px] md:max-h-[300px] overflow-y-scroll hide-scroll"
+					class="w-full drop-shadow-[0px_2px_6px_rgba(0,0,0,0.15)] bg-white rounded-lg mt-0.5 max-h-[206px] overflow-y-scroll hide-scroll"
 				>
 					{#each searchResults as result}
 						<button
 							on:click={() => searchSelect(result)}
-							class="hover:text-black text-sm block w-full p-2 border-t-2 border-statBorder {result ===
-							searchResults[0]
-								? 'border-none'
-								: ''} {result.tags.name.match('([^ ]{19})') ? 'break-all' : ''}"
-							>{result.tags.name}
-							<div class="text-xs text-mapButton">
-								<span>{result.distanceKm} km | {result.distanceMi} mi</span>
+							class="block hover:bg-searchHover w-full md:text-left md:flex justify-between px-4 py-2
+							{result.tags.name.match('([^ ]{21})') ||
+							(result.tags['addr:street'] && result.tags['addr:street'].match('([^ ]{21})')) ||
+							(result.tags['addr:city'] && result.tags['addr:city'].match('([^ ]{21})'))
+								? 'break-all'
+								: ''}"
+						>
+							<div class="md:flex items-start md:space-x-2">
+								<img src="/icons/marker.svg" alt="marker" class="mx-auto md:mx-0 mt-1 opacity-50" />
+
+								<div>
+									<p class="text-sm text-mapButton">{result.tags.name}</p>
+									<p class="text-xs text-searchSubtext">{checkAddress(result.tags)}</p>
+								</div>
+							</div>
+
+							<div class="text-xs text-searchSubtext text-center">
+								<p>{result.distanceKm} km</p>
+								<p>({result.distanceMi} mi)</p>
 							</div>
 						</button>
 					{/each}
 
-					{#if searchResults.length === 0}
-						<span class="text-sm text-mapButton text-center block w-full p-2"
-							>No results found.</span
-						>
+					{#if !searchStatus && searchResults.length === 0}
+						<p class="text-sm text-searchSubtext text-center w-full px-4 py-2">No results found.</p>
 					{/if}
 				</div>
 			</OutClick>
