@@ -754,7 +754,7 @@ Thanks for using BTC Map!`);
 			<input
 				id="search-input"
 				type="text"
-				class="w-full drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] rounded-lg p-2 focus:outline-none text-mapButton text-[16px]"
+				class="w-full drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] rounded-lg p-2.5 focus:outline-none text-mapButton text-[16px]"
 				placeholder="Search..."
 				on:keyup={searchDebounce}
 				on:keydown={(e) => {
