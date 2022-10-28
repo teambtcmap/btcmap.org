@@ -7,7 +7,15 @@
 	import { browser } from '$app/environment';
 	import { onMount, onDestroy } from 'svelte';
 	import { users, events, elements } from '$lib/store';
-	import { checkAddress } from '$lib/map/setup';
+	import {
+		attribution,
+		fullscreenButton,
+		changeDefaultIcons,
+		calcVerifiedDate,
+		latCalc,
+		longCalc,
+		generateMarker
+	} from '$lib/map/setup';
 	import { errToast } from '$lib/utils';
 	import { error } from '@sveltejs/kit';
 	import {
@@ -125,7 +133,7 @@
 			const leafletMarkerCluster = await import('leaflet.markercluster');
 
 			// add map and tiles
-			map = leaflet.map(mapElement);
+			map = leaflet.map(mapElement, { attributionControl: false });
 
 			const osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				noWrap: true,
@@ -138,95 +146,19 @@
 			L.Icon.Default.prototype.options.imagePath = '/icons/';
 
 			// add OSM attribution
-			document.querySelector(
-				'.leaflet-bottom.leaflet-right > .leaflet-control-attribution'
-			).innerHTML =
-				'&copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors';
-
-			const attribution = document.querySelector(
-				'.leaflet-bottom.leaflet-right > .leaflet-control-attribution'
-			);
-			attribution.style.borderRadius = '8px 0 0 0';
-			attribution.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+			attribution(L, map);
 
 			// change default icons
-			const leafletBar = document.querySelector('.leaflet-bar');
-			leafletBar.style.border = 'none';
-			leafletBar.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
-
-			const zoomIn = document.querySelector('.leaflet-control-zoom-in');
-			zoomIn.style.borderRadius = '8px 8px 0 0';
-			zoomIn.innerHTML = `<img src='/icons/plus.svg' alt='zoomin' class='inline' id='zoomin'/>`;
-			zoomIn.onmouseenter = () => {
-				document.querySelector('#zoomin').src = '/icons/plus-black.svg';
-			};
-			zoomIn.onmouseleave = () => {
-				document.querySelector('#zoomin').src = '/icons/plus.svg';
-			};
-
-			const zoomOut = document.querySelector('.leaflet-control-zoom-out');
-			zoomOut.style.borderRadius = '0 0 8px 8px';
-			zoomOut.innerHTML = `<img src='/icons/minus.svg' alt='zoomout' class='inline' id='zoomout'/>`;
-			zoomOut.onmouseenter = () => {
-				document.querySelector('#zoomout').src = '/icons/minus-black.svg';
-			};
-			zoomOut.onmouseleave = () => {
-				document.querySelector('#zoomout').src = '/icons/minus.svg';
-			};
+			changeDefaultIcons();
 
 			// add fullscreen button to map
-			const customFullScreenButton = L.Control.extend({
-				options: {
-					position: 'topleft'
-				},
-				onAdd: () => {
-					const fullscreenDiv = L.DomUtil.create('div');
-					fullscreenDiv.classList.add('leaflet-bar');
-					fullscreenDiv.style.border = 'none';
-					fullscreenDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
-
-					const fullscreenButton = L.DomUtil.create('a');
-					fullscreenButton.classList.add('leaflet-control-full-screen');
-					fullscreenButton.href = '#';
-					fullscreenButton.title = 'Full screen';
-					fullscreenButton.role = 'button';
-					fullscreenButton.ariaLabel = 'Full screen';
-					fullscreenButton.ariaDisabled = 'false';
-					fullscreenButton.innerHTML = `<img src='/icons/expand.svg' alt='fullscreen' class='inline' id='fullscreen'/>`;
-					fullscreenButton.style.borderRadius = '8px';
-					fullscreenButton.onclick = function toggleFullscreen() {
-						if (!document.fullscreenElement) {
-							mapElement.requestFullscreen().catch((err) => {
-								errToast(
-									`Error attempting to enable fullscreen mode: ${err.message} (${err.name})`
-								);
-							});
-						} else {
-							document.exitFullscreen();
-						}
-					};
-					fullscreenButton.onmouseenter = () => {
-						document.querySelector('#fullscreen').src = '/icons/expand-black.svg';
-					};
-					fullscreenButton.onmouseleave = () => {
-						document.querySelector('#fullscreen').src = '/icons/expand.svg';
-					};
-
-					fullscreenDiv.append(fullscreenButton);
-
-					return fullscreenDiv;
-				}
-			});
-
-			map.addControl(new customFullScreenButton());
+			fullscreenButton(L, mapElement, map, DomEvent);
 
 			// create marker cluster group
 			let markers = L.markerClusterGroup();
 
 			// get date from 1 year ago to add verified check if survey is current
-			let verifiedDate = new Date();
-			const previousYear = verifiedDate.getFullYear() - 1;
-			verifiedDate.setFullYear(previousYear);
+			let verifiedDate = calcVerifiedDate();
 
 			// filter elements edited by user
 			let filteredElements = $elements.filter((element) =>
@@ -238,127 +170,17 @@
 
 			filteredElements.forEach((element) => {
 				element = element['osm_json'];
-				const latCalc =
-					element.type == 'node'
-						? element.lat
-						: (element.bounds.minlat + element.bounds.maxlat) / 2;
-				const longCalc =
-					element.type == 'node'
-						? element.lon
-						: (element.bounds.minlon + element.bounds.maxlon) / 2;
+				const lat = latCalc(element);
+				const long = longCalc(element);
 
-				let marker = L.marker([latCalc, longCalc]).bindPopup(
-					// marker popup component
-					`${
-						element.tags && element.tags.name
-							? `<span class='block font-bold text-lg text-primary break-all leading-snug' title='Merchant name'>${element.tags.name}</span>`
-							: ''
-					}
-
-                <span class='block text-body font-bold' title='Address'>${
-									element.tags && checkAddress(element.tags)
-								}</span>
-
-                <div class='w-[211px] flex space-x-2 my-1'>
-                  ${
-										element.tags && element.tags.phone
-											? `<a href='tel:${element.tags.phone}' title='Phone'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-phone" /></a>`
-											: ''
-									}
-
-                  ${
-										element.tags && element.tags.website
-											? `<a href=${element.tags.website} target="_blank" rel="noreferrer" title='Website'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-globe" /></a>`
-											: ''
-									}
-
-						      ${
-										element.tags && element.tags['contact:twitter']
-											? `<a href=${
-													element.tags['contact:twitter'].startsWith('http')
-														? element.tags['contact:twitter']
-														: `https://twitter.com/${element.tags['contact:twitter']}`
-											  } target="_blank" rel="noreferrer" title='Twitter'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-brands fa-twitter" /></a>`
-											: ''
-									}
-
-                  <a href='https://www.openstreetmap.org/edit?${element.type}=${
-						element.id
-					}' target="_blank" rel="noreferrer" title='Edit'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-pen-to-square" /></a>
-
-                  <a href='https://btcmap.org/map?lat=${
-										element.type == 'node' ? element.lat : latCalc
-									}&long=${
-						element.type == 'node' ? element.lon : longCalc
-					}' target="_blank" rel="noreferrer" title='Share'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-share-nodes" /></a>
-                </div>
-
-                   <div class='w-full flex space-x-2 my-1'>
-	                   <img src=${
-												element.tags && element.tags['payment:onchain'] === 'yes'
-													? '/icons/btc-highlight.svg'
-													: element.tags && element.tags['payment:onchain'] === 'no'
-													? '/icons/btc-no.svg'
-													: '/icons/btc.svg'
-											} alt="bitcoin" class="w-7 h-7" title="${
-						element.tags && element.tags['payment:onchain'] === 'yes'
-							? 'On-chain accepted'
-							: element.tags && element.tags['payment:onchain'] === 'no'
-							? 'On-chain not accepted'
-							: 'On-chain unknown'
-					}"/>
-
-	                   <img src=${
-												element.tags && element.tags['payment:lightning'] === 'yes'
-													? '/icons/ln-highlight.svg'
-													: element.tags && element.tags['payment:lightning'] === 'no'
-													? '/icons/ln-no.svg'
-													: '/icons/ln.svg'
-											} alt="lightning" class="w-7 h-7" title="${
-						element.tags && element.tags['payment:lightning'] === 'yes'
-							? 'Lightning accepted'
-							: element.tags && element.tags['payment:lightning'] === 'no'
-							? 'Lightning not accepted'
-							: 'Lightning unknown'
-					}"/>
-
-	                   <img src=${
-												element.tags && element.tags['payment:lightning_contactless'] === 'yes'
-													? '/icons/nfc-highlight.svg'
-													: element.tags && element.tags['payment:lightning_contactless'] === 'no'
-													? '/icons/nfc-no.svg'
-													: '/icons/nfc.svg'
-											} alt="nfc" class="w-7 h-7" title="${
-						element.tags && element.tags['payment:lightning_contactless'] === 'yes'
-							? 'Lightning Contactless accepted'
-							: element.tags && element.tags['payment:lightning_contactless'] === 'no'
-							? 'Lightning contactless not accepted'
-							: 'Lightning Contactless unknown'
-					}"/>
-	                 </div>
-
-								<span class='text-body my-1' title="Surveys are completed by BTC Map community members">Survey date:
-								${
-									element.tags && element.tags['survey:date']
-										? `${element.tags['survey:date']} ${
-												Date.parse(element.tags['survey:date']) > verifiedDate
-													? '<img src="/icons/verified.svg" alt="verified" class="inline w-5 h-5" title="Verified within the last year"/>'
-													: ''
-										  }`
-										: '<span class="fa-solid fa-question" title="Not verified"></span>'
-								}
-								</span>`,
-					{ closeButton: false }
-				);
+				let marker = generateMarker(lat, long, element, L, verifiedDate, 'report');
 
 				markers.addLayer(marker);
-				bounds.push({ latCalc, longCalc });
+				bounds.push({ lat, long });
 			});
 
 			map.addLayer(markers);
-			map.fitBounds(bounds.map(({ latCalc, longCalc }) => [latCalc, longCalc]));
-
-			DomEvent.disableClickPropagation(document.querySelector('.leaflet-control-full-screen'));
+			map.fitBounds(bounds.map(({ lat, long }) => [lat, long]));
 
 			mapLoaded = true;
 		}

@@ -10,16 +10,16 @@
 		"format": "prettier --write ."
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-auto": "^1.0.0-next.83",
-		"@sveltejs/adapter-node": "^1.0.0-next.98",
-		"@sveltejs/kit": "1.0.0-next.517",
+		"@sveltejs/adapter-auto": "^1.0.0-next.84",
+		"@sveltejs/adapter-node": "^1.0.0-next.99",
+		"@sveltejs/kit": "1.0.0-next.525",
 		"autoprefixer": "^10.4.12",
 		"postcss": "^8.4.18",
 		"prettier": "^2.6.2",
 		"prettier-plugin-svelte": "^2.8.0",
 		"svelte": "^3.52.0",
 		"svelte-preprocess": "^4.10.7",
-		"tailwindcss": "^3.1.8",
+		"tailwindcss": "^3.2.1",
 		"vite": "^3.1.8"
 	},
 	"type": "module",
