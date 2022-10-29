@@ -250,7 +250,7 @@
 							disabled={!captchaSecret || !mapLoaded}
 							name="socials"
 							placeholder="Website, Twitter, Telegram, Matrix etc."
-							rows="5"
+							rows="3"
 							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
 							bind:value={socialLinks}
 						/>
