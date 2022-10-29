@@ -23,7 +23,9 @@
 
 	const supertaggerSync = (status, users, events, elements) => {
 		if (elements.length && events.length && users.length && !status) {
-			let recentEvents = events.slice(0, 50);
+			let recentEvents = events
+				.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']))
+				.slice(0, 50);
 
 			elementsLoading = true;
 			supertaggers = [];
