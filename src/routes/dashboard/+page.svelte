@@ -51,7 +51,7 @@
 		}).length;
 	};
 
-	$: total = stats && stats[0].total_elements;
+	$: total = stats && stats[0].tags.total_elements;
 
 	$: created = $events && $events.length ? getStat('create') : undefined;
 	$: createdPrevious = $events && $events.length ? getStatPrevious('create') : undefined;
@@ -62,14 +62,14 @@
 	$: deleted = $events && $events.length ? getStat('delete') : undefined;
 	$: deletedPrevious = $events && $events.length ? getStatPrevious('delete') : undefined;
 
-	$: onchain = stats && stats[0].total_elements_onchain;
-	$: lightning = stats && stats[0].total_elements_lightning;
-	$: nfc = stats && stats[0].total_elements_lightning_contactless;
+	$: onchain = stats && stats[0].tags.total_elements_onchain;
+	$: lightning = stats && stats[0].tags.total_elements_lightning;
+	$: nfc = stats && stats[0].tags.total_elements_lightning_contactless;
 
 	$: totalChange =
 		stats &&
 		new Intl.NumberFormat('en-US', { signDisplay: 'always' })
-			.format(total - stats[1].total_elements)
+			.format(total - stats[1].tags.total_elements)
 			.toString();
 
 	$: createdPercentChange =
@@ -98,7 +98,8 @@
 		new Intl.NumberFormat('en-US', { signDisplay: 'always' })
 			.format(
 				(
-					((onchain - stats[1].total_elements_onchain) / stats[1].total_elements_onchain) *
+					((onchain - stats[1].tags.total_elements_onchain) /
+						stats[1].tags.total_elements_onchain) *
 					100
 				).toFixed(1)
 			)
@@ -109,7 +110,8 @@
 		new Intl.NumberFormat('en-US', { signDisplay: 'always' })
 			.format(
 				(
-					((lightning - stats[1].total_elements_lightning) / stats[1].total_elements_lightning) *
+					((lightning - stats[1].tags.total_elements_lightning) /
+						stats[1].tags.total_elements_lightning) *
 					100
 				).toFixed(1)
 			)
@@ -120,8 +122,8 @@
 		new Intl.NumberFormat('en-US', { signDisplay: 'always' })
 			.format(
 				(
-					((nfc - stats[1].total_elements_lightning_contactless) /
-						stats[1].total_elements_lightning_contactless) *
+					((nfc - stats[1].tags.total_elements_lightning_contactless) /
+						stats[1].tags.total_elements_lightning_contactless) *
 					100
 				).toFixed(1)
 			)
@@ -150,7 +152,9 @@
 					.get('https://api.btcmap.org/v2/reports')
 					.then(function (response) {
 						// handle success
-						stats = response.data.filter((report) => report['area_id'] === '');
+						stats = response.data
+							.filter((report) => report['area_id'] === '')
+							.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
 
 						let statsCopy = [...stats];
 						let statsSorted = statsCopy.sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
@@ -158,31 +162,32 @@
 						if (initialRenderComplete) {
 							totalChart.data.labels = statsSorted.map(({ date }) => date);
 							totalChart.data.datasets[0].data = statsSorted.map(
-								({ total_elements }) => total_elements
+								({ tags: { total_elements } }) => total_elements
 							);
 							totalChart.update();
 
 							upToDateChart.data.labels = statsSorted.map(({ date }) => date);
 							upToDateChart.data.datasets[0].data = statsSorted.map(
-								({ up_to_date_elements }) => up_to_date_elements
+								({ tags: { up_to_date_elements } }) => up_to_date_elements
 							);
 							upToDateChart.update();
 
 							legacyChart.data.labels = statsSorted.map(({ date }) => date);
 							legacyChart.data.datasets[0].data = statsSorted.map(
-								({ legacy_elements }) => legacy_elements
+								({ tags: { legacy_elements } }) => legacy_elements
 							);
 							legacyChart.update();
 
 							paymentMethodChart.data.labels = statsSorted.map(({ date }) => date);
 							paymentMethodChart.data.datasets[0].data = statsSorted.map(
-								({ total_elements_onchain }) => total_elements_onchain
+								({ tags: { total_elements_onchain } }) => total_elements_onchain
 							);
 							paymentMethodChart.data.datasets[1].data = statsSorted.map(
-								({ total_elements_lightning }) => total_elements_lightning
+								({ tags: { total_elements_lightning } }) => total_elements_lightning
 							);
 							paymentMethodChart.data.datasets[2].data = statsSorted.map(
-								({ total_elements_lightning_contactless }) => total_elements_lightning_contactless
+								({ tags: { total_elements_lightning_contactless } }) =>
+									total_elements_lightning_contactless
 							);
 							paymentMethodChart.update();
 						} else {
@@ -193,7 +198,7 @@
 									datasets: [
 										{
 											label: 'Total Locations',
-											data: statsSorted.map(({ total_elements }) => total_elements),
+											data: statsSorted.map(({ tags: { total_elements } }) => total_elements),
 											fill: false,
 											borderColor: 'rgb(0, 153, 175)',
 											tension: 0.1
@@ -238,7 +243,9 @@
 									datasets: [
 										{
 											label: 'Up-to-date Locations',
-											data: statsSorted.map(({ up_to_date_elements }) => up_to_date_elements),
+											data: statsSorted.map(
+												({ tags: { up_to_date_elements } }) => up_to_date_elements
+											),
 											fill: false,
 											borderColor: 'rgb(11, 144, 114)',
 											tension: 0.1
@@ -283,7 +290,7 @@
 									datasets: [
 										{
 											label: 'Legacy Locations',
-											data: statsSorted.map(({ legacy_elements }) => legacy_elements),
+											data: statsSorted.map(({ tags: { legacy_elements } }) => legacy_elements),
 											fill: false,
 											borderColor: 'rgb(235, 87, 87)',
 											tension: 0.1
@@ -328,7 +335,9 @@
 									datasets: [
 										{
 											label: 'On-chain',
-											data: statsSorted.map(({ total_elements_onchain }) => total_elements_onchain),
+											data: statsSorted.map(
+												({ tags: { total_elements_onchain } }) => total_elements_onchain
+											),
 											fill: false,
 											borderColor: 'rgb(247, 147, 26)',
 											tension: 0.1
@@ -336,7 +345,7 @@
 										{
 											label: 'Lightning',
 											data: statsSorted.map(
-												({ total_elements_lightning }) => total_elements_lightning
+												({ tags: { total_elements_lightning } }) => total_elements_lightning
 											),
 											fill: false,
 											borderColor: 'rgb(249, 193, 50)',
@@ -345,7 +354,7 @@
 										{
 											label: 'Contactless',
 											data: statsSorted.map(
-												({ total_elements_lightning_contactless }) =>
+												({ tags: { total_elements_lightning_contactless } }) =>
 													total_elements_lightning_contactless
 											),
 											fill: false,
