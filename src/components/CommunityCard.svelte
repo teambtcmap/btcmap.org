@@ -11,6 +11,7 @@
 	$: telegram = tags['contact:telegram'] && tags['contact:telegram'];
 	$: discord = tags['contact:discord'] && tags['contact:discord'];
 	$: youtube = tags['contact:youtube'] && tags['contact:youtube'];
+	$: github = tags['contact:github'] && tags['contact:github'];
 	$: tip = tags['tips:lightning_address'] && tags['tips:lightning_address'];
 </script>
 
@@ -23,9 +24,7 @@
 				class="w-20 h-20 object-cover rounded-full mx-auto"
 			/>
 
-			<span class="text-center text-lg font-semibold block"
-				>{tags.name}</span
-			>
+			<span class="text-center text-lg font-semibold block">{tags.name}</span>
 		</a>
 		{#if tip}
 			<Tip destination={tip} style="mx-auto block" />
@@ -63,6 +62,11 @@
 		{#if youtube}
 			<a href={youtube} target="_blank" rel="noreferrer" class="m-1">
 				<img src="/icons/socials/youtube.svg" alt="youtube" />
+			</a>
+		{/if}
+		{#if github}
+			<a href={github} target="_blank" rel="noreferrer" class="m-1">
+				<img src="/icons/socials/github.svg" alt="github" />
 			</a>
 		{/if}
 	</div>
