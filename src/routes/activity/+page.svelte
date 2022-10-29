@@ -108,7 +108,7 @@
 									location={tagger.location}
 									action={tagger.type}
 									user={findUser(tagger)}
-									time={tagger.date}
+									time={tagger['created_at']}
 									latest={tagger === supertaggers[0] ? true : false}
 									lat={tagger.lat}
 									long={tagger.long}

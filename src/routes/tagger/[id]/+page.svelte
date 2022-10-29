@@ -293,7 +293,7 @@
 								<ProfileActivity
 									location={event.location}
 									action={event.type}
-									time={event.date}
+									time={event['created_at']}
 									latest={event === eventElements[0] ? true : false}
 									lat={event.lat}
 									long={event.long}
