@@ -131,16 +131,19 @@
 			// set URL lat/long query view if it exists and is valid
 			if (urlLat.length && urlLong.length) {
 				try {
-					if (urlLat.length > 1 && urlLong.length > 1)
+					if (urlLat.length > 1 && urlLong.length > 1) {
 						map.fitBounds([
 							[urlLat[0], urlLong[0]],
 							[urlLat[1], urlLong[1]]
 						]);
-					else {
+						mapCenter = map.getCenter();
+					} else {
 						map.fitBounds([[urlLat[0], urlLong[0]]]);
+						mapCenter = map.getCenter();
 					}
 				} catch (error) {
 					map.setView([0, 0], 3);
+					mapCenter = map.getCenter();
 					errToast(
 						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
 					);
