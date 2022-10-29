@@ -4,6 +4,7 @@
 	export let title;
 	export let stat;
 	export let percent;
+	export let change;
 	export let border;
 	export let loading;
 </script>
@@ -29,6 +30,14 @@
 						? 'text-statPositive'
 						: 'text-statNegative'} ml-1 font-semibold text-lg"
 					>{percent === '+0' ? percent.slice(1) : percent}%</span
+				>
+			{:else if change}
+				<span
+					class="{change === '+0'
+						? 'text-primary'
+						: change.startsWith('+')
+						? 'text-statPositive'
+						: 'text-statNegative'} ml-1 font-semibold text-lg">{change}</span
 				>
 			{/if}
 		{:else}

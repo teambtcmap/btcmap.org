@@ -4,8 +4,11 @@
 	import { browser } from '$app/environment';
 	import { onMount, onDestroy } from 'svelte';
 	import { Header, Footer, DashboardStat } from '$comp';
-
+	import { events, eventError, syncStatus } from '$lib/store';
 	import { errToast } from '$lib/utils';
+
+	// alert for event errors
+	$: $eventError && errToast($eventError);
 
 	let statsAPIInterval;
 	let communitiesAPIInterval;
@@ -17,42 +20,77 @@
 	let stats;
 	let communities;
 
+	const getStatPeriod = () => {
+		return new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+	};
+
+	const getStat = (stat) => {
+		return $events.filter((event) => {
+			let statPeriod = getStatPeriod();
+			if (event.type === stat && Date.parse(event['created_at']) > statPeriod) {
+				return true;
+			} else {
+				return false;
+			}
+		}).length;
+	};
+
+	const getStatPrevious = (stat) => {
+		return $events.filter((event) => {
+			let statPeriod = getStatPeriod();
+			let previousStatPeriod = new Date(new Date().getTime() - 48 * 60 * 60 * 1000);
+			if (
+				event.type === stat &&
+				Date.parse(event['created_at']) > previousStatPeriod &&
+				Date.parse(event['created_at']) < statPeriod
+			) {
+				return true;
+			} else {
+				return false;
+			}
+		}).length;
+	};
+
 	$: total = stats && stats[0].total_elements;
-	$: created = stats && stats[1].elements_created;
-	$: updated = stats && stats[1].elements_updated;
-	$: deleted = stats && stats[1].elements_deleted;
+
+	$: created = $events && $events.length ? getStat('create') : undefined;
+	$: createdPrevious = $events && $events.length ? getStatPrevious('create') : undefined;
+
+	$: updated = $events && $events.length ? getStat('update') : undefined;
+	$: updatedPrevious = $events && $events.length ? getStatPrevious('update') : undefined;
+
+	$: deleted = $events && $events.length ? getStat('delete') : undefined;
+	$: deletedPrevious = $events && $events.length ? getStatPrevious('delete') : undefined;
+
 	$: onchain = stats && stats[0].total_elements_onchain;
 	$: lightning = stats && stats[0].total_elements_lightning;
 	$: nfc = stats && stats[0].total_elements_lightning_contactless;
 
-	$: totalPercentChange =
+	$: totalChange =
 		stats &&
 		new Intl.NumberFormat('en-US', { signDisplay: 'always' })
-			.format((((total - stats[1].total_elements) / stats[1].total_elements) * 100).toFixed(1))
+			.format(total - stats[1].total_elements)
 			.toString();
 
 	$: createdPercentChange =
-		stats &&
+		created &&
+		createdPrevious &&
 		new Intl.NumberFormat('en-US', { signDisplay: 'always' })
-			.format(
-				(((created - stats[2].elements_created) / stats[2].elements_created) * 100).toFixed(1)
-			)
+			.format((((created - createdPrevious) / createdPrevious) * 100).toFixed(1))
 			.toString();
 
 	$: updatedPercentChange =
-		stats &&
+		updated &&
+		updatedPrevious &&
 		new Intl.NumberFormat('en-US', { signDisplay: 'always' })
-			.format(
-				(((updated - stats[2].elements_updated) / stats[2].elements_updated) * 100).toFixed(1)
-			)
+			.format((((updated - updatedPrevious) / updatedPrevious) * 100).toFixed(1))
 			.toString();
 
 	$: deletedPercentChange =
-		stats &&
+		deleted &&
+		deletedPrevious &&
 		new Intl.NumberFormat('en-US', { signDisplay: 'always' })
-			.format(
-				(((deleted - stats[2].elements_deleted) / stats[2].elements_deleted) * 100).toFixed(1)
-			)
+			.format((((deleted - deletedPrevious) / deletedPrevious) * 100).toFixed(1))
 			.toString();
 
 	$: onchainPercentChange =
@@ -416,7 +454,7 @@
 					<DashboardStat
 						title="Total Locations"
 						stat={total}
-						percent={totalPercentChange}
+						change={totalChange}
 						border="border-b md:border-r border-statBorder"
 						loading={statsLoading}
 					/>
@@ -425,21 +463,21 @@
 						stat={created}
 						percent={createdPercentChange}
 						border="border-b xl:border-r border-statBorder"
-						loading={statsLoading}
+						loading={$syncStatus}
 					/>
 					<DashboardStat
 						title="Updated in last 24 hours"
 						stat={updated}
 						percent={updatedPercentChange}
 						border="border-b md:border-r border-statBorder"
-						loading={statsLoading}
+						loading={$syncStatus}
 					/>
 					<DashboardStat
 						title="Deleted in last 24 hours"
 						stat={deleted}
 						percent={deletedPercentChange}
 						border="border-b border-statBorder"
-						loading={statsLoading}
+						loading={$syncStatus}
 					/>
 					<DashboardStat
 						title="Merchants accepting on-chain"
@@ -471,7 +509,7 @@
 					/>
 				</div>
 				<p class="text-sm text-body">
-					*Data updated every 10 minutes, percentages based on previous 24 hours.
+					*Data updated every 10 minutes, change based on previous 24 hours.
 				</p>
 			</section>
 
