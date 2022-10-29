@@ -23,7 +23,7 @@
 				class="w-20 h-20 object-cover rounded-full mx-auto"
 			/>
 
-			<span class="{!tip ? 'pb-[38px]' : ''} text-center text-lg font-semibold block"
+			<span class="text-center text-lg font-semibold block"
 				>{tags.name}</span
 			>
 		</a>
