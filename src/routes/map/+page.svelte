@@ -515,7 +515,7 @@ Thanks for using BTC Map!`);
 								</div>
 							</div>
 
-							<div class="text-xs text-searchSubtext text-center">
+							<div class="text-xs text-searchSubtext text-right w-[65px]">
 								<p>{result.distanceKm} km</p>
 								<p>{result.distanceMi} mi</p>
 							</div>
