@@ -491,7 +491,7 @@ Thanks for using BTC Map!`);
 				on:outclick={clearSearch}
 			>
 				<div
-					class="w-full drop-shadow-[0px_2px_6px_rgba(0,0,0,0.15)] bg-white rounded-lg mt-0.5 max-h-[206px] overflow-y-scroll hide-scroll"
+					class="w-full drop-shadow-[0px_2px_6px_rgba(0,0,0,0.15)] bg-white rounded-lg mt-0.5 max-h-[204px] overflow-y-scroll hide-scroll"
 				>
 					{#each searchResults as result}
 						<button
