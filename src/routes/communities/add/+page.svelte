@@ -32,6 +32,7 @@
 	let name;
 	let icon;
 	let socialLinks;
+	let discord;
 	let contact;
 
 	let selected = false;
@@ -66,6 +67,7 @@
 					location,
 					name,
 					icon: icon ? icon : '',
+					discord: discord ? 'Yes' : 'No',
 					socialLinks: socialLinks ? socialLinks : '',
 					contact
 				})
@@ -212,8 +214,8 @@
 							>Icon URL <span class="font-normal">(optional)</span></label
 						>
 						<p class="text-sm mb-2">
-							We will use the country's flag your community is located in if a custom icon is not
-							provided.
+							We will use the avatar from your social link or the country's flag your community is
+							located in if an icon is not provided.
 						</p>
 						<input
 							disabled={!captchaSecret || !mapLoaded}
@@ -226,13 +228,25 @@
 					</div>
 
 					<div>
-						<label for="socials" class="mb-2 block font-semibold"
-							>Social Links <span class="font-normal">(optional)</span></label
-						>
+						<label for="socials" class="mb-2 block font-semibold">Social Links</label>
 						<p class="text-sm mb-2">
-							We will create your very own Discord channel on our server for community discussions.
+							You need to provide at least one method for people to join your community. We can
+							create a channel for you on the BTC Map Discord server if requested.
 						</p>
+
+						<div class="mb-2 flex items-center space-x-2">
+							<label for="discord" class="text-sm cursor-pointer">Create a Discord channel</label>
+							<input
+								disabled={!captchaSecret || !mapLoaded}
+								type="checkbox"
+								id="discord"
+								name="discord"
+								bind:checked={discord}
+							/>
+						</div>
+
 						<textarea
+							required={!discord}
 							disabled={!captchaSecret || !mapLoaded}
 							name="socials"
 							placeholder="Website, Twitter, Telegram, Matrix etc."
@@ -252,7 +266,7 @@
 							disabled={!captchaSecret || !mapLoaded}
 							type="text"
 							name="contact"
-							placeholder="hello@btcmap.org"
+							placeholder="e.g. hello@btcmap.org"
 							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
 							bind:value={contact}
 						/>

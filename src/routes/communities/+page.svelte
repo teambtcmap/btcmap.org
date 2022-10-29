@@ -25,7 +25,7 @@
 								area.tags['box:west'] &&
 								area.tags.name &&
 								area.tags['icon:square'] &&
-								area.tags['contact:discord']
+								Object.keys(area.tags).find((key) => key.includes('contact'))
 						);
 
 						communities.sort((a, b) => {

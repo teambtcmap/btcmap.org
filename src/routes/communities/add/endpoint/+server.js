@@ -12,7 +12,7 @@ export async function POST({ request }) {
 		Accept: 'application/vnd.github+json'
 	};
 
-	let { captchaSecret, captchaTest, honey, location, name, icon, socialLinks, contact } =
+	let { captchaSecret, captchaTest, honey, location, name, icon, socialLinks, discord, contact } =
 		await request.json();
 
 	// if honey field has value return
@@ -51,6 +51,7 @@ South: ${location.maxLat}
 West: ${location.maxLong}
 Icon URL: ${icon}
 Social links: ${socialLinks}
+Create Discord: ${discord}
 Community leader contact: ${contact}
 Status: Todo
 Created at: ${new Date(Date.now()).toISOString()}`,
