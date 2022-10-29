@@ -514,7 +514,7 @@ Thanks for using BTC Map!`);
 
 							<div class="text-xs text-searchSubtext text-center">
 								<p>{result.distanceKm} km</p>
-								<p>({result.distanceMi} mi)</p>
+								<p>{result.distanceMi} mi</p>
 							</div>
 						</button>
 					{/each}
