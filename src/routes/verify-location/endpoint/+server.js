@@ -22,7 +22,6 @@ export async function POST({ request }) {
 		current,
 		outdated,
 		verified,
-		survey,
 		lat,
 		long
 	} = await request.json();
@@ -62,7 +61,6 @@ Edit link: ${edit}
 Current information correct: ${current}
 Outdated information: ${outdated}
 How did you verify this?: ${verified}
-Survey date: ${survey}
 Lat: ${lat}
 Long: ${long}
 Status: Todo

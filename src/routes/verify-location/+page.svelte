@@ -52,14 +52,6 @@
 	let current;
 	let outdated;
 	let verify;
-	let survey;
-
-	const date = new Date();
-	const dateTimeFormat = new Intl.DateTimeFormat('en-US');
-	const parts = dateTimeFormat.formatToParts(date);
-	const partValues = parts.map((p) => p.value);
-	const today = partValues[4] + '-' + partValues[0] + '-' + partValues[2];
-	survey = today;
 
 	let selected = location ? true : false;
 	let noLocationSelected = false;
@@ -86,7 +78,6 @@
 					current: current ? 'Yes' : 'No',
 					outdated: outdated ? outdated : '',
 					verified: verify.value,
-					survey: survey,
 					lat: lat ? lat.toString() : '',
 					long: long ? long.toString() : ''
 				})
@@ -323,19 +314,6 @@
 							rows="3"
 							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
 							bind:this={verify}
-						/>
-					</div>
-
-					<div>
-						<label for="survey" class="mb-2 block font-semibold">Survey Date</label>
-						<input
-							disabled={!captchaSecret || (showMap && !mapLoaded)}
-							required
-							type="date"
-							name="survey"
-							class="focus:outline-link border-2 border-input rounded-2xl p-3"
-							max={today}
-							bind:value={survey}
 						/>
 					</div>
 
