@@ -2,10 +2,8 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
 	import axios from 'axios';
-	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
-	import { Header, Footer, PrimaryButton, MapLoading } from '$comp';
+	import { Header, Footer, PrimaryButton, MapLoading, FormSuccess } from '$comp';
 	import { fullscreenButton, geolocate, changeDefaultIcons } from '$lib/map/setup';
-	import { socials } from '$lib/store';
 	import { errToast } from '$lib/utils';
 
 	let captcha;
@@ -371,7 +369,7 @@
 									disabled={!captchaSecret || !mapLoaded}
 									name="notes"
 									placeholder="Any other relevant details? Website URL, phone number etc."
-									rows="5"
+									rows="3"
 									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
 									bind:this={notes}
 								/>
@@ -448,43 +446,12 @@
 				</section>
 			</div>
 		{:else}
-			<div class="flex justify-center items-center text-center pb-20 md:pb-32 mt-10">
-				<div>
-					<h2 class="gradient text-4xl font-semibold mb-5">Location Submitted!</h2>
-					<p class="text-primary w-full md:w-[500px] mb-5">
-						We’ll review your information and add it ASAP. If you wish to know the status of your
-						contribution, join our <a
-							href={$socials.discord}
-							target="_blank"
-							rel="noreferrer"
-							class="text-link hover:text-hover">Discord</a
-						>. You can also monitor the progress on GitHub
-						<a
-							href="https://github.com/teambtcmap/btcmap-data/issues/{submissionIssueNumber}"
-							target="_blank"
-							rel="noreferrer"
-							class="text-link hover:text-hover">issue #{submissionIssueNumber}</a
-						>.
-					</p>
-					{#if typeof window !== 'undefined'}
-						<div class="w-full md:w-96 mx-auto">
-							<LottiePlayer
-								src="/lottie/lightning-bolt.json"
-								autoplay={true}
-								loop={true}
-								controls={false}
-								renderer="svg"
-								background="transparent"
-							/>
-						</div>
-					{/if}
-					<PrimaryButton
-						text="Submit another location"
-						link="/add-location"
-						style="w-52 py-3 mx-auto mt-10 rounded-xl"
-					/>
-				</div>
-			</div>
+			<FormSuccess
+				type="Location"
+				text="We’ll review your information and add it ASAP."
+				issue={submissionIssueNumber}
+				link="/add-location"
+			/>
 		{/if}
 
 		<Footer />

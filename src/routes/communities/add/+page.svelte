@@ -2,10 +2,8 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
 	import axios from 'axios';
-	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
-	import { Header, Footer, PrimaryButton, MapLoading } from '$comp';
+	import { Header, Footer, PrimaryButton, MapLoading, FormSuccess } from '$comp';
 	import { fullscreenButton, geolocate, changeDefaultIcons } from '$lib/map/setup';
-	import { socials } from '$lib/store';
 	import { errToast, successToast } from '$lib/utils';
 
 	let captcha;
@@ -319,44 +317,14 @@
 				</form>
 			</section>
 		{:else}
-			<div class="flex justify-center items-center text-center pb-20 md:pb-32 mt-10">
-				<div>
-					<h2 class="gradient text-4xl font-semibold mb-5">Community Submitted!</h2>
-					<p class="text-primary w-full md:w-[500px] mb-5">
-						Thanks for your initiative to create a bitcoin community. We’ll review your information
-						and reach out if we need any more details. If you wish to know the status of your
-						community submission, you can join our <a
-							href={$socials.discord}
-							target="_blank"
-							rel="noreferrer"
-							class="text-link hover:text-hover">Discord</a
-						>. You can also monitor the progress on GitHub
-						<a
-							href="https://github.com/teambtcmap/btcmap-data/issues/{submissionIssueNumber}"
-							target="_blank"
-							rel="noreferrer"
-							class="text-link hover:text-hover">issue #{submissionIssueNumber}</a
-						>.
-					</p>
-					{#if typeof window !== 'undefined'}
-						<div class="w-full md:w-96 mx-auto">
-							<LottiePlayer
-								src="/lottie/lightning-bolt.json"
-								autoplay={true}
-								loop={true}
-								controls={false}
-								renderer="svg"
-								background="transparent"
-							/>
-						</div>
-					{/if}
-					<PrimaryButton
-						text="Submit another community"
-						link="/communities/add"
-						style="w-60 py-3 mx-auto mt-10 rounded-xl"
-					/>
-				</div>
-			</div>
+			<FormSuccess
+				type="Community"
+				text="Thanks for your initiative to create a bitcoin community. We’ll review your information
+	and reach out if we need any more details."
+				issue={submissionIssueNumber}
+				link="/communities/add"
+				buttonWidth="w-60"
+			/>
 		{/if}
 
 		<Footer />

@@ -22,3 +22,4 @@ export { default as TaggerLoading } from './TaggerLoading.svelte';
 export { default as ProfileStat } from './ProfileStat.svelte';
 export { default as ProfileActivity } from './ProfileActivity.svelte';
 export { default as ProfileActivitySkeleton } from './ProfileActivitySkeleton.svelte';
+export { default as FormSuccess } from './FormSuccess.svelte';
