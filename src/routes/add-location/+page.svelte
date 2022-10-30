@@ -192,7 +192,7 @@
 	<div class="w-10/12 xl:w-[1200px] mx-auto">
 		{#if !submitted}
 			<h1 class="text-4xl md:text-5xl gradient font-semibold mt-10 text-center lg:text-left">
-				Join the bitcoin map community.
+				Accept bitcoin? Get found.
 			</h1>
 
 			<div class="mt-16 pb-20 md:pb-32 lg:flex justify-between">
@@ -201,7 +201,7 @@
 					class="mx-auto w-full md:w-2/3 lg:w-1/2 border-b lg:border-b-0 pb-14 lg:pb-0 lg:border-r border-input"
 				>
 					<div class="lg:w-10/12 xl:w-3/4">
-						<h2 class="text-primary text-3xl font-semibold mb-5">Noob?</h2>
+						<h2 class="text-primary text-3xl font-semibold mb-5">Noobs</h2>
 
 						<p class="text-primary w-full mb-10">
 							Fill out the following form and one of our volunteer community members will add your
@@ -426,7 +426,7 @@
 				<section id="supertagger" class="mx-auto w-full md:w-2/3 lg:w-1/2 pt-14 lg:pt-0">
 					<div class="lg:flex justify-end">
 						<div class="lg:w-10/12 xl:w-3/4">
-							<h2 class="text-primary text-3xl font-semibold mb-5">Shadowy Supertagger?</h2>
+							<h2 class="text-primary text-3xl font-semibold mb-5">Shadowy Supertaggers</h2>
 							<p class="text-primary w-full mb-10">
 								Contribute changes directly to OSM - like a 😎 boss. Who needs forms anyway.
 							</p>

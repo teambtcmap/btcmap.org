@@ -72,7 +72,7 @@
 	<div class="w-10/12 xl:w-[1200px] mx-auto">
 		<main class="text-center space-y-10 my-10 md:my-20">
 			<h1 class="text-4xl md:text-5xl font-semibold text-primary gradient !leading-tight">
-				Communities
+				Join the bitcoin map community.
 			</h1>
 
 			<h2 class="text-primary text-xl font-semibold w-full lg:w-[800px] mx-auto">
