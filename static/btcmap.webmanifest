@@ -49,10 +49,10 @@
 			"icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
 		},
 		{
-			"name": "Report outdated info",
-			"short_name": "Report",
-			"description": "Report outdated map information to be updated",
-			"url": "/report-outdated-info",
+			"name": "Verify location",
+			"short_name": "Verify",
+			"description": "Verify a location's information",
+			"url": "/verify-location",
 			"icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
 		},
 		{

@@ -173,7 +173,7 @@
 				const lat = latCalc(element);
 				const long = longCalc(element);
 
-				let marker = generateMarker(lat, long, element, L, verifiedDate, 'report');
+				let marker = generateMarker(lat, long, element, L, verifiedDate, 'verify');
 
 				markers.addLayer(marker);
 				bounds.push({ lat, long });

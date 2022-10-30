@@ -254,7 +254,7 @@ export const longCalc = (element) => {
 	return element.type == 'node' ? element.lon : (element.bounds.minlon + element.bounds.maxlon) / 2;
 };
 
-export const generateMarker = (lat, long, element, L, verifiedDate, report) => {
+export const generateMarker = (lat, long, element, L, verifiedDate, verify) => {
 	return L.marker([lat, long]).bindPopup(
 		// marker popup component
 		`${
@@ -267,7 +267,7 @@ export const generateMarker = (lat, long, element, L, verifiedDate, report) => {
 						element.tags && checkAddress(element.tags)
 					}</span>
 
-					<div class='w-[211px] flex space-x-2 my-1'>
+					<div class='w-[256px] flex space-x-2 my-1'>
 						${
 							element.tags && element.tags.phone
 								? `<a href='tel:${element.tags.phone}' title='Phone'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-phone" /></a>`
@@ -290,11 +290,13 @@ export const generateMarker = (lat, long, element, L, verifiedDate, report) => {
 								: ''
 						}
 
+						<a href='geo:${lat},${long}' title='Navigate'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-compass" /></a>
+
 						<a href='https://www.openstreetmap.org/edit?${element.type}=${
 			element.id
 		}' target="_blank" rel="noreferrer" title='Edit'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-pen-to-square" /></a>
 
-						<a href='https://btcmap.org/map?lat=${lat}&long=${long}' target="_blank" rel="noreferrer" title='Share'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-share-nodes" /></a>
+						<a href='/map?lat=${lat}&long=${long}' target="_blank" rel="noreferrer" title='Share'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-share-nodes" /></a>
 					</div>
 
 					<div class='w-full flex space-x-2 my-1'>
@@ -353,14 +355,14 @@ export const generateMarker = (lat, long, element, L, verifiedDate, report) => {
 					}
 					</span>
 
-					<div class='flex ${report ? 'justify-between' : 'justify-end'} items-center'>
+					<div class='flex ${verify ? 'justify-between' : 'justify-end'} items-center'>
 					${
-						report
-							? `<a href="/report-outdated-info?${
+						verify
+							? `<a href="/verify-location?${
 									element.tags && element.tags.name ? `&name=${element.tags.name}` : ''
 							  }&lat=${lat}&long=${long}&${element.type}=${
 									element.id
-							  }" class='text-link hover:text-hover text-xs' title="Reporting helps improve the data for everyone">Report outdated info</a>`
+							  }" class='text-link hover:text-hover text-xs' title="Help improve the data for everyone">Verify location</a>`
 							: ''
 					}
 
