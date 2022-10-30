@@ -47,7 +47,12 @@
 					link={$apps.play}
 					desc="Not Recommended"
 				/>
-				<AppCard image="fa-brands fa-app-store-ios" text="iOS" link="" desc="" />
+				<AppCard
+					image="fa-brands fa-app-store-ios"
+					text="iOS"
+					link={$apps.ios}
+					desc="Native Option"
+				/>
 			</section>
 		</main>
 

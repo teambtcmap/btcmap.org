@@ -10,7 +10,8 @@ export const apps = readable({
 	fdroid: 'https://f-droid.org/en/packages/org.btcmap/',
 	direct: 'https://github.com/teambtcmap/btcmap-android/releases/latest',
 	web: '/map',
-	play: 'https://play.google.com/store/apps/details?id=org.btcmap.app'
+	play: 'https://play.google.com/store/apps/details?id=org.btcmap.app',
+	ios: 'https://apps.apple.com/app/btc-world-map/id6443604345'
 });
 
 export const elements = writable([]);
