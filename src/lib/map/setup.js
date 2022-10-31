@@ -254,8 +254,20 @@ export const longCalc = (element) => {
 	return element.type == 'node' ? element.lon : (element.bounds.minlon + element.bounds.maxlon) / 2;
 };
 
-export const generateMarker = (lat, long, element, L, verifiedDate, verify) => {
-	return L.marker([lat, long]).bindPopup(
+export const markerIcon = (L) => {
+	return L.icon({
+		iconUrl: '/icons/location-pin.png',
+		shadowUrl: '/icons/location-pin-shadow.png',
+		iconSize: [32, 43], // size of the icon
+		shadowSize: [43, 50], // size of the shadow
+		iconAnchor: [19, 43], // point of the icon which will correspond to marker's location
+		shadowAnchor: [10, 48], // the same for the shadow
+		popupAnchor: [-3, -34] // point from which the popup should open relative to the iconAnchor
+	});
+};
+
+export const generateMarker = (lat, long, icon, element, L, verifiedDate, verify) => {
+	return L.marker([lat, long], { icon }).bindPopup(
 		// marker popup component
 		`${
 			element.tags && element.tags.name

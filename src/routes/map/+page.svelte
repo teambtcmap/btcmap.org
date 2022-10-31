@@ -18,6 +18,7 @@
 		checkAddress,
 		latCalc,
 		longCalc,
+		markerIcon,
 		generateMarker
 	} from '$lib/map/setup';
 	import { errToast } from '$lib/utils';
@@ -290,6 +291,9 @@ Thanks for using BTC Map!`);
 			// change broken marker image path in prod
 			L.Icon.Default.prototype.options.imagePath = '/icons/';
 
+			// use new icon
+			const newIcon = markerIcon(L);
+
 			// add support attribution
 			support();
 
@@ -408,7 +412,7 @@ Thanks for using BTC Map!`);
 					const lat = latCalc(element);
 					const long = longCalc(element);
 
-					let marker = generateMarker(lat, long, element, L, verifiedDate, 'verify');
+					let marker = generateMarker(lat, long, newIcon, element, L, verifiedDate, 'verify');
 
 					markers.addLayer(marker);
 

@@ -14,6 +14,7 @@
 		calcVerifiedDate,
 		latCalc,
 		longCalc,
+		markerIcon,
 		generateMarker
 	} from '$lib/map/setup';
 	import { errToast } from '$lib/utils';
@@ -259,6 +260,9 @@
 			// change broken marker image path in prod
 			L.Icon.Default.prototype.options.imagePath = '/icons/';
 
+			// use new icon
+			const newIcon = markerIcon(L);
+
 			// add OSM attribution
 			attribution(L, map);
 
@@ -287,7 +291,7 @@
 				const lat = latCalc(element);
 				const long = longCalc(element);
 
-				let marker = generateMarker(lat, long, element, L, verifiedDate, 'verify');
+				let marker = generateMarker(lat, long, newIcon, element, L, verifiedDate, 'verify');
 
 				markers.addLayer(marker);
 				bounds.push({ lat, long });
