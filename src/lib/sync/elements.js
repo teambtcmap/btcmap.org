@@ -83,9 +83,9 @@ export const elementsSync = async () => {
 								mapUpdates.set(true);
 							})
 							.catch(function (err) {
-								elementError.set(
-									'Could not update elements locally, please try again or contact BTC Map.'
-								);
+								//elementError.set(
+									//'Could not update elements locally, please try again or contact BTC Map.'
+								//);
 								console.log(err);
 							});
 					}
