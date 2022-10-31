@@ -123,7 +123,11 @@
 				>
 					{#each supporters as supporter}
 						<a href={supporter.url} target="_blank" rel="noreferrer" class="self-center">
-							<img src="/images/supporters/{supporter.title}.svg" alt={supporter.title} class="mx-auto" />
+							<img
+								src="/images/supporters/{supporter.title}.svg"
+								alt={supporter.title}
+								class="mx-auto"
+							/>
 						</a>
 					{/each}
 					<!-- supporter placeholders -->

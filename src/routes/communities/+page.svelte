@@ -3,7 +3,6 @@
 	import { browser } from '$app/environment';
 	import { onMount, onDestroy } from 'svelte';
 	import { Header, Footer, PrimaryButton, CommunityCard, CommunitySkeleton } from '$comp';
-	import { socials } from '$lib/store';
 	import { errToast } from '$lib/utils';
 
 	let communitiesAPIInterval;

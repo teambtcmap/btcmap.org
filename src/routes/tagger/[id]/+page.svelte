@@ -29,11 +29,13 @@
 		MapLoading
 	} from '$comp';
 
-	let user = $users.find((user) => user.id === data.user)['osm_json'];
+	let user = $users.find((user) => user.id === data.user);
 	if (!user) {
 		errToast('Could not find user, please try again or contact BTC Map.');
 		throw error(404, 'User Not Found');
 	}
+	let userCreated = user['created_at'];
+	user = user['osm_json'];
 	let avatar = user.img ? user.img.href : '/images/satoshi-nakamoto.png';
 	let username = user['display_name'];
 	let description = user.description;
@@ -44,10 +46,122 @@
 	let lightning = regexMatch && regexMatch[0].slice(10);
 
 	let userEvents = $events.filter((event) => event['user_id'] == user.id);
-	let created = userEvents.filter((event) => event.type === 'create').length;
-	let updated = userEvents.filter((event) => event.type === 'update').length;
+	let created =
+		user['display_name'] === 'Bill on Bitcoin Island'
+			? userEvents.filter((event) => event.type === 'create').length + 100
+			: userEvents.filter((event) => event.type === 'create').length;
+	let updated =
+		user['display_name'] === 'Bill on Bitcoin Island'
+			? userEvents.filter((event) => event.type === 'update').length + 20
+			: userEvents.filter((event) => event.type === 'update').length;
 	let deleted = userEvents.filter((event) => event.type === 'delete').length;
 	let total = created + updated + deleted;
+
+	let supporter = false;
+
+	let leaderboard = [];
+
+	const populateLeaderboard = () => {
+		$users.forEach((user) => {
+			let userEvents = $events.filter((event) => event['user_id'] == user.id);
+
+			if (userEvents.length) {
+				leaderboard.push({
+					id: user.id,
+					total:
+						user['osm_json']['display_name'] === 'Bill on Bitcoin Island'
+							? userEvents.length + 120
+							: userEvents.length
+				});
+			}
+		});
+
+		leaderboard.sort((a, b) => b.total - a.total);
+		leaderboard = leaderboard.slice(0, 10);
+	};
+	populateLeaderboard();
+
+	let badges = [
+		{ check: supporter, title: 'Supporter', icon: 'supporter' },
+		{
+			check: leaderboard[0].id == user.id,
+			title: 'Top Tagger',
+			icon: 'top-tagger'
+		},
+		{
+			check: leaderboard.slice(0, 3).find((item) => item.id == user.id),
+			title: 'Podium',
+			icon: 'podium'
+		},
+		{
+			check: leaderboard.find((item) => item.id == user.id),
+			title: 'High Rank',
+			icon: 'high-rank'
+		},
+		{
+			check: userCreated < Date('December 26, 2022 00:00:00'),
+			title: 'OG Supertagger',
+			icon: 'og-supertagger'
+		},
+		{
+			check: lightning,
+			title: 'Lightning Junkie',
+			icon: 'lightning-junkie'
+		},
+		{
+			check: user.img,
+			title: 'Hello World',
+			icon: 'hello-world'
+		},
+		{
+			check: created > updated && created > deleted,
+			title: 'Creator',
+			icon: 'creator'
+		},
+		{
+			check: updated > created && updated > deleted,
+			title: 'Update Maxi',
+			icon: 'update-maxi'
+		},
+		{
+			check: deleted > created && deleted > updated,
+			title: 'Demolition Specialist',
+			icon: 'demolition-specialist'
+		},
+		{
+			check: total >= 21000000,
+			title: 'Hyperbitcoinisation',
+			icon: 'hyperbitcoinisation'
+		},
+		{ check: total >= 10000, title: 'Pizza Time', icon: 'pizza-time' },
+		{ check: total >= 7777, title: 'Godly', icon: 'godly' },
+		{ check: total >= 5000, title: 'Shadow', icon: 'shadow' },
+		{ check: total >= 3110, title: 'Whitepaper', icon: 'whitepaper' },
+		{ check: total >= 1984, title: 'Winston', icon: 'winston' },
+		{ check: total >= 1000, title: 'Whale', icon: 'whale' },
+		{ check: total >= 821, title: 'Infinity', icon: 'infinity' },
+		{ check: total >= 500, title: 'Legend', icon: 'legend' },
+		{ check: total >= 301, title: 'Chancellor', icon: 'chancellor' },
+		{ check: total >= 256, title: 'SHA', icon: 'sha' },
+		{ check: total >= 210, title: 'No Bailouts', icon: 'no-bailouts' },
+		{ check: total >= 100, title: 'Supertagger', icon: 'supertagger' },
+		{ check: total >= 69, title: 'ATH', icon: 'ath' },
+		{ check: total >= 51, title: 'Longest Chain', icon: 'longest-chain' },
+		{ check: total >= 21, title: 'Satoshi', icon: 'satoshi' },
+		{ check: total >= 10, title: 'Heartbeat', icon: 'heartbeat' },
+		{ check: total >= 4, title: 'Segwit', icon: 'segwit' },
+		{ check: total >= 1, title: 'Whole Tagger', icon: 'whole-tagger' }
+	];
+
+	let earnedBadges = [];
+
+	const addBadge = (check, title, icon) => {
+		if (check) {
+			earnedBadges.push({ title, icon });
+		}
+	};
+
+	badges.forEach((badge) => addBadge(badge.check, badge.title, badge.icon));
 
 	let createdPercent = new Intl.NumberFormat('en-US')
 		.format((created / (total / 100)).toFixed(0))
@@ -239,9 +353,24 @@
 				{/if}
 			</section>
 
-			<section id="badges" class="" />
+			<section id="badges" class="mt-16">
+				<div class="flex flex-wrap justify-center items-center">
+					{#each earnedBadges as badge}
+						<a href="/badges#{badge.icon}" class="hover:scale-110 transition-transform">
+							<div class="mx-3 mb-6">
+								<img
+									src="/icons/badges/{badge.icon}.svg"
+									alt={badge.title}
+									class="w-20 h-20 mx-auto mb-1"
+								/>
+								<p class="text-xs text-center">{badge.title}</p>
+							</div>
+						</a>
+					{/each}
+				</div>
+			</section>
 
-			<section id="stats" class="my-16">
+			<section id="stats" class="mt-10 mb-16">
 				<div class="border border-statBorder rounded-t-3xl grid md:grid-cols-2 xl:grid-cols-4">
 					<ProfileStat
 						title="Total Tags"
