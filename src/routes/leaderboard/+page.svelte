@@ -44,11 +44,11 @@
 					avatar: avatar,
 					tagger: profile['display_name'],
 					id: user.id,
-					created: profile['display_name'] === 'Bill on Bitcoin Island' ? created + 100 : created,
-					updated: profile['display_name'] === 'Bill on Bitcoin Island' ? updated + 20 : updated,
+					created: user.id === '17221642' ? created + 100 : created,
+					updated: user.id === '17221642' ? updated + 20 : updated,
 					deleted: deleted,
 					total:
-						profile['display_name'] === 'Bill on Bitcoin Island'
+						user.id === '17221642'
 							? created + updated + deleted + 120
 							: created + updated + deleted,
 					tip: profile.description

@@ -48,17 +48,18 @@
 
 	let userEvents = $events.filter((event) => event['user_id'] == user.id);
 	let created =
-		user['display_name'] === 'Bill on Bitcoin Island'
+		user.id == '17221642'
 			? userEvents.filter((event) => event.type === 'create').length + 100
 			: userEvents.filter((event) => event.type === 'create').length;
 	let updated =
-		user['display_name'] === 'Bill on Bitcoin Island'
+		user.id == '17221642'
 			? userEvents.filter((event) => event.type === 'update').length + 20
 			: userEvents.filter((event) => event.type === 'update').length;
 	let deleted = userEvents.filter((event) => event.type === 'delete').length;
 	let total = created + updated + deleted;
 
-	let supporter = false;
+	let supporters = [10396321];
+	let supporter = supporters.includes(user.id);
 
 	let leaderboard = [];
 
@@ -69,10 +70,7 @@
 			if (userEvents.length) {
 				leaderboard.push({
 					id: user.id,
-					total:
-						user['osm_json']['display_name'] === 'Bill on Bitcoin Island'
-							? userEvents.length + 120
-							: userEvents.length
+					total: user.id === '17221642' ? userEvents.length + 120 : userEvents.length
 				});
 			}
 		});
