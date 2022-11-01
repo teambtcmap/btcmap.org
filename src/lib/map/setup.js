@@ -256,8 +256,8 @@ export const longCalc = (element) => {
 
 export const markerIcon = (L) => {
 	return L.icon({
-		iconUrl: '/icons/location-pin.png',
-		shadowUrl: '/icons/location-pin-shadow.png',
+		iconUrl: '/icons/location-pin.svg',
+		shadowUrl: '/icons/location-pin-shadow.svg',
 		iconSize: [32, 43], // size of the icon
 		shadowSize: [43, 50], // size of the shadow
 		iconAnchor: [19, 43], // point of the icon which will correspond to marker's location
