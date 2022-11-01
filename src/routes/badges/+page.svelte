@@ -49,7 +49,7 @@
 		},
 		{
 			title: 'Supporter',
-			desc: 'Donate to BTC Map',
+			desc: 'Make an annual donation to BTC Map',
 			icon: 'supporter'
 		}
 	];
