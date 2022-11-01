@@ -280,6 +280,7 @@
 								>Current information is correct</label
 							>
 							<input
+								class="accent-link"
 								disabled={!captchaSecret || (showMap && !mapLoaded) || outdated}
 								required={!outdated}
 								type="checkbox"

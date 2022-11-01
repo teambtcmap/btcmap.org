@@ -235,6 +235,7 @@
 						<div class="mb-2 flex items-center space-x-2">
 							<label for="discord" class="text-sm cursor-pointer">Create a Discord channel</label>
 							<input
+								class="accent-link"
 								disabled={!captchaSecret || !mapLoaded}
 								type="checkbox"
 								id="discord"

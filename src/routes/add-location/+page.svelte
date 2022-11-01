@@ -297,6 +297,7 @@
 								<div class="space-y-4">
 									<div>
 										<input
+											class="accent-link"
 											disabled={!captchaSecret || !mapLoaded}
 											type="checkbox"
 											name="onchain"
@@ -310,6 +311,7 @@
 									</div>
 									<div>
 										<input
+											class="accent-link"
 											disabled={!captchaSecret || !mapLoaded}
 											type="checkbox"
 											name="lightning"
@@ -323,6 +325,7 @@
 									</div>
 									<div>
 										<input
+											class="accent-link"
 											disabled={!captchaSecret || !mapLoaded}
 											type="checkbox"
 											name="nfc"
