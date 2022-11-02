@@ -22,9 +22,9 @@
 	<div class="flex justify-center md:justify-start">
 		{#if stat >= 0}
 			<span class="text-5xl text-primary font-semibold">{stat}</span>
-			{#if percent}
+			{#if percent !== undefined}
 				<span
-					class="{percent === '+0'
+					class="{percent === '+0' || percent === 0
 						? 'text-primary'
 						: percent.startsWith('+')
 						? 'text-statPositive'
