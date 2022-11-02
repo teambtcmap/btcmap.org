@@ -3,9 +3,30 @@ import axios from 'axios';
 import { users, userError } from '$lib/store';
 
 export const usersSync = async () => {
-	// get users from local
+	// clear potentially broken users sync
 	await localforage
 		.getItem('users')
+		.then(function (value) {
+			if (value) {
+				localforage
+					.removeItem('users')
+					.then(function () {
+						console.log('Key is cleared!');
+					})
+					.catch(function (err) {
+						userError.set('Could not clear users locally, please try again or contact BTC Map.');
+						console.log(err);
+					});
+			}
+		})
+		.catch(function (err) {
+			userError.set('Could not check users locally, please try again or contact BTC Map.');
+			console.log(err);
+		});
+
+	// get users from local
+	await localforage
+		.getItem('users_v2')
 		.then(async function (value) {
 			// get users from API if initial sync
 			if (!value) {
@@ -18,7 +39,7 @@ export const usersSync = async () => {
 
 						// set response to local
 						localforage
-							.setItem('users', response.data)
+							.setItem('users_v2', response.data)
 							.then(function (value) {
 								// set response to store
 								users.set(usersFiltered);
@@ -75,7 +96,7 @@ export const usersSync = async () => {
 
 						// set updated users locally
 						localforage
-							.setItem('users', newUsers)
+							.setItem('users_v2', newUsers)
 							.then(function (value) {
 								// set updated users to store
 								users.set(newUsersFiltered);
