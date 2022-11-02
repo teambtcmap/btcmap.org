@@ -30,7 +30,7 @@
 		MapLoading
 	} from '$comp';
 
-	let user = $users.find((user) => user.id === data.user);
+	let user = $users.find((user) => user.id == data.user);
 	if (!user) {
 		errToast('Could not find user, please try again or contact BTC Map.');
 		throw error(404, 'User Not Found');
@@ -70,7 +70,7 @@
 			if (userEvents.length) {
 				leaderboard.push({
 					id: user.id,
-					total: user.id === '17221642' ? userEvents.length + 120 : userEvents.length
+					total: user.id == '17221642' ? userEvents.length + 120 : userEvents.length
 				});
 			}
 		});
