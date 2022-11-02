@@ -3,7 +3,7 @@ import axios from 'axios';
 import { users, userError } from '$lib/store';
 
 export const usersSync = async () => {
-	// clear potentially broken users sync
+	// clear potentially broken users v1 sync due to top level ID changing from string to int
 	await localforage
 		.getItem('users')
 		.then(function (value) {
