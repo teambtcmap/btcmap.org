@@ -23,36 +23,9 @@
 			</h2>
 
 			<section id="apps" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
-				<AppCard
-					image="fa-solid fa-earth-americas"
-					text="Web"
-					desc="Progressive Web App"
-					link={$apps.web}
-				/>
-				<AppCard
-					image="fa-brands fa-android"
-					text="APK"
-					desc="Direct Download"
-					link={$apps.direct}
-				/>
-				<AppCard
-					image="fa-solid fa-robot"
-					text="F-Droid"
-					desc="FOSS App Store"
-					link={$apps.fdroid}
-				/>
-				<AppCard
-					image="fa-brands fa-google-play"
-					text="Play"
-					link={$apps.play}
-					desc="Not Recommended"
-				/>
-				<AppCard
-					image="fa-brands fa-app-store-ios"
-					text="iOS"
-					link={$apps.ios}
-					desc="Native Option"
-				/>
+				{#each $apps as app}
+					<AppCard image={app.icon} text={app.type} desc={app.desc} link={app.link} />
+				{/each}
 			</section>
 		</main>
 

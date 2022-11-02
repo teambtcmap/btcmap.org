@@ -133,14 +133,14 @@
 				<h2 class="text-primary text-3xl font-semibold">(Don't Use) Google</h2>
 				<p>
 					Our Android app is available to download via the Google <a
-						href={$apps.play}
+						href={$apps[3].link}
 						class="text-link hover:text-hover transition-colors">Play Store</a
 					>. However, we <strong>do not</strong> recommend using this method. God only knows what
 					information is collected about you when using Google services. Instead, we have our
 					Android app available for download directly from our GitHub repo as an
-					<a href={$apps.direct} class="text-link hover:text-hover transition-colors">APK</a>
+					<a href={$apps[1].link} class="text-link hover:text-hover transition-colors">APK</a>
 					or on the FOSS app store
-					<a href={$apps.fdroid} class="text-link hover:text-hover transition-colors">F-Droid.</a>
+					<a href={$apps[2].link} class="text-link hover:text-hover transition-colors">F-Droid.</a>
 				</p>
 			</div>
 

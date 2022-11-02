@@ -9,7 +9,7 @@
 	{#if link}
 		<a
 			href={link}
-			target="_blank"
+			target={text === 'Web' ? '_self' : '_blank'}
 			rel="noreferrer"
 			class="text-link hover:text-hover text-2xl font-semibold transition-colors"
 		>

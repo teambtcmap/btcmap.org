@@ -1,12 +1,6 @@
 <script>
 	import { Header, Footer, PrimaryButton } from '$comp';
 	import { socials, apps } from '$lib/store';
-
-	const appOptions = [
-		{ title: 'Web', link: $apps.web, icon: 'fa-solid fa-earth-americas' },
-		{ title: 'APK', link: $apps.direct, icon: 'fa-brands fa-android' },
-		{ title: 'F-Droid', link: $apps.fdroid, icon: 'fa-solid fa-robot' }
-	];
 </script>
 
 <svelte:head>
@@ -26,12 +20,12 @@
 					Easily find places to spend sats anywhere on the planet.
 				</h1>
 				<div class="bg-white/30 rounded-2xl py-6 flex flex-wrap justify-center my-16">
-					{#each appOptions as app}
+					{#each $apps as app}
 						<div class="space-y-1 text-body font-semibold text-center my-2 md:my-0 mx-2">
-							<p>{app.title}</p>
+							<p>{app.type}</p>
 							<a
 								href={app.link}
-								target={app.title === 'Web' ? '_self' : '_blank'}
+								target={app.type === 'Web' ? '_self' : '_blank'}
 								rel="noreferrer"
 								class="block"
 								><i
@@ -40,14 +34,6 @@
 							>
 						</div>
 					{/each}
-					<div class="space-y-1 my-2 mx-2 md:my-0 md:mx-0 md:ml-3 md:mr-2">
-						<p class="text-body font-semibold text-center">Contribute</p>
-						<PrimaryButton
-							text="Add Location"
-							style="py-3 px-4 rounded-full"
-							link="/add-location"
-						/>
-					</div>
 				</div>
 				<h2 class="text-primary text-xl font-semibold">
 					Our apps and the underlying data are free and open source.
