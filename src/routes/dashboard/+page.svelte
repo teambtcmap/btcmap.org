@@ -512,8 +512,6 @@
 					<DashboardStat
 						title="Number of communities"
 						stat={communities && communities.length}
-						percent=""
-						border=""
 						loading={communitiesLoading}
 					/>
 				</div>
