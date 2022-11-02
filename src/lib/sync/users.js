@@ -58,7 +58,7 @@ export const usersSync = async () => {
 					// check for new users in local and purge if they exist
 					if (newUsers.length) {
 						let updatedUsers = value.filter((value) => {
-							if (newUsers.find((user) => user.id === value.id)) {
+							if (newUsers.find((user) => user.id == value.id)) {
 								return false;
 							} else {
 								return true;
