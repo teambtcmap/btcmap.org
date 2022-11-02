@@ -35,7 +35,7 @@
 								rel="noreferrer"
 								class="block"
 								><i
-									class="bg-link hover:bg-hover p-3 rounded-full w-8 h-8 text-white {app.icon}"
+									class="bg-link hover:bg-hover p-3 rounded-full w-8 h-8 text-white {app.icon} transition-colors"
 								/></a
 							>
 						</div>

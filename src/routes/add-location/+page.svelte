@@ -217,7 +217,7 @@
 									name="name"
 									placeholder="Satoshi's Comics"
 									required
-									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
 									bind:this={name}
 								/>
 							</div>
@@ -230,7 +230,7 @@
 									name="address"
 									placeholder="2100 Freedom Drive..."
 									required
-									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
 									bind:this={address}
 								/>
 							</div>
@@ -284,7 +284,7 @@
 									type="text"
 									name="category"
 									placeholder="Restaurant etc."
-									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
 									bind:this={category}
 								/>
 							</div>
@@ -297,7 +297,7 @@
 								<div class="space-y-4">
 									<div>
 										<input
-											class="accent-link"
+											class="accent-link w-4 h-4"
 											disabled={!captchaSecret || !mapLoaded}
 											type="checkbox"
 											name="onchain"
@@ -311,7 +311,7 @@
 									</div>
 									<div>
 										<input
-											class="accent-link"
+											class="accent-link w-4 h-4"
 											disabled={!captchaSecret || !mapLoaded}
 											type="checkbox"
 											name="lightning"
@@ -325,7 +325,7 @@
 									</div>
 									<div>
 										<input
-											class="accent-link"
+											class="accent-link w-4 h-4"
 											disabled={!captchaSecret || !mapLoaded}
 											type="checkbox"
 											name="nfc"
@@ -350,7 +350,7 @@
 										type="text"
 										name="twitter"
 										placeholder="Merchant"
-										class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+										class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
 										bind:this={twitterMerchant}
 									/>
 									<input
@@ -358,7 +358,7 @@
 										type="text"
 										name="twitter"
 										placeholder="Submitter"
-										class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+										class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
 										bind:this={twitterSubmitter}
 									/>
 								</div>
@@ -373,7 +373,7 @@
 									name="notes"
 									placeholder="Any other relevant details? Website URL, phone number etc."
 									rows="3"
-									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
 									bind:this={notes}
 								/>
 							</div>
@@ -402,7 +402,7 @@
 										type="text"
 										name="captcha"
 										placeholder="Please enter the captcha text."
-										class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+										class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
 										bind:this={captchaInput}
 									/>
 								</div>

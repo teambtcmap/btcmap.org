@@ -325,7 +325,7 @@
 						href="https://www.openstreetmap.org/user/{username}"
 						target="_blank"
 						rel="noreferrer"
-						class="w-24 mx-auto mt-1 text-xs text-link hover:text-hover flex justify-center items-center"
+						class="w-24 mx-auto mt-1 text-xs text-link hover:text-hover flex justify-center items-center transition-colors"
 						>OSM Profile <svg
 							class="ml-1 w-3"
 							width="16"

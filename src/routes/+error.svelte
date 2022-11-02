@@ -20,7 +20,7 @@
 		</header>
 
 		<div class="text-center space-y-10 py-10">
-			<a href="/" class="text-link hover:text-hover font-semibold text-xl"
+			<a href="/" class="text-link hover:text-hover font-semibold text-xl transition-colors"
 				><i class="fa-solid fa-house mr-2" /> Home</a
 			>
 			<h1 class="text-4xl md:text-5xl">{$page.status}: {$page.error.message}</h1>

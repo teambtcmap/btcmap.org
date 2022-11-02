@@ -229,13 +229,13 @@
 						href="https://www.openstreetmap.org"
 						target="_blank"
 						rel="noreferrer"
-						class="text-link hover:text-hover">OpenStreetMap</a
+						class="text-link hover:text-hover transition-colors">OpenStreetMap</a
 					>? You can check out our
 					<a
 						href="https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions"
 						target="_blank"
 						rel="noreferrer"
-						class="text-link hover:text-hover">Wiki</a
+						class="text-link hover:text-hover transition-colors">Wiki</a
 					> for more instructions.
 				</p>
 
@@ -280,7 +280,7 @@
 								>Current information is correct</label
 							>
 							<input
-								class="accent-link"
+								class="accent-link w-4 h-4"
 								disabled={!captchaSecret || (showMap && !mapLoaded) || outdated}
 								required={!outdated}
 								type="checkbox"
@@ -304,7 +304,7 @@
 							name="outdated"
 							placeholder="Provide what info is incorrect and the updated info on this location"
 							rows="3"
-							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
 							bind:value={outdated}
 						/>
 					</div>
@@ -317,7 +317,7 @@
 							name="verify"
 							placeholder="Please provide additional info here"
 							rows="3"
-							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
 							bind:this={verify}
 						/>
 					</div>
@@ -346,7 +346,7 @@
 								type="text"
 								name="captcha"
 								placeholder="Please enter the captcha text."
-								class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+								class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
 								bind:this={captchaInput}
 							/>
 						</div>

@@ -8,7 +8,7 @@
 	<div class="!my-12">
 		<a
 			href="lightning:{destination}"
-			class="text-center text-lg font-semibold text-white w-full p-3 bg-link hover:bg-hover rounded-xl"
+			class="text-center text-lg font-semibold text-white w-full p-3 bg-link hover:bg-hover rounded-xl transition-colors"
 		>
 			<!--  lightning icon -->
 			<svg
@@ -33,7 +33,7 @@
 {:else}
 	<a
 		href="lightning:{destination}"
-		class="text-sm text-center font-semibold border border-link text-link w-full md:w-20 py-2 md:py-1 hover:border-white hover:text-white hover:bg-link rounded-lg {style}"
+		class="text-sm text-center font-semibold border border-link text-link w-full md:w-20 py-2 md:py-1 hover:border-white hover:text-white hover:bg-link rounded-lg {style} transition-colors"
 	>
 		<!--  lightning icon -->
 		<svg

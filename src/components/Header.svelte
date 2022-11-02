@@ -82,7 +82,9 @@
 				/>
 			{:else}
 				<!-- regular links -->
-				<a href={link.url} class="text-link hover:text-hover text-xl font-semibold"
+				<a
+					href={link.url}
+					class="text-link hover:text-hover text-xl font-semibold transition-colors"
 					>{link.title}
 				</a>
 			{/if}
@@ -135,7 +137,7 @@
 					<img
 						src="/icons/mobile-nav/{link.icon}.svg"
 						alt={link.icon}
-						class="mr-4 bg-mobileButtons active:bg-mobileButtonsActive rounded-full p-3"
+						class="mr-4 bg-mobileButtons active:bg-mobileButtonsActive rounded-full p-3 transition-colors"
 					/>
 					<span>{link.title}</span>
 				</a>

@@ -39,7 +39,10 @@
 
 		<div class="space-x-4">
 			<!-- qr button -->
-			<button class="text-link hover:text-hover" on:click={() => showQrToggle(text)}>
+			<button
+				class="text-link hover:text-hover transition-colors"
+				on:click={() => showQrToggle(text)}
+			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					viewBox="0 0 448 512"
@@ -52,7 +55,7 @@
 			</button>
 
 			<!-- copy button -->
-			<button class="text-link hover:text-hover" on:click={() => copy(value)}>
+			<button class="text-link hover:text-hover transition-colors" on:click={() => copy(value)}>
 				{#if copied}
 					<svg
 						xmlns="http://www.w3.org/2000/svg"

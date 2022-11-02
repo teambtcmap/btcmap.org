@@ -63,7 +63,7 @@
 							<!-- close button -->
 							<div class="absolute top-4 right-6">
 								<button on:click={() => (showQr = false)}
-									><i class="fa-solid fa-x text-link hover:text-hover" /></button
+									><i class="fa-solid fa-x text-link hover:text-hover transition-colors" /></button
 								>
 							</div>
 
@@ -74,7 +74,7 @@
 										? '/images/lightning-qr.svg'
 										: '/images/onchain-qr.svg'}
 									alt="qr"
-									class="w-[256px] h-[256px] mx-auto border-4 rounded-xl border-link hover:border-hover"
+									class="w-[256px] h-[256px] mx-auto border-4 rounded-xl border-link hover:border-hover transition-colors"
 								/>
 							</a>
 
@@ -108,7 +108,7 @@
 						href="https://mempool.space/lightning/node/02eb5a2e05ef32d0434ea616d38a1a46deaf9f246dc418673f43a571bba0363031"
 						target="_blank"
 						rel="noreferrer"
-						class="text-link hover:text-hover break-all"
+						class="text-link hover:text-hover break-all transition-colors"
 						>02eb5a2e05ef32d0434ea616d38a1a46deaf9f246dc418673f43a571bba0363031</a
 					>
 				</div>
@@ -116,7 +116,9 @@
 
 			<section id="supporters">
 				<h3 class="uppercase text-body text-lg font-semibold">Our amazing supporters</h3>
-				<a href="mailto:hello@btcmap.org" class="text-link hover:text-hover">Become a Sponsor</a>
+				<a href="mailto:hello@btcmap.org" class="text-link hover:text-hover transition-colors"
+					>Become a Sponsor</a
+				>
 
 				<div
 					class="mt-8 space-y-10 lg:space-y-0 lg:grid grid-cols-3 gap-10 w-full lg:w-[800px] mx-auto"

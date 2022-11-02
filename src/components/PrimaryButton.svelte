@@ -16,7 +16,7 @@
 		href={link}
 		target={external ? '_blank' : '_self'}
 		rel={external ? 'noreferrer' : ''}
-		class="block bg-link hover:bg-hover text-white text-center font-semibold {style}"
+		class="block bg-link hover:bg-hover text-white text-center font-semibold {style} transition-colors"
 	>
 		{text}
 	</a>
@@ -25,7 +25,7 @@
 		on:click={click}
 		{type}
 		{disabled}
-		class="block bg-link hover:bg-hover text-white text-center font-semibold {style}"
+		class="block bg-link hover:bg-hover text-white text-center font-semibold {style} transition-colors"
 	>
 		{#if loading}
 			<LoadingSpinner />

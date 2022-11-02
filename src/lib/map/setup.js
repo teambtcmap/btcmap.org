@@ -8,7 +8,7 @@ export const attribution = (L, map) => {
 	OSMAttribution.style.borderRadius = '0 8px 0 0';
 	OSMAttribution.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 	OSMAttribution.innerHTML =
-		'&copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors';
+		'&copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" class="text-link hover:text-hover !no-underline transition-colors">OpenStreetMap</a> contributors';
 };
 
 export const support = () => {
@@ -19,7 +19,7 @@ export const support = () => {
 	supportAttribution.style.borderRadius = '8px 0 0 0';
 	supportAttribution.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 	supportAttribution.innerHTML =
-		'<a href="/support-us" class="text-link hover:text-hover" title="Support with sats">Support</a> BTC Map';
+		'<a href="/support-us" class="text-link hover:text-hover !no-underline transition-colors" title="Support with sats">Support</a> BTC Map';
 };
 
 export const scaleBars = (L, map) => {
@@ -282,13 +282,13 @@ export const generateMarker = (lat, long, icon, element, L, verifiedDate, verify
 					<div class='w-[256px] flex space-x-2 my-1'>
 						${
 							element.tags && element.tags.phone
-								? `<a href='tel:${element.tags.phone}' title='Phone'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-phone" /></a>`
+								? `<a href='tel:${element.tags.phone}' title='Phone'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-phone transition-colors" /></a>`
 								: ''
 						}
 
 						${
 							element.tags && element.tags.website
-								? `<a href=${element.tags.website} target="_blank" rel="noreferrer" title='Website'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-globe" /></a>`
+								? `<a href=${element.tags.website} target="_blank" rel="noreferrer" title='Website'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-globe transition-colors" /></a>`
 								: ''
 						}
 
@@ -298,17 +298,17 @@ export const generateMarker = (lat, long, icon, element, L, verifiedDate, verify
 										element.tags['contact:twitter'].startsWith('http')
 											? element.tags['contact:twitter']
 											: `https://twitter.com/${element.tags['contact:twitter']}`
-								  } target="_blank" rel="noreferrer" title='Twitter'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-brands fa-twitter" /></a>`
+								  } target="_blank" rel="noreferrer" title='Twitter'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-brands fa-twitter transition-colors" /></a>`
 								: ''
 						}
 
-						<a href='geo:${lat},${long}' title='Navigate'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-compass" /></a>
+						<a href='geo:${lat},${long}' title='Navigate'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-compass transition-colors" /></a>
 
 						<a href='https://www.openstreetmap.org/edit?${element.type}=${
 			element.id
-		}' target="_blank" rel="noreferrer" title='Edit'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-pen-to-square" /></a>
+		}' target="_blank" rel="noreferrer" title='Edit'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-pen-to-square transition-colors" /></a>
 
-						<a href='/map?lat=${lat}&long=${long}' target="_blank" rel="noreferrer" title='Share'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-share-nodes" /></a>
+						<a href='/map?lat=${lat}&long=${long}' target="_blank" rel="noreferrer" title='Share'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-share-nodes transition-colors" /></a>
 					</div>
 
 					<div class='w-full flex space-x-2 my-1'>
@@ -374,7 +374,7 @@ export const generateMarker = (lat, long, icon, element, L, verifiedDate, verify
 									element.tags && element.tags.name ? `&name=${element.tags.name}` : ''
 							  }&lat=${lat}&long=${long}&${element.type}=${
 									element.id
-							  }" class='text-link hover:text-hover text-xs' title="Help improve the data for everyone">Verify location</a>`
+							  }" class='text-link hover:text-hover text-xs transition-colors' title="Help improve the data for everyone">Verify location</a>`
 							: ''
 					}
 
@@ -383,7 +383,7 @@ export const generateMarker = (lat, long, icon, element, L, verifiedDate, verify
 							target="_blank"
 							rel="noreferrer"
 							title="Map legend">
-							<span class="fa-solid fa-circle-info text-sm text-link hover:text-hover"></span>
+							<span class="fa-solid fa-circle-info text-sm text-link hover:text-hover transition-colors"></span>
 						</a>
 					</div>`,
 		{ closeButton: false }

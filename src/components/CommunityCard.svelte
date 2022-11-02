@@ -17,7 +17,7 @@
 
 <div class="border border-statBorder rounded-3xl shadow hover:shadow-2xl transition-shadow">
 	<div class="my-4 p-4 space-y-2">
-		<a href="/community/{id}" class="text-link hover:text-hover space-y-2">
+		<a href="/community/{id}" class="text-link hover:text-hover space-y-2 transition-colors">
 			<img
 				src={image ? image : '/images/communities/bitcoin.svg'}
 				alt={tags.name}

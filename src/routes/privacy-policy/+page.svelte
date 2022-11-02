@@ -31,19 +31,19 @@
 					<li>
 						An issue is automatically created in our <a
 							href="https://github.com/teambtcmap/btcmap-data/issues"
-							class="text-link hover:text-hover">btcmap-data</a
+							class="text-link hover:text-hover transition-colors">btcmap-data</a
 						> repo on GitHub containing the form information.
 					</li>
 					<li>
 						A message is automatically sent in the <a
 							href="https://discord.gg/sCBUzb4Qch"
-							class="text-link hover:text-hover">data-feed</a
+							class="text-link hover:text-hover transition-colors">data-feed</a
 						> channel on our Discord containing the form information.
 					</li>
 					<li>
 						If the submission is valid, it is added to <a
 							href="https://www.openstreetmap.org"
-							class="text-link hover:text-hover">OpenStreetMap</a
+							class="text-link hover:text-hover transition-colors">OpenStreetMap</a
 						> by a BTC Map contributor and will appear in our apps.
 					</li>
 				</ol>
@@ -55,18 +55,19 @@
 					<li>
 						<a
 							href="https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement"
-							class="text-link hover:text-hover">GitHub Privacy Policy</a
+							class="text-link hover:text-hover transition-colors">GitHub Privacy Policy</a
 						>
 					</li>
 					<li>
-						<a href="https://discord.com/privacy" class="text-link hover:text-hover"
-							>Discord Privacy Policy</a
+						<a
+							href="https://discord.com/privacy"
+							class="text-link hover:text-hover transition-colors">Discord Privacy Policy</a
 						>
 					</li>
 					<li>
 						<a
 							href="https://wiki.osmfoundation.org/wiki/Privacy_Policy"
-							class="text-link hover:text-hover">OpenStreetMap Privacy Policy</a
+							class="text-link hover:text-hover transition-colors">OpenStreetMap Privacy Policy</a
 						>
 					</li>
 				</ul>
@@ -78,7 +79,7 @@
 				<p>
 					If you include a Twitter handle, we may Tweet about your submission from the <a
 						href={$socials.twitter}
-						class="text-link hover:text-hover">@BTCMapDotOrg</a
+						class="text-link hover:text-hover transition-colors">@BTCMapDotOrg</a
 					> Twitter account.
 				</p>
 			</div>
@@ -88,7 +89,7 @@
 				<p>
 					We use privacy respecting analytics provided by <a
 						href="https://www.netlify.com/"
-						class="text-link hover:text-hover">Netlify</a
+						class="text-link hover:text-hover transition-colors">Netlify</a
 					> in order to see activity on BTC Map. For example, how many users are visiting the website.
 				</p>
 				<p>
@@ -96,26 +97,28 @@
 					There is no personally identifiable information included. All of the data is anonymous and
 					complies with the <a
 						href="https://www.netlify.com/gdpr-ccpa/"
-						class="text-link hover:text-hover">GDPR</a
+						class="text-link hover:text-hover transition-colors">GDPR</a
 					>. This data is deleted after 30 days.
 				</p>
 				<p>Below are some links to read more about Netlify Analytics:</p>
 				<ul class="list-disc space-y-2 ml-5">
 					<li>
-						<a href="https://www.netlify.com/products/analytics/" class="text-link hover:text-hover"
-							>Netlify Analytics</a
+						<a
+							href="https://www.netlify.com/products/analytics/"
+							class="text-link hover:text-hover transition-colors">Netlify Analytics</a
 						>
 					</li>
 					<li>
 						<a
 							href="https://docs.netlify.com/monitor-sites/analytics/"
-							class="text-link hover:text-hover">Netlify Docs - Analytics</a
+							class="text-link hover:text-hover transition-colors">Netlify Docs - Analytics</a
 						>
 					</li>
 					<li>
 						<a
 							href="https://docs.netlify.com/monitor-sites/analytics/how-analytics-works/"
-							class="text-link hover:text-hover">Netlify Docs - How Analytics Works</a
+							class="text-link hover:text-hover transition-colors"
+							>Netlify Docs - How Analytics Works</a
 						>
 					</li>
 				</ul>
@@ -131,13 +134,13 @@
 				<p>
 					Our Android app is available to download via the Google <a
 						href={$apps.play}
-						class="text-link hover:text-hover">Play Store</a
+						class="text-link hover:text-hover transition-colors">Play Store</a
 					>. However, we <strong>do not</strong> recommend using this method. God only knows what
 					information is collected about you when using Google services. Instead, we have our
 					Android app available for download directly from our GitHub repo as an
-					<a href={$apps.direct} class="text-link hover:text-hover">APK</a>
+					<a href={$apps.direct} class="text-link hover:text-hover transition-colors">APK</a>
 					or on the FOSS app store
-					<a href={$apps.fdroid} class="text-link hover:text-hover">F-Droid.</a>
+					<a href={$apps.fdroid} class="text-link hover:text-hover transition-colors">F-Droid.</a>
 				</p>
 			</div>
 
@@ -151,11 +154,14 @@
 					<li>
 						Use a VPN service like <a
 							href="https://mullvad.net/en/"
-							class="text-link hover:text-hover">Mullvad</a
+							class="text-link hover:text-hover transition-colors">Mullvad</a
 						>.
 					</li>
 					<li>
-						Use <a href="https://www.torproject.org/" class="text-link hover:text-hover">Tor</a> browser.
+						Use <a
+							href="https://www.torproject.org/"
+							class="text-link hover:text-hover transition-colors">Tor</a
+						> browser.
 					</li>
 				</ol>
 			</div>
@@ -170,7 +176,7 @@
 				<p>
 					If you have any questions or feedback about our privacy policy, please contact us at <a
 						href="mailto:hello@btcmap.org"
-						class="text-link hover:text-hover">hello@btcmap.org</a
+						class="text-link hover:text-hover transition-colors">hello@btcmap.org</a
 					> or on any of our social platforms.
 				</p>
 			</div>

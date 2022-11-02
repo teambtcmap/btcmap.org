@@ -50,7 +50,7 @@
 						: `/map?lat=${lat}&long=${long}`}
 					target={action === 'delete' ? '_blank' : '_self'}
 					rel="noreferrer"
-					class="text-link hover:text-hover break-all"
+					class="text-link hover:text-hover break-all transition-colors"
 					>{location}
 					{#if action === 'delete'}
 						<svg

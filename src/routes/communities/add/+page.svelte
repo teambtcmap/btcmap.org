@@ -202,7 +202,7 @@
 							name="name"
 							placeholder="Bitcoin Island Philippines"
 							required
-							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
 							bind:value={name}
 						/>
 					</div>
@@ -220,7 +220,7 @@
 							type="url"
 							name="icon"
 							placeholder="https://btcmap.org/images/communities/iom.svg"
-							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
 							bind:value={icon}
 						/>
 					</div>
@@ -235,7 +235,7 @@
 						<div class="mb-2 flex items-center space-x-2">
 							<label for="discord" class="text-sm cursor-pointer">Create a Discord channel</label>
 							<input
-								class="accent-link"
+								class="accent-link w-4 h-4"
 								disabled={!captchaSecret || !mapLoaded}
 								type="checkbox"
 								id="discord"
@@ -250,7 +250,7 @@
 							name="socials"
 							placeholder="Website, Twitter, Telegram, Matrix etc."
 							rows="3"
-							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
 							bind:value={socialLinks}
 						/>
 					</div>
@@ -266,7 +266,7 @@
 							type="text"
 							name="contact"
 							placeholder="e.g. hello@btcmap.org"
-							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
 							bind:value={contact}
 						/>
 					</div>
@@ -295,7 +295,7 @@
 								type="text"
 								name="captcha"
 								placeholder="Please enter the captcha text."
-								class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+								class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
 								bind:value={captchaInput}
 							/>
 						</div>

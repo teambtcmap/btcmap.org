@@ -7,7 +7,7 @@
 
 <div
 	id={icon}
-	class="bg-white drop-shadow-xl rounded-3xl p-5 md:p-10 space-y-4 text-center relative"
+	class="bg-white drop-shadow-xl hover:drop-shadow-2xl rounded-3xl p-5 md:p-10 space-y-4 text-center relative transition-all"
 >
 	{#if type === 'contribution'}
 		<div

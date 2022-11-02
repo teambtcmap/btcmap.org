@@ -992,6 +992,30 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 					var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia)
 					var(--tw-drop-shadow);
 			}
+			.transition-colors {
+				transition-property: color, background-color, border-color, text-decoration-color, fill,
+					stroke;
+				transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+				transition-duration: 150ms;
+			}
+			.transition-shadow {
+				transition-property: box-shadow;
+				transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+				transition-duration: 150ms;
+			}
+			.transition-all {
+				transition-property: all;
+				transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+				transition-duration: 150ms;
+			}
+			.transition-transform {
+				transition-property: transform;
+				transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+				transition-duration: 150ms;
+			}
+			.ease-in-out {
+				transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+			}
 
 			@font-face {
 				font-family: 'Manrope';
@@ -1172,27 +1196,27 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 					</header>
 
 					<div class="text-center space-y-10 py-10">
-						<a href="/" class="text-link hover:text-hover font-semibold text-xl"
+						<a href="/" class="text-link hover:text-hover font-semibold text-xl transition-colors"
 							><i class="fa-solid fa-house mr-2"></i> Home</a
 						>
-						<h1 class="text-4xl md:text-5xl">Status: Not Found or Error</h1>
+						<h1 class="text-4xl md:text-5xl">%sveltekit.status%: %sveltekit.error.message%</h1>
 						<h2 class="text-xl text-primary font-semibold">Please try again or contact BTC Map.</h2>
 					</div>
 
 					<footer class="space-x-5 pb-5 flex justify-center">
 						<a href="https://twitter.com/BTCMapDotOrg" target="_blank" rel="noreferrer"
 							><i
-								class="bg-link hover:bg-hover rounded-full p-2 w-7 h-7 text-white fa-brands fa-twitter"
+								class="bg-link hover:bg-hover rounded-full p-2 w-7 h-7 text-white fa-brands fa-twitter transition-colors"
 							></i
 						></a>
 						<a href="https://discord.gg/wPqva83uzq" target="_blank" rel="noreferrer"
 							><i
-								class="bg-link hover:bg-hover rounded-full p-2 w-7 h-7 text-white fa-brands fa-discord"
+								class="bg-link hover:bg-hover rounded-full p-2 w-7 h-7 text-white fa-brands fa-discord transition-colors"
 							></i
 						></a>
 						<a href="https://github.com/teambtcmap" target="_blank" rel="noreferrer"
 							><i
-								class="bg-link hover:bg-hover rounded-full p-2 w-7 h-7 text-white fa-brands fa-github"
+								class="bg-link hover:bg-hover rounded-full p-2 w-7 h-7 text-white fa-brands fa-github transition-colors"
 							></i
 						></a>
 					</footer>

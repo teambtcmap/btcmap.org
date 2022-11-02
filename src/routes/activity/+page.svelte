@@ -91,7 +91,7 @@
 			<p class="text-center lg:text-left text-xl text-primary">
 				You too can be a shadowy supertagging legend! What are you waiting for? <a
 					href="https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions#shadowy-supertaggers"
-					class="text-link hover:text-hover">Get taggin’!</a
+					class="text-link hover:text-hover transition-colors">Get taggin’!</a
 				>
 			</p>
 

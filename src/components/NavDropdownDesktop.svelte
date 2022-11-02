@@ -14,7 +14,7 @@
 	<button
 		id="dropdown-{title.toLowerCase()}"
 		on:click={() => (show = !show)}
-		class="mr-4 mt-4 md:mr-0 md:mt-0 text-link hover:text-hover text-xl font-semibold flex items-center"
+		class="mr-4 mt-4 md:mr-0 md:mt-0 text-link hover:text-hover text-xl font-semibold flex items-center transition-colors"
 	>
 		{title} <i class="ml-1 w-4 h-4 fa-solid fa-chevron-down" />
 	</button>
@@ -36,7 +36,7 @@
 							? 'rounded-t-2xl'
 							: link.icon === bottom
 							? 'rounded-b-2xl'
-							: ''}"
+							: ''} transition-colors"
 					>
 						{link.title}
 						{#if link.external}

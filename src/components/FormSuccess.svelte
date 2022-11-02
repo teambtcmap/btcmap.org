@@ -15,14 +15,17 @@
 		<h2 class="gradient text-4xl font-semibold mb-5">{type} Submitted!</h2>
 		<p class="text-primary w-full md:w-[500px] mb-5">
 			{text} If you wish to know the status of your contribution, join our
-			<a href={$socials.discord} target="_blank" rel="noreferrer" class="text-link hover:text-hover"
-				>Discord</a
+			<a
+				href={$socials.discord}
+				target="_blank"
+				rel="noreferrer"
+				class="text-link hover:text-hover transition-colors">Discord</a
 			>. You can also monitor the progress on GitHub
 			<a
 				href="https://github.com/teambtcmap/btcmap-data/issues/{issue}"
 				target="_blank"
 				rel="noreferrer"
-				class="text-link hover:text-hover">issue #{issue}</a
+				class="text-link hover:text-hover transition-colors">issue #{issue}</a
 			>.
 		</p>
 		{#if typeof window !== 'undefined'}

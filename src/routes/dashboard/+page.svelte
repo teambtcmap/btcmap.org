@@ -587,7 +587,7 @@
 					href="https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions#tagging-guidance"
 					target="_blank"
 					rel="noreferrer"
-					class="text-link hover:text-hover">here</a
+					class="text-link hover:text-hover transition-colors">here</a
 				>.
 			</p>
 		</main>

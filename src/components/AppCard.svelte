@@ -11,7 +11,7 @@
 			href={link}
 			target="_blank"
 			rel="noreferrer"
-			class="text-link hover:text-hover text-2xl font-semibold"
+			class="text-link hover:text-hover text-2xl font-semibold transition-colors"
 		>
 			<div class="bg-offwhite rounded-2xl mb-5 h-60 flex justify-center items-center">
 				<i class="{image} w-28 h-28" />
