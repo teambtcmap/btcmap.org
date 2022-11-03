@@ -80,86 +80,101 @@
 	populateLeaderboard();
 
 	let badges = [
-		{ check: supporter, title: 'Supporter', icon: 'supporter' },
+		{ check: supporter, title: 'Supporter', icon: 'supporter', type: 'achievement' },
 		{
 			check: leaderboard[0].id == user.id,
 			title: 'Top Tagger',
-			icon: 'top-tagger'
+			icon: 'top-tagger',
+			type: 'achievement'
 		},
 		{
 			check: leaderboard.slice(0, 3).find((item) => item.id == user.id),
 			title: 'Podium',
-			icon: 'podium'
+			icon: 'podium',
+			type: 'achievement'
 		},
 		{
 			check: leaderboard.find((item) => item.id == user.id),
 			title: 'High Rank',
-			icon: 'high-rank'
+			icon: 'high-rank',
+			type: 'achievement'
 		},
 		{
 			check: userCreated < Date('December 26, 2022 00:00:00'),
 			title: 'OG Supertagger',
-			icon: 'og-supertagger'
+			icon: 'og-supertagger',
+			type: 'achievement'
 		},
 		{
 			check: lightning,
 			title: 'Lightning Junkie',
-			icon: 'lightning-junkie'
+			icon: 'lightning-junkie',
+			type: 'achievement'
 		},
 		{
 			check: user.img,
 			title: 'Hello World',
-			icon: 'hello-world'
+			icon: 'hello-world',
+			type: 'achievement'
 		},
 		{
 			check: created > updated && created > deleted,
 			title: 'Creator',
-			icon: 'creator'
+			icon: 'creator',
+			type: 'achievement'
 		},
 		{
 			check: updated > created && updated > deleted,
 			title: 'Update Maxi',
-			icon: 'update-maxi'
+			icon: 'update-maxi',
+			type: 'achievement'
 		},
 		{
 			check: deleted > created && deleted > updated,
 			title: 'Demolition Specialist',
-			icon: 'demolition-specialist'
+			icon: 'demolition-specialist',
+			type: 'achievement'
 		},
 		{
 			check: total >= 21000000,
 			title: 'Hyperbitcoinisation',
-			icon: 'hyperbitcoinisation'
+			icon: 'hyperbitcoinisation',
+			type: 'contribution'
 		},
-		{ check: total >= 10000, title: 'Pizza Time', icon: 'pizza-time' },
-		{ check: total >= 7777, title: 'Godly', icon: 'godly' },
-		{ check: total >= 5000, title: 'Shadow', icon: 'shadow' },
-		{ check: total >= 3110, title: 'Whitepaper', icon: 'whitepaper' },
-		{ check: total >= 1984, title: 'Winston', icon: 'winston' },
-		{ check: total >= 1000, title: 'Whale', icon: 'whale' },
-		{ check: total >= 821, title: 'Infinity', icon: 'infinity' },
-		{ check: total >= 500, title: 'Legend', icon: 'legend' },
-		{ check: total >= 301, title: 'Chancellor', icon: 'chancellor' },
-		{ check: total >= 256, title: 'SHA', icon: 'sha' },
-		{ check: total >= 210, title: 'No Bailouts', icon: 'no-bailouts' },
-		{ check: total >= 100, title: 'Supertagger', icon: 'supertagger' },
-		{ check: total >= 69, title: 'ATH', icon: 'ath' },
-		{ check: total >= 51, title: 'Longest Chain', icon: 'longest-chain' },
-		{ check: total >= 21, title: 'Satoshi', icon: 'satoshi' },
-		{ check: total >= 10, title: 'Heartbeat', icon: 'heartbeat' },
-		{ check: total >= 4, title: 'Segwit', icon: 'segwit' },
-		{ check: total >= 1, title: 'Whole Tagger', icon: 'whole-tagger' }
+		{ check: total >= 10000, title: 'Pizza Time', icon: 'pizza-time', type: 'contribution' },
+		{ check: total >= 7777, title: 'Godly', icon: 'godly', type: 'contribution' },
+		{ check: total >= 5000, title: 'Shadow', icon: 'shadow', type: 'contribution' },
+		{ check: total >= 3110, title: 'Whitepaper', icon: 'whitepaper', type: 'contribution' },
+		{ check: total >= 1984, title: 'Winston', icon: 'winston', type: 'contribution' },
+		{ check: total >= 1000, title: 'Whale', icon: 'whale', type: 'contribution' },
+		{ check: total >= 821, title: 'Infinity', icon: 'infinity', type: 'contribution' },
+		{ check: total >= 500, title: 'Legend', icon: 'legend', type: 'contribution' },
+		{ check: total >= 301, title: 'Chancellor', icon: 'chancellor', type: 'contribution' },
+		{ check: total >= 256, title: 'SHA', icon: 'sha', type: 'contribution' },
+		{ check: total >= 210, title: 'No Bailouts', icon: 'no-bailouts', type: 'contribution' },
+		{ check: total >= 100, title: 'Supertagger', icon: 'supertagger', type: 'contribution' },
+		{ check: total >= 69, title: 'ATH', icon: 'ath', type: 'contribution' },
+		{ check: total >= 51, title: 'Longest Chain', icon: 'longest-chain', type: 'contribution' },
+		{ check: total >= 21, title: 'Satoshi', icon: 'satoshi', type: 'contribution' },
+		{ check: total >= 10, title: 'Heartbeat', icon: 'heartbeat', type: 'contribution' },
+		{ check: total >= 4, title: 'Segwit', icon: 'segwit', type: 'contribution' },
+		{ check: total >= 1, title: 'Whole Tagger', icon: 'whole-tagger', type: 'contribution' }
 	];
 
 	let earnedBadges = [];
 
-	const addBadge = (check, title, icon) => {
+	const addBadge = (check, title, icon, type) => {
 		if (check) {
-			earnedBadges.push({ title, icon });
+			earnedBadges.push({ title, icon, type });
 		}
 	};
 
-	badges.forEach((badge) => addBadge(badge.check, badge.title, badge.icon));
+	badges.some((badge) => {
+		if (earnedBadges.find((badge) => badge.type === 'contribution')) {
+			return true;
+		}
+		addBadge(badge.check, badge.title, badge.icon, badge.type);
+	});
 
 	let createdPercent = new Intl.NumberFormat('en-US')
 		.format((created / (total / 100)).toFixed(0))
