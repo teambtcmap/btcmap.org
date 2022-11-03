@@ -36,6 +36,8 @@
 		throw error(404, 'User Not Found');
 	}
 	let userCreated = user['created_at'];
+	let supporter =
+		user.tags['supporter:expires'] && Date.parse(user.tags['supporter:expires']) > Date.now();
 	user = user['osm_json'];
 	let avatar = user.img ? user.img.href : '/images/satoshi-nakamoto.png';
 	let username = user['display_name'];
@@ -57,9 +59,6 @@
 			: userEvents.filter((event) => event.type === 'update').length;
 	let deleted = userEvents.filter((event) => event.type === 'delete').length;
 	let total = created + updated + deleted;
-
-	let supporters = [10396321];
-	let supporter = supporters.includes(user.id);
 
 	let leaderboard = [];
 
