@@ -393,7 +393,7 @@ Thanks for using BTC Map!`);
 			dataRefresh(L, map, DomEvent);
 
 			// create marker cluster group
-			let markers = L.markerClusterGroup();
+			let markers = L.markerClusterGroup({ maxClusterRadius: 60 });
 
 			// get date from 1 year ago to add verified check if survey is current
 			let verifiedDate = calcVerifiedDate();
