@@ -254,15 +254,20 @@ export const longCalc = (element) => {
 	return element.type == 'node' ? element.lon : (element.bounds.minlon + element.bounds.maxlon) / 2;
 };
 
-export const markerIcon = (L) => {
-	return L.icon({
-		iconUrl: '/icons/location-pin.svg',
-		shadowUrl: '/icons/location-pin-shadow.svg',
-		iconSize: [32, 43], // size of the icon
-		shadowSize: [43, 50], // size of the shadow
-		iconAnchor: [19, 43], // point of the icon which will correspond to marker's location
-		shadowAnchor: [10, 48], // the same for the shadow
-		popupAnchor: [-3, -34] // point from which the popup should open relative to the iconAnchor
+export const generateIcon = (L, icon) => {
+	return L.divIcon({
+		className: 'remove-default',
+		iconSize: [32, 43],
+		iconAnchor: [16, 43],
+		popupAnchor: [0, -43],
+		html: `<div class='relative drop-shadow-2xl'>
+						<img src='/icons/div-icon-pin.svg' alt='marker'/>
+					 	<svg class='absolute w-5 h-5 top-[5.75px] left-[5.75px]'>
+			        <use xlink:href="/icons/markers/sprite.svg#${
+								icon !== 'question_mark' ? icon : 'currency_bitcoin'
+							}"></use>
+			      </svg>
+					 </div>`
 	});
 };
 
@@ -355,7 +360,7 @@ export const generateMarker = (lat, long, icon, element, L, verifiedDate, verify
 		}"/>
 					</div>
 
-					<span class='text-body my-1' title="Surveys are completed by BTC Map community members">Survey date:
+					<span class='text-body my-1' title="Completed by BTC Map community members">Survey date:
 					${
 						element.tags && (element.tags['survey:date'] || element.tags['check_date'])
 							? `${

@@ -18,7 +18,7 @@
 		checkAddress,
 		latCalc,
 		longCalc,
-		markerIcon,
+		generateIcon,
 		generateMarker
 	} from '$lib/map/setup';
 	import { errToast } from '$lib/utils';
@@ -300,9 +300,6 @@ Thanks for using BTC Map!`);
 			// change broken marker image path in prod
 			L.Icon.Default.prototype.options.imagePath = '/icons/';
 
-			// use new icon
-			const newIcon = markerIcon(L);
-
 			// add support attribution
 			support();
 
@@ -411,6 +408,7 @@ Thanks for using BTC Map!`);
 				}
 
 				let category = element.tags.category;
+				let icon = element.tags['icon:android'];
 				element = element['osm_json'];
 
 				if (
@@ -421,7 +419,9 @@ Thanks for using BTC Map!`);
 					const lat = latCalc(element);
 					const long = longCalc(element);
 
-					let marker = generateMarker(lat, long, newIcon, element, L, verifiedDate, 'verify');
+					let divIcon = generateIcon(L, icon);
+
+					let marker = generateMarker(lat, long, divIcon, element, L, verifiedDate, 'verify');
 
 					if (category === 'atm') {
 						ATMs.addLayer(marker);
@@ -533,7 +533,9 @@ Thanks for using BTC Map!`);
 								</div>
 							</div>
 
-							<div class="text-xs text-searchSubtext text-center md:text-right w-[65px] mx-auto md:mx-0">
+							<div
+								class="text-xs text-searchSubtext text-center md:text-right w-[65px] mx-auto md:mx-0"
+							>
 								<p>{result.distanceKm} km</p>
 								<p>{result.distanceMi} mi</p>
 							</div>
