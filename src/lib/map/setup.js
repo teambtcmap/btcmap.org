@@ -357,9 +357,17 @@ export const generateMarker = (lat, long, icon, element, L, verifiedDate, verify
 
 					<span class='text-body my-1' title="Surveys are completed by BTC Map community members">Survey date:
 					${
-						element.tags && element.tags['survey:date']
-							? `${element.tags['survey:date']} ${
-									Date.parse(element.tags['survey:date']) > verifiedDate
+						element.tags && (element.tags['survey:date'] || element.tags['check_date'])
+							? `${
+									element.tags['survey:date']
+										? element.tags['survey:date']
+										: element.tags['check_date']
+							  } ${
+									Date.parse(
+										element.tags['survey:date']
+											? element.tags['survey:date']
+											: element.tags['check_date']
+									) > verifiedDate
 										? '<img src="/icons/verified.svg" alt="verified" class="inline w-5 h-5" title="Verified within the last year"/>'
 										: ''
 							  }`
