@@ -251,8 +251,8 @@
 			};
 
 			// create marker cluster groups
-			let merchants = L.markerClusterGroup({ maxClusterRadius: 60 });
-			let ATMs = L.markerClusterGroup({ maxClusterRadius: 60 });
+			let merchants = L.markerClusterGroup({ maxClusterRadius: 80 });
+			let ATMs = L.markerClusterGroup({ maxClusterRadius: 80 });
 
 			const overlayMaps = {
 				Merchants: merchants,
