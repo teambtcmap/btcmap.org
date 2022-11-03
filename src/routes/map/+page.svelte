@@ -250,7 +250,16 @@
 				OpenStreetMapFR: osmFR
 			};
 
-			const layerControl = L.control.layers(baseMaps).addTo(map);
+			// create marker cluster groups
+			let merchants = L.markerClusterGroup({ maxClusterRadius: 60 });
+			let ATMs = L.markerClusterGroup({ maxClusterRadius: 60 });
+
+			const overlayMaps = {
+				Merchants: merchants,
+				ATMs: ATMs
+			};
+
+			const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
 
 			osm.addTo(map);
 
@@ -392,9 +401,6 @@ Thanks for using BTC Map!`);
 			// add data refresh button to map
 			dataRefresh(L, map, DomEvent);
 
-			// create marker cluster group
-			let markers = L.markerClusterGroup({ maxClusterRadius: 60 });
-
 			// get date from 1 year ago to add verified check if survey is current
 			let verifiedDate = calcVerifiedDate();
 
@@ -403,7 +409,10 @@ Thanks for using BTC Map!`);
 				if (element['deleted_at']) {
 					return;
 				}
+
+				let category = element.tags.category;
 				element = element['osm_json'];
+
 				if (
 					(onchain ? element.tags && element.tags['payment:onchain'] === 'yes' : true) &&
 					(lightning ? element.tags && element.tags['payment:lightning'] === 'yes' : true) &&
@@ -414,7 +423,11 @@ Thanks for using BTC Map!`);
 
 					let marker = generateMarker(lat, long, newIcon, element, L, verifiedDate, 'verify');
 
-					markers.addLayer(marker);
+					if (category === 'atm') {
+						ATMs.addLayer(marker);
+					} else {
+						merchants.addLayer(marker);
+					}
 
 					element.latLng = L.latLng(lat, long);
 					element.marker = marker;
@@ -422,7 +435,8 @@ Thanks for using BTC Map!`);
 				}
 			});
 
-			map.addLayer(markers);
+			map.addLayer(merchants);
+			map.addLayer(ATMs);
 
 			// final map setup
 			map.on('load', () => {
