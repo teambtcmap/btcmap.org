@@ -260,7 +260,7 @@ export const generateIcon = (L, icon) => {
 		iconSize: [32, 43],
 		iconAnchor: [16, 43],
 		popupAnchor: [0, -43],
-		html: `<div class='relative drop-shadow-2xl'>
+		html: `<div class='relative'>
 						<img src='/icons/div-icon-pin.svg' alt='marker'/>
 					 	<svg class='absolute w-5 h-5 top-[5.75px] left-[5.75px]'>
 			        <use xlink:href="/icons/markers/sprite.svg#${
