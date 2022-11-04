@@ -958,6 +958,11 @@ kleur@^4.1.4, kleur@^4.1.5:
   resolved "https://registry.yarnpkg.com/kleur/-/kleur-4.1.5.tgz#95106101795f7050c6c650f350c683febddb1780"
   integrity sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==
 
+leaflet.featuregroup.subgroup@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/leaflet.featuregroup.subgroup/-/leaflet.featuregroup.subgroup-1.0.2.tgz#ffbc96ea6db41893b6d5fb60ba09f13876c45d28"
+  integrity sha512-9nCVg8nUe686+BtPbUT7ALOe/IA+8Mum+rkA8pfPpCkH0WvKevRrH+JMcMTjAoNQKVI0uxrWrLV5w298SS3ESA==
+
 leaflet.locatecontrol@^0.77.0:
   version "0.77.0"
   resolved "https://registry.yarnpkg.com/leaflet.locatecontrol/-/leaflet.locatecontrol-0.77.0.tgz#d5dabaff57c6bf907f54a5bd245f1d624e9a388c"

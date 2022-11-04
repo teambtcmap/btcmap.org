@@ -125,6 +125,7 @@
 			const DomEvent = await import('leaflet/src/dom/DomEvent');
 			const leafletLocateControl = await import('leaflet.locatecontrol');
 			const leafletMarkerCluster = await import('leaflet.markercluster');
+			const leafletFeaturegroupSubgroup = await import('leaflet.featuregroup.subgroup');
 
 			// add map and tiles
 			map = leaflet.map(mapElement);
@@ -250,9 +251,11 @@
 				OpenStreetMapFR: osmFR
 			};
 
-			// create marker cluster groups
-			let merchants = L.markerClusterGroup({ maxClusterRadius: 80 });
-			let ATMs = L.markerClusterGroup({ maxClusterRadius: 80 });
+			// create marker cluster group and layers
+			let markers = L.markerClusterGroup({ maxClusterRadius: 80 });
+
+			let merchants = L.featureGroup.subGroup(markers);
+			let ATMs = L.featureGroup.subGroup(markers);
 
 			const overlayMaps = {
 				Merchants: merchants,
@@ -435,6 +438,7 @@ Thanks for using BTC Map!`);
 				}
 			});
 
+			map.addLayer(markers);
 			map.addLayer(merchants);
 			map.addLayer(ATMs);
 
