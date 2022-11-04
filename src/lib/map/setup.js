@@ -256,18 +256,14 @@ export const longCalc = (element) => {
 
 export const generateIcon = (L, icon) => {
 	return L.divIcon({
-		className: 'remove-default',
+		className: 'div-icon',
 		iconSize: [32, 43],
 		iconAnchor: [16, 43],
 		popupAnchor: [0, -43],
-		html: `<div class='relative'>
-						<img src='/icons/div-icon-pin.svg' alt='marker'/>
-					 	<svg width='20px' height='20px' class='absolute top-[5.75px] left-[5.75px]'>
-			        <use width='20px' height='20px' href="/icons/markers/sprite.svg#${
-								icon !== 'question_mark' ? icon : 'currency_bitcoin'
-							}"></use>
-			      </svg>
-					 </div>`
+		html: `<svg width='20px' height='20px' class='mx-auto mt-[5.75px]'>
+			     	<use href="/icons/markers/sprite.svg#${icon !== 'question_mark' ? icon : 'currency_bitcoin'}">
+						</use>
+			     </svg>`
 	});
 };
 
