@@ -29,6 +29,7 @@
 	let location = { minLat: '', minLong: '', maxLat: '', maxLong: '' };
 	let name;
 	let icon;
+	let lightning;
 	let socialLinks;
 	let discord;
 	let contact;
@@ -65,6 +66,7 @@
 					location,
 					name,
 					icon: icon ? icon : '',
+					lightning: lightning ? lightning : '',
 					discord: discord ? 'Yes' : 'No',
 					socialLinks: socialLinks ? socialLinks : '',
 					contact
@@ -222,6 +224,35 @@
 							placeholder="https://btcmap.org/images/communities/iom.svg"
 							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
 							bind:value={icon}
+						/>
+					</div>
+
+					<div>
+						<label for="lightning" class="mb-2 block font-semibold"
+							>Lightning Tips <span class="font-normal">(optional)</span></label
+						>
+						<p class="text-sm mb-2">
+							If you want the ability to receive sats you can add either a <a
+								href="https://lightningaddress.com/"
+								target="_blank"
+								rel="noreferrer"
+								class="text-link hover:text-hover transition-colors">Lightning Address</a
+							>
+							or
+							<a
+								href="https://github.com/fiatjaf/lnurl-rfc#lnurl-documents"
+								target="_blank"
+								rel="noreferrer"
+								class="text-link hover:text-hover transition-colors">LNURL-pay</a
+							> string.
+						</p>
+						<input
+							disabled={!captchaSecret || !mapLoaded}
+							type="text"
+							name="lightning"
+							placeholder="btcmap@zbd.gg"
+							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+							bind:value={lightning}
 						/>
 					</div>
 

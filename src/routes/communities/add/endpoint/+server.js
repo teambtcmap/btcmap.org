@@ -12,8 +12,18 @@ export async function POST({ request }) {
 		Accept: 'application/vnd.github+json'
 	};
 
-	let { captchaSecret, captchaTest, honey, location, name, icon, socialLinks, discord, contact } =
-		await request.json();
+	let {
+		captchaSecret,
+		captchaTest,
+		honey,
+		location,
+		name,
+		icon,
+		lightning,
+		socialLinks,
+		discord,
+		contact
+	} = await request.json();
 
 	// if honey field has value return
 	if (honey) {
@@ -50,6 +60,7 @@ East: ${location.minLong}
 South: ${location.maxLat}
 West: ${location.maxLong}
 Icon URL: ${icon}
+Lightning: ${lightning}
 Social links: ${socialLinks}
 Create Discord: ${discord}
 Community leader contact: ${contact}
