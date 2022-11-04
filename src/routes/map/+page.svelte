@@ -23,7 +23,7 @@
 		generateMarker
 	} from '$lib/map/setup';
 	import { errToast } from '$lib/utils';
-	import { MapLoading } from '$comp';
+	import { MapLoading, Icon } from '$comp';
 
 	let mapElement;
 	let map;
@@ -435,6 +435,7 @@ Thanks for using BTC Map!`);
 
 					element.latLng = L.latLng(lat, long);
 					element.marker = marker;
+					element.icon = icon;
 					elementsCopy.push(element);
 				}
 			});
@@ -522,24 +523,39 @@ Thanks for using BTC Map!`);
 					{#each searchResults as result}
 						<button
 							on:click={() => searchSelect(result)}
-							class="block hover:bg-searchHover w-full md:text-left md:flex justify-between px-4 py-2
-							{result.tags.name.match('([^ ]{21})') ||
-							(result.tags['addr:street'] && result.tags['addr:street'].match('([^ ]{21})')) ||
-							(result.tags['addr:city'] && result.tags['addr:city'].match('([^ ]{21})'))
-								? 'break-all'
-								: ''}"
+							class="block hover:bg-searchHover w-full md:text-left md:flex justify-between px-4 py-2"
 						>
 							<div class="md:flex items-start md:space-x-2">
-								<img src="/icons/marker.svg" alt="marker" class="mx-auto md:mx-0 mt-1 opacity-50" />
+								<Icon
+									width="20"
+									height="20"
+									style="mx-auto md:mx-0 mt-1 opacity-50 text-mapButton"
+									icon={result.icon !== 'question_mark' ? result.icon : 'currency_bitcoin'}
+									type="material"
+								/>
 
-								<div>
-									<p class="text-sm text-mapButton">{result.tags.name}</p>
-									<p class="text-xs text-searchSubtext">{checkAddress(result.tags)}</p>
+								<div class="md:max-w-[200px] mx-auto">
+									<p
+										class="text-sm text-mapButton {result.tags.name.match('([^ ]{21})')
+											? 'break-all'
+											: ''}"
+									>
+										{result.tags.name}
+									</p>
+									<p
+										class="text-xs text-searchSubtext {(result.tags['addr:street'] &&
+											result.tags['addr:street'].match('([^ ]{21})')) ||
+										(result.tags['addr:city'] && result.tags['addr:city'].match('([^ ]{21})'))
+											? 'break-all'
+											: ''}"
+									>
+										{checkAddress(result.tags)}
+									</p>
 								</div>
 							</div>
 
 							<div
-								class="text-xs text-searchSubtext text-center md:text-right w-[65px] mx-auto md:mx-0"
+								class="text-xs text-searchSubtext text-center md:text-right w-[80px] mx-auto md:mx-0"
 							>
 								<p>{result.distanceKm} km</p>
 								<p>{result.distanceMi} mi</p>

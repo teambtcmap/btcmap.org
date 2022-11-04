@@ -260,8 +260,10 @@ export const generateIcon = (L, icon) => {
 		iconSize: [32, 43],
 		iconAnchor: [16, 43],
 		popupAnchor: [0, -43],
-		html: `<svg width='20px' height='20px' class='mx-auto mt-[5.75px]'>
-			     	<use href="/icons/markers/sprite.svg#${icon !== 'question_mark' ? icon : 'currency_bitcoin'}">
+		html: `<svg width='20px' height='20px' class='mx-auto mt-[5.75px] text-white'>
+			     	<use width='20px' height='20px' href="/icons/material/spritesheet.svg#${
+							icon !== 'question_mark' ? icon : 'currency_bitcoin'
+						}">
 						</use>
 			     </svg>`
 	});

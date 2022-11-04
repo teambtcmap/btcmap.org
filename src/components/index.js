@@ -23,3 +23,4 @@ export { default as ProfileActivity } from './ProfileActivity.svelte';
 export { default as ProfileActivitySkeleton } from './ProfileActivitySkeleton.svelte';
 export { default as FormSuccess } from './FormSuccess.svelte';
 export { default as BadgeCard } from './BadgeCard.svelte';
+export { default as Icon } from './Icon.svelte';
