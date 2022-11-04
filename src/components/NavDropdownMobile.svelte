@@ -1,5 +1,5 @@
 <script>
-	import { OutClick } from '$comp';
+	import OutClick from 'svelte-outclick';
 
 	export let title;
 	export let icon;

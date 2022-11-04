@@ -1,5 +1,6 @@
 <script>
 	import localforage from 'localforage';
+	import OutClick from 'svelte-outclick';
 	import { tick } from 'svelte';
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
@@ -22,7 +23,7 @@
 		generateMarker
 	} from '$lib/map/setup';
 	import { errToast } from '$lib/utils';
-	import { MapLoading, OutClick } from '$comp';
+	import { MapLoading } from '$comp';
 
 	let mapElement;
 	let map;

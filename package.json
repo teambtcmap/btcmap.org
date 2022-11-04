@@ -36,6 +36,7 @@
 		"leaflet.markercluster": "^1.5.3",
 		"localforage": "^1.10.0",
 		"marked": "^4.1.1",
+		"svelte-outclick": "^3.2.0",
 		"svelte-time": "^0.7.1",
 		"svg-captcha": "^1.4.0"
 	}

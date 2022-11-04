@@ -262,8 +262,8 @@ export const generateIcon = (L, icon) => {
 		popupAnchor: [0, -43],
 		html: `<div class='relative'>
 						<img src='/icons/div-icon-pin.svg' alt='marker'/>
-					 	<svg class='absolute w-5 h-5 top-[5.75px] left-[5.75px]'>
-			        <use xlink:href="/icons/markers/sprite.svg#${
+					 	<svg class='absolute top-[5.75px] left-[5.75px]'>
+			        <use width='20px' height='20px' href="/icons/markers/sprite.svg#${
 								icon !== 'question_mark' ? icon : 'currency_bitcoin'
 							}"></use>
 			      </svg>
