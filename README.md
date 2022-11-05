@@ -20,6 +20,7 @@
 - vite
 - fontawesome
 - lottie
+- opencage
 
 ## Getting started
 
