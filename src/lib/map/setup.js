@@ -291,7 +291,11 @@ export const generateMarker = (lat, long, icon, element, L, verifiedDate, verify
 
 						${
 							element.tags && element.tags.website
-								? `<a href=${element.tags.website} target="_blank" rel="noreferrer" title='Website'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-globe transition-colors" /></a>`
+								? `<a href=${
+										element.tags.website.startsWith('http')
+											? element.tags.website
+											: `https://${element.tags.website}`
+								  } target="_blank" rel="noreferrer" title='Website'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-globe transition-colors" /></a>`
 								: ''
 						}
 
