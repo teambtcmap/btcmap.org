@@ -1,15 +1,28 @@
 <script>
 	import axios from 'axios';
+	import Chart from 'chart.js/dist/chart.min.js';
 	import { browser } from '$app/environment';
 	import { onMount, onDestroy } from 'svelte';
-	import { Header, Footer, PrimaryButton, CommunityCard, CommunitySkeleton } from '$comp';
+	import { Header, Footer, PrimaryButton, CommunitySection } from '$comp';
 	import { errToast } from '$lib/utils';
 
+	let initialRenderComplete = false;
 	let communitiesAPIInterval;
 	let communities;
+	let africa;
+	let asia;
+	let europe;
+	let northAmerica;
+	let oceania;
+	let southAmerica;
+
+	let continentChartCanvas;
+	let continentChart;
 
 	onMount(async () => {
 		if (browser) {
+			continentChartCanvas.getContext('2d');
+
 			const communitiesAPI = async () => {
 				await axios
 					.get('https://api.btcmap.org/v2/areas')
@@ -24,6 +37,7 @@
 								area.tags['box:west'] &&
 								area.tags.name &&
 								area.tags['icon:square'] &&
+								area.tags.continent &&
 								Object.keys(area.tags).find((key) => key.includes('contact'))
 						);
 
@@ -41,7 +55,70 @@
 							return 0;
 						});
 
-						communities = communities;
+						africa = communities.filter((community) => community.tags.continent === 'africa');
+						asia = communities.filter((community) => community.tags.continent === 'asia');
+						europe = communities.filter((community) => community.tags.continent === 'europe');
+						northAmerica = communities.filter(
+							(community) => community.tags.continent === 'north-america'
+						);
+						oceania = communities.filter((community) => community.tags.continent === 'oceania');
+						southAmerica = communities.filter(
+							(community) => community.tags.continent === 'south-america'
+						);
+
+						// setup chart
+						if (initialRenderComplete) {
+							continentChart.data.datasets[0].data = [
+								africa.length,
+								asia.length,
+								europe.length,
+								northAmerica.length,
+								oceania.length,
+								southAmerica.length
+							];
+							continentChart.update();
+						} else {
+							continentChart = new Chart(continentChartCanvas, {
+								type: 'doughnut',
+								data: {
+									labels: ['Africa', 'Asia', 'Europe', 'North America', 'Oceania', 'South America'],
+									datasets: [
+										{
+											label: 'Communities by Continent',
+											data: [
+												africa.length,
+												asia.length,
+												europe.length,
+												northAmerica.length,
+												oceania.length,
+												southAmerica.length
+											],
+											backgroundColor: [
+												'rgba(247, 147, 26, 1)',
+												'rgba(11, 144, 114, 1)',
+												'rgba(247, 147, 26, 0.7)',
+												'rgba(11, 144, 114, 0.7)',
+												'rgba(247, 147, 26, 0.35)',
+												'rgba(11, 144, 114, 0.35)'
+											],
+											hoverOffset: 4
+										}
+									]
+								},
+								options: {
+									maintainAspectRatio: false,
+									plugins: {
+										legend: {
+											labels: {
+												font: {
+													weight: 600
+												}
+											}
+										}
+									}
+								}
+							});
+						}
 					})
 					.catch(function (error) {
 						// handle error
@@ -49,8 +126,10 @@
 						console.log(error);
 					});
 			};
-			communitiesAPI();
-			communitiesAPIInterval = setInterval(communitiesAPI, 600000);
+			await communitiesAPI();
+			communitiesAPIInterval = setInterval(communitiesAPI, 10000);
+
+			initialRenderComplete = true;
 		}
 	});
 
@@ -86,17 +165,23 @@
 				link="/communities/add"
 			/>
 
-			<section id="communities" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
-				{#if communities && communities.length}
-					{#each communities as community}
-						<CommunityCard id={community.id} tags={community.tags} />
-					{/each}
-				{:else}
-					{#each Array(10) as skeleton}
-						<CommunitySkeleton />
-					{/each}
+			<div class="relative">
+				{#if !initialRenderComplete}
+					<div
+						class="absolute top-0 left-[calc(50%-150px)] bg-link/50 rounded-full animate-pulse w-[300px] h-[300px]"
+					/>
 				{/if}
-			</section>
+				<canvas bind:this={continentChartCanvas} width="300" height="300" />
+			</div>
+
+			<div class="space-y-20">
+				<CommunitySection title="Africa" communities={africa} />
+				<CommunitySection title="Asia" communities={asia} />
+				<CommunitySection title="Europe" communities={europe} />
+				<CommunitySection title="North America" communities={northAmerica} />
+				<CommunitySection title="Oceania" communities={oceania} />
+				<CommunitySection title="South America" communities={southAmerica} />
+			</div>
 		</main>
 
 		<Footer />

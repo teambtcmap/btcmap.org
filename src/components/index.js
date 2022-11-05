@@ -24,3 +24,4 @@ export { default as ProfileActivitySkeleton } from './ProfileActivitySkeleton.sv
 export { default as FormSuccess } from './FormSuccess.svelte';
 export { default as BadgeCard } from './BadgeCard.svelte';
 export { default as Icon } from './Icon.svelte';
+export { default as CommunitySection } from './CommunitySection.svelte';
