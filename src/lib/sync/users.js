@@ -69,8 +69,12 @@ export const usersSync = async () => {
 
 				// start update sync from API
 				try {
+					// sort to get most recent record
+					let cacheSorted = [...value];
+					cacheSorted.sort((a, b) => Date.parse(b['updated_at']) - Date.parse(a['updated_at']));
+
 					const response = await axios.get(
-						`https://api.btcmap.org/v2/users?updated_since=${value[0]['updated_at']}`
+						`https://api.btcmap.org/v2/users?updated_since=${cacheSorted[0]['updated_at']}`
 					);
 
 					// update new records if they exist
