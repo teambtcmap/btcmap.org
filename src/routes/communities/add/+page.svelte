@@ -26,7 +26,14 @@
 			});
 	};
 
-	let location = { minLat: '', minLong: '', maxLat: '', maxLong: '' };
+	let location = {
+		minLat: '',
+		minLong: '',
+		maxLat: '',
+		maxLong: '',
+		centerLat: '',
+		centerLong: ''
+	};
 	let name;
 	let icon;
 	let lightning;
@@ -42,10 +49,13 @@
 
 	const setLocation = () => {
 		const coords = map.getBounds();
+		const center = map.getCenter();
 		location.minLat = coords._northEast.lat;
 		location.minLong = coords._northEast.lng;
 		location.maxLat = coords._southWest.lat;
 		location.maxLong = coords._southWest.lng;
+		location.centerLat = center.lat.toString();
+		location.centerLong = center.lng.toString();
 		selected = true;
 		successToast('Location set!');
 	};

@@ -1,7 +1,11 @@
 import axios from 'axios';
-import { GITHUB_API_KEY } from '$env/static/private';
 import crypto from 'crypto';
-import { SERVER_CRYPTO_KEY, SERVER_INIT_VECTOR } from '$env/static/private';
+import {
+	GITHUB_API_KEY,
+	SERVER_CRYPTO_KEY,
+	SERVER_INIT_VECTOR,
+	OPENCAGE_API_KEY
+} from '$env/static/private';
 import { error } from '@sveltejs/kit';
 
 let used = [];
@@ -52,12 +56,27 @@ export async function POST({ request }) {
 		used.push(captchaSecret);
 	}
 
+	let country = await axios
+		.get(
+			`https://api.opencagedata.com/geocode/v1/json?q=${lat.slice(0, 7)}%2C%20${long.slice(
+				0,
+				7
+			)}&key=${OPENCAGE_API_KEY}&language=en&limit=1&no_annotations=1&no_record=1`
+		)
+		.then(function (response) {
+			return response.data.results[0].components.country;
+		})
+		.catch(function (error) {
+			console.log(error);
+		});
+
 	let github = await axios
 		.post(
 			'https://api.github.com/repos/teambtcmap/btcmap-data/issues',
 			{
 				title: name,
 				body: `Merchant name: ${name}
+Country: ${country ? country : ''}
 Address: ${address}
 Lat: ${lat}
 Long: ${long}
@@ -69,7 +88,9 @@ Twitter submitter: ${twitterSubmitter}
 Notes: ${notes}
 Status: Todo
 Created at: ${new Date(Date.now()).toISOString()}`,
-				labels: ['good first issue', 'help wanted', 'location-submission']
+				labels: country
+					? ['good first issue', 'help wanted', 'location-submission', country]
+					: ['good first issue', 'help wanted', 'location-submission']
 			},
 			{ headers }
 		)

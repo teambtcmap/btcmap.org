@@ -1,7 +1,11 @@
 import axios from 'axios';
-import { GITHUB_API_KEY } from '$env/static/private';
 import crypto from 'crypto';
-import { SERVER_CRYPTO_KEY, SERVER_INIT_VECTOR } from '$env/static/private';
+import {
+	GITHUB_API_KEY,
+	SERVER_CRYPTO_KEY,
+	SERVER_INIT_VECTOR,
+	OPENCAGE_API_KEY
+} from '$env/static/private';
 import { error } from '@sveltejs/kit';
 
 let used = [];
@@ -49,12 +53,30 @@ export async function POST({ request }) {
 		used.push(captchaSecret);
 	}
 
+	let continent = await axios
+		.get(
+			`https://api.opencagedata.com/geocode/v1/json?q=${location.centerLat.slice(
+				0,
+				7
+			)}%2C%20${location.centerLong.slice(
+				0,
+				7
+			)}&key=${OPENCAGE_API_KEY}&language=en&limit=1&no_annotations=1&no_record=1`
+		)
+		.then(function (response) {
+			return response.data.results[0].components.continent;
+		})
+		.catch(function (error) {
+			console.log(error);
+		});
+
 	let github = await axios
 		.post(
 			'https://api.github.com/repos/teambtcmap/btcmap-data/issues',
 			{
 				title: name,
 				body: `Community name: ${name}
+Continent: ${continent ? continent : ''}
 North: ${location.minLat}
 East: ${location.minLong}
 South: ${location.maxLat}
@@ -66,7 +88,7 @@ Create Discord: ${discord}
 Community leader contact: ${contact}
 Status: Todo
 Created at: ${new Date(Date.now()).toISOString()}`,
-				labels: ['community-submission']
+				labels: continent ? ['community-submission', continent] : ['community-submission']
 			},
 			{ headers }
 		)
