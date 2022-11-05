@@ -253,7 +253,7 @@
 			};
 
 			// create marker cluster group and layers
-			let markers = L.markerClusterGroup({ maxClusterRadius: 80 });
+			let markers = L.markerClusterGroup({ maxClusterRadius: 60 });
 
 			let merchants = L.featureGroup.subGroup(markers);
 			let ATMs = L.featureGroup.subGroup(markers);
