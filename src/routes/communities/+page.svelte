@@ -171,7 +171,7 @@
 						class="absolute top-0 left-[calc(50%-150px)] bg-link/50 rounded-full animate-pulse w-[300px] h-[300px]"
 					/>
 				{/if}
-				<canvas bind:this={continentChartCanvas} width="300" height="300" />
+				<canvas bind:this={continentChartCanvas} width="350" height="350" />
 			</div>
 
 			<div class="space-y-20">
