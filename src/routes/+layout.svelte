@@ -25,9 +25,11 @@
 		const dataSync = async () => {
 			$mapLoading = 'Starting data sync...';
 			$syncStatus = true;
-			await elementsSync();
-			await eventsSync();
-			await usersSync();
+
+			await Promise.allSettled([elementsSync(), eventsSync(), usersSync()]).then((results) =>
+				results.forEach((result) => console.log(result.status))
+			);
+
 			$syncStatus = false;
 		};
 
