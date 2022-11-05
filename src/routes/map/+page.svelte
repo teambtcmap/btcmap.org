@@ -534,7 +534,7 @@ Thanks for using BTC Map!`);
 									type="material"
 								/>
 
-								<div class="md:max-w-[200px] mx-auto">
+								<div class="md:max-w-[210px] mx-auto">
 									<p
 										class="text-sm text-mapButton {result.tags.name.match('([^ ]{21})')
 											? 'break-all'
