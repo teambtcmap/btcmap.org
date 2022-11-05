@@ -127,7 +127,7 @@
 					});
 			};
 			await communitiesAPI();
-			communitiesAPIInterval = setInterval(communitiesAPI, 10000);
+			communitiesAPIInterval = setInterval(communitiesAPI, 600000);
 
 			initialRenderComplete = true;
 		}
@@ -166,7 +166,7 @@
 			/>
 
 			<div class="relative">
-				{#if !initialRenderComplete}
+				{#if !initialRenderComplete || !communities}
 					<div
 						class="absolute top-0 left-[calc(50%-150px)] bg-link/50 rounded-full animate-pulse w-[300px] h-[300px]"
 					/>
