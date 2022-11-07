@@ -1,5 +1,5 @@
 <script>
-	import { Header, Footer, PrimaryButton } from '$comp';
+	import { Header, Footer, PrimaryButton, Icon } from '$comp';
 	import { socials, apps } from '$lib/store';
 </script>
 
@@ -27,11 +27,10 @@
 								href={app.link}
 								target={app.type === 'Web' ? '_self' : '_blank'}
 								rel="noreferrer"
-								class="block"
-								><i
-									class="bg-link hover:bg-hover p-3 rounded-full w-8 h-8 text-white {app.icon} transition-colors"
-								/></a
+								class="block bg-link hover:bg-hover p-3 rounded-full text-white transition-colors"
 							>
+								<Icon width="32" height="32" icon={app.icon} type="apps" />
+							</a>
 						</div>
 					{/each}
 				</div>
