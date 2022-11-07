@@ -1,7 +1,0 @@
-version: '3'
-
-services:
-  website:
-    build: .
-    ports:
-      - 127.0.0.1:3333:3000
