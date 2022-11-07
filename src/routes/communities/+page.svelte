@@ -167,9 +167,16 @@
 
 			<div class="relative">
 				{#if !initialRenderComplete || !communities}
-					<div
-						class="absolute top-0 left-[calc(50%-150px)] bg-link/50 rounded-full animate-pulse w-[300px] h-[300px]"
-					/>
+					<div class="absolute top-0 left-0 w-full h-full flex flex-col justify-between">
+						<div class="flex flex-wrap justify-center">
+							{#each Array(6) as skeleton}
+								<div class="w-[94px] py-2 rounded-sm m-2 bg-link/50 animate-pulse" />
+							{/each}
+						</div>
+						<div
+							class="bg-link/50 rounded-full animate-pulse w-[225px] h-[225px] md:w-[300px] md:h-[300px] mx-auto"
+						/>
+					</div>
 				{/if}
 				<canvas bind:this={continentChartCanvas} width="350" height="350" />
 			</div>
