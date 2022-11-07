@@ -29,7 +29,7 @@ export const apps = readable([
 		link: 'https://play.google.com/store/apps/details?id=org.btcmap.app',
 		type: 'Play',
 		icon: 'fa-brands fa-google-play',
-		desc: "We Don't Recommend Using Google"
+		desc: "Surveillance Option"
 	},
 	{
 		link: 'https://apps.apple.com/app/btc-world-map/id6443604345',
