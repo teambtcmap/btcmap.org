@@ -38,6 +38,6 @@ html {
 }
 
 .leaflet-popup-content {
-	min-width: 256px;
+	min-width: 256px !important;
 	overflow-x: auto;
 }
