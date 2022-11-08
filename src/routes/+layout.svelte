@@ -3,6 +3,7 @@
 	import { SvelteToast } from '@zerodevx/svelte-toast';
 	import '../app.css';
 	import { onMount, onDestroy } from 'svelte';
+	import { page } from '$app/stores';
 	import { elementsSync } from '$lib/sync/elements';
 	import { eventsSync } from '$lib/sync/events';
 	import { usersSync } from '$lib/sync/users';
@@ -41,6 +42,17 @@
 		clearInterval(dataSyncInterval);
 	});
 </script>
+
+<svelte:head>
+	{#if !$page.url.pathname.startsWith('/tagger')}
+		<meta
+			name="lightning"
+			content="lnurlp:LNURL1DP68GURN8GHJ7ERZXVUXVER9X4SNYTNY9EMX7MR5V9NK2CTSWQHXJME0D3H82UNVWQHKZURF9AMRZTMVDE6HYMP0XYA8GEF9"
+		/>
+		<meta property="alby:image" content="/images/logo.svg" />
+		<meta property="alby:name" content="BTC Map" />
+	{/if}
+</svelte:head>
 
 <slot />
 <SvelteToast {options} />

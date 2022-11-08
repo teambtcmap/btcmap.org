@@ -9,7 +9,7 @@ export async function load({ params }) {
 	const data = response.data;
 
 	if (data) {
-		return { user: data.id };
+		return { user: data.id, username: data['osm_json']['display_name'] };
 	}
 
 	throw error(404, 'User Not Found');

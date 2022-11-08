@@ -1,4 +1,5 @@
 <script>
+	import { page } from '$app/stores';
 	import { users, userError, events, eventError, elements, elementError } from '$lib/store';
 	import { errToast } from '$lib/utils';
 	import { TaggerLoading } from '$comp';
@@ -12,9 +13,9 @@
 </script>
 
 <svelte:head>
-	<title>BTC Map - Supertagger</title>
+	<title>{$page.data.username} - BTC Map Supertagger</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/leader.png" />
-	<meta property="twitter:title" content="BTC Map - Supertagger" />
+	<meta property="twitter:title" content="{$page.data.username} - BTC Map Supertagger" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/leader.png" />
 </svelte:head>
 

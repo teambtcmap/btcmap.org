@@ -326,6 +326,21 @@
 	});
 </script>
 
+<svelte:head>
+	{#if lightning}
+		<meta name="lightning" content="lnurlp:{lightning}" />
+		<meta property="alby:image" content={avatar} />
+		<meta property="alby:name" content={username} />
+	{:else}
+		<meta
+			name="lightning"
+			content="lnurlp:LNURL1DP68GURN8GHJ7ERZXVUXVER9X4SNYTNY9EMX7MR5V9NK2CTSWQHXJME0D3H82UNVWQHKZURF9AMRZTMVDE6HYMP0XYA8GEF9"
+		/>
+		<meta property="alby:image" content="/images/logo.svg" />
+		<meta property="alby:name" content="BTC Map" />
+	{/if}
+</svelte:head>
+
 <div class="bg-teal">
 	<Header />
 	<div class="w-10/12 xl:w-[1200px] mx-auto">
