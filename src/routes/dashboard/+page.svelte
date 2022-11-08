@@ -515,7 +515,7 @@
 						loading={communitiesLoading}
 					/>
 				</div>
-				<p class="text-sm text-body">
+				<p class="text-sm text-body text-center md:text-left">
 					*Data updated every 10 minutes, change based on previous 24 hours.
 				</p>
 			</section>
@@ -580,7 +580,7 @@
 				</div>
 			</section>
 
-			<p class="text-sm text-body">
+			<p class="text-sm text-body text-center md:text-left">
 				*More information on bitcoin mapping tags can be found <a
 					href="https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions#tagging-guidance"
 					target="_blank"

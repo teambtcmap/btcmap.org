@@ -123,7 +123,7 @@
 						{/if}
 					</div>
 				</div>
-				<p class="text-sm text-body">*Data updated every 10 minutes</p>
+				<p class="text-sm text-body text-center lg:text-left">*Data updated every 10 minutes</p>
 				<div class="mt-10 flex justify-center">
 					<TopButton />
 				</div>

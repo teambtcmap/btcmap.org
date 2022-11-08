@@ -16,7 +16,9 @@
 	<div class="w-10/12 xl:w-[1200px] mx-auto relative">
 		<section id="hero" class="pb-20 pt-10 xl:pt-0 xl:flex justify-between items-center">
 			<div class="w-full xl:w-[500px] mx-auto xl:mx-0">
-				<h1 class="text-4xl md:text-5xl font-semibold text-primary gradient !leading-tight">
+				<h1
+					class="text-4xl md:text-5xl font-semibold text-primary gradient !leading-tight text-center xl:text-left"
+				>
 					Easily find places to spend sats anywhere on the planet.
 				</h1>
 				<div class="bg-white/30 rounded-2xl py-6 flex flex-wrap justify-center my-16">
@@ -34,7 +36,7 @@
 						</div>
 					{/each}
 				</div>
-				<h2 class="text-primary text-xl font-semibold">
+				<h2 class="text-primary text-xl font-semibold text-center xl:text-left">
 					Our apps and the underlying data are free and open source.
 					<br /><br />
 					We use OpenStreetMap to properly tag places where you can spend bitcoin and we display that
