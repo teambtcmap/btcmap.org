@@ -282,6 +282,17 @@ export const generateMarker = (lat, long, icon, element, L, verifiedDate, verify
 						element.tags && checkAddress(element.tags)
 					}</span>
 
+			${
+				element.tags && element.tags['opening_hours']
+					? `<div class='my-1 w-full flex items-center space-x-1' title='Opening hours'>
+		  				<svg width='16px' height='16px' class='text-mapHighlight'>
+	  						<use width='16px' height='16px' href="/icons/font-awesome/spritesheet.svg#clock-solid"></use>
+				 	 		</svg>
+			     		<span class='text-body'>${element.tags['opening_hours']}</span>
+	  			 	 </div>`
+					: ''
+			}
+
 					<div class='flex space-x-2 my-1'>
 						${
 							element.tags && element.tags.phone

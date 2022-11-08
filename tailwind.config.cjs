@@ -29,7 +29,8 @@ module.exports = {
 				bitcoin: '#F7931A',
 				map: '#333333',
 				searchHover: '#F8F8F8',
-				searchSubtext: '#999999'
+				searchSubtext: '#999999',
+				mapHighlight: '#1C4347'
 			}
 		}
 	},
