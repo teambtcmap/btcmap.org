@@ -14,9 +14,9 @@
 
 <svelte:head>
 	<title>{$page.data.username} - BTC Map Supertagger</title>
-	<meta property="og:image" content="https://btcmap.org/images/og/leader.png" />
+	<meta property="og:image" content="https://btcmap.org/images/og/supertagger.png" />
 	<meta property="twitter:title" content="{$page.data.username} - BTC Map Supertagger" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/leader.png" />
+	<meta property="twitter:image" content="https://btcmap.org/images/og/supertagger.png" />
 </svelte:head>
 
 {#if $users && $users.length && $events && $events.length && $elements && $elements.length}
