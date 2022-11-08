@@ -36,3 +36,7 @@ html {
 .div-icon {
 	background-image: url('/icons/div-icon-pin.svg');
 }
+
+.leaflet-popup-content {
+	width: 256px;
+}

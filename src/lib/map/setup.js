@@ -282,7 +282,7 @@ export const generateMarker = (lat, long, icon, element, L, verifiedDate, verify
 						element.tags && checkAddress(element.tags)
 					}</span>
 
-					<div class='w-[256px] flex space-x-2 my-1'>
+					<div class='flex space-x-2 my-1'>
 						${
 							element.tags && element.tags.phone
 								? `<a href='tel:${element.tags.phone}' title='Phone'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-phone transition-colors" /></a>`
