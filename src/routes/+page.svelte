@@ -31,7 +31,7 @@
 								rel="noreferrer"
 								class="block bg-link hover:bg-hover p-3 rounded-full text-white transition-colors"
 							>
-								<Icon width="32" height="32" icon={app.icon} type="apps" />
+								<Icon w="32" h="32" icon={app.icon} type="apps" />
 							</a>
 						</div>
 					{/each}

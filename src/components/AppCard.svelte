@@ -16,7 +16,7 @@
 			class="text-link hover:text-hover text-2xl font-semibold transition-colors"
 		>
 			<div class="bg-offwhite rounded-2xl mb-5 h-60 flex justify-center items-center">
-				<Icon width="112" height="112" icon={image} type="apps" />
+				<Icon w="112" h="112" icon={image} type="apps" />
 			</div>
 			<p>{text}</p>
 			<p class="font-normal text-xl">{desc}</p>

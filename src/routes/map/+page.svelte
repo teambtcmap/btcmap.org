@@ -531,8 +531,8 @@ Thanks for using BTC Map!`);
 						>
 							<div class="md:flex items-start md:space-x-2">
 								<Icon
-									width="20"
-									height="20"
+									w="20"
+									h="20"
 									style="mx-auto md:mx-0 mt-1 opacity-50 text-mapButton"
 									icon={result.icon !== 'question_mark' ? result.icon : 'currency_bitcoin'}
 									type="material"

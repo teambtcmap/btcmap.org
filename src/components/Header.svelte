@@ -1,5 +1,5 @@
 <script>
-	import { NavDropdownDesktop, NavDropdownMobile } from '$comp';
+	import { NavDropdownDesktop, NavDropdownMobile, Icon } from '$comp';
 
 	const navLinks = [
 		{ title: 'Map', url: '/map', icon: 'map' },
@@ -104,10 +104,12 @@
 
 	<!-- menu toggle -->
 	<button on:click={() => (showMobileMenu = !showMobileMenu)}>
-		<img
-			src={showMobileMenu ? '/icons/mobile-nav/close.svg' : '/icons/mobile-nav/bars.svg'}
-			alt="togglemenu"
-			class="mx-auto mb-3"
+		<Icon
+			w={showMobileMenu ? '28' : '34'}
+			h={showMobileMenu ? '27' : '12'}
+			style="mx-auto mb-3"
+			icon={showMobileMenu ? 'close' : 'bars'}
+			type="mobile-nav"
 		/>
 		<span class="uppercase text-mobileMenu font-semibold">Menu</span>
 	</button>
@@ -134,11 +136,11 @@
 				<!-- regular links -->
 			{:else}
 				<a href={link.url} class="w-full text-link text-xl flex items-center">
-					<img
-						src="/icons/mobile-nav/{link.icon}.svg"
-						alt={link.icon}
+					<span
 						class="mr-4 bg-mobileButtons active:bg-mobileButtonsActive rounded-full p-3 transition-colors"
-					/>
+					>
+						<Icon w="24" h="24" icon={link.icon} type="mobile-nav" />
+					</span>
 					<span>{link.title}</span>
 				</a>
 			{/if}
