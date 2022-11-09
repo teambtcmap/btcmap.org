@@ -375,7 +375,7 @@ export const generateMarker = (lat, long, icon, element, L, verifiedDate, verify
 
 					${
 						element.tags && element.tags['payment:pouch']
-							? `<a href=${element.tags['payment:pouch']} target="_blank" rel="noreferrer" title='Pouch' class='flex w-[121.5px] justify-center items-center my-1 bg-pouch hover:bg-pouch/90 transition-colors py-1 rounded-full !text-white text-center'>Pay with Pouch
+							? `<a href="https://app.pouch.ph/${element.tags['payment:pouch']}" target="_blank" rel="noreferrer" title='Pouch' class='flex w-[121.5px] justify-center items-center my-1 bg-pouch hover:bg-pouch/90 transition-colors py-1 rounded-full !text-white text-center'>Pay with Pouch
 								<svg
 									class="ml-1 w-3"
 									width="16"
