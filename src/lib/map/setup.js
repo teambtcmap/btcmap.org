@@ -373,6 +373,29 @@ export const generateMarker = (lat, long, icon, element, L, verifiedDate, verify
 		}"/>
 					</div>
 
+					${
+						element.tags && element.tags['payment:pouch']
+							? `<a href=${element.tags['payment:pouch']} target="_blank" rel="noreferrer" title='Pouch' class='flex w-[121.5px] justify-center items-center my-1 bg-pouch hover:bg-pouch/90 transition-colors py-1 rounded-full !text-white text-center'>Pay with Pouch
+								<svg
+									class="ml-1 w-3"
+									width="16"
+									height="16"
+									viewBox="0 0 16 16"
+									fill="none"
+									xmlns="http://www.w3.org/2000/svg"
+								>
+									<path
+										d="M3 13L13 3M13 3H5.5M13 3V10.5"
+										stroke="currentColor"
+										stroke-width="1.5"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+									/>
+								</svg>
+							</a>`
+							: ''
+					}
+
 					<span class='text-body my-1' title="Completed by BTC Map community members">Survey date:
 					${
 						element.tags && (element.tags['survey:date'] || element.tags['check_date'])

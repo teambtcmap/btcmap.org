@@ -5,18 +5,22 @@ module.exports = {
 		extend: {
 			colors: {
 				primary: '#144046',
+				body: '#3E6267',
 				link: '#0099AF',
+				hover: '#00B7D2',
 				highlight: '#051173',
+				input: '#BDD2D4',
 				teal: '#E4EBEC',
 				offwhite: '#F0F6F6',
-				hover: '#00B7D2',
 				grey: '#9FB4B6',
-				input: '#BDD2D4',
-				error: '#DF3C3C',
-				body: '#3E6267',
-				supporter: '#095D73',
 				lightBlue: '#D4E1E2',
+				error: '#DF3C3C',
+				supporter: '#095D73',
+				map: '#333333',
 				mapButton: '#5F5F5F',
+				mapHighlight: '#1C4347',
+				searchHover: '#F8F8F8',
+				searchSubtext: '#999999',
 				mobileMenu: '#085D69',
 				mobileButtons: '#D6E4E6',
 				mobileButtonsActive: '#C3DCDF',
@@ -27,10 +31,7 @@ module.exports = {
 				created: '#10B791',
 				deleted: '#EB5757',
 				bitcoin: '#F7931A',
-				map: '#333333',
-				searchHover: '#F8F8F8',
-				searchSubtext: '#999999',
-				mapHighlight: '#1C4347'
+				pouch: '#6922FF'
 			}
 		}
 	},
