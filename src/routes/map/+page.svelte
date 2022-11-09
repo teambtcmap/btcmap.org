@@ -109,6 +109,9 @@
 	const lightning = $page.url.searchParams.has('lightning');
 	const nfc = $page.url.searchParams.has('nfc');
 
+	// allow to view map with only legacy nodes
+	const legacy = $page.url.searchParams.has('legacy');
+
 	// displays a button in controls if there is new data available
 	const showDataRefresh = () => {
 		document.querySelector('.data-refresh-div').style.display = 'block';
@@ -418,7 +421,8 @@ Thanks for using BTC Map!`);
 				if (
 					(onchain ? element.tags && element.tags['payment:onchain'] === 'yes' : true) &&
 					(lightning ? element.tags && element.tags['payment:lightning'] === 'yes' : true) &&
-					(nfc ? element.tags && element.tags['payment:lightning_contactless'] === 'yes' : true)
+					(nfc ? element.tags && element.tags['payment:lightning_contactless'] === 'yes' : true) &&
+					(legacy ? element.tags && element.tags['payment:bitcoin'] === 'yes' : true)
 				) {
 					const lat = latCalc(element);
 					const long = longCalc(element);
