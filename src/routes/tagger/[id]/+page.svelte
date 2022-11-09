@@ -6,7 +6,7 @@
 	import Chart from 'chart.js/dist/chart.min.js';
 	import { browser } from '$app/environment';
 	import { onMount, onDestroy } from 'svelte';
-	import { users, events, elements } from '$lib/store';
+	import { users, events, elements, excludeLeader } from '$lib/store';
 	import {
 		attribution,
 		fullscreenButton,
@@ -64,6 +64,10 @@
 
 	const populateLeaderboard = () => {
 		$users.forEach((user) => {
+			if ($excludeLeader.includes(user.id)) {
+				return;
+			}
+
 			let userEvents = $events.filter((event) => event['user_id'] == user.id);
 
 			if (userEvents.length) {

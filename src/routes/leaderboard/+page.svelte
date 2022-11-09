@@ -10,7 +10,7 @@
 		LeaderboardSkeleton,
 		TopButton
 	} from '$comp';
-	import { users, userError, events, eventError, syncStatus } from '$lib/store';
+	import { users, userError, events, eventError, syncStatus, excludeLeader } from '$lib/store';
 	import { errToast } from '$lib/utils';
 
 	// alert for user errors
@@ -31,6 +31,10 @@
 		leaderboard = [];
 
 		$users.forEach((user) => {
+			if ($excludeLeader.includes(user.id)) {
+				return;
+			}
+
 			let userEvents = $events.filter((event) => event['user_id'] == user.id);
 
 			if (userEvents.length) {
