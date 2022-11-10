@@ -14,16 +14,16 @@ export const apps = readable([
 		desc: 'Progressive Web App'
 	},
 	{
-		link: 'https://github.com/teambtcmap/btcmap-android/releases/latest',
-		type: 'APK',
-		icon: 'android',
-		desc: 'Direct Download'
-	},
-	{
 		link: 'https://f-droid.org/en/packages/org.btcmap/',
 		type: 'F-Droid',
 		icon: 'f-droid',
 		desc: 'FOSS App Store'
+	},
+	{
+		link: 'https://github.com/teambtcmap/btcmap-android/releases/latest',
+		type: 'APK',
+		icon: 'android',
+		desc: 'Direct Download'
 	},
 	{
 		link: 'https://play.google.com/store/apps/details?id=org.btcmap.app',
