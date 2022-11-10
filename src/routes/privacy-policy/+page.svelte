@@ -46,7 +46,10 @@
 							class="text-link hover:text-hover transition-colors">OpenStreetMap</a
 						> by a BTC Map contributor and will appear in our apps.
 					</li>
-					<li>Some information including communities is stored in the BTC Map database.</li>
+					<li>
+						Some information including communities is not stored on OpenStreetMap but in the BTC Map
+						database instead.
+					</li>
 				</ol>
 				<p>
 					Please refer to the privacy policies of each of these third parties to understand how your
@@ -169,7 +172,7 @@
 
 			<div class="text-body text-xl space-y-5">
 				<h2 class="text-primary text-3xl font-semibold">Changes to this Privacy Policy</h2>
-				<p>This privacy policy was last updated: November 9, 2022.</p>
+				<p>This privacy policy was last updated: November 10, 2022.</p>
 			</div>
 
 			<div class="text-body text-xl space-y-5">
