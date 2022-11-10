@@ -31,7 +31,13 @@
 								rel="noreferrer"
 								class="block bg-link hover:bg-hover p-3 rounded-full text-white transition-colors"
 							>
-								<Icon w="32" h="32" style={app.icon === 'play' ? 'pl-0.5' : ''} icon={app.icon} type="apps" />
+								<Icon
+									w="32"
+									h="32"
+									style={app.icon === 'play' ? 'pl-0.5' : ''}
+									icon={app.icon}
+									type="apps"
+								/>
 							</a>
 						</div>
 					{/each}

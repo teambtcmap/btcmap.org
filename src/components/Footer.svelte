@@ -9,8 +9,15 @@
 		<SocialLink url={$socials.discord} social="discord" />
 		<SocialLink url={$socials.github} social="github" />
 	</div>
-	<div class="space-x-5 flex md:block justify-center">
-		<a href="/bitcoin.pdf" class="text-link hover:text-hover transition-colors">White paper</a>
-		<a href="/privacy-policy" class="text-link hover:text-hover transition-colors">Privacy</a>
+	<div class="flex flex-wrap md:block justify-center">
+		<a
+			href="/bitcoin.pdf"
+			class="mx-2.5 mb-2.5 md:mb-0 text-link hover:text-hover transition-colors">White paper</a
+		>
+		<a href="/license" class="mx-2.5 mb-2.5 md:mb-0 text-link hover:text-hover transition-colors"
+			>License</a
+		>
+		<a href="/privacy-policy" class="mx-2.5 text-link hover:text-hover transition-colors">Privacy</a
+		>
 	</div>
 </footer>
