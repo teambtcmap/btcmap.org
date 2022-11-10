@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import { users, userError, events, eventError, elements, elementError } from '$lib/store';
 	import { errToast } from '$lib/utils';
-	import { TaggerLoading } from '$comp';
+	import { LoadingSplash } from '$comp';
 
 	// alert for user errors
 	$: $userError && errToast($userError);
@@ -22,5 +22,5 @@
 {#if $users && $users.length && $events && $events.length && $elements && $elements.length}
 	<slot />
 {:else}
-	<TaggerLoading page="profile" />
+	<LoadingSplash page="profile" />
 {/if}

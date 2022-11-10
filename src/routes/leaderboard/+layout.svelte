@@ -1,6 +1,6 @@
 <script>
 	import { users, userError, events, eventError } from '$lib/store';
-	import { TaggerLoading } from '$comp';
+	import { LoadingSplash } from '$comp';
 </script>
 
 <svelte:head>
@@ -13,5 +13,5 @@
 {#if ($users && $users.length && $events && $events.length) || $userError || $eventError}
 	<slot />
 {:else}
-	<TaggerLoading page="leaderboard" />
+	<LoadingSplash page="leaderboard" />
 {/if}
