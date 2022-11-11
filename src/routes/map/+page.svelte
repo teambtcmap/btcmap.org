@@ -416,6 +416,11 @@ Thanks for using BTC Map!`);
 
 				let category = element.tags.category;
 				let icon = element.tags['icon:android'];
+				let payment = element.tags['payment:pouch']
+					? { type: 'pouch', username: element.tags['payment:pouch'] }
+					: element.tags['payment:coinos']
+					? { type: 'coinos', username: element.tags['payment:coinos'] }
+					: undefined;
 				element = element['osm_json'];
 
 				if (
@@ -429,7 +434,16 @@ Thanks for using BTC Map!`);
 
 					let divIcon = generateIcon(L, icon);
 
-					let marker = generateMarker(lat, long, divIcon, element, L, verifiedDate, 'verify');
+					let marker = generateMarker(
+						lat,
+						long,
+						divIcon,
+						element,
+						payment,
+						L,
+						verifiedDate,
+						'verify'
+					);
 
 					if (category === 'atm') {
 						ATMs.addLayer(marker);

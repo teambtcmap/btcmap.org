@@ -167,6 +167,11 @@
 					}
 
 					let icon = element.tags['icon:android'];
+					let payment = element.tags['payment:pouch']
+						? { type: 'pouch', username: element.tags['payment:pouch'] }
+						: element.tags['payment:coinos']
+						? { type: 'coinos', username: element.tags['payment:coinos'] }
+						: undefined;
 
 					element = element['osm_json'];
 
@@ -175,7 +180,7 @@
 
 					let divIcon = generateIcon(L, icon);
 
-					let marker = generateMarker(latC, longC, divIcon, element, L, verifiedDate);
+					let marker = generateMarker(latC, longC, divIcon, element, payment, L, verifiedDate);
 
 					// add marker click event
 					marker.on('click', (e) => {

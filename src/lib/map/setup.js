@@ -269,7 +269,7 @@ export const generateIcon = (L, icon) => {
 	});
 };
 
-export const generateMarker = (lat, long, icon, element, L, verifiedDate, verify) => {
+export const generateMarker = (lat, long, icon, element, payment, L, verifiedDate, verify) => {
 	return L.marker([lat, long], { icon }).bindPopup(
 		// marker popup component
 		`${
@@ -374,8 +374,14 @@ export const generateMarker = (lat, long, icon, element, L, verifiedDate, verify
 					</div>
 
 					${
-						element.tags && element.tags['payment:pouch']
-							? `<a href="https://app.pouch.ph/${element.tags['payment:pouch']}" target="_blank" rel="noreferrer" title='Pouch' class='flex w-[121.5px] justify-center items-center my-1 bg-pouch hover:bg-pouch/90 transition-colors py-1 rounded-full !text-white text-center'>Pay with Pouch
+						payment
+							? `<a href="${
+									payment.type === 'pouch'
+										? `https://app.pouch.ph/${payment.username}`
+										: payment.type === 'coinos'
+										? `https://coinos.io/${payment.username}`
+										: '#'
+							  }" target="_blank" rel="noreferrer" title='Pay merchant' class='flex w-[100px] justify-center items-center my-1 bg-link hover:bg-hover transition-colors py-1 rounded-full !text-white'>Pay
 								<svg
 									class="ml-1 w-3"
 									width="16"
