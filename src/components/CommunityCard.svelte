@@ -26,6 +26,11 @@
 
 			<span class="text-center text-lg font-semibold block">{tags.name}</span>
 		</a>
+		{#if tags.sponsor}
+			<p class="gradient-bg w-32 mx-auto py-1 text-xs text-white font-semibold rounded-full">
+				BTC Map Sponsor
+			</p>
+		{/if}
 		{#if tip}
 			<Tip destination={tip} style="mx-auto block" />
 		{/if}

@@ -30,8 +30,7 @@ module.exports = {
 				taggerTime: '#7C9CA0',
 				created: '#10B791',
 				deleted: '#EB5757',
-				bitcoin: '#F7931A',
-				pouch: '#6922FF'
+				bitcoin: '#F7931A'
 			}
 		}
 	},
