@@ -1,7 +1,7 @@
 <script>
 	import axios from 'axios';
 	import { onMount } from 'svelte';
-	import { Header, Footer, DonationOption } from '$comp';
+	import { Header, Footer, DonationOption, SupportSection } from '$comp';
 	import { errToast } from '$lib/utils';
 
 	let onchain = 'bc1qyyr7g9tew6sfa57mv2r6rvgj2ucakcmqnqzqjj';
@@ -16,7 +16,14 @@
 		showQr = true;
 	};
 
-	const supporters = [{ url: 'https://coinos.io/', title: 'coinos' }];
+	const company = [
+		{ url: 'https://coinos.io/', title: 'coinos', logo: 'coinos.svg' },
+		{ url: 'https://www.walletofsatoshi.com/', title: 'Wallet of Satoshi', logo: 'wos.svg' }
+	];
+
+	const community = [
+		{ url: 'https://btccuracao.com/', title: 'BTC Curacao', logo: 'btccuracao.png' }
+	];
 
 	/* onMount(() => {
 		axios
@@ -47,11 +54,11 @@
 			</h1>
 
 			<h2 class="text-primary text-xl font-semibold w-full lg:w-[800px] mx-auto">
-				BTCMap.org is a free and open source project (FOSS). We rely on community contributions to
-				help cover various expenses, but otherwise donate our own time.
+				BTCMap.org is a free and open source project (FOSS). We rely on donations and sponsorship to
+				continue.
 
 				<br /><br />
-				We greatly appreciate all contributions.
+				We greatly appreciate all support.
 			</h2>
 
 			<section id="donate" class="space-y-10">
@@ -115,34 +122,14 @@
 			</section>
 
 			<section id="supporters">
-				<h3 class="uppercase text-body text-lg font-semibold">Our amazing supporters</h3>
+				<h2 class="uppercase text-primary text-xl font-semibold">Our amazing supporters</h2>
 				<a href="mailto:hello@btcmap.org" class="text-link hover:text-hover transition-colors"
 					>Become a Sponsor</a
 				>
 
-				<div
-					class="mt-8 space-y-10 lg:space-y-0 lg:grid grid-cols-3 gap-10 w-full lg:w-[800px] mx-auto"
-				>
-					{#each supporters as supporter}
-						<a href={supporter.url} target="_blank" rel="noreferrer" class="self-center">
-							<img
-								src="/images/supporters/{supporter.title}.svg"
-								alt={supporter.title}
-								class="mx-auto"
-							/>
-						</a>
-					{/each}
-					<!-- supporter placeholders -->
-					<div
-						class="bg-supporter/50 h-[100px] drop-shadow-xl rounded-xl flex justify-center items-center"
-					>
-						<a href="mailto:hello@btcmap.org" class="text-white uppercase">Apply here</a>
-					</div>
-					<div
-						class="bg-supporter/50 h-[100px] drop-shadow-xl rounded-xl flex justify-center items-center"
-					>
-						<a href="mailto:hello@btcmap.org" class="text-white uppercase">Apply here</a>
-					</div>
+				<div class="mt-4 space-y-16">
+					<SupportSection title="Company" supporters={company} placeholders={1} />
+					<SupportSection title="Community" supporters={community} placeholders={2} />
 				</div>
 			</section>
 		</main>
