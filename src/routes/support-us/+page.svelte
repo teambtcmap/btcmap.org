@@ -22,7 +22,12 @@
 	];
 
 	const community = [
-		{ url: 'https://btccuracao.com/', title: 'BTC Curacao', logo: 'btccuracao.png' }
+		{ url: 'https://btccuracao.com/', title: 'BTC Curacao', logo: 'btccuracao.png' },
+		{
+			url: 'https://pouch.ph/bitcoinisland',
+			title: 'Bitcoin Island Philippines',
+			logo: 'bitcoin-island-philippines.jpeg'
+		}
 	];
 
 	/* onMount(() => {
@@ -129,7 +134,7 @@
 
 				<div class="mt-4 space-y-16">
 					<SupportSection title="Company" supporters={company} placeholders={1} />
-					<SupportSection title="Community" supporters={community} placeholders={2} />
+					<SupportSection title="Community" supporters={community} placeholders={1} />
 				</div>
 			</section>
 		</main>
