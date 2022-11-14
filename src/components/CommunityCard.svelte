@@ -12,7 +12,12 @@
 	$: discord = tags['contact:discord'] && tags['contact:discord'];
 	$: youtube = tags['contact:youtube'] && tags['contact:youtube'];
 	$: github = tags['contact:github'] && tags['contact:github'];
-	$: tip = tags['tips:lightning_address'] && tags['tips:lightning_address'];
+	$: tip =
+		(tags['tips:lightning_address'] && {
+			destination: tags['tips:lightning_address'],
+			type: 'address'
+		}) ||
+		(tags['tips:url'] && { destination: tags['tips:url'], type: 'url' });
 </script>
 
 <div class="border border-statBorder rounded-3xl shadow hover:shadow-2xl transition-shadow">
@@ -32,7 +37,7 @@
 			</p>
 		{/if}
 		{#if tip}
-			<Tip destination={tip} style="mx-auto block" />
+			<Tip destination={tip.destination} type={tip.type} style="mx-auto block" />
 		{/if}
 	</div>
 

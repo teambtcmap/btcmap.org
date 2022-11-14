@@ -2,6 +2,7 @@
 	export let user;
 	export let destination;
 	export let style;
+	export let type;
 </script>
 
 {#if user}
@@ -32,7 +33,9 @@
 	</div>
 {:else}
 	<a
-		href="lightning:{destination}"
+		href={type === 'url' ? destination : `lightning:${destination}`}
+		target={type === 'url' ? '_blank' : '_self'}
+		rel="noreferrer"
 		class="text-sm text-center font-semibold border border-link text-link w-full md:w-20 py-2 md:py-1 hover:border-white hover:text-white hover:bg-link rounded-lg {style} transition-colors"
 	>
 		<!--  lightning icon -->
