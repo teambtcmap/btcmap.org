@@ -49,6 +49,7 @@
 	let lightning = regexMatch && regexMatch[0].slice(10);
 
 	let userEvents = $events.filter((event) => event['user_id'] == user.id);
+	userEvents.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
 	let created =
 		user.id == '17221642'
 			? userEvents.filter((event) => event.type === 'create').length + 100
