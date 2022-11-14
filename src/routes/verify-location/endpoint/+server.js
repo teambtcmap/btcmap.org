@@ -85,8 +85,8 @@ Long: ${long}
 Status: Todo
 Created at: ${new Date(Date.now()).toISOString()}`,
 				labels: country
-					? ['good first issue', 'help wanted', 'location-submission', country]
-					: ['good first issue', 'help wanted', 'location-submission']
+					? ['good first issue', 'help wanted', 'verify-submission', country]
+					: ['good first issue', 'help wanted', 'verify-submission']
 			},
 			{ headers }
 		)
