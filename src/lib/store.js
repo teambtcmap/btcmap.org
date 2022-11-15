@@ -52,4 +52,4 @@ export const eventError = writable('');
 
 export const syncStatus = writable();
 
-export const excludeLeader = readable([17085479, 2104834, 9451067]);
+export const excludeLeader = readable([17085479, 2104834, 9451067, 616463]);
