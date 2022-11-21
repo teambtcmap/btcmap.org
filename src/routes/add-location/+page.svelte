@@ -41,6 +41,7 @@
 	let notes;
 	let source;
 	let sourceOther;
+	let sourceOtherElement;
 	let contact;
 	let noLocationSelected = false;
 	let noMethodSelected = false;
@@ -395,7 +396,7 @@
 									on:change={async () => {
 										if (source === 'Other') {
 											await tick();
-											sourceOther.focus();
+											sourceOtherElement.focus();
 										}
 									}}
 								>
@@ -415,6 +416,7 @@
 										placeholder="Local knowledge, online etc."
 										class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
 										bind:value={sourceOther}
+										bind:this={sourceOtherElement}
 									/>
 								{/if}
 							</div>
