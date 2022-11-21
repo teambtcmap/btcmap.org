@@ -83,7 +83,9 @@ How did you verify this?: ${verified}
 Lat: ${lat}
 Long: ${long}
 Status: Todo
-Created at: ${new Date(Date.now()).toISOString()}`,
+Created at: ${new Date(Date.now()).toISOString()}
+
+If you are a new contributor please read our Tagging Instructions [here](https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions).`,
 				labels: country
 					? ['good first issue', 'help wanted', 'verify-submission', country]
 					: ['good first issue', 'help wanted', 'verify-submission']

@@ -1,5 +1,5 @@
 <script>
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount, onDestroy, tick } from 'svelte';
 	import { browser } from '$app/environment';
 	import axios from 'axios';
 	import { Header, Footer, PrimaryButton, MapLoading, FormSuccess } from '$comp';
@@ -39,6 +39,9 @@
 	let twitterMerchant;
 	let twitterSubmitter;
 	let notes;
+	let source;
+	let sourceOther;
+	let contact;
 	let noLocationSelected = false;
 	let noMethodSelected = false;
 	let submitted = false;
@@ -94,7 +97,10 @@
 							? twitterSubmitter.value
 							: '@' + twitterSubmitter.value
 						: '',
-					notes: notes.value
+					notes: notes.value,
+					source,
+					sourceOther: sourceOther ? sourceOther : '',
+					contact: contact.value
 				})
 				.then(function (response) {
 					submissionIssueNumber = response.data.number;
@@ -290,7 +296,7 @@
 							</div>
 
 							<fieldset>
-								<legend class="mb-2 block font-semibold">Select one or more options</legend>
+								<legend class="mb-2 block font-semibold">Select accepted payment methods</legend>
 								{#if noMethodSelected}
 									<span class="text-error font-semibold">Please fix this...</span>
 								{/if}
@@ -371,10 +377,63 @@
 								<textarea
 									disabled={!captchaSecret || !mapLoaded}
 									name="notes"
-									placeholder="Any other relevant details? Website URL, phone number etc."
+									placeholder="Any other relevant details? Website URL, phone number, opening hours etc."
 									rows="3"
 									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
 									bind:this={notes}
+								/>
+							</div>
+
+							<div>
+								<label for="source" class="mb-2 block font-semibold">Data Source</label>
+								<select
+									disabled={!captchaSecret || !mapLoaded}
+									name="source"
+									required
+									class="focus:outline-link bg-white border-2 border-input rounded-2xl py-3 w-full transition-all"
+									bind:value={source}
+									on:change={async () => {
+										if (source === 'Other') {
+											await tick();
+											sourceOther.focus();
+										}
+									}}
+								>
+									<option value="">Please select an option</option>
+									<option value="Business Owner">I am the business owner</option>
+									<option value="Customer">I visited as a customer</option>
+									<option value="Other">Other method</option>
+								</select>
+								{#if source === 'Other'}
+									<p class="text-sm my-2">
+										How did you verify this information? Please provide as much detail as possible.
+									</p>
+									<textarea
+										disabled={!captchaSecret || !mapLoaded}
+										required
+										name="source-other"
+										placeholder="Local knowledge, online etc."
+										class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+										bind:value={sourceOther}
+									/>
+								{/if}
+							</div>
+
+							<div>
+								<label for="contact" class="mb-2 block font-semibold"
+									>Public Contact <span class="font-normal">(optional)</span></label
+								>
+								<p class="text-sm mb-2">
+									If we have any follow-up questions we will contact you in order to add your
+									location successfully.
+								</p>
+								<input
+									disabled={!captchaSecret || !mapLoaded}
+									type="email"
+									name="contact"
+									placeholder="hello@btcmap.org"
+									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+									bind:this={contact}
 								/>
 							</div>
 

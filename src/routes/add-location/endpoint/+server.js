@@ -29,7 +29,10 @@ export async function POST({ request }) {
 		methods,
 		twitterMerchant,
 		twitterSubmitter,
-		notes
+		notes,
+		source,
+		sourceOther,
+		contact
 	} = await request.json();
 
 	// if honey field has value return
@@ -86,8 +89,13 @@ Payment methods: ${methods}
 Twitter merchant: ${twitterMerchant}
 Twitter submitter: ${twitterSubmitter}
 Notes: ${notes}
+Data Source: ${source}
+Details (if applicable): ${sourceOther}
+Contact: ${contact}
 Status: Todo
-Created at: ${new Date(Date.now()).toISOString()}`,
+Created at: ${new Date(Date.now()).toISOString()}
+
+If you are a new contributor please read our Tagging Instructions [here](https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions).`,
 				labels: country
 					? ['good first issue', 'help wanted', 'location-submission', country]
 					: ['good first issue', 'help wanted', 'location-submission']
