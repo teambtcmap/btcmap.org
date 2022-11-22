@@ -24,7 +24,6 @@ export const support = () => {
 
 export const scaleBars = (L, map) => {
 	L.control.scale({ position: 'bottomleft' }).addTo(map);
-	document.querySelector('.leaflet-control-scale').style.fontSize = '10px';
 };
 
 export const changeDefaultIcons = (layers) => {

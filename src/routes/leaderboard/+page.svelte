@@ -1,5 +1,5 @@
 <script>
-	import Chart from 'chart.js/dist/chart.min.js';
+	import Chart from 'chart.js/auto';
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import {
