@@ -211,8 +211,8 @@
 					: undefined;
 
 			event.location = location ? location : 'Unnamed element';
-			event.lat = elementMatch['osm_json'].lat;
-			event.long = elementMatch['osm_json'].lon;
+			event.lat = latCalc(elementMatch['osm_json']);
+			event.long = longCalc(elementMatch['osm_json']);
 
 			eventElements.push(event);
 		}

@@ -10,6 +10,7 @@
 		syncStatus
 	} from '$lib/store';
 	import { errToast } from '$lib/utils';
+	import { latCalc, longCalc } from '$lib/map/setup';
 
 	// alert for user errors
 	$: $userError && errToast($userError);
@@ -40,8 +41,8 @@
 							: undefined;
 
 					event.location = location ? location : 'Unnamed element';
-					event.lat = elementMatch['osm_json'].lat;
-					event.long = elementMatch['osm_json'].lon;
+					event.lat = latCalc(elementMatch['osm_json']);
+					event.long = longCalc(elementMatch['osm_json']);
 
 					supertaggers.push(event);
 				}
