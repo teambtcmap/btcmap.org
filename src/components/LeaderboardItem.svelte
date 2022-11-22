@@ -36,7 +36,7 @@
 
 		<a
 			href="/tagger/{id}"
-			class="lg:text-left text-link hover:text-hover {tagger.match('([^ ]{12})')
+			class="lg:text-left text-link hover:text-hover {tagger.match('([^ ]{16})')
 				? 'break-all'
 				: ''} transition-colors">{tagger}</a
 		>

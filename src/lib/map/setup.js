@@ -293,7 +293,7 @@ export const generateMarker = (lat, long, icon, element, payment, L, verifiedDat
 		// marker popup component
 		`${
 			element.tags && element.tags.name
-				? `<span class='block font-bold text-lg text-primary break-all leading-snug' title='Merchant name'>${element.tags.name}</span>`
+				? `<span class='block font-bold text-lg text-primary leading-snug' title='Merchant name'>${element.tags.name}</span>`
 				: ''
 		}
 
@@ -303,8 +303,8 @@ export const generateMarker = (lat, long, icon, element, payment, L, verifiedDat
 
 			${
 				element.tags && element.tags['opening_hours']
-					? `<div class='my-1 w-full flex items-center space-x-1' title='Opening hours'>
-		  				<svg width='16px' height='16px' class='text-mapHighlight'>
+					? `<div class='my-1 w-full' title='Opening hours'>
+		  				<svg width='16px' height='16px' class='inline text-mapHighlight'>
 	  						<use width='16px' height='16px' href="/icons/font-awesome/spritesheet.svg#clock-solid"></use>
 				 	 		</svg>
 			     		<span class='text-body'>${element.tags['opening_hours']}</span>
