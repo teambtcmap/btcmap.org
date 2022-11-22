@@ -270,6 +270,26 @@ export const generateIcon = (L, icon) => {
 };
 
 export const generateMarker = (lat, long, icon, element, payment, L, verifiedDate, verify) => {
+	let verified = [];
+
+	if (element.tags) {
+		if (element.tags['survey:date']) {
+			verified.push(element.tags['survey:date']);
+		}
+
+		if (element.tags['check_date']) {
+			verified.push(element.tags['check_date']);
+		}
+
+		if (element.tags['check_date:currency:XBT']) {
+			verified.push(element.tags['check_date:currency:XBT']);
+		}
+
+		if (verified.length > 1) {
+			verified.sort((a, b) => Date.parse(b) - Date.parse(a));
+		}
+	}
+
 	return L.marker([lat, long], { icon }).bindPopup(
 		// marker popup component
 		`${
@@ -404,24 +424,9 @@ export const generateMarker = (lat, long, icon, element, payment, L, verifiedDat
 
 					<span class='text-body my-1' title="Completed by BTC Map community members">Survey date:
 					${
-						element.tags &&
-						(element.tags['survey:date'] ||
-							element.tags['check_date'] ||
-							element.tags['check_date:currency:XBT'])
-							? `${
-									element.tags['survey:date']
-										? element.tags['survey:date']
-										: element.tags['check_date']
-										? element.tags['check_date']
-										: element.tags['check_date:currency:XBT']
-							  } ${
-									Date.parse(
-										element.tags['survey:date']
-											? element.tags['survey:date']
-											: element.tags['check_date']
-											? element.tags['check_date']
-											: element.tags['check_date:currency:XBT']
-									) > verifiedDate
+						verified.length
+							? `${verified[0]} ${
+									Date.parse(verified[0]) > verifiedDate
 										? '<img src="/icons/verified.svg" alt="verified" class="inline w-5 h-5" title="Verified within the last year"/>'
 										: ''
 							  }`
