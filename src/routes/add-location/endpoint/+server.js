@@ -27,6 +27,9 @@ export async function POST({ request }) {
 		osm,
 		category,
 		methods,
+		website,
+		phone,
+		hours,
 		twitterMerchant,
 		twitterSubmitter,
 		notes,
@@ -86,6 +89,9 @@ Long: ${long}
 OSM: ${osm}
 Category: ${category}
 Payment methods: ${methods}
+Website: ${website}
+Phone: ${phone}
+Opening hours: ${hours}
 Twitter merchant: ${twitterMerchant}
 Twitter submitter: ${twitterSubmitter}
 Notes: ${notes}

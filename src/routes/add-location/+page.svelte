@@ -36,6 +36,9 @@
 	let onchain;
 	let lightning;
 	let nfc;
+	let website;
+	let phone;
+	let hours;
 	let twitterMerchant;
 	let twitterSubmitter;
 	let notes;
@@ -88,6 +91,9 @@
 					osm: lat && long ? `https://www.openstreetmap.org/edit#map=21/${lat}/${long}` : '',
 					category: category.value,
 					methods: methods.toString(),
+					website: website.value,
+					phone: phone.value,
+					hours: hours.value,
 					twitterMerchant: twitterMerchant.value
 						? twitterMerchant.value.startsWith('@')
 							? twitterMerchant.value
@@ -348,6 +354,48 @@
 							</fieldset>
 
 							<div>
+								<label for="website" class="mb-2 block font-semibold"
+									>Website <span class="font-normal">(optional)</span></label
+								>
+								<input
+									disabled={!captchaSecret || !mapLoaded}
+									type="url"
+									name="website"
+									placeholder="https://bitcoin.org"
+									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+									bind:this={website}
+								/>
+							</div>
+
+							<div>
+								<label for="phone" class="mb-2 block font-semibold"
+									>Phone <span class="font-normal">(optional)</span></label
+								>
+								<input
+									disabled={!captchaSecret || !mapLoaded}
+									type="tel"
+									name="phone"
+									placeholder="Number"
+									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+									bind:this={phone}
+								/>
+							</div>
+
+							<div>
+								<label for="hours" class="mb-2 block font-semibold"
+									>Opening Hours <span class="font-normal">(optional)</span></label
+								>
+								<input
+									disabled={!captchaSecret || !mapLoaded}
+									type="text"
+									name="hours"
+									placeholder="Mo-Fr 08:30-20:00"
+									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+									bind:this={hours}
+								/>
+							</div>
+
+							<div>
 								<label for="twitter" class="mb-2 block font-semibold"
 									>Twitter handle <span class="font-normal">(optional)</span></label
 								>
@@ -378,7 +426,7 @@
 								<textarea
 									disabled={!captchaSecret || !mapLoaded}
 									name="notes"
-									placeholder="Any other relevant details? Website URL, phone number, opening hours etc."
+									placeholder="Any other relevant details?"
 									rows="3"
 									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
 									bind:this={notes}
