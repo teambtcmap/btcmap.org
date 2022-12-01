@@ -40,9 +40,7 @@ export const apps = readable([
 ]);
 
 export const elements = writable([]);
-export const mapUpdates = writable(false);
 export const elementError = writable('');
-export const mapLoading = writable('Loading map...');
 
 export const users = writable([]);
 export const userError = writable('');
@@ -51,5 +49,8 @@ export const events = writable([]);
 export const eventError = writable('');
 
 export const syncStatus = writable();
+
+export const mapUpdates = writable(false);
+export const mapLoading = writable('Loading map...');
 
 export const excludeLeader = readable([17085479, 2104834, 9451067, 616463, 1722488, 81735]);

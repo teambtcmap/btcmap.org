@@ -8,7 +8,7 @@ export const attribution = (L, map) => {
 	OSMAttribution.style.borderRadius = '0 8px 0 0';
 	OSMAttribution.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 	OSMAttribution.innerHTML =
-		'&copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" class="text-link hover:text-hover !no-underline transition-colors">OpenStreetMap</a> contributors';
+		'&copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" class="!text-link hover:!text-hover !no-underline transition-colors">OpenStreetMap</a> contributors';
 };
 
 export const support = () => {
@@ -19,7 +19,7 @@ export const support = () => {
 	supportAttribution.style.borderRadius = '8px 0 0 0';
 	supportAttribution.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 	supportAttribution.innerHTML =
-		'<a href="/support-us" class="text-link hover:text-hover !no-underline transition-colors" title="Support with sats">Support</a> BTC Map';
+		'<a href="/support-us" class="!text-link hover:!text-hover !no-underline transition-colors" title="Support with sats">Support</a> BTC Map';
 };
 
 export const scaleBars = (L, map) => {
@@ -289,79 +289,153 @@ export const generateMarker = (lat, long, icon, element, payment, L, verifiedDat
 		}
 	}
 
-	return L.marker([lat, long], { icon }).bindPopup(
-		// marker popup component
-		`${
-			element.tags && element.tags.name
-				? `<span class='block font-bold text-lg text-primary leading-snug' title='Merchant name'>${element.tags.name}</span>`
-				: ''
-		}
+	const popupContainer = L.DomUtil.create('div');
 
-					<span class='block text-body font-bold' title='Address'>${
-						element.tags && checkAddress(element.tags)
-					}</span>
+	popupContainer.innerHTML = `${
+		element.tags && element.tags.name
+			? `<span class='block font-bold text-lg text-primary leading-snug' title='Merchant name'>${element.tags.name}</span>`
+			: ''
+	}
+
+				 <span class='block text-body' title='Address'>${element.tags && checkAddress(element.tags)}</span>
 
 			${
 				element.tags && element.tags['opening_hours']
 					? `<div class='my-1 w-full' title='Opening hours'>
-		  				<svg width='16px' height='16px' class='inline text-mapHighlight'>
-	  						<use width='16px' height='16px' href="/icons/font-awesome/spritesheet.svg#clock-solid"></use>
+		  				<svg width='16px' height='16px' class='inline'>
+	  						<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#clock"></use>
 				 	 		</svg>
 			     		<span class='text-body'>${element.tags['opening_hours']}</span>
 	  			 	 </div>`
 					: ''
 			}
 
-					<div class='flex space-x-2 my-1'>
-						${
-							element.tags && element.tags.phone
-								? `<a href='tel:${element.tags.phone}' title='Phone'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-phone transition-colors" /></a>`
-								: ''
-						}
+					<div class='flex space-x-2 mt-2.5 mb-1'>
+						<a id='navigate' href='geo:${lat},${long}' title='Navigate' class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-[62px] transition-colors'>
+							<svg width='24px' height='24px' class='mx-auto'>
+								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#compass"></use>
+							</svg>
+							<span class='block text-xs text-center mt-1'>Navigate</span>
+						</a>
 
-						${
-							element.tags && element.tags.website
-								? `<a href=${
-										element.tags.website.startsWith('http')
-											? element.tags.website
-											: `https://${element.tags.website}`
-								  } target="_blank" rel="noreferrer" title='Website'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-globe transition-colors" /></a>`
-								: ''
-						}
+						<a id='edit' href='https://www.openstreetmap.org/edit?${element.type}=${
+		element.id
+	}' target="_blank" rel="noreferrer" title='Edit' class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-[62px] transition-colors'>
+							<svg width='24px' height='24px' class='mx-auto'>
+								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#pencil"></use>
+							</svg>
+							<span class='block text-xs text-center mt-1'>Edit</span>
+						</a>
 
-						${
-							element.tags && element.tags['contact:twitter']
-								? `<a href=${
-										element.tags['contact:twitter'].startsWith('http')
-											? element.tags['contact:twitter']
-											: `https://twitter.com/${element.tags['contact:twitter']}`
-								  } target="_blank" rel="noreferrer" title='Twitter'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-brands fa-twitter transition-colors" /></a>`
-								: ''
-						}
+						<a id='share' href='/map?lat=${lat}&long=${long}' target="_blank" rel="noreferrer" title='Share' class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-[62px] transition-colors'>
+							<svg width='24px' height='24px' class='mx-auto'>
+								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#share"></use>
+							</svg>
+							<span class='block text-xs text-center mt-1'>Share</span>
+						</a>
 
-						<a href='geo:${lat},${long}' title='Navigate'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-compass transition-colors" /></a>
+						<div class='relative'>
+							<button id='more-button' title='More' class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-[62px] transition-colors'>
+								<svg width='24px' height='24px' class='mx-auto'>
+									<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#dots-horizontal"></use>
+								</svg>
+								<span class='block text-xs text-center mt-1'>More</span>
+							</button>
 
-						<a href='https://www.openstreetmap.org/edit?${element.type}=${
-			element.id
-		}' target="_blank" rel="noreferrer" title='Edit'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-pen-to-square transition-colors" /></a>
+							<div id='show-more' class='hidden z-[100] w-[147px] border border-mapBorder p-4 absolute top-[55px] right-0 bg-white rounded-xl shadow-xl space-y-3'>
+							${
+								payment
+									? `<a href="${
+											payment.type === 'pouch'
+												? `https://app.pouch.ph/${payment.username}`
+												: payment.type === 'coinos'
+												? `https://coinos.io/${payment.username}`
+												: '#'
+									  }" target="_blank" rel="noreferrer" title='Pay merchant' class='flex items-center !text-primary hover:!text-link text-xs transition-colors'>
+											<svg width='24px' height='24px' class='mr-2'>
+												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#bolt"></use>
+											</svg>
+											Pay Merchant
+										</a>`
+									: ''
+							}
 
-						<a href='/map?lat=${lat}&long=${long}' target="_blank" rel="noreferrer" title='Share'><span class="bg-link hover:bg-hover rounded-full p-2 w-5 h-5 text-white fa-solid fa-share-nodes transition-colors" /></a>
+							${
+								element.tags && element.tags.phone
+									? `<a href='tel:${element.tags.phone}' title='Phone' class='flex items-center !text-primary hover:!text-link text-xs  transition-colors'>
+											<svg width='24px' height='24px' class='mr-2'>
+												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#phone"></use>
+											</svg>
+											Phone
+										</a>`
+									: ''
+							}
+
+							${
+								element.tags && element.tags.website
+									? `<a href=${
+											element.tags.website.startsWith('http')
+												? element.tags.website
+												: `https://${element.tags.website}`
+									  } target="_blank" rel="noreferrer" title='Website' class='flex items-center !text-primary hover:!text-link text-xs  transition-colors'>
+											<svg width='24px' height='24px' class='mr-2'>
+												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#globe"></use>
+											</svg>
+											Website
+										</a>`
+									: ''
+							}
+
+							${
+								element.tags && element.tags['contact:twitter']
+									? `<a href=${
+											element.tags['contact:twitter'].startsWith('http')
+												? element.tags['contact:twitter']
+												: `https://twitter.com/${element.tags['contact:twitter']}`
+									  } target="_blank" rel="noreferrer" title='Twitter' class='flex items-center !text-primary hover:!text-link text-xs  transition-colors'>
+											<svg width='24px' height='24px' class='mr-2'>
+												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#twitter"></use>
+											</svg>
+											Twitter
+										</a>`
+									: ''
+							}
+
+							<a
+								href="https://github.com/teambtcmap/btcmap-data/wiki/Map-Legend"
+								target="_blank"
+								rel="noreferrer"
+								title="Map legend"
+								class='flex items-center !text-primary hover:!text-link text-xs transition-colors'>
+									<svg width='24px' height='24px' class='mr-2'>
+										<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#info-circle"></use>
+									</svg>
+									Map Legend
+							</a>
+							</div>
+						</div>
 					</div>
 
-					<div class='w-full flex space-x-2 my-1'>
+			<div class='w-full border-t-[0.5px] border-mapBorder mt-3 mb-2 opacity-80'></div>
+
+			<div class='flex space-x-4'>
+				<div>
+					<span class='block text-mapLabel text-xs'>Payment Methods</span>
+
+					<div class='w-full flex space-x-2 mt-0.5'>
 						<img src=${
 							element.tags && element.tags['payment:onchain'] === 'yes'
 								? '/icons/btc-highlight.svg'
 								: element.tags && element.tags['payment:onchain'] === 'no'
 								? '/icons/btc-no.svg'
 								: '/icons/btc.svg'
-						} alt="bitcoin" class="w-7 h-7" title="${
-			element.tags && element.tags['payment:onchain'] === 'yes'
-				? 'On-chain accepted'
-				: element.tags && element.tags['payment:onchain'] === 'no'
-				? 'On-chain not accepted'
-				: 'On-chain unknown'
-		}"/>
+						} alt="bitcoin" class="w-6 h-6" title="${
+		element.tags && element.tags['payment:onchain'] === 'yes'
+			? 'On-chain accepted'
+			: element.tags && element.tags['payment:onchain'] === 'no'
+			? 'On-chain not accepted'
+			: 'On-chain unknown'
+	}"/>
 
 						<img src=${
 							element.tags && element.tags['payment:lightning'] === 'yes'
@@ -369,13 +443,13 @@ export const generateMarker = (lat, long, icon, element, payment, L, verifiedDat
 								: element.tags && element.tags['payment:lightning'] === 'no'
 								? '/icons/ln-no.svg'
 								: '/icons/ln.svg'
-						} alt="lightning" class="w-7 h-7" title="${
-			element.tags && element.tags['payment:lightning'] === 'yes'
-				? 'Lightning accepted'
-				: element.tags && element.tags['payment:lightning'] === 'no'
-				? 'Lightning not accepted'
-				: 'Lightning unknown'
-		}"/>
+						} alt="lightning" class="w-6 h-6" title="${
+		element.tags && element.tags['payment:lightning'] === 'yes'
+			? 'Lightning accepted'
+			: element.tags && element.tags['payment:lightning'] === 'no'
+			? 'Lightning not accepted'
+			: 'Lightning unknown'
+	}"/>
 
 						<img src=${
 							element.tags && element.tags['payment:lightning_contactless'] === 'yes'
@@ -383,75 +457,75 @@ export const generateMarker = (lat, long, icon, element, payment, L, verifiedDat
 								: element.tags && element.tags['payment:lightning_contactless'] === 'no'
 								? '/icons/nfc-no.svg'
 								: '/icons/nfc.svg'
-						} alt="nfc" class="w-7 h-7" title="${
-			element.tags && element.tags['payment:lightning_contactless'] === 'yes'
-				? 'Lightning Contactless accepted'
-				: element.tags && element.tags['payment:lightning_contactless'] === 'no'
-				? 'Lightning contactless not accepted'
-				: 'Lightning Contactless unknown'
-		}"/>
+						} alt="nfc" class="w-6 h-6" title="${
+		element.tags && element.tags['payment:lightning_contactless'] === 'yes'
+			? 'Lightning Contactless accepted'
+			: element.tags && element.tags['payment:lightning_contactless'] === 'no'
+			? 'Lightning contactless not accepted'
+			: 'Lightning Contactless unknown'
+	}"/>
 					</div>
+				</div>
 
-					${
-						payment
-							? `<a href="${
-									payment.type === 'pouch'
-										? `https://app.pouch.ph/${payment.username}`
-										: payment.type === 'coinos'
-										? `https://coinos.io/${payment.username}`
-										: '#'
-							  }" target="_blank" rel="noreferrer" title='Pay merchant' class='flex w-[100px] justify-center items-center my-1 bg-link hover:bg-hover transition-colors py-1 rounded-full !text-white'>Pay
-								<svg
-									class="ml-1 w-3"
-									width="16"
-									height="16"
-									viewBox="0 0 16 16"
-									fill="none"
-									xmlns="http://www.w3.org/2000/svg"
-								>
-									<path
-										d="M3 13L13 3M13 3H5.5M13 3V10.5"
-										stroke="currentColor"
-										stroke-width="1.5"
-										stroke-linecap="round"
-										stroke-linejoin="round"
-									/>
-								</svg>
-							</a>`
-							: ''
-					}
-
-					<span class='text-body my-1' title="Completed by BTC Map community members">Survey date:
+				<div>
+					<span class='block text-mapLabel text-xs' title="Completed by BTC Map community members">Last Surveyed</span>
+					<span class='block text-body'>
 					${
 						verified.length
 							? `${verified[0]} ${
 									Date.parse(verified[0]) > verifiedDate
-										? '<img src="/icons/verified.svg" alt="verified" class="inline w-5 h-5" title="Verified within the last year"/>'
+										? `<span title="Verified within the last year"><svg width='16px' height='16px' class='inline'>
+												<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#verified"></use>
+											</svg></span>`
 										: ''
 							  }`
-							: '<span class="fa-solid fa-question" title="Not verified"></span>'
+							: '<span title="Not verified">---</span>'
 					}
 					</span>
-
-					<div class='flex ${verify ? 'justify-between' : 'justify-end'} items-center'>
 					${
 						verify
 							? `<a href="/verify-location?${
 									element.tags && element.tags.name ? `&name=${element.tags.name}` : ''
 							  }&lat=${lat}&long=${long}&${element.type}=${
 									element.id
-							  }" class='text-link hover:text-hover text-xs transition-colors' title="Help improve the data for everyone">Verify location</a>`
+							  }" class='!text-link hover:!text-hover text-xs transition-colors' title="Help improve the data for everyone">Verify Location</a>`
 							: ''
 					}
+				</div>
+			</div>`;
 
-						<a
-							href="https://github.com/teambtcmap/btcmap-data/wiki/Map-Legend"
-							target="_blank"
-							rel="noreferrer"
-							title="Map legend">
-							<span class="fa-solid fa-circle-info text-sm text-link hover:text-hover transition-colors"></span>
-						</a>
-					</div>`,
-		{ closeButton: false }
-	);
+	const showMoreDiv = popupContainer.querySelector('#show-more');
+	const moreButton = popupContainer.querySelector('#more-button');
+
+	let showMore = false;
+
+	const hideMore = () => {
+		showMoreDiv.classList.add('hidden');
+		moreButton.classList.replace('!text-link', '!text-primary');
+		moreButton.classList.replace('border-link', 'border-mapBorder');
+		showMore = false;
+	};
+
+	moreButton.onclick = () => {
+		if (!showMore) {
+			showMoreDiv.classList.remove('hidden');
+			moreButton.classList.replace('!text-primary', '!text-link');
+			moreButton.classList.replace('border-mapBorder', 'border-link');
+			showMore = true;
+		} else {
+			hideMore();
+		}
+	};
+
+	popupContainer.querySelector('#navigate').onclick = () => hideMore();
+	popupContainer.querySelector('#edit').onclick = () => hideMore();
+	popupContainer.querySelector('#share').onclick = () => hideMore();
+
+	return L.marker([lat, long], { icon })
+		.bindPopup(
+			// marker popup component
+			popupContainer,
+			{ closeButton: false }
+		)
+		.on('popupclose', () => hideMore());
 };
