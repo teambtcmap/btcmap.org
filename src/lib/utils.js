@@ -10,6 +10,16 @@ export const errToast = (m) => {
 	});
 };
 
+export const warningToast = (m) => {
+	toast.pop();
+
+	toast.push(m, {
+		theme: {
+			'--toastBarBackground': '#FACA15'
+		}
+	});
+};
+
 export const successToast = (m) => {
 	toast.pop();
 

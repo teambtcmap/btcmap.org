@@ -1,3 +1,8 @@
+import Time from 'svelte-time';
+import axios from 'axios';
+import { boost, exchangeRate } from '$lib/store';
+import { errToast } from '$lib/utils';
+
 export const attribution = (L, map) => {
 	L.control.attribution({ position: 'bottomleft' }).addTo(map);
 
@@ -253,13 +258,15 @@ export const longCalc = (element) => {
 	return element.type == 'node' ? element.lon : (element.bounds.minlon + element.bounds.maxlon) / 2;
 };
 
-export const generateIcon = (L, icon) => {
+export const generateIcon = (L, icon, boosted) => {
 	return L.divIcon({
-		className: 'div-icon',
+		className: boosted ? 'boosted-icon' : 'div-icon',
 		iconSize: [32, 43],
 		iconAnchor: [16, 43],
 		popupAnchor: [0, -43],
-		html: `<svg width='20px' height='20px' class='mx-auto mt-[5.75px] text-white'>
+		html: `<svg width='20px' height='20px' class='${
+			boosted ? 'animate-wiggle' : ''
+		} mx-auto mt-[5.75px] text-white'>
 			     	<use width='20px' height='20px' href="/icons/material/spritesheet.svg#${
 							icon !== 'question_mark' ? icon : 'currency_bitcoin'
 						}">
@@ -268,7 +275,17 @@ export const generateIcon = (L, icon) => {
 	});
 };
 
-export const generateMarker = (lat, long, icon, element, payment, L, verifiedDate, verify) => {
+export const generateMarker = (
+	lat,
+	long,
+	icon,
+	element,
+	payment,
+	L,
+	verifiedDate,
+	verify,
+	boosted
+) => {
 	let verified = [];
 
 	if (element.tags) {
@@ -342,7 +359,7 @@ export const generateMarker = (lat, long, icon, element, payment, L, verifiedDat
 								<span class='block text-xs text-center mt-1'>More</span>
 							</button>
 
-							<div id='show-more' class='hidden z-[100] w-[147px] border border-mapBorder p-4 absolute top-[55px] right-0 bg-white rounded-xl shadow-xl space-y-3'>
+							<div id='show-more' class='hidden z-[500] w-[147px] border border-mapBorder p-4 absolute top-[55px] right-0 bg-white rounded-xl shadow-xl space-y-3'>
 							${
 								payment
 									? `<a href="${
@@ -492,6 +509,25 @@ export const generateMarker = (lat, long, icon, element, payment, L, verifiedDat
 							: ''
 					}
 				</div>
+
+				<div>
+					${
+						boosted
+							? `<span class='block text-mapLabel text-xs' title="This location is boosted!">Boost Expires</span>
+					<span class='block text-body' id='boosted-time'></span>`
+							: ''
+					}
+					${
+						location.pathname === '/map'
+							? `<button title='Boost' id='boost-button' class='flex justify-center items-center space-x-2 text-primary hover:text-link border border-mapBorder hover:border-link rounded-lg w-[82px] h-[32px] transition-colors'>
+						<svg width='16px' height='16px'>
+							<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#boost"></use>
+						</svg>
+						<span class='text-xs'>Boost</span>
+					</button>`
+							: ''
+					}
+				</div>
 			</div>`;
 
 	const showMoreDiv = popupContainer.querySelector('#show-more');
@@ -520,6 +556,58 @@ export const generateMarker = (lat, long, icon, element, payment, L, verifiedDat
 	popupContainer.querySelector('#navigate').onclick = () => hideMore();
 	popupContainer.querySelector('#edit').onclick = () => hideMore();
 	popupContainer.querySelector('#share').onclick = () => hideMore();
+
+	if (location.pathname === '/map') {
+		const boostButton = popupContainer.querySelector('#boost-button');
+		const boostButtonText = boostButton.querySelector('span');
+		const boostButtonIcon = boostButton.querySelector('svg');
+
+		const resetButton = () => {
+			boostButton.disabled = false;
+			boostButtonText.innerText = 'Boost';
+			boostButton.classList.add('space-x-2');
+			boostButtonIcon.classList.remove('hidden');
+		};
+
+		boostButton.onclick = () => {
+			boostButton.disabled = true;
+			boostButtonIcon.classList.add('hidden');
+			boostButton.classList.remove('space-x-2');
+			boostButtonText.innerText = 'Boosting...';
+
+			boost.set({
+				id: element.type + ':' + element.id,
+				name: element.tags && element.tags.name ? element.tags.name : '',
+				boost: boosted ? boosted : '',
+				lat,
+				long
+			});
+
+			axios
+				.get('https://blockchain.info/ticker')
+				.then(function (response) {
+					exchangeRate.set(response.data['USD']['15m']);
+					setTimeout(() => resetButton(), 300);
+				})
+				.catch(function (error) {
+					errToast('Could not fetch bitcoin exchange rate, please try again or contact BTC Map.');
+					console.log(error);
+					resetButton();
+				});
+		};
+	}
+
+	if (boosted) {
+		const boostedTime = popupContainer.querySelector('#boosted-time');
+		new Time({
+			target: boostedTime,
+			props: {
+				live: 3000,
+				relative: true,
+				timestamp: boosted
+			}
+		});
+	}
 
 	return L.marker([lat, long], { icon })
 		.bindPopup(

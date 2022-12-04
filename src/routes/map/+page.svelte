@@ -5,7 +5,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
-	import { elements, mapUpdates, elementError } from '$lib/store';
+	import { elements, mapUpdates, elementError, elementsSyncCount } from '$lib/store';
 	import {
 		attribution,
 		support,
@@ -23,7 +23,7 @@
 		generateMarker
 	} from '$lib/map/setup';
 	import { errToast } from '$lib/utils';
-	import { MapLoading, Icon } from '$comp';
+	import { MapLoading, Icon, Boost } from '$comp';
 
 	let mapElement;
 	let map;
@@ -117,7 +117,7 @@
 		document.querySelector('.data-refresh-div').style.display = 'block';
 	};
 
-	$: map && mapLoaded && $mapUpdates && showDataRefresh();
+	$: map && mapLoaded && $mapUpdates && $elementsSyncCount > 1 && showDataRefresh();
 
 	// alert for map errors
 	$: $elementError && errToast($elementError);
@@ -421,6 +421,10 @@ Thanks for using BTC Map!`);
 					: element.tags['payment:coinos']
 					? { type: 'coinos', username: element.tags['payment:coinos'] }
 					: undefined;
+				let boosted =
+					element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now()
+						? element.tags['boost:expires']
+						: undefined;
 				element = element['osm_json'];
 
 				if (
@@ -432,7 +436,7 @@ Thanks for using BTC Map!`);
 					const lat = latCalc(element);
 					const long = longCalc(element);
 
-					let divIcon = generateIcon(L, icon);
+					let divIcon = generateIcon(L, icon, boosted);
 
 					let marker = generateMarker(
 						lat,
@@ -442,7 +446,8 @@ Thanks for using BTC Map!`);
 						payment,
 						L,
 						verifiedDate,
-						'verify'
+						'verify',
+						boosted
 					);
 
 					if (category === 'atm') {
@@ -454,6 +459,7 @@ Thanks for using BTC Map!`);
 					element.latLng = L.latLng(lat, long);
 					element.marker = marker;
 					element.icon = icon;
+					element.boosted = boosted;
 					elementsCopy.push(element);
 				}
 			});
@@ -547,21 +553,24 @@ Thanks for using BTC Map!`);
 								<Icon
 									w="20"
 									h="20"
-									style="mx-auto md:mx-0 mt-1 opacity-50 text-mapButton"
+									style="mx-auto md:mx-0 mt-1 opacity-50 {result.boosted
+										? 'text-bitcoin animate-wiggle'
+										: 'text-mapButton'}"
 									icon={result.icon !== 'question_mark' ? result.icon : 'currency_bitcoin'}
 									type="material"
 								/>
 
 								<div class="md:max-w-[210px] mx-auto">
 									<p
-										class="text-sm text-mapButton {result.tags.name.match('([^ ]{21})')
-											? 'break-all'
-											: ''}"
+										class="text-sm {result.boosted
+											? 'text-bitcoin'
+											: 'text-mapButton'} {result.tags.name.match('([^ ]{21})') ? 'break-all' : ''}"
 									>
 										{result.tags.name}
 									</p>
 									<p
-										class="text-xs text-searchSubtext {(result.tags['addr:street'] &&
+										class="text-xs {result.boosted ? 'text-bitcoin' : 'text-searchSubtext'} {(result
+											.tags['addr:street'] &&
 											result.tags['addr:street'].match('([^ ]{21})')) ||
 										(result.tags['addr:city'] && result.tags['addr:city'].match('([^ ]{21})'))
 											? 'break-all'
@@ -573,7 +582,9 @@ Thanks for using BTC Map!`);
 							</div>
 
 							<div
-								class="text-xs text-searchSubtext text-center md:text-right w-[80px] mx-auto md:mx-0"
+								class="text-xs {result.boosted
+									? 'text-bitcoin'
+									: 'text-searchSubtext'} text-center md:text-right w-[80px] mx-auto md:mx-0"
 							>
 								<p>{result.distanceKm} km</p>
 								<p>{result.distanceMi} mi</p>
@@ -588,6 +599,8 @@ Thanks for using BTC Map!`);
 			</OutClick>
 		{/if}
 	</div>
+
+	<Boost />
 
 	<div bind:this={mapElement} class="!bg-teal h-[100vh]" />
 </main>
