@@ -151,13 +151,13 @@
 									transition:fade={{ delay: 0, duration: 100 }}
 									class="absolute -top-16 left-[26px] w-[52px] bg-white shadow-lg rounded-lg py-2 border border-mapBorder"
 								>
-									<img
-										decoding="sync"
-										fetchpriority="high"
-										src="/icons/boosted-icon-pin.svg"
-										alt="boosted-icon"
-										class="mx-auto"
-									/>
+									<svg width="32px" height="43px" class="mx-auto">
+										<use
+											width="32px"
+											height="43px"
+											href="/icons/popup/spritesheet.svg#boosted-icon-pin"
+										/>
+									</svg>
 									<svg
 										width="20px"
 										height="20px"
