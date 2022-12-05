@@ -144,18 +144,24 @@
 						<button
 							on:mouseenter={() => (tooltip = true)}
 							on:mouseleave={() => (tooltip = false)}
-							class="relative text-sm text-link hover:text-hover transition-colors"
+							class="relative w-[104px] text-sm text-link hover:text-hover transition-colors"
 							>See how it looks
 							{#if tooltip}
 								<div
 									transition:fade={{ delay: 0, duration: 100 }}
-									class="absolute -top-16 left-[25.75px] w-[51.5px] bg-white shadow-lg rounded-lg py-2 border border-mapBorder"
+									class="absolute -top-16 left-[26px] w-[52px] bg-white shadow-lg rounded-lg py-2 border border-mapBorder"
 								>
-									<img src="/icons/boosted-icon-pin.svg" alt="boosted-icon" class="mx-auto" />
+									<img
+										decoding="sync"
+										fetchpriority="high"
+										src="/icons/boosted-icon-pin.svg"
+										alt="boosted-icon"
+										class="mx-auto"
+									/>
 									<svg
 										width="20px"
 										height="20px"
-										class="animate-wiggle absolute top-3.5 left-[14.5px] text-white"
+										class="animate-wiggle absolute top-3.5 left-[15px] text-white"
 									>
 										<use
 											width="20px"
