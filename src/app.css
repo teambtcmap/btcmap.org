@@ -46,5 +46,5 @@ html {
 }
 
 .leaflet-popup-content {
-	min-width: 275px !important;
+	min-width: 300px !important;
 }

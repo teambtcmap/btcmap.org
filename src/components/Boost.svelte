@@ -137,8 +137,8 @@
 						<p class="text-primary text-xl font-bold mb-2">Boost Location</p>
 
 						<p class="text-body text-sm">
-							Make a merchant stand out from the rest and let everyone know that they are
-							bitcoiners!
+							Make this merchant stand out in bitcoin orange on the map, shine in the search
+							results, and be discovered in the exclusive boosted locations map!
 						</p>
 
 						<button

@@ -505,7 +505,7 @@ export const generateMarker = (
 						<svg width='16px' height='16px'>
 							<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#boost"></use>
 						</svg>
-						<span class='text-xs'>Boost</span>
+						<span class='text-xs'>${boosted ? 'Extend' : 'Boost'}</span>
 					</button>`
 							: ''
 					}
@@ -546,7 +546,7 @@ export const generateMarker = (
 
 		const resetButton = () => {
 			boostButton.disabled = false;
-			boostButtonText.innerText = 'Boost';
+			boostButtonText.innerText = boosted ? 'Extend' : 'Boost';
 			boostButton.classList.add('space-x-2');
 			boostButtonIcon.classList.remove('hidden');
 		};
