@@ -7,7 +7,6 @@
 	import { elements, elementError } from '$lib/store';
 	import {
 		attribution,
-		fullscreenButton,
 		geolocate,
 		changeDefaultIcons,
 		calcVerifiedDate,
@@ -145,14 +144,11 @@
 				// add OSM attribution
 				attribution(L, map);
 
-				// add fullscreen button to map
-				fullscreenButton(L, mapElement, map, DomEvent);
-
 				// add locate button to map
 				geolocate(L, map);
 
 				// change default icons
-				changeDefaultIcons();
+				changeDefaultIcons('', L, mapElement, DomEvent);
 
 				// create marker cluster group
 				let markers = L.markerClusterGroup();
@@ -172,15 +168,29 @@
 						: element.tags['payment:coinos']
 						? { type: 'coinos', username: element.tags['payment:coinos'] }
 						: undefined;
+					let boosted =
+						element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now()
+							? element.tags['boost:expires']
+							: undefined;
 
 					element = element['osm_json'];
 
 					const latC = latCalc(element);
 					const longC = longCalc(element);
 
-					let divIcon = generateIcon(L, icon);
+					let divIcon = generateIcon(L, icon, boosted);
 
-					let marker = generateMarker(latC, longC, divIcon, element, payment, L, verifiedDate);
+					let marker = generateMarker(
+						latC,
+						longC,
+						divIcon,
+						element,
+						payment,
+						L,
+						verifiedDate,
+						'',
+						boosted
+					);
 
 					// add marker click event
 					marker.on('click', (e) => {

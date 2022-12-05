@@ -3,7 +3,7 @@
 	import { browser } from '$app/environment';
 	import axios from 'axios';
 	import { Header, Footer, PrimaryButton, MapLoading, FormSuccess } from '$comp';
-	import { fullscreenButton, geolocate, changeDefaultIcons } from '$lib/map/setup';
+	import { geolocate, changeDefaultIcons } from '$lib/map/setup';
 	import { errToast } from '$lib/utils';
 
 	let captcha;
@@ -172,14 +172,11 @@
 			// change broken marker image path in prod
 			L.Icon.Default.prototype.options.imagePath = '/icons/';
 
-			// add fullscreen button to map
-			fullscreenButton(L, mapElement, map, DomEvent);
-
 			// add locate button to map
 			geolocate(L, map);
 
 			// change default icons
-			changeDefaultIcons();
+			changeDefaultIcons('', L, mapElement, DomEvent);
 
 			mapLoaded = true;
 		}
