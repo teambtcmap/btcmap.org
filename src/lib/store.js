@@ -41,6 +41,7 @@ export const apps = readable([
 
 export const elements = writable([]);
 export const elementError = writable('');
+export const elementsSyncCount = writable(0);
 
 export const users = writable([]);
 export const userError = writable('');
@@ -54,3 +55,6 @@ export const mapUpdates = writable(false);
 export const mapLoading = writable('Loading map...');
 
 export const excludeLeader = readable([17085479, 2104834, 9451067, 616463, 1722488, 81735]);
+
+export const boost = writable();
+export const exchangeRate = writable();
