@@ -81,7 +81,7 @@
 		loading = true;
 		axios
 			.get(
-				`/boost/invoice/generate?amount=${selectedBoost.sats}&name=${$boost.name}&time=${selectedBoost.time}`
+				`/boost/invoice/generate?amount=1&name=${$boost.name}&time=${selectedBoost.time}`
 			)
 			.then(async function (response) {
 				invoice = response.data['payment_request'];
