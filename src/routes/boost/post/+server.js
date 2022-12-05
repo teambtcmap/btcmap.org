@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { BTCMAP_KEY } from '$env/static/private';
-import { error } from '@sveltejs/kit';
+import { error, json } from '@sveltejs/kit';
 
 let used = [];
 
@@ -28,7 +28,7 @@ export async function POST({ request }) {
 			if (response.data.paid === true) {
 				used.push(hash);
 
-				axios
+				return axios
 					.get(`https://api.btcmap.org/v2/elements/${element}`)
 					.then(function (response) {
 						let expires;
@@ -41,14 +41,14 @@ export async function POST({ request }) {
 							expires = new Date(dateNow.setMonth(dateNow.getMonth() + time));
 						}
 
-						axios
+						return axios
 							.post(
 								`https://api.btcmap.org/v2/elements/${element}/tags`,
 								`name=boost:expires&value=${expires.toISOString()}`,
 								{ headers }
 							)
 							.then(function (response) {
-								return 'Boost success!';
+								return response.status;
 							})
 							.catch(function (error) {
 								throw error(400, 'Could not finalize boost, please contact BTC Map.');
@@ -68,5 +68,5 @@ export async function POST({ request }) {
 			console.log(error);
 		});
 
-	return new Response(String(boost));
+	return json({ status: boost });
 }
