@@ -9,7 +9,6 @@
 	import { users, events, elements, excludeLeader } from '$lib/store';
 	import {
 		attribution,
-		fullscreenButton,
 		changeDefaultIcons,
 		calcVerifiedDate,
 		latCalc,
@@ -281,10 +280,7 @@
 			attribution(L, map);
 
 			// change default icons
-			changeDefaultIcons();
-
-			// add fullscreen button to map
-			fullscreenButton(L, mapElement, map, DomEvent);
+			changeDefaultIcons('', L, mapElement, DomEvent);
 
 			// create marker cluster group
 			let markers = L.markerClusterGroup();
@@ -307,13 +303,17 @@
 					: element.tags['payment:coinos']
 					? { type: 'coinos', username: element.tags['payment:coinos'] }
 					: undefined;
+				let boosted =
+					element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now()
+						? element.tags['boost:expires']
+						: undefined;
 
 				element = element['osm_json'];
 
 				const lat = latCalc(element);
 				const long = longCalc(element);
 
-				let divIcon = generateIcon(L, icon);
+				let divIcon = generateIcon(L, icon, boosted);
 
 				let marker = generateMarker(
 					lat,
@@ -323,7 +323,8 @@
 					payment,
 					L,
 					verifiedDate,
-					'verify'
+					'verify',
+					boosted
 				);
 
 				markers.addLayer(marker);

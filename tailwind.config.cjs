@@ -32,7 +32,17 @@ module.exports = {
 				taggerTime: '#7C9CA0',
 				created: '#10B791',
 				deleted: '#EB5757',
-				bitcoin: '#F7931A'
+				bitcoin: '#F7931A',
+				twitter: '#1DA1F2'
+			},
+			keyframes: {
+				wiggle: {
+					'0%, 100%': { transform: 'rotate(-3deg)' },
+					'50%': { transform: 'rotate(3deg)' }
+				}
+			},
+			animation: {
+				wiggle: 'wiggle 1s ease-in-out infinite'
 			}
 		}
 	},

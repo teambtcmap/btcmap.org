@@ -43,9 +43,6 @@ export const eventsSync = async () => {
 				// filter out deleted events
 				const eventsFiltered = value.filter((event) => !event['deleted_at']);
 
-				// load events locally first
-				events.set(eventsFiltered);
-
 				// start update sync from API
 				try {
 					// sort to get most recent record
@@ -85,13 +82,22 @@ export const eventsSync = async () => {
 								events.set(newEventsFiltered);
 							})
 							.catch(function (err) {
+								// set updated events to store
+								events.set(newEventsFiltered);
+
 								eventError.set(
 									'Could not update events locally, please try again or contact BTC Map.'
 								);
 								console.log(err);
 							});
+					} else {
+						// load events from cache
+						events.set(eventsFiltered);
 					}
 				} catch (error) {
+					// load events from cache
+					events.set(eventsFiltered);
+
 					eventError.set('Could not update events from API, please try again or contact BTC Map.');
 					console.error(error);
 				}

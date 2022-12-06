@@ -5,13 +5,12 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
-	import { elements, mapUpdates, elementError } from '$lib/store';
+	import { elements, mapUpdates, elementError, elementsSyncCount } from '$lib/store';
 	import {
 		attribution,
 		support,
 		scaleBars,
 		changeDefaultIcons,
-		fullscreenButton,
 		geolocate,
 		homeMarkerButtons,
 		dataRefresh,
@@ -23,7 +22,7 @@
 		generateMarker
 	} from '$lib/map/setup';
 	import { errToast } from '$lib/utils';
-	import { MapLoading, Icon } from '$comp';
+	import { MapLoading, Icon, Boost } from '$comp';
 
 	let mapElement;
 	let map;
@@ -112,12 +111,15 @@
 	// allow to view map with only legacy nodes
 	const legacy = $page.url.searchParams.has('legacy');
 
+	// allow to view map with only boosted locations
+	const boosts = $page.url.searchParams.has('boosts');
+
 	// displays a button in controls if there is new data available
 	const showDataRefresh = () => {
 		document.querySelector('.data-refresh-div').style.display = 'block';
 	};
 
-	$: map && mapLoaded && $mapUpdates && showDataRefresh();
+	$: map && mapLoaded && $mapUpdates && $elementsSyncCount > 1 && showDataRefresh();
 
 	// alert for map errors
 	$: $elementError && errToast($elementError);
@@ -317,10 +319,7 @@ Thanks for using BTC Map!`);
 			scaleBars(L, map);
 
 			// change default icons
-			changeDefaultIcons('layers');
-
-			// add fullscreen button to map
-			fullscreenButton(L, mapElement, map, DomEvent);
+			changeDefaultIcons('layers', L, mapElement, DomEvent);
 
 			// add locate button to map
 			geolocate(L, map);
@@ -399,6 +398,59 @@ Thanks for using BTC Map!`);
 			DomEvent.disableClickPropagation(document.querySelector('.leaflet-control-search-toggle'));
 			DomEvent.disableClickPropagation(clearSearchButton);
 
+			// add boost layer button
+
+			const customBoostLayerButton = L.Control.extend({
+				options: {
+					position: 'topleft'
+				},
+				onAdd: () => {
+					const boostLayerDiv = L.DomUtil.create('div');
+					boostLayerDiv.classList.add('leaflet-bar');
+					boostLayerDiv.style.border = 'none';
+					boostLayerDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+
+					const boostLayerButton = L.DomUtil.create('a');
+					boostLayerButton.classList.add('leaflet-control-boost-layer');
+					boostLayerButton.href = '#';
+					boostLayerButton.title = 'Boosted locations';
+					boostLayerButton.role = 'button';
+					boostLayerButton.ariaLabel = 'Boosted locations';
+					boostLayerButton.ariaDisabled = 'false';
+					boostLayerButton.innerHTML = `<img src=${
+						boosts ? '/icons/boost-solid.svg' : '/icons/boost.svg'
+					} alt='boost' class='inline' id='boost-layer'/>`;
+					boostLayerButton.style.borderRadius = '8px';
+					boostLayerButton.onclick = function toggleLayer() {
+						if (boosts) {
+							$page.url.searchParams.delete('boosts');
+							location.search = $page.url.search;
+						} else {
+							$page.url.searchParams.append('boosts', 'true');
+							location.search = $page.url.search;
+						}
+					};
+
+					boostLayerButton.onmouseenter = () => {
+						document.querySelector('#boost-layer').src = boosts
+							? '/icons/boost-solid-black.svg'
+							: '/icons/boost-black.svg';
+					};
+					boostLayerButton.onmouseleave = () => {
+						document.querySelector('#boost-layer').src = boosts
+							? '/icons/boost-solid.svg'
+							: '/icons/boost.svg';
+					};
+
+					boostLayerDiv.append(boostLayerButton);
+
+					return boostLayerDiv;
+				}
+			});
+
+			map.addControl(new customBoostLayerButton());
+			DomEvent.disableClickPropagation(document.querySelector('.leaflet-control-boost-layer'));
+
 			// add home and marker buttons to map
 			homeMarkerButtons(L, map, DomEvent);
 
@@ -421,18 +473,23 @@ Thanks for using BTC Map!`);
 					: element.tags['payment:coinos']
 					? { type: 'coinos', username: element.tags['payment:coinos'] }
 					: undefined;
+				let boosted =
+					element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now()
+						? element.tags['boost:expires']
+						: undefined;
 				element = element['osm_json'];
 
 				if (
 					(onchain ? element.tags && element.tags['payment:onchain'] === 'yes' : true) &&
 					(lightning ? element.tags && element.tags['payment:lightning'] === 'yes' : true) &&
 					(nfc ? element.tags && element.tags['payment:lightning_contactless'] === 'yes' : true) &&
-					(legacy ? element.tags && element.tags['payment:bitcoin'] === 'yes' : true)
+					(legacy ? element.tags && element.tags['payment:bitcoin'] === 'yes' : true) &&
+					(boosts ? boosted : true)
 				) {
 					const lat = latCalc(element);
 					const long = longCalc(element);
 
-					let divIcon = generateIcon(L, icon);
+					let divIcon = generateIcon(L, icon, boosted);
 
 					let marker = generateMarker(
 						lat,
@@ -442,7 +499,8 @@ Thanks for using BTC Map!`);
 						payment,
 						L,
 						verifiedDate,
-						'verify'
+						'verify',
+						boosted
 					);
 
 					if (category === 'atm') {
@@ -454,6 +512,7 @@ Thanks for using BTC Map!`);
 					element.latLng = L.latLng(lat, long);
 					element.marker = marker;
 					element.icon = icon;
+					element.boosted = boosted;
 					elementsCopy.push(element);
 				}
 			});
@@ -493,7 +552,7 @@ Thanks for using BTC Map!`);
 			<input
 				id="search-input"
 				type="text"
-				class="w-full drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] rounded-lg p-2.5 focus:outline-none text-mapButton text-[16px]"
+				class="w-full drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] rounded-lg px-5 py-2.5 focus:outline-none text-mapButton text-[16px]"
 				placeholder="Search..."
 				on:keyup={searchDebounce}
 				on:keydown={(e) => {
@@ -547,21 +606,24 @@ Thanks for using BTC Map!`);
 								<Icon
 									w="20"
 									h="20"
-									style="mx-auto md:mx-0 mt-1 opacity-50 text-mapButton"
+									style="mx-auto md:mx-0 mt-1 {result.boosted
+										? 'text-bitcoin animate-wiggle'
+										: 'text-mapButton opacity-50'}"
 									icon={result.icon !== 'question_mark' ? result.icon : 'currency_bitcoin'}
 									type="material"
 								/>
 
 								<div class="md:max-w-[210px] mx-auto">
 									<p
-										class="text-sm text-mapButton {result.tags.name.match('([^ ]{21})')
-											? 'break-all'
-											: ''}"
+										class="text-sm {result.boosted
+											? 'text-bitcoin font-semibold'
+											: 'text-mapButton'} {result.tags.name.match('([^ ]{21})') ? 'break-all' : ''}"
 									>
 										{result.tags.name}
 									</p>
 									<p
-										class="text-xs text-searchSubtext {(result.tags['addr:street'] &&
+										class="text-xs {result.boosted ? 'text-bitcoin' : 'text-searchSubtext'} {(result
+											.tags['addr:street'] &&
 											result.tags['addr:street'].match('([^ ]{21})')) ||
 										(result.tags['addr:city'] && result.tags['addr:city'].match('([^ ]{21})'))
 											? 'break-all'
@@ -573,7 +635,9 @@ Thanks for using BTC Map!`);
 							</div>
 
 							<div
-								class="text-xs text-searchSubtext text-center md:text-right w-[80px] mx-auto md:mx-0"
+								class="text-xs {result.boosted
+									? 'text-bitcoin'
+									: 'text-searchSubtext'} text-center md:text-right w-[80px] mx-auto md:mx-0"
 							>
 								<p>{result.distanceKm} km</p>
 								<p>{result.distanceMi} mi</p>
@@ -588,6 +652,8 @@ Thanks for using BTC Map!`);
 			</OutClick>
 		{/if}
 	</div>
+
+	<Boost />
 
 	<div bind:this={mapElement} class="!bg-teal h-[100vh]" />
 </main>

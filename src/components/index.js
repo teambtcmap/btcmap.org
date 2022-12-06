@@ -26,3 +26,5 @@ export { default as BadgeCard } from './BadgeCard.svelte';
 export { default as Icon } from './Icon.svelte';
 export { default as CommunitySection } from './CommunitySection.svelte';
 export { default as SupportSection } from './SupportSection.svelte';
+export { default as Boost } from './Boost.svelte';
+export { default as CopyButton } from './CopyButton.svelte';

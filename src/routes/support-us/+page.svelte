@@ -1,7 +1,7 @@
 <script>
 	import axios from 'axios';
 	import { onMount } from 'svelte';
-	import { Header, Footer, DonationOption, SupportSection } from '$comp';
+	import { Header, Footer, DonationOption, SupportSection, Icon } from '$comp';
 	import { errToast } from '$lib/utils';
 
 	let onchain = 'bc1qyyr7g9tew6sfa57mv2r6rvgj2ucakcmqnqzqjj';
@@ -75,7 +75,13 @@
 							<!-- close button -->
 							<div class="absolute top-4 right-6">
 								<button on:click={() => (showQr = false)}
-									><i class="fa-solid fa-x text-link hover:text-hover transition-colors" /></button
+									><Icon
+										w="25"
+										h="25"
+										style="text-link hover:text-hover transition-colors"
+										icon="close"
+										type="popup"
+									/></button
 								>
 							</div>
 

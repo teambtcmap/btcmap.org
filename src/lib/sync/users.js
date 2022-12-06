@@ -64,9 +64,6 @@ export const usersSync = async () => {
 				// filter out deleted users
 				const usersFiltered = value.filter((user) => !user['deleted_at']);
 
-				// load users locally first
-				users.set(usersFiltered);
-
 				// start update sync from API
 				try {
 					// sort to get most recent record
@@ -106,13 +103,22 @@ export const usersSync = async () => {
 								users.set(newUsersFiltered);
 							})
 							.catch(function (err) {
+								// set updated users to store
+								users.set(newUsersFiltered);
+
 								userError.set(
 									'Could not update users locally, please try again or contact BTC Map.'
 								);
 								console.log(err);
 							});
+					} else {
+						// load users from cache
+						users.set(usersFiltered);
 					}
 				} catch (error) {
+					// load users from cache
+					users.set(usersFiltered);
+
 					userError.set('Could not update users from API, please try again or contact BTC Map.');
 					console.error(error);
 				}
