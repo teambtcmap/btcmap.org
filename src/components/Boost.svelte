@@ -120,14 +120,20 @@
 		<div
 			transition:fly={{ y: 200, duration: 300 }}
 			class="z-[2000] border border-mapBorder absolute top-[5vh] {stage === 0
-				? 'md:top-[calc(50vh-204px)]'
+				? 'md:top-[calc(50vh-202px)]'
 				: stage === 1
-				? 'md:top-[calc(50vh-261.5px)]'
-				: 'md:top-[calc(50vh-214.5px)]'} left-[5vw] md:left-[calc(50vw-215px)] h-[90vh] md:h-auto w-[90vw] md:w-[430px] bg-white p-6 rounded-xl shadow-2xl overflow-auto"
+				? 'md:top-[calc(50vh-249.5px)]'
+				: 'md:top-[calc(50vh-202.5px)]'} left-[5vw] md:left-[calc(50vw-215px)] h-[90vh] md:h-auto w-[90vw] md:w-[430px] bg-white p-6 rounded-xl shadow-2xl overflow-auto"
 		>
-			<div class="flex justify-end">
+			<div class="absolute top-5 right-5">
 				<button on:click={closeModal}
-					><span class="fa-solid fa-x text-primary hover:text-link transition-colors" /></button
+					><Icon
+						w="25"
+						h="25"
+						style="text-primary hover:text-link transition-colors"
+						icon="close"
+						type="popup"
+					/></button
 				>
 			</div>
 
@@ -144,31 +150,21 @@
 						<button
 							on:mouseenter={() => (tooltip = true)}
 							on:mouseleave={() => (tooltip = false)}
-							class="relative w-[104px] text-sm text-link hover:text-hover transition-colors"
+							class="relative text-sm text-link hover:text-hover transition-colors"
 							>See how it looks
 							{#if tooltip}
 								<div
 									transition:fade={{ delay: 0, duration: 100 }}
 									class="absolute -top-16 left-[26px] w-[52px] bg-white shadow-lg rounded-lg py-2 border border-mapBorder"
 								>
-									<svg width="32px" height="43px" class="mx-auto">
-										<use
-											width="32px"
-											height="43px"
-											href="/icons/popup/spritesheet.svg#boosted-icon-pin"
-										/>
-									</svg>
-									<svg
-										width="20px"
-										height="20px"
-										class="animate-wiggle absolute top-3.5 left-[15px] text-white"
-									>
-										<use
-											width="20px"
-											height="20px"
-											href="/icons/material/spritesheet.svg#currency_bitcoin"
-										/>
-									</svg>
+									<Icon w="32" h="43" style="mx-auto" icon="boosted-icon-pin" type="popup" />
+									<Icon
+										w="20"
+										h="20"
+										style="animate-wiggle absolute top-3.5 left-[15px] text-white"
+										icon="currency_bitcoin"
+										type="material"
+									/>
 								</div>
 							{/if}
 						</button>
