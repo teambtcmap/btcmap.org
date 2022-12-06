@@ -5,7 +5,7 @@
 	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
 	import JSConfetti from 'js-confetti';
 	import { tick } from 'svelte';
-	import { boost, exchangeRate } from '$lib/store';
+	import { boost, exchangeRate, resetBoost } from '$lib/store';
 	import { PrimaryButton, CopyButton, Icon } from '$comp';
 	import { fly, fade } from 'svelte/transition';
 	import { errToast, warningToast } from '$lib/utils';
@@ -35,6 +35,9 @@
 		hash = '';
 		clearInterval(checkInvoiceInterval);
 		jsConfetti.clearCanvas();
+		tooltip = false;
+		loading = false;
+		$resetBoost = $resetBoost + 1;
 	};
 
 	let invoice = '';
@@ -116,7 +119,7 @@
 </script>
 
 {#if $boost && $exchangeRate}
-	<OutClick on:outclick={closeModal}>
+	<OutClick excludeByQuerySelector={['#boost-button']} on:outclick={closeModal}>
 		<div
 			transition:fly={{ y: 200, duration: 300 }}
 			class="z-[2000] border border-mapBorder absolute top-[5vh] {stage === 0

@@ -58,3 +58,4 @@ export const excludeLeader = readable([17085479, 2104834, 9451067, 616463, 17224
 
 export const boost = writable();
 export const exchangeRate = writable();
+export const resetBoost = writable(0);

@@ -1,6 +1,6 @@
 import Time from 'svelte-time';
 import axios from 'axios';
-import { boost, exchangeRate } from '$lib/store';
+import { boost, exchangeRate, resetBoost } from '$lib/store';
 import { errToast } from '$lib/utils';
 
 export const attribution = (L, map) => {
@@ -569,7 +569,6 @@ export const generateMarker = (
 				.get('https://blockchain.info/ticker')
 				.then(function (response) {
 					exchangeRate.set(response.data['USD']['15m']);
-					setTimeout(() => resetButton(), 300);
 				})
 				.catch(function (error) {
 					errToast('Could not fetch bitcoin exchange rate, please try again or contact BTC Map.');
@@ -577,6 +576,8 @@ export const generateMarker = (
 					resetButton();
 				});
 		};
+
+		resetBoost.subscribe(resetButton);
 	}
 
 	if (boosted) {
