@@ -23,7 +23,7 @@ export async function POST({ request }) {
 	}
 
 	let boost = await axios
-		.get(`https://boosts--btcmap.netlify.app/boost/invoice/status?hash=${hash}`)
+		.get(`https://btcmap.org/boost/invoice/status?hash=${hash}`)
 		.then(function (response) {
 			if (response.data.paid === true) {
 				used.push(hash);
