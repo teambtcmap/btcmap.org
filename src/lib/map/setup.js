@@ -345,7 +345,9 @@ export const generateMarker = (
 							${
 								payment
 									? `<a href="${
-											payment.type === 'pouch'
+											payment.type === 'uri'
+												? payment.url
+												: payment.type === 'pouch'
 												? `https://app.pouch.ph/${payment.username}`
 												: payment.type === 'coinos'
 												? `https://coinos.io/${payment.username}`
