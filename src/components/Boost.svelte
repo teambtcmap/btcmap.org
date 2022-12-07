@@ -287,7 +287,7 @@
 
 					<a
 						href="https://twitter.com/share?text=I just boosted {$boost.name
-							? $boost.name
+							? $boost.name.replaceAll('&', '%26')
 							: 'this location'} on @BTCMapDotOrg. Check them out!&url=https://btcmap.org/map?lat={$boost.lat}%26long={$boost.long}&hashtags=bitcoin"
 						target="_blank"
 						rel="noreferrer"
