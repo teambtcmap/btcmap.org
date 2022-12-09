@@ -257,19 +257,6 @@
 				OpenStreetMapFR: osmFR
 			};
 
-			// create marker cluster group and layers
-			let markers = L.markerClusterGroup({ maxClusterRadius: 60 });
-
-			let merchants = L.featureGroup.subGroup(markers);
-			let ATMs = L.featureGroup.subGroup(markers);
-
-			const overlayMaps = {
-				Merchants: merchants,
-				ATMs: ATMs
-			};
-
-			const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
-
 			osm.addTo(map);
 
 			// add click event to help devs find lat/long of desired location for iframe embeds
@@ -317,9 +304,6 @@ Thanks for using BTC Map!`);
 
 			// add scale
 			scaleBars(L, map);
-
-			// change default icons
-			changeDefaultIcons('layers', L, mapElement, DomEvent);
 
 			// add locate button to map
 			geolocate(L, map);
@@ -460,6 +444,10 @@ Thanks for using BTC Map!`);
 			// get date from 1 year ago to add verified check if survey is current
 			let verifiedDate = calcVerifiedDate();
 
+			// create marker cluster group and layers
+			let markers = L.markerClusterGroup({ maxClusterRadius: 60 });
+			let categories = {};
+
 			// add location information
 			$elements.forEach((element) => {
 				if (element['deleted_at']) {
@@ -505,11 +493,11 @@ Thanks for using BTC Map!`);
 						boosted
 					);
 
-					if (category === 'atm') {
-						ATMs.addLayer(marker);
-					} else {
-						merchants.addLayer(marker);
+					if (!categories[category]) {
+						categories[category] = L.featureGroup.subGroup(markers);
 					}
+
+					categories[category].addLayer(marker);
 
 					element.latLng = L.latLng(lat, long);
 					element.marker = marker;
@@ -520,8 +508,24 @@ Thanks for using BTC Map!`);
 			});
 
 			map.addLayer(markers);
-			map.addLayer(merchants);
-			map.addLayer(ATMs);
+
+			let overlayMaps = {};
+
+			Object.keys(categories)
+				.sort()
+				.map((category) => {
+					overlayMaps[
+						category === 'atm'
+							? category.toUpperCase()
+							: category.charAt(0).toUpperCase() + category.slice(1)
+					] = categories[category];
+					map.addLayer(categories[category]);
+				});
+
+			const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+			// change default icons
+			changeDefaultIcons('layers', L, mapElement, DomEvent);
 
 			// final map setup
 			map.on('load', () => {
