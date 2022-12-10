@@ -126,13 +126,13 @@
 		<div
 			transition:fly={{ y: 200, duration: 300 }}
 			class="z-[2000] border border-mapBorder absolute top-[5vh] {stage === 0
-				? 'md:top-[calc(50vh-202px)]'
+				? 'md:top-[calc(50vh-214.5px)]'
 				: stage === 1
-				? 'md:top-[calc(50vh-249.5px)]'
-				: 'md:top-[calc(50vh-202.5px)]'} left-[5vw] md:left-[calc(50vw-215px)] h-[90vh] md:h-auto w-[90vw] md:w-[430px] bg-white p-6 rounded-xl shadow-2xl overflow-auto"
+				? 'md:top-[calc(50vh-262px)]'
+				: 'md:top-[calc(50vh-215px)]'} left-[5vw] md:left-[calc(50vw-215px)] h-[90vh] md:h-auto w-[90vw] md:w-[430px] bg-white p-6 rounded-xl shadow-2xl overflow-auto"
 		>
 			<CloseButton
-				position="top-5 right-5"
+				position="flex justify-end"
 				click={closeModal}
 				colors="text-primary hover:text-link"
 			/>

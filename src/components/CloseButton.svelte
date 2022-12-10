@@ -6,7 +6,7 @@
 	import { Icon } from '$comp';
 </script>
 
-<div class="absolute {position}">
+<div class={position}>
 	<button on:click={click}>
 		<Icon w="25" h="25" style="{colors} transition-colors" icon="close" type="popup" />
 	</button>
