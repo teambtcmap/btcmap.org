@@ -363,11 +363,11 @@ export const generateMarker = (
 
 							${
 								element.tags && element.tags.phone
-									? `<a href='tel:${element.tags.phone}' title='Phone' class='flex items-center !text-primary hover:!text-link text-xs  transition-colors'>
+									? `<a href='tel:${element.tags.phone}' title='Call' class='flex items-center !text-primary hover:!text-link text-xs  transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
 												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#phone"></use>
 											</svg>
-											Phone
+											Call
 										</a>`
 									: ''
 							}
