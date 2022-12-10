@@ -1,7 +1,7 @@
 <script>
 	import axios from 'axios';
 	import { onMount } from 'svelte';
-	import { Header, Footer, DonationOption, SupportSection, Icon } from '$comp';
+	import { Header, Footer, DonationOption, SupportSection, Icon, CloseButton } from '$comp';
 	import { errToast } from '$lib/utils';
 
 	let onchain = 'bc1qyyr7g9tew6sfa57mv2r6rvgj2ucakcmqnqzqjj';
@@ -72,18 +72,11 @@
 						class="drop-shadow-xl relative bg-lightBlue rounded-xl w-full md:w-[475px] h-[450px] md:h-[380px] flex justify-center items-center mx-auto"
 					>
 						<div class="space-y-5">
-							<!-- close button -->
-							<div class="absolute top-4 right-6">
-								<button on:click={() => (showQr = false)}
-									><Icon
-										w="25"
-										h="25"
-										style="text-link hover:text-hover transition-colors"
-										icon="close"
-										type="popup"
-									/></button
-								>
-							</div>
+							<CloseButton
+								position="top-4 right-6"
+								click={() => (showQr = false)}
+								colors="text-link hover:text-hover"
+							/>
 
 							<!-- qr -->
 							<a href={network === 'Lightning' ? `lightning:${lnurlp}` : `bitcoin:${onchain}`}>

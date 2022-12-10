@@ -1,6 +1,6 @@
 import Time from 'svelte-time';
 import axios from 'axios';
-import { boost, exchangeRate, resetBoost } from '$lib/store';
+import { boost, exchangeRate, resetBoost, showTags } from '$lib/store';
 import { errToast } from '$lib/utils';
 
 export const attribution = (L, map) => {
@@ -402,6 +402,20 @@ export const generateMarker = (
 									: ''
 							}
 
+							${
+								element.tags && location.pathname === '/map'
+									? `<button
+														id='show-tags'
+														title="Show tags"
+														class='flex items-center !text-primary hover:!text-link text-xs transition-colors'>
+															<svg width='24px' height='24px' class='mr-2'>
+																<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#tags"></use>
+															</svg>
+															Show Tags
+													</button>`
+									: ''
+							}
+
 							<a
 								href="https://github.com/teambtcmap/btcmap-data/wiki/Map-Legend"
 								target="_blank"
@@ -544,6 +558,11 @@ export const generateMarker = (
 	popupContainer.querySelector('#share').onclick = () => hideMore();
 
 	if (location.pathname === '/map') {
+		const showTagsButton = popupContainer.querySelector('#show-tags');
+		showTagsButton.onclick = () => {
+			showTags.set(element.tags);
+		};
+
 		const boostButton = popupContainer.querySelector('#boost-button');
 		const boostButtonText = boostButton.querySelector('span');
 		const boostButtonIcon = boostButton.querySelector('svg');

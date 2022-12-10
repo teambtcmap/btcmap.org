@@ -6,7 +6,7 @@
 	import JSConfetti from 'js-confetti';
 	import { tick } from 'svelte';
 	import { boost, exchangeRate, resetBoost } from '$lib/store';
-	import { PrimaryButton, CopyButton, Icon } from '$comp';
+	import { PrimaryButton, CopyButton, Icon, CloseButton } from '$comp';
 	import { fly, fade } from 'svelte/transition';
 	import { errToast, warningToast } from '$lib/utils';
 
@@ -131,17 +131,11 @@
 				? 'md:top-[calc(50vh-249.5px)]'
 				: 'md:top-[calc(50vh-202.5px)]'} left-[5vw] md:left-[calc(50vw-215px)] h-[90vh] md:h-auto w-[90vw] md:w-[430px] bg-white p-6 rounded-xl shadow-2xl overflow-auto"
 		>
-			<div class="absolute top-5 right-5">
-				<button on:click={closeModal}
-					><Icon
-						w="25"
-						h="25"
-						style="text-primary hover:text-link transition-colors"
-						icon="close"
-						type="popup"
-					/></button
-				>
-			</div>
+			<CloseButton
+				position="top-5 right-5"
+				click={closeModal}
+				colors="text-primary hover:text-link"
+			/>
 
 			{#if stage === 0}
 				<div class="space-y-4">

@@ -22,7 +22,7 @@
 		generateMarker
 	} from '$lib/map/setup';
 	import { errToast } from '$lib/utils';
-	import { MapLoading, Icon, Boost } from '$comp';
+	import { MapLoading, Icon, Boost, ShowTags } from '$comp';
 
 	let mapElement;
 	let map;
@@ -197,6 +197,7 @@
 				noWrap: true,
 				maxZoom: 20
 			});
+
 			const topo = leaflet.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
 				noWrap: true,
 				maxZoom: 17
@@ -662,6 +663,7 @@ Thanks for using BTC Map!`);
 	</div>
 
 	<Boost />
+	<ShowTags />
 
 	<div bind:this={mapElement} class="!bg-teal h-[100vh]" />
 </main>
