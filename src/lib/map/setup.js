@@ -619,7 +619,7 @@ export const generateMarker = (
 		.bindPopup(
 			// marker popup component
 			popupContainer,
-			{ closeButton: false }
+			{ closeButton: false, maxWidth: 350, minWidth: 300 }
 		)
 		.on('popupclose', () => hideMore());
 };
