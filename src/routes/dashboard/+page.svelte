@@ -199,7 +199,10 @@
 										{
 											label: 'Total Locations',
 											data: statsSorted.map(({ tags: { total_elements } }) => total_elements),
-											fill: false,
+											fill: {
+												target: 'origin',
+												above: 'rgba(0, 153, 175, 0.2)'
+											},
 											borderColor: 'rgb(0, 153, 175)',
 											tension: 0.1
 										}
@@ -246,7 +249,10 @@
 											data: statsSorted.map(
 												({ tags: { up_to_date_elements } }) => up_to_date_elements
 											),
-											fill: false,
+											fill: {
+												target: 'origin',
+												above: 'rgba(11, 144, 114, 0.2)'
+											},
 											borderColor: 'rgb(11, 144, 114)',
 											tension: 0.1
 										}
@@ -291,7 +297,10 @@
 										{
 											label: 'Legacy Locations',
 											data: statsSorted.map(({ tags: { legacy_elements } }) => legacy_elements),
-											fill: false,
+											fill: {
+												target: 'origin',
+												above: 'rgba(235, 87, 87, 0.2)'
+											},
 											borderColor: 'rgb(235, 87, 87)',
 											tension: 0.1
 										}
