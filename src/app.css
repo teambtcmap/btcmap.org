@@ -44,7 +44,3 @@ html {
 .boosted-icon {
 	background-image: url('/icons/boosted-icon-pin.svg');
 }
-
-.leaflet-popup-content {
-	min-width: 300px !important;
-}

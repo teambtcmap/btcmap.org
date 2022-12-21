@@ -292,15 +292,17 @@ export const generateMarker = (
 
 	popupContainer.innerHTML = `${
 		element.tags && element.tags.name
-			? `<span class='block font-bold text-lg text-primary leading-snug' title='Merchant name'>${element.tags.name}</span>`
+			? `<span class='block font-bold text-lg text-primary leading-snug max-w-[300px]' title='Merchant name'>${element.tags.name}</span>`
 			: ''
 	}
 
-				 <span class='block text-body' title='Address'>${element.tags && checkAddress(element.tags)}</span>
+				 <span class='block text-body max-w-[300px]' title='Address'>${
+						element.tags && checkAddress(element.tags)
+					}</span>
 
 			${
 				element.tags && element.tags['opening_hours']
-					? `<div class='my-1 w-full' title='Opening hours'>
+					? `<div class='my-1 w-full max-w-[300px]' title='Opening hours'>
 		  				<svg width='16px' height='16px' class='inline'>
 	  						<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#clock"></use>
 				 	 		</svg>
@@ -619,7 +621,7 @@ export const generateMarker = (
 		.bindPopup(
 			// marker popup component
 			popupContainer,
-			{ closeButton: false, maxWidth: 350, minWidth: 300 }
+			{ closeButton: false, maxWidth: 1000, minWidth: 300 }
 		)
 		.on('popupclose', () => hideMore());
 };
