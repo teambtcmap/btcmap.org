@@ -312,7 +312,7 @@ export const generateMarker = (
 			}
 
 					<div class='flex space-x-2 mt-2.5 mb-1'>
-						<a id='navigate' href='geo:${lat},${long}' title='Navigate' class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-[62px] transition-colors'>
+						<a id='navigate' href='geo:${lat},${long}' title='Navigate' class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
 								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#compass"></use>
 							</svg>
@@ -321,22 +321,22 @@ export const generateMarker = (
 
 						<a id='edit' href='https://www.openstreetmap.org/edit?${element.type}=${
 		element.id
-	}' target="_blank" rel="noreferrer" title='Edit' class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-[62px] transition-colors'>
+	}' target="_blank" rel="noreferrer" title='Edit' class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
 								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#pencil"></use>
 							</svg>
 							<span class='block text-xs text-center mt-1'>Edit</span>
 						</a>
 
-						<a id='share' href='/map?lat=${lat}&long=${long}' target="_blank" rel="noreferrer" title='Share' class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-[62px] transition-colors'>
+						<a id='share' href='/map?lat=${lat}&long=${long}' target="_blank" rel="noreferrer" title='Share' class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
 								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#share"></use>
 							</svg>
 							<span class='block text-xs text-center mt-1'>Share</span>
 						</a>
 
-						<div class='relative'>
-							<button id='more-button' title='More' class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-[62px] transition-colors'>
+						<div class='relative w-full'>
+							<button id='more-button' title='More' class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-full transition-colors'>
 								<svg width='24px' height='24px' class='mx-auto'>
 									<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#dots-horizontal"></use>
 								</svg>
@@ -435,7 +435,7 @@ export const generateMarker = (
 
 			<div class='w-full border-t-[0.5px] border-mapBorder mt-3 mb-2 opacity-80'></div>
 
-			<div class='flex space-x-4'>
+			<div class='flex justify-center space-x-4'>
 				<div>
 					<span class='block text-mapLabel text-xs'>Payment Methods</span>
 
@@ -521,7 +521,7 @@ export const generateMarker = (
 					}
 					${
 						location.pathname === '/map'
-							? `<button title='Boost' id='boost-button' class='flex justify-center items-center space-x-2 text-primary hover:text-link border border-mapBorder hover:border-link rounded-lg w-[82px] h-[32px] transition-colors'>
+							? `<button title='Boost' id='boost-button' class='flex justify-center items-center space-x-2 text-primary hover:text-link border border-mapBorder hover:border-link rounded-lg px-3 h-[32px] transition-colors'>
 						<svg width='16px' height='16px'>
 							<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#boost"></use>
 						</svg>
