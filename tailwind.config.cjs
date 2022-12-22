@@ -3,19 +3,19 @@ module.exports = {
 	content: ['./src/**/*.{html,js,svelte}'],
 	theme: {
 		fontSize: {
-			xs: '12px',
-			sm: '14px',
-			base: '16px',
-			lg: '18px',
-			xl: '20px',
-			'2xl': '24px',
-			'3xl': '30px',
-			'4xl': '36px',
-			'5xl': '48px',
-			'6xl': '60px',
-			'7xl': '72px',
-			'8xl': '96px',
-			'9xl': '128px'
+			xs: ['12px', '16px'],
+			sm: ['14px', '20px'],
+			base: ['16px', '24px'],
+			lg: ['18px', '28px'],
+			xl: ['20px', '28px'],
+			'2xl': ['24px', '32px'],
+			'3xl': ['30px', '36px'],
+			'4xl': ['36px', '40px'],
+			'5xl': ['48px', '1'],
+			'6xl': ['60px', '1'],
+			'7xl': ['72px', '1'],
+			'8xl': ['96px', '1'],
+			'9xl': ['128px', '1']
 		},
 		extend: {
 			colors: {
