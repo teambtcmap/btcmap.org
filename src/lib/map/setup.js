@@ -288,6 +288,12 @@ export const generateMarker = (
 		}
 	}
 
+	const paymentMethod =
+		element.tags &&
+		(element.tags['payment:onchain'] ||
+			element.tags['payment:lightning'] ||
+			element.tags['payment:lightning_contactless']);
+
 	const popupContainer = L.DomUtil.create('div');
 
 	popupContainer.innerHTML = `${
@@ -435,8 +441,10 @@ export const generateMarker = (
 
 			<div class='w-full border-t-[0.5px] border-mapBorder mt-3 mb-2 opacity-80'></div>
 
-			<div class='flex justify-center space-x-4'>
-				<div>
+			<div class='flex ${paymentMethod ? 'justify-center' : ''} space-x-4'>
+${
+	paymentMethod
+		? `<div>
 					<span class='block text-mapLabel text-xs'>Payment Methods</span>
 
 					<div class='w-full flex space-x-2 mt-0.5'>
@@ -447,12 +455,12 @@ export const generateMarker = (
 								? '/icons/btc-no.svg'
 								: '/icons/btc.svg'
 						} alt="bitcoin" class="w-6 h-6" title="${
-		element.tags && element.tags['payment:onchain'] === 'yes'
-			? 'On-chain accepted'
-			: element.tags && element.tags['payment:onchain'] === 'no'
-			? 'On-chain not accepted'
-			: 'On-chain unknown'
-	}"/>
+				element.tags && element.tags['payment:onchain'] === 'yes'
+					? 'On-chain accepted'
+					: element.tags && element.tags['payment:onchain'] === 'no'
+					? 'On-chain not accepted'
+					: 'On-chain unknown'
+		  }"/>
 
 						<img src=${
 							element.tags && element.tags['payment:lightning'] === 'yes'
@@ -461,12 +469,12 @@ export const generateMarker = (
 								? '/icons/ln-no.svg'
 								: '/icons/ln.svg'
 						} alt="lightning" class="w-6 h-6" title="${
-		element.tags && element.tags['payment:lightning'] === 'yes'
-			? 'Lightning accepted'
-			: element.tags && element.tags['payment:lightning'] === 'no'
-			? 'Lightning not accepted'
-			: 'Lightning unknown'
-	}"/>
+				element.tags && element.tags['payment:lightning'] === 'yes'
+					? 'Lightning accepted'
+					: element.tags && element.tags['payment:lightning'] === 'no'
+					? 'Lightning not accepted'
+					: 'Lightning unknown'
+		  }"/>
 
 						<img src=${
 							element.tags && element.tags['payment:lightning_contactless'] === 'yes'
@@ -475,14 +483,16 @@ export const generateMarker = (
 								? '/icons/nfc-no.svg'
 								: '/icons/nfc.svg'
 						} alt="nfc" class="w-6 h-6" title="${
-		element.tags && element.tags['payment:lightning_contactless'] === 'yes'
-			? 'Lightning Contactless accepted'
-			: element.tags && element.tags['payment:lightning_contactless'] === 'no'
-			? 'Lightning contactless not accepted'
-			: 'Lightning Contactless unknown'
-	}"/>
+				element.tags && element.tags['payment:lightning_contactless'] === 'yes'
+					? 'Lightning Contactless accepted'
+					: element.tags && element.tags['payment:lightning_contactless'] === 'no'
+					? 'Lightning contactless not accepted'
+					: 'Lightning Contactless unknown'
+		  }"/>
 					</div>
-				</div>
+				</div>`
+		: ''
+}
 
 				<div>
 					<span class='block text-mapLabel text-xs' title="Completed by BTC Map community members">Last Surveyed</span>
