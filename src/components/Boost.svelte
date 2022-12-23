@@ -122,7 +122,7 @@
 </script>
 
 {#if $boost && $exchangeRate}
-	<OutClick excludeByQuerySelector={['#boost-button']} on:outclick={closeModal}>
+	<OutClick excludeQuerySelectorAll={['#boost-button']} on:outclick={closeModal}>
 		<div
 			transition:fly={{ y: 200, duration: 300 }}
 			class="z-[2000] border border-mapBorder absolute top-[5vh] {stage === 0

@@ -8,7 +8,7 @@
 </script>
 
 {#if $showTags}
-	<OutClick excludeByQuerySelector={['#show-tags']} on:outclick={closeModal}>
+	<OutClick excludeQuerySelectorAll={['#show-tags']} on:outclick={closeModal}>
 		<div
 			transition:fly={{ y: 200, duration: 300 }}
 			class="z-[2000] border border-mapBorder absolute top-[5vh] md:top-[calc(50vh-200px)] left-[5vw] md:left-[calc(50vw-215px)] h-[90vh] md:h-[400px] w-[90vw] md:w-[430px] bg-white p-6 rounded-xl shadow-2xl overflow-auto"

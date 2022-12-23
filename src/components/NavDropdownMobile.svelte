@@ -26,7 +26,7 @@
 <!-- dropdown items -->
 {#if show}
 	<OutClick
-		excludeByQuerySelector={[`#dropdown-${title.toLowerCase()}-mobile`]}
+		excludeQuerySelectorAll={[`#dropdown-${title.toLowerCase()}-mobile`]}
 		on:outclick={() => (show = false)}
 	>
 		<div class="ml-7 space-y-2">

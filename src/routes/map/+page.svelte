@@ -600,7 +600,7 @@ Thanks for using BTC Map!`);
 
 		{#if search && search.length > 2}
 			<OutClick
-				excludeByQuerySelector={['#search-button', '#search-div']}
+				excludeQuerySelectorAll={['#search-button', '#search-div', '#search-input']}
 				on:outclick={clearSearch}
 			>
 				<div

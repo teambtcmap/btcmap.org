@@ -22,7 +22,7 @@
 	<!-- dropdown items -->
 	{#if show}
 		<OutClick
-			excludeByQuerySelector={[`#dropdown-${title.toLowerCase()}`]}
+			excludeQuerySelectorAll={[`#dropdown-${title.toLowerCase()}`]}
 			on:outclick={() => (show = false)}
 		>
 			<div class="w-[185px] absolute top-8 right-0 rounded-2xl shadow-lg">
