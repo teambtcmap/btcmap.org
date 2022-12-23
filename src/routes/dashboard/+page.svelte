@@ -129,10 +129,10 @@
 			)
 			.toString();
 
-	let totalChartCanvas;
-	let totalChart;
 	let upToDateChartCanvas;
 	let upToDateChart;
+	let totalChartCanvas;
+	let totalChart;
 	let legacyChartCanvas;
 	let legacyChart;
 	let paymentMethodChartCanvas;
@@ -140,8 +140,8 @@
 
 	onMount(async () => {
 		if (browser) {
-			totalChartCanvas.getContext('2d');
 			upToDateChartCanvas.getContext('2d');
+			totalChartCanvas.getContext('2d');
 			legacyChartCanvas.getContext('2d');
 			paymentMethodChartCanvas.getContext('2d');
 
@@ -160,17 +160,17 @@
 						let statsSorted = statsCopy.sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
 
 						if (initialRenderComplete) {
-							totalChart.data.labels = statsSorted.map(({ date }) => date);
-							totalChart.data.datasets[0].data = statsSorted.map(
-								({ tags: { total_elements } }) => total_elements
-							);
-							totalChart.update();
-
 							upToDateChart.data.labels = statsSorted.map(({ date }) => date);
 							upToDateChart.data.datasets[0].data = statsSorted.map(
 								({ tags: { up_to_date_elements } }) => up_to_date_elements
 							);
 							upToDateChart.update();
+
+							totalChart.data.labels = statsSorted.map(({ date }) => date);
+							totalChart.data.datasets[0].data = statsSorted.map(
+								({ tags: { total_elements } }) => total_elements
+							);
+							totalChart.update();
 
 							legacyChart.data.labels = statsSorted.map(({ date }) => date);
 							legacyChart.data.datasets[0].data = statsSorted.map(
@@ -191,19 +191,21 @@
 							);
 							paymentMethodChart.update();
 						} else {
-							totalChart = new Chart(totalChartCanvas, {
+							upToDateChart = new Chart(upToDateChartCanvas, {
 								type: 'line',
 								data: {
 									labels: statsSorted.map(({ date }) => date),
 									datasets: [
 										{
-											label: 'Total Locations',
-											data: statsSorted.map(({ tags: { total_elements } }) => total_elements),
+											label: 'Up-to-date Locations',
+											data: statsSorted.map(
+												({ tags: { up_to_date_elements } }) => up_to_date_elements
+											),
 											fill: {
 												target: 'origin',
-												above: 'rgba(0, 153, 175, 0.2)'
+												above: 'rgba(11, 144, 114, 0.2)'
 											},
-											borderColor: 'rgb(0, 153, 175)',
+											borderColor: 'rgb(11, 144, 114)',
 											tension: 0.1
 										}
 									]
@@ -239,21 +241,19 @@
 								}
 							});
 
-							upToDateChart = new Chart(upToDateChartCanvas, {
+							totalChart = new Chart(totalChartCanvas, {
 								type: 'line',
 								data: {
 									labels: statsSorted.map(({ date }) => date),
 									datasets: [
 										{
-											label: 'Up-to-date Locations',
-											data: statsSorted.map(
-												({ tags: { up_to_date_elements } }) => up_to_date_elements
-											),
+											label: 'Total Locations',
+											data: statsSorted.map(({ tags: { total_elements } }) => total_elements),
 											fill: {
 												target: 'origin',
-												above: 'rgba(11, 144, 114, 0.2)'
+												above: 'rgba(0, 153, 175, 0.2)'
 											},
-											borderColor: 'rgb(11, 144, 114)',
+											borderColor: 'rgb(0, 153, 175)',
 											tension: 0.1
 										}
 									]
@@ -537,10 +537,10 @@
 								class="absolute top-0 left-0 border border-link/50 rounded-3xl animate-pulse w-full h-[400px]"
 							/>
 						{/if}
-						<canvas bind:this={totalChartCanvas} width="400" height="400" />
+						<canvas bind:this={upToDateChartCanvas} width="400" height="400" />
 					</div>
 					<p class="text-sm text-body text-center mt-1">
-						*Elements accepting any bitcoin payment method.
+						*Elements with a <em>survey:date</em> or <em>check_date</em> tag less than one year old.
 					</p>
 				</div>
 
@@ -551,10 +551,10 @@
 								class="absolute top-0 left-0 border border-link/50 rounded-3xl animate-pulse w-full h-[400px]"
 							/>
 						{/if}
-						<canvas bind:this={upToDateChartCanvas} width="400" height="400" />
+						<canvas bind:this={totalChartCanvas} width="400" height="400" />
 					</div>
 					<p class="text-sm text-body text-center mt-1">
-						*Elements with a <em>survey:date</em> or <em>check_date</em> tag less than one year old.
+						*Elements accepting any bitcoin payment method.
 					</p>
 				</div>
 
