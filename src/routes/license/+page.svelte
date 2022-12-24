@@ -16,7 +16,7 @@
 			<p class="text-center font-semibold text-primary">
 				BTC Map - Easily find places to spend sats anywhere on the planet.
 				<br />
-				Copyright &#169; 2022 BTC Map
+				Copyright &#169; 2022-{new Date().getFullYear()} BTC Map
 				<br />
 				<a
 					href="mailto:hello@btcmap.org"
