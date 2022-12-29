@@ -17,13 +17,13 @@
 
 	<!-- stats placeholders -->
 	<span
-		class="bg-link/50 animate-pulse w-20 h-5 lg:w-5 rounded-xl lg:rounded-full lg:!my-auto mx-auto block lg:inline-block my- lg:my-0"
+		class="bg-link/50 animate-pulse w-32 h-5 lg:w-5 rounded-xl lg:rounded-full lg:!my-auto mx-auto block lg:inline-block my- lg:my-0"
 	/>
 	<span
-		class="bg-link/50 animate-pulse w-20 h-5 lg:w-5 rounded-xl lg:rounded-full lg:!my-auto mx-auto block lg:inline-block my-2 lg:my-0"
+		class="bg-link/50 animate-pulse w-32 h-5 lg:w-5 rounded-xl lg:rounded-full lg:!my-auto mx-auto block lg:inline-block my-2 lg:my-0"
 	/>
 	<span
-		class="bg-link/50 animate-pulse w-20 h-5 lg:w-5 rounded-xl lg:rounded-full lg:!my-auto mx-auto block lg:inline-block my-2 lg:my-0"
+		class="bg-link/50 animate-pulse w-32 h-5 lg:w-5 rounded-xl lg:rounded-full lg:!my-auto mx-auto block lg:inline-block my-2 lg:my-0"
 	/>
 	<i
 		class="text-link/50 animate-pulse lg:!my-auto mx-auto block lg:inline-block my-2 lg:my-0 fa-solid fa-star"
