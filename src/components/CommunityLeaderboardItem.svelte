@@ -45,9 +45,7 @@
 	{#each stats as stat}
 		<span class="flex lg:inline-flex justify-center items-center my-2 lg:my-0">
 			<span class="text-primary lg:hidden mr-1">{stat.title}:</span>
-			{stat.stat}
-			{#if stat.title === 'Up-To-Date'}
-				%
+			{stat.stat}{#if stat.title === 'Up-To-Date'}%
 			{:else if stat.title === 'Grade'}
 				<i class="fa-solid fa-star ml-1" />
 			{/if}
