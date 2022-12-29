@@ -30,3 +30,6 @@ export { default as Boost } from './Boost.svelte';
 export { default as CopyButton } from './CopyButton.svelte';
 export { default as ShowTags } from './ShowTags.svelte';
 export { default as CloseButton } from './CloseButton.svelte';
+export { default as CommunityLeaderboardItem } from './CommunityLeaderboardItem.svelte';
+export { default as CommunityLeaderboardSkeleton } from './CommunityLeaderboardSkeleton.svelte';
+export { default as SponsorBadge } from './SponsorBadge.svelte';
