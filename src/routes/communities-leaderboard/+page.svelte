@@ -52,11 +52,13 @@
 			reports.forEach((report) => {
 				let community = communities.find((community) => community.id === report.area_id);
 
-				report.icon = community.tags['icon:square'];
-				report.name = community.tags.name;
-				report.sponsor = community.tags.sponsor ? true : false;
+				if (community && community.tags && community.tags['icon:square'] && community.tags.name) {
+					report.icon = community.tags['icon:square'];
+					report.name = community.tags.name;
+					report.sponsor = community.tags.sponsor ? true : false;
 
-				leaderboard.push(report);
+					leaderboard.push(report);
+				}
 			});
 
 			leaderboard.sort((a, b) =>
