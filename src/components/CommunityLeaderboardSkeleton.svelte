@@ -17,7 +17,7 @@
 
 	<!-- stats placeholders -->
 	<span
-		class="bg-link/50 animate-pulse w-32 h-5 lg:w-5 rounded-xl lg:rounded-full lg:!my-auto mx-auto block lg:inline-block my- lg:my-0"
+		class="bg-link/50 animate-pulse w-[100px] h-5 lg:!my-auto mx-auto block lg:inline-block my-2 lg:my-0"
 	/>
 	<span
 		class="bg-link/50 animate-pulse w-32 h-5 lg:w-5 rounded-xl lg:rounded-full lg:!my-auto mx-auto block lg:inline-block my-2 lg:my-0"
@@ -25,7 +25,9 @@
 	<span
 		class="bg-link/50 animate-pulse w-32 h-5 lg:w-5 rounded-xl lg:rounded-full lg:!my-auto mx-auto block lg:inline-block my-2 lg:my-0"
 	/>
-	<i
-		class="text-link/50 animate-pulse lg:!my-auto mx-auto block lg:inline-block my-2 lg:my-0 fa-solid fa-star"
-	/>
+	<div class="flex lg:inline-flex justify-center items-center space-x-1 my-2 lg:my-0">
+		{#each Array(5) as star}
+			<i class="text-link/50 text-lg animate-pulse fa-solid fa-star" />
+		{/each}
+	</div>
 </div>
