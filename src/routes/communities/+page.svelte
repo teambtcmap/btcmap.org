@@ -161,7 +161,7 @@
 
 			<PrimaryButton
 				text="Add a local community"
-				style="w-[200px] mx-auto py-3 rounded-xl"
+				style="w-[210px] mx-auto py-3 rounded-xl"
 				link="/communities/add"
 			/>
 
