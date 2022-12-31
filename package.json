@@ -39,6 +39,7 @@
 		"qrcode": "^1.5.1",
 		"svelte-outclick": "^3.3.3",
 		"svelte-time": "^0.7.1",
-		"svg-captcha": "^1.4.0"
+		"svg-captcha": "^1.4.0",
+		"tippy.js": "^6.3.7"
 	}
 }
