@@ -198,7 +198,7 @@
 						</button>
 					</h3>
 					<h3>
-						Legacy Locations <button bind:this={legacyTooltipMobile}>
+						Legacy <button bind:this={legacyTooltipMobile}>
 							<i class="fa-solid fa-circle-info" />
 						</button>
 					</h3>

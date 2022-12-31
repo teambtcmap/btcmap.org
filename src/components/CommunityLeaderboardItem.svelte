@@ -14,7 +14,7 @@
 	const stats = [
 		{ stat: upToDate, title: 'Up-To-Date' },
 		{ stat: total, title: 'Total Locations' },
-		{ stat: legacy, title: 'Legacy Locations' },
+		{ stat: legacy, title: 'Legacy' },
 		{ stat: grade, title: 'Grade' }
 	];
 </script>
@@ -47,8 +47,9 @@
 
 		<a
 			href="/community/{id}"
-			class="hover:text-hover {name.match('([^ ]{21})') ? 'break-all' : ''} transition-colors"
-			>{name}</a
+			class="hover:text-hover {name.match('([^ ]{21})')
+				? 'break-all'
+				: ''} transition-colors inline-block mb-1">{name}</a
 		>
 
 		{#if sponsor}
