@@ -28,7 +28,7 @@
 
 	const communitiesDropdownLinks = [
 		{ title: 'Directory', url: '/communities', icon: 'directory' },
-		{ title: 'Leaderboard', url: '/communities-leaderboard', icon: 'leader' }
+		{ title: 'Leaderboard', url: '/communities/leaderboard', icon: 'leader' }
 	];
 
 	const wikiDropdownLinks = [
