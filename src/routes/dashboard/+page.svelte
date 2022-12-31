@@ -540,7 +540,8 @@
 						<canvas bind:this={upToDateChartCanvas} width="400" height="400" />
 					</div>
 					<p class="text-sm text-body text-center mt-1">
-						*Elements with a <em>survey:date</em> or <em>check_date</em> tag less than one year old.
+						*Elements with a <em>survey:date</em>, <em>check_date</em>, or
+						<em>check_date:currency:XBT</em> tag less than one year old.
 					</p>
 				</div>
 
