@@ -11,7 +11,7 @@
 
 	import { SponsorBadge } from '$comp';
 
-	const stats = [
+	$: stats = [
 		{ stat: upToDate, title: 'Up-To-Date' },
 		{ stat: total, title: 'Total Locations' },
 		{ stat: legacy, title: 'Legacy' },

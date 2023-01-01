@@ -1,24 +1,43 @@
 <script>
-	import axios from 'axios';
 	import Chart from 'chart.js/auto';
 	import { browser } from '$app/environment';
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import { Header, Footer, DashboardStat } from '$comp';
-	import { events, eventError, syncStatus } from '$lib/store';
+	import {
+		events,
+		eventError,
+		areas,
+		areaError,
+		reports,
+		reportError,
+		syncStatus
+	} from '$lib/store';
 	import { errToast } from '$lib/utils';
 
 	// alert for event errors
 	$: $eventError && errToast($eventError);
 
-	let statsAPIInterval;
-	let communitiesAPIInterval;
+	// alert for area errors
+	$: $areaError && errToast($areaError);
 
-	let statsLoading = true;
-	let communitiesLoading = true;
+	// alert for report errors
+	$: $reportError && errToast($reportError);
+
+	let chartsLoading = true;
+	let chartsRendered = false;
 	let initialRenderComplete = false;
 
-	let stats;
-	let communities;
+	$: stats =
+		$reports && $reports.length
+			? $reports
+					.filter((report) => report['area_id'] === '')
+					.sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+			: undefined;
+	$: statsCopy = stats && [...stats];
+	$: statsSorted = statsCopy && statsCopy.sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+
+	$: communities =
+		$areas && $areas.length ? $areas.filter((area) => area.tags.type === 'community') : undefined;
 
 	const getStatPeriod = () => {
 		return new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
@@ -138,6 +157,264 @@
 	let paymentMethodChartCanvas;
 	let paymentMethodChart;
 
+	const populateCharts = () => {
+		upToDateChart = new Chart(upToDateChartCanvas, {
+			type: 'line',
+			data: {
+				labels: statsSorted.map(({ date }) => date),
+				datasets: [
+					{
+						label: 'Up-to-date Locations',
+						data: statsSorted.map(({ tags: { up_to_date_elements } }) => up_to_date_elements),
+						fill: {
+							target: 'origin',
+							above: 'rgba(11, 144, 114, 0.2)'
+						},
+						borderColor: 'rgb(11, 144, 114)',
+						tension: 0.1
+					}
+				]
+			},
+			options: {
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						labels: {
+							font: {
+								weight: 600
+							}
+						}
+					}
+				},
+				scales: {
+					x: {
+						ticks: {
+							maxTicksLimit: 5,
+							font: {
+								weight: 600
+							}
+						}
+					},
+					y: {
+						ticks: {
+							font: {
+								weight: 600
+							}
+						}
+					}
+				}
+			}
+		});
+
+		totalChart = new Chart(totalChartCanvas, {
+			type: 'line',
+			data: {
+				labels: statsSorted.map(({ date }) => date),
+				datasets: [
+					{
+						label: 'Total Locations',
+						data: statsSorted.map(({ tags: { total_elements } }) => total_elements),
+						fill: {
+							target: 'origin',
+							above: 'rgba(0, 153, 175, 0.2)'
+						},
+						borderColor: 'rgb(0, 153, 175)',
+						tension: 0.1
+					}
+				]
+			},
+			options: {
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						labels: {
+							font: {
+								weight: 600
+							}
+						}
+					}
+				},
+				scales: {
+					x: {
+						ticks: {
+							maxTicksLimit: 5,
+							font: {
+								weight: 600
+							}
+						}
+					},
+					y: {
+						ticks: {
+							font: {
+								weight: 600
+							}
+						}
+					}
+				}
+			}
+		});
+
+		legacyChart = new Chart(legacyChartCanvas, {
+			type: 'line',
+			data: {
+				labels: statsSorted.map(({ date }) => date),
+				datasets: [
+					{
+						label: 'Legacy Locations',
+						data: statsSorted.map(({ tags: { legacy_elements } }) => legacy_elements),
+						fill: {
+							target: 'origin',
+							above: 'rgba(235, 87, 87, 0.2)'
+						},
+						borderColor: 'rgb(235, 87, 87)',
+						tension: 0.1
+					}
+				]
+			},
+			options: {
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						labels: {
+							font: {
+								weight: 600
+							}
+						}
+					}
+				},
+				scales: {
+					x: {
+						ticks: {
+							maxTicksLimit: 5,
+							font: {
+								weight: 600
+							}
+						}
+					},
+					y: {
+						ticks: {
+							font: {
+								weight: 600
+							}
+						}
+					}
+				}
+			}
+		});
+
+		paymentMethodChart = new Chart(paymentMethodChartCanvas, {
+			type: 'line',
+			data: {
+				labels: statsSorted.map(({ date }) => date),
+				datasets: [
+					{
+						label: 'On-chain',
+						data: statsSorted.map(({ tags: { total_elements_onchain } }) => total_elements_onchain),
+						fill: false,
+						borderColor: 'rgb(247, 147, 26)',
+						tension: 0.1
+					},
+					{
+						label: 'Lightning',
+						data: statsSorted.map(
+							({ tags: { total_elements_lightning } }) => total_elements_lightning
+						),
+						fill: false,
+						borderColor: 'rgb(249, 193, 50)',
+						tension: 0.1
+					},
+					{
+						label: 'Contactless',
+						data: statsSorted.map(
+							({ tags: { total_elements_lightning_contactless } }) =>
+								total_elements_lightning_contactless
+						),
+						fill: false,
+						borderColor: 'rgb(102, 16, 242)',
+						tension: 0.1
+					}
+				]
+			},
+			options: {
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						labels: {
+							font: {
+								weight: 600
+							}
+						}
+					}
+				},
+				scales: {
+					x: {
+						ticks: {
+							maxTicksLimit: 5,
+							font: {
+								weight: 600
+							}
+						}
+					},
+					y: {
+						ticks: {
+							font: {
+								weight: 600
+							}
+						}
+					}
+				}
+			}
+		});
+
+		chartsLoading = false;
+		chartsRendered = true;
+	};
+
+	const chartSync = (status, reports) => {
+		if (reports.length && !status && initialRenderComplete) {
+			if (chartsRendered) {
+				chartsLoading = true;
+
+				upToDateChart.data.labels = statsSorted.map(({ date }) => date);
+				upToDateChart.data.datasets[0].data = statsSorted.map(
+					({ tags: { up_to_date_elements } }) => up_to_date_elements
+				);
+				upToDateChart.update();
+
+				totalChart.data.labels = statsSorted.map(({ date }) => date);
+				totalChart.data.datasets[0].data = statsSorted.map(
+					({ tags: { total_elements } }) => total_elements
+				);
+				totalChart.update();
+
+				legacyChart.data.labels = statsSorted.map(({ date }) => date);
+				legacyChart.data.datasets[0].data = statsSorted.map(
+					({ tags: { legacy_elements } }) => legacy_elements
+				);
+				legacyChart.update();
+
+				paymentMethodChart.data.labels = statsSorted.map(({ date }) => date);
+				paymentMethodChart.data.datasets[0].data = statsSorted.map(
+					({ tags: { total_elements_onchain } }) => total_elements_onchain
+				);
+				paymentMethodChart.data.datasets[1].data = statsSorted.map(
+					({ tags: { total_elements_lightning } }) => total_elements_lightning
+				);
+				paymentMethodChart.data.datasets[2].data = statsSorted.map(
+					({ tags: { total_elements_lightning_contactless } }) =>
+						total_elements_lightning_contactless
+				);
+				paymentMethodChart.update();
+
+				chartsLoading = false;
+			} else {
+				populateCharts();
+			}
+		}
+	};
+
+	$: chartSync($syncStatus, $reports);
+
 	onMount(async () => {
 		if (browser) {
 			upToDateChartCanvas.getContext('2d');
@@ -145,313 +422,14 @@
 			legacyChartCanvas.getContext('2d');
 			paymentMethodChartCanvas.getContext('2d');
 
-			const statsAPI = async () => {
-				statsLoading = true;
-
-				await axios
-					.get('https://api.btcmap.org/v2/reports')
-					.then(function (response) {
-						// handle success
-						stats = response.data
-							.filter((report) => report['area_id'] === '')
-							.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
-
-						let statsCopy = [...stats];
-						let statsSorted = statsCopy.sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
-
-						if (initialRenderComplete) {
-							upToDateChart.data.labels = statsSorted.map(({ date }) => date);
-							upToDateChart.data.datasets[0].data = statsSorted.map(
-								({ tags: { up_to_date_elements } }) => up_to_date_elements
-							);
-							upToDateChart.update();
-
-							totalChart.data.labels = statsSorted.map(({ date }) => date);
-							totalChart.data.datasets[0].data = statsSorted.map(
-								({ tags: { total_elements } }) => total_elements
-							);
-							totalChart.update();
-
-							legacyChart.data.labels = statsSorted.map(({ date }) => date);
-							legacyChart.data.datasets[0].data = statsSorted.map(
-								({ tags: { legacy_elements } }) => legacy_elements
-							);
-							legacyChart.update();
-
-							paymentMethodChart.data.labels = statsSorted.map(({ date }) => date);
-							paymentMethodChart.data.datasets[0].data = statsSorted.map(
-								({ tags: { total_elements_onchain } }) => total_elements_onchain
-							);
-							paymentMethodChart.data.datasets[1].data = statsSorted.map(
-								({ tags: { total_elements_lightning } }) => total_elements_lightning
-							);
-							paymentMethodChart.data.datasets[2].data = statsSorted.map(
-								({ tags: { total_elements_lightning_contactless } }) =>
-									total_elements_lightning_contactless
-							);
-							paymentMethodChart.update();
-						} else {
-							upToDateChart = new Chart(upToDateChartCanvas, {
-								type: 'line',
-								data: {
-									labels: statsSorted.map(({ date }) => date),
-									datasets: [
-										{
-											label: 'Up-to-date Locations',
-											data: statsSorted.map(
-												({ tags: { up_to_date_elements } }) => up_to_date_elements
-											),
-											fill: {
-												target: 'origin',
-												above: 'rgba(11, 144, 114, 0.2)'
-											},
-											borderColor: 'rgb(11, 144, 114)',
-											tension: 0.1
-										}
-									]
-								},
-								options: {
-									maintainAspectRatio: false,
-									plugins: {
-										legend: {
-											labels: {
-												font: {
-													weight: 600
-												}
-											}
-										}
-									},
-									scales: {
-										x: {
-											ticks: {
-												maxTicksLimit: 5,
-												font: {
-													weight: 600
-												}
-											}
-										},
-										y: {
-											ticks: {
-												font: {
-													weight: 600
-												}
-											}
-										}
-									}
-								}
-							});
-
-							totalChart = new Chart(totalChartCanvas, {
-								type: 'line',
-								data: {
-									labels: statsSorted.map(({ date }) => date),
-									datasets: [
-										{
-											label: 'Total Locations',
-											data: statsSorted.map(({ tags: { total_elements } }) => total_elements),
-											fill: {
-												target: 'origin',
-												above: 'rgba(0, 153, 175, 0.2)'
-											},
-											borderColor: 'rgb(0, 153, 175)',
-											tension: 0.1
-										}
-									]
-								},
-								options: {
-									maintainAspectRatio: false,
-									plugins: {
-										legend: {
-											labels: {
-												font: {
-													weight: 600
-												}
-											}
-										}
-									},
-									scales: {
-										x: {
-											ticks: {
-												maxTicksLimit: 5,
-												font: {
-													weight: 600
-												}
-											}
-										},
-										y: {
-											ticks: {
-												font: {
-													weight: 600
-												}
-											}
-										}
-									}
-								}
-							});
-
-							legacyChart = new Chart(legacyChartCanvas, {
-								type: 'line',
-								data: {
-									labels: statsSorted.map(({ date }) => date),
-									datasets: [
-										{
-											label: 'Legacy Locations',
-											data: statsSorted.map(({ tags: { legacy_elements } }) => legacy_elements),
-											fill: {
-												target: 'origin',
-												above: 'rgba(235, 87, 87, 0.2)'
-											},
-											borderColor: 'rgb(235, 87, 87)',
-											tension: 0.1
-										}
-									]
-								},
-								options: {
-									maintainAspectRatio: false,
-									plugins: {
-										legend: {
-											labels: {
-												font: {
-													weight: 600
-												}
-											}
-										}
-									},
-									scales: {
-										x: {
-											ticks: {
-												maxTicksLimit: 5,
-												font: {
-													weight: 600
-												}
-											}
-										},
-										y: {
-											ticks: {
-												font: {
-													weight: 600
-												}
-											}
-										}
-									}
-								}
-							});
-
-							paymentMethodChart = new Chart(paymentMethodChartCanvas, {
-								type: 'line',
-								data: {
-									labels: statsSorted.map(({ date }) => date),
-									datasets: [
-										{
-											label: 'On-chain',
-											data: statsSorted.map(
-												({ tags: { total_elements_onchain } }) => total_elements_onchain
-											),
-											fill: false,
-											borderColor: 'rgb(247, 147, 26)',
-											tension: 0.1
-										},
-										{
-											label: 'Lightning',
-											data: statsSorted.map(
-												({ tags: { total_elements_lightning } }) => total_elements_lightning
-											),
-											fill: false,
-											borderColor: 'rgb(249, 193, 50)',
-											tension: 0.1
-										},
-										{
-											label: 'Contactless',
-											data: statsSorted.map(
-												({ tags: { total_elements_lightning_contactless } }) =>
-													total_elements_lightning_contactless
-											),
-											fill: false,
-											borderColor: 'rgb(102, 16, 242)',
-											tension: 0.1
-										}
-									]
-								},
-								options: {
-									maintainAspectRatio: false,
-									plugins: {
-										legend: {
-											labels: {
-												font: {
-													weight: 600
-												}
-											}
-										}
-									},
-									scales: {
-										x: {
-											ticks: {
-												maxTicksLimit: 5,
-												font: {
-													weight: 600
-												}
-											}
-										},
-										y: {
-											ticks: {
-												font: {
-													weight: 600
-												}
-											}
-										}
-									}
-								}
-							});
-						}
-					})
-					.catch(function (error) {
-						// handle error
-						errToast('Could not fetch stats data, please try again or contact BTC Map.');
-						console.log(error);
-					});
-
-				statsLoading = false;
-			};
-			await statsAPI();
-			statsAPIInterval = setInterval(statsAPI, 600000);
-
-			const communitiesAPI = async () => {
-				communitiesLoading = true;
-
-				await axios
-					.get('https://api.btcmap.org/v2/areas')
-					.then(function (response) {
-						// handle success
-						communities = response.data.filter((area) => area.tags.type === 'community');
-						communities = communities;
-					})
-					.catch(function (error) {
-						// handle error
-						errToast('Could not fetch communities data, please try again or contact BTC Map.');
-						console.log(error);
-					});
-
-				communitiesLoading = false;
-			};
-			communitiesAPI();
-			communitiesAPIInterval = setInterval(communitiesAPI, 600000);
+			if ($reports && $reports.length) {
+				populateCharts();
+			}
 
 			initialRenderComplete = true;
 		}
 	});
-
-	onDestroy(() => {
-		clearInterval(statsAPIInterval);
-		clearInterval(communitiesAPIInterval);
-	});
 </script>
-
-<svelte:head>
-	<title>BTC Map - Dashboard</title>
-	<meta property="og:image" content="https://btcmap.org/images/og/dash.png" />
-	<meta property="twitter:title" content="BTC Map - Dashboard" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/dash.png" />
-</svelte:head>
 
 <div class="bg-teal">
 	<Header />
@@ -474,7 +452,7 @@
 						stat={total}
 						change={totalChange}
 						border="border-b md:border-r border-statBorder"
-						loading={statsLoading}
+						loading={$syncStatus}
 					/>
 					<DashboardStat
 						title="Created in last 24 hours"
@@ -502,26 +480,26 @@
 						stat={onchain}
 						percent={onchainPercentChange}
 						border="border-b xl:border-b-0 md:border-r border-statBorder"
-						loading={statsLoading}
+						loading={$syncStatus}
 					/>
 					<DashboardStat
 						title="Merchants accepting lightning"
 						stat={lightning}
 						percent={lightningPercentChange}
 						border="border-b xl:border-b-0 xl:border-r border-statBorder"
-						loading={statsLoading}
+						loading={$syncStatus}
 					/>
 					<DashboardStat
 						title="Merchants accepting contactless"
 						stat={nfc}
 						percent={nfcPercentChange}
 						border="border-b md:border-b-0 md:border-r border-statBorder"
-						loading={statsLoading}
+						loading={$syncStatus}
 					/>
 					<DashboardStat
 						title="Number of communities"
 						stat={communities && communities.length}
-						loading={communitiesLoading}
+						loading={$syncStatus}
 					/>
 				</div>
 				<p class="text-sm text-body text-center md:text-left">
@@ -532,7 +510,7 @@
 			<section id="charts" class="space-y-10">
 				<div>
 					<div class="relative">
-						{#if statsLoading}
+						{#if chartsLoading}
 							<div
 								class="absolute top-0 left-0 border border-link/50 rounded-3xl animate-pulse w-full h-[400px]"
 							/>
@@ -547,7 +525,7 @@
 
 				<div>
 					<div class="relative">
-						{#if statsLoading}
+						{#if chartsLoading}
 							<div
 								class="absolute top-0 left-0 border border-link/50 rounded-3xl animate-pulse w-full h-[400px]"
 							/>
@@ -561,7 +539,7 @@
 
 				<div>
 					<div class="relative">
-						{#if statsLoading}
+						{#if chartsLoading}
 							<div
 								class="absolute top-0 left-0 border border-link/50 rounded-3xl animate-pulse w-full h-[400px]"
 							/>
@@ -576,7 +554,7 @@
 
 				<div>
 					<div class="relative">
-						{#if statsLoading}
+						{#if chartsLoading}
 							<div
 								class="absolute top-0 left-0 border border-link/50 rounded-3xl animate-pulse w-full h-[400px]"
 							/>

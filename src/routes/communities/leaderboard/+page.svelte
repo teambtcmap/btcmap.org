@@ -1,7 +1,6 @@
 <script>
 	import axios from 'axios';
 	import tippy from 'tippy.js';
-	import { onMount } from 'svelte';
 	import {
 		Header,
 		Footer,
@@ -11,10 +10,20 @@
 		TopButton
 	} from '$comp';
 	import { errToast } from '$lib/utils';
+	import { areas, areaError, reports, reportError, syncStatus } from '$lib/store';
 
-	let reports = [];
-	let communities = [];
-	let leaderboard = [];
+	// alert for area errors
+	$: $areaError && errToast($areaError);
+
+	// alert for report errors
+	$: $reportError && errToast($reportError);
+
+	$: communities = $areas.filter((area) => area.tags.type === 'community');
+	$: communityReports = $reports
+		.filter((report) => report.area_id && report.area_id.length > 2)
+		.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
+	let leaderboard;
+	let loading;
 
 	let upToDateTooltip;
 	let upToDateTooltipMobile;
@@ -23,39 +32,11 @@
 	let gradeTooltip;
 	let gradeTooltipMobile;
 
-	const populateLeaderboard = async () => {
-		const getReports = axios
-			.get('https://api.btcmap.org/v2/reports')
-			.then(function (response) {
-				// handle success
-				reports = response.data
-					.filter((report) => report.area_id && report.area_id.length > 2)
-					.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
-			})
-			.catch(function (error) {
-				// handle error
-				errToast('Could not fetch reports, please try again or contact BTC Map.');
-				console.log(error);
-			});
-
-		const getCommunities = axios
-			.get('https://api.btcmap.org/v2/areas')
-			.then(function (response) {
-				// handle success
-				communities = response.data.filter((area) => area.tags.type === 'community');
-			})
-			.catch(function (error) {
-				// handle error
-				errToast('Could not fetch communities, please try again or contact BTC Map.');
-				console.log(error);
-			});
-
-		await Promise.allSettled([getReports, getCommunities]).then((results) =>
-			results.forEach((result) => console.log(result.status))
-		);
-
-		if (reports && reports.length && communities && communities.length) {
-			reports = reports.slice(0, communities.length);
+	const populateLeaderboard = (status, communities, communityReports) => {
+		if (communities.length && communityReports.length && !status) {
+			loading = true;
+			leaderboard = [];
+			let reports = communityReports.slice(0, communities.length);
 
 			reports.forEach((report) => {
 				let community = communities.find((community) => community.id === report.area_id);
@@ -78,10 +59,11 @@
 			);
 
 			leaderboard = leaderboard;
+			loading = false;
 		}
 	};
 
-	onMount(() => populateLeaderboard());
+	$: populateLeaderboard($syncStatus, communities, communityReports);
 
 	const headings = ['Position', 'Name', 'Up-To-Date', 'Total Locations', 'Legacy', 'Grade'];
 
@@ -210,7 +192,7 @@
 				</div>
 
 				<div>
-					{#if leaderboard && leaderboard.length}
+					{#if leaderboard && leaderboard.length && !loading}
 						{#each leaderboard as item, index}
 							<CommunityLeaderboardItem
 								position={index + 1}

@@ -1,140 +1,136 @@
 <script>
-	import axios from 'axios';
 	import Chart from 'chart.js/auto';
 	import { browser } from '$app/environment';
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import { Header, Footer, PrimaryButton, CommunitySection } from '$comp';
 	import { errToast } from '$lib/utils';
+	import { areas, areaError, syncStatus } from '$lib/store';
 
+	// alert for area errors
+	$: $areaError && errToast($areaError);
+
+	let chartRendered = false;
 	let initialRenderComplete = false;
-	let communitiesAPIInterval;
-	let communities;
-	let africa;
-	let asia;
-	let europe;
-	let northAmerica;
-	let oceania;
-	let southAmerica;
+
+	$: communities =
+		$areas && $areas.length
+			? $areas
+					.filter(
+						(area) =>
+							area.tags.type === 'community' &&
+							area.tags['box:east'] &&
+							area.tags['box:north'] &&
+							area.tags['box:south'] &&
+							area.tags['box:west'] &&
+							area.tags.name &&
+							area.tags['icon:square'] &&
+							area.tags.continent &&
+							Object.keys(area.tags).find((key) => key.includes('contact'))
+					)
+					.sort((a, b) => {
+						const nameA = a.tags.name.toUpperCase(); // ignore upper and lowercase
+						const nameB = b.tags.name.toUpperCase(); // ignore upper and lowercase
+						if (nameA < nameB) {
+							return -1;
+						}
+						if (nameA > nameB) {
+							return 1;
+						}
+						// names must be equal
+						return 0;
+					})
+			: undefined;
+
+	$: africa =
+		communities && communities.filter((community) => community.tags.continent === 'africa');
+	$: asia = communities && communities.filter((community) => community.tags.continent === 'asia');
+	$: europe =
+		communities && communities.filter((community) => community.tags.continent === 'europe');
+	$: northAmerica =
+		communities && communities.filter((community) => community.tags.continent === 'north-america');
+	$: oceania =
+		communities && communities.filter((community) => community.tags.continent === 'oceania');
+	$: southAmerica =
+		communities && communities.filter((community) => community.tags.continent === 'south-america');
 
 	let continentChartCanvas;
 	let continentChart;
+
+	const populateChart = () => {
+		continentChart = new Chart(continentChartCanvas, {
+			type: 'doughnut',
+			data: {
+				labels: ['Africa', 'Asia', 'Europe', 'North America', 'Oceania', 'South America'],
+				datasets: [
+					{
+						label: 'Communities by Continent',
+						data: [
+							africa.length,
+							asia.length,
+							europe.length,
+							northAmerica.length,
+							oceania.length,
+							southAmerica.length
+						],
+						backgroundColor: [
+							'rgba(247, 147, 26, 1)',
+							'rgba(11, 144, 114, 1)',
+							'rgba(247, 147, 26, 0.7)',
+							'rgba(11, 144, 114, 0.7)',
+							'rgba(247, 147, 26, 0.35)',
+							'rgba(11, 144, 114, 0.35)'
+						],
+						hoverOffset: 4
+					}
+				]
+			},
+			options: {
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						labels: {
+							font: {
+								weight: 600
+							}
+						}
+					}
+				}
+			}
+		});
+
+		chartRendered = true;
+	};
+
+	const chartSync = (status, areas) => {
+		if (areas.length && !status && initialRenderComplete) {
+			if (chartRendered) {
+				continentChart.data.datasets[0].data = [
+					africa.length,
+					asia.length,
+					europe.length,
+					northAmerica.length,
+					oceania.length,
+					southAmerica.length
+				];
+				continentChart.update();
+			} else {
+				populateChart();
+			}
+		}
+	};
+
+	$: chartSync($syncStatus, $areas);
 
 	onMount(async () => {
 		if (browser) {
 			continentChartCanvas.getContext('2d');
 
-			const communitiesAPI = async () => {
-				await axios
-					.get('https://api.btcmap.org/v2/areas')
-					.then(function (response) {
-						// handle success
-						communities = response.data.filter(
-							(area) =>
-								area.tags.type === 'community' &&
-								area.tags['box:east'] &&
-								area.tags['box:north'] &&
-								area.tags['box:south'] &&
-								area.tags['box:west'] &&
-								area.tags.name &&
-								area.tags['icon:square'] &&
-								area.tags.continent &&
-								Object.keys(area.tags).find((key) => key.includes('contact'))
-						);
-
-						communities.sort((a, b) => {
-							const nameA = a.tags.name.toUpperCase(); // ignore upper and lowercase
-							const nameB = b.tags.name.toUpperCase(); // ignore upper and lowercase
-							if (nameA < nameB) {
-								return -1;
-							}
-							if (nameA > nameB) {
-								return 1;
-							}
-
-							// names must be equal
-							return 0;
-						});
-
-						africa = communities.filter((community) => community.tags.continent === 'africa');
-						asia = communities.filter((community) => community.tags.continent === 'asia');
-						europe = communities.filter((community) => community.tags.continent === 'europe');
-						northAmerica = communities.filter(
-							(community) => community.tags.continent === 'north-america'
-						);
-						oceania = communities.filter((community) => community.tags.continent === 'oceania');
-						southAmerica = communities.filter(
-							(community) => community.tags.continent === 'south-america'
-						);
-
-						// setup chart
-						if (initialRenderComplete) {
-							continentChart.data.datasets[0].data = [
-								africa.length,
-								asia.length,
-								europe.length,
-								northAmerica.length,
-								oceania.length,
-								southAmerica.length
-							];
-							continentChart.update();
-						} else {
-							continentChart = new Chart(continentChartCanvas, {
-								type: 'doughnut',
-								data: {
-									labels: ['Africa', 'Asia', 'Europe', 'North America', 'Oceania', 'South America'],
-									datasets: [
-										{
-											label: 'Communities by Continent',
-											data: [
-												africa.length,
-												asia.length,
-												europe.length,
-												northAmerica.length,
-												oceania.length,
-												southAmerica.length
-											],
-											backgroundColor: [
-												'rgba(247, 147, 26, 1)',
-												'rgba(11, 144, 114, 1)',
-												'rgba(247, 147, 26, 0.7)',
-												'rgba(11, 144, 114, 0.7)',
-												'rgba(247, 147, 26, 0.35)',
-												'rgba(11, 144, 114, 0.35)'
-											],
-											hoverOffset: 4
-										}
-									]
-								},
-								options: {
-									maintainAspectRatio: false,
-									plugins: {
-										legend: {
-											labels: {
-												font: {
-													weight: 600
-												}
-											}
-										}
-									}
-								}
-							});
-						}
-					})
-					.catch(function (error) {
-						// handle error
-						errToast('Could not fetch communities data, please try again or contact BTC Map.');
-						console.log(error);
-					});
-			};
-			await communitiesAPI();
-			communitiesAPIInterval = setInterval(communitiesAPI, 600000);
+			if ($areas && $areas.length) {
+				populateChart();
+			}
 
 			initialRenderComplete = true;
 		}
-	});
-
-	onDestroy(() => {
-		clearInterval(communitiesAPIInterval);
 	});
 </script>
 
