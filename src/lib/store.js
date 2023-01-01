@@ -49,6 +49,12 @@ export const userError = writable('');
 export const events = writable([]);
 export const eventError = writable('');
 
+export const areas = writable([]);
+export const areaError = writable('');
+
+export const reports = writable([]);
+export const reportError = writable('');
+
 export const syncStatus = writable();
 
 export const mapUpdates = writable(false);

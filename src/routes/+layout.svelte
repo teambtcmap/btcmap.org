@@ -7,6 +7,8 @@
 	import { elementsSync } from '$lib/sync/elements';
 	import { eventsSync } from '$lib/sync/events';
 	import { usersSync } from '$lib/sync/users';
+	import { areasSync } from '$lib/sync/areas';
+	import { reportsSync } from '$lib/sync/reports';
 	import { syncStatus, mapLoading } from '$lib/store';
 
 	const options = {
@@ -27,9 +29,13 @@
 			$mapLoading = 'Starting data sync...';
 			$syncStatus = true;
 
-			await Promise.allSettled([elementsSync(), eventsSync(), usersSync()]).then((results) =>
-				results.forEach((result) => console.log(result.status))
-			);
+			await Promise.allSettled([
+				elementsSync(),
+				eventsSync(),
+				usersSync(),
+				areasSync(),
+				reportsSync()
+			]).then((results) => results.forEach((result) => console.log(result.status)));
 
 			$syncStatus = false;
 		};

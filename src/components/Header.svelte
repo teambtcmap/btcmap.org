@@ -6,7 +6,7 @@
 		{ title: 'Apps', url: '/apps', icon: 'apps' },
 		{ title: 'Contribute', url: '', icon: 'contribute' },
 		{ title: 'Stats', url: '', icon: 'stats' },
-		{ title: 'Communities', url: '/communities', icon: 'communities' },
+		{ title: 'Communities', url: '', icon: 'communities' },
 		{
 			title: 'Wiki',
 			url: '',
@@ -24,6 +24,11 @@
 		{ title: 'Dashboard', url: '/dashboard', icon: 'dash' },
 		{ title: 'Activity', url: '/activity', icon: 'activity' },
 		{ title: 'Leaderboard', url: '/leaderboard', icon: 'leader' }
+	];
+
+	const communitiesDropdownLinks = [
+		{ title: 'Directory', url: '/communities', icon: 'directory' },
+		{ title: 'Leaderboard', url: '/communities/leaderboard', icon: 'leader' }
 	];
 
 	const wikiDropdownLinks = [
@@ -69,6 +74,15 @@
 					title={link.title}
 					links={statsDropdownLinks}
 					top="dash"
+					bottom="leader"
+				/>
+
+				<!-- dropdown menu -->
+			{:else if link.title === 'Communities'}
+				<NavDropdownDesktop
+					title={link.title}
+					links={communitiesDropdownLinks}
+					top="directory"
 					bottom="leader"
 				/>
 
@@ -128,6 +142,10 @@
 				<!-- dropdown menu -->
 			{:else if link.title === 'Stats'}
 				<NavDropdownMobile title={link.title} icon={link.icon} links={statsDropdownLinks} />
+
+				<!-- dropdown menu -->
+			{:else if link.title === 'Communities'}
+				<NavDropdownMobile title={link.title} icon={link.icon} links={communitiesDropdownLinks} />
 
 				<!-- dropdown menu -->
 			{:else if link.title === 'Wiki'}
