@@ -213,6 +213,10 @@
 					{/if}
 				</div>
 
+				<p class="text-sm text-center text-body">
+					*Data sorted by Up-To-Date, then Total Locations, then Legacy.
+				</p>
+
 				<div class="mt-10 flex justify-center">
 					<TopButton />
 				</div>
