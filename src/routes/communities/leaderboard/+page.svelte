@@ -173,7 +173,7 @@
 						</h3>
 					{/each}
 				</div>
-				<div class="lg:hidden text-center text-primary text-lg font-semibold mb-5">
+				<div class="lg:hidden text-center text-primary text-lg font-semibold mb-5 space-y-1">
 					<h3>
 						Up-To-Date <button bind:this={upToDateTooltipMobile}>
 							<i class="fa-solid fa-circle-info" />
