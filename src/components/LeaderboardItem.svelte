@@ -23,9 +23,21 @@
 <div
 	class="py-5 lg:py-0 border-t border-b border-statBorder lg:border-none space-y-5 lg:space-y-0 text-center lg:grid grid-cols-6 text-lg font-semibold"
 >
-	<span class="text-link my-auto underline lg:no-underline underline-offset-4 decoration-4"
-		>{position}</span
+	<span
+		class="text-link my-auto {position > 3
+			? 'underline'
+			: ''} lg:no-underline underline-offset-4 decoration-4"
 	>
+		{#if position === 1}
+			<span class="text-2xl">🥇</span>
+		{:else if position === 2}
+			<span class="text-2xl">🥈</span>
+		{:else if position === 3}
+			<span class="text-2xl">🥉</span>
+		{:else}
+			{position}
+		{/if}
+	</span>
 
 	<div class="lg:flex lg:space-x-2 items-center">
 		<img
