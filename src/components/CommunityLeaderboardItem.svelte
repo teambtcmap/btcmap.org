@@ -71,11 +71,11 @@
 				</div>
 			{:else if stat.title === 'Grade'}
 				<div class="space-x-1">
-					{#each Array(stat.stat) as star}
+					{#each Array(upToDate === 100 ? 5 : stat.stat) as star}
 						<i class="fa-solid fa-star" />
 					{/each}
 
-					{#each Array(5 - stat.stat) as star}
+					{#each Array(5 - (upToDate === 100 ? 5 : stat.stat)) as star}
 						<i class="fa-solid fa-star opacity-25" />
 					{/each}
 				</div>
