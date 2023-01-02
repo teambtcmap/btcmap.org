@@ -83,7 +83,7 @@
 				<p>
 					If you include a Twitter handle, we may Tweet about your submission from the <a
 						href={$socials.twitter}
-						class="text-link hover:text-hover transition-colors">@BTCMapDotOrg</a
+						class="text-link hover:text-hover transition-colors">@btcmap</a
 					> Twitter account.
 				</p>
 			</div>
