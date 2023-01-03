@@ -8,12 +8,14 @@
 {#if user}
 	<div class="!my-12">
 		<a
-			href="lightning:{destination}"
-			class="text-center text-lg font-semibold text-white w-full p-3 bg-link hover:bg-hover rounded-xl transition-colors"
+			href={type === 'url' ? destination : `lightning:${destination}`}
+			target={type === 'url' ? '_blank' : '_self'}
+			rel="noreferrer"
+			class="text-center md:text-lg font-semibold text-white w-full p-3 px-5 bg-link hover:bg-hover rounded-xl transition-colors"
 		>
 			<!--  lightning icon -->
 			<svg
-				class="inline w-7 h-7"
+				class="hidden md:inline w-7 h-7"
 				width="16"
 				height="17"
 				viewBox="0 0 16 17"

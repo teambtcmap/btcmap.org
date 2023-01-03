@@ -50,7 +50,7 @@
 </script>
 
 <svelte:head>
-	{#if !$page.url.pathname.startsWith('/tagger')}
+	{#if !$page.url.pathname.startsWith('/tagger') && !$page.url.pathname.startsWith('/community')}
 		<meta
 			name="lightning"
 			content="lnurlp:LNURL1DP68GURN8GHJ7ERZXVUXVER9X4SNYTNY9EMX7MR5V9NK2CTSWQHXJME0D3H82UNVWQHKZURF9AMRZTMVDE6HYMP0XYA8GEF9"

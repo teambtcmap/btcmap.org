@@ -1,13 +1,29 @@
 <script>
+	import tippy from 'tippy.js';
+
 	export let title;
 	export let stat;
 	export let percent;
 	export let border;
+	export let tooltip;
+
+	let tooltipElement;
+
+	$: tooltipElement &&
+		tippy([tooltipElement], {
+			content: tooltip,
+			allowHTML: true
+		});
 </script>
 
 <div class="space-y-5 p-5 {border}">
 	<h3 class="font-semibold text-center md:text-left text-primary text-lg">
 		{title}
+		{#if tooltip}
+			<button bind:this={tooltipElement}>
+				<i class="fa-solid fa-circle-info text-base" />
+			</button>
+		{/if}
 	</h3>
 
 	<div class="flex justify-center md:justify-start">
@@ -22,3 +38,7 @@
 		{/if}
 	</div>
 </div>
+
+<style>
+	@import 'tippy.js/dist/tippy.css';
+</style>
