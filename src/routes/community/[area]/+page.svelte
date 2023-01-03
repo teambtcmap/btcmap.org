@@ -276,7 +276,6 @@
 				},
 				scales: {
 					x: {
-						min: '2022-11-30',
 						ticks: {
 							maxTicksLimit: 5,
 							font: {
