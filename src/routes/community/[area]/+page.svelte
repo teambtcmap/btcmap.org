@@ -596,10 +596,10 @@
 					<img src={avatar} alt="avatar" class="rounded-full w-32 h-32 object-cover mx-auto" />
 					<h1 class="text-4xl font-semibold text-primary !leading-tight">
 						{name}
-						{#if sponsor}
-							<SponsorBadge />
-						{/if}
 					</h1>
+					{#if sponsor}
+						<SponsorBadge />
+					{/if}
 					<h2 class="text-primary text-xl uppercase">
 						{continent.replace('-', ' ')}
 						<i
