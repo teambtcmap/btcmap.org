@@ -441,7 +441,7 @@ export const generateMarker = (
 
 			<div class='w-full border-t-[0.5px] border-mapBorder mt-3 mb-2 opacity-80'></div>
 
-			<div class='flex ${paymentMethod ? 'justify-center' : ''} space-x-4'>
+			<div class='flex space-x-4'>
 ${
 	paymentMethod
 		? `<div>
