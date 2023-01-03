@@ -163,7 +163,9 @@
 					}
 
 					let icon = element.tags['icon:android'];
-					let payment = element.tags['payment:pouch']
+					let payment = element.tags['payment:uri']
+						? { type: 'uri', url: element.tags['payment:uri'] }
+						: element.tags['payment:pouch']
 						? { type: 'pouch', username: element.tags['payment:pouch'] }
 						: element.tags['payment:coinos']
 						? { type: 'coinos', username: element.tags['payment:coinos'] }
