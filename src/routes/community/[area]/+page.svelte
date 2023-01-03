@@ -246,14 +246,16 @@
 			}
 		});
 
+		let percents = chartsReports.filter((report) => report.tags.up_to_date_percent);
+
 		upToDateChart = new Chart(upToDateChartCanvas, {
 			type: 'line',
 			data: {
-				labels: chartsReports.map(({ date }) => date),
+				labels: percents.map(({ date }) => date),
 				datasets: [
 					{
 						label: 'Up-To-Date Percent',
-						data: chartsReports.map(({ tags: { up_to_date_percent } }) => up_to_date_percent),
+						data: percents.map(({ tags: { up_to_date_percent } }) => up_to_date_percent),
 						fill: {
 							target: 'origin',
 							above: 'rgba(11, 144, 114, 0.2)'
@@ -769,7 +771,9 @@
 					<h3 class="text-center text-primary text-lg border-b border-statBorder p-5 font-semibold">
 						{name} Supertaggers
 					</h3>
-					<div class="p-1 flex flex-wrap justify-center items-center">
+					<div
+						class="max-h-[375px] overflow-scroll hide-scroll p-1 flex flex-wrap justify-center items-center"
+					>
 						{#if taggers && taggers.length}
 							{#each taggers as tagger}
 								<div class="space-y-1 m-4 hover:scale-110 transition-transform">
