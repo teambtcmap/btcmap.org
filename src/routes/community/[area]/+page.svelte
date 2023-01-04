@@ -52,7 +52,7 @@
 		.filter((report) => report.area_id === data.id)
 		.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
 
-	if (!communityReports) {
+	if (!communityReports.length) {
 		errToast('Could not find any community reports, please try again tomorrow or contact BTC Map.');
 		throw error(404, 'Community Report Not Found');
 	}
@@ -70,6 +70,7 @@
 	let discord = community['contact:discord'];
 	let youtube = community['contact:youtube'];
 	let github = community['contact:github'];
+	let reddit = community['contact:reddit'];
 	$: lightning =
 		(community['tips:lightning_address'] && {
 			destination: community['tips:lightning_address'],
@@ -679,6 +680,11 @@
 					{#if github}
 						<a href={github} target="_blank" rel="noreferrer" class="m-1">
 							<img src="/icons/socials/github.svg" alt="github" />
+						</a>
+					{/if}
+					{#if reddit}
+						<a href={reddit} target="_blank" rel="noreferrer" class="m-1">
+							<img src="/icons/socials/reddit.svg" alt="reddit" />
 						</a>
 					{/if}
 				</div>

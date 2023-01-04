@@ -12,6 +12,7 @@
 	$: discord = tags['contact:discord'] && tags['contact:discord'];
 	$: youtube = tags['contact:youtube'] && tags['contact:youtube'];
 	$: github = tags['contact:github'] && tags['contact:github'];
+	$: reddit = tags['contact:reddit'] && tags['contact:reddit'];
 	$: tip =
 		(tags['tips:lightning_address'] && {
 			destination: tags['tips:lightning_address'],
@@ -75,6 +76,11 @@
 		{#if github}
 			<a href={github} target="_blank" rel="noreferrer" class="m-1">
 				<img src="/icons/socials/github.svg" alt="github" />
+			</a>
+		{/if}
+		{#if reddit}
+			<a href={reddit} target="_blank" rel="noreferrer" class="m-1">
+				<img src="/icons/socials/reddit.svg" alt="reddit" />
 			</a>
 		{/if}
 	</div>
