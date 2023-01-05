@@ -3,6 +3,87 @@ import axios from 'axios';
 import { boost, exchangeRate, resetBoost, showTags } from '$lib/store';
 import { errToast } from '$lib/utils';
 
+export const layers = (leaflet, map) => {
+	const osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		noWrap: true,
+		maxZoom: 19
+	});
+
+	const osmDE = leaflet.tileLayer('https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png', {
+		noWrap: true,
+		maxZoom: 18
+	});
+
+	const osmFR = leaflet.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+		noWrap: true,
+		maxZoom: 20
+	});
+
+	const topo = leaflet.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+		noWrap: true,
+		maxZoom: 17
+	});
+
+	const imagery = leaflet.tileLayer(
+		'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+		{
+			noWrap: true
+		}
+	);
+
+	const toner = leaflet.tileLayer(
+		'https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}{r}.{ext}',
+		{
+			noWrap: true,
+			maxZoom: 20,
+			ext: 'png'
+		}
+	);
+
+	const tonerLite = leaflet.tileLayer(
+		'https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.{ext}',
+		{
+			noWrap: true,
+			maxZoom: 20,
+			ext: 'png'
+		}
+	);
+
+	const watercolor = leaflet.tileLayer(
+		'https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.{ext}',
+		{
+			noWrap: true,
+			maxZoom: 16,
+			ext: 'jpg'
+		}
+	);
+
+	const terrain = leaflet.tileLayer(
+		'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.{ext}',
+		{
+			noWrap: true,
+			maxZoom: 18,
+			ext: 'png'
+		}
+	);
+
+	osm.addTo(map);
+
+	const baseMaps = {
+		OpenStreetMap: osm,
+		Imagery: imagery,
+		Terrain: terrain,
+		Topo: topo,
+		Toner: toner,
+		'Toner Lite': tonerLite,
+		Watercolor: watercolor,
+		OpenStreetMapDE: osmDE,
+		OpenStreetMapFR: osmFR
+	};
+
+	return baseMaps;
+};
+
 export const attribution = (L, map) => {
 	L.control.attribution({ position: 'bottomleft' }).addTo(map);
 
@@ -257,17 +338,7 @@ export const generateIcon = (L, icon, boosted, campsite) => {
 	});
 };
 
-export const generateMarker = (
-	lat,
-	long,
-	icon,
-	element,
-	payment,
-	L,
-	verifiedDate,
-	verify,
-	boosted
-) => {
+export const verifiedArr = (element) => {
 	let verified = [];
 
 	if (element.tags) {
@@ -287,6 +358,22 @@ export const generateMarker = (
 			verified.sort((a, b) => Date.parse(b) - Date.parse(a));
 		}
 	}
+
+	return verified;
+};
+
+export const generateMarker = (
+	lat,
+	long,
+	icon,
+	element,
+	payment,
+	L,
+	verifiedDate,
+	verify,
+	boosted
+) => {
+	let verified = verifiedArr(element);
 
 	const paymentMethod =
 		element.tags &&

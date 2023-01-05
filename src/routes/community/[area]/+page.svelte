@@ -7,13 +7,15 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { users, events, elements, areas, reports } from '$lib/store';
 	import {
+		layers,
 		attribution,
 		changeDefaultIcons,
 		calcVerifiedDate,
 		latCalc,
 		longCalc,
 		generateIcon,
-		generateMarker
+		generateMarker,
+		verifiedArr
 	} from '$lib/map/setup';
 	import { errToast } from '$lib/utils';
 	import { error } from '@sveltejs/kit';
@@ -491,16 +493,13 @@
 			const leaflet = await import('leaflet');
 			const DomEvent = await import('leaflet/src/dom/DomEvent');
 			const leafletMarkerCluster = await import('leaflet.markercluster');
+			const leafletFeaturegroupSubgroup = await import('leaflet.featuregroup.subgroup');
 
-			// add map and tiles
+			// add map
 			map = leaflet.map(mapElement, { attributionControl: false });
 
-			const osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-				noWrap: true,
-				maxZoom: 19
-			});
-
-			osm.addTo(map);
+			// add tiles and basemaps
+			const baseMaps = layers(leaflet, map);
 
 			// change broken marker image path in prod
 			L.Icon.Default.prototype.options.imagePath = '/icons/';
@@ -508,11 +507,16 @@
 			// add OSM attribution
 			attribution(L, map);
 
-			// change default icons
-			changeDefaultIcons('', L, mapElement, DomEvent);
-
-			// create marker cluster group
+			// create marker cluster groups
 			let markers = L.markerClusterGroup();
+			let upToDateLayer = L.featureGroup.subGroup(markers);
+			let outdatedLayer = L.featureGroup.subGroup(markers);
+
+			let overlayMaps = { 'Up-To-Date': upToDateLayer, Outdated: outdatedLayer };
+			const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+			// change default icons
+			changeDefaultIcons('layers', L, mapElement, DomEvent);
 
 			// get date from 1 year ago to add verified check if survey is current
 			let verifiedDate = calcVerifiedDate();
@@ -556,10 +560,19 @@
 					boosted
 				);
 
-				markers.addLayer(marker);
+				let verified = verifiedArr(element);
+
+				if (verified.length && Date.parse(verified[0]) > verifiedDate) {
+					upToDateLayer.addLayer(marker);
+				} else {
+					outdatedLayer.addLayer(marker);
+				}
 			});
 
 			map.addLayer(markers);
+			map.addLayer(upToDateLayer);
+			map.addLayer(outdatedLayer);
+
 			map.fitBounds([
 				[community['box:south'], community['box:west']],
 				[community['box:north'], community['box:east']]
@@ -720,7 +733,7 @@
 				<div class="relative">
 					<div
 						bind:this={mapElement}
-						class="!bg-teal z-10 border border-statBorder rounded-b-3xl h-[300px] md:h-[600px]"
+						class="!bg-teal z-10 border border-statBorder rounded-b-3xl h-[300px] md:h-[600px] text-left"
 					/>
 					{#if !mapLoaded}
 						<MapLoading
