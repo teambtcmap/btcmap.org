@@ -795,7 +795,9 @@
 											class="rounded-full w-20 h-20 object-cover mx-auto"
 										/>
 										<p class="text-body text-center font-semibold">
-											{tagger.osm_json.display_name}
+											{tagger.osm_json.display_name.length > 21
+												? tagger.osm_json.display_name.slice(0, 18) + '...'
+												: tagger.osm_json.display_name}
 										</p>
 									</a>
 								</div>
