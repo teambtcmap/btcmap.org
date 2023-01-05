@@ -511,8 +511,13 @@
 			let markers = L.markerClusterGroup();
 			let upToDateLayer = L.featureGroup.subGroup(markers);
 			let outdatedLayer = L.featureGroup.subGroup(markers);
+			let legacyLayer = L.featureGroup.subGroup(markers);
 
-			let overlayMaps = { 'Up-To-Date': upToDateLayer, Outdated: outdatedLayer };
+			let overlayMaps = {
+				'Up-To-Date': upToDateLayer,
+				Outdated: outdatedLayer,
+				Legacy: legacyLayer
+			};
 			const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
 
 			// change default icons
@@ -567,11 +572,16 @@
 				} else {
 					outdatedLayer.addLayer(marker);
 				}
+
+				if (element.tags && element.tags['payment:bitcoin']) {
+					legacyLayer.addLayer(marker);
+				}
 			});
 
 			map.addLayer(markers);
 			map.addLayer(upToDateLayer);
 			map.addLayer(outdatedLayer);
+			map.addLayer(legacyLayer);
 
 			map.fitBounds([
 				[community['box:south'], community['box:west']],
