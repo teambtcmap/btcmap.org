@@ -217,6 +217,9 @@
 		}
 	});
 
+	let eventCount = 50;
+	$: eventElementsPaginated = eventElements.slice(0, eventCount);
+
 	loading = false;
 
 	let mapElement;
@@ -475,7 +478,7 @@
 						}}
 					>
 						{#if eventElements && eventElements.length && !loading}
-							{#each eventElements as event}
+							{#each eventElementsPaginated as event}
 								<ProfileActivity
 									location={event.location}
 									action={event.type}
@@ -486,7 +489,12 @@
 								/>
 							{/each}
 
-							{#if eventElements.length > 10}
+							{#if eventElementsPaginated.length !== eventElements.length}
+								<button
+									class="block !mb-5 mx-auto text-link hover:text-hover transition-colors text-xl font-semibold"
+									on:click={() => (eventCount = eventCount + 50)}>Load More</button
+								>
+							{:else if eventElements.length > 10}
 								<TopButton scroll={activityDiv} style="!mb-5" />
 							{/if}
 
