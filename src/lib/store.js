@@ -67,3 +67,4 @@ export const exchangeRate = writable();
 export const resetBoost = writable(0);
 
 export const showTags = writable();
+export const showMore = writable(false);

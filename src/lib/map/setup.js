@@ -1,6 +1,7 @@
 import Time from 'svelte-time';
 import axios from 'axios';
-import { boost, exchangeRate, resetBoost, showTags } from '$lib/store';
+import { boost, exchangeRate, resetBoost, showTags, showMore } from '$lib/store';
+import { get } from 'svelte/store';
 import { errToast } from '$lib/utils';
 
 export const layers = (leaflet, map) => {
@@ -373,21 +374,22 @@ export const generateMarker = (
 	verify,
 	boosted
 ) => {
-	let verified = verifiedArr(element);
+	const generatePopup = () => {
+		let verified = verifiedArr(element);
 
-	const paymentMethod =
-		element.tags &&
-		(element.tags['payment:onchain'] ||
-			element.tags['payment:lightning'] ||
-			element.tags['payment:lightning_contactless']);
+		const paymentMethod =
+			element.tags &&
+			(element.tags['payment:onchain'] ||
+				element.tags['payment:lightning'] ||
+				element.tags['payment:lightning_contactless']);
 
-	const popupContainer = L.DomUtil.create('div');
+		const popupContainer = L.DomUtil.create('div');
 
-	popupContainer.innerHTML = `${
-		element.tags && element.tags.name
-			? `<span class='block font-bold text-lg text-primary leading-snug max-w-[300px]' title='Merchant name'>${element.tags.name}</span>`
-			: ''
-	}
+		popupContainer.innerHTML = `${
+			element.tags && element.tags.name
+				? `<span class='block font-bold text-lg text-primary leading-snug max-w-[300px]' title='Merchant name'>${element.tags.name}</span>`
+				: ''
+		}
 
 				 <span class='block text-body max-w-[300px]' title='Address'>${
 						element.tags && checkAddress(element.tags)
@@ -413,8 +415,8 @@ export const generateMarker = (
 						</a>
 
 						<a id='edit' href='https://www.openstreetmap.org/edit?${element.type}=${
-		element.id
-	}' target="_blank" rel="noreferrer" title='Edit' class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-full transition-colors'>
+			element.id
+		}' target="_blank" rel="noreferrer" title='Edit' class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
 								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#pencil"></use>
 							</svg>
@@ -629,96 +631,118 @@ ${
 				</div>
 			</div>`;
 
-	const showMoreDiv = popupContainer.querySelector('#show-more');
-	const moreButton = popupContainer.querySelector('#more-button');
+		const showMoreDiv = popupContainer.querySelector('#show-more');
+		const moreButton = popupContainer.querySelector('#more-button');
 
-	let showMore = false;
-
-	const hideMore = () => {
-		showMoreDiv.classList.add('hidden');
-		moreButton.classList.replace('!text-link', '!text-primary');
-		moreButton.classList.replace('border-link', 'border-mapBorder');
-		showMore = false;
-	};
-
-	moreButton.onclick = () => {
-		if (!showMore) {
-			showMoreDiv.classList.remove('hidden');
-			moreButton.classList.replace('!text-primary', '!text-link');
-			moreButton.classList.replace('border-mapBorder', 'border-link');
-			showMore = true;
-		} else {
-			hideMore();
-		}
-	};
-
-	popupContainer.querySelector('#navigate').onclick = () => hideMore();
-	popupContainer.querySelector('#edit').onclick = () => hideMore();
-	popupContainer.querySelector('#share').onclick = () => hideMore();
-
-	if (location.pathname === '/map') {
-		const showTagsButton = popupContainer.querySelector('#show-tags');
-		showTagsButton.onclick = () => {
-			showTags.set(element.tags);
+		const hideMore = () => {
+			showMoreDiv.classList.add('hidden');
+			moreButton.classList.replace('!text-link', '!text-primary');
+			moreButton.classList.replace('border-link', 'border-mapBorder');
+			showMore.set(false);
 		};
 
-		const boostButton = popupContainer.querySelector('#boost-button');
-		const boostButtonText = boostButton.querySelector('span');
-		const boostButtonIcon = boostButton.querySelector('svg');
-
-		const resetButton = () => {
-			boostButton.disabled = false;
-			boostButtonText.innerText = boosted ? 'Extend' : 'Boost';
-			boostButton.classList.add('space-x-2');
-			boostButtonIcon.classList.remove('hidden');
-		};
-
-		boostButton.onclick = () => {
-			boostButton.disabled = true;
-			boostButtonIcon.classList.add('hidden');
-			boostButton.classList.remove('space-x-2');
-			boostButtonText.innerText = 'Boosting...';
-
-			boost.set({
-				id: element.type + ':' + element.id,
-				name: element.tags && element.tags.name ? element.tags.name : '',
-				boost: boosted ? boosted : '',
-				lat,
-				long
-			});
-
-			axios
-				.get('https://blockchain.info/ticker')
-				.then(function (response) {
-					exchangeRate.set(response.data['USD']['15m']);
-				})
-				.catch(function (error) {
-					errToast('Could not fetch bitcoin exchange rate, please try again or contact BTC Map.');
-					console.log(error);
-					resetButton();
-				});
-		};
-
-		resetBoost.subscribe(resetButton);
-	}
-
-	if (boosted) {
-		const boostedTime = popupContainer.querySelector('#boosted-time');
-		new Time({
-			target: boostedTime,
-			props: {
-				live: 3000,
-				relative: true,
-				timestamp: boosted
+		moreButton.onclick = () => {
+			if (!get(showMore)) {
+				showMoreDiv.classList.remove('hidden');
+				moreButton.classList.replace('!text-primary', '!text-link');
+				moreButton.classList.replace('border-mapBorder', 'border-link');
+				showMore.set(true);
+			} else {
+				hideMore();
 			}
-		});
-	}
+		};
 
-	return L.marker([lat, long], { icon })
-		.bindPopup(
-			// marker popup component
-			popupContainer,
-			{ closeButton: false, maxWidth: 1000, minWidth: 300 }
-		)
-		.on('popupclose', () => hideMore());
+		popupContainer.querySelector('#navigate').onclick = () => hideMore();
+		popupContainer.querySelector('#edit').onclick = () => hideMore();
+		popupContainer.querySelector('#share').onclick = () => hideMore();
+
+		if (location.pathname === '/map') {
+			const showTagsButton = popupContainer.querySelector('#show-tags');
+			showTagsButton.onclick = () => {
+				showTags.set(element.tags);
+			};
+
+			const boostButton = popupContainer.querySelector('#boost-button');
+			const boostButtonText = boostButton.querySelector('span');
+			const boostButtonIcon = boostButton.querySelector('svg');
+
+			const resetButton = () => {
+				boostButton.disabled = false;
+				boostButtonText.innerText = boosted ? 'Extend' : 'Boost';
+				boostButton.classList.add('space-x-2');
+				boostButtonIcon.classList.remove('hidden');
+			};
+
+			boostButton.onclick = () => {
+				boostButton.disabled = true;
+				boostButtonIcon.classList.add('hidden');
+				boostButton.classList.remove('space-x-2');
+				boostButtonText.innerText = 'Boosting...';
+
+				boost.set({
+					id: element.type + ':' + element.id,
+					name: element.tags && element.tags.name ? element.tags.name : '',
+					boost: boosted ? boosted : '',
+					lat,
+					long
+				});
+
+				axios
+					.get('https://blockchain.info/ticker')
+					.then(function (response) {
+						exchangeRate.set(response.data['USD']['15m']);
+					})
+					.catch(function (error) {
+						errToast('Could not fetch bitcoin exchange rate, please try again or contact BTC Map.');
+						console.log(error);
+						resetButton();
+					});
+			};
+
+			resetBoost.subscribe(resetButton);
+		}
+
+		if (boosted) {
+			const boostedTime = popupContainer.querySelector('#boosted-time');
+			new Time({
+				target: boostedTime,
+				props: {
+					live: 3000,
+					relative: true,
+					timestamp: boosted
+				}
+			});
+		}
+
+		return popupContainer;
+	};
+
+	let marker = L.marker([lat, long], { icon });
+
+	marker.on('click', () => {
+		if (marker.isPopupOpen()) {
+			marker.closePopup();
+		} else {
+			marker
+				.bindPopup(
+					// marker popup component
+					generatePopup(),
+					{ closeButton: false, maxWidth: 1000, minWidth: 300 }
+				)
+				.openPopup()
+				.on('popupclose', () => {
+					const showMoreDiv = document.querySelector('#show-more');
+					const moreButton = document.querySelector('#more-button');
+
+					showMoreDiv.classList.add('hidden');
+					moreButton.classList.replace('!text-link', '!text-primary');
+					moreButton.classList.replace('border-link', 'border-mapBorder');
+					showMore.set(false);
+
+					marker.unbindPopup();
+				});
+		}
+	});
+
+	return marker;
 };
