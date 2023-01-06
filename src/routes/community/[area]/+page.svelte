@@ -69,6 +69,7 @@
 	let website = community['contact:website'];
 	let twitter = community['contact:twitter'];
 	let secondTwitter = community['contact:second_twitter'];
+	let meetup = community['contact:meetup'];
 	let telegram = community['contact:telegram'];
 	let discord = community['contact:discord'];
 	let youtube = community['contact:youtube'];
@@ -687,6 +688,11 @@
 					{#if secondTwitter}
 						<a href={secondTwitter} target="_blank" rel="noreferrer" class="m-1">
 							<img src="/icons/socials/twitter.svg" alt="twitter" />
+						</a>
+					{/if}
+					{#if meetup}
+						<a href={meetup} target="_blank" rel="noreferrer" class="m-1">
+							<img src="/icons/socials/meetup.jpg" alt="meetup" class="w-10 h-10 rounded-full" />
 						</a>
 					{/if}
 					{#if telegram}
