@@ -4,16 +4,19 @@
 	import { onMount } from 'svelte';
 	import { Header, Footer, PrimaryButton, CommunitySection } from '$comp';
 	import { errToast } from '$lib/utils';
-	import { areas, areaError, syncStatus } from '$lib/store';
+	import { areas, areaError, syncStatus, reports, reportError } from '$lib/store';
 
 	// alert for area errors
 	$: $areaError && errToast($areaError);
+
+	// alert for report errors
+	$: $reportError && errToast($reportError);
 
 	let chartRendered = false;
 	let initialRenderComplete = false;
 
 	$: communities =
-		$areas && $areas.length
+		$areas && $areas.length && $reports && $reports.length
 			? $areas
 					.filter(
 						(area) =>
@@ -25,7 +28,8 @@
 							area.tags.name &&
 							area.tags['icon:square'] &&
 							area.tags.continent &&
-							Object.keys(area.tags).find((key) => key.includes('contact'))
+							Object.keys(area.tags).find((key) => key.includes('contact')) &&
+							$reports.find((report) => report.area_id === area.id)
 					)
 					.sort((a, b) => {
 						const nameA = a.tags.name.toUpperCase(); // ignore upper and lowercase
