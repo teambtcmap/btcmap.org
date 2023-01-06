@@ -850,9 +850,7 @@
 
 					<div
 						bind:this={activityDiv}
-						class="hide-scroll space-y-2 {eventElements.length > 5
-							? 'h-[375px]'
-							: ''} overflow-y-scroll relative"
+						class="hide-scroll space-y-2 max-h-[375px] overflow-y-scroll relative"
 						on:scroll={() => {
 							if (!loading && !hideArrow) {
 								hideArrow = true;
