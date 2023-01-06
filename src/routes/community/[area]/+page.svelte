@@ -17,8 +17,7 @@
 		generateMarker,
 		verifiedArr
 	} from '$lib/map/setup';
-	import { errToast } from '$lib/utils';
-	import { error } from '@sveltejs/kit';
+	import { goto } from '$app/navigation';
 	import {
 		Header,
 		Footer,
@@ -46,8 +45,8 @@
 	);
 
 	if (!community) {
-		errToast('Could not find community, please try again or contact BTC Map.');
-		throw error(404, 'Community Not Found');
+		console.log('Could not find community, please try again or contact BTC Map.');
+		goto('/404');
 	}
 
 	let communityReports = $reports
@@ -55,8 +54,10 @@
 		.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
 
 	if (!communityReports.length) {
-		errToast('Could not find any community reports, please try again tomorrow or contact BTC Map.');
-		throw error(404, 'Community Report Not Found');
+		console.log(
+			'Could not find any community reports, please try again tomorrow or contact BTC Map.'
+		);
+		goto('/404');
 	}
 
 	community = community.tags;
