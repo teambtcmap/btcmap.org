@@ -140,7 +140,7 @@
 					<iframe
 						src="https://amboss.space/embed/node/info/02eb5a2e05ef32d0434ea616d38a1a46deaf9f246dc418673f43a571bba0363031?theme=light&noBackground=true"
 						width="100%"
-						height="271.5px"
+						class="h-[350px] xl:h-[271.5px]"
 					/>
 				</div>
 			</section>
