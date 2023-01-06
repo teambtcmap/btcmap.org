@@ -33,3 +33,4 @@ export { default as CloseButton } from './CloseButton.svelte';
 export { default as CommunityLeaderboardItem } from './CommunityLeaderboardItem.svelte';
 export { default as CommunityLeaderboardSkeleton } from './CommunityLeaderboardSkeleton.svelte';
 export { default as SponsorBadge } from './SponsorBadge.svelte';
+export { default as TimelineTooltip } from './TimelineTooltip.svelte';

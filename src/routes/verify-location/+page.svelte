@@ -3,7 +3,7 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import axios from 'axios';
-	import { Header, Footer, PrimaryButton, MapLoading, FormSuccess } from '$comp';
+	import { Header, Footer, PrimaryButton, MapLoading, FormSuccess, TimelineTooltip } from '$comp';
 	import { elements, elementError } from '$lib/store';
 	import {
 		attribution,
@@ -258,7 +258,10 @@
 						target="_blank"
 						rel="noreferrer"
 						class="text-link hover:text-hover transition-colors">Wiki</a
-					> for more instructions.
+					>
+					for more instructions. <TimelineTooltip
+						tooltip="NOTE: Due to the backlog of requests and the updates being completed on a volunteer effort, it may take several weeks to update this location. It is encouraged to update the location on OpenStreetMap directly if you want to see the changes appear on the map right away."
+					/>
 				</p>
 
 				<form on:submit={submitForm} class="text-primary space-y-5 w-full">

@@ -2,7 +2,7 @@
 	import { onMount, onDestroy, tick } from 'svelte';
 	import { browser } from '$app/environment';
 	import axios from 'axios';
-	import { Header, Footer, PrimaryButton, MapLoading, FormSuccess } from '$comp';
+	import { Header, Footer, PrimaryButton, MapLoading, FormSuccess, TimelineTooltip } from '$comp';
 	import { geolocate, changeDefaultIcons } from '$lib/map/setup';
 	import { errToast } from '$lib/utils';
 
@@ -215,7 +215,9 @@
 
 						<p class="text-primary w-full mb-10 text-center lg:text-left">
 							Fill out the following form and one of our volunteer community members will add your
-							location to the map.
+							location to the map. <TimelineTooltip
+								tooltip="NOTE: Due to the backlog of requests and the additions being completed on a volunteer effort, it may take several weeks to have your location added. It is encouraged to add your location to OpenStreetMap directly following the Shadowy Supertagger method if you want to appear on the map right away."
+							/>
 						</p>
 
 						<form on:submit={submitForm} class="text-primary space-y-5 w-full">
