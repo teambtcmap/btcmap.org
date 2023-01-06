@@ -116,7 +116,7 @@
 				<div>
 					<h3 class="uppercase text-body text-lg font-semibold">Open a lightning channel to us</h3>
 					<a
-						href="https://mempool.space/lightning/node/02eb5a2e05ef32d0434ea616d38a1a46deaf9f246dc418673f43a571bba0363031"
+						href="https://amboss.space/node/02eb5a2e05ef32d0434ea616d38a1a46deaf9f246dc418673f43a571bba0363031"
 						target="_blank"
 						rel="noreferrer"
 						class="text-link hover:text-hover break-all transition-colors"
