@@ -66,7 +66,7 @@
 				We greatly appreciate all support.
 			</h2>
 
-			<section id="donate" class="space-y-10">
+			<section id="donate">
 				{#if showQr}
 					<div
 						class="drop-shadow-xl relative bg-lightBlue rounded-xl w-full md:w-[475px] h-[450px] md:h-[380px] flex justify-center items-center mx-auto"
@@ -112,17 +112,6 @@
 						<DonationOption value={lnurlp} text="Lightning" {showQrToggle} />
 					</div>
 				{/if}
-				<!-- channel -->
-				<div>
-					<h3 class="uppercase text-body text-lg font-semibold">Open a lightning channel to us</h3>
-					<a
-						href="https://amboss.space/node/02eb5a2e05ef32d0434ea616d38a1a46deaf9f246dc418673f43a571bba0363031"
-						target="_blank"
-						rel="noreferrer"
-						class="text-link hover:text-hover break-all transition-colors"
-						>02eb5a2e05ef32d0434ea616d38a1a46deaf9f246dc418673f43a571bba0363031</a
-					>
-				</div>
 			</section>
 
 			<section id="supporters">
@@ -134,6 +123,25 @@
 				<div class="mt-4 space-y-16">
 					<SupportSection title="Company" supporters={company} placeholders={1} />
 					<SupportSection title="Community" supporters={community} placeholders={1} />
+				</div>
+			</section>
+
+			<section id="node">
+				<!-- channel -->
+				<div>
+					<h3 class="uppercase text-body text-lg font-semibold">Open a lightning channel to us</h3>
+					<a
+						href="https://amboss.space/node/02eb5a2e05ef32d0434ea616d38a1a46deaf9f246dc418673f43a571bba0363031"
+						target="_blank"
+						rel="noreferrer"
+						class="text-link hover:text-hover break-all transition-colors"
+						>02eb5a2e05ef32d0434ea616d38a1a46deaf9f246dc418673f43a571bba0363031</a
+					>
+					<iframe
+						src="https://amboss.space/embed/node/info/02eb5a2e05ef32d0434ea616d38a1a46deaf9f246dc418673f43a571bba0363031?theme=light&noBackground=true"
+						width="100%"
+						height="271.5px"
+					/>
 				</div>
 			</section>
 		</main>
