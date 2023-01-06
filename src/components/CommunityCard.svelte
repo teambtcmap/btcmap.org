@@ -9,6 +9,7 @@
 	$: twitter = tags['contact:twitter'] && tags['contact:twitter'];
 	$: secondTwitter = tags['contact:second_twitter'] && tags['contact:second_twitter'];
 	$: meetup = tags['contact:meetup'] && tags['contact:meetup'];
+	$: eventbrite = tags['contact:eventbrite'] && tags['contact:eventbrite'];
 	$: telegram = tags['contact:telegram'] && tags['contact:telegram'];
 	$: discord = tags['contact:discord'] && tags['contact:discord'];
 	$: youtube = tags['contact:youtube'] && tags['contact:youtube'];
@@ -62,6 +63,11 @@
 		{#if meetup}
 			<a href={meetup} target="_blank" rel="noreferrer" class="m-1">
 				<img src="/icons/socials/meetup.jpg" alt="meetup" class="w-10 h-10 rounded-full" />
+			</a>
+		{/if}
+		{#if eventbrite}
+			<a href={eventbrite} target="_blank" rel="noreferrer" class="m-1">
+				<img src="/icons/socials/eventbrite.png" alt="eventbrite" class="w-10 h-10 rounded-full" />
 			</a>
 		{/if}
 		{#if telegram}

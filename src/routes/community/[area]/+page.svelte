@@ -70,6 +70,7 @@
 	let twitter = community['contact:twitter'];
 	let secondTwitter = community['contact:second_twitter'];
 	let meetup = community['contact:meetup'];
+	let eventbrite = community['contact:eventbrite'];
 	let telegram = community['contact:telegram'];
 	let discord = community['contact:discord'];
 	let youtube = community['contact:youtube'];
@@ -693,6 +694,15 @@
 					{#if meetup}
 						<a href={meetup} target="_blank" rel="noreferrer" class="m-1">
 							<img src="/icons/socials/meetup.jpg" alt="meetup" class="w-10 h-10 rounded-full" />
+						</a>
+					{/if}
+					{#if eventbrite}
+						<a href={eventbrite} target="_blank" rel="noreferrer" class="m-1">
+							<img
+								src="/icons/socials/eventbrite.png"
+								alt="eventbrite"
+								class="w-10 h-10 rounded-full"
+							/>
 						</a>
 					{/if}
 					{#if telegram}
