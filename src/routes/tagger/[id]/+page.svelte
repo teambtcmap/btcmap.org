@@ -104,7 +104,7 @@
 			type: 'achievement'
 		},
 		{
-			check: userCreated < Date('December 26, 2022 00:00:00'),
+			check: Date.parse(userCreated) < new Date('December 26, 2022 00:00:00'),
 			title: 'OG Supertagger',
 			icon: 'og-supertagger',
 			type: 'achievement'
