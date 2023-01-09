@@ -18,7 +18,13 @@
 	// alert for report errors
 	$: $reportError && errToast($reportError);
 
-	$: communities = $areas.filter((area) => area.tags.type === 'community');
+	$: communities =
+		$reports &&
+		$reports.length &&
+		$areas.filter(
+			(area) =>
+				area.tags.type === 'community' && $reports.find((report) => report.area_id === area.id)
+		);
 	$: communityReports = $reports
 		.filter((report) => report.area_id && report.area_id.length > 2)
 		.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
