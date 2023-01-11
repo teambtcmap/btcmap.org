@@ -38,7 +38,6 @@
 	let icon;
 	let lightning;
 	let socialLinks;
-	let discord;
 	let contact;
 
 	let selected = false;
@@ -77,7 +76,6 @@
 					name,
 					icon: icon ? icon : '',
 					lightning: lightning ? lightning : '',
-					discord: discord ? 'Yes' : 'No',
 					socialLinks: socialLinks ? socialLinks : '',
 					contact
 				})
@@ -266,24 +264,11 @@
 					<div>
 						<label for="socials" class="mb-2 block font-semibold">Social Links</label>
 						<p class="text-sm mb-2">
-							You need to provide at least one method for people to join your community. We can
-							create a channel for you on the BTC Map Discord server if requested.
+							You need to provide at least one method for people to join your community.
 						</p>
 
-						<div class="mb-2 flex items-center space-x-2">
-							<label for="discord" class="text-sm cursor-pointer">Create a Discord channel</label>
-							<input
-								class="accent-link w-4 h-4"
-								disabled={!captchaSecret || !mapLoaded}
-								type="checkbox"
-								id="discord"
-								name="discord"
-								bind:checked={discord}
-							/>
-						</div>
-
 						<textarea
-							required={!discord}
+							required
 							disabled={!captchaSecret || !mapLoaded}
 							name="socials"
 							placeholder="Website, Twitter, Telegram, Matrix etc."
