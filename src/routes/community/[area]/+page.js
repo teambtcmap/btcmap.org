@@ -11,7 +11,7 @@ export async function load({ params }) {
 		if (data && data.id && data.tags && data.tags.name) {
 			return { id: data.id, name: data.tags.name };
 		}
-	} catch (error) {
+	} catch (err) {
 		throw error(404, 'Community Not Found');
 	}
 }
