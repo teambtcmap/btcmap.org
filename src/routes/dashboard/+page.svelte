@@ -37,7 +37,21 @@
 	$: statsSorted = statsCopy && statsCopy.sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
 
 	$: communities =
-		$areas && $areas.length ? $areas.filter((area) => area.tags.type === 'community') : undefined;
+		$areas && $areas.length && $reports && $reports.length
+			? $areas.filter(
+					(area) =>
+						area.tags.type === 'community' &&
+						area.tags['box:east'] &&
+						area.tags['box:north'] &&
+						area.tags['box:south'] &&
+						area.tags['box:west'] &&
+						area.tags.name &&
+						area.tags['icon:square'] &&
+						area.tags.continent &&
+						Object.keys(area.tags).find((key) => key.includes('contact')) &&
+						$reports.find((report) => report.area_id === area.id)
+			  )
+			: undefined;
 
 	const getStatPeriod = () => {
 		return new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
