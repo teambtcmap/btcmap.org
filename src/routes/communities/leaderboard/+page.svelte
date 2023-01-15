@@ -23,11 +23,23 @@
 		$reports.length &&
 		$areas.filter(
 			(area) =>
-				area.tags.type === 'community' && $reports.find((report) => report.area_id === area.id)
+				area.tags.type === 'community' &&
+				area.tags['box:east'] &&
+				area.tags['box:north'] &&
+				area.tags['box:south'] &&
+				area.tags['box:west'] &&
+				area.tags.name &&
+				area.tags['icon:square'] &&
+				area.tags.continent &&
+				Object.keys(area.tags).find((key) => key.includes('contact')) &&
+				$reports.find((report) => report.area_id === area.id)
 		);
-	$: communityReports = $reports
-		.filter((report) => report.area_id && report.area_id.length > 2)
-		.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
+	$: communityReports =
+		communities &&
+		communities.length &&
+		$reports
+			.filter((report) => communities.find((community) => community.id === report.area_id))
+			.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
 	let leaderboard;
 	let loading;
 
@@ -42,26 +54,23 @@
 		if (communities.length && communityReports.length && !status) {
 			loading = true;
 			leaderboard = [];
-			let reports = communityReports.slice(0, communities.length);
 
-			reports.forEach((report) => {
-				let community = communities.find((community) => community.id === report.area_id);
+			communities.forEach((community) => {
+				let communityReport = communityReports.find((report) => report.area_id === community.id);
 
-				if (community && community.tags && community.tags['icon:square'] && community.tags.name) {
-					report.icon = community.tags['icon:square'];
-					report.name = community.tags.name;
-					report.sponsor = community.tags.sponsor ? true : false;
+				if (communityReport) {
+					community.report = communityReport;
 
-					leaderboard.push(report);
+					leaderboard.push(community);
 				}
 			});
 
 			leaderboard.sort((a, b) =>
-				b.tags.up_to_date_percent === a.tags.up_to_date_percent
-					? b.tags.total_elements === a.tags.total_elements
-						? a.tags.legacy_elements - b.tags.legacy_elements
-						: b.tags.total_elements - a.tags.total_elements
-					: b.tags.up_to_date_percent - a.tags.up_to_date_percent
+				b.report.tags.up_to_date_percent === a.report.tags.up_to_date_percent
+					? b.report.tags.total_elements === a.report.tags.total_elements
+						? a.report.tags.legacy_elements - b.report.tags.legacy_elements
+						: b.report.tags.total_elements - a.report.tags.total_elements
+					: b.report.tags.up_to_date_percent - a.report.tags.up_to_date_percent
 			);
 
 			leaderboard = leaderboard;
@@ -202,14 +211,14 @@
 						{#each leaderboard as item, index}
 							<CommunityLeaderboardItem
 								position={index + 1}
-								avatar={item.icon}
-								name={item.name}
-								sponsor={item.sponsor}
-								id={item.area_id}
-								upToDate={item.tags.up_to_date_percent}
-								total={item.tags.total_elements}
-								legacy={item.tags.legacy_elements}
-								grade={item.tags.grade}
+								avatar={item.tags['icon:square']}
+								name={item.tags.name}
+								sponsor={item.tags.sponsor}
+								id={item.id}
+								upToDate={item.report.tags.up_to_date_percent}
+								total={item.report.tags.total_elements}
+								legacy={item.report.tags.legacy_elements}
+								grade={item.report.tags.grade}
 							/>
 						{/each}
 					{:else}
