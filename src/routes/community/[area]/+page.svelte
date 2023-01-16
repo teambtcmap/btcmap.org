@@ -1,6 +1,7 @@
 <script>
 	export let data;
 
+	import { geoContains } from 'd3-geo';
 	import tippy from 'tippy.js';
 	import Chart from 'chart.js/auto';
 	import { browser } from '$app/environment';
@@ -34,10 +35,11 @@
 		(area) =>
 			area.id == data.id &&
 			area.tags.type === 'community' &&
-			area.tags['box:east'] &&
-			area.tags['box:north'] &&
-			area.tags['box:south'] &&
-			area.tags['box:west'] &&
+			((area.tags['box:east'] &&
+				area.tags['box:north'] &&
+				area.tags['box:south'] &&
+				area.tags['box:west']) ||
+				area.tags.geo_json) &&
 			area.tags.name &&
 			area.tags['icon:square'] &&
 			area.tags.continent &&
@@ -149,7 +151,13 @@
 		let lat = latCalc(element['osm_json']);
 		let long = longCalc(element['osm_json']);
 
-		if (
+		if (community.geo_json) {
+			if (geoContains(community.geo_json, [long, lat])) {
+				return false;
+			} else {
+				return true;
+			}
+		} else if (
 			lat >= community['box:south'] &&
 			lat <= community['box:north'] &&
 			long >= community['box:west'] &&
@@ -586,10 +594,14 @@
 			map.addLayer(outdatedLayer);
 			map.addLayer(legacyLayer);
 
-			map.fitBounds([
-				[community['box:south'], community['box:west']],
-				[community['box:north'], community['box:east']]
-			]);
+			map.fitBounds(
+				community.geo_json
+					? L.geoJSON(community.geo_json).getBounds()
+					: [
+							[community['box:south'], community['box:west']],
+							[community['box:north'], community['box:east']]
+					  ]
+			);
 
 			mapLoaded = true;
 		}

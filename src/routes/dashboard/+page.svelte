@@ -41,10 +41,11 @@
 			? $areas.filter(
 					(area) =>
 						area.tags.type === 'community' &&
-						area.tags['box:east'] &&
-						area.tags['box:north'] &&
-						area.tags['box:south'] &&
-						area.tags['box:west'] &&
+						((area.tags['box:east'] &&
+							area.tags['box:north'] &&
+							area.tags['box:south'] &&
+							area.tags['box:west']) ||
+							area.tags.geo_json) &&
 						area.tags.name &&
 						area.tags['icon:square'] &&
 						area.tags.continent &&
