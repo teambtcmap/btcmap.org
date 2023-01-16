@@ -5,7 +5,14 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
-	import { elements, mapUpdates, elementError, elementsSyncCount } from '$lib/store';
+	import {
+		elements,
+		mapUpdates,
+		elementError,
+		elementsSyncCount,
+		areas,
+		areaError
+	} from '$lib/store';
 	import {
 		layers,
 		attribution,
@@ -115,6 +122,10 @@
 	// allow to view map with only boosted locations
 	const boosts = $page.url.searchParams.has('boosts');
 
+	// allow to view map centered on a community
+	const community = $page.url.searchParams.get('community');
+	const communitySelected = $areas.find((area) => area.id === community);
+
 	// displays a button in controls if there is new data available
 	const showDataRefresh = () => {
 		document.querySelector('.data-refresh-div').style.display = 'block';
@@ -124,6 +135,9 @@
 
 	// alert for map errors
 	$: $elementError && errToast($elementError);
+
+	// alert for area errors
+	$: $areaError && errToast($areaError);
 
 	onMount(async () => {
 		if (browser) {
@@ -137,8 +151,23 @@
 			// add map and tiles
 			map = leaflet.map(mapElement);
 
+			// set view to community if in url params
+			if (community && communitySelected) {
+				try {
+					map.fitBounds(L.geoJSON(communitySelected.tags.geo_json).getBounds());
+					mapCenter = map.getCenter();
+				} catch (error) {
+					map.setView([0, 0], 3);
+					mapCenter = map.getCenter();
+					errToast(
+						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
+					);
+					console.log(error);
+				}
+			}
+
 			// set URL lat/long query view if it exists and is valid
-			if (urlLat.length && urlLong.length) {
+			else if (urlLat.length && urlLong.length) {
 				try {
 					if (urlLat.length > 1 && urlLong.length > 1) {
 						map.fitBounds([

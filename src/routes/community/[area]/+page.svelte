@@ -662,7 +662,9 @@
 						/>
 					</h2>
 					<a
-						href={`/map?lat=${community['box:south']}&long=${community['box:west']}&lat=${community['box:north']}&long=${community['box:east']}`}
+						href={community.geo_json
+							? `/map?community=${data.id}`
+							: `/map?lat=${community['box:south']}&long=${community['box:west']}&lat=${community['box:north']}&long=${community['box:east']}`}
 						class="text-xs text-link hover:text-hover inline-flex justify-center items-center transition-colors"
 						>View on main map <svg
 							class="ml-1 w-3"
