@@ -23,7 +23,7 @@
 - lottie
 - opencage
 
-(see `package.json` for full list)
+(see [`package.json`](https://github.com/teambtcmap/btcmap.org/blob/main/package.json) for full list)
 
 ## Getting started
 
