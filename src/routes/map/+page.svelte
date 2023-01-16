@@ -436,7 +436,7 @@ Thanks for using BTC Map!`);
 					style: { color: getRandomColor() }
 				}).bindPopup(
 					`<div class='text-center space-y-2'>
-<img src=${community.tags['icon:square']} alt='avatar' class='w-24 h-24 rounded-full mx-auto' title='Community icon'/>
+<img src=${community.tags['icon:square']} alt='avatar' class='w-24 h-24 rounded-full mx-auto' title='Community icon' decoding="sync" fetchpriority="high"/>
 <span class='text-primary font-semibold text-xl' title='Community name'>${community.tags.name}</span>
 <a href='/community/${community.id}' class='block bg-link hover:bg-hover !text-white text-center font-semibold py-3 rounded-xl transition-colors' title='Community page'>View Community</a>
 </div>
