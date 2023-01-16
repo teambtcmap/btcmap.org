@@ -12,6 +12,7 @@
 - openstreetmap
 - localforage
 - chartjs
+- d3-geo
 - marked
 - dompurify
 - yarn
@@ -21,6 +22,8 @@
 - fontawesome
 - lottie
 - opencage
+
+(see `package.json` for full list)
 
 ## Getting started
 
@@ -60,6 +63,12 @@ Permissions-Policy: geolocation=(self "https://btcmap.org")
 For more information see this [article](https://developer.chrome.com/docs/privacy-sandbox/permissions-policy/).
 
 ### If you would like the map the initialize on a specific location there are a couple more steps to complete
+
+#### Community area
+
+1. Add `?community=einundzwanzig-deutschland` to your `iframe` URL (replace `einundzwanzig-deutschland` with the ID of your community - this can be found in the URL when visiting your community page)
+
+#### General area
 
 1. Visit [btcmap.org/map](https://btcmap.org/map) and zoom the map to your desired location
 2. Click anywhere on the map and open up the `console` in `DevTools` for your browser
