@@ -537,6 +537,12 @@
 			// get date from 1 year ago to add verified check if survey is current
 			let verifiedDate = calcVerifiedDate();
 
+			// add community area poly to map
+			if (community.geo_json) {
+				L.geoJSON(community.geo_json).addTo(map);
+			}
+
+			// add elements to map
 			filteredElements.forEach((element) => {
 				if (element['deleted_at']) {
 					return;

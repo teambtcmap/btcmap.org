@@ -1,6 +1,14 @@
 <script>
 	import { MapLoading } from '$comp';
-	import { elements, elementError, areas, areaError, mapLoading } from '$lib/store';
+	import {
+		elements,
+		elementError,
+		areas,
+		areaError,
+		reports,
+		reportError,
+		mapLoading
+	} from '$lib/store';
 </script>
 
 <svelte:head>
@@ -10,7 +18,7 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/map.png" />
 </svelte:head>
 
-{#if ($elements && $elements.length && $areas && $areas.length) || $elementError || $areaError}
+{#if ($elements && $elements.length && $areas && $areas.length && $reports && $reports.length) || $elementError || $areaError || $reportError}
 	<slot />
 {:else}
 	<MapLoading type="main" message={$mapLoading} />

@@ -11,7 +11,9 @@
 		elementError,
 		elementsSyncCount,
 		areas,
-		areaError
+		areaError,
+		reports,
+		reportError
 	} from '$lib/store';
 	import {
 		layers,
@@ -38,6 +40,17 @@
 
 	let mapCenter;
 	let elementsCopy = [];
+
+	let communities = $areas.filter(
+		(area) =>
+			area.tags.type === 'community' &&
+			area.tags.geo_json &&
+			area.tags.name &&
+			area.tags['icon:square'] &&
+			area.tags.continent &&
+			Object.keys(area.tags).find((key) => key.includes('contact')) &&
+			$reports.find((report) => report.area_id === area.id)
+	);
 
 	let customSearchBar;
 	let clearSearchButton;
@@ -138,6 +151,9 @@
 
 	// alert for area errors
 	$: $areaError && errToast($areaError);
+
+	// alert for report errors
+	$: $reportError && errToast($reportError);
 
 	onMount(async () => {
 		if (browser) {
@@ -403,6 +419,35 @@ Thanks for using BTC Map!`);
 			// create marker cluster group and layers
 			let markers = L.markerClusterGroup({ maxClusterRadius: 60 });
 			let categories = {};
+			let communitiesLayer = L.layerGroup();
+
+			// add communities to map
+			function getRandomColor() {
+				var letters = '0123456789ABCDEF';
+				var color = '#';
+				for (var i = 0; i < 6; i++) {
+					color += letters[Math.floor(Math.random() * 16)];
+				}
+				return color;
+			}
+
+			communities.forEach((community) => {
+				let communityLayer = L.geoJSON(community.tags.geo_json, {
+					style: { color: getRandomColor() }
+				}).bindPopup(
+					`<div class='text-center space-y-2'>
+<img src=${community.tags['icon:square']} alt='avatar' class='w-24 h-24 rounded-full mx-auto' title='Community icon'/>
+<span class='text-primary font-semibold text-xl' title='Community name'>${community.tags.name}</span>
+<a href='/community/${community.id}' class='block bg-link hover:bg-hover !text-white text-center font-semibold py-3 rounded-xl transition-colors' title='Community page'>View Community</a>
+</div>
+`,
+					{ closeButton: false, minWidth: 300 }
+				);
+
+				communityLayer.on('click', () => communityLayer.bringToBack());
+
+				communityLayer.addTo(communitiesLayer);
+			});
 
 			// add location information
 			$elements.forEach((element) => {
@@ -467,7 +512,7 @@ Thanks for using BTC Map!`);
 
 			map.addLayer(markers);
 
-			let overlayMaps = {};
+			let overlayMaps = { Communities: communitiesLayer };
 
 			Object.keys(categories)
 				.sort()
