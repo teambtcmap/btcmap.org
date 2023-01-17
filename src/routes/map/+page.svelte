@@ -440,6 +440,10 @@ Thanks for using BTC Map!`);
 				communityLayer.addTo(communitiesLayer);
 			});
 
+			if (community && communitySelected) {
+				communitiesLayer.addTo(map);
+			}
+
 			// add location information
 			$elements.forEach((element) => {
 				if (element['deleted_at']) {
