@@ -31,7 +31,7 @@
 		generateIcon,
 		generateMarker
 	} from '$lib/map/setup';
-	import { errToast } from '$lib/utils';
+	import { errToast, getRandomColor } from '$lib/utils';
 	import { MapLoading, Icon, Boost, ShowTags } from '$comp';
 
 	let mapElement;
@@ -422,15 +422,6 @@ Thanks for using BTC Map!`);
 			let communitiesLayer = L.layerGroup();
 
 			// add communities to map
-			function getRandomColor() {
-				var letters = '0123456789ABCDEF';
-				var color = '#';
-				for (var i = 0; i < 6; i++) {
-					color += letters[Math.floor(Math.random() * 16)];
-				}
-				return color;
-			}
-
 			communities.forEach((community) => {
 				let communityLayer = L.geoJSON(community.tags.geo_json, {
 					style: { color: getRandomColor() }

@@ -30,6 +30,7 @@
 		MapLoading,
 		SponsorBadge
 	} from '$comp';
+	import { getRandomColor } from '$lib/utils';
 
 	let community = $areas.find(
 		(area) =>
@@ -539,7 +540,9 @@
 
 			// add community area poly to map
 			if (community.geo_json) {
-				L.geoJSON(community.geo_json).addTo(map);
+				L.geoJSON(community.geo_json, {
+					style: { color: getRandomColor() }
+				}).addTo(map);
 			}
 
 			// add elements to map
