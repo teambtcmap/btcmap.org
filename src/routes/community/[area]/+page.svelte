@@ -542,7 +542,7 @@
 
 			// add community area poly to map
 			if (community.geo_json) {
-				L.geoJSON(community.geo_json).addTo(map);
+				L.geoJSON(community.geo_json, { style: { fill: false } }).addTo(map);
 			}
 
 			// add elements to map

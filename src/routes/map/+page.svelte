@@ -424,7 +424,7 @@ Thanks for using BTC Map!`);
 			// add communities to map
 			communities.forEach((community) => {
 				let communityLayer = L.geoJSON(community.tags.geo_json, {
-					style: { color: getRandomColor() }
+					style: { color: getRandomColor(), fillOpacity: 0 }
 				}).bindPopup(
 					`<div class='text-center space-y-2'>
 <img src=${community.tags['icon:square']} alt='avatar' class='w-24 h-24 rounded-full mx-auto' title='Community icon' decoding="sync" fetchpriority="high"/>
