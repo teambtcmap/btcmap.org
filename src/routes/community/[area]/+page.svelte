@@ -1,6 +1,7 @@
 <script>
 	export let data;
 
+	import rewind from '@mapbox/geojson-rewind';
 	import { geoContains } from 'd3-geo';
 	import tippy from 'tippy.js';
 	import Chart from 'chart.js/auto';
@@ -146,16 +147,18 @@
 
 	let loading = true;
 
+	let rewoundPoly = community.geo_json ? rewind(community.geo_json, true) : undefined;
+
 	// filter elements within community
 	let filteredElements = $elements.filter((element) => {
 		let lat = latCalc(element['osm_json']);
 		let long = longCalc(element['osm_json']);
 
 		if (community.geo_json) {
-			if (geoContains(community.geo_json, [long, lat])) {
-				return false;
-			} else {
+			if (geoContains(rewoundPoly, [long, lat])) {
 				return true;
+			} else {
+				return false;
 			}
 		} else if (
 			lat >= community['box:south'] &&
