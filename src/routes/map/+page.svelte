@@ -423,11 +423,12 @@ Thanks for using BTC Map!`);
 
 			// add communities to map
 			communities.forEach((community) => {
+				let randomColor = getRandomColor();
 				let communityLayer = L.geoJSON(community.tags.geo_json, {
-					style: { color: getRandomColor(), fillOpacity: 0 }
+					style: { color: randomColor, fillOpacity: 0 }
 				}).bindPopup(
 					`<div class='text-center space-y-2'>
-<img src=${community.tags['icon:square']} alt='avatar' class='w-24 h-24 rounded-full mx-auto' title='Community icon' decoding="sync" fetchpriority="high"/>
+<img src=${community.tags['icon:square']} alt='avatar' class='w-24 h-24 rounded-full mx-auto' title='Community icon' decoding="sync" fetchpriority="high" style="border: 4px solid ${randomColor};"/>
 <span class='text-primary font-semibold text-xl' title='Community name'>${community.tags.name}</span>
 <a href='/community/${community.id}' class='block bg-link hover:bg-hover !text-white text-center font-semibold py-3 rounded-xl transition-colors' title='Community page'>View Community</a>
 </div>
