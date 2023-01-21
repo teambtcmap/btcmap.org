@@ -569,9 +569,7 @@
 				const lat = latCalc(element);
 				const long = longCalc(element);
 
-				let campsite = element.tags && element.tags['tourism'] === 'camp_site';
-
-				let divIcon = generateIcon(L, icon, boosted, campsite);
+				let divIcon = generateIcon(L, icon, boosted);
 
 				let marker = generateMarker(
 					lat,

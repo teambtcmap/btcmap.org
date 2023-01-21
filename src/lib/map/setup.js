@@ -322,7 +322,7 @@ export const longCalc = (element) => {
 	return element.type == 'node' ? element.lon : (element.bounds.minlon + element.bounds.maxlon) / 2;
 };
 
-export const generateIcon = (L, icon, boosted, campsite) => {
+export const generateIcon = (L, icon, boosted) => {
 	return L.divIcon({
 		className: boosted ? 'boosted-icon' : 'div-icon',
 		iconSize: [32, 43],
@@ -332,7 +332,7 @@ export const generateIcon = (L, icon, boosted, campsite) => {
 			boosted ? 'animate-wiggle' : ''
 		} mx-auto mt-[5.75px] text-white'>
 			     	<use width='20px' height='20px' href="/icons/material/spritesheet.svg#${
-							campsite ? 'camping' : icon !== 'question_mark' ? icon : 'currency_bitcoin'
+							icon !== 'question_mark' ? icon : 'currency_bitcoin'
 						}">
 						</use>
 			     </svg>`
