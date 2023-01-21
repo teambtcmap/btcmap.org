@@ -1,6 +1,6 @@
 <script>
 	export let type;
-	export let message;
+	export let message = undefined;
 	export let style;
 
 	import { LoadingSpinner } from '$comp';

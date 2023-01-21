@@ -1,7 +1,7 @@
 <script>
 	export let color = 'text-white';
 	export let size = 'h-6 w-6';
-	export let style;
+	export let style = undefined;
 </script>
 
 <svg

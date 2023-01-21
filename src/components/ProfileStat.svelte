@@ -5,7 +5,7 @@
 	export let stat;
 	export let percent;
 	export let border;
-	export let tooltip;
+	export let tooltip = undefined;
 
 	let tooltipElement;
 

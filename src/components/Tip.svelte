@@ -1,8 +1,8 @@
 <script>
-	export let user;
+	export let user = undefined;
 	export let destination;
 	export let style;
-	export let type;
+	export let type = undefined;
 </script>
 
 {#if user}

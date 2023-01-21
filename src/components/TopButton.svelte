@@ -1,6 +1,6 @@
 <script>
-	export let scroll;
-	export let style;
+	export let scroll = undefined;
+	export let style = undefined;
 </script>
 
 <button

@@ -1,7 +1,7 @@
 <script>
 	export let w;
 	export let h;
-	export let style;
+	export let style = undefined;
 	export let icon;
 	export let type;
 </script>

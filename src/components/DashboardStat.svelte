@@ -3,9 +3,9 @@
 
 	export let title;
 	export let stat;
-	export let percent;
-	export let change;
-	export let border;
+	export let percent = undefined;
+	export let change = undefined;
+	export let border = undefined;
 	export let loading;
 </script>
 
