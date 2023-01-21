@@ -29,18 +29,6 @@
 			logo: 'bitcoin-island-philippines.jpeg'
 		}
 	];
-
-	/* onMount(() => {
-		axios
-			.get('/support-us/endpoint')
-			.then(function (response) {
-				console.log(response);
-			})
-			.catch(function (error) {
-				errToast('Could not fetch new on-chain address, please use lightning.');
-				console.log(error);
-			});
-	}); */
 </script>
 
 <svelte:head>
