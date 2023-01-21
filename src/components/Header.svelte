@@ -17,7 +17,8 @@
 
 	const contributeDropdownLinks = [
 		{ title: 'Add Location', url: '/add-location', icon: 'add' },
-		{ title: 'Verify Location', url: '/verify-location', icon: 'verify' }
+		{ title: 'Verify Location', url: '/verify-location', icon: 'verify' },
+		{ title: 'Open Tickets', url: '/tickets', icon: 'ticket' }
 	];
 
 	const statsDropdownLinks = [
@@ -65,7 +66,7 @@
 					title={link.title}
 					links={contributeDropdownLinks}
 					top="add"
-					bottom="verify"
+					bottom="ticket"
 				/>
 
 				<!-- dropdown menu -->

@@ -34,3 +34,6 @@ export { default as CommunityLeaderboardItem } from './CommunityLeaderboardItem.
 export { default as CommunityLeaderboardSkeleton } from './CommunityLeaderboardSkeleton.svelte';
 export { default as SponsorBadge } from './SponsorBadge.svelte';
 export { default as TimelineTooltip } from './TimelineTooltip.svelte';
+export { default as OpenTicket } from './OpenTicket.svelte';
+export { default as OpenTicketSkeleton } from './OpenTicketSkeleton.svelte';
+export { default as TicketLabel } from './TicketLabel.svelte';
