@@ -74,7 +74,7 @@
 					: b.report.tags.up_to_date_percent - a.report.tags.up_to_date_percent
 			);
 
-			leaderboard = leaderboard;
+			leaderboard = leaderboard.slice(0, 50);
 			loading = false;
 		}
 	};
@@ -162,11 +162,18 @@
 				accurate information. They also help onboard new merchants in their area!
 			</h2>
 
-			<PrimaryButton
-				text="Add a local community"
-				style="w-[210px] mx-auto py-3 rounded-xl"
-				link="/communities/add"
-			/>
+			<div class="md:flex justify-center items-center space-y-5 md:space-y-0 md:space-x-5">
+				<PrimaryButton
+					text="Add community"
+					style="md:w-[150px] mx-auto md:mx-0 py-3 rounded-xl"
+					link="/communities/add"
+				/>
+				<PrimaryButton
+					text="View map"
+					style="md:w-[150px] mx-auto md:mx-0 py-3 rounded-xl"
+					link="/map?communitiesOnly"
+				/>
+			</div>
 
 			<section id="leaderboard">
 				<div class="hidden lg:grid text-center grid-cols-6 mb-5">
