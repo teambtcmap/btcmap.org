@@ -491,7 +491,7 @@ ${
 		community.tags['contact:twitter']
 			? `
 		<a href=${community.tags['contact:twitter']} target="_blank" rel="noreferrer" class="m-1" title='Twitter'>
-			<img src="/icons/socials/twitter.svg" alt="twitter" />
+			<img src="/icons/socials/twitter.svg" alt="twitter" decoding="sync" fetchpriority="high" />
 		</a>`
 			: ''
 	}
@@ -500,7 +500,7 @@ ${
 		community.tags['contact:secondTwitter']
 			? `
 		<a href=${community.tags['contact:secondTwitter']} target="_blank" rel="noreferrer" class="m-1" title='Twitter'>
-			<img src="/icons/socials/twitter.svg" alt="twitter" />
+			<img src="/icons/socials/twitter.svg" alt="twitter" decoding="sync" fetchpriority="high" />
 		</a>`
 			: ''
 	}
@@ -509,7 +509,7 @@ ${
 		community.tags['contact:meetup']
 			? `
 		<a href=${community.tags['contact:meetup']} target="_blank" rel="noreferrer" class="m-1" title='Meetup'>
-			<img src="/icons/socials/meetup.jpg" alt="meetup" class="w-10 h-10 rounded-full" />
+			<img src="/icons/socials/meetup.jpg" alt="meetup" class="w-10 h-10 rounded-full" decoding="sync" fetchpriority="high" />
 		</a>`
 			: ''
 	}
@@ -518,7 +518,7 @@ ${
 		community.tags['contact:eventbrite']
 			? `
 		<a href=${community.tags['contact:eventbrite']} target="_blank" rel="noreferrer" class="m-1" title='Eventbrite'>
-			<img src="/icons/socials/eventbrite.png" alt="eventbrite" class="w-10 h-10 rounded-full" />
+			<img src="/icons/socials/eventbrite.png" alt="eventbrite" class="w-10 h-10 rounded-full" decoding="sync" fetchpriority="high" />
 		</a>`
 			: ''
 	}
@@ -527,7 +527,7 @@ ${
 		community.tags['contact:telegram']
 			? `
 		<a href=${community.tags['contact:telegram']} target="_blank" rel="noreferrer" class="m-1" title='Telegram'>
-			<img src="/icons/socials/telegram.svg" alt="telegram" />
+			<img src="/icons/socials/telegram.svg" alt="telegram" decoding="sync" fetchpriority="high" />
 		</a>`
 			: ''
 	}
@@ -536,7 +536,7 @@ ${
 		community.tags['contact:discord']
 			? `
 		<a href=${community.tags['contact:discord']} target="_blank" rel="noreferrer" class="m-1" title='Discord'>
-			<img src="/icons/socials/discord.svg" alt="discord" />
+			<img src="/icons/socials/discord.svg" alt="discord" decoding="sync" fetchpriority="high" />
 		</a>`
 			: ''
 	}
@@ -545,7 +545,7 @@ ${
 		community.tags['contact:youtube']
 			? `
 		<a href=${community.tags['contact:youtube']} target="_blank" rel="noreferrer" class="m-1" title='YouTube'>
-			<img src="/icons/socials/youtube.svg" alt="youtube" />
+			<img src="/icons/socials/youtube.svg" alt="youtube" decoding="sync" fetchpriority="high" />
 		</a>`
 			: ''
 	}
@@ -554,7 +554,7 @@ ${
 		community.tags['contact:github']
 			? `
 		<a href=${community.tags['contact:github']} target="_blank" rel="noreferrer" class="m-1" title='GitHub'>
-			<img src="/icons/socials/github.svg" alt="github" />
+			<img src="/icons/socials/github.svg" alt="github" decoding="sync" fetchpriority="high" />
 		</a>`
 			: ''
 	}
@@ -563,7 +563,7 @@ ${
 		community.tags['contact:reddit']
 			? `
 		<a href=${community.tags['contact:reddit']} target="_blank" rel="noreferrer" class="m-1" title='Reddit'>
-			<img src="/icons/socials/reddit.svg" alt="reddit" />
+			<img src="/icons/socials/reddit.svg" alt="reddit" decoding="sync" fetchpriority="high" />
 		</a>`
 			: ''
 	}
