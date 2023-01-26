@@ -81,6 +81,18 @@ Thanks for using BTC Map!
 
 4. Add this URL to your `iframe` embed code
 
+#### Communities only
+
+1. Add `?communitiesOnly` to your `iframe` URL
+
+##### Language filter
+
+1. Add `?communitiesOnly&language=es`
+
+##### Organization filter
+
+1. Add `?communitiesOnly&organization=einundzwanzig`
+
 ### If you would like to filter by payment method
 
 Add the preferred payment method(s) as `URLSearchParams` to the `src` attribute of your `iframe`. These can be added in addition to the location params above.
