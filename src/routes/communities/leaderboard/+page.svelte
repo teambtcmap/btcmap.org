@@ -165,12 +165,12 @@
 			<div class="md:flex justify-center items-center space-y-5 md:space-y-0 md:space-x-5">
 				<PrimaryButton
 					text="Add community"
-					style="md:w-[150px] mx-auto md:mx-0 py-3 rounded-xl"
+					style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
 					link="/communities/add"
 				/>
 				<PrimaryButton
-					text="View map"
-					style="md:w-[150px] mx-auto md:mx-0 py-3 rounded-xl"
+					text="View community map"
+					style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
 					link="/map?communitiesOnly"
 				/>
 			</div>
