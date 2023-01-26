@@ -2,7 +2,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
 	import axios from 'axios';
-	import { Header, Footer, PrimaryButton, MapLoading, FormSuccess } from '$comp';
+	import { Header, Footer, PrimaryButton, MapLoading, FormSuccess, TimelineTooltip } from '$comp';
 	import { geolocate, changeDefaultIcons } from '$lib/map/setup';
 	import { errToast, successToast } from '$lib/utils';
 
@@ -39,6 +39,7 @@
 	let lightning;
 	let socialLinks;
 	let contact;
+	let notes;
 
 	let selected = false;
 	let noLocationSelected = false;
@@ -77,7 +78,8 @@
 					icon: icon ? icon : '',
 					lightning: lightning ? lightning : '',
 					socialLinks: socialLinks ? socialLinks : '',
-					contact
+					contact,
+					notes: notes ? notes : ''
 				})
 				.then(function (response) {
 					submissionIssueNumber = response.data.number;
@@ -160,11 +162,23 @@
 			<section id="add-community" class="mx-auto w-full md:w-[600px] mt-16 pb-20 md:pb-32">
 				<h2 class="text-primary text-3xl font-semibold mb-5 text-center">Add Community</h2>
 
-				<p class="text-primary w-full mb-10 text-center">
+				<p class="text-primary w-full mb-5 text-center">
 					Please fill out this form to submit a community application. This is a great way to grow
 					bitcoin adoption in your area, have some fun, and maybe even make some friends along the
-					way.
+					way. <TimelineTooltip
+						tooltip="NOTE: BTC Map is a free and open source project run by volunteers. Each community application is manually reviewed to ensure quality. It may take a few weeks to have your community added."
+					/>
 				</p>
+
+				<div class="text-primary w-full mb-10">
+					<p class="font-semibold">Criteria</p>
+					<ul class="list-disc ml-5">
+						<li>bitcoin-only</li>
+						<li>must be a geographical area not a single point</li>
+						<li>be willing to take ownership of your local mapping data</li>
+						<li>try to onboard new businesses in your area</li>
+					</ul>
+				</div>
 
 				<form on:submit={submitForm} class="text-primary space-y-5 w-full">
 					<div>
@@ -271,7 +285,7 @@
 							required
 							disabled={!captchaSecret || !mapLoaded}
 							name="socials"
-							placeholder="Website, Twitter, Telegram, Matrix etc."
+							placeholder="Website, Nostr, Telegram, Meetup etc."
 							rows="3"
 							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
 							bind:value={socialLinks}
@@ -291,6 +305,25 @@
 							placeholder="e.g. hello@btcmap.org"
 							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
 							bind:value={contact}
+						/>
+					</div>
+
+					<div>
+						<label for="notes" class="mb-2 block font-semibold"
+							>Notes <span class="font-normal">(optional)</span></label
+						>
+						<p class="text-sm mb-2">
+							Is this community part of an organization? Would you like to be associated with a
+							specific language? Etc.
+						</p>
+
+						<textarea
+							disabled={!captchaSecret || !mapLoaded}
+							name="notes"
+							placeholder="German speaking - part of Einundzwanzig."
+							rows="2"
+							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+							bind:value={notes}
 						/>
 					</div>
 
