@@ -41,17 +41,6 @@
 	let mapCenter;
 	let elementsCopy = [];
 
-	let communities = $areas.filter(
-		(area) =>
-			area.tags.type === 'community' &&
-			area.tags.geo_json &&
-			area.tags.name &&
-			area.tags['icon:square'] &&
-			area.tags.continent &&
-			Object.keys(area.tags).find((key) => key.includes('contact')) &&
-			$reports.find((report) => report.area_id === area.id)
-	);
-
 	let customSearchBar;
 	let clearSearchButton;
 	let showSearch;
@@ -139,6 +128,29 @@
 	const community = $page.url.searchParams.get('community');
 	const communitySelected = $areas.find((area) => area.id === community);
 
+	// allow to view map with communities only
+	const communitiesOnly = $page.url.searchParams.has('communitiesOnly');
+
+	// allow to view map with only certain language communities
+	const language = $page.url.searchParams.get('language');
+
+	// allow to view map with only certain org communities
+	const organization = $page.url.searchParams.get('organization');
+
+	// filter communities
+	let communities = $areas.filter(
+		(area) =>
+			area.tags.type === 'community' &&
+			area.tags.geo_json &&
+			area.tags.name &&
+			area.tags['icon:square'] &&
+			area.tags.continent &&
+			Object.keys(area.tags).find((key) => key.includes('contact')) &&
+			$reports.find((report) => report.area_id === area.id) &&
+			(language ? area.tags.language === language : true) &&
+			(organization ? area.tags.organization === organization : true)
+	);
+
 	// displays a button in controls if there is new data available
 	const showDataRefresh = () => {
 		document.querySelector('.data-refresh-div').style.display = 'block';
@@ -171,6 +183,23 @@
 			if (community && communitySelected) {
 				try {
 					map.fitBounds(L.geoJSON(communitySelected.tags.geo_json).getBounds());
+					mapCenter = map.getCenter();
+				} catch (error) {
+					map.setView([0, 0], 3);
+					mapCenter = map.getCenter();
+					errToast(
+						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
+					);
+					console.log(error);
+				}
+			}
+
+			// set view to communities if in url params
+			else if (communitiesOnly && communities.length) {
+				try {
+					map.fitBounds(
+						communities.map((community) => L.geoJSON(community.tags.geo_json).getBounds())
+					);
 					mapCenter = map.getCenter();
 				} catch (error) {
 					map.setView([0, 0], 3);
@@ -428,11 +457,122 @@ Thanks for using BTC Map!`);
 					style: { color: randomColor, fillOpacity: 0 }
 				}).bindPopup(
 					`<div class='text-center space-y-2'>
-<img src=${community.tags['icon:square']} alt='avatar' class='w-24 h-24 rounded-full mx-auto p-1' title='Community icon' decoding="sync" fetchpriority="high" style="border: 4px solid ${randomColor};"/>
-<span class='text-primary font-semibold text-xl' title='Community name'>${community.tags.name}</span>
-<a href='/community/${community.id}' class='block bg-link hover:bg-hover !text-white text-center font-semibold py-3 rounded-xl transition-colors' title='Community page'>View Community</a>
+<img src=${
+						community.tags['icon:square']
+					} alt='avatar' class='w-24 h-24 rounded-full mx-auto p-1' title='Community icon' decoding="sync" fetchpriority="high" style="border: 4px solid ${randomColor};"/>
+
+<span class='text-primary font-semibold text-xl' title='Community name'>${
+						community.tags.name
+					}</span>
+
+${
+	community.tags.sponsor
+		? `<span class="block gradient-bg w-32 mx-auto py-1 text-xs text-white font-semibold rounded-full" title='Supporter'>
+	BTC Map Sponsor
+</span>`
+		: ''
+}
+
+<div class='flex flex-wrap justify-center items-center'>
+	${
+		community.tags['contact:website']
+			? `
+		<a href=${community.tags['contact:website']} target="_blank" rel="noreferrer" class="m-1" title='Website'>
+			<span class="bg-bitcoin w-[40px] h-[40px] flex justify-center items-center rounded-full">
+				<svg width='28px' height='28px' class='text-white'>
+					<use width='28px' height='28px' href="/icons/popup/spritesheet.svg#globe"></use>
+				</svg>
+			</span>
+		</a>`
+			: ''
+	}
+
+	${
+		community.tags['contact:twitter']
+			? `
+		<a href=${community.tags['contact:twitter']} target="_blank" rel="noreferrer" class="m-1" title='Twitter'>
+			<img src="/icons/socials/twitter.svg" alt="twitter" />
+		</a>`
+			: ''
+	}
+
+	${
+		community.tags['contact:secondTwitter']
+			? `
+		<a href=${community.tags['contact:secondTwitter']} target="_blank" rel="noreferrer" class="m-1" title='Twitter'>
+			<img src="/icons/socials/twitter.svg" alt="twitter" />
+		</a>`
+			: ''
+	}
+
+	${
+		community.tags['contact:meetup']
+			? `
+		<a href=${community.tags['contact:meetup']} target="_blank" rel="noreferrer" class="m-1" title='Meetup'>
+			<img src="/icons/socials/meetup.jpg" alt="meetup" class="w-10 h-10 rounded-full" />
+		</a>`
+			: ''
+	}
+
+	${
+		community.tags['contact:eventbrite']
+			? `
+		<a href=${community.tags['contact:eventbrite']} target="_blank" rel="noreferrer" class="m-1" title='Eventbrite'>
+			<img src="/icons/socials/eventbrite.png" alt="eventbrite" class="w-10 h-10 rounded-full" />
+		</a>`
+			: ''
+	}
+
+	${
+		community.tags['contact:telegram']
+			? `
+		<a href=${community.tags['contact:telegram']} target="_blank" rel="noreferrer" class="m-1" title='Telegram'>
+			<img src="/icons/socials/telegram.svg" alt="telegram" />
+		</a>`
+			: ''
+	}
+
+	${
+		community.tags['contact:discord']
+			? `
+		<a href=${community.tags['contact:discord']} target="_blank" rel="noreferrer" class="m-1" title='Discord'>
+			<img src="/icons/socials/discord.svg" alt="discord" />
+		</a>`
+			: ''
+	}
+
+	${
+		community.tags['contact:youtube']
+			? `
+		<a href=${community.tags['contact:youtube']} target="_blank" rel="noreferrer" class="m-1" title='YouTube'>
+			<img src="/icons/socials/youtube.svg" alt="youtube" />
+		</a>`
+			: ''
+	}
+
+	${
+		community.tags['contact:github']
+			? `
+		<a href=${community.tags['contact:github']} target="_blank" rel="noreferrer" class="m-1" title='GitHub'>
+			<img src="/icons/socials/github.svg" alt="github" />
+		</a>`
+			: ''
+	}
+
+	${
+		community.tags['contact:reddit']
+			? `
+		<a href=${community.tags['contact:reddit']} target="_blank" rel="noreferrer" class="m-1" title='Reddit'>
+			<img src="/icons/socials/reddit.svg" alt="reddit" />
+		</a>`
+			: ''
+	}
 </div>
-`,
+
+<a href='/community/${
+						community.id
+					}' class='block bg-link hover:bg-hover !text-white text-center font-semibold py-3 rounded-xl transition-colors' title='Community page'>View Community</a>
+</div>`,
 					{ closeButton: false, minWidth: 300 }
 				);
 
@@ -441,7 +581,7 @@ Thanks for using BTC Map!`);
 				communityLayer.addTo(communitiesLayer);
 			});
 
-			if (community && communitySelected) {
+			if ((community && communitySelected) || communitiesOnly) {
 				communitiesLayer.addTo(map);
 			}
 
@@ -516,7 +656,9 @@ Thanks for using BTC Map!`);
 							? category.toUpperCase()
 							: category.charAt(0).toUpperCase() + category.slice(1)
 					] = categories[category];
-					map.addLayer(categories[category]);
+					if (!communitiesOnly) {
+						map.addLayer(categories[category]);
+					}
 				});
 
 			const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
