@@ -160,11 +160,18 @@
 				and have fun!
 			</h2>
 
-			<PrimaryButton
-				text="Add a local community"
-				style="w-[210px] mx-auto py-3 rounded-xl"
-				link="/communities/add"
-			/>
+			<div class="md:flex justify-center items-center space-y-5 md:space-y-0 md:space-x-5">
+				<PrimaryButton
+					text="Add community"
+					style="md:w-[150px] mx-auto md:mx-0 py-3 rounded-xl"
+					link="/communities/add"
+				/>
+				<PrimaryButton
+					text="View map"
+					style="md:w-[150px] mx-auto md:mx-0 py-3 rounded-xl"
+					link="/map?communitiesOnly"
+				/>
+			</div>
 
 			<div class="relative">
 				{#if !initialRenderComplete || !communities}
