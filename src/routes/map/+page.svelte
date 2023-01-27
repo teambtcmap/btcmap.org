@@ -1,6 +1,8 @@
 <script>
 	import localforage from 'localforage';
 	import OutClick from 'svelte-outclick';
+	import rewind from '@mapbox/geojson-rewind';
+	import { geoArea } from 'd3-geo';
 	import { tick } from 'svelte';
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
@@ -150,6 +152,14 @@
 			(language ? area.tags.language === language : true) &&
 			(organization ? area.tags.organization === organization : true)
 	);
+
+	// sort communities by largest to smallest
+	communities.forEach((community) => {
+		rewind(community.tags.geo_json, true);
+		community.area = geoArea(community.tags.geo_json);
+	});
+
+	communities.sort((a, b) => b.area - a.area);
 
 	// displays a button in controls if there is new data available
 	const showDataRefresh = () => {
