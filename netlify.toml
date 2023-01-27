@@ -1,0 +1,4 @@
+[[headers]]
+  for = "/images/communities"
+  [headers.values]
+    Cache-Control = "public, max-age=15552000"
