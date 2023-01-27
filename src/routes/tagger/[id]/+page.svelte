@@ -371,7 +371,12 @@
 	<div class="w-10/12 xl:w-[1200px] mx-auto">
 		<main class="text-center my-10 md:my-20">
 			<section id="profile" class="space-y-8">
-				<img src={avatar} alt="avatar" class="rounded-full w-32 h-32 object-cover mx-auto" />
+				<img
+					src={avatar}
+					alt="avatar"
+					class="rounded-full w-32 h-32 object-cover mx-auto"
+					onerror="this.src='/images/satoshi-nakamoto.png'"
+				/>
 
 				<div>
 					<h1 class="text-4xl font-semibold text-primary !leading-tight">

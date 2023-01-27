@@ -643,7 +643,12 @@
 		<main class="text-center my-10 md:my-20 space-y-16">
 			<section id="profile" class="space-y-8">
 				<div class="space-y-2">
-					<img src={avatar} alt="avatar" class="rounded-full w-32 h-32 object-cover mx-auto" />
+					<img
+						src={avatar}
+						alt="avatar"
+						class="rounded-full w-32 h-32 object-cover mx-auto"
+						onerror="this.src='/images/communities/bitcoin.svg'"
+					/>
 					<h1 class="text-4xl font-semibold text-primary !leading-tight">
 						{name}
 					</h1>
@@ -854,6 +859,7 @@
 												: '/images/satoshi-nakamoto.png'}
 											alt="avatar"
 											class="rounded-full w-20 h-20 object-cover mx-auto"
+											onerror="this.src='/images/satoshi-nakamoto.png'"
 										/>
 										<p class="text-body text-center font-semibold">
 											{tagger.osm_json.display_name.length > 21

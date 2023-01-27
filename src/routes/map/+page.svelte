@@ -459,7 +459,7 @@ Thanks for using BTC Map!`);
 					`<div class='text-center space-y-2'>
 <img src=${
 						community.tags['icon:square']
-					} alt='avatar' class='w-24 h-24 rounded-full mx-auto p-1' title='Community icon' decoding="sync" fetchpriority="high" style="border: 4px solid ${randomColor};"/>
+					} alt='avatar' class='w-24 h-24 rounded-full mx-auto p-1' title='Community icon' decoding="sync" fetchpriority="high" style="border: 4px solid ${randomColor};" onerror="this.src='/images/communities/bitcoin.svg'" />
 
 <span class='text-primary font-semibold text-xl' title='Community name'>${
 						community.tags.name

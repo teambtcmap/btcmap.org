@@ -44,6 +44,7 @@
 			src={avatar}
 			alt="avatar"
 			class="rounded-full w-20 h-20 lg:w-14 lg:h-14 object-cover mx-auto lg:mx-0 mb-2 lg:mb-0"
+			onerror="this.src='/images/satoshi-nakamoto.png'"
 		/>
 
 		<a
