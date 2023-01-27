@@ -30,6 +30,7 @@
 				src={image ? image : '/images/communities/bitcoin.svg'}
 				alt={tags.name}
 				class="w-20 h-20 object-cover rounded-full mx-auto"
+				onerror="this.src='/images/communities/bitcoin.svg'"
 			/>
 
 			<span class="text-center text-lg font-semibold block">{tags.name}</span>

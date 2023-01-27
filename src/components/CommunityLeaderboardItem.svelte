@@ -43,6 +43,7 @@
 			src={avatar}
 			alt="avatar"
 			class="rounded-full w-20 h-20 lg:w-14 lg:h-14 object-cover mx-auto mb-2"
+			onerror="this.src='/images/communities/bitcoin.svg'"
 		/>
 
 		<a
