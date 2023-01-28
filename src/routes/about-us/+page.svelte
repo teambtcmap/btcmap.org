@@ -337,9 +337,10 @@
 
 					<div class="space-y-10">
 						<p>
-							<strong>Nathan</strong> is a tech entrepreneur turned pleb-at-large. Having built, sold,
-							invested in and advised tech businesses over the years he is now focused on bitcoin, building
-							BTCMap.org, gamertron.net and delivering bitcoin education for kids.
+							<strong>Nathan</strong> is a tech entrepreneur turned pleb-at-large. He brought the core
+							team together to accelerate app development. Having built, sold, invested in and advised
+							tech businesses over the years he is now focused on bitcoin, building BTCMap.org, gamertron.net
+							and delivering bitcoin education for kids.
 						</p>
 						<p>
 							<strong>Igor</strong> is a long time bitcoiner, mapper, and digital nomad living abroad.
@@ -348,8 +349,9 @@
 						</p>
 						<p>
 							A self-taught Web Developer, <strong>secondl1ght</strong> dove head first down the bitcoin
-							rabbit hole and left his fiat career to focus on bitcoin development full-time. He contributes
-							to open source projects, is a privacy advocate, and freedom lover.
+							rabbit hole and left his fiat career to focus on bitcoin development full-time. He created
+							and maintains the BTC Map web application and works on lightning network tools at Amboss
+							Technologies.
 						</p>
 						<p>
 							<strong>Karnage</strong> is the lead designer on the web app and created the BTC Map brand.
