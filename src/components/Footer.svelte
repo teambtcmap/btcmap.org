@@ -10,9 +10,12 @@
 		<SocialLink url={$socials.github} social="github" />
 	</div>
 	<div class="flex flex-wrap md:block justify-center">
+		<a href="/about-us" class="mx-2.5 mb-2.5 md:mb-0 text-link hover:text-hover transition-colors"
+			>About Us</a
+		>
 		<a
 			href="/bitcoin.pdf"
-			class="mx-2.5 mb-2.5 md:mb-0 text-link hover:text-hover transition-colors">White paper</a
+			class="mx-2.5 mb-2.5 md:mb-0 text-link hover:text-hover transition-colors">White Paper</a
 		>
 		<a href="/license" class="mx-2.5 mb-2.5 md:mb-0 text-link hover:text-hover transition-colors"
 			>License</a
