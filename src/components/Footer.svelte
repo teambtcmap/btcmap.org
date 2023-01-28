@@ -1,6 +1,14 @@
 <script>
 	import { SocialLink } from '$comp';
 	import { socials } from '$lib/store';
+
+	const links = [
+		{ link: '/about-us', name: 'About Us' },
+		{ link: '/media', name: 'Media' },
+		{ link: '/bitcoin.pdf', name: 'White Paper' },
+		{ link: '/license', name: 'License' },
+		{ link: '/privacy-policy', name: 'Privacy' }
+	];
 </script>
 
 <footer class="w-full pb-5 md:flex justify-between items-center space-y-5 md:space-y-0">
@@ -10,17 +18,13 @@
 		<SocialLink url={$socials.github} social="github" />
 	</div>
 	<div class="flex flex-wrap md:block justify-center">
-		<a href="/about-us" class="mx-2.5 mb-2.5 md:mb-0 text-link hover:text-hover transition-colors"
-			>About Us</a
-		>
-		<a
-			href="/bitcoin.pdf"
-			class="mx-2.5 mb-2.5 md:mb-0 text-link hover:text-hover transition-colors">White Paper</a
-		>
-		<a href="/license" class="mx-2.5 mb-2.5 md:mb-0 text-link hover:text-hover transition-colors"
-			>License</a
-		>
-		<a href="/privacy-policy" class="mx-2.5 text-link hover:text-hover transition-colors">Privacy</a
-		>
+		{#each links as link}
+			<a
+				href={link.link}
+				class="mx-2.5 {link.name !== 'Privacy'
+					? 'mb-2.5 md:mb-0'
+					: ''} text-link hover:text-hover transition-colors">{link.name}</a
+			>
+		{/each}
 	</div>
 </footer>
