@@ -490,7 +490,7 @@ ${
 		<a href=${community.tags['contact:website']} target="_blank" rel="noreferrer" class="m-1" title='Website'>
 			<span class="bg-bitcoin w-[40px] h-[40px] flex justify-center items-center rounded-full">
 				<svg width='28px' height='28px' class='text-white'>
-					<use width='28px' height='28px' href="/icons/popup/spritesheet.svg#globe"></use>
+					<use width='28px' height='28px' href="/icons/socials/spritesheet.svg#website"></use>
 				</svg>
 			</span>
 		</a>`
