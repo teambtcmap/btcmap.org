@@ -360,7 +360,7 @@
 					</div>
 				</div>
 
-				<div class="flex flex-wrap justify-center lg:grid grid-cols-2 gap-10">
+				<div class="flex flex-wrap justify-center items-center lg:grid grid-cols-2 gap-10">
 					{#each coreTeam as member}
 						<AboutCore {member} />
 					{/each}
