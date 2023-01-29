@@ -9,7 +9,7 @@
 	class="text-center space-y-2 hover:text-link transition-colors"
 >
 	<img
-		src="/images/contributors/{contributor.name}.jpg"
+		src="/images/contributors/{contributor.name}.{contributor.file}"
 		alt="avatar"
 		class="rounded-full object-cover w-24 h-24 mx-auto"
 		onerror="this.src='/images/satoshi-nakamoto.png'"

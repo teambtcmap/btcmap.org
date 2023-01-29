@@ -103,9 +103,30 @@
 	];
 
 	const contributors = [
-		{ name: 'salvanakamoto', title: 'iOS Developer', url: 'https://github.com/salvatoto' },
-		{ name: 'saunter', title: 'Community Leader', url: 'https://twitter.com/StackingSaunter' },
-		{ name: 'Rogzy', title: 'Community Leader', url: 'https://twitter.com/DecouvreBitcoin' }
+		{
+			name: 'salvanakamoto',
+			title: 'iOS Developer',
+			url: 'https://github.com/salvatoto',
+			file: 'jpg'
+		},
+		{
+			name: 'saunter',
+			title: 'Community Leader',
+			url: 'https://twitter.com/StackingSaunter',
+			file: 'jpg'
+		},
+		{
+			name: 'Rogzy',
+			title: 'Community Leader',
+			url: 'https://twitter.com/DecouvreBitcoin',
+			file: 'jpg'
+		},
+		{
+			name: 'HolgerHatGarKeineNode',
+			title: 'Community Coder',
+			url: 'https://github.com/HolgerHatGarKeineNode',
+			file: 'jpeg'
+		}
 	];
 
 	const coreTeam = [
