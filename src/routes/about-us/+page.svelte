@@ -258,10 +258,7 @@
 					<h2 class="mb-5 font-semibold text-3xl">Communities</h2>
 
 					<div class="space-y-5">
-						<p>
-							Bitcoin mapping communities maintain their local datasets and strive to have the most
-							accurate information. They also help onboard new merchants in their area!
-						</p>
+						<p>Bitcoin communities help drive global adoption by onboarding new users locally!</p>
 						<p>
 							<strong>Don’t see your community?</strong>
 							<a
