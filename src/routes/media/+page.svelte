@@ -4,10 +4,10 @@
 	const brandColors = ['#10B981', '#53C5D5', '#051173', '#0891B2', '#E4EBEC', '#164E63', '#155E75'];
 
 	const brand = [
+		{ link: '/images/hero-mobile-example.png', name: 'App Screenshot' },
 		{ link: '/images/logo.svg', name: 'BTC Map Logo' },
 		{ link: '/images/supertagger.svg', name: 'Shadowy Supertagger' },
-		{ link: '/images/supertagger-king.svg', name: 'Shadowy Supertagger - Leader' },
-		{ link: '/images/hero-mobile-example.png', name: 'App Screenshot' }
+		{ link: '/images/supertagger-king.svg', name: 'Shadowy Supertagger - Leader' }
 	];
 
 	const promotional = [
@@ -16,11 +16,11 @@
 		{ link: '/images/og/add.png', name: 'Add Location' },
 		{ link: '/images/og/apps.png', name: 'Download Apps' },
 		{ link: '/images/og/badges.png', name: 'Earn Badges' },
+		{ link: '/images/og/home.png', name: 'Main' },
+		{ link: '/images/og/map.png', name: 'Map' },
 		{ link: '/images/og/communities.png', name: 'Map Communities' },
 		{ link: '/images/og/dash.png', name: 'Stats Dashboard' },
-		{ link: '/images/og/home.png', name: 'Main' },
 		{ link: '/images/og/leader.png', name: 'Supertagger Leaderboard' },
-		{ link: '/images/og/map.png', name: 'Map' },
 		{ link: '/images/og/supertagger.png', name: 'Supertagger Profile' },
 		{ link: '/images/og/support.png', name: 'Support Us' },
 		{ link: '/images/og/top-communities.png', name: 'Top Communities' },
