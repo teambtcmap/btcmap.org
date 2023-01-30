@@ -14,10 +14,10 @@
 </script>
 
 <div
-	class="space-y-1 md:space-y-0 text-center md:text-left md:flex justify-between items-center w-full p-5 border-t border-t-statBorder"
+	class="w-full items-center justify-between space-y-1 border-t border-t-statBorder p-5 text-center md:flex md:space-y-0 md:text-left"
 >
-	<div class="space-y-1 md:space-y-0 md:flex items-center md:space-x-2">
-		<i class="text-xl text-link fa-solid fa-ticket" />
+	<div class="items-center space-y-1 md:flex md:space-y-0 md:space-x-2">
+		<i class="fa-solid fa-ticket text-xl text-link" />
 
 		<div>
 			<p>
@@ -25,7 +25,7 @@
 					href={url}
 					target="_blank"
 					rel="noreferrer"
-					class="text-primary hover:text-link font-semibold text-lg transition-colors mr-1"
+					class="mr-1 text-lg font-semibold text-primary transition-colors hover:text-link"
 					>{name}</a
 				>
 
@@ -44,13 +44,13 @@
 					href={user.html_url}
 					target="_blank"
 					rel="noreferrer"
-					class="hover:text-link transition-colors">{user.login}</a
+					class="transition-colors hover:text-link">{user.login}</a
 				>
 			</p>
 		</div>
 	</div>
 
-	<div class="space-y-1 md:space-y-0 md:flex md:space-x-2">
+	<div class="space-y-1 md:flex md:space-y-0 md:space-x-2">
 		<div class="flex flex-wrap justify-center md:justify-start">
 			{#each assignees as assignee}
 				<a href={assignee.html_url} target="_blank" rel="noreferrer" class="mr-1 mb-1">
@@ -58,14 +58,14 @@
 						src={assignee.avatar_url}
 						alt="avatar"
 						title={assignee.login}
-						class="rounded-full w-8 h-8 object-cover"
+						class="h-8 w-8 rounded-full object-cover"
 					/>
 				</a>
 			{/each}
 		</div>
 
-		<div class="md:flex items-center">
-			<i class="text-link fa-solid fa-comment md:mr-1" />
+		<div class="items-center md:flex">
+			<i class="fa-solid fa-comment text-link md:mr-1" />
 			<strong class="text-primary">{comments}</strong>
 		</div>
 	</div>

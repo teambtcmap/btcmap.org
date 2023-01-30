@@ -50,20 +50,20 @@
 
 <div class="bg-teal">
 	<Header />
-	<div class="w-10/12 xl:w-[1200px] mx-auto">
-		<main class="text-center space-y-10 mt-10 mb-20 text-primary">
-			<div class="text-xl space-y-5">
-				<h1 class="text-4xl md:text-5xl font-semibold !leading-tight">Media</h1>
+	<div class="mx-auto w-10/12 xl:w-[1200px]">
+		<main class="mt-10 mb-20 space-y-10 text-center text-primary">
+			<div class="space-y-5 text-xl">
+				<h1 class="text-4xl font-semibold !leading-tight md:text-5xl">Media</h1>
 				<p>Media assets are available for free to use for promotional purposes.</p>
 			</div>
 
 			<section>
-				<h2 class="text-3xl font-semibold mb-5">Brand Colors</h2>
+				<h2 class="mb-5 text-3xl font-semibold">Brand Colors</h2>
 
 				<div class="flex flex-wrap justify-center gap-5">
 					{#each brandColors as color}
 						<div
-							class="w-24 h-24 flex justify-center items-center"
+							class="flex h-24 w-24 items-center justify-center"
 							style="background-color: {color}; border: 1px solid black;"
 						>
 							<p class="text-black">{color}</p>
@@ -79,18 +79,18 @@
 					<a
 						href="/assets/btcmap-media-assets.zip"
 						download
-						class="block text-white font-semibold bg-link hover:bg-hover w-36 mx-auto py-3 rounded-lg transition-colors"
+						class="mx-auto block w-36 rounded-lg bg-link py-3 font-semibold text-white transition-colors hover:bg-hover"
 						>Download All</a
 					>
 
 					{#each assetSections as section}
-						<div class="text-left space-y-2">
+						<div class="space-y-2 text-left">
 							<h3 class="text-xl font-semibold">{section.title}</h3>
 
-							<ul class="list-disc ml-5 space-y-1">
+							<ul class="ml-5 list-disc space-y-1">
 								{#each section.data as asset}
 									<li>
-										<a href={asset.link} class="text-link hover:text-hover transition-colors"
+										<a href={asset.link} class="text-link transition-colors hover:text-hover"
 											>{asset.name}</a
 										>
 									</li>

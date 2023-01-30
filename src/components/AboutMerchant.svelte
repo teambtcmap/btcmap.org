@@ -20,7 +20,7 @@
 <a
 	bind:this={merchantTooltip}
 	href="/map?lat={lat}&long={long}"
-	class="bg-bitcoin rounded-full h-24 w-24 flex justify-center items-center hover:animate-wiggle"
+	class="flex h-24 w-24 items-center justify-center rounded-full bg-bitcoin hover:animate-wiggle"
 >
 	<Icon
 		w="40"

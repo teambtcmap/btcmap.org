@@ -21,12 +21,12 @@
 </script>
 
 <div
-	class="py-5 lg:py-0 border-t border-b border-statBorder lg:border-none space-y-5 lg:space-y-0 text-center lg:grid grid-cols-6 text-lg font-semibold"
+	class="grid-cols-6 space-y-5 border-t border-b border-statBorder py-5 text-center text-lg font-semibold lg:grid lg:space-y-0 lg:border-none lg:py-0"
 >
 	<span
-		class="text-link my-auto {position > 3
+		class="my-auto text-link {position > 3
 			? 'underline'
-			: ''} lg:no-underline underline-offset-4 decoration-4"
+			: ''} decoration-4 underline-offset-4 lg:no-underline"
 	>
 		{#if position === 1}
 			<span class="text-2xl">🥇</span>
@@ -39,26 +39,26 @@
 		{/if}
 	</span>
 
-	<div class="lg:flex lg:space-x-2 items-center">
+	<div class="items-center lg:flex lg:space-x-2">
 		<img
 			src={avatar}
 			alt="avatar"
-			class="rounded-full w-20 h-20 lg:w-14 lg:h-14 object-cover mx-auto lg:mx-0 mb-2 lg:mb-0"
+			class="mx-auto mb-2 h-20 w-20 rounded-full object-cover lg:mx-0 lg:mb-0 lg:h-14 lg:w-14"
 			onerror="this.src='/images/satoshi-nakamoto.png'"
 		/>
 
 		<a
 			href="/tagger/{id}"
-			class="lg:text-left text-link hover:text-hover {tagger.match('([^ ]{16})')
+			class="text-link hover:text-hover lg:text-left {tagger.match('([^ ]{16})')
 				? 'break-all'
 				: ''} transition-colors">{tagger}</a
 		>
 	</div>
 
 	{#each stats as stat}
-		<span class="text-link lg:!my-auto mx-5 lg:mx-0 inline-block">
+		<span class="mx-5 inline-block text-link lg:!my-auto lg:mx-0">
 			<span
-				class="h-3 w-3 inline-block rounded-full mr-1 {stat.title === 'C'
+				class="mr-1 inline-block h-3 w-3 rounded-full {stat.title === 'C'
 					? 'bg-created'
 					: stat.title === 'U'
 					? 'bg-link'

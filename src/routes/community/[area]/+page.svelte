@@ -639,23 +639,23 @@
 
 <div class="bg-teal">
 	<Header />
-	<div class="w-10/12 xl:w-[1200px] mx-auto">
-		<main class="text-center my-10 md:my-20 space-y-16">
+	<div class="mx-auto w-10/12 xl:w-[1200px]">
+		<main class="my-10 space-y-16 text-center md:my-20">
 			<section id="profile" class="space-y-8">
 				<div class="space-y-2">
 					<img
 						src={avatar}
 						alt="avatar"
-						class="rounded-full w-32 h-32 object-cover mx-auto"
+						class="mx-auto h-32 w-32 rounded-full object-cover"
 						onerror="this.src='/images/communities/bitcoin.svg'"
 					/>
-					<h1 class="text-4xl font-semibold text-primary !leading-tight">
+					<h1 class="text-4xl font-semibold !leading-tight text-primary">
 						{name}
 					</h1>
 					{#if sponsor}
 						<SponsorBadge />
 					{/if}
-					<h2 class="text-primary text-xl uppercase">
+					<h2 class="text-xl uppercase text-primary">
 						{continent.replace('-', ' ')}
 						<i
 							class="fa-solid fa-earth-{continent === 'africa'
@@ -677,7 +677,7 @@
 						href={community.geo_json
 							? `/map?community=${data.id}`
 							: `/map?lat=${community['box:south']}&long=${community['box:west']}&lat=${community['box:north']}&long=${community['box:east']}`}
-						class="text-xs text-link hover:text-hover inline-flex justify-center items-center transition-colors"
+						class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
 						>View on main map <svg
 							class="ml-1 w-3"
 							width="16"
@@ -697,13 +697,13 @@
 					>
 				</div>
 
-				<div class="flex flex-wrap justify-center items-center">
+				<div class="flex flex-wrap items-center justify-center">
 					{#if website}
 						<a href={website} target="_blank" rel="noreferrer" class="m-1">
 							<span
-								class="bg-bitcoin w-[40px] h-[40px] flex justify-center items-center rounded-full"
+								class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-bitcoin"
 							>
-								<i class="text-white w-7 h-7 fa-solid fa-globe" />
+								<i class="fa-solid fa-globe h-7 w-7 text-white" />
 							</span>
 						</a>
 					{/if}
@@ -719,7 +719,7 @@
 					{/if}
 					{#if meetup}
 						<a href={meetup} target="_blank" rel="noreferrer" class="m-1">
-							<img src="/icons/socials/meetup.jpg" alt="meetup" class="w-10 h-10 rounded-full" />
+							<img src="/icons/socials/meetup.jpg" alt="meetup" class="h-10 w-10 rounded-full" />
 						</a>
 					{/if}
 					{#if eventbrite}
@@ -727,7 +727,7 @@
 							<img
 								src="/icons/socials/eventbrite.png"
 								alt="eventbrite"
-								class="w-10 h-10 rounded-full"
+								class="h-10 w-10 rounded-full"
 							/>
 						</a>
 					{/if}
@@ -765,10 +765,10 @@
 
 			<section id="map-section">
 				<h3
-					class="text-center md:text-left text-primary text-lg border border-statBorder border-b-0 rounded-t-3xl p-5 font-semibold"
+					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left"
 				>
 					{name} Map
-					<div class="text-link space-x-1">
+					<div class="space-x-1 text-link">
 						{#each Array(grade) as star}
 							<i class="fa-solid fa-star" />
 						{/each}
@@ -786,7 +786,7 @@
 				<div class="relative">
 					<div
 						bind:this={mapElement}
-						class="!bg-teal z-10 border border-statBorder rounded-b-3xl h-[300px] md:h-[600px] text-left"
+						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal text-left md:h-[600px]"
 					/>
 					{#if !mapLoaded}
 						<MapLoading
@@ -835,33 +835,33 @@
 				<div
 					class="{total === 0
 						? 'hidden'
-						: ''} border border-statBorder border-t-0 rounded-b-3xl p-5"
+						: ''} rounded-b-3xl border border-t-0 border-statBorder p-5"
 				>
 					<canvas bind:this={updatedChartCanvas} width="250" height="250" />
 				</div>
 			</section>
 
 			<section id="taggers">
-				<div class="w-full border border-statBorder rounded-3xl">
-					<h3 class="text-center text-primary text-lg border-b border-statBorder p-5 font-semibold">
+				<div class="w-full rounded-3xl border border-statBorder">
+					<h3 class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary">
 						{name} Supertaggers
 					</h3>
 					<div
-						class="max-h-[375px] overflow-scroll hide-scroll p-1 flex flex-wrap justify-center items-center"
+						class="hide-scroll flex max-h-[375px] flex-wrap items-center justify-center overflow-scroll p-1"
 					>
 						{#if taggers && taggers.length}
 							{#each taggers as tagger}
-								<div class="space-y-1 m-4 hover:scale-110 transition-transform">
+								<div class="m-4 space-y-1 transition-transform hover:scale-110">
 									<a href="/tagger/{tagger.id}">
 										<img
 											src={tagger.osm_json.img
 												? tagger.osm_json.img.href
 												: '/images/satoshi-nakamoto.png'}
 											alt="avatar"
-											class="rounded-full w-20 h-20 object-cover mx-auto"
+											class="mx-auto h-20 w-20 rounded-full object-cover"
 											onerror="this.src='/images/satoshi-nakamoto.png'"
 										/>
-										<p class="text-body text-center font-semibold">
+										<p class="text-center font-semibold text-body">
 											{tagger.osm_json.display_name.length > 21
 												? tagger.osm_json.display_name.slice(0, 18) + '...'
 												: tagger.osm_json.display_name}
@@ -870,12 +870,12 @@
 								</div>
 							{/each}
 						{:else if !communityEvents.length}
-							<p class="text-body p-5">No supertaggers to display.</p>
+							<p class="p-5 text-body">No supertaggers to display.</p>
 						{:else}
 							{#each Array(5) as tagger}
-								<div class="space-y-1 m-4 hover:scale-110 transition-transform">
-									<p class="bg-link/50 animate-pulse rounded-full w-20 h-20 mx-auto" />
-									<p class="bg-link/50 animate-pulse rounded w-28 h-5 mx-auto" />
+								<div class="m-4 space-y-1 transition-transform hover:scale-110">
+									<p class="mx-auto h-20 w-20 animate-pulse rounded-full bg-link/50" />
+									<p class="mx-auto h-5 w-28 animate-pulse rounded bg-link/50" />
 								</div>
 							{/each}
 						{/if}
@@ -884,16 +884,16 @@
 			</section>
 
 			<section id="activity">
-				<div class="w-full border border-statBorder rounded-3xl">
+				<div class="w-full rounded-3xl border border-statBorder">
 					<h3
-						class="text-center md:text-left text-primary text-lg border-b border-statBorder p-5 font-semibold"
+						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left"
 					>
 						{name} Activity
 					</h3>
 
 					<div
 						bind:this={activityDiv}
-						class="hide-scroll space-y-2 max-h-[375px] overflow-y-scroll relative"
+						class="hide-scroll relative max-h-[375px] space-y-2 overflow-y-scroll"
 						on:scroll={() => {
 							if (!loading && !hideArrow) {
 								hideArrow = true;
@@ -915,7 +915,7 @@
 
 							{#if eventElementsPaginated.length !== eventElements.length}
 								<button
-									class="block !mb-5 mx-auto text-link hover:text-hover transition-colors text-xl font-semibold"
+									class="mx-auto !mb-5 block text-xl font-semibold text-link transition-colors hover:text-hover"
 									on:click={() => (eventCount = eventCount + 50)}>Load More</button
 								>
 							{:else if eventElements.length > 10}
@@ -924,7 +924,7 @@
 
 							{#if !hideArrow && eventElements.length > 5}
 								<svg
-									class="z-20 w-4 h-4 animate-bounce text-primary absolute bottom-4 left-[calc(50%-8px)]"
+									class="absolute bottom-4 left-[calc(50%-8px)] z-20 h-4 w-4 animate-bounce text-primary"
 									fill="currentColor"
 									xmlns="http://www.w3.org/2000/svg"
 									viewBox="0 0 512 512"
@@ -934,7 +934,7 @@
 								>
 							{/if}
 						{:else if !communityEvents.length}
-							<p class="text-body p-5">No activity to display.</p>
+							<p class="p-5 text-body">No activity to display.</p>
 						{:else}
 							{#each Array(5) as skeleton}
 								<TaggerSkeleton />
@@ -945,51 +945,51 @@
 			</section>
 
 			<section id="charts" class="space-y-10">
-				<div class="w-full border border-statBorder rounded-3xl">
+				<div class="w-full rounded-3xl border border-statBorder">
 					<h3
-						class="text-center md:text-left text-primary text-lg border-b border-statBorder p-5 font-semibold"
+						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left"
 					>
 						{name} Charts
 					</h3>
-					<div class="p-5 border-b border-statBorder">
+					<div class="border-b border-statBorder p-5">
 						<div class="relative">
 							{#if chartsLoading}
 								<div
-									class="absolute top-0 left-0 border border-link/50 rounded-3xl animate-pulse w-full h-[400px]"
+									class="absolute top-0 left-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
 								/>
 							{/if}
 							<canvas bind:this={upToDateChartCanvas} width="400" height="400" />
 						</div>
-						<p class="text-sm text-body text-center mt-1">
+						<p class="mt-1 text-center text-sm text-body">
 							*Locations with a <em>survey:date</em>, <em>check_date</em>, or
 							<em>check_date:currency:XBT</em> tag less than one year old.
 						</p>
 					</div>
 
-					<div class="p-5 border-b border-statBorder">
+					<div class="border-b border-statBorder p-5">
 						<div class="relative">
 							{#if chartsLoading}
 								<div
-									class="absolute top-0 left-0 border border-link/50 rounded-3xl animate-pulse w-full h-[400px]"
+									class="absolute top-0 left-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
 								/>
 							{/if}
 							<canvas bind:this={totalChartCanvas} width="400" height="400" />
 						</div>
-						<p class="text-sm text-body text-center mt-1">
+						<p class="mt-1 text-center text-sm text-body">
 							*Locations accepting any bitcoin payment method.
 						</p>
 					</div>
 
-					<div class="p-5 border-b border-statBorder">
+					<div class="border-b border-statBorder p-5">
 						<div class="relative">
 							{#if chartsLoading}
 								<div
-									class="absolute top-0 left-0 border border-link/50 rounded-3xl animate-pulse w-full h-[400px]"
+									class="absolute top-0 left-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
 								/>
 							{/if}
 							<canvas bind:this={legacyChartCanvas} width="400" height="400" />
 						</div>
-						<p class="text-sm text-body text-center mt-1">
+						<p class="mt-1 text-center text-sm text-body">
 							*Locations with a <em>payment:bitcoin</em> tag instead of the
 							<em>currency:XBT</em> tag.
 						</p>
@@ -999,12 +999,12 @@
 						<div class="relative">
 							{#if chartsLoading}
 								<div
-									class="absolute top-0 left-0 border border-link/50 rounded-3xl animate-pulse w-full h-[400px]"
+									class="absolute top-0 left-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
 								/>
 							{/if}
 							<canvas bind:this={paymentMethodChartCanvas} width="400" height="400" />
 						</div>
-						<p class="text-sm text-body text-center mt-1">
+						<p class="mt-1 text-center text-sm text-body">
 							*Locations with <em>payment:onchain</em>, <em>payment:lightning</em> and
 							<em>payment:lightning_contactless</em> tags.
 						</p>
@@ -1012,12 +1012,12 @@
 				</div>
 			</section>
 
-			<p class="text-sm text-body text-center md:text-left">
+			<p class="text-center text-sm text-body md:text-left">
 				*More information on bitcoin mapping tags can be found <a
 					href="https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions#tagging-guidance"
 					target="_blank"
 					rel="noreferrer"
-					class="text-link hover:text-hover transition-colors">here</a
+					class="text-link transition-colors hover:text-hover">here</a
 				>.
 			</p>
 		</main>

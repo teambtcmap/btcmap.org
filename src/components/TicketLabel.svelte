@@ -15,7 +15,7 @@
 
 <span
 	bind:this={labelTooltip}
-	class="inline-block text-xs rounded-full p-1 mr-1 mb-1 border border-link bg-link/25 text-primary"
+	class="mr-1 mb-1 inline-block rounded-full border border-link bg-link/25 p-1 text-xs text-primary"
 	>{title}</span
 >
 

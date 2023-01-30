@@ -1,20 +1,20 @@
 <div
-	class="border border-link/50 animate-pulse rounded-3xl shadow hover:shadow-2xl transition-shadow"
+	class="animate-pulse rounded-3xl border border-link/50 shadow transition-shadow hover:shadow-2xl"
 >
-	<div class="space-y-2 my-4 p-4">
+	<div class="my-4 space-y-2 p-4">
 		<!-- avatar placeholder -->
-		<div class="w-20 h-20 mx-auto rounded-full animate-pulse bg-link/50" />
+		<div class="mx-auto h-20 w-20 animate-pulse rounded-full bg-link/50" />
 
 		<!-- name placeholder -->
-		<div class="w-[200px] h-[28px] animate-pulse bg-link/50 rounded-xl mx-auto" />
+		<div class="mx-auto h-[28px] w-[200px] animate-pulse rounded-xl bg-link/50" />
 	</div>
 
 	<!-- socials placeholder -->
 	<div
-		class="space-x-2 p-4 w-full flex justify-center items-center border-t border-t-link/50 animate-pulse"
+		class="flex w-full animate-pulse items-center justify-center space-x-2 border-t border-t-link/50 p-4"
 	>
-		<div class="w-[40px] h-[40px] rounded-full bg-link/50 animate-pulse" />
-		<div class="w-[40px] h-[40px] rounded-full bg-link/50 animate-pulse" />
-		<div class="w-[40px] h-[40px] rounded-full bg-link/50 animate-pulse" />
+		<div class="h-[40px] w-[40px] animate-pulse rounded-full bg-link/50" />
+		<div class="h-[40px] w-[40px] animate-pulse rounded-full bg-link/50" />
+		<div class="h-[40px] w-[40px] animate-pulse rounded-full bg-link/50" />
 	</div>
 </div>

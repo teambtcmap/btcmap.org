@@ -11,11 +11,11 @@
 			href={type === 'url' ? destination : `lightning:${destination}`}
 			target={type === 'url' ? '_blank' : '_self'}
 			rel="noreferrer"
-			class="text-center md:text-lg font-semibold text-white w-full p-3 px-5 bg-link hover:bg-hover rounded-xl transition-colors"
+			class="w-full rounded-xl bg-link p-3 px-5 text-center font-semibold text-white transition-colors hover:bg-hover md:text-lg"
 		>
 			<!--  lightning icon -->
 			<svg
-				class="hidden md:inline w-7 h-7"
+				class="hidden h-7 w-7 md:inline"
 				width="16"
 				height="17"
 				viewBox="0 0 16 17"
@@ -38,7 +38,7 @@
 		href={type === 'url' ? destination : `lightning:${destination}`}
 		target={type === 'url' ? '_blank' : '_self'}
 		rel="noreferrer"
-		class="text-sm text-center font-semibold border border-link text-link w-full md:w-20 py-2 md:py-1 hover:border-white hover:text-white hover:bg-link rounded-lg {style} transition-colors"
+		class="w-full rounded-lg border border-link py-2 text-center text-sm font-semibold text-link hover:border-white hover:bg-link hover:text-white md:w-20 md:py-1 {style} transition-colors"
 	>
 		<!--  lightning icon -->
 		<svg

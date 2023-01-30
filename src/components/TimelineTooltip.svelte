@@ -11,7 +11,7 @@
 </script>
 
 <button bind:this={timelineTooltip}>
-	<i class="text-primary fa-solid fa-circle-info" />
+	<i class="fa-solid fa-circle-info text-primary" />
 </button>
 
 <style>

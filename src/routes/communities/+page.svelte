@@ -153,19 +153,19 @@
 
 <div class="bg-teal">
 	<Header />
-	<div class="w-10/12 xl:w-[1200px] mx-auto">
-		<main class="text-center space-y-10 my-10 md:my-20">
-			<h1 class="text-4xl md:text-5xl font-semibold text-primary gradient !leading-tight">
+	<div class="mx-auto w-10/12 xl:w-[1200px]">
+		<main class="my-10 space-y-10 text-center md:my-20">
+			<h1 class="gradient text-4xl font-semibold !leading-tight text-primary md:text-5xl">
 				Join the bitcoin map community.
 			</h1>
 
-			<h2 class="text-primary text-xl font-semibold w-full lg:w-[800px] mx-auto">
+			<h2 class="mx-auto w-full text-xl font-semibold text-primary lg:w-[800px]">
 				Take ownership of your local bitcoin mapping data and help drive adoption. Bitcoin
 				communities are the spark that ignites the movement. Join your friends, onboard businesses
 				and have fun!
 			</h2>
 
-			<div class="md:flex justify-center items-center space-y-5 md:space-y-0 md:space-x-5">
+			<div class="items-center justify-center space-y-5 md:flex md:space-y-0 md:space-x-5">
 				<PrimaryButton
 					text="Add community"
 					style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
@@ -180,14 +180,14 @@
 
 			<div class="relative">
 				{#if !initialRenderComplete || !communities}
-					<div class="absolute top-0 left-0 w-full h-full flex flex-col justify-between">
+					<div class="absolute top-0 left-0 flex h-full w-full flex-col justify-between">
 						<div class="flex flex-wrap justify-center">
 							{#each Array(6) as skeleton}
-								<div class="w-[94px] py-2 rounded-sm m-2 bg-link/50 animate-pulse" />
+								<div class="m-2 w-[94px] animate-pulse rounded-sm bg-link/50 py-2" />
 							{/each}
 						</div>
 						<div
-							class="bg-link/50 rounded-full animate-pulse w-[225px] h-[225px] md:w-[300px] md:h-[300px] mx-auto"
+							class="mx-auto h-[225px] w-[225px] animate-pulse rounded-full bg-link/50 md:h-[300px] md:w-[300px]"
 						/>
 					</div>
 				{/if}

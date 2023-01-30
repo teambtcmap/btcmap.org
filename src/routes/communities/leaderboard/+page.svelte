@@ -150,19 +150,19 @@
 	<Header />
 
 	<main class="mt-10 mb-20">
-		<div class="w-10/12 xl:w-[1200px] mx-auto space-y-10">
+		<div class="mx-auto w-10/12 space-y-10 xl:w-[1200px]">
 			<h1
-				class="text-center text-4xl md:text-5xl font-semibold text-primary gradient !leading-tight"
+				class="gradient text-center text-4xl font-semibold !leading-tight text-primary md:text-5xl"
 			>
 				Top Communities
 			</h1>
 
-			<h2 class="text-center text-primary text-xl font-semibold w-full lg:w-[800px] mx-auto">
+			<h2 class="mx-auto w-full text-center text-xl font-semibold text-primary lg:w-[800px]">
 				Bitcoin mapping communities maintain their local datasets and strive to have the most
 				accurate information. They also help onboard new merchants in their area!
 			</h2>
 
-			<div class="md:flex justify-center items-center space-y-5 md:space-y-0 md:space-x-5">
+			<div class="items-center justify-center space-y-5 md:flex md:space-y-0 md:space-x-5">
 				<PrimaryButton
 					text="Add community"
 					style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
@@ -176,7 +176,7 @@
 			</div>
 
 			<section id="leaderboard">
-				<div class="hidden lg:grid text-center grid-cols-6 mb-5">
+				<div class="mb-5 hidden grid-cols-6 text-center lg:grid">
 					{#each headings as heading}
 						<h3 class="text-lg font-semibold text-primary">
 							{heading}
@@ -196,7 +196,7 @@
 						</h3>
 					{/each}
 				</div>
-				<div class="lg:hidden text-center text-primary text-lg font-semibold mb-5 space-y-1">
+				<div class="mb-5 space-y-1 text-center text-lg font-semibold text-primary lg:hidden">
 					<h3>
 						Up-To-Date <button bind:this={upToDateTooltipMobile}>
 							<i class="fa-solid fa-circle-info" />
@@ -236,7 +236,7 @@
 					{/if}
 				</div>
 
-				<p class="text-sm text-center text-body">
+				<p class="text-center text-sm text-body">
 					*Data sorted by Up-To-Date, then Total Locations, then Legacy.
 				</p>
 

@@ -199,28 +199,28 @@
 
 <div class="bg-teal">
 	<Header />
-	<div class="w-10/12 xl:w-[1200px] mx-auto">
+	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		{#if !submitted}
-			<h1 class="text-4xl md:text-5xl gradient font-semibold mt-10 text-center lg:text-left">
+			<h1 class="gradient mt-10 text-center text-4xl font-semibold md:text-5xl lg:text-left">
 				Accept bitcoin? Get found.
 			</h1>
 
-			<div class="mt-16 pb-20 md:pb-32 lg:flex justify-between">
+			<div class="mt-16 justify-between pb-20 md:pb-32 lg:flex">
 				<section
 					id="noob"
-					class="mx-auto w-full md:w-2/3 lg:w-1/2 border-b lg:border-b-0 pb-14 lg:pb-0 lg:border-r border-input"
+					class="mx-auto w-full border-b border-input pb-14 md:w-2/3 lg:w-1/2 lg:border-b-0 lg:border-r lg:pb-0"
 				>
 					<div class="lg:w-10/12 xl:w-3/4">
-						<h2 class="text-primary text-3xl font-semibold mb-5 text-center lg:text-left">Noobs</h2>
+						<h2 class="mb-5 text-center text-3xl font-semibold text-primary lg:text-left">Noobs</h2>
 
-						<p class="text-primary w-full mb-10 text-center lg:text-left">
+						<p class="mb-10 w-full text-center text-primary lg:text-left">
 							Fill out the following form and one of our volunteer community members will add your
 							location to the map. <TimelineTooltip
 								tooltip="NOTE: Due to the backlog of requests and the additions being completed on a volunteer effort, it may take several weeks to have your location added. It is encouraged to add your location to OpenStreetMap directly following the Shadowy Supertagger method if you want to appear on the map right away."
 							/>
 						</p>
 
-						<form on:submit={submitForm} class="text-primary space-y-5 w-full">
+						<form on:submit={submitForm} class="w-full space-y-5 text-primary">
 							<div>
 								<label for="name" class="mb-2 block font-semibold">Merchant Name</label>
 								<input
@@ -229,7 +229,7 @@
 									name="name"
 									placeholder="Satoshi's Comics"
 									required
-									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
 									bind:this={name}
 								/>
 							</div>
@@ -242,7 +242,7 @@
 									name="address"
 									placeholder="2100 Freedom Drive..."
 									required
-									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
 									bind:this={address}
 								/>
 							</div>
@@ -251,14 +251,14 @@
 								<label for="location-picker" class="mb-2 block font-semibold">Select Location</label
 								>
 								{#if selected}
-									<span class="text-green-500 font-semibold">Location selected!</span>
+									<span class="font-semibold text-green-500">Location selected!</span>
 								{:else if noLocationSelected}
-									<span class="text-error font-semibold">Please select a location...</span>
+									<span class="font-semibold text-error">Please select a location...</span>
 								{/if}
 								<div class="relative mb-2">
 									<div
 										bind:this={mapElement}
-										class="!bg-teal z-10 !cursor-crosshair border-2 border-input rounded-2xl h-[300px]"
+										class="z-10 h-[300px] !cursor-crosshair rounded-2xl border-2 border-input !bg-teal"
 									/>
 									{#if !mapLoaded}
 										<MapLoading type="embed" style="h-[300px] border-2 border-input rounded-2xl" />
@@ -273,7 +273,7 @@
 										type="number"
 										name="lat"
 										placeholder="Latitude"
-										class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+										class="w-full rounded-2xl border-2 border-input p-3 focus:outline-link"
 									/>
 									<input
 										required
@@ -283,7 +283,7 @@
 										type="number"
 										name="long"
 										placeholder="Longitude"
-										class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full"
+										class="w-full rounded-2xl border-2 border-input p-3 focus:outline-link"
 									/>
 								</div>
 							</div>
@@ -296,7 +296,7 @@
 									type="text"
 									name="category"
 									placeholder="Restaurant etc."
-									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
 									bind:this={category}
 								/>
 							</div>
@@ -304,12 +304,12 @@
 							<fieldset>
 								<legend class="mb-2 block font-semibold">Select accepted payment methods</legend>
 								{#if noMethodSelected}
-									<span class="text-error font-semibold">Please fix this...</span>
+									<span class="font-semibold text-error">Please fix this...</span>
 								{/if}
 								<div class="space-y-4">
 									<div>
 										<input
-											class="accent-link w-4 h-4"
+											class="h-4 w-4 accent-link"
 											disabled={!captchaSecret || !mapLoaded}
 											type="checkbox"
 											name="onchain"
@@ -323,7 +323,7 @@
 									</div>
 									<div>
 										<input
-											class="accent-link w-4 h-4"
+											class="h-4 w-4 accent-link"
 											disabled={!captchaSecret || !mapLoaded}
 											type="checkbox"
 											name="lightning"
@@ -337,7 +337,7 @@
 									</div>
 									<div>
 										<input
-											class="accent-link w-4 h-4"
+											class="h-4 w-4 accent-link"
 											disabled={!captchaSecret || !mapLoaded}
 											type="checkbox"
 											name="nfc"
@@ -361,7 +361,7 @@
 									type="url"
 									name="website"
 									placeholder="https://bitcoin.org"
-									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
 									bind:this={website}
 								/>
 							</div>
@@ -375,7 +375,7 @@
 									type="tel"
 									name="phone"
 									placeholder="Number"
-									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
 									bind:this={phone}
 								/>
 							</div>
@@ -389,7 +389,7 @@
 									type="text"
 									name="hours"
 									placeholder="Mo-Fr 08:30-20:00"
-									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
 									bind:this={hours}
 								/>
 							</div>
@@ -404,7 +404,7 @@
 										type="text"
 										name="twitter"
 										placeholder="Merchant"
-										class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
 										bind:this={twitterMerchant}
 									/>
 									<input
@@ -412,7 +412,7 @@
 										type="text"
 										name="twitter"
 										placeholder="Submitter"
-										class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
 										bind:this={twitterSubmitter}
 									/>
 								</div>
@@ -427,7 +427,7 @@
 									name="notes"
 									placeholder="Any other relevant details?"
 									rows="3"
-									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
 									bind:this={notes}
 								/>
 							</div>
@@ -438,7 +438,7 @@
 									disabled={!captchaSecret || !mapLoaded}
 									name="source"
 									required
-									class="focus:outline-link bg-white border-2 border-input rounded-2xl py-3 w-full transition-all"
+									class="w-full rounded-2xl border-2 border-input bg-white py-3 transition-all focus:outline-link"
 									bind:value={source}
 									on:change={async () => {
 										if (source === 'Other') {
@@ -453,7 +453,7 @@
 									<option value="Other">Other method</option>
 								</select>
 								{#if source === 'Other'}
-									<p class="text-sm my-2">
+									<p class="my-2 text-sm">
 										How did you verify this information? Please provide as much detail as possible.
 									</p>
 									<textarea
@@ -461,7 +461,7 @@
 										required
 										name="source-other"
 										placeholder="Local knowledge, online etc."
-										class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
 										bind:value={sourceOther}
 										bind:this={sourceOtherElement}
 									/>
@@ -472,7 +472,7 @@
 								<label for="contact" class="mb-2 block font-semibold"
 									>Public Contact <span class="font-normal">(optional)</span></label
 								>
-								<p class="text-sm mb-2">
+								<p class="mb-2 text-sm">
 									If we have any follow-up questions we will contact you in order to add your
 									location successfully.
 								</p>
@@ -481,13 +481,13 @@
 									type="email"
 									name="contact"
 									placeholder="hello@btcmap.org"
-									class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
 									bind:this={contact}
 								/>
 							</div>
 
 							<div>
-								<div class="flex items-center mb-2 space-x-2">
+								<div class="mb-2 flex items-center space-x-2">
 									<label for="captcha" class="font-semibold"
 										>Bot protection <span class="font-normal">(case-sensitive)</span></label
 									>
@@ -500,9 +500,9 @@
 								<div class="space-y-2">
 									<div
 										bind:this={captcha}
-										class="border-2 border-input rounded-2xl flex justify-center items-center py-1"
+										class="flex items-center justify-center rounded-2xl border-2 border-input py-1"
 									>
-										<div class="w-[275px] h-[100px] bg-link/50 animate-pulse" />
+										<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
 									</div>
 									<input
 										disabled={!captchaSecret || !mapLoaded}
@@ -510,7 +510,7 @@
 										type="text"
 										name="captcha"
 										placeholder="Please enter the captcha text."
-										class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
 										bind:this={captchaInput}
 									/>
 								</div>
@@ -534,19 +534,19 @@
 					</div>
 				</section>
 
-				<section id="supertagger" class="mx-auto w-full md:w-2/3 lg:w-1/2 pt-14 lg:pt-0">
-					<div class="lg:flex justify-end">
+				<section id="supertagger" class="mx-auto w-full pt-14 md:w-2/3 lg:w-1/2 lg:pt-0">
+					<div class="justify-end lg:flex">
 						<div class="lg:w-10/12 xl:w-3/4">
-							<h2 class="text-primary text-3xl font-semibold mb-5 text-center lg:text-left">
+							<h2 class="mb-5 text-center text-3xl font-semibold text-primary lg:text-left">
 								Shadowy Supertaggers
 							</h2>
-							<p class="text-primary w-full mb-10 text-center lg:text-left">
+							<p class="mb-10 w-full text-center text-primary lg:text-left">
 								Contribute changes directly to OSM - like a 😎 boss. Who needs forms anyway.
 							</p>
 							<img
 								src="/images/supertagger.svg"
 								alt="shadowy supertagger"
-								class="w-[220px] h-[220px] mb-10 mx-auto"
+								class="mx-auto mb-10 h-[220px] w-[220px]"
 							/>
 							<PrimaryButton
 								text="See Wiki for instructions"

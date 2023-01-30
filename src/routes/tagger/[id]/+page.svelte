@@ -368,25 +368,25 @@
 
 <div class="bg-teal">
 	<Header />
-	<div class="w-10/12 xl:w-[1200px] mx-auto">
-		<main class="text-center my-10 md:my-20">
+	<div class="mx-auto w-10/12 xl:w-[1200px]">
+		<main class="my-10 text-center md:my-20">
 			<section id="profile" class="space-y-8">
 				<img
 					src={avatar}
 					alt="avatar"
-					class="rounded-full w-32 h-32 object-cover mx-auto"
+					class="mx-auto h-32 w-32 rounded-full object-cover"
 					onerror="this.src='/images/satoshi-nakamoto.png'"
 				/>
 
 				<div>
-					<h1 class="text-4xl font-semibold text-primary !leading-tight">
+					<h1 class="text-4xl font-semibold !leading-tight text-primary">
 						{username}
 					</h1>
 					<a
 						href="https://www.openstreetmap.org/user/{username}"
 						target="_blank"
 						rel="noreferrer"
-						class="w-24 mx-auto mt-1 text-xs text-link hover:text-hover flex justify-center items-center transition-colors"
+						class="mx-auto mt-1 flex w-24 items-center justify-center text-xs text-link transition-colors hover:text-hover"
 						>OSM Profile <svg
 							class="ml-1 w-3"
 							width="16"
@@ -408,7 +408,7 @@
 
 				<h2
 					bind:this={profileDesc}
-					class="break-all text-body text-xl w-full lg:w-[800px] mx-auto"
+					class="mx-auto w-full break-all text-xl text-body lg:w-[800px]"
 				/>
 
 				{#if lightning}
@@ -417,16 +417,16 @@
 			</section>
 
 			<section id="badges" class="mt-16">
-				<div class="flex flex-wrap justify-center items-center">
+				<div class="flex flex-wrap items-center justify-center">
 					{#each earnedBadges as badge}
-						<a href="/badges#{badge.icon}" class="hover:scale-110 transition-transform">
+						<a href="/badges#{badge.icon}" class="transition-transform hover:scale-110">
 							<div class="mx-3 mb-6">
 								<img
 									src="/icons/badges/{badge.icon}.svg"
 									alt={badge.title}
-									class="w-20 h-20 mx-auto mb-1"
+									class="mx-auto mb-1 h-20 w-20"
 								/>
-								<p class="text-xs text-center">{badge.title}</p>
+								<p class="text-center text-xs">{badge.title}</p>
 							</div>
 						</a>
 					{/each}
@@ -434,7 +434,7 @@
 			</section>
 
 			<section id="stats" class="mt-10 mb-16">
-				<div class="border border-statBorder rounded-t-3xl grid md:grid-cols-2 xl:grid-cols-4">
+				<div class="grid rounded-t-3xl border border-statBorder md:grid-cols-2 xl:grid-cols-4">
 					<ProfileStat
 						title="Total Tags"
 						stat={total}
@@ -456,15 +456,15 @@
 					<ProfileStat title="Deleted" stat={deleted} percent={deletedPercent} border="" />
 				</div>
 
-				<div class="border border-statBorder border-t-0 rounded-b-3xl p-5">
+				<div class="rounded-b-3xl border border-t-0 border-statBorder p-5">
 					<canvas bind:this={tagTypeChartCanvas} width="250" height="250" />
 				</div>
 			</section>
 
 			<section id="activity" class="my-16">
-				<div class="w-full border border-statBorder rounded-3xl">
+				<div class="w-full rounded-3xl border border-statBorder">
 					<h3
-						class="text-center md:text-left text-primary text-lg border-b border-statBorder p-5 font-semibold"
+						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left"
 					>
 						{username}'s Activity
 					</h3>
@@ -473,7 +473,7 @@
 						bind:this={activityDiv}
 						class="hide-scroll space-y-2 {eventElements.length > 5
 							? 'h-[375px]'
-							: ''} overflow-y-scroll relative"
+							: ''} relative overflow-y-scroll"
 						on:scroll={() => {
 							if (!loading && !hideArrow) {
 								hideArrow = true;
@@ -494,7 +494,7 @@
 
 							{#if eventElementsPaginated.length !== eventElements.length}
 								<button
-									class="block !mb-5 mx-auto text-link hover:text-hover transition-colors text-xl font-semibold"
+									class="mx-auto !mb-5 block text-xl font-semibold text-link transition-colors hover:text-hover"
 									on:click={() => (eventCount = eventCount + 50)}>Load More</button
 								>
 							{:else if eventElements.length > 10}
@@ -503,7 +503,7 @@
 
 							{#if !hideArrow && eventElements.length > 5}
 								<svg
-									class="z-20 w-4 h-4 animate-bounce text-primary absolute bottom-4 left-[calc(50%-8px)]"
+									class="absolute bottom-4 left-[calc(50%-8px)] z-20 h-4 w-4 animate-bounce text-primary"
 									fill="currentColor"
 									xmlns="http://www.w3.org/2000/svg"
 									viewBox="0 0 512 512"
@@ -523,7 +523,7 @@
 
 			<section id="map-section">
 				<h3
-					class="text-center md:text-left text-primary text-lg border border-statBorder border-b-0 rounded-t-3xl p-5 font-semibold"
+					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left"
 				>
 					{username}'s Map
 				</h3>
@@ -531,7 +531,7 @@
 				<div class="relative mb-2">
 					<div
 						bind:this={mapElement}
-						class="!bg-teal z-10 border border-statBorder rounded-b-3xl h-[300px] md:h-[600px]"
+						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal md:h-[600px]"
 					/>
 					{#if !mapLoaded}
 						<MapLoading

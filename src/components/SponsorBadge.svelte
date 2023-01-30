@@ -1,3 +1,3 @@
-<p class="gradient-bg w-32 mx-auto py-1 text-xs text-white font-semibold rounded-full">
+<p class="gradient-bg mx-auto w-32 rounded-full py-1 text-xs font-semibold text-white">
 	BTC Map Sponsor
 </p>

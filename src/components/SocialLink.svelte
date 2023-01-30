@@ -9,7 +9,7 @@
 	href={url}
 	target="_blank"
 	rel="noreferrer"
-	class="inline-block bg-link hover:bg-hover rounded-full p-2 text-white transition-colors"
+	class="inline-block rounded-full bg-link p-2 text-white transition-colors hover:bg-hover"
 >
 	<Icon w="28" h="28" icon={social} type="socials" />
 </a>

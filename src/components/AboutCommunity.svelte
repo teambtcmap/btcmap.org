@@ -15,7 +15,7 @@
 	<img
 		src={community.tags['icon:square']}
 		alt="avatar"
-		class="rounded-full object-cover w-24 h-24"
+		class="h-24 w-24 rounded-full object-cover"
 		onerror="this.src='/images/communities/bitcoin.svg'"
 	/>
 </a>

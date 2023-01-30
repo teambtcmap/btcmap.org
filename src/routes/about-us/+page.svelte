@@ -172,19 +172,19 @@
 
 <div class="bg-teal">
 	<Header />
-	<div class="w-10/12 xl:w-[1200px] mx-auto">
-		<main class="space-y-20 md:space-y-40 mt-10 mb-20 text-primary">
-			<div class="text-xl text-center space-y-5">
-				<h1 class="text-4xl md:text-5xl font-semibold !leading-tight">About Us</h1>
-				<p class="md:w-[600px] mx-auto">
+	<div class="mx-auto w-10/12 xl:w-[1200px]">
+		<main class="mt-10 mb-20 space-y-20 text-primary md:space-y-40">
+			<div class="space-y-5 text-center text-xl">
+				<h1 class="text-4xl font-semibold !leading-tight md:text-5xl">About Us</h1>
+				<p class="mx-auto md:w-[600px]">
 					BTC Map is a free and open source project powered by volunteer bitcoiners and
 					bitcoin-friendly merchants around the world.
 				</p>
 			</div>
 
-			<section class="w-full lg:flex justify-center space-y-10 lg:space-y-0 lg:space-x-10">
+			<section class="w-full justify-center space-y-10 lg:flex lg:space-y-0 lg:space-x-10">
 				<div class="lg:w-[475px]">
-					<h2 class="mb-5 font-semibold text-3xl">Merchants</h2>
+					<h2 class="mb-5 text-3xl font-semibold">Merchants</h2>
 
 					<div class="space-y-5">
 						<p>
@@ -196,14 +196,14 @@
 							<strong>Accept bitcoin?</strong>
 							<a
 								href="/add-location"
-								class="text-link font-semibold hover:text-hover transition-colors"
+								class="font-semibold text-link transition-colors hover:text-hover"
 								>Get listed on BTC Map</a
 							>!
 						</p>
 					</div>
 				</div>
 
-				<div class="flex flex-wrap justify-center lg:grid grid-cols-3 gap-5">
+				<div class="flex grid-cols-3 flex-wrap justify-center gap-5 lg:grid">
 					{#if merchants.length}
 						{#each merchants as merchant}
 							<AboutMerchant
@@ -215,23 +215,23 @@
 						{/each}
 					{:else}
 						{#each Array(6) as skeleton}
-							<span class="w-24 h-24 rounded-full bg-link/50 animate-pulse" />
+							<span class="h-24 w-24 animate-pulse rounded-full bg-link/50" />
 						{/each}
 					{/if}
 				</div>
 			</section>
 
-			<section class="bg-[#164E63] p-5 md:p-10 rounded-xl w-full space-y-10 text-center text-white">
-				<h2 class="font-semibold text-3xl">Shadowy Supertaggers</h2>
+			<section class="w-full space-y-10 rounded-xl bg-[#164E63] p-5 text-center text-white md:p-10">
+				<h2 class="text-3xl font-semibold">Shadowy Supertaggers</h2>
 
-				<p class="lg:w-[650px] mx-auto">
+				<p class="mx-auto lg:w-[650px]">
 					Shadowy Supertaggers are people who power this project. They are volunteers who selflessly
 					take the time to update business locations with new information. Without them, BTC Map
 					would not be sustainable!
 				</p>
 
 				<div class="space-y-5">
-					<p class="uppercase font-semibold">Our top supertaggers</p>
+					<p class="font-semibold uppercase">Our top supertaggers</p>
 
 					<div class="flex flex-wrap justify-center gap-5">
 						{#if supertaggers.length}
@@ -240,22 +240,22 @@
 							{/each}
 						{:else}
 							{#each Array(6) as skeleton}
-								<span class="w-24 h-24 rounded-full bg-link/50 animate-pulse" />
+								<span class="h-24 w-24 animate-pulse rounded-full bg-link/50" />
 							{/each}
 						{/if}
 					</div>
 
 					<a
 						href="/leaderboard"
-						class="font-semibold inline-block underline hover:no-underline underline-offset-4"
+						class="inline-block font-semibold underline underline-offset-4 hover:no-underline"
 						>View leaderboard</a
 					>
 				</div>
 			</section>
 
-			<section class="w-full lg:flex justify-center space-y-10 lg:space-y-0 lg:space-x-10">
+			<section class="w-full justify-center space-y-10 lg:flex lg:space-y-0 lg:space-x-10">
 				<div class="lg:w-[475px]">
-					<h2 class="mb-5 font-semibold text-3xl">Communities</h2>
+					<h2 class="mb-5 text-3xl font-semibold">Communities</h2>
 
 					<div class="space-y-5">
 						<p>Bitcoin communities help drive global adoption by onboarding new users locally!</p>
@@ -263,7 +263,7 @@
 							<strong>Don’t see your community?</strong>
 							<a
 								href="/communities/add"
-								class="text-link font-semibold hover:text-hover transition-colors"
+								class="font-semibold text-link transition-colors hover:text-hover"
 								>Add it to BTC Map</a
 							>.
 						</p>
@@ -271,33 +271,33 @@
 				</div>
 
 				<div>
-					<div class="flex flex-wrap justify-center lg:grid grid-cols-3 gap-5">
+					<div class="flex grid-cols-3 flex-wrap justify-center gap-5 lg:grid">
 						{#if communities.length}
 							{#each communities as community}
 								<AboutCommunity {community} />
 							{/each}
 						{:else}
 							{#each Array(6) as skeleton}
-								<span class="w-24 h-24 rounded-full bg-link/50 animate-pulse" />
+								<span class="h-24 w-24 animate-pulse rounded-full bg-link/50" />
 							{/each}
 						{/if}
 					</div>
 
-					<div class="flex justify-center mt-5">
+					<div class="mt-5 flex justify-center">
 						<a
 							href="/communities"
-							class="text-link font-semibold hover:text-hover transition-colors"
+							class="font-semibold text-link transition-colors hover:text-hover"
 							>See all communities</a
 						>
 					</div>
 				</div>
 			</section>
 
-			<section class="bg-[#F1F7FC] p-5 md:p-10 rounded-xl w-full space-y-10 text-center">
-				<h2 class="font-semibold text-3xl">Integrations</h2>
+			<section class="w-full space-y-10 rounded-xl bg-[#F1F7FC] p-5 text-center md:p-10">
+				<h2 class="text-3xl font-semibold">Integrations</h2>
 
 				<p class="font-semibold uppercase">
-					Community integrations <span class="text-sm font-normal block normal-case"
+					Community integrations <span class="block text-sm font-normal normal-case"
 						>Projects using BTC Map</span
 					>
 				</p>
@@ -310,7 +310,7 @@
 				</div>
 
 				<p class="font-semibold uppercase">
-					Project integrations <span class="text-sm font-normal block normal-case"
+					Project integrations <span class="block text-sm font-normal normal-case"
 						>BTC Map uses these projects</span
 					>
 				</p>
@@ -325,14 +325,14 @@
 				<p>
 					If you are interested in integrating with us please <a
 						href="mailto:hello@btcmap.org"
-						class="text-link font-semibold hover:text-hover transition-colors">reach out</a
+						class="font-semibold text-link transition-colors hover:text-hover">reach out</a
 					>!
 				</p>
 			</section>
 
-			<section class="w-full lg:flex justify-center space-y-10 lg:space-y-0 lg:space-x-10">
+			<section class="w-full justify-center space-y-10 lg:flex lg:space-y-0 lg:space-x-10">
 				<div class="lg:w-[475px]">
-					<h2 class="mb-5 font-semibold text-3xl">Contributors</h2>
+					<h2 class="mb-5 text-3xl font-semibold">Contributors</h2>
 
 					<p>
 						Anybody can contribute to BTC Map in many different ways. If you would like to get
@@ -340,7 +340,7 @@
 					</p>
 				</div>
 
-				<div class="flex flex-wrap justify-center lg:grid grid-cols-3 gap-5">
+				<div class="flex grid-cols-3 flex-wrap justify-center gap-5 lg:grid">
 					{#each contributors as contributor}
 						<AboutContributor {contributor} />
 					{/each}
@@ -348,10 +348,10 @@
 			</section>
 
 			<section
-				class="bg-[#EBEFF2] p-5 md:p-10 rounded-xl w-full lg:flex justify-center space-y-10 lg:space-y-0 lg:space-x-10"
+				class="w-full justify-center space-y-10 rounded-xl bg-[#EBEFF2] p-5 md:p-10 lg:flex lg:space-y-0 lg:space-x-10"
 			>
 				<div class="lg:w-[475px]">
-					<h2 class="mb-10 font-semibold text-3xl">Core Team</h2>
+					<h2 class="mb-10 text-3xl font-semibold">Core Team</h2>
 
 					<div class="space-y-10">
 						<p>
@@ -380,7 +380,7 @@
 					</div>
 				</div>
 
-				<div class="flex flex-wrap justify-center items-center lg:grid grid-cols-2 gap-10">
+				<div class="flex grid-cols-2 flex-wrap items-center justify-center gap-10 lg:grid">
 					{#each coreTeam as member}
 						<AboutCore {member} />
 					{/each}

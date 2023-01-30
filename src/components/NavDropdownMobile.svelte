@@ -13,10 +13,10 @@
 <button
 	id="dropdown-{title.toLowerCase()}-mobile"
 	on:click={() => (show = !show)}
-	class="w-full {show ? 'text-[#144046]' : 'text-link'} text-xl flex items-center"
+	class="w-full {show ? 'text-[#144046]' : 'text-link'} flex items-center text-xl"
 >
 	<span
-		class="mr-4 bg-mobileButtons active:bg-mobileButtonsActive rounded-full p-3 transition-colors"
+		class="mr-4 rounded-full bg-mobileButtons p-3 transition-colors active:bg-mobileButtonsActive"
 	>
 		<Icon w="24" h="24" icon={show ? `${icon}-highlight` : `${icon}`} type="mobile-nav" />
 	</span>
@@ -35,16 +35,16 @@
 					href={link.url}
 					target={link.external ? '_blank' : '_self'}
 					rel="noreferrer"
-					class="w-full text-link text-xl flex items-center"
+					class="flex w-full items-center text-xl text-link"
 				>
 					<span
-						class="mr-4 bg-mobileButtons active:bg-mobileButtonsActive rounded-full p-3 transition-colors"
+						class="mr-4 rounded-full bg-mobileButtons p-3 transition-colors active:bg-mobileButtonsActive"
 					>
 						<Icon w="24" h="24" icon={link.icon} type="mobile-nav" />
 					</span>
 					<span>{link.title}</span>
 					{#if link.external}
-						<i class="ml-1 w-4 h-4 fa-solid fa-arrow-up-right-from-square" />
+						<i class="fa-solid fa-arrow-up-right-from-square ml-1 h-4 w-4" />
 					{/if}
 				</a>
 			{/each}

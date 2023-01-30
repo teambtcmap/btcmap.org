@@ -58,10 +58,10 @@
 
 <div class="bg-teal">
 	<Header />
-	<div class="w-10/12 xl:w-[1200px] mx-auto">
-		<main class="space-y-10 mt-10 mb-20">
+	<div class="mx-auto w-10/12 xl:w-[1200px]">
+		<main class="mt-10 mb-20 space-y-10">
 			<h1
-				class="text-center lg:text-left text-4xl md:text-5xl font-semibold text-primary gradient !leading-tight"
+				class="gradient text-center text-4xl font-semibold !leading-tight text-primary md:text-5xl lg:text-left"
 			>
 				Open Tickets
 				{#if totalTickets}
@@ -69,29 +69,29 @@
 				{/if}
 			</h1>
 
-			<h2 class="text-center lg:text-left text-primary text-xl font-semibold w-full lg:w-[675px]">
+			<h2 class="w-full text-center text-xl font-semibold text-primary lg:w-[675px] lg:text-left">
 				Tickets up for grabs from our noob forms! Anybody can help add or verify submissions on
 				OpenStreetMap and prepare community area polygons.
 			</h2>
 
-			<p class="text-center lg:text-left text-xl text-primary">
+			<p class="text-center text-xl text-primary lg:text-left">
 				More information on how to get involved can be found in our <a
 					href="https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions"
-					class="text-link hover:text-hover transition-colors">Tagging Instructions</a
+					class="text-link transition-colors hover:text-hover">Tagging Instructions</a
 				>
 				and
 				<a
 					href="https://github.com/teambtcmap/btcmap-data/wiki/Creating-GeoJSON-Areas"
-					class="text-link hover:text-hover transition-colors">Creating GeoJSON Areas</a
+					class="text-link transition-colors hover:text-hover">Creating GeoJSON Areas</a
 				> Wiki pages.
 			</p>
 
 			<section id="tickets">
-				<div class="w-full border border-statBorder rounded-3xl">
-					<div class="text-center text-primary text-2xl p-5 font-semibold">
+				<div class="w-full rounded-3xl border border-statBorder">
+					<div class="p-5 text-center text-2xl font-semibold text-primary">
 						{#each ticketTypes as type}
 							<button
-								class="block md:inline mx-auto w-40 py-2 border border-link {type === 'Add'
+								class="mx-auto block w-40 border border-link py-2 md:inline {type === 'Add'
 									? 'rounded-t md:rounded-l md:rounded-tr-none'
 									: type === 'Community'
 									? 'rounded-b md:rounded-r md:rounded-bl-none'
@@ -117,7 +117,7 @@
 									/>
 								{/each}
 							{:else}
-								<p class="text-body text-center p-5 border-t border-statBorder">
+								<p class="border-t border-statBorder p-5 text-center text-body">
 									No open <strong>add</strong> tickets.
 								</p>
 							{/if}
@@ -136,7 +136,7 @@
 									/>
 								{/each}
 							{:else}
-								<p class="text-body text-center p-5 border-t border-statBorder">
+								<p class="border-t border-statBorder p-5 text-center text-body">
 									No open <strong>verify</strong> tickets.
 								</p>
 							{/if}
@@ -155,19 +155,19 @@
 									/>
 								{/each}
 							{:else}
-								<p class="text-body text-center p-5 border-t border-statBorder">
+								<p class="border-t border-statBorder p-5 text-center text-body">
 									No open <strong>community</strong> tickets.
 								</p>
 							{/if}
 						{/if}
 
 						{#if tickets.length === 100}
-							<p class="text-primary font-semibold text-center p-5 border-t border-statBorder">
+							<p class="border-t border-statBorder p-5 text-center font-semibold text-primary">
 								View all open tickets directly on <a
 									href="https://github.com/teambtcmap/btcmap-data/issues"
 									target="_blank"
 									rel="noreferrer"
-									class="text-link hover:text-hover transition-colors">GitHub</a
+									class="text-link transition-colors hover:text-hover">GitHub</a
 								>.
 							</p>
 						{/if}
@@ -177,7 +177,7 @@
 						{/each}
 					{/if}
 				</div>
-				<p class="text-sm text-body text-center lg:text-left">*Data updated every 10 minutes.</p>
+				<p class="text-center text-sm text-body lg:text-left">*Data updated every 10 minutes.</p>
 				<div class="mt-10 flex justify-center">
 					<TopButton />
 				</div>

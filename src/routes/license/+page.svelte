@@ -11,8 +11,8 @@
 
 <div class="bg-teal">
 	<Header />
-	<div class="w-10/12 xl:w-[1200px] mx-auto">
-		<main class="space-y-5 text-body mt-10 mb-20">
+	<div class="mx-auto w-10/12 xl:w-[1200px]">
+		<main class="mt-10 mb-20 space-y-5 text-body">
 			<p class="text-center font-semibold text-primary">
 				BTC Map - Easily find places to spend sats anywhere on the planet.
 				<br />
@@ -20,7 +20,7 @@
 				<br />
 				<a
 					href="mailto:hello@btcmap.org"
-					class="font-normal text-link hover:text-hover transition-colors">hello@btcmap.org</a
+					class="font-normal text-link transition-colors hover:text-hover">hello@btcmap.org</a
 				>
 			</p>
 			<p>
@@ -36,7 +36,7 @@
 				the GNU Affero General Public License for more details.
 			</p>
 
-			<h1 class="text-center text-4xl md:text-5xl font-semibold text-primary !leading-tight">
+			<h1 class="text-center text-4xl font-semibold !leading-tight text-primary md:text-5xl">
 				GNU AFFERO GENERAL PUBLIC LICENSE
 				<span class="block text-base">Version 3, 19 November 2007</span>
 			</h1>
@@ -44,13 +44,13 @@
 			<p>
 				Copyright (C) 2007 Free Software Foundation, Inc. <a
 					href="https://fsf.org/"
-					class="text-link hover:text-hover transition-colors">https://fsf.org/</a
+					class="text-link transition-colors hover:text-hover">https://fsf.org/</a
 				>
 				Everyone is permitted to copy and distribute verbatim copies of this license document, but changing
 				it is not allowed.
 			</p>
 
-			<h2 class="text-center text-primary text-3xl font-semibold">Preamble</h2>
+			<h2 class="text-center text-3xl font-semibold text-primary">Preamble</h2>
 
 			<p>
 				The GNU Affero General Public License is a free, copyleft license for software and other
@@ -99,9 +99,9 @@
 			</p>
 			<p>The precise terms and conditions for copying, distribution and modification follow.</p>
 
-			<h2 class="text-center text-primary text-3xl font-semibold">TERMS AND CONDITIONS</h2>
+			<h2 class="text-center text-3xl font-semibold text-primary">TERMS AND CONDITIONS</h2>
 
-			<h3 class="text-primary text-2xl font-semibold">0. Definitions.</h3>
+			<h3 class="text-2xl font-semibold text-primary">0. Definitions.</h3>
 
 			<p>
 				<strong>"This License"</strong> refers to version 3 of the GNU Affero General Public License.
@@ -146,7 +146,7 @@
 				commands or options, such as a menu, a prominent item in the list meets this criterion.
 			</p>
 
-			<h3 class="text-primary text-2xl font-semibold">1. Source Code.</h3>
+			<h3 class="text-2xl font-semibold text-primary">1. Source Code.</h3>
 
 			<p>
 				The <strong>"source code"</strong> for a work means the preferred form of the work for
@@ -185,7 +185,7 @@
 			</p>
 			<p>The Corresponding Source for a work in source code form is that same work.</p>
 
-			<h3 class="text-primary text-2xl font-semibold">2. Basic Permissions.</h3>
+			<h3 class="text-2xl font-semibold text-primary">2. Basic Permissions.</h3>
 
 			<p>
 				All rights granted under this License are granted for the term of copyright on the Program,
@@ -210,7 +210,7 @@
 				below. Sublicensing is not allowed; section 10 makes it unnecessary.
 			</p>
 
-			<h3 class="text-primary text-2xl font-semibold">
+			<h3 class="text-2xl font-semibold text-primary">
 				3. Protecting Users' Legal Rights From Anti-Circumvention Law.
 			</h3>
 
@@ -228,7 +228,7 @@
 				your or third parties' legal rights to forbid circumvention of technological measures.
 			</p>
 
-			<h3 class="text-primary text-2xl font-semibold">4. Conveying Verbatim Copies.</h3>
+			<h3 class="text-2xl font-semibold text-primary">4. Conveying Verbatim Copies.</h3>
 
 			<p>
 				You may convey verbatim copies of the Program's source code as you receive it, in any
@@ -243,14 +243,14 @@
 				support or warranty protection for a fee.
 			</p>
 
-			<h3 class="text-primary text-2xl font-semibold">5. Conveying Modified Source Versions.</h3>
+			<h3 class="text-2xl font-semibold text-primary">5. Conveying Modified Source Versions.</h3>
 
 			<p>
 				You may convey a work based on the Program, or the modifications to produce it from the
 				Program, in the form of source code under the terms of section 4, provided that you also
 				meet all of these conditions:
 			</p>
-			<ul class="space-y-5 ml-5">
+			<ul class="ml-5 space-y-5">
 				<li>
 					a) The work must carry prominent notices stating that you modified it, and giving a
 					relevant date.
@@ -284,14 +284,14 @@
 				parts of the aggregate.
 			</p>
 
-			<h3 class="text-primary text-2xl font-semibold">6. Conveying Non-Source Forms.</h3>
+			<h3 class="text-2xl font-semibold text-primary">6. Conveying Non-Source Forms.</h3>
 
 			<p>
 				You may convey a covered work in object code form under the terms of sections 4 and 5,
 				provided that you also convey the machine-readable Corresponding Source under the terms of
 				this License, in one of these ways:
 			</p>
-			<ul class="space-y-5 ml-5">
+			<ul class="ml-5 space-y-5">
 				<li>
 					a) Convey the object code in, or embodied in, a physical product (including a physical
 					distribution medium), accompanied by the Corresponding Source fixed on a durable physical
@@ -377,7 +377,7 @@
 				for unpacking, reading or copying.
 			</p>
 
-			<h3 class="text-primary text-2xl font-semibold">7. Additional Terms.</h3>
+			<h3 class="text-2xl font-semibold text-primary">7. Additional Terms.</h3>
 
 			<p>
 				<strong>"Additional permissions"</strong> are terms that supplement the terms of this License
@@ -399,7 +399,7 @@
 				you may (if authorized by the copyright holders of that material) supplement the terms of
 				this License with terms:
 			</p>
-			<ul class="space-y-5 ml-5">
+			<ul class="ml-5 space-y-5">
 				<li>
 					a) Disclaiming warranty or limiting liability differently from the terms of sections 15
 					and 16 of this License; or
@@ -453,7 +453,7 @@
 				written license, or stated as exceptions; the above requirements apply either way.
 			</p>
 
-			<h3 class="text-primary text-2xl font-semibold">8. Termination.</h3>
+			<h3 class="text-2xl font-semibold text-primary">8. Termination.</h3>
 
 			<p>
 				You may not propagate or modify a covered work except as expressly provided under this
@@ -482,7 +482,7 @@
 				the same material under section 10.
 			</p>
 
-			<h3 class="text-primary text-2xl font-semibold">
+			<h3 class="text-2xl font-semibold text-primary">
 				9. Acceptance Not Required for Having Copies.
 			</h3>
 
@@ -496,7 +496,7 @@
 				so.
 			</p>
 
-			<h3 class="text-primary text-2xl font-semibold">
+			<h3 class="text-2xl font-semibold text-primary">
 				10. Automatic Licensing of Downstream Recipients.
 			</h3>
 
@@ -523,7 +523,7 @@
 				any portion of it.
 			</p>
 
-			<h3 class="text-primary text-2xl font-semibold">11. Patents.</h3>
+			<h3 class="text-2xl font-semibold text-primary">11. Patents.</h3>
 
 			<p>
 				A <strong>"contributor"</strong> is a copyright holder who authorizes use under this License
@@ -588,7 +588,7 @@
 				patent law.
 			</p>
 
-			<h3 class="text-primary text-2xl font-semibold">12. No Surrender of Others' Freedom.</h3>
+			<h3 class="text-2xl font-semibold text-primary">12. No Surrender of Others' Freedom.</h3>
 
 			<p>
 				If conditions are imposed on you (whether by court order, agreement or otherwise) that
@@ -601,7 +601,7 @@
 				conveying the Program.
 			</p>
 
-			<h3 class="text-primary text-2xl font-semibold">
+			<h3 class="text-2xl font-semibold text-primary">
 				13. Remote Network Interaction; Use with the GNU General Public License.
 			</h3>
 
@@ -623,7 +623,7 @@
 				combined will remain governed by version 3 of the GNU General Public License.
 			</p>
 
-			<h3 class="text-primary text-2xl font-semibold">14. Revised Versions of this License.</h3>
+			<h3 class="text-2xl font-semibold text-primary">14. Revised Versions of this License.</h3>
 
 			<p>
 				The Free Software Foundation may publish revised and/or new versions of the GNU Affero
@@ -650,7 +650,7 @@
 				choosing to follow a later version.
 			</p>
 
-			<h3 class="text-primary text-2xl font-semibold">15. Disclaimer of Warranty.</h3>
+			<h3 class="text-2xl font-semibold text-primary">15. Disclaimer of Warranty.</h3>
 
 			<p class="font-semibold">
 				THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN
@@ -662,7 +662,7 @@
 				CORRECTION.
 			</p>
 
-			<h3 class="text-primary text-2xl font-semibold">16. Limitation of Liability.</h3>
+			<h3 class="text-2xl font-semibold text-primary">16. Limitation of Liability.</h3>
 
 			<p class="font-semibold">
 				IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL ANY COPYRIGHT
@@ -674,7 +674,7 @@
 				OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 			</p>
 
-			<h3 class="text-primary text-2xl font-semibold">17. Interpretation of Sections 15 and 16.</h3>
+			<h3 class="text-2xl font-semibold text-primary">17. Interpretation of Sections 15 and 16.</h3>
 
 			<p>
 				If the disclaimer of warranty and limitation of liability provided above cannot be given
@@ -684,7 +684,7 @@
 				return for a fee.
 			</p>
 
-			<h2 class="text-center text-primary text-3xl font-semibold">END OF TERMS AND CONDITIONS</h2>
+			<h2 class="text-center text-3xl font-semibold text-primary">END OF TERMS AND CONDITIONS</h2>
 		</main>
 		<Footer />
 	</div>

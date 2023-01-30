@@ -10,26 +10,26 @@
 	import { socials } from '$lib/store';
 </script>
 
-<div class="flex justify-center items-center text-center pb-20 md:pb-32 mt-10">
+<div class="mt-10 flex items-center justify-center pb-20 text-center md:pb-32">
 	<div>
-		<h2 class="gradient text-4xl font-semibold mb-5">{type} Submitted!</h2>
-		<p class="text-primary w-full md:w-[500px] mb-5">
+		<h2 class="gradient mb-5 text-4xl font-semibold">{type} Submitted!</h2>
+		<p class="mb-5 w-full text-primary md:w-[500px]">
 			{text} If you wish to know the status of your contribution, you can join our
 			<a
 				href={$socials.discord}
 				target="_blank"
 				rel="noreferrer"
-				class="text-link hover:text-hover transition-colors">Discord</a
+				class="text-link transition-colors hover:text-hover">Discord</a
 			>. You may also monitor the progress on GitHub
 			<a
 				href="https://github.com/teambtcmap/btcmap-data/issues/{issue}"
 				target="_blank"
 				rel="noreferrer"
-				class="text-link hover:text-hover transition-colors">issue #{issue}</a
+				class="text-link transition-colors hover:text-hover">issue #{issue}</a
 			>.
 		</p>
 		{#if typeof window !== 'undefined'}
-			<div class="w-full md:w-96 mx-auto">
+			<div class="mx-auto w-full md:w-96">
 				<LottiePlayer
 					src="/lottie/lightning-bolt.json"
 					autoplay={true}

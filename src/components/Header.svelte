@@ -52,7 +52,7 @@
 
 <!-- desktop header -->
 <header
-	class="z-30 w-10/12 xl:w-[1200px] mx-auto relative hidden lg:flex justify-between items-center w-full py-5"
+	class="relative z-30 mx-auto hidden w-10/12 w-full items-center justify-between py-5 lg:flex xl:w-[1200px]"
 >
 	<a href="/">
 		<img src="/images/logo.svg" alt="logo" class="w-16" />
@@ -99,7 +99,7 @@
 				<!-- regular links -->
 				<a
 					href={link.url}
-					class="text-link hover:text-hover text-xl font-semibold transition-colors"
+					class="text-xl font-semibold text-link transition-colors hover:text-hover"
 					>{link.title}
 				</a>
 			{/if}
@@ -109,7 +109,7 @@
 
 <!-- mobile header -->
 <header
-	class="px-4 sticky top-0 z-30 flex lg:hidden justify-between items-center w-full py-5 {showMobileMenu
+	class="sticky top-0 z-30 flex w-full items-center justify-between px-4 py-5 lg:hidden {showMobileMenu
 		? 'bg-teal'
 		: 'bg-teal/90'}"
 >
@@ -126,14 +126,14 @@
 			icon={showMobileMenu ? 'close' : 'bars'}
 			type="mobile-nav"
 		/>
-		<span class="uppercase text-mobileMenu font-semibold">Menu</span>
+		<span class="font-semibold uppercase text-mobileMenu">Menu</span>
 	</button>
 
 	<!-- menu -->
 	<nav
-		class="z-30 absolute top-[122.45px] {showMobileMenu
+		class="absolute top-[122.45px] z-30 {showMobileMenu
 			? 'left-0'
-			: 'left-[-100%]'} transition-all ease-in-out border-t border-[#BDD2D4] w-full h-[100vh] space-y-2 pt-8 px-8 bg-teal"
+			: 'left-[-100%]'} h-[100vh] w-full space-y-2 border-t border-[#BDD2D4] bg-teal px-8 pt-8 transition-all ease-in-out"
 	>
 		{#each navLinks as link}
 			<!-- dropdown menu -->
@@ -154,9 +154,9 @@
 
 				<!-- regular links -->
 			{:else}
-				<a href={link.url} class="w-full text-link text-xl flex items-center">
+				<a href={link.url} class="flex w-full items-center text-xl text-link">
 					<span
-						class="mr-4 bg-mobileButtons active:bg-mobileButtonsActive rounded-full p-3 transition-colors"
+						class="mr-4 rounded-full bg-mobileButtons p-3 transition-colors active:bg-mobileButtonsActive"
 					>
 						<Icon w="24" h="24" icon={link.icon} type="mobile-nav" />
 					</span>

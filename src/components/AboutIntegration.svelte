@@ -6,12 +6,12 @@
 	href={integration.url}
 	target="_blank"
 	rel="noreferrer"
-	class="space-y-2 hover:text-link transition-colors"
+	class="space-y-2 transition-colors hover:text-link"
 >
 	<img
 		src="/images/integrations/{integration.icon}{integration.icon === 'voltage' ? '.png' : '.jpg'}"
 		alt="logo"
-		class="rounded-full object-cover w-24 h-24 mx-auto"
+		class="mx-auto h-24 w-24 rounded-full object-cover"
 		onerror="this.src='/images/communities/bitcoin.svg'"
 	/>
 

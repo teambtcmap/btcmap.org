@@ -11,7 +11,7 @@
 	<OutClick excludeQuerySelectorAll={['#show-tags']} on:outclick={closeModal}>
 		<div
 			transition:fly={{ y: 200, duration: 300 }}
-			class="z-[2000] border border-mapBorder absolute top-[5vh] md:top-[calc(50vh-200px)] left-[5vw] md:left-[calc(50vw-215px)] h-[90vh] md:h-[400px] w-[90vw] md:w-[430px] bg-white p-6 rounded-xl shadow-2xl overflow-auto"
+			class="absolute top-[5vh] left-[5vw] z-[2000] h-[90vh] w-[90vw] overflow-auto rounded-xl border border-mapBorder bg-white p-6 shadow-2xl md:top-[calc(50vh-200px)] md:left-[calc(50vw-215px)] md:h-[400px] md:w-[430px]"
 		>
 			<CloseButton
 				position="flex justify-end"
@@ -21,8 +21,8 @@
 			<div class="space-y-2">
 				{#each Object.entries($showTags) as tag}
 					<div>
-						<span class="text-primary font-semibold">{tag[0]}</span>=<span
-							class="text-body font-semibold">{tag[1]}</span
+						<span class="font-semibold text-primary">{tag[0]}</span>=<span
+							class="font-semibold text-body">{tag[1]}</span
 						>
 					</div>
 				{/each}

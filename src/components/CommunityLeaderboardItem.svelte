@@ -20,12 +20,12 @@
 </script>
 
 <div
-	class="py-5 border-b border-statBorder text-center text-link lg:grid grid-cols-6 text-lg font-semibold"
+	class="grid-cols-6 border-b border-statBorder py-5 text-center text-lg font-semibold text-link lg:grid"
 >
 	<span
 		class="my-auto {position > 3
 			? 'underline'
-			: ''} lg:no-underline underline-offset-4 decoration-4"
+			: ''} decoration-4 underline-offset-4 lg:no-underline"
 	>
 		{#if position === 1}
 			<span class="text-2xl">🥇</span>
@@ -42,7 +42,7 @@
 		<img
 			src={avatar}
 			alt="avatar"
-			class="rounded-full w-20 h-20 lg:w-14 lg:h-14 object-cover mx-auto mb-2"
+			class="mx-auto mb-2 h-20 w-20 rounded-full object-cover lg:h-14 lg:w-14"
 			onerror="this.src='/images/communities/bitcoin.svg'"
 		/>
 
@@ -50,7 +50,7 @@
 			href="/community/{id}"
 			class="hover:text-hover {name.match('([^ ]{21})')
 				? 'break-all'
-				: ''} transition-colors inline-block mb-1">{name}</a
+				: ''} mb-1 inline-block transition-colors">{name}</a
 		>
 
 		{#if sponsor}
@@ -59,12 +59,12 @@
 	</div>
 
 	{#each stats as stat}
-		<span class="flex lg:inline-flex justify-center items-center my-2 lg:my-0">
-			<span class="text-primary lg:hidden mr-1">{stat.title}:</span>
+		<span class="my-2 flex items-center justify-center lg:my-0 lg:inline-flex">
+			<span class="mr-1 text-primary lg:hidden">{stat.title}:</span>
 			{#if stat.title === 'Up-To-Date'}
 				<div class="w-[100px] bg-link/25">
 					<div
-						class="bg-link text-xs font-semibold text-white text-center p-1 leading-none"
+						class="bg-link p-1 text-center text-xs font-semibold leading-none text-white"
 						style="width: {stat.stat}%"
 					>
 						{stat.stat}%

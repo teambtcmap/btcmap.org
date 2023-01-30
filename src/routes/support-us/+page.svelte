@@ -40,13 +40,13 @@
 
 <div class="bg-teal">
 	<Header />
-	<div class="w-10/12 xl:w-[1200px] mx-auto">
-		<main class="text-center space-y-10 my-10 md:my-20">
-			<h1 class="text-4xl md:text-5xl font-semibold text-primary gradient !leading-tight">
+	<div class="mx-auto w-10/12 xl:w-[1200px]">
+		<main class="my-10 space-y-10 text-center md:my-20">
+			<h1 class="gradient text-4xl font-semibold !leading-tight text-primary md:text-5xl">
 				Help place bitcoin on the map.
 			</h1>
 
-			<h2 class="text-primary text-xl font-semibold w-full lg:w-[800px] mx-auto">
+			<h2 class="mx-auto w-full text-xl font-semibold text-primary lg:w-[800px]">
 				BTCMap.org is a free and open source project (FOSS). We rely on donations and sponsorship to
 				continue.
 
@@ -57,7 +57,7 @@
 			<section id="donate">
 				{#if showQr}
 					<div
-						class="drop-shadow-xl relative bg-lightBlue rounded-xl w-full md:w-[475px] h-[450px] md:h-[380px] flex justify-center items-center mx-auto"
+						class="relative mx-auto flex h-[450px] w-full items-center justify-center rounded-xl bg-lightBlue drop-shadow-xl md:h-[380px] md:w-[475px]"
 					>
 						<div class="space-y-5">
 							<CloseButton
@@ -73,12 +73,12 @@
 										? '/images/lightning-qr.svg'
 										: '/images/onchain-qr.svg'}
 									alt="qr"
-									class="w-[256px] h-[256px] mx-auto border-4 rounded-xl border-link hover:border-hover transition-colors"
+									class="mx-auto h-[256px] w-[256px] rounded-xl border-4 border-link transition-colors hover:border-hover"
 								/>
 							</a>
 
 							<!-- cta -->
-							<p class="text-primary text-xl text-center">
+							<p class="text-center text-xl text-primary">
 								Scan or click to donate <br class="block md:hidden" /><strong class="lowercase"
 									>{network}</strong
 								>
@@ -87,7 +87,7 @@
 										? '/icons/ln-highlight.svg'
 										: '/icons/btc-highlight.svg'}
 									alt="protocol"
-									class="inline mb-1"
+									class="mb-1 inline"
 								/>
 							</p>
 						</div>
@@ -103,8 +103,8 @@
 			</section>
 
 			<section id="supporters">
-				<h2 class="uppercase text-primary text-xl font-semibold">Our amazing supporters</h2>
-				<a href="mailto:hello@btcmap.org" class="text-link hover:text-hover transition-colors"
+				<h2 class="text-xl font-semibold uppercase text-primary">Our amazing supporters</h2>
+				<a href="mailto:hello@btcmap.org" class="text-link transition-colors hover:text-hover"
 					>Become a Sponsor</a
 				>
 
@@ -117,12 +117,12 @@
 			<section id="node">
 				<!-- channel -->
 				<div>
-					<h3 class="uppercase text-body text-lg font-semibold">Open a lightning channel to us</h3>
+					<h3 class="text-lg font-semibold uppercase text-body">Open a lightning channel to us</h3>
 					<a
 						href="https://amboss.space/node/02eb5a2e05ef32d0434ea616d38a1a46deaf9f246dc418673f43a571bba0363031"
 						target="_blank"
 						rel="noreferrer"
-						class="text-link hover:text-hover break-all transition-colors"
+						class="break-all text-link transition-colors hover:text-hover"
 						>02eb5a2e05ef32d0434ea616d38a1a46deaf9f246dc418673f43a571bba0363031</a
 					>
 					<iframe

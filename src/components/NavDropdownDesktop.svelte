@@ -14,9 +14,9 @@
 	<button
 		id="dropdown-{title.toLowerCase()}"
 		on:click={() => (show = !show)}
-		class="mr-4 mt-4 md:mr-0 md:mt-0 text-link hover:text-hover text-xl font-semibold flex items-center transition-colors"
+		class="mr-4 mt-4 flex items-center text-xl font-semibold text-link transition-colors hover:text-hover md:mr-0 md:mt-0"
 	>
-		{title} <i class="ml-1 w-4 h-4 fa-solid fa-chevron-down" />
+		{title} <i class="fa-solid fa-chevron-down ml-1 h-4 w-4" />
 	</button>
 
 	<!-- dropdown items -->
@@ -25,13 +25,13 @@
 			excludeQuerySelectorAll={[`#dropdown-${title.toLowerCase()}`]}
 			on:outclick={() => (show = false)}
 		>
-			<div class="w-[185px] absolute top-8 right-0 rounded-2xl shadow-lg">
+			<div class="absolute top-8 right-0 w-[185px] rounded-2xl shadow-lg">
 				{#each links as link}
 					<a
 						href={link.url}
 						target={link.external ? '_blank' : '_self'}
 						rel="noreferrer"
-						class="p-4 block bg-link hover:bg-hover text-white text-xl font-semibold flex justify-center items-center {link.icon ===
+						class="block flex items-center justify-center bg-link p-4 text-xl font-semibold text-white hover:bg-hover {link.icon ===
 						top
 							? 'rounded-t-2xl'
 							: link.icon === bottom
@@ -40,7 +40,7 @@
 					>
 						{link.title}
 						{#if link.external}
-							<i class="ml-1 w-4 h-4 fa-solid fa-arrow-up-right-from-square" />
+							<i class="fa-solid fa-arrow-up-right-from-square ml-1 h-4 w-4" />
 						{/if}
 					</a>
 				{/each}

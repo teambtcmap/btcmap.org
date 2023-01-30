@@ -1,33 +1,33 @@
-<div class="text-center py-5 border-b border-link/50 animate-pulse lg:grid grid-cols-6">
+<div class="animate-pulse grid-cols-6 border-b border-link/50 py-5 text-center lg:grid">
 	<!-- position placeholder -->
-	<span class="block lg:inline bg-link/50 animate-pulse h-5 w-5 rounded-full my-auto mx-auto" />
+	<span class="my-auto mx-auto block h-5 w-5 animate-pulse rounded-full bg-link/50 lg:inline" />
 
 	<!-- avatar and name placeholder -->
 	<div class="my-5 lg:my-0">
 		<!-- avatar -->
 		<span
-			class="block bg-link/50 animate-pulse w-20 h-20 lg:w-14 lg:h-14 rounded-full mx-auto mb-2"
+			class="mx-auto mb-2 block h-20 w-20 animate-pulse rounded-full bg-link/50 lg:h-14 lg:w-14"
 		/>
 
 		<!-- name -->
 		<span
-			class="block bg-link/50 animate-pulse w-[150px] lg:w-[100px] h-[30px] rounded-xl mx-auto"
+			class="mx-auto block h-[30px] w-[150px] animate-pulse rounded-xl bg-link/50 lg:w-[100px]"
 		/>
 	</div>
 
 	<!-- stats placeholders -->
 	<span
-		class="bg-link/50 animate-pulse w-[100px] h-5 lg:!my-auto mx-auto block lg:inline-block my-2 lg:my-0"
+		class="mx-auto my-2 block h-5 w-[100px] animate-pulse bg-link/50 lg:!my-auto lg:my-0 lg:inline-block"
 	/>
 	<span
-		class="bg-link/50 animate-pulse w-32 h-5 lg:w-5 rounded-xl lg:rounded-full lg:!my-auto mx-auto block lg:inline-block my-2 lg:my-0"
+		class="mx-auto my-2 block h-5 w-32 animate-pulse rounded-xl bg-link/50 lg:!my-auto lg:my-0 lg:inline-block lg:w-5 lg:rounded-full"
 	/>
 	<span
-		class="bg-link/50 animate-pulse w-32 h-5 lg:w-5 rounded-xl lg:rounded-full lg:!my-auto mx-auto block lg:inline-block my-2 lg:my-0"
+		class="mx-auto my-2 block h-5 w-32 animate-pulse rounded-xl bg-link/50 lg:!my-auto lg:my-0 lg:inline-block lg:w-5 lg:rounded-full"
 	/>
-	<div class="flex lg:inline-flex justify-center items-center space-x-1 my-2 lg:my-0">
+	<div class="my-2 flex items-center justify-center space-x-1 lg:my-0 lg:inline-flex">
 		{#each Array(5) as star}
-			<i class="text-link/50 text-lg animate-pulse fa-solid fa-star" />
+			<i class="fa-solid fa-star animate-pulse text-lg text-link/50" />
 		{/each}
 	</div>
 </div>

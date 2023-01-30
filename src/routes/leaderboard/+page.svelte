@@ -146,20 +146,20 @@
 	<Header />
 
 	<main class="mt-10 mb-20">
-		<div class="flex justify-center mb-10">
-			<div id="hero" class="w-full h-[324px] flex justify-center items-end">
+		<div class="mb-10 flex justify-center">
+			<div id="hero" class="flex h-[324px] w-full items-end justify-center">
 				<img src="/images/supertagger-king.svg" alt="ultimate supertagger" />
 			</div>
 		</div>
 
-		<div class="w-10/12 xl:w-[1200px] mx-auto space-y-10">
+		<div class="mx-auto w-10/12 space-y-10 xl:w-[1200px]">
 			<h1
-				class="text-center text-4xl md:text-5xl font-semibold text-primary gradient !leading-tight"
+				class="gradient text-center text-4xl font-semibold !leading-tight text-primary md:text-5xl"
 			>
 				Top Supertaggers
 			</h1>
 
-			<h2 class="text-center text-primary text-xl font-semibold w-full lg:w-[800px] mx-auto">
+			<h2 class="mx-auto w-full text-center text-xl font-semibold text-primary lg:w-[800px]">
 				Shadowy supertaggers are a competitive bunch. When they are not smashing the keys, they
 				check this leaderboard to make sure they’re on top. Are you going to stand by and let them
 				claim the top spot?! Get taggin’!
@@ -167,7 +167,7 @@
 
 			<section id="chart" class="relative">
 				{#if leaderboard && leaderboard.length && !loading}{:else}
-					<div class="absolute top-0 left-0 border border-link/50 animate-pulse w-full h-[400px]" />
+					<div class="absolute top-0 left-0 h-[400px] w-full animate-pulse border border-link/50" />
 				{/if}
 				<canvas bind:this={topTenChartCanvas} width="400" height="400" />
 			</section>
@@ -180,7 +180,7 @@
 			/>
 
 			<section id="leaderboard">
-				<div class="hidden lg:grid text-center grid-cols-6 mb-5">
+				<div class="mb-5 hidden grid-cols-6 text-center lg:grid">
 					{#each headings as heading}
 						<h3 class="text-lg font-semibold text-primary">
 							{heading}
@@ -216,7 +216,7 @@
 					{/if}
 				</div>
 
-				<p class="text-sm text-center text-body">*Data updated every 10 minutes</p>
+				<p class="text-center text-sm text-body">*Data updated every 10 minutes</p>
 
 				<div class="mt-10 flex justify-center">
 					<TopButton />

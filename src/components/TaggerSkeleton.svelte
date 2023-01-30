@@ -1,18 +1,18 @@
 <div
-	class="md:flex justify-between space-y-2 md:space-y-0 md:space-x-5 lg:space-x-0 items-center p-5"
+	class="items-center justify-between space-y-2 p-5 md:flex md:space-y-0 md:space-x-5 lg:space-x-0"
 >
-	<div class="space-y-2 md:space-y-0 md:space-x-5 md:flex items-center">
+	<div class="items-center space-y-2 md:flex md:space-y-0 md:space-x-5">
 		<!-- dot placeholder -->
-		<div class="h-3 w-3 mx-auto md:mx-0 animate-pulse rounded-full bg-link/50" />
+		<div class="mx-auto h-3 w-3 animate-pulse rounded-full bg-link/50 md:mx-0" />
 
 		<!-- event placeholder -->
 		<div
-			class="h-[38px] md:h-[30px] w-full md:w-[450px] mx-auto md:mx-0 animate-pulse rounded-xl bg-link/50"
+			class="mx-auto h-[38px] w-full animate-pulse rounded-xl bg-link/50 md:mx-0 md:h-[30px] md:w-[450px]"
 		/>
 	</div>
 
 	<!-- tipping button placeholder -->
 	<div
-		class="h-[38px] md:h-[30px] w-full md:w-20 mx-auto md:mx-0 animate-pulse rounded-lg bg-link/50"
+		class="mx-auto h-[38px] w-full animate-pulse rounded-lg bg-link/50 md:mx-0 md:h-[30px] md:w-20"
 	/>
 </div>

@@ -7,19 +7,19 @@
 
 <div
 	id={icon}
-	class="bg-white drop-shadow-xl hover:drop-shadow-2xl rounded-3xl p-5 md:p-10 space-y-4 text-center relative transition-all"
+	class="relative space-y-4 rounded-3xl bg-white p-5 text-center drop-shadow-xl transition-all hover:drop-shadow-2xl md:p-10"
 >
 	{#if type === 'contribution'}
 		<div
-			class="w-20 py-2 rounded-full shadow-lg text-link font-semibold bg-white absolute top-5 -right-2"
+			class="absolute top-5 -right-2 w-20 rounded-full bg-white py-2 font-semibold text-link shadow-lg"
 		>
 			+{desc}
 		</div>
 	{/if}
 
-	<img src="/icons/badges/{icon}.svg" alt={title} class="w-20 h-20 mx-auto" />
+	<img src="/icons/badges/{icon}.svg" alt={title} class="mx-auto h-20 w-20" />
 
-	<p class="text-primary text-xl font-semibold">{title}</p>
+	<p class="text-xl font-semibold text-primary">{title}</p>
 
 	{#if type === 'achievement'}
 		<p class="text-body">{desc}</p>

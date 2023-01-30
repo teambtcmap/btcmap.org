@@ -20,22 +20,22 @@
 </svelte:head>
 
 <div class="bg-teal">
-	<div class="w-10/12 xl:w-[1200px] mx-auto relative">
+	<div class="relative mx-auto w-10/12 xl:w-[1200px]">
 		<header>
 			<a href="/">
-				<img src="/images/logo.svg" alt="logo" class="w-32 py-5 mx-auto" />
+				<img src="/images/logo.svg" alt="logo" class="mx-auto w-32 py-5" />
 			</a>
 		</header>
 
-		<div class="text-center space-y-10 py-10">
-			<a href="/" class="text-link hover:text-hover font-semibold text-xl transition-colors"
+		<div class="space-y-10 py-10 text-center">
+			<a href="/" class="text-xl font-semibold text-link transition-colors hover:text-hover"
 				><i class="fa-solid fa-house mr-2" /> Home</a
 			>
 			<h1 class="text-4xl md:text-5xl">{$page.status}: {$page.error.message}</h1>
-			<h2 class="text-xl text-primary font-semibold">Please try again or contact BTC Map.</h2>
+			<h2 class="text-xl font-semibold text-primary">Please try again or contact BTC Map.</h2>
 		</div>
 
-		<footer class="space-x-5 pb-5 flex justify-center">
+		<footer class="flex justify-center space-x-5 pb-5">
 			<SocialLink url={$socials.twitter} social="twitter" />
 			<SocialLink url={$socials.discord} social="discord" />
 			<SocialLink url={$socials.github} social="github" />

@@ -6,9 +6,9 @@
 </script>
 
 <section id={title}>
-	<h2 class="text-primary text-3xl font-semibold md:text-left mb-5">{title}</h2>
+	<h2 class="mb-5 text-3xl font-semibold text-primary md:text-left">{title}</h2>
 
-	<div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
+	<div class="grid gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 		{#if communities && communities.length}
 			{#each communities as community}
 				<CommunityCard id={community.id} tags={community.tags} />

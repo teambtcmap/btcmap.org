@@ -13,21 +13,21 @@
 			href={link}
 			target={text === 'Web' ? '_self' : '_blank'}
 			rel="noreferrer"
-			class="text-link hover:text-hover text-2xl font-semibold transition-colors"
+			class="text-2xl font-semibold text-link transition-colors hover:text-hover"
 		>
-			<div class="bg-offwhite rounded-2xl mb-5 h-60 flex justify-center items-center">
+			<div class="mb-5 flex h-60 items-center justify-center rounded-2xl bg-offwhite">
 				<Icon w="112" h="112" icon={image} type="apps" />
 			</div>
 			<p>{text}</p>
-			<p class="font-normal text-xl">{desc}</p>
+			<p class="text-xl font-normal">{desc}</p>
 		</a>
 	{:else}
 		<div
-			class="opacity-50 text-link bg-offwhite rounded-2xl mb-5 h-60 flex justify-center items-center"
+			class="mb-5 flex h-60 items-center justify-center rounded-2xl bg-offwhite text-link opacity-50"
 		>
-			<i class="{image} w-28 h-28" />
+			<i class="{image} h-28 w-28" />
 		</div>
-		<p class="opacity-50 text-link text-2xl font-semibold">{text}</p>
-		<p class="opacity-50 text-link text-xl">Soon!</p>
+		<p class="text-2xl font-semibold text-link opacity-50">{text}</p>
+		<p class="text-xl text-link opacity-50">Soon!</p>
 	{/if}
 </div>

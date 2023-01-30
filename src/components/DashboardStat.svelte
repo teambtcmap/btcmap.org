@@ -10,7 +10,7 @@
 </script>
 
 <div class="space-y-5 p-5 {border}">
-	<h3 class="text-center md:text-left text-primary text-xl md:h-[56px]">
+	<h3 class="text-center text-xl text-primary md:h-[56px] md:text-left">
 		{title}
 		{#if title === 'Number of communities'}
 			<a href="/communities"><i class="fa-solid fa-circle-info text-base" /></a>
@@ -21,14 +21,14 @@
 	</h3>
 	<div class="flex justify-center md:justify-start">
 		{#if stat >= 0}
-			<span class="text-5xl text-primary font-semibold">{stat}</span>
+			<span class="text-5xl font-semibold text-primary">{stat}</span>
 			{#if percent !== undefined}
 				<span
 					class="{percent === '+0' || percent === 0
 						? 'text-primary'
 						: percent.startsWith('+')
 						? 'text-statPositive'
-						: 'text-statNegative'} ml-1 font-semibold text-lg"
+						: 'text-statNegative'} ml-1 text-lg font-semibold"
 					>{percent === '+0' ? percent.slice(1) : percent}%</span
 				>
 			{:else if change}
@@ -37,7 +37,7 @@
 						? 'text-primary'
 						: change.startsWith('+')
 						? 'text-statPositive'
-						: 'text-statNegative'} ml-1 font-semibold text-lg">{change}</span
+						: 'text-statNegative'} ml-1 text-lg font-semibold">{change}</span
 				>
 			{/if}
 		{:else}

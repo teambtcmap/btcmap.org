@@ -153,16 +153,16 @@
 
 <div class="bg-teal">
 	<Header />
-	<div class="w-10/12 xl:w-[1200px] mx-auto">
+	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		{#if !submitted}
-			<h1 class="text-4xl md:text-5xl gradient font-semibold mt-10 text-center">
+			<h1 class="gradient mt-10 text-center text-4xl font-semibold md:text-5xl">
 				Make an impact locally!
 			</h1>
 
-			<section id="add-community" class="mx-auto w-full md:w-[600px] mt-16 pb-20 md:pb-32">
-				<h2 class="text-primary text-3xl font-semibold mb-5 text-center">Add Community</h2>
+			<section id="add-community" class="mx-auto mt-16 w-full pb-20 md:w-[600px] md:pb-32">
+				<h2 class="mb-5 text-center text-3xl font-semibold text-primary">Add Community</h2>
 
-				<p class="text-primary w-full mb-5 text-center">
+				<p class="mb-5 w-full text-center text-primary">
 					Please fill out this form to submit a community application. This is a great way to grow
 					bitcoin adoption in your area, have some fun, and maybe even make some friends along the
 					way. <TimelineTooltip
@@ -170,9 +170,9 @@
 					/>
 				</p>
 
-				<div class="text-primary w-full mb-10">
+				<div class="mb-10 w-full text-primary">
 					<p class="font-semibold">Criteria</p>
-					<ul class="list-disc ml-5">
+					<ul class="ml-5 list-disc">
 						<li>bitcoin-only</li>
 						<li>must be a geographical area not a single point</li>
 						<li>be willing to take ownership of your local mapping data</li>
@@ -180,22 +180,22 @@
 					</ul>
 				</div>
 
-				<form on:submit={submitForm} class="text-primary space-y-5 w-full">
+				<form on:submit={submitForm} class="w-full space-y-5 text-primary">
 					<div>
 						<div>
 							<label for="location-picker" class="mb-2 block font-semibold">Set Location</label>
-							<p class="text-sm mb-2">
+							<p class="mb-2 text-sm">
 								Zoom and pan the map to the extent you want included in your community.
 							</p>
 							{#if selected}
-								<span class="text-green-500 font-semibold">Location set!</span>
+								<span class="font-semibold text-green-500">Location set!</span>
 							{:else if noLocationSelected}
-								<span class="text-error font-semibold">Please set a location...</span>
+								<span class="font-semibold text-error">Please set a location...</span>
 							{/if}
 							<div class="relative mb-2">
 								<div
 									bind:this={mapElement}
-									class="!bg-teal z-10 border-2 border-input rounded-2xl h-[300px] md:h-[450px]"
+									class="z-10 h-[300px] rounded-2xl border-2 border-input !bg-teal md:h-[450px]"
 								/>
 								{#if !mapLoaded}
 									<MapLoading
@@ -223,7 +223,7 @@
 							name="name"
 							placeholder="Bitcoin Island Philippines"
 							required
-							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
 							bind:value={name}
 						/>
 					</div>
@@ -232,7 +232,7 @@
 						<label for="icon" class="mb-2 block font-semibold"
 							>Icon URL <span class="font-normal">(optional)</span></label
 						>
-						<p class="text-sm mb-2">
+						<p class="mb-2 text-sm">
 							We will use the avatar from your social link or the country's flag your community is
 							located in if an icon is not provided.
 						</p>
@@ -241,7 +241,7 @@
 							type="url"
 							name="icon"
 							placeholder="https://btcmap.org/images/communities/iom.svg"
-							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
 							bind:value={icon}
 						/>
 					</div>
@@ -250,19 +250,19 @@
 						<label for="lightning" class="mb-2 block font-semibold"
 							>Lightning Tips <span class="font-normal">(optional)</span></label
 						>
-						<p class="text-sm mb-2">
+						<p class="mb-2 text-sm">
 							If you want the ability to receive sats you can add either a <a
 								href="https://lightningaddress.com/"
 								target="_blank"
 								rel="noreferrer"
-								class="text-link hover:text-hover transition-colors">Lightning Address</a
+								class="text-link transition-colors hover:text-hover">Lightning Address</a
 							>
 							or
 							<a
 								href="https://github.com/fiatjaf/lnurl-rfc#lnurl-documents"
 								target="_blank"
 								rel="noreferrer"
-								class="text-link hover:text-hover transition-colors">LNURL-pay</a
+								class="text-link transition-colors hover:text-hover">LNURL-pay</a
 							> string.
 						</p>
 						<input
@@ -270,14 +270,14 @@
 							type="text"
 							name="lightning"
 							placeholder="btcmap@zbd.gg"
-							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
 							bind:value={lightning}
 						/>
 					</div>
 
 					<div>
 						<label for="socials" class="mb-2 block font-semibold">Social Links</label>
-						<p class="text-sm mb-2">
+						<p class="mb-2 text-sm">
 							You need to provide at least one method for people to join your community.
 						</p>
 
@@ -287,14 +287,14 @@
 							name="socials"
 							placeholder="Website, Nostr, Telegram, Meetup etc."
 							rows="3"
-							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
 							bind:value={socialLinks}
 						/>
 					</div>
 
 					<div>
 						<label for="icon" class="mb-2 block font-semibold">Public Contact</label>
-						<p class="text-sm mb-2">
+						<p class="mb-2 text-sm">
 							A way to get in touch with the community leader if we have any questions.
 						</p>
 						<input
@@ -303,7 +303,7 @@
 							type="text"
 							name="contact"
 							placeholder="e.g. hello@btcmap.org"
-							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
 							bind:value={contact}
 						/>
 					</div>
@@ -312,7 +312,7 @@
 						<label for="notes" class="mb-2 block font-semibold"
 							>Notes <span class="font-normal">(optional)</span></label
 						>
-						<p class="text-sm mb-2">
+						<p class="mb-2 text-sm">
 							Is this community part of an organization? Would you like to be associated with a
 							specific language? Etc.
 						</p>
@@ -322,13 +322,13 @@
 							name="notes"
 							placeholder="German speaking - part of Einundzwanzig."
 							rows="2"
-							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
 							bind:value={notes}
 						/>
 					</div>
 
 					<div>
-						<div class="flex items-center mb-2 space-x-2">
+						<div class="mb-2 flex items-center space-x-2">
 							<label for="captcha" class="font-semibold"
 								>Bot protection <span class="font-normal">(case-sensitive)</span></label
 							>
@@ -341,9 +341,9 @@
 						<div class="space-y-2">
 							<div
 								bind:this={captcha}
-								class="border-2 border-input rounded-2xl flex justify-center items-center py-1"
+								class="flex items-center justify-center rounded-2xl border-2 border-input py-1"
 							>
-								<div class="w-[275px] h-[100px] bg-link/50 animate-pulse" />
+								<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
 							</div>
 							<input
 								disabled={!captchaSecret || !mapLoaded}
@@ -351,7 +351,7 @@
 								type="text"
 								name="captcha"
 								placeholder="Please enter the captcha text."
-								class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
 								bind:value={captchaInput}
 							/>
 						</div>

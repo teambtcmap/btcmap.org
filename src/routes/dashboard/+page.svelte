@@ -448,20 +448,20 @@
 
 <div class="bg-teal">
 	<Header />
-	<div class="w-10/12 xl:w-[1200px] mx-auto">
-		<main class="space-y-10 mt-10 mb-20">
+	<div class="mx-auto w-10/12 xl:w-[1200px]">
+		<main class="mt-10 mb-20 space-y-10">
 			<h1
-				class="text-center md:text-left text-4xl md:text-5xl font-semibold text-primary gradient !leading-tight"
+				class="gradient text-center text-4xl font-semibold !leading-tight text-primary md:text-left md:text-5xl"
 			>
 				Dashboard
 			</h1>
 
-			<h2 class="text-center md:text-left text-primary text-xl font-semibold w-full lg:w-[675px]">
+			<h2 class="w-full text-center text-xl font-semibold text-primary md:text-left lg:w-[675px]">
 				Here are some stats and charts for the MATH nerds.
 			</h2>
 
 			<section id="stats">
-				<div class="border border-statBorder rounded-3xl grid md:grid-cols-2 xl:grid-cols-4">
+				<div class="grid rounded-3xl border border-statBorder md:grid-cols-2 xl:grid-cols-4">
 					<DashboardStat
 						title="Total Locations"
 						stat={total}
@@ -517,7 +517,7 @@
 						loading={$syncStatus}
 					/>
 				</div>
-				<p class="text-sm text-body text-center md:text-left">
+				<p class="text-center text-sm text-body md:text-left">
 					*Data updated every 10 minutes, change based on previous 24 hours.
 				</p>
 			</section>
@@ -527,12 +527,12 @@
 					<div class="relative">
 						{#if chartsLoading}
 							<div
-								class="absolute top-0 left-0 border border-link/50 rounded-3xl animate-pulse w-full h-[400px]"
+								class="absolute top-0 left-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
 							/>
 						{/if}
 						<canvas bind:this={upToDateChartCanvas} width="400" height="400" />
 					</div>
-					<p class="text-sm text-body text-center mt-1">
+					<p class="mt-1 text-center text-sm text-body">
 						*Elements with a <em>survey:date</em>, <em>check_date</em>, or
 						<em>check_date:currency:XBT</em> tag less than one year old.
 					</p>
@@ -542,12 +542,12 @@
 					<div class="relative">
 						{#if chartsLoading}
 							<div
-								class="absolute top-0 left-0 border border-link/50 rounded-3xl animate-pulse w-full h-[400px]"
+								class="absolute top-0 left-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
 							/>
 						{/if}
 						<canvas bind:this={totalChartCanvas} width="400" height="400" />
 					</div>
-					<p class="text-sm text-body text-center mt-1">
+					<p class="mt-1 text-center text-sm text-body">
 						*Elements accepting any bitcoin payment method.
 					</p>
 				</div>
@@ -556,12 +556,12 @@
 					<div class="relative">
 						{#if chartsLoading}
 							<div
-								class="absolute top-0 left-0 border border-link/50 rounded-3xl animate-pulse w-full h-[400px]"
+								class="absolute top-0 left-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
 							/>
 						{/if}
 						<canvas bind:this={legacyChartCanvas} width="400" height="400" />
 					</div>
-					<p class="text-sm text-body text-center mt-1">
+					<p class="mt-1 text-center text-sm text-body">
 						*Elements with a <em>payment:bitcoin</em> tag instead of the
 						<em>currency:XBT</em> tag.
 					</p>
@@ -571,24 +571,24 @@
 					<div class="relative">
 						{#if chartsLoading}
 							<div
-								class="absolute top-0 left-0 border border-link/50 rounded-3xl animate-pulse w-full h-[400px]"
+								class="absolute top-0 left-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
 							/>
 						{/if}
 						<canvas bind:this={paymentMethodChartCanvas} width="400" height="400" />
 					</div>
-					<p class="text-sm text-body text-center mt-1">
+					<p class="mt-1 text-center text-sm text-body">
 						*Elements with <em>payment:onchain</em>, <em>payment:lightning</em> and
 						<em>payment:lightning_contactless</em> tags.
 					</p>
 				</div>
 			</section>
 
-			<p class="text-sm text-body text-center md:text-left">
+			<p class="text-center text-sm text-body md:text-left">
 				*More information on bitcoin mapping tags can be found <a
 					href="https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions#tagging-guidance"
 					target="_blank"
 					rel="noreferrer"
-					class="text-link hover:text-hover transition-colors">here</a
+					class="text-link transition-colors hover:text-hover">here</a
 				>.
 			</p>
 		</main>

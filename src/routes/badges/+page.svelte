@@ -162,21 +162,21 @@
 
 <div class="bg-teal">
 	<Header />
-	<div class="w-10/12 xl:w-[1200px] mx-auto">
-		<main class="text-center my-10 md:my-20">
-			<h1 class="text-4xl md:text-5xl font-semibold text-primary gradient !leading-tight mb-8">
+	<div class="mx-auto w-10/12 xl:w-[1200px]">
+		<main class="my-10 text-center md:my-20">
+			<h1 class="gradient mb-8 text-4xl font-semibold !leading-tight text-primary md:text-5xl">
 				Badges
 			</h1>
 
-			<p class="text-primary text-lg w-full lg:w-[700px] mx-auto">
+			<p class="mx-auto w-full text-lg text-primary lg:w-[700px]">
 				You can earn badges for your BTC Map contributions that will be displayed on your profile.
 				Have a badge idea? Let us know!
 			</p>
 
-			<section id="achievements" class="space-y-8 mt-16 mb-20">
-				<h2 class="text-primary text-3xl font-semibold text-center">Achievements</h2>
+			<section id="achievements" class="mt-16 mb-20 space-y-8">
+				<h2 class="text-center text-3xl font-semibold text-primary">Achievements</h2>
 
-				<div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+				<div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 					{#each achievements.reverse() as achievement}
 						<BadgeCard
 							icon={achievement.icon}
@@ -189,9 +189,9 @@
 			</section>
 
 			<section id="contributions" class="space-y-8">
-				<h2 class="text-primary text-3xl font-semibold text-center">Contributions</h2>
+				<h2 class="text-center text-3xl font-semibold text-primary">Contributions</h2>
 
-				<div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+				<div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 					{#each contributions.reverse() as contribution}
 						<BadgeCard
 							icon={contribution.icon}

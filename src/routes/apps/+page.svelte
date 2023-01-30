@@ -12,17 +12,17 @@
 
 <div class="bg-teal">
 	<Header />
-	<div class="w-10/12 xl:w-[1200px] mx-auto">
-		<main class="text-center space-y-10 my-10 md:my-20">
-			<h1 class="text-4xl md:text-5xl font-semibold text-primary gradient !leading-tight">
+	<div class="mx-auto w-10/12 xl:w-[1200px]">
+		<main class="my-10 space-y-10 text-center md:my-20">
+			<h1 class="gradient text-4xl font-semibold !leading-tight text-primary md:text-5xl">
 				Find merchants on any platform.
 			</h1>
 
-			<h2 class="text-primary text-xl font-semibold w-full lg:w-[800px] mx-auto">
+			<h2 class="mx-auto w-full text-xl font-semibold text-primary lg:w-[800px]">
 				We have you covered on whatever device and OS you choose.
 			</h2>
 
-			<section id="apps" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
+			<section id="apps" class="grid gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 				{#each $apps as app}
 					<AppCard image={app.icon} text={app.type} desc={app.desc} link={app.link} />
 				{/each}

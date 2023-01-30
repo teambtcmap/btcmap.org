@@ -18,10 +18,10 @@
 </script>
 
 <div
-	class="text-center lg:text-left space-y-2 lg:space-y-0 lg:space-x-5 text-xl lg:flex items-center p-5"
+	class="items-center space-y-2 p-5 text-center text-xl lg:flex lg:space-y-0 lg:space-x-5 lg:text-left"
 >
 	<!-- dot -->
-	<span class="mx-auto lg:mx-0 mb-2 lg:mb-0 relative flex h-3 w-3">
+	<span class="relative mx-auto mb-2 flex h-3 w-3 lg:mx-0 lg:mb-0">
 		<span
 			class="{latest
 				? 'animate-ping'
@@ -32,7 +32,7 @@
 				: 'bg-link'} opacity-75"
 		/>
 		<span
-			class="relative inline-flex rounded-full h-3 w-3 {action === 'create'
+			class="relative inline-flex h-3 w-3 rounded-full {action === 'create'
 				? 'bg-created'
 				: action === 'delete'
 				? 'bg-deleted'
@@ -40,7 +40,7 @@
 		/>
 	</span>
 
-	<div class="space-y-2 lg:space-y-0 lg:flex flex-wrap w-full justify-between items-center">
+	<div class="w-full flex-wrap items-center justify-between space-y-2 lg:flex lg:space-y-0">
 		<!-- event information -->
 		<div class="space-y-2 lg:space-y-0">
 			<span class="text-primary lg:mr-5">
@@ -51,7 +51,7 @@
 						: `/map?lat=${lat}&long=${long}`}
 					target={action === 'delete' ? '_blank' : '_self'}
 					rel="noreferrer"
-					class="text-link hover:text-hover break-all transition-colors"
+					class="break-all text-link transition-colors hover:text-hover"
 					>{location}
 					{#if action === 'delete'}
 						<svg
@@ -81,7 +81,7 @@
 				{#if username.length}
 					by <a
 						href="/tagger/{user.id}"
-						class="block lg:inline text-link hover:text-hover break-all transition-colors"
+						class="block break-all text-link transition-colors hover:text-hover lg:inline"
 						>{username}
 					</a>
 				{/if}
@@ -89,7 +89,7 @@
 
 			<!-- time ago -->
 			<span
-				class="text-center block lg:inline text-taggerTime font-semibold {lightning
+				class="block text-center font-semibold text-taggerTime lg:inline {lightning
 					? 'lg:mr-5'
 					: ''}"
 			>

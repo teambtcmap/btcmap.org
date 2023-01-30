@@ -6,12 +6,12 @@
 	href={contributor.url}
 	target="_blank"
 	rel="noreferrer"
-	class="text-center space-y-2 hover:text-link transition-colors"
+	class="space-y-2 text-center transition-colors hover:text-link"
 >
 	<img
 		src="/images/contributors/{contributor.name}.{contributor.file}"
 		alt="avatar"
-		class="rounded-full object-cover w-24 h-24 mx-auto"
+		class="mx-auto h-24 w-24 rounded-full object-cover"
 		onerror="this.src='/images/satoshi-nakamoto.png'"
 	/>
 

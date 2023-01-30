@@ -701,13 +701,13 @@ ${
 	<div
 		id="search-div"
 		bind:this={customSearchBar}
-		class="w-[50vw] md:w-[350px] absolute top-0 left-[60px] {showSearch ? 'block' : 'hidden'}"
+		class="absolute top-0 left-[60px] w-[50vw] md:w-[350px] {showSearch ? 'block' : 'hidden'}"
 	>
 		<div class="relative">
 			<input
 				id="search-input"
 				type="text"
-				class="w-full drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] rounded-lg px-5 py-2.5 focus:outline-none text-mapButton text-[16px]"
+				class="w-full rounded-lg px-5 py-2.5 text-[16px] text-mapButton drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:outline-none focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)]"
 				placeholder="Search..."
 				on:keyup={searchDebounce}
 				on:keydown={(e) => {
@@ -722,7 +722,7 @@ ${
 			<button
 				bind:this={clearSearchButton}
 				on:click={clearSearch}
-				class="text-mapButton hover:text-black absolute top-[10px] right-[8px] bg-white {search
+				class="absolute top-[10px] right-[8px] bg-white text-mapButton hover:text-black {search
 					? 'block'
 					: 'hidden'}"
 			>
@@ -750,14 +750,14 @@ ${
 				on:outclick={clearSearch}
 			>
 				<div
-					class="w-full drop-shadow-[0px_2px_6px_rgba(0,0,0,0.15)] bg-white rounded-lg mt-0.5 max-h-[204px] overflow-y-scroll hide-scroll"
+					class="hide-scroll mt-0.5 max-h-[204px] w-full overflow-y-scroll rounded-lg bg-white drop-shadow-[0px_2px_6px_rgba(0,0,0,0.15)]"
 				>
 					{#each searchResults as result}
 						<button
 							on:click={() => searchSelect(result)}
-							class="block hover:bg-searchHover w-full md:text-left md:flex justify-between px-4 py-2"
+							class="block w-full justify-between px-4 py-2 hover:bg-searchHover md:flex md:text-left"
 						>
-							<div class="md:flex items-start md:space-x-2">
+							<div class="items-start md:flex md:space-x-2">
 								<Icon
 									w="20"
 									h="20"
@@ -768,10 +768,10 @@ ${
 									type="material"
 								/>
 
-								<div class="md:max-w-[210px] mx-auto">
+								<div class="mx-auto md:max-w-[210px]">
 									<p
 										class="text-sm {result.boosted
-											? 'text-bitcoin font-semibold'
+											? 'font-semibold text-bitcoin'
 											: 'text-mapButton'} {result.tags.name.match('([^ ]{21})') ? 'break-all' : ''}"
 									>
 										{result.tags.name}
@@ -792,7 +792,7 @@ ${
 							<div
 								class="text-xs {result.boosted
 									? 'text-bitcoin'
-									: 'text-searchSubtext'} text-center md:text-right w-[80px] mx-auto md:mx-0"
+									: 'text-searchSubtext'} mx-auto w-[80px] text-center md:mx-0 md:text-right"
 							>
 								<p>{result.distanceKm} km</p>
 								<p>{result.distanceMi} mi</p>
@@ -801,7 +801,7 @@ ${
 					{/each}
 
 					{#if !searchStatus && searchResults.length === 0}
-						<p class="text-sm text-searchSubtext text-center w-full px-4 py-2">No results found.</p>
+						<p class="w-full px-4 py-2 text-center text-sm text-searchSubtext">No results found.</p>
 					{/if}
 				</div>
 			</OutClick>
@@ -811,7 +811,7 @@ ${
 	<Boost />
 	<ShowTags />
 
-	<div bind:this={mapElement} class="!bg-teal h-[100vh]" />
+	<div bind:this={mapElement} class="h-[100vh] !bg-teal" />
 </main>
 
 <style>

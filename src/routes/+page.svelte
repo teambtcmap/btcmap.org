@@ -10,26 +10,26 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
-<div class="bg-teal street-map">
-	<img src="/images/street-map.svg" alt="roads" class="xl:hidden absolute top-0 right-0" />
+<div class="street-map bg-teal">
+	<img src="/images/street-map.svg" alt="roads" class="absolute top-0 right-0 xl:hidden" />
 	<Header />
-	<div class="w-10/12 xl:w-[1200px] mx-auto relative">
-		<section id="hero" class="pb-20 pt-10 xl:pt-0 xl:flex justify-between items-center">
-			<div class="w-full xl:w-[500px] mx-auto xl:mx-0">
+	<div class="relative mx-auto w-10/12 xl:w-[1200px]">
+		<section id="hero" class="items-center justify-between pb-20 pt-10 xl:flex xl:pt-0">
+			<div class="mx-auto w-full xl:mx-0 xl:w-[500px]">
 				<h1
-					class="text-4xl md:text-5xl font-semibold text-primary gradient !leading-tight text-center xl:text-left"
+					class="gradient text-center text-4xl font-semibold !leading-tight text-primary md:text-5xl xl:text-left"
 				>
 					Easily find places to spend sats anywhere on the planet.
 				</h1>
-				<div class="bg-white/30 rounded-2xl py-6 flex flex-wrap justify-center my-16">
+				<div class="my-16 flex flex-wrap justify-center rounded-2xl bg-white/30 py-6">
 					{#each $apps as app}
-						<div class="space-y-1 text-body font-semibold text-center my-2 md:my-0 mx-2">
+						<div class="my-2 mx-2 space-y-1 text-center font-semibold text-body md:my-0">
 							<p>{app.type}</p>
 							<a
 								href={app.link}
 								target={app.type === 'Web' ? '_self' : '_blank'}
 								rel="noreferrer"
-								class="block bg-link hover:bg-hover p-3 rounded-full text-white transition-colors"
+								class="block rounded-full bg-link p-3 text-white transition-colors hover:bg-hover"
 							>
 								<Icon
 									w="32"
@@ -42,7 +42,7 @@
 						</div>
 					{/each}
 				</div>
-				<h2 class="text-primary text-xl font-semibold text-center xl:text-left">
+				<h2 class="text-center text-xl font-semibold text-primary xl:text-left">
 					Our apps and the underlying data are free and open source.
 					<br /><br />
 					We use
@@ -50,7 +50,7 @@
 						href="https://www.openstreetmap.org/about"
 						target="_blank"
 						rel="noreferrer"
-						class="text-link hover:text-hover transition-colors">OpenStreetMap</a
+						class="text-link transition-colors hover:text-hover">OpenStreetMap</a
 					> to properly tag places where you can spend bitcoin and we display that data in our beautiful
 					apps.
 				</h2>
@@ -58,7 +58,7 @@
 			<img
 				src="/images/hero-mobile-example.png"
 				alt="mobile example"
-				class="drop-shadow-2xl mx-auto xl:mx-0 mt-10 xl:mt-0 w-80"
+				class="mx-auto mt-10 w-80 drop-shadow-2xl xl:mx-0 xl:mt-0"
 			/>
 		</section>
 

@@ -229,52 +229,52 @@
 
 <div class="bg-teal">
 	<Header />
-	<div class="w-10/12 xl:w-[1200px] mx-auto">
+	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		{#if !submitted}
-			<h1 class="text-4xl md:text-5xl gradient font-semibold mt-10 text-center">
+			<h1 class="gradient mt-10 text-center text-4xl font-semibold md:text-5xl">
 				Help improve the data for everyone.
 			</h1>
 
-			<section id="verify" class="mx-auto w-full md:w-[600px] mt-16 pb-20 md:pb-32">
-				<h2 class="text-primary text-3xl font-semibold mb-5 text-center">
+			<section id="verify" class="mx-auto mt-16 w-full pb-20 md:w-[600px] md:pb-32">
+				<h2 class="mb-5 text-center text-3xl font-semibold text-primary">
 					Verify Location<br />
 					<span class="text-base font-normal"
 						>(Ensure the information is still accurate and update it otherwise.)</span
 					>
 				</h2>
 
-				<p class="text-primary w-full mb-10 text-center">
+				<p class="mb-10 w-full text-center text-primary">
 					Please fill out the following form and one of our volunteer community members will update
 					your location on the map. Did you know you can update this data yourself on <a
 						href="https://www.openstreetmap.org"
 						target="_blank"
 						rel="noreferrer"
-						class="text-link hover:text-hover transition-colors">OpenStreetMap</a
+						class="text-link transition-colors hover:text-hover">OpenStreetMap</a
 					>? You can check out our
 					<a
 						href="https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions"
 						target="_blank"
 						rel="noreferrer"
-						class="text-link hover:text-hover transition-colors">Wiki</a
+						class="text-link transition-colors hover:text-hover">Wiki</a
 					>
 					for more instructions. <TimelineTooltip
 						tooltip="NOTE: Due to the backlog of requests and the updates being completed on a volunteer effort, it may take several weeks to update this location. It is encouraged to update the location on OpenStreetMap directly if you want to see the changes appear on the map right away."
 					/>
 				</p>
 
-				<form on:submit={submitForm} class="text-primary space-y-5 w-full">
+				<form on:submit={submitForm} class="w-full space-y-5 text-primary">
 					<div>
 						<div class={showMap ? 'block' : 'hidden'}>
 							<label for="location-picker" class="mb-2 block font-semibold">Select Location</label>
 							{#if selected}
-								<span class="text-green-500 font-semibold">Location selected!</span>
+								<span class="font-semibold text-green-500">Location selected!</span>
 							{:else if noLocationSelected}
-								<span class="text-error font-semibold">Please select a location...</span>
+								<span class="font-semibold text-error">Please select a location...</span>
 							{/if}
 							<div class="relative mb-2">
 								<div
 									bind:this={mapElement}
-									class="!bg-teal z-10 !cursor-crosshair border-2 border-input rounded-2xl h-[300px] md:h-[450px]"
+									class="z-10 h-[300px] !cursor-crosshair rounded-2xl border-2 border-input !bg-teal md:h-[450px]"
 								/>
 								{#if !mapLoaded}
 									<MapLoading
@@ -293,7 +293,7 @@
 							type="text"
 							name="name"
 							placeholder="Merchant Name"
-							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full font-semibold text-center"
+							class="w-full rounded-2xl border-2 border-input p-3 text-center font-semibold focus:outline-link"
 						/>
 					</div>
 
@@ -303,7 +303,7 @@
 								>Current information is correct</label
 							>
 							<input
-								class="accent-link w-4 h-4"
+								class="h-4 w-4 accent-link"
 								disabled={!captchaSecret || (showMap && !mapLoaded) || outdated}
 								required={!outdated}
 								type="checkbox"
@@ -327,7 +327,7 @@
 							name="outdated"
 							placeholder="Provide what info is incorrect and the updated info on this location"
 							rows="3"
-							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
 							bind:value={outdated}
 						/>
 					</div>
@@ -340,13 +340,13 @@
 							name="verify"
 							placeholder="Please provide additional info here"
 							rows="3"
-							class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
 							bind:this={verify}
 						/>
 					</div>
 
 					<div>
-						<div class="flex items-center mb-2 space-x-2">
+						<div class="mb-2 flex items-center space-x-2">
 							<label for="captcha" class="font-semibold"
 								>Bot protection <span class="font-normal">(case-sensitive)</span></label
 							>
@@ -359,9 +359,9 @@
 						<div class="space-y-2">
 							<div
 								bind:this={captcha}
-								class="border-2 border-input rounded-2xl flex justify-center items-center py-1"
+								class="flex items-center justify-center rounded-2xl border-2 border-input py-1"
 							>
-								<div class="w-[275px] h-[100px] bg-link/50 animate-pulse" />
+								<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
 							</div>
 							<input
 								disabled={!captchaSecret || (showMap && !mapLoaded)}
@@ -369,7 +369,7 @@
 								type="text"
 								name="captcha"
 								placeholder="Please enter the captcha text."
-								class="focus:outline-link border-2 border-input rounded-2xl p-3 w-full transition-all"
+								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
 								bind:this={captchaInput}
 							/>
 						</div>

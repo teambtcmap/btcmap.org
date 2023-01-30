@@ -17,7 +17,7 @@
 </script>
 
 <div class="space-y-5 p-5 {border}">
-	<h3 class="font-semibold text-center md:text-left text-primary text-lg">
+	<h3 class="text-center text-lg font-semibold text-primary md:text-left">
 		{title}
 		{#if tooltip}
 			<button bind:this={tooltipElement}>
@@ -28,9 +28,9 @@
 
 	<div class="flex justify-center md:justify-start">
 		{#if stat >= 0}
-			<span class="text-5xl text-primary font-semibold">{stat}</span>
+			<span class="text-5xl font-semibold text-primary">{stat}</span>
 			{#if percent}
-				<span class="ml-1 text-body text-lg">({percent}%)</span>
+				<span class="ml-1 text-lg text-body">({percent}%)</span>
 			{/if}
 		{:else}
 			<!-- loading skeleton -->

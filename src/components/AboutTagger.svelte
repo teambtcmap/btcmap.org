@@ -15,7 +15,7 @@
 	<img
 		src={tagger.avatar}
 		alt="avatar"
-		class="rounded-full object-cover w-24 h-24 bg-black"
+		class="h-24 w-24 rounded-full bg-black object-cover"
 		onerror="this.src='/images/satoshi-nakamoto.png'"
 	/>
 </a>

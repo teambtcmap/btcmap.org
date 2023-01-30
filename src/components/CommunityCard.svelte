@@ -23,17 +23,17 @@
 		(tags['tips:url'] && { destination: tags['tips:url'], type: 'url' });
 </script>
 
-<div class="border border-statBorder rounded-3xl shadow hover:shadow-2xl transition-shadow">
-	<div class="my-4 p-4 space-y-2">
-		<a href="/community/{id}" class="text-link hover:text-hover space-y-2 transition-colors">
+<div class="rounded-3xl border border-statBorder shadow transition-shadow hover:shadow-2xl">
+	<div class="my-4 space-y-2 p-4">
+		<a href="/community/{id}" class="space-y-2 text-link transition-colors hover:text-hover">
 			<img
 				src={image ? image : '/images/communities/bitcoin.svg'}
 				alt={tags.name}
-				class="w-20 h-20 object-cover rounded-full mx-auto"
+				class="mx-auto h-20 w-20 rounded-full object-cover"
 				onerror="this.src='/images/communities/bitcoin.svg'"
 			/>
 
-			<span class="text-center text-lg font-semibold block">{tags.name}</span>
+			<span class="block text-center text-lg font-semibold">{tags.name}</span>
 		</a>
 		{#if tags.sponsor}
 			<SponsorBadge />
@@ -43,11 +43,11 @@
 		{/if}
 	</div>
 
-	<div class="p-4 w-full flex flex-wrap justify-center items-center border-t border-t-statBorder">
+	<div class="flex w-full flex-wrap items-center justify-center border-t border-t-statBorder p-4">
 		{#if website}
 			<a href={website} target="_blank" rel="noreferrer" class="m-1">
-				<span class="bg-bitcoin w-[40px] h-[40px] flex justify-center items-center rounded-full">
-					<i class="text-white w-7 h-7 fa-solid fa-globe" />
+				<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-bitcoin">
+					<i class="fa-solid fa-globe h-7 w-7 text-white" />
 				</span>
 			</a>
 		{/if}
@@ -63,12 +63,12 @@
 		{/if}
 		{#if meetup}
 			<a href={meetup} target="_blank" rel="noreferrer" class="m-1">
-				<img src="/icons/socials/meetup.jpg" alt="meetup" class="w-10 h-10 rounded-full" />
+				<img src="/icons/socials/meetup.jpg" alt="meetup" class="h-10 w-10 rounded-full" />
 			</a>
 		{/if}
 		{#if eventbrite}
 			<a href={eventbrite} target="_blank" rel="noreferrer" class="m-1">
-				<img src="/icons/socials/eventbrite.png" alt="eventbrite" class="w-10 h-10 rounded-full" />
+				<img src="/icons/socials/eventbrite.png" alt="eventbrite" class="h-10 w-10 rounded-full" />
 			</a>
 		{/if}
 		{#if telegram}

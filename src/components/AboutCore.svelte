@@ -4,11 +4,11 @@
 	import { Icon } from '$comp';
 </script>
 
-<div class="text-center space-y-2">
+<div class="space-y-2 text-center">
 	<img
 		src="/images/team/{member.avatar}.jpg"
 		alt="avatar"
-		class="rounded-full object-cover w-28 h-28 mx-auto"
+		class="mx-auto h-28 w-28 rounded-full object-cover"
 		onerror="this.src='/images/satoshi-nakamoto.png'"
 	/>
 
@@ -23,7 +23,7 @@
 				href={social.url}
 				target="_blank"
 				rel="noreferrer"
-				class="inline-block bg-[#AFBBC9] rounded-full p-2 text-white hover:opacity-80 transition-opacity"
+				class="inline-block rounded-full bg-[#AFBBC9] p-2 text-white transition-opacity hover:opacity-80"
 			>
 				<Icon w="16" h="16" icon={social.name} type="socials" />
 			</a>
