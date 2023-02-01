@@ -393,7 +393,7 @@ export const generateMarker = (
 			element.tags && element.tags.name
 				? `<span class='block font-bold text-lg text-primary leading-snug max-w-[300px]' title='Merchant name'>${
 						element.tags.name
-				  } ${description ? `<span id='description'></span>` : ''}</span>`
+				  } ${description ? `<span id='description' title='Description'></span>` : ''}</span>`
 				: ''
 		}
 
