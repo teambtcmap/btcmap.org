@@ -202,7 +202,8 @@
 											on:click={() => setLocation(area.display_name)}
 											class="{index !== searchResults.length - 1
 												? 'border-b'
-												: ''} whitespace-nowrap p-3 hover:bg-link/50">{area.display_name}</button
+												: ''} block whitespace-nowrap p-3 hover:bg-link/50"
+											>{area.display_name}</button
 										>
 									{/each}
 								{:else}
