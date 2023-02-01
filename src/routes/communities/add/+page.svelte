@@ -3,7 +3,7 @@
 	import { browser } from '$app/environment';
 	import axios from 'axios';
 	import { Header, Footer, PrimaryButton, FormSuccess, TimelineTooltip } from '$comp';
-	import { errToast, successToast } from '$lib/utils';
+	import { errToast, successToast, warningToast } from '$lib/utils';
 
 	let captcha;
 	let captchaSecret;
@@ -51,11 +51,16 @@
 
 		axios
 			.get(
-				`https://nominatim.openstreetmap.org/search?q=${searchQuery}&format=json&email=hello@btcmap.org`
+				`https://nominatim.openstreetmap.org/search?q=${searchQuery}&format=json&polygon_geojson=1&email=hello@btcmap.org`
 			)
 			.then(function (response) {
 				// handle success
-				searchResults = response.data;
+				searchResults = response.data.filter(
+					(area) => area.geojson.type === 'Polygon' || area.geojson.type === 'MultiPolygon'
+				);
+				if (!searchResults.length) {
+					warningToast('No locations found, please adjust query.');
+				}
 				searchLoading = false;
 			})
 			.catch(function (error) {
