@@ -1,9 +1,8 @@
 <script>
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import axios from 'axios';
-	import { Header, Footer, PrimaryButton, MapLoading, FormSuccess, TimelineTooltip } from '$comp';
-	import { geolocate, changeDefaultIcons } from '$lib/map/setup';
+	import { Header, Footer, PrimaryButton, FormSuccess, TimelineTooltip } from '$comp';
 	import { errToast, successToast } from '$lib/utils';
 
 	let captcha;
@@ -26,14 +25,7 @@
 			});
 	};
 
-	let location = {
-		minLat: '',
-		minLong: '',
-		maxLat: '',
-		maxLong: '',
-		centerLat: '',
-		centerLong: ''
-	};
+	let location;
 	let name;
 	let icon;
 	let lightning;
@@ -47,17 +39,37 @@
 	let submitting = false;
 	let submissionIssueNumber;
 
-	const setLocation = () => {
-		const coords = map.getBounds();
-		const center = map.getCenter();
-		location.minLat = coords._northEast.lat;
-		location.minLong = coords._northEast.lng;
-		location.maxLat = coords._southWest.lat;
-		location.maxLong = coords._southWest.lng;
-		location.centerLat = center.lat.toString();
-		location.centerLong = center.lng.toString();
+	let searchQuery;
+	let searchResults = [];
+	let searchLoading = false;
+
+	const searchLocation = () => {
+		searchLoading = true;
+		searchResults = [];
+		location = undefined;
+		selected = false;
+
+		axios
+			.get(
+				`https://nominatim.openstreetmap.org/search?q=${searchQuery}&format=json&email=hello@btcmap.org`
+			)
+			.then(function (response) {
+				// handle success
+				searchResults = response.data;
+				searchLoading = false;
+			})
+			.catch(function (error) {
+				// handle error
+				errToast('Could not search for locations, please try again or contact BTC Map.');
+				searchLoading = false;
+				console.log(error);
+			});
+	};
+
+	const setLocation = (area) => {
+		location = area;
 		selected = true;
-		successToast('Location set!');
+		successToast('Location selected!');
 	};
 
 	const submitForm = (e) => {
@@ -98,48 +110,10 @@
 		}
 	};
 
-	// location picker map
-	let mapElement;
-	let map;
-	let mapLoaded;
-
 	onMount(async () => {
 		if (browser) {
 			// fetch and add captcha
 			fetchCaptcha();
-
-			//import packages
-			const leaflet = await import('leaflet');
-			const DomEvent = await import('leaflet/src/dom/DomEvent');
-			const leafletLocateControl = await import('leaflet.locatecontrol');
-
-			// add map and tiles
-			map = leaflet.map(mapElement, { attributionControl: false }).setView([0, 0], 2);
-
-			const osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-				noWrap: true,
-				maxZoom: 19
-			});
-
-			osm.addTo(map);
-
-			// change broken marker image path in prod
-			L.Icon.Default.prototype.options.imagePath = '/icons/';
-
-			// add locate button to map
-			geolocate(L, map);
-
-			// change default icons
-			changeDefaultIcons('', L, mapElement, DomEvent);
-
-			mapLoaded = true;
-		}
-	});
-
-	onDestroy(async () => {
-		if (map) {
-			console.log('Unloading Leaflet map.');
-			map.remove();
 		}
 	});
 </script>
@@ -181,44 +155,67 @@
 				</div>
 
 				<form on:submit={submitForm} class="w-full space-y-5 text-primary">
-					<div>
-						<div>
-							<label for="location-picker" class="mb-2 block font-semibold">Set Location</label>
-							<p class="mb-2 text-sm">
-								Zoom and pan the map to the extent you want included in your community.
-							</p>
-							{#if selected}
-								<span class="font-semibold text-green-500">Location set!</span>
-							{:else if noLocationSelected}
-								<span class="font-semibold text-error">Please set a location...</span>
-							{/if}
-							<div class="relative mb-2">
-								<div
-									bind:this={mapElement}
-									class="z-10 h-[300px] rounded-2xl border-2 border-input !bg-teal md:h-[450px]"
-								/>
-								{#if !mapLoaded}
-									<MapLoading
-										type="embed"
-										style="h-[300px] md:h-[450px] border-2 border-input rounded-2xl"
-									/>
-								{/if}
-							</div>
+					<div class="space-y-2">
+						<label for="location-picker" class="block font-semibold">Select Location</label>
+						<p class="text-sm">Search for an area and select an option from the results.</p>
+
+						{#if selected}
+							<span class="font-semibold text-green-500">Location selected!</span>
+						{:else if noLocationSelected}
+							<span class="font-semibold text-error">Please select a location...</span>
+						{/if}
+
+						<div class="space-y-2 md:flex md:space-x-2 md:space-y-0">
+							<input
+								on:keydown={(e) => {
+									if (e.key === 'Enter') {
+										searchLocation();
+									}
+								}}
+								disabled={!captchaSecret}
+								type="text"
+								name="location"
+								placeholder="Berlin, Germany"
+								required
+								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+								bind:value={searchQuery}
+							/>
+							<PrimaryButton
+								type="button"
+								click={searchLocation}
+								loading={searchLoading}
+								disabled={!captchaSecret || searchLoading || !searchQuery}
+								text="Search 🔍"
+								style="w-full md:w-[210px] py-3 rounded-xl"
+							/>
 						</div>
 
-						<PrimaryButton
-							type="button"
-							click={setLocation}
-							disabled={!captchaSecret || !mapLoaded}
-							text="Set Location"
-							style="w-full py-3 rounded-xl"
-						/>
+						{#if searchResults && searchResults.length}
+							<div
+								class="{!location
+									? 'bg-white'
+									: ''} max-h-[300px] overflow-auto border-2 border-input"
+							>
+								{#if !location}
+									{#each searchResults as area, index}
+										<button
+											on:click={() => setLocation(area.display_name)}
+											class="{index !== searchResults.length - 1
+												? 'border-b'
+												: ''} whitespace-nowrap p-3 hover:bg-link/50">{area.display_name}</button
+										>
+									{/each}
+								{:else}
+									<p class="whitespace-nowrap p-3 font-semibold">{location}</p>
+								{/if}
+							</div>
+						{/if}
 					</div>
 
 					<div>
 						<label for="name" class="mb-2 block font-semibold">Community Name</label>
 						<input
-							disabled={!captchaSecret || !mapLoaded}
+							disabled={!captchaSecret}
 							type="text"
 							name="name"
 							placeholder="Bitcoin Island Philippines"
@@ -237,7 +234,7 @@
 							located in if an icon is not provided.
 						</p>
 						<input
-							disabled={!captchaSecret || !mapLoaded}
+							disabled={!captchaSecret}
 							type="url"
 							name="icon"
 							placeholder="https://btcmap.org/images/communities/iom.svg"
@@ -266,7 +263,7 @@
 							> string.
 						</p>
 						<input
-							disabled={!captchaSecret || !mapLoaded}
+							disabled={!captchaSecret}
 							type="text"
 							name="lightning"
 							placeholder="btcmap@zbd.gg"
@@ -283,7 +280,7 @@
 
 						<textarea
 							required
-							disabled={!captchaSecret || !mapLoaded}
+							disabled={!captchaSecret}
 							name="socials"
 							placeholder="Website, Nostr, Telegram, Meetup etc."
 							rows="3"
@@ -299,7 +296,7 @@
 						</p>
 						<input
 							required
-							disabled={!captchaSecret || !mapLoaded}
+							disabled={!captchaSecret}
 							type="text"
 							name="contact"
 							placeholder="e.g. hello@btcmap.org"
@@ -318,7 +315,7 @@
 						</p>
 
 						<textarea
-							disabled={!captchaSecret || !mapLoaded}
+							disabled={!captchaSecret}
 							name="notes"
 							placeholder="German speaking - part of Einundzwanzig."
 							rows="2"
@@ -346,7 +343,7 @@
 								<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
 							</div>
 							<input
-								disabled={!captchaSecret || !mapLoaded}
+								disabled={!captchaSecret}
 								required
 								type="text"
 								name="captcha"
@@ -367,7 +364,7 @@
 
 					<PrimaryButton
 						loading={submitting}
-						disabled={submitting || !captchaSecret || !mapLoaded}
+						disabled={submitting || !captchaSecret}
 						text="Submit Community"
 						style="w-full py-3 rounded-xl"
 					/>
