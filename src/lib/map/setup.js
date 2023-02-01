@@ -3,6 +3,7 @@ import axios from 'axios';
 import { boost, exchangeRate, resetBoost, showTags, showMore } from '$lib/store';
 import { get } from 'svelte/store';
 import { errToast } from '$lib/utils';
+import { InfoTooltip } from '$comp';
 
 export const layers = (leaflet, map) => {
 	const osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -375,6 +376,9 @@ export const generateMarker = (
 	boosted
 ) => {
 	const generatePopup = () => {
+		const description =
+			element.tags && element.tags.description ? element.tags.description : undefined;
+
 		let verified = verifiedArr(element);
 
 		const paymentMethod =
@@ -387,7 +391,9 @@ export const generateMarker = (
 
 		popupContainer.innerHTML = `${
 			element.tags && element.tags.name
-				? `<span class='block font-bold text-lg text-primary leading-snug max-w-[300px]' title='Merchant name'>${element.tags.name}</span>`
+				? `<span class='block font-bold text-lg text-primary leading-snug max-w-[300px]' title='Merchant name'>${
+						element.tags.name
+				  } ${description ? `<span id='description' title='Description'></span>` : ''}</span>`
 				: ''
 		}
 
@@ -630,6 +636,16 @@ ${
 					}
 				</div>
 			</div>`;
+
+		if (description) {
+			const descriptionContainer = popupContainer.querySelector('#description');
+			new InfoTooltip({
+				target: descriptionContainer,
+				props: {
+					tooltip: description
+				}
+			});
+		}
 
 		const showMoreDiv = popupContainer.querySelector('#show-more');
 		const moreButton = popupContainer.querySelector('#more-button');
