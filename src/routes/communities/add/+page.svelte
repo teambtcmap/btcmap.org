@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import axios from 'axios';
-	import { Header, Footer, PrimaryButton, FormSuccess, TimelineTooltip } from '$comp';
+	import { Header, Footer, PrimaryButton, FormSuccess, InfoTooltip } from '$comp';
 	import { errToast, successToast, warningToast } from '$lib/utils';
 
 	let captcha;
@@ -144,7 +144,7 @@
 				<p class="mb-5 w-full text-center text-primary">
 					Please fill out this form to submit a community application. This is a great way to grow
 					bitcoin adoption in your area, have some fun, and maybe even make some friends along the
-					way. <TimelineTooltip
+					way. <InfoTooltip
 						tooltip="NOTE: BTC Map is a free and open source project run by volunteers. Each community application is manually reviewed to ensure quality. It may take a few weeks to have your community added."
 					/>
 				</p>
