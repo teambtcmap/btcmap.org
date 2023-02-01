@@ -175,7 +175,7 @@
 								disabled={!captchaSecret}
 								type="text"
 								name="location"
-								placeholder="Berlin, Germany"
+								placeholder="El Zonte, El Salvador"
 								required
 								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
 								bind:value={searchQuery}
