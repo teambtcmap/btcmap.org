@@ -528,6 +528,17 @@ export const generateMarker = (
 									</svg>
 									Map Legend
 							</a>
+
+					<a
+						href="https://www.openstreetmap.org/${element.type}/${element.id}"
+						target="_blank"
+						rel="noreferrer"
+						class='flex items-center !text-primary hover:!text-link text-xs transition-colors'>
+							<svg width='24px' height='24px' class='mr-2'>
+								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#external"></use>
+							</svg>
+							View OSM
+					</a>
 							</div>
 						</div>
 					</div>
