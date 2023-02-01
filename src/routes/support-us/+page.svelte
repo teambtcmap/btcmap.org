@@ -18,7 +18,8 @@
 
 	const company = [
 		{ url: 'https://coinos.io/', title: 'coinos', logo: 'coinos.svg' },
-		{ url: 'https://www.walletofsatoshi.com/', title: 'Wallet of Satoshi', logo: 'wos.svg' }
+		{ url: 'https://www.walletofsatoshi.com/', title: 'Wallet of Satoshi', logo: 'wos.svg' },
+		{ url: 'https://swiss-bitcoin-pay.ch/', title: 'Swiss Bitcoin Pay', logo: 'swiss.svg' }
 	];
 
 	const community = [
@@ -109,7 +110,7 @@
 				>
 
 				<div class="mt-4 space-y-16">
-					<SupportSection title="Company" supporters={company} placeholders={1} />
+					<SupportSection title="Company" supporters={company} placeholders={0} />
 					<SupportSection title="Community" supporters={community} placeholders={1} />
 				</div>
 			</section>
