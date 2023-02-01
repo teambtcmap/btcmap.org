@@ -393,7 +393,7 @@ export const generateMarker = (
 			element.tags && element.tags.name
 				? `<span class='block font-bold text-lg text-primary leading-snug max-w-[300px]' title='Merchant name'>${
 						element.tags.name
-				  } ${description ? `<span id='description' title='Description'></span>` : ''}</span>`
+				  } ${description ? `<span id='description'></span>` : ''}</span>`
 				: ''
 		}
 
@@ -413,7 +413,7 @@ export const generateMarker = (
 			}
 
 					<div class='flex space-x-2 mt-2.5 mb-1'>
-						<a id='navigate' href='geo:${lat},${long}' title='Navigate' class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-full transition-colors'>
+						<a id='navigate' href='geo:${lat},${long}' class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
 								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#compass"></use>
 							</svg>
@@ -422,14 +422,14 @@ export const generateMarker = (
 
 						<a id='edit' href='https://www.openstreetmap.org/edit?${element.type}=${
 			element.id
-		}' target="_blank" rel="noreferrer" title='Edit' class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-full transition-colors'>
+		}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
 								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#pencil"></use>
 							</svg>
 							<span class='block text-xs text-center mt-1'>Edit</span>
 						</a>
 
-						<a id='share' href='/map?lat=${lat}&long=${long}' target="_blank" rel="noreferrer" title='Share' class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-full transition-colors'>
+						<a id='share' href='/map?lat=${lat}&long=${long}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
 								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#share"></use>
 							</svg>
@@ -437,7 +437,7 @@ export const generateMarker = (
 						</a>
 
 						<div class='relative w-full'>
-							<button id='more-button' title='More' class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-full transition-colors'>
+							<button id='more-button' class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-full transition-colors'>
 								<svg width='24px' height='24px' class='mx-auto'>
 									<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#dots-horizontal"></use>
 								</svg>
@@ -455,7 +455,7 @@ export const generateMarker = (
 												: payment.type === 'coinos'
 												? `https://coinos.io/${payment.username}`
 												: '#'
-									  }" target="_blank" rel="noreferrer" title='Pay merchant' class='flex items-center !text-primary hover:!text-link text-xs transition-colors'>
+									  }" target="_blank" rel="noreferrer" class='flex items-center !text-primary hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
 												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#bolt"></use>
 											</svg>
@@ -466,7 +466,7 @@ export const generateMarker = (
 
 							${
 								element.tags && element.tags.phone
-									? `<a href='tel:${element.tags.phone}' title='Call' class='flex items-center !text-primary hover:!text-link text-xs  transition-colors'>
+									? `<a href='tel:${element.tags.phone}' class='flex items-center !text-primary hover:!text-link text-xs  transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
 												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#phone"></use>
 											</svg>
@@ -481,7 +481,7 @@ export const generateMarker = (
 											element.tags.website.startsWith('http')
 												? element.tags.website
 												: `https://${element.tags.website}`
-									  } target="_blank" rel="noreferrer" title='Website' class='flex items-center !text-primary hover:!text-link text-xs  transition-colors'>
+									  } target="_blank" rel="noreferrer" class='flex items-center !text-primary hover:!text-link text-xs  transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
 												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#globe"></use>
 											</svg>
@@ -496,7 +496,7 @@ export const generateMarker = (
 											element.tags['contact:twitter'].startsWith('http')
 												? element.tags['contact:twitter']
 												: `https://twitter.com/${element.tags['contact:twitter']}`
-									  } target="_blank" rel="noreferrer" title='Twitter' class='flex items-center !text-primary hover:!text-link text-xs  transition-colors'>
+									  } target="_blank" rel="noreferrer" class='flex items-center !text-primary hover:!text-link text-xs  transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
 												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#twitter"></use>
 											</svg>
@@ -509,7 +509,6 @@ export const generateMarker = (
 								element.tags && location.pathname === '/map'
 									? `<button
 														id='show-tags'
-														title="Show tags"
 														class='flex items-center !text-primary hover:!text-link text-xs transition-colors'>
 															<svg width='24px' height='24px' class='mr-2'>
 																<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#tags"></use>
@@ -523,7 +522,6 @@ export const generateMarker = (
 								href="https://github.com/teambtcmap/btcmap-data/wiki/Map-Legend"
 								target="_blank"
 								rel="noreferrer"
-								title="Map legend"
 								class='flex items-center !text-primary hover:!text-link text-xs transition-colors'>
 									<svg width='24px' height='24px' class='mr-2'>
 										<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#info-circle"></use>
