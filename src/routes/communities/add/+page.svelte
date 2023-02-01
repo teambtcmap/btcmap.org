@@ -186,7 +186,9 @@
 								loading={searchLoading}
 								disabled={!captchaSecret || searchLoading || !searchQuery}
 								text="Search 🔍"
-								style="w-full md:w-[210px] py-3 rounded-xl"
+								style="{!searchQuery
+									? 'opacity-50 hover:bg-link'
+									: ''} w-full md:w-[210px] py-3 rounded-xl"
 							/>
 						</div>
 
