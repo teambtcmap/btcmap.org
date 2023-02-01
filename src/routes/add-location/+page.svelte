@@ -235,7 +235,12 @@
 							</div>
 
 							<div>
-								<label for="address" class="mb-2 block font-semibold">Address</label>
+								<label for="address" class="mb-2 block font-semibold"
+									>Address <InfoTooltip
+										tooltip="All locations are required to have a physical
+										address. You must be able to visit the location in person and pay with bitcoin. Service industries are not map-able."
+									/></label
+								>
 								<input
 									disabled={!captchaSecret || !mapLoaded}
 									type="text"
