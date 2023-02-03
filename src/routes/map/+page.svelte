@@ -670,6 +670,8 @@ ${
 				}
 			});
 
+			map.addLayer(markers);
+
 			let overlayMaps = {
 				Communities: communitiesLayer,
 				'Up-To-Date': upToDateLayer,
@@ -686,16 +688,14 @@ ${
 							: category.charAt(0).toUpperCase() + category.slice(1)
 					] = categories[category];
 					if (!communitiesOnly) {
+						map.addLayer(upToDateLayer);
+						map.addLayer(outdatedLayer);
+						map.addLayer(legacyLayer);
 						map.addLayer(categories[category]);
 					}
 				});
 
 			const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
-
-			map.addLayer(markers);
-			map.addLayer(upToDateLayer);
-			map.addLayer(outdatedLayer);
-			map.addLayer(legacyLayer);
 
 			// change default icons
 			changeDefaultIcons('layers', L, mapElement, DomEvent);
