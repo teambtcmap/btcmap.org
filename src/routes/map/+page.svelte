@@ -31,7 +31,8 @@
 		latCalc,
 		longCalc,
 		generateIcon,
-		generateMarker
+		generateMarker,
+		verifiedArr
 	} from '$lib/map/setup';
 	import { errToast, getRandomColor } from '$lib/utils';
 	import { MapLoading, Icon, Boost, ShowTags } from '$comp';
@@ -456,9 +457,12 @@ Thanks for using BTC Map!`);
 			let verifiedDate = calcVerifiedDate();
 
 			// create marker cluster group and layers
-			let markers = L.markerClusterGroup({ maxClusterRadius: 60 });
-			let categories = {};
 			let communitiesLayer = L.layerGroup();
+			let markers = L.markerClusterGroup({ maxClusterRadius: 60 });
+			let upToDateLayer = L.featureGroup.subGroup(markers);
+			let outdatedLayer = L.featureGroup.subGroup(markers);
+			let legacyLayer = L.featureGroup.subGroup(markers);
+			let categories = {};
 
 			// add communities to map
 			communities.forEach((community) => {
@@ -640,6 +644,18 @@ ${
 						boosted
 					);
 
+					let verified = verifiedArr(element);
+
+					if (verified.length && Date.parse(verified[0]) > verifiedDate) {
+						upToDateLayer.addLayer(marker);
+					} else {
+						outdatedLayer.addLayer(marker);
+					}
+
+					if (element.tags && element.tags['payment:bitcoin']) {
+						legacyLayer.addLayer(marker);
+					}
+
 					if (!categories[category]) {
 						categories[category] = L.featureGroup.subGroup(markers);
 					}
@@ -654,9 +670,12 @@ ${
 				}
 			});
 
-			map.addLayer(markers);
-
-			let overlayMaps = { Communities: communitiesLayer };
+			let overlayMaps = {
+				Communities: communitiesLayer,
+				'Up-To-Date': upToDateLayer,
+				Outdated: outdatedLayer,
+				Legacy: legacyLayer
+			};
 
 			Object.keys(categories)
 				.sort()
@@ -672,6 +691,11 @@ ${
 				});
 
 			const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+			map.addLayer(markers);
+			map.addLayer(upToDateLayer);
+			map.addLayer(outdatedLayer);
+			map.addLayer(legacyLayer);
 
 			// change default icons
 			changeDefaultIcons('layers', L, mapElement, DomEvent);
