@@ -74,12 +74,16 @@
 					: b.report.tags.up_to_date_percent - a.report.tags.up_to_date_percent
 			);
 
-			leaderboard = leaderboard.slice(0, 50);
+			leaderboard = leaderboard;
 			loading = false;
 		}
 	};
 
 	$: populateLeaderboard($syncStatus, communities, communityReports);
+
+	let leaderboardCount = 50;
+	$: leaderboardPaginated =
+		leaderboard && leaderboard.length && !loading && leaderboard.slice(0, leaderboardCount);
 
 	const headings = ['Position', 'Name', 'Up-To-Date', 'Total Locations', 'Legacy', 'Grade'];
 
@@ -216,7 +220,7 @@
 
 				<div>
 					{#if leaderboard && leaderboard.length && !loading}
-						{#each leaderboard as item, index}
+						{#each leaderboardPaginated as item, index}
 							<CommunityLeaderboardItem
 								position={index + 1}
 								avatar={item.tags['icon:square']}
@@ -230,6 +234,13 @@
 								grade={item.report.tags.grade}
 							/>
 						{/each}
+
+						{#if leaderboardPaginated.length !== leaderboard.length}
+							<button
+								class="mx-auto !my-5 block text-xl font-semibold text-link transition-colors hover:text-hover"
+								on:click={() => (leaderboardCount = leaderboardCount + 50)}>Load More</button
+							>
+						{/if}
 					{:else}
 						{#each Array(50) as skeleton}
 							<CommunityLeaderboardSkeleton />

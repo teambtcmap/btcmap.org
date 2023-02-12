@@ -59,7 +59,6 @@
 		});
 
 		leaderboard.sort((a, b) => b.total - a.total);
-		leaderboard = leaderboard.slice(0, 50);
 		leaderboard = leaderboard;
 
 		loading = false;
@@ -78,6 +77,10 @@
 	};
 
 	$: leaderboardSync($syncStatus, $users, $events);
+
+	let leaderboardCount = 50;
+	$: leaderboardPaginated =
+		leaderboard && leaderboard.length && !loading && leaderboard.slice(0, leaderboardCount);
 
 	onMount(() => {
 		if (browser) {
@@ -197,7 +200,7 @@
 
 				<div class="space-y-10 lg:space-y-5">
 					{#if leaderboard && leaderboard.length && !loading}
-						{#each leaderboard as item, index}
+						{#each leaderboardPaginated as item, index}
 							<LeaderboardItem
 								position={index + 1}
 								avatar={item.avatar}
@@ -209,6 +212,13 @@
 								tip={item.tip}
 							/>
 						{/each}
+
+						{#if leaderboardPaginated.length !== leaderboard.length}
+							<button
+								class="mx-auto !mb-5 block text-xl font-semibold text-link transition-colors hover:text-hover"
+								on:click={() => (leaderboardCount = leaderboardCount + 50)}>Load More</button
+							>
+						{/if}
 					{:else}
 						{#each Array(50) as skeleton}
 							<LeaderboardSkeleton />
