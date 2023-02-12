@@ -11,7 +11,7 @@
 	<OutClick excludeQuerySelectorAll={['#show-tags']} on:outclick={closeModal}>
 		<div
 			transition:fly={{ y: 200, duration: 300 }}
-			class="absolute top-[5vh] left-[5vw] z-[2000] h-[90vh] w-[90vw] overflow-auto rounded-xl border border-mapBorder bg-white p-6 shadow-2xl md:top-[calc(50vh-200px)] md:left-[calc(50vw-215px)] md:h-[400px] md:w-[430px]"
+			class="center z-[2000] max-h-[90vh] w-[90vw] overflow-auto rounded-xl border border-mapBorder bg-white p-6 shadow-2xl md:h-[400px] md:w-[430px]"
 		>
 			<CloseButton
 				position="flex justify-end"
