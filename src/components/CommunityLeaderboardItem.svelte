@@ -2,6 +2,7 @@
 	export let position;
 	export let avatar;
 	export let name;
+	export let org;
 	export let sponsor;
 	export let id;
 	export let upToDate;
@@ -9,7 +10,7 @@
 	export let legacy;
 	export let grade;
 
-	import { SponsorBadge } from '$comp';
+	import { SponsorBadge, OrgBadge } from '$comp';
 
 	$: stats = [
 		{ stat: upToDate, title: 'Up-To-Date' },
@@ -53,9 +54,15 @@
 				: ''} mb-1 inline-block transition-colors">{name}</a
 		>
 
-		{#if sponsor}
-			<SponsorBadge />
-		{/if}
+		<div class="space-y-2">
+			{#if org}
+				<OrgBadge {org} />
+			{/if}
+
+			{#if sponsor}
+				<SponsorBadge />
+			{/if}
+		</div>
 	</div>
 
 	{#each stats as stat}

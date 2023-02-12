@@ -29,7 +29,8 @@
 		TaggerSkeleton,
 		TopButton,
 		MapLoading,
-		SponsorBadge
+		SponsorBadge,
+		OrgBadge
 	} from '$comp';
 
 	let community = $areas.find(
@@ -67,6 +68,7 @@
 
 	let avatar = community['icon:square'];
 	let name = data.name;
+	let org = community.organization;
 	let sponsor = community.sponsor;
 	let continent = community.continent;
 	let website = community['contact:website'];
@@ -652,6 +654,9 @@
 					<h1 class="text-4xl font-semibold !leading-tight text-primary">
 						{name}
 					</h1>
+					{#if org}
+						<OrgBadge {org} />
+					{/if}
 					{#if sponsor}
 						<SponsorBadge />
 					{/if}

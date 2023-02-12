@@ -479,6 +479,16 @@ Thanks for using BTC Map!`);
 						community.tags.name
 					}</span>
 
+					${
+						community.tags.organization
+							? `<span
+						class="mx-auto inline-block rounded-full bg-[#10B981] px-3.5 py-1 text-xs font-semibold uppercase text-white" title='Organization'
+					>
+					${community.tags.organization}
+					</span>`
+							: ''
+					}
+
 ${
 	community.tags.sponsor
 		? `<span class="block gradient-bg w-32 mx-auto py-1 text-xs text-white font-semibold rounded-full" title='Supporter'>

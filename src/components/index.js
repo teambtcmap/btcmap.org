@@ -44,3 +44,4 @@ export { default as AboutIntegration } from './AboutIntegration.svelte';
 export { default as AboutPlus } from './AboutPlus.svelte';
 export { default as AboutContributor } from './AboutContributor.svelte';
 export { default as AboutCore } from './AboutCore.svelte';
+export { default as OrgBadge } from './OrgBadge.svelte';
