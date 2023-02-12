@@ -6,6 +6,8 @@
 
 	$: image = tags['icon:square'] && tags['icon:square'];
 	$: website = tags['contact:website'] && tags['contact:website'];
+	$: email = tags['contact:email'] && tags['contact:email'];
+	$: nostr = tags['contact:nostr'] && tags['contact:nostr'];
 	$: twitter = tags['contact:twitter'] && tags['contact:twitter'];
 	$: secondTwitter = tags['contact:second_twitter'] && tags['contact:second_twitter'];
 	$: meetup = tags['contact:meetup'] && tags['contact:meetup'];
@@ -15,6 +17,10 @@
 	$: youtube = tags['contact:youtube'] && tags['contact:youtube'];
 	$: github = tags['contact:github'] && tags['contact:github'];
 	$: reddit = tags['contact:reddit'] && tags['contact:reddit'];
+	$: instagram = tags['contact:instagram'] && tags['contact:instagram'];
+	$: whatsapp = tags['contact:whatsapp'] && tags['contact:whatsapp'];
+	$: facebook = tags['contact:facebook'] && tags['contact:facebook'];
+	$: linkedin = tags['contact:linkedin'] && tags['contact:linkedin'];
 	$: tip =
 		(tags['tips:lightning_address'] && {
 			destination: tags['tips:lightning_address'],
@@ -51,6 +57,20 @@
 			<a href={website} target="_blank" rel="noreferrer" class="m-1">
 				<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-bitcoin">
 					<i class="fa-solid fa-globe h-7 w-7 text-white" />
+				</span>
+			</a>
+		{/if}
+		{#if email}
+			<a href="mailto:{email}" target="_blank" rel="noreferrer" class="m-1">
+				<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-[#53C5D5]">
+					<i class="fa-solid fa-envelope h-7 w-7 text-white" />
+				</span>
+			</a>
+		{/if}
+		{#if nostr}
+			<a href="https://snort.social/p/{nostr}" target="_blank" rel="noreferrer" class="m-1">
+				<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-nostr">
+					<i class="fa-solid fa-n h-7 w-7 text-white" />
 				</span>
 			</a>
 		{/if}
@@ -97,6 +117,26 @@
 		{#if reddit}
 			<a href={reddit} target="_blank" rel="noreferrer" class="m-1">
 				<img src="/icons/socials/reddit.svg" alt="reddit" />
+			</a>
+		{/if}
+		{#if instagram}
+			<a href={instagram} target="_blank" rel="noreferrer" class="m-1">
+				<img src="/icons/socials/instagram.svg" alt="instagram" />
+			</a>
+		{/if}
+		{#if whatsapp}
+			<a href={whatsapp} target="_blank" rel="noreferrer" class="m-1">
+				<img src="/icons/socials/whatsapp.svg" alt="whatsapp" />
+			</a>
+		{/if}
+		{#if facebook}
+			<a href={facebook} target="_blank" rel="noreferrer" class="m-1">
+				<img src="/icons/socials/facebook.svg" alt="facebook" />
+			</a>
+		{/if}
+		{#if linkedin}
+			<a href={linkedin} target="_blank" rel="noreferrer" class="m-1">
+				<img src="/icons/socials/linkedin.svg" alt="linkedin" />
 			</a>
 		{/if}
 	</div>

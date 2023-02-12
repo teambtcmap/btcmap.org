@@ -72,6 +72,8 @@
 	let sponsor = community.sponsor;
 	let continent = community.continent;
 	let website = community['contact:website'];
+	let email = community['contact:email'];
+	let nostr = community['contact:nostr'];
 	let twitter = community['contact:twitter'];
 	let secondTwitter = community['contact:second_twitter'];
 	let meetup = community['contact:meetup'];
@@ -81,6 +83,10 @@
 	let youtube = community['contact:youtube'];
 	let github = community['contact:github'];
 	let reddit = community['contact:reddit'];
+	let instagram = community['contact:instagram'];
+	let whatsapp = community['contact:whatsapp'];
+	let facebook = community['contact:facebook'];
+	let linkedin = community['contact:linkedin'];
 	$: lightning =
 		(community['tips:lightning_address'] && {
 			destination: community['tips:lightning_address'],
@@ -712,6 +718,24 @@
 							</span>
 						</a>
 					{/if}
+					{#if email}
+						<a href="mailto:{email}" target="_blank" rel="noreferrer" class="m-1">
+							<span
+								class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-[#53C5D5]"
+							>
+								<i class="fa-solid fa-envelope h-7 w-7 text-white" />
+							</span>
+						</a>
+					{/if}
+					{#if nostr}
+						<a href="https://snort.social/p/{nostr}" target="_blank" rel="noreferrer" class="m-1">
+							<span
+								class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-nostr"
+							>
+								<i class="fa-solid fa-n h-7 w-7 text-white" />
+							</span>
+						</a>
+					{/if}
 					{#if twitter}
 						<a href={twitter} target="_blank" rel="noreferrer" class="m-1">
 							<img src="/icons/socials/twitter.svg" alt="twitter" />
@@ -759,6 +783,26 @@
 					{#if reddit}
 						<a href={reddit} target="_blank" rel="noreferrer" class="m-1">
 							<img src="/icons/socials/reddit.svg" alt="reddit" />
+						</a>
+					{/if}
+					{#if instagram}
+						<a href={instagram} target="_blank" rel="noreferrer" class="m-1">
+							<img src="/icons/socials/instagram.svg" alt="instagram" />
+						</a>
+					{/if}
+					{#if whatsapp}
+						<a href={whatsapp} target="_blank" rel="noreferrer" class="m-1">
+							<img src="/icons/socials/whatsapp.svg" alt="whatsapp" />
+						</a>
+					{/if}
+					{#if facebook}
+						<a href={facebook} target="_blank" rel="noreferrer" class="m-1">
+							<img src="/icons/socials/facebook.svg" alt="facebook" />
+						</a>
+					{/if}
+					{#if linkedin}
+						<a href={linkedin} target="_blank" rel="noreferrer" class="m-1">
+							<img src="/icons/socials/linkedin.svg" alt="linkedin" />
 						</a>
 					{/if}
 				</div>

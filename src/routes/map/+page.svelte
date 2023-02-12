@@ -512,6 +512,32 @@ ${
 	}
 
 	${
+		community.tags['contact:email']
+			? `
+		<a href="mailto:${community.tags['contact:email']}" target="_blank" rel="noreferrer" class="m-1" title='Email'>
+			<span class="bg-[#53C5D5] w-[40px] h-[40px] flex justify-center items-center rounded-full">
+				<svg width='28px' height='28px' class='text-white'>
+					<use width='28px' height='28px' href="/icons/socials/spritesheet.svg#email"></use>
+				</svg>
+			</span>
+		</a>`
+			: ''
+	}
+
+	${
+		community.tags['contact:nostr']
+			? `
+		<a href="https://snort.social/p/${community.tags['contact:nostr']}" target="_blank" rel="noreferrer" class="m-1" title='Nostr'>
+			<span class="bg-nostr w-[40px] h-[40px] flex justify-center items-center rounded-full">
+				<svg width='28px' height='28px' class='text-white'>
+					<use width='28px' height='28px' href="/icons/socials/spritesheet.svg#nostr"></use>
+				</svg>
+			</span>
+		</a>`
+			: ''
+	}
+
+	${
 		community.tags['contact:twitter']
 			? `
 		<a href=${community.tags['contact:twitter']} target="_blank" rel="noreferrer" class="m-1" title='Twitter'>
@@ -588,6 +614,42 @@ ${
 			? `
 		<a href=${community.tags['contact:reddit']} target="_blank" rel="noreferrer" class="m-1" title='Reddit'>
 			<img src="/icons/socials/reddit.svg" alt="reddit" decoding="sync" fetchpriority="high" />
+		</a>`
+			: ''
+	}
+
+	${
+		community.tags['contact:instagram']
+			? `
+		<a href=${community.tags['contact:instagram']} target="_blank" rel="noreferrer" class="m-1" title='Instagram'>
+			<img src="/icons/socials/instagram.svg" alt="instagram" decoding="sync" fetchpriority="high" />
+		</a>`
+			: ''
+	}
+
+	${
+		community.tags['contact:whatsapp']
+			? `
+		<a href=${community.tags['contact:whatsapp']} target="_blank" rel="noreferrer" class="m-1" title='WhatsApp'>
+			<img src="/icons/socials/whatsapp.svg" alt="whatsapp" decoding="sync" fetchpriority="high" />
+		</a>`
+			: ''
+	}
+
+	${
+		community.tags['contact:facebook']
+			? `
+		<a href=${community.tags['contact:facebook']} target="_blank" rel="noreferrer" class="m-1" title='Facebook'>
+			<img src="/icons/socials/facebook.svg" alt="facebook" decoding="sync" fetchpriority="high" />
+		</a>`
+			: ''
+	}
+
+	${
+		community.tags['contact:linkedin']
+			? `
+		<a href=${community.tags['contact:linkedin']} target="_blank" rel="noreferrer" class="m-1" title='LinkedIn'>
+			<img src="/icons/socials/linkedin.svg" alt="linkedin" decoding="sync" fetchpriority="high" />
 		</a>`
 			: ''
 	}
