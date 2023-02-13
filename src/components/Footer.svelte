@@ -5,9 +5,10 @@
 	const links = [
 		{ link: '/about-us', name: 'About Us' },
 		{ link: '/media', name: 'Media' },
-		{ link: '/bitcoin.pdf', name: 'White Paper' },
 		{ link: '/license', name: 'License' },
-		{ link: '/privacy-policy', name: 'Privacy' }
+		{ link: '/privacy-policy', name: 'Privacy' },
+		{ link: '/bitcoin.pdf', name: 'White Paper' },
+		{ link: '/cypherpunks-manifesto.pdf', name: 'Cypherpunks' }
 	];
 </script>
 
