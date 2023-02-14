@@ -7,6 +7,7 @@
 		{ link: '/media', name: 'Media' },
 		{ link: '/license', name: 'License' },
 		{ link: '/privacy-policy', name: 'Privacy' },
+		{ link: 'https://stats.uptimerobot.com/7kgEVtzlV1', name: 'Status' },
 		{ link: '/bitcoin.pdf', name: 'White Paper' },
 		{ link: '/cypherpunks-manifesto.pdf', name: 'Cypherpunks' }
 	];
