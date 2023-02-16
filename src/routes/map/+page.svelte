@@ -659,7 +659,7 @@ ${
 						community.id
 					}' class='block bg-link hover:bg-hover !text-white text-center font-semibold py-3 rounded-xl transition-colors' title='Community page'>View Community</a>
 </div>`,
-					{ closeButton: false, minWidth: 300 }
+					{ minWidth: 300 }
 				);
 
 				communityLayer.on('click', () => communityLayer.bringToBack());
