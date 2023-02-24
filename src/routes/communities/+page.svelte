@@ -210,27 +210,29 @@
 			<div class="space-y-20">
 				<CommunitySection
 					title="Africa"
-					communities={africa.filter((community) => !community.tags.organization)}
+					communities={africa && africa.filter((community) => !community.tags.organization)}
 				/>
 				<CommunitySection
 					title="Asia"
-					communities={asia.filter((community) => !community.tags.organization)}
+					communities={asia && asia.filter((community) => !community.tags.organization)}
 				/>
 				<CommunitySection
 					title="Europe"
-					communities={europe.filter((community) => !community.tags.organization)}
+					communities={europe && europe.filter((community) => !community.tags.organization)}
 				/>
 				<CommunitySection
 					title="North America"
-					communities={northAmerica.filter((community) => !community.tags.organization)}
+					communities={northAmerica &&
+						northAmerica.filter((community) => !community.tags.organization)}
 				/>
 				<CommunitySection
 					title="Oceania"
-					communities={oceania.filter((community) => !community.tags.organization)}
+					communities={oceania && oceania.filter((community) => !community.tags.organization)}
 				/>
 				<CommunitySection
 					title="South America"
-					communities={southAmerica.filter((community) => !community.tags.organization)}
+					communities={southAmerica &&
+						southAmerica.filter((community) => !community.tags.organization)}
 				/>
 
 				<CommunitySection title="2140 Meetups" communities={meetups2140} />
