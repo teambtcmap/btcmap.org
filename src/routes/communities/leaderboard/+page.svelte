@@ -225,7 +225,6 @@
 								position={index + 1}
 								avatar={item.tags['icon:square']}
 								name={item.tags.name}
-								org={item.tags.organization}
 								sponsor={item.tags.sponsor}
 								id={item.id}
 								upToDate={item.report.tags.up_to_date_percent}
