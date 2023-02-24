@@ -67,6 +67,8 @@
 	$: decouvreBitcoin =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'decouvre-bitcoin');
+	$: dwadziescia =
+		communities && communities.filter((community) => community.tags.organization === 'dwadziescia');
 	$: einundzwanzig =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'einundzwanzig');
@@ -241,6 +243,7 @@
 				<CommunitySection title="2140 Meetups" communities={meetups2140} />
 				<CommunitySection title="Bitcoin4India" communities={bitcoin4India} />
 				<CommunitySection title="Découvre Bitcoin" communities={decouvreBitcoin} />
+				<CommunitySection title="Dwadzieścia" communities={dwadziescia} />
 				<CommunitySection title="Einundzwanzig" communities={einundzwanzig} />
 				<CommunitySection title="Satoshi Spritz" communities={satoshiSpritz} />
 			</div>
