@@ -6,7 +6,9 @@
 </script>
 
 <section id={title}>
-	<h2 class="mb-5 text-3xl font-semibold text-primary md:text-left">{title}</h2>
+	<h2 class="mb-5 text-3xl font-semibold text-primary md:text-left">
+		<a href="/communities#{title}">{title}</a>
+	</h2>
 
 	<div class="grid gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 		{#if communities && communities.length}
