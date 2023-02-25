@@ -68,7 +68,8 @@
 		communities &&
 		communities.filter((community) => community.tags.organization === 'decouvre-bitcoin');
 	$: dwadziesciaJeden =
-		communities && communities.filter((community) => community.tags.organization === 'dwadziescia-jeden');
+		communities &&
+		communities.filter((community) => community.tags.organization === 'dwadziescia-jeden');
 	$: einundzwanzig =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'einundzwanzig');

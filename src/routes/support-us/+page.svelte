@@ -4,9 +4,8 @@
 	import { Header, Footer, DonationOption, SupportSection, Icon, CloseButton } from '$comp';
 	import { errToast } from '$lib/utils';
 
-	let onchain = 'bc1qyyr7g9tew6sfa57mv2r6rvgj2ucakcmqnqzqjj';
-	const lnurlp =
-		'LNURL1DP68GURN8GHJ7ERZXVUXVER9X4SNYTNY9EMX7MR5V9NK2CTSWQHXJME0D3H82UNVWQHKZURF9AMRZTMVDE6HYMP0XYA8GEF9';
+	let onchain = 'bc1qqmy5c03clt6a72aq0ys5jzm2sjnws3qr05nvmz';
+	const lnurlp = 'LNURL1DP68GURN8GHJ7MT9WF3KSCTWW3EJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQCJQMEY';
 
 	let showQr = false;
 	let network;
@@ -120,14 +119,14 @@
 				<div>
 					<h3 class="text-lg font-semibold uppercase text-body">Open a lightning channel to us</h3>
 					<a
-						href="https://amboss.space/node/02eb5a2e05ef32d0434ea616d38a1a46deaf9f246dc418673f43a571bba0363031"
+						href="https://amboss.space/node/03ef01535d57cd3a3ddff8b4050650b278991b3eb7853f772a200079b9adb24988"
 						target="_blank"
 						rel="noreferrer"
 						class="break-all text-link transition-colors hover:text-hover"
-						>02eb5a2e05ef32d0434ea616d38a1a46deaf9f246dc418673f43a571bba0363031</a
+						>03ef01535d57cd3a3ddff8b4050650b278991b3eb7853f772a200079b9adb24988</a
 					>
 					<iframe
-						src="https://amboss.space/embed/node/info/02eb5a2e05ef32d0434ea616d38a1a46deaf9f246dc418673f43a571bba0363031?theme=light&noBackground=true"
+						src="https://amboss.space/embed/node/info/03ef01535d57cd3a3ddff8b4050650b278991b3eb7853f772a200079b9adb24988?theme=light&noBackground=true"
 						width="100%"
 						class="h-[300px] xl:h-[271.5px]"
 					/>
