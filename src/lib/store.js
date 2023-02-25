@@ -3,7 +3,8 @@ import { writable, readable } from 'svelte/store';
 export const socials = readable({
 	twitter: 'https://twitter.com/btcmap',
 	discord: 'https://discord.gg/wPqva83uzq',
-	github: 'https://github.com/teambtcmap'
+	github: 'https://github.com/teambtcmap',
+	amboss: 'https://amboss.space/community/edf8d227-9bc7-4cb2-af2a-66c1b455109a'
 });
 
 export const apps = readable([

@@ -35,10 +35,11 @@
 			<h2 class="text-xl font-semibold text-primary">Please try again or contact BTC Map.</h2>
 		</div>
 
-		<footer class="flex justify-center space-x-5 pb-5">
+		<footer class="flex flex-wrap justify-center gap-5 pb-5">
 			<SocialLink url={$socials.twitter} social="twitter" />
 			<SocialLink url={$socials.discord} social="discord" />
 			<SocialLink url={$socials.github} social="github" />
+			<SocialLink url={$socials.amboss} social="amboss" />
 		</footer>
 	</div>
 </div>
