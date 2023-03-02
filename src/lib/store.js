@@ -2,6 +2,7 @@ import { writable, readable } from 'svelte/store';
 
 export const socials = readable({
 	twitter: 'https://twitter.com/btcmap',
+	nostr: 'https://snort.social/p/npub1864jglrrhv6alguwql9pqtmd5296nww5dpcewapmmcazk8vq4mks0tt2tq',
 	discord: 'https://discord.gg/wPqva83uzq',
 	github: 'https://github.com/teambtcmap',
 	amboss: 'https://amboss.space/community/edf8d227-9bc7-4cb2-af2a-66c1b455109a'

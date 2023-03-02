@@ -1,5 +1,5 @@
 <script>
-	import { Tip, SponsorBadge } from '$comp';
+	import { Tip, SponsorBadge, Icon } from '$comp';
 
 	export let id;
 	export let tags;
@@ -67,7 +67,7 @@
 		{#if nostr}
 			<a href="https://snort.social/p/{nostr}" target="_blank" rel="noreferrer" class="m-1">
 				<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-nostr">
-					<i class="fa-solid fa-n h-7 w-7 text-white" />
+					<Icon w="28" h="28" icon="nostr" type="socials" style="text-white" />
 				</span>
 			</a>
 		{/if}
