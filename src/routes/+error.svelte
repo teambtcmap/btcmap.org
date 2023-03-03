@@ -37,6 +37,7 @@
 
 		<footer class="flex flex-wrap justify-center gap-5 pb-5">
 			<SocialLink url={$socials.twitter} social="twitter" />
+			<SocialLink url={$socials.nostr} social="nostr" />
 			<SocialLink url={$socials.discord} social="discord" />
 			<SocialLink url={$socials.github} social="github" />
 			<SocialLink url={$socials.amboss} social="amboss" />

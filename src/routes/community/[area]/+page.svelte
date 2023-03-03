@@ -30,7 +30,8 @@
 		TopButton,
 		MapLoading,
 		SponsorBadge,
-		OrgBadge
+		OrgBadge,
+		Icon
 	} from '$comp';
 
 	let community = $areas.find(
@@ -732,7 +733,7 @@
 							<span
 								class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-nostr"
 							>
-								<i class="fa-solid fa-n h-7 w-7 text-white" />
+								<Icon w="28" h="28" icon="nostr" type="socials" style="text-white" />
 							</span>
 						</a>
 					{/if}
