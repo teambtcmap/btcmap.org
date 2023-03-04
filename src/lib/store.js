@@ -62,7 +62,9 @@ export const syncStatus = writable();
 export const mapUpdates = writable(false);
 export const mapLoading = writable('Loading map...');
 
-export const excludeLeader = readable([17085479, 2104834, 9451067, 616463, 1722488, 81735]);
+export const excludeLeader = readable([
+	17085479, 2104834, 9451067, 616463, 1722488, 81735, 18545877
+]);
 
 export const boost = writable();
 export const exchangeRate = writable();
