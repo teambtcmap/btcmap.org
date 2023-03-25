@@ -11,7 +11,7 @@
 </script>
 
 <button bind:this={infoTooltip}>
-	<i class="fa-solid fa-circle-info text-base text-primary" />
+	<i class="fa-solid fa-circle-info text-base text-primary dark:text-white" />
 </button>
 
 <style>

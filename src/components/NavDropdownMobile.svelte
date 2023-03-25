@@ -16,7 +16,7 @@
 	class="w-full {show ? 'text-[#144046]' : 'text-link'} flex items-center text-xl"
 >
 	<span
-		class="mr-4 rounded-full bg-mobileButtons p-3 transition-colors active:bg-mobileButtonsActive"
+		class="mr-4 rounded-full bg-mobileButtons p-3 transition-colors active:bg-mobileButtonsActive dark:bg-white/[0.15] dark:active:bg-mobileButtonsActive"
 	>
 		<Icon w="24" h="24" icon={show ? `${icon}-highlight` : `${icon}`} type="mobile-nav" />
 	</span>
@@ -38,7 +38,7 @@
 					class="flex w-full items-center text-xl text-link"
 				>
 					<span
-						class="mr-4 rounded-full bg-mobileButtons p-3 transition-colors active:bg-mobileButtonsActive"
+						class="mr-4 rounded-full bg-mobileButtons p-3 transition-colors active:bg-mobileButtonsActive dark:bg-white/[0.15] dark:active:bg-mobileButtonsActive"
 					>
 						<Icon w="24" h="24" icon={link.icon} type="mobile-nav" />
 					</span>

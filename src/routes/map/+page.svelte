@@ -34,7 +34,7 @@
 		generateMarker,
 		verifiedArr
 	} from '$lib/map/setup';
-	import { errToast, getRandomColor } from '$lib/utils';
+	import { errToast, getRandomColor, detectTheme } from '$lib/utils';
 	import { MapLoading, Icon, Boost, ShowTags } from '$comp';
 
 	let mapElement;
@@ -180,6 +180,8 @@
 
 	onMount(async () => {
 		if (browser) {
+			const theme = detectTheme();
+
 			//import packages
 			const leaflet = await import('leaflet');
 			const DomEvent = await import('leaflet/src/dom/DomEvent');
@@ -338,7 +340,9 @@ Thanks for using BTC Map!`);
 					searchButton.role = 'button';
 					searchButton.ariaLabel = 'Search toggle';
 					searchButton.ariaDisabled = 'false';
-					searchButton.innerHTML = `<img src='/icons/search.svg' alt='search' class='inline' id='search-button'/>`;
+					searchButton.innerHTML = `<img src=${
+						theme === 'dark' ? '/icons/search-white.svg' : '/icons/search.svg'
+					} alt='search' class='inline' id='search-button'/>`;
 					searchButton.style.borderRadius = '8px';
 					searchButton.onclick = async function toggleSearch() {
 						showSearch = !showSearch;
@@ -350,12 +354,15 @@ Thanks for using BTC Map!`);
 							searchResults = [];
 						}
 					};
-					searchButton.onmouseenter = () => {
-						document.querySelector('#search-button').src = '/icons/search-black.svg';
-					};
-					searchButton.onmouseleave = () => {
-						document.querySelector('#search-button').src = '/icons/search.svg';
-					};
+					if (theme === 'light') {
+						searchButton.onmouseenter = () => {
+							document.querySelector('#search-button').src = '/icons/search-black.svg';
+						};
+						searchButton.onmouseleave = () => {
+							document.querySelector('#search-button').src = '/icons/search.svg';
+						};
+					}
+					searchButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/90');
 
 					searchButtonDiv.append(searchButton);
 
@@ -414,7 +421,13 @@ Thanks for using BTC Map!`);
 					boostLayerButton.ariaLabel = 'Boosted locations';
 					boostLayerButton.ariaDisabled = 'false';
 					boostLayerButton.innerHTML = `<img src=${
-						boosts ? '/icons/boost-solid.svg' : '/icons/boost.svg'
+						boosts
+							? theme === 'dark'
+								? '/icons/boost-solid-white.svg'
+								: '/icons/boost-solid.svg'
+							: theme === 'dark'
+							? '/icons/boost-white.svg'
+							: '/icons/boost.svg'
 					} alt='boost' class='inline' id='boost-layer'/>`;
 					boostLayerButton.style.borderRadius = '8px';
 					boostLayerButton.onclick = function toggleLayer() {
@@ -426,17 +439,19 @@ Thanks for using BTC Map!`);
 							location.search = $page.url.search;
 						}
 					};
-
-					boostLayerButton.onmouseenter = () => {
-						document.querySelector('#boost-layer').src = boosts
-							? '/icons/boost-solid-black.svg'
-							: '/icons/boost-black.svg';
-					};
-					boostLayerButton.onmouseleave = () => {
-						document.querySelector('#boost-layer').src = boosts
-							? '/icons/boost-solid.svg'
-							: '/icons/boost.svg';
-					};
+					if (theme === 'light') {
+						boostLayerButton.onmouseenter = () => {
+							document.querySelector('#boost-layer').src = boosts
+								? '/icons/boost-solid-black.svg'
+								: '/icons/boost-black.svg';
+						};
+						boostLayerButton.onmouseleave = () => {
+							document.querySelector('#boost-layer').src = boosts
+								? '/icons/boost-solid.svg'
+								: '/icons/boost.svg';
+						};
+					}
+					boostLayerButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/90');
 
 					boostLayerDiv.append(boostLayerButton);
 
@@ -475,7 +490,7 @@ Thanks for using BTC Map!`);
 						community.tags['icon:square']
 					} alt='avatar' class='w-24 h-24 rounded-full mx-auto p-1' title='Community icon' decoding="sync" fetchpriority="high" style="border: 4px solid ${randomColor};" onerror="this.src='/images/communities/bitcoin.svg'" />
 
-<span class='text-primary font-semibold text-xl' title='Community name'>${
+<span class='text-primary dark:text-white font-semibold text-xl' title='Community name'>${
 						community.tags.name
 					}</span>
 
@@ -658,7 +673,19 @@ ${
 <a href='/community/${
 						community.id
 					}' class='block bg-link hover:bg-hover !text-white text-center font-semibold py-3 rounded-xl transition-colors' title='Community page'>View Community</a>
-</div>`,
+</div>
+
+${
+	theme === 'dark'
+		? `
+			<style>
+				.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+					background-color: #06171C;
+			}
+			</style>`
+		: ''
+}
+`,
 					{ minWidth: 300 }
 				);
 
@@ -803,7 +830,7 @@ ${
 			<input
 				id="search-input"
 				type="text"
-				class="w-full rounded-lg px-5 py-2.5 text-[16px] text-mapButton drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:outline-none focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)]"
+				class="w-full rounded-lg px-5 py-2.5 text-[16px] text-mapButton drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:outline-none focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] dark:bg-dark dark:text-white"
 				placeholder="Search..."
 				on:keyup={searchDebounce}
 				on:keydown={(e) => {
@@ -818,7 +845,7 @@ ${
 			<button
 				bind:this={clearSearchButton}
 				on:click={clearSearch}
-				class="absolute top-[10px] right-[8px] bg-white text-mapButton hover:text-black {search
+				class="absolute top-[10px] right-[8px] bg-white text-mapButton hover:text-black dark:bg-dark dark:text-white dark:hover:text-white/80 {search
 					? 'block'
 					: 'hidden'}"
 			>
@@ -846,12 +873,12 @@ ${
 				on:outclick={clearSearch}
 			>
 				<div
-					class="hide-scroll mt-0.5 max-h-[204px] w-full overflow-y-scroll rounded-lg bg-white drop-shadow-[0px_2px_6px_rgba(0,0,0,0.15)]"
+					class="hide-scroll mt-0.5 max-h-[204px] w-full overflow-y-scroll rounded-lg bg-white drop-shadow-[0px_2px_6px_rgba(0,0,0,0.15)] dark:bg-dark"
 				>
 					{#each searchResults as result}
 						<button
 							on:click={() => searchSelect(result)}
-							class="block w-full justify-between px-4 py-2 hover:bg-searchHover md:flex md:text-left"
+							class="block w-full justify-between px-4 py-2 hover:bg-searchHover dark:hover:bg-white/[0.15] md:flex md:text-left"
 						>
 							<div class="items-start md:flex md:space-x-2">
 								<Icon
@@ -859,7 +886,7 @@ ${
 									h="20"
 									style="mx-auto md:mx-0 mt-1 {result.boosted
 										? 'text-bitcoin animate-wiggle'
-										: 'text-mapButton opacity-50'}"
+										: 'text-mapButton dark:text-white opacity-50'}"
 									icon={result.icon !== 'question_mark' ? result.icon : 'currency_bitcoin'}
 									type="material"
 								/>
@@ -868,7 +895,9 @@ ${
 									<p
 										class="text-sm {result.boosted
 											? 'font-semibold text-bitcoin'
-											: 'text-mapButton'} {result.tags.name.match('([^ ]{21})') ? 'break-all' : ''}"
+											: 'text-mapButton dark:text-white'} {result.tags.name.match('([^ ]{21})')
+											? 'break-all'
+											: ''}"
 									>
 										{result.tags.name}
 									</p>
@@ -907,7 +936,7 @@ ${
 	<Boost />
 	<ShowTags />
 
-	<div bind:this={mapElement} class="h-[100vh] !bg-teal" />
+	<div bind:this={mapElement} class="h-[100vh] !bg-teal dark:!bg-dark" />
 </main>
 
 <style>

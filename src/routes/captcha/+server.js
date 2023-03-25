@@ -13,7 +13,7 @@ export function GET() {
 	svgCaptcha.options.height = 100;
 	svgCaptcha.options.fontSize = 100;
 
-	let captcha = svgCaptcha.create({ size: 7, noise: 2 });
+	let captcha = svgCaptcha.create({ size: 7, noise: 2, color: true });
 
 	if (!captcha.data) {
 		throw error(400, 'Could not generate captcha, please try again or contact BTC Map.');

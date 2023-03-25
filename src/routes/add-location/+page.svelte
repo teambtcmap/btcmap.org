@@ -4,7 +4,8 @@
 	import axios from 'axios';
 	import { Header, Footer, PrimaryButton, MapLoading, FormSuccess, InfoTooltip } from '$comp';
 	import { geolocate, changeDefaultIcons } from '$lib/map/setup';
-	import { errToast } from '$lib/utils';
+	import { errToast, detectTheme } from '$lib/utils';
+	import { theme } from '$lib/store';
 
 	let captcha;
 	let captchaSecret;
@@ -197,7 +198,7 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/add.png" />
 </svelte:head>
 
-<div class="bg-teal">
+<div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		{#if !submitted}
@@ -211,16 +212,20 @@
 					class="mx-auto w-full border-b border-input pb-14 md:w-2/3 lg:w-1/2 lg:border-b-0 lg:border-r lg:pb-0"
 				>
 					<div class="lg:w-10/12 xl:w-3/4">
-						<h2 class="mb-5 text-center text-3xl font-semibold text-primary lg:text-left">Noobs</h2>
+						<h2
+							class="mb-5 text-center text-3xl font-semibold text-primary dark:text-white lg:text-left"
+						>
+							Noobs
+						</h2>
 
-						<p class="mb-10 w-full text-center text-primary lg:text-left">
+						<p class="mb-10 w-full text-center text-primary dark:text-white lg:text-left">
 							Fill out the following form and one of our volunteer community members will add your
 							location to the map. <InfoTooltip
 								tooltip="NOTE: Due to the backlog of requests and the additions being completed on a volunteer effort, it may take several weeks to have your location added. It is encouraged to add your location to OpenStreetMap directly following the Shadowy Supertagger method if you want to appear on the map right away."
 							/>
 						</p>
 
-						<form on:submit={submitForm} class="w-full space-y-5 text-primary">
+						<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
 							<div>
 								<label for="name" class="mb-2 block font-semibold">Merchant Name</label>
 								<input
@@ -229,7 +234,7 @@
 									name="name"
 									placeholder="Satoshi's Comics"
 									required
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:this={name}
 								/>
 							</div>
@@ -247,7 +252,7 @@
 									name="address"
 									placeholder="2100 Freedom Drive..."
 									required
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:this={address}
 								/>
 							</div>
@@ -263,7 +268,7 @@
 								<div class="relative mb-2">
 									<div
 										bind:this={mapElement}
-										class="z-10 h-[300px] !cursor-crosshair rounded-2xl border-2 border-input !bg-teal"
+										class="z-10 h-[300px] !cursor-crosshair rounded-2xl border-2 border-input !bg-teal dark:!bg-dark"
 									/>
 									{#if !mapLoaded}
 										<MapLoading type="embed" style="h-[300px] border-2 border-input rounded-2xl" />
@@ -301,7 +306,7 @@
 									type="text"
 									name="category"
 									placeholder="Restaurant etc."
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:this={category}
 								/>
 							</div>
@@ -322,9 +327,18 @@
 											bind:this={onchain}
 											on:click={handleCheckboxClick}
 										/>
-										<label for="onchain" class="ml-1 cursor-pointer"
-											><img src="/icons/btc-primary.svg" alt="onchain" class="inline" /> On-chain</label
-										>
+										<label for="onchain" class="ml-1 cursor-pointer">
+											{#if typeof window !== 'undefined'}
+												<img
+													src={detectTheme() === 'dark' || $theme === 'dark'
+														? '/icons/btc-highlight-dark.svg'
+														: '/icons/btc-primary.svg'}
+													alt="onchain"
+													class="inline"
+												/>
+											{/if}
+											On-chain
+										</label>
 									</div>
 									<div>
 										<input
@@ -336,9 +350,18 @@
 											bind:this={lightning}
 											on:click={handleCheckboxClick}
 										/>
-										<label for="lightning" class="ml-1 cursor-pointer"
-											><img src="/icons/ln-primary.svg" alt="lightning" class="inline" /> Lightning</label
-										>
+										<label for="lightning" class="ml-1 cursor-pointer">
+											{#if typeof window !== 'undefined'}
+												<img
+													src={detectTheme() === 'dark' || $theme === 'dark'
+														? '/icons/ln-highlight-dark.svg'
+														: '/icons/ln-primary.svg'}
+													alt="lightning"
+													class="inline"
+												/>
+											{/if}
+											Lightning
+										</label>
 									</div>
 									<div>
 										<input
@@ -350,9 +373,18 @@
 											bind:this={nfc}
 											on:click={handleCheckboxClick}
 										/>
-										<label for="nfc" class="ml-1 cursor-pointer"
-											><img src="/icons/nfc-primary.svg" alt="nfc" class="inline" /> Lightning Contactless</label
-										>
+										<label for="nfc" class="ml-1 cursor-pointer">
+											{#if typeof window !== 'undefined'}
+												<img
+													src={detectTheme() === 'dark' || $theme === 'dark'
+														? '/icons/nfc-highlight-dark.svg'
+														: '/icons/nfc-primary.svg'}
+													alt="nfc"
+													class="inline"
+												/>
+											{/if}
+											Lightning Contactless
+										</label>
 									</div>
 								</div>
 							</fieldset>
@@ -366,7 +398,7 @@
 									type="url"
 									name="website"
 									placeholder="https://bitcoin.org"
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:this={website}
 								/>
 							</div>
@@ -380,7 +412,7 @@
 									type="tel"
 									name="phone"
 									placeholder="Number"
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:this={phone}
 								/>
 							</div>
@@ -394,7 +426,7 @@
 									type="text"
 									name="hours"
 									placeholder="Mo-Fr 08:30-20:00"
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:this={hours}
 								/>
 							</div>
@@ -409,7 +441,7 @@
 										type="text"
 										name="twitter"
 										placeholder="Merchant"
-										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 										bind:this={twitterMerchant}
 									/>
 									<input
@@ -417,7 +449,7 @@
 										type="text"
 										name="twitter"
 										placeholder="Submitter"
-										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 										bind:this={twitterSubmitter}
 									/>
 								</div>
@@ -432,7 +464,7 @@
 									name="notes"
 									placeholder="Any other relevant details?"
 									rows="3"
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:this={notes}
 								/>
 							</div>
@@ -443,7 +475,7 @@
 									disabled={!captchaSecret || !mapLoaded}
 									name="source"
 									required
-									class="w-full rounded-2xl border-2 border-input bg-white py-3 transition-all focus:outline-link"
+									class="w-full rounded-2xl border-2 border-input bg-white py-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:value={source}
 									on:change={async () => {
 										if (source === 'Other') {
@@ -466,7 +498,7 @@
 										required
 										name="source-other"
 										placeholder="Local knowledge, online etc."
-										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 										bind:value={sourceOther}
 										bind:this={sourceOtherElement}
 									/>
@@ -486,7 +518,7 @@
 									type="email"
 									name="contact"
 									placeholder="hello@btcmap.org"
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:this={contact}
 								/>
 							</div>
@@ -515,7 +547,7 @@
 										type="text"
 										name="captcha"
 										placeholder="Please enter the captcha text."
-										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 										bind:this={captchaInput}
 									/>
 								</div>
@@ -542,10 +574,12 @@
 				<section id="supertagger" class="mx-auto w-full pt-14 md:w-2/3 lg:w-1/2 lg:pt-0">
 					<div class="justify-end lg:flex">
 						<div class="lg:w-10/12 xl:w-3/4">
-							<h2 class="mb-5 text-center text-3xl font-semibold text-primary lg:text-left">
+							<h2
+								class="mb-5 text-center text-3xl font-semibold text-primary dark:text-white lg:text-left"
+							>
 								Shadowy Supertaggers
 							</h2>
-							<p class="mb-10 w-full text-center text-primary lg:text-left">
+							<p class="mb-10 w-full text-center text-primary dark:text-white lg:text-left">
 								Contribute changes directly to OSM - like a 😎 boss. Who needs forms anyway.
 							</p>
 							<img
@@ -575,6 +609,16 @@
 		<Footer />
 	</div>
 </div>
+
+{#if typeof window !== 'undefined'}
+	{#if detectTheme() === 'dark' || $theme === 'dark'}
+		<style>
+			select option {
+				@apply bg-gray-700;
+			}
+		</style>
+	{/if}
+{/if}
 
 <style>
 	@import 'leaflet/dist/leaflet.css';

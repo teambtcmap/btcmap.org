@@ -125,20 +125,20 @@
 	<OutClick excludeQuerySelectorAll={['#boost-button']} on:outclick={closeModal}>
 		<div
 			transition:fly={{ y: 200, duration: 300 }}
-			class="center z-[2000] max-h-[90vh] w-[90vw] overflow-auto rounded-xl border border-mapBorder bg-white p-6 shadow-2xl md:w-[430px]"
+			class="center z-[2000] max-h-[90vh] w-[90vw] overflow-auto rounded-xl border border-mapBorder bg-white p-6 shadow-2xl dark:bg-dark md:w-[430px]"
 		>
 			<CloseButton
 				position="flex justify-end"
 				click={closeModal}
-				colors="text-primary hover:text-link"
+				colors="text-primary dark:text-white dark:hover:text-white/80 hover:text-link"
 			/>
 
 			{#if stage === 0}
 				<div class="space-y-4">
 					<div>
-						<p class="mb-2 text-xl font-bold text-primary">Boost Location</p>
+						<p class="mb-2 text-xl font-bold text-primary dark:text-white">Boost Location</p>
 
-						<p class="text-sm text-body">
+						<p class="text-sm text-body dark:text-white">
 							Make this merchant stand out in bitcoin orange on the map, shine in the search
 							results, and be discovered in the exclusive boosted locations map!
 						</p>
@@ -151,7 +151,7 @@
 							{#if tooltip}
 								<div
 									transition:fade={{ delay: 0, duration: 100 }}
-									class="absolute -top-16 left-[26px] w-[52px] rounded-lg border border-mapBorder bg-white py-2 shadow-lg"
+									class="absolute -top-16 left-[26px] w-[52px] rounded-lg border border-mapBorder bg-white py-2 shadow-lg dark:bg-dark"
 								>
 									<Icon w="32" h="43" style="mx-auto" icon="boosted-icon-pin" type="popup" />
 									<Icon
@@ -184,7 +184,7 @@
 								class="relative w-full space-y-0.5 rounded-xl border-2 py-1 {selectedBoost &&
 								selectedBoost.time === value.time
 									? 'border-link text-link'
-									: 'border-mapBorder text-primary'} text-center transition-colors hover:border-link hover:text-link"
+									: 'border-mapBorder text-primary dark:text-white'} text-center transition-colors hover:border-link hover:text-link dark:hover:text-link"
 							>
 								{#if value.time === 3}
 									<img src="/icons/star.svg" alt="star" class="absolute top-1 right-1" />
@@ -197,12 +197,14 @@
 						{/each}
 					</div>
 
-					<p class="text-xs text-body">
+					<p class="text-xs text-body dark:text-white">
 						The fee is used to support the BTC Map open source project and continue it's
 						development.
 					</p>
 
-					<p class="text-xs text-body">*Fiat exchange rates may change during payment flow.</p>
+					<p class="text-xs text-body dark:text-white">
+						*Fiat exchange rates may change during payment flow.
+					</p>
 
 					<PrimaryButton
 						text={selectedBoost
@@ -216,7 +218,9 @@
 				</div>
 			{:else if stage === 1}
 				<div class="space-y-4 text-center">
-					<p class="text-xl font-bold text-primary">Scan or click to pay with lightning</p>
+					<p class="text-xl font-bold text-primary dark:text-white">
+						Scan or click to pay with lightning
+					</p>
 
 					<a href="lightning:{invoice}" class="inline-block">
 						<canvas
@@ -225,7 +229,7 @@
 						/>
 					</a>
 
-					<p class="text-body">
+					<p class="text-body dark:text-white">
 						Boost this location for <strong
 							>{selectedBoost.time} month{selectedBoost.time > 1 ? 's' : ''} <br />
 							${selectedBoost.fiat}</strong
@@ -236,9 +240,15 @@
 					<div
 						class="flex w-full items-center justify-between space-x-2 rounded-xl border-2 border-mapBorder p-2 md:justify-center"
 					>
-						<p class="hidden text-sm text-body md:block">{invoice.slice(0, 39)}...</p>
-						<p class="block text-sm uppercase text-body md:hidden">
-							Invoice <img src="/icons/ln-highlight.svg" alt="protocol" class="mb-1 inline" />
+						<p class="hidden text-sm text-body dark:text-white md:block">
+							{invoice.slice(0, 39)}...
+						</p>
+						<p class="block text-sm uppercase text-body dark:text-white md:hidden">
+							Invoice <img
+								src="/icons/ln-highlight.svg"
+								alt="protocol"
+								class="mb-1 inline dark:rounded-full dark:bg-white dark:p-0.5"
+							/>
 						</p>
 
 						<CopyButton value={invoice} />
@@ -260,14 +270,14 @@
 					{/if}
 
 					<p
-						class="text-xl font-bold text-primary {$boost.name.match('([^ ]{14})')
+						class="text-xl font-bold text-primary dark:text-white {$boost.name.match('([^ ]{14})')
 							? 'break-all'
 							: ''}"
 					>
 						Thank you for supporting {$boost.name ? $boost.name : 'this location'} & BTC Map!
 					</p>
 
-					<p class="text-body">
+					<p class="text-body dark:text-white">
 						This location will be boosted until <br />
 						<strong
 							>{selectedBoost.expires.toLocaleDateString(undefined, {
@@ -288,7 +298,7 @@
 						>Share on Twitter <Icon w="24" h="24" style="ml-2" icon="twitter" type="socials" /></a
 					>
 
-					<p class="text-sm text-body">
+					<p class="text-sm text-body dark:text-white">
 						Sharing your support may encourage <br /> others to show theirs 🥰
 					</p>
 				</div>

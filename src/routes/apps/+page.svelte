@@ -10,15 +10,17 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/apps.png" />
 </svelte:head>
 
-<div class="bg-teal">
+<div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		<main class="my-10 space-y-10 text-center md:my-20">
-			<h1 class="gradient text-4xl font-semibold !leading-tight text-primary md:text-5xl">
+			<h1
+				class="gradient text-4xl font-semibold !leading-tight text-primary dark:text-white md:text-5xl"
+			>
 				Find merchants on any platform.
 			</h1>
 
-			<h2 class="mx-auto w-full text-xl font-semibold text-primary lg:w-[800px]">
+			<h2 class="mx-auto w-full text-xl font-semibold text-primary dark:text-white lg:w-[800px]">
 				We have you covered on whatever device and OS you choose.
 			</h2>
 

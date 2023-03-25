@@ -74,22 +74,24 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/activity.png" />
 </svelte:head>
 
-<div class="bg-teal">
+<div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		<main class="mt-10 mb-20 space-y-10">
 			<h1
-				class="gradient text-center text-4xl font-semibold !leading-tight text-primary md:text-5xl lg:text-left"
+				class="gradient text-center text-4xl font-semibold !leading-tight text-primary dark:text-white md:text-5xl lg:text-left"
 			>
 				Activity
 			</h1>
 
-			<h2 class="w-full text-center text-xl font-semibold text-primary lg:w-[675px] lg:text-left">
+			<h2
+				class="w-full text-center text-xl font-semibold text-primary dark:text-white lg:w-[675px] lg:text-left"
+			>
 				Shadowy Supertaggers don’t sleep. They are up all night, tagging away. The world we want is
 				a tag away.
 			</h2>
 
-			<p class="text-center text-xl text-primary lg:text-left">
+			<p class="text-center text-xl text-primary dark:text-white lg:text-left">
 				You too can be a shadowy supertagging legend! What are you waiting for? <a
 					href="https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions#shadowy-supertaggers"
 					class="text-link transition-colors hover:text-hover">Get taggin’!</a
@@ -99,7 +101,7 @@
 			<section id="taggers">
 				<div class="w-full rounded-3xl border border-statBorder">
 					<h3
-						class="border-b border-statBorder p-5 text-center text-2xl font-semibold text-primary lg:text-left"
+						class="border-b border-statBorder p-5 text-center text-2xl font-semibold text-primary dark:text-white lg:text-left"
 					>
 						Latest Supertaggers
 					</h3>
@@ -124,7 +126,9 @@
 						{/if}
 					</div>
 				</div>
-				<p class="text-center text-sm text-body lg:text-left">*Data updated every 10 minutes</p>
+				<p class="text-center text-sm text-body dark:text-white lg:text-left">
+					*Data updated every 10 minutes
+				</p>
 				<div class="mt-10 flex justify-center">
 					<TopButton />
 				</div>

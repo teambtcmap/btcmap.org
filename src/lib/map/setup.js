@@ -2,7 +2,7 @@ import Time from 'svelte-time';
 import axios from 'axios';
 import { boost, exchangeRate, resetBoost, showTags, showMore } from '$lib/store';
 import { get } from 'svelte/store';
-import { errToast } from '$lib/utils';
+import { errToast, detectTheme } from '$lib/utils';
 import { InfoTooltip } from '$comp';
 
 export const layers = (leaflet, map) => {
@@ -97,6 +97,7 @@ export const attribution = (L, map) => {
 	OSMAttribution.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 	OSMAttribution.innerHTML =
 		'&copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" class="!text-link hover:!text-hover !no-underline transition-colors">OpenStreetMap</a> contributors';
+	OSMAttribution.classList.add('dark:!bg-dark', 'dark:!text-white');
 };
 
 export const support = () => {
@@ -108,18 +109,31 @@ export const support = () => {
 	supportAttribution.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 	supportAttribution.innerHTML =
 		'<a href="/support-us" class="!text-link hover:!text-hover !no-underline transition-colors" title="Support with sats">Support</a> BTC Map';
+	supportAttribution.classList.add('dark:!bg-dark', 'dark:!text-white');
 };
 
 export const scaleBars = (L, map) => {
+	const theme = detectTheme();
+
 	L.control.scale({ position: 'bottomleft' }).addTo(map);
+	const scaleBars = document.querySelectorAll('.leaflet-control-scale-line');
+	scaleBars.forEach((bar) => {
+		bar.classList.add('dark:!bg-dark', 'dark:!text-white');
+		if (theme === 'dark') {
+			bar.style.textShadow = 'none';
+		}
+	});
 };
 
 export const changeDefaultIcons = (layers, L, mapElement, DomEvent) => {
+	const theme = detectTheme();
+
 	if (layers) {
 		const layers = document.querySelector('.leaflet-control-layers');
 		layers.style.border = 'none';
 		layers.style.borderRadius = '8px';
 		layers.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+		layers.classList.add('dark:!bg-dark', 'dark:!text-white');
 	}
 
 	const leafletBar = document.querySelector('.leaflet-bar');
@@ -128,22 +142,32 @@ export const changeDefaultIcons = (layers, L, mapElement, DomEvent) => {
 
 	const zoomIn = document.querySelector('.leaflet-control-zoom-in');
 	zoomIn.style.borderRadius = '8px 8px 0 0';
-	zoomIn.innerHTML = `<img src='/icons/plus.svg' alt='zoomin' class='inline' id='zoomin'/>`;
-	zoomIn.onmouseenter = () => {
-		document.querySelector('#zoomin').src = '/icons/plus-black.svg';
-	};
-	zoomIn.onmouseleave = () => {
-		document.querySelector('#zoomin').src = '/icons/plus.svg';
-	};
+	zoomIn.innerHTML = `<img src=${
+		theme === 'dark' ? '/icons/plus-white.svg' : '/icons/plus.svg'
+	} alt='zoomin' class='inline' id='zoomin'/>`;
+	if (theme === 'light') {
+		zoomIn.onmouseenter = () => {
+			document.querySelector('#zoomin').src = '/icons/plus-black.svg';
+		};
+		zoomIn.onmouseleave = () => {
+			document.querySelector('#zoomin').src = '/icons/plus.svg';
+		};
+	}
+	zoomIn.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/90');
 
 	const zoomOut = document.querySelector('.leaflet-control-zoom-out');
-	zoomOut.innerHTML = `<img src='/icons/minus.svg' alt='zoomout' class='inline' id='zoomout'/>`;
-	zoomOut.onmouseenter = () => {
-		document.querySelector('#zoomout').src = '/icons/minus-black.svg';
-	};
-	zoomOut.onmouseleave = () => {
-		document.querySelector('#zoomout').src = '/icons/minus.svg';
-	};
+	zoomOut.innerHTML = `<img src=${
+		theme === 'dark' ? '/icons/minus-white.svg' : '/icons/minus.svg'
+	} alt='zoomout' class='inline' id='zoomout'/>`;
+	if (theme === 'light') {
+		zoomOut.onmouseenter = () => {
+			document.querySelector('#zoomout').src = '/icons/minus-black.svg';
+		};
+		zoomOut.onmouseleave = () => {
+			document.querySelector('#zoomout').src = '/icons/minus.svg';
+		};
+	}
+	zoomOut.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/90');
 
 	const fullscreenButton = L.DomUtil.create('a');
 	fullscreenButton.classList.add('leaflet-control-full-screen');
@@ -152,7 +176,9 @@ export const changeDefaultIcons = (layers, L, mapElement, DomEvent) => {
 	fullscreenButton.role = 'button';
 	fullscreenButton.ariaLabel = 'Full screen';
 	fullscreenButton.ariaDisabled = 'false';
-	fullscreenButton.innerHTML = `<img src='/icons/expand.svg' alt='fullscreen' class='inline' id='fullscreen'/>`;
+	fullscreenButton.innerHTML = `<img src=${
+		theme === 'dark' ? '/icons/expand-white.svg' : '/icons/expand.svg'
+	} alt='fullscreen' class='inline' id='fullscreen'/>`;
 	fullscreenButton.style.borderRadius = '0 0 8px 8px';
 	fullscreenButton.onclick = function toggleFullscreen() {
 		if (!document.fullscreenElement) {
@@ -163,12 +189,15 @@ export const changeDefaultIcons = (layers, L, mapElement, DomEvent) => {
 			document.exitFullscreen();
 		}
 	};
-	fullscreenButton.onmouseenter = () => {
-		document.querySelector('#fullscreen').src = '/icons/expand-black.svg';
-	};
-	fullscreenButton.onmouseleave = () => {
-		document.querySelector('#fullscreen').src = '/icons/expand.svg';
-	};
+	if (theme === 'light') {
+		fullscreenButton.onmouseenter = () => {
+			document.querySelector('#fullscreen').src = '/icons/expand-black.svg';
+		};
+		fullscreenButton.onmouseleave = () => {
+			document.querySelector('#fullscreen').src = '/icons/expand.svg';
+		};
+	}
+	fullscreenButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/90');
 
 	leafletBar.append(fullscreenButton);
 
@@ -176,10 +205,12 @@ export const changeDefaultIcons = (layers, L, mapElement, DomEvent) => {
 };
 
 export const geolocate = (L, map) => {
+	const theme = detectTheme();
+
 	L.control.locate({ position: 'topleft' }).addTo(map);
 
 	const newLocateIcon = L.DomUtil.create('img');
-	newLocateIcon.src = '/icons/locate.svg';
+	newLocateIcon.src = theme === 'dark' ? '/icons/locate-white.svg' : '/icons/locate.svg';
 	newLocateIcon.alt = 'locate';
 	newLocateIcon.classList.add('inline');
 	newLocateIcon.id = 'locatebutton';
@@ -191,15 +222,20 @@ export const geolocate = (L, map) => {
 
 	const locateButton = document.querySelector('.leaflet-bar-part.leaflet-bar-part-single');
 	locateButton.style.borderRadius = '8px';
-	locateButton.onmouseenter = () => {
-		document.querySelector('#locatebutton').src = '/icons/locate-black.svg';
-	};
-	locateButton.onmouseleave = () => {
-		document.querySelector('#locatebutton').src = '/icons/locate.svg';
-	};
+	if (theme === 'light') {
+		locateButton.onmouseenter = () => {
+			document.querySelector('#locatebutton').src = '/icons/locate-black.svg';
+		};
+		locateButton.onmouseleave = () => {
+			document.querySelector('#locatebutton').src = '/icons/locate.svg';
+		};
+	}
+	locateButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/90');
 };
 
 export const homeMarkerButtons = (L, map, DomEvent) => {
+	const theme = detectTheme();
+
 	const customControls = L.Control.extend({
 		options: {
 			position: 'topleft'
@@ -217,14 +253,19 @@ export const homeMarkerButtons = (L, map, DomEvent) => {
 			addHomeButton.role = 'button';
 			addHomeButton.ariaLabel = 'Go to home page';
 			addHomeButton.ariaDisabled = 'false';
-			addHomeButton.innerHTML = `<img src='/icons/home.svg' alt='home' class='inline' id='homebutton'/>`;
+			addHomeButton.innerHTML = `<img src=${
+				theme === 'dark' ? '/icons/home-white.svg' : '/icons/home.svg'
+			} alt='home' class='inline' id='homebutton'/>`;
 			addHomeButton.style.borderRadius = '8px 8px 0 0';
-			addHomeButton.onmouseenter = () => {
-				document.querySelector('#homebutton').src = '/icons/home-black.svg';
-			};
-			addHomeButton.onmouseleave = () => {
-				document.querySelector('#homebutton').src = '/icons/home.svg';
-			};
+			if (theme === 'light') {
+				addHomeButton.onmouseenter = () => {
+					document.querySelector('#homebutton').src = '/icons/home-black.svg';
+				};
+				addHomeButton.onmouseleave = () => {
+					document.querySelector('#homebutton').src = '/icons/home.svg';
+				};
+			}
+			addHomeButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/90');
 
 			addControlDiv.append(addHomeButton);
 
@@ -235,14 +276,19 @@ export const homeMarkerButtons = (L, map, DomEvent) => {
 			addLocationButton.role = 'button';
 			addLocationButton.ariaLabel = 'Add location';
 			addLocationButton.ariaDisabled = 'false';
-			addLocationButton.innerHTML = `<img src='/icons/marker.svg' alt='marker' class='inline' id='marker'/>`;
+			addLocationButton.innerHTML = `<img src=${
+				theme === 'dark' ? '/icons/marker-white.svg' : '/icons/marker.svg'
+			} alt='marker' class='inline' id='marker'/>`;
 			addLocationButton.style.borderRadius = '0 0 8px 8px';
-			addLocationButton.onmouseenter = () => {
-				document.querySelector('#marker').src = '/icons/marker-black.svg';
-			};
-			addLocationButton.onmouseleave = () => {
-				document.querySelector('#marker').src = '/icons/marker.svg';
-			};
+			if (theme === 'light') {
+				addLocationButton.onmouseenter = () => {
+					document.querySelector('#marker').src = '/icons/marker-black.svg';
+				};
+				addLocationButton.onmouseleave = () => {
+					document.querySelector('#marker').src = '/icons/marker.svg';
+				};
+			}
+			addLocationButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/90');
 
 			addControlDiv.append(addLocationButton);
 
@@ -255,6 +301,8 @@ export const homeMarkerButtons = (L, map, DomEvent) => {
 };
 
 export const dataRefresh = (L, map, DomEvent) => {
+	const theme = detectTheme();
+
 	const customDataRefreshButton = L.Control.extend({
 		options: {
 			position: 'topleft'
@@ -273,17 +321,22 @@ export const dataRefresh = (L, map, DomEvent) => {
 			dataRefreshButton.role = 'button';
 			dataRefreshButton.ariaLabel = 'Data refresh available';
 			dataRefreshButton.ariaDisabled = 'false';
-			dataRefreshButton.innerHTML = `<img src='/icons/refresh.svg' alt='refresh' class='inline' id='refresh'/>`;
+			dataRefreshButton.innerHTML = `<img src=${
+				theme === 'dark' ? '/icons/refresh-white.svg' : '/icons/refresh.svg'
+			} alt='refresh' class='inline' id='refresh'/>`;
 			dataRefreshButton.style.borderRadius = '8px';
 			dataRefreshButton.onclick = () => {
 				location.reload();
 			};
-			dataRefreshButton.onmouseenter = () => {
-				document.querySelector('#refresh').src = '/icons/refresh-black.svg';
-			};
-			dataRefreshButton.onmouseleave = () => {
-				document.querySelector('#refresh').src = '/icons/refresh.svg';
-			};
+			if (theme === 'light') {
+				dataRefreshButton.onmouseenter = () => {
+					document.querySelector('#refresh').src = '/icons/refresh-black.svg';
+				};
+				dataRefreshButton.onmouseleave = () => {
+					document.querySelector('#refresh').src = '/icons/refresh.svg';
+				};
+			}
+			dataRefreshButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/90');
 
 			dataRefreshDiv.append(dataRefreshButton);
 
@@ -376,6 +429,8 @@ export const generateMarker = (
 	boosted
 ) => {
 	const generatePopup = () => {
+		const theme = detectTheme();
+
 		const description =
 			element.tags && element.tags.description ? element.tags.description : undefined;
 
@@ -391,29 +446,29 @@ export const generateMarker = (
 
 		popupContainer.innerHTML = `${
 			element.tags && element.tags.name
-				? `<span class='block font-bold text-lg text-primary leading-snug max-w-[300px]' title='Merchant name'>${
+				? `<span class='block font-bold text-lg text-primary dark:text-white leading-snug max-w-[300px]' title='Merchant name'>${
 						element.tags.name
 				  } ${description ? `<span id='description' title='Description'></span>` : ''}</span>`
 				: ''
 		}
 
-				 <span class='block text-body max-w-[300px]' title='Address'>${
+				 <span class='block text-body dark:text-white max-w-[300px]' title='Address'>${
 						element.tags && checkAddress(element.tags)
 					}</span>
 
 			${
 				element.tags && element.tags['opening_hours']
 					? `<div class='my-1 w-full max-w-[300px]' title='Opening hours'>
-		  				<svg width='16px' height='16px' class='inline'>
+		  				<svg width='16px' height='16px' class='inline text-primary dark:text-white'>
 	  						<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#clock"></use>
 				 	 		</svg>
-			     		<span class='text-body'>${element.tags['opening_hours']}</span>
+			     		<span class='text-body dark:text-white'>${element.tags['opening_hours']}</span>
 	  			 	 </div>`
 					: ''
 			}
 
 					<div class='flex space-x-2 mt-2.5 mb-1'>
-						<a id='navigate' href='geo:${lat},${long}' class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-full transition-colors'>
+						<a id='navigate' href='geo:${lat},${long}' class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
 								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#compass"></use>
 							</svg>
@@ -422,14 +477,14 @@ export const generateMarker = (
 
 						<a id='edit' href='https://www.openstreetmap.org/edit?${element.type}=${
 			element.id
-		}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-full transition-colors'>
+		}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
 								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#pencil"></use>
 							</svg>
 							<span class='block text-xs text-center mt-1'>Edit</span>
 						</a>
 
-						<a id='share' href='/map?lat=${lat}&long=${long}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-full transition-colors'>
+						<a id='share' href='/map?lat=${lat}&long=${long}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
 								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#share"></use>
 							</svg>
@@ -437,14 +492,14 @@ export const generateMarker = (
 						</a>
 
 						<div class='relative w-full'>
-							<button id='more-button' class='border border-mapBorder hover:border-link !text-primary hover:!text-link rounded-lg py-1 w-full transition-colors'>
+							<button id='more-button' class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 								<svg width='24px' height='24px' class='mx-auto'>
 									<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#dots-horizontal"></use>
 								</svg>
 								<span class='block text-xs text-center mt-1'>More</span>
 							</button>
 
-							<div id='show-more' class='hidden z-[500] w-[147px] border border-mapBorder p-4 absolute top-[55px] right-0 bg-white rounded-xl shadow-xl space-y-3'>
+							<div id='show-more' class='hidden z-[500] w-[147px] border border-mapBorder p-4 absolute top-[55px] right-0 bg-white dark:bg-dark rounded-xl shadow-xl space-y-3'>
 							${
 								payment
 									? `<a href="${
@@ -455,7 +510,7 @@ export const generateMarker = (
 												: payment.type === 'coinos'
 												? `https://coinos.io/${payment.username}`
 												: '#'
-									  }" target="_blank" rel="noreferrer" class='flex items-center !text-primary hover:!text-link text-xs transition-colors'>
+									  }" target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
 												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#bolt"></use>
 											</svg>
@@ -466,7 +521,7 @@ export const generateMarker = (
 
 							${
 								element.tags && element.tags.phone
-									? `<a href='tel:${element.tags.phone}' class='flex items-center !text-primary hover:!text-link text-xs  transition-colors'>
+									? `<a href='tel:${element.tags.phone}' class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs  transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
 												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#phone"></use>
 											</svg>
@@ -481,7 +536,7 @@ export const generateMarker = (
 											element.tags.website.startsWith('http')
 												? element.tags.website
 												: `https://${element.tags.website}`
-									  } target="_blank" rel="noreferrer" class='flex items-center !text-primary hover:!text-link text-xs  transition-colors'>
+									  } target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs  transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
 												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#globe"></use>
 											</svg>
@@ -496,7 +551,7 @@ export const generateMarker = (
 											element.tags['contact:twitter'].startsWith('http')
 												? element.tags['contact:twitter']
 												: `https://twitter.com/${element.tags['contact:twitter']}`
-									  } target="_blank" rel="noreferrer" class='flex items-center !text-primary hover:!text-link text-xs  transition-colors'>
+									  } target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs  transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
 												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#twitter"></use>
 											</svg>
@@ -509,7 +564,7 @@ export const generateMarker = (
 								element.tags && location.pathname === '/map'
 									? `<button
 														id='show-tags'
-														class='flex items-center !text-primary hover:!text-link text-xs transition-colors'>
+														class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 															<svg width='24px' height='24px' class='mr-2'>
 																<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#tags"></use>
 															</svg>
@@ -522,7 +577,7 @@ export const generateMarker = (
 								href="https://github.com/teambtcmap/btcmap-data/wiki/Map-Legend"
 								target="_blank"
 								rel="noreferrer"
-								class='flex items-center !text-primary hover:!text-link text-xs transition-colors'>
+								class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 									<svg width='24px' height='24px' class='mr-2'>
 										<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#info-circle"></use>
 									</svg>
@@ -533,7 +588,7 @@ export const generateMarker = (
 						href="https://www.openstreetmap.org/${element.type}/${element.id}"
 						target="_blank"
 						rel="noreferrer"
-						class='flex items-center !text-primary hover:!text-link text-xs transition-colors'>
+						class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 							<svg width='24px' height='24px' class='mr-2'>
 								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#external"></use>
 							</svg>
@@ -554,9 +609,15 @@ ${
 					<div class='w-full flex space-x-2 mt-0.5'>
 						<img src=${
 							element.tags && element.tags['payment:onchain'] === 'yes'
-								? '/icons/btc-highlight.svg'
+								? theme === 'dark'
+									? '/icons/btc-highlight-dark.svg'
+									: '/icons/btc-highlight.svg'
 								: element.tags && element.tags['payment:onchain'] === 'no'
-								? '/icons/btc-no.svg'
+								? theme === 'dark'
+									? '/icons/btc-no-dark.svg'
+									: '/icons/btc-no.svg'
+								: theme === 'dark'
+								? '/icons/btc-dark.svg'
 								: '/icons/btc.svg'
 						} alt="bitcoin" class="w-6 h-6" title="${
 				element.tags && element.tags['payment:onchain'] === 'yes'
@@ -568,9 +629,15 @@ ${
 
 						<img src=${
 							element.tags && element.tags['payment:lightning'] === 'yes'
-								? '/icons/ln-highlight.svg'
+								? theme === 'dark'
+									? '/icons/ln-highlight-dark.svg'
+									: '/icons/ln-highlight.svg'
 								: element.tags && element.tags['payment:lightning'] === 'no'
-								? '/icons/ln-no.svg'
+								? theme === 'dark'
+									? '/icons/ln-no-dark.svg'
+									: '/icons/ln-no.svg'
+								: theme === 'dark'
+								? '/icons/ln-dark.svg'
 								: '/icons/ln.svg'
 						} alt="lightning" class="w-6 h-6" title="${
 				element.tags && element.tags['payment:lightning'] === 'yes'
@@ -582,9 +649,15 @@ ${
 
 						<img src=${
 							element.tags && element.tags['payment:lightning_contactless'] === 'yes'
-								? '/icons/nfc-highlight.svg'
+								? theme === 'dark'
+									? '/icons/nfc-highlight-dark.svg'
+									: '/icons/nfc-highlight.svg'
 								: element.tags && element.tags['payment:lightning_contactless'] === 'no'
-								? '/icons/nfc-no.svg'
+								? theme === 'dark'
+									? '/icons/nfc-no-dark.svg'
+									: '/icons/nfc-no.svg'
+								: theme === 'dark'
+								? '/icons/nfc-dark.svg'
 								: '/icons/nfc.svg'
 						} alt="nfc" class="w-6 h-6" title="${
 				element.tags && element.tags['payment:lightning_contactless'] === 'yes'
@@ -600,12 +673,12 @@ ${
 
 				<div>
 					<span class='block text-mapLabel text-xs' title="Completed by BTC Map community members">Last Surveyed</span>
-					<span class='block text-body'>
+					<span class='block text-body dark:text-white'>
 					${
 						verified.length
 							? `${verified[0]} ${
 									Date.parse(verified[0]) > verifiedDate
-										? `<span title="Verified within the last year"><svg width='16px' height='16px' class='inline'>
+										? `<span title="Verified within the last year"><svg width='16px' height='16px' class='inline text-primary dark:text-white'>
 												<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#verified"></use>
 											</svg></span>`
 										: ''
@@ -630,12 +703,12 @@ ${
 					${
 						boosted
 							? `<span class='block text-mapLabel text-xs' title="This location is boosted!">Boost Expires</span>
-					<span class='block text-body' id='boosted-time'></span>`
+					<span class='block text-body dark:text-white' id='boosted-time'></span>`
 							: ''
 					}
 					${
 						location.pathname === '/map'
-							? `<button title='Boost' id='boost-button' class='flex justify-center items-center space-x-2 text-primary hover:text-link border border-mapBorder hover:border-link rounded-lg px-3 h-[32px] transition-colors'>
+							? `<button title='Boost' id='boost-button' class='flex justify-center items-center space-x-2 text-primary dark:text-white hover:text-link dark:hover:text-link border border-mapBorder hover:border-link rounded-lg px-3 h-[32px] transition-colors'>
 						<svg width='16px' height='16px'>
 							<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#boost"></use>
 						</svg>
@@ -644,7 +717,19 @@ ${
 							: ''
 					}
 				</div>
-			</div>`;
+			</div>
+			
+			${
+				theme === 'dark'
+					? `
+			<style>
+				.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+					background-color: #06171C;
+			}
+			</style>`
+					: ''
+			}
+			`;
 
 		if (description) {
 			const descriptionContainer = popupContainer.querySelector('#description');
@@ -661,7 +746,8 @@ ${
 
 		const hideMore = () => {
 			showMoreDiv.classList.add('hidden');
-			moreButton.classList.replace('!text-link', '!text-primary');
+			moreButton.classList.remove('!text-link');
+			moreButton.classList.add('!text-primary', 'dark:!text-white');
 			moreButton.classList.replace('border-link', 'border-mapBorder');
 			showMore.set(false);
 		};
@@ -669,7 +755,8 @@ ${
 		moreButton.onclick = () => {
 			if (!get(showMore)) {
 				showMoreDiv.classList.remove('hidden');
-				moreButton.classList.replace('!text-primary', '!text-link');
+				moreButton.classList.remove('!text-primary', 'dark:!text-white');
+				moreButton.classList.add('!text-link');
 				moreButton.classList.replace('border-mapBorder', 'border-link');
 				showMore.set(true);
 			} else {
@@ -760,7 +847,8 @@ ${
 					const moreButton = document.querySelector('#more-button');
 
 					showMoreDiv.classList.add('hidden');
-					moreButton.classList.replace('!text-link', '!text-primary');
+					moreButton.classList.remove('!text-link');
+					moreButton.classList.add('!text-primary', 'dark:!text-white');
 					moreButton.classList.replace('border-link', 'border-mapBorder');
 					showMore.set(false);
 

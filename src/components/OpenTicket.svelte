@@ -25,7 +25,7 @@
 					href={url}
 					target="_blank"
 					rel="noreferrer"
-					class="mr-1 text-lg font-semibold text-primary transition-colors hover:text-link"
+					class="mr-1 text-lg font-semibold text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
 					>{name}</a
 				>
 
@@ -36,7 +36,7 @@
 				</span>
 			</p>
 
-			<p class="text-body">
+			<p class="text-body dark:text-white">
 				#{id} opened <Time live={3000} relative timestamp={created} />
 				<br class="block md:hidden" />
 				by
@@ -66,7 +66,7 @@
 
 		<div class="items-center md:flex">
 			<i class="fa-solid fa-comment text-link md:mr-1" />
-			<strong class="text-primary">{comments}</strong>
+			<strong class="text-primary dark:text-white">{comments}</strong>
 		</div>
 	</div>
 </div>

@@ -7,7 +7,7 @@
 	import Chart from 'chart.js/auto';
 	import { browser } from '$app/environment';
 	import { onMount, onDestroy } from 'svelte';
-	import { users, events, elements, areas, reports } from '$lib/store';
+	import { users, events, elements, areas, reports, theme } from '$lib/store';
 	import {
 		layers,
 		attribution,
@@ -33,6 +33,7 @@
 		OrgBadge,
 		Icon
 	} from '$comp';
+	import { detectTheme } from '$lib/utils';
 
 	let community = $areas.find(
 		(area) =>
@@ -248,6 +249,8 @@
 	);
 
 	const populateCharts = () => {
+		const theme = detectTheme();
+
 		updatedChart = new Chart(updatedChartCanvas, {
 			type: 'pie',
 			data: {
@@ -312,6 +315,9 @@
 							font: {
 								weight: 600
 							}
+						},
+						grid: {
+							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					},
 					y: {
@@ -322,6 +328,9 @@
 							font: {
 								weight: 600
 							}
+						},
+						grid: {
+							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					}
 				}
@@ -363,6 +372,9 @@
 							font: {
 								weight: 600
 							}
+						},
+						grid: {
+							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					},
 					y: {
@@ -373,6 +385,9 @@
 							font: {
 								weight: 600
 							}
+						},
+						grid: {
+							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					}
 				}
@@ -414,6 +429,9 @@
 							font: {
 								weight: 600
 							}
+						},
+						grid: {
+							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					},
 					y: {
@@ -424,6 +442,9 @@
 							font: {
 								weight: 600
 							}
+						},
+						grid: {
+							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					}
 				}
@@ -483,6 +504,9 @@
 							font: {
 								weight: 600
 							}
+						},
+						grid: {
+							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					},
 					y: {
@@ -493,6 +517,9 @@
 							font: {
 								weight: 600
 							}
+						},
+						grid: {
+							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					}
 				}
@@ -501,6 +528,38 @@
 
 		chartsLoading = false;
 	};
+
+	const updateChartThemes = () => {
+		if ($theme === 'dark') {
+			upToDateChart.options.scales.x.grid.color = 'rgba(255, 255, 255, 0.15)';
+			upToDateChart.options.scales.y.grid.color = 'rgba(255, 255, 255, 0.15)';
+			totalChart.options.scales.x.grid.color = 'rgba(255, 255, 255, 0.15)';
+			totalChart.options.scales.y.grid.color = 'rgba(255, 255, 255, 0.15)';
+			legacyChart.options.scales.x.grid.color = 'rgba(255, 255, 255, 0.15)';
+			legacyChart.options.scales.y.grid.color = 'rgba(255, 255, 255, 0.15)';
+			paymentMethodChart.options.scales.x.grid.color = 'rgba(255, 255, 255, 0.15)';
+			paymentMethodChart.options.scales.y.grid.color = 'rgba(255, 255, 255, 0.15)';
+			upToDateChart.update();
+			totalChart.update();
+			legacyChart.update();
+			paymentMethodChart.update();
+		} else {
+			upToDateChart.options.scales.x.grid.color = 'rgba(0, 0, 0, 0.1)';
+			upToDateChart.options.scales.y.grid.color = 'rgba(0, 0, 0, 0.1)';
+			totalChart.options.scales.x.grid.color = 'rgba(0, 0, 0, 0.1)';
+			totalChart.options.scales.y.grid.color = 'rgba(0, 0, 0, 0.1)';
+			legacyChart.options.scales.x.grid.color = 'rgba(0, 0, 0, 0.1)';
+			legacyChart.options.scales.y.grid.color = 'rgba(0, 0, 0, 0.1)';
+			paymentMethodChart.options.scales.x.grid.color = 'rgba(0, 0, 0, 0.1)';
+			paymentMethodChart.options.scales.y.grid.color = 'rgba(0, 0, 0, 0.1)';
+			upToDateChart.update();
+			totalChart.update();
+			legacyChart.update();
+			paymentMethodChart.update();
+		}
+	};
+
+	$: $theme !== undefined && chartsLoading === false && updateChartThemes();
 
 	onMount(async () => {
 		if (browser) {
@@ -646,7 +705,7 @@
 	{/if}
 </svelte:head>
 
-<div class="bg-teal">
+<div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		<main class="my-10 space-y-16 text-center md:my-20">
@@ -658,7 +717,7 @@
 						class="mx-auto h-32 w-32 rounded-full object-cover"
 						onerror="this.src='/images/communities/bitcoin.svg'"
 					/>
-					<h1 class="text-4xl font-semibold !leading-tight text-primary">
+					<h1 class="text-4xl font-semibold !leading-tight text-primary dark:text-white">
 						{name}
 					</h1>
 					{#if org}
@@ -667,7 +726,7 @@
 					{#if sponsor}
 						<SponsorBadge />
 					{/if}
-					<h2 class="text-xl uppercase text-primary">
+					<h2 class="text-xl uppercase text-primary dark:text-white">
 						{continent.replace('-', ' ')}
 						<i
 							class="fa-solid fa-earth-{continent === 'africa'
@@ -815,7 +874,7 @@
 
 			<section id="map-section">
 				<h3
-					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left"
+					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
 				>
 					{name} Map
 					<div class="space-x-1 text-link">
@@ -836,7 +895,7 @@
 				<div class="relative">
 					<div
 						bind:this={mapElement}
-						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal text-left md:h-[600px]"
+						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal text-left dark:!bg-dark md:h-[600px]"
 					/>
 					{#if !mapLoaded}
 						<MapLoading
@@ -893,7 +952,9 @@
 
 			<section id="taggers">
 				<div class="w-full rounded-3xl border border-statBorder">
-					<h3 class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary">
+					<h3
+						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white"
+					>
 						{name} Supertaggers
 					</h3>
 					<div
@@ -911,7 +972,7 @@
 											class="mx-auto h-20 w-20 rounded-full object-cover"
 											onerror="this.src='/images/satoshi-nakamoto.png'"
 										/>
-										<p class="text-center font-semibold text-body">
+										<p class="text-center font-semibold text-body dark:text-white">
 											{tagger.osm_json.display_name.length > 21
 												? tagger.osm_json.display_name.slice(0, 18) + '...'
 												: tagger.osm_json.display_name}
@@ -920,7 +981,7 @@
 								</div>
 							{/each}
 						{:else if !communityEvents.length}
-							<p class="p-5 text-body">No supertaggers to display.</p>
+							<p class="p-5 text-body dark:text-white">No supertaggers to display.</p>
 						{:else}
 							{#each Array(5) as tagger}
 								<div class="m-4 space-y-1 transition-transform hover:scale-110">
@@ -936,7 +997,7 @@
 			<section id="activity">
 				<div class="w-full rounded-3xl border border-statBorder">
 					<h3
-						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left"
+						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
 					>
 						{name} Activity
 					</h3>
@@ -974,7 +1035,7 @@
 
 							{#if !hideArrow && eventElements.length > 5}
 								<svg
-									class="absolute bottom-4 left-[calc(50%-8px)] z-20 h-4 w-4 animate-bounce text-primary"
+									class="absolute bottom-4 left-[calc(50%-8px)] z-20 h-4 w-4 animate-bounce text-primary dark:text-white"
 									fill="currentColor"
 									xmlns="http://www.w3.org/2000/svg"
 									viewBox="0 0 512 512"
@@ -984,7 +1045,7 @@
 								>
 							{/if}
 						{:else if !communityEvents.length}
-							<p class="p-5 text-body">No activity to display.</p>
+							<p class="p-5 text-body dark:text-white">No activity to display.</p>
 						{:else}
 							{#each Array(5) as skeleton}
 								<TaggerSkeleton />
@@ -997,7 +1058,7 @@
 			<section id="charts" class="space-y-10">
 				<div class="w-full rounded-3xl border border-statBorder">
 					<h3
-						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left"
+						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
 					>
 						{name} Charts
 					</h3>
@@ -1010,7 +1071,7 @@
 							{/if}
 							<canvas bind:this={upToDateChartCanvas} width="400" height="400" />
 						</div>
-						<p class="mt-1 text-center text-sm text-body">
+						<p class="mt-1 text-center text-sm text-body dark:text-white">
 							*Locations with a <em>survey:date</em>, <em>check_date</em>, or
 							<em>check_date:currency:XBT</em> tag less than one year old.
 						</p>
@@ -1025,7 +1086,7 @@
 							{/if}
 							<canvas bind:this={totalChartCanvas} width="400" height="400" />
 						</div>
-						<p class="mt-1 text-center text-sm text-body">
+						<p class="mt-1 text-center text-sm text-body dark:text-white">
 							*Locations accepting any bitcoin payment method.
 						</p>
 					</div>
@@ -1039,7 +1100,7 @@
 							{/if}
 							<canvas bind:this={legacyChartCanvas} width="400" height="400" />
 						</div>
-						<p class="mt-1 text-center text-sm text-body">
+						<p class="mt-1 text-center text-sm text-body dark:text-white">
 							*Locations with a <em>payment:bitcoin</em> tag instead of the
 							<em>currency:XBT</em> tag.
 						</p>
@@ -1054,7 +1115,7 @@
 							{/if}
 							<canvas bind:this={paymentMethodChartCanvas} width="400" height="400" />
 						</div>
-						<p class="mt-1 text-center text-sm text-body">
+						<p class="mt-1 text-center text-sm text-body dark:text-white">
 							*Locations with <em>payment:onchain</em>, <em>payment:lightning</em> and
 							<em>payment:lightning_contactless</em> tags.
 						</p>
@@ -1062,7 +1123,7 @@
 				</div>
 			</section>
 
-			<p class="text-center text-sm text-body md:text-left">
+			<p class="text-center text-sm text-body dark:text-white md:text-left">
 				*More information on bitcoin mapping tags can be found <a
 					href="https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions#tagging-guidance"
 					target="_blank"

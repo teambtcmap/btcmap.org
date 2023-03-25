@@ -366,7 +366,7 @@
 	{/if}
 </svelte:head>
 
-<div class="bg-teal">
+<div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		<main class="my-10 text-center md:my-20">
@@ -379,7 +379,7 @@
 				/>
 
 				<div>
-					<h1 class="text-4xl font-semibold !leading-tight text-primary">
+					<h1 class="text-4xl font-semibold !leading-tight text-primary dark:text-white">
 						{username}
 					</h1>
 					<a
@@ -426,7 +426,7 @@
 									alt={badge.title}
 									class="mx-auto mb-1 h-20 w-20"
 								/>
-								<p class="text-center text-xs">{badge.title}</p>
+								<p class="text-center text-xs dark:text-white">{badge.title}</p>
 							</div>
 						</a>
 					{/each}
@@ -464,7 +464,7 @@
 			<section id="activity" class="my-16">
 				<div class="w-full rounded-3xl border border-statBorder">
 					<h3
-						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left"
+						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
 					>
 						{username}'s Activity
 					</h3>
@@ -503,7 +503,7 @@
 
 							{#if !hideArrow && eventElements.length > 5}
 								<svg
-									class="absolute bottom-4 left-[calc(50%-8px)] z-20 h-4 w-4 animate-bounce text-primary"
+									class="absolute bottom-4 left-[calc(50%-8px)] z-20 h-4 w-4 animate-bounce text-primary dark:text-white"
 									fill="currentColor"
 									xmlns="http://www.w3.org/2000/svg"
 									viewBox="0 0 512 512"
@@ -523,7 +523,7 @@
 
 			<section id="map-section">
 				<h3
-					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left"
+					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
 				>
 					{username}'s Map
 				</h3>
@@ -531,7 +531,7 @@
 				<div class="relative mb-2">
 					<div
 						bind:this={mapElement}
-						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal md:h-[600px]"
+						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal dark:!bg-dark md:h-[600px]"
 					/>
 					{#if !mapLoaded}
 						<MapLoading

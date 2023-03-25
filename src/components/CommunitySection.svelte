@@ -6,7 +6,7 @@
 </script>
 
 <section id={title}>
-	<h2 class="mb-5 text-3xl font-semibold text-primary md:text-left">
+	<h2 class="mb-5 text-3xl font-semibold text-primary dark:text-white md:text-left">
 		<a href="/communities#{title}">{title}</a>
 	</h2>
 

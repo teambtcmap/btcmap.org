@@ -10,9 +10,10 @@
 		areaError,
 		reports,
 		reportError,
-		syncStatus
+		syncStatus,
+		theme
 	} from '$lib/store';
-	import { errToast } from '$lib/utils';
+	import { errToast, detectTheme } from '$lib/utils';
 
 	// alert for event errors
 	$: $eventError && errToast($eventError);
@@ -173,6 +174,8 @@
 	let paymentMethodChart;
 
 	const populateCharts = () => {
+		const theme = detectTheme();
+
 		upToDateChart = new Chart(upToDateChartCanvas, {
 			type: 'line',
 			data: {
@@ -208,6 +211,9 @@
 							font: {
 								weight: 600
 							}
+						},
+						grid: {
+							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					},
 					y: {
@@ -215,6 +221,9 @@
 							font: {
 								weight: 600
 							}
+						},
+						grid: {
+							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					}
 				}
@@ -256,6 +265,9 @@
 							font: {
 								weight: 600
 							}
+						},
+						grid: {
+							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					},
 					y: {
@@ -263,6 +275,9 @@
 							font: {
 								weight: 600
 							}
+						},
+						grid: {
+							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					}
 				}
@@ -304,6 +319,9 @@
 							font: {
 								weight: 600
 							}
+						},
+						grid: {
+							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					},
 					y: {
@@ -311,6 +329,9 @@
 							font: {
 								weight: 600
 							}
+						},
+						grid: {
+							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					}
 				}
@@ -368,6 +389,9 @@
 							font: {
 								weight: 600
 							}
+						},
+						grid: {
+							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					},
 					y: {
@@ -375,6 +399,9 @@
 							font: {
 								weight: 600
 							}
+						},
+						grid: {
+							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					}
 				}
@@ -430,6 +457,41 @@
 
 	$: chartSync($syncStatus, $reports);
 
+	const updateChartThemes = () => {
+		if ($theme === 'dark') {
+			upToDateChart.options.scales.x.grid.color = 'rgba(255, 255, 255, 0.15)';
+			upToDateChart.options.scales.y.grid.color = 'rgba(255, 255, 255, 0.15)';
+			totalChart.options.scales.x.grid.color = 'rgba(255, 255, 255, 0.15)';
+			totalChart.options.scales.y.grid.color = 'rgba(255, 255, 255, 0.15)';
+			legacyChart.options.scales.x.grid.color = 'rgba(255, 255, 255, 0.15)';
+			legacyChart.options.scales.y.grid.color = 'rgba(255, 255, 255, 0.15)';
+			paymentMethodChart.options.scales.x.grid.color = 'rgba(255, 255, 255, 0.15)';
+			paymentMethodChart.options.scales.y.grid.color = 'rgba(255, 255, 255, 0.15)';
+			upToDateChart.update();
+			totalChart.update();
+			legacyChart.update();
+			paymentMethodChart.update();
+		} else {
+			upToDateChart.options.scales.x.grid.color = 'rgba(0, 0, 0, 0.1)';
+			upToDateChart.options.scales.y.grid.color = 'rgba(0, 0, 0, 0.1)';
+			totalChart.options.scales.x.grid.color = 'rgba(0, 0, 0, 0.1)';
+			totalChart.options.scales.y.grid.color = 'rgba(0, 0, 0, 0.1)';
+			legacyChart.options.scales.x.grid.color = 'rgba(0, 0, 0, 0.1)';
+			legacyChart.options.scales.y.grid.color = 'rgba(0, 0, 0, 0.1)';
+			paymentMethodChart.options.scales.x.grid.color = 'rgba(0, 0, 0, 0.1)';
+			paymentMethodChart.options.scales.y.grid.color = 'rgba(0, 0, 0, 0.1)';
+			upToDateChart.update();
+			totalChart.update();
+			legacyChart.update();
+			paymentMethodChart.update();
+		}
+	};
+
+	$: $theme !== undefined &&
+		chartsLoading === false &&
+		chartsRendered === true &&
+		updateChartThemes();
+
 	onMount(async () => {
 		if (browser) {
 			upToDateChartCanvas.getContext('2d');
@@ -446,17 +508,19 @@
 	});
 </script>
 
-<div class="bg-teal">
+<div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		<main class="mt-10 mb-20 space-y-10">
 			<h1
-				class="gradient text-center text-4xl font-semibold !leading-tight text-primary md:text-left md:text-5xl"
+				class="gradient text-center text-4xl font-semibold !leading-tight md:text-left md:text-5xl"
 			>
 				Dashboard
 			</h1>
 
-			<h2 class="w-full text-center text-xl font-semibold text-primary md:text-left lg:w-[675px]">
+			<h2
+				class="w-full text-center text-xl font-semibold text-primary dark:text-white md:text-left lg:w-[675px]"
+			>
 				Here are some stats and charts for the MATH nerds.
 			</h2>
 
@@ -517,7 +581,7 @@
 						loading={$syncStatus}
 					/>
 				</div>
-				<p class="text-center text-sm text-body md:text-left">
+				<p class="text-center text-sm text-body dark:text-white md:text-left">
 					*Data updated every 10 minutes, change based on previous 24 hours.
 				</p>
 			</section>
@@ -532,7 +596,7 @@
 						{/if}
 						<canvas bind:this={upToDateChartCanvas} width="400" height="400" />
 					</div>
-					<p class="mt-1 text-center text-sm text-body">
+					<p class="mt-1 text-center text-sm text-body dark:text-white">
 						*Elements with a <em>survey:date</em>, <em>check_date</em>, or
 						<em>check_date:currency:XBT</em> tag less than one year old.
 					</p>
@@ -547,7 +611,7 @@
 						{/if}
 						<canvas bind:this={totalChartCanvas} width="400" height="400" />
 					</div>
-					<p class="mt-1 text-center text-sm text-body">
+					<p class="mt-1 text-center text-sm text-body dark:text-white">
 						*Elements accepting any bitcoin payment method.
 					</p>
 				</div>
@@ -561,7 +625,7 @@
 						{/if}
 						<canvas bind:this={legacyChartCanvas} width="400" height="400" />
 					</div>
-					<p class="mt-1 text-center text-sm text-body">
+					<p class="mt-1 text-center text-sm text-body dark:text-white">
 						*Elements with a <em>payment:bitcoin</em> tag instead of the
 						<em>currency:XBT</em> tag.
 					</p>
@@ -576,14 +640,14 @@
 						{/if}
 						<canvas bind:this={paymentMethodChartCanvas} width="400" height="400" />
 					</div>
-					<p class="mt-1 text-center text-sm text-body">
+					<p class="mt-1 text-center text-sm text-body dark:text-white">
 						*Elements with <em>payment:onchain</em>, <em>payment:lightning</em> and
 						<em>payment:lightning_contactless</em> tags.
 					</p>
 				</div>
 			</section>
 
-			<p class="text-center text-sm text-body md:text-left">
+			<p class="text-center text-sm text-body dark:text-white md:text-left">
 				*More information on bitcoin mapping tags can be found <a
 					href="https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions#tagging-guidance"
 					target="_blank"
