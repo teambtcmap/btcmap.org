@@ -1,5 +1,7 @@
 <script>
-	import { Header, Footer, BadgeCard } from '$comp';
+	import { Header, Footer, BadgeCard, HeaderPlaceholder } from '$comp';
+	import { theme } from '$lib/store';
+	import { detectTheme } from '$lib/utils';
 
 	let achievements = [
 		{
@@ -164,7 +166,17 @@
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		<main class="my-10 text-center md:my-20">
-			<h1 class="gradient mb-8 text-4xl font-semibold !leading-tight md:text-5xl">Badges</h1>
+			{#if typeof window !== 'undefined'}
+				<h1
+					class="{detectTheme() === 'dark' || $theme === 'dark'
+						? 'text-white'
+						: 'gradient'} mb-8 text-4xl font-semibold !leading-tight md:text-5xl"
+				>
+					Badges
+				</h1>
+			{:else}
+				<HeaderPlaceholder />
+			{/if}
 
 			<p class="mx-auto w-full text-lg text-primary dark:text-white lg:w-[700px]">
 				You can earn badges for your BTC Map contributions that will be displayed on your profile.

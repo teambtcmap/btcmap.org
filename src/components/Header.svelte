@@ -99,7 +99,7 @@
 				<!-- regular links -->
 				<a
 					href={link.url}
-					class="text-xl font-semibold text-link transition-colors hover:text-hover"
+					class="text-xl font-semibold text-link transition-colors hover:text-hover dark:text-white dark:hover:text-link"
 					>{link.title}
 				</a>
 			{/if}
@@ -160,9 +160,9 @@
 
 				<!-- regular links -->
 			{:else}
-				<a href={link.url} class="flex w-full items-center text-xl text-link">
+				<a href={link.url} class="flex w-full items-center text-xl text-link dark:text-white">
 					<span
-						class="mr-4 rounded-full bg-mobileButtons p-3 transition-colors active:bg-mobileButtonsActive dark:bg-white/[0.15] dark:active:bg-mobileButtonsActive"
+						class="mr-4 rounded-full bg-mobileButtons p-3 transition-colors active:bg-mobileButtonsActive"
 					>
 						<Icon w="24" h="24" icon={link.icon} type="mobile-nav" />
 					</span>

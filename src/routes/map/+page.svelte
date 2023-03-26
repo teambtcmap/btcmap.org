@@ -362,7 +362,7 @@ Thanks for using BTC Map!`);
 							document.querySelector('#search-button').src = '/icons/search.svg';
 						};
 					}
-					searchButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/90');
+					searchButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
 
 					searchButtonDiv.append(searchButton);
 
@@ -451,7 +451,7 @@ Thanks for using BTC Map!`);
 								: '/icons/boost.svg';
 						};
 					}
-					boostLayerButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/90');
+					boostLayerButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
 
 					boostLayerDiv.append(boostLayerButton);
 
@@ -681,6 +681,7 @@ ${
 			<style>
 				.leaflet-popup-content-wrapper, .leaflet-popup-tip {
 					background-color: #06171C;
+					border: 1px solid #e5e7eb
 			}
 			</style>`
 		: ''
@@ -830,7 +831,7 @@ ${
 			<input
 				id="search-input"
 				type="text"
-				class="w-full rounded-lg px-5 py-2.5 text-[16px] text-mapButton drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:outline-none focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] dark:bg-dark dark:text-white"
+				class="w-full rounded-lg px-5 py-2.5 text-[16px] text-mapButton drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:outline-none focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] dark:border dark:bg-dark dark:text-white"
 				placeholder="Search..."
 				on:keyup={searchDebounce}
 				on:keydown={(e) => {
@@ -878,7 +879,7 @@ ${
 					{#each searchResults as result}
 						<button
 							on:click={() => searchSelect(result)}
-							class="block w-full justify-between px-4 py-2 hover:bg-searchHover dark:hover:bg-white/[0.15] md:flex md:text-left"
+							class="block w-full justify-between px-4 py-2 hover:bg-searchHover dark:border-b dark:hover:bg-white/[0.15] md:flex md:text-left"
 						>
 							<div class="items-start md:flex md:space-x-2">
 								<Icon

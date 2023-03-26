@@ -1,5 +1,12 @@
 <script>
-	import { Header, Footer, LatestTagger, TaggerSkeleton, TopButton } from '$comp';
+	import {
+		Header,
+		Footer,
+		LatestTagger,
+		TaggerSkeleton,
+		TopButton,
+		HeaderPlaceholder
+	} from '$comp';
 	import {
 		users,
 		userError,
@@ -7,9 +14,10 @@
 		eventError,
 		elements,
 		elementError,
-		syncStatus
+		syncStatus,
+		theme
 	} from '$lib/store';
-	import { errToast } from '$lib/utils';
+	import { errToast, detectTheme } from '$lib/utils';
 	import { latCalc, longCalc } from '$lib/map/setup';
 
 	// alert for user errors
@@ -78,11 +86,17 @@
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		<main class="mt-10 mb-20 space-y-10">
-			<h1
-				class="gradient text-center text-4xl font-semibold !leading-tight text-primary dark:text-white md:text-5xl lg:text-left"
-			>
-				Activity
-			</h1>
+			{#if typeof window !== 'undefined'}
+				<h1
+					class="{detectTheme() === 'dark' || $theme === 'dark'
+						? 'text-white'
+						: 'gradient'} text-center text-4xl font-semibold !leading-tight text-primary dark:text-white md:text-5xl lg:text-left"
+				>
+					Activity
+				</h1>
+			{:else}
+				<HeaderPlaceholder />
+			{/if}
 
 			<h2
 				class="w-full text-center text-xl font-semibold text-primary dark:text-white lg:w-[675px] lg:text-left"

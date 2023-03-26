@@ -2,7 +2,7 @@
 	import Chart from 'chart.js/auto';
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
-	import { Header, Footer, DashboardStat } from '$comp';
+	import { Header, Footer, DashboardStat, HeaderPlaceholder } from '$comp';
 	import {
 		events,
 		eventError,
@@ -512,11 +512,17 @@
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		<main class="mt-10 mb-20 space-y-10">
-			<h1
-				class="gradient text-center text-4xl font-semibold !leading-tight md:text-left md:text-5xl"
-			>
-				Dashboard
-			</h1>
+			{#if typeof window !== 'undefined'}
+				<h1
+					class="{detectTheme() === 'dark' || $theme === 'dark'
+						? 'text-white'
+						: 'gradient'} text-center text-4xl font-semibold !leading-tight md:text-left md:text-5xl"
+				>
+					Dashboard
+				</h1>
+			{:else}
+				<HeaderPlaceholder />
+			{/if}
 
 			<h2
 				class="w-full text-center text-xl font-semibold text-primary dark:text-white md:text-left lg:w-[675px]"

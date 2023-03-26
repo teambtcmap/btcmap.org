@@ -2,8 +2,16 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import axios from 'axios';
-	import { Header, Footer, PrimaryButton, FormSuccess, InfoTooltip } from '$comp';
-	import { errToast, successToast, warningToast } from '$lib/utils';
+	import {
+		Header,
+		Footer,
+		PrimaryButton,
+		FormSuccess,
+		InfoTooltip,
+		HeaderPlaceholder
+	} from '$comp';
+	import { errToast, successToast, warningToast, detectTheme } from '$lib/utils';
+	import { theme } from '$lib/store';
 
 	let captcha;
 	let captchaSecret;
@@ -134,9 +142,17 @@
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		{#if !submitted}
-			<h1 class="gradient mt-10 text-center text-4xl font-semibold md:text-5xl">
-				Make an impact locally!
-			</h1>
+			{#if typeof window !== 'undefined'}
+				<h1
+					class="{detectTheme() === 'dark' || $theme === 'dark'
+						? 'text-white'
+						: 'gradient'} mt-10 text-center text-4xl font-semibold md:text-5xl"
+				>
+					Make an impact locally!
+				</h1>
+			{:else}
+				<HeaderPlaceholder />
+			{/if}
 
 			<section id="add-community" class="mx-auto mt-16 w-full pb-20 md:w-[600px] md:pb-32">
 				<h2 class="mb-5 text-center text-3xl font-semibold text-primary dark:text-white">

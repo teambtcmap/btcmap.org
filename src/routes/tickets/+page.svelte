@@ -1,9 +1,17 @@
 <script>
 	import axios from 'axios';
 
-	import { Header, Footer, OpenTicket, OpenTicketSkeleton, TopButton } from '$comp';
-	import { errToast } from '$lib/utils';
+	import {
+		Header,
+		Footer,
+		OpenTicket,
+		OpenTicketSkeleton,
+		TopButton,
+		HeaderPlaceholder
+	} from '$comp';
+	import { errToast, detectTheme } from '$lib/utils';
 	import { onMount, onDestroy } from 'svelte';
+	import { theme } from '$lib/store';
 
 	const ticketTypes = ['Add', 'Verify', 'Community'];
 	let showType = 'Add';
@@ -60,14 +68,20 @@
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		<main class="mt-10 mb-20 space-y-10">
-			<h1
-				class="gradient text-center text-4xl font-semibold !leading-tight md:text-5xl lg:text-left"
-			>
-				Open Tickets
-				{#if totalTickets}
-					<span class="text-3xl">({totalTickets})</span>
-				{/if}
-			</h1>
+			{#if typeof window !== 'undefined'}
+				<h1
+					class="{detectTheme() === 'dark' || $theme === 'dark'
+						? 'text-white'
+						: 'gradient'} text-center text-4xl font-semibold !leading-tight md:text-5xl lg:text-left"
+				>
+					Open Tickets
+					{#if totalTickets}
+						<span class="text-3xl">({totalTickets})</span>
+					{/if}
+				</h1>
+			{:else}
+				<HeaderPlaceholder />
+			{/if}
 
 			<h2
 				class="w-full text-center text-xl font-semibold text-primary dark:text-white lg:w-[675px] lg:text-left"

@@ -2,7 +2,15 @@
 	import { onMount, onDestroy, tick } from 'svelte';
 	import { browser } from '$app/environment';
 	import axios from 'axios';
-	import { Header, Footer, PrimaryButton, MapLoading, FormSuccess, InfoTooltip } from '$comp';
+	import {
+		Header,
+		Footer,
+		PrimaryButton,
+		MapLoading,
+		FormSuccess,
+		InfoTooltip,
+		HeaderPlaceholder
+	} from '$comp';
 	import { geolocate, changeDefaultIcons } from '$lib/map/setup';
 	import { errToast, detectTheme } from '$lib/utils';
 	import { theme } from '$lib/store';
@@ -132,6 +140,15 @@
 	let map;
 	let mapLoaded;
 
+	let zoomInBtn;
+	let zoomOutBtn;
+	let fullScreenBtn;
+	let locateBtn;
+	let zoomInImg;
+	let zoomOutImg;
+	let fullScreenImg;
+	let locateImg;
+
 	onMount(async () => {
 		if (browser) {
 			// fetch and add captcha
@@ -179,6 +196,15 @@
 			// change default icons
 			changeDefaultIcons('', L, mapElement, DomEvent);
 
+			zoomInBtn = document.querySelector('.leaflet-control-zoom-in');
+			zoomOutBtn = document.querySelector('.leaflet-control-zoom-out');
+			fullScreenBtn = document.querySelector('.leaflet-control-full-screen');
+			locateBtn = document.querySelector('.leaflet-bar-part.leaflet-bar-part-single');
+			zoomInImg = document.querySelector('#zoomin');
+			zoomOutImg = document.querySelector('#zoomout');
+			fullScreenImg = document.querySelector('#fullscreen');
+			locateImg = document.querySelector('#locatebutton');
+
 			mapLoaded = true;
 		}
 	});
@@ -189,6 +215,59 @@
 			map.remove();
 		}
 	});
+
+	const toggleMapButtons = () => {
+		if ($theme === 'dark') {
+			zoomInImg.src = '/icons/plus-white.svg';
+			zoomOutImg.src = '/icons/minus-white.svg';
+			fullScreenImg.src = '/icons/expand-white.svg';
+			locateImg.src = '/icons/locate-white.svg';
+
+			zoomInBtn.onmouseenter = undefined;
+			zoomInBtn.onmouseleave = undefined;
+			zoomOutBtn.onmouseenter = undefined;
+			zoomOutBtn.onmouseleave = undefined;
+			fullScreenBtn.onmouseenter = undefined;
+			fullScreenBtn.onmouseleave = undefined;
+			locateBtn.onmouseenter = undefined;
+			locateBtn.onmouseleave = undefined;
+		} else {
+			zoomInImg.src = '/icons/plus.svg';
+			zoomOutImg.src = '/icons/minus.svg';
+			fullScreenImg.src = '/icons/expand.svg';
+			locateImg.src = '/icons/locate.svg';
+
+			zoomInBtn.onmouseenter = () => {
+				zoomInImg.src = '/icons/plus-black.svg';
+			};
+			zoomInBtn.onmouseleave = () => {
+				zoomInImg.src = '/icons/plus.svg';
+			};
+
+			zoomOutBtn.onmouseenter = () => {
+				zoomOutImg.src = '/icons/minus-black.svg';
+			};
+			zoomOutBtn.onmouseleave = () => {
+				zoomOutImg.src = '/icons/minus.svg';
+			};
+
+			fullScreenBtn.onmouseenter = () => {
+				fullScreenImg.src = '/icons/expand-black.svg';
+			};
+			fullScreenBtn.onmouseleave = () => {
+				fullScreenImg.src = '/icons/expand.svg';
+			};
+
+			locateBtn.onmouseenter = () => {
+				locateImg.src = '/icons/locate-black.svg';
+			};
+			locateBtn.onmouseleave = () => {
+				locateImg.src = '/icons/locate.svg';
+			};
+		}
+	};
+
+	$: $theme !== undefined && mapLoaded === true && toggleMapButtons();
 </script>
 
 <svelte:head>
@@ -202,9 +281,17 @@
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		{#if !submitted}
-			<h1 class="gradient mt-10 text-center text-4xl font-semibold md:text-5xl lg:text-left">
-				Accept bitcoin? Get found.
-			</h1>
+			{#if typeof window !== 'undefined'}
+				<h1
+					class="{detectTheme() === 'dark' || $theme === 'dark'
+						? 'text-white'
+						: 'gradient'} mt-10 text-center text-4xl font-semibold md:text-5xl lg:text-left"
+				>
+					Accept bitcoin? Get found.
+				</h1>
+			{:else}
+				<HeaderPlaceholder />
+			{/if}
 
 			<div class="mt-16 justify-between pb-20 md:pb-32 lg:flex">
 				<section

@@ -3,8 +3,16 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import axios from 'axios';
-	import { Header, Footer, PrimaryButton, MapLoading, FormSuccess, InfoTooltip } from '$comp';
-	import { elements, elementError } from '$lib/store';
+	import {
+		Header,
+		Footer,
+		PrimaryButton,
+		MapLoading,
+		FormSuccess,
+		InfoTooltip,
+		HeaderPlaceholder
+	} from '$comp';
+	import { elements, elementError, theme } from '$lib/store';
 	import {
 		attribution,
 		geolocate,
@@ -15,7 +23,7 @@
 		generateIcon,
 		generateMarker
 	} from '$lib/map/setup';
-	import { errToast } from '$lib/utils';
+	import { errToast, detectTheme } from '$lib/utils';
 
 	let name = $page.url.searchParams.has('name') ? $page.url.searchParams.get('name') : '';
 	let lat = $page.url.searchParams.has('lat') ? $page.url.searchParams.get('lat') : '';
@@ -231,9 +239,17 @@
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		{#if !submitted}
-			<h1 class="gradient mt-10 text-center text-4xl font-semibold md:text-5xl">
-				Help improve the data for everyone.
-			</h1>
+			{#if typeof window !== 'undefined'}
+				<h1
+					class="{detectTheme() === 'dark' || $theme === 'dark'
+						? 'text-white'
+						: 'gradient'} mt-10 text-center text-4xl font-semibold md:text-5xl"
+				>
+					Help improve the data for everyone.
+				</h1>
+			{:else}
+				<HeaderPlaceholder />
+			{/if}
 
 			<section id="verify" class="mx-auto mt-16 w-full pb-20 md:w-[600px] md:pb-32">
 				<h2 class="mb-5 text-center text-3xl font-semibold text-primary dark:text-white">

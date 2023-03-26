@@ -1,5 +1,5 @@
 <script>
-	import { Header, Footer, PrimaryButton, Icon } from '$comp';
+	import { Header, Footer, PrimaryButton, Icon, HeaderPlaceholder } from '$comp';
 	import { socials, apps, theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
 </script>
@@ -21,11 +21,17 @@
 	<div class="relative mx-auto w-10/12 xl:w-[1200px]">
 		<section id="hero" class="items-center justify-between pb-20 pt-10 xl:flex xl:pt-0">
 			<div class="mx-auto w-full xl:mx-0 xl:w-[500px]">
-				<h1
-					class="gradient text-center text-4xl font-semibold !leading-tight md:text-5xl xl:text-left"
-				>
-					Easily find places to spend sats anywhere on the planet.
-				</h1>
+				{#if typeof window !== 'undefined'}
+					<h1
+						class="{detectTheme() === 'dark' || $theme === 'dark'
+							? 'text-white'
+							: 'gradient'} text-center text-4xl font-semibold !leading-tight md:text-5xl xl:text-left"
+					>
+						Easily find places to spend sats anywhere on the planet.
+					</h1>
+				{:else}
+					<HeaderPlaceholder />
+				{/if}
 				<div
 					class="my-16 flex flex-wrap justify-center rounded-2xl bg-white/30 py-6 dark:bg-white/[0.15]"
 				>

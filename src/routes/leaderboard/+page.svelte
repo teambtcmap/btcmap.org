@@ -8,7 +8,8 @@
 		PrimaryButton,
 		LeaderboardItem,
 		LeaderboardSkeleton,
-		TopButton
+		TopButton,
+		HeaderPlaceholder
 	} from '$comp';
 	import {
 		users,
@@ -189,9 +190,17 @@
 		</div>
 
 		<div class="mx-auto w-10/12 space-y-10 xl:w-[1200px]">
-			<h1 class="gradient text-center text-4xl font-semibold !leading-tight md:text-5xl">
-				Top Supertaggers
-			</h1>
+			{#if typeof window !== 'undefined'}
+				<h1
+					class="{detectTheme() === 'dark' || $theme === 'dark'
+						? 'text-white'
+						: 'gradient'} text-center text-4xl font-semibold !leading-tight md:text-5xl"
+				>
+					Top Supertaggers
+				</h1>
+			{:else}
+				<HeaderPlaceholder />
+			{/if}
 
 			<h2
 				class="mx-auto w-full text-center text-xl font-semibold text-primary dark:text-white lg:w-[800px]"

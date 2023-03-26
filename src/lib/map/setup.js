@@ -97,7 +97,12 @@ export const attribution = (L, map) => {
 	OSMAttribution.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 	OSMAttribution.innerHTML =
 		'&copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" class="!text-link hover:!text-hover !no-underline transition-colors">OpenStreetMap</a> contributors';
-	OSMAttribution.classList.add('dark:!bg-dark', 'dark:!text-white');
+	OSMAttribution.classList.add(
+		'dark:!bg-dark',
+		'dark:!text-white',
+		'dark:border-t',
+		'dark:border-r'
+	);
 };
 
 export const support = () => {
@@ -109,7 +114,12 @@ export const support = () => {
 	supportAttribution.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 	supportAttribution.innerHTML =
 		'<a href="/support-us" class="!text-link hover:!text-hover !no-underline transition-colors" title="Support with sats">Support</a> BTC Map';
-	supportAttribution.classList.add('dark:!bg-dark', 'dark:!text-white');
+	supportAttribution.classList.add(
+		'dark:!bg-dark',
+		'dark:!text-white',
+		'dark:border-t',
+		'dark:border-l'
+	);
 };
 
 export const scaleBars = (L, map) => {
@@ -130,7 +140,7 @@ export const changeDefaultIcons = (layers, L, mapElement, DomEvent) => {
 
 	if (layers) {
 		const layers = document.querySelector('.leaflet-control-layers');
-		layers.style.border = 'none';
+		layers.style.border = theme === 'dark' ? '1px solid #e5e7eb' : 'none';
 		layers.style.borderRadius = '8px';
 		layers.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 		layers.classList.add('dark:!bg-dark', 'dark:!text-white');
@@ -153,7 +163,7 @@ export const changeDefaultIcons = (layers, L, mapElement, DomEvent) => {
 			document.querySelector('#zoomin').src = '/icons/plus.svg';
 		};
 	}
-	zoomIn.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/90');
+	zoomIn.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
 
 	const zoomOut = document.querySelector('.leaflet-control-zoom-out');
 	zoomOut.innerHTML = `<img src=${
@@ -167,7 +177,7 @@ export const changeDefaultIcons = (layers, L, mapElement, DomEvent) => {
 			document.querySelector('#zoomout').src = '/icons/minus.svg';
 		};
 	}
-	zoomOut.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/90');
+	zoomOut.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
 
 	const fullscreenButton = L.DomUtil.create('a');
 	fullscreenButton.classList.add('leaflet-control-full-screen');
@@ -197,7 +207,7 @@ export const changeDefaultIcons = (layers, L, mapElement, DomEvent) => {
 			document.querySelector('#fullscreen').src = '/icons/expand.svg';
 		};
 	}
-	fullscreenButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/90');
+	fullscreenButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
 
 	leafletBar.append(fullscreenButton);
 
@@ -230,7 +240,7 @@ export const geolocate = (L, map) => {
 			document.querySelector('#locatebutton').src = '/icons/locate.svg';
 		};
 	}
-	locateButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/90');
+	locateButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
 };
 
 export const homeMarkerButtons = (L, map, DomEvent) => {
@@ -265,7 +275,7 @@ export const homeMarkerButtons = (L, map, DomEvent) => {
 					document.querySelector('#homebutton').src = '/icons/home.svg';
 				};
 			}
-			addHomeButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/90');
+			addHomeButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
 
 			addControlDiv.append(addHomeButton);
 
@@ -288,7 +298,7 @@ export const homeMarkerButtons = (L, map, DomEvent) => {
 					document.querySelector('#marker').src = '/icons/marker.svg';
 				};
 			}
-			addLocationButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/90');
+			addLocationButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
 
 			addControlDiv.append(addLocationButton);
 
@@ -336,7 +346,7 @@ export const dataRefresh = (L, map, DomEvent) => {
 					document.querySelector('#refresh').src = '/icons/refresh.svg';
 				};
 			}
-			dataRefreshButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/90');
+			dataRefreshButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
 
 			dataRefreshDiv.append(dataRefreshButton);
 
@@ -725,6 +735,7 @@ ${
 			<style>
 				.leaflet-popup-content-wrapper, .leaflet-popup-tip {
 					background-color: #06171C;
+					border: 1px solid #e5e7eb
 			}
 			</style>`
 					: ''

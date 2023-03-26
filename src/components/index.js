@@ -46,3 +46,4 @@ export { default as AboutContributor } from './AboutContributor.svelte';
 export { default as AboutCore } from './AboutCore.svelte';
 export { default as OrgBadge } from './OrgBadge.svelte';
 export { default as ThemeToggle } from './ThemeToggle.svelte';
+export { default as HeaderPlaceholder } from './HeaderPlaceholder.svelte';

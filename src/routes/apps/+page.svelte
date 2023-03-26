@@ -1,6 +1,7 @@
 <script>
-	import { Header, Footer, AppCard } from '$comp';
-	import { apps } from '$lib/store';
+	import { Header, Footer, AppCard, HeaderPlaceholder } from '$comp';
+	import { apps, theme } from '$lib/store';
+	import { detectTheme } from '$lib/utils';
 </script>
 
 <svelte:head>
@@ -14,11 +15,17 @@
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		<main class="my-10 space-y-10 text-center md:my-20">
-			<h1
-				class="gradient text-4xl font-semibold !leading-tight text-primary dark:text-white md:text-5xl"
-			>
-				Find merchants on any platform.
-			</h1>
+			{#if typeof window !== 'undefined'}
+				<h1
+					class="{detectTheme() === 'dark' || $theme === 'dark'
+						? 'text-white'
+						: 'gradient'} text-4xl font-semibold !leading-tight text-primary dark:text-white md:text-5xl"
+				>
+					Find merchants on any platform.
+				</h1>
+			{:else}
+				<HeaderPlaceholder />
+			{/if}
 
 			<h2 class="mx-auto w-full text-xl font-semibold text-primary dark:text-white lg:w-[800px]">
 				We have you covered on whatever device and OS you choose.
