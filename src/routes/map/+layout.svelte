@@ -9,6 +9,16 @@
 		reportError,
 		mapLoading
 	} from '$lib/store';
+	import { errToast } from '$lib/utils';
+
+	// alert for map errors
+	$: $elementError && errToast($elementError);
+
+	// alert for area errors
+	$: $areaError && errToast($areaError);
+
+	// alert for report errors
+	$: $reportError && errToast($reportError);
 </script>
 
 <svelte:head>
