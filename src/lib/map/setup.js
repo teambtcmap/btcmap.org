@@ -1,9 +1,69 @@
 import Time from 'svelte-time';
 import axios from 'axios';
-import { boost, exchangeRate, resetBoost, showTags, showMore } from '$lib/store';
+import { boost, exchangeRate, resetBoost, showTags, showMore, theme } from '$lib/store';
 import { get } from 'svelte/store';
 import { errToast, detectTheme } from '$lib/utils';
 import { InfoTooltip } from '$comp';
+
+export const toggleMapButtons = () => {
+	const zoomInBtn = document.querySelector('.leaflet-control-zoom-in');
+	const zoomOutBtn = document.querySelector('.leaflet-control-zoom-out');
+	const fullScreenBtn = document.querySelector('.leaflet-control-full-screen');
+	const locateBtn = document.querySelector('.leaflet-bar-part.leaflet-bar-part-single');
+	const zoomInImg = document.querySelector('#zoomin');
+	const zoomOutImg = document.querySelector('#zoomout');
+	const fullScreenImg = document.querySelector('#fullscreen');
+	const locateImg = document.querySelector('#locatebutton');
+
+	if (get(theme) === 'dark') {
+		zoomInImg.src = '/icons/plus-white.svg';
+		zoomOutImg.src = '/icons/minus-white.svg';
+		fullScreenImg.src = '/icons/expand-white.svg';
+		locateImg.src = '/icons/locate-white.svg';
+
+		zoomInBtn.onmouseenter = undefined;
+		zoomInBtn.onmouseleave = undefined;
+		zoomOutBtn.onmouseenter = undefined;
+		zoomOutBtn.onmouseleave = undefined;
+		fullScreenBtn.onmouseenter = undefined;
+		fullScreenBtn.onmouseleave = undefined;
+		locateBtn.onmouseenter = undefined;
+		locateBtn.onmouseleave = undefined;
+	} else {
+		zoomInImg.src = '/icons/plus.svg';
+		zoomOutImg.src = '/icons/minus.svg';
+		fullScreenImg.src = '/icons/expand.svg';
+		locateImg.src = '/icons/locate.svg';
+
+		zoomInBtn.onmouseenter = () => {
+			zoomInImg.src = '/icons/plus-black.svg';
+		};
+		zoomInBtn.onmouseleave = () => {
+			zoomInImg.src = '/icons/plus.svg';
+		};
+
+		zoomOutBtn.onmouseenter = () => {
+			zoomOutImg.src = '/icons/minus-black.svg';
+		};
+		zoomOutBtn.onmouseleave = () => {
+			zoomOutImg.src = '/icons/minus.svg';
+		};
+
+		fullScreenBtn.onmouseenter = () => {
+			fullScreenImg.src = '/icons/expand-black.svg';
+		};
+		fullScreenBtn.onmouseleave = () => {
+			fullScreenImg.src = '/icons/expand.svg';
+		};
+
+		locateBtn.onmouseenter = () => {
+			locateImg.src = '/icons/locate-black.svg';
+		};
+		locateBtn.onmouseleave = () => {
+			locateImg.src = '/icons/locate.svg';
+		};
+	}
+};
 
 export const layers = (leaflet, map) => {
 	const osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

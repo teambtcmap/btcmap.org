@@ -17,7 +17,9 @@
 		longCalc,
 		generateIcon,
 		generateMarker,
-		verifiedArr
+		verifiedArr,
+		toggleMapButtons,
+		geolocate
 	} from '$lib/map/setup';
 	import { goto } from '$app/navigation';
 	import {
@@ -576,6 +578,7 @@
 			const DomEvent = await import('leaflet/src/dom/DomEvent');
 			const leafletMarkerCluster = await import('leaflet.markercluster');
 			const leafletFeaturegroupSubgroup = await import('leaflet.featuregroup.subgroup');
+			const leafletLocateControl = await import('leaflet.locatecontrol');
 
 			// add map
 			map = leaflet.map(mapElement, { attributionControl: false });
@@ -601,6 +604,9 @@
 				Legacy: legacyLayer
 			};
 			const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+			// add locate button to map
+			geolocate(L, map);
 
 			// change default icons
 			changeDefaultIcons('layers', L, mapElement, DomEvent);
@@ -681,6 +687,14 @@
 			mapLoaded = true;
 		}
 	});
+
+	$: $theme !== undefined && mapLoaded === true && toggleMapButtons();
+
+	const closePopup = () => {
+		map.closePopup();
+	};
+
+	$: $theme !== undefined && mapLoaded === true && closePopup();
 
 	onDestroy(async () => {
 		if (map) {
@@ -874,7 +888,7 @@
 
 			<section id="map-section">
 				<h3
-					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
+					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary dark:bg-white/10 dark:text-white md:text-left"
 				>
 					{name} Map
 					<div class="space-x-1 text-link">
@@ -908,7 +922,7 @@
 
 			<section id="stats">
 				<div
-					class="border border-statBorder {total === 0
+					class="border border-statBorder dark:bg-white/10 {total === 0
 						? 'rounded-3xl'
 						: 'rounded-t-3xl'} grid md:grid-cols-2 xl:grid-cols-4"
 				>
@@ -944,14 +958,14 @@
 				<div
 					class="{total === 0
 						? 'hidden'
-						: ''} rounded-b-3xl border border-t-0 border-statBorder p-5"
+						: ''} rounded-b-3xl border border-t-0 border-statBorder p-5 dark:bg-white/10"
 				>
 					<canvas bind:this={updatedChartCanvas} width="250" height="250" />
 				</div>
 			</section>
 
 			<section id="taggers">
-				<div class="w-full rounded-3xl border border-statBorder">
+				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
 					<h3
 						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white"
 					>
@@ -995,7 +1009,7 @@
 			</section>
 
 			<section id="activity">
-				<div class="w-full rounded-3xl border border-statBorder">
+				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
 					<h3
 						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
 					>
@@ -1056,7 +1070,7 @@
 			</section>
 
 			<section id="charts" class="space-y-10">
-				<div class="w-full rounded-3xl border border-statBorder">
+				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
 					<h3
 						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
 					>
@@ -1141,5 +1155,6 @@
 	@import 'leaflet/dist/leaflet.css';
 	@import 'leaflet.markercluster/dist/MarkerCluster.css';
 	@import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+	@import 'leaflet.locatecontrol/dist/L.Control.Locate.min.css';
 	@import 'tippy.js/dist/tippy.css';
 </style>

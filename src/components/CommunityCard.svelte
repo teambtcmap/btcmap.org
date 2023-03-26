@@ -29,7 +29,9 @@
 		(tags['tips:url'] && { destination: tags['tips:url'], type: 'url' });
 </script>
 
-<div class="rounded-3xl border border-statBorder shadow transition-shadow hover:shadow-2xl">
+<div
+	class="rounded-3xl border border-statBorder shadow transition-shadow hover:shadow-2xl dark:bg-white/10"
+>
 	<div class="my-4 space-y-2 p-4">
 		<a href="/community/{id}" class="space-y-2 text-link transition-colors hover:text-hover">
 			<img

@@ -21,7 +21,8 @@
 		latCalc,
 		longCalc,
 		generateIcon,
-		generateMarker
+		generateMarker,
+		toggleMapButtons
 	} from '$lib/map/setup';
 	import { errToast, detectTheme } from '$lib/utils';
 
@@ -224,6 +225,14 @@
 			}
 		}
 	});
+
+	$: $theme !== undefined && mapLoaded === true && showMap && toggleMapButtons();
+
+	const closePopup = () => {
+		map.closePopup();
+	};
+
+	$: $theme !== undefined && mapLoaded === true && showMap && closePopup();
 
 	if (showMap) {
 		onDestroy(async () => {

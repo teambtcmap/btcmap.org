@@ -11,7 +11,7 @@
 		InfoTooltip,
 		HeaderPlaceholder
 	} from '$comp';
-	import { geolocate, changeDefaultIcons } from '$lib/map/setup';
+	import { geolocate, changeDefaultIcons, toggleMapButtons } from '$lib/map/setup';
 	import { errToast, detectTheme } from '$lib/utils';
 	import { theme } from '$lib/store';
 
@@ -140,15 +140,6 @@
 	let map;
 	let mapLoaded;
 
-	let zoomInBtn;
-	let zoomOutBtn;
-	let fullScreenBtn;
-	let locateBtn;
-	let zoomInImg;
-	let zoomOutImg;
-	let fullScreenImg;
-	let locateImg;
-
 	onMount(async () => {
 		if (browser) {
 			// fetch and add captcha
@@ -196,15 +187,6 @@
 			// change default icons
 			changeDefaultIcons('', L, mapElement, DomEvent);
 
-			zoomInBtn = document.querySelector('.leaflet-control-zoom-in');
-			zoomOutBtn = document.querySelector('.leaflet-control-zoom-out');
-			fullScreenBtn = document.querySelector('.leaflet-control-full-screen');
-			locateBtn = document.querySelector('.leaflet-bar-part.leaflet-bar-part-single');
-			zoomInImg = document.querySelector('#zoomin');
-			zoomOutImg = document.querySelector('#zoomout');
-			fullScreenImg = document.querySelector('#fullscreen');
-			locateImg = document.querySelector('#locatebutton');
-
 			mapLoaded = true;
 		}
 	});
@@ -215,57 +197,6 @@
 			map.remove();
 		}
 	});
-
-	const toggleMapButtons = () => {
-		if ($theme === 'dark') {
-			zoomInImg.src = '/icons/plus-white.svg';
-			zoomOutImg.src = '/icons/minus-white.svg';
-			fullScreenImg.src = '/icons/expand-white.svg';
-			locateImg.src = '/icons/locate-white.svg';
-
-			zoomInBtn.onmouseenter = undefined;
-			zoomInBtn.onmouseleave = undefined;
-			zoomOutBtn.onmouseenter = undefined;
-			zoomOutBtn.onmouseleave = undefined;
-			fullScreenBtn.onmouseenter = undefined;
-			fullScreenBtn.onmouseleave = undefined;
-			locateBtn.onmouseenter = undefined;
-			locateBtn.onmouseleave = undefined;
-		} else {
-			zoomInImg.src = '/icons/plus.svg';
-			zoomOutImg.src = '/icons/minus.svg';
-			fullScreenImg.src = '/icons/expand.svg';
-			locateImg.src = '/icons/locate.svg';
-
-			zoomInBtn.onmouseenter = () => {
-				zoomInImg.src = '/icons/plus-black.svg';
-			};
-			zoomInBtn.onmouseleave = () => {
-				zoomInImg.src = '/icons/plus.svg';
-			};
-
-			zoomOutBtn.onmouseenter = () => {
-				zoomOutImg.src = '/icons/minus-black.svg';
-			};
-			zoomOutBtn.onmouseleave = () => {
-				zoomOutImg.src = '/icons/minus.svg';
-			};
-
-			fullScreenBtn.onmouseenter = () => {
-				fullScreenImg.src = '/icons/expand-black.svg';
-			};
-			fullScreenBtn.onmouseleave = () => {
-				fullScreenImg.src = '/icons/expand.svg';
-			};
-
-			locateBtn.onmouseenter = () => {
-				locateImg.src = '/icons/locate-black.svg';
-			};
-			locateBtn.onmouseleave = () => {
-				locateImg.src = '/icons/locate.svg';
-			};
-		}
-	};
 
 	$: $theme !== undefined && mapLoaded === true && toggleMapButtons();
 </script>
@@ -562,7 +493,7 @@
 									disabled={!captchaSecret || !mapLoaded}
 									name="source"
 									required
-									class="w-full rounded-2xl border-2 border-input bg-white py-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+									class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:value={source}
 									on:change={async () => {
 										if (source === 'Other') {

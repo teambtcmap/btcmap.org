@@ -103,7 +103,7 @@
 			</p>
 
 			<section id="tickets">
-				<div class="w-full rounded-3xl border border-statBorder">
+				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
 					<div class="p-5 text-center text-2xl font-semibold text-primary dark:text-white">
 						{#each ticketTypes as type}
 							<button

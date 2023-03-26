@@ -531,7 +531,9 @@
 			</h2>
 
 			<section id="stats">
-				<div class="grid rounded-3xl border border-statBorder md:grid-cols-2 xl:grid-cols-4">
+				<div
+					class="grid rounded-3xl border border-statBorder dark:bg-white/10 md:grid-cols-2 xl:grid-cols-4"
+				>
 					<DashboardStat
 						title="Total Locations"
 						stat={total}

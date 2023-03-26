@@ -188,7 +188,7 @@
 				/>
 			</div>
 
-			<section id="leaderboard">
+			<section id="leaderboard" class="dark:lg:rounded dark:lg:bg-white/10 dark:lg:py-8">
 				<div class="mb-5 hidden grid-cols-6 text-center lg:grid">
 					{#each headings as heading}
 						<h3 class="text-lg font-semibold text-primary dark:text-white">

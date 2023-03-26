@@ -6,7 +6,7 @@
 	import Chart from 'chart.js/auto';
 	import { browser } from '$app/environment';
 	import { onMount, onDestroy } from 'svelte';
-	import { users, events, elements, excludeLeader } from '$lib/store';
+	import { users, events, elements, excludeLeader, theme } from '$lib/store';
 	import {
 		attribution,
 		changeDefaultIcons,
@@ -14,7 +14,9 @@
 		latCalc,
 		longCalc,
 		generateIcon,
-		generateMarker
+		generateMarker,
+		toggleMapButtons,
+		geolocate
 	} from '$lib/map/setup';
 	import { errToast } from '$lib/utils';
 	import { error } from '@sveltejs/kit';
@@ -265,6 +267,7 @@
 			const leaflet = await import('leaflet');
 			const DomEvent = await import('leaflet/src/dom/DomEvent');
 			const leafletMarkerCluster = await import('leaflet.markercluster');
+			const leafletLocateControl = await import('leaflet.locatecontrol');
 
 			// add map and tiles
 			map = leaflet.map(mapElement, { attributionControl: false });
@@ -281,6 +284,9 @@
 
 			// add OSM attribution
 			attribution(L, map);
+
+			// add locate button to map
+			geolocate(L, map);
 
 			// change default icons
 			changeDefaultIcons('', L, mapElement, DomEvent);
@@ -342,6 +348,14 @@
 			mapLoaded = true;
 		}
 	});
+
+	$: $theme !== undefined && mapLoaded === true && toggleMapButtons();
+
+	const closePopup = () => {
+		map.closePopup();
+	};
+
+	$: $theme !== undefined && mapLoaded === true && closePopup();
 
 	onDestroy(async () => {
 		if (map) {
@@ -408,7 +422,7 @@
 
 				<h2
 					bind:this={profileDesc}
-					class="mx-auto w-full break-all text-xl text-body lg:w-[800px]"
+					class="mx-auto w-full break-all text-xl text-body dark:text-white lg:w-[800px]"
 				/>
 
 				{#if lightning}
@@ -434,7 +448,9 @@
 			</section>
 
 			<section id="stats" class="mt-10 mb-16">
-				<div class="grid rounded-t-3xl border border-statBorder md:grid-cols-2 xl:grid-cols-4">
+				<div
+					class="grid rounded-t-3xl border border-statBorder dark:bg-white/10 md:grid-cols-2 xl:grid-cols-4"
+				>
 					<ProfileStat
 						title="Total Tags"
 						stat={total}
@@ -456,13 +472,13 @@
 					<ProfileStat title="Deleted" stat={deleted} percent={deletedPercent} border="" />
 				</div>
 
-				<div class="rounded-b-3xl border border-t-0 border-statBorder p-5">
+				<div class="rounded-b-3xl border border-t-0 border-statBorder p-5 dark:bg-white/10">
 					<canvas bind:this={tagTypeChartCanvas} width="250" height="250" />
 				</div>
 			</section>
 
 			<section id="activity" class="my-16">
-				<div class="w-full rounded-3xl border border-statBorder">
+				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
 					<h3
 						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
 					>
@@ -523,7 +539,7 @@
 
 			<section id="map-section">
 				<h3
-					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
+					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary dark:bg-white/10 dark:text-white md:text-left"
 				>
 					{username}'s Map
 				</h3>
@@ -551,4 +567,5 @@
 	@import 'leaflet/dist/leaflet.css';
 	@import 'leaflet.markercluster/dist/MarkerCluster.css';
 	@import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+	@import 'leaflet.locatecontrol/dist/L.Control.Locate.min.css';
 </style>
