@@ -2,9 +2,9 @@
 	import Chart from 'chart.js/auto';
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
-	import { Header, Footer, PrimaryButton, CommunitySection } from '$comp';
-	import { errToast } from '$lib/utils';
-	import { areas, areaError, syncStatus, reports, reportError } from '$lib/store';
+	import { Header, Footer, PrimaryButton, CommunitySection, HeaderPlaceholder } from '$comp';
+	import { errToast, detectTheme } from '$lib/utils';
+	import { areas, areaError, syncStatus, reports, reportError, theme } from '$lib/store';
 
 	// alert for area errors
 	$: $areaError && errToast($areaError);
@@ -172,15 +172,23 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/communities.png" />
 </svelte:head>
 
-<div class="bg-teal">
+<div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		<main class="my-10 space-y-10 text-center md:my-20">
-			<h1 class="gradient text-4xl font-semibold !leading-tight text-primary md:text-5xl">
-				Join the bitcoin map community.
-			</h1>
+			{#if typeof window !== 'undefined'}
+				<h1
+					class="{detectTheme() === 'dark' || $theme === 'dark'
+						? 'text-white'
+						: 'gradient'} text-4xl font-semibold !leading-tight md:text-5xl"
+				>
+					Join the bitcoin map community.
+				</h1>
+			{:else}
+				<HeaderPlaceholder />
+			{/if}
 
-			<h2 class="mx-auto w-full text-xl font-semibold text-primary lg:w-[800px]">
+			<h2 class="mx-auto w-full text-xl font-semibold text-primary dark:text-white lg:w-[800px]">
 				Take ownership of your local bitcoin mapping data and help drive adoption. Bitcoin
 				communities are the spark that ignites the movement. Join your friends, onboard businesses
 				and have fun!

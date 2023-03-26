@@ -4,7 +4,7 @@
 	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
 </script>
 
-<div class="w-full bg-teal">
+<div class="w-full bg-teal dark:bg-dark">
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		<div class="flex h-[100vh] w-full items-center justify-center">
 			<main class="space-y-10 text-center">
@@ -20,7 +20,7 @@
 						/>
 					</div>
 				{/if}
-				<h1 class="text-4xl font-semibold text-primary md:text-5xl">
+				<h1 class="text-4xl font-semibold text-primary dark:text-white md:text-5xl">
 					Loading {page}...
 				</h1>
 				<a

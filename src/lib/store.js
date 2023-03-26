@@ -72,3 +72,5 @@ export const resetBoost = writable(0);
 
 export const showTags = writable();
 export const showMore = writable(false);
+
+export const theme = writable();

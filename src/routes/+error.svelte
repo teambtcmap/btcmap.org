@@ -19,7 +19,7 @@
 	{/if}
 </svelte:head>
 
-<div class="bg-teal">
+<div class="bg-teal dark:bg-dark">
 	<div class="relative mx-auto w-10/12 xl:w-[1200px]">
 		<header>
 			<a href="/">
@@ -31,8 +31,10 @@
 			<a href="/" class="text-xl font-semibold text-link transition-colors hover:text-hover"
 				><i class="fa-solid fa-house mr-2" /> Home</a
 			>
-			<h1 class="text-4xl md:text-5xl">{$page.status}: {$page.error.message}</h1>
-			<h2 class="text-xl font-semibold text-primary">Please try again or contact BTC Map.</h2>
+			<h1 class="text-4xl dark:text-white md:text-5xl">{$page.status}: {$page.error.message}</h1>
+			<h2 class="text-xl font-semibold text-primary dark:text-white">
+				Please try again or contact BTC Map.
+			</h2>
 		</div>
 
 		<footer class="flex flex-wrap justify-center gap-5 pb-5">

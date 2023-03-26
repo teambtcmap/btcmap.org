@@ -6,7 +6,7 @@
 	import Chart from 'chart.js/auto';
 	import { browser } from '$app/environment';
 	import { onMount, onDestroy } from 'svelte';
-	import { users, events, elements, excludeLeader } from '$lib/store';
+	import { users, events, elements, excludeLeader, theme } from '$lib/store';
 	import {
 		attribution,
 		changeDefaultIcons,
@@ -14,9 +14,11 @@
 		latCalc,
 		longCalc,
 		generateIcon,
-		generateMarker
+		generateMarker,
+		toggleMapButtons,
+		geolocate
 	} from '$lib/map/setup';
-	import { errToast } from '$lib/utils';
+	import { errToast, detectTheme } from '$lib/utils';
 	import { error } from '@sveltejs/kit';
 	import {
 		Header,
@@ -226,8 +228,13 @@
 	let map;
 	let mapLoaded;
 
+	let osm;
+	let alidadeSmoothDark;
+
 	onMount(async () => {
 		if (browser) {
+			const theme = detectTheme();
+
 			// add markdown support for profile description
 			profileDesc.innerHTML = DOMPurify.sanitize(marked.parse(filteredDesc));
 
@@ -265,22 +272,38 @@
 			const leaflet = await import('leaflet');
 			const DomEvent = await import('leaflet/src/dom/DomEvent');
 			const leafletMarkerCluster = await import('leaflet.markercluster');
+			const leafletLocateControl = await import('leaflet.locatecontrol');
 
 			// add map and tiles
 			map = leaflet.map(mapElement, { attributionControl: false });
 
-			const osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				noWrap: true,
 				maxZoom: 19
 			});
 
-			osm.addTo(map);
+			alidadeSmoothDark = leaflet.tileLayer(
+				'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
+				{
+					noWrap: true,
+					maxZoom: 20
+				}
+			);
+
+			if (theme === 'dark') {
+				alidadeSmoothDark.addTo(map);
+			} else {
+				osm.addTo(map);
+			}
 
 			// change broken marker image path in prod
 			L.Icon.Default.prototype.options.imagePath = '/icons/';
 
 			// add OSM attribution
 			attribution(L, map);
+
+			// add locate button to map
+			geolocate(L, map);
 
 			// change default icons
 			changeDefaultIcons('', L, mapElement, DomEvent);
@@ -343,6 +366,26 @@
 		}
 	});
 
+	$: $theme !== undefined && mapLoaded === true && toggleMapButtons();
+
+	const closePopup = () => {
+		map.closePopup();
+	};
+
+	$: $theme !== undefined && mapLoaded === true && closePopup();
+
+	const toggleTheme = () => {
+		if ($theme === 'dark') {
+			osm.remove();
+			alidadeSmoothDark.addTo(map);
+		} else {
+			alidadeSmoothDark.remove();
+			osm.addTo(map);
+		}
+	};
+
+	$: $theme !== undefined && mapLoaded === true && toggleTheme();
+
 	onDestroy(async () => {
 		if (map) {
 			console.log('Unloading Leaflet map.');
@@ -366,7 +409,7 @@
 	{/if}
 </svelte:head>
 
-<div class="bg-teal">
+<div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		<main class="my-10 text-center md:my-20">
@@ -379,7 +422,7 @@
 				/>
 
 				<div>
-					<h1 class="text-4xl font-semibold !leading-tight text-primary">
+					<h1 class="text-4xl font-semibold !leading-tight text-primary dark:text-white">
 						{username}
 					</h1>
 					<a
@@ -408,7 +451,7 @@
 
 				<h2
 					bind:this={profileDesc}
-					class="mx-auto w-full break-all text-xl text-body lg:w-[800px]"
+					class="mx-auto w-full break-all text-xl text-body dark:text-white lg:w-[800px]"
 				/>
 
 				{#if lightning}
@@ -426,7 +469,7 @@
 									alt={badge.title}
 									class="mx-auto mb-1 h-20 w-20"
 								/>
-								<p class="text-center text-xs">{badge.title}</p>
+								<p class="text-center text-xs dark:text-white">{badge.title}</p>
 							</div>
 						</a>
 					{/each}
@@ -434,7 +477,9 @@
 			</section>
 
 			<section id="stats" class="mt-10 mb-16">
-				<div class="grid rounded-t-3xl border border-statBorder md:grid-cols-2 xl:grid-cols-4">
+				<div
+					class="grid rounded-t-3xl border border-statBorder dark:bg-white/10 md:grid-cols-2 xl:grid-cols-4"
+				>
 					<ProfileStat
 						title="Total Tags"
 						stat={total}
@@ -456,15 +501,15 @@
 					<ProfileStat title="Deleted" stat={deleted} percent={deletedPercent} border="" />
 				</div>
 
-				<div class="rounded-b-3xl border border-t-0 border-statBorder p-5">
+				<div class="rounded-b-3xl border border-t-0 border-statBorder p-5 dark:bg-white/10">
 					<canvas bind:this={tagTypeChartCanvas} width="250" height="250" />
 				</div>
 			</section>
 
 			<section id="activity" class="my-16">
-				<div class="w-full rounded-3xl border border-statBorder">
+				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
 					<h3
-						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left"
+						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
 					>
 						{username}'s Activity
 					</h3>
@@ -503,7 +548,7 @@
 
 							{#if !hideArrow && eventElements.length > 5}
 								<svg
-									class="absolute bottom-4 left-[calc(50%-8px)] z-20 h-4 w-4 animate-bounce text-primary"
+									class="absolute bottom-4 left-[calc(50%-8px)] z-20 h-4 w-4 animate-bounce text-primary dark:text-white"
 									fill="currentColor"
 									xmlns="http://www.w3.org/2000/svg"
 									viewBox="0 0 512 512"
@@ -523,7 +568,7 @@
 
 			<section id="map-section">
 				<h3
-					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left"
+					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary dark:bg-white/10 dark:text-white md:text-left"
 				>
 					{username}'s Map
 				</h3>
@@ -531,7 +576,7 @@
 				<div class="relative mb-2">
 					<div
 						bind:this={mapElement}
-						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal md:h-[600px]"
+						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal dark:!bg-[#202f33] md:h-[600px]"
 					/>
 					{#if !mapLoaded}
 						<MapLoading
@@ -551,4 +596,5 @@
 	@import 'leaflet/dist/leaflet.css';
 	@import 'leaflet.markercluster/dist/MarkerCluster.css';
 	@import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+	@import 'leaflet.locatecontrol/dist/L.Control.Locate.min.css';
 </style>

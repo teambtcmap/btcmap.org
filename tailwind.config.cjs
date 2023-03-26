@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+	darkMode: 'class',
 	content: ['./src/**/*.{html,js,svelte}'],
 	theme: {
 		fontSize: {
@@ -49,7 +50,8 @@ module.exports = {
 				deleted: '#EB5757',
 				bitcoin: '#F7931A',
 				nostr: '#8b5cf6',
-				twitter: '#1DA1F2'
+				twitter: '#1DA1F2',
+				dark: '#06171C'
 			},
 			keyframes: {
 				wiggle: {

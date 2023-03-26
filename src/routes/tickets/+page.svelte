@@ -1,9 +1,17 @@
 <script>
 	import axios from 'axios';
 
-	import { Header, Footer, OpenTicket, OpenTicketSkeleton, TopButton } from '$comp';
-	import { errToast } from '$lib/utils';
+	import {
+		Header,
+		Footer,
+		OpenTicket,
+		OpenTicketSkeleton,
+		TopButton,
+		HeaderPlaceholder
+	} from '$comp';
+	import { errToast, detectTheme } from '$lib/utils';
 	import { onMount, onDestroy } from 'svelte';
+	import { theme } from '$lib/store';
 
 	const ticketTypes = ['Add', 'Verify', 'Community'];
 	let showType = 'Add';
@@ -56,25 +64,33 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
-<div class="bg-teal">
+<div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		<main class="mt-10 mb-20 space-y-10">
-			<h1
-				class="gradient text-center text-4xl font-semibold !leading-tight text-primary md:text-5xl lg:text-left"
-			>
-				Open Tickets
-				{#if totalTickets}
-					<span class="text-3xl">({totalTickets})</span>
-				{/if}
-			</h1>
+			{#if typeof window !== 'undefined'}
+				<h1
+					class="{detectTheme() === 'dark' || $theme === 'dark'
+						? 'text-white'
+						: 'gradient'} text-center text-4xl font-semibold !leading-tight md:text-5xl lg:text-left"
+				>
+					Open Tickets
+					{#if totalTickets}
+						<span class="text-3xl">({totalTickets})</span>
+					{/if}
+				</h1>
+			{:else}
+				<HeaderPlaceholder />
+			{/if}
 
-			<h2 class="w-full text-center text-xl font-semibold text-primary lg:w-[675px] lg:text-left">
+			<h2
+				class="w-full text-center text-xl font-semibold text-primary dark:text-white lg:w-[675px] lg:text-left"
+			>
 				Tickets up for grabs from our noob forms! Anybody can help add or verify submissions on
 				OpenStreetMap and prepare community area polygons.
 			</h2>
 
-			<p class="text-center text-xl text-primary lg:text-left">
+			<p class="text-center text-xl text-primary dark:text-white lg:text-left">
 				More information on how to get involved can be found in our <a
 					href="https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions"
 					class="text-link transition-colors hover:text-hover">Tagging Instructions</a
@@ -87,8 +103,8 @@
 			</p>
 
 			<section id="tickets">
-				<div class="w-full rounded-3xl border border-statBorder">
-					<div class="p-5 text-center text-2xl font-semibold text-primary">
+				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
+					<div class="p-5 text-center text-2xl font-semibold text-primary dark:text-white">
 						{#each ticketTypes as type}
 							<button
 								class="mx-auto block w-40 border border-link py-2 md:inline {type === 'Add'
@@ -117,7 +133,7 @@
 									/>
 								{/each}
 							{:else}
-								<p class="border-t border-statBorder p-5 text-center text-body">
+								<p class="border-t border-statBorder p-5 text-center text-body dark:text-white">
 									No open <strong>add</strong> tickets.
 								</p>
 							{/if}
@@ -136,7 +152,7 @@
 									/>
 								{/each}
 							{:else}
-								<p class="border-t border-statBorder p-5 text-center text-body">
+								<p class="border-t border-statBorder p-5 text-center text-body dark:text-white">
 									No open <strong>verify</strong> tickets.
 								</p>
 							{/if}
@@ -155,14 +171,16 @@
 									/>
 								{/each}
 							{:else}
-								<p class="border-t border-statBorder p-5 text-center text-body">
+								<p class="border-t border-statBorder p-5 text-center text-body dark:text-white">
 									No open <strong>community</strong> tickets.
 								</p>
 							{/if}
 						{/if}
 
 						{#if tickets.length === 100}
-							<p class="border-t border-statBorder p-5 text-center font-semibold text-primary">
+							<p
+								class="border-t border-statBorder p-5 text-center font-semibold text-primary dark:text-white"
+							>
 								View all open tickets directly on <a
 									href="https://github.com/teambtcmap/btcmap-data/issues"
 									target="_blank"
@@ -177,7 +195,9 @@
 						{/each}
 					{/if}
 				</div>
-				<p class="text-center text-sm text-body lg:text-left">*Data updated every 10 minutes.</p>
+				<p class="text-center text-sm text-body dark:text-white lg:text-left">
+					*Data updated every 10 minutes.
+				</p>
 				<div class="mt-10 flex justify-center">
 					<TopButton />
 				</div>

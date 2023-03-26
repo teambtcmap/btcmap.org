@@ -7,10 +7,11 @@
 		PrimaryButton,
 		CommunityLeaderboardItem,
 		CommunityLeaderboardSkeleton,
-		TopButton
+		TopButton,
+		HeaderPlaceholder
 	} from '$comp';
-	import { errToast } from '$lib/utils';
-	import { areas, areaError, reports, reportError, syncStatus } from '$lib/store';
+	import { errToast, detectTheme } from '$lib/utils';
+	import { areas, areaError, reports, reportError, syncStatus, theme } from '$lib/store';
 
 	// alert for area errors
 	$: $areaError && errToast($areaError);
@@ -150,18 +151,26 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/top-communities.png" />
 </svelte:head>
 
-<div class="bg-teal">
+<div class="bg-teal dark:bg-dark">
 	<Header />
 
-	<main class="mt-10 mb-20">
+	<main class="mt-10">
 		<div class="mx-auto w-10/12 space-y-10 xl:w-[1200px]">
-			<h1
-				class="gradient text-center text-4xl font-semibold !leading-tight text-primary md:text-5xl"
-			>
-				Top Communities
-			</h1>
+			{#if typeof window !== 'undefined'}
+				<h1
+					class="{detectTheme() === 'dark' || $theme === 'dark'
+						? 'text-white'
+						: 'gradient'} text-center text-4xl font-semibold !leading-tight md:text-5xl"
+				>
+					Top Communities
+				</h1>
+			{:else}
+				<HeaderPlaceholder />
+			{/if}
 
-			<h2 class="mx-auto w-full text-center text-xl font-semibold text-primary lg:w-[800px]">
+			<h2
+				class="mx-auto w-full text-center text-xl font-semibold text-primary dark:text-white lg:w-[800px]"
+			>
 				Bitcoin mapping communities maintain their local datasets and strive to have the most
 				accurate information. They also help onboard new merchants in their area!
 			</h2>
@@ -179,10 +188,10 @@
 				/>
 			</div>
 
-			<section id="leaderboard">
+			<section id="leaderboard" class="dark:lg:rounded dark:lg:bg-white/10 dark:lg:py-8">
 				<div class="mb-5 hidden grid-cols-6 text-center lg:grid">
 					{#each headings as heading}
-						<h3 class="text-lg font-semibold text-primary">
+						<h3 class="text-lg font-semibold text-primary dark:text-white">
 							{heading}
 							{#if heading === 'Up-To-Date'}
 								<button bind:this={upToDateTooltip}>
@@ -200,7 +209,9 @@
 						</h3>
 					{/each}
 				</div>
-				<div class="mb-5 space-y-1 text-center text-lg font-semibold text-primary lg:hidden">
+				<div
+					class="mb-5 space-y-1 text-center text-lg font-semibold text-primary dark:text-white lg:hidden"
+				>
 					<h3>
 						Up-To-Date <button bind:this={upToDateTooltipMobile}>
 							<i class="fa-solid fa-circle-info" />
@@ -247,7 +258,7 @@
 					{/if}
 				</div>
 
-				<p class="text-center text-sm text-body">
+				<p class="text-center text-sm text-body dark:text-white">
 					*Data sorted by Up-To-Date, then Total Locations, then Legacy.
 				</p>
 

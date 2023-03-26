@@ -2,8 +2,16 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import axios from 'axios';
-	import { Header, Footer, PrimaryButton, FormSuccess, InfoTooltip } from '$comp';
-	import { errToast, successToast, warningToast } from '$lib/utils';
+	import {
+		Header,
+		Footer,
+		PrimaryButton,
+		FormSuccess,
+		InfoTooltip,
+		HeaderPlaceholder
+	} from '$comp';
+	import { errToast, successToast, warningToast, detectTheme } from '$lib/utils';
+	import { theme } from '$lib/store';
 
 	let captcha;
 	let captchaSecret;
@@ -130,18 +138,28 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/add-community.png" />
 </svelte:head>
 
-<div class="bg-teal">
+<div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		{#if !submitted}
-			<h1 class="gradient mt-10 text-center text-4xl font-semibold md:text-5xl">
-				Make an impact locally!
-			</h1>
+			{#if typeof window !== 'undefined'}
+				<h1
+					class="{detectTheme() === 'dark' || $theme === 'dark'
+						? 'text-white'
+						: 'gradient'} mt-10 text-center text-4xl font-semibold md:text-5xl"
+				>
+					Make an impact locally!
+				</h1>
+			{:else}
+				<HeaderPlaceholder />
+			{/if}
 
 			<section id="add-community" class="mx-auto mt-16 w-full pb-20 md:w-[600px] md:pb-32">
-				<h2 class="mb-5 text-center text-3xl font-semibold text-primary">Add Community</h2>
+				<h2 class="mb-5 text-center text-3xl font-semibold text-primary dark:text-white">
+					Add Community
+				</h2>
 
-				<p class="mb-5 w-full text-center text-primary">
+				<p class="mb-5 w-full text-center text-primary dark:text-white">
 					Please fill out this form to submit a community application. This is a great way to grow
 					bitcoin adoption in your area, have some fun, and maybe even make some friends along the
 					way. <InfoTooltip
@@ -149,7 +167,7 @@
 					/>
 				</p>
 
-				<div class="mb-10 w-full text-primary">
+				<div class="mb-10 w-full text-primary dark:text-white">
 					<p class="font-semibold">Criteria</p>
 					<ul class="ml-5 list-disc">
 						<li>bitcoin-only</li>
@@ -159,7 +177,7 @@
 					</ul>
 				</div>
 
-				<form on:submit={submitForm} class="w-full space-y-5 text-primary">
+				<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
 					<div class="space-y-2">
 						<label for="location-picker" class="block font-semibold">Select Location</label>
 						<p class="text-sm">Search for an area and select an option from the results.</p>
@@ -182,7 +200,7 @@
 								name="location"
 								placeholder="El Zonte, El Salvador"
 								required
-								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 								bind:value={searchQuery}
 							/>
 							<PrimaryButton
@@ -200,7 +218,7 @@
 						{#if searchResults && searchResults.length}
 							<div
 								class="{!location
-									? 'bg-white'
+									? 'bg-white dark:bg-dark'
 									: ''} max-h-[300px] overflow-auto border-2 border-input"
 							>
 								{#if !location}
@@ -228,7 +246,7 @@
 							name="name"
 							placeholder="Bitcoin Island Philippines"
 							required
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 							bind:value={name}
 						/>
 					</div>
@@ -246,7 +264,7 @@
 							type="url"
 							name="icon"
 							placeholder="https://btcmap.org/images/communities/iom.svg"
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 							bind:value={icon}
 						/>
 					</div>
@@ -275,7 +293,7 @@
 							type="text"
 							name="lightning"
 							placeholder="btcmap@zbd.gg"
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 							bind:value={lightning}
 						/>
 					</div>
@@ -292,7 +310,7 @@
 							name="socials"
 							placeholder="Website, Nostr, Telegram, Meetup etc."
 							rows="3"
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 							bind:value={socialLinks}
 						/>
 					</div>
@@ -308,7 +326,7 @@
 							type="text"
 							name="contact"
 							placeholder="e.g. hello@btcmap.org"
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 							bind:value={contact}
 						/>
 					</div>
@@ -327,7 +345,7 @@
 							name="notes"
 							placeholder="German speaking - part of Einundzwanzig."
 							rows="2"
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 							bind:value={notes}
 						/>
 					</div>
@@ -356,7 +374,7 @@
 								type="text"
 								name="captcha"
 								placeholder="Please enter the captcha text."
-								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 								bind:value={captchaInput}
 							/>
 						</div>

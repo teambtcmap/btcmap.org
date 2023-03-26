@@ -8,10 +8,19 @@
 		PrimaryButton,
 		LeaderboardItem,
 		LeaderboardSkeleton,
-		TopButton
+		TopButton,
+		HeaderPlaceholder
 	} from '$comp';
-	import { users, userError, events, eventError, syncStatus, excludeLeader } from '$lib/store';
-	import { errToast } from '$lib/utils';
+	import {
+		users,
+		userError,
+		events,
+		eventError,
+		syncStatus,
+		excludeLeader,
+		theme
+	} from '$lib/store';
+	import { errToast, detectTheme } from '$lib/utils';
 
 	// alert for user errors
 	$: $userError && errToast($userError);
@@ -23,6 +32,7 @@
 
 	let topTenChartCanvas;
 	let topTenChart;
+	let chartsLoading;
 
 	let initialRenderComplete = false;
 
@@ -70,13 +80,29 @@
 
 			let leaderboardCopy = [...leaderboard];
 			leaderboardCopy = leaderboardCopy.slice(0, 10);
+			chartsLoading = true;
 			topTenChart.data.labels = leaderboardCopy.map(({ tagger }) => tagger);
 			topTenChart.data.datasets[0].data = leaderboardCopy.map(({ total }) => total);
 			topTenChart.update();
+			chartsLoading = false;
 		}
 	};
 
 	$: leaderboardSync($syncStatus, $users, $events);
+
+	const updateChartTheme = () => {
+		if ($theme === 'dark') {
+			topTenChart.options.scales.x.grid.color = 'rgba(255, 255, 255, 0.15)';
+			topTenChart.options.scales.y.grid.color = 'rgba(255, 255, 255, 0.15)';
+			topTenChart.update();
+		} else {
+			topTenChart.options.scales.x.grid.color = 'rgba(0, 0, 0, 0.1)';
+			topTenChart.options.scales.y.grid.color = 'rgba(0, 0, 0, 0.1)';
+			topTenChart.update();
+		}
+	};
+
+	$: $theme !== undefined && !chartsLoading && initialRenderComplete === true && updateChartTheme();
 
 	let leaderboardCount = 50;
 	$: leaderboardPaginated =
@@ -84,6 +110,8 @@
 
 	onMount(() => {
 		if (browser) {
+			const theme = detectTheme();
+
 			// setup leaderboard
 			populateLeaderboard();
 
@@ -124,6 +152,9 @@
 								font: {
 									weight: 600
 								}
+							},
+							grid: {
+								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 							}
 						},
 						y: {
@@ -132,6 +163,9 @@
 								font: {
 									weight: 600
 								}
+							},
+							grid: {
+								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 							}
 						}
 					}
@@ -145,10 +179,10 @@
 	const headings = ['Position', 'Supertagger', 'Created', 'Updated', 'Deleted', 'Tip'];
 </script>
 
-<div class="bg-teal">
+<div class="bg-teal dark:bg-dark">
 	<Header />
 
-	<main class="mt-10 mb-20">
+	<main class="mt-10">
 		<div class="mb-10 flex justify-center">
 			<div id="hero" class="flex h-[324px] w-full items-end justify-center">
 				<img src="/images/supertagger-king.svg" alt="ultimate supertagger" />
@@ -156,13 +190,21 @@
 		</div>
 
 		<div class="mx-auto w-10/12 space-y-10 xl:w-[1200px]">
-			<h1
-				class="gradient text-center text-4xl font-semibold !leading-tight text-primary md:text-5xl"
-			>
-				Top Supertaggers
-			</h1>
+			{#if typeof window !== 'undefined'}
+				<h1
+					class="{detectTheme() === 'dark' || $theme === 'dark'
+						? 'text-white'
+						: 'gradient'} text-center text-4xl font-semibold !leading-tight md:text-5xl"
+				>
+					Top Supertaggers
+				</h1>
+			{:else}
+				<HeaderPlaceholder />
+			{/if}
 
-			<h2 class="mx-auto w-full text-center text-xl font-semibold text-primary lg:w-[800px]">
+			<h2
+				class="mx-auto w-full text-center text-xl font-semibold text-primary dark:text-white lg:w-[800px]"
+			>
 				Shadowy supertaggers are a competitive bunch. When they are not smashing the keys, they
 				check this leaderboard to make sure they’re on top. Are you going to stand by and let them
 				claim the top spot?! Get taggin’!
@@ -182,10 +224,10 @@
 				external
 			/>
 
-			<section id="leaderboard">
+			<section id="leaderboard" class="dark:lg:rounded dark:lg:bg-white/10 dark:lg:py-8">
 				<div class="mb-5 hidden grid-cols-6 text-center lg:grid">
 					{#each headings as heading}
-						<h3 class="text-lg font-semibold text-primary">
+						<h3 class="text-lg font-semibold text-primary dark:text-white">
 							{heading}
 							{#if heading === 'Tip'}
 								<a
@@ -226,7 +268,7 @@
 					{/if}
 				</div>
 
-				<p class="text-center text-sm text-body">*Data updated every 10 minutes</p>
+				<p class="text-center text-sm text-body dark:text-white">*Data updated every 10 minutes</p>
 
 				<div class="mt-10 flex justify-center">
 					<TopButton />

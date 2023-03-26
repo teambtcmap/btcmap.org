@@ -15,7 +15,9 @@
 			rel="noreferrer"
 			class="text-2xl font-semibold text-link transition-colors hover:text-hover"
 		>
-			<div class="mb-5 flex h-60 items-center justify-center rounded-2xl bg-offwhite">
+			<div
+				class="mb-5 flex h-60 items-center justify-center rounded-2xl bg-offwhite dark:bg-white/[0.15]"
+			>
 				<Icon w="112" h="112" icon={image} type="apps" />
 			</div>
 			<p>{text}</p>
@@ -23,7 +25,7 @@
 		</a>
 	{:else}
 		<div
-			class="mb-5 flex h-60 items-center justify-center rounded-2xl bg-offwhite text-link opacity-50"
+			class="mb-5 flex h-60 items-center justify-center rounded-2xl bg-offwhite text-link opacity-50 dark:bg-white/[0.15]"
 		>
 			<i class="{image} h-28 w-28" />
 		</div>

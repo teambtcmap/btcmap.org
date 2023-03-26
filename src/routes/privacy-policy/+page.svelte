@@ -10,12 +10,12 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
-<div class="bg-teal">
+<div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		<main class="mt-10 mb-20 space-y-10">
-			<div class="space-y-5 text-xl text-body">
-				<h1 class="text-4xl font-semibold !leading-tight text-primary md:text-5xl">
+			<div class="space-y-5 text-xl text-body dark:text-white">
+				<h1 class="text-4xl font-semibold !leading-tight text-primary dark:text-white md:text-5xl">
 					Privacy Policy
 				</h1>
 				<p>
@@ -24,8 +24,8 @@
 				<p>Please read further for more details.</p>
 			</div>
 
-			<div class="space-y-5 text-xl text-body">
-				<h2 class="text-3xl font-semibold text-primary">Forms</h2>
+			<div class="space-y-5 text-xl text-body dark:text-white">
+				<h2 class="text-3xl font-semibold text-primary dark:text-white">Forms</h2>
 				<p>What happens when you submit a form on our website:</p>
 				<ol class="ml-5 list-decimal space-y-2">
 					<li>
@@ -88,8 +88,8 @@
 				</p>
 			</div>
 
-			<div class="space-y-5 text-xl text-body">
-				<h2 class="text-3xl font-semibold text-primary">Analytics</h2>
+			<div class="space-y-5 text-xl text-body dark:text-white">
+				<h2 class="text-3xl font-semibold text-primary dark:text-white">Analytics</h2>
 				<p>
 					We use privacy respecting analytics provided by <a
 						href="https://www.netlify.com/"
@@ -128,13 +128,13 @@
 				</ul>
 			</div>
 
-			<div class="space-y-5 text-xl text-body">
-				<h2 class="text-3xl font-semibold text-primary">Cookies</h2>
+			<div class="space-y-5 text-xl text-body dark:text-white">
+				<h2 class="text-3xl font-semibold text-primary dark:text-white">Cookies</h2>
 				<p>We <strong>do not</strong> use cookies.</p>
 			</div>
 
-			<div class="space-y-5 text-xl text-body">
-				<h2 class="text-3xl font-semibold text-primary">(Don't Use) Google</h2>
+			<div class="space-y-5 text-xl text-body dark:text-white">
+				<h2 class="text-3xl font-semibold text-primary dark:text-white">(Don't Use) Google</h2>
 				<p>
 					Our Android app is available to download via the Google <a
 						href={$apps[3].link}
@@ -148,8 +148,10 @@
 				</p>
 			</div>
 
-			<div class="space-y-5 text-xl text-body">
-				<h2 class="text-3xl font-semibold text-primary">How to Protect Your IP Online</h2>
+			<div class="space-y-5 text-xl text-body dark:text-white">
+				<h2 class="text-3xl font-semibold text-primary dark:text-white">
+					How to Protect Your IP Online
+				</h2>
 				<p>
 					It is good practice to protect your public IP address when surfing the web. The two most
 					common methods to do this are:
@@ -170,13 +172,15 @@
 				</ol>
 			</div>
 
-			<div class="space-y-5 text-xl text-body">
-				<h2 class="text-3xl font-semibold text-primary">Changes to this Privacy Policy</h2>
+			<div class="space-y-5 text-xl text-body dark:text-white">
+				<h2 class="text-3xl font-semibold text-primary dark:text-white">
+					Changes to this Privacy Policy
+				</h2>
 				<p>This privacy policy was last updated: November 10, 2022.</p>
 			</div>
 
-			<div class="space-y-5 text-xl text-body">
-				<h2 class="text-3xl font-semibold text-primary">Contact Us</h2>
+			<div class="space-y-5 text-xl text-body dark:text-white">
+				<h2 class="text-3xl font-semibold text-primary dark:text-white">Contact Us</h2>
 				<p>
 					If you have any questions or feedback about our privacy policy, please contact us at <a
 						href="mailto:hello@btcmap.org"

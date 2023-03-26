@@ -27,7 +27,8 @@
 				href={link.link}
 				class="mx-2.5 {link.name !== 'Cypherpunks'
 					? 'mb-2.5 xl:mb-0'
-					: ''} text-link transition-colors hover:text-hover">{link.name}</a
+					: ''} text-link transition-colors hover:text-hover dark:text-white dark:hover:text-link"
+				>{link.name}</a
 			>
 		{/each}
 	</div>

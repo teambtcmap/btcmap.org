@@ -3,8 +3,16 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import axios from 'axios';
-	import { Header, Footer, PrimaryButton, MapLoading, FormSuccess, InfoTooltip } from '$comp';
-	import { elements, elementError } from '$lib/store';
+	import {
+		Header,
+		Footer,
+		PrimaryButton,
+		MapLoading,
+		FormSuccess,
+		InfoTooltip,
+		HeaderPlaceholder
+	} from '$comp';
+	import { elements, elementError, theme } from '$lib/store';
 	import {
 		attribution,
 		geolocate,
@@ -13,9 +21,10 @@
 		latCalc,
 		longCalc,
 		generateIcon,
-		generateMarker
+		generateMarker,
+		toggleMapButtons
 	} from '$lib/map/setup';
-	import { errToast } from '$lib/utils';
+	import { errToast, detectTheme } from '$lib/utils';
 
 	let name = $page.url.searchParams.has('name') ? $page.url.searchParams.get('name') : '';
 	let lat = $page.url.searchParams.has('lat') ? $page.url.searchParams.get('lat') : '';
@@ -104,11 +113,16 @@
 	let showMap = !name || !lat || !long || !edit ? true : false;
 	let mapLoaded;
 
+	let osm;
+	let alidadeSmoothDark;
+
 	// alert for map errors
 	$: $elementError && showMap && errToast($elementError);
 
 	onMount(async () => {
 		if (browser) {
+			const theme = detectTheme();
+
 			// fetch and add captcha
 			fetchCaptcha();
 
@@ -122,12 +136,24 @@
 				// add map and tiles
 				map = leaflet.map(mapElement, { attributionControl: false }).setView([0, 0], 2);
 
-				const osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 					noWrap: true,
 					maxZoom: 19
 				});
 
-				osm.addTo(map);
+				alidadeSmoothDark = leaflet.tileLayer(
+					'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
+					{
+						noWrap: true,
+						maxZoom: 20
+					}
+				);
+
+				if (theme === 'dark') {
+					alidadeSmoothDark.addTo(map);
+				} else {
+					osm.addTo(map);
+				}
 
 				// set URL lat/long query view if it exists and is valid
 				if (lat.length && long.length) {
@@ -217,6 +243,26 @@
 		}
 	});
 
+	$: $theme !== undefined && mapLoaded === true && showMap && toggleMapButtons();
+
+	const closePopup = () => {
+		map.closePopup();
+	};
+
+	$: $theme !== undefined && mapLoaded === true && showMap && closePopup();
+
+	const toggleTheme = () => {
+		if ($theme === 'dark') {
+			osm.remove();
+			alidadeSmoothDark.addTo(map);
+		} else {
+			alidadeSmoothDark.remove();
+			osm.addTo(map);
+		}
+	};
+
+	$: $theme !== undefined && mapLoaded === true && showMap && toggleTheme();
+
 	if (showMap) {
 		onDestroy(async () => {
 			if (map) {
@@ -227,23 +273,31 @@
 	}
 </script>
 
-<div class="bg-teal">
+<div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		{#if !submitted}
-			<h1 class="gradient mt-10 text-center text-4xl font-semibold md:text-5xl">
-				Help improve the data for everyone.
-			</h1>
+			{#if typeof window !== 'undefined'}
+				<h1
+					class="{detectTheme() === 'dark' || $theme === 'dark'
+						? 'text-white'
+						: 'gradient'} mt-10 text-center text-4xl font-semibold md:text-5xl"
+				>
+					Help improve the data for everyone.
+				</h1>
+			{:else}
+				<HeaderPlaceholder />
+			{/if}
 
 			<section id="verify" class="mx-auto mt-16 w-full pb-20 md:w-[600px] md:pb-32">
-				<h2 class="mb-5 text-center text-3xl font-semibold text-primary">
+				<h2 class="mb-5 text-center text-3xl font-semibold text-primary dark:text-white">
 					Verify Location<br />
 					<span class="text-base font-normal"
 						>(Ensure the information is still accurate and update it otherwise.)</span
 					>
 				</h2>
 
-				<p class="mb-10 w-full text-center text-primary">
+				<p class="mb-10 w-full text-center text-primary dark:text-white">
 					Please fill out the following form and one of our volunteer community members will update
 					your location on the map. Did you know you can update this data yourself on <a
 						href="https://www.openstreetmap.org"
@@ -262,7 +316,7 @@
 					/>
 				</p>
 
-				<form on:submit={submitForm} class="w-full space-y-5 text-primary">
+				<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
 					<div>
 						<div class={showMap ? 'block' : 'hidden'}>
 							<label for="location-picker" class="mb-2 block font-semibold">Select Location</label>
@@ -274,7 +328,7 @@
 							<div class="relative mb-2">
 								<div
 									bind:this={mapElement}
-									class="z-10 h-[300px] !cursor-crosshair rounded-2xl border-2 border-input !bg-teal md:h-[450px]"
+									class="z-10 h-[300px] !cursor-crosshair rounded-2xl border-2 border-input !bg-teal dark:!bg-dark md:h-[450px]"
 								/>
 								{#if !mapLoaded}
 									<MapLoading
@@ -327,7 +381,7 @@
 							name="outdated"
 							placeholder="Provide what info is incorrect and the updated info on this location"
 							rows="3"
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 							bind:value={outdated}
 						/>
 					</div>
@@ -340,7 +394,7 @@
 							name="verify"
 							placeholder="Please provide additional info here"
 							rows="3"
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 							bind:this={verify}
 						/>
 					</div>
@@ -369,7 +423,7 @@
 								type="text"
 								name="captcha"
 								placeholder="Please enter the captcha text."
-								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link"
+								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 								bind:this={captchaInput}
 							/>
 						</div>

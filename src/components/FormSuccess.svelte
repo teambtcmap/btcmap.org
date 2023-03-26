@@ -6,14 +6,25 @@
 	export let buttonWidth = 'w-52';
 
 	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
-	import { PrimaryButton } from '$comp';
-	import { socials } from '$lib/store';
+	import { PrimaryButton, HeaderPlaceholder } from '$comp';
+	import { socials, theme } from '$lib/store';
+	import { detectTheme } from '$lib/utils';
 </script>
 
 <div class="mt-10 flex items-center justify-center pb-20 text-center md:pb-32">
 	<div>
-		<h2 class="gradient mb-5 text-4xl font-semibold">{type} Submitted!</h2>
-		<p class="mb-5 w-full text-primary md:w-[500px]">
+		{#if typeof window !== 'undefined'}
+			<h2
+				class="{detectTheme() === 'dark' || $theme === 'dark'
+					? 'text-white'
+					: 'gradient'} mb-5 text-4xl font-semibold"
+			>
+				{type} Submitted!
+			</h2>
+		{:else}
+			<HeaderPlaceholder />
+		{/if}
+		<p class="mb-5 w-full text-primary dark:text-white md:w-[500px]">
 			{text} If you wish to know the status of your contribution, you can join our
 			<a
 				href={$socials.discord}

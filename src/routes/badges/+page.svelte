@@ -1,5 +1,7 @@
 <script>
-	import { Header, Footer, BadgeCard } from '$comp';
+	import { Header, Footer, BadgeCard, HeaderPlaceholder } from '$comp';
+	import { theme } from '$lib/store';
+	import { detectTheme } from '$lib/utils';
 
 	let achievements = [
 		{
@@ -160,21 +162,31 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/badges.png" />
 </svelte:head>
 
-<div class="bg-teal">
+<div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		<main class="my-10 text-center md:my-20">
-			<h1 class="gradient mb-8 text-4xl font-semibold !leading-tight text-primary md:text-5xl">
-				Badges
-			</h1>
+			{#if typeof window !== 'undefined'}
+				<h1
+					class="{detectTheme() === 'dark' || $theme === 'dark'
+						? 'text-white'
+						: 'gradient'} mb-8 text-4xl font-semibold !leading-tight md:text-5xl"
+				>
+					Badges
+				</h1>
+			{:else}
+				<HeaderPlaceholder />
+			{/if}
 
-			<p class="mx-auto w-full text-lg text-primary lg:w-[700px]">
+			<p class="mx-auto w-full text-lg text-primary dark:text-white lg:w-[700px]">
 				You can earn badges for your BTC Map contributions that will be displayed on your profile.
 				Have a badge idea? Let us know!
 			</p>
 
 			<section id="achievements" class="mt-16 mb-20 space-y-8">
-				<h2 class="text-center text-3xl font-semibold text-primary">Achievements</h2>
+				<h2 class="text-center text-3xl font-semibold text-primary dark:text-white">
+					Achievements
+				</h2>
 
 				<div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 					{#each achievements.reverse() as achievement}
@@ -189,7 +201,9 @@
 			</section>
 
 			<section id="contributions" class="space-y-8">
-				<h2 class="text-center text-3xl font-semibold text-primary">Contributions</h2>
+				<h2 class="text-center text-3xl font-semibold text-primary dark:text-white">
+					Contributions
+				</h2>
 
 				<div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 					{#each contributions.reverse() as contribution}

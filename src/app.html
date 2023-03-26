@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
+		<script>
+			if (
+				localStorage.theme === 'dark' ||
+				(!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
+			) {
+				document.documentElement.classList.add('dark');
+			} else {
+				document.documentElement.classList.remove('dark');
+			}
+		</script>
 		<meta name="theme-color" content="#0B9072" />
 		<meta name="keywords" content="bitcoin, open source, map" />
 		<meta name="author" content="BTC Map" />
@@ -26,7 +36,7 @@
 		<script defer src="/icons/fontawesome.js"></script>
 		%sveltekit.head%
 	</head>
-	<body class="bg-teal">
+	<body class="bg-teal dark:bg-dark">
 		<div>%sveltekit.body%</div>
 	</body>
 </html>
