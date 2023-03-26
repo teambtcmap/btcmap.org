@@ -25,7 +25,7 @@
 	};
 
 	const company = [
-		{ url: 'https://coinos.io/', title: 'coinos', logo: 'coinos.svg' },
+		{ url: 'https://coinos.io/', title: 'coinos', logo: 'coinos.svg', logoDark: 'coinos-dark.svg' },
 		{ url: 'https://www.walletofsatoshi.com/', title: 'Wallet of Satoshi', logo: 'wos.svg' },
 		{ url: 'https://swiss-bitcoin-pay.ch/', title: 'Swiss Bitcoin Pay', logo: 'swiss.svg' }
 	];

@@ -2,6 +2,9 @@
 	export let title;
 	export let supporters;
 	export let placeholders;
+
+	import { detectTheme } from '$lib/utils';
+	import { theme } from '$lib/store';
 </script>
 
 <div>
@@ -14,11 +17,17 @@
 				rel="noreferrer"
 				class="mx-auto block w-full self-center md:w-[250px]"
 			>
-				<img
-					src="/images/supporters/{supporter.logo}"
-					alt={supporter.title}
-					class="mx-auto w-[250px]"
-				/>
+				{#if typeof window !== 'undefined'}
+					<img
+						src="/images/supporters/{supporter.logoDark
+							? detectTheme() === 'dark' || $theme === 'dark'
+								? supporter.logoDark
+								: supporter.logo
+							: supporter.logo}"
+						alt={supporter.title}
+						class="mx-auto w-[250px]"
+					/>
+				{/if}
 			</a>
 		{/each}
 		<!-- supporter placeholders -->
