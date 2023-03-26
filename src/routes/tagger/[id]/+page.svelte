@@ -18,7 +18,7 @@
 		toggleMapButtons,
 		geolocate
 	} from '$lib/map/setup';
-	import { errToast } from '$lib/utils';
+	import { errToast, detectTheme } from '$lib/utils';
 	import { error } from '@sveltejs/kit';
 	import {
 		Header,
@@ -228,8 +228,13 @@
 	let map;
 	let mapLoaded;
 
+	let osm;
+	let alidadeSmoothDark;
+
 	onMount(async () => {
 		if (browser) {
+			const theme = detectTheme();
+
 			// add markdown support for profile description
 			profileDesc.innerHTML = DOMPurify.sanitize(marked.parse(filteredDesc));
 
@@ -272,12 +277,24 @@
 			// add map and tiles
 			map = leaflet.map(mapElement, { attributionControl: false });
 
-			const osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				noWrap: true,
 				maxZoom: 19
 			});
 
-			osm.addTo(map);
+			alidadeSmoothDark = leaflet.tileLayer(
+				'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
+				{
+					noWrap: true,
+					maxZoom: 20
+				}
+			);
+
+			if (theme === 'dark') {
+				alidadeSmoothDark.addTo(map);
+			} else {
+				osm.addTo(map);
+			}
 
 			// change broken marker image path in prod
 			L.Icon.Default.prototype.options.imagePath = '/icons/';
@@ -356,6 +373,18 @@
 	};
 
 	$: $theme !== undefined && mapLoaded === true && closePopup();
+
+	const toggleTheme = () => {
+		if ($theme === 'dark') {
+			osm.remove();
+			alidadeSmoothDark.addTo(map);
+		} else {
+			alidadeSmoothDark.remove();
+			osm.addTo(map);
+		}
+	};
+
+	$: $theme !== undefined && mapLoaded === true && toggleTheme();
 
 	onDestroy(async () => {
 		if (map) {

@@ -66,6 +66,8 @@ export const toggleMapButtons = () => {
 };
 
 export const layers = (leaflet, map) => {
+	const theme = detectTheme();
+
 	const osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		noWrap: true,
 		maxZoom: 19
@@ -129,10 +131,23 @@ export const layers = (leaflet, map) => {
 		}
 	);
 
-	osm.addTo(map);
+	const alidadeSmoothDark = leaflet.tileLayer(
+		'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
+		{
+			noWrap: true,
+			maxZoom: 20
+		}
+	);
+
+	if (theme === 'dark') {
+		alidadeSmoothDark.addTo(map);
+	} else {
+		osm.addTo(map);
+	}
 
 	const baseMaps = {
 		OpenStreetMap: osm,
+		'Alidade Smooth Dark': alidadeSmoothDark,
 		Imagery: imagery,
 		Terrain: terrain,
 		Topo: topo,
@@ -156,7 +171,7 @@ export const attribution = (L, map) => {
 	OSMAttribution.style.borderRadius = '0 8px 0 0';
 	OSMAttribution.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 	OSMAttribution.innerHTML =
-		'&copy; <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" class="!text-link hover:!text-hover !no-underline transition-colors">OpenStreetMap</a> contributors';
+		'<a href="https://stadiamaps.com/" target="_blank" rel="noreferrer" class="!text-link hover:!text-hover !no-underline transition-colors block md:inline"><span class="text-map dark:text-white">&copy;</span> Stadia Maps</a> <a href="https://openmaptiles.org/" target="_blank" rel="noreferrer" class="!text-link hover:!text-hover !no-underline transition-colors block md:inline"><span class="text-map dark:text-white">&copy;</span> OpenMapTiles</a> <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" class="!text-link hover:!text-hover !no-underline transition-colors block md:inline"><span class="text-map dark:text-white">&copy;</span> OpenStreetMap <span class="text-map dark:text-white">contributors</span></a>';
 	OSMAttribution.classList.add(
 		'dark:!bg-dark',
 		'dark:!text-white',

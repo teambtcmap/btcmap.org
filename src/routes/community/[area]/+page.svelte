@@ -236,6 +236,8 @@
 	let map;
 	let mapLoaded;
 
+	let baseMaps;
+
 	let chartsLoading = true;
 	let upToDateChartCanvas;
 	let upToDateChart;
@@ -584,7 +586,7 @@
 			map = leaflet.map(mapElement, { attributionControl: false });
 
 			// add tiles and basemaps
-			const baseMaps = layers(leaflet, map);
+			baseMaps = layers(leaflet, map);
 
 			// change broken marker image path in prod
 			L.Icon.Default.prototype.options.imagePath = '/icons/';
@@ -695,6 +697,18 @@
 	};
 
 	$: $theme !== undefined && mapLoaded === true && closePopup();
+
+	const toggleTheme = () => {
+		if ($theme === 'dark') {
+			baseMaps.OpenStreetMap.remove();
+			baseMaps['Alidade Smooth Dark'].addTo(map);
+		} else {
+			baseMaps['Alidade Smooth Dark'].remove();
+			baseMaps.OpenStreetMap.addTo(map);
+		}
+	};
+
+	$: $theme !== undefined && mapLoaded === true && toggleTheme();
 
 	onDestroy(async () => {
 		if (map) {

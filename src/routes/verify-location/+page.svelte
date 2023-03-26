@@ -113,11 +113,16 @@
 	let showMap = !name || !lat || !long || !edit ? true : false;
 	let mapLoaded;
 
+	let osm;
+	let alidadeSmoothDark;
+
 	// alert for map errors
 	$: $elementError && showMap && errToast($elementError);
 
 	onMount(async () => {
 		if (browser) {
+			const theme = detectTheme();
+
 			// fetch and add captcha
 			fetchCaptcha();
 
@@ -131,12 +136,24 @@
 				// add map and tiles
 				map = leaflet.map(mapElement, { attributionControl: false }).setView([0, 0], 2);
 
-				const osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 					noWrap: true,
 					maxZoom: 19
 				});
 
-				osm.addTo(map);
+				alidadeSmoothDark = leaflet.tileLayer(
+					'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
+					{
+						noWrap: true,
+						maxZoom: 20
+					}
+				);
+
+				if (theme === 'dark') {
+					alidadeSmoothDark.addTo(map);
+				} else {
+					osm.addTo(map);
+				}
 
 				// set URL lat/long query view if it exists and is valid
 				if (lat.length && long.length) {
@@ -233,6 +250,18 @@
 	};
 
 	$: $theme !== undefined && mapLoaded === true && showMap && closePopup();
+
+	const toggleTheme = () => {
+		if ($theme === 'dark') {
+			osm.remove();
+			alidadeSmoothDark.addTo(map);
+		} else {
+			alidadeSmoothDark.remove();
+			osm.addTo(map);
+		}
+	};
+
+	$: $theme !== undefined && mapLoaded === true && showMap && toggleTheme();
 
 	if (showMap) {
 		onDestroy(async () => {
