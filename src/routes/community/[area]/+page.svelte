@@ -909,7 +909,7 @@
 				<div class="relative">
 					<div
 						bind:this={mapElement}
-						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal text-left dark:!bg-dark md:h-[600px]"
+						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal text-left dark:!bg-[#202f33] md:h-[600px]"
 					/>
 					{#if !mapLoaded}
 						<MapLoading
