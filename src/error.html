@@ -934,6 +934,12 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 			.h-\[48px\] {
 				height: 48px;
 			}
+			.h-\[60px\] {
+				height: 60px;
+			}
+			.h-\[648px\] {
+				height: 648px;
+			}
 			.h-\[90px\] {
 				height: 90px;
 			}
@@ -1610,6 +1616,10 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 				padding-left: 0px;
 				padding-right: 0px;
 			}
+			.px-2 {
+				padding-left: 0.5rem;
+				padding-right: 0.5rem;
+			}
 			.px-3 {
 				padding-left: 0.75rem;
 				padding-right: 0.75rem;
@@ -1838,6 +1848,10 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 			}
 			.text-link\/50 {
 				color: rgb(0 153 175 / 0.5);
+			}
+			.text-map {
+				--tw-text-opacity: 1;
+				color: rgb(51 51 51 / var(--tw-text-opacity));
 			}
 			.text-mapButton {
 				--tw-text-opacity: 1;
@@ -2205,6 +2219,31 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 				border-radius: 9999px;
 			}
 
+			.dark .dark\:border {
+				border-width: 1px;
+			}
+
+			.dark .dark\:border-b {
+				border-bottom-width: 1px;
+			}
+
+			.dark .dark\:border-l {
+				border-left-width: 1px;
+			}
+
+			.dark .dark\:border-r {
+				border-right-width: 1px;
+			}
+
+			.dark .dark\:border-t {
+				border-top-width: 1px;
+			}
+
+			.dark .dark\:\!bg-\[\#202f33\] {
+				--tw-bg-opacity: 1 !important;
+				background-color: rgb(32 47 51 / var(--tw-bg-opacity)) !important;
+			}
+
 			.dark .dark\:\!bg-dark {
 				--tw-bg-opacity: 1 !important;
 				background-color: rgb(6 23 28 / var(--tw-bg-opacity)) !important;
@@ -2222,6 +2261,10 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 			.dark .dark\:bg-white {
 				--tw-bg-opacity: 1;
 				background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+			}
+
+			.dark .dark\:bg-white\/10 {
+				background-color: rgb(255 255 255 / 0.1);
 			}
 
 			.dark .dark\:bg-white\/\[0\.15\] {
@@ -2245,21 +2288,40 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 				color: rgb(255 255 255 / var(--tw-text-opacity)) !important;
 			}
 
+			.dark .dark\:text-link {
+				--tw-text-opacity: 1;
+				color: rgb(0 153 175 / var(--tw-text-opacity));
+			}
+
 			.dark .dark\:text-white {
 				--tw-text-opacity: 1;
 				color: rgb(255 255 255 / var(--tw-text-opacity));
+			}
+
+			.dark .dark\:text-white\/50 {
+				color: rgb(255 255 255 / 0.5);
+			}
+
+			.dark .dark\:\!text-link {
+				--tw-text-opacity: 1 !important;
+				color: rgb(0 153 175 / var(--tw-text-opacity)) !important;
 			}
 
 			.dark .dark\:opacity-10 {
 				opacity: 0.1;
 			}
 
-			.dark .dark\:hover\:\!bg-dark\/90:hover {
-				background-color: rgb(6 23 28 / 0.9) !important;
+			.dark .dark\:hover\:\!bg-dark\/75:hover {
+				background-color: rgb(6 23 28 / 0.75) !important;
 			}
 
 			.dark .dark\:hover\:bg-white\/\[0\.15\]:hover {
 				background-color: rgb(255 255 255 / 0.15);
+			}
+
+			.dark .dark\:hover\:bg-link:hover {
+				--tw-bg-opacity: 1;
+				background-color: rgb(0 153 175 / var(--tw-bg-opacity));
 			}
 
 			.dark .dark\:hover\:\!text-link:hover {
@@ -2354,6 +2416,10 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 
 				.md\:h-\[56px\] {
 					height: 56px;
+				}
+
+				.md\:h-\[588px\] {
+					height: 588px;
 				}
 
 				.md\:h-\[600px\] {
@@ -2599,6 +2665,10 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 					height: 1.25rem;
 				}
 
+				.lg\:h-\[271\.5px\] {
+					height: 271.5px;
+				}
+
 				.lg\:h-\[30px\] {
 					height: 30px;
 				}
@@ -2733,6 +2803,19 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 				.lg\:no-underline {
 					text-decoration-line: none;
 				}
+
+				.dark .dark\:lg\:rounded {
+					border-radius: 0.25rem;
+				}
+
+				.dark .dark\:lg\:bg-white\/10 {
+					background-color: rgb(255 255 255 / 0.1);
+				}
+
+				.dark .dark\:lg\:py-8 {
+					padding-top: 2rem;
+					padding-bottom: 2rem;
+				}
 			}
 
 			@media (min-width: 1280px) {
@@ -2759,10 +2842,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 
 				.xl\:hidden {
 					display: none;
-				}
-
-				.xl\:h-\[271\.5px\] {
-					height: 271.5px;
 				}
 
 				.xl\:w-3\/4 {
@@ -3683,7 +3762,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 							href="https://twitter.com/btcmap"
 							target="_blank"
 							rel="noreferrer"
-							class="inline-block rounded-full bg-link p-2 text-white transition-colors hover:bg-hover"
+							class="inline-block rounded-full bg-link p-2 text-white transition-colors hover:bg-hover dark:bg-white/[0.15] dark:hover:bg-link"
 							><svg width="28px" height="28px">
 								<use
 									width="28px"
@@ -3695,7 +3774,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 							href="https://snort.social/p/npub1864jglrrhv6alguwql9pqtmd5296nww5dpcewapmmcazk8vq4mks0tt2tq"
 							target="_blank"
 							rel="noreferrer"
-							class="inline-block rounded-full bg-link p-2 text-white transition-colors hover:bg-hover"
+							class="inline-block rounded-full bg-link p-2 text-white transition-colors hover:bg-hover dark:bg-white/[0.15] dark:hover:bg-link"
 							><svg width="28px" height="28px">
 								<use
 									width="28px"
@@ -3707,7 +3786,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 							href="https://discord.gg/wPqva83uzq"
 							target="_blank"
 							rel="noreferrer"
-							class="inline-block rounded-full bg-link p-2 text-white transition-colors hover:bg-hover"
+							class="inline-block rounded-full bg-link p-2 text-white transition-colors hover:bg-hover dark:bg-white/[0.15] dark:hover:bg-link"
 							><svg width="28px" height="28px">
 								<use
 									width="28px"
@@ -3719,7 +3798,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 							href="https://github.com/teambtcmap"
 							target="_blank"
 							rel="noreferrer"
-							class="inline-block rounded-full bg-link p-2 text-white transition-colors hover:bg-hover"
+							class="inline-block rounded-full bg-link p-2 text-white transition-colors hover:bg-hover dark:bg-white/[0.15] dark:hover:bg-link"
 							><svg width="28px" height="28px">
 								<use
 									width="28px"
@@ -3731,7 +3810,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 							href="https://amboss.space/community/edf8d227-9bc7-4cb2-af2a-66c1b455109a"
 							target="_blank"
 							rel="noreferrer"
-							class="inline-block rounded-full bg-link p-2 text-white transition-colors hover:bg-hover"
+							class="inline-block rounded-full bg-link p-2 text-white transition-colors hover:bg-hover dark:bg-white/[0.15] dark:hover:bg-link"
 							><svg width="28px" height="28px">
 								<use
 									width="28px"
