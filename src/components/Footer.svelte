@@ -27,7 +27,7 @@
 				href={link.link}
 				class="mx-2.5 {link.name !== 'Cypherpunks'
 					? 'mb-2.5 xl:mb-0'
-					: ''} text-link transition-colors hover:text-hover dark:text-white dark:hover:text-link"
+					: ''} text-link transition-colors hover:text-hover text-sm dark:text-white/50 dark:hover:text-link"
 				>{link.name}</a
 			>
 		{/each}
