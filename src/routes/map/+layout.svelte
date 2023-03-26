@@ -18,7 +18,7 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/map.png" />
 </svelte:head>
 
-{#if ($elements && $elements.length && $areas && $areas.length && $reports && $reports.length) || $elementError || $areaError || $reportError}
+{#if ($elements && $elements.length && $areas && $areas.length && $reports && $reports.length)}
 	<slot />
 {:else}
 	<MapLoading type="main" message={$mapLoading} />
