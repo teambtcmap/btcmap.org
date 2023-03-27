@@ -119,7 +119,7 @@ Thanks to:
 - [OpenTopoMap](https://opentopomap.org) (Topo)
 - [ESRI](https://www.esri.com) (Imagery)
 - [Stamen](http://maps.stamen.com) (Terrain, Toner, Toner Lite, Watercolor)
-- [Stadia](https://stadiamaps.com/) (Alidade Smooth Dark)
+- [Stadia](https://stadiamaps.com/) (Alidade Smooth, Alidade Smooth Dark, Outdoors, OSM Bright)
 
 ### Icons
 
