@@ -126,6 +126,18 @@
 			title: 'Community Coder',
 			url: 'https://github.com/HolgerHatGarKeineNode',
 			file: 'jpeg'
+		},
+		{
+			name: '3j2009',
+			title: 'Designer',
+			url: 'https://github.com/3j2009',
+			file: 'jpeg'
+		},
+		{
+			name: 'Liam',
+			title: 'Animator',
+			url: 'https://twitter.com/LiamCyDennis',
+			file: 'jpg'
 		}
 	];
 
