@@ -250,7 +250,7 @@ export const changeDefaultIcons = (layers, L, mapElement, DomEvent) => {
 
 	const leafletBar = document.querySelector('.leaflet-bar');
 	leafletBar.style.border = 'none';
-	//leafletBar.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+	leafletBar.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 
 	const zoomIn = document.querySelector('.leaflet-control-zoom-in');
 	zoomIn.style.borderRadius = '8px 8px 0 0';
