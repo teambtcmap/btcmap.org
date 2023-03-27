@@ -131,8 +131,32 @@ export const layers = (leaflet, map) => {
 		}
 	);
 
+	const alidadeSmooth = leaflet.tileLayer(
+		'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png',
+		{
+			noWrap: true,
+			maxZoom: 20
+		}
+	);
+
 	const alidadeSmoothDark = leaflet.tileLayer(
 		'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
+		{
+			noWrap: true,
+			maxZoom: 20
+		}
+	);
+
+	const outdoors = leaflet.tileLayer(
+		'https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png',
+		{
+			noWrap: true,
+			maxZoom: 20
+		}
+	);
+
+	const OSMBright = leaflet.tileLayer(
+		'https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png',
 		{
 			noWrap: true,
 			maxZoom: 20
@@ -147,15 +171,18 @@ export const layers = (leaflet, map) => {
 
 	const baseMaps = {
 		OpenStreetMap: osm,
+		'Alidade Smooth': alidadeSmooth,
 		'Alidade Smooth Dark': alidadeSmoothDark,
 		Imagery: imagery,
+		Outdoors: outdoors,
 		Terrain: terrain,
 		Topo: topo,
 		Toner: toner,
 		'Toner Lite': tonerLite,
 		Watercolor: watercolor,
 		OpenStreetMapDE: osmDE,
-		OpenStreetMapFR: osmFR
+		OpenStreetMapFR: osmFR,
+		'OSM Bright': OSMBright
 	};
 
 	return baseMaps;
@@ -223,7 +250,7 @@ export const changeDefaultIcons = (layers, L, mapElement, DomEvent) => {
 
 	const leafletBar = document.querySelector('.leaflet-bar');
 	leafletBar.style.border = 'none';
-	leafletBar.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+	//leafletBar.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 
 	const zoomIn = document.querySelector('.leaflet-control-zoom-in');
 	zoomIn.style.borderRadius = '8px 8px 0 0';
