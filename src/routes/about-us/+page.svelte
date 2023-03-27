@@ -91,7 +91,9 @@
 		{ name: 'Wallet of Satoshi', icon: 'wos', url: 'https://www.walletofsatoshi.com/' },
 		{ name: 'Pouch', icon: 'pouch', url: 'https://pouch.ph/' },
 		{ name: 'Bolt Card', icon: 'bolt', url: 'https://www.boltcard.org/' },
-		{ name: 'Galoy', icon: 'galoy', url: 'https://galoy.io/' }
+		{ name: 'Galoy', icon: 'galoy', url: 'https://galoy.io/' },
+		{ name: 'Satimoto', icon: 'satimoto', url: 'https://satimoto.com/' },
+		{ name: 'Bitcoin Dashboard', icon: '', url: 'https://bitcoin-primodata.streamlit.app/' }
 	];
 
 	const projectIntegrations = [
@@ -99,7 +101,9 @@
 		{ name: 'LNbits', icon: 'lnbits', url: 'https://lnbits.com/' },
 		{ name: 'GitHub', icon: 'gh', url: 'https://github.com/' },
 		{ name: 'Voltage', icon: 'voltage', url: 'https://voltage.cloud/' },
-		{ name: 'Leaflet', icon: 'leaflet', url: 'https://leafletjs.com/' }
+		{ name: 'Leaflet', icon: 'leaflet', url: 'https://leafletjs.com/' },
+		{ name: 'Stadia Maps', icon: 'stadia', url: 'https://stadiamaps.com/' },
+		{ name: 'Chart.js', icon: 'chartjs', url: 'https://www.chartjs.org/' }
 	];
 
 	const contributors = [
