@@ -142,7 +142,13 @@
 			title: 'Animator',
 			url: 'https://twitter.com/LiamCyDennis',
 			file: 'jpg'
-		}
+		},
+		{
+			name: 'Andrej',
+			title: 'Icon Designer',
+			url: 'https://snort.social/p/designsats@nostrplebs.com',
+			file: 'png'
+		},
 	];
 
 	const coreTeam = [
