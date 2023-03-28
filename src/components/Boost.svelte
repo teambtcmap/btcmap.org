@@ -109,7 +109,7 @@
 					}
 				);
 
-				checkInvoiceInterval = setInterval(checkInvoice, 1000);
+				checkInvoiceInterval = setInterval(checkInvoice, 2500);
 
 				loading = false;
 			})
