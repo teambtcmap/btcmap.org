@@ -32,12 +32,15 @@ export async function POST({ request }) {
 					.get(`https://api.btcmap.org/v2/elements/${element}`)
 					.then(function (response) {
 						let expires;
+						let currentBoost =
+							response.data.tags && response.data.tags['boost:expires']
+								? new Date(response.data.tags['boost:expires'])
+								: null;
+						let dateNow = new Date();
 
-						if (response.data.tags && response.data.tags['boost:expires']) {
-							let currentBoost = new Date(response.data.tags['boost:expires']);
+						if (currentBoost && currentBoost > dateNow) {
 							expires = new Date(currentBoost.setMonth(currentBoost.getMonth() + time));
 						} else {
-							let dateNow = new Date();
 							expires = new Date(dateNow.setMonth(dateNow.getMonth() + time));
 						}
 
