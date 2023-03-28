@@ -170,8 +170,11 @@
 						{#each values as value}
 							<button
 								on:click={() => {
-									let currentBoost = $boost && $boost.boost ? new Date($boost.boost) : undefined;
 									let dateNow = new Date();
+									let currentBoost =
+										$boost && $boost.boost && new Date($boost.boost) > dateNow
+											? new Date($boost.boost)
+											: undefined;
 									selectedBoost = {
 										fiat: value.fiat,
 										sats: (value.fiat / ($exchangeRate / 100000000)).toFixed(0),
