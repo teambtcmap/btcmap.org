@@ -44,7 +44,7 @@ export async function POST({ request }) {
 						return axios
 							.patch(
 								`https://api.btcmap.org/v2/elements/${element}/tags`,
-								{ name: 'boost:expires', value: `${expires.toISOString()}` },
+								{ 'boost:expires': `${expires.toISOString()}` },
 								{ headers }
 							)
 							.then(function (response) {
