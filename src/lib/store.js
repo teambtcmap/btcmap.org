@@ -69,6 +69,7 @@ export const excludeLeader = readable([
 export const boost = writable();
 export const exchangeRate = writable();
 export const resetBoost = writable(0);
+export const boostHash = writable();
 
 export const showTags = writable();
 export const showMore = writable(false);

@@ -5,7 +5,7 @@
 	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
 	import JSConfetti from 'js-confetti';
 	import { tick } from 'svelte';
-	import { boost, exchangeRate, resetBoost } from '$lib/store';
+	import { boost, exchangeRate, resetBoost, boostHash } from '$lib/store';
 	import { PrimaryButton, CopyButton, Icon, CloseButton } from '$comp';
 	import { fly, fade } from 'svelte/transition';
 	import { errToast, warningToast } from '$lib/utils';
@@ -55,6 +55,11 @@
 			.then(function (response) {
 				if (response.data.paid === true) {
 					clearInterval(checkInvoiceInterval);
+
+					if ($boostHash === hash) {
+						return;
+					}
+					$boostHash = hash;
 
 					axios
 						.post('/boost/post', {

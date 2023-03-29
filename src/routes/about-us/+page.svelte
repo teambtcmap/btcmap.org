@@ -148,7 +148,7 @@
 			title: 'Icon Designer',
 			url: 'https://snort.social/p/designsats@nostrplebs.com',
 			file: 'png'
-		},
+		}
 	];
 
 	const coreTeam = [
