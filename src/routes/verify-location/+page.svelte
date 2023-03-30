@@ -136,10 +136,13 @@
 				// add map and tiles
 				map = leaflet.map(mapElement, { attributionControl: false }).setView([0, 0], 2);
 
-				osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-					noWrap: true,
-					maxZoom: 19
-				});
+				osm = leaflet.tileLayer(
+					'https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png',
+					{
+						noWrap: true,
+						maxZoom: 20
+					}
+				);
 
 				alidadeSmoothDark = leaflet.tileLayer(
 					'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',

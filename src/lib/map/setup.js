@@ -166,13 +166,14 @@ export const layers = (leaflet, map) => {
 	if (theme === 'dark') {
 		alidadeSmoothDark.addTo(map);
 	} else {
-		osm.addTo(map);
+		OSMBright.addTo(map);
 	}
 
 	const baseMaps = {
+		'OSM Bright': OSMBright,
+		'Alidade Smooth Dark': alidadeSmoothDark,
 		OpenStreetMap: osm,
 		'Alidade Smooth': alidadeSmooth,
-		'Alidade Smooth Dark': alidadeSmoothDark,
 		Imagery: imagery,
 		Outdoors: outdoors,
 		Terrain: terrain,
@@ -181,8 +182,7 @@ export const layers = (leaflet, map) => {
 		'Toner Lite': tonerLite,
 		Watercolor: watercolor,
 		OpenStreetMapDE: osmDE,
-		OpenStreetMapFR: osmFR,
-		'OSM Bright': OSMBright
+		OpenStreetMapFR: osmFR
 	};
 
 	return baseMaps;

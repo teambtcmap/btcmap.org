@@ -700,11 +700,11 @@
 
 	const toggleTheme = () => {
 		if ($theme === 'dark') {
-			baseMaps.OpenStreetMap.remove();
+			baseMaps['OSM Bright'].remove();
 			baseMaps['Alidade Smooth Dark'].addTo(map);
 		} else {
 			baseMaps['Alidade Smooth Dark'].remove();
-			baseMaps.OpenStreetMap.addTo(map);
+			baseMaps['OSM Bright'].addTo(map);
 		}
 	};
 
