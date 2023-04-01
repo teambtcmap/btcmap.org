@@ -12,7 +12,7 @@
 		<img
 			src={text === 'Lightning' ? '/icons/ln-highlight.svg' : '/icons/btc-highlight.svg'}
 			alt="protocol"
-			class="mb-1 inline"
+			class="mb-1 inline dark:rounded-full dark:bg-white dark:p-0.5"
 		/>
 	</h3>
 	<div
