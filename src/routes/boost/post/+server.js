@@ -53,22 +53,22 @@ export async function POST({ request }) {
 							.then(function (response) {
 								return response.status;
 							})
-							.catch(function (error) {
+							.catch(function (err) {
+								console.log(err);
 								throw error(400, 'Could not finalize boost, please contact BTC Map.');
-								console.log(error);
 							});
 					})
-					.catch(function (error) {
+					.catch(function (err) {
+						console.log(err);
 						throw error(400, 'Could not finalize boost, please contact BTC Map.');
-						console.log(error);
 					});
 			} else {
 				return;
 			}
 		})
-		.catch(function (error) {
+		.catch(function (err) {
+			console.log(err);
 			throw error(400, 'Could not finalize boost, please contact BTC Map.');
-			console.log(error);
 		});
 
 	return json({ status: boost });

@@ -1,16 +1,13 @@
 <script>
-	import axios from 'axios';
-	import { onMount } from 'svelte';
 	import {
 		Header,
 		Footer,
 		DonationOption,
 		SupportSection,
-		Icon,
 		CloseButton,
 		HeaderPlaceholder
 	} from '$comp';
-	import { errToast, detectTheme } from '$lib/utils';
+	import { detectTheme } from '$lib/utils';
 	import { theme } from '$lib/store';
 
 	let onchain = 'bc1qqmy5c03clt6a72aq0ys5jzm2sjnws3qr05nvmz';

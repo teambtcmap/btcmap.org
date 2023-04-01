@@ -27,9 +27,9 @@ export async function GET({ url }) {
 		.then(function (response) {
 			return response.data;
 		})
-		.catch(function (error) {
+		.catch(function (err) {
+			console.log(err);
 			throw error(400, 'Could not generate invoice, please try again or contact BTC Map.');
-			console.log(error);
 		});
 
 	return new Response(JSON.stringify(invoice));

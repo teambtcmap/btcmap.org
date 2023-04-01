@@ -1,5 +1,4 @@
 <script>
-	import axios from 'axios';
 	import tippy from 'tippy.js';
 	import {
 		Header,

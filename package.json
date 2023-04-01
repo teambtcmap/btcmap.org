@@ -1,18 +1,22 @@
 {
-	"name": "my-app",
-	"version": "0.0.1",
+	"name": "btcmap",
+	"version": "1.0.0",
 	"private": true,
 	"scripts": {
 		"dev": "vite dev --host",
 		"build": "vite build",
 		"preview": "vite preview",
 		"lint": "prettier --check .",
-		"format": "prettier --write ."
+		"format": "prettier --write .",
+		"eslint": "npx eslint src/"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^2.0.0",
 		"@sveltejs/kit": "1.12.0",
 		"autoprefixer": "^10.4.14",
+		"eslint": "^8.37.0",
+		"eslint-config-prettier": "^8.8.0",
+		"eslint-plugin-svelte3": "^4.0.0",
 		"postcss": "^8.4.21",
 		"prettier": "^2.8.4",
 		"prettier-plugin-svelte": "^2.9.0",
@@ -44,5 +48,9 @@
 		"svelte-time": "^0.7.1",
 		"svg-captcha": "^1.4.0",
 		"tippy.js": "^6.3.7"
-	}
+	},
+	"description": "Easily find places to spend sats anywhere on the planet.",
+	"repository": "https://github.com/teambtcmap/btcmap.org",
+	"author": "secondl1ght <secondl1ght@protonmail.com>",
+	"license": "AGPL-3.0"
 }

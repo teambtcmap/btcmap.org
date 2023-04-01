@@ -1,6 +1,6 @@
 <script>
-	import { Header, Footer, PrimaryButton, Icon, HeaderPlaceholder } from '$comp';
-	import { socials, apps, theme } from '$lib/store';
+	import { Header, Footer, Icon, HeaderPlaceholder } from '$comp';
+	import { apps, theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
 </script>
 
