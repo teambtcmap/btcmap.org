@@ -19,6 +19,7 @@ export const areasSync = async () => {
 						// set response to local
 						localforage
 							.setItem('areas', response.data)
+							// eslint-disable-next-line no-unused-vars
 							.then(function (value) {
 								// set response to store
 								areas.set(areasFiltered);
@@ -77,6 +78,7 @@ export const areasSync = async () => {
 						// set updated areas locally
 						localforage
 							.setItem('areas', newAreas)
+							// eslint-disable-next-line no-unused-vars
 							.then(function (value) {
 								// set updated areas to store
 								areas.set(newAreasFiltered);

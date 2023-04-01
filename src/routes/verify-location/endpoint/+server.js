@@ -36,8 +36,10 @@ export async function POST({ request }) {
 	}
 
 	// verify that captcha is correct
+	/* eslint-disable no-undef */
 	const initVector = Buffer.from(SERVER_INIT_VECTOR, 'hex');
 	const serverKey = Buffer.from(SERVER_CRYPTO_KEY, 'hex');
+	/* eslint-enable no-undef */
 
 	let decrypt = crypto.createDecipheriv('aes-256-cbc', serverKey, initVector);
 

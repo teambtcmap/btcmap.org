@@ -24,6 +24,7 @@ export const elementsSync = async () => {
 						// set response to local
 						localforage
 							.setItem('elements', response.data)
+							// eslint-disable-next-line no-unused-vars
 							.then(function (value) {
 								mapLoading.set('Initial sync complete!');
 								// set response to store
@@ -88,6 +89,7 @@ export const elementsSync = async () => {
 						// set updated elements locally
 						localforage
 							.setItem('elements', newElements)
+							// eslint-disable-next-line no-unused-vars
 							.then(function (value) {
 								mapLoading.set('Map loading complete!');
 								// set updated elements to store

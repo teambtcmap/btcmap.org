@@ -185,9 +185,11 @@
 			//import packages
 			const leaflet = await import('leaflet');
 			const DomEvent = await import('leaflet/src/dom/DomEvent');
+			/* eslint-disable no-unused-vars */
 			const leafletLocateControl = await import('leaflet.locatecontrol');
 			const leafletMarkerCluster = await import('leaflet.markercluster');
 			const leafletFeaturegroupSubgroup = await import('leaflet.featuregroup.subgroup');
+			/* eslint-enable no-unused-vars */
 
 			// add map and tiles
 			map = leaflet.map(mapElement);
@@ -195,6 +197,7 @@
 			// set view to community if in url params
 			if (community && communitySelected) {
 				try {
+					// eslint-disable-next-line no-undef
 					map.fitBounds(L.geoJSON(communitySelected.tags.geo_json).getBounds());
 					mapCenter = map.getCenter();
 				} catch (error) {
@@ -211,6 +214,7 @@
 			else if (communitiesOnly && communities.length) {
 				try {
 					map.fitBounds(
+						// eslint-disable-next-line no-undef
 						communities.map((community) => L.geoJSON(community.tags.geo_json).getBounds())
 					);
 					mapCenter = map.getCenter();
@@ -288,6 +292,7 @@ Thanks for using BTC Map!`);
 
 				localforage
 					.setItem('coords', coords)
+					// eslint-disable-next-line no-unused-vars
 					.then(function (value) {})
 					.catch(function (err) {
 						console.log(err);
@@ -301,6 +306,7 @@ Thanks for using BTC Map!`);
 
 				localforage
 					.setItem('coords', coords)
+					// eslint-disable-next-line no-unused-vars
 					.then(function (value) {})
 					.catch(function (err) {
 						console.log(err);
@@ -308,31 +314,38 @@ Thanks for using BTC Map!`);
 			});
 
 			// change broken marker image path in prod
+			// eslint-disable-next-line no-undef
 			L.Icon.Default.prototype.options.imagePath = '/icons/';
 
 			// add support attribution
 			support();
 
 			// add OSM attribution
+			// eslint-disable-next-line no-undef
 			attribution(L, map);
 
 			// add scale
+			// eslint-disable-next-line no-undef
 			scaleBars(L, map);
 
 			// add locate button to map
+			// eslint-disable-next-line no-undef
 			geolocate(L, map);
 
 			// add search button to map
+			// eslint-disable-next-line no-undef
 			const customSearchButton = L.Control.extend({
 				options: {
 					position: 'topleft'
 				},
 				onAdd: () => {
+					// eslint-disable-next-line no-undef
 					const searchButtonDiv = L.DomUtil.create('div');
 					searchButtonDiv.classList.add('leaflet-bar');
 					searchButtonDiv.style.border = 'none';
 					searchButtonDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 
+					// eslint-disable-next-line no-undef
 					const searchButton = L.DomUtil.create('a');
 					searchButton.classList.add('leaflet-control-search-toggle');
 					searchButton.href = '#';
@@ -373,17 +386,20 @@ Thanks for using BTC Map!`);
 			map.addControl(new customSearchButton());
 
 			// add search bar to map
+			// eslint-disable-next-line no-undef
 			map._controlCorners['topcenter'] = L.DomUtil.create(
 				'div',
 				'leaflet-top leaflet-center',
 				map._controlContainer
 			);
 
+			// eslint-disable-next-line no-undef
 			L.Control.Search = L.Control.extend({
 				options: {
 					position: 'topcenter'
 				},
 				onAdd: () => {
+					// eslint-disable-next-line no-undef
 					const searchBarDiv = L.DomUtil.create('div');
 					searchBarDiv.classList.add('leafet-control', 'search-bar-div');
 
@@ -393,6 +409,7 @@ Thanks for using BTC Map!`);
 				}
 			});
 
+			// eslint-disable-next-line no-undef
 			new L.Control.Search().addTo(map);
 
 			// disable map events
@@ -403,16 +420,19 @@ Thanks for using BTC Map!`);
 
 			// add boost layer button
 
+			// eslint-disable-next-line no-undef
 			const customBoostLayerButton = L.Control.extend({
 				options: {
 					position: 'topleft'
 				},
 				onAdd: () => {
+					// eslint-disable-next-line no-undef
 					const boostLayerDiv = L.DomUtil.create('div');
 					boostLayerDiv.classList.add('leaflet-bar');
 					boostLayerDiv.style.border = 'none';
 					boostLayerDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 
+					// eslint-disable-next-line no-undef
 					const boostLayerButton = L.DomUtil.create('a');
 					boostLayerButton.classList.add('leaflet-control-boost-layer');
 					boostLayerButton.href = '#';
@@ -463,25 +483,30 @@ Thanks for using BTC Map!`);
 			DomEvent.disableClickPropagation(document.querySelector('.leaflet-control-boost-layer'));
 
 			// add home and marker buttons to map
+			// eslint-disable-next-line no-undef
 			homeMarkerButtons(L, map, DomEvent);
 
 			// add data refresh button to map
+			// eslint-disable-next-line no-undef
 			dataRefresh(L, map, DomEvent);
 
 			// get date from 1 year ago to add verified check if survey is current
 			let verifiedDate = calcVerifiedDate();
 
 			// create marker cluster group and layers
+			/* eslint-disable no-undef */
 			let communitiesLayer = L.layerGroup();
 			let markers = L.markerClusterGroup({ maxClusterRadius: 60 });
 			let upToDateLayer = L.featureGroup.subGroup(markers);
 			let outdatedLayer = L.featureGroup.subGroup(markers);
 			let legacyLayer = L.featureGroup.subGroup(markers);
+			/* eslint-enable no-undef */
 			let categories = {};
 
 			// add communities to map
 			communities.forEach((community) => {
 				let randomColor = getRandomColor();
+				// eslint-disable-next-line no-undef
 				let communityLayer = L.geoJSON(community.tags.geo_json, {
 					style: { color: randomColor, fillOpacity: 0 }
 				}).bindPopup(
@@ -730,6 +755,7 @@ ${
 					const lat = latCalc(element);
 					const long = longCalc(element);
 
+					// eslint-disable-next-line no-undef
 					let divIcon = generateIcon(L, icon, boosted);
 
 					let marker = generateMarker(
@@ -738,6 +764,7 @@ ${
 						divIcon,
 						element,
 						payment,
+						// eslint-disable-next-line no-undef
 						L,
 						verifiedDate,
 						'verify',
@@ -757,11 +784,13 @@ ${
 					}
 
 					if (!categories[category]) {
+						// eslint-disable-next-line no-undef
 						categories[category] = L.featureGroup.subGroup(markers);
 					}
 
 					categories[category].addLayer(marker);
 
+					// eslint-disable-next-line no-undef
 					element.latLng = L.latLng(lat, long);
 					element.marker = marker;
 					element.icon = icon;
@@ -795,9 +824,11 @@ ${
 					}
 				});
 
+			// eslint-disable-next-line no-unused-vars, no-undef
 			const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
 
 			// change default icons
+			// eslint-disable-next-line no-undef
 			changeDefaultIcons('layers', L, mapElement, DomEvent);
 
 			// final map setup

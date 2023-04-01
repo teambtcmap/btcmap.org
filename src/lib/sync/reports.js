@@ -19,6 +19,7 @@ export const reportsSync = async () => {
 						// set response to local
 						localforage
 							.setItem('reports', response.data)
+							// eslint-disable-next-line no-unused-vars
 							.then(function (value) {
 								// set response to store
 								reports.set(reportsFiltered);
@@ -77,6 +78,7 @@ export const reportsSync = async () => {
 						// set updated reports locally
 						localforage
 							.setItem('reports', newReports)
+							// eslint-disable-next-line no-unused-vars
 							.then(function (value) {
 								// set updated reports to store
 								reports.set(newReportsFiltered);

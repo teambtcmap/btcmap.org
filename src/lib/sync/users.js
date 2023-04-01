@@ -40,6 +40,7 @@ export const usersSync = async () => {
 						// set response to local
 						localforage
 							.setItem('users_v2', response.data)
+							// eslint-disable-next-line no-unused-vars
 							.then(function (value) {
 								// set response to store
 								users.set(usersFiltered);
@@ -98,6 +99,7 @@ export const usersSync = async () => {
 						// set updated users locally
 						localforage
 							.setItem('users_v2', newUsers)
+							// eslint-disable-next-line no-unused-vars
 							.then(function (value) {
 								// set updated users to store
 								users.set(newUsersFiltered);

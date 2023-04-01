@@ -550,9 +550,11 @@
 			//import packages
 			const leaflet = await import('leaflet');
 			const DomEvent = await import('leaflet/src/dom/DomEvent');
+			/* eslint-disable no-unused-vars */
 			const leafletMarkerCluster = await import('leaflet.markercluster');
 			const leafletFeaturegroupSubgroup = await import('leaflet.featuregroup.subgroup');
 			const leafletLocateControl = await import('leaflet.locatecontrol');
+			/* eslint-enable no-unused-vars */
 
 			// add map
 			map = leaflet.map(mapElement, { attributionControl: false });
@@ -561,28 +563,35 @@
 			baseMaps = layers(leaflet, map);
 
 			// change broken marker image path in prod
+			// eslint-disable-next-line no-undef
 			L.Icon.Default.prototype.options.imagePath = '/icons/';
 
 			// add OSM attribution
+			// eslint-disable-next-line no-undef
 			attribution(L, map);
 
 			// create marker cluster groups
+			/* eslint-disable no-undef */
 			let markers = L.markerClusterGroup();
 			let upToDateLayer = L.featureGroup.subGroup(markers);
 			let outdatedLayer = L.featureGroup.subGroup(markers);
 			let legacyLayer = L.featureGroup.subGroup(markers);
+			/* eslint-enable no-undef */
 
 			let overlayMaps = {
 				'Up-To-Date': upToDateLayer,
 				Outdated: outdatedLayer,
 				Legacy: legacyLayer
 			};
+			// eslint-disable-next-line no-undef, no-unused-vars
 			const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
 
 			// add locate button to map
+			// eslint-disable-next-line no-undef
 			geolocate(L, map);
 
 			// change default icons
+			// eslint-disable-next-line no-undef
 			changeDefaultIcons('layers', L, mapElement, DomEvent);
 
 			// get date from 1 year ago to add verified check if survey is current
@@ -590,6 +599,7 @@
 
 			// add community area poly to map
 			if (community.geo_json) {
+				// eslint-disable-next-line no-undef
 				L.geoJSON(community.geo_json, { style: { fill: false } }).addTo(map);
 			}
 
@@ -617,6 +627,7 @@
 				const lat = latCalc(element);
 				const long = longCalc(element);
 
+				// eslint-disable-next-line no-undef
 				let divIcon = generateIcon(L, icon, boosted);
 
 				let marker = generateMarker(
@@ -625,6 +636,7 @@
 					divIcon,
 					element,
 					payment,
+					// eslint-disable-next-line no-undef
 					L,
 					verifiedDate,
 					'verify',
@@ -651,7 +663,8 @@
 
 			map.fitBounds(
 				community.geo_json
-					? L.geoJSON(community.geo_json).getBounds()
+					? // eslint-disable-next-line no-undef
+					  L.geoJSON(community.geo_json).getBounds()
 					: [
 							[community['box:south'], community['box:west']],
 							[community['box:north'], community['box:east']]

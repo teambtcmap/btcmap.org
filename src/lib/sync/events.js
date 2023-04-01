@@ -19,6 +19,7 @@ export const eventsSync = async () => {
 						// set response to local
 						localforage
 							.setItem('events', response.data)
+							// eslint-disable-next-line no-unused-vars
 							.then(function (value) {
 								// set response to store
 								events.set(eventsFiltered);
@@ -77,6 +78,7 @@ export const eventsSync = async () => {
 						// set updated events locally
 						localforage
 							.setItem('events', newEvents)
+							// eslint-disable-next-line no-unused-vars
 							.then(function (value) {
 								// set updated events to store
 								events.set(newEventsFiltered);

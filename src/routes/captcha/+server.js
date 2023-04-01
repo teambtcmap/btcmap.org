@@ -6,8 +6,10 @@ import { error } from '@sveltejs/kit';
 
 // generate and return captcha
 export function GET() {
+	/* eslint-disable no-undef */
 	const initVector = Buffer.from(SERVER_INIT_VECTOR, 'hex');
 	const serverKey = Buffer.from(SERVER_CRYPTO_KEY, 'hex');
+	/* eslint-enable no-undef */
 
 	svgCaptcha.options.width = 275;
 	svgCaptcha.options.height = 100;

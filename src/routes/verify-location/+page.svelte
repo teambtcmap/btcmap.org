@@ -130,8 +130,10 @@
 				//import packages
 				const leaflet = await import('leaflet');
 				const DomEvent = await import('leaflet/src/dom/DomEvent');
+				/* eslint-disable no-unused-vars */
 				const leafletLocateControl = await import('leaflet.locatecontrol');
 				const leafletMarkerCluster = await import('leaflet.markercluster');
+				/* eslint-enable no-unused-vars */
 
 				// add map and tiles
 				map = leaflet.map(mapElement, { attributionControl: false }).setView([0, 0], 2);
@@ -168,18 +170,23 @@
 				}
 
 				// change broken marker image path in prod
+				// eslint-disable-next-line no-undef
 				L.Icon.Default.prototype.options.imagePath = '/icons/';
 
 				// add OSM attribution
+				// eslint-disable-next-line no-undef
 				attribution(L, map);
 
 				// add locate button to map
+				// eslint-disable-next-line no-undef
 				geolocate(L, map);
 
 				// change default icons
+				// eslint-disable-next-line no-undef
 				changeDefaultIcons('', L, mapElement, DomEvent);
 
 				// create marker cluster group
+				// eslint-disable-next-line no-undef
 				let markers = L.markerClusterGroup();
 
 				// get date from 1 year ago to add verified check if survey is current
@@ -209,6 +216,7 @@
 					const latC = latCalc(element);
 					const longC = longCalc(element);
 
+					// eslint-disable-next-line no-undef
 					let divIcon = generateIcon(L, icon, boosted);
 
 					let marker = generateMarker(
@@ -217,6 +225,7 @@
 						divIcon,
 						element,
 						payment,
+						// eslint-disable-next-line no-undef
 						L,
 						verifiedDate,
 						'',

@@ -153,6 +153,7 @@
 			//import packages
 			const leaflet = await import('leaflet');
 			const DomEvent = await import('leaflet/src/dom/DomEvent');
+			// eslint-disable-next-line no-unused-vars
 			const leafletLocateControl = await import('leaflet.locatecontrol');
 
 			// add map and tiles
@@ -188,7 +189,7 @@
 					if (marker) {
 						map.removeLayer(marker);
 					}
-
+					// eslint-disable-next-line no-undef
 					marker = L.marker([lat, long]).addTo(map);
 
 					selected = true;
@@ -196,15 +197,19 @@
 			});
 
 			// change broken marker image path in prod
+			// eslint-disable-next-line no-undef
 			L.Icon.Default.prototype.options.imagePath = '/icons/';
 
 			// add locate button to map
+			// eslint-disable-next-line no-undef
 			geolocate(L, map);
 
 			// change default icons
+			// eslint-disable-next-line no-undef
 			changeDefaultIcons('', L, mapElement, DomEvent);
 
 			// add OSM attribution
+			// eslint-disable-next-line no-undef
 			attribution(L, map);
 
 			mapLoaded = true;
