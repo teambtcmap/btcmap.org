@@ -1,4 +1,4 @@
-name: ESLint and Prettier CI
+name: ESLint, Prettier, build CI
 
 on: [push, pull_request]
 
@@ -17,3 +17,6 @@ jobs:
 
       - name: run prettier
         run: yarn lint
+
+      - name: build app
+        run: yarn build
