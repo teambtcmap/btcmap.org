@@ -53,32 +53,18 @@ export const detectTheme = () => {
 	}
 };
 
-export const updateChartThemes = (upToDateChart, totalChart, legacyChart, paymentMethodChart) => {
+export const updateChartThemes = (charts) => {
 	if (get(theme) === 'dark') {
-		upToDateChart.options.scales.x.grid.color = 'rgba(255, 255, 255, 0.15)';
-		upToDateChart.options.scales.y.grid.color = 'rgba(255, 255, 255, 0.15)';
-		totalChart.options.scales.x.grid.color = 'rgba(255, 255, 255, 0.15)';
-		totalChart.options.scales.y.grid.color = 'rgba(255, 255, 255, 0.15)';
-		legacyChart.options.scales.x.grid.color = 'rgba(255, 255, 255, 0.15)';
-		legacyChart.options.scales.y.grid.color = 'rgba(255, 255, 255, 0.15)';
-		paymentMethodChart.options.scales.x.grid.color = 'rgba(255, 255, 255, 0.15)';
-		paymentMethodChart.options.scales.y.grid.color = 'rgba(255, 255, 255, 0.15)';
-		upToDateChart.update();
-		totalChart.update();
-		legacyChart.update();
-		paymentMethodChart.update();
+		charts.forEach((chart) => {
+			chart.options.scales.x.grid.color = 'rgba(255, 255, 255, 0.15)';
+			chart.options.scales.y.grid.color = 'rgba(255, 255, 255, 0.15)';
+			chart.update();
+		});
 	} else {
-		upToDateChart.options.scales.x.grid.color = 'rgba(0, 0, 0, 0.1)';
-		upToDateChart.options.scales.y.grid.color = 'rgba(0, 0, 0, 0.1)';
-		totalChart.options.scales.x.grid.color = 'rgba(0, 0, 0, 0.1)';
-		totalChart.options.scales.y.grid.color = 'rgba(0, 0, 0, 0.1)';
-		legacyChart.options.scales.x.grid.color = 'rgba(0, 0, 0, 0.1)';
-		legacyChart.options.scales.y.grid.color = 'rgba(0, 0, 0, 0.1)';
-		paymentMethodChart.options.scales.x.grid.color = 'rgba(0, 0, 0, 0.1)';
-		paymentMethodChart.options.scales.y.grid.color = 'rgba(0, 0, 0, 0.1)';
-		upToDateChart.update();
-		totalChart.update();
-		legacyChart.update();
-		paymentMethodChart.update();
+		charts.forEach((chart) => {
+			chart.options.scales.x.grid.color = 'rgba(0, 0, 0, 0.1)';
+			chart.options.scales.y.grid.color = 'rgba(0, 0, 0, 0.1)';
+			chart.update();
+		});
 	}
 };

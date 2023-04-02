@@ -20,7 +20,7 @@
 		excludeLeader,
 		theme
 	} from '$lib/store';
-	import { errToast, detectTheme } from '$lib/utils';
+	import { errToast, detectTheme, updateChartThemes } from '$lib/utils';
 
 	// alert for user errors
 	$: $userError && errToast($userError);
@@ -90,19 +90,10 @@
 
 	$: leaderboardSync($syncStatus, $users, $events);
 
-	const updateChartTheme = () => {
-		if ($theme === 'dark') {
-			topTenChart.options.scales.x.grid.color = 'rgba(255, 255, 255, 0.15)';
-			topTenChart.options.scales.y.grid.color = 'rgba(255, 255, 255, 0.15)';
-			topTenChart.update();
-		} else {
-			topTenChart.options.scales.x.grid.color = 'rgba(0, 0, 0, 0.1)';
-			topTenChart.options.scales.y.grid.color = 'rgba(0, 0, 0, 0.1)';
-			topTenChart.update();
-		}
-	};
-
-	$: $theme !== undefined && !chartsLoading && initialRenderComplete === true && updateChartTheme();
+	$: $theme !== undefined &&
+		!chartsLoading &&
+		initialRenderComplete === true &&
+		updateChartThemes([topTenChart]);
 
 	let leaderboardCount = 50;
 	$: leaderboardPaginated =

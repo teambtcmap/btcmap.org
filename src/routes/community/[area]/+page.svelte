@@ -535,7 +535,7 @@
 
 	$: $theme !== undefined &&
 		chartsLoading === false &&
-		updateChartThemes(upToDateChart, totalChart, legacyChart, paymentMethodChart);
+		updateChartThemes([upToDateChart, totalChart, legacyChart, paymentMethodChart]);
 
 	onMount(async () => {
 		if (browser) {
