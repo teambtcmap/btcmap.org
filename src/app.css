@@ -46,6 +46,10 @@ html {
 	background-image: url('/icons/boosted-icon-pin.svg');
 }
 
+.treasure-icon {
+	background-image: url('/icons/treasure-icon.png');
+}
+
 .center {
 	position: absolute;
 	top: 50%;

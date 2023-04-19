@@ -127,6 +127,8 @@ Tagger profile badges by [AndrejCibik](https://twitter.com/AndrejCibik)
 
 <a href="https://www.flaticon.com/free-icons/satoshi-nakamoto" title="satoshi nakamoto icons">Satoshi nakamoto icons created by Vitaly Gorbachev - Flaticon</a>
 
+Treasure Chest icon by [Bonsaiheldin](https://opengameart.org/content/treasure-chests-32x32)
+
 ---
 
 ![Untitled](https://user-images.githubusercontent.com/85003930/194117128-2f96bafd-2379-407a-a584-6c03396a42cc.png)
