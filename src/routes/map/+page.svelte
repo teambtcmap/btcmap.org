@@ -828,6 +828,7 @@ ${
 			const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
 
 			// treasure hunt event
+			// eslint-disable-next-line no-undef
 			const treasureIcon = L.divIcon({
 				className: 'treasure-icon',
 				iconSize: [24, 24],
@@ -841,10 +842,11 @@ ${
 					  </span>`
 			});
 
-			const treasureMarker = L.marker([53.37225, -6.17711], { icon: treasureIcon })
+			// eslint-disable-next-line no-undef
+			L.marker([53.37225, -6.17711], { icon: treasureIcon })
 				.bindTooltip(
-					`<p class='text-primary dark:text-white text-lg text-center px-1.5'>
-						<strong>Bitcoin Treasure Hunt</strong>
+					`<p class='text-primary dark:text-white text-lg text-center p-2'>
+						<i class="fa-solid fa-coins text-bitcoin"></i> <strong>Bitcoin Treasure Hunt</strong> <i class="fa-solid fa-coins text-bitcoin"></i>
 						<br/>
 						April 29th, 2023 @ 1PM
 						<br/>
