@@ -833,14 +833,16 @@ ${
 				const treasureIcon = L.divIcon({
 					className: 'treasure-icon',
 					iconSize: [24, 24],
-					html: `<span class="relative flex h-6 w-6">
-							<span
-								class="animate-ping absolute inline-flex h-full w-full rounded-full bg-bitcoin opacity-75"
-							/>
-							<span
-								class="relative inline-flex h-6 w-6 rounded-full bg-bitcoin"
-							/>
-						  </span>`
+					html: `<a href='https://dublinbitcoiners.com/treasure-hunt' target='_blank' rel='noreferrer'>
+							<span class="relative flex h-6 w-6">
+								<span
+									class="animate-ping absolute inline-flex h-full w-full rounded-full bg-bitcoin opacity-75"
+								/>
+								<span
+									class="relative inline-flex h-6 w-6 rounded-full bg-bitcoin"
+								/>
+							</span>
+						  </a>`
 				});
 
 				// eslint-disable-next-line no-undef
