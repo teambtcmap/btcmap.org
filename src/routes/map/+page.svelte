@@ -827,6 +827,61 @@ ${
 			// eslint-disable-next-line no-unused-vars, no-undef
 			const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
 
+			// treasure hunt event
+			// eslint-disable-next-line no-undef
+			const treasureIcon = L.divIcon({
+				className: 'treasure-icon',
+				iconSize: [24, 24],
+				html: `<span class="relative flex h-6 w-6">
+						<span
+							class="animate-ping absolute inline-flex h-full w-full rounded-full bg-bitcoin opacity-75"
+						/>
+						<span
+							class="relative inline-flex h-6 w-6 rounded-full bg-bitcoin"
+						/>
+					  </span>`
+			});
+
+			// eslint-disable-next-line no-undef
+			L.marker([53.37225, -6.17711], { icon: treasureIcon })
+				.bindTooltip(
+					`<p class='text-primary dark:text-white text-lg text-center p-2'>
+						<i class="fa-solid fa-coins text-bitcoin"></i> <strong>Bitcoin Treasure Hunt</strong> <i class="fa-solid fa-coins text-bitcoin"></i>
+						<br/>
+						April 29th, 2023 @ 1PM
+						<br/>
+						Hosted by <strong>Dublin Bitcoiners</strong>
+						<br/>
+						dublinbitcoiners.com/treasure-hunt
+						<br/>
+						Everyone welcome!
+					</p>
+	
+					${
+						theme === 'dark'
+							? `
+							<style>
+							.leaflet-tooltip {
+									background-color: #06171C;
+									border: 1px solid #e5e7eb
+							}
+
+							.leaflet-tooltip-left::before {
+							
+									border-left-color: #e5e7eb
+							}
+
+							.leaflet-tooltip-right::before {
+								
+									border-right-color: #e5e7eb
+							}
+							</style>`
+							: ''
+					}`,
+					{ sticky: true }
+				)
+				.addTo(map);
+
 			// change default icons
 			// eslint-disable-next-line no-undef
 			changeDefaultIcons('layers', L, mapElement, DomEvent);
