@@ -1025,7 +1025,7 @@ ${
 	<Boost />
 	<ShowTags />
 
-	<div bind:this={mapElement} class="h-[100vh] !bg-teal dark:!bg-dark" />
+	<div bind:this={mapElement} class="absolute h-[100%] w-full !bg-teal dark:!bg-dark" />
 </main>
 
 <style>
