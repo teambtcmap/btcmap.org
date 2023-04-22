@@ -1,5 +1,6 @@
 <script>
 	import axios from 'axios';
+	import axiosRetry from 'axios-retry';
 	import QRCode from 'qrcode';
 	import OutClick from 'svelte-outclick';
 	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
@@ -49,6 +50,9 @@
 	const jsConfetti = new JSConfetti();
 	document.querySelector('canvas').style.zIndex = '2001';
 
+	const boostRetry = axios.create()
+	axiosRetry(boostRetry, { retries: 3 });
+
 	const checkInvoice = () => {
 		axios
 			.get(`/boost/invoice/status?hash=${hash}`)
@@ -61,7 +65,7 @@
 					}
 					$boostHash = hash;
 
-					axios
+					boostRetry
 						.post('/boost/post', {
 							element: $boost.id,
 							time: selectedBoost.time,
