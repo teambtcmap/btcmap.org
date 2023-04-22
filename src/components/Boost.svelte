@@ -50,7 +50,7 @@
 	const jsConfetti = new JSConfetti();
 	document.querySelector('canvas').style.zIndex = '2001';
 
-	const boostRetry = axios.create()
+	const boostRetry = axios.create();
 	axiosRetry(boostRetry, { retries: 3 });
 
 	const checkInvoice = () => {

@@ -127,8 +127,25 @@ export const usersSync = async () => {
 			}
 		})
 
-		.catch(function (err) {
+		.catch(async function (err) {
 			userError.set('Could not load users locally, please try again or contact BTC Map.');
 			console.log(err);
+
+			try {
+				const response = await axios.get('https://api.btcmap.org/v2/users');
+
+				if (response.data.length) {
+					// filter out deleted users
+					const usersFiltered = response.data.filter((user) => !user['deleted_at']);
+
+					// set response to store
+					users.set(usersFiltered);
+				} else {
+					userError.set('Users API returned an empty result, please try again or contact BTC Map.');
+				}
+			} catch (error) {
+				userError.set('Could not load users from API, please try again or contact BTC Map.');
+				console.log(error);
+			}
 		});
 };

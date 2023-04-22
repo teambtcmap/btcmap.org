@@ -108,8 +108,27 @@ export const reportsSync = async () => {
 			}
 		})
 
-		.catch(function (err) {
+		.catch(async function (err) {
 			reportError.set('Could not load reports locally, please try again or contact BTC Map.');
 			console.log(err);
+
+			try {
+				const response = await axios.get('https://api.btcmap.org/v2/reports');
+
+				if (response.data.length) {
+					// filter out deleted reports
+					const reportsFiltered = response.data.filter((report) => !report['deleted_at']);
+
+					// set response to store
+					reports.set(reportsFiltered);
+				} else {
+					reportError.set(
+						'Reports API returned an empty result, please try again or contact BTC Map.'
+					);
+				}
+			} catch (error) {
+				reportError.set('Could not load reports from API, please try again or contact BTC Map.');
+				console.log(error);
+			}
 		});
 };

@@ -127,8 +127,30 @@ export const elementsSync = async () => {
 			}
 		})
 
-		.catch(function (err) {
+		.catch(async function (err) {
 			elementError.set('Could not load elements locally, please try again or contact BTC Map.');
 			console.log(err);
+
+			// add to sync count to only show data refresh after initial load
+			let count = get(elementsSyncCount);
+			elementsSyncCount.set(count + 1);
+
+			try {
+				mapLoading.set('Fetching elements...');
+				const response = await axios.get('https://api.btcmap.org/v2/elements');
+
+				if (response.data.length) {
+					mapLoading.set('Initial sync complete!');
+					// set response to store
+					elements.set(response.data);
+				} else {
+					elementError.set(
+						'Elements API returned an empty result, please try again or contact BTC Map.'
+					);
+				}
+			} catch (error) {
+				elementError.set('Could not load elements from API, please try again or contact BTC Map.');
+				console.log(error);
+			}
 		});
 };

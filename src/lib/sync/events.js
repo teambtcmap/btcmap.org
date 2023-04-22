@@ -106,8 +106,27 @@ export const eventsSync = async () => {
 			}
 		})
 
-		.catch(function (err) {
+		.catch(async function (err) {
 			eventError.set('Could not load events locally, please try again or contact BTC Map.');
 			console.log(err);
+
+			try {
+				const response = await axios.get('https://api.btcmap.org/v2/events');
+
+				if (response.data.length) {
+					// filter out deleted events
+					const eventsFiltered = response.data.filter((event) => !event['deleted_at']);
+
+					// set response to store
+					events.set(eventsFiltered);
+				} else {
+					eventError.set(
+						'Events API returned an empty result, please try again or contact BTC Map.'
+					);
+				}
+			} catch (error) {
+				eventError.set('Could not load events from API, please try again or contact BTC Map.');
+				console.log(error);
+			}
 		});
 };

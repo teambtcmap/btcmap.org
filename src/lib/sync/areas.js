@@ -106,8 +106,25 @@ export const areasSync = async () => {
 			}
 		})
 
-		.catch(function (err) {
+		.catch(async function (err) {
 			areaError.set('Could not load areas locally, please try again or contact BTC Map.');
 			console.log(err);
+
+			try {
+				const response = await axios.get('https://api.btcmap.org/v2/areas');
+
+				if (response.data.length) {
+					// filter out deleted areas
+					const areasFiltered = response.data.filter((area) => !area['deleted_at']);
+
+					// set response to store
+					areas.set(areasFiltered);
+				} else {
+					areaError.set('Areas API returned an empty result, please try again or contact BTC Map.');
+				}
+			} catch (error) {
+				areaError.set('Could not load areas from API, please try again or contact BTC Map.');
+				console.log(error);
+			}
 		});
 };
