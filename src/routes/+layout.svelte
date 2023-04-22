@@ -53,7 +53,7 @@
 	{#if !$page.url.pathname.startsWith('/tagger') && !$page.url.pathname.startsWith('/community')}
 		<meta
 			name="lightning"
-			content="lnurlp:LNURL1DP68GURN8GHJ7MT9WF3KSCTWW3EJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQCJQMEY"
+			content="lnurlp:LNURL1DP68GURN8GHJ7CM0WFJJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQPSYZ34"
 		/>
 		<meta property="alby:image" content="/images/logo.svg" />
 		<meta property="alby:name" content="BTC Map" />
