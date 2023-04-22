@@ -1,9 +1,12 @@
 import Time from 'svelte-time';
 import axios from 'axios';
+import axiosRetry from 'axios-retry';
 import { boost, exchangeRate, resetBoost, showTags, showMore, theme } from '$lib/store';
 import { get } from 'svelte/store';
 import { errToast, detectTheme } from '$lib/utils';
 import { InfoTooltip } from '$comp';
+
+axiosRetry(axios, { retries: 3 });
 
 export const toggleMapButtons = () => {
 	const zoomInBtn = document.querySelector('.leaflet-control-zoom-in');

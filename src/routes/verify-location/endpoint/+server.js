@@ -1,4 +1,5 @@
 import axios from 'axios';
+import axiosRetry from 'axios-retry';
 import crypto from 'crypto';
 import {
 	GITHUB_API_KEY,
@@ -7,6 +8,8 @@ import {
 	OPENCAGE_API_KEY
 } from '$env/static/private';
 import { error } from '@sveltejs/kit';
+
+axiosRetry(axios, { retries: 3 });
 
 let used = [];
 

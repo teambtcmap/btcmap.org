@@ -1,6 +1,9 @@
 import axios from 'axios';
+import axiosRetry from 'axios-retry';
 import { BTCMAP_KEY } from '$env/static/private';
 import { error, json } from '@sveltejs/kit';
+
+axiosRetry(axios, { retries: 3 });
 
 let used = [];
 

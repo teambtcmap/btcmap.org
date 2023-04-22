@@ -1,6 +1,9 @@
 import axios from 'axios';
+import axiosRetry from 'axios-retry';
 import { LNBITS_URL, LNBITS_API_KEY } from '$env/static/private';
 import { error } from '@sveltejs/kit';
+
+axiosRetry(axios, { retries: 3 });
 
 // generate and return invoice
 export async function GET({ url }) {
