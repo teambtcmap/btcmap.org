@@ -1,6 +1,9 @@
 import localforage from 'localforage';
 import axios from 'axios';
+import axiosRetry from 'axios-retry';
 import { events, eventError } from '$lib/store';
+
+axiosRetry(axios, { retries: 3 });
 
 export const eventsSync = async () => {
 	// get events from local

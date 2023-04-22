@@ -1,6 +1,9 @@
 import localforage from 'localforage';
 import axios from 'axios';
+import axiosRetry from 'axios-retry';
 import { areas, areaError } from '$lib/store';
+
+axiosRetry(axios, { retries: 3 });
 
 export const areasSync = async () => {
 	// get areas from local

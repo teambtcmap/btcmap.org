@@ -1,6 +1,9 @@
 import localforage from 'localforage';
 import axios from 'axios';
+import axiosRetry from 'axios-retry';
 import { users, userError } from '$lib/store';
+
+axiosRetry(axios, { retries: 3 });
 
 export const usersSync = async () => {
 	// clear potentially broken users v1 sync due to top level ID changing from string to int

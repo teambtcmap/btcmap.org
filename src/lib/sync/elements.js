@@ -1,7 +1,10 @@
 import localforage from 'localforage';
 import axios from 'axios';
+import axiosRetry from 'axios-retry';
 import { elements, mapUpdates, elementError, mapLoading, elementsSyncCount } from '$lib/store';
 import { get } from 'svelte/store';
+
+axiosRetry(axios, { retries: 3 });
 
 export const elementsSync = async () => {
 	mapLoading.set('Checking local cache...');
