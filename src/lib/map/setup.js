@@ -889,7 +889,7 @@ ${
 		if (location.pathname === '/map') {
 			const showTagsButton = popupContainer.querySelector('#show-tags');
 			showTagsButton.onclick = () => {
-				showTags.set(element.tags);
+				showTags.set(element.tags || {});
 			};
 
 			const boostButton = popupContainer.querySelector('#boost-button');
