@@ -470,24 +470,6 @@
 					</div>
 				{/if}
 
-				<button
-					id="boost-button"
-					on:click={startBoost}
-					disabled={boostLoading}
-					class="{boosted
-						? 'bg-bitcoin hover:bg-bitcoinHover'
-						: 'bg-link hover:bg-hover'} mx-auto flex items-center justify-center rounded-xl p-3 text-center font-semibold text-white transition-colors"
-				>
-					<Icon
-						w="20"
-						h="20"
-						style="text-white mr-1"
-						icon={boosted ? 'boost-solid' : 'boost'}
-						type="popup"
-					/>
-					{boostLoading ? 'Boosting...' : boosted ? 'Extend Boost' : 'Boost'}
-				</button>
-
 				{#if description}
 					<p class="mx-auto max-w-[600px] text-primary dark:text-white">{description}</p>
 				{/if}
@@ -546,7 +528,7 @@
 								<strong>{verified[0]}</strong>
 							</div>
 						{:else}
-							<p>This location needs to be surveyed!</p>
+							<p class="font-semibold">This location needs to be surveyed!</p>
 						{/if}
 
 						<PrimaryButton
@@ -554,7 +536,7 @@
 							link={`/verify-location?${
 								name ? `&name=${name.replaceAll('&', '%26')}` : ''
 							}&lat=${lat}&long=${long}&${merchant.osm_json.type}=${merchant.osm_json.id}`}
-							style="rounded-xl p-3 w-fit mx-auto"
+							style="rounded-xl p-3 w-40 mx-auto"
 						/>
 					</div>
 
@@ -575,6 +557,24 @@
 								>
 							</p>
 						{/if}
+
+						<button
+							id="boost-button"
+							on:click={startBoost}
+							disabled={boostLoading}
+							class="{boosted
+								? 'bg-bitcoin hover:bg-bitcoinHover'
+								: 'bg-link hover:bg-hover'} mx-auto flex w-40 items-center justify-center rounded-xl p-3 text-center font-semibold text-white transition-colors"
+						>
+							<Icon
+								w="20"
+								h="20"
+								style="text-white mr-1"
+								icon={boosted ? 'boost-solid' : 'boost'}
+								type="popup"
+							/>
+							{boostLoading ? 'Boosting...' : boosted ? 'Extend Boost' : 'Boost'}
+						</button>
 					</div>
 				</div>
 			</section>

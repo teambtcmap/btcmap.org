@@ -561,9 +561,11 @@ export const generateMarker = (
 
 		popupContainer.innerHTML = `${
 			element.tags && element.tags.name
-				? `<span class='block font-bold text-lg text-primary dark:text-white leading-snug max-w-[300px]' title='Merchant name'>${
+				? `<a href='/merchant/${element.type}:${
+						element.id
+				  }' class='font-bold text-lg text-link hover:text-hover transition-colors leading-snug max-w-[300px]' title='Merchant name'>${
 						element.tags.name
-				  } ${description ? `<span id='description' title='Description'></span>` : ''}</span>`
+				  }</a> ${description ? `<span id='description' title='Description'></span>` : ''}`
 				: ''
 		}
 
