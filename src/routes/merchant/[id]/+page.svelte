@@ -60,6 +60,7 @@
 
 	const name = merchant.osm_json.tags?.name || '';
 	const icon = merchant.tags['icon:android'];
+	const address = merchant.osm_json.tags ? checkAddress(merchant.osm_json.tags) : '';
 	const description = merchant.osm_json.tags?.description || '';
 	const hours = merchant.osm_json.tags?.['opening_hours'] || '';
 	const payment = merchant.tags['payment:uri']
@@ -317,9 +318,11 @@
 						{name ? name : 'BTC Map Merchant'}
 					</h1>
 
-					<h2 class="text-xl text-primary dark:text-white">
-						{merchant.osm_json.tags && checkAddress(merchant.osm_json.tags)}
-					</h2>
+					{#if address}
+						<h2 class="text-xl text-primary dark:text-white">
+							{address}
+						</h2>
+					{/if}
 
 					<a
 						href={`/map?lat=${lat}&long=${long}`}
