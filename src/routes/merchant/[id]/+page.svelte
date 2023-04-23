@@ -474,7 +474,7 @@
 					on:click={startBoost}
 					disabled={boostLoading}
 					class="{boosted
-						? 'bg-bitcoin'
+						? 'bg-bitcoin hover:bg-bitcoinHover'
 						: 'bg-link hover:bg-hover'} mx-auto flex items-center justify-center rounded-xl p-3 text-center font-semibold text-white transition-colors"
 				>
 					<Icon

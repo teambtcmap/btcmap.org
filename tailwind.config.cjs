@@ -49,6 +49,7 @@ module.exports = {
 				created: '#10B791',
 				deleted: '#EB5757',
 				bitcoin: '#F7931A',
+				bitcoinHover: '#F9A136',
 				nostr: '#8b5cf6',
 				twitter: '#1DA1F2',
 				dark: '#06171C'
