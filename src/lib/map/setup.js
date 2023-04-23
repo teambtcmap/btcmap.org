@@ -565,7 +565,7 @@ export const generateMarker = (
 						element.id
 				  }' class='inline-block font-bold text-lg text-link hover:text-hover transition-colors leading-snug max-w-[300px]' title='Merchant name'>${
 						element.tags.name
-				  }</a> ${description ? `<span id='description' title='Description'></span>` : ''}`
+				  } ${description ? `<span id='description' title='Description'></span>` : ''}</a>`
 				: ''
 		}
 
