@@ -481,7 +481,7 @@
 <div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
-		<main class="mt-10 mb-20 space-y-10">
+		<main class="mb-20 mt-10 space-y-10">
 			{#if typeof window !== 'undefined'}
 				<h1
 					class="{detectTheme() === 'dark' || $theme === 'dark'
@@ -569,7 +569,7 @@
 					<div class="relative">
 						{#if chartsLoading}
 							<div
-								class="absolute top-0 left-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
+								class="absolute left-0 top-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
 							/>
 						{/if}
 						<canvas bind:this={upToDateChartCanvas} width="400" height="400" />
@@ -584,7 +584,7 @@
 					<div class="relative">
 						{#if chartsLoading}
 							<div
-								class="absolute top-0 left-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
+								class="absolute left-0 top-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
 							/>
 						{/if}
 						<canvas bind:this={totalChartCanvas} width="400" height="400" />
@@ -598,7 +598,7 @@
 					<div class="relative">
 						{#if chartsLoading}
 							<div
-								class="absolute top-0 left-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
+								class="absolute left-0 top-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
 							/>
 						{/if}
 						<canvas bind:this={legacyChartCanvas} width="400" height="400" />
@@ -613,7 +613,7 @@
 					<div class="relative">
 						{#if chartsLoading}
 							<div
-								class="absolute top-0 left-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
+								class="absolute left-0 top-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
 							/>
 						{/if}
 						<canvas bind:this={paymentMethodChartCanvas} width="400" height="400" />

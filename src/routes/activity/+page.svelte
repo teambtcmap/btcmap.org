@@ -18,7 +18,6 @@
 		theme
 	} from '$lib/store';
 	import { errToast, detectTheme } from '$lib/utils';
-	import { latCalc, longCalc } from '$lib/map/setup';
 
 	// alert for user errors
 	$: $userError && errToast($userError);
@@ -49,8 +48,7 @@
 							: undefined;
 
 					event.location = location ? location : 'Unnamed element';
-					event.lat = latCalc(elementMatch['osm_json']);
-					event.long = longCalc(elementMatch['osm_json']);
+					event.merchantId = elementMatch.id;
 
 					supertaggers.push(event);
 				}
@@ -85,7 +83,7 @@
 <div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
-		<main class="mt-10 mb-20 space-y-10">
+		<main class="mb-20 mt-10 space-y-10">
 			{#if typeof window !== 'undefined'}
 				<h1
 					class="{detectTheme() === 'dark' || $theme === 'dark'
@@ -129,8 +127,7 @@
 									user={findUser(tagger)}
 									time={tagger['created_at']}
 									latest={tagger === supertaggers[0] ? true : false}
-									lat={tagger.lat}
-									long={tagger.long}
+									merchantId={tagger.merchantId}
 								/>
 							{/each}
 						{:else}

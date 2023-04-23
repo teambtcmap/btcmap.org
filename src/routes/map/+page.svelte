@@ -915,7 +915,7 @@ ${
 	<div
 		id="search-div"
 		bind:this={customSearchBar}
-		class="absolute top-0 left-[60px] w-[50vw] md:w-[350px] {showSearch ? 'block' : 'hidden'}"
+		class="absolute left-[60px] top-0 w-[50vw] md:w-[350px] {showSearch ? 'block' : 'hidden'}"
 	>
 		<div class="relative">
 			<input
@@ -936,7 +936,7 @@ ${
 			<button
 				bind:this={clearSearchButton}
 				on:click={clearSearch}
-				class="absolute top-[10px] right-[8px] bg-white text-mapButton hover:text-black dark:bg-dark dark:text-white dark:hover:text-white/80 {search
+				class="absolute right-[8px] top-[10px] bg-white text-mapButton hover:text-black dark:bg-dark dark:text-white dark:hover:text-white/80 {search
 					? 'block'
 					: 'hidden'}"
 			>

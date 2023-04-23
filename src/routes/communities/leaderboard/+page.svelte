@@ -174,7 +174,7 @@
 				accurate information. They also help onboard new merchants in their area!
 			</h2>
 
-			<div class="items-center justify-center space-y-5 md:flex md:space-y-0 md:space-x-5">
+			<div class="items-center justify-center space-y-5 md:flex md:space-x-5 md:space-y-0">
 				<PrimaryButton
 					text="Add community"
 					style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
@@ -246,7 +246,7 @@
 
 						{#if leaderboardPaginated.length !== leaderboard.length}
 							<button
-								class="mx-auto !my-5 block text-xl font-semibold text-link transition-colors hover:text-hover"
+								class="!my-5 mx-auto block text-xl font-semibold text-link transition-colors hover:text-hover"
 								on:click={() => (leaderboardCount = leaderboardCount + 50)}>Load More</button
 							>
 						{/if}

@@ -27,7 +27,7 @@
 			excludeQuerySelectorAll={[`#dropdown-${title.toLowerCase()}`]}
 			on:outclick={() => (show = false)}
 		>
-			<div class="absolute top-8 right-0 w-[185px] rounded-2xl shadow-lg">
+			<div class="absolute right-0 top-8 w-[185px] rounded-2xl shadow-lg">
 				{#each links as link}
 					<a
 						href={link.url}

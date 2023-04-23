@@ -16,7 +16,7 @@
 		/>
 	</h3>
 	<div
-		class="mx-auto flex w-full items-center justify-between rounded-xl bg-lightBlue py-4 px-4 text-body dark:bg-white/[0.15] dark:text-white md:w-[475px] md:justify-center md:space-x-4 md:py-3 md:px-0"
+		class="mx-auto flex w-full items-center justify-between rounded-xl bg-lightBlue px-4 py-4 text-body dark:bg-white/[0.15] dark:text-white md:w-[475px] md:justify-center md:space-x-4 md:px-0 md:py-3"
 	>
 		<!-- value -->
 		<span class="hidden lowercase md:block"

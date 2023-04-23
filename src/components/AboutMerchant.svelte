@@ -2,8 +2,7 @@
 	import { Icon } from '$comp';
 	import tippy from 'tippy.js';
 
-	export let lat;
-	export let long;
+	export let id;
 	export let icon;
 	export let tooltip;
 
@@ -19,7 +18,7 @@
 
 <a
 	bind:this={merchantTooltip}
-	href="/map?lat={lat}&long={long}"
+	href="/merchant/{id}"
 	class="flex h-24 w-24 items-center justify-center rounded-full bg-bitcoin hover:animate-wiggle"
 >
 	<Icon

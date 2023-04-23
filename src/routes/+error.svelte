@@ -9,7 +9,7 @@
 	<meta property="og:image" content="https://btcmap.org/images/og/home.png" />
 	<meta property="twitter:title" content="BTC Map" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
-	{#if $page.url.pathname.startsWith('/tagger') || $page.url.pathname.startsWith('/community')}
+	{#if $page.url.pathname.startsWith('/tagger') || $page.url.pathname.startsWith('/community') || $page.url.pathname.startsWith('/merchant')}
 		<meta
 			name="lightning"
 			content="lnurlp:LNURL1DP68GURN8GHJ7CM0WFJJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQPSYZ34"

@@ -67,7 +67,7 @@
 <div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
-		<main class="mt-10 mb-20 space-y-10">
+		<main class="mb-20 mt-10 space-y-10">
 			{#if typeof window !== 'undefined'}
 				<h1
 					class="{detectTheme() === 'dark' || $theme === 'dark'

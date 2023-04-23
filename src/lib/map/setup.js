@@ -599,7 +599,9 @@ export const generateMarker = (
 							<span class='block text-xs text-center mt-1'>Edit</span>
 						</a>
 
-						<a id='share' href='/map?lat=${lat}&long=${long}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+						<a id='share' href='/merchant/${element.type}:${
+			element.id
+		}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
 								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#share"></use>
 							</svg>
@@ -910,9 +912,7 @@ ${
 				boost.set({
 					id: element.type + ':' + element.id,
 					name: element.tags && element.tags.name ? element.tags.name : '',
-					boost: boosted ? boosted : '',
-					lat,
-					long
+					boost: boosted ? boosted : ''
 				});
 
 				axios

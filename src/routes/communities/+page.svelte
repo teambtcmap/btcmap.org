@@ -197,7 +197,7 @@
 				and have fun!
 			</h2>
 
-			<div class="items-center justify-center space-y-5 md:flex md:space-y-0 md:space-x-5">
+			<div class="items-center justify-center space-y-5 md:flex md:space-x-5 md:space-y-0">
 				<PrimaryButton
 					text="Add community"
 					style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
@@ -212,7 +212,7 @@
 
 			<div class="relative">
 				{#if !initialRenderComplete || !communities}
-					<div class="absolute top-0 left-0 flex h-full w-full flex-col justify-between">
+					<div class="absolute left-0 top-0 flex h-full w-full flex-col justify-between">
 						<div class="flex flex-wrap justify-center">
 							{#each Array(6) as skeleton}
 								<div class="m-2 w-[94px] animate-pulse rounded-sm bg-link/50 py-2" />

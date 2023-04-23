@@ -15,7 +15,7 @@
 	<img
 		src="/images/street-map.svg"
 		alt="roads"
-		class="absolute top-0 right-0 dark:opacity-10 xl:hidden"
+		class="absolute right-0 top-0 dark:opacity-10 xl:hidden"
 	/>
 	<Header />
 	<div class="relative mx-auto w-10/12 xl:w-[1200px]">
@@ -37,7 +37,7 @@
 				>
 					{#each $apps as app}
 						<div
-							class="my-2 mx-2 space-y-1 text-center font-semibold text-body dark:text-white md:my-0"
+							class="mx-2 my-2 space-y-1 text-center font-semibold text-body dark:text-white md:my-0"
 						>
 							<p>{app.type}</p>
 							<a

@@ -204,8 +204,7 @@
 					: undefined;
 
 			event.location = location ? location : 'Unnamed element';
-			event.lat = latCalc(elementMatch['osm_json']);
-			event.long = longCalc(elementMatch['osm_json']);
+			event.merchantId = elementMatch.id;
 
 			eventElements.push(event);
 		}
@@ -966,7 +965,7 @@
 			<section id="taggers">
 				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
 					<h3
-						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white"
+						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
 					>
 						{name} Supertaggers
 					</h3>
@@ -1032,8 +1031,7 @@
 									user={findUser(event)}
 									time={event['created_at']}
 									latest={event === eventElements[0] ? true : false}
-									lat={event.lat}
-									long={event.long}
+									merchantId={event.merchantId}
 								/>
 							{/each}
 
@@ -1079,7 +1077,7 @@
 						<div class="relative">
 							{#if chartsLoading}
 								<div
-									class="absolute top-0 left-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
+									class="absolute left-0 top-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
 								/>
 							{/if}
 							<canvas bind:this={upToDateChartCanvas} width="400" height="400" />
@@ -1094,7 +1092,7 @@
 						<div class="relative">
 							{#if chartsLoading}
 								<div
-									class="absolute top-0 left-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
+									class="absolute left-0 top-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
 								/>
 							{/if}
 							<canvas bind:this={totalChartCanvas} width="400" height="400" />
@@ -1108,7 +1106,7 @@
 						<div class="relative">
 							{#if chartsLoading}
 								<div
-									class="absolute top-0 left-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
+									class="absolute left-0 top-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
 								/>
 							{/if}
 							<canvas bind:this={legacyChartCanvas} width="400" height="400" />
@@ -1123,7 +1121,7 @@
 						<div class="relative">
 							{#if chartsLoading}
 								<div
-									class="absolute top-0 left-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
+									class="absolute left-0 top-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
 								/>
 							{/if}
 							<canvas bind:this={paymentMethodChartCanvas} width="400" height="400" />

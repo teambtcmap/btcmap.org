@@ -2,14 +2,10 @@
 	import Time from 'svelte-time';
 	import { Tip } from '$comp';
 
-	export let location;
 	export let action;
 	export let user;
 	export let time;
 	export let latest;
-	export let lat;
-	export let long;
-	export let merchantId;
 
 	$: profile = user['osm_json'] && user['osm_json'];
 	$: regexMatch = profile && profile.description.match('(lightning:[^)]+)');
@@ -45,38 +41,8 @@
 		<!-- event information -->
 		<div class="space-y-2 lg:space-y-0">
 			<span class="text-primary dark:text-white lg:mr-5">
-				<!-- location -->
-				<a
-					href={action === 'delete'
-						? `https://www.openstreetmap.org/#map=21/${lat}/${long}`
-						: `/merchant/${merchantId}`}
-					target={action === 'delete' ? '_blank' : '_self'}
-					rel="noreferrer"
-					class="break-all text-link transition-colors hover:text-hover"
-					>{location}
-					{#if action === 'delete'}
-						<svg
-							class="inline"
-							width="16"
-							height="16"
-							viewBox="0 0 16 16"
-							fill="none"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path
-								d="M3 13L13 3M13 3H5.5M13 3V10.5"
-								stroke="currentColor"
-								stroke-width="1.5"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							/>
-						</svg>
-					{/if}
-				</a>
-
 				<!-- action -->
-				was
-				<strong>{action}d</strong>
+				<strong>{action.charAt(0).toUpperCase() + action.slice(1, action.length)}d</strong>
 
 				<!-- user -->
 				{#if username.length}

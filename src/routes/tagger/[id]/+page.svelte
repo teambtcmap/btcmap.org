@@ -214,6 +214,7 @@
 			event.location = location ? location : 'Unnamed element';
 			event.lat = latCalc(elementMatch['osm_json']);
 			event.long = longCalc(elementMatch['osm_json']);
+			event.merchantId = elementMatch.id;
 
 			eventElements.push(event);
 		}
@@ -485,7 +486,7 @@
 				</div>
 			</section>
 
-			<section id="stats" class="mt-10 mb-16">
+			<section id="stats" class="mb-16 mt-10">
 				<div
 					class="grid rounded-t-3xl border border-statBorder dark:bg-white/10 md:grid-cols-2 xl:grid-cols-4"
 				>
@@ -543,6 +544,7 @@
 									latest={event === eventElements[0] ? true : false}
 									lat={event.lat}
 									long={event.long}
+									merchantId={event.merchantId}
 								/>
 							{/each}
 

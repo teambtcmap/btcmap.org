@@ -183,7 +183,7 @@
 				Have a badge idea? Let us know!
 			</p>
 
-			<section id="achievements" class="mt-16 mb-20 space-y-8">
+			<section id="achievements" class="mb-20 mt-16 space-y-8">
 				<h2 class="text-center text-3xl font-semibold text-primary dark:text-white">
 					Achievements
 				</h2>

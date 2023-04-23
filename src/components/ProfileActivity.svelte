@@ -7,6 +7,7 @@
 	export let latest;
 	export let lat;
 	export let long;
+	export let merchantId;
 
 	const capitalizeFirstLetter = (string) => {
 		return string.charAt(0).toUpperCase() + string.slice(1);
@@ -14,7 +15,7 @@
 </script>
 
 <div
-	class="items-center space-y-2 p-5 text-center text-xl lg:flex lg:space-y-0 lg:space-x-5 lg:text-left"
+	class="items-center space-y-2 p-5 text-center text-xl lg:flex lg:space-x-5 lg:space-y-0 lg:text-left"
 >
 	<!-- dot -->
 	<span class="relative mx-auto mb-2 flex h-3 w-3 lg:mx-0 lg:mb-0">
@@ -47,7 +48,7 @@
 				<a
 					href={action === 'delete'
 						? `https://www.openstreetmap.org/#map=21/${lat}/${long}`
-						: `/map?lat=${lat}&long=${long}`}
+						: `/merchant/${merchantId}`}
 					target={action === 'delete' ? '_blank' : '_self'}
 					rel="noreferrer"
 					class="break-all text-link transition-colors hover:text-hover"

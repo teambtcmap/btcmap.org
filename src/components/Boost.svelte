@@ -130,7 +130,7 @@
 	<OutClick excludeQuerySelectorAll={['#boost-button']} on:outclick={closeModal}>
 		<div
 			transition:fly={{ y: 200, duration: 300 }}
-			class="center z-[2000] max-h-[90vh] w-[90vw] overflow-auto rounded-xl border border-mapBorder bg-white p-6 shadow-2xl dark:bg-dark md:w-[430px]"
+			class="center-fixed z-[2000] max-h-[90vh] w-[90vw] overflow-auto rounded-xl border border-mapBorder bg-white p-6 text-left shadow-2xl dark:bg-dark md:w-[430px]"
 		>
 			<CloseButton
 				position="flex justify-end"
@@ -171,7 +171,7 @@
 						</button>
 					</div>
 
-					<div class="space-y-2 md:flex md:space-y-0 md:space-x-2">
+					<div class="space-y-2 md:flex md:space-x-2 md:space-y-0">
 						{#each values as value}
 							<button
 								on:click={() => {
@@ -195,7 +195,7 @@
 									: 'border-mapBorder text-primary dark:text-white'} text-center transition-colors hover:border-link hover:text-link dark:hover:text-link"
 							>
 								{#if value.time === 3}
-									<img src="/icons/star.svg" alt="star" class="absolute top-1 right-1" />
+									<img src="/icons/star.svg" alt="star" class="absolute right-1 top-1" />
 								{/if}
 
 								<p>${value.fiat}</p>
@@ -299,7 +299,7 @@
 					<a
 						href="https://twitter.com/share?text=I just boosted {$boost.name
 							? $boost.name.replaceAll('&', '%26')
-							: 'this location'} on @btcmap. Check them out!&url=https://btcmap.org/map?lat={$boost.lat}%26long={$boost.long}&hashtags=bitcoin"
+							: 'this location'} on @btcmap. Check them out!&url=https://btcmap.org/merchant/{$boost.id}&hashtags=bitcoin"
 						target="_blank"
 						rel="noreferrer"
 						class="mx-auto flex w-[200px] items-center justify-center rounded-xl bg-twitter py-3 text-white"

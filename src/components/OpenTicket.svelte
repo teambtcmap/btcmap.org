@@ -16,7 +16,7 @@
 <div
 	class="w-full items-center justify-between space-y-1 border-t border-t-statBorder p-5 text-center md:flex md:space-y-0 md:text-left"
 >
-	<div class="items-center space-y-1 md:flex md:space-y-0 md:space-x-2">
+	<div class="items-center space-y-1 md:flex md:space-x-2 md:space-y-0">
 		<i class="fa-solid fa-ticket text-xl text-link" />
 
 		<div>
@@ -50,10 +50,10 @@
 		</div>
 	</div>
 
-	<div class="space-y-1 md:flex md:space-y-0 md:space-x-2">
+	<div class="space-y-1 md:flex md:space-x-2 md:space-y-0">
 		<div class="flex flex-wrap justify-center md:justify-start">
 			{#each assignees as assignee}
-				<a href={assignee.html_url} target="_blank" rel="noreferrer" class="mr-1 mb-1">
+				<a href={assignee.html_url} target="_blank" rel="noreferrer" class="mb-1 mr-1">
 					<img
 						src={assignee.avatar_url}
 						alt="avatar"

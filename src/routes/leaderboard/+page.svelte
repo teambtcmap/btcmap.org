@@ -203,7 +203,7 @@
 
 			<section id="chart" class="relative">
 				{#if leaderboard && leaderboard.length && !loading}{:else}
-					<div class="absolute top-0 left-0 h-[400px] w-full animate-pulse border border-link/50" />
+					<div class="absolute left-0 top-0 h-[400px] w-full animate-pulse border border-link/50" />
 				{/if}
 				<canvas bind:this={topTenChartCanvas} width="400" height="400" />
 			</section>

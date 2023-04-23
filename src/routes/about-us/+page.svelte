@@ -38,11 +38,6 @@
 		.sort((a, b) => Date.parse(b.tags['boost:expires']) - Date.parse(a.tags['boost:expires']))
 		.slice(0, 6);
 
-	merchants.forEach((merchant) => {
-		merchant.lat = latCalc(merchant['osm_json']);
-		merchant.long = longCalc(merchant['osm_json']);
-	});
-
 	let supertaggers = [];
 
 	const populateLeaderboard = () => {
@@ -195,7 +190,7 @@
 <div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
-		<main class="mt-10 mb-20 space-y-20 text-primary dark:text-white md:space-y-40">
+		<main class="mb-20 mt-10 space-y-20 text-primary dark:text-white md:space-y-40">
 			<div class="space-y-5 text-center text-xl">
 				<h1 class="text-4xl font-semibold !leading-tight md:text-5xl">About Us</h1>
 				<p class="mx-auto md:w-[600px]">
@@ -204,7 +199,7 @@
 				</p>
 			</div>
 
-			<section class="w-full justify-center space-y-10 lg:flex lg:space-y-0 lg:space-x-10">
+			<section class="w-full justify-center space-y-10 lg:flex lg:space-x-10 lg:space-y-0">
 				<div class="lg:w-[475px]">
 					<h2 class="mb-5 text-3xl font-semibold">Merchants</h2>
 
@@ -229,8 +224,7 @@
 					{#if merchants.length}
 						{#each merchants as merchant}
 							<AboutMerchant
-								lat={merchant.lat}
-								long={merchant.long}
+								id={merchant.id}
 								icon={merchant.tags['icon:android']}
 								tooltip={merchant['osm_json'].tags.name}
 							/>
@@ -275,7 +269,7 @@
 				</div>
 			</section>
 
-			<section class="w-full justify-center space-y-10 lg:flex lg:space-y-0 lg:space-x-10">
+			<section class="w-full justify-center space-y-10 lg:flex lg:space-x-10 lg:space-y-0">
 				<div class="lg:w-[475px]">
 					<h2 class="mb-5 text-3xl font-semibold">Communities</h2>
 
@@ -354,7 +348,7 @@
 				</p>
 			</section>
 
-			<section class="w-full justify-center space-y-10 lg:flex lg:space-y-0 lg:space-x-10">
+			<section class="w-full justify-center space-y-10 lg:flex lg:space-x-10 lg:space-y-0">
 				<div class="lg:w-[475px]">
 					<h2 class="mb-5 text-3xl font-semibold">Contributors</h2>
 
@@ -372,7 +366,7 @@
 			</section>
 
 			<section
-				class="w-full justify-center space-y-10 rounded-xl bg-[#EBEFF2] p-5 dark:bg-white/[0.15] md:p-10 lg:flex lg:space-y-0 lg:space-x-10"
+				class="w-full justify-center space-y-10 rounded-xl bg-[#EBEFF2] p-5 dark:bg-white/[0.15] md:p-10 lg:flex lg:space-x-10 lg:space-y-0"
 			>
 				<div class="lg:w-[475px]">
 					<h2 class="mb-10 text-3xl font-semibold">Core Team</h2>

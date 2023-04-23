@@ -11,7 +11,7 @@
 >
 	{#if type === 'contribution'}
 		<div
-			class="absolute top-5 -right-2 w-20 rounded-full bg-white py-2 font-semibold text-link shadow-lg dark:bg-white/[0.15]"
+			class="absolute -right-2 top-5 w-20 rounded-full bg-white py-2 font-semibold text-link shadow-lg dark:bg-white/[0.15]"
 		>
 			+{desc}
 		</div>

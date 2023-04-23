@@ -12,7 +12,7 @@
 <div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
-		<main class="mt-10 mb-20 space-y-5 text-body dark:text-white">
+		<main class="mb-20 mt-10 space-y-5 text-body dark:text-white">
 			<p class="text-center font-semibold text-primary dark:text-white">
 				BTC Map - Easily find places to spend sats anywhere on the planet.
 				<br />

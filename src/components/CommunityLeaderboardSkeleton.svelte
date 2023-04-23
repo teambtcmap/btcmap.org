@@ -1,6 +1,6 @@
 <div class="animate-pulse grid-cols-6 border-b border-link/50 py-5 text-center lg:grid">
 	<!-- position placeholder -->
-	<span class="my-auto mx-auto block h-5 w-5 animate-pulse rounded-full bg-link/50 lg:inline" />
+	<span class="mx-auto my-auto block h-5 w-5 animate-pulse rounded-full bg-link/50 lg:inline" />
 
 	<!-- avatar and name placeholder -->
 	<div class="my-5 lg:my-0">
