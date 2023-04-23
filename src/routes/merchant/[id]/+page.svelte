@@ -47,7 +47,7 @@
 		ShowTags,
 		PrimaryButton
 	} from '$comp';
-	import { successToast, detectTheme } from '$lib/utils';
+	import { successToast, errToast, detectTheme } from '$lib/utils';
 
 	const merchant = $elements.find((element) => element.id == data.id && !element['deleted_at']);
 
@@ -245,6 +245,7 @@
 			// eslint-disable-next-line no-undef
 			const divIcon = generateIcon(L, icon, boosted);
 
+			// eslint-disable-next-line no-undef
 			const marker = L.marker([lat, long], { icon: divIcon });
 
 			map.addLayer(marker);

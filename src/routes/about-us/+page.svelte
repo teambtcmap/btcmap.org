@@ -22,7 +22,6 @@
 		excludeLeader
 	} from '$lib/store';
 	import { errToast } from '$lib/utils';
-	import { latCalc, longCalc } from '$lib/map/setup';
 
 	// alert for element errors
 	$: $elementError && errToast($elementError);
