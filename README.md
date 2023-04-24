@@ -79,7 +79,7 @@ Here is your iframe embed URL: https://btcmap.org/map?lat=47.502358951968596&lon
 Thanks for using BTC Map!
 ```
 
-4. Add this URL to your `iframe` embed code
+4. Add this URL to your `iframe` embed code 
 
 #### Communities only
 
