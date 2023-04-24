@@ -83,7 +83,7 @@ Thanks for using BTC Map!
 
 #### Communities only
 
-1. Add `?communitiesOnly` to your `iframe` URL 
+1. Add `?communitiesOnly` to your `iframe` URL
 
 ##### Language filter
 
