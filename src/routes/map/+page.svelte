@@ -194,8 +194,24 @@
 			// add map and tiles
 			map = leaflet.map(mapElement);
 
+			// use url hash if present
+			if (location.hash) {
+				try {
+					const coords = location.hash.split('/');
+					map.setView([coords[1], coords[2]], coords[0].slice(1));
+					mapCenter = map.getCenter();
+				} catch (error) {
+					map.setView([0, 0], 3);
+					mapCenter = map.getCenter();
+					errToast(
+						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
+					);
+					console.log(error);
+				}
+			}
+
 			// set view to community if in url params
-			if (community && communitySelected) {
+			else if (community && communitySelected) {
 				try {
 					// eslint-disable-next-line no-undef
 					map.fitBounds(L.geoJSON(communitySelected.tags.geo_json).getBounds());
@@ -304,6 +320,11 @@ Thanks for using BTC Map!`);
 
 				mapCenter = map.getCenter();
 
+				if (!community && !communitiesOnly && !urlLat.length && !urlLong.length) {
+					const zoom = map.getZoom();
+					location.hash = zoom + '/' + mapCenter.lat.toFixed(5) + '/' + mapCenter.lng.toFixed(5);
+				}
+
 				localforage
 					.setItem('coords', coords)
 					// eslint-disable-next-line no-unused-vars
@@ -348,7 +369,6 @@ Thanks for using BTC Map!`);
 					// eslint-disable-next-line no-undef
 					const searchButton = L.DomUtil.create('a');
 					searchButton.classList.add('leaflet-control-search-toggle');
-					searchButton.href = '#';
 					searchButton.title = 'Search toggle';
 					searchButton.role = 'button';
 					searchButton.ariaLabel = 'Search toggle';
@@ -435,7 +455,6 @@ Thanks for using BTC Map!`);
 					// eslint-disable-next-line no-undef
 					const boostLayerButton = L.DomUtil.create('a');
 					boostLayerButton.classList.add('leaflet-control-boost-layer');
-					boostLayerButton.href = '#';
 					boostLayerButton.title = 'Boosted locations';
 					boostLayerButton.role = 'button';
 					boostLayerButton.ariaLabel = 'Boosted locations';

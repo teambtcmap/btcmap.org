@@ -286,7 +286,6 @@ export const changeDefaultIcons = (layers, L, mapElement, DomEvent) => {
 
 	const fullscreenButton = L.DomUtil.create('a');
 	fullscreenButton.classList.add('leaflet-control-full-screen');
-	fullscreenButton.href = '#';
 	fullscreenButton.title = 'Full screen';
 	fullscreenButton.role = 'button';
 	fullscreenButton.ariaLabel = 'Full screen';
@@ -431,7 +430,6 @@ export const dataRefresh = (L, map, DomEvent) => {
 
 			const dataRefreshButton = L.DomUtil.create('a');
 			dataRefreshButton.classList.add('leaflet-control-data-refresh');
-			dataRefreshButton.href = '#';
 			dataRefreshButton.title = 'Data refresh available';
 			dataRefreshButton.role = 'button';
 			dataRefreshButton.ariaLabel = 'Data refresh available';
