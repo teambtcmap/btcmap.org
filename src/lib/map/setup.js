@@ -561,9 +561,9 @@ export const generateMarker = (
 			element.tags && element.tags.name
 				? `<a href='/merchant/${element.type}:${
 						element.id
-				  }' class='inline-block font-bold text-lg !text-link hover:!text-hover transition-colors leading-snug max-w-[300px]' title='Merchant name'>${
+				  }' class='inline-block font-bold text-lg leading-snug max-w-[300px]' title='Merchant name'><span class='!text-link hover:!text-hover transition-colors'>${
 						element.tags.name
-				  } ${description ? `<span id='description' title='Description'></span>` : ''}</a>`
+				  }</span> ${description ? `<span id='description' title='Description'></span>` : ''}</a>`
 				: ''
 		}
 
