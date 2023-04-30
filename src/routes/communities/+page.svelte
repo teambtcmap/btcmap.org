@@ -155,12 +155,72 @@
 
 	$: chartSync($syncStatus, $areas);
 
+	let section;
+	const sections = [
+		'--Continents--',
+		'Africa',
+		'Asia',
+		'Europe',
+		'North America',
+		'Oceania',
+		'South America',
+		'--Organizations--',
+		'2140 Meetups',
+		'Bitcoin4India',
+		'BitDevs',
+		'Breizh Bitcoin',
+		'Découvre Bitcoin',
+		'Dwadzieścia Jeden',
+		'Einundzwanzig',
+		'Satoshi Spritz'
+	];
+	$: communitySections = [
+		{
+			section: 'Africa',
+			communities: africa && africa.filter((community) => !community.tags.organization)
+		},
+		{
+			section: 'Asia',
+			communities: asia && asia.filter((community) => !community.tags.organization)
+		},
+		{
+			section: 'Europe',
+			communities: europe && europe.filter((community) => !community.tags.organization)
+		},
+		{
+			section: 'North America',
+			communities: northAmerica && northAmerica.filter((community) => !community.tags.organization)
+		},
+		{
+			section: 'Oceania',
+			communities: oceania && oceania.filter((community) => !community.tags.organization)
+		},
+		{
+			section: 'South America',
+			communities: southAmerica && southAmerica.filter((community) => !community.tags.organization)
+		},
+		{ section: '2140 Meetups', communities: meetups2140 },
+		{ section: 'Bitcoin4India', communities: bitcoin4India },
+		{ section: 'BitDevs', communities: bitDevs },
+		{ section: 'Breizh Bitcoin', communities: breizhBitcoin },
+		{ section: 'Découvre Bitcoin', communities: decouvreBitcoin },
+		{ section: 'Dwadzieścia Jeden', communities: dwadziesciaJeden },
+		{ section: 'Einundzwanzig', communities: einundzwanzig },
+		{ section: 'Satoshi Spritz', communities: satoshiSpritz }
+	];
+
 	onMount(async () => {
 		if (browser) {
 			continentChartCanvas.getContext('2d');
 
 			if ($areas && $areas.length) {
 				populateChart();
+			}
+
+			if (location.hash) {
+				section = location.hash.slice(1).replaceAll('%20', ' ');
+			} else {
+				section = 'Africa';
 			}
 
 			initialRenderComplete = true;
@@ -226,45 +286,48 @@
 				<canvas bind:this={continentChartCanvas} width="350" height="350" />
 			</div>
 
-			<div class="space-y-20">
-				<CommunitySection
-					title="Africa"
-					communities={africa && africa.filter((community) => !community.tags.organization)}
-				/>
-				<CommunitySection
-					title="Asia"
-					communities={asia && asia.filter((community) => !community.tags.organization)}
-				/>
-				<CommunitySection
-					title="Europe"
-					communities={europe && europe.filter((community) => !community.tags.organization)}
-				/>
-				<CommunitySection
-					title="North America"
-					communities={northAmerica &&
-						northAmerica.filter((community) => !community.tags.organization)}
-				/>
-				<CommunitySection
-					title="Oceania"
-					communities={oceania && oceania.filter((community) => !community.tags.organization)}
-				/>
-				<CommunitySection
-					title="South America"
-					communities={southAmerica &&
-						southAmerica.filter((community) => !community.tags.organization)}
-				/>
+			<div>
+				<div class="mb-5 justify-between md:flex">
+					{#if section}
+						<h2
+							class="mb-2 text-3xl font-semibold text-primary dark:text-white md:mb-0 md:text-left"
+						>
+							<a href="/communities#{section.replaceAll(' ', '%20')}">{section}</a>
+						</h2>
 
-				<CommunitySection title="2140 Meetups" communities={meetups2140} />
-				<CommunitySection title="Bitcoin4India" communities={bitcoin4India} />
-				<CommunitySection title="BitDevs" communities={bitDevs} />
-				<CommunitySection title="Breizh Bitcoin" communities={breizhBitcoin} />
-				<CommunitySection title="Découvre Bitcoin" communities={decouvreBitcoin} />
-				<CommunitySection title="Dwadzieścia Jeden" communities={dwadziesciaJeden} />
-				<CommunitySection title="Einundzwanzig" communities={einundzwanzig} />
-				<CommunitySection title="Satoshi Spritz" communities={satoshiSpritz} />
+						<select
+							class="rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link dark:bg-white/[0.15] dark:text-white"
+							bind:value={section}
+							on:change={(e) => {
+								section = e.target.value;
+								location.hash = e.target.value;
+							}}
+						>
+							{#each sections as option}
+								<option disabled={option.startsWith('--')} value={option}>{option}</option>
+							{/each}
+						</select>
+					{/if}
+				</div>
+
+				{#each communitySections as item}
+					{#if section === item.section}
+						<CommunitySection communities={item.communities} />
+					{/if}
+				{/each}
 			</div>
 		</main>
 
 		<Footer />
 	</div>
 </div>
+
+{#if typeof window !== 'undefined'}
+	{#if detectTheme() === 'dark' || $theme === 'dark'}
+		<style>
+			select option {
+				@apply bg-gray-700;
+			}
+		</style>
+	{/if}
+{/if}

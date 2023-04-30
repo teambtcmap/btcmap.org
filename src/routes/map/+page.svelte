@@ -681,7 +681,7 @@ ${
 		community.tags['contact:instagram']
 			? `
 		<a href=${community.tags['contact:instagram']} target="_blank" rel="noreferrer" class="m-1" title='Instagram'>
-			<img src="/icons/socials/instagram.svg" alt="instagram" decoding="sync" fetchpriority="high" />
+			<img src="/icons/socials/instagram.svg" alt="instagram" class="h-10 w-10 rounded-full" decoding="sync" fetchpriority="high" />
 		</a>`
 			: ''
 	}

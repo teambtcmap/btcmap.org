@@ -859,7 +859,11 @@
 					{/if}
 					{#if instagram}
 						<a href={instagram} target="_blank" rel="noreferrer" class="m-1">
-							<img src="/icons/socials/instagram.svg" alt="instagram" />
+							<img
+								src="/icons/socials/instagram.svg"
+								alt="instagram"
+								class="h-10 w-10 rounded-full"
+							/>
 						</a>
 					{/if}
 					{#if whatsapp}
