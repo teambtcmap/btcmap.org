@@ -25,12 +25,12 @@
 
 <svelte:head>
 	<title>{$page.data.name ? $page.data.name + ' - ' : ''}BTC Map Merchant</title>
-	<meta property="og:image" content="https://btcmap.org/images/og/add.png" />
+	<meta property="og:image" content="https://btcmap.org/images/og/merchant.png" />
 	<meta
 		property="twitter:title"
 		content="{$page.data.name ? $page.data.name + ' - ' : ''}BTC Map Merchant"
 	/>
-	<meta property="twitter:image" content="https://btcmap.org/images/og/add.png" />
+	<meta property="twitter:image" content="https://btcmap.org/images/og/merchant.png" />
 </svelte:head>
 
 {#if $users && $users.length && $events && $events.length && $elements && $elements.length && $areas && $areas.length}
