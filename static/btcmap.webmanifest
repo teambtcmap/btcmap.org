@@ -19,19 +19,19 @@
 			"src": "/maskable_icon_x96.png",
 			"sizes": "96x96",
 			"type": "image/png",
-			"purpose": "any maskable"
+			"purpose": "maskable"
 		},
 		{
 			"src": "/maskable_icon_x192.png",
 			"sizes": "192x192",
 			"type": "image/png",
-			"purpose": "any maskable"
+			"purpose": "maskable"
 		},
 		{
 			"src": "/maskable_icon_x512.png",
 			"sizes": "512x512",
 			"type": "image/png",
-			"purpose": "any maskable"
+			"purpose": "maskable"
 		},
 		{
 			"src": "/apple-touch-icon.png",
@@ -61,8 +61,16 @@
 			"url": "/map",
 			"icons": [
 				{
+					"src": "/maskable_icon_x96.png",
+					"sizes": "96x96"
+				},
+				{
 					"src": "/android-chrome-192x192.png",
 					"sizes": "192x192"
+				},
+				{
+					"src": "/android-chrome-512x512.png",
+					"sizes": "512x512"
 				}
 			]
 		},
@@ -73,8 +81,16 @@
 			"url": "/add-location",
 			"icons": [
 				{
+					"src": "/maskable_icon_x96.png",
+					"sizes": "96x96"
+				},
+				{
 					"src": "/android-chrome-192x192.png",
 					"sizes": "192x192"
+				},
+				{
+					"src": "/android-chrome-512x512.png",
+					"sizes": "512x512"
 				}
 			]
 		},
@@ -85,8 +101,16 @@
 			"url": "/verify-location",
 			"icons": [
 				{
+					"src": "/maskable_icon_x96.png",
+					"sizes": "96x96"
+				},
+				{
 					"src": "/android-chrome-192x192.png",
 					"sizes": "192x192"
+				},
+				{
+					"src": "/android-chrome-512x512.png",
+					"sizes": "512x512"
 				}
 			]
 		},
@@ -97,8 +121,16 @@
 			"url": "/dashboard",
 			"icons": [
 				{
+					"src": "/maskable_icon_x96.png",
+					"sizes": "96x96"
+				},
+				{
 					"src": "/android-chrome-192x192.png",
 					"sizes": "192x192"
+				},
+				{
+					"src": "/android-chrome-512x512.png",
+					"sizes": "512x512"
 				}
 			]
 		},
@@ -109,8 +141,16 @@
 			"url": "/activity",
 			"icons": [
 				{
+					"src": "/maskable_icon_x96.png",
+					"sizes": "96x96"
+				},
+				{
 					"src": "/android-chrome-192x192.png",
 					"sizes": "192x192"
+				},
+				{
+					"src": "/android-chrome-512x512.png",
+					"sizes": "512x512"
 				}
 			]
 		},
@@ -121,8 +161,16 @@
 			"url": "/leaderboard",
 			"icons": [
 				{
+					"src": "/maskable_icon_x96.png",
+					"sizes": "96x96"
+				},
+				{
 					"src": "/android-chrome-192x192.png",
 					"sizes": "192x192"
+				},
+				{
+					"src": "/android-chrome-512x512.png",
+					"sizes": "512x512"
 				}
 			]
 		},
@@ -133,8 +181,16 @@
 			"url": "/communities",
 			"icons": [
 				{
+					"src": "/maskable_icon_x96.png",
+					"sizes": "96x96"
+				},
+				{
 					"src": "/android-chrome-192x192.png",
 					"sizes": "192x192"
+				},
+				{
+					"src": "/android-chrome-512x512.png",
+					"sizes": "512x512"
 				}
 			]
 		},
@@ -145,8 +201,16 @@
 			"url": "/support-us",
 			"icons": [
 				{
+					"src": "/maskable_icon_x96.png",
+					"sizes": "96x96"
+				},
+				{
 					"src": "/android-chrome-192x192.png",
 					"sizes": "192x192"
+				},
+				{
+					"src": "/android-chrome-512x512.png",
+					"sizes": "512x512"
 				}
 			]
 		}
