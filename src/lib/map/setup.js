@@ -849,7 +849,7 @@ ${
 			}
 			`;
 
-		if (description) {
+		if (description && element.tags && element.tags.name) {
 			const descriptionContainer = popupContainer.querySelector('#description');
 			new InfoTooltip({
 				target: descriptionContainer,
