@@ -57,7 +57,13 @@ self.addEventListener('fetch', (event) => {
 
 			return response;
 		} catch {
-			return cache.match(event.request);
+			const cachedPage = await cache.match(event.request);
+
+			if (cachedPage.status === 200) {
+				return cachedPage;
+			} else {
+				return cache.match('/offline.html');
+			}
 		}
 	}
 

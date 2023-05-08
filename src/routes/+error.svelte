@@ -5,7 +5,7 @@
 </script>
 
 <svelte:head>
-	<title>BTC Map</title>
+	<title>BTC Map - Error</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/home.png" />
 	<meta property="twitter:title" content="BTC Map" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
