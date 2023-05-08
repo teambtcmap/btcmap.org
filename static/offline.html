@@ -3746,9 +3746,15 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 					</header>
 
 					<div class="space-y-10 py-10 text-center">
-						<a href="/" class="text-xl font-semibold text-link transition-colors hover:text-hover"
-							><i class="fa-solid fa-house mr-2"></i> Home</a
+						<button
+							id="back"
+							class="inline text-xl font-semibold text-link transition-colors hover:text-hover"
 						>
+							<i class="fa-solid fa-backward-step mr-2"></i> Back
+						</button>
+						<script>
+							document.querySelector('#back').onclick = () => window.history.back();
+						</script>
 						<h1 class="text-4xl dark:text-white md:text-5xl">You are offline.</h1>
 						<h2
 							class="text-xl font-semibold text-primary dark:text-white"
