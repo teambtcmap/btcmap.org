@@ -86,57 +86,72 @@
 	let continentChart;
 
 	const populateChart = () => {
-		continentChart = new Chart(continentChartCanvas, {
-			type: 'doughnut',
-			data: {
-				labels: ['Africa', 'Asia', 'Europe', 'North America', 'Oceania', 'South America'],
-				datasets: [
-					{
-						label: 'Communities by Continent',
-						data: [
-							africa.length,
-							asia.length,
-							europe.length,
-							northAmerica.length,
-							oceania.length,
-							southAmerica.length
-						],
-						backgroundColor: [
-							'rgba(247, 147, 26, 1)',
-							'rgba(11, 144, 114, 1)',
-							'rgba(247, 147, 26, 0.7)',
-							'rgba(11, 144, 114, 0.7)',
-							'rgba(247, 147, 26, 0.35)',
-							'rgba(11, 144, 114, 0.35)'
-						],
-						hoverOffset: 4
-					}
-				]
-			},
-			options: {
-				maintainAspectRatio: false,
-				plugins: {
-					legend: {
-						labels: {
-							font: {
-								weight: 600
-							}
+		if (
+			africa &&
+			africa.length &&
+			asia &&
+			asia.length &&
+			europe &&
+			europe.length &&
+			northAmerica &&
+			northAmerica.length &&
+			oceania &&
+			oceania.length &&
+			southAmerica &&
+			southAmerica.length
+		) {
+			continentChart = new Chart(continentChartCanvas, {
+				type: 'doughnut',
+				data: {
+					labels: ['Africa', 'Asia', 'Europe', 'North America', 'Oceania', 'South America'],
+					datasets: [
+						{
+							label: 'Communities by Continent',
+							data: [
+								africa.length,
+								asia.length,
+								europe.length,
+								northAmerica.length,
+								oceania.length,
+								southAmerica.length
+							],
+							backgroundColor: [
+								'rgba(247, 147, 26, 1)',
+								'rgba(11, 144, 114, 1)',
+								'rgba(247, 147, 26, 0.7)',
+								'rgba(11, 144, 114, 0.7)',
+								'rgba(247, 147, 26, 0.35)',
+								'rgba(11, 144, 114, 0.35)'
+							],
+							hoverOffset: 4
 						}
-					},
-					title: {
-						display: true,
-						text: `${communities.length} Total`,
-						font: { size: 18 }
+					]
+				},
+				options: {
+					maintainAspectRatio: false,
+					plugins: {
+						legend: {
+							labels: {
+								font: {
+									weight: 600
+								}
+							}
+						},
+						title: {
+							display: true,
+							text: `${communities.length} Total`,
+							font: { size: 18 }
+						}
 					}
 				}
-			}
-		});
+			});
 
-		chartRendered = true;
+			chartRendered = true;
+		}
 	};
 
-	const chartSync = (status, areas) => {
-		if (areas.length && !status && initialRenderComplete) {
+	const chartSync = (status) => {
+		if (!status && initialRenderComplete) {
 			if (chartRendered) {
 				continentChart.data.datasets[0].data = [
 					africa.length,
@@ -153,7 +168,7 @@
 		}
 	};
 
-	$: chartSync($syncStatus, $areas);
+	$: $areas && $areas.length && communities && communities.length && chartSync($syncStatus);
 
 	let section;
 	const sections = [
@@ -212,10 +227,6 @@
 	onMount(async () => {
 		if (browser) {
 			continentChartCanvas.getContext('2d');
-
-			if ($areas && $areas.length) {
-				populateChart();
-			}
 
 			if (location.hash) {
 				section = location.hash.slice(1).replaceAll('%20', ' ');
