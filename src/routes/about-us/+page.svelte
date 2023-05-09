@@ -87,7 +87,8 @@
 		{ name: 'Bolt Card', icon: 'bolt', url: 'https://www.boltcard.org/' },
 		{ name: 'Galoy', icon: 'galoy', url: 'https://galoy.io/' },
 		{ name: 'Satimoto', icon: 'satimoto', url: 'https://satimoto.com/' },
-		{ name: 'Bitcoin Dashboard', icon: '', url: 'https://bitcoin-primodata.streamlit.app/' }
+		{ name: 'Bitcoin Dashboard', icon: '', url: 'https://bitcoin-primodata.streamlit.app/' },
+		{ name: 'BitLocal', icon: 'bitlocal', url: 'https://www.bitlocal.app/' }
 	];
 
 	const projectIntegrations = [
