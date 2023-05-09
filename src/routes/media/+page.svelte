@@ -19,6 +19,7 @@
 		{ link: '/images/og/badges.png', name: 'Earn Badges' },
 		{ link: '/images/og/home.png', name: 'Main' },
 		{ link: '/images/og/map.png', name: 'Map' },
+		{ link: '/images/og/merchant.png', name: 'Merchant' },
 		{ link: '/images/og/dash.png', name: 'Stats Dashboard' },
 		{ link: '/images/og/leader.png', name: 'Supertagger Leaderboard' },
 		{ link: '/images/og/supertagger.png', name: 'Supertagger Profile' },
