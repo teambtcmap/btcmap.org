@@ -1,4 +1,6 @@
 <script>
+	import rewind from '@mapbox/geojson-rewind';
+	import { geoContains } from 'd3-geo';
 	import { onMount, onDestroy, tick } from 'svelte';
 	import { browser } from '$app/environment';
 	import axios from 'axios';
@@ -13,7 +15,7 @@
 	} from '$comp';
 	import { geolocate, changeDefaultIcons, toggleMapButtons, attribution } from '$lib/map/setup';
 	import { errToast, detectTheme } from '$lib/utils';
-	import { theme } from '$lib/store';
+	import { theme, areas, areaError } from '$lib/store';
 
 	let captcha;
 	let captchaSecret;
@@ -34,6 +36,20 @@
 				console.log(error);
 			});
 	};
+
+	// alert for area errors
+	$: $areaError && errToast($areaError);
+
+	$: communities = $areas.filter(
+		(area) =>
+			area.tags.type === 'community' &&
+			area.tags.geo_json &&
+			area.tags.name &&
+			area.tags['icon:square'] &&
+			area.tags.continent &&
+			Object.keys(area.tags).find((key) => key.includes('contact'))
+	);
+	let filteredCommunities;
 
 	let name;
 	let address;
@@ -116,7 +132,8 @@
 					notes: notes.value,
 					source,
 					sourceOther: sourceOther ? sourceOther : '',
-					contact: contact.value
+					contact: contact.value,
+					communities: filteredCommunities
 				})
 				.then(function (response) {
 					submissionIssueNumber = response.data.number;
@@ -193,6 +210,19 @@
 					marker = L.marker([lat, long]).addTo(map);
 
 					selected = true;
+
+					// filter communities containing element
+					filteredCommunities = communities
+						.filter((community) => {
+							let rewoundPoly = rewind(community.tags.geo_json, true);
+
+							if (geoContains(rewoundPoly, [long, lat])) {
+								return true;
+							} else {
+								return false;
+							}
+						})
+						.map((community) => community.tags.name);
 				}
 			});
 

@@ -33,9 +33,11 @@
 		MapLoading,
 		SponsorBadge,
 		OrgBadge,
-		Icon
+		Icon,
+		OpenTicket,
+		InfoTooltip
 	} from '$comp';
-	import { detectTheme, updateChartThemes } from '$lib/utils';
+	import { detectTheme, updateChartThemes, errToast } from '$lib/utils';
 
 	let community = $areas.find(
 		(area) =>
@@ -69,6 +71,26 @@
 	}
 
 	community = community.tags;
+
+	const ticketTypes = ['Add', 'Verify'];
+	let showType = 'Add';
+
+	const tickets = data.tickets;
+	const totalTickets = tickets.length;
+	const ticketError = tickets === 'error' ? true : false;
+
+	$: ticketError && errToast('Could not load open tickets, please try again or contact BTC Map.');
+
+	const add =
+		tickets &&
+		tickets.length &&
+		!ticketError &&
+		tickets.filter((issue) => issue.labels.find((label) => label.name === 'location-submission'));
+	const verify =
+		tickets &&
+		tickets.length &&
+		!ticketError &&
+		tickets.filter((issue) => issue.labels.find((label) => label.name === 'verify-submission'));
 
 	let avatar = community['icon:square'];
 	let name = data.name;
@@ -1067,6 +1089,96 @@
 							{/each}
 						{/if}
 					</div>
+				</div>
+			</section>
+
+			<section id="tickets">
+				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
+					<div class="p-5 text-lg font-semibold text-primary dark:text-white">
+						<h3 class="mb-2 text-center md:text-left">
+							{name} Tickets
+							{#if !ticketError}
+								<span class="text-base">({totalTickets})</span>
+							{/if}
+							<InfoTooltip
+								tooltip="Tickets up for grabs from our noob forms! Anybody can help add or verify submissions on OpenStreetMap."
+							/>
+						</h3>
+
+						{#each ticketTypes as type}
+							<button
+								class="mx-auto block w-40 border border-link py-2 text-center md:inline {type ===
+								'Add'
+									? 'rounded-t md:rounded-l md:rounded-tr-none'
+									: type === 'Verify'
+									? 'rounded-b md:rounded-r md:rounded-bl-none'
+									: ''} {showType === type ? 'bg-link text-white' : ''} transition-colors"
+								on:click={() => (showType = type)}>{type}</button
+							>
+						{/each}
+					</div>
+
+					{#if !ticketError}
+						{#if showType === 'Add'}
+							{#if add.length}
+								{#each add as ticket}
+									<OpenTicket
+										assignees={ticket.assignees}
+										comments={ticket.comments}
+										created={ticket.created_at}
+										url={ticket.html_url}
+										labels={ticket.labels}
+										id={ticket.number}
+										name={ticket.title}
+										user={ticket.user}
+									/>
+								{/each}
+							{:else}
+								<p class="border-t border-statBorder p-5 text-center text-body dark:text-white">
+									No open <strong>add</strong> tickets.
+								</p>
+							{/if}
+						{:else if showType === 'Verify'}
+							{#if verify.length}
+								{#each verify as ticket}
+									<OpenTicket
+										assignees={ticket.assignees}
+										comments={ticket.comments}
+										created={ticket.created_at}
+										url={ticket.html_url}
+										labels={ticket.labels}
+										id={ticket.number}
+										name={ticket.title}
+										user={ticket.user}
+									/>
+								{/each}
+							{:else}
+								<p class="border-t border-statBorder p-5 text-center text-body dark:text-white">
+									No open <strong>verify</strong> tickets.
+								</p>
+							{/if}
+						{/if}
+
+						{#if tickets.length === 100}
+							<p
+								class="border-t border-statBorder p-5 text-center font-semibold text-primary dark:text-white"
+							>
+								View all open tickets directly on <a
+									href="https://github.com/teambtcmap/btcmap-data/issues?q=is%3Aopen+is%3Aissue+label%3A%22{name.replaceAll(
+										' ',
+										'+'
+									)}%22"
+									target="_blank"
+									rel="noreferrer"
+									class="text-link transition-colors hover:text-hover">GitHub</a
+								>.
+							</p>
+						{/if}
+					{:else}
+						<p class="border-t border-statBorder p-5 text-center text-body dark:text-white">
+							Error fetching tickets.
+						</p>
+					{/if}
 				</div>
 			</section>
 

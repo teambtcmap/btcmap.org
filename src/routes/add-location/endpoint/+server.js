@@ -38,7 +38,8 @@ export async function POST({ request }) {
 		notes,
 		source,
 		sourceOther,
-		contact
+		contact,
+		communities
 	} = await request.json();
 
 	// if honey field has value return
@@ -81,6 +82,8 @@ export async function POST({ request }) {
 			console.log(error);
 		});
 
+	const standardLabels = ['good first issue', 'help wanted', 'location-submission'];
+
 	let github = await axios
 		.post(
 			'https://api.github.com/repos/teambtcmap/btcmap-data/issues',
@@ -88,6 +91,7 @@ export async function POST({ request }) {
 				title: name,
 				body: `Merchant name: ${name}
 Country: ${country ? country : ''}
+Communities: ${communities.length ? communities.join(', ') : ''}
 Address: ${address}
 Lat: ${lat}
 Long: ${long}
@@ -107,9 +111,14 @@ Status: Todo
 Created at: ${new Date(Date.now()).toISOString()}
 
 If you are a new contributor please read our Tagging Instructions [here](https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions).`,
-				labels: country
-					? ['good first issue', 'help wanted', 'location-submission', country]
-					: ['good first issue', 'help wanted', 'location-submission']
+				labels:
+					country && communities.length
+						? [...standardLabels, country, ...communities]
+						: country
+						? [...standardLabels, country]
+						: communities.length
+						? [...standardLabels, ...communities]
+						: [...standardLabels]
 			},
 			{ headers }
 		)
