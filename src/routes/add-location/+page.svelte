@@ -15,7 +15,7 @@
 	} from '$comp';
 	import { geolocate, changeDefaultIcons, toggleMapButtons, attribution } from '$lib/map/setup';
 	import { errToast, detectTheme } from '$lib/utils';
-	import { theme, areas, areaError } from '$lib/store';
+	import { theme, areas, areaError, socials } from '$lib/store';
 
 	let captcha;
 	let captchaSecret;
@@ -283,7 +283,7 @@
 				<h1
 					class="{detectTheme() === 'dark' || $theme === 'dark'
 						? 'text-white'
-						: 'gradient'} mt-10 text-center text-4xl font-semibold md:text-5xl lg:text-left"
+						: 'gradient'} mt-10 text-center text-4xl font-semibold md:text-5xl"
 				>
 					Accept bitcoin? Get found.
 				</h1>
@@ -291,19 +291,93 @@
 				<HeaderPlaceholder />
 			{/if}
 
-			<div class="mt-16 justify-between pb-20 md:pb-32 lg:flex">
-				<section
-					id="noob"
-					class="mx-auto w-full border-b border-input pb-14 md:w-2/3 lg:w-1/2 lg:border-b-0 lg:border-r lg:pb-0"
-				>
-					<div class="lg:w-10/12 xl:w-3/4">
+			<div class="mt-16 pb-20 md:pb-32">
+				<section id="supertagger" class="mx-auto w-full border-b border-input pb-14">
+					<div class="mx-auto max-w-xl text-primary dark:text-white">
+						<h2 class="mb-5 text-center text-3xl font-semibold md:text-left">Start Here</h2>
+						<p class="mb-10 w-full text-justify">
+							We use OpenStreetMap to tag locations. Follow the steps below to quickly add a
+							merchant to BTC Map.
+						</p>
+
+						<div class="flex justify-center">
+							<ol class="space-y-10 text-center text-xl font-semibold md:space-y-8 md:text-left">
+								<li class="items-center md:flex">
+									<img
+										src="/icons/pin-1.svg"
+										alt="pin"
+										class="mx-auto mb-4 md:mx-0 md:mb-0 md:mr-4"
+									/>
+									Create an
+									<a
+										href="https://www.openstreetmap.org/user/new"
+										target="_blank"
+										rel="noreferrer"
+										class="mx-1 text-link transition-colors hover:text-hover">OpenStreetMap</a
+									> account
+								</li>
+								<li class="items-center md:flex">
+									<img
+										src="/icons/pin-2.svg"
+										alt="pin"
+										class="mx-auto mb-4 md:mx-0 md:mb-0 md:mr-4"
+									/>
+									<a
+										href="https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions#tagging-guidance"
+										target="_blank"
+										rel="noreferrer"
+										class="mr-1 text-link transition-colors hover:text-hover">Tag</a
+									> the location
+								</li>
+								<li class="items-center md:flex">
+									<img
+										src="/icons/pin-3.svg"
+										alt="pin"
+										class="mx-auto mb-4 md:mx-0 md:mb-0 md:mr-4"
+									/>
+									Show up on the
+									<a href="/map" class="ml-1 text-link transition-colors hover:text-hover">map</a>!
+								</li>
+							</ol>
+						</div>
+
+						<h3 class="mb-5 mt-16 text-center text-2xl font-semibold md:mt-10">
+							See how it's done
+						</h3>
+						<!-- svelte-ignore a11y-media-has-caption -->
+						<video
+							controls
+							playsinline
+							preload="auto"
+							src="/videos/osm-tagging-tutorial.mp4"
+							class="w-full border-2 border-input"
+						/>
+
+						<h3 class="mb-5 mt-16 text-center text-2xl font-semibold md:mt-10">
+							Still have questions?
+						</h3>
+						<p class="text-justify">
+							Ask for help in our <a
+								href={$socials.discord}
+								target="_blank"
+								rel="noreferrer"
+								class="text-link transition-colors hover:text-hover">Discord</a
+							> server and a community member will be happy to assist. Alternatively, you can fill out
+							the form below. This method is not recommended if you would like to be added to the map
+							right away.
+						</p>
+					</div>
+				</section>
+
+				<section id="noob" class="mx-auto w-full pt-14">
+					<div class="mx-auto max-w-xl">
 						<h2
-							class="mb-5 text-center text-3xl font-semibold text-primary dark:text-white lg:text-left"
+							class="mb-5 text-center text-3xl font-semibold text-primary dark:text-white md:text-left"
 						>
-							Noobs
+							Form Option
 						</h2>
 
-						<p class="mb-10 w-full text-center text-primary dark:text-white lg:text-left">
+						<p class="mb-10 w-full text-justify text-primary dark:text-white">
 							Fill out the following form and one of our volunteer community members will add your
 							location to the map. <InfoTooltip
 								tooltip="NOTE: Due to the backlog of requests and the additions being completed on a volunteer effort, it may take several weeks to have your location added. It is encouraged to add your location to OpenStreetMap directly following the Shadowy Supertagger method if you want to appear on the map right away."
@@ -353,10 +427,13 @@
 								<div class="relative mb-2">
 									<div
 										bind:this={mapElement}
-										class="z-10 h-[300px] !cursor-crosshair rounded-2xl border-2 border-input !bg-teal dark:!bg-dark"
+										class="z-10 h-[300px] !cursor-crosshair rounded-2xl border-2 border-input !bg-teal dark:!bg-dark md:h-[400px]"
 									/>
 									{#if !mapLoaded}
-										<MapLoading type="embed" style="h-[300px] border-2 border-input rounded-2xl" />
+										<MapLoading
+											type="embed"
+											style="h-[300px] md:h-[400px] border-2 border-input rounded-2xl"
+										/>
 									{/if}
 								</div>
 								<div class="flex space-x-2">
@@ -575,7 +652,7 @@
 									<option value="Other">Other method</option>
 								</select>
 								{#if source === 'Other'}
-									<p class="my-2 text-sm">
+									<p class="my-2 text-justify text-sm">
 										How did you verify this information? Please provide as much detail as possible.
 									</p>
 									<textarea
@@ -594,7 +671,7 @@
 								<label for="contact" class="mb-2 block font-semibold"
 									>Public Contact <span class="font-normal">(optional)</span></label
 								>
-								<p class="mb-2 text-sm">
+								<p class="mb-2 text-justify text-sm">
 									If we have any follow-up questions we will contact you in order to add your
 									location successfully.
 								</p>
@@ -653,32 +730,6 @@
 								style="w-full py-3 rounded-xl"
 							/>
 						</form>
-					</div>
-				</section>
-
-				<section id="supertagger" class="mx-auto w-full pt-14 md:w-2/3 lg:w-1/2 lg:pt-0">
-					<div class="justify-end lg:flex">
-						<div class="lg:w-10/12 xl:w-3/4">
-							<h2
-								class="mb-5 text-center text-3xl font-semibold text-primary dark:text-white lg:text-left"
-							>
-								Shadowy Supertaggers
-							</h2>
-							<p class="mb-10 w-full text-center text-primary dark:text-white lg:text-left">
-								Contribute changes directly to OSM - like a 😎 boss. Who needs forms anyway.
-							</p>
-							<img
-								src="/images/supertagger.svg"
-								alt="shadowy supertagger"
-								class="mx-auto mb-10 h-[220px] w-[220px]"
-							/>
-							<PrimaryButton
-								text="See Wiki for instructions"
-								link="https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions"
-								style="w-full py-3 rounded-xl"
-								external
-							/>
-						</div>
 					</div>
 				</section>
 			</div>
