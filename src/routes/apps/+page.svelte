@@ -2,6 +2,15 @@
 	import { Header, Footer, AppCard, HeaderPlaceholder } from '$comp';
 	import { apps, theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
+
+	const communityApps = [
+		{
+			link: 'https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666',
+			type: 'BitLocal',
+			icon: 'ios',
+			desc: 'iOS'
+		}
+	];
 </script>
 
 <svelte:head>
@@ -31,8 +40,16 @@
 				We have you covered on whatever device and OS you choose.
 			</h2>
 
-			<section id="apps" class="grid gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+			<h3 class="text-2xl font-semibold text-primary dark:text-white md:text-left">Official</h3>
+			<section id="official-apps" class="grid gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 				{#each $apps as app}
+					<AppCard image={app.icon} text={app.type} desc={app.desc} link={app.link} />
+				{/each}
+			</section>
+
+			<h3 class="text-2xl font-semibold text-primary dark:text-white md:text-left">Community</h3>
+			<section id="community-apps" class="grid gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+				{#each communityApps as app}
 					<AppCard image={app.icon} text={app.type} desc={app.desc} link={app.link} />
 				{/each}
 			</section>
