@@ -18,6 +18,7 @@
 		theme
 	} from '$lib/store';
 	import { errToast, detectTheme } from '$lib/utils';
+	import { latCalc, longCalc } from '$lib/map/setup';
 
 	// alert for user errors
 	$: $userError && errToast($userError);
@@ -48,6 +49,8 @@
 							: undefined;
 
 					event.location = location ? location : 'Unnamed element';
+					event.lat = latCalc(elementMatch['osm_json']);
+					event.long = longCalc(elementMatch['osm_json']);
 					event.merchantId = elementMatch.id;
 
 					supertaggers.push(event);
@@ -127,6 +130,8 @@
 									user={findUser(tagger)}
 									time={tagger['created_at']}
 									latest={tagger === supertaggers[0] ? true : false}
+									lat={tagger.lat}
+									long={tagger.long}
 									merchantId={tagger.merchantId}
 								/>
 							{/each}
