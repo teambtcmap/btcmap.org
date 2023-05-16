@@ -3,17 +3,15 @@
 		"browser": true,
 		"es2021": true
 	},
-	"extends": ["eslint:recommended", "prettier"],
-	"plugins": ["svelte3"],
-	"overrides": [
-		{
-			"files": ["*.svelte"],
-			"processor": "svelte3/svelte3"
-		}
+	"extends": [
+		"eslint:recommended",
+		"prettier",
+		"plugin:svelte/recommended",
+		"plugin:svelte/prettier"
 	],
 	"parserOptions": {
 		"ecmaVersion": "latest",
 		"sourceType": "module"
 	},
-	"rules": {}
+	"rules": { "svelte/no-dupe-style-properties": "warn" }
 }

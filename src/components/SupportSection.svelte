@@ -31,6 +31,7 @@
 			</a>
 		{/each}
 		<!-- supporter placeholders -->
+		<!-- eslint-disable-next-line no-unused-vars -->
 		{#each Array(placeholders) as placeholder}
 			<div
 				class="mx-auto flex h-[90px] w-full items-center justify-center self-center rounded-xl bg-supporter/50 drop-shadow-xl md:w-[250px]"

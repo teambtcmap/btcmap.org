@@ -72,10 +72,12 @@
 				</div>
 			{:else if stat.title === 'Grade'}
 				<div class="space-x-1">
+					<!-- eslint-disable-next-line no-unused-vars -->
 					{#each Array(stat.stat) as star}
 						<i class="fa-solid fa-star" />
 					{/each}
 
+					<!-- eslint-disable-next-line no-unused-vars -->
 					{#each Array(5 - stat.stat) as star}
 						<i class="fa-solid fa-star opacity-25" />
 					{/each}

@@ -190,6 +190,7 @@
 							</p>
 						{/if}
 					{:else}
+						<!-- eslint-disable-next-line no-unused-vars -->
 						{#each Array(10) as skeleton}
 							<OpenTicketSkeleton />
 						{/each}

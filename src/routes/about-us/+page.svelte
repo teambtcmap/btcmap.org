@@ -230,6 +230,7 @@
 							/>
 						{/each}
 					{:else}
+						<!-- eslint-disable-next-line no-unused-vars -->
 						{#each Array(6) as skeleton}
 							<span class="h-24 w-24 animate-pulse rounded-full bg-link/50" />
 						{/each}
@@ -255,6 +256,7 @@
 								<AboutTagger {tagger} />
 							{/each}
 						{:else}
+							<!-- eslint-disable-next-line no-unused-vars -->
 							{#each Array(6) as skeleton}
 								<span class="h-24 w-24 animate-pulse rounded-full bg-link/50" />
 							{/each}
@@ -293,6 +295,7 @@
 								<AboutCommunity {community} />
 							{/each}
 						{:else}
+							<!-- eslint-disable-next-line no-unused-vars -->
 							{#each Array(6) as skeleton}
 								<span class="h-24 w-24 animate-pulse rounded-full bg-link/50" />
 							{/each}

@@ -195,6 +195,7 @@
 		.toString();
 
 	let tagTypeChartCanvas;
+	// eslint-disable-next-line no-unused-vars
 	let tagTypeChart;
 
 	let loading = true;
@@ -459,6 +460,7 @@
 					>
 				</div>
 
+				<!-- eslint-disable-next-line svelte/valid-compile -->
 				<h2
 					bind:this={profileDesc}
 					class="mx-auto w-full break-all text-xl text-body dark:text-white lg:w-[800px]"
@@ -569,6 +571,7 @@
 								>
 							{/if}
 						{:else}
+							<!-- eslint-disable-next-line no-unused-vars -->
 							{#each Array(5) as skeleton}
 								<ProfileActivitySkeleton />
 							{/each}

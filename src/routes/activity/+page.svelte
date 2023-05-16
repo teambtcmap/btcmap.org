@@ -131,6 +131,7 @@
 								/>
 							{/each}
 						{:else}
+							<!-- eslint-disable-next-line no-unused-vars -->
 							{#each Array(50) as skeleton}
 								<TaggerSkeleton />
 							{/each}

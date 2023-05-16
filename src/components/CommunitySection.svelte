@@ -11,6 +11,7 @@
 				<CommunityCard id={community.id} tags={community.tags} />
 			{/each}
 		{:else}
+			<!-- eslint-disable-next-line no-unused-vars -->
 			{#each Array(4) as skeleton}
 				<CommunitySkeleton />
 			{/each}

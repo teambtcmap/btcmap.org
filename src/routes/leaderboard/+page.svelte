@@ -202,6 +202,7 @@
 			</h2>
 
 			<section id="chart" class="relative">
+				<!-- eslint-disable-next-line svelte/valid-compile -->
 				{#if leaderboard && leaderboard.length && !loading}{:else}
 					<div class="absolute left-0 top-0 h-[400px] w-full animate-pulse border border-link/50" />
 				{/if}
@@ -253,6 +254,7 @@
 							>
 						{/if}
 					{:else}
+						<!-- eslint-disable-next-line no-unused-vars -->
 						{#each Array(50) as skeleton}
 							<LeaderboardSkeleton />
 						{/each}

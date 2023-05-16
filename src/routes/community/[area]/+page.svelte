@@ -177,6 +177,7 @@
 		.toString();
 
 	let updatedChartCanvas;
+	// eslint-disable-next-line no-unused-vars
 	let updatedChart;
 
 	let loading = true;
@@ -916,10 +917,12 @@
 				>
 					{name} Map
 					<div class="space-x-1 text-link">
+						<!-- eslint-disable-next-line no-unused-vars -->
 						{#each Array(grade) as star}
 							<i class="fa-solid fa-star" />
 						{/each}
 
+						<!-- eslint-disable-next-line no-unused-vars -->
 						{#each Array(5 - grade) as star}
 							<i class="fa-solid fa-star opacity-25" />
 						{/each}
@@ -1021,6 +1024,7 @@
 						{:else if !communityEvents.length}
 							<p class="p-5 text-body dark:text-white">No supertaggers to display.</p>
 						{:else}
+							<!-- eslint-disable-next-line no-unused-vars -->
 							{#each Array(5) as tagger}
 								<div class="m-4 space-y-1 transition-transform hover:scale-110">
 									<p class="mx-auto h-20 w-20 animate-pulse rounded-full bg-link/50" />
@@ -1084,6 +1088,7 @@
 						{:else if !communityEvents.length}
 							<p class="p-5 text-body dark:text-white">No activity to display.</p>
 						{:else}
+							<!-- eslint-disable-next-line no-unused-vars -->
 							{#each Array(5) as skeleton}
 								<TaggerSkeleton />
 							{/each}
