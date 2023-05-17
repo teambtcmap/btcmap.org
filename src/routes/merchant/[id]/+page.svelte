@@ -62,6 +62,7 @@
 	const icon = merchant.tags['icon:android'];
 	const address = merchant.osm_json.tags ? checkAddress(merchant.osm_json.tags) : '';
 	const description = merchant.osm_json.tags?.description || '';
+	const note = merchant.osm_json.tags?.note || '';
 	const hours = merchant.osm_json.tags?.['opening_hours'] || '';
 	const payment = merchant.tags['payment:uri']
 		? { type: 'uri', url: merchant.tags['payment:uri'] }
@@ -475,6 +476,10 @@
 
 				{#if description}
 					<p class="mx-auto max-w-[600px] text-primary dark:text-white">{description}</p>
+				{/if}
+
+				{#if note}
+					<p class="mx-auto max-w-[600px] text-primary dark:text-white">{note}</p>
 				{/if}
 
 				<div class="grid-cols-2 gap-12 space-y-12 lg:grid lg:space-y-0">

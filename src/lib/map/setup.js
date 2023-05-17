@@ -546,6 +546,7 @@ export const generateMarker = (
 
 		const description =
 			element.tags && element.tags.description ? element.tags.description : undefined;
+		const note = element.tags && element.tags.note ? element.tags.note : undefined;
 
 		let verified = verifiedArr(element);
 
@@ -563,7 +564,7 @@ export const generateMarker = (
 						element.id
 				  }' class='inline-block font-bold text-lg leading-snug max-w-[300px]' title='Merchant name'><span class='!text-link hover:!text-hover transition-colors'>${
 						element.tags.name
-				  }</span> ${description ? `<span id='description' title='Description'></span>` : ''}</a>`
+				  }</span> ${description || note ? `<span id='info' title='Information'></span>` : ''}</a>`
 				: ''
 		}
 
@@ -849,12 +850,12 @@ ${
 			}
 			`;
 
-		if (description && element.tags && element.tags.name) {
-			const descriptionContainer = popupContainer.querySelector('#description');
+		if ((description || note) && element.tags && element.tags.name) {
+			const infoContainer = popupContainer.querySelector('#info');
 			new InfoTooltip({
-				target: descriptionContainer,
+				target: infoContainer,
 				props: {
-					tooltip: description
+					tooltip: description || note
 				}
 			});
 		}
