@@ -34,7 +34,7 @@
 		generateMarker,
 		verifiedArr
 	} from '$lib/map/setup';
-	import { errToast, getRandomColor, detectTheme } from '$lib/utils';
+	import { errToast, detectTheme } from '$lib/utils';
 	import { MapLoading, Icon, Boost, ShowTags } from '$comp';
 
 	let mapElement;
@@ -524,15 +524,14 @@ Thanks for using BTC Map!`);
 
 			// add communities to map
 			communities.forEach((community) => {
-				let randomColor = getRandomColor();
 				// eslint-disable-next-line no-undef
 				let communityLayer = L.geoJSON(community.tags.geo_json, {
-					style: { color: randomColor, fillOpacity: 0 }
+					style: { color: '#000000', fillColor: '#F7931A', fillOpacity: 0.5 }
 				}).bindPopup(
 					`<div class='text-center space-y-2'>
 <img src=${
 						community.tags['icon:square']
-					} alt='avatar' class='w-24 h-24 rounded-full mx-auto p-1' title='Community icon' decoding="sync" fetchpriority="high" style="border: 4px solid ${randomColor};" onerror="this.src='/images/communities/bitcoin.svg'" />
+					} alt='avatar' class='w-24 h-24 rounded-full mx-auto' title='Community icon' decoding="sync" fetchpriority="high" onerror="this.src='/images/communities/bitcoin.svg'" />
 
 <span class='text-primary dark:text-white font-semibold text-xl' title='Community name'>${
 						community.tags.name
@@ -726,6 +725,12 @@ ${
 				.leaflet-popup-content-wrapper, .leaflet-popup-tip {
 					background-color: #06171C;
 					border: 1px solid #e5e7eb
+			}
+
+				.leaflet-popup-close-button {
+					font-size: 24px !important;
+					top: 4px !important;
+					right: 4px !important;
 			}
 			</style>`
 		: ''
