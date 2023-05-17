@@ -806,12 +806,8 @@ ${
 					</span>
 					${
 						verify
-							? `<a href="/verify-location?${
-									element.tags && element.tags.name
-										? `&name=${element.tags.name.replaceAll('&', '%26')}`
-										: ''
-							  }&lat=${lat}&long=${long}&${element.type}=${
-									element.id
+							? `<a href="/verify-location?id=${
+									element.type + ':' + element.id
 							  }" class='!text-link hover:!text-hover text-xs transition-colors' title="Help improve the data for everyone">Verify Location</a>`
 							: ''
 					}

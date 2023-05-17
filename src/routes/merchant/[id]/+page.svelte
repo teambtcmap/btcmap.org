@@ -541,9 +541,7 @@
 
 						<PrimaryButton
 							text="Verify Location"
-							link={`/verify-location?${
-								name ? `&name=${name.replaceAll('&', '%26')}` : ''
-							}&lat=${lat}&long=${long}&${merchant.osm_json.type}=${merchant.osm_json.id}`}
+							link={`/verify-location?id=${merchant.id}`}
 							style="rounded-xl p-3 w-40 mx-auto"
 						/>
 					</div>

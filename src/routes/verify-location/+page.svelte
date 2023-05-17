@@ -26,16 +26,15 @@
 	} from '$lib/map/setup';
 	import { errToast, detectTheme } from '$lib/utils';
 
-	let name = $page.url.searchParams.has('name') ? $page.url.searchParams.get('name') : '';
-	let lat = $page.url.searchParams.has('lat') ? $page.url.searchParams.get('lat') : '';
-	let long = $page.url.searchParams.has('long') ? $page.url.searchParams.get('long') : '';
+	const id = $page.url.searchParams.has('id') ? $page.url.searchParams.get('id') : '';
+	const merchant = $elements.find((element) => element.id && element.id === id);
+
+	let name = merchant ? merchant.osm_json.tags?.name : '';
+	let lat = merchant ? latCalc(merchant.osm_json) : '';
+	let long = merchant ? longCalc(merchant.osm_json) : '';
 	let location = lat && long ? `https://btcmap.org/map?lat=${lat}&long=${long}` : '';
-	let edit = $page.url.searchParams.has('node')
-		? `https://www.openstreetmap.org/edit?node=${$page.url.searchParams.get('node')}`
-		: $page.url.searchParams.has('way')
-		? `https://www.openstreetmap.org/edit?way=${$page.url.searchParams.get('way')}`
-		: $page.url.searchParams.has('relation')
-		? `https://www.openstreetmap.org/edit?relation=${$page.url.searchParams.get('relation')}`
+	let edit = merchant
+		? `https://www.openstreetmap.org/edit?${merchant.osm_json.type}=${merchant.osm_json.id}`
 		: '';
 
 	let captcha;
@@ -110,7 +109,7 @@
 	// location picker map if not accessing page from webapp
 	let mapElement;
 	let map;
-	let showMap = !name || !lat || !long || !edit ? true : false;
+	let showMap = !lat || !long || !edit ? true : false;
 	let mapLoaded;
 
 	let osm;
@@ -352,7 +351,6 @@
 						</div>
 
 						<input
-							required
 							disabled
 							bind:value={name}
 							readonly
