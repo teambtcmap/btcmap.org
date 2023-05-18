@@ -32,8 +32,13 @@
 				{:else}
 					<HeaderPlaceholder />
 				{/if}
+				<a
+					href="/map"
+					class="mx-auto my-8 block w-fit rounded-full bg-gradient-to-r from-[#0ecd71] to-[#040273] px-7 py-3.5 text-lg font-semibold text-white"
+					>Open Map</a
+				>
 				<div
-					class="my-16 flex flex-wrap justify-center rounded-2xl bg-white/30 py-6 dark:bg-white/[0.15]"
+					class="my-8 flex flex-wrap justify-center rounded-2xl bg-white/30 py-6 dark:bg-white/[0.15]"
 				>
 					{#each $apps as app}
 						<div
