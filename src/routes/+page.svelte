@@ -34,7 +34,7 @@
 				{/if}
 				<a
 					href="/map"
-					class="mx-auto my-8 block w-fit rounded-full bg-link px-7 py-3.5 text-lg font-semibold text-white transition-all hover:shadow-[0px_0px_40px_#0891B2] dark:bg-gradient-to-r dark:from-[#0ecd71] dark:to-[#040273] dark:hover:shadow-[0px_0px_40px_#0B9072]"
+					class="mx-auto my-8 block w-fit rounded-full bg-link px-7 py-3.5 text-lg font-semibold text-white transition-colors hover:bg-hover dark:bg-gradient-to-r dark:from-[#0ecd71] dark:to-[#040273]"
 					>Open Map</a
 				>
 				<div
