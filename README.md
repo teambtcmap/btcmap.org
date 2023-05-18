@@ -33,7 +33,7 @@
 
 ## PWA
 
-This website is a progressive web app, meaning you can install it on your mobile device and use it like a native application. Just look for the **Add to home screen** option in your browser while visiting [btcmap.org](https://btcmap.org).
+This website is a progressive web app, meaning you can install it on your mobile device and use it like a native application. Just look for the **Add to home screen** or **Install** option in your browser while visiting [btcmap.org](https://btcmap.org).
 
 ## Embedding
 
