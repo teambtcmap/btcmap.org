@@ -540,7 +540,7 @@ Thanks for using BTC Map!`);
 					${
 						community.tags.organization
 							? `<span
-						class="mx-auto w-fit block rounded-full bg-[#10B981] px-3.5 py-1 text-xs font-semibold uppercase text-white" title='Organization'
+						class="mx-auto whitespace-nowrap w-fit block rounded-full bg-[#10B981] px-3.5 py-1 text-xs font-semibold uppercase text-white" title='Organization'
 					>
 					${community.tags.organization}
 					</span>`
