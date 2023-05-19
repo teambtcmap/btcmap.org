@@ -1,5 +1,5 @@
 <script>
-	import { elements, elementError } from '$lib/store';
+	import { elements } from '$lib/store';
 </script>
 
 <svelte:head>
@@ -9,6 +9,6 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/verify.png" />
 </svelte:head>
 
-{#if ($elements && $elements.length) || $elementError}
+{#if $elements && $elements.length}
 	<slot />
 {/if}
