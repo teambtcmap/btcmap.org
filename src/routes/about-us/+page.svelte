@@ -88,7 +88,9 @@
 		{ name: 'Galoy', icon: 'galoy', url: 'https://galoy.io/' },
 		{ name: 'Satimoto', icon: 'satimoto', url: 'https://satimoto.com/' },
 		{ name: 'Bitcoin Dashboard', icon: '', url: 'https://bitcoin-primodata.streamlit.app/' },
-		{ name: 'BitLocal', icon: 'bitlocal', url: 'https://www.bitlocal.app/' }
+		{ name: 'BitLocal', icon: 'bitlocal', url: 'https://www.bitlocal.app/' },
+		{ name: 'Nostr Bot', icon: 'nostr-bot', url: 'https://github.com/BcnBitcoinOnly/btcmap-bot' },
+		{ name: 'Fedi', icon: 'fedi', url: 'https://www.fedi.xyz/' }
 	];
 
 	const projectIntegrations = [
