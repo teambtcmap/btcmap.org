@@ -524,6 +524,7 @@ Thanks for using BTC Map!`);
 
 			// add communities to map
 			communities.forEach((community) => {
+				// eslint-disable-next-line no-undef
 				const popupContainer = L.DomUtil.create('div');
 
 				popupContainer.innerHTML = `
