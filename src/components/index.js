@@ -50,3 +50,4 @@ export { default as HeaderPlaceholder } from './HeaderPlaceholder.svelte';
 export { default as MerchantLink } from './MerchantLink.svelte';
 export { default as MerchantButton } from './MerchantButton.svelte';
 export { default as MerchantEvent } from './MerchantEvent.svelte';
+export { default as Socials } from './Socials.svelte';
