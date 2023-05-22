@@ -548,6 +548,13 @@ export const generateMarker = (
 			element.tags && element.tags.description ? element.tags.description : undefined;
 		const note = element.tags && element.tags.note ? element.tags.note : undefined;
 
+		const phone = element.tags?.phone || element.tags?.['contact:phone'] || '';
+		const website = element.tags?.website || element.tags?.['contact:website'] || '';
+		const email = element.tags?.email || element.tags?.['contact:email'] || '';
+		const twitter = element.tags?.twitter || element.tags?.['contact:twitter'] || '';
+		const instagram = element.tags?.instagram || element.tags?.['contact:instagram'] || '';
+		const facebook = element.tags?.facebook || element.tags?.['contact:facebook'] || '';
+
 		let verified = verifiedArr(element);
 
 		const paymentMethod =
@@ -638,8 +645,8 @@ export const generateMarker = (
 							}
 
 							${
-								element.tags && element.tags.phone
-									? `<a href='tel:${element.tags.phone}' class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs  transition-colors'>
+								phone
+									? `<a href='tel:${phone}' class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
 												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#phone"></use>
 											</svg>
@@ -649,12 +656,21 @@ export const generateMarker = (
 							}
 
 							${
-								element.tags && element.tags.website
+								email
+									? `<a href='mailto:${email}' class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+											<svg width='24px' height='24px' class='mr-2'>
+												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#email"></use>
+											</svg>
+											Email
+										</a>`
+									: ''
+							}
+
+							${
+								website
 									? `<a href=${
-											element.tags.website.startsWith('http')
-												? element.tags.website
-												: `https://${element.tags.website}`
-									  } target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs  transition-colors'>
+											website.startsWith('http') ? website : `https://${website}`
+									  } target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
 												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#globe"></use>
 											</svg>
@@ -664,16 +680,42 @@ export const generateMarker = (
 							}
 
 							${
-								element.tags && element.tags['contact:twitter']
+								twitter
 									? `<a href=${
-											element.tags['contact:twitter'].startsWith('http')
-												? element.tags['contact:twitter']
-												: `https://twitter.com/${element.tags['contact:twitter']}`
-									  } target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs  transition-colors'>
+											twitter.startsWith('http') ? twitter : `https://twitter.com/${twitter}`
+									  } target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
 												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#twitter"></use>
 											</svg>
 											Twitter
+										</a>`
+									: ''
+							}
+
+							${
+								instagram
+									? `<a href=${
+											instagram.startsWith('http')
+												? instagram
+												: `https://instagram.com/${instagram}`
+									  } target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+											<svg width='24px' height='24px' class='mr-2'>
+												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#instagram"></use>
+											</svg>
+											Instagram
+										</a>`
+									: ''
+							}
+
+							${
+								facebook
+									? `<a href=${
+											facebook.startsWith('http') ? facebook : `https://facebook.com/${facebook}`
+									  } target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+											<svg width='24px' height='24px' class='mr-2'>
+												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#facebook"></use>
+											</svg>
+											Facebook
 										</a>`
 									: ''
 							}

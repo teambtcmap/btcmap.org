@@ -78,9 +78,17 @@
 			: undefined;
 	const verified = verifiedArr(merchant.osm_json);
 	const verifiedDate = calcVerifiedDate();
-	const phone = merchant.osm_json.tags?.phone || '';
-	const website = merchant.osm_json.tags?.website || '';
-	const twitter = merchant.osm_json.tags?.['contact:twitter'] || '';
+	const phone = merchant.osm_json.tags?.phone || merchant.osm_json.tags?.['contact:phone'] || '';
+	const website =
+		merchant.osm_json.tags?.website || merchant.osm_json.tags?.['contact:website'] || '';
+	const email = merchant.osm_json.tags?.email || merchant.osm_json.tags?.['contact:email'] || '';
+	const twitter =
+		merchant.osm_json.tags?.twitter || merchant.osm_json.tags?.['contact:twitter'] || '';
+	const instagram =
+		merchant.osm_json.tags?.instagram || merchant.osm_json.tags?.['contact:instagram'] || '';
+	const facebook =
+		merchant.osm_json.tags?.facebook || merchant.osm_json.tags?.['contact:facebook'] || '';
+
 	const paymentMethod =
 		merchant.osm_json.tags &&
 		(merchant.osm_json.tags['payment:onchain'] ||
@@ -385,6 +393,10 @@
 						<MerchantLink link={`tel:${phone}`} icon="phone" text="Call" />
 					{/if}
 
+					{#if email}
+						<MerchantLink link={`mailto:${email}`} icon="email" text="Email" />
+					{/if}
+
 					{#if website}
 						<MerchantLink
 							link={website.startsWith('http') ? website : `https://${website}`}
@@ -398,6 +410,22 @@
 							link={twitter.startsWith('http') ? twitter : `https://twitter.com/${twitter}`}
 							icon="twitter"
 							text="Twitter"
+						/>
+					{/if}
+
+					{#if instagram}
+						<MerchantLink
+							link={instagram.startsWith('http') ? instagram : `https://instagram.com/${instagram}`}
+							icon="instagram"
+							text="Instagram"
+						/>
+					{/if}
+
+					{#if facebook}
+						<MerchantLink
+							link={facebook.startsWith('http') ? facebook : `https://facebook.com/${facebook}`}
+							icon="facebook"
+							text="Facebook"
 						/>
 					{/if}
 
