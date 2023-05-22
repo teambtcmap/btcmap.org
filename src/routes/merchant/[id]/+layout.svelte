@@ -8,7 +8,9 @@
 		elements,
 		elementError,
 		areas,
-		areaError
+		areaError,
+		reports,
+		reportError
 	} from '$lib/store';
 	import { errToast } from '$lib/utils';
 	import { LoadingSplash } from '$comp';
@@ -21,6 +23,8 @@
 	$: $elementError && errToast($elementError);
 	// alert for area errors
 	$: $areaError && errToast($areaError);
+	// alert for report errors
+	$: $reportError && errToast($reportError);
 </script>
 
 <svelte:head>
@@ -33,7 +37,7 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/merchant.png" />
 </svelte:head>
 
-{#if $users && $users.length && $events && $events.length && $elements && $elements.length && $areas && $areas.length}
+{#if $users && $users.length && $events && $events.length && $elements && $elements.length && $areas && $areas.length && $reports && $reports.length}
 	<slot />
 {:else}
 	<LoadingSplash page="merchant" />
