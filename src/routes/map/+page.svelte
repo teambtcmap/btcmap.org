@@ -35,7 +35,7 @@
 		verifiedArr
 	} from '$lib/map/setup';
 	import { errToast, detectTheme } from '$lib/utils';
-	import { MapLoading, Icon, Boost, ShowTags } from '$comp';
+	import { MapLoading, Icon, Boost, ShowTags, Socials } from '$comp';
 
 	let mapElement;
 	let map;
@@ -524,16 +524,15 @@ Thanks for using BTC Map!`);
 
 			// add communities to map
 			communities.forEach((community) => {
-				// eslint-disable-next-line no-undef
-				let communityLayer = L.geoJSON(community.tags.geo_json, {
-					style: { color: '#000000', fillColor: '#F7931A', fillOpacity: 0.5 }
-				}).bindPopup(
-					`<div class='text-center space-y-2'>
-<img src=${
+				const popupContainer = L.DomUtil.create('div');
+
+				popupContainer.innerHTML = `
+				<div class='text-center space-y-2'>
+					<img src=${
 						community.tags['icon:square']
 					} alt='avatar' class='w-24 h-24 rounded-full mx-auto' title='Community icon' decoding="sync" fetchpriority="high" onerror="this.src='/images/communities/bitcoin.svg'" />
 
-<span class='text-primary dark:text-white font-semibold text-xl' title='Community name'>${
+					<span class='text-primary dark:text-white font-semibold text-xl' title='Community name'>${
 						community.tags.name
 					}</span>
 
@@ -547,197 +546,69 @@ Thanks for using BTC Map!`);
 							: ''
 					}
 
-${
-	community.tags.sponsor
-		? `<span class="block gradient-bg w-32 mx-auto py-1 text-xs text-white font-semibold rounded-full" title='Supporter'>
-	BTC Map Sponsor
-</span>`
-		: ''
-}
+					${
+						community.tags.sponsor
+							? `<span class="block gradient-bg w-32 mx-auto py-1 text-xs text-white font-semibold rounded-full" title='Supporter'>
+						BTC Map Sponsor
+					</span>`
+							: ''
+					}
 
-<div class='flex flex-wrap justify-center items-center'>
-	${
-		community.tags['contact:website']
-			? `
-		<a href=${community.tags['contact:website']} target="_blank" rel="noreferrer" class="m-1" title='Website'>
-			<span class="bg-bitcoin w-[40px] h-[40px] flex justify-center items-center rounded-full">
-				<svg width='28px' height='28px' class='text-white'>
-					<use width='28px' height='28px' href="/icons/socials/spritesheet.svg#website"></use>
-				</svg>
-			</span>
-		</a>`
-			: ''
-	}
+					<div id='socials'>
+					</div>
 
-	${
-		community.tags['contact:email']
-			? `
-		<a href="mailto:${community.tags['contact:email']}" target="_blank" rel="noreferrer" class="m-1" title='Email'>
-			<span class="bg-[#53C5D5] w-[40px] h-[40px] flex justify-center items-center rounded-full">
-				<svg width='28px' height='28px' class='text-white'>
-					<use width='28px' height='28px' href="/icons/socials/spritesheet.svg#email"></use>
-				</svg>
-			</span>
-		</a>`
-			: ''
-	}
-
-	${
-		community.tags['contact:nostr']
-			? `
-		<a href="https://snort.social/p/${community.tags['contact:nostr']}" target="_blank" rel="noreferrer" class="m-1" title='Nostr'>
-			<span class="bg-nostr w-[40px] h-[40px] flex justify-center items-center rounded-full">
-				<svg width='28px' height='28px' class='text-white'>
-					<use width='28px' height='28px' href="/icons/socials/spritesheet.svg#nostr"></use>
-				</svg>
-			</span>
-		</a>`
-			: ''
-	}
-
-	${
-		community.tags['contact:twitter']
-			? `
-		<a href=${community.tags['contact:twitter']} target="_blank" rel="noreferrer" class="m-1" title='Twitter'>
-			<img src="/icons/socials/twitter.svg" alt="twitter" decoding="sync" fetchpriority="high" />
-		</a>`
-			: ''
-	}
-
-	${
-		community.tags['contact:secondTwitter']
-			? `
-		<a href=${community.tags['contact:secondTwitter']} target="_blank" rel="noreferrer" class="m-1" title='Twitter'>
-			<img src="/icons/socials/twitter.svg" alt="twitter" decoding="sync" fetchpriority="high" />
-		</a>`
-			: ''
-	}
-
-	${
-		community.tags['contact:meetup']
-			? `
-		<a href=${community.tags['contact:meetup']} target="_blank" rel="noreferrer" class="m-1" title='Meetup'>
-			<img src="/icons/socials/meetup.jpg" alt="meetup" class="w-10 h-10 rounded-full" decoding="sync" fetchpriority="high" />
-		</a>`
-			: ''
-	}
-
-	${
-		community.tags['contact:eventbrite']
-			? `
-		<a href=${community.tags['contact:eventbrite']} target="_blank" rel="noreferrer" class="m-1" title='Eventbrite'>
-			<img src="/icons/socials/eventbrite.png" alt="eventbrite" class="w-10 h-10 rounded-full" decoding="sync" fetchpriority="high" />
-		</a>`
-			: ''
-	}
-
-	${
-		community.tags['contact:telegram']
-			? `
-		<a href=${community.tags['contact:telegram']} target="_blank" rel="noreferrer" class="m-1" title='Telegram'>
-			<img src="/icons/socials/telegram.svg" alt="telegram" decoding="sync" fetchpriority="high" />
-		</a>`
-			: ''
-	}
-
-	${
-		community.tags['contact:discord']
-			? `
-		<a href=${community.tags['contact:discord']} target="_blank" rel="noreferrer" class="m-1" title='Discord'>
-			<img src="/icons/socials/discord.svg" alt="discord" decoding="sync" fetchpriority="high" />
-		</a>`
-			: ''
-	}
-
-	${
-		community.tags['contact:youtube']
-			? `
-		<a href=${community.tags['contact:youtube']} target="_blank" rel="noreferrer" class="m-1" title='YouTube'>
-			<img src="/icons/socials/youtube.svg" alt="youtube" decoding="sync" fetchpriority="high" />
-		</a>`
-			: ''
-	}
-
-	${
-		community.tags['contact:github']
-			? `
-		<a href=${community.tags['contact:github']} target="_blank" rel="noreferrer" class="m-1" title='GitHub'>
-			<img src="/icons/socials/github.svg" alt="github" decoding="sync" fetchpriority="high" />
-		</a>`
-			: ''
-	}
-
-	${
-		community.tags['contact:reddit']
-			? `
-		<a href=${community.tags['contact:reddit']} target="_blank" rel="noreferrer" class="m-1" title='Reddit'>
-			<img src="/icons/socials/reddit.svg" alt="reddit" decoding="sync" fetchpriority="high" />
-		</a>`
-			: ''
-	}
-
-	${
-		community.tags['contact:instagram']
-			? `
-		<a href=${community.tags['contact:instagram']} target="_blank" rel="noreferrer" class="m-1" title='Instagram'>
-			<img src="/icons/socials/instagram.svg" alt="instagram" class="h-10 w-10 rounded-full" decoding="sync" fetchpriority="high" />
-		</a>`
-			: ''
-	}
-
-	${
-		community.tags['contact:whatsapp']
-			? `
-		<a href=${community.tags['contact:whatsapp']} target="_blank" rel="noreferrer" class="m-1" title='WhatsApp'>
-			<img src="/icons/socials/whatsapp.svg" alt="whatsapp" decoding="sync" fetchpriority="high" />
-		</a>`
-			: ''
-	}
-
-	${
-		community.tags['contact:facebook']
-			? `
-		<a href=${community.tags['contact:facebook']} target="_blank" rel="noreferrer" class="m-1" title='Facebook'>
-			<img src="/icons/socials/facebook.svg" alt="facebook" decoding="sync" fetchpriority="high" />
-		</a>`
-			: ''
-	}
-
-	${
-		community.tags['contact:linkedin']
-			? `
-		<a href=${community.tags['contact:linkedin']} target="_blank" rel="noreferrer" class="m-1" title='LinkedIn'>
-			<img src="/icons/socials/linkedin.svg" alt="linkedin" decoding="sync" fetchpriority="high" />
-		</a>`
-			: ''
-	}
-</div>
-
-<a href='/community/${
+					<a href='/community/${
 						community.id
 					}' class='block bg-link hover:bg-hover !text-white text-center font-semibold py-3 rounded-xl transition-colors' title='Community page'>View Community</a>
-</div>
+				</div>
 
-${
-	theme === 'dark'
-		? `
-			<style>
-				.leaflet-popup-content-wrapper, .leaflet-popup-tip {
-					background-color: #06171C;
-					border: 1px solid #e5e7eb
-			}
+				${
+					theme === 'dark'
+						? `
+							<style>
+								.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+									background-color: #06171C;
+									border: 1px solid #e5e7eb
+							}
 
-				.leaflet-popup-close-button {
-					font-size: 24px !important;
-					top: 4px !important;
-					right: 4px !important;
-			}
-			</style>`
-		: ''
-}
-`,
-					{ minWidth: 300 }
-				);
+								.leaflet-popup-close-button {
+									font-size: 24px !important;
+									top: 4px !important;
+									right: 4px !important;
+							}
+							</style>`
+						: ''
+				}`;
+
+				const socials = popupContainer.querySelector('#socials');
+				new Socials({
+					target: socials,
+					props: {
+						website: community.tags['contact:website'],
+						email: community.tags['contact:email'],
+						nostr: community.tags['contact:nostr'],
+						twitter: community.tags['contact:twitter'],
+						secondTwitter: community.tags['contact:secondTwitter'],
+						meetup: community.tags['contact:meetup'],
+						eventbrite: community.tags['contact:eventbrite'],
+						telegram: community.tags['contact:telegram'],
+						discord: community.tags['contact:discord'],
+						youtube: community.tags['contact:youtube'],
+						github: community.tags['contact:github'],
+						reddit: community.tags['contact:reddit'],
+						instagram: community.tags['contact:instagram'],
+						whatsapp: community.tags['contact:whatsapp'],
+						facebook: community.tags['contact:facebook'],
+						linkedin: community.tags['contact:linkedin'],
+						rss: community.tags['contact:rss'],
+						signal: community.tags['contact:signal']
+					}
+				});
+
+				// eslint-disable-next-line no-undef
+				let communityLayer = L.geoJSON(community.tags.geo_json, {
+					style: { color: '#000000', fillColor: '#F7931A', fillOpacity: 0.5 }
+				}).bindPopup(popupContainer, { minWidth: 300 });
 
 				communityLayer.on('click', () => communityLayer.bringToBack());
 
