@@ -263,7 +263,7 @@
 							disabled={!captchaSecret}
 							type="url"
 							name="icon"
-							placeholder="https://btcmap.org/images/communities/iom.svg"
+							placeholder="https://static.btcmap.org/images/communities/iom.svg"
 							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 							bind:value={icon}
 						/>
