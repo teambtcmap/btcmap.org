@@ -90,7 +90,8 @@
 		{ name: 'Bitcoin Dashboard', icon: '', url: 'https://bitcoin-primodata.streamlit.app/' },
 		{ name: 'BitLocal', icon: 'bitlocal', url: 'https://www.bitlocal.app/' },
 		{ name: 'Nostr Bot', icon: 'nostr-bot', url: 'https://github.com/BcnBitcoinOnly/btcmap-bot' },
-		{ name: 'Fedi', icon: 'fedi', url: 'https://www.fedi.xyz/' }
+		{ name: 'Fedi', icon: 'fedi', url: 'https://www.fedi.xyz/' },
+		{ name: 'Osmo', icon: 'osmo', url: 'https://www.osmowallet.com/' }
 	];
 
 	const projectIntegrations = [
