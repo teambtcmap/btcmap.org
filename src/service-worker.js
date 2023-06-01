@@ -59,7 +59,8 @@ self.addEventListener('fetch', (event) => {
 
 		// `build`/`files` can always be served from the cache
 		if (ASSETS.includes(url.pathname)) {
-			return cache.match(url.pathname);
+			const res = await cache.match(url.pathname);
+			if (res) return res;
 		}
 
 		// for everything else, try the network first, but
