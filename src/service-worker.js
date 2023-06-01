@@ -10,13 +10,13 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
-	// Create a new cache and add all files to it
-	async function addFilesToCache() {
+	// Create a new cache and add offline file to it
+	async function addFileToCache() {
 		const cache = await caches.open(CACHE);
-		await cache.addAll(ASSETS);
+		await cache.add('/offline.html');
 	}
 
-	event.waitUntil(addFilesToCache());
+	event.waitUntil(addFileToCache());
 });
 
 self.addEventListener('activate', (event) => {
@@ -28,6 +28,18 @@ self.addEventListener('activate', (event) => {
 	}
 
 	event.waitUntil(deleteOldCaches());
+});
+
+self.addEventListener('message', async (event) => {
+	if (event.data === 'CACHE_ASSETS') {
+		// Create a new cache and add all files to it
+		const cache = await caches.open(CACHE);
+		const cached = await cache.match('/cached.txt');
+
+		if (cached) return;
+
+		event.waitUntil(await cache.addAll(ASSETS));
+	}
 });
 
 self.addEventListener('fetch', (event) => {

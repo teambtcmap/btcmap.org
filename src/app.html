@@ -2,6 +2,7 @@
 <html lang="en">
 	<head>
 		<script>
+			// theme
 			if (
 				localStorage.theme === 'dark' ||
 				(!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
@@ -10,6 +11,15 @@
 			} else {
 				document.documentElement.classList.remove('dark');
 			}
+
+			// service worker
+			navigator.serviceWorker?.ready.then((registration) => {
+				const appInstalled = window.matchMedia('(display-mode: standalone)').matches;
+
+				if (appInstalled) {
+					registration.active.postMessage('CACHE_ASSETS');
+				}
+			});
 		</script>
 		<meta name="theme-color" content="#0B9072" />
 		<meta name="keywords" content="bitcoin, open source, map" />
