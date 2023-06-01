@@ -30,15 +30,19 @@ self.addEventListener('activate', (event) => {
 	event.waitUntil(deleteOldCaches());
 });
 
-self.addEventListener('message', async (event) => {
-	if (event.data === 'CACHE_ASSETS') {
+self.addEventListener('message', (event) => {
+	async function cacheAssets() {
 		// Create a new cache and add all files to it
 		const cache = await caches.open(CACHE);
 		const cached = await cache.match('/cached.txt');
 
 		if (cached) return;
 
-		event.waitUntil(await cache.addAll(ASSETS));
+		await cache.addAll(ASSETS);
+	}
+
+	if (event.data === 'CACHE_ASSETS') {
+		event.waitUntil(cacheAssets());
 	}
 });
 
