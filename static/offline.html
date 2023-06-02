@@ -3748,9 +3748,12 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 					<div class="space-y-10 py-10 text-center">
 						<button
 							id="back"
-							class="inline text-xl font-semibold text-link transition-colors hover:text-hover"
+							class="inline-flex items-center text-xl font-semibold text-link transition-colors hover:text-hover"
 						>
-							<i class="fa-solid fa-backward-step mr-2"></i> Back
+							<svg class="mr-2" width="12.5px" height="20px">
+								<use width="12.5px" height="20px" href="/icons/socials/spritesheet.svg#back"></use>
+							</svg>
+							Back
 						</button>
 						<script>
 							document.querySelector('#back').onclick = () => window.history.back();

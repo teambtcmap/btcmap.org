@@ -2,6 +2,13 @@
 	import { page } from '$app/stores';
 	import { SocialLink } from '$comp';
 	import { socials } from '$lib/store';
+	import { onMount } from 'svelte';
+
+	onMount(() => {
+		if ($page.status === 500 && !navigator.onLine) {
+			location.reload();
+		}
+	});
 </script>
 
 <svelte:head>
