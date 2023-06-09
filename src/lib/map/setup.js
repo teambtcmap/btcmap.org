@@ -734,7 +734,7 @@ export const generateMarker = (
 							}
 
 							<a
-								href="https://github.com/teambtcmap/btcmap-data/wiki/Map-Legend"
+								href="https://wiki.btcmap.org/general/map-legend.html"
 								target="_blank"
 								rel="noreferrer"
 								class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>

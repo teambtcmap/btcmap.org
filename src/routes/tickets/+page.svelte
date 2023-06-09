@@ -92,12 +92,12 @@
 
 			<p class="text-center text-xl text-primary dark:text-white lg:text-left">
 				More information on how to get involved can be found in our <a
-					href="https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions"
+					href="https://wiki.btcmap.org/general/tagging-instructions.html"
 					class="text-link transition-colors hover:text-hover">Tagging Instructions</a
 				>
 				and
 				<a
-					href="https://github.com/teambtcmap/btcmap-data/wiki/Creating-GeoJSON-Areas"
+					href="https://wiki.btcmap.org/general/geojson-areas.html"
 					class="text-link transition-colors hover:text-hover">Creating GeoJSON Areas</a
 				> Wiki pages.
 			</p>

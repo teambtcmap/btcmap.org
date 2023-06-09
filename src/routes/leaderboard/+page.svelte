@@ -212,7 +212,7 @@
 			<PrimaryButton
 				text="Smash these numbers"
 				style="w-[207px] mx-auto py-3 rounded-xl"
-				link="https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions#shadowy-supertaggers"
+				link="https://wiki.btcmap.org/general/tagging-instructions.html#shadowy-supertaggers-"
 				external
 			/>
 
@@ -223,7 +223,7 @@
 							{heading}
 							{#if heading === 'Tip'}
 								<a
-									href="https://github.com/teambtcmap/btcmap-data/wiki/Lightning-Tips"
+									href="https://wiki.btcmap.org/general/lightning-tips.html"
 									target="_blank"
 									rel="noreferrer"><i class="fa-solid fa-circle-info text-sm" /></a
 								>

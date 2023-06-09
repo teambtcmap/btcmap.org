@@ -627,7 +627,7 @@
 
 			<p class="text-center text-sm text-body dark:text-white md:text-left">
 				*More information on bitcoin mapping tags can be found <a
-					href="https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions#tagging-guidance"
+					href="https://wiki.btcmap.org/general/tagging-instructions.html#tagging-guidance"
 					target="_blank"
 					rel="noreferrer"
 					class="text-link transition-colors hover:text-hover">here</a

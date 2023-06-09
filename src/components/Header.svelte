@@ -35,13 +35,13 @@
 	const wikiDropdownLinks = [
 		{
 			title: 'General',
-			url: 'https://github.com/teambtcmap/btcmap-data/wiki',
+			url: 'https://wiki.btcmap.org',
 			icon: 'general',
 			external: true
 		},
 		{
 			title: 'API',
-			url: 'https://github.com/teambtcmap/btcmap-api/wiki',
+			url: 'https://wiki.btcmap.org/api/introduction.html',
 			icon: 'api',
 			external: true
 		}

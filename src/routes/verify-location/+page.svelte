@@ -317,7 +317,7 @@
 						class="text-link transition-colors hover:text-hover">OpenStreetMap</a
 					>? You can check out our
 					<a
-						href="https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions"
+						href="https://wiki.btcmap.org/general/tagging-instructions.html"
 						target="_blank"
 						rel="noreferrer"
 						class="text-link transition-colors hover:text-hover">Wiki</a

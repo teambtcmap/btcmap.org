@@ -110,7 +110,7 @@ Contact: ${contact}
 Status: Todo
 Created at: ${new Date(Date.now()).toISOString()}
 
-If you are a new contributor please read our Tagging Instructions [here](https://github.com/teambtcmap/btcmap-data/wiki/Tagging-Instructions).`,
+If you are a new contributor please read our Tagging Instructions [here](https://wiki.btcmap.org/general/tagging-instructions.html).`,
 				labels:
 					country && communities.length
 						? [...standardLabels, country, ...communities]
