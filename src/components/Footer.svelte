@@ -8,6 +8,7 @@
 		{ link: '/license', name: 'License' },
 		{ link: '/privacy-policy', name: 'Privacy' },
 		{ link: 'https://stats.uptimerobot.com/7kgEVtzlV1', name: 'Status' },
+		{ link: 'https://bitcoin.rocks/business/', name: 'Bitcoin for Business', external: true },
 		{ link: '/bitcoin.pdf', name: 'White Paper' },
 		{ link: '/cypherpunks-manifesto.pdf', name: 'Cypherpunks' }
 	];
@@ -25,6 +26,8 @@
 		{#each links as link}
 			<a
 				href={link.link}
+				target={link.external ? '_blank' : '_self'}
+				rel="noreferrer"
 				class="mx-2.5 {link.name !== 'Cypherpunks'
 					? 'mb-2.5 xl:mb-0'
 					: ''} text-sm text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link"
