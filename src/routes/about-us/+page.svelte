@@ -91,7 +91,8 @@
 		{ name: 'BitLocal', icon: 'bitlocal', url: 'https://www.bitlocal.app/' },
 		{ name: 'Nostr Bot', icon: 'nostr-bot', url: 'https://github.com/BcnBitcoinOnly/btcmap-bot' },
 		{ name: 'Fedi', icon: 'fedi', url: 'https://www.fedi.xyz/' },
-		{ name: 'Osmo', icon: 'osmo', url: 'https://www.osmowallet.com/' }
+		{ name: 'Osmo', icon: 'osmo', url: 'https://www.osmowallet.com/' },
+		{ name: 'Bitcoin Rocks!', icon: 'bitcoin-rocks', url: 'https://bitcoin.rocks/' }
 	];
 
 	const projectIntegrations = [
