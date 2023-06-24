@@ -349,7 +349,7 @@
 							controls
 							playsinline
 							preload="auto"
-							src="/videos/osm-tagging-tutorial.mp4"
+							src="/videos/osm-tagging-tutorial.webm"
 							class="w-full border-2 border-input"
 						/>
 
