@@ -128,8 +128,8 @@
 	const boosts = $page.url.searchParams.has('boosts');
 
 	// allow to view map centered on a community
-	const community = $page.url.searchParams.get('community');
-	const communitySelected = $areas.find((area) => area.id === community);
+	const communityQuery = $page.url.searchParams.get('community');
+	const communitySelected = $areas.find((area) => area.id === communityQuery);
 
 	// allow to view map with communities only
 	const communitiesOnly = $page.url.searchParams.has('communitiesOnly');
@@ -211,7 +211,7 @@
 			}
 
 			// set view to community if in url params
-			else if (community && communitySelected) {
+			else if (communityQuery && communitySelected) {
 				try {
 					// eslint-disable-next-line no-undef
 					map.fitBounds(L.geoJSON(communitySelected.tags.geo_json).getBounds());
@@ -320,7 +320,7 @@ Thanks for using BTC Map!`);
 
 				mapCenter = map.getCenter();
 
-				if (!community && !communitiesOnly && !urlLat.length && !urlLong.length) {
+				if (!communityQuery && !communitiesOnly && !urlLat.length && !urlLong.length) {
 					const zoom = map.getZoom();
 					location.hash = zoom + '/' + mapCenter.lat.toFixed(5) + '/' + mapCenter.lng.toFixed(5);
 				}
@@ -531,7 +531,11 @@ Thanks for using BTC Map!`);
 				<div class='text-center space-y-2'>
 					<img src=${
 						community.tags['icon:square']
-					} alt='avatar' class='w-24 h-24 rounded-full mx-auto' title='Community icon' decoding="sync" fetchpriority="high" onerror="this.src='/images/communities/bitcoin.svg'" />
+					} alt='avatar' class='w-24 h-24 rounded-full mx-auto' title='Community icon' ${
+					communityQuery || communitiesOnly
+						? 'decoding="sync" fetchpriority="high"'
+						: 'loading="lazy"'
+				} onerror="this.src='/images/communities/bitcoin.svg'" />
 
 					<span class='text-primary dark:text-white font-semibold text-xl' title='Community name'>${
 						community.tags.name
@@ -616,7 +620,7 @@ Thanks for using BTC Map!`);
 				communityLayer.addTo(communitiesLayer);
 			});
 
-			if ((community && communitySelected) || communitiesOnly) {
+			if ((communityQuery && communitySelected) || communitiesOnly) {
 				communitiesLayer.addTo(map);
 			}
 
