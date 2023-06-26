@@ -37,7 +37,7 @@ This website is a progressive web app, meaning you can install it on your mobile
 
 ## Embedding
 
-If you would like to embed the map on your own website, simply add the following code to your HTML:
+If you would like to embed the web map on your own website, simply add the following code to your HTML:
 
 ```html
 <iframe
@@ -71,15 +71,8 @@ For more information see this [article](https://developer.chrome.com/docs/privac
 #### General area
 
 1. Visit [btcmap.org/map](https://btcmap.org/map) and zoom the map to your desired location
-2. Click anywhere on the map and open up the `console` in `DevTools` for your browser
-3. An iframe `src` attribute URL will be generated for you like this:
-
-```console
-Here is your iframe embed URL: https://btcmap.org/map?lat=47.502358951968596&long=39.58374023437501&lat=40.63896734381725&long=24.587402343750004
-Thanks for using BTC Map!
-```
-
-4. Add this URL to your `iframe` embed code
+2. Copy the URL from your browser tab which contains geolocation data
+3. Add this URL to your `iframe` `src` attribute embed code
 
 #### Communities only
 
@@ -106,6 +99,8 @@ The available options are:
 Example: `/map?onchain&lightning`
 
 That's it!
+
+Embedding is also possible on native mobile applications by utilizing the **WebView**.
 
 ---
 
