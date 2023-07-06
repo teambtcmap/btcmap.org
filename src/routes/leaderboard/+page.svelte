@@ -9,7 +9,8 @@
 		LeaderboardItem,
 		LeaderboardSkeleton,
 		TopButton,
-		HeaderPlaceholder
+		HeaderPlaceholder,
+		Countdown
 	} from '$comp';
 	import {
 		users,
@@ -30,6 +31,10 @@
 	let loading;
 	let leaderboard;
 
+	let showGeyser = false;
+	const eventStart = new Date('Jul 4, 2023 00:00:00').toISOString();
+	const eventEnd = new Date('Sep 2, 2023 00:00:00').toISOString();
+
 	let topTenChartCanvas;
 	let topTenChart;
 	let chartsLoading;
@@ -41,11 +46,17 @@
 		leaderboard = [];
 
 		$users.forEach((user) => {
-			if ($excludeLeader.includes(user.id)) {
+			if ($excludeLeader.includes(user.id) || (showGeyser && user.id === 10396321)) {
 				return;
 			}
 
 			let userEvents = $events.filter((event) => event['user_id'] == user.id);
+
+			if (showGeyser) {
+				userEvents = userEvents.filter(
+					(event) => event['created_at'] > eventStart && event['created_at'] < eventEnd
+				);
+			}
 
 			if (userEvents.length) {
 				let created = userEvents.filter((event) => event.type === 'create').length;
@@ -58,11 +69,13 @@
 					avatar: avatar,
 					tagger: profile['display_name'],
 					id: user.id,
-					created: user.id == '17221642' ? created + 100 : created,
-					updated: user.id == '17221642' ? updated + 20 : updated,
+					created: user.id == '17221642' && !showGeyser ? created + 100 : created,
+					updated: user.id == '17221642' && !showGeyser ? updated + 20 : updated,
 					deleted: deleted,
 					total:
-						user.id == '17221642' ? created + updated + deleted + 120 : created + updated + deleted,
+						user.id == '17221642' && !showGeyser
+							? created + updated + deleted + 120
+							: created + updated + deleted,
 					tip: profile.description
 				});
 			}
@@ -74,7 +87,7 @@
 		loading = false;
 	};
 
-	const leaderboardSync = (status, users, events) => {
+	const leaderboardSync = (status, users, events, showGeyser) => {
 		if (users.length && events.length && !status && initialRenderComplete) {
 			populateLeaderboard();
 
@@ -88,7 +101,7 @@
 		}
 	};
 
-	$: leaderboardSync($syncStatus, $users, $events);
+	$: leaderboardSync($syncStatus, $users, $events, showGeyser);
 
 	$: $theme !== undefined &&
 		!chartsLoading &&
@@ -171,6 +184,25 @@
 </script>
 
 <div class="bg-teal dark:bg-dark">
+	<div
+		class="w-full border-b border-primary p-4 text-center text-sm text-primary dark:border-white dark:text-white"
+	>
+		<strong>
+			SUPERTAGGER EVENT IN PROGRESS! 🥷
+			<br />
+			<span class="underline decoration-bitcoin decoration-2 underline-offset-4">2,100,000</span>
+		</strong>
+		sats are up for grabs during this
+		<a
+			href="https://snort.social/e/nevent1qqs2x7kz5ut4e62ng7pjpx3mf7eenancnzkstsgjmpd7sec0h9nr63qpz9mhxue69uhkummnw3ezuamfdejj7qgwwaehxw309ahx7uewd3hkctcsd7w8k"
+			target="_blank"
+			rel="noreferrer"
+			class="text-link transition-colors hover:text-hover">Geyser Grant initiative</a
+		>.
+		<br />
+		<strong><Countdown date="Sep 2, 2023 00:00:00" /></strong>
+	</div>
+
 	<Header />
 
 	<main class="mt-10">
@@ -217,6 +249,23 @@
 			/>
 
 			<section id="leaderboard" class="dark:lg:rounded dark:lg:bg-white/10 dark:lg:py-8">
+				<div
+					class="mb-8 flex flex-wrap items-center justify-center gap-8 text-xl font-semibold text-primary dark:text-white lg:gap-16"
+				>
+					<button
+						on:click={() => (showGeyser = false)}
+						class="{showGeyser ? '' : 'underline'} decoration-4 underline-offset-8 hover:underline"
+					>
+						All Time
+					</button>
+					<button
+						on:click={() => (showGeyser = true)}
+						class="{showGeyser ? 'underline' : ''} decoration-4 underline-offset-8 hover:underline"
+					>
+						Geyser Initiative 🌊
+					</button>
+				</div>
+
 				<div class="mb-5 hidden grid-cols-6 text-center lg:grid">
 					{#each headings as heading}
 						<h3 class="text-lg font-semibold text-primary dark:text-white">
