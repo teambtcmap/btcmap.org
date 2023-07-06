@@ -31,7 +31,7 @@
 	let loading;
 	let leaderboard;
 
-	let showGeyser = false;
+	let showGeyser = location.hash === '#geyser' ? true : false;
 	const eventStart = new Date('Jul 4, 2023 00:00:00').toISOString();
 	const eventEnd = new Date('Sep 2, 2023 00:00:00').toISOString();
 
@@ -254,13 +254,19 @@
 					class="mb-8 flex flex-wrap items-center justify-center gap-8 text-xl font-semibold text-primary dark:text-white lg:gap-16"
 				>
 					<button
-						on:click={() => (showGeyser = false)}
+						on:click={() => {
+							showGeyser = false;
+							location.hash = 'all-time';
+						}}
 						class="{showGeyser ? '' : 'underline'} decoration-4 underline-offset-8 hover:underline"
 					>
 						All Time
 					</button>
 					<button
-						on:click={() => (showGeyser = true)}
+						on:click={() => {
+							showGeyser = true;
+							location.hash = 'geyser';
+						}}
 						class="{showGeyser ? 'underline' : ''} decoration-4 underline-offset-8 hover:underline"
 					>
 						Geyser Initiative 🌊
