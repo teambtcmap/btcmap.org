@@ -87,6 +87,7 @@
 		loading = false;
 	};
 
+	// eslint-disable-next-line no-unused-vars
 	const leaderboardSync = (status, users, events, showGeyser) => {
 		if (users.length && events.length && !status && initialRenderComplete) {
 			populateLeaderboard();
