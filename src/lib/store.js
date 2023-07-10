@@ -37,7 +37,7 @@ export const apps = readable([
 		link: 'https://apps.apple.com/app/btc-world-map/id6443604345',
 		type: 'iOS',
 		icon: 'ios',
-		desc: 'Surveillance Option'
+		desc: 'Walled Garden Option'
 	}
 ]);
 

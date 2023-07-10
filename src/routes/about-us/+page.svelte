@@ -157,21 +157,21 @@
 
 	const coreTeam = [
 		{
-			name: 'Nathan Day',
-			title: 'Project Manager',
-			avatar: 'nathan',
-			socials: [
-				{ url: 'https://twitter.com/nathan_day', name: 'twitter' },
-				{ url: 'https://github.com/dadofsambonzuki', name: 'github' }
-			]
-		},
-		{
 			name: 'Igor',
 			title: 'Backend & Android',
 			avatar: 'igor',
 			socials: [
 				{ url: 'https://bubelov.com/', name: 'website' },
 				{ url: 'https://github.com/bubelov', name: 'github' }
+			]
+		},
+		{
+			name: 'Nathan Day',
+			title: 'Project Manager',
+			avatar: 'nathan',
+			socials: [
+				{ url: 'https://twitter.com/nathan_day', name: 'twitter' },
+				{ url: 'https://github.com/dadofsambonzuki', name: 'github' }
 			]
 		},
 		{
@@ -385,15 +385,15 @@
 
 					<div class="space-y-10">
 						<p>
+							<strong>Igor</strong> is a long time bitcoiner, mapper, and digital nomad living abroad.
+							He created BTC Map as an Android application and the project has since gained worldwide
+							momentum from there. He now also maintains all of the backend infrastructure for the project.
+						</p>
+						<p>
 							<strong>Nathan</strong> is a tech entrepreneur turned pleb-at-large. He brought the core
 							team together to accelerate app development. Having built, sold, invested in and advised
 							tech businesses over the years he is now focused on bitcoin, building BTCMap.org, gamertron.net
 							and delivering bitcoin education for kids.
-						</p>
-						<p>
-							<strong>Igor</strong> is a long time bitcoiner, mapper, and digital nomad living abroad.
-							He created BTC Map as an Android application and the project has since gained worldwide
-							momentum from there. He now also maintains all of the backend infrastructure for the project.
 						</p>
 						<p>
 							A self-taught Web Developer, <strong>secondl1ght</strong> dove head first down the bitcoin
