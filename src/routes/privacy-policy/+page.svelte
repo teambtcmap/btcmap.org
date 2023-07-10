@@ -94,12 +94,12 @@
 					We use privacy respecting analytics provided by <a
 						href="https://www.netlify.com/"
 						class="text-link transition-colors hover:text-hover">Netlify</a
-					> in order to see activity on BTC Map. For example, how many users are visiting the website.
+					> in order to see activity on BTC Map. For example, how many users are visiting the website
+					and the performance.
 				</p>
 				<p>
-					These analytics are done server-side and do not use any JavaScript, cookies or trackers.
-					There is no personally identifiable information included. All of the data is anonymous and
-					complies with the <a
+					These analytics do not use any cookies or trackers. There is no personally identifiable
+					information included. All of the data is anonymous and complies with the <a
 						href="https://www.netlify.com/gdpr-ccpa/"
 						class="text-link transition-colors hover:text-hover">GDPR</a
 					>. This data is deleted after 30 days.
@@ -176,7 +176,7 @@
 				<h2 class="text-3xl font-semibold text-primary dark:text-white">
 					Changes to this Privacy Policy
 				</h2>
-				<p>This privacy policy was last updated: November 10, 2022.</p>
+				<p>This privacy policy was last updated: July 10, 2023.</p>
 			</div>
 
 			<div class="space-y-5 text-xl text-body dark:text-white">
