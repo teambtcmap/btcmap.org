@@ -28,6 +28,8 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/map.png" />
 </svelte:head>
 
+<h1 class="hidden">Map</h1>
+
 {#if $elements && $elements.length && $areas && $areas.length && $reports && $reports.length}
 	<slot />
 {:else}
