@@ -81,6 +81,9 @@
 	$: satoshiSpritz =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'satoshi-spritz');
+	$: jednadvacet =
+		communities &&
+		communities.filter((community) => community.tags.organization === 'jednadvacet');
 
 	let continentChartCanvas;
 	let continentChart;
@@ -187,7 +190,8 @@
 		'Découvre Bitcoin',
 		'Dwadzieścia Jeden',
 		'Einundzwanzig',
-		'Satoshi Spritz'
+		'Satoshi Spritz',
+		'Jednadvacet'
 	];
 	$: communitySections = [
 		{
@@ -221,7 +225,8 @@
 		{ section: 'Découvre Bitcoin', communities: decouvreBitcoin },
 		{ section: 'Dwadzieścia Jeden', communities: dwadziesciaJeden },
 		{ section: 'Einundzwanzig', communities: einundzwanzig },
-		{ section: 'Satoshi Spritz', communities: satoshiSpritz }
+		{ section: 'Satoshi Spritz', communities: satoshiSpritz },
+		{ section: 'Jednadvacet', communities: jednadvacet }
 	];
 
 	onMount(async () => {
