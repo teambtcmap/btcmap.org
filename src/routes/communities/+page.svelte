@@ -177,6 +177,7 @@
 	$: $areas && $areas.length && communities && communities.length && chartSync($syncStatus);
 
 	let section;
+
 	const sections = [
 		'--Continents--',
 		'Africa',
@@ -188,15 +189,16 @@
 		'--Organizations--',
 		'2140 Meetups',
 		'Bitcoin4India',
+		'Bitcoin Jamii',
 		'BitDevs',
 		'Breizh Bitcoin',
 		'Découvre Bitcoin',
 		'Dwadzieścia Jeden',
 		'Einundzwanzig',
-		'Satoshi Spritz',
 		'Jednadvacet',
-		'Bitcoin Jamii'
+		'Satoshi Spritz'	
 	];
+
 	$: communitySections = [
 		{
 			section: 'Africa',
