@@ -1,4 +1,5 @@
 <script>
+	import axios from 'axios';
 	import localforage from 'localforage';
 	import OutClick from 'svelte-outclick';
 	import rewind from '@mapbox/geojson-rewind';
@@ -126,6 +127,9 @@
 
 	// allow to view map with only boosted locations
 	const boosts = $page.url.searchParams.has('boosts');
+
+	// allow to view map for hike event
+	const hikeEvent = $page.url.searchParams.has('mount-kili-hike');
 
 	// allow to view map centered on a community
 	const communityQuery = $page.url.searchParams.get('community');
@@ -320,7 +324,13 @@ Thanks for using BTC Map!`);
 
 				mapCenter = map.getCenter();
 
-				if (!communityQuery && !communitiesOnly && !urlLat.length && !urlLong.length) {
+				if (
+					!communityQuery &&
+					!communitiesOnly &&
+					!urlLat.length &&
+					!urlLong.length &&
+					!hikeEvent
+				) {
 					const zoom = map.getZoom();
 					location.hash = zoom + '/' + mapCenter.lat.toFixed(5) + '/' + mapCenter.lng.toFixed(5);
 				}
@@ -784,6 +794,95 @@ Thanks for using BTC Map!`);
 						{ sticky: true }
 					)
 					.addTo(map);
+			}
+
+			// mount kili hike event
+			if (Date.now() < new Date('September 4, 2023 00:00:00')) {
+				try {
+					const hikeData = await axios.get('https://static.btcmap.org/mount-kili-hike/data.json');
+					const hikeDataFiltered = hikeData.data.filter(
+						(update) =>
+							update.id !== undefined &&
+							update.lat &&
+							update.lon &&
+							update.title &&
+							update.comment &&
+							update.timestamp &&
+							update.url &&
+							update.lightning &&
+							update.active === true
+					);
+
+					// eslint-disable-next-line no-undef
+					const hikerIcon = L.icon({
+						iconUrl: '/icons/hiker-icon.png',
+						iconSize: [44, 44],
+						iconAnchor: [22, 44],
+						popupAnchor: [0, -44]
+					});
+
+					hikeDataFiltered.forEach((update) => {
+						const { lat, lon, title, comment, timestamp, url, lightning } = update;
+						const dateFormatted = new Intl.DateTimeFormat('en-US', {
+							dateStyle: 'medium',
+							timeStyle: 'short',
+							hour12: false
+						}).format(new Date(timestamp));
+
+						// eslint-disable-next-line no-undef
+						L.marker([lat, lon], { icon: hikerIcon })
+							.bindPopup(
+								`<p class='text-primary dark:text-white text-base text-center'>
+									<i class="fa-solid fa-person-hiking text-bitcoin"></i> <strong>${title}</strong> <i class="fa-solid fa-person-hiking text-bitcoin"></i>
+									<br/>
+									${comment}
+									<br/>
+									<span class='text-sm'><i class='fa-solid fa-clock mr-1'></i>
+									${dateFormatted}
+									</span>
+									<br/>
+									<span class='text-sm'><i class='fa-solid fa-location-dot mr-1'></i> ${lat}, ${lon}</span>
+									<br/>
+									<a href='${url}' target='_blank' rel='noreferrer' class='!text-link hover:!text-hover transition-colors'>Read More</a> | 
+									<a href='lightning:${lightning}' class='!text-link hover:!text-hover transition-colors'>Donate</a>
+								</p>
+	
+								${
+									theme === 'dark'
+										? `
+										<style>
+											.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+												background-color: #06171C;
+												border: 1px solid #e5e7eb
+										}
+										</style>`
+										: ''
+								}`,
+								{ closeButton: false, maxWidth: 300, minWidth: 300 }
+							)
+							.addTo(map);
+					});
+
+					if (hikeEvent) {
+						try {
+							map.fitBounds(
+								// eslint-disable-next-line no-undef
+								hikeDataFiltered.map((update) => [update.lat, update.lon]),
+								{ animate: false }
+							);
+							mapCenter = map.getCenter();
+						} catch (error) {
+							map.setView([0, 0], 3);
+							mapCenter = map.getCenter();
+							errToast(
+								'Could not set map view to provided coordinates, please try again or contact BTC Map.'
+							);
+							console.log(error);
+						}
+					}
+				} catch (error) {
+					console.error(error);
+				}
 			}
 
 			// change default icons
