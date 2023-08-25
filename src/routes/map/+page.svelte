@@ -198,100 +198,102 @@
 			// add map and tiles
 			map = leaflet.map(mapElement);
 
-			// use url hash if present
-			if (location.hash) {
-				try {
-					const coords = location.hash.split('/');
-					map.setView([coords[1], coords[2]], coords[0].slice(1));
-					mapCenter = map.getCenter();
-				} catch (error) {
-					map.setView([0, 0], 3);
-					mapCenter = map.getCenter();
-					errToast(
-						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
-					);
-					console.log(error);
-				}
-			}
-
-			// set view to community if in url params
-			else if (communityQuery && communitySelected) {
-				try {
-					// eslint-disable-next-line no-undef
-					map.fitBounds(L.geoJSON(communitySelected.tags.geo_json).getBounds());
-					mapCenter = map.getCenter();
-				} catch (error) {
-					map.setView([0, 0], 3);
-					mapCenter = map.getCenter();
-					errToast(
-						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
-					);
-					console.log(error);
-				}
-			}
-
-			// set view to communities if in url params
-			else if (communitiesOnly && communities.length) {
-				try {
-					map.fitBounds(
-						// eslint-disable-next-line no-undef
-						communities.map((community) => L.geoJSON(community.tags.geo_json).getBounds())
-					);
-					mapCenter = map.getCenter();
-				} catch (error) {
-					map.setView([0, 0], 3);
-					mapCenter = map.getCenter();
-					errToast(
-						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
-					);
-					console.log(error);
-				}
-			}
-
-			// set URL lat/long query view if it exists and is valid
-			else if (urlLat.length && urlLong.length) {
-				try {
-					if (urlLat.length > 1 && urlLong.length > 1) {
-						map.fitBounds([
-							[urlLat[0], urlLong[0]],
-							[urlLat[1], urlLong[1]]
-						]);
+			if (!hikeEvent) {
+				// use url hash if present
+				if (location.hash) {
+					try {
+						const coords = location.hash.split('/');
+						map.setView([coords[1], coords[2]], coords[0].slice(1));
 						mapCenter = map.getCenter();
-					} else {
-						map.fitBounds([[urlLat[0], urlLong[0]]]);
-						mapCenter = map.getCenter();
-					}
-				} catch (error) {
-					map.setView([0, 0], 3);
-					mapCenter = map.getCenter();
-					errToast(
-						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
-					);
-					console.log(error);
-				}
-			}
-
-			// set view to last location if it is present in the cache
-			else {
-				localforage
-					.getItem('coords')
-					.then(function (value) {
-						if (value) {
-							map.fitBounds([
-								[value._northEast.lat, value._northEast.lng],
-								[value._southWest.lat, value._southWest.lng]
-							]);
-						} else {
-							map.setView([0, 0], 3);
-						}
-					})
-					.catch(function (err) {
+					} catch (error) {
 						map.setView([0, 0], 3);
+						mapCenter = map.getCenter();
 						errToast(
-							'Could not set map view to cached coords, please try again or contact BTC Map.'
+							'Could not set map view to provided coordinates, please try again or contact BTC Map.'
 						);
-						console.log(err);
-					});
+						console.log(error);
+					}
+				}
+
+				// set view to community if in url params
+				else if (communityQuery && communitySelected) {
+					try {
+						// eslint-disable-next-line no-undef
+						map.fitBounds(L.geoJSON(communitySelected.tags.geo_json).getBounds());
+						mapCenter = map.getCenter();
+					} catch (error) {
+						map.setView([0, 0], 3);
+						mapCenter = map.getCenter();
+						errToast(
+							'Could not set map view to provided coordinates, please try again or contact BTC Map.'
+						);
+						console.log(error);
+					}
+				}
+
+				// set view to communities if in url params
+				else if (communitiesOnly && communities.length) {
+					try {
+						map.fitBounds(
+							// eslint-disable-next-line no-undef
+							communities.map((community) => L.geoJSON(community.tags.geo_json).getBounds())
+						);
+						mapCenter = map.getCenter();
+					} catch (error) {
+						map.setView([0, 0], 3);
+						mapCenter = map.getCenter();
+						errToast(
+							'Could not set map view to provided coordinates, please try again or contact BTC Map.'
+						);
+						console.log(error);
+					}
+				}
+
+				// set URL lat/long query view if it exists and is valid
+				else if (urlLat.length && urlLong.length) {
+					try {
+						if (urlLat.length > 1 && urlLong.length > 1) {
+							map.fitBounds([
+								[urlLat[0], urlLong[0]],
+								[urlLat[1], urlLong[1]]
+							]);
+							mapCenter = map.getCenter();
+						} else {
+							map.fitBounds([[urlLat[0], urlLong[0]]]);
+							mapCenter = map.getCenter();
+						}
+					} catch (error) {
+						map.setView([0, 0], 3);
+						mapCenter = map.getCenter();
+						errToast(
+							'Could not set map view to provided coordinates, please try again or contact BTC Map.'
+						);
+						console.log(error);
+					}
+				}
+
+				// set view to last location if it is present in the cache
+				else {
+					localforage
+						.getItem('coords')
+						.then(function (value) {
+							if (value) {
+								map.fitBounds([
+									[value._northEast.lat, value._northEast.lng],
+									[value._southWest.lat, value._southWest.lng]
+								]);
+							} else {
+								map.setView([0, 0], 3);
+							}
+						})
+						.catch(function (err) {
+							map.setView([0, 0], 3);
+							errToast(
+								'Could not set map view to cached coords, please try again or contact BTC Map.'
+							);
+							console.log(err);
+						});
+				}
 			}
 
 			// add tiles and basemaps
