@@ -599,8 +599,8 @@ export const generateMarker = (
 						</a>
 
 						<a id='edit' href='https://www.openstreetmap.org/edit?${element.type}=${
-			element.id
-		}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+							element.id
+						}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
 								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#pencil"></use>
 							</svg>
@@ -608,8 +608,8 @@ export const generateMarker = (
 						</a>
 
 						<a id='share' href='/merchant/${element.type}:${
-			element.id
-		}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+							element.id
+						}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
 								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#share"></use>
 							</svg>
@@ -780,12 +780,12 @@ ${
 								? '/icons/btc-dark.svg'
 								: '/icons/btc.svg'
 						} alt="bitcoin" class="w-6 h-6" title="${
-				element.tags && element.tags['payment:onchain'] === 'yes'
-					? 'On-chain accepted'
-					: element.tags && element.tags['payment:onchain'] === 'no'
-					? 'On-chain not accepted'
-					: 'On-chain unknown'
-		  }"/>
+							element.tags && element.tags['payment:onchain'] === 'yes'
+								? 'On-chain accepted'
+								: element.tags && element.tags['payment:onchain'] === 'no'
+								? 'On-chain not accepted'
+								: 'On-chain unknown'
+						}"/>
 
 						<img src=${
 							element.tags && element.tags['payment:lightning'] === 'yes'
@@ -800,12 +800,12 @@ ${
 								? '/icons/ln-dark.svg'
 								: '/icons/ln.svg'
 						} alt="lightning" class="w-6 h-6" title="${
-				element.tags && element.tags['payment:lightning'] === 'yes'
-					? 'Lightning accepted'
-					: element.tags && element.tags['payment:lightning'] === 'no'
-					? 'Lightning not accepted'
-					: 'Lightning unknown'
-		  }"/>
+							element.tags && element.tags['payment:lightning'] === 'yes'
+								? 'Lightning accepted'
+								: element.tags && element.tags['payment:lightning'] === 'no'
+								? 'Lightning not accepted'
+								: 'Lightning unknown'
+						}"/>
 
 						<img src=${
 							element.tags && element.tags['payment:lightning_contactless'] === 'yes'
@@ -820,12 +820,12 @@ ${
 								? '/icons/nfc-dark.svg'
 								: '/icons/nfc.svg'
 						} alt="nfc" class="w-6 h-6" title="${
-				element.tags && element.tags['payment:lightning_contactless'] === 'yes'
-					? 'Lightning Contactless accepted'
-					: element.tags && element.tags['payment:lightning_contactless'] === 'no'
-					? 'Lightning contactless not accepted'
-					: 'Lightning Contactless unknown'
-		  }"/>
+							element.tags && element.tags['payment:lightning_contactless'] === 'yes'
+								? 'Lightning Contactless accepted'
+								: element.tags && element.tags['payment:lightning_contactless'] === 'no'
+								? 'Lightning contactless not accepted'
+								: 'Lightning Contactless unknown'
+						}"/>
 					</div>
 				</div>`
 		: ''

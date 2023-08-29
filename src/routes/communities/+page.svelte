@@ -226,14 +226,14 @@
 		},
 		{ section: '2140 Meetups', communities: meetups2140 },
 		{ section: 'Bitcoin4India', communities: bitcoin4India },
+		{ section: 'Bitcoin Jamii', communities: bitcoinJamii }
 		{ section: 'BitDevs', communities: bitDevs },
 		{ section: 'Breizh Bitcoin', communities: breizhBitcoin },
 		{ section: 'Découvre Bitcoin', communities: decouvreBitcoin },
 		{ section: 'Dwadzieścia Jeden', communities: dwadziesciaJeden },
 		{ section: 'Einundzwanzig', communities: einundzwanzig },
-		{ section: 'Satoshi Spritz', communities: satoshiSpritz },
 		{ section: 'Jednadvacet', communities: jednadvacet },
-		{ section: 'Bitcoin Jamii', communities: bitcoinJamii }
+		{ section: 'Satoshi Spritz', communities: satoshiSpritz }
 	];
 
 	onMount(async () => {
