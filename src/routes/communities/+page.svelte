@@ -64,6 +64,9 @@
 	$: bitcoin4India =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'bitcoin4india');
+	$: bitcoinJamii =
+		communities &&
+		communities.filter((community) => community.tags.organization === 'bitcoin-jamii');
 	$: bitDevs =
 		communities && communities.filter((community) => community.tags.organization === 'bit-devs');
 	$: breizhBitcoin =
@@ -78,15 +81,12 @@
 	$: einundzwanzig =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'einundzwanzig');
-	$: satoshiSpritz =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'satoshi-spritz');
 	$: jednadvacet =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'jednadvacet');
-	$: bitcoinJamii =
+	$: satoshiSpritz =
 		communities &&
-		communities.filter((community) => community.tags.organization === 'bitcoin-jamii');
+		communities.filter((community) => community.tags.organization === 'satoshi-spritz');
 
 	let continentChartCanvas;
 	let continentChart;
