@@ -7,9 +7,9 @@
 	export let user;
 	export let time;
 	export let latest;
-	export let lat;
-	export let long;
 	export let merchantId;
+
+	$: deleteLink = merchantId.split(':');
 
 	$: profile = user['osm_json'] && user['osm_json'];
 	$: regexMatch = profile && profile.description.match('(lightning:[^)]+)');
@@ -48,7 +48,7 @@
 				<!-- location -->
 				<a
 					href={action === 'delete'
-						? `https://www.openstreetmap.org/#map=21/${lat}/${long}`
+						? `https://www.openstreetmap.org/${deleteLink[0]}/${deleteLink[1]}`
 						: `/merchant/${merchantId}`}
 					target={action === 'delete' ? '_blank' : '_self'}
 					rel="noreferrer"

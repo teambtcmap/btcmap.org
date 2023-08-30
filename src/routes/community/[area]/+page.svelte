@@ -229,8 +229,6 @@
 					: undefined;
 
 			event.location = location ? location : 'Unnamed element';
-			event.lat = latCalc(elementMatch['osm_json']);
-			event.long = longCalc(elementMatch['osm_json']);
 			event.merchantId = elementMatch.id;
 
 			eventElements.push(event);
@@ -983,8 +981,6 @@
 									user={findUser(event)}
 									time={event['created_at']}
 									latest={event === eventElements[0] ? true : false}
-									lat={event.lat}
-									long={event.long}
 									merchantId={event.merchantId}
 								/>
 							{/each}

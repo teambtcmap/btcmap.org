@@ -5,9 +5,9 @@
 	export let action;
 	export let time;
 	export let latest;
-	export let lat;
-	export let long;
 	export let merchantId;
+
+	$: deleteLink = merchantId.split(':');
 
 	const capitalizeFirstLetter = (string) => {
 		return string.charAt(0).toUpperCase() + string.slice(1);
@@ -47,7 +47,7 @@
 				<!-- location -->
 				<a
 					href={action === 'delete'
-						? `https://www.openstreetmap.org/#map=21/${lat}/${long}`
+						? `https://www.openstreetmap.org/${deleteLink[0]}/${deleteLink[1]}`
 						: `/merchant/${merchantId}`}
 					target={action === 'delete' ? '_blank' : '_self'}
 					rel="noreferrer"
