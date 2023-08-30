@@ -237,7 +237,22 @@
 				datasets: [
 					{
 						label: 'Total Locations',
-						data: statsSorted.map(({ tags: { total_elements } }) => total_elements),
+						data: statsSorted.map((stat) => {
+							switch (stat.date) {
+								case '2023-08-02':
+									return 7886;
+								case '2023-08-03':
+									return 7895;
+								case '2023-08-04':
+									return 7897;
+								case '2023-08-05':
+									return 7903;
+								case '2023-08-06':
+									return 7905;
+								default:
+									return stat.tags.total_elements;
+							}
+						}),
 						fill: {
 							target: 'origin',
 							above: 'rgba(0, 153, 175, 0.2)'
@@ -424,9 +439,22 @@
 				upToDateChart.update();
 
 				totalChart.data.labels = statsSorted.map(({ date }) => date);
-				totalChart.data.datasets[0].data = statsSorted.map(
-					({ tags: { total_elements } }) => total_elements
-				);
+				totalChart.data.datasets[0].data = statsSorted.map((stat) => {
+					switch (stat.date) {
+						case '2023-08-02':
+							return 7886;
+						case '2023-08-03':
+							return 7895;
+						case '2023-08-04':
+							return 7897;
+						case '2023-08-05':
+							return 7903;
+						case '2023-08-06':
+							return 7905;
+						default:
+							return stat.tags.total_elements;
+					}
+				});
 				totalChart.update();
 
 				legacyChart.data.labels = statsSorted.map(({ date }) => date);
