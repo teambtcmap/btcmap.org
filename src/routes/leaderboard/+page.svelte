@@ -185,7 +185,7 @@
 </script>
 
 <div class="bg-teal dark:bg-dark">
-	<div
+<!-- 	<div
 		class="w-full border-b border-primary p-4 text-center text-sm text-primary dark:border-white dark:text-white"
 	>
 		<strong>
@@ -202,7 +202,7 @@
 		>.
 		<br />
 		<strong><Countdown date="Sep 2, 2023 00:00:00" /></strong>
-	</div>
+	</div> -->
 
 	<Header />
 
@@ -250,7 +250,7 @@
 			/>
 
 			<section id="leaderboard" class="dark:lg:rounded dark:lg:bg-white/10 dark:lg:py-8">
-				<div
+<!-- 				<div
 					class="mb-8 flex flex-wrap items-center justify-center gap-8 text-xl font-semibold text-primary dark:text-white lg:gap-16"
 				>
 					<button
@@ -271,7 +271,7 @@
 					>
 						Geyser Initiative 🌊
 					</button>
-				</div>
+				</div> -->
 
 				<div class="mb-5 hidden grid-cols-6 text-center lg:grid">
 					{#each headings as heading}
