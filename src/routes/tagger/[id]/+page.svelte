@@ -478,9 +478,9 @@
 								<img
 									src="/icons/badges/{badge.icon}.svg"
 									alt={badge.title}
-									class="mx-auto mb-1 h-20 w-20"
+									class="mx-auto mb-1 h-24 w-24"
 								/>
-								<p class="text-center text-xs dark:text-white">{badge.title}</p>
+								<p class="text-center text-sm dark:text-white">{badge.title}</p>
 							</div>
 						</a>
 					{/each}

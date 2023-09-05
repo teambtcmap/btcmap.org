@@ -17,7 +17,7 @@
 		</div>
 	{/if}
 
-	<img src="/icons/badges/{icon}.svg" alt={title} class="mx-auto h-20 w-20" />
+	<img src="/icons/badges/{icon}.svg" alt={title} class="mx-auto h-28 w-28" />
 
 	<p class="text-xl font-semibold text-primary dark:text-white">{title}</p>
 
