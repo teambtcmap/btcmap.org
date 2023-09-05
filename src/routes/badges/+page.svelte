@@ -5,6 +5,11 @@
 
 	let achievements = [
 		{
+			title: 'Geyser Tournament',
+			desc: 'Participate in the 2023 Supertagger Event',
+			icon: 'geyser'
+		},
+		{
 			title: 'Top Tagger',
 			desc: '#1 on the leaderboard',
 			icon: 'top-tagger'

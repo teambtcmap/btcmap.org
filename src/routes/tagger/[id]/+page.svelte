@@ -86,6 +86,7 @@
 	populateLeaderboard();
 
 	let badges = [
+		{ check: [10396321, 17441326, 17199501, 668096, 17462838, 17221642, 5432507, 17354902, 18452174, 18360665, 616774, 18062435, 7522075, 18380975, 1697546, 19288099, 11903494, 18552145, 1836965, 19795869, 17872, 19768735, 17573979, 2929493, 19714509, 1851550, 18244560, 19756689, 527105, 2339960, 17322349, 17300693, 1236325, 1787080].includes(user.id), title: 'Geyser Tournament', icon: 'geyser', type: 'achievement' },
 		{ check: supporter, title: 'Supporter', icon: 'supporter', type: 'achievement' },
 		{
 			check: leaderboard[0].id == user.id,
