@@ -9,8 +9,7 @@
 		LeaderboardItem,
 		LeaderboardSkeleton,
 		TopButton,
-		HeaderPlaceholder,
-		Countdown
+		HeaderPlaceholder
 	} from '$comp';
 	import {
 		users,
