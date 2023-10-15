@@ -544,10 +544,10 @@ Thanks for using BTC Map!`);
 					<img src=${
 						community.tags['icon:square']
 					} alt='avatar' class='w-24 h-24 rounded-full mx-auto' title='Community icon' ${
-					communityQuery || communitiesOnly
-						? 'decoding="sync" fetchpriority="high"'
-						: 'loading="lazy"'
-				} onerror="this.src='/images/communities/bitcoin.svg'" />
+						communityQuery || communitiesOnly
+							? 'decoding="sync" fetchpriority="high"'
+							: 'loading="lazy"'
+					} onerror="this.src='/images/communities/bitcoin.svg'" />
 
 					<span class='text-primary dark:text-white font-semibold text-xl' title='Community name'>${
 						community.tags.name
@@ -622,14 +622,18 @@ Thanks for using BTC Map!`);
 					}
 				});
 
-				// eslint-disable-next-line no-undef
-				let communityLayer = L.geoJSON(community.tags.geo_json, {
-					style: { color: '#000000', fillColor: '#F7931A', fillOpacity: 0.5 }
-				}).bindPopup(popupContainer, { minWidth: 300 });
+				try {
+					// eslint-disable-next-line no-undef
+					let communityLayer = L.geoJSON(community.tags.geo_json, {
+						style: { color: '#000000', fillColor: '#F7931A', fillOpacity: 0.5 }
+					}).bindPopup(popupContainer, { minWidth: 300 });
 
-				communityLayer.on('click', () => communityLayer.bringToBack());
+					communityLayer.on('click', () => communityLayer.bringToBack());
 
-				communityLayer.addTo(communitiesLayer);
+					communityLayer.addTo(communitiesLayer);
+				} catch (error) {
+					console.log(error, community);
+				}
 			});
 
 			if ((communityQuery && communitySelected) || communitiesOnly) {
