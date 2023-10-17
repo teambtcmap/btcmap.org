@@ -32,6 +32,7 @@
 		verifiedArr,
 		toggleMapButtons,
 		geolocate,
+		getSupportedThirdPartyPaymentMethods,
 		checkAddress
 	} from '$lib/map/setup';
 	import { goto } from '$app/navigation';
@@ -46,6 +47,7 @@
 		MerchantButton,
 		Boost,
 		ShowTags,
+		PaymentMethodIcon,
 		PrimaryButton
 	} from '$comp';
 	import { successToast, errToast, detectTheme } from '$lib/utils';
@@ -94,6 +96,8 @@
 		(merchant.osm_json.tags['payment:onchain'] ||
 			merchant.osm_json.tags['payment:lightning'] ||
 			merchant.osm_json.tags['payment:lightning_contactless']);
+
+	const supportedThirdPartyPaymentMethods = getSupportedThirdPartyPaymentMethods(merchant.osm_json.tags ?? {});
 
 	let onchainTooltip;
 	let lnTooltip;
@@ -444,7 +448,7 @@
 					/>
 				</div>
 
-				{#if paymentMethod}
+				{#if paymentMethod || supportedThirdPartyPaymentMethods.length > 0}
 					<div>
 						<h4 class="uppercase text-primary dark:text-white">Accepted Payments</h4>
 						<div class="mt-1 flex items-center justify-center space-x-2">
@@ -501,6 +505,22 @@
 								/>
 							{/if}
 						</div>
+
+						{#if supportedThirdPartyPaymentMethods.length > 0}
+							<h4 class="uppercase text-primary dark:text-white mt-4">3th Party Payment Methods</h4>
+							<div class="mt-1 flex items-center justify-center space-x-2">
+								{#each supportedThirdPartyPaymentMethods as supportedThirdPartyPaymentMethod}
+									{#if typeof window !== 'undefined'}
+										<PaymentMethodIcon
+											title={supportedThirdPartyPaymentMethod.title}
+											icon={detectTheme() === 'dark' || $theme === 'dark'
+												? supportedThirdPartyPaymentMethod.icon.dark
+												: supportedThirdPartyPaymentMethod.icon.light}
+										/>
+									{/if}
+								{/each}
+							</div>
+						{/if}
 					</div>
 				{/if}
 

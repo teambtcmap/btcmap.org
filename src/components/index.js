@@ -51,4 +51,5 @@ export { default as MerchantLink } from './MerchantLink.svelte';
 export { default as MerchantButton } from './MerchantButton.svelte';
 export { default as MerchantEvent } from './MerchantEvent.svelte';
 export { default as Socials } from './Socials.svelte';
+export { default as PaymentMethodIcon } from './PaymentMethodIcon.svelte';
 export { default as Countdown } from './Countdown.svelte';

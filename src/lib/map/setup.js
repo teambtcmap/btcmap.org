@@ -530,6 +530,23 @@ export const verifiedArr = (element) => {
 	return verified;
 };
 
+const thirdPartyPaymentMethods = [
+	{
+		isEnabled: (tags) =>
+			tags['payment:qerko:lightning'] === 'yes' || // deprecated tag, but still used somewhere. Let's remove it in a few weeks
+			(tags['payment:lightning:requires_companion_app'] === 'yes' &&
+				tags['payment:lightning:companion_app_url'] === 'https://www.qerko.com'),
+		icon: {
+			dark: '/icons/ln-highlight-dark.svg',
+			light: '/icons/ln-highlight.svg'
+		},
+		title: 'Lightning over Qerko accepted'
+	}
+];
+
+export const getSupportedThirdPartyPaymentMethods = (tags) =>
+	thirdPartyPaymentMethods.filter(({ isEnabled }) => isEnabled(tags));
+
 export const generateMarker = (
 	lat,
 	long,
@@ -562,6 +579,10 @@ export const generateMarker = (
 			(element.tags['payment:onchain'] ||
 				element.tags['payment:lightning'] ||
 				element.tags['payment:lightning_contactless']);
+
+		const supportedThirdPartyPaymentMethods = getSupportedThirdPartyPaymentMethods(
+			element.tags ?? {}
+		);
 
 		const popupContainer = L.DomUtil.create('div');
 
@@ -762,7 +783,7 @@ export const generateMarker = (
 
 			<div class='flex space-x-4'>
 ${
-	paymentMethod
+	paymentMethod || supportedThirdPartyPaymentMethods.length > 0
 		? `<div>
 					<span class='block text-mapLabel text-xs'>Payment Methods</span>
 
@@ -827,6 +848,22 @@ ${
 								: 'Lightning Contactless unknown'
 						}"/>
 					</div>
+					${
+						supportedThirdPartyPaymentMethods.length > 0
+							? `
+						<span class='block text-mapLabel text-xs mt-1'>3th Party Payment Methods</span>
+						<div class='w-full flex space-x-2 mt-0.5'>
+							${supportedThirdPartyPaymentMethods
+								.map(
+									({ icon, title }) => `
+								<img src=${theme === 'dark' ? icon.dark : icon.light} alt="nfc" class="w-6 h-6" title="${title}"/>
+							`
+								)
+								.join('')}
+						</div>
+					`
+							: ''
+					}
 				</div>`
 		: ''
 }
