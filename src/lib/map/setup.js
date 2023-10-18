@@ -537,8 +537,8 @@ const thirdPartyPaymentMethods = [
 			(tags['payment:lightning:requires_companion_app'] === 'yes' &&
 				tags['payment:lightning:companion_app_url'] === 'https://www.qerko.com'),
 		icon: {
-			dark: '/icons/ln-highlight-dark.svg',
-			light: '/icons/ln-highlight.svg'
+			dark: '/icons/qerko-highlight-dark.svg',
+			light: '/icons/qerko-highlight.svg'
 		},
 		title: 'Lightning over Qerko accepted'
 	}
