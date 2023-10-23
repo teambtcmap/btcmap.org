@@ -507,7 +507,7 @@
 						</div>
 
 						{#if supportedThirdPartyPaymentMethods.length > 0}
-							<h4 class="uppercase text-primary dark:text-white mt-4">3th Party Payment Methods</h4>
+							<h4 class="uppercase text-primary dark:text-white mt-4">3rd Party Payment Methods</h4>
 							<div class="mt-1 flex items-center justify-center space-x-2">
 								{#each supportedThirdPartyPaymentMethods as supportedThirdPartyPaymentMethod}
 									{#if typeof window !== 'undefined'}

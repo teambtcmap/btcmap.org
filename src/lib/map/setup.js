@@ -1,7 +1,15 @@
 import Time from 'svelte-time';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
-import { boost, exchangeRate, resetBoost, showTags, showMore, theme } from '$lib/store';
+import {
+	boost,
+	exchangeRate,
+	resetBoost,
+	showTags,
+	showMore,
+	theme,
+	showMorePaymentMethods
+} from '$lib/store';
 import { get } from 'svelte/store';
 import { errToast, detectTheme } from '$lib/utils';
 import { InfoTooltip } from '$comp';
@@ -537,8 +545,8 @@ const thirdPartyPaymentMethods = [
 			(tags['payment:lightning:requires_companion_app'] === 'yes' &&
 				tags['payment:lightning:companion_app_url'] === 'https://www.qerko.com'),
 		icon: {
-			dark: '/icons/qerko-highlight-dark.svg',
-			light: '/icons/qerko-highlight.svg'
+			dark: '/icons/qerko.svg',
+			light: '/icons/qerko.svg'
 		},
 		title: 'Lightning over Qerko accepted'
 	}
@@ -558,6 +566,10 @@ export const generateMarker = (
 	verify,
 	boosted
 ) => {
+	const supportedThirdPartyPaymentMethods = getSupportedThirdPartyPaymentMethods(
+		element.tags ?? {}
+	);
+
 	const generatePopup = () => {
 		const theme = detectTheme();
 
@@ -579,10 +591,6 @@ export const generateMarker = (
 			(element.tags['payment:onchain'] ||
 				element.tags['payment:lightning'] ||
 				element.tags['payment:lightning_contactless']);
-
-		const supportedThirdPartyPaymentMethods = getSupportedThirdPartyPaymentMethods(
-			element.tags ?? {}
-		);
 
 		const popupContainer = L.DomUtil.create('div');
 
@@ -619,15 +627,6 @@ export const generateMarker = (
 							<span class='block text-xs text-center mt-1'>Navigate</span>
 						</a>
 
-						<a id='edit' href='https://www.openstreetmap.org/edit?${element.type}=${
-							element.id
-						}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
-							<svg width='24px' height='24px' class='mx-auto'>
-								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#pencil"></use>
-							</svg>
-							<span class='block text-xs text-center mt-1'>Edit</span>
-						</a>
-
 						<a id='share' href='/merchant/${element.type}:${
 							element.id
 						}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
@@ -646,6 +645,15 @@ export const generateMarker = (
 							</button>
 
 							<div id='show-more' class='hidden z-[500] w-[147px] border border-mapBorder p-4 absolute top-[55px] right-0 bg-white dark:bg-dark rounded-xl shadow-xl space-y-3'>
+								<a id='edit' href='https://www.openstreetmap.org/edit?${element.type}=${
+									element.id
+								}' target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+									<svg width='24px' height='24px' class='mr-2'>
+										<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#pencil"></use>
+									</svg>
+									<span class='block text-xs text-center mt-1'>Edit</span>
+								</a>
+
 							${
 								payment
 									? `<a href="${
@@ -779,15 +787,19 @@ export const generateMarker = (
 						</div>
 					</div>
 
-			<div class='w-full border-t-[0.5px] border-mapBorder mt-3 mb-2 opacity-80'></div>
+			<div class='w-full border-t-[0.5px] border-mapBorder mt-3 mb-3 opacity-80'></div>
 
-			<div class='flex space-x-4'>
+			<div class='flex space-x-6'>
 ${
 	paymentMethod || supportedThirdPartyPaymentMethods.length > 0
-		? `<div>
+		? `<div class="flex-auto">
 					<span class='block text-mapLabel text-xs'>Payment Methods</span>
 
-					<div class='w-full flex space-x-2 mt-0.5'>
+					<div id='more-payment-methods-button' class='w-full flex space-x-2 mt-1 border border-mapBorder !text-primary dark:!text-white rounded-lg p-2 ${
+						supportedThirdPartyPaymentMethods.length
+							? 'hover:border-link hover:!text-link dark:hover:!text-link transition-colors cursor-pointer'
+							: ''
+					}'>
 						<img src=${
 							element.tags && element.tags['payment:onchain'] === 'yes'
 								? theme === 'dark'
@@ -847,30 +859,21 @@ ${
 								? 'Lightning contactless not accepted'
 								: 'Lightning Contactless unknown'
 						}"/>
+
+						${
+							supportedThirdPartyPaymentMethods.length > 0
+								? `<img src="/icons/3rd-party.svg" alt="3rd party payment methods" class="w-6 h-6" title="Show 3rd party payment methods details"/>`
+								: ''
+						}
+
 					</div>
-					${
-						supportedThirdPartyPaymentMethods.length > 0
-							? `
-						<span class='block text-mapLabel text-xs mt-1'>3th Party Payment Methods</span>
-						<div class='w-full flex space-x-2 mt-0.5'>
-							${supportedThirdPartyPaymentMethods
-								.map(
-									({ icon, title }) => `
-								<img src=${theme === 'dark' ? icon.dark : icon.light} alt="nfc" class="w-6 h-6" title="${title}"/>
-							`
-								)
-								.join('')}
-						</div>
-					`
-							: ''
-					}
 				</div>`
 		: ''
 }
 
-				<div>
+				<div class="flex-auto">
 					<span class='block text-mapLabel text-xs' title="Completed by BTC Map community members">Last Surveyed</span>
-					<span class='block text-body dark:text-white'>
+					<span class='block text-body dark:text-white mt-2'>
 					${
 						verified.length
 							? `${verified[0]} ${
@@ -885,14 +888,16 @@ ${
 					</span>
 					${
 						verify
-							? `<a href="/verify-location?id=${
+							? `<span class='block text-body dark:text-white mt-2'>
+								<a href="/verify-location?id=${
 									element.type + ':' + element.id
-							  }" class='!text-link hover:!text-hover text-xs transition-colors' title="Help improve the data for everyone">Verify Location</a>`
+								}" class='!text-link hover:!text-hover text-xs transition-colors' title="Help improve the data for everyone">Verify Location</a>
+								</span>`
 							: ''
 					}
 				</div>
 
-				<div>
+				<div class="flex-none">
 					${
 						boosted
 							? `<span class='block text-mapLabel text-xs' title="This location is boosted!">Boost Expires</span>
@@ -901,7 +906,7 @@ ${
 					}
 					${
 						location.pathname === '/map'
-							? `<button title='Boost' id='boost-button' class='flex justify-center items-center space-x-2 text-primary dark:text-white hover:text-link dark:hover:text-link border border-mapBorder hover:border-link rounded-lg px-3 h-[32px] transition-colors'>
+							? `<button title='Boost' id='boost-button' class='flex justify-center items-center space-x-2 text-primary dark:text-white hover:text-link dark:hover:text-link border border-mapBorder hover:border-link rounded-lg px-3 transition-colors h-16'>
 						<svg width='16px' height='16px'>
 							<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#boost"></use>
 						</svg>
@@ -912,6 +917,28 @@ ${
 				</div>
 			</div>
 			
+			${
+				supportedThirdPartyPaymentMethods.length > 0
+					? `
+						<div id='show-more-payment-methods' class="hidden">
+                            <div class='w-full border-t-[0.5px] border-mapBorder mt-3 mb-3 opacity-80'></div>
+                            <span class='block text-mapLabel text-xs mt-1'>3rd Party Payment Methods</span>
+                            <div class='w-full flex space-x-2 mt-2'>
+                                ${supportedThirdPartyPaymentMethods
+																	.map(
+																		({ icon, title }) => `
+                                        <img src=${
+																					theme === 'dark' ? icon.dark : icon.light
+																				} alt="${title} icon" class="w-6 h-6" title="${title}"/><span class="p-1 text-primary dark:text-white">${title}</span>
+                                    `
+																	)
+																	.join('')}
+                            </div>
+						</div>
+					`
+					: ''
+			}
+
 			${
 				theme === 'dark'
 					? `
@@ -957,6 +984,31 @@ ${
 				hideMore();
 			}
 		};
+
+		if (supportedThirdPartyPaymentMethods.length > 0) {
+			const showMorePaymentMethodsDiv = popupContainer.querySelector('#show-more-payment-methods');
+			const morePaymentMethodsButton = popupContainer.querySelector('#more-payment-methods-button');
+
+			const hideMorePaymentMethods = () => {
+				showMorePaymentMethodsDiv.classList.add('hidden');
+				morePaymentMethodsButton.classList.remove('!text-link');
+				morePaymentMethodsButton.classList.add('!text-primary', 'dark:!text-white');
+				morePaymentMethodsButton.classList.replace('border-link', 'border-mapBorder');
+				showMorePaymentMethods.set(false);
+			};
+
+			morePaymentMethodsButton.onclick = () => {
+				if (!get(showMorePaymentMethods)) {
+					showMorePaymentMethodsDiv.classList.remove('hidden');
+					morePaymentMethodsButton.classList.remove('!text-primary', 'dark:!text-white');
+					morePaymentMethodsButton.classList.add('!text-link');
+					morePaymentMethodsButton.classList.replace('border-mapBorder', 'border-link');
+					showMorePaymentMethods.set(true);
+				} else {
+					hideMorePaymentMethods();
+				}
+			};
+		}
 
 		popupContainer.querySelector('#navigate').onclick = () => hideMore();
 		popupContainer.querySelector('#edit').onclick = () => hideMore();
@@ -1031,7 +1083,11 @@ ${
 				.bindPopup(
 					// marker popup component
 					generatePopup(),
-					{ closeButton: false, maxWidth: 1000, minWidth: 300 }
+					{
+						closeButton: false,
+						maxWidth: 1000,
+						minWidth: supportedThirdPartyPaymentMethods.length > 0 ? 360 : 330
+					}
 				)
 				.openPopup()
 				.on('popupclose', () => {
@@ -1043,6 +1099,17 @@ ${
 					moreButton.classList.add('!text-primary', 'dark:!text-white');
 					moreButton.classList.replace('border-link', 'border-mapBorder');
 					showMore.set(false);
+
+					if (supportedThirdPartyPaymentMethods.length > 0) {
+						const showMorePaymentMethodsDiv = document.querySelector('#show-more-payment-methods');
+						const morePaymentMethodsButton = document.querySelector('#more-payment-methods-button');
+
+						showMorePaymentMethodsDiv.classList.add('hidden');
+						morePaymentMethodsButton.classList.remove('!text-link');
+						morePaymentMethodsButton.classList.add('!text-primary', 'dark:!text-white');
+						morePaymentMethodsButton.classList.replace('border-link', 'border-mapBorder');
+						showMorePaymentMethods.set(false);
+					}
 
 					marker.unbindPopup();
 				});

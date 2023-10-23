@@ -73,5 +73,6 @@ export const boostHash = writable();
 
 export const showTags = writable();
 export const showMore = writable(false);
+export const showMorePaymentMethods = writable(false);
 
 export const theme = writable();
