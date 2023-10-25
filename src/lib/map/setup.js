@@ -583,6 +583,7 @@ export const generateMarker = (
 		const twitter = element.tags?.twitter || element.tags?.['contact:twitter'] || '';
 		const instagram = element.tags?.instagram || element.tags?.['contact:instagram'] || '';
 		const facebook = element.tags?.facebook || element.tags?.['contact:facebook'] || '';
+		const type = element.tags?.shop || element.tags?.amenity || element.tags?.business || '';
 
 		let verified = verifiedArr(element);
 
@@ -598,13 +599,19 @@ export const generateMarker = (
 			element.tags && element.tags.name
 				? `<a href='/merchant/${element.type}:${
 						element.id
-				  }' class='inline-block font-bold text-lg leading-snug max-w-[300px]' title='Merchant name'><span class='!text-link hover:!text-hover transition-colors'>${
+				  }' class='inline-block font-bold text-lg leading-snug max-w-[300px] mb-1' title='Merchant name'><span class='!text-link hover:!text-hover transition-colors'>${
 						element.tags.name
 				  }</span> ${description || note ? `<span id='info' title='Information'></span>` : ''}</a>`
 				: ''
 		}
 
-				 <span class='block text-body dark:text-white max-w-[300px]' title='Address'>${
+				${
+					type
+						? `<span class='block font-bold !text-primary dark:!text-white leading-snug max-w-[300px] mt-1 mb-1' title='Merchant type'>${type}</span>`
+						: ''
+				}
+
+				 <span class='block text-body dark:text-white max-w-[300px] mt-1 mb-1' title='Address'>${
 						element.tags && checkAddress(element.tags)
 					}</span>
 
@@ -626,6 +633,19 @@ export const generateMarker = (
 							</svg>
 							<span class='block text-xs text-center mt-1'>Navigate</span>
 						</a>
+
+						${
+							website
+								? `<a href=${
+										website.startsWith('http') ? website : `https://${website}`
+								  } target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+										<svg width='24px' height='24px' class='mx-auto'>
+											<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#globe"></use>
+										</svg>
+										<span class='block text-xs text-center mt-1'>Website</span>
+									</a>`
+								: ''
+						}
 
 						<a id='share' href='/merchant/${element.type}:${
 							element.id
@@ -691,19 +711,6 @@ export const generateMarker = (
 												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#email"></use>
 											</svg>
 											Email
-										</a>`
-									: ''
-							}
-
-							${
-								website
-									? `<a href=${
-											website.startsWith('http') ? website : `https://${website}`
-									  } target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#globe"></use>
-											</svg>
-											Website
 										</a>`
 									: ''
 							}
