@@ -99,7 +99,7 @@ export const layers = (leaflet, map) => {
 	);
 
 	const toner = leaflet.tileLayer(
-		'https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}{r}.{ext}',
+		'https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png	',
 		{
 			noWrap: true,
 			maxZoom: 20,
@@ -108,7 +108,7 @@ export const layers = (leaflet, map) => {
 	);
 
 	const tonerLite = leaflet.tileLayer(
-		'https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.{ext}',
+		'https://tiles.stadiamaps.com/tiles/stamen_toner_lite/{z}/{x}/{y}{r}.png	',
 		{
 			noWrap: true,
 			maxZoom: 20,
@@ -117,7 +117,7 @@ export const layers = (leaflet, map) => {
 	);
 
 	const watercolor = leaflet.tileLayer(
-		'https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.{ext}',
+		'https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg	',
 		{
 			noWrap: true,
 			maxZoom: 16,
@@ -126,7 +126,7 @@ export const layers = (leaflet, map) => {
 	);
 
 	const terrain = leaflet.tileLayer(
-		'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.{ext}',
+		'https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png	',
 		{
 			noWrap: true,
 			maxZoom: 18,
