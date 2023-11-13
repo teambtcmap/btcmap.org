@@ -631,10 +631,10 @@ export const generateMarker = (
 											payment.type === 'uri'
 												? payment.url
 												: payment.type === 'pouch'
-												? `https://app.pouch.ph/${payment.username}`
-												: payment.type === 'coinos'
-												? `https://coinos.io/${payment.username}`
-												: '#'
+												  ? `https://app.pouch.ph/${payment.username}`
+												  : payment.type === 'coinos'
+												    ? `https://coinos.io/${payment.username}`
+												    : '#'
 									  }" target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
 												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#bolt"></use>
@@ -773,18 +773,18 @@ ${
 									? '/icons/btc-highlight-dark.svg'
 									: '/icons/btc-highlight.svg'
 								: element.tags && element.tags['payment:onchain'] === 'no'
-								? theme === 'dark'
-									? '/icons/btc-no-dark.svg'
-									: '/icons/btc-no.svg'
-								: theme === 'dark'
-								? '/icons/btc-dark.svg'
-								: '/icons/btc.svg'
+								  ? theme === 'dark'
+										? '/icons/btc-no-dark.svg'
+										: '/icons/btc-no.svg'
+								  : theme === 'dark'
+								    ? '/icons/btc-dark.svg'
+								    : '/icons/btc.svg'
 						} alt="bitcoin" class="w-6 h-6" title="${
 							element.tags && element.tags['payment:onchain'] === 'yes'
 								? 'On-chain accepted'
 								: element.tags && element.tags['payment:onchain'] === 'no'
-								? 'On-chain not accepted'
-								: 'On-chain unknown'
+								  ? 'On-chain not accepted'
+								  : 'On-chain unknown'
 						}"/>
 
 						<img src=${
@@ -793,18 +793,18 @@ ${
 									? '/icons/ln-highlight-dark.svg'
 									: '/icons/ln-highlight.svg'
 								: element.tags && element.tags['payment:lightning'] === 'no'
-								? theme === 'dark'
-									? '/icons/ln-no-dark.svg'
-									: '/icons/ln-no.svg'
-								: theme === 'dark'
-								? '/icons/ln-dark.svg'
-								: '/icons/ln.svg'
+								  ? theme === 'dark'
+										? '/icons/ln-no-dark.svg'
+										: '/icons/ln-no.svg'
+								  : theme === 'dark'
+								    ? '/icons/ln-dark.svg'
+								    : '/icons/ln.svg'
 						} alt="lightning" class="w-6 h-6" title="${
 							element.tags && element.tags['payment:lightning'] === 'yes'
 								? 'Lightning accepted'
 								: element.tags && element.tags['payment:lightning'] === 'no'
-								? 'Lightning not accepted'
-								: 'Lightning unknown'
+								  ? 'Lightning not accepted'
+								  : 'Lightning unknown'
 						}"/>
 
 						<img src=${
@@ -813,18 +813,18 @@ ${
 									? '/icons/nfc-highlight-dark.svg'
 									: '/icons/nfc-highlight.svg'
 								: element.tags && element.tags['payment:lightning_contactless'] === 'no'
-								? theme === 'dark'
-									? '/icons/nfc-no-dark.svg'
-									: '/icons/nfc-no.svg'
-								: theme === 'dark'
-								? '/icons/nfc-dark.svg'
-								: '/icons/nfc.svg'
+								  ? theme === 'dark'
+										? '/icons/nfc-no-dark.svg'
+										: '/icons/nfc-no.svg'
+								  : theme === 'dark'
+								    ? '/icons/nfc-dark.svg'
+								    : '/icons/nfc.svg'
 						} alt="nfc" class="w-6 h-6" title="${
 							element.tags && element.tags['payment:lightning_contactless'] === 'yes'
 								? 'Lightning Contactless accepted'
 								: element.tags && element.tags['payment:lightning_contactless'] === 'no'
-								? 'Lightning contactless not accepted'
-								: 'Lightning Contactless unknown'
+								  ? 'Lightning contactless not accepted'
+								  : 'Lightning Contactless unknown'
 						}"/>
 					</div>
 				</div>`

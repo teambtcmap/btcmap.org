@@ -637,10 +637,10 @@
 				let payment = element.tags['payment:uri']
 					? { type: 'uri', url: element.tags['payment:uri'] }
 					: element.tags['payment:pouch']
-					? { type: 'pouch', username: element.tags['payment:pouch'] }
-					: element.tags['payment:coinos']
-					? { type: 'coinos', username: element.tags['payment:coinos'] }
-					: undefined;
+					  ? { type: 'pouch', username: element.tags['payment:pouch'] }
+					  : element.tags['payment:coinos']
+					    ? { type: 'coinos', username: element.tags['payment:coinos'] }
+					    : undefined;
 				let boosted =
 					element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now()
 						? element.tags['boost:expires']
@@ -769,16 +769,16 @@
 							class="fa-solid fa-earth-{continent === 'africa'
 								? 'africa'
 								: continent === 'asia'
-								? 'asia'
-								: continent === 'europe'
-								? 'europe'
-								: continent === 'north-america'
-								? 'americas'
-								: continent === 'oceania'
-								? 'oceania'
-								: continent === 'south-america'
-								? 'americas'
-								: ''}"
+								  ? 'asia'
+								  : continent === 'europe'
+								    ? 'europe'
+								    : continent === 'north-america'
+								      ? 'americas'
+								      : continent === 'oceania'
+								        ? 'oceania'
+								        : continent === 'south-america'
+								          ? 'americas'
+								          : ''}"
 						/>
 					</h2>
 					<a
@@ -1036,8 +1036,8 @@
 								'Add'
 									? 'rounded-t md:rounded-l md:rounded-tr-none'
 									: type === 'Verify'
-									? 'rounded-b md:rounded-r md:rounded-bl-none'
-									: ''} {showType === type ? 'bg-link text-white' : ''} transition-colors"
+									  ? 'rounded-b md:rounded-r md:rounded-bl-none'
+									  : ''} {showType === type ? 'bg-link text-white' : ''} transition-colors"
 								on:click={() => (showType = type)}>{type}</button
 							>
 						{/each}

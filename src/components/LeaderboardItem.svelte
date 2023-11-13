@@ -61,8 +61,8 @@
 				class="mr-1 inline-block h-3 w-3 rounded-full {stat.title === 'C'
 					? 'bg-created'
 					: stat.title === 'U'
-					? 'bg-link'
-					: 'bg-deleted'} lg:hidden"
+					  ? 'bg-link'
+					  : 'bg-deleted'} lg:hidden"
 			/>{stat.stat}
 		</span>
 	{/each}
