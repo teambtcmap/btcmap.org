@@ -398,8 +398,8 @@
 						<p>
 							A self-taught Web Developer, <strong>secondl1ght</strong> dove head first down the bitcoin
 							rabbit hole and left his fiat career to focus on bitcoin development full-time. He created
-							and maintains the BTC Map web application and works on lightning network tools at Amboss
-							Technologies.
+							and maintains the BTC Map web application, as well as an encrypted messaging app called
+							Cipherchat, and works on lightning network tools at Amboss Technologies.
 						</p>
 						<p>
 							<strong>Karnage</strong> is the lead designer on the web app and created the BTC Map brand.
