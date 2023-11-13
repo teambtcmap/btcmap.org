@@ -33,7 +33,7 @@
 						href={link.url}
 						target={link.external ? '_blank' : '_self'}
 						rel="noreferrer"
-						class="block flex items-center justify-center bg-link p-4 text-xl font-semibold text-white hover:bg-hover {link.icon ===
+						class="flex items-center justify-center bg-link p-4 text-xl font-semibold text-white hover:bg-hover {link.icon ===
 						top
 							? 'rounded-t-2xl'
 							: link.icon === bottom
