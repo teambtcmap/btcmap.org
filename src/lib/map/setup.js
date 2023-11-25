@@ -71,7 +71,7 @@ export const toggleMapButtons = () => {
 export const layers = (leaflet, map) => {
 	const theme = detectTheme();
 
-	const osm = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+	const osm = leaflet.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		noWrap: true,
 		maxZoom: 19
 	});
