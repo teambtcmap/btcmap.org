@@ -1,35 +1,35 @@
 <script>
 	export let data;
 
-	import { marked } from 'marked';
-	import DOMPurify from 'dompurify';
-	import Chart from 'chart.js/auto';
 	import { browser } from '$app/environment';
-	import { onMount, onDestroy } from 'svelte';
-	import { users, events, elements, excludeLeader, theme } from '$lib/store';
 	import {
-		attribution,
-		changeDefaultIcons,
-		calcVerifiedDate,
-		latCalc,
-		longCalc,
-		generateIcon,
-		generateMarker,
-		toggleMapButtons,
-		geolocate
-	} from '$lib/map/setup';
-	import { errToast, detectTheme } from '$lib/utils';
-	import { error } from '@sveltejs/kit';
-	import {
-		Header,
 		Footer,
-		Tip,
-		ProfileStat,
+		Header,
+		MapLoading,
 		ProfileActivity,
 		ProfileActivitySkeleton,
-		TopButton,
-		MapLoading
+		ProfileStat,
+		Tip,
+		TopButton
 	} from '$comp';
+	import {
+		attribution,
+		calcVerifiedDate,
+		changeDefaultIcons,
+		generateIcon,
+		generateMarker,
+		geolocate,
+		latCalc,
+		longCalc,
+		toggleMapButtons
+	} from '$lib/map/setup';
+	import { elements, events, excludeLeader, theme, users } from '$lib/store';
+	import { detectTheme, errToast } from '$lib/utils';
+	import { error } from '@sveltejs/kit';
+	import Chart from 'chart.js/auto';
+	import DOMPurify from 'dompurify';
+	import { marked } from 'marked';
+	import { onDestroy, onMount } from 'svelte';
 
 	let user = $users.find((user) => user.id == data.user);
 	if (!user) {

@@ -1,8 +1,8 @@
 <script>
 	import { page } from '$app/stores';
-	import { users, userError, events, eventError, elements, elementError } from '$lib/store';
-	import { errToast } from '$lib/utils';
 	import { LoadingSplash } from '$comp';
+	import { elementError, elements, eventError, events, userError, users } from '$lib/store';
+	import { errToast } from '$lib/utils';
 
 	// alert for user errors
 	$: $userError && errToast($userError);

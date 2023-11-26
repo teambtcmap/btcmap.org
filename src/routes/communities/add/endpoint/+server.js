@@ -1,8 +1,8 @@
+import { GITHUB_API_KEY, SERVER_CRYPTO_KEY, SERVER_INIT_VECTOR } from '$env/static/private';
+import { error } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import crypto from 'crypto';
-import { GITHUB_API_KEY, SERVER_CRYPTO_KEY, SERVER_INIT_VECTOR } from '$env/static/private';
-import { error } from '@sveltejs/kit';
 
 axiosRetry(axios, { retries: 3 });
 

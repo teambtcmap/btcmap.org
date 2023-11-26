@@ -1,6 +1,6 @@
 <script>
-	import { users, userError, events, eventError } from '$lib/store';
 	import { LoadingSplash } from '$comp';
+	import { eventError, events, userError, users } from '$lib/store';
 </script>
 
 <svelte:head>

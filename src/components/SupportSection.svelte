@@ -3,8 +3,8 @@
 	export let supporters;
 	export let placeholders;
 
-	import { detectTheme } from '$lib/utils';
 	import { theme } from '$lib/store';
+	import { detectTheme } from '$lib/utils';
 </script>
 
 <div>

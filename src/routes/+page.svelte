@@ -1,5 +1,5 @@
 <script>
-	import { Header, Footer, Icon, HeaderPlaceholder } from '$comp';
+	import { Footer, Header, HeaderPlaceholder, Icon } from '$comp';
 	import { apps, theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
 </script>

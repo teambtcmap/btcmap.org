@@ -1,26 +1,26 @@
 <script>
-	import Chart from 'chart.js/auto';
 	import { browser } from '$app/environment';
-	import { onMount } from 'svelte';
 	import {
-		Header,
 		Footer,
-		PrimaryButton,
+		Header,
+		HeaderPlaceholder,
 		LeaderboardItem,
 		LeaderboardSkeleton,
-		TopButton,
-		HeaderPlaceholder
+		PrimaryButton,
+		TopButton
 	} from '$comp';
 	import {
-		users,
-		userError,
-		events,
 		eventError,
-		syncStatus,
+		events,
 		excludeLeader,
-		theme
+		syncStatus,
+		theme,
+		userError,
+		users
 	} from '$lib/store';
-	import { errToast, detectTheme, updateChartThemes } from '$lib/utils';
+	import { detectTheme, errToast, updateChartThemes } from '$lib/utils';
+	import Chart from 'chart.js/auto';
+	import { onMount } from 'svelte';
 
 	// alert for user errors
 	$: $userError && errToast($userError);

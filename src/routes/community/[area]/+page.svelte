@@ -1,43 +1,43 @@
 <script>
 	export let data;
 
-	import rewind from '@mapbox/geojson-rewind';
-	import { geoContains } from 'd3-geo';
-	import tippy from 'tippy.js';
-	import Chart from 'chart.js/auto';
 	import { browser } from '$app/environment';
-	import { onMount, onDestroy } from 'svelte';
-	import { users, events, elements, areas, reports, theme } from '$lib/store';
-	import {
-		layers,
-		attribution,
-		changeDefaultIcons,
-		calcVerifiedDate,
-		latCalc,
-		longCalc,
-		generateIcon,
-		generateMarker,
-		verifiedArr,
-		toggleMapButtons,
-		geolocate
-	} from '$lib/map/setup';
 	import { goto } from '$app/navigation';
 	import {
-		Header,
 		Footer,
-		Tip,
-		ProfileStat,
-		LatestTagger,
-		TaggerSkeleton,
-		TopButton,
-		MapLoading,
-		SponsorBadge,
-		OrgBadge,
-		OpenTicket,
+		Header,
 		InfoTooltip,
-		Socials
+		LatestTagger,
+		MapLoading,
+		OpenTicket,
+		OrgBadge,
+		ProfileStat,
+		Socials,
+		SponsorBadge,
+		TaggerSkeleton,
+		Tip,
+		TopButton
 	} from '$comp';
-	import { detectTheme, updateChartThemes, errToast } from '$lib/utils';
+	import {
+		attribution,
+		calcVerifiedDate,
+		changeDefaultIcons,
+		generateIcon,
+		generateMarker,
+		geolocate,
+		latCalc,
+		layers,
+		longCalc,
+		toggleMapButtons,
+		verifiedArr
+	} from '$lib/map/setup';
+	import { areas, elements, events, reports, theme, users } from '$lib/store';
+	import { detectTheme, errToast, updateChartThemes } from '$lib/utils';
+	import rewind from '@mapbox/geojson-rewind';
+	import Chart from 'chart.js/auto';
+	import { geoContains } from 'd3-geo';
+	import { onDestroy, onMount } from 'svelte';
+	import tippy from 'tippy.js';
 
 	let community = $areas.find(
 		(area) =>

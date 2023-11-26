@@ -1,30 +1,30 @@
 <script>
-	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
-	import axios from 'axios';
 	import {
-		Header,
 		Footer,
-		PrimaryButton,
-		MapLoading,
 		FormSuccess,
+		Header,
+		HeaderPlaceholder,
 		InfoTooltip,
-		HeaderPlaceholder
+		MapLoading,
+		PrimaryButton
 	} from '$comp';
-	import { elements, elementError, theme } from '$lib/store';
 	import {
 		attribution,
-		geolocate,
-		changeDefaultIcons,
 		calcVerifiedDate,
-		latCalc,
-		longCalc,
+		changeDefaultIcons,
 		generateIcon,
 		generateMarker,
+		geolocate,
+		latCalc,
+		longCalc,
 		toggleMapButtons
 	} from '$lib/map/setup';
-	import { errToast, detectTheme } from '$lib/utils';
+	import { elementError, elements, theme } from '$lib/store';
+	import { detectTheme, errToast } from '$lib/utils';
+	import axios from 'axios';
+	import { onDestroy, onMount } from 'svelte';
 
 	const id = $page.url.searchParams.has('id') ? $page.url.searchParams.get('id') : '';
 	const merchant = $elements.find((element) => element.id && element.id === id);

@@ -1,4 +1,4 @@
-import { writable, readable } from 'svelte/store';
+import { readable, writable } from 'svelte/store';
 
 export const socials = readable({
 	twitter: 'https://twitter.com/btcmap',

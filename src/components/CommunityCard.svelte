@@ -1,5 +1,5 @@
 <script>
-	import { Tip, SponsorBadge, Socials } from '$comp';
+	import { Socials, SponsorBadge, Tip } from '$comp';
 
 	export let id;
 	export let tags;

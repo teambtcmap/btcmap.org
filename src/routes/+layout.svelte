@@ -1,15 +1,15 @@
 <script>
-	import localforage from 'localforage';
-	import { SvelteToast } from '@zerodevx/svelte-toast';
-	import '../app.css';
-	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
+	import { mapLoading, syncStatus } from '$lib/store';
+	import { areasSync } from '$lib/sync/areas';
 	import { elementsSync } from '$lib/sync/elements';
 	import { eventsSync } from '$lib/sync/events';
-	import { usersSync } from '$lib/sync/users';
-	import { areasSync } from '$lib/sync/areas';
 	import { reportsSync } from '$lib/sync/reports';
-	import { syncStatus, mapLoading } from '$lib/store';
+	import { usersSync } from '$lib/sync/users';
+	import { SvelteToast } from '@zerodevx/svelte-toast';
+	import localforage from 'localforage';
+	import { onDestroy, onMount } from 'svelte';
+	import '../app.css';
 
 	const options = {
 		reversed: true,

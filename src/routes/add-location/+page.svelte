@@ -1,21 +1,21 @@
 <script>
-	import rewind from '@mapbox/geojson-rewind';
-	import { geoContains } from 'd3-geo';
-	import { onMount, onDestroy, tick } from 'svelte';
 	import { browser } from '$app/environment';
-	import axios from 'axios';
 	import {
-		Header,
 		Footer,
-		PrimaryButton,
-		MapLoading,
 		FormSuccess,
+		Header,
+		HeaderPlaceholder,
 		InfoTooltip,
-		HeaderPlaceholder
+		MapLoading,
+		PrimaryButton
 	} from '$comp';
-	import { geolocate, changeDefaultIcons, toggleMapButtons, attribution } from '$lib/map/setup';
-	import { errToast, detectTheme } from '$lib/utils';
-	import { theme, areas, areaError, socials } from '$lib/store';
+	import { attribution, changeDefaultIcons, geolocate, toggleMapButtons } from '$lib/map/setup';
+	import { areaError, areas, socials, theme } from '$lib/store';
+	import { detectTheme, errToast } from '$lib/utils';
+	import rewind from '@mapbox/geojson-rewind';
+	import axios from 'axios';
+	import { geoContains } from 'd3-geo';
+	import { onDestroy, onMount, tick } from 'svelte';
 
 	let captcha;
 	let captchaSecret;

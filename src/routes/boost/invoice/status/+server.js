@@ -1,6 +1,6 @@
-import axios from 'axios';
-import { LNBITS_URL, LNBITS_API_KEY } from '$env/static/private';
+import { LNBITS_API_KEY, LNBITS_URL } from '$env/static/private';
 import { error } from '@sveltejs/kit';
+import axios from 'axios';
 
 // check the status of an invoice
 export async function GET({ url }) {

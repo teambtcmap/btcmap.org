@@ -1,19 +1,19 @@
 <script>
 	import { page } from '$app/stores';
+	import { LoadingSplash } from '$comp';
 	import {
-		users,
-		userError,
-		events,
-		eventError,
-		elements,
-		elementError,
-		areas,
 		areaError,
+		areas,
+		elementError,
+		elements,
+		eventError,
+		events,
+		reportError,
 		reports,
-		reportError
+		userError,
+		users
 	} from '$lib/store';
 	import { errToast } from '$lib/utils';
-	import { LoadingSplash } from '$comp';
 
 	// alert for user errors
 	$: $userError && errToast($userError);

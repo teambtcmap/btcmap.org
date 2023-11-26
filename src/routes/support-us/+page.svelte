@@ -1,14 +1,14 @@
 <script>
 	import {
-		Header,
-		Footer,
-		DonationOption,
-		SupportSection,
 		CloseButton,
-		HeaderPlaceholder
+		DonationOption,
+		Footer,
+		Header,
+		HeaderPlaceholder,
+		SupportSection
 	} from '$comp';
-	import { detectTheme } from '$lib/utils';
 	import { theme } from '$lib/store';
+	import { detectTheme } from '$lib/utils';
 
 	let onchain = 'bc1qqmy5c03clt6a72aq0ys5jzm2sjnws3qr05nvmz';
 	const lnurlp = 'LNURL1DP68GURN8GHJ7CM0WFJJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQPSYZ34';

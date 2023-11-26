@@ -1,19 +1,19 @@
 <script>
-	import Chart from 'chart.js/auto';
 	import { browser } from '$app/environment';
-	import { onMount } from 'svelte';
-	import { Header, Footer, DashboardStat, HeaderPlaceholder } from '$comp';
+	import { DashboardStat, Footer, Header, HeaderPlaceholder } from '$comp';
 	import {
-		events,
-		eventError,
-		areas,
 		areaError,
-		reports,
+		areas,
+		eventError,
+		events,
 		reportError,
+		reports,
 		syncStatus,
 		theme
 	} from '$lib/store';
-	import { errToast, detectTheme, updateChartThemes } from '$lib/utils';
+	import { detectTheme, errToast, updateChartThemes } from '$lib/utils';
+	import Chart from 'chart.js/auto';
+	import { onMount } from 'svelte';
 
 	// alert for event errors
 	$: $eventError && errToast($eventError);

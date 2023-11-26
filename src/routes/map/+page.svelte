@@ -1,42 +1,41 @@
 <script>
-	import axios from 'axios';
-	import localforage from 'localforage';
-	import OutClick from 'svelte-outclick';
-	import rewind from '@mapbox/geojson-rewind';
-	import { geoArea } from 'd3-geo';
-	import { tick } from 'svelte';
-	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
+	import { Boost, Icon, MapLoading, ShowTags, Socials } from '$comp';
 	import {
-		elements,
-		mapUpdates,
-		elementError,
-		elementsSyncCount,
-		areas,
-		areaError,
-		reports,
-		reportError
-	} from '$lib/store';
-	import {
-		layers,
 		attribution,
-		support,
-		scaleBars,
-		changeDefaultIcons,
-		geolocate,
-		homeMarkerButtons,
-		dataRefresh,
 		calcVerifiedDate,
+		changeDefaultIcons,
 		checkAddress,
-		latCalc,
-		longCalc,
+		dataRefresh,
 		generateIcon,
 		generateMarker,
+		geolocate,
+		homeMarkerButtons,
+		latCalc,
+		layers,
+		longCalc,
+		scaleBars,
+		support,
 		verifiedArr
 	} from '$lib/map/setup';
-	import { errToast, detectTheme } from '$lib/utils';
-	import { MapLoading, Icon, Boost, ShowTags, Socials } from '$comp';
+	import {
+		areaError,
+		areas,
+		elementError,
+		elements,
+		elementsSyncCount,
+		mapUpdates,
+		reportError,
+		reports
+	} from '$lib/store';
+	import { detectTheme, errToast } from '$lib/utils';
+	import rewind from '@mapbox/geojson-rewind';
+	import axios from 'axios';
+	import { geoArea } from 'd3-geo';
+	import localforage from 'localforage';
+	import { onDestroy, onMount, tick } from 'svelte';
+	import OutClick from 'svelte-outclick';
 
 	let mapElement;
 	let map;

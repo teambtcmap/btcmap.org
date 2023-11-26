@@ -1,17 +1,17 @@
 <script>
-	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
-	import axios from 'axios';
 	import {
-		Header,
 		Footer,
-		PrimaryButton,
 		FormSuccess,
+		Header,
+		HeaderPlaceholder,
 		InfoTooltip,
-		HeaderPlaceholder
+		PrimaryButton
 	} from '$comp';
-	import { errToast, successToast, warningToast, detectTheme } from '$lib/utils';
 	import { theme } from '$lib/store';
+	import { detectTheme, errToast, successToast, warningToast } from '$lib/utils';
+	import axios from 'axios';
+	import { onMount } from 'svelte';
 
 	let captcha;
 	let captchaSecret;

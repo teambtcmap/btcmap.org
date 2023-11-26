@@ -1,16 +1,16 @@
 <script>
-	import tippy from 'tippy.js';
 	import {
-		Header,
-		Footer,
-		PrimaryButton,
 		CommunityLeaderboardItem,
 		CommunityLeaderboardSkeleton,
-		TopButton,
-		HeaderPlaceholder
+		Footer,
+		Header,
+		HeaderPlaceholder,
+		PrimaryButton,
+		TopButton
 	} from '$comp';
-	import { errToast, detectTheme } from '$lib/utils';
-	import { areas, areaError, reports, reportError, syncStatus, theme } from '$lib/store';
+	import { areaError, areas, reportError, reports, syncStatus, theme } from '$lib/store';
+	import { detectTheme, errToast } from '$lib/utils';
+	import tippy from 'tippy.js';
 
 	// alert for area errors
 	$: $areaError && errToast($areaError);

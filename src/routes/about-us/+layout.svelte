@@ -1,15 +1,15 @@
 <script>
-	import {
-		elements,
-		elementError,
-		users,
-		userError,
-		events,
-		eventError,
-		areas,
-		areaError
-	} from '$lib/store';
 	import { LoadingSplash } from '$comp';
+	import {
+		areaError,
+		areas,
+		elementError,
+		elements,
+		eventError,
+		events,
+		userError,
+		users
+	} from '$lib/store';
 </script>
 
 <svelte:head>

@@ -1,25 +1,25 @@
 <script>
 	import {
-		Header,
-		Footer,
-		AboutMerchant,
-		AboutTagger,
 		AboutCommunity,
-		AboutIntegration,
-		AboutPlus,
 		AboutContributor,
-		AboutCore
+		AboutCore,
+		AboutIntegration,
+		AboutMerchant,
+		AboutPlus,
+		AboutTagger,
+		Footer,
+		Header
 	} from '$comp';
 	import {
-		elements,
-		elementError,
-		users,
-		userError,
-		events,
-		eventError,
-		areas,
 		areaError,
-		excludeLeader
+		areas,
+		elementError,
+		elements,
+		eventError,
+		events,
+		excludeLeader,
+		userError,
+		users
 	} from '$lib/store';
 	import { errToast } from '$lib/utils';
 

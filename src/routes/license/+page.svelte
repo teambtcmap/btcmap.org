@@ -1,5 +1,5 @@
 <script>
-	import { Header, Footer } from '$comp';
+	import { Footer, Header } from '$comp';
 </script>
 
 <svelte:head>

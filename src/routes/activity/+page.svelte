@@ -1,23 +1,23 @@
 <script>
 	import {
-		Header,
 		Footer,
+		Header,
+		HeaderPlaceholder,
 		LatestTagger,
 		TaggerSkeleton,
-		TopButton,
-		HeaderPlaceholder
+		TopButton
 	} from '$comp';
 	import {
-		users,
-		userError,
-		events,
-		eventError,
-		elements,
 		elementError,
+		elements,
+		eventError,
+		events,
 		syncStatus,
-		theme
+		theme,
+		userError,
+		users
 	} from '$lib/store';
-	import { errToast, detectTheme } from '$lib/utils';
+	import { detectTheme, errToast } from '$lib/utils';
 
 	// alert for user errors
 	$: $userError && errToast($userError);

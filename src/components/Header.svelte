@@ -1,5 +1,5 @@
 <script>
-	import { NavDropdownDesktop, NavDropdownMobile, Icon, ThemeToggle } from '$comp';
+	import { Icon, NavDropdownDesktop, NavDropdownMobile, ThemeToggle } from '$comp';
 
 	const navLinks = [
 		{ title: 'Map', url: '/map', icon: 'map' },

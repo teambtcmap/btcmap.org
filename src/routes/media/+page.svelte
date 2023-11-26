@@ -1,5 +1,5 @@
 <script>
-	import { Header, Footer } from '$comp';
+	import { Footer, Header } from '$comp';
 
 	const brandColors = ['#10B981', '#53C5D5', '#051173', '#0891B2', '#E4EBEC', '#164E63', '#155E75'];
 

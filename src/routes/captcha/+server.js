@@ -1,8 +1,7 @@
-import { json } from '@sveltejs/kit';
+import { SERVER_CRYPTO_KEY, SERVER_INIT_VECTOR } from '$env/static/private';
+import { error, json } from '@sveltejs/kit';
 import crypto from 'crypto';
 import svgCaptcha from 'svg-captcha';
-import { SERVER_CRYPTO_KEY, SERVER_INIT_VECTOR } from '$env/static/private';
-import { error } from '@sveltejs/kit';
 
 // generate and return captcha
 export function GET() {

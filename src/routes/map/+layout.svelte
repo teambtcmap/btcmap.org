@@ -1,13 +1,13 @@
 <script>
 	import { MapLoading } from '$comp';
 	import {
-		elements,
-		elementError,
-		areas,
 		areaError,
-		reports,
+		areas,
+		elementError,
+		elements,
+		mapLoading,
 		reportError,
-		mapLoading
+		reports
 	} from '$lib/store';
 	import { errToast } from '$lib/utils';
 

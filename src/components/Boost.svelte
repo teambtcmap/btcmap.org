@@ -1,14 +1,14 @@
 <script>
-	import axios from 'axios';
-	import QRCode from 'qrcode';
-	import OutClick from 'svelte-outclick';
-	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
-	import JSConfetti from 'js-confetti';
-	import { tick } from 'svelte';
-	import { boost, exchangeRate, resetBoost, boostHash } from '$lib/store';
-	import { PrimaryButton, CopyButton, Icon, CloseButton } from '$comp';
-	import { fly, fade } from 'svelte/transition';
+	import { CloseButton, CopyButton, Icon, PrimaryButton } from '$comp';
+	import { boost, boostHash, exchangeRate, resetBoost } from '$lib/store';
 	import { errToast, warningToast } from '$lib/utils';
+	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
+	import axios from 'axios';
+	import JSConfetti from 'js-confetti';
+	import QRCode from 'qrcode';
+	import { tick } from 'svelte';
+	import OutClick from 'svelte-outclick';
+	import { fade, fly } from 'svelte/transition';
 
 	let stage = 0;
 

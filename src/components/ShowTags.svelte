@@ -1,8 +1,8 @@
 <script>
-	import OutClick from 'svelte-outclick';
-	import { showTags } from '$lib/store';
-	import { fly } from 'svelte/transition';
 	import { CloseButton } from '$comp';
+	import { showTags } from '$lib/store';
+	import OutClick from 'svelte-outclick';
+	import { fly } from 'svelte/transition';
 
 	const closeModal = () => ($showTags = undefined);
 </script>

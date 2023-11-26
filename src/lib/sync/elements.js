@@ -1,7 +1,7 @@
-import localforage from 'localforage';
+import { elementError, elements, elementsSyncCount, mapLoading, mapUpdates } from '$lib/store';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
-import { elements, mapUpdates, elementError, mapLoading, elementsSyncCount } from '$lib/store';
+import localforage from 'localforage';
 import { get } from 'svelte/store';
 
 axiosRetry(axios, { retries: 3 });

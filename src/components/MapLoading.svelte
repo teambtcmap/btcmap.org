@@ -3,8 +3,8 @@
 	export let message = undefined;
 	export let style;
 
-	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
 	import { LoadingSpinner } from '$comp';
+	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
 </script>
 
 {#if type === 'main'}

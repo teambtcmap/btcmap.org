@@ -5,10 +5,10 @@
 	export let link;
 	export let buttonWidth = 'w-52';
 
-	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
-	import { PrimaryButton, HeaderPlaceholder } from '$comp';
+	import { HeaderPlaceholder, PrimaryButton } from '$comp';
 	import { socials, theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
+	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
 </script>
 
 <div class="mt-10 flex items-center justify-center pb-20 text-center md:pb-32">

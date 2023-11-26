@@ -1,6 +1,6 @@
 <script>
-	import { reports, reportError } from '$lib/store';
 	import { LoadingSplash } from '$comp';
+	import { reportError, reports } from '$lib/store';
 </script>
 
 <svelte:head>

@@ -1,10 +1,10 @@
 <script>
-	import Chart from 'chart.js/auto';
 	import { browser } from '$app/environment';
+	import { CommunitySection, Footer, Header, HeaderPlaceholder, PrimaryButton } from '$comp';
+	import { areaError, areas, reportError, reports, syncStatus, theme } from '$lib/store';
+	import { detectTheme, errToast } from '$lib/utils';
+	import Chart from 'chart.js/auto';
 	import { onMount } from 'svelte';
-	import { Header, Footer, PrimaryButton, CommunitySection, HeaderPlaceholder } from '$comp';
-	import { errToast, detectTheme } from '$lib/utils';
-	import { areas, areaError, syncStatus, reports, reportError, theme } from '$lib/store';
 
 	// alert for area errors
 	$: $areaError && errToast($areaError);

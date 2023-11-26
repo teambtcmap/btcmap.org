@@ -1,54 +1,54 @@
 <script>
 	export let data;
 
-	import axios from 'axios';
-	import axiosRetry from 'axios-retry';
-	import rewind from '@mapbox/geojson-rewind';
-	import { geoContains } from 'd3-geo';
-	import tippy from 'tippy.js';
-	import Time from 'svelte-time';
 	import { browser } from '$app/environment';
-	import { onMount, onDestroy } from 'svelte';
-	import {
-		users,
-		events,
-		elements,
-		areas,
-		reports,
-		theme,
-		boost,
-		exchangeRate,
-		resetBoost,
-		showTags
-	} from '$lib/store';
-	import {
-		layers,
-		attribution,
-		changeDefaultIcons,
-		calcVerifiedDate,
-		latCalc,
-		longCalc,
-		generateIcon,
-		verifiedArr,
-		toggleMapButtons,
-		geolocate,
-		checkAddress
-	} from '$lib/map/setup';
 	import { goto } from '$app/navigation';
 	import {
-		Header,
-		Footer,
-		MerchantEvent,
-		TopButton,
-		MapLoading,
-		Icon,
-		MerchantLink,
-		MerchantButton,
 		Boost,
+		Footer,
+		Header,
+		Icon,
+		MapLoading,
+		MerchantButton,
+		MerchantEvent,
+		MerchantLink,
+		PrimaryButton,
 		ShowTags,
-		PrimaryButton
+		TopButton
 	} from '$comp';
-	import { successToast, errToast, detectTheme } from '$lib/utils';
+	import {
+		attribution,
+		calcVerifiedDate,
+		changeDefaultIcons,
+		checkAddress,
+		generateIcon,
+		geolocate,
+		latCalc,
+		layers,
+		longCalc,
+		toggleMapButtons,
+		verifiedArr
+	} from '$lib/map/setup';
+	import {
+		areas,
+		boost,
+		elements,
+		events,
+		exchangeRate,
+		reports,
+		resetBoost,
+		showTags,
+		theme,
+		users
+	} from '$lib/store';
+	import { detectTheme, errToast, successToast } from '$lib/utils';
+	import rewind from '@mapbox/geojson-rewind';
+	import axios from 'axios';
+	import axiosRetry from 'axios-retry';
+	import { geoContains } from 'd3-geo';
+	import { onDestroy, onMount } from 'svelte';
+	import Time from 'svelte-time';
+	import tippy from 'tippy.js';
 
 	const merchant = $elements.find((element) => element.id == data.id && !element['deleted_at']);
 

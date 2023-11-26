@@ -2,16 +2,16 @@
 	import axios from 'axios';
 
 	import {
-		Header,
 		Footer,
+		Header,
+		HeaderPlaceholder,
 		OpenTicket,
 		OpenTicketSkeleton,
-		TopButton,
-		HeaderPlaceholder
+		TopButton
 	} from '$comp';
-	import { errToast, detectTheme } from '$lib/utils';
-	import { onMount, onDestroy } from 'svelte';
 	import { theme } from '$lib/store';
+	import { detectTheme, errToast } from '$lib/utils';
+	import { onDestroy, onMount } from 'svelte';
 
 	const ticketTypes = ['Add', 'Verify', 'Community'];
 	let showType = 'Add';

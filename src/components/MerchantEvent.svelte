@@ -1,6 +1,6 @@
 <script>
-	import Time from 'svelte-time';
 	import { Tip } from '$comp';
+	import Time from 'svelte-time';
 
 	export let action;
 	export let user;

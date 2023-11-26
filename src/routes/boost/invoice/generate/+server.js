@@ -1,7 +1,7 @@
+import { LNBITS_API_KEY, LNBITS_URL } from '$env/static/private';
+import { error } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
-import { LNBITS_URL, LNBITS_API_KEY } from '$env/static/private';
-import { error } from '@sveltejs/kit';
 
 axiosRetry(axios, { retries: 3 });
 

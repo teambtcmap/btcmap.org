@@ -1,7 +1,7 @@
-import localforage from 'localforage';
+import { eventError, events } from '$lib/store';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
-import { events, eventError } from '$lib/store';
+import localforage from 'localforage';
 
 axiosRetry(axios, { retries: 3 });
 

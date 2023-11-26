@@ -1,10 +1,10 @@
-import Time from 'svelte-time';
+import { InfoTooltip } from '$comp';
+import { boost, exchangeRate, resetBoost, showMore, showTags, theme } from '$lib/store';
+import { detectTheme, errToast } from '$lib/utils';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
-import { boost, exchangeRate, resetBoost, showTags, showMore, theme } from '$lib/store';
+import Time from 'svelte-time';
 import { get } from 'svelte/store';
-import { errToast, detectTheme } from '$lib/utils';
-import { InfoTooltip } from '$comp';
 
 axiosRetry(axios, { retries: 3 });
 

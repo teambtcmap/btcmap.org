@@ -1,6 +1,6 @@
 <script>
-	import { Header, Footer } from '$comp';
-	import { socials, apps } from '$lib/store';
+	import { Footer, Header } from '$comp';
+	import { apps, socials } from '$lib/store';
 </script>
 
 <svelte:head>
