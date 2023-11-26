@@ -669,7 +669,7 @@
 
 							<div>
 								<label for="contact" class="mb-2 block font-semibold"
-									>Public Contact <span class="font-normal">(optional)</span></label
+									>Public Contact</label
 								>
 								<p class="mb-2 text-justify text-sm">
 									If we have any follow-up questions we will contact you in order to add your
@@ -677,6 +677,7 @@
 								</p>
 								<input
 									disabled={!captchaSecret || !mapLoaded}
+									required
 									type="email"
 									name="contact"
 									placeholder="hello@btcmap.org"
