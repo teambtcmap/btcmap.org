@@ -5,6 +5,8 @@ import { events, eventError } from '$lib/store';
 
 axiosRetry(axios, { retries: 3 });
 
+const limit = 50000;
+
 export const eventsSync = async () => {
 	// get events from local
 	await localforage
@@ -12,99 +14,134 @@ export const eventsSync = async () => {
 		.then(async function (value) {
 			// get events from API if initial sync
 			if (!value) {
-				try {
-					const response = await axios.get('https://api.btcmap.org/v2/events');
+				let updatedSince = '2022-01-01T00:00:00.000Z';
+				let responseCount;
+				let eventsData = [];
 
-					if (response.data.length) {
-						// filter out deleted events
-						const eventsFiltered = response.data.filter((event) => !event['deleted_at']);
-
-						// set response to local
-						localforage
-							.setItem('events', response.data)
-							// eslint-disable-next-line no-unused-vars
-							.then(function (value) {
-								// set response to store
-								events.set(eventsFiltered);
-							})
-							.catch(function (err) {
-								events.set(eventsFiltered);
-								eventError.set(
-									'Could not store events locally, please try again or contact BTC Map.'
-								);
-								console.log(err);
-							});
-					} else {
-						eventError.set(
-							'Events API returned an empty result, please try again or contact BTC Map.'
+				do {
+					try {
+						const response = await axios.get(
+							`https://api.btcmap.org/v2/events?updated_since=${updatedSince}&limit=${limit}`
 						);
+
+						if (response.data.length) {
+							updatedSince = response.data[response.data.length - 1]['updated_at'];
+							responseCount = response.data.length;
+							eventsData.filter((event) => !response.data.find((data) => data.id === event.id));
+							response.data.forEach((data) => eventsData.push(data));
+						} else {
+							eventError.set(
+								'Events API returned an empty result, please try again or contact BTC Map.'
+							);
+							break;
+						}
+					} catch (error) {
+						eventError.set('Could not load events from API, please try again or contact BTC Map.');
+						console.log(error);
+						break;
 					}
-				} catch (error) {
-					eventError.set('Could not load events from API, please try again or contact BTC Map.');
-					console.log(error);
+				} while (responseCount === limit);
+
+				if (eventsData.length) {
+					// filter out deleted events
+					const eventsFiltered = eventsData.filter((event) => !event['deleted_at']);
+
+					// set response to local
+					localforage
+						.setItem('events', eventsData)
+						// eslint-disable-next-line no-unused-vars
+						.then(function (value) {
+							// set response to store
+							events.set(eventsFiltered);
+						})
+						.catch(function (err) {
+							events.set(eventsFiltered);
+							eventError.set(
+								'Could not store events locally, please try again or contact BTC Map.'
+							);
+							console.log(err);
+						});
 				}
 			} else {
 				// filter out deleted events
 				const eventsFiltered = value.filter((event) => !event['deleted_at']);
 
 				// start update sync from API
-				try {
-					// sort to get most recent record
-					let cacheSorted = [...value];
-					cacheSorted.sort((a, b) => Date.parse(b['updated_at']) - Date.parse(a['updated_at']));
+				// sort to get most recent record
+				let cacheSorted = [...value];
+				cacheSorted.sort((a, b) => Date.parse(b['updated_at']) - Date.parse(a['updated_at']));
 
-					const response = await axios.get(
-						`https://api.btcmap.org/v2/events?updated_since=${cacheSorted[0]['updated_at']}`
-					);
+				let updatedSince = cacheSorted[0]['updated_at'];
+				let responseCount;
+				let eventsData = value;
+				let useCachedData = false;
 
-					// update new records if they exist
-					let newEvents = response.data;
+				do {
+					try {
+						const response = await axios.get(
+							`https://api.btcmap.org/v2/events?updated_since=${updatedSince}&limit=${limit}`
+						);
 
-					// check for new events in local and purge if they exist
-					if (newEvents.length) {
-						let updatedEvents = value.filter((value) => {
-							if (newEvents.find((event) => event.id === value.id)) {
-								return false;
-							} else {
-								return true;
-							}
-						});
+						// update new records if they exist
+						let newEvents = response.data;
 
-						// add new events
-						updatedEvents.forEach((event) => {
-							newEvents.push(event);
-						});
+						// check for new events in local and purge if they exist
+						if (newEvents.length) {
+							updatedSince = newEvents[newEvents.length - 1]['updated_at'];
+							responseCount = newEvents.length;
 
-						// filter out deleted events
-						const newEventsFiltered = newEvents.filter((event) => !event['deleted_at']);
-
-						// set updated events locally
-						localforage
-							.setItem('events', newEvents)
-							// eslint-disable-next-line no-unused-vars
-							.then(function (value) {
-								// set updated events to store
-								events.set(newEventsFiltered);
-							})
-							.catch(function (err) {
-								// set updated events to store
-								events.set(newEventsFiltered);
-
-								eventError.set(
-									'Could not update events locally, please try again or contact BTC Map.'
-								);
-								console.log(err);
+							eventsData.filter((value) => {
+								if (newEvents.find((event) => event.id === value.id)) {
+									return false;
+								} else {
+									return true;
+								}
 							});
-					} else {
+
+							// add new events
+							newEvents.forEach((event) => {
+								eventsData.push(event);
+							});
+						} else {
+							// load events from cache
+							events.set(eventsFiltered);
+							useCachedData = true;
+							break;
+						}
+					} catch (error) {
 						// load events from cache
 						events.set(eventsFiltered);
-					}
-				} catch (error) {
-					// load events from cache
-					events.set(eventsFiltered);
+						useCachedData = true;
 
-					eventError.set('Could not update events from API, please try again or contact BTC Map.');
-					console.error(error);
+						eventError.set(
+							'Could not update events from API, please try again or contact BTC Map.'
+						);
+						console.error(error);
+						break;
+					}
+				} while (responseCount === limit);
+
+				if (!useCachedData) {
+					// filter out deleted events
+					const newEventsFiltered = eventsData.filter((event) => !event['deleted_at']);
+
+					// set updated events locally
+					localforage
+						.setItem('events', eventsData)
+						// eslint-disable-next-line no-unused-vars
+						.then(function (value) {
+							// set updated events to store
+							events.set(newEventsFiltered);
+						})
+						.catch(function (err) {
+							// set updated events to store
+							events.set(newEventsFiltered);
+
+							eventError.set(
+								'Could not update events locally, please try again or contact BTC Map.'
+							);
+							console.log(err);
+						});
 				}
 			}
 		})
@@ -113,23 +150,40 @@ export const eventsSync = async () => {
 			eventError.set('Could not load events locally, please try again or contact BTC Map.');
 			console.log(err);
 
-			try {
-				const response = await axios.get('https://api.btcmap.org/v2/events');
+			let updatedSince = '2022-01-01T00:00:00.000Z';
+			let responseCount;
+			let eventsData = [];
 
-				if (response.data.length) {
-					// filter out deleted events
-					const eventsFiltered = response.data.filter((event) => !event['deleted_at']);
-
-					// set response to store
-					events.set(eventsFiltered);
-				} else {
-					eventError.set(
-						'Events API returned an empty result, please try again or contact BTC Map.'
+			do {
+				try {
+					const response = await axios.get(
+						`https://api.btcmap.org/v2/events?updated_since=${updatedSince}&limit=${limit}`
 					);
+
+					if (response.data.length) {
+						updatedSince = response.data[response.data.length - 1]['updated_at'];
+						responseCount = response.data.length;
+						eventsData.filter((event) => !response.data.find((data) => data.id === event.id));
+						response.data.forEach((data) => eventsData.push(data));
+					} else {
+						eventError.set(
+							'Events API returned an empty result, please try again or contact BTC Map.'
+						);
+						break;
+					}
+				} catch (error) {
+					eventError.set('Could not load events from API, please try again or contact BTC Map.');
+					console.log(error);
+					break;
 				}
-			} catch (error) {
-				eventError.set('Could not load events from API, please try again or contact BTC Map.');
-				console.log(error);
+			} while (responseCount === limit);
+
+			if (eventsData.length) {
+				// filter out deleted events
+				const eventsFiltered = eventsData.filter((event) => !event['deleted_at']);
+
+				// set response to store
+				events.set(eventsFiltered);
 			}
 		});
 };

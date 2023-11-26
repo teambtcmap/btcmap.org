@@ -6,6 +6,8 @@ import { get } from 'svelte/store';
 
 axiosRetry(axios, { retries: 3 });
 
+const limit = 5000;
+
 export const elementsSync = async () => {
 	mapLoading.set('Checking local cache...');
 	// get elements from local
@@ -18,39 +20,59 @@ export const elementsSync = async () => {
 				let count = get(elementsSyncCount);
 				elementsSyncCount.set(count + 1);
 
-				try {
-					mapLoading.set('Fetching elements...');
-					const response = await axios.get('https://api.btcmap.org/v2/elements');
+				let updatedSince = '2022-01-01T00:00:00.000Z';
+				let responseCount;
+				let elementsData = [];
 
-					if (response.data.length) {
-						mapLoading.set('Storing data...');
-						// set response to local
-						localforage
-							.setItem('elements', response.data)
-							// eslint-disable-next-line no-unused-vars
-							.then(function (value) {
-								mapLoading.set('Initial sync complete!');
-								// set response to store
-								elements.set(response.data);
-							})
-							.catch(function (err) {
-								mapLoading.set('Map loading complete!');
-								elements.set(response.data);
-								elementError.set(
-									'Could not store elements locally, please try again or contact BTC Map.'
-								);
-								console.log(err);
-							});
-					} else {
-						elementError.set(
-							'Elements API returned an empty result, please try again or contact BTC Map.'
+				mapLoading.set('Fetching elements...');
+
+				do {
+					try {
+						const response = await axios.get(
+							`https://api.btcmap.org/v2/elements?updated_since=${updatedSince}&limit=${limit}`
 						);
+
+						if (response.data.length) {
+							updatedSince = response.data[response.data.length - 1]['updated_at'];
+							responseCount = response.data.length;
+							elementsData.filter(
+								(element) => !response.data.find((data) => data.id === element.id)
+							);
+							response.data.forEach((data) => elementsData.push(data));
+						} else {
+							elementError.set(
+								'Elements API returned an empty result, please try again or contact BTC Map.'
+							);
+							break;
+						}
+					} catch (error) {
+						elementError.set(
+							'Could not load elements from API, please try again or contact BTC Map.'
+						);
+						console.log(error);
+						break;
 					}
-				} catch (error) {
-					elementError.set(
-						'Could not load elements from API, please try again or contact BTC Map.'
-					);
-					console.log(error);
+				} while (responseCount === limit);
+
+				if (elementsData.length) {
+					mapLoading.set('Storing data...');
+					// set response to local
+					localforage
+						.setItem('elements', elementsData)
+						// eslint-disable-next-line no-unused-vars
+						.then(function (value) {
+							mapLoading.set('Initial sync complete!');
+							// set response to store
+							elements.set(elementsData);
+						})
+						.catch(function (err) {
+							mapLoading.set('Map loading complete!');
+							elements.set(elementsData);
+							elementError.set(
+								'Could not store elements locally, please try again or contact BTC Map.'
+							);
+							console.log(err);
+						});
 				}
 			} else {
 				mapLoading.set('Local cache found!');
@@ -60,72 +82,90 @@ export const elementsSync = async () => {
 				elementsSyncCount.set(count + 1);
 
 				// start update sync from API
-				try {
-					// sort to get most recent record
-					let cacheSorted = [...value];
-					cacheSorted.sort((a, b) => Date.parse(b['updated_at']) - Date.parse(a['updated_at']));
+				// sort to get most recent record
+				let cacheSorted = [...value];
+				cacheSorted.sort((a, b) => Date.parse(b['updated_at']) - Date.parse(a['updated_at']));
 
-					mapLoading.set('Fetching new elements...');
-					const response = await axios.get(
-						`https://api.btcmap.org/v2/elements?updated_since=${cacheSorted[0]['updated_at']}`
-					);
+				let updatedSince = cacheSorted[0]['updated_at'];
+				let responseCount;
+				let elementsData = value;
+				let useCachedData = false;
 
-					// update new records if they exist
-					let newElements = response.data;
+				mapLoading.set('Fetching new elements...');
 
-					// check for new elements in local and purge if they exist
-					if (newElements.length) {
-						mapLoading.set('Storing data...');
-						let updatedElements = value.filter((value) => {
-							if (newElements.find((element) => element.id === value.id)) {
-								return false;
-							} else {
-								return true;
-							}
-						});
+				do {
+					try {
+						const response = await axios.get(
+							`https://api.btcmap.org/v2/elements?updated_since=${updatedSince}&limit=${limit}`
+						);
 
-						// add new elements
-						updatedElements.forEach((element) => {
-							newElements.push(element);
-						});
+						// update new records if they exist
+						let newElements = response.data;
 
-						// set updated elements locally
-						localforage
-							.setItem('elements', newElements)
-							// eslint-disable-next-line no-unused-vars
-							.then(function (value) {
-								mapLoading.set('Map loading complete!');
-								// set updated elements to store
-								elements.set(newElements);
+						// check for new elements in local and purge if they exist
+						if (newElements.length) {
+							updatedSince = newElements[newElements.length - 1]['updated_at'];
+							responseCount = newElements.length;
 
-								// display data refresh icon on map
-								mapUpdates.set(true);
-							})
-							.catch(function (err) {
-								// set updated elements to store
-								elements.set(newElements);
-
-								// display data refresh icon on map
-								mapUpdates.set(true);
-
-								elementError.set(
-									'Could not update elements locally, please try again or contact BTC Map.'
-								);
-								console.log(err);
+							elementsData.filter((value) => {
+								if (newElements.find((element) => element.id === value.id)) {
+									return false;
+								} else {
+									return true;
+								}
 							});
-					} else {
-						mapLoading.set('Map loading complete!');
+
+							// add new elements
+							newElements.forEach((element) => {
+								elementsData.push(element);
+							});
+						} else {
+							mapLoading.set('Map loading complete!');
+							// set cached elements to store
+							elements.set(value);
+							useCachedData = true;
+							break;
+						}
+					} catch (error) {
 						// set cached elements to store
 						elements.set(value);
-					}
-				} catch (error) {
-					// set cached elements to store
-					elements.set(value);
+						useCachedData = true;
 
-					elementError.set(
-						'Could not update elements from API, please try again or contact BTC Map.'
-					);
-					console.error(error);
+						elementError.set(
+							'Could not update elements from API, please try again or contact BTC Map.'
+						);
+						console.error(error);
+						break;
+					}
+				} while (responseCount === limit);
+
+				if (!useCachedData) {
+					// set updated elements locally
+					mapLoading.set('Storing data...');
+
+					localforage
+						.setItem('elements', elementsData)
+						// eslint-disable-next-line no-unused-vars
+						.then(function (value) {
+							mapLoading.set('Map loading complete!');
+							// set updated elements to store
+							elements.set(elementsData);
+
+							// display data refresh icon on map
+							mapUpdates.set(true);
+						})
+						.catch(function (err) {
+							// set updated elements to store
+							elements.set(elementsData);
+
+							// display data refresh icon on map
+							mapUpdates.set(true);
+
+							elementError.set(
+								'Could not update elements locally, please try again or contact BTC Map.'
+							);
+							console.log(err);
+						});
 				}
 			}
 		})
@@ -138,22 +178,42 @@ export const elementsSync = async () => {
 			let count = get(elementsSyncCount);
 			elementsSyncCount.set(count + 1);
 
-			try {
-				mapLoading.set('Fetching elements...');
-				const response = await axios.get('https://api.btcmap.org/v2/elements');
+			let updatedSince = '2022-01-01T00:00:00.000Z';
+			let responseCount;
+			let elementsData = [];
 
-				if (response.data.length) {
-					mapLoading.set('Initial sync complete!');
-					// set response to store
-					elements.set(response.data);
-				} else {
-					elementError.set(
-						'Elements API returned an empty result, please try again or contact BTC Map.'
+			mapLoading.set('Fetching elements...');
+
+			do {
+				try {
+					const response = await axios.get(
+						`https://api.btcmap.org/v2/elements?updated_since=${updatedSince}&limit=${limit}`
 					);
+
+					if (response.data.length) {
+						updatedSince = response.data[response.data.length - 1]['updated_at'];
+						responseCount = response.data.length;
+						elementsData.filter((element) => !response.data.find((data) => data.id === element.id));
+						response.data.forEach((data) => elementsData.push(data));
+					} else {
+						elementError.set(
+							'Elements API returned an empty result, please try again or contact BTC Map.'
+						);
+						break;
+					}
+				} catch (error) {
+					elementError.set(
+						'Could not load elements from API, please try again or contact BTC Map.'
+					);
+					console.log(error);
+					break;
 				}
-			} catch (error) {
-				elementError.set('Could not load elements from API, please try again or contact BTC Map.');
-				console.log(error);
+			} while (responseCount === limit);
+
+			if (elementsData.length) {
+				mapLoading.set('Map loading complete!');
+				// set response to store
+				elements.set(elementsData);
 			}
 		});
 };
