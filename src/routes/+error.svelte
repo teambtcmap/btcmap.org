@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { page } from '$app/stores';
 	import { SocialLink } from '$comp';
 	import { socials } from '$lib/store';

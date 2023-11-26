@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { Footer, Header, HeaderPlaceholder, Icon } from '$comp';
 	import { apps, theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { LoadingSplash } from '$comp';
 	import { elements } from '$lib/store';
 </script>

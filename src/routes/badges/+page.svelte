@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { BadgeCard, Footer, Header, HeaderPlaceholder } from '$comp';
 	import { theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';

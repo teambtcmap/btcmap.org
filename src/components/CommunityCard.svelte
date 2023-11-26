@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { Socials, SponsorBadge, Tip } from '$comp';
 
 	export let id;

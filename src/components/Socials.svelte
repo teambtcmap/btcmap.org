@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	export let website = undefined;
 	export let email = undefined;
 	export let nostr = undefined;

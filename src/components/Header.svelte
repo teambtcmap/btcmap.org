@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { Icon, NavDropdownDesktop, NavDropdownMobile, ThemeToggle } from '$comp';
 
 	const navLinks = [

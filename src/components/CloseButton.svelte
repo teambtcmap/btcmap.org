@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	export let position;
 	export let click;
 	export let colors;

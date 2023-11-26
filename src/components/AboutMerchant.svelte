@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { Icon } from '$comp';
 	import tippy from 'tippy.js';
 

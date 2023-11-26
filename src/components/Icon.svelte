@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	export let w;
 	export let h;
 	export let style = undefined;

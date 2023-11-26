@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	export let type;
 	export let message = undefined;
 	export let style;

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import Time from 'svelte-time';
 
 	export let location;

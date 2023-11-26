@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	export let page;
 
 	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	export let user = undefined;
 	export let destination;
 	export let style;

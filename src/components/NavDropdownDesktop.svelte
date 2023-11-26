@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import OutClick from 'svelte-outclick';
 
 	export let title;

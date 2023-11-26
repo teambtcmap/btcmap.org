@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { browser } from '$app/environment';
 	import { CommunitySection, Footer, Header, HeaderPlaceholder, PrimaryButton } from '$comp';
 	import { areaError, areas, reportError, reports, syncStatus, theme } from '$lib/store';

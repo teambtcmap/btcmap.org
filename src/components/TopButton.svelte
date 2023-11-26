@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	export let scroll = undefined;
 	export let style = undefined;
 </script>

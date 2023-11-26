@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	export let communities;
 
 	import { CommunityCard, CommunitySkeleton } from '$comp';

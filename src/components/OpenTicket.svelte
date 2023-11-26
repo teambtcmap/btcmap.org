@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import Time from 'svelte-time';
 
 	import { TicketLabel } from '$comp';

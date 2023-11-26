@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	export let date;
 	export let style = '';
 

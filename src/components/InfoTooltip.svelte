@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	export let tooltip;
 	import tippy from 'tippy.js';
 

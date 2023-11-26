@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { CloseButton, CopyButton, Icon, PrimaryButton } from '$comp';
 	import { boost, boostHash, exchangeRate, resetBoost } from '$lib/store';
 	import { errToast, warningToast } from '$lib/utils';

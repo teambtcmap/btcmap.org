@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { CloseButton } from '$comp';
 	import { showTags } from '$lib/store';
 	import OutClick from 'svelte-outclick';

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { page } from '$app/stores';
 	import { mapLoading, syncStatus } from '$lib/store';
 	import { areasSync } from '$lib/sync/areas';

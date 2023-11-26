@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { Footer, Header } from '$comp';
 	import { apps, socials } from '$lib/store';
 </script>

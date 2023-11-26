@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { Tip } from '$comp';
 	import Time from 'svelte-time';
 

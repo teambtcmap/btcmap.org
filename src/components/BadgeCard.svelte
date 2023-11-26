@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	export let icon;
 	export let title;
 	export let desc;

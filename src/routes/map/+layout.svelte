@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { MapLoading } from '$comp';
 	import {
 		areaError,
