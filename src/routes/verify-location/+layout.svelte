@@ -1,4 +1,5 @@
 <script>
+	import { LoadingSplash } from '$comp';
 	import { elements } from '$lib/store';
 </script>
 
@@ -11,4 +12,6 @@
 
 {#if $elements && $elements.length}
 	<slot />
+{:else}
+	<LoadingSplash page="map" />
 {/if}
