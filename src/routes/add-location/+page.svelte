@@ -668,9 +668,7 @@
 							</div>
 
 							<div>
-								<label for="contact" class="mb-2 block font-semibold"
-									>Public Contact</label
-								>
+								<label for="contact" class="mb-2 block font-semibold">Public Contact</label>
 								<p class="mb-2 text-justify text-sm">
 									If we have any follow-up questions we will contact you in order to add your
 									location successfully.
