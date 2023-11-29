@@ -8,9 +8,30 @@ axiosRetry(axios, { retries: 3 });
 const limit = 50000;
 
 export const eventsSync = async () => {
-	// get events from local
+	// clear v1 table if present
 	await localforage
 		.getItem('events')
+		.then(function (value) {
+			if (value) {
+				localforage
+					.removeItem('events')
+					.then(function () {
+						console.log('Key is cleared!');
+					})
+					.catch(function (err) {
+						eventError.set('Could not clear events locally, please try again or contact BTC Map.');
+						console.log(err);
+					});
+			}
+		})
+		.catch(function (err) {
+			eventError.set('Could not check events locally, please try again or contact BTC Map.');
+			console.log(err);
+		});
+
+	// get events from local
+	await localforage
+		.getItem('events_v2')
 		.then(async function (value) {
 			// get events from API if initial sync
 			if (!value) {
@@ -48,7 +69,7 @@ export const eventsSync = async () => {
 
 					// set response to local
 					localforage
-						.setItem('events', eventsData)
+						.setItem('events_v2', eventsData)
 						// eslint-disable-next-line no-unused-vars
 						.then(function (value) {
 							// set response to store
@@ -127,7 +148,7 @@ export const eventsSync = async () => {
 
 					// set updated events locally
 					localforage
-						.setItem('events', eventsData)
+						.setItem('events_v2', eventsData)
 						// eslint-disable-next-line no-unused-vars
 						.then(function (value) {
 							// set updated events to store

@@ -8,9 +8,32 @@ axiosRetry(axios, { retries: 3 });
 const limit = 20000;
 
 export const reportsSync = async () => {
-	// get reports from local
+	// clear v1 table if present
 	await localforage
 		.getItem('reports')
+		.then(function (value) {
+			if (value) {
+				localforage
+					.removeItem('reports')
+					.then(function () {
+						console.log('Key is cleared!');
+					})
+					.catch(function (err) {
+						reportError.set(
+							'Could not clear reports locally, please try again or contact BTC Map.'
+						);
+						console.log(err);
+					});
+			}
+		})
+		.catch(function (err) {
+			reportError.set('Could not check reports locally, please try again or contact BTC Map.');
+			console.log(err);
+		});
+
+	// get reports from local
+	await localforage
+		.getItem('reports_v2')
 		.then(async function (value) {
 			// get reports from API if initial sync
 			if (!value) {
@@ -50,7 +73,7 @@ export const reportsSync = async () => {
 
 					// set response to local
 					localforage
-						.setItem('reports', reportsData)
+						.setItem('reports_v2', reportsData)
 						// eslint-disable-next-line no-unused-vars
 						.then(function (value) {
 							// set response to store
@@ -129,7 +152,7 @@ export const reportsSync = async () => {
 
 					// set updated reports locally
 					localforage
-						.setItem('reports', reportsData)
+						.setItem('reports_v2', reportsData)
 						// eslint-disable-next-line no-unused-vars
 						.then(function (value) {
 							// set updated reports to store

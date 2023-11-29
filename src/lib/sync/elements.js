@@ -10,9 +10,33 @@ const limit = 5000;
 
 export const elementsSync = async () => {
 	mapLoading.set('Checking local cache...');
-	// get elements from local
+
+	// clear v1 table if present
 	await localforage
 		.getItem('elements')
+		.then(function (value) {
+			if (value) {
+				localforage
+					.removeItem('elements')
+					.then(function () {
+						console.log('Key is cleared!');
+					})
+					.catch(function (err) {
+						elementError.set(
+							'Could not clear elements locally, please try again or contact BTC Map.'
+						);
+						console.log(err);
+					});
+			}
+		})
+		.catch(function (err) {
+			elementError.set('Could not check elements locally, please try again or contact BTC Map.');
+			console.log(err);
+		});
+
+	// get elements from local
+	await localforage
+		.getItem('elements_v2')
 		.then(async function (value) {
 			// get elements from API if initial sync
 			if (!value) {
@@ -58,7 +82,7 @@ export const elementsSync = async () => {
 					mapLoading.set('Storing data...');
 					// set response to local
 					localforage
-						.setItem('elements', elementsData)
+						.setItem('elements_v2', elementsData)
 						// eslint-disable-next-line no-unused-vars
 						.then(function (value) {
 							mapLoading.set('Initial sync complete!');
@@ -144,7 +168,7 @@ export const elementsSync = async () => {
 					mapLoading.set('Storing data...');
 
 					localforage
-						.setItem('elements', elementsData)
+						.setItem('elements_v2', elementsData)
 						// eslint-disable-next-line no-unused-vars
 						.then(function (value) {
 							mapLoading.set('Map loading complete!');

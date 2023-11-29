@@ -29,9 +29,30 @@ export const usersSync = async () => {
 			console.log(err);
 		});
 
-	// get users from local
+	// clear v2 table if present
 	await localforage
 		.getItem('users_v2')
+		.then(function (value) {
+			if (value) {
+				localforage
+					.removeItem('users_v2')
+					.then(function () {
+						console.log('Key is cleared!');
+					})
+					.catch(function (err) {
+						userError.set('Could not clear users locally, please try again or contact BTC Map.');
+						console.log(err);
+					});
+			}
+		})
+		.catch(function (err) {
+			userError.set('Could not check users locally, please try again or contact BTC Map.');
+			console.log(err);
+		});
+
+	// get users from local
+	await localforage
+		.getItem('users_v3')
 		.then(async function (value) {
 			// get users from API if initial sync
 			if (!value) {
@@ -69,7 +90,7 @@ export const usersSync = async () => {
 
 					// set response to local
 					localforage
-						.setItem('users_v2', usersData)
+						.setItem('users_v3', usersData)
 						// eslint-disable-next-line no-unused-vars
 						.then(function (value) {
 							// set response to store
@@ -144,7 +165,7 @@ export const usersSync = async () => {
 
 					// set updated users locally
 					localforage
-						.setItem('users_v2', usersData)
+						.setItem('users_v3', usersData)
 						// eslint-disable-next-line no-unused-vars
 						.then(function (value) {
 							// set updated users to store
