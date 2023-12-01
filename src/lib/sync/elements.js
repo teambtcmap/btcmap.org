@@ -34,9 +34,32 @@ export const elementsSync = async () => {
 			console.log(err);
 		});
 
-	// get elements from local
+	// clear v2 table if present
 	await localforage
 		.getItem('elements_v2')
+		.then(function (value) {
+			if (value) {
+				localforage
+					.removeItem('elements_v2')
+					.then(function () {
+						console.log('Key is cleared!');
+					})
+					.catch(function (err) {
+						elementError.set(
+							'Could not clear elements locally, please try again or contact BTC Map.'
+						);
+						console.log(err);
+					});
+			}
+		})
+		.catch(function (err) {
+			elementError.set('Could not check elements locally, please try again or contact BTC Map.');
+			console.log(err);
+		});
+
+	// get elements from local
+	await localforage
+		.getItem('elements_v3')
 		.then(async function (value) {
 			// get elements from API if initial sync
 			if (!value) {
@@ -59,9 +82,10 @@ export const elementsSync = async () => {
 						if (response.data.length) {
 							updatedSince = response.data[response.data.length - 1]['updated_at'];
 							responseCount = response.data.length;
-							elementsData.filter(
+							const elementsUpdated = elementsData.filter(
 								(element) => !response.data.find((data) => data.id === element.id)
 							);
+							elementsData = elementsUpdated;
 							response.data.forEach((data) => elementsData.push(data));
 						} else {
 							elementError.set(
@@ -82,7 +106,7 @@ export const elementsSync = async () => {
 					mapLoading.set('Storing data...');
 					// set response to local
 					localforage
-						.setItem('elements_v2', elementsData)
+						.setItem('elements_v3', elementsData)
 						// eslint-disable-next-line no-unused-vars
 						.then(function (value) {
 							mapLoading.set('Initial sync complete!');
@@ -131,13 +155,14 @@ export const elementsSync = async () => {
 							updatedSince = newElements[newElements.length - 1]['updated_at'];
 							responseCount = newElements.length;
 
-							elementsData.filter((value) => {
+							const elementsUpdated = elementsData.filter((value) => {
 								if (newElements.find((element) => element.id === value.id)) {
 									return false;
 								} else {
 									return true;
 								}
 							});
+							elementsData = elementsUpdated;
 
 							// add new elements
 							newElements.forEach((element) => {
@@ -168,7 +193,7 @@ export const elementsSync = async () => {
 					mapLoading.set('Storing data...');
 
 					localforage
-						.setItem('elements_v2', elementsData)
+						.setItem('elements_v3', elementsData)
 						// eslint-disable-next-line no-unused-vars
 						.then(function (value) {
 							mapLoading.set('Map loading complete!');
@@ -217,7 +242,10 @@ export const elementsSync = async () => {
 					if (response.data.length) {
 						updatedSince = response.data[response.data.length - 1]['updated_at'];
 						responseCount = response.data.length;
-						elementsData.filter((element) => !response.data.find((data) => data.id === element.id));
+						const elementsUpdated = elementsData.filter(
+							(element) => !response.data.find((data) => data.id === element.id)
+						);
+						elementsData = elementsUpdated;
 						response.data.forEach((data) => elementsData.push(data));
 					} else {
 						elementError.set(

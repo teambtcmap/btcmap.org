@@ -29,9 +29,30 @@ export const eventsSync = async () => {
 			console.log(err);
 		});
 
-	// get events from local
+	// clear v2 table if present
 	await localforage
 		.getItem('events_v2')
+		.then(function (value) {
+			if (value) {
+				localforage
+					.removeItem('events_v2')
+					.then(function () {
+						console.log('Key is cleared!');
+					})
+					.catch(function (err) {
+						eventError.set('Could not clear events locally, please try again or contact BTC Map.');
+						console.log(err);
+					});
+			}
+		})
+		.catch(function (err) {
+			eventError.set('Could not check events locally, please try again or contact BTC Map.');
+			console.log(err);
+		});
+
+	// get events from local
+	await localforage
+		.getItem('events_v3')
 		.then(async function (value) {
 			// get events from API if initial sync
 			if (!value) {
@@ -48,7 +69,10 @@ export const eventsSync = async () => {
 						if (response.data.length) {
 							updatedSince = response.data[response.data.length - 1]['updated_at'];
 							responseCount = response.data.length;
-							eventsData.filter((event) => !response.data.find((data) => data.id === event.id));
+							const eventsUpdated = eventsData.filter(
+								(event) => !response.data.find((data) => data.id === event.id)
+							);
+							eventsData = eventsUpdated;
 							response.data.forEach((data) => eventsData.push(data));
 						} else {
 							eventError.set(
@@ -69,7 +93,7 @@ export const eventsSync = async () => {
 
 					// set response to local
 					localforage
-						.setItem('events_v2', eventsData)
+						.setItem('events_v3', eventsData)
 						// eslint-disable-next-line no-unused-vars
 						.then(function (value) {
 							// set response to store
@@ -111,13 +135,14 @@ export const eventsSync = async () => {
 							updatedSince = newEvents[newEvents.length - 1]['updated_at'];
 							responseCount = newEvents.length;
 
-							eventsData.filter((value) => {
+							const eventsUpdated = eventsData.filter((value) => {
 								if (newEvents.find((event) => event.id === value.id)) {
 									return false;
 								} else {
 									return true;
 								}
 							});
+							eventsData = eventsUpdated;
 
 							// add new events
 							newEvents.forEach((event) => {
@@ -148,7 +173,7 @@ export const eventsSync = async () => {
 
 					// set updated events locally
 					localforage
-						.setItem('events_v2', eventsData)
+						.setItem('events_v3', eventsData)
 						// eslint-disable-next-line no-unused-vars
 						.then(function (value) {
 							// set updated events to store
@@ -184,7 +209,10 @@ export const eventsSync = async () => {
 					if (response.data.length) {
 						updatedSince = response.data[response.data.length - 1]['updated_at'];
 						responseCount = response.data.length;
-						eventsData.filter((event) => !response.data.find((data) => data.id === event.id));
+						const eventsUpdated = eventsData.filter(
+							(event) => !response.data.find((data) => data.id === event.id)
+						);
+						eventsData = eventsUpdated;
 						response.data.forEach((data) => eventsData.push(data));
 					} else {
 						eventError.set(

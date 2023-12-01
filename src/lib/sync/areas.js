@@ -29,9 +29,30 @@ export const areasSync = async () => {
 			console.log(err);
 		});
 
-	// get areas from local
+	// clear v2 table if present
 	await localforage
 		.getItem('areas_v2')
+		.then(function (value) {
+			if (value) {
+				localforage
+					.removeItem('areas_v2')
+					.then(function () {
+						console.log('Key is cleared!');
+					})
+					.catch(function (err) {
+						areaError.set('Could not clear areas locally, please try again or contact BTC Map.');
+						console.log(err);
+					});
+			}
+		})
+		.catch(function (err) {
+			areaError.set('Could not check areas locally, please try again or contact BTC Map.');
+			console.log(err);
+		});
+
+	// get areas from local
+	await localforage
+		.getItem('areas_v3')
 		.then(async function (value) {
 			// get areas from API if initial sync
 			if (!value) {
@@ -48,7 +69,10 @@ export const areasSync = async () => {
 						if (response.data.length) {
 							updatedSince = response.data[response.data.length - 1]['updated_at'];
 							responseCount = response.data.length;
-							areasData.filter((area) => !response.data.find((data) => data.id === area.id));
+							const areasUpdated = areasData.filter(
+								(area) => !response.data.find((data) => data.id === area.id)
+							);
+							areasData = areasUpdated;
 							response.data.forEach((data) => areasData.push(data));
 						} else {
 							areaError.set(
@@ -69,7 +93,7 @@ export const areasSync = async () => {
 
 					// set response to local
 					localforage
-						.setItem('areas_v2', areasData)
+						.setItem('areas_v3', areasData)
 						// eslint-disable-next-line no-unused-vars
 						.then(function (value) {
 							// set response to store
@@ -109,13 +133,14 @@ export const areasSync = async () => {
 							updatedSince = newAreas[newAreas.length - 1]['updated_at'];
 							responseCount = newAreas.length;
 
-							areasData.filter((value) => {
+							const areasUpdated = areasData.filter((value) => {
 								if (newAreas.find((area) => area.id === value.id)) {
 									return false;
 								} else {
 									return true;
 								}
 							});
+							areasData = areasUpdated;
 
 							// add new areas
 							newAreas.forEach((area) => {
@@ -144,7 +169,7 @@ export const areasSync = async () => {
 
 					// set updated areas locally
 					localforage
-						.setItem('areas_v2', areasData)
+						.setItem('areas_v3', areasData)
 						// eslint-disable-next-line no-unused-vars
 						.then(function (value) {
 							// set updated areas to store
@@ -178,7 +203,10 @@ export const areasSync = async () => {
 					if (response.data.length) {
 						updatedSince = response.data[response.data.length - 1]['updated_at'];
 						responseCount = response.data.length;
-						areasData.filter((area) => !response.data.find((data) => data.id === area.id));
+						const areasUpdated = areasData.filter(
+							(area) => !response.data.find((data) => data.id === area.id)
+						);
+						areasData = areasUpdated;
 						response.data.forEach((data) => areasData.push(data));
 					} else {
 						areaError.set(

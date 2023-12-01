@@ -31,9 +31,32 @@ export const reportsSync = async () => {
 			console.log(err);
 		});
 
-	// get reports from local
+	// clear v2 table if present
 	await localforage
 		.getItem('reports_v2')
+		.then(function (value) {
+			if (value) {
+				localforage
+					.removeItem('reports_v2')
+					.then(function () {
+						console.log('Key is cleared!');
+					})
+					.catch(function (err) {
+						reportError.set(
+							'Could not clear reports locally, please try again or contact BTC Map.'
+						);
+						console.log(err);
+					});
+			}
+		})
+		.catch(function (err) {
+			reportError.set('Could not check reports locally, please try again or contact BTC Map.');
+			console.log(err);
+		});
+
+	// get reports from local
+	await localforage
+		.getItem('reports_v3')
 		.then(async function (value) {
 			// get reports from API if initial sync
 			if (!value) {
@@ -50,7 +73,10 @@ export const reportsSync = async () => {
 						if (response.data.length) {
 							updatedSince = response.data[response.data.length - 1]['updated_at'];
 							responseCount = response.data.length;
-							reportsData.filter((report) => !response.data.find((data) => data.id === report.id));
+							const reportsUpdated = reportsData.filter(
+								(report) => !response.data.find((data) => data.id === report.id)
+							);
+							reportsData = reportsUpdated;
 							response.data.forEach((data) => reportsData.push(data));
 						} else {
 							reportError.set(
@@ -73,7 +99,7 @@ export const reportsSync = async () => {
 
 					// set response to local
 					localforage
-						.setItem('reports_v2', reportsData)
+						.setItem('reports_v3', reportsData)
 						// eslint-disable-next-line no-unused-vars
 						.then(function (value) {
 							// set response to store
@@ -115,13 +141,14 @@ export const reportsSync = async () => {
 							updatedSince = newReports[newReports.length - 1]['updated_at'];
 							responseCount = newReports.length;
 
-							reportsData.filter((value) => {
+							const reportsUpdated = reportsData.filter((value) => {
 								if (newReports.find((report) => report.id === value.id)) {
 									return false;
 								} else {
 									return true;
 								}
 							});
+							reportsData = reportsUpdated;
 
 							// add new reports
 							newReports.forEach((report) => {
@@ -152,7 +179,7 @@ export const reportsSync = async () => {
 
 					// set updated reports locally
 					localforage
-						.setItem('reports_v2', reportsData)
+						.setItem('reports_v3', reportsData)
 						// eslint-disable-next-line no-unused-vars
 						.then(function (value) {
 							// set updated reports to store
@@ -188,7 +215,10 @@ export const reportsSync = async () => {
 					if (response.data.length) {
 						updatedSince = response.data[response.data.length - 1]['updated_at'];
 						responseCount = response.data.length;
-						reportsData.filter((report) => !response.data.find((data) => data.id === report.id));
+						const reportsUpdated = reportsData.filter(
+							(report) => !response.data.find((data) => data.id === report.id)
+						);
+						reportsData = reportsUpdated;
 						response.data.forEach((data) => reportsData.push(data));
 					} else {
 						reportError.set(

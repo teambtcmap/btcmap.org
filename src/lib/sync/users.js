@@ -50,9 +50,30 @@ export const usersSync = async () => {
 			console.log(err);
 		});
 
-	// get users from local
+	// clear v3 table if present
 	await localforage
 		.getItem('users_v3')
+		.then(function (value) {
+			if (value) {
+				localforage
+					.removeItem('users_v3')
+					.then(function () {
+						console.log('Key is cleared!');
+					})
+					.catch(function (err) {
+						userError.set('Could not clear users locally, please try again or contact BTC Map.');
+						console.log(err);
+					});
+			}
+		})
+		.catch(function (err) {
+			userError.set('Could not check users locally, please try again or contact BTC Map.');
+			console.log(err);
+		});
+
+	// get users from local
+	await localforage
+		.getItem('users_v4')
 		.then(async function (value) {
 			// get users from API if initial sync
 			if (!value) {
@@ -69,7 +90,10 @@ export const usersSync = async () => {
 						if (response.data.length) {
 							updatedSince = response.data[response.data.length - 1]['updated_at'];
 							responseCount = response.data.length;
-							usersData.filter((user) => !response.data.find((data) => data.id === user.id));
+							const usersUpdated = usersData.filter(
+								(user) => !response.data.find((data) => data.id === user.id)
+							);
+							usersData = usersUpdated;
 							response.data.forEach((data) => usersData.push(data));
 						} else {
 							userError.set(
@@ -90,7 +114,7 @@ export const usersSync = async () => {
 
 					// set response to local
 					localforage
-						.setItem('users_v3', usersData)
+						.setItem('users_v4', usersData)
 						// eslint-disable-next-line no-unused-vars
 						.then(function (value) {
 							// set response to store
@@ -130,13 +154,14 @@ export const usersSync = async () => {
 							updatedSince = newUsers[newUsers.length - 1]['updated_at'];
 							responseCount = newUsers.length;
 
-							usersData.filter((value) => {
+							const usersUpdated = usersData.filter((value) => {
 								if (newUsers.find((user) => user.id == value.id)) {
 									return false;
 								} else {
 									return true;
 								}
 							});
+							usersData = usersUpdated;
 
 							// add new users
 							newUsers.forEach((user) => {
@@ -165,7 +190,7 @@ export const usersSync = async () => {
 
 					// set updated users locally
 					localforage
-						.setItem('users_v3', usersData)
+						.setItem('users_v4', usersData)
 						// eslint-disable-next-line no-unused-vars
 						.then(function (value) {
 							// set updated users to store
@@ -199,7 +224,10 @@ export const usersSync = async () => {
 					if (response.data.length) {
 						updatedSince = response.data[response.data.length - 1]['updated_at'];
 						responseCount = response.data.length;
-						usersData.filter((user) => !response.data.find((data) => data.id === user.id));
+						const usersUpdated = usersData.filter(
+							(user) => !response.data.find((data) => data.id === user.id)
+						);
+						usersData = usersUpdated;
 						response.data.forEach((data) => usersData.push(data));
 					} else {
 						userError.set(
