@@ -9,15 +9,57 @@ axiosRetry(axios, { retries: 3 });
 const limit = 50000;
 
 export const eventsSync = async () => {
+	// clear v1 table if present
+	await localforage
+		.getItem('events')
+		.then(function (value) {
+			if (value) {
+				localforage
+					.removeItem('events')
+					.then(function () {
+						console.log('Key is cleared!');
+					})
+					.catch(function (err) {
+						eventError.set('Could not clear events locally, please try again or contact BTC Map.');
+						console.log(err);
+					});
+			}
+		})
+		.catch(function (err) {
+			eventError.set('Could not check events locally, please try again or contact BTC Map.');
+			console.log(err);
+		});
+
+	// clear v2 table if present
+	await localforage
+		.getItem('events_v2')
+		.then(function (value) {
+			if (value) {
+				localforage
+					.removeItem('events_v2')
+					.then(function () {
+						console.log('Key is cleared!');
+					})
+					.catch(function (err) {
+						eventError.set('Could not clear events locally, please try again or contact BTC Map.');
+						console.log(err);
+					});
+			}
+		})
+		.catch(function (err) {
+			eventError.set('Could not check events locally, please try again or contact BTC Map.');
+			console.log(err);
+		});
+
 	// get events from local
 	await localforage
-		.getItem<Event[]>('events')
+		.getItem<Event[]>('events_v3')
 		.then(async function (value) {
 			// get events from API if initial sync
 			if (!value) {
 				let updatedSince = '2022-01-01T00:00:00.000Z';
 				let responseCount;
-				const eventsData: Event[] = [];
+				let eventsData: Event[] = [];
 
 				do {
 					try {
@@ -28,7 +70,10 @@ export const eventsSync = async () => {
 						if (response.data.length) {
 							updatedSince = response.data[response.data.length - 1]['updated_at'];
 							responseCount = response.data.length;
-							eventsData.filter((event) => !response.data.find((data) => data.id === event.id));
+							const eventsUpdated = eventsData.filter(
+								(event) => !response.data.find((data) => data.id === event.id)
+							);
+							eventsData = eventsUpdated;
 							response.data.forEach((data) => eventsData.push(data));
 						} else {
 							eventError.set(
@@ -49,7 +94,7 @@ export const eventsSync = async () => {
 
 					// set response to local
 					localforage
-						.setItem('events', eventsData)
+						.setItem('events_v3', eventsData)
 						.then(function () {
 							// set response to store
 							events.set(eventsFiltered);
@@ -73,7 +118,7 @@ export const eventsSync = async () => {
 
 				let updatedSince = cacheSorted[0]['updated_at'];
 				let responseCount;
-				const eventsData = value;
+				let eventsData = value;
 				let useCachedData = false;
 
 				do {
@@ -90,13 +135,14 @@ export const eventsSync = async () => {
 							updatedSince = newEvents[newEvents.length - 1]['updated_at'];
 							responseCount = newEvents.length;
 
-							eventsData.filter((value) => {
+							const eventsUpdated = eventsData.filter((value) => {
 								if (newEvents.find((event) => event.id === value.id)) {
 									return false;
 								} else {
 									return true;
 								}
 							});
+							eventsData = eventsUpdated;
 
 							// add new events
 							newEvents.forEach((event) => {
@@ -127,7 +173,7 @@ export const eventsSync = async () => {
 
 					// set updated events locally
 					localforage
-						.setItem('events', eventsData)
+						.setItem('events_v3', eventsData)
 						.then(function () {
 							// set updated events to store
 							events.set(newEventsFiltered);
@@ -151,7 +197,7 @@ export const eventsSync = async () => {
 
 			let updatedSince = '2022-01-01T00:00:00.000Z';
 			let responseCount;
-			const eventsData: Event[] = [];
+			let eventsData: Event[] = [];
 
 			do {
 				try {
@@ -162,7 +208,10 @@ export const eventsSync = async () => {
 					if (response.data.length) {
 						updatedSince = response.data[response.data.length - 1]['updated_at'];
 						responseCount = response.data.length;
-						eventsData.filter((event) => !response.data.find((data) => data.id === event.id));
+						const eventsUpdated = eventsData.filter(
+							(event) => !response.data.find((data) => data.id === event.id)
+						);
+						eventsData = eventsUpdated;
 						response.data.forEach((data) => eventsData.push(data));
 					} else {
 						eventError.set(

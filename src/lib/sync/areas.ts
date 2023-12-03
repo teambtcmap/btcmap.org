@@ -9,15 +9,57 @@ axiosRetry(axios, { retries: 3 });
 const limit = 500;
 
 export const areasSync = async () => {
+	// clear v1 table if present
+	await localforage
+		.getItem('areas')
+		.then(function (value) {
+			if (value) {
+				localforage
+					.removeItem('areas')
+					.then(function () {
+						console.log('Key is cleared!');
+					})
+					.catch(function (err) {
+						areaError.set('Could not clear areas locally, please try again or contact BTC Map.');
+						console.log(err);
+					});
+			}
+		})
+		.catch(function (err) {
+			areaError.set('Could not check areas locally, please try again or contact BTC Map.');
+			console.log(err);
+		});
+
+	// clear v2 table if present
+	await localforage
+		.getItem('areas_v2')
+		.then(function (value) {
+			if (value) {
+				localforage
+					.removeItem('areas_v2')
+					.then(function () {
+						console.log('Key is cleared!');
+					})
+					.catch(function (err) {
+						areaError.set('Could not clear areas locally, please try again or contact BTC Map.');
+						console.log(err);
+					});
+			}
+		})
+		.catch(function (err) {
+			areaError.set('Could not check areas locally, please try again or contact BTC Map.');
+			console.log(err);
+		});
+
 	// get areas from local
 	await localforage
-		.getItem<Area[]>('areas')
+		.getItem<Area[]>('areas_v3')
 		.then(async function (value) {
 			// get areas from API if initial sync
 			if (!value) {
 				let updatedSince = '2022-01-01T00:00:00.000Z';
 				let responseCount;
-				const areasData: Area[] = [];
+				let areasData: Area[] = [];
 
 				do {
 					try {
@@ -28,7 +70,10 @@ export const areasSync = async () => {
 						if (response.data.length) {
 							updatedSince = response.data[response.data.length - 1]['updated_at'];
 							responseCount = response.data.length;
-							areasData.filter((area) => !response.data.find((data) => data.id === area.id));
+							const areasUpdated = areasData.filter(
+								(area) => !response.data.find((data) => data.id === area.id)
+							);
+							areasData = areasUpdated;
 							response.data.forEach((data) => areasData.push(data));
 						} else {
 							areaError.set(
@@ -49,7 +94,7 @@ export const areasSync = async () => {
 
 					// set response to local
 					localforage
-						.setItem('areas', areasData)
+						.setItem('areas_v3', areasData)
 						.then(function () {
 							// set response to store
 							areas.set(areasFiltered);
@@ -71,7 +116,7 @@ export const areasSync = async () => {
 
 				let updatedSince = cacheSorted[0]['updated_at'];
 				let responseCount;
-				const areasData = value;
+				let areasData = value;
 				let useCachedData = false;
 
 				do {
@@ -88,13 +133,14 @@ export const areasSync = async () => {
 							updatedSince = newAreas[newAreas.length - 1]['updated_at'];
 							responseCount = newAreas.length;
 
-							areasData.filter((value) => {
+							const areasUpdated = areasData.filter((value) => {
 								if (newAreas.find((area) => area.id === value.id)) {
 									return false;
 								} else {
 									return true;
 								}
 							});
+							areasData = areasUpdated;
 
 							// add new areas
 							newAreas.forEach((area) => {
@@ -123,7 +169,7 @@ export const areasSync = async () => {
 
 					// set updated areas locally
 					localforage
-						.setItem('areas', areasData)
+						.setItem('areas_v3', areasData)
 						.then(function () {
 							// set updated areas to store
 							areas.set(newAreasFiltered);
@@ -145,7 +191,7 @@ export const areasSync = async () => {
 
 			let updatedSince = '2022-01-01T00:00:00.000Z';
 			let responseCount;
-			const areasData: Area[] = [];
+			let areasData: Area[] = [];
 
 			do {
 				try {
@@ -156,7 +202,10 @@ export const areasSync = async () => {
 					if (response.data.length) {
 						updatedSince = response.data[response.data.length - 1]['updated_at'];
 						responseCount = response.data.length;
-						areasData.filter((area) => !response.data.find((data) => data.id === area.id));
+						const areasUpdated = areasData.filter(
+							(area) => !response.data.find((data) => data.id === area.id)
+						);
+						areasData = areasUpdated;
 						response.data.forEach((data) => areasData.push(data));
 					} else {
 						areaError.set(

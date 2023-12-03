@@ -30,15 +30,57 @@ export const usersSync = async () => {
 			console.log(err);
 		});
 
+	// clear v2 table if present
+	await localforage
+		.getItem('users_v2')
+		.then(function (value) {
+			if (value) {
+				localforage
+					.removeItem('users_v2')
+					.then(function () {
+						console.log('Key is cleared!');
+					})
+					.catch(function (err) {
+						userError.set('Could not clear users locally, please try again or contact BTC Map.');
+						console.log(err);
+					});
+			}
+		})
+		.catch(function (err) {
+			userError.set('Could not check users locally, please try again or contact BTC Map.');
+			console.log(err);
+		});
+
+	// clear v3 table if present
+	await localforage
+		.getItem('users_v3')
+		.then(function (value) {
+			if (value) {
+				localforage
+					.removeItem('users_v3')
+					.then(function () {
+						console.log('Key is cleared!');
+					})
+					.catch(function (err) {
+						userError.set('Could not clear users locally, please try again or contact BTC Map.');
+						console.log(err);
+					});
+			}
+		})
+		.catch(function (err) {
+			userError.set('Could not check users locally, please try again or contact BTC Map.');
+			console.log(err);
+		});
+
 	// get users from local
 	await localforage
-		.getItem<User[]>('users_v2')
+		.getItem<User[]>('users_v4')
 		.then(async function (value) {
 			// get users from API if initial sync
 			if (!value) {
 				let updatedSince = '2022-01-01T00:00:00.000Z';
 				let responseCount;
-				const usersData: User[] = [];
+				let usersData: User[] = [];
 
 				do {
 					try {
@@ -49,7 +91,10 @@ export const usersSync = async () => {
 						if (response.data.length) {
 							updatedSince = response.data[response.data.length - 1]['updated_at'];
 							responseCount = response.data.length;
-							usersData.filter((user) => !response.data.find((data) => data.id === user.id));
+							const usersUpdated = usersData.filter(
+								(user) => !response.data.find((data) => data.id === user.id)
+							);
+							usersData = usersUpdated;
 							response.data.forEach((data) => usersData.push(data));
 						} else {
 							userError.set(
@@ -70,7 +115,7 @@ export const usersSync = async () => {
 
 					// set response to local
 					localforage
-						.setItem('users_v2', usersData)
+						.setItem('users_v4', usersData)
 						.then(function () {
 							// set response to store
 							users.set(usersFiltered);
@@ -92,7 +137,7 @@ export const usersSync = async () => {
 
 				let updatedSince = cacheSorted[0]['updated_at'];
 				let responseCount;
-				const usersData = value;
+				let usersData = value;
 				let useCachedData = false;
 
 				do {
@@ -109,13 +154,14 @@ export const usersSync = async () => {
 							updatedSince = newUsers[newUsers.length - 1]['updated_at'];
 							responseCount = newUsers.length;
 
-							usersData.filter((value) => {
+							const usersUpdated = usersData.filter((value) => {
 								if (newUsers.find((user) => user.id == value.id)) {
 									return false;
 								} else {
 									return true;
 								}
 							});
+							usersData = usersUpdated;
 
 							// add new users
 							newUsers.forEach((user) => {
@@ -144,7 +190,7 @@ export const usersSync = async () => {
 
 					// set updated users locally
 					localforage
-						.setItem('users_v2', usersData)
+						.setItem('users_v4', usersData)
 						.then(function () {
 							// set updated users to store
 							users.set(newUsersFiltered);
@@ -166,7 +212,7 @@ export const usersSync = async () => {
 
 			let updatedSince = '2022-01-01T00:00:00.000Z';
 			let responseCount;
-			const usersData: User[] = [];
+			let usersData: User[] = [];
 
 			do {
 				try {
@@ -177,7 +223,10 @@ export const usersSync = async () => {
 					if (response.data.length) {
 						updatedSince = response.data[response.data.length - 1]['updated_at'];
 						responseCount = response.data.length;
-						usersData.filter((user) => !response.data.find((data) => data.id === user.id));
+						const usersUpdated = usersData.filter(
+							(user) => !response.data.find((data) => data.id === user.id)
+						);
+						usersData = usersUpdated;
 						response.data.forEach((data) => usersData.push(data));
 					} else {
 						userError.set(

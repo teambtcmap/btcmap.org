@@ -11,9 +11,56 @@ const limit = 5000;
 
 export const elementsSync = async () => {
 	mapLoading.set('Checking local cache...');
+
+	// clear v1 table if present
+	await localforage
+		.getItem('elements')
+		.then(function (value) {
+			if (value) {
+				localforage
+					.removeItem('elements')
+					.then(function () {
+						console.log('Key is cleared!');
+					})
+					.catch(function (err) {
+						elementError.set(
+							'Could not clear elements locally, please try again or contact BTC Map.'
+						);
+						console.log(err);
+					});
+			}
+		})
+		.catch(function (err) {
+			elementError.set('Could not check elements locally, please try again or contact BTC Map.');
+			console.log(err);
+		});
+
+	// clear v2 table if present
+	await localforage
+		.getItem('elements_v2')
+		.then(function (value) {
+			if (value) {
+				localforage
+					.removeItem('elements_v2')
+					.then(function () {
+						console.log('Key is cleared!');
+					})
+					.catch(function (err) {
+						elementError.set(
+							'Could not clear elements locally, please try again or contact BTC Map.'
+						);
+						console.log(err);
+					});
+			}
+		})
+		.catch(function (err) {
+			elementError.set('Could not check elements locally, please try again or contact BTC Map.');
+			console.log(err);
+		});
+
 	// get elements from local
 	await localforage
-		.getItem<Element[]>('elements')
+		.getItem<Element[]>('elements_v3')
 		.then(async function (value) {
 			// get elements from API if initial sync
 			if (!value) {
@@ -23,7 +70,7 @@ export const elementsSync = async () => {
 
 				let updatedSince = '2022-01-01T00:00:00.000Z';
 				let responseCount;
-				const elementsData: Element[] = [];
+				let elementsData: Element[] = [];
 
 				mapLoading.set('Fetching elements...');
 
@@ -36,9 +83,10 @@ export const elementsSync = async () => {
 						if (response.data.length) {
 							updatedSince = response.data[response.data.length - 1]['updated_at'];
 							responseCount = response.data.length;
-							elementsData.filter(
+							const elementsUpdated = elementsData.filter(
 								(element) => !response.data.find((data) => data.id === element.id)
 							);
+							elementsData = elementsUpdated;
 							response.data.forEach((data) => elementsData.push(data));
 						} else {
 							elementError.set(
@@ -59,7 +107,7 @@ export const elementsSync = async () => {
 					mapLoading.set('Storing data...');
 					// set response to local
 					localforage
-						.setItem('elements', elementsData)
+						.setItem('elements_v3', elementsData)
 						.then(function () {
 							mapLoading.set('Initial sync complete!');
 							// set response to store
@@ -88,7 +136,7 @@ export const elementsSync = async () => {
 
 				let updatedSince = cacheSorted[0]['updated_at'];
 				let responseCount;
-				const elementsData = value;
+				let elementsData = value;
 				let useCachedData = false;
 
 				mapLoading.set('Fetching new elements...');
@@ -107,13 +155,14 @@ export const elementsSync = async () => {
 							updatedSince = newElements[newElements.length - 1]['updated_at'];
 							responseCount = newElements.length;
 
-							elementsData.filter((value) => {
+							const elementsUpdated = elementsData.filter((value) => {
 								if (newElements.find((element) => element.id === value.id)) {
 									return false;
 								} else {
 									return true;
 								}
 							});
+							elementsData = elementsUpdated;
 
 							// add new elements
 							newElements.forEach((element) => {
@@ -144,7 +193,7 @@ export const elementsSync = async () => {
 					mapLoading.set('Storing data...');
 
 					localforage
-						.setItem('elements', elementsData)
+						.setItem('elements_v3', elementsData)
 						.then(function () {
 							mapLoading.set('Map loading complete!');
 							// set updated elements to store
@@ -179,7 +228,7 @@ export const elementsSync = async () => {
 
 			let updatedSince = '2022-01-01T00:00:00.000Z';
 			let responseCount;
-			const elementsData: Element[] = [];
+			let elementsData: Element[] = [];
 
 			mapLoading.set('Fetching elements...');
 
@@ -192,7 +241,10 @@ export const elementsSync = async () => {
 					if (response.data.length) {
 						updatedSince = response.data[response.data.length - 1]['updated_at'];
 						responseCount = response.data.length;
-						elementsData.filter((element) => !response.data.find((data) => data.id === element.id));
+						const elementsUpdated = elementsData.filter(
+							(element) => !response.data.find((data) => data.id === element.id)
+						);
+						elementsData = elementsUpdated;
 						response.data.forEach((data) => elementsData.push(data));
 					} else {
 						elementError.set(
