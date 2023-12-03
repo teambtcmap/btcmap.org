@@ -7,16 +7,17 @@
 		HeaderPlaceholder,
 		InfoTooltip,
 		PrimaryButton
-	} from '$comp';
+	} from '$lib/comp';
 	import { theme } from '$lib/store';
+	import type { SubmitForm } from '$lib/types';
 	import { detectTheme, errToast, successToast, warningToast } from '$lib/utils';
 	import axios from 'axios';
 	import { onMount } from 'svelte';
 
-	let captcha;
-	let captchaSecret;
-	let captchaInput;
-	let honeyInput;
+	let captcha: HTMLDivElement;
+	let captchaSecret: string;
+	let captchaInput: HTMLInputElement;
+	let honeyInput: HTMLInputElement;
 
 	const fetchCaptcha = () => {
 		axios
@@ -33,22 +34,22 @@
 			});
 	};
 
-	let location;
-	let name;
-	let icon;
-	let lightning;
-	let socialLinks;
-	let contact;
-	let notes;
+	let location: string | undefined;
+	let name: string;
+	let icon: string;
+	let lightning: string;
+	let socialLinks: string;
+	let contact: string;
+	let notes: string;
 
 	let selected = false;
 	let noLocationSelected = false;
 	let submitted = false;
 	let submitting = false;
-	let submissionIssueNumber;
+	let submissionIssueNumber: number;
 
-	let searchQuery;
-	let searchResults = [];
+	let searchQuery: string;
+	let searchResults: any[] = [];
 	let searchLoading = false;
 
 	const searchLocation = () => {
@@ -64,7 +65,7 @@
 			.then(function (response) {
 				// handle success
 				searchResults = response.data.filter(
-					(area) => area.geojson.type === 'Polygon' || area.geojson.type === 'MultiPolygon'
+					(area: any) => area.geojson.type === 'Polygon' || area.geojson.type === 'MultiPolygon'
 				);
 				if (!searchResults.length) {
 					warningToast('No locations found, please adjust query.');
@@ -79,13 +80,13 @@
 			});
 	};
 
-	const setLocation = (area) => {
+	const setLocation = (area: string) => {
 		location = area;
 		selected = true;
 		successToast('Location selected!');
 	};
 
-	const submitForm = (e) => {
+	const submitForm = (e: SubmitForm) => {
 		e.preventDefault();
 		if (!selected) {
 			noLocationSelected = true;

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Footer, Header } from '$comp';
+	import { Footer, Header } from '$lib/comp';
 </script>
 
 <svelte:head>

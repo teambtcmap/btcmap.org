@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { LoadingSplash } from '$comp';
+	import { LoadingSplash } from '$lib/comp';
 	import { eventError, events, userError, users } from '$lib/store';
 </script>
 

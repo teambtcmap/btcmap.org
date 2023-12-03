@@ -1,21 +1,22 @@
 <script lang="ts">
-	import { Tip } from '$comp';
+	import { Tip } from '$lib/comp';
+	import type { EventType, User } from '$lib/types';
 	import Time from 'svelte-time';
 
-	export let location;
-	export let action;
-	export let user;
-	export let time;
-	export let latest;
-	export let merchantId;
+	export let location: string;
+	export let action: EventType;
+	export let user: User | '';
+	export let time: string;
+	export let latest: boolean;
+	export let merchantId: string;
 
 	$: deleteLink = merchantId.split(':');
 
-	$: profile = user['osm_json'] && user['osm_json'];
+	$: profile = user && user['osm_json'];
 	$: regexMatch = profile && profile.description.match('(lightning:[^)]+)');
 	$: lightning = regexMatch && regexMatch[0].slice(10);
 
-	$: username = profile ? profile['display_name'] : user;
+	$: username = profile && profile['display_name'];
 </script>
 
 <div
@@ -79,7 +80,7 @@
 				<strong>{action}d</strong>
 
 				<!-- user -->
-				{#if username.length}
+				{#if user && username}
 					by <a
 						href="/tagger/{user.id}"
 						class="block break-all text-link transition-colors hover:text-hover lg:inline"

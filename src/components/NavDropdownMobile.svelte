@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { Icon } from '$comp';
+	import { Icon } from '$lib/comp';
+	import type { DropdownLink } from '$lib/types';
 	import OutClick from 'svelte-outclick';
 
-	export let title;
-	export let icon;
-	export let links;
+	export let title: string;
+	export let icon: string;
+	export let links: DropdownLink[];
 
 	let show = false;
 </script>
@@ -26,7 +27,7 @@
 <!-- dropdown items -->
 {#if show}
 	<OutClick
-		excludeQuerySelectorAll={[`#dropdown-${title.toLowerCase()}-mobile`]}
+		excludeQuerySelectorAll={`#dropdown-${title.toLowerCase()}-mobile`}
 		on:outclick={() => (show = false)}
 	>
 		<div class="ml-7 space-y-2">

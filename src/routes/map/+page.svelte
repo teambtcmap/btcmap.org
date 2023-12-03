@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
-	import { Boost, Icon, MapLoading, ShowTags, Socials } from '$comp';
+	import { Boost, Icon, MapLoading, ShowTags, Socials } from '$lib/comp';
 	import {
 		attribution,
 		calcVerifiedDate,
@@ -29,34 +29,39 @@
 		reportError,
 		reports
 	} from '$lib/store';
+	import type { MapGroups, OSMTags, SearchElement, SearchResult } from '$lib/types';
 	import { detectTheme, errToast } from '$lib/utils';
+	// @ts-expect-error
 	import rewind from '@mapbox/geojson-rewind';
 	import axios from 'axios';
 	import { geoArea } from 'd3-geo';
+	import type { LatLng, LatLngBounds, Map } from 'leaflet';
 	import localforage from 'localforage';
 	import { onDestroy, onMount, tick } from 'svelte';
 	import OutClick from 'svelte-outclick';
 
-	let mapElement;
-	let map;
-	let mapLoaded;
+	let mapElement: HTMLDivElement;
+	let map: Map;
+	let mapLoaded = false;
 
-	let mapCenter;
-	let elementsCopy = [];
+	let mapCenter: LatLng;
+	let elementsCopy: SearchElement[] = [];
 
-	let customSearchBar;
-	let clearSearchButton;
-	let showSearch;
-	let search;
-	let searchStatus;
-	let searchResults = [];
+	let customSearchBar: HTMLDivElement;
+	let clearSearchButton: HTMLButtonElement;
+	let showSearch = false;
+	let search: string;
+	let searchStatus: boolean;
+	let searchResults: SearchResult[] = [];
 
 	//search functions
-	function debounce(func, timeout = 500) {
-		let timer;
+	function debounce(func: () => void, timeout = 500) {
+		let timer: ReturnType<typeof setTimeout>;
+		// @ts-expect-error
 		return (...args) => {
 			clearTimeout(timer);
 			timer = setTimeout(() => {
+				// @ts-expect-error
 				func.apply(this, args);
 			}, timeout);
 		};
@@ -77,17 +82,17 @@
 
 				let values = Object.values(tags);
 
-				return values.some((value) =>
+				return values.some((value: OSMTags) =>
 					splitWords.some((word) => value.toLowerCase().includes(word.toLowerCase()))
 				);
 			}
 		});
 
-		let distance = [];
+		let distance: SearchResult[] = [];
 		filter.forEach((element) => {
-			element.distanceKm = (mapCenter.distanceTo(element.latLng) / 1000).toFixed(1);
-			element.distanceMi = (element.distanceKm * 0.6213712).toFixed(1);
-			distance.push(element);
+			const distanceKm = Number((mapCenter.distanceTo(element.latLng) / 1000).toFixed(1));
+			const distanceMi = Number((distanceKm * 0.6213712).toFixed(1));
+			distance.push({ ...element, distanceKm, distanceMi });
 		});
 
 		let sorted = distance.sort((a, b) => a.distanceKm - b.distanceKm);
@@ -104,7 +109,7 @@
 		searchResults = [];
 	};
 
-	const searchSelect = (result) => {
+	const searchSelect = (result: SearchResult) => {
 		clearSearch();
 		map.flyTo(result.latLng, 19);
 		map.once('moveend', () => {
@@ -144,7 +149,7 @@
 	const organization = $page.url.searchParams.get('organization');
 
 	// filter communities
-	let communities = $areas.filter(
+	let communitiesFiltered = $areas.filter(
 		(area) =>
 			area.tags.type === 'community' &&
 			area.tags.geo_json &&
@@ -158,16 +163,18 @@
 	);
 
 	// sort communities by largest to smallest
-	communities.forEach((community) => {
+	let communities = communitiesFiltered.map((community) => {
 		rewind(community.tags.geo_json, true);
-		community.area = geoArea(community.tags.geo_json);
+		return { ...community, area: geoArea(community.tags.geo_json) };
 	});
 
 	communities.sort((a, b) => b.area - a.area);
 
 	// displays a button in controls if there is new data available
 	const showDataRefresh = () => {
-		document.querySelector('.data-refresh-div').style.display = 'block';
+		const refreshDiv: HTMLDivElement | null = document.querySelector('.data-refresh-div');
+		if (!refreshDiv) return;
+		refreshDiv.style.display = 'block';
 	};
 
 	$: map && mapLoaded && $mapUpdates && $elementsSyncCount > 1 && showDataRefresh();
@@ -187,12 +194,13 @@
 
 			//import packages
 			const leaflet = await import('leaflet');
+			// @ts-expect-error
 			const DomEvent = await import('leaflet/src/dom/DomEvent');
-			/* eslint-disable no-unused-vars */
+			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
 			const leafletLocateControl = await import('leaflet.locatecontrol');
 			const leafletMarkerCluster = await import('leaflet.markercluster');
 			const leafletFeaturegroupSubgroup = await import('leaflet.featuregroup.subgroup');
-			/* eslint-enable no-unused-vars */
+			/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
 
 			// add map and tiles
 			map = leaflet.map(mapElement);
@@ -202,7 +210,7 @@
 				if (location.hash) {
 					try {
 						const coords = location.hash.split('/');
-						map.setView([coords[1], coords[2]], coords[0].slice(1));
+						map.setView([Number(coords[1]), Number(coords[2])], Number(coords[0].slice(1)));
 						mapCenter = map.getCenter();
 					} catch (error) {
 						map.setView([0, 0], 3);
@@ -217,8 +225,7 @@
 				// set view to community if in url params
 				else if (communityQuery && communitySelected) {
 					try {
-						// eslint-disable-next-line no-undef
-						map.fitBounds(L.geoJSON(communitySelected.tags.geo_json).getBounds());
+						map.fitBounds(leaflet.geoJSON(communitySelected.tags.geo_json).getBounds());
 						mapCenter = map.getCenter();
 					} catch (error) {
 						map.setView([0, 0], 3);
@@ -234,8 +241,8 @@
 				else if (communitiesOnly && communities.length) {
 					try {
 						map.fitBounds(
-							// eslint-disable-next-line no-undef
-							communities.map((community) => L.geoJSON(community.tags.geo_json).getBounds())
+							// @ts-expect-error
+							communities.map((community) => leaflet.geoJSON(community.tags.geo_json).getBounds())
 						);
 						mapCenter = map.getCenter();
 					} catch (error) {
@@ -253,12 +260,12 @@
 					try {
 						if (urlLat.length > 1 && urlLong.length > 1) {
 							map.fitBounds([
-								[urlLat[0], urlLong[0]],
-								[urlLat[1], urlLong[1]]
+								[Number(urlLat[0]), Number(urlLong[0])],
+								[Number(urlLat[1]), Number(urlLong[1])]
 							]);
 							mapCenter = map.getCenter();
 						} else {
-							map.fitBounds([[urlLat[0], urlLong[0]]]);
+							map.fitBounds([[Number(urlLat[0]), Number(urlLong[0])]]);
 							mapCenter = map.getCenter();
 						}
 					} catch (error) {
@@ -274,11 +281,13 @@
 				// set view to last location if it is present in the cache
 				else {
 					localforage
-						.getItem('coords')
+						.getItem<LatLngBounds>('coords')
 						.then(function (value) {
 							if (value) {
 								map.fitBounds([
+									// @ts-expect-error
 									[value._northEast.lat, value._northEast.lng],
+									// @ts-expect-error
 									[value._southWest.lat, value._southWest.lng]
 								]);
 							} else {
@@ -301,6 +310,7 @@
 			// add click event to help devs find lat/long of desired location for iframe embeds
 			map.on('click', () => {
 				const coords = map.getBounds();
+				// @ts-expect-error
 				console.log(`Here is your iframe embed URL: https://btcmap.org/map?lat=${coords._northEast.lat}&long=${coords._northEast.lng}&lat=${coords._southWest.lat}&long=${coords._southWest.lng}
 Thanks for using BTC Map!`);
 			});
@@ -311,13 +321,9 @@ Thanks for using BTC Map!`);
 
 				mapCenter = map.getCenter();
 
-				localforage
-					.setItem('coords', coords)
-					// eslint-disable-next-line no-unused-vars
-					.then(function (value) {})
-					.catch(function (err) {
-						console.log(err);
-					});
+				localforage.setItem('coords', coords).catch(function (err) {
+					console.log(err);
+				});
 			});
 
 			map.on('moveend', () => {
@@ -336,49 +342,38 @@ Thanks for using BTC Map!`);
 					location.hash = zoom + '/' + mapCenter.lat.toFixed(5) + '/' + mapCenter.lng.toFixed(5);
 				}
 
-				localforage
-					.setItem('coords', coords)
-					// eslint-disable-next-line no-unused-vars
-					.then(function (value) {})
-					.catch(function (err) {
-						console.log(err);
-					});
+				localforage.setItem('coords', coords).catch(function (err) {
+					console.log(err);
+				});
 			});
 
 			// change broken marker image path in prod
-			// eslint-disable-next-line no-undef
-			L.Icon.Default.prototype.options.imagePath = '/icons/';
+			leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
 
 			// add support attribution
 			support();
 
 			// add OSM attribution
-			// eslint-disable-next-line no-undef
-			attribution(L, map);
+			attribution(leaflet, map);
 
 			// add scale
-			// eslint-disable-next-line no-undef
-			scaleBars(L, map);
+			scaleBars(leaflet, map);
 
 			// add locate button to map
-			// eslint-disable-next-line no-undef
-			geolocate(L, map);
+			geolocate(leaflet, map);
 
 			// add search button to map
-			// eslint-disable-next-line no-undef
-			const customSearchButton = L.Control.extend({
+			const customSearchButton = leaflet.Control.extend({
 				options: {
 					position: 'topleft'
 				},
 				onAdd: () => {
-					// eslint-disable-next-line no-undef
-					const searchButtonDiv = L.DomUtil.create('div');
+					const searchButtonDiv = leaflet.DomUtil.create('div');
 					searchButtonDiv.classList.add('leaflet-bar');
 					searchButtonDiv.style.border = 'none';
 					searchButtonDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 
-					// eslint-disable-next-line no-undef
-					const searchButton = L.DomUtil.create('a');
+					const searchButton = leaflet.DomUtil.create('a');
 					searchButton.classList.add('leaflet-control-search-toggle');
 					searchButton.title = 'Search toggle';
 					searchButton.role = 'button';
@@ -392,7 +387,8 @@ Thanks for using BTC Map!`);
 						showSearch = !showSearch;
 						if (showSearch) {
 							await tick();
-							document.querySelector('#search-input').focus();
+							const searchInput: HTMLInputElement | null = document.querySelector('#search-input');
+							searchInput?.focus();
 						} else {
 							search = '';
 							searchResults = [];
@@ -400,9 +396,11 @@ Thanks for using BTC Map!`);
 					};
 					if (theme === 'light') {
 						searchButton.onmouseenter = () => {
+							// @ts-expect-error
 							document.querySelector('#search-button').src = '/icons/search-black.svg';
 						};
 						searchButton.onmouseleave = () => {
+							// @ts-expect-error
 							document.querySelector('#search-button').src = '/icons/search.svg';
 						};
 					}
@@ -417,21 +415,21 @@ Thanks for using BTC Map!`);
 			map.addControl(new customSearchButton());
 
 			// add search bar to map
-			// eslint-disable-next-line no-undef
-			map._controlCorners['topcenter'] = L.DomUtil.create(
+			// @ts-expect-error
+			map._controlCorners['topcenter'] = leaflet.DomUtil.create(
 				'div',
 				'leaflet-top leaflet-center',
+				// @ts-expect-error
 				map._controlContainer
 			);
 
-			// eslint-disable-next-line no-undef
-			L.Control.Search = L.Control.extend({
+			// @ts-expect-error
+			leaflet.Control.Search = leaflet.Control.extend({
 				options: {
 					position: 'topcenter'
 				},
 				onAdd: () => {
-					// eslint-disable-next-line no-undef
-					const searchBarDiv = L.DomUtil.create('div');
+					const searchBarDiv = leaflet.DomUtil.create('div');
 					searchBarDiv.classList.add('leafet-control', 'search-bar-div');
 
 					searchBarDiv.append(customSearchBar);
@@ -440,8 +438,8 @@ Thanks for using BTC Map!`);
 				}
 			});
 
-			// eslint-disable-next-line no-undef
-			new L.Control.Search().addTo(map);
+			// @ts-expect-error
+			new leaflet.Control.Search().addTo(map);
 
 			// disable map events
 			DomEvent.disableScrollPropagation(customSearchBar);
@@ -451,20 +449,17 @@ Thanks for using BTC Map!`);
 
 			// add boost layer button
 
-			// eslint-disable-next-line no-undef
-			const customBoostLayerButton = L.Control.extend({
+			const customBoostLayerButton = leaflet.Control.extend({
 				options: {
 					position: 'topleft'
 				},
 				onAdd: () => {
-					// eslint-disable-next-line no-undef
-					const boostLayerDiv = L.DomUtil.create('div');
+					const boostLayerDiv = leaflet.DomUtil.create('div');
 					boostLayerDiv.classList.add('leaflet-bar');
 					boostLayerDiv.style.border = 'none';
 					boostLayerDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 
-					// eslint-disable-next-line no-undef
-					const boostLayerButton = L.DomUtil.create('a');
+					const boostLayerButton = leaflet.DomUtil.create('a');
 					boostLayerButton.classList.add('leaflet-control-boost-layer');
 					boostLayerButton.title = 'Boosted locations';
 					boostLayerButton.role = 'button';
@@ -491,11 +486,13 @@ Thanks for using BTC Map!`);
 					};
 					if (theme === 'light') {
 						boostLayerButton.onmouseenter = () => {
+							// @ts-expect-error
 							document.querySelector('#boost-layer').src = boosts
 								? '/icons/boost-solid-black.svg'
 								: '/icons/boost-black.svg';
 						};
 						boostLayerButton.onmouseleave = () => {
+							// @ts-expect-error
 							document.querySelector('#boost-layer').src = boosts
 								? '/icons/boost-solid.svg'
 								: '/icons/boost.svg';
@@ -513,30 +510,26 @@ Thanks for using BTC Map!`);
 			DomEvent.disableClickPropagation(document.querySelector('.leaflet-control-boost-layer'));
 
 			// add home and marker buttons to map
-			// eslint-disable-next-line no-undef
-			homeMarkerButtons(L, map, DomEvent);
+			homeMarkerButtons(leaflet, map, DomEvent);
 
 			// add data refresh button to map
-			// eslint-disable-next-line no-undef
-			dataRefresh(L, map, DomEvent);
+			dataRefresh(leaflet, map, DomEvent);
 
 			// get date from 1 year ago to add verified check if survey is current
 			let verifiedDate = calcVerifiedDate();
 
 			// create marker cluster group and layers
-			/* eslint-disable no-undef */
-			let communitiesLayer = L.layerGroup();
+			let communitiesLayer = leaflet.layerGroup();
+			// eslint-disable-next-line no-undef
 			let markers = L.markerClusterGroup({ maxClusterRadius: 60 });
-			let upToDateLayer = L.featureGroup.subGroup(markers);
-			let outdatedLayer = L.featureGroup.subGroup(markers);
-			let legacyLayer = L.featureGroup.subGroup(markers);
-			/* eslint-enable no-undef */
-			let categories = {};
+			let upToDateLayer = leaflet.featureGroup.subGroup(markers);
+			let outdatedLayer = leaflet.featureGroup.subGroup(markers);
+			let legacyLayer = leaflet.featureGroup.subGroup(markers);
+			let categories: MapGroups = {};
 
 			// add communities to map
 			communities.forEach((community) => {
-				// eslint-disable-next-line no-undef
-				const popupContainer = L.DomUtil.create('div');
+				const popupContainer = leaflet.DomUtil.create('div');
 
 				popupContainer.innerHTML = `
 				<div class='text-center space-y-2'>
@@ -597,35 +590,38 @@ Thanks for using BTC Map!`);
 				}`;
 
 				const socials = popupContainer.querySelector('#socials');
-				new Socials({
-					target: socials,
-					props: {
-						website: community.tags['contact:website'],
-						email: community.tags['contact:email'],
-						nostr: community.tags['contact:nostr'],
-						twitter: community.tags['contact:twitter'],
-						secondTwitter: community.tags['contact:secondTwitter'],
-						meetup: community.tags['contact:meetup'],
-						eventbrite: community.tags['contact:eventbrite'],
-						telegram: community.tags['contact:telegram'],
-						discord: community.tags['contact:discord'],
-						youtube: community.tags['contact:youtube'],
-						github: community.tags['contact:github'],
-						reddit: community.tags['contact:reddit'],
-						instagram: community.tags['contact:instagram'],
-						whatsapp: community.tags['contact:whatsapp'],
-						facebook: community.tags['contact:facebook'],
-						linkedin: community.tags['contact:linkedin'],
-						rss: community.tags['contact:rss'],
-						signal: community.tags['contact:signal']
-					}
-				});
+				if (socials) {
+					new Socials({
+						target: socials,
+						props: {
+							website: community.tags['contact:website'],
+							email: community.tags['contact:email'],
+							nostr: community.tags['contact:nostr'],
+							twitter: community.tags['contact:twitter'],
+							secondTwitter: community.tags['contact:second_twitter'],
+							meetup: community.tags['contact:meetup'],
+							eventbrite: community.tags['contact:eventbrite'],
+							telegram: community.tags['contact:telegram'],
+							discord: community.tags['contact:discord'],
+							youtube: community.tags['contact:youtube'],
+							github: community.tags['contact:github'],
+							reddit: community.tags['contact:reddit'],
+							instagram: community.tags['contact:instagram'],
+							whatsapp: community.tags['contact:whatsapp'],
+							facebook: community.tags['contact:facebook'],
+							linkedin: community.tags['contact:linkedin'],
+							rss: community.tags['contact:rss'],
+							signal: community.tags['contact:signal']
+						}
+					});
+				}
 
 				try {
-					// eslint-disable-next-line no-undef
-					let communityLayer = L.geoJSON(community.tags.geo_json, {
-						style: { color: '#000000', fillColor: '#F7931A', fillOpacity: 0.5 }
-					}).bindPopup(popupContainer, { minWidth: 300 });
+					let communityLayer = leaflet
+						.geoJSON(community.tags.geo_json, {
+							style: { color: '#000000', fillColor: '#F7931A', fillOpacity: 0.5 }
+						})
+						.bindPopup(popupContainer, { minWidth: 300 });
 
 					communityLayer.on('click', () => communityLayer.bringToBack());
 
@@ -658,35 +654,36 @@ Thanks for using BTC Map!`);
 					element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now()
 						? element.tags['boost:expires']
 						: undefined;
-				element = element['osm_json'];
+
+				const elementOSM = element['osm_json'];
 
 				if (
-					(onchain ? element.tags && element.tags['payment:onchain'] === 'yes' : true) &&
-					(lightning ? element.tags && element.tags['payment:lightning'] === 'yes' : true) &&
-					(nfc ? element.tags && element.tags['payment:lightning_contactless'] === 'yes' : true) &&
-					(legacy ? element.tags && element.tags['payment:bitcoin'] === 'yes' : true) &&
+					(onchain ? elementOSM.tags && elementOSM.tags['payment:onchain'] === 'yes' : true) &&
+					(lightning ? elementOSM.tags && elementOSM.tags['payment:lightning'] === 'yes' : true) &&
+					(nfc
+						? elementOSM.tags && elementOSM.tags['payment:lightning_contactless'] === 'yes'
+						: true) &&
+					(legacy ? elementOSM.tags && elementOSM.tags['payment:bitcoin'] === 'yes' : true) &&
 					(boosts ? boosted : true)
 				) {
-					const lat = latCalc(element);
-					const long = longCalc(element);
+					const lat = latCalc(elementOSM);
+					const long = longCalc(elementOSM);
 
-					// eslint-disable-next-line no-undef
-					let divIcon = generateIcon(L, icon, boosted);
+					let divIcon = generateIcon(leaflet, icon, boosted ? true : false);
 
 					let marker = generateMarker(
 						lat,
 						long,
 						divIcon,
-						element,
+						elementOSM,
 						payment,
-						// eslint-disable-next-line no-undef
-						L,
+						leaflet,
 						verifiedDate,
-						'verify',
+						true,
 						boosted
 					);
 
-					let verified = verifiedArr(element);
+					let verified = verifiedArr(elementOSM);
 
 					if (verified.length && Date.parse(verified[0]) > verifiedDate) {
 						upToDateLayer.addLayer(marker);
@@ -694,29 +691,29 @@ Thanks for using BTC Map!`);
 						outdatedLayer.addLayer(marker);
 					}
 
-					if (element.tags && element.tags['payment:bitcoin']) {
+					if (elementOSM.tags && elementOSM.tags['payment:bitcoin']) {
 						legacyLayer.addLayer(marker);
 					}
 
 					if (!categories[category]) {
-						// eslint-disable-next-line no-undef
-						categories[category] = L.featureGroup.subGroup(markers);
+						categories[category] = leaflet.featureGroup.subGroup(markers);
 					}
 
 					categories[category].addLayer(marker);
 
-					// eslint-disable-next-line no-undef
-					element.latLng = L.latLng(lat, long);
-					element.marker = marker;
-					element.icon = icon;
-					element.boosted = boosted;
-					elementsCopy.push(element);
+					elementsCopy.push({
+						...elementOSM,
+						latLng: leaflet.latLng(lat, long),
+						marker,
+						icon,
+						boosted
+					});
 				}
 			});
 
 			map.addLayer(markers);
 
-			let overlayMaps = {
+			let overlayMaps: MapGroups = {
 				Communities: communitiesLayer,
 				'Up-To-Date': upToDateLayer,
 				Outdated: outdatedLayer,
@@ -739,13 +736,11 @@ Thanks for using BTC Map!`);
 					}
 				});
 
-			// eslint-disable-next-line no-unused-vars, no-undef
-			const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
+			leaflet.control.layers(baseMaps, overlayMaps).addTo(map);
 
 			// treasure hunt event
-			if (Date.now() < new Date('April 30, 2023 00:00:00')) {
-				// eslint-disable-next-line no-undef
-				const treasureIcon = L.divIcon({
+			if (Date.now() < new Date('April 30, 2023 00:00:00').getTime()) {
+				const treasureIcon = leaflet.divIcon({
 					className: 'treasure-icon',
 					iconSize: [24, 24],
 					html: `<a href='https://dublinbitcoiners.com/treasure-hunt' target='_blank' rel='noreferrer'>
@@ -760,8 +755,8 @@ Thanks for using BTC Map!`);
 						  </a>`
 				});
 
-				// eslint-disable-next-line no-undef
-				L.marker([53.37225, -6.17711], { icon: treasureIcon })
+				leaflet
+					.marker([53.37225, -6.17711], { icon: treasureIcon })
 					.bindTooltip(
 						`<p class='text-primary dark:text-white text-lg text-center p-2'>
 							<i class="fa-solid fa-coins text-bitcoin"></i> <strong>Bitcoin Treasure Hunt</strong> <i class="fa-solid fa-coins text-bitcoin"></i>
@@ -802,11 +797,11 @@ Thanks for using BTC Map!`);
 			}
 
 			// mount kili hike event
-			if (Date.now() < new Date('September 4, 2023 00:00:00')) {
+			if (Date.now() < new Date('September 4, 2023 00:00:00').getTime()) {
 				try {
 					const hikeData = await axios.get('https://static.btcmap.org/mount-kili-hike/data.json');
 					const hikeDataFiltered = hikeData.data.filter(
-						(update) =>
+						(update: any) =>
 							update.id !== undefined &&
 							update.lat &&
 							update.lon &&
@@ -818,15 +813,14 @@ Thanks for using BTC Map!`);
 							update.active === true
 					);
 
-					// eslint-disable-next-line no-undef
-					const hikerIcon = L.icon({
+					const hikerIcon = leaflet.icon({
 						iconUrl: '/icons/hiker-icon.png',
 						iconSize: [44, 44],
 						iconAnchor: [22, 44],
 						popupAnchor: [0, -44]
 					});
 
-					hikeDataFiltered.forEach((update) => {
+					hikeDataFiltered.forEach((update: any) => {
 						const { lat, lon, title, comment, timestamp, url, lightning } = update;
 						const dateFormatted = new Intl.DateTimeFormat('en-US', {
 							dateStyle: 'medium',
@@ -834,8 +828,8 @@ Thanks for using BTC Map!`);
 							hour12: false
 						}).format(new Date(timestamp));
 
-						// eslint-disable-next-line no-undef
-						L.marker([lat, lon], { icon: hikerIcon })
+						leaflet
+							.marker([lat, lon], { icon: hikerIcon })
 							.bindPopup(
 								`<p class='text-primary dark:text-white text-base text-center'>
 									<i class="fa-solid fa-person-hiking text-bitcoin"></i> <strong>${title}</strong> <i class="fa-solid fa-person-hiking text-bitcoin"></i>
@@ -871,8 +865,7 @@ Thanks for using BTC Map!`);
 					if (hikeEvent) {
 						try {
 							map.fitBounds(
-								// eslint-disable-next-line no-undef
-								hikeDataFiltered.map((update) => [update.lat, update.lon]),
+								hikeDataFiltered.map((update: any) => [update.lat, update.lon]),
 								{ animate: false }
 							);
 							mapCenter = map.getCenter();
@@ -891,8 +884,7 @@ Thanks for using BTC Map!`);
 			}
 
 			// change default icons
-			// eslint-disable-next-line no-undef
-			changeDefaultIcons('layers', L, mapElement, DomEvent);
+			changeDefaultIcons(true, leaflet, mapElement, DomEvent);
 
 			// final map setup
 			map.on('load', () => {
@@ -964,7 +956,7 @@ Thanks for using BTC Map!`);
 
 		{#if search && search.length > 2}
 			<OutClick
-				excludeQuerySelectorAll={['#search-button', '#search-div', '#search-input']}
+				excludeQuerySelectorAll="#search-button, #search-div, #search-input"
 				on:outclick={clearSearch}
 			>
 				<div
@@ -990,21 +982,21 @@ Thanks for using BTC Map!`);
 									<p
 										class="text-sm {result.boosted
 											? 'font-semibold text-bitcoin'
-											: 'text-mapButton dark:text-white'} {result.tags.name.match('([^ ]{21})')
+											: 'text-mapButton dark:text-white'} {result.tags?.name.match('([^ ]{21})')
 											? 'break-all'
 											: ''}"
 									>
-										{result.tags.name}
+										{result.tags?.name}
 									</p>
 									<p
 										class="text-xs {result.boosted ? 'text-bitcoin' : 'text-searchSubtext'} {(result
-											.tags['addr:street'] &&
+											.tags?.['addr:street'] &&
 											result.tags['addr:street'].match('([^ ]{21})')) ||
-										(result.tags['addr:city'] && result.tags['addr:city'].match('([^ ]{21})'))
+										(result.tags?.['addr:city'] && result.tags['addr:city'].match('([^ ]{21})'))
 											? 'break-all'
 											: ''}"
 									>
-										{checkAddress(result.tags)}
+										{result.tags ? checkAddress(result.tags) : ''}
 									</p>
 								</div>
 							</div>

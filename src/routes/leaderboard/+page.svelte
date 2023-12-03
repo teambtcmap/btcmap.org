@@ -8,7 +8,7 @@
 		LeaderboardSkeleton,
 		PrimaryButton,
 		TopButton
-	} from '$comp';
+	} from '$lib/comp';
 	import {
 		eventError,
 		events,
@@ -18,6 +18,7 @@
 		userError,
 		users
 	} from '$lib/store';
+	import type { Event, TaggerLeaderboard, User } from '$lib/types';
 	import { detectTheme, errToast, updateChartThemes } from '$lib/utils';
 	import Chart from 'chart.js/auto';
 	import { onMount } from 'svelte';
@@ -27,16 +28,16 @@
 	// alert for event errors
 	$: $eventError && errToast($eventError);
 
-	let loading;
-	let leaderboard;
+	let loading: boolean;
+	let leaderboard: TaggerLeaderboard[];
 
 	let showGeyser = location.hash === '#geyser' ? true : false;
 	const eventStart = new Date('Jul 4, 2023 00:00:00').toISOString();
 	const eventEnd = new Date('Sep 2, 2023 00:00:00').toISOString();
 
-	let topTenChartCanvas;
-	let topTenChart;
-	let chartsLoading;
+	let topTenChartCanvas: HTMLCanvasElement;
+	let topTenChart: Chart<'bar', number[], string>;
+	let chartsLoading: boolean;
 
 	let initialRenderComplete = false;
 
@@ -68,11 +69,11 @@
 					avatar: avatar,
 					tagger: profile['display_name'],
 					id: user.id,
-					created: user.id == '17221642' && !showGeyser ? created + 100 : created,
-					updated: user.id == '17221642' && !showGeyser ? updated + 20 : updated,
+					created: user.id === 17221642 && !showGeyser ? created + 100 : created,
+					updated: user.id === 17221642 && !showGeyser ? updated + 20 : updated,
 					deleted: deleted,
 					total:
-						user.id == '17221642' && !showGeyser
+						user.id === 17221642 && !showGeyser
 							? created + updated + deleted + 120
 							: created + updated + deleted,
 					tip: profile.description
@@ -86,8 +87,13 @@
 		loading = false;
 	};
 
-	// eslint-disable-next-line no-unused-vars
-	const leaderboardSync = (status, users, events, showGeyser) => {
+	const leaderboardSync = (
+		status: boolean,
+		users: User[],
+		events: Event[],
+		// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+		showGeyser: boolean
+	) => {
 		if (users.length && events.length && !status && initialRenderComplete) {
 			populateLeaderboard();
 
@@ -110,7 +116,7 @@
 
 	let leaderboardCount = 50;
 	$: leaderboardPaginated =
-		leaderboard && leaderboard.length && !loading && leaderboard.slice(0, leaderboardCount);
+		leaderboard && leaderboard.length && !loading ? leaderboard.slice(0, leaderboardCount) : [];
 
 	onMount(() => {
 		if (browser) {
@@ -145,7 +151,7 @@
 						legend: {
 							labels: {
 								font: {
-									weight: 600
+									weight: '600'
 								}
 							}
 						}
@@ -154,7 +160,7 @@
 						x: {
 							ticks: {
 								font: {
-									weight: 600
+									weight: '600'
 								}
 							},
 							grid: {
@@ -165,7 +171,7 @@
 							beginAtZero: true,
 							ticks: {
 								font: {
-									weight: 600
+									weight: '600'
 								}
 							},
 							grid: {
@@ -234,8 +240,7 @@
 			</h2>
 
 			<section id="chart" class="relative">
-				<!-- eslint-disable-next-line svelte/valid-compile -->
-				{#if leaderboard && leaderboard.length && !loading}{:else}
+				{#if !leaderboard?.length && loading}
 					<div class="absolute left-0 top-0 h-[400px] w-full animate-pulse border border-link/50" />
 				{/if}
 				<canvas bind:this={topTenChartCanvas} width="400" height="400" />
@@ -309,7 +314,7 @@
 							>
 						{/if}
 					{:else}
-						<!-- eslint-disable-next-line no-unused-vars -->
+						<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 						{#each Array(50) as skeleton}
 							<LeaderboardSkeleton />
 						{/each}

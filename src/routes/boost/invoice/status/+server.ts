@@ -3,15 +3,16 @@ import { error } from '@sveltejs/kit';
 import axios from 'axios';
 
 // check the status of an invoice
+// @ts-expect-error
 export async function GET({ url }) {
-	let hash = url.searchParams.get('hash');
+	const hash = url.searchParams.get('hash');
 
 	const headers = {
 		'X-API-Key': `${LNBITS_API_KEY}`,
 		'Content-type': 'application/json'
 	};
 
-	let status = await axios
+	const status = await axios
 		.get(`https://${LNBITS_URL}/api/v1/payments/${hash}`, { headers })
 		.then(function (response) {
 			return response.data;

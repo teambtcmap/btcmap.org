@@ -1,13 +1,14 @@
 <script lang="ts">
-	export let type;
-	export let text;
-	export let issue;
-	export let link;
+	export let type: string;
+	export let text: string;
+	export let issue: number;
+	export let link: string;
 	export let buttonWidth = 'w-52';
 
-	import { HeaderPlaceholder, PrimaryButton } from '$comp';
+	import { HeaderPlaceholder, PrimaryButton } from '$lib/comp';
 	import { socials, theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
+	// @ts-expect-error
 	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
 </script>
 

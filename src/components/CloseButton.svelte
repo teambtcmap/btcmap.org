@@ -1,9 +1,9 @@
 <script lang="ts">
-	export let position;
-	export let click;
-	export let colors;
+	export let position: string;
+	export let click: () => void | boolean | undefined;
+	export let colors: string;
 
-	import { Icon } from '$comp';
+	import { Icon } from '$lib/comp';
 </script>
 
 <div class={position}>

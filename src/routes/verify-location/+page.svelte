@@ -9,7 +9,7 @@
 		InfoTooltip,
 		MapLoading,
 		PrimaryButton
-	} from '$comp';
+	} from '$lib/comp';
 	import {
 		attribution,
 		calcVerifiedDate,
@@ -22,25 +22,27 @@
 		toggleMapButtons
 	} from '$lib/map/setup';
 	import { elementError, elements, theme } from '$lib/store';
+	import type { SubmitForm } from '$lib/types';
 	import { detectTheme, errToast } from '$lib/utils';
 	import axios from 'axios';
+	import type { Map, TileLayer } from 'leaflet';
 	import { onDestroy, onMount } from 'svelte';
 
 	const id = $page.url.searchParams.has('id') ? $page.url.searchParams.get('id') : '';
 	const merchant = $elements.find((element) => element.id && element.id === id);
 
 	let name = merchant ? merchant.osm_json.tags?.name : '';
-	let lat = merchant ? latCalc(merchant.osm_json) : '';
-	let long = merchant ? longCalc(merchant.osm_json) : '';
+	let lat = merchant ? latCalc(merchant.osm_json) : undefined;
+	let long = merchant ? longCalc(merchant.osm_json) : undefined;
 	let location = lat && long ? `https://btcmap.org/map?lat=${lat}&long=${long}` : '';
 	let edit = merchant
 		? `https://www.openstreetmap.org/edit?${merchant.osm_json.type}=${merchant.osm_json.id}`
 		: '';
 
-	let captcha;
-	let captchaSecret;
-	let captchaInput;
-	let honeyInput;
+	let captcha: HTMLDivElement;
+	let captchaSecret: string;
+	let captchaInput: HTMLInputElement;
+	let honeyInput: HTMLInputElement;
 
 	const fetchCaptcha = () => {
 		axios
@@ -57,17 +59,17 @@
 			});
 	};
 
-	let current;
-	let outdated;
-	let verify;
+	let current: boolean;
+	let outdated: string;
+	let verify: HTMLTextAreaElement;
 
 	let selected = location ? true : false;
 	let noLocationSelected = false;
 	let submitted = false;
 	let submitting = false;
-	let submissionIssueNumber;
+	let submissionIssueNumber: number;
 
-	const submitForm = (e) => {
+	const submitForm = (e: SubmitForm) => {
 		e.preventDefault();
 		if (!selected) {
 			noLocationSelected = true;
@@ -107,13 +109,13 @@
 	};
 
 	// location picker map if not accessing page from webapp
-	let mapElement;
-	let map;
+	let mapElement: HTMLDivElement;
+	let map: Map;
 	let showMap = !lat || !long || !edit ? true : false;
-	let mapLoaded;
+	let mapLoaded = false;
 
-	let osm;
-	let alidadeSmoothDark;
+	let osm: TileLayer;
+	let alidadeSmoothDark: TileLayer;
 
 	// alert for map errors
 	$: $elementError && showMap && errToast($elementError);
@@ -128,11 +130,12 @@
 			if (showMap) {
 				//import packages
 				const leaflet = await import('leaflet');
+				// @ts-expect-error
 				const DomEvent = await import('leaflet/src/dom/DomEvent');
-				/* eslint-disable no-unused-vars */
+				/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
 				const leafletLocateControl = await import('leaflet.locatecontrol');
 				const leafletMarkerCluster = await import('leaflet.markercluster');
-				/* eslint-enable no-unused-vars */
+				/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
 
 				// add map and tiles
 				map = leaflet.map(mapElement, { attributionControl: false }).setView([0, 0], 2);
@@ -160,7 +163,7 @@
 				}
 
 				// set URL lat/long query view if it exists and is valid
-				if (lat.length && long.length) {
+				if (lat && long) {
 					try {
 						map.fitBounds([[lat, long]]);
 					} catch (error) {
@@ -169,20 +172,16 @@
 				}
 
 				// change broken marker image path in prod
-				// eslint-disable-next-line no-undef
-				L.Icon.Default.prototype.options.imagePath = '/icons/';
+				leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
 
 				// add OSM attribution
-				// eslint-disable-next-line no-undef
-				attribution(L, map);
+				attribution(leaflet, map);
 
 				// add locate button to map
-				// eslint-disable-next-line no-undef
-				geolocate(L, map);
+				geolocate(leaflet, map);
 
 				// change default icons
-				// eslint-disable-next-line no-undef
-				changeDefaultIcons('', L, mapElement, DomEvent);
+				changeDefaultIcons(false, leaflet, mapElement, DomEvent);
 
 				// create marker cluster group
 				// eslint-disable-next-line no-undef
@@ -210,24 +209,22 @@
 							? element.tags['boost:expires']
 							: undefined;
 
-					element = element['osm_json'];
+					const elementOSM = element['osm_json'];
 
-					const latC = latCalc(element);
-					const longC = longCalc(element);
+					const latC = latCalc(elementOSM);
+					const longC = longCalc(elementOSM);
 
-					// eslint-disable-next-line no-undef
-					let divIcon = generateIcon(L, icon, boosted);
+					let divIcon = generateIcon(leaflet, icon, boosted ? true : false);
 
 					let marker = generateMarker(
 						latC,
 						longC,
 						divIcon,
-						element,
+						elementOSM,
 						payment,
-						// eslint-disable-next-line no-undef
-						L,
+						leaflet,
 						verifiedDate,
-						'',
+						false,
 						boosted
 					);
 
@@ -235,11 +232,11 @@
 					marker.on('click', (e) => {
 						if (captchaSecret) {
 							map.setView(e.latlng, 19);
-							name = element.tags && element.tags.name ? element.tags.name : '';
+							name = elementOSM.tags?.name || '';
 							lat = latC;
 							long = longC;
 							location = lat && long ? `https://btcmap.org/map?lat=${lat}&long=${long}` : '';
-							edit = `https://www.openstreetmap.org/edit?${element.type}=${element.id}`;
+							edit = `https://www.openstreetmap.org/edit?${elementOSM.type}=${elementOSM.id}`;
 							selected = true;
 						}
 					});
@@ -368,7 +365,7 @@
 							>
 							<input
 								class="h-4 w-4 accent-link"
-								disabled={!captchaSecret || (showMap && !mapLoaded) || outdated}
+								disabled={!captchaSecret || (showMap && !mapLoaded) || Boolean(outdated)}
 								required={!outdated}
 								type="checkbox"
 								id="current"

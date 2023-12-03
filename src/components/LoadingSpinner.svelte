@@ -1,7 +1,7 @@
 <script lang="ts">
 	export let color = 'text-white';
 	export let size = 'h-6 w-6';
-	export let style = undefined;
+	export let style: undefined | string = undefined;
 </script>
 
 <svg

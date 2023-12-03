@@ -17,7 +17,7 @@
 		pausable: true
 	};
 
-	let dataSyncInterval;
+	let dataSyncInterval: ReturnType<typeof setInterval>;
 
 	onMount(async () => {
 		localforage.config({

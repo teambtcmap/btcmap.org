@@ -5,14 +5,15 @@ import axiosRetry from 'axios-retry';
 
 axiosRetry(axios, { retries: 3 });
 
-let used = [];
+const used: string[] = [];
 
+// @ts-expect-error
 export async function POST({ request }) {
 	const headers = {
 		Authorization: `Bearer ${BTCMAP_KEY}`
 	};
 
-	let { element, time, hash } = await request.json();
+	const { element, time, hash } = await request.json();
 
 	// check that time is valid
 	const validTimes = [1, 3, 12];
@@ -25,7 +26,7 @@ export async function POST({ request }) {
 		return;
 	}
 
-	let boost = await axios
+	const boost = await axios
 		.get(`https://btcmap.org/boost/invoice/status?hash=${hash}`)
 		.then(function (response) {
 			if (response.data.paid === true) {
@@ -35,11 +36,11 @@ export async function POST({ request }) {
 					.get(`https://api.btcmap.org/v2/elements/${element}`)
 					.then(function (response) {
 						let expires;
-						let currentBoost =
+						const currentBoost =
 							response.data.tags && response.data.tags['boost:expires']
 								? new Date(response.data.tags['boost:expires'])
 								: null;
-						let dateNow = new Date();
+						const dateNow = new Date();
 
 						if (currentBoost && currentBoost > dateNow) {
 							expires = new Date(currentBoost.setMonth(currentBoost.getMonth() + time));

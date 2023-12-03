@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { SocialLink } from '$comp';
+	import { SocialLink } from '$lib/comp';
 	import { socials } from '$lib/store';
 
 	const links = [

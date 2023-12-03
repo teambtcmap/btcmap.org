@@ -1,9 +1,9 @@
 <script lang="ts">
-	export let title;
-	export let tooltip;
+	export let title: string;
+	export let tooltip: string | undefined;
 	import tippy from 'tippy.js';
 
-	let labelTooltip;
+	let labelTooltip: HTMLSpanElement;
 
 	$: tooltip &&
 		tooltip.length &&

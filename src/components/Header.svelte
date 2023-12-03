@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Icon, NavDropdownDesktop, NavDropdownMobile, ThemeToggle } from '$comp';
+	import { Icon, NavDropdownDesktop, NavDropdownMobile, ThemeToggle } from '$lib/comp';
 
 	const navLinks = [
 		{ title: 'Map', url: '/map', icon: 'map' },

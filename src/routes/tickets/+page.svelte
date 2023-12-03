@@ -8,7 +8,7 @@
 		OpenTicket,
 		OpenTicketSkeleton,
 		TopButton
-	} from '$comp';
+	} from '$lib/comp';
 	import { theme } from '$lib/store';
 	import { detectTheme, errToast } from '$lib/utils';
 	import { onDestroy, onMount } from 'svelte';
@@ -16,21 +16,27 @@
 	const ticketTypes = ['Add', 'Verify', 'Community'];
 	let showType = 'Add';
 
-	let tickets = [];
-	let totalTickets;
+	let tickets: any[] = [];
+	let totalTickets: number;
 
 	$: add =
-		tickets &&
-		tickets.length &&
-		tickets.filter((issue) => issue.labels.find((label) => label.name === 'location-submission'));
+		tickets && tickets.length
+			? tickets.filter((issue) =>
+					issue.labels.find((label: any) => label.name === 'location-submission')
+			  )
+			: [];
 	$: verify =
-		tickets &&
-		tickets.length &&
-		tickets.filter((issue) => issue.labels.find((label) => label.name === 'verify-submission'));
+		tickets && tickets.length
+			? tickets.filter((issue) =>
+					issue.labels.find((label: any) => label.name === 'verify-submission')
+			  )
+			: [];
 	$: community =
-		tickets &&
-		tickets.length &&
-		tickets.filter((issue) => issue.labels.find((label) => label.name === 'community-submission'));
+		tickets && tickets.length
+			? tickets.filter((issue) =>
+					issue.labels.find((label: any) => label.name === 'community-submission')
+			  )
+			: [];
 
 	const getIssues = () => {
 		axios
@@ -47,7 +53,7 @@
 			});
 	};
 
-	let getIssuesInterval;
+	let getIssuesInterval: ReturnType<typeof setInterval>;
 
 	onMount(() => {
 		getIssues();
@@ -190,7 +196,7 @@
 							</p>
 						{/if}
 					{:else}
-						<!-- eslint-disable-next-line no-unused-vars -->
+						<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 						{#each Array(10) as skeleton}
 							<OpenTicketSkeleton />
 						{/each}

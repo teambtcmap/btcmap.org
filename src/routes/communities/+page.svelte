@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { CommunitySection, Footer, Header, HeaderPlaceholder, PrimaryButton } from '$comp';
+	import { CommunitySection, Footer, Header, HeaderPlaceholder, PrimaryButton } from '$lib/comp';
 	import { areaError, areas, reportError, reports, syncStatus, theme } from '$lib/store';
 	import { detectTheme, errToast } from '$lib/utils';
 	import Chart from 'chart.js/auto';
@@ -82,8 +82,8 @@
 		communities &&
 		communities.filter((community) => community.tags.organization === 'satoshi-spritz');
 
-	let continentChartCanvas;
-	let continentChart;
+	let continentChartCanvas: HTMLCanvasElement;
+	let continentChart: Chart<'doughnut', number[], string>;
 
 	const populateChart = () => {
 		if (
@@ -133,13 +133,13 @@
 						legend: {
 							labels: {
 								font: {
-									weight: 600
+									weight: '600'
 								}
 							}
 						},
 						title: {
 							display: true,
-							text: `${communities.length} Total`,
+							text: `${communities?.length || 0} Total`,
 							font: { size: 18 }
 						}
 					}
@@ -150,16 +150,16 @@
 		}
 	};
 
-	const chartSync = (status) => {
+	const chartSync = (status: boolean) => {
 		if (!status && initialRenderComplete) {
 			if (chartRendered) {
 				continentChart.data.datasets[0].data = [
-					africa.length,
-					asia.length,
-					europe.length,
-					northAmerica.length,
-					oceania.length,
-					southAmerica.length
+					africa?.length || 0,
+					asia?.length || 0,
+					europe?.length || 0,
+					northAmerica?.length || 0,
+					oceania?.length || 0,
+					southAmerica?.length || 0
 				];
 				continentChart.update();
 			} else {
@@ -170,7 +170,7 @@
 
 	$: $areas && $areas.length && communities && communities.length && chartSync($syncStatus);
 
-	let section;
+	let section: string;
 	const sections = [
 		'--Continents--',
 		'Africa',
@@ -285,7 +285,7 @@
 				{#if !initialRenderComplete || !communities}
 					<div class="absolute left-0 top-0 flex h-full w-full flex-col justify-between">
 						<div class="flex flex-wrap justify-center">
-							<!-- eslint-disable-next-line no-unused-vars -->
+							<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 							{#each Array(6) as skeleton}
 								<div class="m-2 w-[94px] animate-pulse rounded-sm bg-link/50 py-2" />
 							{/each}
@@ -311,8 +311,10 @@
 							class="rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link dark:bg-white/[0.15] dark:text-white"
 							bind:value={section}
 							on:change={(e) => {
-								section = e.target.value;
-								location.hash = e.target.value;
+								// @ts-expect-error
+								section = e.target?.value;
+								// @ts-expect-error
+								location.hash = e.target?.value;
 							}}
 						>
 							{#each sections as option}
@@ -338,7 +340,8 @@
 	{#if detectTheme() === 'dark' || $theme === 'dark'}
 		<style>
 			select option {
-				@apply bg-gray-700;
+				--tw-bg-opacity: 1;
+				background-color: rgb(55 65 81 / var(--tw-bg-opacity));
 			}
 		</style>
 	{/if}

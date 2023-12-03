@@ -1,5 +1,5 @@
 <script lang="ts">
-	export let org;
+	export let org: string;
 </script>
 
 <p

@@ -7,8 +7,9 @@
 		HeaderPlaceholder,
 		PrimaryButton,
 		TopButton
-	} from '$comp';
+	} from '$lib/comp';
 	import { areaError, areas, reportError, reports, syncStatus, theme } from '$lib/store';
+	import type { Area, LeaderboardArea, Report } from '$lib/types';
 	import { detectTheme, errToast } from '$lib/utils';
 	import tippy from 'tippy.js';
 
@@ -19,39 +20,43 @@
 	$: $reportError && errToast($reportError);
 
 	$: communities =
-		$reports &&
-		$reports.length &&
-		$areas.filter(
-			(area) =>
-				area.tags.type === 'community' &&
-				((area.tags['box:east'] &&
-					area.tags['box:north'] &&
-					area.tags['box:south'] &&
-					area.tags['box:west']) ||
-					area.tags.geo_json) &&
-				area.tags.name &&
-				area.tags['icon:square'] &&
-				area.tags.continent &&
-				Object.keys(area.tags).find((key) => key.includes('contact')) &&
-				$reports.find((report) => report.area_id === area.id)
-		);
+		$reports && $reports.length
+			? $areas.filter(
+					(area) =>
+						area.tags.type === 'community' &&
+						((area.tags['box:east'] &&
+							area.tags['box:north'] &&
+							area.tags['box:south'] &&
+							area.tags['box:west']) ||
+							area.tags.geo_json) &&
+						area.tags.name &&
+						area.tags['icon:square'] &&
+						area.tags.continent &&
+						Object.keys(area.tags).find((key) => key.includes('contact')) &&
+						$reports.find((report) => report.area_id === area.id)
+			  )
+			: [];
 	$: communityReports =
-		communities &&
-		communities.length &&
-		$reports
-			.filter((report) => communities.find((community) => community.id === report.area_id))
-			.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
-	let leaderboard;
-	let loading;
+		communities && communities.length
+			? $reports
+					.filter((report) => communities.find((community) => community.id === report.area_id))
+					.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']))
+			: [];
+	let leaderboard: LeaderboardArea[];
+	let loading: boolean;
 
-	let upToDateTooltip;
-	let upToDateTooltipMobile;
-	let legacyTooltip;
-	let legacyTooltipMobile;
-	let gradeTooltip;
-	let gradeTooltipMobile;
+	let upToDateTooltip: HTMLButtonElement;
+	let upToDateTooltipMobile: HTMLButtonElement;
+	let legacyTooltip: HTMLButtonElement;
+	let legacyTooltipMobile: HTMLButtonElement;
+	let gradeTooltip: HTMLButtonElement;
+	let gradeTooltipMobile: HTMLButtonElement;
 
-	const populateLeaderboard = (status, communities, communityReports) => {
+	const populateLeaderboard = (
+		status: boolean,
+		communities: Area[],
+		communityReports: Report[]
+	) => {
 		if (communities.length && communityReports.length && !status) {
 			loading = true;
 			leaderboard = [];
@@ -60,9 +65,7 @@
 				let communityReport = communityReports.find((report) => report.area_id === community.id);
 
 				if (communityReport) {
-					community.report = communityReport;
-
-					leaderboard.push(community);
+					leaderboard.push({ ...community, report: communityReport });
 				}
 			});
 
@@ -83,7 +86,7 @@
 
 	let leaderboardCount = 50;
 	$: leaderboardPaginated =
-		leaderboard && leaderboard.length && !loading && leaderboard.slice(0, leaderboardCount);
+		leaderboard && leaderboard.length && !loading ? leaderboard.slice(0, leaderboardCount) : [];
 
 	const headings = ['Position', 'Name', 'Up-To-Date', 'Total Locations', 'Legacy', 'Grade'];
 
@@ -235,7 +238,7 @@
 								position={index + 1}
 								avatar={item.tags['icon:square']}
 								name={item.tags.name}
-								sponsor={item.tags.sponsor}
+								sponsor={item.tags.sponsor ? true : false}
 								id={item.id}
 								upToDate={item.report.tags.up_to_date_percent}
 								total={item.report.tags.total_elements}
@@ -251,7 +254,7 @@
 							>
 						{/if}
 					{:else}
-						<!-- eslint-disable-next-line no-unused-vars -->
+						<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 						{#each Array(50) as skeleton}
 							<CommunityLeaderboardSkeleton />
 						{/each}

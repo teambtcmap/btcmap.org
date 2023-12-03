@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { LoadingSplash } from '$comp';
+	import { LoadingSplash } from '$lib/comp';
 	import { elementError, elements, eventError, events, userError, users } from '$lib/store';
 	import { errToast } from '$lib/utils';
 

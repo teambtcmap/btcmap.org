@@ -9,7 +9,7 @@
 		AboutTagger,
 		Footer,
 		Header
-	} from '$comp';
+	} from '$lib/comp';
 	import {
 		areaError,
 		areas,
@@ -34,10 +34,14 @@
 
 	let merchants = $elements
 		.filter((element) => element.tags['boost:expires'])
-		.sort((a, b) => Date.parse(b.tags['boost:expires']) - Date.parse(a.tags['boost:expires']))
+		.sort(
+			(a, b) =>
+				// @ts-expect-error
+				Date.parse(b.tags['boost:expires']) - Date.parse(a.tags['boost:expires'])
+		)
 		.slice(0, 6);
 
-	let supertaggers = [];
+	let supertaggers: { id: number; username: string; avatar: string; total: number }[] = [];
 
 	const populateLeaderboard = () => {
 		$users.forEach((user) => {
@@ -58,7 +62,7 @@
 					id,
 					username,
 					avatar,
-					total: id == '17221642' ? userEvents.length + 120 : userEvents.length
+					total: id === 17221642 ? userEvents.length + 120 : userEvents.length
 				});
 			}
 		});
@@ -235,11 +239,11 @@
 							<AboutMerchant
 								id={merchant.id}
 								icon={merchant.tags['icon:android']}
-								tooltip={merchant['osm_json'].tags.name}
+								tooltip={merchant['osm_json'].tags?.name}
 							/>
 						{/each}
 					{:else}
-						<!-- eslint-disable-next-line no-unused-vars -->
+						<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 						{#each Array(6) as skeleton}
 							<span class="h-24 w-24 animate-pulse rounded-full bg-link/50" />
 						{/each}
@@ -261,11 +265,11 @@
 
 					<div class="flex flex-wrap justify-center gap-5">
 						{#if supertaggers.length}
-							{#each supertaggers as tagger}
+							{#each supertaggers.map((t) => ({ ...t, total: undefined })) as tagger}
 								<AboutTagger {tagger} />
 							{/each}
 						{:else}
-							<!-- eslint-disable-next-line no-unused-vars -->
+							<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 							{#each Array(6) as skeleton}
 								<span class="h-24 w-24 animate-pulse rounded-full bg-link/50" />
 							{/each}
@@ -304,7 +308,7 @@
 								<AboutCommunity {community} />
 							{/each}
 						{:else}
-							<!-- eslint-disable-next-line no-unused-vars -->
+							<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 							{#each Array(6) as skeleton}
 								<span class="h-24 w-24 animate-pulse rounded-full bg-link/50" />
 							{/each}

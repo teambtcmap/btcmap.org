@@ -1,74 +1,91 @@
-import { InfoTooltip } from '$comp';
+import { InfoTooltip } from '$lib/comp';
 import { boost, exchangeRate, resetBoost, showMore, showTags, theme } from '$lib/store';
+import type { DomEventType, ElementOSM, Leaflet, OSMTags } from '$lib/types';
 import { detectTheme, errToast } from '$lib/utils';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
+import type { DivIcon, Map } from 'leaflet';
 import Time from 'svelte-time';
 import { get } from 'svelte/store';
 
 axiosRetry(axios, { retries: 3 });
 
 export const toggleMapButtons = () => {
-	const zoomInBtn = document.querySelector('.leaflet-control-zoom-in');
-	const zoomOutBtn = document.querySelector('.leaflet-control-zoom-out');
-	const fullScreenBtn = document.querySelector('.leaflet-control-full-screen');
-	const locateBtn = document.querySelector('.leaflet-bar-part.leaflet-bar-part-single');
-	const zoomInImg = document.querySelector('#zoomin');
-	const zoomOutImg = document.querySelector('#zoomout');
-	const fullScreenImg = document.querySelector('#fullscreen');
-	const locateImg = document.querySelector('#locatebutton');
+	const zoomInBtn: HTMLAnchorElement | null = document.querySelector('.leaflet-control-zoom-in');
+	const zoomOutBtn: HTMLAnchorElement | null = document.querySelector('.leaflet-control-zoom-out');
+	const fullScreenBtn: HTMLAnchorElement | null = document.querySelector(
+		'.leaflet-control-full-screen'
+	);
+	const locateBtn: HTMLAnchorElement | null = document.querySelector(
+		'.leaflet-bar-part.leaflet-bar-part-single'
+	);
+	const zoomInImg: HTMLImageElement | null = document.querySelector('#zoomin');
+	const zoomOutImg: HTMLImageElement | null = document.querySelector('#zoomout');
+	const fullScreenImg: HTMLImageElement | null = document.querySelector('#fullscreen');
+	const locateImg: HTMLImageElement | null = document.querySelector('#locatebutton');
 
-	if (get(theme) === 'dark') {
-		zoomInImg.src = '/icons/plus-white.svg';
-		zoomOutImg.src = '/icons/minus-white.svg';
-		fullScreenImg.src = '/icons/expand-white.svg';
-		locateImg.src = '/icons/locate-white.svg';
+	if (
+		zoomInBtn &&
+		zoomOutBtn &&
+		fullScreenBtn &&
+		locateBtn &&
+		zoomInImg &&
+		zoomOutImg &&
+		fullScreenImg &&
+		locateImg
+	) {
+		if (get(theme) === 'dark') {
+			zoomInImg.src = '/icons/plus-white.svg';
+			zoomOutImg.src = '/icons/minus-white.svg';
+			fullScreenImg.src = '/icons/expand-white.svg';
+			locateImg.src = '/icons/locate-white.svg';
 
-		zoomInBtn.onmouseenter = undefined;
-		zoomInBtn.onmouseleave = undefined;
-		zoomOutBtn.onmouseenter = undefined;
-		zoomOutBtn.onmouseleave = undefined;
-		fullScreenBtn.onmouseenter = undefined;
-		fullScreenBtn.onmouseleave = undefined;
-		locateBtn.onmouseenter = undefined;
-		locateBtn.onmouseleave = undefined;
-	} else {
-		zoomInImg.src = '/icons/plus.svg';
-		zoomOutImg.src = '/icons/minus.svg';
-		fullScreenImg.src = '/icons/expand.svg';
-		locateImg.src = '/icons/locate.svg';
-
-		zoomInBtn.onmouseenter = () => {
-			zoomInImg.src = '/icons/plus-black.svg';
-		};
-		zoomInBtn.onmouseleave = () => {
+			zoomInBtn.onmouseenter = null;
+			zoomInBtn.onmouseleave = null;
+			zoomOutBtn.onmouseenter = null;
+			zoomOutBtn.onmouseleave = null;
+			fullScreenBtn.onmouseenter = null;
+			fullScreenBtn.onmouseleave = null;
+			locateBtn.onmouseenter = null;
+			locateBtn.onmouseleave = null;
+		} else {
 			zoomInImg.src = '/icons/plus.svg';
-		};
-
-		zoomOutBtn.onmouseenter = () => {
-			zoomOutImg.src = '/icons/minus-black.svg';
-		};
-		zoomOutBtn.onmouseleave = () => {
 			zoomOutImg.src = '/icons/minus.svg';
-		};
-
-		fullScreenBtn.onmouseenter = () => {
-			fullScreenImg.src = '/icons/expand-black.svg';
-		};
-		fullScreenBtn.onmouseleave = () => {
 			fullScreenImg.src = '/icons/expand.svg';
-		};
-
-		locateBtn.onmouseenter = () => {
-			locateImg.src = '/icons/locate-black.svg';
-		};
-		locateBtn.onmouseleave = () => {
 			locateImg.src = '/icons/locate.svg';
-		};
+
+			zoomInBtn.onmouseenter = () => {
+				zoomInImg.src = '/icons/plus-black.svg';
+			};
+			zoomInBtn.onmouseleave = () => {
+				zoomInImg.src = '/icons/plus.svg';
+			};
+
+			zoomOutBtn.onmouseenter = () => {
+				zoomOutImg.src = '/icons/minus-black.svg';
+			};
+			zoomOutBtn.onmouseleave = () => {
+				zoomOutImg.src = '/icons/minus.svg';
+			};
+
+			fullScreenBtn.onmouseenter = () => {
+				fullScreenImg.src = '/icons/expand-black.svg';
+			};
+			fullScreenBtn.onmouseleave = () => {
+				fullScreenImg.src = '/icons/expand.svg';
+			};
+
+			locateBtn.onmouseenter = () => {
+				locateImg.src = '/icons/locate-black.svg';
+			};
+			locateBtn.onmouseleave = () => {
+				locateImg.src = '/icons/locate.svg';
+			};
+		}
 	}
 };
 
-export const layers = (leaflet, map) => {
+export const layers = (leaflet: Leaflet, map: Map) => {
 	const theme = detectTheme();
 
 	const osm = leaflet.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -102,8 +119,7 @@ export const layers = (leaflet, map) => {
 		'https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png	',
 		{
 			noWrap: true,
-			maxZoom: 20,
-			ext: 'png'
+			maxZoom: 20
 		}
 	);
 
@@ -111,8 +127,7 @@ export const layers = (leaflet, map) => {
 		'https://tiles.stadiamaps.com/tiles/stamen_toner_lite/{z}/{x}/{y}{r}.png	',
 		{
 			noWrap: true,
-			maxZoom: 20,
-			ext: 'png'
+			maxZoom: 20
 		}
 	);
 
@@ -120,8 +135,7 @@ export const layers = (leaflet, map) => {
 		'https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg	',
 		{
 			noWrap: true,
-			maxZoom: 16,
-			ext: 'jpg'
+			maxZoom: 16
 		}
 	);
 
@@ -129,8 +143,7 @@ export const layers = (leaflet, map) => {
 		'https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png	',
 		{
 			noWrap: true,
-			maxZoom: 18,
-			ext: 'png'
+			maxZoom: 18
 		}
 	);
 
@@ -191,12 +204,14 @@ export const layers = (leaflet, map) => {
 	return baseMaps;
 };
 
-export const attribution = (L, map) => {
+export const attribution = (L: Leaflet, map: Map) => {
 	L.control.attribution({ position: 'bottomleft' }).addTo(map);
 
-	const OSMAttribution = document.querySelector(
+	const OSMAttribution: HTMLDivElement | null = document.querySelector(
 		'.leaflet-bottom.leaflet-left > .leaflet-control-attribution'
 	);
+
+	if (!OSMAttribution) return;
 
 	OSMAttribution.style.borderRadius = '0 8px 0 0';
 	OSMAttribution.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
@@ -211,9 +226,11 @@ export const attribution = (L, map) => {
 };
 
 export const support = () => {
-	const supportAttribution = document.querySelector(
+	const supportAttribution: HTMLDivElement | null = document.querySelector(
 		'.leaflet-bottom.leaflet-right > .leaflet-control-attribution'
 	);
+
+	if (!supportAttribution) return;
 
 	supportAttribution.style.borderRadius = '8px 0 0 0';
 	supportAttribution.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
@@ -227,11 +244,13 @@ export const support = () => {
 	);
 };
 
-export const scaleBars = (L, map) => {
+export const scaleBars = (L: Leaflet, map: Map) => {
 	const theme = detectTheme();
 
 	L.control.scale({ position: 'bottomleft' }).addTo(map);
-	const scaleBars = document.querySelectorAll('.leaflet-control-scale-line');
+	const scaleBars: NodeListOf<HTMLDivElement> = document.querySelectorAll(
+		'.leaflet-control-scale-line'
+	);
 	scaleBars.forEach((bar) => {
 		bar.classList.add('dark:!bg-dark', 'dark:!text-white');
 		if (theme === 'dark') {
@@ -240,49 +259,68 @@ export const scaleBars = (L, map) => {
 	});
 };
 
-export const changeDefaultIcons = (layers, L, mapElement, DomEvent) => {
+export const changeDefaultIcons = (
+	layers: boolean,
+	L: Leaflet,
+	mapElement: HTMLDivElement,
+	DomEvent: DomEventType
+) => {
 	const theme = detectTheme();
 
 	if (layers) {
-		const layers = document.querySelector('.leaflet-control-layers');
-		layers.style.border = theme === 'dark' ? '1px solid #e5e7eb' : 'none';
-		layers.style.borderRadius = '8px';
-		layers.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
-		layers.classList.add('dark:!bg-dark', 'dark:!text-white');
+		const layers: HTMLDivElement | null = document.querySelector('.leaflet-control-layers');
+		if (layers) {
+			layers.style.border = theme === 'dark' ? '1px solid #e5e7eb' : 'none';
+			layers.style.borderRadius = '8px';
+			layers.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+			layers.classList.add('dark:!bg-dark', 'dark:!text-white');
+		}
 	}
 
-	const leafletBar = document.querySelector('.leaflet-bar');
-	leafletBar.style.border = 'none';
-	leafletBar.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
-
-	const zoomIn = document.querySelector('.leaflet-control-zoom-in');
-	zoomIn.style.borderRadius = '8px 8px 0 0';
-	zoomIn.innerHTML = `<img src=${
-		theme === 'dark' ? '/icons/plus-white.svg' : '/icons/plus.svg'
-	} alt='zoomin' class='inline' id='zoomin'/>`;
-	if (theme === 'light') {
-		zoomIn.onmouseenter = () => {
-			document.querySelector('#zoomin').src = '/icons/plus-black.svg';
-		};
-		zoomIn.onmouseleave = () => {
-			document.querySelector('#zoomin').src = '/icons/plus.svg';
-		};
+	const leafletBar: HTMLDivElement | null = document.querySelector('.leaflet-bar');
+	if (leafletBar) {
+		leafletBar.style.border = 'none';
+		leafletBar.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 	}
-	zoomIn.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
 
-	const zoomOut = document.querySelector('.leaflet-control-zoom-out');
-	zoomOut.innerHTML = `<img src=${
-		theme === 'dark' ? '/icons/minus-white.svg' : '/icons/minus.svg'
-	} alt='zoomout' class='inline' id='zoomout'/>`;
-	if (theme === 'light') {
-		zoomOut.onmouseenter = () => {
-			document.querySelector('#zoomout').src = '/icons/minus-black.svg';
-		};
-		zoomOut.onmouseleave = () => {
-			document.querySelector('#zoomout').src = '/icons/minus.svg';
-		};
+	const zoomIn: HTMLAnchorElement | null = document.querySelector('.leaflet-control-zoom-in');
+	if (zoomIn) {
+		zoomIn.style.borderRadius = '8px 8px 0 0';
+		zoomIn.innerHTML = `<img src=${
+			theme === 'dark' ? '/icons/plus-white.svg' : '/icons/plus.svg'
+		} alt='zoomin' class='inline' id='zoomin'/>`;
+		if (theme === 'light') {
+			const zoomInIcon: HTMLImageElement | null = document.querySelector('#zoomin');
+			if (zoomInIcon) {
+				zoomIn.onmouseenter = () => {
+					zoomInIcon.src = '/icons/plus-black.svg';
+				};
+				zoomIn.onmouseleave = () => {
+					zoomInIcon.src = '/icons/plus.svg';
+				};
+			}
+		}
+		zoomIn.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
 	}
-	zoomOut.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+
+	const zoomOut: HTMLAnchorElement | null = document.querySelector('.leaflet-control-zoom-out');
+	if (zoomOut) {
+		zoomOut.innerHTML = `<img src=${
+			theme === 'dark' ? '/icons/minus-white.svg' : '/icons/minus.svg'
+		} alt='zoomout' class='inline' id='zoomout'/>`;
+		if (theme === 'light') {
+			const zoomOutIcon: HTMLImageElement | null = document.querySelector('#zoomout');
+			if (zoomOutIcon) {
+				zoomOut.onmouseenter = () => {
+					zoomOutIcon.src = '/icons/minus-black.svg';
+				};
+				zoomOut.onmouseleave = () => {
+					zoomOutIcon.src = '/icons/minus.svg';
+				};
+			}
+		}
+		zoomOut.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+	}
 
 	const fullscreenButton = L.DomUtil.create('a');
 	fullscreenButton.classList.add('leaflet-control-full-screen');
@@ -305,20 +343,22 @@ export const changeDefaultIcons = (layers, L, mapElement, DomEvent) => {
 	};
 	if (theme === 'light') {
 		fullscreenButton.onmouseenter = () => {
+			// @ts-expect-error
 			document.querySelector('#fullscreen').src = '/icons/expand-black.svg';
 		};
 		fullscreenButton.onmouseleave = () => {
+			// @ts-expect-error
 			document.querySelector('#fullscreen').src = '/icons/expand.svg';
 		};
 	}
 	fullscreenButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
 
-	leafletBar.append(fullscreenButton);
+	leafletBar?.append(fullscreenButton);
 
-	DomEvent.disableClickPropagation(document.querySelector('.leaflet-control-full-screen'));
+	DomEvent.disableClickPropagation(fullscreenButton);
 };
 
-export const geolocate = (L, map) => {
+export const geolocate = (L: Leaflet, map: Map) => {
 	const theme = detectTheme();
 
 	L.control.locate({ position: 'topleft' }).addTo(map);
@@ -328,39 +368,49 @@ export const geolocate = (L, map) => {
 	newLocateIcon.alt = 'locate';
 	newLocateIcon.classList.add('inline');
 	newLocateIcon.id = 'locatebutton';
-	document.querySelector('.leaflet-control-locate-location-arrow').replaceWith(newLocateIcon);
+	document.querySelector('.leaflet-control-locate-location-arrow')?.replaceWith(newLocateIcon);
 
-	const locateDiv = document.querySelector('.leaflet-control-locate');
-	locateDiv.style.border = 'none';
-	locateDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
-
-	const locateButton = document.querySelector('.leaflet-bar-part.leaflet-bar-part-single');
-	locateButton.style.borderRadius = '8px';
-	if (theme === 'light') {
-		locateButton.onmouseenter = () => {
-			document.querySelector('#locatebutton').src = '/icons/locate-black.svg';
-		};
-		locateButton.onmouseleave = () => {
-			document.querySelector('#locatebutton').src = '/icons/locate.svg';
-		};
+	const locateDiv: HTMLDivElement | null = document.querySelector('.leaflet-control-locate');
+	if (locateDiv) {
+		locateDiv.style.border = 'none';
+		locateDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 	}
-	locateButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+
+	const locateButton: HTMLAnchorElement | null = document.querySelector(
+		'.leaflet-bar-part.leaflet-bar-part-single'
+	);
+	if (locateButton) {
+		locateButton.style.borderRadius = '8px';
+		if (theme === 'light') {
+			const locateIcon: HTMLImageElement | null = document.querySelector('#locatebutton');
+			if (locateIcon) {
+				locateButton.onmouseenter = () => {
+					locateIcon.src = '/icons/locate-black.svg';
+				};
+				locateButton.onmouseleave = () => {
+					locateIcon.src = '/icons/locate.svg';
+				};
+			}
+		}
+		locateButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+	}
 };
 
-export const homeMarkerButtons = (L, map, DomEvent) => {
+export const homeMarkerButtons = (L: Leaflet, map: Map, DomEvent: DomEventType) => {
 	const theme = detectTheme();
+
+	const addControlDiv = L.DomUtil.create('div');
 
 	const customControls = L.Control.extend({
 		options: {
 			position: 'topleft'
 		},
 		onAdd: () => {
-			const addControlDiv = L.DomUtil.create('div');
 			addControlDiv.style.border = 'none';
 			addControlDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+			addControlDiv.classList.add('leaflet-control-site-links', 'leaflet-bar', 'leaflet-control');
 
 			const addHomeButton = L.DomUtil.create('a');
-			addControlDiv.classList.add('leaflet-control-site-links', 'leaflet-bar', 'leaflet-control');
 			addHomeButton.classList.add('leaflet-bar-part');
 			addHomeButton.href = '/';
 			addHomeButton.title = 'Go to home page';
@@ -373,9 +423,11 @@ export const homeMarkerButtons = (L, map, DomEvent) => {
 			addHomeButton.style.borderRadius = '8px 8px 0 0';
 			if (theme === 'light') {
 				addHomeButton.onmouseenter = () => {
+					// @ts-expect-error
 					document.querySelector('#homebutton').src = '/icons/home-black.svg';
 				};
 				addHomeButton.onmouseleave = () => {
+					// @ts-expect-error
 					document.querySelector('#homebutton').src = '/icons/home.svg';
 				};
 			}
@@ -396,9 +448,11 @@ export const homeMarkerButtons = (L, map, DomEvent) => {
 			addLocationButton.style.borderRadius = '0 0 8px 8px';
 			if (theme === 'light') {
 				addLocationButton.onmouseenter = () => {
+					// @ts-expect-error
 					document.querySelector('#marker').src = '/icons/marker-black.svg';
 				};
 				addLocationButton.onmouseleave = () => {
+					// @ts-expect-error
 					document.querySelector('#marker').src = '/icons/marker.svg';
 				};
 			}
@@ -411,11 +465,13 @@ export const homeMarkerButtons = (L, map, DomEvent) => {
 	});
 
 	map.addControl(new customControls());
-	DomEvent.disableClickPropagation(document.querySelector('.leaflet-control-site-links'));
+	DomEvent.disableClickPropagation(addControlDiv);
 };
 
-export const dataRefresh = (L, map, DomEvent) => {
+export const dataRefresh = (L: Leaflet, map: Map, DomEvent: DomEventType) => {
 	const theme = detectTheme();
+
+	const dataRefreshButton = L.DomUtil.create('a');
 
 	const customDataRefreshButton = L.Control.extend({
 		options: {
@@ -428,7 +484,6 @@ export const dataRefresh = (L, map, DomEvent) => {
 			dataRefreshDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 			dataRefreshDiv.style.display = 'none';
 
-			const dataRefreshButton = L.DomUtil.create('a');
 			dataRefreshButton.classList.add('leaflet-control-data-refresh');
 			dataRefreshButton.title = 'Data refresh available';
 			dataRefreshButton.role = 'button';
@@ -443,9 +498,11 @@ export const dataRefresh = (L, map, DomEvent) => {
 			};
 			if (theme === 'light') {
 				dataRefreshButton.onmouseenter = () => {
+					// @ts-expect-error
 					document.querySelector('#refresh').src = '/icons/refresh-black.svg';
 				};
 				dataRefreshButton.onmouseleave = () => {
+					// @ts-expect-error
 					document.querySelector('#refresh').src = '/icons/refresh.svg';
 				};
 			}
@@ -458,16 +515,16 @@ export const dataRefresh = (L, map, DomEvent) => {
 	});
 
 	map.addControl(new customDataRefreshButton());
-	DomEvent.disableClickPropagation(document.querySelector('.leaflet-control-data-refresh'));
+	DomEvent.disableClickPropagation(dataRefreshButton);
 };
 
 export const calcVerifiedDate = () => {
-	let verifiedDate = new Date();
+	const verifiedDate = new Date();
 	const previousYear = verifiedDate.getFullYear() - 1;
 	return verifiedDate.setFullYear(previousYear);
 };
 
-export const checkAddress = (element) => {
+export const checkAddress = (element: OSMTags) => {
 	if (element['addr:housenumber'] && element['addr:street'] && element['addr:city']) {
 		return `${
 			element['addr:housenumber'] + ' ' + element['addr:street'] + ', ' + element['addr:city']
@@ -481,15 +538,17 @@ export const checkAddress = (element) => {
 	}
 };
 
-export const latCalc = (element) => {
+export const latCalc = (element: ElementOSM) => {
+	// @ts-expect-error
 	return element.type == 'node' ? element.lat : (element.bounds.minlat + element.bounds.maxlat) / 2;
 };
 
-export const longCalc = (element) => {
+export const longCalc = (element: ElementOSM) => {
+	// @ts-expect-error
 	return element.type == 'node' ? element.lon : (element.bounds.minlon + element.bounds.maxlon) / 2;
 };
 
-export const generateIcon = (L, icon, boosted) => {
+export const generateIcon = (L: Leaflet, icon: string, boosted: boolean) => {
 	return L.divIcon({
 		className: boosted ? 'boosted-icon' : 'div-icon',
 		iconSize: [32, 43],
@@ -506,8 +565,8 @@ export const generateIcon = (L, icon, boosted) => {
 	});
 };
 
-export const verifiedArr = (element) => {
-	let verified = [];
+export const verifiedArr = (element: ElementOSM) => {
+	const verified = [];
 
 	if (element.tags) {
 		if (element.tags['survey:date']) {
@@ -531,15 +590,15 @@ export const verifiedArr = (element) => {
 };
 
 export const generateMarker = (
-	lat,
-	long,
-	icon,
-	element,
-	payment,
-	L,
-	verifiedDate,
-	verify,
-	boosted
+	lat: number,
+	long: number,
+	icon: DivIcon,
+	element: ElementOSM,
+	payment: { type: string; url?: string; username?: string } | undefined,
+	L: Leaflet,
+	verifiedDate: number,
+	verify: boolean,
+	boosted: string | undefined
 ) => {
 	const generatePopup = () => {
 		const theme = detectTheme();
@@ -555,7 +614,7 @@ export const generateMarker = (
 		const instagram = element.tags?.instagram || element.tags?.['contact:instagram'] || '';
 		const facebook = element.tags?.facebook || element.tags?.['contact:facebook'] || '';
 
-		let verified = verifiedArr(element);
+		const verified = verifiedArr(element);
 
 		const paymentMethod =
 			element.tags &&
@@ -899,92 +958,112 @@ ${
 		}
 
 		const showMoreDiv = popupContainer.querySelector('#show-more');
-		const moreButton = popupContainer.querySelector('#more-button');
+		const moreButton: HTMLButtonElement | null = popupContainer.querySelector('#more-button');
 
 		const hideMore = () => {
-			showMoreDiv.classList.add('hidden');
-			moreButton.classList.remove('!text-link');
-			moreButton.classList.add('!text-primary', 'dark:!text-white');
-			moreButton.classList.replace('border-link', 'border-mapBorder');
+			showMoreDiv?.classList.add('hidden');
+			moreButton?.classList.remove('!text-link');
+			moreButton?.classList.add('!text-primary', 'dark:!text-white');
+			moreButton?.classList.replace('border-link', 'border-mapBorder');
 			showMore.set(false);
 		};
 
-		moreButton.onclick = () => {
-			if (!get(showMore)) {
-				showMoreDiv.classList.remove('hidden');
-				moreButton.classList.remove('!text-primary', 'dark:!text-white');
-				moreButton.classList.add('!text-link');
-				moreButton.classList.replace('border-mapBorder', 'border-link');
-				showMore.set(true);
-			} else {
-				hideMore();
-			}
-		};
+		if (moreButton) {
+			moreButton.onclick = () => {
+				if (!get(showMore)) {
+					showMoreDiv?.classList.remove('hidden');
+					moreButton.classList.remove('!text-primary', 'dark:!text-white');
+					moreButton.classList.add('!text-link');
+					moreButton.classList.replace('border-mapBorder', 'border-link');
+					showMore.set(true);
+				} else {
+					hideMore();
+				}
+			};
+		}
 
-		popupContainer.querySelector('#navigate').onclick = () => hideMore();
-		popupContainer.querySelector('#edit').onclick = () => hideMore();
-		popupContainer.querySelector('#share').onclick = () => hideMore();
+		const navigateBtn: HTMLAnchorElement | null = popupContainer.querySelector('#navigate');
+		const editBtn: HTMLAnchorElement | null = popupContainer.querySelector('#edit');
+		const shareBtn: HTMLAnchorElement | null = popupContainer.querySelector('#share');
+		if (navigateBtn && editBtn && shareBtn) {
+			navigateBtn.onclick = () => hideMore();
+			editBtn.onclick = () => hideMore();
+			shareBtn.onclick = () => hideMore();
+		}
 
 		if (location.pathname === '/map') {
-			const showTagsButton = popupContainer.querySelector('#show-tags');
-			showTagsButton.onclick = () => {
-				showTags.set(element.tags || {});
-			};
+			const showTagsButton: HTMLButtonElement | null = popupContainer.querySelector('#show-tags');
+			if (showTagsButton) {
+				showTagsButton.onclick = () => {
+					showTags.set(element.tags || {});
+				};
+			}
 
-			const boostButton = popupContainer.querySelector('#boost-button');
-			const boostButtonText = boostButton.querySelector('span');
-			const boostButtonIcon = boostButton.querySelector('svg');
+			const boostButton: HTMLButtonElement | null = popupContainer.querySelector('#boost-button');
+			const boostButtonText: HTMLSpanElement | null | undefined =
+				boostButton?.querySelector('span');
+			const boostButtonIcon: SVGElement | null | undefined = boostButton?.querySelector('svg');
 
 			const resetButton = () => {
-				boostButton.disabled = false;
-				boostButtonText.innerText = boosted ? 'Extend' : 'Boost';
-				boostButton.classList.add('space-x-2');
-				boostButtonIcon.classList.remove('hidden');
+				if (boostButton && boostButtonText && boostButtonIcon) {
+					boostButton.disabled = false;
+					boostButtonText.innerText = boosted ? 'Extend' : 'Boost';
+					boostButton.classList.add('space-x-2');
+					boostButtonIcon.classList.remove('hidden');
+				}
 			};
 
-			boostButton.onclick = () => {
-				boostButton.disabled = true;
-				boostButtonIcon.classList.add('hidden');
-				boostButton.classList.remove('space-x-2');
-				boostButtonText.innerText = 'Boosting...';
+			if (boostButton) {
+				boostButton.onclick = () => {
+					if (boostButton && boostButtonText && boostButtonIcon) {
+						boostButton.disabled = true;
+						boostButtonIcon.classList.add('hidden');
+						boostButton.classList.remove('space-x-2');
+						boostButtonText.innerText = 'Boosting...';
 
-				boost.set({
-					id: element.type + ':' + element.id,
-					name: element.tags && element.tags.name ? element.tags.name : '',
-					boost: boosted ? boosted : ''
-				});
+						boost.set({
+							id: element.type + ':' + element.id,
+							name: element.tags && element.tags.name ? element.tags.name : '',
+							boost: boosted ? boosted : ''
+						});
 
-				axios
-					.get('https://blockchain.info/ticker')
-					.then(function (response) {
-						exchangeRate.set(response.data['USD']['15m']);
-					})
-					.catch(function (error) {
-						errToast('Could not fetch bitcoin exchange rate, please try again or contact BTC Map.');
-						console.log(error);
-						resetButton();
-					});
-			};
+						axios
+							.get('https://blockchain.info/ticker')
+							.then(function (response) {
+								exchangeRate.set(response.data['USD']['15m']);
+							})
+							.catch(function (error) {
+								errToast(
+									'Could not fetch bitcoin exchange rate, please try again or contact BTC Map.'
+								);
+								console.log(error);
+								resetButton();
+							});
+					}
+				};
+			}
 
 			resetBoost.subscribe(resetButton);
 		}
 
 		if (boosted) {
 			const boostedTime = popupContainer.querySelector('#boosted-time');
-			new Time({
-				target: boostedTime,
-				props: {
-					live: 3000,
-					relative: true,
-					timestamp: boosted
-				}
-			});
+			if (boostedTime) {
+				new Time({
+					target: boostedTime,
+					props: {
+						live: 3000,
+						relative: true,
+						timestamp: boosted
+					}
+				});
+			}
 		}
 
 		return popupContainer;
 	};
 
-	let marker = L.marker([lat, long], { icon });
+	const marker = L.marker([lat, long], { icon });
 
 	marker.on('click', () => {
 		if (marker.isPopupOpen()) {
@@ -1001,10 +1080,10 @@ ${
 					const showMoreDiv = document.querySelector('#show-more');
 					const moreButton = document.querySelector('#more-button');
 
-					showMoreDiv.classList.add('hidden');
-					moreButton.classList.remove('!text-link');
-					moreButton.classList.add('!text-primary', 'dark:!text-white');
-					moreButton.classList.replace('border-link', 'border-mapBorder');
+					showMoreDiv?.classList.add('hidden');
+					moreButton?.classList.remove('!text-link');
+					moreButton?.classList.add('!text-primary', 'dark:!text-white');
+					moreButton?.classList.replace('border-link', 'border-mapBorder');
 					showMore.set(false);
 
 					marker.unbindPopup();

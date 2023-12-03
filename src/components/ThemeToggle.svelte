@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { theme } from '$lib/store';
+	import type { Theme } from '$lib/types';
 	import { detectTheme } from '$lib/utils';
 	import { onMount } from 'svelte';
 
-	let currentTheme;
+	let currentTheme: undefined | Theme;
 
 	onMount(() => {
 		currentTheme = detectTheme();

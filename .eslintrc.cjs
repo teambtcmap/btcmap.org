@@ -28,8 +28,8 @@ module.exports = {
 		}
 	],
 	rules: {
-		"svelte/no-dupe-style-properties": "warn",
-		'@typescript-eslint/ban-ts-comment': 'warn',
+		'svelte/no-dupe-style-properties': 'warn',
+		'@typescript-eslint/ban-ts-comment': 'off',
 		'@typescript-eslint/no-explicit-any': 'warn'
 	}
 };

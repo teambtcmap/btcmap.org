@@ -6,7 +6,7 @@
 		LatestTagger,
 		TaggerSkeleton,
 		TopButton
-	} from '$comp';
+	} from '$lib/comp';
 	import {
 		elementError,
 		elements,
@@ -17,6 +17,7 @@
 		userError,
 		users
 	} from '$lib/store';
+	import type { ActivityEvent, Element, Event, User } from '$lib/types';
 	import { detectTheme, errToast } from '$lib/utils';
 
 	// alert for user errors
@@ -26,10 +27,15 @@
 	// alert for element errors
 	$: $elementError && errToast($elementError);
 
-	let elementsLoading;
-	let supertaggers;
+	let elementsLoading: boolean;
+	let supertaggers: ActivityEvent[];
 
-	const supertaggerSync = (status, users, events, elements) => {
+	const supertaggerSync = (
+		status: boolean,
+		users: User[],
+		events: Event[],
+		elements: Element[]
+	) => {
 		if (elements.length && events.length && users.length && !status) {
 			let recentEvents = events
 				.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']))
@@ -47,10 +53,11 @@
 							? elementMatch['osm_json'].tags.name
 							: undefined;
 
-					event.location = location ? location : 'Unnamed element';
-					event.merchantId = elementMatch.id;
-
-					supertaggers.push(event);
+					supertaggers.push({
+						...event,
+						location: location || 'Unnamed element',
+						merchantId: elementMatch.id
+					});
 				}
 			});
 
@@ -63,7 +70,7 @@
 
 	$: latestTaggers = supertaggers && supertaggers.length && !elementsLoading ? true : false;
 
-	const findUser = (tagger) => {
+	const findUser = (tagger: ActivityEvent) => {
 		let foundUser = $users.find((user) => user.id == tagger['user_id']);
 		if (foundUser) {
 			return foundUser;
@@ -131,7 +138,7 @@
 								/>
 							{/each}
 						{:else}
-							<!-- eslint-disable-next-line no-unused-vars -->
+							<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 							{#each Array(50) as skeleton}
 								<TaggerSkeleton />
 							{/each}

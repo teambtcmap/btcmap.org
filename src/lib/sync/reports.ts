@@ -1,4 +1,5 @@
 import { reportError, reports } from '$lib/store';
+import type { Report } from '$lib/types';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import localforage from 'localforage';
@@ -10,17 +11,17 @@ const limit = 20000;
 export const reportsSync = async () => {
 	// get reports from local
 	await localforage
-		.getItem('reports')
+		.getItem<Report[]>('reports')
 		.then(async function (value) {
 			// get reports from API if initial sync
 			if (!value) {
 				let updatedSince = '2022-01-01T00:00:00.000Z';
 				let responseCount;
-				let reportsData = [];
+				const reportsData: Report[] = [];
 
 				do {
 					try {
-						const response = await axios.get(
+						const response = await axios.get<Report[]>(
 							`https://api.btcmap.org/v2/reports?updated_since=${updatedSince}&limit=${limit}`
 						);
 
@@ -51,8 +52,7 @@ export const reportsSync = async () => {
 					// set response to local
 					localforage
 						.setItem('reports', reportsData)
-						// eslint-disable-next-line no-unused-vars
-						.then(function (value) {
+						.then(function () {
 							// set response to store
 							reports.set(reportsFiltered);
 						})
@@ -70,22 +70,22 @@ export const reportsSync = async () => {
 
 				// start update sync from API
 				// sort to get most recent record
-				let cacheSorted = [...value];
+				const cacheSorted = [...value];
 				cacheSorted.sort((a, b) => Date.parse(b['updated_at']) - Date.parse(a['updated_at']));
 
 				let updatedSince = cacheSorted[0]['updated_at'];
 				let responseCount;
-				let reportsData = value;
+				const reportsData = value;
 				let useCachedData = false;
 
 				do {
 					try {
-						const response = await axios.get(
+						const response = await axios.get<Report[]>(
 							`https://api.btcmap.org/v2/reports?updated_since=${updatedSince}&limit=${limit}`
 						);
 
 						// update new records if they exist
-						let newReports = response.data;
+						const newReports = response.data;
 
 						// check for new reports in local and purge if they exist
 						if (newReports.length) {
@@ -130,8 +130,7 @@ export const reportsSync = async () => {
 					// set updated reports locally
 					localforage
 						.setItem('reports', reportsData)
-						// eslint-disable-next-line no-unused-vars
-						.then(function (value) {
+						.then(function () {
 							// set updated reports to store
 							reports.set(newReportsFiltered);
 						})
@@ -154,11 +153,11 @@ export const reportsSync = async () => {
 
 			let updatedSince = '2022-01-01T00:00:00.000Z';
 			let responseCount;
-			let reportsData = [];
+			const reportsData: Report[] = [];
 
 			do {
 				try {
-					const response = await axios.get(
+					const response = await axios.get<Report[]>(
 						`https://api.btcmap.org/v2/reports?updated_since=${updatedSince}&limit=${limit}`
 					);
 

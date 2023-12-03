@@ -8,19 +8,22 @@
 		InfoTooltip,
 		MapLoading,
 		PrimaryButton
-	} from '$comp';
+	} from '$lib/comp';
 	import { attribution, changeDefaultIcons, geolocate, toggleMapButtons } from '$lib/map/setup';
 	import { areaError, areas, socials, theme } from '$lib/store';
+	import type { SubmitForm } from '$lib/types';
 	import { detectTheme, errToast } from '$lib/utils';
+	// @ts-expect-error
 	import rewind from '@mapbox/geojson-rewind';
 	import axios from 'axios';
 	import { geoContains } from 'd3-geo';
+	import type { Map, Marker, TileLayer } from 'leaflet';
 	import { onDestroy, onMount, tick } from 'svelte';
 
-	let captcha;
-	let captchaSecret;
-	let captchaInput;
-	let honeyInput;
+	let captcha: HTMLDivElement;
+	let captchaSecret: string;
+	let captchaInput: HTMLInputElement;
+	let honeyInput: HTMLInputElement;
 
 	const fetchCaptcha = () => {
 		axios
@@ -49,33 +52,33 @@
 			area.tags.continent &&
 			Object.keys(area.tags).find((key) => key.includes('contact'))
 	);
-	let filteredCommunities;
+	let filteredCommunities: string[];
 
-	let name;
-	let address;
-	let lat;
-	let long;
+	let name: HTMLInputElement;
+	let address: HTMLInputElement;
+	let lat: number;
+	let long: number;
 	let selected = false;
-	let category;
-	let methods = [];
-	let onchain;
-	let lightning;
-	let nfc;
-	let website;
-	let phone;
-	let hours;
-	let twitterMerchant;
-	let twitterSubmitter;
-	let notes;
-	let source;
-	let sourceOther;
-	let sourceOtherElement;
-	let contact;
+	let category: HTMLInputElement;
+	let methods: ('onchain' | 'lightning' | 'nfc')[] = [];
+	let onchain: HTMLInputElement;
+	let lightning: HTMLInputElement;
+	let nfc: HTMLInputElement;
+	let website: HTMLInputElement;
+	let phone: HTMLInputElement;
+	let hours: HTMLInputElement;
+	let twitterMerchant: HTMLInputElement;
+	let twitterSubmitter: HTMLInputElement;
+	let notes: HTMLTextAreaElement;
+	let source: 'Business Owner' | 'Customer' | 'Other';
+	let sourceOther: string;
+	let sourceOtherElement: HTMLTextAreaElement;
+	let contact: HTMLInputElement;
 	let noLocationSelected = false;
 	let noMethodSelected = false;
 	let submitted = false;
 	let submitting = false;
-	let submissionIssueNumber;
+	let submissionIssueNumber: number;
 
 	const handleCheckboxClick = () => {
 		noMethodSelected = false;
@@ -84,7 +87,7 @@
 	$: latFixed = lat && lat.toFixed(5);
 	$: longFixed = long && long.toFixed(5);
 
-	const submitForm = (e) => {
+	const submitForm = (e: SubmitForm) => {
 		e.preventDefault();
 		if (!selected) {
 			noLocationSelected = true;
@@ -153,12 +156,12 @@
 	};
 
 	// location picker map
-	let mapElement;
-	let map;
-	let mapLoaded;
+	let mapElement: HTMLDivElement;
+	let map: Map;
+	let mapLoaded = false;
 
-	let osm;
-	let alidadeSmoothDark;
+	let osm: TileLayer;
+	let alidadeSmoothDark: TileLayer;
 
 	onMount(async () => {
 		if (browser) {
@@ -169,8 +172,9 @@
 
 			//import packages
 			const leaflet = await import('leaflet');
+			// @ts-expect-error
 			const DomEvent = await import('leaflet/src/dom/DomEvent');
-			// eslint-disable-next-line no-unused-vars
+			// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 			const leafletLocateControl = await import('leaflet.locatecontrol');
 
 			// add map and tiles
@@ -196,7 +200,7 @@
 			}
 
 			// add marker on click
-			let marker;
+			let marker: Marker;
 
 			map.on('click', (e) => {
 				if (captchaSecret) {
@@ -206,8 +210,8 @@
 					if (marker) {
 						map.removeLayer(marker);
 					}
-					// eslint-disable-next-line no-undef
-					marker = L.marker([lat, long]).addTo(map);
+
+					marker = leaflet.marker([lat, long]).addTo(map);
 
 					selected = true;
 
@@ -227,20 +231,16 @@
 			});
 
 			// change broken marker image path in prod
-			// eslint-disable-next-line no-undef
-			L.Icon.Default.prototype.options.imagePath = '/icons/';
+			leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
 
 			// add locate button to map
-			// eslint-disable-next-line no-undef
-			geolocate(L, map);
+			geolocate(leaflet, map);
 
 			// change default icons
-			// eslint-disable-next-line no-undef
-			changeDefaultIcons('', L, mapElement, DomEvent);
+			changeDefaultIcons(false, leaflet, mapElement, DomEvent);
 
 			// add OSM attribution
-			// eslint-disable-next-line no-undef
-			attribution(L, map);
+			attribution(leaflet, map);
 
 			mapLoaded = true;
 		}
@@ -749,7 +749,8 @@
 	{#if detectTheme() === 'dark' || $theme === 'dark'}
 		<style>
 			select option {
-				@apply bg-gray-700;
+				--tw-bg-opacity: 1;
+				background-color: rgb(55 65 81 / var(--tw-bg-opacity));
 			}
 		</style>
 	{/if}

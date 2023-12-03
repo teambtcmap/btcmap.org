@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { LoadingSpinner } from '$comp';
+	import { LoadingSpinner } from '$lib/comp';
 
-	export let title;
-	export let stat;
-	export let percent = undefined;
-	export let change = undefined;
-	export let border = undefined;
-	export let loading;
+	export let title: string;
+	export let stat: number | undefined;
+	export let percent: undefined | string = undefined;
+	export let change: undefined | string = undefined;
+	export let border: undefined | string = undefined;
+	export let loading: boolean;
 </script>
 
 <div class="space-y-5 p-5 {border}">
@@ -20,11 +20,11 @@
 		{/if}
 	</h3>
 	<div class="flex justify-center md:justify-start">
-		{#if stat >= 0}
+		{#if stat !== undefined}
 			<span class="text-5xl font-semibold text-primary dark:text-white">{stat}</span>
-			{#if percent !== undefined}
+			{#if percent}
 				<span
-					class="{percent === '+0' || percent === 0
+					class="{percent === '+0'
 						? 'text-primary dark:text-white'
 						: percent.startsWith('+')
 						  ? 'text-statPositive'

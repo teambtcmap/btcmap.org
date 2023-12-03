@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { DashboardStat, Footer, Header, HeaderPlaceholder } from '$comp';
+	import { DashboardStat, Footer, Header, HeaderPlaceholder } from '$lib/comp';
 	import {
 		areaError,
 		areas,
@@ -11,6 +11,7 @@
 		syncStatus,
 		theme
 	} from '$lib/store';
+	import type { EventType, Report } from '$lib/types';
 	import { detectTheme, errToast, updateChartThemes } from '$lib/utils';
 	import Chart from 'chart.js/auto';
 	import { onMount } from 'svelte';
@@ -56,10 +57,10 @@
 			: undefined;
 
 	const getStatPeriod = () => {
-		return new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+		return new Date(new Date().getTime() - 24 * 60 * 60 * 1000).getTime();
 	};
 
-	const getStat = (stat) => {
+	const getStat = (stat: EventType) => {
 		return $events.filter((event) => {
 			let statPeriod = getStatPeriod();
 			if (event.type === stat && Date.parse(event['created_at']) > statPeriod) {
@@ -70,10 +71,10 @@
 		}).length;
 	};
 
-	const getStatPrevious = (stat) => {
+	const getStatPrevious = (stat: EventType) => {
 		return $events.filter((event) => {
 			let statPeriod = getStatPeriod();
-			let previousStatPeriod = new Date(new Date().getTime() - 48 * 60 * 60 * 1000);
+			let previousStatPeriod = new Date(new Date().getTime() - 48 * 60 * 60 * 1000).getTime();
 			if (
 				event.type === stat &&
 				Date.parse(event['created_at']) > previousStatPeriod &&
@@ -102,76 +103,80 @@
 	$: nfc = stats && stats[0].tags.total_elements_lightning_contactless;
 
 	$: totalChange =
-		stats &&
-		new Intl.NumberFormat('en-US', { signDisplay: 'always' })
-			.format(total - stats[1].tags.total_elements)
-			.toString();
+		stats && total
+			? new Intl.NumberFormat('en-US', { signDisplay: 'always' }).format(
+					total - stats[1].tags.total_elements
+			  )
+			: undefined;
 
 	$: createdPercentChange =
-		created &&
-		createdPrevious &&
-		new Intl.NumberFormat('en-US', { signDisplay: 'always' })
-			.format((((created - createdPrevious) / createdPrevious) * 100).toFixed(1))
-			.toString();
+		created && createdPrevious
+			? new Intl.NumberFormat('en-US', { signDisplay: 'always' }).format(
+					Number((((created - createdPrevious) / createdPrevious) * 100).toFixed(1))
+			  )
+			: '';
 
 	$: updatedPercentChange =
-		updated &&
-		updatedPrevious &&
-		new Intl.NumberFormat('en-US', { signDisplay: 'always' })
-			.format((((updated - updatedPrevious) / updatedPrevious) * 100).toFixed(1))
-			.toString();
+		updated && updatedPrevious
+			? new Intl.NumberFormat('en-US', { signDisplay: 'always' }).format(
+					Number((((updated - updatedPrevious) / updatedPrevious) * 100).toFixed(1))
+			  )
+			: '';
 
 	$: deletedPercentChange =
-		deleted &&
-		deletedPrevious &&
-		new Intl.NumberFormat('en-US', { signDisplay: 'always' })
-			.format((((deleted - deletedPrevious) / deletedPrevious) * 100).toFixed(1))
-			.toString();
+		deleted && deletedPrevious
+			? new Intl.NumberFormat('en-US', { signDisplay: 'always' }).format(
+					Number((((deleted - deletedPrevious) / deletedPrevious) * 100).toFixed(1))
+			  )
+			: '';
 
 	$: onchainPercentChange =
-		stats &&
-		new Intl.NumberFormat('en-US', { signDisplay: 'always' })
-			.format(
-				(
-					((onchain - stats[1].tags.total_elements_onchain) /
-						stats[1].tags.total_elements_onchain) *
-					100
-				).toFixed(1)
-			)
-			.toString();
+		stats && onchain
+			? new Intl.NumberFormat('en-US', { signDisplay: 'always' }).format(
+					Number(
+						(
+							((onchain - stats[1].tags.total_elements_onchain) /
+								stats[1].tags.total_elements_onchain) *
+							100
+						).toFixed(1)
+					)
+			  )
+			: '';
 
 	$: lightningPercentChange =
-		stats &&
-		new Intl.NumberFormat('en-US', { signDisplay: 'always' })
-			.format(
-				(
-					((lightning - stats[1].tags.total_elements_lightning) /
-						stats[1].tags.total_elements_lightning) *
-					100
-				).toFixed(1)
-			)
-			.toString();
+		stats && lightning
+			? new Intl.NumberFormat('en-US', { signDisplay: 'always' }).format(
+					Number(
+						(
+							((lightning - stats[1].tags.total_elements_lightning) /
+								stats[1].tags.total_elements_lightning) *
+							100
+						).toFixed(1)
+					)
+			  )
+			: '';
 
 	$: nfcPercentChange =
-		stats &&
-		new Intl.NumberFormat('en-US', { signDisplay: 'always' })
-			.format(
-				(
-					((nfc - stats[1].tags.total_elements_lightning_contactless) /
-						stats[1].tags.total_elements_lightning_contactless) *
-					100
-				).toFixed(1)
-			)
-			.toString();
+		stats && nfc
+			? new Intl.NumberFormat('en-US', { signDisplay: 'always' }).format(
+					Number(
+						(
+							((nfc - stats[1].tags.total_elements_lightning_contactless) /
+								stats[1].tags.total_elements_lightning_contactless) *
+							100
+						).toFixed(1)
+					)
+			  )
+			: '';
 
-	let upToDateChartCanvas;
-	let upToDateChart;
-	let totalChartCanvas;
-	let totalChart;
-	let legacyChartCanvas;
-	let legacyChart;
-	let paymentMethodChartCanvas;
-	let paymentMethodChart;
+	let upToDateChartCanvas: HTMLCanvasElement;
+	let upToDateChart: Chart<'line', number[] | undefined, string>;
+	let totalChartCanvas: HTMLCanvasElement;
+	let totalChart: Chart<'line', number[] | undefined, string>;
+	let legacyChartCanvas: HTMLCanvasElement;
+	let legacyChart: Chart<'line', number[] | undefined, string>;
+	let paymentMethodChartCanvas: HTMLCanvasElement;
+	let paymentMethodChart: Chart<'line', number[] | undefined, string>;
 
 	const populateCharts = () => {
 		const theme = detectTheme();
@@ -179,11 +184,11 @@
 		upToDateChart = new Chart(upToDateChartCanvas, {
 			type: 'line',
 			data: {
-				labels: statsSorted.map(({ date }) => date),
+				labels: statsSorted?.map(({ date }) => date),
 				datasets: [
 					{
 						label: 'Up-to-date Locations',
-						data: statsSorted.map(({ tags: { up_to_date_elements } }) => up_to_date_elements),
+						data: statsSorted?.map(({ tags: { up_to_date_elements } }) => up_to_date_elements),
 						fill: {
 							target: 'origin',
 							above: 'rgba(11, 144, 114, 0.2)'
@@ -199,7 +204,7 @@
 					legend: {
 						labels: {
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						}
 					}
@@ -209,7 +214,7 @@
 						ticks: {
 							maxTicksLimit: 5,
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						},
 						grid: {
@@ -219,7 +224,7 @@
 					y: {
 						ticks: {
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						},
 						grid: {
@@ -233,11 +238,11 @@
 		totalChart = new Chart(totalChartCanvas, {
 			type: 'line',
 			data: {
-				labels: statsSorted.map(({ date }) => date),
+				labels: statsSorted?.map(({ date }) => date),
 				datasets: [
 					{
 						label: 'Total Locations',
-						data: statsSorted.map((stat) => {
+						data: statsSorted?.map((stat) => {
 							switch (stat.date) {
 								case '2023-08-02':
 									return 7886;
@@ -268,7 +273,7 @@
 					legend: {
 						labels: {
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						}
 					}
@@ -278,7 +283,7 @@
 						ticks: {
 							maxTicksLimit: 5,
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						},
 						grid: {
@@ -288,7 +293,7 @@
 					y: {
 						ticks: {
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						},
 						grid: {
@@ -302,11 +307,11 @@
 		legacyChart = new Chart(legacyChartCanvas, {
 			type: 'line',
 			data: {
-				labels: statsSorted.map(({ date }) => date),
+				labels: statsSorted?.map(({ date }) => date),
 				datasets: [
 					{
 						label: 'Legacy Locations',
-						data: statsSorted.map(({ tags: { legacy_elements } }) => legacy_elements),
+						data: statsSorted?.map(({ tags: { legacy_elements } }) => legacy_elements),
 						fill: {
 							target: 'origin',
 							above: 'rgba(235, 87, 87, 0.2)'
@@ -322,7 +327,7 @@
 					legend: {
 						labels: {
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						}
 					}
@@ -332,7 +337,7 @@
 						ticks: {
 							maxTicksLimit: 5,
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						},
 						grid: {
@@ -342,7 +347,7 @@
 					y: {
 						ticks: {
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						},
 						grid: {
@@ -356,18 +361,20 @@
 		paymentMethodChart = new Chart(paymentMethodChartCanvas, {
 			type: 'line',
 			data: {
-				labels: statsSorted.map(({ date }) => date),
+				labels: statsSorted?.map(({ date }) => date),
 				datasets: [
 					{
 						label: 'On-chain',
-						data: statsSorted.map(({ tags: { total_elements_onchain } }) => total_elements_onchain),
+						data: statsSorted?.map(
+							({ tags: { total_elements_onchain } }) => total_elements_onchain
+						),
 						fill: false,
 						borderColor: 'rgb(247, 147, 26)',
 						tension: 0.1
 					},
 					{
 						label: 'Lightning',
-						data: statsSorted.map(
+						data: statsSorted?.map(
 							({ tags: { total_elements_lightning } }) => total_elements_lightning
 						),
 						fill: false,
@@ -376,7 +383,7 @@
 					},
 					{
 						label: 'Contactless',
-						data: statsSorted.map(
+						data: statsSorted?.map(
 							({ tags: { total_elements_lightning_contactless } }) =>
 								total_elements_lightning_contactless
 						),
@@ -392,7 +399,7 @@
 					legend: {
 						labels: {
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						}
 					}
@@ -402,7 +409,7 @@
 						ticks: {
 							maxTicksLimit: 5,
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						},
 						grid: {
@@ -412,7 +419,7 @@
 					y: {
 						ticks: {
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						},
 						grid: {
@@ -427,19 +434,19 @@
 		chartsRendered = true;
 	};
 
-	const chartSync = (status, reports) => {
+	const chartSync = (status: boolean, reports: Report[]) => {
 		if (reports.length && !status && initialRenderComplete) {
 			if (chartsRendered) {
 				chartsLoading = true;
 
-				upToDateChart.data.labels = statsSorted.map(({ date }) => date);
-				upToDateChart.data.datasets[0].data = statsSorted.map(
+				upToDateChart.data.labels = statsSorted?.map(({ date }) => date);
+				upToDateChart.data.datasets[0].data = statsSorted?.map(
 					({ tags: { up_to_date_elements } }) => up_to_date_elements
 				);
 				upToDateChart.update();
 
-				totalChart.data.labels = statsSorted.map(({ date }) => date);
-				totalChart.data.datasets[0].data = statsSorted.map((stat) => {
+				totalChart.data.labels = statsSorted?.map(({ date }) => date);
+				totalChart.data.datasets[0].data = statsSorted?.map((stat) => {
 					switch (stat.date) {
 						case '2023-08-02':
 							return 7886;
@@ -457,20 +464,20 @@
 				});
 				totalChart.update();
 
-				legacyChart.data.labels = statsSorted.map(({ date }) => date);
-				legacyChart.data.datasets[0].data = statsSorted.map(
+				legacyChart.data.labels = statsSorted?.map(({ date }) => date);
+				legacyChart.data.datasets[0].data = statsSorted?.map(
 					({ tags: { legacy_elements } }) => legacy_elements
 				);
 				legacyChart.update();
 
-				paymentMethodChart.data.labels = statsSorted.map(({ date }) => date);
-				paymentMethodChart.data.datasets[0].data = statsSorted.map(
+				paymentMethodChart.data.labels = statsSorted?.map(({ date }) => date);
+				paymentMethodChart.data.datasets[0].data = statsSorted?.map(
 					({ tags: { total_elements_onchain } }) => total_elements_onchain
 				);
-				paymentMethodChart.data.datasets[1].data = statsSorted.map(
+				paymentMethodChart.data.datasets[1].data = statsSorted?.map(
 					({ tags: { total_elements_lightning } }) => total_elements_lightning
 				);
-				paymentMethodChart.data.datasets[2].data = statsSorted.map(
+				paymentMethodChart.data.datasets[2].data = statsSorted?.map(
 					({ tags: { total_elements_lightning_contactless } }) =>
 						total_elements_lightning_contactless
 				);

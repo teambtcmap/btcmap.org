@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { CloseButton, CopyButton, Icon, PrimaryButton } from '$comp';
+	import { CloseButton, CopyButton, Icon, PrimaryButton } from '$lib/comp';
 	import { boost, boostHash, exchangeRate, resetBoost } from '$lib/store';
 	import { errToast, warningToast } from '$lib/utils';
+	// @ts-expect-error
 	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
 	import axios from 'axios';
 	import JSConfetti from 'js-confetti';
@@ -18,10 +19,9 @@
 		{ fiat: 30, time: 12 }
 	];
 
-	let tooltip;
-
-	let selectedBoost;
-	let boostComplete;
+	let tooltip = false;
+	let selectedBoost: { fiat: number; sats: string; time: number; expires: Date } | undefined;
+	let boostComplete = false;
 
 	const closeModal = () => {
 		if (boostComplete) {
@@ -42,18 +42,19 @@
 
 	let invoice = '';
 	let hash = '';
-	let qr;
-	let checkInvoiceInterval;
+	let qr: HTMLCanvasElement;
+	let checkInvoiceInterval: ReturnType<typeof setInterval>;
 	let loading = false;
 
 	const jsConfetti = new JSConfetti();
+	// @ts-expect-error
 	document.querySelector('canvas').style.zIndex = '2001';
 
 	const checkInvoice = () => {
 		axios
 			.get(`/boost/invoice/status?hash=${hash}`)
 			.then(function (response) {
-				if (response.data.paid === true) {
+				if (response.data.paid === true && $boost && selectedBoost) {
 					clearInterval(checkInvoiceInterval);
 
 					if ($boostHash === hash) {
@@ -89,10 +90,10 @@
 		loading = true;
 		axios
 			.get(
-				`/boost/invoice/generate?amount=${selectedBoost.sats}&name=${$boost.name.replaceAll(
+				`/boost/invoice/generate?amount=${selectedBoost?.sats}&name=${$boost?.name.replaceAll(
 					'&',
 					'%26'
-				)}&time=${selectedBoost.time}`
+				)}&time=${selectedBoost?.time}`
 			)
 			.then(async function (response) {
 				invoice = response.data['payment_request'];
@@ -106,7 +107,7 @@
 					qr,
 					invoice,
 					{ width: window.innerWidth > 768 ? 275 : 200 },
-					function (error) {
+					function (error: any) {
 						if (error) {
 							errToast('Could not generate QR, please try again or contact BTC Map.');
 							console.error(error);
@@ -127,7 +128,7 @@
 </script>
 
 {#if $boost && $exchangeRate}
-	<OutClick excludeQuerySelectorAll={['#boost-button']} on:outclick={closeModal}>
+	<OutClick excludeQuerySelectorAll="#boost-button" on:outclick={closeModal}>
 		<div
 			transition:fly={{ y: 200, duration: 300 }}
 			class="center-fixed z-[2000] max-h-[90vh] w-[90vw] overflow-auto rounded-xl border border-mapBorder bg-white p-6 text-left shadow-2xl dark:bg-dark md:w-[430px]"
@@ -175,6 +176,7 @@
 						{#each values as value}
 							<button
 								on:click={() => {
+									if (!$exchangeRate) return;
 									let dateNow = new Date();
 									let currentBoost =
 										$boost && $boost.boost && new Date($boost.boost) > dateNow
@@ -237,13 +239,15 @@
 						/>
 					</a>
 
-					<p class="text-body dark:text-white">
-						Boost this location for <strong
-							>{selectedBoost.time} month{selectedBoost.time > 1 ? 's' : ''} <br />
-							${selectedBoost.fiat}</strong
-						>
-						(<strong>{selectedBoost.sats} sats</strong>)
-					</p>
+					{#if selectedBoost}
+						<p class="text-body dark:text-white">
+							Boost this location for <strong
+								>{selectedBoost.time} month{selectedBoost.time > 1 ? 's' : ''} <br />
+								${selectedBoost.fiat}</strong
+							>
+							(<strong>{selectedBoost.sats} sats</strong>)
+						</p>
+					{/if}
 
 					<div
 						class="flex w-full items-center justify-between space-x-2 rounded-xl border-2 border-mapBorder p-2 md:justify-center"
@@ -288,7 +292,7 @@
 					<p class="text-body dark:text-white">
 						This location will be boosted until <br />
 						<strong
-							>{selectedBoost.expires.toLocaleDateString(undefined, {
+							>{selectedBoost?.expires.toLocaleDateString(undefined, {
 								year: 'numeric',
 								month: 'long',
 								day: 'numeric'

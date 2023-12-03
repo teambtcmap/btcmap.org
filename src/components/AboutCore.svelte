@@ -1,7 +1,12 @@
 <script lang="ts">
-	export let member;
+	export let member: {
+		avatar: string;
+		name: string;
+		title: string;
+		socials: { url: string; name: string }[];
+	};
 
-	import { Icon } from '$comp';
+	import { Icon } from '$lib/comp';
 </script>
 
 <div class="space-y-2 text-center">
@@ -9,7 +14,9 @@
 		src="/images/team/{member.avatar}.jpg"
 		alt="avatar"
 		class="mx-auto h-28 w-28 rounded-full object-cover"
-		onerror="this.src='/images/satoshi-nakamoto.png'"
+		on:error={function () {
+			this.src = '/images/satoshi-nakamoto.png';
+		}}
 	/>
 
 	<div>

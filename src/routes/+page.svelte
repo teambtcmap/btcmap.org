@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Footer, Header, HeaderPlaceholder, Icon } from '$comp';
+	import { Footer, Header, HeaderPlaceholder, Icon } from '$lib/comp';
 	import { apps, theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
 </script>

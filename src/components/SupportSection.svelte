@@ -1,7 +1,7 @@
 <script lang="ts">
-	export let title;
-	export let supporters;
-	export let placeholders;
+	export let title: 'Company' | 'Community';
+	export let supporters: { url: string; logoDark?: string; logo: string; title: string }[];
+	export let placeholders: number;
 
 	import { theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
@@ -31,7 +31,7 @@
 			</a>
 		{/each}
 		<!-- supporter placeholders -->
-		<!-- eslint-disable-next-line no-unused-vars -->
+		<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 		{#each Array(placeholders) as placeholder}
 			<div
 				class="mx-auto flex h-[90px] w-full items-center justify-center self-center rounded-xl bg-supporter/50 drop-shadow-xl md:w-[250px]"

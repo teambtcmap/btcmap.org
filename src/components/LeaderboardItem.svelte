@@ -1,14 +1,14 @@
 <script lang="ts">
-	export let position;
-	export let avatar;
-	export let tagger;
-	export let id;
-	export let created;
-	export let updated;
-	export let deleted;
-	export let tip;
+	export let position: number;
+	export let avatar: string;
+	export let tagger: string;
+	export let id: number;
+	export let created: number;
+	export let updated: number;
+	export let deleted: number;
+	export let tip: string;
 
-	import { Tip } from '$comp';
+	import { Tip } from '$lib/comp';
 
 	$: stats = [
 		{ stat: created, title: 'C' },
@@ -44,7 +44,9 @@
 			src={avatar}
 			alt="avatar"
 			class="mx-auto mb-2 h-20 w-20 rounded-full object-cover lg:mx-0 lg:mb-0 lg:h-14 lg:w-14"
-			onerror="this.src='/images/satoshi-nakamoto.png'"
+			on:error={function () {
+				this.src = '/images/satoshi-nakamoto.png';
+			}}
 		/>
 
 		<a

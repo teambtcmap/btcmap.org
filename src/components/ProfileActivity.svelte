@@ -1,15 +1,16 @@
 <script lang="ts">
+	import type { EventType } from '$lib/types';
 	import Time from 'svelte-time';
 
-	export let location;
-	export let action;
-	export let time;
-	export let latest;
-	export let merchantId;
+	export let location: string;
+	export let action: EventType;
+	export let time: string;
+	export let latest: boolean;
+	export let merchantId: string;
 
 	$: deleteLink = merchantId.split(':');
 
-	const capitalizeFirstLetter = (string) => {
+	const capitalizeFirstLetter = (string: string) => {
 		return string.charAt(0).toUpperCase() + string.slice(1);
 	};
 </script>

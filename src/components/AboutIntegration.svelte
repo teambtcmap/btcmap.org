@@ -1,5 +1,5 @@
 <script lang="ts">
-	export let integration;
+	export let integration: { url: string; icon: string; name: string };
 </script>
 
 <div class="space-y-2">
@@ -15,7 +15,9 @@
 				: '.jpg'}"
 			alt="logo"
 			class="mx-auto h-24 w-24 rounded-full object-cover"
-			onerror="this.src='/images/communities/bitcoin.svg'"
+			on:error={function () {
+				this.src = '/images/communities/bitcoin.svg';
+			}}
 		/>
 
 		<p class="text-center font-semibold">{integration.name}</p>

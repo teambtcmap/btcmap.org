@@ -26,7 +26,7 @@
 		class="mx-auto my-2 block h-5 w-32 animate-pulse rounded-xl bg-link/50 lg:my-auto lg:inline-block lg:w-5 lg:rounded-full"
 	/>
 	<div class="my-2 flex items-center justify-center space-x-1 lg:my-0 lg:inline-flex">
-		<!-- eslint-disable-next-line no-unused-vars -->
+		<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 		{#each Array(5) as star}
 			<i class="fa-solid fa-star animate-pulse text-lg text-link/50" />
 		{/each}

@@ -1,8 +1,10 @@
 <script lang="ts">
-	export let user = undefined;
-	export let destination;
-	export let style;
-	export let type = undefined;
+	import { TipType } from '$lib/types';
+
+	export let user: undefined | string = undefined;
+	export let destination: string;
+	export let style: undefined | string = undefined;
+	export let type: TipType = TipType.Address;
 </script>
 
 {#if user}

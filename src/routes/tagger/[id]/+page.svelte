@@ -11,7 +11,7 @@
 		ProfileStat,
 		Tip,
 		TopButton
-	} from '$comp';
+	} from '$lib/comp';
 	import {
 		attribution,
 		calcVerifiedDate,
@@ -24,45 +24,55 @@
 		toggleMapButtons
 	} from '$lib/map/setup';
 	import { elements, events, excludeLeader, theme, users } from '$lib/store';
+	import {
+		BadgeType,
+		type ActivityEvent,
+		type EarnedBadge,
+		type ProfileLeaderboard
+	} from '$lib/types.js';
 	import { detectTheme, errToast } from '$lib/utils';
 	import { error } from '@sveltejs/kit';
 	import Chart from 'chart.js/auto';
 	import DOMPurify from 'dompurify';
+	import type { Map, TileLayer } from 'leaflet';
 	import { marked } from 'marked';
 	import { onDestroy, onMount } from 'svelte';
 
-	let user = $users.find((user) => user.id == data.user);
-	if (!user) {
+	let userFound = $users.find((user) => user.id == data.user);
+	if (!userFound) {
 		errToast('Could not find user, please try again or contact BTC Map.');
 		throw error(404, 'User Not Found');
 	}
-	let userCreated = user['created_at'];
+	let userCreated = userFound['created_at'];
 	let supporter =
-		user.tags['supporter:expires'] && Date.parse(user.tags['supporter:expires']) > Date.now();
-	user = user['osm_json'];
+		userFound.tags['supporter:expires'] &&
+		Date.parse(userFound.tags['supporter:expires']) > Date.now();
+	const user = userFound['osm_json'];
 	let avatar = user.img ? user.img.href : '/images/satoshi-nakamoto.png';
 	let username = user['display_name'];
 	let description = user.description;
 	let removeLightning = description.match(/(\[⚡]\(lightning:[^)]+\))/g);
-	let filteredDesc = description.replaceAll(removeLightning, '');
-	let profileDesc;
+	let filteredDesc = removeLightning?.length
+		? description.replaceAll(removeLightning[0], '')
+		: description;
+	let profileDesc: HTMLHeadingElement;
 	let regexMatch = description.match('(lightning:[^)]+)');
 	let lightning = regexMatch && regexMatch[0].slice(10);
 
 	let userEvents = $events.filter((event) => event['user_id'] == user.id);
 	userEvents.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
 	let created =
-		user.id == '17221642'
+		user.id === 17221642
 			? userEvents.filter((event) => event.type === 'create').length + 100
 			: userEvents.filter((event) => event.type === 'create').length;
 	let updated =
-		user.id == '17221642'
+		user.id === 17221642
 			? userEvents.filter((event) => event.type === 'update').length + 20
 			: userEvents.filter((event) => event.type === 'update').length;
 	let deleted = userEvents.filter((event) => event.type === 'delete').length;
 	let total = created + updated + deleted;
 
-	let leaderboard = [];
+	let leaderboard: ProfileLeaderboard[] = [];
 
 	const populateLeaderboard = () => {
 		$users.forEach((user) => {
@@ -75,7 +85,7 @@
 			if (userEvents.length) {
 				leaderboard.push({
 					id: user.id,
-					total: user.id == '17221642' ? userEvents.length + 120 : userEvents.length
+					total: user.id === 17221642 ? userEvents.length + 120 : userEvents.length
 				});
 			}
 		});
@@ -95,124 +105,144 @@
 			].includes(user.id),
 			title: 'Geyser Tournament',
 			icon: 'geyser',
-			type: 'achievement'
+			type: BadgeType.Achievement
 		},
-		{ check: supporter, title: 'Supporter', icon: 'supporter', type: 'achievement' },
+		{ check: supporter, title: 'Supporter', icon: 'supporter', type: BadgeType.Achievement },
 		{
 			check: leaderboard[0].id == user.id,
 			title: 'Top Tagger',
 			icon: 'top-tagger',
-			type: 'achievement'
+			type: BadgeType.Achievement
 		},
 		{
 			check: leaderboard.slice(0, 3).find((item) => item.id == user.id),
 			title: 'Podium',
 			icon: 'podium',
-			type: 'achievement'
+			type: BadgeType.Achievement
 		},
 		{
 			check: leaderboard.find((item) => item.id == user.id),
 			title: 'High Rank',
 			icon: 'high-rank',
-			type: 'achievement'
+			type: BadgeType.Achievement
 		},
 		{
-			check: Date.parse(userCreated) < new Date('December 26, 2022 00:00:00'),
+			check: Date.parse(userCreated) < new Date('December 26, 2022 00:00:00').getTime(),
 			title: 'OG Supertagger',
 			icon: 'og-supertagger',
-			type: 'achievement'
+			type: BadgeType.Achievement
 		},
 		{
 			check: lightning,
 			title: 'Lightning Junkie',
 			icon: 'lightning-junkie',
-			type: 'achievement'
+			type: BadgeType.Achievement
 		},
 		{
 			check: user.img,
 			title: 'Hello World',
 			icon: 'hello-world',
-			type: 'achievement'
+			type: BadgeType.Achievement
 		},
 		{
 			check: created > updated && created > deleted,
 			title: 'Creator',
 			icon: 'creator',
-			type: 'achievement'
+			type: BadgeType.Achievement
 		},
 		{
 			check: updated > created && updated > deleted,
 			title: 'Update Maxi',
 			icon: 'update-maxi',
-			type: 'achievement'
+			type: BadgeType.Achievement
 		},
 		{
 			check: deleted > created && deleted > updated,
 			title: 'Demolition Specialist',
 			icon: 'demolition-specialist',
-			type: 'achievement'
+			type: BadgeType.Achievement
 		},
 		{
 			check: total >= 21000000,
 			title: 'Hyperbitcoinisation',
 			icon: 'hyperbitcoinisation',
-			type: 'contribution'
+			type: BadgeType.Contribution
 		},
-		{ check: total >= 10000, title: 'Pizza Time', icon: 'pizza-time', type: 'contribution' },
-		{ check: total >= 7777, title: 'Godly', icon: 'godly', type: 'contribution' },
-		{ check: total >= 5000, title: 'Shadow', icon: 'shadow', type: 'contribution' },
-		{ check: total >= 3110, title: 'Whitepaper', icon: 'whitepaper', type: 'contribution' },
-		{ check: total >= 1984, title: 'Winston', icon: 'winston', type: 'contribution' },
-		{ check: total >= 1000, title: 'Whale', icon: 'whale', type: 'contribution' },
-		{ check: total >= 821, title: 'Infinity', icon: 'infinity', type: 'contribution' },
-		{ check: total >= 500, title: 'Legend', icon: 'legend', type: 'contribution' },
-		{ check: total >= 301, title: 'Chancellor', icon: 'chancellor', type: 'contribution' },
-		{ check: total >= 256, title: 'SHA', icon: 'sha', type: 'contribution' },
-		{ check: total >= 210, title: 'No Bailouts', icon: 'no-bailouts', type: 'contribution' },
-		{ check: total >= 100, title: 'Supertagger', icon: 'supertagger', type: 'contribution' },
-		{ check: total >= 69, title: 'ATH', icon: 'ath', type: 'contribution' },
-		{ check: total >= 51, title: 'Longest Chain', icon: 'longest-chain', type: 'contribution' },
-		{ check: total >= 21, title: 'Satoshi', icon: 'satoshi', type: 'contribution' },
-		{ check: total >= 10, title: 'Heartbeat', icon: 'heartbeat', type: 'contribution' },
-		{ check: total >= 4, title: 'Segwit', icon: 'segwit', type: 'contribution' },
-		{ check: total >= 1, title: 'Whole Tagger', icon: 'whole-tagger', type: 'contribution' }
+		{
+			check: total >= 10000,
+			title: 'Pizza Time',
+			icon: 'pizza-time',
+			type: BadgeType.Contribution
+		},
+		{ check: total >= 7777, title: 'Godly', icon: 'godly', type: BadgeType.Contribution },
+		{ check: total >= 5000, title: 'Shadow', icon: 'shadow', type: BadgeType.Contribution },
+		{ check: total >= 3110, title: 'Whitepaper', icon: 'whitepaper', type: BadgeType.Contribution },
+		{ check: total >= 1984, title: 'Winston', icon: 'winston', type: BadgeType.Contribution },
+		{ check: total >= 1000, title: 'Whale', icon: 'whale', type: BadgeType.Contribution },
+		{ check: total >= 821, title: 'Infinity', icon: 'infinity', type: BadgeType.Contribution },
+		{ check: total >= 500, title: 'Legend', icon: 'legend', type: BadgeType.Contribution },
+		{ check: total >= 301, title: 'Chancellor', icon: 'chancellor', type: BadgeType.Contribution },
+		{ check: total >= 256, title: 'SHA', icon: 'sha', type: BadgeType.Contribution },
+		{
+			check: total >= 210,
+			title: 'No Bailouts',
+			icon: 'no-bailouts',
+			type: BadgeType.Contribution
+		},
+		{
+			check: total >= 100,
+			title: 'Supertagger',
+			icon: 'supertagger',
+			type: BadgeType.Contribution
+		},
+		{ check: total >= 69, title: 'ATH', icon: 'ath', type: BadgeType.Contribution },
+		{
+			check: total >= 51,
+			title: 'Longest Chain',
+			icon: 'longest-chain',
+			type: BadgeType.Contribution
+		},
+		{ check: total >= 21, title: 'Satoshi', icon: 'satoshi', type: BadgeType.Contribution },
+		{ check: total >= 10, title: 'Heartbeat', icon: 'heartbeat', type: BadgeType.Contribution },
+		{ check: total >= 4, title: 'Segwit', icon: 'segwit', type: BadgeType.Contribution },
+		{ check: total >= 1, title: 'Whole Tagger', icon: 'whole-tagger', type: BadgeType.Contribution }
 	];
 
-	let earnedBadges = [];
+	let earnedBadges: EarnedBadge[] = [];
 
-	const addBadge = (check, title, icon, type) => {
+	const addBadge = (check: boolean, title: string, icon: string, type: BadgeType) => {
 		if (check) {
 			earnedBadges.push({ title, icon, type });
 		}
 	};
 
 	badges.some((badge) => {
-		if (earnedBadges.find((badge) => badge.type === 'contribution')) {
+		if (earnedBadges.find((badge) => badge.type === BadgeType.Contribution)) {
 			return true;
 		}
-		addBadge(badge.check, badge.title, badge.icon, badge.type);
+		addBadge(Boolean(badge.check), badge.title, badge.icon, badge.type);
 	});
 
-	let createdPercent = new Intl.NumberFormat('en-US')
-		.format((created / (total / 100)).toFixed(0))
-		.toString();
+	let createdPercent = new Intl.NumberFormat('en-US').format(
+		Number((created / (total / 100)).toFixed(0))
+	);
 
-	let updatedPercent = new Intl.NumberFormat('en-US')
-		.format((updated / (total / 100)).toFixed(0))
-		.toString();
+	let updatedPercent = new Intl.NumberFormat('en-US').format(
+		Number((updated / (total / 100)).toFixed(0))
+	);
 
-	let deletedPercent = new Intl.NumberFormat('en-US')
-		.format((deleted / (total / 100)).toFixed(0))
-		.toString();
+	let deletedPercent = new Intl.NumberFormat('en-US').format(
+		Number((deleted / (total / 100)).toFixed(0))
+	);
 
-	let tagTypeChartCanvas;
-	// eslint-disable-next-line no-unused-vars
+	let tagTypeChartCanvas: HTMLCanvasElement;
+	// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 	let tagTypeChart;
 
 	let loading = true;
 	let hideArrow = false;
 	let activityDiv;
-	let eventElements = [];
+	let eventElements: ActivityEvent[] = [];
 
 	userEvents.forEach((event) => {
 		let elementMatch = $elements.find((element) => element.id === event['element_id']);
@@ -223,10 +253,11 @@
 					? elementMatch['osm_json'].tags.name
 					: undefined;
 
-			event.location = location ? location : 'Unnamed element';
-			event.merchantId = elementMatch.id;
-
-			eventElements.push(event);
+			eventElements.push({
+				...event,
+				location: location || 'Unnamed element',
+				merchantId: elementMatch.id
+			});
 		}
 	});
 
@@ -235,12 +266,12 @@
 
 	loading = false;
 
-	let mapElement;
-	let map;
-	let mapLoaded;
+	let mapElement: HTMLDivElement;
+	let map: Map;
+	let mapLoaded = false;
 
-	let osm;
-	let alidadeSmoothDark;
+	let osm: TileLayer;
+	let alidadeSmoothDark: TileLayer;
 
 	onMount(async () => {
 		if (browser) {
@@ -271,7 +302,7 @@
 						legend: {
 							labels: {
 								font: {
-									weight: 600
+									weight: '600'
 								}
 							}
 						}
@@ -281,11 +312,12 @@
 
 			//import packages
 			const leaflet = await import('leaflet');
+			// @ts-expect-error
 			const DomEvent = await import('leaflet/src/dom/DomEvent');
-			/* eslint-disable no-unused-vars */
+			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
 			const leafletMarkerCluster = await import('leaflet.markercluster');
 			const leafletLocateControl = await import('leaflet.locatecontrol');
-			/* eslint-enable no-unused-vars */
+			/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
 
 			// add map and tiles
 			map = leaflet.map(mapElement, { attributionControl: false });
@@ -310,20 +342,16 @@
 			}
 
 			// change broken marker image path in prod
-			// eslint-disable-next-line no-undef
-			L.Icon.Default.prototype.options.imagePath = '/icons/';
+			leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
 
 			// add OSM attribution
-			// eslint-disable-next-line no-undef
-			attribution(L, map);
+			attribution(leaflet, map);
 
 			// add locate button to map
-			// eslint-disable-next-line no-undef
-			geolocate(L, map);
+			geolocate(leaflet, map);
 
 			// change default icons
-			// eslint-disable-next-line no-undef
-			changeDefaultIcons('', L, mapElement, DomEvent);
+			changeDefaultIcons(false, leaflet, mapElement, DomEvent);
 
 			// create marker cluster group
 			// eslint-disable-next-line no-undef
@@ -338,7 +366,7 @@
 			);
 
 			// add location information
-			let bounds = [];
+			let bounds: { lat: number; long: number }[] = [];
 
 			filteredElements.forEach((element) => {
 				let icon = element.tags['icon:android'];
@@ -354,24 +382,22 @@
 						? element.tags['boost:expires']
 						: undefined;
 
-				element = element['osm_json'];
+				const elementOSM = element['osm_json'];
 
-				const lat = latCalc(element);
-				const long = longCalc(element);
+				const lat = latCalc(elementOSM);
+				const long = longCalc(elementOSM);
 
-				// eslint-disable-next-line no-undef
-				let divIcon = generateIcon(L, icon, boosted);
+				let divIcon = generateIcon(leaflet, icon, boosted ? true : false);
 
 				let marker = generateMarker(
 					lat,
 					long,
 					divIcon,
-					element,
+					elementOSM,
 					payment,
-					// eslint-disable-next-line no-undef
-					L,
+					leaflet,
 					verifiedDate,
-					'verify',
+					true,
 					boosted
 				);
 
@@ -438,7 +464,9 @@
 					src={avatar}
 					alt="avatar"
 					class="mx-auto h-32 w-32 rounded-full object-cover"
-					onerror="this.src='/images/satoshi-nakamoto.png'"
+					on:error={function () {
+						this.src = '/images/satoshi-nakamoto.png';
+					}}
 				/>
 
 				<div>
@@ -469,7 +497,7 @@
 					>
 				</div>
 
-				<!-- eslint-disable-next-line svelte/valid-compile -->
+				<!-- svelte-ignore a11y-missing-content -->
 				<h2
 					bind:this={profileDesc}
 					class="mx-auto w-full break-all text-xl text-body dark:text-white lg:w-[800px]"
@@ -578,7 +606,7 @@
 								>
 							{/if}
 						{:else}
-							<!-- eslint-disable-next-line no-unused-vars -->
+							<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 							{#each Array(5) as skeleton}
 								<ProfileActivitySkeleton />
 							{/each}

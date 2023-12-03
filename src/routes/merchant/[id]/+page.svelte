@@ -15,7 +15,7 @@
 		PrimaryButton,
 		ShowTags,
 		TopButton
-	} from '$comp';
+	} from '$lib/comp';
 	import {
 		attribution,
 		calcVerifiedDate,
@@ -41,11 +41,14 @@
 		theme,
 		users
 	} from '$lib/store';
+	import type { BaseMaps, Event } from '$lib/types.js';
 	import { detectTheme, errToast, successToast } from '$lib/utils';
+	// @ts-expect-error
 	import rewind from '@mapbox/geojson-rewind';
 	import axios from 'axios';
 	import axiosRetry from 'axios-retry';
 	import { geoContains } from 'd3-geo';
+	import type { Map } from 'leaflet';
 	import { onDestroy, onMount } from 'svelte';
 	import Time from 'svelte-time';
 	import tippy from 'tippy.js';
@@ -59,53 +62,53 @@
 
 	axiosRetry(axios, { retries: 3 });
 
-	const name = merchant.osm_json.tags?.name || '';
-	const icon = merchant.tags['icon:android'];
-	const address = merchant.osm_json.tags ? checkAddress(merchant.osm_json.tags) : '';
-	const description = merchant.osm_json.tags?.description || '';
-	const note = merchant.osm_json.tags?.note || '';
-	const hours = merchant.osm_json.tags?.['opening_hours'] || '';
-	const payment = merchant.tags['payment:uri']
+	const name = merchant?.osm_json.tags?.name || '';
+	const icon = merchant?.tags['icon:android'] || 'question_mark';
+	const address = merchant?.osm_json.tags ? checkAddress(merchant.osm_json.tags) : '';
+	const description = merchant?.osm_json.tags?.description || '';
+	const note = merchant?.osm_json.tags?.note || '';
+	const hours = merchant?.osm_json.tags?.['opening_hours'] || '';
+	const payment = merchant?.tags['payment:uri']
 		? { type: 'uri', url: merchant.tags['payment:uri'] }
-		: merchant.tags['payment:pouch']
+		: merchant?.tags['payment:pouch']
 		  ? { type: 'pouch', username: merchant.tags['payment:pouch'] }
-		  : merchant.tags['payment:coinos']
+		  : merchant?.tags['payment:coinos']
 		    ? { type: 'coinos', username: merchant.tags['payment:coinos'] }
 		    : undefined;
 	const boosted =
-		merchant.tags['boost:expires'] && Date.parse(merchant.tags['boost:expires']) > Date.now()
+		merchant?.tags['boost:expires'] && Date.parse(merchant.tags['boost:expires']) > Date.now()
 			? merchant.tags['boost:expires']
 			: undefined;
-	const verified = verifiedArr(merchant.osm_json);
+	const verified = merchant ? verifiedArr(merchant.osm_json) : [];
 	const verifiedDate = calcVerifiedDate();
-	const phone = merchant.osm_json.tags?.phone || merchant.osm_json.tags?.['contact:phone'] || '';
+	const phone = merchant?.osm_json.tags?.phone || merchant?.osm_json.tags?.['contact:phone'] || '';
 	const website =
-		merchant.osm_json.tags?.website || merchant.osm_json.tags?.['contact:website'] || '';
-	const email = merchant.osm_json.tags?.email || merchant.osm_json.tags?.['contact:email'] || '';
+		merchant?.osm_json.tags?.website || merchant?.osm_json.tags?.['contact:website'] || '';
+	const email = merchant?.osm_json.tags?.email || merchant?.osm_json.tags?.['contact:email'] || '';
 	const twitter =
-		merchant.osm_json.tags?.twitter || merchant.osm_json.tags?.['contact:twitter'] || '';
+		merchant?.osm_json.tags?.twitter || merchant?.osm_json.tags?.['contact:twitter'] || '';
 	const instagram =
-		merchant.osm_json.tags?.instagram || merchant.osm_json.tags?.['contact:instagram'] || '';
+		merchant?.osm_json.tags?.instagram || merchant?.osm_json.tags?.['contact:instagram'] || '';
 	const facebook =
-		merchant.osm_json.tags?.facebook || merchant.osm_json.tags?.['contact:facebook'] || '';
+		merchant?.osm_json.tags?.facebook || merchant?.osm_json.tags?.['contact:facebook'] || '';
 
 	const paymentMethod =
-		merchant.osm_json.tags &&
+		merchant?.osm_json.tags &&
 		(merchant.osm_json.tags['payment:onchain'] ||
 			merchant.osm_json.tags['payment:lightning'] ||
 			merchant.osm_json.tags['payment:lightning_contactless']);
 
-	let onchainTooltip;
-	let lnTooltip;
-	let nfcTooltip;
-	let verifiedTooltip;
+	let onchainTooltip: HTMLImageElement;
+	let lnTooltip: HTMLImageElement;
+	let nfcTooltip: HTMLImageElement;
+	let verifiedTooltip: HTMLSpanElement;
 
 	$: onchainTooltip &&
 		tippy([onchainTooltip], {
 			content:
-				merchant.osm_json.tags?.['payment:onchain'] === 'yes'
+				merchant?.osm_json.tags?.['payment:onchain'] === 'yes'
 					? 'On-chain accepted'
-					: merchant.osm_json.tags?.['payment:onchain'] === 'no'
+					: merchant?.osm_json.tags?.['payment:onchain'] === 'no'
 					  ? 'On-chain not accepted'
 					  : 'On-chain unknown'
 		});
@@ -113,9 +116,9 @@
 	$: lnTooltip &&
 		tippy([lnTooltip], {
 			content:
-				merchant.osm_json.tags?.['payment:lightning'] === 'yes'
+				merchant?.osm_json.tags?.['payment:lightning'] === 'yes'
 					? 'Lightning accepted'
-					: merchant.osm_json.tags?.['payment:lightning'] === 'no'
+					: merchant?.osm_json.tags?.['payment:lightning'] === 'no'
 					  ? 'Lightning not accepted'
 					  : 'Lightning unknown'
 		});
@@ -123,9 +126,9 @@
 	$: nfcTooltip &&
 		tippy([nfcTooltip], {
 			content:
-				merchant.osm_json.tags?.['payment:lightning_contactless'] === 'yes'
+				merchant?.osm_json.tags?.['payment:lightning_contactless'] === 'yes'
 					? 'Lightning Contactless accepted'
-					: merchant.osm_json.tags?.['payment:lightning_contactless'] === 'no'
+					: merchant?.osm_json.tags?.['payment:lightning_contactless'] === 'no'
 					  ? 'Lightning contactless not accepted'
 					  : 'Lightning Contactless unknown'
 		});
@@ -135,8 +138,8 @@
 			content: 'Verified within the last year'
 		});
 
-	const lat = latCalc(merchant['osm_json']);
-	const long = longCalc(merchant['osm_json']);
+	const lat = merchant ? latCalc(merchant['osm_json']) : 0;
+	const long = merchant ? longCalc(merchant['osm_json']) : 0;
 
 	let boostLoading = false;
 
@@ -145,6 +148,8 @@
 	};
 
 	const startBoost = () => {
+		if (!merchant) return;
+
 		boostLoading = true;
 
 		$boost = {
@@ -194,7 +199,7 @@
 	let hideArrow = false;
 	let activityDiv;
 
-	const merchantEvents = $events.filter((event) => event.element_id === merchant.id);
+	const merchantEvents = $events.filter((event) => event.element_id === merchant?.id);
 
 	merchantEvents.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
 
@@ -203,7 +208,7 @@
 
 	loading = false;
 
-	const findUser = (tagger) => {
+	const findUser = (tagger: Event) => {
 		let foundUser = $users.find((user) => user.id == tagger['user_id']);
 
 		if (foundUser) {
@@ -213,20 +218,21 @@
 		}
 	};
 
-	let mapElement;
-	let map;
-	let mapLoaded;
+	let mapElement: HTMLDivElement;
+	let map: Map;
+	let mapLoaded = false;
 
-	let baseMaps;
+	let baseMaps: BaseMaps;
 
 	onMount(async () => {
 		if (browser) {
 			//import packages
 			const leaflet = await import('leaflet');
+			// @ts-expect-error
 			const DomEvent = await import('leaflet/src/dom/DomEvent');
-			/* eslint-disable no-unused-vars */
+			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
 			const leafletLocateControl = await import('leaflet.locatecontrol');
-			/* eslint-enable no-unused-vars */
+			/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
 
 			// add map
 			map = leaflet.map(mapElement, { attributionControl: false });
@@ -235,30 +241,23 @@
 			baseMaps = layers(leaflet, map);
 
 			// change broken marker image path in prod
-			// eslint-disable-next-line no-undef
-			L.Icon.Default.prototype.options.imagePath = '/icons/';
+			leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
 
 			// add OSM attribution
-			// eslint-disable-next-line no-undef
-			attribution(L, map);
+			attribution(leaflet, map);
 
-			// eslint-disable-next-line no-undef, no-unused-vars
-			const layerControl = L.control.layers(baseMaps).addTo(map);
+			leaflet.control.layers(baseMaps).addTo(map);
 
 			// add locate button to map
-			// eslint-disable-next-line no-undef
-			geolocate(L, map);
+			geolocate(leaflet, map);
 
 			// change default icons
-			// eslint-disable-next-line no-undef
-			changeDefaultIcons('layers', L, mapElement, DomEvent);
+			changeDefaultIcons(true, leaflet, mapElement, DomEvent);
 
 			// add element to map
-			// eslint-disable-next-line no-undef
-			const divIcon = generateIcon(L, icon, boosted);
+			const divIcon = generateIcon(leaflet, icon, boosted ? true : false);
 
-			// eslint-disable-next-line no-undef
-			const marker = L.marker([lat, long], { icon: divIcon });
+			const marker = leaflet.marker([lat, long], { icon: divIcon });
 
 			map.addLayer(marker);
 
@@ -291,7 +290,7 @@
 </script>
 
 <svelte:head>
-	{#if payment && payment.type === 'uri' && payment.url.startsWith('lightning:')}
+	{#if payment && payment.type === 'uri' && payment.url?.startsWith('lightning:')}
 		<meta name="lightning" content="lnurlp:{payment.url.slice(10, payment.url.length)}" />
 		<meta property="alby:image" content="/images/logo.svg" />
 		<meta property="alby:name" content={name ? name : 'BTC Map Merchant'} />
@@ -361,14 +360,14 @@
 					<MerchantLink link={`geo:${lat},${long}`} icon="compass" text="Navigate" />
 
 					<MerchantLink
-						link={`https://www.openstreetmap.org/edit?${merchant.osm_json.type}=${merchant.osm_json.id}`}
+						link={`https://www.openstreetmap.org/edit?${merchant?.osm_json.type}=${merchant?.osm_json.id}`}
 						icon="pencil"
 						text="Edit"
 					/>
 
 					<MerchantButton
 						click={() => {
-							navigator.clipboard.writeText(`https://btcmap.org/merchant/${merchant.id}`);
+							navigator.clipboard.writeText(`https://btcmap.org/merchant/${merchant?.id}`);
 							successToast('Link copied to clipboard!');
 						}}
 						icon="share"
@@ -378,7 +377,7 @@
 					{#if payment}
 						<MerchantLink
 							link={payment.type === 'uri'
-								? payment.url
+								? payment.url || '#'
 								: payment.type === 'pouch'
 								  ? `https://app.pouch.ph/${payment.username}`
 								  : payment.type === 'coinos'
@@ -431,14 +430,14 @@
 
 					<span id="show-tags">
 						<MerchantButton
-							click={() => ($showTags = merchant.osm_json.tags || {})}
+							click={() => ($showTags = merchant?.osm_json.tags || {})}
 							icon="tags"
 							text="Show Tags"
 						/>
 					</span>
 
 					<MerchantLink
-						link={`https://www.openstreetmap.org/${merchant.osm_json.type}/${merchant.osm_json.id}`}
+						link={`https://www.openstreetmap.org/${merchant?.osm_json.type}/${merchant?.osm_json.id}`}
 						icon="external"
 						text="View OSM"
 					/>
@@ -451,11 +450,11 @@
 							{#if typeof window !== 'undefined'}
 								<img
 									bind:this={onchainTooltip}
-									src={merchant.osm_json.tags['payment:onchain'] === 'yes'
+									src={merchant.osm_json.tags?.['payment:onchain'] === 'yes'
 										? detectTheme() === 'dark' || $theme === 'dark'
 											? '/icons/btc-highlight-dark.svg'
 											: '/icons/btc-highlight.svg'
-										: merchant.osm_json.tags['payment:onchain'] === 'no'
+										: merchant.osm_json.tags?.['payment:onchain'] === 'no'
 										  ? detectTheme() === 'dark' || $theme === 'dark'
 												? '/icons/btc-no-dark.svg'
 												: '/icons/btc-no-teal.svg'
@@ -468,11 +467,11 @@
 
 								<img
 									bind:this={lnTooltip}
-									src={merchant.osm_json.tags['payment:lightning'] === 'yes'
+									src={merchant.osm_json.tags?.['payment:lightning'] === 'yes'
 										? detectTheme() === 'dark' || $theme === 'dark'
 											? '/icons/ln-highlight-dark.svg'
 											: '/icons/ln-highlight.svg'
-										: merchant.osm_json.tags['payment:lightning'] === 'no'
+										: merchant.osm_json.tags?.['payment:lightning'] === 'no'
 										  ? detectTheme() === 'dark' || $theme === 'dark'
 												? '/icons/ln-no-dark.svg'
 												: '/icons/ln-no-teal.svg'
@@ -485,11 +484,11 @@
 
 								<img
 									bind:this={nfcTooltip}
-									src={merchant.osm_json.tags['payment:lightning_contactless'] === 'yes'
+									src={merchant.osm_json.tags?.['payment:lightning_contactless'] === 'yes'
 										? detectTheme() === 'dark' || $theme === 'dark'
 											? '/icons/nfc-highlight-dark.svg'
 											: '/icons/nfc-highlight.svg'
-										: merchant.osm_json.tags['payment:lightning_contactless'] === 'no'
+										: merchant.osm_json.tags?.['payment:lightning_contactless'] === 'no'
 										  ? detectTheme() === 'dark' || $theme === 'dark'
 												? '/icons/nfc-no-dark.svg'
 												: '/icons/nfc-no-teal.svg'
@@ -571,7 +570,7 @@
 
 						<PrimaryButton
 							text="Verify Location"
-							link={`/verify-location?id=${merchant.id}`}
+							link={`/verify-location?id=${merchant?.id}`}
 							style="rounded-xl p-3 w-40 mx-auto"
 						/>
 					</div>
@@ -708,7 +707,9 @@
 											src={community.tags['icon:square']}
 											alt="logo"
 											class="mx-auto h-20 w-20 rounded-full object-cover"
-											onerror="this.src='/images/communities/bitcoin.svg'"
+											on:error={function () {
+												this.src = '/images/communities/bitcoin.svg';
+											}}
 										/>
 										<p class="text-center font-semibold text-body dark:text-white">
 											{community.tags.name}

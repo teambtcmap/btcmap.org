@@ -4,8 +4,9 @@ import axiosRetry from 'axios-retry';
 
 axiosRetry(axios, { retries: 3 });
 
+// @ts-expect-error
 export async function load({ params }) {
-	let { id } = params;
+	const { id } = params;
 
 	const response = await axios.get(`https://api.btcmap.org/v2/users/${id}`);
 

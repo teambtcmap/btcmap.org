@@ -11,15 +11,16 @@ import crypto from 'crypto';
 
 axiosRetry(axios, { retries: 3 });
 
-let used = [];
+const used: string[] = [];
 
+// @ts-expect-error
 export async function POST({ request }) {
 	const headers = {
 		Authorization: `Bearer ${GITHUB_API_KEY}`,
 		Accept: 'application/vnd.github+json'
 	};
 
-	let {
+	const {
 		captchaSecret,
 		captchaTest,
 		honey,
@@ -39,12 +40,10 @@ export async function POST({ request }) {
 	}
 
 	// verify that captcha is correct
-	/* eslint-disable no-undef */
 	const initVector = Buffer.from(SERVER_INIT_VECTOR, 'hex');
 	const serverKey = Buffer.from(SERVER_CRYPTO_KEY, 'hex');
-	/* eslint-enable no-undef */
 
-	let decrypt = crypto.createDecipheriv('aes-256-cbc', serverKey, initVector);
+	const decrypt = crypto.createDecipheriv('aes-256-cbc', serverKey, initVector);
 
 	let secret = decrypt.update(captchaSecret, 'hex', 'utf8');
 	secret += decrypt.final('utf8');
@@ -59,7 +58,7 @@ export async function POST({ request }) {
 		used.push(captchaSecret);
 	}
 
-	let country = await axios
+	const country = await axios
 		.get(
 			`https://api.opencagedata.com/geocode/v1/json?q=${lat.slice(0, 7)}%2C%20${long.slice(
 				0,
@@ -73,7 +72,7 @@ export async function POST({ request }) {
 			console.log(error);
 		});
 
-	let github = await axios
+	const github = await axios
 		.post(
 			'https://api.github.com/repos/teambtcmap/btcmap-data/issues',
 			{
