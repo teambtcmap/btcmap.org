@@ -1,4 +1,5 @@
 import { elementError, elements, elementsSyncCount, mapLoading, mapUpdates } from '$lib/store';
+import type { Element } from '$lib/types';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import localforage from 'localforage';
@@ -59,23 +60,23 @@ export const elementsSync = async () => {
 
 	// get elements from local
 	await localforage
-		.getItem('elements_v3')
+		.getItem<Element[]>('elements_v3')
 		.then(async function (value) {
 			// get elements from API if initial sync
 			if (!value) {
 				// add to sync count to only show data refresh after initial load
-				let count = get(elementsSyncCount);
+				const count = get(elementsSyncCount);
 				elementsSyncCount.set(count + 1);
 
 				let updatedSince = '2022-01-01T00:00:00.000Z';
 				let responseCount;
-				let elementsData = [];
+				let elementsData: Element[] = [];
 
 				mapLoading.set('Fetching elements...');
 
 				do {
 					try {
-						const response = await axios.get(
+						const response = await axios.get<Element[]>(
 							`https://api.btcmap.org/v2/elements?updated_since=${updatedSince}&limit=${limit}`
 						);
 
@@ -107,8 +108,7 @@ export const elementsSync = async () => {
 					// set response to local
 					localforage
 						.setItem('elements_v3', elementsData)
-						// eslint-disable-next-line no-unused-vars
-						.then(function (value) {
+						.then(function () {
 							mapLoading.set('Initial sync complete!');
 							// set response to store
 							elements.set(elementsData);
@@ -126,12 +126,12 @@ export const elementsSync = async () => {
 				mapLoading.set('Local cache found!');
 
 				// add to sync count to only show data refresh after initial load
-				let count = get(elementsSyncCount);
+				const count = get(elementsSyncCount);
 				elementsSyncCount.set(count + 1);
 
 				// start update sync from API
 				// sort to get most recent record
-				let cacheSorted = [...value];
+				const cacheSorted = [...value];
 				cacheSorted.sort((a, b) => Date.parse(b['updated_at']) - Date.parse(a['updated_at']));
 
 				let updatedSince = cacheSorted[0]['updated_at'];
@@ -143,12 +143,12 @@ export const elementsSync = async () => {
 
 				do {
 					try {
-						const response = await axios.get(
+						const response = await axios.get<Element[]>(
 							`https://api.btcmap.org/v2/elements?updated_since=${updatedSince}&limit=${limit}`
 						);
 
 						// update new records if they exist
-						let newElements = response.data;
+						const newElements = response.data;
 
 						// check for new elements in local and purge if they exist
 						if (newElements.length) {
@@ -194,8 +194,7 @@ export const elementsSync = async () => {
 
 					localforage
 						.setItem('elements_v3', elementsData)
-						// eslint-disable-next-line no-unused-vars
-						.then(function (value) {
+						.then(function () {
 							mapLoading.set('Map loading complete!');
 							// set updated elements to store
 							elements.set(elementsData);
@@ -224,18 +223,18 @@ export const elementsSync = async () => {
 			console.log(err);
 
 			// add to sync count to only show data refresh after initial load
-			let count = get(elementsSyncCount);
+			const count = get(elementsSyncCount);
 			elementsSyncCount.set(count + 1);
 
 			let updatedSince = '2022-01-01T00:00:00.000Z';
 			let responseCount;
-			let elementsData = [];
+			let elementsData: Element[] = [];
 
 			mapLoading.set('Fetching elements...');
 
 			do {
 				try {
-					const response = await axios.get(
+					const response = await axios.get<Element[]>(
 						`https://api.btcmap.org/v2/elements?updated_since=${updatedSince}&limit=${limit}`
 					);
 

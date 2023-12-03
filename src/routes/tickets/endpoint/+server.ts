@@ -11,7 +11,7 @@ export async function GET() {
 		Accept: 'application/vnd.github+json'
 	};
 
-	let issues = await axios
+	const issues = await axios
 		.get('https://api.github.com/repos/teambtcmap/btcmap-data/issues?per_page=100', { headers })
 		.then(function (response) {
 			// handle success
@@ -23,7 +23,7 @@ export async function GET() {
 			throw new Error(error);
 		});
 
-	let total = await axios
+	const total = await axios
 		.get('https://api.github.com/repos/teambtcmap/btcmap-data', { headers })
 		.then(function (response) {
 			// handle success

@@ -1,9 +1,9 @@
-<script>
+<script lang="ts">
 	import tippy from 'tippy.js';
 
-	export let tagger;
+	export let tagger: { id: number; avatar: string; username: string };
 
-	let taggerTooltip;
+	let taggerTooltip: HTMLAnchorElement;
 
 	$: taggerTooltip &&
 		tippy([taggerTooltip], {
@@ -16,7 +16,9 @@
 		src={tagger.avatar}
 		alt="avatar"
 		class="h-24 w-24 rounded-full bg-black object-cover"
-		onerror="this.src='/images/satoshi-nakamoto.png'"
+		on:error={function () {
+			this.src = '/images/satoshi-nakamoto.png';
+		}}
 	/>
 </a>
 

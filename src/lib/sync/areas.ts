@@ -1,4 +1,5 @@
 import { areaError, areas } from '$lib/store';
+import type { Area } from '$lib/types';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import localforage from 'localforage';
@@ -52,17 +53,17 @@ export const areasSync = async () => {
 
 	// get areas from local
 	await localforage
-		.getItem('areas_v3')
+		.getItem<Area[]>('areas_v3')
 		.then(async function (value) {
 			// get areas from API if initial sync
 			if (!value) {
 				let updatedSince = '2022-01-01T00:00:00.000Z';
 				let responseCount;
-				let areasData = [];
+				let areasData: Area[] = [];
 
 				do {
 					try {
-						const response = await axios.get(
+						const response = await axios.get<Area[]>(
 							`https://api.btcmap.org/v2/areas?updated_since=${updatedSince}&limit=${limit}`
 						);
 
@@ -94,8 +95,7 @@ export const areasSync = async () => {
 					// set response to local
 					localforage
 						.setItem('areas_v3', areasData)
-						// eslint-disable-next-line no-unused-vars
-						.then(function (value) {
+						.then(function () {
 							// set response to store
 							areas.set(areasFiltered);
 						})
@@ -111,7 +111,7 @@ export const areasSync = async () => {
 
 				// start update sync from API
 				// sort to get most recent record
-				let cacheSorted = [...value];
+				const cacheSorted = [...value];
 				cacheSorted.sort((a, b) => Date.parse(b['updated_at']) - Date.parse(a['updated_at']));
 
 				let updatedSince = cacheSorted[0]['updated_at'];
@@ -121,12 +121,12 @@ export const areasSync = async () => {
 
 				do {
 					try {
-						const response = await axios.get(
+						const response = await axios.get<Area[]>(
 							`https://api.btcmap.org/v2/areas?updated_since=${updatedSince}&limit=${limit}`
 						);
 
 						// update new records if they exist
-						let newAreas = response.data;
+						const newAreas = response.data;
 
 						// check for new areas in local and purge if they exist
 						if (newAreas.length) {
@@ -170,8 +170,7 @@ export const areasSync = async () => {
 					// set updated areas locally
 					localforage
 						.setItem('areas_v3', areasData)
-						// eslint-disable-next-line no-unused-vars
-						.then(function (value) {
+						.then(function () {
 							// set updated areas to store
 							areas.set(newAreasFiltered);
 						})
@@ -192,11 +191,11 @@ export const areasSync = async () => {
 
 			let updatedSince = '2022-01-01T00:00:00.000Z';
 			let responseCount;
-			let areasData = [];
+			let areasData: Area[] = [];
 
 			do {
 				try {
-					const response = await axios.get(
+					const response = await axios.get<Area[]>(
 						`https://api.btcmap.org/v2/areas?updated_since=${updatedSince}&limit=${limit}`
 					);
 

@@ -1,10 +1,11 @@
-<script>
+<script lang="ts">
+	import type { DropdownLink } from '$lib/types';
 	import OutClick from 'svelte-outclick';
 
-	export let title;
-	export let links;
-	export let top;
-	export let bottom;
+	export let title: string;
+	export let links: DropdownLink[];
+	export let top: string;
+	export let bottom: string;
 
 	let show = false;
 </script>
@@ -24,7 +25,7 @@
 	<!-- dropdown items -->
 	{#if show}
 		<OutClick
-			excludeQuerySelectorAll={[`#dropdown-${title.toLowerCase()}`]}
+			excludeQuerySelectorAll={`#dropdown-${title.toLowerCase()}`}
 			on:outclick={() => (show = false)}
 		>
 			<div class="absolute right-0 top-8 w-[185px] rounded-2xl shadow-lg">

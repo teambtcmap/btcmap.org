@@ -1,12 +1,12 @@
-<script>
-	import { Icon } from '$comp';
+<script lang="ts">
+	import { Icon } from '$lib/comp';
 	import tippy from 'tippy.js';
 
-	export let id;
-	export let icon;
-	export let tooltip;
+	export let id: string;
+	export let icon: string;
+	export let tooltip: string | undefined;
 
-	let merchantTooltip;
+	let merchantTooltip: HTMLAnchorElement;
 
 	$: merchantTooltip &&
 		tooltip &&

@@ -1,10 +1,10 @@
-<script>
-	export let image;
-	export let text;
-	export let desc;
-	export let link;
+<script lang="ts">
+	export let image: string;
+	export let text: string;
+	export let desc: string;
+	export let link: string;
 
-	import { Icon } from '$comp';
+	import { Icon } from '$lib/comp';
 </script>
 
 <div>

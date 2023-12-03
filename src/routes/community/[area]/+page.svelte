@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	export let data;
 
 	import { browser } from '$app/environment';
@@ -17,7 +17,7 @@
 		TaggerSkeleton,
 		Tip,
 		TopButton
-	} from '$comp';
+	} from '$lib/comp';
 	import {
 		attribution,
 		calcVerifiedDate,
@@ -32,14 +32,17 @@
 		verifiedArr
 	} from '$lib/map/setup';
 	import { areas, elements, events, reports, theme, users } from '$lib/store';
+	import { TipType, type ActivityEvent, type BaseMaps, type User } from '$lib/types.js';
 	import { detectTheme, errToast, updateChartThemes } from '$lib/utils';
+	// @ts-expect-error
 	import rewind from '@mapbox/geojson-rewind';
 	import Chart from 'chart.js/auto';
 	import { geoContains } from 'd3-geo';
+	import type { Map } from 'leaflet';
 	import { onDestroy, onMount } from 'svelte';
 	import tippy from 'tippy.js';
 
-	let community = $areas.find(
+	const communityFound = $areas.find(
 		(area) =>
 			area.id == data.id &&
 			area.tags.type === 'community' &&
@@ -54,7 +57,7 @@
 			Object.keys(area.tags).find((key) => key.includes('contact'))
 	);
 
-	if (!community) {
+	if (!communityFound) {
 		console.log('Could not find community, please try again or contact BTC Map.');
 		goto('/404');
 	}
@@ -70,7 +73,7 @@
 		goto('/404');
 	}
 
-	community = community.tags;
+	const community = communityFound?.tags;
 
 	const ticketTypes = ['Add', 'Verify'];
 	let showType = 'Add';
@@ -85,42 +88,46 @@
 		tickets &&
 		tickets.length &&
 		!ticketError &&
-		tickets.filter((issue) => issue.labels.find((label) => label.name === 'location-submission'));
+		tickets.filter((issue: any) =>
+			issue.labels.find((label: any) => label.name === 'location-submission')
+		);
 	const verify =
 		tickets &&
 		tickets.length &&
 		!ticketError &&
-		tickets.filter((issue) => issue.labels.find((label) => label.name === 'verify-submission'));
+		tickets.filter((issue: any) =>
+			issue.labels.find((label: any) => label.name === 'verify-submission')
+		);
 
-	let avatar = community['icon:square'];
+	let avatar = community?.['icon:square'];
 	let name = data.name;
-	let org = community.organization;
-	let sponsor = community.sponsor;
-	let continent = community.continent;
-	let website = community['contact:website'];
-	let email = community['contact:email'];
-	let nostr = community['contact:nostr'];
-	let twitter = community['contact:twitter'];
-	let secondTwitter = community['contact:second_twitter'];
-	let meetup = community['contact:meetup'];
-	let eventbrite = community['contact:eventbrite'];
-	let telegram = community['contact:telegram'];
-	let discord = community['contact:discord'];
-	let youtube = community['contact:youtube'];
-	let github = community['contact:github'];
-	let reddit = community['contact:reddit'];
-	let instagram = community['contact:instagram'];
-	let whatsapp = community['contact:whatsapp'];
-	let facebook = community['contact:facebook'];
-	let linkedin = community['contact:linkedin'];
-	let rss = community['contact:rss'];
-	let signal = community['contact:signal'];
+	let org = community?.organization;
+	let sponsor = community?.sponsor;
+	let continent = community?.continent;
+	let website = community?.['contact:website'];
+	let email = community?.['contact:email'];
+	let nostr = community?.['contact:nostr'];
+	let twitter = community?.['contact:twitter'];
+	let secondTwitter = community?.['contact:second_twitter'];
+	let meetup = community?.['contact:meetup'];
+	let eventbrite = community?.['contact:eventbrite'];
+	let telegram = community?.['contact:telegram'];
+	let discord = community?.['contact:discord'];
+	let youtube = community?.['contact:youtube'];
+	let github = community?.['contact:github'];
+	let reddit = community?.['contact:reddit'];
+	let instagram = community?.['contact:instagram'];
+	let whatsapp = community?.['contact:whatsapp'];
+	let facebook = community?.['contact:facebook'];
+	let linkedin = community?.['contact:linkedin'];
+	let rss = community?.['contact:rss'];
+	let signal = community?.['contact:signal'];
 	$: lightning =
-		(community['tips:lightning_address'] && {
-			destination: community['tips:lightning_address'],
-			type: 'address'
+		(community?.['tips:lightning_address'] && {
+			destination: community?.['tips:lightning_address'],
+			type: TipType.Address
 		}) ||
-		(community['tips:url'] && { destination: community['tips:url'], type: 'url' });
+		(community?.['tips:url'] && { destination: community?.['tips:url'], type: TipType.Url });
 
 	let latestReport = communityReports[0].tags;
 	let total = latestReport.total_elements || 0;
@@ -129,7 +136,7 @@
 	let legacy = latestReport.legacy_elements || 0;
 	let grade = latestReport.grade || 0;
 
-	let gradeTooltip;
+	let gradeTooltip: HTMLButtonElement;
 
 	$: gradeTooltip &&
 		tippy([gradeTooltip], {
@@ -166,42 +173,42 @@
 			allowHTML: true
 		});
 
-	let upToDatePercent = new Intl.NumberFormat('en-US')
-		.format((upToDate / (total / 100)).toFixed(0))
-		.toString();
+	let upToDatePercent = new Intl.NumberFormat('en-US').format(
+		Number((upToDate / (total / 100)).toFixed(0))
+	);
 
-	let outdatedPercent = new Intl.NumberFormat('en-US')
-		.format((outdated / (total / 100)).toFixed(0))
-		.toString();
+	let outdatedPercent = new Intl.NumberFormat('en-US').format(
+		Number((outdated / (total / 100)).toFixed(0))
+	);
 
-	let legacyPercent = new Intl.NumberFormat('en-US')
-		.format((legacy / (total / 100)).toFixed(0))
-		.toString();
+	let legacyPercent = new Intl.NumberFormat('en-US').format(
+		Number((legacy / (total / 100)).toFixed(0))
+	);
 
-	let updatedChartCanvas;
-	// eslint-disable-next-line no-unused-vars
+	let updatedChartCanvas: HTMLCanvasElement;
+	// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 	let updatedChart;
 
 	let loading = true;
 
-	let rewoundPoly = community.geo_json ? rewind(community.geo_json, true) : undefined;
+	let rewoundPoly = community?.geo_json ? rewind(community.geo_json, true) : undefined;
 
 	// filter elements within community
 	let filteredElements = $elements.filter((element) => {
 		let lat = latCalc(element['osm_json']);
 		let long = longCalc(element['osm_json']);
 
-		if (community.geo_json) {
+		if (community?.geo_json) {
 			if (geoContains(rewoundPoly, [long, lat])) {
 				return true;
 			} else {
 				return false;
 			}
 		} else if (
-			lat >= community['box:south'] &&
-			lat <= community['box:north'] &&
-			long >= community['box:west'] &&
-			long <= community['box:east']
+			lat >= Number(community?.['box:south']) &&
+			lat <= Number(community?.['box:north']) &&
+			long >= Number(community?.['box:west']) &&
+			long <= Number(community?.['box:east'])
 		) {
 			return true;
 		} else {
@@ -211,7 +218,7 @@
 
 	let hideArrow = false;
 	let activityDiv;
-	let eventElements = [];
+	let eventElements: ActivityEvent[] = [];
 
 	let communityEvents = $events.filter((event) =>
 		filteredElements.find((element) => element.id === event.element_id)
@@ -228,10 +235,11 @@
 					? elementMatch['osm_json'].tags.name
 					: undefined;
 
-			event.location = location ? location : 'Unnamed element';
-			event.merchantId = elementMatch.id;
-
-			eventElements.push(event);
+			eventElements.push({
+				...event,
+				location: location || 'Unnamed element',
+				merchantId: elementMatch.id
+			});
 		}
 	});
 
@@ -240,13 +248,14 @@
 
 	loading = false;
 
+	let taggers: User[];
 	$: taggers = [];
 
-	const findUser = (tagger) => {
+	const findUser = (tagger: ActivityEvent) => {
 		let foundUser = $users.find((user) => user.id == tagger['user_id']);
 
 		if (foundUser) {
-			if (!taggers.find((tagger) => tagger.id === foundUser.id)) {
+			if (!taggers.find((tagger) => tagger.id === foundUser?.id)) {
 				taggers.push(foundUser);
 			}
 
@@ -256,21 +265,21 @@
 		}
 	};
 
-	let mapElement;
-	let map;
-	let mapLoaded;
+	let mapElement: HTMLDivElement;
+	let map: Map;
+	let mapLoaded = false;
 
-	let baseMaps;
+	let baseMaps: BaseMaps;
 
 	let chartsLoading = true;
-	let upToDateChartCanvas;
-	let upToDateChart;
-	let totalChartCanvas;
-	let totalChart;
-	let legacyChartCanvas;
-	let legacyChart;
-	let paymentMethodChartCanvas;
-	let paymentMethodChart;
+	let upToDateChartCanvas: HTMLCanvasElement;
+	let upToDateChart: Chart<'line', number[], string>;
+	let totalChartCanvas: HTMLCanvasElement;
+	let totalChart: Chart<'line', number[], string>;
+	let legacyChartCanvas: HTMLCanvasElement;
+	let legacyChart: Chart<'line', number[], string>;
+	let paymentMethodChartCanvas: HTMLCanvasElement;
+	let paymentMethodChart: Chart<'line', number[], string>;
 
 	let chartsReports = [...communityReports].sort(
 		(a, b) => Date.parse(a['created_at']) - Date.parse(b['created_at'])
@@ -298,7 +307,7 @@
 					legend: {
 						labels: {
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						}
 					}
@@ -331,7 +340,7 @@
 					legend: {
 						labels: {
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						}
 					}
@@ -341,7 +350,7 @@
 						ticks: {
 							maxTicksLimit: 5,
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						},
 						grid: {
@@ -354,7 +363,7 @@
 						ticks: {
 							precision: 0,
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						},
 						grid: {
@@ -388,7 +397,7 @@
 					legend: {
 						labels: {
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						}
 					}
@@ -398,7 +407,7 @@
 						ticks: {
 							maxTicksLimit: 5,
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						},
 						grid: {
@@ -411,7 +420,7 @@
 						ticks: {
 							precision: 0,
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						},
 						grid: {
@@ -445,7 +454,7 @@
 					legend: {
 						labels: {
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						}
 					}
@@ -455,7 +464,7 @@
 						ticks: {
 							maxTicksLimit: 5,
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						},
 						grid: {
@@ -468,7 +477,7 @@
 						ticks: {
 							precision: 0,
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						},
 						grid: {
@@ -520,7 +529,7 @@
 					legend: {
 						labels: {
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						}
 					}
@@ -530,7 +539,7 @@
 						ticks: {
 							maxTicksLimit: 5,
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						},
 						grid: {
@@ -543,7 +552,7 @@
 						ticks: {
 							precision: 0,
 							font: {
-								weight: 600
+								weight: '600'
 							}
 						},
 						grid: {
@@ -573,12 +582,13 @@
 
 			//import packages
 			const leaflet = await import('leaflet');
+			// @ts-expect-error
 			const DomEvent = await import('leaflet/src/dom/DomEvent');
-			/* eslint-disable no-unused-vars */
+			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
 			const leafletMarkerCluster = await import('leaflet.markercluster');
 			const leafletFeaturegroupSubgroup = await import('leaflet.featuregroup.subgroup');
 			const leafletLocateControl = await import('leaflet.locatecontrol');
-			/* eslint-enable no-unused-vars */
+			/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
 
 			// add map
 			map = leaflet.map(mapElement, { attributionControl: false });
@@ -587,44 +597,38 @@
 			baseMaps = layers(leaflet, map);
 
 			// change broken marker image path in prod
-			// eslint-disable-next-line no-undef
-			L.Icon.Default.prototype.options.imagePath = '/icons/';
+			leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
 
 			// add OSM attribution
-			// eslint-disable-next-line no-undef
-			attribution(L, map);
+			attribution(leaflet, map);
 
 			// create marker cluster groups
-			/* eslint-disable no-undef */
+			// eslint-disable-next-line no-undef
 			let markers = L.markerClusterGroup();
-			let upToDateLayer = L.featureGroup.subGroup(markers);
-			let outdatedLayer = L.featureGroup.subGroup(markers);
-			let legacyLayer = L.featureGroup.subGroup(markers);
-			/* eslint-enable no-undef */
+			let upToDateLayer = leaflet.featureGroup.subGroup(markers);
+			let outdatedLayer = leaflet.featureGroup.subGroup(markers);
+			let legacyLayer = leaflet.featureGroup.subGroup(markers);
 
 			let overlayMaps = {
 				'Up-To-Date': upToDateLayer,
 				Outdated: outdatedLayer,
 				Legacy: legacyLayer
 			};
-			// eslint-disable-next-line no-undef, no-unused-vars
-			const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+			leaflet.control.layers(baseMaps, overlayMaps).addTo(map);
 
 			// add locate button to map
-			// eslint-disable-next-line no-undef
-			geolocate(L, map);
+			geolocate(leaflet, map);
 
 			// change default icons
-			// eslint-disable-next-line no-undef
-			changeDefaultIcons('layers', L, mapElement, DomEvent);
+			changeDefaultIcons(true, leaflet, mapElement, DomEvent);
 
 			// get date from 1 year ago to add verified check if survey is current
 			let verifiedDate = calcVerifiedDate();
 
 			// add community area poly to map
-			if (community.geo_json) {
-				// eslint-disable-next-line no-undef
-				L.geoJSON(community.geo_json, { style: { fill: false } }).addTo(map);
+			if (community?.geo_json) {
+				leaflet.geoJSON(community.geo_json, { style: { fill: false } }).addTo(map);
 			}
 
 			// add elements to map
@@ -646,28 +650,26 @@
 						? element.tags['boost:expires']
 						: undefined;
 
-				element = element['osm_json'];
+				const elementOSM = element['osm_json'];
 
-				const lat = latCalc(element);
-				const long = longCalc(element);
+				const lat = latCalc(elementOSM);
+				const long = longCalc(elementOSM);
 
-				// eslint-disable-next-line no-undef
-				let divIcon = generateIcon(L, icon, boosted);
+				let divIcon = generateIcon(leaflet, icon, boosted ? true : false);
 
 				let marker = generateMarker(
 					lat,
 					long,
 					divIcon,
-					element,
+					elementOSM,
 					payment,
-					// eslint-disable-next-line no-undef
-					L,
+					leaflet,
 					verifiedDate,
-					'verify',
+					true,
 					boosted
 				);
 
-				let verified = verifiedArr(element);
+				let verified = verifiedArr(elementOSM);
 
 				if (verified.length && Date.parse(verified[0]) > verifiedDate) {
 					upToDateLayer.addLayer(marker);
@@ -675,7 +677,7 @@
 					outdatedLayer.addLayer(marker);
 				}
 
-				if (element.tags && element.tags['payment:bitcoin']) {
+				if (elementOSM.tags && elementOSM.tags['payment:bitcoin']) {
 					legacyLayer.addLayer(marker);
 				}
 			});
@@ -686,12 +688,12 @@
 			map.addLayer(legacyLayer);
 
 			map.fitBounds(
-				community.geo_json
-					? // eslint-disable-next-line no-undef
-					  L.geoJSON(community.geo_json).getBounds()
+				// @ts-expect-error
+				community?.geo_json
+					? leaflet.geoJSON(community.geo_json).getBounds()
 					: [
-							[community['box:south'], community['box:west']],
-							[community['box:north'], community['box:east']]
+							[community?.['box:south'], community?.['box:west']],
+							[community?.['box:north'], community?.['box:east']]
 					  ]
 			);
 
@@ -752,7 +754,9 @@
 						src={avatar}
 						alt="avatar"
 						class="mx-auto h-32 w-32 rounded-full object-cover"
-						onerror="this.src='/images/communities/bitcoin.svg'"
+						on:error={function () {
+							this.src = '/images/communities/bitcoin.svg';
+						}}
 					/>
 					<h1 class="text-4xl font-semibold !leading-tight text-primary dark:text-white">
 						{name}
@@ -764,7 +768,7 @@
 						<SponsorBadge />
 					{/if}
 					<h2 class="text-xl uppercase text-primary dark:text-white">
-						{continent.replace('-', ' ')}
+						{continent?.replace('-', ' ')}
 						<i
 							class="fa-solid fa-earth-{continent === 'africa'
 								? 'africa'
@@ -782,9 +786,9 @@
 						/>
 					</h2>
 					<a
-						href={community.geo_json
+						href={community?.geo_json
 							? `/map?community=${data.id}`
-							: `/map?lat=${community['box:south']}&long=${community['box:west']}&lat=${community['box:north']}&long=${community['box:east']}`}
+							: `/map?lat=${community?.['box:south']}&long=${community?.['box:west']}&lat=${community?.['box:north']}&long=${community?.['box:east']}`}
 						class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
 						>View on main map <svg
 							class="ml-1 w-3"
@@ -837,12 +841,12 @@
 				>
 					{name} Map
 					<div class="space-x-1 text-link">
-						<!-- eslint-disable-next-line no-unused-vars -->
+						<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 						{#each Array(grade) as star}
 							<i class="fa-solid fa-star" />
 						{/each}
 
-						<!-- eslint-disable-next-line no-unused-vars -->
+						<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 						{#each Array(5 - grade) as star}
 							<i class="fa-solid fa-star opacity-25" />
 						{/each}
@@ -931,7 +935,9 @@
 												: '/images/satoshi-nakamoto.png'}
 											alt="avatar"
 											class="mx-auto h-20 w-20 rounded-full object-cover"
-											onerror="this.src='/images/satoshi-nakamoto.png'"
+											on:error={function () {
+												this.src = '/images/satoshi-nakamoto.png';
+											}}
 										/>
 										<p class="text-center font-semibold text-body dark:text-white">
 											{tagger.osm_json.display_name.length > 21
@@ -944,7 +950,7 @@
 						{:else if !communityEvents.length}
 							<p class="p-5 text-body dark:text-white">No supertaggers to display.</p>
 						{:else}
-							<!-- eslint-disable-next-line no-unused-vars -->
+							<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 							{#each Array(5) as tagger}
 								<div class="m-4 space-y-1 transition-transform hover:scale-110">
 									<p class="mx-auto h-20 w-20 animate-pulse rounded-full bg-link/50" />
@@ -1008,7 +1014,7 @@
 						{:else if !communityEvents.length}
 							<p class="p-5 text-body dark:text-white">No activity to display.</p>
 						{:else}
-							<!-- eslint-disable-next-line no-unused-vars -->
+							<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 							{#each Array(5) as skeleton}
 								<TaggerSkeleton />
 							{/each}

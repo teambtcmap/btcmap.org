@@ -1,13 +1,13 @@
-<script>
+<script lang="ts">
 	import tippy from 'tippy.js';
 
-	export let title;
-	export let stat;
-	export let percent;
-	export let border;
-	export let tooltip = undefined;
+	export let title: string;
+	export let stat: number;
+	export let percent: string;
+	export let border: string;
+	export let tooltip: undefined | string = undefined;
 
-	let tooltipElement;
+	let tooltipElement: HTMLButtonElement;
 
 	$: tooltipElement &&
 		tippy([tooltipElement], {

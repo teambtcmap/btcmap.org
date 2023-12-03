@@ -1,26 +1,26 @@
-<script>
-	export let website = undefined;
-	export let email = undefined;
-	export let nostr = undefined;
-	export let twitter = undefined;
-	export let secondTwitter = undefined;
-	export let meetup = undefined;
-	export let eventbrite = undefined;
-	export let telegram = undefined;
-	export let discord = undefined;
-	export let youtube = undefined;
-	export let github = undefined;
-	export let reddit = undefined;
-	export let instagram = undefined;
-	export let whatsapp = undefined;
-	export let facebook = undefined;
-	export let linkedin = undefined;
-	export let rss = undefined;
-	export let signal = undefined;
+<script lang="ts">
+	export let website: undefined | string = undefined;
+	export let email: undefined | string = undefined;
+	export let nostr: undefined | string = undefined;
+	export let twitter: undefined | string = undefined;
+	export let secondTwitter: undefined | string = undefined;
+	export let meetup: undefined | string = undefined;
+	export let eventbrite: undefined | string = undefined;
+	export let telegram: undefined | string = undefined;
+	export let discord: undefined | string = undefined;
+	export let youtube: undefined | string = undefined;
+	export let github: undefined | string = undefined;
+	export let reddit: undefined | string = undefined;
+	export let instagram: undefined | string = undefined;
+	export let whatsapp: undefined | string = undefined;
+	export let facebook: undefined | string = undefined;
+	export let linkedin: undefined | string = undefined;
+	export let rss: undefined | string = undefined;
+	export let signal: undefined | string = undefined;
 
-	export let style = undefined;
+	export let style: undefined | string = undefined;
 
-	import { Icon } from '$comp';
+	import { Icon } from '$lib/comp';
 </script>
 
 <div class="flex flex-wrap items-center justify-center {style || ''}">

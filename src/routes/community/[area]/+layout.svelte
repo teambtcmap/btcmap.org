@@ -1,6 +1,6 @@
-<script>
+<script lang="ts">
 	import { page } from '$app/stores';
-	import { LoadingSplash } from '$comp';
+	import { LoadingSplash } from '$lib/comp';
 	import {
 		areaError,
 		areas,

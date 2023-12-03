@@ -6,17 +6,18 @@ import axiosRetry from 'axios-retry';
 axiosRetry(axios, { retries: 3 });
 
 // generate and return invoice
+// @ts-expect-error
 export async function GET({ url }) {
-	let amount = url.searchParams.get('amount');
-	let name = url.searchParams.get('name');
-	let time = url.searchParams.get('time');
+	const amount = url.searchParams.get('amount');
+	const name = url.searchParams.get('name');
+	const time = url.searchParams.get('time');
 
 	const headers = {
 		'X-API-Key': `${LNBITS_API_KEY}`,
 		'Content-type': 'application/json'
 	};
 
-	let invoice = await axios
+	const invoice = await axios
 		.post(
 			`https://${LNBITS_URL}/api/v1/payments`,
 			{

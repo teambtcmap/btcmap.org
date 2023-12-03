@@ -1,0 +1,218 @@
+import type { GeoJSON } from 'geojson';
+import type leaflet from 'leaflet';
+import type { DomEvent, FeatureGroup, LatLng, LayerGroup, Marker, TileLayer } from 'leaflet';
+
+// BACKEND
+
+export type Area = {
+	id: string;
+	tags: AreaTags;
+	created_at: string;
+	updated_at: string;
+	deleted_at: string;
+};
+
+export type AreaTags = {
+	type: 'community' | 'country';
+	name: string;
+	continent: 'africa' | 'asia' | 'europe' | 'north-america' | 'oceania' | 'south-america';
+	url_alias: string;
+	geo_json: GeoJSON;
+	['icon:square']: string;
+	organization?: string;
+	language?: string;
+	population?: string;
+	['population:date']?: string;
+	['contact:website']?: string;
+	['contact:email']?: string;
+	['contact:nostr']?: string;
+	['contact:twitter']?: string;
+	['contact:second_twitter']?: string;
+	['contact:meetup']?: string;
+	['contact:eventbrite']?: string;
+	['contact:telegram']?: string;
+	['contact:discord']?: string;
+	['contact:youtube']?: string;
+	['contact:github']?: string;
+	['contact:reddit']?: string;
+	['contact:instagram']?: string;
+	['contact:whatsapp']?: string;
+	['contact:facebook']?: string;
+	['contact:linkedin']?: string;
+	['contact:rss']?: string;
+	['contact:signal']?: string;
+	['tips:lightning_address']?: string;
+	['tips:url']?: string;
+	sponsor?: boolean;
+	['box:north']?: string;
+	['box:east']?: string;
+	['box:south']?: string;
+	['box:west']?: string;
+};
+
+export type Element = {
+	id: string;
+	osm_json: ElementOSM;
+	tags: {
+		['icon:android']: string;
+		category: string;
+		['boost:expires']?: string;
+		['payment:uri']?: string;
+		['payment:coinos']?: string;
+		['payment:pouch']?: string;
+	};
+	created_at: string;
+	updated_at: string;
+	deleted_at: string;
+};
+
+export type ElementOSM = {
+	type: 'node' | 'way' | 'relation';
+	id: number;
+	lat: number;
+	lon: number;
+	bounds: { minlat: number; minlon: number; maxlat: number; maxlon: number } | null;
+	tags?: OSMTags;
+};
+
+export type OSMTags = { [key: string]: any };
+
+export type Event = {
+	id: number;
+	user_id: number;
+	element_id: string;
+	type: EventType;
+	tags: object;
+	created_at: string;
+	updated_at: string;
+	deleted_at: string;
+};
+
+export type EventType = 'create' | 'update' | 'delete';
+
+export type Report = {
+	id: number;
+	area_id: string;
+	date: string;
+	tags: {
+		total_elements: number;
+		total_elements_onchain: number;
+		total_elements_lightning: number;
+		total_elements_lightning_contactless: number;
+		total_atms: number;
+		up_to_date_elements: number;
+		up_to_date_percent: number;
+		outdated_elements: number;
+		legacy_elements: number;
+		avg_verification_date: string;
+		grade: Grade;
+	};
+	created_at: string;
+	updated_at: string;
+	deleted_at: string;
+};
+
+export type Grade = 0 | 1 | 2 | 3 | 4 | 5;
+
+export type User = {
+	id: number;
+	osm_json: { id: number; display_name: string; description: string; img: { href: string } | null };
+	tags: { ['supporter:expires']?: string };
+	created_at: string;
+	updated_at: string;
+	deleted_at: string;
+};
+
+// FRONTEND
+
+// leaflet
+
+export type Leaflet = typeof leaflet;
+
+export type DomEventType = typeof DomEvent;
+
+export type MapGroups = { [key: string]: LayerGroup | FeatureGroup.SubGroup };
+
+export type BaseMaps = {
+	'OSM Bright': TileLayer;
+	'Alidade Smooth Dark': TileLayer;
+	OpenStreetMap: TileLayer;
+	'Alidade Smooth': TileLayer;
+	Imagery: TileLayer;
+	Outdoors: TileLayer;
+	Terrain: TileLayer;
+	Topo: TileLayer;
+	Toner: TileLayer;
+	'Toner Lite': TileLayer;
+	Watercolor: TileLayer;
+	OpenStreetMapDE: TileLayer;
+	OpenStreetMapFR: TileLayer;
+};
+
+// map
+
+export type Boost = { id: string; name: string; boost: string } | undefined;
+
+export interface SearchElement extends ElementOSM {
+	latLng: LatLng;
+	marker: Marker<any>;
+	icon: string;
+	boosted: string | undefined;
+}
+
+export interface SearchResult extends SearchElement {
+	distanceKm: number;
+	distanceMi: number;
+}
+
+// leaderboards
+
+export type TaggerLeaderboard = {
+	avatar: string;
+	tagger: string;
+	id: number;
+	created: number;
+	updated: number;
+	deleted: number;
+	total: number;
+	tip: string;
+};
+
+export type ProfileLeaderboard = { id: number; total: number };
+
+export interface LeaderboardArea extends Area {
+	report: Report;
+}
+
+// tagger
+
+export enum BadgeType {
+	Contribution = 'contribution',
+	Achievement = 'achievement'
+}
+
+export type EarnedBadge = { title: string; icon: string; type: BadgeType };
+
+export enum TipType {
+	Address = 'address',
+	Url = 'url'
+}
+
+// events
+
+export interface ActivityEvent extends Event {
+	location: string;
+	merchantId: string;
+}
+
+// misc
+
+export type Theme = 'light' | 'dark';
+
+export type DonationType = 'On-chain' | 'Lightning';
+
+export type DropdownLink = { url: string; external?: boolean; icon: string; title: string };
+
+export type SubmitForm = SubmitEvent & {
+	currentTarget: EventTarget & HTMLFormElement;
+};

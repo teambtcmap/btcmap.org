@@ -1,15 +1,16 @@
-<script>
-	export let position;
-	export let avatar;
-	export let name;
-	export let sponsor;
-	export let id;
-	export let upToDate;
-	export let total;
-	export let legacy;
-	export let grade;
+<script lang="ts">
+	export let position: number;
+	export let avatar: string;
+	export let name: string;
+	export let sponsor: boolean;
+	export let id: string;
+	export let upToDate: number;
+	export let total: number;
+	export let legacy: number;
+	export let grade: Grade;
 
-	import { SponsorBadge } from '$comp';
+	import { SponsorBadge } from '$lib/comp';
+	import type { Grade } from '$lib/types';
 
 	$: stats = [
 		{ stat: upToDate, title: 'Up-To-Date' },
@@ -43,7 +44,9 @@
 			src={avatar}
 			alt="avatar"
 			class="mx-auto mb-2 h-20 w-20 rounded-full object-cover lg:h-14 lg:w-14"
-			onerror="this.src='/images/communities/bitcoin.svg'"
+			on:error={function () {
+				this.src = '/images/communities/bitcoin.svg';
+			}}
 		/>
 
 		<a
@@ -72,12 +75,12 @@
 				</div>
 			{:else if stat.title === 'Grade'}
 				<div class="space-x-1">
-					<!-- eslint-disable-next-line no-unused-vars -->
+					<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 					{#each Array(stat.stat) as star}
 						<i class="fa-solid fa-star" />
 					{/each}
 
-					<!-- eslint-disable-next-line no-unused-vars -->
+					<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 					{#each Array(5 - stat.stat) as star}
 						<i class="fa-solid fa-star opacity-25" />
 					{/each}

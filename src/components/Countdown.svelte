@@ -1,5 +1,5 @@
-<script>
-	export let date;
+<script lang="ts">
+	export let date: string;
 	export let style = '';
 
 	import { onDestroy } from 'svelte';
@@ -7,10 +7,10 @@
 	// Set the date we're counting down to
 	const countDownDate = new Date(date).getTime();
 
-	let days = '- -';
-	let hours = '- -';
-	let minutes = '- -';
-	let seconds = '- -';
+	let days: string | number = '- -';
+	let hours: string | number = '- -';
+	let minutes: string | number = '- -';
+	let seconds: string | number = '- -';
 	let distance = 0;
 
 	// Update the count down every 1 second

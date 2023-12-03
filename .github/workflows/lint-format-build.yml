@@ -18,6 +18,9 @@ jobs:
       - name: run prettier
         run: yarn lint
 
+      - name: run check
+        run: yarn check
+
       - name: create .env
         run: cp .env.example .env
 

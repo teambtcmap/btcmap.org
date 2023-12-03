@@ -1,5 +1,5 @@
-<script>
-	export let contributor;
+<script lang="ts">
+	export let contributor: { url: string; name: string; file: string; title: string };
 </script>
 
 <a
@@ -12,7 +12,9 @@
 		src="/images/contributors/{contributor.name}.{contributor.file}"
 		alt="avatar"
 		class="mx-auto h-24 w-24 rounded-full object-cover"
-		onerror="this.src='/images/satoshi-nakamoto.png'"
+		on:error={function () {
+			this.src = '/images/satoshi-nakamoto.png';
+		}}
 	/>
 
 	<div>

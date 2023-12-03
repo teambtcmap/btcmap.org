@@ -1,6 +1,7 @@
-<script>
-	import { BadgeCard, Footer, Header, HeaderPlaceholder } from '$comp';
+<script lang="ts">
+	import { BadgeCard, Footer, Header, HeaderPlaceholder } from '$lib/comp';
 	import { theme } from '$lib/store';
+	import { BadgeType } from '$lib/types';
 	import { detectTheme } from '$lib/utils';
 
 	let achievements = [
@@ -199,7 +200,7 @@
 							icon={achievement.icon}
 							title={achievement.title}
 							desc={achievement.desc}
-							type="achievement"
+							type={BadgeType.Achievement}
 						/>
 					{/each}
 				</div>
@@ -216,7 +217,7 @@
 							icon={contribution.icon}
 							title={contribution.title}
 							desc={contribution.desc}
-							type="contribution"
+							type={BadgeType.Contribution}
 						/>
 					{/each}
 				</div>

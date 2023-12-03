@@ -1,8 +1,8 @@
-<script>
-	export let url;
-	export let social;
+<script lang="ts">
+	export let url: string;
+	export let social: string;
 
-	import { Icon } from '$comp';
+	import { Icon } from '$lib/comp';
 </script>
 
 <a

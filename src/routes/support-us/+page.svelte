@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import {
 		CloseButton,
 		DonationOption,
@@ -6,17 +6,18 @@
 		Header,
 		HeaderPlaceholder,
 		SupportSection
-	} from '$comp';
+	} from '$lib/comp';
 	import { theme } from '$lib/store';
+	import type { DonationType } from '$lib/types';
 	import { detectTheme } from '$lib/utils';
 
 	let onchain = 'bc1qqmy5c03clt6a72aq0ys5jzm2sjnws3qr05nvmz';
 	const lnurlp = 'LNURL1DP68GURN8GHJ7CM0WFJJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQPSYZ34';
 
 	let showQr = false;
-	let network;
+	let network: DonationType;
 
-	const showQrToggle = (type) => {
+	const showQrToggle = (type: DonationType) => {
 		network = type;
 		showQr = true;
 	};

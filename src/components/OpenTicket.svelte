@@ -1,16 +1,16 @@
-<script>
+<script lang="ts">
 	import Time from 'svelte-time';
 
-	import { TicketLabel } from '$comp';
+	import { TicketLabel } from '$lib/comp';
 
-	export let assignees;
-	export let comments;
-	export let created;
-	export let url;
-	export let labels;
-	export let id;
-	export let name;
-	export let user;
+	export let assignees: { html_url: string; avatar_url: string; login: string }[];
+	export let comments: number;
+	export let created: string;
+	export let url: string;
+	export let labels: { name: string; description?: string }[];
+	export let id: number;
+	export let name: string;
+	export let user: { html_url: string; login: string };
 </script>
 
 <div

@@ -11,26 +11,35 @@ import crypto from 'crypto';
 
 axiosRetry(axios, { retries: 3 });
 
-let used = [];
-
+const used: string[] = [];
+// @ts-expect-error
 export async function POST({ request }) {
 	const headers = {
 		Authorization: `Bearer ${GITHUB_API_KEY}`,
 		Accept: 'application/vnd.github+json'
 	};
 
-	let {
+	const {
 		captchaSecret,
 		captchaTest,
 		honey,
 		name,
-		location,
-		edit,
-		current,
-		outdated,
-		verified,
+		address,
 		lat,
-		long
+		long,
+		osm,
+		category,
+		methods,
+		website,
+		phone,
+		hours,
+		twitterMerchant,
+		twitterSubmitter,
+		notes,
+		source,
+		sourceOther,
+		contact,
+		communities
 	} = await request.json();
 
 	// if honey field has value return
@@ -39,12 +48,10 @@ export async function POST({ request }) {
 	}
 
 	// verify that captcha is correct
-	/* eslint-disable no-undef */
 	const initVector = Buffer.from(SERVER_INIT_VECTOR, 'hex');
 	const serverKey = Buffer.from(SERVER_CRYPTO_KEY, 'hex');
-	/* eslint-enable no-undef */
 
-	let decrypt = crypto.createDecipheriv('aes-256-cbc', serverKey, initVector);
+	const decrypt = crypto.createDecipheriv('aes-256-cbc', serverKey, initVector);
 
 	let secret = decrypt.update(captchaSecret, 'hex', 'utf8');
 	secret += decrypt.final('utf8');
@@ -59,7 +66,7 @@ export async function POST({ request }) {
 		used.push(captchaSecret);
 	}
 
-	let country = await axios
+	const country = await axios
 		.get(
 			`https://api.opencagedata.com/geocode/v1/json?q=${lat.slice(0, 7)}%2C%20${long.slice(
 				0,
@@ -73,27 +80,43 @@ export async function POST({ request }) {
 			console.log(error);
 		});
 
-	let github = await axios
+	const standardLabels = ['good first issue', 'help wanted', 'location-submission'];
+
+	const github = await axios
 		.post(
 			'https://api.github.com/repos/teambtcmap/btcmap-data/issues',
 			{
 				title: name,
 				body: `Merchant name: ${name}
 Country: ${country ? country : ''}
-Merchant location: ${location}
-Edit link: ${edit}
-Current information correct: ${current}
-Outdated information: ${outdated}
-How did you verify this?: ${verified}
+Communities: ${communities.length ? communities.join(', ') : ''}
+Address: ${address}
 Lat: ${lat}
 Long: ${long}
+OSM: ${osm}
+Category: ${category}
+Payment methods: ${methods}
+Website: ${website}
+Phone: ${phone}
+Opening hours: ${hours}
+Twitter merchant: ${twitterMerchant}
+Twitter submitter: ${twitterSubmitter}
+Notes: ${notes}
+Data Source: ${source}
+Details (if applicable): ${sourceOther}
+Contact: ${contact}
 Status: Todo
 Created at: ${new Date(Date.now()).toISOString()}
 
 If you are a new contributor please read our Tagging Instructions [here](https://wiki.btcmap.org/general/tagging-instructions.html).`,
-				labels: country
-					? ['good first issue', 'help wanted', 'verify-submission', country]
-					: ['good first issue', 'help wanted', 'verify-submission']
+				labels:
+					country && communities.length
+						? [...standardLabels, country, ...communities]
+						: country
+						  ? [...standardLabels, country]
+						  : communities.length
+						    ? [...standardLabels, ...communities]
+						    : [...standardLabels]
 			},
 			{ headers }
 		)

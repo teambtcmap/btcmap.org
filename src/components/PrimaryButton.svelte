@@ -1,14 +1,14 @@
-<script>
-	import { LoadingSpinner } from '$comp';
+<script lang="ts">
+	import { LoadingSpinner } from '$lib/comp';
 
-	export let text;
-	export let style;
-	export let link = undefined;
-	export let click = undefined;
-	export let type = undefined;
-	export let external = undefined;
-	export let disabled = undefined;
-	export let loading = undefined;
+	export let text: string;
+	export let style: string;
+	export let link: undefined | string = undefined;
+	export let click: undefined | ((p?: any) => void) = undefined;
+	export let type: undefined | 'button' | 'submit' = undefined;
+	export let external: undefined | boolean = undefined;
+	export let disabled: undefined | boolean = undefined;
+	export let loading: undefined | boolean = undefined;
 </script>
 
 {#if link}

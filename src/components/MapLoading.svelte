@@ -1,9 +1,10 @@
-<script>
-	export let type;
-	export let message = undefined;
-	export let style;
+<script lang="ts">
+	export let type: 'main' | 'embed';
+	export let message: undefined | string = undefined;
+	export let style: undefined | string = undefined;
 
-	import { LoadingSpinner } from '$comp';
+	import { LoadingSpinner } from '$lib/comp';
+	// @ts-expect-error
 	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
 </script>
 

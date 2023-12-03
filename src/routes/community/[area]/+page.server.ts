@@ -5,8 +5,9 @@ import axiosRetry from 'axios-retry';
 
 axiosRetry(axios, { retries: 3 });
 
+// @ts-expect-error
 export async function load({ params }) {
-	let { area } = params;
+	const { area } = params;
 	try {
 		const response = await axios.get(`https://api.btcmap.org/v2/areas/${area}`);
 
@@ -18,7 +19,7 @@ export async function load({ params }) {
 				Accept: 'application/vnd.github+json'
 			};
 
-			let issues = await axios
+			const issues = await axios
 				.get(
 					`https://api.github.com/repos/teambtcmap/btcmap-data/issues?per_page=100&labels=${data.tags.name}`,
 					{ headers }

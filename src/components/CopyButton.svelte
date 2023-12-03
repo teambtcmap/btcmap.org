@@ -1,9 +1,9 @@
-<script>
-	export let value;
+<script lang="ts">
+	export let value: string;
 
 	let copied = false;
 
-	const copy = (field) => {
+	const copy = (field: string) => {
 		navigator.clipboard.writeText(field);
 		copied = true;
 		setTimeout(() => (copied = false), 2100);

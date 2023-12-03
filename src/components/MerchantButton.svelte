@@ -1,7 +1,7 @@
-<script>
-	export let click;
-	export let icon;
-	export let text;
+<script lang="ts">
+	export let click: () => void;
+	export let icon: string;
+	export let text: string;
 </script>
 
 <button

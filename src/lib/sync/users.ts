@@ -1,4 +1,5 @@
 import { userError, users } from '$lib/store';
+import type { User } from '$lib/types';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import localforage from 'localforage';
@@ -73,17 +74,17 @@ export const usersSync = async () => {
 
 	// get users from local
 	await localforage
-		.getItem('users_v4')
+		.getItem<User[]>('users_v4')
 		.then(async function (value) {
 			// get users from API if initial sync
 			if (!value) {
 				let updatedSince = '2022-01-01T00:00:00.000Z';
 				let responseCount;
-				let usersData = [];
+				let usersData: User[] = [];
 
 				do {
 					try {
-						const response = await axios.get(
+						const response = await axios.get<User[]>(
 							`https://api.btcmap.org/v2/users?updated_since=${updatedSince}&limit=${limit}`
 						);
 
@@ -115,8 +116,7 @@ export const usersSync = async () => {
 					// set response to local
 					localforage
 						.setItem('users_v4', usersData)
-						// eslint-disable-next-line no-unused-vars
-						.then(function (value) {
+						.then(function () {
 							// set response to store
 							users.set(usersFiltered);
 						})
@@ -132,7 +132,7 @@ export const usersSync = async () => {
 
 				// start update sync from API
 				// sort to get most recent record
-				let cacheSorted = [...value];
+				const cacheSorted = [...value];
 				cacheSorted.sort((a, b) => Date.parse(b['updated_at']) - Date.parse(a['updated_at']));
 
 				let updatedSince = cacheSorted[0]['updated_at'];
@@ -142,12 +142,12 @@ export const usersSync = async () => {
 
 				do {
 					try {
-						const response = await axios.get(
+						const response = await axios.get<User[]>(
 							`https://api.btcmap.org/v2/users?updated_since=${updatedSince}&limit=${limit}`
 						);
 
 						// update new records if they exist
-						let newUsers = response.data;
+						const newUsers = response.data;
 
 						// check for new users in local and purge if they exist
 						if (newUsers.length) {
@@ -191,8 +191,7 @@ export const usersSync = async () => {
 					// set updated users locally
 					localforage
 						.setItem('users_v4', usersData)
-						// eslint-disable-next-line no-unused-vars
-						.then(function (value) {
+						.then(function () {
 							// set updated users to store
 							users.set(newUsersFiltered);
 						})
@@ -213,11 +212,11 @@ export const usersSync = async () => {
 
 			let updatedSince = '2022-01-01T00:00:00.000Z';
 			let responseCount;
-			let usersData = [];
+			let usersData: User[] = [];
 
 			do {
 				try {
-					const response = await axios.get(
+					const response = await axios.get<User[]>(
 						`https://api.btcmap.org/v2/users?updated_since=${updatedSince}&limit=${limit}`
 					);
 

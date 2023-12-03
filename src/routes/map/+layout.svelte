@@ -1,5 +1,5 @@
-<script>
-	import { MapLoading } from '$comp';
+<script lang="ts">
+	import { MapLoading } from '$lib/comp';
 	import {
 		areaError,
 		areas,

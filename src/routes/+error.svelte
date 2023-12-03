@@ -1,6 +1,6 @@
-<script>
+<script lang="ts">
 	import { page } from '$app/stores';
-	import { SocialLink } from '$comp';
+	import { SocialLink } from '$lib/comp';
 	import { socials } from '$lib/store';
 	import { onMount } from 'svelte';
 
@@ -38,7 +38,7 @@
 			<a href="/" class="text-xl font-semibold text-link transition-colors hover:text-hover"
 				><i class="fa-solid fa-house mr-2" /> Home</a
 			>
-			<h1 class="text-4xl dark:text-white md:text-5xl">{$page.status}: {$page.error.message}</h1>
+			<h1 class="text-4xl dark:text-white md:text-5xl">{$page.status}: {$page.error?.message}</h1>
 			<h2 class="text-xl font-semibold text-primary dark:text-white">
 				Please try again or contact BTC Map.
 			</h2>

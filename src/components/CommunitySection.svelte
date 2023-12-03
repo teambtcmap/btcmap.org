@@ -1,7 +1,8 @@
-<script>
-	export let communities;
+<script lang="ts">
+	export let communities: Area[] | undefined;
 
-	import { CommunityCard, CommunitySkeleton } from '$comp';
+	import { CommunityCard, CommunitySkeleton } from '$lib/comp';
+	import type { Area } from '$lib/types';
 </script>
 
 <section>
@@ -11,7 +12,7 @@
 				<CommunityCard id={community.id} tags={community.tags} />
 			{/each}
 		{:else}
-			<!-- eslint-disable-next-line no-unused-vars -->
+			<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 			{#each Array(4) as skeleton}
 				<CommunitySkeleton />
 			{/each}

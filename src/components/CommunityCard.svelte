@@ -1,8 +1,9 @@
-<script>
-	import { Socials, SponsorBadge, Tip } from '$comp';
+<script lang="ts">
+	import { Socials, SponsorBadge, Tip } from '$lib/comp';
+	import { TipType, type AreaTags } from '$lib/types';
 
-	export let id;
-	export let tags;
+	export let id: string;
+	export let tags: AreaTags;
 
 	$: image = tags['icon:square'] && tags['icon:square'];
 	$: website = tags['contact:website'] && tags['contact:website'];
@@ -26,9 +27,9 @@
 	$: tip =
 		(tags['tips:lightning_address'] && {
 			destination: tags['tips:lightning_address'],
-			type: 'address'
+			type: TipType.Address
 		}) ||
-		(tags['tips:url'] && { destination: tags['tips:url'], type: 'url' });
+		(tags['tips:url'] && { destination: tags['tips:url'], type: TipType.Url });
 </script>
 
 <div
@@ -40,7 +41,9 @@
 				src={image ? image : '/images/communities/bitcoin.svg'}
 				alt={tags.name}
 				class="mx-auto h-20 w-20 rounded-full object-cover"
-				onerror="this.src='/images/communities/bitcoin.svg'"
+				on:error={function () {
+					this.src = '/images/communities/bitcoin.svg';
+				}}
 			/>
 
 			<span class="block text-center text-lg font-semibold">{tags.name}</span>

@@ -1,9 +1,10 @@
-<script>
-	export let value;
-	export let text;
-	export let showQrToggle;
+<script lang="ts">
+	export let value: string;
+	export let text: DonationType;
+	export let showQrToggle: (type: DonationType) => void;
 
-	import { CopyButton } from '$comp';
+	import { CopyButton } from '$lib/comp';
+	import type { DonationType } from '$lib/types';
 </script>
 
 <div>

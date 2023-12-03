@@ -1,6 +1,7 @@
-<script>
-	export let page;
+<script lang="ts">
+	export let page: string;
 
+	// @ts-expect-error
 	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
 </script>
 

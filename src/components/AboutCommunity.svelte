@@ -1,9 +1,10 @@
-<script>
+<script lang="ts">
+	import type { Area } from '$lib/types';
 	import tippy from 'tippy.js';
 
-	export let community;
+	export let community: Area;
 
-	let communityTooltip;
+	let communityTooltip: HTMLAnchorElement;
 
 	$: communityTooltip &&
 		tippy([communityTooltip], {
@@ -16,7 +17,9 @@
 		src={community.tags['icon:square']}
 		alt="avatar"
 		class="h-24 w-24 rounded-full object-cover"
-		onerror="this.src='/images/communities/bitcoin.svg'"
+		on:error={function () {
+			this.src = '/images/communities/bitcoin.svg';
+		}}
 	/>
 </a>
 

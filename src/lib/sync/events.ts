@@ -1,4 +1,5 @@
 import { eventError, events } from '$lib/store';
+import type { Event } from '$lib/types';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import localforage from 'localforage';
@@ -52,17 +53,17 @@ export const eventsSync = async () => {
 
 	// get events from local
 	await localforage
-		.getItem('events_v3')
+		.getItem<Event[]>('events_v3')
 		.then(async function (value) {
 			// get events from API if initial sync
 			if (!value) {
 				let updatedSince = '2022-01-01T00:00:00.000Z';
 				let responseCount;
-				let eventsData = [];
+				let eventsData: Event[] = [];
 
 				do {
 					try {
-						const response = await axios.get(
+						const response = await axios.get<Event[]>(
 							`https://api.btcmap.org/v2/events?updated_since=${updatedSince}&limit=${limit}`
 						);
 
@@ -94,8 +95,7 @@ export const eventsSync = async () => {
 					// set response to local
 					localforage
 						.setItem('events_v3', eventsData)
-						// eslint-disable-next-line no-unused-vars
-						.then(function (value) {
+						.then(function () {
 							// set response to store
 							events.set(eventsFiltered);
 						})
@@ -113,7 +113,7 @@ export const eventsSync = async () => {
 
 				// start update sync from API
 				// sort to get most recent record
-				let cacheSorted = [...value];
+				const cacheSorted = [...value];
 				cacheSorted.sort((a, b) => Date.parse(b['updated_at']) - Date.parse(a['updated_at']));
 
 				let updatedSince = cacheSorted[0]['updated_at'];
@@ -123,12 +123,12 @@ export const eventsSync = async () => {
 
 				do {
 					try {
-						const response = await axios.get(
+						const response = await axios.get<Event[]>(
 							`https://api.btcmap.org/v2/events?updated_since=${updatedSince}&limit=${limit}`
 						);
 
 						// update new records if they exist
-						let newEvents = response.data;
+						const newEvents = response.data;
 
 						// check for new events in local and purge if they exist
 						if (newEvents.length) {
@@ -174,8 +174,7 @@ export const eventsSync = async () => {
 					// set updated events locally
 					localforage
 						.setItem('events_v3', eventsData)
-						// eslint-disable-next-line no-unused-vars
-						.then(function (value) {
+						.then(function () {
 							// set updated events to store
 							events.set(newEventsFiltered);
 						})
@@ -198,11 +197,11 @@ export const eventsSync = async () => {
 
 			let updatedSince = '2022-01-01T00:00:00.000Z';
 			let responseCount;
-			let eventsData = [];
+			let eventsData: Event[] = [];
 
 			do {
 				try {
-					const response = await axios.get(
+					const response = await axios.get<Event[]>(
 						`https://api.btcmap.org/v2/events?updated_since=${updatedSince}&limit=${limit}`
 					);
 

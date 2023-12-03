@@ -1,8 +1,9 @@
 import { theme } from '$lib/store';
 import { toast } from '@zerodevx/svelte-toast';
+import type { Chart } from 'chart.js';
 import { get } from 'svelte/store';
 
-export const errToast = (m) => {
+export const errToast = (m: string) => {
 	toast.pop();
 
 	toast.push(m, {
@@ -12,7 +13,7 @@ export const errToast = (m) => {
 	});
 };
 
-export const warningToast = (m) => {
+export const warningToast = (m: string) => {
 	toast.pop();
 
 	toast.push(m, {
@@ -23,7 +24,7 @@ export const warningToast = (m) => {
 	});
 };
 
-export const successToast = (m) => {
+export const successToast = (m: string) => {
 	toast.pop();
 
 	toast.push(m, {
@@ -34,9 +35,9 @@ export const successToast = (m) => {
 };
 
 export function getRandomColor() {
-	var letters = '0123456789ABCDEF';
-	var color = '#';
-	for (var i = 0; i < 6; i++) {
+	const letters = '0123456789ABCDEF';
+	let color = '#';
+	for (let i = 0; i < 6; i++) {
 		color += letters[Math.floor(Math.random() * 16)];
 	}
 	return color;
@@ -53,18 +54,24 @@ export const detectTheme = () => {
 	}
 };
 
-export const updateChartThemes = (charts) => {
+export const updateChartThemes = (
+	charts: Chart<'line' | 'bar', number[] | undefined, string>[]
+) => {
 	if (get(theme) === 'dark') {
 		charts.forEach((chart) => {
-			chart.options.scales.x.grid.color = 'rgba(255, 255, 255, 0.15)';
-			chart.options.scales.y.grid.color = 'rgba(255, 255, 255, 0.15)';
-			chart.update();
+			if (chart.options.scales?.x?.grid && chart.options.scales?.y?.grid) {
+				chart.options.scales.x.grid.color = 'rgba(255, 255, 255, 0.15)';
+				chart.options.scales.y.grid.color = 'rgba(255, 255, 255, 0.15)';
+				chart.update();
+			}
 		});
 	} else {
 		charts.forEach((chart) => {
-			chart.options.scales.x.grid.color = 'rgba(0, 0, 0, 0.1)';
-			chart.options.scales.y.grid.color = 'rgba(0, 0, 0, 0.1)';
-			chart.update();
+			if (chart.options.scales?.x?.grid && chart.options.scales?.y?.grid) {
+				chart.options.scales.x.grid.color = 'rgba(0, 0, 0, 0.1)';
+				chart.options.scales.y.grid.color = 'rgba(0, 0, 0, 0.1)';
+				chart.update();
+			}
 		});
 	}
 };

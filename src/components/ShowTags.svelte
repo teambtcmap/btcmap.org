@@ -1,5 +1,5 @@
-<script>
-	import { CloseButton } from '$comp';
+<script lang="ts">
+	import { CloseButton } from '$lib/comp';
 	import { showTags } from '$lib/store';
 	import OutClick from 'svelte-outclick';
 	import { fly } from 'svelte/transition';
@@ -8,7 +8,7 @@
 </script>
 
 {#if $showTags}
-	<OutClick excludeQuerySelectorAll={['#show-tags']} on:outclick={closeModal}>
+	<OutClick excludeQuerySelectorAll="#show-tags" on:outclick={closeModal}>
 		<div
 			transition:fly={{ y: 200, duration: 300 }}
 			class="center-fixed z-[2000] max-h-[90vh] w-[90vw] overflow-auto rounded-xl border border-mapBorder bg-white p-6 text-left shadow-2xl dark:bg-dark md:h-[400px] md:w-[430px]"

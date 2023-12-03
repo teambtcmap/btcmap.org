@@ -1,5 +1,5 @@
-<script>
-	import { LoadingSplash } from '$comp';
+<script lang="ts">
+	import { LoadingSplash } from '$lib/comp';
 	import {
 		areaError,
 		areas,

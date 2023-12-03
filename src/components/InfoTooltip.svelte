@@ -1,8 +1,8 @@
-<script>
-	export let tooltip;
+<script lang="ts">
+	export let tooltip: string;
 	import tippy from 'tippy.js';
 
-	let infoTooltip;
+	let infoTooltip: HTMLButtonElement;
 
 	$: infoTooltip &&
 		tippy([infoTooltip], {
