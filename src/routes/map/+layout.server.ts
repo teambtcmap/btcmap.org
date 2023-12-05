@@ -20,6 +20,7 @@ export function load({ url }) {
 			throw redirect(301, `/communities/map?language=${language}`);
 
 		case communitiesOnly:
+			url.searchParams.delete('communitiesOnly');
 			throw redirect(301, '/communities/map');
 	}
 }
