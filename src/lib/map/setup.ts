@@ -396,7 +396,12 @@ export const geolocate = (L: Leaflet, map: Map) => {
 	}
 };
 
-export const homeMarkerButtons = (L: Leaflet, map: Map, DomEvent: DomEventType) => {
+export const homeMarkerButtons = (
+	L: Leaflet,
+	map: Map,
+	DomEvent: DomEventType,
+	mainMap?: boolean
+) => {
 	const theme = detectTheme();
 
 	const addControlDiv = L.DomUtil.create('div');
@@ -435,30 +440,82 @@ export const homeMarkerButtons = (L: Leaflet, map: Map, DomEvent: DomEventType) 
 
 			addControlDiv.append(addHomeButton);
 
-			const addLocationButton = L.DomUtil.create('a');
-			addLocationButton.classList.add('leaflet-bar-part');
-			addLocationButton.href = '/add-location';
-			addLocationButton.title = 'Add location';
-			addLocationButton.role = 'button';
-			addLocationButton.ariaLabel = 'Add location';
-			addLocationButton.ariaDisabled = 'false';
-			addLocationButton.innerHTML = `<img src=${
-				theme === 'dark' ? '/icons/marker-white.svg' : '/icons/marker.svg'
-			} alt='marker' class='inline' id='marker'/>`;
-			addLocationButton.style.borderRadius = '0 0 8px 8px';
-			if (theme === 'light') {
-				addLocationButton.onmouseenter = () => {
-					// @ts-expect-error
-					document.querySelector('#marker').src = '/icons/marker-black.svg';
-				};
-				addLocationButton.onmouseleave = () => {
-					// @ts-expect-error
-					document.querySelector('#marker').src = '/icons/marker.svg';
-				};
-			}
-			addLocationButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+			if (mainMap) {
+				const addLocationButton = L.DomUtil.create('a');
+				addLocationButton.classList.add('leaflet-bar-part');
+				addLocationButton.href = '/add-location';
+				addLocationButton.title = 'Add location';
+				addLocationButton.role = 'button';
+				addLocationButton.ariaLabel = 'Add location';
+				addLocationButton.ariaDisabled = 'false';
+				addLocationButton.innerHTML = `<img src=${
+					theme === 'dark' ? '/icons/marker-white.svg' : '/icons/marker.svg'
+				} alt='marker' class='inline' id='marker'/>`;
+				addLocationButton.style.borderRadius = '0';
+				if (theme === 'light') {
+					addLocationButton.onmouseenter = () => {
+						// @ts-expect-error
+						document.querySelector('#marker').src = '/icons/marker-black.svg';
+					};
+					addLocationButton.onmouseleave = () => {
+						// @ts-expect-error
+						document.querySelector('#marker').src = '/icons/marker.svg';
+					};
+				}
+				addLocationButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
 
-			addControlDiv.append(addLocationButton);
+				addControlDiv.append(addLocationButton);
+
+				const communityMapButton = L.DomUtil.create('a');
+				communityMapButton.classList.add('leaflet-bar-part');
+				communityMapButton.href = '/communities/map';
+				communityMapButton.title = 'Community map';
+				communityMapButton.role = 'button';
+				communityMapButton.ariaLabel = 'Community map';
+				communityMapButton.ariaDisabled = 'false';
+				communityMapButton.innerHTML = `<img src=${
+					theme === 'dark' ? '/icons/group-white.svg' : '/icons/group.svg'
+				} alt='group' class='inline' id='group'/>`;
+				communityMapButton.style.borderRadius = '0 0 8px 8px';
+				if (theme === 'light') {
+					communityMapButton.onmouseenter = () => {
+						// @ts-expect-error
+						document.querySelector('#group').src = '/icons/group-black.svg';
+					};
+					communityMapButton.onmouseleave = () => {
+						// @ts-expect-error
+						document.querySelector('#group').src = '/icons/group.svg';
+					};
+				}
+				communityMapButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+
+				addControlDiv.append(communityMapButton);
+			} else {
+				const merchantMapButton = L.DomUtil.create('a');
+				merchantMapButton.classList.add('leaflet-bar-part');
+				merchantMapButton.href = '/map';
+				merchantMapButton.title = 'Merchant map';
+				merchantMapButton.role = 'button';
+				merchantMapButton.ariaLabel = 'Merchant map';
+				merchantMapButton.ariaDisabled = 'false';
+				merchantMapButton.innerHTML = `<img src=${
+					theme === 'dark' ? '/icons/shopping-white.svg' : '/icons/shopping.svg'
+				} alt='shopping' class='inline' id='shopping'/>`;
+				merchantMapButton.style.borderRadius = '0 0 8px 8px';
+				if (theme === 'light') {
+					merchantMapButton.onmouseenter = () => {
+						// @ts-expect-error
+						document.querySelector('#shopping').src = '/icons/shopping-black.svg';
+					};
+					merchantMapButton.onmouseleave = () => {
+						// @ts-expect-error
+						document.querySelector('#shopping').src = '/icons/shopping.svg';
+					};
+				}
+				merchantMapButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+
+				addControlDiv.append(merchantMapButton);
+			}
 
 			return addControlDiv;
 		}

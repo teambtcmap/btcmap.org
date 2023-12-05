@@ -1,24 +1,10 @@
 <script lang="ts">
 	import { MapLoading } from '$lib/comp';
-	import {
-		areaError,
-		areas,
-		elementError,
-		elements,
-		mapLoading,
-		reportError,
-		reports
-	} from '$lib/store';
+	import { elementError, elements, mapLoading } from '$lib/store';
 	import { errToast } from '$lib/utils';
 
 	// alert for map errors
 	$: $elementError && errToast($elementError);
-
-	// alert for area errors
-	$: $areaError && errToast($areaError);
-
-	// alert for report errors
-	$: $reportError && errToast($reportError);
 </script>
 
 <svelte:head>
@@ -30,7 +16,7 @@
 
 <h1 class="hidden">Map</h1>
 
-{#if $elements && $elements.length && $areas && $areas.length && $reports && $reports.length}
+{#if $elements && $elements.length}
 	<slot />
 {:else}
 	<MapLoading type="main" message={$mapLoading} />

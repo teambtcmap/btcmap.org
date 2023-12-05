@@ -184,8 +184,10 @@
 				changeDefaultIcons(false, leaflet, mapElement, DomEvent);
 
 				// create marker cluster group
-				// eslint-disable-next-line no-undef
+				/* eslint-disable no-undef */
+				// @ts-expect-error
 				let markers = L.markerClusterGroup();
+				/* eslint-enable no-undef */
 
 				// get date from 1 year ago to add verified check if survey is current
 				let verifiedDate = calcVerifiedDate();

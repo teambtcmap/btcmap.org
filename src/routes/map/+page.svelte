@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
-	import { Boost, Icon, MapLoading, ShowTags, Socials } from '$lib/comp';
+	import { Boost, Icon, MapLoading, ShowTags } from '$lib/comp';
 	import {
 		attribution,
 		calcVerifiedDate,
@@ -19,22 +19,10 @@
 		support,
 		verifiedArr
 	} from '$lib/map/setup';
-	import {
-		areaError,
-		areas,
-		elementError,
-		elements,
-		elementsSyncCount,
-		mapUpdates,
-		reportError,
-		reports
-	} from '$lib/store';
+	import { elementError, elements, elementsSyncCount, mapUpdates } from '$lib/store';
 	import type { MapGroups, OSMTags, SearchElement, SearchResult } from '$lib/types';
 	import { detectTheme, errToast } from '$lib/utils';
-	// @ts-expect-error
-	import rewind from '@mapbox/geojson-rewind';
 	import axios from 'axios';
-	import { geoArea } from 'd3-geo';
 	import type { LatLng, LatLngBounds, Map } from 'leaflet';
 	import localforage from 'localforage';
 	import { onDestroy, onMount, tick } from 'svelte';
@@ -135,41 +123,6 @@
 	// allow to view map for hike event
 	const hikeEvent = $page.url.searchParams.has('mount-kili-hike');
 
-	// allow to view map centered on a community
-	const communityQuery = $page.url.searchParams.get('community');
-	const communitySelected = $areas.find((area) => area.id === communityQuery);
-
-	// allow to view map with communities only
-	const communitiesOnly = $page.url.searchParams.has('communitiesOnly');
-
-	// allow to view map with only certain language communities
-	const language = $page.url.searchParams.get('language');
-
-	// allow to view map with only certain org communities
-	const organization = $page.url.searchParams.get('organization');
-
-	// filter communities
-	let communitiesFiltered = $areas.filter(
-		(area) =>
-			area.tags.type === 'community' &&
-			area.tags.geo_json &&
-			area.tags.name &&
-			area.tags['icon:square'] &&
-			area.tags.continent &&
-			Object.keys(area.tags).find((key) => key.includes('contact')) &&
-			$reports.find((report) => report.area_id === area.id) &&
-			(language ? area.tags.language === language : true) &&
-			(organization ? area.tags.organization === organization : true)
-	);
-
-	// sort communities by largest to smallest
-	let communities = communitiesFiltered.map((community) => {
-		rewind(community.tags.geo_json, true);
-		return { ...community, area: geoArea(community.tags.geo_json) };
-	});
-
-	communities.sort((a, b) => b.area - a.area);
-
 	// displays a button in controls if there is new data available
 	const showDataRefresh = () => {
 		const refreshDiv: HTMLDivElement | null = document.querySelector('.data-refresh-div');
@@ -181,12 +134,6 @@
 
 	// alert for map errors
 	$: $elementError && errToast($elementError);
-
-	// alert for area errors
-	$: $areaError && errToast($areaError);
-
-	// alert for report errors
-	$: $reportError && errToast($reportError);
 
 	onMount(async () => {
 		if (browser) {
@@ -211,39 +158,6 @@
 					try {
 						const coords = location.hash.split('/');
 						map.setView([Number(coords[1]), Number(coords[2])], Number(coords[0].slice(1)));
-						mapCenter = map.getCenter();
-					} catch (error) {
-						map.setView([0, 0], 3);
-						mapCenter = map.getCenter();
-						errToast(
-							'Could not set map view to provided coordinates, please try again or contact BTC Map.'
-						);
-						console.log(error);
-					}
-				}
-
-				// set view to community if in url params
-				else if (communityQuery && communitySelected) {
-					try {
-						map.fitBounds(leaflet.geoJSON(communitySelected.tags.geo_json).getBounds());
-						mapCenter = map.getCenter();
-					} catch (error) {
-						map.setView([0, 0], 3);
-						mapCenter = map.getCenter();
-						errToast(
-							'Could not set map view to provided coordinates, please try again or contact BTC Map.'
-						);
-						console.log(error);
-					}
-				}
-
-				// set view to communities if in url params
-				else if (communitiesOnly && communities.length) {
-					try {
-						map.fitBounds(
-							// @ts-expect-error
-							communities.map((community) => leaflet.geoJSON(community.tags.geo_json).getBounds())
-						);
 						mapCenter = map.getCenter();
 					} catch (error) {
 						map.setView([0, 0], 3);
@@ -331,13 +245,7 @@ Thanks for using BTC Map!`);
 
 				mapCenter = map.getCenter();
 
-				if (
-					!communityQuery &&
-					!communitiesOnly &&
-					!urlLat.length &&
-					!urlLong.length &&
-					!hikeEvent
-				) {
+				if (!urlLat.length && !urlLong.length && !hikeEvent) {
 					const zoom = map.getZoom();
 					location.hash = zoom + '/' + mapCenter.lat.toFixed(5) + '/' + mapCenter.lng.toFixed(5);
 				}
@@ -362,17 +270,22 @@ Thanks for using BTC Map!`);
 			// add locate button to map
 			geolocate(leaflet, map);
 
-			// add search button to map
-			const customSearchButton = leaflet.Control.extend({
+			// add new control container for search and boost
+			const customControls = leaflet.Control.extend({
 				options: {
 					position: 'topleft'
 				},
 				onAdd: () => {
-					const searchButtonDiv = leaflet.DomUtil.create('div');
-					searchButtonDiv.classList.add('leaflet-bar');
-					searchButtonDiv.style.border = 'none';
-					searchButtonDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+					const addControlDiv = leaflet.DomUtil.create('div');
+					addControlDiv.style.border = 'none';
+					addControlDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+					addControlDiv.classList.add(
+						'leaflet-control-search-boost',
+						'leaflet-bar',
+						'leaflet-control'
+					);
 
+					// add search button to map
 					const searchButton = leaflet.DomUtil.create('a');
 					searchButton.classList.add('leaflet-control-search-toggle');
 					searchButton.title = 'Search toggle';
@@ -382,7 +295,7 @@ Thanks for using BTC Map!`);
 					searchButton.innerHTML = `<img src=${
 						theme === 'dark' ? '/icons/search-white.svg' : '/icons/search.svg'
 					} alt='search' class='inline' id='search-button'/>`;
-					searchButton.style.borderRadius = '8px';
+					searchButton.style.borderRadius = '8px 8px 0 0';
 					searchButton.onclick = async function toggleSearch() {
 						showSearch = !showSearch;
 						if (showSearch) {
@@ -406,13 +319,58 @@ Thanks for using BTC Map!`);
 					}
 					searchButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
 
-					searchButtonDiv.append(searchButton);
+					addControlDiv.append(searchButton);
 
-					return searchButtonDiv;
+					// add boost layer button
+					const boostLayerButton = leaflet.DomUtil.create('a');
+					boostLayerButton.classList.add('leaflet-control-boost-layer');
+					boostLayerButton.title = 'Boosted locations';
+					boostLayerButton.role = 'button';
+					boostLayerButton.ariaLabel = 'Boosted locations';
+					boostLayerButton.ariaDisabled = 'false';
+					boostLayerButton.innerHTML = `<img src=${
+						boosts
+							? theme === 'dark'
+								? '/icons/boost-solid-white.svg'
+								: '/icons/boost-solid.svg'
+							: theme === 'dark'
+							  ? '/icons/boost-white.svg'
+							  : '/icons/boost.svg'
+					} alt='boost' class='inline' id='boost-layer'/>`;
+					boostLayerButton.style.borderRadius = '0 0 8px 8px';
+					boostLayerButton.onclick = function toggleLayer() {
+						if (boosts) {
+							$page.url.searchParams.delete('boosts');
+							location.search = $page.url.search;
+						} else {
+							$page.url.searchParams.append('boosts', 'true');
+							location.search = $page.url.search;
+						}
+					};
+					if (theme === 'light') {
+						boostLayerButton.onmouseenter = () => {
+							// @ts-expect-error
+							document.querySelector('#boost-layer').src = boosts
+								? '/icons/boost-solid-black.svg'
+								: '/icons/boost-black.svg';
+						};
+						boostLayerButton.onmouseleave = () => {
+							// @ts-expect-error
+							document.querySelector('#boost-layer').src = boosts
+								? '/icons/boost-solid.svg'
+								: '/icons/boost.svg';
+						};
+					}
+					boostLayerButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+
+					addControlDiv.append(boostLayerButton);
+
+					return addControlDiv;
 				}
 			});
 
-			map.addControl(new customSearchButton());
+			map.addControl(new customControls());
+			DomEvent.disableClickPropagation(document.querySelector('.leaflet-control-boost-layer'));
 
 			// add search bar to map
 			// @ts-expect-error
@@ -447,70 +405,8 @@ Thanks for using BTC Map!`);
 			DomEvent.disableClickPropagation(document.querySelector('.leaflet-control-search-toggle'));
 			DomEvent.disableClickPropagation(clearSearchButton);
 
-			// add boost layer button
-
-			const customBoostLayerButton = leaflet.Control.extend({
-				options: {
-					position: 'topleft'
-				},
-				onAdd: () => {
-					const boostLayerDiv = leaflet.DomUtil.create('div');
-					boostLayerDiv.classList.add('leaflet-bar');
-					boostLayerDiv.style.border = 'none';
-					boostLayerDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
-
-					const boostLayerButton = leaflet.DomUtil.create('a');
-					boostLayerButton.classList.add('leaflet-control-boost-layer');
-					boostLayerButton.title = 'Boosted locations';
-					boostLayerButton.role = 'button';
-					boostLayerButton.ariaLabel = 'Boosted locations';
-					boostLayerButton.ariaDisabled = 'false';
-					boostLayerButton.innerHTML = `<img src=${
-						boosts
-							? theme === 'dark'
-								? '/icons/boost-solid-white.svg'
-								: '/icons/boost-solid.svg'
-							: theme === 'dark'
-							  ? '/icons/boost-white.svg'
-							  : '/icons/boost.svg'
-					} alt='boost' class='inline' id='boost-layer'/>`;
-					boostLayerButton.style.borderRadius = '8px';
-					boostLayerButton.onclick = function toggleLayer() {
-						if (boosts) {
-							$page.url.searchParams.delete('boosts');
-							location.search = $page.url.search;
-						} else {
-							$page.url.searchParams.append('boosts', 'true');
-							location.search = $page.url.search;
-						}
-					};
-					if (theme === 'light') {
-						boostLayerButton.onmouseenter = () => {
-							// @ts-expect-error
-							document.querySelector('#boost-layer').src = boosts
-								? '/icons/boost-solid-black.svg'
-								: '/icons/boost-black.svg';
-						};
-						boostLayerButton.onmouseleave = () => {
-							// @ts-expect-error
-							document.querySelector('#boost-layer').src = boosts
-								? '/icons/boost-solid.svg'
-								: '/icons/boost.svg';
-						};
-					}
-					boostLayerButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
-
-					boostLayerDiv.append(boostLayerButton);
-
-					return boostLayerDiv;
-				}
-			});
-
-			map.addControl(new customBoostLayerButton());
-			DomEvent.disableClickPropagation(document.querySelector('.leaflet-control-boost-layer'));
-
 			// add home and marker buttons to map
-			homeMarkerButtons(leaflet, map, DomEvent);
+			homeMarkerButtons(leaflet, map, DomEvent, true);
 
 			// add data refresh button to map
 			dataRefresh(leaflet, map, DomEvent);
@@ -519,121 +415,14 @@ Thanks for using BTC Map!`);
 			let verifiedDate = calcVerifiedDate();
 
 			// create marker cluster group and layers
-			let communitiesLayer = leaflet.layerGroup();
-			// eslint-disable-next-line no-undef
+			/* eslint-disable no-undef */
+			// @ts-expect-error
 			let markers = L.markerClusterGroup({ maxClusterRadius: 60 });
+			/* eslint-enable no-undef */
 			let upToDateLayer = leaflet.featureGroup.subGroup(markers);
 			let outdatedLayer = leaflet.featureGroup.subGroup(markers);
 			let legacyLayer = leaflet.featureGroup.subGroup(markers);
 			let categories: MapGroups = {};
-
-			// add communities to map
-			communities.forEach((community) => {
-				const popupContainer = leaflet.DomUtil.create('div');
-
-				popupContainer.innerHTML = `
-				<div class='text-center space-y-2'>
-					<img src=${
-						community.tags['icon:square']
-					} alt='avatar' class='w-24 h-24 rounded-full mx-auto' title='Community icon' ${
-						communityQuery || communitiesOnly
-							? 'decoding="sync" fetchpriority="high"'
-							: 'loading="lazy"'
-					} onerror="this.src='/images/communities/bitcoin.svg'" />
-
-					<span class='text-primary dark:text-white font-semibold text-xl' title='Community name'>${
-						community.tags.name
-					}</span>
-
-					${
-						community.tags.organization
-							? `<span
-						class="mx-auto whitespace-nowrap w-fit block rounded-full bg-[#10B981] px-3.5 py-1 text-xs font-semibold uppercase text-white" title='Organization'
-					>
-					${community.tags.organization}
-					</span>`
-							: ''
-					}
-
-					${
-						community.tags.sponsor
-							? `<span class="block gradient-bg w-32 mx-auto py-1 text-xs text-white font-semibold rounded-full" title='Supporter'>
-						BTC Map Sponsor
-					</span>`
-							: ''
-					}
-
-					<div id='socials'>
-					</div>
-
-					<a href='/community/${
-						community.id
-					}' class='block bg-link hover:bg-hover !text-white text-center font-semibold py-3 rounded-xl transition-colors' title='Community page'>View Community</a>
-				</div>
-
-				${
-					theme === 'dark'
-						? `
-							<style>
-								.leaflet-popup-content-wrapper, .leaflet-popup-tip {
-									background-color: #06171C;
-									border: 1px solid #e5e7eb
-							}
-
-								.leaflet-popup-close-button {
-									font-size: 24px !important;
-									top: 4px !important;
-									right: 4px !important;
-							}
-							</style>`
-						: ''
-				}`;
-
-				const socials = popupContainer.querySelector('#socials');
-				if (socials) {
-					new Socials({
-						target: socials,
-						props: {
-							website: community.tags['contact:website'],
-							email: community.tags['contact:email'],
-							nostr: community.tags['contact:nostr'],
-							twitter: community.tags['contact:twitter'],
-							secondTwitter: community.tags['contact:second_twitter'],
-							meetup: community.tags['contact:meetup'],
-							eventbrite: community.tags['contact:eventbrite'],
-							telegram: community.tags['contact:telegram'],
-							discord: community.tags['contact:discord'],
-							youtube: community.tags['contact:youtube'],
-							github: community.tags['contact:github'],
-							reddit: community.tags['contact:reddit'],
-							instagram: community.tags['contact:instagram'],
-							whatsapp: community.tags['contact:whatsapp'],
-							facebook: community.tags['contact:facebook'],
-							linkedin: community.tags['contact:linkedin'],
-							rss: community.tags['contact:rss'],
-							signal: community.tags['contact:signal']
-						}
-					});
-				}
-
-				try {
-					let communityLayer = leaflet
-						.geoJSON(community.tags.geo_json, {
-							style: { color: '#000000', fillColor: '#F7931A', fillOpacity: 0.5 }
-						})
-						.bindPopup(popupContainer, { minWidth: 300 });
-
-					communityLayer.on('click', () => communityLayer.bringToBack());
-
-					communityLayer.addTo(communitiesLayer);
-				} catch (error) {
-					console.log(error, community);
-				}
-			});
-
-			if ((communityQuery && communitySelected) || communitiesOnly) {
-				communitiesLayer.addTo(map);
-			}
 
 			// add location information
 			$elements.forEach((element) => {
@@ -714,7 +503,6 @@ Thanks for using BTC Map!`);
 			map.addLayer(markers);
 
 			let overlayMaps: MapGroups = {
-				Communities: communitiesLayer,
 				'Up-To-Date': upToDateLayer,
 				Outdated: outdatedLayer,
 				Legacy: legacyLayer
@@ -728,12 +516,10 @@ Thanks for using BTC Map!`);
 							? category.toUpperCase()
 							: category.charAt(0).toUpperCase() + category.slice(1)
 					] = categories[category];
-					if (!communitiesOnly) {
-						map.addLayer(upToDateLayer);
-						map.addLayer(outdatedLayer);
-						map.addLayer(legacyLayer);
-						map.addLayer(categories[category]);
-					}
+					map.addLayer(upToDateLayer);
+					map.addLayer(outdatedLayer);
+					map.addLayer(legacyLayer);
+					map.addLayer(categories[category]);
 				});
 
 			leaflet.control.layers(baseMaps, overlayMaps).addTo(map);

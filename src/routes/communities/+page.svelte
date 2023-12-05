@@ -277,7 +277,7 @@
 				<PrimaryButton
 					text="View community map"
 					style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
-					link="/map?communitiesOnly"
+					link="/communities/map"
 				/>
 			</div>
 

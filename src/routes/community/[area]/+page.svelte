@@ -603,8 +603,10 @@
 			attribution(leaflet, map);
 
 			// create marker cluster groups
-			// eslint-disable-next-line no-undef
+			/* eslint-disable no-undef */
+			// @ts-expect-error
 			let markers = L.markerClusterGroup();
+			/* eslint-enable no-undef */
 			let upToDateLayer = leaflet.featureGroup.subGroup(markers);
 			let outdatedLayer = leaflet.featureGroup.subGroup(markers);
 			let legacyLayer = leaflet.featureGroup.subGroup(markers);
@@ -785,28 +787,28 @@
 								          : ''}"
 						/>
 					</h2>
-					<a
-						href={community?.geo_json
-							? `/map?community=${data.id}`
-							: `/map?lat=${community?.['box:south']}&long=${community?.['box:west']}&lat=${community?.['box:north']}&long=${community?.['box:east']}`}
-						class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
-						>View on main map <svg
-							class="ml-1 w-3"
-							width="16"
-							height="16"
-							viewBox="0 0 16 16"
-							fill="none"
-							xmlns="http://www.w3.org/2000/svg"
+					{#if community?.geo_json}
+						<a
+							href={`/communities/map?community=${data.id}`}
+							class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
+							>View on community map <svg
+								class="ml-1 w-3"
+								width="16"
+								height="16"
+								viewBox="0 0 16 16"
+								fill="none"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									d="M3 13L13 3M13 3H5.5M13 3V10.5"
+									stroke="currentColor"
+									stroke-width="1.5"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								/>
+							</svg></a
 						>
-							<path
-								d="M3 13L13 3M13 3H5.5M13 3V10.5"
-								stroke="currentColor"
-								stroke-width="1.5"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							/>
-						</svg></a
-					>
+					{/if}
 				</div>
 
 				<Socials
