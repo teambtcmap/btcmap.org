@@ -153,9 +153,9 @@
 
 				popupContainer.innerHTML = `
 				<div class='text-center space-y-2'>
-					<img src=${
+					<img loading='lazy' src=${
 						community.tags['icon:square']
-					} alt='avatar' class='w-24 h-24 rounded-full mx-auto' title='Community icon' loading='lazy' onerror="this.src='/images/communities/bitcoin.svg'" />
+					} alt='avatar' class='w-24 h-24 rounded-full mx-auto' title='Community icon' onerror="this.src='/images/communities/bitcoin.svg'" />
 
 					<span class='text-primary dark:text-white font-semibold text-xl' title='Community name'>${
 						community.tags.name
