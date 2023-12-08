@@ -168,7 +168,12 @@
 		}
 	};
 
-	$: $areas && $areas.length && communities && communities.length && initialRenderComplete && chartSync($syncStatus);
+	$: $areas &&
+		$areas.length &&
+		communities &&
+		communities.length &&
+		initialRenderComplete &&
+		chartSync($syncStatus);
 
 	let section: string;
 	const sections = [
