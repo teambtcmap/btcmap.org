@@ -26,8 +26,8 @@
 		{#each links as link}
 			<a
 				href={link.link}
-				target={link.external ? '_blank' : '_self'}
-				rel="noreferrer"
+				target={link.external ? '_blank' : null}
+				rel={link.external ? 'noreferrer' : null}
 				class="mx-2.5 {link.name !== 'Cypherpunks'
 					? 'mb-2.5 xl:mb-0'
 					: ''} text-sm text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link"

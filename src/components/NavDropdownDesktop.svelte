@@ -32,8 +32,8 @@
 				{#each links as link}
 					<a
 						href={link.url}
-						target={link.external ? '_blank' : '_self'}
-						rel="noreferrer"
+						target={link.external ? '_blank' : null}
+						rel={link.external ? 'noreferrer' : null}
 						class="flex items-center justify-center bg-link p-4 text-xl font-semibold text-white hover:bg-hover {link.icon ===
 						top
 							? 'rounded-t-2xl'

@@ -11,8 +11,8 @@
 	{#if link}
 		<a
 			href={link}
-			target={text === 'Web' ? '_self' : '_blank'}
-			rel="noreferrer"
+			target={text === 'Web' ? null : '_blank'}
+			rel={text === 'Web' ? null : 'noreferrer'}
 			class="text-2xl font-semibold text-link transition-colors hover:text-hover"
 		>
 			<div

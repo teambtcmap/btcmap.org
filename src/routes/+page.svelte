@@ -47,8 +47,8 @@
 							<p>{app.type}</p>
 							<a
 								href={app.link}
-								target={app.type === 'Web' ? '_self' : '_blank'}
-								rel="noreferrer"
+								target={app.type === 'Web' ? null : '_blank'}
+								rel={app.type === 'Web' ? null : 'noreferrer'}
 								class="block rounded-full bg-link p-3 text-white transition-colors hover:bg-hover"
 							>
 								<Icon

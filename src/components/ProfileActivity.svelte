@@ -50,8 +50,8 @@
 					href={action === 'delete'
 						? `https://www.openstreetmap.org/${deleteLink[0]}/${deleteLink[1]}`
 						: `/merchant/${merchantId}`}
-					target={action === 'delete' ? '_blank' : '_self'}
-					rel="noreferrer"
+					target={action === 'delete' ? '_blank' : null}
+					rel={action === 'delete' ? 'noreferrer' : null}
 					class="break-all text-link transition-colors hover:text-hover"
 					>{location}
 					{#if action === 'delete'}

@@ -151,7 +151,7 @@
 	};
 
 	const chartSync = (status: boolean) => {
-		if (!status && initialRenderComplete) {
+		if (!status) {
 			if (chartRendered) {
 				continentChart.data.datasets[0].data = [
 					africa?.length || 0,
@@ -168,7 +168,7 @@
 		}
 	};
 
-	$: $areas && $areas.length && communities && communities.length && chartSync($syncStatus);
+	$: $areas && $areas.length && communities && communities.length && initialRenderComplete && chartSync($syncStatus);
 
 	let section: string;
 	const sections = [

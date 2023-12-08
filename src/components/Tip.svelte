@@ -11,8 +11,8 @@
 	<div class="!my-12">
 		<a
 			href={type === 'url' ? destination : `lightning:${destination}`}
-			target={type === 'url' ? '_blank' : '_self'}
-			rel="noreferrer"
+			target={type === 'url' ? '_blank' : null}
+			rel={type === 'url' ? 'noreferrer' : null}
 			class="w-full rounded-xl bg-link p-3 px-5 text-center font-semibold text-white transition-colors hover:bg-hover md:text-lg"
 		>
 			<!--  lightning icon -->
@@ -38,8 +38,8 @@
 {:else}
 	<a
 		href={type === 'url' ? destination : `lightning:${destination}`}
-		target={type === 'url' ? '_blank' : '_self'}
-		rel="noreferrer"
+		target={type === 'url' ? '_blank' : null}
+		rel={type === 'url' ? 'noreferrer' : null}
 		class="w-full rounded-lg border border-link py-2 text-center text-sm font-semibold text-link hover:border-white hover:bg-link hover:text-white md:w-20 md:py-1 {style} transition-colors"
 	>
 		<!--  lightning icon -->
