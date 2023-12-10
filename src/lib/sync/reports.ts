@@ -8,6 +8,10 @@ axiosRetry(axios, { retries: 3 });
 
 const limit = 20000;
 
+const today = new Date();
+today.setMonth(today.getMonth() - 1);
+const monthAgo = today.toISOString();
+
 export const reportsSync = async () => {
 	// clear v1 table if present
 	await localforage
@@ -61,7 +65,7 @@ export const reportsSync = async () => {
 		.then(async function (value) {
 			// get reports from API if initial sync
 			if (!value) {
-				let updatedSince = '2022-01-01T00:00:00.000Z';
+				let updatedSince = monthAgo;
 				let responseCount;
 				let reportsData: Report[] = [];
 
@@ -201,7 +205,7 @@ export const reportsSync = async () => {
 			reportError.set('Could not load reports locally, please try again or contact BTC Map.');
 			console.log(err);
 
-			let updatedSince = '2022-01-01T00:00:00.000Z';
+			let updatedSince = monthAgo;
 			let responseCount;
 			let reportsData: Report[] = [];
 
