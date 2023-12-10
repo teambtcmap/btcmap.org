@@ -21,6 +21,7 @@
 		userError,
 		users
 	} from '$lib/store';
+	import type { Area, Element } from '$lib/types';
 	import { errToast } from '$lib/utils';
 
 	// alert for element errors
@@ -32,14 +33,40 @@
 	// alert for area errors
 	$: $areaError && errToast($areaError);
 
-	let merchants = $elements
-		.filter((element) => element.tags['boost:expires'])
-		.sort(
-			(a, b) =>
-				// @ts-expect-error
-				Date.parse(b.tags['boost:expires']) - Date.parse(a.tags['boost:expires'])
-		)
-		.slice(0, 6);
+	let dataInitalized = false;
+
+	let merchants: Element[] = [];
+	let communities: Area[] = [];
+
+	const initializeData = () => {
+		if (dataInitalized) return;
+
+		merchants = $elements
+			.filter((element) => element.tags['boost:expires'])
+			.sort(
+				(a, b) =>
+					// @ts-expect-error
+					Date.parse(b.tags['boost:expires']) - Date.parse(a.tags['boost:expires'])
+			)
+			.slice(0, 6);
+
+		populateLeaderboard();
+
+		communities = $areas.filter((area) => featuredCommunities.includes(area.id));
+
+		dataInitalized = true;
+	};
+
+	$: $elements &&
+		$elements.length &&
+		$users &&
+		$users.length &&
+		$events &&
+		$events.length &&
+		$areas &&
+		$areas.length &&
+		!dataInitalized &&
+		initializeData();
 
 	let supertaggers: { id: number; username: string; avatar: string; total: number }[] = [];
 
@@ -71,8 +98,6 @@
 		supertaggers = supertaggers.slice(0, 6);
 	};
 
-	populateLeaderboard();
-
 	const featuredCommunities = [
 		'bitcoin-island-philippines',
 		'btc-curacao',
@@ -81,8 +106,6 @@
 		'einundzwanzig-deutschland',
 		'free-madeira'
 	];
-
-	const communities = $areas.filter((area) => featuredCommunities.includes(area.id));
 
 	const communityIntegrations = [
 		{ name: 'Coinos', icon: 'coinos', url: 'https://coinos.io/' },
@@ -199,6 +222,13 @@
 		}
 	];
 </script>
+
+<svelte:head>
+	<title>BTC Map - About</title>
+	<meta property="og:image" content="https://btcmap.org/images/og/home.png" />
+	<meta property="twitter:title" content="BTC Map - About" />
+	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
+</svelte:head>
 
 <div class="bg-teal dark:bg-dark">
 	<Header />
