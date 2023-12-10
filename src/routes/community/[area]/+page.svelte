@@ -8,7 +8,7 @@
 		Header,
 		InfoTooltip,
 		LatestTagger,
-		MapLoading,
+		MapLoadingEmbed,
 		OpenTicket,
 		OrgBadge,
 		ProfileStat,
@@ -865,8 +865,7 @@
 						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal text-left dark:!bg-[#202f33] md:h-[600px]"
 					/>
 					{#if !mapLoaded}
-						<MapLoading
-							type="embed"
+						<MapLoadingEmbed
 							style="h-[300px] md:h-[600px] border border-statBorder rounded-b-3xl"
 						/>
 					{/if}

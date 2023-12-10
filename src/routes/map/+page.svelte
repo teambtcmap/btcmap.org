@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
-	import { Boost, Icon, MapLoading, ShowTags } from '$lib/comp';
+	import { Boost, Icon, MapLoadingMain, ShowTags } from '$lib/comp';
 	import {
 		attribution,
 		calcVerifiedDate,
@@ -20,17 +20,23 @@
 		verifiedArr
 	} from '$lib/map/setup';
 	import { elementError, elements, elementsSyncCount, mapUpdates } from '$lib/store';
-	import type { MapGroups, OSMTags, SearchElement, SearchResult } from '$lib/types';
+	import type { Leaflet, MapGroups, OSMTags, SearchElement, SearchResult } from '$lib/types';
 	import { detectTheme, errToast } from '$lib/utils';
 	import axios from 'axios';
-	import type { LatLng, LatLngBounds, Map } from 'leaflet';
+	import type { Control, LatLng, LatLngBounds, Map } from 'leaflet';
 	import localforage from 'localforage';
 	import { onDestroy, onMount, tick } from 'svelte';
 	import OutClick from 'svelte-outclick';
 
+	let mapLoading = 0;
+
+	let leaflet: Leaflet;
+	let controlLayers: Control.Layers;
+
 	let mapElement: HTMLDivElement;
 	let map: Map;
 	let mapLoaded = false;
+	let elementsLoaded = false;
 
 	let mapCenter: LatLng;
 	let elementsCopy: SearchElement[] = [];
@@ -135,12 +141,135 @@
 	// alert for map errors
 	$: $elementError && errToast($elementError);
 
+	const initializeElements = () => {
+		if (elementsLoaded) return;
+
+		// get date from 1 year ago to add verified check if survey is current
+		let verifiedDate = calcVerifiedDate();
+
+		// create marker cluster group and layers
+		/* eslint-disable no-undef */
+		// @ts-expect-error
+		let markers = L.markerClusterGroup({ maxClusterRadius: 60 });
+		/* eslint-enable no-undef */
+		let upToDateLayer = leaflet.featureGroup.subGroup(markers);
+		let outdatedLayer = leaflet.featureGroup.subGroup(markers);
+		let legacyLayer = leaflet.featureGroup.subGroup(markers);
+		let categories: MapGroups = {};
+
+		// add location information
+		$elements.forEach((element) => {
+			if (element['deleted_at']) {
+				return;
+			}
+
+			let category = element.tags.category;
+			let icon = element.tags['icon:android'];
+			let payment = element.tags['payment:uri']
+				? { type: 'uri', url: element.tags['payment:uri'] }
+				: element.tags['payment:pouch']
+				  ? { type: 'pouch', username: element.tags['payment:pouch'] }
+				  : element.tags['payment:coinos']
+				    ? { type: 'coinos', username: element.tags['payment:coinos'] }
+				    : undefined;
+			let boosted =
+				element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now()
+					? element.tags['boost:expires']
+					: undefined;
+
+			const elementOSM = element['osm_json'];
+
+			if (
+				(onchain ? elementOSM.tags && elementOSM.tags['payment:onchain'] === 'yes' : true) &&
+				(lightning ? elementOSM.tags && elementOSM.tags['payment:lightning'] === 'yes' : true) &&
+				(nfc
+					? elementOSM.tags && elementOSM.tags['payment:lightning_contactless'] === 'yes'
+					: true) &&
+				(legacy ? elementOSM.tags && elementOSM.tags['payment:bitcoin'] === 'yes' : true) &&
+				(boosts ? boosted : true)
+			) {
+				const lat = latCalc(elementOSM);
+				const long = longCalc(elementOSM);
+
+				let divIcon = generateIcon(leaflet, icon, boosted ? true : false);
+
+				let marker = generateMarker(
+					lat,
+					long,
+					divIcon,
+					elementOSM,
+					payment,
+					leaflet,
+					verifiedDate,
+					true,
+					boosted
+				);
+
+				let verified = verifiedArr(elementOSM);
+
+				if (verified.length && Date.parse(verified[0]) > verifiedDate) {
+					upToDateLayer.addLayer(marker);
+				} else {
+					outdatedLayer.addLayer(marker);
+				}
+
+				if (elementOSM.tags && elementOSM.tags['payment:bitcoin']) {
+					legacyLayer.addLayer(marker);
+				}
+
+				if (!categories[category]) {
+					categories[category] = leaflet.featureGroup.subGroup(markers);
+				}
+
+				categories[category].addLayer(marker);
+
+				elementsCopy.push({
+					...elementOSM,
+					latLng: leaflet.latLng(lat, long),
+					marker,
+					icon,
+					boosted
+				});
+			}
+		});
+
+		map.addLayer(markers);
+
+		let overlayMaps: MapGroups = {
+			'Up-To-Date': upToDateLayer,
+			Outdated: outdatedLayer,
+			Legacy: legacyLayer
+		};
+
+		Object.keys(categories)
+			.sort()
+			.map((category) => {
+				overlayMaps[
+					category === 'atm'
+						? category.toUpperCase()
+						: category.charAt(0).toUpperCase() + category.slice(1)
+				] = categories[category];
+				map.addLayer(upToDateLayer);
+				map.addLayer(outdatedLayer);
+				map.addLayer(legacyLayer);
+				map.addLayer(categories[category]);
+			});
+
+		Object.entries(overlayMaps).forEach((layer) => controlLayers.addOverlay(layer[1], layer[0]));
+
+		mapLoading = 100;
+
+		elementsLoaded = true;
+	};
+
+	$: $elements && $elements.length && mapLoaded && !elementsLoaded && initializeElements();
+
 	onMount(async () => {
 		if (browser) {
 			const theme = detectTheme();
 
 			//import packages
-			const leaflet = await import('leaflet');
+			leaflet = await import('leaflet');
 			// @ts-expect-error
 			const DomEvent = await import('leaflet/src/dom/DomEvent');
 			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
@@ -411,118 +540,7 @@ Thanks for using BTC Map!`);
 			// add data refresh button to map
 			dataRefresh(leaflet, map, DomEvent);
 
-			// get date from 1 year ago to add verified check if survey is current
-			let verifiedDate = calcVerifiedDate();
-
-			// create marker cluster group and layers
-			/* eslint-disable no-undef */
-			// @ts-expect-error
-			let markers = L.markerClusterGroup({ maxClusterRadius: 60 });
-			/* eslint-enable no-undef */
-			let upToDateLayer = leaflet.featureGroup.subGroup(markers);
-			let outdatedLayer = leaflet.featureGroup.subGroup(markers);
-			let legacyLayer = leaflet.featureGroup.subGroup(markers);
-			let categories: MapGroups = {};
-
-			// add location information
-			$elements.forEach((element) => {
-				if (element['deleted_at']) {
-					return;
-				}
-
-				let category = element.tags.category;
-				let icon = element.tags['icon:android'];
-				let payment = element.tags['payment:uri']
-					? { type: 'uri', url: element.tags['payment:uri'] }
-					: element.tags['payment:pouch']
-					  ? { type: 'pouch', username: element.tags['payment:pouch'] }
-					  : element.tags['payment:coinos']
-					    ? { type: 'coinos', username: element.tags['payment:coinos'] }
-					    : undefined;
-				let boosted =
-					element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now()
-						? element.tags['boost:expires']
-						: undefined;
-
-				const elementOSM = element['osm_json'];
-
-				if (
-					(onchain ? elementOSM.tags && elementOSM.tags['payment:onchain'] === 'yes' : true) &&
-					(lightning ? elementOSM.tags && elementOSM.tags['payment:lightning'] === 'yes' : true) &&
-					(nfc
-						? elementOSM.tags && elementOSM.tags['payment:lightning_contactless'] === 'yes'
-						: true) &&
-					(legacy ? elementOSM.tags && elementOSM.tags['payment:bitcoin'] === 'yes' : true) &&
-					(boosts ? boosted : true)
-				) {
-					const lat = latCalc(elementOSM);
-					const long = longCalc(elementOSM);
-
-					let divIcon = generateIcon(leaflet, icon, boosted ? true : false);
-
-					let marker = generateMarker(
-						lat,
-						long,
-						divIcon,
-						elementOSM,
-						payment,
-						leaflet,
-						verifiedDate,
-						true,
-						boosted
-					);
-
-					let verified = verifiedArr(elementOSM);
-
-					if (verified.length && Date.parse(verified[0]) > verifiedDate) {
-						upToDateLayer.addLayer(marker);
-					} else {
-						outdatedLayer.addLayer(marker);
-					}
-
-					if (elementOSM.tags && elementOSM.tags['payment:bitcoin']) {
-						legacyLayer.addLayer(marker);
-					}
-
-					if (!categories[category]) {
-						categories[category] = leaflet.featureGroup.subGroup(markers);
-					}
-
-					categories[category].addLayer(marker);
-
-					elementsCopy.push({
-						...elementOSM,
-						latLng: leaflet.latLng(lat, long),
-						marker,
-						icon,
-						boosted
-					});
-				}
-			});
-
-			map.addLayer(markers);
-
-			let overlayMaps: MapGroups = {
-				'Up-To-Date': upToDateLayer,
-				Outdated: outdatedLayer,
-				Legacy: legacyLayer
-			};
-
-			Object.keys(categories)
-				.sort()
-				.map((category) => {
-					overlayMaps[
-						category === 'atm'
-							? category.toUpperCase()
-							: category.charAt(0).toUpperCase() + category.slice(1)
-					] = categories[category];
-					map.addLayer(upToDateLayer);
-					map.addLayer(outdatedLayer);
-					map.addLayer(legacyLayer);
-					map.addLayer(categories[category]);
-				});
-
-			leaflet.control.layers(baseMaps, overlayMaps).addTo(map);
+			controlLayers = leaflet.control.layers(baseMaps).addTo(map);
 
 			// treasure hunt event
 			if (Date.now() < new Date('April 30, 2023 00:00:00').getTime()) {
@@ -677,6 +695,8 @@ Thanks for using BTC Map!`);
 				mapCenter = map.getCenter();
 			});
 
+			mapLoading = 40;
+
 			mapLoaded = true;
 		}
 	});
@@ -689,10 +709,17 @@ Thanks for using BTC Map!`);
 	});
 </script>
 
+<svelte:head>
+	<title>BTC Map</title>
+	<meta property="og:image" content="https://btcmap.org/images/og/map.png" />
+	<meta property="twitter:title" content="BTC Map" />
+	<meta property="twitter:image" content="https://btcmap.org/images/og/map.png" />
+</svelte:head>
+
 <main>
-	{#if !mapLoaded}
-		<MapLoading type="main" message="Rendering map..." style="absolute top-0 left-0 z-[10000]" />
-	{/if}
+	<h1 class="hidden">Map</h1>
+
+	<MapLoadingMain progress={mapLoading} />
 
 	<div
 		id="search-div"
@@ -713,6 +740,7 @@ Thanks for using BTC Map!`);
 					}
 				}}
 				bind:value={search}
+				disabled={!elementsLoaded}
 			/>
 
 			<button
@@ -806,7 +834,10 @@ Thanks for using BTC Map!`);
 		{/if}
 	</div>
 
-	<Boost />
+	{#if browser}
+		<Boost />
+	{/if}
+
 	<ShowTags />
 
 	<div bind:this={mapElement} class="absolute h-[100%] w-full !bg-teal dark:!bg-dark" />

@@ -7,7 +7,7 @@
 		Header,
 		HeaderPlaceholder,
 		InfoTooltip,
-		MapLoading,
+		MapLoadingEmbed,
 		PrimaryButton
 	} from '$lib/comp';
 	import {
@@ -341,8 +341,7 @@
 									class="z-10 h-[300px] !cursor-crosshair rounded-2xl border-2 border-input !bg-teal dark:!bg-dark dark:text-map md:h-[450px]"
 								/>
 								{#if !mapLoaded}
-									<MapLoading
-										type="embed"
+									<MapLoadingEmbed
 										style="h-[300px] md:h-[450px] border-2 border-input rounded-2xl"
 									/>
 								{/if}

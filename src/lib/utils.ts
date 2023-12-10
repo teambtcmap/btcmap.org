@@ -4,8 +4,6 @@ import type { Chart } from 'chart.js';
 import { get } from 'svelte/store';
 
 export const errToast = (m: string) => {
-	toast.pop();
-
 	toast.push(m, {
 		theme: {
 			'--toastBarBackground': '#DF3C3C'
@@ -14,8 +12,6 @@ export const errToast = (m: string) => {
 };
 
 export const warningToast = (m: string) => {
-	toast.pop();
-
 	toast.push(m, {
 		theme: {
 			'--toastBarBackground': '#FACA15'
@@ -25,8 +21,6 @@ export const warningToast = (m: string) => {
 };
 
 export const successToast = (m: string) => {
-	toast.pop();
-
 	toast.push(m, {
 		theme: {
 			'--toastBarBackground': '#22C55E'

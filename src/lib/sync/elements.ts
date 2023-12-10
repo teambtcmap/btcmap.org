@@ -1,4 +1,4 @@
-import { elementError, elements, elementsSyncCount, mapLoading, mapUpdates } from '$lib/store';
+import { elementError, elements, elementsSyncCount, mapUpdates } from '$lib/store';
 import type { Element } from '$lib/types';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -10,8 +10,6 @@ axiosRetry(axios, { retries: 3 });
 const limit = 5000;
 
 export const elementsSync = async () => {
-	mapLoading.set('Checking local cache...');
-
 	// clear v1 table if present
 	await localforage
 		.getItem('elements')
@@ -72,8 +70,6 @@ export const elementsSync = async () => {
 				let responseCount;
 				let elementsData: Element[] = [];
 
-				mapLoading.set('Fetching elements...');
-
 				do {
 					try {
 						const response = await axios.get<Element[]>(
@@ -104,17 +100,14 @@ export const elementsSync = async () => {
 				} while (responseCount === limit);
 
 				if (elementsData.length) {
-					mapLoading.set('Storing data...');
 					// set response to local
 					localforage
 						.setItem('elements_v3', elementsData)
 						.then(function () {
-							mapLoading.set('Initial sync complete!');
 							// set response to store
 							elements.set(elementsData);
 						})
 						.catch(function (err) {
-							mapLoading.set('Map loading complete!');
 							elements.set(elementsData);
 							elementError.set(
 								'Could not store elements locally, please try again or contact BTC Map.'
@@ -123,8 +116,6 @@ export const elementsSync = async () => {
 						});
 				}
 			} else {
-				mapLoading.set('Local cache found!');
-
 				// add to sync count to only show data refresh after initial load
 				const count = get(elementsSyncCount);
 				elementsSyncCount.set(count + 1);
@@ -138,8 +129,6 @@ export const elementsSync = async () => {
 				let responseCount;
 				let elementsData = value;
 				let useCachedData = false;
-
-				mapLoading.set('Fetching new elements...');
 
 				do {
 					try {
@@ -169,7 +158,6 @@ export const elementsSync = async () => {
 								elementsData.push(element);
 							});
 						} else {
-							mapLoading.set('Map loading complete!');
 							// set cached elements to store
 							elements.set(value);
 							useCachedData = true;
@@ -190,12 +178,9 @@ export const elementsSync = async () => {
 
 				if (!useCachedData) {
 					// set updated elements locally
-					mapLoading.set('Storing data...');
-
 					localforage
 						.setItem('elements_v3', elementsData)
 						.then(function () {
-							mapLoading.set('Map loading complete!');
 							// set updated elements to store
 							elements.set(elementsData);
 
@@ -230,8 +215,6 @@ export const elementsSync = async () => {
 			let responseCount;
 			let elementsData: Element[] = [];
 
-			mapLoading.set('Fetching elements...');
-
 			do {
 				try {
 					const response = await axios.get<Element[]>(
@@ -262,7 +245,6 @@ export const elementsSync = async () => {
 			} while (responseCount === limit);
 
 			if (elementsData.length) {
-				mapLoading.set('Map loading complete!');
 				// set response to store
 				elements.set(elementsData);
 			}

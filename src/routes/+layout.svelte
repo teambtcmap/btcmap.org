@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { mapLoading, syncStatus } from '$lib/store';
+	import { syncStatus } from '$lib/store';
 	import { areasSync } from '$lib/sync/areas';
 	import { elementsSync } from '$lib/sync/elements';
 	import { eventsSync } from '$lib/sync/events';
@@ -26,7 +26,6 @@
 		});
 
 		const dataSync = async () => {
-			$mapLoading = 'Starting data sync...';
 			$syncStatus = true;
 
 			await Promise.allSettled([
