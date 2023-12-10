@@ -9,7 +9,6 @@
 		PrimaryButton
 	} from '$lib/comp';
 	import { theme } from '$lib/store';
-	import type { SubmitForm } from '$lib/types';
 	import { detectTheme, errToast, successToast, warningToast } from '$lib/utils';
 	import axios from 'axios';
 	import { onMount } from 'svelte';
@@ -86,8 +85,7 @@
 		successToast('Location selected!');
 	};
 
-	const submitForm = (e: SubmitForm) => {
-		e.preventDefault();
+	const submitForm = () => {
 		if (!selected) {
 			noLocationSelected = true;
 			errToast('Please select a location...');
@@ -178,7 +176,10 @@
 					</ul>
 				</div>
 
-				<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
+				<form
+					on:submit|preventDefault={submitForm}
+					class="w-full space-y-5 text-primary dark:text-white"
+				>
 					<div class="space-y-2">
 						<label for="location-picker" class="block font-semibold">Select Location</label>
 						<p class="text-sm">Search for an area and select an option from the results.</p>

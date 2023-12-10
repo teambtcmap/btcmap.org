@@ -22,7 +22,7 @@
 		toggleMapButtons
 	} from '$lib/map/setup';
 	import { elementError, elements, theme } from '$lib/store';
-	import type { DomEventType, Element, Leaflet, SubmitForm } from '$lib/types';
+	import type { DomEventType, Element, Leaflet } from '$lib/types';
 	import { detectTheme, errToast } from '$lib/utils';
 	import axios from 'axios';
 	import type { Map, TileLayer } from 'leaflet';
@@ -212,8 +212,7 @@
 	let submitting = false;
 	let submissionIssueNumber: number;
 
-	const submitForm = (e: SubmitForm) => {
-		e.preventDefault();
+	const submitForm = () => {
 		if (!selected) {
 			noLocationSelected = true;
 			errToast('Please select a location...');
@@ -361,7 +360,10 @@
 					/>
 				</p>
 
-				<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
+				<form
+					on:submit|preventDefault={submitForm}
+					class="w-full space-y-5 text-primary dark:text-white"
+				>
 					<div>
 						<div class={showMap ? 'block' : 'hidden'}>
 							<label for="location-picker" class="mb-2 block font-semibold">Select Location</label>

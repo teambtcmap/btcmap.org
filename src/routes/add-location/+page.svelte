@@ -11,7 +11,6 @@
 	} from '$lib/comp';
 	import { attribution, changeDefaultIcons, geolocate, toggleMapButtons } from '$lib/map/setup';
 	import { areaError, areas, socials, theme } from '$lib/store';
-	import type { SubmitForm } from '$lib/types';
 	import { detectTheme, errToast } from '$lib/utils';
 	// @ts-expect-error
 	import rewind from '@mapbox/geojson-rewind';
@@ -87,8 +86,7 @@
 	$: latFixed = lat && lat.toFixed(5);
 	$: longFixed = long && long.toFixed(5);
 
-	const submitForm = (e: SubmitForm) => {
-		e.preventDefault();
+	const submitForm = () => {
 		if (!selected) {
 			noLocationSelected = true;
 			errToast('Please select a location...');
@@ -384,7 +382,10 @@
 							/>
 						</p>
 
-						<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
+						<form
+							on:submit|preventDefault={submitForm}
+							class="w-full space-y-5 text-primary dark:text-white"
+						>
 							<div>
 								<label for="name" class="mb-2 block font-semibold">Merchant Name</label>
 								<input

@@ -212,7 +212,3 @@ export type Theme = 'light' | 'dark';
 export type DonationType = 'On-chain' | 'Lightning';
 
 export type DropdownLink = { url: string; external?: boolean; icon: string; title: string };
-
-export type SubmitForm = SubmitEvent & {
-	currentTarget: EventTarget & HTMLFormElement;
-};
