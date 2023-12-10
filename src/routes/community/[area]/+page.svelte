@@ -79,25 +79,24 @@
 	let showType = 'Add';
 
 	const tickets = data.tickets;
-	const totalTickets = tickets.length;
 	const ticketError = tickets === 'error' ? true : false;
 
 	$: ticketError && errToast('Could not load open tickets, please try again or contact BTC Map.');
 
 	const add =
-		tickets &&
-		tickets.length &&
-		!ticketError &&
-		tickets.filter((issue: any) =>
-			issue.labels.find((label: any) => label.name === 'location-submission')
-		);
+		tickets && tickets.length && !ticketError
+			? tickets.filter((issue: any) =>
+					issue.labels.find((label: any) => label.name === 'location-submission')
+			  )
+			: [];
 	const verify =
-		tickets &&
-		tickets.length &&
-		!ticketError &&
-		tickets.filter((issue: any) =>
-			issue.labels.find((label: any) => label.name === 'verify-submission')
-		);
+		tickets && tickets.length && !ticketError
+			? tickets.filter((issue: any) =>
+					issue.labels.find((label: any) => label.name === 'verify-submission')
+			  )
+			: [];
+
+	const totalTickets = add.length + verify.length;
 
 	let avatar = community?.['icon:square'];
 	let name = data.name;
