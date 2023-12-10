@@ -31,32 +31,83 @@
 	let loading: boolean;
 	let leaderboard: TaggerLeaderboard[];
 
-	let showGeyser = location.hash === '#geyser' ? true : false;
-	const eventStart = new Date('Jul 4, 2023 00:00:00').toISOString();
-	const eventEnd = new Date('Sep 2, 2023 00:00:00').toISOString();
-
 	let topTenChartCanvas: HTMLCanvasElement;
 	let topTenChart: Chart<'bar', number[], string>;
 	let chartsLoading: boolean;
+	let chartsRendered = false;
 
 	let initialRenderComplete = false;
+
+	const populateCharts = () => {
+		const theme = detectTheme();
+
+		let leaderboardCopy = [...leaderboard];
+		leaderboardCopy = leaderboardCopy.slice(0, 10);
+
+		topTenChart = new Chart(topTenChartCanvas, {
+			type: 'bar',
+			data: {
+				labels: leaderboardCopy.map(({ tagger }) => tagger),
+				datasets: [
+					{
+						label: 'Top Ten',
+						data: leaderboardCopy.map(({ total }) => total),
+						backgroundColor: 'rgba(247, 147, 26, 0.2)',
+						borderColor: 'rgb(247, 147, 26)',
+						borderWidth: 1
+					}
+				]
+			},
+			options: {
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						labels: {
+							font: {
+								weight: '600'
+							}
+						}
+					}
+				},
+				scales: {
+					x: {
+						ticks: {
+							font: {
+								weight: '600'
+							}
+						},
+						grid: {
+							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+						}
+					},
+					y: {
+						beginAtZero: true,
+						ticks: {
+							font: {
+								weight: '600'
+							}
+						},
+						grid: {
+							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+						}
+					}
+				}
+			}
+		});
+
+		chartsRendered = true;
+	};
 
 	const populateLeaderboard = () => {
 		loading = true;
 		leaderboard = [];
 
 		$users.forEach((user) => {
-			if ($excludeLeader.includes(user.id) || (showGeyser && user.id === 10396321)) {
+			if ($excludeLeader.includes(user.id)) {
 				return;
 			}
 
 			let userEvents = $events.filter((event) => event['user_id'] == user.id);
-
-			if (showGeyser) {
-				userEvents = userEvents.filter(
-					(event) => event['created_at'] > eventStart && event['created_at'] < eventEnd
-				);
-			}
 
 			if (userEvents.length) {
 				let created = userEvents.filter((event) => event.type === 'create').length;
@@ -69,13 +120,11 @@
 					avatar: avatar,
 					tagger: profile['display_name'],
 					id: user.id,
-					created: user.id === 17221642 && !showGeyser ? created + 100 : created,
-					updated: user.id === 17221642 && !showGeyser ? updated + 20 : updated,
+					created: user.id === 17221642 ? created + 100 : created,
+					updated: user.id === 17221642 ? updated + 20 : updated,
 					deleted: deleted,
 					total:
-						user.id === 17221642 && !showGeyser
-							? created + updated + deleted + 120
-							: created + updated + deleted,
+						user.id === 17221642 ? created + updated + deleted + 120 : created + updated + deleted,
 					tip: profile.description
 				});
 			}
@@ -87,32 +136,28 @@
 		loading = false;
 	};
 
-	const leaderboardSync = (
-		status: boolean,
-		users: User[],
-		events: Event[],
-		// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-		showGeyser: boolean
-	) => {
-		if (users.length && events.length && !status && initialRenderComplete) {
-			populateLeaderboard();
+	const leaderboardSync = (status: boolean, users: User[], events: Event[]) => {
+		if (initialRenderComplete && users.length && events.length) {
+			if (!chartsRendered) {
+				populateLeaderboard();
+				populateCharts();
+			} else if (!status) {
+				populateLeaderboard();
 
-			let leaderboardCopy = [...leaderboard];
-			leaderboardCopy = leaderboardCopy.slice(0, 10);
-			chartsLoading = true;
-			topTenChart.data.labels = leaderboardCopy.map(({ tagger }) => tagger);
-			topTenChart.data.datasets[0].data = leaderboardCopy.map(({ total }) => total);
-			topTenChart.update();
-			chartsLoading = false;
+				let leaderboardCopy = [...leaderboard];
+				leaderboardCopy = leaderboardCopy.slice(0, 10);
+				chartsLoading = true;
+				topTenChart.data.labels = leaderboardCopy.map(({ tagger }) => tagger);
+				topTenChart.data.datasets[0].data = leaderboardCopy.map(({ total }) => total);
+				topTenChart.update();
+				chartsLoading = false;
+			}
 		}
 	};
 
-	$: leaderboardSync($syncStatus, $users, $events, showGeyser);
+	$: leaderboardSync($syncStatus, $users, $events);
 
-	$: $theme !== undefined &&
-		!chartsLoading &&
-		initialRenderComplete === true &&
-		updateChartThemes([topTenChart]);
+	$: $theme !== undefined && !chartsLoading && chartsRendered && updateChartThemes([topTenChart]);
 
 	let leaderboardCount = 50;
 	$: leaderboardPaginated =
@@ -120,67 +165,15 @@
 
 	onMount(() => {
 		if (browser) {
-			const theme = detectTheme();
-
-			// setup leaderboard
-			populateLeaderboard();
-
-			// setup chart
 			topTenChartCanvas.getContext('2d');
 
-			let leaderboardCopy = [...leaderboard];
-			leaderboardCopy = leaderboardCopy.slice(0, 10);
+			if ($users && $users.length && $events && $events.length) {
+				// setup leaderboard
+				populateLeaderboard();
 
-			topTenChart = new Chart(topTenChartCanvas, {
-				type: 'bar',
-				data: {
-					labels: leaderboardCopy.map(({ tagger }) => tagger),
-					datasets: [
-						{
-							label: 'Top Ten',
-							data: leaderboardCopy.map(({ total }) => total),
-							backgroundColor: 'rgba(247, 147, 26, 0.2)',
-							borderColor: 'rgb(247, 147, 26)',
-							borderWidth: 1
-						}
-					]
-				},
-				options: {
-					maintainAspectRatio: false,
-					plugins: {
-						legend: {
-							labels: {
-								font: {
-									weight: '600'
-								}
-							}
-						}
-					},
-					scales: {
-						x: {
-							ticks: {
-								font: {
-									weight: '600'
-								}
-							},
-							grid: {
-								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
-							}
-						},
-						y: {
-							beginAtZero: true,
-							ticks: {
-								font: {
-									weight: '600'
-								}
-							},
-							grid: {
-								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
-							}
-						}
-					}
-				}
-			});
+				// setup chart
+				populateCharts();
+			}
 
 			initialRenderComplete = true;
 		}
@@ -189,26 +182,14 @@
 	const headings = ['Position', 'Supertagger', 'Created', 'Updated', 'Deleted', 'Tip'];
 </script>
 
-<div class="bg-teal dark:bg-dark">
-	<!-- 	<div
-		class="w-full border-b border-primary p-4 text-center text-sm text-primary dark:border-white dark:text-white"
-	>
-		<strong>
-			SUPERTAGGER EVENT IN PROGRESS! 🥷
-			<br />
-			<span class="underline decoration-bitcoin decoration-2 underline-offset-4">2,100,000</span>
-		</strong>
-		sats are up for grabs during this
-		<a
-			href="https://snort.social/e/nevent1qqs2x7kz5ut4e62ng7pjpx3mf7eenancnzkstsgjmpd7sec0h9nr63qpz9mhxue69uhkummnw3ezuamfdejj7qgwwaehxw309ahx7uewd3hkctcsd7w8k"
-			target="_blank"
-			rel="noreferrer"
-			class="text-link transition-colors hover:text-hover">Geyser Grant initiative</a
-		>.
-		<br />
-		<strong><Countdown date="Sep 2, 2023 00:00:00" /></strong>
-	</div> -->
+<svelte:head>
+	<title>BTC Map - Leaderboard</title>
+	<meta property="og:image" content="https://btcmap.org/images/og/leader.png" />
+	<meta property="twitter:title" content="BTC Map - Leaderboard" />
+	<meta property="twitter:image" content="https://btcmap.org/images/og/leader.png" />
+</svelte:head>
 
+<div class="bg-teal dark:bg-dark">
 	<Header />
 
 	<main class="mt-10">
@@ -240,7 +221,7 @@
 			</h2>
 
 			<section id="chart" class="relative">
-				{#if !leaderboard?.length && loading}
+				{#if !leaderboard || loading}
 					<div class="absolute left-0 top-0 h-[400px] w-full animate-pulse border border-link/50" />
 				{/if}
 				<canvas bind:this={topTenChartCanvas} width="400" height="400" />
@@ -254,29 +235,6 @@
 			/>
 
 			<section id="leaderboard" class="dark:lg:rounded dark:lg:bg-white/10 dark:lg:py-8">
-				<!-- 				<div
-					class="mb-8 flex flex-wrap items-center justify-center gap-8 text-xl font-semibold text-primary dark:text-white lg:gap-16"
-				>
-					<button
-						on:click={() => {
-							showGeyser = false;
-							location.hash = 'all-time';
-						}}
-						class="{showGeyser ? '' : 'underline'} decoration-4 underline-offset-8 hover:underline"
-					>
-						All Time
-					</button>
-					<button
-						on:click={() => {
-							showGeyser = true;
-							location.hash = 'geyser';
-						}}
-						class="{showGeyser ? 'underline' : ''} decoration-4 underline-offset-8 hover:underline"
-					>
-						Geyser Initiative 🌊
-					</button>
-				</div> -->
-
 				<div class="mb-5 hidden grid-cols-6 text-center lg:grid">
 					{#each headings as heading}
 						<h3 class="text-lg font-semibold text-primary dark:text-white">
