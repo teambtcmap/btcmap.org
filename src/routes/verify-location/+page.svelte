@@ -22,22 +22,165 @@
 		toggleMapButtons
 	} from '$lib/map/setup';
 	import { elementError, elements, theme } from '$lib/store';
-	import type { SubmitForm } from '$lib/types';
+	import type { DomEventType, Element, Leaflet, SubmitForm } from '$lib/types';
 	import { detectTheme, errToast } from '$lib/utils';
 	import axios from 'axios';
 	import type { Map, TileLayer } from 'leaflet';
 	import { onDestroy, onMount } from 'svelte';
 
-	const id = $page.url.searchParams.has('id') ? $page.url.searchParams.get('id') : '';
-	const merchant = $elements.find((element) => element.id && element.id === id);
+	let initialRenderComplete = false;
+	let elementsLoaded = false;
 
-	let name = merchant ? merchant.osm_json.tags?.name : '';
-	let lat = merchant ? latCalc(merchant.osm_json) : undefined;
-	let long = merchant ? longCalc(merchant.osm_json) : undefined;
-	let location = lat && long ? `https://btcmap.org/map?lat=${lat}&long=${long}` : '';
-	let edit = merchant
-		? `https://www.openstreetmap.org/edit?${merchant.osm_json.type}=${merchant.osm_json.id}`
-		: '';
+	let leaflet: Leaflet;
+	let DomEvent: DomEventType;
+
+	const initializeElements = () => {
+		if (elementsLoaded) return;
+
+		if (id) {
+			merchant = $elements.find((element) => element.id && element.id === id);
+		}
+
+		if (merchant) {
+			name = merchant.osm_json.tags?.name;
+			lat = latCalc(merchant.osm_json);
+			long = longCalc(merchant.osm_json);
+			location = `https://btcmap.org/map?lat=${lat}&long=${long}`;
+			edit = `https://www.openstreetmap.org/edit?${merchant.osm_json.type}=${merchant.osm_json.id}`;
+			selected = true;
+		} else {
+			showMap = true;
+
+			const theme = detectTheme();
+
+			// add map and tiles
+			map = leaflet.map(mapElement, { attributionControl: false }).setView([0, 0], 2);
+
+			osm = leaflet.tileLayer('https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png', {
+				noWrap: true,
+				maxZoom: 20
+			});
+
+			alidadeSmoothDark = leaflet.tileLayer(
+				'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
+				{
+					noWrap: true,
+					maxZoom: 20
+				}
+			);
+
+			if (theme === 'dark') {
+				alidadeSmoothDark.addTo(map);
+			} else {
+				osm.addTo(map);
+			}
+
+			// set URL lat/long query view if it exists and is valid
+			if (lat && long) {
+				try {
+					map.fitBounds([[lat, long]]);
+				} catch (error) {
+					console.log(error);
+				}
+			}
+
+			// change broken marker image path in prod
+			leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
+
+			// add OSM attribution
+			attribution(leaflet, map);
+
+			// add locate button to map
+			geolocate(leaflet, map);
+
+			// change default icons
+			changeDefaultIcons(false, leaflet, mapElement, DomEvent);
+
+			// create marker cluster group
+			/* eslint-disable no-undef */
+			// @ts-expect-error
+			let markers = L.markerClusterGroup();
+			/* eslint-enable no-undef */
+
+			// get date from 1 year ago to add verified check if survey is current
+			let verifiedDate = calcVerifiedDate();
+
+			// add location information
+			$elements.forEach((element) => {
+				if (element['deleted_at']) {
+					return;
+				}
+
+				let icon = element.tags['icon:android'];
+				let payment = element.tags['payment:uri']
+					? { type: 'uri', url: element.tags['payment:uri'] }
+					: element.tags['payment:pouch']
+					  ? { type: 'pouch', username: element.tags['payment:pouch'] }
+					  : element.tags['payment:coinos']
+					    ? { type: 'coinos', username: element.tags['payment:coinos'] }
+					    : undefined;
+				let boosted =
+					element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now()
+						? element.tags['boost:expires']
+						: undefined;
+
+				const elementOSM = element['osm_json'];
+
+				const latC = latCalc(elementOSM);
+				const longC = longCalc(elementOSM);
+
+				let divIcon = generateIcon(leaflet, icon, boosted ? true : false);
+
+				let marker = generateMarker(
+					latC,
+					longC,
+					divIcon,
+					elementOSM,
+					payment,
+					leaflet,
+					verifiedDate,
+					false,
+					boosted
+				);
+
+				// add marker click event
+				marker.on('click', (e) => {
+					if (captchaSecret) {
+						map.setView(e.latlng, 19);
+						name = elementOSM.tags?.name || '';
+						lat = latC;
+						long = longC;
+						location = `https://btcmap.org/map?lat=${lat}&long=${long}`;
+						edit = `https://www.openstreetmap.org/edit?${elementOSM.type}=${elementOSM.id}`;
+						selected = true;
+					}
+				});
+
+				markers.addLayer(marker);
+			});
+
+			map.addLayer(markers);
+
+			mapLoaded = true;
+		}
+
+		elementsLoaded = true;
+	};
+
+	$: $elements &&
+		$elements.length &&
+		initialRenderComplete &&
+		!elementsLoaded &&
+		initializeElements();
+
+	const id = $page.url.searchParams.has('id') ? $page.url.searchParams.get('id') : '';
+	let merchant: Element | undefined;
+
+	let name = '';
+	let lat: number | undefined;
+	let long: number | undefined;
+	let location = '';
+	let edit = '';
 
 	let captcha: HTMLDivElement;
 	let captchaSecret: string;
@@ -63,7 +206,7 @@
 	let outdated: string;
 	let verify: HTMLTextAreaElement;
 
-	let selected = location ? true : false;
+	let selected = false;
 	let noLocationSelected = false;
 	let submitted = false;
 	let submitting = false;
@@ -111,155 +254,40 @@
 	// location picker map if not accessing page from webapp
 	let mapElement: HTMLDivElement;
 	let map: Map;
-	let showMap = !lat || !long || !edit ? true : false;
+	let showMap = id ? false : true;
 	let mapLoaded = false;
 
 	let osm: TileLayer;
 	let alidadeSmoothDark: TileLayer;
 
 	// alert for map errors
-	$: $elementError && showMap && errToast($elementError);
+	$: $elementError && errToast($elementError);
 
 	onMount(async () => {
 		if (browser) {
-			const theme = detectTheme();
-
 			// fetch and add captcha
 			fetchCaptcha();
 
-			if (showMap) {
-				//import packages
-				const leaflet = await import('leaflet');
-				// @ts-expect-error
-				const DomEvent = await import('leaflet/src/dom/DomEvent');
-				/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
-				const leafletLocateControl = await import('leaflet.locatecontrol');
-				const leafletMarkerCluster = await import('leaflet.markercluster');
-				/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
+			//import packages
+			leaflet = await import('leaflet');
+			// @ts-expect-error
+			DomEvent = await import('leaflet/src/dom/DomEvent');
+			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
+			const leafletLocateControl = await import('leaflet.locatecontrol');
+			const leafletMarkerCluster = await import('leaflet.markercluster');
+			/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
 
-				// add map and tiles
-				map = leaflet.map(mapElement, { attributionControl: false }).setView([0, 0], 2);
-
-				osm = leaflet.tileLayer(
-					'https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png',
-					{
-						noWrap: true,
-						maxZoom: 20
-					}
-				);
-
-				alidadeSmoothDark = leaflet.tileLayer(
-					'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
-					{
-						noWrap: true,
-						maxZoom: 20
-					}
-				);
-
-				if (theme === 'dark') {
-					alidadeSmoothDark.addTo(map);
-				} else {
-					osm.addTo(map);
-				}
-
-				// set URL lat/long query view if it exists and is valid
-				if (lat && long) {
-					try {
-						map.fitBounds([[lat, long]]);
-					} catch (error) {
-						console.log(error);
-					}
-				}
-
-				// change broken marker image path in prod
-				leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
-
-				// add OSM attribution
-				attribution(leaflet, map);
-
-				// add locate button to map
-				geolocate(leaflet, map);
-
-				// change default icons
-				changeDefaultIcons(false, leaflet, mapElement, DomEvent);
-
-				// create marker cluster group
-				/* eslint-disable no-undef */
-				// @ts-expect-error
-				let markers = L.markerClusterGroup();
-				/* eslint-enable no-undef */
-
-				// get date from 1 year ago to add verified check if survey is current
-				let verifiedDate = calcVerifiedDate();
-
-				// add location information
-				$elements.forEach((element) => {
-					if (element['deleted_at']) {
-						return;
-					}
-
-					let icon = element.tags['icon:android'];
-					let payment = element.tags['payment:uri']
-						? { type: 'uri', url: element.tags['payment:uri'] }
-						: element.tags['payment:pouch']
-						  ? { type: 'pouch', username: element.tags['payment:pouch'] }
-						  : element.tags['payment:coinos']
-						    ? { type: 'coinos', username: element.tags['payment:coinos'] }
-						    : undefined;
-					let boosted =
-						element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now()
-							? element.tags['boost:expires']
-							: undefined;
-
-					const elementOSM = element['osm_json'];
-
-					const latC = latCalc(elementOSM);
-					const longC = longCalc(elementOSM);
-
-					let divIcon = generateIcon(leaflet, icon, boosted ? true : false);
-
-					let marker = generateMarker(
-						latC,
-						longC,
-						divIcon,
-						elementOSM,
-						payment,
-						leaflet,
-						verifiedDate,
-						false,
-						boosted
-					);
-
-					// add marker click event
-					marker.on('click', (e) => {
-						if (captchaSecret) {
-							map.setView(e.latlng, 19);
-							name = elementOSM.tags?.name || '';
-							lat = latC;
-							long = longC;
-							location = lat && long ? `https://btcmap.org/map?lat=${lat}&long=${long}` : '';
-							edit = `https://www.openstreetmap.org/edit?${elementOSM.type}=${elementOSM.id}`;
-							selected = true;
-						}
-					});
-
-					markers.addLayer(marker);
-				});
-
-				map.addLayer(markers);
-
-				mapLoaded = true;
-			}
+			initialRenderComplete = true;
 		}
 	});
 
-	$: $theme !== undefined && mapLoaded === true && showMap && toggleMapButtons();
+	$: $theme !== undefined && mapLoaded && showMap && toggleMapButtons();
 
 	const closePopup = () => {
 		map.closePopup();
 	};
 
-	$: $theme !== undefined && mapLoaded === true && showMap && closePopup();
+	$: $theme !== undefined && mapLoaded && showMap && closePopup();
 
 	const toggleTheme = () => {
 		if ($theme === 'dark') {
@@ -271,7 +299,7 @@
 		}
 	};
 
-	$: $theme !== undefined && mapLoaded === true && showMap && toggleTheme();
+	$: $theme !== undefined && mapLoaded && showMap && toggleTheme();
 
 	if (showMap) {
 		onDestroy(async () => {
@@ -282,6 +310,13 @@
 		});
 	}
 </script>
+
+<svelte:head>
+	<title>BTC Map - Verify Location</title>
+	<meta property="og:image" content="https://btcmap.org/images/og/verify.png" />
+	<meta property="twitter:title" content="BTC Map - Verify Location" />
+	<meta property="twitter:image" content="https://btcmap.org/images/og/verify.png" />
+</svelte:head>
 
 <div class="bg-teal dark:bg-dark">
 	<Header />
@@ -354,7 +389,7 @@
 							readonly
 							type="text"
 							name="name"
-							placeholder="Merchant Name"
+							placeholder={!showMap && !elementsLoaded ? 'Loading Merchant...' : 'Merchant Name'}
 							class="w-full rounded-2xl border-2 border-input p-3 text-center font-semibold focus:outline-link"
 						/>
 					</div>
@@ -366,7 +401,7 @@
 							>
 							<input
 								class="h-4 w-4 accent-link"
-								disabled={!captchaSecret || (showMap && !mapLoaded) || Boolean(outdated)}
+								disabled={!captchaSecret || !elementsLoaded || Boolean(outdated)}
 								required={!outdated}
 								type="checkbox"
 								id="current"
@@ -384,7 +419,7 @@
 							>Outdated information <span class="font-normal">(If applicable)</span></label
 						>
 						<textarea
-							disabled={!captchaSecret || (showMap && !mapLoaded) || current}
+							disabled={!captchaSecret || !elementsLoaded || current}
 							required={!current}
 							name="outdated"
 							placeholder="Provide what info is incorrect and the updated info on this location"
@@ -397,7 +432,7 @@
 					<div>
 						<label for="verify" class="mb-2 block font-semibold">How did you verify this?</label>
 						<textarea
-							disabled={!captchaSecret || (showMap && !mapLoaded)}
+							disabled={!captchaSecret || !elementsLoaded}
 							required
 							name="verify"
 							placeholder="Please provide additional info here"
@@ -426,7 +461,7 @@
 								<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
 							</div>
 							<input
-								disabled={!captchaSecret || (showMap && !mapLoaded)}
+								disabled={!captchaSecret || !elementsLoaded}
 								required
 								type="text"
 								name="captcha"
@@ -447,7 +482,7 @@
 
 					<PrimaryButton
 						loading={submitting}
-						disabled={submitting || !captchaSecret || (showMap && !mapLoaded)}
+						disabled={submitting || !captchaSecret || !elementsLoaded}
 						text="Submit Report"
 						style="w-full py-3 rounded-xl"
 					/>
