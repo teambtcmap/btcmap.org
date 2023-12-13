@@ -2,6 +2,7 @@
 	export let data;
 
 	import { browser } from '$app/environment';
+	import { page } from '$app/stores';
 	import {
 		Footer,
 		Header,
@@ -23,11 +24,22 @@
 		longCalc,
 		toggleMapButtons
 	} from '$lib/map/setup';
-	import { elements, events, excludeLeader, theme, users } from '$lib/store';
+	import {
+		elementError,
+		elements,
+		eventError,
+		events,
+		excludeLeader,
+		theme,
+		userError,
+		users
+	} from '$lib/store';
 	import {
 		BadgeType,
 		type ActivityEvent,
+		type DomEventType,
 		type EarnedBadge,
+		type Leaflet,
 		type ProfileLeaderboard
 	} from '$lib/types.js';
 	import { detectTheme, errToast } from '$lib/utils';
@@ -38,251 +50,252 @@
 	import { marked } from 'marked';
 	import { onDestroy, onMount } from 'svelte';
 
-	let userFound = $users.find((user) => user.id == data.user);
-	if (!userFound) {
-		errToast('Could not find user, please try again or contact BTC Map.');
-		throw error(404, 'User Not Found');
-	}
-	let userCreated = userFound['created_at'];
-	let supporter =
-		userFound.tags['supporter:expires'] &&
-		Date.parse(userFound.tags['supporter:expires']) > Date.now();
-	const user = userFound['osm_json'];
-	let avatar = user.img ? user.img.href : '/images/satoshi-nakamoto.png';
-	let username = user['display_name'];
-	let description = user.description;
-	let removeLightning = description.match(/(\[⚡]\(lightning:[^)]+\))/g);
-	let filteredDesc = removeLightning?.length
-		? description.replaceAll(removeLightning[0], '')
-		: description;
-	let profileDesc: HTMLHeadingElement;
-	let regexMatch = description.match('(lightning:[^)]+)');
-	let lightning = regexMatch && regexMatch[0].slice(10);
+	// alert for user errors
+	$: $userError && errToast($userError);
+	// alert for event errors
+	$: $eventError && errToast($eventError);
+	// alert for element errors
+	$: $elementError && errToast($elementError);
 
-	let userEvents = $events.filter((event) => event['user_id'] == user.id);
-	userEvents.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
-	let created =
-		user.id === 17221642
-			? userEvents.filter((event) => event.type === 'create').length + 100
-			: userEvents.filter((event) => event.type === 'create').length;
-	let updated =
-		user.id === 17221642
-			? userEvents.filter((event) => event.type === 'update').length + 20
-			: userEvents.filter((event) => event.type === 'update').length;
-	let deleted = userEvents.filter((event) => event.type === 'delete').length;
-	let total = created + updated + deleted;
+	let dataInitialized = false;
+	let initialRenderComplete = false;
 
-	let leaderboard: ProfileLeaderboard[] = [];
+	let leaflet: Leaflet;
+	let DomEvent: DomEventType;
 
-	const populateLeaderboard = () => {
-		$users.forEach((user) => {
-			if ($excludeLeader.includes(user.id)) {
-				return;
+	const initializeData = () => {
+		if (dataInitialized) return;
+
+		const userFound = $users.find((user) => user.id == data.user);
+		if (!userFound) {
+			errToast('Could not find user, please try again or contact BTC Map.');
+			throw error(404, 'User Not Found');
+		}
+		userCreated = userFound['created_at'];
+		supporter = Boolean(
+			userFound.tags['supporter:expires'] &&
+				Date.parse(userFound.tags['supporter:expires']) > Date.now()
+		);
+		const user = userFound['osm_json'];
+		avatar = user.img ? user.img.href : '/images/satoshi-nakamoto.png';
+		const description = user.description;
+		const removeLightning = description.match(/(\[⚡]\(lightning:[^)]+\))/g);
+		filteredDesc = removeLightning?.length
+			? description.replaceAll(removeLightning[0], '')
+			: description;
+		const regexMatch = description.match('(lightning:[^)]+)');
+		lightning = regexMatch && regexMatch[0].slice(10);
+
+		const userEvents = $events.filter((event) => event['user_id'] == user.id);
+		userEvents.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
+		created =
+			user.id === 17221642
+				? userEvents.filter((event) => event.type === 'create').length + 100
+				: userEvents.filter((event) => event.type === 'create').length;
+		updated =
+			user.id === 17221642
+				? userEvents.filter((event) => event.type === 'update').length + 20
+				: userEvents.filter((event) => event.type === 'update').length;
+		deleted = userEvents.filter((event) => event.type === 'delete').length;
+		total = created + updated + deleted;
+
+		const populateLeaderboard = () => {
+			$users.forEach((user) => {
+				if ($excludeLeader.includes(user.id)) {
+					return;
+				}
+
+				let userEvents = $events.filter((event) => event['user_id'] == user.id);
+
+				if (userEvents.length) {
+					leaderboard.push({
+						id: user.id,
+						total: user.id === 17221642 ? userEvents.length + 120 : userEvents.length
+					});
+				}
+			});
+
+			leaderboard.sort((a, b) => b.total - a.total);
+			leaderboard = leaderboard.slice(0, 10);
+		};
+		populateLeaderboard();
+
+		const badges = [
+			{
+				check: [
+					10396321, 17441326, 17199501, 668096, 17462838, 17221642, 5432507, 17354902, 18452174,
+					18360665, 616774, 18062435, 7522075, 18380975, 1697546, 19288099, 11903494, 18552145,
+					1836965, 19795869, 17872, 19768735, 17573979, 2929493, 19714509, 1851550, 18244560,
+					19756689, 527105, 2339960, 17322349, 17300693, 1236325, 1787080
+				].includes(user.id),
+				title: 'Geyser Tournament',
+				icon: 'geyser',
+				type: BadgeType.Achievement
+			},
+			{ check: supporter, title: 'Supporter', icon: 'supporter', type: BadgeType.Achievement },
+			{
+				check: leaderboard[0].id == user.id,
+				title: 'Top Tagger',
+				icon: 'top-tagger',
+				type: BadgeType.Achievement
+			},
+			{
+				check: Boolean(leaderboard.slice(0, 3).find((item) => item.id == user.id)),
+				title: 'Podium',
+				icon: 'podium',
+				type: BadgeType.Achievement
+			},
+			{
+				check: Boolean(leaderboard.find((item) => item.id == user.id)),
+				title: 'High Rank',
+				icon: 'high-rank',
+				type: BadgeType.Achievement
+			},
+			{
+				check: Date.parse(userCreated) < new Date('December 26, 2022 00:00:00').getTime(),
+				title: 'OG Supertagger',
+				icon: 'og-supertagger',
+				type: BadgeType.Achievement
+			},
+			{
+				check: Boolean(lightning),
+				title: 'Lightning Junkie',
+				icon: 'lightning-junkie',
+				type: BadgeType.Achievement
+			},
+			{
+				check: Boolean(user.img),
+				title: 'Hello World',
+				icon: 'hello-world',
+				type: BadgeType.Achievement
+			},
+			{
+				check: created > updated && created > deleted,
+				title: 'Creator',
+				icon: 'creator',
+				type: BadgeType.Achievement
+			},
+			{
+				check: updated > created && updated > deleted,
+				title: 'Update Maxi',
+				icon: 'update-maxi',
+				type: BadgeType.Achievement
+			},
+			{
+				check: deleted > created && deleted > updated,
+				title: 'Demolition Specialist',
+				icon: 'demolition-specialist',
+				type: BadgeType.Achievement
+			},
+			{
+				check: total >= 21000000,
+				title: 'Hyperbitcoinisation',
+				icon: 'hyperbitcoinisation',
+				type: BadgeType.Contribution
+			},
+			{
+				check: total >= 10000,
+				title: 'Pizza Time',
+				icon: 'pizza-time',
+				type: BadgeType.Contribution
+			},
+			{ check: total >= 7777, title: 'Godly', icon: 'godly', type: BadgeType.Contribution },
+			{ check: total >= 5000, title: 'Shadow', icon: 'shadow', type: BadgeType.Contribution },
+			{
+				check: total >= 3110,
+				title: 'Whitepaper',
+				icon: 'whitepaper',
+				type: BadgeType.Contribution
+			},
+			{ check: total >= 1984, title: 'Winston', icon: 'winston', type: BadgeType.Contribution },
+			{ check: total >= 1000, title: 'Whale', icon: 'whale', type: BadgeType.Contribution },
+			{ check: total >= 821, title: 'Infinity', icon: 'infinity', type: BadgeType.Contribution },
+			{ check: total >= 500, title: 'Legend', icon: 'legend', type: BadgeType.Contribution },
+			{
+				check: total >= 301,
+				title: 'Chancellor',
+				icon: 'chancellor',
+				type: BadgeType.Contribution
+			},
+			{ check: total >= 256, title: 'SHA', icon: 'sha', type: BadgeType.Contribution },
+			{
+				check: total >= 210,
+				title: 'No Bailouts',
+				icon: 'no-bailouts',
+				type: BadgeType.Contribution
+			},
+			{
+				check: total >= 100,
+				title: 'Supertagger',
+				icon: 'supertagger',
+				type: BadgeType.Contribution
+			},
+			{ check: total >= 69, title: 'ATH', icon: 'ath', type: BadgeType.Contribution },
+			{
+				check: total >= 51,
+				title: 'Longest Chain',
+				icon: 'longest-chain',
+				type: BadgeType.Contribution
+			},
+			{ check: total >= 21, title: 'Satoshi', icon: 'satoshi', type: BadgeType.Contribution },
+			{ check: total >= 10, title: 'Heartbeat', icon: 'heartbeat', type: BadgeType.Contribution },
+			{ check: total >= 4, title: 'Segwit', icon: 'segwit', type: BadgeType.Contribution },
+			{
+				check: total >= 1,
+				title: 'Whole Tagger',
+				icon: 'whole-tagger',
+				type: BadgeType.Contribution
 			}
+		];
 
-			let userEvents = $events.filter((event) => event['user_id'] == user.id);
+		const addBadge = (check: boolean, title: string, icon: string, type: BadgeType) => {
+			if (check) {
+				earnedBadges.push({ title, icon, type });
+			}
+		};
 
-			if (userEvents.length) {
-				leaderboard.push({
-					id: user.id,
-					total: user.id === 17221642 ? userEvents.length + 120 : userEvents.length
+		badges.some((badge) => {
+			if (earnedBadges.find((badge) => badge.type === BadgeType.Contribution)) {
+				return true;
+			}
+			addBadge(Boolean(badge.check), badge.title, badge.icon, badge.type);
+		});
+
+		createdPercent = new Intl.NumberFormat('en-US').format(
+			Number((created / (total / 100)).toFixed(0))
+		);
+
+		updatedPercent = new Intl.NumberFormat('en-US').format(
+			Number((updated / (total / 100)).toFixed(0))
+		);
+
+		deletedPercent = new Intl.NumberFormat('en-US').format(
+			Number((deleted / (total / 100)).toFixed(0))
+		);
+
+		userEvents.forEach((event) => {
+			let elementMatch = $elements.find((element) => element.id === event['element_id']);
+
+			if (elementMatch) {
+				let location =
+					elementMatch['osm_json'].tags && elementMatch['osm_json'].tags.name
+						? elementMatch['osm_json'].tags.name
+						: undefined;
+
+				eventElements.push({
+					...event,
+					location: location || 'Unnamed element',
+					merchantId: elementMatch.id
 				});
 			}
 		});
 
-		leaderboard.sort((a, b) => b.total - a.total);
-		leaderboard = leaderboard.slice(0, 10);
-	};
-	populateLeaderboard();
+		eventElements = eventElements;
 
-	let badges = [
-		{
-			check: [
-				10396321, 17441326, 17199501, 668096, 17462838, 17221642, 5432507, 17354902, 18452174,
-				18360665, 616774, 18062435, 7522075, 18380975, 1697546, 19288099, 11903494, 18552145,
-				1836965, 19795869, 17872, 19768735, 17573979, 2929493, 19714509, 1851550, 18244560,
-				19756689, 527105, 2339960, 17322349, 17300693, 1236325, 1787080
-			].includes(user.id),
-			title: 'Geyser Tournament',
-			icon: 'geyser',
-			type: BadgeType.Achievement
-		},
-		{ check: supporter, title: 'Supporter', icon: 'supporter', type: BadgeType.Achievement },
-		{
-			check: leaderboard[0].id == user.id,
-			title: 'Top Tagger',
-			icon: 'top-tagger',
-			type: BadgeType.Achievement
-		},
-		{
-			check: leaderboard.slice(0, 3).find((item) => item.id == user.id),
-			title: 'Podium',
-			icon: 'podium',
-			type: BadgeType.Achievement
-		},
-		{
-			check: leaderboard.find((item) => item.id == user.id),
-			title: 'High Rank',
-			icon: 'high-rank',
-			type: BadgeType.Achievement
-		},
-		{
-			check: Date.parse(userCreated) < new Date('December 26, 2022 00:00:00').getTime(),
-			title: 'OG Supertagger',
-			icon: 'og-supertagger',
-			type: BadgeType.Achievement
-		},
-		{
-			check: lightning,
-			title: 'Lightning Junkie',
-			icon: 'lightning-junkie',
-			type: BadgeType.Achievement
-		},
-		{
-			check: user.img,
-			title: 'Hello World',
-			icon: 'hello-world',
-			type: BadgeType.Achievement
-		},
-		{
-			check: created > updated && created > deleted,
-			title: 'Creator',
-			icon: 'creator',
-			type: BadgeType.Achievement
-		},
-		{
-			check: updated > created && updated > deleted,
-			title: 'Update Maxi',
-			icon: 'update-maxi',
-			type: BadgeType.Achievement
-		},
-		{
-			check: deleted > created && deleted > updated,
-			title: 'Demolition Specialist',
-			icon: 'demolition-specialist',
-			type: BadgeType.Achievement
-		},
-		{
-			check: total >= 21000000,
-			title: 'Hyperbitcoinisation',
-			icon: 'hyperbitcoinisation',
-			type: BadgeType.Contribution
-		},
-		{
-			check: total >= 10000,
-			title: 'Pizza Time',
-			icon: 'pizza-time',
-			type: BadgeType.Contribution
-		},
-		{ check: total >= 7777, title: 'Godly', icon: 'godly', type: BadgeType.Contribution },
-		{ check: total >= 5000, title: 'Shadow', icon: 'shadow', type: BadgeType.Contribution },
-		{ check: total >= 3110, title: 'Whitepaper', icon: 'whitepaper', type: BadgeType.Contribution },
-		{ check: total >= 1984, title: 'Winston', icon: 'winston', type: BadgeType.Contribution },
-		{ check: total >= 1000, title: 'Whale', icon: 'whale', type: BadgeType.Contribution },
-		{ check: total >= 821, title: 'Infinity', icon: 'infinity', type: BadgeType.Contribution },
-		{ check: total >= 500, title: 'Legend', icon: 'legend', type: BadgeType.Contribution },
-		{ check: total >= 301, title: 'Chancellor', icon: 'chancellor', type: BadgeType.Contribution },
-		{ check: total >= 256, title: 'SHA', icon: 'sha', type: BadgeType.Contribution },
-		{
-			check: total >= 210,
-			title: 'No Bailouts',
-			icon: 'no-bailouts',
-			type: BadgeType.Contribution
-		},
-		{
-			check: total >= 100,
-			title: 'Supertagger',
-			icon: 'supertagger',
-			type: BadgeType.Contribution
-		},
-		{ check: total >= 69, title: 'ATH', icon: 'ath', type: BadgeType.Contribution },
-		{
-			check: total >= 51,
-			title: 'Longest Chain',
-			icon: 'longest-chain',
-			type: BadgeType.Contribution
-		},
-		{ check: total >= 21, title: 'Satoshi', icon: 'satoshi', type: BadgeType.Contribution },
-		{ check: total >= 10, title: 'Heartbeat', icon: 'heartbeat', type: BadgeType.Contribution },
-		{ check: total >= 4, title: 'Segwit', icon: 'segwit', type: BadgeType.Contribution },
-		{ check: total >= 1, title: 'Whole Tagger', icon: 'whole-tagger', type: BadgeType.Contribution }
-	];
+		// add markdown support for profile description
+		profileDesc.innerHTML = DOMPurify.sanitize(marked.parse(filteredDesc));
 
-	let earnedBadges: EarnedBadge[] = [];
-
-	const addBadge = (check: boolean, title: string, icon: string, type: BadgeType) => {
-		if (check) {
-			earnedBadges.push({ title, icon, type });
-		}
-	};
-
-	badges.some((badge) => {
-		if (earnedBadges.find((badge) => badge.type === BadgeType.Contribution)) {
-			return true;
-		}
-		addBadge(Boolean(badge.check), badge.title, badge.icon, badge.type);
-	});
-
-	let createdPercent = new Intl.NumberFormat('en-US').format(
-		Number((created / (total / 100)).toFixed(0))
-	);
-
-	let updatedPercent = new Intl.NumberFormat('en-US').format(
-		Number((updated / (total / 100)).toFixed(0))
-	);
-
-	let deletedPercent = new Intl.NumberFormat('en-US').format(
-		Number((deleted / (total / 100)).toFixed(0))
-	);
-
-	let tagTypeChartCanvas: HTMLCanvasElement;
-	// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-	let tagTypeChart;
-
-	let loading = true;
-	let hideArrow = false;
-	let activityDiv;
-	let eventElements: ActivityEvent[] = [];
-
-	userEvents.forEach((event) => {
-		let elementMatch = $elements.find((element) => element.id === event['element_id']);
-
-		if (elementMatch) {
-			let location =
-				elementMatch['osm_json'].tags && elementMatch['osm_json'].tags.name
-					? elementMatch['osm_json'].tags.name
-					: undefined;
-
-			eventElements.push({
-				...event,
-				location: location || 'Unnamed element',
-				merchantId: elementMatch.id
-			});
-		}
-	});
-
-	let eventCount = 50;
-	$: eventElementsPaginated = eventElements.slice(0, eventCount);
-
-	loading = false;
-
-	let mapElement: HTMLDivElement;
-	let map: Map;
-	let mapLoaded = false;
-
-	let osm: TileLayer;
-	let alidadeSmoothDark: TileLayer;
-
-	onMount(async () => {
-		if (browser) {
-			const theme = detectTheme();
-
-			// add markdown support for profile description
-			profileDesc.innerHTML = DOMPurify.sanitize(marked.parse(filteredDesc));
-
-			// setup chart
-			tagTypeChartCanvas.getContext('2d');
-
+		const setupChart = () => {
 			tagTypeChart = new Chart(tagTypeChartCanvas, {
 				type: 'pie',
 				data: {
@@ -309,15 +322,11 @@
 					}
 				}
 			});
+		};
+		setupChart();
 
-			//import packages
-			const leaflet = await import('leaflet');
-			// @ts-expect-error
-			const DomEvent = await import('leaflet/src/dom/DomEvent');
-			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
-			const leafletMarkerCluster = await import('leaflet.markercluster');
-			const leafletLocateControl = await import('leaflet.locatecontrol');
-			/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
+		const setupMap = () => {
+			const theme = detectTheme();
 
 			// add map and tiles
 			map = leaflet.map(mapElement, { attributionControl: false });
@@ -411,16 +420,86 @@
 			map.fitBounds(bounds.map(({ lat, long }) => [lat, long]));
 
 			mapLoaded = true;
+		};
+		setupMap();
+
+		dataInitialized = true;
+	};
+
+	$: $users &&
+		$users.length &&
+		$events &&
+		$events.length &&
+		$elements &&
+		$elements.length &&
+		initialRenderComplete &&
+		!dataInitialized &&
+		initializeData();
+
+	let userCreated: string | undefined;
+	let supporter: boolean | undefined;
+	let avatar: string | undefined;
+	let username = data.username;
+	let filteredDesc: string | undefined;
+	let profileDesc: HTMLHeadingElement;
+	let lightning: string | null;
+
+	let created: number | undefined;
+	let updated: number | undefined;
+	let deleted: number | undefined;
+	let total: number | undefined;
+
+	let leaderboard: ProfileLeaderboard[] = [];
+
+	let earnedBadges: EarnedBadge[] = [];
+
+	let createdPercent: string | undefined;
+	let updatedPercent: string | undefined;
+	let deletedPercent: string | undefined;
+
+	let tagTypeChartCanvas: HTMLCanvasElement;
+	// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+	let tagTypeChart;
+
+	let hideArrow = false;
+	let activityDiv;
+	let eventElements: ActivityEvent[] = [];
+
+	let eventCount = 50;
+	$: eventElementsPaginated = eventElements.slice(0, eventCount);
+
+	let mapElement: HTMLDivElement;
+	let map: Map;
+	let mapLoaded = false;
+
+	let osm: TileLayer;
+	let alidadeSmoothDark: TileLayer;
+
+	onMount(async () => {
+		if (browser) {
+			// setup chart
+			tagTypeChartCanvas.getContext('2d');
+
+			//import packages
+			leaflet = await import('leaflet');
+			// @ts-expect-error
+			DomEvent = await import('leaflet/src/dom/DomEvent');
+			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
+			const leafletMarkerCluster = await import('leaflet.markercluster');
+			const leafletLocateControl = await import('leaflet.locatecontrol');
+			/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
+
+			initialRenderComplete = true;
 		}
 	});
 
-	$: $theme !== undefined && mapLoaded === true && toggleMapButtons();
+	$: $theme !== undefined && mapLoaded && toggleMapButtons();
 
 	const closePopup = () => {
 		map.closePopup();
 	};
 
-	$: $theme !== undefined && mapLoaded === true && closePopup();
+	$: $theme !== undefined && mapLoaded && closePopup();
 
 	const toggleTheme = () => {
 		if ($theme === 'dark') {
@@ -432,7 +511,7 @@
 		}
 	};
 
-	$: $theme !== undefined && mapLoaded === true && toggleTheme();
+	$: $theme !== undefined && mapLoaded && toggleTheme();
 
 	onDestroy(async () => {
 		if (map) {
@@ -443,6 +522,11 @@
 </script>
 
 <svelte:head>
+	<title>{$page.data.username} - BTC Map Supertagger</title>
+	<meta property="og:image" content="https://btcmap.org/images/og/supertagger.png" />
+	<meta property="twitter:title" content="{$page.data.username} - BTC Map Supertagger" />
+	<meta property="twitter:image" content="https://btcmap.org/images/og/supertagger.png" />
+
 	{#if lightning}
 		<meta name="lightning" content="lnurlp:{lightning}" />
 		<meta property="alby:image" content={avatar} />
@@ -462,14 +546,18 @@
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		<main class="my-10 text-center md:my-20">
 			<section id="profile" class="space-y-8">
-				<img
-					src={avatar}
-					alt="avatar"
-					class="mx-auto h-32 w-32 rounded-full object-cover"
-					on:error={function () {
-						this.src = '/images/satoshi-nakamoto.png';
-					}}
-				/>
+				{#if avatar}
+					<img
+						src={avatar}
+						alt="avatar"
+						class="mx-auto h-32 w-32 rounded-full object-cover"
+						on:error={function () {
+							this.src = '/images/satoshi-nakamoto.png';
+						}}
+					/>
+				{:else}
+					<div class="mx-auto h-32 w-32 animate-pulse rounded-full bg-link/50" />
+				{/if}
 
 				<div>
 					<h1 class="text-4xl font-semibold !leading-tight text-primary dark:text-white">
@@ -512,18 +600,28 @@
 
 			<section id="badges" class="mt-16">
 				<div class="flex flex-wrap items-center justify-center">
-					{#each earnedBadges as badge}
-						<a href="/badges#{badge.icon}" class="transition-transform hover:scale-110">
+					{#if dataInitialized}
+						{#each earnedBadges as badge}
+							<a href="/badges#{badge.icon}" class="transition-transform hover:scale-110">
+								<div class="mx-3 mb-6">
+									<img
+										src="/icons/badges/{badge.icon}.svg"
+										alt={badge.title}
+										class="mx-auto mb-1 h-24 w-24"
+									/>
+									<p class="text-center text-sm dark:text-white">{badge.title}</p>
+								</div>
+							</a>
+						{/each}
+					{:else}
+						<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
+						{#each Array(3) as badge}
 							<div class="mx-3 mb-6">
-								<img
-									src="/icons/badges/{badge.icon}.svg"
-									alt={badge.title}
-									class="mx-auto mb-1 h-24 w-24"
-								/>
-								<p class="text-center text-sm dark:text-white">{badge.title}</p>
+								<div class="mx-auto mb-1 h-24 w-24 animate-pulse rounded-full bg-link/50" />
+								<div class="mx-auto h-5 w-20 animate-pulse rounded bg-link/50" />
 							</div>
-						</a>
-					{/each}
+						{/each}
+					{/if}
 				</div>
 			</section>
 
@@ -534,7 +632,6 @@
 					<ProfileStat
 						title="Total Tags"
 						stat={total}
-						percent=""
 						border="border-b xl:border-b-0 md:border-r border-statBorder"
 					/>
 					<ProfileStat
@@ -549,10 +646,20 @@
 						percent={updatedPercent}
 						border="border-b md:border-b-0 md:border-r border-statBorder"
 					/>
-					<ProfileStat title="Deleted" stat={deleted} percent={deletedPercent} border="" />
+					<ProfileStat title="Deleted" stat={deleted} percent={deletedPercent} />
 				</div>
 
-				<div class="rounded-b-3xl border border-t-0 border-statBorder p-5 dark:bg-white/10">
+				<div
+					class="relative rounded-b-3xl border border-t-0 border-statBorder p-5 dark:bg-white/10"
+				>
+					{#if !dataInitialized}
+						<p
+							class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-semibold text-primary dark:text-white"
+						>
+							Loading chart...
+						</p>
+					{/if}
+
 					<canvas bind:this={tagTypeChartCanvas} width="250" height="250" />
 				</div>
 			</section>
@@ -571,12 +678,12 @@
 							? 'h-[375px]'
 							: ''} relative overflow-y-scroll"
 						on:scroll={() => {
-							if (!loading && !hideArrow) {
+							if (dataInitialized && !hideArrow) {
 								hideArrow = true;
 							}
 						}}
 					>
-						{#if eventElements && eventElements.length && !loading}
+						{#if eventElements && eventElements.length && dataInitialized}
 							{#each eventElementsPaginated as event}
 								<ProfileActivity
 									location={event.location}

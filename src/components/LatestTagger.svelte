@@ -5,7 +5,7 @@
 
 	export let location: string;
 	export let action: EventType;
-	export let user: User | '';
+	export let user: User | undefined = undefined;
 	export let time: string;
 	export let latest: boolean;
 	export let merchantId: string;

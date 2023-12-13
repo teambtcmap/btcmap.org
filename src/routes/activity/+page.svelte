@@ -30,6 +30,15 @@
 	let elementsLoading: boolean;
 	let supertaggers: ActivityEvent[];
 
+	const findUser = (tagger: Event) => {
+		let foundUser = $users.find((user) => user.id == tagger['user_id']);
+		if (foundUser) {
+			return foundUser;
+		} else {
+			return undefined;
+		}
+	};
+
 	const supertaggerSync = (
 		status: boolean,
 		users: User[],
@@ -53,10 +62,13 @@
 							? elementMatch['osm_json'].tags.name
 							: undefined;
 
+					let tagger = findUser(event);
+
 					supertaggers.push({
 						...event,
 						location: location || 'Unnamed element',
-						merchantId: elementMatch.id
+						merchantId: elementMatch.id,
+						tagger
 					});
 				}
 			});
@@ -69,15 +81,6 @@
 	$: supertaggerSync($syncStatus, $users, $events, $elements);
 
 	$: latestTaggers = supertaggers && supertaggers.length && !elementsLoading ? true : false;
-
-	const findUser = (tagger: ActivityEvent) => {
-		let foundUser = $users.find((user) => user.id == tagger['user_id']);
-		if (foundUser) {
-			return foundUser;
-		} else {
-			return '';
-		}
-	};
 </script>
 
 <svelte:head>
@@ -131,7 +134,7 @@
 								<LatestTagger
 									location={tagger.location}
 									action={tagger.type}
-									user={findUser(tagger)}
+									user={tagger.tagger}
 									time={tagger['created_at']}
 									latest={tagger === supertaggers[0] ? true : false}
 									merchantId={tagger.merchantId}

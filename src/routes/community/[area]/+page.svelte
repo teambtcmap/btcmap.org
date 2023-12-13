@@ -3,6 +3,7 @@
 
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import {
 		Footer,
 		Header,
@@ -31,8 +32,30 @@
 		toggleMapButtons,
 		verifiedArr
 	} from '$lib/map/setup';
-	import { areas, elements, events, reports, theme, users } from '$lib/store';
-	import { TipType, type ActivityEvent, type BaseMaps, type User } from '$lib/types.js';
+	import {
+		areaError,
+		areas,
+		elementError,
+		elements,
+		eventError,
+		events,
+		reportError,
+		reports,
+		theme,
+		userError,
+		users
+	} from '$lib/store';
+	import {
+		TipType,
+		type ActivityEvent,
+		type BaseMaps,
+		type Continents,
+		type DomEventType,
+		type Event,
+		type Grade,
+		type Leaflet,
+		type User
+	} from '$lib/types.js';
 	import { detectTheme, errToast, updateChartThemes } from '$lib/utils';
 	// @ts-expect-error
 	import rewind from '@mapbox/geojson-rewind';
@@ -42,553 +65,462 @@
 	import { onDestroy, onMount } from 'svelte';
 	import tippy from 'tippy.js';
 
-	const communityFound = $areas.find(
-		(area) =>
-			area.id == data.id &&
-			area.tags.type === 'community' &&
-			((area.tags['box:east'] &&
-				area.tags['box:north'] &&
-				area.tags['box:south'] &&
-				area.tags['box:west']) ||
-				area.tags.geo_json) &&
-			area.tags.name &&
-			area.tags['icon:square'] &&
-			area.tags.continent &&
-			Object.keys(area.tags).find((key) => key.includes('contact'))
-	);
+	// alert for user errors
+	$: $userError && errToast($userError);
+	// alert for event errors
+	$: $eventError && errToast($eventError);
+	// alert for element errors
+	$: $elementError && errToast($elementError);
+	// alert for area errors
+	$: $areaError && errToast($areaError);
+	// alert for report errors
+	$: $reportError && errToast($reportError);
 
-	if (!communityFound) {
-		console.log('Could not find community, please try again or contact BTC Map.');
-		goto('/404');
-	}
+	let initialRenderComplete = false;
+	let dataInitialized = false;
 
-	let communityReports = $reports
-		.filter((report) => report.area_id === data.id)
-		.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
+	const initializeData = () => {
+		if (dataInitialized) return;
 
-	if (!communityReports.length) {
-		console.log(
-			'Could not find any community reports, please try again tomorrow or contact BTC Map.'
+		const communityFound = $areas.find(
+			(area) =>
+				area.id == data.id &&
+				area.tags.type === 'community' &&
+				((area.tags['box:east'] &&
+					area.tags['box:north'] &&
+					area.tags['box:south'] &&
+					area.tags['box:west']) ||
+					area.tags.geo_json) &&
+				area.tags.name &&
+				area.tags['icon:square'] &&
+				area.tags.continent &&
+				Object.keys(area.tags).find((key) => key.includes('contact'))
 		);
-		goto('/404');
-	}
 
-	const community = communityFound?.tags;
+		if (!communityFound) {
+			console.log('Could not find community, please try again or contact BTC Map.');
+			goto('/404');
+			return;
+		}
 
-	const ticketTypes = ['Add', 'Verify'];
-	let showType = 'Add';
+		const communityReports = $reports
+			.filter((report) => report.area_id === data.id)
+			.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
 
-	const tickets = data.tickets;
-	const ticketError = tickets === 'error' ? true : false;
+		if (!communityReports.length) {
+			console.log(
+				'Could not find any community reports, please try again tomorrow or contact BTC Map.'
+			);
+			goto('/404');
+			return;
+		}
 
-	$: ticketError && errToast('Could not load open tickets, please try again or contact BTC Map.');
+		const community = communityFound.tags;
 
-	const add =
-		tickets && tickets.length && !ticketError
-			? tickets.filter((issue: any) =>
-					issue.labels.find((label: any) => label.name === 'location-submission')
-			  )
-			: [];
-	const verify =
-		tickets && tickets.length && !ticketError
-			? tickets.filter((issue: any) =>
-					issue.labels.find((label: any) => label.name === 'verify-submission')
-			  )
-			: [];
+		avatar = community['icon:square'];
+		org = community.organization;
+		sponsor = community.sponsor;
+		continent = community.continent;
+		website = community['contact:website'];
+		email = community['contact:email'];
+		nostr = community['contact:nostr'];
+		twitter = community['contact:twitter'];
+		secondTwitter = community['contact:second_twitter'];
+		meetup = community['contact:meetup'];
+		eventbrite = community['contact:eventbrite'];
+		telegram = community['contact:telegram'];
+		discord = community['contact:discord'];
+		youtube = community['contact:youtube'];
+		github = community['contact:github'];
+		reddit = community['contact:reddit'];
+		instagram = community['contact:instagram'];
+		whatsapp = community['contact:whatsapp'];
+		facebook = community['contact:facebook'];
+		linkedin = community['contact:linkedin'];
+		rss = community['contact:rss'];
+		signal = community['contact:signal'];
 
-	const totalTickets = add.length + verify.length;
+		if (community['tips:lightning_address']) {
+			lightning = {
+				destination: community['tips:lightning_address'],
+				type: TipType.Address
+			};
+		} else if (community['tips:url']) {
+			lightning = { destination: community['tips:url'], type: TipType.Url };
+		}
 
-	let avatar = community?.['icon:square'];
-	let name = data.name;
-	let org = community?.organization;
-	let sponsor = community?.sponsor;
-	let continent = community?.continent;
-	let website = community?.['contact:website'];
-	let email = community?.['contact:email'];
-	let nostr = community?.['contact:nostr'];
-	let twitter = community?.['contact:twitter'];
-	let secondTwitter = community?.['contact:second_twitter'];
-	let meetup = community?.['contact:meetup'];
-	let eventbrite = community?.['contact:eventbrite'];
-	let telegram = community?.['contact:telegram'];
-	let discord = community?.['contact:discord'];
-	let youtube = community?.['contact:youtube'];
-	let github = community?.['contact:github'];
-	let reddit = community?.['contact:reddit'];
-	let instagram = community?.['contact:instagram'];
-	let whatsapp = community?.['contact:whatsapp'];
-	let facebook = community?.['contact:facebook'];
-	let linkedin = community?.['contact:linkedin'];
-	let rss = community?.['contact:rss'];
-	let signal = community?.['contact:signal'];
-	$: lightning =
-		(community?.['tips:lightning_address'] && {
-			destination: community?.['tips:lightning_address'],
-			type: TipType.Address
-		}) ||
-		(community?.['tips:url'] && { destination: community?.['tips:url'], type: TipType.Url });
+		const latestReport = communityReports[0].tags;
+		total = latestReport.total_elements;
+		upToDate = latestReport.up_to_date_elements;
+		outdated = latestReport.outdated_elements;
+		legacy = latestReport.legacy_elements;
+		grade = latestReport.grade;
 
-	let latestReport = communityReports[0].tags;
-	let total = latestReport.total_elements || 0;
-	let upToDate = latestReport.up_to_date_elements || 0;
-	let outdated = latestReport.outdated_elements || 0;
-	let legacy = latestReport.legacy_elements || 0;
-	let grade = latestReport.grade || 0;
+		upToDatePercent = new Intl.NumberFormat('en-US').format(
+			Number((upToDate / (total / 100)).toFixed(0))
+		);
 
-	let gradeTooltip: HTMLButtonElement;
+		outdatedPercent = new Intl.NumberFormat('en-US').format(
+			Number((outdated / (total / 100)).toFixed(0))
+		);
 
-	$: gradeTooltip &&
-		tippy([gradeTooltip], {
-			content: `<table>
-	<thead>
-		<tr>
-			<th class='mr-1 inline-block'>Up-To-Date</th>
-			<th>Grade</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td>95-100%</td>
-			<td>5 Star</td>
-		</tr>
-		<tr>
-			<td>75-95%</td>
-			<td>4 Star</td>
-		</tr>
-		<tr>
-			<td>50-75%</td>
-			<td>3 Star</td>
-		</tr>
-		<tr>
-			<td>25-50%</td>
-			<td>2 Star</td>
-		</tr>
-		<tr>
-			<td>0-25%</td>
-			<td>1 Star</td>
-		</tr>
-	</tbody>
-</table>`,
-			allowHTML: true
-		});
+		legacyPercent = new Intl.NumberFormat('en-US').format(
+			Number((legacy / (total / 100)).toFixed(0))
+		);
 
-	let upToDatePercent = new Intl.NumberFormat('en-US').format(
-		Number((upToDate / (total / 100)).toFixed(0))
-	);
+		const rewoundPoly = rewind(community.geo_json, true);
 
-	let outdatedPercent = new Intl.NumberFormat('en-US').format(
-		Number((outdated / (total / 100)).toFixed(0))
-	);
+		// filter elements within community
+		const filteredElements = $elements.filter((element) => {
+			let lat = latCalc(element['osm_json']);
+			let long = longCalc(element['osm_json']);
 
-	let legacyPercent = new Intl.NumberFormat('en-US').format(
-		Number((legacy / (total / 100)).toFixed(0))
-	);
-
-	let updatedChartCanvas: HTMLCanvasElement;
-	// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-	let updatedChart;
-
-	let loading = true;
-
-	let rewoundPoly = community?.geo_json ? rewind(community.geo_json, true) : undefined;
-
-	// filter elements within community
-	let filteredElements = $elements.filter((element) => {
-		let lat = latCalc(element['osm_json']);
-		let long = longCalc(element['osm_json']);
-
-		if (community?.geo_json) {
-			if (geoContains(rewoundPoly, [long, lat])) {
+			if (community.geo_json) {
+				if (geoContains(rewoundPoly, [long, lat])) {
+					return true;
+				} else {
+					return false;
+				}
+			} else if (
+				lat >= Number(community['box:south']) &&
+				lat <= Number(community['box:north']) &&
+				long >= Number(community['box:west']) &&
+				long <= Number(community['box:east'])
+			) {
 				return true;
 			} else {
 				return false;
 			}
-		} else if (
-			lat >= Number(community?.['box:south']) &&
-			lat <= Number(community?.['box:north']) &&
-			long >= Number(community?.['box:west']) &&
-			long <= Number(community?.['box:east'])
-		) {
-			return true;
-		} else {
-			return false;
-		}
-	});
+		});
 
-	let hideArrow = false;
-	let activityDiv;
-	let eventElements: ActivityEvent[] = [];
+		const communityEvents = $events.filter((event) =>
+			filteredElements.find((element) => element.id === event.element_id)
+		);
 
-	let communityEvents = $events.filter((event) =>
-		filteredElements.find((element) => element.id === event.element_id)
-	);
+		communityEvents.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
 
-	communityEvents.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
+		const findUser = (tagger: Event) => {
+			let foundUser = $users.find((user) => user.id == tagger['user_id']);
 
-	communityEvents.forEach((event) => {
-		let elementMatch = filteredElements.find((element) => element.id === event['element_id']);
+			if (foundUser) {
+				if (!taggers.find((tagger) => tagger.id === foundUser?.id)) {
+					taggers.push(foundUser);
+				}
 
-		if (elementMatch) {
-			let location =
-				elementMatch['osm_json'].tags && elementMatch['osm_json'].tags.name
-					? elementMatch['osm_json'].tags.name
-					: undefined;
+				return foundUser;
+			} else {
+				return undefined;
+			}
+		};
 
-			eventElements.push({
-				...event,
-				location: location || 'Unnamed element',
-				merchantId: elementMatch.id
+		communityEvents.forEach((event) => {
+			let elementMatch = filteredElements.find((element) => element.id === event['element_id']);
+
+			if (elementMatch) {
+				let location = elementMatch['osm_json'].tags?.name || undefined;
+
+				let tagger = findUser(event);
+
+				eventElements.push({
+					...event,
+					location: location || 'Unnamed element',
+					merchantId: elementMatch.id,
+					tagger
+				});
+			}
+		});
+
+		eventElements = eventElements;
+		taggers = taggers;
+
+		const populateCharts = () => {
+			const chartsReports = [...communityReports].sort(
+				(a, b) => Date.parse(a['created_at']) - Date.parse(b['created_at'])
+			);
+
+			const theme = detectTheme();
+
+			updatedChart = new Chart(updatedChartCanvas, {
+				type: 'pie',
+				data: {
+					labels: ['Up-To-Date', 'Outdated'],
+					datasets: [
+						{
+							label: 'Locations',
+							data: [upToDate, outdated],
+							backgroundColor: ['rgb(16, 183, 145)', 'rgb(235, 87, 87)'],
+							hoverOffset: 4
+						}
+					]
+				},
+				options: {
+					maintainAspectRatio: false,
+					plugins: {
+						legend: {
+							labels: {
+								font: {
+									weight: '600'
+								}
+							}
+						}
+					}
+				}
 			});
-		}
-	});
 
-	let eventCount = 50;
-	$: eventElementsPaginated = eventElements.slice(0, eventCount);
+			let percents = chartsReports.filter((report) => report.tags.up_to_date_percent);
 
-	loading = false;
-
-	let taggers: User[];
-	$: taggers = [];
-
-	const findUser = (tagger: ActivityEvent) => {
-		let foundUser = $users.find((user) => user.id == tagger['user_id']);
-
-		if (foundUser) {
-			if (!taggers.find((tagger) => tagger.id === foundUser?.id)) {
-				taggers.push(foundUser);
-			}
-
-			return foundUser;
-		} else {
-			return '';
-		}
-	};
-
-	let mapElement: HTMLDivElement;
-	let map: Map;
-	let mapLoaded = false;
-
-	let baseMaps: BaseMaps;
-
-	let chartsLoading = true;
-	let upToDateChartCanvas: HTMLCanvasElement;
-	let upToDateChart: Chart<'line', number[], string>;
-	let totalChartCanvas: HTMLCanvasElement;
-	let totalChart: Chart<'line', number[], string>;
-	let legacyChartCanvas: HTMLCanvasElement;
-	let legacyChart: Chart<'line', number[], string>;
-	let paymentMethodChartCanvas: HTMLCanvasElement;
-	let paymentMethodChart: Chart<'line', number[], string>;
-
-	let chartsReports = [...communityReports].sort(
-		(a, b) => Date.parse(a['created_at']) - Date.parse(b['created_at'])
-	);
-
-	const populateCharts = () => {
-		const theme = detectTheme();
-
-		updatedChart = new Chart(updatedChartCanvas, {
-			type: 'pie',
-			data: {
-				labels: ['Up-To-Date', 'Outdated'],
-				datasets: [
-					{
-						label: 'Locations',
-						data: [upToDate, outdated],
-						backgroundColor: ['rgb(16, 183, 145)', 'rgb(235, 87, 87)'],
-						hoverOffset: 4
-					}
-				]
-			},
-			options: {
-				maintainAspectRatio: false,
-				plugins: {
-					legend: {
-						labels: {
-							font: {
-								weight: '600'
-							}
+			upToDateChart = new Chart(upToDateChartCanvas, {
+				type: 'line',
+				data: {
+					labels: percents.map(({ date }) => date),
+					datasets: [
+						{
+							label: 'Up-To-Date Percent',
+							data: percents.map(({ tags: { up_to_date_percent } }) => up_to_date_percent),
+							fill: {
+								target: 'origin',
+								above: 'rgba(11, 144, 114, 0.2)'
+							},
+							borderColor: 'rgb(11, 144, 114)',
+							tension: 0.1
 						}
-					}
-				}
-			}
-		});
-
-		let percents = chartsReports.filter((report) => report.tags.up_to_date_percent);
-
-		upToDateChart = new Chart(upToDateChartCanvas, {
-			type: 'line',
-			data: {
-				labels: percents.map(({ date }) => date),
-				datasets: [
-					{
-						label: 'Up-To-Date Percent',
-						data: percents.map(({ tags: { up_to_date_percent } }) => up_to_date_percent),
-						fill: {
-							target: 'origin',
-							above: 'rgba(11, 144, 114, 0.2)'
-						},
-						borderColor: 'rgb(11, 144, 114)',
-						tension: 0.1
-					}
-				]
-			},
-			options: {
-				maintainAspectRatio: false,
-				plugins: {
-					legend: {
-						labels: {
-							font: {
-								weight: '600'
-							}
-						}
-					}
+					]
 				},
-				scales: {
-					x: {
-						ticks: {
-							maxTicksLimit: 5,
-							font: {
-								weight: '600'
+				options: {
+					maintainAspectRatio: false,
+					plugins: {
+						legend: {
+							labels: {
+								font: {
+									weight: '600'
+								}
 							}
-						},
-						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					},
-					y: {
-						min: 0,
-						max: 100,
-						ticks: {
-							precision: 0,
-							font: {
-								weight: '600'
+					scales: {
+						x: {
+							ticks: {
+								maxTicksLimit: 5,
+								font: {
+									weight: '600'
+								}
+							},
+							grid: {
+								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 							}
 						},
-						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+						y: {
+							min: 0,
+							max: 100,
+							ticks: {
+								precision: 0,
+								font: {
+									weight: '600'
+								}
+							},
+							grid: {
+								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+							}
 						}
 					}
 				}
-			}
-		});
+			});
 
-		totalChart = new Chart(totalChartCanvas, {
-			type: 'line',
-			data: {
-				labels: chartsReports.map(({ date }) => date),
-				datasets: [
-					{
-						label: 'Total Locations',
-						data: chartsReports.map(({ tags: { total_elements } }) => total_elements),
-						fill: {
-							target: 'origin',
-							above: 'rgba(0, 153, 175, 0.2)'
-						},
-						borderColor: 'rgb(0, 153, 175)',
-						tension: 0.1
-					}
-				]
-			},
-			options: {
-				maintainAspectRatio: false,
-				plugins: {
-					legend: {
-						labels: {
-							font: {
-								weight: '600'
-							}
+			totalChart = new Chart(totalChartCanvas, {
+				type: 'line',
+				data: {
+					labels: chartsReports.map(({ date }) => date),
+					datasets: [
+						{
+							label: 'Total Locations',
+							data: chartsReports.map(({ tags: { total_elements } }) => total_elements),
+							fill: {
+								target: 'origin',
+								above: 'rgba(0, 153, 175, 0.2)'
+							},
+							borderColor: 'rgb(0, 153, 175)',
+							tension: 0.1
 						}
-					}
+					]
 				},
-				scales: {
-					x: {
-						ticks: {
-							maxTicksLimit: 5,
-							font: {
-								weight: '600'
+				options: {
+					maintainAspectRatio: false,
+					plugins: {
+						legend: {
+							labels: {
+								font: {
+									weight: '600'
+								}
 							}
-						},
-						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					},
-					y: {
-						min: 0,
-						grace: '5%',
-						ticks: {
-							precision: 0,
-							font: {
-								weight: '600'
+					scales: {
+						x: {
+							ticks: {
+								maxTicksLimit: 5,
+								font: {
+									weight: '600'
+								}
+							},
+							grid: {
+								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 							}
 						},
-						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+						y: {
+							min: 0,
+							grace: '5%',
+							ticks: {
+								precision: 0,
+								font: {
+									weight: '600'
+								}
+							},
+							grid: {
+								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+							}
 						}
 					}
 				}
-			}
-		});
+			});
 
-		legacyChart = new Chart(legacyChartCanvas, {
-			type: 'line',
-			data: {
-				labels: chartsReports.map(({ date }) => date),
-				datasets: [
-					{
-						label: 'Legacy Locations',
-						data: chartsReports.map(({ tags: { legacy_elements } }) => legacy_elements),
-						fill: {
-							target: 'origin',
-							above: 'rgba(235, 87, 87, 0.2)'
-						},
-						borderColor: 'rgb(235, 87, 87)',
-						tension: 0.1
-					}
-				]
-			},
-			options: {
-				maintainAspectRatio: false,
-				plugins: {
-					legend: {
-						labels: {
-							font: {
-								weight: '600'
-							}
+			legacyChart = new Chart(legacyChartCanvas, {
+				type: 'line',
+				data: {
+					labels: chartsReports.map(({ date }) => date),
+					datasets: [
+						{
+							label: 'Legacy Locations',
+							data: chartsReports.map(({ tags: { legacy_elements } }) => legacy_elements),
+							fill: {
+								target: 'origin',
+								above: 'rgba(235, 87, 87, 0.2)'
+							},
+							borderColor: 'rgb(235, 87, 87)',
+							tension: 0.1
 						}
-					}
+					]
 				},
-				scales: {
-					x: {
-						ticks: {
-							maxTicksLimit: 5,
-							font: {
-								weight: '600'
+				options: {
+					maintainAspectRatio: false,
+					plugins: {
+						legend: {
+							labels: {
+								font: {
+									weight: '600'
+								}
 							}
-						},
-						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					},
-					y: {
-						min: 0,
-						grace: '5%',
-						ticks: {
-							precision: 0,
-							font: {
-								weight: '600'
+					scales: {
+						x: {
+							ticks: {
+								maxTicksLimit: 5,
+								font: {
+									weight: '600'
+								}
+							},
+							grid: {
+								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 							}
 						},
-						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+						y: {
+							min: 0,
+							grace: '5%',
+							ticks: {
+								precision: 0,
+								font: {
+									weight: '600'
+								}
+							},
+							grid: {
+								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+							}
 						}
 					}
 				}
-			}
-		});
+			});
 
-		paymentMethodChart = new Chart(paymentMethodChartCanvas, {
-			type: 'line',
-			data: {
-				labels: chartsReports.map(({ date }) => date),
-				datasets: [
-					{
-						label: 'On-chain',
-						data: chartsReports.map(
-							({ tags: { total_elements_onchain } }) => total_elements_onchain
-						),
-						fill: false,
-						borderColor: 'rgb(247, 147, 26)',
-						tension: 0.1
-					},
-					{
-						label: 'Lightning',
-						data: chartsReports.map(
-							({ tags: { total_elements_lightning } }) => total_elements_lightning
-						),
-						fill: false,
-						borderColor: 'rgb(249, 193, 50)',
-						tension: 0.1
-					},
-					{
-						label: 'Contactless',
-						data: chartsReports.map(
-							({ tags: { total_elements_lightning_contactless } }) =>
-								total_elements_lightning_contactless
-						),
-						fill: false,
-						borderColor: 'rgb(102, 16, 242)',
-						tension: 0.1
-					}
-				]
-			},
-			options: {
-				maintainAspectRatio: false,
-				plugins: {
-					legend: {
-						labels: {
-							font: {
-								weight: '600'
-							}
+			paymentMethodChart = new Chart(paymentMethodChartCanvas, {
+				type: 'line',
+				data: {
+					labels: chartsReports.map(({ date }) => date),
+					datasets: [
+						{
+							label: 'On-chain',
+							data: chartsReports.map(
+								({ tags: { total_elements_onchain } }) => total_elements_onchain
+							),
+							fill: false,
+							borderColor: 'rgb(247, 147, 26)',
+							tension: 0.1
+						},
+						{
+							label: 'Lightning',
+							data: chartsReports.map(
+								({ tags: { total_elements_lightning } }) => total_elements_lightning
+							),
+							fill: false,
+							borderColor: 'rgb(249, 193, 50)',
+							tension: 0.1
+						},
+						{
+							label: 'Contactless',
+							data: chartsReports.map(
+								({ tags: { total_elements_lightning_contactless } }) =>
+									total_elements_lightning_contactless
+							),
+							fill: false,
+							borderColor: 'rgb(102, 16, 242)',
+							tension: 0.1
 						}
-					}
+					]
 				},
-				scales: {
-					x: {
-						ticks: {
-							maxTicksLimit: 5,
-							font: {
-								weight: '600'
+				options: {
+					maintainAspectRatio: false,
+					plugins: {
+						legend: {
+							labels: {
+								font: {
+									weight: '600'
+								}
 							}
-						},
-						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					},
-					y: {
-						min: 0,
-						grace: '5%',
-						ticks: {
-							precision: 0,
-							font: {
-								weight: '600'
+					scales: {
+						x: {
+							ticks: {
+								maxTicksLimit: 5,
+								font: {
+									weight: '600'
+								}
+							},
+							grid: {
+								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 							}
 						},
-						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+						y: {
+							min: 0,
+							grace: '5%',
+							ticks: {
+								precision: 0,
+								font: {
+									weight: '600'
+								}
+							},
+							grid: {
+								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+							}
 						}
 					}
 				}
-			}
-		});
+			});
 
-		chartsLoading = false;
-	};
+			chartsLoading = false;
+		};
 
-	$: $theme !== undefined &&
-		chartsLoading === false &&
-		updateChartThemes([upToDateChart, totalChart, legacyChart, paymentMethodChart]);
+		populateCharts();
 
-	onMount(async () => {
-		if (browser) {
-			// setup charts
-			updatedChartCanvas.getContext('2d');
-			upToDateChartCanvas.getContext('2d');
-			totalChartCanvas.getContext('2d');
-			legacyChartCanvas.getContext('2d');
-			paymentMethodChartCanvas.getContext('2d');
-			populateCharts();
-
-			//import packages
-			const leaflet = await import('leaflet');
-			// @ts-expect-error
-			const DomEvent = await import('leaflet/src/dom/DomEvent');
-			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
-			const leafletMarkerCluster = await import('leaflet.markercluster');
-			const leafletFeaturegroupSubgroup = await import('leaflet.featuregroup.subgroup');
-			const leafletLocateControl = await import('leaflet.locatecontrol');
-			/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
-
+		const populateMap = () => {
 			// add map
 			map = leaflet.map(mapElement, { attributionControl: false });
 
@@ -628,7 +560,7 @@
 			let verifiedDate = calcVerifiedDate();
 
 			// add community area poly to map
-			if (community?.geo_json) {
+			if (community.geo_json) {
 				leaflet.geoJSON(community.geo_json, { style: { fill: false } }).addTo(map);
 			}
 
@@ -690,25 +622,200 @@
 
 			map.fitBounds(
 				// @ts-expect-error
-				community?.geo_json
+				community.geo_json
 					? leaflet.geoJSON(community.geo_json).getBounds()
 					: [
-							[community?.['box:south'], community?.['box:west']],
-							[community?.['box:north'], community?.['box:east']]
+							[community['box:south'], community['box:west']],
+							[community['box:north'], community['box:east']]
 					  ]
 			);
 
 			mapLoaded = true;
+		};
+
+		populateMap();
+
+		dataInitialized = true;
+	};
+
+	$: $users &&
+		$users.length &&
+		$events &&
+		$events.length &&
+		$elements &&
+		$elements.length &&
+		$areas &&
+		$areas.length &&
+		$reports &&
+		$reports.length &&
+		initialRenderComplete &&
+		!dataInitialized &&
+		initializeData();
+
+	const ticketTypes = ['Add', 'Verify'];
+	let showType = 'Add';
+
+	const tickets = data.tickets;
+	const ticketError = tickets === 'error' ? true : false;
+
+	$: ticketError && errToast('Could not load open tickets, please try again or contact BTC Map.');
+
+	const add =
+		tickets && tickets.length && !ticketError
+			? tickets.filter((issue: any) =>
+					issue.labels.find((label: any) => label.name === 'location-submission')
+			  )
+			: [];
+	const verify =
+		tickets && tickets.length && !ticketError
+			? tickets.filter((issue: any) =>
+					issue.labels.find((label: any) => label.name === 'verify-submission')
+			  )
+			: [];
+
+	const totalTickets = add.length + verify.length;
+
+	let avatar: string;
+	const name = data.name;
+	let org: string | undefined;
+	let sponsor: boolean | undefined;
+	let continent: Continents;
+	let website: string | undefined;
+	let email: string | undefined;
+	let nostr: string | undefined;
+	let twitter: string | undefined;
+	let secondTwitter: string | undefined;
+	let meetup: string | undefined;
+	let eventbrite: string | undefined;
+	let telegram: string | undefined;
+	let discord: string | undefined;
+	let youtube: string | undefined;
+	let github: string | undefined;
+	let reddit: string | undefined;
+	let instagram: string | undefined;
+	let whatsapp: string | undefined;
+	let facebook: string | undefined;
+	let linkedin: string | undefined;
+	let rss: string | undefined;
+	let signal: string | undefined;
+	let lightning: { destination: string; type: TipType } | undefined;
+
+	let total: number | undefined;
+	let upToDate: number | undefined;
+	let outdated: number | undefined;
+	let legacy: number | undefined;
+	let grade: Grade;
+
+	let gradeTooltip: HTMLButtonElement;
+
+	$: gradeTooltip &&
+		tippy([gradeTooltip], {
+			content: `<table>
+	<thead>
+		<tr>
+			<th class='mr-1 inline-block'>Up-To-Date</th>
+			<th>Grade</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>95-100%</td>
+			<td>5 Star</td>
+		</tr>
+		<tr>
+			<td>75-95%</td>
+			<td>4 Star</td>
+		</tr>
+		<tr>
+			<td>50-75%</td>
+			<td>3 Star</td>
+		</tr>
+		<tr>
+			<td>25-50%</td>
+			<td>2 Star</td>
+		</tr>
+		<tr>
+			<td>0-25%</td>
+			<td>1 Star</td>
+		</tr>
+	</tbody>
+</table>`,
+			allowHTML: true
+		});
+
+	let upToDatePercent: string | undefined;
+	let outdatedPercent: string | undefined;
+	let legacyPercent: string | undefined;
+
+	let updatedChartCanvas: HTMLCanvasElement;
+	// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+	let updatedChart;
+
+	let hideArrow = false;
+	let activityDiv: HTMLDivElement;
+	let eventElements: ActivityEvent[] = [];
+
+	let eventCount = 50;
+	$: eventElementsPaginated = eventElements.slice(0, eventCount);
+
+	let taggers: User[] = [];
+	let taggerCount = 50;
+	$: taggersPaginated = taggers.slice(0, taggerCount);
+	let taggerDiv: HTMLDivElement;
+
+	let mapElement: HTMLDivElement;
+	let map: Map;
+	let mapLoaded = false;
+
+	let baseMaps: BaseMaps;
+
+	let chartsLoading = true;
+	let upToDateChartCanvas: HTMLCanvasElement;
+	let upToDateChart: Chart<'line', number[], string>;
+	let totalChartCanvas: HTMLCanvasElement;
+	let totalChart: Chart<'line', number[], string>;
+	let legacyChartCanvas: HTMLCanvasElement;
+	let legacyChart: Chart<'line', number[], string>;
+	let paymentMethodChartCanvas: HTMLCanvasElement;
+	let paymentMethodChart: Chart<'line', number[], string>;
+
+	$: $theme !== undefined &&
+		!chartsLoading &&
+		updateChartThemes([upToDateChart, totalChart, legacyChart, paymentMethodChart]);
+
+	let leaflet: Leaflet;
+	let DomEvent: DomEventType;
+
+	onMount(async () => {
+		if (browser) {
+			// setup charts
+			updatedChartCanvas.getContext('2d');
+			upToDateChartCanvas.getContext('2d');
+			totalChartCanvas.getContext('2d');
+			legacyChartCanvas.getContext('2d');
+			paymentMethodChartCanvas.getContext('2d');
+
+			//import packages
+			leaflet = await import('leaflet');
+			// @ts-expect-error
+			DomEvent = await import('leaflet/src/dom/DomEvent');
+			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
+			const leafletMarkerCluster = await import('leaflet.markercluster');
+			const leafletFeaturegroupSubgroup = await import('leaflet.featuregroup.subgroup');
+			const leafletLocateControl = await import('leaflet.locatecontrol');
+			/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
+
+			initialRenderComplete = true;
 		}
 	});
 
-	$: $theme !== undefined && mapLoaded === true && toggleMapButtons();
+	$: $theme !== undefined && mapLoaded && toggleMapButtons();
 
 	const closePopup = () => {
 		map.closePopup();
 	};
 
-	$: $theme !== undefined && mapLoaded === true && closePopup();
+	$: $theme !== undefined && mapLoaded && closePopup();
 
 	const toggleTheme = () => {
 		if ($theme === 'dark') {
@@ -720,7 +827,7 @@
 		}
 	};
 
-	$: $theme !== undefined && mapLoaded === true && toggleTheme();
+	$: $theme !== undefined && mapLoaded && toggleTheme();
 
 	onDestroy(async () => {
 		if (map) {
@@ -731,6 +838,11 @@
 </script>
 
 <svelte:head>
+	<title>{$page.data.name} - BTC Map Community</title>
+	<meta property="og:image" content="https://btcmap.org/images/og/communities.png" />
+	<meta property="twitter:title" content="{$page.data.name} - BTC Map Community" />
+	<meta property="twitter:image" content="https://btcmap.org/images/og/communities.png" />
+
 	{#if lightning && lightning.type === 'address'}
 		<meta name="lightning" content="lnurlp:{lightning.destination}" />
 		<meta property="alby:image" content={avatar} />
@@ -751,14 +863,18 @@
 		<main class="my-10 space-y-16 text-center md:my-20">
 			<section id="profile" class="space-y-8">
 				<div class="space-y-2">
-					<img
-						src={avatar}
-						alt="avatar"
-						class="mx-auto h-32 w-32 rounded-full object-cover"
-						on:error={function () {
-							this.src = '/images/communities/bitcoin.svg';
-						}}
-					/>
+					{#if avatar}
+						<img
+							src={avatar}
+							alt="avatar"
+							class="mx-auto h-32 w-32 rounded-full object-cover"
+							on:error={function () {
+								this.src = '/images/communities/bitcoin.svg';
+							}}
+						/>
+					{:else}
+						<div class="mx-auto h-32 w-32 animate-pulse rounded-full bg-link/50" />
+					{/if}
 					<h1 class="text-4xl font-semibold !leading-tight text-primary dark:text-white">
 						{name}
 					</h1>
@@ -768,68 +884,79 @@
 					{#if sponsor}
 						<SponsorBadge />
 					{/if}
-					<h2 class="text-xl uppercase text-primary dark:text-white">
-						{continent?.replace('-', ' ')}
-						<i
-							class="fa-solid fa-earth-{continent === 'africa'
-								? 'africa'
-								: continent === 'asia'
-								  ? 'asia'
-								  : continent === 'europe'
-								    ? 'europe'
-								    : continent === 'north-america'
-								      ? 'americas'
-								      : continent === 'oceania'
-								        ? 'oceania'
-								        : continent === 'south-america'
-								          ? 'americas'
-								          : ''}"
-						/>
-					</h2>
-					{#if community?.geo_json}
-						<a
-							href={`/communities/map?community=${data.id}`}
-							class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
-							>View on community map <svg
-								class="ml-1 w-3"
-								width="16"
-								height="16"
-								viewBox="0 0 16 16"
-								fill="none"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									d="M3 13L13 3M13 3H5.5M13 3V10.5"
-									stroke="currentColor"
-									stroke-width="1.5"
-									stroke-linecap="round"
-									stroke-linejoin="round"
-								/>
-							</svg></a
-						>
+					{#if continent}
+						<h2 class="text-xl uppercase text-primary dark:text-white">
+							{continent.replace('-', ' ')}
+							<i
+								class="fa-solid fa-earth-{continent === 'africa'
+									? 'africa'
+									: continent === 'asia'
+									  ? 'asia'
+									  : continent === 'europe'
+									    ? 'europe'
+									    : continent === 'north-america'
+									      ? 'americas'
+									      : continent === 'oceania'
+									        ? 'oceania'
+									        : continent === 'south-america'
+									          ? 'americas'
+									          : ''}"
+							/>
+						</h2>
+					{:else}
+						<div class="mx-auto h-7 w-24 animate-pulse rounded bg-link/50" />
 					{/if}
+					<a
+						href={`/communities/map?community=${data.id}`}
+						class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
+						>View on community map <svg
+							class="ml-1 w-3"
+							width="16"
+							height="16"
+							viewBox="0 0 16 16"
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path
+								d="M3 13L13 3M13 3H5.5M13 3V10.5"
+								stroke="currentColor"
+								stroke-width="1.5"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+						</svg></a
+					>
 				</div>
 
-				<Socials
-					{website}
-					{email}
-					{nostr}
-					{twitter}
-					{secondTwitter}
-					{meetup}
-					{eventbrite}
-					{telegram}
-					{discord}
-					{youtube}
-					{github}
-					{reddit}
-					{instagram}
-					{whatsapp}
-					{facebook}
-					{linkedin}
-					{rss}
-					{signal}
-				/>
+				{#if dataInitialized}
+					<Socials
+						{website}
+						{email}
+						{nostr}
+						{twitter}
+						{secondTwitter}
+						{meetup}
+						{eventbrite}
+						{telegram}
+						{discord}
+						{youtube}
+						{github}
+						{reddit}
+						{instagram}
+						{whatsapp}
+						{facebook}
+						{linkedin}
+						{rss}
+						{signal}
+					/>
+				{:else}
+					<div class="flex flex-wrap items-center justify-center">
+						<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
+						{#each Array(3) as skeleton}
+							<div class="m-1 h-10 w-10 animate-pulse rounded-full bg-link/50" />
+						{/each}
+					</div>
+				{/if}
 
 				{#if lightning}
 					<Tip destination={lightning.destination} type={lightning.type} user={name} />
@@ -841,16 +968,29 @@
 					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary dark:bg-white/10 dark:text-white md:text-left"
 				>
 					{name} Map
-					<div class="space-x-1 text-link">
-						<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
-						{#each Array(grade) as star}
-							<i class="fa-solid fa-star" />
-						{/each}
+					<div class="flex items-center space-x-1 text-link">
+						{#if dataInitialized}
+							<div class="flex items-center space-x-1">
+								<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
+								{#each Array(grade) as star}
+									<i class="fa-solid fa-star" />
+								{/each}
+							</div>
 
-						<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
-						{#each Array(5 - grade) as star}
-							<i class="fa-solid fa-star opacity-25" />
-						{/each}
+							<div class="flex items-center space-x-1">
+								<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
+								{#each Array(5 - grade) as star}
+									<i class="fa-solid fa-star opacity-25" />
+								{/each}
+							</div>
+						{:else}
+							<div class="flex items-center space-x-1">
+								<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
+								{#each Array(5) as star}
+									<i class="fa-solid fa-star animate-pulse text-link/50" />
+								{/each}
+							</div>
+						{/if}
 
 						<button bind:this={gradeTooltip}>
 							<i class="fa-solid fa-circle-info text-sm" />
@@ -880,27 +1020,25 @@
 					<ProfileStat
 						title="Total Locations"
 						stat={total}
-						percent=""
 						border="border-b xl:border-b-0 md:border-r border-statBorder"
 					/>
 					<ProfileStat
 						title="Up-To-Date"
 						stat={upToDate}
-						percent={total > 0 ? upToDatePercent : ''}
+						percent={total && total > 0 ? upToDatePercent : undefined}
 						border="border-b xl:border-b-0 xl:border-r border-statBorder"
 						tooltip="Locations that have been verified within one year."
 					/>
 					<ProfileStat
 						title="Outdated"
 						stat={outdated}
-						percent={total > 0 ? outdatedPercent : ''}
+						percent={total && total > 0 ? outdatedPercent : undefined}
 						border="border-b md:border-b-0 md:border-r border-statBorder"
 					/>
 					<ProfileStat
 						title="Legacy"
 						stat={legacy}
-						percent={total > 0 ? legacyPercent : ''}
-						border=""
+						percent={total && total > 0 ? legacyPercent : undefined}
 						tooltip="Locations with a <em>payment:bitcoin</em> tag instead of the
 					<em>currency:XBT</em> tag."
 					/>
@@ -909,8 +1047,16 @@
 				<div
 					class="{total === 0
 						? 'hidden'
-						: ''} rounded-b-3xl border border-t-0 border-statBorder p-5 dark:bg-white/10"
+						: ''} relative rounded-b-3xl border border-t-0 border-statBorder p-5 dark:bg-white/10"
 				>
+					{#if chartsLoading}
+						<p
+							class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-semibold text-primary dark:text-white"
+						>
+							Loading chart...
+						</p>
+					{/if}
+
 					<canvas bind:this={updatedChartCanvas} width="250" height="250" />
 				</div>
 			</section>
@@ -922,41 +1068,50 @@
 					>
 						{name} Supertaggers
 					</h3>
-					<div
-						class="hide-scroll flex max-h-[375px] flex-wrap items-center justify-center overflow-scroll p-1"
-					>
+					<div bind:this={taggerDiv} class="hide-scroll max-h-[375px] overflow-scroll p-1">
 						{#if taggers && taggers.length}
-							{#each taggers as tagger}
-								<div class="m-4 space-y-1 transition-transform hover:scale-110">
-									<a href="/tagger/{tagger.id}">
-										<img
-											src={tagger.osm_json.img
-												? tagger.osm_json.img.href
-												: '/images/satoshi-nakamoto.png'}
-											alt="avatar"
-											class="mx-auto h-20 w-20 rounded-full object-cover"
-											on:error={function () {
-												this.src = '/images/satoshi-nakamoto.png';
-											}}
-										/>
-										<p class="text-center font-semibold text-body dark:text-white">
-											{tagger.osm_json.display_name.length > 21
-												? tagger.osm_json.display_name.slice(0, 18) + '...'
-												: tagger.osm_json.display_name}
-										</p>
-									</a>
-								</div>
-							{/each}
-						{:else if !communityEvents.length}
-							<p class="p-5 text-body dark:text-white">No supertaggers to display.</p>
+							<div class="flex flex-wrap items-center justify-center">
+								{#each taggersPaginated as tagger}
+									<div class="m-4 space-y-1 transition-transform hover:scale-110">
+										<a href="/tagger/{tagger.id}">
+											<img
+												src={tagger.osm_json.img
+													? tagger.osm_json.img.href
+													: '/images/satoshi-nakamoto.png'}
+												alt="avatar"
+												class="mx-auto h-20 w-20 rounded-full object-cover"
+												on:error={function () {
+													this.src = '/images/satoshi-nakamoto.png';
+												}}
+											/>
+											<p class="text-center font-semibold text-body dark:text-white">
+												{tagger.osm_json.display_name.length > 21
+													? tagger.osm_json.display_name.slice(0, 18) + '...'
+													: tagger.osm_json.display_name}
+											</p>
+										</a>
+									</div>
+								{/each}
+							</div>
+
+							{#if taggersPaginated.length !== taggers.length}
+								<button
+									class="mx-auto !mb-4 block text-xl font-semibold text-link transition-colors hover:text-hover"
+									on:click={() => (taggerCount = taggerCount + 50)}>Load More</button
+								>
+							{/if}
+						{:else if !dataInitialized}
+							<div class="flex flex-wrap items-center justify-center">
+								<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
+								{#each Array(5) as tagger}
+									<div class="m-4 space-y-1 transition-transform hover:scale-110">
+										<p class="mx-auto h-20 w-20 animate-pulse rounded-full bg-link/50" />
+										<p class="mx-auto h-5 w-28 animate-pulse rounded bg-link/50" />
+									</div>
+								{/each}
+							</div>
 						{:else}
-							<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
-							{#each Array(5) as tagger}
-								<div class="m-4 space-y-1 transition-transform hover:scale-110">
-									<p class="mx-auto h-20 w-20 animate-pulse rounded-full bg-link/50" />
-									<p class="mx-auto h-5 w-28 animate-pulse rounded bg-link/50" />
-								</div>
-							{/each}
+							<p class="p-5 text-center text-body dark:text-white">No supertaggers to display.</p>
 						{/if}
 					</div>
 				</div>
@@ -974,17 +1129,17 @@
 						bind:this={activityDiv}
 						class="hide-scroll relative max-h-[375px] space-y-2 overflow-y-scroll"
 						on:scroll={() => {
-							if (!loading && !hideArrow) {
+							if (dataInitialized && !hideArrow) {
 								hideArrow = true;
 							}
 						}}
 					>
-						{#if eventElements && eventElements.length && !loading}
+						{#if eventElements && eventElements.length}
 							{#each eventElementsPaginated as event}
 								<LatestTagger
 									location={event.location}
 									action={event.type}
-									user={findUser(event)}
+									user={event.tagger}
 									time={event['created_at']}
 									latest={event === eventElements[0] ? true : false}
 									merchantId={event.merchantId}
@@ -1011,13 +1166,13 @@
 									/></svg
 								>
 							{/if}
-						{:else if !communityEvents.length}
-							<p class="p-5 text-body dark:text-white">No activity to display.</p>
-						{:else}
+						{:else if !dataInitialized}
 							<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 							{#each Array(5) as skeleton}
 								<TaggerSkeleton />
 							{/each}
+						{:else}
+							<p class="p-5 text-body dark:text-white">No activity to display.</p>
 						{/if}
 					</div>
 				</div>

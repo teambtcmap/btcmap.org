@@ -15,7 +15,7 @@ export type Area = {
 export type AreaTags = {
 	type: 'community' | 'country';
 	name: string;
-	continent: 'africa' | 'asia' | 'europe' | 'north-america' | 'oceania' | 'south-america';
+	continent: Continents;
 	url_alias: string;
 	geo_json: GeoJSON;
 	['icon:square']: string;
@@ -49,6 +49,14 @@ export type AreaTags = {
 	['box:south']?: string;
 	['box:west']?: string;
 };
+
+export type Continents =
+	| 'africa'
+	| 'asia'
+	| 'europe'
+	| 'north-america'
+	| 'oceania'
+	| 'south-america';
 
 export type Element = {
 	id: string;
@@ -94,25 +102,27 @@ export type Report = {
 	id: number;
 	area_id: string;
 	date: string;
-	tags: {
-		total_elements: number;
-		total_elements_onchain: number;
-		total_elements_lightning: number;
-		total_elements_lightning_contactless: number;
-		total_atms: number;
-		up_to_date_elements: number;
-		up_to_date_percent: number;
-		outdated_elements: number;
-		legacy_elements: number;
-		avg_verification_date: string;
-		grade: Grade;
-	};
+	tags: ReportTags;
 	created_at: string;
 	updated_at: string;
 	deleted_at: string;
 };
 
-export type Grade = 0 | 1 | 2 | 3 | 4 | 5;
+export type ReportTags = {
+	total_elements: number;
+	total_elements_onchain: number;
+	total_elements_lightning: number;
+	total_elements_lightning_contactless: number;
+	total_atms: number;
+	up_to_date_elements: number;
+	up_to_date_percent: number;
+	outdated_elements: number;
+	legacy_elements: number;
+	avg_verification_date: string;
+	grade: Grade;
+};
+
+export type Grade = 1 | 2 | 3 | 4 | 5;
 
 export type User = {
 	id: number;
@@ -203,6 +213,7 @@ export enum TipType {
 export interface ActivityEvent extends Event {
 	location: string;
 	merchantId: string;
+	tagger?: User;
 }
 
 // misc
