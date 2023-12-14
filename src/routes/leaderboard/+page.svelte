@@ -64,7 +64,7 @@
 					legend: {
 						labels: {
 							font: {
-								weight: '600'
+								weight: 600
 							}
 						}
 					}
@@ -73,7 +73,7 @@
 					x: {
 						ticks: {
 							font: {
-								weight: '600'
+								weight: 600
 							}
 						},
 						grid: {
@@ -84,7 +84,7 @@
 						beginAtZero: true,
 						ticks: {
 							font: {
-								weight: '600'
+								weight: 600
 							}
 						},
 						grid: {

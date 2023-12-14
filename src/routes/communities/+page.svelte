@@ -133,7 +133,7 @@
 						legend: {
 							labels: {
 								font: {
-									weight: '600'
+									weight: 600
 								}
 							}
 						},

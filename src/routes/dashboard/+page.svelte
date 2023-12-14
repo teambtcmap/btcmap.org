@@ -204,7 +204,7 @@
 					legend: {
 						labels: {
 							font: {
-								weight: '600'
+								weight: 600
 							}
 						}
 					}
@@ -214,7 +214,7 @@
 						ticks: {
 							maxTicksLimit: 5,
 							font: {
-								weight: '600'
+								weight: 600
 							}
 						},
 						grid: {
@@ -224,7 +224,7 @@
 					y: {
 						ticks: {
 							font: {
-								weight: '600'
+								weight: 600
 							}
 						},
 						grid: {
@@ -273,7 +273,7 @@
 					legend: {
 						labels: {
 							font: {
-								weight: '600'
+								weight: 600
 							}
 						}
 					}
@@ -283,7 +283,7 @@
 						ticks: {
 							maxTicksLimit: 5,
 							font: {
-								weight: '600'
+								weight: 600
 							}
 						},
 						grid: {
@@ -293,7 +293,7 @@
 					y: {
 						ticks: {
 							font: {
-								weight: '600'
+								weight: 600
 							}
 						},
 						grid: {
@@ -327,7 +327,7 @@
 					legend: {
 						labels: {
 							font: {
-								weight: '600'
+								weight: 600
 							}
 						}
 					}
@@ -337,7 +337,7 @@
 						ticks: {
 							maxTicksLimit: 5,
 							font: {
-								weight: '600'
+								weight: 600
 							}
 						},
 						grid: {
@@ -347,7 +347,7 @@
 					y: {
 						ticks: {
 							font: {
-								weight: '600'
+								weight: 600
 							}
 						},
 						grid: {
@@ -399,7 +399,7 @@
 					legend: {
 						labels: {
 							font: {
-								weight: '600'
+								weight: 600
 							}
 						}
 					}
@@ -409,7 +409,7 @@
 						ticks: {
 							maxTicksLimit: 5,
 							font: {
-								weight: '600'
+								weight: 600
 							}
 						},
 						grid: {
@@ -419,7 +419,7 @@
 					y: {
 						ticks: {
 							font: {
-								weight: '600'
+								weight: 600
 							}
 						},
 						grid: {
