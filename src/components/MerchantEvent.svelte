@@ -4,7 +4,7 @@
 	import Time from 'svelte-time';
 
 	export let action: EventType;
-	export let user: User | '';
+	export let user: User | undefined;
 	export let time: string;
 	export let latest: boolean;
 

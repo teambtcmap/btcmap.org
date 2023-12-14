@@ -3,6 +3,7 @@
 
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import {
 		Boost,
 		Footer,
@@ -14,6 +15,7 @@
 		MerchantLink,
 		PrimaryButton,
 		ShowTags,
+		TaggerSkeleton,
 		TopButton
 	} from '$lib/comp';
 	import {
@@ -30,18 +32,31 @@
 		verifiedArr
 	} from '$lib/map/setup';
 	import {
+		areaError,
 		areas,
 		boost,
+		elementError,
 		elements,
+		eventError,
 		events,
 		exchangeRate,
+		reportError,
 		reports,
 		resetBoost,
 		showTags,
 		theme,
+		userError,
 		users
 	} from '$lib/store';
-	import type { BaseMaps, Event } from '$lib/types.js';
+	import type {
+		Area,
+		BaseMaps,
+		DomEventType,
+		Element,
+		Event,
+		Leaflet,
+		PayMerchant
+	} from '$lib/types.js';
 	import { detectTheme, errToast, successToast } from '$lib/utils';
 	// @ts-expect-error
 	import rewind from '@mapbox/geojson-rewind';
@@ -53,50 +68,170 @@
 	import Time from 'svelte-time';
 	import tippy from 'tippy.js';
 
-	const merchant = $elements.find((element) => element.id == data.id && !element['deleted_at']);
+	// alert for user errors
+	$: $userError && errToast($userError);
+	// alert for event errors
+	$: $eventError && errToast($eventError);
+	// alert for element errors
+	$: $elementError && errToast($elementError);
+	// alert for area errors
+	$: $areaError && errToast($areaError);
+	// alert for report errors
+	$: $reportError && errToast($reportError);
 
-	if (!merchant) {
-		console.log('Could not find merchant, please try again or contact BTC Map.');
-		goto('/404');
-	}
+	let dataInitialized = false;
+	let initialRenderComplete = false;
+
+	let leaflet: Leaflet;
+	let DomEvent: DomEventType;
+
+	const initializeData = () => {
+		if (dataInitialized) return;
+
+		merchant = $elements.find((element) => element.id == data.id && !element['deleted_at']);
+
+		if (!merchant) {
+			console.log('Could not find merchant, please try again or contact BTC Map.');
+			goto('/404');
+			return;
+		}
+
+		icon = merchant.tags['icon:android'] || 'question_mark';
+		address = merchant.osm_json.tags && checkAddress(merchant.osm_json.tags);
+		description = merchant.osm_json.tags?.description;
+		note = merchant.osm_json.tags?.note;
+		hours = merchant.osm_json.tags?.['opening_hours'];
+		payment = merchant.tags['payment:uri']
+			? { type: 'uri', url: merchant.tags['payment:uri'] }
+			: merchant.tags['payment:pouch']
+			  ? { type: 'pouch', username: merchant.tags['payment:pouch'] }
+			  : merchant.tags['payment:coinos']
+			    ? { type: 'coinos', username: merchant.tags['payment:coinos'] }
+			    : undefined;
+		boosted =
+			merchant.tags['boost:expires'] && Date.parse(merchant.tags['boost:expires']) > Date.now()
+				? merchant.tags['boost:expires']
+				: undefined;
+		verified = verifiedArr(merchant.osm_json);
+		phone = merchant.osm_json.tags?.phone || merchant.osm_json.tags?.['contact:phone'];
+		website = merchant.osm_json.tags?.website || merchant.osm_json.tags?.['contact:website'];
+		email = merchant.osm_json.tags?.email || merchant.osm_json.tags?.['contact:email'];
+		twitter = merchant.osm_json.tags?.twitter || merchant.osm_json.tags?.['contact:twitter'];
+		instagram = merchant.osm_json.tags?.instagram || merchant.osm_json.tags?.['contact:instagram'];
+		facebook = merchant.osm_json.tags?.facebook || merchant.osm_json.tags?.['contact:facebook'];
+
+		paymentMethod =
+			merchant.osm_json.tags &&
+			(merchant.osm_json.tags['payment:onchain'] ||
+				merchant.osm_json.tags['payment:lightning'] ||
+				merchant.osm_json.tags['payment:lightning_contactless']);
+
+		lat = latCalc(merchant['osm_json']);
+		long = longCalc(merchant['osm_json']);
+
+		const communities = $areas.filter(
+			(area) =>
+				area.tags.type === 'community' &&
+				area.tags.geo_json &&
+				area.tags.name &&
+				area.tags['icon:square'] &&
+				area.tags.continent &&
+				Object.keys(area.tags).find((key) => key.includes('contact')) &&
+				$reports.find((report) => report.area_id === area.id)
+		);
+
+		// filter communities containing element
+		filteredCommunities = communities.filter((community) => {
+			let rewoundPoly = rewind(community.tags.geo_json, true);
+
+			// @ts-expect-error
+			if (geoContains(rewoundPoly, [long, lat])) {
+				return true;
+			} else {
+				return false;
+			}
+		});
+
+		merchantEvents = $events.filter((event) => event.element_id === merchant?.id);
+
+		merchantEvents.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
+
+		const setupMap = () => {
+			// add map
+			map = leaflet.map(mapElement, { attributionControl: false });
+
+			// add tiles and basemaps
+			baseMaps = layers(leaflet, map);
+
+			// change broken marker image path in prod
+			leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
+
+			// add OSM attribution
+			attribution(leaflet, map);
+
+			leaflet.control.layers(baseMaps).addTo(map);
+
+			// add locate button to map
+			geolocate(leaflet, map);
+
+			// change default icons
+			changeDefaultIcons(true, leaflet, mapElement, DomEvent);
+
+			// add element to map
+			// @ts-expect-error
+			const divIcon = generateIcon(leaflet, icon, boosted ? true : false);
+
+			// @ts-expect-error
+			const marker = leaflet.marker([lat, long], { icon: divIcon });
+
+			map.addLayer(marker);
+
+			// @ts-expect-error
+			map.fitBounds([[lat, long]]);
+
+			mapLoaded = true;
+		};
+		setupMap();
+
+		dataInitialized = true;
+	};
+
+	$: $users &&
+		$users.length &&
+		$events &&
+		$events.length &&
+		$elements &&
+		$elements.length &&
+		$areas &&
+		$areas.length &&
+		$reports &&
+		$reports.length &&
+		initialRenderComplete &&
+		!dataInitialized &&
+		initializeData();
 
 	axiosRetry(axios, { retries: 3 });
 
-	const name = merchant?.osm_json.tags?.name || '';
-	const icon = merchant?.tags['icon:android'] || 'question_mark';
-	const address = merchant?.osm_json.tags ? checkAddress(merchant.osm_json.tags) : '';
-	const description = merchant?.osm_json.tags?.description || '';
-	const note = merchant?.osm_json.tags?.note || '';
-	const hours = merchant?.osm_json.tags?.['opening_hours'] || '';
-	const payment = merchant?.tags['payment:uri']
-		? { type: 'uri', url: merchant.tags['payment:uri'] }
-		: merchant?.tags['payment:pouch']
-		  ? { type: 'pouch', username: merchant.tags['payment:pouch'] }
-		  : merchant?.tags['payment:coinos']
-		    ? { type: 'coinos', username: merchant.tags['payment:coinos'] }
-		    : undefined;
-	const boosted =
-		merchant?.tags['boost:expires'] && Date.parse(merchant.tags['boost:expires']) > Date.now()
-			? merchant.tags['boost:expires']
-			: undefined;
-	const verified = merchant ? verifiedArr(merchant.osm_json) : [];
-	const verifiedDate = calcVerifiedDate();
-	const phone = merchant?.osm_json.tags?.phone || merchant?.osm_json.tags?.['contact:phone'] || '';
-	const website =
-		merchant?.osm_json.tags?.website || merchant?.osm_json.tags?.['contact:website'] || '';
-	const email = merchant?.osm_json.tags?.email || merchant?.osm_json.tags?.['contact:email'] || '';
-	const twitter =
-		merchant?.osm_json.tags?.twitter || merchant?.osm_json.tags?.['contact:twitter'] || '';
-	const instagram =
-		merchant?.osm_json.tags?.instagram || merchant?.osm_json.tags?.['contact:instagram'] || '';
-	const facebook =
-		merchant?.osm_json.tags?.facebook || merchant?.osm_json.tags?.['contact:facebook'] || '';
+	let merchant: Element | undefined;
 
-	const paymentMethod =
-		merchant?.osm_json.tags &&
-		(merchant.osm_json.tags['payment:onchain'] ||
-			merchant.osm_json.tags['payment:lightning'] ||
-			merchant.osm_json.tags['payment:lightning_contactless']);
+	const name = data.name;
+	let icon: string | undefined;
+	let address: string | undefined;
+	let description: string | undefined;
+	let note: string | undefined;
+	let hours: string | undefined;
+	let payment: PayMerchant;
+	let boosted: string | undefined;
+	let verified: string[] = [];
+	const verifiedDate = calcVerifiedDate();
+	let phone: string | undefined;
+	let website: string | undefined;
+	let email: string | undefined;
+	let twitter: string | undefined;
+	let instagram: string | undefined;
+	let facebook: string | undefined;
+
+	let paymentMethod: string | undefined;
 
 	let onchainTooltip: HTMLImageElement;
 	let lnTooltip: HTMLImageElement;
@@ -104,31 +239,34 @@
 	let verifiedTooltip: HTMLSpanElement;
 
 	$: onchainTooltip &&
+		merchant &&
 		tippy([onchainTooltip], {
 			content:
-				merchant?.osm_json.tags?.['payment:onchain'] === 'yes'
+				merchant.osm_json.tags?.['payment:onchain'] === 'yes'
 					? 'On-chain accepted'
-					: merchant?.osm_json.tags?.['payment:onchain'] === 'no'
+					: merchant.osm_json.tags?.['payment:onchain'] === 'no'
 					  ? 'On-chain not accepted'
 					  : 'On-chain unknown'
 		});
 
 	$: lnTooltip &&
+		merchant &&
 		tippy([lnTooltip], {
 			content:
-				merchant?.osm_json.tags?.['payment:lightning'] === 'yes'
+				merchant.osm_json.tags?.['payment:lightning'] === 'yes'
 					? 'Lightning accepted'
-					: merchant?.osm_json.tags?.['payment:lightning'] === 'no'
+					: merchant.osm_json.tags?.['payment:lightning'] === 'no'
 					  ? 'Lightning not accepted'
 					  : 'Lightning unknown'
 		});
 
 	$: nfcTooltip &&
+		merchant &&
 		tippy([nfcTooltip], {
 			content:
-				merchant?.osm_json.tags?.['payment:lightning_contactless'] === 'yes'
+				merchant.osm_json.tags?.['payment:lightning_contactless'] === 'yes'
 					? 'Lightning Contactless accepted'
-					: merchant?.osm_json.tags?.['payment:lightning_contactless'] === 'no'
+					: merchant.osm_json.tags?.['payment:lightning_contactless'] === 'no'
 					  ? 'Lightning contactless not accepted'
 					  : 'Lightning Contactless unknown'
 		});
@@ -138,8 +276,8 @@
 			content: 'Verified within the last year'
 		});
 
-	const lat = merchant ? latCalc(merchant['osm_json']) : 0;
-	const long = merchant ? longCalc(merchant['osm_json']) : 0;
+	let lat: number | undefined;
+	let long: number | undefined;
 
 	let boostLoading = false;
 
@@ -172,41 +310,15 @@
 
 	$: $resetBoost && resetBoostLoading();
 
-	let loading = true;
-
-	const communities = $areas.filter(
-		(area) =>
-			area.tags.type === 'community' &&
-			area.tags.geo_json &&
-			area.tags.name &&
-			area.tags['icon:square'] &&
-			area.tags.continent &&
-			Object.keys(area.tags).find((key) => key.includes('contact')) &&
-			$reports.find((report) => report.area_id === area.id)
-	);
-
-	// filter communities containing element
-	const filteredCommunities = communities.filter((community) => {
-		let rewoundPoly = rewind(community.tags.geo_json, true);
-
-		if (geoContains(rewoundPoly, [long, lat])) {
-			return true;
-		} else {
-			return false;
-		}
-	});
+	let filteredCommunities: Area[] = [];
 
 	let hideArrow = false;
 	let activityDiv;
 
-	const merchantEvents = $events.filter((event) => event.element_id === merchant?.id);
-
-	merchantEvents.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
+	let merchantEvents: Event[] = [];
 
 	let eventCount = 50;
 	$: eventsPaginated = merchantEvents.slice(0, eventCount);
-
-	loading = false;
 
 	const findUser = (tagger: Event) => {
 		let foundUser = $users.find((user) => user.id == tagger['user_id']);
@@ -214,7 +326,7 @@
 		if (foundUser) {
 			return foundUser;
 		} else {
-			return '';
+			return undefined;
 		}
 	};
 
@@ -227,43 +339,14 @@
 	onMount(async () => {
 		if (browser) {
 			//import packages
-			const leaflet = await import('leaflet');
+			leaflet = await import('leaflet');
 			// @ts-expect-error
-			const DomEvent = await import('leaflet/src/dom/DomEvent');
+			DomEvent = await import('leaflet/src/dom/DomEvent');
 			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
 			const leafletLocateControl = await import('leaflet.locatecontrol');
 			/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
 
-			// add map
-			map = leaflet.map(mapElement, { attributionControl: false });
-
-			// add tiles and basemaps
-			baseMaps = layers(leaflet, map);
-
-			// change broken marker image path in prod
-			leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
-
-			// add OSM attribution
-			attribution(leaflet, map);
-
-			leaflet.control.layers(baseMaps).addTo(map);
-
-			// add locate button to map
-			geolocate(leaflet, map);
-
-			// change default icons
-			changeDefaultIcons(true, leaflet, mapElement, DomEvent);
-
-			// add element to map
-			const divIcon = generateIcon(leaflet, icon, boosted ? true : false);
-
-			const marker = leaflet.marker([lat, long], { icon: divIcon });
-
-			map.addLayer(marker);
-
-			map.fitBounds([[lat, long]]);
-
-			mapLoaded = true;
+			initialRenderComplete = true;
 		}
 	});
 
@@ -277,9 +360,9 @@
 		}
 	};
 
-	$: $theme !== undefined && mapLoaded === true && toggleMapButtons();
+	$: $theme !== undefined && mapLoaded && toggleMapButtons();
 
-	$: $theme !== undefined && mapLoaded === true && toggleTheme();
+	$: $theme !== undefined && mapLoaded && toggleTheme();
 
 	onDestroy(async () => {
 		if (map) {
@@ -290,10 +373,18 @@
 </script>
 
 <svelte:head>
+	<title>{$page.data.name ? $page.data.name + ' - ' : ''}BTC Map Merchant</title>
+	<meta property="og:image" content="https://btcmap.org/images/og/merchant.png" />
+	<meta
+		property="twitter:title"
+		content="{$page.data.name ? $page.data.name + ' - ' : ''}BTC Map Merchant"
+	/>
+	<meta property="twitter:image" content="https://btcmap.org/images/og/merchant.png" />
+
 	{#if payment && payment.type === 'uri' && payment.url?.startsWith('lightning:')}
 		<meta name="lightning" content="lnurlp:{payment.url.slice(10, payment.url.length)}" />
 		<meta property="alby:image" content="/images/logo.svg" />
-		<meta property="alby:name" content={name ? name : 'BTC Map Merchant'} />
+		<meta property="alby:name" content={name || 'BTC Map Merchant'} />
 	{:else}
 		<meta
 			name="lightning"
@@ -310,22 +401,26 @@
 		<main class="my-10 space-y-16 text-center md:my-20">
 			<section id="profile" class="space-y-8">
 				<div class="space-y-2">
-					<div
-						class="mx-auto flex h-32 w-32 items-center justify-center rounded-full {boosted
-							? 'bg-bitcoin hover:animate-wiggle'
-							: 'bg-link'}"
-					>
-						<Icon
-							w="60"
-							h="60"
-							style="text-white"
-							icon={icon !== 'question_mark' ? icon : 'currency_bitcoin'}
-							type="material"
-						/>
-					</div>
+					{#if icon}
+						<div
+							class="mx-auto flex h-32 w-32 items-center justify-center rounded-full {boosted
+								? 'bg-bitcoin hover:animate-wiggle'
+								: 'bg-link'}"
+						>
+							<Icon
+								w="60"
+								h="60"
+								style="text-white"
+								icon={icon !== 'question_mark' ? icon : 'currency_bitcoin'}
+								type="material"
+							/>
+						</div>
+					{:else}
+						<div class="mx-auto h-32 w-32 animate-pulse rounded-full bg-link/50" />
+					{/if}
 
 					<h1 class="text-4xl font-semibold !leading-tight text-primary dark:text-white">
-						{name ? name : 'BTC Map Merchant'}
+						{name || 'BTC Map Merchant'}
 					</h1>
 
 					{#if address}
@@ -334,116 +429,129 @@
 						</h2>
 					{/if}
 
-					<a
-						href={`/map?lat=${lat}&long=${long}`}
-						class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
-						>View on main map <svg
-							class="ml-1 w-3"
-							width="16"
-							height="16"
-							viewBox="0 0 16 16"
-							fill="none"
-							xmlns="http://www.w3.org/2000/svg"
+					{#if lat && long}
+						<a
+							href={`/map?lat=${lat}&long=${long}`}
+							class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
+							>View on main map <svg
+								class="ml-1 w-3"
+								width="16"
+								height="16"
+								viewBox="0 0 16 16"
+								fill="none"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									d="M3 13L13 3M13 3H5.5M13 3V10.5"
+									stroke="currentColor"
+									stroke-width="1.5"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								/>
+							</svg></a
 						>
-							<path
-								d="M3 13L13 3M13 3H5.5M13 3V10.5"
-								stroke="currentColor"
-								stroke-width="1.5"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							/>
-						</svg></a
-					>
+					{:else}
+						<div class="mx-auto h-4 w-28 animate-pulse rounded bg-link/50" />
+					{/if}
 				</div>
 
 				<div class="flex flex-wrap items-center justify-center gap-4">
-					<MerchantLink link={`geo:${lat},${long}`} icon="compass" text="Navigate" />
+					{#if dataInitialized}
+						<MerchantLink link={`geo:${lat},${long}`} icon="compass" text="Navigate" />
 
-					<MerchantLink
-						link={`https://www.openstreetmap.org/edit?${merchant?.osm_json.type}=${merchant?.osm_json.id}`}
-						icon="pencil"
-						text="Edit"
-					/>
-
-					<MerchantButton
-						click={() => {
-							navigator.clipboard.writeText(`https://btcmap.org/merchant/${merchant?.id}`);
-							successToast('Link copied to clipboard!');
-						}}
-						icon="share"
-						text="Share"
-					/>
-
-					{#if payment}
 						<MerchantLink
-							link={payment.type === 'uri'
-								? payment.url || '#'
-								: payment.type === 'pouch'
-								  ? `https://app.pouch.ph/${payment.username}`
-								  : payment.type === 'coinos'
-								    ? `https://coinos.io/${payment.username}`
-								    : '#'}
-							icon="bolt"
-							text="Pay Merchant"
+							link={`https://www.openstreetmap.org/edit?${merchant?.osm_json.type}=${merchant?.osm_json.id}`}
+							icon="pencil"
+							text="Edit"
 						/>
-					{/if}
 
-					{#if phone}
-						<MerchantLink link={`tel:${phone}`} icon="phone" text="Call" />
-					{/if}
-
-					{#if email}
-						<MerchantLink link={`mailto:${email}`} icon="email" text="Email" />
-					{/if}
-
-					{#if website}
-						<MerchantLink
-							link={website.startsWith('http') ? website : `https://${website}`}
-							icon="globe"
-							text="Website"
-						/>
-					{/if}
-
-					{#if twitter}
-						<MerchantLink
-							link={twitter.startsWith('http') ? twitter : `https://twitter.com/${twitter}`}
-							icon="twitter"
-							text="Twitter"
-						/>
-					{/if}
-
-					{#if instagram}
-						<MerchantLink
-							link={instagram.startsWith('http') ? instagram : `https://instagram.com/${instagram}`}
-							icon="instagram"
-							text="Instagram"
-						/>
-					{/if}
-
-					{#if facebook}
-						<MerchantLink
-							link={facebook.startsWith('http') ? facebook : `https://facebook.com/${facebook}`}
-							icon="facebook"
-							text="Facebook"
-						/>
-					{/if}
-
-					<span id="show-tags">
 						<MerchantButton
-							click={() => ($showTags = merchant?.osm_json.tags || {})}
-							icon="tags"
-							text="Show Tags"
+							click={() => {
+								navigator.clipboard.writeText(`https://btcmap.org/merchant/${merchant?.id}`);
+								successToast('Link copied to clipboard!');
+							}}
+							icon="share"
+							text="Share"
 						/>
-					</span>
 
-					<MerchantLink
-						link={`https://www.openstreetmap.org/${merchant?.osm_json.type}/${merchant?.osm_json.id}`}
-						icon="external"
-						text="View OSM"
-					/>
+						{#if payment}
+							<MerchantLink
+								link={payment.type === 'uri'
+									? payment.url || '#'
+									: payment.type === 'pouch'
+									  ? `https://app.pouch.ph/${payment.username}`
+									  : payment.type === 'coinos'
+									    ? `https://coinos.io/${payment.username}`
+									    : '#'}
+								icon="bolt"
+								text="Pay Merchant"
+							/>
+						{/if}
+
+						{#if phone}
+							<MerchantLink link={`tel:${phone}`} icon="phone" text="Call" />
+						{/if}
+
+						{#if email}
+							<MerchantLink link={`mailto:${email}`} icon="email" text="Email" />
+						{/if}
+
+						{#if website}
+							<MerchantLink
+								link={website.startsWith('http') ? website : `https://${website}`}
+								icon="globe"
+								text="Website"
+							/>
+						{/if}
+
+						{#if twitter}
+							<MerchantLink
+								link={twitter.startsWith('http') ? twitter : `https://twitter.com/${twitter}`}
+								icon="twitter"
+								text="Twitter"
+							/>
+						{/if}
+
+						{#if instagram}
+							<MerchantLink
+								link={instagram.startsWith('http')
+									? instagram
+									: `https://instagram.com/${instagram}`}
+								icon="instagram"
+								text="Instagram"
+							/>
+						{/if}
+
+						{#if facebook}
+							<MerchantLink
+								link={facebook.startsWith('http') ? facebook : `https://facebook.com/${facebook}`}
+								icon="facebook"
+								text="Facebook"
+							/>
+						{/if}
+
+						<span id="show-tags">
+							<MerchantButton
+								click={() => ($showTags = merchant?.osm_json.tags || {})}
+								icon="tags"
+								text="Show Tags"
+							/>
+						</span>
+
+						<MerchantLink
+							link={`https://www.openstreetmap.org/${merchant?.osm_json.type}/${merchant?.osm_json.id}`}
+							icon="external"
+							text="View OSM"
+						/>
+					{:else}
+						<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
+						{#each Array(5) as btn}
+							<div class="h-20 w-24 animate-pulse rounded-lg bg-link/50" />
+						{/each}
+					{/if}
 				</div>
 
-				{#if paymentMethod}
+				{#if paymentMethod && merchant}
 					<div>
 						<h4 class="uppercase text-primary dark:text-white">Accepted Payments</h4>
 						<div class="mt-1 flex items-center justify-center space-x-2">
@@ -511,114 +619,116 @@
 					<p class="mx-auto max-w-[600px] text-primary dark:text-white">{note}</p>
 				{/if}
 
-				<div class="grid-cols-2 gap-12 space-y-12 lg:grid lg:space-y-0">
-					{#if phone}
-						<div class="text-primary dark:text-white">
-							<h3 class="mb-4 text-2xl font-semibold">Contact</h3>
+				{#if dataInitialized}
+					<div class="grid-cols-2 gap-12 space-y-12 lg:grid lg:space-y-0">
+						{#if phone}
+							<div class="text-primary dark:text-white">
+								<h3 class="mb-4 text-2xl font-semibold">Contact</h3>
 
-							<div class="flex items-center justify-center">
-								<Icon
-									w="30"
-									h="30"
-									style="text-primary dark:text-white mr-2"
-									icon="phone"
-									type="popup"
-								/>
-								<strong>{phone}</strong>
+								<div class="flex items-center justify-center">
+									<Icon
+										w="30"
+										h="30"
+										style="text-primary dark:text-white mr-2"
+										icon="phone"
+										type="popup"
+									/>
+									<strong>{phone}</strong>
+								</div>
 							</div>
-						</div>
-					{/if}
-
-					{#if hours}
-						<div class="text-primary dark:text-white">
-							<h3 class="mb-4 text-2xl font-semibold">Hours</h3>
-
-							<div class="items-center justify-center md:flex">
-								<Icon
-									w="30"
-									h="30"
-									style="text-primary dark:text-white mx-auto md:mx-0 mb-2 md:mb-0 md:mr-2"
-									icon="clock"
-									type="popup"
-								/>
-								<strong>{hours}</strong>
-							</div>
-						</div>
-					{/if}
-
-					<div class="space-y-4 text-primary dark:text-white">
-						<h3 class="text-2xl font-semibold">Last Surveyed</h3>
-
-						{#if verified.length}
-							<div class="flex items-center justify-center">
-								{#if Date.parse(verified[0]) > verifiedDate}
-									<span bind:this={verifiedTooltip}>
-										<Icon
-											w="30"
-											h="30"
-											style="text-primary dark:text-white mr-2"
-											icon="verified"
-											type="popup"
-										/>
-									</span>
-								{/if}
-								<strong>{verified[0]}</strong>
-							</div>
-						{:else}
-							<p class="font-semibold">This location needs to be surveyed!</p>
 						{/if}
 
-						<PrimaryButton
-							text="Verify Location"
-							link={`/verify-location?id=${merchant?.id}`}
-							style="rounded-xl p-3 w-40 mx-auto"
-						/>
-					</div>
+						{#if hours}
+							<div class="text-primary dark:text-white">
+								<h3 class="mb-4 text-2xl font-semibold">Hours</h3>
 
-					<div class="space-y-4 text-primary dark:text-white">
-						<h3 class="text-2xl font-semibold">Boost</h3>
-
-						<p class="mx-auto max-w-[300px] font-semibold">
-							{boosted
-								? 'This location is boosted!'
-								: "Boost this location to improve it's visibility on the map."}
-						</p>
-
-						{#if boosted}
-							<p>
-								Boost Expires: <span
-									class="underline decoration-bitcoin decoration-4 underline-offset-8"
-									><Time live={3000} relative={true} timestamp={boosted} /></span
-								>
-							</p>
+								<div class="items-center justify-center md:flex">
+									<Icon
+										w="30"
+										h="30"
+										style="text-primary dark:text-white mx-auto md:mx-0 mb-2 md:mb-0 md:mr-2"
+										icon="clock"
+										type="popup"
+									/>
+									<strong>{hours}</strong>
+								</div>
+							</div>
 						{/if}
 
-						<button
-							id="boost-button"
-							on:click={startBoost}
-							disabled={boostLoading}
-							class="{boosted
-								? 'bg-bitcoin hover:bg-bitcoinHover'
-								: 'bg-link hover:bg-hover'} mx-auto flex w-40 items-center justify-center rounded-xl p-3 text-center font-semibold text-white transition-colors"
-						>
-							<Icon
-								w="20"
-								h="20"
-								style="text-white mr-1"
-								icon={boosted ? 'boost-solid' : 'boost'}
-								type="popup"
+						<div class="space-y-4 text-primary dark:text-white">
+							<h3 class="text-2xl font-semibold">Last Surveyed</h3>
+
+							{#if verified.length}
+								<div class="flex items-center justify-center">
+									{#if Date.parse(verified[0]) > verifiedDate}
+										<span bind:this={verifiedTooltip}>
+											<Icon
+												w="30"
+												h="30"
+												style="text-primary dark:text-white mr-2"
+												icon="verified"
+												type="popup"
+											/>
+										</span>
+									{/if}
+									<strong>{verified[0]}</strong>
+								</div>
+							{:else}
+								<p class="font-semibold">This location needs to be surveyed!</p>
+							{/if}
+
+							<PrimaryButton
+								text="Verify Location"
+								link={`/verify-location?id=${merchant?.id}`}
+								style="rounded-xl p-3 w-40 mx-auto"
 							/>
-							{boostLoading ? 'Boosting...' : boosted ? 'Extend Boost' : 'Boost'}
-						</button>
+						</div>
+
+						<div class="space-y-4 text-primary dark:text-white">
+							<h3 class="text-2xl font-semibold">Boost</h3>
+
+							<p class="mx-auto max-w-[300px] font-semibold">
+								{boosted
+									? 'This location is boosted!'
+									: "Boost this location to improve it's visibility on the map."}
+							</p>
+
+							{#if boosted}
+								<p>
+									Boost Expires: <span
+										class="underline decoration-bitcoin decoration-4 underline-offset-8"
+										><Time live={3000} relative={true} timestamp={boosted} /></span
+									>
+								</p>
+							{/if}
+
+							<button
+								id="boost-button"
+								on:click={startBoost}
+								disabled={boostLoading}
+								class="{boosted
+									? 'bg-bitcoin hover:bg-bitcoinHover'
+									: 'bg-link hover:bg-hover'} mx-auto flex w-40 items-center justify-center rounded-xl p-3 text-center font-semibold text-white transition-colors"
+							>
+								<Icon
+									w="20"
+									h="20"
+									style="text-white mr-1"
+									icon={boosted ? 'boost-solid' : 'boost'}
+									type="popup"
+								/>
+								{boostLoading ? 'Boosting...' : boosted ? 'Extend Boost' : 'Boost'}
+							</button>
+						</div>
 					</div>
-				</div>
+				{/if}
 			</section>
 
 			<section id="map-section">
 				<h3
 					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary dark:bg-white/10 dark:text-white lg:text-left"
 				>
-					{name ? name : 'Merchant'} Location
+					{name || 'Merchant'} Location
 				</h3>
 
 				<div class="relative">
@@ -639,19 +749,19 @@
 					<h3
 						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white lg:text-left"
 					>
-						{name ? name : 'Merchant'} Activity
+						{name || 'Merchant'} Activity
 					</h3>
 
 					<div
 						bind:this={activityDiv}
 						class="hide-scroll relative max-h-[375px] space-y-2 overflow-y-scroll"
 						on:scroll={() => {
-							if (!loading && !hideArrow) {
+							if (dataInitialized && !hideArrow) {
 								hideArrow = true;
 							}
 						}}
 					>
-						{#if merchantEvents && merchantEvents.length && !loading}
+						{#if merchantEvents && merchantEvents.length}
 							{#each eventsPaginated as event}
 								<MerchantEvent
 									action={event.type}
@@ -681,6 +791,11 @@
 									/></svg
 								>
 							{/if}
+						{:else if !dataInitialized}
+							<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
+							{#each Array(5) as skeleton}
+								<TaggerSkeleton />
+							{/each}
 						{:else}
 							<p class="p-5 text-body dark:text-white">No activity to display.</p>
 						{/if}
@@ -693,7 +808,7 @@
 					<h3
 						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white lg:text-left"
 					>
-						{name ? name : 'Merchant'} Communities
+						{name || 'Merchant'} Communities
 					</h3>
 					<div
 						class="hide-scroll flex max-h-[375px] flex-wrap items-center justify-center overflow-scroll p-1"
@@ -716,6 +831,8 @@
 									</a>
 								</div>
 							{/each}
+						{:else if !dataInitialized}
+							<p class="p-5 text-body dark:text-white">Loading communities...</p>
 						{:else}
 							<p class="p-5 text-body dark:text-white">
 								This location is not part of a communtiy, but one can be <a
@@ -740,7 +857,11 @@
 
 		<Footer />
 	</div>
-	<Boost />
+
+	{#if browser}
+		<Boost />
+	{/if}
+
 	<ShowTags />
 </div>
 

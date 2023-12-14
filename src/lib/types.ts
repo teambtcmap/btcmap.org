@@ -175,6 +175,8 @@ export interface SearchResult extends SearchElement {
 	distanceMi: number;
 }
 
+export type PayMerchant = { type: string; url?: string; username?: string } | undefined;
+
 // leaderboards
 
 export type TaggerLeaderboard = {

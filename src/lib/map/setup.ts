@@ -1,6 +1,6 @@
 import { InfoTooltip } from '$lib/comp';
 import { boost, exchangeRate, resetBoost, showMore, showTags, theme } from '$lib/store';
-import type { DomEventType, ElementOSM, Leaflet, OSMTags } from '$lib/types';
+import type { DomEventType, ElementOSM, Leaflet, OSMTags, PayMerchant } from '$lib/types';
 import { detectTheme, errToast } from '$lib/utils';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -651,7 +651,7 @@ export const generateMarker = (
 	long: number,
 	icon: DivIcon,
 	element: ElementOSM,
-	payment: { type: string; url?: string; username?: string } | undefined,
+	payment: PayMerchant,
 	L: Leaflet,
 	verifiedDate: number,
 	verify: boolean,

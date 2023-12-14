@@ -29,7 +29,6 @@ export { default as LatestTagger } from '../components/LatestTagger.svelte';
 export { default as LeaderboardItem } from '../components/LeaderboardItem.svelte';
 export { default as LeaderboardSkeleton } from '../components/LeaderboardSkeleton.svelte';
 export { default as LoadingSpinner } from '../components/LoadingSpinner.svelte';
-export { default as LoadingSplash } from '../components/LoadingSplash.svelte';
 export { default as MapLoadingEmbed } from '../components/MapLoadingEmbed.svelte';
 export { default as MapLoadingMain } from '../components/MapLoadingMain.svelte';
 export { default as MerchantButton } from '../components/MerchantButton.svelte';
