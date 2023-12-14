@@ -660,7 +660,7 @@
 						</p>
 					{/if}
 
-					<canvas bind:this={tagTypeChartCanvas} width="250" height="250" />
+					<canvas bind:this={tagTypeChartCanvas} width="100%" height="250" />
 				</div>
 			</section>
 

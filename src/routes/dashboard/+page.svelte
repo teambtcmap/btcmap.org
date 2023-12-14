@@ -614,7 +614,7 @@
 								class="absolute left-0 top-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
 							/>
 						{/if}
-						<canvas bind:this={upToDateChartCanvas} width="400" height="400" />
+						<canvas bind:this={upToDateChartCanvas} width="100%" height="400" />
 					</div>
 					<p class="mt-1 text-center text-sm text-body dark:text-white">
 						*Elements with a <em>survey:date</em>, <em>check_date</em>, or
@@ -629,7 +629,7 @@
 								class="absolute left-0 top-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
 							/>
 						{/if}
-						<canvas bind:this={totalChartCanvas} width="400" height="400" />
+						<canvas bind:this={totalChartCanvas} width="100%" height="400" />
 					</div>
 					<p class="mt-1 text-center text-sm text-body dark:text-white">
 						*Elements accepting any bitcoin payment method.
@@ -643,7 +643,7 @@
 								class="absolute left-0 top-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
 							/>
 						{/if}
-						<canvas bind:this={legacyChartCanvas} width="400" height="400" />
+						<canvas bind:this={legacyChartCanvas} width="100%" height="400" />
 					</div>
 					<p class="mt-1 text-center text-sm text-body dark:text-white">
 						*Elements with a <em>payment:bitcoin</em> tag instead of the
@@ -658,7 +658,7 @@
 								class="absolute left-0 top-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
 							/>
 						{/if}
-						<canvas bind:this={paymentMethodChartCanvas} width="400" height="400" />
+						<canvas bind:this={paymentMethodChartCanvas} width="100%" height="400" />
 					</div>
 					<p class="mt-1 text-center text-sm text-body dark:text-white">
 						*Elements with <em>payment:onchain</em>, <em>payment:lightning</em> and

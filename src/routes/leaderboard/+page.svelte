@@ -224,7 +224,7 @@
 				{#if !leaderboard || loading}
 					<div class="absolute left-0 top-0 h-[400px] w-full animate-pulse border border-link/50" />
 				{/if}
-				<canvas bind:this={topTenChartCanvas} width="400" height="400" />
+				<canvas bind:this={topTenChartCanvas} width="100%" height="400" />
 			</section>
 
 			<PrimaryButton

@@ -300,7 +300,7 @@
 						/>
 					</div>
 				{/if}
-				<canvas bind:this={continentChartCanvas} width="350" height="350" />
+				<canvas bind:this={continentChartCanvas} width="100%" height="350" />
 			</div>
 
 			<div>
