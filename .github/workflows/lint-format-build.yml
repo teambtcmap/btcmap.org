@@ -12,10 +12,7 @@ jobs:
       - name: install modules
         run: yarn
 
-      - name: run eslint
-        run: yarn eslint
-
-      - name: run prettier
+      - name: run prettier and eslint
         run: yarn lint
 
       - name: run check
