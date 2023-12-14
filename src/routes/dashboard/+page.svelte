@@ -551,54 +551,54 @@
 						stat={total}
 						change={totalChange}
 						border="border-b md:border-r border-statBorder"
-						loading={$syncStatus}
+						loading={$syncStatus && chartsRendered}
 					/>
 					<DashboardStat
 						title="Created in last 24 hours"
 						stat={created}
 						percent={createdPercentChange}
 						border="border-b xl:border-r border-statBorder"
-						loading={$syncStatus}
+						loading={$syncStatus && chartsRendered}
 					/>
 					<DashboardStat
 						title="Updated in last 24 hours"
 						stat={updated}
 						percent={updatedPercentChange}
 						border="border-b md:border-r border-statBorder"
-						loading={$syncStatus}
+						loading={$syncStatus && chartsRendered}
 					/>
 					<DashboardStat
 						title="Deleted in last 24 hours"
 						stat={deleted}
 						percent={deletedPercentChange}
 						border="border-b border-statBorder"
-						loading={$syncStatus}
+						loading={$syncStatus && chartsRendered}
 					/>
 					<DashboardStat
 						title="Merchants accepting on-chain"
 						stat={onchain}
 						percent={onchainPercentChange}
 						border="border-b xl:border-b-0 md:border-r border-statBorder"
-						loading={$syncStatus}
+						loading={$syncStatus && chartsRendered}
 					/>
 					<DashboardStat
 						title="Merchants accepting lightning"
 						stat={lightning}
 						percent={lightningPercentChange}
 						border="border-b xl:border-b-0 xl:border-r border-statBorder"
-						loading={$syncStatus}
+						loading={$syncStatus && chartsRendered}
 					/>
 					<DashboardStat
 						title="Merchants accepting contactless"
 						stat={nfc}
 						percent={nfcPercentChange}
 						border="border-b md:border-b-0 md:border-r border-statBorder"
-						loading={$syncStatus}
+						loading={$syncStatus && chartsRendered}
 					/>
 					<DashboardStat
 						title="Number of communities"
 						stat={communities && communities.length}
-						loading={$syncStatus}
+						loading={$syncStatus && chartsRendered}
 					/>
 				</div>
 				<p class="text-center text-sm text-body dark:text-white md:text-left">
