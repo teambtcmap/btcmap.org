@@ -653,11 +653,11 @@
 					class="relative rounded-b-3xl border border-t-0 border-statBorder p-5 dark:bg-white/10"
 				>
 					{#if !dataInitialized}
-						<p
-							class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-semibold text-primary dark:text-white"
-						>
-							Loading chart...
-						</p>
+						<div>
+							<i
+								class="fa-solid fa-chart-pie absolute left-1/2 top-1/2 h-52 w-52 -translate-x-1/2 -translate-y-1/2 animate-pulse text-link/50 md:h-60 md:w-60"
+							/>
+						</div>
 					{/if}
 
 					<canvas bind:this={tagTypeChartCanvas} width="100%" height="250" />

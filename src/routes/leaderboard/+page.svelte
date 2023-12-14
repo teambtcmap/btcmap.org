@@ -222,7 +222,11 @@
 
 			<section id="chart" class="relative">
 				{#if !leaderboard || loading}
-					<div class="absolute left-0 top-0 h-[400px] w-full animate-pulse border border-link/50" />
+					<div
+						class="absolute left-0 top-0 flex h-[400px] w-full animate-pulse items-center justify-center border border-link/50"
+					>
+						<i class="fa-solid fa-chart-bar h-24 w-24 animate-pulse text-link/50" />
+					</div>
 				{/if}
 				<canvas bind:this={topTenChartCanvas} width="100%" height="400" />
 			</section>

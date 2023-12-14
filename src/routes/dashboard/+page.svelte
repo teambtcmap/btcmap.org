@@ -611,8 +611,10 @@
 					<div class="relative">
 						{#if chartsLoading}
 							<div
-								class="absolute left-0 top-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
-							/>
+								class="absolute left-0 top-0 flex h-[400px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
+							>
+								<i class="fa-solid fa-chart-area h-24 w-24 animate-pulse text-link/50" />
+							</div>
 						{/if}
 						<canvas bind:this={upToDateChartCanvas} width="100%" height="400" />
 					</div>
@@ -626,8 +628,10 @@
 					<div class="relative">
 						{#if chartsLoading}
 							<div
-								class="absolute left-0 top-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
-							/>
+								class="absolute left-0 top-0 flex h-[400px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
+							>
+								<i class="fa-solid fa-chart-area h-24 w-24 animate-pulse text-link/50" />
+							</div>
 						{/if}
 						<canvas bind:this={totalChartCanvas} width="100%" height="400" />
 					</div>
@@ -640,8 +644,10 @@
 					<div class="relative">
 						{#if chartsLoading}
 							<div
-								class="absolute left-0 top-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
-							/>
+								class="absolute left-0 top-0 flex h-[400px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
+							>
+								<i class="fa-solid fa-chart-area h-24 w-24 animate-pulse text-link/50" />
+							</div>
 						{/if}
 						<canvas bind:this={legacyChartCanvas} width="100%" height="400" />
 					</div>
@@ -655,8 +661,10 @@
 					<div class="relative">
 						{#if chartsLoading}
 							<div
-								class="absolute left-0 top-0 h-[400px] w-full animate-pulse rounded-3xl border border-link/50"
-							/>
+								class="absolute left-0 top-0 flex h-[400px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
+							>
+								<i class="fa-solid fa-chart-area h-24 w-24 animate-pulse text-link/50" />
+							</div>
 						{/if}
 						<canvas bind:this={paymentMethodChartCanvas} width="100%" height="400" />
 					</div>
