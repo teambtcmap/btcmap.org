@@ -23,19 +23,19 @@
 		tickets && tickets.length
 			? tickets.filter((issue) =>
 					issue.labels.find((label: any) => label.name === 'location-submission')
-			  )
+				)
 			: [];
 	$: verify =
 		tickets && tickets.length
 			? tickets.filter((issue) =>
 					issue.labels.find((label: any) => label.name === 'verify-submission')
-			  )
+				)
 			: [];
 	$: community =
 		tickets && tickets.length
 			? tickets.filter((issue) =>
 					issue.labels.find((label: any) => label.name === 'community-submission')
-			  )
+				)
 			: [];
 
 	const getIssues = () => {
@@ -116,8 +116,8 @@
 								class="mx-auto block w-40 border border-link py-2 md:inline {type === 'Add'
 									? 'rounded-t md:rounded-l md:rounded-tr-none'
 									: type === 'Community'
-									  ? 'rounded-b md:rounded-r md:rounded-bl-none'
-									  : ''} {showType === type ? 'bg-link text-white' : ''} transition-colors"
+										? 'rounded-b md:rounded-r md:rounded-bl-none'
+										: ''} {showType === type ? 'bg-link text-white' : ''} transition-colors"
 								on:click={() => (showType = type)}>{type}</button
 							>
 						{/each}

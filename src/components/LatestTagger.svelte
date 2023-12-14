@@ -30,15 +30,15 @@
 				: ''} absolute inline-flex h-full w-full rounded-full {action === 'create'
 				? 'bg-created'
 				: action === 'delete'
-				  ? 'bg-deleted'
-				  : 'bg-link'} opacity-75"
+					? 'bg-deleted'
+					: 'bg-link'} opacity-75"
 		/>
 		<span
 			class="relative inline-flex h-3 w-3 rounded-full {action === 'create'
 				? 'bg-created'
 				: action === 'delete'
-				  ? 'bg-deleted'
-				  : 'bg-link'}"
+					? 'bg-deleted'
+					: 'bg-link'}"
 		/>
 	</span>
 

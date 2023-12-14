@@ -34,7 +34,7 @@
 						area.tags.continent &&
 						Object.keys(area.tags).find((key) => key.includes('contact')) &&
 						$reports.find((report) => report.area_id === area.id)
-			  )
+				)
 			: [];
 	$: communityReports =
 		communities && communities.length

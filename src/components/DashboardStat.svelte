@@ -27,8 +27,8 @@
 					class="{percent === '+0'
 						? 'text-primary dark:text-white'
 						: percent.startsWith('+')
-						  ? 'text-statPositive'
-						  : 'text-statNegative'} ml-1 text-lg font-semibold"
+							? 'text-statPositive'
+							: 'text-statNegative'} ml-1 text-lg font-semibold"
 					>{percent === '+0' ? percent.slice(1) : percent}%</span
 				>
 			{:else if change}
@@ -36,8 +36,8 @@
 					class="{change === '+0'
 						? 'text-primary dark:text-white'
 						: change.startsWith('+')
-						  ? 'text-statPositive'
-						  : 'text-statNegative'} ml-1 text-lg font-semibold">{change}</span
+							? 'text-statPositive'
+							: 'text-statNegative'} ml-1 text-lg font-semibold">{change}</span
 				>
 			{/if}
 		{:else}

@@ -113,10 +113,10 @@ If you are a new contributor please read our Tagging Instructions [here](https:/
 					country && communities.length
 						? [...standardLabels, country, ...communities]
 						: country
-						  ? [...standardLabels, country]
-						  : communities.length
-						    ? [...standardLabels, ...communities]
-						    : [...standardLabels]
+							? [...standardLabels, country]
+							: communities.length
+								? [...standardLabels, ...communities]
+								: [...standardLabels]
 			},
 			{ headers }
 		)

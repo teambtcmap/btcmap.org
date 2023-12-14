@@ -685,9 +685,9 @@ export const generateMarker = (
 			element.tags && element.tags.name
 				? `<a href='/merchant/${element.type}:${
 						element.id
-				  }' class='inline-block font-bold text-lg leading-snug max-w-[300px]' title='Merchant name'><span class='!text-link hover:!text-hover transition-colors'>${
+					}' class='inline-block font-bold text-lg leading-snug max-w-[300px]' title='Merchant name'><span class='!text-link hover:!text-hover transition-colors'>${
 						element.tags.name
-				  }</span> ${description || note ? `<span id='info' title='Information'></span>` : ''}</a>`
+					}</span> ${description || note ? `<span id='info' title='Information'></span>` : ''}</a>`
 				: ''
 		}
 
@@ -747,11 +747,11 @@ export const generateMarker = (
 											payment.type === 'uri'
 												? payment.url
 												: payment.type === 'pouch'
-												  ? `https://app.pouch.ph/${payment.username}`
-												  : payment.type === 'coinos'
-												    ? `https://coinos.io/${payment.username}`
-												    : '#'
-									  }" target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+													? `https://app.pouch.ph/${payment.username}`
+													: payment.type === 'coinos'
+														? `https://coinos.io/${payment.username}`
+														: '#'
+										}" target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
 												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#bolt"></use>
 											</svg>
@@ -786,7 +786,7 @@ export const generateMarker = (
 								website
 									? `<a href=${
 											website.startsWith('http') ? website : `https://${website}`
-									  } target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+										} target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
 												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#globe"></use>
 											</svg>
@@ -799,7 +799,7 @@ export const generateMarker = (
 								twitter
 									? `<a href=${
 											twitter.startsWith('http') ? twitter : `https://twitter.com/${twitter}`
-									  } target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+										} target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
 												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#twitter"></use>
 											</svg>
@@ -814,7 +814,7 @@ export const generateMarker = (
 											instagram.startsWith('http')
 												? instagram
 												: `https://instagram.com/${instagram}`
-									  } target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+										} target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
 												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#instagram"></use>
 											</svg>
@@ -827,7 +827,7 @@ export const generateMarker = (
 								facebook
 									? `<a href=${
 											facebook.startsWith('http') ? facebook : `https://facebook.com/${facebook}`
-									  } target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+										} target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
 												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#facebook"></use>
 											</svg>
@@ -889,18 +889,18 @@ ${
 									? '/icons/btc-highlight-dark.svg'
 									: '/icons/btc-highlight.svg'
 								: element.tags && element.tags['payment:onchain'] === 'no'
-								  ? theme === 'dark'
+									? theme === 'dark'
 										? '/icons/btc-no-dark.svg'
 										: '/icons/btc-no.svg'
-								  : theme === 'dark'
-								    ? '/icons/btc-dark.svg'
-								    : '/icons/btc.svg'
+									: theme === 'dark'
+										? '/icons/btc-dark.svg'
+										: '/icons/btc.svg'
 						} alt="bitcoin" class="w-6 h-6" title="${
 							element.tags && element.tags['payment:onchain'] === 'yes'
 								? 'On-chain accepted'
 								: element.tags && element.tags['payment:onchain'] === 'no'
-								  ? 'On-chain not accepted'
-								  : 'On-chain unknown'
+									? 'On-chain not accepted'
+									: 'On-chain unknown'
 						}"/>
 
 						<img src=${
@@ -909,18 +909,18 @@ ${
 									? '/icons/ln-highlight-dark.svg'
 									: '/icons/ln-highlight.svg'
 								: element.tags && element.tags['payment:lightning'] === 'no'
-								  ? theme === 'dark'
+									? theme === 'dark'
 										? '/icons/ln-no-dark.svg'
 										: '/icons/ln-no.svg'
-								  : theme === 'dark'
-								    ? '/icons/ln-dark.svg'
-								    : '/icons/ln.svg'
+									: theme === 'dark'
+										? '/icons/ln-dark.svg'
+										: '/icons/ln.svg'
 						} alt="lightning" class="w-6 h-6" title="${
 							element.tags && element.tags['payment:lightning'] === 'yes'
 								? 'Lightning accepted'
 								: element.tags && element.tags['payment:lightning'] === 'no'
-								  ? 'Lightning not accepted'
-								  : 'Lightning unknown'
+									? 'Lightning not accepted'
+									: 'Lightning unknown'
 						}"/>
 
 						<img src=${
@@ -929,18 +929,18 @@ ${
 									? '/icons/nfc-highlight-dark.svg'
 									: '/icons/nfc-highlight.svg'
 								: element.tags && element.tags['payment:lightning_contactless'] === 'no'
-								  ? theme === 'dark'
+									? theme === 'dark'
 										? '/icons/nfc-no-dark.svg'
 										: '/icons/nfc-no.svg'
-								  : theme === 'dark'
-								    ? '/icons/nfc-dark.svg'
-								    : '/icons/nfc.svg'
+									: theme === 'dark'
+										? '/icons/nfc-dark.svg'
+										: '/icons/nfc.svg'
 						} alt="nfc" class="w-6 h-6" title="${
 							element.tags && element.tags['payment:lightning_contactless'] === 'yes'
 								? 'Lightning Contactless accepted'
 								: element.tags && element.tags['payment:lightning_contactless'] === 'no'
-								  ? 'Lightning contactless not accepted'
-								  : 'Lightning Contactless unknown'
+									? 'Lightning contactless not accepted'
+									: 'Lightning Contactless unknown'
 						}"/>
 					</div>
 				</div>`
@@ -958,7 +958,7 @@ ${
 												<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#verified"></use>
 											</svg></span>`
 										: ''
-							  }`
+								}`
 							: '<span title="Not verified">---</span>'
 					}
 					</span>
@@ -966,7 +966,7 @@ ${
 						verify
 							? `<a href="/verify-location?id=${
 									element.type + ':' + element.id
-							  }" class='!text-link hover:!text-hover text-xs transition-colors' title="Help improve the data for everyone">Verify Location</a>`
+								}" class='!text-link hover:!text-hover text-xs transition-colors' title="Help improve the data for everyone">Verify Location</a>`
 							: ''
 					}
 				</div>

@@ -168,10 +168,10 @@
 			let payment = element.tags['payment:uri']
 				? { type: 'uri', url: element.tags['payment:uri'] }
 				: element.tags['payment:pouch']
-				  ? { type: 'pouch', username: element.tags['payment:pouch'] }
-				  : element.tags['payment:coinos']
-				    ? { type: 'coinos', username: element.tags['payment:coinos'] }
-				    : undefined;
+					? { type: 'pouch', username: element.tags['payment:pouch'] }
+					: element.tags['payment:coinos']
+						? { type: 'coinos', username: element.tags['payment:coinos'] }
+						: undefined;
 			let boosted =
 				element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now()
 					? element.tags['boost:expires']
@@ -463,8 +463,8 @@ Thanks for using BTC Map!`);
 								? '/icons/boost-solid-white.svg'
 								: '/icons/boost-solid.svg'
 							: theme === 'dark'
-							  ? '/icons/boost-white.svg'
-							  : '/icons/boost.svg'
+								? '/icons/boost-white.svg'
+								: '/icons/boost.svg'
 					} alt='boost' class='inline' id='boost-layer'/>`;
 					boostLayerButton.style.borderRadius = '0 0 8px 8px';
 					boostLayerButton.onclick = function toggleLayer() {

@@ -38,8 +38,8 @@
 						top
 							? 'rounded-t-2xl'
 							: link.icon === bottom
-							  ? 'rounded-b-2xl'
-							  : ''} transition-colors"
+								? 'rounded-b-2xl'
+								: ''} transition-colors"
 					>
 						{link.title}
 						{#if link.external}

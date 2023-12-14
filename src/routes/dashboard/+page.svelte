@@ -53,7 +53,7 @@
 						area.tags.continent &&
 						Object.keys(area.tags).find((key) => key.includes('contact')) &&
 						$reports.find((report) => report.area_id === area.id)
-			  )
+				)
 			: undefined;
 
 	const getStatPeriod = () => {
@@ -106,28 +106,28 @@
 		stats && total
 			? new Intl.NumberFormat('en-US', { signDisplay: 'always' }).format(
 					total - stats[1].tags.total_elements
-			  )
+				)
 			: undefined;
 
 	$: createdPercentChange =
 		created && createdPrevious
 			? new Intl.NumberFormat('en-US', { signDisplay: 'always' }).format(
 					Number((((created - createdPrevious) / createdPrevious) * 100).toFixed(1))
-			  )
+				)
 			: '';
 
 	$: updatedPercentChange =
 		updated && updatedPrevious
 			? new Intl.NumberFormat('en-US', { signDisplay: 'always' }).format(
 					Number((((updated - updatedPrevious) / updatedPrevious) * 100).toFixed(1))
-			  )
+				)
 			: '';
 
 	$: deletedPercentChange =
 		deleted && deletedPrevious
 			? new Intl.NumberFormat('en-US', { signDisplay: 'always' }).format(
 					Number((((deleted - deletedPrevious) / deletedPrevious) * 100).toFixed(1))
-			  )
+				)
 			: '';
 
 	$: onchainPercentChange =
@@ -140,7 +140,7 @@
 							100
 						).toFixed(1)
 					)
-			  )
+				)
 			: '';
 
 	$: lightningPercentChange =
@@ -153,7 +153,7 @@
 							100
 						).toFixed(1)
 					)
-			  )
+				)
 			: '';
 
 	$: nfcPercentChange =
@@ -166,7 +166,7 @@
 							100
 						).toFixed(1)
 					)
-			  )
+				)
 			: '';
 
 	let upToDateChartCanvas: HTMLCanvasElement;

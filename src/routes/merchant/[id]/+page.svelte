@@ -104,10 +104,10 @@
 		payment = merchant.tags['payment:uri']
 			? { type: 'uri', url: merchant.tags['payment:uri'] }
 			: merchant.tags['payment:pouch']
-			  ? { type: 'pouch', username: merchant.tags['payment:pouch'] }
-			  : merchant.tags['payment:coinos']
-			    ? { type: 'coinos', username: merchant.tags['payment:coinos'] }
-			    : undefined;
+				? { type: 'pouch', username: merchant.tags['payment:pouch'] }
+				: merchant.tags['payment:coinos']
+					? { type: 'coinos', username: merchant.tags['payment:coinos'] }
+					: undefined;
 		boosted =
 			merchant.tags['boost:expires'] && Date.parse(merchant.tags['boost:expires']) > Date.now()
 				? merchant.tags['boost:expires']
@@ -245,8 +245,8 @@
 				merchant.osm_json.tags?.['payment:onchain'] === 'yes'
 					? 'On-chain accepted'
 					: merchant.osm_json.tags?.['payment:onchain'] === 'no'
-					  ? 'On-chain not accepted'
-					  : 'On-chain unknown'
+						? 'On-chain not accepted'
+						: 'On-chain unknown'
 		});
 
 	$: lnTooltip &&
@@ -256,8 +256,8 @@
 				merchant.osm_json.tags?.['payment:lightning'] === 'yes'
 					? 'Lightning accepted'
 					: merchant.osm_json.tags?.['payment:lightning'] === 'no'
-					  ? 'Lightning not accepted'
-					  : 'Lightning unknown'
+						? 'Lightning not accepted'
+						: 'Lightning unknown'
 		});
 
 	$: nfcTooltip &&
@@ -267,8 +267,8 @@
 				merchant.osm_json.tags?.['payment:lightning_contactless'] === 'yes'
 					? 'Lightning Contactless accepted'
 					: merchant.osm_json.tags?.['payment:lightning_contactless'] === 'no'
-					  ? 'Lightning contactless not accepted'
-					  : 'Lightning Contactless unknown'
+						? 'Lightning contactless not accepted'
+						: 'Lightning Contactless unknown'
 		});
 
 	$: verifiedTooltip &&
@@ -479,10 +479,10 @@
 								link={payment.type === 'uri'
 									? payment.url || '#'
 									: payment.type === 'pouch'
-									  ? `https://app.pouch.ph/${payment.username}`
-									  : payment.type === 'coinos'
-									    ? `https://coinos.io/${payment.username}`
-									    : '#'}
+										? `https://app.pouch.ph/${payment.username}`
+										: payment.type === 'coinos'
+											? `https://coinos.io/${payment.username}`
+											: '#'}
 								icon="bolt"
 								text="Pay Merchant"
 							/>
@@ -563,12 +563,12 @@
 											? '/icons/btc-highlight-dark.svg'
 											: '/icons/btc-highlight.svg'
 										: merchant.osm_json.tags?.['payment:onchain'] === 'no'
-										  ? detectTheme() === 'dark' || $theme === 'dark'
+											? detectTheme() === 'dark' || $theme === 'dark'
 												? '/icons/btc-no-dark.svg'
 												: '/icons/btc-no-teal.svg'
-										  : detectTheme() === 'dark' || $theme === 'dark'
-										    ? '/icons/btc-dark.svg'
-										    : '/icons/btc.svg'}
+											: detectTheme() === 'dark' || $theme === 'dark'
+												? '/icons/btc-dark.svg'
+												: '/icons/btc.svg'}
 									alt="bitcoin"
 									class="h-8 w-8"
 								/>
@@ -580,12 +580,12 @@
 											? '/icons/ln-highlight-dark.svg'
 											: '/icons/ln-highlight.svg'
 										: merchant.osm_json.tags?.['payment:lightning'] === 'no'
-										  ? detectTheme() === 'dark' || $theme === 'dark'
+											? detectTheme() === 'dark' || $theme === 'dark'
 												? '/icons/ln-no-dark.svg'
 												: '/icons/ln-no-teal.svg'
-										  : detectTheme() === 'dark' || $theme === 'dark'
-										    ? '/icons/ln-dark.svg'
-										    : '/icons/ln.svg'}
+											: detectTheme() === 'dark' || $theme === 'dark'
+												? '/icons/ln-dark.svg'
+												: '/icons/ln.svg'}
 									alt="lightning"
 									class="h-8 w-8"
 								/>
@@ -597,12 +597,12 @@
 											? '/icons/nfc-highlight-dark.svg'
 											: '/icons/nfc-highlight.svg'
 										: merchant.osm_json.tags?.['payment:lightning_contactless'] === 'no'
-										  ? detectTheme() === 'dark' || $theme === 'dark'
+											? detectTheme() === 'dark' || $theme === 'dark'
 												? '/icons/nfc-no-dark.svg'
 												: '/icons/nfc-no-teal.svg'
-										  : detectTheme() === 'dark' || $theme === 'dark'
-										    ? '/icons/nfc-dark.svg'
-										    : '/icons/nfc.svg'}
+											: detectTheme() === 'dark' || $theme === 'dark'
+												? '/icons/nfc-dark.svg'
+												: '/icons/nfc.svg'}
 									alt="nfc"
 									class="h-8 w-8"
 								/>

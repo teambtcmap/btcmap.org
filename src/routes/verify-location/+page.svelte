@@ -115,10 +115,10 @@
 				let payment = element.tags['payment:uri']
 					? { type: 'uri', url: element.tags['payment:uri'] }
 					: element.tags['payment:pouch']
-					  ? { type: 'pouch', username: element.tags['payment:pouch'] }
-					  : element.tags['payment:coinos']
-					    ? { type: 'coinos', username: element.tags['payment:coinos'] }
-					    : undefined;
+						? { type: 'pouch', username: element.tags['payment:pouch'] }
+						: element.tags['payment:coinos']
+							? { type: 'coinos', username: element.tags['payment:coinos'] }
+							: undefined;
 				let boosted =
 					element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now()
 						? element.tags['boost:expires']

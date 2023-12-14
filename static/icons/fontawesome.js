@@ -27,12 +27,12 @@
 			i % 2
 				? ownKeys(Object(source), !0).forEach(function (key) {
 						_defineProperty(target, key, source[key]);
-				  })
+					})
 				: Object.getOwnPropertyDescriptors
-				  ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source))
-				  : ownKeys(Object(source)).forEach(function (key) {
+					? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source))
+					: ownKeys(Object(source)).forEach(function (key) {
 							Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
-				    });
+						});
 		}
 
 		return target;
@@ -46,7 +46,7 @@
 				'function' == typeof Symbol && 'symbol' == typeof Symbol.iterator
 					? function (obj) {
 							return typeof obj;
-					  }
+						}
 					: function (obj) {
 							return obj &&
 								'function' == typeof Symbol &&
@@ -54,7 +54,7 @@
 								obj !== Symbol.prototype
 								? 'symbol'
 								: typeof obj;
-					  }),
+						}),
 			_typeof(obj)
 		);
 	}
@@ -1248,7 +1248,7 @@
 				? {
 						prefix: 'fas',
 						iconName: newUnicode
-				  }
+					}
 				: null) || {
 				prefix: null,
 				iconName: null
@@ -1440,7 +1440,7 @@
 						definition.prefix && definition.iconName && definition.icon
 							? {
 									0: definition
-							  }
+								}
 							: definition;
 					Object.keys(normalized).map(function (key) {
 						var _normalized$key = normalized[key],
@@ -1869,7 +1869,7 @@
 			isUploadedIcon && !~extra.classes.indexOf('fa-fw')
 				? {
 						width: ''.concat((width / height) * 16 * 0.0625, 'em')
-				  }
+					}
 				: {};
 
 		if (watchable) {
@@ -1907,11 +1907,11 @@
 					? callProvided('generateAbstractMask', args) || {
 							children: [],
 							attributes: {}
-					  }
+						}
 					: callProvided('generateAbstractIcon', args) || {
 							children: [],
 							attributes: {}
-					  },
+						},
 			children = _ref2.children,
 			attributes = _ref2.attributes;
 
@@ -1940,7 +1940,7 @@
 				title
 					? {
 							title: title
-					  }
+						}
 					: {}
 			),
 			{},
@@ -2001,7 +2001,7 @@
 				title
 					? {
 							title: title
-					  }
+						}
 					: {}
 			),
 			{},
@@ -2151,7 +2151,7 @@
 			: {
 					mark: noop$1,
 					measure: noop$1
-			  };
+				};
 	var preamble = 'FA "6.2.0"';
 
 	var begin = function begin(name) {
@@ -2531,7 +2531,7 @@
 				? arguments[1]
 				: {
 						styleParser: true
-				  };
+					};
 
 		var _classParser = classParser(node),
 			iconName = _classParser.iconName,
@@ -2572,7 +2572,7 @@
 			config.autoReplaceSvg === 'nest'
 				? parseMeta(node, {
 						styleParser: false
-				  })
+					})
 				: parseMeta(node);
 
 		if (~nodeMeta.extra.classes.indexOf(LAYERS_TEXT_CLASSNAME)) {
@@ -2607,7 +2607,7 @@
 			? knownPrefixes
 			: FAMILIES.map(function (f) {
 					return 'fa-'.concat(f);
-			  }).concat(Object.keys(styles$2));
+				}).concat(Object.keys(styles$2));
 
 		if (!prefixes.includes('fa')) {
 			prefixes.push('fa');
@@ -2769,7 +2769,7 @@
 									width: null,
 									height: null,
 									icon: {}
-							  }
+								}
 					},
 					prefix: prefix,
 					iconName: iconName,
@@ -2831,7 +2831,7 @@
 									width: 512,
 									height: 512,
 									icon: {}
-							  })
+								})
 					])
 						.then(function (_ref) {
 							var _ref2 = _slicedToArray(_ref, 2),
@@ -2914,7 +2914,7 @@
 								Array.isArray(args)
 									? args.map(function (a) {
 											children = children.concat(a.abstract);
-									  })
+										})
 									: (children = children.concat(args.abstract));
 							});
 							return [
@@ -3448,7 +3448,7 @@
 								maskData.split(' ').map(function (i) {
 									return i.trim();
 								})
-						  );
+							);
 
 					if (!mask.prefix) {
 						mask.prefix = getDefaultUsablePrefix();
@@ -3490,7 +3490,7 @@
 				var maskInnerGroupChildrenMixin = mainPath.children
 					? {
 							children: mainPath.children.map(fillBlack)
-					  }
+						}
 					: {};
 				var maskInnerGroup = {
 					tag: 'g',
@@ -3661,7 +3661,7 @@
 										}
 									)
 								}
-						  ]
+							]
 				});
 
 				if (!reduceMotion) {
