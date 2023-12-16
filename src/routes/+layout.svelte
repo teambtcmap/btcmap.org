@@ -7,8 +7,13 @@
 	import { reportsSync } from '$lib/sync/reports';
 	import { usersSync } from '$lib/sync/users';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
+	import 'leaflet.locatecontrol/dist/L.Control.Locate.min.css';
+	import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+	import 'leaflet.markercluster/dist/MarkerCluster.css';
+	import 'leaflet/dist/leaflet.css';
 	import localforage from 'localforage';
 	import { onDestroy, onMount } from 'svelte';
+	import 'tippy.js/dist/tippy.css';
 	import '../app.css';
 
 	const options = {

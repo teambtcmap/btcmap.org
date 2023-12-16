@@ -13,7 +13,3 @@
 <button bind:this={infoTooltip}>
 	<i class="fa-solid fa-circle-info text-base text-primary dark:text-white" />
 </button>
-
-<style>
-	@import 'tippy.js/dist/tippy.css';
-</style>

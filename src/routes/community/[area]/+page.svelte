@@ -1357,11 +1357,3 @@
 		<Footer />
 	</div>
 </div>
-
-<style>
-	@import 'leaflet/dist/leaflet.css';
-	@import 'leaflet.markercluster/dist/MarkerCluster.css';
-	@import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
-	@import 'leaflet.locatecontrol/dist/L.Control.Locate.min.css';
-	@import 'tippy.js/dist/tippy.css';
-</style>

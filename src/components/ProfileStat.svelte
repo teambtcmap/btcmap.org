@@ -38,7 +38,3 @@
 		{/if}
 	</div>
 </div>
-
-<style>
-	@import 'tippy.js/dist/tippy.css';
-</style>

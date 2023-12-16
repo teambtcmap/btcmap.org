@@ -274,7 +274,3 @@
 		</div>
 	</main>
 </div>
-
-<style>
-	@import 'tippy.js/dist/tippy.css';
-</style>

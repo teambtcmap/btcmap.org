@@ -842,10 +842,3 @@ Thanks for using BTC Map!`);
 
 	<div bind:this={mapElement} class="absolute h-[100%] w-full !bg-teal dark:!bg-dark" />
 </main>
-
-<style>
-	@import 'leaflet/dist/leaflet.css';
-	@import 'leaflet.locatecontrol/dist/L.Control.Locate.min.css';
-	@import 'leaflet.markercluster/dist/MarkerCluster.css';
-	@import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
-</style>

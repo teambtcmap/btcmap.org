@@ -29,7 +29,3 @@
 		type="material"
 	/>
 </a>
-
-<style>
-	@import 'tippy.js/dist/tippy.css';
-</style>

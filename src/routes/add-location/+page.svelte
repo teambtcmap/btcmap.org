@@ -755,8 +755,3 @@
 		</style>
 	{/if}
 {/if}
-
-<style>
-	@import 'leaflet/dist/leaflet.css';
-	@import 'leaflet.locatecontrol/dist/L.Control.Locate.min.css';
-</style>
