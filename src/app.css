@@ -7,63 +7,59 @@
 	src: url('/fonts/Manrope-Regular.ttf') format('truetype');
 }
 
-html {
-	font-family: Manrope, sans-serif;
-	font-size: 16px;
+@layer base {
+	html {
+		font-family: Manrope, sans-serif;
+		@apply text-base;
+	}
+
+	::selection {
+		@apply bg-[#53c5d5] text-white;
+	}
 }
 
-::selection {
-	color: white;
-	background: #53c5d5;
+@layer utilities {
+	.gradient {
+		background: -webkit-linear-gradient(45deg, #0ecd71, #040273);
+		background-clip: text;
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+	}
+
+	.gradient-bg {
+		background: -webkit-linear-gradient(45deg, #0ecd71, #040273);
+	}
+
+	/* Hide scrollbar for Chrome, Safari and Opera */
+	.hide-scroll::-webkit-scrollbar {
+		@apply hidden;
+	}
+
+	/* Hide scrollbar for IE, Edge and Firefox */
+	.hide-scroll {
+		-ms-overflow-style: none; /* IE and Edge */
+		scrollbar-width: none; /* Firefox */
+	}
+
+	.center {
+		@apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2;
+	}
+
+	.center-fixed {
+		@apply fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2;
+	}
 }
 
-.gradient {
-	background: -webkit-linear-gradient(45deg, #0ecd71, #040273);
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-}
+@layer components {
+	.div-icon {
+		background-image: url('/icons/div-icon-pin.svg');
+	}
 
-.gradient-bg {
-	background: -webkit-linear-gradient(45deg, #0ecd71, #040273);
-}
+	.boosted-icon {
+		background-image: url('/icons/boosted-icon-pin.svg');
+	}
 
-/* Hide scrollbar for Chrome, Safari and Opera */
-.hide-scroll::-webkit-scrollbar {
-	display: none;
-}
-
-/* Hide scrollbar for IE, Edge and Firefox */
-.hide-scroll {
-	-ms-overflow-style: none; /* IE and Edge */
-	scrollbar-width: none; /* Firefox */
-}
-
-.div-icon {
-	background-image: url('/icons/div-icon-pin.svg');
-}
-
-.boosted-icon {
-	background-image: url('/icons/boosted-icon-pin.svg');
-}
-
-.treasure-icon {
-	background-image: url('/icons/treasure-icon.png');
-}
-
-.center {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	-moz-transform: translateX(-50%) translateY(-50%);
-	-webkit-transform: translateX(-50%) translateY(-50%);
-	transform: translateX(-50%) translateY(-50%);
-}
-
-.center-fixed {
-	position: fixed;
-	top: 50%;
-	left: 50%;
-	-moz-transform: translateX(-50%) translateY(-50%);
-	-webkit-transform: translateX(-50%) translateY(-50%);
-	transform: translateX(-50%) translateY(-50%);
+	.treasure-icon {
+		background-image: url('/icons/treasure-icon.png');
+	}
 }
