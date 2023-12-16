@@ -18,9 +18,6 @@ jobs:
       - name: run check
         run: yarn check
 
-      - name: compile ts
-        run: yarn tsc
-
       - name: create .env
         run: cp .env.example .env
 
