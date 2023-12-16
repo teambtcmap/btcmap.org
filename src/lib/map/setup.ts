@@ -1006,12 +1006,15 @@ ${
 
 		if ((description || note) && element.tags && element.tags.name) {
 			const infoContainer = popupContainer.querySelector('#info');
-			new InfoTooltip({
-				target: infoContainer,
-				props: {
-					tooltip: description || note
-				}
-			});
+
+			if (infoContainer) {
+				new InfoTooltip({
+					target: infoContainer,
+					props: {
+						tooltip: description || note
+					}
+				});
+			}
 		}
 
 		const showMoreDiv = popupContainer.querySelector('#show-more');
