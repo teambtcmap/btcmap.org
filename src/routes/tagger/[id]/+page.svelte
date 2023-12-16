@@ -63,7 +63,7 @@
 	let leaflet: Leaflet;
 	let DomEvent: DomEventType;
 
-	const initializeData = () => {
+	const initializeData = async () => {
 		if (dataInitialized) return;
 
 		const userFound = $users.find((user) => user.id == data.user);
@@ -293,7 +293,8 @@
 		eventElements = eventElements;
 
 		// add markdown support for profile description
-		profileDesc.innerHTML = DOMPurify.sanitize(marked.parse(filteredDesc));
+		const markdown = await marked.parse(filteredDesc);
+		profileDesc.innerHTML = DOMPurify.sanitize(markdown);
 
 		const setupChart = () => {
 			tagTypeChart = new Chart(tagTypeChartCanvas, {
