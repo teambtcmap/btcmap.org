@@ -19,7 +19,7 @@ export async function GET({ url }) {
 		})
 		.catch(function (err) {
 			console.log(err);
-			throw error(400, 'Could not check invoice status, please try again or contact BTC Map.');
+			error(400, 'Could not check invoice status, please try again or contact BTC Map.');
 		});
 
 	return new Response(JSON.stringify(status));

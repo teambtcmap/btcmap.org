@@ -15,7 +15,7 @@ export function GET() {
 	const captcha = svgCaptcha.create({ size: 7, noise: 2, color: true });
 
 	if (!captcha.data) {
-		throw error(400, 'Could not generate captcha, please try again or contact BTC Map.');
+		error(400, 'Could not generate captcha, please try again or contact BTC Map.');
 	}
 
 	const encrypt = crypto.createCipheriv('aes-256-cbc', serverKey, initVector);

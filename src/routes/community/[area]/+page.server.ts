@@ -37,6 +37,6 @@ export async function load({ params }) {
 			return { id: data.id, name: data.tags.name, tickets: issues };
 		}
 	} catch (err) {
-		throw error(404, 'Community Not Found');
+		error(404, 'Community Not Found');
 	}
 }

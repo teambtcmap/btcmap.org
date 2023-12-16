@@ -11,16 +11,20 @@ export function load({ url }) {
 
 	switch (true) {
 		case Boolean(community):
-			throw redirect(301, `/communities/map?community=${community}`);
+			redirect(301, `/communities/map?community=${community}`);
+			break;
 
 		case Boolean(organization):
-			throw redirect(301, `/communities/map?organization=${organization}`);
+			redirect(301, `/communities/map?organization=${organization}`);
+			break;
 
 		case Boolean(language):
-			throw redirect(301, `/communities/map?language=${language}`);
+			redirect(301, `/communities/map?language=${language}`);
+			break;
 
 		case communitiesOnly:
 			url.searchParams.delete('communitiesOnly');
-			throw redirect(301, '/communities/map');
+			redirect(301, '/communities/map');
+			break;
 	}
 }

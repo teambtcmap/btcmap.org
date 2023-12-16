@@ -33,7 +33,7 @@ export async function GET({ url }) {
 		})
 		.catch(function (err) {
 			console.log(err);
-			throw error(400, 'Could not generate invoice, please try again or contact BTC Map.');
+			error(400, 'Could not generate invoice, please try again or contact BTC Map.');
 		});
 
 	return new Response(JSON.stringify(invoice));

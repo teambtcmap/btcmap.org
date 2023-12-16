@@ -16,5 +16,5 @@ export async function load({ params }) {
 		return { user: data.id, username: data['osm_json']['display_name'] };
 	}
 
-	throw error(404, 'User Not Found');
+	error(404, 'User Not Found');
 }

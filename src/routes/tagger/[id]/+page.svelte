@@ -69,7 +69,7 @@
 		const userFound = $users.find((user) => user.id == data.user);
 		if (!userFound) {
 			errToast('Could not find user, please try again or contact BTC Map.');
-			throw error(404, 'User Not Found');
+			error(404, 'User Not Found');
 		}
 		userCreated = userFound['created_at'];
 		supporter = Boolean(

@@ -19,6 +19,6 @@ export async function load({ params }) {
 			};
 		}
 	} catch (err) {
-		throw error(404, 'Merchant Not Found');
+		error(404, 'Merchant Not Found');
 	}
 }

@@ -43,11 +43,11 @@ export async function POST({ request }) {
 	secret += decrypt.final('utf8');
 
 	if (captchaTest !== secret) {
-		throw error(400, 'Captcha test failed, please try again or contact BTC Map.');
+		error(400, 'Captcha test failed, please try again or contact BTC Map.');
 	}
 
 	if (used.includes(captchaSecret)) {
-		throw error(400, 'Captcha has already been used, please try another.');
+		error(400, 'Captcha has already been used, please try another.');
 	} else {
 		used.push(captchaSecret);
 	}
