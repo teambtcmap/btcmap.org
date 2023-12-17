@@ -341,10 +341,10 @@
   dependencies:
     import-meta-resolve "^4.0.0"
 
-"@sveltejs/kit@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@sveltejs/kit/-/kit-2.0.0.tgz#9cbaed71542e4fc34f96a232d3000a9d6ec40afd"
-  integrity sha512-/GFxvit+q7PztRbgGTFXhVB6jvb0fZSeWuz5f4siQ2r/5BVhxYh7++Bw3/ZUjiOuyoZFiNBmOPcRNQbkzEce0g==
+"@sveltejs/kit@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@sveltejs/kit/-/kit-2.0.1.tgz#78d793ab0b00fec9e363d96691809e95f6f015a5"
+  integrity sha512-Pu/YJ5pPy8UgC1LlrlGpL7UK25CKganlLqqO7oYdFGt7eSa+Y2ouJomwiGHatV3uHvVOPGEkcb4O4QtyZQDuGw==
   dependencies:
     "@types/cookie" "^0.6.0"
     cookie "^0.6.0"
@@ -851,7 +851,7 @@ d3-geo@^3.1.0:
   dependencies:
     d3-array "2.5.0 - 3"
 
-dayjs@^1.11.9:
+dayjs@^1.11.10:
   version "1.11.10"
   resolved "https://registry.yarnpkg.com/dayjs/-/dayjs-1.11.10.tgz#68acea85317a6e164457d6d6947564029a6a16a0"
   integrity sha512-vjAczensTgRcqDERK0SR2XMwsF/tSvnvlv6VcF2GIhg6Sx4yOIt/irsr1RDJsKiIyBzJDpCoXiWWq28MqH2cnQ==
@@ -2207,12 +2207,12 @@ svelte-preprocess@^5.1.0, svelte-preprocess@^5.1.2:
     sorcery "^0.11.0"
     strip-indent "^3.0.0"
 
-svelte-time@^0.8.0:
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/svelte-time/-/svelte-time-0.8.0.tgz#efdb4aae9e857b9464cb2e6b1ba9e54ed13ce333"
-  integrity sha512-V0LBpJhYV2Q+jqiJ94ITAo51P6RIhrHQpDt3LCSk8PXfL2UMvSMlDzkqHq8mdKqmBCRZURnXhpynN03GQa/G/A==
+svelte-time@^0.8.2:
+  version "0.8.2"
+  resolved "https://registry.yarnpkg.com/svelte-time/-/svelte-time-0.8.2.tgz#342cace5fdc7b020d0af42b5d255a88a3a4778ec"
+  integrity sha512-sBLLrWMMInx5iidGlbtlCBAu8CzSixdqOkbhizdalULXBvYMPACp0GtzmyBLEa77hbaMVySZzApIaNG4B4OVmg==
   dependencies:
-    dayjs "^1.11.9"
+    dayjs "^1.11.10"
 
 svelte@^4.2.8:
   version "4.2.8"

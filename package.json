@@ -13,7 +13,7 @@
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^3.0.0",
-		"@sveltejs/kit": "^2.0.0",
+		"@sveltejs/kit": "^2.0.1",
 		"@sveltejs/vite-plugin-svelte": "^3.0.0",
 		"@types/d3-geo": "^3.1.0",
 		"@types/dompurify": "^3.0.5",
@@ -61,7 +61,7 @@
 		"marked": "^11.1.0",
 		"qrcode": "^1.5.3",
 		"svelte-outclick": "^3.7.0",
-		"svelte-time": "^0.8.0",
+		"svelte-time": "^0.8.2",
 		"svg-captcha": "^1.4.0",
 		"tippy.js": "^6.3.7"
 	},
