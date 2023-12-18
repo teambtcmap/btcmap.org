@@ -225,3 +225,5 @@ export type Theme = 'light' | 'dark';
 export type DonationType = 'On-chain' | 'Lightning';
 
 export type DropdownLink = { url: string; external?: boolean; icon: string; title: string };
+
+export type ChartHistory = '7D' | '1M' | '3M' | '6M' | 'YTD' | '1Y' | 'ALL';

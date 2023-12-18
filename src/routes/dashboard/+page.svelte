@@ -11,9 +11,10 @@
 		syncStatus,
 		theme
 	} from '$lib/store';
-	import type { EventType, Report } from '$lib/types';
+	import type { ChartHistory, EventType, Report } from '$lib/types';
 	import { detectTheme, errToast, updateChartThemes } from '$lib/utils';
 	import Chart from 'chart.js/auto';
+	import { format, startOfYear, subDays, subMonths, subYears } from 'date-fns';
 	import { onMount } from 'svelte';
 
 	// alert for event errors
@@ -35,8 +36,49 @@
 					.filter((report) => report['area_id'] === '')
 					.sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
 			: undefined;
-	$: statsCopy = stats && [...stats];
-	$: statsSorted = statsCopy && statsCopy.sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+
+	const chartHistory: ChartHistory[] = ['7D', '1M', '3M', '6M', 'YTD', '1Y', 'ALL'];
+	let chartHistorySelected: ChartHistory = 'ALL';
+	const getChartHistoryDate = () => {
+		const today = new Date();
+
+		switch (chartHistorySelected) {
+			case '7D':
+				return subDays(today, 7);
+			case '1M':
+				return subMonths(today, 1);
+			case '3M':
+				return subMonths(today, 3);
+			case '6M':
+				return subMonths(today, 6);
+			case 'YTD':
+				return startOfYear(today);
+			case '1Y':
+				return subYears(today, 1);
+			case 'ALL':
+				return new Date('2022-10-29T00:00:00.000Z');
+		}
+	};
+
+	$: statsSorted = stats
+		? [...stats]
+				.sort((a, b) => Date.parse(a.date) - Date.parse(b.date))
+				.map((stat) => ({ ...stat, date: format(new Date(stat.created_at), 'yyyy-MM-dd') }))
+		: [];
+	$: statsFiltered =
+		statsSorted && chartHistorySelected
+			? statsSorted.filter((stat) => {
+					if (chartHistorySelected === 'ALL') return true;
+
+					const dateHistory = getChartHistoryDate();
+
+					if (new Date(stat.created_at) >= dateHistory) {
+						return true;
+					} else {
+						return false;
+					}
+				})
+			: [];
 
 	$: communities =
 		$areas && $areas.length && $reports && $reports.length
@@ -184,17 +226,18 @@
 		upToDateChart = new Chart(upToDateChartCanvas, {
 			type: 'line',
 			data: {
-				labels: statsSorted?.map(({ date }) => date),
+				labels: statsFiltered.map(({ date }) => date),
 				datasets: [
 					{
 						label: 'Up-to-date Locations',
-						data: statsSorted?.map(({ tags: { up_to_date_elements } }) => up_to_date_elements),
+						data: statsFiltered.map(({ tags: { up_to_date_elements } }) => up_to_date_elements),
 						fill: {
 							target: 'origin',
 							above: 'rgba(11, 144, 114, 0.2)'
 						},
 						borderColor: 'rgb(11, 144, 114)',
-						tension: 0.1
+						tension: 0.1,
+						pointStyle: false
 					}
 				]
 			},
@@ -231,6 +274,9 @@
 							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					}
+				},
+				interaction: {
+					intersect: false
 				}
 			}
 		});
@@ -238,21 +284,21 @@
 		totalChart = new Chart(totalChartCanvas, {
 			type: 'line',
 			data: {
-				labels: statsSorted?.map(({ date }) => date),
+				labels: statsFiltered.map(({ date }) => date),
 				datasets: [
 					{
 						label: 'Total Locations',
-						data: statsSorted?.map((stat) => {
-							switch (stat.date) {
-								case '2023-08-02':
+						data: statsFiltered.map((stat) => {
+							switch (stat.id) {
+								case 60675:
 									return 7886;
-								case '2023-08-03':
+								case 61063:
 									return 7895;
-								case '2023-08-04':
+								case 61459:
 									return 7897;
-								case '2023-08-05':
+								case 61855:
 									return 7903;
-								case '2023-08-06':
+								case 62251:
 									return 7905;
 								default:
 									return stat.tags.total_elements;
@@ -263,7 +309,8 @@
 							above: 'rgba(0, 153, 175, 0.2)'
 						},
 						borderColor: 'rgb(0, 153, 175)',
-						tension: 0.1
+						tension: 0.1,
+						pointStyle: false
 					}
 				]
 			},
@@ -300,6 +347,9 @@
 							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					}
+				},
+				interaction: {
+					intersect: false
 				}
 			}
 		});
@@ -307,17 +357,18 @@
 		legacyChart = new Chart(legacyChartCanvas, {
 			type: 'line',
 			data: {
-				labels: statsSorted?.map(({ date }) => date),
+				labels: statsFiltered.map(({ date }) => date),
 				datasets: [
 					{
 						label: 'Legacy Locations',
-						data: statsSorted?.map(({ tags: { legacy_elements } }) => legacy_elements),
+						data: statsFiltered.map(({ tags: { legacy_elements } }) => legacy_elements),
 						fill: {
 							target: 'origin',
 							above: 'rgba(235, 87, 87, 0.2)'
 						},
 						borderColor: 'rgb(235, 87, 87)',
-						tension: 0.1
+						tension: 0.1,
+						pointStyle: false
 					}
 				]
 			},
@@ -354,6 +405,9 @@
 							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					}
+				},
+				interaction: {
+					intersect: false
 				}
 			}
 		});
@@ -361,35 +415,38 @@
 		paymentMethodChart = new Chart(paymentMethodChartCanvas, {
 			type: 'line',
 			data: {
-				labels: statsSorted?.map(({ date }) => date),
+				labels: statsFiltered.map(({ date }) => date),
 				datasets: [
 					{
 						label: 'On-chain',
-						data: statsSorted?.map(
+						data: statsFiltered.map(
 							({ tags: { total_elements_onchain } }) => total_elements_onchain
 						),
 						fill: false,
 						borderColor: 'rgb(247, 147, 26)',
-						tension: 0.1
+						tension: 0.1,
+						pointStyle: false
 					},
 					{
 						label: 'Lightning',
-						data: statsSorted?.map(
+						data: statsFiltered.map(
 							({ tags: { total_elements_lightning } }) => total_elements_lightning
 						),
 						fill: false,
 						borderColor: 'rgb(249, 193, 50)',
-						tension: 0.1
+						tension: 0.1,
+						pointStyle: false
 					},
 					{
 						label: 'Contactless',
-						data: statsSorted?.map(
+						data: statsFiltered.map(
 							({ tags: { total_elements_lightning_contactless } }) =>
 								total_elements_lightning_contactless
 						),
 						fill: false,
 						borderColor: 'rgb(102, 16, 242)',
-						tension: 0.1
+						tension: 0.1,
+						pointStyle: false
 					}
 				]
 			},
@@ -426,6 +483,9 @@
 							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					}
+				},
+				interaction: {
+					intersect: false
 				}
 			}
 		});
@@ -436,27 +496,75 @@
 
 	const chartSync = (status: boolean, reports: Report[]) => {
 		if (reports.length && !status && initialRenderComplete) {
-			if (chartsRendered) {
-				chartsLoading = true;
+			chartsLoading = true;
 
-				upToDateChart.data.labels = statsSorted?.map(({ date }) => date);
-				upToDateChart.data.datasets[0].data = statsSorted?.map(
+			const today = new Date();
+
+			if (statsFiltered.length) {
+				const latestReport = statsFiltered[statsFiltered.length - 1];
+				const latestReportDate = new Date(latestReport.created_at);
+				const reportIsCurrent =
+					today.getDate() === latestReportDate.getDate() &&
+					today.getMonth() === latestReportDate.getMonth() &&
+					today.getFullYear() === latestReportDate.getFullYear();
+
+				if (!reportIsCurrent) {
+					statsFiltered.push({
+						...latestReport,
+						id: latestReport.id + 1,
+						date: `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`,
+						created_at: today.toISOString(),
+						updated_at: today.toISOString()
+					});
+
+					statsFiltered = statsFiltered;
+				}
+			} else {
+				const latestReport = statsSorted[statsSorted.length - 1];
+				const dateHistory = getChartHistoryDate();
+
+				statsFiltered.push(
+					...[
+						{
+							...latestReport,
+							date: `${dateHistory.getFullYear()}-${
+								dateHistory.getMonth() + 1
+							}-${dateHistory.getDate()}`,
+							created_at: dateHistory.toISOString(),
+							updated_at: dateHistory.toISOString()
+						},
+						{
+							...latestReport,
+							id: latestReport.id + 1,
+							date: `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`,
+							created_at: today.toISOString(),
+							updated_at: today.toISOString()
+						}
+					]
+				);
+
+				statsFiltered = statsFiltered;
+			}
+
+			if (chartsRendered) {
+				upToDateChart.data.labels = statsFiltered.map(({ date }) => date);
+				upToDateChart.data.datasets[0].data = statsFiltered.map(
 					({ tags: { up_to_date_elements } }) => up_to_date_elements
 				);
 				upToDateChart.update();
 
-				totalChart.data.labels = statsSorted?.map(({ date }) => date);
-				totalChart.data.datasets[0].data = statsSorted?.map((stat) => {
-					switch (stat.date) {
-						case '2023-08-02':
+				totalChart.data.labels = statsFiltered.map(({ date }) => date);
+				totalChart.data.datasets[0].data = statsFiltered.map((stat) => {
+					switch (stat.id) {
+						case 60675:
 							return 7886;
-						case '2023-08-03':
+						case 61063:
 							return 7895;
-						case '2023-08-04':
+						case 61459:
 							return 7897;
-						case '2023-08-05':
+						case 61855:
 							return 7903;
-						case '2023-08-06':
+						case 62251:
 							return 7905;
 						default:
 							return stat.tags.total_elements;
@@ -464,20 +572,20 @@
 				});
 				totalChart.update();
 
-				legacyChart.data.labels = statsSorted?.map(({ date }) => date);
-				legacyChart.data.datasets[0].data = statsSorted?.map(
+				legacyChart.data.labels = statsFiltered.map(({ date }) => date);
+				legacyChart.data.datasets[0].data = statsFiltered.map(
 					({ tags: { legacy_elements } }) => legacy_elements
 				);
 				legacyChart.update();
 
-				paymentMethodChart.data.labels = statsSorted?.map(({ date }) => date);
-				paymentMethodChart.data.datasets[0].data = statsSorted?.map(
+				paymentMethodChart.data.labels = statsFiltered.map(({ date }) => date);
+				paymentMethodChart.data.datasets[0].data = statsFiltered.map(
 					({ tags: { total_elements_onchain } }) => total_elements_onchain
 				);
-				paymentMethodChart.data.datasets[1].data = statsSorted?.map(
+				paymentMethodChart.data.datasets[1].data = statsFiltered.map(
 					({ tags: { total_elements_lightning } }) => total_elements_lightning
 				);
-				paymentMethodChart.data.datasets[2].data = statsSorted?.map(
+				paymentMethodChart.data.datasets[2].data = statsFiltered.map(
 					({ tags: { total_elements_lightning_contactless } }) =>
 						total_elements_lightning_contactless
 				);
@@ -490,7 +598,7 @@
 		}
 	};
 
-	$: chartSync($syncStatus, $reports);
+	$: chartHistorySelected && chartSync($syncStatus, $reports);
 
 	$: $theme !== undefined &&
 		chartsLoading === false &&
@@ -607,6 +715,22 @@
 			</section>
 
 			<section id="charts" class="space-y-10">
+				<div
+					class="flex flex-wrap justify-end gap-3 font-semibold text-primary dark:text-white md:gap-5"
+				>
+					{#each chartHistory as history}
+						<button
+							class={chartHistorySelected === history
+								? 'underline decoration-primary decoration-4 underline-offset-8 dark:decoration-white'
+								: ''}
+							on:click={() => (chartHistorySelected = history)}
+							disabled={chartsLoading}
+						>
+							{history}
+						</button>
+					{/each}
+				</div>
+
 				<div>
 					<div class="relative">
 						{#if chartsLoading}
