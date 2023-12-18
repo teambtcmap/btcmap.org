@@ -38,7 +38,7 @@
 			: undefined;
 
 	const chartHistory: ChartHistory[] = ['7D', '1M', '3M', '6M', 'YTD', '1Y', 'ALL'];
-	let chartHistorySelected: ChartHistory = 'ALL';
+	let chartHistorySelected: ChartHistory = '3M';
 	const getChartHistoryDate = () => {
 		const today = new Date();
 
