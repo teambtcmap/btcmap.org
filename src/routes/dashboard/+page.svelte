@@ -522,26 +522,29 @@
 			} else {
 				const latestReport = statsSorted[statsSorted.length - 1];
 				const dateHistory = getChartHistoryDate();
+				const reportIsCurrent =
+					today.getDate() === dateHistory.getDate() &&
+					today.getMonth() === dateHistory.getMonth() &&
+					today.getFullYear() === dateHistory.getFullYear();
 
-				statsFiltered.push(
-					...[
-						{
-							...latestReport,
-							date: `${dateHistory.getFullYear()}-${
-								dateHistory.getMonth() + 1
-							}-${dateHistory.getDate()}`,
-							created_at: dateHistory.toISOString(),
-							updated_at: dateHistory.toISOString()
-						},
-						{
-							...latestReport,
-							id: latestReport.id + 1,
-							date: `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`,
-							created_at: today.toISOString(),
-							updated_at: today.toISOString()
-						}
-					]
-				);
+				statsFiltered.push({
+					...latestReport,
+					date: `${dateHistory.getFullYear()}-${
+						dateHistory.getMonth() + 1
+					}-${dateHistory.getDate()}`,
+					created_at: dateHistory.toISOString(),
+					updated_at: dateHistory.toISOString()
+				});
+
+				if (!reportIsCurrent) {
+					statsFiltered.push({
+						...latestReport,
+						id: latestReport.id + 1,
+						date: `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`,
+						created_at: today.toISOString(),
+						updated_at: today.toISOString()
+					});
+				}
 
 				statsFiltered = statsFiltered;
 			}
