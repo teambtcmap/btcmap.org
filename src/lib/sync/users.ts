@@ -1,4 +1,5 @@
 import { userError, users } from '$lib/store';
+import { clearTables } from '$lib/sync/clearTables';
 import type { User } from '$lib/types';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -9,68 +10,8 @@ axiosRetry(axios, { retries: 3 });
 const limit = 7500;
 
 export const usersSync = async () => {
-	// clear potentially broken users v1 sync due to top level ID changing from string to int
-	await localforage
-		.getItem('users')
-		.then(function (value) {
-			if (value) {
-				localforage
-					.removeItem('users')
-					.then(function () {
-						console.log('Key is cleared!');
-					})
-					.catch(function (err) {
-						userError.set('Could not clear users locally, please try again or contact BTC Map.');
-						console.log(err);
-					});
-			}
-		})
-		.catch(function (err) {
-			userError.set('Could not check users locally, please try again or contact BTC Map.');
-			console.log(err);
-		});
-
-	// clear v2 table if present
-	await localforage
-		.getItem('users_v2')
-		.then(function (value) {
-			if (value) {
-				localforage
-					.removeItem('users_v2')
-					.then(function () {
-						console.log('Key is cleared!');
-					})
-					.catch(function (err) {
-						userError.set('Could not clear users locally, please try again or contact BTC Map.');
-						console.log(err);
-					});
-			}
-		})
-		.catch(function (err) {
-			userError.set('Could not check users locally, please try again or contact BTC Map.');
-			console.log(err);
-		});
-
-	// clear v3 table if present
-	await localforage
-		.getItem('users_v3')
-		.then(function (value) {
-			if (value) {
-				localforage
-					.removeItem('users_v3')
-					.then(function () {
-						console.log('Key is cleared!');
-					})
-					.catch(function (err) {
-						userError.set('Could not clear users locally, please try again or contact BTC Map.');
-						console.log(err);
-					});
-			}
-		})
-		.catch(function (err) {
-			userError.set('Could not check users locally, please try again or contact BTC Map.');
-			console.log(err);
-		});
+	// clear tables if present
+	clearTables(['users', 'users_v2', 'users_v3']);
 
 	// get users from local
 	await localforage

@@ -1,4 +1,5 @@
 import { eventError, events } from '$lib/store';
+import { clearTables } from '$lib/sync/clearTables';
 import type { Event } from '$lib/types';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -9,47 +10,8 @@ axiosRetry(axios, { retries: 3 });
 const limit = 50000;
 
 export const eventsSync = async () => {
-	// clear v1 table if present
-	await localforage
-		.getItem('events')
-		.then(function (value) {
-			if (value) {
-				localforage
-					.removeItem('events')
-					.then(function () {
-						console.log('Key is cleared!');
-					})
-					.catch(function (err) {
-						eventError.set('Could not clear events locally, please try again or contact BTC Map.');
-						console.log(err);
-					});
-			}
-		})
-		.catch(function (err) {
-			eventError.set('Could not check events locally, please try again or contact BTC Map.');
-			console.log(err);
-		});
-
-	// clear v2 table if present
-	await localforage
-		.getItem('events_v2')
-		.then(function (value) {
-			if (value) {
-				localforage
-					.removeItem('events_v2')
-					.then(function () {
-						console.log('Key is cleared!');
-					})
-					.catch(function (err) {
-						eventError.set('Could not clear events locally, please try again or contact BTC Map.');
-						console.log(err);
-					});
-			}
-		})
-		.catch(function (err) {
-			eventError.set('Could not check events locally, please try again or contact BTC Map.');
-			console.log(err);
-		});
+	// clear tables if present
+	clearTables(['events', 'events_v2']);
 
 	// get events from local
 	await localforage

@@ -1,4 +1,5 @@
 import { reportError, reports } from '$lib/store';
+import { clearTables } from '$lib/sync/clearTables';
 import type { Report } from '$lib/types';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -9,74 +10,8 @@ axiosRetry(axios, { retries: 3 });
 const limit = 20000;
 
 export const reportsSync = async () => {
-	// clear v1 table if present
-	await localforage
-		.getItem('reports')
-		.then(function (value) {
-			if (value) {
-				localforage
-					.removeItem('reports')
-					.then(function () {
-						console.log('Key is cleared!');
-					})
-					.catch(function (err) {
-						reportError.set(
-							'Could not clear reports locally, please try again or contact BTC Map.'
-						);
-						console.log(err);
-					});
-			}
-		})
-		.catch(function (err) {
-			reportError.set('Could not check reports locally, please try again or contact BTC Map.');
-			console.log(err);
-		});
-
-	// clear v2 table if present
-	await localforage
-		.getItem('reports_v2')
-		.then(function (value) {
-			if (value) {
-				localforage
-					.removeItem('reports_v2')
-					.then(function () {
-						console.log('Key is cleared!');
-					})
-					.catch(function (err) {
-						reportError.set(
-							'Could not clear reports locally, please try again or contact BTC Map.'
-						);
-						console.log(err);
-					});
-			}
-		})
-		.catch(function (err) {
-			reportError.set('Could not check reports locally, please try again or contact BTC Map.');
-			console.log(err);
-		});
-
-	// clear v3 table if present
-	await localforage
-		.getItem('reports_v3')
-		.then(function (value) {
-			if (value) {
-				localforage
-					.removeItem('reports_v3')
-					.then(function () {
-						console.log('Key is cleared!');
-					})
-					.catch(function (err) {
-						reportError.set(
-							'Could not clear reports locally, please try again or contact BTC Map.'
-						);
-						console.log(err);
-					});
-			}
-		})
-		.catch(function (err) {
-			reportError.set('Could not check reports locally, please try again or contact BTC Map.');
-			console.log(err);
-		});
+	// clear tables if present
+	clearTables(['reports', 'reports_v2', 'reports_v3']);
 
 	// get reports from local
 	await localforage
