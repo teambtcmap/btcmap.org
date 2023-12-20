@@ -117,7 +117,7 @@
 
 		const community = communityFound.tags;
 
-		avatar = community['icon:square'];
+		avatar = `https://btcmap.org/.netlify/images?url=${community['icon:square']}&fit=cover&w=256&h=256`;
 		org = community.organization;
 		sponsor = community.sponsor;
 		continent = community.continent;

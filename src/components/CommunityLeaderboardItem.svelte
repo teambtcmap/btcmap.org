@@ -41,7 +41,7 @@
 
 	<div class="my-5 lg:my-0">
 		<img
-			src={avatar}
+			src={`https://btcmap.org/.netlify/images?url=${avatar}&fit=cover&w=256&h=256`}
 			alt="avatar"
 			class="mx-auto mb-2 h-20 w-20 rounded-full object-cover lg:h-14 lg:w-14"
 			on:error={function () {

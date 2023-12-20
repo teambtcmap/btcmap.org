@@ -818,7 +818,7 @@
 								<div class="m-4 space-y-1 transition-transform hover:scale-110">
 									<a href="/community/{community.id}">
 										<img
-											src={community.tags['icon:square']}
+											src={`https://btcmap.org/.netlify/images?url=${community.tags['icon:square']}&fit=cover&w=256&h=256`}
 											alt="logo"
 											class="mx-auto h-20 w-20 rounded-full object-cover"
 											on:error={function () {
