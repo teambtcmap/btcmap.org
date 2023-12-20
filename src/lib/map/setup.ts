@@ -8,7 +8,7 @@ import type { DivIcon, Map } from 'leaflet';
 import Time from 'svelte-time';
 import { get } from 'svelte/store';
 
-axiosRetry(axios, { retries: 3 });
+axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 export const toggleMapButtons = () => {
 	const zoomInBtn: HTMLAnchorElement | null = document.querySelector('.leaflet-control-zoom-in');

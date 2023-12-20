@@ -4,7 +4,7 @@ import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import localforage from 'localforage';
 
-axiosRetry(axios, { retries: 3 });
+axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 const limit = 20000;
 

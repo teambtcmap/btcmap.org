@@ -210,7 +210,7 @@
 		!dataInitialized &&
 		initializeData();
 
-	axiosRetry(axios, { retries: 3 });
+	axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 	let merchant: Element | undefined;
 
