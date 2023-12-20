@@ -86,11 +86,7 @@
 			(area) =>
 				area.id == data.id &&
 				area.tags.type === 'community' &&
-				((area.tags['box:east'] &&
-					area.tags['box:north'] &&
-					area.tags['box:south'] &&
-					area.tags['box:west']) ||
-					area.tags.geo_json) &&
+				area.tags.geo_json &&
 				area.tags.name &&
 				area.tags['icon:square'] &&
 				area.tags.continent &&
@@ -175,18 +171,7 @@
 			let lat = latCalc(element['osm_json']);
 			let long = longCalc(element['osm_json']);
 
-			if (community.geo_json) {
-				if (geoContains(rewoundPoly, [long, lat])) {
-					return true;
-				} else {
-					return false;
-				}
-			} else if (
-				lat >= Number(community['box:south']) &&
-				lat <= Number(community['box:north']) &&
-				long >= Number(community['box:west']) &&
-				long <= Number(community['box:east'])
-			) {
+			if (geoContains(rewoundPoly, [long, lat])) {
 				return true;
 			} else {
 				return false;
@@ -620,15 +605,7 @@
 			map.addLayer(outdatedLayer);
 			map.addLayer(legacyLayer);
 
-			map.fitBounds(
-				// @ts-expect-error
-				community.geo_json
-					? leaflet.geoJSON(community.geo_json).getBounds()
-					: [
-							[community['box:south'], community['box:west']],
-							[community['box:north'], community['box:east']]
-						]
-			);
+			map.fitBounds(leaflet.geoJSON(community.geo_json).getBounds());
 
 			mapLoaded = true;
 		};
