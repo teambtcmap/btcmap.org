@@ -344,14 +344,6 @@
 			// add tiles and basemaps
 			const baseMaps = layers(leaflet, map);
 
-			// add click event to help devs find lat/long of desired location for iframe embeds
-			map.on('click', () => {
-				const coords = map.getBounds();
-				// @ts-expect-error
-				console.log(`Here is your iframe embed URL: https://btcmap.org/map?lat=${coords._northEast.lat}&long=${coords._northEast.lng}&lat=${coords._southWest.lat}&long=${coords._southWest.lng}
-Thanks for using BTC Map!`);
-			});
-
 			// add events to cache last viewed location so it can be used on next map launch
 			map.on('zoomend', () => {
 				const coords = map.getBounds();
