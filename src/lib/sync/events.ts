@@ -29,20 +29,13 @@ export const eventsSync = async () => {
 							`https://api.btcmap.org/v2/events?updated_since=${updatedSince}&limit=${limit}`
 						);
 
-						if (response.data.length) {
-							updatedSince = response.data[response.data.length - 1]['updated_at'];
-							responseCount = response.data.length;
-							const eventsUpdated = eventsData.filter(
-								(event) => !response.data.find((data) => data.id === event.id)
-							);
-							eventsData = eventsUpdated;
-							response.data.forEach((data) => eventsData.push(data));
-						} else {
-							eventError.set(
-								'Events API returned an empty result, please try again or contact BTC Map.'
-							);
-							break;
-						}
+						updatedSince = response.data[response.data.length - 1]['updated_at'];
+						responseCount = response.data.length;
+						const eventsUpdated = eventsData.filter(
+							(event) => !response.data.find((data) => data.id === event.id)
+						);
+						eventsData = eventsUpdated;
+						response.data.forEach((data) => eventsData.push(data));
 					} catch (error) {
 						eventError.set('Could not load events from API, please try again or contact BTC Map.');
 						console.log(error);
@@ -167,20 +160,13 @@ export const eventsSync = async () => {
 						`https://api.btcmap.org/v2/events?updated_since=${updatedSince}&limit=${limit}`
 					);
 
-					if (response.data.length) {
-						updatedSince = response.data[response.data.length - 1]['updated_at'];
-						responseCount = response.data.length;
-						const eventsUpdated = eventsData.filter(
-							(event) => !response.data.find((data) => data.id === event.id)
-						);
-						eventsData = eventsUpdated;
-						response.data.forEach((data) => eventsData.push(data));
-					} else {
-						eventError.set(
-							'Events API returned an empty result, please try again or contact BTC Map.'
-						);
-						break;
-					}
+					updatedSince = response.data[response.data.length - 1]['updated_at'];
+					responseCount = response.data.length;
+					const eventsUpdated = eventsData.filter(
+						(event) => !response.data.find((data) => data.id === event.id)
+					);
+					eventsData = eventsUpdated;
+					response.data.forEach((data) => eventsData.push(data));
 				} catch (error) {
 					eventError.set('Could not load events from API, please try again or contact BTC Map.');
 					console.log(error);

@@ -34,20 +34,13 @@ export const elementsSync = async () => {
 							`https://api.btcmap.org/v2/elements?updated_since=${updatedSince}&limit=${limit}`
 						);
 
-						if (response.data.length) {
-							updatedSince = response.data[response.data.length - 1]['updated_at'];
-							responseCount = response.data.length;
-							const elementsUpdated = elementsData.filter(
-								(element) => !response.data.find((data) => data.id === element.id)
-							);
-							elementsData = elementsUpdated;
-							response.data.forEach((data) => elementsData.push(data));
-						} else {
-							elementError.set(
-								'Elements API returned an empty result, please try again or contact BTC Map.'
-							);
-							break;
-						}
+						updatedSince = response.data[response.data.length - 1]['updated_at'];
+						responseCount = response.data.length;
+						const elementsUpdated = elementsData.filter(
+							(element) => !response.data.find((data) => data.id === element.id)
+						);
+						elementsData = elementsUpdated;
+						response.data.forEach((data) => elementsData.push(data));
 					} catch (error) {
 						elementError.set(
 							'Could not load elements from API, please try again or contact BTC Map.'
@@ -179,20 +172,13 @@ export const elementsSync = async () => {
 						`https://api.btcmap.org/v2/elements?updated_since=${updatedSince}&limit=${limit}`
 					);
 
-					if (response.data.length) {
-						updatedSince = response.data[response.data.length - 1]['updated_at'];
-						responseCount = response.data.length;
-						const elementsUpdated = elementsData.filter(
-							(element) => !response.data.find((data) => data.id === element.id)
-						);
-						elementsData = elementsUpdated;
-						response.data.forEach((data) => elementsData.push(data));
-					} else {
-						elementError.set(
-							'Elements API returned an empty result, please try again or contact BTC Map.'
-						);
-						break;
-					}
+					updatedSince = response.data[response.data.length - 1]['updated_at'];
+					responseCount = response.data.length;
+					const elementsUpdated = elementsData.filter(
+						(element) => !response.data.find((data) => data.id === element.id)
+					);
+					elementsData = elementsUpdated;
+					response.data.forEach((data) => elementsData.push(data));
 				} catch (error) {
 					elementError.set(
 						'Could not load elements from API, please try again or contact BTC Map.'

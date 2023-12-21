@@ -29,20 +29,13 @@ export const areasSync = async () => {
 							`https://api.btcmap.org/v2/areas?updated_since=${updatedSince}&limit=${limit}`
 						);
 
-						if (response.data.length) {
-							updatedSince = response.data[response.data.length - 1]['updated_at'];
-							responseCount = response.data.length;
-							const areasUpdated = areasData.filter(
-								(area) => !response.data.find((data) => data.id === area.id)
-							);
-							areasData = areasUpdated;
-							response.data.forEach((data) => areasData.push(data));
-						} else {
-							areaError.set(
-								'Areas API returned an empty result, please try again or contact BTC Map.'
-							);
-							break;
-						}
+						updatedSince = response.data[response.data.length - 1]['updated_at'];
+						responseCount = response.data.length;
+						const areasUpdated = areasData.filter(
+							(area) => !response.data.find((data) => data.id === area.id)
+						);
+						areasData = areasUpdated;
+						response.data.forEach((data) => areasData.push(data));
 					} catch (error) {
 						areaError.set('Could not load areas from API, please try again or contact BTC Map.');
 						console.log(error);
@@ -161,20 +154,13 @@ export const areasSync = async () => {
 						`https://api.btcmap.org/v2/areas?updated_since=${updatedSince}&limit=${limit}`
 					);
 
-					if (response.data.length) {
-						updatedSince = response.data[response.data.length - 1]['updated_at'];
-						responseCount = response.data.length;
-						const areasUpdated = areasData.filter(
-							(area) => !response.data.find((data) => data.id === area.id)
-						);
-						areasData = areasUpdated;
-						response.data.forEach((data) => areasData.push(data));
-					} else {
-						areaError.set(
-							'Areas API returned an empty result, please try again or contact BTC Map.'
-						);
-						break;
-					}
+					updatedSince = response.data[response.data.length - 1]['updated_at'];
+					responseCount = response.data.length;
+					const areasUpdated = areasData.filter(
+						(area) => !response.data.find((data) => data.id === area.id)
+					);
+					areasData = areasUpdated;
+					response.data.forEach((data) => areasData.push(data));
 				} catch (error) {
 					areaError.set('Could not load areas from API, please try again or contact BTC Map.');
 					console.log(error);
