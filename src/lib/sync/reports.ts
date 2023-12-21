@@ -26,7 +26,7 @@ export const reportsSync = async () => {
 				do {
 					try {
 						const response = await axios.get<Report[]>(
-							`https://api.btcmap.org/v2/reports?updated_since=${updatedSince}&limit=${limit}&compress=true`
+							`https://api.btcmap.org/v2/reports?updated_since=${updatedSince}&compress=true`
 						);
 
 						if (response.data.length) {
@@ -88,7 +88,7 @@ export const reportsSync = async () => {
 				do {
 					try {
 						const response = await axios.get<Report[]>(
-							`https://api.btcmap.org/v2/reports?updated_since=${updatedSince}&limit=${limit}&compress=true`
+							`https://api.btcmap.org/v2/reports?updated_since=${updatedSince}&compress=true`
 						);
 
 						// update new records if they exist
@@ -166,7 +166,7 @@ export const reportsSync = async () => {
 			do {
 				try {
 					const response = await axios.get<Report[]>(
-						`https://api.btcmap.org/v2/reports?updated_since=${updatedSince}&limit=${limit}&compress=true`
+						`https://api.btcmap.org/v2/reports?updated_since=${updatedSince}&compress=true`
 					);
 
 					if (response.data.length) {
