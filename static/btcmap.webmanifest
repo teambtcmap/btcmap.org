@@ -1,230 +1,16 @@
 {
 	"name": "BTC Map",
 	"short_name": "BTC Map",
+	"description": "Easily find places to spend sats anywhere on the planet.",
+	"scope": "/",
 	"start_url": "/map",
-	"icons": [
-		{
-			"src": "/android-chrome-192x192.png",
-			"sizes": "192x192",
-			"type": "image/png",
-			"purpose": "any"
-		},
-		{
-			"src": "/android-chrome-512x512.png",
-			"sizes": "512x512",
-			"type": "image/png",
-			"purpose": "any"
-		},
-		{
-			"src": "/maskable_icon_x96.png",
-			"sizes": "96x96",
-			"type": "image/png",
-			"purpose": "maskable"
-		},
-		{
-			"src": "/maskable_icon_x192.png",
-			"sizes": "192x192",
-			"type": "image/png",
-			"purpose": "maskable"
-		},
-		{
-			"src": "/maskable_icon_x512.png",
-			"sizes": "512x512",
-			"type": "image/png",
-			"purpose": "maskable"
-		},
-		{
-			"src": "/apple-touch-icon.png",
-			"sizes": "180x180",
-			"type": "image/png"
-		},
-		{
-			"src": "/mstile-150x150.png",
-			"sizes": "150x150",
-			"type": "image/png"
-		},
-		{
-			"src": "/safari-pinned-tab.svg",
-			"sizes": "860x860",
-			"type": "image/svg"
-		}
-	],
+	"display": "standalone",
 	"theme_color": "#E4EBEC",
 	"background_color": "#E4EBEC",
-	"scope": "/",
-	"display": "standalone",
-	"shortcuts": [
-		{
-			"name": "Map",
-			"short_name": "Map",
-			"description": "Bitcoin merchant locations",
-			"url": "/map",
-			"icons": [
-				{
-					"src": "/maskable_icon_x96.png",
-					"sizes": "96x96"
-				},
-				{
-					"src": "/android-chrome-192x192.png",
-					"sizes": "192x192"
-				},
-				{
-					"src": "/android-chrome-512x512.png",
-					"sizes": "512x512"
-				}
-			]
-		},
-		{
-			"name": "Add location",
-			"short_name": "Add",
-			"description": "Add a locaion to OSM",
-			"url": "/add-location",
-			"icons": [
-				{
-					"src": "/maskable_icon_x96.png",
-					"sizes": "96x96"
-				},
-				{
-					"src": "/android-chrome-192x192.png",
-					"sizes": "192x192"
-				},
-				{
-					"src": "/android-chrome-512x512.png",
-					"sizes": "512x512"
-				}
-			]
-		},
-		{
-			"name": "Verify location",
-			"short_name": "Verify",
-			"description": "Verify a location's information",
-			"url": "/verify-location",
-			"icons": [
-				{
-					"src": "/maskable_icon_x96.png",
-					"sizes": "96x96"
-				},
-				{
-					"src": "/android-chrome-192x192.png",
-					"sizes": "192x192"
-				},
-				{
-					"src": "/android-chrome-512x512.png",
-					"sizes": "512x512"
-				}
-			]
-		},
-		{
-			"name": "Dashboard",
-			"short_name": "Dash",
-			"description": "Map stats and charts",
-			"url": "/dashboard",
-			"icons": [
-				{
-					"src": "/maskable_icon_x96.png",
-					"sizes": "96x96"
-				},
-				{
-					"src": "/android-chrome-192x192.png",
-					"sizes": "192x192"
-				},
-				{
-					"src": "/android-chrome-512x512.png",
-					"sizes": "512x512"
-				}
-			]
-		},
-		{
-			"name": "Activity",
-			"short_name": "Activity",
-			"description": "Latest Supertaggers",
-			"url": "/activity",
-			"icons": [
-				{
-					"src": "/maskable_icon_x96.png",
-					"sizes": "96x96"
-				},
-				{
-					"src": "/android-chrome-192x192.png",
-					"sizes": "192x192"
-				},
-				{
-					"src": "/android-chrome-512x512.png",
-					"sizes": "512x512"
-				}
-			]
-		},
-		{
-			"name": "Leaderboard",
-			"short_name": "Leaderboard",
-			"description": "Top Supertaggers",
-			"url": "/leaderboard",
-			"icons": [
-				{
-					"src": "/maskable_icon_x96.png",
-					"sizes": "96x96"
-				},
-				{
-					"src": "/android-chrome-192x192.png",
-					"sizes": "192x192"
-				},
-				{
-					"src": "/android-chrome-512x512.png",
-					"sizes": "512x512"
-				}
-			]
-		},
-		{
-			"name": "Communities",
-			"short_name": "Communities",
-			"description": "Local bitcoin communities",
-			"url": "/communities",
-			"icons": [
-				{
-					"src": "/maskable_icon_x96.png",
-					"sizes": "96x96"
-				},
-				{
-					"src": "/android-chrome-192x192.png",
-					"sizes": "192x192"
-				},
-				{
-					"src": "/android-chrome-512x512.png",
-					"sizes": "512x512"
-				}
-			]
-		},
-		{
-			"name": "Support Us",
-			"short_name": "Support",
-			"description": "Support BTC Map development",
-			"url": "/support-us",
-			"icons": [
-				{
-					"src": "/maskable_icon_x96.png",
-					"sizes": "96x96"
-				},
-				{
-					"src": "/android-chrome-192x192.png",
-					"sizes": "192x192"
-				},
-				{
-					"src": "/android-chrome-512x512.png",
-					"sizes": "512x512"
-				}
-			]
-		}
-	],
-	"developer": {
-		"name": "secondl1ght",
-		"url": "https://secondl1ght.site"
-	},
-	"description": "Easily find places to spend sats anywhere on the planet.",
+	"orientation": "portrait-primary",
 	"dir": "ltr",
 	"lang": "en",
-	"orientation": "portrait-primary",
 	"display_override": [],
-	"prefer_related_applications": false,
 	"categories": [
 		"business",
 		"finance",
@@ -235,6 +21,7 @@
 		"travel",
 		"utilities"
 	],
+	"prefer_related_applications": false,
 	"related_applications": [
 		{
 			"platform": "f-droid",
@@ -252,11 +39,622 @@
 			"id": ""
 		}
 	],
+	"developer": {
+		"name": "secondl1ght",
+		"url": "https://secondl1ght.site"
+	},
+	"icons": [
+		{
+			"src": "/icons/pwa/maskable/maskable_icon_x48.png",
+			"sizes": "48x48",
+			"type": "image/png",
+			"purpose": "maskable"
+		},
+		{
+			"src": "/icons/pwa/maskable/maskable_icon_x72.png",
+			"sizes": "72x72",
+			"type": "image/png",
+			"purpose": "maskable"
+		},
+		{
+			"src": "/icons/pwa/maskable/maskable_icon_x96.png",
+			"sizes": "96x96",
+			"type": "image/png",
+			"purpose": "maskable"
+		},
+		{
+			"src": "/icons/pwa/maskable/maskable_icon_x128.png",
+			"sizes": "128x128",
+			"type": "image/png",
+			"purpose": "maskable"
+		},
+		{
+			"src": "/icons/pwa/maskable/maskable_icon_x192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "maskable"
+		},
+		{
+			"src": "/icons/pwa/maskable/maskable_icon_x384.png",
+			"sizes": "384x384",
+			"type": "image/png",
+			"purpose": "maskable"
+		},
+		{
+			"src": "/icons/pwa/maskable/maskable_icon_x512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "maskable"
+		},
+		{
+			"src": "/icons/pwa/windows11/SmallTile.scale-100.png",
+			"sizes": "71x71"
+		},
+		{
+			"src": "/icons/pwa/windows11/SmallTile.scale-125.png",
+			"sizes": "89x89"
+		},
+		{
+			"src": "/icons/pwa/windows11/SmallTile.scale-150.png",
+			"sizes": "107x107"
+		},
+		{
+			"src": "/icons/pwa/windows11/SmallTile.scale-200.png",
+			"sizes": "142x142"
+		},
+		{
+			"src": "/icons/pwa/windows11/SmallTile.scale-400.png",
+			"sizes": "284x284"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square150x150Logo.scale-100.png",
+			"sizes": "150x150"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square150x150Logo.scale-125.png",
+			"sizes": "188x188"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square150x150Logo.scale-150.png",
+			"sizes": "225x225"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square150x150Logo.scale-200.png",
+			"sizes": "300x300"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square150x150Logo.scale-400.png",
+			"sizes": "600x600"
+		},
+		{
+			"src": "/icons/pwa/windows11/Wide310x150Logo.scale-100.png",
+			"sizes": "310x150"
+		},
+		{
+			"src": "/icons/pwa/windows11/Wide310x150Logo.scale-125.png",
+			"sizes": "388x188"
+		},
+		{
+			"src": "/icons/pwa/windows11/Wide310x150Logo.scale-150.png",
+			"sizes": "465x225"
+		},
+		{
+			"src": "/icons/pwa/windows11/Wide310x150Logo.scale-200.png",
+			"sizes": "620x300"
+		},
+		{
+			"src": "/icons/pwa/windows11/Wide310x150Logo.scale-400.png",
+			"sizes": "1240x600"
+		},
+		{
+			"src": "/icons/pwa/windows11/LargeTile.scale-100.png",
+			"sizes": "310x310"
+		},
+		{
+			"src": "/icons/pwa/windows11/LargeTile.scale-125.png",
+			"sizes": "388x388"
+		},
+		{
+			"src": "/icons/pwa/windows11/LargeTile.scale-150.png",
+			"sizes": "465x465"
+		},
+		{
+			"src": "/icons/pwa/windows11/LargeTile.scale-200.png",
+			"sizes": "620x620"
+		},
+		{
+			"src": "/icons/pwa/windows11/LargeTile.scale-400.png",
+			"sizes": "1240x1240"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.scale-100.png",
+			"sizes": "44x44"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.scale-125.png",
+			"sizes": "55x55"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.scale-150.png",
+			"sizes": "66x66"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.scale-200.png",
+			"sizes": "88x88"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.scale-400.png",
+			"sizes": "176x176"
+		},
+		{
+			"src": "/icons/pwa/windows11/StoreLogo.scale-100.png",
+			"sizes": "50x50"
+		},
+		{
+			"src": "/icons/pwa/windows11/StoreLogo.scale-125.png",
+			"sizes": "63x63"
+		},
+		{
+			"src": "/icons/pwa/windows11/StoreLogo.scale-150.png",
+			"sizes": "75x75"
+		},
+		{
+			"src": "/icons/pwa/windows11/StoreLogo.scale-200.png",
+			"sizes": "100x100"
+		},
+		{
+			"src": "/icons/pwa/windows11/StoreLogo.scale-400.png",
+			"sizes": "200x200"
+		},
+		{
+			"src": "/icons/pwa/windows11/SplashScreen.scale-100.png",
+			"sizes": "620x300"
+		},
+		{
+			"src": "/icons/pwa/windows11/SplashScreen.scale-125.png",
+			"sizes": "775x375"
+		},
+		{
+			"src": "/icons/pwa/windows11/SplashScreen.scale-150.png",
+			"sizes": "930x450"
+		},
+		{
+			"src": "/icons/pwa/windows11/SplashScreen.scale-200.png",
+			"sizes": "1240x600"
+		},
+		{
+			"src": "/icons/pwa/windows11/SplashScreen.scale-400.png",
+			"sizes": "2480x1200"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.targetsize-16.png",
+			"sizes": "16x16"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.targetsize-20.png",
+			"sizes": "20x20"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.targetsize-24.png",
+			"sizes": "24x24"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.targetsize-30.png",
+			"sizes": "30x30"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.targetsize-32.png",
+			"sizes": "32x32"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.targetsize-36.png",
+			"sizes": "36x36"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.targetsize-40.png",
+			"sizes": "40x40"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.targetsize-44.png",
+			"sizes": "44x44"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.targetsize-48.png",
+			"sizes": "48x48"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.targetsize-60.png",
+			"sizes": "60x60"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.targetsize-64.png",
+			"sizes": "64x64"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.targetsize-72.png",
+			"sizes": "72x72"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.targetsize-80.png",
+			"sizes": "80x80"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.targetsize-96.png",
+			"sizes": "96x96"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.targetsize-256.png",
+			"sizes": "256x256"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-unplated_targetsize-16.png",
+			"sizes": "16x16"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-unplated_targetsize-20.png",
+			"sizes": "20x20"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-unplated_targetsize-24.png",
+			"sizes": "24x24"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-unplated_targetsize-30.png",
+			"sizes": "30x30"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-unplated_targetsize-32.png",
+			"sizes": "32x32"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-unplated_targetsize-36.png",
+			"sizes": "36x36"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-unplated_targetsize-40.png",
+			"sizes": "40x40"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-unplated_targetsize-44.png",
+			"sizes": "44x44"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-unplated_targetsize-48.png",
+			"sizes": "48x48"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-unplated_targetsize-60.png",
+			"sizes": "60x60"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-unplated_targetsize-64.png",
+			"sizes": "64x64"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-unplated_targetsize-72.png",
+			"sizes": "72x72"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-unplated_targetsize-80.png",
+			"sizes": "80x80"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-unplated_targetsize-96.png",
+			"sizes": "96x96"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-unplated_targetsize-256.png",
+			"sizes": "256x256"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-lightunplated_targetsize-16.png",
+			"sizes": "16x16"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-lightunplated_targetsize-20.png",
+			"sizes": "20x20"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-lightunplated_targetsize-24.png",
+			"sizes": "24x24"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-lightunplated_targetsize-30.png",
+			"sizes": "30x30"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-lightunplated_targetsize-32.png",
+			"sizes": "32x32"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-lightunplated_targetsize-36.png",
+			"sizes": "36x36"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-lightunplated_targetsize-40.png",
+			"sizes": "40x40"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-lightunplated_targetsize-44.png",
+			"sizes": "44x44"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-lightunplated_targetsize-48.png",
+			"sizes": "48x48"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-lightunplated_targetsize-60.png",
+			"sizes": "60x60"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-lightunplated_targetsize-64.png",
+			"sizes": "64x64"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-lightunplated_targetsize-72.png",
+			"sizes": "72x72"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-lightunplated_targetsize-80.png",
+			"sizes": "80x80"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-lightunplated_targetsize-96.png",
+			"sizes": "96x96"
+		},
+		{
+			"src": "/icons/pwa/windows11/Square44x44Logo.altform-lightunplated_targetsize-256.png",
+			"sizes": "256x256"
+		},
+		{
+			"src": "/icons/pwa/android/android-launchericon-512-512.png",
+			"sizes": "512x512"
+		},
+		{
+			"src": "/icons/pwa/android/android-launchericon-192-192.png",
+			"sizes": "192x192"
+		},
+		{
+			"src": "/icons/pwa/android/android-launchericon-144-144.png",
+			"sizes": "144x144"
+		},
+		{
+			"src": "/icons/pwa/android/android-launchericon-96-96.png",
+			"sizes": "96x96"
+		},
+		{
+			"src": "/icons/pwa/android/android-launchericon-72-72.png",
+			"sizes": "72x72"
+		},
+		{
+			"src": "/icons/pwa/android/android-launchericon-48-48.png",
+			"sizes": "48x48"
+		},
+		{
+			"src": "/icons/pwa/ios/16.png",
+			"sizes": "16x16"
+		},
+		{
+			"src": "/icons/pwa/ios/20.png",
+			"sizes": "20x20"
+		},
+		{
+			"src": "/icons/pwa/ios/29.png",
+			"sizes": "29x29"
+		},
+		{
+			"src": "/icons/pwa/ios/32.png",
+			"sizes": "32x32"
+		},
+		{
+			"src": "/icons/pwa/ios/40.png",
+			"sizes": "40x40"
+		},
+		{
+			"src": "/icons/pwa/ios/50.png",
+			"sizes": "50x50"
+		},
+		{
+			"src": "/icons/pwa/ios/57.png",
+			"sizes": "57x57"
+		},
+		{
+			"src": "/icons/pwa/ios/58.png",
+			"sizes": "58x58"
+		},
+		{
+			"src": "/icons/pwa/ios/60.png",
+			"sizes": "60x60"
+		},
+		{
+			"src": "/icons/pwa/ios/64.png",
+			"sizes": "64x64"
+		},
+		{
+			"src": "/icons/pwa/ios/72.png",
+			"sizes": "72x72"
+		},
+		{
+			"src": "/icons/pwa/ios/76.png",
+			"sizes": "76x76"
+		},
+		{
+			"src": "/icons/pwa/ios/80.png",
+			"sizes": "80x80"
+		},
+		{
+			"src": "/icons/pwa/ios/87.png",
+			"sizes": "87x87"
+		},
+		{
+			"src": "/icons/pwa/ios/100.png",
+			"sizes": "100x100"
+		},
+		{
+			"src": "/icons/pwa/ios/114.png",
+			"sizes": "114x114"
+		},
+		{
+			"src": "/icons/pwa/ios/120.png",
+			"sizes": "120x120"
+		},
+		{
+			"src": "/icons/pwa/ios/128.png",
+			"sizes": "128x128"
+		},
+		{
+			"src": "/icons/pwa/ios/144.png",
+			"sizes": "144x144"
+		},
+		{
+			"src": "/icons/pwa/ios/152.png",
+			"sizes": "152x152"
+		},
+		{
+			"src": "/icons/pwa/ios/167.png",
+			"sizes": "167x167"
+		},
+		{
+			"src": "/icons/pwa/ios/180.png",
+			"sizes": "180x180"
+		},
+		{
+			"src": "/icons/pwa/ios/192.png",
+			"sizes": "192x192"
+		},
+		{
+			"src": "/icons/pwa/ios/256.png",
+			"sizes": "256x256"
+		},
+		{
+			"src": "/icons/pwa/ios/512.png",
+			"sizes": "512x512"
+		},
+		{
+			"src": "/icons/pwa/ios/1024.png",
+			"sizes": "1024x1024"
+		}
+	],
+	"shortcuts": [
+		{
+			"name": "Map",
+			"short_name": "Map",
+			"description": "Bitcoin merchant locations",
+			"url": "/map",
+			"icons": [
+				{
+					"src": "/icons/pwa/maskable/maskable_icon_x96.png",
+					"sizes": "96x96",
+					"type": "image/png",
+					"purpose": "maskable"
+				}
+			]
+		},
+		{
+			"name": "Add location",
+			"short_name": "Add",
+			"description": "Add a locaion to OSM",
+			"url": "/add-location",
+			"icons": [
+				{
+					"src": "/icons/pwa/maskable/maskable_icon_x96.png",
+					"sizes": "96x96",
+					"type": "image/png",
+					"purpose": "maskable"
+				}
+			]
+		},
+		{
+			"name": "Verify location",
+			"short_name": "Verify",
+			"description": "Verify a location's information",
+			"url": "/verify-location",
+			"icons": [
+				{
+					"src": "/icons/pwa/maskable/maskable_icon_x96.png",
+					"sizes": "96x96",
+					"type": "image/png",
+					"purpose": "maskable"
+				}
+			]
+		},
+		{
+			"name": "Dashboard",
+			"short_name": "Dash",
+			"description": "Map stats and charts",
+			"url": "/dashboard",
+			"icons": [
+				{
+					"src": "/icons/pwa/maskable/maskable_icon_x96.png",
+					"sizes": "96x96",
+					"type": "image/png",
+					"purpose": "maskable"
+				}
+			]
+		},
+		{
+			"name": "Activity",
+			"short_name": "Activity",
+			"description": "Latest Supertaggers",
+			"url": "/activity",
+			"icons": [
+				{
+					"src": "/icons/pwa/maskable/maskable_icon_x96.png",
+					"sizes": "96x96",
+					"type": "image/png",
+					"purpose": "maskable"
+				}
+			]
+		},
+		{
+			"name": "Leaderboard",
+			"short_name": "Leaderboard",
+			"description": "Top Supertaggers",
+			"url": "/leaderboard",
+			"icons": [
+				{
+					"src": "/icons/pwa/maskable/maskable_icon_x96.png",
+					"sizes": "96x96",
+					"type": "image/png",
+					"purpose": "maskable"
+				}
+			]
+		},
+		{
+			"name": "Communities",
+			"short_name": "Communities",
+			"description": "Local bitcoin communities",
+			"url": "/communities",
+			"icons": [
+				{
+					"src": "/icons/pwa/maskable/maskable_icon_x96.png",
+					"sizes": "96x96",
+					"type": "image/png",
+					"purpose": "maskable"
+				}
+			]
+		},
+		{
+			"name": "Support Us",
+			"short_name": "Support",
+			"description": "Support BTC Map development",
+			"url": "/support-us",
+			"icons": [
+				{
+					"src": "/icons/pwa/maskable/maskable_icon_x96.png",
+					"sizes": "96x96",
+					"type": "image/png",
+					"purpose": "maskable"
+				}
+			]
+		}
+	],
 	"screenshots": [
 		{
 			"src": "/images/screenshots/0.png",
 			"sizes": "1280x800",
-			"type": "image/png"
+			"type": "image/png",
+			"form_factor": "wide"
 		},
 		{
 			"src": "/images/screenshots/1.png",
