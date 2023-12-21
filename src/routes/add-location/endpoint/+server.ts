@@ -9,7 +9,7 @@ import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import crypto from 'crypto';
 
-axiosRetry(axios, { retries: 3 });
+axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 const used: string[] = [];
 // @ts-expect-error

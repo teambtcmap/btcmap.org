@@ -22,7 +22,6 @@
 	import { elementError, elements, elementsSyncCount, mapUpdates } from '$lib/store';
 	import type { Leaflet, MapGroups, OSMTags, SearchElement, SearchResult } from '$lib/types';
 	import { detectTheme, errToast } from '$lib/utils';
-	import axios from 'axios';
 	import type { Control, LatLng, LatLngBounds, Map } from 'leaflet';
 	import localforage from 'localforage';
 	import { onDestroy, onMount, tick } from 'svelte';
@@ -125,9 +124,6 @@
 
 	// allow to view map with only boosted locations
 	const boosts = $page.url.searchParams.has('boosts');
-
-	// allow to view map for hike event
-	const hikeEvent = $page.url.searchParams.has('mount-kili-hike');
 
 	// displays a button in controls if there is new data available
 	const showDataRefresh = () => {
@@ -281,82 +277,72 @@
 			// add map and tiles
 			map = leaflet.map(mapElement);
 
-			if (!hikeEvent) {
-				// use url hash if present
-				if (location.hash) {
-					try {
-						const coords = location.hash.split('/');
-						map.setView([Number(coords[1]), Number(coords[2])], Number(coords[0].slice(1)));
-						mapCenter = map.getCenter();
-					} catch (error) {
-						map.setView([0, 0], 3);
-						mapCenter = map.getCenter();
-						errToast(
-							'Could not set map view to provided coordinates, please try again or contact BTC Map.'
-						);
-						console.log(error);
-					}
+			// use url hash if present
+			if (location.hash) {
+				try {
+					const coords = location.hash.split('/');
+					map.setView([Number(coords[1]), Number(coords[2])], Number(coords[0].slice(1)));
+					mapCenter = map.getCenter();
+				} catch (error) {
+					map.setView([0, 0], 3);
+					mapCenter = map.getCenter();
+					errToast(
+						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
+					);
+					console.log(error);
 				}
+			}
 
-				// set URL lat/long query view if it exists and is valid
-				else if (urlLat.length && urlLong.length) {
-					try {
-						if (urlLat.length > 1 && urlLong.length > 1) {
+			// set URL lat/long query view if it exists and is valid
+			else if (urlLat.length && urlLong.length) {
+				try {
+					if (urlLat.length > 1 && urlLong.length > 1) {
+						map.fitBounds([
+							[Number(urlLat[0]), Number(urlLong[0])],
+							[Number(urlLat[1]), Number(urlLong[1])]
+						]);
+						mapCenter = map.getCenter();
+					} else {
+						map.fitBounds([[Number(urlLat[0]), Number(urlLong[0])]]);
+						mapCenter = map.getCenter();
+					}
+				} catch (error) {
+					map.setView([0, 0], 3);
+					mapCenter = map.getCenter();
+					errToast(
+						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
+					);
+					console.log(error);
+				}
+			}
+
+			// set view to last location if it is present in the cache
+			else {
+				localforage
+					.getItem<LatLngBounds>('coords')
+					.then(function (value) {
+						if (value) {
 							map.fitBounds([
-								[Number(urlLat[0]), Number(urlLong[0])],
-								[Number(urlLat[1]), Number(urlLong[1])]
+								// @ts-expect-error
+								[value._northEast.lat, value._northEast.lng],
+								// @ts-expect-error
+								[value._southWest.lat, value._southWest.lng]
 							]);
-							mapCenter = map.getCenter();
 						} else {
-							map.fitBounds([[Number(urlLat[0]), Number(urlLong[0])]]);
-							mapCenter = map.getCenter();
-						}
-					} catch (error) {
-						map.setView([0, 0], 3);
-						mapCenter = map.getCenter();
-						errToast(
-							'Could not set map view to provided coordinates, please try again or contact BTC Map.'
-						);
-						console.log(error);
-					}
-				}
-
-				// set view to last location if it is present in the cache
-				else {
-					localforage
-						.getItem<LatLngBounds>('coords')
-						.then(function (value) {
-							if (value) {
-								map.fitBounds([
-									// @ts-expect-error
-									[value._northEast.lat, value._northEast.lng],
-									// @ts-expect-error
-									[value._southWest.lat, value._southWest.lng]
-								]);
-							} else {
-								map.setView([0, 0], 3);
-							}
-						})
-						.catch(function (err) {
 							map.setView([0, 0], 3);
-							errToast(
-								'Could not set map view to cached coords, please try again or contact BTC Map.'
-							);
-							console.log(err);
-						});
-				}
+						}
+					})
+					.catch(function (err) {
+						map.setView([0, 0], 3);
+						errToast(
+							'Could not set map view to cached coords, please try again or contact BTC Map.'
+						);
+						console.log(err);
+					});
 			}
 
 			// add tiles and basemaps
 			const baseMaps = layers(leaflet, map);
-
-			// add click event to help devs find lat/long of desired location for iframe embeds
-			map.on('click', () => {
-				const coords = map.getBounds();
-				// @ts-expect-error
-				console.log(`Here is your iframe embed URL: https://btcmap.org/map?lat=${coords._northEast.lat}&long=${coords._northEast.lng}&lat=${coords._southWest.lat}&long=${coords._southWest.lng}
-Thanks for using BTC Map!`);
-			});
 
 			// add events to cache last viewed location so it can be used on next map launch
 			map.on('zoomend', () => {
@@ -374,7 +360,7 @@ Thanks for using BTC Map!`);
 
 				mapCenter = map.getCenter();
 
-				if (!urlLat.length && !urlLong.length && !hikeEvent) {
+				if (!urlLat.length && !urlLong.length) {
 					const zoom = map.getZoom();
 					location.hash = zoom + '/' + mapCenter.lat.toFixed(5) + '/' + mapCenter.lng.toFixed(5);
 				}
@@ -541,151 +527,6 @@ Thanks for using BTC Map!`);
 			dataRefresh(leaflet, map, DomEvent);
 
 			controlLayers = leaflet.control.layers(baseMaps).addTo(map);
-
-			// treasure hunt event
-			if (Date.now() < new Date('April 30, 2023 00:00:00').getTime()) {
-				const treasureIcon = leaflet.divIcon({
-					className: 'treasure-icon',
-					iconSize: [24, 24],
-					html: `<a href='https://dublinbitcoiners.com/treasure-hunt' target='_blank' rel='noreferrer'>
-							<span class="relative flex h-6 w-6">
-								<span
-									class="animate-ping absolute inline-flex h-full w-full rounded-full bg-bitcoin opacity-75"
-								/>
-								<span
-									class="relative inline-flex h-6 w-6 rounded-full bg-bitcoin"
-								/>
-							</span>
-						  </a>`
-				});
-
-				leaflet
-					.marker([53.37225, -6.17711], { icon: treasureIcon })
-					.bindTooltip(
-						`<p class='text-primary dark:text-white text-lg text-center p-2'>
-							<i class="fa-solid fa-coins text-bitcoin"></i> <strong>Bitcoin Treasure Hunt</strong> <i class="fa-solid fa-coins text-bitcoin"></i>
-							<br/>
-							April 29th, 2023 @ 1PM
-							<br/>
-							Hosted by <strong>Dublin Bitcoiners</strong>
-							<br/>
-							dublinbitcoiners.com/treasure-hunt
-							<br/>
-							Everyone welcome!
-						</p>
-	
-						${
-							theme === 'dark'
-								? `
-								<style>
-								.leaflet-tooltip {
-										background-color: #06171C;
-										border: 1px solid #e5e7eb
-								}
-
-								.leaflet-tooltip-left::before {
-								
-										border-left-color: #e5e7eb
-								}
-
-								.leaflet-tooltip-right::before {
-									
-										border-right-color: #e5e7eb
-								}
-								</style>`
-								: ''
-						}`,
-						{ sticky: true }
-					)
-					.addTo(map);
-			}
-
-			// mount kili hike event
-			if (Date.now() < new Date('September 4, 2023 00:00:00').getTime()) {
-				try {
-					const hikeData = await axios.get('https://static.btcmap.org/mount-kili-hike/data.json');
-					const hikeDataFiltered = hikeData.data.filter(
-						(update: any) =>
-							update.id !== undefined &&
-							update.lat &&
-							update.lon &&
-							update.title &&
-							update.comment &&
-							update.timestamp &&
-							update.url &&
-							update.lightning &&
-							update.active === true
-					);
-
-					const hikerIcon = leaflet.icon({
-						iconUrl: '/icons/hiker-icon.png',
-						iconSize: [44, 44],
-						iconAnchor: [22, 44],
-						popupAnchor: [0, -44]
-					});
-
-					hikeDataFiltered.forEach((update: any) => {
-						const { lat, lon, title, comment, timestamp, url, lightning } = update;
-						const dateFormatted = new Intl.DateTimeFormat('en-US', {
-							dateStyle: 'medium',
-							timeStyle: 'short',
-							hour12: false
-						}).format(new Date(timestamp));
-
-						leaflet
-							.marker([lat, lon], { icon: hikerIcon })
-							.bindPopup(
-								`<p class='text-primary dark:text-white text-base text-center'>
-									<i class="fa-solid fa-person-hiking text-bitcoin"></i> <strong>${title}</strong> <i class="fa-solid fa-person-hiking text-bitcoin"></i>
-									<br/>
-									${comment}
-									<br/>
-									<span class='text-sm'><i class='fa-solid fa-clock mr-1'></i>
-									${dateFormatted}
-									</span>
-									<br/>
-									<span class='text-sm'><i class='fa-solid fa-location-dot mr-1'></i> ${lat}, ${lon}</span>
-									<br/>
-									<a href='${url}' target='_blank' rel='noreferrer' class='!text-link hover:!text-hover transition-colors'>Read More</a> | 
-									<a href='lightning:${lightning}' class='!text-link hover:!text-hover transition-colors'>Donate</a>
-								</p>
-	
-								${
-									theme === 'dark'
-										? `
-										<style>
-											.leaflet-popup-content-wrapper, .leaflet-popup-tip {
-												background-color: #06171C;
-												border: 1px solid #e5e7eb
-										}
-										</style>`
-										: ''
-								}`,
-								{ closeButton: false, maxWidth: 300, minWidth: 300 }
-							)
-							.addTo(map);
-					});
-
-					if (hikeEvent) {
-						try {
-							map.fitBounds(
-								hikeDataFiltered.map((update: any) => [update.lat, update.lon]),
-								{ animate: false }
-							);
-							mapCenter = map.getCenter();
-						} catch (error) {
-							map.setView([0, 0], 3);
-							mapCenter = map.getCenter();
-							errToast(
-								'Could not set map view to provided coordinates, please try again or contact BTC Map.'
-							);
-							console.log(error);
-						}
-					}
-				} catch (error) {
-					console.error(error);
-				}
-			}
 
 			// change default icons
 			changeDefaultIcons(true, leaflet, mapElement, DomEvent);

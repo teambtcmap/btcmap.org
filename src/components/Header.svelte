@@ -51,14 +51,12 @@
 </script>
 
 <!-- desktop header -->
-<header
-	class="relative z-30 mx-auto hidden w-10/12 items-center justify-between py-5 lg:flex xl:w-[1200px]"
->
+<header class="relative z-30 mx-auto hidden w-[1200px] items-center justify-between py-5 xl:flex">
 	<a href="/">
 		<img src="/images/logo.svg" alt="logo" class="w-16" />
 	</a>
 
-	<nav class="flex flex-wrap lg:space-x-4 xl:space-x-16">
+	<nav class="flex flex-wrap space-x-16">
 		{#each navLinks as link}
 			<!-- dropdown menu -->
 			{#if link.title === 'Contribute'}
@@ -111,7 +109,7 @@
 
 <!-- mobile header -->
 <header
-	class="sticky top-0 z-30 flex w-full items-center justify-between px-4 py-5 lg:hidden {showMobileMenu
+	class="sticky top-0 z-30 flex w-full items-center justify-between px-4 py-5 xl:hidden {showMobileMenu
 		? 'bg-teal dark:bg-dark'
 		: 'bg-teal/90 dark:bg-dark/90'}"
 >
@@ -137,9 +135,9 @@
 
 	<!-- menu -->
 	<nav
-		class="absolute top-[122.45px] z-30 {showMobileMenu
+		class="hide-scroll absolute top-[122.45px] z-30 {showMobileMenu
 			? 'left-0'
-			: 'left-[-100%]'} h-[100vh] w-full space-y-2 border-t border-[#BDD2D4] bg-teal px-8 pt-8 transition-all ease-in-out dark:bg-dark"
+			: 'left-[-100%]'} h-[calc(100dvh-122.45px)] w-full space-y-2 overflow-y-auto border-t border-[#BDD2D4] bg-teal p-8 transition-all ease-in-out dark:bg-dark"
 	>
 		{#each navLinks as link}
 			<!-- dropdown menu -->

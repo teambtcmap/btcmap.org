@@ -124,7 +124,8 @@
 		{ name: 'Fedi', icon: 'fedi', url: 'https://www.fedi.xyz/' },
 		{ name: 'Osmo', icon: 'osmo', url: 'https://www.osmowallet.com/' },
 		{ name: 'Bitcoin Rocks!', icon: 'bitcoin-rocks', url: 'https://bitcoin.rocks/' },
-		{ name: 'lipa', icon: 'lipa', url: 'https://lipa.swiss/' }
+		{ name: 'lipa', icon: 'lipa', url: 'https://lipa.swiss/' },
+		{ name: 'Spirit of Satoshi', icon: 'spirit', url: 'https://www.spiritofsatoshi.ai/' }
 	];
 
 	const projectIntegrations = [

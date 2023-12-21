@@ -6,7 +6,7 @@ import axiosRetry from 'axios-retry';
 import localforage from 'localforage';
 import { get } from 'svelte/store';
 
-axiosRetry(axios, { retries: 3 });
+axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 const limit = 5000;
 

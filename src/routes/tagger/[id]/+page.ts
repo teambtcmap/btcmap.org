@@ -2,7 +2,7 @@ import { error } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 
-axiosRetry(axios, { retries: 3 });
+axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 // @ts-expect-error
 export async function load({ params }) {
