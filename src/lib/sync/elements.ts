@@ -1,4 +1,5 @@
 import { elementError, elements, elementsSyncCount, mapUpdates } from '$lib/store';
+import { clearTables } from '$lib/sync/clearTables';
 import type { Element } from '$lib/types';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -10,51 +11,8 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 const limit = 5000;
 
 export const elementsSync = async () => {
-	// clear v1 table if present
-	await localforage
-		.getItem('elements')
-		.then(function (value) {
-			if (value) {
-				localforage
-					.removeItem('elements')
-					.then(function () {
-						console.log('Key is cleared!');
-					})
-					.catch(function (err) {
-						elementError.set(
-							'Could not clear elements locally, please try again or contact BTC Map.'
-						);
-						console.log(err);
-					});
-			}
-		})
-		.catch(function (err) {
-			elementError.set('Could not check elements locally, please try again or contact BTC Map.');
-			console.log(err);
-		});
-
-	// clear v2 table if present
-	await localforage
-		.getItem('elements_v2')
-		.then(function (value) {
-			if (value) {
-				localforage
-					.removeItem('elements_v2')
-					.then(function () {
-						console.log('Key is cleared!');
-					})
-					.catch(function (err) {
-						elementError.set(
-							'Could not clear elements locally, please try again or contact BTC Map.'
-						);
-						console.log(err);
-					});
-			}
-		})
-		.catch(function (err) {
-			elementError.set('Could not check elements locally, please try again or contact BTC Map.');
-			console.log(err);
-		});
+	// clear tables if present
+	clearTables(['elements', 'elements_v2']);
 
 	// get elements from local
 	await localforage

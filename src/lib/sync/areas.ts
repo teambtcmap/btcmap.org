@@ -1,4 +1,5 @@
 import { areaError, areas } from '$lib/store';
+import { clearTables } from '$lib/sync/clearTables';
 import type { Area } from '$lib/types';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -9,47 +10,8 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 const limit = 500;
 
 export const areasSync = async () => {
-	// clear v1 table if present
-	await localforage
-		.getItem('areas')
-		.then(function (value) {
-			if (value) {
-				localforage
-					.removeItem('areas')
-					.then(function () {
-						console.log('Key is cleared!');
-					})
-					.catch(function (err) {
-						areaError.set('Could not clear areas locally, please try again or contact BTC Map.');
-						console.log(err);
-					});
-			}
-		})
-		.catch(function (err) {
-			areaError.set('Could not check areas locally, please try again or contact BTC Map.');
-			console.log(err);
-		});
-
-	// clear v2 table if present
-	await localforage
-		.getItem('areas_v2')
-		.then(function (value) {
-			if (value) {
-				localforage
-					.removeItem('areas_v2')
-					.then(function () {
-						console.log('Key is cleared!');
-					})
-					.catch(function (err) {
-						areaError.set('Could not clear areas locally, please try again or contact BTC Map.');
-						console.log(err);
-					});
-			}
-		})
-		.catch(function (err) {
-			areaError.set('Could not check areas locally, please try again or contact BTC Map.');
-			console.log(err);
-		});
+	// clear tables if present
+	clearTables(['areas', 'areas_v2']);
 
 	// get areas from local
 	await localforage

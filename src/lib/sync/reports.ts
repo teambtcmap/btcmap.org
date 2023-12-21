@@ -1,4 +1,5 @@
 import { reportError, reports } from '$lib/store';
+import { clearTables } from '$lib/sync/clearTables';
 import type { Report } from '$lib/types';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -8,71 +9,24 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 const limit = 20000;
 
-const today = new Date();
-today.setMonth(today.getMonth() - 1);
-const monthAgo = today.toISOString();
-
 export const reportsSync = async () => {
-	// clear v1 table if present
-	await localforage
-		.getItem('reports')
-		.then(function (value) {
-			if (value) {
-				localforage
-					.removeItem('reports')
-					.then(function () {
-						console.log('Key is cleared!');
-					})
-					.catch(function (err) {
-						reportError.set(
-							'Could not clear reports locally, please try again or contact BTC Map.'
-						);
-						console.log(err);
-					});
-			}
-		})
-		.catch(function (err) {
-			reportError.set('Could not check reports locally, please try again or contact BTC Map.');
-			console.log(err);
-		});
-
-	// clear v2 table if present
-	await localforage
-		.getItem('reports_v2')
-		.then(function (value) {
-			if (value) {
-				localforage
-					.removeItem('reports_v2')
-					.then(function () {
-						console.log('Key is cleared!');
-					})
-					.catch(function (err) {
-						reportError.set(
-							'Could not clear reports locally, please try again or contact BTC Map.'
-						);
-						console.log(err);
-					});
-			}
-		})
-		.catch(function (err) {
-			reportError.set('Could not check reports locally, please try again or contact BTC Map.');
-			console.log(err);
-		});
+	// clear tables if present
+	clearTables(['reports', 'reports_v2', 'reports_v3']);
 
 	// get reports from local
 	await localforage
-		.getItem<Report[]>('reports_v3')
+		.getItem<Report[]>('reports_v4')
 		.then(async function (value) {
 			// get reports from API if initial sync
 			if (!value) {
-				let updatedSince = monthAgo;
+				let updatedSince = '2022-01-01T00:00:00.000Z';
 				let responseCount;
 				let reportsData: Report[] = [];
 
 				do {
 					try {
 						const response = await axios.get<Report[]>(
-							`https://api.btcmap.org/v2/reports?updated_since=${updatedSince}&limit=${limit}`
+							`https://api.btcmap.org/v2/reports?updated_since=${updatedSince}&compress=true`
 						);
 
 						if (response.data.length) {
@@ -104,7 +58,7 @@ export const reportsSync = async () => {
 
 					// set response to local
 					localforage
-						.setItem('reports_v3', reportsData)
+						.setItem('reports_v4', reportsData)
 						.then(function () {
 							// set response to store
 							reports.set(reportsFiltered);
@@ -134,7 +88,7 @@ export const reportsSync = async () => {
 				do {
 					try {
 						const response = await axios.get<Report[]>(
-							`https://api.btcmap.org/v2/reports?updated_since=${updatedSince}&limit=${limit}`
+							`https://api.btcmap.org/v2/reports?updated_since=${updatedSince}&compress=true`
 						);
 
 						// update new records if they exist
@@ -183,7 +137,7 @@ export const reportsSync = async () => {
 
 					// set updated reports locally
 					localforage
-						.setItem('reports_v3', reportsData)
+						.setItem('reports_v4', reportsData)
 						.then(function () {
 							// set updated reports to store
 							reports.set(newReportsFiltered);
@@ -205,14 +159,14 @@ export const reportsSync = async () => {
 			reportError.set('Could not load reports locally, please try again or contact BTC Map.');
 			console.log(err);
 
-			let updatedSince = monthAgo;
+			let updatedSince = '2022-01-01T00:00:00.000Z';
 			let responseCount;
 			let reportsData: Report[] = [];
 
 			do {
 				try {
 					const response = await axios.get<Report[]>(
-						`https://api.btcmap.org/v2/reports?updated_since=${updatedSince}&limit=${limit}`
+						`https://api.btcmap.org/v2/reports?updated_since=${updatedSince}&compress=true`
 					);
 
 					if (response.data.length) {

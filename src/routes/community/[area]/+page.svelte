@@ -223,6 +223,24 @@
 				(a, b) => Date.parse(a['created_at']) - Date.parse(b['created_at'])
 			);
 
+			const today = new Date();
+			const latestReport = chartsReports[chartsReports.length - 1];
+			const latestReportDate = new Date(latestReport.created_at);
+			const reportIsCurrent =
+				today.getDate() === latestReportDate.getDate() &&
+				today.getMonth() === latestReportDate.getMonth() &&
+				today.getFullYear() === latestReportDate.getFullYear();
+
+			if (!reportIsCurrent) {
+				chartsReports.push({
+					...latestReport,
+					id: latestReport.id + 1,
+					date: `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`,
+					created_at: today.toISOString(),
+					updated_at: today.toISOString()
+				});
+			}
+
 			const theme = detectTheme();
 
 			updatedChart = new Chart(updatedChartCanvas, {
@@ -267,7 +285,8 @@
 								above: 'rgba(11, 144, 114, 0.2)'
 							},
 							borderColor: 'rgb(11, 144, 114)',
-							tension: 0.1
+							tension: 0.1,
+							pointStyle: false
 						}
 					]
 				},
@@ -307,6 +326,9 @@
 								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 							}
 						}
+					},
+					interaction: {
+						intersect: false
 					}
 				}
 			});
@@ -324,7 +346,8 @@
 								above: 'rgba(0, 153, 175, 0.2)'
 							},
 							borderColor: 'rgb(0, 153, 175)',
-							tension: 0.1
+							tension: 0.1,
+							pointStyle: false
 						}
 					]
 				},
@@ -364,6 +387,9 @@
 								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 							}
 						}
+					},
+					interaction: {
+						intersect: false
 					}
 				}
 			});
@@ -381,7 +407,8 @@
 								above: 'rgba(235, 87, 87, 0.2)'
 							},
 							borderColor: 'rgb(235, 87, 87)',
-							tension: 0.1
+							tension: 0.1,
+							pointStyle: false
 						}
 					]
 				},
@@ -421,6 +448,9 @@
 								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 							}
 						}
+					},
+					interaction: {
+						intersect: false
 					}
 				}
 			});
@@ -437,7 +467,8 @@
 							),
 							fill: false,
 							borderColor: 'rgb(247, 147, 26)',
-							tension: 0.1
+							tension: 0.1,
+							pointStyle: false
 						},
 						{
 							label: 'Lightning',
@@ -446,7 +477,8 @@
 							),
 							fill: false,
 							borderColor: 'rgb(249, 193, 50)',
-							tension: 0.1
+							tension: 0.1,
+							pointStyle: false
 						},
 						{
 							label: 'Contactless',
@@ -456,7 +488,8 @@
 							),
 							fill: false,
 							borderColor: 'rgb(102, 16, 242)',
-							tension: 0.1
+							tension: 0.1,
+							pointStyle: false
 						}
 					]
 				},
@@ -496,6 +529,9 @@
 								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 							}
 						}
+					},
+					interaction: {
+						intersect: false
 					}
 				}
 			});
