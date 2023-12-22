@@ -15,7 +15,7 @@ export async function load({ params }) {
 		if (data && data.id) {
 			return {
 				id: data.id,
-				name: data.osm_json.tags && data.osm_json.tags.name ? data.osm_json.tags.name : ''
+				name: data.osm_json.tags?.name
 			};
 		}
 	} catch (err) {

@@ -2,7 +2,7 @@
 	export let data;
 
 	import { browser } from '$app/environment';
-	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 	import {
 		Footer,
 		Header,
@@ -43,7 +43,6 @@
 		type ProfileLeaderboard
 	} from '$lib/types.js';
 	import { detectTheme, errToast } from '$lib/utils';
-	import { error } from '@sveltejs/kit';
 	import Chart from 'chart.js/auto';
 	import DOMPurify from 'dompurify';
 	import type { Map, TileLayer } from 'leaflet';
@@ -68,8 +67,9 @@
 
 		const userFound = $users.find((user) => user.id == data.user);
 		if (!userFound) {
-			errToast('Could not find user, please try again or contact BTC Map.');
-			error(404, 'User Not Found');
+			console.log('Could not find user, please try again or contact BTC Map.');
+			goto('/404');
+			return;
 		}
 		userCreated = userFound['created_at'];
 		supporter = Boolean(
@@ -523,9 +523,9 @@
 </script>
 
 <svelte:head>
-	<title>{$page.data.username} - BTC Map Supertagger</title>
+	<title>{username ? username + ' - ' : ''}BTC Map Supertagger</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/supertagger.png" />
-	<meta property="twitter:title" content="{$page.data.username} - BTC Map Supertagger" />
+	<meta property="twitter:title" content="{username ? username + ' - ' : ''}BTC Map Supertagger" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/supertagger.png" />
 
 	{#if lightning}
@@ -562,30 +562,32 @@
 
 				<div>
 					<h1 class="text-4xl font-semibold !leading-tight text-primary dark:text-white">
-						{username}
+						{username || 'BTC Map Supertagger'}
 					</h1>
-					<a
-						href="https://www.openstreetmap.org/user/{username}"
-						target="_blank"
-						rel="noreferrer"
-						class="mx-auto mt-1 flex w-24 items-center justify-center text-xs text-link transition-colors hover:text-hover"
-						>OSM Profile <svg
-							class="ml-1 w-3"
-							width="16"
-							height="16"
-							viewBox="0 0 16 16"
-							fill="none"
-							xmlns="http://www.w3.org/2000/svg"
+					{#if username}
+						<a
+							href="https://www.openstreetmap.org/user/{username}"
+							target="_blank"
+							rel="noreferrer"
+							class="mx-auto mt-1 flex w-24 items-center justify-center text-xs text-link transition-colors hover:text-hover"
+							>OSM Profile <svg
+								class="ml-1 w-3"
+								width="16"
+								height="16"
+								viewBox="0 0 16 16"
+								fill="none"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									d="M3 13L13 3M13 3H5.5M13 3V10.5"
+									stroke="currentColor"
+									stroke-width="1.5"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								/>
+							</svg></a
 						>
-							<path
-								d="M3 13L13 3M13 3H5.5M13 3V10.5"
-								stroke="currentColor"
-								stroke-width="1.5"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							/>
-						</svg></a
-					>
+					{/if}
 				</div>
 
 				<!-- svelte-ignore a11y-missing-content -->
@@ -670,7 +672,7 @@
 					<h3
 						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
 					>
-						{username}'s Activity
+						{username || 'BTC Map Supertagger'}'s Activity
 					</h3>
 
 					<div
@@ -729,7 +731,7 @@
 				<h3
 					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary dark:bg-white/10 dark:text-white md:text-left"
 				>
-					{username}'s Map
+					{username || 'BTC Map Supertagger'}'s Map
 				</h3>
 
 				<div class="relative mb-2">

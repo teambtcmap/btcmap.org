@@ -3,7 +3,6 @@
 
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
 	import {
 		Boost,
 		Footer,
@@ -373,12 +372,9 @@
 </script>
 
 <svelte:head>
-	<title>{$page.data.name ? $page.data.name + ' - ' : ''}BTC Map Merchant</title>
+	<title>{name ? name + ' - ' : ''}BTC Map Merchant</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/merchant.png" />
-	<meta
-		property="twitter:title"
-		content="{$page.data.name ? $page.data.name + ' - ' : ''}BTC Map Merchant"
-	/>
+	<meta property="twitter:title" content="{name ? name + ' - ' : ''}BTC Map Merchant" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/merchant.png" />
 
 	{#if payment && payment.type === 'uri' && payment.url?.startsWith('lightning:')}

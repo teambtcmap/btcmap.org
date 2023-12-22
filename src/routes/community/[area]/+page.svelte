@@ -3,7 +3,6 @@
 
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
 	import {
 		Footer,
 		Header,
@@ -851,9 +850,9 @@
 </script>
 
 <svelte:head>
-	<title>{$page.data.name} - BTC Map Community</title>
+	<title>{name ? name + ' - ' : ''}BTC Map Community</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/communities.png" />
-	<meta property="twitter:title" content="{$page.data.name} - BTC Map Community" />
+	<meta property="twitter:title" content="{name ? name + ' - ' : ''}BTC Map Community" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/communities.png" />
 
 	{#if lightning && lightning.type === 'address'}
@@ -889,7 +888,7 @@
 						<div class="mx-auto h-32 w-32 animate-pulse rounded-full bg-link/50" />
 					{/if}
 					<h1 class="text-4xl font-semibold !leading-tight text-primary dark:text-white">
-						{name}
+						{name || 'BTC Map Community'}
 					</h1>
 					{#if org}
 						<OrgBadge {org} />
@@ -919,26 +918,28 @@
 					{:else}
 						<div class="mx-auto h-7 w-24 animate-pulse rounded bg-link/50" />
 					{/if}
-					<a
-						href={`/communities/map?community=${data.id}`}
-						class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
-						>View on community map <svg
-							class="ml-1 w-3"
-							width="16"
-							height="16"
-							viewBox="0 0 16 16"
-							fill="none"
-							xmlns="http://www.w3.org/2000/svg"
+					{#if data.id}
+						<a
+							href={`/communities/map?community=${data.id}`}
+							class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
+							>View on community map <svg
+								class="ml-1 w-3"
+								width="16"
+								height="16"
+								viewBox="0 0 16 16"
+								fill="none"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									d="M3 13L13 3M13 3H5.5M13 3V10.5"
+									stroke="currentColor"
+									stroke-width="1.5"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								/>
+							</svg></a
 						>
-							<path
-								d="M3 13L13 3M13 3H5.5M13 3V10.5"
-								stroke="currentColor"
-								stroke-width="1.5"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							/>
-						</svg></a
-					>
+					{/if}
 				</div>
 
 				{#if dataInitialized}
@@ -980,7 +981,7 @@
 				<h3
 					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary dark:bg-white/10 dark:text-white md:text-left"
 				>
-					{name} Map
+					{name || 'BTC Map Community'} Map
 					<div class="flex items-center space-x-1 text-link">
 						{#if dataInitialized}
 							<div class="flex items-center space-x-1">
@@ -1079,7 +1080,7 @@
 					<h3
 						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
 					>
-						{name} Supertaggers
+						{name || 'BTC Map Community'} Supertaggers
 					</h3>
 					<div bind:this={taggerDiv} class="hide-scroll max-h-[375px] overflow-scroll p-1">
 						{#if taggers && taggers.length}
@@ -1135,7 +1136,7 @@
 					<h3
 						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
 					>
-						{name} Activity
+						{name || 'BTC Map Community'} Activity
 					</h3>
 
 					<div
@@ -1195,8 +1196,8 @@
 				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
 					<div class="p-5 text-lg font-semibold text-primary dark:text-white">
 						<h3 class="mb-2 text-center md:text-left">
-							{name} Tickets
-							{#if !ticketError}
+							{name || 'BTC Map Community'} Tickets
+							{#if tickets && !ticketError}
 								<span class="text-base">({totalTickets})</span>
 							{/if}
 							<InfoTooltip
@@ -1212,12 +1213,15 @@
 									: type === 'Verify'
 										? 'rounded-b md:rounded-r md:rounded-bl-none'
 										: ''} {showType === type ? 'bg-link text-white' : ''} transition-colors"
-								on:click={() => (showType = type)}>{type}</button
+								on:click={() => (showType = type)}
+								disabled={!tickets || ticketError}
 							>
+								{type}
+							</button>
 						{/each}
 					</div>
 
-					{#if !ticketError}
+					{#if tickets && !ticketError}
 						{#if showType === 'Add'}
 							{#if add.length}
 								{#each add as ticket}
@@ -1258,7 +1262,7 @@
 							{/if}
 						{/if}
 
-						{#if tickets.length === 100}
+						{#if tickets?.length === 100}
 							<p
 								class="border-t border-statBorder p-5 text-center font-semibold text-primary dark:text-white"
 							>
@@ -1286,7 +1290,7 @@
 					<h3
 						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
 					>
-						{name} Charts
+						{name || 'BTC Map Community'} Charts
 					</h3>
 					<div class="border-b border-statBorder p-5">
 						<div class="relative">
