@@ -12,16 +12,15 @@
 <div class="space-y-5 p-5 {border}">
 	<h3 class="text-center text-xl text-primary dark:text-white md:h-[56px] md:text-left">
 		{title}
-		{#if title === 'Number of communities'}
-			<a href="/communities"><i class="fa-solid fa-circle-info text-base" /></a>
-		{/if}
 		{#if loading}
 			<LoadingSpinner color="text-link" style="inline" />
 		{/if}
 	</h3>
 	<div class="flex justify-center md:justify-start">
 		{#if stat !== undefined}
-			<span class="text-5xl font-semibold text-primary dark:text-white">{stat}</span>
+			<span class="text-5xl font-semibold text-primary dark:text-white">
+				{stat}{title === 'Up-To-Date Percent' ? '%' : ''}
+			</span>
 			{#if percent}
 				<span
 					class="{percent === '+0'

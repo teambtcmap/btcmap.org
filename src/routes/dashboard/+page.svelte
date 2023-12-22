@@ -1,16 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { DashboardStat, Footer, Header, HeaderPlaceholder } from '$lib/comp';
-	import {
-		areaError,
-		areas,
-		eventError,
-		events,
-		reportError,
-		reports,
-		syncStatus,
-		theme
-	} from '$lib/store';
+	import { eventError, events, reportError, reports, syncStatus, theme } from '$lib/store';
 	import type { ChartHistory, EventType, Report } from '$lib/types';
 	import { detectTheme, errToast, updateChartThemes } from '$lib/utils';
 	import Chart from 'chart.js/auto';
@@ -19,9 +10,6 @@
 
 	// alert for event errors
 	$: $eventError && errToast($eventError);
-
-	// alert for area errors
-	$: $areaError && errToast($areaError);
 
 	// alert for report errors
 	$: $reportError && errToast($reportError);
@@ -80,20 +68,6 @@
 				})
 			: [];
 
-	$: communities =
-		$areas && $areas.length && $reports && $reports.length
-			? $areas.filter(
-					(area) =>
-						area.tags.type === 'community' &&
-						area.tags.geo_json &&
-						area.tags.name &&
-						area.tags['icon:square'] &&
-						area.tags.continent &&
-						Object.keys(area.tags).find((key) => key.includes('contact')) &&
-						$reports.find((report) => report.area_id === area.id)
-				)
-			: undefined;
-
 	const getStatPeriod = () => {
 		return new Date(new Date().getTime() - 24 * 60 * 60 * 1000).getTime();
 	};
@@ -139,6 +113,8 @@
 	$: onchain = stats && stats[0].tags.total_elements_onchain;
 	$: lightning = stats && stats[0].tags.total_elements_lightning;
 	$: nfc = stats && stats[0].tags.total_elements_lightning_contactless;
+
+	$: upToDatePercent = stats && stats[0].tags.up_to_date_percent;
 
 	$: totalChange =
 		stats && total
@@ -206,6 +182,13 @@
 					)
 				)
 			: '';
+
+	$: upToDatePercentChange =
+		stats && upToDatePercent
+			? new Intl.NumberFormat('en-US', { signDisplay: 'always' }).format(
+					upToDatePercent - stats[1].tags.up_to_date_percent
+				)
+			: undefined;
 
 	let upToDateChartCanvas: HTMLCanvasElement;
 	let upToDateChart: Chart<'line', number[] | undefined, string>;
@@ -703,8 +686,9 @@
 						loading={$syncStatus && chartsRendered}
 					/>
 					<DashboardStat
-						title="Number of communities"
-						stat={communities && communities.length}
+						title="Up-To-Date Percent"
+						stat={upToDatePercent}
+						change={upToDatePercentChange}
 						loading={$syncStatus && chartsRendered}
 					/>
 				</div>
