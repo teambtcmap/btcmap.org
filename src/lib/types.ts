@@ -126,7 +126,13 @@ export type Grade = 1 | 2 | 3 | 4 | 5;
 
 export type User = {
 	id: number;
-	osm_json: { id: number; display_name: string; description: string; img: { href: string } | null };
+	osm_json: {
+		id: number;
+		display_name: string;
+		description: string;
+		img: { href: string } | null;
+		account_created: string;
+	};
 	tags: { ['supporter:expires']?: string };
 	created_at: string;
 	updated_at: string;

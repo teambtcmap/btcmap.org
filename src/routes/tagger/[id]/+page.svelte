@@ -44,6 +44,7 @@
 	} from '$lib/types.js';
 	import { detectTheme, errToast } from '$lib/utils';
 	import Chart from 'chart.js/auto';
+	import { format } from 'date-fns';
 	import DOMPurify from 'dompurify';
 	import type { Map, TileLayer } from 'leaflet';
 	import { marked } from 'marked';
@@ -78,6 +79,7 @@
 		);
 		const user = userFound['osm_json'];
 		avatar = user.img ? user.img.href : '/images/satoshi-nakamoto.png';
+		mappingSince = user['account_created'];
 		const description = user.description;
 		const removeLightning = description.match(/(\[⚡]\(lightning:[^)]+\))/g);
 		filteredDesc = removeLightning?.length
@@ -440,6 +442,7 @@
 	let userCreated: string | undefined;
 	let supporter: boolean | undefined;
 	let avatar: string | undefined;
+	let mappingSince: string | undefined;
 	let username = data.username;
 	let filteredDesc: string | undefined;
 	let profileDesc: HTMLHeadingElement;
@@ -560,16 +563,24 @@
 					<div class="mx-auto h-32 w-32 animate-pulse rounded-full bg-link/50" />
 				{/if}
 
-				<div>
+				<div class="space-y-1">
 					<h1 class="text-4xl font-semibold !leading-tight text-primary dark:text-white">
 						{username || 'BTC Map Supertagger'}
 					</h1>
+					<p
+						class="flex items-center justify-center space-x-1 text-sm text-primary dark:text-white"
+					>
+						<i class="fa-solid fa-map-pin" />
+						<span class="block">
+							Mapping Since: {mappingSince ? format(new Date(mappingSince), 'yyyy-MM-dd') : '-'}
+						</span>
+					</p>
 					{#if username}
 						<a
 							href="https://www.openstreetmap.org/user/{username}"
 							target="_blank"
 							rel="noreferrer"
-							class="mx-auto mt-1 flex w-24 items-center justify-center text-xs text-link transition-colors hover:text-hover"
+							class="mx-auto flex w-24 items-center justify-center text-xs text-link transition-colors hover:text-hover"
 							>OSM Profile <svg
 								class="ml-1 w-3"
 								width="16"
