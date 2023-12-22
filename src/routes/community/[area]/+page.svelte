@@ -144,25 +144,6 @@
 			lightning = { destination: community['tips:url'], type: TipType.Url };
 		}
 
-		const latestReport = communityReports[0].tags;
-		total = latestReport.total_elements;
-		upToDate = latestReport.up_to_date_elements;
-		outdated = latestReport.outdated_elements;
-		legacy = latestReport.legacy_elements;
-		grade = latestReport.grade;
-
-		upToDatePercent = new Intl.NumberFormat('en-US').format(
-			Number((upToDate / (total / 100)).toFixed(0))
-		);
-
-		outdatedPercent = new Intl.NumberFormat('en-US').format(
-			Number((outdated / (total / 100)).toFixed(0))
-		);
-
-		legacyPercent = new Intl.NumberFormat('en-US').format(
-			Number((legacy / (total / 100)).toFixed(0))
-		);
-
 		const rewoundPoly = rewind(community.geo_json, true);
 
 		// filter elements within community
@@ -216,6 +197,187 @@
 
 		eventElements = eventElements;
 		taggers = taggers;
+
+		const populateMap = () => {
+			// add map
+			map = leaflet.map(mapElement, { attributionControl: false });
+
+			// add tiles and basemaps
+			baseMaps = layers(leaflet, map);
+
+			// change broken marker image path in prod
+			leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
+
+			// add OSM attribution
+			attribution(leaflet, map);
+
+			// create marker cluster groups
+			/* eslint-disable no-undef */
+			// @ts-expect-error
+			let markers = L.markerClusterGroup();
+			/* eslint-enable no-undef */
+			let upToDateLayer = leaflet.featureGroup.subGroup(markers);
+			let outdatedLayer = leaflet.featureGroup.subGroup(markers);
+			let legacyLayer = leaflet.featureGroup.subGroup(markers);
+
+			let overlayMaps = {
+				'Up-To-Date': upToDateLayer,
+				Outdated: outdatedLayer,
+				Legacy: legacyLayer
+			};
+
+			leaflet.control.layers(baseMaps, overlayMaps).addTo(map);
+
+			// add locate button to map
+			geolocate(leaflet, map);
+
+			// change default icons
+			changeDefaultIcons(true, leaflet, mapElement, DomEvent);
+
+			// get date from 1 year ago to add verified check if survey is current
+			let verifiedDate = calcVerifiedDate();
+
+			// add community area poly to map
+			if (community.geo_json) {
+				leaflet.geoJSON(community.geo_json, { style: { fill: false } }).addTo(map);
+			}
+
+			// add elements to map
+			filteredElements.forEach((element) => {
+				if (element['deleted_at']) {
+					return;
+				}
+
+				let icon = element.tags['icon:android'];
+				let payment = element.tags['payment:uri']
+					? { type: 'uri', url: element.tags['payment:uri'] }
+					: element.tags['payment:pouch']
+						? { type: 'pouch', username: element.tags['payment:pouch'] }
+						: element.tags['payment:coinos']
+							? { type: 'coinos', username: element.tags['payment:coinos'] }
+							: undefined;
+				let boosted =
+					element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now()
+						? element.tags['boost:expires']
+						: undefined;
+
+				const elementOSM = element['osm_json'];
+
+				const lat = latCalc(elementOSM);
+				const long = longCalc(elementOSM);
+
+				let divIcon = generateIcon(leaflet, icon, boosted ? true : false);
+
+				let marker = generateMarker(
+					lat,
+					long,
+					divIcon,
+					elementOSM,
+					payment,
+					leaflet,
+					verifiedDate,
+					true,
+					boosted
+				);
+
+				let verified = verifiedArr(elementOSM);
+
+				if (verified.length && Date.parse(verified[0]) > verifiedDate) {
+					upToDateLayer.addLayer(marker);
+
+					if (upToDate === undefined) {
+						upToDate = 1;
+					} else {
+						upToDate++;
+					}
+				} else {
+					outdatedLayer.addLayer(marker);
+
+					if (outdated === undefined) {
+						outdated = 1;
+					} else {
+						outdated++;
+					}
+				}
+
+				if (elementOSM.tags && elementOSM.tags['payment:bitcoin']) {
+					legacyLayer.addLayer(marker);
+
+					if (legacy === undefined) {
+						legacy = 1;
+					} else {
+						legacy++;
+					}
+				}
+
+				if (total === undefined) {
+					total = 1;
+				} else {
+					total++;
+				}
+			});
+
+			map.addLayer(markers);
+			map.addLayer(upToDateLayer);
+			map.addLayer(outdatedLayer);
+			map.addLayer(legacyLayer);
+
+			map.fitBounds(leaflet.geoJSON(community.geo_json).getBounds());
+
+			mapLoaded = true;
+		};
+
+		populateMap();
+
+		if (!upToDate) {
+			upToDate = 0;
+		}
+
+		if (!outdated) {
+			outdated = 0;
+		}
+
+		if (!legacy) {
+			legacy = 0;
+		}
+
+		if (!total) {
+			total = 0;
+		}
+
+		upToDatePercent = new Intl.NumberFormat('en-US').format(
+			Number((upToDate / (total / 100)).toFixed(0))
+		);
+
+		outdatedPercent = new Intl.NumberFormat('en-US').format(
+			Number((outdated / (total / 100)).toFixed(0))
+		);
+
+		legacyPercent = new Intl.NumberFormat('en-US').format(
+			Number((legacy / (total / 100)).toFixed(0))
+		);
+
+		const setGrade = () => {
+			switch (true) {
+				case Number(upToDatePercent) >= 95:
+					grade = 5;
+					break;
+				case Number(upToDatePercent) >= 75:
+					grade = 4;
+					break;
+				case Number(upToDatePercent) >= 50:
+					grade = 3;
+					break;
+				case Number(upToDatePercent) >= 25:
+					grade = 2;
+					break;
+				case Number(upToDatePercent) >= 0:
+					grade = 1;
+					break;
+			}
+		};
+
+		setGrade();
 
 		const populateCharts = () => {
 			const chartsReports = [...communityReports].sort(
@@ -539,113 +701,6 @@
 		};
 
 		populateCharts();
-
-		const populateMap = () => {
-			// add map
-			map = leaflet.map(mapElement, { attributionControl: false });
-
-			// add tiles and basemaps
-			baseMaps = layers(leaflet, map);
-
-			// change broken marker image path in prod
-			leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
-
-			// add OSM attribution
-			attribution(leaflet, map);
-
-			// create marker cluster groups
-			/* eslint-disable no-undef */
-			// @ts-expect-error
-			let markers = L.markerClusterGroup();
-			/* eslint-enable no-undef */
-			let upToDateLayer = leaflet.featureGroup.subGroup(markers);
-			let outdatedLayer = leaflet.featureGroup.subGroup(markers);
-			let legacyLayer = leaflet.featureGroup.subGroup(markers);
-
-			let overlayMaps = {
-				'Up-To-Date': upToDateLayer,
-				Outdated: outdatedLayer,
-				Legacy: legacyLayer
-			};
-
-			leaflet.control.layers(baseMaps, overlayMaps).addTo(map);
-
-			// add locate button to map
-			geolocate(leaflet, map);
-
-			// change default icons
-			changeDefaultIcons(true, leaflet, mapElement, DomEvent);
-
-			// get date from 1 year ago to add verified check if survey is current
-			let verifiedDate = calcVerifiedDate();
-
-			// add community area poly to map
-			if (community.geo_json) {
-				leaflet.geoJSON(community.geo_json, { style: { fill: false } }).addTo(map);
-			}
-
-			// add elements to map
-			filteredElements.forEach((element) => {
-				if (element['deleted_at']) {
-					return;
-				}
-
-				let icon = element.tags['icon:android'];
-				let payment = element.tags['payment:uri']
-					? { type: 'uri', url: element.tags['payment:uri'] }
-					: element.tags['payment:pouch']
-						? { type: 'pouch', username: element.tags['payment:pouch'] }
-						: element.tags['payment:coinos']
-							? { type: 'coinos', username: element.tags['payment:coinos'] }
-							: undefined;
-				let boosted =
-					element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now()
-						? element.tags['boost:expires']
-						: undefined;
-
-				const elementOSM = element['osm_json'];
-
-				const lat = latCalc(elementOSM);
-				const long = longCalc(elementOSM);
-
-				let divIcon = generateIcon(leaflet, icon, boosted ? true : false);
-
-				let marker = generateMarker(
-					lat,
-					long,
-					divIcon,
-					elementOSM,
-					payment,
-					leaflet,
-					verifiedDate,
-					true,
-					boosted
-				);
-
-				let verified = verifiedArr(elementOSM);
-
-				if (verified.length && Date.parse(verified[0]) > verifiedDate) {
-					upToDateLayer.addLayer(marker);
-				} else {
-					outdatedLayer.addLayer(marker);
-				}
-
-				if (elementOSM.tags && elementOSM.tags['payment:bitcoin']) {
-					legacyLayer.addLayer(marker);
-				}
-			});
-
-			map.addLayer(markers);
-			map.addLayer(upToDateLayer);
-			map.addLayer(outdatedLayer);
-			map.addLayer(legacyLayer);
-
-			map.fitBounds(leaflet.geoJSON(community.geo_json).getBounds());
-
-			mapLoaded = true;
-		};
-
-		populateMap();
 
 		dataInitialized = true;
 	};
@@ -1368,6 +1423,8 @@
 					rel="noreferrer"
 					class="text-link transition-colors hover:text-hover">here</a
 				>.
+				<br />
+				*Chart data updated once every 24 hours.
 			</p>
 		</main>
 

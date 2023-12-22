@@ -709,7 +709,7 @@
 					/>
 				</div>
 				<p class="text-center text-sm text-body dark:text-white md:text-left">
-					*Data updated every 10 minutes, change based on previous 24 hours.
+					*Data updated once daily, change based on previous 24 hours.
 				</p>
 			</section>
 

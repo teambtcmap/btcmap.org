@@ -259,6 +259,8 @@
 
 				<p class="text-center text-sm text-body dark:text-white">
 					*Data sorted by Up-To-Date, then Total Locations, then Legacy.
+					<br />
+					*Leaderboard updated once every 24 hours.
 				</p>
 
 				<div class="mt-10 flex justify-center">
