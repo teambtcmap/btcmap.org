@@ -20,15 +20,13 @@
 		class="mx-auto flex w-full items-center justify-between rounded-xl bg-lightBlue px-4 py-4 text-body dark:bg-white/[0.15] dark:text-white md:w-[475px] md:justify-center md:space-x-4 md:px-0 md:py-3"
 	>
 		<!-- value -->
-		<span class="hidden lowercase md:block"
-			>{text === 'Lightning' ? `${value.slice(0, 41)}...` : value}</span
-		>
+		<span class="hidden lowercase md:block">{value.slice(0, 41)}...</span>
 		<span class="block uppercase md:hidden"
 			>{text}
 			<img
 				src={text === 'Lightning' ? '/icons/ln-highlight.svg' : '/icons/btc-highlight.svg'}
 				alt="protocol"
-				class="mb-1 inline"
+				class="mb-1 inline dark:rounded-full dark:bg-white dark:p-0.5"
 			/>
 		</span>
 

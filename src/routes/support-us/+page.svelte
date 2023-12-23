@@ -9,9 +9,14 @@
 	} from '$lib/comp';
 	import { theme } from '$lib/store';
 	import type { DonationType } from '$lib/types';
-	import { detectTheme } from '$lib/utils';
+	import { detectTheme, warningToast } from '$lib/utils';
+	import QRCode from 'qrcode';
+	import type { Action } from 'svelte/action';
+	import type { PageData } from './$types';
 
-	let onchain = 'bc1qqmy5c03clt6a72aq0ys5jzm2sjnws3qr05nvmz';
+	export let data: PageData;
+
+	let onchain = data.address;
 	const lnurlp = 'LNURL1DP68GURN8GHJ7CM0WFJJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQPSYZ34';
 
 	let showQr = false;
@@ -20,6 +25,20 @@
 	const showQrToggle = (type: DonationType) => {
 		network = type;
 		showQr = true;
+	};
+
+	const renderQr: Action<HTMLCanvasElement> = (node) => {
+		QRCode.toCanvas(
+			node,
+			network === 'Lightning' ? 'lightning:' + lnurlp : 'bitcoin:' + onchain,
+			{ width: window.innerWidth > 640 ? 256 : 200 },
+			function (error: any) {
+				if (error) {
+					warningToast('Could not generate QR, please try again or contact BTC Map.');
+					console.error(error);
+				}
+			}
+		);
 	};
 
 	const company = [
@@ -83,12 +102,9 @@
 
 							<!-- qr -->
 							<a href={network === 'Lightning' ? `lightning:${lnurlp}` : `bitcoin:${onchain}`}>
-								<img
-									src={network === 'Lightning'
-										? '/images/lightning-qr.svg'
-										: '/images/onchain-qr.svg'}
-									alt="qr"
-									class="mx-auto h-[256px] w-[256px] rounded-xl border-4 border-link transition-colors hover:border-hover"
+								<canvas
+									use:renderQr
+									class="mx-auto h-[200px] w-[200px] rounded-xl border-4 border-link transition-colors hover:border-hover sm:h-[256px] sm:w-[256px]"
 								/>
 							</a>
 
