@@ -2,12 +2,12 @@ import { LNBITS_API_KEY, LNBITS_URL } from '$env/static/private';
 import { error } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
+import type { RequestHandler } from './$types';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 // generate and return invoice
-// @ts-expect-error
-export async function GET({ url }) {
+export const GET: RequestHandler = async ({ url }) => {
 	const amount = url.searchParams.get('amount');
 	const name = url.searchParams.get('name');
 	const time = url.searchParams.get('time');
@@ -23,7 +23,7 @@ export async function GET({ url }) {
 			{
 				out: false,
 				amount: `${amount}`,
-				memo: `BTC Map boost ${name} for ${time} month${time > 1 ? 's' : ''}`,
+				memo: `BTC Map boost ${name} for ${time} month${Number(time) > 1 ? 's' : ''}`,
 				unit: 'sat'
 			},
 			{ headers }
@@ -37,4 +37,4 @@ export async function GET({ url }) {
 		});
 
 	return new Response(JSON.stringify(invoice));
-}
+};

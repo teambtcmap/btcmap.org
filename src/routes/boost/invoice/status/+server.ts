@@ -1,10 +1,10 @@
 import { LNBITS_API_KEY, LNBITS_URL } from '$env/static/private';
 import { error } from '@sveltejs/kit';
 import axios from 'axios';
+import type { RequestHandler } from './$types';
 
 // check the status of an invoice
-// @ts-expect-error
-export async function GET({ url }) {
+export const GET: RequestHandler = async ({ url }) => {
 	const hash = url.searchParams.get('hash');
 
 	const headers = {
@@ -23,4 +23,4 @@ export async function GET({ url }) {
 		});
 
 	return new Response(JSON.stringify(status));
-}
+};

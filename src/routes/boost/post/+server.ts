@@ -2,13 +2,13 @@ import { BTCMAP_KEY } from '$env/static/private';
 import { error, json } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
+import type { RequestHandler } from './$types';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 const used: string[] = [];
 
-// @ts-expect-error
-export async function POST({ request }) {
+export const POST: RequestHandler = async ({ request }) => {
 	const headers = {
 		Authorization: `Bearer ${BTCMAP_KEY}`
 	};
@@ -18,12 +18,12 @@ export async function POST({ request }) {
 	// check that time is valid
 	const validTimes = [1, 3, 12];
 	if (!validTimes.includes(time)) {
-		return;
+		error(418);
 	}
 
 	// verify that the invoice has been paid
 	if (used.includes(hash)) {
-		return;
+		error(418);
 	}
 
 	const boost = await axios
@@ -76,4 +76,4 @@ export async function POST({ request }) {
 		});
 
 	return json({ status: boost });
-}
+};

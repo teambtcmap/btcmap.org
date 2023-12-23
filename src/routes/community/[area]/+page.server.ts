@@ -2,11 +2,11 @@ import { GITHUB_API_KEY } from '$env/static/private';
 import { error } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
+import type { PageServerLoad } from './$types';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
-// @ts-expect-error
-export async function load({ params }) {
+export const load: PageServerLoad = async ({ params }) => {
 	const { area } = params;
 	try {
 		const response = await axios.get(`https://api.btcmap.org/v2/areas/${area}`);
@@ -39,4 +39,4 @@ export async function load({ params }) {
 	} catch (err) {
 		error(404, 'Community Not Found');
 	}
-}
+};

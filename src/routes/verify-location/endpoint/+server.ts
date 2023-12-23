@@ -8,13 +8,13 @@ import { error } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import crypto from 'crypto';
+import type { RequestHandler } from './$types';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 const used: string[] = [];
 
-// @ts-expect-error
-export async function POST({ request }) {
+export const POST: RequestHandler = async ({ request }) => {
 	const headers = {
 		Authorization: `Bearer ${GITHUB_API_KEY}`,
 		Accept: 'application/vnd.github+json'
@@ -36,7 +36,7 @@ export async function POST({ request }) {
 
 	// if honey field has value return
 	if (honey) {
-		return;
+		error(418);
 	}
 
 	// verify that captcha is correct
@@ -105,4 +105,4 @@ If you are a new contributor please read our Tagging Instructions [here](https:/
 		});
 
 	return new Response(JSON.stringify(github));
-}
+};

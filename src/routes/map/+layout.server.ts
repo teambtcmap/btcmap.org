@@ -1,8 +1,7 @@
 import { redirect } from '@sveltejs/kit';
+import type { LayoutServerLoad } from './$types';
 
-/** @type {import('./$types').LayoutServerLoad} */
-// @ts-expect-error
-export function load({ url }) {
+export const load: LayoutServerLoad = ({ url }) => {
 	// redirect to communities map if params match
 	const community = url.searchParams.get('community');
 	const organization = url.searchParams.get('organization');
@@ -27,4 +26,4 @@ export function load({ url }) {
 			redirect(301, '/communities/map');
 			break;
 	}
-}
+};
