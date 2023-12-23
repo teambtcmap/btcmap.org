@@ -627,14 +627,14 @@
 			{/if}
 
 			<h2
-				class="w-full text-center text-xl font-semibold text-primary dark:text-white md:text-left lg:w-[675px]"
+				class="w-full text-center text-xl font-semibold text-primary md:text-left lg:w-[675px] dark:text-white"
 			>
 				Here are some stats and charts for the MATH nerds.
 			</h2>
 
 			<section id="stats">
 				<div
-					class="grid rounded-3xl border border-statBorder dark:bg-white/10 md:grid-cols-2 xl:grid-cols-4"
+					class="grid rounded-3xl border border-statBorder md:grid-cols-2 xl:grid-cols-4 dark:bg-white/10"
 				>
 					<DashboardStat
 						title="Total Locations"
@@ -692,14 +692,14 @@
 						loading={$syncStatus && chartsRendered}
 					/>
 				</div>
-				<p class="text-center text-sm text-body dark:text-white md:text-left">
+				<p class="text-center text-sm text-body md:text-left dark:text-white">
 					*Data updated once daily, change based on previous 24 hours.
 				</p>
 			</section>
 
 			<section id="charts" class="space-y-10">
 				<div
-					class="flex flex-wrap justify-end gap-3 font-semibold text-primary dark:text-white md:gap-5"
+					class="flex flex-wrap justify-end gap-3 font-semibold text-primary md:gap-5 dark:text-white"
 				>
 					{#each chartHistory as history}
 						<button
@@ -782,7 +782,7 @@
 				</div>
 			</section>
 
-			<p class="text-center text-sm text-body dark:text-white md:text-left">
+			<p class="text-center text-sm text-body md:text-left dark:text-white">
 				*More information on bitcoin mapping tags can be found <a
 					href="https://wiki.btcmap.org/general/tagging-instructions.html#tagging-guidance"
 					target="_blank"

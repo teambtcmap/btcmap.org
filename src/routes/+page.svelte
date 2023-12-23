@@ -15,7 +15,7 @@
 	<img
 		src="/images/street-map.svg"
 		alt="roads"
-		class="absolute right-0 top-0 dark:opacity-10 xl:hidden"
+		class="absolute right-0 top-0 xl:hidden dark:opacity-10"
 	/>
 	<Header />
 	<div class="relative mx-auto w-10/12 xl:w-[1200px]">
@@ -42,7 +42,7 @@
 				>
 					{#each $apps as app}
 						<div
-							class="mx-2 my-2 space-y-1 text-center font-semibold text-body dark:text-white md:my-0"
+							class="mx-2 my-2 space-y-1 text-center font-semibold text-body md:my-0 dark:text-white"
 						>
 							<p>{app.type}</p>
 							<a
@@ -62,7 +62,7 @@
 						</div>
 					{/each}
 				</div>
-				<h2 class="text-center text-xl font-semibold text-primary dark:text-white xl:text-left">
+				<h2 class="text-center text-xl font-semibold text-primary xl:text-left dark:text-white">
 					Our apps and the underlying data are free and open source.
 					<br /><br />
 					We use

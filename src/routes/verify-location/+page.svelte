@@ -375,7 +375,7 @@
 							<div class="relative mb-2">
 								<div
 									bind:this={mapElement}
-									class="z-10 h-[300px] !cursor-crosshair rounded-2xl border-2 border-input !bg-teal dark:!bg-dark dark:text-map md:h-[450px]"
+									class="z-10 h-[300px] !cursor-crosshair rounded-2xl border-2 border-input !bg-teal md:h-[450px] dark:!bg-dark dark:text-map"
 								/>
 								{#if !mapLoaded}
 									<MapLoadingEmbed

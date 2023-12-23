@@ -370,7 +370,7 @@
 				<section id="noob" class="mx-auto w-full pt-14">
 					<div class="mx-auto max-w-xl">
 						<h2
-							class="mb-5 text-center text-3xl font-semibold text-primary dark:text-white md:text-left"
+							class="mb-5 text-center text-3xl font-semibold text-primary md:text-left dark:text-white"
 						>
 							Form Option
 						</h2>
@@ -428,7 +428,7 @@
 								<div class="relative mb-2">
 									<div
 										bind:this={mapElement}
-										class="z-10 h-[300px] !cursor-crosshair rounded-2xl border-2 border-input !bg-teal dark:!bg-dark md:h-[400px]"
+										class="z-10 h-[300px] !cursor-crosshair rounded-2xl border-2 border-input !bg-teal md:h-[400px] dark:!bg-dark"
 									/>
 									{#if !mapLoaded}
 										<MapLoadingEmbed

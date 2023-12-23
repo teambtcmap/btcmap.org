@@ -8,7 +8,7 @@
 </script>
 
 <div>
-	<h3 class="hidden text-lg uppercase text-body dark:text-white md:block">
+	<h3 class="hidden text-lg uppercase text-body md:block dark:text-white">
 		{text}
 		<img
 			src={text === 'Lightning' ? '/icons/ln-highlight.svg' : '/icons/btc-highlight.svg'}
@@ -17,7 +17,7 @@
 		/>
 	</h3>
 	<div
-		class="mx-auto flex w-full items-center justify-between rounded-xl bg-lightBlue px-4 py-4 text-body dark:bg-white/[0.15] dark:text-white md:w-[475px] md:justify-center md:space-x-4 md:px-0 md:py-3"
+		class="mx-auto flex w-full items-center justify-between rounded-xl bg-lightBlue px-4 py-4 text-body md:w-[475px] md:justify-center md:space-x-4 md:px-0 md:py-3 dark:bg-white/[0.15] dark:text-white"
 	>
 		<!-- value -->
 		<span class="hidden lowercase md:block">{value.slice(0, 41)}...</span>

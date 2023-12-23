@@ -25,7 +25,7 @@
 		{:else}
 			<HeaderPlaceholder />
 		{/if}
-		<p class="mb-5 w-full text-primary dark:text-white md:w-[500px]">
+		<p class="mb-5 w-full text-primary md:w-[500px] dark:text-white">
 			{text} If you wish to know the status of your contribution, you can join our
 			<a
 				href={$socials.discord}

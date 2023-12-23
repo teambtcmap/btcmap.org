@@ -263,7 +263,7 @@
 				<HeaderPlaceholder />
 			{/if}
 
-			<h2 class="mx-auto w-full text-xl font-semibold text-primary dark:text-white lg:w-[800px]">
+			<h2 class="mx-auto w-full text-xl font-semibold text-primary lg:w-[800px] dark:text-white">
 				Take ownership of your local bitcoin mapping data and help drive adoption. Bitcoin
 				communities are the spark that ignites the movement. Join your friends, onboard businesses
 				and have fun!
@@ -303,7 +303,7 @@
 				<div class="mb-5 justify-between md:flex">
 					{#if section}
 						<h2
-							class="mb-2 text-3xl font-semibold text-primary dark:text-white md:mb-0 md:text-left"
+							class="mb-2 text-3xl font-semibold text-primary md:mb-0 md:text-left dark:text-white"
 						>
 							<a href="/communities#{section.replaceAll(' ', '%20')}">{section}</a>
 						</h2>

@@ -1034,7 +1034,7 @@
 
 			<section id="map-section">
 				<h3
-					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary dark:bg-white/10 dark:text-white md:text-left"
+					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left dark:bg-white/10 dark:text-white"
 				>
 					{name || 'BTC Map Community'} Map
 					<div class="flex items-center space-x-1 text-link">
@@ -1070,7 +1070,7 @@
 				<div class="relative">
 					<div
 						bind:this={mapElement}
-						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal text-left dark:!bg-[#202f33] md:h-[600px]"
+						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal text-left md:h-[600px] dark:!bg-[#202f33]"
 					/>
 					{#if !mapLoaded}
 						<MapLoadingEmbed
@@ -1133,7 +1133,7 @@
 			<section id="taggers">
 				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
 					<h3
-						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
+						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left dark:text-white"
 					>
 						{name || 'BTC Map Community'} Supertaggers
 					</h3>
@@ -1189,7 +1189,7 @@
 			<section id="activity">
 				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
 					<h3
-						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
+						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left dark:text-white"
 					>
 						{name || 'BTC Map Community'} Activity
 					</h3>
@@ -1343,7 +1343,7 @@
 			<section id="charts" class="space-y-10">
 				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
 					<h3
-						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
+						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left dark:text-white"
 					>
 						{name || 'BTC Map Community'} Charts
 					</h3>
@@ -1416,7 +1416,7 @@
 				</div>
 			</section>
 
-			<p class="text-center text-sm text-body dark:text-white md:text-left">
+			<p class="text-center text-sm text-body md:text-left dark:text-white">
 				*More information on bitcoin mapping tags can be found <a
 					href="https://wiki.btcmap.org/general/tagging-instructions.html#tagging-guidance"
 					target="_blank"
