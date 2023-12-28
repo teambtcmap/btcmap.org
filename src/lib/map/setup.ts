@@ -626,15 +626,18 @@ export const verifiedArr = (element: ElementOSM) => {
 	const verified = [];
 
 	if (element.tags) {
-		if (element.tags['survey:date']) {
+		if (element.tags['survey:date'] && Date.parse(element.tags['survey:date'])) {
 			verified.push(element.tags['survey:date']);
 		}
 
-		if (element.tags['check_date']) {
+		if (element.tags['check_date'] && Date.parse(element.tags['check_date'])) {
 			verified.push(element.tags['check_date']);
 		}
 
-		if (element.tags['check_date:currency:XBT']) {
+		if (
+			element.tags['check_date:currency:XBT'] &&
+			Date.parse(element.tags['check_date:currency:XBT'])
+		) {
 			verified.push(element.tags['check_date:currency:XBT']);
 		}
 
