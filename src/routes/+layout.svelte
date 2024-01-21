@@ -18,7 +18,6 @@
 	import '../app.css';
 
 	axios.defaults.timeout = 10000;
-	axios.defaults.signal = AbortSignal.timeout(10000);
 
 	const options = {
 		reversed: true,
