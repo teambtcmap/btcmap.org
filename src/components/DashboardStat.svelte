@@ -10,7 +10,7 @@
 </script>
 
 <div class="space-y-5 p-5 {border}">
-	<h3 class="text-center text-xl text-primary md:h-[56px] md:text-left dark:text-white">
+	<h3 class="text-center text-xl text-primary dark:text-white md:h-[56px] md:text-left">
 		{title}
 		{#if loading}
 			<LoadingSpinner color="text-link" style="inline" />

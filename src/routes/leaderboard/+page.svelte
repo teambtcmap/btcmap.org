@@ -213,7 +213,7 @@
 			{/if}
 
 			<h2
-				class="mx-auto w-full text-center text-xl font-semibold text-primary lg:w-[800px] dark:text-white"
+				class="mx-auto w-full text-center text-xl font-semibold text-primary dark:text-white lg:w-[800px]"
 			>
 				Shadowy supertaggers are a competitive bunch. When they are not smashing the keys, they
 				check this leaderboard to make sure they’re on top. Are you going to stand by and let them

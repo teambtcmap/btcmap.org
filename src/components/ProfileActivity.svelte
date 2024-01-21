@@ -41,7 +41,7 @@
 	<div class="w-full flex-wrap items-center justify-between space-y-2 lg:flex lg:space-y-0">
 		<!-- event information -->
 		<div class="space-y-2 lg:space-y-0">
-			<span class="text-primary lg:mr-5 dark:text-white">
+			<span class="text-primary dark:text-white lg:mr-5">
 				<!-- action -->
 				<span>{capitalizeFirstLetter(action)}d</span>
 

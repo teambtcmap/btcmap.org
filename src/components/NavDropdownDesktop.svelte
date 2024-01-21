@@ -17,7 +17,7 @@
 		on:click={() => (show = !show)}
 		class="{show
 			? 'dark:!text-link'
-			: ''} mr-4 mt-4 flex items-center text-xl font-semibold text-link transition-colors hover:text-hover md:mr-0 md:mt-0 dark:text-white dark:hover:text-link"
+			: ''} mr-4 mt-4 flex items-center text-xl font-semibold text-link transition-colors hover:text-hover dark:text-white dark:hover:text-link md:mr-0 md:mt-0"
 	>
 		{title} <i class="fa-solid fa-chevron-down ml-1 h-4 w-4" />
 	</button>

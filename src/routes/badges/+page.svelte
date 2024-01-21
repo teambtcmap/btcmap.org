@@ -184,7 +184,7 @@
 				<HeaderPlaceholder />
 			{/if}
 
-			<p class="mx-auto w-full text-lg text-primary lg:w-[700px] dark:text-white">
+			<p class="mx-auto w-full text-lg text-primary dark:text-white lg:w-[700px]">
 				You can earn badges for your BTC Map contributions that will be displayed on your profile.
 				Have a badge idea? Let us know!
 			</p>

@@ -63,7 +63,7 @@
 
 	{#each stats as stat}
 		<span class="my-2 flex items-center justify-center lg:my-0 lg:inline-flex">
-			<span class="mr-1 text-primary lg:hidden dark:text-white">{stat.title}:</span>
+			<span class="mr-1 text-primary dark:text-white lg:hidden">{stat.title}:</span>
 			{#if stat.title === 'Up-To-Date'}
 				<div class="w-[100px] bg-link/25">
 					<div

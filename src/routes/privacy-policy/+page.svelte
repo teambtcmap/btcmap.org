@@ -15,7 +15,7 @@
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		<main class="mb-20 mt-10 space-y-10">
 			<div class="space-y-5 text-xl text-body dark:text-white">
-				<h1 class="text-4xl font-semibold !leading-tight text-primary md:text-5xl dark:text-white">
+				<h1 class="text-4xl font-semibold !leading-tight text-primary dark:text-white md:text-5xl">
 					Privacy Policy
 				</h1>
 				<p>

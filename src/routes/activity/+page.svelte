@@ -98,7 +98,7 @@
 				<h1
 					class="{detectTheme() === 'dark' || $theme === 'dark'
 						? 'text-white'
-						: 'gradient'} text-center text-4xl font-semibold !leading-tight text-primary md:text-5xl lg:text-left dark:text-white"
+						: 'gradient'} text-center text-4xl font-semibold !leading-tight text-primary dark:text-white md:text-5xl lg:text-left"
 				>
 					Activity
 				</h1>
@@ -107,13 +107,13 @@
 			{/if}
 
 			<h2
-				class="w-full text-center text-xl font-semibold text-primary lg:w-[675px] lg:text-left dark:text-white"
+				class="w-full text-center text-xl font-semibold text-primary dark:text-white lg:w-[675px] lg:text-left"
 			>
 				Shadowy Supertaggers don’t sleep. They are up all night, tagging away. The world we want is
 				a tag away.
 			</h2>
 
-			<p class="text-center text-xl text-primary lg:text-left dark:text-white">
+			<p class="text-center text-xl text-primary dark:text-white lg:text-left">
 				You too can be a shadowy supertagging legend! What are you waiting for? <a
 					href="https://wiki.btcmap.org/general/tagging-instructions.html#shadowy-supertaggers-"
 					class="text-link transition-colors hover:text-hover">Get taggin’!</a
@@ -123,7 +123,7 @@
 			<section id="taggers">
 				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
 					<h3
-						class="border-b border-statBorder p-5 text-center text-2xl font-semibold text-primary lg:text-left dark:text-white"
+						class="border-b border-statBorder p-5 text-center text-2xl font-semibold text-primary dark:text-white lg:text-left"
 					>
 						Latest Supertaggers
 					</h3>
@@ -148,7 +148,7 @@
 						{/if}
 					</div>
 				</div>
-				<p class="text-center text-sm text-body lg:text-left dark:text-white">
+				<p class="text-center text-sm text-body dark:text-white lg:text-left">
 					*Data updated every 10 minutes
 				</p>
 				<div class="mt-10 flex justify-center">

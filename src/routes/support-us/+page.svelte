@@ -80,7 +80,7 @@
 				<HeaderPlaceholder />
 			{/if}
 
-			<h2 class="mx-auto w-full text-xl font-semibold text-primary lg:w-[800px] dark:text-white">
+			<h2 class="mx-auto w-full text-xl font-semibold text-primary dark:text-white lg:w-[800px]">
 				BTCMap.org is a free and open source project (FOSS). We rely on donations and sponsorship to
 				continue.
 
@@ -91,7 +91,7 @@
 			<section id="donate">
 				{#if showQr}
 					<div
-						class="relative mx-auto flex h-[450px] w-full items-center justify-center rounded-xl bg-lightBlue drop-shadow-xl md:h-[380px] md:w-[475px] dark:bg-white/[0.15]"
+						class="relative mx-auto flex h-[450px] w-full items-center justify-center rounded-xl bg-lightBlue drop-shadow-xl dark:bg-white/[0.15] md:h-[380px] md:w-[475px]"
 					>
 						<div class="space-y-5">
 							<CloseButton

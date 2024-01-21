@@ -28,7 +28,7 @@
 				<h1
 					class="{detectTheme() === 'dark' || $theme === 'dark'
 						? 'text-white'
-						: 'gradient'} text-4xl font-semibold !leading-tight text-primary md:text-5xl dark:text-white"
+						: 'gradient'} text-4xl font-semibold !leading-tight text-primary dark:text-white md:text-5xl"
 				>
 					Find merchants on any platform.
 				</h1>
@@ -36,18 +36,18 @@
 				<HeaderPlaceholder />
 			{/if}
 
-			<h2 class="mx-auto w-full text-xl font-semibold text-primary lg:w-[800px] dark:text-white">
+			<h2 class="mx-auto w-full text-xl font-semibold text-primary dark:text-white lg:w-[800px]">
 				We have you covered on whatever device and OS you choose.
 			</h2>
 
-			<h3 class="text-2xl font-semibold text-primary md:text-left dark:text-white">Official</h3>
+			<h3 class="text-2xl font-semibold text-primary dark:text-white md:text-left">Official</h3>
 			<section id="official-apps" class="grid gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 				{#each $apps as app}
 					<AppCard image={app.icon} text={app.type} desc={app.desc} link={app.link} />
 				{/each}
 			</section>
 
-			<h3 class="text-2xl font-semibold text-primary md:text-left dark:text-white">Community</h3>
+			<h3 class="text-2xl font-semibold text-primary dark:text-white md:text-left">Community</h3>
 			<section id="community-apps" class="grid gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 				{#each communityApps as app}
 					<AppCard image={app.icon} text={app.type} desc={app.desc} link={app.link} />

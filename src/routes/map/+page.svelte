@@ -620,7 +620,7 @@
 					{#each searchResults as result}
 						<button
 							on:click={() => searchSelect(result)}
-							class="block w-full justify-between px-4 py-2 hover:bg-searchHover md:flex md:text-left dark:border-b dark:hover:bg-white/[0.15]"
+							class="block w-full justify-between px-4 py-2 hover:bg-searchHover dark:border-b dark:hover:bg-white/[0.15] md:flex md:text-left"
 						>
 							<div class="items-start md:flex md:space-x-2">
 								<Icon

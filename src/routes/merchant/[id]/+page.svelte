@@ -722,7 +722,7 @@
 
 			<section id="map-section">
 				<h3
-					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary lg:text-left dark:bg-white/10 dark:text-white"
+					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary dark:bg-white/10 dark:text-white lg:text-left"
 				>
 					{name || 'Merchant'} Location
 				</h3>
@@ -730,7 +730,7 @@
 				<div class="relative">
 					<div
 						bind:this={mapElement}
-						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal text-left md:h-[600px] dark:!bg-[#202f33]"
+						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal text-left dark:!bg-[#202f33] md:h-[600px]"
 					/>
 					{#if !mapLoaded}
 						<MapLoadingEmbed
@@ -743,7 +743,7 @@
 			<section id="activity">
 				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
 					<h3
-						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary lg:text-left dark:text-white"
+						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white lg:text-left"
 					>
 						{name || 'Merchant'} Activity
 					</h3>
@@ -802,7 +802,7 @@
 			<section id="communities">
 				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
 					<h3
-						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary lg:text-left dark:text-white"
+						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white lg:text-left"
 					>
 						{name || 'Merchant'} Communities
 					</h3>
@@ -841,7 +841,7 @@
 				</div>
 			</section>
 
-			<p class="text-center text-sm text-body md:text-left dark:text-white">
+			<p class="text-center text-sm text-body dark:text-white md:text-left">
 				*More information on bitcoin mapping tags can be found <a
 					href="https://wiki.btcmap.org/general/tagging-instructions.html#tagging-guidance"
 					target="_blank"

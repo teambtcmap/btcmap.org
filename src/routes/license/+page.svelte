@@ -37,7 +37,7 @@
 			</p>
 
 			<h1
-				class="text-center text-4xl font-semibold !leading-tight text-primary md:text-5xl dark:text-white"
+				class="text-center text-4xl font-semibold !leading-tight text-primary dark:text-white md:text-5xl"
 			>
 				GNU AFFERO GENERAL PUBLIC LICENSE
 				<span class="block text-base">Version 3, 19 November 2007</span>

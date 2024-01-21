@@ -17,7 +17,7 @@
 </script>
 
 <div class="space-y-5 p-5 {border}">
-	<h3 class="text-center text-lg font-semibold text-primary md:text-left dark:text-white">
+	<h3 class="text-center text-lg font-semibold text-primary dark:text-white md:text-left">
 		{title}
 		{#if tooltip}
 			<button bind:this={tooltipElement}>

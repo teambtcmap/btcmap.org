@@ -234,7 +234,7 @@
 <div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
-		<main class="mb-20 mt-10 space-y-20 text-primary md:space-y-40 dark:text-white">
+		<main class="mb-20 mt-10 space-y-20 text-primary dark:text-white md:space-y-40">
 			<div class="space-y-5 text-center text-xl">
 				<h1 class="text-4xl font-semibold !leading-tight md:text-5xl">About Us</h1>
 				<p class="mx-auto md:w-[600px]">
@@ -357,7 +357,7 @@
 			</section>
 
 			<section
-				class="w-full space-y-10 rounded-xl bg-[#F1F7FC] p-5 text-center md:p-10 dark:bg-white/[0.15]"
+				class="w-full space-y-10 rounded-xl bg-[#F1F7FC] p-5 text-center dark:bg-white/[0.15] md:p-10"
 			>
 				<h2 class="text-3xl font-semibold">Integrations</h2>
 
@@ -413,7 +413,7 @@
 			</section>
 
 			<section
-				class="w-full justify-center space-y-10 rounded-xl bg-[#EBEFF2] p-5 md:p-10 lg:flex lg:space-x-10 lg:space-y-0 dark:bg-white/[0.15]"
+				class="w-full justify-center space-y-10 rounded-xl bg-[#EBEFF2] p-5 dark:bg-white/[0.15] md:p-10 lg:flex lg:space-x-10 lg:space-y-0"
 			>
 				<div class="lg:w-[475px]">
 					<h2 class="mb-10 text-3xl font-semibold">Core Team</h2>

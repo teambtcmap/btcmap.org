@@ -167,7 +167,7 @@
 			{/if}
 
 			<h2
-				class="mx-auto w-full text-center text-xl font-semibold text-primary lg:w-[800px] dark:text-white"
+				class="mx-auto w-full text-center text-xl font-semibold text-primary dark:text-white lg:w-[800px]"
 			>
 				Bitcoin mapping communities maintain their local datasets and strive to have the most
 				accurate information. They also help onboard new merchants in their area!
@@ -208,7 +208,7 @@
 					{/each}
 				</div>
 				<div
-					class="mb-5 space-y-1 text-center text-lg font-semibold text-primary lg:hidden dark:text-white"
+					class="mb-5 space-y-1 text-center text-lg font-semibold text-primary dark:text-white lg:hidden"
 				>
 					<h3>
 						Up-To-Date <button bind:this={upToDateTooltipMobile}>

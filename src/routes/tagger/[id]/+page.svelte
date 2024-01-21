@@ -604,7 +604,7 @@
 				<!-- svelte-ignore a11y-missing-content -->
 				<h2
 					bind:this={profileDesc}
-					class="mx-auto w-full break-all text-xl text-body lg:w-[800px] dark:text-white"
+					class="mx-auto w-full break-all text-xl text-body dark:text-white lg:w-[800px]"
 				/>
 
 				{#if lightning}
@@ -641,7 +641,7 @@
 
 			<section id="stats" class="mb-16 mt-10">
 				<div
-					class="grid rounded-t-3xl border border-statBorder md:grid-cols-2 xl:grid-cols-4 dark:bg-white/10"
+					class="grid rounded-t-3xl border border-statBorder dark:bg-white/10 md:grid-cols-2 xl:grid-cols-4"
 				>
 					<ProfileStat
 						title="Total Tags"
@@ -681,7 +681,7 @@
 			<section id="activity" class="my-16">
 				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
 					<h3
-						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left dark:text-white"
+						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
 					>
 						{username || 'BTC Map Supertagger'}'s Activity
 					</h3>
@@ -740,7 +740,7 @@
 
 			<section id="map-section">
 				<h3
-					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left dark:bg-white/10 dark:text-white"
+					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary dark:bg-white/10 dark:text-white md:text-left"
 				>
 					{username || 'BTC Map Supertagger'}'s Map
 				</h3>
@@ -748,7 +748,7 @@
 				<div class="relative mb-2">
 					<div
 						bind:this={mapElement}
-						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal text-left md:h-[600px] dark:!bg-[#202f33]"
+						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal text-left dark:!bg-[#202f33] md:h-[600px]"
 					/>
 					{#if !mapLoaded}
 						<MapLoadingEmbed

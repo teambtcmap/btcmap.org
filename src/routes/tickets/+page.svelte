@@ -90,13 +90,13 @@
 			{/if}
 
 			<h2
-				class="w-full text-center text-xl font-semibold text-primary lg:w-[675px] lg:text-left dark:text-white"
+				class="w-full text-center text-xl font-semibold text-primary dark:text-white lg:w-[675px] lg:text-left"
 			>
 				Tickets up for grabs from our noob forms! Anybody can help add or verify submissions on
 				OpenStreetMap and prepare community area polygons.
 			</h2>
 
-			<p class="text-center text-xl text-primary lg:text-left dark:text-white">
+			<p class="text-center text-xl text-primary dark:text-white lg:text-left">
 				More information on how to get involved can be found in our <a
 					href="https://wiki.btcmap.org/general/tagging-instructions.html"
 					class="text-link transition-colors hover:text-hover">Tagging Instructions</a
@@ -202,7 +202,7 @@
 						{/each}
 					{/if}
 				</div>
-				<p class="text-center text-sm text-body lg:text-left dark:text-white">
+				<p class="text-center text-sm text-body dark:text-white lg:text-left">
 					*Data updated every 10 minutes.
 				</p>
 				<div class="mt-10 flex justify-center">
