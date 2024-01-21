@@ -7,6 +7,7 @@
 	import { reportsSync } from '$lib/sync/reports';
 	import { usersSync } from '$lib/sync/users';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
+	import axios from 'axios';
 	import 'leaflet.locatecontrol/dist/L.Control.Locate.min.css';
 	import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 	import 'leaflet.markercluster/dist/MarkerCluster.css';
@@ -15,6 +16,9 @@
 	import { onDestroy, onMount } from 'svelte';
 	import 'tippy.js/dist/tippy.css';
 	import '../app.css';
+
+	axios.defaults.timeout = 10000;
+	axios.defaults.signal = AbortSignal.timeout(10000);
 
 	const options = {
 		reversed: true,
