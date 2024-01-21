@@ -11,11 +11,11 @@ const limit = 20000;
 
 export const reportsSync = async () => {
 	// clear tables if present
-	clearTables(['reports', 'reports_v2', 'reports_v3']);
+	clearTables(['reports', 'reports_v2', 'reports_v3', 'reports_v4']);
 
 	// get reports from local
 	await localforage
-		.getItem<Report[]>('reports_v4')
+		.getItem<Report[]>('reports_v5')
 		.then(async function (value) {
 			// get reports from API if initial sync
 			if (!value) {
@@ -26,7 +26,7 @@ export const reportsSync = async () => {
 				do {
 					try {
 						const response = await axios.get<Report[]>(
-							`https://api.btcmap.org/v2/reports?updated_since=${updatedSince}&compress=true`
+							`https://api.btcmap.org/v2/reports?updated_since=${updatedSince}&limit=${limit}`
 						);
 
 						updatedSince = response.data[response.data.length - 1]['updated_at'];
@@ -51,7 +51,7 @@ export const reportsSync = async () => {
 
 					// set response to local
 					localforage
-						.setItem('reports_v4', reportsData)
+						.setItem('reports_v5', reportsData)
 						.then(function () {
 							// set response to store
 							reports.set(reportsFiltered);
@@ -81,7 +81,7 @@ export const reportsSync = async () => {
 				do {
 					try {
 						const response = await axios.get<Report[]>(
-							`https://api.btcmap.org/v2/reports?updated_since=${updatedSince}&compress=true`
+							`https://api.btcmap.org/v2/reports?updated_since=${updatedSince}&limit=${limit}`
 						);
 
 						// update new records if they exist
@@ -130,7 +130,7 @@ export const reportsSync = async () => {
 
 					// set updated reports locally
 					localforage
-						.setItem('reports_v4', reportsData)
+						.setItem('reports_v5', reportsData)
 						.then(function () {
 							// set updated reports to store
 							reports.set(newReportsFiltered);
@@ -159,7 +159,7 @@ export const reportsSync = async () => {
 			do {
 				try {
 					const response = await axios.get<Report[]>(
-						`https://api.btcmap.org/v2/reports?updated_since=${updatedSince}&compress=true`
+						`https://api.btcmap.org/v2/reports?updated_since=${updatedSince}&limit=${limit}`
 					);
 
 					updatedSince = response.data[response.data.length - 1]['updated_at'];
