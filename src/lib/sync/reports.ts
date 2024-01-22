@@ -11,11 +11,11 @@ const limit = 20000;
 
 export const reportsSync = async () => {
 	// clear tables if present
-	clearTables(['reports', 'reports_v2', 'reports_v3', 'reports_v4']);
+	clearTables(['reports', 'reports_v2', 'reports_v3', 'reports_v4', 'reports_v5']);
 
 	// get reports from local
 	await localforage
-		.getItem<Report[]>('reports_v5')
+		.getItem<Report[]>('reports_v6')
 		.then(async function (value) {
 			// get reports from API if initial sync
 			if (!value) {
@@ -51,7 +51,7 @@ export const reportsSync = async () => {
 
 					// set response to local
 					localforage
-						.setItem('reports_v5', reportsData)
+						.setItem('reports_v6', reportsFiltered)
 						.then(function () {
 							// set response to store
 							reports.set(reportsFiltered);
@@ -65,9 +65,6 @@ export const reportsSync = async () => {
 						});
 				}
 			} else {
-				// filter out deleted reports
-				const reportsFiltered = value.filter((report) => !report['deleted_at']);
-
 				// start update sync from API
 				// sort to get most recent record
 				const cacheSorted = [...value];
@@ -103,17 +100,19 @@ export const reportsSync = async () => {
 
 							// add new reports
 							newReports.forEach((report) => {
-								reportsData.push(report);
+								if (!report['deleted_at']) {
+									reportsData.push(report);
+								}
 							});
 						} else {
 							// load reports from cache
-							reports.set(reportsFiltered);
+							reports.set(value);
 							useCachedData = true;
 							break;
 						}
 					} catch (error) {
 						// load reports from cache
-						reports.set(reportsFiltered);
+						reports.set(value);
 						useCachedData = true;
 
 						reportError.set(
@@ -125,19 +124,16 @@ export const reportsSync = async () => {
 				} while (responseCount === limit);
 
 				if (!useCachedData) {
-					// filter out deleted reports
-					const newReportsFiltered = reportsData.filter((report) => !report['deleted_at']);
-
 					// set updated reports locally
 					localforage
-						.setItem('reports_v5', reportsData)
+						.setItem('reports_v6', reportsData)
 						.then(function () {
 							// set updated reports to store
-							reports.set(newReportsFiltered);
+							reports.set(reportsData);
 						})
 						.catch(function (err) {
 							// set updated reports to store
-							reports.set(newReportsFiltered);
+							reports.set(reportsData);
 
 							reportError.set(
 								'Could not update reports locally, please try again or contact BTC Map.'

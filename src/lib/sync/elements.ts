@@ -12,11 +12,11 @@ const limit = 5000;
 
 export const elementsSync = async () => {
 	// clear tables if present
-	clearTables(['elements', 'elements_v2']);
+	clearTables(['elements', 'elements_v2', 'elements_v3']);
 
 	// get elements from local
 	await localforage
-		.getItem<Element[]>('elements_v3')
+		.getItem<Element[]>('elements_v4')
 		.then(async function (value) {
 			// get elements from API if initial sync
 			if (!value) {
@@ -51,15 +51,18 @@ export const elementsSync = async () => {
 				} while (responseCount === limit);
 
 				if (elementsData.length) {
+					// filter out deleted elements
+					const elementsFiltered = elementsData.filter((element) => !element['deleted_at']);
+
 					// set response to local
 					localforage
-						.setItem('elements_v3', elementsData)
+						.setItem('elements_v4', elementsFiltered)
 						.then(function () {
 							// set response to store
-							elements.set(elementsData);
+							elements.set(elementsFiltered);
 						})
 						.catch(function (err) {
-							elements.set(elementsData);
+							elements.set(elementsFiltered);
 							elementError.set(
 								'Could not store elements locally, please try again or contact BTC Map.'
 							);
@@ -106,7 +109,9 @@ export const elementsSync = async () => {
 
 							// add new elements
 							newElements.forEach((element) => {
-								elementsData.push(element);
+								if (!element['deleted_at']) {
+									elementsData.push(element);
+								}
 							});
 						} else {
 							// set cached elements to store
@@ -130,7 +135,7 @@ export const elementsSync = async () => {
 				if (!useCachedData) {
 					// set updated elements locally
 					localforage
-						.setItem('elements_v3', elementsData)
+						.setItem('elements_v4', elementsData)
 						.then(function () {
 							// set updated elements to store
 							elements.set(elementsData);
@@ -189,8 +194,11 @@ export const elementsSync = async () => {
 			} while (responseCount === limit);
 
 			if (elementsData.length) {
+				// filter out deleted elements
+				const elementsFiltered = elementsData.filter((element) => !element['deleted_at']);
+
 				// set response to store
-				elements.set(elementsData);
+				elements.set(elementsFiltered);
 			}
 		});
 };

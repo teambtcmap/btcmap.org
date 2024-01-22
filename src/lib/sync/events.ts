@@ -11,11 +11,11 @@ const limit = 50000;
 
 export const eventsSync = async () => {
 	// clear tables if present
-	clearTables(['events', 'events_v2']);
+	clearTables(['events', 'events_v2', 'events_v3']);
 
 	// get events from local
 	await localforage
-		.getItem<Event[]>('events_v3')
+		.getItem<Event[]>('events_v4')
 		.then(async function (value) {
 			// get events from API if initial sync
 			if (!value) {
@@ -49,7 +49,7 @@ export const eventsSync = async () => {
 
 					// set response to local
 					localforage
-						.setItem('events_v3', eventsData)
+						.setItem('events_v4', eventsFiltered)
 						.then(function () {
 							// set response to store
 							events.set(eventsFiltered);
@@ -63,9 +63,6 @@ export const eventsSync = async () => {
 						});
 				}
 			} else {
-				// filter out deleted events
-				const eventsFiltered = value.filter((event) => !event['deleted_at']);
-
 				// start update sync from API
 				// sort to get most recent record
 				const cacheSorted = [...value];
@@ -101,17 +98,19 @@ export const eventsSync = async () => {
 
 							// add new events
 							newEvents.forEach((event) => {
-								eventsData.push(event);
+								if (!event['deleted_at']) {
+									eventsData.push(event);
+								}
 							});
 						} else {
 							// load events from cache
-							events.set(eventsFiltered);
+							events.set(value);
 							useCachedData = true;
 							break;
 						}
 					} catch (error) {
 						// load events from cache
-						events.set(eventsFiltered);
+						events.set(value);
 						useCachedData = true;
 
 						eventError.set(
@@ -123,19 +122,16 @@ export const eventsSync = async () => {
 				} while (responseCount === limit);
 
 				if (!useCachedData) {
-					// filter out deleted events
-					const newEventsFiltered = eventsData.filter((event) => !event['deleted_at']);
-
 					// set updated events locally
 					localforage
-						.setItem('events_v3', eventsData)
+						.setItem('events_v4', eventsData)
 						.then(function () {
 							// set updated events to store
-							events.set(newEventsFiltered);
+							events.set(eventsData);
 						})
 						.catch(function (err) {
 							// set updated events to store
-							events.set(newEventsFiltered);
+							events.set(eventsData);
 
 							eventError.set(
 								'Could not update events locally, please try again or contact BTC Map.'

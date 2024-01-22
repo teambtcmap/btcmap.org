@@ -244,10 +244,6 @@
 
 			// add elements to map
 			filteredElements.forEach((element) => {
-				if (element['deleted_at']) {
-					return;
-				}
-
 				let icon = element.tags['icon:android'];
 				let payment = element.tags['payment:uri']
 					? { type: 'uri', url: element.tags['payment:uri'] }

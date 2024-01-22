@@ -87,7 +87,7 @@
 	const initializeData = () => {
 		if (dataInitialized) return;
 
-		merchant = $elements.find((element) => element.id == data.id && !element['deleted_at']);
+		merchant = $elements.find((element) => element.id == data.id);
 
 		if (!merchant) {
 			console.log('Could not find merchant, please try again or contact BTC Map.');

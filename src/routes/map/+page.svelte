@@ -155,10 +155,6 @@
 
 		// add location information
 		$elements.forEach((element) => {
-			if (element['deleted_at']) {
-				return;
-			}
-
 			let category = element.tags.category;
 			let icon = element.tags['icon:android'];
 			let payment = element.tags['payment:uri']

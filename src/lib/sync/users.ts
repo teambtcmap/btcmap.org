@@ -11,11 +11,11 @@ const limit = 7500;
 
 export const usersSync = async () => {
 	// clear tables if present
-	clearTables(['users', 'users_v2', 'users_v3']);
+	clearTables(['users', 'users_v2', 'users_v3', 'users_v4']);
 
 	// get users from local
 	await localforage
-		.getItem<User[]>('users_v4')
+		.getItem<User[]>('users_v5')
 		.then(async function (value) {
 			// get users from API if initial sync
 			if (!value) {
@@ -49,7 +49,7 @@ export const usersSync = async () => {
 
 					// set response to local
 					localforage
-						.setItem('users_v4', usersData)
+						.setItem('users_v5', usersFiltered)
 						.then(function () {
 							// set response to store
 							users.set(usersFiltered);
@@ -61,9 +61,6 @@ export const usersSync = async () => {
 						});
 				}
 			} else {
-				// filter out deleted users
-				const usersFiltered = value.filter((user) => !user['deleted_at']);
-
 				// start update sync from API
 				// sort to get most recent record
 				const cacheSorted = [...value];
@@ -99,17 +96,19 @@ export const usersSync = async () => {
 
 							// add new users
 							newUsers.forEach((user) => {
-								usersData.push(user);
+								if (!user['deleted_at']) {
+									usersData.push(user);
+								}
 							});
 						} else {
 							// load users from cache
-							users.set(usersFiltered);
+							users.set(value);
 							useCachedData = true;
 							break;
 						}
 					} catch (error) {
 						// load users from cache
-						users.set(usersFiltered);
+						users.set(value);
 						useCachedData = true;
 
 						userError.set('Could not update users from API, please try again or contact BTC Map.');
@@ -119,19 +118,16 @@ export const usersSync = async () => {
 				} while (responseCount === limit);
 
 				if (!useCachedData) {
-					// filter out deleted users
-					const newUsersFiltered = usersData.filter((user) => !user['deleted_at']);
-
 					// set updated users locally
 					localforage
-						.setItem('users_v4', usersData)
+						.setItem('users_v5', usersData)
 						.then(function () {
 							// set updated users to store
-							users.set(newUsersFiltered);
+							users.set(usersData);
 						})
 						.catch(function (err) {
 							// set updated users to store
-							users.set(newUsersFiltered);
+							users.set(usersData);
 
 							userError.set('Could not update users locally, please try again or contact BTC Map.');
 							console.log(err);

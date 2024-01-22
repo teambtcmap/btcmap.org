@@ -745,7 +745,7 @@
 					{username || 'BTC Map Supertagger'}'s Map
 				</h3>
 
-				<div class="relative mb-2">
+				<div class="relative">
 					<div
 						bind:this={mapElement}
 						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal text-left dark:!bg-[#202f33] md:h-[600px]"
@@ -756,6 +756,10 @@
 						/>
 					{/if}
 				</div>
+
+				<p class="text-center text-sm text-body dark:text-white lg:text-left">
+					*Does not display deleted merchants.
+				</p>
 			</section>
 		</main>
 

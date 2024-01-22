@@ -12,7 +12,7 @@ export const load: PageLoad = async ({ params }) => {
 
 		const data = response.data;
 
-		if (data && data.id) {
+		if (data && data.id && !data['deleted_at']) {
 			return {
 				id: data.id,
 				name: data.osm_json.tags?.name

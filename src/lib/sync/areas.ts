@@ -11,11 +11,11 @@ const limit = 500;
 
 export const areasSync = async () => {
 	// clear tables if present
-	clearTables(['areas', 'areas_v2']);
+	clearTables(['areas', 'areas_v2', 'areas_v3']);
 
 	// get areas from local
 	await localforage
-		.getItem<Area[]>('areas_v3')
+		.getItem<Area[]>('areas_v4')
 		.then(async function (value) {
 			// get areas from API if initial sync
 			if (!value) {
@@ -49,7 +49,7 @@ export const areasSync = async () => {
 
 					// set response to local
 					localforage
-						.setItem('areas_v3', areasData)
+						.setItem('areas_v4', areasFiltered)
 						.then(function () {
 							// set response to store
 							areas.set(areasFiltered);
@@ -61,9 +61,6 @@ export const areasSync = async () => {
 						});
 				}
 			} else {
-				// filter out deleted areas
-				const areasFiltered = value.filter((area) => !area['deleted_at']);
-
 				// start update sync from API
 				// sort to get most recent record
 				const cacheSorted = [...value];
@@ -99,17 +96,19 @@ export const areasSync = async () => {
 
 							// add new areas
 							newAreas.forEach((area) => {
-								areasData.push(area);
+								if (!area['deleted_at']) {
+									areasData.push(area);
+								}
 							});
 						} else {
 							// load areas from cache
-							areas.set(areasFiltered);
+							areas.set(value);
 							useCachedData = true;
 							break;
 						}
 					} catch (error) {
 						// load areas from cache
-						areas.set(areasFiltered);
+						areas.set(value);
 						useCachedData = true;
 
 						areaError.set('Could not update areas from API, please try again or contact BTC Map.');
@@ -119,19 +118,16 @@ export const areasSync = async () => {
 				} while (responseCount === limit);
 
 				if (!useCachedData) {
-					// filter out deleted areas
-					const newAreasFiltered = areasData.filter((area) => !area['deleted_at']);
-
 					// set updated areas locally
 					localforage
-						.setItem('areas_v3', areasData)
+						.setItem('areas_v4', areasData)
 						.then(function () {
 							// set updated areas to store
-							areas.set(newAreasFiltered);
+							areas.set(areasData);
 						})
 						.catch(function (err) {
 							// set updated areas to store
-							areas.set(newAreasFiltered);
+							areas.set(areasData);
 
 							areaError.set('Could not update areas locally, please try again or contact BTC Map.');
 							console.log(err);
