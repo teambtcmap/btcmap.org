@@ -7,7 +7,7 @@ import localforage from 'localforage';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
-const limit = 20000;
+const limit = 10000;
 
 export const reportsSync = async () => {
 	// clear tables if present
