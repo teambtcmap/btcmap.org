@@ -69,3 +69,14 @@ export const updateChartThemes = (
 		});
 	}
 };
+
+export const formatElementID = (id: string) => {
+	const elementIdSplit = id.split(':');
+	const elementIdFormatted =
+		elementIdSplit[0].charAt(0).toUpperCase() +
+		elementIdSplit[0].slice(1, elementIdSplit[0].length) +
+		' ' +
+		elementIdSplit[1];
+
+	return elementIdFormatted;
+};

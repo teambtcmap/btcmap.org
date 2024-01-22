@@ -18,7 +18,7 @@
 		users
 	} from '$lib/store';
 	import type { ActivityEvent, Element, Event, User } from '$lib/types';
-	import { detectTheme, errToast } from '$lib/utils';
+	import { detectTheme, errToast, formatElementID } from '$lib/utils';
 
 	// alert for user errors
 	$: $userError && errToast($userError);
@@ -56,21 +56,19 @@
 			recentEvents.forEach((event) => {
 				let elementMatch = elements.find((element) => element.id === event['element_id']);
 
-				if (elementMatch) {
-					let location =
-						elementMatch['osm_json'].tags && elementMatch['osm_json'].tags.name
-							? elementMatch['osm_json'].tags.name
-							: undefined;
+				let location =
+					elementMatch?.['osm_json'].tags && elementMatch['osm_json'].tags.name
+						? elementMatch['osm_json'].tags.name
+						: undefined;
 
-					let tagger = findUser(event);
+				let tagger = findUser(event);
 
-					supertaggers.push({
-						...event,
-						location: location || 'Unnamed element',
-						merchantId: elementMatch.id,
-						tagger
-					});
-				}
+				supertaggers.push({
+					...event,
+					location: location || formatElementID(event['element_id']),
+					merchantId: event['element_id'],
+					tagger
+				});
 			});
 
 			supertaggers = supertaggers;

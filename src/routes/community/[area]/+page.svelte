@@ -55,7 +55,7 @@
 		type Leaflet,
 		type User
 	} from '$lib/types.js';
-	import { detectTheme, errToast, updateChartThemes } from '$lib/utils';
+	import { detectTheme, errToast, formatElementID, updateChartThemes } from '$lib/utils';
 	// @ts-expect-error
 	import rewind from '@mapbox/geojson-rewind';
 	import Chart from 'chart.js/auto';
@@ -181,18 +181,16 @@
 		communityEvents.forEach((event) => {
 			let elementMatch = filteredElements.find((element) => element.id === event['element_id']);
 
-			if (elementMatch) {
-				let location = elementMatch['osm_json'].tags?.name || undefined;
+			let location = elementMatch?.['osm_json'].tags?.name || undefined;
 
-				let tagger = findUser(event);
+			let tagger = findUser(event);
 
-				eventElements.push({
-					...event,
-					location: location || 'Unnamed element',
-					merchantId: elementMatch.id,
-					tagger
-				});
-			}
+			eventElements.push({
+				...event,
+				location: location || formatElementID(event['element_id']),
+				merchantId: event['element_id'],
+				tagger
+			});
 		});
 
 		eventElements = eventElements;
