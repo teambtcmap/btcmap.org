@@ -43,8 +43,6 @@
 
 	let upToDateTooltip: HTMLButtonElement;
 	let upToDateTooltipMobile: HTMLButtonElement;
-	let legacyTooltip: HTMLButtonElement;
-	let legacyTooltipMobile: HTMLButtonElement;
 	let gradeTooltip: HTMLButtonElement;
 	let gradeTooltipMobile: HTMLButtonElement;
 
@@ -67,9 +65,7 @@
 
 			leaderboard.sort((a, b) =>
 				b.report.tags.up_to_date_percent === a.report.tags.up_to_date_percent
-					? b.report.tags.total_elements === a.report.tags.total_elements
-						? a.report.tags.legacy_elements - b.report.tags.legacy_elements
-						: b.report.tags.total_elements - a.report.tags.total_elements
+					? b.report.tags.total_elements - a.report.tags.total_elements
 					: b.report.tags.up_to_date_percent - a.report.tags.up_to_date_percent
 			);
 
@@ -84,17 +80,11 @@
 	$: leaderboardPaginated =
 		leaderboard && leaderboard.length && !loading ? leaderboard.slice(0, leaderboardCount) : [];
 
-	const headings = ['Position', 'Name', 'Up-To-Date', 'Total Locations', 'Legacy', 'Grade'];
+	const headings = ['Position', 'Name', 'Up-To-Date', 'Total Locations', 'Grade'];
 
 	const setTooltips = () => {
 		tippy([upToDateTooltip, upToDateTooltipMobile], {
 			content: `Locations that have been verified within one year.`,
-			allowHTML: true
-		});
-
-		tippy([legacyTooltip, legacyTooltipMobile], {
-			content: `Locations with a <em>payment:bitcoin</em> tag instead of the
-			<em>currency:XBT</em> tag.`,
 			allowHTML: true
 		});
 
@@ -135,8 +125,6 @@
 
 	$: upToDateTooltip &&
 		upToDateTooltipMobile &&
-		legacyTooltip &&
-		legacyTooltipMobile &&
 		gradeTooltip &&
 		gradeTooltipMobile &&
 		setTooltips();
@@ -187,16 +175,12 @@
 			</div>
 
 			<section id="leaderboard" class="dark:lg:rounded dark:lg:bg-white/10 dark:lg:py-8">
-				<div class="mb-5 hidden grid-cols-6 text-center lg:grid">
+				<div class="mb-5 hidden grid-cols-5 text-center lg:grid">
 					{#each headings as heading}
 						<h3 class="text-lg font-semibold text-primary dark:text-white">
 							{heading}
 							{#if heading === 'Up-To-Date'}
 								<button bind:this={upToDateTooltip}>
-									<i class="fa-solid fa-circle-info text-sm" />
-								</button>
-							{:else if heading === 'Legacy'}
-								<button bind:this={legacyTooltip}>
 									<i class="fa-solid fa-circle-info text-sm" />
 								</button>
 							{:else if heading === 'Grade'}
@@ -212,11 +196,6 @@
 				>
 					<h3>
 						Up-To-Date <button bind:this={upToDateTooltipMobile}>
-							<i class="fa-solid fa-circle-info" />
-						</button>
-					</h3>
-					<h3>
-						Legacy <button bind:this={legacyTooltipMobile}>
 							<i class="fa-solid fa-circle-info" />
 						</button>
 					</h3>
@@ -238,7 +217,6 @@
 								id={item.id}
 								upToDate={item.report.tags.up_to_date_percent}
 								total={item.report.tags.total_elements}
-								legacy={item.report.tags.legacy_elements}
 								grade={item.report.tags.grade}
 							/>
 						{/each}
@@ -258,7 +236,7 @@
 				</div>
 
 				<p class="text-center text-sm text-body dark:text-white">
-					*Data sorted by Up-To-Date, then Total Locations, then Legacy.
+					*Data sorted by Up-To-Date and then Total Locations.
 					<br />
 					*Leaderboard updated once every 24 hours.
 				</p>

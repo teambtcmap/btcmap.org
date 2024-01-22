@@ -6,7 +6,6 @@
 	export let id: string;
 	export let upToDate: number;
 	export let total: number;
-	export let legacy: number;
 	export let grade: Grade;
 
 	import { SponsorBadge } from '$lib/comp';
@@ -15,13 +14,12 @@
 	$: stats = [
 		{ stat: upToDate, title: 'Up-To-Date' },
 		{ stat: total, title: 'Total Locations' },
-		{ stat: legacy, title: 'Legacy' },
 		{ stat: grade, title: 'Grade' }
 	];
 </script>
 
 <div
-	class="grid-cols-6 border-b border-statBorder py-5 text-center text-lg font-semibold text-link lg:grid"
+	class="grid-cols-5 border-b border-statBorder py-5 text-center text-lg font-semibold text-link lg:grid"
 >
 	<span
 		class="my-auto {position > 3

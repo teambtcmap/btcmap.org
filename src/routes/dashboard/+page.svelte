@@ -194,8 +194,6 @@
 	let upToDateChart: Chart<'line', number[] | undefined, string>;
 	let totalChartCanvas: HTMLCanvasElement;
 	let totalChart: Chart<'line', number[] | undefined, string>;
-	let legacyChartCanvas: HTMLCanvasElement;
-	let legacyChart: Chart<'line', number[] | undefined, string>;
 	let paymentMethodChartCanvas: HTMLCanvasElement;
 	let paymentMethodChart: Chart<'line', number[] | undefined, string>;
 
@@ -288,64 +286,6 @@
 							above: 'rgba(0, 153, 175, 0.2)'
 						},
 						borderColor: 'rgb(0, 153, 175)',
-						tension: 0.1,
-						pointStyle: false
-					}
-				]
-			},
-			options: {
-				maintainAspectRatio: false,
-				plugins: {
-					legend: {
-						labels: {
-							font: {
-								weight: 600
-							}
-						}
-					}
-				},
-				scales: {
-					x: {
-						ticks: {
-							maxTicksLimit: 5,
-							font: {
-								weight: 600
-							}
-						},
-						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
-						}
-					},
-					y: {
-						ticks: {
-							font: {
-								weight: 600
-							}
-						},
-						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
-						}
-					}
-				},
-				interaction: {
-					intersect: false
-				}
-			}
-		});
-
-		legacyChart = new Chart(legacyChartCanvas, {
-			type: 'line',
-			data: {
-				labels: statsFiltered.map(({ date }) => date),
-				datasets: [
-					{
-						label: 'Legacy Locations',
-						data: statsFiltered.map(({ tags: { legacy_elements } }) => legacy_elements),
-						fill: {
-							target: 'origin',
-							above: 'rgba(235, 87, 87, 0.2)'
-						},
-						borderColor: 'rgb(235, 87, 87)',
 						tension: 0.1,
 						pointStyle: false
 					}
@@ -554,12 +494,6 @@
 				});
 				totalChart.update();
 
-				legacyChart.data.labels = statsFiltered.map(({ date }) => date);
-				legacyChart.data.datasets[0].data = statsFiltered.map(
-					({ tags: { legacy_elements } }) => legacy_elements
-				);
-				legacyChart.update();
-
 				paymentMethodChart.data.labels = statsFiltered.map(({ date }) => date);
 				paymentMethodChart.data.datasets[0].data = statsFiltered.map(
 					({ tags: { total_elements_onchain } }) => total_elements_onchain
@@ -585,13 +519,12 @@
 	$: $theme !== undefined &&
 		chartsLoading === false &&
 		chartsRendered === true &&
-		updateChartThemes([upToDateChart, totalChart, legacyChart, paymentMethodChart]);
+		updateChartThemes([upToDateChart, totalChart, paymentMethodChart]);
 
 	onMount(async () => {
 		if (browser) {
 			upToDateChartCanvas.getContext('2d');
 			totalChartCanvas.getContext('2d');
-			legacyChartCanvas.getContext('2d');
 			paymentMethodChartCanvas.getContext('2d');
 
 			if ($reports && $reports.length) {
@@ -744,23 +677,6 @@
 					</div>
 					<p class="mt-1 text-center text-sm text-body dark:text-white">
 						*Elements accepting any bitcoin payment method.
-					</p>
-				</div>
-
-				<div>
-					<div class="relative">
-						{#if chartsLoading}
-							<div
-								class="absolute left-0 top-0 flex h-[400px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
-							>
-								<i class="fa-solid fa-chart-area h-24 w-24 animate-pulse text-link/50" />
-							</div>
-						{/if}
-						<canvas bind:this={legacyChartCanvas} width="100%" height="400" />
-					</div>
-					<p class="mt-1 text-center text-sm text-body dark:text-white">
-						*Elements with a <em>payment:bitcoin</em> tag instead of the
-						<em>currency:XBT</em> tag.
 					</p>
 				</div>
 
