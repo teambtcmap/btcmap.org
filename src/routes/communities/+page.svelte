@@ -60,6 +60,15 @@
 	$: bitcoin4India =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'bitcoin4india');
+	$: bitcoin4Iranians =
+		communities &&
+		communities.filter((community) => community.tags.organization === 'bitcoin4iranians');
+	$: bitcoinBulgaria =
+		communities &&
+		communities.filter((community) => community.tags.organization === 'bitcoin-bulgaria');
+	$: bitcoinJamii =
+		communities &&
+		communities.filter((community) => community.tags.organization === 'bitcoin-jamii');
 	$: bitDevs =
 		communities && communities.filter((community) => community.tags.organization === 'bit-devs');
 	$: breizhBitcoin =
@@ -74,6 +83,10 @@
 	$: einundzwanzig =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'einundzwanzig');
+	$: enogtyve =
+		communities && communities.filter((community) => community.tags.organization === 'enogtyve');
+	$: jednadvacet =
+		communities && communities.filter((community) => community.tags.organization === 'jednadvacet');
 	$: satoshiSpritz =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'satoshi-spritz');
@@ -183,11 +196,16 @@
 		'--Organizations--',
 		'2140 Meetups',
 		'Bitcoin4India',
+		'Bitcoin 4 Iranians',
+		'Bitcoin Bulgaria',
+		'Bitcoin Jamii',
 		'BitDevs',
 		'Breizh Bitcoin',
 		'Découvre Bitcoin',
 		'Dwadzieścia Jeden',
 		'Einundzwanzig',
+		'Enogtyve',
+		'Jednadvacet',
 		'Satoshi Spritz'
 	];
 	$: communitySections = [
@@ -217,11 +235,16 @@
 		},
 		{ section: '2140 Meetups', communities: meetups2140 },
 		{ section: 'Bitcoin4India', communities: bitcoin4India },
+		{ section: 'Bitcoin 4 Iranians', communities: bitcoin4Iranians },
+		{ section: 'Bitcoin Bulgaria', communities: bitcoinBulgaria },
+		{ section: 'Bitcoin Jamii', communities: bitcoinJamii },
 		{ section: 'BitDevs', communities: bitDevs },
 		{ section: 'Breizh Bitcoin', communities: breizhBitcoin },
 		{ section: 'Découvre Bitcoin', communities: decouvreBitcoin },
 		{ section: 'Dwadzieścia Jeden', communities: dwadziesciaJeden },
 		{ section: 'Einundzwanzig', communities: einundzwanzig },
+		{ section: 'Enogtyve', communities: enogtyve },
+		{ section: 'Jednadvacet', communities: jednadvacet },
 		{ section: 'Satoshi Spritz', communities: satoshiSpritz }
 	];
 
