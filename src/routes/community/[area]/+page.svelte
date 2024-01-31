@@ -55,7 +55,7 @@
 		type Leaflet,
 		type User
 	} from '$lib/types.js';
-	import { detectTheme, errToast, formatElementID, updateChartThemes } from '$lib/utils';
+	import { detectTheme, errToast, formatElementID, getGrade, updateChartThemes } from '$lib/utils';
 	// @ts-expect-error
 	import rewind from '@mapbox/geojson-rewind';
 	import Chart from 'chart.js/auto';
@@ -345,27 +345,7 @@
 
 		legacyPercent = legacy ? (legacy / (total / 100)).toFixed(0) : '0';
 
-		const setGrade = () => {
-			switch (true) {
-				case Number(upToDatePercent) >= 95:
-					grade = 5;
-					break;
-				case Number(upToDatePercent) >= 75:
-					grade = 4;
-					break;
-				case Number(upToDatePercent) >= 50:
-					grade = 3;
-					break;
-				case Number(upToDatePercent) >= 25:
-					grade = 2;
-					break;
-				case Number(upToDatePercent) >= 0:
-					grade = 1;
-					break;
-			}
-		};
-
-		setGrade();
+		grade = getGrade(Number(upToDatePercent));
 
 		const populateCharts = () => {
 			const chartsReports = [...communityReports].sort(

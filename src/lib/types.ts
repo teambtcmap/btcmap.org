@@ -119,7 +119,6 @@ export type ReportTags = {
 	outdated_elements: number;
 	legacy_elements: number;
 	avg_verification_date: string;
-	grade: Grade;
 };
 
 export type Grade = 1 | 2 | 3 | 4 | 5;
@@ -200,6 +199,7 @@ export type ProfileLeaderboard = { id: number; total: number };
 
 export interface LeaderboardArea extends Area {
 	report: Report;
+	grade: Grade;
 }
 
 // tagger

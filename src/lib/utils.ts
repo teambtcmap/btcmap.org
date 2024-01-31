@@ -2,6 +2,7 @@ import { theme } from '$lib/store';
 import { toast } from '@zerodevx/svelte-toast';
 import type { Chart } from 'chart.js';
 import { get } from 'svelte/store';
+import type { Grade } from './types';
 
 export const errToast = (m: string) => {
 	toast.push(m, {
@@ -79,4 +80,20 @@ export const formatElementID = (id: string) => {
 		elementIdSplit[1];
 
 	return elementIdFormatted;
+};
+
+export const getGrade = (upToDatePercent: number): Grade => {
+	switch (true) {
+		case upToDatePercent >= 95:
+			return 5;
+		case upToDatePercent >= 75:
+			return 4;
+		case upToDatePercent >= 50:
+			return 3;
+		case upToDatePercent >= 25:
+			return 2;
+		case upToDatePercent >= 0:
+		default:
+			return 1;
+	}
 };

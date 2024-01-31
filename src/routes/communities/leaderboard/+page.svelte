@@ -10,7 +10,7 @@
 	} from '$lib/comp';
 	import { areaError, areas, reportError, reports, syncStatus, theme } from '$lib/store';
 	import type { Area, LeaderboardArea, Report } from '$lib/types';
-	import { detectTheme, errToast } from '$lib/utils';
+	import { detectTheme, errToast, getGrade } from '$lib/utils';
 	import tippy from 'tippy.js';
 
 	// alert for area errors
@@ -59,7 +59,9 @@
 				let communityReport = communityReports.find((report) => report.area_id === community.id);
 
 				if (communityReport) {
-					leaderboard.push({ ...community, report: communityReport });
+					const grade = getGrade(communityReport.tags.up_to_date_percent);
+
+					leaderboard.push({ ...community, report: communityReport, grade });
 				}
 			});
 
@@ -217,7 +219,7 @@
 								id={item.id}
 								upToDate={item.report.tags.up_to_date_percent}
 								total={item.report.tags.total_elements}
-								grade={item.report.tags.grade}
+								grade={item.grade}
 							/>
 						{/each}
 
