@@ -77,6 +77,9 @@
 	$: decouvreBitcoin =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'decouvre-bitcoin');
+	$: dvadsatjeden =
+		communities &&
+		communities.filter((community) => community.tags.organization === 'dvadsatjeden');
 	$: dwadziesciaJeden =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'dwadziescia-jeden');
@@ -202,6 +205,7 @@
 		'BitDevs',
 		'Breizh Bitcoin',
 		'Découvre Bitcoin',
+		'Dvadsatjeden',
 		'Dwadzieścia Jeden',
 		'Einundzwanzig',
 		'Enogtyve',
@@ -241,6 +245,7 @@
 		{ section: 'BitDevs', communities: bitDevs },
 		{ section: 'Breizh Bitcoin', communities: breizhBitcoin },
 		{ section: 'Découvre Bitcoin', communities: decouvreBitcoin },
+		{ section: 'Dvadsatjeden', communities: dvadsatjeden },
 		{ section: 'Dwadzieścia Jeden', communities: dwadziesciaJeden },
 		{ section: 'Einundzwanzig', communities: einundzwanzig },
 		{ section: 'Enogtyve', communities: enogtyve },
