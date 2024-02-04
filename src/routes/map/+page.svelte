@@ -151,6 +151,7 @@
 		let upToDateLayer = leaflet.featureGroup.subGroup(markers);
 		let outdatedLayer = leaflet.featureGroup.subGroup(markers);
 		let legacyLayer = leaflet.featureGroup.subGroup(markers);
+		let thirdPartyLayer = leaflet.featureGroup.subGroup(markers);
 		let categories: MapGroups = {};
 
 		// add location information
@@ -209,6 +210,13 @@
 					legacyLayer.addLayer(marker);
 				}
 
+				if (
+					elementOSM.tags &&
+					elementOSM.tags['payment:lightning:requires_companion_app'] === 'yes'
+				) {
+					thirdPartyLayer.addLayer(marker);
+				}
+
 				if (!categories[category]) {
 					categories[category] = leaflet.featureGroup.subGroup(markers);
 				}
@@ -230,7 +238,8 @@
 		let overlayMaps: MapGroups = {
 			'Up-To-Date': upToDateLayer,
 			Outdated: outdatedLayer,
-			Legacy: legacyLayer
+			Legacy: legacyLayer,
+			'Third Party App': thirdPartyLayer
 		};
 
 		Object.keys(categories)
@@ -244,6 +253,7 @@
 				map.addLayer(upToDateLayer);
 				map.addLayer(outdatedLayer);
 				map.addLayer(legacyLayer);
+				map.addLayer(thirdPartyLayer);
 				map.addLayer(categories[category]);
 			});
 
