@@ -676,11 +676,16 @@ export const generateMarker = (
 
 		const verified = verifiedArr(element);
 
+		const thirdParty =
+			element.tags?.['payment:lightning:requires_companion_app'] === 'yes' &&
+			element.tags['payment:lightning:companion_app_url'];
+
 		const paymentMethod =
 			element.tags &&
 			(element.tags['payment:onchain'] ||
 				element.tags['payment:lightning'] ||
-				element.tags['payment:lightning_contactless']);
+				element.tags['payment:lightning_contactless'] ||
+				thirdParty);
 
 		const popupContainer = L.DomUtil.create('div');
 
@@ -886,6 +891,12 @@ ${
 					<span class='block text-mapLabel text-xs'>Payment Methods</span>
 
 					<div class='w-full flex space-x-2 mt-0.5'>
+					${
+						thirdParty
+							? `<a href=${element.tags?.['payment:lightning:companion_app_url']} target="_blank" rel="noreferrer">
+								<i class="fa-solid fa-mobile-screen-button w-6 h-6 !text-primary dark:!text-white hover:!text-link dark:hover:!text-link transition-colors" title="Third party app required"></i>
+							   </a>`
+							: `
 						<img src=${
 							element.tags && element.tags['payment:onchain'] === 'yes'
 								? theme === 'dark'
@@ -943,8 +954,9 @@ ${
 								? 'Lightning Contactless accepted'
 								: element.tags && element.tags['payment:lightning_contactless'] === 'no'
 									? 'Lightning contactless not accepted'
-									: 'Lightning Contactless unknown'
-						}"/>
+									: 'Lightning contactless unknown'
+						}"/>`
+					}
 					</div>
 				</div>`
 		: ''

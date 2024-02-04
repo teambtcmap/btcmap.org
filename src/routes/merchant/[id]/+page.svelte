@@ -119,11 +119,16 @@
 		instagram = merchant.osm_json.tags?.instagram || merchant.osm_json.tags?.['contact:instagram'];
 		facebook = merchant.osm_json.tags?.facebook || merchant.osm_json.tags?.['contact:facebook'];
 
+		thirdParty =
+			merchant.osm_json.tags?.['payment:lightning:requires_companion_app'] === 'yes' &&
+			merchant.osm_json.tags['payment:lightning:companion_app_url'];
+
 		paymentMethod =
 			merchant.osm_json.tags &&
 			(merchant.osm_json.tags['payment:onchain'] ||
 				merchant.osm_json.tags['payment:lightning'] ||
-				merchant.osm_json.tags['payment:lightning_contactless']);
+				merchant.osm_json.tags['payment:lightning_contactless'] ||
+				thirdParty);
 
 		lat = latCalc(merchant['osm_json']);
 		long = longCalc(merchant['osm_json']);
@@ -230,12 +235,20 @@
 	let instagram: string | undefined;
 	let facebook: string | undefined;
 
+	let thirdParty: boolean | undefined;
 	let paymentMethod: string | undefined;
 
+	let thirdPartyTooltip: HTMLAnchorElement;
 	let onchainTooltip: HTMLImageElement;
 	let lnTooltip: HTMLImageElement;
 	let nfcTooltip: HTMLImageElement;
 	let verifiedTooltip: HTMLSpanElement;
+
+	$: thirdPartyTooltip &&
+		merchant &&
+		tippy([thirdPartyTooltip], {
+			content: 'Third party app required'
+		});
 
 	$: onchainTooltip &&
 		merchant &&
@@ -267,7 +280,7 @@
 					? 'Lightning Contactless accepted'
 					: merchant.osm_json.tags?.['payment:lightning_contactless'] === 'no'
 						? 'Lightning contactless not accepted'
-						: 'Lightning Contactless unknown'
+						: 'Lightning contactless unknown'
 		});
 
 	$: verifiedTooltip &&
@@ -551,7 +564,19 @@
 					<div>
 						<h4 class="uppercase text-primary dark:text-white">Accepted Payments</h4>
 						<div class="mt-1 flex items-center justify-center space-x-2">
-							{#if typeof window !== 'undefined'}
+							{#if thirdParty}
+								<a
+									bind:this={thirdPartyTooltip}
+									href={merchant.osm_json.tags?.['payment:lightning:companion_app_url']}
+									target="_blank"
+									rel="noreferrer"
+								>
+									<i
+										class="fa-solid fa-mobile-screen-button h-8 w-8 text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
+									>
+									</i>
+								</a>
+							{:else if typeof window !== 'undefined'}
 								<img
 									bind:this={onchainTooltip}
 									src={merchant.osm_json.tags?.['payment:onchain'] === 'yes'
