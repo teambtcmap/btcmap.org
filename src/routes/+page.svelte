@@ -78,8 +78,8 @@
 			{#if typeof window !== 'undefined'}
 				<img
 					src={detectTheme() === 'dark' || $theme === 'dark'
-						? '/images/hero-mobile-example-dark.png'
-						: '/images/hero-mobile-example.png'}
+						? '/images/hero-mobile-example-dark.webp'
+						: '/images/hero-mobile-example.webp'}
 					alt="mobile example"
 					class="mx-auto mt-10 w-80 drop-shadow-2xl xl:mx-0 xl:mt-0"
 				/>

@@ -4,7 +4,7 @@
 	const brandColors = ['#10B981', '#53C5D5', '#051173', '#0891B2', '#E4EBEC', '#164E63', '#155E75'];
 
 	const brand = [
-		{ link: '/images/hero-mobile-example.png', name: 'App Screenshot' },
+		{ link: '/images/hero-mobile-example.webp', name: 'App Screenshot' },
 		{ link: '/images/logo.svg', name: 'BTC Map Logo' },
 		{ link: '/images/supertagger.svg', name: 'Shadowy Supertagger' },
 		{ link: '/images/supertagger-king.svg', name: 'Shadowy Supertagger - Leader' }
