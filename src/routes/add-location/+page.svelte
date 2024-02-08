@@ -671,7 +671,8 @@
 								<label for="contact" class="mb-2 block font-semibold">Public Contact</label>
 								<p class="mb-2 text-justify text-sm">
 									If we have any follow-up questions we will contact you in order to add your
-									location successfully.
+									location successfully. To speed up the process please check your spam folder in
+									case it ends up there.
 								</p>
 								<input
 									disabled={!captchaSecret || !mapLoaded}
