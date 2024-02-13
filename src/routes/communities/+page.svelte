@@ -90,6 +90,9 @@
 		communities && communities.filter((community) => community.tags.organization === 'enogtyve');
 	$: jednadvacet =
 		communities && communities.filter((community) => community.tags.organization === 'jednadvacet');
+	$: planBNetwork =
+		communities &&
+		communities.filter((community) => community.tags.organization === 'plan-b-network');
 	$: satoshiSpritz =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'satoshi-spritz');
@@ -210,6 +213,7 @@
 		'Einundzwanzig',
 		'Enogtyve',
 		'Jednadvacet',
+		'Plan B Network',
 		'Satoshi Spritz'
 	];
 	$: communitySections = [
@@ -250,6 +254,7 @@
 		{ section: 'Einundzwanzig', communities: einundzwanzig },
 		{ section: 'Enogtyve', communities: enogtyve },
 		{ section: 'Jednadvacet', communities: jednadvacet },
+		{ section: 'Plan B Network', communities: planBNetwork },
 		{ section: 'Satoshi Spritz', communities: satoshiSpritz }
 	];
 
