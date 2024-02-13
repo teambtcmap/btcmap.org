@@ -91,7 +91,8 @@
 	$: jednadvacet =
 		communities && communities.filter((community) => community.tags.organization === 'jednadvacet');
 	$: planBNetwork =
-		communities && communities.filter((community) => community.tags.organization === 'plan-b-network');
+		communities &&
+		communities.filter((community) => community.tags.organization === 'plan-b-network');
 	$: satoshiSpritz =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'satoshi-spritz');
