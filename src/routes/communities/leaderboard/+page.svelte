@@ -46,9 +46,9 @@
 	let gradeTooltip: HTMLButtonElement;
 	let gradeTooltipMobile: HTMLButtonElement;
 
-	function score(report: Report): number {
+	const score = (report: Report): number => {
 		return Math.max(report.tags.total_elements - report.tags.outdated_elements * 5, 0);
-	}
+	};
 
 	const populateLeaderboard = (
 		status: boolean,
@@ -69,11 +69,16 @@
 				}
 			});
 
-			leaderboard.sort((a, b) =>
-				score(b.report) === score(a.report)
-					? b.report.tags.total_elements - a.report.tags.total_elements
-					: score(b.report) - score(a.report)
-			);
+			leaderboard.sort((a, b) => {
+				const aScore = score(a.report);
+				const bScore = score(b.report);
+
+				if (bScore === aScore) {
+					return b.report.tags.total_elements - a.report.tags.total_elements;
+				} else {
+					return bScore - aScore;
+				}
+			});
 
 			leaderboard = leaderboard;
 			loading = false;
@@ -242,7 +247,7 @@
 				</div>
 
 				<p class="text-center text-sm text-body dark:text-white">
-					*Data sorted by Up-To-Date and then Total Locations.
+					*Data is weighted by Up-To-Date locations and then sorted by Total Locations.
 					<br />
 					*Leaderboard updated once every 24 hours.
 				</p>
