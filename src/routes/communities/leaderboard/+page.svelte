@@ -46,6 +46,10 @@
 	let gradeTooltip: HTMLButtonElement;
 	let gradeTooltipMobile: HTMLButtonElement;
 
+	function score(report: Report): number {
+		return Math.max(report.tags.total_elements - report.tags.outdated_elements * 5, 0);
+	}
+
 	const populateLeaderboard = (
 		status: boolean,
 		communities: Area[],
@@ -66,9 +70,9 @@
 			});
 
 			leaderboard.sort((a, b) =>
-				b.report.tags.up_to_date_percent === a.report.tags.up_to_date_percent
+				score(b.report) === score(a.report)
 					? b.report.tags.total_elements - a.report.tags.total_elements
-					: b.report.tags.up_to_date_percent - a.report.tags.up_to_date_percent
+					: score(b.report) - score(a.report)
 			);
 
 			leaderboard = leaderboard;
