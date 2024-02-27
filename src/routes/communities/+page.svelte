@@ -263,7 +263,7 @@
 			continentChartCanvas.getContext('2d');
 
 			if (location.hash) {
-				section = location.hash.slice(1).replaceAll('%20', ' ');
+				section = decodeURI(location.hash).slice(1);
 			} else {
 				section = 'Africa';
 			}
