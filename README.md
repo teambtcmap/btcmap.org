@@ -31,6 +31,8 @@
 2. run `yarn` to install the packages
 3. `yarn dev` will open the app on `localhost:5173`
 
+_NOTE:_ BTC Map uses the latest LTS version of [node](https://nodejs.org/). If you have [NVM](https://github.com/nvm-sh/nvm), you can simply run `nvm use` in the root directory of the repo to switch to the supported node version.
+
 ## PWA
 
 This website is a progressive web app, meaning you can install it on your mobile device and use it like a native application. Just look for the **Add to home screen** or **Install** option in your browser while visiting [btcmap.org](https://btcmap.org).
