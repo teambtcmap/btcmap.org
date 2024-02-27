@@ -59,7 +59,7 @@ export const POST: RequestHandler = async ({ request }) => {
 				title: name,
 				body: `Community name: ${name}
 Location: ${location}
-GeoJSON: https://geojson.easify.de/?search=${encodeURIComponent(location)}
+GeoJSON: https://geojson.codingarena.top/?search=${encodeURIComponent(location)}
 Icon URL: ${icon}
 Lightning: ${lightning}
 Social links: ${socialLinks}
