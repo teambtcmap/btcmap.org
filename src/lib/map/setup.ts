@@ -86,6 +86,8 @@ export const toggleMapButtons = () => {
 };
 
 export const layers = (leaflet: Leaflet, map: Map) => {
+	const urlBasemap = new URLSearchParams(location.search).get('basemap') || '';
+	const validBasemaps = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13'];
 	const theme = detectTheme();
 
 	const osm = leaflet.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -179,7 +181,49 @@ export const layers = (leaflet: Leaflet, map: Map) => {
 		}
 	);
 
-	if (theme === 'dark') {
+	if (validBasemaps.includes(urlBasemap)) {
+		switch (urlBasemap) {
+			case '1':
+				OSMBright.addTo(map);
+				break;
+			case '2':
+				alidadeSmoothDark.addTo(map);
+				break;
+			case '3':
+				osm.addTo(map);
+				break;
+			case '4':
+				alidadeSmooth.addTo(map);
+				break;
+			case '5':
+				imagery.addTo(map);
+				break;
+			case '6':
+				outdoors.addTo(map);
+				break;
+			case '7':
+				terrain.addTo(map);
+				break;
+			case '8':
+				topo.addTo(map);
+				break;
+			case '9':
+				toner.addTo(map);
+				break;
+			case '10':
+				tonerLite.addTo(map);
+				break;
+			case '11':
+				watercolor.addTo(map);
+				break;
+			case '12':
+				osmDE.addTo(map);
+				break;
+			case '13':
+				osmFR.addTo(map);
+				break;
+		}
+	} else if (theme === 'dark') {
 		alidadeSmoothDark.addTo(map);
 	} else {
 		OSMBright.addTo(map);
