@@ -7,6 +7,7 @@
 		Footer,
 		Header,
 		InfoTooltip,
+		IssuesTable,
 		LatestTagger,
 		MapLoadingEmbed,
 		OpenTicket,
@@ -50,12 +51,21 @@
 		type BaseMaps,
 		type Continents,
 		type DomEventType,
+		type Element,
 		type Event,
 		type Grade,
+		type Issues,
 		type Leaflet,
 		type User
 	} from '$lib/types.js';
-	import { detectTheme, errToast, formatElementID, getGrade, updateChartThemes } from '$lib/utils';
+	import {
+		detectTheme,
+		errToast,
+		formatElementID,
+		getGrade,
+		getIssues,
+		updateChartThemes
+	} from '$lib/utils';
 	// @ts-expect-error
 	import rewind from '@mapbox/geojson-rewind';
 	import Chart from 'chart.js/auto';
@@ -147,7 +157,7 @@
 		const rewoundPoly = rewind(community.geo_json, true);
 
 		// filter elements within community
-		const filteredElements = $elements.filter((element) => {
+		const filteredElements: Element[] = $elements.filter((element) => {
 			let lat = latCalc(element['osm_json']);
 			let long = longCalc(element['osm_json']);
 
@@ -346,6 +356,8 @@
 		legacyPercent = legacy ? (legacy / (total / 100)).toFixed(0) : '0';
 
 		grade = getGrade(Number(upToDatePercent));
+
+		issues = getIssues(filteredElements);
 
 		const populateCharts = () => {
 			const chartsReports = [...communityReports].sort(
@@ -804,6 +816,8 @@
 
 	let baseMaps: BaseMaps;
 
+	let issues: Issues = [];
+
 	let chartsLoading = true;
 	let upToDateChartCanvas: HTMLCanvasElement;
 	let upToDateChart: Chart<'line', number[], string>;
@@ -1214,6 +1228,12 @@
 					</div>
 				</div>
 			</section>
+
+			<IssuesTable
+				title="{name || 'BTC Map Community'} Tagging Issues"
+				{issues}
+				loading={!dataInitialized}
+			/>
 
 			<section id="tickets">
 				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">

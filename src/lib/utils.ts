@@ -1,8 +1,8 @@
 import { theme } from '$lib/store';
+import type { Element, Grade, IssueIcon, IssueType, Issues } from '$lib/types';
 import { toast } from '@zerodevx/svelte-toast';
 import type { Chart } from 'chart.js';
 import { get } from 'svelte/store';
-import type { Grade } from './types';
 
 export const errToast = (m: string) => {
 	toast.push(m, {
@@ -97,3 +97,52 @@ export const getGrade = (upToDatePercent: number): Grade => {
 			return 1;
 	}
 };
+
+export const getIssues = (elements: Element[]): Issues => {
+	const issues: Issues = [];
+
+	elements.forEach((element) => {
+		if (!element.tags.issues?.length) return;
+
+		element.tags.issues.forEach((issue) => {
+			issues.push({ ...issue, merchantName: element.osm_json.tags?.name, merchantId: element.id });
+		});
+	});
+
+	return issues;
+};
+
+export const getIssueIcon = (type: IssueType): IssueIcon => {
+	switch (type) {
+		case 'date_format':
+			return 'fa-calendar-days';
+		case 'misspelled_tag':
+			return 'fa-spell-check';
+		case 'missing_icon':
+			return 'fa-icons';
+		case 'not_verified':
+			return 'fa-clipboard-question';
+		case 'out_of_date':
+			return 'fa-hourglass-end';
+		case 'out_of_date_soon':
+			return 'fa-hourglass-half';
+		default:
+			return 'fa-list-check';
+	}
+};
+
+export const isEven = (number: number) => {
+	return number % 2 === 0;
+};
+
+export function debounce(func: (e?: any) => void, timeout = 500) {
+	let timer: ReturnType<typeof setTimeout>;
+	// @ts-expect-error
+	return (...args) => {
+		clearTimeout(timer);
+		timer = setTimeout(() => {
+			// @ts-expect-error
+			func.apply(this, args);
+		}, timeout);
+	};
+}

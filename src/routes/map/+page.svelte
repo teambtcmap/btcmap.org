@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
-	import { Boost, Icon, MapLoadingMain, ShowTags } from '$lib/comp';
+	import { Boost, Icon, MapLoadingMain, ShowTags, TaggingIssues } from '$lib/comp';
 	import {
 		attribution,
 		calcVerifiedDate,
@@ -21,7 +21,7 @@
 	} from '$lib/map/setup';
 	import { elementError, elements, elementsSyncCount, mapUpdates } from '$lib/store';
 	import type { Leaflet, MapGroups, OSMTags, SearchElement, SearchResult } from '$lib/types';
-	import { detectTheme, errToast } from '$lib/utils';
+	import { debounce, detectTheme, errToast } from '$lib/utils';
 	import type { Control, LatLng, LatLngBounds, Map } from 'leaflet';
 	import localforage from 'localforage';
 	import { onDestroy, onMount, tick } from 'svelte';
@@ -48,18 +48,6 @@
 	let searchResults: SearchResult[] = [];
 
 	//search functions
-	function debounce(func: () => void, timeout = 500) {
-		let timer: ReturnType<typeof setTimeout>;
-		// @ts-expect-error
-		return (...args) => {
-			clearTimeout(timer);
-			timer = setTimeout(() => {
-				// @ts-expect-error
-				func.apply(this, args);
-			}, timeout);
-		};
-	}
-
 	const elementSearch = () => {
 		if (search.length < 3) {
 			searchResults = [];
@@ -195,7 +183,8 @@
 					leaflet,
 					verifiedDate,
 					true,
-					boosted
+					boosted,
+					element.tags.issues
 				);
 
 				let verified = verifiedArr(elementOSM);
@@ -686,6 +675,7 @@
 	{/if}
 
 	<ShowTags />
+	<TaggingIssues />
 
 	<div bind:this={mapElement} class="absolute h-[100%] w-full !bg-teal dark:!bg-dark" />
 </main>

@@ -15,6 +15,7 @@
 		PrimaryButton,
 		ShowTags,
 		TaggerSkeleton,
+		TaggingIssues,
 		TopButton
 	} from '$lib/comp';
 	import {
@@ -43,6 +44,7 @@
 		reports,
 		resetBoost,
 		showTags,
+		taggingIssues,
 		theme,
 		userError,
 		users
@@ -547,6 +549,14 @@
 							/>
 						</span>
 
+						<span id="tagging-issues">
+							<MerchantButton
+								click={() => ($taggingIssues = merchant?.tags?.issues || [])}
+								icon="issues"
+								text="Tag Issues"
+							/>
+						</span>
+
 						<MerchantLink
 							link={`https://www.openstreetmap.org/${merchant?.osm_json.type}/${merchant?.osm_json.id}`}
 							icon="external"
@@ -884,4 +894,5 @@
 	{/if}
 
 	<ShowTags />
+	<TaggingIssues />
 </div>

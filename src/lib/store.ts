@@ -1,4 +1,4 @@
-import type { Area, Boost, Element, Event, OSMTags, Report, Theme, User } from '$lib/types';
+import type { Area, Boost, Element, Event, Issue, OSMTags, Report, Theme, User } from '$lib/types';
 import { readable, writable, type Writable } from 'svelte/store';
 
 export const socials = readable({
@@ -72,6 +72,7 @@ export const resetBoost = writable(0);
 export const boostHash: Writable<string> = writable();
 
 export const showTags: Writable<OSMTags | undefined> = writable();
+export const taggingIssues: Writable<Issue[] | undefined> = writable();
 export const showMore = writable(false);
 
 export const theme: Writable<Theme> = writable();

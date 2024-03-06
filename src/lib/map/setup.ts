@@ -1,6 +1,14 @@
 import { InfoTooltip } from '$lib/comp';
-import { boost, exchangeRate, resetBoost, showMore, showTags, theme } from '$lib/store';
-import type { DomEventType, ElementOSM, Leaflet, OSMTags, PayMerchant } from '$lib/types';
+import {
+	boost,
+	exchangeRate,
+	resetBoost,
+	showMore,
+	showTags,
+	taggingIssues,
+	theme
+} from '$lib/store';
+import type { DomEventType, ElementOSM, Issue, Leaflet, OSMTags, PayMerchant } from '$lib/types';
 import { detectTheme, errToast } from '$lib/utils';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -702,7 +710,8 @@ export const generateMarker = (
 	L: Leaflet,
 	verifiedDate: number,
 	verify: boolean,
-	boosted: string | undefined
+	boosted: string | undefined,
+	issues?: Issue[] | undefined
 ) => {
 	const generatePopup = () => {
 		const theme = detectTheme();
@@ -897,6 +906,15 @@ export const generateMarker = (
 																<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#tags"></use>
 															</svg>
 															Show Tags
+													</button>
+													
+													<button
+														id='tagging-issues'
+														class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+															<svg width='24px' height='24px' class='mr-2'>
+																<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#issues"></use>
+															</svg>
+															Tag Issues
 													</button>`
 									: ''
 							}
@@ -1115,6 +1133,14 @@ ${
 			if (showTagsButton) {
 				showTagsButton.onclick = () => {
 					showTags.set(element.tags || {});
+				};
+			}
+
+			const taggingIssuesButton: HTMLButtonElement | null =
+				popupContainer.querySelector('#tagging-issues');
+			if (taggingIssuesButton) {
+				taggingIssuesButton.onclick = () => {
+					taggingIssues.set(issues || []);
 				};
 			}
 

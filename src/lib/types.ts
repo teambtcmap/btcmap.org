@@ -68,10 +68,25 @@ export type Element = {
 		['payment:uri']?: string;
 		['payment:coinos']?: string;
 		['payment:pouch']?: string;
+		issues?: Issue[];
 	};
 	created_at: string;
 	updated_at: string;
 	deleted_at: string;
+};
+
+export type IssueType =
+	| 'date_format'
+	| 'misspelled_tag'
+	| 'missing_icon'
+	| 'not_verified'
+	| 'out_of_date'
+	| 'out_of_date_soon';
+
+export type Issue = {
+	description: string;
+	severity: number;
+	type: IssueType;
 };
 
 export type ElementOSM = {
@@ -223,6 +238,24 @@ export interface ActivityEvent extends Event {
 	merchantId: string;
 	tagger?: User;
 }
+
+// issues
+
+interface IssueExtended extends Issue {
+	merchantName: string | undefined;
+	merchantId: string;
+}
+
+export type Issues = IssueExtended[];
+
+export type IssueIcon =
+	| 'fa-calendar-days'
+	| 'fa-spell-check'
+	| 'fa-icons'
+	| 'fa-clipboard-question'
+	| 'fa-hourglass-end'
+	| 'fa-list-check'
+	| 'fa-hourglass-half';
 
 // misc
 
