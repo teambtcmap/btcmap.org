@@ -41,13 +41,7 @@
 					<span
 						class="mr-4 rounded-full bg-mobileButtons p-3 transition-colors active:bg-mobileButtonsActive"
 					>
-						<Icon
-							w="24"
-							h="24"
-							icon={link.icon}
-							type="mobile-nav"
-							style={link.icon === 'issue' ? 'opacity-75' : ''}
-						/>
+						<Icon w="24" h="24" icon={link.icon} type="mobile-nav" />
 					</span>
 					<span>{link.title}</span>
 					{#if link.external}
