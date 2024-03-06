@@ -196,6 +196,10 @@
 			class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
 		>
 			{title}
+
+			{#if !loading}
+				({issues.length})
+			{/if}
 		</h3>
 
 		{#if loading}
