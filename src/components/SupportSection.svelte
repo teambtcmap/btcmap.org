@@ -1,5 +1,4 @@
 <script lang="ts">
-	export let title: 'Company' | 'Community';
 	export let supporters: { url: string; logoDark?: string; logo: string; title: string }[];
 	export let placeholders: number;
 
@@ -7,8 +6,7 @@
 	import { detectTheme } from '$lib/utils';
 </script>
 
-<div>
-	<h3 class="mb-4 text-xl font-semibold text-body dark:text-white">{title}</h3>
+<div class="mt-4">
 	<div class="mx-auto w-full grid-cols-3 gap-10 space-y-10 lg:grid lg:w-[830px] lg:space-y-0">
 		{#each supporters as supporter}
 			<a

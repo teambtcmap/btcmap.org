@@ -41,18 +41,10 @@
 		);
 	};
 
-	const company = [
+	const supporters = [
 		{ url: 'https://coinos.io/', title: 'coinos', logo: 'coinos.svg', logoDark: 'coinos-dark.svg' },
-		{ url: 'https://www.walletofsatoshi.com/', title: 'Wallet of Satoshi', logo: 'wos.png' }
-	];
-
-	const community = [
-		{ url: 'https://btccuracao.com/', title: 'BTC Curacao', logo: 'btccuracao.png' },
-		{
-			url: 'https://pouch.ph/bitcoinisland',
-			title: 'Bitcoin Island Philippines',
-			logo: 'bitcoin-island-philippines.jpeg'
-		}
+		{ url: 'https://www.walletofsatoshi.com/', title: 'Wallet of Satoshi', logo: 'wos.png' },
+		{ url: 'https://btccuracao.com/', title: 'BTC Curacao', logo: 'btccuracao.png' }
 	];
 </script>
 
@@ -140,10 +132,7 @@
 					>Become a Sponsor</a
 				>
 
-				<div class="mt-4 space-y-16">
-					<SupportSection title="Company" supporters={company} placeholders={1} />
-					<SupportSection title="Community" supporters={community} placeholders={1} />
-				</div>
+				<SupportSection {supporters} placeholders={0} />
 			</section>
 
 			<section id="node">
