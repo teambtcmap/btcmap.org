@@ -42,6 +42,7 @@
 	const pageSizes = [10, 20, 30, 40, 50];
 
 	let globalFilter = '';
+	let searchInput: HTMLInputElement;
 
 	const handleKeyUp = (e: any) => {
 		$table?.setGlobalFilter(String(e?.target?.value));
@@ -220,6 +221,7 @@
 					class="w-full bg-primary/5 px-5 py-2.5 text-sm focus:outline-primary dark:bg-white/5 dark:focus:outline-white"
 					bind:value={globalFilter}
 					on:keyup={searchDebounce}
+					bind:this={searchInput}
 				/>
 				{#if globalFilter}
 					<button
@@ -230,6 +232,15 @@
 						}}
 					>
 						<i class="fa-solid fa-circle-xmark" />
+					</button>
+				{:else}
+					<button
+						class="absolute right-3 top-1/2 -translate-y-1/2"
+						on:click={() => {
+							searchInput.focus();
+						}}
+					>
+						<i class="fa-solid fa-magnifying-glass" />
 					</button>
 				{/if}
 			</div>
