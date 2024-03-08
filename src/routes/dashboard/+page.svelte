@@ -194,8 +194,18 @@
 	let upToDateChart: Chart<'line', number[] | undefined, string>;
 	let totalChartCanvas: HTMLCanvasElement;
 	let totalChart: Chart<'line', number[] | undefined, string>;
+	let daysSinceVerifiedChartCanvas: HTMLCanvasElement;
+	let daysSinceVerifiedChart: Chart<'line', number[] | undefined, string>;
 	let paymentMethodChartCanvas: HTMLCanvasElement;
 	let paymentMethodChart: Chart<'line', number[] | undefined, string>;
+
+	const days_since_verified = (report: Report): number => {
+		var report_date = new Date(report.created_at);
+		var avg_verification_date = new Date(report.tags.avg_verification_date);
+		var diff = Math.abs(report_date.getTime() - avg_verification_date.getTime());
+		var diffDays = Math.ceil(diff / (1000 * 3600 * 24));
+		return diffDays;
+	};
 
 	const populateCharts = () => {
 		const theme = detectTheme();
@@ -286,6 +296,66 @@
 							above: 'rgba(0, 153, 175, 0.2)'
 						},
 						borderColor: 'rgb(0, 153, 175)',
+						tension: 0.1,
+						pointStyle: false
+					}
+				]
+			},
+			options: {
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						labels: {
+							font: {
+								weight: 600
+							}
+						}
+					}
+				},
+				scales: {
+					x: {
+						ticks: {
+							maxTicksLimit: 5,
+							font: {
+								weight: 600
+							}
+						},
+						grid: {
+							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+						}
+					},
+					y: {
+						ticks: {
+							font: {
+								weight: 600
+							}
+						},
+						grid: {
+							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+						}
+					}
+				},
+				interaction: {
+					intersect: false
+				}
+			}
+		});
+
+		daysSinceVerifiedChart = new Chart(daysSinceVerifiedChartCanvas, {
+			type: 'line',
+			data: {
+				labels: statsFiltered.map(({ date }) => date),
+				datasets: [
+					{
+						label: 'Days Since Verified',
+						data: statsFiltered.map((stat) => {
+							return days_since_verified(stat);
+						}),
+						fill: {
+							target: 'origin',
+							above: 'rgba(247, 147, 26, 0.3)'
+						},
+						borderColor: 'rgb(247, 147, 26)',
 						tension: 0.1,
 						pointStyle: false
 					}
@@ -494,6 +564,12 @@
 				});
 				totalChart.update();
 
+				daysSinceVerifiedChart.data.labels = statsFiltered.map(({ date }) => date);
+				daysSinceVerifiedChart.data.datasets[0].data = statsFiltered.map((stat) => {
+					return days_since_verified(stat);
+				});
+				daysSinceVerifiedChart.update();
+
 				paymentMethodChart.data.labels = statsFiltered.map(({ date }) => date);
 				paymentMethodChart.data.datasets[0].data = statsFiltered.map(
 					({ tags: { total_elements_onchain } }) => total_elements_onchain
@@ -519,12 +595,13 @@
 	$: $theme !== undefined &&
 		chartsLoading === false &&
 		chartsRendered === true &&
-		updateChartThemes([upToDateChart, totalChart, paymentMethodChart]);
+		updateChartThemes([upToDateChart, totalChart, daysSinceVerifiedChart, paymentMethodChart]);
 
 	onMount(async () => {
 		if (browser) {
 			upToDateChartCanvas.getContext('2d');
 			totalChartCanvas.getContext('2d');
+			daysSinceVerifiedChartCanvas.getContext('2d');
 			paymentMethodChartCanvas.getContext('2d');
 
 			if ($reports && $reports.length) {
@@ -677,6 +754,23 @@
 					</div>
 					<p class="mt-1 text-center text-sm text-body dark:text-white">
 						*Elements accepting any bitcoin payment method.
+					</p>
+				</div>
+
+				<div>
+					<div class="relative">
+						{#if chartsLoading}
+							<div
+								class="absolute left-0 top-0 flex h-[400px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
+							>
+								<i class="fa-solid fa-chart-area h-24 w-24 animate-pulse text-link/50" />
+							</div>
+						{/if}
+						<canvas bind:this={daysSinceVerifiedChartCanvas} width="100%" height="400" />
+					</div>
+					<p class="mt-1 text-center text-sm text-body dark:text-white">
+						*Based on <em>survey:date</em>, <em>check_date</em>, or
+						<em>check_date:currency:XBT</em>.
 					</p>
 				</div>
 
