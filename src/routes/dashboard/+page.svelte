@@ -199,11 +199,11 @@
 	let paymentMethodChartCanvas: HTMLCanvasElement;
 	let paymentMethodChart: Chart<'line', number[] | undefined, string>;
 
-	const days_since_verified = (report: Report): number => {
-		var report_date = new Date(report.created_at);
-		var avg_verification_date = new Date(report.tags.avg_verification_date);
-		var diff = Math.abs(report_date.getTime() - avg_verification_date.getTime());
-		var diffDays = Math.ceil(diff / (1000 * 3600 * 24));
+	const getDaysSinceVerified = (report: Report): number => {
+		const reportDate = new Date(report.created_at);
+		const avgVerificationDate = new Date(report.tags.avg_verification_date);
+		const diff = Math.abs(reportDate.getTime() - avgVerificationDate.getTime());
+		const diffDays = Math.ceil(diff / (1000 * 3600 * 24));
 		return diffDays;
 	};
 
@@ -348,9 +348,7 @@
 				datasets: [
 					{
 						label: 'Days Since Verified',
-						data: statsFiltered.map((stat) => {
-							return days_since_verified(stat);
-						}),
+						data: statsFiltered.map((stat) => getDaysSinceVerified(stat)),
 						fill: {
 							target: 'origin',
 							above: 'rgba(247, 147, 26, 0.3)'
@@ -565,9 +563,9 @@
 				totalChart.update();
 
 				daysSinceVerifiedChart.data.labels = statsFiltered.map(({ date }) => date);
-				daysSinceVerifiedChart.data.datasets[0].data = statsFiltered.map((stat) => {
-					return days_since_verified(stat);
-				});
+				daysSinceVerifiedChart.data.datasets[0].data = statsFiltered.map((stat) =>
+					getDaysSinceVerified(stat)
+				);
 				daysSinceVerifiedChart.update();
 
 				paymentMethodChart.data.labels = statsFiltered.map(({ date }) => date);
