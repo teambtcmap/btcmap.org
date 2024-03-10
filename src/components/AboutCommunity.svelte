@@ -18,7 +18,7 @@
 		alt="avatar"
 		class="h-24 w-24 rounded-full object-cover"
 		on:error={function () {
-			this.src = '/images/communities/bitcoin.svg';
+			this.src = '/images/bitcoin.svg';
 		}}
 	/>
 </a>

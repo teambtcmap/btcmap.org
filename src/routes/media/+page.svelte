@@ -15,6 +15,7 @@
 		{ link: '/images/og/add-community.png', name: 'Add Community' },
 		{ link: '/images/og/add.png', name: 'Add Location' },
 		{ link: '/images/og/communities.png', name: 'Communities' },
+		{ link: '/images/og/countries.png', name: 'Countries' },
 		{ link: '/images/og/apps.png', name: 'Download Apps' },
 		{ link: '/images/og/badges.png', name: 'Earn Badges' },
 		{ link: '/images/og/home.png', name: 'Main' },
@@ -25,6 +26,7 @@
 		{ link: '/images/og/supertagger.png', name: 'Supertagger Profile' },
 		{ link: '/images/og/support.png', name: 'Support Us' },
 		{ link: '/images/og/top-communities.png', name: 'Top Communities' },
+		{ link: '/images/og/top-countries.png', name: 'Top Countries' },
 		{ link: '/images/og/verify.png', name: 'Verify Locations' }
 	];
 

@@ -263,7 +263,7 @@
 			continentChartCanvas.getContext('2d');
 
 			if (location.hash) {
-				section = decodeURI(location.hash).slice(1);
+				section = decodeURIComponent(location.hash).slice(1);
 			} else {
 				section = 'Africa';
 			}
@@ -302,17 +302,25 @@
 				and have fun!
 			</h2>
 
-			<div class="items-center justify-center space-y-5 md:flex md:space-x-5 md:space-y-0">
+			<div>
 				<PrimaryButton
-					text="Add community"
-					style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
-					link="/communities/add"
+					text="Leaderboard"
+					style="md:w-[200px] mx-auto py-3 rounded-xl mb-5"
+					link="/communities/leaderboard"
 				/>
-				<PrimaryButton
-					text="View community map"
-					style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
-					link="/communities/map"
-				/>
+
+				<div class="items-center justify-center space-y-5 md:flex md:space-x-5 md:space-y-0">
+					<PrimaryButton
+						text="Add community"
+						style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
+						link="/communities/add"
+					/>
+					<PrimaryButton
+						text="View community map"
+						style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
+						link="/communities/map"
+					/>
+				</div>
 			</div>
 
 			<div class="relative">
@@ -338,17 +346,17 @@
 						<h2
 							class="mb-2 text-3xl font-semibold text-primary dark:text-white md:mb-0 md:text-left"
 						>
-							<a href="/communities#{section.replaceAll(' ', '%20')}">{section}</a>
+							<a href="/communities#{encodeURIComponent(section)}">{section}</a>
 						</h2>
 
 						<select
-							class="rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link dark:bg-white/[0.15] dark:text-white"
+							class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link dark:bg-white/[0.15] dark:text-white md:w-auto"
 							bind:value={section}
 							on:change={(e) => {
 								// @ts-expect-error
 								section = e.target?.value;
 								// @ts-expect-error
-								location.hash = e.target?.value;
+								location.hash = encodeURIComponent(e.target?.value);
 							}}
 						>
 							{#each sections as option}

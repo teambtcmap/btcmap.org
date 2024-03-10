@@ -40,11 +40,11 @@
 			<img
 				src={image
 					? `https://btcmap.org/.netlify/images?url=${image}&fit=cover&w=256&h=256`
-					: '/images/communities/bitcoin.svg'}
+					: '/images/bitcoin.svg'}
 				alt={tags.name}
 				class="mx-auto h-20 w-20 rounded-full object-cover"
 				on:error={function () {
-					this.src = '/images/communities/bitcoin.svg';
+					this.src = '/images/bitcoin.svg';
 				}}
 			/>
 

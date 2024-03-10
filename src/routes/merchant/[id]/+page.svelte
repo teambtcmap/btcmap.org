@@ -853,7 +853,7 @@
 											alt="logo"
 											class="mx-auto h-20 w-20 rounded-full object-cover"
 											on:error={function () {
-												this.src = '/images/communities/bitcoin.svg';
+												this.src = '/images/bitcoin.svg';
 											}}
 										/>
 										<p class="text-center font-semibold text-body dark:text-white">

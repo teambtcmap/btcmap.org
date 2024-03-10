@@ -1,5 +1,5 @@
 import { theme } from '$lib/store';
-import type { Element, Grade, IssueIcon, IssueType, Issues } from '$lib/types';
+import type { Continents, Element, Grade, IssueIcon, IssueType, Issues } from '$lib/types';
 import { toast } from '@zerodevx/svelte-toast';
 import type { Chart } from 'chart.js';
 import { get } from 'svelte/store';
@@ -146,3 +146,19 @@ export function debounce(func: (e?: any) => void, timeout = 500) {
 		}, timeout);
 	};
 }
+
+export const validateContinents = (continent: Continents) =>
+	[
+		'africa',
+		'asia',
+		'europe',
+		'north-america',
+		'oceania',
+		'south-america',
+		'Africa',
+		'Asia',
+		'Europe',
+		'North America',
+		'Oceania',
+		'South America'
+	].includes(continent);

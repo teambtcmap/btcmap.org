@@ -1,4 +1,5 @@
 <script lang="ts">
+	export let type: AreaType;
 	export let position: number;
 	export let avatar: string;
 	export let name: string;
@@ -9,7 +10,7 @@
 	export let grade: Grade;
 
 	import { SponsorBadge } from '$lib/comp';
-	import type { Grade } from '$lib/types';
+	import type { AreaType, Grade } from '$lib/types';
 
 	$: stats = [
 		{ stat: upToDate, title: 'Up-To-Date' },
@@ -39,16 +40,18 @@
 
 	<div class="my-5 lg:my-0">
 		<img
-			src={`https://btcmap.org/.netlify/images?url=${avatar}&fit=cover&w=256&h=256`}
+			src={type === 'community'
+				? `https://btcmap.org/.netlify/images?url=${avatar}&fit=cover&w=256&h=256`
+				: avatar}
 			alt="avatar"
 			class="mx-auto mb-2 h-20 w-20 rounded-full object-cover lg:h-14 lg:w-14"
 			on:error={function () {
-				this.src = '/images/communities/bitcoin.svg';
+				this.src = '/images/bitcoin.svg';
 			}}
 		/>
 
 		<a
-			href="/community/{id}"
+			href="/{type}/{id}"
 			class="hover:text-hover {name.match('([^ ]{21})')
 				? 'break-all'
 				: ''} mb-1 inline-block transition-colors">{name}</a

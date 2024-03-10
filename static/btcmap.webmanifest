@@ -635,6 +635,20 @@
 			]
 		},
 		{
+			"name": "Countries",
+			"short_name": "Countries",
+			"description": "Bitcoin adoption by countries",
+			"url": "/countries",
+			"icons": [
+				{
+					"src": "/icons/pwa/maskable/maskable_icon_x96.png",
+					"sizes": "96x96",
+					"type": "image/png",
+					"purpose": "maskable"
+				}
+			]
+		},
+		{
 			"name": "Support Us",
 			"short_name": "Support",
 			"description": "Support BTC Map development",

@@ -13,12 +13,12 @@ export type Area = {
 };
 
 export type AreaTags = {
-	type: 'community' | 'country';
+	type: AreaType;
 	name: string;
 	continent: Continents;
 	url_alias: string;
 	geo_json: GeoJSON;
-	['icon:square']: string;
+	['icon:square']: string; // countries don't have this tag yet
 	organization?: string;
 	language?: string;
 	population?: string;
@@ -50,13 +50,21 @@ export type AreaTags = {
 	['box:west']?: string;
 };
 
+export type AreaType = 'community' | 'country';
+
 export type Continents =
 	| 'africa'
 	| 'asia'
 	| 'europe'
 	| 'north-america'
 	| 'oceania'
-	| 'south-america';
+	| 'south-america'
+	| 'Africa'
+	| 'Asia'
+	| 'Europe'
+	| 'North America'
+	| 'Oceania'
+	| 'South America';
 
 export type Element = {
 	id: string;
@@ -266,3 +274,5 @@ export type DonationType = 'On-chain' | 'Lightning';
 export type DropdownLink = { url: string; external?: boolean; icon: string; title: string };
 
 export type ChartHistory = '7D' | '1M' | '3M' | '6M' | 'YTD' | '1Y' | 'ALL';
+
+export type AreaPageProps = { id: string; name: string; tickets: [] | 'error' };

@@ -78,7 +78,7 @@
 
 			popupContainer.innerHTML = `
 				<div class='text-center space-y-2'>
-					<img loading='lazy' src=${`https://btcmap.org/.netlify/images?url=${community.tags['icon:square']}&fit=cover&w=256&h=256`} alt='avatar' class='w-24 h-24 rounded-full mx-auto' title='Community icon' onerror="this.src='/images/communities/bitcoin.svg'" />
+					<img loading='lazy' src=${`https://btcmap.org/.netlify/images?url=${community.tags['icon:square']}&fit=cover&w=256&h=256`} alt='avatar' class='w-24 h-24 rounded-full mx-auto' title='Community icon' onerror="this.src='/images/bitcoin.svg'" />
 
 					<span class='text-primary dark:text-white font-semibold text-xl' title='Community name'>${
 						community.tags.name
