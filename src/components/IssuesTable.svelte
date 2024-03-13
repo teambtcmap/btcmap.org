@@ -34,6 +34,7 @@
 		type: string;
 		viewLink: string;
 		editLink: string;
+		helpLink: string | undefined;
 	};
 
 	let table: Readable<Table<IssueFormatted>> | undefined;
@@ -75,7 +76,18 @@
 				const viewLink = id[0] + '/' + id[1];
 				const editLink = id[0] + '=' + id[1];
 
-				return { icon, name, type, viewLink, editLink };
+				let helpLink: string | undefined;
+
+				switch (issue.description) {
+					case 'Out of date':
+					case 'Not verified':
+						helpLink = 'https://wiki.btcmap.org/general/outdated';
+						break;
+					default:
+						helpLink = undefined;
+				}
+
+				return { icon, name, type, viewLink, editLink, helpLink };
 			});
 
 		const columns: ColumnDef<IssueFormatted>[] = [
@@ -98,6 +110,13 @@
 				accessorKey: 'type',
 				header: 'Description',
 				cell: (info) => flexRender(IssueCell, { id: 'type', value: info.getValue() }),
+				enableGlobalFilter: false
+			},
+			{
+				accessorKey: 'helpLink',
+				header: '',
+				cell: (info) => flexRender(IssueCell, { id: 'helpLink', value: info.getValue() }),
+				enableSorting: false,
 				enableGlobalFilter: false
 			},
 			{

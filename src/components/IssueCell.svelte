@@ -29,4 +29,13 @@
 	>
 		Edit
 	</a>
+{:else if id === 'helpLink' && value}
+	<a
+		href={value}
+		target="_blank"
+		rel="noreferrer"
+		class="text-link transition-colors hover:text-hover"
+	>
+		How to fix?
+	</a>
 {/if}
