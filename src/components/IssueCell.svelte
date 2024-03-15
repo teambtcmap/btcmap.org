@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { IssueIcon } from '$lib/comp';
 
-	export let id: 'icon' | 'name' | 'type' | 'viewLink' | 'editLink';
+	export let id: 'icon' | 'name' | 'type' | 'viewLink' | 'editLink' | 'helpLink';
 	export let value: string;
 </script>
 
@@ -36,6 +36,6 @@
 		rel="noreferrer"
 		class="text-link transition-colors hover:text-hover"
 	>
-		How to fix?
+		Help
 	</a>
 {/if}

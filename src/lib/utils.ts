@@ -131,6 +131,22 @@ export const getIssueIcon = (type: IssueType): IssueIcon => {
 	}
 };
 
+export const getIssueHelpLink = (type: IssueType) => {
+	switch (type) {
+		case 'out_of_date':
+		case 'out_of_date_soon':
+		case 'not_verified':
+			return 'https://wiki.btcmap.org/general/outdated';
+		case 'date_format':
+			return 'https://wiki.btcmap.org/general/tagging-instructions#verified-tags---more-information';
+		case 'misspelled_tag':
+			return 'https://wiki.btcmap.org/general/tagging-instructions#required-tags';
+		case 'missing_icon':
+		default:
+			return undefined;
+	}
+};
+
 export const isEven = (number: number) => {
 	return number % 2 === 0;
 };

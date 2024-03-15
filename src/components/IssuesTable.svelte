@@ -2,7 +2,7 @@
 	import { IssueCell } from '$lib/comp';
 	import { theme } from '$lib/store';
 	import type { Issues } from '$lib/types';
-	import { debounce, detectTheme, getIssueIcon, isEven } from '$lib/utils';
+	import { debounce, detectTheme, getIssueHelpLink, getIssueIcon, isEven } from '$lib/utils';
 	import { rankItem } from '@tanstack/match-sorter-utils';
 	import type {
 		ColumnDef,
@@ -75,17 +75,7 @@
 				const id = issue.merchantId.split(':');
 				const viewLink = id[0] + '/' + id[1];
 				const editLink = id[0] + '=' + id[1];
-
-				let helpLink: string | undefined;
-
-				switch (issue.description) {
-					case 'Out of date':
-					case 'Not verified':
-						helpLink = 'https://wiki.btcmap.org/general/outdated';
-						break;
-					default:
-						helpLink = undefined;
-				}
+				const helpLink = getIssueHelpLink(issue.type);
 
 				return { icon, name, type, viewLink, editLink, helpLink };
 			});
@@ -113,13 +103,6 @@
 				enableGlobalFilter: false
 			},
 			{
-				accessorKey: 'helpLink',
-				header: '',
-				cell: (info) => flexRender(IssueCell, { id: 'helpLink', value: info.getValue() }),
-				enableSorting: false,
-				enableGlobalFilter: false
-			},
-			{
 				accessorKey: 'viewLink',
 				header: '',
 				cell: (info) => flexRender(IssueCell, { id: 'viewLink', value: info.getValue() }),
@@ -130,6 +113,13 @@
 				accessorKey: 'editLink',
 				header: '',
 				cell: (info) => flexRender(IssueCell, { id: 'editLink', value: info.getValue() }),
+				enableSorting: false,
+				enableGlobalFilter: false
+			},
+			{
+				accessorKey: 'helpLink',
+				header: '',
+				cell: (info) => flexRender(IssueCell, { id: 'helpLink', value: info.getValue() }),
 				enableSorting: false,
 				enableGlobalFilter: false
 			}
