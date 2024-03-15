@@ -105,7 +105,11 @@ export const getIssues = (elements: Element[]): Issues => {
 		if (!element.tags.issues?.length) return;
 
 		element.tags.issues.forEach((issue) => {
-			issues.push({ ...issue, merchantName: element.osm_json.tags?.name, merchantId: element.id });
+			issues.push({
+				...issue,
+				merchantName: element.osm_json.tags?.name || element.osm_json.tags?.['name:en'],
+				merchantId: element.id
+			});
 		});
 	});
 
