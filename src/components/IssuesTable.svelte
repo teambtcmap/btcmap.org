@@ -2,7 +2,7 @@
 	import { IssueCell } from '$lib/comp';
 	import { theme } from '$lib/store';
 	import type { Issues } from '$lib/types';
-	import { debounce, detectTheme, getIssueIcon, isEven } from '$lib/utils';
+	import { debounce, detectTheme, getIssueHelpLink, getIssueIcon, isEven } from '$lib/utils';
 	import { rankItem } from '@tanstack/match-sorter-utils';
 	import type {
 		ColumnDef,
@@ -34,6 +34,7 @@
 		type: string;
 		viewLink: string;
 		editLink: string;
+		helpLink: string | undefined;
 	};
 
 	let table: Readable<Table<IssueFormatted>> | undefined;
@@ -74,8 +75,9 @@
 				const id = issue.merchantId.split(':');
 				const viewLink = id[0] + '/' + id[1];
 				const editLink = id[0] + '=' + id[1];
+				const helpLink = getIssueHelpLink(issue.type);
 
-				return { icon, name, type, viewLink, editLink };
+				return { icon, name, type, viewLink, editLink, helpLink };
 			});
 
 		const columns: ColumnDef<IssueFormatted>[] = [
@@ -111,6 +113,13 @@
 				accessorKey: 'editLink',
 				header: '',
 				cell: (info) => flexRender(IssueCell, { id: 'editLink', value: info.getValue() }),
+				enableSorting: false,
+				enableGlobalFilter: false
+			},
+			{
+				accessorKey: 'helpLink',
+				header: '',
+				cell: (info) => flexRender(IssueCell, { id: 'helpLink', value: info.getValue() }),
 				enableSorting: false,
 				enableGlobalFilter: false
 			}

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { CloseButton, IssueIcon } from '$lib/comp';
 	import { taggingIssues } from '$lib/store';
-	import { getIssueIcon } from '$lib/utils';
+	import { getIssueHelpLink, getIssueIcon } from '$lib/utils';
 	import OutClick from 'svelte-outclick';
 	import { fly } from 'svelte/transition';
 
@@ -25,6 +25,16 @@
 						<div class="flex items-center space-x-2">
 							<IssueIcon icon={getIssueIcon(issue.type)} />
 							<p>{issue.description}</p>
+							{#if getIssueHelpLink(issue.type)}
+								<a
+									href={getIssueHelpLink(issue.type)}
+									target="_blank"
+									rel="noreferrer"
+									class="text-link transition-colors hover:text-hover"
+								>
+									Help
+								</a>
+							{/if}
 						</div>
 					{/each}
 				{:else}
