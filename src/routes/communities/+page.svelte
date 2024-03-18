@@ -84,7 +84,8 @@
 		communities &&
 		communities.filter((community) => community.tags.organization === 'dwadziescia-jeden');
 	$: eenentwintig =
-	communities && communities.filter((community) => community.tags.organization === 'eenentwintig');
+		communities &&
+		communities.filter((community) => community.tags.organization === 'eenentwintig');
 	$: einundzwanzig =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'einundzwanzig');
