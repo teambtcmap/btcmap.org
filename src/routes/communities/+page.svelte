@@ -83,6 +83,8 @@
 	$: dwadziesciaJeden =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'dwadziescia-jeden');
+	$: eenentwintig =
+	communities && communities.filter((community) => community.tags.organization === 'eenentwintig');
 	$: einundzwanzig =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'einundzwanzig');
@@ -210,6 +212,7 @@
 		'Découvre Bitcoin',
 		'Dvadsatjeden',
 		'Dwadzieścia Jeden',
+		'Eenentwintig',
 		'Einundzwanzig',
 		'Enogtyve',
 		'Jednadvacet',
@@ -251,6 +254,7 @@
 		{ section: 'Découvre Bitcoin', communities: decouvreBitcoin },
 		{ section: 'Dvadsatjeden', communities: dvadsatjeden },
 		{ section: 'Dwadzieścia Jeden', communities: dwadziesciaJeden },
+		{ section: 'Eenentwintig', communities: eenentwintig },
 		{ section: 'Einundzwanzig', communities: einundzwanzig },
 		{ section: 'Enogtyve', communities: enogtyve },
 		{ section: 'Jednadvacet', communities: jednadvacet },
