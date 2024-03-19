@@ -1034,7 +1034,9 @@ ${
 										? `<span title="Verified within the last year"><svg width='16px' height='16px' class='inline text-primary dark:text-white'>
 												<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#verified"></use>
 											</svg></span>`
-										: ''
+										: `<span title="Outdated please re-verify"><svg width='16px' height='16px' class='inline text-primary dark:text-white'>
+												<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#outdated"></use>
+											</svg></span>`
 								}`
 							: '<span title="Not verified">---</span>'
 					}

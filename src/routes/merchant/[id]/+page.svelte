@@ -245,6 +245,7 @@
 	let lnTooltip: HTMLImageElement;
 	let nfcTooltip: HTMLImageElement;
 	let verifiedTooltip: HTMLSpanElement;
+	let outdatedTooltip: HTMLSpanElement;
 
 	$: thirdPartyTooltip &&
 		merchant &&
@@ -288,6 +289,11 @@
 	$: verifiedTooltip &&
 		tippy([verifiedTooltip], {
 			content: 'Verified within the last year'
+		});
+
+	$: outdatedTooltip &&
+		tippy([outdatedTooltip], {
+			content: 'Outdated please re-verify'
 		});
 
 	let lat: number | undefined;
@@ -698,6 +704,16 @@
 												h="30"
 												style="text-primary dark:text-white mr-2"
 												icon="verified"
+												type="popup"
+											/>
+										</span>
+									{:else}
+										<span bind:this={outdatedTooltip}>
+											<Icon
+												w="30"
+												h="30"
+												style="text-primary dark:text-white mr-2"
+												icon="outdated"
 												type="popup"
 											/>
 										</span>
