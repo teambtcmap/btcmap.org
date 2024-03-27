@@ -285,6 +285,12 @@
 				>
 					Accept bitcoin? Get found.
 				</h1>
+				<p class="mt-10 text-center font-semibold text-primary dark:text-white md:text-xl">
+					If you're a business owner, please read our <a
+						href="https://wiki.btcmap.org/general/merchant-best-practices"
+						class="mx-1 text-link transition-colors hover:text-hover">Merchant Best Practices</a
+					> guide.
+				</p>
 			{:else}
 				<HeaderPlaceholder />
 			{/if}
