@@ -66,6 +66,9 @@
 	$: bitcoinBulgaria =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'bitcoin-bulgaria');
+	$: bitcoinIndonesia =
+		communities &&
+		communities.filter((community) => community.tags.organization === 'bitcoin-indonesia');
 	$: bitcoinJamii =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'bitcoin-jamii');
@@ -207,6 +210,7 @@
 		'Bitcoin4India',
 		'Bitcoin 4 Iranians',
 		'Bitcoin Bulgaria',
+		'Bitcoin Indonesia',
 		'Bitcoin Jamii',
 		'BitDevs',
 		'Breizh Bitcoin',
@@ -249,6 +253,7 @@
 		{ section: 'Bitcoin4India', communities: bitcoin4India },
 		{ section: 'Bitcoin 4 Iranians', communities: bitcoin4Iranians },
 		{ section: 'Bitcoin Bulgaria', communities: bitcoinBulgaria },
+		{ section: 'Bitcoin Indonesia', communities: bitcoinIndonesia },
 		{ section: 'Bitcoin Jamii', communities: bitcoinJamii },
 		{ section: 'BitDevs', communities: bitDevs },
 		{ section: 'Breizh Bitcoin', communities: breizhBitcoin },
