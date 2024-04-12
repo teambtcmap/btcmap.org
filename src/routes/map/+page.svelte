@@ -110,6 +110,9 @@
 	// allow to view map with only legacy nodes
 	const legacy = $page.url.searchParams.has('legacy');
 
+	// allow to view map with only outdated nodes
+	const outdated = $page.url.searchParams.has('outdated');
+
 	// allow to view map with only boosted locations
 	const boosts = $page.url.searchParams.has('boosts');
 
@@ -160,6 +163,9 @@
 
 			const elementOSM = element['osm_json'];
 
+			let verified = verifiedArr(elementOSM);
+			let upToDate = verified.length && Date.parse(verified[0]) > verifiedDate;
+
 			if (
 				(onchain ? elementOSM.tags && elementOSM.tags['payment:onchain'] === 'yes' : true) &&
 				(lightning ? elementOSM.tags && elementOSM.tags['payment:lightning'] === 'yes' : true) &&
@@ -167,6 +173,7 @@
 					? elementOSM.tags && elementOSM.tags['payment:lightning_contactless'] === 'yes'
 					: true) &&
 				(legacy ? elementOSM.tags && elementOSM.tags['payment:bitcoin'] === 'yes' : true) &&
+				(outdated ? !upToDate : true) &&
 				(boosts ? boosted : true)
 			) {
 				const lat = latCalc(elementOSM);
@@ -187,9 +194,7 @@
 					element.tags.issues
 				);
 
-				let verified = verifiedArr(elementOSM);
-
-				if (verified.length && Date.parse(verified[0]) > verifiedDate) {
+				if (upToDate) {
 					upToDateLayer.addLayer(marker);
 				} else {
 					outdatedLayer.addLayer(marker);
@@ -231,13 +236,16 @@
 		map.addLayer(markers);
 
 		let overlayMaps: MapGroups = {
-			'Up-To-Date': upToDateLayer,
+			...(!outdated ? { 'Up-To-Date': upToDateLayer } : {}),
 			Outdated: outdatedLayer,
 			Legacy: legacyLayer,
 			'Third Party App': thirdPartyLayer
 		};
 
-		map.addLayer(upToDateLayer);
+		if (!outdated) {
+			map.addLayer(upToDateLayer);
+		}
+
 		map.addLayer(outdatedLayer);
 		map.addLayer(legacyLayer);
 		map.addLayer(thirdPartyLayer);
