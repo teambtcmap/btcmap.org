@@ -129,8 +129,7 @@
 			merchant.osm_json.tags &&
 			(merchant.osm_json.tags['payment:onchain'] ||
 				merchant.osm_json.tags['payment:lightning'] ||
-				merchant.osm_json.tags['payment:lightning_contactless'] ||
-				thirdParty);
+				merchant.osm_json.tags['payment:lightning_contactless']);
 
 		lat = latCalc(merchant['osm_json']);
 		long = longCalc(merchant['osm_json']);
@@ -576,11 +575,11 @@
 					{/if}
 				</div>
 
-				{#if paymentMethod && merchant}
+				{#if (paymentMethod || thirdParty) && merchant}
 					<div>
 						<h4 class="uppercase text-primary dark:text-white">Accepted Payments</h4>
 						<div class="mt-1 flex items-center justify-center space-x-2">
-							{#if thirdParty}
+							{#if !paymentMethod}
 								<a
 									bind:this={thirdPartyTooltip}
 									href={merchant.osm_json.tags?.['payment:lightning:companion_app_url']}

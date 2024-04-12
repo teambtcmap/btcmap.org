@@ -737,8 +737,7 @@ export const generateMarker = (
 			element.tags &&
 			(element.tags['payment:onchain'] ||
 				element.tags['payment:lightning'] ||
-				element.tags['payment:lightning_contactless'] ||
-				thirdParty);
+				element.tags['payment:lightning_contactless']);
 
 		const popupContainer = L.DomUtil.create('div');
 
@@ -948,13 +947,13 @@ export const generateMarker = (
 
 			<div class='flex space-x-4'>
 ${
-	paymentMethod
+	paymentMethod || thirdParty
 		? `<div>
 					<span class='block text-mapLabel text-xs'>Payment Methods</span>
 
 					<div class='w-full flex space-x-2 mt-0.5'>
 					${
-						thirdParty
+						!paymentMethod
 							? `<a href=${element.tags?.['payment:lightning:companion_app_url']} target="_blank" rel="noreferrer">
 								<i class="fa-solid fa-mobile-screen-button w-6 h-6 !text-primary dark:!text-white hover:!text-link dark:hover:!text-link transition-colors" title="Third party app required"></i>
 							   </a>`

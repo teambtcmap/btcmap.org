@@ -201,7 +201,13 @@
 
 				if (
 					elementOSM.tags &&
-					elementOSM.tags['payment:lightning:requires_companion_app'] === 'yes'
+					elementOSM.tags['payment:lightning:requires_companion_app'] === 'yes' &&
+					elementOSM.tags['payment:lightning:companion_app_url'] &&
+					!(
+						elementOSM.tags['payment:onchain'] ||
+						elementOSM.tags['payment:lightning'] ||
+						elementOSM.tags['payment:lightning_contactless']
+					)
 				) {
 					thirdPartyLayer.addLayer(marker);
 				}
@@ -231,18 +237,19 @@
 			'Third Party App': thirdPartyLayer
 		};
 
+		map.addLayer(upToDateLayer);
+		map.addLayer(outdatedLayer);
+		map.addLayer(legacyLayer);
+		map.addLayer(thirdPartyLayer);
+
 		Object.keys(categories)
 			.sort()
-			.map((category) => {
+			.forEach((category) => {
 				overlayMaps[
 					category === 'atm'
 						? category.toUpperCase()
 						: category.charAt(0).toUpperCase() + category.slice(1)
 				] = categories[category];
-				map.addLayer(upToDateLayer);
-				map.addLayer(outdatedLayer);
-				map.addLayer(legacyLayer);
-				map.addLayer(thirdPartyLayer);
 				map.addLayer(categories[category]);
 			});
 
