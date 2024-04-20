@@ -17,7 +17,7 @@
 	import 'tippy.js/dist/tippy.css';
 	import '../app.css';
 
-	axios.defaults.timeout = 10000;
+	axios.defaults.timeout = 60000;
 
 	const options = {
 		reversed: true,
