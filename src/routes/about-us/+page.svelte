@@ -178,7 +178,7 @@
 		{
 			name: 'Andrej',
 			title: 'Icon Designer',
-			url: 'https://snort.social/p/designsats@nostrplebs.com',
+			url: 'https://nostr.com/p/designsats@nostrplebs.com',
 			file: 'png'
 		}
 	];

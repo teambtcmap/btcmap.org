@@ -39,7 +39,7 @@
 		</a>
 	{/if}
 	{#if nostr}
-		<a href="https://snort.social/p/{nostr}" target="_blank" rel="noreferrer" class="m-1">
+		<a href="https://nostr.com/{nostr}" target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-nostr">
 				<Icon w="28" h="28" icon="nostr" type="socials" style="text-white" />
 			</span>
