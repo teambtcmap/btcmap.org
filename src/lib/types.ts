@@ -275,4 +275,6 @@ export type DropdownLink = { url: string; external?: boolean; icon: string; titl
 
 export type ChartHistory = '7D' | '1M' | '3M' | '6M' | 'YTD' | '1Y' | 'ALL';
 
-export type AreaPageProps = { id: string; name: string; tickets: [] | 'error' };
+export type Tickets = [] | 'error';
+
+export type AreaPageProps = { id: string; name: string; tickets: Tickets };
