@@ -17,6 +17,7 @@ export { default as AreaStats } from '../components/AreaStats.svelte';
 export { default as AreaTickets } from '../components/AreaTickets.svelte';
 export { default as BadgeCard } from '../components/BadgeCard.svelte';
 export { default as Boost } from '../components/Boost.svelte';
+export { default as Breadcrumbs } from '../components/Breadcrumbs.svelte';
 export { default as CloseButton } from '../components/CloseButton.svelte';
 export { default as CommunityCard } from '../components/CommunityCard.svelte';
 export { default as CommunitySection } from '../components/CommunitySection.svelte';

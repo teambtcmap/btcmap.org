@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import {
+		Breadcrumbs,
 		Footer,
 		FormSuccess,
 		Header,
@@ -12,6 +13,11 @@
 	import { detectTheme, errToast, successToast, warningToast } from '$lib/utils';
 	import axios from 'axios';
 	import { onMount } from 'svelte';
+
+	const routes = [
+		{ name: 'Communities', url: '/communities' },
+		{ name: 'Add', url: '/communities/add' }
+	];
 
 	let captcha: HTMLDivElement;
 	let captchaSecret: string;
@@ -139,6 +145,7 @@
 
 <div class="bg-teal dark:bg-dark">
 	<Header />
+	<Breadcrumbs {routes} />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		{#if !submitted}
 			{#if typeof window !== 'undefined'}

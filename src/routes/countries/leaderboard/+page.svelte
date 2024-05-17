@@ -1,7 +1,19 @@
 <script lang="ts">
-	import { AreaLeaderboard, Footer, Header, HeaderPlaceholder, PrimaryButton } from '$lib/comp';
+	import {
+		AreaLeaderboard,
+		Breadcrumbs,
+		Footer,
+		Header,
+		HeaderPlaceholder,
+		PrimaryButton
+	} from '$lib/comp';
 	import { theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
+
+	const routes = [
+		{ name: 'Countries', url: '/countries' },
+		{ name: 'Leaderboard', url: '/countries/leaderboard' }
+	];
 </script>
 
 <svelte:head>
@@ -13,6 +25,7 @@
 
 <div class="bg-teal dark:bg-dark">
 	<Header />
+	<Breadcrumbs {routes} />
 
 	<main class="mt-10">
 		<div class="mx-auto w-10/12 space-y-10 xl:w-[1200px]">

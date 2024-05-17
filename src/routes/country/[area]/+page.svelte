@@ -1,10 +1,15 @@
 <script lang="ts">
 	export let data: AreaPageProps;
 
-	import { AreaPage, Footer, Header } from '$lib/comp';
+	import { AreaPage, Breadcrumbs, Footer, Header } from '$lib/comp';
 	import type { AreaPageProps } from '$lib/types';
 
-	const { name } = data;
+	const { name, id } = data;
+
+	const routes = [
+		{ name: 'Countries', url: '/countries' },
+		{ name, url: `/countries/${id}` }
+	];
 </script>
 
 <svelte:head>
@@ -16,6 +21,7 @@
 
 <div class="bg-teal dark:bg-dark">
 	<Header />
+	<Breadcrumbs {routes} />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		<AreaPage type="country" {data} />
 
