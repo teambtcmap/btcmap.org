@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
+
 	export let type: AreaType;
 	export let data: AreaPageProps;
 
@@ -6,8 +8,10 @@
 	import {
 		AreaActivity,
 		AreaMap,
+		AreaMerchantHighlights,
 		AreaStats,
 		AreaTickets,
+		Boost,
 		IssuesTable,
 		OrgBadge,
 		Socials,
@@ -412,6 +416,10 @@
 
 	{#if activeSection === Sections.merchants}
 		<AreaMap {name} geoJSON={area?.geo_json} {filteredElements} />
+		<AreaMerchantHighlights {dataInitialized} {filteredElements} />
+		{#if browser}
+			<Boost />
+		{/if}
 	{:else if activeSection === Sections.stats}
 		<AreaStats {name} {filteredElements} {areaReports} />
 	{:else if activeSection === Sections.activity}

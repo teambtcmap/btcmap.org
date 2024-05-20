@@ -5,6 +5,7 @@
 	import { goto } from '$app/navigation';
 	import {
 		Boost,
+		BoostButton,
 		Footer,
 		Header,
 		Icon,
@@ -34,15 +35,12 @@
 	import {
 		areaError,
 		areas,
-		boost,
 		elementError,
 		elements,
 		eventError,
 		events,
-		exchangeRate,
 		reportError,
 		reports,
-		resetBoost,
 		showTags,
 		taggingIssues,
 		theme,
@@ -61,8 +59,6 @@
 	import { detectTheme, errToast, successToast } from '$lib/utils';
 	// @ts-expect-error
 	import rewind from '@mapbox/geojson-rewind';
-	import axios from 'axios';
-	import axiosRetry from 'axios-retry';
 	import { geoContains } from 'd3-geo';
 	import type { Map } from 'leaflet';
 	import { onDestroy, onMount } from 'svelte';
@@ -215,8 +211,6 @@
 		!dataInitialized &&
 		initializeData();
 
-	axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
-
 	let merchant: Element | undefined;
 
 	const name = data.name;
@@ -297,37 +291,6 @@
 
 	let lat: number | undefined;
 	let long: number | undefined;
-
-	let boostLoading = false;
-
-	const resetBoostLoading = () => {
-		boostLoading = false;
-	};
-
-	const startBoost = () => {
-		if (!merchant) return;
-
-		boostLoading = true;
-
-		$boost = {
-			id: merchant.id,
-			name: merchant.osm_json.tags?.name || '',
-			boost: boosted ? boosted : ''
-		};
-
-		axios
-			.get('https://blockchain.info/ticker')
-			.then(function (response) {
-				$exchangeRate = response.data['USD']['15m'];
-			})
-			.catch(function (error) {
-				errToast('Could not fetch bitcoin exchange rate, please try again or contact BTC Map.');
-				console.log(error);
-				resetBoostLoading();
-			});
-	};
-
-	$: $resetBoost && resetBoostLoading();
 
 	let filteredCommunities: Area[] = [];
 
@@ -748,23 +711,7 @@
 								</p>
 							{/if}
 
-							<button
-								id="boost-button"
-								on:click={startBoost}
-								disabled={boostLoading}
-								class="{boosted
-									? 'bg-bitcoin hover:bg-bitcoinHover'
-									: 'bg-link hover:bg-hover'} mx-auto flex w-40 items-center justify-center rounded-xl p-3 text-center font-semibold text-white transition-colors"
-							>
-								<Icon
-									w="20"
-									h="20"
-									style="text-white mr-1"
-									icon={boosted ? 'boost-solid' : 'boost'}
-									type="popup"
-								/>
-								{boostLoading ? 'Boosting...' : boosted ? 'Extend Boost' : 'Boost'}
-							</button>
+							<BoostButton {merchant} {boosted} />
 						</div>
 					</div>
 				{/if}

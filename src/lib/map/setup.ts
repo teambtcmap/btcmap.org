@@ -739,6 +739,11 @@ export const generateMarker = (
 				element.tags['payment:lightning'] ||
 				element.tags['payment:lightning_contactless']);
 
+		const extraButtons =
+			location.pathname === '/map' ||
+			location.pathname.includes('/community') ||
+			location.pathname.includes('/country');
+
 		const popupContainer = L.DomUtil.create('div');
 
 		popupContainer.innerHTML = `${
@@ -897,7 +902,7 @@ export const generateMarker = (
 							}
 
 							${
-								element.tags && location.pathname === '/map'
+								element.tags && extraButtons
 									? `<button
 														id='show-tags'
 														class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
@@ -1057,7 +1062,7 @@ ${
 							: ''
 					}
 					${
-						location.pathname === '/map'
+						extraButtons
 							? `<button title='Boost' id='boost-button' class='flex justify-center items-center space-x-2 text-primary dark:text-white hover:text-link dark:hover:text-link border border-mapBorder hover:border-link rounded-lg px-3 h-[32px] transition-colors'>
 						<svg width='16px' height='16px'>
 							<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#boost"></use>
@@ -1129,7 +1134,7 @@ ${
 			shareBtn.onclick = () => hideMore();
 		}
 
-		if (location.pathname === '/map') {
+		if (extraButtons) {
 			const showTagsButton: HTMLButtonElement | null = popupContainer.querySelector('#show-tags');
 			if (showTagsButton) {
 				showTagsButton.onclick = () => {

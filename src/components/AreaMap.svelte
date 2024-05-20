@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { GradeTable, MapLoadingEmbed } from '$lib/comp';
+	import { GradeTable, MapLoadingEmbed, ShowTags, TaggingIssues } from '$lib/comp';
 	import {
 		attribution,
 		calcVerifiedDate,
@@ -274,4 +274,7 @@
 			<MapLoadingEmbed style="h-[300px] md:h-[600px] border border-statBorder rounded-b-3xl" />
 		{/if}
 	</div>
+
+	<ShowTags />
+	<TaggingIssues />
 </section>

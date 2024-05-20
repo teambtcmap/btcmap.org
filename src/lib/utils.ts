@@ -178,3 +178,6 @@ export const validateContinents = (continent: Continents) =>
 		'Oceania',
 		'South America'
 	].includes(continent);
+
+export const isBoosted = (element: Element) =>
+	element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now();
