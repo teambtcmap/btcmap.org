@@ -69,6 +69,7 @@
 
 	const sections = Object.values(Sections);
 	let activeSection = Sections.merchants;
+	let scrolled = false;
 
 	let dataInitialized = false;
 
@@ -400,7 +401,10 @@
 		{/if}
 	</section>
 
-	<div class="hide-scroll grid w-full auto-cols-[minmax(150px,_1fr)] grid-flow-col overflow-x-auto">
+	<div
+		on:scroll={() => (scrolled = true)}
+		class="hide-scroll relative grid w-full auto-cols-[minmax(150px,_1fr)] grid-flow-col overflow-x-auto"
+	>
 		{#each sections as section}
 			<button
 				on:click={() => (activeSection = section)}
@@ -412,6 +416,14 @@
 				{section}
 			</button>
 		{/each}
+
+		{#if !scrolled}
+			<div
+				class="absolute right-0 top-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#cce3e6] sm:hidden"
+			>
+				<i class="fa-solid fa-chevron-right text-link" />
+			</div>
+		{/if}
 	</div>
 
 	{#if activeSection === Sections.merchants}
