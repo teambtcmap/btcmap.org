@@ -45,7 +45,9 @@
 					{/each}
 				</div>
 			{:else}
-				<p class="text-left text-primary dark:text-white">No boosted merchants in this area.</p>
+				<p class="text-center text-primary dark:text-white sm:text-left">
+					No boosted merchants in this area.
+				</p>
 			{/if}
 		</div>
 	</div>
@@ -74,7 +76,7 @@
 					{/each}
 				</div>
 			{:else}
-				<p class="text-left text-primary dark:text-white">
+				<p class="text-center text-primary dark:text-white sm:text-left">
 					No latest added in this area. You can <a
 						href="/add-location"
 						class="text-link transition-colors hover:text-hover">add a new merchant</a
