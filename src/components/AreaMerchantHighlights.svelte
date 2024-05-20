@@ -3,7 +3,7 @@
 	import type { Element } from '$lib/types';
 	import { isBoosted } from '$lib/utils';
 
-	export let dataInitialized: Boolean;
+	export let dataInitialized: boolean;
 	export let filteredElements: Element[];
 
 	$: boosts =
