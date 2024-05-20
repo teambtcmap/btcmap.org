@@ -23,7 +23,7 @@
 	const facebook = tags?.facebook || tags?.['contact:facebook'];
 	const verified = verifiedArr(merchant.osm_json);
 	const verifiedDate = calcVerifiedDate();
-    
+
 	let outdatedTooltip: HTMLDivElement;
 
 	$: outdatedTooltip &&
@@ -33,7 +33,7 @@
 </script>
 
 <div
-	class="flex flex-col justify-between rounded-2xl border bg-white/50 p-6 text-left transition-shadow hover:shadow-lg dark:bg-white/5 {boosted
+	class="flex flex-col justify-between rounded-2xl border bg-white/50 p-4 text-left transition-shadow hover:shadow-lg dark:bg-white/5 sm:p-6 {boosted
 		? 'border-bitcoin'
 		: 'border-statBorder'}"
 >

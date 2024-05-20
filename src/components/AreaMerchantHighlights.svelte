@@ -30,7 +30,7 @@
 			Boosted Merchants
 		</h3>
 
-		<div class="w-full px-5 py-6">
+		<div class="w-full px-2 py-6 sm:px-5">
 			{#if !dataInitialized}
 				<div class="grid w-full grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
 					<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
@@ -59,7 +59,7 @@
 			Latest Added
 		</h3>
 
-		<div class="w-full px-5 py-6">
+		<div class="w-full px-2 py-6 sm:px-5">
 			{#if !dataInitialized}
 				<div class="grid w-full grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
 					<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
