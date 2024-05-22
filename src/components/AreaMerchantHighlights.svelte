@@ -12,7 +12,7 @@
 			.filter((e) => isBoosted(e))
 			.toSorted(
 				(a, b) =>
-					Date.parse(a.tags['boost:expires'] || '') - Date.parse(b.tags['boost:expires'] || '')
+					Date.parse(b.tags['boost:expires'] || '') - Date.parse(a.tags['boost:expires'] || '')
 			);
 
 	$: latest =
