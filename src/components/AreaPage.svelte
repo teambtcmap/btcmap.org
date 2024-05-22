@@ -64,7 +64,7 @@
 		merchants = 'Merchants',
 		stats = 'Stats',
 		activity = 'Activity',
-		contibute = 'Contribute'
+		maintain = 'Maintain'
 	}
 
 	const sections = Object.values(Sections);
@@ -436,7 +436,7 @@
 		<AreaStats {name} {filteredElements} {areaReports} />
 	{:else if activeSection === Sections.activity}
 		<AreaActivity {name} {dataInitialized} {eventElements} {taggers} />
-	{:else if activeSection === Sections.contibute}
+	{:else if activeSection === Sections.maintain}
 		<IssuesTable
 			title="{name || 'BTC Map Area'} Tagging Issues"
 			{issues}
