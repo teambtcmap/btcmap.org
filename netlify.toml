@@ -3,4 +3,4 @@
 	publish = "build"
 
 [images]
-  remote_images = ["https://static.btcmap.org/images/communities/.*", "https://www.openstreetmap.org/.*", "https://avatars.githubusercontent.com/.*" ]
+  remote_images = ["https://static.btcmap.org/images/.*", "https://www.openstreetmap.org/.*", "https://avatars.githubusercontent.com/.*" ]
