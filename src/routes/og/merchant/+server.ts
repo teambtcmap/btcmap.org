@@ -14,9 +14,10 @@ export const GET: RequestHandler = async ({ url }) => {
 	const image = await generateImage(component);
 
 	return new Response(image, {
+		status: 200,
 		headers: {
 			'content-type': 'image/png',
-			'cache-control': 'max-age=31449600'
+			'cache-control': 'public, immutable, no-transform, max-age=31536000'
 		}
 	});
 };
