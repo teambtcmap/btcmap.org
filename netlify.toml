@@ -4,3 +4,6 @@
 
 [images]
   remote_images = ["https://static.btcmap.org/images/.*", "https://www.openstreetmap.org/.*", "https://avatars.githubusercontent.com/.*" ]
+
+[functions]
+  included_files = ["static/fonts/Manrope-Regular.ttf"]
