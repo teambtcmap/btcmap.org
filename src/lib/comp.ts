@@ -50,6 +50,7 @@ export { default as MerchantButton } from '../components/MerchantButton.svelte';
 export { default as MerchantCard } from '../components/MerchantCard.svelte';
 export { default as MerchantEvent } from '../components/MerchantEvent.svelte';
 export { default as MerchantLink } from '../components/MerchantLink.svelte';
+export { default as MerchantOG } from '../components/MerchantOG.svelte';
 export { default as NavDropdownDesktop } from '../components/NavDropdownDesktop.svelte';
 export { default as NavDropdownMobile } from '../components/NavDropdownMobile.svelte';
 export { default as OpenTicket } from '../components/OpenTicket.svelte';

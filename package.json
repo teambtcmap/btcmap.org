@@ -12,7 +12,8 @@
 		"format": "prettier --plugin=prettier-plugin-svelte --plugin=prettier-plugin-tailwindcss --write ."
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-auto": "^3.2.0",
+		"@resvg/resvg-js": "^2.6.2",
+		"@sveltejs/adapter-netlify": "^4.2.0",
 		"@sveltejs/kit": "^2.5.8",
 		"@sveltejs/vite-plugin-svelte": "^3.1.0",
 		"@types/d3-geo": "^3.1.0",
@@ -33,6 +34,8 @@
 		"prettier": "^3.2.5",
 		"prettier-plugin-svelte": "^3.2.3",
 		"prettier-plugin-tailwindcss": "^0.5.14",
+		"satori": "^0.10.13",
+		"satori-html": "^0.3.2",
 		"svelte": "^4.2.17",
 		"svelte-check": "^3.7.1",
 		"svelte-preprocess": "^5.1.4",

@@ -352,13 +352,15 @@
 			map.remove();
 		}
 	});
+
+	const ogImage = `https://btcmap.org/og/merchant?lat=${data.lat}&lon=${data.lon}`;
 </script>
 
 <svelte:head>
 	<title>{name ? name + ' - ' : ''}BTC Map Merchant</title>
-	<meta property="og:image" content="https://btcmap.org/images/og/merchant.png" />
+	<meta property="og:image" content={ogImage} />
 	<meta property="twitter:title" content="{name ? name + ' - ' : ''}BTC Map Merchant" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/merchant.png" />
+	<meta property="twitter:image" content={ogImage} />
 
 	{#if payment && payment.type === 'uri' && payment.url?.startsWith('lightning:')}
 		<meta name="lightning" content="lnurlp:{payment.url.slice(10, payment.url.length)}" />
