@@ -148,17 +148,6 @@
 						class="break-all text-link transition-colors hover:text-hover"
 						>03ef01535d57cd3a3ddff8b4050650b278991b3eb7853f772a200079b9adb24988</a
 					>
-					{#if typeof window !== 'undefined'}
-						<iframe
-							title="Amboss Stats"
-							src="https://amboss.space/embed/node/info/03ef01535d57cd3a3ddff8b4050650b278991b3eb7853f772a200079b9adb24988?theme={detectTheme() ===
-								'dark' || $theme === 'dark'
-								? 'dark'
-								: 'light'}&noBackground=true"
-							width="100%"
-							class="h-[648px] md:h-[588px] lg:h-[271.5px]"
-						/>
-					{/if}
 				</div>
 			</section>
 		</main>
