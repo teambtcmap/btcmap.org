@@ -1,10 +1,10 @@
-// import { read } from '$app/server';
+import { read } from '$app/server';
 import { Resvg } from '@resvg/resvg-js';
 import satori from 'satori';
 import { html as toReactNode } from 'satori-html';
-// import Manrope from '../../../static/fonts/Manrope-Regular.ttf';
+import Manrope from '../../../static/fonts/Manrope-Regular.ttf';
 
-// const fontData = read(Manrope).arrayBuffer();
+const fontData = read(Manrope).arrayBuffer();
 
 const height = 630;
 const width = 1200;
@@ -15,11 +15,11 @@ export const generateImage = async (component: any) => {
 
 	const svg = await satori(jsx, {
 		fonts: [
-			/* 			{
+			{
 				name: 'Manrope',
 				data: await fontData,
 				style: 'normal'
-			} */
+			}
 		],
 		height,
 		width
