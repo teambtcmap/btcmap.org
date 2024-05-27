@@ -765,7 +765,7 @@ export const generateMarker = (
 					? `<div class='my-1 w-full max-w-[300px]' title='Opening hours'>
 		  				<svg width='16px' height='16px' class='inline text-primary dark:text-white'>
 	  						<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#clock"></use>
-				 	 		</svg>
+				 	 	</svg>
 			     		<span class='text-body dark:text-white'>${element.tags['opening_hours']}</span>
 	  			 	 </div>`
 					: ''
@@ -904,46 +904,46 @@ export const generateMarker = (
 							${
 								element.tags && extraButtons
 									? `<button
-														id='show-tags'
-														class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-															<svg width='24px' height='24px' class='mr-2'>
-																<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#tags"></use>
-															</svg>
-															Show Tags
-													</button>
+										id='show-tags'
+										class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+											<svg width='24px' height='24px' class='mr-2'>
+												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#tags"></use>
+											</svg>
+											Show Tags
+										</button>
 													
-													<button
-														id='tagging-issues'
-														class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-															<svg width='24px' height='24px' class='mr-2'>
-																<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#issues"></use>
-															</svg>
-															Tag Issues
-													</button>`
+										<button
+										id='tagging-issues'
+										class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+											<svg width='24px' height='24px' class='mr-2'>
+												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#issues"></use>
+											</svg>
+											Tag Issues
+										</button>`
 									: ''
 							}
 
-							<a
-								href="https://wiki.btcmap.org/general/map-legend.html"
-								target="_blank"
-								rel="noreferrer"
-								class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-									<svg width='24px' height='24px' class='mr-2'>
-										<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#info-circle"></use>
-									</svg>
-									Map Legend
-							</a>
+								<a
+									href="https://wiki.btcmap.org/general/map-legend.html"
+									target="_blank"
+									rel="noreferrer"
+									class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+										<svg width='24px' height='24px' class='mr-2'>
+											<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#info-circle"></use>
+										</svg>
+										Map Legend
+								</a>
 
-					<a
-						href="https://www.openstreetmap.org/${element.type}/${element.id}"
-						target="_blank"
-						rel="noreferrer"
-						class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-							<svg width='24px' height='24px' class='mr-2'>
-								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#external"></use>
-							</svg>
-							View OSM
-					</a>
+								<a
+									href="https://www.openstreetmap.org/${element.type}/${element.id}"
+									target="_blank"
+									rel="noreferrer"
+									class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+										<svg width='24px' height='24px' class='mr-2'>
+											<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#external"></use>
+										</svg>
+										View OSM
+								</a>
 							</div>
 						</div>
 					</div>
@@ -1045,6 +1045,7 @@ ${
 							: '<span title="Not verified">---</span>'
 					}
 					</span>
+
 					${
 						verify
 							? `<a href="/verify-location?id=${
@@ -1058,17 +1059,18 @@ ${
 					${
 						boosted
 							? `<span class='block text-mapLabel text-xs' title="This location is boosted!">Boost Expires</span>
-					<span class='block text-body dark:text-white' id='boosted-time'></span>`
+							   <span class='block text-body dark:text-white' id='boosted-time'></span>`
 							: ''
 					}
+					
 					${
 						extraButtons
 							? `<button title='Boost' id='boost-button' class='flex justify-center items-center space-x-2 text-primary dark:text-white hover:text-link dark:hover:text-link border border-mapBorder hover:border-link rounded-lg px-3 h-[32px] transition-colors'>
-						<svg width='16px' height='16px'>
-							<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#boost"></use>
-						</svg>
-						<span class='text-xs'>${boosted ? 'Extend' : 'Boost'}</span>
-					</button>`
+								<svg width='16px' height='16px'>
+									<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#boost"></use>
+								</svg>
+								<span class='text-xs'>${boosted ? 'Extend' : 'Boost'}</span>
+							   </button>`
 							: ''
 					}
 				</div>
@@ -1076,13 +1078,12 @@ ${
 			
 			${
 				theme === 'dark'
-					? `
-			<style>
-				.leaflet-popup-content-wrapper, .leaflet-popup-tip {
-					background-color: #06171C;
-					border: 1px solid #e5e7eb
-			}
-			</style>`
+					? `<style>
+						.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+							background-color: #06171C;
+							border: 1px solid #e5e7eb
+						}
+					   </style>`
 					: ''
 			}
 			`;
