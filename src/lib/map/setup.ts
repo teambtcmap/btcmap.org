@@ -767,7 +767,7 @@ export const generateMarker = (
 	  						<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#clock"></use>
 				 	 	</svg>
 			     		<span class='text-body dark:text-white'>${element.tags['opening_hours']}</span>
-	  			 	 </div>`
+	  			 	   </div>`
 					: ''
 			}
 

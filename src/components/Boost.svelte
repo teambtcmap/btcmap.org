@@ -90,10 +90,7 @@
 		loading = true;
 		axios
 			.get(
-				`/boost/invoice/generate?amount=${selectedBoost?.sats}&name=${$boost?.name.replaceAll(
-					'&',
-					'%26'
-				)}&time=${selectedBoost?.time}`
+				`/boost/invoice/generate?amount=${selectedBoost?.sats}&name=${encodeURIComponent($boost?.name || 'location')}&time=${selectedBoost?.time}`
 			)
 			.then(async function (response) {
 				invoice = response.data['payment_request'];
@@ -302,7 +299,7 @@
 
 					<a
 						href="https://twitter.com/share?text=I just boosted {$boost.name
-							? $boost.name.replaceAll('&', '%26')
+							? encodeURIComponent($boost.name)
 							: 'this location'} on @btcmap. Check them out!&url=https://btcmap.org/merchant/{$boost.id}&hashtags=bitcoin"
 						target="_blank"
 						rel="noreferrer"
