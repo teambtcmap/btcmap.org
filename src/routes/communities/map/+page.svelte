@@ -183,22 +183,6 @@
 			}
 		}
 
-		// set view to all communities as default
-		else if (communities.length) {
-			try {
-				map.fitBounds(
-					// @ts-expect-error
-					communities.map((community) => leaflet.geoJSON(community.tags.geo_json).getBounds())
-				);
-			} catch (error) {
-				map.setView([0, 0], 3);
-				errToast(
-					'Could not set map view to provided coordinates, please try again or contact BTC Map.'
-				);
-				console.log(error);
-			}
-		}
-
 		mapLoading = 100;
 
 		communitiesLoaded = true;
