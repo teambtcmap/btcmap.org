@@ -12,11 +12,8 @@
 	import { detectTheme, warningToast } from '$lib/utils';
 	import QRCode from 'qrcode';
 	import type { Action } from 'svelte/action';
-	import type { PageData } from './$types';
 
-	export let data: PageData;
-
-	let onchain = data.address;
+	const onchain = 'bc1qqmy5c03clt6a72aq0ys5jzm2sjnws3qr05nvmz';
 	const lnurlp = 'LNURL1DP68GURN8GHJ7CM0WFJJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQPSYZ34';
 
 	let showQr = false;
