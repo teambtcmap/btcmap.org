@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import { syncStatus } from '$lib/store';
 	import { areasSync } from '$lib/sync/areas';
 	import { elementsSync } from '$lib/sync/elements';
