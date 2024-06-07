@@ -528,19 +528,6 @@
 	<meta property="og:image" content="https://btcmap.org/images/og/supertagger.png" />
 	<meta property="twitter:title" content="{username ? username + ' - ' : ''}BTC Map Supertagger" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/supertagger.png" />
-
-	{#if lightning}
-		<meta name="lightning" content="lnurlp:{lightning}" />
-		<meta property="alby:image" content={avatar} />
-		<meta property="alby:name" content={username} />
-	{:else}
-		<meta
-			name="lightning"
-			content="lnurlp:LNURL1DP68GURN8GHJ7CM0WFJJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQPSYZ34"
-		/>
-		<meta property="alby:image" content="/images/logo.svg" />
-		<meta property="alby:name" content="BTC Map" />
-	{/if}
 </svelte:head>
 
 <div class="bg-teal dark:bg-dark">

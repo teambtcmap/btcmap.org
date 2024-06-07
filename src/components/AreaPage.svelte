@@ -291,23 +291,6 @@
 	let issues: Issues = [];
 </script>
 
-<svelte:head>
-	{#if type === 'community'}
-		{#if lightning && lightning.type === 'address'}
-			<meta name="lightning" content="lnurlp:{lightning.destination}" />
-			<meta property="alby:image" content={avatar} />
-			<meta property="alby:name" content={name} />
-		{:else}
-			<meta
-				name="lightning"
-				content="lnurlp:LNURL1DP68GURN8GHJ7CM0WFJJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQPSYZ34"
-			/>
-			<meta property="alby:image" content="/images/logo.svg" />
-			<meta property="alby:name" content="BTC Map" />
-		{/if}
-	{/if}
-</svelte:head>
-
 <main class="my-10 space-y-16 text-center md:my-20">
 	<section id="profile" class="space-y-8">
 		<div class="space-y-2">
