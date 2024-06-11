@@ -125,7 +125,8 @@
 		{ name: 'Osmo', icon: 'osmo', url: 'https://www.osmowallet.com/' },
 		{ name: 'Bitcoin Rocks!', icon: 'bitcoin-rocks', url: 'https://bitcoin.rocks/' },
 		{ name: 'lipa', icon: 'lipa', url: 'https://lipa.swiss/' },
-		{ name: 'Spirit of Satoshi', icon: 'spirit', url: 'https://www.spiritofsatoshi.ai/' }
+		{ name: 'Spirit of Satoshi', icon: 'spirit', url: 'https://www.spiritofsatoshi.ai/' },
+		{ name: 'Blockstream', icon: 'blockstream', url: 'https://blockstream.com/local/' }
 	];
 
 	const projectIntegrations = [
