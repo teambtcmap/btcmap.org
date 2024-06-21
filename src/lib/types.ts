@@ -41,6 +41,7 @@ export type AreaTags = {
 	['contact:linkedin']?: string;
 	['contact:rss']?: string;
 	['contact:signal']?: string;
+	['contact:simplex']?: string;
 	['tips:lightning_address']?: string;
 	['tips:url']?: string;
 	sponsor?: boolean;

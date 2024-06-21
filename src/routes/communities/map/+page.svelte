@@ -150,7 +150,8 @@
 						facebook: community.tags['contact:facebook'],
 						linkedin: community.tags['contact:linkedin'],
 						rss: community.tags['contact:rss'],
-						signal: community.tags['contact:signal']
+						signal: community.tags['contact:signal'],
+						simplex: community.tags['contact:simplex']
 					}
 				});
 			}

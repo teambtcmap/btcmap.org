@@ -24,6 +24,7 @@
 	$: linkedin = tags['contact:linkedin'] && tags['contact:linkedin'];
 	$: rss = tags['contact:rss'] && tags['contact:rss'];
 	$: signal = tags['contact:signal'] && tags['contact:signal'];
+	$: simplex = tags['contact:simplex'] && tags['contact:simplex'];
 	$: tip =
 		(tags['tips:lightning_address'] && {
 			destination: tags['tips:lightning_address'],
@@ -77,6 +78,7 @@
 		{linkedin}
 		{rss}
 		{signal}
+		{simplex}
 		style="border-t border-t-statBorder p-4 w-full"
 	/>
 </div>

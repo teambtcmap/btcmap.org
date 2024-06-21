@@ -17,6 +17,7 @@
 	export let linkedin: undefined | string = undefined;
 	export let rss: undefined | string = undefined;
 	export let signal: undefined | string = undefined;
+	export let simplex: undefined | string = undefined;
 
 	export let style: undefined | string = undefined;
 
@@ -120,6 +121,11 @@
 	{#if signal}
 		<a href={signal} target="_blank" rel="noreferrer" class="m-1">
 			<img src="/icons/socials/signal.svg" alt="signal" class="h-10 w-10 rounded-full" />
+		</a>
+	{/if}
+	{#if simplex}
+		<a href={simplex} target="_blank" rel="noreferrer" class="m-1">
+			<img src="/icons/socials/simplex.svg" alt="simplex" class="h-10 w-10 rounded-full" />
 		</a>
 	{/if}
 </div>

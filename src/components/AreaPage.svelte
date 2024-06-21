@@ -147,6 +147,7 @@
 			linkedin = area['contact:linkedin'];
 			rss = area['contact:rss'];
 			signal = area['contact:signal'];
+			simplex = area['contact:simplex'];
 
 			if (area['tips:lightning_address']) {
 				lightning = {
@@ -283,6 +284,7 @@
 	let linkedin: string | undefined;
 	let rss: string | undefined;
 	let signal: string | undefined;
+	let simplex: string | undefined;
 	let lightning: { destination: string; type: TipType } | undefined;
 
 	let eventElements: ActivityEvent[] = [];
@@ -368,6 +370,7 @@
 					{linkedin}
 					{rss}
 					{signal}
+					{simplex}
 				/>
 			{:else}
 				<div class="flex flex-wrap items-center justify-center">
