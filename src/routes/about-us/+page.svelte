@@ -126,7 +126,8 @@
 		{ name: 'Bitcoin Rocks!', icon: 'bitcoin-rocks', url: 'https://bitcoin.rocks/' },
 		{ name: 'lipa', icon: 'lipa', url: 'https://lipa.swiss/' },
 		{ name: 'Spirit of Satoshi', icon: 'spirit', url: 'https://www.spiritofsatoshi.ai/' },
-		{ name: 'Blockstream', icon: 'blockstream', url: 'https://blockstream.com/local/' }
+		{ name: 'Blockstream', icon: 'blockstream', url: 'https://blockstream.com/local/' },
+		{ name: 'Satlantis', icon: 'satlantis', url: 'https://www.satlantis.io/' }
 	];
 
 	const projectIntegrations = [
