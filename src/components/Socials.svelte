@@ -125,7 +125,7 @@
 	{/if}
 	{#if simplex}
 		<a href={simplex} target="_blank" rel="noreferrer" class="m-1">
-			<img src="/icons/socials/simplex.svg" alt="simplex" class="h-10 w-10 rounded-full" />
+			<img src="/icons/socials/simplex.svg" alt="simplex" class="h-10 w-10 rounded-full bg-white" />
 		</a>
 	{/if}
 </div>
