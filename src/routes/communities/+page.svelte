@@ -96,6 +96,9 @@
 		communities && communities.filter((community) => community.tags.organization === 'enogtyve');
 	$: jednadvacet =
 		communities && communities.filter((community) => community.tags.organization === 'jednadvacet');
+	$: miPrimerBitcoin =
+		communities &&
+		communities.filter((community) => community.tags.organization === 'mi-primer-bitcoin');
 	$: planBNetwork =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'plan-b-network');
@@ -221,6 +224,7 @@
 		'Einundzwanzig',
 		'Enogtyve',
 		'Jednadvacet',
+		'Mi Primer Bitcoin',
 		'Plan B Network',
 		'Satoshi Spritz'
 	];
@@ -264,6 +268,7 @@
 		{ section: 'Einundzwanzig', communities: einundzwanzig },
 		{ section: 'Enogtyve', communities: enogtyve },
 		{ section: 'Jednadvacet', communities: jednadvacet },
+		{ section: 'Mi Primer Bitcoin', communities: miPrimerBitcoin },
 		{ section: 'Plan B Network', communities: planBNetwork },
 		{ section: 'Satoshi Spritz', communities: satoshiSpritz }
 	];
