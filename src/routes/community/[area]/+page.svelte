@@ -8,7 +8,7 @@
 
 	const routes = [
 		{ name: 'Communities', url: '/communities' },
-		{ name, url: `/communities/${id}` }
+		{ name, url: `/community/${id}` }
 	];
 </script>
 
