@@ -8,7 +8,7 @@
 
 	const routes = [
 		{ name: 'Countries', url: '/countries' },
-		{ name, url: `/countries/${id}` }
+		{ name, url: `/country/${id}` }
 	];
 </script>
 
