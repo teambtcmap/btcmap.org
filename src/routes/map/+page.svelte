@@ -263,6 +263,8 @@
 
 		Object.entries(overlayMaps).forEach((layer) => controlLayers.addOverlay(layer[1], layer[0]));
 
+		map.removeLayer(categories['atm']);
+
 		mapLoading = 100;
 
 		elementsLoaded = true;
