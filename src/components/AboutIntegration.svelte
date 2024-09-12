@@ -24,12 +24,12 @@
 	</a>
 	{#if integration.name === 'OpenStreetMap'}
 		<a
-			href="https://wiki.osmfoundation.org/wiki/Corporate_Members#Bronze_Corporate_Members"
+			href="https://wiki.osmfoundation.org/wiki/Corporate_Members#Supporter_Corporate_Members"
 			target="_blank"
 			rel="noreferrer"
-			class="mx-auto block w-32 rounded-full bg-[#ffab01] py-1 text-xs font-semibold text-black"
+			class="mx-auto block w-32 rounded-full bg-link py-1 text-xs font-semibold text-white transition-colors hover:bg-hover"
 		>
-			Bronze Sponsor
+			Supporter
 		</a>
 	{/if}
 </div>
