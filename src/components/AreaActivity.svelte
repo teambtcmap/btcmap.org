@@ -20,9 +20,19 @@
 </script>
 
 <section id="feeds">
-	<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10 p-3">
-		<p><a class="text-center font-semibold text-link" href="https://api.btcmap.org/feeds/new-places/{alias}">New Places Atom Feed</a></p>
-		<p class="mt-2"><a class="text-center font-semibold text-link mt-6" href="https://api.btcmap.org/feeds/new-comments/{alias}">New Comments Atom Feed</a></p>
+	<div class="w-full rounded-3xl border border-statBorder p-3 dark:bg-white/10">
+		<p>
+			<a
+				class="text-center font-semibold text-link"
+				href="https://api.btcmap.org/feeds/new-places/{alias}">New Places Atom Feed</a
+			>
+		</p>
+		<p class="mt-2">
+			<a
+				class="mt-6 text-center font-semibold text-link"
+				href="https://api.btcmap.org/feeds/new-comments/{alias}">New Comments Atom Feed</a
+			>
+		</p>
 	</div>
 </section>
 
