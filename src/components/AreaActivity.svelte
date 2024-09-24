@@ -19,23 +19,6 @@
 	let taggerDiv: HTMLDivElement;
 </script>
 
-<section id="feeds">
-	<div class="w-full rounded-3xl border border-statBorder p-3 dark:bg-white/10">
-		<p>
-			<a
-				class="text-center font-semibold text-link"
-				href="https://api.btcmap.org/feeds/new-places/{alias}">New Places Atom Feed</a
-			>
-		</p>
-		<p class="mt-2">
-			<a
-				class="mt-6 text-center font-semibold text-link"
-				href="https://api.btcmap.org/feeds/new-comments/{alias}">New Comments Atom Feed</a
-			>
-		</p>
-	</div>
-</section>
-
 <section id="taggers">
 	<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
 		<h3
@@ -43,6 +26,7 @@
 		>
 			{name || 'BTC Map Area'} Supertaggers
 		</h3>
+
 		<div bind:this={taggerDiv} class="hide-scroll max-h-[375px] overflow-scroll p-1">
 			{#if taggers && taggers.length}
 				<div class="flex flex-wrap items-center justify-center">
@@ -150,5 +134,40 @@
 				<p class="p-5 text-body dark:text-white">No activity to display.</p>
 			{/if}
 		</div>
+	</div>
+</section>
+
+<section id="atom">
+	<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
+		<h3
+			class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
+		>
+			{name || 'BTC Map Area'} Atom Feeds
+		</h3>
+
+		<ul class="space-y-5 p-5 text-lg font-semibold text-primary dark:text-white">
+			<li>
+				<a
+					class="text-link transition-colors hover:text-hover"
+					href="https://api.btcmap.org/feeds/new-places/{alias}"
+					target="_blank"
+					rel="noreferrer"
+				>
+					New Places
+				</a>
+				<i class="fa-solid fa-location-pin ml-1" />
+			</li>
+			<li>
+				<a
+					class="text-link transition-colors hover:text-hover"
+					href="https://api.btcmap.org/feeds/new-comments/{alias}"
+					target="_blank"
+					rel="noreferrer"
+				>
+					New Comments
+				</a>
+				<i class="fa-solid fa-comment ml-1"></i>
+			</li>
+		</ul>
 	</div>
 </section>

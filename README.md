@@ -30,7 +30,7 @@
 1. `git clone` the repo and `cd` into the directory
 2. run `yarn` to install the packages
 3. `yarn dev` will open the app on `localhost:5173`
-4. after making edits run `yarn format` to format the Markdown files
+4. after making edits run `yarn format` to format the files
 
 _NOTE:_ BTC Map uses the latest LTS version of [node](https://nodejs.org/). If you have [NVM](https://github.com/nvm-sh/nvm), you can simply run `nvm use` in the root directory of the repo to switch to the supported node version.
 

@@ -326,9 +326,9 @@
 			{:else}
 				<div class="mx-auto h-7 w-24 animate-pulse rounded bg-link/50" />
 			{/if}
-			{#if data.id && type === 'community'}
+			{#if alias && type === 'community'}
 				<a
-					href={`/communities/map?community=${data.id}`}
+					href={`/communities/map?community=${alias}`}
 					class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
 					>View on community map <svg
 						class="ml-1 w-3"
