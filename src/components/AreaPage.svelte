@@ -262,6 +262,7 @@
 	let areaReports: Report[];
 
 	let avatar: string;
+	const alias = data.id;
 	const name = data.name;
 	let continent: Continents;
 	let org: string | undefined;
@@ -421,7 +422,7 @@
 	{:else if activeSection === Sections.stats}
 		<AreaStats {name} {filteredElements} {areaReports} />
 	{:else if activeSection === Sections.activity}
-		<AreaActivity {name} {dataInitialized} {eventElements} {taggers} />
+		<AreaActivity {alias} {name} {dataInitialized} {eventElements} {taggers} />
 	{:else if activeSection === Sections.maintain}
 		<IssuesTable
 			title="{name || 'BTC Map Area'} Tagging Issues"

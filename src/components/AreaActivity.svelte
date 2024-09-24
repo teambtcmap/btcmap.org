@@ -2,6 +2,7 @@
 	import { LatestTagger, TaggerSkeleton, TopButton } from '$lib/comp';
 	import { type ActivityEvent, type User } from '$lib/types.js';
 
+	export let alias: string;
 	export let name: string;
 	export let dataInitialized: boolean;
 	export let eventElements: ActivityEvent[];
@@ -17,6 +18,13 @@
 	$: taggersPaginated = taggers.slice(0, taggerCount);
 	let taggerDiv: HTMLDivElement;
 </script>
+
+<section id="feeds">
+	<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10 p-3">
+		<p><a class="text-center font-semibold text-link" href="https://api.btcmap.org/feeds/new-places/{alias}">New Places Atom Feed</a></p>
+		<p class="mt-2"><a class="text-center font-semibold text-link mt-6" href="https://api.btcmap.org/feeds/new-comments/{alias}">New Comments Atom Feed</a></p>
+	</div>
+</section>
 
 <section id="taggers">
 	<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
