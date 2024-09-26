@@ -10,7 +10,8 @@
 		class="space-y-2 transition-colors hover:text-link"
 	>
 		<img
-			src="/images/integrations/{integration.icon}{integration.icon === 'voltage'
+			src="/images/integrations/{integration.icon}{integration.icon === 'voltage' ||
+			integration.icon === 'adopting'
 				? '.png'
 				: '.jpg'}"
 			alt="logo"
