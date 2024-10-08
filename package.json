@@ -2,6 +2,7 @@
 	"name": "btcmap",
 	"version": "1.0.0",
 	"private": true,
+	"packageManager": "yarn@4.5.0",
 	"scripts": {
 		"dev": "vite dev --host",
 		"build": "vite build",
@@ -30,6 +31,7 @@
 		"eslint": "8.57.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "^2.39.0",
+		"nostr-tools": "2.7.2",
 		"postcss": "^8.4.38",
 		"prettier": "^3.2.5",
 		"prettier-plugin-svelte": "^3.2.3",

@@ -34,6 +34,7 @@
 		userError,
 		users
 	} from '$lib/store';
+	import parseNostrIdentity from '$lib/parseNostrIdentity.ts';
 	import {
 		BadgeType,
 		type ActivityEvent,
@@ -87,6 +88,7 @@
 			: description;
 		const regexMatch = description.match('(lightning:[^)]+)');
 		lightning = regexMatch && regexMatch[0].slice(10);
+		const {exists, checksum, npub, hex} = parseNostrIdentity(user)
 
 		const userEvents = $events.filter((event) => event['user_id'] == user.id);
 		userEvents.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
