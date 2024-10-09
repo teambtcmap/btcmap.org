@@ -49,11 +49,12 @@ export const POST: RequestHandler = async ({ request }) => {
 						}
 
 						return axios
-							.patch(
-								`https://api.btcmap.org/v2/elements/${element}`,
-								{ tags: { 'boost:expires': `${expires.toISOString()}` } },
-								{ headers }
-							)
+							.post(`https://api.btcmap.org/rpc`, {
+								jsonrpc: '2.0',
+								method: 'boostelement',
+								params: { password: BTCMAP_KEY, id: element, days: time * 30 },
+								id: 1
+							})
 							.then(function (response) {
 								return response.status;
 							})
