@@ -9,10 +9,6 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 const used: string[] = [];
 
 export const POST: RequestHandler = async ({ request }) => {
-	const headers = {
-		Authorization: `Bearer ${BTCMAP_KEY}`
-	};
-
 	const { element, time, hash } = await request.json();
 
 	// check that time is valid
@@ -31,37 +27,15 @@ export const POST: RequestHandler = async ({ request }) => {
 		.then(function (response) {
 			if (response.data.paid === true) {
 				used.push(hash);
-
 				return axios
-					.get(`https://api.btcmap.org/v2/elements/${element}`)
+					.post(`https://api.btcmap.org/rpc`, {
+						jsonrpc: '2.0',
+						method: 'boostelement',
+						params: { password: BTCMAP_KEY, id: element, days: time * 30 },
+						id: 1
+					})
 					.then(function (response) {
-						let expires;
-						const currentBoost =
-							response.data.tags && response.data.tags['boost:expires']
-								? new Date(response.data.tags['boost:expires'])
-								: null;
-						const dateNow = new Date();
-
-						if (currentBoost && currentBoost > dateNow) {
-							expires = new Date(currentBoost.setMonth(currentBoost.getMonth() + time));
-						} else {
-							expires = new Date(dateNow.setMonth(dateNow.getMonth() + time));
-						}
-
-						return axios
-							.post(`https://api.btcmap.org/rpc`, {
-								jsonrpc: '2.0',
-								method: 'boostelement',
-								params: { password: BTCMAP_KEY, id: element, days: time * 30 },
-								id: 1
-							})
-							.then(function (response) {
-								return response.status;
-							})
-							.catch(function (err) {
-								console.log(err);
-								error(400, 'Could not finalize boost, please contact BTC Map.');
-							});
+						return response.status;
 					})
 					.catch(function (err) {
 						console.log(err);
