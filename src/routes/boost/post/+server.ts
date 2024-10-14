@@ -30,7 +30,7 @@ export const POST: RequestHandler = async ({ request }) => {
 				return axios
 					.post(`https://api.btcmap.org/rpc`, {
 						jsonrpc: '2.0',
-						method: 'boostelement',
+						method: 'boost_element',
 						params: { password: BTCMAP_KEY, id: element, days: time * 30 },
 						id: 1
 					})
