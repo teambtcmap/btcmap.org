@@ -72,6 +72,9 @@
 	$: bitcoinJamii =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'bitcoin-jamii');
+	$: bitcoinParaguay =
+		communities &&
+		communities.filter((community) => community.tags.organization === 'bitcoin-paraguay');
 	$: bitDevs =
 		communities && communities.filter((community) => community.tags.organization === 'bit-devs');
 	$: breizhBitcoin =
@@ -215,6 +218,7 @@
 		'Bitcoin Bulgaria',
 		'Bitcoin Indonesia',
 		'Bitcoin Jamii',
+		'Bitcoin Paraguay',
 		'BitDevs',
 		'Breizh Bitcoin',
 		'Découvre Bitcoin',
@@ -259,6 +263,7 @@
 		{ section: 'Bitcoin Bulgaria', communities: bitcoinBulgaria },
 		{ section: 'Bitcoin Indonesia', communities: bitcoinIndonesia },
 		{ section: 'Bitcoin Jamii', communities: bitcoinJamii },
+		{ section: 'Bitcoin Paraguay', communities: bitcoinParaguay },
 		{ section: 'BitDevs', communities: bitDevs },
 		{ section: 'Breizh Bitcoin', communities: breizhBitcoin },
 		{ section: 'Découvre Bitcoin', communities: decouvreBitcoin },
