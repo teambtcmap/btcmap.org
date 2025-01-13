@@ -8,8 +8,6 @@
 	import { HeaderPlaceholder, PrimaryButton } from '$lib/comp';
 	import { socials, theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
-	// @ts-expect-error
-	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
 </script>
 
 <div class="mt-10 flex items-center justify-center pb-20 text-center md:pb-32">
@@ -40,18 +38,7 @@
 				class="text-link transition-colors hover:text-hover">issue #{issue}</a
 			>.
 		</p>
-		{#if typeof window !== 'undefined'}
-			<div class="mx-auto w-full md:w-96">
-				<LottiePlayer
-					src="/lottie/lightning-bolt.json"
-					autoplay={true}
-					loop={true}
-					controls={false}
-					renderer="svg"
-					background="transparent"
-				/>
-			</div>
-		{/if}
+		
 		<PrimaryButton
 			text="Submit another {type.toLowerCase()}"
 			{link}

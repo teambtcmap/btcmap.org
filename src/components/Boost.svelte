@@ -2,8 +2,6 @@
 	import { CloseButton, CopyButton, Icon, PrimaryButton } from '$lib/comp';
 	import { boost, boostHash, exchangeRate, resetBoost } from '$lib/store';
 	import { errToast, warningToast } from '$lib/utils';
-	// @ts-expect-error
-	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
 	import axios from 'axios';
 	import JSConfetti from 'js-confetti';
 	import QRCode from 'qrcode';
@@ -265,19 +263,6 @@
 				</div>
 			{:else}
 				<div class="space-y-4 text-center">
-					{#if typeof window !== 'undefined'}
-						<div class="mx-auto h-[99px] w-44">
-							<LottiePlayer
-								src="/lottie/boost.json"
-								autoplay={true}
-								loop={true}
-								controls={false}
-								renderer="svg"
-								background="transparent"
-							/>
-						</div>
-					{/if}
-
 					<p
 						class="text-xl font-bold text-primary dark:text-white {$boost.name.match('([^ ]{14})')
 							? 'break-all'

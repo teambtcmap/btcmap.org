@@ -20,7 +20,6 @@
 - axios
 - vite
 - fontawesome
-- lottie
 - opencage
 
 (see [`package.json`](https://github.com/teambtcmap/btcmap.org/blob/main/package.json) for full list)
@@ -28,9 +27,14 @@
 ## Getting started
 
 1. `git clone` the repo and `cd` into the directory
-2. run `yarn` to install the packages
-3. `yarn dev` will open the app on `localhost:5173`
-4. after making edits run `yarn format` to format the files
+1. run `yarn` to install the packages
+1. `yarn dev` will open the app on `localhost:5173`
+1. after making edits run `yarn format` to format the files
+
+### Build project
+
+1. Create `.env` (Copy `.env.example` and sane as `.env`)
+1. `yarn build`
 
 _NOTE:_ BTC Map uses the latest LTS version of [node](https://nodejs.org/). If you have [NVM](https://github.com/nvm-sh/nvm), you can simply run `nvm use` in the root directory of the repo to switch to the supported node version.
 
