@@ -38,7 +38,7 @@
 				class="text-link transition-colors hover:text-hover">issue #{issue}</a
 			>.
 		</p>
-		
+
 		<PrimaryButton
 			text="Submit another {type.toLowerCase()}"
 			{link}
