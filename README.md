@@ -33,7 +33,8 @@
 
 ### Build project
 
-1. Create `.env` (Copy `.env.example` and sane as `.env`)
+1. Create `.env`  
+   Copy `.env.example` and save as `.env`
 1. `yarn build`
 
 _NOTE:_ BTC Map uses the latest LTS version of [node](https://nodejs.org/). If you have [NVM](https://github.com/nvm-sh/nvm), you can simply run `nvm use` in the root directory of the repo to switch to the supported node version.
