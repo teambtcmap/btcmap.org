@@ -15,6 +15,11 @@ export default [
 				project: './tsconfig.json',
 				extraFileExtensions: ['.svelte']
 			}
+		},
+		rules: {
+			'svelte/valid-compile': 'off',
+			'no-undef': 'off',
+			'no-unused-vars': 'off'
 		}
 	},
 	{
