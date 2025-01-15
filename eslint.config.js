@@ -2,9 +2,11 @@ import js from '@eslint/js';
 import eslintPluginSvelte from 'eslint-plugin-svelte';
 import * as svelteParser from 'svelte-eslint-parser';
 import * as typescriptParser from '@typescript-eslint/parser';
+import tseslint from 'typescript-eslint';
 
-export default [
+export default tseslint.config(
 	js.configs.recommended,
+	...tseslint.configs.recommended,
 	...eslintPluginSvelte.configs.recommended,
 	{
 		files: ['**/*.svelte'],
@@ -25,4 +27,4 @@ export default [
 	{
 		ignores: ['.netlify', '.svelte-kit', 'static', 'build']
 	}
-];
+);
