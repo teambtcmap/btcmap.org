@@ -465,6 +465,7 @@
 								: '/icons/boost.svg'
 					} alt='boost' class='inline' id='boost-layer'/>`;
 					boostLayerButton.style.borderRadius = '0 0 8px 8px';
+					boostLayerButton.style.borderBottom = '1px solid #ccc';
 					boostLayerButton.onclick = function toggleLayer() {
 						if (boosts) {
 							$page.url.searchParams.delete('boosts');

@@ -404,6 +404,7 @@ export const changeDefaultIcons = (
 		};
 	}
 	fullscreenButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+	fullscreenButton.style.borderBottom = '1px solid #ccc';
 
 	leafletBar?.append(fullscreenButton);
 
@@ -433,6 +434,7 @@ export const geolocate = (L: Leaflet, map: Map) => {
 	);
 	if (locateButton) {
 		locateButton.style.borderRadius = '8px';
+		locateButton.style.borderBottom = '1px solid #ccc';
 		if (theme === 'light') {
 			const locateIcon: HTMLImageElement | null = document.querySelector('#locatebutton');
 			if (locateIcon) {
@@ -540,6 +542,7 @@ export const homeMarkerButtons = (
 					};
 				}
 				communityMapButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+				communityMapButton.style.borderBottom = '1px solid #ccc';
 
 				addControlDiv.append(communityMapButton);
 			} else {
