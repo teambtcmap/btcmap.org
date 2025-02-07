@@ -100,6 +100,7 @@
 	};
 
 	$: total = stats && stats[0].tags.total_elements;
+	$: recently_verified = stats && stats[0].tags.up_to_date_elements;
 
 	$: created = $events && $events.length ? getStat('create') : undefined;
 	$: createdPrevious = $events && $events.length ? getStatPrevious('create') : undefined;
@@ -196,8 +197,6 @@
 	let totalChart: Chart<'line', number[] | undefined, string>;
 	let daysSinceVerifiedChartCanvas: HTMLCanvasElement;
 	let daysSinceVerifiedChart: Chart<'line', number[] | undefined, string>;
-	let paymentMethodChartCanvas: HTMLCanvasElement;
-	let paymentMethodChart: Chart<'line', number[] | undefined, string>;
 
 	const getDaysSinceVerified = (report: Report): number => {
 		const reportDate = new Date(report.created_at);
@@ -216,7 +215,7 @@
 				labels: statsFiltered.map(({ date }) => date),
 				datasets: [
 					{
-						label: 'Up-to-date Locations',
+						label: 'Recently Verified Locations',
 						data: statsFiltered.map(({ tags: { up_to_date_elements } }) => up_to_date_elements),
 						fill: {
 							target: 'origin',
@@ -347,91 +346,13 @@
 				labels: statsFiltered.map(({ date }) => date),
 				datasets: [
 					{
-						label: 'Days Since Verified',
+						label: 'Average Last Verification Age',
 						data: statsFiltered.map((stat) => getDaysSinceVerified(stat)),
 						fill: {
 							target: 'origin',
 							above: 'rgba(247, 147, 26, 0.3)'
 						},
 						borderColor: 'rgb(247, 147, 26)',
-						tension: 0.1,
-						pointStyle: false
-					}
-				]
-			},
-			options: {
-				maintainAspectRatio: false,
-				plugins: {
-					legend: {
-						labels: {
-							font: {
-								weight: 600
-							}
-						}
-					}
-				},
-				scales: {
-					x: {
-						ticks: {
-							maxTicksLimit: 5,
-							font: {
-								weight: 600
-							}
-						},
-						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
-						}
-					},
-					y: {
-						ticks: {
-							font: {
-								weight: 600
-							}
-						},
-						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
-						}
-					}
-				},
-				interaction: {
-					intersect: false
-				}
-			}
-		});
-
-		paymentMethodChart = new Chart(paymentMethodChartCanvas, {
-			type: 'line',
-			data: {
-				labels: statsFiltered.map(({ date }) => date),
-				datasets: [
-					{
-						label: 'On-chain',
-						data: statsFiltered.map(
-							({ tags: { total_elements_onchain } }) => total_elements_onchain
-						),
-						fill: false,
-						borderColor: 'rgb(247, 147, 26)',
-						tension: 0.1,
-						pointStyle: false
-					},
-					{
-						label: 'Lightning',
-						data: statsFiltered.map(
-							({ tags: { total_elements_lightning } }) => total_elements_lightning
-						),
-						fill: false,
-						borderColor: 'rgb(249, 193, 50)',
-						tension: 0.1,
-						pointStyle: false
-					},
-					{
-						label: 'Contactless',
-						data: statsFiltered.map(
-							({ tags: { total_elements_lightning_contactless } }) =>
-								total_elements_lightning_contactless
-						),
-						fill: false,
-						borderColor: 'rgb(102, 16, 242)',
 						tension: 0.1,
 						pointStyle: false
 					}
@@ -568,19 +489,6 @@
 				);
 				daysSinceVerifiedChart.update();
 
-				paymentMethodChart.data.labels = statsFiltered.map(({ date }) => date);
-				paymentMethodChart.data.datasets[0].data = statsFiltered.map(
-					({ tags: { total_elements_onchain } }) => total_elements_onchain
-				);
-				paymentMethodChart.data.datasets[1].data = statsFiltered.map(
-					({ tags: { total_elements_lightning } }) => total_elements_lightning
-				);
-				paymentMethodChart.data.datasets[2].data = statsFiltered.map(
-					({ tags: { total_elements_lightning_contactless } }) =>
-						total_elements_lightning_contactless
-				);
-				paymentMethodChart.update();
-
 				chartsLoading = false;
 			} else {
 				populateCharts();
@@ -593,14 +501,13 @@
 	$: $theme !== undefined &&
 		chartsLoading === false &&
 		chartsRendered === true &&
-		updateChartThemes([upToDateChart, totalChart, daysSinceVerifiedChart, paymentMethodChart]);
+		updateChartThemes([upToDateChart, totalChart, daysSinceVerifiedChart]);
 
 	onMount(async () => {
 		if (browser) {
 			upToDateChartCanvas.getContext('2d');
 			totalChartCanvas.getContext('2d');
 			daysSinceVerifiedChartCanvas.getContext('2d');
-			paymentMethodChartCanvas.getContext('2d');
 
 			if ($reports && $reports.length) {
 				populateCharts();
@@ -634,75 +541,22 @@
 				<HeaderPlaceholder />
 			{/if}
 
-			<h2
-				class="w-full text-center text-xl font-semibold text-primary dark:text-white md:text-left lg:w-[675px]"
-			>
-				Here are some stats and charts for the MATH nerds.
-			</h2>
-
 			<section id="stats">
 				<div
-					class="grid rounded-3xl border border-statBorder dark:bg-white/10 md:grid-cols-2 xl:grid-cols-4"
+					class="grid rounded-3xl border border-statBorder dark:bg-white/10 md:grid-cols-2 xl:grid-cols-2"
 				>
 					<DashboardStat
 						title="Total Locations"
 						stat={total}
-						change={totalChange}
-						border="border-b md:border-r border-statBorder"
+						border="md:border-r border-statBorder"
 						loading={$syncStatus && chartsRendered}
 					/>
 					<DashboardStat
-						title="Created in last 24 hours"
-						stat={created}
-						percent={createdPercentChange}
-						border="border-b xl:border-r border-statBorder"
-						loading={$syncStatus && chartsRendered}
-					/>
-					<DashboardStat
-						title="Updated in last 24 hours"
-						stat={updated}
-						percent={updatedPercentChange}
-						border="border-b md:border-r border-statBorder"
-						loading={$syncStatus && chartsRendered}
-					/>
-					<DashboardStat
-						title="Deleted in last 24 hours"
-						stat={deleted}
-						percent={deletedPercentChange}
-						border="border-b border-statBorder"
-						loading={$syncStatus && chartsRendered}
-					/>
-					<DashboardStat
-						title="Merchants accepting on-chain"
-						stat={onchain}
-						percent={onchainPercentChange}
-						border="border-b xl:border-b-0 md:border-r border-statBorder"
-						loading={$syncStatus && chartsRendered}
-					/>
-					<DashboardStat
-						title="Merchants accepting lightning"
-						stat={lightning}
-						percent={lightningPercentChange}
-						border="border-b xl:border-b-0 xl:border-r border-statBorder"
-						loading={$syncStatus && chartsRendered}
-					/>
-					<DashboardStat
-						title="Merchants accepting contactless"
-						stat={nfc}
-						percent={nfcPercentChange}
-						border="border-b md:border-b-0 md:border-r border-statBorder"
-						loading={$syncStatus && chartsRendered}
-					/>
-					<DashboardStat
-						title="Up-To-Date Percent"
-						stat={upToDatePercent}
-						change={upToDatePercentChange}
+						title="Recetnly Verified Locations"
+						stat={recently_verified}
 						loading={$syncStatus && chartsRendered}
 					/>
 				</div>
-				<p class="text-center text-sm text-body dark:text-white md:text-left">
-					*Data updated once daily, change based on previous 24 hours.
-				</p>
 			</section>
 
 			<section id="charts" class="space-y-10">
@@ -731,6 +585,22 @@
 								<i class="fa-solid fa-chart-area h-24 w-24 animate-pulse text-link/50" />
 							</div>
 						{/if}
+						<canvas bind:this={totalChartCanvas} width="100%" height="400" />
+					</div>
+					<p class="mt-1 text-center text-sm text-body dark:text-white">
+						*Elements accepting any bitcoin method.
+					</p>
+				</div>
+
+				<div>
+					<div class="relative">
+						{#if chartsLoading}
+							<div
+								class="absolute left-0 top-0 flex h-[400px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
+							>
+								<i class="fa-solid fa-chart-area h-24 w-24 animate-pulse text-link/50" />
+							</div>
+						{/if}
 						<canvas bind:this={upToDateChartCanvas} width="100%" height="400" />
 					</div>
 					<p class="mt-1 text-center text-sm text-body dark:text-white">
@@ -748,44 +618,11 @@
 								<i class="fa-solid fa-chart-area h-24 w-24 animate-pulse text-link/50" />
 							</div>
 						{/if}
-						<canvas bind:this={totalChartCanvas} width="100%" height="400" />
-					</div>
-					<p class="mt-1 text-center text-sm text-body dark:text-white">
-						*Elements accepting any bitcoin payment method.
-					</p>
-				</div>
-
-				<div>
-					<div class="relative">
-						{#if chartsLoading}
-							<div
-								class="absolute left-0 top-0 flex h-[400px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
-							>
-								<i class="fa-solid fa-chart-area h-24 w-24 animate-pulse text-link/50" />
-							</div>
-						{/if}
 						<canvas bind:this={daysSinceVerifiedChartCanvas} width="100%" height="400" />
 					</div>
 					<p class="mt-1 text-center text-sm text-body dark:text-white">
 						*Based on <em>survey:date</em>, <em>check_date</em>, or
 						<em>check_date:currency:XBT</em>.
-					</p>
-				</div>
-
-				<div>
-					<div class="relative">
-						{#if chartsLoading}
-							<div
-								class="absolute left-0 top-0 flex h-[400px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
-							>
-								<i class="fa-solid fa-chart-area h-24 w-24 animate-pulse text-link/50" />
-							</div>
-						{/if}
-						<canvas bind:this={paymentMethodChartCanvas} width="100%" height="400" />
-					</div>
-					<p class="mt-1 text-center text-sm text-body dark:text-white">
-						*Elements with <em>payment:onchain</em>, <em>payment:lightning</em> and
-						<em>payment:lightning_contactless</em> tags.
 					</p>
 				</div>
 			</section>

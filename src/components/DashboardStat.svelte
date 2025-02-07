@@ -19,7 +19,7 @@
 	<div class="flex justify-center md:justify-start">
 		{#if stat !== undefined}
 			<span class="text-5xl font-semibold text-primary dark:text-white">
-				{stat}{title === 'Up-To-Date Percent' ? '%' : ''}
+				{stat.toLocaleString()}{title === 'Up-To-Date Percent' ? '%' : ''}
 			</span>
 			{#if percent}
 				<span
