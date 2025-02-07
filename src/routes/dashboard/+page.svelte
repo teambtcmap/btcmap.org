@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { DashboardStat, Footer, Header, HeaderPlaceholder } from '$lib/comp';
-	import { eventError, events, reportError, reports, syncStatus, theme } from '$lib/store';
-	import type { ChartHistory, EventType, Report } from '$lib/types';
+	import { eventError, reportError, reports, syncStatus, theme } from '$lib/store';
+	import type { ChartHistory, Report } from '$lib/types';
 	import { detectTheme, errToast, updateChartThemes } from '$lib/utils';
 	import Chart from 'chart.js/auto';
 	import { format, startOfYear, subDays, subMonths, subYears } from 'date-fns';
@@ -68,128 +68,8 @@
 				})
 			: [];
 
-	const getStatPeriod = () => {
-		return new Date(new Date().getTime() - 24 * 60 * 60 * 1000).getTime();
-	};
-
-	const getStat = (stat: EventType) => {
-		return $events.filter((event) => {
-			let statPeriod = getStatPeriod();
-			if (event.type === stat && Date.parse(event['created_at']) > statPeriod) {
-				return true;
-			} else {
-				return false;
-			}
-		}).length;
-	};
-
-	const getStatPrevious = (stat: EventType) => {
-		return $events.filter((event) => {
-			let statPeriod = getStatPeriod();
-			let previousStatPeriod = new Date(new Date().getTime() - 48 * 60 * 60 * 1000).getTime();
-			if (
-				event.type === stat &&
-				Date.parse(event['created_at']) > previousStatPeriod &&
-				Date.parse(event['created_at']) < statPeriod
-			) {
-				return true;
-			} else {
-				return false;
-			}
-		}).length;
-	};
-
 	$: total = stats && stats[0].tags.total_elements;
 	$: recently_verified = stats && stats[0].tags.up_to_date_elements;
-
-	$: created = $events && $events.length ? getStat('create') : undefined;
-	$: createdPrevious = $events && $events.length ? getStatPrevious('create') : undefined;
-
-	$: updated = $events && $events.length ? getStat('update') : undefined;
-	$: updatedPrevious = $events && $events.length ? getStatPrevious('update') : undefined;
-
-	$: deleted = $events && $events.length ? getStat('delete') : undefined;
-	$: deletedPrevious = $events && $events.length ? getStatPrevious('delete') : undefined;
-
-	$: onchain = stats && stats[0].tags.total_elements_onchain;
-	$: lightning = stats && stats[0].tags.total_elements_lightning;
-	$: nfc = stats && stats[0].tags.total_elements_lightning_contactless;
-
-	$: upToDatePercent = stats && stats[0].tags.up_to_date_percent;
-
-	$: totalChange =
-		stats && total
-			? new Intl.NumberFormat('en-US', { signDisplay: 'always' }).format(
-					total - stats[1].tags.total_elements
-				)
-			: undefined;
-
-	$: createdPercentChange =
-		created && createdPrevious
-			? new Intl.NumberFormat('en-US', { signDisplay: 'always' }).format(
-					Number((((created - createdPrevious) / createdPrevious) * 100).toFixed(1))
-				)
-			: '';
-
-	$: updatedPercentChange =
-		updated && updatedPrevious
-			? new Intl.NumberFormat('en-US', { signDisplay: 'always' }).format(
-					Number((((updated - updatedPrevious) / updatedPrevious) * 100).toFixed(1))
-				)
-			: '';
-
-	$: deletedPercentChange =
-		deleted && deletedPrevious
-			? new Intl.NumberFormat('en-US', { signDisplay: 'always' }).format(
-					Number((((deleted - deletedPrevious) / deletedPrevious) * 100).toFixed(1))
-				)
-			: '';
-
-	$: onchainPercentChange =
-		stats && onchain
-			? new Intl.NumberFormat('en-US', { signDisplay: 'always' }).format(
-					Number(
-						(
-							((onchain - stats[1].tags.total_elements_onchain) /
-								stats[1].tags.total_elements_onchain) *
-							100
-						).toFixed(1)
-					)
-				)
-			: '';
-
-	$: lightningPercentChange =
-		stats && lightning
-			? new Intl.NumberFormat('en-US', { signDisplay: 'always' }).format(
-					Number(
-						(
-							((lightning - stats[1].tags.total_elements_lightning) /
-								stats[1].tags.total_elements_lightning) *
-							100
-						).toFixed(1)
-					)
-				)
-			: '';
-
-	$: nfcPercentChange =
-		stats && nfc
-			? new Intl.NumberFormat('en-US', { signDisplay: 'always' }).format(
-					Number(
-						(
-							((nfc - stats[1].tags.total_elements_lightning_contactless) /
-								stats[1].tags.total_elements_lightning_contactless) *
-							100
-						).toFixed(1)
-					)
-				)
-			: '';
-
-	$: upToDatePercentChange =
-		stats && upToDatePercent
-			? new Intl.NumberFormat('en-US', { signDisplay: 'always' }).format(
-					upToDatePercent - stats[1].tags.up_to_date_percent
-				)
-			: undefined;
 
 	let upToDateChartCanvas: HTMLCanvasElement;
 	let upToDateChart: Chart<'line', number[] | undefined, string>;
