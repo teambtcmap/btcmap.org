@@ -432,7 +432,7 @@
 						loading={$syncStatus && chartsRendered}
 					/>
 					<DashboardStat
-						title="Recetnly Verified Locations"
+						title="Recently Verified Locations"
 						stat={recently_verified}
 						loading={$syncStatus && chartsRendered}
 					/>
