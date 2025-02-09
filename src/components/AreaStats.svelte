@@ -70,10 +70,6 @@
 
 		upToDatePercent = upToDate ? (upToDate / (total / 100)).toFixed(0) : '0';
 
-		outdatedPercent = outdated ? (outdated / (total / 100)).toFixed(0) : '0';
-
-		legacyPercent = legacy ? (legacy / (total / 100)).toFixed(0) : '0';
-
 		const populateCharts = () => {
 			const chartsReports = [...areaReports].sort(
 				(a, b) => Date.parse(a['created_at']) - Date.parse(b['created_at'])
@@ -102,7 +98,7 @@
 			updatedChart = new Chart(updatedChartCanvas, {
 				type: 'pie',
 				data: {
-					labels: ['Up-To-Date', 'Outdated'],
+					labels: ['Recently Verified', 'Outdated'],
 					datasets: [
 						{
 							label: 'Locations',
@@ -134,7 +130,7 @@
 					labels: percents.map(({ date }) => date),
 					datasets: [
 						{
-							label: 'Up-To-Date Percent',
+							label: 'Recently Verified Percent',
 							data: percents.map(({ tags: { up_to_date_percent } }) => up_to_date_percent),
 							fill: {
 								target: 'origin',
@@ -270,8 +266,6 @@
 	let legacy: number | undefined;
 
 	let upToDatePercent: string | undefined;
-	let outdatedPercent: string | undefined;
-	let legacyPercent: string | undefined;
 
 	let updatedChartCanvas: HTMLCanvasElement;
 	// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
@@ -301,7 +295,7 @@
 	<div
 		class="border border-statBorder dark:bg-white/10 {total === 0
 			? 'rounded-3xl'
-			: 'rounded-t-3xl'} grid md:grid-cols-2 xl:grid-cols-4"
+			: 'rounded-t-3xl'} grid md:grid-cols-2 xl:grid-cols-2"
 	>
 		<ProfileStat
 			title="Total Locations"
@@ -309,24 +303,11 @@
 			border="border-b xl:border-b-0 md:border-r border-statBorder"
 		/>
 		<ProfileStat
-			title="Up-To-Date"
+			title="Recently Verified Locations"
 			stat={upToDate}
 			percent={total && total > 0 ? upToDatePercent : undefined}
 			border="border-b xl:border-b-0 xl:border-r border-statBorder"
 			tooltip="Locations that have been verified within one year."
-		/>
-		<ProfileStat
-			title="Outdated"
-			stat={outdated}
-			percent={total && total > 0 ? outdatedPercent : undefined}
-			border="border-b md:border-b-0 md:border-r border-statBorder"
-		/>
-		<ProfileStat
-			title="Legacy"
-			stat={legacy}
-			percent={total && total > 0 ? legacyPercent : undefined}
-			tooltip="Locations with a <em>payment:bitcoin</em> tag instead of the
-                <em>currency:XBT</em> tag."
 		/>
 	</div>
 
