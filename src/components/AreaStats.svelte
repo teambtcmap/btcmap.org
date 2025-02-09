@@ -250,148 +250,6 @@
 				}
 			});
 
-			legacyChart = new Chart(legacyChartCanvas, {
-				type: 'line',
-				data: {
-					labels: chartsReports.map(({ date }) => date),
-					datasets: [
-						{
-							label: 'Legacy Locations',
-							data: chartsReports.map(({ tags: { legacy_elements } }) => legacy_elements),
-							fill: {
-								target: 'origin',
-								above: 'rgba(235, 87, 87, 0.2)'
-							},
-							borderColor: 'rgb(235, 87, 87)',
-							tension: 0.1,
-							pointStyle: false
-						}
-					]
-				},
-				options: {
-					maintainAspectRatio: false,
-					plugins: {
-						legend: {
-							labels: {
-								font: {
-									weight: 600
-								}
-							}
-						}
-					},
-					scales: {
-						x: {
-							ticks: {
-								maxTicksLimit: 5,
-								font: {
-									weight: 600
-								}
-							},
-							grid: {
-								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
-							}
-						},
-						y: {
-							min: 0,
-							grace: '5%',
-							ticks: {
-								precision: 0,
-								font: {
-									weight: 600
-								}
-							},
-							grid: {
-								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
-							}
-						}
-					},
-					interaction: {
-						intersect: false
-					}
-				}
-			});
-
-			paymentMethodChart = new Chart(paymentMethodChartCanvas, {
-				type: 'line',
-				data: {
-					labels: chartsReports.map(({ date }) => date),
-					datasets: [
-						{
-							label: 'On-chain',
-							data: chartsReports.map(
-								({ tags: { total_elements_onchain } }) => total_elements_onchain
-							),
-							fill: false,
-							borderColor: 'rgb(247, 147, 26)',
-							tension: 0.1,
-							pointStyle: false
-						},
-						{
-							label: 'Lightning',
-							data: chartsReports.map(
-								({ tags: { total_elements_lightning } }) => total_elements_lightning
-							),
-							fill: false,
-							borderColor: 'rgb(249, 193, 50)',
-							tension: 0.1,
-							pointStyle: false
-						},
-						{
-							label: 'Contactless',
-							data: chartsReports.map(
-								({ tags: { total_elements_lightning_contactless } }) =>
-									total_elements_lightning_contactless
-							),
-							fill: false,
-							borderColor: 'rgb(102, 16, 242)',
-							tension: 0.1,
-							pointStyle: false
-						}
-					]
-				},
-				options: {
-					maintainAspectRatio: false,
-					plugins: {
-						legend: {
-							labels: {
-								font: {
-									weight: 600
-								}
-							}
-						}
-					},
-					scales: {
-						x: {
-							ticks: {
-								maxTicksLimit: 5,
-								font: {
-									weight: 600
-								}
-							},
-							grid: {
-								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
-							}
-						},
-						y: {
-							min: 0,
-							grace: '5%',
-							ticks: {
-								precision: 0,
-								font: {
-									weight: 600
-								}
-							},
-							grid: {
-								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
-							}
-						}
-					},
-					interaction: {
-						intersect: false
-					}
-				}
-			});
-
 			chartsLoading = false;
 		};
 
@@ -424,14 +282,8 @@
 	let upToDateChart: Chart<'line', number[], string>;
 	let totalChartCanvas: HTMLCanvasElement;
 	let totalChart: Chart<'line', number[], string>;
-	let legacyChartCanvas: HTMLCanvasElement;
-	let legacyChart: Chart<'line', number[], string>;
-	let paymentMethodChartCanvas: HTMLCanvasElement;
-	let paymentMethodChart: Chart<'line', number[], string>;
 
-	$: $theme !== undefined &&
-		!chartsLoading &&
-		updateChartThemes([upToDateChart, totalChart, legacyChart, paymentMethodChart]);
+	$: $theme !== undefined && !chartsLoading && updateChartThemes([upToDateChart, totalChart]);
 
 	onMount(async () => {
 		if (browser) {
@@ -439,8 +291,6 @@
 			updatedChartCanvas.getContext('2d');
 			upToDateChartCanvas.getContext('2d');
 			totalChartCanvas.getContext('2d');
-			legacyChartCanvas.getContext('2d');
-			paymentMethodChartCanvas.getContext('2d');
 
 			initialRenderComplete = true;
 		}
@@ -504,22 +354,6 @@
 		>
 			{name || 'BTC Map Area'} Charts
 		</h3>
-		<div class="border-b border-statBorder p-5">
-			<div class="relative">
-				{#if chartsLoading}
-					<div
-						class="absolute left-0 top-0 flex h-[400px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
-					>
-						<i class="fa-solid fa-chart-area h-24 w-24 animate-pulse text-link/50" />
-					</div>
-				{/if}
-				<canvas bind:this={upToDateChartCanvas} width="100%" height="400" />
-			</div>
-			<p class="mt-1 text-center text-sm text-body dark:text-white">
-				*Locations with a <em>survey:date</em>, <em>check_date</em>, or
-				<em>check_date:currency:XBT</em> tag less than one year old.
-			</p>
-		</div>
 
 		<div class="border-b border-statBorder p-5">
 			<div class="relative">
@@ -537,7 +371,7 @@
 			</p>
 		</div>
 
-		<div class="border-b border-statBorder p-5">
+		<div class="border-statBorder p-5">
 			<div class="relative">
 				{#if chartsLoading}
 					<div
@@ -546,28 +380,11 @@
 						<i class="fa-solid fa-chart-area h-24 w-24 animate-pulse text-link/50" />
 					</div>
 				{/if}
-				<canvas bind:this={legacyChartCanvas} width="100%" height="400" />
+				<canvas bind:this={upToDateChartCanvas} width="100%" height="400" />
 			</div>
 			<p class="mt-1 text-center text-sm text-body dark:text-white">
-				*Locations with a <em>payment:bitcoin</em> tag instead of the
-				<em>currency:XBT</em> tag.
-			</p>
-		</div>
-
-		<div class="p-5">
-			<div class="relative">
-				{#if chartsLoading}
-					<div
-						class="absolute left-0 top-0 flex h-[400px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
-					>
-						<i class="fa-solid fa-chart-area h-24 w-24 animate-pulse text-link/50" />
-					</div>
-				{/if}
-				<canvas bind:this={paymentMethodChartCanvas} width="100%" height="400" />
-			</div>
-			<p class="mt-1 text-center text-sm text-body dark:text-white">
-				*Locations with <em>payment:onchain</em>, <em>payment:lightning</em> and
-				<em>payment:lightning_contactless</em> tags.
+				*Locations with a <em>survey:date</em>, <em>check_date</em>, or
+				<em>check_date:currency:XBT</em> tag less than one year old.
 			</p>
 		</div>
 	</div>
