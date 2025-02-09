@@ -27,9 +27,10 @@
 ## Getting started
 
 1. `git clone` the repo and `cd` into the directory
-1. run `yarn` to install the packages
-1. `yarn dev` will open the app on `localhost:5173`
-1. after making edits run `yarn format` to format the files
+2. run `yarn` to install the packages
+3. `yarn dev` will open the app on `localhost:5173`
+4. after making edits run `yarn format` to format the files
+5. run `yarn lint` before commiting any changes
 
 ### Build project
 
