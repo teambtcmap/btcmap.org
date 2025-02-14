@@ -1,102 +1,47 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { DashboardStat, Footer, Header, HeaderPlaceholder } from '$lib/comp';
-	import { eventError, reportError, reports, syncStatus, theme } from '$lib/store';
-	import type { ChartHistory, Report } from '$lib/types';
-	import { detectTheme, errToast, updateChartThemes } from '$lib/utils';
+	import { theme } from '$lib/store';
+	import type { ChartHistory } from '$lib/types';
+	import { detectTheme, updateChartThemes } from '$lib/utils';
 	import Chart from 'chart.js/auto';
 	import { format, startOfYear, subDays, subMonths, subYears } from 'date-fns';
 	import { onMount } from 'svelte';
 
-	// alert for event errors
-	$: $eventError && errToast($eventError);
+	export let data;
 
-	// alert for report errors
-	$: $reportError && errToast($reportError);
-
-	let chartsLoading = true;
-	let chartsRendered = false;
-	let initialRenderComplete = false;
-
-	$: stats =
-		$reports && $reports.length
-			? $reports
-					.filter((report) => report['area_id'] === '')
-					.sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-			: undefined;
+	let areaDashboard = data.areaDashboard;
+	let error = data.error;
 
 	const chartHistory: ChartHistory[] = ['7D', '1M', '3M', '6M', 'YTD', '1Y', 'ALL'];
 	let chartHistorySelected: ChartHistory = '3M';
-	const getChartHistoryDate = () => {
-		const today = new Date();
-
-		switch (chartHistorySelected) {
-			case '7D':
-				return subDays(today, 7);
-			case '1M':
-				return subMonths(today, 1);
-			case '3M':
-				return subMonths(today, 3);
-			case '6M':
-				return subMonths(today, 6);
-			case 'YTD':
-				return startOfYear(today);
-			case '1Y':
-				return subYears(today, 1);
-			case 'ALL':
-				return new Date('2022-10-29T00:00:00.000Z');
-		}
-	};
-
-	$: statsSorted = stats
-		? [...stats]
-				.sort((a, b) => Date.parse(a.date) - Date.parse(b.date))
-				.map((stat) => ({ ...stat, date: format(new Date(stat.created_at), 'yyyy-MM-dd') }))
-		: [];
-	$: statsFiltered =
-		statsSorted && chartHistorySelected
-			? statsSorted.filter((stat) => {
-					if (chartHistorySelected === 'ALL') return true;
-
-					const dateHistory = getChartHistoryDate();
-
-					if (new Date(stat.created_at) >= dateHistory) {
-						return true;
-					} else {
-						return false;
-					}
-				})
-			: [];
-
-	$: total = stats && stats[0].tags.total_elements;
-	$: recently_verified = stats && stats[0].tags.up_to_date_elements;
 
 	let upToDateChartCanvas: HTMLCanvasElement;
-	let upToDateChart: Chart<'line', number[] | undefined, string>;
+	let upToDateChart: Chart<'line', number[], string>;
 	let totalChartCanvas: HTMLCanvasElement;
-	let totalChart: Chart<'line', number[] | undefined, string>;
+	let totalChart: Chart<'line', number[], string>;
 	let daysSinceVerifiedChartCanvas: HTMLCanvasElement;
-	let daysSinceVerifiedChart: Chart<'line', number[] | undefined, string>;
-
-	const getDaysSinceVerified = (report: Report): number => {
-		const reportDate = new Date(report.created_at);
-		const avgVerificationDate = new Date(report.tags.avg_verification_date);
-		const diff = Math.abs(reportDate.getTime() - avgVerificationDate.getTime());
-		const diffDays = Math.ceil(diff / (1000 * 3600 * 24));
-		return diffDays;
-	};
+	let daysSinceVerifiedChart: Chart<'line', number[], string>;
 
 	const populateCharts = () => {
 		const theme = detectTheme();
+		const cutoffDate = getChartHistoryDate();
+
+		const filterData = (data: ChartDataItem[] = []) =>
+			data.filter((item) => new Date(item.date) >= cutoffDate);
 
 		upToDateChart = new Chart(upToDateChartCanvas, {
 			type: 'line',
 			data: {
-				labels: statsFiltered.map(({ date }) => date),
+				labels: filterData(areaDashboard?.verified_elements_365d_chart || [])
+					.map((item) => format(new Date(item.date), 'yyyy-MM-dd'))
+					.reverse(),
 				datasets: [
 					{
 						label: 'Recently Verified Locations',
-						data: statsFiltered.map(({ tags: { up_to_date_elements } }) => up_to_date_elements),
+						data: filterData(areaDashboard?.verified_elements_365d_chart || [])
+							.map((item) => item.value)
+							.reverse(),
 						fill: {
 							target: 'origin',
 							above: 'rgba(11, 144, 114, 0.2)'
@@ -108,6 +53,7 @@
 				]
 			},
 			options: {
+				animation: false,
 				maintainAspectRatio: false,
 				plugins: {
 					legend: {
@@ -150,26 +96,15 @@
 		totalChart = new Chart(totalChartCanvas, {
 			type: 'line',
 			data: {
-				labels: statsFiltered.map(({ date }) => date),
+				labels: filterData(areaDashboard?.total_elements_chart || [])
+					.map((item) => format(new Date(item.date), 'yyyy-MM-dd'))
+					.reverse(),
 				datasets: [
 					{
 						label: 'Total Locations',
-						data: statsFiltered.map((stat) => {
-							switch (stat.id) {
-								case 60675:
-									return 7886;
-								case 61063:
-									return 7895;
-								case 61459:
-									return 7897;
-								case 61855:
-									return 7903;
-								case 62251:
-									return 7905;
-								default:
-									return stat.tags.total_elements;
-							}
-						}),
+						data: filterData(areaDashboard?.total_elements_chart || [])
+							.map((item) => item.value)
+							.reverse(),
 						fill: {
 							target: 'origin',
 							above: 'rgba(0, 153, 175, 0.2)'
@@ -181,6 +116,7 @@
 				]
 			},
 			options: {
+				animation: false,
 				maintainAspectRatio: false,
 				plugins: {
 					legend: {
@@ -223,11 +159,15 @@
 		daysSinceVerifiedChart = new Chart(daysSinceVerifiedChartCanvas, {
 			type: 'line',
 			data: {
-				labels: statsFiltered.map(({ date }) => date),
+				labels: filterData(areaDashboard?.days_since_verified_chart || [])
+					.map((item) => format(new Date(item.date), 'yyyy-MM-dd'))
+					.reverse(),
 				datasets: [
 					{
 						label: 'Average Last Verification Age',
-						data: statsFiltered.map((stat) => getDaysSinceVerified(stat)),
+						data: filterData(areaDashboard?.days_since_verified_chart || [])
+							.map((item) => item.value)
+							.reverse(),
 						fill: {
 							target: 'origin',
 							above: 'rgba(247, 147, 26, 0.3)'
@@ -239,6 +179,7 @@
 				]
 			},
 			options: {
+				animation: false,
 				maintainAspectRatio: false,
 				plugins: {
 					legend: {
@@ -277,125 +218,70 @@
 				}
 			}
 		});
-
-		chartsLoading = false;
-		chartsRendered = true;
 	};
 
-	const chartSync = (status: boolean, reports: Report[]) => {
-		if (reports.length && !status && initialRenderComplete) {
-			chartsLoading = true;
-
-			const today = new Date();
-
-			if (statsFiltered.length) {
-				const latestReport = statsFiltered[statsFiltered.length - 1];
-				const latestReportDate = new Date(latestReport.created_at);
-				const reportIsCurrent =
-					today.getDate() === latestReportDate.getDate() &&
-					today.getMonth() === latestReportDate.getMonth() &&
-					today.getFullYear() === latestReportDate.getFullYear();
-
-				if (!reportIsCurrent) {
-					statsFiltered.push({
-						...latestReport,
-						id: latestReport.id + 1,
-						date: `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`,
-						created_at: today.toISOString(),
-						updated_at: today.toISOString()
-					});
-
-					statsFiltered = statsFiltered;
-				}
-			} else {
-				const latestReport = statsSorted[statsSorted.length - 1];
-				const dateHistory = getChartHistoryDate();
-				const reportIsCurrent =
-					today.getDate() === dateHistory.getDate() &&
-					today.getMonth() === dateHistory.getMonth() &&
-					today.getFullYear() === dateHistory.getFullYear();
-
-				statsFiltered.push({
-					...latestReport,
-					date: `${dateHistory.getFullYear()}-${
-						dateHistory.getMonth() + 1
-					}-${dateHistory.getDate()}`,
-					created_at: dateHistory.toISOString(),
-					updated_at: dateHistory.toISOString()
-				});
-
-				if (!reportIsCurrent) {
-					statsFiltered.push({
-						...latestReport,
-						id: latestReport.id + 1,
-						date: `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`,
-						created_at: today.toISOString(),
-						updated_at: today.toISOString()
-					});
-				}
-
-				statsFiltered = statsFiltered;
-			}
-
-			if (chartsRendered) {
-				upToDateChart.data.labels = statsFiltered.map(({ date }) => date);
-				upToDateChart.data.datasets[0].data = statsFiltered.map(
-					({ tags: { up_to_date_elements } }) => up_to_date_elements
-				);
-				upToDateChart.update();
-
-				totalChart.data.labels = statsFiltered.map(({ date }) => date);
-				totalChart.data.datasets[0].data = statsFiltered.map((stat) => {
-					switch (stat.id) {
-						case 60675:
-							return 7886;
-						case 61063:
-							return 7895;
-						case 61459:
-							return 7897;
-						case 61855:
-							return 7903;
-						case 62251:
-							return 7905;
-						default:
-							return stat.tags.total_elements;
-					}
-				});
-				totalChart.update();
-
-				daysSinceVerifiedChart.data.labels = statsFiltered.map(({ date }) => date);
-				daysSinceVerifiedChart.data.datasets[0].data = statsFiltered.map((stat) =>
-					getDaysSinceVerified(stat)
-				);
-				daysSinceVerifiedChart.update();
-
-				chartsLoading = false;
-			} else {
-				populateCharts();
-			}
-		}
-	};
-
-	$: chartHistorySelected && chartSync($syncStatus, $reports);
-
-	$: $theme !== undefined &&
-		chartsLoading === false &&
-		chartsRendered === true &&
-		updateChartThemes([upToDateChart, totalChart, daysSinceVerifiedChart]);
+	$: $theme !== undefined && updateChartThemes([upToDateChart, totalChart, daysSinceVerifiedChart]);
 
 	onMount(async () => {
 		if (browser) {
 			upToDateChartCanvas.getContext('2d');
 			totalChartCanvas.getContext('2d');
 			daysSinceVerifiedChartCanvas.getContext('2d');
-
-			if ($reports && $reports.length) {
-				populateCharts();
-			}
-
-			initialRenderComplete = true;
+			populateCharts();
 		}
 	});
+
+	interface ChartDataItem {
+		date: string;
+		value: number;
+	}
+
+	const getChartHistoryDate = () => {
+		const today = new Date();
+		switch (chartHistorySelected) {
+			case '7D':
+				return subDays(today, 7);
+			case '1M':
+				return subMonths(today, 1);
+			case '3M':
+				return subMonths(today, 3);
+			case '6M':
+				return subMonths(today, 6);
+			case 'YTD':
+				return startOfYear(today);
+			case '1Y':
+				return subYears(today, 1);
+			case 'ALL':
+				return new Date(0);
+		}
+	};
+
+	$: {
+		if (chartHistorySelected && upToDateChart && totalChart && daysSinceVerifiedChart) {
+			const cutoffDate = getChartHistoryDate();
+
+			const filterData = (data: ChartDataItem[] = []) =>
+				data.filter((item) => new Date(item.date) >= cutoffDate);
+
+			const updateChart = (chart: Chart<'line', number[], string>, data: ChartDataItem[]) => {
+				const filtered = filterData(data);
+				chart.data.labels = filtered
+					.map((item) => format(new Date(item.date), 'yyyy-MM-dd'))
+					.reverse();
+				chart.data.datasets[0].data = filtered.map((item) => item.value).reverse();
+				chart.update();
+			};
+
+			updateChart(upToDateChart, areaDashboard?.verified_elements_365d_chart || []);
+			updateChart(totalChart, areaDashboard?.total_elements_chart || []);
+			updateChart(daysSinceVerifiedChart, areaDashboard?.days_since_verified_chart || []);
+		}
+	}
+
+	$: {
+		areaDashboard = data.areaDashboard;
+		error = data.error;
+	}
 </script>
 
 <svelte:head>
@@ -421,20 +307,26 @@
 				<HeaderPlaceholder />
 			{/if}
 
+			{#if error}
+				<div class="rounded-lg bg-red-100 p-4 text-red-700 dark:bg-red-900/50 dark:text-red-100">
+					<p>Error loading dashboard data: {error}</p>
+				</div>
+			{/if}
+
 			<section id="stats">
 				<div
 					class="grid rounded-3xl border border-statBorder dark:bg-white/10 md:grid-cols-2 xl:grid-cols-2"
 				>
 					<DashboardStat
 						title="Total Locations"
-						stat={total}
+						stat={areaDashboard?.total_elements}
 						border="md:border-r border-statBorder"
-						loading={$syncStatus && chartsRendered}
+						loading={false}
 					/>
 					<DashboardStat
 						title="Recently Verified Locations"
-						stat={recently_verified}
-						loading={$syncStatus && chartsRendered}
+						stat={areaDashboard?.verified_elements_365d}
+						loading={false}
 					/>
 				</div>
 			</section>
@@ -449,7 +341,6 @@
 								? 'underline decoration-primary decoration-4 underline-offset-8 dark:decoration-white'
 								: ''}
 							on:click={() => (chartHistorySelected = history)}
-							disabled={chartsLoading}
 						>
 							{history}
 						</button>
@@ -458,13 +349,6 @@
 
 				<div>
 					<div class="relative">
-						{#if chartsLoading}
-							<div
-								class="absolute left-0 top-0 flex h-[400px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
-							>
-								<i class="fa-solid fa-chart-area h-24 w-24 animate-pulse text-link/50" />
-							</div>
-						{/if}
 						<canvas bind:this={totalChartCanvas} width="100%" height="400" />
 					</div>
 					<p class="mt-1 text-center text-sm text-body dark:text-white">
@@ -474,13 +358,6 @@
 
 				<div>
 					<div class="relative">
-						{#if chartsLoading}
-							<div
-								class="absolute left-0 top-0 flex h-[400px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
-							>
-								<i class="fa-solid fa-chart-area h-24 w-24 animate-pulse text-link/50" />
-							</div>
-						{/if}
 						<canvas bind:this={upToDateChartCanvas} width="100%" height="400" />
 					</div>
 					<p class="mt-1 text-center text-sm text-body dark:text-white">
@@ -491,13 +368,6 @@
 
 				<div>
 					<div class="relative">
-						{#if chartsLoading}
-							<div
-								class="absolute left-0 top-0 flex h-[400px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
-							>
-								<i class="fa-solid fa-chart-area h-24 w-24 animate-pulse text-link/50" />
-							</div>
-						{/if}
 						<canvas bind:this={daysSinceVerifiedChartCanvas} width="100%" height="400" />
 					</div>
 					<p class="mt-1 text-center text-sm text-body dark:text-white">
