@@ -40,11 +40,11 @@
 		type Continents,
 		type Element,
 		type Event,
-		type Issues,
 		type Report,
+		type RpcIssue,
 		type User
 	} from '$lib/types.js';
-	import { errToast, formatElementID, getIssues, validateContinents } from '$lib/utils';
+	import { errToast, formatElementID, validateContinents } from '$lib/utils';
 	// @ts-expect-error
 	import rewind from '@mapbox/geojson-rewind';
 	import { geoContains } from 'd3-geo';
@@ -211,7 +211,7 @@
 		eventElements = eventElements;
 		taggers = taggers;
 
-		issues = getIssues(filteredElements);
+		issues = data.issues;
 
 		dataInitialized = true;
 	};
@@ -291,7 +291,7 @@
 	let eventElements: ActivityEvent[] = [];
 	let taggers: User[] = [];
 
-	let issues: Issues = [];
+	let issues: RpcIssue[] = [];
 </script>
 
 <main class="my-10 space-y-16 text-center md:my-20">

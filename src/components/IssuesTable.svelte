@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { IssueCell } from '$lib/comp';
 	import { theme } from '$lib/store';
-	import type { Issues } from '$lib/types';
+	import type { RpcIssue } from '$lib/types';
 	import { debounce, detectTheme, getIssueHelpLink, getIssueIcon, isEven } from '$lib/utils';
 	import { rankItem } from '@tanstack/match-sorter-utils';
 	import type {
@@ -24,7 +24,7 @@
 	import { writable, type Readable } from 'svelte/store';
 
 	export let title: string;
-	export let issues: Issues;
+	export let issues: RpcIssue[];
 	export let loading: boolean;
 	export let initialPageSize = 10;
 
@@ -52,33 +52,30 @@
 	const searchDebounce = debounce((e) => handleKeyUp(e));
 
 	const renderTable = () => {
-		const data = issues
-			.sort((a, b) => {
-				if (a.type === b.type) {
-					return b.severity - a.severity;
-				} else {
-					if (a.type < b.type) {
-						return -1;
-					}
-
-					if (a.type > b.type) {
-						return 1;
-					}
-
-					return 0;
-				}
-			})
-			.map((issue) => {
-				const icon = getIssueIcon(issue.type);
-				const name = issue.merchantName || 'Unnamed Merchant';
-				const type = issue.description;
-				const id = issue.merchantId.split(':');
-				const viewLink = id[0] + '/' + id[1];
-				const editLink = id[0] + '=' + id[1];
-				const helpLink = getIssueHelpLink(issue.type);
-
-				return { icon, name, type, viewLink, editLink, helpLink };
-			});
+		const data = issues.map((issue) => {
+			const icon = getIssueIcon(issue.issue_code);
+			const name = issue.element_name;
+			var type: string = 'TODO';
+			if (issue.issue_code == 'missing_icon') {
+				type = 'Icon is missing';
+			} else if (issue.issue_code == 'not_verified') {
+				type = 'Last verification date is missing';
+			} else if (issue.issue_code == 'outdated') {
+				type = 'Outdated, needs re-verification';
+			} else if (issue.issue_code == 'outdated_soon') {
+				type = 'Soon to be outdated, needs re-verification';
+			} else if (issue.issue_code.startsWith('invalid_tag_value')) {
+				type = `Tag value is not formatted properly (${issue.issue_code})`;
+			} else if (issue.issue_code.startsWith('misspelled_tag_name')) {
+				type = `Spelling issue in tag name (${issue.issue_code})`;
+			} else {
+				type = issue.issue_code;
+			}
+			const viewLink = `${issue.element_osm_type}/${issue.element_osm_id}`;
+			const editLink = `${issue.element_osm_type}=${issue.element_osm_id}`;
+			const helpLink = getIssueHelpLink(issue.issue_code);
+			return { icon, name, type, viewLink, editLink, helpLink };
+		});
 
 		const columns: ColumnDef<IssueFormatted>[] = [
 			{

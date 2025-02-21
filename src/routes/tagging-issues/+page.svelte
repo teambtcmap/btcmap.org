@@ -1,19 +1,11 @@
 <script lang="ts">
 	import { Footer, Header, HeaderPlaceholder, IssuesTable } from '$lib/comp';
 	import { theme } from '$lib/store';
-	import { detectTheme, getIssues } from '$lib/utils';
-	import { elements } from '$lib/store';
-	import type { Issues } from '$lib/types';
+	import { detectTheme } from '$lib/utils';
+	import type { RpcIssue } from '$lib/types';
 
-	let issues: Issues = [];
-	let dataInitialized = false;
-
-	const renderTable = () => {
-		issues = getIssues($elements);
-		dataInitialized = true;
-	};
-
-	$: $elements && $elements.length && !dataInitialized && renderTable();
+	export let data;
+	let issues: RpcIssue[] = data.rpcResult.requested_issues;
 </script>
 
 <svelte:head>
@@ -52,8 +44,7 @@
 				>
 				Wiki page.
 			</p>
-
-			<IssuesTable title="Global Issues" {issues} loading={!dataInitialized} initialPageSize={50} />
+			<IssuesTable title="Global Issues" {issues} loading={false} initialPageSize={50} />
 		</main>
 
 		<Footer />

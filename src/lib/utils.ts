@@ -1,5 +1,5 @@
 import { theme } from '$lib/store';
-import type { Continents, Element, Grade, IssueIcon, IssueType, Issues } from '$lib/types';
+import type { Continents, Element, Grade } from '$lib/types';
 import { toast } from '@zerodevx/svelte-toast';
 import type { Chart } from 'chart.js';
 import { get } from 'svelte/store';
@@ -98,53 +98,39 @@ export const getGrade = (upToDatePercent: number): Grade => {
 	}
 };
 
-export const getIssues = (elements: Element[]): Issues => {
-	const issues: Issues = [];
-
-	elements.forEach((element) => {
-		if (!element.tags.issues?.length) return;
-
-		element.tags.issues.forEach((issue) => {
-			issues.push({ ...issue, merchantName: element.osm_json.tags?.name, merchantId: element.id });
-		});
-	});
-
-	return issues;
+export const getIssueIcon = (issue_code: string): IssueIcon => {
+	if (issue_code.startsWith('invalid_tag_value')) {
+		return 'fa-calendar-days';
+	}
+	if (issue_code.startsWith('misspelled_tag_name')) {
+		return 'fa-spell-check';
+	}
+	if (issue_code == 'missing_icon') {
+		return 'fa-icons';
+	}
+	if (issue_code == 'not_verified') {
+		return 'fa-clipboard-question';
+	}
+	if (issue_code == 'outdated') {
+		return 'fa-hourglass-end';
+	}
+	if (issue_code == 'outdated_soon') {
+		return 'fa-hourglass-half';
+	}
+	return 'fa-list-check';
 };
 
-export const getIssueIcon = (type: IssueType): IssueIcon => {
-	switch (type) {
-		case 'date_format':
-			return 'fa-calendar-days';
-		case 'misspelled_tag':
-			return 'fa-spell-check';
-		case 'missing_icon':
-			return 'fa-icons';
-		case 'not_verified':
-			return 'fa-clipboard-question';
-		case 'out_of_date':
-			return 'fa-hourglass-end';
-		case 'out_of_date_soon':
-			return 'fa-hourglass-half';
-		default:
-			return 'fa-list-check';
+export const getIssueHelpLink = (issue_code: string) => {
+	if (issue_code == 'outdated' || issue_code == 'outdated_soon' || issue_code == 'not_verified') {
+		return 'https://wiki.btcmap.org/general/outdated';
 	}
-};
-
-export const getIssueHelpLink = (type: IssueType) => {
-	switch (type) {
-		case 'out_of_date':
-		case 'out_of_date_soon':
-		case 'not_verified':
-			return 'https://wiki.btcmap.org/general/outdated';
-		case 'date_format':
-			return 'https://wiki.btcmap.org/general/tagging-instructions#verified-tags---more-information';
-		case 'misspelled_tag':
-			return 'https://wiki.btcmap.org/general/tagging-instructions#required-tags';
-		case 'missing_icon':
-		default:
-			return undefined;
+	if (issue_code.startsWith('invalid_tag_value')) {
+		return 'https://wiki.btcmap.org/general/tagging-instructions#verified-tags---more-information';
 	}
+	if (issue_code.startsWith('misspelled_tag_name')) {
+		return 'https://wiki.btcmap.org/general/tagging-instructions#required-tags';
+	}
+	return undefined;
 };
 
 export const isEven = (number: number) => {
