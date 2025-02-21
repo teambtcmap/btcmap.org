@@ -1,16 +1,24 @@
 <script lang="ts">
-	export let title: string;
-	export let tooltip: string | undefined;
+	import { run } from 'svelte/legacy';
+
 	import tippy from 'tippy.js';
+	interface Props {
+		title: string;
+		tooltip: string | undefined;
+	}
 
-	let labelTooltip: HTMLSpanElement;
+	let { title, tooltip }: Props = $props();
 
-	$: tooltip &&
-		tooltip.length &&
-		labelTooltip &&
-		tippy([labelTooltip], {
-			content: tooltip
-		});
+	let labelTooltip: HTMLSpanElement = $state();
+
+	run(() => {
+		tooltip &&
+			tooltip.length &&
+			labelTooltip &&
+			tippy([labelTooltip], {
+				content: tooltip
+			});
+	});
 </script>
 
 <span

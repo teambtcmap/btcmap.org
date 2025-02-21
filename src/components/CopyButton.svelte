@@ -1,7 +1,11 @@
 <script lang="ts">
-	export let value: string;
+	interface Props {
+		value: string;
+	}
 
-	let copied = false;
+	let { value }: Props = $props();
+
+	let copied = $state(false);
 
 	const copy = (field: string) => {
 		navigator.clipboard.writeText(field);
@@ -10,7 +14,7 @@
 	};
 </script>
 
-<button class="text-link transition-colors hover:text-hover" on:click={() => copy(value)}>
+<button class="text-link transition-colors hover:text-hover" onclick={() => copy(value)}>
 	{#if copied}
 		<svg
 			xmlns="http://www.w3.org/2000/svg"

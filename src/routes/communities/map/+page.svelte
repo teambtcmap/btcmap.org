@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import { MapLoadingMain, Socials } from '$lib/comp';
@@ -20,15 +22,15 @@
 	import type { Map } from 'leaflet';
 	import { onDestroy, onMount } from 'svelte';
 
-	let mapLoading = 0;
+	let mapLoading = $state(0);
 
 	let leaflet: Leaflet;
 	let theme: Theme;
 
-	let mapElement: HTMLDivElement;
+	let mapElement: HTMLDivElement = $state();
 	let map: Map;
-	let mapLoaded = false;
-	let communitiesLoaded = false;
+	let mapLoaded = $state(false);
+	let communitiesLoaded = $state(false);
 
 	// allow to view map centered on a community
 	const communityQuery = $page.url.searchParams.get('community');
@@ -40,10 +42,14 @@
 	const organization = $page.url.searchParams.get('organization');
 
 	// alert for area errors
-	$: $areaError && errToast($areaError);
+	run(() => {
+		$areaError && errToast($areaError);
+	});
 
 	// alert for report errors
-	$: $reportError && errToast($reportError);
+	run(() => {
+		$reportError && errToast($reportError);
+	});
 
 	const initializeCommunities = () => {
 		if (communitiesLoaded) return;
@@ -189,13 +195,15 @@
 		communitiesLoaded = true;
 	};
 
-	$: $areas &&
-		$areas.length &&
-		$reports &&
-		$reports.length &&
-		mapLoaded &&
-		!communitiesLoaded &&
-		initializeCommunities();
+	run(() => {
+		$areas &&
+			$areas.length &&
+			$reports &&
+			$reports.length &&
+			mapLoaded &&
+			!communitiesLoaded &&
+			initializeCommunities();
+	});
 
 	onMount(async () => {
 		if (browser) {
@@ -286,5 +294,5 @@
 
 	<MapLoadingMain progress={mapLoading} />
 
-	<div bind:this={mapElement} class="absolute h-[100%] w-full !bg-teal dark:!bg-dark" />
+	<div bind:this={mapElement} class="absolute h-[100%] w-full !bg-teal dark:!bg-dark"></div>
 </main>

@@ -1,19 +1,33 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import tippy from 'tippy.js';
 
-	export let title: string;
-	export let stat: number | undefined;
-	export let percent: string | undefined = undefined;
-	export let border: string | undefined = undefined;
-	export let tooltip: undefined | string = undefined;
+	interface Props {
+		title: string;
+		stat: number | undefined;
+		percent?: string | undefined;
+		border?: string | undefined;
+		tooltip?: undefined | string;
+	}
 
-	let tooltipElement: HTMLButtonElement;
+	let {
+		title,
+		stat,
+		percent = undefined,
+		border = undefined,
+		tooltip = undefined
+	}: Props = $props();
 
-	$: tooltipElement &&
-		tippy([tooltipElement], {
-			content: tooltip,
-			allowHTML: true
-		});
+	let tooltipElement: HTMLButtonElement = $state();
+
+	run(() => {
+		tooltipElement &&
+			tippy([tooltipElement], {
+				content: tooltip,
+				allowHTML: true
+			});
+	});
 </script>
 
 <div class="space-y-5 p-5 {border}">
@@ -21,7 +35,7 @@
 		{title}
 		{#if tooltip}
 			<button bind:this={tooltipElement}>
-				<i class="fa-solid fa-circle-info text-base" />
+				<i class="fa-solid fa-circle-info text-base"></i>
 			</button>
 		{/if}
 	</h3>
@@ -34,7 +48,7 @@
 			{/if}
 		{:else}
 			<!-- loading skeleton -->
-			<span class="h-[48px] w-[150px] animate-pulse rounded-xl bg-link/50" />
+			<span class="h-[48px] w-[150px] animate-pulse rounded-xl bg-link/50"></span>
 		{/if}
 	</div>
 </div>

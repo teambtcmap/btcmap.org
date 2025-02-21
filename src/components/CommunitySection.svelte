@@ -1,8 +1,12 @@
 <script lang="ts">
-	export let communities: Area[] | undefined;
 
 	import { CommunityCard, CommunitySkeleton } from '$lib/comp';
 	import type { Area } from '$lib/types';
+	interface Props {
+		communities: Area[] | undefined;
+	}
+
+	let { communities }: Props = $props();
 </script>
 
 <section>

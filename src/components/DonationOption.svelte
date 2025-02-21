@@ -1,10 +1,14 @@
 <script lang="ts">
-	export let value: string;
-	export let text: DonationType;
-	export let showQrToggle: (type: DonationType) => void;
 
 	import { CopyButton } from '$lib/comp';
 	import type { DonationType } from '$lib/types';
+	interface Props {
+		value: string;
+		text: DonationType;
+		showQrToggle: (type: DonationType) => void;
+	}
+
+	let { value, text, showQrToggle }: Props = $props();
 </script>
 
 <div>
@@ -34,7 +38,7 @@
 			<!-- qr button -->
 			<button
 				class="text-link transition-colors hover:text-hover"
-				on:click={() => showQrToggle(text)}
+				onclick={() => showQrToggle(text)}
 			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"

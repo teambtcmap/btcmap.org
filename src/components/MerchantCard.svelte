@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { BoostButton, Icon, InfoTooltip } from '$lib/comp';
 	import { calcVerifiedDate, checkAddress, verifiedArr } from '$lib/map/setup';
 	import type { Element } from '$lib/types';
@@ -6,7 +8,11 @@
 	import Time from 'svelte-time';
 	import tippy from 'tippy.js';
 
-	export let merchant: Element;
+	interface Props {
+		merchant: Element;
+	}
+
+	let { merchant }: Props = $props();
 
 	const boosted = isBoosted(merchant);
 	const icon = merchant.tags['icon:android'];
@@ -24,12 +30,14 @@
 	const verified = verifiedArr(merchant.osm_json);
 	const verifiedDate = calcVerifiedDate();
 
-	let outdatedTooltip: HTMLDivElement;
+	let outdatedTooltip: HTMLDivElement = $state();
 
-	$: outdatedTooltip &&
-		tippy([outdatedTooltip], {
-			content: 'Outdated please re-verify'
-		});
+	run(() => {
+		outdatedTooltip &&
+			tippy([outdatedTooltip], {
+				content: 'Outdated please re-verify'
+			});
+	});
 </script>
 
 <div

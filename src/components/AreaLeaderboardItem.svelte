@@ -1,22 +1,36 @@
 <script lang="ts">
-	export let type: AreaType;
-	export let position: number;
-	export let avatar: string;
-	export let name: string;
-	export let sponsor: boolean;
-	export let id: string;
-	export let upToDate: number;
-	export let total: number;
-	export let grade: Grade;
 
 	import { SponsorBadge } from '$lib/comp';
 	import type { AreaType, Grade } from '$lib/types';
+	interface Props {
+		type: AreaType;
+		position: number;
+		avatar: string;
+		name: string;
+		sponsor: boolean;
+		id: string;
+		upToDate: number;
+		total: number;
+		grade: Grade;
+	}
 
-	$: stats = [
+	let {
+		type,
+		position,
+		avatar,
+		name,
+		sponsor,
+		id,
+		upToDate,
+		total,
+		grade
+	}: Props = $props();
+
+	let stats = $derived([
 		{ stat: upToDate, title: 'Up-To-Date' },
 		{ stat: total, title: 'Total Locations' },
 		{ stat: grade, title: 'Grade' }
-	];
+	]);
 </script>
 
 <div
@@ -45,7 +59,7 @@
 				: avatar}
 			alt="avatar"
 			class="mx-auto mb-2 h-20 w-20 rounded-full object-cover lg:h-14 lg:w-14"
-			on:error={function () {
+			onerror={function () {
 				this.src = '/images/bitcoin.svg';
 			}}
 		/>
@@ -78,12 +92,12 @@
 				<div class="space-x-1">
 					<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 					{#each Array(stat.stat) as star}
-						<i class="fa-solid fa-star" />
+						<i class="fa-solid fa-star"></i>
 					{/each}
 
 					<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 					{#each Array(5 - stat.stat) as star}
-						<i class="fa-solid fa-star opacity-25" />
+						<i class="fa-solid fa-star opacity-25"></i>
 					{/each}
 				</div>
 			{:else}

@@ -1,8 +1,8 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { browser } from '$app/environment';
 
-	export let type: AreaType;
-	export let data: AreaPageProps;
 
 	import { goto } from '$app/navigation';
 	import {
@@ -48,17 +48,33 @@
 	// @ts-expect-error
 	import rewind from '@mapbox/geojson-rewind';
 	import { geoContains } from 'd3-geo';
+	interface Props {
+		type: AreaType;
+		data: AreaPageProps;
+	}
+
+	let { type, data }: Props = $props();
 
 	// alert for user errors
-	$: $userError && errToast($userError);
+	run(() => {
+		$userError && errToast($userError);
+	});
 	// alert for event errors
-	$: $eventError && errToast($eventError);
+	run(() => {
+		$eventError && errToast($eventError);
+	});
 	// alert for element errors
-	$: $elementError && errToast($elementError);
+	run(() => {
+		$elementError && errToast($elementError);
+	});
 	// alert for area errors
-	$: $areaError && errToast($areaError);
+	run(() => {
+		$areaError && errToast($areaError);
+	});
 	// alert for report errors
-	$: $reportError && errToast($reportError);
+	run(() => {
+		$reportError && errToast($reportError);
+	});
 
 	enum Sections {
 		merchants = 'Merchants',
@@ -68,10 +84,10 @@
 	}
 
 	const sections = Object.values(Sections);
-	let activeSection = Sections.merchants;
-	let scrolled = false;
+	let activeSection = $state(Sections.merchants);
+	let scrolled = $state(false);
 
-	let dataInitialized = false;
+	let dataInitialized = $state(false);
 
 	const initializeData = () => {
 		if (dataInitialized) return;
@@ -216,18 +232,20 @@
 		dataInitialized = true;
 	};
 
-	$: $users &&
-		$users.length &&
-		$events &&
-		$events.length &&
-		$elements &&
-		$elements.length &&
-		$areas &&
-		$areas.length &&
-		$reports &&
-		$reports.length &&
-		!dataInitialized &&
-		initializeData();
+	run(() => {
+		$users &&
+			$users.length &&
+			$events &&
+			$events.length &&
+			$elements &&
+			$elements.length &&
+			$areas &&
+			$areas.length &&
+			$reports &&
+			$reports.length &&
+			!dataInitialized &&
+			initializeData();
+	});
 
 	const getContinentIcon = (continent: Continents) => {
 		switch (continent) {
@@ -257,41 +275,41 @@
 		}
 	};
 
-	let area: AreaTags;
-	let filteredElements: Element[];
-	let areaReports: Report[];
+	let area: AreaTags = $state();
+	let filteredElements: Element[] = $state();
+	let areaReports: Report[] = $state();
 
-	let avatar: string;
+	let avatar: string = $state();
 	const alias = data.id;
 	const name = data.name;
-	let continent: Continents;
-	let org: string | undefined;
-	let sponsor: boolean | undefined;
-	let website: string | undefined;
-	let email: string | undefined;
-	let nostr: string | undefined;
-	let twitter: string | undefined;
-	let secondTwitter: string | undefined;
-	let meetup: string | undefined;
-	let eventbrite: string | undefined;
-	let telegram: string | undefined;
-	let discord: string | undefined;
-	let youtube: string | undefined;
-	let github: string | undefined;
-	let reddit: string | undefined;
-	let instagram: string | undefined;
-	let whatsapp: string | undefined;
-	let facebook: string | undefined;
-	let linkedin: string | undefined;
-	let rss: string | undefined;
-	let signal: string | undefined;
-	let simplex: string | undefined;
-	let lightning: { destination: string; type: TipType } | undefined;
+	let continent: Continents = $state();
+	let org: string | undefined = $state();
+	let sponsor: boolean | undefined = $state();
+	let website: string | undefined = $state();
+	let email: string | undefined = $state();
+	let nostr: string | undefined = $state();
+	let twitter: string | undefined = $state();
+	let secondTwitter: string | undefined = $state();
+	let meetup: string | undefined = $state();
+	let eventbrite: string | undefined = $state();
+	let telegram: string | undefined = $state();
+	let discord: string | undefined = $state();
+	let youtube: string | undefined = $state();
+	let github: string | undefined = $state();
+	let reddit: string | undefined = $state();
+	let instagram: string | undefined = $state();
+	let whatsapp: string | undefined = $state();
+	let facebook: string | undefined = $state();
+	let linkedin: string | undefined = $state();
+	let rss: string | undefined = $state();
+	let signal: string | undefined = $state();
+	let simplex: string | undefined = $state();
+	let lightning: { destination: string; type: TipType } | undefined = $state();
 
-	let eventElements: ActivityEvent[] = [];
-	let taggers: User[] = [];
+	let eventElements: ActivityEvent[] = $state([]);
+	let taggers: User[] = $state([]);
 
-	let issues: Issues = [];
+	let issues: Issues = $state([]);
 </script>
 
 <main class="my-10 space-y-16 text-center md:my-20">
@@ -302,12 +320,12 @@
 					src={avatar}
 					alt="avatar"
 					class="mx-auto h-32 w-32 rounded-full object-cover"
-					on:error={function () {
+					onerror={function () {
 						this.src = '/images/bitcoin.svg';
 					}}
 				/>
 			{:else}
-				<div class="mx-auto h-32 w-32 animate-pulse rounded-full bg-link/50" />
+				<div class="mx-auto h-32 w-32 animate-pulse rounded-full bg-link/50"></div>
 			{/if}
 			<h1 class="text-4xl font-semibold !leading-tight text-primary dark:text-white">
 				{name || 'BTC Map Area'}
@@ -321,10 +339,10 @@
 			{#if continent}
 				<h2 class="text-xl uppercase text-primary dark:text-white">
 					{continent.replace('-', ' ')}
-					<i class="fa-solid fa-earth-{getContinentIcon(continent)}" />
+					<i class="fa-solid fa-earth-{getContinentIcon(continent)}"></i>
 				</h2>
 			{:else}
-				<div class="mx-auto h-7 w-24 animate-pulse rounded bg-link/50" />
+				<div class="mx-auto h-7 w-24 animate-pulse rounded bg-link/50"></div>
 			{/if}
 			{#if alias && type === 'community'}
 				<a
@@ -377,7 +395,7 @@
 				<div class="flex flex-wrap items-center justify-center">
 					<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 					{#each Array(3) as skeleton}
-						<div class="m-1 h-10 w-10 animate-pulse rounded-full bg-link/50" />
+						<div class="m-1 h-10 w-10 animate-pulse rounded-full bg-link/50"></div>
 					{/each}
 				</div>
 			{/if}
@@ -389,12 +407,12 @@
 	</section>
 
 	<div
-		on:scroll={() => (scrolled = true)}
+		onscroll={() => (scrolled = true)}
 		class="hide-scroll relative grid w-full auto-cols-[minmax(150px,_1fr)] grid-flow-col overflow-x-auto"
 	>
 		{#each sections as section}
 			<button
-				on:click={() => (activeSection = section)}
+				onclick={() => (activeSection = section)}
 				class="border-b-4 pb-3 text-center text-lg text-link transition-colors hover:border-link {activeSection ===
 				section
 					? 'border-link font-bold'
@@ -408,7 +426,7 @@
 			<div
 				class="absolute right-0 top-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#cce3e6] sm:hidden"
 			>
-				<i class="fa-solid fa-chevron-right text-link" />
+				<i class="fa-solid fa-chevron-right text-link"></i>
 			</div>
 		{/if}
 	</div>

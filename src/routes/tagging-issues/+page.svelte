@@ -1,19 +1,23 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { Footer, Header, HeaderPlaceholder, IssuesTable } from '$lib/comp';
 	import { theme } from '$lib/store';
 	import { detectTheme, getIssues } from '$lib/utils';
 	import { elements } from '$lib/store';
 	import type { Issues } from '$lib/types';
 
-	let issues: Issues = [];
-	let dataInitialized = false;
+	let issues: Issues = $state([]);
+	let dataInitialized = $state(false);
 
 	const renderTable = () => {
 		issues = getIssues($elements);
 		dataInitialized = true;
 	};
 
-	$: $elements && $elements.length && !dataInitialized && renderTable();
+	run(() => {
+		$elements && $elements.length && !dataInitialized && renderTable();
+	});
 </script>
 
 <svelte:head>

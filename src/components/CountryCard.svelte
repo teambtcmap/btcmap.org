@@ -1,6 +1,10 @@
 <script lang="ts">
-	export let id: string;
-	export let name: string;
+	interface Props {
+		id: string;
+		name: string;
+	}
+
+	let { id, name }: Props = $props();
 </script>
 
 <div
@@ -12,7 +16,7 @@
 				src={`https://static.btcmap.org/images/countries/${id}.svg`}
 				alt={name}
 				class="mx-auto h-20 w-20 rounded-full object-cover"
-				on:error={function () {
+				onerror={function () {
 					this.src = '/images/bitcoin.svg';
 				}}
 			/>

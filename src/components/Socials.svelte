@@ -1,41 +1,66 @@
 <script lang="ts">
-	export let website: undefined | string = undefined;
-	export let email: undefined | string = undefined;
-	export let nostr: undefined | string = undefined;
-	export let twitter: undefined | string = undefined;
-	export let secondTwitter: undefined | string = undefined;
-	export let meetup: undefined | string = undefined;
-	export let eventbrite: undefined | string = undefined;
-	export let telegram: undefined | string = undefined;
-	export let discord: undefined | string = undefined;
-	export let youtube: undefined | string = undefined;
-	export let github: undefined | string = undefined;
-	export let reddit: undefined | string = undefined;
-	export let instagram: undefined | string = undefined;
-	export let whatsapp: undefined | string = undefined;
-	export let facebook: undefined | string = undefined;
-	export let linkedin: undefined | string = undefined;
-	export let rss: undefined | string = undefined;
-	export let signal: undefined | string = undefined;
-	export let simplex: undefined | string = undefined;
 
-	export let style: undefined | string = undefined;
 
 	import { Icon } from '$lib/comp';
+	interface Props {
+		website?: undefined | string;
+		email?: undefined | string;
+		nostr?: undefined | string;
+		twitter?: undefined | string;
+		secondTwitter?: undefined | string;
+		meetup?: undefined | string;
+		eventbrite?: undefined | string;
+		telegram?: undefined | string;
+		discord?: undefined | string;
+		youtube?: undefined | string;
+		github?: undefined | string;
+		reddit?: undefined | string;
+		instagram?: undefined | string;
+		whatsapp?: undefined | string;
+		facebook?: undefined | string;
+		linkedin?: undefined | string;
+		rss?: undefined | string;
+		signal?: undefined | string;
+		simplex?: undefined | string;
+		style?: undefined | string;
+	}
+
+	let {
+		website = undefined,
+		email = undefined,
+		nostr = undefined,
+		twitter = undefined,
+		secondTwitter = undefined,
+		meetup = undefined,
+		eventbrite = undefined,
+		telegram = undefined,
+		discord = undefined,
+		youtube = undefined,
+		github = undefined,
+		reddit = undefined,
+		instagram = undefined,
+		whatsapp = undefined,
+		facebook = undefined,
+		linkedin = undefined,
+		rss = undefined,
+		signal = undefined,
+		simplex = undefined,
+		style = undefined
+	}: Props = $props();
 </script>
 
 <div class="flex flex-wrap items-center justify-center {style || ''}">
 	{#if website}
 		<a href={website} target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-bitcoin">
-				<i class="fa-solid fa-globe h-7 w-7 text-white" />
+				<i class="fa-solid fa-globe h-7 w-7 text-white"></i>
 			</span>
 		</a>
 	{/if}
 	{#if email}
 		<a href="mailto:{email}" target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-[#53C5D5]">
-				<i class="fa-solid fa-envelope h-7 w-7 text-white" />
+				<i class="fa-solid fa-envelope h-7 w-7 text-white"></i>
 			</span>
 		</a>
 	{/if}
@@ -114,7 +139,7 @@
 	{#if rss}
 		<a href={rss} target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-orange-500">
-				<i class="fa-solid fa-rss h-7 w-7 text-white" />
+				<i class="fa-solid fa-rss h-7 w-7 text-white"></i>
 			</span>
 		</a>
 	{/if}

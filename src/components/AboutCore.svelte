@@ -1,12 +1,16 @@
 <script lang="ts">
-	export let member: {
+
+	import { Icon } from '$lib/comp';
+	interface Props {
+		member: {
 		avatar: string;
 		name: string;
 		title: string;
 		socials: { url: string; name: string }[];
 	};
+	}
 
-	import { Icon } from '$lib/comp';
+	let { member }: Props = $props();
 </script>
 
 <div class="space-y-2 text-center">
@@ -14,7 +18,7 @@
 		src="/images/team/{member.avatar}.jpg"
 		alt="avatar"
 		class="mx-auto h-28 w-28 rounded-full object-cover"
-		on:error={function () {
+		onerror={function () {
 			this.src = '/images/satoshi-nakamoto.png';
 		}}
 	/>

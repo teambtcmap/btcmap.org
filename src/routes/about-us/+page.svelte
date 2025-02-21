@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import {
 		AboutCommunity,
 		AboutContributor,
@@ -25,18 +27,26 @@
 	import { errToast } from '$lib/utils';
 
 	// alert for element errors
-	$: $elementError && errToast($elementError);
+	run(() => {
+		$elementError && errToast($elementError);
+	});
 	// alert for user errors
-	$: $userError && errToast($userError);
+	run(() => {
+		$userError && errToast($userError);
+	});
 	// alert for event errors
-	$: $eventError && errToast($eventError);
+	run(() => {
+		$eventError && errToast($eventError);
+	});
 	// alert for area errors
-	$: $areaError && errToast($areaError);
+	run(() => {
+		$areaError && errToast($areaError);
+	});
 
-	let dataInitalized = false;
+	let dataInitalized = $state(false);
 
-	let merchants: Element[] = [];
-	let communities: Area[] = [];
+	let merchants: Element[] = $state([]);
+	let communities: Area[] = $state([]);
 
 	const initializeData = () => {
 		if (dataInitalized) return;
@@ -57,18 +67,20 @@
 		dataInitalized = true;
 	};
 
-	$: $elements &&
-		$elements.length &&
-		$users &&
-		$users.length &&
-		$events &&
-		$events.length &&
-		$areas &&
-		$areas.length &&
-		!dataInitalized &&
-		initializeData();
+	run(() => {
+		$elements &&
+			$elements.length &&
+			$users &&
+			$users.length &&
+			$events &&
+			$events.length &&
+			$areas &&
+			$areas.length &&
+			!dataInitalized &&
+			initializeData();
+	});
 
-	let supertaggers: { id: number; username: string; avatar: string; total: number }[] = [];
+	let supertaggers: { id: number; username: string; avatar: string; total: number }[] = $state([]);
 
 	const populateLeaderboard = () => {
 		$users.forEach((user) => {
@@ -280,7 +292,7 @@
 					{:else}
 						<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 						{#each Array(6) as skeleton}
-							<span class="h-24 w-24 animate-pulse rounded-full bg-link/50" />
+							<span class="h-24 w-24 animate-pulse rounded-full bg-link/50"></span>
 						{/each}
 					{/if}
 				</div>
@@ -306,7 +318,7 @@
 						{:else}
 							<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 							{#each Array(6) as skeleton}
-								<span class="h-24 w-24 animate-pulse rounded-full bg-link/50" />
+								<span class="h-24 w-24 animate-pulse rounded-full bg-link/50"></span>
 							{/each}
 						{/if}
 					</div>
@@ -345,7 +357,7 @@
 						{:else}
 							<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 							{#each Array(6) as skeleton}
-								<span class="h-24 w-24 animate-pulse rounded-full bg-link/50" />
+								<span class="h-24 w-24 animate-pulse rounded-full bg-link/50"></span>
 							{/each}
 						{/if}
 					</div>

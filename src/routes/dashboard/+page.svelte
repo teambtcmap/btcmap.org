@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { browser } from '$app/environment';
 	import { DashboardStat, Footer, Header, HeaderPlaceholder } from '$lib/comp';
 	import { theme } from '$lib/store';
@@ -8,20 +10,20 @@
 	import { format, startOfYear, subDays, subMonths, subYears } from 'date-fns';
 	import { onMount } from 'svelte';
 
-	export let data;
+	let { data } = $props();
 
-	let areaDashboard = data.areaDashboard;
-	let error = data.error;
+	let areaDashboard = $state(data.areaDashboard);
+	let error = $state(data.error);
 
 	const chartHistory: ChartHistory[] = ['7D', '1M', '3M', '6M', 'YTD', '1Y', 'ALL'];
-	let chartHistorySelected: ChartHistory = '3M';
+	let chartHistorySelected: ChartHistory = $state('3M');
 
-	let upToDateChartCanvas: HTMLCanvasElement;
-	let upToDateChart: Chart<'line', number[], string>;
-	let totalChartCanvas: HTMLCanvasElement;
-	let totalChart: Chart<'line', number[], string>;
-	let daysSinceVerifiedChartCanvas: HTMLCanvasElement;
-	let daysSinceVerifiedChart: Chart<'line', number[], string>;
+	let upToDateChartCanvas: HTMLCanvasElement = $state();
+	let upToDateChart: Chart<'line', number[], string> = $state();
+	let totalChartCanvas: HTMLCanvasElement = $state();
+	let totalChart: Chart<'line', number[], string> = $state();
+	let daysSinceVerifiedChartCanvas: HTMLCanvasElement = $state();
+	let daysSinceVerifiedChart: Chart<'line', number[], string> = $state();
 
 	const populateCharts = () => {
 		const theme = detectTheme();
@@ -220,7 +222,9 @@
 		});
 	};
 
-	$: $theme !== undefined && updateChartThemes([upToDateChart, totalChart, daysSinceVerifiedChart]);
+	run(() => {
+		$theme !== undefined && updateChartThemes([upToDateChart, totalChart, daysSinceVerifiedChart]);
+	});
 
 	onMount(async () => {
 		if (browser) {
@@ -256,7 +260,7 @@
 		}
 	};
 
-	$: {
+	run(() => {
 		if (chartHistorySelected && upToDateChart && totalChart && daysSinceVerifiedChart) {
 			const cutoffDate = getChartHistoryDate();
 
@@ -276,12 +280,12 @@
 			updateChart(totalChart, areaDashboard?.total_elements_chart || []);
 			updateChart(daysSinceVerifiedChart, areaDashboard?.days_since_verified_chart || []);
 		}
-	}
+	});
 
-	$: {
+	run(() => {
 		areaDashboard = data.areaDashboard;
 		error = data.error;
-	}
+	});
 </script>
 
 <svelte:head>
@@ -340,7 +344,7 @@
 							class={chartHistorySelected === history
 								? 'underline decoration-primary decoration-4 underline-offset-8 dark:decoration-white'
 								: ''}
-							on:click={() => (chartHistorySelected = history)}
+							onclick={() => (chartHistorySelected = history)}
 						>
 							{history}
 						</button>
@@ -349,7 +353,7 @@
 
 				<div>
 					<div class="relative">
-						<canvas bind:this={totalChartCanvas} width="100%" height="400" />
+						<canvas bind:this={totalChartCanvas} width="100%" height="400"></canvas>
 					</div>
 					<p class="mt-1 text-center text-sm text-body dark:text-white">
 						*Elements accepting any bitcoin method.
@@ -358,7 +362,7 @@
 
 				<div>
 					<div class="relative">
-						<canvas bind:this={upToDateChartCanvas} width="100%" height="400" />
+						<canvas bind:this={upToDateChartCanvas} width="100%" height="400"></canvas>
 					</div>
 					<p class="mt-1 text-center text-sm text-body dark:text-white">
 						*Elements with a <em>survey:date</em>, <em>check_date</em>, or
@@ -368,7 +372,7 @@
 
 				<div>
 					<div class="relative">
-						<canvas bind:this={daysSinceVerifiedChartCanvas} width="100%" height="400" />
+						<canvas bind:this={daysSinceVerifiedChartCanvas} width="100%" height="400"></canvas>
 					</div>
 					<p class="mt-1 text-center text-sm text-body dark:text-white">
 						*Based on <em>survey:date</em>, <em>check_date</em>, or

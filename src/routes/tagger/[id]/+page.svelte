@@ -1,5 +1,6 @@
 <script lang="ts">
-	export let data;
+	import { run } from 'svelte/legacy';
+
 
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
@@ -49,16 +50,23 @@
 	import type { Map, TileLayer } from 'leaflet';
 	import { marked } from 'marked';
 	import { onDestroy, onMount } from 'svelte';
+	let { data } = $props();
 
 	// alert for user errors
-	$: $userError && errToast($userError);
+	run(() => {
+		$userError && errToast($userError);
+	});
 	// alert for event errors
-	$: $eventError && errToast($eventError);
+	run(() => {
+		$eventError && errToast($eventError);
+	});
 	// alert for element errors
-	$: $elementError && errToast($elementError);
+	run(() => {
+		$elementError && errToast($elementError);
+	});
 
-	let dataInitialized = false;
-	let initialRenderComplete = false;
+	let dataInitialized = $state(false);
+	let initialRenderComplete = $state(false);
 
 	let leaflet: Leaflet;
 	let DomEvent: DomEventType;
@@ -427,52 +435,54 @@
 		dataInitialized = true;
 	};
 
-	$: $users &&
-		$users.length &&
-		$events &&
-		$events.length &&
-		$elements &&
-		$elements.length &&
-		initialRenderComplete &&
-		!dataInitialized &&
-		initializeData();
+	run(() => {
+		$users &&
+			$users.length &&
+			$events &&
+			$events.length &&
+			$elements &&
+			$elements.length &&
+			initialRenderComplete &&
+			!dataInitialized &&
+			initializeData();
+	});
 
 	let userCreated: string | undefined;
 	let supporter: boolean | undefined;
-	let avatar: string | undefined;
-	let mappingSince: string | undefined;
+	let avatar: string | undefined = $state();
+	let mappingSince: string | undefined = $state();
 	let username = data.username;
 	let filteredDesc: string | undefined;
-	let profileDesc: HTMLHeadingElement;
-	let lightning: string | null;
+	let profileDesc: HTMLHeadingElement = $state();
+	let lightning: string | null = $state();
 
-	let created: number | undefined;
-	let updated: number | undefined;
-	let deleted: number | undefined;
-	let total: number | undefined;
+	let created: number | undefined = $state();
+	let updated: number | undefined = $state();
+	let deleted: number | undefined = $state();
+	let total: number | undefined = $state();
 
 	let leaderboard: ProfileLeaderboard[] = [];
 
 	let earnedBadges: EarnedBadge[] = [];
 
-	let createdPercent: string | undefined;
-	let updatedPercent: string | undefined;
-	let deletedPercent: string | undefined;
+	let createdPercent: string | undefined = $state();
+	let updatedPercent: string | undefined = $state();
+	let deletedPercent: string | undefined = $state();
 
-	let tagTypeChartCanvas: HTMLCanvasElement;
+	let tagTypeChartCanvas: HTMLCanvasElement = $state();
 	// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 	let tagTypeChart;
 
-	let hideArrow = false;
-	let activityDiv;
-	let eventElements: ActivityEvent[] = [];
+	let hideArrow = $state(false);
+	let activityDiv = $state();
+	let eventElements: ActivityEvent[] = $state([]);
 
-	let eventCount = 50;
-	$: eventElementsPaginated = eventElements.slice(0, eventCount);
+	let eventCount = $state(50);
+	let eventElementsPaginated = $derived(eventElements.slice(0, eventCount));
 
-	let mapElement: HTMLDivElement;
+	let mapElement: HTMLDivElement = $state();
 	let map: Map;
-	let mapLoaded = false;
+	let mapLoaded = $state(false);
 
 	let osm: TileLayer;
 	let alidadeSmoothDark: TileLayer;
@@ -495,13 +505,17 @@
 		}
 	});
 
-	$: $theme !== undefined && mapLoaded && toggleMapButtons();
+	run(() => {
+		$theme !== undefined && mapLoaded && toggleMapButtons();
+	});
 
 	const closePopup = () => {
 		map.closePopup();
 	};
 
-	$: $theme !== undefined && mapLoaded && closePopup();
+	run(() => {
+		$theme !== undefined && mapLoaded && closePopup();
+	});
 
 	const toggleTheme = () => {
 		if ($theme === 'dark') {
@@ -513,7 +527,9 @@
 		}
 	};
 
-	$: $theme !== undefined && mapLoaded && toggleTheme();
+	run(() => {
+		$theme !== undefined && mapLoaded && toggleTheme();
+	});
 
 	onDestroy(async () => {
 		if (map) {
@@ -540,12 +556,12 @@
 						src={avatar}
 						alt="avatar"
 						class="mx-auto h-32 w-32 rounded-full object-cover"
-						on:error={function () {
+						onerror={function () {
 							this.src = '/images/satoshi-nakamoto.png';
 						}}
 					/>
 				{:else}
-					<div class="mx-auto h-32 w-32 animate-pulse rounded-full bg-link/50" />
+					<div class="mx-auto h-32 w-32 animate-pulse rounded-full bg-link/50"></div>
 				{/if}
 
 				<div class="space-y-1">
@@ -555,7 +571,7 @@
 					<p
 						class="flex items-center justify-center space-x-1 text-sm text-primary dark:text-white"
 					>
-						<i class="fa-solid fa-map-pin" />
+						<i class="fa-solid fa-map-pin"></i>
 						<span class="block">
 							Mapping Since: {mappingSince ? format(new Date(mappingSince), 'yyyy-MM-dd') : '-'}
 						</span>
@@ -586,11 +602,11 @@
 					{/if}
 				</div>
 
-				<!-- svelte-ignore a11y-missing-content -->
+				<!-- svelte-ignore a11y_missing_content -->
 				<h2
 					bind:this={profileDesc}
 					class="mx-auto w-full break-all text-xl text-body dark:text-white lg:w-[800px]"
-				/>
+				></h2>
 
 				{#if lightning}
 					<Tip destination={lightning} user={username} />
@@ -616,8 +632,8 @@
 						<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 						{#each Array(3) as badge}
 							<div class="mx-3 mb-6">
-								<div class="mx-auto mb-1 h-24 w-24 animate-pulse rounded-full bg-link/50" />
-								<div class="mx-auto h-5 w-20 animate-pulse rounded bg-link/50" />
+								<div class="mx-auto mb-1 h-24 w-24 animate-pulse rounded-full bg-link/50"></div>
+								<div class="mx-auto h-5 w-20 animate-pulse rounded bg-link/50"></div>
 							</div>
 						{/each}
 					{/if}
@@ -655,11 +671,11 @@
 						<div>
 							<i
 								class="fa-solid fa-chart-pie absolute left-1/2 top-1/2 h-52 w-52 -translate-x-1/2 -translate-y-1/2 animate-pulse text-link/50 md:h-60 md:w-60"
-							/>
+							></i>
 						</div>
 					{/if}
 
-					<canvas bind:this={tagTypeChartCanvas} width="100%" height="250" />
+					<canvas bind:this={tagTypeChartCanvas} width="100%" height="250"></canvas>
 				</div>
 			</section>
 
@@ -676,7 +692,7 @@
 						class="hide-scroll space-y-2 {eventElements.length > 5
 							? 'h-[375px]'
 							: ''} relative overflow-y-scroll"
-						on:scroll={() => {
+						onscroll={() => {
 							if (dataInitialized && !hideArrow) {
 								hideArrow = true;
 							}
@@ -696,7 +712,7 @@
 							{#if eventElementsPaginated.length !== eventElements.length}
 								<button
 									class="mx-auto !mb-5 block text-xl font-semibold text-link transition-colors hover:text-hover"
-									on:click={() => (eventCount = eventCount + 50)}>Load More</button
+									onclick={() => (eventCount = eventCount + 50)}>Load More</button
 								>
 							{:else if eventElements.length > 10}
 								<TopButton scroll={activityDiv} style="!mb-5" />
@@ -734,7 +750,7 @@
 					<div
 						bind:this={mapElement}
 						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal text-left dark:!bg-[#202f33] md:h-[600px]"
-					/>
+					></div>
 					{#if !mapLoaded}
 						<MapLoadingEmbed
 							style="h-[300px] md:h-[600px] border border-statBorder rounded-b-3xl"

@@ -1,20 +1,30 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { AreaLeaderboardItem, AreaLeaderboardSkeleton, GradeTable, TopButton } from '$lib/comp';
 	import { areaError, areas, reportError, reports, syncStatus } from '$lib/store';
 	import type { Area, AreaType, LeaderboardArea, Report } from '$lib/types';
 	import { errToast, getGrade, validateContinents } from '$lib/utils';
 	import tippy from 'tippy.js';
 
-	export let type: AreaType;
+	interface Props {
+		type: AreaType;
+	}
+
+	let { type }: Props = $props();
 
 	// alert for area errors
-	$: $areaError && errToast($areaError);
+	run(() => {
+		$areaError && errToast($areaError);
+	});
 
 	// alert for report errors
-	$: $reportError && errToast($reportError);
+	run(() => {
+		$reportError && errToast($reportError);
+	});
 
-	$: areasFiltered =
-		$reports && $reports.length
+	let areasFiltered =
+		$derived($reports && $reports.length
 			? $areas.filter((area) => {
 					if (type === 'community') {
 						return (
@@ -37,20 +47,20 @@
 						);
 					}
 				})
-			: [];
-	$: areaReports =
-		areasFiltered && areasFiltered.length
+			: []);
+	let areaReports =
+		$derived(areasFiltered && areasFiltered.length
 			? $reports
 					.filter((report) => areasFiltered.find((area) => area.id === report.area_id))
 					.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']))
-			: [];
-	let leaderboard: LeaderboardArea[];
-	let loading: boolean;
+			: []);
+	let leaderboard: LeaderboardArea[] = $state();
+	let loading: boolean = $state();
 
-	let upToDateTooltip: HTMLButtonElement;
-	let upToDateTooltipMobile: HTMLButtonElement;
-	let gradeTooltip: HTMLButtonElement;
-	let gradeTooltipMobile: HTMLButtonElement;
+	let upToDateTooltip: HTMLButtonElement = $state();
+	let upToDateTooltipMobile: HTMLButtonElement = $state();
+	let gradeTooltip: HTMLButtonElement = $state();
+	let gradeTooltipMobile: HTMLButtonElement = $state();
 
 	const score = (report: Report): number => {
 		return Math.max(report.tags.total_elements - report.tags.outdated_elements * 5, 0);
@@ -87,11 +97,13 @@
 		}
 	};
 
-	$: populateLeaderboard($syncStatus, areasFiltered, areaReports);
+	run(() => {
+		populateLeaderboard($syncStatus, areasFiltered, areaReports);
+	});
 
-	let leaderboardCount = 50;
-	$: leaderboardPaginated =
-		leaderboard && leaderboard.length && !loading ? leaderboard.slice(0, leaderboardCount) : [];
+	let leaderboardCount = $state(50);
+	let leaderboardPaginated =
+		$derived(leaderboard && leaderboard.length && !loading ? leaderboard.slice(0, leaderboardCount) : []);
 
 	const headings = ['Position', 'Name', 'Up-To-Date', 'Total Locations', 'Grade'];
 
@@ -107,11 +119,13 @@
 		});
 	};
 
-	$: upToDateTooltip &&
-		upToDateTooltipMobile &&
-		gradeTooltip &&
-		gradeTooltipMobile &&
-		setTooltips();
+	run(() => {
+		upToDateTooltip &&
+			upToDateTooltipMobile &&
+			gradeTooltip &&
+			gradeTooltipMobile &&
+			setTooltips();
+	});
 </script>
 
 <section id="leaderboard" class="dark:lg:rounded dark:lg:bg-white/10 dark:lg:py-8">
@@ -121,11 +135,11 @@
 				{heading}
 				{#if heading === 'Up-To-Date'}
 					<button bind:this={upToDateTooltip}>
-						<i class="fa-solid fa-circle-info text-sm" />
+						<i class="fa-solid fa-circle-info text-sm"></i>
 					</button>
 				{:else if heading === 'Grade'}
 					<button bind:this={gradeTooltip}>
-						<i class="fa-solid fa-circle-info text-sm" />
+						<i class="fa-solid fa-circle-info text-sm"></i>
 					</button>
 				{/if}
 			</h3>
@@ -136,12 +150,12 @@
 	>
 		<h3>
 			Up-To-Date <button bind:this={upToDateTooltipMobile}>
-				<i class="fa-solid fa-circle-info" />
+				<i class="fa-solid fa-circle-info"></i>
 			</button>
 		</h3>
 		<h3>
 			Grade <button bind:this={gradeTooltipMobile}>
-				<i class="fa-solid fa-circle-info" />
+				<i class="fa-solid fa-circle-info"></i>
 			</button>
 		</h3>
 	</div>
@@ -167,7 +181,7 @@
 			{#if leaderboardPaginated.length !== leaderboard.length}
 				<button
 					class="!my-5 mx-auto block text-xl font-semibold text-link transition-colors hover:text-hover"
-					on:click={() => (leaderboardCount = leaderboardCount + 50)}>Load More</button
+					onclick={() => (leaderboardCount = leaderboardCount + 50)}>Load More</button
 				>
 			{/if}
 		{:else}

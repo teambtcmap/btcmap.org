@@ -1,17 +1,25 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { InfoTooltip, OpenTicket } from '$lib/comp';
 	import { type Tickets } from '$lib/types.js';
 	import { errToast } from '$lib/utils';
 
-	export let name: string;
-	export let tickets: Tickets;
+	interface Props {
+		name: string;
+		tickets: Tickets;
+	}
+
+	let { name, tickets }: Props = $props();
 
 	const ticketTypes = ['Add', 'Verify'];
-	let showType = 'Add';
+	let showType = $state('Add');
 
 	const ticketError = tickets === 'error' ? true : false;
 
-	$: ticketError && errToast('Could not load open tickets, please try again or contact BTC Map.');
+	run(() => {
+		ticketError && errToast('Could not load open tickets, please try again or contact BTC Map.');
+	});
 
 	const add =
 		tickets && tickets.length && !ticketError
@@ -51,7 +59,7 @@
 						: type === 'Verify'
 							? 'rounded-b md:rounded-r md:rounded-bl-none'
 							: ''} {showType === type ? 'bg-link text-white' : ''} transition-colors"
-					on:click={() => (showType = type)}
+					onclick={() => (showType = type)}
 					disabled={!tickets || ticketError}
 				>
 					{type}

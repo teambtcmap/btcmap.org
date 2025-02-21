@@ -1,15 +1,23 @@
 <script lang="ts">
-	export let tooltip: string;
+	import { run } from 'svelte/legacy';
+
 	import tippy from 'tippy.js';
+	interface Props {
+		tooltip: string;
+	}
 
-	let infoTooltip: HTMLButtonElement;
+	let { tooltip }: Props = $props();
 
-	$: infoTooltip &&
-		tippy([infoTooltip], {
-			content: tooltip
-		});
+	let infoTooltip: HTMLButtonElement = $state();
+
+	run(() => {
+		infoTooltip &&
+			tippy([infoTooltip], {
+				content: tooltip
+			});
+	});
 </script>
 
 <button bind:this={infoTooltip}>
-	<i class="fa-solid fa-circle-info text-base text-primary dark:text-white" />
+	<i class="fa-solid fa-circle-info text-base text-primary dark:text-white"></i>
 </button>

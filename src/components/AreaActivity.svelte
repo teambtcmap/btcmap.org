@@ -2,21 +2,31 @@
 	import { LatestTagger, TaggerSkeleton, TopButton } from '$lib/comp';
 	import { type ActivityEvent, type User } from '$lib/types.js';
 
-	export let alias: string;
-	export let name: string;
-	export let dataInitialized: boolean;
-	export let eventElements: ActivityEvent[];
-	export let taggers: User[];
+	interface Props {
+		alias: string;
+		name: string;
+		dataInitialized: boolean;
+		eventElements: ActivityEvent[];
+		taggers: User[];
+	}
 
-	let hideArrow = false;
-	let activityDiv: HTMLDivElement;
+	let {
+		alias,
+		name,
+		dataInitialized,
+		eventElements,
+		taggers
+	}: Props = $props();
 
-	let eventCount = 25;
-	$: eventElementsPaginated = eventElements.slice(0, eventCount);
+	let hideArrow = $state(false);
+	let activityDiv: HTMLDivElement = $state();
 
-	let taggerCount = 25;
-	$: taggersPaginated = taggers.slice(0, taggerCount);
-	let taggerDiv: HTMLDivElement;
+	let eventCount = $state(25);
+	let eventElementsPaginated = $derived(eventElements.slice(0, eventCount));
+
+	let taggerCount = $state(25);
+	let taggersPaginated = $derived(taggers.slice(0, taggerCount));
+	let taggerDiv: HTMLDivElement = $state();
 </script>
 
 <section id="taggers">
@@ -39,7 +49,7 @@
 										: '/images/satoshi-nakamoto.png'}
 									alt="avatar"
 									class="mx-auto h-20 w-20 rounded-full object-cover"
-									on:error={function () {
+									onerror={function () {
 										this.src = '/images/satoshi-nakamoto.png';
 									}}
 								/>
@@ -56,7 +66,7 @@
 				{#if taggersPaginated.length !== taggers.length}
 					<button
 						class="mx-auto !mb-4 block text-xl font-semibold text-link transition-colors hover:text-hover"
-						on:click={() => (taggerCount = taggerCount + 25)}>Load More</button
+						onclick={() => (taggerCount = taggerCount + 25)}>Load More</button
 					>
 				{/if}
 			{:else if !dataInitialized}
@@ -64,8 +74,8 @@
 					<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 					{#each Array(5) as tagger}
 						<div class="m-4 space-y-1 transition-transform hover:scale-110">
-							<p class="mx-auto h-20 w-20 animate-pulse rounded-full bg-link/50" />
-							<p class="mx-auto h-5 w-28 animate-pulse rounded bg-link/50" />
+							<p class="mx-auto h-20 w-20 animate-pulse rounded-full bg-link/50"></p>
+							<p class="mx-auto h-5 w-28 animate-pulse rounded bg-link/50"></p>
 						</div>
 					{/each}
 				</div>
@@ -87,7 +97,7 @@
 		<div
 			bind:this={activityDiv}
 			class="hide-scroll relative max-h-[375px] space-y-2 overflow-y-scroll"
-			on:scroll={() => {
+			onscroll={() => {
 				if (dataInitialized && !hideArrow) {
 					hideArrow = true;
 				}
@@ -108,7 +118,7 @@
 				{#if eventElementsPaginated.length !== eventElements.length}
 					<button
 						class="mx-auto !mb-5 block text-xl font-semibold text-link transition-colors hover:text-hover"
-						on:click={() => (eventCount = eventCount + 25)}>Load More</button
+						onclick={() => (eventCount = eventCount + 25)}>Load More</button
 					>
 				{:else if eventElements.length > 10}
 					<TopButton scroll={activityDiv} style="!mb-5" />
@@ -155,7 +165,7 @@
 				>
 					New Places
 				</a>
-				<i class="fa-solid fa-location-pin ml-1" />
+				<i class="fa-solid fa-location-pin ml-1"></i>
 			</li>
 			<li>
 				<a

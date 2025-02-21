@@ -3,16 +3,25 @@
 	import type { EventType, User } from '$lib/types';
 	import Time from 'svelte-time';
 
-	export let action: EventType;
-	export let user: User | undefined;
-	export let time: string;
-	export let latest: boolean;
+	interface Props {
+		action: EventType;
+		user: User | undefined;
+		time: string;
+		latest: boolean;
+	}
 
-	$: profile = user && user['osm_json'];
-	$: regexMatch = profile && profile.description.match('(lightning:[^)]+)');
-	$: lightning = regexMatch && regexMatch[0].slice(10);
+	let {
+		action,
+		user,
+		time,
+		latest
+	}: Props = $props();
 
-	$: username = profile && profile['display_name'];
+	let profile = $derived(user && user['osm_json']);
+	let regexMatch = $derived(profile && profile.description.match('(lightning:[^)]+)'));
+	let lightning = $derived(regexMatch && regexMatch[0].slice(10));
+
+	let username = $derived(profile && profile['display_name']);
 </script>
 
 <div
@@ -28,14 +37,14 @@
 				: action === 'delete'
 					? 'bg-deleted'
 					: 'bg-link'} opacity-75"
-		/>
+		></span>
 		<span
 			class="relative inline-flex h-3 w-3 rounded-full {action === 'create'
 				? 'bg-created'
 				: action === 'delete'
 					? 'bg-deleted'
 					: 'bg-link'}"
-		/>
+		></span>
 	</span>
 
 	<div class="w-full flex-wrap items-center justify-between space-y-2 lg:flex lg:space-y-0">

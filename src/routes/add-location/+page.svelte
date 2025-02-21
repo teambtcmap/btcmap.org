@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run, preventDefault } from 'svelte/legacy';
+
 	import { browser } from '$app/environment';
 	import {
 		Footer,
@@ -19,10 +21,10 @@
 	import type { Map, Marker, TileLayer } from 'leaflet';
 	import { onDestroy, onMount, tick } from 'svelte';
 
-	let captcha: HTMLDivElement;
-	let captchaSecret: string;
-	let captchaInput: HTMLInputElement;
-	let honeyInput: HTMLInputElement;
+	let captcha: HTMLDivElement = $state();
+	let captchaSecret: string = $state();
+	let captchaInput: HTMLInputElement = $state();
+	let honeyInput: HTMLInputElement = $state();
 
 	const fetchCaptcha = () => {
 		axios
@@ -40,9 +42,11 @@
 	};
 
 	// alert for area errors
-	$: $areaError && errToast($areaError);
+	run(() => {
+		$areaError && errToast($areaError);
+	});
 
-	$: communities = $areas.filter(
+	let communities = $derived($areas.filter(
 		(area) =>
 			area.tags.type === 'community' &&
 			area.tags.geo_json &&
@@ -50,41 +54,47 @@
 			area.tags['icon:square'] &&
 			area.tags.continent &&
 			Object.keys(area.tags).find((key) => key.includes('contact'))
-	);
+	));
 	let filteredCommunities: string[];
 
-	let name: HTMLInputElement;
-	let address: HTMLInputElement;
-	let lat: number;
-	let long: number;
-	let selected = false;
-	let category: HTMLInputElement;
+	let name: HTMLInputElement = $state();
+	let address: HTMLInputElement = $state();
+	let lat: number = $state();
+	let long: number = $state();
+	let selected = $state(false);
+	let category: HTMLInputElement = $state();
 	let methods: ('onchain' | 'lightning' | 'nfc')[] = [];
-	let onchain: HTMLInputElement;
-	let lightning: HTMLInputElement;
-	let nfc: HTMLInputElement;
-	let website: HTMLInputElement;
-	let phone: HTMLInputElement;
-	let hours: HTMLInputElement;
-	let twitterMerchant: HTMLInputElement;
-	let twitterSubmitter: HTMLInputElement;
-	let notes: HTMLTextAreaElement;
-	let source: 'Business Owner' | 'Customer' | 'Other';
-	let sourceOther: string;
-	let sourceOtherElement: HTMLTextAreaElement;
-	let contact: HTMLInputElement;
-	let noLocationSelected = false;
-	let noMethodSelected = false;
-	let submitted = false;
-	let submitting = false;
-	let submissionIssueNumber: number;
+	let onchain: HTMLInputElement = $state();
+	let lightning: HTMLInputElement = $state();
+	let nfc: HTMLInputElement = $state();
+	let website: HTMLInputElement = $state();
+	let phone: HTMLInputElement = $state();
+	let hours: HTMLInputElement = $state();
+	let twitterMerchant: HTMLInputElement = $state();
+	let twitterSubmitter: HTMLInputElement = $state();
+	let notes: HTMLTextAreaElement = $state();
+	let source: 'Business Owner' | 'Customer' | 'Other' = $state();
+	let sourceOther: string = $state();
+	let sourceOtherElement: HTMLTextAreaElement = $state();
+	let contact: HTMLInputElement = $state();
+	let noLocationSelected = $state(false);
+	let noMethodSelected = $state(false);
+	let submitted = $state(false);
+	let submitting = $state(false);
+	let submissionIssueNumber: number = $state();
 
 	const handleCheckboxClick = () => {
 		noMethodSelected = false;
 	};
 
-	$: latFixed = lat && lat.toFixed(5);
-	$: longFixed = long && long.toFixed(5);
+	let latFixed;
+	run(() => {
+		latFixed = lat && lat.toFixed(5);
+	});
+	let longFixed;
+	run(() => {
+		longFixed = long && long.toFixed(5);
+	});
 
 	const submitForm = () => {
 		if (!selected) {
@@ -154,9 +164,9 @@
 	};
 
 	// location picker map
-	let mapElement: HTMLDivElement;
+	let mapElement: HTMLDivElement = $state();
 	let map: Map;
-	let mapLoaded = false;
+	let mapLoaded = $state(false);
 
 	let osm: TileLayer;
 	let alidadeSmoothDark: TileLayer;
@@ -251,7 +261,9 @@
 		}
 	});
 
-	$: $theme !== undefined && mapLoaded === true && toggleMapButtons();
+	run(() => {
+		$theme !== undefined && mapLoaded === true && toggleMapButtons();
+	});
 
 	const toggleTheme = () => {
 		if ($theme === 'dark') {
@@ -263,7 +275,9 @@
 		}
 	};
 
-	$: $theme !== undefined && mapLoaded === true && toggleTheme();
+	run(() => {
+		$theme !== undefined && mapLoaded === true && toggleTheme();
+	});
 </script>
 
 <svelte:head>
@@ -351,14 +365,14 @@
 						<h3 class="mb-5 mt-16 text-center text-2xl font-semibold md:mt-10">
 							See how it's done
 						</h3>
-						<!-- svelte-ignore a11y-media-has-caption -->
+						<!-- svelte-ignore a11y_media_has_caption -->
 						<video
 							controls
 							playsinline
 							preload="auto"
 							src="/videos/osm-tagging-tutorial.webm"
 							class="w-full border-2 border-input"
-						/>
+						></video>
 
 						<h3 class="mb-5 mt-16 text-center text-2xl font-semibold md:mt-10">
 							Still have questions?
@@ -392,7 +406,7 @@
 						</p>
 
 						<form
-							on:submit|preventDefault={submitForm}
+							onsubmit={preventDefault(submitForm)}
 							class="w-full space-y-5 text-primary dark:text-white"
 						>
 							<div>
@@ -438,7 +452,7 @@
 									<div
 										bind:this={mapElement}
 										class="z-10 h-[300px] !cursor-crosshair rounded-2xl border-2 border-input !bg-teal dark:!bg-dark md:h-[400px]"
-									/>
+									></div>
 									{#if !mapLoaded}
 										<MapLoadingEmbed
 											style="h-[300px] md:h-[400px] border-2 border-input rounded-2xl"
@@ -496,7 +510,7 @@
 											name="onchain"
 											id="onchain"
 											bind:this={onchain}
-											on:click={handleCheckboxClick}
+											onclick={handleCheckboxClick}
 										/>
 										<label for="onchain" class="ml-1 cursor-pointer">
 											{#if typeof window !== 'undefined'}
@@ -519,7 +533,7 @@
 											name="lightning"
 											id="lightning"
 											bind:this={lightning}
-											on:click={handleCheckboxClick}
+											onclick={handleCheckboxClick}
 										/>
 										<label for="lightning" class="ml-1 cursor-pointer">
 											{#if typeof window !== 'undefined'}
@@ -542,7 +556,7 @@
 											name="nfc"
 											id="nfc"
 											bind:this={nfc}
-											on:click={handleCheckboxClick}
+											onclick={handleCheckboxClick}
 										/>
 										<label for="nfc" class="ml-1 cursor-pointer">
 											{#if typeof window !== 'undefined'}
@@ -637,7 +651,7 @@
 									rows="3"
 									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:this={notes}
-								/>
+								></textarea>
 							</div>
 
 							<div>
@@ -648,7 +662,7 @@
 									required
 									class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:value={source}
-									on:change={async () => {
+									onchange={async () => {
 										if (source === 'Other') {
 											await tick();
 											sourceOtherElement.focus();
@@ -672,7 +686,7 @@
 										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 										bind:value={sourceOther}
 										bind:this={sourceOtherElement}
-									/>
+									></textarea>
 								{/if}
 							</div>
 
@@ -700,8 +714,8 @@
 										>Bot protection <span class="font-normal">(case-sensitive)</span></label
 									>
 									{#if captchaSecret}
-										<button type="button" on:click={fetchCaptcha}>
-											<i class="fa-solid fa-arrows-rotate" />
+										<button type="button" onclick={fetchCaptcha}>
+											<i class="fa-solid fa-arrows-rotate"></i>
 										</button>
 									{/if}
 								</div>
@@ -710,7 +724,7 @@
 										bind:this={captcha}
 										class="flex items-center justify-center rounded-2xl border-2 border-input py-1"
 									>
-										<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
+										<div class="h-[100px] w-[275px] animate-pulse bg-link/50"></div>
 									</div>
 									<input
 										disabled={!captchaSecret || !mapLoaded}

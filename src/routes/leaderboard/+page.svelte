@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { browser } from '$app/environment';
 	import {
 		Footer,
@@ -24,17 +26,21 @@
 	import { onMount } from 'svelte';
 
 	// alert for user errors
-	$: $userError && errToast($userError);
+	run(() => {
+		$userError && errToast($userError);
+	});
 	// alert for event errors
-	$: $eventError && errToast($eventError);
+	run(() => {
+		$eventError && errToast($eventError);
+	});
 
-	let loading: boolean;
-	let leaderboard: TaggerLeaderboard[];
+	let loading: boolean = $state();
+	let leaderboard: TaggerLeaderboard[] = $state();
 
-	let topTenChartCanvas: HTMLCanvasElement;
-	let topTenChart: Chart<'bar', number[], string>;
-	let chartsLoading: boolean;
-	let chartsRendered = false;
+	let topTenChartCanvas: HTMLCanvasElement = $state();
+	let topTenChart: Chart<'bar', number[], string> = $state();
+	let chartsLoading: boolean = $state();
+	let chartsRendered = $state(false);
 
 	let initialRenderComplete = false;
 
@@ -155,13 +161,17 @@
 		}
 	};
 
-	$: leaderboardSync($syncStatus, $users, $events);
+	run(() => {
+		leaderboardSync($syncStatus, $users, $events);
+	});
 
-	$: $theme !== undefined && !chartsLoading && chartsRendered && updateChartThemes([topTenChart]);
+	run(() => {
+		$theme !== undefined && !chartsLoading && chartsRendered && updateChartThemes([topTenChart]);
+	});
 
-	let leaderboardCount = 50;
-	$: leaderboardPaginated =
-		leaderboard && leaderboard.length && !loading ? leaderboard.slice(0, leaderboardCount) : [];
+	let leaderboardCount = $state(50);
+	let leaderboardPaginated =
+		$derived(leaderboard && leaderboard.length && !loading ? leaderboard.slice(0, leaderboardCount) : []);
 
 	onMount(() => {
 		if (browser) {
@@ -225,10 +235,10 @@
 					<div
 						class="absolute left-0 top-0 flex h-[400px] w-full animate-pulse items-center justify-center border border-link/50"
 					>
-						<i class="fa-solid fa-chart-bar h-24 w-24 animate-pulse text-link/50" />
+						<i class="fa-solid fa-chart-bar h-24 w-24 animate-pulse text-link/50"></i>
 					</div>
 				{/if}
-				<canvas bind:this={topTenChartCanvas} width="100%" height="400" />
+				<canvas bind:this={topTenChartCanvas} width="100%" height="400"></canvas>
 			</section>
 
 			<PrimaryButton
@@ -247,7 +257,7 @@
 								<a
 									href="https://wiki.btcmap.org/general/lightning-tips.html"
 									target="_blank"
-									rel="noreferrer"><i class="fa-solid fa-circle-info text-sm" /></a
+									rel="noreferrer"><i class="fa-solid fa-circle-info text-sm"></i></a
 								>
 							{/if}
 						</h3>
@@ -272,7 +282,7 @@
 						{#if leaderboardPaginated.length !== leaderboard.length}
 							<button
 								class="mx-auto !mb-5 block text-xl font-semibold text-link transition-colors hover:text-hover"
-								on:click={() => (leaderboardCount = leaderboardCount + 50)}>Load More</button
+								onclick={() => (leaderboardCount = leaderboardCount + 50)}>Load More</button
 							>
 						{/if}
 					{:else}

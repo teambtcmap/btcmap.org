@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { Icon } from '$lib/comp';
 	import { boost, exchangeRate, resetBoost } from '$lib/store';
 	import type { Element } from '$lib/types';
@@ -6,13 +8,17 @@
 	import axios from 'axios';
 	import axiosRetry from 'axios-retry';
 
-	export let merchant: Element | undefined;
-	export let boosted: string | undefined;
-	export let style: 'button' | 'link' = 'button';
+	interface Props {
+		merchant: Element | undefined;
+		boosted: string | undefined;
+		style?: 'button' | 'link';
+	}
+
+	let { merchant, boosted, style = 'button' }: Props = $props();
 
 	axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
-	let boostLoading = false;
+	let boostLoading = $state(false);
 
 	const resetBoostLoading = () => {
 		boostLoading = false;
@@ -41,13 +47,15 @@
 			});
 	};
 
-	$: $resetBoost && resetBoostLoading();
+	run(() => {
+		$resetBoost && resetBoostLoading();
+	});
 </script>
 
 {#if style === 'button'}
 	<button
 		id="boost-button"
-		on:click={startBoost}
+		onclick={startBoost}
 		disabled={boostLoading}
 		class="{boosted
 			? 'bg-bitcoin hover:bg-bitcoinHover'
@@ -65,7 +73,7 @@
 {:else}
 	<button
 		id="boost-button"
-		on:click={startBoost}
+		onclick={startBoost}
 		disabled={boostLoading || Boolean($boost)}
 		class="inline-flex items-center space-x-1 font-semibold text-link transition-colors hover:text-hover"
 	>

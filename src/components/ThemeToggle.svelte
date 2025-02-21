@@ -4,7 +4,7 @@
 	import { detectTheme } from '$lib/utils';
 	import { onMount } from 'svelte';
 
-	let currentTheme: undefined | Theme;
+	let currentTheme: undefined | Theme = $state();
 
 	onMount(() => {
 		currentTheme = detectTheme();
@@ -26,7 +26,7 @@
 </script>
 
 <button
-	on:click={toggleTheme}
+	onclick={toggleTheme}
 	disabled={!currentTheme}
 	class="h-10 w-10 text-link transition-colors hover:text-hover dark:text-white dark:hover:text-link"
 >

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run, preventDefault } from 'svelte/legacy';
+
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import {
@@ -28,8 +30,8 @@
 	import type { Map, TileLayer } from 'leaflet';
 	import { onDestroy, onMount } from 'svelte';
 
-	let initialRenderComplete = false;
-	let elementsLoaded = false;
+	let initialRenderComplete = $state(false);
+	let elementsLoaded = $state(false);
 
 	let leaflet: Leaflet;
 	let DomEvent: DomEventType;
@@ -163,25 +165,27 @@
 		elementsLoaded = true;
 	};
 
-	$: $elements &&
-		$elements.length &&
-		initialRenderComplete &&
-		!elementsLoaded &&
-		initializeElements();
+	run(() => {
+		$elements &&
+			$elements.length &&
+			initialRenderComplete &&
+			!elementsLoaded &&
+			initializeElements();
+	});
 
 	const id = $page.url.searchParams.has('id') ? $page.url.searchParams.get('id') : '';
 	let merchant: Element | undefined;
 
-	let name = '';
+	let name = $state('');
 	let lat: number | undefined;
 	let long: number | undefined;
 	let location = '';
 	let edit = '';
 
-	let captcha: HTMLDivElement;
-	let captchaSecret: string;
-	let captchaInput: HTMLInputElement;
-	let honeyInput: HTMLInputElement;
+	let captcha: HTMLDivElement = $state();
+	let captchaSecret: string = $state();
+	let captchaInput: HTMLInputElement = $state();
+	let honeyInput: HTMLInputElement = $state();
 
 	const fetchCaptcha = () => {
 		axios
@@ -198,15 +202,15 @@
 			});
 	};
 
-	let current: boolean;
-	let outdated: string;
-	let verify: HTMLTextAreaElement;
+	let current: boolean = $state();
+	let outdated: string = $state();
+	let verify: HTMLTextAreaElement = $state();
 
-	let selected = false;
-	let noLocationSelected = false;
-	let submitted = false;
-	let submitting = false;
-	let submissionIssueNumber: number;
+	let selected = $state(false);
+	let noLocationSelected = $state(false);
+	let submitted = $state(false);
+	let submitting = $state(false);
+	let submissionIssueNumber: number = $state();
 
 	const submitForm = () => {
 		if (!selected) {
@@ -247,16 +251,18 @@
 	};
 
 	// location picker map if not accessing page from webapp
-	let mapElement: HTMLDivElement;
+	let mapElement: HTMLDivElement = $state();
 	let map: Map;
-	let showMap = id ? false : true;
-	let mapLoaded = false;
+	let showMap = $state(id ? false : true);
+	let mapLoaded = $state(false);
 
 	let osm: TileLayer;
 	let alidadeSmoothDark: TileLayer;
 
 	// alert for map errors
-	$: $elementError && errToast($elementError);
+	run(() => {
+		$elementError && errToast($elementError);
+	});
 
 	onMount(async () => {
 		if (browser) {
@@ -276,13 +282,17 @@
 		}
 	});
 
-	$: $theme !== undefined && mapLoaded && showMap && toggleMapButtons();
+	run(() => {
+		$theme !== undefined && mapLoaded && showMap && toggleMapButtons();
+	});
 
 	const closePopup = () => {
 		map.closePopup();
 	};
 
-	$: $theme !== undefined && mapLoaded && showMap && closePopup();
+	run(() => {
+		$theme !== undefined && mapLoaded && showMap && closePopup();
+	});
 
 	const toggleTheme = () => {
 		if ($theme === 'dark') {
@@ -294,7 +304,9 @@
 		}
 	};
 
-	$: $theme !== undefined && mapLoaded && showMap && toggleTheme();
+	run(() => {
+		$theme !== undefined && mapLoaded && showMap && toggleTheme();
+	});
 
 	if (showMap) {
 		onDestroy(async () => {
@@ -357,7 +369,7 @@
 				</p>
 
 				<form
-					on:submit|preventDefault={submitForm}
+					onsubmit={preventDefault(submitForm)}
 					class="w-full space-y-5 text-primary dark:text-white"
 				>
 					<div>
@@ -372,7 +384,7 @@
 								<div
 									bind:this={mapElement}
 									class="z-10 h-[300px] !cursor-crosshair rounded-2xl border-2 border-input !bg-teal dark:!bg-dark dark:text-map md:h-[450px]"
-								/>
+								></div>
 								{#if !mapLoaded}
 									<MapLoadingEmbed
 										style="h-[300px] md:h-[450px] border-2 border-input rounded-2xl"
@@ -424,7 +436,7 @@
 							rows="3"
 							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 							bind:value={outdated}
-						/>
+						></textarea>
 					</div>
 
 					<div>
@@ -437,7 +449,7 @@
 							rows="3"
 							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 							bind:this={verify}
-						/>
+						></textarea>
 					</div>
 
 					<div>
@@ -446,8 +458,8 @@
 								>Bot protection <span class="font-normal">(case-sensitive)</span></label
 							>
 							{#if captchaSecret}
-								<button type="button" on:click={fetchCaptcha}>
-									<i class="fa-solid fa-arrows-rotate" />
+								<button type="button" onclick={fetchCaptcha}>
+									<i class="fa-solid fa-arrows-rotate"></i>
 								</button>
 							{/if}
 						</div>
@@ -456,7 +468,7 @@
 								bind:this={captcha}
 								class="flex items-center justify-center rounded-2xl border-2 border-input py-1"
 							>
-								<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
+								<div class="h-[100px] w-[275px] animate-pulse bg-link/50"></div>
 							</div>
 							<input
 								disabled={!captchaSecret || !elementsLoaded}

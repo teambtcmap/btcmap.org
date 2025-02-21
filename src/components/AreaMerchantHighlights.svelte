@@ -3,23 +3,27 @@
 	import type { Element } from '$lib/types';
 	import { isBoosted } from '$lib/utils';
 
-	export let dataInitialized: boolean;
-	export let filteredElements: Element[];
+	interface Props {
+		dataInitialized: boolean;
+		filteredElements: Element[];
+	}
 
-	$: boosts =
-		filteredElements &&
+	let { dataInitialized, filteredElements }: Props = $props();
+
+	let boosts =
+		$derived(filteredElements &&
 		filteredElements
 			.filter((e) => isBoosted(e))
 			.toSorted(
 				(a, b) =>
 					Date.parse(b.tags['boost:expires'] || '') - Date.parse(a.tags['boost:expires'] || '')
-			);
+			));
 
-	$: latest =
-		filteredElements &&
+	let latest =
+		$derived(filteredElements &&
 		filteredElements
 			.toSorted((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']))
-			.slice(0, 6);
+			.slice(0, 6));
 </script>
 
 <section id="boosted">
@@ -35,7 +39,7 @@
 				<div class="grid w-full grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
 					<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 					{#each Array(3) as skeleton}
-						<div class="h-56 animate-pulse rounded-2xl bg-link/50" />
+						<div class="h-56 animate-pulse rounded-2xl bg-link/50"></div>
 					{/each}
 				</div>
 			{:else if boosts.length}
@@ -66,7 +70,7 @@
 				<div class="grid w-full grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
 					<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 					{#each Array(3) as skeleton}
-						<div class="h-56 animate-pulse rounded-2xl bg-link/50" />
+						<div class="h-56 animate-pulse rounded-2xl bg-link/50"></div>
 					{/each}
 				</div>
 			{:else if latest.length}

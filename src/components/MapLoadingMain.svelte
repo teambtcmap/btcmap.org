@@ -1,22 +1,32 @@
 <script lang="ts">
-	export let progress: number | undefined;
+	import { run } from 'svelte/legacy';
+
 
 	import { tick } from 'svelte';
 	import { fade } from 'svelte/transition';
+	interface Props {
+		progress: number | undefined;
+	}
 
-	$: progress === 40 &&
-		setTimeout(() => {
-			if (progress !== undefined && progress !== 100) {
-				progress = 60;
-			}
-		}, 2000);
+	let { progress = $bindable() }: Props = $props();
+
+	run(() => {
+		progress === 40 &&
+			setTimeout(() => {
+				if (progress !== undefined && progress !== 100) {
+					progress = 60;
+				}
+			}, 2000);
+	});
 
 	const hideProgressBar = async () => {
 		await tick();
 		progress = undefined;
 	};
 
-	$: progress === 100 && hideProgressBar();
+	run(() => {
+		progress === 100 && hideProgressBar();
+	});
 </script>
 
 {#if progress !== undefined}
@@ -30,7 +40,7 @@
 			<div
 				class="h-2 rounded-full bg-link transition-all duration-1000"
 				style:width={progress.toString() + '%'}
-			/>
+			></div>
 		</div>
 	</div>
 {/if}

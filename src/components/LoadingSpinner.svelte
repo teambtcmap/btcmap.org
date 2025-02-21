@@ -1,7 +1,11 @@
 <script lang="ts">
-	export let color = 'text-white';
-	export let size = 'h-6 w-6';
-	export let style: undefined | string = undefined;
+	interface Props {
+		color?: string;
+		size?: string;
+		style?: undefined | string;
+	}
+
+	let { color = 'text-white', size = 'h-6 w-6', style = undefined }: Props = $props();
 </script>
 
 <svg

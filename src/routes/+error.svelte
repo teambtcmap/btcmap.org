@@ -28,7 +28,7 @@
 
 		<div class="space-y-10 py-10 text-center">
 			<a href="/" class="text-xl font-semibold text-link transition-colors hover:text-hover"
-				><i class="fa-solid fa-house mr-2" /> Home</a
+				><i class="fa-solid fa-house mr-2"></i> Home</a
 			>
 			<h1 class="text-4xl dark:text-white md:text-5xl">{$page.status}: {$page.error?.message}</h1>
 			<h2 class="text-xl font-semibold text-primary dark:text-white">

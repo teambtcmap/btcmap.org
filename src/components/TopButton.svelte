@@ -1,11 +1,15 @@
 <script lang="ts">
-	export let scroll: undefined | HTMLElement = undefined;
-	export let style: undefined | string = undefined;
+	interface Props {
+		scroll?: undefined | HTMLElement;
+		style?: undefined | string;
+	}
+
+	let { scroll = undefined, style = undefined }: Props = $props();
 </script>
 
 <button
-	on:click={() => (scroll ? scroll : window).scrollTo({ top: 0, behavior: 'smooth' })}
+	onclick={() => (scroll ? scroll : window).scrollTo({ top: 0, behavior: 'smooth' })}
 	class="h-8 w-8 animate-bounce rounded-full bg-link text-white hover:bg-hover {style} transition-colors"
 >
-	<i class="fa-solid fa-chevron-up" />
+	<i class="fa-solid fa-chevron-up"></i>
 </button>

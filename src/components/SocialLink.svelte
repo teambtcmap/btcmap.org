@@ -1,8 +1,12 @@
 <script lang="ts">
-	export let url: string;
-	export let social: string;
 
 	import { Icon } from '$lib/comp';
+	interface Props {
+		url: string;
+		social: string;
+	}
+
+	let { url, social }: Props = $props();
 </script>
 
 <a

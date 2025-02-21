@@ -1,7 +1,11 @@
 <script lang="ts">
-	export let lat: string;
-	export let lon: string;
-	export let STADIA_API_KEY: string;
+	interface Props {
+		lat: string;
+		lon: string;
+		STADIA_API_KEY: string;
+	}
+
+	let { lat, lon, STADIA_API_KEY }: Props = $props();
 </script>
 
 <img

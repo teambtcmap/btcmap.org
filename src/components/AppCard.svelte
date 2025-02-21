@@ -1,10 +1,19 @@
 <script lang="ts">
-	export let image: string;
-	export let text: string;
-	export let desc: string;
-	export let link: string;
 
 	import { Icon } from '$lib/comp';
+	interface Props {
+		image: string;
+		text: string;
+		desc: string;
+		link: string;
+	}
+
+	let {
+		image,
+		text,
+		desc,
+		link
+	}: Props = $props();
 </script>
 
 <div>
@@ -27,7 +36,7 @@
 		<div
 			class="mb-5 flex h-60 items-center justify-center rounded-2xl bg-offwhite text-link opacity-50 dark:bg-white/[0.15]"
 		>
-			<i class="{image} h-28 w-28" />
+			<i class="{image} h-28 w-28"></i>
 		</div>
 		<p class="text-2xl font-semibold text-link opacity-50">{text}</p>
 		<p class="text-xl text-link opacity-50">Soon!</p>

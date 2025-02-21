@@ -1,23 +1,36 @@
 <script lang="ts">
-	export let position: number;
-	export let avatar: string;
-	export let tagger: string;
-	export let id: number;
-	export let created: number;
-	export let updated: number;
-	export let deleted: number;
-	export let tip: string;
 
 	import { Tip } from '$lib/comp';
+	interface Props {
+		position: number;
+		avatar: string;
+		tagger: string;
+		id: number;
+		created: number;
+		updated: number;
+		deleted: number;
+		tip: string;
+	}
 
-	$: stats = [
+	let {
+		position,
+		avatar,
+		tagger,
+		id,
+		created,
+		updated,
+		deleted,
+		tip
+	}: Props = $props();
+
+	let stats = $derived([
 		{ stat: created, title: 'C' },
 		{ stat: updated, title: 'U' },
 		{ stat: deleted, title: 'D' }
-	];
+	]);
 
-	$: regexMatch = tip && tip.match('(lightning:[^)]+)');
-	$: lightning = regexMatch && regexMatch[0].slice(10);
+	let regexMatch = $derived(tip && tip.match('(lightning:[^)]+)'));
+	let lightning = $derived(regexMatch && regexMatch[0].slice(10));
 </script>
 
 <div
@@ -44,7 +57,7 @@
 			src={avatar}
 			alt="avatar"
 			class="mx-auto mb-2 h-20 w-20 rounded-full object-cover lg:mx-0 lg:mb-0 lg:h-14 lg:w-14"
-			on:error={function () {
+			onerror={function () {
 				this.src = '/images/satoshi-nakamoto.png';
 			}}
 		/>
@@ -65,7 +78,7 @@
 					: stat.title === 'U'
 						? 'bg-link'
 						: 'bg-deleted'} lg:hidden"
-			/>{stat.stat}
+			></span>{stat.stat}
 		</span>
 	{/each}
 

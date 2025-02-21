@@ -1,13 +1,17 @@
 <script lang="ts">
-	export let position: string;
-	export let click: () => void | boolean | undefined;
-	export let colors: string;
 
 	import { Icon } from '$lib/comp';
+	interface Props {
+		position: string;
+		click: () => void | boolean | undefined;
+		colors: string;
+	}
+
+	let { position, click, colors }: Props = $props();
 </script>
 
 <div class={position}>
-	<button on:click={click}>
+	<button onclick={click}>
 		<Icon w="25" h="25" style="{colors} transition-colors" icon="close" type="popup" />
 	</button>
 </div>

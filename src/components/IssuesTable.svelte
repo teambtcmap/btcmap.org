@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { IssueCell } from '$lib/comp';
 	import { theme } from '$lib/store';
 	import type { Issues } from '$lib/types';
@@ -23,10 +25,19 @@
 	} from '@tanstack/svelte-table';
 	import { writable, type Readable } from 'svelte/store';
 
-	export let title: string;
-	export let issues: Issues;
-	export let loading: boolean;
-	export let initialPageSize = 10;
+	interface Props {
+		title: string;
+		issues: Issues;
+		loading: boolean;
+		initialPageSize?: number;
+	}
+
+	let {
+		title,
+		issues,
+		loading,
+		initialPageSize = 10
+	}: Props = $props();
 
 	type IssueFormatted = {
 		icon: string;
@@ -37,13 +48,13 @@
 		helpLink: string | undefined;
 	};
 
-	let table: Readable<Table<IssueFormatted>> | undefined;
-	let tableRendered = false;
+	let table: Readable<Table<IssueFormatted>> | undefined = $state();
+	let tableRendered = $state(false);
 
 	const pageSizes = [10, 20, 30, 40, 50];
 
-	let globalFilter = '';
-	let searchInput: HTMLInputElement;
+	let globalFilter = $state('');
+	let searchInput: HTMLInputElement = $state();
 
 	const handleKeyUp = (e: any) => {
 		$table?.setGlobalFilter(String(e?.target?.value));
@@ -197,7 +208,9 @@
 		tableRendered = true;
 	};
 
-	$: !loading && !tableRendered && renderTable();
+	run(() => {
+		!loading && !tableRendered && renderTable();
+	});
 </script>
 
 <section id="issues">
@@ -217,7 +230,7 @@
 				<div
 					class="flex h-[572px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
 				>
-					<i class="fa-solid fa-table h-24 w-24 animate-pulse text-link/50" />
+					<i class="fa-solid fa-table h-24 w-24 animate-pulse text-link/50"></i>
 				</div>
 			</div>
 		{:else if !issues.length}
@@ -229,27 +242,27 @@
 					placeholder="Search..."
 					class="w-full bg-primary/5 px-5 py-2.5 text-sm focus:outline-primary dark:bg-white/5 dark:focus:outline-white"
 					bind:value={globalFilter}
-					on:keyup={searchDebounce}
+					onkeyup={searchDebounce}
 					bind:this={searchInput}
 				/>
 				{#if globalFilter}
 					<button
 						class="absolute right-3 top-1/2 -translate-y-1/2"
-						on:click={() => {
+						onclick={() => {
 							globalFilter = '';
 							$table?.setGlobalFilter('');
 						}}
 					>
-						<i class="fa-solid fa-circle-xmark" />
+						<i class="fa-solid fa-circle-xmark"></i>
 					</button>
 				{:else}
 					<button
 						class="absolute right-3 top-1/2 -translate-y-1/2"
-						on:click={() => {
+						onclick={() => {
 							searchInput.focus();
 						}}
 					>
-						<i class="fa-solid fa-magnifying-glass" />
+						<i class="fa-solid fa-magnifying-glass"></i>
 					</button>
 				{/if}
 			</div>
@@ -264,12 +277,12 @@
 									{#each headerGroup.headers as header}
 										<th colSpan={header.colSpan} class="px-5 pb-2.5 pt-5">
 											{#if !header.isPlaceholder}
+												{@const SvelteComponent = flexRender(header.column.columnDef.header, header.getContext())}
 												<button
 													class="flex select-none items-center gap-x-2"
-													on:click={header.column.getToggleSortingHandler()}
+													onclick={header.column.getToggleSortingHandler()}
 												>
-													<svelte:component
-														this={flexRender(header.column.columnDef.header, header.getContext())}
+													<SvelteComponent
 													/>
 													{#if header.column.getIsSorted().toString() === 'asc'}
 														<svg
@@ -303,9 +316,9 @@
 							{#each $table.getRowModel().rows as row, index}
 								<tr class={isEven(index) ? 'bg-primary/5 dark:bg-white/5' : ''}>
 									{#each row.getVisibleCells() as cell}
+										{@const SvelteComponent_1 = flexRender(cell.column.columnDef.cell, cell.getContext())}
 										<td class="px-5 py-2.5">
-											<svelte:component
-												this={flexRender(cell.column.columnDef.cell, cell.getContext())}
+											<SvelteComponent_1
 											/>
 										</td>
 									{/each}
@@ -320,7 +333,7 @@
 				>
 					<select
 						value={$table?.getState().pagination.pageSize}
-						on:change={(e) => {
+						onchange={(e) => {
 							// @ts-expect-error
 							$table?.setPageSize(Number(e.target?.value));
 						}}
@@ -340,7 +353,7 @@
 									class="text-xl font-bold {!$table?.getCanPreviousPage()
 										? 'cursor-not-allowed opacity-50'
 										: ''}"
-									on:click={() => $table?.firstPage()}
+									onclick={() => $table?.firstPage()}
 									disabled={!$table?.getCanPreviousPage()}
 								>
 									{'<<'}
@@ -349,7 +362,7 @@
 									class="text-xl font-bold {!$table?.getCanPreviousPage()
 										? 'cursor-not-allowed opacity-50'
 										: ''}"
-									on:click={() => $table?.previousPage()}
+									onclick={() => $table?.previousPage()}
 									disabled={!$table?.getCanPreviousPage()}
 								>
 									{'<'}
@@ -360,7 +373,7 @@
 									class="text-xl font-bold {!$table?.getCanNextPage()
 										? 'cursor-not-allowed opacity-50'
 										: ''}"
-									on:click={() => $table?.nextPage()}
+									onclick={() => $table?.nextPage()}
 									disabled={!$table?.getCanNextPage()}
 								>
 									{'>'}
@@ -369,7 +382,7 @@
 									class="text-xl font-bold {!$table?.getCanNextPage()
 										? 'cursor-not-allowed opacity-50'
 										: ''}"
-									on:click={() => $table?.lastPage()}
+									onclick={() => $table?.lastPage()}
 									disabled={!$table?.getCanNextPage()}
 								>
 									{'>>'}

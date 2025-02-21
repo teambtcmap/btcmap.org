@@ -1,6 +1,10 @@
 <script lang="ts">
 	type Routes = { name: string; url: string }[];
-	export let routes: Routes;
+	interface Props {
+		routes: Routes;
+	}
+
+	let { routes }: Props = $props();
 </script>
 
 <div class="mx-auto flex w-full flex-wrap items-center gap-3 px-4 py-5 xl:w-[1200px] xl:px-0">
@@ -14,7 +18,7 @@
 			{route.name}
 		</a>
 		{#if index !== routes.length - 1}
-			<i class="fa-solid fa-chevron-right w-2 text-link" />
+			<i class="fa-solid fa-chevron-right w-2 text-link"></i>
 		{/if}
 	{/each}
 </div>

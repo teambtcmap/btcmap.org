@@ -1,17 +1,21 @@
 <script lang="ts">
-	export let date: string;
-	export let style = '';
 
 	import { onDestroy } from 'svelte';
+	interface Props {
+		date: string;
+		style?: string;
+	}
+
+	let { date, style = '' }: Props = $props();
 
 	// Set the date we're counting down to
 	const countDownDate = new Date(date).getTime();
 
-	let days: string | number = '- -';
-	let hours: string | number = '- -';
-	let minutes: string | number = '- -';
-	let seconds: string | number = '- -';
-	let distance = 0;
+	let days: string | number = $state('- -');
+	let hours: string | number = $state('- -');
+	let minutes: string | number = $state('- -');
+	let seconds: string | number = $state('- -');
+	let distance = $state(0);
 
 	// Update the count down every 1 second
 	const timer = setInterval(function () {

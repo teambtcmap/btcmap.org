@@ -1,19 +1,27 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { Icon } from '$lib/comp';
 	import tippy from 'tippy.js';
 
-	export let id: string;
-	export let icon: string;
-	export let tooltip: string | undefined;
+	interface Props {
+		id: string;
+		icon: string;
+		tooltip: string | undefined;
+	}
 
-	let merchantTooltip: HTMLAnchorElement;
+	let { id, icon, tooltip }: Props = $props();
 
-	$: merchantTooltip &&
-		tooltip &&
-		tooltip.length &&
-		tippy([merchantTooltip], {
-			content: tooltip
-		});
+	let merchantTooltip: HTMLAnchorElement = $state();
+
+	run(() => {
+		merchantTooltip &&
+			tooltip &&
+			tooltip.length &&
+			tippy([merchantTooltip], {
+				content: tooltip
+			});
+	});
 </script>
 
 <a

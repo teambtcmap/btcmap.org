@@ -1,10 +1,19 @@
 <script lang="ts">
 	import { TipType } from '$lib/types';
 
-	export let user: undefined | string = undefined;
-	export let destination: string;
-	export let style: undefined | string = undefined;
-	export let type: TipType = TipType.Address;
+	interface Props {
+		user?: undefined | string;
+		destination: string;
+		style?: undefined | string;
+		type?: TipType;
+	}
+
+	let {
+		user = undefined,
+		destination,
+		style = undefined,
+		type = TipType.Address
+	}: Props = $props();
 </script>
 
 {#if user}

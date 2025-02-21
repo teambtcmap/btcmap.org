@@ -3,17 +3,21 @@
 	import type { DropdownLink } from '$lib/types';
 	import OutClick from 'svelte-outclick';
 
-	export let title: string;
-	export let icon: string;
-	export let links: DropdownLink[];
+	interface Props {
+		title: string;
+		icon: string;
+		links: DropdownLink[];
+	}
 
-	let show = false;
+	let { title, icon, links }: Props = $props();
+
+	let show = $state(false);
 </script>
 
 <!-- dropdown menu -->
 <button
 	id="dropdown-{title.toLowerCase()}-mobile"
-	on:click={() => (show = !show)}
+	onclick={() => (show = !show)}
 	class="w-full {show ? 'text-[#144046]' : 'text-link'} flex items-center text-xl dark:text-white"
 >
 	<span
@@ -45,7 +49,7 @@
 					</span>
 					<span>{link.title}</span>
 					{#if link.external}
-						<i class="fa-solid fa-arrow-up-right-from-square ml-1 h-4 w-4" />
+						<i class="fa-solid fa-arrow-up-right-from-square ml-1 h-4 w-4"></i>
 					{/if}
 				</a>
 			{/each}

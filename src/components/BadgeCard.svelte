@@ -1,10 +1,19 @@
 <script lang="ts">
 	import type { BadgeType } from '$lib/types';
 
-	export let icon: string;
-	export let title: string;
-	export let desc: string;
-	export let type: BadgeType;
+	interface Props {
+		icon: string;
+		title: string;
+		desc: string;
+		type: BadgeType;
+	}
+
+	let {
+		icon,
+		title,
+		desc,
+		type
+	}: Props = $props();
 </script>
 
 <div

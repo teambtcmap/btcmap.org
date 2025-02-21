@@ -48,7 +48,7 @@
 		}
 	];
 
-	let showMobileMenu = false;
+	let showMobileMenu = $state(false);
 </script>
 
 <!-- desktop header -->
@@ -122,7 +122,7 @@
 		<ThemeToggle />
 
 		<!-- menu toggle -->
-		<button on:click={() => (showMobileMenu = !showMobileMenu)}>
+		<button onclick={() => (showMobileMenu = !showMobileMenu)}>
 			<Icon
 				w={showMobileMenu ? '28' : '34'}
 				h={showMobileMenu ? '27' : '12'}

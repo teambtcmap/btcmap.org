@@ -1,8 +1,12 @@
 <script lang="ts">
 	import { IssueIcon } from '$lib/comp';
 
-	export let id: 'icon' | 'name' | 'type' | 'viewLink' | 'editLink' | 'helpLink';
-	export let value: string;
+	interface Props {
+		id: 'icon' | 'name' | 'type' | 'viewLink' | 'editLink' | 'helpLink';
+		value: string;
+	}
+
+	let { id, value }: Props = $props();
 </script>
 
 {#if id === 'icon'}

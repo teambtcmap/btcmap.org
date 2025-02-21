@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { browser } from '$app/environment';
 	import { GradeTable, MapLoadingEmbed, ShowTags, TaggingIssues } from '$lib/comp';
 	import {
@@ -23,40 +25,50 @@
 	import { onDestroy, onMount } from 'svelte';
 	import tippy from 'tippy.js';
 
-	export let name: string;
-	export let geoJSON: GeoJSON;
-	export let filteredElements: Element[];
+	interface Props {
+		name: string;
+		geoJSON: GeoJSON;
+		filteredElements: Element[];
+	}
+
+	let { name, geoJSON, filteredElements }: Props = $props();
 
 	let total: number | undefined;
 	let upToDate: number | undefined;
 	let upToDatePercent: string | undefined;
 
-	let grade: Grade;
+	let grade: Grade = $state();
 
-	let gradeTooltip: HTMLButtonElement;
+	let gradeTooltip: HTMLButtonElement = $state();
 
-	$: gradeTooltip &&
-		tippy([gradeTooltip], {
-			content: GradeTable,
-			allowHTML: true
-		});
+	run(() => {
+		gradeTooltip &&
+			tippy([gradeTooltip], {
+				content: GradeTable,
+				allowHTML: true
+			});
+	});
 
-	let mapElement: HTMLDivElement;
+	let mapElement: HTMLDivElement = $state();
 	let map: Map;
-	let mapLoaded = false;
+	let mapLoaded = $state(false);
 
 	let baseMaps: BaseMaps;
 
 	let leaflet: Leaflet;
 	let DomEvent: DomEventType;
 
-	$: $theme !== undefined && mapLoaded && toggleMapButtons();
+	run(() => {
+		$theme !== undefined && mapLoaded && toggleMapButtons();
+	});
 
 	const closePopup = () => {
 		map.closePopup();
 	};
 
-	$: $theme !== undefined && mapLoaded && closePopup();
+	run(() => {
+		$theme !== undefined && mapLoaded && closePopup();
+	});
 
 	const toggleTheme = () => {
 		if ($theme === 'dark') {
@@ -68,7 +80,9 @@
 		}
 	};
 
-	$: $theme !== undefined && mapLoaded && toggleTheme();
+	run(() => {
+		$theme !== undefined && mapLoaded && toggleTheme();
+	});
 
 	onMount(async () => {
 		if (browser) {
@@ -93,8 +107,8 @@
 		}
 	});
 
-	let initialRenderComplete = false;
-	let dataInitialized = false;
+	let initialRenderComplete = $state(false);
+	let dataInitialized = $state(false);
 
 	const initializeData = () => {
 		if (dataInitialized) return;
@@ -227,7 +241,9 @@
 		dataInitialized = true;
 	};
 
-	$: geoJSON && filteredElements && initialRenderComplete && !dataInitialized && initializeData();
+	run(() => {
+		geoJSON && filteredElements && initialRenderComplete && !dataInitialized && initializeData();
+	});
 </script>
 
 <section id="map-section">
@@ -240,27 +256,27 @@
 				<div class="flex items-center space-x-1">
 					<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 					{#each Array(grade) as star}
-						<i class="fa-solid fa-star" />
+						<i class="fa-solid fa-star"></i>
 					{/each}
 				</div>
 
 				<div class="flex items-center space-x-1">
 					<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 					{#each Array(5 - grade) as star}
-						<i class="fa-solid fa-star opacity-25" />
+						<i class="fa-solid fa-star opacity-25"></i>
 					{/each}
 				</div>
 			{:else}
 				<div class="flex items-center space-x-1">
 					<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 					{#each Array(5) as star}
-						<i class="fa-solid fa-star animate-pulse text-link/50" />
+						<i class="fa-solid fa-star animate-pulse text-link/50"></i>
 					{/each}
 				</div>
 			{/if}
 
 			<button bind:this={gradeTooltip}>
-				<i class="fa-solid fa-circle-info text-sm" />
+				<i class="fa-solid fa-circle-info text-sm"></i>
 			</button>
 		</div>
 	</h3>
@@ -269,7 +285,7 @@
 		<div
 			bind:this={mapElement}
 			class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal text-left dark:!bg-[#202f33] md:h-[600px]"
-		/>
+		></div>
 		{#if !mapLoaded}
 			<MapLoadingEmbed style="h-[300px] md:h-[600px] border border-statBorder rounded-b-3xl" />
 		{/if}

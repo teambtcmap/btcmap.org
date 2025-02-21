@@ -3,21 +3,34 @@
 
 	import { TicketLabel } from '$lib/comp';
 
-	export let assignees: { html_url: string; avatar_url: string; login: string }[];
-	export let comments: number;
-	export let created: string;
-	export let url: string;
-	export let labels: { name: string; description?: string }[];
-	export let id: number;
-	export let name: string;
-	export let user: { html_url: string; login: string };
+	interface Props {
+		assignees: { html_url: string; avatar_url: string; login: string }[];
+		comments: number;
+		created: string;
+		url: string;
+		labels: { name: string; description?: string }[];
+		id: number;
+		name: string;
+		user: { html_url: string; login: string };
+	}
+
+	let {
+		assignees,
+		comments,
+		created,
+		url,
+		labels,
+		id,
+		name,
+		user
+	}: Props = $props();
 </script>
 
 <div
 	class="w-full items-center justify-between space-y-1 border-t border-t-statBorder p-5 text-center md:flex md:space-y-0 md:text-left"
 >
 	<div class="items-center space-y-1 md:flex md:space-x-2 md:space-y-0">
-		<i class="fa-solid fa-ticket text-xl text-link" />
+		<i class="fa-solid fa-ticket text-xl text-link"></i>
 
 		<div>
 			<p>
@@ -65,7 +78,7 @@
 		</div>
 
 		<div class="items-center md:flex">
-			<i class="fa-solid fa-comment text-link md:mr-1" />
+			<i class="fa-solid fa-comment text-link md:mr-1"></i>
 			<strong class="text-primary dark:text-white">{comments}</strong>
 		</div>
 	</div>

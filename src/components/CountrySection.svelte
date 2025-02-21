@@ -1,8 +1,12 @@
 <script lang="ts">
-	export let countries: Area[] | undefined;
 
 	import { CountryCard, CountrySkeleton } from '$lib/comp';
 	import type { Area } from '$lib/types';
+	interface Props {
+		countries: Area[] | undefined;
+	}
+
+	let { countries }: Props = $props();
 </script>
 
 <section>

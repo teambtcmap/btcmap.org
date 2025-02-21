@@ -3,20 +3,31 @@
 	import type { EventType, User } from '$lib/types';
 	import Time from 'svelte-time';
 
-	export let location: string;
-	export let action: EventType;
-	export let user: User | undefined = undefined;
-	export let time: string;
-	export let latest: boolean;
-	export let merchantId: string;
+	interface Props {
+		location: string;
+		action: EventType;
+		user?: User | undefined;
+		time: string;
+		latest: boolean;
+		merchantId: string;
+	}
 
-	$: deleteLink = merchantId.split(':');
+	let {
+		location,
+		action,
+		user = undefined,
+		time,
+		latest,
+		merchantId
+	}: Props = $props();
 
-	$: profile = user && user['osm_json'];
-	$: regexMatch = profile && profile.description.match('(lightning:[^)]+)');
-	$: lightning = regexMatch && regexMatch[0].slice(10);
+	let deleteLink = $derived(merchantId.split(':'));
 
-	$: username = profile && profile['display_name'];
+	let profile = $derived(user && user['osm_json']);
+	let regexMatch = $derived(profile && profile.description.match('(lightning:[^)]+)'));
+	let lightning = $derived(regexMatch && regexMatch[0].slice(10));
+
+	let username = $derived(profile && profile['display_name']);
 </script>
 
 <div
@@ -32,14 +43,14 @@
 				: action === 'delete'
 					? 'bg-deleted'
 					: 'bg-link'} opacity-75"
-		/>
+		></span>
 		<span
 			class="relative inline-flex h-3 w-3 rounded-full {action === 'create'
 				? 'bg-created'
 				: action === 'delete'
 					? 'bg-deleted'
 					: 'bg-link'}"
-		/>
+		></span>
 	</span>
 
 	<div class="w-full flex-wrap items-center justify-between space-y-2 lg:flex lg:space-y-0">

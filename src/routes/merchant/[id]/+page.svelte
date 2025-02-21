@@ -1,5 +1,6 @@
 <script lang="ts">
-	export let data;
+	import { run } from 'svelte/legacy';
+
 
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
@@ -64,20 +65,31 @@
 	import { onDestroy, onMount } from 'svelte';
 	import Time from 'svelte-time';
 	import tippy from 'tippy.js';
+	let { data } = $props();
 
 	// alert for user errors
-	$: $userError && errToast($userError);
+	run(() => {
+		$userError && errToast($userError);
+	});
 	// alert for event errors
-	$: $eventError && errToast($eventError);
+	run(() => {
+		$eventError && errToast($eventError);
+	});
 	// alert for element errors
-	$: $elementError && errToast($elementError);
+	run(() => {
+		$elementError && errToast($elementError);
+	});
 	// alert for area errors
-	$: $areaError && errToast($areaError);
+	run(() => {
+		$areaError && errToast($areaError);
+	});
 	// alert for report errors
-	$: $reportError && errToast($reportError);
+	run(() => {
+		$reportError && errToast($reportError);
+	});
 
-	let dataInitialized = false;
-	let initialRenderComplete = false;
+	let dataInitialized = $state(false);
+	let initialRenderComplete = $state(false);
 
 	let leaflet: Leaflet;
 	let DomEvent: DomEventType;
@@ -197,110 +209,124 @@
 		dataInitialized = true;
 	};
 
-	$: $users &&
-		$users.length &&
-		$events &&
-		$events.length &&
-		$elements &&
-		$elements.length &&
-		$areas &&
-		$areas.length &&
-		$reports &&
-		$reports.length &&
-		initialRenderComplete &&
-		!dataInitialized &&
-		initializeData();
+	run(() => {
+		$users &&
+			$users.length &&
+			$events &&
+			$events.length &&
+			$elements &&
+			$elements.length &&
+			$areas &&
+			$areas.length &&
+			$reports &&
+			$reports.length &&
+			initialRenderComplete &&
+			!dataInitialized &&
+			initializeData();
+	});
 
-	let merchant: Element | undefined;
+	let merchant: Element | undefined = $state();
 
 	const name = data.name;
-	let icon: string | undefined;
-	let address: string | undefined;
-	let description: string | undefined;
-	let note: string | undefined;
-	let hours: string | undefined;
-	let payment: PayMerchant;
-	let boosted: string | undefined;
-	let verified: string[] = [];
+	let icon: string | undefined = $state();
+	let address: string | undefined = $state();
+	let description: string | undefined = $state();
+	let note: string | undefined = $state();
+	let hours: string | undefined = $state();
+	let payment: PayMerchant = $state();
+	let boosted: string | undefined = $state();
+	let verified: string[] = $state([]);
 	const verifiedDate = calcVerifiedDate();
-	let phone: string | undefined;
-	let website: string | undefined;
-	let email: string | undefined;
-	let twitter: string | undefined;
-	let instagram: string | undefined;
-	let facebook: string | undefined;
+	let phone: string | undefined = $state();
+	let website: string | undefined = $state();
+	let email: string | undefined = $state();
+	let twitter: string | undefined = $state();
+	let instagram: string | undefined = $state();
+	let facebook: string | undefined = $state();
 
-	let thirdParty: boolean | undefined;
-	let paymentMethod: string | undefined;
+	let thirdParty: boolean | undefined = $state();
+	let paymentMethod: string | undefined = $state();
 
-	let thirdPartyTooltip: HTMLAnchorElement;
-	let onchainTooltip: HTMLImageElement;
-	let lnTooltip: HTMLImageElement;
-	let nfcTooltip: HTMLImageElement;
-	let verifiedTooltip: HTMLSpanElement;
-	let outdatedTooltip: HTMLSpanElement;
+	let thirdPartyTooltip: HTMLAnchorElement = $state();
+	let onchainTooltip: HTMLImageElement = $state();
+	let lnTooltip: HTMLImageElement = $state();
+	let nfcTooltip: HTMLImageElement = $state();
+	let verifiedTooltip: HTMLSpanElement = $state();
+	let outdatedTooltip: HTMLSpanElement = $state();
 
-	$: thirdPartyTooltip &&
-		merchant &&
-		tippy([thirdPartyTooltip], {
-			content: 'Third party app required'
-		});
+	run(() => {
+		thirdPartyTooltip &&
+			merchant &&
+			tippy([thirdPartyTooltip], {
+				content: 'Third party app required'
+			});
+	});
 
-	$: onchainTooltip &&
-		merchant &&
-		tippy([onchainTooltip], {
-			content:
-				merchant.osm_json.tags?.['payment:onchain'] === 'yes'
-					? 'On-chain accepted'
-					: merchant.osm_json.tags?.['payment:onchain'] === 'no'
-						? 'On-chain not accepted'
-						: 'On-chain unknown'
-		});
+	run(() => {
+		onchainTooltip &&
+			merchant &&
+			tippy([onchainTooltip], {
+				content:
+					merchant.osm_json.tags?.['payment:onchain'] === 'yes'
+						? 'On-chain accepted'
+						: merchant.osm_json.tags?.['payment:onchain'] === 'no'
+							? 'On-chain not accepted'
+							: 'On-chain unknown'
+			});
+	});
 
-	$: lnTooltip &&
-		merchant &&
-		tippy([lnTooltip], {
-			content:
-				merchant.osm_json.tags?.['payment:lightning'] === 'yes'
-					? 'Lightning accepted'
-					: merchant.osm_json.tags?.['payment:lightning'] === 'no'
-						? 'Lightning not accepted'
-						: 'Lightning unknown'
-		});
+	run(() => {
+		lnTooltip &&
+			merchant &&
+			tippy([lnTooltip], {
+				content:
+					merchant.osm_json.tags?.['payment:lightning'] === 'yes'
+						? 'Lightning accepted'
+						: merchant.osm_json.tags?.['payment:lightning'] === 'no'
+							? 'Lightning not accepted'
+							: 'Lightning unknown'
+			});
+	});
 
-	$: nfcTooltip &&
-		merchant &&
-		tippy([nfcTooltip], {
-			content:
-				merchant.osm_json.tags?.['payment:lightning_contactless'] === 'yes'
-					? 'Lightning Contactless accepted'
-					: merchant.osm_json.tags?.['payment:lightning_contactless'] === 'no'
-						? 'Lightning contactless not accepted'
-						: 'Lightning contactless unknown'
-		});
+	run(() => {
+		nfcTooltip &&
+			merchant &&
+			tippy([nfcTooltip], {
+				content:
+					merchant.osm_json.tags?.['payment:lightning_contactless'] === 'yes'
+						? 'Lightning Contactless accepted'
+						: merchant.osm_json.tags?.['payment:lightning_contactless'] === 'no'
+							? 'Lightning contactless not accepted'
+							: 'Lightning contactless unknown'
+			});
+	});
 
-	$: verifiedTooltip &&
-		tippy([verifiedTooltip], {
-			content: 'Verified within the last year'
-		});
+	run(() => {
+		verifiedTooltip &&
+			tippy([verifiedTooltip], {
+				content: 'Verified within the last year'
+			});
+	});
 
-	$: outdatedTooltip &&
-		tippy([outdatedTooltip], {
-			content: 'Outdated please re-verify'
-		});
+	run(() => {
+		outdatedTooltip &&
+			tippy([outdatedTooltip], {
+				content: 'Outdated please re-verify'
+			});
+	});
 
-	let lat: number | undefined;
-	let long: number | undefined;
+	let lat: number | undefined = $state();
+	let long: number | undefined = $state();
 
-	let filteredCommunities: Area[] = [];
+	let filteredCommunities: Area[] = $state([]);
 
-	let hideArrow = false;
-	let activityDiv;
+	let hideArrow = $state(false);
+	let activityDiv = $state();
 
-	let merchantEvents: Event[] = [];
+	let merchantEvents: Event[] = $state([]);
 
-	let eventCount = 50;
-	$: eventsPaginated = merchantEvents.slice(0, eventCount);
+	let eventCount = $state(50);
+	let eventsPaginated = $derived(merchantEvents.slice(0, eventCount));
 
 	const findUser = (tagger: Event) => {
 		let foundUser = $users.find((user) => user.id == tagger['user_id']);
@@ -312,9 +338,9 @@
 		}
 	};
 
-	let mapElement: HTMLDivElement;
+	let mapElement: HTMLDivElement = $state();
 	let map: Map;
-	let mapLoaded = false;
+	let mapLoaded = $state(false);
 
 	let baseMaps: BaseMaps;
 
@@ -342,9 +368,13 @@
 		}
 	};
 
-	$: $theme !== undefined && mapLoaded && toggleMapButtons();
+	run(() => {
+		$theme !== undefined && mapLoaded && toggleMapButtons();
+	});
 
-	$: $theme !== undefined && mapLoaded && toggleTheme();
+	run(() => {
+		$theme !== undefined && mapLoaded && toggleTheme();
+	});
 
 	onDestroy(async () => {
 		if (map) {
@@ -384,7 +414,7 @@
 							/>
 						</div>
 					{:else}
-						<div class="mx-auto h-32 w-32 animate-pulse rounded-full bg-link/50" />
+						<div class="mx-auto h-32 w-32 animate-pulse rounded-full bg-link/50"></div>
 					{/if}
 
 					<h1 class="text-4xl font-semibold !leading-tight text-primary dark:text-white">
@@ -419,7 +449,7 @@
 							</svg></a
 						>
 					{:else}
-						<div class="mx-auto h-4 w-28 animate-pulse rounded bg-link/50" />
+						<div class="mx-auto h-4 w-28 animate-pulse rounded bg-link/50"></div>
 					{/if}
 				</div>
 
@@ -522,7 +552,7 @@
 					{:else}
 						<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 						{#each Array(5) as btn}
-							<div class="h-20 w-24 animate-pulse rounded-lg bg-link/50" />
+							<div class="h-20 w-24 animate-pulse rounded-lg bg-link/50"></div>
 						{/each}
 					{/if}
 				</div>
@@ -717,7 +747,7 @@
 					<div
 						bind:this={mapElement}
 						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal text-left dark:!bg-[#202f33] md:h-[600px]"
-					/>
+					></div>
 					{#if !mapLoaded}
 						<MapLoadingEmbed
 							style="h-[300px] md:h-[600px] border border-statBorder rounded-b-3xl"
@@ -737,7 +767,7 @@
 					<div
 						bind:this={activityDiv}
 						class="hide-scroll relative max-h-[375px] space-y-2 overflow-y-scroll"
-						on:scroll={() => {
+						onscroll={() => {
 							if (dataInitialized && !hideArrow) {
 								hideArrow = true;
 							}
@@ -756,7 +786,7 @@
 							{#if eventsPaginated.length !== merchantEvents.length}
 								<button
 									class="mx-auto !mb-5 block text-xl font-semibold text-link transition-colors hover:text-hover"
-									on:click={() => (eventCount = eventCount + 50)}>Load More</button
+									onclick={() => (eventCount = eventCount + 50)}>Load More</button
 								>
 							{:else if merchantEvents.length > 10}
 								<TopButton scroll={activityDiv} style="!mb-5" />
@@ -803,7 +833,7 @@
 											src={`https://btcmap.org/.netlify/images?url=${community.tags['icon:square']}&fit=cover&w=256&h=256`}
 											alt="logo"
 											class="mx-auto h-20 w-20 rounded-full object-cover"
-											on:error={function () {
+											onerror={function () {
 												this.src = '/images/bitcoin.svg';
 											}}
 										/>

@@ -1,9 +1,13 @@
 <script lang="ts">
-	export let supporters: { url: string; logoDark?: string; logo: string; title: string }[];
-	export let placeholders: number;
 
 	import { theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
+	interface Props {
+		supporters: { url: string; logoDark?: string; logo: string; title: string }[];
+		placeholders: number;
+	}
+
+	let { supporters, placeholders }: Props = $props();
 </script>
 
 <div class="mt-4">

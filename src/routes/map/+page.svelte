@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import { Boost, Icon, MapLoadingMain, ShowTags, TaggingIssues } from '$lib/comp';
@@ -27,25 +29,25 @@
 	import { onDestroy, onMount, tick } from 'svelte';
 	import OutClick from 'svelte-outclick';
 
-	let mapLoading = 0;
+	let mapLoading = $state(0);
 
 	let leaflet: Leaflet;
 	let controlLayers: Control.Layers;
 
-	let mapElement: HTMLDivElement;
-	let map: Map;
-	let mapLoaded = false;
-	let elementsLoaded = false;
+	let mapElement: HTMLDivElement = $state();
+	let map: Map = $state();
+	let mapLoaded = $state(false);
+	let elementsLoaded = $state(false);
 
 	let mapCenter: LatLng;
 	let elementsCopy: SearchElement[] = [];
 
-	let customSearchBar: HTMLDivElement;
-	let clearSearchButton: HTMLButtonElement;
-	let showSearch = false;
-	let search: string;
-	let searchStatus: boolean;
-	let searchResults: SearchResult[] = [];
+	let customSearchBar: HTMLDivElement = $state();
+	let clearSearchButton: HTMLButtonElement = $state();
+	let showSearch = $state(false);
+	let search: string = $state();
+	let searchStatus: boolean = $state();
+	let searchResults: SearchResult[] = $state([]);
 
 	//search functions
 	const elementSearch = () => {
@@ -123,10 +125,14 @@
 		refreshDiv.style.display = 'block';
 	};
 
-	$: map && mapLoaded && $mapUpdates && $elementsSyncCount > 1 && showDataRefresh();
+	run(() => {
+		map && mapLoaded && $mapUpdates && $elementsSyncCount > 1 && showDataRefresh();
+	});
 
 	// alert for map errors
-	$: $elementError && errToast($elementError);
+	run(() => {
+		$elementError && errToast($elementError);
+	});
 
 	const initializeElements = () => {
 		if (elementsLoaded) return;
@@ -270,7 +276,9 @@
 		elementsLoaded = true;
 	};
 
-	$: $elements && $elements.length && mapLoaded && !elementsLoaded && initializeElements();
+	run(() => {
+		$elements && $elements.length && mapLoaded && !elementsLoaded && initializeElements();
+	});
 
 	onMount(async () => {
 		if (browser) {
@@ -586,8 +594,8 @@
 				type="text"
 				class="w-full rounded-lg px-5 py-2.5 text-[16px] text-mapButton drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:outline-none focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] dark:border dark:bg-dark dark:text-white"
 				placeholder="Search..."
-				on:keyup={searchDebounce}
-				on:keydown={(e) => {
+				onkeyup={searchDebounce}
+				onkeydown={(e) => {
 					searchStatus = true;
 					if (e.key === 'Escape') {
 						clearSearch();
@@ -599,7 +607,7 @@
 
 			<button
 				bind:this={clearSearchButton}
-				on:click={clearSearch}
+				onclick={clearSearch}
 				class="absolute right-[8px] top-[10px] bg-white text-mapButton hover:text-black dark:bg-dark dark:text-white dark:hover:text-white/80 {search
 					? 'block'
 					: 'hidden'}"
@@ -632,7 +640,7 @@
 				>
 					{#each searchResults as result}
 						<button
-							on:click={() => searchSelect(result)}
+							onclick={() => searchSelect(result)}
 							class="block w-full justify-between px-4 py-2 hover:bg-searchHover dark:border-b dark:hover:bg-white/[0.15] md:flex md:text-left"
 						>
 							<div class="items-start md:flex md:space-x-2">
@@ -695,5 +703,5 @@
 	<ShowTags />
 	<TaggingIssues />
 
-	<div bind:this={mapElement} class="absolute h-[100%] w-full !bg-teal dark:!bg-dark" />
+	<div bind:this={mapElement} class="absolute h-[100%] w-full !bg-teal dark:!bg-dark"></div>
 </main>

@@ -1,7 +1,11 @@
 <script lang="ts">
-	export let style: undefined | string = undefined;
 
 	import { LoadingSpinner } from '$lib/comp';
+	interface Props {
+		style?: undefined | string;
+	}
+
+	let { style = undefined }: Props = $props();
 </script>
 
 <div

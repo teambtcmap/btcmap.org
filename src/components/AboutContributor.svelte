@@ -1,5 +1,9 @@
 <script lang="ts">
-	export let contributor: { url: string; name: string; file: string; title: string };
+	interface Props {
+		contributor: { url: string; name: string; file: string; title: string };
+	}
+
+	let { contributor }: Props = $props();
 </script>
 
 <a
@@ -12,7 +16,7 @@
 		src="/images/contributors/{contributor.name}.{contributor.file}"
 		alt="avatar"
 		class="mx-auto h-24 w-24 rounded-full object-cover"
-		on:error={function () {
+		onerror={function () {
 			this.src = '/images/satoshi-nakamoto.png';
 		}}
 	/>

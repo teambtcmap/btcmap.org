@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { preventDefault } from 'svelte/legacy';
+
 	import { browser } from '$app/environment';
 	import {
 		Breadcrumbs,
@@ -19,10 +21,10 @@
 		{ name: 'Add', url: '/communities/add' }
 	];
 
-	let captcha: HTMLDivElement;
-	let captchaSecret: string;
-	let captchaInput: HTMLInputElement;
-	let honeyInput: HTMLInputElement;
+	let captcha: HTMLDivElement = $state();
+	let captchaSecret: string = $state();
+	let captchaInput: HTMLInputElement = $state();
+	let honeyInput: HTMLInputElement = $state();
 
 	const fetchCaptcha = () => {
 		axios
@@ -39,23 +41,23 @@
 			});
 	};
 
-	let location: string | undefined;
-	let name: string;
-	let icon: string;
-	let lightning: string;
-	let socialLinks: string;
-	let contact: string;
-	let notes: string;
+	let location: string | undefined = $state();
+	let name: string = $state();
+	let icon: string = $state();
+	let lightning: string = $state();
+	let socialLinks: string = $state();
+	let contact: string = $state();
+	let notes: string = $state();
 
-	let selected = false;
-	let noLocationSelected = false;
-	let submitted = false;
-	let submitting = false;
-	let submissionIssueNumber: number;
+	let selected = $state(false);
+	let noLocationSelected = $state(false);
+	let submitted = $state(false);
+	let submitting = $state(false);
+	let submissionIssueNumber: number = $state();
 
-	let searchQuery: string;
-	let searchResults: any[] = [];
-	let searchLoading = false;
+	let searchQuery: string = $state();
+	let searchResults: any[] = $state([]);
+	let searchLoading = $state(false);
 
 	const searchLocation = () => {
 		searchLoading = true;
@@ -184,7 +186,7 @@
 				</div>
 
 				<form
-					on:submit|preventDefault={submitForm}
+					onsubmit={preventDefault(submitForm)}
 					class="w-full space-y-5 text-primary dark:text-white"
 				>
 					<div class="space-y-2">
@@ -199,7 +201,7 @@
 
 						<div class="space-y-2 md:flex md:space-x-2 md:space-y-0">
 							<input
-								on:keydown={(e) => {
+								onkeydown={(e) => {
 									if (e.key === 'Enter') {
 										searchLocation();
 									}
@@ -233,7 +235,7 @@
 								{#if !location}
 									{#each searchResults as area, index}
 										<button
-											on:click={() => setLocation(area.display_name)}
+											onclick={() => setLocation(area.display_name)}
 											class="{index !== searchResults.length - 1
 												? 'border-b'
 												: ''} block whitespace-nowrap p-3 hover:bg-link/50"
@@ -321,7 +323,7 @@
 							rows="3"
 							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 							bind:value={socialLinks}
-						/>
+						></textarea>
 					</div>
 
 					<div>
@@ -356,7 +358,7 @@
 							rows="2"
 							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 							bind:value={notes}
-						/>
+						></textarea>
 					</div>
 
 					<div>
@@ -365,8 +367,8 @@
 								>Bot protection <span class="font-normal">(case-sensitive)</span></label
 							>
 							{#if captchaSecret}
-								<button type="button" on:click={fetchCaptcha}>
-									<i class="fa-solid fa-arrows-rotate" />
+								<button type="button" onclick={fetchCaptcha}>
+									<i class="fa-solid fa-arrows-rotate"></i>
 								</button>
 							{/if}
 						</div>
@@ -375,7 +377,7 @@
 								bind:this={captcha}
 								class="flex items-center justify-center rounded-2xl border-2 border-input py-1"
 							>
-								<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
+								<div class="h-[100px] w-[275px] animate-pulse bg-link/50"></div>
 							</div>
 							<input
 								disabled={!captchaSecret}

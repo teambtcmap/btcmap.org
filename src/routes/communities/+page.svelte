@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { browser } from '$app/environment';
 	import { CommunitySection, Footer, Header, HeaderPlaceholder, PrimaryButton } from '$lib/comp';
 	import { areaError, areas, reportError, reports, syncStatus, theme } from '$lib/store';
@@ -7,16 +9,20 @@
 	import { onMount } from 'svelte';
 
 	// alert for area errors
-	$: $areaError && errToast($areaError);
+	run(() => {
+		$areaError && errToast($areaError);
+	});
 
 	// alert for report errors
-	$: $reportError && errToast($reportError);
+	run(() => {
+		$reportError && errToast($reportError);
+	});
 
 	let chartRendered = false;
-	let initialRenderComplete = false;
+	let initialRenderComplete = $state(false);
 
-	$: communities =
-		$areas && $areas.length && $reports && $reports.length
+	let communities =
+		$derived($areas && $areas.length && $reports && $reports.length
 			? $areas
 					.filter(
 						(area) =>
@@ -40,76 +46,76 @@
 						// names must be equal
 						return 0;
 					})
-			: undefined;
+			: undefined);
 
-	$: africa =
-		communities && communities.filter((community) => community.tags.continent === 'africa');
-	$: asia = communities && communities.filter((community) => community.tags.continent === 'asia');
-	$: europe =
-		communities && communities.filter((community) => community.tags.continent === 'europe');
-	$: northAmerica =
-		communities && communities.filter((community) => community.tags.continent === 'north-america');
-	$: oceania =
-		communities && communities.filter((community) => community.tags.continent === 'oceania');
-	$: southAmerica =
-		communities && communities.filter((community) => community.tags.continent === 'south-america');
+	let africa =
+		$derived(communities && communities.filter((community) => community.tags.continent === 'africa'));
+	let asia = $derived(communities && communities.filter((community) => community.tags.continent === 'asia'));
+	let europe =
+		$derived(communities && communities.filter((community) => community.tags.continent === 'europe'));
+	let northAmerica =
+		$derived(communities && communities.filter((community) => community.tags.continent === 'north-america'));
+	let oceania =
+		$derived(communities && communities.filter((community) => community.tags.continent === 'oceania'));
+	let southAmerica =
+		$derived(communities && communities.filter((community) => community.tags.continent === 'south-america'));
 
-	$: meetups2140 =
-		communities &&
-		communities.filter((community) => community.tags.organization === '2140-meetups');
-	$: bitcoin4India =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'bitcoin4india');
-	$: bitcoin4Iranians =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'bitcoin-4-iranians');
-	$: bitcoinBulgaria =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'bitcoin-bulgaria');
-	$: bitcoinIndonesia =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'bitcoin-indonesia');
-	$: bitcoinJamii =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'bitcoin-jamii');
-	$: bitcoinParaguay =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'bitcoin-paraguay');
-	$: bitDevs =
-		communities && communities.filter((community) => community.tags.organization === 'bit-devs');
-	$: breizhBitcoin =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'breizh-bitcoin');
-	$: decouvreBitcoin =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'decouvre-bitcoin');
-	$: dvadsatjeden =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'dvadsatjeden');
-	$: dwadziesciaJeden =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'dwadziescia-jeden');
-	$: eenentwintig =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'eenentwintig');
-	$: einundzwanzig =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'einundzwanzig');
-	$: enogtyve =
-		communities && communities.filter((community) => community.tags.organization === 'enogtyve');
-	$: jednadvacet =
-		communities && communities.filter((community) => community.tags.organization === 'jednadvacet');
-	$: miPrimerBitcoin =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'mi-primer-bitcoin');
-	$: planBNetwork =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'plan-b-network');
-	$: satoshiSpritz =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'satoshi-spritz');
+	let meetups2140 =
+		$derived(communities &&
+		communities.filter((community) => community.tags.organization === '2140-meetups'));
+	let bitcoin4India =
+		$derived(communities &&
+		communities.filter((community) => community.tags.organization === 'bitcoin4india'));
+	let bitcoin4Iranians =
+		$derived(communities &&
+		communities.filter((community) => community.tags.organization === 'bitcoin-4-iranians'));
+	let bitcoinBulgaria =
+		$derived(communities &&
+		communities.filter((community) => community.tags.organization === 'bitcoin-bulgaria'));
+	let bitcoinIndonesia =
+		$derived(communities &&
+		communities.filter((community) => community.tags.organization === 'bitcoin-indonesia'));
+	let bitcoinJamii =
+		$derived(communities &&
+		communities.filter((community) => community.tags.organization === 'bitcoin-jamii'));
+	let bitcoinParaguay =
+		$derived(communities &&
+		communities.filter((community) => community.tags.organization === 'bitcoin-paraguay'));
+	let bitDevs =
+		$derived(communities && communities.filter((community) => community.tags.organization === 'bit-devs'));
+	let breizhBitcoin =
+		$derived(communities &&
+		communities.filter((community) => community.tags.organization === 'breizh-bitcoin'));
+	let decouvreBitcoin =
+		$derived(communities &&
+		communities.filter((community) => community.tags.organization === 'decouvre-bitcoin'));
+	let dvadsatjeden =
+		$derived(communities &&
+		communities.filter((community) => community.tags.organization === 'dvadsatjeden'));
+	let dwadziesciaJeden =
+		$derived(communities &&
+		communities.filter((community) => community.tags.organization === 'dwadziescia-jeden'));
+	let eenentwintig =
+		$derived(communities &&
+		communities.filter((community) => community.tags.organization === 'eenentwintig'));
+	let einundzwanzig =
+		$derived(communities &&
+		communities.filter((community) => community.tags.organization === 'einundzwanzig'));
+	let enogtyve =
+		$derived(communities && communities.filter((community) => community.tags.organization === 'enogtyve'));
+	let jednadvacet =
+		$derived(communities && communities.filter((community) => community.tags.organization === 'jednadvacet'));
+	let miPrimerBitcoin =
+		$derived(communities &&
+		communities.filter((community) => community.tags.organization === 'mi-primer-bitcoin'));
+	let planBNetwork =
+		$derived(communities &&
+		communities.filter((community) => community.tags.organization === 'plan-b-network'));
+	let satoshiSpritz =
+		$derived(communities &&
+		communities.filter((community) => community.tags.organization === 'satoshi-spritz'));
 
-	let continentChartCanvas: HTMLCanvasElement;
+	let continentChartCanvas: HTMLCanvasElement = $state();
 	let continentChart: Chart<'doughnut', number[], string>;
 
 	const populateChart = () => {
@@ -195,14 +201,16 @@
 		}
 	};
 
-	$: $areas &&
-		$areas.length &&
-		communities &&
-		communities.length &&
-		initialRenderComplete &&
-		chartSync($syncStatus);
+	run(() => {
+		$areas &&
+			$areas.length &&
+			communities &&
+			communities.length &&
+			initialRenderComplete &&
+			chartSync($syncStatus);
+	});
 
-	let section: string;
+	let section: string = $state();
 	const sections = [
 		'--Continents--',
 		'Africa',
@@ -232,7 +240,7 @@
 		'Plan B Network',
 		'Satoshi Spritz'
 	];
-	$: communitySections = [
+	let communitySections = $derived([
 		{
 			section: 'Africa',
 			communities: africa && africa.filter((community) => !community.tags.organization)
@@ -276,7 +284,7 @@
 		{ section: 'Mi Primer Bitcoin', communities: miPrimerBitcoin },
 		{ section: 'Plan B Network', communities: planBNetwork },
 		{ section: 'Satoshi Spritz', communities: satoshiSpritz }
-	];
+	]);
 
 	onMount(async () => {
 		if (browser) {
@@ -349,15 +357,15 @@
 						<div class="flex flex-wrap justify-center">
 							<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 							{#each Array(6) as skeleton}
-								<div class="m-2 w-[94px] animate-pulse rounded-sm bg-link/50 py-2" />
+								<div class="m-2 w-[94px] animate-pulse rounded-sm bg-link/50 py-2"></div>
 							{/each}
 						</div>
 						<div
 							class="mx-auto h-[225px] w-[225px] animate-pulse rounded-full bg-link/50 md:h-[300px] md:w-[300px]"
-						/>
+						></div>
 					</div>
 				{/if}
-				<canvas bind:this={continentChartCanvas} width="100%" height="350" />
+				<canvas bind:this={continentChartCanvas} width="100%" height="350"></canvas>
 			</div>
 
 			<div>
@@ -372,7 +380,7 @@
 						<select
 							class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link dark:bg-white/[0.15] dark:text-white md:w-auto"
 							bind:value={section}
-							on:change={(e) => {
+							onchange={(e) => {
 								// @ts-expect-error
 								section = e.target?.value;
 								// @ts-expect-error

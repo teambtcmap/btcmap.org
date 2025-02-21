@@ -1,9 +1,19 @@
 <script lang="ts">
-	export let w: string;
-	export let h: string;
-	export let style: undefined | string = undefined;
-	export let icon: string;
-	export let type: 'apps' | 'material' | 'mobile-nav' | 'popup' | 'socials';
+	interface Props {
+		w: string;
+		h: string;
+		style?: undefined | string;
+		icon: string;
+		type: 'apps' | 'material' | 'mobile-nav' | 'popup' | 'socials';
+	}
+
+	let {
+		w,
+		h,
+		style = undefined,
+		icon,
+		type
+	}: Props = $props();
 </script>
 
 <svg width="{w}px" height="{h}px" class={style}>

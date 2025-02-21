@@ -16,8 +16,8 @@
 	const onchain = 'bc1qqmy5c03clt6a72aq0ys5jzm2sjnws3qr05nvmz';
 	const lnurlp = 'LNURL1DP68GURN8GHJ7CM0WFJJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQPSYZ34';
 
-	let showQr = false;
-	let network: DonationType;
+	let showQr = $state(false);
+	let network: DonationType = $state();
 
 	const showQrToggle = (type: DonationType) => {
 		network = type;
@@ -93,7 +93,7 @@
 								<canvas
 									use:renderQr
 									class="mx-auto h-[200px] w-[200px] rounded-xl border-4 border-link transition-colors hover:border-hover sm:h-[256px] sm:w-[256px]"
-								/>
+								></canvas>
 							</a>
 
 							<!-- cta -->

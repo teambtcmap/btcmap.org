@@ -2,13 +2,23 @@
 	import type { EventType } from '$lib/types';
 	import Time from 'svelte-time';
 
-	export let location: string;
-	export let action: EventType;
-	export let time: string;
-	export let latest: boolean;
-	export let merchantId: string;
+	interface Props {
+		location: string;
+		action: EventType;
+		time: string;
+		latest: boolean;
+		merchantId: string;
+	}
 
-	$: deleteLink = merchantId.split(':');
+	let {
+		location,
+		action,
+		time,
+		latest,
+		merchantId
+	}: Props = $props();
+
+	let deleteLink = $derived(merchantId.split(':'));
 
 	const capitalizeFirstLetter = (string: string) => {
 		return string.charAt(0).toUpperCase() + string.slice(1);
@@ -28,14 +38,14 @@
 				: action === 'delete'
 					? 'bg-deleted'
 					: 'bg-link'} opacity-75"
-		/>
+		></span>
 		<span
 			class="relative inline-flex h-3 w-3 rounded-full {action === 'create'
 				? 'bg-created'
 				: action === 'delete'
 					? 'bg-deleted'
 					: 'bg-link'}"
-		/>
+		></span>
 	</span>
 
 	<div class="w-full flex-wrap items-center justify-between space-y-2 lg:flex lg:space-y-0">

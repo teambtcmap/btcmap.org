@@ -1,12 +1,23 @@
 <script lang="ts">
 	import { LoadingSpinner } from '$lib/comp';
 
-	export let title: string;
-	export let stat: number | undefined;
-	export let percent: undefined | string = undefined;
-	export let change: undefined | string = undefined;
-	export let border: undefined | string = undefined;
-	export let loading: boolean;
+	interface Props {
+		title: string;
+		stat: number | undefined;
+		percent?: undefined | string;
+		change?: undefined | string;
+		border?: undefined | string;
+		loading: boolean;
+	}
+
+	let {
+		title,
+		stat,
+		percent = undefined,
+		change = undefined,
+		border = undefined,
+		loading
+	}: Props = $props();
 </script>
 
 <div class="space-y-5 p-5 {border}">
@@ -41,7 +52,7 @@
 			{/if}
 		{:else}
 			<!-- loading skeleton -->
-			<span class="h-[48px] w-[150px] animate-pulse rounded-xl bg-link/50" />
+			<span class="h-[48px] w-[150px] animate-pulse rounded-xl bg-link/50"></span>
 		{/if}
 	</div>
 </div>

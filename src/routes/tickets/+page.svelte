@@ -14,29 +14,29 @@
 	import { onDestroy, onMount } from 'svelte';
 
 	const ticketTypes = ['Add', 'Verify', 'Community'];
-	let showType = 'Add';
+	let showType = $state('Add');
 
-	let tickets: any[] = [];
-	let totalTickets: number;
+	let tickets: any[] = $state([]);
+	let totalTickets: number = $state();
 
-	$: add =
-		tickets && tickets.length
+	let add =
+		$derived(tickets && tickets.length
 			? tickets.filter((issue) =>
 					issue.labels.find((label: any) => label.name === 'location-submission')
 				)
-			: [];
-	$: verify =
-		tickets && tickets.length
+			: []);
+	let verify =
+		$derived(tickets && tickets.length
 			? tickets.filter((issue) =>
 					issue.labels.find((label: any) => label.name === 'verify-submission')
 				)
-			: [];
-	$: community =
-		tickets && tickets.length
+			: []);
+	let community =
+		$derived(tickets && tickets.length
 			? tickets.filter((issue) =>
 					issue.labels.find((label: any) => label.name === 'community-submission')
 				)
-			: [];
+			: []);
 
 	const getIssues = () => {
 		axios
@@ -118,7 +118,7 @@
 									: type === 'Community'
 										? 'rounded-b md:rounded-r md:rounded-bl-none'
 										: ''} {showType === type ? 'bg-link text-white' : ''} transition-colors"
-								on:click={() => (showType = type)}>{type}</button
+								onclick={() => (showType = type)}>{type}</button
 							>
 						{/each}
 					</div>

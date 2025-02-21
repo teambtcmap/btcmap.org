@@ -2,35 +2,39 @@
 	import { Socials, SponsorBadge, Tip } from '$lib/comp';
 	import { TipType, type AreaTags } from '$lib/types';
 
-	export let id: string;
-	export let tags: AreaTags;
+	interface Props {
+		id: string;
+		tags: AreaTags;
+	}
 
-	$: image = tags['icon:square'] && tags['icon:square'];
-	$: website = tags['contact:website'] && tags['contact:website'];
-	$: email = tags['contact:email'] && tags['contact:email'];
-	$: nostr = tags['contact:nostr'] && tags['contact:nostr'];
-	$: twitter = tags['contact:twitter'] && tags['contact:twitter'];
-	$: secondTwitter = tags['contact:second_twitter'] && tags['contact:second_twitter'];
-	$: meetup = tags['contact:meetup'] && tags['contact:meetup'];
-	$: eventbrite = tags['contact:eventbrite'] && tags['contact:eventbrite'];
-	$: telegram = tags['contact:telegram'] && tags['contact:telegram'];
-	$: discord = tags['contact:discord'] && tags['contact:discord'];
-	$: youtube = tags['contact:youtube'] && tags['contact:youtube'];
-	$: github = tags['contact:github'] && tags['contact:github'];
-	$: reddit = tags['contact:reddit'] && tags['contact:reddit'];
-	$: instagram = tags['contact:instagram'] && tags['contact:instagram'];
-	$: whatsapp = tags['contact:whatsapp'] && tags['contact:whatsapp'];
-	$: facebook = tags['contact:facebook'] && tags['contact:facebook'];
-	$: linkedin = tags['contact:linkedin'] && tags['contact:linkedin'];
-	$: rss = tags['contact:rss'] && tags['contact:rss'];
-	$: signal = tags['contact:signal'] && tags['contact:signal'];
-	$: simplex = tags['contact:simplex'] && tags['contact:simplex'];
-	$: tip =
-		(tags['tips:lightning_address'] && {
+	let { id, tags }: Props = $props();
+
+	let image = $derived(tags['icon:square'] && tags['icon:square']);
+	let website = $derived(tags['contact:website'] && tags['contact:website']);
+	let email = $derived(tags['contact:email'] && tags['contact:email']);
+	let nostr = $derived(tags['contact:nostr'] && tags['contact:nostr']);
+	let twitter = $derived(tags['contact:twitter'] && tags['contact:twitter']);
+	let secondTwitter = $derived(tags['contact:second_twitter'] && tags['contact:second_twitter']);
+	let meetup = $derived(tags['contact:meetup'] && tags['contact:meetup']);
+	let eventbrite = $derived(tags['contact:eventbrite'] && tags['contact:eventbrite']);
+	let telegram = $derived(tags['contact:telegram'] && tags['contact:telegram']);
+	let discord = $derived(tags['contact:discord'] && tags['contact:discord']);
+	let youtube = $derived(tags['contact:youtube'] && tags['contact:youtube']);
+	let github = $derived(tags['contact:github'] && tags['contact:github']);
+	let reddit = $derived(tags['contact:reddit'] && tags['contact:reddit']);
+	let instagram = $derived(tags['contact:instagram'] && tags['contact:instagram']);
+	let whatsapp = $derived(tags['contact:whatsapp'] && tags['contact:whatsapp']);
+	let facebook = $derived(tags['contact:facebook'] && tags['contact:facebook']);
+	let linkedin = $derived(tags['contact:linkedin'] && tags['contact:linkedin']);
+	let rss = $derived(tags['contact:rss'] && tags['contact:rss']);
+	let signal = $derived(tags['contact:signal'] && tags['contact:signal']);
+	let simplex = $derived(tags['contact:simplex'] && tags['contact:simplex']);
+	let tip =
+		$derived((tags['tips:lightning_address'] && {
 			destination: tags['tips:lightning_address'],
 			type: TipType.Address
 		}) ||
-		(tags['tips:url'] && { destination: tags['tips:url'], type: TipType.Url });
+		(tags['tips:url'] && { destination: tags['tips:url'], type: TipType.Url }));
 </script>
 
 <div
@@ -44,7 +48,7 @@
 					: '/images/bitcoin.svg'}
 				alt={tags.name}
 				class="mx-auto h-20 w-20 rounded-full object-cover"
-				on:error={function () {
+				onerror={function () {
 					this.src = '/images/bitcoin.svg';
 				}}
 			/>

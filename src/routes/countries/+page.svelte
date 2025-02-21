@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { browser } from '$app/environment';
 	import { CountrySection, Footer, Header, HeaderPlaceholder, PrimaryButton } from '$lib/comp';
 	import { areaError, areas, theme } from '$lib/store';
@@ -6,10 +8,12 @@
 	import { onMount } from 'svelte';
 
 	// alert for area errors
-	$: $areaError && errToast($areaError);
+	run(() => {
+		$areaError && errToast($areaError);
+	});
 
-	$: countries =
-		$areas && $areas.length
+	let countries =
+		$derived($areas && $areas.length
 			? $areas
 					.filter(
 						(area) =>
@@ -32,18 +36,18 @@
 						// names must be equal
 						return 0;
 					})
-			: undefined;
+			: undefined);
 
-	$: africa = countries && countries.filter((country) => country.tags.continent === 'Africa');
-	$: asia = countries && countries.filter((country) => country.tags.continent === 'Asia');
-	$: europe = countries && countries.filter((country) => country.tags.continent === 'Europe');
-	$: northAmerica =
-		countries && countries.filter((country) => country.tags.continent === 'North America');
-	$: oceania = countries && countries.filter((country) => country.tags.continent === 'Oceania');
-	$: southAmerica =
-		countries && countries.filter((country) => country.tags.continent === 'South America');
+	let africa = $derived(countries && countries.filter((country) => country.tags.continent === 'Africa'));
+	let asia = $derived(countries && countries.filter((country) => country.tags.continent === 'Asia'));
+	let europe = $derived(countries && countries.filter((country) => country.tags.continent === 'Europe'));
+	let northAmerica =
+		$derived(countries && countries.filter((country) => country.tags.continent === 'North America'));
+	let oceania = $derived(countries && countries.filter((country) => country.tags.continent === 'Oceania'));
+	let southAmerica =
+		$derived(countries && countries.filter((country) => country.tags.continent === 'South America'));
 
-	let section: string;
+	let section: string = $state();
 	const sections = [
 		'--Continents--',
 		'Africa',
@@ -53,7 +57,7 @@
 		'Oceania',
 		'South America'
 	];
-	$: countrySections = [
+	let countrySections = $derived([
 		{
 			section: 'Africa',
 			countries: africa
@@ -78,7 +82,7 @@
 			section: 'South America',
 			countries: southAmerica
 		}
-	];
+	]);
 
 	onMount(async () => {
 		if (browser) {
@@ -136,7 +140,7 @@
 						<select
 							class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link dark:bg-white/[0.15] dark:text-white md:w-auto"
 							bind:value={section}
-							on:change={(e) => {
+							onchange={(e) => {
 								// @ts-expect-error
 								section = e.target?.value;
 								// @ts-expect-error

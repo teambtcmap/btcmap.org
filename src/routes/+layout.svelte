@@ -15,6 +15,11 @@
 	import { onDestroy, onMount } from 'svelte';
 	import 'tippy.js/dist/tippy.css';
 	import '../app.css';
+	interface Props {
+		children?: import('svelte').Snippet;
+	}
+
+	let { children }: Props = $props();
 
 	axios.defaults.timeout = 600000;
 
@@ -64,7 +69,7 @@
 	<meta property="alby:name" content="BTC Map" />
 </svelte:head>
 
-<slot />
+{@render children?.()}
 <SvelteToast {options} />
 
 <style>

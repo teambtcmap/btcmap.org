@@ -39,7 +39,7 @@
 					{/each}
 				{:else}
 					<div class="flex items-center space-x-2">
-						<i class="fa-solid fa-thumbs-up w-3" />
+						<i class="fa-solid fa-thumbs-up w-3"></i>
 						<p>No tagging issues!</p>
 					</div>
 				{/if}

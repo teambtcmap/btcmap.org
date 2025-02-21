@@ -1,13 +1,23 @@
 <script lang="ts">
-	export let type: string;
-	export let text: string;
-	export let issue: number;
-	export let link: string;
-	export let buttonWidth = 'w-52';
 
 	import { HeaderPlaceholder, PrimaryButton } from '$lib/comp';
 	import { socials, theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
+	interface Props {
+		type: string;
+		text: string;
+		issue: number;
+		link: string;
+		buttonWidth?: string;
+	}
+
+	let {
+		type,
+		text,
+		issue,
+		link,
+		buttonWidth = 'w-52'
+	}: Props = $props();
 </script>
 
 <div class="mt-10 flex items-center justify-center pb-20 text-center md:pb-32">

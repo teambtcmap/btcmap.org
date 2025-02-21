@@ -1,14 +1,22 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import tippy from 'tippy.js';
 
-	export let tagger: { id: number; avatar: string; username: string };
+	interface Props {
+		tagger: { id: number; avatar: string; username: string };
+	}
 
-	let taggerTooltip: HTMLAnchorElement;
+	let { tagger }: Props = $props();
 
-	$: taggerTooltip &&
-		tippy([taggerTooltip], {
-			content: tagger.username
-		});
+	let taggerTooltip: HTMLAnchorElement = $state();
+
+	run(() => {
+		taggerTooltip &&
+			tippy([taggerTooltip], {
+				content: tagger.username
+			});
+	});
 </script>
 
 <a bind:this={taggerTooltip} href="/tagger/{tagger.id}">
@@ -16,7 +24,7 @@
 		src={tagger.avatar}
 		alt="avatar"
 		class="h-24 w-24 rounded-full bg-black object-cover"
-		on:error={function () {
+		onerror={function () {
 			this.src = '/images/satoshi-nakamoto.png';
 		}}
 	/>

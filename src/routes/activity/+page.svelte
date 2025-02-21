@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import {
 		Footer,
 		Header,
@@ -21,14 +23,20 @@
 	import { detectTheme, errToast, formatElementID } from '$lib/utils';
 
 	// alert for user errors
-	$: $userError && errToast($userError);
+	run(() => {
+		$userError && errToast($userError);
+	});
 	// alert for event errors
-	$: $eventError && errToast($eventError);
+	run(() => {
+		$eventError && errToast($eventError);
+	});
 	// alert for element errors
-	$: $elementError && errToast($elementError);
+	run(() => {
+		$elementError && errToast($elementError);
+	});
 
-	let elementsLoading: boolean;
-	let supertaggers: ActivityEvent[];
+	let elementsLoading: boolean = $state();
+	let supertaggers: ActivityEvent[] = $state();
 
 	const findUser = (tagger: Event) => {
 		let foundUser = $users.find((user) => user.id == tagger['user_id']);
@@ -76,9 +84,11 @@
 		}
 	};
 
-	$: supertaggerSync($syncStatus, $users, $events, $elements);
+	run(() => {
+		supertaggerSync($syncStatus, $users, $events, $elements);
+	});
 
-	$: latestTaggers = supertaggers && supertaggers.length && !elementsLoading ? true : false;
+	let latestTaggers = $derived(supertaggers && supertaggers.length && !elementsLoading ? true : false);
 </script>
 
 <svelte:head>

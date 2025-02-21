@@ -1,7 +1,11 @@
 <script lang="ts">
 	import type { IssueIcon } from '$lib/types';
 
-	export let icon: IssueIcon | string;
+	interface Props {
+		icon: IssueIcon | string;
+	}
+
+	let { icon }: Props = $props();
 </script>
 
 <div class="w-3 flex-shrink-0">

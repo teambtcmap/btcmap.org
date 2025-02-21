@@ -1,7 +1,11 @@
 <script lang="ts">
-	export let link: string;
-	export let icon: string;
-	export let text: string;
+	interface Props {
+		link: string;
+		icon: string;
+		text: string;
+	}
+
+	let { link, icon, text }: Props = $props();
 </script>
 
 <a

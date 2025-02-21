@@ -1,5 +1,9 @@
 <script lang="ts">
-	export let integration: { url: string; icon: string; name: string };
+	interface Props {
+		integration: { url: string; icon: string; name: string };
+	}
+
+	let { integration }: Props = $props();
 </script>
 
 <div class="space-y-2">
@@ -16,7 +20,7 @@
 				: '.jpg'}"
 			alt="logo"
 			class="mx-auto h-24 w-24 rounded-full object-cover"
-			on:error={function () {
+			onerror={function () {
 				this.src = '/images/bitcoin.svg';
 			}}
 		/>

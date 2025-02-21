@@ -2,22 +2,22 @@
 	class="w-full items-center justify-between space-y-1 border-t border-t-statBorder p-5 text-center md:flex md:space-y-0 md:text-left"
 >
 	<div class="items-center space-y-1 md:flex md:space-x-2 md:space-y-0">
-		<i class="fa-solid fa-ticket animate-pulse text-xl text-link/50" />
+		<i class="fa-solid fa-ticket animate-pulse text-xl text-link/50"></i>
 
 		<div>
-			<span class="mr-1 inline-block h-6 w-32 animate-pulse rounded bg-link/50" />
+			<span class="mr-1 inline-block h-6 w-32 animate-pulse rounded bg-link/50"></span>
 
 			<span class="block items-center md:inline-flex">
 				<span
 					class="mb-1 mr-1 inline-block h-7 w-20 animate-pulse rounded-full border border-link bg-link/25 p-1"
-				/>
+				></span>
 			</span>
 
-			<span class="mx-auto block h-12 w-40 animate-pulse rounded bg-link/50 md:mx-0 md:h-5" />
+			<span class="mx-auto block h-12 w-40 animate-pulse rounded bg-link/50 md:mx-0 md:h-5"></span>
 		</div>
 	</div>
 
 	<div>
-		<i class="fa-solid fa-comment animate-pulse text-link/50" />
+		<i class="fa-solid fa-comment animate-pulse text-link/50"></i>
 	</div>
 </div>

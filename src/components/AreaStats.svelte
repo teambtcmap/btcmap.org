@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { browser } from '$app/environment';
 	import { ProfileStat } from '$lib/comp';
 	import { calcVerifiedDate, verifiedArr } from '$lib/map/setup';
@@ -8,12 +10,16 @@
 	import Chart from 'chart.js/auto';
 	import { onMount } from 'svelte';
 
-	export let name: string;
-	export let filteredElements: Element[];
-	export let areaReports: Report[];
+	interface Props {
+		name: string;
+		filteredElements: Element[];
+		areaReports: Report[];
+	}
 
-	let initialRenderComplete = false;
-	let dataInitialized = false;
+	let { name, filteredElements, areaReports }: Props = $props();
+
+	let initialRenderComplete = $state(false);
+	let dataInitialized = $state(false);
 
 	const initializeData = () => {
 		if (dataInitialized) return;
@@ -254,30 +260,34 @@
 		dataInitialized = true;
 	};
 
-	$: filteredElements &&
-		areaReports &&
-		initialRenderComplete &&
-		!dataInitialized &&
-		initializeData();
+	run(() => {
+		filteredElements &&
+			areaReports &&
+			initialRenderComplete &&
+			!dataInitialized &&
+			initializeData();
+	});
 
-	let total: number | undefined;
-	let upToDate: number | undefined;
+	let total: number | undefined = $state();
+	let upToDate: number | undefined = $state();
 	let outdated: number | undefined;
 	let legacy: number | undefined;
 
-	let upToDatePercent: string | undefined;
+	let upToDatePercent: string | undefined = $state();
 
-	let updatedChartCanvas: HTMLCanvasElement;
+	let updatedChartCanvas: HTMLCanvasElement = $state();
 	// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 	let updatedChart;
 
-	let chartsLoading = true;
-	let upToDateChartCanvas: HTMLCanvasElement;
-	let upToDateChart: Chart<'line', number[], string>;
-	let totalChartCanvas: HTMLCanvasElement;
-	let totalChart: Chart<'line', number[], string>;
+	let chartsLoading = $state(true);
+	let upToDateChartCanvas: HTMLCanvasElement = $state();
+	let upToDateChart: Chart<'line', number[], string> = $state();
+	let totalChartCanvas: HTMLCanvasElement = $state();
+	let totalChart: Chart<'line', number[], string> = $state();
 
-	$: $theme !== undefined && !chartsLoading && updateChartThemes([upToDateChart, totalChart]);
+	run(() => {
+		$theme !== undefined && !chartsLoading && updateChartThemes([upToDateChart, totalChart]);
+	});
 
 	onMount(async () => {
 		if (browser) {
@@ -320,11 +330,11 @@
 			<div>
 				<i
 					class="fa-solid fa-chart-pie absolute left-1/2 top-1/2 h-52 w-52 -translate-x-1/2 -translate-y-1/2 animate-pulse text-link/50 md:h-60 md:w-60"
-				/>
+				></i>
 			</div>
 		{/if}
 
-		<canvas bind:this={updatedChartCanvas} width="100%" height="250" />
+		<canvas bind:this={updatedChartCanvas} width="100%" height="250"></canvas>
 	</div>
 </section>
 
@@ -342,10 +352,10 @@
 					<div
 						class="absolute left-0 top-0 flex h-[400px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
 					>
-						<i class="fa-solid fa-chart-area h-24 w-24 animate-pulse text-link/50" />
+						<i class="fa-solid fa-chart-area h-24 w-24 animate-pulse text-link/50"></i>
 					</div>
 				{/if}
-				<canvas bind:this={totalChartCanvas} width="100%" height="400" />
+				<canvas bind:this={totalChartCanvas} width="100%" height="400"></canvas>
 			</div>
 			<p class="mt-1 text-center text-sm text-body dark:text-white">
 				*Locations accepting any bitcoin payment method.
@@ -358,10 +368,10 @@
 					<div
 						class="absolute left-0 top-0 flex h-[400px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
 					>
-						<i class="fa-solid fa-chart-area h-24 w-24 animate-pulse text-link/50" />
+						<i class="fa-solid fa-chart-area h-24 w-24 animate-pulse text-link/50"></i>
 					</div>
 				{/if}
-				<canvas bind:this={upToDateChartCanvas} width="100%" height="400" />
+				<canvas bind:this={upToDateChartCanvas} width="100%" height="400"></canvas>
 			</div>
 			<p class="mt-1 text-center text-sm text-body dark:text-white">
 				*Locations with a <em>survey:date</em>, <em>check_date</em>, or

@@ -9,7 +9,7 @@
 	import OutClick from 'svelte-outclick';
 	import { fade, fly } from 'svelte/transition';
 
-	let stage = 0;
+	let stage = $state(0);
 
 	const values = [
 		{ fiat: 5, time: 1 },
@@ -17,8 +17,8 @@
 		{ fiat: 30, time: 12 }
 	];
 
-	let tooltip = false;
-	let selectedBoost: { fiat: number; sats: string; time: number; expires: Date } | undefined;
+	let tooltip = $state(false);
+	let selectedBoost: { fiat: number; sats: string; time: number; expires: Date } | undefined = $state();
 	let boostComplete = false;
 
 	const closeModal = () => {
@@ -38,11 +38,11 @@
 		$resetBoost = $resetBoost + 1;
 	};
 
-	let invoice = '';
+	let invoice = $state('');
 	let hash = '';
-	let qr: HTMLCanvasElement;
+	let qr: HTMLCanvasElement = $state();
 	let checkInvoiceInterval: ReturnType<typeof setInterval>;
-	let loading = false;
+	let loading = $state(false);
 
 	const jsConfetti = new JSConfetti();
 	// @ts-expect-error
@@ -145,8 +145,8 @@
 						</p>
 
 						<button
-							on:mouseenter={() => (tooltip = true)}
-							on:mouseleave={() => (tooltip = false)}
+							onmouseenter={() => (tooltip = true)}
+							onmouseleave={() => (tooltip = false)}
 							class="relative text-sm text-link transition-colors hover:text-hover"
 							>See how it looks
 							{#if tooltip}
@@ -170,7 +170,7 @@
 					<div class="space-y-2 md:flex md:space-x-2 md:space-y-0">
 						{#each values as value}
 							<button
-								on:click={() => {
+								onclick={() => {
 									if (!$exchangeRate) return;
 									let dateNow = new Date();
 									let currentBoost =
@@ -231,7 +231,7 @@
 						<canvas
 							class="mx-auto h-[200px] w-[200px] rounded-2xl border-2 border-mapBorder transition-colors hover:border-link md:h-[275px] md:w-[275px]"
 							bind:this={qr}
-						/>
+						></canvas>
 					</a>
 
 					{#if selectedBoost}
