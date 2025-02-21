@@ -3,6 +3,8 @@
 
 	import { browser } from '$app/environment';
 
+	import { Sections } from '$lib/types';
+
 
 	import { goto } from '$app/navigation';
 	import {
@@ -75,13 +77,6 @@
 	run(() => {
 		$reportError && errToast($reportError);
 	});
-
-	enum Sections {
-		merchants = 'Merchants',
-		stats = 'Stats',
-		activity = 'Activity',
-		maintain = 'Maintain'
-	}
 
 	const sections = Object.values(Sections);
 	let activeSection = $state(Sections.merchants);

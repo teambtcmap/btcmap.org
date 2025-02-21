@@ -279,3 +279,10 @@ export type ChartHistory = '7D' | '1M' | '3M' | '6M' | 'YTD' | '1Y' | 'ALL';
 export type Tickets = [] | 'error';
 
 export type AreaPageProps = { id: string; name: string; tickets: Tickets };
+
+export enum Sections {
+	merchants = 'Merchants',
+	stats = 'Stats',
+	activity = 'Activity',
+	maintain = 'Maintain'
+}
