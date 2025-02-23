@@ -12,6 +12,7 @@
 		"format": "prettier --plugin=prettier-plugin-svelte --plugin=prettier-plugin-tailwindcss --write ."
 	},
 	"devDependencies": {
+		"@playwright/test": "^1.50.1",
 		"@resvg/resvg-js": "^2.6.2",
 		"@sveltejs/adapter-netlify": "^4.4.0",
 		"@sveltejs/kit": "^2.15.2",
@@ -23,6 +24,7 @@
 		"@types/leaflet.featuregroup.subgroup": "^1.0.3",
 		"@types/leaflet.locatecontrol": "^0.74.6",
 		"@types/leaflet.markercluster": "^1.5.5",
+		"@types/node": "^22.13.5",
 		"@types/qrcode": "^1.5.5",
 		"@typescript-eslint/eslint-plugin": "^7.9.0",
 		"@typescript-eslint/parser": "^7.9.0",
