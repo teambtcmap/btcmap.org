@@ -281,13 +281,15 @@
 			// @ts-expect-error
 			const DomEvent = await import('leaflet/src/dom/DomEvent');
 			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
+			const maplibreGl = await import('maplibre-gl');
+			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
 			const leafletLocateControl = await import('leaflet.locatecontrol');
 			const leafletMarkerCluster = await import('leaflet.markercluster');
 			const leafletFeaturegroupSubgroup = await import('leaflet.featuregroup.subgroup');
 			/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
 
 			// add map and tiles
-			map = leaflet.map(mapElement);
+			map = window.L.map(mapElement);
 
 			// use url hash if present
 			if (location.hash) {
