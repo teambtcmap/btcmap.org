@@ -137,7 +137,7 @@
 		// create marker cluster group and layers
 		/* eslint-disable no-undef */
 		// @ts-expect-error
-		let markers = L.markerClusterGroup({ maxClusterRadius: 80, disableClusteringAtZoom: 17	 });
+		let markers = L.markerClusterGroup({ maxClusterRadius: 80, disableClusteringAtZoom: 17 });
 		/* eslint-enable no-undef */
 		let upToDateLayer = leaflet.featureGroup.subGroup(markers);
 		let outdatedLayer = leaflet.featureGroup.subGroup(markers);
