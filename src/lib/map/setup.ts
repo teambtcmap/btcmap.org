@@ -112,15 +112,15 @@ export const layers = (leaflet: Leaflet, map: Map) => {
 	});
 
 	if (theme === 'dark') {
-		osm.addTo(map);
+		openFreeMapDark.addTo(map);
 	} else {
-		osm.addTo(map);
+		openFreeMapLiberty.addTo(map);
 	}
 
 	const baseMaps = {
-		OpenStreetMap: osm,
 		'OpenFreeMap Liberty': openFreeMapLiberty,
-		'OpenFreeMap Dark': openFreeMapDark
+		'OpenFreeMap Dark': openFreeMapDark,
+		OpenStreetMap: osm
 	};
 
 	return baseMaps;
@@ -138,7 +138,7 @@ export const attribution = (L: Leaflet, map: Map) => {
 	OSMAttribution.style.borderRadius = '0 8px 0 0';
 	OSMAttribution.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 	OSMAttribution.innerHTML =
-		'<a href="https://stadiamaps.com/" target="_blank" rel="noreferrer" class="!text-link hover:!text-hover !no-underline transition-colors block md:inline"><span class="text-map dark:text-white">&copy;</span> Stadia Maps</a> <a href="https://openmaptiles.org/" target="_blank" rel="noreferrer" class="!text-link hover:!text-hover !no-underline transition-colors block md:inline"><span class="text-map dark:text-white">&copy;</span> OpenMapTiles</a> <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" class="!text-link hover:!text-hover !no-underline transition-colors block md:inline"><span class="text-map dark:text-white">&copy;</span> OpenStreetMap <span class="text-map dark:text-white">contributors</span></a>';
+		'<a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" class="!text-link hover:!text-hover !no-underline transition-colors block md:inline"><span class="text-map dark:text-white">&copy;</span> OpenStreetMap <span class="text-map dark:text-white">contributors</span></a>';
 	OSMAttribution.classList.add(
 		'dark:!bg-dark',
 		'dark:!text-white',

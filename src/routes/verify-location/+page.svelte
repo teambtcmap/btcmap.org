@@ -25,7 +25,7 @@
 	import type { DomEventType, Element, Leaflet } from '$lib/types';
 	import { detectTheme, errToast } from '$lib/utils';
 	import axios from 'axios';
-	import type { Map, TileLayer } from 'leaflet';
+	import type { Map, MaplibreGL } from 'leaflet';
 	import { onDestroy, onMount } from 'svelte';
 
 	let initialRenderComplete = false;
@@ -56,23 +56,20 @@
 			// add map and tiles
 			map = leaflet.map(mapElement, { attributionControl: false }).setView([0, 0], 2);
 
-			osm = leaflet.tileLayer('https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png', {
-				noWrap: true,
-				maxZoom: 20
+			openFreeMapLiberty = window.L.maplibreGL({
+				style: 'https://tiles.openfreemap.org/styles/liberty',
+				maxZoom: 19
 			});
 
-			alidadeSmoothDark = leaflet.tileLayer(
-				'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
-				{
-					noWrap: true,
-					maxZoom: 20
-				}
-			);
+			openFreeMapDark = window.L.maplibreGL({
+				style: 'https://static.btcmap.org/map-styles/dark.json',
+				maxZoom: 19
+			});
 
 			if (theme === 'dark') {
-				alidadeSmoothDark.addTo(map);
+				openFreeMapDark.addTo(map);
 			} else {
-				osm.addTo(map);
+				openFreeMapLiberty.addTo(map);
 			}
 
 			// set URL lat/long query view if it exists and is valid
@@ -252,8 +249,8 @@
 	let showMap = id ? false : true;
 	let mapLoaded = false;
 
-	let osm: TileLayer;
-	let alidadeSmoothDark: TileLayer;
+	let openFreeMapLiberty: MaplibreGL;
+	let openFreeMapDark: MaplibreGL;
 
 	// alert for map errors
 	$: $elementError && errToast($elementError);
@@ -268,6 +265,8 @@
 			// @ts-expect-error
 			DomEvent = await import('leaflet/src/dom/DomEvent');
 			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
+			const maplibreGl = await import('maplibre-gl');
+			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
 			const leafletLocateControl = await import('leaflet.locatecontrol');
 			const leafletMarkerCluster = await import('leaflet.markercluster');
 			/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
@@ -286,11 +285,11 @@
 
 	const toggleTheme = () => {
 		if ($theme === 'dark') {
-			osm.remove();
-			alidadeSmoothDark.addTo(map);
+			openFreeMapLiberty.remove();
+			openFreeMapDark.addTo(map);
 		} else {
-			alidadeSmoothDark.remove();
-			osm.addTo(map);
+			openFreeMapDark.remove();
+			openFreeMapLiberty.addTo(map);
 		}
 	};
 
