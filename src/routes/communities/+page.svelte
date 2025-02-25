@@ -66,6 +66,9 @@
 	$: bitcoinBulgaria =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'bitcoin-bulgaria');
+	$: goBtc =
+		communities &&
+		communities.filter((community) => community.tags.organization === 'go-btc');
 	$: bitcoinIndonesia =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'bitcoin-indonesia');
