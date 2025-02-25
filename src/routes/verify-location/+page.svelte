@@ -54,16 +54,14 @@
 			const theme = detectTheme();
 
 			// add map and tiles
-			map = leaflet.map(mapElement, { attributionControl: false }).setView([0, 0], 2);
+			map = leaflet.map(mapElement, { attributionControl: false, maxZoom: 19 }).setView([0, 0], 2);
 
 			openFreeMapLiberty = window.L.maplibreGL({
-				style: 'https://tiles.openfreemap.org/styles/liberty',
-				maxZoom: 19
+				style: 'https://tiles.openfreemap.org/styles/liberty'
 			});
 
 			openFreeMapDark = window.L.maplibreGL({
-				style: 'https://static.btcmap.org/map-styles/dark.json',
-				maxZoom: 19
+				style: 'https://static.btcmap.org/map-styles/dark.json'
 			});
 
 			if (theme === 'dark') {

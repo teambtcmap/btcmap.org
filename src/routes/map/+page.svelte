@@ -289,7 +289,7 @@
 			/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
 
 			// add map and tiles
-			map = window.L.map(mapElement);
+			map = window.L.map(mapElement, { maxZoom: 19 });
 
 			// use url hash if present
 			if (location.hash) {

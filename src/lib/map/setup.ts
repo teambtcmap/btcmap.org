@@ -102,13 +102,11 @@ export const layers = (leaflet: Leaflet, map: Map) => {
 	});
 
 	const openFreeMapLiberty = window.L.maplibreGL({
-		style: 'https://tiles.openfreemap.org/styles/liberty',
-		maxZoom: 19
+		style: 'https://tiles.openfreemap.org/styles/liberty'
 	});
 
 	const openFreeMapDark = window.L.maplibreGL({
-		style: 'https://static.btcmap.org/map-styles/dark.json',
-		maxZoom: 19
+		style: 'https://static.btcmap.org/map-styles/dark.json'
 	});
 
 	if (theme === 'dark') {
