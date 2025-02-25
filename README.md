@@ -40,6 +40,28 @@
 
 _NOTE:_ BTC Map uses the latest LTS version of [node](https://nodejs.org/). If you have [NVM](https://github.com/nvm-sh/nvm), you can simply run `nvm use` in the root directory of the repo to switch to the supported node version.
 
+### E2E tests
+
+```sh
+  yarn playwright test
+    Runs the end-to-end tests.
+
+  yarn playwright test --ui
+    Starts the interactive UI mode.
+
+  yarn playwright test --project=chromium
+    Runs the tests only on Desktop Chrome.
+
+  yarn playwright test example
+    Runs the tests in a specific file.
+
+  yarn playwright test --debug
+    Runs the tests in debug mode.
+
+  yarn playwright codegen
+    Auto generate tests with Codegen.
+```
+
 ## PWA
 
 This website is a progressive web app, meaning you can install it on your mobile device and use it like a native application. Just look for the **Add to home screen** or **Install** option in your browser while visiting [btcmap.org](https://btcmap.org).
