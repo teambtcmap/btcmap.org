@@ -66,9 +66,6 @@
 	$: bitcoinBulgaria =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'bitcoin-bulgaria');
-	$: goBtc =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'go-btc');
 	$: bitcoinIndonesia =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'bitcoin-indonesia');
@@ -100,6 +97,9 @@
 		communities.filter((community) => community.tags.organization === 'einundzwanzig');
 	$: enogtyve =
 		communities && communities.filter((community) => community.tags.organization === 'enogtyve');
+	$: goBtc =
+		communities &&
+		communities.filter((community) => community.tags.organization === 'go-btc');
 	$: jednadvacet =
 		communities && communities.filter((community) => community.tags.organization === 'jednadvacet');
 	$: miPrimerBitcoin =
