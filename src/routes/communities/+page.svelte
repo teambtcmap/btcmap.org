@@ -98,8 +98,7 @@
 	$: enogtyve =
 		communities && communities.filter((community) => community.tags.organization === 'enogtyve');
 	$: goBtc =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'go-btc');
+		communities && communities.filter((community) => community.tags.organization === 'go-btc');
 	$: jednadvacet =
 		communities && communities.filter((community) => community.tags.organization === 'jednadvacet');
 	$: miPrimerBitcoin =
