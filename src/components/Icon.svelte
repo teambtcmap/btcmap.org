@@ -7,5 +7,6 @@
 </script>
 
 <svg width="{w}px" height="{h}px" class={style}>
-	<use width="{w}px" height="{h}px" href="/icons/{type}/spritesheet.svg#{icon}" />
+	<!-- <use width="{w}px" height="{h}px" href="/icons/{type}/spritesheet.svg#{icon}" /> -->
+	<use width="{w}px" height="{h}px" href="/__spritemap#sprite-{icon}" />
 </svg>
