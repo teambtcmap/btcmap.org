@@ -159,7 +159,7 @@
 
 		const setupMap = () => {
 			// add map
-			map = leaflet.map(mapElement, { attributionControl: false });
+			map = leaflet.map(mapElement, { attributionControl: false, maxZoom: 19 });
 
 			// add tiles and basemaps
 			baseMaps = layers(leaflet, map);
@@ -325,6 +325,8 @@
 			// @ts-expect-error
 			DomEvent = await import('leaflet/src/dom/DomEvent');
 			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
+			const maplibreGl = await import('maplibre-gl');
+			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
 			const leafletLocateControl = await import('leaflet.locatecontrol');
 			/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
 
@@ -334,11 +336,11 @@
 
 	const toggleTheme = () => {
 		if ($theme === 'dark') {
-			baseMaps['OSM Bright'].remove();
-			baseMaps['Alidade Smooth Dark'].addTo(map);
+			baseMaps['OpenFreeMap Liberty'].remove();
+			baseMaps['OpenFreeMap Dark'].addTo(map);
 		} else {
-			baseMaps['Alidade Smooth Dark'].remove();
-			baseMaps['OSM Bright'].addTo(map);
+			baseMaps['OpenFreeMap Dark'].remove();
+			baseMaps['OpenFreeMap Liberty'].addTo(map);
 		}
 	};
 

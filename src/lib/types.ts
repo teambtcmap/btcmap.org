@@ -1,6 +1,14 @@
 import type { GeoJSON } from 'geojson';
 import type leaflet from 'leaflet';
-import type { DomEvent, FeatureGroup, LatLng, LayerGroup, Marker, TileLayer } from 'leaflet';
+import type {
+	DomEvent,
+	FeatureGroup,
+	LatLng,
+	LayerGroup,
+	MaplibreGL,
+	Marker,
+	TileLayer
+} from 'leaflet';
 
 // BACKEND
 
@@ -165,19 +173,9 @@ export type DomEventType = typeof DomEvent;
 export type MapGroups = { [key: string]: LayerGroup | FeatureGroup.SubGroup };
 
 export type BaseMaps = {
-	'OSM Bright': TileLayer;
-	'Alidade Smooth Dark': TileLayer;
+	'OpenFreeMap Liberty': MaplibreGL;
+	'OpenFreeMap Dark': MaplibreGL;
 	OpenStreetMap: TileLayer;
-	'Alidade Smooth': TileLayer;
-	Imagery: TileLayer;
-	Outdoors: TileLayer;
-	Terrain: TileLayer;
-	Topo: TileLayer;
-	Toner: TileLayer;
-	'Toner Lite': TileLayer;
-	Watercolor: TileLayer;
-	OpenStreetMapDE: TileLayer;
-	OpenStreetMapFR: TileLayer;
 };
 
 // map
