@@ -16,7 +16,7 @@
 	import rewind from '@mapbox/geojson-rewind';
 	import axios from 'axios';
 	import { geoContains } from 'd3-geo';
-	import type { Map, Marker, TileLayer } from 'leaflet';
+	import type { Map, MaplibreGL, Marker } from 'leaflet';
 	import { onDestroy, onMount, tick } from 'svelte';
 
 	let captcha: HTMLDivElement;
@@ -158,8 +158,8 @@
 	let map: Map;
 	let mapLoaded = false;
 
-	let osm: TileLayer;
-	let alidadeSmoothDark: TileLayer;
+	let openFreeMapLiberty: MaplibreGL;
+	let openFreeMapDark: MaplibreGL;
 
 	onMount(async () => {
 		if (browser) {
@@ -172,29 +172,27 @@
 			const leaflet = await import('leaflet');
 			// @ts-expect-error
 			const DomEvent = await import('leaflet/src/dom/DomEvent');
-			// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
 			const leafletLocateControl = await import('leaflet.locatecontrol');
+			const maplibreGl = await import('maplibre-gl');
+			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
+			/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
 
 			// add map and tiles
-			map = leaflet.map(mapElement, { attributionControl: false }).setView([0, 0], 2);
+			map = leaflet.map(mapElement, { attributionControl: false, maxZoom: 19 }).setView([0, 0], 2);
 
-			osm = leaflet.tileLayer('https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png', {
-				noWrap: true,
-				maxZoom: 20
+			openFreeMapLiberty = window.L.maplibreGL({
+				style: 'https://tiles.openfreemap.org/styles/liberty'
 			});
 
-			alidadeSmoothDark = leaflet.tileLayer(
-				'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
-				{
-					noWrap: true,
-					maxZoom: 20
-				}
-			);
+			openFreeMapDark = window.L.maplibreGL({
+				style: 'https://static.btcmap.org/map-styles/dark.json'
+			});
 
 			if (theme === 'dark') {
-				alidadeSmoothDark.addTo(map);
+				openFreeMapDark.addTo(map);
 			} else {
-				osm.addTo(map);
+				openFreeMapLiberty.addTo(map);
 			}
 
 			// add marker on click
@@ -255,11 +253,11 @@
 
 	const toggleTheme = () => {
 		if ($theme === 'dark') {
-			osm.remove();
-			alidadeSmoothDark.addTo(map);
+			openFreeMapLiberty.remove();
+			openFreeMapDark.addTo(map);
 		} else {
-			alidadeSmoothDark.remove();
-			osm.addTo(map);
+			openFreeMapDark.remove();
+			openFreeMapLiberty.addTo(map);
 		}
 	};
 

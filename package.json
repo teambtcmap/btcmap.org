@@ -48,6 +48,7 @@
 	"dependencies": {
 		"@fortawesome/fontawesome-free": "^6.7.2",
 		"@mapbox/geojson-rewind": "^0.5.2",
+		"@maplibre/maplibre-gl-leaflet": "^0.0.22",
 		"@tanstack/match-sorter-utils": "^8.19.4",
 		"@tanstack/svelte-table": "^8.20.5",
 		"@zerodevx/svelte-toast": "^0.9.6",
@@ -63,6 +64,7 @@
 		"leaflet.locatecontrol": "^0.81.0",
 		"leaflet.markercluster": "^1.5.3",
 		"localforage": "^1.10.0",
+		"maplibre-gl": "4.3.2",
 		"marked": "^15.0.6",
 		"qrcode": "^1.5.4",
 		"svelte-outclick": "^3.7.1",

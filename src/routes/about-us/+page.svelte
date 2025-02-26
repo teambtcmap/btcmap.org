@@ -138,7 +138,6 @@
 		{ name: 'GitHub', icon: 'gh', url: 'https://github.com/' },
 		{ name: 'Voltage', icon: 'voltage', url: 'https://voltage.cloud/' },
 		{ name: 'Leaflet', icon: 'leaflet', url: 'https://leafletjs.com/' },
-		{ name: 'Stadia Maps', icon: 'stadia', url: 'https://stadiamaps.com/' },
 		{ name: 'Chart.js', icon: 'chartjs', url: 'https://www.chartjs.org/' }
 	];
 

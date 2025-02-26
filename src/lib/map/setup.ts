@@ -94,8 +94,6 @@ export const toggleMapButtons = () => {
 };
 
 export const layers = (leaflet: Leaflet, map: Map) => {
-	const urlBasemap = new URLSearchParams(location.search).get('basemap') || '';
-	const validBasemaps = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13'];
 	const theme = detectTheme();
 
 	const osm = leaflet.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -103,154 +101,24 @@ export const layers = (leaflet: Leaflet, map: Map) => {
 		maxZoom: 19
 	});
 
-	const osmDE = leaflet.tileLayer('https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png', {
-		noWrap: true,
-		maxZoom: 18
+	const openFreeMapLiberty = window.L.maplibreGL({
+		style: 'https://tiles.openfreemap.org/styles/liberty'
 	});
 
-	const osmFR = leaflet.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
-		noWrap: true,
-		maxZoom: 20
+	const openFreeMapDark = window.L.maplibreGL({
+		style: 'https://static.btcmap.org/map-styles/dark.json'
 	});
 
-	const topo = leaflet.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-		noWrap: true,
-		maxZoom: 17
-	});
-
-	const imagery = leaflet.tileLayer(
-		'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-		{
-			noWrap: true
-		}
-	);
-
-	const toner = leaflet.tileLayer(
-		'https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png	',
-		{
-			noWrap: true,
-			maxZoom: 20
-		}
-	);
-
-	const tonerLite = leaflet.tileLayer(
-		'https://tiles.stadiamaps.com/tiles/stamen_toner_lite/{z}/{x}/{y}{r}.png	',
-		{
-			noWrap: true,
-			maxZoom: 20
-		}
-	);
-
-	const watercolor = leaflet.tileLayer(
-		'https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg	',
-		{
-			noWrap: true,
-			maxZoom: 16
-		}
-	);
-
-	const terrain = leaflet.tileLayer(
-		'https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png	',
-		{
-			noWrap: true,
-			maxZoom: 18
-		}
-	);
-
-	const alidadeSmooth = leaflet.tileLayer(
-		'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png',
-		{
-			noWrap: true,
-			maxZoom: 20
-		}
-	);
-
-	const alidadeSmoothDark = leaflet.tileLayer(
-		'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
-		{
-			noWrap: true,
-			maxZoom: 20
-		}
-	);
-
-	const outdoors = leaflet.tileLayer(
-		'https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png',
-		{
-			noWrap: true,
-			maxZoom: 20
-		}
-	);
-
-	const OSMBright = leaflet.tileLayer(
-		'https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png',
-		{
-			noWrap: true,
-			maxZoom: 20
-		}
-	);
-
-	if (validBasemaps.includes(urlBasemap)) {
-		switch (urlBasemap) {
-			case '1':
-				OSMBright.addTo(map);
-				break;
-			case '2':
-				alidadeSmoothDark.addTo(map);
-				break;
-			case '3':
-				osm.addTo(map);
-				break;
-			case '4':
-				alidadeSmooth.addTo(map);
-				break;
-			case '5':
-				imagery.addTo(map);
-				break;
-			case '6':
-				outdoors.addTo(map);
-				break;
-			case '7':
-				terrain.addTo(map);
-				break;
-			case '8':
-				topo.addTo(map);
-				break;
-			case '9':
-				toner.addTo(map);
-				break;
-			case '10':
-				tonerLite.addTo(map);
-				break;
-			case '11':
-				watercolor.addTo(map);
-				break;
-			case '12':
-				osmDE.addTo(map);
-				break;
-			case '13':
-				osmFR.addTo(map);
-				break;
-		}
-	} else if (theme === 'dark') {
-		alidadeSmoothDark.addTo(map);
+	if (theme === 'dark') {
+		openFreeMapDark.addTo(map);
 	} else {
-		OSMBright.addTo(map);
+		openFreeMapLiberty.addTo(map);
 	}
 
 	const baseMaps = {
-		'OSM Bright': OSMBright,
-		'Alidade Smooth Dark': alidadeSmoothDark,
-		OpenStreetMap: osm,
-		'Alidade Smooth': alidadeSmooth,
-		Imagery: imagery,
-		Outdoors: outdoors,
-		Terrain: terrain,
-		Topo: topo,
-		Toner: toner,
-		'Toner Lite': tonerLite,
-		Watercolor: watercolor,
-		OpenStreetMapDE: osmDE,
-		OpenStreetMapFR: osmFR
+		'OpenFreeMap Liberty': openFreeMapLiberty,
+		'OpenFreeMap Dark': openFreeMapDark,
+		OpenStreetMap: osm
 	};
 
 	return baseMaps;
@@ -268,7 +136,7 @@ export const attribution = (L: Leaflet, map: Map) => {
 	OSMAttribution.style.borderRadius = '0 8px 0 0';
 	OSMAttribution.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 	OSMAttribution.innerHTML =
-		'<a href="https://stadiamaps.com/" target="_blank" rel="noreferrer" class="!text-link hover:!text-hover !no-underline transition-colors block md:inline"><span class="text-map dark:text-white">&copy;</span> Stadia Maps</a> <a href="https://openmaptiles.org/" target="_blank" rel="noreferrer" class="!text-link hover:!text-hover !no-underline transition-colors block md:inline"><span class="text-map dark:text-white">&copy;</span> OpenMapTiles</a> <a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" class="!text-link hover:!text-hover !no-underline transition-colors block md:inline"><span class="text-map dark:text-white">&copy;</span> OpenStreetMap <span class="text-map dark:text-white">contributors</span></a>';
+		'<a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" class="!text-link hover:!text-hover !no-underline transition-colors block md:inline"><span class="text-map dark:text-white">&copy;</span> OpenStreetMap <span class="text-map dark:text-white">contributors</span></a>';
 	OSMAttribution.classList.add(
 		'dark:!bg-dark',
 		'dark:!text-white',

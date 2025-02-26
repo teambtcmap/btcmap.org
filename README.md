@@ -56,11 +56,8 @@ Thanks to:
 
 ### Base map tiles
 
-- [OpenStreetMap](https://www.openstreetmap.org) (OpenStreetMap, OpenStreetMapDE, OpenStreetMapFR)
-- [OpenTopoMap](https://opentopomap.org) (Topo)
-- [ESRI](https://www.esri.com) (Imagery)
-- [Stamen](http://maps.stamen.com) (Terrain, Toner, Toner Lite, Watercolor)
-- [Stadia](https://stadiamaps.com/) (Alidade Smooth, Alidade Smooth Dark, Outdoors, OSM Bright)
+- [OpenFreeMap](https://openfreemap.org/)
+- [OpenStreetMap](https://www.openstreetmap.org)
 
 ### Icons
 
