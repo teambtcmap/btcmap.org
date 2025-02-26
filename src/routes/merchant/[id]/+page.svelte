@@ -355,7 +355,7 @@
 		}
 	});
 
-	const ogImage = `https://btcmap.org/og/merchant?lat=${data.lat}&lon=${data.lon}`;
+	const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 </script>
 
 <svelte:head>
