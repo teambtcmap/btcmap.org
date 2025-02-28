@@ -3,9 +3,9 @@
 export const iconNames = [
   "youtube",
   "whatsapp",
+  "website",
   "twitter",
   "telegram",
-  "spritesheet",
   "signal",
   "reddit",
   "nostr",
@@ -13,6 +13,7 @@ export const iconNames = [
   "instagram",
   "github",
   "facebook",
+  "email",
   "discord",
   "amboss",
 ] as const
