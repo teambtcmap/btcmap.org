@@ -4,7 +4,7 @@ import { defineConfig } from 'vite';
 import VitePluginSvgSpritemap from '@spiriit/vite-plugin-svg-spritemap';
 
 export default defineConfig({
-	plugins: [sveltekit(), VitePluginSvgSpritemap('./src/lib/icons/**/*.svg')],
+	plugins: [sveltekit(), VitePluginSvgSpritemap('./src/lib/icons/socials/*.svg')],
 	optimizeDeps: { exclude: ['@resvg/resvg-js'] },
 	server: {
 		host: '0.0.0.0',
