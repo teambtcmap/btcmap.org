@@ -408,18 +408,13 @@
 							</div>
 
 							<div>
-								<label for="address" class="mb-2 block font-semibold"
-									>Address <InfoTooltip
-										tooltip="All locations are required to have a physical
-										address. You must be able to visit the location in person and pay with bitcoin. Service industries are not map-able."
-									/></label
-								>
+								<label for="address" class="mb-2 block font-semibold">Address</label>
 								<input
 									disabled={!captchaSecret || !mapLoaded}
 									type="text"
 									name="address"
+									id="address"
 									placeholder="2100 Freedom Drive..."
-									required
 									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:this={address}
 								/>
