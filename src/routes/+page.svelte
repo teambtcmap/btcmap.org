@@ -63,7 +63,6 @@
 									h="32"
 									style={app.icon === 'play' ? 'pl-0.5' : ''}
 									icon={app.icon}
-									type="apps"
 								/>
 							</a>
 						</div>

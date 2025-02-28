@@ -2,6 +2,7 @@
 
 export const iconNames = [
   "spritesheet",
+  "activity",
 ] as const
 
 export type IconName = typeof iconNames[number]

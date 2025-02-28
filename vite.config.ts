@@ -4,7 +4,10 @@ import { defineConfig } from 'vite';
 import VitePluginSvgSpritemap from '@spiriit/vite-plugin-svg-spritemap';
 
 export default defineConfig({
-	plugins: [sveltekit(), VitePluginSvgSpritemap('./src/lib/icons/**/*.svg')],
+	plugins: [
+		sveltekit(),
+		VitePluginSvgSpritemap(['./static/icons/socials/*.svg', './static/icons/apps/*.svg'])
+	],
 	server: {
 		host: '0.0.0.0',
 		allowedHosts: ['btcmap.org']
