@@ -16,7 +16,7 @@
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.24.0",
-		"@spiriit/vite-plugin-svg-spritemap": "^3.0.1",
+		"@spiriit/vite-plugin-svg-spritemap": "^4.0.0",
 		"@sveltejs/adapter-netlify": "^4.4.0",
 		"@sveltejs/kit": "^2.15.2",
 		"@sveltejs/vite-plugin-svelte": "^3.1.0",
