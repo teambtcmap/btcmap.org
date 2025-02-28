@@ -399,6 +399,7 @@
 									disabled={!captchaSecret || !mapLoaded}
 									type="text"
 									name="name"
+									id="name"
 									placeholder="Satoshi's Comics"
 									required
 									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
@@ -474,6 +475,7 @@
 									required
 									type="text"
 									name="category"
+									id="category"
 									placeholder="Restaurant etc."
 									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:this={category}
@@ -566,6 +568,7 @@
 									disabled={!captchaSecret || !mapLoaded}
 									type="url"
 									name="website"
+									id="website"
 									placeholder="https://bitcoin.org"
 									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:this={website}
@@ -580,6 +583,7 @@
 									disabled={!captchaSecret || !mapLoaded}
 									type="tel"
 									name="phone"
+									id="phone"
 									placeholder="Number"
 									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:this={phone}
@@ -594,6 +598,7 @@
 									disabled={!captchaSecret || !mapLoaded}
 									type="text"
 									name="hours"
+									id="hours"
 									placeholder="Mo-Fr 08:30-20:00"
 									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:this={hours}
@@ -609,6 +614,7 @@
 										disabled={!captchaSecret || !mapLoaded}
 										type="text"
 										name="twitter"
+										id="twitter"
 										placeholder="Merchant"
 										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 										bind:this={twitterMerchant}
@@ -631,6 +637,7 @@
 								<textarea
 									disabled={!captchaSecret || !mapLoaded}
 									name="notes"
+									id="notes"
 									placeholder="Any other relevant details?"
 									rows="3"
 									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
@@ -643,6 +650,7 @@
 								<select
 									disabled={!captchaSecret || !mapLoaded}
 									name="source"
+									id="source"
 									required
 									class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:value={source}
@@ -686,6 +694,7 @@
 									required
 									type="email"
 									name="contact"
+									id="contact"
 									placeholder="hello@btcmap.org"
 									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:this={contact}
@@ -715,6 +724,7 @@
 										required
 										type="text"
 										name="captcha"
+										id="captcha"
 										placeholder="Please enter the captcha text."
 										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 										bind:this={captchaInput}
