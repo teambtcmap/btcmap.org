@@ -21,7 +21,7 @@ sw.addEventListener('install', (event) => {
 	// Create a new cache and add offline file to it
 	async function addFileToCache() {
 		const cache = await caches.open(CACHE);
-		await cache.addAll(['/offline.html', '/images/logo.svg', '/icons/socials/spritesheet.svg']);
+		await cache.addAll(['/offline.html', '/images/logo.svg']);
 	}
 
 	event.waitUntil(addFileToCache());
