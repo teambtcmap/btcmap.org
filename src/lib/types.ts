@@ -98,6 +98,17 @@ export type RpcIssue = {
 	issue_code: string;
 };
 
+export type RpcGetMostActiveUsersItem = {
+	id: number;
+	name: string;
+	image_url: string;
+	tip_address: string;
+	edits: number;
+	created: number;
+	updated: number;
+	deleted: number;
+};
+
 export type ElementOSM = {
 	type: 'node' | 'way' | 'relation';
 	id: number;
