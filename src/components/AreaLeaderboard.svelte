@@ -80,7 +80,7 @@
 			});
 
 			leaderboard.sort((a, b) => {
-				// Im so sorry to anyone who is reading this code, ive never used svelte, and my friends asked me for a favor, any mistakes you find please solve, this is a cry for help.
+
 				let aScore: number = 0;
 				let bScore: number = 0;
 				if (localStorage.currentSort === 'totalLocations') {
@@ -110,7 +110,6 @@
 	$: leaderboardPaginated =
 		leaderboard && leaderboard.length && !loading ? leaderboard.slice(0, leaderboardCount) : [];
 
-	// If you wonder if it can get any worse, trust me it can
 	let headings = [
 		'Position',
 		'Name',
