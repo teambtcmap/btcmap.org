@@ -2,7 +2,7 @@
 	import { AreaLeaderboardItem, AreaLeaderboardSkeleton, GradeTable, TopButton } from '$lib/comp';
 	import { areaError, areas, reportError, reports, syncStatus } from '$lib/store';
 	import type { Area, AreaType, LeaderboardArea, Report } from '$lib/types';
-	import { errToast, getGrade, validateContinents } from '$lib/utils';
+	import { detectSort, errToast, getGrade, validateContinents } from '$lib/utils';
 	import tippy from 'tippy.js';
 
 	export let type: AreaType;
@@ -23,6 +23,7 @@
 							area.tags.name &&
 							area.tags['icon:square'] &&
 							area.tags.continent &&
+							area.tags.population &&
 							Object.keys(area.tags).find((key) => key.includes('contact')) &&
 							$reports.find((report) => report.area_id === area.id)
 						);
@@ -33,6 +34,7 @@
 							area.tags.geo_json &&
 							area.tags.name &&
 							area.tags.continent &&
+							area.tags.population &&
 							validateContinents(area.tags.continent)
 						);
 					}
@@ -52,8 +54,11 @@
 	let gradeTooltip: HTMLButtonElement;
 	let gradeTooltipMobile: HTMLButtonElement;
 
-	const score = (report: Report): number => {
-		return Math.max(report.tags.total_elements - report.tags.outdated_elements * 5, 0);
+	const scorePerLocation = (report: Report): number => {
+		return Math.max((report.tags.total_elements - report.tags.outdated_elements * 5), 0);
+	};
+	const scorePerCapita = (report: Report, population: number): number => {
+		return Math.max(((report.tags.total_elements - report.tags.outdated_elements * 5) / population), 0);
 	};
 
 	const populateLeaderboard = (status: boolean, areasFiltered: Area[], areasReports: Report[]) => {
@@ -72,13 +77,22 @@
 			});
 
 			leaderboard.sort((a, b) => {
-				const aScore = score(a.report);
-				const bScore = score(b.report);
+				// Im so sorry to anyone who is reading this code, ive never used svelte, and my friends asked me for a favor, any mistakes you find please solve, this is a cry for help.
+				let aScore: Number = 0;
+				let bScore: Number = 0;
+				if (localStorage.currentSort === "totalLocations"){
+					aScore = scorePerLocation(a.report);
+					bScore = scorePerLocation(b.report);
+				}else{
+					aScore = scorePerCapita(a.report, Number(a.tags.population));
+					bScore = scorePerCapita(b.report, Number(b.tags.population));
+				}
 
 				if (bScore === aScore) {
 					return b.report.tags.total_elements - a.report.tags.total_elements;
 				} else {
-					return bScore - aScore;
+					// I know the number is already a number, but it wont accept it without the number for some reason.
+					return Number(bScore) - Number(aScore);
 				}
 			});
 
@@ -93,7 +107,11 @@
 	$: leaderboardPaginated =
 		leaderboard && leaderboard.length && !loading ? leaderboard.slice(0, leaderboardCount) : [];
 
-	const headings = ['Position', 'Name', 'Up-To-Date', 'Total Locations', 'Grade'];
+
+		// If you wonder if it can get any worse, trust me it can
+		let headings = ['Position', 'Name', 'Up-To-Date', 'Total Location', 'Locations Per Capita' , 'Grade'];
+
+		
 
 	const setTooltips = () => {
 		tippy([upToDateTooltip, upToDateTooltipMobile], {
@@ -115,7 +133,7 @@
 </script>
 
 <section id="leaderboard" class="dark:lg:rounded dark:lg:bg-white/10 dark:lg:py-8">
-	<div class="mb-5 hidden grid-cols-5 text-center lg:grid">
+	<div class="mb-5 hidden grid-cols-6 text-center lg:grid">
 		{#each headings as heading}
 			<h3 class="text-lg font-semibold text-primary dark:text-white">
 				{heading}
@@ -160,6 +178,7 @@
 					id={item.id}
 					upToDate={item.report.tags.up_to_date_percent}
 					total={item.report.tags.total_elements}
+					perCapita={Math.round((item.report.tags.total_elements / Number(item.tags.population))*100000)}
 					grade={item.grade}
 				/>
 			{/each}

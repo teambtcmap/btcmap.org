@@ -5,7 +5,8 @@
 		Footer,
 		Header,
 		HeaderPlaceholder,
-		PrimaryButton
+		PrimaryButton,
+		LeaderboardSortButton
 	} from '$lib/comp';
 	import { theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
@@ -65,6 +66,10 @@
 						text="View community map"
 						style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
 						link="/communities/map"
+					/>
+					<LeaderboardSortButton
+						text="Toggle Sort"
+						style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
 					/>
 				</div>
 			</div>
