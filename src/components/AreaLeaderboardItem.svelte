@@ -7,7 +7,7 @@
 	export let id: string;
 	export let upToDate: number;
 	export let total: number;
-	export let perCapita : number;
+	export let perCapita: number;
 	export let grade: Grade;
 
 	import { SponsorBadge } from '$lib/comp';
@@ -16,7 +16,7 @@
 	$: stats = [
 		{ stat: upToDate, title: 'Up-To-Date' },
 		{ stat: total, title: 'Total Locations' },
-		{ stat: perCapita, title: 'Total Per Capita'},
+		{ stat: perCapita, title: 'Total Per Capita' },
 		{ stat: grade, title: 'Grade' }
 	];
 </script>

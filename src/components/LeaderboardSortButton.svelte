@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { LoadingSpinner } from '$lib/comp';
 	import { detectSort } from '$lib/utils';
-  import { onMount } from 'svelte';
+	import { onMount } from 'svelte';
 
 	export let text: string;
 	export let style: string;
@@ -11,25 +11,24 @@
 	export let disabled: undefined | boolean = undefined;
 	export let loading: undefined | boolean = undefined;
 
-  let currentSort: undefined | string;
+	let currentSort: undefined | string;
 
-  onMount(() => {
+	onMount(() => {
 		currentSort = detectSort();
 	});
 
-  const toggleSort = () => {
-    if (currentSort === "totalLocations"){
-      currentSort = "locationsPerCap"
-      localStorage.currentSort = currentSort
-      console.log(localStorage.currentSort)
-    }else{
-      currentSort = "totalLocations"
-      localStorage.currentSort = currentSort
-      console.log(localStorage.currentSort)
-    }
-    location.reload();
-  } 
-
+	const toggleSort = () => {
+		if (currentSort === 'totalLocations') {
+			currentSort = 'locationsPerCap';
+			localStorage.currentSort = currentSort;
+			console.log(localStorage.currentSort);
+		} else {
+			currentSort = 'totalLocations';
+			localStorage.currentSort = currentSort;
+			console.log(localStorage.currentSort);
+		}
+		location.reload();
+	};
 </script>
 
 {#if link}

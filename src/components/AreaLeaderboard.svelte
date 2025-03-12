@@ -2,7 +2,7 @@
 	import { AreaLeaderboardItem, AreaLeaderboardSkeleton, GradeTable, TopButton } from '$lib/comp';
 	import { areaError, areas, reportError, reports, syncStatus } from '$lib/store';
 	import type { Area, AreaType, LeaderboardArea, Report } from '$lib/types';
-	import { detectSort, errToast, getGrade, validateContinents } from '$lib/utils';
+	import { errToast, getGrade, validateContinents } from '$lib/utils';
 	import tippy from 'tippy.js';
 
 	export let type: AreaType;
@@ -55,10 +55,13 @@
 	let gradeTooltipMobile: HTMLButtonElement;
 
 	const scorePerLocation = (report: Report): number => {
-		return Math.max((report.tags.total_elements - report.tags.outdated_elements * 5), 0);
+		return Math.max(report.tags.total_elements - report.tags.outdated_elements * 5, 0);
 	};
 	const scorePerCapita = (report: Report, population: number): number => {
-		return Math.max(((report.tags.total_elements - report.tags.outdated_elements * 5) / population), 0);
+		return Math.max(
+			(report.tags.total_elements - report.tags.outdated_elements * 5) / population,
+			0
+		);
 	};
 
 	const populateLeaderboard = (status: boolean, areasFiltered: Area[], areasReports: Report[]) => {
@@ -78,12 +81,12 @@
 
 			leaderboard.sort((a, b) => {
 				// Im so sorry to anyone who is reading this code, ive never used svelte, and my friends asked me for a favor, any mistakes you find please solve, this is a cry for help.
-				let aScore: Number = 0;
-				let bScore: Number = 0;
-				if (localStorage.currentSort === "totalLocations"){
+				let aScore: number = 0;
+				let bScore: number = 0;
+				if (localStorage.currentSort === 'totalLocations') {
 					aScore = scorePerLocation(a.report);
 					bScore = scorePerLocation(b.report);
-				}else{
+				} else {
 					aScore = scorePerCapita(a.report, Number(a.tags.population));
 					bScore = scorePerCapita(b.report, Number(b.tags.population));
 				}
@@ -107,11 +110,15 @@
 	$: leaderboardPaginated =
 		leaderboard && leaderboard.length && !loading ? leaderboard.slice(0, leaderboardCount) : [];
 
-
-		// If you wonder if it can get any worse, trust me it can
-		let headings = ['Position', 'Name', 'Up-To-Date', 'Total Location', 'Locations Per Capita' , 'Grade'];
-
-		
+	// If you wonder if it can get any worse, trust me it can
+	let headings = [
+		'Position',
+		'Name',
+		'Up-To-Date',
+		'Total Location',
+		'Locations Per Capita',
+		'Grade'
+	];
 
 	const setTooltips = () => {
 		tippy([upToDateTooltip, upToDateTooltipMobile], {
@@ -178,7 +185,9 @@
 					id={item.id}
 					upToDate={item.report.tags.up_to_date_percent}
 					total={item.report.tags.total_elements}
-					perCapita={Math.round((item.report.tags.total_elements / Number(item.tags.population))*100000)}
+					perCapita={Math.round(
+						(item.report.tags.total_elements / Number(item.tags.population)) * 1000000
+					)}
 					grade={item.grade}
 				/>
 			{/each}

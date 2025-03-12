@@ -5,7 +5,8 @@
 		Footer,
 		Header,
 		HeaderPlaceholder,
-		PrimaryButton
+		PrimaryButton,
+		LeaderboardSortButton
 	} from '$lib/comp';
 	import { theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
@@ -47,11 +48,17 @@
 				Insights into bitcoin adoption worldwide!
 			</h2>
 
-			<PrimaryButton
-				text="View directory"
-				style="md:w-[200px] mx-auto py-3 rounded-xl"
-				link="/countries"
-			/>
+			<div class="items-center justify-center space-y-5 md:flex md:space-x-5 md:space-y-0">
+				<PrimaryButton
+					text="View directory"
+					style="md:w-[200px] mx-auto py-3 md:mx-0 rounded-xl"
+					link="/countries"
+				/>
+				<LeaderboardSortButton
+					text="Toggle Sort"
+					style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
+				/>
+			</div>
 
 			<AreaLeaderboard type="country" />
 
