@@ -6,10 +6,29 @@
 		Header,
 		HeaderPlaceholder,
 		PrimaryButton,
-		LeaderboardSortButton
 	} from '$lib/comp';
 	import { theme } from '$lib/store';
-	import { detectTheme } from '$lib/utils';
+	import { detectTheme, detectSort } from '$lib/utils';
+	import { onMount } from 'svelte';
+
+	let currentSort: undefined | string;
+
+	onMount(() => {
+		currentSort = detectSort();
+	});
+
+	const toggleSort = () => {
+	if (currentSort === 'totalLocations') {
+		currentSort = 'locationsPerCap';
+		localStorage.currentSort = currentSort;
+		console.log(localStorage.currentSort);
+	} else {
+		currentSort = 'totalLocations';
+		localStorage.currentSort = currentSort;
+		console.log(localStorage.currentSort);
+	}
+	location.reload();
+};
 
 	const routes = [
 		{ name: 'Countries', url: '/countries' },
@@ -54,9 +73,10 @@
 					style="md:w-[200px] mx-auto py-3 md:mx-0 rounded-xl"
 					link="/countries"
 				/>
-				<LeaderboardSortButton
+				<PrimaryButton
 					text="Toggle Sort"
 					style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
+					click={toggleSort}
 				/>
 			</div>
 
