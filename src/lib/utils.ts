@@ -49,7 +49,6 @@ export const detectTheme = () => {
 	}
 };
 
-
 export const detectSort = () => {
 	if (localStorage.currentSort === 'totalLocations' || !('currentSort' in localStorage)) {
 		return 'totalLocations';

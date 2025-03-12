@@ -5,7 +5,7 @@
 		Footer,
 		Header,
 		HeaderPlaceholder,
-		PrimaryButton,
+		PrimaryButton
 	} from '$lib/comp';
 	import { theme } from '$lib/store';
 	import { detectTheme, detectSort } from '$lib/utils';
@@ -18,17 +18,17 @@
 	});
 
 	const toggleSort = () => {
-	if (currentSort === 'totalLocations') {
-		currentSort = 'locationsPerCap';
-		localStorage.currentSort = currentSort;
-		console.log(localStorage.currentSort);
-	} else {
-		currentSort = 'totalLocations';
-		localStorage.currentSort = currentSort;
-		console.log(localStorage.currentSort);
-	}
-	location.reload();
-};
+		if (currentSort === 'totalLocations') {
+			currentSort = 'locationsPerCap';
+			localStorage.currentSort = currentSort;
+			console.log(localStorage.currentSort);
+		} else {
+			currentSort = 'totalLocations';
+			localStorage.currentSort = currentSort;
+			console.log(localStorage.currentSort);
+		}
+		location.reload();
+	};
 
 	const routes = [
 		{ name: 'Countries', url: '/countries' },
