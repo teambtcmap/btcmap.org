@@ -66,7 +66,6 @@
 					top="communities"
 					bottom="countries"
 				/>
-
 			{:else}
 				<!-- regular links -->
 				<a
