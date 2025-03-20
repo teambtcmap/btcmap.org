@@ -2,26 +2,34 @@
 	import { Icon, NavDropdownDesktop, NavDropdownMobile, ThemeToggle } from '$lib/comp';
 
 	const navLinks = [
-		{ title: 'Map', url: '/map', icon: 'map' },
+		{ title: 'Maps', url: '', icon: 'map' },
 		{ title: 'Apps', url: '/apps', icon: 'apps' },
-		{ title: 'Contribute', url: '', icon: 'contribute' },
 		{ title: 'Stats', url: '', icon: 'stats' },
 		{ title: 'Areas', url: '', icon: 'areas' },
+		{ title: 'Maintain', url: '', icon: 'contribute' },
 		{ title: 'Wiki', url: 'https://github.com/teambtcmap/btcmap-general/wiki', icon: 'wiki' },
 		{ title: 'Support Us', url: '/support-us', icon: 'support' }
 	];
 
-	const contributeDropdownLinks = [
-		{ title: 'Add Location', url: '/add-location', icon: 'add' },
-		{ title: 'Verify Location', url: '/verify-location', icon: 'verify' },
-		{ title: 'Open Tickets', url: '/tickets', icon: 'ticket' },
-		{ title: 'Tagging Issues', url: '/tagging-issues', icon: 'issue' }
+	const mapsDropdownLinks = [
+		{ title: 'Merchant Map', url: '/map', icon: 'add' },
+		{ title: 'Community Map', url: '/communities/map', icon: 'communities' }
 	];
 
 	const statsDropdownLinks = [
 		{ title: 'Dashboard', url: '/dashboard', icon: 'dash' },
-		{ title: 'Activity', url: '/activity', icon: 'activity' },
-		{ title: 'Leaderboard', url: '/leaderboard', icon: 'leader' }
+		{ title: 'Tagger Leaderboard', url: '/leaderboard', icon: 'leader' },
+		{ title: 'Community Leaderboard', url: '/communities/leaderboard', icon: 'communities' },
+		{ title: 'Country Leaderboard', url: '/countries/leaderboard', icon: 'countries' }
+	];
+
+	const maintainDropdownLinks = [
+		{ title: 'Add Location', url: '/add-location', icon: 'add' },
+		{ title: 'Verify Location', url: '/verify-location', icon: 'verify' },
+		{ title: 'Add Community', url: '/communites/add', icon: 'communities' },
+		{ title: 'Open Tickets', url: '/tickets', icon: 'ticket' },
+		{ title: 'Tagging Activity', url: '/activity', icon: 'activity' },
+		{ title: 'Tagging Issues', url: '/tagging-issues', icon: 'issue' }
 	];
 
 	const areasDropdownLinks = [
@@ -41,12 +49,12 @@
 	<nav class="flex flex-wrap space-x-16">
 		{#each navLinks as link}
 			<!-- dropdown menu -->
-			{#if link.title === 'Contribute'}
+			{#if link.title === 'Maps'}
 				<NavDropdownDesktop
 					title={link.title}
-					links={contributeDropdownLinks}
+					links={mapsDropdownLinks}
 					top="add"
-					bottom="issue"
+					bottom="communities"
 				/>
 
 				<!-- dropdown menu -->
@@ -55,7 +63,16 @@
 					title={link.title}
 					links={statsDropdownLinks}
 					top="dash"
-					bottom="leader"
+					bottom="countries"
+				/>
+
+				<!-- dropdown menu -->
+			{:else if link.title === 'Maintain'}
+				<NavDropdownDesktop
+					title={link.title}
+					links={maintainDropdownLinks}
+					top="add"
+					bottom="issue"
 				/>
 
 				<!-- dropdown menu -->
@@ -114,8 +131,8 @@
 	>
 		{#each navLinks as link}
 			<!-- dropdown menu -->
-			{#if link.title === 'Contribute'}
-				<NavDropdownMobile title={link.title} icon={link.icon} links={contributeDropdownLinks} />
+			{#if link.title === 'Maps'}
+				<NavDropdownMobile title={link.title} icon={link.icon} links={mapsDropdownLinks} />
 
 				<!-- dropdown menu -->
 			{:else if link.title === 'Stats'}
@@ -124,6 +141,10 @@
 				<!-- dropdown menu -->
 			{:else if link.title === 'Areas'}
 				<NavDropdownMobile title={link.title} icon={link.icon} links={areasDropdownLinks} />
+
+				<!-- dropdown menu -->
+			{:else if link.title === 'Maintain'}
+				<NavDropdownMobile title={link.title} icon={link.icon} links={maintainDropdownLinks} />
 
 				<!-- regular links -->
 			{:else}

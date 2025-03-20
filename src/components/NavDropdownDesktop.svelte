@@ -28,13 +28,13 @@
 			excludeQuerySelectorAll={`#dropdown-${title.toLowerCase()}`}
 			on:outclick={() => (show = false)}
 		>
-			<div class="absolute right-0 top-8 w-[185px] rounded-2xl shadow-lg">
+			<div class="absolute right-0 top-8 z-50 w-[185px] rounded-2xl shadow-lg">
 				{#each links as link}
 					<a
 						href={link.url}
 						target={link.external ? '_blank' : null}
 						rel={link.external ? 'noreferrer' : null}
-						class="flex items-center justify-center bg-link p-4 text-xl font-semibold text-white hover:bg-hover {link.icon ===
+						class="flex w-full items-center justify-center bg-link p-4 text-center text-xl font-semibold text-white hover:bg-hover {link.icon ===
 						top
 							? 'rounded-t-2xl'
 							: link.icon === bottom
