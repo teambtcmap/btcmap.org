@@ -289,7 +289,7 @@
 
 			<p class="mt-10 text-center text-lg font-semibold text-primary dark:text-white md:text-xl">
 				If you're a business owner, please read our <a
-					href="https://wiki.btcmap.org/general/merchant-best-practices"
+					href="https://github.com/teambtcmap/btcmap-general/wiki/Merchant-Best-Practices"
 					target="_blank"
 					rel="noreferrer"
 					class="text-link transition-colors hover:text-hover">Merchant Best Practices</a
@@ -328,7 +328,7 @@
 										class="mx-auto mb-4 md:mx-0 md:mb-0 md:mr-4"
 									/>
 									<a
-										href="https://wiki.btcmap.org/general/tagging-instructions.html#tagging-guidance"
+										href="https://github.com/teambtcmap/btcmap-general/wiki/Tagging-Merchants"
 										target="_blank"
 										rel="noreferrer"
 										class="mr-1 text-link transition-colors hover:text-hover">Tag</a
