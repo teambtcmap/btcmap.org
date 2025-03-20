@@ -27,16 +27,23 @@
 							? 'text-white'
 							: 'gradient'} text-center text-4xl font-semibold !leading-tight md:text-5xl xl:text-left"
 					>
-						Easily find places to spend sats anywhere on the planet.
+						Find places to spend sats wherever you are.
 					</h1>
 				{:else}
 					<HeaderPlaceholder />
 				{/if}
-				<a
-					href="/map"
-					class="mx-auto my-8 block w-fit whitespace-nowrap rounded-full bg-link px-7 py-3.5 text-lg font-semibold text-white transition-colors hover:bg-hover"
-					>Open Map</a
-				>
+				<div class="my-8 flex flex-wrap justify-center gap-4">
+					<a
+						href="/map"
+						class="rounded-full bg-link px-7 py-3.5 text-lg font-semibold text-white transition-colors hover:bg-hover"
+						>Open Map</a
+					>
+					<a
+						href="/add-location"
+						class="rounded-full bg-link px-7 py-3.5 text-lg font-semibold text-white transition-colors hover:bg-hover"
+						>Add Location</a
+					>
+				</div>
 				<div
 					class="my-8 flex flex-wrap justify-center rounded-2xl bg-white/30 py-6 dark:bg-white/[0.15]"
 				>
@@ -63,16 +70,18 @@
 					{/each}
 				</div>
 				<h2 class="text-center text-xl font-semibold text-primary dark:text-white xl:text-left">
-					Our apps and the underlying data are free and open source.
-					<br /><br />
 					We use
 					<a
 						href="https://www.openstreetmap.org/about"
 						target="_blank"
 						rel="noreferrer"
 						class="text-link transition-colors hover:text-hover">OpenStreetMap</a
-					> to properly tag places where you can spend bitcoin and we display that data in our beautiful
-					apps.
+					>
+					to tag places that accept bitcoin and we display those merchants in our beautiful apps.
+					<br /><br />
+					Our apps and the underlying data are free and open source.
+					<br /><br />
+					#SPEDN ✊
 				</h2>
 			</div>
 			{#if typeof window !== 'undefined'}
