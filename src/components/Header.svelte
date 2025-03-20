@@ -7,11 +7,7 @@
 		{ title: 'Contribute', url: '', icon: 'contribute' },
 		{ title: 'Stats', url: '', icon: 'stats' },
 		{ title: 'Areas', url: '', icon: 'areas' },
-		{
-			title: 'Wiki',
-			url: '',
-			icon: 'wiki'
-		},
+		{	title: 'Wiki', url: 'https://github.com/teambtcmap/btcmap-general/wiki', icon: 'wiki'},
 		{ title: 'Support Us', url: '/support-us', icon: 'support' }
 	];
 
@@ -31,21 +27,6 @@
 	const areasDropdownLinks = [
 		{ title: 'Communities', url: '/communities', icon: 'communities' },
 		{ title: 'Countries', url: '/countries', icon: 'countries' }
-	];
-
-	const wikiDropdownLinks = [
-		{
-			title: 'General',
-			url: 'https://wiki.btcmap.org',
-			icon: 'general',
-			external: true
-		},
-		{
-			title: 'API',
-			url: 'https://wiki.btcmap.org/api/introduction.html',
-			icon: 'api',
-			external: true
-		}
 	];
 
 	let showMobileMenu = false;
@@ -86,14 +67,6 @@
 					bottom="countries"
 				/>
 
-				<!-- dropdown menu -->
-			{:else if link.title === 'Wiki'}
-				<NavDropdownDesktop
-					title={link.title}
-					links={wikiDropdownLinks}
-					top="general"
-					bottom="api"
-				/>
 			{:else}
 				<!-- regular links -->
 				<a
@@ -152,10 +125,6 @@
 				<!-- dropdown menu -->
 			{:else if link.title === 'Areas'}
 				<NavDropdownMobile title={link.title} icon={link.icon} links={areasDropdownLinks} />
-
-				<!-- dropdown menu -->
-			{:else if link.title === 'Wiki'}
-				<NavDropdownMobile title={link.title} icon={link.icon} links={wikiDropdownLinks} />
 
 				<!-- regular links -->
 			{:else}
