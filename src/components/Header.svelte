@@ -7,7 +7,7 @@
 		{ title: 'Contribute', url: '', icon: 'contribute' },
 		{ title: 'Stats', url: '', icon: 'stats' },
 		{ title: 'Areas', url: '', icon: 'areas' },
-		{	title: 'Wiki', url: 'https://github.com/teambtcmap/btcmap-general/wiki', icon: 'wiki'},
+		{ title: 'Wiki', url: 'https://github.com/teambtcmap/btcmap-general/wiki', icon: 'wiki' },
 		{ title: 'Support Us', url: '/support-us', icon: 'support' }
 	];
 
