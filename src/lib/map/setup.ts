@@ -528,6 +528,7 @@ export const longCalc = (element: ElementOSM) => {
 	return element.type == 'node' ? element.lon : (element.bounds.minlon + element.bounds.maxlon) / 2;
 };
 
+// TODO: check thsi icon usage
 export const generateIcon = (L: Leaflet, icon: string, boosted: boolean) => {
 	return L.divIcon({
 		className: boosted ? 'boosted-icon' : 'div-icon',

@@ -10,7 +10,7 @@
 >
 	<div>
 		<svg width="30px" height="30px" class="mx-auto">
-			<use width="30px" height="30px" href="/__spritemap#sprite-#{icon}" />
+			<use width="30px" height="30px" href="/__spritemap#sprite-{icon}" />
 		</svg>
 		<span class="mt-1 block text-center text-xs font-semibold">{text}</span>
 	</div>
