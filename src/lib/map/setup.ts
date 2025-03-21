@@ -567,6 +567,7 @@ export const longCalc = (element: ElementOSM) => {
 	}
 };
 
+// TODO: check thsi icon usage
 export const generateIcon = (L: Leaflet, icon: string, boosted: boolean) => {
 	return L.divIcon({
 		className: boosted ? 'boosted-icon' : 'div-icon',

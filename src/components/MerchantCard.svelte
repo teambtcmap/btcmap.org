@@ -75,7 +75,7 @@
 
 			{#if website}
 				<div class="flex items-center space-x-2">
-					<Icon w="16" h="16" icon="globe" type="popup" style="shrink-0" />
+					<Icon w="16" h="16" icon="globe" style="shrink-0" />
 					<a
 						href={website.startsWith('http') ? website : `https://${website}`}
 						target="_blank"
@@ -89,14 +89,14 @@
 
 			{#if openingHours}
 				<div class="flex items-center space-x-2">
-					<Icon w="16" h="16" icon="clock" type="popup" style="shrink-0" />
+					<Icon w="16" h="16" icon="clock" style="shrink-0" />
 					<p class="text-sm">{openingHours}</p>
 				</div>
 			{/if}
 
 			{#if phone}
 				<div class="flex items-center space-x-2">
-					<Icon w="16" h="16" icon="phone" type="popup" style="shrink-0" />
+					<Icon w="16" h="16" icon="phone" style="shrink-0" />
 					<a
 						href="tel:{phone}"
 						class="text-sm underline decoration-primary decoration-1 underline-offset-4 dark:decoration-white"
@@ -108,7 +108,7 @@
 
 			{#if email}
 				<div class="flex items-center space-x-2">
-					<Icon w="16" h="16" icon="email" type="popup" style="shrink-0" />
+					<Icon w="16" h="16" icon="email-outline" style="shrink-0" />
 					<a
 						href="mailto:{email}"
 						class="text-sm underline decoration-primary decoration-1 underline-offset-4 dark:decoration-white"
@@ -125,7 +125,7 @@
 						target="_blank"
 						rel="noreferrer"
 					>
-						<Icon w="16" h="16" icon="twitter" type="popup" />
+						<Icon w="16" h="16" icon="twitter" />
 					</a>
 				{/if}
 
@@ -135,7 +135,7 @@
 						target="_blank"
 						rel="noreferrer"
 					>
-						<Icon w="16" h="16" icon="instagram" type="popup" />
+						<Icon w="16" h="16" icon="instagram" />
 					</a>
 				{/if}
 
@@ -145,7 +145,7 @@
 						target="_blank"
 						rel="noreferrer"
 					>
-						<Icon w="16" h="16" icon="facebook" type="popup" />
+						<Icon w="16" h="16" icon="facebook" />
 					</a>
 				{/if}
 			</div>
@@ -161,7 +161,7 @@
 
 				{#if !(Date.parse(verified[0]) > verifiedDate)}
 					<div bind:this={outdatedTooltip} class="text-primary dark:text-white">
-						<Icon w="16" h="16" icon="outdated" type="popup" style="shrink-0" />
+						<Icon w="16" h="16" icon="outdated" style="shrink-0" />
 					</div>
 				{/if}
 			</div>
@@ -188,7 +188,7 @@
 				class="inline-flex items-center space-x-1 font-semibold text-link transition-colors hover:text-hover"
 				title="Help improve the data for everyone"
 			>
-				<Icon w="16" h="16" icon="verified" type="popup" style="shrink-0" />
+				<Icon w="16" h="16" icon="verified" style="shrink-0" />
 				<p class="text-sm">Verify</p>
 			</a>
 

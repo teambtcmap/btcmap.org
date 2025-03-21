@@ -9,7 +9,8 @@ export default defineConfig({
 		VitePluginSvgSpritemap([
 			'./static/icons/socials/*.svg',
 			'./static/icons/apps/*.svg',
-			'./static/icons/popup/*.svg'
+			'./static/icons/popup/*.svg',
+			'./static/icons/mobile-nav/*.svg'
 		])
 	],
 	server: {

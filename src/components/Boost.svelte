@@ -154,7 +154,7 @@
 									transition:fade={{ delay: 0, duration: 100 }}
 									class="absolute -top-16 left-[26px] w-[52px] rounded-lg border border-mapBorder bg-white py-2 shadow-lg dark:bg-dark"
 								>
-									<Icon w="32" h="43" style="mx-auto" icon="boosted-icon-pin" type="popup" />
+									<Icon w="32" h="43" style="mx-auto" icon="boosted-icon-pin" />
 									<Icon
 										w="20"
 										h="20"
