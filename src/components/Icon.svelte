@@ -6,7 +6,7 @@
 	export let style: undefined | string = undefined;
 	export let icon: string;
 	export let type: undefined | 'material' = undefined;
-	
+
 	// Format material icon name to work with IconIconify
 	$: formattedIcon = type === 'material' ? `ic:outline-${icon.replace(/_/g, '-')}` : icon;
 </script>
