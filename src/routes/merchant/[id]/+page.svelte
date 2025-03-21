@@ -403,7 +403,9 @@
 						<a
 							href={`/map?lat=${lat}&long=${long}`}
 							class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
-							>View on main map <svg
+						>
+							View on main map
+							<svg
 								class="ml-1 w-3"
 								width="16"
 								height="16"
@@ -418,8 +420,8 @@
 									stroke-linecap="round"
 									stroke-linejoin="round"
 								/>
-							</svg></a
-						>
+							</svg>
+						</a>
 					{:else}
 						<div class="mx-auto h-4 w-28 animate-pulse rounded bg-link/50" />
 					{/if}
@@ -616,13 +618,7 @@
 								<h3 class="mb-4 text-2xl font-semibold">Contact</h3>
 
 								<div class="flex items-center justify-center">
-									<Icon
-										w="30"
-										h="30"
-										style="text-primary dark:text-white mr-2"
-										icon="phone"
-										type="popup"
-									/>
+									<Icon w="30" h="30" style="text-primary dark:text-white mr-2" icon="phone" />
 									<strong>{phone}</strong>
 								</div>
 							</div>
@@ -638,7 +634,6 @@
 										h="30"
 										style="text-primary dark:text-white mx-auto md:mx-0 mb-2 md:mb-0 md:mr-2"
 										icon="clock"
-										type="popup"
 									/>
 									<strong>{hours}</strong>
 								</div>
@@ -657,7 +652,6 @@
 												h="30"
 												style="text-primary dark:text-white mr-2"
 												icon="verified"
-												type="popup"
 											/>
 										</span>
 									{:else}
@@ -667,7 +661,6 @@
 												h="30"
 												style="text-primary dark:text-white mr-2"
 												icon="outdated"
-												type="popup"
 											/>
 										</span>
 									{/if}
