@@ -1,4 +1,4 @@
-import { InfoTooltip } from '$lib/comp';
+import { InfoTooltip, Icon } from '$lib/comp';
 import {
 	boost,
 	exchangeRate,
@@ -567,21 +567,32 @@ export const longCalc = (element: ElementOSM) => {
 	}
 };
 
-// TODO: check thsi icon usage
 export const generateIcon = (L: Leaflet, icon: string, boosted: boolean) => {
+	const className = boosted ? 'animate-wiggle' : '';
+	const iconTmp = icon !== 'question_mark' ? icon : 'currency_bitcoin';
+
+	// Create a container div to render our Icon component
+	const iconContainer = document.createElement('div');
+	iconContainer.className = 'icon-container';
+
+	// Create and mount the Icon component into the container
+	new Icon({
+		target: iconContainer,
+		props: {
+			w: '20',
+			h: '20',
+			style: `${className} mx-auto mt-[5.75px] text-white`,
+			icon: iconTmp,
+			type: 'material'
+		}
+	});
+
 	return L.divIcon({
 		className: boosted ? 'boosted-icon' : 'div-icon',
 		iconSize: [32, 43],
 		iconAnchor: [16, 43],
 		popupAnchor: [0, -43],
-		html: `<svg width='20px' height='20px' class='${
-			boosted ? 'animate-wiggle' : ''
-		} mx-auto mt-[5.75px] text-white'>
-			     	<use width='20px' height='20px' href="/icons/material/spritesheet.svg#${
-							icon !== 'question_mark' ? icon : 'currency_bitcoin'
-						}">
-						</use>
-			     </svg>`
+		html: iconContainer
 	});
 };
 
