@@ -631,7 +631,7 @@
   resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.39.0.tgz#bfe0214e163f70c4fec1c8f7bb8ce266f4c05b7e"
   integrity sha512-yAkUOkIKZlK5dl7u6dg897doBgLXmUHhIINM2c+sND3DZwnrdQkkSiDh7N75Ll4mM4dxSkYfXqU9fW3lLkMFug==
 
-"@spiriit/vite-plugin-svg-spritemap@^4.0.0":
+"@spiriit/vite-plugin-svg-spritemap@^4.0.1":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@spiriit/vite-plugin-svg-spritemap/-/vite-plugin-svg-spritemap-4.0.1.tgz#2ce6bb9b9cbf78160b14db5ec3a8f90beec10779"
   integrity sha512-rRhcmUHrlC8b3lUxP69+AV5+JOg1j2x6RhxVUz3cu3R7frgZ1GWuhXij5fZ2FGh1VRRGXWZs17ECHVq+JrcK2Q==
