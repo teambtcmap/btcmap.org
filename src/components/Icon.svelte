@@ -22,6 +22,7 @@
 	// this is AI code
 	// Type assertion to make TypeScript happy
 	// we want to make sure that if the type is 'material', the icon can be any string
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const props = { type, icon, w, h, style } as IconProps;
 
 	$: formattedMaterialIcon = type === 'material' ? `ic:outline-${icon.replace(/_/g, '-')}` : icon;
