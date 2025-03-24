@@ -25,7 +25,8 @@
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const props = { type, icon, w, h, style } as IconProps;
 
-	$: formattedMaterialIcon = type === 'material' ? `ic:outline-${icon.replace(/_/g, '-')}` : icon;
+	$: formattedMaterialIcon =
+		type === 'material' ? `material-symbols:${icon.replace(/_/g, '-')}-outline` : icon;
 
 	$: spriteHref =
 		{
