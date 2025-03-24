@@ -461,7 +461,7 @@
 						{/if}
 
 						{#if phone}
-							<MerchantLink link={`tel:${phone}`} icon="phone" text="Call" />
+							<MerchantLink link={`tel:${phone}`} icon="phone" text="Call" type="popup" />
 						{/if}
 
 						{#if email}
@@ -634,6 +634,7 @@
 										h="30"
 										style="text-primary dark:text-white mx-auto md:mx-0 mb-2 md:mb-0 md:mr-2"
 										icon="clock"
+										type="popup"
 									/>
 									<strong>{hours}</strong>
 								</div>
@@ -652,6 +653,7 @@
 												h="30"
 												style="text-primary dark:text-white mr-2"
 												icon="verified"
+												type="popup"
 											/>
 										</span>
 									{:else}
@@ -661,6 +663,7 @@
 												h="30"
 												style="text-primary dark:text-white mr-2"
 												icon="outdated"
+												type="popup"
 											/>
 										</span>
 									{/if}

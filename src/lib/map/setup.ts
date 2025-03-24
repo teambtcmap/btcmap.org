@@ -686,7 +686,7 @@ export const generateMarker = (
 				element.tags && element.tags['opening_hours']
 					? `<div class='my-1 w-full max-w-[300px]' title='Opening hours'>
 		  				<svg width='16px' height='16px' class='inline text-primary dark:text-white'>
-	  						<use width='16px' height='16px' href="/__spritemap#sprite-clock"></use>
+	  						<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#cl#sprite-clock"></use>
 				 	 	</svg>
 			     		<span class='text-body dark:text-white'>${element.tags['opening_hours']}</span>
 	  			 	   </div>`
@@ -696,7 +696,7 @@ export const generateMarker = (
 					<div class='flex space-x-2 mt-2.5 mb-1'>
 						<a id='navigate' href='geo:${lat},${long}' class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
-								<use width='24px' height='24px' href="/__spritemap#sprite-compass"></use>
+								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#cl#sprite-compass"></use>
 							</svg>
 							<span class='block text-xs text-center mt-1'>Navigate</span>
 						</a>
@@ -705,7 +705,7 @@ export const generateMarker = (
 							element.id
 						}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
-								<use width='24px' height='24px' href="/__spritemap#sprite-pencil"></use>
+								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#cl#sprite-pencil"></use>
 							</svg>
 							<span class='block text-xs text-center mt-1'>Edit</span>
 						</a>
@@ -714,7 +714,7 @@ export const generateMarker = (
 							element.id
 						}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
-								<use width='24px' height='24px' href="/__spritemap#sprite-share"></use>
+								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#cl#sprite-share"></use>
 							</svg>
 							<span class='block text-xs text-center mt-1'>Share</span>
 						</a>
@@ -722,7 +722,7 @@ export const generateMarker = (
 						<div class='relative w-full'>
 							<button id='more-button' class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 								<svg width='24px' height='24px' class='mx-auto'>
-									<use width='24px' height='24px' href="/__spritemap#sprite-dots-horizontal"></use>
+									<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#cl#sprite-dots-horizontal"></use>
 								</svg>
 								<span class='block text-xs text-center mt-1'>More</span>
 							</button>
@@ -740,7 +740,7 @@ export const generateMarker = (
 														: '#'
 										}" target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/__spritemap#sprite-bolt"></use>
+												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#cl#sprite-bolt"></use>
 											</svg>
 											Pay Merchant
 										</a>`
@@ -751,7 +751,7 @@ export const generateMarker = (
 								phone
 									? `<a href='tel:${phone}' class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/__spritemap#sprite-phone"></use>
+												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#cl#sprite-phone"></use>
 											</svg>
 											Call
 										</a>`
@@ -762,7 +762,7 @@ export const generateMarker = (
 								email
 									? `<a href='mailto:${email}' class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/__spritemap#sprite-email"></use>
+												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#cl#sprite-email"></use>
 											</svg>
 											Email
 										</a>`
@@ -775,7 +775,7 @@ export const generateMarker = (
 											website.startsWith('http') ? website : `https://${website}`
 										} target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/__spritemap#sprite-globe"></use>
+												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#cl#sprite-globe"></use>
 											</svg>
 											Website
 										</a>`
@@ -788,7 +788,7 @@ export const generateMarker = (
 											twitter.startsWith('http') ? twitter : `https://twitter.com/${twitter}`
 										} target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/__spritemap#sprite-twitter"></use>
+												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#cl#sprite-twitter"></use>
 											</svg>
 											Twitter
 										</a>`
@@ -803,7 +803,7 @@ export const generateMarker = (
 												: `https://instagram.com/${instagram}`
 										} target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/__spritemap#sprite-instagram"></use>
+												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#cl#sprite-instagram"></use>
 											</svg>
 											Instagram
 										</a>`
@@ -816,7 +816,7 @@ export const generateMarker = (
 											facebook.startsWith('http') ? facebook : `https://facebook.com/${facebook}`
 										} target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/__spritemap#sprite-facebook"></use>
+												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#cl#sprite-facebook"></use>
 											</svg>
 											Facebook
 										</a>`
@@ -829,7 +829,7 @@ export const generateMarker = (
 										id='show-tags'
 										class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/__spritemap#sprite-tags"></use>
+												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#cl#sprite-tags"></use>
 											</svg>
 											Show Tags
 										</button>
@@ -838,7 +838,7 @@ export const generateMarker = (
 										id='tagging-issues'
 										class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/__spritemap#sprite-issues"></use>
+												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#cl#sprite-issues"></use>
 											</svg>
 											Tag Issues
 										</button>`
@@ -851,7 +851,7 @@ export const generateMarker = (
 									rel="noreferrer"
 									class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 										<svg width='24px' height='24px' class='mr-2'>
-											<use width='24px' height='24px' href="/__spritemap#sprite-info-circle"></use>
+											<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#cl#sprite-info-circle"></use>
 										</svg>
 										Map Legend
 								</a>
@@ -862,7 +862,7 @@ export const generateMarker = (
 									rel="noreferrer"
 									class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 										<svg width='24px' height='24px' class='mr-2'>
-											<use width='24px' height='24px' href="/__spritemap#sprite-external"></use>
+											<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#cl#sprite-external"></use>
 										</svg>
 										View OSM
 								</a>
@@ -958,10 +958,10 @@ ${
 							? `${verified[0]} ${
 									Date.parse(verified[0]) > verifiedDate
 										? `<span title="Verified within the last year"><svg width='16px' height='16px' class='inline text-primary dark:text-white'>
-												<use width='16px' height='16px' href="/__spritemap#sprite-verified"></use>
+												<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#cl#sprite-verified"></use>
 											</svg></span>`
 										: `<span title="Outdated please re-verify"><svg width='16px' height='16px' class='inline text-primary dark:text-white'>
-												<use width='16px' height='16px' href="/__spritemap#sprite-outdated"></use>
+												<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#cl#sprite-outdated"></use>
 											</svg></span>`
 								}`
 							: '<span title="Not verified">---</span>'
@@ -989,7 +989,7 @@ ${
 						extraButtons
 							? `<button title='Boost' id='boost-button' class='flex justify-center items-center space-x-2 text-primary dark:text-white hover:text-link dark:hover:text-link border border-mapBorder hover:border-link rounded-lg px-3 h-[32px] transition-colors'>
 								<svg width='16px' height='16px'>
-									<use width='16px' height='16px' href="/__spritemap#sprite-boost"></use>
+									<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#cl#sprite-boost"></use>
 								</svg>
 								<span class='text-xs'>${boosted ? 'Extend' : 'Boost'}</span>
 							   </button>`
