@@ -461,7 +461,7 @@
 						{/if}
 
 						{#if phone}
-							<MerchantLink link={`tel:${phone}`} icon="phone" text="Call" type="popup" />
+							<MerchantLink link={`tel:${phone}`} icon="phone" text="Call" />
 						{/if}
 
 						{#if email}
@@ -618,7 +618,13 @@
 								<h3 class="mb-4 text-2xl font-semibold">Contact</h3>
 
 								<div class="flex items-center justify-center">
-									<Icon w="30" h="30" style="text-primary dark:text-white mr-2" icon="phone" />
+									<Icon
+										w="30"
+										h="30"
+										style="text-primary dark:text-white mr-2"
+										icon="phone"
+										type="popup"
+									/>
 									<strong>{phone}</strong>
 								</div>
 							</div>
