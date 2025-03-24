@@ -26,7 +26,7 @@
 	const props = { type, icon, w, h, style } as IconProps;
 
 	$: formattedMaterialIcon =
-		type === 'material' ? `material-symbols:${icon.replace(/_/g, '-')}-outline` : icon;
+		type === 'material' ? `material-symbols:${icon.replace(/_/g, '-')}` : icon;
 
 	$: spriteHref =
 		{
