@@ -58,7 +58,13 @@
 								rel={app.type === 'Web' ? null : 'noreferrer'}
 								class="block rounded-full bg-link p-3 text-white transition-colors hover:bg-hover"
 							>
-								<Icon w="32" h="32" style={app.icon === 'play' ? 'pl-0.5' : ''} icon={app.icon} />
+								<Icon
+									w="32"
+									h="32"
+									style={app.icon === 'play' ? 'pl-0.5' : ''}
+									icon={app.icon}
+									type="apps"
+								/>
 							</a>
 						</div>
 					{/each}

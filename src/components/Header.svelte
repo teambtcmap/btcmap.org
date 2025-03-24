@@ -117,6 +117,7 @@
 				h={showMobileMenu ? '27' : '12'}
 				style="mx-auto mb-3 text-mobileMenu dark:text-white"
 				icon={showMobileMenu ? 'close' : 'bars'}
+				type="mobile-nav"
 			/>
 			<span class="font-semibold uppercase text-mobileMenu dark:text-white">Menu</span>
 		</button>
@@ -151,7 +152,7 @@
 					<span
 						class="mr-4 rounded-full bg-mobileButtons p-3 transition-colors active:bg-mobileButtonsActive"
 					>
-						<Icon w="24" h="24" icon={link.icon} />
+						<Icon w="24" h="24" icon={link.icon} type="mobile-nav" />
 					</span>
 					<span>{link.title}</span>
 				</a>

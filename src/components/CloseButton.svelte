@@ -8,6 +8,6 @@
 
 <div class={position}>
 	<button on:click={click}>
-		<Icon w="25" h="25" style="{colors} transition-colors" icon="close-rounded" />
+		<Icon w="25" h="25" style="{colors} transition-colors" icon="close-rounded" type="popup" />
 	</button>
 </div>

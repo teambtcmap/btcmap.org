@@ -19,7 +19,7 @@
 	<span
 		class="mr-4 rounded-full bg-mobileButtons p-3 transition-colors active:bg-mobileButtonsActive"
 	>
-		<Icon w="24" h="24" icon={show ? `${icon}-highlight` : `${icon}`} />
+		<Icon w="24" h="24" icon={show ? `${icon}-highlight` : `${icon}`} type="mobile-nav" />
 	</span>
 	<span>{title}</span>
 </button>
@@ -41,7 +41,7 @@
 					<span
 						class="mr-4 rounded-full bg-mobileButtons p-3 transition-colors active:bg-mobileButtonsActive"
 					>
-						<Icon w="24" h="24" icon={link.icon} />
+						<Icon w="24" h="24" icon={link.icon} type="mobile-nav" />
 					</span>
 					<span>{link.title}</span>
 					{#if link.external}
