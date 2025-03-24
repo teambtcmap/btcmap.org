@@ -108,7 +108,7 @@
 
 			{#if email}
 				<div class="flex items-center space-x-2">
-					<Icon w="16" h="16" icon="email-outline" type="popup" style="shrink-0" />
+					<Icon w="16" h="16" icon="email" type="popup" style="shrink-0" />
 					<a
 						href="mailto:{email}"
 						class="text-sm underline decoration-primary decoration-1 underline-offset-4 dark:decoration-white"
