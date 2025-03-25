@@ -40,6 +40,12 @@
 
 _NOTE:_ BTC Map uses the latest LTS version of [node](https://nodejs.org/). If you have [NVM](https://github.com/nvm-sh/nvm), you can simply run `nvm use` in the root directory of the repo to switch to the supported node version.
 
+#### Icons
+
+- [Iconify](https://iconify.design/docs/icon-components/svelte/#iconify-for-svelte): for general material icons
+- [vite-plugin-icons-spritesheet](https://github.com/forge-42/vite-plugin-icons-spritesheet): for individual icons (i.e. apps) spritesheets are automatically generated  
+  During development the spritsheets might not update. Use a private-tab to check the latest version.
+
 ## PWA
 
 This website is a progressive web app, meaning you can install it on your mobile device and use it like a native application. Just look for the **Add to home screen** or **Install** option in your browser while visiting [btcmap.org](https://btcmap.org).
