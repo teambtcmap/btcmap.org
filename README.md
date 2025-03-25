@@ -2,28 +2,6 @@
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/8a9b0504-641c-4975-9e2b-daefe43f93e8/deploy-status)](https://app.netlify.com/sites/btcmap/deploys)
 
-## PR's, issues and feature requests welcome
-
-## Tech stack
-
-- sveltekit
-- tailwindcss
-- leafletjs
-- openstreetmap
-- localforage
-- chartjs
-- d3-geo
-- marked
-- dompurify
-- yarn
-- prettier
-- axios
-- vite
-- fontawesome
-- opencage
-
-(see [`package.json`](https://github.com/teambtcmap/btcmap.org/blob/main/package.json) for full list)
-
 ## Getting started
 
 1. `git clone` the repo and `cd` into the directory
