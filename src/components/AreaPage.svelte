@@ -37,7 +37,6 @@
 		type AreaPageProps,
 		type AreaTags,
 		type AreaType,
-		type Continents,
 		type Element,
 		type Event,
 		type Report,
@@ -124,7 +123,7 @@
 			type === 'community'
 				? `https://btcmap.org/.netlify/images?url=${area['icon:square']}&fit=cover&w=256&h=256`
 				: `https://static.btcmap.org/images/countries/${areaFound.id}.svg`;
-		continent = area.continent;
+		description = area.description;
 
 		if (type === 'community') {
 			org = area.organization;
@@ -229,34 +228,6 @@
 		!dataInitialized &&
 		initializeData();
 
-	const getContinentIcon = (continent: Continents) => {
-		switch (continent) {
-			case 'africa':
-			case 'Africa':
-				return 'africa';
-
-			case 'asia':
-			case 'Asia':
-				return 'asia';
-
-			case 'europe':
-			case 'Europe':
-				return 'europe';
-
-			case 'north-america':
-			case 'North America':
-				return 'americas';
-
-			case 'oceania':
-			case 'Oceania':
-				return 'oceania';
-
-			case 'south-america':
-			case 'South America':
-				return 'americas';
-		}
-	};
-
 	let area: AreaTags;
 	let filteredElements: Element[];
 	let areaReports: Report[];
@@ -264,7 +235,7 @@
 	let avatar: string;
 	const alias = data.id;
 	const name = data.name;
-	let continent: Continents;
+	let description: string | undefined;
 	let org: string | undefined;
 	let sponsor: boolean | undefined;
 	let website: string | undefined;
@@ -318,13 +289,8 @@
 			{#if sponsor}
 				<SponsorBadge />
 			{/if}
-			{#if continent}
-				<h2 class="text-xl uppercase text-primary dark:text-white">
-					{continent.replace('-', ' ')}
-					<i class="fa-solid fa-earth-{getContinentIcon(continent)}" />
-				</h2>
-			{:else}
-				<div class="mx-auto h-7 w-24 animate-pulse rounded bg-link/50" />
+			{#if description}
+				<p class="text-xl text-primary dark:text-white">{description}</p>
 			{/if}
 			{#if alias && type === 'community'}
 				<a

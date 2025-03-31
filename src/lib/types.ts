@@ -23,6 +23,7 @@ export type Area = {
 export type AreaTags = {
 	type: AreaType;
 	name: string;
+	description?: string;
 	continent: Continents;
 	url_alias: string;
 	geo_json: GeoJSON;
