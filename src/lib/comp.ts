@@ -1,4 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
+
 export { default as AboutCommunity } from '../components/AboutCommunity.svelte';
 export { default as AboutContributor } from '../components/AboutContributor.svelte';
 export { default as AboutCore } from '../components/AboutCore.svelte';

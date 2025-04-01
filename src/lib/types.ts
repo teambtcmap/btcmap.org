@@ -119,6 +119,7 @@ export type ElementOSM = {
 	tags?: OSMTags;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type OSMTags = { [key: string]: any };
 
 export type Event = {
@@ -194,12 +195,14 @@ export type BaseMaps = {
 
 export type Boost = { id: string; name: string; boost: string } | undefined;
 
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 export interface SearchElement extends ElementOSM {
 	latLng: LatLng;
 	marker: Marker<any>;
 	icon: string;
 	boosted: string | undefined;
 }
+/* eslint-enable  @typescript-eslint/no-explicit-any */
 
 export interface SearchResult extends SearchElement {
 	distanceKm: number;

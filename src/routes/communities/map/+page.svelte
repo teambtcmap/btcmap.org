@@ -205,9 +205,9 @@
 			leaflet = await import('leaflet');
 			// @ts-expect-error
 			const DomEvent = await import('leaflet/src/dom/DomEvent');
-			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
+			/* eslint-disable @typescript-eslint/no-unused-vars */
 			const leafletLocateControl = await import('leaflet.locatecontrol');
-			/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
+			/* eslint-enable @typescript-eslint/no-unused-vars */
 
 			// add map and tiles
 			map = leaflet.map(mapElement);

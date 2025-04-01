@@ -268,7 +268,7 @@
 	let upToDatePercent: string | undefined;
 
 	let updatedChartCanvas: HTMLCanvasElement;
-	// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	let updatedChart;
 
 	let chartsLoading = true;

@@ -76,13 +76,17 @@
 			leaflet = await import('leaflet');
 			// @ts-expect-error
 			DomEvent = await import('leaflet/src/dom/DomEvent');
+<<<<<<< HEAD
 			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
 			const maplibreGl = await import('maplibre-gl');
 			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
+=======
+			/* eslint-disable @typescript-eslint/no-unused-vars */
+>>>>>>> 596ae90 (chore: update eslint and related deps, update rules and some linting)
 			const leafletMarkerCluster = await import('leaflet.markercluster');
 			const leafletFeaturegroupSubgroup = await import('leaflet.featuregroup.subgroup');
 			const leafletLocateControl = await import('leaflet.locatecontrol');
-			/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
+			/* eslint-enable @typescript-eslint/no-unused-vars */
 
 			initialRenderComplete = true;
 		}
@@ -115,10 +119,10 @@
 			attribution(leaflet, map);
 
 			// create marker cluster groups
-			/* eslint-disable no-undef */
+			 
 			// @ts-expect-error
 			let markers = L.markerClusterGroup();
-			/* eslint-enable no-undef */
+			 
 			let upToDateLayer = leaflet.featureGroup.subGroup(markers);
 			let outdatedLayer = leaflet.featureGroup.subGroup(markers);
 			let legacyLayer = leaflet.featureGroup.subGroup(markers);

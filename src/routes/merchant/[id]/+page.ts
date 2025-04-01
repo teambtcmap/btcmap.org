@@ -25,6 +25,7 @@ export const load: PageLoad = async ({ params }) => {
 			};
 		}
 	} catch (err) {
+		console.error(err);
 		error(404, 'Merchant Not Found');
 	}
 };

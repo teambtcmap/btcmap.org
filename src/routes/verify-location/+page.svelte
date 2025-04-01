@@ -92,10 +92,10 @@
 			changeDefaultIcons(false, leaflet, mapElement, DomEvent);
 
 			// create marker cluster group
-			/* eslint-disable no-undef */
+			 
 			// @ts-expect-error
 			let markers = L.markerClusterGroup();
-			/* eslint-enable no-undef */
+			 
 
 			// get date from 1 year ago to add verified check if survey is current
 			let verifiedDate = calcVerifiedDate();
@@ -262,12 +262,16 @@
 			leaflet = await import('leaflet');
 			// @ts-expect-error
 			DomEvent = await import('leaflet/src/dom/DomEvent');
+<<<<<<< HEAD
 			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
 			const maplibreGl = await import('maplibre-gl');
 			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
+=======
+			/* eslint-disable @typescript-eslint/no-unused-vars */
+>>>>>>> 596ae90 (chore: update eslint and related deps, update rules and some linting)
 			const leafletLocateControl = await import('leaflet.locatecontrol');
 			const leafletMarkerCluster = await import('leaflet.markercluster');
-			/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
+			/* eslint-enable @typescript-eslint/no-unused-vars */
 
 			initialRenderComplete = true;
 		}

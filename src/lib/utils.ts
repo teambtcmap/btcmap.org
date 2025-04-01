@@ -137,17 +137,17 @@ export const isEven = (number: number) => {
 	return number % 2 === 0;
 };
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export function debounce(func: (e?: any) => void, timeout = 500) {
 	let timer: ReturnType<typeof setTimeout>;
-	// @ts-expect-error
 	return (...args) => {
 		clearTimeout(timer);
 		timer = setTimeout(() => {
-			// @ts-expect-error
 			func.apply(this, args);
 		}, timeout);
 	};
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 export const validateContinents = (continent: Continents) =>
 	[

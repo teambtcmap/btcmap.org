@@ -263,12 +263,16 @@ export const changeDefaultIcons = (
 	};
 	if (theme === 'light') {
 		fullscreenButton.onmouseenter = () => {
-			// @ts-expect-error
-			document.querySelector('#fullscreen').src = '/icons/expand-black.svg';
+			const fullscreenIcon = document.querySelector('#fullscreen') as HTMLImageElement;
+			if (fullscreenIcon) {
+				fullscreenIcon.src = '/icons/expand-black.svg';
+			}
 		};
 		fullscreenButton.onmouseleave = () => {
-			// @ts-expect-error
-			document.querySelector('#fullscreen').src = '/icons/expand.svg';
+			const fullscreenIcon = document.querySelector('#fullscreen') as HTMLImageElement;
+			if (fullscreenIcon) {
+				fullscreenIcon.src = '/icons/expand.svg';
+			}
 		};
 	}
 	fullscreenButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
@@ -350,12 +354,16 @@ export const homeMarkerButtons = (
 			addHomeButton.style.borderRadius = '8px 8px 0 0';
 			if (theme === 'light') {
 				addHomeButton.onmouseenter = () => {
-					// @ts-expect-error
-					document.querySelector('#homebutton').src = '/icons/home-black.svg';
+					const homeIcon = document.querySelector('#homebutton') as HTMLImageElement;
+					if (homeIcon) {
+						homeIcon.src = '/icons/home-black.svg';
+					}
 				};
 				addHomeButton.onmouseleave = () => {
-					// @ts-expect-error
-					document.querySelector('#homebutton').src = '/icons/home.svg';
+					const homeIcon = document.querySelector('#homebutton') as HTMLImageElement;
+					if (homeIcon) {
+						homeIcon.src = '/icons/home.svg';
+					}
 				};
 			}
 			addHomeButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
@@ -376,12 +384,16 @@ export const homeMarkerButtons = (
 				addLocationButton.style.borderRadius = '0';
 				if (theme === 'light') {
 					addLocationButton.onmouseenter = () => {
-						// @ts-expect-error
-						document.querySelector('#marker').src = '/icons/marker-black.svg';
+						const markerIcon = document.querySelector('#marker') as HTMLImageElement;
+						if (markerIcon) {
+							markerIcon.src = '/icons/marker-black.svg';
+						}
 					};
 					addLocationButton.onmouseleave = () => {
-						// @ts-expect-error
-						document.querySelector('#marker').src = '/icons/marker.svg';
+						const markerIcon = document.querySelector('#marker') as HTMLImageElement;
+						if (markerIcon) {
+							markerIcon.src = '/icons/marker.svg';
+						}
 					};
 				}
 				addLocationButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
@@ -401,12 +413,16 @@ export const homeMarkerButtons = (
 				communityMapButton.style.borderRadius = '0 0 8px 8px';
 				if (theme === 'light') {
 					communityMapButton.onmouseenter = () => {
-						// @ts-expect-error
-						document.querySelector('#group').src = '/icons/group-black.svg';
+						const groupIcon = document.querySelector('#group') as HTMLImageElement;
+						if (groupIcon) {
+							groupIcon.src = '/icons/group-black.svg';
+						}
 					};
 					communityMapButton.onmouseleave = () => {
-						// @ts-expect-error
-						document.querySelector('#group').src = '/icons/group.svg';
+						const groupIcon = document.querySelector('#group') as HTMLImageElement;
+						if (groupIcon) {
+							groupIcon.src = '/icons/group.svg';
+						}
 					};
 				}
 				communityMapButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
@@ -427,12 +443,16 @@ export const homeMarkerButtons = (
 				merchantMapButton.style.borderRadius = '0 0 8px 8px';
 				if (theme === 'light') {
 					merchantMapButton.onmouseenter = () => {
-						// @ts-expect-error
-						document.querySelector('#shopping').src = '/icons/shopping-black.svg';
+						const shoppingIcon = document.querySelector('#shopping') as HTMLImageElement;
+						if (shoppingIcon) {
+							shoppingIcon.src = '/icons/shopping-black.svg';
+						}
 					};
 					merchantMapButton.onmouseleave = () => {
-						// @ts-expect-error
-						document.querySelector('#shopping').src = '/icons/shopping.svg';
+						const shoppingIcon = document.querySelector('#shopping') as HTMLImageElement;
+						if (shoppingIcon) {
+							shoppingIcon.src = '/icons/shopping.svg';
+						}
 					};
 				}
 				merchantMapButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
@@ -478,12 +498,16 @@ export const dataRefresh = (L: Leaflet, map: Map, DomEvent: DomEventType) => {
 			};
 			if (theme === 'light') {
 				dataRefreshButton.onmouseenter = () => {
-					// @ts-expect-error
-					document.querySelector('#refresh').src = '/icons/refresh-black.svg';
+					const refreshIcon = document.querySelector('#refresh') as HTMLImageElement;
+					if (refreshIcon) {
+						refreshIcon.src = '/icons/refresh-black.svg';
+					}
 				};
 				dataRefreshButton.onmouseleave = () => {
-					// @ts-expect-error
-					document.querySelector('#refresh').src = '/icons/refresh.svg';
+					const refreshIcon = document.querySelector('#refresh') as HTMLImageElement;
+					if (refreshIcon) {
+						refreshIcon.src = '/icons/refresh.svg';
+					}
 				};
 			}
 			dataRefreshButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
@@ -519,13 +543,25 @@ export const checkAddress = (element: OSMTags) => {
 };
 
 export const latCalc = (element: ElementOSM) => {
-	// @ts-expect-error
-	return element.type == 'node' ? element.lat : (element.bounds.minlat + element.bounds.maxlat) / 2;
+	if (element.type === 'node') {
+		return element.lat;
+	} else {
+		if (element.bounds && 'minlat' in element.bounds && 'maxlat' in element.bounds) {
+			return (element.bounds.minlat + element.bounds.maxlat) / 2;
+		}
+		return 0;
+	}
 };
 
 export const longCalc = (element: ElementOSM) => {
-	// @ts-expect-error
-	return element.type == 'node' ? element.lon : (element.bounds.minlon + element.bounds.maxlon) / 2;
+	if (element.type === 'node') {
+		return element.lon;
+	} else {
+		if (element.bounds && 'minlon' in element.bounds && 'maxlon' in element.bounds) {
+			return (element.bounds.minlon + element.bounds.maxlon) / 2;
+		}
+		return 0;
+	}
 };
 
 export const generateIcon = (L: Leaflet, icon: string, boosted: boolean) => {

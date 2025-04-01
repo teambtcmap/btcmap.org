@@ -60,6 +60,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			};
 		}
 	} catch (err) {
+		console.error(err);
 		error(404, 'Country Not Found');
 	}
 };
