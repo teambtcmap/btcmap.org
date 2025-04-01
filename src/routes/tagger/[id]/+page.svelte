@@ -359,10 +359,10 @@
 			changeDefaultIcons(false, leaflet, mapElement, DomEvent);
 
 			// create marker cluster group
-			 
+			/* eslint-disable no-undef */
 			// @ts-expect-error
 			let markers = L.markerClusterGroup();
-			 
+			/* eslint-enable no-undef */
 
 			// get date from 1 year ago to add verified check if survey is current
 			let verifiedDate = calcVerifiedDate();
@@ -455,7 +455,7 @@
 	let deletedPercent: string | undefined;
 
 	let tagTypeChartCanvas: HTMLCanvasElement;
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 	let tagTypeChart;
 
 	let hideArrow = false;
@@ -481,16 +481,12 @@
 			leaflet = await import('leaflet');
 			// @ts-expect-error
 			DomEvent = await import('leaflet/src/dom/DomEvent');
-<<<<<<< HEAD
 			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
 			const maplibreGl = await import('maplibre-gl');
 			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
-=======
-			/* eslint-disable @typescript-eslint/no-unused-vars */
->>>>>>> 596ae90 (chore: update eslint and related deps, update rules and some linting)
 			const leafletMarkerCluster = await import('leaflet.markercluster');
 			const leafletLocateControl = await import('leaflet.locatecontrol');
-			/* eslint-enable @typescript-eslint/no-unused-vars */
+			/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
 
 			initialRenderComplete = true;
 		}

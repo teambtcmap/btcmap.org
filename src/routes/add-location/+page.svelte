@@ -172,11 +172,7 @@
 			const leaflet = await import('leaflet');
 			// @ts-expect-error
 			const DomEvent = await import('leaflet/src/dom/DomEvent');
-<<<<<<< HEAD
 			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
-=======
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
->>>>>>> 596ae90 (chore: update eslint and related deps, update rules and some linting)
 			const leafletLocateControl = await import('leaflet.locatecontrol');
 			const maplibreGl = await import('maplibre-gl');
 			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
