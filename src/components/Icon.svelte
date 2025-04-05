@@ -25,7 +25,27 @@
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const props = { type, icon, w, h, style } as IconProps;
 
-	$: formattedMaterialIcon = type === 'material' ? `ic:outline-${icon.replace(/_/g, '-')}` : icon;
+	$: formattedMaterialIcon =
+		type === 'material'
+			? (() => {
+					// Handle exceptions for specific icons
+					const exceptions: Record<string, string> = {
+						camping: 'material-symbols:camping-rounded',
+						gate: 'material-symbols:gate',
+						cooking: 'material-symbols:cooking',
+						dentistry: 'material-symbols:dentistry',
+						sauna: 'material-symbols:sauna'
+					};
+
+					// Check if this icon has an exception
+					if (exceptions[icon as string]) {
+						return exceptions[icon as string];
+					}
+
+					// Default handling
+					return `ic:outline-${(icon as string).replace(/_/g, '-')}`;
+				})()
+			: icon;
 
 	$: spriteHref =
 		{
@@ -38,7 +58,6 @@
 
 {#if type === 'material'}
 	<IconIconify icon={formattedMaterialIcon} width={w} height={h} class={style} />
-{:else}
 	<svg width="{w}px" height="{h}px" class={style}>
 		<use width="{w}px" height="{h}px" href={`${spriteHref}#${icon}`} />
 	</svg>
