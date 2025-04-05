@@ -16,6 +16,7 @@ export const load: PageLoad = async ({ params }) => {
 			return { user: data.id, username: data['osm_json']['display_name'] };
 		}
 	} catch (err) {
+		console.error(err);
 		error(404, 'User Not Found');
 	}
 };

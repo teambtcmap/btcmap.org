@@ -340,7 +340,7 @@
 									on:click={() => $table?.firstPage()}
 									disabled={!$table?.getCanPreviousPage()}
 								>
-									{'<<'}
+									&lt;&lt;
 								</button>
 								<button
 									class="text-xl font-bold {!$table?.getCanPreviousPage()
@@ -349,7 +349,7 @@
 									on:click={() => $table?.previousPage()}
 									disabled={!$table?.getCanPreviousPage()}
 								>
-									{'<'}
+									&lt;
 								</button>
 							</div>
 							<div class="flex items-center gap-5">
@@ -360,7 +360,7 @@
 									on:click={() => $table?.nextPage()}
 									disabled={!$table?.getCanNextPage()}
 								>
-									{'>'}
+									&gt;
 								</button>
 								<button
 									class="text-xl font-bold {!$table?.getCanNextPage()
@@ -369,7 +369,7 @@
 									on:click={() => $table?.lastPage()}
 									disabled={!$table?.getCanNextPage()}
 								>
-									{'>>'}
+									&gt;&gt;
 								</button>
 							</div>
 						</div>
