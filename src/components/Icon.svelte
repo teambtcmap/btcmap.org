@@ -58,6 +58,7 @@
 
 {#if type === 'material'}
 	<IconIconify icon={formattedMaterialIcon} width={w} height={h} class={style} />
+{:else}
 	<svg width="{w}px" height="{h}px" class={style}>
 		<use width="{w}px" height="{h}px" href={`${spriteHref}#${icon}`} />
 	</svg>
