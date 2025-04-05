@@ -48,12 +48,16 @@
 	{/if}
 	{#if twitter}
 		<a href={twitter} target="_blank" rel="noreferrer" class="m-1">
-			<img src="/icons/socials/twitter.svg" alt="twitter" />
+			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-black">
+				<Icon w="25" h="25" icon="twitter" type="socials" style="text-white" />
+			</span>
 		</a>
 	{/if}
 	{#if secondTwitter}
 		<a href={secondTwitter} target="_blank" rel="noreferrer" class="m-1">
-			<img src="/icons/socials/twitter.svg" alt="twitter" />
+			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-black">
+				<Icon w="25" h="25" icon="twitter" type="socials" style="text-white" />
+			</span>
 		</a>
 	{/if}
 	{#if meetup}

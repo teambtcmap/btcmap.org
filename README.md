@@ -2,28 +2,6 @@
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/8a9b0504-641c-4975-9e2b-daefe43f93e8/deploy-status)](https://app.netlify.com/sites/btcmap/deploys)
 
-## PR's, issues and feature requests welcome
-
-## Tech stack
-
-- sveltekit
-- tailwindcss
-- leafletjs
-- openstreetmap
-- localforage
-- chartjs
-- d3-geo
-- marked
-- dompurify
-- yarn
-- prettier
-- axios
-- vite
-- fontawesome
-- opencage
-
-(see [`package.json`](https://github.com/teambtcmap/btcmap.org/blob/main/package.json) for full list)
-
 ## Getting started
 
 1. `git clone` the repo and `cd` into the directory
@@ -39,6 +17,12 @@
 1. `yarn build`
 
 _NOTE:_ BTC Map uses the latest LTS version of [node](https://nodejs.org/). If you have [NVM](https://github.com/nvm-sh/nvm), you can simply run `nvm use` in the root directory of the repo to switch to the supported node version.
+
+#### Icons
+
+- [Iconify](https://iconify.design/docs/icon-components/svelte/#iconify-for-svelte): for general material icons
+- [vite-plugin-icons-spritesheet](https://github.com/forge-42/vite-plugin-icons-spritesheet): for individual icons (i.e. apps) spritesheets are automatically generated  
+  During development the spritsheets might not update. Use a private-tab to check the latest version.
 
 ## PWA
 

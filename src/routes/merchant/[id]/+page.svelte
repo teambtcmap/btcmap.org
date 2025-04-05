@@ -403,7 +403,9 @@
 						<a
 							href={`/map?lat=${lat}&long=${long}`}
 							class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
-							>View on main map <svg
+						>
+							View on main map
+							<svg
 								class="ml-1 w-3"
 								width="16"
 								height="16"
@@ -418,8 +420,8 @@
 									stroke-linecap="round"
 									stroke-linejoin="round"
 								/>
-							</svg></a
-						>
+							</svg>
+						</a>
 					{:else}
 						<div class="mx-auto h-4 w-28 animate-pulse rounded bg-link/50" />
 					{/if}

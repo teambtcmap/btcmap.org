@@ -24,7 +24,6 @@
 	<Breadcrumbs {routes} />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		<AreaPage type="community" {data} />
-
 		<Footer />
 	</div>
 </div>

@@ -69,7 +69,7 @@
 		disabled={boostLoading || Boolean($boost)}
 		class="inline-flex items-center space-x-1 font-semibold text-link transition-colors hover:text-hover"
 	>
-		<Icon w="16" h="16" icon="boost" type="popup" style="shrink-0" />
+		<Icon w="16" h="16" icon="boost" style="shrink-0" type="popup" />
 		<p class="text-sm">{boostLoading ? 'Boosting...' : boosted ? 'Extend Boost' : 'Boost'}</p>
 	</button>
 {/if}
