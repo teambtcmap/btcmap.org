@@ -620,9 +620,9 @@
   integrity sha512-yAkUOkIKZlK5dl7u6dg897doBgLXmUHhIINM2c+sND3DZwnrdQkkSiDh7N75Ll4mM4dxSkYfXqU9fW3lLkMFug==
 
 "@sveltejs/adapter-netlify@^4.4.0":
-  version "4.4.1"
-  resolved "https://registry.yarnpkg.com/@sveltejs/adapter-netlify/-/adapter-netlify-4.4.1.tgz#d6fda62d310dec376aa6277e06d833b5980c0a6d"
-  integrity sha512-GKx49T1dHafTUIbGuh5Me1hCy5uQxyGrgVo9TV0ulV+SnMDqnxfYURFD7pwAksrPjWAPeE5lHRV5LLXFS3HH1w==
+  version "4.4.2"
+  resolved "https://registry.yarnpkg.com/@sveltejs/adapter-netlify/-/adapter-netlify-4.4.2.tgz#c851cccf12522af7159386b4b55b3a3b6dfbe660"
+  integrity sha512-APMX6rrRNnYJTexn1NttHwBOUmcWIc8hMb8bNjJeIa8tfvlPo68DZOYGCfi80yfH9AfEc27g3cwIrV9C9kZKMQ==
   dependencies:
     "@iarna/toml" "^2.2.5"
     esbuild "^0.24.0"
