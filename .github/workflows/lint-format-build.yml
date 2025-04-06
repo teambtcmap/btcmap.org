@@ -18,6 +18,10 @@ jobs:
       - name: run check
         run: yarn check
 
+      - name: run typecheck
+        run: yarn typecheck
+        continue-on-error: true
+
       - name: create .env
         run: cp .env.example .env
 
