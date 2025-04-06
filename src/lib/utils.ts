@@ -140,11 +140,11 @@ export const isEven = (number: number) => {
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export function debounce(func: (e?: any) => void, timeout = 500) {
 	let timer: ReturnType<typeof setTimeout>;
-	// @ts-ignore
+	// @ts-expect-error: introducing typecheck, this was failing, so ingoring for now
 	return (...args) => {
 		clearTimeout(timer);
 		timer = setTimeout(() => {
-			// @ts-ignore
+			// @ts-expect-error: introducing typecheck, this was failing, so ingoring for now
 			func.apply(this, args);
 		}, timeout);
 	};

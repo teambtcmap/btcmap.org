@@ -286,7 +286,7 @@ export const changeDefaultIcons = (
 export const geolocate = (L: Leaflet, map: Map) => {
 	const theme = detectTheme();
 
-	// @ts-ignore
+	// @ts-expect-error: introducing typecheck, this was failing, so ingoring for now
 	L.control.locate({ position: 'topleft' }).addTo(map);
 
 	const newLocateIcon = L.DomUtil.create('img');

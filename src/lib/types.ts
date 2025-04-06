@@ -206,7 +206,7 @@ export type Leaflet = typeof leaflet;
 
 export type DomEventType = typeof DomEvent;
 
-// @ts-ignore
+// @ts-expect-error: introducing typecheck, this was failing, so ingoring for now
 export type MapGroups = { [key: string]: LayerGroup | FeatureGroup.SubGroup };
 
 export type BaseMaps = {
