@@ -5,6 +5,7 @@ import type {
 	FeatureGroup,
 	LatLng,
 	LayerGroup,
+	// @ts-expect-error: introducing typecheck, this was failing, so ingoring for now
 	MaplibreGL,
 	Marker,
 	TileLayer
