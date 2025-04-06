@@ -86,6 +86,7 @@ export type Element = {
 		['payment:uri']?: string;
 		['payment:coinos']?: string;
 		['payment:pouch']?: string;
+		issues?: Issue[];
 	};
 	created_at: string;
 	updated_at: string;
