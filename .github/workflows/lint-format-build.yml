@@ -15,6 +15,9 @@ jobs:
       - name: install modules
         run: yarn
 
+      - name: build app
+        run: yarn run build
+
       - name: run prettier
         run: yarn run format
 
@@ -26,6 +29,3 @@ jobs:
 
       - name: run check
         run: yarn run check
-
-      - name: build app
-        run: yarn run build
