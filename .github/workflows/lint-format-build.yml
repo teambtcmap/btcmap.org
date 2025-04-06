@@ -13,20 +13,20 @@ jobs:
         run: yarn
 
       - name: run prettier
-        run: yarn format
+        run: yarn run format
 
       - name: run eslint
-        run: yarn lint
+        run: yarn run lint
 
       - name: run check
-        run: yarn check
+        run: yarn run check
 
       - name: run typecheck
-        run: yarn typecheck
+        run: yarn run typecheck
         continue-on-error: true
 
       - name: create .env
         run: cp .env.example .env
 
       - name: build app
-        run: yarn build
+        run: yarn run build
