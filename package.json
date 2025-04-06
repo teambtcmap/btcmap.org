@@ -12,7 +12,7 @@
 		"format:fix": "prettier --plugin=prettier-plugin-svelte --plugin=prettier-plugin-tailwindcss --write .",
 		"lint": "eslint",
 		"lint:fix": "eslint --fix",
-		"typecheck": "tsc"
+		"typecheck": "tsc --project ./tsconfig.json --noEmit"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.24.0",

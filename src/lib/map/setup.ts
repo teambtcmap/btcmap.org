@@ -101,12 +101,12 @@ export const layers = (leaflet: Leaflet, map: Map) => {
 		maxZoom: 19
 	});
 
-	// @ts-expect-error: introducing typecheck, this was failing, so ingoring for now
+	// @ts-ignore
 	const openFreeMapLiberty = window.L.maplibreGL({
 		style: 'https://tiles.openfreemap.org/styles/liberty'
 	});
 
-	// @ts-expect-error: introducing typecheck, this was failing, so ingoring for now
+	// @ts-ignore
 	const openFreeMapDark = window.L.maplibreGL({
 		style: 'https://static.btcmap.org/map-styles/dark.json'
 	});
