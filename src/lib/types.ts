@@ -99,6 +99,29 @@ export type RpcIssue = {
 	issue_code: string;
 };
 
+export type IssueType =
+	| 'date_format'
+	| 'misspelled_tag'
+	| 'missing_icon'
+	| 'not_verified'
+	| 'out_of_date'
+	| 'out_of_date_soon';
+
+export type Issue = {
+	description: string;
+	severity: number;
+	type: IssueType;
+};
+
+export type IssueIcon =
+	| 'fa-calendar-days'
+	| 'fa-spell-check'
+	| 'fa-icons'
+	| 'fa-clipboard-question'
+	| 'fa-hourglass-end'
+	| 'fa-list-check'
+	| 'fa-hourglass-half';
+
 export type RpcGetMostActiveUsersItem = {
 	id: number;
 	name: string;
@@ -183,6 +206,7 @@ export type Leaflet = typeof leaflet;
 
 export type DomEventType = typeof DomEvent;
 
+// @ts-ignore
 export type MapGroups = { [key: string]: LayerGroup | FeatureGroup.SubGroup };
 
 export type BaseMaps = {

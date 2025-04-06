@@ -286,6 +286,7 @@ export const changeDefaultIcons = (
 export const geolocate = (L: Leaflet, map: Map) => {
 	const theme = detectTheme();
 
+	// @ts-ignore
 	L.control.locate({ position: 'topleft' }).addTo(map);
 
 	const newLocateIcon = L.DomUtil.create('img');

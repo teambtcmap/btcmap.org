@@ -10,6 +10,8 @@ import axiosRetry from 'axios-retry';
 import crypto from 'crypto';
 import type { RequestHandler } from './$types';
 
+import type { CipherKey, BinaryLike } from 'crypto';
+
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 const used: string[] = [];
@@ -52,7 +54,10 @@ export const POST: RequestHandler = async ({ request }) => {
 	const initVector = Buffer.from(SERVER_INIT_VECTOR, 'hex');
 	const serverKey = Buffer.from(SERVER_CRYPTO_KEY, 'hex');
 
-	const decrypt = crypto.createDecipheriv('aes-256-cbc', serverKey, initVector);
+	const algorithm = 'aes-256-cbc' as string;
+	const key = serverKey as unknown as CipherKey;
+	const iv = initVector as unknown as BinaryLike;
+	const decrypt = crypto.createDecipheriv(algorithm, key, iv);
 
 	let secret = decrypt.update(captchaSecret, 'hex', 'utf8');
 	secret += decrypt.final('utf8');

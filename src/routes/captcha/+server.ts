@@ -2,6 +2,7 @@ import { SERVER_CRYPTO_KEY, SERVER_INIT_VECTOR } from '$env/static/private';
 import { error, json } from '@sveltejs/kit';
 import crypto from 'crypto';
 import svgCaptcha from 'svg-captcha';
+import type { CipherKey, BinaryLike } from 'crypto';
 
 // generate and return captcha
 export function GET() {
@@ -18,7 +19,10 @@ export function GET() {
 		error(400, 'Could not generate captcha, please try again or contact BTC Map.');
 	}
 
-	const encrypt = crypto.createCipheriv('aes-256-cbc', serverKey, initVector);
+	const algorithm = 'aes-256-cbc' as string;
+	const key = serverKey as unknown as CipherKey;
+	const iv = initVector as unknown as BinaryLike;
+	const encrypt = crypto.createDecipheriv(algorithm, key, iv);
 
 	let secret = encrypt.update(captcha.text, 'utf8', 'hex');
 	secret += encrypt.final('hex');
