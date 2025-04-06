@@ -18,11 +18,11 @@ jobs:
       - name: run eslint
         run: yarn run lint
 
-      - name: run check
-        run: yarn run check
-
       - name: run typecheck
         run: yarn run typecheck
+
+      - name: run check
+        run: yarn run check
 
       - name: create .env
         run: cp .env.example .env
