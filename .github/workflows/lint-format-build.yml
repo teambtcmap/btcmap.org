@@ -9,6 +9,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: create .env
+        run: cp .env.example .env
+
       - name: install modules
         run: yarn
 
@@ -23,9 +26,6 @@ jobs:
 
       - name: run check
         run: yarn run check
-
-      - name: create .env
-        run: cp .env.example .env
 
       - name: build app
         run: yarn run build
