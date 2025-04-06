@@ -23,7 +23,6 @@ jobs:
 
       - name: run typecheck
         run: yarn run typecheck
-        continue-on-error: true
 
       - name: create .env
         run: cp .env.example .env
