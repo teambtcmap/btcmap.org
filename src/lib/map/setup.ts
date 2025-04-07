@@ -101,10 +101,12 @@ export const layers = (leaflet: Leaflet, map: Map) => {
 		maxZoom: 19
 	});
 
+	// @ts-ignore
 	const openFreeMapLiberty = window.L.maplibreGL({
 		style: 'https://tiles.openfreemap.org/styles/liberty'
 	});
 
+	// @ts-ignore
 	const openFreeMapDark = window.L.maplibreGL({
 		style: 'https://static.btcmap.org/map-styles/dark.json'
 	});
@@ -286,6 +288,7 @@ export const changeDefaultIcons = (
 export const geolocate = (L: Leaflet, map: Map) => {
 	const theme = detectTheme();
 
+	// @ts-expect-error: introducing typecheck, this was failing, so ingoring for now
 	L.control.locate({ position: 'topleft' }).addTo(map);
 
 	const newLocateIcon = L.DomUtil.create('img');

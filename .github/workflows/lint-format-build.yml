@@ -9,17 +9,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: install modules
-        run: yarn
-
-      - name: run prettier and eslint
-        run: yarn lint
-
-      - name: run check
-        run: yarn check
-
       - name: create .env
         run: cp .env.example .env
 
+      - name: install modules
+        run: yarn
+
       - name: build app
-        run: yarn build
+        run: yarn run build
+
+      - name: run prettier
+        run: yarn run format
+
+      - name: run eslint
+        run: yarn run lint
+
+      - name: run typecheck
+        run: yarn run typecheck
+
+      - name: run check
+        run: yarn run check

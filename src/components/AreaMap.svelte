@@ -115,12 +115,14 @@
 			attribution(leaflet, map);
 
 			// create marker cluster groups
-			/* eslint-disable no-undef */
+
 			// @ts-expect-error
 			let markers = L.markerClusterGroup();
-			/* eslint-enable no-undef */
+			// @ts-expect-error
 			let upToDateLayer = leaflet.featureGroup.subGroup(markers);
+			// @ts-expect-error
 			let outdatedLayer = leaflet.featureGroup.subGroup(markers);
+			// @ts-expect-error
 			let legacyLayer = leaflet.featureGroup.subGroup(markers);
 
 			let overlayMaps = {

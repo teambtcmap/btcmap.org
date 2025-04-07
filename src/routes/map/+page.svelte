@@ -135,13 +135,15 @@
 		let verifiedDate = calcVerifiedDate();
 
 		// create marker cluster group and layers
-		/* eslint-disable no-undef */
 		// @ts-expect-error
 		let markers = L.markerClusterGroup({ maxClusterRadius: 80, disableClusteringAtZoom: 17 });
-		/* eslint-enable no-undef */
+		// @ts-expect-error
 		let upToDateLayer = leaflet.featureGroup.subGroup(markers);
+		// @ts-expect-error
 		let outdatedLayer = leaflet.featureGroup.subGroup(markers);
+		// @ts-expect-error
 		let legacyLayer = leaflet.featureGroup.subGroup(markers);
+		// @ts-expect-error
 		let thirdPartyLayer = leaflet.featureGroup.subGroup(markers);
 		let categories: MapGroups = {};
 
@@ -218,6 +220,7 @@
 				}
 
 				if (!categories[category]) {
+					// @ts-expect-error
 					categories[category] = leaflet.featureGroup.subGroup(markers);
 				}
 

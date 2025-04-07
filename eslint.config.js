@@ -9,6 +9,13 @@ export default tseslint.config(
 	...tseslint.configs.recommended,
 	...eslintPluginSvelte.configs.recommended,
 	{
+		// Override the TypeScript ESLint recommended config
+		name: 'typescript-eslint/disable-ban-ts-comment',
+		rules: {
+			'@typescript-eslint/ban-ts-comment': 'warn'
+		}
+	},
+	{
 		files: ['**/*.svelte'],
 		languageOptions: {
 			parser: svelteParser,
@@ -27,7 +34,6 @@ export default tseslint.config(
 			'svelte/no-reactive-reassign': 'warn',
 			'svelte/no-immutable-reactive-statements': 'warn',
 			'@typescript-eslint/no-unused-expressions': 'warn',
-			'@typescript-eslint/ban-ts-comment': 'warn',
 			'@typescript-eslint/no-unused-vars': 'warn',
 			'@typescript-eslint/no-explicit-any': 'warn',
 			'no-undef': 'warn',

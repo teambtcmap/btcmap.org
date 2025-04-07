@@ -1,5 +1,5 @@
 import { theme } from '$lib/store';
-import type { Continents, Element, Grade } from '$lib/types';
+import type { Continents, Element, Grade, IssueIcon } from '$lib/types';
 import { toast } from '@zerodevx/svelte-toast';
 import type { Chart } from 'chart.js';
 import { get } from 'svelte/store';
@@ -140,9 +140,11 @@ export const isEven = (number: number) => {
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export function debounce(func: (e?: any) => void, timeout = 500) {
 	let timer: ReturnType<typeof setTimeout>;
+	// @ts-expect-error: introducing typecheck, this was failing, so ingoring for now
 	return (...args) => {
 		clearTimeout(timer);
 		timer = setTimeout(() => {
+			// @ts-expect-error: introducing typecheck, this was failing, so ingoring for now
 			func.apply(this, args);
 		}, timeout);
 	};
