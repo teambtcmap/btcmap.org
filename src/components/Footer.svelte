@@ -22,6 +22,7 @@
 		<SocialLink url={$socials.nostr} social="nostr" />
 		<SocialLink url={$socials.twitter} social="twitter" />
 	</div>
+
 	<div class="flex flex-wrap justify-center xl:block">
 		{#each links as link}
 			<a

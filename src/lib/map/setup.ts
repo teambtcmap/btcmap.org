@@ -1,4 +1,4 @@
-import { InfoTooltip } from '$lib/comp';
+import { InfoTooltip, Icon } from '$lib/comp';
 import {
 	boost,
 	exchangeRate,
@@ -568,19 +568,31 @@ export const longCalc = (element: ElementOSM) => {
 };
 
 export const generateIcon = (L: Leaflet, icon: string, boosted: boolean) => {
+	const className = boosted ? 'animate-wiggle' : '';
+	const iconTmp = icon !== 'question_mark' ? icon : 'currency_bitcoin';
+
+	// Create a container div to render our Icon component
+	const iconContainer = document.createElement('div');
+	iconContainer.className = 'icon-container';
+
+	// Create and mount the Icon component into the container
+	new Icon({
+		target: iconContainer,
+		props: {
+			w: '20',
+			h: '20',
+			style: `${className} mx-auto mt-[5.75px] text-white`,
+			icon: iconTmp,
+			type: 'material'
+		}
+	});
+
 	return L.divIcon({
 		className: boosted ? 'boosted-icon' : 'div-icon',
 		iconSize: [32, 43],
 		iconAnchor: [16, 43],
 		popupAnchor: [0, -43],
-		html: `<svg width='20px' height='20px' class='${
-			boosted ? 'animate-wiggle' : ''
-		} mx-auto mt-[5.75px] text-white'>
-			     	<use width='20px' height='20px' href="/icons/material/spritesheet.svg#${
-							icon !== 'question_mark' ? icon : 'currency_bitcoin'
-						}">
-						</use>
-			     </svg>`
+		html: iconContainer
 	});
 };
 
@@ -674,7 +686,7 @@ export const generateMarker = (
 				element.tags && element.tags['opening_hours']
 					? `<div class='my-1 w-full max-w-[300px]' title='Opening hours'>
 		  				<svg width='16px' height='16px' class='inline text-primary dark:text-white'>
-	  						<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#clock"></use>
+	  						<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#clock"></use>
 				 	 	</svg>
 			     		<span class='text-body dark:text-white'>${element.tags['opening_hours']}</span>
 	  			 	   </div>`
@@ -684,7 +696,7 @@ export const generateMarker = (
 					<div class='flex space-x-2 mt-2.5 mb-1'>
 						<a id='navigate' href='geo:${lat},${long}' class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
-								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#compass"></use>
+								<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#compass"></use>
 							</svg>
 							<span class='block text-xs text-center mt-1'>Navigate</span>
 						</a>
@@ -693,7 +705,7 @@ export const generateMarker = (
 							element.id
 						}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
-								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#pencil"></use>
+								<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#pencil"></use>
 							</svg>
 							<span class='block text-xs text-center mt-1'>Edit</span>
 						</a>
@@ -702,7 +714,7 @@ export const generateMarker = (
 							element.id
 						}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
-								<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#share"></use>
+								<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#share"></use>
 							</svg>
 							<span class='block text-xs text-center mt-1'>Share</span>
 						</a>
@@ -710,7 +722,7 @@ export const generateMarker = (
 						<div class='relative w-full'>
 							<button id='more-button' class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 								<svg width='24px' height='24px' class='mx-auto'>
-									<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#dots-horizontal"></use>
+									<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#dots-horizontal"></use>
 								</svg>
 								<span class='block text-xs text-center mt-1'>More</span>
 							</button>
@@ -728,7 +740,7 @@ export const generateMarker = (
 														: '#'
 										}" target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#bolt"></use>
+												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#bolt"></use>
 											</svg>
 											Pay Merchant
 										</a>`
@@ -739,7 +751,7 @@ export const generateMarker = (
 								phone
 									? `<a href='tel:${phone}' class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#phone"></use>
+												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#phone"></use>
 											</svg>
 											Call
 										</a>`
@@ -750,7 +762,7 @@ export const generateMarker = (
 								email
 									? `<a href='mailto:${email}' class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#email"></use>
+												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#email"></use>
 											</svg>
 											Email
 										</a>`
@@ -763,7 +775,7 @@ export const generateMarker = (
 											website.startsWith('http') ? website : `https://${website}`
 										} target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#globe"></use>
+												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#globe"></use>
 											</svg>
 											Website
 										</a>`
@@ -776,7 +788,7 @@ export const generateMarker = (
 											twitter.startsWith('http') ? twitter : `https://twitter.com/${twitter}`
 										} target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#twitter"></use>
+												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#twitter"></use>
 											</svg>
 											Twitter
 										</a>`
@@ -791,7 +803,7 @@ export const generateMarker = (
 												: `https://instagram.com/${instagram}`
 										} target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#instagram"></use>
+												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#instagram"></use>
 											</svg>
 											Instagram
 										</a>`
@@ -804,7 +816,7 @@ export const generateMarker = (
 											facebook.startsWith('http') ? facebook : `https://facebook.com/${facebook}`
 										} target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#facebook"></use>
+												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#facebook"></use>
 											</svg>
 											Facebook
 										</a>`
@@ -817,7 +829,7 @@ export const generateMarker = (
 										id='show-tags'
 										class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#tags"></use>
+												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#tags"></use>
 											</svg>
 											Show Tags
 										</button>
@@ -826,7 +838,7 @@ export const generateMarker = (
 										id='tagging-issues'
 										class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#issues"></use>
+												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#issues"></use>
 											</svg>
 											Tag Issues
 										</button>`
@@ -839,7 +851,7 @@ export const generateMarker = (
 									rel="noreferrer"
 									class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 										<svg width='24px' height='24px' class='mr-2'>
-											<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#info-circle"></use>
+											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#info-circle"></use>
 										</svg>
 										Map Legend
 								</a>
@@ -850,7 +862,7 @@ export const generateMarker = (
 									rel="noreferrer"
 									class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 										<svg width='24px' height='24px' class='mr-2'>
-											<use width='24px' height='24px' href="/icons/popup/spritesheet.svg#external"></use>
+											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#external"></use>
 										</svg>
 										View OSM
 								</a>
@@ -946,10 +958,10 @@ ${
 							? `${verified[0]} ${
 									Date.parse(verified[0]) > verifiedDate
 										? `<span title="Verified within the last year"><svg width='16px' height='16px' class='inline text-primary dark:text-white'>
-												<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#verified"></use>
+												<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#verified"></use>
 											</svg></span>`
 										: `<span title="Outdated please re-verify"><svg width='16px' height='16px' class='inline text-primary dark:text-white'>
-												<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#outdated"></use>
+												<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#outdated"></use>
 											</svg></span>`
 								}`
 							: '<span title="Not verified">---</span>'
@@ -977,7 +989,7 @@ ${
 						extraButtons
 							? `<button title='Boost' id='boost-button' class='flex justify-center items-center space-x-2 text-primary dark:text-white hover:text-link dark:hover:text-link border border-mapBorder hover:border-link rounded-lg px-3 h-[32px] transition-colors'>
 								<svg width='16px' height='16px'>
-									<use width='16px' height='16px' href="/icons/popup/spritesheet.svg#boost"></use>
+									<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#boost"></use>
 								</svg>
 								<span class='text-xs'>${boosted ? 'Extend' : 'Boost'}</span>
 							   </button>`
