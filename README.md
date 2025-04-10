@@ -41,9 +41,6 @@ _NOTE:_ BTC Map uses the latest LTS version of [node](https://nodejs.org/). If y
 
   yarn playwright test --debug
     Runs the tests in debug mode.
-
-  yarn playwright codegen
-    Auto generate tests with Codegen.
 ```
 
 ## PWA
