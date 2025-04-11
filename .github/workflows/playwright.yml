@@ -18,8 +18,27 @@ jobs:
           cache: 'yarn'
       - name: Install dependencies
         run: npm install -g yarn && yarn
+
+      # Cache Playwright browsers
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      # Only install browsers if cache missed
       - name: Install Playwright Browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: yarn playwright install --with-deps
+
+      # If cache hit, just install dependencies without browsers
+      - name: Install Playwright Dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: yarn playwright install-deps
+
       - name: Run Playwright tests
         run: yarn playwright test
       - uses: actions/upload-artifact@v4
