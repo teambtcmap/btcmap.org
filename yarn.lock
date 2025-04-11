@@ -477,10 +477,10 @@
   resolved "https://registry.yarnpkg.com/@mapbox/whoots-js/-/whoots-js-3.1.0.tgz#497c67a1cef50d1a2459ba60f315e448d2ad87fe"
   integrity sha512-Es6WcD0nO5l+2BOQS4uLfNPYQaNDfbot3X1XUoloz+x0mPDS3eeORZJl06HXjwBG1fOGwCRnzK88LMdxKRrd6Q==
 
-"@maplibre/maplibre-gl-leaflet@^0.0.22":
-  version "0.0.22"
-  resolved "https://registry.yarnpkg.com/@maplibre/maplibre-gl-leaflet/-/maplibre-gl-leaflet-0.0.22.tgz#04c4d5b65f44be0962330f8b5a7cafc8c3bd2676"
-  integrity sha512-9p4DSPLUE5t0StXH/IcZw37/UL7Ekea4jcVdkSsb2jWI+sM3K7mYHLOnti/2wn+HqxG4jMVUHah7Xun3bs00AQ==
+"@maplibre/maplibre-gl-leaflet@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@maplibre/maplibre-gl-leaflet/-/maplibre-gl-leaflet-0.1.0.tgz#3516c9e5b419fb469653e0d2a1007e1b0a65cda1"
+  integrity sha512-QY2y7oRt/1qE8Mo3+hoWJeZ9xR9AGNzGdNPkwrBaOVBmO+dk6btWQ/W7C6ByRbKezcc5I5R/zSXUV2O6z459+A==
 
 "@maplibre/maplibre-gl-style-spec@^20.2.0":
   version "20.4.0"
