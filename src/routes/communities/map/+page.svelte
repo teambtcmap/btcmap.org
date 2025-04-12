@@ -209,6 +209,9 @@
 			const leafletLocateControl = await import('leaflet.locatecontrol');
 			/* eslint-enable @typescript-eslint/no-unused-vars */
 
+			const maplibreGL = await import('maplibre-gl');
+			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
+
 			// add map and tiles
 			map = leaflet.map(mapElement);
 
