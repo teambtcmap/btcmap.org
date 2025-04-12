@@ -38,7 +38,7 @@ export const eventsSync = async () => {
 						response.data.forEach((data) => eventsData.push(data));
 					} catch (error) {
 						eventError.set('Could not load events from API, please try again or contact BTC Map.');
-						console.log(error);
+						console.error(error);
 						break;
 					}
 				} while (responseCount === limit);
@@ -59,7 +59,7 @@ export const eventsSync = async () => {
 							eventError.set(
 								'Could not store events locally, please try again or contact BTC Map.'
 							);
-							console.log(err);
+							console.error(err);
 						});
 				}
 			} else {
@@ -136,7 +136,7 @@ export const eventsSync = async () => {
 							eventError.set(
 								'Could not update events locally, please try again or contact BTC Map.'
 							);
-							console.log(err);
+							console.error(err);
 						});
 				}
 			}
@@ -144,7 +144,7 @@ export const eventsSync = async () => {
 
 		.catch(async function (err) {
 			eventError.set('Could not load events locally, please try again or contact BTC Map.');
-			console.log(err);
+			console.error(err);
 
 			let updatedSince = '2022-01-01T00:00:00.000Z';
 			let responseCount;
@@ -165,7 +165,7 @@ export const eventsSync = async () => {
 					response.data.forEach((data) => eventsData.push(data));
 				} catch (error) {
 					eventError.set('Could not load events from API, please try again or contact BTC Map.');
-					console.log(error);
+					console.error(error);
 					break;
 				}
 			} while (responseCount === limit);

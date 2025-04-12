@@ -41,7 +41,7 @@
 				usersSync(),
 				areasSync(),
 				reportsSync()
-			]).then((results) => results.forEach((result) => console.log(result.status)));
+			]).then((results) => results.forEach((result) => console.info(result.status)));
 
 			$syncStatus = false;
 		};

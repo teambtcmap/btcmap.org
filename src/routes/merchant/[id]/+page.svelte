@@ -88,7 +88,7 @@
 		merchant = $elements.find((element) => element.id == data.id);
 
 		if (!merchant) {
-			console.log('Could not find merchant, please try again or contact BTC Map.');
+			console.error('Could not find merchant, please try again or contact BTC Map.');
 			goto('/404');
 			return;
 		}
@@ -350,7 +350,7 @@
 
 	onDestroy(async () => {
 		if (map) {
-			console.log('Unloading Leaflet map.');
+			console.info('Unloading Leaflet map.');
 			map.remove();
 		}
 	});

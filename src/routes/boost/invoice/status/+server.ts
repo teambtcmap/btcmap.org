@@ -18,7 +18,7 @@ export const GET: RequestHandler = async ({ url }) => {
 			return response.data;
 		})
 		.catch(function (err) {
-			console.log(err);
+			console.error(err);
 			error(400, 'Could not check invoice status, please try again or contact BTC Map.');
 		});
 

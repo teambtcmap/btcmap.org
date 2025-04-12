@@ -41,6 +41,6 @@ export default tseslint.config(
 		}
 	},
 	{
-		ignores: ['.netlify', '.svelte-kit', 'static', 'build', 'spritesheet-*.ts']
+		ignores: ['.netlify', '.svelte-kit', 'static', 'build', 'spritesheet-*.ts', 'playwright-report']
 	}
 );

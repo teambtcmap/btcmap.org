@@ -35,7 +35,7 @@
 			.catch(function (error) {
 				// handle error
 				errToast('Could not fetch captcha, please try again or contact BTC Map.');
-				console.log(error);
+				console.error(error);
 			});
 	};
 
@@ -81,7 +81,7 @@
 				// handle error
 				errToast('Could not search for locations, please try again or contact BTC Map.');
 				searchLoading = false;
-				console.log(error);
+				console.error(error);
 			});
 	};
 
@@ -122,7 +122,7 @@
 						errToast('Form submission failed, please try again or contact BTC Map.');
 					}
 
-					console.log(error);
+					console.error(error);
 					submitting = false;
 				});
 		}

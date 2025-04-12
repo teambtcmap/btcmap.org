@@ -79,7 +79,7 @@ Created at: ${new Date(Date.now()).toISOString()}`,
 			return response.data;
 		})
 		.catch(function (error) {
-			console.log(error);
+			console.error(error);
 			throw new Error(error);
 		});
 

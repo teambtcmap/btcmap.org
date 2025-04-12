@@ -38,7 +38,7 @@ export const areasSync = async () => {
 						response.data.forEach((data) => areasData.push(data));
 					} catch (error) {
 						areaError.set('Could not load areas from API, please try again or contact BTC Map.');
-						console.log(error);
+						console.error(error);
 						break;
 					}
 				} while (responseCount === limit);
@@ -57,7 +57,7 @@ export const areasSync = async () => {
 						.catch(function (err) {
 							areas.set(areasFiltered);
 							areaError.set('Could not store areas locally, please try again or contact BTC Map.');
-							console.log(err);
+							console.error(err);
 						});
 				}
 			} else {
@@ -130,7 +130,7 @@ export const areasSync = async () => {
 							areas.set(areasData);
 
 							areaError.set('Could not update areas locally, please try again or contact BTC Map.');
-							console.log(err);
+							console.error(err);
 						});
 				}
 			}
@@ -138,7 +138,7 @@ export const areasSync = async () => {
 
 		.catch(async function (err) {
 			areaError.set('Could not load areas locally, please try again or contact BTC Map.');
-			console.log(err);
+			console.error(err);
 
 			let updatedSince = '2022-01-01T00:00:00.000Z';
 			let responseCount;
@@ -159,7 +159,7 @@ export const areasSync = async () => {
 					response.data.forEach((data) => areasData.push(data));
 				} catch (error) {
 					areaError.set('Could not load areas from API, please try again or contact BTC Map.');
-					console.log(error);
+					console.error(error);
 					break;
 				}
 			} while (responseCount === limit);

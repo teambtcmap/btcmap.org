@@ -1110,7 +1110,7 @@ ${
 								errToast(
 									'Could not fetch bitcoin exchange rate, please try again or contact BTC Map.'
 								);
-								console.log(error);
+								console.error(error);
 								resetButton();
 							});
 					}

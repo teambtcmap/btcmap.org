@@ -38,7 +38,7 @@ export const usersSync = async () => {
 						response.data.forEach((data) => usersData.push(data));
 					} catch (error) {
 						userError.set('Could not load users from API, please try again or contact BTC Map.');
-						console.log(error);
+						console.error(error);
 						break;
 					}
 				} while (responseCount === limit);
@@ -57,7 +57,7 @@ export const usersSync = async () => {
 						.catch(function (err) {
 							users.set(usersFiltered);
 							userError.set('Could not store users locally, please try again or contact BTC Map.');
-							console.log(err);
+							console.error(err);
 						});
 				}
 			} else {
@@ -130,7 +130,7 @@ export const usersSync = async () => {
 							users.set(usersData);
 
 							userError.set('Could not update users locally, please try again or contact BTC Map.');
-							console.log(err);
+							console.error(err);
 						});
 				}
 			}
@@ -138,7 +138,7 @@ export const usersSync = async () => {
 
 		.catch(async function (err) {
 			userError.set('Could not load users locally, please try again or contact BTC Map.');
-			console.log(err);
+			console.error(err);
 
 			let updatedSince = '2022-01-01T00:00:00.000Z';
 			let responseCount;
@@ -159,7 +159,7 @@ export const usersSync = async () => {
 					response.data.forEach((data) => usersData.push(data));
 				} catch (error) {
 					userError.set('Could not load users from API, please try again or contact BTC Map.');
-					console.log(error);
+					console.error(error);
 					break;
 				}
 			} while (responseCount === limit);

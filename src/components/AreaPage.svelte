@@ -100,7 +100,7 @@
 		});
 
 		if (!areaFound) {
-			console.log(`Could not find ${type}, please try again or contact BTC Map.`);
+			console.error(`Could not find ${type}, please try again or contact BTC Map.`);
 			goto('/404');
 			return;
 		}
@@ -110,7 +110,7 @@
 			.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
 
 		if (!areaReports.length) {
-			console.log(
+			console.error(
 				`Could not find any ${type} reports, please try again tomorrow or contact BTC Map.`
 			);
 			goto('/404');

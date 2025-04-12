@@ -19,7 +19,7 @@ export async function GET() {
 		})
 		.catch(function (error) {
 			// handle error
-			console.log(error);
+			console.error(error);
 			throw new Error(error);
 		});
 
@@ -31,7 +31,7 @@ export async function GET() {
 		})
 		.catch(function (error) {
 			// handle error
-			console.log(error);
+			console.error(error);
 			throw new Error(error);
 		});
 

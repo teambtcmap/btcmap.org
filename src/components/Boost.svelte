@@ -70,17 +70,17 @@
 							stage = 2;
 							jsConfetti.addConfetti();
 							boostComplete = true;
-							console.log(response);
+							console.info(response);
 						})
 						.catch(function (error) {
 							warningToast('Could not finalize boost, please contact BTC Map.');
-							console.log(error);
+							console.error(error);
 						});
 				}
 			})
 			.catch(function (error) {
 				errToast('Could not check invoice status, please try again or contact BTC Map.');
-				console.log(error);
+				console.error(error);
 			});
 	};
 
@@ -116,7 +116,7 @@
 			})
 			.catch(function (error) {
 				errToast('Could not generate invoice, please try again or contact BTC Map.');
-				console.log(error);
+				console.error(error);
 				loading = false;
 			});
 	};
