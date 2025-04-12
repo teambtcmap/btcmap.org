@@ -4,7 +4,7 @@
 </script>
 
 <div class="mx-auto flex w-full flex-wrap items-center gap-3 px-4 py-5 xl:w-[1200px] xl:px-0">
-	{#each routes as route, index}
+	{#each routes as route, index (route.url)}
 		<a
 			href={route.url}
 			class="text-sm text-link transition-colors hover:text-hover {index === routes.length - 1

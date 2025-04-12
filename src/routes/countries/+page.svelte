@@ -143,14 +143,14 @@
 								location.hash = encodeURIComponent(e.target?.value);
 							}}
 						>
-							{#each sections as option}
+							{#each sections as option (option)}
 								<option disabled={option.startsWith('--')} value={option}>{option}</option>
 							{/each}
 						</select>
 					{/if}
 				</div>
 
-				{#each countrySections as item}
+				{#each countrySections as item (item.section)}
 					{#if section === item.section}
 						<CountrySection countries={item.countries} />
 					{/if}

@@ -47,7 +47,7 @@
 	</a>
 
 	<nav class="flex flex-wrap space-x-16">
-		{#each navLinks as link}
+		{#each navLinks as link (link.title)}
 			<!-- dropdown menu -->
 			{#if link.title === 'Maps'}
 				<NavDropdownDesktop
@@ -129,7 +129,7 @@
 			? 'left-0'
 			: 'left-[-100%]'} h-[calc(100dvh-122.45px)] w-full space-y-2 overflow-y-auto border-t border-[#BDD2D4] bg-teal p-8 transition-all ease-in-out dark:bg-dark"
 	>
-		{#each navLinks as link}
+		{#each navLinks as link (link.title)}
 			<!-- dropdown menu -->
 			{#if link.title === 'Maps'}
 				<NavDropdownMobile title={link.title} icon={link.icon} links={mapsDropdownLinks} />

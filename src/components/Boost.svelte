@@ -168,7 +168,7 @@
 					</div>
 
 					<div class="space-y-2 md:flex md:space-x-2 md:space-y-0">
-						{#each values as value}
+						{#each values as value (value.time)}
 							<button
 								on:click={() => {
 									if (!$exchangeRate) return;

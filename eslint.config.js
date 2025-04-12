@@ -32,7 +32,6 @@ export default tseslint.config(
 		},
 		rules: {
 			'svelte/valid-compile': 'warn',
-			'svelte/require-each-key': 'warn',
 			'svelte/no-dupe-style-properties': 'warn',
 			'svelte/no-dom-manipulating': 'warn',
 			'svelte/infinite-reactive-loop': 'warn',

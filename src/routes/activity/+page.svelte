@@ -128,7 +128,7 @@
 
 					<div class="space-y-5">
 						{#if latestTaggers}
-							{#each supertaggers as tagger}
+							{#each supertaggers as tagger (tagger.id)}
 								<LatestTagger
 									location={tagger.location}
 									action={tagger.type}
@@ -139,8 +139,7 @@
 								/>
 							{/each}
 						{:else}
-							<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
-							{#each Array(50) as skeleton}
+							{#each Array(50) as skeleton (skeleton)}
 								<TaggerSkeleton />
 							{/each}
 						{/if}
