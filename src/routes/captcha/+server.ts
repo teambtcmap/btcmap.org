@@ -22,7 +22,7 @@ export function GET() {
 	const algorithm = 'aes-256-cbc' as string;
 	const key = serverKey as unknown as CipherKey;
 	const iv = initVector as unknown as BinaryLike;
-	const encrypt = crypto.createDecipheriv(algorithm, key, iv);
+	const encrypt = crypto.createCipheriv(algorithm, key, iv);
 
 	let secret = encrypt.update(captcha.text, 'utf8', 'hex');
 	secret += encrypt.final('hex');
