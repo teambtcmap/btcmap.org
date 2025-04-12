@@ -167,7 +167,7 @@
 
 				communityLayer.addTo(map);
 			} catch (error) {
-				console.log(error, community);
+				console.error(error, community);
 			}
 		});
 
@@ -180,7 +180,7 @@
 				errToast(
 					'Could not set map view to provided coordinates, please try again or contact BTC Map.'
 				);
-				console.log(error);
+				console.error(error);
 			}
 		}
 
@@ -225,7 +225,7 @@
 					errToast(
 						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
 					);
-					console.log(error);
+					console.error(error);
 				}
 			} else {
 				map.setView([0, 0], 3);
@@ -271,7 +271,7 @@
 
 	onDestroy(async () => {
 		if (map) {
-			console.log('Unloading Leaflet map.');
+			console.info('Unloading Leaflet map.');
 			map.remove();
 		}
 	});

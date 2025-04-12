@@ -40,7 +40,7 @@ export const reportsSync = async () => {
 						reportError.set(
 							'Could not load reports from API, please try again or contact BTC Map.'
 						);
-						console.log(error);
+						console.error(error);
 						break;
 					}
 				} while (responseCount === limit);
@@ -61,7 +61,7 @@ export const reportsSync = async () => {
 							reportError.set(
 								'Could not store reports locally, please try again or contact BTC Map.'
 							);
-							console.log(err);
+							console.error(err);
 						});
 				}
 			} else {
@@ -138,7 +138,7 @@ export const reportsSync = async () => {
 							reportError.set(
 								'Could not update reports locally, please try again or contact BTC Map.'
 							);
-							console.log(err);
+							console.error(err);
 						});
 				}
 			}
@@ -146,7 +146,7 @@ export const reportsSync = async () => {
 
 		.catch(async function (err) {
 			reportError.set('Could not load reports locally, please try again or contact BTC Map.');
-			console.log(err);
+			console.error(err);
 
 			let updatedSince = '2022-01-01T00:00:00.000Z';
 			let responseCount;
@@ -167,7 +167,7 @@ export const reportsSync = async () => {
 					response.data.forEach((data) => reportsData.push(data));
 				} catch (error) {
 					reportError.set('Could not load reports from API, please try again or contact BTC Map.');
-					console.log(error);
+					console.error(error);
 					break;
 				}
 			} while (responseCount === limit);

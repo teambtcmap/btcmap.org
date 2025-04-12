@@ -35,7 +35,7 @@
 			.catch(function (error) {
 				// handle error
 				errToast('Could not fetch captcha, please try again or contact BTC Map.');
-				console.log(error);
+				console.error(error);
 			});
 	};
 
@@ -147,7 +147,7 @@
 					} else {
 						errToast('Form submission failed, please try again or contact BTC Map.');
 					}
-					console.log(error);
+					console.error(error);
 					submitting = false;
 				});
 		}
@@ -244,7 +244,7 @@
 
 	onDestroy(async () => {
 		if (map) {
-			console.log('Unloading Leaflet map.');
+			console.info('Unloading Leaflet map.');
 			map.remove();
 		}
 	});

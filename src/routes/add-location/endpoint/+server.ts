@@ -83,7 +83,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			return response.data.results[0].components.country;
 		})
 		.catch(function (error) {
-			console.log(error);
+			console.error(error);
 		});
 
 	const standardLabels = ['good first issue', 'help wanted', 'location-submission'];
@@ -130,7 +130,7 @@ If you are a new contributor please read our Tagging Instructions [here](https:/
 			return response.data;
 		})
 		.catch(function (error) {
-			console.log(error);
+			console.error(error);
 			throw new Error(error);
 		});
 

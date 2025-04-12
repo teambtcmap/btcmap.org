@@ -68,7 +68,7 @@
 
 		const userFound = $users.find((user) => user.id == data.user);
 		if (!userFound) {
-			console.log('Could not find user, please try again or contact BTC Map.');
+			console.error('Could not find user, please try again or contact BTC Map.');
 			goto('/404');
 			return;
 		}
@@ -514,7 +514,7 @@
 
 	onDestroy(async () => {
 		if (map) {
-			console.log('Unloading Leaflet map.');
+			console.info('Unloading Leaflet map.');
 			map.remove();
 		}
 	});

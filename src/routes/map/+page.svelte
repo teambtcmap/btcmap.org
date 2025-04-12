@@ -306,7 +306,7 @@
 					errToast(
 						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
 					);
-					console.log(error);
+					console.error(error);
 				}
 			}
 
@@ -329,7 +329,7 @@
 					errToast(
 						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
 					);
-					console.log(error);
+					console.error(error);
 				}
 			}
 
@@ -354,7 +354,7 @@
 						errToast(
 							'Could not set map view to cached coords, please try again or contact BTC Map.'
 						);
-						console.log(err);
+						console.error(err);
 					});
 			}
 
@@ -368,7 +368,7 @@
 				mapCenter = map.getCenter();
 
 				localforage.setItem('coords', coords).catch(function (err) {
-					console.log(err);
+					console.error(err);
 				});
 			});
 
@@ -383,7 +383,7 @@
 				}
 
 				localforage.setItem('coords', coords).catch(function (err) {
-					console.log(err);
+					console.error(err);
 				});
 			});
 
@@ -562,7 +562,7 @@
 
 	onDestroy(async () => {
 		if (map) {
-			console.log('Unloading Leaflet map.');
+			console.info('Unloading Leaflet map.');
 			map.remove();
 		}
 	});

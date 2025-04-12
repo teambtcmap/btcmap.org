@@ -45,7 +45,7 @@ export const elementsSync = async () => {
 						elementError.set(
 							'Could not load elements from API, please try again or contact BTC Map.'
 						);
-						console.log(error);
+						console.error(error);
 						break;
 					}
 				} while (responseCount === limit);
@@ -66,7 +66,7 @@ export const elementsSync = async () => {
 							elementError.set(
 								'Could not store elements locally, please try again or contact BTC Map.'
 							);
-							console.log(err);
+							console.error(err);
 						});
 				}
 			} else {
@@ -153,7 +153,7 @@ export const elementsSync = async () => {
 							elementError.set(
 								'Could not update elements locally, please try again or contact BTC Map.'
 							);
-							console.log(err);
+							console.error(err);
 						});
 				}
 			}
@@ -161,7 +161,7 @@ export const elementsSync = async () => {
 
 		.catch(async function (err) {
 			elementError.set('Could not load elements locally, please try again or contact BTC Map.');
-			console.log(err);
+			console.error(err);
 
 			// add to sync count to only show data refresh after initial load
 			const count = get(elementsSyncCount);
@@ -188,7 +188,7 @@ export const elementsSync = async () => {
 					elementError.set(
 						'Could not load elements from API, please try again or contact BTC Map.'
 					);
-					console.log(error);
+					console.error(error);
 					break;
 				}
 			} while (responseCount === limit);

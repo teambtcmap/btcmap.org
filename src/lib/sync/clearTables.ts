@@ -9,15 +9,15 @@ export const clearTables = (tables: string[]) => {
 					localforage
 						.removeItem(table)
 						.then(function () {
-							console.log('Key is cleared!');
+							console.info('Key is cleared!');
 						})
 						.catch(function (err) {
-							console.log(err);
+							console.error(err);
 						});
 				}
 			})
 			.catch(function (err) {
-				console.log(err);
+				console.error(err);
 			});
 	}
 };

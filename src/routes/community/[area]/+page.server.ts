@@ -29,7 +29,7 @@ export const load: PageServerLoad = async ({ params }) => {
 				})
 				.catch(function (error) {
 					// handle error
-					console.log(error);
+					console.error(error);
 					return 'error';
 				});
 

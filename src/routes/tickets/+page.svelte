@@ -49,7 +49,7 @@
 			.catch(function (error) {
 				// handle error
 				errToast('Could not load open tickets, please try again or contact BTC Map.');
-				console.log(error);
+				console.error(error);
 			});
 	};
 

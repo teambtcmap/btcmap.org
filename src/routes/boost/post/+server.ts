@@ -38,7 +38,7 @@ export const POST: RequestHandler = async ({ request }) => {
 						return response.status;
 					})
 					.catch(function (err) {
-						console.log(err);
+						console.error(err);
 						error(400, 'Could not finalize boost, please contact BTC Map.');
 					});
 			} else {
@@ -46,7 +46,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			}
 		})
 		.catch(function (err) {
-			console.log(err);
+			console.error(err);
 			error(400, 'Could not finalize boost, please contact BTC Map.');
 		});
 
