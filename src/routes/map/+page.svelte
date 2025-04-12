@@ -635,7 +635,7 @@
 				<div
 					class="hide-scroll mt-0.5 max-h-[204px] w-full overflow-y-scroll rounded-lg bg-white drop-shadow-[0px_2px_6px_rgba(0,0,0,0.15)] dark:bg-dark"
 				>
-					{#each searchResults as result}
+					{#each searchResults as result (result)}
 						<button
 							on:click={() => searchSelect(result)}
 							class="block w-full justify-between px-4 py-2 hover:bg-searchHover dark:border-b dark:hover:bg-white/[0.15] md:flex md:text-left"

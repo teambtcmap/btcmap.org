@@ -335,7 +335,7 @@
 				<div
 					class="flex flex-wrap justify-end gap-3 font-semibold text-primary dark:text-white md:gap-5"
 				>
-					{#each chartHistory as history}
+					{#each chartHistory as history (history)}
 						<button
 							class={chartHistorySelected === history
 								? 'underline decoration-primary decoration-4 underline-offset-8 dark:decoration-white'

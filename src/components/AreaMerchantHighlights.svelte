@@ -33,14 +33,13 @@
 		<div class="w-full px-2 py-6 sm:px-5">
 			{#if !dataInitialized}
 				<div class="grid w-full grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
-					<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
-					{#each Array(3) as skeleton}
+					{#each Array(3) as skeleton (skeleton)}
 						<div class="h-56 animate-pulse rounded-2xl bg-link/50" />
 					{/each}
 				</div>
 			{:else if boosts.length}
 				<div class="grid w-full grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
-					{#each boosts as merchant}
+					{#each boosts as merchant (merchant)}
 						<MerchantCard {merchant} />
 					{/each}
 				</div>
@@ -64,14 +63,13 @@
 		<div class="w-full px-2 py-6 sm:px-5">
 			{#if !dataInitialized}
 				<div class="grid w-full grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
-					<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
-					{#each Array(3) as skeleton}
+					{#each Array(3) as skeleton (skeleton)}
 						<div class="h-56 animate-pulse rounded-2xl bg-link/50" />
 					{/each}
 				</div>
 			{:else if latest.length}
 				<div class="grid w-full grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
-					{#each latest as merchant}
+					{#each latest as merchant (merchant)}
 						<MerchantCard {merchant} />
 					{/each}
 				</div>

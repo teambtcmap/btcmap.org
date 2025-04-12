@@ -57,7 +57,7 @@
 		>
 	</div>
 
-	{#each stats as stat}
+	{#each stats as stat (stat)}
 		<span class="mx-5 inline-block text-link lg:!my-auto lg:mx-0">
 			<span
 				class="mr-1 inline-block h-3 w-3 rounded-full {stat.title === 'C'
@@ -65,7 +65,8 @@
 					: stat.title === 'U'
 						? 'bg-link'
 						: 'bg-deleted'} lg:hidden"
-			/>{stat.stat}
+			/>
+			{stat.stat}
 		</span>
 	{/each}
 
