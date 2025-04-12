@@ -406,7 +406,7 @@
 				</div>
 
 				<div class="flex grid-cols-3 flex-wrap justify-center gap-5 lg:grid">
-					{#each contributors as contributor (contributor.id)}
+					{#each contributors as contributor (contributor.name)}
 						<AboutContributor {contributor} />
 					{/each}
 				</div>
@@ -446,7 +446,7 @@
 				</div>
 
 				<div class="flex grid-cols-2 flex-wrap items-center justify-center gap-10 lg:grid">
-					{#each coreTeam as member (member.id)}
+					{#each coreTeam as member (member.name)}
 						<AboutCore {member} />
 					{/each}
 				</div>
