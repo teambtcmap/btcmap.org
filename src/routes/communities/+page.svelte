@@ -111,8 +111,7 @@
 		communities &&
 		communities.filter((community) => community.tags.organization === 'satoshi-spritz');
 	$: uaibit =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'uaibit');
+		communities && communities.filter((community) => community.tags.organization === 'uaibit');
 
 	let continentChartCanvas: HTMLCanvasElement;
 	let continentChart: Chart<'doughnut', number[], string>;
