@@ -110,6 +110,8 @@
 	$: satoshiSpritz =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'satoshi-spritz');
+	$: uaibit =
+		communities && communities.filter((community) => community.tags.organization === 'uaibit');
 
 	let continentChartCanvas: HTMLCanvasElement;
 	let continentChart: Chart<'doughnut', number[], string>;
@@ -224,7 +226,7 @@
 		'BitDevs',
 		'Breizh Bitcoin',
 		'Découvre Bitcoin',
-		'Dvadsatjeden',
+		'Dvadsaťjeden',
 		'Dwadzieścia Jeden',
 		'Eenentwintig',
 		'Einundzwanzig',
@@ -233,7 +235,8 @@
 		'Jednadvacet',
 		'Mi Primer Bitcoin',
 		'Plan B Network',
-		'Satoshi Spritz'
+		'Satoshi Spritz',
+		'UAIBIT'
 	];
 	$: communitySections = [
 		{
@@ -270,7 +273,7 @@
 		{ section: 'BitDevs', communities: bitDevs },
 		{ section: 'Breizh Bitcoin', communities: breizhBitcoin },
 		{ section: 'Découvre Bitcoin', communities: decouvreBitcoin },
-		{ section: 'Dvadsatjeden', communities: dvadsatjeden },
+		{ section: 'Dvadsaťjeden', communities: dvadsatjeden },
 		{ section: 'Dwadzieścia Jeden', communities: dwadziesciaJeden },
 		{ section: 'Eenentwintig', communities: eenentwintig },
 		{ section: 'Einundzwanzig', communities: einundzwanzig },
@@ -279,7 +282,8 @@
 		{ section: 'Jednadvacet', communities: jednadvacet },
 		{ section: 'Mi Primer Bitcoin', communities: miPrimerBitcoin },
 		{ section: 'Plan B Network', communities: planBNetwork },
-		{ section: 'Satoshi Spritz', communities: satoshiSpritz }
+		{ section: 'Satoshi Spritz', communities: satoshiSpritz },
+		{ section: 'UAIBIT', communities: uaibit }
 	];
 
 	onMount(async () => {
