@@ -647,10 +647,10 @@
     esbuild "^0.24.0"
     set-cookie-parser "^2.6.0"
 
-"@sveltejs/kit@^2.20.6":
-  version "2.20.6"
-  resolved "https://registry.yarnpkg.com/@sveltejs/kit/-/kit-2.20.6.tgz#168e03e6c8373f6b18ea1b88e62a6a452a19881a"
-  integrity sha512-ImUkSQ//Xf4N9r0HHAe5vRA7RyQ7U1Ue1YUT235Ig+IiIqbsixEulHTHrP5LtBiC8xOkJoPZQ1VZ/nWHNOaGGw==
+"@sveltejs/kit@^2.15.2":
+  version "2.20.5"
+  resolved "https://registry.yarnpkg.com/@sveltejs/kit/-/kit-2.20.5.tgz#72546cf594fe8cebc2ef0bbf2923dffb411a5e20"
+  integrity sha512-zT/97KvVUo19jEGZa972ls7KICjPCB53j54TVxnEFT5VEwL16G+YFqRVwJbfxh7AmS7/Ptr1rKF7Qt4FBMDNlw==
   dependencies:
     "@types/cookie" "^0.6.0"
     cookie "^0.6.0"
@@ -2132,12 +2132,19 @@ lru-cache@^11.0.0:
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-11.1.0.tgz#afafb060607108132dbc1cf8ae661afb69486117"
   integrity sha512-QIXZUBJUx+2zHUdQujWejBkcD9+cs94tLn0+YL8UrCh+D5sCXZ4c7LaEH48pNwRY3MLDgqUFyhlCyjJPf1WP0A==
 
-magic-string@^0.30.10, magic-string@^0.30.4, magic-string@^0.30.5:
+magic-string@^0.30.10, magic-string@^0.30.5:
   version "0.30.17"
   resolved "https://registry.yarnpkg.com/magic-string/-/magic-string-0.30.17.tgz#450a449673d2460e5bbcfba9a61916a1714c7453"
   integrity sha512-sNPKHvyjVf7gyjwS4xGTaW/mCnF8wnjtifKBEhxfZ7E/S8tQ0rssrwGNn6q8JH/ohItJfSQp9mBtQYuTlH5QnA==
   dependencies:
     "@jridgewell/sourcemap-codec" "^1.5.0"
+
+magic-string@^0.30.4:
+  version "0.30.10"
+  resolved "https://registry.yarnpkg.com/magic-string/-/magic-string-0.30.10.tgz#123d9c41a0cb5640c892b041d4cfb3bd0aa4b39e"
+  integrity sha512-iIRwTIf0QKV3UAnYK4PU8uiEc4SRh5jX0mwpIwETPpHdhVM4f53RSwS/vXvN1JhGX+Cs7B8qIq3d6AH49O5fAQ==
+  dependencies:
+    "@jridgewell/sourcemap-codec" "^1.4.15"
 
 maplibre-gl@4.3.2:
   version "4.3.2"
