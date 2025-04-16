@@ -4,11 +4,18 @@
 
 ## Getting started
 
-1. `git clone` the repo and `cd` into the directory
-2. run `yarn` to install the packages
-3. `yarn dev` will open the app on `localhost:5173`
-4. after making edits run `yarn format` to format the files
-5. run `yarn lint` before commiting any changes
+1. `git clone`\
+   to clone the repo and `cd` into the directory
+2. `yarn`\
+   to install the packages
+3. `yarn dev`\
+   will open the app on: http://localhost:5173
+
+### Check your changes before commit/pushing
+
+- `yarn run format`
+- `yarn run lint`
+- `yarn run typecheck`
 
 ### Build project
 
