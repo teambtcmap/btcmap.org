@@ -8,7 +8,7 @@
 
 <div class="mt-4">
 	<div class="mx-auto w-full grid-cols-3 gap-10 space-y-10 lg:grid lg:w-[830px] lg:space-y-0">
-		{#each supporters as supporter (supporter)}
+		{#each supporters as supporter}
 			<a
 				href={supporter.url}
 				target="_blank"
@@ -29,7 +29,8 @@
 			</a>
 		{/each}
 		<!-- supporter placeholders -->
-		{#each Array(placeholders) as placeholder (placeholder)}
+		<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
+		{#each Array(placeholders) as placeholder}
 			<div
 				class="mx-auto flex h-[90px] w-full items-center justify-center self-center rounded-xl bg-supporter/50 drop-shadow-xl md:w-[250px]"
 			>

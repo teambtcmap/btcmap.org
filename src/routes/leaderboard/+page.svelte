@@ -11,7 +11,6 @@
 	import { theme } from '$lib/store';
 	import type { RpcGetMostActiveUsersItem, TaggerLeaderboard } from '$lib/types';
 	import { detectTheme } from '$lib/utils';
-	import { he } from 'date-fns/locale';
 	import { onMount } from 'svelte';
 
 	export let data;
@@ -92,7 +91,7 @@
 
 			<section id="leaderboard" class="dark:lg:rounded dark:lg:bg-white/10 dark:lg:py-8">
 				<div class="mb-5 hidden grid-cols-6 text-center lg:grid">
-					{#each headings as heading (heading)}
+					{#each headings as heading}
 						<h3 class="text-lg font-semibold text-primary dark:text-white">
 							{heading}
 							{#if heading === 'Tip'}
@@ -108,7 +107,7 @@
 
 				<div class="space-y-10 lg:space-y-5">
 					{#if leaderboard && leaderboard.length && !loading}
-						{#each leaderboard as item, index (item.id)}
+						{#each leaderboard as item, index}
 							<LeaderboardItem
 								position={index + 1}
 								avatar={item.avatar}
@@ -121,7 +120,8 @@
 							/>
 						{/each}
 					{:else}
-						{#each Array(50) as skeleton (skeleton)}
+						<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
+						{#each Array(50) as skeleton}
 							<LeaderboardSkeleton />
 						{/each}
 					{/if}

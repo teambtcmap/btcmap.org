@@ -30,7 +30,7 @@
 		<div bind:this={taggerDiv} class="hide-scroll max-h-[375px] overflow-scroll p-1">
 			{#if taggers && taggers.length}
 				<div class="flex flex-wrap items-center justify-center">
-					{#each taggersPaginated as tagger (tagger.id)}
+					{#each taggersPaginated as tagger}
 						<div class="m-4 space-y-1 transition-transform hover:scale-110">
 							<a href="/tagger/{tagger.id}">
 								<img
@@ -61,7 +61,8 @@
 				{/if}
 			{:else if !dataInitialized}
 				<div class="flex flex-wrap items-center justify-center">
-					{#each Array(5) as tagger (tagger)}
+					<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
+					{#each Array(5) as tagger}
 						<div class="m-4 space-y-1 transition-transform hover:scale-110">
 							<p class="mx-auto h-20 w-20 animate-pulse rounded-full bg-link/50" />
 							<p class="mx-auto h-5 w-28 animate-pulse rounded bg-link/50" />
@@ -93,7 +94,7 @@
 			}}
 		>
 			{#if eventElements && eventElements.length}
-				{#each eventElementsPaginated as event (event['created_at'])}
+				{#each eventElementsPaginated as event}
 					<LatestTagger
 						location={event.location}
 						action={event.type}
@@ -125,7 +126,8 @@
 					>
 				{/if}
 			{:else if !dataInitialized}
-				{#each Array(5) as skeleton (skeleton)}
+				<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
+				{#each Array(5) as skeleton}
 					<TaggerSkeleton />
 				{/each}
 			{:else}
