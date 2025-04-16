@@ -647,7 +647,7 @@
     esbuild "^0.24.0"
     set-cookie-parser "^2.6.0"
 
-"@sveltejs/kit@2.20.7":
+"@sveltejs/kit@^2.20.7":
   version "2.20.7"
   resolved "https://registry.yarnpkg.com/@sveltejs/kit/-/kit-2.20.7.tgz#c6fd581403fe55a6a2deefd027e0547c98e780b4"
   integrity sha512-dVbLMubpJJSLI4OYB+yWYNHGAhgc2bVevWuBjDj8jFUXIJOAnLwYP3vsmtcgoxNGUXoq0rHS5f7MFCsryb6nzg==
@@ -1488,7 +1488,7 @@ eslint-config-prettier@^10.1.1:
   resolved "https://registry.yarnpkg.com/eslint-config-prettier/-/eslint-config-prettier-10.1.2.tgz#31a4b393c40c4180202c27e829af43323bf85276"
   integrity sha512-Epgp/EofAUeEpIdZkW60MHKvPyru1ruQJxPL+WIycnaPApuseK0Zpkrh/FwL9oIpQvIhJwV7ptOy0DWUjTlCiA==
 
-eslint-plugin-svelte@3.5.1:
+eslint-plugin-svelte@^3.5.1:
   version "3.5.1"
   resolved "https://registry.yarnpkg.com/eslint-plugin-svelte/-/eslint-plugin-svelte-3.5.1.tgz#63144938069dfbf61826d2b3edbbed80c35fa6ea"
   integrity sha512-Qn1slddZHfqYiDO6IN8/iN3YL+VuHlgYjm30FT+hh0Jf/TX0jeZMTJXQMajFm5f6f6hURi+XO8P+NPYD+T4jkg==
