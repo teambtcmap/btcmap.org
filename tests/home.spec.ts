@@ -9,6 +9,10 @@ describe('Home Page', () => {
 
 		await page.getByRole('link', { name: 'Open Map' }).click();
 		await expect(page).toHaveURL(/map/);
+
+		// Check if the zoom-in button is visible (aka map is actually loaded and visible)
+		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
+		await expect(zoomInButton).toBeVisible();
 	});
 
 	test('add location opens', async ({ page }) => {
