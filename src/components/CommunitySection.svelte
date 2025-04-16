@@ -8,12 +8,11 @@
 <section>
 	<div class="grid gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 		{#if communities && communities.length}
-			{#each communities as community}
+			{#each communities as community (community.id)}
 				<CommunityCard id={community.id} tags={community.tags} />
 			{/each}
 		{:else}
-			<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
-			{#each Array(4) as skeleton}
+			{#each Array(4) as skeleton (skeleton)}
 				<CommunitySkeleton />
 			{/each}
 		{/if}

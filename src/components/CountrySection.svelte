@@ -8,12 +8,11 @@
 <section>
 	<div class="grid gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 		{#if countries && countries.length}
-			{#each countries as country}
+			{#each countries as country (country.id)}
 				<CountryCard id={country.id} name={country.tags.name} />
 			{/each}
 		{:else}
-			<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
-			{#each Array(4) as skeleton}
+			{#each Array(4) as skeleton (skeleton)}
 				<CountrySkeleton />
 			{/each}
 		{/if}

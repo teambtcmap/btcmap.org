@@ -116,7 +116,7 @@
 
 <section id="leaderboard" class="dark:lg:rounded dark:lg:bg-white/10 dark:lg:py-8">
 	<div class="mb-5 hidden grid-cols-5 text-center lg:grid">
-		{#each headings as heading}
+		{#each headings as heading, index (index)}
 			<h3 class="text-lg font-semibold text-primary dark:text-white">
 				{heading}
 				{#if heading === 'Up-To-Date'}
@@ -148,7 +148,7 @@
 
 	<div>
 		{#if leaderboard && leaderboard.length && !loading}
-			{#each leaderboardPaginated as item, index}
+			{#each leaderboardPaginated as item, index (index)}
 				<AreaLeaderboardItem
 					{type}
 					position={index + 1}
@@ -171,8 +171,7 @@
 				>
 			{/if}
 		{:else}
-			<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
-			{#each Array(50) as skeleton}
+			{#each Array(50) as skeleton (skeleton)}
 				<AreaLeaderboardSkeleton />
 			{/each}
 		{/if}
