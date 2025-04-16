@@ -355,7 +355,8 @@
 				{#if !initialRenderComplete || !communities}
 					<div class="absolute left-0 top-0 flex h-full w-full flex-col justify-between">
 						<div class="flex flex-wrap justify-center">
-							{#each Array(6) as skeleton (skeleton)}
+							<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
+							{#each Array(6) as skeleton}
 								<div class="m-2 w-[94px] animate-pulse rounded-sm bg-link/50 py-2" />
 							{/each}
 						</div>
@@ -386,14 +387,14 @@
 								location.hash = encodeURIComponent(e.target?.value);
 							}}
 						>
-							{#each sections as option (option)}
+							{#each sections as option}
 								<option disabled={option.startsWith('--')} value={option}>{option}</option>
 							{/each}
 						</select>
 					{/if}
 				</div>
 
-				{#each communitySections as item (item.section)}
+				{#each communitySections as item}
 					{#if section === item.section}
 						<CommunitySection communities={item.communities} />
 					{/if}

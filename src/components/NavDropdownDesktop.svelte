@@ -29,7 +29,7 @@
 			on:outclick={() => (show = false)}
 		>
 			<div class="absolute right-0 top-8 z-50 w-[185px] rounded-2xl shadow-lg">
-				{#each links as link (link.url)}
+				{#each links as link}
 					<a
 						href={link.url}
 						target={link.external ? '_blank' : null}

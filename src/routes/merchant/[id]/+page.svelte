@@ -524,7 +524,8 @@
 							text="View OSM"
 						/>
 					{:else}
-						{#each Array(5) as btn (btn)}
+						<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
+						{#each Array(5) as btn}
 							<div class="h-20 w-24 animate-pulse rounded-lg bg-link/50" />
 						{/each}
 					{/if}
@@ -747,7 +748,7 @@
 						}}
 					>
 						{#if merchantEvents && merchantEvents.length}
-							{#each eventsPaginated as event (event['created_at'])}
+							{#each eventsPaginated as event}
 								<MerchantEvent
 									action={event.type}
 									user={findUser(event)}
@@ -777,7 +778,8 @@
 								>
 							{/if}
 						{:else if !dataInitialized}
-							{#each Array(5) as skeleton (skeleton)}
+							<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
+							{#each Array(5) as skeleton}
 								<TaggerSkeleton />
 							{/each}
 						{:else}
@@ -798,7 +800,7 @@
 						class="hide-scroll flex max-h-[375px] flex-wrap items-center justify-center overflow-scroll p-1"
 					>
 						{#if filteredCommunities && filteredCommunities.length}
-							{#each filteredCommunities as community (community.id)}
+							{#each filteredCommunities as community}
 								<div class="m-4 space-y-1 transition-transform hover:scale-110">
 									<a href="/community/{community.id}">
 										<img

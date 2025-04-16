@@ -25,7 +25,7 @@
 	</div>
 
 	<div class="flex justify-center space-x-2">
-		{#each member.socials as social (social.url)}
+		{#each member.socials as social}
 			<a
 				href={social.url}
 				target="_blank"

@@ -19,7 +19,7 @@
 				colors="text-primary dark:text-white dark:hover:text-white/80 hover:text-link"
 			/>
 			<div class="space-y-2">
-				{#each Object.entries($showTags) as tag (tag)}
+				{#each Object.entries($showTags) as tag}
 					<div>
 						<span class="font-semibold text-primary dark:font-normal dark:text-white">{tag[0]}</span
 						><span class="dark:text-white">=</span><span

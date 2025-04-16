@@ -21,7 +21,7 @@
 			/>
 			<div class="space-y-2 text-primary dark:text-white">
 				{#if $taggingIssues.length}
-					{#each $taggingIssues as issue (issue)}
+					{#each $taggingIssues as issue}
 						<div class="flex items-center space-x-2">
 							<IssueIcon icon={getIssueIcon(issue.type)} />
 							<p>{issue.description}</p>
