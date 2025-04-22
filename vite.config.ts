@@ -43,6 +43,6 @@ export default defineConfig({
 	],
 	server: {
 		host: '0.0.0.0',
-		allowedHosts: ['btcmap.org']
+		allowedHosts: ['btcmap.org', '.replit.dev', 'replit.app']
 	}
 });
