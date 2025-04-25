@@ -88,12 +88,13 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	const standardLabels = ['good first issue', 'help wanted', 'location-submission'];
 
-	const github = await axios
-		.post(
-			'https://api.github.com/repos/teambtcmap/btcmap-data/issues',
-			{
-				title: name,
-				body: `Merchant name: ${name}
+	// Try to create issue with labels, if it fails due to missing labels, create without labels
+const createIssue = async (labels?: string[]) => {
+  return axios.post(
+    'https://api.github.com/repos/teambtcmap/btcmap-data/issues',
+    {
+      title: name,
+      body: `Merchant name: ${name}
 Country: ${country ? country : ''}
 Communities: ${communities.length ? communities.join(', ') : ''}
 Address: ${address}
@@ -115,24 +116,37 @@ Status: Todo
 Created at: ${new Date(Date.now()).toISOString()}
 
 If you are a new contributor please read our Tagging Instructions [here](https://wiki.btcmap.org/general/tagging-instructions.html).`,
-				labels:
-					country && communities.length
-						? [...standardLabels, country, ...communities]
-						: country
-							? [...standardLabels, country]
-							: communities.length
-								? [...standardLabels, ...communities]
-								: [...standardLabels]
-			},
-			{ headers }
-		)
-		.then(function (response) {
-			return response.data;
-		})
-		.catch(function (error) {
-			console.error(error);
-			throw new Error(error);
-		});
+				labels: labels
+    },
+    { headers }
+  );
+};
+
+const labels = country && communities.length
+  ? [...standardLabels, country, ...communities]
+  : country
+    ? [...standardLabels, country]
+    : communities.length
+      ? [...standardLabels, ...communities]
+      : [...standardLabels];
+
+const github = await createIssue(labels)
+  .then(function (response) {
+    return response.data;
+  })
+  .catch(async function (error) {
+    if (error.response?.status === 422) { // Label doesn't exist error
+      console.warn('Failed to create issue with labels, retrying without labels');
+      return createIssue() // Retry without any labels
+        .then(response => response.data)
+        .catch(error => {
+          console.error(error);
+          throw new Error('Failed to create issue even without labels');
+        });
+    }
+    console.error(error);
+    throw new Error('Failed to create issue');
+  });
 
 	return new Response(JSON.stringify(github));
 };
