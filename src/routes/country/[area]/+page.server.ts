@@ -14,13 +14,12 @@ export const load: PageServerLoad = async ({ params }) => {
 
 		if (fetchedArea && fetchedArea.id && fetchedArea.tags && fetchedArea.tags.name) {
 			const headers = {
-				Authorization: `Bearer ${GITHUB_API_KEY}`,
-				Accept: 'application/vnd.github+json'
+				Authorization: `token ${GITEA_API_KEY}`
 			};
 
 			const tickets = await axios
 				.get(
-					`https://api.github.com/repos/teambtcmap/btcmap-data/issues?per_page=100&labels=${fetchedArea.tags.name}`,
+					`${GITEA_API_URL}/repos/teambtcmap/btcmap-data/issues?state=open&labels=${encodeURIComponent(fetchedArea.tags.name)}&limit=100`,
 					{ headers }
 				)
 				.then(function (response) {
