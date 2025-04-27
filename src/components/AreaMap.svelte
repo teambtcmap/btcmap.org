@@ -118,11 +118,8 @@
 
 			// @ts-expect-error
 			let markers = L.markerClusterGroup();
-			// @ts-expect-error
 			let upToDateLayer = leaflet.featureGroup.subGroup(markers);
-			// @ts-expect-error
 			let outdatedLayer = leaflet.featureGroup.subGroup(markers);
-			// @ts-expect-error
 			let legacyLayer = leaflet.featureGroup.subGroup(markers);
 
 			let overlayMaps = {
