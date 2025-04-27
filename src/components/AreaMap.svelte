@@ -18,6 +18,7 @@
 	import type { BaseMaps, DomEventType, Grade, Leaflet } from '$lib/types';
 	import { type Element } from '$lib/types.js';
 	import { getGrade } from '$lib/utils';
+	import { elements } from 'chart.js';
 	import type { GeoJSON } from 'geojson';
 	import type { Map } from 'leaflet';
 	import { onDestroy, onMount } from 'svelte';
@@ -162,7 +163,9 @@
 				const lat = latCalc(elementOSM);
 				const long = longCalc(elementOSM);
 
-				let divIcon = generateIcon(leaflet, icon, boosted ? true : false);
+				const commentsCount = element.tags.comments || 0;
+
+				let divIcon = generateIcon(leaflet, icon, boosted ? true : false, commentsCount);
 
 				let marker = generateMarker(
 					lat,

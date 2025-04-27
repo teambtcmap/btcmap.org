@@ -566,25 +566,35 @@ export const longCalc = (element: ElementOSM) => {
 	}
 };
 
-export const generateIcon = (L: Leaflet, icon: string, boosted: boolean) => {
+export const generateIcon = (L: Leaflet, icon: string, boosted: boolean, commentsCount: number) => {
 	const className = boosted ? 'animate-wiggle' : '';
 	const iconTmp = icon !== 'question_mark' ? icon : 'currency_bitcoin';
 
-	// Create a container div to render our Icon component
 	const iconContainer = document.createElement('div');
-	iconContainer.className = 'icon-container';
+	iconContainer.className = 'icon-container relative flex items-center justify-center';
 
-	// Create and mount the Icon component into the container
+	const iconElement = document.createElement('div');
 	new Icon({
-		target: iconContainer,
+		target: iconElement,
 		props: {
 			w: '20',
 			h: '20',
-			style: `${className} mx-auto mt-[5.75px] text-white`,
+			style: `${className} mt-[5.75px] text-white`,
 			icon: iconTmp,
 			type: 'material'
 		}
 	});
+	iconContainer.appendChild(iconElement);
+
+	if (commentsCount > 0) {
+		const commentsCountSpan = document.createElement('span');
+		commentsCountSpan.textContent = `${commentsCount}`;
+		commentsCountSpan.className =
+			'absolute top-1 right-1 transform translate-x-1/2 -translate-y-1/2 ' + // Positioning
+			'bg-green-600 text-white text-[10px] font-bold ' + // Colors and text
+			'rounded-full w-4 h-4 flex items-center justify-center'; // Shape and alignment
+		iconContainer.appendChild(commentsCountSpan);
+	}
 
 	return L.divIcon({
 		className: boosted ? 'boosted-icon' : 'div-icon',
