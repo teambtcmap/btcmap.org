@@ -11,8 +11,6 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 const limit = 5000;
 
 export const elementsSync = async () => {
-	console.log('--------------> elementsSync');
-
 	// clear tables if present
 	clearTables(['elements', 'elements_v2', 'elements_v3']);
 
@@ -35,8 +33,6 @@ export const elementsSync = async () => {
 						const response = await axios.get<Element[]>(
 							`https://api.btcmap.org/v2/elements?updated_since=${updatedSince}&limit=${limit}`
 						);
-
-						console.log('-------------\nElements Sync\n', response.data);
 
 						updatedSince = response.data[response.data.length - 1]['updated_at'];
 						responseCount = response.data.length;

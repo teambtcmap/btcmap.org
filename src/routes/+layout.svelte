@@ -32,10 +32,7 @@
 			description: 'The Times 03/Jan/2009 Chancellor on brink of second bailout for banks'
 		});
 
-		console.log('MOUNT ------------------------');
-
 		const dataSync = async () => {
-			console.log(' ------------------------ sync');
 			$syncStatus = true;
 
 			await Promise.allSettled([
