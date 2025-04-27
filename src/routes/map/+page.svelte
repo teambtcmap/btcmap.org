@@ -177,7 +177,9 @@
 				const lat = latCalc(elementOSM);
 				const long = longCalc(elementOSM);
 
-				let divIcon = generateIcon(leaflet, icon, boosted ? true : false);
+				const commentsCount = element.tags.comments || 0;
+
+				let divIcon = generateIcon(leaflet, icon, boosted ? true : false, commentsCount);
 
 				let marker = generateMarker(
 					lat,

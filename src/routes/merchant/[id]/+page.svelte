@@ -93,7 +93,7 @@
 			return;
 		}
 
-		icon = merchant.tags['icon:android'] || 'question_mark';
+		icon = merchant.tags['icon:android'];
 		address = merchant.osm_json.tags && checkAddress(merchant.osm_json.tags);
 		description = merchant.osm_json.tags?.description;
 		note = merchant.osm_json.tags?.note;
@@ -129,6 +129,8 @@
 
 		lat = latCalc(merchant['osm_json']);
 		long = longCalc(merchant['osm_json']);
+
+		const commentsCount = merchant.tags.comments || 0;
 
 		const communities = $areas.filter(
 			(area) =>
@@ -179,8 +181,12 @@
 			changeDefaultIcons(true, leaflet, mapElement, DomEvent);
 
 			// add element to map
-			// @ts-expect-error
-			const divIcon = generateIcon(leaflet, icon, boosted ? true : false);
+			const divIcon = generateIcon(
+				leaflet,
+				icon || 'question_mark',
+				boosted ? true : false,
+				commentsCount
+			);
 
 			// @ts-expect-error
 			const marker = leaflet.marker([lat, long], { icon: divIcon });

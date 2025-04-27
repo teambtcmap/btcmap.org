@@ -88,6 +88,8 @@ export type Element = {
 		['payment:coinos']?: string;
 		['payment:pouch']?: string;
 		issues?: Issue[];
+		areas?: Array<{ id: number; url_alias: string }>;
+		comments?: number;
 	};
 	created_at: string;
 	updated_at: string;
