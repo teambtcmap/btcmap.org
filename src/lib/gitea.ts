@@ -31,7 +31,7 @@ export async function createIssueWithLabels(title: string, body: string, labels:
   try {
     // Try to create the issue with labels first
     return await axios.post(
-      `${GITEA_API_URL}/teambtcmap/btcmap-data/issues`,
+      `${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues`,
       { title, body, labels },
       { headers }
     );
