@@ -86,7 +86,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			console.error(error);
 		});
 
-	const standardLabels = ['good first issue', 'help wanted', 'location-submission'];
+	const standardLabels = ['location-submission'];
 
 	// Try to create issue with labels, if it fails due to missing labels, create without labels
 const createIssue = async (labels?: string[]) => {
