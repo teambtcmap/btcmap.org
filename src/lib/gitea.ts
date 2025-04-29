@@ -9,7 +9,7 @@ async function createLabel(label: string) {
 
   try {
     await axios.post(
-      `${GITEA_API_URL}/teambtcmap/btcmap-data/labels`,
+      `${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/labels`,
       {
         name: label,
         color: '#' + Math.floor(Math.random()*16777215).toString(16) // Random color
