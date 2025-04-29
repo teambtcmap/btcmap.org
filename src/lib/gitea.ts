@@ -9,7 +9,7 @@ async function createLabel(label: string) {
 
   try {
     await axios.post(
-      `${GITEA_API_URL}/repos/teambtcmap/btcmap-data/labels`,
+      `${GITEA_API_URL}/teambtcmap/btcmap-data/labels`,
       {
         name: label,
         color: '#' + Math.floor(Math.random()*16777215).toString(16) // Random color
@@ -17,10 +17,9 @@ async function createLabel(label: string) {
       { headers }
     );
   } catch (error) {
-    // Ignore 422 errors as they mean the label already exists
-    if (error.response?.status !== 422) {
-      console.error(`Failed to create label ${label}:`, error);
-    }
+
+  console.error(`Failed to create label ${label}:`, error);
+
   }
 }
 
