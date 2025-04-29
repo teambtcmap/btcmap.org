@@ -1,5 +1,5 @@
+
 import {
-	GITHUB_API_KEY,
 	OPENCAGE_API_KEY,
 	SERVER_CRYPTO_KEY,
 	SERVER_INIT_VECTOR
@@ -16,11 +16,6 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 const used: string[] = [];
 
 export const POST: RequestHandler = async ({ request }) => {
-	const headers = {
-		Authorization: `Bearer ${GITHUB_API_KEY}`,
-		Accept: 'application/vnd.github+json'
-	};
-
 	const {
 		captchaSecret,
 		captchaTest,
@@ -97,7 +92,7 @@ Created at: ${new Date(Date.now()).toISOString()}
 If you are a new contributor please read our Tagging Instructions [here](https://wiki.btcmap.org/general/tagging-instructions.html).`;
 
 	const response = await createIssueWithLabels(name, body, labels);
-	const github = response.data;
+	const gitea = response.data;
 
-	return new Response(JSON.stringify(github));
+	return new Response(JSON.stringify(gitea));
 };
