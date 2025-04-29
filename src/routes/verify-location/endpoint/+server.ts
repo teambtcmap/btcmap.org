@@ -76,12 +76,13 @@ export const POST: RequestHandler = async ({ request }) => {
 			console.error(error);
 		});
 
-	const github = await axios
-		.post(
-			'https://api.github.com/repos/teambtcmap/btcmap-data/issues',
-			{
-				title: name,
-				body: `Merchant name: ${name}
+	const { createIssueWithLabels } = await import('$lib/gitea');
+
+	const labels = country
+		? ['good first issue', 'help wanted', 'verify-submission', country]
+		: ['good first issue', 'help wanted', 'verify-submission'];
+
+	const body = `Merchant name: ${name}
 Country: ${country ? country : ''}
 Merchant location: ${location}
 Edit link: ${edit}
@@ -93,20 +94,10 @@ Long: ${long}
 Status: Todo
 Created at: ${new Date(Date.now()).toISOString()}
 
-If you are a new contributor please read our Tagging Instructions [here](https://wiki.btcmap.org/general/tagging-instructions.html).`,
-				labels: country
-					? ['good first issue', 'help wanted', 'verify-submission', country]
-					: ['good first issue', 'help wanted', 'verify-submission']
-			},
-			{ headers }
-		)
-		.then(function (response) {
-			return response.data;
-		})
-		.catch(function (error) {
-			console.error(error);
-			throw new Error(error);
-		});
+If you are a new contributor please read our Tagging Instructions [here](https://wiki.btcmap.org/general/tagging-instructions.html).`;
+
+	const response = await createIssueWithLabels(name, body, labels);
+	const github = response.data;
 
 	return new Response(JSON.stringify(github));
 };
