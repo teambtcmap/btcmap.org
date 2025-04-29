@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 import { GITEA_API_KEY, GITEA_API_URL } from '$env/static/private';
 
@@ -29,7 +28,7 @@ export async function createIssueWithLabels(title: string, body: string, labels:
   };
 
   try {
-    // Try to create the issue with labels first
+    // Create issue with labels as string array
     return await axios.post(
       `${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues`,
       { title, body, labels },
