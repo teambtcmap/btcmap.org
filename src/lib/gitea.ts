@@ -32,7 +32,7 @@ export async function createIssueWithLabels(title: string, body: string, labels:
   try {
     // Try to create the issue with labels first
     return await axios.post(
-      `${GITEA_API_URL}/repos/teambtcmap/btcmap-data/issues`,
+      `${GITEA_API_URL}/teambtcmap/btcmap-data/issues`,
       { title, body, labels },
       { headers }
     );
@@ -45,7 +45,7 @@ export async function createIssueWithLabels(title: string, body: string, labels:
       // Retry the issue creation
       try {
         return await axios.post(
-          `${GITEA_API_URL}/repos/teambtcmap/btcmap-data/issues`,
+          `${GITEA_API_URL}/teambtcmap/btcmap-data/issues`,
           { title, body, labels },
           { headers }
         );
