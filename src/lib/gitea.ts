@@ -31,6 +31,13 @@ async function createLabel(name: string): Promise<number | null> {
     Authorization: `token ${GITEA_API_KEY}`
   };
 
+  // First try to get existing label
+  const existingLabels = await getLabels();
+  const existingLabel = existingLabels.find(l => l.name === name);
+  if (existingLabel) {
+    return existingLabel.id;
+  }
+
   try {
     // Generate a valid 6-character hex color
     const color = Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
@@ -46,15 +53,7 @@ async function createLabel(name: string): Promise<number | null> {
     );
     return response.data.id;
   } catch (error) {
-    // If label already exists, try to fetch its ID
-    if (error.response?.status === 422) {
-      const labels = await getLabels();
-      const existingLabel = labels.find(l => l.name === name);
-      if (existingLabel) {
-        return existingLabel.id;
-      }
-    }
-    console.error(`Failed to create/get label ${name}:`, error);
+    console.error(`Failed to create label ${name}:`, error);
     if (error.response?.data?.message) {
       console.error('Error message:', error.response.data.message);
     }
