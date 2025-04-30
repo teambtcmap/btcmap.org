@@ -62,9 +62,12 @@ export async function createIssueWithLabels(title: string, body: string, labelNa
   };
 
   try {
-    // For now, we'll just get the location-submission label
-    const locationSubmissionLabel = await getLabelId('location-submission');
-    const labels = locationSubmissionLabel ? [locationSubmissionLabel] : [];
+    // Get or create all label IDs
+    const labelPromises = labelNames.map(name => getLabelId(name));
+    const labelIds = await Promise.all(labelPromises);
+    
+    // Filter out any null values from failed label creation
+    const labels = labelIds.filter((id): id is number => id !== null);
 
     return await axios.post(
       `${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues`,
