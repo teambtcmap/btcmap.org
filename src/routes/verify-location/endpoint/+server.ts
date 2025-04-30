@@ -77,11 +77,11 @@ export const POST: RequestHandler = async ({ request }) => {
 	const standardLabels = ['location-verification'];
 
 	const labels = country && communities.length
-		? [...standardLabels, country, ...communities]
+		? [...standardLabels, country, ...communities.map(area => area.url_alias)]
 		: country
 			? [...standardLabels, country]
 			: communities.length
-				? [...standardLabels, ...communities]
+				? [...standardLabels, ...communities.map(area => area.url_alias)]
 				: [...standardLabels];
 
 	const body = `Merchant name: ${name}
