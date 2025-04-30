@@ -39,13 +39,22 @@ async function createLabel(name: string): Promise<number | null> {
       `${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/labels`,
       {
         name,
-        color
+        color,
+        description: `Auto-generated label for ${name}`
       },
       { headers }
     );
     return response.data.id;
   } catch (error) {
-    console.error(`Failed to create label ${name}:`, error);
+    // If label already exists, try to fetch its ID
+    if (error.response?.status === 422) {
+      const labels = await getLabels();
+      const existingLabel = labels.find(l => l.name === name);
+      if (existingLabel) {
+        return existingLabel.id;
+      }
+    }
+    console.error(`Failed to create/get label ${name}:`, error);
     if (error.response?.data?.message) {
       console.error('Error message:', error.response.data.message);
     }
