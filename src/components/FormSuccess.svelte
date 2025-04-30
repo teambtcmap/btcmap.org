@@ -24,18 +24,12 @@
 			<HeaderPlaceholder />
 		{/if}
 		<p class="mb-5 w-full text-primary dark:text-white md:w-[500px]">
-			{text} If you wish to know the status of your contribution, you can join our
+			{text} You may also monitor the progress of your submission here: 
 			<a
-				href={$socials.discord}
+				href="https://gitea.btcmap.org/teambtcmap/btcmap-data/issues/{issue}"
 				target="_blank"
 				rel="noreferrer"
-				class="text-link transition-colors hover:text-hover">Discord</a
-			>. You may also monitor the progress on GitHub
-			<a
-				href="https://github.com/teambtcmap/btcmap-data/issues/{issue}"
-				target="_blank"
-				rel="noreferrer"
-				class="text-link transition-colors hover:text-hover">issue #{issue}</a
+				class="text-link transition-colors hover:text-hover">Issue #{issue}</a
 			>.
 		</p>
 
