@@ -32,17 +32,23 @@ async function createLabel(name: string): Promise<number | null> {
   };
 
   try {
+    // Generate a valid 6-character hex color
+    const color = Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+    
     const response = await axios.post(
       `${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/labels`,
       {
         name,
-        color: '#' + Math.floor(Math.random()*16777215).toString(16) // Random color
+        color
       },
       { headers }
     );
     return response.data.id;
   } catch (error) {
     console.error(`Failed to create label ${name}:`, error);
+    if (error.response?.data?.message) {
+      console.error('Error message:', error.response.data.message);
+    }
     return null;
   }
 }
