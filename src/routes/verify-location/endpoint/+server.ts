@@ -28,7 +28,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		verified,
 		lat,
 		long,
-		communities
+		areas
 	} = await request.json();
 
 	// if honey field has value return
@@ -75,14 +75,8 @@ export const POST: RequestHandler = async ({ request }) => {
 	const { createIssueWithLabels } = await import('$lib/gitea');
 
 	const standardLabels = ['location-verification'];
-
-	const labels = country && communities.length
-		? [...standardLabels, country, ...communities.map(area => area.url_alias)]
-		: country
-			? [...standardLabels, country]
-			: communities.length
-				? [...standardLabels, ...communities.map(area => area.url_alias)]
-				: [...standardLabels];
+	const areaLabels = (areas || []).map(area => area.url_alias);
+	const labels = [...standardLabels, ...areaLabels];
 
 	const body = `Merchant name: ${name}
 Country: ${country ? country : ''}
