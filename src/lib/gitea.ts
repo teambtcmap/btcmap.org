@@ -67,7 +67,7 @@ export async function createIssueWithLabels(title: string, body: string, labelNa
     const labels = locationSubmissionLabel ? [locationSubmissionLabel] : [];
 
     return await axios.post(
-      `${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/labels`,
+      `${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues`,
       { title, body, labels },
       { headers }
     );
