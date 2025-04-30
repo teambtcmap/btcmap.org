@@ -1,4 +1,3 @@
-
 import {
 	OPENCAGE_API_KEY,
 	SERVER_CRYPTO_KEY,
@@ -75,7 +74,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	const { createIssueWithLabels } = await import('$lib/gitea');
 
 	const standardLabels = ['location-verification'];
-	const areaLabels = (areas || []).map(area => area.url_alias);
+	const areaLabels = Array.isArray(areas) ? areas.map(area => area.url_alias) : [];
 	const labels = [...standardLabels, ...areaLabels];
 
 	const body = `Merchant name: ${name}
@@ -89,6 +88,7 @@ Lat: ${lat}
 Long: ${long}
 Status: Todo
 Created at: ${new Date(Date.now()).toISOString()}
+Areas: ${areaLabels.length > 0 ? areaLabels.join(', ') : 'None'}
 
 If you are a new contributor please read our Tagging Instructions [here](https://wiki.btcmap.org/general/tagging-instructions.html).`;
 
