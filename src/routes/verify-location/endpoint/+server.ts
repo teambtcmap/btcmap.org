@@ -54,13 +54,13 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	const standardLabels = ['location-verification'];
-	const areaData = lat && long ? getAreasByCoordinates(lat, long) : [];
-	console.log('Area data for coordinates:', {lat, long}, areaData); // Debug log
-	const areaLabels = areaData.map(([id, alias]) => alias || id).filter(Boolean);
+	const areas = lat && long ? getAreasByCoordinates(lat, long) : [];
+	console.log('Areas for coordinates:', {lat, long}, areas); // Debug log
+	const areaLabels = areas.map(([id, alias]) => alias || id).filter(Boolean);
 	const allLabels = [...standardLabels, ...areaLabels];
 
 	// Format areas for the issue body
-	const areasFormatted = areaData.map(([id, alias, type]) => 
+	const areasFormatted = areas.map(([id, alias, type]) => 
 		`${alias || id}${type ? ` (${type})` : ''}`
 	).join(', ');
 
