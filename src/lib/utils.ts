@@ -179,7 +179,7 @@ export function getAreasByElementId(elementId: string): Array<[
   string | undefined  // Type of the area, if available
 ]> {
   console.log('getAreasByElementId called with:', elementId);
-  
+
   const element = get(elements).find(element => element.id === elementId);
   if (!element) {
     console.log('No element found for ID:', elementId);
@@ -200,15 +200,26 @@ export function getAreasByElementId(elementId: string): Array<[
 }
 
 export function getAreasByCoordinates(lat: number, long: number): Array<[
-	string,             // Area ID
-	string | undefined, // URL Alias for the area, if available
-	string | undefined  // Type of the area, if available
+  string,             // Area ID
+  string | undefined, // URL Alias for the area, if available
+  string | undefined  // Type of the area, if available
 ]> {
-	return get(areas)
-		.filter(area => {
-			if (!area.tags.geo_json) return false;
-			let rewoundPoly = rewind(area.tags.geo_json, true);
-			return geoContains(rewoundPoly, [long, lat]);
-		})
-		.map(area => [area.id, area.tags.url_alias, area.tags.type]);
+  console.log('Checking areas with coordinates:', {lat, long});
+  const allAreas = get(areas);
+  console.log('Total areas to check:', allAreas.length);
+
+  return allAreas
+    .filter(area => {
+      if (!area.tags.geo_json) {
+        console.log('Area missing geo_json:', area.id);
+        return false;
+      }
+      let rewoundPoly = rewind(area.tags.geo_json, true);
+      const contains = geoContains(rewoundPoly, [long, lat]);
+      if (contains) {
+        console.log('Found matching area:', area.id);
+      }
+      return contains;
+    })
+    .map(area => [area.id, area.tags.url_alias, area.tags.type]);
 }
