@@ -173,7 +173,6 @@ export const isBoosted = (element: Element) =>
 
 export function getAreasByElementId(elementId: string): string[] {
   const elementsList = get(elements);
-  const areasList = get(areas);
   
   const element = elementsList.find(e => e.id === elementId);
   if (!element || !element.areas) {
@@ -181,22 +180,7 @@ export function getAreasByElementId(elementId: string): string[] {
     return [];
   }
 
-  const areaLabels = element.areas
-    .map(areaId => {
-      const area = areasList.find(a => a.id === areaId);
-      if (area?.tags?.type === 'community' && 
-          area.tags.geo_json && 
-          area.tags.name && 
-          area.tags['icon:square'] && 
-          area.tags.continent && 
-          Object.keys(area.tags).find(key => key.includes('contact'))) {
-        return area.tags.url_alias;
-      }
-      return undefined;
-    })
-    .filter(alias => alias !== undefined);
-
-  return areaLabels;
+  return element.areas;
 }
 
 export function getUrlAlias(areaId: string, areasList: any[]): string | undefined {
