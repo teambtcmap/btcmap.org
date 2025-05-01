@@ -144,6 +144,7 @@
 						location = `https://btcmap.org/map?lat=${lat}&long=${long}`;
 						edit = `https://www.openstreetmap.org/edit?${elementOSM.type}=${elementOSM.id}`;
 						merchantAreas = element.areas || [];
+						console.log('Selected merchant areas:', merchantAreas);
 						selected = true;
 					}
 				});
