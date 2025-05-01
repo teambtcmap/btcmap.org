@@ -238,10 +238,7 @@
 					edit: edit,
 					current: current ? 'Yes' : 'No',
 					outdated: outdated ? outdated : '',
-					verified: verify.value,
-					lat: lat ? lat.toString() : '',
-					long: long ? long.toString() : '',
-					areas: merchantAreas.map(area => area.url_alias)
+					verified: verify.value
 				})
 				.then(function (response) {
 					submissionIssueNumber = response.data.number;

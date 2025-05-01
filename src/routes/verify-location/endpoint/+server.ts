@@ -24,10 +24,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		edit,
 		current,
 		outdated,
-		verified,
-		lat,
-		long,
-		areas
+		verified
 	} = await request.json();
 
 	// if honey field has value return
