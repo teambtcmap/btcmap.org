@@ -54,7 +54,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	const standardLabels = ['location-verification'];
-	const areas = lat && long ? getAreasByCoordinates(lat, long) : [];
+	const areas = lat && long ? await getAreasByCoordinates(lat, long) : [];
 	console.log('Areas for coordinates:', {lat, long}, areas); // Debug log
 	const areaLabels = areas.map(([id, alias]) => alias || id).filter(Boolean);
 	const allLabels = [...standardLabels, ...areaLabels];

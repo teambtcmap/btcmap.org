@@ -199,12 +199,13 @@ export function getAreasByElementId(elementId: string): Array<[
     .map(area => [area.id, area.tags.url_alias, area.tags.type]);
 }
 
-export function getAreasByCoordinates(lat: number, long: number): Array<[
-  string,             // Area ID
+export async function getAreasByCoordinates(lat: number, long: number): Promise<Array<[
+  string,             // Area ID 
   string | undefined, // URL Alias for the area, if available
   string | undefined  // Type of the area, if available
-]> {
+]>> {
   console.log('Checking areas with coordinates:', {lat, long});
+  await areasSync(); // Explicitly sync areas
   const allAreas = get(areas);
   console.log('Total areas to check:', allAreas.length);
 
