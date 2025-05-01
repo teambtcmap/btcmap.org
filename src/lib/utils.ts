@@ -173,14 +173,28 @@ export const isBoosted = (element: Element) =>
 
 export function getAreaIdsByElementId(elementId: string): string[] {
   const elementsList = get(elements);
+  const areasList = get(areas);
   
-  const element = elementsList.find(e => e.id === elementId);
-  if (!element || !element.areas) {
-    console.log('No element or areas found for ID:', elementId);
+  const element = elementsList.find(element => element.id == elementId);
+  if (!element) {
+    console.log('No element found for ID:', elementId);
     return [];
   }
 
-  return element.areas;
+  const lat = element.osm_json.type === 'node' 
+    ? element.osm_json.lat 
+    : (element.osm_json.bounds.minlat + element.osm_json.bounds.maxlat) / 2;
+  const long = element.osm_json.type === 'node'
+    ? element.osm_json.lon
+    : (element.osm_json.bounds.minlon + element.osm_json.bounds.maxlon) / 2;
+
+  return areasList
+    .filter(area => {
+      if (!area.tags.geo_json) return false;
+      let rewoundPoly = rewind(area.tags.geo_json, true);
+      return geoContains(rewoundPoly, [long, lat]);
+    })
+    .map(area => area.id);
 }
 
 export function getUrlAlias(areaId: string, areasList: any[]): string | undefined {
