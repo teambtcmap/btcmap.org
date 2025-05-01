@@ -182,22 +182,13 @@ export function getAreasByElementId(elementId: string): string[] {
   }
 
   const areaLabels = element.areas
-    .map(areaId => areasList.find(a => a.id === areaId))
-    .filter(area => area !== undefined)
-    .map(area => area.tags?.url_alias)
+    .map(areaId => getUrlAlias(areaId, areasList))
     .filter(alias => alias !== undefined);
 
   return areaLabels;
 }
 
-export async function getAreasByLatLon(lat: number, lon: number): Promise<string[]> {
-  try {
-    const response = await axios.get(`https://api.btcmap.org/v2/elements/nearby?lat=${lat}&lon=${lon}&limit=1`);
-    if (response.data && response.data.length > 0) {
-      return getAreasByElementId(response.data[0].id);
-    }
-  } catch (error) {
-    console.error('Failed to get nearby elements:', error);
-  }
-  return [];
+export function getUrlAlias(areaId: string, areasList: any[]): string | undefined {
+  const area = areasList.find(a => a.id === areaId);
+  return area?.tags?.url_alias;
 }
