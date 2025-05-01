@@ -43,8 +43,8 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	const standardLabels = ['location-verification'];
-	const areaData = elementId ? getAreasByElementId(elementId) : [];
-	console.log('Area data for element:', elementId, areaData); // Debug log
+	const areaData = merchant && merchant.id ? getAreasByElementId(merchant.id) : [];
+	console.log('Area data for element:', merchant?.id, areaData); // Debug log
 	const areaLabels = areaData.map(([id, alias]) => alias || id).filter(Boolean);
 	const allLabels = [...standardLabels, ...areaLabels];
 
