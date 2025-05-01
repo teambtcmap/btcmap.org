@@ -6,7 +6,7 @@ import { error } from '@sveltejs/kit';
 import crypto from 'crypto';
 import type { RequestHandler } from './$types';
 import type { CipherKey, BinaryLike } from 'crypto';
-import { getAreaIdsByElementId, getAreasByElementId } from '$lib/utils';
+import { getAreasByElementId } from '$lib/utils';
 import { createIssueWithLabels } from '$lib/gitea';
 
 export const POST: RequestHandler = async ({ request }) => {
