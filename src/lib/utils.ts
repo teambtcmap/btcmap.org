@@ -169,3 +169,35 @@ export const validateContinents = (continent: Continents) =>
 
 export const isBoosted = (element: Element) =>
 	element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now();
+
+
+export function getAreasByElementId(elementId: string): string[] {
+  const elementsList = get(elements);
+  const areasList = get(areas);
+  
+  const element = elementsList.find(e => e.id === elementId);
+  if (!element || !element.areas) {
+    console.log('No element or areas found for ID:', elementId);
+    return [];
+  }
+
+  const areaLabels = element.areas
+    .map(areaId => areasList.find(a => a.id === areaId))
+    .filter(area => area !== undefined)
+    .map(area => area.tags?.url_alias)
+    .filter(alias => alias !== undefined);
+
+  return areaLabels;
+}
+
+export async function getAreasByLatLon(lat: number, lon: number): Promise<string[]> {
+  try {
+    const response = await axios.get(`https://api.btcmap.org/v2/elements/nearby?lat=${lat}&lon=${lon}&limit=1`);
+    if (response.data && response.data.length > 0) {
+      return getAreasByElementId(response.data[0].id);
+    }
+  } catch (error) {
+    console.error('Failed to get nearby elements:', error);
+  }
+  return [];
+}
