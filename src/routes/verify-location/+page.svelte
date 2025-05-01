@@ -199,14 +199,12 @@
 	let verify: HTMLTextAreaElement;
 
 	let selected = false;
-	let noLocationSelected = false;
 	let submitted = false;
 	let submitting = false;
 	let submissionIssueNumber: number;
 
 	const submitForm = () => {
 		if (!selected) {
-			noLocationSelected = true;
 			errToast('Please select a location...');
 		} else {
 			submitting = true;
@@ -362,7 +360,7 @@
 							<label for="location-picker" class="mb-2 block font-semibold">Select Location</label>
 							{#if selected}
 								<span class="font-semibold text-green-500">Location selected!</span>
-							{:else if noLocationSelected}
+							{:else}
 								<span class="font-semibold text-error">Please select a location...</span>
 							{/if}
 							<div class="relative mb-2">
