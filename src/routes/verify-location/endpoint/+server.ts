@@ -22,6 +22,8 @@ export const POST: RequestHandler = async ({ request }) => {
 		outdated,
 		verified,
 		merchantId,
+		lat,
+		long
 	} = await request.json();
 	
 	console.log('Request data:', { 
@@ -65,6 +67,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	const body = `Merchant name: ${name}
 Areas: ${areasFormatted || 'None'}
 Merchant location: ${location}
+Coordinates: ${lat}, ${long}
 Edit link: ${edit}
 Current information correct: ${current}
 Outdated information: ${outdated}
