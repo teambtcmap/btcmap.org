@@ -54,20 +54,6 @@ export const POST: RequestHandler = async ({ request }) => {
 		used.push(captchaSecret);
 	}
 
-	const country = await axios
-		.get(
-			`https://api.opencagedata.com/geocode/v1/json?q=${lat.slice(0, 7)}%2C%20${long.slice(
-				0,
-				7
-			)}&key=${OPENCAGE_API_KEY}&language=en&limit=1&no_annotations=1&no_record=1`
-		)
-		.then(function (response) {
-			return response.data.results[0].components.country;
-		})
-		.catch(function (error) {
-			console.error(error);
-		});
-
 	const { createIssueWithLabels } = await import('$lib/gitea');
 
 	const standardLabels = ['location-verification'];
