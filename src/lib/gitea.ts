@@ -31,14 +31,14 @@ async function createLabel(name: string): Promise<number | null> {
     Authorization: `token ${GITEA_API_KEY}`
   };
 
-  // First try to get existing label
-  const existingLabels = await getLabels();
-  const existingLabel = existingLabels.find(l => l.name === name);
-  if (existingLabel) {
-    return existingLabel.id;
-  }
-
   try {
+    // First try to get existing label
+    const existingLabels = await getLabels();
+    const existingLabel = existingLabels.find(l => l.name === name);
+    if (existingLabel) {
+      return existingLabel.id;
+    }
+
     // Generate a valid 6-character hex color
     const color = Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
     
@@ -51,13 +51,14 @@ async function createLabel(name: string): Promise<number | null> {
       },
       { headers }
     );
+    console.log(`Created label: ${name} with ID: ${response.data.id}`);
     return response.data.id;
   } catch (error) {
-    console.error(`Failed to create label ${name}:`, error);
+    console.error(`Failed to create/get label ${name}:`, error);
     if (error.response?.data?.message) {
       console.error('Error message:', error.response.data.message);
     }
-    return null;
+    throw error; // Propagate error instead of returning null
   }
 }
 
@@ -76,20 +77,30 @@ export async function createIssueWithLabels(title: string, body: string, labelNa
   };
 
   try {
+    console.log('Creating issue with labels:', labelNames);
+    
     // Get or create all label IDs
     const labelPromises = labelNames.map(name => getLabelId(name));
     const labelIds = await Promise.all(labelPromises);
     
-    // Filter out any null values from failed label creation
-    const labels = labelIds.filter((id): id is number => id !== null);
+    // No need to filter null values since getLabelId now throws errors
+    const labels = labelIds;
+    
+    console.log('Resolved label IDs:', labels);
 
-    return await axios.post(
+    const response = await axios.post(
       `${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues`,
       { title, body, labels },
       { headers }
     );
+    
+    console.log('Created issue with ID:', response.data.number);
+    return response;
   } catch (error) {
     console.error('Failed to create issue:', error);
+    if (error.response?.data) {
+      console.error('API Error response:', error.response.data);
+    }
     throw error;
   }
 }
