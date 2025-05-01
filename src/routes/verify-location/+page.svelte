@@ -202,6 +202,7 @@
 	let submitted = false;
 	let submitting = false;
 	let submissionIssueNumber: number;
+	let merchantId: string;
 
 	const submitForm = () => {
 		if (!selected) {
