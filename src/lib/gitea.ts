@@ -1,6 +1,8 @@
 
 import axios from 'axios';
 import { GITEA_API_KEY, GITEA_API_URL } from '$env/static/private';
+import { get } from 'svelte/store';
+import { areas, elements } from '$lib/store';
 
 interface GiteaLabel {
   id: number;
@@ -8,6 +10,39 @@ interface GiteaLabel {
   color: string;
   description?: string;
 }
+
+async function getAreaLabelsFromElement(elementId: string): Promise<string[]> {
+  const elementsList = get(elements);
+  const areasList = get(areas);
+  
+  const element = elementsList.find(e => e.id === elementId);
+  if (!element || !element.areas) {
+    console.log('No element or areas found for ID:', elementId);
+    return [];
+  }
+
+  const areaLabels = element.areas
+    .map(areaId => areasList.find(a => a.id === areaId))
+    .filter(area => area !== undefined)
+    .map(area => area.tags?.url_alias)
+    .filter(alias => alias !== undefined);
+
+  console.log('Found area labels:', areaLabels);
+  return areaLabels;
+}
+
+async function getAreaLabelsFromCoords(lat: number, lon: number): Promise<string[]> {
+  try {
+    const response = await axios.get(`https://api.btcmap.org/v2/elements/nearby?lat=${lat}&lon=${lon}&limit=1`);
+    if (response.data && response.data.length > 0) {
+      return getAreaLabelsFromElement(response.data[0].id);
+    }
+  } catch (error) {
+    console.error('Failed to get nearby elements:', error);
+  }
+  return [];
+}
+
 
 async function getLabels(): Promise<GiteaLabel[]> {
   const headers = {
@@ -71,16 +106,23 @@ async function getLabelId(name: string): Promise<number | null> {
   return createLabel(name);
 }
 
-export async function createIssueWithLabels(title: string, body: string, labelNames: string[]) {
+export async function createIssueWithLabels(title: string, body: string, labelNames: string[], elementId?: string) {
   const headers = {
     Authorization: `token ${GITEA_API_KEY}`
   };
 
   try {
-    console.log('Creating issue with labels:', labelNames);
+    // Get area labels if element ID is provided
+    let allLabels = [...labelNames];
+    if (elementId) {
+      const areaLabels = await getAreaLabelsFromElement(elementId);
+      allLabels = [...labelNames, ...areaLabels];
+    }
+    
+    console.log('Creating issue with labels:', allLabels);
     
     // Get or create all label IDs
-    const labelPromises = labelNames.map(name => getLabelId(name));
+    const labelPromises = allLabels.map(name => getLabelId(name));
     const labelIds = await Promise.all(labelPromises);
     
     // No need to filter null values since getLabelId now throws errors
