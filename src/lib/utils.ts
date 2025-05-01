@@ -173,10 +173,6 @@ export const validateContinents = (continent: Continents) =>
 export const isBoosted = (element: Element) =>
 	element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now();
 
-
-import { elements, areas } from '$lib/store';
-import { get } from 'svelte/store';
-
 export function getAreasByElementId(elementId: string): Array<[string, string | undefined, string | undefined]> {
   console.log('getAreasByElementId called with:', elementId);
   const elementsList = get(elements) || [];
