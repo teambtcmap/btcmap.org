@@ -74,7 +74,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	const { createIssueWithLabels } = await import('$lib/gitea');
 
 	const standardLabels = ['location-verification'];
-	const areaLabels = Array.isArray(areas) ? areas.map(area => area.url_alias) : [];
+	const areaLabels = Array.isArray(areas) ? areas : [];
 	const labels = [...standardLabels, ...areaLabels];
 
 	const body = `Merchant name: ${name}

@@ -225,7 +225,7 @@
 					verified: verify.value,
 					lat: lat ? lat.toString() : '',
 					long: long ? long.toString() : '',
-					merchantAreas: merchantAreas.map(area => area.url_alias) // Added merchantAreas
+					areas: merchantAreas.map(area => area.url_alias)
 				})
 				.then(function (response) {
 					submissionIssueNumber = response.data.number;
