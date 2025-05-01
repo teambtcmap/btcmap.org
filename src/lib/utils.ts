@@ -1,4 +1,4 @@
-import { theme } from '$lib/store';
+import { theme, elements, areas } from '$lib/store';
 import type { Continents, Element, Grade, IssueIcon } from '$lib/types';
 import { toast } from '@zerodevx/svelte-toast';
 import type { Chart } from 'chart.js';
