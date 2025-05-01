@@ -43,11 +43,17 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	const standardLabels = ['location-verification'];
-	const areaLabels = elementId ? getAreaIdsByElementId(elementId) : [];
+	const areaData = elementId ? getAreasByElementId(elementId) : [];
+	const areaLabels = areaData.map(([_, alias, type]) => alias || _).filter(label => label);
 	const allLabels = [...standardLabels, ...areaLabels];
 
+	// Format areas for the issue body
+	const areasFormatted = areaData.map(([id, alias, type]) => 
+		`${alias || id}${type ? ` (${type})` : ''}`
+	).join(', ');
+
 	const body = `Merchant name: ${name}
-Areas: ${areaLabels.length > 0 ? areaLabels.join(', ') : 'None'}
+Areas: ${areasFormatted || 'None'}
 Merchant location: ${location}
 Edit link: ${edit}
 Current information correct: ${current}
