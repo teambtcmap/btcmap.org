@@ -10,6 +10,7 @@ import { getAreasByElementId } from '$lib/utils';
 import { createIssueWithLabels } from '$lib/gitea';
 
 export const POST: RequestHandler = async ({ request }) => {
+	console.log('Verify location POST endpoint called');
 	const {
 		captchaSecret,
 		captchaTest,
@@ -22,6 +23,14 @@ export const POST: RequestHandler = async ({ request }) => {
 		verified,
 		merchantId,
 	} = await request.json();
+	
+	console.log('Request data:', { 
+		name, 
+		location, 
+		current, 
+		outdated,
+		merchantId 
+	});
 
 	if (honey) {
 		error(418);

@@ -175,14 +175,20 @@ export const isBoosted = (element: Element) =>
 
 
 export function getAreasByElementId(elementId: string): Array<[string, string | undefined, string | undefined]> {
+  console.log('getAreasByElementId called with:', elementId);
   const elementsList = get(elements);
   const areasList = get(areas);
+  
+  console.log('Current elements list length:', elementsList?.length);
+  console.log('Current areas list length:', areasList?.length);
 
   const element = elementsList.find(element => element.id == elementId);
   if (!element) {
     console.log('No element found for ID:', elementId);
     return [];
   }
+
+  console.log('Found element:', element);
 
   const lat = latCalc(element.osm_json);
   const long = longCalc(element.osm_json);

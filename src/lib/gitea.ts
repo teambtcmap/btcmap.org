@@ -56,13 +56,16 @@ async function createLabel(name: string): Promise<number | null> {
 }
 
 export async function createIssueWithLabels(title: string, body: string, labelNames: string[]) {
+  console.log('createIssueWithLabels - Input:', { title, labelNames });
   const headers = {
     Authorization: `token ${GITEA_API_KEY}`
   };
 
   try {
+    console.log('Attempting to create/get labels...');
     const labelPromises = labelNames.map(name => createLabel(name));
     const labelIds = await Promise.all(labelPromises);
+    console.log('Label IDs resolved:', labelIds);
 
     const response = await axios.post(
       `${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues`,
