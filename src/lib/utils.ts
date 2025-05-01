@@ -198,3 +198,17 @@ export function getAreasByElementId(elementId: string): Array<[
     })
     .map(area => [area.id, area.tags.url_alias, area.tags.type]);
 }
+
+export function getAreasByCoordinates(lat: number, long: number): Array<[
+	string,             // Area ID
+	string | undefined, // URL Alias for the area, if available
+	string | undefined  // Type of the area, if available
+]> {
+	return get(areas)
+		.filter(area => {
+			if (!area.tags.geo_json) return false;
+			let rewoundPoly = rewind(area.tags.geo_json, true);
+			return geoContains(rewoundPoly, [long, lat]);
+		})
+		.map(area => [area.id, area.tags.url_alias, area.tags.type]);
+}

@@ -6,7 +6,7 @@ import { error } from '@sveltejs/kit';
 import crypto from 'crypto';
 import type { RequestHandler } from './$types';
 import type { CipherKey, BinaryLike } from 'crypto';
-import { getAreasByElementId } from '$lib/utils';
+import { getAreasByCoordinates } from '$lib/utils';
 import { createIssueWithLabels } from '$lib/gitea';
 
 export const POST: RequestHandler = async ({ request }) => {
@@ -54,8 +54,8 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	const standardLabels = ['location-verification'];
-	const areaData = merchantId ? getAreasByElementId(merchantId) : [];
-	console.log('Area data for element:', merchantId, areaData); // Debug log
+	const areaData = lat && long ? getAreasByCoordinates(lat, long) : [];
+	console.log('Area data for coordinates:', {lat, long}, areaData); // Debug log
 	const areaLabels = areaData.map(([id, alias]) => alias || id).filter(Boolean);
 	const allLabels = [...standardLabels, ...areaLabels];
 
