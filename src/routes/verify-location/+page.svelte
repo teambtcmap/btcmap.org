@@ -143,6 +143,7 @@
 						long = longC;
 						location = `https://btcmap.org/map?lat=${lat}&long=${long}`;
 						edit = `https://www.openstreetmap.org/edit?${elementOSM.type}=${elementOSM.id}`;
+						merchantId = `${elementOSM.type}:${elementOSM.id}`;
 						selected = true;
 					}
 				});
