@@ -1,5 +1,5 @@
 import { theme, elements, areas } from '$lib/store';
-import type { Continents, Element, Grade, IssueIcon } from '$lib/types';
+import type { Continents, Element, Grade, IssueIcon, ElementOSM } from '$lib/types';
 import { toast } from '@zerodevx/svelte-toast';
 import type { Chart } from 'chart.js';
 import { get } from 'svelte/store';
@@ -181,14 +181,9 @@ export function getAreaIdsByElementId(elementId: string): string[] {
     return [];
   }
 
-  const lat = element.osm_json.type === 'node' 
-    ? element.osm_json.lat 
-    : (element.osm_json.bounds.minlat + element.osm_json.bounds.maxlat) / 2;
-  const long = element.osm_json.type === 'node'
-    ? element.osm_json.lon
-    : (element.osm_json.bounds.minlon + element.osm_json.bounds.maxlon) / 2;
-
-  return areasList
+  const lat = latcalc(element.osm_json);
+  const long = longcalc(element.osm_json);
+	  return areasList
     .filter(area => {
       if (!area.tags.geo_json) return false;
       let rewoundPoly = rewind(area.tags.geo_json, true);
