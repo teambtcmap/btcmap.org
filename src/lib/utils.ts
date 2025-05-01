@@ -175,6 +175,9 @@ export const isBoosted = (element: Element) =>
 
 export function getAreasByElementId(elementId: string): Array<[string, string | undefined, string | undefined]> {
   console.log('getAreasByElementId called with:', elementId);
+  console.log('Raw elements store:', elements);
+  console.log('Raw areas store:', areas);
+  
   const elementsList = get(elements) || [];
   const areasList = get(areas) || [];
   
