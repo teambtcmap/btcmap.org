@@ -221,7 +221,9 @@
 					current: current ? 'Yes' : 'No',
 					outdated: outdated ? outdated : '',
 					verified: verify.value,
-					merchantId: merchantId
+					merchantId: merchantId,
+					lat: lat,
+					long: long
 				})
 				.then(function (response) {
 					submissionIssueNumber = response.data.number;
