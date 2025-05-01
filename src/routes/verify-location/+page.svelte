@@ -143,6 +143,7 @@
 						long = longC;
 						location = `https://btcmap.org/map?lat=${lat}&long=${long}`;
 						edit = `https://www.openstreetmap.org/edit?${elementOSM.type}=${elementOSM.id}`;
+						merchantAreas = element.areas || [];
 						selected = true;
 					}
 				});
@@ -166,6 +167,7 @@
 
 	const id = $page.url.searchParams.has('id') ? $page.url.searchParams.get('id') : '';
 	let merchant: Element | undefined;
+	let merchantAreas: {url_alias: string}[] = [];
 
 	let name = '';
 	let lat: number | undefined;
@@ -222,7 +224,8 @@
 					outdated: outdated ? outdated : '',
 					verified: verify.value,
 					lat: lat ? lat.toString() : '',
-					long: long ? long.toString() : ''
+					long: long ? long.toString() : '',
+					merchantAreas: merchantAreas.map(area => area.url_alias) // Added merchantAreas
 				})
 				.then(function (response) {
 					submissionIssueNumber = response.data.number;
