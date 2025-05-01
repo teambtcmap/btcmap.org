@@ -171,7 +171,7 @@ export const isBoosted = (element: Element) =>
 	element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now();
 
 
-export function getAreasByElementId(elementId: string): string[] {
+export function getAreaIdsByElementId(elementId: string): string[] {
   const elementsList = get(elements);
   
   const element = elementsList.find(e => e.id === elementId);
