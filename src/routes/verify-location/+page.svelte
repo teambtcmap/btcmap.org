@@ -143,23 +143,6 @@
 						long = longC;
 						location = `https://btcmap.org/map?lat=${lat}&long=${long}`;
 						edit = `https://www.openstreetmap.org/edit?${elementOSM.type}=${elementOSM.id}`;
-						// Map element area IDs to full area data from store
-						console.log('Element:', element);
-						console.log('Element areas:', element.areas);
-						console.log('Areas store:', $areas);
-						merchantAreas = (element.areas || [])
-							.map(areaId => {
-								const area = $areas.find(a => a.id === areaId);
-								console.log('Found area for ID', areaId, ':', area);
-								return area;
-							})
-							.filter(area => area !== undefined)
-							.map(area => {
-								console.log('Processing area:', area);
-								return area.tags?.url_alias ? { url_alias: area.tags.url_alias } : null;
-							})
-							.filter(area => area !== null);
-						console.log('Final merchant areas:', merchantAreas);
 						selected = true;
 					}
 				});
@@ -183,7 +166,6 @@
 
 	const id = $page.url.searchParams.has('id') ? $page.url.searchParams.get('id') : '';
 	let merchant: Element | undefined;
-	let merchantAreas: {url_alias: string}[] = [];
 
 	let name = '';
 	let lat: number | undefined;
