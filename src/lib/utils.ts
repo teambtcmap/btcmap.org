@@ -1,9 +1,11 @@
 import { theme, elements, areas } from '$lib/store';
 import { latCalc, longCalc } from '$lib/map/setup';
-import type { Continents, Element, Grade, IssueIcon, ElementOSM } from '$lib/types';
+import type { Continents, Element, Grade, IssueIcon} from '$lib/types';
 import { toast } from '@zerodevx/svelte-toast';
 import type { Chart } from 'chart.js';
 import { get } from 'svelte/store';
+import rewind from '@mapbox/geojson-rewind';
+import { geoContains } from 'd3-geo';
 
 export const errToast = (m: string) => {
 	toast.push(m, {
@@ -172,10 +174,10 @@ export const isBoosted = (element: Element) =>
 	element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now();
 
 
-export function getAreaIdsByElementId(elementId: string): string[] {
+export function getAreasByElementId(elementId: string): Array<[string, string | undefined, string | undefined]> {
   const elementsList = get(elements);
   const areasList = get(areas);
-  
+
   const element = elementsList.find(element => element.id == elementId);
   if (!element) {
     console.log('No element found for ID:', elementId);
@@ -184,16 +186,11 @@ export function getAreaIdsByElementId(elementId: string): string[] {
 
   const lat = latCalc(element.osm_json);
   const long = longCalc(element.osm_json);
-	  return areasList
+  return areasList
     .filter(area => {
       if (!area.tags.geo_json) return false;
       let rewoundPoly = rewind(area.tags.geo_json, true);
       return geoContains(rewoundPoly, [long, lat]);
     })
-    .map(area => area.id);
-}
-
-export function getUrlAlias(areaId: string, areasList: any[]): string | undefined {
-  const area = areasList.find(a => a.id === areaId);
-  return area?.tags?.url_alias;
+    .map(area => [area.id, area.tags.url_alias, area.tags.type]);
 }
