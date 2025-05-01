@@ -238,7 +238,8 @@
 					edit: edit,
 					current: current ? 'Yes' : 'No',
 					outdated: outdated ? outdated : '',
-					verified: verify.value
+					verified: verify.value,
+					elementId: merchant?.id
 				})
 				.then(function (response) {
 					submissionIssueNumber = response.data.number;
