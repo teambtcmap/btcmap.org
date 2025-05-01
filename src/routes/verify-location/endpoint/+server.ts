@@ -44,7 +44,8 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	const standardLabels = ['location-verification'];
 	const areaData = elementId ? getAreasByElementId(elementId) : [];
-	const areaLabels = areaData.map(([_, alias, type]) => alias || _).filter(label => label);
+	console.log('Area data for element:', elementId, areaData); // Debug log
+	const areaLabels = areaData.map(([id, alias]) => alias || id).filter(Boolean);
 	const allLabels = [...standardLabels, ...areaLabels];
 
 	// Format areas for the issue body
