@@ -143,7 +143,11 @@
 						long = longC;
 						location = `https://btcmap.org/map?lat=${lat}&long=${long}`;
 						edit = `https://www.openstreetmap.org/edit?${elementOSM.type}=${elementOSM.id}`;
-						merchantAreas = element.areas || [];
+						// Map element area IDs to full area data from store
+						merchantAreas = (element.areas || [])
+							.map(areaId => $areas.find(a => a.id === areaId))
+							.filter(area => area !== undefined)
+							.map(area => ({ url_alias: area.tags.url_alias }));
 						console.log('Selected merchant areas:', merchantAreas);
 						selected = true;
 					}
