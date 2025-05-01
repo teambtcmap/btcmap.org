@@ -21,7 +21,7 @@
 		longCalc,
 		toggleMapButtons
 	} from '$lib/map/setup';
-	import { elementError, elements, theme } from '$lib/store';
+	import { areas, elementError, elements, theme } from '$lib/store';
 	import type { DomEventType, Element, Leaflet } from '$lib/types';
 	import { detectTheme, errToast } from '$lib/utils';
 	import axios from 'axios';
