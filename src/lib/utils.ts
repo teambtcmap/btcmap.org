@@ -1,5 +1,6 @@
 import { theme, elements, areas } from '$lib/store';
 import { latCalc, longCalc } from '$lib/map/setup';
+import { areasSync } from '$lib/sync/areas';
 import type { Continents, Element, Grade, IssueIcon} from '$lib/types';
 import { toast } from '@zerodevx/svelte-toast';
 import type { Chart } from 'chart.js';
