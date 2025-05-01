@@ -174,13 +174,16 @@ export const isBoosted = (element: Element) =>
 	element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now();
 
 
+import { elements, areas } from '$lib/store';
+import { get } from 'svelte/store';
+
 export function getAreasByElementId(elementId: string): Array<[string, string | undefined, string | undefined]> {
   console.log('getAreasByElementId called with:', elementId);
-  const elementsList = get(elements);
-  const areasList = get(areas);
+  const elementsList = get(elements) || [];
+  const areasList = get(areas) || [];
   
-  console.log('Current elements list length:', elementsList?.length);
-  console.log('Current areas list length:', areasList?.length);
+  console.log('Current elements list length:', elementsList.length);
+  console.log('Current areas list length:', areasList.length);
 
   const element = elementsList.find(element => element.id == elementId);
   if (!element) {
