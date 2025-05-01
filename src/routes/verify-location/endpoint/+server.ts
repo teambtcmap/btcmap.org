@@ -20,7 +20,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		current,
 		outdated,
 		verified,
-		elementId
+		merchantId,
 	} = await request.json();
 
 	if (honey) {
@@ -43,8 +43,8 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	const standardLabels = ['location-verification'];
-	const areaData = elementId ? getAreasByElementId(elementId) : [];
-	console.log('Area data for element:', elementId, areaData); // Debug log
+	const areaData = merchantId ? getAreasByElementId(merchantId) : [];
+	console.log('Area data for element:', merchantId, areaData); // Debug log
 	const areaLabels = areaData.map(([id, alias]) => alias || id).filter(Boolean);
 	const allLabels = [...standardLabels, ...areaLabels];
 
