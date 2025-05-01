@@ -220,7 +220,7 @@
 					current: current ? 'Yes' : 'No',
 					outdated: outdated ? outdated : '',
 					verified: verify.value,
-					merchantId: merchant?.id
+					merchantId: merchantId
 				})
 				.then(function (response) {
 					submissionIssueNumber = response.data.number;
