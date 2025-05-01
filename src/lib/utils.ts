@@ -1,4 +1,5 @@
 import { theme, elements, areas } from '$lib/store';
+import { latCalc, longCalc } from '$lib/map/setup';
 import type { Continents, Element, Grade, IssueIcon, ElementOSM } from '$lib/types';
 import { toast } from '@zerodevx/svelte-toast';
 import type { Chart } from 'chart.js';
@@ -181,8 +182,8 @@ export function getAreaIdsByElementId(elementId: string): string[] {
     return [];
   }
 
-  const lat = latcalc(element.osm_json);
-  const long = longcalc(element.osm_json);
+  const lat = latCalc(element.osm_json);
+  const long = longCalc(element.osm_json);
 	  return areasList
     .filter(area => {
       if (!area.tags.geo_json) return false;
