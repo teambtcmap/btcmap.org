@@ -1,4 +1,4 @@
-c
+import { theme } from '$lib/store';
 import { latCalc, longCalc } from '$lib/map/setup';
 import { areasSync } from '$lib/sync/areas';
 import type { Continents, Element, Grade, IssueIcon} from '$lib/types';
