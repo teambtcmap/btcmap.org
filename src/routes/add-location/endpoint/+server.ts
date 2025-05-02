@@ -84,17 +84,20 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	const standardLabels = ['location-submission'];
 
-	const labels = country && communities.length
-		? [...standardLabels, country, ...communities]
-		: country
-			? [...standardLabels, country]
-			: communities.length
-				? [...standardLabels, ...communities]
-				: [...standardLabels];
+	const areas = lat && long ? await getAreasByCoordinates(lat, long) : [];
+	const areaLabels = areas.map(([id, alias]) => alias || id).filter(Boolean);
+	
+	const labels = [...standardLabels, ...(country ? [country] : []), ...communities, ...areaLabels];
 
-	const body = `Merchant name: ${name}
+	// Format areas for the issue body
+const areasFormatted = areas.map(([id, alias, type]) => 
+	`${alias || id}${type ? ` (${type})` : ''}`
+).join(', ');
+
+const body = `Merchant name: ${name}
 Country: ${country ? country : ''}
 Communities: ${communities.length ? communities.join(', ') : ''}
+Areas: ${areasFormatted || 'None'}
 Address: ${address}
 Lat: ${lat}
 Long: ${long}
