@@ -174,32 +174,6 @@ export const validateContinents = (continent: Continents) =>
 export const isBoosted = (element: Element) =>
 	element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now();
 
-export function getAreasByElementId(elementId: string): Array<[
-  string,             // Area ID
-  string | undefined, // URL Alias for the area, if available
-  string | undefined  // Type of the area, if available
-]> {
-  console.log('getAreasByElementId called with:', elementId);
-
-  const element = get(elements).find(element => element.id === elementId);
-  if (!element) {
-    console.log('No element found for ID:', elementId);
-    return [];
-  }
-
-  console.log('Found element:', element);
-
-  const lat = latCalc(element.osm_json);
-  const long = longCalc(element.osm_json);
-  return get(areas)
-    .filter(area => {
-      if (!area.tags.geo_json) return false;
-      let rewoundPoly = rewind(area.tags.geo_json, true);
-      return geoContains(rewoundPoly, [long, lat]);
-    })
-    .map(area => [area.id, area.tags.url_alias, area.tags.type]);
-}
-
 export async function getAreasByCoordinates(lat: number, long: number): Promise<Array<[
   string,             // Area ID 
   string | undefined, // URL Alias for the area, if available
