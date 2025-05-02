@@ -179,7 +179,7 @@ export async function getAreasByCoordinates(lat: number, long: number): Promise<
   string | undefined  // Type of the area, if available
 ]>> {
   console.log('Checking areas with coordinates:', {lat, long});
-  await areasSync(); // Explicitly sync areas
+  await areasSync(); // Get latest areas
   const allAreas = get(areas);
   console.log('Total areas to check:', allAreas.length);
 
