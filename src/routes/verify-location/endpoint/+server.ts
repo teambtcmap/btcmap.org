@@ -55,7 +55,6 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	const standardLabels = ['location-verification'];
 	const areas = lat && long ? await getAreasByCoordinates(lat, long) : [];
-	console.log('Areas for coordinates:', {lat, long}, areas); // Debug log
 	const areaLabels = areas.map(([id, alias]) => alias || id).filter(Boolean);
 	const allLabels = [...standardLabels, ...areaLabels];
 
@@ -75,7 +74,7 @@ How did you verify this?: ${verified}
 Status: Todo
 Created at: ${new Date(Date.now()).toISOString()}
 
-If you are a new contributor please read our Tagging Instructions [here](https://wiki.btcmap.org/general/tagging-instructions.html).`;
+If you are a new contributor please read our Tagging Instructions [here](https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants).`;
 
 	const response = await createIssueWithLabels(name, body, allLabels);
 	return new Response(JSON.stringify(response.data));
