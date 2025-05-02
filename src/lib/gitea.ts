@@ -38,14 +38,31 @@ async function createLabel(name: string): Promise<number | null> {
       return existingLabel.id;
     }
 
-    const color = getRandomColor().substring(1); // Remove the # from the hex color
+    // Get the area type from the API
+    let areaType: string | undefined;
+    try {
+      const areaResponse = await axios.get(`https://api.btcmap.org/v2/areas/${name}`);
+      areaType = areaResponse.data?.tags?.type;
+    } catch (error) {
+      console.log(`Area ${name} not found, using random color`);
+    }
+
+    // Define colors based on area type
+    let color = '';
+    if (areaType === 'country') {
+      color = '4A90E2'; // Blue for countries
+    } else if (areaType === 'community') {
+      color = '7ED321'; // Green for communities
+    } else {
+      color = Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+    }
 
     const response = await axios.post(
       `${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/labels`,
       {
         name,
         color,
-        description: `Auto-generated label for ${name}`
+        description: `Auto-generated label for ${name}${areaType ? ` (${areaType})` : ''}`
       },
       { headers }
     );
