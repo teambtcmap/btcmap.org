@@ -1,8 +1,6 @@
 import axios from 'axios';
 import { GITEA_API_KEY, GITEA_API_URL } from '$env/static/private';
 import { getRandomColor } from '$lib/utils';
-import { areas } from '$lib/store';
-import { get } from 'svelte/store';
 
 interface GiteaLabel {
   id: number;
@@ -40,10 +38,13 @@ async function createLabel(name: string): Promise<number | null> {
       return existingLabel.id;
     }
 
-    // Get the area type from the local areas store
-    let areaType: string | undefined = areas.get(name)?.tags?.type;
-    if (!areaType) {
-      console.log(`Area ${name} not found locally.`);
+    // Get the area type from the API
+    let areaType: string | undefined;
+    try {
+      const areaResponse = await axios.get(`https://api.btcmap.org/v2/areas/${name}`);
+      areaType = areaResponse.data?.tags?.type;
+    } catch (error) {
+      console.log(`Area ${name} not found, using random color`);
     }
 
     // Define colors based on area type
@@ -53,7 +54,7 @@ async function createLabel(name: string): Promise<number | null> {
     } else if (areaType === 'community') {
       color = '7ED321'; // Green for communities
     } else {
-      color = getRandomColor().substring(1); // Random color for other types and remove the '#'
+      color = getRandomColor().substring(1);
     }
 
     const response = await axios.post(

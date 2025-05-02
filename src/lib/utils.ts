@@ -1,5 +1,4 @@
-import { theme } from '$lib/store';
-import { latCalc, longCalc } from '$lib/map/setup';
+import { theme, areas } from '$lib/store';
 import { areasSync } from '$lib/sync/areas';
 import type { Continents, Element, Grade, IssueIcon} from '$lib/types';
 import { toast } from '@zerodevx/svelte-toast';
@@ -180,36 +179,22 @@ export async function getAreasByCoordinates(lat: number, long: number): Promise<
   string | undefined  // Type of the area, if available
 ]>> {
   console.log('Checking areas with coordinates:', {lat, long});
-  try {
-    await areasSync(); // Explicitly sync areas  
-    const areasStore = get(areas);
-    if (!areasStore || !areasStore.length) {
-      console.warn('No areas available');
-      return [];
-    }
-    console.log('Total areas to check:', areasStore.length);
+  await areasSync(); // Explicitly sync areas
+  const allAreas = get(areas);
+  console.log('Total areas to check:', allAreas.length);
 
-    return areasStore
-      .filter(area => {
-        if (!area.tags.geo_json) {
-          console.log('Area missing geo_json:', area.id);
-          return false;
-        }
-        try {
-          let rewoundPoly = rewind(area.tags.geo_json, true);
-          const contains = geoContains(rewoundPoly, [long, lat]);
-          if (contains) {
-            console.log('Found matching area:', area.id);
-          }
-          return contains;
-        } catch (err) {
-          console.error('Error processing area geometry:', err);
-          return false;
-        }
-      })
-      .map(area => [area.id, area.tags.url_alias, area.tags.type]);
-  } catch (err) {
-    console.error('Error fetching areas:', err);
-    return [];
-  }
+  return allAreas
+    .filter(area => {
+      if (!area.tags.geo_json) {
+        console.log('Area missing geo_json:', area.id);
+        return false;
+      }
+      let rewoundPoly = rewind(area.tags.geo_json, true);
+      const contains = geoContains(rewoundPoly, [long, lat]);
+      if (contains) {
+        console.log('Found matching area:', area.id);
+      }
+      return contains;
+    })
+    .map(area => [area.id, area.tags.url_alias, area.tags.type]);
 }
