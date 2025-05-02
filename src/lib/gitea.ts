@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { GITEA_API_KEY, GITEA_API_URL } from '$env/static/private';
 import { getRandomColor } from '$lib/utils';
+import { get } from 'svelte/store';
+import { areas } from '$lib/store';
 
 interface GiteaLabel {
   id: number;
@@ -39,8 +41,7 @@ async function createLabel(name: string): Promise<number | null> {
     }
 
     // Get the area type from the store
-    import { get } from 'svelte/store';
-    import { areas } from '$lib/store';
+
     const areaType = get(areas).find(area => area.id === name)?.tags?.type;
     if (!areaType) {
       console.log(`Area ${name} not found in store, using random color`);
@@ -53,7 +54,7 @@ async function createLabel(name: string): Promise<number | null> {
     } else if (areaType === 'community') {
       color = '7ED321'; // Green for communities
     } else {
-      color = getRandomColor().substring(1);
+      color = getRandomColor().substring(1); // Random color for other types. Remove the leading '#'.
     }
 
     const response = await axios.post(
