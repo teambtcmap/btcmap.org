@@ -38,13 +38,12 @@ async function createLabel(name: string): Promise<number | null> {
       return existingLabel.id;
     }
 
-    // Get the area type from the API
-    let areaType: string | undefined;
-    try {
-      const areaResponse = await axios.get(`https://api.btcmap.org/v2/areas/${name}`);
-      areaType = areaResponse.data?.tags?.type;
-    } catch (error) {
-      console.log(`Area ${name} not found, using random color`);
+    // Get the area type from the store
+    import { get } from 'svelte/store';
+    import { areas } from '$lib/store';
+    const areaType = get(areas).find(area => area.id === name)?.tags?.type;
+    if (!areaType) {
+      console.log(`Area ${name} not found in store, using random color`);
     }
 
     // Define colors based on area type
