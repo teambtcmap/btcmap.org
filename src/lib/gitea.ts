@@ -54,7 +54,7 @@ async function createLabel(name: string): Promise<number | null> {
     } else if (areaType === 'community') {
       color = '7ED321'; // Green for communities
     } else {
-      color = Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+      color = getRandomColor();
     }
 
     const response = await axios.post(
