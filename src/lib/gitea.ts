@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { GITEA_API_KEY, GITEA_API_URL } from '$env/static/private';
+import { getRandomColor } from '$lib/utils';
 
 interface GiteaLabel {
   id: number;
@@ -37,7 +38,7 @@ async function createLabel(name: string): Promise<number | null> {
       return existingLabel.id;
     }
 
-    const color = Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+    const color = getRandomColor().substring(1); // Remove the # from the hex color
 
     const response = await axios.post(
       `${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/labels`,
