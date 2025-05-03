@@ -85,8 +85,21 @@
 			});
 	};
 
-	const setLocation = (area: string) => {
-		location = area;
+	const setLocation = async (area: any) => {
+		location = area.display_name;
+		const lat = parseFloat(area.lat);
+		const lon = parseFloat(area.lon);
+
+		if (lat && lon) {
+			try {
+				const matchingAreas = await getAreasByCoordinates(lat, lon);
+				console.log('Found matching areas:', matchingAreas);
+				// matchingAreas will be array of [areaId, urlAlias, type]
+			} catch (err) {
+				console.error('Error getting areas by coordinates:', err);
+			}
+		}
+
 		selected = true;
 		successToast('Location selected!');
 	};
@@ -233,7 +246,7 @@
 								{#if !location}
 									{#each searchResults as area, index}
 										<button
-											on:click={() => setLocation(area.display_name)}
+											on:click={() => setLocation(area)}
 											class="{index !== searchResults.length - 1
 												? 'border-b'
 												: ''} block whitespace-nowrap p-3 hover:bg-link/50"
