@@ -1,5 +1,4 @@
 import {
-	OPENCAGE_API_KEY,
 	SERVER_CRYPTO_KEY,
 	SERVER_INIT_VECTOR
 } from '$env/static/private';
@@ -36,7 +35,6 @@ export const POST: RequestHandler = async ({ request }) => {
 		source,
 		sourceOther,
 		contact,
-		communities
 	} = await request.json();
 
 	// if honey field has value return
@@ -66,36 +64,12 @@ export const POST: RequestHandler = async ({ request }) => {
 		used.push(captchaSecret);
 	}
 
-	const country = await axios
-		.get(
-			`https://api.opencagedata.com/geocode/v1/json?q=${lat.slice(0, 7)}%2C%20${long.slice(
-				0,
-				7
-			)}&key=${OPENCAGE_API_KEY}&language=en&limit=1&no_annotations=1&no_record=1`
-		)
-		.then(function (response) {
-			return response.data.results[0].components.country;
-		})
-		.catch(function (error) {
-			console.error(error);
-		});
-
-	const { createIssueWithLabels } = await import('$lib/gitea');
-
 	const standardLabels = ['location-submission'];
 	const areas = lat && long ? await getAreasByCoordinates(lat, long) : [];
 	const areaLabels = areas.map(([id, alias]) => alias || id).filter(Boolean);
-	const allLabels = [...standardLabels, ...areaLabels];
-
-	// Format areas for the issue body
-const areasFormatted = areas.map(([id, alias, type]) => 
-	`${alias || id}${type ? ` (${type})` : ''}`
-).join(', ');
+	const labels = [...standardLabels, ...areaLabels];
 
 const body = `Merchant name: ${name}
-Country: ${country ? country : ''}
-Communities: ${communities.length ? communities.join(', ') : ''}
-Areas: ${areasFormatted || 'None'}
 Address: ${address}
 Lat: ${lat}
 Long: ${long}
@@ -109,7 +83,6 @@ Notes: ${notes}
 Data Source: ${source}
 Details (if applicable): ${sourceOther}
 Contact: ${contact}
-Status: Todo
 Created at: ${new Date(Date.now()).toISOString()}
 
 If you are a new contributor please read our Tagging Instructions [here](https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants).`;

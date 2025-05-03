@@ -71,7 +71,6 @@ Edit link: ${edit}
 Current information correct: ${current}
 Outdated information: ${outdated}
 How did you verify this?: ${verified}
-Status: Todo
 Created at: ${new Date(Date.now()).toISOString()}
 
 If you are a new contributor please read our Tagging Instructions [here](https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants).`;

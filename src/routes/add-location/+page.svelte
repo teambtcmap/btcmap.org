@@ -10,7 +10,7 @@
 		PrimaryButton
 	} from '$lib/comp';
 	import { attribution, changeDefaultIcons, geolocate, toggleMapButtons } from '$lib/map/setup';
-	import { areaError, areas, socials, theme } from '$lib/store';
+	import { socials, theme } from '$lib/store';
 	import { detectTheme, errToast } from '$lib/utils';
 	// @ts-expect-error
 	import rewind from '@mapbox/geojson-rewind';
@@ -39,20 +39,6 @@
 			});
 	};
 
-	// alert for area errors
-	$: $areaError && errToast($areaError);
-
-	$: communities = $areas.filter(
-		(area) =>
-			area.tags.type === 'community' &&
-			area.tags.geo_json &&
-			area.tags.name &&
-			area.tags['icon:square'] &&
-			area.tags.continent &&
-			Object.keys(area.tags).find((key) => key.includes('contact'))
-	);
-	let filteredCommunities: string[];
-
 	let name: HTMLInputElement;
 	let address: HTMLInputElement;
 	let lat: number;
@@ -66,8 +52,6 @@
 	let website: HTMLInputElement;
 	let phone: HTMLInputElement;
 	let hours: HTMLInputElement;
-	let twitterMerchant: HTMLInputElement;
-	let twitterSubmitter: HTMLInputElement;
 	let notes: HTMLTextAreaElement;
 	let source: 'Business Owner' | 'Customer' | 'Other';
 	let sourceOther: string;
@@ -120,21 +104,10 @@
 					website: website.value,
 					phone: phone.value,
 					hours: hours.value,
-					twitterMerchant: twitterMerchant.value
-						? twitterMerchant.value.startsWith('@')
-							? twitterMerchant.value
-							: '@' + twitterMerchant.value
-						: '',
-					twitterSubmitter: twitterSubmitter.value
-						? twitterSubmitter.value.startsWith('@')
-							? twitterSubmitter.value
-							: '@' + twitterSubmitter.value
-						: '',
 					notes: notes.value,
 					source,
 					sourceOther: sourceOther ? sourceOther : '',
 					contact: contact.value,
-					communities: filteredCommunities
 				})
 				.then(function (response) {
 					submissionIssueNumber = response.data.number;
@@ -210,19 +183,6 @@
 					marker = leaflet.marker([lat, long]).addTo(map);
 
 					selected = true;
-
-					// filter communities containing element
-					filteredCommunities = communities
-						.filter((community) => {
-							let rewoundPoly = rewind(community.tags.geo_json, true);
-
-							if (geoContains(rewoundPoly, [long, lat])) {
-								return true;
-							} else {
-								return false;
-							}
-						})
-						.map((community) => community.tags.name);
 				}
 			});
 
@@ -385,7 +345,7 @@
 						<p class="mb-10 w-full text-justify text-primary dark:text-white">
 							Fill out the following form and one of our volunteer community members will add your
 							location to the map. <InfoTooltip
-								tooltip="NOTE: Due to the backlog of requests and the additions being completed on a volunteer effort, it may take several weeks to have your location added. It is encouraged to add your location to OpenStreetMap directly following the Shadowy Supertagger method if you want to appear on the map right away."
+								tooltip="All additions being completed on a volunteer basi and so we can't garuantee when your location will be added."
 							/>
 						</p>
 
@@ -462,7 +422,6 @@
 									type="text"
 									name="address"
 									placeholder="2100 Freedom Drive..."
-									required
 									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:this={address}
 								/>
