@@ -85,21 +85,13 @@
 			});
 	};
 
-	const setLocation = async (area: any) => {
+	let selectedLat: number;
+	let selectedLon: number;
+
+	const setLocation = (area: any) => {
 		location = area.display_name;
-		const lat = parseFloat(area.lat);
-		const lon = parseFloat(area.lon);
-
-		if (lat && lon) {
-			try {
-				const matchingAreas = await getAreasByCoordinates(lat, lon);
-				console.log('Found matching areas:', matchingAreas);
-				// matchingAreas will be array of [areaId, urlAlias, type]
-			} catch (err) {
-				console.error('Error getting areas by coordinates:', err);
-			}
-		}
-
+		selectedLat = parseFloat(area.lat);
+		selectedLon = parseFloat(area.lon);
 		selected = true;
 		successToast('Location selected!');
 	};
@@ -122,7 +114,9 @@
 					lightning: lightning ? lightning : '',
 					socialLinks: socialLinks ? socialLinks : '',
 					contact,
-					notes: notes ? notes : ''
+					notes: notes ? notes : '',
+					lat: selectedLat,
+					long: selectedLon
 				})
 				.then(function (response) {
 					submissionIssueNumber = response.data.number;
