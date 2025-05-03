@@ -344,7 +344,7 @@
 						class="text-link transition-colors hover:text-hover">OpenStreetMap</a
 					>? You can check out our
 					<a
-						href="https://wiki.btcmap.org/general/tagging-instructions.html"
+						href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers"
 						target="_blank"
 						rel="noreferrer"
 						class="text-link transition-colors hover:text-hover">Wiki</a

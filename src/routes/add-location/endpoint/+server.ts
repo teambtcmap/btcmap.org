@@ -8,6 +8,8 @@ import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import crypto from 'crypto';
 import type { RequestHandler } from './$types';
+import { getAreasByCoordinates } from '$lib/utils';
+import { createIssueWithLabels } from '$lib/gitea';
 
 import type { CipherKey, BinaryLike } from 'crypto';
 
@@ -30,8 +32,6 @@ export const POST: RequestHandler = async ({ request }) => {
 		website,
 		phone,
 		hours,
-		twitterMerchant,
-		twitterSubmitter,
 		notes,
 		source,
 		sourceOther,
@@ -83,11 +83,9 @@ export const POST: RequestHandler = async ({ request }) => {
 	const { createIssueWithLabels } = await import('$lib/gitea');
 
 	const standardLabels = ['location-submission'];
-
 	const areas = lat && long ? await getAreasByCoordinates(lat, long) : [];
 	const areaLabels = areas.map(([id, alias]) => alias || id).filter(Boolean);
-	
-	const labels = [...standardLabels, ...(country ? [country] : []), ...communities, ...areaLabels];
+	const allLabels = [...standardLabels, ...areaLabels];
 
 	// Format areas for the issue body
 const areasFormatted = areas.map(([id, alias, type]) => 
@@ -107,8 +105,6 @@ Payment methods: ${methods}
 Website: ${website}
 Phone: ${phone}
 Opening hours: ${hours}
-Twitter merchant: ${twitterMerchant}
-Twitter submitter: ${twitterSubmitter}
 Notes: ${notes}
 Data Source: ${source}
 Details (if applicable): ${sourceOther}
@@ -116,7 +112,7 @@ Contact: ${contact}
 Status: Todo
 Created at: ${new Date(Date.now()).toISOString()}
 
-If you are a new contributor please read our Tagging Instructions [here](https://wiki.btcmap.org/general/tagging-instructions.html).`;
+If you are a new contributor please read our Tagging Instructions [here](https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants).`;
 
 	const response = await createIssueWithLabels(name, body, labels);
 	const gitea = response.data;

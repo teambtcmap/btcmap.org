@@ -289,7 +289,7 @@
 
 			<p class="mt-10 text-center text-lg font-semibold text-primary dark:text-white md:text-xl">
 				If you're a business owner, please read our <a
-					href="https://github.com/teambtcmap/btcmap-general/wiki/Merchant-Best-Practices"
+					href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Merchant-Best-Practices"
 					target="_blank"
 					rel="noreferrer"
 					class="text-link transition-colors hover:text-hover">Merchant Best Practices</a
@@ -328,7 +328,7 @@
 										class="mx-auto mb-4 md:mx-0 md:mb-0 md:mr-4"
 									/>
 									<a
-										href="https://github.com/teambtcmap/btcmap-general/wiki/Tagging-Merchants"
+										href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants"
 										target="_blank"
 										rel="noreferrer"
 										class="mr-1 text-link transition-colors hover:text-hover">Tag</a
@@ -407,24 +407,6 @@
 							</div>
 
 							<div>
-								<label for="address" class="mb-2 block font-semibold"
-									>Address <InfoTooltip
-										tooltip="All locations are required to have a physical
-										address. You must be able to visit the location in person and pay with bitcoin. Service industries are not map-able."
-									/></label
-								>
-								<input
-									disabled={!captchaSecret || !mapLoaded}
-									type="text"
-									name="address"
-									placeholder="2100 Freedom Drive..."
-									required
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
-									bind:this={address}
-								/>
-							</div>
-
-							<div>
 								<label for="location-picker" class="mb-2 block font-semibold">Select Location</label
 								>
 								{#if selected}
@@ -467,11 +449,29 @@
 								</div>
 							</div>
 
+
+							<div>
+								<label for="address" class="mb-2 block font-semibold"
+									>Address (Optional) <InfoTooltip
+										tooltip="All locations are required to have a physical
+										presence. Optionally enter an address here if that makes sense where the merchant is located. Services without locations are not map-able."
+									/></label
+								>
+								<input
+									disabled={!captchaSecret || !mapLoaded}
+									type="text"
+									name="address"
+									placeholder="2100 Freedom Drive..."
+									required
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+									bind:this={address}
+								/>
+							</div>
+
 							<div>
 								<label for="category" class="mb-2 block font-semibold">Category</label>
 								<input
 									disabled={!captchaSecret || !mapLoaded}
-									required
 									type="text"
 									name="category"
 									placeholder="Restaurant etc."
@@ -601,37 +601,13 @@
 							</div>
 
 							<div>
-								<label for="twitter" class="mb-2 block font-semibold"
-									>Twitter handle <span class="font-normal">(optional)</span></label
-								>
-								<div class="flex space-x-2">
-									<input
-										disabled={!captchaSecret || !mapLoaded}
-										type="text"
-										name="twitter"
-										placeholder="Merchant"
-										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
-										bind:this={twitterMerchant}
-									/>
-									<input
-										disabled={!captchaSecret || !mapLoaded}
-										type="text"
-										name="twitter"
-										placeholder="Submitter"
-										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
-										bind:this={twitterSubmitter}
-									/>
-								</div>
-							</div>
-
-							<div>
 								<label for="notes" class="mb-2 block font-semibold"
 									>Notes <span class="font-normal">(optional)</span></label
 								>
 								<textarea
 									disabled={!captchaSecret || !mapLoaded}
 									name="notes"
-									placeholder="Any other relevant details?"
+									placeholder="Please add further details here like additional merchant details, contacts, socials, etc."
 									rows="3"
 									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:this={notes}
@@ -677,7 +653,7 @@
 							<div>
 								<label for="contact" class="mb-2 block font-semibold">Public Contact</label>
 								<p class="mb-2 text-justify text-sm">
-									If we have any follow-up questions we will contact you in order to add your
+									If we have any follow-up questions we will contact you in order to add this
 									location successfully. To speed up the process please check your spam folder in
 									case it ends up there.
 								</p>

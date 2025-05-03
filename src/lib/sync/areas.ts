@@ -165,8 +165,8 @@ export const areasSync = async () => {
 			} while (responseCount === limit);
 
 			if (areasData.length) {
-				// filter out deleted areas
-				const areasFiltered = areasData.filter((area) => !area['deleted_at']);
+				// filter out deleted areas and areas of type trash
+				const areasFiltered = areasData.filter((area) => !area['deleted_at'] && area['tags.type'] !== 'trash');
 
 				// set response to store
 				areas.set(areasFiltered);
