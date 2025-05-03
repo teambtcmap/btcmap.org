@@ -1,21 +1,14 @@
-import { GITHUB_API_KEY, SERVER_CRYPTO_KEY, SERVER_INIT_VECTOR } from '$env/static/private';
+import { SERVER_CRYPTO_KEY, SERVER_INIT_VECTOR } from '$env/static/private';
 import { error } from '@sveltejs/kit';
-import axios from 'axios';
-import axiosRetry from 'axios-retry';
 import crypto from 'crypto';
 import type { RequestHandler } from './$types';
 import type { CipherKey, BinaryLike } from 'crypto';
-
-axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
+import { getAreasByCoordinates } from '$lib/utils';
+import { createIssueWithLabels } from '$lib/gitea';
 
 const used: string[] = [];
 
 export const POST: RequestHandler = async ({ request }) => {
-	const headers = {
-		Authorization: `Bearer ${GITHUB_API_KEY}`,
-		Accept: 'application/vnd.github+json'
-	};
-
 	const {
 		captchaSecret,
 		captchaTest,
@@ -26,7 +19,9 @@ export const POST: RequestHandler = async ({ request }) => {
 		lightning,
 		socialLinks,
 		contact,
-		notes
+		notes,
+		lat,
+		long
 	} = await request.json();
 
 	// if honey field has value return
@@ -56,12 +51,12 @@ export const POST: RequestHandler = async ({ request }) => {
 		used.push(captchaSecret);
 	}
 
-	const github = await axios
-		.post(
-			'https://api.github.com/repos/teambtcmap/btcmap-data/issues',
-			{
-				title: name,
-				body: `Community name: ${name}
+	const standardLabels = ['community-submission'];
+	const areas = lat && long ? await getAreasByCoordinates(lat, long) : [];
+	const areaLabels = areas.map(([id, alias]) => alias || id).filter(Boolean);
+	const labels = [...standardLabels, ...areaLabels];
+
+	const body = `Community name: ${name}
 Location: ${location}
 GeoJSON: https://geojson.codingarena.top/?search=${encodeURIComponent(location)}
 Icon URL: ${icon}
@@ -70,18 +65,10 @@ Social links: ${socialLinks}
 Community leader contact: ${contact}
 Notes: ${notes}
 Status: Todo
-Created at: ${new Date(Date.now()).toISOString()}`,
-				labels: ['community-submission']
-			},
-			{ headers }
-		)
-		.then(function (response) {
-			return response.data;
-		})
-		.catch(function (error) {
-			console.error(error);
-			throw new Error(error);
-		});
+Created at: ${new Date(Date.now()).toISOString()}`;
 
-	return new Response(JSON.stringify(github));
+	const response = await createIssueWithLabels(name, body, labels);
+	const gitea = response.data;
+
+	return new Response(JSON.stringify(gitea));
 };
