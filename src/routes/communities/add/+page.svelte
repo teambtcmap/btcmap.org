@@ -65,7 +65,7 @@
 
 		axios
 			.get(
-				`https://nominatim.openstreetmap.org/search?q=${searchQuery}&format=json&polygon_geojson=1&email=hello@btcmap.org`
+				`https://nominatim.openstreetmap.org/search?q=${searchQuery}&format=json&email=hello@btcmap.org`
 			)
 			.then(function (response) {
 				// handle success

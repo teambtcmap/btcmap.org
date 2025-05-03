@@ -64,7 +64,6 @@ Lightning: ${lightning}
 Social links: ${socialLinks}
 Community leader contact: ${contact}
 Notes: ${notes}
-Status: Todo
 Created at: ${new Date(Date.now()).toISOString()}`;
 
 	const response = await createIssueWithLabels(name, body, labels);
