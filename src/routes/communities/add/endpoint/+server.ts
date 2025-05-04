@@ -5,7 +5,8 @@ import type { RequestHandler } from './$types';
 import type { CipherKey, BinaryLike } from 'crypto';
 import { getAreaIdsByCoordinates } from '$lib/utils';
 import { createIssueWithLabels } from '$lib/gitea';
-import { areas, get } from '$lib/store';
+import { get } from 'svelte/store';
+import { areas } from '$lib/store';
 
 const used: string[] = [];
 
@@ -53,13 +54,8 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	const standardLabels = ['community-submission'];
-	const areaIds = lat && long ? await getAreaIdsByCoordinates(lat, long) : [];
-	const areaLabels = areaIds.map(id => {
-		const areasData = get(areas);
-		const area = areasData.find(area => area.id === id);
-
-		return area ? area.tags.name || area.id : null;
-	}).filter(Boolean);
+	const areas = lat && long ? await getAreaIdsByCoordinates(lat, long) : [];
+	const areaLabels = areas.map(([id, alias]) => alias || id).filter(Boolean);
 	const labels = [...standardLabels, ...areaLabels];
 
 	const body = `Community name: ${name}

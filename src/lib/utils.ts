@@ -1,5 +1,5 @@
-import { theme, elements, areas } from '$lib/store';
-import { latCalc, longCalc } from '$lib/map/setup';
+import { theme, areas } from '$lib/store';
+import { areasSync } from '$lib/sync/areas';
 import type { Continents, Element, Grade, IssueIcon} from '$lib/types';
 import { toast } from '@zerodevx/svelte-toast';
 import type { Chart } from 'chart.js';
@@ -173,30 +173,24 @@ export const validateContinents = (continent: Continents) =>
 export const isBoosted = (element: Element) =>
 	element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now();
 
+export async function getAreaIdsByCoordinates(lat: number, long: number): Promise<string[]> {
+  console.log('Checking areas with coordinates:', {lat, long});
+  await areasSync(); // Get latest areas
+  const allAreas = get(areas);
+  console.log('Total areas to check:', allAreas.length);
 
-export function getAreaIdsByElementId(elementId: string): string[] {
-  console.log('getAreaIdsByElementId() called with:', elementId);
-  const elementsList = get(elements);
-  const areasList = get(areas);
-  
-  console.log('Current elements list length:', elementsList?.length);
-  console.log('Current areas list length:', areasList?.length);
-
-  const element = elementsList.find(element => element.id == elementId);
-  if (!element) {
-    console.log('No element found for ID:', elementId);
-    return [];
-  }
-
-  console.log('Found element:', element);
-
-  const lat = latCalc(element.osm_json);
-  const long = longCalc(element.osm_json);
-  return areasList
+  return allAreas
     .filter(area => {
-      if (!area.tags.geo_json) return false;
+      if (!area.tags.geo_json) {
+        console.log('Area missing geo_json:', area.id);
+        return false;
+      }
       let rewoundPoly = rewind(area.tags.geo_json, true);
-      return geoContains(rewoundPoly, [long, lat]);
+      const contains = geoContains(rewoundPoly, [long, lat]);
+      if (contains) {
+        console.log('Found matching area:', area.id);
+      }
+      return contains;
     })
     .map(area => area.id);
 }
