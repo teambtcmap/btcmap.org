@@ -5,7 +5,7 @@ import type { RequestHandler } from './$types';
 import type { CipherKey, BinaryLike } from 'crypto';
 import { getAreaIdsByCoordinates } from '$lib/utils';
 import { createIssueWithLabels } from '$lib/gitea';
-import { areas } from '$lib/store';
+import { areas, get } from '$lib/store';
 
 const used: string[] = [];
 
@@ -55,9 +55,10 @@ export const POST: RequestHandler = async ({ request }) => {
 	const standardLabels = ['community-submission'];
 	const areaIds = lat && long ? await getAreaIdsByCoordinates(lat, long) : [];
 	const areaLabels = areaIds.map(id => {
-		const area = areas.find(([areaId]) => areaId === id);
+		const areasData = get(areas);
+		const area = areasData.find(area => area.id === id);
 
-		return area ? area[1] || area[0] : null;
+		return area ? area.tags.name || area.id : null;
 	}).filter(Boolean);
 	const labels = [...standardLabels, ...areaLabels];
 
