@@ -1,3 +1,4 @@
+
 import {
 	SERVER_CRYPTO_KEY,
 	SERVER_INIT_VECTOR
@@ -6,8 +7,12 @@ import { error } from '@sveltejs/kit';
 import crypto from 'crypto';
 import type { RequestHandler } from './$types';
 import type { CipherKey, BinaryLike } from 'crypto';
-import { getAreasByCoordinates } from '$lib/utils';
+import { getAreaIdsByCoordinates } from '$lib/utils';
 import { createIssueWithLabels } from '$lib/gitea';
+import { get } from 'svelte/store';
+import { areas } from '$lib/store';
+
+const used: string[] = [];
 
 export const POST: RequestHandler = async ({ request }) => {
 	console.log('Verify location POST endpoint called');
@@ -53,15 +58,30 @@ export const POST: RequestHandler = async ({ request }) => {
 		error(400, 'Captcha test failed, please try again or contact BTC Map.');
 	}
 
+	if (used.includes(captchaSecret)) {
+		error(400, 'Captcha has already been used, please try another.');
+	} else {
+		used.push(captchaSecret);
+	}
+
 	const standardLabels = ['location-verification'];
-	const areas = lat && long ? await getAreasByCoordinates(lat, long) : [];
-	const areaLabels = areas.map(([id, alias]) => alias || id).filter(Boolean);
+	
+	// Create filtered list of matched areas for reuse
+	const associatedAreaIds = lat && long ? await getAreaIdsByCoordinates(lat, long) : [];
+	const areasData = get(areas);
+	const filteredAreas = associatedAreaIds
+		.map(id => areasData.find(a => a.id === id))
+		.filter(Boolean);
+
+	const areaLabels = filteredAreas
+		.map(area => area?.tags?.url_alias || area?.id)
+		.filter((label): label is string => Boolean(label));
 	const allLabels = [...standardLabels, ...areaLabels];
 
 	// Format areas for the issue body
-	const areasFormatted = areas.map(([id, alias, type]) => 
-		`${alias || id}${type ? ` (${type})` : ''}`
-	).join(', ');
+	const areasFormatted = filteredAreas
+		.map(area => `${area?.tags.name} (${area?.tags?.url_alias || area?.id})`)
+		.join(', ');
 
 	const body = `Merchant name: ${name}
 Areas: ${areasFormatted || 'None'}
