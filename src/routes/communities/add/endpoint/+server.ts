@@ -54,9 +54,9 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	const standardLabels = ['community-submission'];
-	const areaIds = lat && long ? await getAreaIdsByCoordinates(lat, long) : [];
+	const associatedAreaIds = lat && long ? await getAreaIdsByCoordinates(lat, long) : [];
 	const areasData = get(areas);
-	const areaLabels = areaIds.map(id => {
+	const areaLabels = associatedAreaIds.map(id => {
 		const area = areasData.find(a => a.id === id);
 		return area?.tags?.url_alias || area?.id;
 	}).filter(Boolean);
