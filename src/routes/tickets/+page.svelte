@@ -20,24 +20,15 @@
 	let tickets = data.tickets;
 	let totalTickets = data.totalTickets;
 
-	$: add =
-		tickets && tickets.length
-			? tickets.filter((issue) =>
-					issue.labels?.some((label: any) => label.name === 'location-submission')
-				)
-			: [];
-	$: verify =
-		tickets && tickets.length
-			? tickets.filter((issue) =>
-					issue.labels?.some((label: any) => label.name === 'location-verification')
-				)
-			: [];
-	$: community =
-		tickets && tickets.length
-			? tickets.filter((issue) =>
-					issue.labels?.some((label: any) => label.name === 'community-submission')
-				)
-			: [];
+	$: add = tickets?.filter((issue) => 
+		issue?.labels?.some((label: any) => label?.name === 'location-submission')
+	) || [];
+	$: verify = tickets?.filter((issue) => 
+		issue?.labels?.some((label: any) => label?.name === 'location-verification')
+	) || [];
+	$: community = tickets?.filter((issue) => 
+		issue?.labels?.some((label: any) => label?.name === 'community-submission')
+	) || [];
 
 	if (data.error) {
 		errToast(data.error);
