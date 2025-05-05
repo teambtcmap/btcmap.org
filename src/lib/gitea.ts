@@ -107,17 +107,21 @@ export async function getIssues(label?: string): Promise<{ issues: SimplifiedIss
   if (issuesCache && Date.now() - issuesCache.timestamp < CACHE_DURATION) {
     const issues = issuesCache.data.issues;
     if (label) {
-      const filteredIssues = issues.filter(issue => 
-        issue.labels && issue.labels.some(l => {
-          // Check for area name match
-          if (l.name.toLowerCase() === label.toLowerCase()) return true;
-          // For "Add" tickets, also check if this issue has location-submission AND the area label
-          if (l.name === 'location-submission') {
-            return issue.labels.some(areaLabel => areaLabel.name.toLowerCase() === label.toLowerCase());
-          }
-          return false;
-        })
-      );
+      const filteredIssues = issues.filter(issue => {
+        if (!issue.labels) return false;
+        
+        // Check if issue has area label
+        const hasAreaLabel = issue.labels.some(l => 
+          l.name.toLowerCase() === label.toLowerCase()
+        );
+        
+        // For location submissions, must have both location-submission and area label
+        const isLocationSubmission = issue.labels.some(l => 
+          l.name === 'location-submission'
+        );
+        
+        return isLocationSubmission ? hasAreaLabel : hasAreaLabel;
+      });
       return {
         issues: filteredIssues,
         totalCount: filteredIssues.length
