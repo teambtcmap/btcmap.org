@@ -16,51 +16,32 @@
 	const ticketTypes = ['Add', 'Verify', 'Community'];
 	let showType = 'Add';
 
-	let tickets: any[] = [];
-	let totalTickets: number;
+	export let data;
+	let tickets = data.tickets;
+	let totalTickets = data.totalTickets;
 
 	$: add =
 		tickets && tickets.length
 			? tickets.filter((issue) =>
-					issue.labels.name?.some((label: any) => label.name === 'location-submission')
+					issue.labels?.some((label: any) => label.name === 'location-submission')
 				)
 			: [];
 	$: verify =
 		tickets && tickets.length
 			? tickets.filter((issue) =>
-					issue.labels.name?.some((label: any) => label.name === 'location-verification')
+					issue.labels?.some((label: any) => label.name === 'location-verification')
 				)
 			: [];
 	$: community =
 		tickets && tickets.length
 			? tickets.filter((issue) =>
-					issue.labels.name?.some((label: any) => label.name === 'community-submission')
+					issue.labels?.some((label: any) => label.name === 'community-submission')
 				)
 			: [];
 
-	const getIssues = () => {
-		axios
-			.get('/tickets/endpoint')
-			.then(function (response) {
-				// handle success
-				tickets = response.data.tickets;
-				totalTickets = response.data.totalTickets;
-			})
-			.catch(function (error) {
-				// handle error
-				errToast('Could not load open tickets, please try again or contact BTC Map.');
-				console.error(error);
-			});
-	};
-
-	let getIssuesInterval: ReturnType<typeof setInterval>;
-
-	onMount(() => {
-		getIssues();
-		getIssuesInterval = setInterval(getIssues, 600000);
-	});
-
-	onDestroy(() => clearInterval(getIssuesInterval));
+	if (data.error) {
+		errToast(data.error);
+	}
 </script>
 
 <svelte:head>
