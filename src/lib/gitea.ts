@@ -90,10 +90,41 @@ async function createLabel(name: string): Promise<number | null> {
   }
 }
 
-export async function getIssues(): Promise<{ issues: SimplifiedIssue[], totalCount: number }> {
+// Cache issues with 10 minute expiry
+let issuesCache: {
+  timestamp: number;
+  data: { issues: SimplifiedIssue[]; totalCount: number };
+} | null = null;
+
+const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
+
+export async function getIssues(label?: string): Promise<{ issues: SimplifiedIssue[], totalCount: number }> {
   const headers = {
     Authorization: `token ${GITEA_API_KEY}`
   };
+
+  // Return filtered cached data if label provided and cache exists
+  if (issuesCache && Date.now() - issuesCache.timestamp < CACHE_DURATION) {
+    const issues = issuesCache.data.issues;
+    if (label) {
+      const filteredIssues = issues.filter(issue => 
+        issue.labels && issue.labels.some(l => {
+          // Check for area name match
+          if (l.name.toLowerCase() === label.toLowerCase()) return true;
+          // For "Add" tickets, also check if this issue has location-submission AND the area label
+          if (l.name === 'location-submission') {
+            return issue.labels.some(areaLabel => areaLabel.name.toLowerCase() === label.toLowerCase());
+          }
+          return false;
+        })
+      );
+      return {
+        issues: filteredIssues,
+        totalCount: filteredIssues.length
+      };
+    }
+    return issuesCache.data;
+  }
 
   try {
     const [issuesResponse, repoResponse] = await Promise.all([
@@ -117,10 +148,20 @@ export async function getIssues(): Promise<{ issues: SimplifiedIssue[], totalCou
       assignees: issue.assignees
     }));
 
-    return {
+    const result = {
       issues: simplifiedIssues,
       totalCount: repoResponse.data.open_issues_count
     };
+
+    // Only cache if no label filter
+    if (!label) {
+      issuesCache = {
+        timestamp: Date.now(),
+        data: result
+      };
+    }
+
+    return result;
   } catch (error) {
     console.error('Failed to fetch issues:', error);
     throw error;
