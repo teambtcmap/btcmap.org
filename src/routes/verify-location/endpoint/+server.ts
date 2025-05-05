@@ -78,15 +78,10 @@ export const POST: RequestHandler = async ({ request }) => {
 		.filter((label): label is string => Boolean(label));
 	const allLabels = [...standardLabels, ...areaLabels];
 
-	// Format areas for the issue body
-	const areasFormatted = filteredAreas
-		.map(area => `${area?.tags.name} (${area?.tags?.url_alias || area?.id})`)
-		.join(', ');
-
 	const body = `Merchant name: ${name}
-Areas: ${areasFormatted || 'None'}
 Merchant location: ${location}
 Coordinates: ${lat}, ${long}
+Associated areas: ${filteredAreas.map(area => `${area?.tags.name} (${area?.tags?.url_alias || area?.id})`).join(', ')}
 Edit link: ${edit}
 Current information correct: ${current}
 Outdated information: ${outdated}

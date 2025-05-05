@@ -9,137 +9,73 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 const limit = 500;
 
+import { serverCache } from '$lib/cache';
+
 export const areasSync = async () => {
-	// clear tables if present
-	clearTables(['areas', 'areas_v2', 'areas_v3']);
-
-	// get areas from local
-	await localforage
-		.getItem<Area[]>('areas_v4')
-		.then(async function (value) {
-			// get areas from API if initial sync
-			if (!value) {
-				let updatedSince = '2022-01-01T00:00:00.000Z';
-				let responseCount;
-				let areasData: Area[] = [];
-
-				do {
-					try {
-						const response = await axios.get<Area[]>(
-							`https://api.btcmap.org/v2/areas?updated_since=${updatedSince}&limit=${limit}`
-						);
-
-						updatedSince = response.data[response.data.length - 1]['updated_at'];
-						responseCount = response.data.length;
-						const areasUpdated = areasData.filter(
-							(area) => !response.data.find((data) => data.id === area.id)
-						);
-						areasData = areasUpdated;
-						response.data.forEach((data) => areasData.push(data));
-					} catch (error) {
-						areaError.set('Could not load areas from API, please try again or contact BTC Map.');
-						console.error(error);
-						break;
-					}
-				} while (responseCount === limit);
-
-				if (areasData.length) {
-					// filter out deleted areas
-					const areasFiltered = areasData.filter((area) => !area['deleted_at']);
-
-					// set response to local
-					localforage
-						.setItem('areas_v4', areasFiltered)
-						.then(function () {
-							// set response to store
-							areas.set(areasFiltered);
-						})
-						.catch(function (err) {
-							areas.set(areasFiltered);
-							areaError.set('Could not store areas locally, please try again or contact BTC Map.');
-							console.error(err);
-						});
-				}
-			} else {
-				// start update sync from API
-				// sort to get most recent record
-				const cacheSorted = [...value];
-				cacheSorted.sort((a, b) => Date.parse(b['updated_at']) - Date.parse(a['updated_at']));
-
-				let updatedSince = cacheSorted[0]['updated_at'];
-				let responseCount;
-				let areasData = value;
-				let useCachedData = false;
-
-				do {
-					try {
-						const response = await axios.get<Area[]>(
-							`https://api.btcmap.org/v2/areas?updated_since=${updatedSince}&limit=${limit}`
-						);
-
-						// update new records if they exist
-						const newAreas = response.data;
-
-						// check for new areas in local and purge if they exist
-						if (newAreas.length) {
-							updatedSince = newAreas[newAreas.length - 1]['updated_at'];
-							responseCount = newAreas.length;
-
-							const areasUpdated = areasData.filter((value) => {
-								if (newAreas.find((area) => area.id === value.id)) {
-									return false;
-								} else {
-									return true;
-								}
-							});
-							areasData = areasUpdated;
-
-							// add new areas
-							newAreas.forEach((area) => {
-								if (!area['deleted_at']) {
-									areasData.push(area);
-								}
-							});
-						} else {
-							// load areas from cache
-							areas.set(value);
-							useCachedData = true;
-							break;
-						}
-					} catch (error) {
-						// load areas from cache
-						areas.set(value);
-						useCachedData = true;
-
-						areaError.set('Could not update areas from API, please try again or contact BTC Map.');
-						console.error(error);
-						break;
-					}
-				} while (responseCount === limit);
-
-				if (!useCachedData) {
-					// set updated areas locally
-					localforage
-						.setItem('areas_v4', areasData)
-						.then(function () {
-							// set updated areas to store
-							areas.set(areasData);
-						})
-						.catch(function (err) {
-							// set updated areas to store
-							areas.set(areasData);
-
-							areaError.set('Could not update areas locally, please try again or contact BTC Map.');
-							console.error(err);
-						});
-				}
+	// Skip local storage operations if running server-side
+	const isServerSide = typeof window === 'undefined';
+	
+	// Check server cache first if running server-side
+	if (isServerSide) {
+		const cachedAreas = serverCache.getAreas();
+		const lastSync = serverCache.getLastSync();
+		
+		if (cachedAreas.length && lastSync) {
+			if (Date.now() - lastSync.getTime() < 5 * 60 * 1000) {
+				areas.set(cachedAreas);
+				return;
 			}
-		})
+			
+			// Do incremental update if cache exists but expired
+			let updatedSince = lastSync.toISOString();
+			let responseCount;
+			let areasData = cachedAreas;
 
-		.catch(async function (err) {
-			areaError.set('Could not load areas locally, please try again or contact BTC Map.');
-			console.error(err);
+			do {
+				try {
+					const response = await axios.get<Area[]>(
+						`https://api.btcmap.org/v2/areas?updated_since=${updatedSince}&limit=${limit}`
+					);
 
+					const newAreas = response.data;
+					if (newAreas.length) {
+						updatedSince = newAreas[newAreas.length - 1]['updated_at'];
+						responseCount = newAreas.length;
+
+						areasData = areasData.filter(value => !newAreas.find(area => area.id === value.id));
+						newAreas.forEach(area => {
+							if (!area['deleted_at'] && area.tags?.type !== 'trash') {
+								areasData.push(area);
+							}
+						});
+					} else {
+						break;
+					}
+				} catch (error) {
+					console.error('Could not update areas from API:', error);
+					break;
+				}
+			} while (responseCount === limit);
+
+			areas.set(areasData);
+			serverCache.setAreas(areasData);
+			return;
+		}
+	}
+
+	if (!isServerSide) {
+		// clear tables if present
+		clearTables(['areas', 'areas_v2', 'areas_v3']);
+	}
+
+	try {
+		// Try to get areas from local storage if client-side
+		let cachedAreas: Area[] | null = null;
+		if (!isServerSide) {
+			cachedAreas = await localforage.getItem('areas_v4');
+		}
+
+		if (!cachedAreas) {
 			let updatedSince = '2022-01-01T00:00:00.000Z';
 			let responseCount;
 			let areasData: Area[] = [];
@@ -165,11 +101,76 @@ export const areasSync = async () => {
 			} while (responseCount === limit);
 
 			if (areasData.length) {
-				// filter out deleted areas and areas of type trash
-				const areasFiltered = areasData.filter((area) => !area['deleted_at'] && area.tags.type !== 'trash');
+				const areasFiltered = areasData.filter((area) => !area['deleted_at'] && area.tags?.type !== 'trash');
 
-				// set response to store
+				// Only try to save to localforage if client-side
+				if (!isServerSide) {
+					try {
+						await localforage.setItem('areas_v4', areasFiltered);
+					} catch (err) {
+						console.error('Could not store areas locally:', err);
+					}
+				}
+
 				areas.set(areasFiltered);
+				if (isServerSide) {
+					serverCache.setAreas(areasFiltered);
+				}
 			}
-		});
+		} else {
+			// Handle cached data updates
+			const cacheSorted = [...cachedAreas];
+			cacheSorted.sort((a, b) => Date.parse(b['updated_at']) - Date.parse(a['updated_at']));
+
+			let updatedSince = cacheSorted[0]['updated_at'];
+			let responseCount;
+			let areasData = cachedAreas;
+
+			do {
+				try {
+					const response = await axios.get<Area[]>(
+						`https://api.btcmap.org/v2/areas?updated_since=${updatedSince}&limit=${limit}`
+					);
+
+					const newAreas = response.data;
+					if (newAreas.length) {
+						updatedSince = newAreas[newAreas.length - 1]['updated_at'];
+						responseCount = newAreas.length;
+
+						const areasUpdated = areasData.filter((value) => {
+							if (newAreas.find((area) => area.id === value.id)) {
+								return false;
+							}
+							return true;
+						});
+						areasData = areasUpdated;
+
+						newAreas.forEach((area) => {
+							if (!area['deleted_at']) {
+								areasData.push(area);
+							}
+						});
+					} else {
+						break;
+					}
+				} catch (error) {
+					console.error('Could not update areas from API:', error);
+					break;
+				}
+			} while (responseCount === limit);
+
+			if (!isServerSide) {
+				try {
+					await localforage.setItem('areas_v4', areasData);
+				} catch (err) {
+					console.error('Could not update areas locally:', err);
+				}
+			}
+
+			areas.set(areasData);
+		}
+	} catch (err) {
+		console.error('Areas sync failed:', err);
+		areaError.set('Could not sync areas, please try again or contact BTC Map.');
+	}
 };

@@ -22,19 +22,19 @@
 	$: add =
 		tickets && tickets.length
 			? tickets.filter((issue) =>
-					issue.labels.find((label: any) => label.name === 'location-submission')
+					issue.labels.find((label: any) => label.id === '901')
 				)
 			: [];
 	$: verify =
 		tickets && tickets.length
 			? tickets.filter((issue) =>
-					issue.labels.find((label: any) => label.name === 'verify-submission')
+					issue.labels.find((label: any) => label.id === '903')
 				)
 			: [];
 	$: community =
 		tickets && tickets.length
 			? tickets.filter((issue) =>
-					issue.labels.find((label: any) => label.name === 'community-submission')
+					issue.labels.find((label: any) => label.id === '902')
 				)
 			: [];
 

@@ -40,10 +40,12 @@ async function createLabel(name: string): Promise<number | null> {
       return existingLabel.id;
     }
 
-    // Get the area type from the store
+    // Get area details from the store
+    const areaDetails = get(areas).find(area => area.id === name);
+    const areaType = areaDetails?.tags?.type;
+    const areaName = areaDetails?.tags?.name || name;
 
-    const areaType = get(areas).find(area => area.id === name)?.tags?.type;
-    if (!areaType) {
+    if (!areaDetails) {
       console.log(`Area ${name} not found in store, using random color`);
     }
 
@@ -62,7 +64,7 @@ async function createLabel(name: string): Promise<number | null> {
       {
         name,
         color,
-        description: `Auto-generated label for ${name}${areaType ? ` (${areaType})` : ''}`
+        description: `Auto-generated label for ${areaName}${areaType ? ` (${areaType})` : ''}`
       },
       { headers }
     );

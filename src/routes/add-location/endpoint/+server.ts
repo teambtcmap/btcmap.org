@@ -7,7 +7,9 @@ import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import crypto from 'crypto';
 import type { RequestHandler } from './$types';
-import { getAreasByCoordinates } from '$lib/utils';
+import { getAreaIdsByCoordinates } from '$lib/utils';
+import { get } from 'svelte/store';
+import { areas } from '$lib/store';
 import { createIssueWithLabels } from '$lib/gitea';
 
 import type { CipherKey, BinaryLike } from 'crypto';
@@ -65,14 +67,24 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	const standardLabels = ['location-submission'];
-	const areas = lat && long ? await getAreasByCoordinates(lat, long) : [];
-	const areaLabels = areas.map(([id, alias]) => alias || id).filter(Boolean);
+	
+	// Create filtered list of matched areas for reuse
+	const associatedAreaIds = lat && long ? await getAreaIdsByCoordinates(lat, long) : [];
+	const areasData = get(areas);
+	const filteredAreas = associatedAreaIds
+		.map(id => areasData.find(a => a.id === id))
+		.filter(Boolean);
+
+	const areaLabels = filteredAreas
+		.map(area => area?.tags?.url_alias || area?.id)
+		.filter((label): label is string => Boolean(label));
 	const labels = [...standardLabels, ...areaLabels];
 
 const body = `Merchant name: ${name}
 Address: ${address}
 Lat: ${lat}
 Long: ${long}
+Associated areas: ${filteredAreas.map(area => `${area?.tags.name} (${area?.tags?.url_alias || area?.id})`).join(', ')}
 OSM: ${osm}
 Category: ${category}
 Payment methods: ${methods}
