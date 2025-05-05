@@ -3,11 +3,11 @@
 
 	import { TicketLabel } from '$lib/comp';
 
-	export let assignees: { html_url: string; avatar_url: string; login: string }[];
+	export let assignees: { html_url: string; avatar_url: string; login: string }[] = [];
 	export let comments: number;
 	export let created: string;
 	export let url: string;
-	export let labels: { name: string; description?: string }[];
+	export let labels: { name: string; description?: string }[] = [];
 	export let id: number;
 	export let name: string;
 	export let user: { html_url: string; login: string };
