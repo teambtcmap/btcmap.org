@@ -22,19 +22,19 @@
 	$: add =
 		tickets && tickets.length
 			? tickets.filter((issue) =>
-					issue.labels?.some((label: any) => label.name === 'location-submission')
+					issue.labels.name?.some((label: any) => label.name === 'location-submission')
 				)
 			: [];
 	$: verify =
 		tickets && tickets.length
 			? tickets.filter((issue) =>
-					issue.labels?.some((label: any) => label.name === 'location-verification')
+					issue.labels.name?.some((label: any) => label.name === 'location-verification')
 				)
 			: [];
 	$: community =
 		tickets && tickets.length
 			? tickets.filter((issue) =>
-					issue.labels?.some((label: any) => label.name === 'community-submission')
+					issue.labels.name?.some((label: any) => label.name === 'community-submission')
 				)
 			: [];
 
@@ -92,20 +92,14 @@
 			<h2
 				class="w-full text-center text-xl font-semibold text-primary dark:text-white lg:w-[675px] lg:text-left"
 			>
-				Tickets up for grabs from our noob forms! Anybody can help add or verify submissions on
-				OpenStreetMap and prepare community area polygons.
+				Tickets up for grabs from our noob forms! Anybody can help add or verify location submissions and help vet communities.
 			</h2>
 
 			<p class="text-center text-xl text-primary dark:text-white lg:text-left">
 				More information on how to get involved can be found in our <a
-					href="https://wiki.btcmap.org/general/tagging-instructions.html"
-					class="text-link transition-colors hover:text-hover">Tagging Instructions</a
-				>
-				and
-				<a
-					href="https://wiki.btcmap.org/general/geojson-areas.html"
-					class="text-link transition-colors hover:text-hover">Creating GeoJSON Areas</a
-				> Wiki pages.
+					href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers"
+					class="text-link transition-colors hover:text-hover">Tagging Merchant Instructions</a
+				>.
 			</p>
 
 			<section id="tickets">
