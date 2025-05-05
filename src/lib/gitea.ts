@@ -1,3 +1,4 @@
+
 import axios from 'axios';
 import { GITEA_API_KEY, GITEA_API_URL } from '$env/static/private';
 import { getRandomColor } from '$lib/utils';
@@ -9,6 +10,22 @@ interface GiteaLabel {
   name: string;
   color: string;
   description?: string;
+}
+
+interface SimplifiedIssue {
+  id: number;
+  number: number;
+  title: string;
+  created_at: string;
+  html_url: string;
+  labels: GiteaLabel[];
+  user: {
+    login: string;
+    avatar_url: string;
+    html_url: string;
+  };
+  comments: number;
+  assignees: any[];
 }
 
 async function getLabels(): Promise<GiteaLabel[]> {
@@ -40,7 +57,6 @@ async function createLabel(name: string): Promise<number | null> {
       return existingLabel.id;
     }
 
-    // Get area details from the store
     const areaDetails = get(areas).find(area => area.id === name);
     const areaType = areaDetails?.tags?.type;
     const areaName = areaDetails?.tags?.name || name;
@@ -49,14 +65,13 @@ async function createLabel(name: string): Promise<number | null> {
       console.log(`Area ${name} not found in store, using random color`);
     }
 
-    // Define colors based on area type
     let color = '';
     if (areaType === 'country') {
-      color = '4A90E2'; // Blue for countries
+      color = '4A90E2';
     } else if (areaType === 'community') {
-      color = '7ED321'; // Green for communities
+      color = '7ED321';
     } else {
-      color = getRandomColor().substring(1); // Random color for other types. Remove the leading '#'.
+      color = getRandomColor().substring(1);
     }
 
     const response = await axios.post(
@@ -71,6 +86,43 @@ async function createLabel(name: string): Promise<number | null> {
     return response.data.id;
   } catch (error) {
     console.error(`Failed to create/get label ${name}:`, error);
+    throw error;
+  }
+}
+
+export async function getIssues(): Promise<{ issues: SimplifiedIssue[], totalCount: number }> {
+  const headers = {
+    Authorization: `token ${GITEA_API_KEY}`
+  };
+
+  try {
+    const [issuesResponse, repoResponse] = await Promise.all([
+      axios.get(`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues?state=open`, { headers }),
+      axios.get(`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data`, { headers })
+    ]);
+
+    const simplifiedIssues = issuesResponse.data.map((issue: any) => ({
+      id: issue.id,
+      number: issue.number,
+      title: issue.title,
+      created_at: issue.created_at,
+      html_url: issue.html_url,
+      labels: issue.labels,
+      user: {
+        login: issue.user.login,
+        avatar_url: issue.user.avatar_url,
+        html_url: issue.user.html_url
+      },
+      comments: issue.comments,
+      assignees: issue.assignees
+    }));
+
+    return {
+      issues: simplifiedIssues,
+      totalCount: repoResponse.data.open_issues_count
+    };
+  } catch (error) {
+    console.error('Failed to fetch issues:', error);
     throw error;
   }
 }
