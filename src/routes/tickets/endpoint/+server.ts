@@ -12,7 +12,7 @@ export async function GET() {
 	};
 
 	const issues = await axios
-		.get(`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues?state=open&limit=100`, { headers })
+		.get(`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues?state=open`, { headers })
 		.then(function (response) {
 			return response.data;
 		})
