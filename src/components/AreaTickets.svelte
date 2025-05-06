@@ -6,27 +6,17 @@
 	export let name: string;
 	export let tickets: Tickets;
 
+	// Updated to fetch all tickets regardless of type. Client-side filtering handles Add/Verify
+	$: filteredTickets = tickets === 'error' ? [] : tickets;
+	const add = filteredTickets.filter((issue: any) => issue.labels.some((label: any) => label.name === 'location-submission'));
+	const verify = filteredTickets.filter((issue: any) => issue.labels.some((label: any) => label.name === 'verify-submission'));
+
 	const ticketTypes = ['Add', 'Verify'];
 	let showType = 'Add';
 
 	const ticketError = tickets === 'error' ? true : false;
 
 	$: ticketError && errToast('Could not load open tickets, please try again or contact BTC Map.');
-
-	const add =
-		tickets && tickets.length && !ticketError
-			? // @ts-expect-error
-				tickets.filter((issue: any) =>
-					issue.labels.find((label: any) => label.name === 'location-submission')
-				)
-			: [];
-	const verify =
-		tickets && tickets.length && !ticketError
-			? // @ts-expect-error
-				tickets.filter((issue: any) =>
-					issue.labels.find((label: any) => label.name === 'verify-submission')
-				)
-			: [];
 
 	const totalTickets = add.length + verify.length;
 </script>
@@ -36,7 +26,7 @@
 		<div class="p-5 text-lg font-semibold text-primary dark:text-white">
 			<h3 class="mb-2 text-center md:text-left">
 				{name || 'BTC Map Area'} Tickets
-				{#if tickets && !ticketError}
+				{#if filteredTickets.length && !ticketError}
 					<span class="text-base">({totalTickets})</span>
 				{/if}
 				<InfoTooltip
@@ -52,14 +42,14 @@
 							? 'rounded-b md:rounded-r md:rounded-bl-none'
 							: ''} {showType === type ? 'bg-link text-white' : ''} transition-colors"
 					on:click={() => (showType = type)}
-					disabled={!tickets || ticketError}
+					disabled={!filteredTickets.length || ticketError}
 				>
 					{type}
 				</button>
 			{/each}
 		</div>
 
-		{#if tickets && !ticketError}
+		{#if filteredTickets.length && !ticketError}
 			{#if showType === 'Add'}
 				{#if add.length}
 					{#each add as ticket}
@@ -100,7 +90,7 @@
 				{/if}
 			{/if}
 
-			{#if tickets?.length === 100}
+			{#if filteredTickets?.length === 100}
 				<p
 					class="border-t border-statBorder p-5 text-center font-semibold text-primary dark:text-white"
 				>

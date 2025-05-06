@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		const areaResponse = await axios.get(`https://api.btcmap.org/v2/areas/${area}`);
 		const fetchedArea = areaResponse.data;
 
-		const { issues: tickets } = await getIssues(fetchedArea.tags.name).catch(() => ({ issues: 'error' }));
+		const { issues: tickets } = await getIssues([fetchedArea.tags.url_alias]).catch(() => ({ issues: 'error' }));
 
 		const issuesResponse = await fetch('https://api.btcmap.org/rpc', {
 			method: 'POST',
