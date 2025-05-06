@@ -124,9 +124,9 @@
 					>.
 				</p>
 			{/if}
-		{:else}
+		{:else if ticketError}
 			<p class="border-t border-statBorder p-5 text-center text-body dark:text-white">
-				Error fetching tickets.
+				Error fetching tickets. Please try again or contact BTC Map support.
 			</p>
 		{/if}
 	</div>
