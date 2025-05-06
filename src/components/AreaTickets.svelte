@@ -7,9 +7,9 @@
 	export let tickets: Tickets;
 
 	$: filteredTickets = tickets === 'error' ? [] : tickets;
-	$: add = filteredTickets.filter((issue: any) => issue.labels.some((label: any) => label.name === 'add-location'));
-	$: verify = filteredTickets.filter((issue: any) => issue.labels.some((label: any) => label.name === 'verify-location'));
-	$: community = filteredTickets.filter((issue: any) => issue.labels.some((label: any) => label.name === 'add-community'));
+	$: add = filteredTickets.filter((issue: any) => issue.labels.some((label: any) => label.name === 'location-submission'));
+	$: verify = filteredTickets.filter((issue: any) => issue.labels.some((label: any) => label.name === 'location-verification'));
+	$: community = filteredTickets.filter((issue: any) => issue.labels.some((label: any) => label.name === 'community-submission'));
 
 	const ticketTypes = ['Add', 'Verify', 'Community'];
 	let showType = 'Add';
