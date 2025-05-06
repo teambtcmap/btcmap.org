@@ -109,21 +109,6 @@
 				{/if}
 			{/if}
 
-			{#if filteredTickets?.length === 100}
-				<p
-					class="border-t border-statBorder p-5 text-center font-semibold text-primary dark:text-white"
-				>
-					View all open tickets directly on <a
-						href="https://github.com/teambtcmap/btcmap-data/issues?q=is%3Aopen+is%3Aissue+label%3A%22{name.replaceAll(
-							' ',
-							'+'
-						)}%22"
-						target="_blank"
-						rel="noreferrer"
-						class="text-link transition-colors hover:text-hover">GitHub</a
-					>.
-				</p>
-			{/if}
 		{:else if ticketError}
 			<p class="border-t border-statBorder p-5 text-center text-body dark:text-white">
 				Error fetching tickets. Please try again or contact BTC Map support.
