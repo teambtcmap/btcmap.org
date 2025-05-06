@@ -15,7 +15,12 @@
 {#if link}
 	<a
 		href={link}
-		on:click
+		on:click={(e) => {
+			if (!external) {
+				e.preventDefault();
+				window.location.href = link;
+			}
+		}}
 		target={external ? '_blank' : undefined}
 		rel={external ? 'noreferrer' : undefined}
 		class="block bg-link text-center font-semibold text-white hover:bg-hover {style} transition-colors"
