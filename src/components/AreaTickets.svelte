@@ -3,7 +3,7 @@
 	import { type Tickets } from '$lib/types.js';
 	import { errToast } from '$lib/utils';
 
-	export let name: string;
+	export let title: string;
 	export let tickets: Tickets;
 
 	$: filteredTickets = tickets === 'error' ? [] : tickets;
@@ -25,7 +25,7 @@
 	<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
 		<div class="p-5 text-lg font-semibold text-primary dark:text-white">
 			<h3 class="mb-2 text-center md:text-left">
-				{name || 'BTC Map Area'} Tickets
+				{title}
 				{#if filteredTickets.length && !ticketError}
 					<span class="text-base">({totalTickets})</span>
 				{/if}
