@@ -15,8 +15,8 @@
 {#if link}
 	<a
 		href={link}
-		target={external ? '_blank' : null}
-		rel={external ? 'noreferrer' : null}
+		target={external ? '_blank' : undefined}
+		rel={external ? 'noreferrer' : undefined}
 		class="block bg-link text-center font-semibold text-white hover:bg-hover {style} transition-colors"
 	>
 		{text}
