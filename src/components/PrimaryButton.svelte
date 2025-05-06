@@ -1,3 +1,4 @@
+
 <script lang="ts">
 	import { LoadingSpinner } from '$lib/comp';
 
@@ -9,14 +10,6 @@
 	export let external: undefined | boolean = undefined;
 	export let disabled: undefined | boolean = undefined;
 	export let loading: undefined | boolean = undefined;
-
-	function handleClick() {
-		if (link) {
-			window.location.href = link;
-		} else if (click) {
-			click();
-		}
-	}
 </script>
 
 {#if link}
@@ -30,7 +23,7 @@
 	</a>
 {:else}
 	<button
-		on:click={handleClick}
+		on:click={click}
 		{type}
 		{disabled}
 		class="block bg-link text-center font-semibold text-white hover:bg-hover {style} transition-colors"
