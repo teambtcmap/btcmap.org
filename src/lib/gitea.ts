@@ -67,11 +67,11 @@ async function createLabel(name: string): Promise<number | null> {
 
     let color = '';
     if (areaType === 'country') {
-      color = '4A90E2';
+      color = '4A90E2';  // Blue color for countries
     } else if (areaType === 'community') {
-      color = '7ED321';
+      color = '7ED321'; // Green color for communities
     } else {
-      color = getRandomColor().substring(1);
+      color = getRandomColor().substring(1); // Random color for other types
     }
 
     const response = await axios.post(
@@ -86,6 +86,31 @@ async function createLabel(name: string): Promise<number | null> {
     return response.data.id;
   } catch (error) {
     console.error(`Failed to create/get label ${name}:`, error);
+    throw error;
+  }
+}
+
+export async function createIssueWithLabels(title: string, body: string, labelNames: string[]) {
+  console.log('createIssueWithLabels - Input:', { title, labelNames });
+  const headers = {
+    Authorization: `token ${GITEA_API_KEY}`
+  };
+
+  try {
+    console.log('Attempting to create/get labels...');
+    const labelPromises = labelNames.map(name => createLabel(name));
+    const labelIds = await Promise.all(labelPromises);
+    console.log('Label IDs resolved:', labelIds);
+
+    const response = await axios.post(
+      `${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues`,
+      { title, body, labels: labelIds },
+      { headers }
+    );
+
+    return response;
+  } catch (error) {
+    console.error('Failed to create issue:', error);
     throw error;
   }
 }
@@ -172,27 +197,4 @@ export async function getIssues(label?: string): Promise<{ issues: SimplifiedIss
   }
 }
 
-export async function createIssueWithLabels(title: string, body: string, labelNames: string[]) {
-  console.log('createIssueWithLabels - Input:', { title, labelNames });
-  const headers = {
-    Authorization: `token ${GITEA_API_KEY}`
-  };
 
-  try {
-    console.log('Attempting to create/get labels...');
-    const labelPromises = labelNames.map(name => createLabel(name));
-    const labelIds = await Promise.all(labelPromises);
-    console.log('Label IDs resolved:', labelIds);
-
-    const response = await axios.post(
-      `${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues`,
-      { title, body, labels: labelIds },
-      { headers }
-    );
-
-    return response;
-  } catch (error) {
-    console.error('Failed to create issue:', error);
-    throw error;
-  }
-}
