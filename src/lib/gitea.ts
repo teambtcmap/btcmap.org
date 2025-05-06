@@ -28,6 +28,82 @@ interface SimplifiedIssue {
   assignees: any[];
 }
 
+// Cache structure with TTL
+interface IssuesCache {
+  timestamp: number;
+  data: SimplifiedIssue[];
+  totalCount: number;
+}
+
+let issuesCache: IssuesCache | null = null;
+const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
+
+async function syncIssuesFromGitea(): Promise<IssuesCache> {
+  const headers = {
+    Authorization: `token ${GITEA_API_KEY}`
+  };
+
+  const [issuesResponse, repoResponse] = await Promise.all([
+    axios.get(`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues?state=open`, { headers }),
+    axios.get(`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data`, { headers })
+  ]);
+
+  const simplifiedIssues = issuesResponse.data.map((issue: any) => ({
+    id: issue.id,
+    number: issue.number,
+    title: issue.title,
+    created_at: issue.created_at,
+    html_url: issue.html_url,
+    labels: issue.labels,
+    user: {
+      login: issue.user.login,
+      avatar_url: issue.user.avatar_url,
+      html_url: issue.user.html_url
+    },
+    comments: issue.comments,
+    assignees: issue.assignees
+  }));
+
+  return {
+    timestamp: Date.now(),
+    data: simplifiedIssues,
+    totalCount: repoResponse.data.open_issues_count
+  };
+}
+
+export async function getIssues(labelNames?: string[]): Promise<{ issues: SimplifiedIssue[], totalCount: number }> {
+  // Refresh cache if expired or doesn't exist
+  if (!issuesCache || Date.now() - issuesCache.timestamp > CACHE_DURATION) {
+    try {
+      issuesCache = await syncIssuesFromGitea();
+    } catch (error) {
+      console.error('Failed to sync issues from Gitea:', error);
+      throw error;
+    }
+  }
+
+  // If no labels specified, return all issues
+  if (!labelNames || labelNames.length === 0) {
+    return {
+      issues: issuesCache.data,
+      totalCount: issuesCache.totalCount
+    };
+  }
+
+  // Filter issues by labels
+  const filteredIssues = issuesCache.data.filter(issue => {
+    const issueLabels = new Set(issue.labels.map(l => l.name.toLowerCase()));
+    return labelNames.every(labelName => 
+      issueLabels.has(labelName.toLowerCase())
+    );
+  });
+
+  return {
+    issues: filteredIssues,
+    totalCount: filteredIssues.length
+  };
+}
+
 async function getLabels(): Promise<GiteaLabel[]> {
   const headers = {
     Authorization: `token ${GITEA_API_KEY}`
@@ -108,93 +184,12 @@ export async function createIssueWithLabels(title: string, body: string, labelNa
       { headers }
     );
 
+    // Invalidate cache after creating new issue
+    issuesCache = null;
+
     return response;
   } catch (error) {
     console.error('Failed to create issue:', error);
     throw error;
   }
 }
-
-// Cache issues with 10 minute expiry
-let issuesCache: {
-  timestamp: number;
-  data: { issues: SimplifiedIssue[]; totalCount: number };
-} | null = null;
-
-const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
-
-export async function getIssues(label?: string): Promise<{ issues: SimplifiedIssue[], totalCount: number }> {
-  const headers = {
-    Authorization: `token ${GITEA_API_KEY}`
-  };
-
-  // Return filtered cached data if label provided and cache exists
-  if (issuesCache && Date.now() - issuesCache.timestamp < CACHE_DURATION) {
-    const issues = issuesCache.data.issues;
-    if (label) {
-      const filteredIssues = issues.filter(issue => {
-        if (!issue.labels) return false;
-        
-        // Check if issue has area label
-        const hasAreaLabel = issue.labels.some(l => 
-          l.name.toLowerCase() === label.toLowerCase()
-        );
-        
-        // For location submissions, must have both location-submission and area label
-        const isLocationSubmission = issue.labels.some(l => 
-          l.name === 'location-submission'
-        );
-        
-        return isLocationSubmission ? hasAreaLabel : hasAreaLabel;
-      });
-      return {
-        issues: filteredIssues,
-        totalCount: filteredIssues.length
-      };
-    }
-    return issuesCache.data;
-  }
-
-  try {
-    const [issuesResponse, repoResponse] = await Promise.all([
-      axios.get(`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues?state=open`, { headers }),
-      axios.get(`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data`, { headers })
-    ]);
-
-    const simplifiedIssues = issuesResponse.data.map((issue: any) => ({
-      id: issue.id,
-      number: issue.number,
-      title: issue.title,
-      created_at: issue.created_at,
-      html_url: issue.html_url,
-      labels: issue.labels,
-      user: {
-        login: issue.user.login,
-        avatar_url: issue.user.avatar_url,
-        html_url: issue.user.html_url
-      },
-      comments: issue.comments,
-      assignees: issue.assignees
-    }));
-
-    const result = {
-      issues: simplifiedIssues,
-      totalCount: repoResponse.data.open_issues_count
-    };
-
-    // Only cache if no label filter
-    if (!label) {
-      issuesCache = {
-        timestamp: Date.now(),
-        data: result
-      };
-    }
-
-    return result;
-  } catch (error) {
-    console.error('Failed to fetch issues:', error);
-    throw error;
-  }
-}
-
-
