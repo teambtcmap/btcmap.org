@@ -44,7 +44,7 @@ export const areasSync = async () => {
 
 						areasData = areasData.filter((value) => !newAreas.find((area) => area.id === value.id));
 						newAreas.forEach((area) => {
-							if (!area['deleted_at'] && area.tags?.type !== 'trash') {
+							if (!area.deleted_at && area.tags.type !== 'trash') {
 								areasData.push(area);
 							}
 						});
