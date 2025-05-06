@@ -33,11 +33,10 @@
 			>.
 		</p>
 
-		<a href={link}>
-			<PrimaryButton
-				text="Submit another {type.toLowerCase()}"
-				style="{buttonWidth} py-3 mx-auto mt-10 rounded-xl"
-			/>
-		</a>
+		<PrimaryButton
+			text="Submit another {type.toLowerCase()}"
+			style="{buttonWidth} py-3 mx-auto mt-10 rounded-xl"
+			{link}
+		/>
 	</div>
 </div>
