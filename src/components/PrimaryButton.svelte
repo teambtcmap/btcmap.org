@@ -14,7 +14,6 @@
 
 {#if link}
 	<a
-		{href}
 		href={link}
 		on:click
 		target={external ? '_blank' : undefined}
