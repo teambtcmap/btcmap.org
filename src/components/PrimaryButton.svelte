@@ -14,7 +14,9 @@
 
 {#if link}
 	<a
+		{href}
 		href={link}
+		on:click
 		target={external ? '_blank' : undefined}
 		rel={external ? 'noreferrer' : undefined}
 		class="block bg-link text-center font-semibold text-white hover:bg-hover {style} transition-colors"
