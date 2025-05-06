@@ -14,10 +14,8 @@
 
 {#if link}
 	<a
-		href={link}
 		on:click={(e) => {
 			if (!external) {
-				e.preventDefault();
 				window.location.href = link;
 			}
 		}}
