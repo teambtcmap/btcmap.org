@@ -14,18 +14,18 @@ import { serverCache } from '$lib/cache';
 export const areasSync = async () => {
 	// Skip local storage operations if running server-side
 	const isServerSide = typeof window === 'undefined';
-	
+
 	// Check server cache first if running server-side
 	if (isServerSide) {
 		const cachedAreas = serverCache.getAreas();
 		const lastSync = serverCache.getLastSync();
-		
+
 		if (cachedAreas.length && lastSync) {
 			if (Date.now() - lastSync.getTime() < 5 * 60 * 1000) {
 				areas.set(cachedAreas);
 				return;
 			}
-			
+
 			// Do incremental update if cache exists but expired
 			let updatedSince = lastSync.toISOString();
 			let responseCount;
@@ -42,8 +42,8 @@ export const areasSync = async () => {
 						updatedSince = newAreas[newAreas.length - 1]['updated_at'];
 						responseCount = newAreas.length;
 
-						areasData = areasData.filter(value => !newAreas.find(area => area.id === value.id));
-						newAreas.forEach(area => {
+						areasData = areasData.filter((value) => !newAreas.find((area) => area.id === value.id));
+						newAreas.forEach((area) => {
 							if (!area['deleted_at'] && area.tags?.type !== 'trash') {
 								areasData.push(area);
 							}
@@ -101,7 +101,9 @@ export const areasSync = async () => {
 			} while (responseCount === limit);
 
 			if (areasData.length) {
-				const areasFiltered = areasData.filter((area) => !area['deleted_at'] && area.tags?.type !== 'trash');
+				const areasFiltered = areasData.filter(
+					(area) => !area['deleted_at'] && area.tags?.type !== 'trash'
+				);
 
 				// Only try to save to localforage if client-side
 				if (!isServerSide) {

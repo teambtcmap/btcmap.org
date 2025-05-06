@@ -7,9 +7,15 @@
 	export let tickets: Tickets;
 
 	$: filteredTickets = tickets === 'error' ? [] : tickets;
-	$: add = filteredTickets.filter((issue: any) => issue.labels.some((label: any) => label.name === 'location-submission'));
-	$: verify = filteredTickets.filter((issue: any) => issue.labels.some((label: any) => label.name === 'location-verification'));
-	$: community = filteredTickets.filter((issue: any) => issue.labels.some((label: any) => label.name === 'community-submission'));
+	$: add = filteredTickets.filter((issue: any) =>
+		issue.labels.some((label: any) => label.name === 'location-submission')
+	);
+	$: verify = filteredTickets.filter((issue: any) =>
+		issue.labels.some((label: any) => label.name === 'location-verification')
+	);
+	$: community = filteredTickets.filter((issue: any) =>
+		issue.labels.some((label: any) => label.name === 'community-submission')
+	);
 
 	const ticketTypes = ['Add', 'Verify', 'Community'];
 	let showType = 'Add';
@@ -108,7 +114,6 @@
 					</p>
 				{/if}
 			{/if}
-
 		{:else if ticketError}
 			<p class="border-t border-statBorder p-5 text-center text-body dark:text-white">
 				Error fetching tickets. Please try again or contact BTC Map support.

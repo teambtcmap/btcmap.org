@@ -107,7 +107,7 @@
 					notes: notes.value,
 					source,
 					sourceOther: sourceOther ? sourceOther : '',
-					contact: contact.value,
+					contact: contact.value
 				})
 				.then(function (response) {
 					submissionIssueNumber = response.data.number;
@@ -410,7 +410,6 @@
 								</div>
 							</div>
 
-
 							<div>
 								<label for="address" class="mb-2 block font-semibold"
 									>Address (Optional) <InfoTooltip
@@ -422,7 +421,7 @@
 									disabled={!captchaSecret || !mapLoaded}
 									type="text"
 									name="address"
-									id="address" 
+									id="address"
 									placeholder="2100 Freedom Drive..."
 									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:this={address}

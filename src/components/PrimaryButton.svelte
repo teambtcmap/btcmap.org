@@ -1,4 +1,3 @@
-
 <script lang="ts">
 	import { LoadingSpinner } from '$lib/comp';
 

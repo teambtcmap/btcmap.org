@@ -20,15 +20,18 @@
 	let tickets = data.tickets;
 	let totalTickets = data.totalTickets;
 
-	$: add = tickets?.filter((issue) => 
-		issue?.labels?.some((label: any) => label?.name === 'location-submission')
-	) || [];
-	$: verify = tickets?.filter((issue) => 
-		issue?.labels?.some((label: any) => label?.name === 'location-verification')
-	) || [];
-	$: community = tickets?.filter((issue) => 
-		issue?.labels?.some((label: any) => label?.name === 'community-submission')
-	) || [];
+	$: add =
+		tickets?.filter((issue) =>
+			issue?.labels?.some((label: any) => label?.name === 'location-submission')
+		) || [];
+	$: verify =
+		tickets?.filter((issue) =>
+			issue?.labels?.some((label: any) => label?.name === 'location-verification')
+		) || [];
+	$: community =
+		tickets?.filter((issue) =>
+			issue?.labels?.some((label: any) => label?.name === 'community-submission')
+		) || [];
 
 	if (data.error) {
 		errToast(data.error);
@@ -64,7 +67,8 @@
 			<h2
 				class="w-full text-center text-xl font-semibold text-primary dark:text-white lg:w-[675px] lg:text-left"
 			>
-				Tickets up for grabs from our noob forms! Anybody can help add or verify location submissions and help vet communities.
+				Tickets up for grabs from our noob forms! Anybody can help add or verify location
+				submissions and help vet communities.
 			</h2>
 
 			<p class="text-center text-xl text-primary dark:text-white lg:text-left">

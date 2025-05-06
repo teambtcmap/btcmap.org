@@ -24,7 +24,7 @@
 			<HeaderPlaceholder />
 		{/if}
 		<p class="mb-5 w-full text-primary dark:text-white md:w-[500px]">
-			{text} You may also monitor the progress of your submission here: 
+			{text} You may also monitor the progress of your submission here:
 			<a
 				href="https://gitea.btcmap.org/teambtcmap/btcmap-data/issues/{issue}"
 				target="_blank"

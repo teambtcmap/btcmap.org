@@ -54,22 +54,22 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	const standardLabels = ['community-submission'];
-	
+
 	// Create filtered list of matched areas (i.e. countries or larger communities) for reuse
 	const associatedAreaIds = lat && long ? await getAreaIdsByCoordinates(lat, long) : [];
 	const areasData = get(areas);
 	const filteredAreas = associatedAreaIds
-		.map(id => areasData.find(a => a.id === id))
+		.map((id) => areasData.find((a) => a.id === id))
 		.filter(Boolean);
 
 	const areaLabels = filteredAreas
-		.map(area => area?.tags?.url_alias || area?.id)
+		.map((area) => area?.tags?.url_alias || area?.id)
 		.filter((label): label is string => Boolean(label)); // Filter out undefined values
 	const labels = [...standardLabels, ...areaLabels];
 
 	const body = `Community name: ${name}
 Location: ${location}
-Associated areas: ${filteredAreas.map(area => `${area?.tags.name} (${area?.tags?.url_alias || area?.id})`).join(', ')}
+Associated areas: ${filteredAreas.map((area) => `${area?.tags.name} (${area?.tags?.url_alias || area?.id})`).join(', ')}
 GeoJSON: https://geojson.codingarena.top/?search=${encodeURIComponent(location)}
 Icon URL: ${icon}
 Lightning: ${lightning}

@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 import { GITEA_API_KEY, GITEA_API_URL } from '$env/static/private';
 import { getRandomColor } from '$lib/utils';
@@ -6,190 +5,192 @@ import { get } from 'svelte/store';
 import { areas } from '$lib/store';
 
 interface GiteaLabel {
-  id: number;
-  name: string;
-  color: string;
-  description?: string;
+	id: number;
+	name: string;
+	color: string;
+	description?: string;
 }
 
 interface SimplifiedIssue {
-  id: number;
-  number: number;
-  title: string;
-  created_at: string;
-  html_url: string;
-  labels: GiteaLabel[];
-  user: {
-    login: string;
-    avatar_url: string;
-    html_url: string;
-  };
-  comments: number;
-  assignees: any[];
+	id: number;
+	number: number;
+	title: string;
+	created_at: string;
+	html_url: string;
+	labels: GiteaLabel[];
+	user: {
+		login: string;
+		avatar_url: string;
+		html_url: string;
+	};
+	comments: number;
+	assignees: any[];
 }
 
 // Cache structure with TTL
 interface IssuesCache {
-  timestamp: number;
-  data: SimplifiedIssue[];
-  totalCount: number;
+	timestamp: number;
+	data: SimplifiedIssue[];
+	totalCount: number;
 }
 
 let issuesCache: IssuesCache | null = null;
 const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
 
 async function syncIssuesFromGitea(): Promise<IssuesCache> {
-  const headers = {
-    Authorization: `token ${GITEA_API_KEY}`
-  };
+	const headers = {
+		Authorization: `token ${GITEA_API_KEY}`
+	};
 
-  const [issuesResponse, repoResponse] = await Promise.all([
-    axios.get(`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues?state=open`, { headers }),
-    axios.get(`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data`, { headers })
-  ]);
+	const [issuesResponse, repoResponse] = await Promise.all([
+		axios.get(`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues?state=open`, {
+			headers
+		}),
+		axios.get(`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data`, { headers })
+	]);
 
-  const simplifiedIssues = issuesResponse.data.map((issue: any) => ({
-    id: issue.id,
-    number: issue.number,
-    title: issue.title,
-    created_at: issue.created_at,
-    html_url: issue.html_url,
-    labels: issue.labels,
-    user: {
-      login: issue.user.login,
-      avatar_url: issue.user.avatar_url,
-      html_url: issue.user.html_url
-    },
-    comments: issue.comments,
-    assignees: issue.assignees
-  }));
+	const simplifiedIssues = issuesResponse.data.map((issue: any) => ({
+		id: issue.id,
+		number: issue.number,
+		title: issue.title,
+		created_at: issue.created_at,
+		html_url: issue.html_url,
+		labels: issue.labels,
+		user: {
+			login: issue.user.login,
+			avatar_url: issue.user.avatar_url,
+			html_url: issue.user.html_url
+		},
+		comments: issue.comments,
+		assignees: issue.assignees
+	}));
 
-  return {
-    timestamp: Date.now(),
-    data: simplifiedIssues,
-    totalCount: repoResponse.data.open_issues_count
-  };
+	return {
+		timestamp: Date.now(),
+		data: simplifiedIssues,
+		totalCount: repoResponse.data.open_issues_count
+	};
 }
 
-export async function getIssues(labelNames?: string[]): Promise<{ issues: SimplifiedIssue[], totalCount: number }> {
-  // Refresh cache if expired or doesn't exist
-  if (!issuesCache || Date.now() - issuesCache.timestamp > CACHE_DURATION) {
-    try {
-      issuesCache = await syncIssuesFromGitea();
-    } catch (error) {
-      console.error('Failed to sync issues from Gitea:', error);
-      throw error;
-    }
-  }
+export async function getIssues(
+	labelNames?: string[]
+): Promise<{ issues: SimplifiedIssue[]; totalCount: number }> {
+	// Refresh cache if expired or doesn't exist
+	if (!issuesCache || Date.now() - issuesCache.timestamp > CACHE_DURATION) {
+		try {
+			issuesCache = await syncIssuesFromGitea();
+		} catch (error) {
+			console.error('Failed to sync issues from Gitea:', error);
+			throw error;
+		}
+	}
 
-  // If no labels specified, return all issues
-  if (!labelNames || labelNames.length === 0) {
-    return {
-      issues: issuesCache.data,
-      totalCount: issuesCache.totalCount
-    };
-  }
+	// If no labels specified, return all issues
+	if (!labelNames || labelNames.length === 0) {
+		return {
+			issues: issuesCache.data,
+			totalCount: issuesCache.totalCount
+		};
+	}
 
-  // Filter issues by labels
-  const filteredIssues = issuesCache.data.filter(issue => {
-    const issueLabels = new Set(issue.labels.map(l => l.name.toLowerCase()));
-    return labelNames.every(labelName => 
-      issueLabels.has(labelName.toLowerCase())
-    );
-  });
+	// Filter issues by labels
+	const filteredIssues = issuesCache.data.filter((issue) => {
+		const issueLabels = new Set(issue.labels.map((l) => l.name.toLowerCase()));
+		return labelNames.every((labelName) => issueLabels.has(labelName.toLowerCase()));
+	});
 
-  return {
-    issues: filteredIssues,
-    totalCount: filteredIssues.length
-  };
+	return {
+		issues: filteredIssues,
+		totalCount: filteredIssues.length
+	};
 }
 
 async function getLabels(): Promise<GiteaLabel[]> {
-  const headers = {
-    Authorization: `token ${GITEA_API_KEY}`
-  };
+	const headers = {
+		Authorization: `token ${GITEA_API_KEY}`
+	};
 
-  try {
-    const response = await axios.get(
-      `${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/labels`,
-      { headers }
-    );
-    return response.data;
-  } catch (error) {
-    console.error('Failed to fetch labels:', error);
-    return [];
-  }
+	try {
+		const response = await axios.get(
+			`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/labels`,
+			{ headers }
+		);
+		return response.data;
+	} catch (error) {
+		console.error('Failed to fetch labels:', error);
+		return [];
+	}
 }
 
 async function createLabel(name: string): Promise<number | null> {
-  const headers = {
-    Authorization: `token ${GITEA_API_KEY}`
-  };
+	const headers = {
+		Authorization: `token ${GITEA_API_KEY}`
+	};
 
-  try {
-    const existingLabels = await getLabels();
-    const existingLabel = existingLabels.find(l => l.name === name);
-    if (existingLabel) {
-      return existingLabel.id;
-    }
+	try {
+		const existingLabels = await getLabels();
+		const existingLabel = existingLabels.find((l) => l.name === name);
+		if (existingLabel) {
+			return existingLabel.id;
+		}
 
-    const areaDetails = get(areas).find(area => area.id === name);
-    const areaType = areaDetails?.tags?.type;
-    const areaName = areaDetails?.tags?.name || name;
+		const areaDetails = get(areas).find((area) => area.id === name);
+		const areaType = areaDetails?.tags?.type;
+		const areaName = areaDetails?.tags?.name || name;
 
-    if (!areaDetails) {
-      console.log(`Area ${name} not found in store, using random color`);
-    }
+		if (!areaDetails) {
+			console.log(`Area ${name} not found in store, using random color`);
+		}
 
-    let color = '';
-    if (areaType === 'country') {
-      color = '4A90E2';  // Blue color for countries
-    } else if (areaType === 'community') {
-      color = '7ED321'; // Green color for communities
-    } else {
-      color = getRandomColor().substring(1); // Random color for other types
-    }
+		let color = '';
+		if (areaType === 'country') {
+			color = '4A90E2'; // Blue color for countries
+		} else if (areaType === 'community') {
+			color = '7ED321'; // Green color for communities
+		} else {
+			color = getRandomColor().substring(1); // Random color for other types
+		}
 
-    const response = await axios.post(
-      `${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/labels`,
-      {
-        name,
-        color,
-        description: `Auto-generated label for ${areaName}${areaType ? ` (${areaType})` : ''}`
-      },
-      { headers }
-    );
-    return response.data.id;
-  } catch (error) {
-    console.error(`Failed to create/get label ${name}:`, error);
-    throw error;
-  }
+		const response = await axios.post(
+			`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/labels`,
+			{
+				name,
+				color,
+				description: `Auto-generated label for ${areaName}${areaType ? ` (${areaType})` : ''}`
+			},
+			{ headers }
+		);
+		return response.data.id;
+	} catch (error) {
+		console.error(`Failed to create/get label ${name}:`, error);
+		throw error;
+	}
 }
 
 export async function createIssueWithLabels(title: string, body: string, labelNames: string[]) {
-  console.log('createIssueWithLabels - Input:', { title, labelNames });
-  const headers = {
-    Authorization: `token ${GITEA_API_KEY}`
-  };
+	console.log('createIssueWithLabels - Input:', { title, labelNames });
+	const headers = {
+		Authorization: `token ${GITEA_API_KEY}`
+	};
 
-  try {
-    console.log('Attempting to create/get labels...');
-    const labelPromises = labelNames.map(name => createLabel(name));
-    const labelIds = await Promise.all(labelPromises);
-    console.log('Label IDs resolved:', labelIds);
+	try {
+		console.log('Attempting to create/get labels...');
+		const labelPromises = labelNames.map((name) => createLabel(name));
+		const labelIds = await Promise.all(labelPromises);
+		console.log('Label IDs resolved:', labelIds);
 
-    const response = await axios.post(
-      `${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues`,
-      { title, body, labels: labelIds },
-      { headers }
-    );
+		const response = await axios.post(
+			`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues`,
+			{ title, body, labels: labelIds },
+			{ headers }
+		);
 
-    // Invalidate cache after creating new issue
-    issuesCache = null;
+		// Invalidate cache after creating new issue
+		issuesCache = null;
 
-    return response;
-  } catch (error) {
-    console.error('Failed to create issue:', error);
-    throw error;
-  }
+		return response;
+	} catch (error) {
+		console.error('Failed to create issue:', error);
+		throw error;
+	}
 }
