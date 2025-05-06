@@ -359,6 +359,7 @@
 									disabled={!captchaSecret || !mapLoaded}
 									type="text"
 									name="name"
+									id="name"
 									placeholder="Satoshi's Comics"
 									required
 									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
@@ -421,6 +422,7 @@
 									disabled={!captchaSecret || !mapLoaded}
 									type="text"
 									name="address"
+									id="address" 
 									placeholder="2100 Freedom Drive..."
 									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:this={address}
@@ -433,6 +435,7 @@
 									disabled={!captchaSecret || !mapLoaded}
 									type="text"
 									name="category"
+									id="category"
 									placeholder="Restaurant etc."
 									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:this={category}
