@@ -404,6 +404,6 @@
 			{issues}
 			loading={!dataInitialized}
 		/>
-		<AreaTickets tickets={data.tickets} />
+		<AreaTickets tickets={data.tickets} title="{name || 'BTC Map Area'} Open Tickets" />
 	{/if}
 </main>
