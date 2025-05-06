@@ -185,7 +185,7 @@ export async function getAreaIdsByCoordinates(lat: number, long: number): Promis
         console.log('Area missing geo_json:', area.id);
         return false;
       }
-      let rewoundPoly = rewind(area.tags.geo_json, true);
+      const rewoundPoly = rewind(area.tags.geo_json, true);
       const contains = geoContains(rewoundPoly, [long, lat]);
       if (contains) {
         console.log('Found matching area:', area.id);
