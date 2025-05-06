@@ -6,19 +6,19 @@
 	export let name: string;
 	export let tickets: Tickets;
 
-	// Updated to fetch all tickets regardless of type. Client-side filtering handles Add/Verify
 	$: filteredTickets = tickets === 'error' ? [] : tickets;
-	const add = filteredTickets.filter((issue: any) => issue.labels.some((label: any) => label.name === 'location-submission'));
-	const verify = filteredTickets.filter((issue: any) => issue.labels.some((label: any) => label.name === 'verify-submission'));
+	$: add = filteredTickets.filter((issue: any) => issue.labels.some((label: any) => label.name === 'add-location'));
+	$: verify = filteredTickets.filter((issue: any) => issue.labels.some((label: any) => label.name === 'verify-location'));
+	$: community = filteredTickets.filter((issue: any) => issue.labels.some((label: any) => label.name === 'add-community'));
 
-	const ticketTypes = ['Add', 'Verify'];
+	const ticketTypes = ['Add', 'Verify', 'Community'];
 	let showType = 'Add';
 
 	const ticketError = tickets === 'error' ? true : false;
 
 	$: ticketError && errToast('Could not load open tickets, please try again or contact BTC Map.');
 
-	const totalTickets = add.length + verify.length;
+	$: totalTickets = add.length + verify.length + community.length;
 </script>
 
 <section id="tickets">
@@ -86,6 +86,25 @@
 				{:else}
 					<p class="border-t border-statBorder p-5 text-center text-body dark:text-white">
 						No open <strong>verify</strong> tickets.
+					</p>
+				{/if}
+			{:else if showType === 'Community'}
+				{#if community.length}
+					{#each community as ticket}
+						<OpenTicket
+							assignees={ticket.assignees}
+							comments={ticket.comments}
+							created={ticket.created_at}
+							url={ticket.html_url}
+							labels={ticket.labels}
+							id={ticket.number}
+							name={ticket.title}
+							user={ticket.user}
+						/>
+					{/each}
+				{:else}
+					<p class="border-t border-statBorder p-5 text-center text-body dark:text-white">
+						No open <strong>community</strong> tickets.
 					</p>
 				{/if}
 			{/if}
