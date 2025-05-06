@@ -9,6 +9,7 @@ node_modules
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .netlify
+/attached_assets
 
 # Playwright
 /test-results/
