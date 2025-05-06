@@ -404,8 +404,6 @@
 			{issues}
 			loading={!dataInitialized}
 		/>
-		<AreaTickets tickets={filteredAddTickets} />
-		<AreaTickets tickets={filteredVerifyTickets} />
-		<AreaTickets tickets={filteredCommunityTickets} />
+		<AreaTickets tickets={data.tickets} />
 	{/if}
 </main>
