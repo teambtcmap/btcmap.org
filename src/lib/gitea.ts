@@ -41,7 +41,7 @@ async function syncIssuesFromGitea(): Promise<IssuesCache> {
 			html_url: string;
 		};
 		comments: number;
-		assignees: any[]; // This could be further typed if needed
+		assignees: { login: string; avatar_url: string; html_url: string }[];
 	}
 
 	const giteaIssues = issuesResponse.data.map((issue: GiteaIssue) => ({
