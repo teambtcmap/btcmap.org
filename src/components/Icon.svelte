@@ -34,7 +34,8 @@
 						gate: 'material-symbols:gate',
 						cooking: 'material-symbols:cooking',
 						dentistry: 'material-symbols:dentistry',
-						sauna: 'material-symbols:sauna'
+						sauna: 'material-symbols:sauna',
+						info_outline: 'material-symbols:info-outline'
 					};
 
 					// Check if this icon has an exception

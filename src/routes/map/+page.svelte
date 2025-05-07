@@ -137,13 +137,9 @@
 		// create marker cluster group and layers
 		// @ts-expect-error
 		let markers = L.markerClusterGroup({ maxClusterRadius: 80, disableClusteringAtZoom: 17 });
-		// @ts-expect-error
 		let upToDateLayer = leaflet.featureGroup.subGroup(markers);
-		// @ts-expect-error
 		let outdatedLayer = leaflet.featureGroup.subGroup(markers);
-		// @ts-expect-error
 		let legacyLayer = leaflet.featureGroup.subGroup(markers);
-		// @ts-expect-error
 		let thirdPartyLayer = leaflet.featureGroup.subGroup(markers);
 		let categories: MapGroups = {};
 
@@ -181,7 +177,9 @@
 				const lat = latCalc(elementOSM);
 				const long = longCalc(elementOSM);
 
-				let divIcon = generateIcon(leaflet, icon, boosted ? true : false);
+				const commentsCount = element.tags.comments || 0;
+
+				let divIcon = generateIcon(leaflet, icon, boosted ? true : false, commentsCount);
 
 				let marker = generateMarker(
 					lat,
@@ -220,7 +218,6 @@
 				}
 
 				if (!categories[category]) {
-					// @ts-expect-error
 					categories[category] = leaflet.featureGroup.subGroup(markers);
 				}
 
