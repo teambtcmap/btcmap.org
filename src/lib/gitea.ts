@@ -29,22 +29,22 @@ async function syncIssuesFromGitea(): Promise<IssuesCache> {
 	]);
 
 	interface GiteaIssue {
-  id: number;
-  number: number;
-  title: string;
-  created_at: string;
-  html_url: string;
-  labels: GiteaLabel[];
-  user: {
-    login: string;
-    avatar_url: string;
-    html_url: string;
-  };
-  comments: number;
-  assignees: any[]; // This could be further typed if needed
-}
+		id: number;
+		number: number;
+		title: string;
+		created_at: string;
+		html_url: string;
+		labels: GiteaLabel[];
+		user: {
+			login: string;
+			avatar_url: string;
+			html_url: string;
+		};
+		comments: number;
+		assignees: any[]; // This could be further typed if needed
+	}
 
-const giteaIssues = issuesResponse.data.map((issue: GiteaIssue) => ({
+	const giteaIssues = issuesResponse.data.map((issue: GiteaIssue) => ({
 		id: issue.id,
 		number: issue.number,
 		title: issue.title,
@@ -134,7 +134,7 @@ async function createLabel(name: string): Promise<number | null> {
 		const areaName = areaDetails?.tags?.name || name;
 
 		if (!areaDetails) {
-			console.log(`Area ${name} not found in store, using random color`);
+			console.warn(`Area ${name} not found in store. Creating label without area details.`);
 		}
 
 		let color = '';
@@ -163,16 +163,16 @@ async function createLabel(name: string): Promise<number | null> {
 }
 
 export async function createIssueWithLabels(title: string, body: string, labelNames: string[]) {
-	console.log('createIssueWithLabels - Input:', { title, labelNames });
+	console.debug('createIssueWithLabels - Input:', { title, labelNames });
 	const headers = {
 		Authorization: `token ${GITEA_API_KEY}`
 	};
 
 	try {
-		console.log('Attempting to create/get labels...');
+		console.debug('Attempting to create/get labels...');
 		const labelPromises = labelNames.map((name) => createLabel(name));
 		const labelIds = await Promise.all(labelPromises);
-		console.log('Label IDs resolved:', labelIds);
+		console.debug('Label IDs resolved:', labelIds);
 
 		const response = await axios.post(
 			`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues`,

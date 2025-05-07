@@ -11,7 +11,7 @@ import { areas } from '$lib/store';
 const used: string[] = [];
 
 export const POST: RequestHandler = async ({ request }) => {
-	console.log('Verify location POST endpoint called');
+	console.debug('Verify location POST endpoint called');
 	const {
 		captchaSecret,
 		captchaTest,
@@ -27,7 +27,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		long
 	} = await request.json();
 
-	console.log('Request data:', {
+	console.debug('Request data:', {
 		name,
 		location,
 		current,

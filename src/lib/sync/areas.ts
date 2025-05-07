@@ -8,6 +8,7 @@ import localforage from 'localforage';
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 const limit = 500;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 import { serverCache } from '$lib/cache';
 
@@ -21,7 +22,7 @@ export const areasSync = async () => {
 		const lastSync = serverCache.getLastSync();
 
 		if (cachedAreas.length && lastSync) {
-			if (Date.now() - lastSync.getTime() < 5 * 60 * 1000) {
+			if (Date.now() - lastSync.getTime() < CACHE_DURATION) {
 				areas.set(cachedAreas);
 				return;
 			}
