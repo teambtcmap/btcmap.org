@@ -276,8 +276,7 @@
 
 			//import packages
 			leaflet = await import('leaflet');
-			const domEventModule = await import('leaflet/src/dom/DomEvent');
-			const DomEvent = domEventModule.default;
+			const DomEvent = leaflet.DomEvent;
 			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
 			const maplibreGl = await import('maplibre-gl');
 			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
