@@ -261,8 +261,6 @@
 				map.addLayer(categories[category]);
 			});
 
-		Object.entries(overlayMaps).forEach((layer) => controlLayers.addOverlay(layer[1], layer[0]));
-
 		map.removeLayer(categories['atm']);
 
 		mapLoading = 100;
@@ -500,7 +498,10 @@
 			});
 
 			map.addControl(new customControls());
-			DomEvent.disableClickPropagation(document.querySelector('.leaflet-control-boost-layer'));
+			const boostLayer = document.querySelector('.leaflet-control-boost-layer');
+			if (boostLayer) {
+				DomEvent.disableClickPropagation(boostLayer);
+			}
 
 			// add search bar to map
 			// @ts-expect-error
@@ -530,10 +531,16 @@
 			new leaflet.Control.Search().addTo(map);
 
 			// disable map events
-			DomEvent.disableScrollPropagation(customSearchBar);
-			DomEvent.disableClickPropagation(customSearchBar);
-			DomEvent.disableClickPropagation(document.querySelector('.leaflet-control-search-toggle'));
-			DomEvent.disableClickPropagation(clearSearchButton);
+			if (customSearchBar) {
+				DomEvent.disableClickPropagation(customSearchBar);
+			}
+			const searchToggle = document.querySelector('.leaflet-control-search-toggle');
+			if (searchToggle) {
+				DomEvent.disableClickPropagation(searchToggle);
+			}
+			if (clearSearchButton) {
+				DomEvent.disableClickPropagation(clearSearchButton);
+			}
 
 			// add home and marker buttons to map
 			homeMarkerButtons(leaflet, map, DomEvent, true);
