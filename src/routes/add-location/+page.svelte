@@ -12,7 +12,6 @@
 	import { attribution, changeDefaultIcons, geolocate, toggleMapButtons } from '$lib/map/setup';
 	import { socials, theme } from '$lib/store';
 	import { detectTheme, errToast } from '$lib/utils';
-	// @ts-expect-error
 	import rewind from '@mapbox/geojson-rewind';
 	import axios from 'axios';
 	import { geoContains } from 'd3-geo';
@@ -143,7 +142,6 @@
 
 			//import packages
 			const leaflet = await import('leaflet');
-			// @ts-expect-error
 			const DomEvent = await import('leaflet/src/dom/DomEvent');
 			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
 			const leafletLocateControl = await import('leaflet.locatecontrol');

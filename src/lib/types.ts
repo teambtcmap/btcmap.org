@@ -309,6 +309,8 @@ export interface GiteaIssue {
 	}[];
 }
 
+export type Tickets = GiteaIssue[] | 'error';
+
 export type Theme = 'light' | 'dark';
 
 export type DonationType = 'On-chain' | 'Lightning';
@@ -316,7 +318,5 @@ export type DonationType = 'On-chain' | 'Lightning';
 export type DropdownLink = { url: string; external?: boolean; icon: string; title: string };
 
 export type ChartHistory = '7D' | '1M' | '3M' | '6M' | 'YTD' | '1Y' | 'ALL';
-
-export type Tickets = [] | 'error';
 
 export type AreaPageProps = { id: string; name: string; tickets: Tickets; issues: RpcIssue[] };
