@@ -499,7 +499,7 @@
 			map.addControl(new customControls());
 			const boostLayer = document.querySelector('.leaflet-control-boost-layer');
 			if (boostLayer) {
-				DomEvent.disableClickPropagation(boostLayer);
+				DomEvent.disableClickPropagation(boostLayer as HTMLElement);
 			}
 
 			// add search bar to map
@@ -531,14 +531,14 @@
 
 			// disable map events
 			if (customSearchBar) {
-				DomEvent.disableClickPropagation(customSearchBar);
+				DomEvent.disableClickPropagation(customSearchBar as HTMLElement);
 			}
 			const searchToggle = document.querySelector('.leaflet-control-search-toggle');
 			if (searchToggle) {
-				DomEvent.disableClickPropagation(searchToggle);
+				DomEvent.disableClickPropagation(searchToggle as HTMLElement);
 			}
 			if (clearSearchButton) {
-				DomEvent.disableClickPropagation(clearSearchButton);
+				DomEvent.disableClickPropagation(clearSearchButton as HTMLElement);
 			}
 
 			// add home and marker buttons to map
