@@ -61,7 +61,7 @@ export type AreaTags = {
 	['box:west']?: string;
 };
 
-export type AreaType = 'community' | 'country';
+export type AreaType = 'community' | 'country' | 'trash';
 
 export type Continents =
 	| 'africa'
