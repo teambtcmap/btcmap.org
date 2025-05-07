@@ -302,7 +302,11 @@ export interface GiteaIssue {
 		html_url: string;
 	};
 	comments: number;
-	assignees: any[];
+	assignees: {
+		login: string;
+		avatar_url: string;
+		html_url: string;
+	}[];
 }
 
 export type Theme = 'light' | 'dark';
