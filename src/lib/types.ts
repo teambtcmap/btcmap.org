@@ -281,6 +281,29 @@ export interface ActivityEvent extends Event {
 
 // misc
 
+export interface GiteaLabel {
+	id: number;
+	name: string;
+	color: string;
+	description?: string;
+}
+
+export interface GiteaIssue {
+	id: number;
+	number: number;
+	title: string;
+	created_at: string;
+	html_url: string;
+	labels: GiteaLabel[];
+	user: {
+		login: string;
+		avatar_url: string;
+		html_url: string;
+	};
+	comments: number;
+	assignees: any[];
+}
+
 export type Theme = 'light' | 'dark';
 
 export type DonationType = 'On-chain' | 'Lightning';

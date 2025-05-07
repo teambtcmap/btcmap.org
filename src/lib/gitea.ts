@@ -4,33 +4,12 @@ import { getRandomColor } from '$lib/utils';
 import { get } from 'svelte/store';
 import { areas } from '$lib/store';
 
-interface GiteaLabel {
-	id: number;
-	name: string;
-	color: string;
-	description?: string;
-}
-
-interface SimplifiedIssue {
-	id: number;
-	number: number;
-	title: string;
-	created_at: string;
-	html_url: string;
-	labels: GiteaLabel[];
-	user: {
-		login: string;
-		avatar_url: string;
-		html_url: string;
-	};
-	comments: number;
-	assignees: any[];
-}
+import type { GiteaLabel, GiteaIssue } from '$lib/types';
 
 // Cache structure with TTL
 interface IssuesCache {
 	timestamp: number;
-	data: SimplifiedIssue[];
+	data: GiteaIssue[];
 	totalCount: number;
 }
 
@@ -49,7 +28,23 @@ async function syncIssuesFromGitea(): Promise<IssuesCache> {
 		axios.get(`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data`, { headers })
 	]);
 
-	const simplifiedIssues = issuesResponse.data.map((issue: any) => ({
+	interface GiteaIssue {
+  id: number;
+  number: number;
+  title: string;
+  created_at: string;
+  html_url: string;
+  labels: GiteaLabel[];
+  user: {
+    login: string;
+    avatar_url: string;
+    html_url: string;
+  };
+  comments: number;
+  assignees: any[]; // This could be further typed if needed
+}
+
+const giteaIssues = issuesResponse.data.map((issue: GiteaIssue) => ({
 		id: issue.id,
 		number: issue.number,
 		title: issue.title,
@@ -67,14 +62,14 @@ async function syncIssuesFromGitea(): Promise<IssuesCache> {
 
 	return {
 		timestamp: Date.now(),
-		data: simplifiedIssues,
+		data: giteaIssues,
 		totalCount: repoResponse.data.open_issues_count
 	};
 }
 
 export async function getIssues(
 	labelNames?: string[]
-): Promise<{ issues: SimplifiedIssue[]; totalCount: number }> {
+): Promise<{ issues: GiteaIssue[]; totalCount: number }> {
 	// Refresh cache if expired or doesn't exist
 	if (!issuesCache || Date.now() - issuesCache.timestamp > CACHE_DURATION) {
 		try {
