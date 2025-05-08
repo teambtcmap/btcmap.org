@@ -282,7 +282,9 @@ export const changeDefaultIcons = (
 
 	leafletBar?.append(fullscreenButton);
 
-	DomEvent.disableClickPropagation(fullscreenButton);
+	if (DomEvent) {
+		DomEvent.disableClickPropagation(fullscreenButton);
+	}
 };
 
 export const geolocate = (L: Leaflet, map: Map) => {
@@ -842,7 +844,7 @@ export const generateMarker = (
 											</svg>
 											Show Tags
 										</button>
-													
+
 										<button
 										id='tagging-issues'
 										class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
@@ -993,7 +995,7 @@ ${
 							   <span class='block text-body dark:text-white' id='boosted-time'></span>`
 							: ''
 					}
-					
+
 					${
 						extraButtons
 							? `<button title='Boost' id='boost-button' class='flex justify-center items-center space-x-2 text-primary dark:text-white hover:text-link dark:hover:text-link border border-mapBorder hover:border-link rounded-lg px-3 h-[32px] transition-colors'>
@@ -1006,7 +1008,7 @@ ${
 					}
 				</div>
 			</div>
-			
+
 			${
 				theme === 'dark'
 					? `<style>
