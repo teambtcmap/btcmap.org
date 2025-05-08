@@ -394,7 +394,9 @@
 				const lat = latCalc(elementOSM);
 				const long = longCalc(elementOSM);
 
-				let divIcon = generateIcon(leaflet, icon, boosted ? true : false);
+				const commentsCount = element.tags.comments || 0;
+
+				let divIcon = generateIcon(leaflet, icon, boosted ? true : false, commentsCount);
 
 				let marker = generateMarker(
 					lat,
@@ -479,8 +481,8 @@
 
 			//import packages
 			leaflet = await import('leaflet');
-			// @ts-expect-error
-			DomEvent = await import('leaflet/src/dom/DomEvent');
+			const domEventModule = await import('leaflet/src/dom/DomEvent');
+			DomEvent = domEventModule.default;
 			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
 			const maplibreGl = await import('maplibre-gl');
 			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');

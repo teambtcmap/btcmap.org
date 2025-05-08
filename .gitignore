@@ -19,5 +19,5 @@ vite.config.ts.timestamp-*
 # ignore unintended npm lock file
 package-lock.json
 
-#Replit
+# Replit
 /attached_assets

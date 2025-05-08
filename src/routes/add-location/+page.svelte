@@ -10,9 +10,8 @@
 		PrimaryButton
 	} from '$lib/comp';
 	import { attribution, changeDefaultIcons, geolocate, toggleMapButtons } from '$lib/map/setup';
-	import { areaError, areas, socials, theme } from '$lib/store';
+	import { socials, theme } from '$lib/store';
 	import { detectTheme, errToast } from '$lib/utils';
-	// @ts-expect-error
 	import rewind from '@mapbox/geojson-rewind';
 	import axios from 'axios';
 	import { geoContains } from 'd3-geo';
@@ -39,20 +38,6 @@
 			});
 	};
 
-	// alert for area errors
-	$: $areaError && errToast($areaError);
-
-	$: communities = $areas.filter(
-		(area) =>
-			area.tags.type === 'community' &&
-			area.tags.geo_json &&
-			area.tags.name &&
-			area.tags['icon:square'] &&
-			area.tags.continent &&
-			Object.keys(area.tags).find((key) => key.includes('contact'))
-	);
-	let filteredCommunities: string[];
-
 	let name: HTMLInputElement;
 	let address: HTMLInputElement;
 	let lat: number;
@@ -66,8 +51,6 @@
 	let website: HTMLInputElement;
 	let phone: HTMLInputElement;
 	let hours: HTMLInputElement;
-	let twitterMerchant: HTMLInputElement;
-	let twitterSubmitter: HTMLInputElement;
 	let notes: HTMLTextAreaElement;
 	let source: 'Business Owner' | 'Customer' | 'Other';
 	let sourceOther: string;
@@ -120,21 +103,10 @@
 					website: website.value,
 					phone: phone.value,
 					hours: hours.value,
-					twitterMerchant: twitterMerchant.value
-						? twitterMerchant.value.startsWith('@')
-							? twitterMerchant.value
-							: '@' + twitterMerchant.value
-						: '',
-					twitterSubmitter: twitterSubmitter.value
-						? twitterSubmitter.value.startsWith('@')
-							? twitterSubmitter.value
-							: '@' + twitterSubmitter.value
-						: '',
 					notes: notes.value,
 					source,
 					sourceOther: sourceOther ? sourceOther : '',
-					contact: contact.value,
-					communities: filteredCommunities
+					contact: contact.value
 				})
 				.then(function (response) {
 					submissionIssueNumber = response.data.number;
@@ -170,7 +142,6 @@
 
 			//import packages
 			const leaflet = await import('leaflet');
-			// @ts-expect-error
 			const DomEvent = await import('leaflet/src/dom/DomEvent');
 			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
 			const leafletLocateControl = await import('leaflet.locatecontrol');
@@ -210,19 +181,6 @@
 					marker = leaflet.marker([lat, long]).addTo(map);
 
 					selected = true;
-
-					// filter communities containing element
-					filteredCommunities = communities
-						.filter((community) => {
-							let rewoundPoly = rewind(community.tags.geo_json, true);
-
-							if (geoContains(rewoundPoly, [long, lat])) {
-								return true;
-							} else {
-								return false;
-							}
-						})
-						.map((community) => community.tags.name);
 				}
 			});
 
@@ -289,7 +247,7 @@
 
 			<p class="mt-10 text-center text-lg font-semibold text-primary dark:text-white md:text-xl">
 				If you're a business owner, please read our <a
-					href="https://github.com/teambtcmap/btcmap-general/wiki/Merchant-Best-Practices"
+					href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Merchant-Best-Practices"
 					target="_blank"
 					rel="noreferrer"
 					class="text-link transition-colors hover:text-hover">Merchant Best Practices</a
@@ -328,7 +286,7 @@
 										class="mx-auto mb-4 md:mx-0 md:mb-0 md:mr-4"
 									/>
 									<a
-										href="https://github.com/teambtcmap/btcmap-general/wiki/Tagging-Merchants"
+										href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants"
 										target="_blank"
 										rel="noreferrer"
 										class="mr-1 text-link transition-colors hover:text-hover">Tag</a
@@ -385,7 +343,7 @@
 						<p class="mb-10 w-full text-justify text-primary dark:text-white">
 							Fill out the following form and one of our volunteer community members will add your
 							location to the map. <InfoTooltip
-								tooltip="NOTE: Due to the backlog of requests and the additions being completed on a volunteer effort, it may take several weeks to have your location added. It is encouraged to add your location to OpenStreetMap directly following the Shadowy Supertagger method if you want to appear on the map right away."
+								tooltip="All additions being completed on a volunteer basi and so we can't garuantee when your location will be added."
 							/>
 						</p>
 
@@ -399,28 +357,11 @@
 									disabled={!captchaSecret || !mapLoaded}
 									type="text"
 									name="name"
+									id="name"
 									placeholder="Satoshi's Comics"
 									required
 									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:this={name}
-								/>
-							</div>
-
-							<div>
-								<label for="address" class="mb-2 block font-semibold"
-									>Address <InfoTooltip
-										tooltip="All locations are required to have a physical
-										address. You must be able to visit the location in person and pay with bitcoin. Service industries are not map-able."
-									/></label
-								>
-								<input
-									disabled={!captchaSecret || !mapLoaded}
-									type="text"
-									name="address"
-									placeholder="2100 Freedom Drive..."
-									required
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
-									bind:this={address}
 								/>
 							</div>
 
@@ -468,12 +409,30 @@
 							</div>
 
 							<div>
+								<label for="address" class="mb-2 block font-semibold"
+									>Address (Optional) <InfoTooltip
+										tooltip="All locations are required to have a physical
+										presence. Optionally enter an address here if that makes sense where the merchant is located. Services without locations are not map-able."
+									/></label
+								>
+								<input
+									disabled={!captchaSecret || !mapLoaded}
+									type="text"
+									name="address"
+									id="address"
+									placeholder="2100 Freedom Drive..."
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+									bind:this={address}
+								/>
+							</div>
+
+							<div>
 								<label for="category" class="mb-2 block font-semibold">Category</label>
 								<input
 									disabled={!captchaSecret || !mapLoaded}
-									required
 									type="text"
 									name="category"
+									id="category"
 									placeholder="Restaurant etc."
 									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:this={category}
@@ -601,37 +560,13 @@
 							</div>
 
 							<div>
-								<label for="twitter" class="mb-2 block font-semibold"
-									>Twitter handle <span class="font-normal">(optional)</span></label
-								>
-								<div class="flex space-x-2">
-									<input
-										disabled={!captchaSecret || !mapLoaded}
-										type="text"
-										name="twitter"
-										placeholder="Merchant"
-										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
-										bind:this={twitterMerchant}
-									/>
-									<input
-										disabled={!captchaSecret || !mapLoaded}
-										type="text"
-										name="twitter"
-										placeholder="Submitter"
-										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
-										bind:this={twitterSubmitter}
-									/>
-								</div>
-							</div>
-
-							<div>
 								<label for="notes" class="mb-2 block font-semibold"
 									>Notes <span class="font-normal">(optional)</span></label
 								>
 								<textarea
 									disabled={!captchaSecret || !mapLoaded}
 									name="notes"
-									placeholder="Any other relevant details?"
+									placeholder="Please add further details here like additional merchant details, contacts, socials, etc."
 									rows="3"
 									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 									bind:this={notes}
@@ -677,7 +612,7 @@
 							<div>
 								<label for="contact" class="mb-2 block font-semibold">Public Contact</label>
 								<p class="mb-2 text-justify text-sm">
-									If we have any follow-up questions we will contact you in order to add your
+									If we have any follow-up questions we will contact you in order to add this
 									location successfully. To speed up the process please check your spam folder in
 									case it ends up there.
 								</p>

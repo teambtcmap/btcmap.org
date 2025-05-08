@@ -85,8 +85,13 @@
 			});
 	};
 
-	const setLocation = (area: string) => {
-		location = area;
+	let selectedLat: number;
+	let selectedLon: number;
+
+	const setLocation = (area: { display_name: string; lat: string; lon: string }) => {
+		location = area.display_name;
+		selectedLat = parseFloat(area.lat);
+		selectedLon = parseFloat(area.lon);
 		selected = true;
 		successToast('Location selected!');
 	};
@@ -109,7 +114,9 @@
 					lightning: lightning ? lightning : '',
 					socialLinks: socialLinks ? socialLinks : '',
 					contact,
-					notes: notes ? notes : ''
+					notes: notes ? notes : '',
+					lat: selectedLat,
+					long: selectedLon
 				})
 				.then(function (response) {
 					submissionIssueNumber = response.data.number;
@@ -233,7 +240,7 @@
 								{#if !location}
 									{#each searchResults as area, index}
 										<button
-											on:click={() => setLocation(area.display_name)}
+											on:click={() => setLocation(area)}
 											class="{index !== searchResults.length - 1
 												? 'border-b'
 												: ''} block whitespace-nowrap p-3 hover:bg-link/50"

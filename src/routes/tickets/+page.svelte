@@ -16,51 +16,26 @@
 	const ticketTypes = ['Add', 'Verify', 'Community'];
 	let showType = 'Add';
 
-	let tickets: any[] = [];
-	let totalTickets: number;
+	export let data;
+	let tickets = data.tickets;
+	let totalTickets = data.totalTickets;
 
 	$: add =
-		tickets && tickets.length
-			? tickets.filter((issue) =>
-					issue.labels.find((label: any) => label.name === 'location-submission')
-				)
-			: [];
+		tickets?.filter((issue) =>
+			issue?.labels?.some((label: any) => label?.name === 'location-submission')
+		) || [];
 	$: verify =
-		tickets && tickets.length
-			? tickets.filter((issue) =>
-					issue.labels.find((label: any) => label.name === 'verify-submission')
-				)
-			: [];
+		tickets?.filter((issue) =>
+			issue?.labels?.some((label: any) => label?.name === 'location-verification')
+		) || [];
 	$: community =
-		tickets && tickets.length
-			? tickets.filter((issue) =>
-					issue.labels.find((label: any) => label.name === 'community-submission')
-				)
-			: [];
+		tickets?.filter((issue) =>
+			issue?.labels?.some((label: any) => label?.name === 'community-submission')
+		) || [];
 
-	const getIssues = () => {
-		axios
-			.get('/tickets/endpoint')
-			.then(function (response) {
-				// handle success
-				tickets = response.data.tickets;
-				totalTickets = response.data.totalTickets;
-			})
-			.catch(function (error) {
-				// handle error
-				errToast('Could not load open tickets, please try again or contact BTC Map.');
-				console.error(error);
-			});
-	};
-
-	let getIssuesInterval: ReturnType<typeof setInterval>;
-
-	onMount(() => {
-		getIssues();
-		getIssuesInterval = setInterval(getIssues, 600000);
-	});
-
-	onDestroy(() => clearInterval(getIssuesInterval));
+	if (data.error) {
+		errToast(data.error);
+	}
 </script>
 
 <svelte:head>
@@ -92,20 +67,15 @@
 			<h2
 				class="w-full text-center text-xl font-semibold text-primary dark:text-white lg:w-[675px] lg:text-left"
 			>
-				Tickets up for grabs from our noob forms! Anybody can help add or verify submissions on
-				OpenStreetMap and prepare community area polygons.
+				Tickets up for grabs from our noob forms! Anybody can help add or verify location
+				submissions and help vet communities.
 			</h2>
 
 			<p class="text-center text-xl text-primary dark:text-white lg:text-left">
 				More information on how to get involved can be found in our <a
-					href="https://wiki.btcmap.org/general/tagging-instructions.html"
-					class="text-link transition-colors hover:text-hover">Tagging Instructions</a
-				>
-				and
-				<a
-					href="https://wiki.btcmap.org/general/geojson-areas.html"
-					class="text-link transition-colors hover:text-hover">Creating GeoJSON Areas</a
-				> Wiki pages.
+					href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers"
+					class="text-link transition-colors hover:text-hover">Tagging Merchant Instructions</a
+				>.
 			</p>
 
 			<section id="tickets">

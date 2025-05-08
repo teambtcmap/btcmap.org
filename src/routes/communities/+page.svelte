@@ -107,6 +107,8 @@
 	$: planBNetwork =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'plan-b-network');
+	$: satoshiSomosTodos =
+		communities && communities.filter((community) => community.tags.organization === 'sst');
 	$: satoshiSpritz =
 		communities &&
 		communities.filter((community) => community.tags.organization === 'satoshi-spritz');
@@ -235,6 +237,7 @@
 		'Jednadvacet',
 		'Mi Primer Bitcoin',
 		'Plan B Network',
+		'Satoshi Somos Todos',
 		'Satoshi Spritz',
 		'UAIBIT'
 	];
@@ -282,6 +285,7 @@
 		{ section: 'Jednadvacet', communities: jednadvacet },
 		{ section: 'Mi Primer Bitcoin', communities: miPrimerBitcoin },
 		{ section: 'Plan B Network', communities: planBNetwork },
+		{ section: 'Satoshi Somos Todos', communities: satoshiSomosTodos },
 		{ section: 'Satoshi Spritz', communities: satoshiSpritz },
 		{ section: 'UAIBIT', communities: uaibit }
 	];

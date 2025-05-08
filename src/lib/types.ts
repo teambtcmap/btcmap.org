@@ -61,7 +61,7 @@ export type AreaTags = {
 	['box:west']?: string;
 };
 
-export type AreaType = 'community' | 'country';
+export type AreaType = 'community' | 'country' | 'trash';
 
 export type Continents =
 	| 'africa'
@@ -88,6 +88,8 @@ export type Element = {
 		['payment:coinos']?: string;
 		['payment:pouch']?: string;
 		issues?: Issue[];
+		areas?: Array<{ id: number; url_alias: string }>;
+		comments?: number;
 	};
 	created_at: string;
 	updated_at: string;
@@ -280,6 +282,35 @@ export interface ActivityEvent extends Event {
 
 // misc
 
+export interface GiteaLabel {
+	id: number;
+	name: string;
+	color: string;
+	description?: string;
+}
+
+export interface GiteaIssue {
+	id: number;
+	number: number;
+	title: string;
+	created_at: string;
+	html_url: string;
+	labels: GiteaLabel[];
+	user: {
+		login: string;
+		avatar_url: string;
+		html_url: string;
+	};
+	comments: number;
+	assignees: {
+		login: string;
+		avatar_url: string;
+		html_url: string;
+	}[];
+}
+
+export type Tickets = GiteaIssue[] | 'error';
+
 export type Theme = 'light' | 'dark';
 
 export type DonationType = 'On-chain' | 'Lightning';
@@ -287,7 +318,5 @@ export type DonationType = 'On-chain' | 'Lightning';
 export type DropdownLink = { url: string; external?: boolean; icon: string; title: string };
 
 export type ChartHistory = '7D' | '1M' | '3M' | '6M' | 'YTD' | '1Y' | 'ALL';
-
-export type Tickets = [] | 'error';
 
 export type AreaPageProps = { id: string; name: string; tickets: Tickets; issues: RpcIssue[] };
