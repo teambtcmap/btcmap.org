@@ -28,8 +28,6 @@ async function syncIssuesFromGitea(): Promise<IssuesCache> {
 		axios.get(`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data`, { headers })
 	]);
 
-	
-
 	const giteaIssues = issuesResponse.data.map((issue: GiteaIssue) => ({
 		id: issue.id,
 		number: issue.number,
