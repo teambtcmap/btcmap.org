@@ -258,7 +258,6 @@
 
 		// Reset state variables
 		selected = false;
-		noLocationSelected = false;
 		submitted = false;
 		submitting = false;
 
