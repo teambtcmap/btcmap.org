@@ -38,30 +38,8 @@
 			});
 	};
 
-	// Add this function to handle form reset
 	function resetForm() {
-		console.log('resetForm');
-
-		submitted = false;
-		submitting = false;
-		methods = [];
-		selected = false;
-		noLocationSelected = false;
-		noMethodSelected = false;
-
-		// Optional: clear form fields
-		name.value = '';
-		address.value = '';
-		category.value = '';
-		website.value = '';
-		phone.value = '';
-		hours.value = '';
-		notes.value = '';
-		contact.value = '';
-		captchaInput.value = '';
-
-		// Refresh captcha
-		fetchCaptcha();
+		window.history.back();
 	}
 
 	let name: HTMLInputElement;
