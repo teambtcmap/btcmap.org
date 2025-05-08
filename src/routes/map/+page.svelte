@@ -261,8 +261,6 @@
 				map.addLayer(categories[category]);
 			});
 
-		Object.entries(overlayMaps).forEach((layer) => controlLayers.addOverlay(layer[1], layer[0]));
-
 		map.removeLayer(categories['atm']);
 
 		mapLoading = 100;
@@ -278,8 +276,7 @@
 
 			//import packages
 			leaflet = await import('leaflet');
-			// @ts-expect-error
-			const DomEvent = await import('leaflet/src/dom/DomEvent');
+			const DomEvent = leaflet.DomEvent;
 			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
 			const maplibreGl = await import('maplibre-gl');
 			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
@@ -500,7 +497,10 @@
 			});
 
 			map.addControl(new customControls());
-			DomEvent.disableClickPropagation(document.querySelector('.leaflet-control-boost-layer'));
+			const boostLayer = document.querySelector('.leaflet-control-boost-layer');
+			if (boostLayer) {
+				DomEvent.disableClickPropagation(boostLayer as HTMLElement);
+			}
 
 			// add search bar to map
 			// @ts-expect-error
@@ -530,10 +530,16 @@
 			new leaflet.Control.Search().addTo(map);
 
 			// disable map events
-			DomEvent.disableScrollPropagation(customSearchBar);
-			DomEvent.disableClickPropagation(customSearchBar);
-			DomEvent.disableClickPropagation(document.querySelector('.leaflet-control-search-toggle'));
-			DomEvent.disableClickPropagation(clearSearchButton);
+			if (customSearchBar) {
+				DomEvent.disableClickPropagation(customSearchBar as HTMLElement);
+			}
+			const searchToggle = document.querySelector('.leaflet-control-search-toggle');
+			if (searchToggle) {
+				DomEvent.disableClickPropagation(searchToggle as HTMLElement);
+			}
+			if (clearSearchButton) {
+				DomEvent.disableClickPropagation(clearSearchButton as HTMLElement);
+			}
 
 			// add home and marker buttons to map
 			homeMarkerButtons(leaflet, map, DomEvent, true);

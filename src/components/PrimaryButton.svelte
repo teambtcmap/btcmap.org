@@ -14,8 +14,21 @@
 {#if link}
 	<a
 		href={link}
-		target={external ? '_blank' : null}
-		rel={external ? 'noreferrer' : null}
+		on:click={(e) => {
+			if (!external) {
+				e.preventDefault();
+				window.location.href = link;
+			}
+		}}
+		on:keydown={(e) => {
+			if (e.key === 'Enter' && !external) {
+				window.location.href = link;
+			}
+		}}
+		target={external ? '_blank' : undefined}
+		rel={external ? 'noreferrer' : undefined}
+		role="button"
+		tabindex="0"
 		class="block bg-link text-center font-semibold text-white hover:bg-hover {style} transition-colors"
 	>
 		{text}

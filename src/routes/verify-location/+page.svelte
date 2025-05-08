@@ -21,7 +21,7 @@
 		longCalc,
 		toggleMapButtons
 	} from '$lib/map/setup';
-	import { elementError, elements, theme } from '$lib/store';
+	import { areas, elementError, elements, theme } from '$lib/store';
 	import type { DomEventType, Element, Leaflet } from '$lib/types';
 	import { detectTheme, errToast } from '$lib/utils';
 	import axios from 'axios';
@@ -145,6 +145,7 @@
 						long = longC;
 						location = `https://btcmap.org/map?lat=${lat}&long=${long}`;
 						edit = `https://www.openstreetmap.org/edit?${elementOSM.type}=${elementOSM.id}`;
+						merchantId = `${elementOSM.type}:${elementOSM.id}`;
 						selected = true;
 					}
 				});
@@ -200,14 +201,13 @@
 	let verify: HTMLTextAreaElement;
 
 	let selected = false;
-	let noLocationSelected = false;
 	let submitted = false;
 	let submitting = false;
 	let submissionIssueNumber: number;
+	let merchantId: string;
 
 	const submitForm = () => {
 		if (!selected) {
-			noLocationSelected = true;
 			errToast('Please select a location...');
 		} else {
 			submitting = true;
@@ -223,8 +223,9 @@
 					current: current ? 'Yes' : 'No',
 					outdated: outdated ? outdated : '',
 					verified: verify.value,
-					lat: lat ? lat.toString() : '',
-					long: long ? long.toString() : ''
+					merchantId: merchantId,
+					lat: lat,
+					long: long
 				})
 				.then(function (response) {
 					submissionIssueNumber = response.data.number;
@@ -262,8 +263,8 @@
 
 			//import packages
 			leaflet = await import('leaflet');
-			// @ts-expect-error
-			DomEvent = await import('leaflet/src/dom/DomEvent');
+			const domEventModule = await import('leaflet/src/dom/DomEvent');
+			DomEvent = domEventModule.default;
 			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
 			const maplibreGl = await import('maplibre-gl');
 			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
@@ -345,7 +346,7 @@
 						class="text-link transition-colors hover:text-hover">OpenStreetMap</a
 					>? You can check out our
 					<a
-						href="https://wiki.btcmap.org/general/tagging-instructions.html"
+						href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers"
 						target="_blank"
 						rel="noreferrer"
 						class="text-link transition-colors hover:text-hover">Wiki</a
@@ -364,7 +365,7 @@
 							<label for="location-picker" class="mb-2 block font-semibold">Select Location</label>
 							{#if selected}
 								<span class="font-semibold text-green-500">Location selected!</span>
-							{:else if noLocationSelected}
+							{:else}
 								<span class="font-semibold text-error">Please select a location...</span>
 							{/if}
 							<div class="relative mb-2">

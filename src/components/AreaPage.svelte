@@ -1,8 +1,23 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 
-	export let type: AreaType;
+	export let type: 'country' | 'community';
 	export let data: AreaPageProps;
+
+	$: filteredAddTickets =
+		data.tickets !== 'error'
+			? data.tickets.filter((ticket) => ticket.labels.some((l) => l.name === 'add-location'))
+			: [];
+
+	$: filteredVerifyTickets =
+		data.tickets !== 'error'
+			? data.tickets.filter((ticket) => ticket.labels.some((l) => l.name === 'verify-location'))
+			: [];
+
+	$: filteredCommunityTickets =
+		data.tickets !== 'error'
+			? data.tickets.filter((ticket) => ticket.labels.some((l) => l.name === 'add-community'))
+			: [];
 
 	import { goto } from '$app/navigation';
 	import {
@@ -44,7 +59,6 @@
 		type User
 	} from '$lib/types.js';
 	import { errToast, formatElementID, validateContinents } from '$lib/utils';
-	// @ts-expect-error
 	import rewind from '@mapbox/geojson-rewind';
 	import { geoContains } from 'd3-geo';
 
@@ -395,6 +409,6 @@
 			{issues}
 			loading={!dataInitialized}
 		/>
-		<AreaTickets {name} tickets={data.tickets} />
+		<AreaTickets tickets={data.tickets} title="{name || 'BTC Map Area'} Open Tickets" />
 	{/if}
 </main>

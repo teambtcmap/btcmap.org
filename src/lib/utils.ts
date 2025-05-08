@@ -1,8 +1,11 @@
-import { theme } from '$lib/store';
+import { theme, areas } from '$lib/store';
+import { areasSync } from '$lib/sync/areas';
 import type { Continents, Element, Grade, IssueIcon } from '$lib/types';
 import { toast } from '@zerodevx/svelte-toast';
 import type { Chart } from 'chart.js';
 import { get } from 'svelte/store';
+import rewind from '@mapbox/geojson-rewind';
+import { geoContains } from 'd3-geo';
 
 export const errToast = (m: string) => {
 	toast.push(m, {
@@ -169,3 +172,25 @@ export const validateContinents = (continent: Continents) =>
 
 export const isBoosted = (element: Element) =>
 	element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now();
+
+export async function getAreaIdsByCoordinates(lat: number, long: number): Promise<string[]> {
+	console.debug('Checking areas with coordinates:', { lat, long });
+	await areasSync(); // Get latest areas
+	const allAreas = get(areas);
+	console.debug('Total areas to check:', allAreas.length);
+
+	return allAreas
+		.filter((area) => {
+			if (!area.tags.geo_json) {
+				console.warn('Area missing geo_json:', area.id);
+				return false;
+			}
+			const rewoundPoly = rewind(area.tags.geo_json, true);
+			const contains = geoContains(rewoundPoly, [long, lat]);
+			if (contains) {
+				console.debug('Found matching area:', area.id);
+			}
+			return contains;
+		})
+		.map((area) => area.id);
+}

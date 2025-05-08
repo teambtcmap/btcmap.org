@@ -57,7 +57,6 @@
 		PayMerchant
 	} from '$lib/types.js';
 	import { detectTheme, errToast, successToast } from '$lib/utils';
-	// @ts-expect-error
 	import rewind from '@mapbox/geojson-rewind';
 	import { geoContains } from 'd3-geo';
 	import type { Map } from 'leaflet';
@@ -147,12 +146,12 @@
 		filteredCommunities = communities.filter((community) => {
 			let rewoundPoly = rewind(community.tags.geo_json, true);
 
-			// @ts-expect-error
-			if (geoContains(rewoundPoly, [long, lat])) {
-				return true;
-			} else {
-				return false;
+			if (typeof lat === 'number' && typeof long === 'number') {
+				if (geoContains(rewoundPoly, [long, lat])) {
+					return true;
+				}
 			}
+			return false;
 		});
 
 		merchantEvents = $events.filter((event) => event.element_id === merchant?.id);
@@ -188,13 +187,11 @@
 				commentsCount
 			);
 
-			// @ts-expect-error
-			const marker = leaflet.marker([lat, long], { icon: divIcon });
-
-			map.addLayer(marker);
-
-			// @ts-expect-error
-			map.fitBounds([[lat, long]]);
+			if (typeof lat === 'number' && typeof long === 'number') {
+				const marker = leaflet.marker([lat, long], { icon: divIcon });
+				map.addLayer(marker);
+				map.fitBounds([[lat, long]]);
+			}
 
 			mapLoaded = true;
 		};
@@ -328,7 +325,6 @@
 		if (browser) {
 			//import packages
 			leaflet = await import('leaflet');
-			// @ts-expect-error
 			DomEvent = await import('leaflet/src/dom/DomEvent');
 			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
 			const maplibreGl = await import('maplibre-gl');

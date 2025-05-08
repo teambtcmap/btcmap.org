@@ -14,7 +14,6 @@
 	import { areaError, areas, reportError, reports } from '$lib/store';
 	import type { Leaflet, Theme } from '$lib/types';
 	import { detectTheme, errToast } from '$lib/utils';
-	// @ts-expect-error
 	import rewind from '@mapbox/geojson-rewind';
 	import { geoArea } from 'd3-geo';
 	import type { Map } from 'leaflet';
@@ -203,12 +202,8 @@
 
 			//import packages
 			leaflet = await import('leaflet');
-			// @ts-expect-error
 			const DomEvent = await import('leaflet/src/dom/DomEvent');
-			/* eslint-disable @typescript-eslint/no-unused-vars */
 			const leafletLocateControl = await import('leaflet.locatecontrol');
-			/* eslint-enable @typescript-eslint/no-unused-vars */
-
 			const maplibreGL = await import('maplibre-gl');
 			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
 

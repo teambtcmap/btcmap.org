@@ -1,14 +1,13 @@
-import {
-	GITHUB_API_KEY,
-	OPENCAGE_API_KEY,
-	SERVER_CRYPTO_KEY,
-	SERVER_INIT_VECTOR
-} from '$env/static/private';
+import { SERVER_CRYPTO_KEY, SERVER_INIT_VECTOR } from '$env/static/private';
 import { error } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import crypto from 'crypto';
 import type { RequestHandler } from './$types';
+import { getAreaIdsByCoordinates } from '$lib/utils';
+import { get } from 'svelte/store';
+import { areas } from '$lib/store';
+import { createIssueWithLabels } from '$lib/gitea';
 
 import type { CipherKey, BinaryLike } from 'crypto';
 
@@ -17,11 +16,6 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 const used: string[] = [];
 
 export const POST: RequestHandler = async ({ request }) => {
-	const headers = {
-		Authorization: `Bearer ${GITHUB_API_KEY}`,
-		Accept: 'application/vnd.github+json'
-	};
-
 	const {
 		captchaSecret,
 		captchaTest,
@@ -36,13 +30,10 @@ export const POST: RequestHandler = async ({ request }) => {
 		website,
 		phone,
 		hours,
-		twitterMerchant,
-		twitterSubmitter,
 		notes,
 		source,
 		sourceOther,
-		contact,
-		communities
+		contact
 	} = await request.json();
 
 	// if honey field has value return
@@ -72,67 +63,41 @@ export const POST: RequestHandler = async ({ request }) => {
 		used.push(captchaSecret);
 	}
 
-	const country = await axios
-		.get(
-			`https://api.opencagedata.com/geocode/v1/json?q=${lat.slice(0, 7)}%2C%20${long.slice(
-				0,
-				7
-			)}&key=${OPENCAGE_API_KEY}&language=en&limit=1&no_annotations=1&no_record=1`
-		)
-		.then(function (response) {
-			return response.data.results[0].components.country;
-		})
-		.catch(function (error) {
-			console.error(error);
-		});
+	const standardLabels = ['location-submission'];
 
-	const standardLabels = ['good first issue', 'help wanted', 'location-submission'];
+	// Create filtered list of matched areas for reuse
+	const associatedAreaIds = lat && long ? await getAreaIdsByCoordinates(lat, long) : [];
+	const areasData = get(areas);
+	const filteredAreas = associatedAreaIds
+		.map((id) => areasData.find((a) => a.id === id))
+		.filter(Boolean);
 
-	const github = await axios
-		.post(
-			'https://api.github.com/repos/teambtcmap/btcmap-data/issues',
-			{
-				title: name,
-				body: `Merchant name: ${name}
-Country: ${country ? country : ''}
-Communities: ${communities.length ? communities.join(', ') : ''}
+	const areaLabels = filteredAreas
+		.map((area) => area?.tags?.url_alias || area?.id)
+		.filter((label): label is string => Boolean(label));
+	const labels = [...standardLabels, ...areaLabels];
+
+	const body = `Merchant name: ${name}
 Address: ${address}
 Lat: ${lat}
 Long: ${long}
+Associated areas: ${filteredAreas.map((area) => `${area?.tags.name} (${area?.tags?.url_alias || area?.id})`).join(', ')}
 OSM: ${osm}
 Category: ${category}
 Payment methods: ${methods}
 Website: ${website}
 Phone: ${phone}
 Opening hours: ${hours}
-Twitter merchant: ${twitterMerchant}
-Twitter submitter: ${twitterSubmitter}
 Notes: ${notes}
 Data Source: ${source}
 Details (if applicable): ${sourceOther}
 Contact: ${contact}
-Status: Todo
 Created at: ${new Date(Date.now()).toISOString()}
 
-If you are a new contributor please read our Tagging Instructions [here](https://wiki.btcmap.org/general/tagging-instructions.html).`,
-				labels:
-					country && communities.length
-						? [...standardLabels, country, ...communities]
-						: country
-							? [...standardLabels, country]
-							: communities.length
-								? [...standardLabels, ...communities]
-								: [...standardLabels]
-			},
-			{ headers }
-		)
-		.then(function (response) {
-			return response.data;
-		})
-		.catch(function (error) {
-			console.error(error);
-			throw new Error(error);
-		});
+If you are a new contributor please read our Tagging Instructions [here](https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants).`;
 
-	return new Response(JSON.stringify(github));
+	const response = await createIssueWithLabels(name, body, labels);
+	const gitea = response.data;
+
+	return new Response(JSON.stringify(gitea));
 };
