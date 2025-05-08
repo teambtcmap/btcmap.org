@@ -244,31 +244,9 @@
 		}
 	};
 
-	const formReset = () => {
-		// Reset form fields
-		name = '';
-		lat = 0;
-		long = 0;
-		location = '';
-		edit = '';
-		outdated = '';
-		if (verify) verify.value = '';
-		if (captchaInput) captchaInput.value = '';
-		if (honeyInput) honeyInput.value = '';
-
-		// Reset state variables
-		selected = false;
-		submitted = false;
-		submitting = false;
-
-		// Fetch a new captcha
-		fetchCaptcha();
-
-		// If using map, reset the view
-		if (map && showMap) {
-			map.setView([0, 0], 2);
-		}
-	};
+	function resetForm() {
+		window.history.back();
+	}
 
 	// location picker map if not accessing page from webapp
 	let mapElement: HTMLDivElement;
