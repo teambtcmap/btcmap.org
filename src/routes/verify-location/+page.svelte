@@ -496,7 +496,7 @@
 				text="Thanks for taking the time to fill out this report. We’ll review your information and
 update it ASAP."
 				issue={submissionIssueNumber}
-				click={formReset}
+				click={resetForm}
 			/>
 		{/if}
 
