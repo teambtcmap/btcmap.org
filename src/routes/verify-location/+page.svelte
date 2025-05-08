@@ -244,6 +244,33 @@
 		}
 	};
 
+	const formReset = () => {
+		// Reset form fields
+		name = '';
+		lat = undefined;
+		long = undefined;
+		location = '';
+		edit = '';
+		outdated = '';
+		if (verify) verify.value = '';
+		if (captchaInput) captchaInput.value = '';
+		if (honeyInput) honeyInput.value = '';
+
+		// Reset state variables
+		selected = false;
+		noLocationSelected = false;
+		submitted = false;
+		submitting = false;
+
+		// Fetch a new captcha
+		fetchCaptcha();
+
+		// If using map, reset the view
+		if (map && showMap) {
+			map.setView([0, 0], 2);
+		}
+	};
+
 	// location picker map if not accessing page from webapp
 	let mapElement: HTMLDivElement;
 	let map: Map;
@@ -492,7 +519,7 @@
 				text="Thanks for taking the time to fill out this report. We’ll review your information and
 update it ASAP."
 				issue={submissionIssueNumber}
-				link="/verify-location"
+				reset={formReset}
 			/>
 		{/if}
 

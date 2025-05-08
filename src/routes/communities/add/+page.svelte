@@ -135,6 +135,29 @@
 		}
 	};
 
+	const formReset = () => {
+		// Reset form fields
+		location = undefined;
+		name = '';
+		icon = '';
+		lightning = '';
+		socialLinks = '';
+		contact = '';
+		notes = '';
+
+		// Reset state variables
+		selected = false;
+		noLocationSelected = false;
+		submitted = false;
+		submitting = false;
+		searchQuery = '';
+		searchResults = [];
+		searchLoading = false;
+
+		// Fetch a new captcha
+		fetchCaptcha();
+	};
+
 	onMount(async () => {
 		if (browser) {
 			// fetch and add captcha
@@ -418,8 +441,8 @@
 				text="Thanks for your initiative to create a bitcoin community. We’ll review your information
 	and reach out if we need any more details."
 				issue={submissionIssueNumber}
-				link="/communities/add"
 				buttonWidth="w-60"
+				reset={formReset}
 			/>
 		{/if}
 

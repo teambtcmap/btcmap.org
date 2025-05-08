@@ -38,6 +38,32 @@
 			});
 	};
 
+	// Add this function to handle form reset
+	function resetForm() {
+		console.log('resetForm');
+
+		submitted = false;
+		submitting = false;
+		methods = [];
+		selected = false;
+		noLocationSelected = false;
+		noMethodSelected = false;
+
+		// Optional: clear form fields
+		name.value = '';
+		address.value = '';
+		category.value = '';
+		website.value = '';
+		phone.value = '';
+		hours.value = '';
+		notes.value = '';
+		contact.value = '';
+		captchaInput.value = '';
+
+		// Refresh captcha
+		fetchCaptcha();
+	}
+
 	let name: HTMLInputElement;
 	let address: HTMLInputElement;
 	let lat: number;
@@ -678,9 +704,9 @@
 		{:else}
 			<FormSuccess
 				type="Location"
-				text="We’ll review your information and add it ASAP."
+				text="We'll review your information and add it ASAP."
 				issue={submissionIssueNumber}
-				link="/add-location"
+				click={resetForm}
 			/>
 		{/if}
 
