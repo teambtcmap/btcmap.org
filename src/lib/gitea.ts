@@ -28,21 +28,7 @@ async function syncIssuesFromGitea(): Promise<IssuesCache> {
 		axios.get(`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data`, { headers })
 	]);
 
-	interface GiteaIssue {
-		id: number;
-		number: number;
-		title: string;
-		created_at: string;
-		html_url: string;
-		labels: GiteaLabel[];
-		user: {
-			login: string;
-			avatar_url: string;
-			html_url: string;
-		};
-		comments: number;
-		assignees: { login: string; avatar_url: string; html_url: string }[];
-	}
+	
 
 	const giteaIssues = issuesResponse.data.map((issue: GiteaIssue) => ({
 		id: issue.id,
