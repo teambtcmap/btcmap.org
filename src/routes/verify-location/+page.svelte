@@ -247,8 +247,8 @@
 	const formReset = () => {
 		// Reset form fields
 		name = '';
-		lat = undefined;
-		long = undefined;
+		lat = 0;
+		long = 0;
 		location = '';
 		edit = '';
 		outdated = '';
@@ -519,7 +519,7 @@
 				text="Thanks for taking the time to fill out this report. We’ll review your information and
 update it ASAP."
 				issue={submissionIssueNumber}
-				reset={formReset}
+				click={formReset}
 			/>
 		{/if}
 

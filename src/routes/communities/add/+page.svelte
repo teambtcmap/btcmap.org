@@ -442,7 +442,7 @@
 	and reach out if we need any more details."
 				issue={submissionIssueNumber}
 				buttonWidth="w-60"
-				reset={formReset}
+				click={formReset}
 			/>
 		{/if}
 
