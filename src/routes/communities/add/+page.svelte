@@ -88,7 +88,7 @@
 	let selectedLat: number;
 	let selectedLon: number;
 
-	const setLocation = (area: any) => {
+	const setLocation = (area: { display_name: string; lat: string; lon: string }) => {
 		location = area.display_name;
 		selectedLat = parseFloat(area.lat);
 		selectedLon = parseFloat(area.lon);
