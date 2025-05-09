@@ -21,7 +21,8 @@
 
 	let captcha: HTMLDivElement;
 	let captchaSecret: string;
-	let captchaInput: HTMLInputElement;
+	let captchaInput: HTMLInputElement; // Element reference
+	let captchaValue: string = ''; // New variable for the value
 	let honeyInput: HTMLInputElement;
 
 	const fetchCaptcha = () => {
@@ -106,7 +107,7 @@
 			axios
 				.post('/communities/add/endpoint', {
 					captchaSecret,
-					captchaTest: captchaInput,
+					captchaTest: captchaValue,
 					honey: honeyInput,
 					location,
 					name,
@@ -133,6 +134,30 @@
 					submitting = false;
 				});
 		}
+	};
+
+	const formReset = () => {
+		// Reset state variables
+		selected = false;
+		noLocationSelected = false;
+		submitted = false;
+		submitting = false;
+		searchQuery = '';
+		searchResults = [];
+		searchLoading = false;
+
+		// Clear form fields
+		location = undefined;
+		name = '';
+		icon = '';
+		lightning = '';
+		socialLinks = '';
+		contact = '';
+		notes = '';
+		captchaValue = ''; // Reset the value directly
+
+		// Refresh captcha
+		fetchCaptcha();
 	};
 
 	onMount(async () => {
@@ -391,7 +416,8 @@
 								name="captcha"
 								placeholder="Please enter the captcha text."
 								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
-								bind:value={captchaInput}
+								bind:this={captchaInput}
+								bind:value={captchaValue}
 							/>
 						</div>
 					</div>
@@ -418,8 +444,8 @@
 				text="Thanks for your initiative to create a bitcoin community. We’ll review your information
 	and reach out if we need any more details."
 				issue={submissionIssueNumber}
-				link="/communities/add"
 				buttonWidth="w-60"
+				click={formReset}
 			/>
 		{/if}
 

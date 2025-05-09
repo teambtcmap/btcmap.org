@@ -244,6 +244,10 @@
 		}
 	};
 
+	function resetForm() {
+		window.history.back();
+	}
+
 	// location picker map if not accessing page from webapp
 	let mapElement: HTMLDivElement;
 	let map: Map;
@@ -492,7 +496,7 @@
 				text="Thanks for taking the time to fill out this report. We’ll review your information and
 update it ASAP."
 				issue={submissionIssueNumber}
-				link="/verify-location"
+				click={resetForm}
 			/>
 		{/if}
 

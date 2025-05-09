@@ -38,10 +38,123 @@
 			});
 	};
 
+	function resetForm() {
+		submitted = false;
+		submitting = false;
+		methods = [];
+		selected = false;
+		noLocationSelected = false;
+		noMethodSelected = false;
+		lat = undefined;
+		long = undefined;
+		source = undefined;
+		sourceOther = undefined;
+
+		// Wait for the DOM to update with the form back in place
+		tick().then(async () => {
+			// Clear form fields
+			if (name) name.value = '';
+			if (address) address.value = '';
+			if (category) category.value = '';
+			if (website) website.value = '';
+			if (phone) phone.value = '';
+			if (hours) hours.value = '';
+			if (notes) notes.value = '';
+			if (contact) contact.value = '';
+			if (captchaInput) captchaInput.value = '';
+			if (onchain) onchain.checked = false;
+			if (lightning) lightning.checked = false;
+			if (nfc) nfc.checked = false;
+
+			// Refresh captcha
+			fetchCaptcha();
+
+			// Reinitialize the map
+			await initializeMap();
+		});
+	}
+
+	/**
+	 * Initialize the map with all required settings and controls
+	 */
+	async function initializeMap() {
+		// Import required packages
+		const leaflet = await import('leaflet');
+		const DomEvent = await import('leaflet/src/dom/DomEvent');
+		const maplibreGl = await import('maplibre-gl');
+		const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
+
+		// Make sure to import the locate control plugin
+		try {
+			// Import the locate control plugin dynamically
+			await import('leaflet.locatecontrol');
+		} catch (e) {
+			console.error('Could not load leaflet.locatecontrol', e);
+		}
+
+		// Create map instance
+		if (map) map.remove(); // Clean up any existing map
+		map = leaflet.map(mapElement, { attributionControl: false, maxZoom: 19 }).setView([0, 0], 2);
+
+		// Create map styles
+		openFreeMapLiberty = window.L.maplibreGL({
+			style: 'https://tiles.openfreemap.org/styles/liberty'
+		});
+
+		openFreeMapDark = window.L.maplibreGL({
+			style: 'https://static.btcmap.org/map-styles/dark.json'
+		});
+
+		// Apply appropriate theme
+		const currentTheme = $theme || detectTheme();
+
+		if (currentTheme === 'dark') {
+			openFreeMapDark.addTo(map);
+		} else {
+			openFreeMapLiberty.addTo(map);
+		}
+
+		// Add marker on click
+		let marker: Marker;
+		map.on('click', (e) => {
+			if (captchaSecret) {
+				lat = e.latlng.lat;
+				long = e.latlng.lng;
+
+				if (marker) {
+					map.removeLayer(marker);
+				}
+
+				marker = leaflet.marker([lat, long]).addTo(map);
+				selected = true;
+			}
+		});
+
+		// Add map controls and settings - with safety check
+		try {
+			if (typeof leaflet.control.locate === 'function') {
+				geolocate(leaflet, map);
+			} else {
+				console.warn('Leaflet locate control not available');
+			}
+		} catch (e) {
+			console.error('Error adding locate control:', e);
+		}
+
+		changeDefaultIcons(false, leaflet, mapElement, DomEvent);
+		attribution(leaflet, map);
+
+		// Force a resize to ensure proper rendering
+		map.invalidateSize();
+
+		mapLoaded = true;
+		return leaflet; // Return leaflet for any additional setup
+	}
+
 	let name: HTMLInputElement;
 	let address: HTMLInputElement;
-	let lat: number;
-	let long: number;
+	let lat: number | undefined = undefined;
+	let long: number | undefined = undefined;
 	let selected = false;
 	let category: HTMLInputElement;
 	let methods: ('onchain' | 'lightning' | 'nfc')[] = [];
@@ -52,8 +165,8 @@
 	let phone: HTMLInputElement;
 	let hours: HTMLInputElement;
 	let notes: HTMLTextAreaElement;
-	let source: 'Business Owner' | 'Customer' | 'Other';
-	let sourceOther: string;
+	let source: 'Business Owner' | 'Customer' | 'Other' | undefined = undefined;
+	let sourceOther: string | undefined = undefined;
 	let sourceOtherElement: HTMLTextAreaElement;
 	let contact: HTMLInputElement;
 	let noLocationSelected = false;
@@ -135,68 +248,11 @@
 
 	onMount(async () => {
 		if (browser) {
-			const theme = detectTheme();
-
 			// fetch and add captcha
 			fetchCaptcha();
 
-			//import packages
-			const leaflet = await import('leaflet');
-			const DomEvent = await import('leaflet/src/dom/DomEvent');
-			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
-			const leafletLocateControl = await import('leaflet.locatecontrol');
-			const maplibreGl = await import('maplibre-gl');
-			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
-			/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
-
-			// add map and tiles
-			map = leaflet.map(mapElement, { attributionControl: false, maxZoom: 19 }).setView([0, 0], 2);
-
-			openFreeMapLiberty = window.L.maplibreGL({
-				style: 'https://tiles.openfreemap.org/styles/liberty'
-			});
-
-			openFreeMapDark = window.L.maplibreGL({
-				style: 'https://static.btcmap.org/map-styles/dark.json'
-			});
-
-			if (theme === 'dark') {
-				openFreeMapDark.addTo(map);
-			} else {
-				openFreeMapLiberty.addTo(map);
-			}
-
-			// add marker on click
-			let marker: Marker;
-
-			map.on('click', (e) => {
-				if (captchaSecret) {
-					lat = e.latlng.lat;
-					long = e.latlng.lng;
-
-					if (marker) {
-						map.removeLayer(marker);
-					}
-
-					marker = leaflet.marker([lat, long]).addTo(map);
-
-					selected = true;
-				}
-			});
-
-			// change broken marker image path in prod
-			leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
-
-			// add locate button to map
-			geolocate(leaflet, map);
-
-			// change default icons
-			changeDefaultIcons(false, leaflet, mapElement, DomEvent);
-
-			// add OSM attribution
-			attribution(leaflet, map);
-
-			mapLoaded = true;
+			// Initialize the map
+			await initializeMap();
 		}
 	});
 
@@ -678,9 +734,9 @@
 		{:else}
 			<FormSuccess
 				type="Location"
-				text="We’ll review your information and add it ASAP."
+				text="We'll review your information and add it ASAP."
 				issue={submissionIssueNumber}
-				link="/add-location"
+				click={resetForm}
 			/>
 		{/if}
 

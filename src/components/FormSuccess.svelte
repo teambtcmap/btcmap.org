@@ -2,7 +2,7 @@
 	export let type: string;
 	export let text: string;
 	export let issue: number;
-	export let link: string;
+	export let click = () => {};
 	export let buttonWidth = 'w-52';
 
 	import { HeaderPlaceholder, PrimaryButton } from '$lib/comp';
@@ -35,8 +35,8 @@
 
 		<PrimaryButton
 			text="Submit another {type.toLowerCase()}"
+			{click}
 			style="{buttonWidth} py-3 mx-auto mt-10 rounded-xl"
-			{link}
 		/>
 	</div>
 </div>
