@@ -12,7 +12,7 @@
 	import { theme } from '$lib/store';
 	import { detectTheme, errToast, successToast, warningToast } from '$lib/utils';
 	import axios from 'axios';
-	import { onMount, tick } from 'svelte';
+	import { onMount } from 'svelte';
 
 	const routes = [
 		{ name: 'Communities', url: '/communities' },
