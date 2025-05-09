@@ -12,7 +12,7 @@
 	import { theme } from '$lib/store';
 	import { detectTheme, errToast, successToast, warningToast } from '$lib/utils';
 	import axios from 'axios';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 
 	const routes = [
 		{ name: 'Communities', url: '/communities' },
@@ -21,7 +21,8 @@
 
 	let captcha: HTMLDivElement;
 	let captchaSecret: string;
-	let captchaInput: HTMLInputElement;
+	let captchaInput: HTMLInputElement; // Element reference
+	let captchaValue: string = ''; // New variable for the value
 	let honeyInput: HTMLInputElement;
 
 	const fetchCaptcha = () => {
@@ -106,7 +107,7 @@
 			axios
 				.post('/communities/add/endpoint', {
 					captchaSecret,
-					captchaTest: captchaInput,
+					captchaTest: captchaValue,
 					honey: honeyInput,
 					location,
 					name,
@@ -136,15 +137,6 @@
 	};
 
 	const formReset = () => {
-		// Reset form fields
-		location = undefined;
-		name = '';
-		icon = '';
-		lightning = '';
-		socialLinks = '';
-		contact = '';
-		notes = '';
-
 		// Reset state variables
 		selected = false;
 		noLocationSelected = false;
@@ -154,7 +146,17 @@
 		searchResults = [];
 		searchLoading = false;
 
-		// Fetch a new captcha
+		// Clear form fields
+		location = undefined;
+		name = '';
+		icon = '';
+		lightning = '';
+		socialLinks = '';
+		contact = '';
+		notes = '';
+		captchaValue = ''; // Reset the value directly
+
+		// Refresh captcha
 		fetchCaptcha();
 	};
 
@@ -414,7 +416,8 @@
 								name="captcha"
 								placeholder="Please enter the captcha text."
 								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
-								bind:value={captchaInput}
+								bind:this={captchaInput}
+								bind:value={captchaValue}
 							/>
 						</div>
 					</div>
