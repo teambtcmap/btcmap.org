@@ -5,7 +5,6 @@ import type {
 	FeatureGroup,
 	LatLng,
 	LayerGroup,
-	// @ts-ignore
 	MaplibreGL,
 	Marker,
 	TileLayer
@@ -95,6 +94,20 @@ export type Element = {
 	updated_at: string;
 	deleted_at: string;
 };
+
+export interface MerchantComment {
+	id: number;
+	text: string;
+	created_at: string;
+}
+
+export interface MerchantPageData {
+	id: string;
+	name?: string;
+	lat: number;
+	lon: number;
+	comments: MerchantComment[];
+}
 
 export type RpcIssue = {
 	element_osm_type: string;
