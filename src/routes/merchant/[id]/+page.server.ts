@@ -3,11 +3,11 @@ import type { Element, MerchantPageData, MerchantComment } from '$lib/types';
 import { error } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
-import type { PageLoad } from './$types';
+import type { PageServerLoad } from './$types';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
-export const load: PageLoad<MerchantPageData> = async ({ params }) => {
+export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 	const { id } = params;
 	try {
 		const response = await axios.get(`https://api.btcmap.org/v2/elements/${id}`);
