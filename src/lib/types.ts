@@ -5,6 +5,7 @@ import type {
 	FeatureGroup,
 	LatLng,
 	LayerGroup,
+	// @ts-ignore
 	MaplibreGL,
 	Marker,
 	TileLayer
