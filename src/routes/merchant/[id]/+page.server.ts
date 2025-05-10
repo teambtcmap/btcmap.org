@@ -1,13 +1,13 @@
 import { latCalc, longCalc } from '$lib/map/setup';
-import type { Element } from '$lib/types';
+import type { Element, MerchantPageData, MerchantComment } from '$lib/types';
 import { error } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
-import type { PageLoad } from './$types';
+import type { PageServerLoad } from './$types';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
-export const load: PageLoad = async ({ params }) => {
+export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 	const { id } = params;
 	try {
 		const response = await axios.get(`https://api.btcmap.org/v2/elements/${id}`);
@@ -17,13 +17,24 @@ export const load: PageLoad = async ({ params }) => {
 		const lon = longCalc(data.osm_json);
 
 		if (data && data.id && lat && lon && !data['deleted_at']) {
+			let comments: MerchantComment[] = [];
+			try {
+				const commentsResponse = await axios.get(`https://api.btcmap.org/v4/places/${id}/comments`);
+				comments = commentsResponse.data;
+			} catch (commentErr) {
+				console.error('Failed to fetch comments:', commentErr);
+				comments = [];
+			}
+
 			return {
 				id: data.id,
 				name: data.osm_json.tags?.name,
 				lat,
-				lon
+				lon,
+				comments
 			};
 		}
+		error(404, 'Merchant Not Found');
 	} catch (err) {
 		console.error(err);
 		error(404, 'Merchant Not Found');

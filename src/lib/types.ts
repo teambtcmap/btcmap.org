@@ -96,6 +96,20 @@ export type Element = {
 	deleted_at: string;
 };
 
+export interface MerchantComment {
+	id: number;
+	text: string;
+	created_at: string;
+}
+
+export interface MerchantPageData {
+	id: string;
+	name?: string;
+	lat: number;
+	lon: number;
+	comments: MerchantComment[];
+}
+
 export type RpcIssue = {
 	element_osm_type: string;
 	element_osm_id: number;
