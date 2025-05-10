@@ -13,9 +13,6 @@ export const load: PageLoad<MerchantPageData> = async ({ params }) => {
 		const response = await axios.get(`https://api.btcmap.org/v2/elements/${id}`);
 
 		const data: Element = response.data;
-
-		console.log('Merchant Data:', data);
-
 		const lat = latCalc(data.osm_json);
 		const lon = longCalc(data.osm_json);
 
