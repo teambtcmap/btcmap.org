@@ -734,6 +734,28 @@
 				</div>
 			</section>
 
+			<section id="comments">
+				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
+					<h3
+						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white lg:text-left"
+					>
+						{name || 'Merchant'} Comments
+					</h3>
+
+					<div class="hide-scroll relative max-h-[375px] space-y-2 overflow-y-scroll">
+						<div class="relative space-y-2">
+							{#if data.comments && data.comments.length}
+								{#each [...data.comments].reverse() as comment}
+									<MerchantComment text={comment.text} time={comment['created_at']} />
+								{/each}
+							{:else}
+								<p class="p-5 text-body dark:text-white">No comments yet.</p>
+							{/if}
+						</div>
+					</div>
+				</div>
+			</section>
+
 			<section id="activity">
 				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
 					<h3
@@ -789,28 +811,6 @@
 						{:else}
 							<p class="p-5 text-body dark:text-white">No activity to display.</p>
 						{/if}
-					</div>
-				</div>
-			</section>
-
-			<section id="comments">
-				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
-					<h3
-						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white lg:text-left"
-					>
-						{name || 'Merchant'} Comments
-					</h3>
-
-					<div class="hide-scroll relative max-h-[375px] space-y-2 overflow-y-scroll">
-						<div class="relative space-y-2">
-							{#if data.comments && data.comments.length}
-								{#each [...data.comments].reverse() as comment}
-									<MerchantComment text={comment.text} time={comment['created_at']} />
-								{/each}
-							{:else}
-								<p class="p-5 text-body dark:text-white">No comments yet.</p>
-							{/if}
-						</div>
 					</div>
 				</div>
 			</section>
