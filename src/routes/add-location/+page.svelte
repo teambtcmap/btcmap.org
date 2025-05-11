@@ -445,6 +445,7 @@
 									{/if}
 								</div>
 								<div class="flex space-x-2">
+									<!-- 	eslint-disable svelte/no-reactive-reassign -->
 									<input
 										required
 										disabled
@@ -465,6 +466,7 @@
 										placeholder="Longitude"
 										class="w-full rounded-2xl border-2 border-input p-3 focus:outline-link"
 									/>
+									<!-- 	eslint-enable svelte/no-reactive-reassign -->
 								</div>
 							</div>
 
