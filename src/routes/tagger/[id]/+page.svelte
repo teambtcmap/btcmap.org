@@ -63,6 +63,9 @@
 	let leaflet: Leaflet;
 	let DomEvent: DomEventType;
 
+	let filteredDesc: string | undefined;
+	let sanitizedMarkdown: string = '';
+
 	const initializeData = async () => {
 		if (dataInitialized) return;
 
@@ -293,8 +296,8 @@
 		eventElements = eventElements;
 
 		// add markdown support for profile description
-		const markdown = await marked.parse(filteredDesc);
-		profileDesc.innerHTML = DOMPurify.sanitize(markdown);
+		const markdown = await marked.parse(filteredDesc || '');
+		sanitizedMarkdown = DOMPurify.sanitize(markdown);
 
 		const setupChart = () => {
 			tagTypeChart = new Chart(tagTypeChartCanvas, {
@@ -439,8 +442,7 @@
 	let avatar: string | undefined;
 	let mappingSince: string | undefined;
 	let username = data.username;
-	let filteredDesc: string | undefined;
-	let profileDesc: HTMLHeadingElement;
+
 	let lightning: string | null;
 
 	let created: number | undefined;
@@ -585,11 +587,10 @@
 					{/if}
 				</div>
 
-				<!-- svelte-ignore a11y-missing-content -->
-				<h2
-					bind:this={profileDesc}
-					class="mx-auto w-full break-all text-xl text-body dark:text-white lg:w-[800px]"
-				/>
+				<h2 class="mx-auto w-full break-all text-xl text-body dark:text-white lg:w-[800px]">
+					<!-- eslint-disable-next-line svelte/no-at-html-tags - we even sanitize the captcha content above -->
+					{@html sanitizedMarkdown}
+				</h2>
 
 				{#if lightning}
 					<Tip destination={lightning} user={username} />

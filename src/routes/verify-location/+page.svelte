@@ -27,6 +27,7 @@
 	import axios from 'axios';
 	import type { Map, MaplibreGL } from 'leaflet';
 	import { onDestroy, onMount } from 'svelte';
+	import DOMPurify from 'dompurify';
 
 	let initialRenderComplete = false;
 	let elementsLoaded = false;
@@ -181,18 +182,25 @@
 	let captchaInput: HTMLInputElement;
 	let honeyInput: HTMLInputElement;
 
+	let captchaContent = '';
+	let isCaptchaLoading = true;
+
 	const fetchCaptcha = () => {
+		isCaptchaLoading = true;
 		axios
 			.get('/captcha')
 			.then(function (response) {
 				// handle success
 				captchaSecret = response.data.captchaSecret;
-				captcha.innerHTML = response.data.captcha;
+				captchaContent = DOMPurify.sanitize(response.data.captcha);
 			})
 			.catch(function (error) {
 				// handle error
 				errToast('Could not fetch captcha, please try again or contact BTC Map.');
 				console.error(error);
+			})
+			.finally(() => {
+				isCaptchaLoading = false;
 			});
 	};
 
@@ -460,7 +468,12 @@
 								bind:this={captcha}
 								class="flex items-center justify-center rounded-2xl border-2 border-input py-1"
 							>
-								<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
+								{#if isCaptchaLoading}
+									<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
+								{:else}
+									<!-- eslint-disable-next-line svelte/no-at-html-tags - we even sanitize the captcha content above -->
+									{@html captchaContent}
+								{/if}
 							</div>
 							<input
 								disabled={!captchaSecret || !elementsLoaded}

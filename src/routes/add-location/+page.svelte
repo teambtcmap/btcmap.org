@@ -17,24 +17,28 @@
 	import { geoContains } from 'd3-geo';
 	import type { Map, MaplibreGL, Marker } from 'leaflet';
 	import { onDestroy, onMount, tick } from 'svelte';
+	import DOMPurify from 'dompurify';
 
-	let captcha: HTMLDivElement;
+	let captchaContent = '';
+	let isCaptchaLoading = true;
 	let captchaSecret: string;
 	let captchaInput: HTMLInputElement;
 	let honeyInput: HTMLInputElement;
 
 	const fetchCaptcha = () => {
+		isCaptchaLoading = true;
 		axios
 			.get('/captcha')
 			.then(function (response) {
-				// handle success
 				captchaSecret = response.data.captchaSecret;
-				captcha.innerHTML = response.data.captcha;
+				captchaContent = DOMPurify.sanitize(response.data.captcha);
 			})
 			.catch(function (error) {
-				// handle error
 				errToast('Could not fetch captcha, please try again or contact BTC Map.');
 				console.error(error);
+			})
+			.finally(() => {
+				isCaptchaLoading = false;
 			});
 	};
 
@@ -666,24 +670,6 @@
 							</div>
 
 							<div>
-								<label for="contact" class="mb-2 block font-semibold">Public Contact</label>
-								<p class="mb-2 text-justify text-sm">
-									If we have any follow-up questions we will contact you in order to add this
-									location successfully. To speed up the process please check your spam folder in
-									case it ends up there.
-								</p>
-								<input
-									disabled={!captchaSecret || !mapLoaded}
-									required
-									type="email"
-									name="contact"
-									placeholder="hello@btcmap.org"
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
-									bind:this={contact}
-								/>
-							</div>
-
-							<div>
 								<div class="mb-2 flex items-center space-x-2">
 									<label for="captcha" class="font-semibold"
 										>Bot protection <span class="font-normal">(case-sensitive)</span></label
@@ -696,10 +682,14 @@
 								</div>
 								<div class="space-y-2">
 									<div
-										bind:this={captcha}
 										class="flex items-center justify-center rounded-2xl border-2 border-input py-1"
 									>
-										<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
+										{#if isCaptchaLoading}
+											<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
+										{:else}
+											<!-- eslint-disable-next-line svelte/no-at-html-tags - we even sanitize the captcha content above -->
+											{@html captchaContent}
+										{/if}
 									</div>
 									<input
 										disabled={!captchaSecret || !mapLoaded}
