@@ -20,9 +20,11 @@
 	const ticketTypes = ['Add', 'Verify', 'Community'];
 	let showType = 'Add';
 
-	const ticketError = tickets === 'error' ? true : false;
+	$: ticketError = tickets === 'error';
 
-	$: ticketError && errToast('Could not load open tickets, please try again or contact BTC Map.');
+	$: if (ticketError) {
+		errToast('Could not load open tickets, please try again or contact BTC Map.');
+	}
 
 	$: totalTickets = add.length + verify.length + community.length;
 </script>

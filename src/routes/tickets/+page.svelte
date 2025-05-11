@@ -17,8 +17,8 @@
 	let showType = 'Add';
 
 	export let data;
-	let tickets = data.tickets;
-	let totalTickets = data.totalTickets;
+
+	$: tickets = data.tickets;
 
 	$: add =
 		tickets?.filter((issue) =>
@@ -32,6 +32,8 @@
 		tickets?.filter((issue) =>
 			issue?.labels?.some((label: any) => label?.name === 'community-submission')
 		) || [];
+
+	let totalTickets = data.totalTickets;
 
 	if (data.error) {
 		errToast(data.error);
