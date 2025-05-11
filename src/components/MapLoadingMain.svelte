@@ -4,6 +4,7 @@
 	import { tick } from 'svelte';
 	import { fade } from 'svelte/transition';
 
+	/* eslint-disable svelte/infinite-reactive-loop */
 	$: progress === 40 &&
 		setTimeout(() => {
 			if (progress !== undefined && progress !== 100) {
@@ -17,6 +18,7 @@
 	};
 
 	$: progress === 100 && hideProgressBar();
+	/* eslint-enable svelte/infinite-reactive-loop */
 </script>
 
 {#if progress !== undefined}

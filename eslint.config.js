@@ -33,7 +33,6 @@ export default tseslint.config(
 		rules: {
 			'svelte/require-each-key': 'warn',
 			'svelte/no-dupe-style-properties': 'warn', // mainly because of tailwind
-			'svelte/infinite-reactive-loop': 'warn',
 			'svelte/no-reactive-reassign': 'warn',
 			'svelte/no-immutable-reactive-statements': 'warn',
 			'@typescript-eslint/no-unused-expressions': 'warn',

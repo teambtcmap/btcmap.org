@@ -424,6 +424,7 @@
 		};
 		setupMap();
 
+		// eslint-disable-next-line svelte/infinite-reactive-loop
 		dataInitialized = true;
 	};
 
@@ -435,6 +436,7 @@
 		$elements.length &&
 		initialRenderComplete &&
 		!dataInitialized &&
+		// eslint-disable-next-line svelte/infinite-reactive-loop
 		initializeData();
 
 	let userCreated: string | undefined;
