@@ -21,7 +21,7 @@
 		longCalc,
 		toggleMapButtons
 	} from '$lib/map/setup';
-	import { areas, elementError, elements, theme } from '$lib/store';
+	import { elementError, elements, theme } from '$lib/store';
 	import type { DomEventType, Element, Leaflet } from '$lib/types';
 	import { detectTheme, errToast } from '$lib/utils';
 	import axios from 'axios';
@@ -94,7 +94,7 @@
 
 			// create marker cluster group
 			/* eslint-disable no-undef */
-			// @ts-expect-error
+			// @ts-expect-error for some reason leafet is not working withput this
 			let markers = L.markerClusterGroup();
 			/* eslint-enable no-undef */
 
@@ -162,11 +162,11 @@
 		elementsLoaded = true;
 	};
 
-	$: $elements &&
-		$elements.length &&
-		initialRenderComplete &&
-		!elementsLoaded &&
-		initializeElements();
+	$: {
+		if ($elements && $elements.length && initialRenderComplete && !elementsLoaded) {
+			initializeElements();
+		}
+	}
 
 	const id = $page.url.searchParams.has('id') ? $page.url.searchParams.get('id') : '';
 	let merchant: Element | undefined;
