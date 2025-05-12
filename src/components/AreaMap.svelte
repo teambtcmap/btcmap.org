@@ -117,8 +117,10 @@
 
 			// create marker cluster groups
 
+			/* eslint-disable no-undef */
 			// @ts-expect-error
 			let markers = L.markerClusterGroup();
+			/* eslint-enable no-undef */
 			let upToDateLayer = leaflet.featureGroup.subGroup(markers);
 			let outdatedLayer = leaflet.featureGroup.subGroup(markers);
 			let legacyLayer = leaflet.featureGroup.subGroup(markers);

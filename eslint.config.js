@@ -31,18 +31,13 @@ export default tseslint.config(
 			}
 		},
 		rules: {
-			'svelte/valid-compile': 'warn',
 			'svelte/require-each-key': 'warn',
-			'svelte/no-dupe-style-properties': 'warn',
-			'svelte/no-dom-manipulating': 'warn',
-			'svelte/infinite-reactive-loop': 'warn',
-			'svelte/no-reactive-reassign': 'warn',
-			'svelte/no-immutable-reactive-statements': 'warn',
+			'svelte/no-dupe-style-properties': 'warn', // mainly because of tailwind (v4 will fix this)
 			'@typescript-eslint/no-unused-expressions': 'warn',
-			'@typescript-eslint/no-unused-vars': 'warn',
-			'@typescript-eslint/no-explicit-any': 'warn',
-			'no-undef': 'warn',
-			'no-unused-vars': 'warn'
+			'@typescript-eslint/no-unused-vars': [
+				'warn',
+				{ argsIgnorePattern: '^_', varsIgnorePattern: '^_' }
+			]
 		}
 	},
 	{

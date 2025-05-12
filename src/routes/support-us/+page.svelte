@@ -29,7 +29,7 @@
 			node,
 			network === 'Lightning' ? 'lightning:' + lnurlp : 'bitcoin:' + onchain,
 			{ width: window.innerWidth > 640 ? 256 : 200 },
-			function (error: any) {
+			function (error: Error | null | undefined) {
 				if (error) {
 					warningToast('Could not generate QR, please try again or contact BTC Map.');
 					console.error(error);

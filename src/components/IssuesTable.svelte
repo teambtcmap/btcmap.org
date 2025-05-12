@@ -45,8 +45,8 @@
 	let globalFilter = '';
 	let searchInput: HTMLInputElement;
 
-	const handleKeyUp = (e: any) => {
-		$table?.setGlobalFilter(String(e?.target?.value));
+	const handleKeyUp = (e: KeyboardEvent) => {
+		$table?.setGlobalFilter(String((e.target as HTMLInputElement)?.value));
 	};
 
 	const searchDebounce = debounce((e) => handleKeyUp(e));
@@ -159,6 +159,8 @@
 			}));
 		};
 
+		// https://tanstack.com/table/v8/docs/framework/svelte/examples/filtering
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
 			// Rank the item
 			const itemRank = rankItem(row.getValue(columnId), value);
@@ -275,7 +277,7 @@
 															fill="currentColor"
 															class="w-2"
 															><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path
-																d="M182.6 137.4c-12.5-12.5-32.8-12.5-45.3 0l-128 128c-9.2 9.2-11.9 22.9-6.9 34.9s16.6 19.8 29.6 19.8H288c12.9 0 24.6-7.8 29.6-19.8s2.2-25.7-6.9-34.9l-128-128z"
+																d="M182.6 137.4c-12.5-12.5-32.8-12.5-45.3 0l-128 128c-9.2 9.2-11.9-22.9-6.9-34.9s16.6-19.8 29.6-19.8H288c12.9 0 24.6-7.8 29.6-19.8s2.2-25.7-6.9-34.9l-128-128z"
 															/></svg
 														>
 													{:else if header.column.getIsSorted().toString() === 'desc'}
@@ -285,7 +287,7 @@
 															fill="currentColor"
 															class="w-2"
 															><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path
-																d="M137.4 374.6c12.5 12.5 32.8 12.5 45.3 0l128-128c9.2-9.2 11.9-22.9 6.9-34.9s-16.6-19.8-29.6-19.8L32 192c-12.9 0-24.6 7.8-29.6 19.8s-2.2 25.7 6.9 34.9l128 128z"
+																d="M137.4 374.6c12.5 12.5 32.8 12.5 45.3 0l128-128c9.2 9.2-11.9-22.9-6.9-34.9s-16.6-19.8-29.6-19.8L32 192c-12.9 0-24.6 7.8-29.6 19.8s-2.2 25.7 6.9 34.9l128 128z"
 															/></svg
 														>
 													{/if}

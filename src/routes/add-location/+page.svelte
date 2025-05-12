@@ -17,24 +17,28 @@
 	import { geoContains } from 'd3-geo';
 	import type { Map, MaplibreGL, Marker } from 'leaflet';
 	import { onDestroy, onMount, tick } from 'svelte';
+	import DOMPurify from 'dompurify';
 
-	let captcha: HTMLDivElement;
+	let captchaContent = '';
+	let isCaptchaLoading = true;
 	let captchaSecret: string;
 	let captchaInput: HTMLInputElement;
 	let honeyInput: HTMLInputElement;
 
 	const fetchCaptcha = () => {
+		isCaptchaLoading = true;
 		axios
 			.get('/captcha')
 			.then(function (response) {
-				// handle success
 				captchaSecret = response.data.captchaSecret;
-				captcha.innerHTML = response.data.captcha;
+				captchaContent = DOMPurify.sanitize(response.data.captcha);
 			})
 			.catch(function (error) {
-				// handle error
 				errToast('Could not fetch captcha, please try again or contact BTC Map.');
 				console.error(error);
+			})
+			.finally(() => {
+				isCaptchaLoading = false;
 			});
 	};
 
@@ -165,10 +169,10 @@
 	let phone: HTMLInputElement;
 	let hours: HTMLInputElement;
 	let notes: HTMLTextAreaElement;
+	let contact: HTMLInputElement;
 	let source: 'Business Owner' | 'Customer' | 'Other' | undefined = undefined;
 	let sourceOther: string | undefined = undefined;
 	let sourceOtherElement: HTMLTextAreaElement;
-	let contact: HTMLInputElement;
 	let noLocationSelected = false;
 	let noMethodSelected = false;
 	let submitted = false;
@@ -441,6 +445,7 @@
 									{/if}
 								</div>
 								<div class="flex space-x-2">
+									<!-- 	eslint-disable svelte/no-reactive-reassign -->
 									<input
 										required
 										disabled
@@ -461,6 +466,7 @@
 										placeholder="Longitude"
 										class="w-full rounded-2xl border-2 border-input p-3 focus:outline-link"
 									/>
+									<!-- 	eslint-enable svelte/no-reactive-reassign -->
 								</div>
 							</div>
 
@@ -696,10 +702,14 @@
 								</div>
 								<div class="space-y-2">
 									<div
-										bind:this={captcha}
 										class="flex items-center justify-center rounded-2xl border-2 border-input py-1"
 									>
-										<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
+										{#if isCaptchaLoading}
+											<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
+										{:else}
+											<!-- eslint-disable-next-line svelte/no-at-html-tags - we even sanitize the captcha content above -->
+											{@html captchaContent}
+										{/if}
 									</div>
 									<input
 										disabled={!captchaSecret || !mapLoaded}

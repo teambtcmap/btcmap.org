@@ -102,7 +102,7 @@
 					qr,
 					invoice,
 					{ width: window.innerWidth > 768 ? 275 : 200 },
-					function (error: any) {
+					function (error: Error | null | undefined) {
 						if (error) {
 							errToast('Could not generate QR, please try again or contact BTC Map.');
 							console.error(error);

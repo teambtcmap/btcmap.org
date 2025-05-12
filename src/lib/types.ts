@@ -1,15 +1,36 @@
-import type { GeoJSON } from 'geojson';
+import type { GeoJSON, Polygon, MultiPolygon } from 'geojson';
 import type leaflet from 'leaflet';
 import type {
 	DomEvent,
 	FeatureGroup,
 	LatLng,
 	LayerGroup,
-	// @ts-ignore
-	MaplibreGL,
 	Marker,
-	TileLayer
+	TileLayer,
+	// @ts-ignore
+	MaplibreGL
 } from 'leaflet';
+
+// nominatim.openstreetmap.org API
+// https://nominatim.org/release-docs/latest/api/Search
+
+export interface NominatimResponse {
+	place_id: number;
+	licence: string;
+	osm_type: string;
+	osm_id: number;
+	lat: string;
+	lon: string;
+	class: string;
+	type: string;
+	place_rank: number;
+	importance: number;
+	addresstype?: string;
+	name?: string;
+	display_name: string;
+	boundingbox: [string, string, string, string];
+	geojson?: Polygon | MultiPolygon; // Use GeoJSON types here
+}
 
 // BACKEND
 

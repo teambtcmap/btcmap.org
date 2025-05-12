@@ -10,33 +10,37 @@
 		PrimaryButton
 	} from '$lib/comp';
 	import { theme } from '$lib/store';
+	import type { NominatimResponse } from '$lib/types';
 	import { detectTheme, errToast, successToast, warningToast } from '$lib/utils';
 	import axios from 'axios';
 	import { onMount } from 'svelte';
+	import DOMPurify from 'dompurify';
 
 	const routes = [
 		{ name: 'Communities', url: '/communities' },
 		{ name: 'Add', url: '/communities/add' }
 	];
 
-	let captcha: HTMLDivElement;
+	let captchaContent = '';
+	let isCaptchaLoading = true;
 	let captchaSecret: string;
-	let captchaInput: HTMLInputElement; // Element reference
-	let captchaValue: string = ''; // New variable for the value
+	let captchaValue: string = '';
 	let honeyInput: HTMLInputElement;
 
 	const fetchCaptcha = () => {
+		isCaptchaLoading = true;
 		axios
 			.get('/captcha')
 			.then(function (response) {
-				// handle success
 				captchaSecret = response.data.captchaSecret;
-				captcha.innerHTML = response.data.captcha;
+				captchaContent = DOMPurify.sanitize(response.data.captcha);
 			})
 			.catch(function (error) {
-				// handle error
 				errToast('Could not fetch captcha, please try again or contact BTC Map.');
 				console.error(error);
+			})
+			.finally(() => {
+				isCaptchaLoading = false;
 			});
 	};
 
@@ -55,7 +59,7 @@
 	let submissionIssueNumber: number;
 
 	let searchQuery: string;
-	let searchResults: any[] = [];
+	let searchResults: NominatimResponse[] = [];
 	let searchLoading = false;
 
 	const searchLocation = () => {
@@ -65,13 +69,12 @@
 		selected = false;
 
 		axios
-			.get(
+			.get<NominatimResponse[]>(
 				`https://nominatim.openstreetmap.org/search?q=${searchQuery}&format=json&polygon_geojson=1&email=hello@btcmap.org`
 			)
 			.then(function (response) {
-				// handle success
 				searchResults = response.data.filter(
-					(area: any) => area.geojson.type === 'Polygon' || area.geojson.type === 'MultiPolygon'
+					(area) => area.geojson?.type === 'Polygon' || area.geojson?.type === 'MultiPolygon'
 				);
 				if (!searchResults.length) {
 					warningToast('No locations found, please adjust query.');
@@ -79,7 +82,6 @@
 				searchLoading = false;
 			})
 			.catch(function (error) {
-				// handle error
 				errToast('Could not search for locations, please try again or contact BTC Map.');
 				searchLoading = false;
 				console.error(error);
@@ -403,11 +405,13 @@
 							{/if}
 						</div>
 						<div class="space-y-2">
-							<div
-								bind:this={captcha}
-								class="flex items-center justify-center rounded-2xl border-2 border-input py-1"
-							>
-								<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
+							<div class="flex items-center justify-center rounded-2xl border-2 border-input py-1">
+								{#if isCaptchaLoading}
+									<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
+								{:else}
+									<!-- eslint-disable-next-line svelte/no-at-html-tags - we even sanitize the captcha content above -->
+									{@html captchaContent}
+								{/if}
 							</div>
 							<input
 								disabled={!captchaSecret}
@@ -416,7 +420,6 @@
 								name="captcha"
 								placeholder="Please enter the captcha text."
 								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
-								bind:this={captchaInput}
 								bind:value={captchaValue}
 							/>
 						</div>
