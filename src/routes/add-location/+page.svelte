@@ -64,6 +64,7 @@
 			if (phone) phone.value = '';
 			if (hours) hours.value = '';
 			if (notes) notes.value = '';
+			if (contact) contact.value = '';
 			if (captchaInput) captchaInput.value = '';
 			if (onchain) onchain.checked = false;
 			if (lightning) lightning.checked = false;
@@ -168,6 +169,7 @@
 	let phone: HTMLInputElement;
 	let hours: HTMLInputElement;
 	let notes: HTMLTextAreaElement;
+	let contact: HTMLInputElement;
 	let source: 'Business Owner' | 'Customer' | 'Other' | undefined = undefined;
 	let sourceOther: string | undefined = undefined;
 	let sourceOtherElement: HTMLTextAreaElement;
@@ -220,7 +222,8 @@
 					hours: hours.value,
 					notes: notes.value,
 					source,
-					sourceOther: sourceOther ? sourceOther : ''
+					sourceOther: sourceOther ? sourceOther : '',
+					contact: contact.value
 				})
 				.then(function (response) {
 					submissionIssueNumber = response.data.number;
@@ -666,6 +669,24 @@
 										bind:this={sourceOtherElement}
 									/>
 								{/if}
+							</div>
+
+							<div>
+								<label for="contact" class="mb-2 block font-semibold">Public Contact</label>
+								<p class="mb-2 text-justify text-sm">
+									If we have any follow-up questions we will contact you in order to add this
+									location successfully. To speed up the process please check your spam folder in
+									case it ends up there.
+								</p>
+								<input
+									disabled={!captchaSecret || !mapLoaded}
+									required
+									type="email"
+									name="contact"
+									placeholder="hello@btcmap.org"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+									bind:this={contact}
+								/>
 							</div>
 
 							<div>
