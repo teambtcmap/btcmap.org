@@ -5,16 +5,18 @@
 
 	export let title: string;
 	export let tickets: Tickets;
+	import type { GiteaLabel, GiteaIssue } from '$lib/types';
 
 	$: filteredTickets = tickets === 'error' ? [] : tickets;
-	$: add = filteredTickets.filter((issue: any) =>
-		issue.labels.some((label: any) => label.name === 'location-submission')
+
+	$: add = filteredTickets.filter((issue: GiteaIssue) =>
+		issue.labels.some((label: GiteaLabel) => label.name === 'location-submission')
 	);
-	$: verify = filteredTickets.filter((issue: any) =>
-		issue.labels.some((label: any) => label.name === 'location-verification')
+	$: verify = filteredTickets.filter((issue: GiteaIssue) =>
+		issue.labels.some((label: GiteaLabel) => label.name === 'location-verification')
 	);
-	$: community = filteredTickets.filter((issue: any) =>
-		issue.labels.some((label: any) => label.name === 'community-submission')
+	$: community = filteredTickets.filter((issue: GiteaIssue) =>
+		issue.labels.some((label: GiteaLabel) => label.name === 'community-submission')
 	);
 
 	const ticketTypes = ['Add', 'Verify', 'Community'];

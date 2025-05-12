@@ -4,7 +4,7 @@
 	export let text: string;
 	export let style: string;
 	export let link: undefined | string = undefined;
-	export let click: undefined | ((p?: any) => void) = undefined;
+	export let click: undefined | (() => void) = undefined;
 	export let type: undefined | 'button' | 'submit' = undefined;
 	export let external: undefined | boolean = undefined;
 	export let disabled: undefined | boolean = undefined;
