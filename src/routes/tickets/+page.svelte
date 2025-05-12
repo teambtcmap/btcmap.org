@@ -67,7 +67,7 @@
 			<h2
 				class="w-full text-center text-xl font-semibold text-primary dark:text-white lg:w-[675px] lg:text-left"
 			>
-				Tickets up for grabs from our noob forms! GiteaLabelbody can help add or verify location
+				Tickets up for grabs from our noob forms! Anyone can help add or verify location
 				submissions and help vet communities.
 			</h2>
 
