@@ -9,6 +9,7 @@
 	} from '$lib/comp';
 	import { theme } from '$lib/store';
 	import { detectTheme, errToast } from '$lib/utils';
+	import type { GiteaLabel } from '$lib/types';
 
 	const ticketTypes = ['Add', 'Verify', 'Community'];
 	let showType = 'Add';
@@ -19,15 +20,15 @@
 
 	$: add =
 		tickets?.filter((issue) =>
-			issue?.labels?.some((label: any) => label?.name === 'location-submission')
+			issue?.labels?.some((label: GiteaLabel) => label?.name === 'location-submission')
 		) || [];
 	$: verify =
 		tickets?.filter((issue) =>
-			issue?.labels?.some((label: any) => label?.name === 'location-verification')
+			issue?.labels?.some((label: GiteaLabel) => label?.name === 'location-verification')
 		) || [];
 	$: community =
 		tickets?.filter((issue) =>
-			issue?.labels?.some((label: any) => label?.name === 'community-submission')
+			issue?.labels?.some((label: GiteaLabel) => label?.name === 'community-submission')
 		) || [];
 
 	let totalTickets = data.totalTickets;
@@ -66,7 +67,7 @@
 			<h2
 				class="w-full text-center text-xl font-semibold text-primary dark:text-white lg:w-[675px] lg:text-left"
 			>
-				Tickets up for grabs from our noob forms! Anybody can help add or verify location
+				Tickets up for grabs from our noob forms! GiteaLabelbody can help add or verify location
 				submissions and help vet communities.
 			</h2>
 
