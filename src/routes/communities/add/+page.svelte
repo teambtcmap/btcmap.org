@@ -73,7 +73,6 @@
 				`https://nominatim.openstreetmap.org/search?q=${searchQuery}&format=json&polygon_geojson=1&email=hello@btcmap.org`
 			)
 			.then(function (response) {
-				// Filter results to include only Polygon or MultiPolygon types
 				searchResults = response.data.filter(
 					(area) => area.geojson?.type === 'Polygon' || area.geojson?.type === 'MultiPolygon'
 				);
