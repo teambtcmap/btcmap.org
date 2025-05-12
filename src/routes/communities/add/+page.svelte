@@ -10,6 +10,7 @@
 		PrimaryButton
 	} from '$lib/comp';
 	import { theme } from '$lib/store';
+	import type { NominatimResponse } from '$lib/types';
 	import { detectTheme, errToast, successToast, warningToast } from '$lib/utils';
 	import axios from 'axios';
 	import { onMount } from 'svelte';
@@ -58,7 +59,7 @@
 	let submissionIssueNumber: number;
 
 	let searchQuery: string;
-	let searchResults: any[] = [];
+	let searchResults: NominatimResponse[] = [];
 	let searchLoading = false;
 
 	const searchLocation = () => {
@@ -68,13 +69,13 @@
 		selected = false;
 
 		axios
-			.get(
+			.get<NominatimResponse[]>(
 				`https://nominatim.openstreetmap.org/search?q=${searchQuery}&format=json&polygon_geojson=1&email=hello@btcmap.org`
 			)
 			.then(function (response) {
-				// handle success
+				// Filter results to include only Polygon or MultiPolygon types
 				searchResults = response.data.filter(
-					(area: any) => area.geojson.type === 'Polygon' || area.geojson.type === 'MultiPolygon'
+					(area) => area.geojson?.type === 'Polygon' || area.geojson?.type === 'MultiPolygon'
 				);
 				if (!searchResults.length) {
 					warningToast('No locations found, please adjust query.');
@@ -82,7 +83,6 @@
 				searchLoading = false;
 			})
 			.catch(function (error) {
-				// handle error
 				errToast('Could not search for locations, please try again or contact BTC Map.');
 				searchLoading = false;
 				console.error(error);
