@@ -64,7 +64,6 @@
 			if (phone) phone.value = '';
 			if (hours) hours.value = '';
 			if (notes) notes.value = '';
-			if (contact) contact.value = '';
 			if (captchaInput) captchaInput.value = '';
 			if (onchain) onchain.checked = false;
 			if (lightning) lightning.checked = false;
@@ -172,7 +171,6 @@
 	let source: 'Business Owner' | 'Customer' | 'Other' | undefined = undefined;
 	let sourceOther: string | undefined = undefined;
 	let sourceOtherElement: HTMLTextAreaElement;
-	let contact: HTMLInputElement;
 	let noLocationSelected = false;
 	let noMethodSelected = false;
 	let submitted = false;
@@ -222,8 +220,7 @@
 					hours: hours.value,
 					notes: notes.value,
 					source,
-					sourceOther: sourceOther ? sourceOther : '',
-					contact: contact.value
+					sourceOther: sourceOther ? sourceOther : ''
 				})
 				.then(function (response) {
 					submissionIssueNumber = response.data.number;
