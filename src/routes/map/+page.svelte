@@ -30,6 +30,7 @@
 	let mapLoading = 0;
 
 	let leaflet: Leaflet;
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	let controlLayers: Control.Layers;
 
 	let mapElement: HTMLDivElement;
@@ -135,8 +136,10 @@
 		let verifiedDate = calcVerifiedDate();
 
 		// create marker cluster group and layers
+		/* eslint-disable no-undef */
 		// @ts-expect-error
 		let markers = L.markerClusterGroup({ maxClusterRadius: 80, disableClusteringAtZoom: 17 });
+		/* eslint-enable no-undef */
 		let upToDateLayer = leaflet.featureGroup.subGroup(markers);
 		let outdatedLayer = leaflet.featureGroup.subGroup(markers);
 		let legacyLayer = leaflet.featureGroup.subGroup(markers);

@@ -203,8 +203,12 @@
 			//import packages
 			leaflet = await import('leaflet');
 			const DomEvent = await import('leaflet/src/dom/DomEvent');
+
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const leafletLocateControl = await import('leaflet.locatecontrol');
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const maplibreGL = await import('maplibre-gl');
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
 
 			// add map and tiles
