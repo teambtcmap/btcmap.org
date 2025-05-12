@@ -1,6 +1,4 @@
 <script lang="ts">
-	import axios from 'axios';
-
 	import {
 		Footer,
 		Header,
@@ -11,7 +9,6 @@
 	} from '$lib/comp';
 	import { theme } from '$lib/store';
 	import { detectTheme, errToast } from '$lib/utils';
-	import { onDestroy, onMount } from 'svelte';
 
 	const ticketTypes = ['Add', 'Verify', 'Community'];
 	let showType = 'Add';
@@ -83,7 +80,7 @@
 			<section id="tickets">
 				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
 					<div class="p-5 text-center text-2xl font-semibold text-primary dark:text-white">
-						{#each ticketTypes as type}
+						{#each ticketTypes as type (type)}
 							<button
 								class="mx-auto block w-40 border border-link py-2 md:inline {type === 'Add'
 									? 'rounded-t md:rounded-l md:rounded-tr-none'
@@ -98,7 +95,7 @@
 					{#if tickets && tickets.length}
 						{#if showType === 'Add'}
 							{#if add.length}
-								{#each add as ticket}
+								{#each add as ticket (ticket.number)}
 									<OpenTicket
 										assignees={ticket.assignees}
 										comments={ticket.comments}
@@ -117,7 +114,7 @@
 							{/if}
 						{:else if showType === 'Verify'}
 							{#if verify.length}
-								{#each verify as ticket}
+								{#each verify as ticket (ticket.number)}
 									<OpenTicket
 										assignees={ticket.assignees}
 										comments={ticket.comments}
@@ -136,7 +133,7 @@
 							{/if}
 						{:else if showType === 'Community'}
 							{#if community.length}
-								{#each community as ticket}
+								{#each community as ticket (ticket.number)}
 									<OpenTicket
 										assignees={ticket.assignees}
 										comments={ticket.comments}
@@ -168,8 +165,7 @@
 							</p>
 						{/if}
 					{:else}
-						<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
-						{#each Array(10) as skeleton}
+						{#each Array(10) as _, index (index)}
 							<OpenTicketSkeleton />
 						{/each}
 					{/if}

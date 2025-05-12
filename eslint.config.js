@@ -34,10 +34,13 @@ export default tseslint.config(
 			'svelte/require-each-key': 'warn',
 			'svelte/no-dupe-style-properties': 'warn', // mainly because of tailwind (v4 will fix this)
 			'@typescript-eslint/no-unused-expressions': 'warn',
-			'@typescript-eslint/no-unused-vars': 'warn',
+			'@typescript-eslint/no-unused-vars': [
+				'warn',
+				{ argsIgnorePattern: '^_', varsIgnorePattern: '^_' }
+			],
 			'@typescript-eslint/no-explicit-any': 'warn',
 			'no-undef': 'warn',
-			'no-unused-vars': 'warn'
+			'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }]
 		}
 	},
 	{
