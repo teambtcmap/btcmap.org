@@ -130,7 +130,7 @@
 		>
 			<CloseButton
 				position="flex justify-end"
-				click={closeModal}
+				on:click={closeModal}
 				colors="text-primary dark:text-white dark:hover:text-white/80 hover:text-link"
 			/>
 
@@ -217,8 +217,8 @@
 							: 'Boost'}
 						style="w-full rounded-xl p-3 {!selectedBoost ? 'opacity-50 hover:bg-link' : ''}"
 						disabled={!selectedBoost || loading}
-						click={generateInvoice}
 						{loading}
+						on:click={generateInvoice}
 					/>
 				</div>
 			{:else if stage === 1}

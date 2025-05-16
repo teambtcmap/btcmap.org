@@ -84,7 +84,7 @@
 						<div class="space-y-5">
 							<CloseButton
 								position="absolute top-4 right-6"
-								click={() => (showQr = false)}
+								on:click={() => (showQr = false)}
 								colors="text-link hover:text-hover"
 							/>
 
