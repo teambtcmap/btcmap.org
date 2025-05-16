@@ -64,7 +64,7 @@
 				<h2 class="mb-5 text-3xl font-semibold">Brand Colors</h2>
 
 				<div class="flex flex-wrap justify-center gap-5">
-					{#each brandColors as color}
+					{#each brandColors as color (color)}
 						<div
 							class="flex h-24 w-24 items-center justify-center"
 							style="background-color: {color}; border: 1px solid black;"
@@ -83,19 +83,20 @@
 						href="/assets/btcmap-media-assets.zip"
 						download
 						class="mx-auto block w-36 rounded-lg bg-link py-3 font-semibold text-white transition-colors hover:bg-hover"
-						>Download All</a
 					>
+						Download All
+					</a>
 
-					{#each assetSections as section}
+					{#each assetSections as section (section.title)}
 						<div class="space-y-2 text-left">
 							<h3 class="text-xl font-semibold">{section.title}</h3>
 
 							<ul class="ml-5 list-disc space-y-1">
-								{#each section.data as asset}
+								{#each section.data as asset (asset.name)}
 									<li>
-										<a href={asset.link} class="text-link transition-colors hover:text-hover"
-											>{asset.name}</a
-										>
+										<a href={asset.link} class="text-link transition-colors hover:text-hover">
+											{asset.name}
+										</a>
 									</li>
 								{/each}
 							</ul>

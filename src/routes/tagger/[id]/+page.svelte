@@ -602,7 +602,7 @@
 			<section id="badges" class="mt-16">
 				<div class="flex flex-wrap items-center justify-center">
 					{#if dataInitialized}
-						{#each earnedBadges as badge}
+						{#each earnedBadges as badge (badge.title)}
 							<a href="/badges#{badge.icon}" class="transition-transform hover:scale-110">
 								<div class="mx-3 mb-6">
 									<img
@@ -615,8 +615,7 @@
 							</a>
 						{/each}
 					{:else}
-						<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
-						{#each Array(3) as badge}
+						{#each Array(3) as _, i (i)}
 							<div class="mx-3 mb-6">
 								<div class="mx-auto mb-1 h-24 w-24 animate-pulse rounded-full bg-link/50" />
 								<div class="mx-auto h-5 w-20 animate-pulse rounded bg-link/50" />
@@ -685,7 +684,7 @@
 						}}
 					>
 						{#if eventElements && eventElements.length && dataInitialized}
-							{#each eventElementsPaginated as event}
+							{#each eventElementsPaginated as event (event['created_at'])}
 								<ProfileActivity
 									location={event.location}
 									action={event.type}
@@ -716,8 +715,7 @@
 								>
 							{/if}
 						{:else}
-							<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
-							{#each Array(5) as skeleton}
+							{#each Array(5) as _, i (i)}
 								<ProfileActivitySkeleton />
 							{/each}
 						{/if}

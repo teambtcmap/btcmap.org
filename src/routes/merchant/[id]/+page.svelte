@@ -528,8 +528,7 @@
 							text="View OSM"
 						/>
 					{:else}
-						<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
-						{#each Array(5) as btn}
+						{#each Array(5) as _, i (i)}
 							<div class="h-20 w-24 animate-pulse rounded-lg bg-link/50" />
 						{/each}
 					{/if}
@@ -745,7 +744,7 @@
 					<div class="hide-scroll relative max-h-[375px] space-y-2 overflow-y-scroll">
 						<div class="relative space-y-2">
 							{#if data.comments && data.comments.length}
-								{#each [...data.comments].reverse() as comment}
+								{#each [...data.comments].reverse() as comment (comment.id)}
 									<MerchantComment text={comment.text} time={comment['created_at']} />
 								{/each}
 							{:else}
@@ -774,7 +773,7 @@
 						}}
 					>
 						{#if merchantEvents && merchantEvents.length}
-							{#each eventsPaginated as event}
+							{#each eventsPaginated as event (event['created_at'])}
 								<MerchantEvent
 									action={event.type}
 									user={findUser(event)}
@@ -804,8 +803,7 @@
 								>
 							{/if}
 						{:else if !dataInitialized}
-							<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
-							{#each Array(5) as skeleton}
+							{#each Array(5) as _, i (i)}
 								<TaggerSkeleton />
 							{/each}
 						{:else}
@@ -826,7 +824,7 @@
 						class="hide-scroll flex max-h-[375px] flex-wrap items-center justify-center overflow-scroll p-1"
 					>
 						{#if filteredCommunities && filteredCommunities.length}
-							{#each filteredCommunities as community}
+							{#each filteredCommunities as community (community.id)}
 								<div class="m-4 space-y-1 transition-transform hover:scale-110">
 									<a href="/community/{community.id}">
 										<img
