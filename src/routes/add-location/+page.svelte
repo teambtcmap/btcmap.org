@@ -746,7 +746,7 @@
 				type="Location"
 				text="We'll review your information and add it ASAP."
 				issue={submissionIssueNumber}
-				click={resetForm}
+				on:click={resetForm}
 			/>
 		{/if}
 
