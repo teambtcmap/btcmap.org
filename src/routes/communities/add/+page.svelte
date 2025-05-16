@@ -248,7 +248,7 @@
 							/>
 							<PrimaryButton
 								type="button"
-								click={searchLocation}
+								on:click={searchLocation}
 								loading={searchLoading}
 								disabled={!captchaSecret || searchLoading || !searchQuery}
 								text="Search 🔍"
@@ -448,7 +448,7 @@
 	and reach out if we need any more details."
 				issue={submissionIssueNumber}
 				buttonWidth="w-60"
-				click={formReset}
+				on:click={formReset}
 			/>
 		{/if}
 
