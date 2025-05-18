@@ -251,11 +251,12 @@
 								on:click={searchLocation}
 								loading={searchLoading}
 								disabled={!captchaSecret || searchLoading || !searchQuery}
-								text="Search 🔍"
 								style="{!searchQuery
 									? 'opacity-50 hover:bg-link'
 									: ''} w-full md:w-[210px] py-3 rounded-xl"
-							/>
+							>
+								Search 🔍
+							</PrimaryButton>
 						</div>
 
 						{#if searchResults && searchResults.length}
@@ -436,9 +437,10 @@
 					<PrimaryButton
 						loading={submitting}
 						disabled={submitting || !captchaSecret}
-						text="Submit Community"
 						style="w-full py-3 rounded-xl"
-					/>
+					>
+						Submit Community
+					</PrimaryButton>
 				</form>
 			</section>
 		{:else}

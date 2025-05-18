@@ -683,10 +683,11 @@
 							{/if}
 
 							<PrimaryButton
-								text="Verify Location"
 								link={`/verify-location?id=${merchant?.id}`}
 								style="rounded-xl p-3 w-40 mx-auto"
-							/>
+							>
+								Verify Location
+							</PrimaryButton>
 						</div>
 
 						<div class="space-y-4 text-primary dark:text-white">

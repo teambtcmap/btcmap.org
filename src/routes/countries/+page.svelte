@@ -118,11 +118,9 @@
 				Your country? Your map!
 			</h2>
 
-			<PrimaryButton
-				text="View leaderboard"
-				style="md:w-[200px] mx-auto py-3 rounded-xl"
-				link="/countries/leaderboard"
-			/>
+			<PrimaryButton style="md:w-[200px] mx-auto py-3 rounded-xl" link="/countries/leaderboard">
+				View leaderboard
+			</PrimaryButton>
 
 			<div>
 				<div class="mb-5 justify-between md:flex">

@@ -47,11 +47,9 @@
 				Insights into bitcoin adoption worldwide!
 			</h2>
 
-			<PrimaryButton
-				text="View directory"
-				style="md:w-[200px] mx-auto py-3 rounded-xl"
-				link="/countries"
-			/>
+			<PrimaryButton style="md:w-[200px] mx-auto py-3 rounded-xl" link="/countries">
+				View directory
+			</PrimaryButton>
 
 			<AreaLeaderboard type="country" />
 

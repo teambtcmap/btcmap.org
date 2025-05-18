@@ -212,14 +212,15 @@
 					</p>
 
 					<PrimaryButton
-						text={selectedBoost
-							? `Boost for ${selectedBoost.time} month${selectedBoost.time > 1 ? 's' : ''}`
-							: 'Boost'}
 						style="w-full rounded-xl p-3 {!selectedBoost ? 'opacity-50 hover:bg-link' : ''}"
 						disabled={!selectedBoost || loading}
 						{loading}
 						on:click={generateInvoice}
-					/>
+					>
+						{selectedBoost
+							? `Boost for ${selectedBoost.time} month${selectedBoost.time > 1 ? 's' : ''}`
+							: 'Boost'}
+					</PrimaryButton>
 				</div>
 			{:else if stage === 1}
 				<div class="space-y-4 text-center">

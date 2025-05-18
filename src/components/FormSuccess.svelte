@@ -32,10 +32,8 @@
 			>.
 		</p>
 
-		<PrimaryButton
-			text="Submit another {type.toLowerCase()}"
-			on:click
-			style="{buttonWidth} py-3 mx-auto mt-10 rounded-xl"
-		/>
+		<PrimaryButton on:click style="{buttonWidth} py-3 mx-auto mt-10 rounded-xl">
+			Submit another {type.toLowerCase()}
+		</PrimaryButton>
 	</div>
 </div>

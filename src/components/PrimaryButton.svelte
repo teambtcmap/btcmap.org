@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { LoadingSpinner } from '$lib/comp';
 
-	export let text: string;
 	export let style: string;
 	export let link: undefined | string = undefined;
 	export let type: undefined | 'button' | 'submit' = undefined;
@@ -17,7 +16,7 @@
 		rel={external ? 'noreferrer' : undefined}
 		class="block bg-link text-center font-semibold text-white hover:bg-hover {style} transition-colors"
 	>
-		{text}
+		<slot />
 	</a>
 {:else}
 	<button
@@ -29,7 +28,7 @@
 		{#if loading}
 			<LoadingSpinner />
 		{:else}
-			{text}
+			<slot />
 		{/if}
 	</button>
 {/if}

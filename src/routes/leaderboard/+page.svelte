@@ -83,11 +83,12 @@
 			{/if}
 
 			<PrimaryButton
-				text="Join Them"
 				style="w-[207px] mx-auto py-3 rounded-xl"
 				link="https://wiki.btcmap.org/general/tagging-instructions.html#shadowy-supertaggers-"
 				external
-			/>
+			>
+				Join Them
+			</PrimaryButton>
 
 			<section id="leaderboard" class="dark:lg:rounded dark:lg:bg-white/10 dark:lg:py-8">
 				<div class="mb-5 hidden grid-cols-6 text-center lg:grid">

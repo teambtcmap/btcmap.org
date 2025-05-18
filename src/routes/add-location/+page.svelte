@@ -734,9 +734,10 @@
 							<PrimaryButton
 								loading={submitting}
 								disabled={submitting || !captchaSecret || !mapLoaded}
-								text="Submit Location"
 								style="w-full py-3 rounded-xl"
-							/>
+							>
+								Submit Location
+							</PrimaryButton>
 						</form>
 					</div>
 				</section>

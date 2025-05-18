@@ -498,9 +498,10 @@
 					<PrimaryButton
 						loading={submitting}
 						disabled={submitting || !captchaSecret || !elementsLoaded}
-						text="Submit Report"
 						style="w-full py-3 rounded-xl"
-					/>
+					>
+						Submit Report
+					</PrimaryButton>
 				</form>
 			</section>
 		{:else}
