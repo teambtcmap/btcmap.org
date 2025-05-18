@@ -55,9 +55,9 @@
 <button
 	on:click={openCommentModal}
 	disabled={false}
-	class="{'bg-link hover:bg-hover'} mx-auto flex w-40 items-center justify-center rounded-xl p-3 text-center font-semibold text-white transition-colors"
+	class="{'bg-link hover:bg-hover'}  flex w-40 items-center justify-center rounded-xl p-3 text-center font-semibold text-white transition-colors"
 >
-	Add comment -> open {open}
+	Add comment
 </button>
 
 {#if browser}

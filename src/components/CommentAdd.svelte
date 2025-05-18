@@ -156,7 +156,7 @@
 
 				<PrimaryButton
 					text="Generate invoice"
-					style=""
+					style="w-full rounded-xl p-3"
 					disabled={loading}
 					click={generateInvoice}
 					{loading}

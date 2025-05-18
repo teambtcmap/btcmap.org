@@ -738,7 +738,7 @@
 			<section id="comments">
 				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
 					<h3
-						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white lg:text-left"
+						class="flex items-center justify-between border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white lg:text-left"
 					>
 						<span>{name || 'Merchant'} Comments</span>
 
