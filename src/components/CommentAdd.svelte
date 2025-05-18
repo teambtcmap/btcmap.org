@@ -13,24 +13,22 @@
 
 	let stage = 0;
 
-	let tooltip = false;
-	let selectedBoost: { fiat: number; sats: string; time: number; expires: Date } | undefined;
-	let boostComplete = false;
+	let commentValue: string = '';
+
+	// let boostComplete = false;
 
 	const closeModal = () => {
-		if (boostComplete) {
-			location.reload();
-		}
+		// if (boostComplete) {
+		// 	location.reload();
+		// }
 		// $boost = undefined;
 		// $exchangeRate = undefined;
 		open = false;
-		selectedBoost = undefined;
 		stage = 0;
 		invoice = '';
 		hash = '';
 		// clearInterval(checkInvoiceInterval);
 		jsConfetti.clearCanvas();
-		tooltip = false;
 		loading = false;
 		// $resetBoost = $resetBoost + 1;
 	};
@@ -83,7 +81,7 @@
 	};
 
 	const generateInvoice = () => {
-		console.log('generateInvoice');
+		console.log('generateInvoice', commentValue);
 
 		loading = true;
 		// axios
@@ -152,6 +150,7 @@
 						name="comment"
 						rows="3"
 						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+						bind:value={commentValue}
 					/>
 				</div>
 
