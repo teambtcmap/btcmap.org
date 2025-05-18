@@ -52,6 +52,14 @@ export const detectTheme = () => {
 	}
 };
 
+export const detectSort = () => {
+	if (localStorage.currentSort === 'totalLocations' || !('currentSort' in localStorage)) {
+		return 'totalLocations';
+	} else {
+		return 'locationsPerCap';
+	}
+};
+
 export const updateChartThemes = (
 	charts: Chart<'line' | 'bar', number[] | undefined, string>[]
 ) => {
