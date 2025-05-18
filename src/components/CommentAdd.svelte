@@ -133,8 +133,8 @@
 			/>
 
 			<!-- {#if stage === 0} -->
-			<div class="space-y-4">
-				<div>
+			<form class="space-y-4" on:submit|preventDefault={generateInvoice}>
+				<legend>
 					<p class="mb-2 text-xl font-bold text-primary dark:text-white">Add comment</p>
 
 					<p class="text-sm text-body dark:text-white">
@@ -142,7 +142,7 @@
 						measure
 					</p>
 					<p class="text-sm text-body dark:text-white">Current fee: 500 sats</p>
-				</div>
+				</legend>
 
 				<div>
 					<label for="comment" class="mb-2 block font-semibold">Comment</label>
@@ -158,10 +158,10 @@
 					text="Generate invoice"
 					style="w-full rounded-xl p-3"
 					disabled={loading}
-					click={generateInvoice}
+					type="submit"
 					{loading}
 				/>
-			</div>
+			</form>
 			<!-- {:else if stage === 1}
 				<div class="space-y-4 text-center">
 					<p class="text-xl font-bold text-primary dark:text-white">
