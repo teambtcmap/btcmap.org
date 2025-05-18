@@ -6,6 +6,7 @@
 	import {
 		Boost,
 		BoostButton,
+		CommentAddButton,
 		Footer,
 		Header,
 		Icon,
@@ -739,7 +740,9 @@
 					<h3
 						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white lg:text-left"
 					>
-						{name || 'Merchant'} Comments
+						<span>{name || 'Merchant'} Comments</span>
+
+						<CommentAddButton />
 					</h3>
 
 					<div class="hide-scroll relative max-h-[375px] space-y-2 overflow-y-scroll">
