@@ -29,12 +29,6 @@ export const apps = readable([
 		desc: 'Direct Download'
 	},
 	{
-		link: 'https://play.google.com/store/apps/details?id=org.btcmap.app',
-		type: 'Play',
-		icon: 'play',
-		desc: 'Surveillance Option'
-	},
-	{
 		link: 'https://apps.apple.com/app/btc-world-map/id6443604345',
 		type: 'iOS',
 		icon: 'ios',

@@ -46,6 +46,9 @@
 					<AppCard image={app.icon} text={app.type} desc={app.desc} link={app.link} />
 				{/each}
 			</section>
+			<p class="text-center font-normal dark:text-white">
+				Note: There is no Google Play option due to their excessive KYC requirements for deveopers.
+			</p>
 
 			<h3 class="text-2xl font-semibold text-primary dark:text-white md:text-left">Community</h3>
 			<section id="community-apps" class="grid gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
