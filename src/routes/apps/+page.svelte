@@ -47,7 +47,7 @@
 				{/each}
 			</section>
 			<p class="text-center font-normal dark:text-white">
-				Note: There is no Google Play option due to their excessive KYC requirements for deveopers.
+				Note: There is no Google Play option due to their excessive KYC requirements for developers.
 			</p>
 
 			<h3 class="text-2xl font-semibold text-primary dark:text-white md:text-left">Community</h3>
