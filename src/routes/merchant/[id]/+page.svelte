@@ -442,7 +442,7 @@
 						/>
 
 						<MerchantButton
-							click={() => {
+							on:click={() => {
 								navigator.clipboard.writeText(`https://btcmap.org/merchant/${merchant?.id}`);
 								successToast('Link copied to clipboard!');
 							}}
@@ -508,7 +508,7 @@
 
 						<span id="show-tags">
 							<MerchantButton
-								click={() => ($showTags = merchant?.osm_json.tags || {})}
+								on:click={() => ($showTags = merchant?.osm_json.tags || {})}
 								icon="tags"
 								text="Show Tags"
 							/>
@@ -516,7 +516,7 @@
 
 						<span id="tagging-issues">
 							<MerchantButton
-								click={() => ($taggingIssues = merchant?.tags?.issues || [])}
+								on:click={() => ($taggingIssues = merchant?.tags?.issues || [])}
 								icon="issues"
 								text="Tag Issues"
 							/>
@@ -683,10 +683,11 @@
 							{/if}
 
 							<PrimaryButton
-								text="Verify Location"
 								link={`/verify-location?id=${merchant?.id}`}
 								style="rounded-xl p-3 w-40 mx-auto"
-							/>
+							>
+								Verify Location
+							</PrimaryButton>
 						</div>
 
 						<div class="space-y-4 text-primary dark:text-white">

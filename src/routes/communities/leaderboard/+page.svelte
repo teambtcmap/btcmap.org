@@ -49,23 +49,23 @@
 			</h2>
 
 			<div>
-				<PrimaryButton
-					text="Directory"
-					style="md:w-[200px] mx-auto py-3 rounded-xl mb-5"
-					link="/communities"
-				/>
+				<PrimaryButton style="md:w-[200px] mx-auto py-3 rounded-xl mb-5" link="/communities">
+					Directory
+				</PrimaryButton>
 
 				<div class="items-center justify-center space-y-5 md:flex md:space-x-5 md:space-y-0">
 					<PrimaryButton
-						text="Add community"
 						style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
 						link="/communities/add"
-					/>
+					>
+						Add community
+					</PrimaryButton>
 					<PrimaryButton
-						text="View community map"
 						style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
 						link="/communities/map"
-					/>
+					>
+						View community map
+					</PrimaryButton>
 				</div>
 			</div>
 

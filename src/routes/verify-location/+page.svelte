@@ -498,9 +498,10 @@
 					<PrimaryButton
 						loading={submitting}
 						disabled={submitting || !captchaSecret || !elementsLoaded}
-						text="Submit Report"
 						style="w-full py-3 rounded-xl"
-					/>
+					>
+						Submit Report
+					</PrimaryButton>
 				</form>
 			</section>
 		{:else}
@@ -509,7 +510,7 @@
 				text="Thanks for taking the time to fill out this report. We’ll review your information and
 update it ASAP."
 				issue={submissionIssueNumber}
-				click={resetForm}
+				on:click={resetForm}
 			/>
 		{/if}
 

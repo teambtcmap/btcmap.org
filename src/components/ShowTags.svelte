@@ -15,7 +15,7 @@
 		>
 			<CloseButton
 				position="flex justify-end"
-				click={closeModal}
+				on:click={closeModal}
 				colors="text-primary dark:text-white dark:hover:text-white/80 hover:text-link"
 			/>
 			<div class="space-y-2">

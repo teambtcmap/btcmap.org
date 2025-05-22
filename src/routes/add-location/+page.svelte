@@ -734,9 +734,10 @@
 							<PrimaryButton
 								loading={submitting}
 								disabled={submitting || !captchaSecret || !mapLoaded}
-								text="Submit Location"
 								style="w-full py-3 rounded-xl"
-							/>
+							>
+								Submit Location
+							</PrimaryButton>
 						</form>
 					</div>
 				</section>
@@ -746,7 +747,7 @@
 				type="Location"
 				text="We'll review your information and add it ASAP."
 				issue={submissionIssueNumber}
-				click={resetForm}
+				on:click={resetForm}
 			/>
 		{/if}
 
