@@ -17,7 +17,6 @@ export const iconNames = [
   "email",
   "dots-horizontal",
   "compass",
-  "close-rounded",
   "clock",
   "boosted-icon-pin",
   "boost",

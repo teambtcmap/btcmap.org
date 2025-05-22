@@ -17,7 +17,7 @@
 	export let h: string;
 	export let style: undefined | string = undefined;
 	export let icon: string | IconNameApps | IconNamePopup | IconNameMobileNav | IconNameSocials;
-	export let type: 'apps' | 'material' | 'mobile-nav' | 'popup' | 'socials';
+	export let type: 'apps' | 'material' | 'mobile-nav' | 'popup' | 'socials' = 'material';
 
 	// this is AI code
 	// Type assertion to make TypeScript happy
@@ -30,12 +30,16 @@
 			? (() => {
 					// Handle exceptions for specific icons
 					const exceptions: Record<string, string> = {
+						// map icons
 						camping: 'material-symbols:camping-rounded',
 						gate: 'material-symbols:gate',
 						cooking: 'material-symbols:cooking',
 						dentistry: 'material-symbols:dentistry',
 						sauna: 'material-symbols:sauna',
-						info_outline: 'material-symbols:info-outline'
+						info_outline: 'material-symbols:info-outline',
+
+						// general app icons
+						close_round: 'ic:round-close'
 					};
 
 					// Check if this icon has an exception
