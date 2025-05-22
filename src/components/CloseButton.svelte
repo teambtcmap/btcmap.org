@@ -7,7 +7,7 @@
 </script>
 
 <div class={position}>
-	<button on:click>
+	<button on:click type="button" aria-label="Close">
 		<Icon w="25" h="25" style="{colors} transition-colors" icon="close_round" />
 	</button>
 </div>
