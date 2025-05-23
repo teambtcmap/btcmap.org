@@ -10,7 +10,7 @@
 <button
 	on:click={() => (open = true)}
 	disabled={open}
-	class="{'bg-link hover:bg-hover'}  flex w-40 items-center justify-center rounded-xl p-3 text-center font-semibold text-white transition-colors"
+	class="flex w-40 items-center justify-center rounded-xl bg-link p-3 text-center font-semibold text-white transition-colors hover:bg-hover"
 >
 	{#if open}
 		Commenting...
