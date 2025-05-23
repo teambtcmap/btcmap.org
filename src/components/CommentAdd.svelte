@@ -128,7 +128,7 @@
 		>
 			<CloseButton
 				position="flex justify-end"
-				click={closeModal}
+				on:click={closeModal}
 				colors="text-primary dark:text-white dark:hover:text-white/80 hover:text-link"
 			/>
 
@@ -154,13 +154,9 @@
 					/>
 				</div>
 
-				<PrimaryButton
-					text="Generate invoice"
-					style="w-full rounded-xl p-3"
-					disabled={loading}
-					type="submit"
-					{loading}
-				/>
+				<PrimaryButton style="w-full rounded-xl p-3" disabled={loading} type="submit" {loading}>
+					Comment
+				</PrimaryButton>
 			</form>
 			<!-- {:else if stage === 1}
 				<div class="space-y-4 text-center">

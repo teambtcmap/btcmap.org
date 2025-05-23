@@ -54,10 +54,14 @@
 
 <button
 	on:click={openCommentModal}
-	disabled={false}
+	disabled={open}
 	class="{'bg-link hover:bg-hover'}  flex w-40 items-center justify-center rounded-xl p-3 text-center font-semibold text-white transition-colors"
 >
-	Add comment
+	{#if open}
+		Commenting...
+	{:else}
+		Add comment
+	{/if}
 </button>
 
 {#if browser}
