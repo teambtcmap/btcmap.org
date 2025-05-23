@@ -12,6 +12,7 @@
 
 	export let open: boolean = false;
 	export let merchantName: MerchantPageData['name'] | undefined;
+	export let elementId: MerchantPageData['id'] | undefined;
 
 	const COMMENT_AMOUNT_IN_SATS = 500;
 
@@ -47,46 +48,25 @@
 	// @ts-expect-error
 	document.querySelector('canvas').style.zIndex = '2001';
 
-	const checkInvoice = () => {
-		console.log('checkInvoice');
-		// axios
-		// 	.get(`/boost/invoice/status?hash=${hash}`)
-		// 	.then(function (response) {
-		// 		if (response.data.paid === true && $boost && selectedBoost) {
-		// 			clearInterval(checkInvoiceInterval);
-
-		// 			if ($boostHash === hash) {
-		// 				return;
-		// 			}
-		// 			$boostHash = hash;
-
-		// 			axios
-		// 				.post('/boost/post', {
-		// 					element: $boost.id,
-		// 					time: selectedBoost.time,
-		// 					hash
-		// 				})
-		// 				.then(function (response) {
-		// 					stage = 2;
-		// 					jsConfetti.addConfetti();
-		// 					boostComplete = true;
-		// 					console.info(response);
-		// 				})
-		// 				.catch(function (error) {
-		// 					warningToast('Could not finalize boost, please contact BTC Map.');
-		// 					console.error(error);
-		// 				});
-		// 		}
-		// 	})
-		// 	.catch(function (error) {
-		// 		errToast('Could not check invoice status, please try again or contact BTC Map.');
-		// 		console.error(error);
-		// 	});
+	const postComment = () => {
+		axios
+			.post('/comment/post', {
+				element_id: elementId,
+				content: commentValue
+			})
+			.then(function (response) {
+				console.info('Comment posted successfully:', response.data);
+			})
+			.catch(function (error) {
+				warningToast('Could not post comment, please contact BTC Map.');
+				console.error(error);
+			});
 	};
 
 	const generateInvoice = () => {
 		console.log('generateInvoice', commentValue);
 		console.log('merchant', merchantName);
+		console.log('elementId', elementId);
 
 		loading = true;
 		axios
@@ -111,7 +91,7 @@
 					}
 				);
 
-				checkInvoiceInterval = setInterval(checkInvoice, 2500);
+				postComment();
 
 				loading = false;
 			})
@@ -161,7 +141,7 @@
 						Comment
 					</PrimaryButton>
 				</form>
-			{:else if stage === 1}
+			{:else}
 				<div class="space-y-4 text-center">
 					<p class="text-xl font-bold text-primary dark:text-white">
 						Scan or click to pay with lightning
@@ -190,43 +170,11 @@
 
 						<CopyButton value={invoice} />
 					</div>
-				</div>
-				<!-- {:else}
-				<div class="space-y-4 text-center">
-					<p
-						class="text-xl font-bold text-primary dark:text-white {$boost.name.match('([^ ]{14})')
-							? 'break-all'
-							: ''}"
-					>
-						Thank you for supporting {$boost.name ? $boost.name : 'this location'} & BTC Map!
-					</p>
 
-					<p class="text-body dark:text-white">
-						This location will be boosted until <br />
-						<strong
-							>{selectedBoost?.expires.toLocaleDateString(undefined, {
-								year: 'numeric',
-								month: 'long',
-								day: 'numeric'
-							})}</strong
-						>
-					</p>
-
-					<a
-						href="https://twitter.com/share?text=I just boosted {$boost.name
-							? encodeURIComponent($boost.name)
-							: 'this location'} on @btcmap. Check them out!&url=https://btcmap.org/merchant/{$boost.id}&hashtags=bitcoin"
-						target="_blank"
-						rel="noreferrer"
-						class="mx-auto flex w-[200px] items-center justify-center rounded-xl bg-twitter py-3 text-white"
-						>Share on Twitter <Icon w="24" h="24" style="ml-2" icon="twitter" type="socials" /></a
-					>
-
-					<p class="text-sm text-body dark:text-white">
-						Sharing your support may encourage <br /> others to show theirs 🥰
+					<p class="text-xl font-bold text-primary dark:text-white">
+						Once the invoice is paid and confirmed by our backend the comment will be posted
 					</p>
 				</div>
-				 -->
 			{/if}
 		</div>
 	</OutClick>

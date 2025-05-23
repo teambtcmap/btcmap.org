@@ -14,7 +14,7 @@ export const GET: RequestHandler = async ({ url }) => {
 		error(400, 'Missing required parameters: amount and name');
 	}
 
-	console.log(`BTCMAP_KEY: ${BTCMAP_KEY}`);
+	console.log(`BTCMAP_KEY: "${BTCMAP_KEY}"`);
 
 	const invoice = await axios
 		.post('https://api.btcmap.org/rpc', {
