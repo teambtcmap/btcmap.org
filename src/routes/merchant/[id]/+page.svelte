@@ -711,6 +711,24 @@
 
 							<BoostButton {merchant} {boosted} />
 						</div>
+
+						<div class="flex flex-col items-center space-y-4 text-primary dark:text-white">
+							<a href="#comments" class="underline transition-colors hover:text-link">
+								<h3 class="text-2xl font-semibold">
+									Comments {#if data.comments.length}({data.comments.length}){/if}
+								</h3>
+							</a>
+
+							<p class="mx-auto max-w-[300px] font-semibold">
+								{#if data.comments.length}
+									Let others now what you like about this merchant
+								{:else}
+									No comments yet. Be the first to leave a comment!
+								{/if}
+							</p>
+
+							<CommentAddButton />
+						</div>
 					</div>
 				{/if}
 			</section>
@@ -738,11 +756,9 @@
 			<section id="comments">
 				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
 					<h3
-						class="flex items-center justify-between border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white lg:text-left"
+						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white lg:text-left"
 					>
-						<span>{name || 'Merchant'} Comments</span>
-
-						<CommentAddButton />
+						{name || 'Merchant'} Comments
 					</h3>
 
 					<div class="hide-scroll relative max-h-[375px] space-y-2 overflow-y-scroll">
