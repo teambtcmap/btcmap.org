@@ -1,4 +1,4 @@
-import { LNBITS_API_KEY, LNBITS_URL } from '$env/static/private';
+import { BTCMAP_KEY } from '$env/static/private';
 import { error } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -10,24 +10,27 @@ export const GET: RequestHandler = async ({ url }) => {
 	const amount = url.searchParams.get('amount');
 	const name = url.searchParams.get('name');
 
-	const headers = {
-		'X-API-Key': `${LNBITS_API_KEY}`,
-		'Content-type': 'application/json'
-	};
+	if (!amount || !name) {
+		error(400, 'Missing required parameters: amount and name');
+	}
+
+	console.log(`BTCMAP_KEY: ${BTCMAP_KEY}`);
 
 	const invoice = await axios
-		.post(
-			`https://${LNBITS_URL}/api/v1/payments`,
-			{
-				out: false,
-				amount: `${amount}`,
-				memo: `BTC Map coment for: ${name}`,
-				unit: 'sat'
+		.post('https://api.btcmap.org/rpc', {
+			jsonrpc: '2.0',
+			method: 'generate_invoice',
+			params: {
+				password: BTCMAP_KEY,
+				amount_sats: parseInt(amount),
+				description: `BTC Map comment for: ${name}`,
+				entity_type: 'comment',
+				entity_id: name
 			},
-			{ headers }
-		)
+			id: 1
+		})
 		.then(function (response) {
-			return response.data;
+			return response.data.result;
 		})
 		.catch(function (err) {
 			console.error(err);
