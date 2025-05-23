@@ -727,7 +727,9 @@
 								{/if}
 							</p>
 
-							<CommentAddButton merchantName={name} elementId={merchant.id} />
+							{#if merchant}
+								<CommentAddButton merchantName={name} elementId={merchant.id} />
+							{/if}
 						</div>
 					</div>
 				{/if}
