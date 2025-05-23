@@ -727,7 +727,7 @@
 								{/if}
 							</p>
 
-							<CommentAddButton />
+							<CommentAddButton merchantName={name} />
 						</div>
 					</div>
 				{/if}

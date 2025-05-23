@@ -8,8 +8,12 @@
 	import { tick } from 'svelte';
 	import OutClick from 'svelte-outclick';
 	import { fade, fly } from 'svelte/transition';
+	import type { MerchantPageData } from '$lib/types.js';
 
 	export let open: boolean = false;
+	export let merchantName: MerchantPageData['name'] | undefined;
+
+	const COMMENT_AMOUNT_IN_SATS = 500;
 
 	let stage = 0;
 
@@ -82,41 +86,40 @@
 
 	const generateInvoice = () => {
 		console.log('generateInvoice', commentValue);
+		console.log('merchant', merchantName);
 
 		loading = true;
-		// axios
-		// 	.get(
-		// 		`/boost/invoice/generate?amount=${selectedBoost?.sats}&name=${encodeURIComponent($boost?.name || 'location')}&time=${selectedBoost?.time}`
-		// 	)
-		// 	.then(async function (response) {
-		// 		invoice = response.data['payment_request'];
-		// 		hash = response.data['payment_hash'];
+		axios
+			.get(`/comment/invoice/generate?amount=${COMMENT_AMOUNT_IN_SATS}&name=${merchantName}`)
+			.then(async function (response) {
+				invoice = response.data['payment_request'];
+				hash = response.data['payment_hash'];
 
-		// 		stage = 1;
+				stage = 1;
 
-		// 		await tick();
+				await tick();
 
-		// 		QRCode.toCanvas(
-		// 			qr,
-		// 			invoice,
-		// 			{ width: window.innerWidth > 768 ? 275 : 200 },
-		// 			function (error: Error | null | undefined) {
-		// 				if (error) {
-		// 					errToast('Could not generate QR, please try again or contact BTC Map.');
-		// 					console.error(error);
-		// 				}
-		// 			}
-		// 		);
+				QRCode.toCanvas(
+					qr,
+					invoice,
+					{ width: window.innerWidth > 768 ? 275 : 200 },
+					function (error: Error | null | undefined) {
+						if (error) {
+							errToast('Could not generate QR, please try again or contact BTC Map.');
+							console.error(error);
+						}
+					}
+				);
 
-		// 		checkInvoiceInterval = setInterval(checkInvoice, 2500);
+				checkInvoiceInterval = setInterval(checkInvoice, 2500);
 
-		// 		loading = false;
-		// 	})
-		// 	.catch(function (error) {
-		// 		errToast('Could not generate invoice, please try again or contact BTC Map.');
-		// 		console.error(error);
-		// 		loading = false;
-		// 	});
+				loading = false;
+			})
+			.catch(function (error) {
+				errToast('Could not generate invoice, please try again or contact BTC Map.');
+				console.error(error);
+				loading = false;
+			});
 	};
 </script>
 
@@ -132,33 +135,33 @@
 				colors="text-primary dark:text-white dark:hover:text-white/80 hover:text-link"
 			/>
 
-			<!-- {#if stage === 0} -->
-			<form class="space-y-4" on:submit|preventDefault={generateInvoice}>
-				<legend>
-					<p class="mb-2 text-xl font-bold text-primary dark:text-white">Add comment</p>
+			{#if stage === 0}
+				<form class="space-y-4" on:submit|preventDefault={generateInvoice}>
+					<legend>
+						<p class="mb-2 text-xl font-bold text-primary dark:text-white">Add Comment</p>
 
-					<p class="text-sm text-body dark:text-white">
-						All comments are anonymous but we collect a small fee in sats as a spam protection
-						measure
-					</p>
-					<p class="text-sm text-body dark:text-white">Current fee: 500 sats</p>
-				</legend>
+						<p class="text-sm text-body dark:text-white">
+							All comments are anonymous but we collect a small fee in sats as a spam protection
+							measure
+						</p>
+						<p class="text-sm text-body dark:text-white">Current fee: 500 sats</p>
+					</legend>
 
-				<div>
-					<label for="comment" class="mb-2 block font-semibold">Comment</label>
-					<textarea
-						name="comment"
-						rows="3"
-						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
-						bind:value={commentValue}
-					/>
-				</div>
+					<div>
+						<label for="comment" class="mb-2 block font-semibold">Your comment</label>
+						<textarea
+							name="comment"
+							rows="3"
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+							bind:value={commentValue}
+						/>
+					</div>
 
-				<PrimaryButton style="w-full rounded-xl p-3" disabled={loading} type="submit" {loading}>
-					Comment
-				</PrimaryButton>
-			</form>
-			<!-- {:else if stage === 1}
+					<PrimaryButton style="w-full rounded-xl p-3" disabled={loading} type="submit" {loading}>
+						Comment
+					</PrimaryButton>
+				</form>
+			{:else if stage === 1}
 				<div class="space-y-4 text-center">
 					<p class="text-xl font-bold text-primary dark:text-white">
 						Scan or click to pay with lightning
@@ -170,16 +173,6 @@
 							bind:this={qr}
 						/>
 					</a>
-
-					{#if selectedBoost}
-						<p class="text-body dark:text-white">
-							Boost this location for <strong
-								>{selectedBoost.time} month{selectedBoost.time > 1 ? 's' : ''} <br />
-								${selectedBoost.fiat}</strong
-							>
-							(<strong>{selectedBoost.sats} sats</strong>)
-						</p>
-					{/if}
 
 					<div
 						class="flex w-full items-center justify-between space-x-2 rounded-xl border-2 border-mapBorder p-2 md:justify-center"
@@ -198,7 +191,7 @@
 						<CopyButton value={invoice} />
 					</div>
 				</div>
-			{:else}
+				<!-- {:else}
 				<div class="space-y-4 text-center">
 					<p
 						class="text-xl font-bold text-primary dark:text-white {$boost.name.match('([^ ]{14})')
@@ -233,7 +226,8 @@
 						Sharing your support may encourage <br /> others to show theirs 🥰
 					</p>
 				</div>
-			{/if} -->
+				 -->
+			{/if}
 		</div>
 	</OutClick>
 {/if}
