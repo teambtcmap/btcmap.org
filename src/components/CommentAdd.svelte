@@ -21,6 +21,7 @@
 	let commentValue: string = '';
 
 	// let boostComplete = false;
+	let commentPosted = false;
 
 	const closeModal = () => {
 		// if (boostComplete) {
@@ -32,9 +33,10 @@
 		stage = 0;
 		invoice = '';
 		hash = '';
-		// clearInterval(checkInvoiceInterval);
+		clearInterval(checkInvoiceInterval);
 		jsConfetti.clearCanvas();
 		loading = false;
+		commentPosted = false;
 		// $resetBoost = $resetBoost + 1;
 	};
 
@@ -56,9 +58,34 @@
 			})
 			.then(function (response) {
 				console.info('Comment posted successfully:', response.data);
+				commentPosted = true;
 			})
 			.catch(function (error) {
 				warningToast('Could not post comment, please contact BTC Map.');
+				console.error(error);
+			});
+	};
+
+	const checkInvoice = () => {
+		axios
+			.get(`/comment/invoice/status?hash=${hash}`)
+			.then(function (response) {
+				// Check if the invoice is paid
+				if (response.data.status === 'paid') {
+					clearInterval(checkInvoiceInterval);
+
+					// If comment hasn't been posted yet, post it
+					if (!commentPosted) {
+						postComment();
+					}
+
+					// Show success screen
+					stage = 2;
+					jsConfetti.addConfetti();
+				}
+			})
+			.catch(function (error) {
+				errToast('Could not check invoice status, please try again or contact BTC Map.');
 				console.error(error);
 			});
 	};
@@ -91,7 +118,8 @@
 					}
 				);
 
-				postComment();
+				// Start checking invoice status
+				checkInvoiceInterval = setInterval(checkInvoice, 2500);
 
 				loading = false;
 			})
@@ -141,7 +169,7 @@
 						Comment
 					</PrimaryButton>
 				</form>
-			{:else}
+			{:else if stage === 1}
 				<div class="space-y-4 text-center">
 					<p class="text-xl font-bold text-primary dark:text-white">
 						Scan or click to pay with lightning
@@ -174,6 +202,17 @@
 					<p class="text-xl font-bold text-primary dark:text-white">
 						Once the invoice is paid and confirmed by our backend the comment will be posted
 					</p>
+				</div>
+			{:else if stage === 2}
+				<div class="space-y-4 text-center">
+					<p class="text-xl font-bold text-primary dark:text-white">Thank you for your comment!</p>
+
+					<p class="text-body dark:text-white">
+						Yeah, payment received, our bots are working on posting your comment it will be live
+						within the next block.
+					</p>
+
+					<PrimaryButton style="w-full rounded-xl p-3" on:click={closeModal}>Close</PrimaryButton>
 				</div>
 			{/if}
 		</div>
