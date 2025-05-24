@@ -6,6 +6,7 @@
 	import {
 		Boost,
 		BoostButton,
+		CommentAddButton,
 		Footer,
 		Header,
 		Icon,
@@ -709,6 +710,26 @@
 							{/if}
 
 							<BoostButton {merchant} {boosted} />
+						</div>
+
+						<div class="flex flex-col items-center space-y-4 text-primary dark:text-white">
+							<a href="#comments" class="underline transition-colors hover:text-link">
+								<h3 class="text-2xl font-semibold">
+									Comments {#if data.comments.length}({data.comments.length}){/if}
+								</h3>
+							</a>
+
+							<p class="mx-auto max-w-[300px] font-semibold">
+								{#if data.comments.length}
+									Let others now what you like about this merchant
+								{:else}
+									No comments yet. Be the first to leave a comment!
+								{/if}
+							</p>
+
+							{#if merchant}
+								<CommentAddButton merchantName={name} elementId={merchant.id} />
+							{/if}
 						</div>
 					</div>
 				{/if}
