@@ -54,7 +54,8 @@
 		axios
 			.post('/comment/post', {
 				element_id: elementId,
-				content: commentValue
+				content: commentValue,
+				payment_hash: hash
 			})
 			.then(function (response) {
 				console.info('Comment posted successfully:', response.data);
