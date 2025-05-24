@@ -1,3 +1,4 @@
+import { BTCMAP_KEY } from '$env/static/private';
 import { error } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -17,6 +18,7 @@ export const GET: RequestHandler = async ({ url }) => {
 			jsonrpc: '2.0',
 			method: 'get_invoice',
 			params: {
+				password: BTCMAP_KEY,
 				invoice_id: hash
 			},
 			id: 1
