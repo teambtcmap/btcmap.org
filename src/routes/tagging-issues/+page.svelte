@@ -39,7 +39,7 @@
 
 			<p class="text-center text-xl text-primary dark:text-white lg:text-left">
 				More information about how to get involved can be found on our <a
-					href="https://wiki.btcmap.org/general/tagging-instructions.html"
+					href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants"
 					class="text-link transition-colors hover:text-hover">Tagging Instructions</a
 				>
 				Wiki page.

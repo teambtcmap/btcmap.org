@@ -125,13 +125,13 @@ export const getIssueIcon = (issue_code: string): IssueIcon => {
 
 export const getIssueHelpLink = (issue_code: string) => {
 	if (issue_code == 'outdated' || issue_code == 'outdated_soon' || issue_code == 'not_verified') {
-		return 'https://wiki.btcmap.org/general/outdated';
+		return 'https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Verifying-Existing-Merchants';
 	}
 	if (issue_code.startsWith('invalid_tag_value')) {
-		return 'https://wiki.btcmap.org/general/tagging-instructions#verified-tags---more-information';
+		return 'https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#tagging-guidance';
 	}
 	if (issue_code.startsWith('misspelled_tag_name')) {
-		return 'https://wiki.btcmap.org/general/tagging-instructions#required-tags';
+		return 'https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#tagging-guidance';
 	}
 	return undefined;
 };

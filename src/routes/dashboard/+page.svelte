@@ -379,7 +379,7 @@
 
 			<p class="text-center text-sm text-body dark:text-white md:text-left">
 				*More information on bitcoin mapping tags can be found <a
-					href="https://wiki.btcmap.org/general/tagging-instructions.html#tagging-guidance"
+					href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#tagging-guidance"
 					target="_blank"
 					rel="noreferrer"
 					class="text-link transition-colors hover:text-hover">here</a

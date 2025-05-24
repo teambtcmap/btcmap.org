@@ -113,7 +113,7 @@
 
 			<p class="text-center text-xl text-primary dark:text-white lg:text-left">
 				You too can be a shadowy supertagging legend! What are you waiting for? <a
-					href="https://wiki.btcmap.org/general/tagging-instructions.html#shadowy-supertaggers-"
+					href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers-"
 					class="text-link transition-colors hover:text-hover">Get taggin’!</a
 				>
 			</p>

@@ -84,7 +84,7 @@
 
 			<PrimaryButton
 				style="w-[207px] mx-auto py-3 rounded-xl"
-				link="https://wiki.btcmap.org/general/tagging-instructions.html#shadowy-supertaggers-"
+				link="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers-"
 				external
 			>
 				Join Them
@@ -97,7 +97,7 @@
 							{heading}
 							{#if heading === 'Tip'}
 								<a
-									href="https://wiki.btcmap.org/general/lightning-tips.html"
+									href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Lightning-Tips"
 									target="_blank"
 									rel="noreferrer"><i class="fa-solid fa-circle-info text-sm" /></a
 								>
