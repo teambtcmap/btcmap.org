@@ -132,8 +132,9 @@
 						<CopyButton value={invoice} />
 					</div>
 
-					<p class="text-sm text-body dark:text-white">
-						Once the payment is confirmed, your comment will appear on the map automatically.
+					<p class="rounded-md border p-1 text-sm text-body dark:text-white">
+						<Icon w="16" h="16" icon="info" style="inline-block" />
+						Once our bots confirmed the payment<br /> your comment be live
 					</p>
 
 					<PrimaryButton style="w-full rounded-xl p-3" on:click={closeModal}>Close</PrimaryButton>
