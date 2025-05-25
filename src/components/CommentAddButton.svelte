@@ -3,7 +3,6 @@
 	import { browser } from '$app/environment';
 	import type { MerchantPageData } from '$lib/types.js';
 
-	export let merchantName: MerchantPageData['name'] | undefined;
 	export let elementId: MerchantPageData['id'] | undefined;
 	let open = false;
 </script>
@@ -21,5 +20,5 @@
 </button>
 
 {#if browser}
-	<CommentAdd bind:open {merchantName} {elementId} />
+	<CommentAdd bind:open {elementId} />
 {/if}
