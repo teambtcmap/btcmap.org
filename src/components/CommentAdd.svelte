@@ -82,8 +82,7 @@
 						<p class="mb-2 text-xl font-bold text-primary dark:text-white">Add Comment</p>
 
 						<p class="text-sm text-body dark:text-white">
-							All comments are anonymous but we collect a small fee in sats as a spam protection
-							measure
+							All comments are currently anonymous. We collect a small fee in sats as a spam protection measure.
 						</p>
 						<p class="text-sm text-body dark:text-white">Current fee: 500 sats</p>
 					</legend>
@@ -134,7 +133,7 @@
 
 					<p class="rounded-md border p-1 text-sm text-body dark:text-white">
 						<Icon w="16" h="16" icon="info" style="inline-block" />
-						Once our bots confirmed the payment<br /> your comment will be live
+						Once our bots have confirmed the payment<br /> your comment will be published
 					</p>
 
 					<PrimaryButton style="w-full rounded-xl p-3" on:click={closeModal}>Close</PrimaryButton>
