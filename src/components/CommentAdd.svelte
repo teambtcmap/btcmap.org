@@ -82,7 +82,8 @@
 						<p class="mb-2 text-xl font-bold text-primary dark:text-white">Add Comment</p>
 
 						<p class="text-sm text-body dark:text-white">
-							All comments are currently anonymous. We collect a small fee in sats as a spam protection measure.
+							All comments are currently anonymous. We collect a small fee in sats as a spam
+							protection measure.
 						</p>
 						<p class="text-sm text-body dark:text-white">Current fee: 500 sats</p>
 					</legend>
