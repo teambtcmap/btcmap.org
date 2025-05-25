@@ -1,4 +1,3 @@
-import { BTCMAP_KEY } from '$env/static/private';
 import { error } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -6,26 +5,21 @@ import type { RequestHandler } from './$types';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
-export const GET: RequestHandler = async ({ url }) => {
-	const amount = url.searchParams.get('amount');
-	const name = url.searchParams.get('name');
+export const POST: RequestHandler = async ({ request }) => {
+	const data = await request.json();
+	const { element_id, comment } = data;
 
-	if (!amount || !name) {
-		error(400, 'Missing required parameters: amount and name');
+	if (!element_id || !comment) {
+		error(400, 'Missing required parameters: element_id and comment');
 	}
 
-	console.log(`BTCMAP_KEY: "${BTCMAP_KEY}"`);
-
-	const invoice = await axios
+	const response = await axios
 		.post('https://api.btcmap.org/rpc', {
 			jsonrpc: '2.0',
-			method: 'generate_invoice',
+			method: 'paywall_add_element_comment',
 			params: {
-				password: BTCMAP_KEY,
-				amount_sats: parseInt(amount),
-				description: `BTC Map comment for: ${name}`,
-				entity_type: 'comment',
-				entity_id: name
+				element_id,
+				comment
 			},
 			id: 1
 		})
@@ -34,8 +28,8 @@ export const GET: RequestHandler = async ({ url }) => {
 		})
 		.catch(function (err) {
 			console.error(err);
-			error(400, 'Could not generate invoice, please try again or contact BTC Map.');
+			error(400, 'Could not process comment request, please try again or contact BTC Map.');
 		});
 
-	return new Response(JSON.stringify(invoice));
+	return new Response(JSON.stringify(response));
 };

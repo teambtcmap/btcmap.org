@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { CloseButton, CopyButton, Icon, PrimaryButton } from '$lib/comp';
-	// import { boost, boostHash, exchangeRate, resetBoost } from '$lib/store';
-	import { errToast, warningToast } from '$lib/utils';
+	import { errToast } from '$lib/utils';
 	import axios from 'axios';
-	import JSConfetti from 'js-confetti';
 	import QRCode from 'qrcode';
 	import { tick } from 'svelte';
 	import OutClick from 'svelte-outclick';
@@ -11,98 +9,35 @@
 	import type { MerchantPageData } from '$lib/types.js';
 
 	export let open: boolean = false;
-	export let merchantName: MerchantPageData['name'] | undefined;
 	export let elementId: MerchantPageData['id'] | undefined;
 
-	const COMMENT_AMOUNT_IN_SATS = 500;
-
 	let stage = 0;
-
 	let commentValue: string = '';
-
-	// let boostComplete = false;
-	let commentPosted = false;
+	let invoice = '';
+	let qr: HTMLCanvasElement;
+	let loading = false;
 
 	const closeModal = () => {
-		// if (boostComplete) {
-		// 	location.reload();
-		// }
-		// $boost = undefined;
-		// $exchangeRate = undefined;
 		open = false;
 		stage = 0;
 		invoice = '';
-		hash = '';
-		clearInterval(checkInvoiceInterval);
-		jsConfetti.clearCanvas();
 		loading = false;
-		commentPosted = false;
-		// $resetBoost = $resetBoost + 1;
-	};
-
-	let invoice = '';
-	let hash = '';
-	let qr: HTMLCanvasElement;
-	let checkInvoiceInterval: ReturnType<typeof setInterval>;
-	let loading = false;
-
-	const jsConfetti = new JSConfetti();
-	// @ts-expect-error
-	document.querySelector('canvas').style.zIndex = '2001';
-
-	const postComment = () => {
-		axios
-			.post('/comment/post', {
-				element_id: elementId,
-				content: commentValue,
-				payment_hash: hash
-			})
-			.then(function (response) {
-				console.info('Comment posted successfully:', response.data);
-				commentPosted = true;
-			})
-			.catch(function (error) {
-				warningToast('Could not post comment, please contact BTC Map.');
-				console.error(error);
-			});
-	};
-
-	const checkInvoice = () => {
-		axios
-			.get(`/comment/invoice/status?hash=${hash}`)
-			.then(function (response) {
-				// Check if the invoice is paid
-				if (response.data.status === 'paid') {
-					clearInterval(checkInvoiceInterval);
-
-					// If comment hasn't been posted yet, post it
-					if (!commentPosted) {
-						postComment();
-					}
-
-					// Show success screen
-					stage = 2;
-					jsConfetti.addConfetti();
-				}
-			})
-			.catch(function (error) {
-				errToast('Could not check invoice status, please try again or contact BTC Map.');
-				console.error(error);
-			});
 	};
 
 	const generateInvoice = () => {
-		console.log('generateInvoice', commentValue);
-		console.log('merchant', merchantName);
-		console.log('elementId', elementId);
+		if (!elementId || !commentValue.trim()) {
+			errToast('Please enter a comment');
+			return;
+		}
 
 		loading = true;
 		axios
-			.get(`/comment/invoice/generate?amount=${COMMENT_AMOUNT_IN_SATS}&name=${merchantName}`)
+			.post('/comment/invoice/generate', {
+				element_id: elementId,
+				comment: commentValue.trim()
+			})
 			.then(async function (response) {
-				invoice = response.data['payment_request'];
-				hash = response.data['payment_hash'];
-
+				invoice = response.data.payment_request;
 				stage = 1;
 
 				await tick();
@@ -118,9 +53,6 @@
 						}
 					}
 				);
-
-				// Start checking invoice status
-				checkInvoiceInterval = setInterval(checkInvoice, 2500);
 
 				loading = false;
 			})
@@ -200,17 +132,8 @@
 						<CopyButton value={invoice} />
 					</div>
 
-					<p class="text-xl font-bold text-primary dark:text-white">
-						Once the invoice is paid and confirmed by our backend the comment will be posted
-					</p>
-				</div>
-			{:else if stage === 2}
-				<div class="space-y-4 text-center">
-					<p class="text-xl font-bold text-primary dark:text-white">Thank you for your comment!</p>
-
-					<p class="text-body dark:text-white">
-						Yeah, payment received, our bots are working on posting your comment it will be live
-						within the next block.
+					<p class="text-sm text-body dark:text-white">
+						Once the payment is confirmed, your comment will appear on the map automatically.
 					</p>
 
 					<PrimaryButton style="w-full rounded-xl p-3" on:click={closeModal}>Close</PrimaryButton>
