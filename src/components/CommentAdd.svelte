@@ -134,7 +134,7 @@
 
 					<p class="rounded-md border p-1 text-sm text-body dark:text-white">
 						<Icon w="16" h="16" icon="info" style="inline-block" />
-						Once our bots have confirmed the payment<br /> your comment will be published
+						Your comment will be published<br /> when our bots have confirmed the payment.
 					</p>
 
 					<PrimaryButton style="w-full rounded-xl p-3" on:click={closeModal}>Close</PrimaryButton>
