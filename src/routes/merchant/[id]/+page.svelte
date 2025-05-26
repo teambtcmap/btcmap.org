@@ -539,7 +539,7 @@
 					{/if}
 				</div>
 
-				<div class="flex flex-col justify-evenly gap-10 lg:flex-row">
+				<div class="grid-cols-3 gap-12 space-y-12 lg:grid lg:space-y-0">
 					{#if phone}
 						<div class="text-primary dark:text-white">
 							<h4 class="uppercase text-primary dark:text-white">Contact</h4>
@@ -555,6 +555,9 @@
 								<span>{phone}</span>
 							</div>
 						</div>
+					{:else}
+						<div></div>
+						<!-- Placeholder for alignment -->
 					{/if}
 
 					{#if (paymentMethod || thirdParty) && merchant}
@@ -633,7 +636,7 @@
 						<div class="text-primary dark:text-white">
 							<h4 class="uppercase text-primary dark:text-white">Hours</h4>
 
-							<div class="items-center justify-center md:flex">
+							<div class="justify-center justify-items-start md:flex">
 								<Icon
 									w="30"
 									h="30"
@@ -656,8 +659,8 @@
 				{/if}
 
 				{#if dataInitialized}
-					<div class="grid-cols-2 gap-12 space-y-12 lg:grid lg:space-y-0">
-						<div class="space-y-4 text-primary dark:text-white">
+					<div class="grid-cols-3 gap-12 space-y-12 lg:grid lg:space-y-0">
+						<div class="flex flex-col justify-between text-primary dark:text-white">
 							<h3 class="text-2xl font-semibold">Last Surveyed</h3>
 
 							{#if verified.length}
