@@ -78,6 +78,10 @@
 	// alert for report errors
 	$: $reportError && errToast($reportError);
 
+	const formatWithLineBreaks = (str: string): string => {
+		return str.replace(/;\s*/g, ';\n');
+	};
+
 	let dataInitialized = false;
 	let initialRenderComplete = false;
 
@@ -548,7 +552,7 @@
 									icon="phone"
 									type="popup"
 								/>
-								<strong>{phone}</strong>
+								<span>{phone}</span>
 							</div>
 						</div>
 					{/if}
@@ -637,7 +641,7 @@
 									icon="clock"
 									type="popup"
 								/>
-								<strong>{hours}</strong>
+								<span class="whitespace-pre-line">{formatWithLineBreaks(hours)}</span>
 							</div>
 						</div>
 					{/if}
