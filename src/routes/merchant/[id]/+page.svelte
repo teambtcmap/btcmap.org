@@ -644,7 +644,7 @@
 									icon="clock"
 									type="popup"
 								/>
-								<span class="whitespace-pre-line">{formatWithLineBreaks(hours)}</span>
+								<time class="whitespace-pre-line">{formatWithLineBreaks(hours)}</time>
 							</div>
 						</div>
 					{/if}
