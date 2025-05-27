@@ -1,12 +1,14 @@
 <script lang="ts">
 	import {
 		AreaLeaderboard,
+		AreaLeaderboardMinimal,
 		Breadcrumbs,
 		Footer,
 		Header,
 		HeaderPlaceholder,
 		PrimaryButton
 	} from '$lib/comp';
+
 	import { theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
 
@@ -69,7 +71,8 @@
 				</div>
 			</div>
 
-			<AreaLeaderboard type="community" />
+			<!-- <AreaLeaderboard type="community" /> -->
+			<AreaLeaderboardMinimal />
 
 			<Footer />
 		</div>
