@@ -79,7 +79,7 @@
 	$: $reportError && errToast($reportError);
 
 	const formatWithLineBreaks = (str: string): string => {
-		return str.replace(/;\s*/g, ';\n');
+		return str.replace(/;\s*/g, '\n');
 	};
 
 	let dataInitialized = false;
