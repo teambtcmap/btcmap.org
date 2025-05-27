@@ -730,7 +730,7 @@
 
 							<p class="mx-auto max-w-[300px] font-semibold">
 								{#if data.comments.length}
-									Let others know your toughts about this merchant
+									Let others know your thoughts about this merchant.
 								{:else}
 									No comments yet. Be the first to leave a comment!
 								{/if}
