@@ -16,7 +16,7 @@
 			<CloseButton on:click={closeModal} />
 
 			<div class="space-y-2">
-				{#each Object.entries($showTags) as tag}
+				{#each Object.entries($showTags) as tag, index (index)}
 					<div>
 						<span class="font-semibold text-primary dark:font-normal dark:text-white">{tag[0]}</span
 						><span class="dark:text-white">=</span><span

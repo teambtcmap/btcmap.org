@@ -258,9 +258,9 @@
 				<div class="overflow-x-auto">
 					<table class="w-full whitespace-nowrap text-left text-primary dark:text-white">
 						<thead>
-							{#each $table.getHeaderGroups() as headerGroup}
+							{#each $table.getHeaderGroups() as headerGroup, index (index)}
 								<tr>
-									{#each headerGroup.headers as header}
+									{#each headerGroup.headers as header, index (index)}
 										<th colSpan={header.colSpan} class="px-5 pb-2.5 pt-5">
 											{#if !header.isPlaceholder}
 												<button
@@ -299,9 +299,9 @@
 							{/each}
 						</thead>
 						<tbody>
-							{#each $table.getRowModel().rows as row, index}
+							{#each $table.getRowModel().rows as row, index (index)}
 								<tr class={isEven(index) ? 'bg-primary/5 dark:bg-white/5' : ''}>
-									{#each row.getVisibleCells() as cell}
+									{#each row.getVisibleCells() as cell, index (index)}
 										<td class="px-5 py-2.5">
 											<svelte:component
 												this={flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -325,7 +325,7 @@
 						}}
 						class="cursor-pointer bg-transparent focus:outline-primary dark:focus:outline-white"
 					>
-						{#each pageSizes as pageSize}
+						{#each pageSizes as pageSize (pageSize)}
 							<option value={pageSize}>
 								Show {pageSize}
 							</option>

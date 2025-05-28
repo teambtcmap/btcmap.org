@@ -244,22 +244,19 @@
 		<div class="flex items-center space-x-1 text-link">
 			{#if dataInitialized}
 				<div class="flex items-center space-x-1">
-					<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
-					{#each Array(grade) as star}
+					{#each Array(grade) as _, index (index)}
 						<i class="fa-solid fa-star" />
 					{/each}
 				</div>
 
 				<div class="flex items-center space-x-1">
-					<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
-					{#each Array(5 - grade) as star}
+					{#each Array(5 - grade) as _, index (index)}
 						<i class="fa-solid fa-star opacity-25" />
 					{/each}
 				</div>
 			{:else}
 				<div class="flex items-center space-x-1">
-					<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
-					{#each Array(5) as star}
+					{#each Array(5) as _, index (index)}
 						<i class="fa-solid fa-star animate-pulse text-link/50" />
 					{/each}
 				</div>

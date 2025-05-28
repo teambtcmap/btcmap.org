@@ -30,7 +30,7 @@
 				>
 
 				<span class="block md:inline">
-					{#each labels || [] as label}
+					{#each labels || [] as label, index (index)}
 						<TicketLabel title={label?.name} tooltip={label?.description} />
 					{/each}
 				</span>
@@ -52,7 +52,7 @@
 
 	<div class="space-y-1 md:flex md:space-x-2 md:space-y-0">
 		<div class="flex flex-wrap justify-center md:justify-start">
-			{#each assignees || [] as assignee}
+			{#each assignees || [] as assignee, index (index)}
 				<a href={assignee?.html_url} target="_blank" rel="noreferrer" class="mb-1 mr-1">
 					<img
 						src={assignee?.avatar_url}

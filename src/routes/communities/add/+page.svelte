@@ -266,7 +266,7 @@
 									: ''} max-h-[300px] overflow-auto border-2 border-input"
 							>
 								{#if !location}
-									{#each searchResults as area, index}
+									{#each searchResults as area, index (area.display_name)}
 										<button
 											on:click={() => setLocation(area)}
 											class="{index !== searchResults.length - 1
