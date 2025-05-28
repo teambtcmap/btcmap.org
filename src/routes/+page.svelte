@@ -47,7 +47,7 @@
 				<div
 					class="my-8 flex flex-wrap justify-center rounded-2xl bg-white/30 py-6 dark:bg-white/[0.15]"
 				>
-					{#each $apps as app}
+					{#each $apps as app (app.link)}
 						<div
 							class="mx-2 my-2 space-y-1 text-center font-semibold text-body dark:text-white md:my-0"
 						>

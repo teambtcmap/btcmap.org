@@ -269,7 +269,7 @@
 
 				<div class="flex grid-cols-3 flex-wrap justify-center gap-5 lg:grid">
 					{#if merchants.length}
-						{#each merchants as merchant}
+						{#each merchants as merchant (merchant.id)}
 							<AboutMerchant
 								id={merchant.id}
 								icon={merchant.tags['icon:android']}
@@ -278,7 +278,7 @@
 						{/each}
 					{:else}
 						<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
-						{#each Array(6) as skeleton}
+						{#each Array(6) as _, index (index)}
 							<span class="h-24 w-24 animate-pulse rounded-full bg-link/50" />
 						{/each}
 					{/if}
@@ -299,12 +299,12 @@
 
 					<div class="flex flex-wrap justify-center gap-5">
 						{#if supertaggers.length}
-							{#each supertaggers.map((t) => ({ ...t, total: undefined })) as tagger}
+							{#each supertaggers.map((t) => ({ ...t, total: undefined })) as tagger (tagger.id)}
 								<AboutTagger {tagger} />
 							{/each}
 						{:else}
 							<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
-							{#each Array(6) as skeleton}
+							{#each Array(6) as _, index (index)}
 								<span class="h-24 w-24 animate-pulse rounded-full bg-link/50" />
 							{/each}
 						{/if}
@@ -338,12 +338,12 @@
 				<div>
 					<div class="flex grid-cols-3 flex-wrap justify-center gap-5 lg:grid">
 						{#if communities.length}
-							{#each communities as community}
+							{#each communities as community (community.id)}
 								<AboutCommunity {community} />
 							{/each}
 						{:else}
 							<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
-							{#each Array(6) as skeleton}
+							{#each Array(6) as _, index (index)}
 								<span class="h-24 w-24 animate-pulse rounded-full bg-link/50" />
 							{/each}
 						{/if}
@@ -371,7 +371,7 @@
 				</p>
 
 				<div class="flex flex-wrap justify-center gap-10">
-					{#each communityIntegrations as integration}
+					{#each communityIntegrations as integration (integration.url)}
 						<AboutIntegration {integration} />
 					{/each}
 					<AboutPlus />
@@ -384,7 +384,7 @@
 				</p>
 
 				<div class="flex flex-wrap justify-center gap-10">
-					{#each projectIntegrations as integration}
+					{#each projectIntegrations as integration (integration.url)}
 						<AboutIntegration {integration} />
 					{/each}
 					<AboutPlus />
@@ -409,7 +409,7 @@
 				</div>
 
 				<div class="flex grid-cols-3 flex-wrap justify-center gap-5 lg:grid">
-					{#each contributors as contributor}
+					{#each contributors as contributor (contributor.url)}
 						<AboutContributor {contributor} />
 					{/each}
 				</div>
@@ -449,7 +449,7 @@
 				</div>
 
 				<div class="flex grid-cols-2 flex-wrap items-center justify-center gap-10 lg:grid">
-					{#each coreTeam as member}
+					{#each coreTeam as member (member.name)}
 						<AboutCore {member} />
 					{/each}
 				</div>
