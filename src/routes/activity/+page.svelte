@@ -139,7 +139,6 @@
 								/>
 							{/each}
 						{:else}
-							<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
 							{#each Array(50) as _, index (index)}
 								<TaggerSkeleton />
 							{/each}

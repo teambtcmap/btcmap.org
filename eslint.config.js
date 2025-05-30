@@ -31,7 +31,6 @@ export default tseslint.config(
 			}
 		},
 		rules: {
-			'svelte/require-each-key': 'warn',
 			'svelte/no-dupe-style-properties': 'warn', // mainly because of tailwind (v4 will fix this)
 			'@typescript-eslint/no-unused-expressions': 'warn',
 			'@typescript-eslint/no-unused-vars': [
