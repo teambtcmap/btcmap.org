@@ -44,8 +44,7 @@
 			.filter((element) => element.tags['boost:expires'])
 			.sort(
 				(a, b) =>
-					// @ts-expect-error
-					Date.parse(b.tags['boost:expires']) - Date.parse(a.tags['boost:expires'])
+					Date.parse(b.tags['boost:expires'] || '0') - Date.parse(a.tags['boost:expires'] || '0')
 			)
 			.slice(0, 6);
 
@@ -56,16 +55,14 @@
 		dataInitalized = true;
 	};
 
-	$: $elements &&
-		$elements.length &&
-		$users &&
-		$users.length &&
-		$events &&
-		$events.length &&
-		$areas &&
-		$areas.length &&
-		!dataInitalized &&
-		initializeData();
+	// Initialize data when all stores are loaded
+	$: {
+		const allDataLoaded = $elements?.length && $users?.length && $events?.length && $areas?.length;
+
+		if (allDataLoaded && !dataInitalized) {
+			initializeData();
+		}
+	}
 
 	let supertaggers: { id: number; username: string; avatar: string; total: number }[] = [];
 
