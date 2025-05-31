@@ -24,14 +24,13 @@
 	import type { Area, Element } from '$lib/types';
 	import { errToast } from '$lib/utils';
 
-	// alert for element errors
-	$: $elementError && errToast($elementError);
-	// alert for user errors
-	$: $userError && errToast($userError);
-	// alert for event errors
-	$: $eventError && errToast($eventError);
-	// alert for area errors
-	$: $areaError && errToast($areaError);
+	// alert for all errors
+	$: {
+		if ($elementError) errToast($elementError);
+		if ($userError) errToast($userError);
+		if ($eventError) errToast($eventError);
+		if ($areaError) errToast($areaError);
+	}
 
 	let dataInitalized = false;
 
