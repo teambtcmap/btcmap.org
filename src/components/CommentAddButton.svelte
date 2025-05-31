@@ -2,22 +2,23 @@
 	import { CommentAdd } from '$lib/comp';
 	import { browser } from '$app/environment';
 	import type { MerchantPageData } from '$lib/types.js';
+	import { PrimaryButton } from '$lib/comp';
 
 	export let elementId: MerchantPageData['id'] | undefined;
 	let open = false;
 </script>
 
-<button
+<PrimaryButton
 	on:click={() => (open = true)}
 	disabled={open}
-	class="flex w-40 items-center justify-center rounded-xl bg-link p-3 text-center font-semibold text-white transition-colors hover:bg-hover"
+	style="flex w-40 items-center justify-center rounded-xl p-3"
 >
 	{#if open}
 		Commenting...
 	{:else}
 		Add comment
 	{/if}
-</button>
+</PrimaryButton>
 
 {#if browser}
 	<CommentAdd bind:open {elementId} />

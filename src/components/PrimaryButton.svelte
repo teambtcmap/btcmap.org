@@ -7,6 +7,10 @@
 	export let external: undefined | boolean = undefined;
 	export let disabled: undefined | boolean = undefined;
 	export let loading: undefined | boolean = undefined;
+
+	const baseStyles =
+		'block bg-link text-center font-semibold text-white hover:bg-hover transition-colors';
+	const combinedStyles = `${baseStyles} ${style}`;
 </script>
 
 {#if link}
@@ -14,17 +18,12 @@
 		href={link}
 		target={external ? '_blank' : undefined}
 		rel={external ? 'noreferrer' : undefined}
-		class="block bg-link text-center font-semibold text-white hover:bg-hover {style} transition-colors"
+		class={combinedStyles}
 	>
 		<slot />
 	</a>
 {:else}
-	<button
-		on:click
-		{type}
-		{disabled}
-		class="block bg-link text-center font-semibold text-white hover:bg-hover {style} transition-colors"
-	>
+	<button on:click {type} {disabled} class={combinedStyles}>
 		{#if loading}
 			<LoadingSpinner />
 		{:else}
