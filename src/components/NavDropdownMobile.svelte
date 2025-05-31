@@ -31,7 +31,7 @@
 		on:outclick={() => (show = false)}
 	>
 		<div class="ml-7 space-y-2">
-			{#each links as link}
+			{#each links as link (link.url)}
 				<a
 					href={link.url}
 					target={link.external ? '_blank' : null}

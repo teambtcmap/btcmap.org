@@ -355,8 +355,7 @@
 				/>
 			{:else}
 				<div class="flex flex-wrap items-center justify-center">
-					<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
-					{#each Array(3) as skeleton}
+					{#each Array(3) as _, index (index)}
 						<div class="m-1 h-10 w-10 animate-pulse rounded-full bg-link/50" />
 					{/each}
 				</div>
@@ -372,7 +371,7 @@
 		on:scroll={() => (scrolled = true)}
 		class="hide-scroll relative grid w-full auto-cols-[minmax(150px,_1fr)] grid-flow-col overflow-x-auto"
 	>
-		{#each sections as section}
+		{#each sections as section, index (index)}
 			<button
 				on:click={() => (activeSection = section)}
 				class="border-b-4 pb-3 text-center text-lg text-link transition-colors hover:border-link {activeSection ===

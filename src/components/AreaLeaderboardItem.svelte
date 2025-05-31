@@ -62,7 +62,7 @@
 		{/if}
 	</div>
 
-	{#each stats as stat}
+	{#each stats as stat (stat.title)}
 		<span class="my-2 flex items-center justify-center lg:my-0 lg:inline-flex">
 			<span class="mr-1 text-primary dark:text-white lg:hidden">{stat.title}:</span>
 			{#if stat.title === 'Up-To-Date'}
@@ -76,13 +76,11 @@
 				</div>
 			{:else if stat.title === 'Grade'}
 				<div class="space-x-1">
-					<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
-					{#each Array(stat.stat) as star}
+					{#each Array(stat.stat) as _, index (index)}
 						<i class="fa-solid fa-star" />
 					{/each}
 
-					<!-- eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars -->
-					{#each Array(5 - stat.stat) as star}
+					{#each Array(5 - stat.stat) as _, index (index)}
 						<i class="fa-solid fa-star opacity-25" />
 					{/each}
 				</div>

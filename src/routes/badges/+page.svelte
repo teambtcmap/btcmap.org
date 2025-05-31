@@ -195,7 +195,7 @@
 				</h2>
 
 				<div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-					{#each achievements.reverse() as achievement}
+					{#each achievements.reverse() as achievement (achievement.title)}
 						<BadgeCard
 							icon={achievement.icon}
 							title={achievement.title}
@@ -212,7 +212,7 @@
 				</h2>
 
 				<div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-					{#each contributions.reverse() as contribution}
+					{#each contributions.reverse() as contribution (contribution.title)}
 						<BadgeCard
 							icon={contribution.icon}
 							title={contribution.title}

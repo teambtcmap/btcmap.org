@@ -44,7 +44,7 @@
 				/>
 			</h3>
 
-			{#each ticketTypes as type}
+			{#each ticketTypes as type (type)}
 				<button
 					class="mx-auto block w-40 border border-link py-2 text-center md:inline {type === 'Add'
 						? 'rounded-t md:rounded-l md:rounded-tr-none'
@@ -62,7 +62,7 @@
 		{#if filteredTickets.length && !ticketError}
 			{#if showType === 'Add'}
 				{#if add.length}
-					{#each add as ticket}
+					{#each add as ticket (ticket.number)}
 						<OpenTicket
 							assignees={ticket.assignees}
 							comments={ticket.comments}
@@ -81,7 +81,7 @@
 				{/if}
 			{:else if showType === 'Verify'}
 				{#if verify.length}
-					{#each verify as ticket}
+					{#each verify as ticket (ticket.number)}
 						<OpenTicket
 							assignees={ticket.assignees}
 							comments={ticket.comments}
@@ -100,7 +100,7 @@
 				{/if}
 			{:else if showType === 'Community'}
 				{#if community.length}
-					{#each community as ticket}
+					{#each community as ticket (ticket.number)}
 						<OpenTicket
 							assignees={ticket.assignees}
 							comments={ticket.comments}

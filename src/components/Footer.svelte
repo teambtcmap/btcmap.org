@@ -24,7 +24,7 @@
 	</div>
 
 	<div class="flex flex-wrap justify-center xl:block">
-		{#each links as link}
+		{#each links as link (link.name)}
 			<a
 				href={link.link}
 				target={link.external ? '_blank' : null}
