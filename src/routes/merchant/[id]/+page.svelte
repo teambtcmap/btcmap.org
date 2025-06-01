@@ -66,6 +66,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import Time from 'svelte-time';
 	import tippy from 'tippy.js';
+	import DOMPurify from 'dompurify';
 
 	// alert for user errors
 	$: $userError && errToast($userError);
@@ -79,10 +80,12 @@
 	$: $reportError && errToast($reportError);
 
 	const formatOpeningHours = (str: string): string => {
-		return str
+		const html = str
 			.split(/;\s*/)
 			.map((part) => `<span>${part.trim()}</span>`)
 			.join('');
+
+		return DOMPurify.sanitize(html, { ALLOWED_TAGS: ['span'] });
 	};
 
 	let dataInitialized = false;
@@ -647,6 +650,7 @@
 									icon="clock"
 									type="popup"
 								/>
+								<!-- eslint-disable-next-line svelte/no-at-html-tags - we even sanitize the captcha content above -->
 								<time class="flex flex-col items-start">{@html formatOpeningHours(hours)}</time>
 							</div>
 						</div>
