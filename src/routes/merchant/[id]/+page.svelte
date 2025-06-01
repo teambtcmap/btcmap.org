@@ -78,8 +78,11 @@
 	// alert for report errors
 	$: $reportError && errToast($reportError);
 
-	const formatWithLineBreaks = (str: string): string => {
-		return str.replace(/;\s*/g, '\n');
+	const formatOpeningHours = (str: string): string => {
+		return str
+			.split(/;\s*/)
+			.map((part) => `<span>${part.trim()}</span>`)
+			.join('');
 	};
 
 	let dataInitialized = false;
@@ -644,7 +647,7 @@
 									icon="clock"
 									type="popup"
 								/>
-								<time class="whitespace-pre-line">{formatWithLineBreaks(hours)}</time>
+								<time class="flex flex-col items-start">{@html formatOpeningHours(hours)}</time>
 							</div>
 						</div>
 					{/if}
