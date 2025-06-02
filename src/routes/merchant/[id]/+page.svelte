@@ -6,6 +6,7 @@
 	import {
 		Boost,
 		BoostButton,
+		CommentAddButton,
 		Footer,
 		Header,
 		Icon,
@@ -76,6 +77,10 @@
 	$: $areaError && errToast($areaError);
 	// alert for report errors
 	$: $reportError && errToast($reportError);
+
+	const formatWithLineBreaks = (str: string): string => {
+		return str.replace(/;\s*/g, '\n');
+	};
 
 	let dataInitialized = false;
 	let initialRenderComplete = false;
@@ -534,77 +539,116 @@
 					{/if}
 				</div>
 
-				{#if (paymentMethod || thirdParty) && merchant}
-					<div>
-						<h4 class="uppercase text-primary dark:text-white">Accepted Payments</h4>
-						<div class="mt-1 flex items-center justify-center space-x-2">
-							{#if !paymentMethod}
-								<a
-									bind:this={thirdPartyTooltip}
-									href={merchant.osm_json.tags?.['payment:lightning:companion_app_url']}
-									target="_blank"
-									rel="noreferrer"
-								>
-									<i
-										class="fa-solid fa-mobile-screen-button h-8 w-8 text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
-									>
-									</i>
-								</a>
-							{:else if typeof window !== 'undefined'}
-								<img
-									bind:this={onchainTooltip}
-									src={merchant.osm_json.tags?.['payment:onchain'] === 'yes'
-										? detectTheme() === 'dark' || $theme === 'dark'
-											? '/icons/btc-highlight-dark.svg'
-											: '/icons/btc-highlight.svg'
-										: merchant.osm_json.tags?.['payment:onchain'] === 'no'
-											? detectTheme() === 'dark' || $theme === 'dark'
-												? '/icons/btc-no-dark.svg'
-												: '/icons/btc-no-teal.svg'
-											: detectTheme() === 'dark' || $theme === 'dark'
-												? '/icons/btc-dark.svg'
-												: '/icons/btc.svg'}
-									alt="bitcoin"
-									class="h-8 w-8"
-								/>
+				<div class="grid-cols-3 gap-12 space-y-12 lg:grid lg:space-y-0">
+					{#if phone}
+						<div class="text-primary dark:text-white">
+							<h4 class="uppercase text-primary dark:text-white">Contact</h4>
 
-								<img
-									bind:this={lnTooltip}
-									src={merchant.osm_json.tags?.['payment:lightning'] === 'yes'
-										? detectTheme() === 'dark' || $theme === 'dark'
-											? '/icons/ln-highlight-dark.svg'
-											: '/icons/ln-highlight.svg'
-										: merchant.osm_json.tags?.['payment:lightning'] === 'no'
-											? detectTheme() === 'dark' || $theme === 'dark'
-												? '/icons/ln-no-dark.svg'
-												: '/icons/ln-no-teal.svg'
-											: detectTheme() === 'dark' || $theme === 'dark'
-												? '/icons/ln-dark.svg'
-												: '/icons/ln.svg'}
-									alt="lightning"
-									class="h-8 w-8"
+							<div class="flex items-center justify-center">
+								<Icon
+									w="30"
+									h="30"
+									style="text-primary dark:text-white mr-2"
+									icon="phone"
+									type="popup"
 								/>
-
-								<img
-									bind:this={nfcTooltip}
-									src={merchant.osm_json.tags?.['payment:lightning_contactless'] === 'yes'
-										? detectTheme() === 'dark' || $theme === 'dark'
-											? '/icons/nfc-highlight-dark.svg'
-											: '/icons/nfc-highlight.svg'
-										: merchant.osm_json.tags?.['payment:lightning_contactless'] === 'no'
-											? detectTheme() === 'dark' || $theme === 'dark'
-												? '/icons/nfc-no-dark.svg'
-												: '/icons/nfc-no-teal.svg'
-											: detectTheme() === 'dark' || $theme === 'dark'
-												? '/icons/nfc-dark.svg'
-												: '/icons/nfc.svg'}
-									alt="nfc"
-									class="h-8 w-8"
-								/>
-							{/if}
+								<span>{phone}</span>
+							</div>
 						</div>
-					</div>
-				{/if}
+					{:else}
+						<div></div>
+						<!-- Placeholder for alignment -->
+					{/if}
+
+					{#if (paymentMethod || thirdParty) && merchant}
+						<div class="text-primary dark:text-white">
+							<h4 class="uppercase text-primary dark:text-white">Accepted Payments</h4>
+							<div class="mt-1 flex items-center justify-center space-x-2">
+								{#if !paymentMethod}
+									<a
+										bind:this={thirdPartyTooltip}
+										href={merchant.osm_json.tags?.['payment:lightning:companion_app_url']}
+										target="_blank"
+										rel="noreferrer"
+									>
+										<i
+											class="fa-solid fa-mobile-screen-button h-8 w-8 text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
+										>
+										</i>
+									</a>
+								{:else if typeof window !== 'undefined'}
+									<img
+										bind:this={onchainTooltip}
+										src={merchant.osm_json.tags?.['payment:onchain'] === 'yes'
+											? detectTheme() === 'dark' || $theme === 'dark'
+												? '/icons/btc-highlight-dark.svg'
+												: '/icons/btc-highlight.svg'
+											: merchant.osm_json.tags?.['payment:onchain'] === 'no'
+												? detectTheme() === 'dark' || $theme === 'dark'
+													? '/icons/btc-no-dark.svg'
+													: '/icons/btc-no-teal.svg'
+												: detectTheme() === 'dark' || $theme === 'dark'
+													? '/icons/btc-dark.svg'
+													: '/icons/btc.svg'}
+										alt="bitcoin"
+										class="h-8 w-8"
+									/>
+
+									<img
+										bind:this={lnTooltip}
+										src={merchant.osm_json.tags?.['payment:lightning'] === 'yes'
+											? detectTheme() === 'dark' || $theme === 'dark'
+												? '/icons/ln-highlight-dark.svg'
+												: '/icons/ln-highlight.svg'
+											: merchant.osm_json.tags?.['payment:lightning'] === 'no'
+												? detectTheme() === 'dark' || $theme === 'dark'
+													? '/icons/ln-no-dark.svg'
+													: '/icons/ln-no-teal.svg'
+												: detectTheme() === 'dark' || $theme === 'dark'
+													? '/icons/ln-dark.svg'
+													: '/icons/ln.svg'}
+										alt="lightning"
+										class="h-8 w-8"
+									/>
+
+									<img
+										bind:this={nfcTooltip}
+										src={merchant.osm_json.tags?.['payment:lightning_contactless'] === 'yes'
+											? detectTheme() === 'dark' || $theme === 'dark'
+												? '/icons/nfc-highlight-dark.svg'
+												: '/icons/nfc-highlight.svg'
+											: merchant.osm_json.tags?.['payment:lightning_contactless'] === 'no'
+												? detectTheme() === 'dark' || $theme === 'dark'
+													? '/icons/nfc-no-dark.svg'
+													: '/icons/nfc-no-teal.svg'
+												: detectTheme() === 'dark' || $theme === 'dark'
+													? '/icons/nfc-dark.svg'
+													: '/icons/nfc.svg'}
+										alt="nfc"
+										class="h-8 w-8"
+									/>
+								{/if}
+							</div>
+						</div>
+					{/if}
+
+					{#if hours}
+						<div class="text-primary dark:text-white">
+							<h4 class="uppercase text-primary dark:text-white">Hours</h4>
+
+							<div class="justify-center justify-items-start md:flex">
+								<Icon
+									w="30"
+									h="30"
+									style="text-primary dark:text-white mx-auto md:mx-0 mb-2 md:mb-0 md:mr-2"
+									icon="clock"
+									type="popup"
+								/>
+								<time class="whitespace-pre-line">{formatWithLineBreaks(hours)}</time>
+							</div>
+						</div>
+					{/if}
+				</div>
 
 				{#if description}
 					<p class="mx-auto max-w-[600px] text-primary dark:text-white">{description}</p>
@@ -615,42 +659,8 @@
 				{/if}
 
 				{#if dataInitialized}
-					<div class="grid-cols-2 gap-12 space-y-12 lg:grid lg:space-y-0">
-						{#if phone}
-							<div class="text-primary dark:text-white">
-								<h3 class="mb-4 text-2xl font-semibold">Contact</h3>
-
-								<div class="flex items-center justify-center">
-									<Icon
-										w="30"
-										h="30"
-										style="text-primary dark:text-white mr-2"
-										icon="phone"
-										type="popup"
-									/>
-									<strong>{phone}</strong>
-								</div>
-							</div>
-						{/if}
-
-						{#if hours}
-							<div class="text-primary dark:text-white">
-								<h3 class="mb-4 text-2xl font-semibold">Hours</h3>
-
-								<div class="items-center justify-center md:flex">
-									<Icon
-										w="30"
-										h="30"
-										style="text-primary dark:text-white mx-auto md:mx-0 mb-2 md:mb-0 md:mr-2"
-										icon="clock"
-										type="popup"
-									/>
-									<strong>{hours}</strong>
-								</div>
-							</div>
-						{/if}
-
-						<div class="space-y-4 text-primary dark:text-white">
+					<div class="grid-cols-3 gap-12 space-y-12 lg:grid lg:space-y-0">
+						<div class="flex flex-col justify-between text-primary dark:text-white">
 							<h3 class="text-2xl font-semibold">Last Surveyed</h3>
 
 							{#if verified.length}
@@ -709,6 +719,26 @@
 							{/if}
 
 							<BoostButton {merchant} {boosted} />
+						</div>
+
+						<div class="flex flex-col items-center space-y-4 text-primary dark:text-white">
+							<a href="#comments" class="underline transition-colors hover:text-link">
+								<h3 class="text-2xl font-semibold">
+									Comments {#if data.comments.length}({data.comments.length}){/if}
+								</h3>
+							</a>
+
+							<p class="mx-auto max-w-[300px] font-semibold">
+								{#if data.comments.length}
+									Let others know your thoughts about this merchant.
+								{:else}
+									No comments yet. Be the first to leave a comment!
+								{/if}
+							</p>
+
+							{#if merchant}
+								<CommentAddButton elementId={merchant.id} />
+							{/if}
 						</div>
 					</div>
 				{/if}

@@ -22,8 +22,9 @@
 	const populateLeaderboard = () => {
 		loading = true;
 		leaderboard = [];
+
 		users.forEach((user) => {
-			var image_url = 'satoshi';
+			var image_url = '/images/satoshi-nakamoto.png';
 			if (user.image_url) {
 				image_url = user.image_url;
 			}
@@ -81,6 +82,13 @@
 			{:else}
 				<HeaderPlaceholder />
 			{/if}
+
+			<div class="mx-auto space-y-5 text-center lg:w-[650px]">
+				<p class="text-xl text-body dark:text-white">
+					This is where our Shadowy Supertaggers shine! They are the ones who have contributed the
+					most edits to BTC Map within the last 12-months.
+				</p>
+			</div>
 
 			<PrimaryButton
 				style="w-[207px] mx-auto py-3 rounded-xl"

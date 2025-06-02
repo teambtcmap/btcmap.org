@@ -1,5 +1,9 @@
 import type { PageServerLoad } from './$types';
 
+const excludeLeader = [
+	2104834, 9451067, 1722488, 81735, 18545877, 232801, 19880430, 1778799, 21749653, 6816132
+];
+
 export const load: PageServerLoad = async () => {
 	try {
 		const response = await fetch('https://api.btcmap.org/rpc', {
@@ -31,8 +35,14 @@ export const load: PageServerLoad = async () => {
 				rpcResult: null
 			};
 		}
+        // Filter out excluded users server-side
+        const filteredUsers = (data.result.users as Array<{ id: number }>).filter((user) => !excludeLeader.includes(user.id));
+
 		return {
-			rpcResult: data.result
+			rpcResult: {
+				...data.result,
+				users: filteredUsers
+			}
 		};
 	} catch (err) {
 		return {

@@ -56,10 +56,6 @@ export const syncStatus: Writable<boolean> = writable();
 
 export const mapUpdates = writable(false);
 
-export const excludeLeader = readable([
-	17085479, 2104834, 9451067, 616463, 1722488, 81735, 18545877, 232801, 19880430, 1778799
-]);
-
 export const boost: Writable<Boost> = writable();
 export const exchangeRate: Writable<number | undefined> = writable();
 export const resetBoost = writable(0);

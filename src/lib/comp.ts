@@ -23,6 +23,8 @@ export { default as Boost } from '../components/Boost.svelte';
 export { default as BoostButton } from '../components/BoostButton.svelte';
 export { default as Breadcrumbs } from '../components/Breadcrumbs.svelte';
 export { default as CloseButton } from '../components/CloseButton.svelte';
+export { default as CommentAdd } from '../components/CommentAdd.svelte';
+export { default as CommentAddButton } from '../components/CommentAddButton.svelte';
 export { default as CommunityCard } from '../components/CommunityCard.svelte';
 export { default as CommunitySection } from '../components/CommunitySection.svelte';
 export { default as CommunitySkeleton } from '../components/CommunitySkeleton.svelte';

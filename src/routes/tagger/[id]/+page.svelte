@@ -29,7 +29,6 @@
 		elements,
 		eventError,
 		events,
-		excludeLeader,
 		theme,
 		userError,
 		users
