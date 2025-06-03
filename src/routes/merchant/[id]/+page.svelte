@@ -764,103 +764,103 @@
 			</section>
 
 			<section id="map-section">
-				<h3
-					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary dark:bg-white/10 dark:text-white lg:text-left"
-				>
-					{name || 'Merchant'} Location
-				</h3>
-
-				<div class="relative">
-					<div
-						bind:this={mapElement}
-						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal text-left dark:!bg-[#202f33] md:h-[600px]"
-					/>
-					{#if !mapLoaded}
-						<MapLoadingEmbed
-							style="h-[300px] md:h-[600px] border border-statBorder rounded-b-3xl"
-						/>
-					{/if}
-				</div>
-			</section>
-
-			<section id="comments">
-				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
-					<h3
-						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white lg:text-left"
-					>
-						{name || 'Merchant'} Comments
+				<Card>
+					<h3 slot="header" class="text-lg font-semibold">
+						{name || 'Merchant'} Location
 					</h3>
 
-					<div class="hide-scroll relative max-h-[375px] space-y-2 overflow-y-scroll">
-						<div class="relative space-y-2">
-							{#if data.comments && data.comments.length}
-								{#each [...data.comments].reverse() as comment (comment.id)}
-									<MerchantComment text={comment.text} time={comment['created_at']} />
-								{/each}
-							{:else}
-								<p class="p-5 text-body dark:text-white">No comments yet.</p>
+					<div slot="body" class="w-full">
+						<div class="relative overflow-hidden">
+							<div
+								bind:this={mapElement}
+								class="z-10 h-[300px] rounded-b-3xl !bg-teal text-left dark:!bg-[#202f33] md:h-[600px]"
+							/>
+							{#if !mapLoaded}
+								<MapLoadingEmbed style="h-[300px] md:h-[600px]  rounded-b-3xl" />
 							{/if}
 						</div>
 					</div>
-				</div>
+				</Card>
+			</section>
+
+			<section id="comments">
+				<Card>
+					<h3 slot="header" class="text-lg font-semibold">
+						{name || 'Merchant'} Comments
+					</h3>
+
+					<div slot="body" class="w-full">
+						<div class="hide-scroll relative max-h-[300px] space-y-2 overflow-y-scroll">
+							<div class="relative space-y-2">
+								{#if data.comments && data.comments.length}
+									{#each [...data.comments].reverse() as comment (comment.id)}
+										<MerchantComment text={comment.text} time={comment['created_at']} />
+									{/each}
+								{:else}
+									<p class="p-5 text-body dark:text-white">No comments yet.</p>
+								{/if}
+							</div>
+						</div>
+					</div>
+				</Card>
 			</section>
 
 			<section id="activity">
-				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
-					<h3
-						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white lg:text-left"
-					>
+				<Card>
+					<h3 slot="header" class="text-lg font-semibold">
 						{name || 'Merchant'} Activity
 					</h3>
 
-					<div
-						bind:this={activityDiv}
-						class="hide-scroll relative max-h-[375px] space-y-2 overflow-y-scroll"
-						on:scroll={() => {
-							if (dataInitialized && !hideArrow) {
-								hideArrow = true;
-							}
-						}}
-					>
-						{#if merchantEvents && merchantEvents.length}
-							{#each eventsPaginated as event (event['created_at'])}
-								<MerchantEvent
-									action={event.type}
-									user={findUser(event)}
-									time={event['created_at']}
-									latest={event === merchantEvents[0] ? true : false}
-								/>
-							{/each}
+					<div slot="body" class="w-full">
+						<div
+							bind:this={activityDiv}
+							class="hide-scroll relative max-h-[300px] space-y-2 overflow-y-scroll"
+							on:scroll={() => {
+								if (dataInitialized && !hideArrow) {
+									hideArrow = true;
+								}
+							}}
+						>
+							{#if merchantEvents && merchantEvents.length}
+								{#each eventsPaginated as event (event['created_at'])}
+									<MerchantEvent
+										action={event.type}
+										user={findUser(event)}
+										time={event['created_at']}
+										latest={event === merchantEvents[0] ? true : false}
+									/>
+								{/each}
 
-							{#if eventsPaginated.length !== merchantEvents.length}
-								<button
-									class="mx-auto !mb-5 block text-xl font-semibold text-link transition-colors hover:text-hover"
-									on:click={() => (eventCount = eventCount + 50)}>Load More</button
-								>
-							{:else if merchantEvents.length > 10}
-								<TopButton scroll={activityDiv} style="!mb-5" />
-							{/if}
+								{#if eventsPaginated.length !== merchantEvents.length}
+									<button
+										class="mx-auto !mb-5 block text-xl font-semibold text-link transition-colors hover:text-hover"
+										on:click={() => (eventCount = eventCount + 50)}>Load More</button
+									>
+								{:else if merchantEvents.length > 10}
+									<TopButton scroll={activityDiv} style="!mb-5" />
+								{/if}
 
-							{#if !hideArrow && merchantEvents.length > 5}
-								<svg
-									class="absolute bottom-4 left-[calc(50%-8px)] z-20 h-4 w-4 animate-bounce text-primary dark:text-white"
-									fill="currentColor"
-									xmlns="http://www.w3.org/2000/svg"
-									viewBox="0 0 512 512"
-									><!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path
-										d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
-									/></svg
-								>
+								{#if !hideArrow && merchantEvents.length > 5}
+									<svg
+										class="absolute bottom-4 left-[calc(50%-8px)] z-20 h-4 w-4 animate-bounce text-primary dark:text-white"
+										fill="currentColor"
+										xmlns="http://www.w3.org/2000/svg"
+										viewBox="0 0 512 512"
+										><!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path
+											d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
+										/></svg
+									>
+								{/if}
+							{:else if !dataInitialized}
+								{#each Array(5) as _, i (i)}
+									<TaggerSkeleton />
+								{/each}
+							{:else}
+								<p class="p-5 text-body dark:text-white">No activity to display.</p>
 							{/if}
-						{:else if !dataInitialized}
-							{#each Array(5) as _, i (i)}
-								<TaggerSkeleton />
-							{/each}
-						{:else}
-							<p class="p-5 text-body dark:text-white">No activity to display.</p>
-						{/if}
+						</div>
 					</div>
-				</div>
+				</Card>
 			</section>
 
 			<section id="communities">
