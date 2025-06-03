@@ -445,17 +445,19 @@
 				<div class="grid-cols-3 gap-12 space-y-12 lg:grid lg:space-y-0">
 					{#if phone}
 						<div class="text-primary dark:text-white">
-							<h4 class="uppercase text-primary dark:text-white">Contact</h4>
-
-							<div class="flex items-center justify-center">
+							<h4 class="uppercase text-primary dark:text-white">
 								<Icon
-									w="30"
-									h="30"
-									style="text-primary dark:text-white mr-2"
+									w="16"
+									h="16"
+									style="text-primary dark:text-white inline-block"
 									icon="phone"
 									type="popup"
 								/>
-								<span>{phone}</span>
+								Contact
+							</h4>
+
+							<div class="flex items-center justify-center">
+								{phone}
 							</div>
 						</div>
 					{:else}
@@ -537,16 +539,18 @@
 
 					{#if hours}
 						<div class="text-primary dark:text-white">
-							<h4 class="uppercase text-primary dark:text-white">Hours</h4>
-
-							<div class="justify-center justify-items-start md:flex">
+							<h4 class="uppercase text-primary dark:text-white">
 								<Icon
-									w="30"
-									h="30"
-									style="text-primary dark:text-white mx-auto md:mx-0 mb-2 md:mb-0 md:mr-2"
+									w="16"
+									h="16"
+									style="text-primary dark:text-white inline"
 									icon="clock"
 									type="popup"
 								/>
+								Hours
+							</h4>
+
+							<div class="justify-center justify-items-start md:flex">
 								<!-- eslint-disable-next-line svelte/no-at-html-tags - we even sanitize the captcha content above -->
 								<time class="flex flex-col items-start">{@html formatOpeningHours(hours)}</time>
 							</div>
