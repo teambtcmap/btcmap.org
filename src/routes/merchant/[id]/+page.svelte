@@ -442,109 +442,6 @@
 					{/if}
 				</div>
 
-				<div class="flex flex-wrap items-center justify-center gap-4">
-					{#if dataInitialized}
-						<MerchantLink link={`geo:${lat},${long}`} icon="compass" text="Navigate" />
-
-						<MerchantLink
-							link={`https://www.openstreetmap.org/edit?${merchant?.osm_json.type}=${merchant?.osm_json.id}`}
-							icon="pencil"
-							text="Edit"
-						/>
-
-						<MerchantButton
-							on:click={() => {
-								navigator.clipboard.writeText(`https://btcmap.org/merchant/${merchant?.id}`);
-								successToast('Link copied to clipboard!');
-							}}
-							icon="share"
-							text="Share"
-						/>
-
-						{#if payment}
-							<MerchantLink
-								link={payment.type === 'uri'
-									? payment.url || '#'
-									: payment.type === 'pouch'
-										? `https://app.pouch.ph/${payment.username}`
-										: payment.type === 'coinos'
-											? `https://coinos.io/${payment.username}`
-											: '#'}
-								icon="bolt"
-								text="Pay Merchant"
-							/>
-						{/if}
-
-						{#if phone}
-							<MerchantLink link={`tel:${phone}`} icon="phone" text="Call" />
-						{/if}
-
-						{#if email}
-							<MerchantLink link={`mailto:${email}`} icon="email" text="Email" />
-						{/if}
-
-						{#if website}
-							<MerchantLink
-								link={website.startsWith('http') ? website : `https://${website}`}
-								icon="globe"
-								text="Website"
-							/>
-						{/if}
-
-						{#if twitter}
-							<MerchantLink
-								link={twitter.startsWith('http') ? twitter : `https://twitter.com/${twitter}`}
-								icon="twitter"
-								text="Twitter"
-							/>
-						{/if}
-
-						{#if instagram}
-							<MerchantLink
-								link={instagram.startsWith('http')
-									? instagram
-									: `https://instagram.com/${instagram}`}
-								icon="instagram"
-								text="Instagram"
-							/>
-						{/if}
-
-						{#if facebook}
-							<MerchantLink
-								link={facebook.startsWith('http') ? facebook : `https://facebook.com/${facebook}`}
-								icon="facebook"
-								text="Facebook"
-							/>
-						{/if}
-
-						<span id="show-tags">
-							<MerchantButton
-								on:click={() => ($showTags = merchant?.osm_json.tags || {})}
-								icon="tags"
-								text="Show Tags"
-							/>
-						</span>
-
-						<span id="tagging-issues">
-							<MerchantButton
-								on:click={() => ($taggingIssues = merchant?.tags?.issues || [])}
-								icon="issues"
-								text="Tag Issues"
-							/>
-						</span>
-
-						<MerchantLink
-							link={`https://www.openstreetmap.org/${merchant?.osm_json.type}/${merchant?.osm_json.id}`}
-							icon="external"
-							text="View OSM"
-						/>
-					{:else}
-						{#each Array(5) as _, i (i)}
-							<div class="h-20 w-24 animate-pulse rounded-lg bg-link/50" />
-						{/each}
-					{/if}
-				</div>
-
 				<div class="grid-cols-3 gap-12 space-y-12 lg:grid lg:space-y-0">
 					{#if phone}
 						<div class="text-primary dark:text-white">
@@ -657,6 +554,109 @@
 					{/if}
 				</div>
 
+				<div class="flex flex-wrap items-center justify-center gap-4">
+					{#if dataInitialized}
+						<MerchantLink link={`geo:${lat},${long}`} icon="compass" text="Navigate" />
+
+						<MerchantLink
+							link={`https://www.openstreetmap.org/edit?${merchant?.osm_json.type}=${merchant?.osm_json.id}`}
+							icon="pencil"
+							text="Edit"
+						/>
+
+						<MerchantButton
+							on:click={() => {
+								navigator.clipboard.writeText(`https://btcmap.org/merchant/${merchant?.id}`);
+								successToast('Link copied to clipboard!');
+							}}
+							icon="share"
+							text="Share"
+						/>
+
+						{#if payment}
+							<MerchantLink
+								link={payment.type === 'uri'
+									? payment.url || '#'
+									: payment.type === 'pouch'
+										? `https://app.pouch.ph/${payment.username}`
+										: payment.type === 'coinos'
+											? `https://coinos.io/${payment.username}`
+											: '#'}
+								icon="bolt"
+								text="Pay Merchant"
+							/>
+						{/if}
+
+						{#if phone}
+							<MerchantLink link={`tel:${phone}`} icon="phone" text="Call" />
+						{/if}
+
+						{#if email}
+							<MerchantLink link={`mailto:${email}`} icon="email" text="Email" />
+						{/if}
+
+						{#if website}
+							<MerchantLink
+								link={website.startsWith('http') ? website : `https://${website}`}
+								icon="globe"
+								text="Website"
+							/>
+						{/if}
+
+						{#if twitter}
+							<MerchantLink
+								link={twitter.startsWith('http') ? twitter : `https://twitter.com/${twitter}`}
+								icon="twitter"
+								text="Twitter"
+							/>
+						{/if}
+
+						{#if instagram}
+							<MerchantLink
+								link={instagram.startsWith('http')
+									? instagram
+									: `https://instagram.com/${instagram}`}
+								icon="instagram"
+								text="Instagram"
+							/>
+						{/if}
+
+						{#if facebook}
+							<MerchantLink
+								link={facebook.startsWith('http') ? facebook : `https://facebook.com/${facebook}`}
+								icon="facebook"
+								text="Facebook"
+							/>
+						{/if}
+
+						<span id="show-tags">
+							<MerchantButton
+								on:click={() => ($showTags = merchant?.osm_json.tags || {})}
+								icon="tags"
+								text="Show Tags"
+							/>
+						</span>
+
+						<span id="tagging-issues">
+							<MerchantButton
+								on:click={() => ($taggingIssues = merchant?.tags?.issues || [])}
+								icon="issues"
+								text="Tag Issues"
+							/>
+						</span>
+
+						<MerchantLink
+							link={`https://www.openstreetmap.org/${merchant?.osm_json.type}/${merchant?.osm_json.id}`}
+							icon="external"
+							text="View OSM"
+						/>
+					{:else}
+						{#each Array(5) as _, i (i)}
+							<div class="h-20 w-24 animate-pulse rounded-lg bg-link/50" />
+						{/each}
+					{/if}
+				</div>
+
 				{#if description}
 					<p class="mx-auto max-w-[600px] text-primary dark:text-white">{description}</p>
 				{/if}
@@ -667,85 +667,107 @@
 
 				{#if dataInitialized}
 					<div class="grid-cols-3 gap-12 space-y-12 lg:grid lg:space-y-0">
-						<div class="flex flex-col justify-between text-primary dark:text-white">
-							<h3 class="text-2xl font-semibold">Last Surveyed</h3>
-
-							{#if verified.length}
-								<div class="flex items-center justify-center">
-									{#if Date.parse(verified[0]) > verifiedDate}
-										<span bind:this={verifiedTooltip}>
-											<Icon
-												w="30"
-												h="30"
-												style="text-primary dark:text-white mr-2"
-												icon="verified"
-												type="popup"
-											/>
-										</span>
-									{:else}
-										<span bind:this={outdatedTooltip}>
-											<Icon
-												w="30"
-												h="30"
-												style="text-primary dark:text-white mr-2"
-												icon="outdated"
-												type="popup"
-											/>
-										</span>
-									{/if}
-									<strong>{verified[0]}</strong>
-								</div>
-							{:else}
-								<p class="font-semibold">This location needs to be surveyed!</p>
-							{/if}
-
-							<PrimaryButton
-								link={`/verify-location?id=${merchant?.id}`}
-								style="rounded-xl p-3 w-40 mx-auto"
+						<div class="flex w-full flex-col rounded-3xl border border-statBorder dark:bg-white/10">
+							<div
+								class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white"
 							>
-								Verify Location
-							</PrimaryButton>
+								<h3 class="text-2xl font-semibold">Last Surveyed</h3>
+							</div>
+
+							<div class="flex flex-1 flex-col items-center justify-between gap-4 p-4">
+								<div class="flex flex-col items-center gap-4">
+									{#if verified.length}
+										<div class="flex items-center justify-center dark:text-white">
+											{#if Date.parse(verified[0]) > verifiedDate}
+												<span bind:this={verifiedTooltip}>
+													<Icon
+														w="30"
+														h="30"
+														style="text-primary dark:text-white mr-2"
+														icon="verified"
+														type="popup"
+													/>
+												</span>
+											{:else}
+												<span bind:this={outdatedTooltip}>
+													<Icon
+														w="30"
+														h="30"
+														style="text-primary dark:text-white mr-2"
+														icon="outdated"
+														type="popup"
+													/>
+												</span>
+											{/if}
+											<strong>{verified[0]}</strong>
+										</div>
+									{:else}
+										<p class="font-semibold dark:text-white">This location needs to be surveyed!</p>
+									{/if}
+								</div>
+
+								<PrimaryButton
+									link={`/verify-location?id=${merchant?.id}`}
+									style="rounded-xl p-3 w-40"
+								>
+									Verify Location
+								</PrimaryButton>
+							</div>
 						</div>
 
-						<div class="space-y-4 text-primary dark:text-white">
-							<h3 class="text-2xl font-semibold">Boost</h3>
+						<div class="flex w-full flex-col rounded-3xl border border-statBorder dark:bg-white/10">
+							<div
+								class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white"
+							>
+								<h3 class="text-2xl font-semibold">Boost</h3>
+							</div>
 
-							<p class="mx-auto max-w-[300px] font-semibold">
-								{boosted
-									? 'This location is boosted!'
-									: "Boost this location to improve it's visibility on the map."}
-							</p>
+							<div class="flex flex-1 flex-col items-center justify-between gap-4 p-4">
+								<div class="flex flex-col items-center gap-4">
+									<p class="mx-auto font-semibold dark:text-white">
+										{boosted
+											? 'This location is boosted!'
+											: "Boost this location to improve it's visibility on the map."}
+									</p>
 
-							{#if boosted}
-								<p>
-									Boost Expires: <span
-										class="underline decoration-bitcoin decoration-4 underline-offset-8"
-										><Time live={3000} relative={true} timestamp={boosted} /></span
-									>
-								</p>
-							{/if}
+									{#if boosted}
+										<p>
+											Boost Expires:
+											<span class="underline decoration-bitcoin decoration-4 underline-offset-8">
+												<Time live={3000} relative={true} timestamp={boosted} />
+											</span>
+										</p>
+									{/if}
+								</div>
 
-							<BoostButton {merchant} {boosted} />
+								<BoostButton {merchant} {boosted} />
+							</div>
 						</div>
 
-						<div class="flex flex-col items-center space-y-4 text-primary dark:text-white">
-							<a href="#comments" class="underline transition-colors hover:text-link">
+						<div class="flex w-full flex-col rounded-3xl border border-statBorder dark:bg-white/10">
+							<div
+								class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white"
+							>
 								<h3 class="text-2xl font-semibold">
 									Comments {#if data.comments.length}({data.comments.length}){/if}
 								</h3>
-							</a>
+							</div>
 
-							<p class="mx-auto max-w-[300px] font-semibold">
-								{#if data.comments.length}
-									Let others know your thoughts about this merchant.
-								{:else}
-									No comments yet. Be the first to leave a comment!
+							<div class="flex flex-1 flex-col items-center justify-between gap-4 p-4">
+								<div class="flex flex-col items-center gap-4">
+									<p class="mx-auto font-semibold dark:text-white">
+										{#if data.comments.length}
+											Let others know your thoughts about this merchant.
+										{:else}
+											No comments yet. Be the first to leave a comment!
+										{/if}
+									</p>
+								</div>
+
+								{#if merchant}
+									<CommentAddButton elementId={merchant.id} />
 								{/if}
-							</p>
-
-							{#if merchant}
-								<CommentAddButton elementId={merchant.id} />
-							{/if}
+							</div>
 						</div>
 					</div>
 				{/if}
