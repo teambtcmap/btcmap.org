@@ -6,6 +6,7 @@
 	import {
 		Boost,
 		BoostButton,
+		Card,
 		CommentAddButton,
 		Footer,
 		Header,
@@ -66,6 +67,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import Time from 'svelte-time';
 	import tippy from 'tippy.js';
+	import DOMPurify from 'dompurify';
 
 	// alert for user errors
 	$: $userError && errToast($userError);
@@ -78,8 +80,13 @@
 	// alert for report errors
 	$: $reportError && errToast($reportError);
 
-	const formatWithLineBreaks = (str: string): string => {
-		return str.replace(/;\s*/g, '\n');
+	const formatOpeningHours = (str: string): string => {
+		const html = str
+			.split(/;\s*/)
+			.map((part) => `<span>${part.trim()}</span>`)
+			.join('');
+
+		return DOMPurify.sanitize(html, { ALLOWED_TAGS: ['span'] });
 	};
 
 	let dataInitialized = false;
@@ -436,6 +443,122 @@
 					{/if}
 				</div>
 
+				<div class="grid-cols-3 gap-12 space-y-12 lg:grid lg:space-y-0">
+					{#if phone}
+						<div class="text-primary dark:text-white">
+							<h4 class="uppercase text-primary dark:text-white">
+								<Icon
+									w="16"
+									h="16"
+									style="text-primary dark:text-white inline-block"
+									icon="phone"
+									type="popup"
+								/>
+								Contact
+							</h4>
+
+							<div class="flex items-center justify-center">
+								{phone}
+							</div>
+						</div>
+					{:else}
+						<div></div>
+						<!-- Placeholder for alignment -->
+					{/if}
+
+					{#if (paymentMethod || thirdParty) && merchant}
+						<div class="text-primary dark:text-white">
+							<h4 class="uppercase text-primary dark:text-white">Accepted Payments</h4>
+							<div class="mt-1 flex items-center justify-center space-x-2">
+								{#if !paymentMethod}
+									<a
+										bind:this={thirdPartyTooltip}
+										href={merchant.osm_json.tags?.['payment:lightning:companion_app_url']}
+										target="_blank"
+										rel="noreferrer"
+									>
+										<i
+											class="fa-solid fa-mobile-screen-button h-8 w-8 text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
+										>
+										</i>
+									</a>
+								{:else if typeof window !== 'undefined'}
+									<img
+										bind:this={onchainTooltip}
+										src={merchant.osm_json.tags?.['payment:onchain'] === 'yes'
+											? detectTheme() === 'dark' || $theme === 'dark'
+												? '/icons/btc-highlight-dark.svg'
+												: '/icons/btc-highlight.svg'
+											: merchant.osm_json.tags?.['payment:onchain'] === 'no'
+												? detectTheme() === 'dark' || $theme === 'dark'
+													? '/icons/btc-no-dark.svg'
+													: '/icons/btc-no-teal.svg'
+												: detectTheme() === 'dark' || $theme === 'dark'
+													? '/icons/btc-dark.svg'
+													: '/icons/btc.svg'}
+										alt="bitcoin"
+										class="h-8 w-8"
+									/>
+
+									<img
+										bind:this={lnTooltip}
+										src={merchant.osm_json.tags?.['payment:lightning'] === 'yes'
+											? detectTheme() === 'dark' || $theme === 'dark'
+												? '/icons/ln-highlight-dark.svg'
+												: '/icons/ln-highlight.svg'
+											: merchant.osm_json.tags?.['payment:lightning'] === 'no'
+												? detectTheme() === 'dark' || $theme === 'dark'
+													? '/icons/ln-no-dark.svg'
+													: '/icons/ln-no-teal.svg'
+												: detectTheme() === 'dark' || $theme === 'dark'
+													? '/icons/ln-dark.svg'
+													: '/icons/ln.svg'}
+										alt="lightning"
+										class="h-8 w-8"
+									/>
+
+									<img
+										bind:this={nfcTooltip}
+										src={merchant.osm_json.tags?.['payment:lightning_contactless'] === 'yes'
+											? detectTheme() === 'dark' || $theme === 'dark'
+												? '/icons/nfc-highlight-dark.svg'
+												: '/icons/nfc-highlight.svg'
+											: merchant.osm_json.tags?.['payment:lightning_contactless'] === 'no'
+												? detectTheme() === 'dark' || $theme === 'dark'
+													? '/icons/nfc-no-dark.svg'
+													: '/icons/nfc-no-teal.svg'
+												: detectTheme() === 'dark' || $theme === 'dark'
+													? '/icons/nfc-dark.svg'
+													: '/icons/nfc.svg'}
+										alt="nfc"
+										class="h-8 w-8"
+									/>
+								{/if}
+							</div>
+						</div>
+					{/if}
+
+					{#if hours}
+						<div class="text-primary dark:text-white">
+							<h4 class="uppercase text-primary dark:text-white">
+								<Icon
+									w="16"
+									h="16"
+									style="text-primary dark:text-white inline"
+									icon="clock"
+									type="popup"
+								/>
+								Hours
+							</h4>
+
+							<div class="justify-center justify-items-start md:flex">
+								<!-- eslint-disable-next-line svelte/no-at-html-tags - we even sanitize the captcha content above -->
+								<time class="flex flex-col items-start">{@html formatOpeningHours(hours)}</time>
+							</div>
+						</div>
+					{/if}
+				</div>
+
 				<div class="flex flex-wrap items-center justify-center gap-4">
 					{#if dataInitialized}
 						<MerchantLink link={`geo:${lat},${long}`} icon="compass" text="Navigate" />
@@ -539,117 +662,6 @@
 					{/if}
 				</div>
 
-				<div class="grid-cols-3 gap-12 space-y-12 lg:grid lg:space-y-0">
-					{#if phone}
-						<div class="text-primary dark:text-white">
-							<h4 class="uppercase text-primary dark:text-white">Contact</h4>
-
-							<div class="flex items-center justify-center">
-								<Icon
-									w="30"
-									h="30"
-									style="text-primary dark:text-white mr-2"
-									icon="phone"
-									type="popup"
-								/>
-								<span>{phone}</span>
-							</div>
-						</div>
-					{:else}
-						<div></div>
-						<!-- Placeholder for alignment -->
-					{/if}
-
-					{#if (paymentMethod || thirdParty) && merchant}
-						<div class="text-primary dark:text-white">
-							<h4 class="uppercase text-primary dark:text-white">Accepted Payments</h4>
-							<div class="mt-1 flex items-center justify-center space-x-2">
-								{#if !paymentMethod}
-									<a
-										bind:this={thirdPartyTooltip}
-										href={merchant.osm_json.tags?.['payment:lightning:companion_app_url']}
-										target="_blank"
-										rel="noreferrer"
-									>
-										<i
-											class="fa-solid fa-mobile-screen-button h-8 w-8 text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
-										>
-										</i>
-									</a>
-								{:else if typeof window !== 'undefined'}
-									<img
-										bind:this={onchainTooltip}
-										src={merchant.osm_json.tags?.['payment:onchain'] === 'yes'
-											? detectTheme() === 'dark' || $theme === 'dark'
-												? '/icons/btc-highlight-dark.svg'
-												: '/icons/btc-highlight.svg'
-											: merchant.osm_json.tags?.['payment:onchain'] === 'no'
-												? detectTheme() === 'dark' || $theme === 'dark'
-													? '/icons/btc-no-dark.svg'
-													: '/icons/btc-no-teal.svg'
-												: detectTheme() === 'dark' || $theme === 'dark'
-													? '/icons/btc-dark.svg'
-													: '/icons/btc.svg'}
-										alt="bitcoin"
-										class="h-8 w-8"
-									/>
-
-									<img
-										bind:this={lnTooltip}
-										src={merchant.osm_json.tags?.['payment:lightning'] === 'yes'
-											? detectTheme() === 'dark' || $theme === 'dark'
-												? '/icons/ln-highlight-dark.svg'
-												: '/icons/ln-highlight.svg'
-											: merchant.osm_json.tags?.['payment:lightning'] === 'no'
-												? detectTheme() === 'dark' || $theme === 'dark'
-													? '/icons/ln-no-dark.svg'
-													: '/icons/ln-no-teal.svg'
-												: detectTheme() === 'dark' || $theme === 'dark'
-													? '/icons/ln-dark.svg'
-													: '/icons/ln.svg'}
-										alt="lightning"
-										class="h-8 w-8"
-									/>
-
-									<img
-										bind:this={nfcTooltip}
-										src={merchant.osm_json.tags?.['payment:lightning_contactless'] === 'yes'
-											? detectTheme() === 'dark' || $theme === 'dark'
-												? '/icons/nfc-highlight-dark.svg'
-												: '/icons/nfc-highlight.svg'
-											: merchant.osm_json.tags?.['payment:lightning_contactless'] === 'no'
-												? detectTheme() === 'dark' || $theme === 'dark'
-													? '/icons/nfc-no-dark.svg'
-													: '/icons/nfc-no-teal.svg'
-												: detectTheme() === 'dark' || $theme === 'dark'
-													? '/icons/nfc-dark.svg'
-													: '/icons/nfc.svg'}
-										alt="nfc"
-										class="h-8 w-8"
-									/>
-								{/if}
-							</div>
-						</div>
-					{/if}
-
-					{#if hours}
-						<div class="text-primary dark:text-white">
-							<h4 class="uppercase text-primary dark:text-white">Hours</h4>
-
-							<div class="justify-center justify-items-start md:flex">
-								<Icon
-									w="30"
-									h="30"
-									style="text-primary dark:text-white mx-auto md:mx-0 mb-2 md:mb-0 md:mr-2"
-									icon="clock"
-									type="popup"
-								/>
-								<time class="whitespace-pre-line">{formatWithLineBreaks(hours)}</time>
-							</div>
-						</div>
-					{/if}
-				</div>
-
 				{#if description}
 					<p class="mx-auto max-w-[600px] text-primary dark:text-white">{description}</p>
 				{/if}
@@ -660,230 +672,238 @@
 
 				{#if dataInitialized}
 					<div class="grid-cols-3 gap-12 space-y-12 lg:grid lg:space-y-0">
-						<div class="flex flex-col justify-between text-primary dark:text-white">
-							<h3 class="text-2xl font-semibold">Last Surveyed</h3>
+						<Card headerAlign="center">
+							<h3 slot="header" class="text-2xl font-semibold">Last Surveyed</h3>
 
-							{#if verified.length}
-								<div class="flex items-center justify-center">
-									{#if Date.parse(verified[0]) > verifiedDate}
-										<span bind:this={verifiedTooltip}>
-											<Icon
-												w="30"
-												h="30"
-												style="text-primary dark:text-white mr-2"
-												icon="verified"
-												type="popup"
-											/>
-										</span>
-									{:else}
-										<span bind:this={outdatedTooltip}>
-											<Icon
-												w="30"
-												h="30"
-												style="text-primary dark:text-white mr-2"
-												icon="outdated"
-												type="popup"
-											/>
-										</span>
-									{/if}
-									<strong>{verified[0]}</strong>
-								</div>
-							{:else}
-								<p class="font-semibold">This location needs to be surveyed!</p>
-							{/if}
+							<div slot="body" class="p-4">
+								{#if verified.length}
+									<div class="flex items-center justify-center dark:text-white">
+										{#if Date.parse(verified[0]) > verifiedDate}
+											<span bind:this={verifiedTooltip}>
+												<Icon
+													w="30"
+													h="30"
+													style="text-primary dark:text-white mr-2"
+													icon="verified"
+													type="popup"
+												/>
+											</span>
+										{:else}
+											<span bind:this={outdatedTooltip}>
+												<Icon
+													w="30"
+													h="30"
+													style="text-primary dark:text-white mr-2"
+													icon="outdated"
+													type="popup"
+												/>
+											</span>
+										{/if}
+										<strong>{verified[0]}</strong>
+									</div>
+								{:else}
+									<p class="font-semibold dark:text-white">This location needs to be surveyed!</p>
+								{/if}
+							</div>
 
 							<PrimaryButton
+								slot="footer"
 								link={`/verify-location?id=${merchant?.id}`}
-								style="rounded-xl p-3 w-40 mx-auto"
+								style="rounded-xl p-3 w-40"
 							>
 								Verify Location
 							</PrimaryButton>
-						</div>
+						</Card>
 
-						<div class="space-y-4 text-primary dark:text-white">
-							<h3 class="text-2xl font-semibold">Boost</h3>
+						<Card headerAlign="center">
+							<h3 slot="header" class="text-2xl font-semibold">Boost</h3>
 
-							<p class="mx-auto max-w-[300px] font-semibold">
-								{boosted
-									? 'This location is boosted!'
-									: "Boost this location to improve it's visibility on the map."}
-							</p>
-
-							{#if boosted}
-								<p>
-									Boost Expires: <span
-										class="underline decoration-bitcoin decoration-4 underline-offset-8"
-										><Time live={3000} relative={true} timestamp={boosted} /></span
-									>
+							<div slot="body" class="p-4">
+								<p class="mx-auto font-semibold dark:text-white">
+									{boosted
+										? 'This location is boosted!'
+										: "Boost this location to improve it's visibility on the map."}
 								</p>
-							{/if}
 
-							<BoostButton {merchant} {boosted} />
-						</div>
-
-						<div class="flex flex-col items-center space-y-4 text-primary dark:text-white">
-							<a href="#comments" class="underline transition-colors hover:text-link">
-								<h3 class="text-2xl font-semibold">
-									Comments {#if data.comments.length}({data.comments.length}){/if}
-								</h3>
-							</a>
-
-							<p class="mx-auto max-w-[300px] font-semibold">
-								{#if data.comments.length}
-									Let others know your thoughts about this merchant.
-								{:else}
-									No comments yet. Be the first to leave a comment!
+								{#if boosted}
+									<p>
+										Boost Expires:
+										<span class="underline decoration-bitcoin decoration-4 underline-offset-8">
+											<Time live={3000} relative={true} timestamp={boosted} />
+										</span>
+									</p>
 								{/if}
-							</p>
+							</div>
 
-							{#if merchant}
-								<CommentAddButton elementId={merchant.id} />
-							{/if}
-						</div>
+							<BoostButton slot="footer" {merchant} {boosted} />
+						</Card>
+
+						<Card headerAlign="center">
+							<h3 slot="header" class="text-2xl font-semibold">
+								Comments {#if data.comments.length}({data.comments.length}){/if}
+							</h3>
+
+							<div slot="body" class="p-4">
+								<p class="mx-auto font-semibold dark:text-white">
+									{#if data.comments.length}
+										Let others know your thoughts about this merchant.
+									{:else}
+										No comments yet. Be the first to leave a comment!
+									{/if}
+								</p>
+							</div>
+
+							<div slot="footer">
+								{#if merchant}
+									<CommentAddButton elementId={merchant.id} />
+								{/if}
+							</div>
+						</Card>
 					</div>
 				{/if}
 			</section>
 
 			<section id="map-section">
-				<h3
-					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary dark:bg-white/10 dark:text-white lg:text-left"
-				>
-					{name || 'Merchant'} Location
-				</h3>
-
-				<div class="relative">
-					<div
-						bind:this={mapElement}
-						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal text-left dark:!bg-[#202f33] md:h-[600px]"
-					/>
-					{#if !mapLoaded}
-						<MapLoadingEmbed
-							style="h-[300px] md:h-[600px] border border-statBorder rounded-b-3xl"
-						/>
-					{/if}
-				</div>
-			</section>
-
-			<section id="comments">
-				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
-					<h3
-						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white lg:text-left"
-					>
-						{name || 'Merchant'} Comments
+				<Card>
+					<h3 slot="header" class="text-lg font-semibold">
+						{name || 'Merchant'} Location
 					</h3>
 
-					<div class="hide-scroll relative max-h-[375px] space-y-2 overflow-y-scroll">
-						<div class="relative space-y-2">
-							{#if data.comments && data.comments.length}
-								{#each [...data.comments].reverse() as comment (comment.id)}
-									<MerchantComment text={comment.text} time={comment['created_at']} />
-								{/each}
-							{:else}
-								<p class="p-5 text-body dark:text-white">No comments yet.</p>
+					<div slot="body" class="w-full">
+						<div class="relative overflow-hidden">
+							<div
+								bind:this={mapElement}
+								class="z-10 h-[300px] rounded-b-3xl !bg-teal text-left dark:!bg-[#202f33] md:h-[600px]"
+							/>
+							{#if !mapLoaded}
+								<MapLoadingEmbed style="h-[300px] md:h-[600px]  rounded-b-3xl" />
 							{/if}
 						</div>
 					</div>
-				</div>
+				</Card>
+			</section>
+
+			<section id="comments">
+				<Card>
+					<h3 slot="header" class="text-lg font-semibold">
+						{name || 'Merchant'} Comments
+					</h3>
+
+					<div slot="body" class="w-full">
+						<div class="hide-scroll relative max-h-[300px] space-y-2 overflow-y-scroll">
+							<div class="relative space-y-2">
+								{#if data.comments && data.comments.length}
+									{#each [...data.comments].reverse() as comment (comment.id)}
+										<MerchantComment text={comment.text} time={comment['created_at']} />
+									{/each}
+								{:else}
+									<p class="p-5 text-body dark:text-white">No comments yet.</p>
+								{/if}
+							</div>
+						</div>
+					</div>
+				</Card>
 			</section>
 
 			<section id="activity">
-				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
-					<h3
-						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white lg:text-left"
-					>
+				<Card>
+					<h3 slot="header" class="text-lg font-semibold">
 						{name || 'Merchant'} Activity
 					</h3>
 
-					<div
-						bind:this={activityDiv}
-						class="hide-scroll relative max-h-[375px] space-y-2 overflow-y-scroll"
-						on:scroll={() => {
-							if (dataInitialized && !hideArrow) {
-								hideArrow = true;
-							}
-						}}
-					>
-						{#if merchantEvents && merchantEvents.length}
-							{#each eventsPaginated as event (event['created_at'])}
-								<MerchantEvent
-									action={event.type}
-									user={findUser(event)}
-									time={event['created_at']}
-									latest={event === merchantEvents[0] ? true : false}
-								/>
-							{/each}
+					<div slot="body" class="w-full">
+						<div
+							bind:this={activityDiv}
+							class="hide-scroll relative max-h-[300px] space-y-2 overflow-y-scroll"
+							on:scroll={() => {
+								if (dataInitialized && !hideArrow) {
+									hideArrow = true;
+								}
+							}}
+						>
+							{#if merchantEvents && merchantEvents.length}
+								{#each eventsPaginated as event (event['created_at'])}
+									<MerchantEvent
+										action={event.type}
+										user={findUser(event)}
+										time={event['created_at']}
+										latest={event === merchantEvents[0] ? true : false}
+									/>
+								{/each}
 
-							{#if eventsPaginated.length !== merchantEvents.length}
-								<button
-									class="mx-auto !mb-5 block text-xl font-semibold text-link transition-colors hover:text-hover"
-									on:click={() => (eventCount = eventCount + 50)}>Load More</button
-								>
-							{:else if merchantEvents.length > 10}
-								<TopButton scroll={activityDiv} style="!mb-5" />
-							{/if}
+								{#if eventsPaginated.length !== merchantEvents.length}
+									<button
+										class="mx-auto !mb-5 block text-xl font-semibold text-link transition-colors hover:text-hover"
+										on:click={() => (eventCount = eventCount + 50)}>Load More</button
+									>
+								{:else if merchantEvents.length > 10}
+									<TopButton scroll={activityDiv} style="!mb-5" />
+								{/if}
 
-							{#if !hideArrow && merchantEvents.length > 5}
-								<svg
-									class="absolute bottom-4 left-[calc(50%-8px)] z-20 h-4 w-4 animate-bounce text-primary dark:text-white"
-									fill="currentColor"
-									xmlns="http://www.w3.org/2000/svg"
-									viewBox="0 0 512 512"
-									><!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path
-										d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
-									/></svg
-								>
+								{#if !hideArrow && merchantEvents.length > 5}
+									<svg
+										class="absolute bottom-4 left-[calc(50%-8px)] z-20 h-4 w-4 animate-bounce text-primary dark:text-white"
+										fill="currentColor"
+										xmlns="http://www.w3.org/2000/svg"
+										viewBox="0 0 512 512"
+										><!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path
+											d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
+										/></svg
+									>
+								{/if}
+							{:else if !dataInitialized}
+								{#each Array(5) as _, i (i)}
+									<TaggerSkeleton />
+								{/each}
+							{:else}
+								<p class="p-5 text-body dark:text-white">No activity to display.</p>
 							{/if}
-						{:else if !dataInitialized}
-							{#each Array(5) as _, i (i)}
-								<TaggerSkeleton />
-							{/each}
-						{:else}
-							<p class="p-5 text-body dark:text-white">No activity to display.</p>
-						{/if}
+						</div>
 					</div>
-				</div>
+				</Card>
 			</section>
 
 			<section id="communities">
-				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
-					<h3
-						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white lg:text-left"
-					>
+				<Card>
+					<h3 slot="header" class="text-lg font-semibold">
 						{name || 'Merchant'} Communities
 					</h3>
-					<div
-						class="hide-scroll flex max-h-[375px] flex-wrap items-center justify-center overflow-scroll p-1"
-					>
-						{#if filteredCommunities && filteredCommunities.length}
-							{#each filteredCommunities as community (community.id)}
-								<div class="m-4 space-y-1 transition-transform hover:scale-110">
-									<a href="/community/{community.id}">
-										<img
-											src={`https://btcmap.org/.netlify/images?url=${community.tags['icon:square']}&fit=cover&w=256&h=256`}
-											alt="logo"
-											class="mx-auto h-20 w-20 rounded-full object-cover"
-											on:error={function () {
-												this.src = '/images/bitcoin.svg';
-											}}
-										/>
-										<p class="text-center font-semibold text-body dark:text-white">
-											{community.tags.name}
-										</p>
-									</a>
-								</div>
-							{/each}
-						{:else if !dataInitialized}
-							<p class="p-5 text-body dark:text-white">Loading communities...</p>
-						{:else}
-							<p class="p-5 text-body dark:text-white">
-								This location is not part of a communtiy, but one can be <a
-									href="/communities/add"
-									class="text-link transition-colors hover:text-hover">created</a
-								> to help maintain this local area.
-							</p>
-						{/if}
+
+					<div slot="body" class="w-full">
+						<div
+							class="hide-scroll flex max-h-[300px] flex-wrap items-center justify-center overflow-scroll"
+						>
+							{#if filteredCommunities && filteredCommunities.length}
+								{#each filteredCommunities as community (community.id)}
+									<div class="m-4 space-y-1 transition-transform hover:scale-110">
+										<a href="/community/{community.id}">
+											<img
+												src={`https://btcmap.org/.netlify/images?url=${community.tags['icon:square']}&fit=cover&w=256&h=256`}
+												alt="logo"
+												class="mx-auto h-20 w-20 rounded-full object-cover"
+												on:error={function () {
+													this.src = '/images/bitcoin.svg';
+												}}
+											/>
+											<p class="text-center font-semibold text-body dark:text-white">
+												{community.tags.name}
+											</p>
+										</a>
+									</div>
+								{/each}
+							{:else if !dataInitialized}
+								<p class="p-5 text-body dark:text-white">Loading communities...</p>
+							{:else}
+								<p class="p-5 text-body dark:text-white">
+									This location is not part of a communtiy, but one can be <a
+										href="/communities/add"
+										class="text-link transition-colors hover:text-hover">created</a
+									> to help maintain this local area.
+								</p>
+							{/if}
+						</div>
 					</div>
-				</div>
+				</Card>
 			</section>
 
 			<p class="text-center text-sm text-body dark:text-white md:text-left">
