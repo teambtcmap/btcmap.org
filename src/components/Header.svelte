@@ -8,6 +8,7 @@
 		{ title: 'Areas', url: '', icon: 'areas' },
 		{ title: 'Maintain', url: '', icon: 'contribute' },
 		{ title: 'Wiki', url: 'https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki', icon: 'wiki' },
+		{ title: 'Blog', url: 'https://blog.btcmap.org', icon: 'blog' },
 		{ title: 'Support Us', url: '/support-us', icon: 'support' }
 	];
 
