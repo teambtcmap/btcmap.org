@@ -22,6 +22,7 @@ export { default as BadgeCard } from '../components/BadgeCard.svelte';
 export { default as Boost } from '../components/Boost.svelte';
 export { default as BoostButton } from '../components/BoostButton.svelte';
 export { default as Breadcrumbs } from '../components/Breadcrumbs.svelte';
+export { default as Card } from '../components/Card.svelte';
 export { default as CloseButton } from '../components/CloseButton.svelte';
 export { default as CommentAdd } from '../components/CommentAdd.svelte';
 export { default as CommentAddButton } from '../components/CommentAddButton.svelte';

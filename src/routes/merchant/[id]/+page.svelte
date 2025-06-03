@@ -6,6 +6,7 @@
 	import {
 		Boost,
 		BoostButton,
+		Card,
 		CommentAddButton,
 		Footer,
 		Header,
@@ -671,108 +672,93 @@
 
 				{#if dataInitialized}
 					<div class="grid-cols-3 gap-12 space-y-12 lg:grid lg:space-y-0">
-						<div class="flex w-full flex-col rounded-3xl border border-statBorder dark:bg-white/10">
-							<div
-								class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white"
-							>
-								<h3 class="text-2xl font-semibold">Last Surveyed</h3>
-							</div>
+						<Card headerAlign="center">
+							<h3 slot="header" class="text-2xl font-semibold">Last Surveyed</h3>
 
-							<div class="flex flex-1 flex-col items-center justify-between gap-4 p-4">
-								<div class="flex flex-col items-center gap-4">
-									{#if verified.length}
-										<div class="flex items-center justify-center dark:text-white">
-											{#if Date.parse(verified[0]) > verifiedDate}
-												<span bind:this={verifiedTooltip}>
-													<Icon
-														w="30"
-														h="30"
-														style="text-primary dark:text-white mr-2"
-														icon="verified"
-														type="popup"
-													/>
-												</span>
-											{:else}
-												<span bind:this={outdatedTooltip}>
-													<Icon
-														w="30"
-														h="30"
-														style="text-primary dark:text-white mr-2"
-														icon="outdated"
-														type="popup"
-													/>
-												</span>
-											{/if}
-											<strong>{verified[0]}</strong>
-										</div>
-									{:else}
-										<p class="font-semibold dark:text-white">This location needs to be surveyed!</p>
-									{/if}
-								</div>
-
-								<PrimaryButton
-									link={`/verify-location?id=${merchant?.id}`}
-									style="rounded-xl p-3 w-40"
-								>
-									Verify Location
-								</PrimaryButton>
-							</div>
-						</div>
-
-						<div class="flex w-full flex-col rounded-3xl border border-statBorder dark:bg-white/10">
-							<div
-								class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white"
-							>
-								<h3 class="text-2xl font-semibold">Boost</h3>
-							</div>
-
-							<div class="flex flex-1 flex-col items-center justify-between gap-4 p-4">
-								<div class="flex flex-col items-center gap-4">
-									<p class="mx-auto font-semibold dark:text-white">
-										{boosted
-											? 'This location is boosted!'
-											: "Boost this location to improve it's visibility on the map."}
-									</p>
-
-									{#if boosted}
-										<p>
-											Boost Expires:
-											<span class="underline decoration-bitcoin decoration-4 underline-offset-8">
-												<Time live={3000} relative={true} timestamp={boosted} />
+							<div slot="body" class="p-4">
+								{#if verified.length}
+									<div class="flex items-center justify-center dark:text-white">
+										{#if Date.parse(verified[0]) > verifiedDate}
+											<span bind:this={verifiedTooltip}>
+												<Icon
+													w="30"
+													h="30"
+													style="text-primary dark:text-white mr-2"
+													icon="verified"
+													type="popup"
+												/>
 											</span>
-										</p>
-									{/if}
-								</div>
-
-								<BoostButton {merchant} {boosted} />
-							</div>
-						</div>
-
-						<div class="flex w-full flex-col rounded-3xl border border-statBorder dark:bg-white/10">
-							<div
-								class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white"
-							>
-								<h3 class="text-2xl font-semibold">
-									Comments {#if data.comments.length}({data.comments.length}){/if}
-								</h3>
-							</div>
-
-							<div class="flex flex-1 flex-col items-center justify-between gap-4 p-4">
-								<div class="flex flex-col items-center gap-4">
-									<p class="mx-auto font-semibold dark:text-white">
-										{#if data.comments.length}
-											Let others know your thoughts about this merchant.
 										{:else}
-											No comments yet. Be the first to leave a comment!
+											<span bind:this={outdatedTooltip}>
+												<Icon
+													w="30"
+													h="30"
+													style="text-primary dark:text-white mr-2"
+													icon="outdated"
+													type="popup"
+												/>
+											</span>
 										{/if}
-									</p>
-								</div>
+										<strong>{verified[0]}</strong>
+									</div>
+								{:else}
+									<p class="font-semibold dark:text-white">This location needs to be surveyed!</p>
+								{/if}
+							</div>
 
+							<PrimaryButton
+								slot="footer"
+								link={`/verify-location?id=${merchant?.id}`}
+								style="rounded-xl p-3 w-40"
+							>
+								Verify Location
+							</PrimaryButton>
+						</Card>
+
+						<Card headerAlign="center">
+							<h3 slot="header" class="text-2xl font-semibold">Boost</h3>
+
+							<div slot="body" class="p-4">
+								<p class="mx-auto font-semibold dark:text-white">
+									{boosted
+										? 'This location is boosted!'
+										: "Boost this location to improve it's visibility on the map."}
+								</p>
+
+								{#if boosted}
+									<p>
+										Boost Expires:
+										<span class="underline decoration-bitcoin decoration-4 underline-offset-8">
+											<Time live={3000} relative={true} timestamp={boosted} />
+										</span>
+									</p>
+								{/if}
+							</div>
+
+							<BoostButton slot="footer" {merchant} {boosted} />
+						</Card>
+
+						<Card headerAlign="center">
+							<h3 slot="header" class="text-2xl font-semibold">
+								Comments {#if data.comments.length}({data.comments.length}){/if}
+							</h3>
+
+							<div slot="body" class="p-4">
+								<p class="mx-auto font-semibold dark:text-white">
+									{#if data.comments.length}
+										Let others know your thoughts about this merchant.
+									{:else}
+										No comments yet. Be the first to leave a comment!
+									{/if}
+								</p>
+							</div>
+
+							<div slot="footer">
 								{#if merchant}
 									<CommentAddButton elementId={merchant.id} />
 								{/if}
 							</div>
-						</div>
+						</Card>
 					</div>
 				{/if}
 			</section>
@@ -878,45 +864,46 @@
 			</section>
 
 			<section id="communities">
-				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
-					<h3
-						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white lg:text-left"
-					>
+				<Card>
+					<h3 slot="header" class="text-lg font-semibold">
 						{name || 'Merchant'} Communities
 					</h3>
-					<div
-						class="hide-scroll flex max-h-[375px] flex-wrap items-center justify-center overflow-scroll p-1"
-					>
-						{#if filteredCommunities && filteredCommunities.length}
-							{#each filteredCommunities as community (community.id)}
-								<div class="m-4 space-y-1 transition-transform hover:scale-110">
-									<a href="/community/{community.id}">
-										<img
-											src={`https://btcmap.org/.netlify/images?url=${community.tags['icon:square']}&fit=cover&w=256&h=256`}
-											alt="logo"
-											class="mx-auto h-20 w-20 rounded-full object-cover"
-											on:error={function () {
-												this.src = '/images/bitcoin.svg';
-											}}
-										/>
-										<p class="text-center font-semibold text-body dark:text-white">
-											{community.tags.name}
-										</p>
-									</a>
-								</div>
-							{/each}
-						{:else if !dataInitialized}
-							<p class="p-5 text-body dark:text-white">Loading communities...</p>
-						{:else}
-							<p class="p-5 text-body dark:text-white">
-								This location is not part of a communtiy, but one can be <a
-									href="/communities/add"
-									class="text-link transition-colors hover:text-hover">created</a
-								> to help maintain this local area.
-							</p>
-						{/if}
+
+					<div slot="body" class="w-full">
+						<div
+							class="hide-scroll flex max-h-[300px] flex-wrap items-center justify-center overflow-scroll"
+						>
+							{#if filteredCommunities && filteredCommunities.length}
+								{#each filteredCommunities as community (community.id)}
+									<div class="m-4 space-y-1 transition-transform hover:scale-110">
+										<a href="/community/{community.id}">
+											<img
+												src={`https://btcmap.org/.netlify/images?url=${community.tags['icon:square']}&fit=cover&w=256&h=256`}
+												alt="logo"
+												class="mx-auto h-20 w-20 rounded-full object-cover"
+												on:error={function () {
+													this.src = '/images/bitcoin.svg';
+												}}
+											/>
+											<p class="text-center font-semibold text-body dark:text-white">
+												{community.tags.name}
+											</p>
+										</a>
+									</div>
+								{/each}
+							{:else if !dataInitialized}
+								<p class="p-5 text-body dark:text-white">Loading communities...</p>
+							{:else}
+								<p class="p-5 text-body dark:text-white">
+									This location is not part of a communtiy, but one can be <a
+										href="/communities/add"
+										class="text-link transition-colors hover:text-hover">created</a
+									> to help maintain this local area.
+								</p>
+							{/if}
+						</div>
 					</div>
-				</div>
+				</Card>
 			</section>
 
 			<p class="text-center text-sm text-body dark:text-white md:text-left">
