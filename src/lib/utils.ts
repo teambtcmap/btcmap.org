@@ -6,6 +6,7 @@ import type { Chart } from 'chart.js';
 import { get } from 'svelte/store';
 import rewind from '@mapbox/geojson-rewind';
 import { geoContains } from 'd3-geo';
+import DOMPurify from 'dompurify';
 
 export const errToast = (m: string) => {
 	toast.push(m, {
@@ -194,3 +195,12 @@ export async function getAreaIdsByCoordinates(lat: number, long: number): Promis
 		})
 		.map((area) => area.id);
 }
+
+export const formatOpeningHours = (str: string): string => {
+	const html = str
+		.split(/;\s*/)
+		.map((part) => `<span>${part.trim()}</span>`)
+		.join('');
+
+	return DOMPurify.sanitize(html, { ALLOWED_TAGS: ['span'] });
+};

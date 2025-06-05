@@ -60,14 +60,13 @@
 		PayMerchant,
 		MerchantPageData
 	} from '$lib/types.js';
-	import { detectTheme, errToast, successToast } from '$lib/utils';
+	import { detectTheme, errToast, successToast, formatOpeningHours } from '$lib/utils';
 	import rewind from '@mapbox/geojson-rewind';
 	import { geoContains } from 'd3-geo';
 	import type { Map } from 'leaflet';
 	import { onDestroy, onMount } from 'svelte';
 	import Time from 'svelte-time';
 	import tippy from 'tippy.js';
-	import DOMPurify from 'dompurify';
 
 	// alert for user errors
 	$: $userError && errToast($userError);
@@ -79,15 +78,6 @@
 	$: $areaError && errToast($areaError);
 	// alert for report errors
 	$: $reportError && errToast($reportError);
-
-	const formatOpeningHours = (str: string): string => {
-		const html = str
-			.split(/;\s*/)
-			.map((part) => `<span>${part.trim()}</span>`)
-			.join('');
-
-		return DOMPurify.sanitize(html, { ALLOWED_TAGS: ['span'] });
-	};
 
 	let dataInitialized = false;
 	let initialRenderComplete = false;
