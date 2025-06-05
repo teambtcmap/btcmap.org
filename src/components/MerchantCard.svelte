@@ -90,9 +90,9 @@
 			{#if openingHours}
 				<div class="flex items-center space-x-2">
 					<Icon w="16" h="16" icon="clock" type="popup" style="shrink-0" />
-					<!-- eslint-disable-next-line svelte/no-at-html-tags - we sanitize the content in formatOpeningHours -->
 					<div class="text-sm">
 						<time class="flex flex-col items-start">
+							<!-- eslint-disable-next-line svelte/no-at-html-tags - we sanitize the content in formatOpeningHours -->
 							{@html formatOpeningHours(openingHours)}
 						</time>
 					</div>
