@@ -55,6 +55,11 @@
 			.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
 	});
 
+	// Scoring function for leaderboard
+	const score = (report: Report): number => {
+		return Math.max(report.tags.total_elements - report.tags.outdated_elements * 5, 0);
+	};
+
 	// Derived store for leaderboard data
 	const leaderboard = derived(
 		[areasFiltered, areaReports, syncStatus],
@@ -74,12 +79,16 @@
 				}
 			});
 
-			// Sort by total elements descending, then by up-to-date percentage descending
+			// Use same sorting logic as original
 			return result.sort((a, b) => {
-				if (b.report.tags.total_elements === a.report.tags.total_elements) {
-					return b.report.tags.up_to_date_percent - a.report.tags.up_to_date_percent;
+				const aScore = score(a.report);
+				const bScore = score(b.report);
+
+				if (bScore === aScore) {
+					return b.report.tags.total_elements - a.report.tags.total_elements;
+				} else {
+					return bScore - aScore;
 				}
-				return b.report.tags.total_elements - a.report.tags.total_elements;
 			});
 		}
 	);
@@ -92,13 +101,29 @@
 		{
 			id: 'position',
 			header: 'Position',
+			accessorFn: (row) => {
+				// Use the weighted score as the accessor for sorting
+				return score(row.report);
+			},
 			cell: (info) => {
 				const table = info.table;
 				const pageIndex = table.getState().pagination.pageIndex;
 				const pageSize = table.getState().pagination.pageSize;
 				return pageIndex * pageSize + info.row.index + 1;
 			},
-			enableSorting: false
+			sortingFn: (a, b) => {
+				// Sort by weighted score (same as original leaderboard logic)
+				const aScore = score(a.original.report);
+				const bScore = score(b.original.report);
+
+				if (bScore === aScore) {
+					// Tiebreaker: total elements (descending)
+					return b.original.report.tags.total_elements - a.original.report.tags.total_elements;
+				}
+				// Primary sort: score (descending)
+				return bScore - aScore;
+			},
+			enableSorting: true
 		},
 		{
 			id: 'name',
@@ -142,7 +167,7 @@
 	];
 
 	// Writable stores for table state
-	let sorting = writable([{ id: 'total', desc: true }]);
+	let sorting = writable([{ id: 'position', desc: false }]);
 	let pagination = writable({
 		pageIndex: 0,
 		pageSize: 10
