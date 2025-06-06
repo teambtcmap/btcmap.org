@@ -11,9 +11,15 @@
 	import { areaError, areas, reportError, reports, syncStatus } from '$lib/store';
 	import type { Area, AreaType, LeaderboardArea, Report } from '$lib/types';
 	import { errToast, getGrade, validateContinents } from '$lib/utils';
+	import { GradeTable } from '$lib/comp';
 	import AreaLeaderboardItemName from './AreaLeaderboardItemName.svelte';
+	import tippy from 'tippy.js';
 
 	export let type: AreaType;
+
+	// Tooltip elements
+	let upToDateTooltip: HTMLButtonElement;
+	let gradeTooltip: HTMLButtonElement;
 
 	// Alert for errors - more idiomatic Svelte
 	$: if ($areaError) errToast($areaError);
@@ -109,7 +115,18 @@
 				const table = info.table;
 				const pageIndex = table.getState().pagination.pageIndex;
 				const pageSize = table.getState().pagination.pageSize;
-				return pageIndex * pageSize + info.row.index + 1;
+				const position = pageIndex * pageSize + info.row.index + 1;
+
+				// Apply medal icons for top 3 positions, same as original
+				if (position === 1) {
+					return '🥇';
+				} else if (position === 2) {
+					return '🥈';
+				} else if (position === 3) {
+					return '🥉';
+				} else {
+					return position.toString();
+				}
 			},
 			sortingFn: (a, b) => {
 				// Sort by weighted score (same as original leaderboard logic)
@@ -166,6 +183,26 @@
 		}
 	];
 
+	// Tooltip setup function
+	const setTooltips = () => {
+		if (upToDateTooltip && gradeTooltip) {
+			tippy(upToDateTooltip, {
+				content: 'Locations that have been verified within one year.',
+				allowHTML: true
+			});
+
+			tippy(gradeTooltip, {
+				content: GradeTable,
+				allowHTML: true
+			});
+		}
+	};
+
+	// Set up tooltips when elements are ready
+	$: if (upToDateTooltip && gradeTooltip) {
+		setTooltips();
+	}
+
 	// Writable stores for table state
 	let sorting = writable([{ id: 'position', desc: false }]);
 	let pagination = writable({
@@ -203,7 +240,7 @@
 	$: table = createSvelteTable(options);
 </script>
 
-<section class="p-4">
+<section class="p-4" id="leaderboard">
 	<header>
 		<h2 class="mb-4 text-2xl font-bold text-primary dark:text-white">
 			{type === 'community' ? 'Community' : 'Country'} Leaderboard
@@ -212,7 +249,7 @@
 
 	{#if loading}
 		<div class="py-8 text-center" role="status" aria-live="polite">
-			<p class="text-body dark:text-white">Loading leaderboard data...</p>
+			<p class="text-body dark:text-white">Loading leaderboard...</p>
 		</div>
 	{:else if $leaderboard.length === 0}
 		<div class="py-8 text-center">
@@ -221,52 +258,77 @@
 	{:else}
 		<!-- Table -->
 		<div class="overflow-x-auto">
-			<table
-				class="w-full border-collapse border border-gray-300 dark:border-gray-600"
-				role="table"
-			>
-				<thead>
-					{#each $table.getHeaderGroups() as headerGroup}
-						<tr>
+			<table class="w-full border-collapse border border-gray-300 dark:border-gray-600">
+				<thead class="bg-gray-50 dark:bg-gray-800">
+					<tr>
+						{#each $table.getHeaderGroups() as headerGroup}
 							{#each headerGroup.headers as header}
 								<th
-									class="border border-gray-300 bg-gray-100 p-3 text-left dark:border-gray-600 dark:bg-gray-800"
-									scope="col"
+									class="border border-gray-300 p-3 text-left font-semibold text-primary dark:border-gray-600 dark:text-white"
+									class:cursor-pointer={header.column.getCanSort()}
+									on:click={header.column.getToggleSortingHandler()}
+									on:keydown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											e.preventDefault();
+											header.column.getToggleSortingHandler()?.(e);
+										}
+									}}
+									role={header.column.getCanSort() ? 'button' : undefined}
+									tabindex={header.column.getCanSort() ? 0 : undefined}
+									aria-label={header.column.getCanSort()
+										? `Sort by ${header.column.columnDef.header}`
+										: undefined}
 								>
-									{#if header.isPlaceholder}
-										<!-- Empty header -->
-									{:else if header.column.getCanSort()}
-										<button
-											type="button"
-											on:click={header.column.getToggleSortingHandler()}
-											class="flex items-center gap-1 font-semibold text-primary transition-colors hover:text-hover dark:text-white"
-											aria-label="Sort by {header.column.columnDef.header}"
-										>
-											{header.column.columnDef.header}
-											{#if header.column.getIsSorted() === 'asc'}
-												<span class="text-xs" aria-hidden="true">↑</span>
-											{:else if header.column.getIsSorted() === 'desc'}
-												<span class="text-xs" aria-hidden="true">↓</span>
-											{:else}
-												<span class="text-xs" aria-hidden="true">↕</span>
-											{/if}
-										</button>
-									{:else}
-										<span class="font-semibold text-primary dark:text-white">
+									<div class="flex items-center gap-2">
+										<span>
 											{header.column.columnDef.header}
 										</span>
-									{/if}
+
+										<!-- Add tooltip buttons for specific columns -->
+										{#if header.column.id === 'upToDate'}
+											<button
+												bind:this={upToDateTooltip}
+												type="button"
+												class="text-sm hover:text-hover"
+												aria-label="Information about Up-To-Date metric"
+											>
+												<i class="fa-solid fa-circle-info" />
+											</button>
+										{:else if header.column.id === 'grade'}
+											<button
+												bind:this={gradeTooltip}
+												type="button"
+												class="text-sm hover:text-hover"
+												aria-label="Information about Grade metric"
+											>
+												<i class="fa-solid fa-circle-info" />
+											</button>
+										{/if}
+
+										<!-- Sort indicator -->
+										{#if header.column.getCanSort()}
+											{#if header.column.getIsSorted() === 'asc'}
+												<i class="fa-solid fa-sort-up text-xs" />
+											{:else if header.column.getIsSorted() === 'desc'}
+												<i class="fa-solid fa-sort-down text-xs" />
+											{:else}
+												<i class="fa-solid fa-sort text-xs opacity-50" />
+											{/if}
+										{/if}
+									</div>
 								</th>
 							{/each}
-						</tr>
-					{/each}
+						{/each}
+					</tr>
 				</thead>
 				<tbody>
-					{#each $table.getRowModel().rows as row (row.id)}
-						<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+					{#each $table.getRowModel().rows as row}
+						<tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
 							{#each row.getVisibleCells() as cell}
 								<td
 									class="border border-gray-300 p-3 text-body dark:border-gray-600 dark:text-white"
+									class:text-center={cell.column.id === 'position'}
+									class:text-2xl={cell.column.id === 'position'}
 								>
 									{#if cell.column.id === 'name'}
 										<AreaLeaderboardItemName
