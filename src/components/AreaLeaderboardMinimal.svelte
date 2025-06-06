@@ -5,22 +5,26 @@
 		getSortedRowModel,
 		getPaginationRowModel,
 		type ColumnDef,
-		type TableOptions
+		type TableOptions,
+		type SortingState,
+		type PaginationState
 	} from '@tanstack/svelte-table';
-	import { writable, derived } from 'svelte/store';
-	import { onDestroy } from 'svelte';
+	import { writable, derived, type Writable } from 'svelte/store';
+	import { onDestroy, onMount } from 'svelte';
 	import { areaError, areas, reportError, reports, syncStatus } from '$lib/store';
 	import type { Area, AreaType, LeaderboardArea, Report } from '$lib/types';
 	import { errToast, getGrade, validateContinents } from '$lib/utils';
 	import { GradeTable } from '$lib/comp';
 	import AreaLeaderboardItemName from './AreaLeaderboardItemName.svelte';
-	import tippy from 'tippy.js';
+	import tippy, { type Instance as TippyInstance } from 'tippy.js';
 
 	export let type: AreaType;
 
-	// Tooltip elements
+	// Tooltip elements and instances with proper typing
 	let upToDateTooltip: HTMLButtonElement;
 	let gradeTooltip: HTMLButtonElement;
+	let upToDateTippyInstance: TippyInstance | null = null;
+	let gradeTippyInstance: TippyInstance | null = null;
 
 	// Alert for errors - more idiomatic Svelte
 	$: if ($areaError) errToast($areaError);
@@ -86,71 +90,62 @@
 				}
 			});
 
-			// Use same sorting logic as original
+			// Apply the same sorting logic as the original component
 			return result.sort((a, b) => {
 				const aScore = score(a.report);
 				const bScore = score(b.report);
 
-				if (bScore === aScore) {
-					return b.report.tags.total_elements - a.report.tags.total_elements;
-				} else {
+				// Primary sort: by score (descending - higher scores first)
+				if (bScore !== aScore) {
 					return bScore - aScore;
 				}
+
+				// Secondary sort: by total elements (descending - more locations first)
+				return b.report.tags.total_elements - a.report.tags.total_elements;
 			});
 		}
 	);
 
-	// Loading state
-	$: loading = $syncStatus || $leaderboard.length === 0;
+	// Create a derived store for leaderboard with positions
+	const leaderboardWithPositions = derived(leaderboard, ($leaderboard) => {
+		return $leaderboard.map((item, index) => ({
+			...item,
+			position: index + 1 // Position based on sorted order
+		}));
+	});
 
-	// Column definitions
-	const columns: ColumnDef<LeaderboardArea>[] = [
+	// Table state with proper typing - default to position ascending to match original
+	const sorting: Writable<SortingState> = writable([{ id: 'position', desc: false }]);
+	const pagination: Writable<PaginationState> = writable({
+		pageIndex: 0,
+		pageSize: 10
+	});
+
+	// Move column definitions outside reactive context for better performance
+	const columns: ColumnDef<LeaderboardArea & { position: number }>[] = [
 		{
 			id: 'position',
 			header: 'Position',
-			accessorFn: (row) => {
-				// Use the weighted score as the accessor for sorting
-				return score(row.report);
-			},
+			accessorFn: (row) => row.position,
 			cell: (info) => {
-				const table = info.table;
-				const pageIndex = table.getState().pagination.pageIndex;
-				const pageSize = table.getState().pagination.pageSize;
-				const position = pageIndex * pageSize + info.row.index + 1;
+				const position = info.getValue() as number;
 
-				// Apply medal icons for top 3 positions, same as original
-				if (position === 1) {
-					return '🥇';
-				} else if (position === 2) {
-					return '🥈';
-				} else if (position === 3) {
-					return '🥉';
-				} else {
-					return position.toString();
-				}
+				if (position === 1) return '🥇';
+				if (position === 2) return '🥈';
+				if (position === 3) return '🥉';
+				return position.toString();
 			},
+			enableSorting: true, // Allow sorting by position
 			sortingFn: (a, b) => {
-				// Sort by weighted score (same as original leaderboard logic)
-				const aScore = score(a.original.report);
-				const bScore = score(b.original.report);
-
-				if (bScore === aScore) {
-					// Tiebreaker: total elements (descending)
-					return b.original.report.tags.total_elements - a.original.report.tags.total_elements;
-				}
-				// Primary sort: score (descending)
-				return bScore - aScore;
-			},
-			enableSorting: true
+				// Sort by position (ascending = best first)
+				return a.original.position - b.original.position;
+			}
 		},
 		{
 			id: 'name',
 			header: 'Name',
 			accessorFn: (row) => row.tags?.name || 'Unknown',
-			cell: (info) => {
-				// Return the complete row object for the Svelte component
-				return info.row.original;
-			},
+			cell: (info) => info.row.original,
 			enableSorting: true
 		},
 		{
@@ -170,13 +165,7 @@
 			id: 'grade',
 			header: 'Grade',
 			accessorFn: (row) => row.grade || 0,
-			cell: (info) => {
-				const grade = info.getValue() as number;
-				if (!grade) return 'N/A';
-
-				// Return object to indicate we need custom rendering
-				return { grade, isCustom: true };
-			},
+			cell: (info) => info.getValue(),
 			sortingFn: (a, b) => {
 				const aGrade = a.original.grade || 0;
 				const bGrade = b.original.grade || 0;
@@ -186,64 +175,43 @@
 		}
 	];
 
-	// Tooltip setup function
-	let tooltipsInitialized = false;
-	let upToDateTippyInstance: any;
-	let gradeTippyInstance: any;
-
-	const cleanupTooltips = () => {
-		if (upToDateTippyInstance) {
-			upToDateTippyInstance.destroy();
-			upToDateTippyInstance = null;
-		}
-		if (gradeTippyInstance) {
-			gradeTippyInstance.destroy();
-			gradeTippyInstance = null;
-		}
-		tooltipsInitialized = false;
-	};
-
-	const setTooltips = () => {
-		if (upToDateTooltip && gradeTooltip && !tooltipsInitialized) {
-			// Clean up any existing tooltips first
-			cleanupTooltips();
-
+	// Tooltip management with proper cleanup
+	const setupTooltips = () => {
+		if (upToDateTooltip && !upToDateTippyInstance) {
 			upToDateTippyInstance = tippy(upToDateTooltip, {
 				content: 'Locations that have been verified within one year.',
 				allowHTML: true
 			});
+		}
 
+		if (gradeTooltip && !gradeTippyInstance) {
 			gradeTippyInstance = tippy(gradeTooltip, {
 				content: GradeTable,
 				allowHTML: true
 			});
-
-			tooltipsInitialized = true;
 		}
 	};
 
-	// Set up tooltips when elements are ready - only once
-	$: if (upToDateTooltip && gradeTooltip && !tooltipsInitialized) {
-		setTooltips();
-	}
+	const cleanupTooltips = () => {
+		upToDateTippyInstance?.destroy();
+		gradeTippyInstance?.destroy();
+		upToDateTippyInstance = null;
+		gradeTippyInstance = null;
+	};
 
-	// Cleanup tooltips on component destroy
-	onDestroy(() => {
-		cleanupTooltips();
+	// Better lifecycle management
+	onMount(() => {
+		// Setup tooltips after mount when elements are available
+		setTimeout(setupTooltips, 0);
 	});
 
-	// Writable stores for table state
-	let sorting = writable([{ id: 'position', desc: false }]);
-	let pagination = writable({
-		pageIndex: 0,
-		pageSize: 10
-	});
+	onDestroy(cleanupTooltips);
 
-	// Create table reactively but with better control
-	$: options =
-		$leaderboard.length > 0
+	// Create table options reactively but more efficiently
+	$: tableOptions =
+		$leaderboardWithPositions.length > 0
 			? ({
-					data: $leaderboard,
+					data: $leaderboardWithPositions,
 					columns,
 					state: {
 						sorting: $sorting,
@@ -265,24 +233,34 @@
 					},
 					getCoreRowModel: getCoreRowModel(),
 					getSortedRowModel: getSortedRowModel(),
-					getPaginationRowModel: getPaginationRowModel()
-				} satisfies TableOptions<LeaderboardArea>)
+					getPaginationRowModel: getPaginationRowModel(),
+					// Add error handling
+					debugTable: false,
+					debugHeaders: false,
+					debugColumns: false
+				} satisfies TableOptions<LeaderboardArea & { position: number }>)
 			: null;
 
-	$: table = options ? createSvelteTable(options) : null;
+	// Create table instance
+	$: table = tableOptions ? createSvelteTable(tableOptions) : null;
 
-	// Reset table when switching between types or when data becomes empty
-	$: if ($leaderboard.length === 0) {
-		table = undefined;
+	// Loading state with better logic
+	$: loading =
+		$syncStatus || ($leaderboardWithPositions.length === 0 && !$areaError && !$reportError);
+
+	// Create stable key for table recreation - avoid JSON.stringify
+	$: sortingKey = $sorting.map((s) => `${s.id}-${s.desc ? 'desc' : 'asc'}`).join('|');
+	$: tableKey = `${$leaderboardWithPositions.length}-${sortingKey}`;
+
+	// Setup tooltips when elements are bound
+	$: if (upToDateTooltip || gradeTooltip) {
+		setupTooltips();
 	}
-
-	// Create a unique key that changes when sorting or data changes
-	$: tableKey = `${$leaderboard.length}-${JSON.stringify($sorting)}`;
 </script>
 
-<section class="p-4" id="leaderboard">
+<section class="p-4" id="leaderboard" aria-labelledby="leaderboard-title">
 	<header>
-		<h2 class="mb-4 text-2xl font-bold text-primary dark:text-white">
+		<h2 id="leaderboard-title" class="mb-4 text-2xl font-bold text-primary dark:text-white">
 			{type === 'community' ? 'Community' : 'Country'} Leaderboard
 		</h2>
 	</header>
@@ -291,14 +269,14 @@
 		<div class="py-8 text-center" role="status" aria-live="polite">
 			<p class="text-body dark:text-white">Loading leaderboard...</p>
 		</div>
-	{:else if $leaderboard.length === 0}
+	{:else if $leaderboardWithPositions.length === 0}
 		<div class="py-8 text-center">
 			<p class="text-body dark:text-white">No data available</p>
 		</div>
-	{:else if table}
-		<!-- Table -->
+	{:else if table && $table}
 		{#key tableKey}
-			<div class="overflow-x-auto">
+			<!-- Table -->
+			<div class="overflow-x-auto" role="region" aria-label="Leaderboard table">
 				<table class="w-full border-collapse border border-gray-300 dark:border-gray-600">
 					<thead class="bg-gray-50 dark:bg-gray-800">
 						<tr>
@@ -314,46 +292,55 @@
 												header.column.getToggleSortingHandler()?.(e);
 											}
 										}}
-										role={header.column.getCanSort() ? 'button' : undefined}
+										role={header.column.getCanSort() ? 'button' : 'columnheader'}
 										tabindex={header.column.getCanSort() ? 0 : undefined}
 										aria-label={header.column.getCanSort()
-											? `Sort by ${header.column.columnDef.header}`
-											: undefined}
+											? `Sort by ${header.column.columnDef.header}, currently ${
+													header.column.getIsSorted() === 'asc'
+														? 'ascending'
+														: header.column.getIsSorted() === 'desc'
+															? 'descending'
+															: 'unsorted'
+												}`
+											: String(header.column.columnDef.header)}
+										aria-sort={header.column.getIsSorted() === 'asc'
+											? 'ascending'
+											: header.column.getIsSorted() === 'desc'
+												? 'descending'
+												: 'none'}
 									>
 										<div class="flex items-center gap-2">
-											<span>
-												{header.column.columnDef.header}
-											</span>
+											<span>{header.column.columnDef.header}</span>
 
-											<!-- Add tooltip buttons for specific columns -->
+											<!-- Tooltip buttons -->
 											{#if header.column.id === 'upToDate'}
 												<button
 													bind:this={upToDateTooltip}
 													type="button"
-													class="text-sm hover:text-hover"
+													class="text-sm hover:text-hover focus:outline-none focus:ring-2 focus:ring-primary"
 													aria-label="Information about Up-To-Date metric"
 												>
-													<i class="fa-solid fa-circle-info" />
+													<i class="fa-solid fa-circle-info" aria-hidden="true" />
 												</button>
 											{:else if header.column.id === 'grade'}
 												<button
 													bind:this={gradeTooltip}
 													type="button"
-													class="text-sm hover:text-hover"
+													class="text-sm hover:text-hover focus:outline-none focus:ring-2 focus:ring-primary"
 													aria-label="Information about Grade metric"
 												>
-													<i class="fa-solid fa-circle-info" />
+													<i class="fa-solid fa-circle-info" aria-hidden="true" />
 												</button>
 											{/if}
 
 											<!-- Sort indicator -->
 											{#if header.column.getCanSort()}
 												{#if header.column.getIsSorted() === 'asc'}
-													<i class="fa-solid fa-sort-up text-xs" />
+													<i class="fa-solid fa-sort-up text-xs" aria-hidden="true" />
 												{:else if header.column.getIsSorted() === 'desc'}
-													<i class="fa-solid fa-sort-down text-xs" />
+													<i class="fa-solid fa-sort-down text-xs" aria-hidden="true" />
 												{:else}
-													<i class="fa-solid fa-sort text-xs opacity-50" />
+													<i class="fa-solid fa-sort text-xs opacity-50" aria-hidden="true" />
 												{/if}
 											{/if}
 										</div>
@@ -383,12 +370,14 @@
 										{:else if cell.column.id === 'grade'}
 											{@const grade = cell.row.original.grade || 0}
 											{#if grade > 0}
-												<div class="space-x-1">
-													<!-- Filled stars -->
+												<div
+													class="flex justify-center space-x-1"
+													role="img"
+													aria-label="{grade} out of 5 stars"
+												>
 													{#each Array(grade) as _}
 														<i class="fa-solid fa-star" aria-hidden="true" />
 													{/each}
-													<!-- Empty stars -->
 													{#each Array(5 - grade) as _}
 														<i class="fa-solid fa-star opacity-25" aria-hidden="true" />
 													{/each}
@@ -396,8 +385,6 @@
 											{:else}
 												<span>N/A</span>
 											{/if}
-										{:else if typeof cell.column.columnDef.cell === 'function'}
-											{cell.column.columnDef.cell(cell.getContext())}
 										{:else}
 											{cell.getValue()}
 										{/if}
@@ -415,23 +402,23 @@
 			<div class="flex items-center gap-4">
 				<button
 					type="button"
-					on:click={() => $table?.previousPage()}
-					disabled={!$table?.getCanPreviousPage()}
-					class="rounded bg-primary px-4 py-2 text-white transition-colors hover:bg-hover disabled:cursor-not-allowed disabled:bg-gray-300 disabled:dark:bg-gray-600"
+					on:click={() => $table.previousPage()}
+					disabled={!$table.getCanPreviousPage()}
+					class="rounded bg-primary px-4 py-2 text-white transition-colors hover:bg-hover focus:outline-none focus:ring-2 focus:ring-primary disabled:cursor-not-allowed disabled:bg-gray-300 disabled:dark:bg-gray-600"
 					aria-label="Go to previous page"
 				>
 					Previous
 				</button>
 
 				<span class="text-body dark:text-white" aria-live="polite">
-					Page {($table?.getState().pagination.pageIndex ?? 0) + 1} of {$table?.getPageCount() ?? 0}
+					Page {$table.getState().pagination.pageIndex + 1} of {$table.getPageCount()}
 				</span>
 
 				<button
 					type="button"
-					on:click={() => $table?.nextPage()}
-					disabled={!$table?.getCanNextPage()}
-					class="rounded bg-primary px-4 py-2 text-white transition-colors hover:bg-hover disabled:cursor-not-allowed disabled:bg-gray-300 disabled:dark:bg-gray-600"
+					on:click={() => $table.nextPage()}
+					disabled={!$table.getCanNextPage()}
+					class="rounded bg-primary px-4 py-2 text-white transition-colors hover:bg-hover focus:outline-none focus:ring-2 focus:ring-primary disabled:cursor-not-allowed disabled:bg-gray-300 disabled:dark:bg-gray-600"
 					aria-label="Go to next page"
 				>
 					Next
@@ -439,14 +426,14 @@
 			</div>
 
 			<div class="text-sm text-body dark:text-white" aria-live="polite">
-				Showing {$table?.getRowModel().rows.length ?? 0} of {$leaderboard.length} results
+				Showing {$table.getRowModel().rows.length} of {$leaderboardWithPositions.length} results
 			</div>
 		</nav>
 
 		<!-- Additional info -->
 		<footer class="mt-4 text-center text-sm text-body dark:text-white">
-			<p>*Data is weighted by Up-To-Date locations and then sorted by Total Locations.</p>
-			<p>*Leaderboard updated once every 24 hours.</p>
+			<p>Data is weighted by Up-To-Date locations and then sorted by Total Locations.</p>
+			<p>Leaderboard updated once every 24 hours.</p>
 		</footer>
 	{/if}
 </section>
