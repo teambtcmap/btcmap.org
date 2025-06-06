@@ -8,6 +8,7 @@
 		type TableOptions
 	} from '@tanstack/svelte-table';
 	import { writable, derived } from 'svelte/store';
+	import { onDestroy } from 'svelte';
 	import { areaError, areas, reportError, reports, syncStatus } from '$lib/store';
 	import type { Area, AreaType, LeaderboardArea, Report } from '$lib/types';
 	import { errToast, getGrade, validateContinents } from '$lib/utils';
@@ -186,24 +187,50 @@
 	];
 
 	// Tooltip setup function
+	let tooltipsInitialized = false;
+	let upToDateTippyInstance: any;
+	let gradeTippyInstance: any;
+
+	const cleanupTooltips = () => {
+		if (upToDateTippyInstance) {
+			upToDateTippyInstance.destroy();
+			upToDateTippyInstance = null;
+		}
+		if (gradeTippyInstance) {
+			gradeTippyInstance.destroy();
+			gradeTippyInstance = null;
+		}
+		tooltipsInitialized = false;
+	};
+
 	const setTooltips = () => {
-		if (upToDateTooltip && gradeTooltip) {
-			tippy(upToDateTooltip, {
+		if (upToDateTooltip && gradeTooltip && !tooltipsInitialized) {
+			// Clean up any existing tooltips first
+			cleanupTooltips();
+
+			upToDateTippyInstance = tippy(upToDateTooltip, {
 				content: 'Locations that have been verified within one year.',
 				allowHTML: true
 			});
 
-			tippy(gradeTooltip, {
+			gradeTippyInstance = tippy(gradeTooltip, {
 				content: GradeTable,
 				allowHTML: true
 			});
+
+			tooltipsInitialized = true;
 		}
 	};
 
-	// Set up tooltips when elements are ready
-	$: if (upToDateTooltip && gradeTooltip) {
+	// Set up tooltips when elements are ready - only once
+	$: if (upToDateTooltip && gradeTooltip && !tooltipsInitialized) {
 		setTooltips();
 	}
+
+	// Cleanup tooltips on component destroy
+	onDestroy(() => {
+		cleanupTooltips();
+	});
 
 	// Writable stores for table state
 	let sorting = writable([{ id: 'position', desc: false }]);
@@ -212,34 +239,45 @@
 		pageSize: 10
 	});
 
-	// Reactive table options
-	$: options = {
-		data: $leaderboard,
-		columns,
-		state: {
-			sorting: $sorting,
-			pagination: $pagination
-		},
-		onSortingChange: (updater) => {
-			if (typeof updater === 'function') {
-				sorting.update(updater);
-			} else {
-				sorting.set(updater);
-			}
-		},
-		onPaginationChange: (updater) => {
-			if (typeof updater === 'function') {
-				pagination.update(updater);
-			} else {
-				pagination.set(updater);
-			}
-		},
-		getCoreRowModel: getCoreRowModel(),
-		getSortedRowModel: getSortedRowModel(),
-		getPaginationRowModel: getPaginationRowModel()
-	} satisfies TableOptions<LeaderboardArea>;
+	// Create table reactively but with better control
+	$: options =
+		$leaderboard.length > 0
+			? ({
+					data: $leaderboard,
+					columns,
+					state: {
+						sorting: $sorting,
+						pagination: $pagination
+					},
+					onSortingChange: (updater) => {
+						if (typeof updater === 'function') {
+							sorting.update(updater);
+						} else {
+							sorting.set(updater);
+						}
+					},
+					onPaginationChange: (updater) => {
+						if (typeof updater === 'function') {
+							pagination.update(updater);
+						} else {
+							pagination.set(updater);
+						}
+					},
+					getCoreRowModel: getCoreRowModel(),
+					getSortedRowModel: getSortedRowModel(),
+					getPaginationRowModel: getPaginationRowModel()
+				} satisfies TableOptions<LeaderboardArea>)
+			: null;
 
-	$: table = createSvelteTable(options);
+	$: table = options ? createSvelteTable(options) : null;
+
+	// Reset table when switching between types or when data becomes empty
+	$: if ($leaderboard.length === 0) {
+		table = undefined;
+	}
+
+	// Create a unique key that changes when sorting or data changes
+	$: tableKey = `${$leaderboard.length}-${JSON.stringify($sorting)}`;
 </script>
 
 <section class="p-4" id="leaderboard">
@@ -257,126 +295,128 @@
 		<div class="py-8 text-center">
 			<p class="text-body dark:text-white">No data available</p>
 		</div>
-	{:else}
+	{:else if table}
 		<!-- Table -->
-		<div class="overflow-x-auto">
-			<table class="w-full border-collapse border border-gray-300 dark:border-gray-600">
-				<thead class="bg-gray-50 dark:bg-gray-800">
-					<tr>
-						{#each $table.getHeaderGroups() as headerGroup}
-							{#each headerGroup.headers as header}
-								<th
-									class="border border-gray-300 p-3 text-left font-semibold text-primary dark:border-gray-600 dark:text-white"
-									class:cursor-pointer={header.column.getCanSort()}
-									on:click={header.column.getToggleSortingHandler()}
-									on:keydown={(e) => {
-										if (e.key === 'Enter' || e.key === ' ') {
-											e.preventDefault();
-											header.column.getToggleSortingHandler()?.(e);
-										}
-									}}
-									role={header.column.getCanSort() ? 'button' : undefined}
-									tabindex={header.column.getCanSort() ? 0 : undefined}
-									aria-label={header.column.getCanSort()
-										? `Sort by ${header.column.columnDef.header}`
-										: undefined}
-								>
-									<div class="flex items-center gap-2">
-										<span>
-											{header.column.columnDef.header}
-										</span>
+		{#key tableKey}
+			<div class="overflow-x-auto">
+				<table class="w-full border-collapse border border-gray-300 dark:border-gray-600">
+					<thead class="bg-gray-50 dark:bg-gray-800">
+						<tr>
+							{#each $table.getHeaderGroups() as headerGroup}
+								{#each headerGroup.headers as header}
+									<th
+										class="border border-gray-300 p-3 text-left font-semibold text-primary dark:border-gray-600 dark:text-white"
+										class:cursor-pointer={header.column.getCanSort()}
+										on:click={header.column.getToggleSortingHandler()}
+										on:keydown={(e) => {
+											if (e.key === 'Enter' || e.key === ' ') {
+												e.preventDefault();
+												header.column.getToggleSortingHandler()?.(e);
+											}
+										}}
+										role={header.column.getCanSort() ? 'button' : undefined}
+										tabindex={header.column.getCanSort() ? 0 : undefined}
+										aria-label={header.column.getCanSort()
+											? `Sort by ${header.column.columnDef.header}`
+											: undefined}
+									>
+										<div class="flex items-center gap-2">
+											<span>
+												{header.column.columnDef.header}
+											</span>
 
-										<!-- Add tooltip buttons for specific columns -->
-										{#if header.column.id === 'upToDate'}
-											<button
-												bind:this={upToDateTooltip}
-												type="button"
-												class="text-sm hover:text-hover"
-												aria-label="Information about Up-To-Date metric"
-											>
-												<i class="fa-solid fa-circle-info" />
-											</button>
-										{:else if header.column.id === 'grade'}
-											<button
-												bind:this={gradeTooltip}
-												type="button"
-												class="text-sm hover:text-hover"
-												aria-label="Information about Grade metric"
-											>
-												<i class="fa-solid fa-circle-info" />
-											</button>
-										{/if}
-
-										<!-- Sort indicator -->
-										{#if header.column.getCanSort()}
-											{#if header.column.getIsSorted() === 'asc'}
-												<i class="fa-solid fa-sort-up text-xs" />
-											{:else if header.column.getIsSorted() === 'desc'}
-												<i class="fa-solid fa-sort-down text-xs" />
-											{:else}
-												<i class="fa-solid fa-sort text-xs opacity-50" />
+											<!-- Add tooltip buttons for specific columns -->
+											{#if header.column.id === 'upToDate'}
+												<button
+													bind:this={upToDateTooltip}
+													type="button"
+													class="text-sm hover:text-hover"
+													aria-label="Information about Up-To-Date metric"
+												>
+													<i class="fa-solid fa-circle-info" />
+												</button>
+											{:else if header.column.id === 'grade'}
+												<button
+													bind:this={gradeTooltip}
+													type="button"
+													class="text-sm hover:text-hover"
+													aria-label="Information about Grade metric"
+												>
+													<i class="fa-solid fa-circle-info" />
+												</button>
 											{/if}
-										{/if}
-									</div>
-								</th>
-							{/each}
-						{/each}
-					</tr>
-				</thead>
-				<tbody>
-					{#each $table.getRowModel().rows as row}
-						<tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-							{#each row.getVisibleCells() as cell}
-								<td
-									class="border border-gray-300 p-3 text-body dark:border-gray-600 dark:text-white"
-									class:text-center={cell.column.id === 'position' || cell.column.id === 'grade'}
-									class:text-2xl={cell.column.id === 'position'}
-								>
-									{#if cell.column.id === 'name'}
-										<AreaLeaderboardItemName
-											{type}
-											avatar={type === 'community'
-												? cell.row.original.tags?.['icon:square'] || ''
-												: `https://static.btcmap.org/images/countries/${cell.row.original.id}.svg`}
-											name={cell.row.original.tags?.name || 'Unknown'}
-											id={cell.row.original.tags?.url_alias || cell.row.original.id || ''}
-										/>
-									{:else if cell.column.id === 'grade'}
-										{@const grade = cell.row.original.grade || 0}
-										{#if grade > 0}
-											<div class="space-x-1">
-												<!-- Filled stars -->
-												{#each Array(grade) as _}
-													<i class="fa-solid fa-star" aria-hidden="true" />
-												{/each}
-												<!-- Empty stars -->
-												{#each Array(5 - grade) as _}
-													<i class="fa-solid fa-star opacity-25" aria-hidden="true" />
-												{/each}
-											</div>
-										{:else}
-											<span>N/A</span>
-										{/if}
-									{:else if typeof cell.column.columnDef.cell === 'function'}
-										{cell.column.columnDef.cell(cell.getContext())}
-									{:else}
-										{cell.getValue()}
-									{/if}
-								</td>
+
+											<!-- Sort indicator -->
+											{#if header.column.getCanSort()}
+												{#if header.column.getIsSorted() === 'asc'}
+													<i class="fa-solid fa-sort-up text-xs" />
+												{:else if header.column.getIsSorted() === 'desc'}
+													<i class="fa-solid fa-sort-down text-xs" />
+												{:else}
+													<i class="fa-solid fa-sort text-xs opacity-50" />
+												{/if}
+											{/if}
+										</div>
+									</th>
+								{/each}
 							{/each}
 						</tr>
-					{/each}
-				</tbody>
-			</table>
-		</div>
+					</thead>
+					<tbody>
+						{#each $table.getRowModel().rows as row}
+							<tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
+								{#each row.getVisibleCells() as cell}
+									<td
+										class="border border-gray-300 p-3 text-body dark:border-gray-600 dark:text-white"
+										class:text-center={cell.column.id === 'position' || cell.column.id === 'grade'}
+										class:text-2xl={cell.column.id === 'position'}
+									>
+										{#if cell.column.id === 'name'}
+											<AreaLeaderboardItemName
+												{type}
+												avatar={type === 'community'
+													? cell.row.original.tags?.['icon:square'] || ''
+													: `https://static.btcmap.org/images/countries/${cell.row.original.id}.svg`}
+												name={cell.row.original.tags?.name || 'Unknown'}
+												id={cell.row.original.tags?.url_alias || cell.row.original.id || ''}
+											/>
+										{:else if cell.column.id === 'grade'}
+											{@const grade = cell.row.original.grade || 0}
+											{#if grade > 0}
+												<div class="space-x-1">
+													<!-- Filled stars -->
+													{#each Array(grade) as _}
+														<i class="fa-solid fa-star" aria-hidden="true" />
+													{/each}
+													<!-- Empty stars -->
+													{#each Array(5 - grade) as _}
+														<i class="fa-solid fa-star opacity-25" aria-hidden="true" />
+													{/each}
+												</div>
+											{:else}
+												<span>N/A</span>
+											{/if}
+										{:else if typeof cell.column.columnDef.cell === 'function'}
+											{cell.column.columnDef.cell(cell.getContext())}
+										{:else}
+											{cell.getValue()}
+										{/if}
+									</td>
+								{/each}
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+		{/key}
 
 		<!-- Pagination -->
 		<nav class="mt-6 flex items-center justify-between" aria-label="Table pagination">
 			<div class="flex items-center gap-4">
 				<button
 					type="button"
-					on:click={() => $table.previousPage()}
-					disabled={!$table.getCanPreviousPage()}
+					on:click={() => $table?.previousPage()}
+					disabled={!$table?.getCanPreviousPage()}
 					class="rounded bg-primary px-4 py-2 text-white transition-colors hover:bg-hover disabled:cursor-not-allowed disabled:bg-gray-300 disabled:dark:bg-gray-600"
 					aria-label="Go to previous page"
 				>
@@ -384,13 +424,13 @@
 				</button>
 
 				<span class="text-body dark:text-white" aria-live="polite">
-					Page {$table.getState().pagination.pageIndex + 1} of {$table.getPageCount()}
+					Page {($table?.getState().pagination.pageIndex ?? 0) + 1} of {$table?.getPageCount() ?? 0}
 				</span>
 
 				<button
 					type="button"
-					on:click={() => $table.nextPage()}
-					disabled={!$table.getCanNextPage()}
+					on:click={() => $table?.nextPage()}
+					disabled={!$table?.getCanNextPage()}
 					class="rounded bg-primary px-4 py-2 text-white transition-colors hover:bg-hover disabled:cursor-not-allowed disabled:bg-gray-300 disabled:dark:bg-gray-600"
 					aria-label="Go to next page"
 				>
@@ -399,7 +439,7 @@
 			</div>
 
 			<div class="text-sm text-body dark:text-white" aria-live="polite">
-				Showing {$table.getRowModel().rows.length} of {$leaderboard.length} results
+				Showing {$table?.getRowModel().rows.length ?? 0} of {$leaderboard.length} results
 			</div>
 		</nav>
 
