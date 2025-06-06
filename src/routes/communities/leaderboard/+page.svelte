@@ -72,7 +72,7 @@
 			</div>
 
 			<!-- <AreaLeaderboard type="community" /> -->
-			<AreaLeaderboardMinimal />
+			<AreaLeaderboardMinimal type="community" />
 
 			<Footer />
 		</div>
