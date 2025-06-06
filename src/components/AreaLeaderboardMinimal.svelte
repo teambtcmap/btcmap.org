@@ -172,7 +172,9 @@
 			cell: (info) => {
 				const grade = info.getValue() as number;
 				if (!grade) return 'N/A';
-				return '★'.repeat(grade) + '☆'.repeat(5 - grade);
+
+				// Return object to indicate we need custom rendering
+				return { grade, isCustom: true };
 			},
 			sortingFn: (a, b) => {
 				const aGrade = a.original.grade || 0;
@@ -327,7 +329,7 @@
 							{#each row.getVisibleCells() as cell}
 								<td
 									class="border border-gray-300 p-3 text-body dark:border-gray-600 dark:text-white"
-									class:text-center={cell.column.id === 'position'}
+									class:text-center={cell.column.id === 'position' || cell.column.id === 'grade'}
 									class:text-2xl={cell.column.id === 'position'}
 								>
 									{#if cell.column.id === 'name'}
@@ -339,6 +341,22 @@
 											name={cell.row.original.tags?.name || 'Unknown'}
 											id={cell.row.original.tags?.url_alias || cell.row.original.id || ''}
 										/>
+									{:else if cell.column.id === 'grade'}
+										{@const grade = cell.row.original.grade || 0}
+										{#if grade > 0}
+											<div class="space-x-1">
+												<!-- Filled stars -->
+												{#each Array(grade) as _}
+													<i class="fa-solid fa-star" aria-hidden="true" />
+												{/each}
+												<!-- Empty stars -->
+												{#each Array(5 - grade) as _}
+													<i class="fa-solid fa-star opacity-25" aria-hidden="true" />
+												{/each}
+											</div>
+										{:else}
+											<span>N/A</span>
+										{/if}
 									{:else if typeof cell.column.columnDef.cell === 'function'}
 										{cell.column.columnDef.cell(cell.getContext())}
 									{:else}
