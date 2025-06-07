@@ -350,7 +350,15 @@
 							{#each $table.getHeaderGroups() as headerGroup}
 								<tr>
 									{#each headerGroup.headers as header}
-										<th colSpan={header.colSpan} class="px-5 pb-2.5 pt-5">
+										<th
+											colSpan={header.colSpan}
+											class="px-5 pb-2.5 pt-5"
+											aria-sort={header.column.getIsSorted() === 'asc'
+												? 'ascending'
+												: header.column.getIsSorted() === 'desc'
+													? 'descending'
+													: 'none'}
+										>
 											{#if !header.isPlaceholder}
 												<button
 													type="button"
@@ -373,11 +381,6 @@
 																		: 'unsorted'
 															}`
 														: String(header.column.columnDef.header)}
-													aria-sort={header.column.getIsSorted() === 'asc'
-														? 'ascending'
-														: header.column.getIsSorted() === 'desc'
-															? 'descending'
-															: 'none'}
 												>
 													<svelte:component
 														this={flexRender(header.column.columnDef.header, header.getContext())}
