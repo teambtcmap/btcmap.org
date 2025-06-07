@@ -10,12 +10,14 @@
 		type TableOptions,
 		type SortingState,
 		type PaginationState,
-		type OnChangeFn
+		type OnChangeFn,
+		type Table,
+		type FilterFn
 	} from '@tanstack/svelte-table';
-	import { writable, derived, type Writable, type Readable } from 'svelte/store';
+	import { writable, derived, type Readable } from 'svelte/store';
 	import { onDestroy } from 'svelte';
 	import { areaError, areas, reportError, reports, syncStatus, theme } from '$lib/store';
-	import type { Area, AreaType, LeaderboardArea, Report } from '$lib/types';
+	import type { AreaType, LeaderboardArea, Report } from '$lib/types';
 	import {
 		errToast,
 		getGrade,
