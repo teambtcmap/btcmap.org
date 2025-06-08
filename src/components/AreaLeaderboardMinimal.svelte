@@ -11,10 +11,9 @@
 		type SortingState,
 		type PaginationState,
 		type OnChangeFn,
-		type Table,
 		type FilterFn
 	} from '@tanstack/svelte-table';
-	import { writable, derived, type Readable } from 'svelte/store';
+	import { writable, derived } from 'svelte/store';
 	import { onDestroy } from 'svelte';
 	import { areaError, areas, reportError, reports, syncStatus, theme } from '$lib/store';
 	import type { AreaType, LeaderboardArea, Report } from '$lib/types';
@@ -157,7 +156,7 @@
 			accessorFn: (row) => row.tags?.name || 'Unknown',
 			cell: (info) => info.row.original,
 			enableSorting: true,
-			// @ts-expect-error
+			// @ts-expect-error TanStack table expects string literal for filterFn but we're using custom fuzzy filter
 			filterFn: 'fuzzy',
 			enableGlobalFilter: true
 		},
@@ -347,9 +346,9 @@
 				<div class="overflow-x-auto" role="region" aria-label="Leaderboard table">
 					<table class="w-full whitespace-nowrap text-left text-primary dark:text-white">
 						<thead>
-							{#each $table.getHeaderGroups() as headerGroup}
+							{#each $table.getHeaderGroups() as headerGroup (headerGroup.id)}
 								<tr>
-									{#each headerGroup.headers as header}
+									{#each headerGroup.headers as header (header.id)}
 										<th
 											colSpan={header.colSpan}
 											class="px-5 pb-2.5 pt-5"
@@ -418,9 +417,9 @@
 							{/each}
 						</thead>
 						<tbody>
-							{#each $table.getRowModel().rows as row, index}
+							{#each $table.getRowModel().rows as row, index (row.id)}
 								<tr class={isEven(index) ? 'bg-primary/5 dark:bg-white/5' : ''}>
-									{#each row.getVisibleCells() as cell}
+									{#each row.getVisibleCells() as cell (cell.id)}
 										<td
 											class="px-5 py-2.5"
 											class:text-center={cell.column.id === 'position' ||
@@ -469,13 +468,13 @@
 					<select
 						value={$table?.getState().pagination.pageSize}
 						on:change={(e) => {
-							// @ts-expect-error
+							// @ts-expect-error Select onChange event target type assertion for page size change
 							$table?.setPageSize(Number(e.target?.value));
 						}}
 						class="cursor-pointer bg-transparent focus:outline-primary dark:focus:outline-white"
 						aria-label="Items per page"
 					>
-						{#each pageSizes as pageSize}
+						{#each pageSizes as pageSize (pageSize)}
 							<option value={pageSize}>
 								Show {pageSize}
 							</option>
