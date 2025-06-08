@@ -32,9 +32,6 @@
 	export let type: AreaType;
 	export let initialPageSize = 10;
 
-	let table: Readable<Table<LeaderboardArea & { position: number }>> | undefined;
-	let tableRendered = false;
-
 	const pageSizes = [10, 20, 30, 40, 50];
 	let globalFilter = '';
 	let searchInput: HTMLInputElement;
@@ -127,13 +124,6 @@
 		}));
 	});
 
-	// Search handlers
-	const handleKeyUp = (e: KeyboardEvent) => {
-		$table?.setGlobalFilter(String((e.target as HTMLInputElement)?.value));
-	};
-
-	const searchDebounce = debounce((e) => handleKeyUp(e));
-
 	// Fuzzy filter for global search
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
@@ -142,133 +132,143 @@
 		return itemRank.passed;
 	};
 
-	// Loading state with better logic
-	$: loading =
-		$syncStatus || ($leaderboardWithPositions.length === 0 && !$areaError && !$reportError);
-
-	const renderTable = () => {
-		const data = $leaderboardWithPositions;
-
-		// Move column definitions
-		const columns: ColumnDef<LeaderboardArea & { position: number }>[] = [
-			{
-				id: 'position',
-				header: 'Position',
-				accessorFn: (row) => row.position,
-				cell: (info) => {
-					const position = info.getValue() as number;
-					if (position === 1) return '🥇';
-					if (position === 2) return '🥈';
-					if (position === 3) return '🥉';
-					return position.toString();
-				},
-				enableSorting: true,
-				enableGlobalFilter: false,
-				sortingFn: (a, b) => {
-					return a.original.position - b.original.position;
-				}
+	// Column definitions - static, defined once
+	const columns: ColumnDef<LeaderboardArea & { position: number }>[] = [
+		{
+			id: 'position',
+			header: 'Position',
+			accessorFn: (row) => row.position,
+			cell: (info) => {
+				const position = info.getValue() as number;
+				if (position === 1) return '🥇';
+				if (position === 2) return '🥈';
+				if (position === 3) return '🥉';
+				return position.toString();
 			},
-			{
-				id: 'name',
-				header: 'Name',
-				accessorFn: (row) => row.tags?.name || 'Unknown',
-				cell: (info) => info.row.original,
-				enableSorting: true,
-				// @ts-expect-error
-				filterFn: 'fuzzy',
-				enableGlobalFilter: true
-			},
-			{
-				id: 'upToDate',
-				header: 'Up-To-Date',
-				accessorFn: (row) => row.report?.tags?.up_to_date_percent || 0,
-				cell: (info) => `${info.getValue()}%`,
-				enableSorting: true,
-				enableGlobalFilter: false
-			},
-			{
-				id: 'total',
-				header: 'Total Locations',
-				accessorFn: (row) => row.report?.tags?.total_elements || 0,
-				enableSorting: true,
-				enableGlobalFilter: false
-			},
-			{
-				id: 'grade',
-				header: 'Grade',
-				accessorFn: (row) => row.grade || 0,
-				cell: (info) => info.getValue(),
-				sortingFn: (a, b) => {
-					const aGrade = a.original.grade || 0;
-					const bGrade = b.original.grade || 0;
-					return bGrade - aGrade;
-				},
-				enableSorting: true,
-				enableGlobalFilter: false
+			enableSorting: true,
+			enableGlobalFilter: false,
+			sortingFn: (a, b) => {
+				return a.original.position - b.original.position;
 			}
-		];
-
-		let sorting: SortingState = [{ id: 'position', desc: false }];
-
-		const setSorting: OnChangeFn<SortingState> = (updater) => {
-			if (updater instanceof Function) {
-				sorting = updater(sorting);
-			} else {
-				sorting = updater;
-			}
-			options.update((old) => ({
-				...old,
-				state: {
-					...old.state,
-					sorting
-				}
-			}));
-		};
-
-		let pagination: PaginationState = {
-			pageIndex: 0,
-			pageSize: initialPageSize
-		};
-
-		const setPagination: OnChangeFn<PaginationState> = (updater) => {
-			if (updater instanceof Function) {
-				pagination = updater(pagination);
-			} else {
-				pagination = updater;
-			}
-			options.update((old) => ({
-				...old,
-				state: {
-					...old.state,
-					pagination
-				}
-			}));
-		};
-
-		const options = writable<TableOptions<LeaderboardArea & { position: number }>>({
-			data,
-			columns,
-			state: {
-				sorting,
-				pagination
+		},
+		{
+			id: 'name',
+			header: 'Name',
+			accessorFn: (row) => row.tags?.name || 'Unknown',
+			cell: (info) => info.row.original,
+			enableSorting: true,
+			// @ts-expect-error
+			filterFn: 'fuzzy',
+			enableGlobalFilter: true
+		},
+		{
+			id: 'upToDate',
+			header: 'Up-To-Date',
+			accessorFn: (row) => row.report?.tags?.up_to_date_percent || 0,
+			cell: (info) => `${info.getValue()}%`,
+			enableSorting: true,
+			enableGlobalFilter: false
+		},
+		{
+			id: 'total',
+			header: 'Total Locations',
+			accessorFn: (row) => row.report?.tags?.total_elements || 0,
+			enableSorting: true,
+			enableGlobalFilter: false
+		},
+		{
+			id: 'grade',
+			header: 'Grade',
+			accessorFn: (row) => row.grade || 0,
+			cell: (info) => info.getValue(),
+			sortingFn: (a, b) => {
+				const aGrade = a.original.grade || 0;
+				const bGrade = b.original.grade || 0;
+				return bGrade - aGrade;
 			},
-			filterFns: {
-				fuzzy: fuzzyFilter
-			},
-			onSortingChange: setSorting,
-			onPaginationChange: setPagination,
-			globalFilterFn: fuzzyFilter,
-			getCoreRowModel: getCoreRowModel(),
-			getSortedRowModel: getSortedRowModel(),
-			getPaginationRowModel: getPaginationRowModel(),
-			getFilteredRowModel: getFilteredRowModel()
-		});
+			enableSorting: true,
+			enableGlobalFilter: false
+		}
+	];
 
-		table = createSvelteTable(options);
-		tableRendered = true;
+	// Table state - initialized once
+	let sorting: SortingState = [{ id: 'position', desc: false }];
+	let pagination: PaginationState = {
+		pageIndex: 0,
+		pageSize: initialPageSize
 	};
 
-	$: !loading && !tableRendered && $leaderboardWithPositions.length > 0 && renderTable();
+	const setSorting: OnChangeFn<SortingState> = (updater) => {
+		if (updater instanceof Function) {
+			sorting = updater(sorting);
+		} else {
+			sorting = updater;
+		}
+		options.update((old) => ({
+			...old,
+			state: {
+				...old.state,
+				sorting
+			}
+		}));
+	};
+
+	const setPagination: OnChangeFn<PaginationState> = (updater) => {
+		if (updater instanceof Function) {
+			pagination = updater(pagination);
+		} else {
+			pagination = updater;
+		}
+		options.update((old) => ({
+			...old,
+			state: {
+				...old.state,
+				pagination
+			}
+		}));
+	};
+
+	// Table options store - created once
+	const options = writable<TableOptions<LeaderboardArea & { position: number }>>({
+		data: [], // Start with empty data
+		columns,
+		state: {
+			sorting,
+			pagination
+		},
+		filterFns: {
+			fuzzy: fuzzyFilter
+		},
+		onSortingChange: setSorting,
+		onPaginationChange: setPagination,
+		globalFilterFn: fuzzyFilter,
+		getCoreRowModel: getCoreRowModel(),
+		getSortedRowModel: getSortedRowModel(),
+		getPaginationRowModel: getPaginationRowModel(),
+		getFilteredRowModel: getFilteredRowModel()
+	});
+
+	// Create table instance once
+	const table = createSvelteTable(options);
+
+	// Update only data reactively, not entire table
+	$: if ($leaderboardWithPositions) {
+		options.update((current) => ({
+			...current,
+			data: $leaderboardWithPositions
+		}));
+	}
+
+	// Search handlers
+	const handleKeyUp = (e: KeyboardEvent) => {
+		$table?.setGlobalFilter(String((e.target as HTMLInputElement)?.value));
+	};
+
+	const searchDebounce = debounce((e) => handleKeyUp(e));
+
+	// Loading state
+	$: loading =
+		$syncStatus || ($leaderboardWithPositions.length === 0 && !$areaError && !$reportError);
 
 	// Better lifecycle management
 	onDestroy(() => {
@@ -302,7 +302,7 @@
 			</div>
 		{:else if $leaderboardWithPositions.length === 0}
 			<p class="w-full p-5 text-center text-primary dark:text-white">No data available</p>
-		{:else if table && $table}
+		{:else}
 			<!-- Search Input -->
 			<div class="relative text-primary dark:text-white">
 				<input
