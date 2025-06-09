@@ -167,22 +167,20 @@
 			enableGlobalFilter: true
 		},
 		{
-			id: 'upToDate',
-			header: () => {
-				return `Up-To-Date`;
-			},
-			accessorFn: (row) => row.report?.tags?.up_to_date_percent || 0,
-			cell: (info) => `${info.getValue()}%`,
-			enableSorting: true,
-			enableGlobalFilter: false
-		},
-		{
 			id: 'total',
-			header: 'Total Locations',
+			header: 'Locations: Total',
 			accessorFn: (row) => row.report?.tags?.total_elements || 0,
 			enableSorting: true,
 			enableGlobalFilter: false
 		},
+		{
+			id: 'upToDateElements',
+			header: 'Up-to-date',
+			accessorFn: (row) => row.report?.tags?.up_to_date_elements || 0,
+			enableSorting: true,
+			enableGlobalFilter: false
+		},
+
 		{
 			id: 'grade',
 			header: () => {
@@ -581,11 +579,15 @@
 			{/if}
 
 			<!-- Additional info -->
-			<footer
-				class="border-t border-statBorder px-5 pb-5 pt-2.5 text-center text-sm text-body dark:text-white"
-			>
-				<p>Data is weighted by Up-To-Date locations and then sorted by Total Locations.</p>
-				<p>Leaderboard updated once every 24 hours.</p>
+			<footer class="border-t border-statBorder px-5 pb-5 pt-2.5 text-sm text-body dark:text-white">
+				<p>Position is calculated as follows:</p>
+
+				<ul class="list-inside list-disc">
+					<li>Primary: Total locations minus 5x outdated elements.</li>
+					<li>Secondary: Total number of locations.</li>
+				</ul>
+
+				<p>Locations include ATMs.</p>
 			</footer>
 		{/if}
 	</div>
