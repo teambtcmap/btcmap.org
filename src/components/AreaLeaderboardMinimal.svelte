@@ -14,7 +14,7 @@
 		type FilterFn
 	} from '@tanstack/svelte-table';
 	import { writable, derived } from 'svelte/store';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { areaError, areas, reportError, reports, syncStatus, theme } from '$lib/store';
 	import type { AreaType, LeaderboardArea, Report } from '$lib/types';
 	import {
@@ -27,6 +27,8 @@
 	} from '$lib/utils';
 	import AreaLeaderboardItemName from './AreaLeaderboardItemName.svelte';
 	import { rankItem } from '@tanstack/match-sorter-utils';
+	import tippy from 'tippy.js';
+	import { GradeTable } from '$lib/comp';
 
 	export let type: AreaType;
 	export let initialPageSize = 10;
@@ -34,6 +36,10 @@
 	const pageSizes = [10, 20, 30, 40, 50];
 	let globalFilter = '';
 	let searchInput: HTMLInputElement;
+
+	// Tooltip references
+	let upToDateTooltip: HTMLButtonElement;
+	let gradeTooltip: HTMLButtonElement;
 
 	// Alert for errors - more idiomatic Svelte
 	$: if ($areaError) errToast($areaError);
@@ -162,7 +168,9 @@
 		},
 		{
 			id: 'upToDate',
-			header: 'Up-To-Date',
+			header: () => {
+				return `Up-To-Date`;
+			},
 			accessorFn: (row) => row.report?.tags?.up_to_date_percent || 0,
 			cell: (info) => `${info.getValue()}%`,
 			enableSorting: true,
@@ -177,7 +185,9 @@
 		},
 		{
 			id: 'grade',
-			header: 'Grade',
+			header: () => {
+				return `Grade`;
+			},
 			accessorFn: (row) => row.grade || 0,
 			cell: (info) => info.getValue(),
 			sortingFn: (a, b) => {
@@ -270,9 +280,33 @@
 		$syncStatus || ($leaderboardWithPositions.length === 0 && !$areaError && !$reportError);
 
 	// Better lifecycle management
+	onMount(() => {
+		setTooltips();
+	});
+
 	onDestroy(() => {
 		// Cleanup logic if needed
 	});
+
+	// Add tooltip setup function
+	const setTooltips = () => {
+		if (upToDateTooltip) {
+			tippy(upToDateTooltip, {
+				content: `Locations that have been verified within one year.`,
+				allowHTML: true
+			});
+		}
+
+		if (gradeTooltip) {
+			tippy(gradeTooltip, {
+				content: GradeTable,
+				allowHTML: true
+			});
+		}
+	};
+
+	// Set tooltips when elements are available
+	$: upToDateTooltip && gradeTooltip && setTooltips();
 </script>
 
 <section class="p-4" id="leaderboard" aria-labelledby="leaderboard-title">
@@ -384,6 +418,25 @@
 													<svelte:component
 														this={flexRender(header.column.columnDef.header, header.getContext())}
 													/>
+													{#if header.column.id === 'upToDate'}
+														<button
+															bind:this={upToDateTooltip}
+															type="button"
+															class="ml-1 cursor-default"
+															aria-label="Information about Up-To-Date metric"
+														>
+															<i class="fa-solid fa-circle-info text-sm" />
+														</button>
+													{:else if header.column.id === 'grade'}
+														<button
+															bind:this={gradeTooltip}
+															type="button"
+															class="ml-1 cursor-default"
+															aria-label="Information about Grade metric"
+														>
+															<i class="fa-solid fa-circle-info text-sm" />
+														</button>
+													{/if}
 													{#if header.column.getIsSorted().toString() === 'asc'}
 														<span aria-hidden="true">▲</span>
 													{:else if header.column.getIsSorted().toString() === 'desc'}
