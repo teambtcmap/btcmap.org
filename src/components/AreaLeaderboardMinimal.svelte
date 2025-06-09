@@ -183,34 +183,6 @@
 			enableGlobalFilter: false
 		},
 		{
-			id: 'avgVerificationAge',
-			header: 'Average Verification Age',
-			accessorFn: (row) => row.report?.tags?.avg_verification_date || null,
-			cell: (info) => {
-				const date = info.getValue() as string | null;
-				if (!date) return 'N/A';
-
-				const verificationDate = new Date(date);
-				const now = new Date();
-				const diffTime = now.getTime() - verificationDate.getTime();
-				const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-				return `${diffDays} days`;
-			},
-			sortingFn: (a, b) => {
-				const aDate = a.original.report?.tags?.avg_verification_date;
-				const bDate = b.original.report?.tags?.avg_verification_date;
-
-				if (!aDate && !bDate) return 0;
-				if (!aDate) return 1;
-				if (!bDate) return -1;
-
-				return new Date(bDate).getTime() - new Date(aDate).getTime();
-			},
-			enableSorting: true,
-			enableGlobalFilter: false
-		},
-		{
 			id: 'grade',
 			header: () => {
 				return `Grade`;
@@ -340,13 +312,23 @@
 	};
 
 	// Svelte action for grade tooltips - more idiomatic approach
-	function gradeTooltipAction(node: HTMLElement, percentage: number | undefined) {
+	function gradeTooltipAction(node: HTMLElement, data: { percentage?: number; avgDate?: string }) {
 		let instance: Instance | undefined;
 
 		function setup() {
-			if (percentage !== undefined) {
+			if (data.percentage !== undefined) {
+				let content = `${data.percentage.toFixed(1)}% up-to-date`;
+
+				if (data.avgDate) {
+					const verificationDate = new Date(data.avgDate);
+					const now = new Date();
+					const diffTime = now.getTime() - verificationDate.getTime();
+					const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+					content += `<br>Average verification: ${diffDays} days ago`;
+				}
+
 				instance = tippy(node, {
-					content: `${percentage.toFixed(1)}% up-to-date`,
+					content,
 					allowHTML: true
 				});
 			}
@@ -362,9 +344,9 @@
 		setup();
 
 		return {
-			update(newPercentage: number | undefined) {
+			update(newData: { percentage?: number; avgDate?: string }) {
 				cleanup();
-				percentage = newPercentage;
+				data = newData;
 				setup();
 			},
 			destroy() {
@@ -377,7 +359,7 @@
 	$: upToDateTooltip && totalTooltip && gradeTooltip && setHeaderTooltips();
 </script>
 
-<section class="p-4" id="leaderboard" aria-labelledby="leaderboard-title">
+<section id="leaderboard" aria-labelledby="leaderboard-title">
 	<div class="w-full rounded-3xl border border-statBorder bg-white dark:bg-white/10">
 		<header>
 			<h2
@@ -445,15 +427,16 @@
 				<p class="w-full p-5 text-center text-primary dark:text-white">No results found.</p>
 			{:else}
 				<!-- Table -->
-				<div class="overflow-x-auto" role="region" aria-label="Leaderboard table">
-					<table class="w-full whitespace-nowrap text-left text-primary dark:text-white">
+				<div role="region" aria-label="Leaderboard table">
+					<table class="w-full text-left text-xs text-primary dark:text-white sm:text-[10px]">
 						<thead>
 							{#each $table.getHeaderGroups() as headerGroup (headerGroup.id)}
 								<tr>
 									{#each headerGroup.headers as header (header.id)}
 										<th
 											colSpan={header.colSpan}
-											class="px-5 pb-2.5 pt-5"
+											class="px-2 pb-2.5 pt-5 md:px-5"
+											class:text-center={header.column.id !== 'name'}
 											aria-sort={header.column.getIsSorted() === 'asc'
 												? 'ascending'
 												: header.column.getIsSorted() === 'desc'
@@ -463,8 +446,10 @@
 											{#if !header.isPlaceholder}
 												<button
 													type="button"
-													class="flex select-none items-center gap-x-2"
+													class="flex select-none items-center gap-x-1 leading-tight md:gap-x-2"
+													class:mx-auto={header.column.id !== 'name'}
 													class:cursor-pointer={header.column.getCanSort()}
+													class:justify-center={header.column.id !== 'name'}
 													on:click={header.column.getToggleSortingHandler()}
 													on:keydown={(e) => {
 														if (e.key === 'Enter' || e.key === ' ') {
@@ -483,9 +468,11 @@
 															}`
 														: String(header.column.columnDef.header)}
 												>
-													<svelte:component
-														this={flexRender(header.column.columnDef.header, header.getContext())}
-													/>
+													<span class="break-words">
+														<svelte:component
+															this={flexRender(header.column.columnDef.header, header.getContext())}
+														/>
+													</span>
 													{#if header.column.id === 'total'}
 														<button
 															bind:this={totalTooltip}
@@ -531,9 +518,11 @@
 								<tr class={isEven(index) ? 'bg-primary/5 dark:bg-white/5' : ''}>
 									{#each row.getVisibleCells() as cell (cell.id)}
 										<td
-											class="px-5 py-2.5"
+											class="px-2 py-2.5 md:px-5"
 											class:text-center={cell.column.id === 'position' ||
-												cell.column.id === 'grade'}
+												cell.column.id === 'grade' ||
+												cell.column.id === 'total' ||
+												cell.column.id === 'upToDateElements'}
 											class:text-2xl={cell.column.id === 'position'}
 										>
 											{#if cell.column.id === 'name'}
@@ -548,6 +537,7 @@
 											{:else if cell.column.id === 'grade'}
 												{@const grade = cell.row.original.grade || 0}
 												{@const percentage = cell.row.original.report?.tags?.up_to_date_percent}
+												{@const avgDate = cell.row.original.report?.tags?.avg_verification_date}
 												{#if grade > 0}
 													<div
 														class="flex cursor-help justify-center"
@@ -555,7 +545,7 @@
 														aria-label="{grade} out of 5 stars, {percentage?.toFixed(
 															1
 														)}% up-to-date"
-														use:gradeTooltipAction={percentage}
+														use:gradeTooltipAction={{ percentage, avgDate }}
 													>
 														{'★'.repeat(grade)}{'☆'.repeat(5 - grade)}
 													</div>
