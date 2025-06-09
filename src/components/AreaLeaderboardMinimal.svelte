@@ -416,7 +416,7 @@
 													<svelte:component
 														this={flexRender(header.column.columnDef.header, header.getContext())}
 													/>
-													{#if header.column.id === 'upToDate'}
+													{#if header.column.id === 'upToDateElements'}
 														<button
 															bind:this={upToDateTooltip}
 															type="button"
