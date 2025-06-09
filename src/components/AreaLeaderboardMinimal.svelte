@@ -182,7 +182,34 @@
 			enableSorting: true,
 			enableGlobalFilter: false
 		},
+		{
+			id: 'avgVerificationAge',
+			header: 'Average Verification Age',
+			accessorFn: (row) => row.report?.tags?.avg_verification_date || null,
+			cell: (info) => {
+				const date = info.getValue() as string | null;
+				if (!date) return 'N/A';
 
+				const verificationDate = new Date(date);
+				const now = new Date();
+				const diffTime = now.getTime() - verificationDate.getTime();
+				const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+				return `${diffDays} days`;
+			},
+			sortingFn: (a, b) => {
+				const aDate = a.original.report?.tags?.avg_verification_date;
+				const bDate = b.original.report?.tags?.avg_verification_date;
+
+				if (!aDate && !bDate) return 0;
+				if (!aDate) return 1;
+				if (!bDate) return -1;
+
+				return new Date(bDate).getTime() - new Date(aDate).getTime();
+			},
+			enableSorting: true,
+			enableGlobalFilter: false
+		},
 		{
 			id: 'grade',
 			header: () => {
