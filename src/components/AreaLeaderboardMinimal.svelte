@@ -428,7 +428,9 @@
 			{:else}
 				<!-- Table -->
 				<div role="region" aria-label="Leaderboard table">
-					<table class="w-full text-left text-xs text-primary dark:text-white sm:text-[10px]">
+					<table
+						class="w-full text-left text-xs text-primary dark:text-white lg:text-sm xl:text-lg"
+					>
 						<thead>
 							{#each $table.getHeaderGroups() as headerGroup (headerGroup.id)}
 								<tr>
