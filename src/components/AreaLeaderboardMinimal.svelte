@@ -192,7 +192,16 @@
 			sortingFn: (a, b) => {
 				const aGrade = a.original.grade || 0;
 				const bGrade = b.original.grade || 0;
-				return bGrade - aGrade;
+
+				// Primary sort: by grade (descending - higher grades first)
+				if (bGrade !== aGrade) {
+					return bGrade - aGrade;
+				}
+
+				// Secondary sort: by up_to_date_percent (descending - higher percentages first)
+				const aPercent = a.original.report?.tags?.up_to_date_percent || 0;
+				const bPercent = b.original.report?.tags?.up_to_date_percent || 0;
+				return bPercent - aPercent;
 			},
 			enableSorting: true,
 			enableGlobalFilter: false
