@@ -38,8 +38,10 @@
 	let searchInput: HTMLInputElement;
 
 	// Tooltip references
+	let totalTooltip: HTMLButtonElement;
 	let upToDateTooltip: HTMLButtonElement;
 	let gradeTooltip: HTMLButtonElement;
+	let gradeDisplayTooltips: HTMLDivElement[] = [];
 
 	// Alert for errors - more idiomatic Svelte
 	$: if ($areaError) errToast($areaError);
@@ -168,14 +170,14 @@
 		},
 		{
 			id: 'total',
-			header: 'Locations: Total',
+			header: 'Total Locations',
 			accessorFn: (row) => row.report?.tags?.total_elements || 0,
 			enableSorting: true,
 			enableGlobalFilter: false
 		},
 		{
 			id: 'upToDateElements',
-			header: 'Up-to-date',
+			header: 'Verified Locations',
 			accessorFn: (row) => row.report?.tags?.up_to_date_elements || 0,
 			enableSorting: true,
 			enableGlobalFilter: false
@@ -288,9 +290,16 @@
 
 	// Add tooltip setup function
 	const setTooltips = () => {
+		if (totalTooltip) {
+			tippy(totalTooltip, {
+				content: 'All locations inc. ATMS',
+				allowHTML: true
+			});
+		}
+
 		if (upToDateTooltip) {
 			tippy(upToDateTooltip, {
-				content: `Locations that have been verified within one year.`,
+				content: 'Locations verified within the past year',
 				allowHTML: true
 			});
 		}
@@ -301,10 +310,24 @@
 				allowHTML: true
 			});
 		}
+
+		// Set tooltips for grade displays
+		gradeDisplayTooltips.forEach((element, index) => {
+			if (element) {
+				const row = $table.getRowModel().rows[index];
+				const percentage = row?.original.report?.tags?.up_to_date_percent;
+				if (percentage !== undefined) {
+					tippy(element, {
+						content: `${percentage.toFixed(1)}% up-to-date`,
+						allowHTML: true
+					});
+				}
+			}
+		});
 	};
 
 	// Set tooltips when elements are available
-	$: upToDateTooltip && gradeTooltip && setTooltips();
+	$: upToDateTooltip && totalTooltip && gradeTooltip && setTooltips();
 </script>
 
 <section class="p-4" id="leaderboard" aria-labelledby="leaderboard-title">
@@ -416,12 +439,21 @@
 													<svelte:component
 														this={flexRender(header.column.columnDef.header, header.getContext())}
 													/>
-													{#if header.column.id === 'upToDateElements'}
+													{#if header.column.id === 'total'}
+														<button
+															bind:this={totalTooltip}
+															type="button"
+															class="ml-1 cursor-default"
+															aria-label="Information about total locations"
+														>
+															<i class="fa-solid fa-circle-info text-sm" />
+														</button>
+													{:else if header.column.id === 'upToDateElements'}
 														<button
 															bind:this={upToDateTooltip}
 															type="button"
 															class="ml-1 cursor-default"
-															aria-label="Information about Up-To-Date metric"
+															aria-label="Information about verified locations"
 														>
 															<i class="fa-solid fa-circle-info text-sm" />
 														</button>
@@ -468,11 +500,15 @@
 												/>
 											{:else if cell.column.id === 'grade'}
 												{@const grade = cell.row.original.grade || 0}
+												{@const percentage = cell.row.original.report?.tags?.up_to_date_percent}
 												{#if grade > 0}
 													<div
-														class="flex justify-center"
+														class="flex cursor-help justify-center"
 														role="img"
-														aria-label="{grade} out of 5 stars"
+														aria-label="{grade} out of 5 stars, {percentage?.toFixed(
+															1
+														)}% up-to-date"
+														bind:this={gradeDisplayTooltips[index]}
 													>
 														{'★'.repeat(grade)}{'☆'.repeat(5 - grade)}
 													</div>
