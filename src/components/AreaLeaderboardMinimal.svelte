@@ -28,6 +28,7 @@
 	import AreaLeaderboardItemName from './AreaLeaderboardItemName.svelte';
 	import { rankItem } from '@tanstack/match-sorter-utils';
 	import tippy from 'tippy.js';
+	import type { Instance } from 'tippy.js';
 	import { GradeTable } from '$lib/comp';
 
 	export let type: AreaType;
@@ -37,11 +38,10 @@
 	let globalFilter = '';
 	let searchInput: HTMLInputElement;
 
-	// Tooltip references
+	// Tooltip references for header tooltips only
 	let totalTooltip: HTMLButtonElement;
 	let upToDateTooltip: HTMLButtonElement;
 	let gradeTooltip: HTMLButtonElement;
-	let gradeDisplayTooltips: HTMLDivElement[] = [];
 
 	// Alert for errors - more idiomatic Svelte
 	$: if ($areaError) errToast($areaError);
@@ -308,15 +308,15 @@
 
 	// Better lifecycle management
 	onMount(() => {
-		setTooltips();
+		setHeaderTooltips();
 	});
 
 	onDestroy(() => {
-		// Cleanup logic if needed
+		// Cleanup will be handled by the action
 	});
 
-	// Add tooltip setup function
-	const setTooltips = () => {
+	// Simplified tooltip setup function for header tooltips only
+	const setHeaderTooltips = () => {
 		if (totalTooltip) {
 			tippy(totalTooltip, {
 				content: 'All locations inc. ATMS',
@@ -337,24 +337,44 @@
 				allowHTML: true
 			});
 		}
-
-		// Set tooltips for grade displays
-		gradeDisplayTooltips.forEach((element, index) => {
-			if (element) {
-				const row = $table.getRowModel().rows[index];
-				const percentage = row?.original.report?.tags?.up_to_date_percent;
-				if (percentage !== undefined) {
-					tippy(element, {
-						content: `${percentage.toFixed(1)}% up-to-date`,
-						allowHTML: true
-					});
-				}
-			}
-		});
 	};
 
-	// Set tooltips when elements are available
-	$: upToDateTooltip && totalTooltip && gradeTooltip && setTooltips();
+	// Svelte action for grade tooltips - more idiomatic approach
+	function gradeTooltipAction(node: HTMLElement, percentage: number | undefined) {
+		let instance: Instance | undefined;
+
+		function setup() {
+			if (percentage !== undefined) {
+				instance = tippy(node, {
+					content: `${percentage.toFixed(1)}% up-to-date`,
+					allowHTML: true
+				});
+			}
+		}
+
+		function cleanup() {
+			if (instance) {
+				instance.destroy();
+				instance = undefined;
+			}
+		}
+
+		setup();
+
+		return {
+			update(newPercentage: number | undefined) {
+				cleanup();
+				percentage = newPercentage;
+				setup();
+			},
+			destroy() {
+				cleanup();
+			}
+		};
+	}
+
+	// Set header tooltips when elements are available
+	$: upToDateTooltip && totalTooltip && gradeTooltip && setHeaderTooltips();
 </script>
 
 <section class="p-4" id="leaderboard" aria-labelledby="leaderboard-title">
@@ -535,7 +555,7 @@
 														aria-label="{grade} out of 5 stars, {percentage?.toFixed(
 															1
 														)}% up-to-date"
-														bind:this={gradeDisplayTooltips[index]}
+														use:gradeTooltipAction={percentage}
 													>
 														{'★'.repeat(grade)}{'☆'.repeat(5 - grade)}
 													</div>
