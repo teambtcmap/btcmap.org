@@ -435,62 +435,128 @@
 			{#if $table.getFilteredRowModel().rows.length === 0}
 				<p class="w-full p-5 text-center text-primary dark:text-white">No results found.</p>
 			{:else}
-				<!-- Mobile: Three-row card layout -->
-				<div class="block space-y-1 lg:hidden">
-					{#each $table.getRowModel().rows as row, index (row.id)}
-						{@const area = row.original}
-						{@const position = area.position}
-						{@const grade = area.grade || 0}
-						{@const percentage = area.report?.tags?.up_to_date_percent}
-						{@const avgDate = area.report?.tags?.avg_verification_date}
-						{@const totalElements = area.report?.tags?.total_elements || 0}
-						{@const upToDateElements = area.report?.tags?.up_to_date_elements || 0}
+				<!-- Mobile: Three-row card layout with sorting headers -->
+				<div class="block lg:hidden">
+					<!-- Mobile sorting headers -->
+					<div class="border-b border-statBorder bg-primary/5 dark:bg-white/5">
+						<div class="grid grid-cols-4 gap-3 px-4 py-3 text-center text-xs">
+							<!-- Position header -->
+							<button
+								type="button"
+								class="flex cursor-pointer select-none items-center justify-center gap-1 text-body transition-colors hover:text-primary dark:text-white/70 dark:hover:text-white"
+								on:click={(e) => $table?.getColumn('position')?.getToggleSortingHandler()?.(e)}
+								aria-label="Sort by position"
+							>
+								<span>Position</span>
+								{#if $table?.getColumn('position')?.getIsSorted() === 'asc'}
+									<span aria-hidden="true" class="text-xs">▲</span>
+								{:else if $table?.getColumn('position')?.getIsSorted() === 'desc'}
+									<span aria-hidden="true" class="text-xs">▼</span>
+								{/if}
+							</button>
 
-						<!-- Card with three-row layout -->
-						<div
-							class="space-y-4 p-4 {isEven(index)
-								? 'bg-primary/5 dark:bg-white/5'
-								: 'bg-white dark:bg-transparent'}"
-							role="row"
-						>
-							<!-- Row 1: Larger Avatar -->
-							<div class="flex justify-center">
-								<img
-									src={type === 'community'
-										? `https://btcmap.org/.netlify/images?url=${area.tags?.['icon:square'] || ''}&fit=cover&w=256&h=256`
-										: `https://static.btcmap.org/images/countries/${area.id}.svg`}
-									alt="{area.tags?.name || 'Unknown'} avatar"
-									class="h-16 w-16 rounded-full object-cover"
-									on:error={(e) => {
-										const target = e.target;
-										if (target instanceof HTMLImageElement) {
-											target.src = '/images/bitcoin.svg';
-										}
-									}}
-									loading="lazy"
-								/>
-							</div>
+							<!-- Total header -->
+							<button
+								type="button"
+								class="flex cursor-pointer select-none items-center justify-center gap-1 text-body transition-colors hover:text-primary dark:text-white/70 dark:hover:text-white"
+								on:click={(e) => $table?.getColumn('total')?.getToggleSortingHandler()?.(e)}
+								aria-label="Sort by total locations"
+							>
+								<span>Total</span>
+								{#if $table?.getColumn('total')?.getIsSorted() === 'asc'}
+									<span aria-hidden="true" class="text-xs">▲</span>
+								{:else if $table?.getColumn('total')?.getIsSorted() === 'desc'}
+									<span aria-hidden="true" class="text-xs">▼</span>
+								{/if}
+							</button>
 
-							<!-- Row 2: Name (centered and prominent) -->
-							<div class="text-center">
-								<a
-									href="/{type}/{area.tags?.url_alias || area.id || ''}"
-									class="text-lg font-semibold text-link transition-colors hover:text-hover {area.tags?.name?.match(
-										/[^ ]{21}/
-									)
-										? 'break-all'
-										: ''}"
-									aria-label="View {area.tags?.name || 'Unknown'} details"
-								>
-									{area.tags?.name || 'Unknown'}
-								</a>
-							</div>
+							<!-- Verified header -->
+							<button
+								type="button"
+								class="flex cursor-pointer select-none items-center justify-center gap-1 text-body transition-colors hover:text-primary dark:text-white/70 dark:hover:text-white"
+								on:click={(e) =>
+									$table?.getColumn('upToDateElements')?.getToggleSortingHandler()?.(e)}
+								aria-label="Sort by verified locations"
+							>
+								<span>Verified</span>
+								{#if $table?.getColumn('upToDateElements')?.getIsSorted() === 'asc'}
+									<span aria-hidden="true" class="text-xs">▲</span>
+								{:else if $table?.getColumn('upToDateElements')?.getIsSorted() === 'desc'}
+									<span aria-hidden="true" class="text-xs">▼</span>
+								{/if}
+							</button>
 
-							<!-- Row 3: Stats in a 4-column grid -->
-							<div class="grid grid-cols-4 gap-3 text-center text-sm">
-								<!-- Position -->
-								<div>
-									<div class="mb-1 text-xs text-body dark:text-white/70">Position</div>
+							<!-- Grade header -->
+							<button
+								type="button"
+								class="flex cursor-pointer select-none items-center justify-center gap-1 text-body transition-colors hover:text-primary dark:text-white/70 dark:hover:text-white"
+								on:click={(e) => $table?.getColumn('grade')?.getToggleSortingHandler()?.(e)}
+								aria-label="Sort by grade"
+							>
+								<span>Grade</span>
+								{#if $table?.getColumn('grade')?.getIsSorted() === 'asc'}
+									<span aria-hidden="true" class="text-xs">▲</span>
+								{:else if $table?.getColumn('grade')?.getIsSorted() === 'desc'}
+									<span aria-hidden="true" class="text-xs">▼</span>
+								{/if}
+							</button>
+						</div>
+					</div>
+
+					<!-- Mobile cards -->
+					<div class="space-y-1">
+						{#each $table.getRowModel().rows as row, index (row.id)}
+							{@const area = row.original}
+							{@const position = area.position}
+							{@const grade = area.grade || 0}
+							{@const percentage = area.report?.tags?.up_to_date_percent}
+							{@const avgDate = area.report?.tags?.avg_verification_date}
+							{@const totalElements = area.report?.tags?.total_elements || 0}
+							{@const upToDateElements = area.report?.tags?.up_to_date_elements || 0}
+
+							<!-- Card with three-row layout -->
+							<div
+								class="space-y-4 p-4 {isEven(index)
+									? 'bg-primary/5 dark:bg-white/5'
+									: 'bg-white dark:bg-transparent'}"
+								role="row"
+							>
+								<!-- Row 1: Larger Avatar -->
+								<div class="flex justify-center">
+									<img
+										src={type === 'community'
+											? `https://btcmap.org/.netlify/images?url=${area.tags?.['icon:square'] || ''}&fit=cover&w=256&h=256`
+											: `https://static.btcmap.org/images/countries/${area.id}.svg`}
+										alt="{area.tags?.name || 'Unknown'} avatar"
+										class="h-16 w-16 rounded-full object-cover"
+										on:error={(e) => {
+											const target = e.target;
+											if (target instanceof HTMLImageElement) {
+												target.src = '/images/bitcoin.svg';
+											}
+										}}
+										loading="lazy"
+									/>
+								</div>
+
+								<!-- Row 2: Name (centered and prominent) -->
+								<div class="text-center">
+									<a
+										href="/{type}/{area.tags?.url_alias || area.id || ''}"
+										class="text-lg font-semibold text-link transition-colors hover:text-hover {area.tags?.name?.match(
+											/[^ ]{21}/
+										)
+											? 'break-all'
+											: ''}"
+										aria-label="View {area.tags?.name || 'Unknown'} details"
+									>
+										{area.tags?.name || 'Unknown'}
+									</a>
+								</div>
+
+								<!-- Row 3: Stats in a 4-column grid (no headers, just data) -->
+								<div class="grid grid-cols-4 gap-3 text-center text-sm">
+									<!-- Position -->
 									<div class="text-lg">
 										{#if position === 1}🥇
 										{:else if position === 2}🥈
@@ -499,27 +565,18 @@
 											<span class="font-semibold text-primary dark:text-white">{position}</span>
 										{/if}
 									</div>
-								</div>
 
-								<!-- Total Locations -->
-								<div>
-									<div class="mb-1 text-xs text-body dark:text-white/70">Total</div>
+									<!-- Total Locations -->
 									<div class="text-sm font-semibold text-primary dark:text-white">
 										{totalElements}
 									</div>
-								</div>
 
-								<!-- Verified Locations -->
-								<div>
-									<div class="mb-1 text-xs text-body dark:text-white/70">Verified</div>
+									<!-- Verified Locations -->
 									<div class="text-sm font-semibold text-primary dark:text-white">
 										{upToDateElements}
 									</div>
-								</div>
 
-								<!-- Grade -->
-								<div>
-									<div class="mb-1 text-xs text-body dark:text-white/70">Grade</div>
+									<!-- Grade -->
 									<div class="text-sm">
 										{#if grade > 0}
 											<div
@@ -536,8 +593,8 @@
 									</div>
 								</div>
 							</div>
-						</div>
-					{/each}
+						{/each}
+					</div>
 				</div>
 
 				<!-- Desktop: Keep the existing table -->
