@@ -435,7 +435,7 @@
 			{#if $table.getFilteredRowModel().rows.length === 0}
 				<p class="w-full p-5 text-center text-primary dark:text-white">No results found.</p>
 			{:else}
-				<!-- Mobile: Card layout like the old component but enhanced -->
+				<!-- Mobile: Card layout with combined Total/Verified column -->
 				<div class="block space-y-1 lg:hidden">
 					{#each $table.getRowModel().rows as row, index (row.id)}
 						{@const area = row.original}
@@ -446,14 +446,14 @@
 						{@const totalElements = area.report?.tags?.total_elements || 0}
 						{@const upToDateElements = area.report?.tags?.up_to_date_elements || 0}
 
-						<!-- Card layout with better color alignment to desktop table -->
+						<!-- Card layout with combined columns for better mobile spacing -->
 						<div
-							class="grid grid-cols-12 items-center gap-3 px-1 py-3 text-center {isEven(index)
+							class="grid grid-cols-10 items-center gap-3 px-1 py-3 text-center {isEven(index)
 								? 'bg-primary/5 dark:bg-white/5'
 								: 'bg-white dark:bg-transparent'}"
 							role="row"
 						>
-							<!-- Position (2 columns) - smaller font on mobile -->
+							<!-- Position (2 columns) -->
 							<div class="col-span-2 text-sm">
 								{#if position === 1}🥇
 								{:else if position === 2}🥈
@@ -463,8 +463,8 @@
 								{/if}
 							</div>
 
-							<!-- Name (4 columns for more space) - smaller font on mobile -->
-							<div class="col-span-4 text-left text-sm">
+							<!-- Name (5 columns for more space) -->
+							<div class="col-span-5 text-left text-sm">
 								<AreaLeaderboardItemName
 									{type}
 									avatar={type === 'community'
@@ -475,24 +475,16 @@
 								/>
 							</div>
 
-							<!-- Total Locations (2 columns) -->
+							<!-- Combined Total/Verified (2 columns) -->
 							<div class="col-span-2">
-								<div class="text-xs text-body dark:text-white/70">Total</div>
+								<div class="text-xs text-body dark:text-white/70">Total/Verified</div>
 								<div class="text-sm font-semibold text-primary dark:text-white">
-									{totalElements}
+									{totalElements}/{upToDateElements}
 								</div>
 							</div>
 
-							<!-- Verified Locations (2 columns) -->
-							<div class="col-span-2">
-								<div class="text-xs text-body dark:text-white/70">Verified</div>
-								<div class="text-sm font-semibold text-primary dark:text-white">
-									{upToDateElements}
-								</div>
-							</div>
-
-							<!-- Grade (2 columns) -->
-							<div class="col-span-2">
+							<!-- Grade (1 column) -->
+							<div class="col-span-1">
 								<div class="text-xs text-body dark:text-white/70">Grade</div>
 								<div class="text-sm">
 									{#if grade > 0}
