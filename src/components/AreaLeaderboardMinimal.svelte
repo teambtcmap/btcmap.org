@@ -435,8 +435,86 @@
 			{#if $table.getFilteredRowModel().rows.length === 0}
 				<p class="w-full p-5 text-center text-primary dark:text-white">No results found.</p>
 			{:else}
-				<!-- Table -->
-				<div role="region" aria-label="Leaderboard table">
+				<!-- Mobile: Card layout like the old component but enhanced -->
+				<div class="block space-y-1 lg:hidden">
+					{#each $table.getRowModel().rows as row, index (row.id)}
+						{@const area = row.original}
+						{@const position = area.position}
+						{@const grade = area.grade || 0}
+						{@const percentage = area.report?.tags?.up_to_date_percent}
+						{@const avgDate = area.report?.tags?.avg_verification_date}
+						{@const totalElements = area.report?.tags?.total_elements || 0}
+						{@const upToDateElements = area.report?.tags?.up_to_date_elements || 0}
+
+						<!-- Card layout with better color alignment to desktop table -->
+						<div
+							class="grid grid-cols-12 items-center gap-3 px-1 py-3 text-center {isEven(index)
+								? 'bg-primary/5 dark:bg-white/5'
+								: 'bg-white dark:bg-transparent'}"
+							role="row"
+						>
+							<!-- Position (2 columns) - smaller font on mobile -->
+							<div class="col-span-2 text-sm">
+								{#if position === 1}🥇
+								{:else if position === 2}🥈
+								{:else if position === 3}🥉
+								{:else}
+									<span class="text-primary dark:text-white">{position}</span>
+								{/if}
+							</div>
+
+							<!-- Name (4 columns for more space) - smaller font on mobile -->
+							<div class="col-span-4 text-left text-sm">
+								<AreaLeaderboardItemName
+									{type}
+									avatar={type === 'community'
+										? area.tags?.['icon:square'] || ''
+										: `https://static.btcmap.org/images/countries/${area.id}.svg`}
+									name={area.tags?.name || 'Unknown'}
+									id={area.tags?.url_alias || area.id || ''}
+								/>
+							</div>
+
+							<!-- Total Locations (2 columns) -->
+							<div class="col-span-2">
+								<div class="text-xs text-body dark:text-white/70">Total</div>
+								<div class="text-sm font-semibold text-primary dark:text-white">
+									{totalElements}
+								</div>
+							</div>
+
+							<!-- Verified Locations (2 columns) -->
+							<div class="col-span-2">
+								<div class="text-xs text-body dark:text-white/70">Verified</div>
+								<div class="text-sm font-semibold text-primary dark:text-white">
+									{upToDateElements}
+								</div>
+							</div>
+
+							<!-- Grade (2 columns) -->
+							<div class="col-span-2">
+								<div class="text-xs text-body dark:text-white/70">Grade</div>
+								<div class="text-sm">
+									{#if grade > 0}
+										<div
+											class="cursor-help text-primary dark:text-white"
+											role="img"
+											aria-label="{grade} out of 5 stars, {percentage?.toFixed(1)}% up-to-date"
+											use:gradeTooltipAction={{ percentage, avgDate }}
+										>
+											{grade}/5
+										</div>
+									{:else}
+										<span class="text-primary dark:text-white">N/A</span>
+									{/if}
+								</div>
+							</div>
+						</div>
+					{/each}
+				</div>
+
+				<!-- Desktop: Keep the existing table -->
+				<div class="hidden lg:block" role="region" aria-label="Leaderboard table">
 					<table
 						class="w-full text-left text-xs text-primary dark:text-white lg:text-sm xl:text-lg"
 					>
