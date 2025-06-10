@@ -435,7 +435,7 @@
 			{#if $table.getFilteredRowModel().rows.length === 0}
 				<p class="w-full p-5 text-center text-primary dark:text-white">No results found.</p>
 			{:else}
-				<!-- Mobile: Two-row card layout -->
+				<!-- Mobile: Three-row card layout -->
 				<div class="block space-y-1 lg:hidden">
 					{#each $table.getRowModel().rows as row, index (row.id)}
 						{@const area = row.original}
@@ -446,27 +446,48 @@
 						{@const totalElements = area.report?.tags?.total_elements || 0}
 						{@const upToDateElements = area.report?.tags?.up_to_date_elements || 0}
 
-						<!-- Card with two-row layout -->
+						<!-- Card with three-row layout -->
 						<div
-							class="space-y-3 p-4 {isEven(index)
+							class="space-y-4 p-4 {isEven(index)
 								? 'bg-primary/5 dark:bg-white/5'
 								: 'bg-white dark:bg-transparent'}"
 							role="row"
 						>
-							<!-- Row 1: Avatar and Name -->
-							<div class="flex items-center gap-3">
-								<AreaLeaderboardItemName
-									{type}
-									avatar={type === 'community'
-										? area.tags?.['icon:square'] || ''
+							<!-- Row 1: Larger Avatar -->
+							<div class="flex justify-center">
+								<img
+									src={type === 'community'
+										? `https://btcmap.org/.netlify/images?url=${area.tags?.['icon:square'] || ''}&fit=cover&w=256&h=256`
 										: `https://static.btcmap.org/images/countries/${area.id}.svg`}
-									name={area.tags?.name || 'Unknown'}
-									id={area.tags?.url_alias || area.id || ''}
+									alt="{area.tags?.name || 'Unknown'} avatar"
+									class="h-16 w-16 rounded-full object-cover"
+									on:error={(e) => {
+										const target = e.target;
+										if (target instanceof HTMLImageElement) {
+											target.src = '/images/bitcoin.svg';
+										}
+									}}
+									loading="lazy"
 								/>
 							</div>
 
-							<!-- Row 2: Stats in a grid -->
-							<div class="grid grid-cols-3 gap-4 text-center text-sm">
+							<!-- Row 2: Name (centered and prominent) -->
+							<div class="text-center">
+								<a
+									href="/{type}/{area.tags?.url_alias || area.id || ''}"
+									class="text-lg font-semibold text-link transition-colors hover:text-hover {area.tags?.name?.match(
+										/[^ ]{21}/
+									)
+										? 'break-all'
+										: ''}"
+									aria-label="View {area.tags?.name || 'Unknown'} details"
+								>
+									{area.tags?.name || 'Unknown'}
+								</a>
+							</div>
+
+							<!-- Row 3: Stats in a 4-column grid -->
+							<div class="grid grid-cols-4 gap-3 text-center text-sm">
 								<!-- Position -->
 								<div>
 									<div class="mb-1 text-xs text-body dark:text-white/70">Position</div>
@@ -480,11 +501,19 @@
 									</div>
 								</div>
 
-								<!-- Total/Verified -->
+								<!-- Total Locations -->
 								<div>
-									<div class="mb-1 text-xs text-body dark:text-white/70">Total/Verified</div>
+									<div class="mb-1 text-xs text-body dark:text-white/70">Total</div>
 									<div class="text-sm font-semibold text-primary dark:text-white">
-										{totalElements}/{upToDateElements}
+										{totalElements}
+									</div>
+								</div>
+
+								<!-- Verified Locations -->
+								<div>
+									<div class="mb-1 text-xs text-body dark:text-white/70">Verified</div>
+									<div class="text-sm font-semibold text-primary dark:text-white">
+										{upToDateElements}
 									</div>
 								</div>
 
@@ -499,7 +528,7 @@
 												aria-label="{grade} out of 5 stars, {percentage?.toFixed(1)}% up-to-date"
 												use:gradeTooltipAction={{ percentage, avgDate }}
 											>
-												{grade}/5
+												{'★'.repeat(grade)}{'☆'.repeat(5 - grade)}
 											</div>
 										{:else}
 											<span class="text-primary dark:text-white">N/A</span>

@@ -25,7 +25,7 @@
 		<img
 			src={avatarSrc}
 			alt="{displayName} avatar"
-			class="h-6 w-6 flex-shrink-0 rounded-full object-cover lg:h-10 lg:w-10"
+			class="h-10 w-10 flex-shrink-0 rounded-full object-cover"
 			on:error={handleImageError}
 			loading="lazy"
 		/>
@@ -43,7 +43,7 @@
 	<!-- Skeleton loading state -->
 	<div class="flex items-center gap-3" role="status" aria-label="Loading area information">
 		<div
-			class="h-6 w-6 flex-shrink-0 animate-pulse rounded-full bg-link/50 lg:h-10 lg:w-10"
+			class="h-10 w-10 flex-shrink-0 animate-pulse rounded-full bg-link/50"
 			aria-hidden="true"
 		></div>
 		<div class="h-5 w-24 animate-pulse rounded bg-link/50" aria-hidden="true"></div>
