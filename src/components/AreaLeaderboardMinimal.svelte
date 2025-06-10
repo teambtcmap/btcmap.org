@@ -435,7 +435,7 @@
 			{#if $table.getFilteredRowModel().rows.length === 0}
 				<p class="w-full p-5 text-center text-primary dark:text-white">No results found.</p>
 			{:else}
-				<!-- Mobile: Card layout with combined Total/Verified column -->
+				<!-- Mobile: Two-row card layout -->
 				<div class="block space-y-1 lg:hidden">
 					{#each $table.getRowModel().rows as row, index (row.id)}
 						{@const area = row.original}
@@ -446,25 +446,15 @@
 						{@const totalElements = area.report?.tags?.total_elements || 0}
 						{@const upToDateElements = area.report?.tags?.up_to_date_elements || 0}
 
-						<!-- Card layout with combined columns for better mobile spacing -->
+						<!-- Card with two-row layout -->
 						<div
-							class="grid grid-cols-10 items-center gap-3 px-1 py-3 text-center {isEven(index)
+							class="space-y-3 p-4 {isEven(index)
 								? 'bg-primary/5 dark:bg-white/5'
 								: 'bg-white dark:bg-transparent'}"
 							role="row"
 						>
-							<!-- Position (2 columns) -->
-							<div class="col-span-2 text-sm">
-								{#if position === 1}🥇
-								{:else if position === 2}🥈
-								{:else if position === 3}🥉
-								{:else}
-									<span class="text-primary dark:text-white">{position}</span>
-								{/if}
-							</div>
-
-							<!-- Name (5 columns for more space) -->
-							<div class="col-span-5 text-left text-sm">
+							<!-- Row 1: Avatar and Name -->
+							<div class="flex items-center gap-3">
 								<AreaLeaderboardItemName
 									{type}
 									avatar={type === 'community'
@@ -475,30 +465,46 @@
 								/>
 							</div>
 
-							<!-- Combined Total/Verified (2 columns) -->
-							<div class="col-span-2">
-								<div class="text-xs text-body dark:text-white/70">Total/Verified</div>
-								<div class="text-sm font-semibold text-primary dark:text-white">
-									{totalElements}/{upToDateElements}
+							<!-- Row 2: Stats in a grid -->
+							<div class="grid grid-cols-3 gap-4 text-center text-sm">
+								<!-- Position -->
+								<div>
+									<div class="mb-1 text-xs text-body dark:text-white/70">Position</div>
+									<div class="text-lg">
+										{#if position === 1}🥇
+										{:else if position === 2}🥈
+										{:else if position === 3}🥉
+										{:else}
+											<span class="font-semibold text-primary dark:text-white">{position}</span>
+										{/if}
+									</div>
 								</div>
-							</div>
 
-							<!-- Grade (1 column) -->
-							<div class="col-span-1">
-								<div class="text-xs text-body dark:text-white/70">Grade</div>
-								<div class="text-sm">
-									{#if grade > 0}
-										<div
-											class="cursor-help text-primary dark:text-white"
-											role="img"
-											aria-label="{grade} out of 5 stars, {percentage?.toFixed(1)}% up-to-date"
-											use:gradeTooltipAction={{ percentage, avgDate }}
-										>
-											{grade}/5
-										</div>
-									{:else}
-										<span class="text-primary dark:text-white">N/A</span>
-									{/if}
+								<!-- Total/Verified -->
+								<div>
+									<div class="mb-1 text-xs text-body dark:text-white/70">Total/Verified</div>
+									<div class="text-sm font-semibold text-primary dark:text-white">
+										{totalElements}/{upToDateElements}
+									</div>
+								</div>
+
+								<!-- Grade -->
+								<div>
+									<div class="mb-1 text-xs text-body dark:text-white/70">Grade</div>
+									<div class="text-sm">
+										{#if grade > 0}
+											<div
+												class="cursor-help font-semibold text-primary dark:text-white"
+												role="img"
+												aria-label="{grade} out of 5 stars, {percentage?.toFixed(1)}% up-to-date"
+												use:gradeTooltipAction={{ percentage, avgDate }}
+											>
+												{grade}/5
+											</div>
+										{:else}
+											<span class="text-primary dark:text-white">N/A</span>
+										{/if}
+									</div>
 								</div>
 							</div>
 						</div>
