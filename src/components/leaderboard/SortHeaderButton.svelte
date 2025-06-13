@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { Column } from '@tanstack/svelte-table';
 
-	export let column: Column<unknown> | undefined;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	export let column: Column<any> | undefined;
 	export let label: string;
 	export let ariaLabel: string;
 </script>

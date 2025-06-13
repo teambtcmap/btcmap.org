@@ -6,7 +6,8 @@
 	import AreaLeaderboardItemName from './AreaLeaderboardItemName.svelte';
 	import GradeDisplay from './GradeDisplay.svelte';
 
-	export let table: Table<LeaderboardArea & { position: number }>;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	export let table: Table<any>;
 	export let type: AreaType;
 	export let totalTooltip: HTMLButtonElement;
 	export let upToDateTooltip: HTMLButtonElement;
