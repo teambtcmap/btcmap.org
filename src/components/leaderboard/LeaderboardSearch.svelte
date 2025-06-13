@@ -17,7 +17,6 @@
 	}
 </script>
 
-<!-- Search Input -->
 <div class="relative text-primary dark:text-white">
 	<input
 		type="text"

@@ -13,7 +13,6 @@
 	export let gradeTooltip: HTMLButtonElement;
 </script>
 
-<!-- Desktop: Keep the existing table -->
 <div class="hidden lg:block" role="region" aria-label="Leaderboard table">
 	<table class="w-full text-left text-xs text-primary dark:text-white lg:text-sm xl:text-lg">
 		<thead>

@@ -17,15 +17,8 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { areaError, areas, reportError, reports, syncStatus, theme } from '$lib/store';
 	import type { AreaType, LeaderboardArea, Report } from '$lib/types';
-	import {
-		errToast,
-		getGrade,
-		validateContinents,
-		detectTheme,
-		debounce,
-		isEven
-	} from '$lib/utils';
-	import AreaLeaderboardItemName from './AreaLeaderboardItemName.svelte';
+	import { errToast, getGrade, validateContinents, detectTheme, debounce } from '$lib/utils';
+
 	import AreaLeaderboardMobileCard from './AreaLeaderboardMobileCard.svelte';
 	import AreaLeaderboardDesktopTable from './AreaLeaderboardDesktopTable.svelte';
 	import LeaderboardSearch from './LeaderboardSearch.svelte';
@@ -297,10 +290,6 @@
 		setHeaderTooltips();
 	});
 
-	onDestroy(() => {
-		// Cleanup will be handled by the action
-	});
-
 	// Simplified tooltip setup function for header tooltips only
 	const setHeaderTooltips = () => {
 		if (totalTooltip) {
@@ -406,7 +395,6 @@
 				<LeaderboardPagination table={$table} {pageSizes} />
 			{/if}
 
-			<!-- Additional info -->
 			<footer class="border-t border-statBorder px-5 pb-5 pt-2.5 text-sm text-body dark:text-white">
 				<p>Position is calculated as follows:</p>
 
