@@ -1,7 +1,6 @@
 <script lang="ts">
 	import {
 		AreaLeaderboard,
-		AreaLeaderboardMinimal,
 		Breadcrumbs,
 		Footer,
 		Header,
@@ -71,8 +70,7 @@
 				</div>
 			</div>
 
-			<!-- <AreaLeaderboard type="community" /> -->
-			<AreaLeaderboardMinimal type="community" />
+			<AreaLeaderboard type="community" />
 
 			<Footer />
 		</div>
