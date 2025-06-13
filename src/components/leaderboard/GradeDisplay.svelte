@@ -13,7 +13,8 @@
 
 	// Svelte action for grade tooltips
 	function gradeTooltipAction(node: HTMLElement, data: { percentage?: number; avgDate?: string }) {
-		let instance: any;
+		// Tippy instance - using object with destroy method since tippy.js types are complex with dynamic imports
+		let instance: { destroy(): void } | undefined;
 
 		async function setup() {
 			if (showTooltip && data.percentage !== undefined) {

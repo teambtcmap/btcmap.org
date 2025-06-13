@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { AreaType } from '$lib/types';
+	import type { AreaType, LeaderboardArea } from '$lib/types';
 	import type { Table } from '@tanstack/svelte-table';
 	import { isEven } from '$lib/utils';
 	import GradeDisplay from './GradeDisplay.svelte';
 
-	export let table: Table<any>;
+	export let table: Table<LeaderboardArea & { position: number }>;
 	export let type: AreaType;
 </script>
 

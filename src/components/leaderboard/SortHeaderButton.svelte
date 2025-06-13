@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Column } from '@tanstack/svelte-table';
 
-	export let column: Column<any> | undefined;
+	export let column: Column<unknown> | undefined;
 	export let label: string;
 	export let ariaLabel: string;
 </script>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Table } from '@tanstack/svelte-table';
 
-	export let table: Table<any>;
+	export let table: Table<unknown>;
 	export let globalFilter: string = '';
 	export let searchDebounce: (e: Event) => void;
 
