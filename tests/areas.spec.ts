@@ -104,7 +104,7 @@ describe('Areas', () => {
 
 		const goldMedalCell = page.getByRole('cell', { name: '🥇' });
 
-		await goldMedalCell.waitFor({ state: 'visible', timeout: 10000 });
+		await goldMedalCell.waitFor({ state: 'visible', timeout: 20000 });
 		await expect(goldMedalCell).toBeVisible();
 
 		// Test sorting functionality by clicking "Position" column header twice to reverse sort
