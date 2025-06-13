@@ -79,4 +79,39 @@ describe('Areas', () => {
 		});
 		await expect(boostForOneMonthButton).toBeVisible();
 	});
+
+	test('community leaderboard sorting', async ({ page }) => {
+		await page.goto('http://127.0.0.1:5173');
+
+		const heading = page.getByRole('heading', {
+			name: 'Find places to spend sats wherever you are.'
+		});
+		await heading.waitFor({ state: 'visible' });
+		await expect(heading).toBeTruthy();
+
+		await page.getByRole('button', { name: 'Areas' }).click();
+		await page.getByRole('link', { name: 'Communities' }).click();
+		await expect(page).toHaveURL(/communities/);
+
+		await page.getByRole('link', { name: 'Leaderboard' }).click();
+		await expect(page).toHaveURL(/communities\/leaderboard/);
+
+		await page
+			.getByRole('heading', {
+				name: 'Community Leaderboard'
+			})
+			.waitFor({ state: 'visible' });
+
+		const goldMedalCell = page.getByRole('cell', { name: '🥇' });
+
+		await goldMedalCell.waitFor({ state: 'visible', timeout: 10000 });
+		await expect(goldMedalCell).toBeVisible();
+
+		// Test sorting functionality by clicking "Position" column header twice to reverse sort
+		await page.getByRole('button', { name: 'Position' }).click();
+		await page.getByRole('button', { name: 'Position' }).click();
+
+		// Wait for the medal to disappear (indicating sorting worked)
+		await goldMedalCell.waitFor({ state: 'hidden', timeout: 5000 });
+	});
 });

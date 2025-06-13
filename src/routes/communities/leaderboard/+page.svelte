@@ -7,6 +7,7 @@
 		HeaderPlaceholder,
 		PrimaryButton
 	} from '$lib/comp';
+
 	import { theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
 
