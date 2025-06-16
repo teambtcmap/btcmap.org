@@ -10,7 +10,8 @@
 
 	const baseStyles =
 		'block bg-link text-center font-semibold text-white hover:bg-hover transition-colors';
-	const combinedStyles = `${baseStyles} ${style}`;
+
+	$: combinedStyles = `${baseStyles} ${style}`;
 </script>
 
 {#if link}
