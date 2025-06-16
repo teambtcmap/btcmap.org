@@ -168,6 +168,7 @@
 							<button
 								on:click={() => {
 									if (!$exchangeRate) return;
+
 									let dateNow = new Date();
 									let currentBoost =
 										$boost && $boost.boost && new Date($boost.boost) > dateNow
@@ -213,7 +214,6 @@
 						{loading}
 						on:click={generateInvoice}
 					>
-						disabled: {selectedBoost}
 						{selectedBoost
 							? `Boost for ${selectedBoost.time} month${selectedBoost.time > 1 ? 's' : ''}`
 							: 'Boost'}
