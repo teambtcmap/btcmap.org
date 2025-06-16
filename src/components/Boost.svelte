@@ -91,7 +91,7 @@
 				`/boost/invoice/generate?amount=${selectedBoost?.sats}&name=${encodeURIComponent($boost?.name || 'location')}&time=${selectedBoost?.time}`
 			)
 			.then(async function (response) {
-				invoice = response.data['payment_request'];
+				invoice = response.data['bolt11'];
 				hash = response.data['payment_hash'];
 
 				stage = 1;
@@ -213,6 +213,7 @@
 						{loading}
 						on:click={generateInvoice}
 					>
+						disabled: {selectedBoost}
 						{selectedBoost
 							? `Boost for ${selectedBoost.time} month${selectedBoost.time > 1 ? 's' : ''}`
 							: 'Boost'}
