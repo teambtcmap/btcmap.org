@@ -15,3 +15,6 @@ yarn.lock
 
 # created spritesheets
 spritesheet-*.ts
+
+# icons
+static/icons/font-awesome/
