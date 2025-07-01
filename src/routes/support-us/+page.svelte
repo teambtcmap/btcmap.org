@@ -41,7 +41,8 @@
 	const supporters = [
 		{ url: 'https://coinos.io/', title: 'coinos', logo: 'coinos.svg', logoDark: 'coinos-dark.svg' },
 		{ url: 'https://www.walletofsatoshi.com/', title: 'Wallet of Satoshi', logo: 'wos.png' },
-		{ url: 'https://btccuracao.com/', title: 'BTC Curacao', logo: 'btccuracao.png' }
+		{ url: 'https://btccuracao.com/', title: 'BTC Curacao', logo: 'btccuracao.png' },
+		{ url: 'https://satsnfacts.btc.pub/', title: 'Sats n Facts', logo: 'satsnfacts.png' }
 	];
 </script>
 
@@ -129,7 +130,7 @@
 					>Become a Sponsor</a
 				>
 
-				<SupportSection {supporters} placeholders={0} />
+				<SupportSection {supporters} placeholders={2} />
 			</section>
 
 			<section id="node">
