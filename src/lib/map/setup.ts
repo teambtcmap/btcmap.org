@@ -8,11 +8,17 @@ import {
 	taggingIssues,
 	theme
 } from '$lib/store';
-import type { DomEventType, ElementOSM, Issue, Leaflet, OSMTags, PayMerchant } from '$lib/types';
+import type {
+	DomEventType,
+	ElementOSM,
+	GenerateMarkerParams,
+	Leaflet,
+	OSMTags
+} from '$lib/types';
 import { detectTheme, errToast } from '$lib/utils';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
-import type { DivIcon, Map } from 'leaflet';
+import type { Map } from 'leaflet';
 import Time from 'svelte-time';
 import { get } from 'svelte/store';
 
@@ -634,18 +640,18 @@ export const verifiedArr = (element: ElementOSM) => {
 	return verified;
 };
 
-export const generateMarker = (
-	lat: number,
-	long: number,
-	icon: DivIcon,
-	element: ElementOSM,
-	payment: PayMerchant,
-	L: Leaflet,
-	verifiedDate: number,
-	verify: boolean,
-	boosted: string | undefined,
-	issues?: Issue[] | undefined
-) => {
+export const generateMarker = ({
+	lat,
+	long,
+	icon,
+	element,
+	payment,
+	leaflet: L,
+	verifiedDate,
+	verify,
+	boosted,
+	issues
+}: GenerateMarkerParams) => {
 	const generatePopup = () => {
 		const theme = detectTheme();
 

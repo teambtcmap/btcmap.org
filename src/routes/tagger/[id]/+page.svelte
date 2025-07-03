@@ -401,17 +401,17 @@
 
 				let divIcon = generateIcon(leaflet, icon, boosted ? true : false, commentsCount);
 
-				let marker = generateMarker(
+				let marker = generateMarker({
 					lat,
 					long,
-					divIcon,
-					elementOSM,
+					icon: divIcon,
+					element: elementOSM,
 					payment,
 					leaflet,
 					verifiedDate,
-					true,
+					verify: true,
 					boosted
-				);
+				});
 
 				markers.addLayer(marker);
 				bounds.push({ lat, long });

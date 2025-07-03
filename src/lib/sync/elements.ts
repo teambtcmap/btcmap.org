@@ -1,6 +1,6 @@
 import { elementError, elements, elementsSyncCount, mapUpdates } from '$lib/store';
 import { clearTables } from '$lib/sync/clearTables';
-import type { Element } from '$lib/types';
+import type { Place } from '$lib/types';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import localforage from 'localforage';
@@ -8,197 +8,125 @@ import { get } from 'svelte/store';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
-const limit = 5000;
+// Helper function to get date 2 weeks ago
+const getTwoWeeksAgoDate = (): string => {
+	const twoWeeksAgo = new Date();
+	twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+	return twoWeeksAgo.toISOString();
+};
 
 export const elementsSync = async () => {
-	// clear tables if present
-	clearTables(['elements', 'elements_v2', 'elements_v3']);
+	// clear old tables if present
+	clearTables(['elements', 'elements_v2', 'elements_v3', 'places_v4']);
 
-	// get elements from local
+	// get places from local storage
 	await localforage
-		.getItem<Element[]>('elements_v4')
-		.then(async function (value) {
-			// get elements from API if initial sync
-			if (!value) {
-				// add to sync count to only show data refresh after initial load
-				const count = get(elementsSyncCount);
-				elementsSyncCount.set(count + 1);
-
-				let updatedSince = '2022-01-01T00:00:00.000Z';
-				let responseCount;
-				let elementsData: Element[] = [];
-
-				do {
-					try {
-						const response = await axios.get<Element[]>(
-							`https://api.btcmap.org/v2/elements?updated_since=${updatedSince}&limit=${limit}`
-						);
-
-						updatedSince = response.data[response.data.length - 1]['updated_at'];
-						responseCount = response.data.length;
-						const elementsUpdated = elementsData.filter(
-							(element) => !response.data.find((data) => data.id === element.id)
-						);
-						elementsData = elementsUpdated;
-						response.data.forEach((data) => elementsData.push(data));
-					} catch (error) {
-						elementError.set(
-							'Could not load elements from API, please try again or contact BTC Map.'
-						);
-						console.error(error);
-						break;
-					}
-				} while (responseCount === limit);
-
-				if (elementsData.length) {
-					// filter out deleted elements
-					const elementsFiltered = elementsData.filter((element) => !element['deleted_at']);
-
-					// set response to local
-					localforage
-						.setItem('elements_v4', elementsFiltered)
-						.then(function () {
-							// set response to store
-							elements.set(elementsFiltered);
-						})
-						.catch(function (err) {
-							elements.set(elementsFiltered);
-							elementError.set(
-								'Could not store elements locally, please try again or contact BTC Map.'
-							);
-							console.error(err);
-						});
-				}
-			} else {
-				// add to sync count to only show data refresh after initial load
-				const count = get(elementsSyncCount);
-				elementsSyncCount.set(count + 1);
-
-				// start update sync from API
-				// sort to get most recent record
-				const cacheSorted = [...value];
-				cacheSorted.sort((a, b) => Date.parse(b['updated_at']) - Date.parse(a['updated_at']));
-
-				let updatedSince = cacheSorted[0]['updated_at'];
-				let responseCount;
-				let elementsData = value;
-				let useCachedData = false;
-
-				do {
-					try {
-						const response = await axios.get<Element[]>(
-							`https://api.btcmap.org/v2/elements?updated_since=${updatedSince}&limit=${limit}`
-						);
-
-						// update new records if they exist
-						const newElements = response.data;
-
-						// check for new elements in local and purge if they exist
-						if (newElements.length) {
-							updatedSince = newElements[newElements.length - 1]['updated_at'];
-							responseCount = newElements.length;
-
-							const elementsUpdated = elementsData.filter((value) => {
-								if (newElements.find((element) => element.id === value.id)) {
-									return false;
-								} else {
-									return true;
-								}
-							});
-							elementsData = elementsUpdated;
-
-							// add new elements
-							newElements.forEach((element) => {
-								if (!element['deleted_at']) {
-									elementsData.push(element);
-								}
-							});
-						} else {
-							// set cached elements to store
-							elements.set(value);
-							useCachedData = true;
-							break;
-						}
-					} catch (error) {
-						// set cached elements to store
-						elements.set(value);
-						useCachedData = true;
-
-						elementError.set(
-							'Could not update elements from API, please try again or contact BTC Map.'
-						);
-						console.error(error);
-						break;
-					}
-				} while (responseCount === limit);
-
-				if (!useCachedData) {
-					// set updated elements locally
-					localforage
-						.setItem('elements_v4', elementsData)
-						.then(function () {
-							// set updated elements to store
-							elements.set(elementsData);
-
-							// display data refresh icon on map
-							mapUpdates.set(true);
-						})
-						.catch(function (err) {
-							// set updated elements to store
-							elements.set(elementsData);
-
-							// display data refresh icon on map
-							mapUpdates.set(true);
-
-							elementError.set(
-								'Could not update elements locally, please try again or contact BTC Map.'
-							);
-							console.error(err);
-						});
-				}
-			}
-		})
-
-		.catch(async function (err) {
-			elementError.set('Could not load elements locally, please try again or contact BTC Map.');
-			console.error(err);
-
+		.getItem<Place[]>('places_v4')
+		.then(async function (cachedPlaces) {
 			// add to sync count to only show data refresh after initial load
 			const count = get(elementsSyncCount);
 			elementsSyncCount.set(count + 1);
 
-			let updatedSince = '2022-01-01T00:00:00.000Z';
-			let responseCount;
-			let elementsData: Element[] = [];
+			let placesData: Place[] = [];
 
-			do {
+			// Step 1: Get base data from static CDN if no cache exists
+			if (!cachedPlaces) {
 				try {
-					const response = await axios.get<Element[]>(
-						`https://api.btcmap.org/v2/elements?updated_since=${updatedSince}&limit=${limit}`
+					const staticResponse = await axios.get<Place[]>(
+						'https://static.btcmap.org/api/v4/places.json'
 					);
-
-					updatedSince = response.data[response.data.length - 1]['updated_at'];
-					responseCount = response.data.length;
-					const elementsUpdated = elementsData.filter(
-						(element) => !response.data.find((data) => data.id === element.id)
-					);
-					elementsData = elementsUpdated;
-					response.data.forEach((data) => elementsData.push(data));
+					placesData = staticResponse.data;
 				} catch (error) {
 					elementError.set(
-						'Could not load elements from API, please try again or contact BTC Map.'
+						'Could not load places from static CDN, please try again or contact BTC Map.'
 					);
 					console.error(error);
-					break;
+					return;
 				}
-			} while (responseCount === limit);
+			} else {
+				// Use cached data as base
+				placesData = [...cachedPlaces];
+			}
 
-			if (elementsData.length) {
-				// filter out deleted elements
-				const elementsFiltered = elementsData.filter((element) => !element['deleted_at']);
+			// Step 2: Get recent updates from API (last 2 weeks)
+			const twoWeeksAgo = getTwoWeeksAgoDate();
 
-				// set response to store
-				elements.set(elementsFiltered);
+			try {
+				const apiResponse = await axios.get<Place[]>(
+					`https://api.btcmap.org/v4/places?fields=id,lat,lon,icon,comments,deleted_at,updated_at&updated_since=${twoWeeksAgo}&include_deleted=true`
+				);
+
+				const recentUpdates = apiResponse.data;
+
+				if (recentUpdates.length > 0) {
+					// Remove existing places that have updates to avoid duplicates
+					const updatedPlaceIds = new Set(recentUpdates.map((place) => place.id));
+					placesData = placesData.filter((place) => !updatedPlaceIds.has(place.id));
+
+					// Add recent updates (exclude deleted ones for the final dataset)
+					recentUpdates.forEach((place) => {
+						if (!place.deleted_at) {
+							placesData.push(place);
+						}
+					});
+
+					// Show refresh indicator if we got updates and had cached data
+					if (cachedPlaces) {
+						mapUpdates.set(true);
+					}
+				}
+			} catch (error) {
+				// If API fails but we have cached data, continue with cached data
+				if (!cachedPlaces) {
+					elementError.set(
+						'Could not load recent updates from API, please try again or contact BTC Map.'
+					);
+					console.error(error);
+					return;
+				}
+
+				elementError.set('Could not update places from API, using cached data.');
+				console.error(error);
+			}
+
+			// Step 3: Save to local storage and update store
+			if (placesData.length > 0) {
+				localforage
+					.setItem('places_v4', placesData)
+					.then(function () {
+						// set response to store
+						elements.set(placesData);
+					})
+					.catch(function (err) {
+						elements.set(placesData);
+						elementError.set(
+							'Could not store places locally, please try again or contact BTC Map.'
+						);
+						console.error(err);
+					});
+			}
+		})
+		.catch(async function (err) {
+			elementError.set('Could not load places locally, please try again or contact BTC Map.');
+			console.error(err);
+
+			// Fallback: try to load from static CDN
+			const count = get(elementsSyncCount);
+			elementsSyncCount.set(count + 1);
+
+			try {
+				const staticResponse = await axios.get<Place[]>(
+					'https://static.btcmap.org/api/v4/places.json'
+				);
+
+				if (staticResponse.data.length > 0) {
+					elements.set(staticResponse.data);
+				}
+			} catch (error) {
+				elementError.set(
+					'Could not load places from static CDN, please try again or contact BTC Map.'
+				);
+				console.error(error);
 			}
 		});
 };
