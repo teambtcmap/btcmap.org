@@ -125,17 +125,17 @@
 
 				let divIcon = generateIcon(leaflet, icon, boosted ? true : false, commentsCount);
 
-				let marker = generateMarker(
-					latC,
-					longC,
-					divIcon,
-					elementOSM,
+				let marker = generateMarker({
+					lat: latC,
+					long: longC,
+					icon: divIcon,
+					element: elementOSM,
 					payment,
 					leaflet,
 					verifiedDate,
-					false,
+					verify: false,
 					boosted
-				);
+				});
 
 				// add marker click event
 				marker.on('click', (e) => {

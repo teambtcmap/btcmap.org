@@ -2,6 +2,7 @@ import type { GeoJSON, Polygon, MultiPolygon } from 'geojson';
 import type leaflet from 'leaflet';
 import type {
 	DomEvent,
+	DivIcon,
 	FeatureGroup,
 	LatLng,
 	LayerGroup,
@@ -172,6 +173,19 @@ export type IssueIcon =
 	| 'fa-hourglass-end'
 	| 'fa-list-check'
 	| 'fa-hourglass-half';
+
+export interface GenerateMarkerParams {
+	lat: number;
+	long: number;
+	icon: DivIcon;
+	element: ElementOSM;
+	payment: PayMerchant;
+	leaflet: Leaflet;
+	verifiedDate: number;
+	verify: boolean;
+	boosted?: string;
+	issues?: Issue[];
+}
 
 export type RpcGetMostActiveUsersItem = {
 	id: number;
@@ -367,3 +381,15 @@ export type DropdownLink = { url: string; external?: boolean; icon: string; titl
 export type ChartHistory = '7D' | '1M' | '3M' | '6M' | 'YTD' | '1Y' | 'ALL';
 
 export type AreaPageProps = { id: string; name: string; tickets: Tickets; issues: RpcIssue[] };
+
+// V4 API Types
+export type Place = {
+	id: number;
+	lat: number;
+	lon: number;
+	icon: string;
+	comments?: number;
+	deleted_at?: string; // Only present when fetching with include_deleted=true
+	updated_at?: string; // Only present when fetching with updated_since parameter
+	boosted_until?: string; // Only present when location is boosted
+};
