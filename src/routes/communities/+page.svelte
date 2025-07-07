@@ -242,27 +242,27 @@
 	$: communitySections = [
 		{
 			section: 'Africa',
-			communities: africa && africa.filter((community) => !community.tags.organization)
+			communities: africa
 		},
 		{
 			section: 'Asia',
-			communities: asia && asia.filter((community) => !community.tags.organization)
+			communities: asia
 		},
 		{
 			section: 'Europe',
-			communities: europe && europe.filter((community) => !community.tags.organization)
+			communities: europe
 		},
 		{
 			section: 'North America',
-			communities: northAmerica && northAmerica.filter((community) => !community.tags.organization)
+			communities: northAmerica
 		},
 		{
 			section: 'Oceania',
-			communities: oceania && oceania.filter((community) => !community.tags.organization)
+			communities: oceania
 		},
 		{
 			section: 'South America',
-			communities: southAmerica && southAmerica.filter((community) => !community.tags.organization)
+			communities: southAmerica
 		},
 		{ section: '2140 Meetups', communities: meetups2140 },
 		{ section: 'Bitcoin4India', communities: bitcoin4India },
