@@ -81,10 +81,10 @@
 				</p>
 				<p><strong>Do not</strong> submit any personal or private information.</p>
 				<p>
-					If you include a Twitter handle, we may Tweet about your submission from the <a
-						href={$socials.twitter}
+					If you include an X handle, we may post about your submission from the <a
+						href={$socials.x}
 						class="text-link transition-colors hover:text-hover">@btcmap</a
-					> Twitter account.
+					> X account.
 				</p>
 			</div>
 
