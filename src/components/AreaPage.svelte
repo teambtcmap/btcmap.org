@@ -123,14 +123,6 @@
 			.filter((report) => report.area_id === data.id)
 			.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
 
-		if (!areaReports.length) {
-			console.error(
-				`Could not find any ${type} reports, please try again tomorrow or contact BTC Map.`
-			);
-			goto('/404');
-			return;
-		}
-
 		area = areaFound.tags;
 
 		avatar =
@@ -399,7 +391,13 @@
 			<Boost />
 		{/if}
 	{:else if activeSection === Sections.stats}
-		<AreaStats {name} {filteredElements} {areaReports} />
+		{#if areaReports && areaReports.length > 0}
+			<AreaStats {name} {filteredElements} {areaReports} />
+		{:else}
+			<div class="text-center text-primary dark:text-white">
+				<p class="text-xl">Data will appear within 24 hours.</p>
+			</div>
+		{/if}
 	{:else if activeSection === Sections.activity}
 		<AreaActivity {alias} {name} {dataInitialized} {eventElements} {taggers} />
 	{:else if activeSection === Sections.maintain}
