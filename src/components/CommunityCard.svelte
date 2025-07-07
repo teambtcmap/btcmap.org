@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Socials, SponsorBadge, Tip } from '$lib/comp';
+	import { Socials, SponsorBadge, Tip, OrgBadge } from '$lib/comp';
 	import { TipType, type AreaTags } from '$lib/types';
 
 	export let id: string;
@@ -51,6 +51,9 @@
 
 			<span class="block text-center text-lg font-semibold">{tags.name}</span>
 		</a>
+		{#if tags.organization}
+			<OrgBadge org={tags.organization}/>
+		{/if}
 		{#if tags.sponsor}
 			<SponsorBadge />
 		{/if}
