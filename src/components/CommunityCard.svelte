@@ -52,7 +52,7 @@
 			<span class="block text-center text-lg font-semibold">{tags.name}</span>
 		</a>
 		{#if tags.organization}
-			<OrgBadge org={tags.organization}/>
+			<OrgBadge org={tags.organization} />
 		{/if}
 		{#if tags.sponsor}
 			<SponsorBadge />
