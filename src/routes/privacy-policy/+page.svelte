@@ -29,10 +29,10 @@
 				<p>What happens when you submit a form on our website:</p>
 				<ol class="ml-5 list-decimal space-y-2">
 					<li>
-						An issue is automatically created in our <a
-							href="https://github.com/teambtcmap/btcmap-data/issues"
+						An issue is automatically created in our self-hosted <a
+							href="https://gitea.btcmap.org/teambtcmap/btcmap-data/issues/"
 							class="text-link transition-colors hover:text-hover">btcmap-data</a
-						> repo on GitHub containing the form information.
+						> repo containing the form information.
 					</li>
 					<li>
 						A message is automatically sent in the <a
