@@ -134,21 +134,6 @@
 			</div>
 
 			<div class="space-y-5 text-xl text-body dark:text-white">
-				<h2 class="text-3xl font-semibold text-primary dark:text-white">(Don't Use) Google</h2>
-				<p>
-					Our Android app is available to download via the Google <a
-						href={$apps[3].link}
-						class="text-link transition-colors hover:text-hover">Play Store</a
-					>. However, we <strong>do not</strong> recommend using this method. God only knows what
-					information is collected about you when using Google services. Instead, we have our
-					Android app available for download directly from our GitHub repo as an
-					<a href={$apps[1].link} class="text-link transition-colors hover:text-hover">APK</a>
-					or on the FOSS app store
-					<a href={$apps[2].link} class="text-link transition-colors hover:text-hover">F-Droid.</a>
-				</p>
-			</div>
-
-			<div class="space-y-5 text-xl text-body dark:text-white">
 				<h2 class="text-3xl font-semibold text-primary dark:text-white">
 					How to Protect Your IP Online
 				</h2>
