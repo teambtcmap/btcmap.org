@@ -2,9 +2,9 @@
 
 export const iconNames = [
   "youtube",
+  "x",
   "whatsapp",
   "website",
-  "twitter",
   "telegram",
   "signal",
   "reddit",

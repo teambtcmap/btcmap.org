@@ -2,9 +2,9 @@ import type { Area, Boost, Element, Event, Issue, OSMTags, Report, Theme, User }
 import { readable, writable, type Writable } from 'svelte/store';
 
 export const socials = readable({
-	twitter: 'https://twitter.com/btcmap',
-	nostr: 'https://nostr.com/npub1864jglrrhv6alguwql9pqtmd5296nww5dpcewapmmcazk8vq4mks0tt2tq',
-	discord: 'https://discord.gg/wPqva83uzq',
+	x: 'https://x.com/btcmap',
+	nostr: 'https://nosta.me/nprofile1qqsra2ey033mkdwl5w8q0jss9ak69zafh82xsuvhwsaauw3trkq2amgax6f75',
+	discord: 'https://discord.com/invite/9mHeTgX2zb',
 	github: 'https://github.com/teambtcmap',
 	amboss: 'https://amboss.space/community/edf8d227-9bc7-4cb2-af2a-66c1b455109a'
 });
