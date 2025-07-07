@@ -403,7 +403,7 @@
 						<p class="mb-10 w-full text-justify text-primary dark:text-white">
 							Fill out the following form and one of our volunteer community members will add your
 							location to the map. <InfoTooltip
-								tooltip="All additions being completed on a volunteer basi and so we can't garuantee when your location will be added."
+								tooltip="All additions are completed on a volunteer basis and so we can't guarantee when your location will be added."
 							/>
 						</p>
 
