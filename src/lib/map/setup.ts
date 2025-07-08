@@ -7,6 +7,7 @@ import axiosRetry from 'axios-retry';
 import type { Map } from 'leaflet';
 import { get } from 'svelte/store';
 import type { DivIcon } from 'leaflet';
+import Time from 'svelte-time';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
@@ -670,7 +671,12 @@ export const generateMarker = ({
 
 				// Calculate verification status
 				const verifiedDate = calcVerifiedDate(); // 1 year ago
-				const isUpToDate = placeDetails.verified_at && Date.parse(placeDetails.verified_at) > verifiedDate;
+				const isUpToDate =
+					placeDetails.verified_at && Date.parse(placeDetails.verified_at) > verifiedDate;
+
+				// Calculate boosted status
+				const isBoosted =
+					placeDetails.boosted_until && Date.parse(placeDetails.boosted_until) > Date.now();
 
 				// Create popup with proper styling structure
 				const popupContent = L.DomUtil.create('div');
@@ -831,34 +837,45 @@ export const generateMarker = ({
 						<div>
 							<span class='block text-mapLabel text-xs' title="Completed by BTC Map community members">Last Surveyed</span>
 							<span class='block text-body dark:text-white'>
-								${placeDetails.verified_at 
-									? `${placeDetails.verified_at} ${
-										isUpToDate
-											? `<span title="Verified within the last year"><svg width='16px' height='16px' class='inline text-primary dark:text-white'>
+								${
+									placeDetails.verified_at
+										? `${placeDetails.verified_at} ${
+												isUpToDate
+													? `<span title="Verified within the last year"><svg width='16px' height='16px' class='inline text-primary dark:text-white'>
 												<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#verified"></use>
 											</svg></span>`
-											: `<span title="Outdated please re-verify"><svg width='16px' height='16px' class='inline text-primary dark:text-white'>
+													: `<span title="Outdated please re-verify"><svg width='16px' height='16px' class='inline text-primary dark:text-white'>
 												<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#outdated"></use>
 											</svg></span>`
-									}`
-									: '<span title="Not verified">---</span>'
+											}`
+										: '<span title="Not verified">---</span>'
 								}
 							</span>
 							
-							${location.pathname === '/map' 
-								? `<a href="/verify-location?id=${osmType}:${osmId}" class='!text-link hover:!text-hover text-xs transition-colors' title="Help improve the data for everyone">Verify Location</a>`
-								: ''
+							${
+								location.pathname === '/map'
+									? `<a href="/verify-location?id=${osmType}:${osmId}" class='!text-link hover:!text-hover text-xs transition-colors' title="Help improve the data for everyone">Verify Location</a>`
+									: ''
 							}
 						</div>
 
-						${
-							placeDetails.boosted_until
-								? `<div>
-								<span class='block text-mapLabel text-xs' title="This location is boosted!">Boost Expires</span>
-								<span class='block text-body dark:text-white'>${placeDetails.boosted_until}</span>
-							   </div>`
-								: ''
-						}
+						<div>
+							${
+								isBoosted
+									? `<span class='block text-mapLabel text-xs' title="This location is boosted!">Boost Expires</span>
+									   <span class='block text-body dark:text-white'><span id="boosted-time"></span></span>`
+									: ''
+							}
+
+							<button title='${isBoosted ? 'Extend Boost' : 'Boost'}' id='boost-button' class='flex justify-center items-center space-x-2 text-primary dark:text-white hover:text-link dark:hover:text-link border border-mapBorder hover:border-link rounded-lg px-3 h-[32px] transition-colors mt-1'>
+								<svg width='16px' height='16px'>
+									<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#${
+										isBoosted ? 'boost-solid' : 'boost'
+									}"></use>
+								</svg>
+								<span class='text-xs'>${isBoosted ? 'Extend' : 'Boost'}</span>
+							</button>
+						</div>
 
 						${
 							placeDetails.comments > 0
@@ -888,6 +905,21 @@ export const generateMarker = ({
 					.on('popupclose', () => {
 						marker.unbindPopup();
 					});
+
+				// Hydrate the boost expiration time with the Time component
+				if (isBoosted) {
+					const boostedTimeElement = popupContent.querySelector('#boosted-time');
+					if (boostedTimeElement) {
+						new Time({
+							target: boostedTimeElement,
+							props: {
+								live: 3000,
+								relative: true,
+								timestamp: placeDetails.boosted_until
+							}
+						});
+					}
+				}
 
 				// Add interactive functionality for the More button
 				const showMoreDiv = popupContent.querySelector('#show-more');
@@ -921,10 +953,43 @@ export const generateMarker = ({
 					const navigateBtn: HTMLAnchorElement | null = popupContent.querySelector('#navigate');
 					const editBtn: HTMLAnchorElement | null = popupContent.querySelector('#edit');
 					const shareBtn: HTMLAnchorElement | null = popupContent.querySelector('#share');
+					const boostBtn: HTMLButtonElement | null = popupContent.querySelector('#boost-button');
 
 					if (navigateBtn) navigateBtn.onclick = () => hideMore();
 					if (editBtn) editBtn.onclick = () => hideMore();
 					if (shareBtn) shareBtn.onclick = () => hideMore();
+
+					// Boost button click handler
+					if (boostBtn) {
+						boostBtn.onclick = async (e) => {
+							e.preventDefault();
+							hideMore();
+
+							// Set up boost data similar to BoostButton.svelte
+							const boostStore = get(boost);
+							if (boostStore) return; // Prevent multiple boost flows
+
+							// Set the boost data in the global store
+							boost.set({
+								id: placeDetails.id,
+								name: placeDetails.name || '',
+								boost: isBoosted ? placeDetails.boosted_until || '' : ''
+							});
+
+							// Fetch exchange rate
+							try {
+								const response = await axios.get('https://blockchain.info/ticker');
+								exchangeRate.set(response.data['USD']['15m']);
+							} catch (error) {
+								console.error('Error fetching exchange rate:', error);
+								// Reset boost store on error
+								boost.set(undefined);
+								errToast(
+									'Could not fetch bitcoin exchange rate, please try again or contact BTC Map.'
+								);
+							}
+						};
+					}
 				}
 			} catch (error) {
 				console.error('Error fetching place details:', error);
