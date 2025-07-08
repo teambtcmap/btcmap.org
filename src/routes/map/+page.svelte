@@ -192,12 +192,12 @@
 				lat: element.lat,
 				long: element.lon,
 				icon: divIcon,
+				placeId: element.id,
 				// element: elementOSM,
 				// payment,
 				leaflet,
 				// verifiedDate,
-				verify: true,
-				boosted
+				verify: true
 				// issues: element.tags.issues
 			});
 
