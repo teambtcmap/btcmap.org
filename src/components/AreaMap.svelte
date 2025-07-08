@@ -169,17 +169,17 @@
 
 				let divIcon = generateIcon(leaflet, icon, boosted ? true : false, commentsCount);
 
-				let marker = generateMarker({
+				let marker = generateMarker(
 					lat,
 					long,
-					icon: divIcon,
-					element: elementOSM,
+					divIcon,
+					elementOSM,
 					payment,
 					leaflet,
 					verifiedDate,
-					verify: true,
+					true,
 					boosted
-				});
+				);
 
 				let verified = verifiedArr(elementOSM);
 
