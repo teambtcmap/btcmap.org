@@ -280,13 +280,13 @@
 			//import packages
 			leaflet = await import('leaflet');
 			const DomEvent = leaflet.DomEvent;
-			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
+			/* eslint-disable @typescript-eslint/no-unused-vars */
 			const maplibreGl = await import('maplibre-gl');
 			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
 			const leafletLocateControl = await import('leaflet.locatecontrol');
 			const leafletMarkerCluster = await import('leaflet.markercluster');
 			const leafletFeaturegroupSubgroup = await import('leaflet.featuregroup.subgroup');
-			/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
+			/* eslint-enable @typescript-eslint/no-unused-vars */
 
 			// add map and tiles
 			map = window.L.map(mapElement, { maxZoom: 19 });

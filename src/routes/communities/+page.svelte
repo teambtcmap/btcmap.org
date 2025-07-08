@@ -3,6 +3,8 @@
 	import { CommunitySection, Footer, Header, HeaderPlaceholder, PrimaryButton } from '$lib/comp';
 	import { areaError, areas, reportError, reports, syncStatus, theme } from '$lib/store';
 	import { detectTheme, errToast } from '$lib/utils';
+	import { getOrganizationDisplayName } from '$lib/organizationDisplayNames';
+	import type { Community } from '$lib/types';
 	import Chart from 'chart.js/auto';
 	import { onMount } from 'svelte';
 
@@ -16,17 +18,15 @@
 	let initialRenderComplete = false;
 
 	$: communities =
-		$areas && $areas.length && $reports && $reports.length
-			? $areas
+		$areas && $areas.length
+			? ($areas
 					.filter(
-						(area) =>
+						(area): area is Community =>
 							area.tags.type === 'community' &&
-							area.tags.geo_json &&
-							area.tags.name &&
-							area.tags['icon:square'] &&
-							area.tags.continent &&
-							Object.keys(area.tags).find((key) => key.includes('contact')) &&
-							$reports.find((report) => report.area_id === area.id)
+							!!area.tags.geo_json &&
+							!!area.tags.name &&
+							!!area.tags['icon:square'] &&
+							!!area.tags.continent
 					)
 					.sort((a, b) => {
 						const nameA = a.tags.name.toUpperCase(); // ignore upper and lowercase
@@ -39,8 +39,14 @@
 						}
 						// names must be equal
 						return 0;
-					})
+					}) as Community[])
 			: undefined;
+
+	const hasOrganization = (community: Community, orgName: string) => {
+		if (!community.tags.organization) return false;
+		const orgs = community.tags.organization.split(',').map((o: string) => o.trim());
+		return orgs.includes(orgName);
+	};
 
 	$: africa =
 		communities && communities.filter((community) => community.tags.continent === 'africa');
@@ -53,67 +59,25 @@
 		communities && communities.filter((community) => community.tags.continent === 'oceania');
 	$: southAmerica =
 		communities && communities.filter((community) => community.tags.continent === 'south-america');
+	// Get unique organizations from community data
+	$: uniqueOrganizations = communities
+		? Array.from(
+				new Set(
+					communities
+						.filter((community) => community.tags.organization)
+						.flatMap((community) =>
+							community.tags.organization!.split(',').map((org) => org.trim())
+						)
+				)
+			).sort()
+		: [];
 
-	$: meetups2140 =
-		communities &&
-		communities.filter((community) => community.tags.organization === '2140-meetups');
-	$: bitcoin4India =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'bitcoin4india');
-	$: bitcoin4Iranians =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'bitcoin-4-iranians');
-	$: bitcoinBulgaria =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'bitcoin-bulgaria');
-	$: bitcoinIndonesia =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'bitcoin-indonesia');
-	$: bitcoinJamii =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'bitcoin-jamii');
-	$: bitcoinParaguay =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'bitcoin-paraguay');
-	$: bitDevs =
-		communities && communities.filter((community) => community.tags.organization === 'bit-devs');
-	$: breizhBitcoin =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'breizh-bitcoin');
-	$: decouvreBitcoin =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'decouvre-bitcoin');
-	$: dvadsatjeden =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'dvadsatjeden');
-	$: dwadziesciaJeden =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'dwadziescia-jeden');
-	$: eenentwintig =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'eenentwintig');
-	$: einundzwanzig =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'einundzwanzig');
-	$: enogtyve =
-		communities && communities.filter((community) => community.tags.organization === 'enogtyve');
-	$: goBtc =
-		communities && communities.filter((community) => community.tags.organization === 'go-btc');
-	$: jednadvacet =
-		communities && communities.filter((community) => community.tags.organization === 'jednadvacet');
-	$: miPrimerBitcoin =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'mi-primer-bitcoin');
-	$: planBNetwork =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'plan-b-network');
-	$: satoshiSomosTodos =
-		communities && communities.filter((community) => community.tags.organization === 'sst');
-	$: satoshiSpritz =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'satoshi-spritz');
-	$: uaibit =
-		communities && communities.filter((community) => community.tags.organization === 'uaibit');
+	// Generate organization sections dynamically
+	$: organizationSections = uniqueOrganizations.map((orgId) => ({
+		id: orgId,
+		displayName: getOrganizationDisplayName(orgId),
+		communities: communities?.filter((community) => hasOrganization(community, orgId)) || []
+	}));
 
 	let continentChartCanvas: HTMLCanvasElement;
 	let continentChart: Chart<'doughnut', number[], string>;
@@ -209,98 +173,100 @@
 		chartSync($syncStatus);
 
 	let section: string;
-	const sections = [
+
+	// Generate sections dynamically
+	$: sections = [
 		'--Continents--',
-		'Africa',
-		'Asia',
-		'Europe',
-		'North America',
-		'Oceania',
-		'South America',
+		'africa',
+		'asia',
+		'europe',
+		'north-america',
+		'oceania',
+		'south-america',
 		'--Organizations--',
-		'2140 Meetups',
-		'Bitcoin4India',
-		'Bitcoin 4 Iranians',
-		'Bitcoin Bulgaria',
-		'Bitcoin Indonesia',
-		'Bitcoin Jamii',
-		'Bitcoin Paraguay',
-		'BitDevs',
-		'Breizh Bitcoin',
-		'Découvre Bitcoin',
-		'Dvadsaťjeden',
-		'Dwadzieścia Jeden',
-		'Eenentwintig',
-		'Einundzwanzig',
-		'Enogtyve',
-		'Go BTC',
-		'Jednadvacet',
-		'Mi Primer Bitcoin',
-		'Plan B Network',
-		'Satoshi Somos Todos',
-		'Satoshi Spritz',
-		'UAIBIT'
-	];
-	$: communitySections = [
-		{
-			section: 'Africa',
-			communities: africa && africa.filter((community) => !community.tags.organization)
-		},
-		{
-			section: 'Asia',
-			communities: asia && asia.filter((community) => !community.tags.organization)
-		},
-		{
-			section: 'Europe',
-			communities: europe && europe.filter((community) => !community.tags.organization)
-		},
-		{
-			section: 'North America',
-			communities: northAmerica && northAmerica.filter((community) => !community.tags.organization)
-		},
-		{
-			section: 'Oceania',
-			communities: oceania && oceania.filter((community) => !community.tags.organization)
-		},
-		{
-			section: 'South America',
-			communities: southAmerica && southAmerica.filter((community) => !community.tags.organization)
-		},
-		{ section: '2140 Meetups', communities: meetups2140 },
-		{ section: 'Bitcoin4India', communities: bitcoin4India },
-		{ section: 'Bitcoin 4 Iranians', communities: bitcoin4Iranians },
-		{ section: 'Bitcoin Bulgaria', communities: bitcoinBulgaria },
-		{ section: 'Bitcoin Indonesia', communities: bitcoinIndonesia },
-		{ section: 'Bitcoin Jamii', communities: bitcoinJamii },
-		{ section: 'Bitcoin Paraguay', communities: bitcoinParaguay },
-		{ section: 'BitDevs', communities: bitDevs },
-		{ section: 'Breizh Bitcoin', communities: breizhBitcoin },
-		{ section: 'Découvre Bitcoin', communities: decouvreBitcoin },
-		{ section: 'Dvadsaťjeden', communities: dvadsatjeden },
-		{ section: 'Dwadzieścia Jeden', communities: dwadziesciaJeden },
-		{ section: 'Eenentwintig', communities: eenentwintig },
-		{ section: 'Einundzwanzig', communities: einundzwanzig },
-		{ section: 'Enogtyve', communities: enogtyve },
-		{ section: 'Go BTC', communities: goBtc },
-		{ section: 'Jednadvacet', communities: jednadvacet },
-		{ section: 'Mi Primer Bitcoin', communities: miPrimerBitcoin },
-		{ section: 'Plan B Network', communities: planBNetwork },
-		{ section: 'Satoshi Somos Todos', communities: satoshiSomosTodos },
-		{ section: 'Satoshi Spritz', communities: satoshiSpritz },
-		{ section: 'UAIBIT', communities: uaibit }
+		...organizationSections.map((org) => org.id)
 	];
 
-	onMount(async () => {
+	$: communitySections = [
+		{
+			section: 'africa',
+			communities: africa
+		},
+		{
+			section: 'asia',
+			communities: asia
+		},
+		{
+			section: 'europe',
+			communities: europe
+		},
+		{
+			section: 'north-america',
+			communities: northAmerica
+		},
+		{
+			section: 'oceania',
+			communities: oceania
+		},
+		{
+			section: 'south-america',
+			communities: southAmerica
+		},
+		...organizationSections.map((org) => ({
+			section: org.id,
+			communities: org.communities
+		}))
+	];
+
+	// Map continent tag values to display names
+	const continentDisplayNames: Record<string, string> = {
+		africa: 'Africa',
+		asia: 'Asia',
+		europe: 'Europe',
+		'north-america': 'North America',
+		oceania: 'Oceania',
+		'south-america': 'South America'
+	};
+
+	onMount(() => {
 		if (browser) {
 			continentChartCanvas.getContext('2d');
 
-			if (location.hash) {
-				section = decodeURIComponent(location.hash).slice(1);
-			} else {
-				section = 'Africa';
-			}
+			const handleHashChange = () => {
+				if (location.hash) {
+					const hashSection = decodeURIComponent(location.hash).slice(1);
+					// Wait for organizationSections to be populated before setting section
+					const checkAndSetSection = () => {
+						if (
+							organizationSections.length > 0 ||
+							['africa', 'asia', 'europe', 'north-america', 'oceania', 'south-america'].includes(
+								hashSection
+							)
+						) {
+							section = hashSection;
+							initialRenderComplete = true;
+						} else {
+							// Retry after a short delay if organizations aren't loaded yet
+							setTimeout(checkAndSetSection, 100);
+						}
+					};
+					checkAndSetSection();
+				} else {
+					section = 'africa';
+					initialRenderComplete = true;
+				}
+			};
 
-			initialRenderComplete = true;
+			// Handle initial hash
+			handleHashChange();
+
+			// Listen for hash changes
+			window.addEventListener('hashchange', handleHashChange);
+
+			// Cleanup
+			return () => {
+				window.removeEventListener('hashchange', handleHashChange);
+			};
 		}
 	});
 </script>
@@ -380,7 +346,11 @@
 						<h2
 							class="mb-2 text-3xl font-semibold text-primary dark:text-white md:mb-0 md:text-left"
 						>
-							<a href="/communities#{encodeURIComponent(section)}">{section}</a>
+							<a href="/communities#{encodeURIComponent(section)}">
+								{organizationSections.find((org) => org.id === section)?.displayName ||
+									continentDisplayNames[section] ||
+									section}
+							</a>
 						</h2>
 
 						<select
@@ -394,7 +364,13 @@
 							}}
 						>
 							{#each sections as option (option)}
-								<option disabled={option.startsWith('--')} value={option}>{option}</option>
+								<option disabled={option.startsWith('--')} value={option}>
+									{option.startsWith('--')
+										? option
+										: organizationSections.find((org) => org.id === option)?.displayName ||
+											continentDisplayNames[option] ||
+											option}
+								</option>
 							{/each}
 						</select>
 					{/if}

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { onMount } from 'svelte';
 
 	export let type: 'country' | 'community';
 	export let data: AreaPageProps;
@@ -84,6 +85,61 @@
 	let activeSection = Sections.merchants;
 	let scrolled = false;
 
+	// Map section names to URL-friendly slugs
+	const sectionSlugs: Record<Sections, string> = {
+		[Sections.merchants]: 'merchants',
+		[Sections.stats]: 'stats',
+		[Sections.activity]: 'activity',
+		[Sections.maintain]: 'maintain'
+	};
+
+	// Reverse mapping from slugs to sections
+	const slugToSection: Record<string, Sections> = {
+		merchants: Sections.merchants,
+		stats: Sections.stats,
+		activity: Sections.activity,
+		maintain: Sections.maintain
+	};
+
+	// Handle hash changes
+	const handleHashChange = () => {
+		if (browser && location.hash) {
+			const hashSection = location.hash.slice(1);
+			if (slugToSection[hashSection]) {
+				activeSection = slugToSection[hashSection];
+			}
+		}
+	};
+
+	// Update URL hash when section changes
+	const updateHash = (section: Sections) => {
+		if (browser) {
+			const slug = sectionSlugs[section];
+			history.replaceState(null, '', `#${slug}`);
+		}
+	};
+
+	// Handle section change
+	const handleSectionChange = (section: Sections) => {
+		activeSection = section;
+		updateHash(section);
+	};
+
+	onMount(() => {
+		if (browser) {
+			// Handle initial hash on mount
+			handleHashChange();
+
+			// Listen for hash changes
+			window.addEventListener('hashchange', handleHashChange);
+
+			// Cleanup
+			return () => {
+				window.removeEventListener('hashchange', handleHashChange);
+			};
+		}
+	});
+
 	let dataInitialized = false;
 
 	const initializeData = () => {
@@ -122,14 +178,6 @@
 		areaReports = $reports
 			.filter((report) => report.area_id === data.id)
 			.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
-
-		if (!areaReports.length) {
-			console.error(
-				`Could not find any ${type} reports, please try again tomorrow or contact BTC Map.`
-			);
-			goto('/404');
-			return;
-		}
 
 		area = areaFound.tags;
 
@@ -373,7 +421,7 @@
 	>
 		{#each sections as section, index (index)}
 			<button
-				on:click={() => (activeSection = section)}
+				on:click={() => handleSectionChange(section)}
 				class="border-b-4 pb-3 text-center text-lg text-link transition-colors hover:border-link {activeSection ===
 				section
 					? 'border-link font-bold'
@@ -399,7 +447,13 @@
 			<Boost />
 		{/if}
 	{:else if activeSection === Sections.stats}
-		<AreaStats {name} {filteredElements} {areaReports} />
+		{#if areaReports && areaReports.length > 0}
+			<AreaStats {name} {filteredElements} {areaReports} areaTags={area} />
+		{:else}
+			<div class="text-center text-primary dark:text-white">
+				<p class="text-xl">Data will appear within 24 hours.</p>
+			</div>
+		{/if}
 	{:else if activeSection === Sections.activity}
 		<AreaActivity {alias} {name} {dataInitialized} {eventElements} {taggers} />
 	{:else if activeSection === Sections.maintain}
