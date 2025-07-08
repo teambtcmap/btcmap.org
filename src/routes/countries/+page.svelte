@@ -44,15 +44,7 @@
 		countries && countries.filter((country) => country.tags.continent === 'South America');
 
 	let section: string;
-	const sections = [
-		'--Continents--',
-		'Africa',
-		'Asia',
-		'Europe',
-		'North America',
-		'Oceania',
-		'South America'
-	];
+	const sections = ['africa', 'asia', 'europe', 'north-america', 'oceania', 'south-america'];
 	$: countrySections = [
 		{
 			section: 'Africa',
@@ -80,13 +72,46 @@
 		}
 	];
 
-	onMount(async () => {
+	// Map continent tag values to display names
+	const continentDisplayNames: Record<string, string> = {
+		africa: 'Africa',
+		asia: 'Asia',
+		europe: 'Europe',
+		'north-america': 'North America',
+		oceania: 'Oceania',
+		'south-america': 'South America'
+	};
+
+	onMount(() => {
 		if (browser) {
-			if (location.hash) {
-				section = decodeURIComponent(location.hash).slice(1);
-			} else {
-				section = 'Africa';
-			}
+			const handleHashChange = () => {
+				if (location.hash) {
+					const hashSection = decodeURIComponent(location.hash).slice(1);
+					// Check if it's a valid continent section
+					if (
+						['africa', 'asia', 'europe', 'north-america', 'oceania', 'south-america'].includes(
+							hashSection
+						)
+					) {
+						section = hashSection;
+					} else {
+						section = 'africa';
+					}
+				} else {
+					section = 'africa';
+				}
+			};
+
+			// Handle initial hash
+			handleHashChange();
+
+			// Listen for hash changes
+			window.addEventListener('hashchange', handleHashChange);
+
+			// Cleanup
+			return () => {
+				window.removeEventListener('hashchange', handleHashChange);
+			};
 		}
 	});
 </script>
@@ -128,7 +153,9 @@
 						<h2
 							class="mb-2 text-3xl font-semibold text-primary dark:text-white md:mb-0 md:text-left"
 						>
-							<a href="/countries#{encodeURIComponent(section)}">{section}</a>
+							<a href="/countries#{encodeURIComponent(section)}"
+								>{continentDisplayNames[section] || section}</a
+							>
 						</h2>
 
 						<select
@@ -142,14 +169,14 @@
 							}}
 						>
 							{#each sections as option (option)}
-								<option disabled={option.startsWith('--')} value={option}>{option}</option>
+								<option value={option}>{continentDisplayNames[option] || option}</option>
 							{/each}
 						</select>
 					{/if}
 				</div>
 
 				{#each countrySections as item (item.section)}
-					{#if section === item.section}
+					{#if continentDisplayNames[section] === item.section}
 						<CountrySection countries={item.countries} />
 					{/if}
 				{/each}
