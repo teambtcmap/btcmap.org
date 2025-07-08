@@ -2,7 +2,6 @@ import type { GeoJSON, Polygon, MultiPolygon } from 'geojson';
 import type leaflet from 'leaflet';
 import type {
 	DomEvent,
-	DivIcon,
 	FeatureGroup,
 	LatLng,
 	LayerGroup,
@@ -173,19 +172,6 @@ export type IssueIcon =
 	| 'fa-hourglass-end'
 	| 'fa-list-check'
 	| 'fa-hourglass-half';
-
-export interface GenerateMarkerParams {
-	lat: number;
-	long: number;
-	icon: DivIcon;
-	element: ElementOSM;
-	payment: PayMerchant;
-	leaflet: Leaflet;
-	verifiedDate: number;
-	verify: boolean;
-	boosted?: string;
-	issues?: Issue[];
-}
 
 export type RpcGetMostActiveUsersItem = {
 	id: number;

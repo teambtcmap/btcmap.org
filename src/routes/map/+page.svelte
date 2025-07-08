@@ -141,130 +141,135 @@
 		let markers = L.markerClusterGroup({ maxClusterRadius: 80, disableClusteringAtZoom: 17 });
 		/* eslint-enable no-undef */
 		let upToDateLayer = leaflet.featureGroup.subGroup(markers);
-		let outdatedLayer = leaflet.featureGroup.subGroup(markers);
-		let legacyLayer = leaflet.featureGroup.subGroup(markers);
-		let thirdPartyLayer = leaflet.featureGroup.subGroup(markers);
-		let categories: MapGroups = {};
+		// let outdatedLayer = leaflet.featureGroup.subGroup(markers);
+		// let legacyLayer = leaflet.featureGroup.subGroup(markers);
+		// let thirdPartyLayer = leaflet.featureGroup.subGroup(markers);
+		// let categories: MapGroups = {};
 
 		// add location information
 		$elements.forEach((element) => {
-			let category = element.tags.category;
-			let icon = element.tags['icon:android'];
-			let payment = element.tags['payment:uri']
-				? { type: 'uri', url: element.tags['payment:uri'] }
-				: element.tags['payment:pouch']
-					? { type: 'pouch', username: element.tags['payment:pouch'] }
-					: element.tags['payment:coinos']
-						? { type: 'coinos', username: element.tags['payment:coinos'] }
-						: undefined;
-			let boosted =
-				element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now()
-					? element.tags['boost:expires']
-					: undefined;
+			// let category = element.tags.category;
+			// let icon = element.tags['icon:android'];
+			// let payment = element.tags['payment:uri']
+			// 	? { type: 'uri', url: element.tags['payment:uri'] }
+			// 	: element.tags['payment:pouch']
+			// 		? { type: 'pouch', username: element.tags['payment:pouch'] }
+			// 		: element.tags['payment:coinos']
+			// 			? { type: 'coinos', username: element.tags['payment:coinos'] }
+			// 			: undefined;
+			// let boosted =
+			// 	element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now()
+			// 		? element.tags['boost:expires']
+			// 		: undefined;
 
-			const elementOSM = element['osm_json'];
+			// const elementOSM = element['osm_json'];
 
-			let verified = verifiedArr(elementOSM);
-			let upToDate = verified.length && Date.parse(verified[0]) > verifiedDate;
+			// let verified = verifiedArr(elementOSM);
+			// let upToDate = verified.length && Date.parse(verified[0]) > verifiedDate;
 
-			if (
-				(onchain ? elementOSM.tags && elementOSM.tags['payment:onchain'] === 'yes' : true) &&
-				(lightning ? elementOSM.tags && elementOSM.tags['payment:lightning'] === 'yes' : true) &&
-				(nfc
-					? elementOSM.tags && elementOSM.tags['payment:lightning_contactless'] === 'yes'
-					: true) &&
-				(legacy ? elementOSM.tags && elementOSM.tags['payment:bitcoin'] === 'yes' : true) &&
-				(outdated ? !upToDate : true) &&
-				(boosts ? boosted : true)
-			) {
-				const lat = latCalc(elementOSM);
-				const long = longCalc(elementOSM);
+			// if (
+			// 	// (onchain ? elementOSM.tags && elementOSM.tags['payment:onchain'] === 'yes' : true) &&
+			// 	// (lightning ? elementOSM.tags && elementOSM.tags['payment:lightning'] === 'yes' : true) &&
+			// 	// (nfc
+			// 	// 	? elementOSM.tags && elementOSM.tags['payment:lightning_contactless'] === 'yes'
+			// 	// 	: true) &&
+			// 	// (legacy ? elementOSM.tags && elementOSM.tags['payment:bitcoin'] === 'yes' : true) &&
+			// 	// (outdated ? !upToDate : true) &&
+			// 	(boosts ? boosted : true)
+			// ) {
+			// const lat = latCalc(elementOSM);
+			// const long = longCalc(elementOSM);
 
-				const commentsCount = element.tags.comments || 0;
+			const commentsCount = element.comments || 0;
+			const icon = element.icon;
+			const boosted = element.boosted_until
+				? Date.parse(element.boosted_until) > Date.now()
+				: false;
 
-				let divIcon = generateIcon(leaflet, icon, boosted ? true : false, commentsCount);
+			let divIcon = generateIcon(leaflet, icon, boosted ? true : false, commentsCount);
 
-				let marker = generateMarker({
-					lat,
-					long,
-					icon: divIcon,
-					element: elementOSM,
-					payment,
-					leaflet,
-					verifiedDate,
-					verify: true,
-					boosted,
-					issues: element.tags.issues
-				});
+			let marker = generateMarker({
+				lat: element.lat,
+				long: element.lon,
+				icon: divIcon,
+				// element: elementOSM,
+				// payment,
+				leaflet,
+				// verifiedDate,
+				verify: true,
+				boosted
+				// issues: element.tags.issues
+			});
 
-				if (upToDate) {
-					upToDateLayer.addLayer(marker);
-				} else {
-					outdatedLayer.addLayer(marker);
-				}
+			// if (upToDate) {
+			upToDateLayer.addLayer(marker);
+			// } else {
+			// 	outdatedLayer.addLayer(marker);
+			// }
 
-				if (elementOSM.tags && elementOSM.tags['payment:bitcoin']) {
-					legacyLayer.addLayer(marker);
-				}
+			// if (elementOSM.tags && elementOSM.tags['payment:bitcoin']) {
+			// 	legacyLayer.addLayer(marker);
+			// }
 
-				if (
-					elementOSM.tags &&
-					elementOSM.tags['payment:lightning:requires_companion_app'] === 'yes' &&
-					elementOSM.tags['payment:lightning:companion_app_url'] &&
-					!(
-						elementOSM.tags['payment:onchain'] ||
-						elementOSM.tags['payment:lightning'] ||
-						elementOSM.tags['payment:lightning_contactless']
-					)
-				) {
-					thirdPartyLayer.addLayer(marker);
-				}
+			// if (
+			// 	elementOSM.tags &&
+			// 	elementOSM.tags['payment:lightning:requires_companion_app'] === 'yes' &&
+			// 	elementOSM.tags['payment:lightning:companion_app_url'] &&
+			// 	!(
+			// 		elementOSM.tags['payment:onchain'] ||
+			// 		elementOSM.tags['payment:lightning'] ||
+			// 		elementOSM.tags['payment:lightning_contactless']
+			// 	)
+			// ) {
+			// 	thirdPartyLayer.addLayer(marker);
+			// }
 
-				if (!categories[category]) {
-					categories[category] = leaflet.featureGroup.subGroup(markers);
-				}
+			// if (!categories[category]) {
+			// 	categories[category] = leaflet.featureGroup.subGroup(markers);
+			// }
 
-				categories[category].addLayer(marker);
+			// categories[category].addLayer(marker);
 
-				elementsCopy.push({
-					...elementOSM,
-					latLng: leaflet.latLng(lat, long),
-					marker,
-					icon,
-					boosted
-				});
-			}
+			// NEEDED FOR THE FE SEARCH TO WORK BUT IGNORE FOR NOW
+			// elementsCopy.push({
+			// 	...elementOSM,
+			// 	latLng: leaflet.latLng(element.lat, element.lon),
+			// 	marker,
+			// 	icon,
+			// 	boosted
+			// });
+			// }
 		});
 
 		map.addLayer(markers);
 
-		let overlayMaps: MapGroups = {
-			...(!outdated ? { 'Up-To-Date': upToDateLayer } : {}),
-			Outdated: outdatedLayer,
-			Legacy: legacyLayer,
-			'Third Party App': thirdPartyLayer
-		};
+		// let overlayMaps: MapGroups = {
+		// 	...(!outdated ? { 'Up-To-Date': upToDateLayer } : {}),
+		// 	Outdated: outdatedLayer,
+		// 	Legacy: legacyLayer,
+		// 	'Third Party App': thirdPartyLayer
+		// };
 
-		if (!outdated) {
-			map.addLayer(upToDateLayer);
-		}
+		// if (!outdated) {
+		map.addLayer(upToDateLayer);
+		// }
 
-		map.addLayer(outdatedLayer);
-		map.addLayer(legacyLayer);
-		map.addLayer(thirdPartyLayer);
+		// map.addLayer(outdatedLayer);
+		// map.addLayer(legacyLayer);
+		// map.addLayer(thirdPartyLayer);
 
-		Object.keys(categories)
-			.sort()
-			.forEach((category) => {
-				overlayMaps[
-					category === 'atm'
-						? category.toUpperCase()
-						: category.charAt(0).toUpperCase() + category.slice(1)
-				] = categories[category];
-				map.addLayer(categories[category]);
-			});
+		// Object.keys(categories)
+		// 	.sort()
+		// 	.forEach((category) => {
+		// 		overlayMaps[
+		// 			category === 'atm'
+		// 				? category.toUpperCase()
+		// 				: category.charAt(0).toUpperCase() + category.slice(1)
+		// 		] = categories[category];
+		// 		map.addLayer(categories[category]);
+		// 	});
 
-		map.removeLayer(categories['atm']);
+		// map.removeLayer(categories['atm']);
 
 		mapLoading = 100;
 
