@@ -84,6 +84,16 @@ export type AreaTags = {
 
 export type AreaType = 'community' | 'country' | 'trash';
 
+export type Community = {
+	id: string;
+	tags: AreaTags & {
+		type: 'community';
+	};
+	created_at: string;
+	updated_at: string;
+	deleted_at: string;
+};
+
 export type Continents =
 	| 'africa'
 	| 'asia'

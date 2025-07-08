@@ -3,6 +3,7 @@
 	import { CommunitySection, Footer, Header, HeaderPlaceholder, PrimaryButton } from '$lib/comp';
 	import { areaError, areas, reportError, reports, syncStatus, theme } from '$lib/store';
 	import { detectTheme, errToast } from '$lib/utils';
+	import type { Community } from '$lib/types';
 	import Chart from 'chart.js/auto';
 	import { onMount } from 'svelte';
 
@@ -17,14 +18,14 @@
 
 	$: communities =
 		$areas && $areas.length
-			? $areas
+			? ($areas
 					.filter(
-						(area) =>
+						(area): area is Community =>
 							area.tags.type === 'community' &&
-							area.tags.geo_json &&
-							area.tags.name &&
-							area.tags['icon:square'] &&
-							area.tags.continent
+							!!area.tags.geo_json &&
+							!!area.tags.name &&
+							!!area.tags['icon:square'] &&
+							!!area.tags.continent
 					)
 					.sort((a, b) => {
 						const nameA = a.tags.name.toUpperCase(); // ignore upper and lowercase
@@ -37,8 +38,14 @@
 						}
 						// names must be equal
 						return 0;
-					})
+					}) as Community[])
 			: undefined;
+
+	const hasOrganization = (community: Community, orgName: string) => {
+		if (!community.tags.organization) return false;
+		const orgs = community.tags.organization.split(',').map((o: string) => o.trim());
+		return orgs.includes(orgName);
+	};
 
 	$: africa =
 		communities && communities.filter((community) => community.tags.continent === 'africa');
@@ -51,67 +58,56 @@
 		communities && communities.filter((community) => community.tags.continent === 'oceania');
 	$: southAmerica =
 		communities && communities.filter((community) => community.tags.continent === 'south-america');
-
 	$: meetups2140 =
-		communities &&
-		communities.filter((community) => community.tags.organization === '2140-meetups');
+		communities && communities.filter((community) => hasOrganization(community, '2140-meetups'));
 	$: bitcoin4India =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'bitcoin4india');
+		communities && communities.filter((community) => hasOrganization(community, 'bitcoin4india'));
 	$: bitcoin4Iranians =
 		communities &&
-		communities.filter((community) => community.tags.organization === 'bitcoin-4-iranians');
+		communities.filter((community) => hasOrganization(community, 'bitcoin-4-iranians'));
 	$: bitcoinBulgaria =
 		communities &&
-		communities.filter((community) => community.tags.organization === 'bitcoin-bulgaria');
+		communities.filter((community) => hasOrganization(community, 'bitcoin-bulgaria'));
 	$: bitcoinIndonesia =
 		communities &&
-		communities.filter((community) => community.tags.organization === 'bitcoin-indonesia');
+		communities.filter((community) => hasOrganization(community, 'bitcoin-indonesia'));
 	$: bitcoinJamii =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'bitcoin-jamii');
+		communities && communities.filter((community) => hasOrganization(community, 'bitcoin-jamii'));
 	$: bitcoinParaguay =
 		communities &&
-		communities.filter((community) => community.tags.organization === 'bitcoin-paraguay');
+		communities.filter((community) => hasOrganization(community, 'bitcoin-paraguay'));
 	$: bitDevs =
-		communities && communities.filter((community) => community.tags.organization === 'bit-devs');
+		communities && communities.filter((community) => hasOrganization(community, 'bit-devs'));
 	$: breizhBitcoin =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'breizh-bitcoin');
+		communities && communities.filter((community) => hasOrganization(community, 'breizh-bitcoin'));
 	$: decouvreBitcoin =
 		communities &&
-		communities.filter((community) => community.tags.organization === 'decouvre-bitcoin');
+		communities.filter((community) => hasOrganization(community, 'decouvre-bitcoin'));
 	$: dvadsatjeden =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'dvadsatjeden');
+		communities && communities.filter((community) => hasOrganization(community, 'dvadsatjeden'));
 	$: dwadziesciaJeden =
 		communities &&
-		communities.filter((community) => community.tags.organization === 'dwadziescia-jeden');
+		communities.filter((community) => hasOrganization(community, 'dwadziescia-jeden'));
 	$: eenentwintig =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'eenentwintig');
+		communities && communities.filter((community) => hasOrganization(community, 'eenentwintig'));
 	$: einundzwanzig =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'einundzwanzig');
+		communities && communities.filter((community) => hasOrganization(community, 'einundzwanzig'));
 	$: enogtyve =
-		communities && communities.filter((community) => community.tags.organization === 'enogtyve');
-	$: goBtc =
-		communities && communities.filter((community) => community.tags.organization === 'go-btc');
+		communities && communities.filter((community) => hasOrganization(community, 'enogtyve'));
+	$: goBtc = communities && communities.filter((community) => hasOrganization(community, 'go-btc'));
 	$: jednadvacet =
-		communities && communities.filter((community) => community.tags.organization === 'jednadvacet');
+		communities && communities.filter((community) => hasOrganization(community, 'jednadvacet'));
 	$: miPrimerBitcoin =
 		communities &&
-		communities.filter((community) => community.tags.organization === 'mi-primer-bitcoin');
+		communities.filter((community) => hasOrganization(community, 'mi-primer-bitcoin'));
 	$: planBNetwork =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'plan-b-network');
+		communities && communities.filter((community) => hasOrganization(community, 'plan-b-network'));
 	$: satoshiSomosTodos =
-		communities && communities.filter((community) => community.tags.organization === 'sst');
+		communities && communities.filter((community) => hasOrganization(community, 'sst'));
 	$: satoshiSpritz =
-		communities &&
-		communities.filter((community) => community.tags.organization === 'satoshi-spritz');
+		communities && communities.filter((community) => hasOrganization(community, 'satoshi-spritz'));
 	$: uaibit =
-		communities && communities.filter((community) => community.tags.organization === 'uaibit');
+		communities && communities.filter((community) => hasOrganization(community, 'uaibit'));
 
 	let continentChartCanvas: HTMLCanvasElement;
 	let continentChart: Chart<'doughnut', number[], string>;
