@@ -53,7 +53,9 @@ export type AreaTags = {
 	organization?: string;
 	language?: string;
 	population?: string;
+	area_km2?: number;
 	['population:date']?: string;
+	['population:year']?: number;
 	['contact:website']?: string;
 	['contact:email']?: string;
 	['contact:nostr']?: string;
