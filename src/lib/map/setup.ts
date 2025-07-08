@@ -8,19 +8,14 @@ import {
 	taggingIssues,
 	theme
 } from '$lib/store';
-import type {
-	DomEventType,
-	ElementOSM,
-	GenerateMarkerParams,
-	Leaflet,
-	OSMTags
-} from '$lib/types';
+import type { DomEventType, ElementOSM, Leaflet, OSMTags } from '$lib/types';
 import { detectTheme, errToast } from '$lib/utils';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import type { Map } from 'leaflet';
 import Time from 'svelte-time';
 import { get } from 'svelte/store';
+import type { DivIcon } from 'leaflet';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
@@ -644,514 +639,528 @@ export const generateMarker = ({
 	lat,
 	long,
 	icon,
-	element,
-	payment,
+	// element,
+	// payment,
 	leaflet: L,
-	verifiedDate,
-	verify,
-	boosted,
-	issues
-}: GenerateMarkerParams) => {
+	// verifiedDate,
+	// verify,
+	boosted
+	// issues
+}: {
+	lat: number;
+	long: number;
+	icon: DivIcon;
+	// element: ElementOSM;
+	// payment: PayMerchant;
+	leaflet: Leaflet;
+	// verifiedDate: number;
+	verify: boolean;
+	boosted?: boolean;
+	// issues?: Issue[];
+}) => {
 	const generatePopup = () => {
-		const theme = detectTheme();
-
-		const description =
-			element.tags && element.tags.description ? element.tags.description : undefined;
-		const note = element.tags && element.tags.note ? element.tags.note : undefined;
-
-		const phone = element.tags?.phone || element.tags?.['contact:phone'] || '';
-		const website = element.tags?.website || element.tags?.['contact:website'] || '';
-		const email = element.tags?.email || element.tags?.['contact:email'] || '';
-		const twitter = element.tags?.twitter || element.tags?.['contact:twitter'] || '';
-		const instagram = element.tags?.instagram || element.tags?.['contact:instagram'] || '';
-		const facebook = element.tags?.facebook || element.tags?.['contact:facebook'] || '';
-
-		const verified = verifiedArr(element);
-
-		const thirdParty =
-			element.tags?.['payment:lightning:requires_companion_app'] === 'yes' &&
-			element.tags['payment:lightning:companion_app_url'];
-
-		const paymentMethod =
-			element.tags &&
-			(element.tags['payment:onchain'] ||
-				element.tags['payment:lightning'] ||
-				element.tags['payment:lightning_contactless']);
-
-		const extraButtons =
-			location.pathname === '/map' ||
-			location.pathname.includes('/community') ||
-			location.pathname.includes('/country');
-
+		console.log('generatePopup is not implemented yet, boosted?:' + boosted);
 		const popupContainer = L.DomUtil.create('div');
-
-		popupContainer.innerHTML = `${
-			element.tags && element.tags.name
-				? `<a href='/merchant/${element.type}:${
-						element.id
-					}' class='inline-block font-bold text-lg leading-snug max-w-[300px]' title='Merchant name'><span class='!text-link hover:!text-hover transition-colors'>${
-						element.tags.name
-					}</span> ${description || note ? `<span id='info' title='Information'></span>` : ''}</a>`
-				: ''
-		}
-
-				 <span class='block text-body dark:text-white max-w-[300px]' title='Address'>${
-						element.tags && checkAddress(element.tags)
-					}</span>
-
-			${
-				element.tags && element.tags['opening_hours']
-					? `<div class='my-1 w-full max-w-[300px]' title='Opening hours'>
-		  				<svg width='16px' height='16px' class='inline text-primary dark:text-white'>
-	  						<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#clock"></use>
-				 	 	</svg>
-			     		<span class='text-body dark:text-white'>${element.tags['opening_hours']}</span>
-	  			 	   </div>`
-					: ''
-			}
-
-					<div class='flex space-x-2 mt-2.5 mb-1'>
-						<a id='navigate' href='geo:${lat},${long}' class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
-							<svg width='24px' height='24px' class='mx-auto'>
-								<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#compass"></use>
-							</svg>
-							<span class='block text-xs text-center mt-1'>Navigate</span>
-						</a>
-
-						<a id='edit' href='https://www.openstreetmap.org/edit?${element.type}=${
-							element.id
-						}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
-							<svg width='24px' height='24px' class='mx-auto'>
-								<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#pencil"></use>
-							</svg>
-							<span class='block text-xs text-center mt-1'>Edit</span>
-						</a>
-
-						<a id='share' href='/merchant/${element.type}:${
-							element.id
-						}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
-							<svg width='24px' height='24px' class='mx-auto'>
-								<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#share"></use>
-							</svg>
-							<span class='block text-xs text-center mt-1'>Share</span>
-						</a>
-
-						<div class='relative w-full'>
-							<button id='more-button' class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
-								<svg width='24px' height='24px' class='mx-auto'>
-									<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#dots-horizontal"></use>
-								</svg>
-								<span class='block text-xs text-center mt-1'>More</span>
-							</button>
-
-							<div id='show-more' class='hidden z-[500] w-[147px] border border-mapBorder p-4 absolute top-[55px] right-0 bg-white dark:bg-dark rounded-xl shadow-xl space-y-3'>
-							${
-								payment
-									? `<a href="${
-											payment.type === 'uri'
-												? payment.url
-												: payment.type === 'pouch'
-													? `https://app.pouch.ph/${payment.username}`
-													: payment.type === 'coinos'
-														? `https://coinos.io/${payment.username}`
-														: '#'
-										}" target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#bolt"></use>
-											</svg>
-											Pay Merchant
-										</a>`
-									: ''
-							}
-
-							${
-								phone
-									? `<a href='tel:${phone}' class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#phone"></use>
-											</svg>
-											Call
-										</a>`
-									: ''
-							}
-
-							${
-								email
-									? `<a href='mailto:${email}' class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#email"></use>
-											</svg>
-											Email
-										</a>`
-									: ''
-							}
-
-							${
-								website
-									? `<a href=${
-											website.startsWith('http') ? website : `https://${website}`
-										} target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#globe"></use>
-											</svg>
-											Website
-										</a>`
-									: ''
-							}
-
-							${
-								twitter
-									? `<a href=${
-											twitter.startsWith('http') ? twitter : `https://twitter.com/${twitter}`
-										} target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#twitter"></use>
-											</svg>
-											Twitter
-										</a>`
-									: ''
-							}
-
-							${
-								instagram
-									? `<a href=${
-											instagram.startsWith('http')
-												? instagram
-												: `https://instagram.com/${instagram}`
-										} target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#instagram"></use>
-											</svg>
-											Instagram
-										</a>`
-									: ''
-							}
-
-							${
-								facebook
-									? `<a href=${
-											facebook.startsWith('http') ? facebook : `https://facebook.com/${facebook}`
-										} target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#facebook"></use>
-											</svg>
-											Facebook
-										</a>`
-									: ''
-							}
-
-							${
-								element.tags && extraButtons
-									? `<button
-										id='show-tags'
-										class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#tags"></use>
-											</svg>
-											Show Tags
-										</button>
-
-										<button
-										id='tagging-issues'
-										class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#issues"></use>
-											</svg>
-											Tag Issues
-										</button>`
-									: ''
-							}
-
-								<a
-									href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Map-Legend"
-									target="_blank"
-									rel="noreferrer"
-									class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-										<svg width='24px' height='24px' class='mr-2'>
-											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#info-circle"></use>
-										</svg>
-										Map Legend
-								</a>
-
-								<a
-									href="https://www.openstreetmap.org/${element.type}/${element.id}"
-									target="_blank"
-									rel="noreferrer"
-									class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-										<svg width='24px' height='24px' class='mr-2'>
-											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#external"></use>
-										</svg>
-										View OSM
-								</a>
-							</div>
-						</div>
-					</div>
-
-			<div class='w-full border-t-[0.5px] border-mapBorder mt-3 mb-2 opacity-80'></div>
-
-			<div class='flex space-x-4'>
-${
-	paymentMethod || thirdParty
-		? `<div>
-					<span class='block text-mapLabel text-xs'>Payment Methods</span>
-
-					<div class='w-full flex space-x-2 mt-0.5'>
-					${
-						!paymentMethod
-							? `<a href=${element.tags?.['payment:lightning:companion_app_url']} target="_blank" rel="noreferrer">
-								<i class="fa-solid fa-mobile-screen-button w-6 h-6 !text-primary dark:!text-white hover:!text-link dark:hover:!text-link transition-colors" title="Third party app required"></i>
-							   </a>`
-							: `
-						<img src=${
-							element.tags && element.tags['payment:onchain'] === 'yes'
-								? theme === 'dark'
-									? '/icons/btc-highlight-dark.svg'
-									: '/icons/btc-highlight.svg'
-								: element.tags && element.tags['payment:onchain'] === 'no'
-									? theme === 'dark'
-										? '/icons/btc-no-dark.svg'
-										: '/icons/btc-no.svg'
-									: theme === 'dark'
-										? '/icons/btc-dark.svg'
-										: '/icons/btc.svg'
-						} alt="bitcoin" class="w-6 h-6" title="${
-							element.tags && element.tags['payment:onchain'] === 'yes'
-								? 'On-chain accepted'
-								: element.tags && element.tags['payment:onchain'] === 'no'
-									? 'On-chain not accepted'
-									: 'On-chain unknown'
-						}"/>
-
-						<img src=${
-							element.tags && element.tags['payment:lightning'] === 'yes'
-								? theme === 'dark'
-									? '/icons/ln-highlight-dark.svg'
-									: '/icons/ln-highlight.svg'
-								: element.tags && element.tags['payment:lightning'] === 'no'
-									? theme === 'dark'
-										? '/icons/ln-no-dark.svg'
-										: '/icons/ln-no.svg'
-									: theme === 'dark'
-										? '/icons/ln-dark.svg'
-										: '/icons/ln.svg'
-						} alt="lightning" class="w-6 h-6" title="${
-							element.tags && element.tags['payment:lightning'] === 'yes'
-								? 'Lightning accepted'
-								: element.tags && element.tags['payment:lightning'] === 'no'
-									? 'Lightning not accepted'
-									: 'Lightning unknown'
-						}"/>
-
-						<img src=${
-							element.tags && element.tags['payment:lightning_contactless'] === 'yes'
-								? theme === 'dark'
-									? '/icons/nfc-highlight-dark.svg'
-									: '/icons/nfc-highlight.svg'
-								: element.tags && element.tags['payment:lightning_contactless'] === 'no'
-									? theme === 'dark'
-										? '/icons/nfc-no-dark.svg'
-										: '/icons/nfc-no.svg'
-									: theme === 'dark'
-										? '/icons/nfc-dark.svg'
-										: '/icons/nfc.svg'
-						} alt="nfc" class="w-6 h-6" title="${
-							element.tags && element.tags['payment:lightning_contactless'] === 'yes'
-								? 'Lightning Contactless accepted'
-								: element.tags && element.tags['payment:lightning_contactless'] === 'no'
-									? 'Lightning contactless not accepted'
-									: 'Lightning contactless unknown'
-						}"/>`
-					}
-					</div>
-				</div>`
-		: ''
-}
-
-				<div>
-					<span class='block text-mapLabel text-xs' title="Completed by BTC Map community members">Last Surveyed</span>
-					<span class='block text-body dark:text-white'>
-					${
-						verified.length
-							? `${verified[0]} ${
-									Date.parse(verified[0]) > verifiedDate
-										? `<span title="Verified within the last year"><svg width='16px' height='16px' class='inline text-primary dark:text-white'>
-												<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#verified"></use>
-											</svg></span>`
-										: `<span title="Outdated please re-verify"><svg width='16px' height='16px' class='inline text-primary dark:text-white'>
-												<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#outdated"></use>
-											</svg></span>`
-								}`
-							: '<span title="Not verified">---</span>'
-					}
-					</span>
-
-					${
-						verify
-							? `<a href="/verify-location?id=${
-									element.type + ':' + element.id
-								}" class='!text-link hover:!text-hover text-xs transition-colors' title="Help improve the data for everyone">Verify Location</a>`
-							: ''
-					}
-				</div>
-
-				<div>
-					${
-						boosted
-							? `<span class='block text-mapLabel text-xs' title="This location is boosted!">Boost Expires</span>
-							   <span class='block text-body dark:text-white' id='boosted-time'></span>`
-							: ''
-					}
-
-					${
-						extraButtons
-							? `<button title='Boost' id='boost-button' class='flex justify-center items-center space-x-2 text-primary dark:text-white hover:text-link dark:hover:text-link border border-mapBorder hover:border-link rounded-lg px-3 h-[32px] transition-colors'>
-								<svg width='16px' height='16px'>
-									<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#boost"></use>
-								</svg>
-								<span class='text-xs'>${boosted ? 'Extend' : 'Boost'}</span>
-							   </button>`
-							: ''
-					}
-				</div>
-			</div>
-
-			${
-				theme === 'dark'
-					? `<style>
-						.leaflet-popup-content-wrapper, .leaflet-popup-tip {
-							background-color: #06171C;
-							border: 1px solid #e5e7eb
-						}
-					   </style>`
-					: ''
-			}
-			`;
-
-		if ((description || note) && element.tags && element.tags.name) {
-			const infoContainer = popupContainer.querySelector('#info');
-
-			if (infoContainer) {
-				new InfoTooltip({
-					target: infoContainer,
-					props: {
-						tooltip: description || note
-					}
-				});
-			}
-		}
-
-		const showMoreDiv = popupContainer.querySelector('#show-more');
-		const moreButton: HTMLButtonElement | null = popupContainer.querySelector('#more-button');
-
-		const hideMore = () => {
-			showMoreDiv?.classList.add('hidden');
-			moreButton?.classList.remove('!text-link');
-			moreButton?.classList.add('!text-primary', 'dark:!text-white');
-			moreButton?.classList.replace('border-link', 'border-mapBorder');
-			showMore.set(false);
-		};
-
-		if (moreButton) {
-			moreButton.onclick = () => {
-				if (!get(showMore)) {
-					showMoreDiv?.classList.remove('hidden');
-					moreButton.classList.remove('!text-primary', 'dark:!text-white');
-					moreButton.classList.add('!text-link');
-					moreButton.classList.replace('border-mapBorder', 'border-link');
-					showMore.set(true);
-				} else {
-					hideMore();
-				}
-			};
-		}
-
-		const navigateBtn: HTMLAnchorElement | null = popupContainer.querySelector('#navigate');
-		const editBtn: HTMLAnchorElement | null = popupContainer.querySelector('#edit');
-		const shareBtn: HTMLAnchorElement | null = popupContainer.querySelector('#share');
-		if (navigateBtn && editBtn && shareBtn) {
-			navigateBtn.onclick = () => hideMore();
-			editBtn.onclick = () => hideMore();
-			shareBtn.onclick = () => hideMore();
-		}
-
-		if (extraButtons) {
-			const showTagsButton: HTMLButtonElement | null = popupContainer.querySelector('#show-tags');
-			if (showTagsButton) {
-				showTagsButton.onclick = () => {
-					showTags.set(element.tags || {});
-				};
-			}
-
-			const taggingIssuesButton: HTMLButtonElement | null =
-				popupContainer.querySelector('#tagging-issues');
-			if (taggingIssuesButton) {
-				taggingIssuesButton.onclick = () => {
-					taggingIssues.set(issues || []);
-				};
-			}
-
-			const boostButton: HTMLButtonElement | null = popupContainer.querySelector('#boost-button');
-			const boostButtonText: HTMLSpanElement | null | undefined =
-				boostButton?.querySelector('span');
-			const boostButtonIcon: SVGElement | null | undefined = boostButton?.querySelector('svg');
-
-			const resetButton = () => {
-				if (boostButton && boostButtonText && boostButtonIcon) {
-					boostButton.disabled = false;
-					boostButtonText.innerText = boosted ? 'Extend' : 'Boost';
-					boostButton.classList.add('space-x-2');
-					boostButtonIcon.classList.remove('hidden');
-				}
-			};
-
-			if (boostButton) {
-				boostButton.onclick = () => {
-					if (boostButton && boostButtonText && boostButtonIcon) {
-						boostButton.disabled = true;
-						boostButtonIcon.classList.add('hidden');
-						boostButton.classList.remove('space-x-2');
-						boostButtonText.innerText = 'Boosting...';
-
-						boost.set({
-							id: element.type + ':' + element.id,
-							name: element.tags && element.tags.name ? element.tags.name : '',
-							boost: boosted ? boosted : ''
-						});
-
-						axios
-							.get('https://blockchain.info/ticker')
-							.then(function (response) {
-								exchangeRate.set(response.data['USD']['15m']);
-							})
-							.catch(function (error) {
-								errToast(
-									'Could not fetch bitcoin exchange rate, please try again or contact BTC Map.'
-								);
-								console.error(error);
-								resetButton();
-							});
-					}
-				};
-			}
-
-			resetBoost.subscribe(resetButton);
-		}
-
-		if (boosted) {
-			const boostedTime = popupContainer.querySelector('#boosted-time');
-			if (boostedTime) {
-				new Time({
-					target: boostedTime,
-					props: {
-						live: 3000,
-						relative: true,
-						timestamp: boosted
-					}
-				});
-			}
-		}
-
 		return popupContainer;
+		// 		const theme = detectTheme();
+
+		// 		const description =
+		// 			element.tags && element.tags.description ? element.tags.description : undefined;
+		// 		const note = element.tags && element.tags.note ? element.tags.note : undefined;
+
+		// 		const phone = element.tags?.phone || element.tags?.['contact:phone'] || '';
+		// 		const website = element.tags?.website || element.tags?.['contact:website'] || '';
+		// 		const email = element.tags?.email || element.tags?.['contact:email'] || '';
+		// 		const twitter = element.tags?.twitter || element.tags?.['contact:twitter'] || '';
+		// 		const instagram = element.tags?.instagram || element.tags?.['contact:instagram'] || '';
+		// 		const facebook = element.tags?.facebook || element.tags?.['contact:facebook'] || '';
+
+		// 		const verified = verifiedArr(element);
+
+		// 		const thirdParty =
+		// 			element.tags?.['payment:lightning:requires_companion_app'] === 'yes' &&
+		// 			element.tags['payment:lightning:companion_app_url'];
+
+		// 		const paymentMethod =
+		// 			element.tags &&
+		// 			(element.tags['payment:onchain'] ||
+		// 				element.tags['payment:lightning'] ||
+		// 				element.tags['payment:lightning_contactless']);
+
+		// 		const extraButtons =
+		// 			location.pathname === '/map' ||
+		// 			location.pathname.includes('/community') ||
+		// 			location.pathname.includes('/country');
+
+		// 		const popupContainer = L.DomUtil.create('div');
+
+		// 		popupContainer.innerHTML = `${
+		// 			element.tags && element.tags.name
+		// 				? `<a href='/merchant/${element.type}:${
+		// 						element.id
+		// 					}' class='inline-block font-bold text-lg leading-snug max-w-[300px]' title='Merchant name'><span class='!text-link hover:!text-hover transition-colors'>${
+		// 						element.tags.name
+		// 					}</span> ${description || note ? `<span id='info' title='Information'></span>` : ''}</a>`
+		// 				: ''
+		// 		}
+
+		// 				 <span class='block text-body dark:text-white max-w-[300px]' title='Address'>${
+		// 						element.tags && checkAddress(element.tags)
+		// 					}</span>
+
+		// 			${
+		// 				element.tags && element.tags['opening_hours']
+		// 					? `<div class='my-1 w-full max-w-[300px]' title='Opening hours'>
+		// 		  				<svg width='16px' height='16px' class='inline text-primary dark:text-white'>
+		// 	  						<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#clock"></use>
+		// 				 	 	</svg>
+		// 			     		<span class='text-body dark:text-white'>${element.tags['opening_hours']}</span>
+		// 	  			 	   </div>`
+		// 					: ''
+		// 			}
+
+		// 					<div class='flex space-x-2 mt-2.5 mb-1'>
+		// 						<a id='navigate' href='geo:${lat},${long}' class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+		// 							<svg width='24px' height='24px' class='mx-auto'>
+		// 								<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#compass"></use>
+		// 							</svg>
+		// 							<span class='block text-xs text-center mt-1'>Navigate</span>
+		// 						</a>
+
+		// 						<a id='edit' href='https://www.openstreetmap.org/edit?${element.type}=${
+		// 							element.id
+		// 						}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+		// 							<svg width='24px' height='24px' class='mx-auto'>
+		// 								<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#pencil"></use>
+		// 							</svg>
+		// 							<span class='block text-xs text-center mt-1'>Edit</span>
+		// 						</a>
+
+		// 						<a id='share' href='/merchant/${element.type}:${
+		// 							element.id
+		// 						}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+		// 							<svg width='24px' height='24px' class='mx-auto'>
+		// 								<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#share"></use>
+		// 							</svg>
+		// 							<span class='block text-xs text-center mt-1'>Share</span>
+		// 						</a>
+
+		// 						<div class='relative w-full'>
+		// 							<button id='more-button' class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+		// 								<svg width='24px' height='24px' class='mx-auto'>
+		// 									<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#dots-horizontal"></use>
+		// 								</svg>
+		// 								<span class='block text-xs text-center mt-1'>More</span>
+		// 							</button>
+
+		// 							<div id='show-more' class='hidden z-[500] w-[147px] border border-mapBorder p-4 absolute top-[55px] right-0 bg-white dark:bg-dark rounded-xl shadow-xl space-y-3'>
+		// 							${
+		// 								payment
+		// 									? `<a href="${
+		// 											payment.type === 'uri'
+		// 												? payment.url
+		// 												: payment.type === 'pouch'
+		// 													? `https://app.pouch.ph/${payment.username}`
+		// 													: payment.type === 'coinos'
+		// 														? `https://coinos.io/${payment.username}`
+		// 														: '#'
+		// 										}" target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+		// 											<svg width='24px' height='24px' class='mr-2'>
+		// 												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#bolt"></use>
+		// 											</svg>
+		// 											Pay Merchant
+		// 										</a>`
+		// 									: ''
+		// 							}
+
+		// 							${
+		// 								phone
+		// 									? `<a href='tel:${phone}' class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+		// 											<svg width='24px' height='24px' class='mr-2'>
+		// 												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#phone"></use>
+		// 											</svg>
+		// 											Call
+		// 										</a>`
+		// 									: ''
+		// 							}
+
+		// 							${
+		// 								email
+		// 									? `<a href='mailto:${email}' class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+		// 											<svg width='24px' height='24px' class='mr-2'>
+		// 												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#email"></use>
+		// 											</svg>
+		// 											Email
+		// 										</a>`
+		// 									: ''
+		// 							}
+
+		// 							${
+		// 								website
+		// 									? `<a href=${
+		// 											website.startsWith('http') ? website : `https://${website}`
+		// 										} target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+		// 											<svg width='24px' height='24px' class='mr-2'>
+		// 												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#globe"></use>
+		// 											</svg>
+		// 											Website
+		// 										</a>`
+		// 									: ''
+		// 							}
+
+		// 							${
+		// 								twitter
+		// 									? `<a href=${
+		// 											twitter.startsWith('http') ? twitter : `https://twitter.com/${twitter}`
+		// 										} target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+		// 											<svg width='24px' height='24px' class='mr-2'>
+		// 												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#twitter"></use>
+		// 											</svg>
+		// 											Twitter
+		// 										</a>`
+		// 									: ''
+		// 							}
+
+		// 							${
+		// 								instagram
+		// 									? `<a href=${
+		// 											instagram.startsWith('http')
+		// 												? instagram
+		// 												: `https://instagram.com/${instagram}`
+		// 										} target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+		// 											<svg width='24px' height='24px' class='mr-2'>
+		// 												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#instagram"></use>
+		// 											</svg>
+		// 											Instagram
+		// 										</a>`
+		// 									: ''
+		// 							}
+
+		// 							${
+		// 								facebook
+		// 									? `<a href=${
+		// 											facebook.startsWith('http') ? facebook : `https://facebook.com/${facebook}`
+		// 										} target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+		// 											<svg width='24px' height='24px' class='mr-2'>
+		// 												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#facebook"></use>
+		// 											</svg>
+		// 											Facebook
+		// 										</a>`
+		// 									: ''
+		// 							}
+
+		// 							${
+		// 								element.tags && extraButtons
+		// 									? `<button
+		// 										id='show-tags'
+		// 										class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+		// 											<svg width='24px' height='24px' class='mr-2'>
+		// 												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#tags"></use>
+		// 											</svg>
+		// 											Show Tags
+		// 										</button>
+
+		// 										<button
+		// 										id='tagging-issues'
+		// 										class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+		// 											<svg width='24px' height='24px' class='mr-2'>
+		// 												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#issues"></use>
+		// 											</svg>
+		// 											Tag Issues
+		// 										</button>`
+		// 									: ''
+		// 							}
+
+		// 								<a
+		// 									href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Map-Legend"
+		// 									target="_blank"
+		// 									rel="noreferrer"
+		// 									class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+		// 										<svg width='24px' height='24px' class='mr-2'>
+		// 											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#info-circle"></use>
+		// 										</svg>
+		// 										Map Legend
+		// 								</a>
+
+		// 								<a
+		// 									href="https://www.openstreetmap.org/${element.type}/${element.id}"
+		// 									target="_blank"
+		// 									rel="noreferrer"
+		// 									class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+		// 										<svg width='24px' height='24px' class='mr-2'>
+		// 											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#external"></use>
+		// 										</svg>
+		// 										View OSM
+		// 								</a>
+		// 							</div>
+		// 						</div>
+		// 					</div>
+
+		// 			<div class='w-full border-t-[0.5px] border-mapBorder mt-3 mb-2 opacity-80'></div>
+
+		// 			<div class='flex space-x-4'>
+		// ${
+		// 	paymentMethod || thirdParty
+		// 		? `<div>
+		// 					<span class='block text-mapLabel text-xs'>Payment Methods</span>
+
+		// 					<div class='w-full flex space-x-2 mt-0.5'>
+		// 					${
+		// 						!paymentMethod
+		// 							? `<a href=${element.tags?.['payment:lightning:companion_app_url']} target="_blank" rel="noreferrer">
+		// 								<i class="fa-solid fa-mobile-screen-button w-6 h-6 !text-primary dark:!text-white hover:!text-link dark:hover:!text-link transition-colors" title="Third party app required"></i>
+		// 							   </a>`
+		// 							: `
+		// 						<img src=${
+		// 							element.tags && element.tags['payment:onchain'] === 'yes'
+		// 								? theme === 'dark'
+		// 									? '/icons/btc-highlight-dark.svg'
+		// 									: '/icons/btc-highlight.svg'
+		// 								: element.tags && element.tags['payment:onchain'] === 'no'
+		// 									? theme === 'dark'
+		// 										? '/icons/btc-no-dark.svg'
+		// 										: '/icons/btc-no.svg'
+		// 									: theme === 'dark'
+		// 										? '/icons/btc-dark.svg'
+		// 										: '/icons/btc.svg'
+		// 						} alt="bitcoin" class="w-6 h-6" title="${
+		// 							element.tags && element.tags['payment:onchain'] === 'yes'
+		// 								? 'On-chain accepted'
+		// 								: element.tags && element.tags['payment:onchain'] === 'no'
+		// 									? 'On-chain not accepted'
+		// 									: 'On-chain unknown'
+		// 						}"/>
+
+		// 						<img src=${
+		// 							element.tags && element.tags['payment:lightning'] === 'yes'
+		// 								? theme === 'dark'
+		// 									? '/icons/ln-highlight-dark.svg'
+		// 									: '/icons/ln-highlight.svg'
+		// 								: element.tags && element.tags['payment:lightning'] === 'no'
+		// 									? theme === 'dark'
+		// 										? '/icons/ln-no-dark.svg'
+		// 										: '/icons/ln-no.svg'
+		// 									: theme === 'dark'
+		// 										? '/icons/ln-dark.svg'
+		// 										: '/icons/ln.svg'
+		// 						} alt="lightning" class="w-6 h-6" title="${
+		// 							element.tags && element.tags['payment:lightning'] === 'yes'
+		// 								? 'Lightning accepted'
+		// 								: element.tags && element.tags['payment:lightning'] === 'no'
+		// 									? 'Lightning not accepted'
+		// 									: 'Lightning unknown'
+		// 						}"/>
+
+		// 						<img src=${
+		// 							element.tags && element.tags['payment:lightning_contactless'] === 'yes'
+		// 								? theme === 'dark'
+		// 									? '/icons/nfc-highlight-dark.svg'
+		// 									: '/icons/nfc-highlight.svg'
+		// 								: element.tags && element.tags['payment:lightning_contactless'] === 'no'
+		// 									? theme === 'dark'
+		// 										? '/icons/nfc-no-dark.svg'
+		// 										: '/icons/nfc-no.svg'
+		// 									: theme === 'dark'
+		// 										? '/icons/nfc-dark.svg'
+		// 										: '/icons/nfc.svg'
+		// 						} alt="nfc" class="w-6 h-6" title="${
+		// 							element.tags && element.tags['payment:lightning_contactless'] === 'yes'
+		// 								? 'Lightning Contactless accepted'
+		// 								: element.tags && element.tags['payment:lightning_contactless'] === 'no'
+		// 									? 'Lightning contactless not accepted'
+		// 									: 'Lightning contactless unknown'
+		// 						}"/>`
+		// 					}
+		// 					</div>
+		// 				</div>`
+		// 		: ''
+		// }
+
+		// 				<div>
+		// 					<span class='block text-mapLabel text-xs' title="Completed by BTC Map community members">Last Surveyed</span>
+		// 					<span class='block text-body dark:text-white'>
+		// 					${
+		// 						verified.length
+		// 							? `${verified[0]} ${
+		// 									Date.parse(verified[0]) > verifiedDate
+		// 										? `<span title="Verified within the last year"><svg width='16px' height='16px' class='inline text-primary dark:text-white'>
+		// 												<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#verified"></use>
+		// 											</svg></span>`
+		// 										: `<span title="Outdated please re-verify"><svg width='16px' height='16px' class='inline text-primary dark:text-white'>
+		// 												<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#outdated"></use>
+		// 											</svg></span>`
+		// 								}`
+		// 							: '<span title="Not verified">---</span>'
+		// 					}
+		// 					</span>
+
+		// 					${
+		// 						verify
+		// 							? `<a href="/verify-location?id=${
+		// 									element.type + ':' + element.id
+		// 								}" class='!text-link hover:!text-hover text-xs transition-colors' title="Help improve the data for everyone">Verify Location</a>`
+		// 							: ''
+		// 					}
+		// 				</div>
+
+		// 				<div>
+		// 					${
+		// 						boosted
+		// 							? `<span class='block text-mapLabel text-xs' title="This location is boosted!">Boost Expires</span>
+		// 							   <span class='block text-body dark:text-white' id='boosted-time'></span>`
+		// 							: ''
+		// 					}
+
+		// 					${
+		// 						extraButtons
+		// 							? `<button title='Boost' id='boost-button' class='flex justify-center items-center space-x-2 text-primary dark:text-white hover:text-link dark:hover:text-link border border-mapBorder hover:border-link rounded-lg px-3 h-[32px] transition-colors'>
+		// 								<svg width='16px' height='16px'>
+		// 									<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#boost"></use>
+		// 								</svg>
+		// 								<span class='text-xs'>${boosted ? 'Extend' : 'Boost'}</span>
+		// 							   </button>`
+		// 							: ''
+		// 					}
+		// 				</div>
+		// 			</div>
+
+		// 			${
+		// 				theme === 'dark'
+		// 					? `<style>
+		// 						.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+		// 							background-color: #06171C;
+		// 							border: 1px solid #e5e7eb
+		// 						}
+		// 					   </style>`
+		// 					: ''
+		// 			}
+		// 			`;
+
+		// 		if ((description || note) && element.tags && element.tags.name) {
+		// 			const infoContainer = popupContainer.querySelector('#info');
+
+		// 			if (infoContainer) {
+		// 				new InfoTooltip({
+		// 					target: infoContainer,
+		// 					props: {
+		// 						tooltip: description || note
+		// 					}
+		// 				});
+		// 			}
+		// 		}
+
+		// 		const showMoreDiv = popupContainer.querySelector('#show-more');
+		// 		const moreButton: HTMLButtonElement | null = popupContainer.querySelector('#more-button');
+
+		// 		const hideMore = () => {
+		// 			showMoreDiv?.classList.add('hidden');
+		// 			moreButton?.classList.remove('!text-link');
+		// 			moreButton?.classList.add('!text-primary', 'dark:!text-white');
+		// 			moreButton?.classList.replace('border-link', 'border-mapBorder');
+		// 			showMore.set(false);
+		// 		};
+
+		// 		if (moreButton) {
+		// 			moreButton.onclick = () => {
+		// 				if (!get(showMore)) {
+		// 					showMoreDiv?.classList.remove('hidden');
+		// 					moreButton.classList.remove('!text-primary', 'dark:!text-white');
+		// 					moreButton.classList.add('!text-link');
+		// 					moreButton.classList.replace('border-mapBorder', 'border-link');
+		// 					showMore.set(true);
+		// 				} else {
+		// 					hideMore();
+		// 				}
+		// 			};
+		// 		}
+
+		// 		const navigateBtn: HTMLAnchorElement | null = popupContainer.querySelector('#navigate');
+		// 		const editBtn: HTMLAnchorElement | null = popupContainer.querySelector('#edit');
+		// 		const shareBtn: HTMLAnchorElement | null = popupContainer.querySelector('#share');
+		// 		if (navigateBtn && editBtn && shareBtn) {
+		// 			navigateBtn.onclick = () => hideMore();
+		// 			editBtn.onclick = () => hideMore();
+		// 			shareBtn.onclick = () => hideMore();
+		// 		}
+
+		// 		if (extraButtons) {
+		// 			const showTagsButton: HTMLButtonElement | null = popupContainer.querySelector('#show-tags');
+		// 			if (showTagsButton) {
+		// 				showTagsButton.onclick = () => {
+		// 					showTags.set(element.tags || {});
+		// 				};
+		// 			}
+
+		// 			const taggingIssuesButton: HTMLButtonElement | null =
+		// 				popupContainer.querySelector('#tagging-issues');
+		// 			if (taggingIssuesButton) {
+		// 				taggingIssuesButton.onclick = () => {
+		// 					taggingIssues.set(issues || []);
+		// 				};
+		// 			}
+
+		// 			const boostButton: HTMLButtonElement | null = popupContainer.querySelector('#boost-button');
+		// 			const boostButtonText: HTMLSpanElement | null | undefined =
+		// 				boostButton?.querySelector('span');
+		// 			const boostButtonIcon: SVGElement | null | undefined = boostButton?.querySelector('svg');
+
+		// 			const resetButton = () => {
+		// 				if (boostButton && boostButtonText && boostButtonIcon) {
+		// 					boostButton.disabled = false;
+		// 					boostButtonText.innerText = boosted ? 'Extend' : 'Boost';
+		// 					boostButton.classList.add('space-x-2');
+		// 					boostButtonIcon.classList.remove('hidden');
+		// 				}
+		// 			};
+
+		// 			if (boostButton) {
+		// 				boostButton.onclick = () => {
+		// 					if (boostButton && boostButtonText && boostButtonIcon) {
+		// 						boostButton.disabled = true;
+		// 						boostButtonIcon.classList.add('hidden');
+		// 						boostButton.classList.remove('space-x-2');
+		// 						boostButtonText.innerText = 'Boosting...';
+
+		// 						boost.set({
+		// 							id: element.type + ':' + element.id,
+		// 							name: element.tags && element.tags.name ? element.tags.name : '',
+		// 							boost: boosted ? boosted : ''
+		// 						});
+
+		// 						axios
+		// 							.get('https://blockchain.info/ticker')
+		// 							.then(function (response) {
+		// 								exchangeRate.set(response.data['USD']['15m']);
+		// 							})
+		// 							.catch(function (error) {
+		// 								errToast(
+		// 									'Could not fetch bitcoin exchange rate, please try again or contact BTC Map.'
+		// 								);
+		// 								console.error(error);
+		// 								resetButton();
+		// 							});
+		// 					}
+		// 				};
+		// 			}
+
+		// 			resetBoost.subscribe(resetButton);
+		// 		}
+
+		// 		if (boosted) {
+		// 			const boostedTime = popupContainer.querySelector('#boosted-time');
+		// 			if (boostedTime) {
+		// 				new Time({
+		// 					target: boostedTime,
+		// 					props: {
+		// 						live: 3000,
+		// 						relative: true,
+		// 						timestamp: boosted
+		// 					}
+		// 				});
+		// 			}
+		// 		}
+
+		// 		return popupContainer;
 	};
 
 	const marker = L.marker([lat, long], { icon });
