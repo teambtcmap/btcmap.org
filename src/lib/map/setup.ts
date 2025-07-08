@@ -668,28 +668,264 @@ export const generateMarker = ({
 
 				console.log('Place details:', placeDetails);
 
-				// For now, create a simple popup with basic info
+				// Calculate verification status
+				const verifiedDate = calcVerifiedDate(); // 1 year ago
+				const isUpToDate = placeDetails.verified_at && Date.parse(placeDetails.verified_at) > verifiedDate;
+
+				// Create popup with proper styling structure
 				const popupContent = L.DomUtil.create('div');
+				const theme = detectTheme();
+
+				// Check if we have an OSM URL to extract type and id for links
+				let osmType = 'node';
+				let osmId = placeDetails.id;
+				if (placeDetails.osm_url) {
+					const osmMatch = placeDetails.osm_url.match(/openstreetmap\.org\/([^/]+)\/(\d+)/);
+					if (osmMatch) {
+						osmType = osmMatch[1];
+						osmId = osmMatch[2];
+					}
+				}
+
 				popupContent.innerHTML = `
-					<div style="padding: 10px;">
-						<h3>${placeDetails.name || 'Unknown Place'}</h3>
-						<p><strong>ID:</strong> ${placeDetails.id}</p>
-						<p><strong>Address:</strong> ${placeDetails.address || 'Not available'}</p>
-						<p><strong>Phone:</strong> ${placeDetails.phone || 'Not available'}</p>
-						<p><strong>Website:</strong> ${placeDetails.website || 'Not available'}</p>
-						<p><strong>Verified:</strong> ${placeDetails.verified_at || 'Not verified'}</p>
-						<p><strong>Comments:</strong> ${placeDetails.comments || 0}</p>
-						<p><strong>Boosted until:</strong> ${placeDetails.boosted_until || 0}</p>
-						${placeDetails.boosted_until ? `<p><strong>Boosted until:</strong> ${placeDetails.boosted_until}</p>` : ''}
+					${
+						placeDetails.name
+							? `<a href='/merchant/${osmType}:${osmId}' class='inline-block font-bold text-lg leading-snug max-w-[300px]' title='Merchant name'>
+							<span class='!text-link hover:!text-hover transition-colors'>${placeDetails.name}</span>
+						   </a>`
+							: ''
+					}
+
+					<span class='block text-body dark:text-white max-w-[300px]' title='Address'>${
+						placeDetails.address || ''
+					}</span>
+
+					${
+						placeDetails.opening_hours
+							? `<div class='my-1 w-full max-w-[300px]' title='Opening hours'>
+							<svg width='16px' height='16px' class='inline text-primary dark:text-white'>
+								<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#clock"></use>
+							</svg>
+							<span class='text-body dark:text-white'>${placeDetails.opening_hours}</span>
+						   </div>`
+							: ''
+					}
+
+					<div class='flex space-x-2 mt-2.5 mb-1'>
+						<a id='navigate' href='geo:${lat},${long}' class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+							<svg width='24px' height='24px' class='mx-auto'>
+								<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#compass"></use>
+							</svg>
+							<span class='block text-xs text-center mt-1'>Navigate</span>
+						</a>
+
+						<a id='edit' href='${placeDetails.osm_url || `https://www.openstreetmap.org/edit?${osmType}=${osmId}`}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+							<svg width='24px' height='24px' class='mx-auto'>
+								<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#pencil"></use>
+							</svg>
+							<span class='block text-xs text-center mt-1'>Edit</span>
+						</a>
+
+						<a id='share' href='/merchant/${osmType}:${osmId}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+							<svg width='24px' height='24px' class='mx-auto'>
+								<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#share"></use>
+							</svg>
+							<span class='block text-xs text-center mt-1'>Share</span>
+						</a>
+
+						<div class='relative w-full'>
+							<button id='more-button' class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+								<svg width='24px' height='24px' class='mx-auto'>
+									<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#dots-horizontal"></use>
+								</svg>
+								<span class='block text-xs text-center mt-1'>More</span>
+							</button>
+
+							<div id='show-more' class='hidden z-[500] w-[147px] border border-mapBorder p-4 absolute top-[55px] right-0 bg-white dark:bg-dark rounded-xl shadow-xl space-y-3'>
+								${
+									placeDetails.phone
+										? `<a href='tel:${placeDetails.phone}' class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+										<svg width='24px' height='24px' class='mr-2'>
+											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#phone"></use>
+										</svg>
+										Call
+									   </a>`
+										: ''
+								}
+
+								${
+									placeDetails.email
+										? `<a href='mailto:${placeDetails.email}' class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+										<svg width='24px' height='24px' class='mr-2'>
+											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#email"></use>
+										</svg>
+										Email
+									   </a>`
+										: ''
+								}
+
+								${
+									placeDetails.website
+										? `<a href='${placeDetails.website.startsWith('http') ? placeDetails.website : `https://${placeDetails.website}`}' target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+										<svg width='24px' height='24px' class='mr-2'>
+											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#globe"></use>
+										</svg>
+										Website
+									   </a>`
+										: ''
+								}
+
+								${
+									placeDetails.twitter
+										? `<a href='${placeDetails.twitter.startsWith('http') ? placeDetails.twitter : `https://twitter.com/${placeDetails.twitter}`}' target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+										<svg width='24px' height='24px' class='mr-2'>
+											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#twitter"></use>
+										</svg>
+										Twitter
+									   </a>`
+										: ''
+								}
+
+								${
+									placeDetails.instagram
+										? `<a href='${placeDetails.instagram.startsWith('http') ? placeDetails.instagram : `https://instagram.com/${placeDetails.instagram}`}' target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+										<svg width='24px' height='24px' class='mr-2'>
+											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#instagram"></use>
+										</svg>
+										Instagram
+									   </a>`
+										: ''
+								}
+
+								${
+									placeDetails.facebook
+										? `<a href='${placeDetails.facebook.startsWith('http') ? placeDetails.facebook : `https://facebook.com/${placeDetails.facebook}`}' target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+										<svg width='24px' height='24px' class='mr-2'>
+											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#facebook"></use>
+										</svg>
+										Facebook
+									   </a>`
+										: ''
+								}
+
+								<a href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Map-Legend" target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+									<svg width='24px' height='24px' class='mr-2'>
+										<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#info-circle"></use>
+									</svg>
+									Map Legend
+								</a>
+
+								<a href="${placeDetails.osm_url || `https://www.openstreetmap.org/${osmType}/${osmId}`}" target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+									<svg width='24px' height='24px' class='mr-2'>
+										<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#external"></use>
+									</svg>
+									View OSM
+								</a>
+							</div>
+						</div>
 					</div>
+
+					<div class='w-full border-t-[0.5px] border-mapBorder mt-3 mb-2 opacity-80'></div>
+
+					<div class='flex space-x-4'>
+						<div>
+							<span class='block text-mapLabel text-xs' title="Completed by BTC Map community members">Last Surveyed</span>
+							<span class='block text-body dark:text-white'>
+								${placeDetails.verified_at 
+									? `${placeDetails.verified_at} ${
+										isUpToDate
+											? `<span title="Verified within the last year"><svg width='16px' height='16px' class='inline text-primary dark:text-white'>
+												<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#verified"></use>
+											</svg></span>`
+											: `<span title="Outdated please re-verify"><svg width='16px' height='16px' class='inline text-primary dark:text-white'>
+												<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#outdated"></use>
+											</svg></span>`
+									}`
+									: '<span title="Not verified">---</span>'
+								}
+							</span>
+							
+							${location.pathname === '/map' 
+								? `<a href="/verify-location?id=${osmType}:${osmId}" class='!text-link hover:!text-hover text-xs transition-colors' title="Help improve the data for everyone">Verify Location</a>`
+								: ''
+							}
+						</div>
+
+						${
+							placeDetails.boosted_until
+								? `<div>
+								<span class='block text-mapLabel text-xs' title="This location is boosted!">Boost Expires</span>
+								<span class='block text-body dark:text-white'>${placeDetails.boosted_until}</span>
+							   </div>`
+								: ''
+						}
+
+						${
+							placeDetails.comments > 0
+								? `<div>
+								<span class='block text-mapLabel text-xs'>Comments</span>
+								<span class='block text-body dark:text-white'>${placeDetails.comments}</span>
+							   </div>`
+								: ''
+						}
+					</div>
+
+					${
+						theme === 'dark'
+							? `<style>
+							.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+								background-color: #06171C;
+								border: 1px solid #e5e7eb
+							}
+						   </style>`
+							: ''
+					}
 				`;
 
 				marker
-					.bindPopup(popupContent, { closeButton: true, maxWidth: 300, minWidth: 250 })
+					.bindPopup(popupContent, { closeButton: true, maxWidth: 1000, minWidth: 300 })
 					.openPopup()
 					.on('popupclose', () => {
 						marker.unbindPopup();
 					});
+
+				// Add interactive functionality for the More button
+				const showMoreDiv = popupContent.querySelector('#show-more');
+				const moreButton: HTMLButtonElement | null = popupContent.querySelector('#more-button');
+
+				if (moreButton && showMoreDiv) {
+					let showMoreOpen = false;
+
+					const hideMore = () => {
+						showMoreDiv.classList.add('hidden');
+						moreButton.classList.remove('!text-link');
+						moreButton.classList.add('!text-primary', 'dark:!text-white');
+						moreButton.classList.replace('border-link', 'border-mapBorder');
+						showMoreOpen = false;
+					};
+
+					moreButton.onclick = (e) => {
+						e.preventDefault();
+						if (!showMoreOpen) {
+							showMoreDiv.classList.remove('hidden');
+							moreButton.classList.remove('!text-primary', 'dark:!text-white');
+							moreButton.classList.add('!text-link');
+							moreButton.classList.replace('border-mapBorder', 'border-link');
+							showMoreOpen = true;
+						} else {
+							hideMore();
+						}
+					};
+
+					// Hide more menu when clicking navigation buttons
+					const navigateBtn: HTMLAnchorElement | null = popupContent.querySelector('#navigate');
+					const editBtn: HTMLAnchorElement | null = popupContent.querySelector('#edit');
+					const shareBtn: HTMLAnchorElement | null = popupContent.querySelector('#share');
+
+					if (navigateBtn) navigateBtn.onclick = () => hideMore();
+					if (editBtn) editBtn.onclick = () => hideMore();
+					if (shareBtn) shareBtn.onclick = () => hideMore();
+				}
 			} catch (error) {
 				console.error('Error fetching place details:', error);
 
