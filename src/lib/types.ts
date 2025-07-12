@@ -355,3 +355,15 @@ export type DropdownLink = { url: string; external?: boolean; icon: string; titl
 export type ChartHistory = '7D' | '1M' | '3M' | '6M' | 'YTD' | '1Y' | 'ALL';
 
 export type AreaPageProps = { id: string; name: string; tickets: Tickets; issues: RpcIssue[] };
+
+// V4 API Types
+export type Place = {
+	id: number;
+	lat: number;
+	lon: number;
+	icon: string;
+	comments?: number;
+	deleted_at?: string; // Only present when fetching with include_deleted=true
+	updated_at?: string; // Only present when fetching with updated_since parameter
+	boosted_until?: string; // Only present when location is boosted
+};
