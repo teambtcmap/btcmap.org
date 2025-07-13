@@ -1014,7 +1014,7 @@ export const generateMarker = ({
 				`;
 
 				marker
-					.bindPopup(popupContent, { closeButton: true, maxWidth: 1000, minWidth: 300 })
+					.bindPopup(popupContent, { closeButton: false, maxWidth: 1000, minWidth: 300 })
 					.openPopup()
 					.on('popupclose', () => {
 						marker.unbindPopup();
