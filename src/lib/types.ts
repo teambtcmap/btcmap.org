@@ -378,4 +378,36 @@ export type Place = {
 	deleted_at?: string; // Only present when fetching with include_deleted=true
 	updated_at?: string; // Only present when fetching with updated_since parameter
 	boosted_until?: string; // Only present when location is boosted
+	// Standard documented fields
+	name?: string;
+	address?: string;
+	opening_hours?: string;
+	created_at?: string;
+	verified_at?: string;
+	osm_id?: string;
+	osm_url?: string;
+	phone?: string;
+	website?: string;
+	twitter?: string;
+	facebook?: string;
+	instagram?: string;
+	line?: string;
+	email?: string;
+	// OSM payment method fields
+	'osm:payment:onchain'?: 'yes';
+	'osm:payment:lightning'?: 'yes';
+	'osm:payment:lightning_contactless'?: 'yes';
+	'osm:payment:bitcoin'?: 'yes';
+	'osm:payment:uri'?: string;
+	'osm:payment:coinos'?: string;
+	'osm:payment:pouch'?: string;
+	'osm:payment:lightning:requires_companion_app'?: 'yes';
+	'osm:payment:lightning:companion_app_url'?: string;
+	// OSM category fields
+	'osm:amenity'?: string;
+	'osm:category'?: string;
+	// OSM tags that might be useful
+	'osm:survey:date'?: string;
+	'osm:check_date'?: string;
+	'osm:check_date:currency:XBT'?: string;
 };
