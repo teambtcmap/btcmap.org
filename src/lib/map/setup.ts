@@ -1075,6 +1075,18 @@ export const generateMarker = ({
 
 					// Boost button click handler
 					if (boostBtn) {
+						const boostButtonText: HTMLSpanElement | null = boostBtn.querySelector('span');
+						const boostButtonIcon: SVGElement | null = boostBtn.querySelector('svg');
+
+						const resetButton = () => {
+							if (boostBtn && boostButtonText && boostButtonIcon) {
+								boostBtn.disabled = false;
+								boostButtonText.innerText = isBoosted ? 'Extend' : 'Boost';
+								boostBtn.classList.add('space-x-2');
+								boostButtonIcon.classList.remove('hidden');
+							}
+						};
+
 						boostBtn.onclick = async (e) => {
 							e.preventDefault();
 							hideMore();
@@ -1083,9 +1095,17 @@ export const generateMarker = ({
 							const boostStore = get(boost);
 							if (boostStore) return; // Prevent multiple boost flows
 
+							// Update button to loading state
+							if (boostBtn && boostButtonText && boostButtonIcon) {
+								boostBtn.disabled = true;
+								boostButtonIcon.classList.add('hidden');
+								boostBtn.classList.remove('space-x-2');
+								boostButtonText.innerText = 'Boosting...';
+							}
+
 							// Set the boost data in the global store
 							boost.set({
-								id: placeDetails.id,
+								id: placeDetails.id.toString(),
 								name: placeDetails.name || '',
 								boost: isBoosted ? placeDetails.boosted_until || '' : ''
 							});
@@ -1098,11 +1118,15 @@ export const generateMarker = ({
 								console.error('Error fetching exchange rate:', error);
 								// Reset boost store on error
 								boost.set(undefined);
+								resetButton();
 								errToast(
 									'Could not fetch bitcoin exchange rate, please try again or contact BTC Map.'
 								);
 							}
 						};
+
+						// Subscribe to resetBoost store for external resets
+						resetBoost.subscribe(resetButton);
 					}
 
 					// Show Tags button handler
