@@ -1112,7 +1112,7 @@ export const generateMarker = ({
 							hideMore();
 							// Convert v4 place data to OSM tags format for the modal
 							const osmTags: any = {};
-							
+
 							// Map standard fields to OSM tags
 							if (placeDetails.name) osmTags.name = placeDetails.name;
 							if (placeDetails.address) osmTags['addr:full'] = placeDetails.address;
@@ -1123,24 +1123,35 @@ export const generateMarker = ({
 							if (placeDetails.twitter) osmTags.twitter = placeDetails.twitter;
 							if (placeDetails.facebook) osmTags.facebook = placeDetails.facebook;
 							if (placeDetails.instagram) osmTags.instagram = placeDetails.instagram;
-							
+
 							// Map payment fields
-							if (placeDetails['osm:payment:onchain']) osmTags['payment:onchain'] = placeDetails['osm:payment:onchain'];
-							if (placeDetails['osm:payment:lightning']) osmTags['payment:lightning'] = placeDetails['osm:payment:lightning'];
-							if (placeDetails['osm:payment:lightning_contactless']) osmTags['payment:lightning_contactless'] = placeDetails['osm:payment:lightning_contactless'];
-							if (placeDetails['osm:payment:bitcoin']) osmTags['payment:bitcoin'] = placeDetails['osm:payment:bitcoin'];
-							if (placeDetails['osm:payment:uri']) osmTags['payment:uri'] = placeDetails['osm:payment:uri'];
-							if (placeDetails['osm:payment:coinos']) osmTags['payment:coinos'] = placeDetails['osm:payment:coinos'];
-							if (placeDetails['osm:payment:pouch']) osmTags['payment:pouch'] = placeDetails['osm:payment:pouch'];
-							
+							if (placeDetails['osm:payment:onchain'])
+								osmTags['payment:onchain'] = placeDetails['osm:payment:onchain'];
+							if (placeDetails['osm:payment:lightning'])
+								osmTags['payment:lightning'] = placeDetails['osm:payment:lightning'];
+							if (placeDetails['osm:payment:lightning_contactless'])
+								osmTags['payment:lightning_contactless'] =
+									placeDetails['osm:payment:lightning_contactless'];
+							if (placeDetails['osm:payment:bitcoin'])
+								osmTags['payment:bitcoin'] = placeDetails['osm:payment:bitcoin'];
+							if (placeDetails['osm:payment:uri'])
+								osmTags['payment:uri'] = placeDetails['osm:payment:uri'];
+							if (placeDetails['osm:payment:coinos'])
+								osmTags['payment:coinos'] = placeDetails['osm:payment:coinos'];
+							if (placeDetails['osm:payment:pouch'])
+								osmTags['payment:pouch'] = placeDetails['osm:payment:pouch'];
+
 							// Map other OSM fields
 							if (placeDetails['osm:amenity']) osmTags.amenity = placeDetails['osm:amenity'];
 							if (placeDetails['osm:category']) osmTags.category = placeDetails['osm:category'];
-							if (placeDetails['osm:survey:date']) osmTags['survey:date'] = placeDetails['osm:survey:date'];
-							if (placeDetails['osm:check_date']) osmTags['check_date'] = placeDetails['osm:check_date'];
-							if (placeDetails['osm:check_date:currency:XBT']) osmTags['check_date:currency:XBT'] = placeDetails['osm:check_date:currency:XBT'];
+							if (placeDetails['osm:survey:date'])
+								osmTags['survey:date'] = placeDetails['osm:survey:date'];
+							if (placeDetails['osm:check_date'])
+								osmTags['check_date'] = placeDetails['osm:check_date'];
+							if (placeDetails['osm:check_date:currency:XBT'])
+								osmTags['check_date:currency:XBT'] = placeDetails['osm:check_date:currency:XBT'];
 							if (placeDetails.verified_at) osmTags['survey:date'] = placeDetails.verified_at;
-							
+
 							// Import and use the showTags store
 							import('$lib/store').then(({ showTags }) => {
 								showTags.set(osmTags);
@@ -1149,7 +1160,8 @@ export const generateMarker = ({
 					}
 
 					// Tag Issues button handler
-					const taggingIssuesButton: HTMLButtonElement | null = popupContent.querySelector('#tagging-issues');
+					const taggingIssuesButton: HTMLButtonElement | null =
+						popupContent.querySelector('#tagging-issues');
 					if (taggingIssuesButton) {
 						taggingIssuesButton.onclick = () => {
 							hideMore();
