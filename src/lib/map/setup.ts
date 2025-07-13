@@ -1,4 +1,4 @@
-import { InfoTooltip, Icon } from '$lib/comp';
+import { Icon } from '$lib/comp';
 import { boost, exchangeRate, resetBoost, theme } from '$lib/store';
 import type { DomEventType, ElementOSM, Leaflet, OSMTags } from '$lib/types';
 import { detectTheme, errToast } from '$lib/utils';
@@ -1135,7 +1135,7 @@ export const generateMarker = ({
 						showTagsButton.onclick = () => {
 							hideMore();
 							// Convert v4 place data to OSM tags format for the modal
-							const osmTags: any = {};
+							const osmTags: OSMTags = {};
 
 							// Map standard fields to OSM tags
 							if (placeDetails.name) osmTags.name = placeDetails.name;
