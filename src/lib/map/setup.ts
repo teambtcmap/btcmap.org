@@ -663,7 +663,7 @@ export const generateMarker = ({
 				console.log(`Fetching details for place ID: ${placeId}`);
 
 				const response = await axios.get(
-					`https://api.btcmap.org/v4/places/${placeId}?fields=id,name,address,phone,website,twitter,facebook,instagram,email,opening_hours,verified_at,osm_url,boosted_until,comments`
+					`https://api.btcmap.org/v4/places/${placeId}?fields=id,name,address,phone,website,twitter,facebook,instagram,email,opening_hours,verified_at,osm_url,boosted_until,comments,osm:payment:onchain,osm:payment:lightning,osm:payment:lightning_contactless,osm:payment:bitcoin,osm:payment:uri,osm:payment:coinos,osm:payment:pouch,osm:amenity,osm:category,osm:survey:date,osm:check_date,osm:check_date:currency:XBT`
 				);
 				const placeDetails = response.data;
 
@@ -814,12 +814,65 @@ export const generateMarker = ({
 										: ''
 								}
 
+								${
+									location.pathname === '/map' ||
+									location.pathname.includes('/community') ||
+									location.pathname.includes('/country')
+										? `<button id='show-tags' class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+											<svg width='24px' height='24px' class='mr-2'>
+												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#tags"></use>
+											</svg>
+											Show Tags
+										   </button>
+
+										   <button id='tagging-issues' class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+											<svg width='24px' height='24px' class='mr-2'>
+												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#issues"></use>
+											</svg>
+											Tag Issues
+										   </button>`
+										: ''
+								}
+
 								<a href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Map-Legend" target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 									<svg width='24px' height='24px' class='mr-2'>
 										<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#info-circle"></use>
 									</svg>
 									Map Legend
 								</a>
+
+								${
+									placeDetails['osm:payment:uri']
+										? `<a href='${placeDetails['osm:payment:uri']}' target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+										<svg width='24px' height='24px' class='mr-2'>
+											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#bolt"></use>
+										</svg>
+										Pay Now
+									   </a>`
+										: ''
+								}
+
+								${
+									placeDetails['osm:payment:coinos']
+										? `<a href='https://coinos.io/pay/${placeDetails['osm:payment:coinos']}' target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+										<svg width='24px' height='24px' class='mr-2'>
+											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#bolt"></use>
+										</svg>
+										Pay via Coinos
+									   </a>`
+										: ''
+								}
+
+								${
+									placeDetails['osm:payment:pouch']
+										? `<a href='https://app.pouch.ph/pay/${placeDetails['osm:payment:pouch']}' target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
+										<svg width='24px' height='24px' class='mr-2'>
+											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#bolt"></use>
+										</svg>
+										Pay via Pouch
+									   </a>`
+										: ''
+								}
 
 								<a href="${placeDetails.osm_url || `https://www.openstreetmap.org/${osmType}/${osmId}`}" target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
 									<svg width='24px' height='24px' class='mr-2'>
@@ -834,6 +887,58 @@ export const generateMarker = ({
 					<div class='w-full border-t-[0.5px] border-mapBorder mt-3 mb-2 opacity-80'></div>
 
 					<div class='flex space-x-4'>
+						${
+							placeDetails['osm:payment:onchain'] ||
+							placeDetails['osm:payment:lightning'] ||
+							placeDetails['osm:payment:lightning_contactless'] ||
+							placeDetails['osm:payment:bitcoin']
+								? `<div>
+									<span class='block text-mapLabel text-xs'>Payment Methods</span>
+									<div class='w-full flex space-x-2 mt-0.5'>
+										<img src="${
+											placeDetails['osm:payment:onchain'] === 'yes'
+												? theme === 'dark'
+													? '/icons/btc-highlight-dark.svg'
+													: '/icons/btc-highlight.svg'
+												: theme === 'dark'
+													? '/icons/btc-dark.svg'
+													: '/icons/btc.svg'
+										}" alt="bitcoin" class="w-6 h-6" title="${
+											placeDetails['osm:payment:onchain'] === 'yes'
+												? 'On-chain accepted'
+												: 'On-chain unknown'
+										}"/>
+										<img src="${
+											placeDetails['osm:payment:lightning'] === 'yes'
+												? theme === 'dark'
+													? '/icons/ln-highlight-dark.svg'
+													: '/icons/ln-highlight.svg'
+												: theme === 'dark'
+													? '/icons/ln-dark.svg'
+													: '/icons/ln.svg'
+										}" alt="lightning" class="w-6 h-6" title="${
+											placeDetails['osm:payment:lightning'] === 'yes'
+												? 'Lightning accepted'
+												: 'Lightning unknown'
+										}"/>
+										<img src="${
+											placeDetails['osm:payment:lightning_contactless'] === 'yes'
+												? theme === 'dark'
+													? '/icons/nfc-highlight-dark.svg'
+													: '/icons/nfc-highlight.svg'
+												: theme === 'dark'
+													? '/icons/nfc-dark.svg'
+													: '/icons/nfc.svg'
+										}" alt="nfc" class="w-6 h-6" title="${
+											placeDetails['osm:payment:lightning_contactless'] === 'yes'
+												? 'Lightning Contactless accepted'
+												: 'Lightning contactless unknown'
+										}"/>
+									</div>
+								   </div>`
+								: ''
+						}
+
 						<div>
 							<span class='block text-mapLabel text-xs' title="Completed by BTC Map community members">Last Surveyed</span>
 							<span class='block text-body dark:text-white'>
@@ -876,15 +981,6 @@ export const generateMarker = ({
 								<span class='text-xs'>${isBoosted ? 'Extend' : 'Boost'}</span>
 							</button>
 						</div>
-
-						${
-							placeDetails.comments > 0
-								? `<div>
-								<span class='block text-mapLabel text-xs'>Comments</span>
-								<span class='block text-body dark:text-white'>${placeDetails.comments}</span>
-							   </div>`
-								: ''
-						}
 					</div>
 
 					${
@@ -988,6 +1084,61 @@ export const generateMarker = ({
 									'Could not fetch bitcoin exchange rate, please try again or contact BTC Map.'
 								);
 							}
+						};
+					}
+
+					// Show Tags button handler
+					const showTagsButton: HTMLButtonElement | null = popupContent.querySelector('#show-tags');
+					if (showTagsButton) {
+						showTagsButton.onclick = () => {
+							hideMore();
+							// Convert v4 place data to OSM tags format for the modal
+							const osmTags: any = {};
+							
+							// Map standard fields to OSM tags
+							if (placeDetails.name) osmTags.name = placeDetails.name;
+							if (placeDetails.address) osmTags['addr:full'] = placeDetails.address;
+							if (placeDetails.opening_hours) osmTags.opening_hours = placeDetails.opening_hours;
+							if (placeDetails.phone) osmTags.phone = placeDetails.phone;
+							if (placeDetails.website) osmTags.website = placeDetails.website;
+							if (placeDetails.email) osmTags.email = placeDetails.email;
+							if (placeDetails.twitter) osmTags.twitter = placeDetails.twitter;
+							if (placeDetails.facebook) osmTags.facebook = placeDetails.facebook;
+							if (placeDetails.instagram) osmTags.instagram = placeDetails.instagram;
+							
+							// Map payment fields
+							if (placeDetails['osm:payment:onchain']) osmTags['payment:onchain'] = placeDetails['osm:payment:onchain'];
+							if (placeDetails['osm:payment:lightning']) osmTags['payment:lightning'] = placeDetails['osm:payment:lightning'];
+							if (placeDetails['osm:payment:lightning_contactless']) osmTags['payment:lightning_contactless'] = placeDetails['osm:payment:lightning_contactless'];
+							if (placeDetails['osm:payment:bitcoin']) osmTags['payment:bitcoin'] = placeDetails['osm:payment:bitcoin'];
+							if (placeDetails['osm:payment:uri']) osmTags['payment:uri'] = placeDetails['osm:payment:uri'];
+							if (placeDetails['osm:payment:coinos']) osmTags['payment:coinos'] = placeDetails['osm:payment:coinos'];
+							if (placeDetails['osm:payment:pouch']) osmTags['payment:pouch'] = placeDetails['osm:payment:pouch'];
+							
+							// Map other OSM fields
+							if (placeDetails['osm:amenity']) osmTags.amenity = placeDetails['osm:amenity'];
+							if (placeDetails['osm:category']) osmTags.category = placeDetails['osm:category'];
+							if (placeDetails['osm:survey:date']) osmTags['survey:date'] = placeDetails['osm:survey:date'];
+							if (placeDetails['osm:check_date']) osmTags['check_date'] = placeDetails['osm:check_date'];
+							if (placeDetails['osm:check_date:currency:XBT']) osmTags['check_date:currency:XBT'] = placeDetails['osm:check_date:currency:XBT'];
+							if (placeDetails.verified_at) osmTags['survey:date'] = placeDetails.verified_at;
+							
+							// Import and use the showTags store
+							import('$lib/store').then(({ showTags }) => {
+								showTags.set(osmTags);
+							});
+						};
+					}
+
+					// Tag Issues button handler
+					const taggingIssuesButton: HTMLButtonElement | null = popupContent.querySelector('#tagging-issues');
+					if (taggingIssuesButton) {
+						taggingIssuesButton.onclick = () => {
+							hideMore();
+							// For now, show empty issues array since we don't have issues data in v4
+							import('$lib/store').then(({ taggingIssues }) => {
+								taggingIssues.set([]);
+							});
 						};
 					}
 				}
