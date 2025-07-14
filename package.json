@@ -51,7 +51,7 @@
 	"devDependencies": {
 		"@eslint/js": "^9.24.0",
 		"@iconify/svelte": "^4.2.0",
-		"@playwright/test": "^1.50.1",
+		"@playwright/test": "^1.54.1",
 		"@sveltejs/adapter-netlify": "^5.0.0",
 		"@sveltejs/kit": "^2.22.2",
 		"@sveltejs/vite-plugin-svelte": "^3.1.0",
