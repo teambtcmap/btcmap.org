@@ -278,7 +278,7 @@ export const changeDefaultIcons = (
 		};
 	}
 	fullscreenButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
-	fullscreenButton.style.borderBottom = '1px solid #ccc';
+	fullscreenButton.style.borderBottom = '1.5px solid #ccc';
 
 	leafletBar?.append(fullscreenButton);
 
@@ -310,7 +310,7 @@ export const geolocate = (L: Leaflet, map: Map) => {
 	);
 	if (locateButton) {
 		locateButton.style.borderRadius = '8px';
-		locateButton.style.borderBottom = '1px solid #ccc';
+		locateButton.style.borderBottom = '1.5px solid #ccc';
 		if (theme === 'light') {
 			const locateIcon: HTMLImageElement | null = document.querySelector('#locatebutton');
 			if (locateIcon) {
@@ -430,7 +430,7 @@ export const homeMarkerButtons = (
 					};
 				}
 				communityMapButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
-				communityMapButton.style.borderBottom = '1px solid #ccc';
+				communityMapButton.style.borderBottom = '1.5px solid #ccc';
 
 				addControlDiv.append(communityMapButton);
 			} else {
@@ -445,6 +445,7 @@ export const homeMarkerButtons = (
 					theme === 'dark' ? '/icons/shopping-white.svg' : '/icons/shopping.svg'
 				} alt='shopping' class='inline' id='shopping'/>`;
 				merchantMapButton.style.borderRadius = '0 0 8px 8px';
+				merchantMapButton.style.borderBottom = '1.5px solid #ccc';
 				if (theme === 'light') {
 					merchantMapButton.onmouseenter = () => {
 						const shoppingIcon = document.querySelector('#shopping') as HTMLImageElement;
