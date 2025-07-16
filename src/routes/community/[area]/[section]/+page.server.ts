@@ -1,4 +1,4 @@
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import type { PageServerLoad } from './$types';
@@ -7,7 +7,13 @@ import { getIssues } from '$lib/gitea';
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 export const load: PageServerLoad = async ({ params }) => {
-	const { area } = params;
+	const { area, section } = params;
+	
+	// Validate section parameter
+	const validSections = ['merchants', 'stats', 'activity', 'maintain'];
+	if (!validSections.includes(section)) {
+		throw redirect(302, `/community/${area}/merchants`);
+	}
 	try {
 		const areaResponse = await axios.get(`https://api.btcmap.org/v2/areas/${area}`);
 		const fetchedArea = areaResponse.data;

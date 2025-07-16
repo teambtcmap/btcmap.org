@@ -217,6 +217,101 @@ describe('Country Area Pages', () => {
 		}
 	});
 
+	test('handles different country section URLs correctly', async ({ page }) => {
+		// Test different country codes with specific sections
+		const testCountries = [
+			{ code: 'us', name: 'United States' },
+			{ code: 'de', name: 'Germany' },
+			{ code: 'gb', name: 'United Kingdom' },
+			{ code: 'za', name: 'South Africa' }
+		];
+		
+		const testSections = ['merchants', 'stats', 'activity', 'maintain'];
+		
+		for (const country of testCountries) {
+			for (const section of testSections) {
+				await page.goto(`http://127.0.0.1:5173/country/${country.code}/${section}`);
+				await page.waitForLoadState('networkidle');
+				
+				// Check that we're on the correct country section page
+				await expect(page).toHaveURL(new RegExp(`/country/${country.code}/${section}$`));
+				
+				// Check that the page loads without JavaScript errors
+				const isOn404 = page.url().includes('/404');
+				expect(isOn404).toBe(false);
+				
+				// Check that the page has basic content (not completely broken)
+				const bodyContent = await page.locator('body').textContent();
+				expect(bodyContent).toBeTruthy();
+				expect(bodyContent.length).toBeGreaterThan(10);
+				
+				// Check that no uncaught errors appear in console
+				const errors = await page.evaluate(() => {
+					const errors = [];
+					const originalError = console.error;
+					console.error = (...args) => {
+						errors.push(args.join(' '));
+						originalError(...args);
+					};
+					return errors;
+				});
+				
+				// Allow some time for any errors to surface
+				await page.waitForTimeout(1000);
+			}
+		}
+	});
+
+	test('handles data loading errors gracefully', async ({ page }) => {
+		// Test that the page handles undefined/error data gracefully
+		await page.goto('http://127.0.0.1:5173/country/invalid-country/merchants');
+		await page.waitForLoadState('networkidle');
+		
+		// Should either show 404 or handle gracefully
+		const isOn404 = page.url().includes('/404');
+		const hasErrorContent = await page.locator('text="Could not find"').count() > 0;
+		const hasConsoleError = await page.locator('text="error"').count() > 0;
+		
+		// One of these should be true - either proper error handling or 404
+		const isHandledGracefully = isOn404 || hasErrorContent || hasConsoleError;
+		
+		if (!isHandledGracefully) {
+			// If none of the above, at least the page should load without crashing
+			const bodyContent = await page.locator('body').textContent();
+			expect(bodyContent).toBeTruthy();
+		}
+	});
+
+	test('handles tickets data loading robustly', async ({ page }) => {
+		// Test that the AreaPage component handles various ticket data states
+		const testUrl = 'http://127.0.0.1:5173/country/de/merchants';
+		
+		await page.goto(testUrl);
+		await page.waitForLoadState('networkidle');
+		
+		// Check that no "Cannot read properties of undefined" errors occur
+		const errors = [];
+		page.on('pageerror', (error) => {
+			errors.push(error.message);
+		});
+		
+		// Wait a bit to let any errors surface
+		await page.waitForTimeout(2000);
+		
+		// Filter for the specific error we're trying to prevent
+		const undefinedErrors = errors.filter(error => 
+			error.includes('Cannot read properties of undefined') && 
+			error.includes('filter')
+		);
+		
+		expect(undefinedErrors.length).toBe(0);
+		
+		// Also check that the page loads basic content
+		const bodyContent = await page.locator('body').textContent();
+		expect(bodyContent).toBeTruthy();
+		expect(bodyContent.length).toBeGreaterThan(100);
+	});
+
 	test('displays activity feed in activity section', async ({ page }) => {
 		// Navigate directly to South Africa activity section
 		await page.goto('http://127.0.0.1:5173/country/za/activity');

@@ -8,17 +8,17 @@
 	export let data: AreaPageProps;
 
 	$: filteredAddTickets =
-		data.tickets !== 'error'
+		data.tickets && data.tickets !== 'error' && Array.isArray(data.tickets)
 			? data.tickets.filter((ticket) => ticket.labels.some((l) => l.name === 'add-location'))
 			: [];
 
 	$: filteredVerifyTickets =
-		data.tickets !== 'error'
+		data.tickets && data.tickets !== 'error' && Array.isArray(data.tickets)
 			? data.tickets.filter((ticket) => ticket.labels.some((l) => l.name === 'verify-location'))
 			: [];
 
 	$: filteredCommunityTickets =
-		data.tickets !== 'error'
+		data.tickets && data.tickets !== 'error' && Array.isArray(data.tickets)
 			? data.tickets.filter((ticket) => ticket.labels.some((l) => l.name === 'add-community'))
 			: [];
 	import {

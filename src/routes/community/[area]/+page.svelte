@@ -1,17 +1,19 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
+	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import type { AreaPageProps } from '$lib/types';
 
 	export let data: AreaPageProps;
 
-	const { id } = data;
+	// Use the URL parameter instead of data.id to avoid mismatch
+	$: area = $page.params.area;
 
 	// Redirect to default section (merchants) when visiting /community/[area]
 	onMount(() => {
-		if (browser) {
-			goto(`/community/${id}/merchants`, { replaceState: true });
+		if (browser && area) {
+			goto(`/community/${area}/merchants`, { replaceState: true });
 		}
 	});
 </script>

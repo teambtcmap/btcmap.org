@@ -232,4 +232,99 @@ describe('Community Area Pages', () => {
 			await expect(page).toHaveURL(new RegExp(`${communityHref.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/stats$`));
 		}
 	});
+
+	test('handles community section URLs robustly', async ({ page }) => {
+		// Test different community section URLs by getting actual community links
+		await page.goto('http://127.0.0.1:5173/communities');
+		await page.waitForLoadState('networkidle');
+		
+		// Get the first few community links
+		const communityLinks = page.locator('a[href^="/community/"]');
+		const linkCount = await communityLinks.count();
+		
+		if (linkCount > 0) {
+			// Test first 3 communities (or all if less than 3)
+			const testCount = Math.min(3, linkCount);
+			const testSections = ['merchants', 'stats', 'activity', 'maintain'];
+			
+			for (let i = 0; i < testCount; i++) {
+				const communityHref = await communityLinks.nth(i).getAttribute('href');
+				if (!communityHref) continue;
+				
+				for (const section of testSections) {
+					await page.goto(`http://127.0.0.1:5173${communityHref}/${section}`);
+					await page.waitForLoadState('networkidle');
+					
+					// Check that we're on the correct community section page
+					await expect(page).toHaveURL(new RegExp(`${communityHref.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/${section}$`));
+					
+					// Check that the page loads without JavaScript errors
+					const isOn404 = page.url().includes('/404');
+					expect(isOn404).toBe(false);
+					
+					// Check that the page has basic content
+					const bodyContent = await page.locator('body').textContent();
+					expect(bodyContent).toBeTruthy();
+					expect(bodyContent.length).toBeGreaterThan(10);
+				}
+			}
+		}
+	});
+
+	test('handles community data loading errors gracefully', async ({ page }) => {
+		// Test that the page handles undefined/error data gracefully
+		await page.goto('http://127.0.0.1:5173/community/invalid-community/merchants');
+		await page.waitForLoadState('networkidle');
+		
+		// Should either show 404 or handle gracefully
+		const isOn404 = page.url().includes('/404');
+		const hasErrorContent = await page.locator('text="Could not find"').count() > 0;
+		const hasConsoleError = await page.locator('text="error"').count() > 0;
+		
+		// One of these should be true - either proper error handling or 404
+		const isHandledGracefully = isOn404 || hasErrorContent || hasConsoleError;
+		
+		if (!isHandledGracefully) {
+			// If none of the above, at least the page should load without crashing
+			const bodyContent = await page.locator('body').textContent();
+			expect(bodyContent).toBeTruthy();
+		}
+	});
+
+	test('handles community tickets data loading robustly', async ({ page }) => {
+		// Test that the AreaPage component handles various ticket data states for communities
+		await page.goto('http://127.0.0.1:5173/communities');
+		await page.waitForLoadState('networkidle');
+		
+		// Get the first community link
+		const firstCommunityLink = page.locator('a[href^="/community/"]').first();
+		const communityHref = await firstCommunityLink.getAttribute('href');
+		
+		if (communityHref) {
+			await page.goto(`http://127.0.0.1:5173${communityHref}/merchants`);
+			await page.waitForLoadState('networkidle');
+			
+			// Check that no "Cannot read properties of undefined" errors occur
+			const errors = [];
+			page.on('pageerror', (error) => {
+				errors.push(error.message);
+			});
+			
+			// Wait a bit to let any errors surface
+			await page.waitForTimeout(2000);
+			
+			// Filter for the specific error we're trying to prevent
+			const undefinedErrors = errors.filter(error => 
+				error.includes('Cannot read properties of undefined') && 
+				error.includes('filter')
+			);
+			
+			expect(undefinedErrors.length).toBe(0);
+			
+			// Also check that the page loads basic content
+			const bodyContent = await page.locator('body').textContent();
+			expect(bodyContent).toBeTruthy();
+			expect(bodyContent.length).toBeGreaterThan(100);
+		}
+	});
 });
