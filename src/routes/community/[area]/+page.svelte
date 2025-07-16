@@ -1,29 +1,43 @@
 <script lang="ts">
-	export let data: AreaPageProps;
-
-	import { AreaPage, Breadcrumbs, Footer, Header } from '$lib/comp';
+	import { goto } from '$app/navigation';
+	import { browser } from '$app/environment';
+	import { onMount } from 'svelte';
 	import type { AreaPageProps } from '$lib/types';
 
-	const { name, id } = data;
+	export let data: AreaPageProps;
 
-	const routes = [
-		{ name: 'Communities', url: '/communities' },
-		{ name, url: `/community/${id}` }
-	];
+	const { id } = data;
+
+	// Redirect to default section (merchants) when visiting /community/[area]
+	onMount(() => {
+		if (browser) {
+			// Check if there's a hash in the URL from the old system
+			const hash = window.location.hash;
+			if (hash) {
+				const section = hash.slice(1); // Remove the #
+				const validSections = ['merchants', 'stats', 'activity', 'maintain'];
+				
+				if (validSections.includes(section)) {
+					// Redirect to the new route with the section from the hash
+					goto(`/community/${id}/${section}`, { replaceState: true });
+					return;
+				}
+			}
+			
+			// Default redirect to merchants
+			goto(`/community/${id}/merchants`, { replaceState: true });
+		}
+	});
 </script>
 
 <svelte:head>
-	<title>{name ? name + ' - ' : ''}BTC Map Community</title>
+	<title>{data.name ? data.name + ' - ' : ''}BTC Map Community</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/communities.png" />
-	<meta property="twitter:title" content="{name ? name + ' - ' : ''}BTC Map Community" />
+	<meta property="twitter:title" content="{data.name ? data.name + ' - ' : ''}BTC Map Community" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/communities.png" />
 </svelte:head>
 
-<div class="bg-teal dark:bg-dark">
-	<Header />
-	<Breadcrumbs {routes} />
-	<div class="mx-auto w-10/12 xl:w-[1200px]">
-		<AreaPage type="community" {data} />
-		<Footer />
-	</div>
+<!-- Loading state while redirecting -->
+<div class="bg-teal dark:bg-dark min-h-screen flex items-center justify-center">
+	<div class="text-primary dark:text-white text-xl">Loading community...</div>
 </div>

@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 
 	export let type: 'country' | 'community';
@@ -82,7 +84,6 @@
 	}
 
 	const sections = Object.values(Sections);
-	let activeSection = Sections.merchants;
 	let scrolled = false;
 
 	// Map section names to URL-friendly slugs
@@ -101,44 +102,18 @@
 		maintain: Sections.maintain
 	};
 
-	// Handle hash changes
-	const handleHashChange = () => {
-		if (browser && location.hash) {
-			const hashSection = location.hash.slice(1);
-			if (slugToSection[hashSection]) {
-				activeSection = slugToSection[hashSection];
-			}
-		}
-	};
-
-	// Update URL hash when section changes
-	const updateHash = (section: Sections) => {
-		if (browser) {
-			const slug = sectionSlugs[section];
-			history.replaceState(null, '', `#${slug}`);
-		}
-	};
+	// Get the current section from the route parameter
+	$: currentSection = $page.params.section || 'merchants';
+	$: activeSection = slugToSection[currentSection] || Sections.merchants;
 
 	// Handle section change
 	const handleSectionChange = (section: Sections) => {
-		activeSection = section;
-		updateHash(section);
+		const slug = sectionSlugs[section];
+		const areaId = data.id;
+		goto(`/${type}/${areaId}/${slug}`);
 	};
 
-	onMount(() => {
-		if (browser) {
-			// Handle initial hash on mount
-			handleHashChange();
-
-			// Listen for hash changes
-			window.addEventListener('hashchange', handleHashChange);
-
-			// Cleanup
-			return () => {
-				window.removeEventListener('hashchange', handleHashChange);
-			};
-		}
-	});
+	// No need for hash handling anymore - sections are handled by route parameters
 
 	let dataInitialized = false;
 
