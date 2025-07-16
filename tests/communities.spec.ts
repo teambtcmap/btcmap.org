@@ -63,11 +63,8 @@ test.describe('Communities Page', () => {
 		await page.goto('http://127.0.0.1:5173/communities');
 		await page.waitForLoadState('networkidle');
 		
-		// Wait for initial render
-		await page.waitForTimeout(1000);
-		
-		// Should default to Africa section
-		await expect(page).toHaveURL(/\/communities$/);
+		// Should redirect to Africa section
+		await expect(page).toHaveURL(/\/communities\/africa$/);
 		
 		// Check that Africa section is displayed
 		const africaHeading = page.getByRole('heading', { name: 'Africa' });
@@ -81,23 +78,23 @@ test.describe('Communities Page', () => {
 		}
 	});
 
-	test('navigates to different continent sections via hash', async ({ page }) => {
+	test('navigates to different continent sections via routes', async ({ page }) => {
 		const continents = [
-			{ hash: 'africa', name: 'Africa' },
-			{ hash: 'asia', name: 'Asia' },
-			{ hash: 'europe', name: 'Europe' },
-			{ hash: 'north-america', name: 'North America' },
-			{ hash: 'oceania', name: 'Oceania' },
-			{ hash: 'south-america', name: 'South America' }
+			{ section: 'africa', name: 'Africa' },
+			{ section: 'asia', name: 'Asia' },
+			{ section: 'europe', name: 'Europe' },
+			{ section: 'north-america', name: 'North America' },
+			{ section: 'oceania', name: 'Oceania' },
+			{ section: 'south-america', name: 'South America' }
 		];
 		
 		for (const continent of continents) {
-			await page.goto(`http://127.0.0.1:5173/communities#${continent.hash}`);
+			await page.goto(`http://127.0.0.1:5173/communities/${continent.section}`);
 			await page.waitForLoadState('networkidle');
 			await page.waitForTimeout(1000);
 			
-			// Check URL contains hash
-			await expect(page).toHaveURL(new RegExp(`#${continent.hash.replace('-', '\\-')}$`));
+			// Check URL contains section
+			await expect(page).toHaveURL(new RegExp(`/communities/${continent.section.replace('-', '\\-')}$`));
 			
 			// Check that correct continent heading is displayed
 			const continentHeading = page.getByRole('heading', { name: continent.name });
@@ -107,13 +104,13 @@ test.describe('Communities Page', () => {
 			const sectionSelect = page.locator('select');
 			if (await sectionSelect.count() > 0) {
 				const selectedValue = await sectionSelect.inputValue();
-				expect(selectedValue).toBe(continent.hash);
+				expect(selectedValue).toBe(continent.section);
 			}
 		}
 	});
 
 	test('changes section via dropdown selection', async ({ page }) => {
-		await page.goto('http://127.0.0.1:5173/communities');
+		await page.goto('http://127.0.0.1:5173/communities/africa');
 		await page.waitForLoadState('networkidle');
 		await page.waitForTimeout(1000);
 		
@@ -124,8 +121,8 @@ test.describe('Communities Page', () => {
 			await sectionSelect.selectOption('asia');
 			await page.waitForTimeout(500);
 			
-			// Check that URL updated with hash
-			await expect(page).toHaveURL(/\/communities#asia$/);
+			// Check that URL updated with new route
+			await expect(page).toHaveURL(/\/communities\/asia$/);
 			
 			// Check that Asia section is displayed
 			const asiaHeading = page.getByRole('heading', { name: 'Asia' });
@@ -136,7 +133,7 @@ test.describe('Communities Page', () => {
 			await page.waitForTimeout(500);
 			
 			// Check that URL updated
-			await expect(page).toHaveURL(/\/communities#europe$/);
+			await expect(page).toHaveURL(/\/communities\/europe$/);
 			
 			// Check that Europe section is displayed
 			const europeHeading = page.getByRole('heading', { name: 'Europe' });
@@ -145,7 +142,7 @@ test.describe('Communities Page', () => {
 	});
 
 	test('displays community sections and content', async ({ page }) => {
-		await page.goto('http://127.0.0.1:5173/communities#africa');
+		await page.goto('http://127.0.0.1:5173/communities/africa');
 		await page.waitForLoadState('networkidle');
 		await page.waitForTimeout(2000);
 		
@@ -166,7 +163,7 @@ test.describe('Communities Page', () => {
 	});
 
 	test('handles organization sections', async ({ page }) => {
-		await page.goto('http://127.0.0.1:5173/communities');
+		await page.goto('http://127.0.0.1:5173/communities/africa');
 		await page.waitForLoadState('networkidle');
 		await page.waitForTimeout(2000);
 		
@@ -190,8 +187,8 @@ test.describe('Communities Page', () => {
 					await sectionSelect.selectOption(firstOrg);
 					await page.waitForTimeout(500);
 					
-					// Check that URL updated with organization hash
-					await expect(page).toHaveURL(new RegExp(`#${encodeURIComponent(firstOrg)}$`));
+					// Check that URL updated with organization route
+					await expect(page).toHaveURL(new RegExp(`/communities/${encodeURIComponent(firstOrg)}$`));
 					
 					// Check that organization section heading is displayed
 					const orgHeading = page.getByRole('heading', { name: firstOrg });
@@ -201,40 +198,39 @@ test.describe('Communities Page', () => {
 		}
 	});
 
-	test('handles hash change events', async ({ page }) => {
-		await page.goto('http://127.0.0.1:5173/communities');
+	test('handles legacy hash URLs with redirect', async ({ page }) => {
+		// Test that old hash-based URLs get redirected to new structure
+		await page.goto('http://127.0.0.1:5173/communities#asia');
 		await page.waitForLoadState('networkidle');
-		await page.waitForTimeout(1000);
 		
-		// Test hash change via JavaScript
-		await page.evaluate(() => {
-			window.location.hash = 'asia';
-		});
+		// Should redirect to new route structure
+		await expect(page).toHaveURL(/\/communities\/asia$/);
 		
-		await page.waitForTimeout(500);
-		
-		// Check that section changed
+		// Check that Asia section is displayed
 		const asiaHeading = page.getByRole('heading', { name: 'Asia' });
 		await expect(asiaHeading).toBeVisible();
 		
-		// Test another hash change
-		await page.evaluate(() => {
-			window.location.hash = 'europe';
-		});
+		// Test another legacy hash URL
+		await page.goto('http://127.0.0.1:5173/communities#europe');
+		await page.waitForLoadState('networkidle');
 		
-		await page.waitForTimeout(500);
+		// Should redirect to new route structure
+		await expect(page).toHaveURL(/\/communities\/europe$/);
 		
-		// Check that section changed again
+		// Check that Europe section is displayed
 		const europeHeading = page.getByRole('heading', { name: 'Europe' });
 		await expect(europeHeading).toBeVisible();
 	});
 
-	test('handles invalid hash gracefully', async ({ page }) => {
-		await page.goto('http://127.0.0.1:5173/communities#invalid-section');
+	test('handles invalid sections gracefully', async ({ page }) => {
+		await page.goto('http://127.0.0.1:5173/communities/invalid-section');
 		await page.waitForLoadState('networkidle');
 		await page.waitForTimeout(1000);
 		
-		// Should fallback to default (Africa) for invalid hash
+		// Should redirect to default (Africa) for invalid section
+		await expect(page).toHaveURL(/\/communities\/africa$/);
+		
+		// Should display Africa section
 		const africaHeading = page.getByRole('heading', { name: 'Africa' });
 		await expect(africaHeading).toBeVisible();
 		
@@ -245,7 +241,7 @@ test.describe('Communities Page', () => {
 	});
 
 	test('preserves section when navigating back', async ({ page }) => {
-		await page.goto('http://127.0.0.1:5173/communities#asia');
+		await page.goto('http://127.0.0.1:5173/communities/asia');
 		await page.waitForLoadState('networkidle');
 		await page.waitForTimeout(1000);
 		
@@ -259,27 +255,27 @@ test.describe('Communities Page', () => {
 		await page.waitForTimeout(500);
 		
 		// Should still be on Asia section
-		await expect(page).toHaveURL(/\/communities#asia$/);
+		await expect(page).toHaveURL(/\/communities\/asia$/);
 		const asiaHeading = page.getByRole('heading', { name: 'Asia' });
 		await expect(asiaHeading).toBeVisible();
 	});
 
 	test('section heading links work correctly', async ({ page }) => {
-		await page.goto('http://127.0.0.1:5173/communities#europe');
+		await page.goto('http://127.0.0.1:5173/communities/europe');
 		await page.waitForLoadState('networkidle');
 		await page.waitForTimeout(1000);
 		
 		// Check that section heading is a link
 		const sectionHeadingLink = page.getByRole('heading', { name: 'Europe' }).locator('a');
 		if (await sectionHeadingLink.count() > 0) {
-			await expect(sectionHeadingLink).toHaveAttribute('href', '/communities#europe');
+			await expect(sectionHeadingLink).toHaveAttribute('href', '/communities/europe');
 			
 			// Click the link
 			await sectionHeadingLink.click();
 			await page.waitForTimeout(500);
 			
 			// Should still be on the same section
-			await expect(page).toHaveURL(/\/communities#europe$/);
+			await expect(page).toHaveURL(/\/communities\/europe$/);
 			const europeHeading = page.getByRole('heading', { name: 'Europe' });
 			await expect(europeHeading).toBeVisible();
 		}
