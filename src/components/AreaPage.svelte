@@ -21,8 +21,6 @@
 		data.tickets !== 'error'
 			? data.tickets.filter((ticket) => ticket.labels.some((l) => l.name === 'add-community'))
 			: [];
-
-	import { goto } from '$app/navigation';
 	import {
 		AreaActivity,
 		AreaMap,
