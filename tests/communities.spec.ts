@@ -198,29 +198,6 @@ test.describe('Communities Page', () => {
 		}
 	});
 
-	test('handles legacy hash URLs with redirect', async ({ page }) => {
-		// Test that old hash-based URLs get redirected to new structure
-		await page.goto('http://127.0.0.1:5173/communities#asia');
-		await page.waitForLoadState('networkidle');
-		
-		// Should redirect to new route structure
-		await expect(page).toHaveURL(/\/communities\/asia$/);
-		
-		// Check that Asia section is displayed
-		const asiaHeading = page.getByRole('heading', { name: 'Asia' });
-		await expect(asiaHeading).toBeVisible();
-		
-		// Test another legacy hash URL
-		await page.goto('http://127.0.0.1:5173/communities#europe');
-		await page.waitForLoadState('networkidle');
-		
-		// Should redirect to new route structure
-		await expect(page).toHaveURL(/\/communities\/europe$/);
-		
-		// Check that Europe section is displayed
-		const europeHeading = page.getByRole('heading', { name: 'Europe' });
-		await expect(europeHeading).toBeVisible();
-	});
 
 	test('handles invalid sections gracefully', async ({ page }) => {
 		await page.goto('http://127.0.0.1:5173/communities/invalid-section');

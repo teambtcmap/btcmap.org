@@ -11,20 +11,6 @@
 	// Redirect to default section (merchants) when visiting /country/[area]
 	onMount(() => {
 		if (browser) {
-			// Check if there's a hash in the URL from the old system
-			const hash = window.location.hash;
-			if (hash) {
-				const section = hash.slice(1); // Remove the #
-				const validSections = ['merchants', 'stats', 'activity', 'maintain'];
-				
-				if (validSections.includes(section)) {
-					// Redirect to the new route with the section from the hash
-					goto(`/country/${id}/${section}`, { replaceState: true });
-					return;
-				}
-			}
-			
-			// Default redirect to merchants
 			goto(`/country/${id}/merchants`, { replaceState: true });
 		}
 	});

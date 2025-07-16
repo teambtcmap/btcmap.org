@@ -52,7 +52,7 @@ describe('Community Area Pages', () => {
 		await expect(page).toHaveURL(/\/communities$/);
 	});
 
-	test('handles section navigation with hash fragments', async ({ page }) => {
+	test('handles section navigation with route parameters', async ({ page }) => {
 		// Navigate to communities page first
 		await page.goto('http://127.0.0.1:5173/communities');
 		
@@ -62,24 +62,21 @@ describe('Community Area Pages', () => {
 		// Click on the first community link
 		const firstCommunityLink = page.locator('a[href^="/community/"]').first();
 		const communityHref = await firstCommunityLink.getAttribute('href');
-		await firstCommunityLink.click();
+		if (!communityHref) return;
 		
-		// Wait for page to load
-		await page.waitForLoadState('networkidle');
-		
-		// Test navigation to different sections using hash
+		// Test navigation to different sections using route parameters
 		const testSections = ['stats', 'activity', 'maintain'];
 		
 		for (const section of testSections) {
-			await page.goto(`http://127.0.0.1:5173${communityHref}#${section}`);
+			await page.goto(`http://127.0.0.1:5173${communityHref}/${section}`);
 			await page.waitForLoadState('networkidle');
 			
-			// Verify the URL contains the hash
-			await expect(page).toHaveURL(new RegExp(`${communityHref.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}#${section}`));
+			// Verify the URL contains the section parameter
+			await expect(page).toHaveURL(new RegExp(`${communityHref.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/${section}$`));
 		}
 	});
 
-	test('defaults to merchants section when no hash is provided', async ({ page }) => {
+	test('defaults to merchants section when no section is provided', async ({ page }) => {
 		// Navigate to communities page first
 		await page.goto('http://127.0.0.1:5173/communities');
 		
@@ -93,8 +90,12 @@ describe('Community Area Pages', () => {
 		// Wait for page to load
 		await page.waitForLoadState('networkidle');
 		
-		// Check that we're on the merchants section by default
-		// (This might be indicated by active tab styling or content)
+		// Should redirect to merchants section
+		const currentUrl = page.url();
+		expect(currentUrl).toContain('/community/');
+		expect(currentUrl).toContain('/merchants');
+		
+		// Check that merchants section is displayed
 		const merchantsContent = page.locator('text="Merchants"').first();
 		await expect(merchantsContent).toBeVisible();
 	});
@@ -154,8 +155,8 @@ describe('Community Area Pages', () => {
 				// Wait a bit for any content to load
 				await page.waitForTimeout(500);
 				
-				// Check that the URL updated with the hash
-				await expect(page).toHaveURL(new RegExp(`#${sectionName.toLowerCase()}`));
+				// Check that the URL updated with the section parameter
+				await expect(page).toHaveURL(new RegExp(`/${sectionName.toLowerCase()}$`));
 			}
 		}
 	});
@@ -215,7 +216,7 @@ describe('Community Area Pages', () => {
 		await page.waitForLoadState('networkidle');
 		
 		// Navigate to stats section
-		await page.goto(`http://127.0.0.1:5173${communityHref}#stats`);
+		await page.goto(`http://127.0.0.1:5173${communityHref}/stats`);
 		await page.waitForLoadState('networkidle');
 		
 		// If there are merchant links, click on one
@@ -228,7 +229,7 @@ describe('Community Area Pages', () => {
 			await page.goBack();
 			
 			// Should still be on the stats section
-			await expect(page).toHaveURL(new RegExp(`${communityHref.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}#stats`));
+			await expect(page).toHaveURL(new RegExp(`${communityHref.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/stats$`));
 		}
 	});
 });

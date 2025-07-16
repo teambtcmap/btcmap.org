@@ -159,7 +159,7 @@ describe('Country Area Pages', () => {
 
 	test('displays country statistics in stats section', async ({ page }) => {
 		// Navigate directly to South Africa stats section
-		await page.goto('http://127.0.0.1:5173/country/za#stats');
+		await page.goto('http://127.0.0.1:5173/country/za/stats');
 		
 		// Wait for page to load
 		await page.waitForLoadState('networkidle');
@@ -177,7 +177,7 @@ describe('Country Area Pages', () => {
 
 	test('preserves section when navigating back from merchant page', async ({ page }) => {
 		// Navigate directly to South Africa stats section
-		await page.goto('http://127.0.0.1:5173/country/za#stats');
+		await page.goto('http://127.0.0.1:5173/country/za/stats');
 		
 		// Wait for page to load
 		await page.waitForLoadState('networkidle');
@@ -192,7 +192,7 @@ describe('Country Area Pages', () => {
 			await page.goBack();
 			
 			// Should still be on the stats section
-			await expect(page).toHaveURL(/\/country\/za#stats/);
+			await expect(page).toHaveURL(/\/country\/za\/stats$/);
 		}
 	});
 
@@ -219,7 +219,7 @@ describe('Country Area Pages', () => {
 
 	test('displays activity feed in activity section', async ({ page }) => {
 		// Navigate directly to South Africa activity section
-		await page.goto('http://127.0.0.1:5173/country/za#activity');
+		await page.goto('http://127.0.0.1:5173/country/za/activity');
 		
 		// Wait for page to load
 		await page.waitForLoadState('networkidle');
@@ -253,33 +253,4 @@ describe('Country Area Pages', () => {
 		}
 	});
 
-	test('handles legacy hash URLs with redirect', async ({ page }) => {
-		// Test that old hash-based URLs get redirected to new structure
-		await page.goto('http://127.0.0.1:5173/country/za#stats');
-
-		// Should redirect to new route structure
-		await expect(page).toHaveURL(/\/country\/za\/stats$/);
-
-		// Wait for the page to load
-		await page.waitForLoadState('networkidle');
-
-		// Check that Stats section is shown
-		const statsContent = page.locator('text="Stats"').first();
-		await expect(statsContent).toBeVisible();
-	});
-
-	test('handles invalid legacy hash URLs', async ({ page }) => {
-		// Test that invalid hash URLs get redirected to default
-		await page.goto('http://127.0.0.1:5173/country/za#invalid-section');
-
-		// Should redirect to default merchants section
-		await expect(page).toHaveURL(/\/country\/za\/merchants$/);
-
-		// Wait for the page to load
-		await page.waitForLoadState('networkidle');
-
-		// Should show merchants section
-		const merchantsContent = page.locator('text="Merchants"').first();
-		await expect(merchantsContent).toBeVisible();
-	});
 });

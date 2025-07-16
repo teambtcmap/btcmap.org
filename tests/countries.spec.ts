@@ -169,49 +169,4 @@ describe('Countries', () => {
 		await expect(northAmericaHeading).toBeVisible();
 	});
 
-	test('handles legacy hash URLs with redirect', async ({ page }) => {
-		// Test that old hash-based URLs get redirected to new structure
-		await page.goto('http://127.0.0.1:5173/countries#europe');
-
-		// Should redirect to new route structure
-		await expect(page).toHaveURL(/countries\/europe/);
-
-		// Wait for the page to load
-		const heading = page.getByRole('heading', {
-			name: 'Bitcoin adoption by countries.'
-		});
-		await heading.waitFor({ state: 'visible' });
-
-		// Check that Europe section is shown
-		const europeHeading = page.getByRole('heading', { name: 'Europe' });
-		await europeHeading.waitFor({ state: 'visible' });
-		await expect(europeHeading).toBeVisible();
-
-		// Verify dropdown shows Europe selected
-		const dropdown = page.getByRole('combobox');
-		await expect(dropdown).toHaveValue('europe');
-	});
-
-	test('handles invalid legacy hash URLs', async ({ page }) => {
-		// Test that invalid hash URLs get redirected to default
-		await page.goto('http://127.0.0.1:5173/countries#invalid-continent');
-
-		// Should redirect to default Africa section
-		await expect(page).toHaveURL(/countries\/africa/);
-
-		// Wait for the page to load
-		const heading = page.getByRole('heading', {
-			name: 'Bitcoin adoption by countries.'
-		});
-		await heading.waitFor({ state: 'visible' });
-
-		// Should show Africa section
-		const africaHeading = page.getByRole('heading', { name: 'Africa' });
-		await africaHeading.waitFor({ state: 'visible' });
-		await expect(africaHeading).toBeVisible();
-
-		// Verify dropdown shows Africa selected
-		const dropdown = page.getByRole('combobox');
-		await expect(dropdown).toHaveValue('africa');
-	});
 });

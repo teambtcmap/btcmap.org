@@ -6,20 +6,6 @@
 	// Redirect to default section (Africa) when visiting /countries
 	onMount(() => {
 		if (browser) {
-			// Check if there's a hash in the URL from the old system
-			const hash = window.location.hash;
-			if (hash) {
-				const section = hash.slice(1); // Remove the #
-				const validSections = ['africa', 'asia', 'europe', 'north-america', 'oceania', 'south-america'];
-				
-				if (validSections.includes(section)) {
-					// Redirect to the new route with the section from the hash
-					goto(`/countries/${section}`, { replaceState: true });
-					return;
-				}
-			}
-			
-			// Default redirect to Africa
 			goto('/countries/africa', { replaceState: true });
 		}
 	});
