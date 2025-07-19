@@ -85,12 +85,10 @@
 		communities: communities?.filter((community) => hasOrganization(community, orgId)) || []
 	}));
 
-	// Get current section from route parameter
-	$: section = data.section;
 
 	// Validate organization sections and redirect if invalid
 	$: if (data.isOrganization && organizationSections.length > 0) {
-		const isValidOrganization = organizationSections.some((org) => org.id === section);
+		const isValidOrganization = organizationSections.some((org) => org.id === data.section);
 		if (!isValidOrganization) {
 			goto('/communities/africa', { replaceState: true });
 		}
@@ -327,20 +325,20 @@
 
 			<div>
 				<div class="mb-5 justify-between md:flex">
-					{#if section}
+					{#if data.section}
 						<h2
 							class="mb-2 text-3xl font-semibold text-primary dark:text-white md:mb-0 md:text-left"
 						>
-							<a href="/communities/{section}">
-								{organizationSections.find((org) => org.id === section)?.displayName ||
-									continentDisplayNames[section] ||
-									section}
+							<a href="/communities/{data.section}">
+								{organizationSections.find((org) => org.id === data.section)?.displayName ||
+									continentDisplayNames[data.section] ||
+									data.section}
 							</a>
 						</h2>
 
 						<select
 							class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link dark:bg-white/[0.15] dark:text-white md:w-auto"
-							bind:value={section}
+							bind:value={data.section}
 							on:change={(e) => {
 								// @ts-expect-error
 								const newSection = e.target?.value;
@@ -363,7 +361,7 @@
 				</div>
 
 				{#each communitySections as item (item.section)}
-					{#if section === item.section}
+					{#if data.section === item.section}
 						<CommunitySection communities={item.communities} />
 					{/if}
 				{/each}
