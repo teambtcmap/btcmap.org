@@ -19,7 +19,9 @@ const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
 async function syncIssuesFromGitea(): Promise<IssuesCache> {
 	// Check if required environment variables are available
 	if (!GITEA_API_URL || !GITEA_API_KEY) {
-		console.warn('Gitea API configuration missing (GITEA_API_URL or GITEA_API_KEY). Returning empty cache.');
+		console.warn(
+			'Gitea API configuration missing (GITEA_API_URL or GITEA_API_KEY). Returning empty cache.'
+		);
 		return {
 			timestamp: Date.now(),
 			data: [],
