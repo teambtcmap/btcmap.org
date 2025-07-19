@@ -14,7 +14,13 @@ test.describe('Areas', () => {
 		await page.getByRole('link', { name: 'Countries' }).click();
 		await expect(page).toHaveURL(/countries/);
 
-		await page.getByRole('link', { name: 'South Africa' }).click();
+		// Wait for the countries page to load and find the South Africa link
+		await page.waitForLoadState('domcontentloaded');
+		const southAfricaLink = page.getByRole('link', { name: 'South Africa' });
+		await southAfricaLink.waitFor({ state: 'visible' });
+		await southAfricaLink.click();
+		// Wait for navigation to complete
+		await page.waitForLoadState('domcontentloaded');
 		await expect(page).toHaveURL(/country\/za\/merchants/); // App redirects to merchants section
 
 		await page
@@ -46,7 +52,10 @@ test.describe('Areas', () => {
 
 		// Find the first community link matching the pattern and click it (should be first community)
 		const firstCommunityLink = page.locator('a[href^="/community/"]').first();
+		await firstCommunityLink.waitFor({ state: 'visible' });
 		await firstCommunityLink.click();
+		// Wait for navigation to complete
+		await page.waitForLoadState('domcontentloaded');
 		await expect(page).toHaveURL(/\/community\/[^/]+\/merchants$/); // App redirects to merchants section
 
 		// Find the first merchant link matching the pattern and click it (should be first merchant)

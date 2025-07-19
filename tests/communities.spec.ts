@@ -230,8 +230,8 @@ test.describe('Communities Page', () => {
 
 	test('preserves section when navigating back', async ({ page }) => {
 		await page.goto('http://127.0.0.1:5173/communities/asia');
-		await page.waitForLoadState('networkidle');
-		await page.waitForTimeout(1000);
+		await page.waitForSelector('main', { timeout: 10000 });
+		await page.waitForTimeout(500);
 
 		// Navigate to another page
 		await page.goto('http://127.0.0.1:5173/');
@@ -250,8 +250,8 @@ test.describe('Communities Page', () => {
 
 	test('section heading links work correctly', async ({ page }) => {
 		await page.goto('http://127.0.0.1:5173/communities/europe');
-		await page.waitForLoadState('networkidle');
-		await page.waitForTimeout(1000);
+		await page.waitForSelector('main', { timeout: 10000 });
+		await page.waitForTimeout(500);
 
 		// Check that section heading is a link
 		const sectionHeadingLink = page.getByRole('heading', { name: 'Europe' }).locator('a');
@@ -295,7 +295,7 @@ test.describe('Communities Page', () => {
 		// Test mobile viewport
 		await page.setViewportSize({ width: 375, height: 667 });
 		await page.goto('http://127.0.0.1:5173/communities');
-		await page.waitForLoadState('networkidle');
+		await page.waitForSelector('main', { timeout: 10000 });
 
 		// Check that content is still visible in mobile view
 		await expect(page.getByText(/join the bitcoin map community/i)).toBeVisible();
@@ -316,9 +316,7 @@ test.describe('Communities Page', () => {
 		await page.goto('http://127.0.0.1:5173/communities');
 
 		// Wait for content to load
-
-		// Wait for content to load
-		await page.waitForLoadState('networkidle');
+		await page.waitForSelector('main', { timeout: 10000 });
 		await page.waitForTimeout(2000);
 
 		// Check that main content is now visible
