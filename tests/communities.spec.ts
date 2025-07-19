@@ -204,7 +204,7 @@ test.describe('Communities Page', () => {
 						await expect(page).toHaveURL(
 							new RegExp(`/communities/${encodeURIComponent(firstOrg)}$`)
 						);
-					} catch (error) {
+					} catch {
 						// If selectOption fails, skip the test or accept it's not available
 						console.log(`Organization option "${firstOrg}" not selectable, skipping...`);
 						return;
