@@ -45,8 +45,6 @@
 	$: southAmerica =
 		countries && countries.filter((country) => country.tags.continent === 'South America');
 
-	// Get the current section from the validated data
-	$: section = data.section;
 
 	const sections = ['africa', 'asia', 'europe', 'north-america', 'oceania', 'south-america'];
 	$: countrySections = [
@@ -129,16 +127,16 @@
 
 			<div>
 				<div class="mb-5 justify-between md:flex">
-					{#if section}
+					{#if data.section}
 						<h2
 							class="mb-2 text-3xl font-semibold text-primary dark:text-white md:mb-0 md:text-left"
 						>
-							<a href="/countries/{section}">{continentDisplayNames[section] || section}</a>
+							<a href="/countries/{data.section}">{continentDisplayNames[data.section] || data.section}</a>
 						</h2>
 
 						<select
 							class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link dark:bg-white/[0.15] dark:text-white md:w-auto"
-							value={section}
+							value={data.section}
 							on:change={handleSectionChange}
 						>
 							{#each sections as option (option)}
@@ -149,7 +147,7 @@
 				</div>
 
 				{#each countrySections as item (item.section)}
-					{#if continentDisplayNames[section] === item.section}
+					{#if continentDisplayNames[data.section] === item.section}
 						<CountrySection countries={item.countries} />
 					{/if}
 				{/each}
