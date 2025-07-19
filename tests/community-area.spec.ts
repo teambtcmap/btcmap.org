@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { describe } from 'node:test';
 
-describe('Community Area Pages', () => {
+test.describe('Community Area Pages', () => {
 	test('loads community area page with valid ID', async ({ page }) => {
 		// Navigate to communities page first
 		await page.goto('http://127.0.0.1:5173/communities');

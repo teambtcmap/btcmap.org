@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { describe } from 'node:test';
 
-describe('Countries', () => {
+test.describe('Countries', () => {
 	test('redirects to Africa section by default', async ({ page }) => {
 		await page.goto('http://127.0.0.1:5173/countries');
 

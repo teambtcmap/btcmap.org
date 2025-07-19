@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { describe } from 'node:test';
 
-describe('Country Area Pages', () => {
+test.describe('Country Area Pages', () => {
 	test('loads country page and redirects to merchants', async ({ page }) => {
 		await page.goto('http://127.0.0.1:5173/country/za');
 		await expect(page).toHaveURL(/\/country\/za\/merchants$/);
