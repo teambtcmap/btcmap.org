@@ -48,7 +48,7 @@ test.describe('Countries', () => {
 		// Navigate to Asia via direct URL
 		await page.goto('http://127.0.0.1:5173/countries/asia');
 		await expect(page).toHaveURL(/countries\/asia/);
-		
+
 		const asiaHeading = page.getByRole('heading', { name: 'Asia' });
 		await asiaHeading.waitFor({ state: 'visible' });
 		await expect(asiaHeading).toBeVisible();
@@ -167,5 +167,4 @@ test.describe('Countries', () => {
 		await expect(page).toHaveURL(/countries\/north-america/);
 		await expect(northAmericaHeading).toBeVisible();
 	});
-
 });

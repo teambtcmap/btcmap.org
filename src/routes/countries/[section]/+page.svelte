@@ -45,7 +45,6 @@
 	$: southAmerica =
 		countries && countries.filter((country) => country.tags.continent === 'South America');
 
-
 	const sections = ['africa', 'asia', 'europe', 'north-america', 'oceania', 'south-america'];
 	$: countrySections = [
 		{
@@ -131,7 +130,9 @@
 						<h2
 							class="mb-2 text-3xl font-semibold text-primary dark:text-white md:mb-0 md:text-left"
 						>
-							<a href="/countries/{data.section}">{continentDisplayNames[data.section] || data.section}</a>
+							<a href="/countries/{data.section}"
+								>{continentDisplayNames[data.section] || data.section}</a
+							>
 						</h2>
 
 						<select

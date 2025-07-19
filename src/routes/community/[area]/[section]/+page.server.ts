@@ -8,7 +8,7 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 export const load: PageServerLoad = async ({ params }) => {
 	const { area, section } = params;
-	
+
 	// Validate section parameter
 	const validSections = ['merchants', 'stats', 'activity', 'maintain'];
 	if (!validSections.includes(section)) {

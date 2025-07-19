@@ -8,11 +8,11 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 export const load: PageServerLoad = async ({ params }) => {
 	const { area, section } = params;
-	
+
 	// Validate section parameter - default to merchants if not provided
 	const validSections = ['merchants', 'stats', 'activity', 'maintain'];
 	const currentSection = section || 'merchants';
-	
+
 	if (!validSections.includes(currentSection)) {
 		throw redirect(302, `/country/${area}/merchants`);
 	}

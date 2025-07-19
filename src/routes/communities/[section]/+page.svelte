@@ -85,7 +85,6 @@
 		communities: communities?.filter((community) => hasOrganization(community, orgId)) || []
 	}));
 
-
 	// Validate organization sections and redirect if invalid
 	$: if (data.isOrganization && organizationSections.length > 0) {
 		const isValidOrganization = organizationSections.some((org) => org.id === data.section);
