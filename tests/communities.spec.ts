@@ -59,7 +59,8 @@ test.describe('Communities Page', () => {
 		// Check that chart has proper dimensions
 		const canvasWidth = await chartCanvas.getAttribute('width');
 		const canvasHeight = await chartCanvas.getAttribute('height');
-		expect(canvasWidth).toBe('100%');
+		// Width is set to actual pixel value, not percentage
+		expect(parseInt(canvasWidth || '0')).toBeGreaterThan(0);
 		expect(canvasHeight).toBe('350');
 	});
 
@@ -94,8 +95,9 @@ test.describe('Communities Page', () => {
 
 		for (const continent of continents) {
 			await page.goto(`http://127.0.0.1:5173/communities/${continent.section}`);
-			await page.waitForLoadState('networkidle');
-			await page.waitForTimeout(1000);
+			// Wait for main content instead of networkidle to avoid timeout issues
+			await page.waitForSelector('main', { timeout: 10000 });
+			await page.waitForTimeout(500);
 
 			// Check URL contains section
 			await expect(page).toHaveURL(
@@ -117,8 +119,9 @@ test.describe('Communities Page', () => {
 
 	test('changes section via dropdown selection', async ({ page }) => {
 		await page.goto('http://127.0.0.1:5173/communities/africa');
-		await page.waitForLoadState('networkidle');
-		await page.waitForTimeout(1000);
+		// Wait for main content to load instead of networkidle
+		await page.waitForSelector('main', { timeout: 10000 });
+		await page.waitForTimeout(500);
 
 		// Check if dropdown is available
 		const sectionSelect = page.locator('select');

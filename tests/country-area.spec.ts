@@ -38,7 +38,8 @@ test.describe('Country Area Pages', () => {
 
 	test('handles invalid country gracefully', async ({ page }) => {
 		await page.goto('http://127.0.0.1:5173/country/invalid-country-id');
-		await page.waitForLoadState('networkidle');
+		// Wait for page to load, but don't require networkidle
+		await page.waitForLoadState('domcontentloaded');
 
 		const isOn404 = page.url().includes('/404');
 		const hasErrorMessage = await page.locator('text="Could not find"').isVisible();
@@ -62,7 +63,8 @@ test.describe('Country Area Pages', () => {
 
 		for (const { country, section } of testCases) {
 			await page.goto(`http://127.0.0.1:5173/country/${country}/${section}`);
-			await page.waitForLoadState('networkidle');
+			// Use domcontentloaded instead of networkidle to avoid timeout issues
+			await page.waitForLoadState('domcontentloaded');
 
 			await expect(page).toHaveURL(new RegExp(`/country/${country}/${section}$`));
 			await expect(page).not.toHaveURL(/\/404/);

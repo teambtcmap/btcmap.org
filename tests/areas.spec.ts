@@ -15,7 +15,7 @@ test.describe('Areas', () => {
 		await expect(page).toHaveURL(/countries/);
 
 		await page.getByRole('link', { name: 'South Africa' }).click();
-		await expect(page).toHaveURL(/country\/za/);
+		await expect(page).toHaveURL(/country\/za\/merchants/); // App redirects to merchants section
 
 		await page
 			.getByRole('heading', {
@@ -47,7 +47,7 @@ test.describe('Areas', () => {
 		// Find the first community link matching the pattern and click it (should be first community)
 		const firstCommunityLink = page.locator('a[href^="/community/"]').first();
 		await firstCommunityLink.click();
-		await expect(page).toHaveURL(/\/community\/[^/]+$/);
+		await expect(page).toHaveURL(/\/community\/[^/]+\/merchants$/); // App redirects to merchants section
 
 		// Find the first merchant link matching the pattern and click it (should be first merchant)
 		const firstMerchantLink = page.locator('a[href^="/merchant/node:"]').first();

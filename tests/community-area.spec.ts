@@ -15,8 +15,8 @@ test.describe('Community Area Pages', () => {
 		const firstCommunityLink = page.locator('a[href^="/community/"]').first();
 		await firstCommunityLink.click();
 
-		// Verify we're on a community area page
-		await expect(page).toHaveURL(/\/community\/[^/]+$/);
+		// Verify we're on a community area page (app redirects to merchants section)
+		await expect(page).toHaveURL(/\/community\/[^/]+\/merchants$/);
 
 		// Check that the page has loaded with basic elements
 		const breadcrumbs = page.locator(
