@@ -164,7 +164,7 @@ test.describe('Communities Page', () => {
 			// Test clicking on a community link
 			const firstCommunityLink = communityLinks.first();
 			const href = await firstCommunityLink.getAttribute('href');
-			expect(href).toMatch(/^\/community\/[^\/]+$/);
+			expect(href).toMatch(/^\/community\/[^/]+$/);
 		}
 	});
 
@@ -311,8 +311,7 @@ test.describe('Communities Page', () => {
 	test('handles loading states properly', async ({ page }) => {
 		await page.goto('http://127.0.0.1:5173/communities');
 
-		// Check for loading placeholders initially
-		const loadingElements = page.locator('.animate-pulse');
+		// Wait for content to load
 
 		// Wait for content to load
 		await page.waitForLoadState('networkidle');
