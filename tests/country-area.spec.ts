@@ -11,7 +11,7 @@ test.describe('Country Area Pages', () => {
 
 		const bodyContent = await page.locator('body').textContent();
 		expect(bodyContent).toBeTruthy();
-		expect(bodyContent.length).toBeGreaterThan(100);
+		expect(bodyContent!.length).toBeGreaterThan(100);
 	});
 
 	test('displays breadcrumb navigation', async ({ page }) => {
@@ -69,12 +69,12 @@ test.describe('Country Area Pages', () => {
 
 			const bodyContent = await page.locator('body').textContent();
 			expect(bodyContent).toBeTruthy();
-			expect(bodyContent.length).toBeGreaterThan(100);
+			expect(bodyContent!.length).toBeGreaterThan(100);
 		}
 	});
 
 	test('handles JavaScript errors gracefully', async ({ page }) => {
-		const errors = [];
+		const errors: string[] = [];
 		page.on('pageerror', (error) => {
 			errors.push(error.message);
 		});
@@ -94,6 +94,6 @@ test.describe('Country Area Pages', () => {
 
 		const bodyContent = await page.locator('body').textContent();
 		expect(bodyContent).toBeTruthy();
-		expect(bodyContent.length).toBeGreaterThan(100);
+		expect(bodyContent!.length).toBeGreaterThan(100);
 	});
 });

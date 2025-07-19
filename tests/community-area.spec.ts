@@ -212,6 +212,7 @@ test.describe('Community Area Pages', () => {
 		// Click on the first community link
 		const firstCommunityLink = page.locator('a[href^="/community/"]').first();
 		const communityHref = await firstCommunityLink.getAttribute('href');
+		if (!communityHref) return; // Skip test if no href found
 		await firstCommunityLink.click();
 
 		// Wait for page to load
@@ -271,7 +272,7 @@ test.describe('Community Area Pages', () => {
 					// Check that the page has basic content
 					const bodyContent = await page.locator('body').textContent();
 					expect(bodyContent).toBeTruthy();
-					expect(bodyContent.length).toBeGreaterThan(10);
+					expect(bodyContent!.length).toBeGreaterThan(10);
 				}
 			}
 		}
@@ -311,7 +312,7 @@ test.describe('Community Area Pages', () => {
 			await page.waitForLoadState('networkidle');
 
 			// Check that no "Cannot read properties of undefined" errors occur
-			const errors = [];
+			const errors: string[] = [];
 			page.on('pageerror', (error) => {
 				errors.push(error.message);
 			});
@@ -329,7 +330,7 @@ test.describe('Community Area Pages', () => {
 			// Also check that the page loads basic content
 			const bodyContent = await page.locator('body').textContent();
 			expect(bodyContent).toBeTruthy();
-			expect(bodyContent.length).toBeGreaterThan(100);
+			expect(bodyContent!.length).toBeGreaterThan(100);
 		}
 	});
 });

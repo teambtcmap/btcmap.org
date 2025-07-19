@@ -24,7 +24,7 @@ test.describe('Communities Page', () => {
 		// Check that content has loaded
 		const bodyContent = await page.locator('body').textContent();
 		expect(bodyContent).toBeTruthy();
-		expect(bodyContent.length).toBeGreaterThan(100);
+		expect(bodyContent!.length).toBeGreaterThan(100);
 	});
 
 	test('displays navigation buttons', async ({ page }) => {
@@ -222,7 +222,7 @@ test.describe('Communities Page', () => {
 		// Page should still be functional
 		const bodyContent = await page.locator('body').textContent();
 		expect(bodyContent).toBeTruthy();
-		expect(bodyContent.length).toBeGreaterThan(100);
+		expect(bodyContent!.length).toBeGreaterThan(100);
 	});
 
 	test('preserves section when navigating back', async ({ page }) => {
@@ -266,9 +266,10 @@ test.describe('Communities Page', () => {
 		}
 	});
 
-	test('loads without JavaScript gracefully', async ({ page }) => {
-		// Disable JavaScript
-		await page.setJavaScriptEnabled(false);
+	test('loads without JavaScript gracefully', async ({ browser }) => {
+		// Create context with JavaScript disabled
+		const context = await browser.newContext({ javaScriptEnabled: false });
+		const page = await context.newPage();
 
 		await page.goto('http://127.0.0.1:5173/communities');
 		await page.waitForLoadState('networkidle');
@@ -283,8 +284,8 @@ test.describe('Communities Page', () => {
 		const leaderboardBtn = page.getByRole('link', { name: 'Leaderboard' });
 		await expect(leaderboardBtn).toBeVisible();
 
-		// Re-enable JavaScript for subsequent tests
-		await page.setJavaScriptEnabled(true);
+		// Clean up
+		await context.close();
 	});
 
 	test('responsive design elements work', async ({ page }) => {
