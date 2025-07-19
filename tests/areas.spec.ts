@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { describe } from 'node:test';
 
-describe('Areas', () => {
+test.describe('Areas', () => {
 	test('opens country area', async ({ page }) => {
 		await page.goto('http://127.0.0.1:5173');
 

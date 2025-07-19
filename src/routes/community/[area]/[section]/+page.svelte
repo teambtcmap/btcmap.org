@@ -1,8 +1,9 @@
 <script lang="ts">
-	export let data: AreaPageProps;
-
 	import { AreaPage, Breadcrumbs, Footer, Header } from '$lib/comp';
 	import type { AreaPageProps } from '$lib/types';
+	import type { PageData } from './$types';
+
+	export let data: PageData & AreaPageProps;
 
 	const { name, id } = data;
 
