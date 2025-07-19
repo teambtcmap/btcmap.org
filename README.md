@@ -33,6 +33,14 @@ _NOTE:_ BTC Map uses the latest LTS version of [node](https://nodejs.org/). If y
 
 ### E2E tests
 
+#### Install
+
+```sh
+  yarn playwright install
+```
+
+#### Run tests
+
 ```sh
   yarn playwright test
     Runs the end-to-end tests.

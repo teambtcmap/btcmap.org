@@ -53,7 +53,9 @@ export type AreaTags = {
 	organization?: string;
 	language?: string;
 	population?: string;
+	area_km2?: number;
 	['population:date']?: string;
+	['population:year']?: number;
 	['contact:website']?: string;
 	['contact:email']?: string;
 	['contact:nostr']?: string;
@@ -83,6 +85,16 @@ export type AreaTags = {
 };
 
 export type AreaType = 'community' | 'country' | 'trash';
+
+export type Community = {
+	id: string;
+	tags: AreaTags & {
+		type: 'community';
+	};
+	created_at: string;
+	updated_at: string;
+	deleted_at: string;
+};
 
 export type Continents =
 	| 'africa'

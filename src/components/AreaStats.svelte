@@ -3,7 +3,7 @@
 	import { ProfileStat } from '$lib/comp';
 	import { calcVerifiedDate, verifiedArr } from '$lib/map/setup';
 	import { theme } from '$lib/store';
-	import { type Element, type Report } from '$lib/types.js';
+	import { type Element, type Report, type AreaTags } from '$lib/types.js';
 	import { detectTheme, updateChartThemes } from '$lib/utils';
 	import Chart from 'chart.js/auto';
 	import { onMount } from 'svelte';
@@ -11,6 +11,16 @@
 	export let name: string;
 	export let filteredElements: Element[];
 	export let areaReports: Report[];
+	export let areaTags: AreaTags | undefined = undefined;
+
+	const getPopulationDate = (tags: AreaTags | undefined): string | undefined => {
+		if (!tags) return undefined;
+		// Prefer population:date over population:year, convert year to string if needed
+		return (
+			tags['population:date'] ||
+			(tags['population:year'] ? String(tags['population:year']) : undefined)
+		);
+	};
 
 	let initialRenderComplete = false;
 	let dataInitialized = false;
@@ -292,6 +302,36 @@
 </script>
 
 <section id="stats">
+	{#if areaTags && (areaTags.population || areaTags.area_km2)}
+		<div
+			class="mb-5 grid gap-4 rounded-3xl border border-statBorder p-6 dark:bg-white/10 md:grid-cols-2"
+		>
+			{#if areaTags.population}
+				<div class="flex flex-col">
+					<span class="text-sm uppercase tracking-wide text-gray-600 dark:text-gray-300"
+						>Population</span
+					>
+					<span class="text-2xl font-bold text-primary dark:text-white">
+						{parseInt(areaTags.population).toLocaleString()}
+					</span>
+					{#if getPopulationDate(areaTags)}
+						<span class="text-xs text-gray-500 dark:text-gray-400">
+							as of {getPopulationDate(areaTags)}
+						</span>
+					{/if}
+				</div>
+			{/if}
+			{#if areaTags.area_km2}
+				<div class="flex flex-col">
+					<span class="text-sm uppercase tracking-wide text-gray-600 dark:text-gray-300">Area</span>
+					<span class="text-2xl font-bold text-primary dark:text-white">
+						{areaTags.area_km2.toLocaleString()} km²
+					</span>
+				</div>
+			{/if}
+		</div>
+	{/if}
+
 	<div
 		class="border border-statBorder dark:bg-white/10 {total === 0
 			? 'rounded-3xl'

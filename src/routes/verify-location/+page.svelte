@@ -277,12 +277,12 @@
 			leaflet = await import('leaflet');
 			const domEventModule = await import('leaflet/src/dom/DomEvent');
 			DomEvent = domEventModule.default;
-			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
+			/* eslint-disable @typescript-eslint/no-unused-vars */
 			const maplibreGl = await import('maplibre-gl');
 			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
 			const leafletLocateControl = await import('leaflet.locatecontrol');
 			const leafletMarkerCluster = await import('leaflet.markercluster');
-			/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
+			/* eslint-enable @typescript-eslint/no-unused-vars */
 
 			initialRenderComplete = true;
 		}

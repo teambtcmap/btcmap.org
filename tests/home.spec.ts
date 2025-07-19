@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { describe } from 'node:test';
 
-describe('Home Page', () => {
+test.describe('Home Page', () => {
 	test('opens map and checks for console errors', async ({ page }) => {
 		const errors: Error[] = [];
 		page.on('pageerror', (exception) => {
