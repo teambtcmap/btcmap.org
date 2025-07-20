@@ -157,7 +157,6 @@ test.describe('Communities Page', () => {
 	test('displays community sections and content', async ({ page }) => {
 		await page.goto('http://127.0.0.1:5173/communities/africa');
 		await page.waitForSelector('main', { timeout: 10000 });
-		await page.waitForTimeout(500);
 		await page.waitForTimeout(2000);
 
 		// Check that community section component is rendered
@@ -179,7 +178,6 @@ test.describe('Communities Page', () => {
 	test('handles organization sections', async ({ page }) => {
 		await page.goto('http://127.0.0.1:5173/communities/africa');
 		await page.waitForSelector('main', { timeout: 10000 });
-		await page.waitForTimeout(500);
 		await page.waitForTimeout(2000);
 
 		// Check if dropdown has organization options
