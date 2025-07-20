@@ -75,7 +75,8 @@ test.describe('Community Area Pages', () => {
 
 		for (const section of testSections) {
 			await page.goto(`http://127.0.0.1:5173${communityHref}/${section}`);
-			await page.waitForLoadState('networkidle');
+			await page.waitForSelector('main', { timeout: 10000 });
+			await page.waitForTimeout(500);
 
 			// Verify the URL contains the section parameter
 			await expect(page).toHaveURL(
@@ -239,7 +240,8 @@ test.describe('Community Area Pages', () => {
 
 		// Navigate to stats section
 		await page.goto(`http://127.0.0.1:5173${communityHref}/stats`);
-		await page.waitForLoadState('networkidle');
+		await page.waitForSelector('main', { timeout: 10000 });
+		await page.waitForTimeout(500);
 
 		// If there are merchant links, click on one
 		const merchantLinks = page.locator('a[href^="/merchant/"]');
@@ -336,7 +338,8 @@ test.describe('Community Area Pages', () => {
 	test('handles community tickets data loading robustly', async ({ page }) => {
 		// Test that the AreaPage component handles various ticket data states for communities
 		await page.goto('http://127.0.0.1:5173/communities');
-		await page.waitForLoadState('networkidle');
+		await page.waitForSelector('main', { timeout: 10000 });
+		await page.waitForTimeout(500);
 
 		// Get the first community link
 		const firstCommunityLink = page.locator('a[href^="/community/"]').first();
@@ -344,7 +347,8 @@ test.describe('Community Area Pages', () => {
 
 		if (communityHref) {
 			await page.goto(`http://127.0.0.1:5173${communityHref}/merchants`);
-			await page.waitForLoadState('networkidle');
+			await page.waitForSelector('main', { timeout: 10000 });
+			await page.waitForTimeout(500);
 
 			// Check that no "Cannot read properties of undefined" errors occur
 			const errors: string[] = [];
