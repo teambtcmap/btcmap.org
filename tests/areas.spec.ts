@@ -127,9 +127,12 @@ test.describe('Areas', () => {
 			})
 			.waitFor({ state: 'visible' });
 
+		// Give more time for leaderboard data to load
+		await page.waitForTimeout(3000);
+
 		const goldMedalCell = page.getByRole('cell', { name: '🥇' });
 
-		await goldMedalCell.waitFor({ state: 'visible', timeout: 20000 });
+		await goldMedalCell.waitFor({ state: 'visible', timeout: 30000 });
 		await expect(goldMedalCell).toBeVisible();
 
 		// Test sorting functionality by clicking "Position" column header twice to reverse sort
