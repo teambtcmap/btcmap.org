@@ -190,12 +190,17 @@ test.describe('Communities Page', () => {
 
 			if (hasOrganizations) {
 				// Find first organization option (not disabled)
+				// Trim whitespace and check against continent names
+				const continents = [
+					'Africa',
+					'Asia',
+					'Europe',
+					'North America',
+					'Oceania',
+					'South America'
+				];
 				const organizationOptions = options.filter(
-					(option) =>
-						!option.includes('--') &&
-						!['Africa', 'Asia', 'Europe', 'North America', 'Oceania', 'South America'].includes(
-							option
-						)
+					(option) => !option.includes('--') && !continents.includes(option.trim())
 				);
 
 				if (organizationOptions.length > 0) {
