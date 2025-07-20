@@ -248,8 +248,8 @@ test.describe('Communities Page', () => {
 
 		// Navigate to another page
 		await page.goto('http://127.0.0.1:5173/');
-		await page.waitForSelector('main', { timeout: 10000 });
-		await page.waitForTimeout(500);
+		await page.waitForLoadState('domcontentloaded');
+		await page.waitForTimeout(1000);
 
 		// Go back
 		await page.goBack();
