@@ -461,7 +461,7 @@
 	let deletedPercent: string | undefined;
 
 	let tagTypeChartCanvas: HTMLCanvasElement;
-	// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	let tagTypeChart;
 
 	let hideArrow = false;
@@ -487,12 +487,12 @@
 			leaflet = await import('leaflet');
 			const domEventModule = await import('leaflet/src/dom/DomEvent');
 			DomEvent = domEventModule.default;
-			/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
+			/* eslint-disable @typescript-eslint/no-unused-vars */
 			const maplibreGl = await import('maplibre-gl');
 			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
 			const leafletMarkerCluster = await import('leaflet.markercluster');
 			const leafletLocateControl = await import('leaflet.locatecontrol');
-			/* eslint-enable no-unused-vars, @typescript-eslint/no-unused-vars */
+			/* eslint-enable @typescript-eslint/no-unused-vars */
 
 			initialRenderComplete = true;
 		}
