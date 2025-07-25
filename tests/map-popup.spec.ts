@@ -13,17 +13,17 @@ test.describe('Map Popup', () => {
 		// Wait for map to be fully initialized and for markers to appear
 		// Give extra time for API data to load and process
 		await page.waitForTimeout(10000);
-		
+
 		// Look for any kind of marker - try different selectors
 		const markerSelectors = [
 			'.leaflet-marker-pane img',
 			'.leaflet-marker-pane > div',
 			'.leaflet-marker-cluster-small',
-			'.leaflet-marker-cluster-medium', 
+			'.leaflet-marker-cluster-medium',
 			'.leaflet-marker-cluster-large',
 			'.leaflet-cluster-anim'
 		];
-		
+
 		let markersFound = false;
 		for (const selector of markerSelectors) {
 			const count = await page.locator(selector).count();
@@ -33,7 +33,7 @@ test.describe('Map Popup', () => {
 				break;
 			}
 		}
-		
+
 		// If no markers found, wait a bit longer and try again
 		if (!markersFound) {
 			await page.waitForTimeout(15000);
@@ -46,7 +46,7 @@ test.describe('Map Popup', () => {
 				}
 			}
 		}
-		
+
 		const markers = page.locator('.leaflet-marker-pane img, .leaflet-marker-pane > div').first();
 		await expect(markers).toBeVisible({ timeout: 5000 });
 
@@ -81,17 +81,19 @@ test.describe('Map Popup', () => {
 		// Wait for map to be fully initialized and for markers to appear
 		// Give extra time for API data to load and process
 		await page.waitForTimeout(10000);
-		
+
 		// Use JavaScript to click a marker directly (bypassing viewport issues)
 		const markerClicked = await page.evaluate(() => {
 			// Find any individual marker (not cluster)
-			const markers = document.querySelectorAll('.leaflet-marker-pane > div:not([class*="cluster"])');
+			const markers = document.querySelectorAll(
+				'.leaflet-marker-pane > div:not([class*="cluster"])'
+			);
 			if (markers.length > 0) {
 				// Click the first marker
 				markers[0].click();
 				return true;
 			}
-			
+
 			// If no individual markers, try clusters
 			const clusters = document.querySelectorAll('.leaflet-marker-cluster');
 			if (clusters.length > 0) {
@@ -99,7 +101,9 @@ test.describe('Map Popup', () => {
 				clusters[0].click();
 				// Wait a bit and try individual markers again
 				setTimeout(() => {
-					const expandedMarkers = document.querySelectorAll('.leaflet-marker-pane > div:not([class*="cluster"])');
+					const expandedMarkers = document.querySelectorAll(
+						'.leaflet-marker-pane > div:not([class*="cluster"])'
+					);
 					if (expandedMarkers.length > 0) {
 						expandedMarkers[0].click();
 					}
@@ -108,7 +112,7 @@ test.describe('Map Popup', () => {
 			}
 			return false;
 		});
-		
+
 		if (markerClicked) {
 			// Wait for popup to appear after JavaScript click
 			await page.waitForTimeout(3000);
@@ -132,5 +136,4 @@ test.describe('Map Popup', () => {
 		const trimmedCount = countText?.trim() || '';
 		expect(trimmedCount).toMatch(/^\d+$/);
 	});
-
 });
