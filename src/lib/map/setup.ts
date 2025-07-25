@@ -741,7 +741,7 @@ export const generateMarker = ({
 
 						<a href='/merchant/${osmType}:${osmId}#comments' class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<div class='flex items-center justify-center h-6 text-lg font-bold mx-auto'>
-								${typeof placeDetails.comments === 'number' ? placeDetails.comments : (placeDetails.comments?.length || 0)}
+								${typeof placeDetails.comments === 'number' ? placeDetails.comments : placeDetails.comments?.length || 0}
 							</div>
 							<span class='block text-xs text-center mt-1'>Comments</span>
 						</a>

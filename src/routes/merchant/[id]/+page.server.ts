@@ -30,15 +30,19 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 			let comments: MerchantComment[] = [];
 			try {
 				// Use same API approach as popup - get place details with comments field
-				const placeResponse = await axios.get(`https://api.btcmap.org/v4/places/${numericId}?fields=comments`);
+				const placeResponse = await axios.get(
+					`https://api.btcmap.org/v4/places/${numericId}?fields=comments`
+				);
 				const placeData = placeResponse.data;
-				
+
 				// If comments field exists and is an array, use it; otherwise fetch from comments endpoint
 				if (Array.isArray(placeData.comments)) {
 					comments = placeData.comments;
 				} else if (placeData.comments > 0) {
 					// If it's a count, fetch full comments from dedicated endpoint
-					const commentsResponse = await axios.get(`https://api.btcmap.org/v4/places/${numericId}/comments`);
+					const commentsResponse = await axios.get(
+						`https://api.btcmap.org/v4/places/${numericId}/comments`
+					);
 					comments = commentsResponse.data;
 				}
 			} catch (commentErr) {
@@ -52,7 +56,7 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 			const description = data.osm_json.tags?.description;
 			const note = data.osm_json.tags?.note;
 			const hours = data.osm_json.tags?.['opening_hours'];
-			
+
 			const payment: PayMerchant = data.tags['payment:uri']
 				? { type: 'uri', url: data.tags['payment:uri'] }
 				: data.tags['payment:pouch']
@@ -60,11 +64,12 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 					: data.tags['payment:coinos']
 						? { type: 'coinos', username: data.tags['payment:coinos'] }
 						: undefined;
-			
-			const boosted = data.tags['boost:expires'] && Date.parse(data.tags['boost:expires']) > Date.now()
-				? data.tags['boost:expires']
-				: undefined;
-			
+
+			const boosted =
+				data.tags['boost:expires'] && Date.parse(data.tags['boost:expires']) > Date.now()
+					? data.tags['boost:expires']
+					: undefined;
+
 			const verified = verifiedArr(data.osm_json);
 			const phone = data.osm_json.tags?.phone || data.osm_json.tags?.['contact:phone'];
 			const website = data.osm_json.tags?.website || data.osm_json.tags?.['contact:website'];
@@ -73,10 +78,12 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 			const instagram = data.osm_json.tags?.instagram || data.osm_json.tags?.['contact:instagram'];
 			const facebook = data.osm_json.tags?.facebook || data.osm_json.tags?.['contact:facebook'];
 
-			const thirdParty = data.osm_json.tags?.['payment:lightning:requires_companion_app'] === 'yes' &&
+			const thirdParty =
+				data.osm_json.tags?.['payment:lightning:requires_companion_app'] === 'yes' &&
 				data.osm_json.tags['payment:lightning:companion_app_url'];
 
-			const paymentMethod = data.osm_json.tags &&
+			const paymentMethod =
+				data.osm_json.tags &&
 				(data.osm_json.tags['payment:onchain'] ||
 					data.osm_json.tags['payment:lightning'] ||
 					data.osm_json.tags['payment:lightning_contactless']);
