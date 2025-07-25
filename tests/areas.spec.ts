@@ -62,7 +62,7 @@ test.describe('Areas', () => {
 		await page.waitForTimeout(2000); // Give time for dynamic content to load
 		const firstCommunityLink = page.locator('a[href^="/community/"]').first();
 		await expect(firstCommunityLink).toBeVisible({ timeout: 15000 });
-		
+
 		await firstCommunityLink.click();
 		// Wait for navigation to complete
 		await page.waitForLoadState('domcontentloaded');

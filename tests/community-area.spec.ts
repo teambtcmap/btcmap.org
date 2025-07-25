@@ -13,7 +13,7 @@ test.describe('Community Area Pages', () => {
 		// Ensure community links are present - this should not be skipped
 		const firstCommunityLink = page.locator('a[href^="/community/"]').first();
 		await expect(firstCommunityLink).toBeVisible({ timeout: 15000 });
-		
+
 		await firstCommunityLink.click();
 		// Wait for navigation to complete
 		await page.waitForLoadState('domcontentloaded');
@@ -56,12 +56,15 @@ test.describe('Community Area Pages', () => {
 
 		// Should redirect to merchants section (URL should end with /merchants)
 		if (communityHref) {
-			await expect(page).toHaveURL(new RegExp(`${communityHref.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/merchants$`));
+			await expect(page).toHaveURL(
+				new RegExp(`${communityHref.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/merchants$`)
+			);
 		}
 
 		// Check that we're on a valid community page with content
 		const currentUrl = page.url();
-		const isOnCommunityPage = currentUrl.includes('/community/') && currentUrl.includes('/merchants');
+		const isOnCommunityPage =
+			currentUrl.includes('/community/') && currentUrl.includes('/merchants');
 		expect(isOnCommunityPage).toBe(true);
 
 		// More robust content checks - look for various indicators of merchants section
