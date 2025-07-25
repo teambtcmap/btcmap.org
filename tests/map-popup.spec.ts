@@ -90,7 +90,7 @@ test.describe('Map Popup', () => {
 			);
 			if (markers.length > 0) {
 				// Click the first marker
-				markers[0].click();
+				(markers[0] as HTMLElement).click();
 				return true;
 			}
 
@@ -98,14 +98,14 @@ test.describe('Map Popup', () => {
 			const clusters = document.querySelectorAll('.leaflet-marker-cluster');
 			if (clusters.length > 0) {
 				// Click cluster to expand
-				clusters[0].click();
+				(clusters[0] as HTMLElement).click();
 				// Wait a bit and try individual markers again
 				setTimeout(() => {
 					const expandedMarkers = document.querySelectorAll(
 						'.leaflet-marker-pane > div:not([class*="cluster"])'
 					);
 					if (expandedMarkers.length > 0) {
-						expandedMarkers[0].click();
+						(expandedMarkers[0] as HTMLElement).click();
 					}
 				}, 1000);
 				return true;
