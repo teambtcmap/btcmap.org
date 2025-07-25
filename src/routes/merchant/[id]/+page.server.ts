@@ -29,10 +29,20 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 
 			let comments: MerchantComment[] = [];
 			try {
-				const commentsResponse = await axios.get(`https://api.btcmap.org/v4/places/${numericId}/comments`);
-				comments = commentsResponse.data;
+				// Use same API approach as popup - get place details with comments field
+				const placeResponse = await axios.get(`https://api.btcmap.org/v4/places/${numericId}?fields=comments`);
+				const placeData = placeResponse.data;
+				
+				// If comments field exists and is an array, use it; otherwise fetch from comments endpoint
+				if (Array.isArray(placeData.comments)) {
+					comments = placeData.comments;
+				} else if (placeData.comments > 0) {
+					// If it's a count, fetch full comments from dedicated endpoint
+					const commentsResponse = await axios.get(`https://api.btcmap.org/v4/places/${numericId}/comments`);
+					comments = commentsResponse.data;
+				}
 			} catch (commentErr) {
-				console.error('Failed to fetch comments:', commentErr);
+				// Place doesn't exist in v4 API or comments failed - use empty array
 				comments = [];
 			}
 
