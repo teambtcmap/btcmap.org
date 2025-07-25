@@ -88,6 +88,8 @@
 	const initializeData = () => {
 		if (dataInitialized) return;
 
+		// TODO: Fix data type mismatch - server returns Element (v2 API, string ID) 
+		// but $elements store contains Places (v4 API, numeric ID)
 		merchant = $elements.find((element) => element.id == data.id);
 
 		if (!merchant) {

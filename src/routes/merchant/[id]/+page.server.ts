@@ -10,6 +10,9 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 	const { id } = params;
 	try {
+		// TODO: Migrate from v2/elements to v4/places API to match the main data store
+		// Currently causes 404s because client store uses v4 Places (numeric IDs) 
+		// but server uses v2 Elements (string IDs like "node:12345")
 		const response = await axios.get(`https://api.btcmap.org/v2/elements/${id}`);
 
 		const data: Element = response.data;

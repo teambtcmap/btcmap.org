@@ -739,149 +739,12 @@ export const generateMarker = ({
 							<span class='block text-xs text-center mt-1'>Share</span>
 						</a>
 
-						<div class='relative w-full'>
-							<button id='more-button' class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
-								<svg width='24px' height='24px' class='mx-auto'>
-									<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#dots-horizontal"></use>
-								</svg>
-								<span class='block text-xs text-center mt-1'>More</span>
-							</button>
-
-							<div id='show-more' class='hidden z-[500] w-[147px] border border-mapBorder p-4 absolute top-[55px] right-0 bg-white dark:bg-dark rounded-xl shadow-xl space-y-3'>
-								${
-									placeDetails.phone
-										? `<a href='tel:${placeDetails.phone}' class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-										<svg width='24px' height='24px' class='mr-2'>
-											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#phone"></use>
-										</svg>
-										Call
-									   </a>`
-										: ''
-								}
-
-								${
-									placeDetails.email
-										? `<a href='mailto:${placeDetails.email}' class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-										<svg width='24px' height='24px' class='mr-2'>
-											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#email"></use>
-										</svg>
-										Email
-									   </a>`
-										: ''
-								}
-
-								${
-									placeDetails.website
-										? `<a href='${placeDetails.website.startsWith('http') ? placeDetails.website : `https://${placeDetails.website}`}' target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-										<svg width='24px' height='24px' class='mr-2'>
-											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#globe"></use>
-										</svg>
-										Website
-									   </a>`
-										: ''
-								}
-
-								${
-									placeDetails.twitter
-										? `<a href='${placeDetails.twitter.startsWith('http') ? placeDetails.twitter : `https://twitter.com/${placeDetails.twitter}`}' target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-										<svg width='24px' height='24px' class='mr-2'>
-											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#twitter"></use>
-										</svg>
-										Twitter
-									   </a>`
-										: ''
-								}
-
-								${
-									placeDetails.instagram
-										? `<a href='${placeDetails.instagram.startsWith('http') ? placeDetails.instagram : `https://instagram.com/${placeDetails.instagram}`}' target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-										<svg width='24px' height='24px' class='mr-2'>
-											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#instagram"></use>
-										</svg>
-										Instagram
-									   </a>`
-										: ''
-								}
-
-								${
-									placeDetails.facebook
-										? `<a href='${placeDetails.facebook.startsWith('http') ? placeDetails.facebook : `https://facebook.com/${placeDetails.facebook}`}' target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-										<svg width='24px' height='24px' class='mr-2'>
-											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#facebook"></use>
-										</svg>
-										Facebook
-									   </a>`
-										: ''
-								}
-
-								${
-									location.pathname === '/map' ||
-									location.pathname.includes('/community') ||
-									location.pathname.includes('/country')
-										? `<button id='show-tags' class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#tags"></use>
-											</svg>
-											Show Tags
-										   </button>
-
-										   <button id='tagging-issues' class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-											<svg width='24px' height='24px' class='mr-2'>
-												<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#issues"></use>
-											</svg>
-											Tag Issues
-										   </button>`
-										: ''
-								}
-
-								<a href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Map-Legend" target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-									<svg width='24px' height='24px' class='mr-2'>
-										<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#info-circle"></use>
-									</svg>
-									Map Legend
-								</a>
-
-								${
-									placeDetails['osm:payment:uri']
-										? `<a href='${placeDetails['osm:payment:uri']}' target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-										<svg width='24px' height='24px' class='mr-2'>
-											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#bolt"></use>
-										</svg>
-										Pay Now
-									   </a>`
-										: ''
-								}
-
-								${
-									placeDetails['osm:payment:coinos']
-										? `<a href='https://coinos.io/pay/${placeDetails['osm:payment:coinos']}' target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-										<svg width='24px' height='24px' class='mr-2'>
-											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#bolt"></use>
-										</svg>
-										Pay via Coinos
-									   </a>`
-										: ''
-								}
-
-								${
-									placeDetails['osm:payment:pouch']
-										? `<a href='https://app.pouch.ph/pay/${placeDetails['osm:payment:pouch']}' target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-										<svg width='24px' height='24px' class='mr-2'>
-											<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#bolt"></use>
-										</svg>
-										Pay via Pouch
-									   </a>`
-										: ''
-								}
-
-								<a href="${placeDetails.osm_url || `https://www.openstreetmap.org/${osmType}/${osmId}`}" target="_blank" rel="noreferrer" class='flex items-center !text-primary dark:!text-white hover:!text-link dark:hover:!text-link text-xs transition-colors'>
-									<svg width='24px' height='24px' class='mr-2'>
-										<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#external"></use>
-									</svg>
-									View OSM
-								</a>
+						<a href='/merchant/${osmType}:${osmId}#comments' class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+							<div class='flex items-center justify-center h-6 text-lg font-bold mx-auto'>
+								${typeof placeDetails.comments === 'number' ? placeDetails.comments : (placeDetails.comments?.length || 0)}
 							</div>
-						</div>
+							<span class='block text-xs text-center mt-1'>Comments</span>
+						</a>
 					</div>
 
 					<div class='w-full border-t-[0.5px] border-mapBorder mt-3 mb-2 opacity-80'></div>
@@ -1035,166 +898,60 @@ export const generateMarker = ({
 					}
 				}
 
-				// Add interactive functionality for the More button
-				const showMoreDiv = popupContent.querySelector('#show-more');
-				const moreButton: HTMLButtonElement | null = popupContent.querySelector('#more-button');
+				// Boost button event handler
+				const boostBtn: HTMLButtonElement | null = popupContent.querySelector('#boost-button');
+				if (boostBtn) {
+					const boostButtonText: HTMLSpanElement | null = boostBtn.querySelector('span');
+					const boostButtonIcon: SVGElement | null = boostBtn.querySelector('svg');
 
-				if (moreButton && showMoreDiv) {
-					let showMoreOpen = false;
-
-					const hideMore = () => {
-						showMoreDiv.classList.add('hidden');
-						moreButton.classList.remove('!text-link');
-						moreButton.classList.add('!text-primary', 'dark:!text-white');
-						moreButton.classList.replace('border-link', 'border-mapBorder');
-						showMoreOpen = false;
-					};
-
-					moreButton.onclick = (e) => {
-						e.preventDefault();
-						if (!showMoreOpen) {
-							showMoreDiv.classList.remove('hidden');
-							moreButton.classList.remove('!text-primary', 'dark:!text-white');
-							moreButton.classList.add('!text-link');
-							moreButton.classList.replace('border-mapBorder', 'border-link');
-							showMoreOpen = true;
-						} else {
-							hideMore();
+					const resetButton = () => {
+						if (boostBtn && boostButtonText && boostButtonIcon) {
+							boostBtn.disabled = false;
+							boostButtonText.innerText = isBoosted ? 'Extend' : 'Boost';
+							boostBtn.classList.add('space-x-2');
+							boostButtonIcon.classList.remove('hidden');
 						}
 					};
 
-					// Hide more menu when clicking navigation buttons
-					const navigateBtn: HTMLAnchorElement | null = popupContent.querySelector('#navigate');
-					const editBtn: HTMLAnchorElement | null = popupContent.querySelector('#edit');
-					const shareBtn: HTMLAnchorElement | null = popupContent.querySelector('#share');
-					const boostBtn: HTMLButtonElement | null = popupContent.querySelector('#boost-button');
+					boostBtn.onclick = async (e) => {
+						e.preventDefault();
 
-					if (navigateBtn) navigateBtn.onclick = () => hideMore();
-					if (editBtn) editBtn.onclick = () => hideMore();
-					if (shareBtn) shareBtn.onclick = () => hideMore();
+						// Set up boost data similar to BoostButton.svelte
+						const boostStore = get(boost);
+						if (boostStore) return; // Prevent multiple boost flows
 
-					// Boost button click handler
-					if (boostBtn) {
-						const boostButtonText: HTMLSpanElement | null = boostBtn.querySelector('span');
-						const boostButtonIcon: SVGElement | null = boostBtn.querySelector('svg');
+						// Update button to loading state
+						if (boostBtn && boostButtonText && boostButtonIcon) {
+							boostBtn.disabled = true;
+							boostButtonIcon.classList.add('hidden');
+							boostBtn.classList.remove('space-x-2');
+							boostButtonText.innerText = 'Boosting...';
+						}
 
-						const resetButton = () => {
-							if (boostBtn && boostButtonText && boostButtonIcon) {
-								boostBtn.disabled = false;
-								boostButtonText.innerText = isBoosted ? 'Extend' : 'Boost';
-								boostBtn.classList.add('space-x-2');
-								boostButtonIcon.classList.remove('hidden');
-							}
-						};
+						// Set the boost data in the global store
+						boost.set({
+							id: placeDetails.id.toString(),
+							name: placeDetails.name || '',
+							boost: isBoosted ? placeDetails.boosted_until || '' : ''
+						});
 
-						boostBtn.onclick = async (e) => {
-							e.preventDefault();
-							hideMore();
+						// Fetch exchange rate
+						try {
+							const response = await axios.get('https://blockchain.info/ticker');
+							exchangeRate.set(response.data['USD']['15m']);
+						} catch (error) {
+							console.error('Error fetching exchange rate:', error);
+							// Reset boost store on error
+							boost.set(undefined);
+							resetButton();
+							errToast(
+								'Could not fetch bitcoin exchange rate, please try again or contact BTC Map.'
+							);
+						}
+					};
 
-							// Set up boost data similar to BoostButton.svelte
-							const boostStore = get(boost);
-							if (boostStore) return; // Prevent multiple boost flows
-
-							// Update button to loading state
-							if (boostBtn && boostButtonText && boostButtonIcon) {
-								boostBtn.disabled = true;
-								boostButtonIcon.classList.add('hidden');
-								boostBtn.classList.remove('space-x-2');
-								boostButtonText.innerText = 'Boosting...';
-							}
-
-							// Set the boost data in the global store
-							boost.set({
-								id: placeDetails.id.toString(),
-								name: placeDetails.name || '',
-								boost: isBoosted ? placeDetails.boosted_until || '' : ''
-							});
-
-							// Fetch exchange rate
-							try {
-								const response = await axios.get('https://blockchain.info/ticker');
-								exchangeRate.set(response.data['USD']['15m']);
-							} catch (error) {
-								console.error('Error fetching exchange rate:', error);
-								// Reset boost store on error
-								boost.set(undefined);
-								resetButton();
-								errToast(
-									'Could not fetch bitcoin exchange rate, please try again or contact BTC Map.'
-								);
-							}
-						};
-
-						// Subscribe to resetBoost store for external resets
-						resetBoost.subscribe(resetButton);
-					}
-
-					// Show Tags button handler
-					const showTagsButton: HTMLButtonElement | null = popupContent.querySelector('#show-tags');
-					if (showTagsButton) {
-						showTagsButton.onclick = () => {
-							hideMore();
-							// Convert v4 place data to OSM tags format for the modal
-							const osmTags: OSMTags = {};
-
-							// Map standard fields to OSM tags
-							if (placeDetails.name) osmTags.name = placeDetails.name;
-							if (placeDetails.address) osmTags['addr:full'] = placeDetails.address;
-							if (placeDetails.opening_hours) osmTags.opening_hours = placeDetails.opening_hours;
-							if (placeDetails.phone) osmTags.phone = placeDetails.phone;
-							if (placeDetails.website) osmTags.website = placeDetails.website;
-							if (placeDetails.email) osmTags.email = placeDetails.email;
-							if (placeDetails.twitter) osmTags.twitter = placeDetails.twitter;
-							if (placeDetails.facebook) osmTags.facebook = placeDetails.facebook;
-							if (placeDetails.instagram) osmTags.instagram = placeDetails.instagram;
-
-							// Map payment fields
-							if (placeDetails['osm:payment:onchain'])
-								osmTags['payment:onchain'] = placeDetails['osm:payment:onchain'];
-							if (placeDetails['osm:payment:lightning'])
-								osmTags['payment:lightning'] = placeDetails['osm:payment:lightning'];
-							if (placeDetails['osm:payment:lightning_contactless'])
-								osmTags['payment:lightning_contactless'] =
-									placeDetails['osm:payment:lightning_contactless'];
-							if (placeDetails['osm:payment:bitcoin'])
-								osmTags['payment:bitcoin'] = placeDetails['osm:payment:bitcoin'];
-							if (placeDetails['osm:payment:uri'])
-								osmTags['payment:uri'] = placeDetails['osm:payment:uri'];
-							if (placeDetails['osm:payment:coinos'])
-								osmTags['payment:coinos'] = placeDetails['osm:payment:coinos'];
-							if (placeDetails['osm:payment:pouch'])
-								osmTags['payment:pouch'] = placeDetails['osm:payment:pouch'];
-
-							// Map other OSM fields
-							if (placeDetails['osm:amenity']) osmTags.amenity = placeDetails['osm:amenity'];
-							if (placeDetails['osm:category']) osmTags.category = placeDetails['osm:category'];
-							if (placeDetails['osm:survey:date'])
-								osmTags['survey:date'] = placeDetails['osm:survey:date'];
-							if (placeDetails['osm:check_date'])
-								osmTags['check_date'] = placeDetails['osm:check_date'];
-							if (placeDetails['osm:check_date:currency:XBT'])
-								osmTags['check_date:currency:XBT'] = placeDetails['osm:check_date:currency:XBT'];
-							if (placeDetails.verified_at) osmTags['survey:date'] = placeDetails.verified_at;
-
-							// Import and use the showTags store
-							import('$lib/store').then(({ showTags }) => {
-								showTags.set(osmTags);
-							});
-						};
-					}
-
-					// Tag Issues button handler
-					const taggingIssuesButton: HTMLButtonElement | null =
-						popupContent.querySelector('#tagging-issues');
-					if (taggingIssuesButton) {
-						taggingIssuesButton.onclick = () => {
-							hideMore();
-							// For now, show empty issues array since we don't have issues data in v4
-							import('$lib/store').then(({ taggingIssues }) => {
-								taggingIssues.set([]);
-							});
-						};
-					}
+					// Subscribe to resetBoost store for external resets
+					resetBoost.subscribe(resetButton);
 				}
 			} catch (error) {
 				console.error('Error fetching place details:', error);
