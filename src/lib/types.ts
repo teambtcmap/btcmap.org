@@ -141,6 +141,29 @@ export interface MerchantPageData {
 	lat: number;
 	lon: number;
 	comments: MerchantComment[];
+	// Additional fields from Element data
+	icon?: string;
+	address?: string;
+	description?: string;
+	note?: string;
+	hours?: string;
+	payment?: PayMerchant;
+	boosted?: string;
+	verified: string[];
+	phone?: string;
+	website?: string;
+	email?: string;
+	twitter?: string;
+	instagram?: string;
+	facebook?: string;
+	thirdParty?: boolean;
+	paymentMethod?: string;
+	// OSM data for edit links and tag functionality
+	osmType: string;
+	osmId: number;
+	osmTags: OSMTags;
+	// Element data for complex client logic (communities, events, etc.)
+	elementData: Element;
 }
 
 export type RpcIssue = {
