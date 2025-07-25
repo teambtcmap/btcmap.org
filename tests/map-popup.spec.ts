@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Map Popup', () => {
-	test('popup title click currently shows 404 (TODO: fix API mismatch)', async ({ page }) => {
+	test('popup title click navigates to merchant detail page', async ({ page }) => {
 		await page.goto('http://127.0.0.1:5173/map');
 		await expect(page).toHaveTitle(/BTC Map/);
 
@@ -31,11 +31,13 @@ test.describe('Map Popup', () => {
 			if (await merchantLink.count() > 0) {
 				await merchantLink.click();
 				
-				// Currently this should result in a 404 due to v2/v4 API mismatch
-				// TODO: Once API migration is complete (see setup.ts TODOs), 
-				// update this test to expect successful navigation to merchant page
-				await expect(page).toHaveURL(/\/404/);
-				await expect(page.getByRole('heading', { name: '404: Not Found' })).toBeVisible();
+				// Should now successfully navigate to merchant detail page
+				await expect(page).toHaveURL(/\/merchant\//);
+				
+				// Check that we're on the merchant detail page by looking for merchant-specific content
+				await expect(page.getByText('Last Surveyed')).toBeVisible();
+				await expect(page.getByText('Boost')).toBeVisible();
+				await expect(page.getByText('Comments')).toBeVisible();
 			} else {
 				// If no merchant link found, skip this test run
 				test.skip(true, 'No merchant popup found on this test run');

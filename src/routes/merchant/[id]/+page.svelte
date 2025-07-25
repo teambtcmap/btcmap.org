@@ -2,7 +2,6 @@
 	export let data: MerchantPageData;
 
 	import { browser } from '$app/environment';
-	import { goto } from '$app/navigation';
 	import {
 		Boost,
 		BoostButton,
@@ -26,14 +25,10 @@
 		attribution,
 		calcVerifiedDate,
 		changeDefaultIcons,
-		checkAddress,
 		generateIcon,
 		geolocate,
-		latCalc,
 		layers,
-		longCalc,
-		toggleMapButtons,
-		verifiedArr
+		toggleMapButtons
 	} from '$lib/map/setup';
 	import {
 		areaError,
@@ -88,54 +83,28 @@
 	const initializeData = () => {
 		if (dataInitialized) return;
 
-		// TODO: Fix data type mismatch - server returns Element (v2 API, string ID) 
-		// but $elements store contains Places (v4 API, numeric ID)
-		merchant = $elements.find((element) => element.id == data.id);
+		// Use server data directly instead of store lookup
+		icon = data.icon;
+		address = data.address;
+		description = data.description;
+		note = data.note;
+		hours = data.hours;
+		payment = data.payment;
+		boosted = data.boosted;
+		verified = data.verified;
+		phone = data.phone;
+		website = data.website;
+		email = data.email;
+		twitter = data.twitter;
+		instagram = data.instagram;
+		facebook = data.facebook;
+		thirdParty = data.thirdParty;
+		paymentMethod = data.paymentMethod;
 
-		if (!merchant) {
-			console.error('Could not find merchant, please try again or contact BTC Map.');
-			goto('/404');
-			return;
-		}
+		lat = data.lat;
+		long = data.lon;
 
-		icon = merchant.tags['icon:android'];
-		address = merchant.osm_json.tags && checkAddress(merchant.osm_json.tags);
-		description = merchant.osm_json.tags?.description;
-		note = merchant.osm_json.tags?.note;
-		hours = merchant.osm_json.tags?.['opening_hours'];
-		payment = merchant.tags['payment:uri']
-			? { type: 'uri', url: merchant.tags['payment:uri'] }
-			: merchant.tags['payment:pouch']
-				? { type: 'pouch', username: merchant.tags['payment:pouch'] }
-				: merchant.tags['payment:coinos']
-					? { type: 'coinos', username: merchant.tags['payment:coinos'] }
-					: undefined;
-		boosted =
-			merchant.tags['boost:expires'] && Date.parse(merchant.tags['boost:expires']) > Date.now()
-				? merchant.tags['boost:expires']
-				: undefined;
-		verified = verifiedArr(merchant.osm_json);
-		phone = merchant.osm_json.tags?.phone || merchant.osm_json.tags?.['contact:phone'];
-		website = merchant.osm_json.tags?.website || merchant.osm_json.tags?.['contact:website'];
-		email = merchant.osm_json.tags?.email || merchant.osm_json.tags?.['contact:email'];
-		twitter = merchant.osm_json.tags?.twitter || merchant.osm_json.tags?.['contact:twitter'];
-		instagram = merchant.osm_json.tags?.instagram || merchant.osm_json.tags?.['contact:instagram'];
-		facebook = merchant.osm_json.tags?.facebook || merchant.osm_json.tags?.['contact:facebook'];
-
-		thirdParty =
-			merchant.osm_json.tags?.['payment:lightning:requires_companion_app'] === 'yes' &&
-			merchant.osm_json.tags['payment:lightning:companion_app_url'];
-
-		paymentMethod =
-			merchant.osm_json.tags &&
-			(merchant.osm_json.tags['payment:onchain'] ||
-				merchant.osm_json.tags['payment:lightning'] ||
-				merchant.osm_json.tags['payment:lightning_contactless']);
-
-		lat = latCalc(merchant['osm_json']);
-		long = longCalc(merchant['osm_json']);
-
-		const commentsCount = merchant.tags.comments || 0;
+		const commentsCount = data.comments.length;
 
 		const communities = $areas.filter(
 			(area) =>
@@ -160,7 +129,7 @@
 			return false;
 		});
 
-		merchantEvents = $events.filter((event) => event.element_id === merchant?.id);
+		merchantEvents = $events.filter((event) => event.element_id === data.elementData?.id);
 
 		merchantEvents.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
 
@@ -206,12 +175,11 @@
 		dataInitialized = true;
 	};
 
+	// Initialize data when component mounts, only need areas/reports/events for communities/activity
 	$: $users &&
 		$users.length &&
 		$events &&
 		$events.length &&
-		$elements &&
-		$elements.length &&
 		$areas &&
 		$areas.length &&
 		$reports &&
@@ -220,7 +188,7 @@
 		!dataInitialized &&
 		initializeData();
 
-	let merchant: Element | undefined;
+	// merchant variable no longer needed - using server data directly
 
 	const name = data.name;
 	let icon: string | undefined;
@@ -250,40 +218,40 @@
 	let outdatedTooltip: HTMLSpanElement;
 
 	$: thirdPartyTooltip &&
-		merchant &&
+		data &&
 		tippy([thirdPartyTooltip], {
 			content: 'Third party app required'
 		});
 
 	$: onchainTooltip &&
-		merchant &&
+		data &&
 		tippy([onchainTooltip], {
 			content:
-				merchant.osm_json.tags?.['payment:onchain'] === 'yes'
+				data.osmTags?.['payment:onchain'] === 'yes'
 					? 'On-chain accepted'
-					: merchant.osm_json.tags?.['payment:onchain'] === 'no'
+					: data.osmTags?.['payment:onchain'] === 'no'
 						? 'On-chain not accepted'
 						: 'On-chain unknown'
 		});
 
 	$: lnTooltip &&
-		merchant &&
+		data &&
 		tippy([lnTooltip], {
 			content:
-				merchant.osm_json.tags?.['payment:lightning'] === 'yes'
+				data.osmTags?.['payment:lightning'] === 'yes'
 					? 'Lightning accepted'
-					: merchant.osm_json.tags?.['payment:lightning'] === 'no'
+					: data.osmTags?.['payment:lightning'] === 'no'
 						? 'Lightning not accepted'
 						: 'Lightning unknown'
 		});
 
 	$: nfcTooltip &&
-		merchant &&
+		data &&
 		tippy([nfcTooltip], {
 			content:
-				merchant.osm_json.tags?.['payment:lightning_contactless'] === 'yes'
+				data.osmTags?.['payment:lightning_contactless'] === 'yes'
 					? 'Lightning Contactless accepted'
-					: merchant.osm_json.tags?.['payment:lightning_contactless'] === 'no'
+					: data.osmTags?.['payment:lightning_contactless'] === 'no'
 						? 'Lightning contactless not accepted'
 						: 'Lightning contactless unknown'
 		});
@@ -458,14 +426,14 @@
 						<!-- Placeholder for alignment -->
 					{/if}
 
-					{#if (paymentMethod || thirdParty) && merchant}
+					{#if (paymentMethod || thirdParty) && data}
 						<div class="text-primary dark:text-white">
 							<h4 class="uppercase text-primary dark:text-white">Accepted Payments</h4>
 							<div class="mt-1 flex items-center justify-center space-x-2">
 								{#if !paymentMethod}
 									<a
 										bind:this={thirdPartyTooltip}
-										href={merchant.osm_json.tags?.['payment:lightning:companion_app_url']}
+										href={data.osmTags?.['payment:lightning:companion_app_url']}
 										target="_blank"
 										rel="noreferrer"
 									>
@@ -477,11 +445,11 @@
 								{:else if typeof window !== 'undefined'}
 									<img
 										bind:this={onchainTooltip}
-										src={merchant.osm_json.tags?.['payment:onchain'] === 'yes'
+										src={data.osmTags?.['payment:onchain'] === 'yes'
 											? detectTheme() === 'dark' || $theme === 'dark'
 												? '/icons/btc-highlight-dark.svg'
 												: '/icons/btc-highlight.svg'
-											: merchant.osm_json.tags?.['payment:onchain'] === 'no'
+											: data.osmTags?.['payment:onchain'] === 'no'
 												? detectTheme() === 'dark' || $theme === 'dark'
 													? '/icons/btc-no-dark.svg'
 													: '/icons/btc-no-teal.svg'
@@ -494,11 +462,11 @@
 
 									<img
 										bind:this={lnTooltip}
-										src={merchant.osm_json.tags?.['payment:lightning'] === 'yes'
+										src={data.osmTags?.['payment:lightning'] === 'yes'
 											? detectTheme() === 'dark' || $theme === 'dark'
 												? '/icons/ln-highlight-dark.svg'
 												: '/icons/ln-highlight.svg'
-											: merchant.osm_json.tags?.['payment:lightning'] === 'no'
+											: data.osmTags?.['payment:lightning'] === 'no'
 												? detectTheme() === 'dark' || $theme === 'dark'
 													? '/icons/ln-no-dark.svg'
 													: '/icons/ln-no-teal.svg'
@@ -511,11 +479,11 @@
 
 									<img
 										bind:this={nfcTooltip}
-										src={merchant.osm_json.tags?.['payment:lightning_contactless'] === 'yes'
+										src={data.osmTags?.['payment:lightning_contactless'] === 'yes'
 											? detectTheme() === 'dark' || $theme === 'dark'
 												? '/icons/nfc-highlight-dark.svg'
 												: '/icons/nfc-highlight.svg'
-											: merchant.osm_json.tags?.['payment:lightning_contactless'] === 'no'
+											: data.osmTags?.['payment:lightning_contactless'] === 'no'
 												? detectTheme() === 'dark' || $theme === 'dark'
 													? '/icons/nfc-no-dark.svg'
 													: '/icons/nfc-no-teal.svg'
@@ -556,14 +524,14 @@
 						<MerchantLink link={`geo:${lat},${long}`} icon="compass" text="Navigate" />
 
 						<MerchantLink
-							link={`https://www.openstreetmap.org/edit?${merchant?.osm_json.type}=${merchant?.osm_json.id}`}
+							link={`https://www.openstreetmap.org/edit?${data.osmType}=${data.osmId}`}
 							icon="pencil"
 							text="Edit"
 						/>
 
 						<MerchantButton
 							on:click={() => {
-								navigator.clipboard.writeText(`https://btcmap.org/merchant/${merchant?.id}`);
+								navigator.clipboard.writeText(`https://btcmap.org/merchant/${data.id}`);
 								successToast('Link copied to clipboard!');
 							}}
 							icon="share"
@@ -628,7 +596,7 @@
 
 						<span id="show-tags">
 							<MerchantButton
-								on:click={() => ($showTags = merchant?.osm_json.tags || {})}
+								on:click={() => ($showTags = data.osmTags)}
 								icon="tags"
 								text="Show Tags"
 							/>
@@ -636,14 +604,14 @@
 
 						<span id="tagging-issues">
 							<MerchantButton
-								on:click={() => ($taggingIssues = merchant?.tags?.issues || [])}
+								on:click={() => ($taggingIssues = data.elementData?.tags?.issues || [])}
 								icon="issues"
 								text="Tag Issues"
 							/>
 						</span>
 
 						<MerchantLink
-							link={`https://www.openstreetmap.org/${merchant?.osm_json.type}/${merchant?.osm_json.id}`}
+							link={`https://www.openstreetmap.org/${data.osmType}/${data.osmId}`}
 							icon="external"
 							text="View OSM"
 						/>
@@ -700,7 +668,7 @@
 
 							<PrimaryButton
 								slot="footer"
-								link={`/verify-location?id=${merchant?.id}`}
+								link={`/verify-location?id=${data.id}`}
 								style="rounded-xl p-3 w-40"
 							>
 								Verify Location
@@ -727,7 +695,7 @@
 								{/if}
 							</div>
 
-							<BoostButton slot="footer" {merchant} {boosted} />
+							<BoostButton slot="footer" merchant={data.elementData} {boosted} />
 						</Card>
 
 						<Card headerAlign="center">
@@ -746,9 +714,7 @@
 							</div>
 
 							<div slot="footer">
-								{#if merchant}
-									<CommentAddButton elementId={merchant.id} />
-								{/if}
+								<CommentAddButton elementId={data.id} />
 							</div>
 						</Card>
 					</div>
