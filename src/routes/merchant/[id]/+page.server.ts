@@ -45,7 +45,7 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 					);
 					comments = commentsResponse.data;
 				}
-			} catch (commentErr) {
+			} catch (_commentErr) {
 				// Place doesn't exist in v4 API or comments failed - use empty array
 				comments = [];
 			}
