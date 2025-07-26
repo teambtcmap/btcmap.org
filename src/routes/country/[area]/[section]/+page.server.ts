@@ -3,8 +3,21 @@ import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import type { PageServerLoad } from './$types';
 import { getIssues } from '$lib/gitea';
+import type { Element } from '$lib/types';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
+
+// Helper function to fetch elements from v2 API by area
+const fetchElementsForArea = async (areaId: number): Promise<Element[]> => {
+	try {
+		// Fetch elements in the area from v2 API
+		const elementsResponse = await axios.get(`https://api.btcmap.org/v2/elements?area_id=${areaId}`);
+		return elementsResponse.data;
+	} catch (error) {
+		console.error('Failed to fetch elements for area:', areaId, error);
+		return [];
+	}
+};
 
 export const load: PageServerLoad = async ({ params }) => {
 	const { area, section } = params;
@@ -43,11 +56,15 @@ export const load: PageServerLoad = async ({ params }) => {
 
 		const issues = await issuesResponse.json();
 
+		// Fetch elements for this area
+		const elements = await fetchElementsForArea(fetchedArea.tags['btcmap:id']);
+
 		return {
 			id: fetchedArea.id,
 			name: fetchedArea.tags.name,
 			tickets: tickets,
-			issues: issues.result.requested_issues
+			issues: issues.result.requested_issues,
+			elements: elements
 		};
 	} catch (err) {
 		console.error(err);

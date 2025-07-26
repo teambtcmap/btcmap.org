@@ -195,12 +195,12 @@
 
 		const rewoundPoly = rewind(area.geo_json, true);
 
-		// filter elements within area
-		filteredElements = $elements.filter((element) => {
-			let lat = latCalc(element['osm_json']);
-			let long = longCalc(element['osm_json']);
+		// Use server-provided elements (already filtered by area)
+		filteredElements = data.elements || [];
 
-			if (geoContains(rewoundPoly, [long, lat])) {
+		// For AreaMap, filter places from client store  
+		filteredPlaces = $elements.filter((place) => {
+			if (geoContains(rewoundPoly, [place.lon, place.lat])) {
 				return true;
 			} else {
 				return false;
@@ -230,7 +230,7 @@
 		areaEvents.forEach((event) => {
 			let elementMatch = filteredElements.find((element) => element.id === event['element_id']);
 
-			let location = elementMatch?.['osm_json'].tags?.name || undefined;
+			let location = elementMatch?.osm_json.tags?.name || undefined;
 
 			let tagger = findUser(event);
 
@@ -265,6 +265,7 @@
 
 	let area: AreaTags;
 	let filteredElements: Element[];
+	let filteredPlaces: Place[];
 	let areaReports: Report[];
 
 	let avatar: string;
@@ -414,7 +415,7 @@
 	</div>
 
 	{#if activeSection === Sections.merchants}
-		<AreaMap {name} geoJSON={area?.geo_json} {filteredElements} />
+		<AreaMap {name} geoJSON={area?.geo_json} filteredPlaces={filteredPlaces} />
 		<AreaMerchantHighlights {dataInitialized} {filteredElements} />
 		{#if browser}
 			<Boost />
