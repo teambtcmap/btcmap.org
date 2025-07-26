@@ -389,7 +389,13 @@ export type DropdownLink = { url: string; external?: boolean; icon: string; titl
 
 export type ChartHistory = '7D' | '1M' | '3M' | '6M' | 'YTD' | '1Y' | 'ALL';
 
-export type AreaPageProps = { id: string; name: string; tickets: Tickets; issues: RpcIssue[]; elements?: Element[] };
+export type AreaPageProps = {
+	id: string;
+	name: string;
+	tickets: Tickets;
+	issues: RpcIssue[];
+	elements?: Element[];
+};
 
 // V4 API Types
 export type Place = {

@@ -122,20 +122,20 @@
 	const fetchElementsForArea = async (areaId: string): Promise<Element[]> => {
 		try {
 			elementsLoading = true;
-			
-			// Find the area by ID 
-			const area = $areas.find(a => a.id === areaId);
+
+			// Find the area by ID
+			const area = $areas.find((a) => a.id === areaId);
 			if (!area || !area.tags.geo_json) {
 				console.error('Area not found or missing geo_json:', areaId);
 				return [];
 			}
-			
+
 			// Fetch all elements from v2 API
 			const elementsResponse = await axios.get(`https://api.btcmap.org/v2/elements`);
 			const allElements = elementsResponse.data;
-			
+
 			console.log(`Fetched ${allElements.length} global elements, filtering for area ${areaId}`);
-			
+
 			// Use the same geo-filtering logic as used for filteredPlaces
 			const rewoundPoly = rewind(area.tags.geo_json, true);
 			const areaElements = allElements.filter((element: Element) => {
@@ -143,7 +143,7 @@
 				const lon = element.osm_json.lon;
 				return geoContains(rewoundPoly, [lon, lat]);
 			});
-			
+
 			console.log(`Filtered to ${areaElements.length} elements for area ${areaId}`);
 			return areaElements;
 		} catch (error) {
@@ -189,8 +189,8 @@
 
 		areaReports = $reports
 			? $reports
-				.filter((report) => report.area_id === data.id)
-				.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']))
+					.filter((report) => report.area_id === data.id)
+					.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']))
 			: [];
 
 		area = areaFound.tags;
@@ -236,7 +236,7 @@
 
 		const rewoundPoly = rewind(area.geo_json, true);
 
-		// For AreaMap, filter places from client store  
+		// For AreaMap, filter places from client store
 		filteredPlaces = $elements.filter((place) => {
 			if (geoContains(rewoundPoly, [place.lon, place.lat])) {
 				return true;
@@ -458,8 +458,11 @@
 	</div>
 
 	{#if activeSection === Sections.merchants}
-		<AreaMap {name} geoJSON={area?.geo_json} filteredPlaces={filteredPlaces} />
-		<AreaMerchantHighlights dataInitialized={dataInitialized && !elementsLoading} {filteredElements} />
+		<AreaMap {name} geoJSON={area?.geo_json} {filteredPlaces} />
+		<AreaMerchantHighlights
+			dataInitialized={dataInitialized && !elementsLoading}
+			{filteredElements}
+		/>
 		{#if browser}
 			<Boost />
 		{/if}
@@ -472,7 +475,13 @@
 			</div>
 		{/if}
 	{:else if activeSection === Sections.activity}
-		<AreaActivity {alias} {name} dataInitialized={dataInitialized && !elementsLoading} {eventElements} {taggers} />
+		<AreaActivity
+			{alias}
+			{name}
+			dataInitialized={dataInitialized && !elementsLoading}
+			{eventElements}
+			{taggers}
+		/>
 	{:else if activeSection === Sections.maintain}
 		<IssuesTable
 			title="{name || 'BTC Map Area'} Tagging Issues"
