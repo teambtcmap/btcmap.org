@@ -122,16 +122,13 @@
 			// change default icons
 			changeDefaultIcons(true, leaflet, mapElement, DomEvent);
 
-
 			// add area poly to map
 			leaflet.geoJSON(geoJSON, { style: { fill: false } }).addTo(map);
 
 			// add places to map
 			filteredPlaces.forEach((place) => {
 				const commentsCount = place.comments || 0;
-				const boosted = place.boosted_until
-					? Date.parse(place.boosted_until) > Date.now()
-					: false;
+				const boosted = place.boosted_until ? Date.parse(place.boosted_until) > Date.now() : false;
 
 				let divIcon = generateIcon(leaflet, place.icon, boosted, commentsCount);
 
