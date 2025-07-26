@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import axios from 'axios';
 
 	export let type: 'country' | 'community';
 	export let data: AreaPageProps;
@@ -55,6 +56,7 @@
 		type AreaType,
 		type Element,
 		type Event,
+		type Place,
 		type Report,
 		type RpcIssue,
 		type User
@@ -114,8 +116,45 @@
 	// No need for hash handling anymore - sections are handled by route parameters
 
 	let dataInitialized = false;
+	let elementsLoading = false;
 
-	const initializeData = () => {
+	// Fetch elements from v2 API and filter by geographic area (client-side)
+	const fetchElementsForArea = async (areaId: string): Promise<Element[]> => {
+		try {
+			elementsLoading = true;
+			
+			// Find the area by ID 
+			const area = $areas.find(a => a.id === areaId);
+			if (!area || !area.tags.geo_json) {
+				console.error('Area not found or missing geo_json:', areaId);
+				return [];
+			}
+			
+			// Fetch all elements from v2 API
+			const elementsResponse = await axios.get(`https://api.btcmap.org/v2/elements`);
+			const allElements = elementsResponse.data;
+			
+			console.log(`Fetched ${allElements.length} global elements, filtering for area ${areaId}`);
+			
+			// Use the same geo-filtering logic as used for filteredPlaces
+			const rewoundPoly = rewind(area.tags.geo_json, true);
+			const areaElements = allElements.filter((element: Element) => {
+				const lat = element.osm_json.lat;
+				const lon = element.osm_json.lon;
+				return geoContains(rewoundPoly, [lon, lat]);
+			});
+			
+			console.log(`Filtered to ${areaElements.length} elements for area ${areaId}`);
+			return areaElements;
+		} catch (error) {
+			console.error('Failed to fetch elements for area:', areaId, error);
+			return [];
+		} finally {
+			elementsLoading = false;
+		}
+	};
+
+	const initializeData = async () => {
 		if (dataInitialized) return;
 
 		const areaFound = $areas.find((area) => {
@@ -149,8 +188,10 @@
 		}
 
 		areaReports = $reports
-			.filter((report) => report.area_id === data.id)
-			.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
+			? $reports
+				.filter((report) => report.area_id === data.id)
+				.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']))
+			: [];
 
 		area = areaFound.tags;
 
@@ -195,9 +236,6 @@
 
 		const rewoundPoly = rewind(area.geo_json, true);
 
-		// Use server-provided elements (already filtered by area)
-		filteredElements = data.elements || [];
-
 		// For AreaMap, filter places from client store  
 		filteredPlaces = $elements.filter((place) => {
 			if (geoContains(rewoundPoly, [place.lon, place.lat])) {
@@ -207,65 +245,70 @@
 			}
 		});
 
-		const areaEvents = $events.filter((event) =>
-			filteredElements.find((element) => element.id === event.element_id)
-		);
-
-		areaEvents.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
-
-		const findUser = (tagger: Event) => {
-			let foundUser = $users.find((user) => user.id == tagger['user_id']);
-
-			if (foundUser) {
-				if (!taggers.find((tagger) => tagger.id === foundUser?.id)) {
-					taggers.push(foundUser);
-				}
-
-				return foundUser;
-			} else {
-				return undefined;
-			}
-		};
-
-		areaEvents.forEach((event) => {
-			let elementMatch = filteredElements.find((element) => element.id === event['element_id']);
-
-			let location = elementMatch?.osm_json.tags?.name || undefined;
-
-			let tagger = findUser(event);
-
-			eventElements.push({
-				...event,
-				location: location || formatElementID(event['element_id']),
-				merchantId: event['element_id'],
-				tagger
-			});
-		});
-
-		eventElements = eventElements;
-		taggers = taggers;
-
 		issues = data.issues;
 
 		dataInitialized = true;
+
+		// Fetch elements in the background for rich components
+		if (browser) {
+			console.log('Fetching elements for area:', areaFound.id);
+			const elements = await fetchElementsForArea(areaFound.id);
+			console.log('Fetched elements:', elements.length, 'items');
+			filteredElements = elements;
+
+			// Process events after elements are loaded, only if events and users stores are populated
+			if ($events.length && $users.length) {
+				const areaEvents = $events.filter((event) =>
+					filteredElements.find((element) => element.id === event.element_id)
+				);
+
+				areaEvents.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
+
+				const findUser = (tagger: Event) => {
+					let foundUser = $users.find((user) => user.id == tagger['user_id']);
+
+					if (foundUser) {
+						if (!taggers.find((tagger) => tagger.id === foundUser?.id)) {
+							taggers.push(foundUser);
+						}
+
+						return foundUser;
+					} else {
+						return undefined;
+					}
+				};
+
+				areaEvents.forEach((event) => {
+					let elementMatch = filteredElements.find((element) => element.id === event['element_id']);
+
+					let location = elementMatch?.osm_json.tags?.name || undefined;
+
+					let tagger = findUser(event);
+
+					eventElements.push({
+						...event,
+						location: location || formatElementID(event['element_id']),
+						merchantId: event['element_id'],
+						tagger
+					});
+				});
+
+				eventElements = eventElements;
+				taggers = taggers;
+			}
+		}
 	};
 
-	$: $users &&
-		$users.length &&
-		$events &&
-		$events.length &&
+	$: $areas &&
+		$areas.length &&
 		$elements &&
 		$elements.length &&
-		$areas &&
-		$areas.length &&
-		$reports &&
-		$reports.length &&
 		!dataInitialized &&
 		initializeData();
 
 	let area: AreaTags;
-	let filteredElements: Element[];
-	let filteredPlaces: Place[];
+	let filteredElements: Element[] = [];
+	let filteredPlaces: Place[] = [];
 	let areaReports: Report[];
 
 	let avatar: string;
@@ -416,7 +459,7 @@
 
 	{#if activeSection === Sections.merchants}
 		<AreaMap {name} geoJSON={area?.geo_json} filteredPlaces={filteredPlaces} />
-		<AreaMerchantHighlights {dataInitialized} {filteredElements} />
+		<AreaMerchantHighlights dataInitialized={dataInitialized && !elementsLoading} {filteredElements} />
 		{#if browser}
 			<Boost />
 		{/if}
@@ -429,12 +472,12 @@
 			</div>
 		{/if}
 	{:else if activeSection === Sections.activity}
-		<AreaActivity {alias} {name} {dataInitialized} {eventElements} {taggers} />
+		<AreaActivity {alias} {name} dataInitialized={dataInitialized && !elementsLoading} {eventElements} {taggers} />
 	{:else if activeSection === Sections.maintain}
 		<IssuesTable
 			title="{name || 'BTC Map Area'} Tagging Issues"
 			{issues}
-			loading={!dataInitialized}
+			loading={!(dataInitialized && !elementsLoading)}
 		/>
 		<AreaTickets tickets={data.tickets} title="{name || 'BTC Map Area'} Open Tickets" />
 	{/if}
