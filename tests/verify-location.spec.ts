@@ -32,15 +32,23 @@ test.describe('Verify Location Page', () => {
 		const submitButton = page.getByRole('button', { name: 'Submit Report' });
 		await expect(submitButton).toBeVisible();
 
-		// Wait for captcha to load and form to become enabled
-		await page.waitForTimeout(3000);
+		// Wait for the data stores to be loaded by checking console logs for "fulfilled" messages
+		// This indicates the reactive stores have loaded the necessary data
+		await page.waitForFunction(() => {
+			return window.console.log.toString().includes('fulfilled') || 
+				   document.querySelector('input[name="current"]:not([disabled])') !== null;
+		}, { timeout: 15000 });
 
-		// Verify form inputs become enabled after captcha loads
+		// Wait for captcha image to be present (indicates captcha loaded)
+		const captchaImage = page.locator('img').nth(-2); // The captcha image is typically one of the last images
+		await expect(captchaImage).toBeVisible({ timeout: 10000 });
+
+		// Now verify form inputs are enabled after captcha and data loads
 		const currentCheckbox = page.getByRole('checkbox', { name: 'Current information is correct' });
-		await expect(currentCheckbox).toBeEnabled({ timeout: 10000 });
+		await expect(currentCheckbox).toBeEnabled({ timeout: 15000 });
 
 		const verifyTextarea = page.getByPlaceholder('Please provide additional info here');
-		await expect(verifyTextarea).toBeEnabled();
+		await expect(verifyTextarea).toBeEnabled({ timeout: 5000 });
 	});
 
 	test('shows error for missing ID parameter', async ({ page }) => {

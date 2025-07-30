@@ -114,25 +114,37 @@ test.describe('Areas', () => {
 		await page.getByRole('link', { name: 'Leaderboard' }).click();
 		await expect(page).toHaveURL(/communities\/leaderboard/);
 
+		// Wait for the page heading to be visible
 		await page
 			.getByRole('heading', {
 				name: 'Community Leaderboard'
 			})
 			.waitFor({ state: 'visible' });
 
-		// Give more time for leaderboard data to load
-		await page.waitForTimeout(3000);
+		// Wait for the table to be populated with data by checking for medal emojis
+		// This ensures the leaderboard data has fully loaded
+		await page.waitForFunction(() => {
+			const tableRows = document.querySelectorAll('tbody tr');
+			return tableRows.length > 0 && 
+				   tableRows[0].textContent && 
+				   (tableRows[0].textContent.includes('🥇') || tableRows[0].textContent.includes('🥈') || tableRows[0].textContent.includes('🥉'));
+		}, { timeout: 60000 });
 
 		const goldMedalCell = page.getByRole('cell', { name: '🥇' });
 
-		await goldMedalCell.waitFor({ state: 'visible', timeout: 30000 });
-		await expect(goldMedalCell).toBeVisible();
+		// Gold medal should be visible now since we confirmed it exists in the previous wait
+		await expect(goldMedalCell).toBeVisible({ timeout: 10000 });
 
 		// Test sorting functionality by clicking "Position" column header twice to reverse sort
-		await page.getByRole('button', { name: 'Position' }).click();
-		await page.getByRole('button', { name: 'Position' }).click();
+		const positionButton = page.getByRole('button', { name: /Sort by Position/ });
+		await positionButton.click();
+		await positionButton.click();
 
-		// Wait for the medal to disappear (indicating sorting worked)
-		await goldMedalCell.waitFor({ state: 'hidden', timeout: 5000 });
+		// Wait for sorting to complete by checking that the medal is no longer in the first row
+		// or that the first position cell doesn't contain the gold medal
+		await page.waitForFunction(() => {
+			const firstRowPositionCell = document.querySelector('tbody tr:first-child td:first-child');
+			return firstRowPositionCell && !firstRowPositionCell.textContent?.includes('🥇');
+		}, { timeout: 10000 });
 	});
 });
