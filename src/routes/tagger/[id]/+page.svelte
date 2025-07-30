@@ -26,7 +26,6 @@
 	} from '$lib/map/setup';
 	import {
 		elementError,
-		elements,
 		eventError,
 		events,
 		excludeLeader,
@@ -278,22 +277,38 @@
 			Number((deleted / (total / 100)).toFixed(0))
 		);
 
-		userEvents.forEach((event) => {
-			let elementMatch = $elements.find((element) => element.id === event['element_id']);
+		const fetchMerchantName = async (elementId: string): Promise<string> => {
+			try {
+				const response = await fetch(`https://api.btcmap.org/v2/elements/${elementId}`);
+				if (!response.ok) throw new Error('API call failed');
+				const data = await response.json();
+				return data.osm_json?.tags?.name || formatElementID(elementId);
+			} catch {
+				return formatElementID(elementId);
+			}
+		};
 
-			let location =
-				elementMatch?.['osm_json'].tags && elementMatch['osm_json'].tags.name
-					? elementMatch['osm_json'].tags.name
-					: undefined;
-
-			eventElements.push({
+		// Fetch merchant names for activity events
+		const activityPromises = userEvents.map(async (event) => {
+			const location = await fetchMerchantName(event['element_id']);
+			return {
 				...event,
-				location: location || formatElementID(event['element_id']),
+				location,
 				merchantId: event['element_id']
-			});
+			};
 		});
 
-		eventElements = eventElements;
+		try {
+			eventElements = await Promise.all(activityPromises);
+		} catch (error) {
+			console.error('Error fetching activity merchant names:', error);
+			// Fallback: create entries with element IDs only
+			eventElements = userEvents.map((event) => ({
+				...event,
+				location: formatElementID(event['element_id']),
+				merchantId: event['element_id']
+			}));
+		}
 
 		// add markdown support for profile description
 		const markdown = await marked.parse(filteredDesc || '');
@@ -329,7 +344,7 @@
 		};
 		setupChart();
 
-		const setupMap = () => {
+		const setupMap = async () => {
 			const theme = detectTheme();
 
 			// add map and tiles
@@ -370,10 +385,25 @@
 			// get date from 1 year ago to add verified check if survey is current
 			let verifiedDate = calcVerifiedDate();
 
-			// filter elements edited by user
-			let filteredElements = $elements.filter((element) =>
-				userEvents.find((event) => event['element_id'] === element.id)
-			);
+			// fetch elements edited by user from API
+			const elementPromises = userEvents.map(async (event) => {
+				try {
+					const response = await fetch(`https://api.btcmap.org/v2/elements/${event['element_id']}`);
+					if (!response.ok) throw new Error('API call failed');
+					return await response.json();
+				} catch {
+					return null;
+				}
+			});
+
+			let filteredElements = [];
+			try {
+				const allElements = await Promise.all(elementPromises);
+				filteredElements = allElements.filter(Boolean);
+			} catch (error) {
+				console.error('Error fetching map elements:', error);
+				filteredElements = [];
+			}
 
 			// add location information
 			let bounds: { lat: number; long: number }[] = [];
@@ -401,14 +431,15 @@
 
 				let divIcon = generateIcon(leaflet, icon, boosted ? true : false, commentsCount);
 
+				// Extract numeric placeId from string ID (e.g., "node:13037531674" -> 13037531674)
+				const numericPlaceId = parseInt(element.id.split(':')[1]);
+
 				let marker = generateMarker({
 					lat,
 					long,
 					icon: divIcon,
-					element: elementOSM,
-					payment,
+					placeId: numericPlaceId,
 					leaflet,
-					verifiedDate,
 					verify: true,
 					boosted
 				});
@@ -422,7 +453,7 @@
 
 			mapLoaded = true;
 		};
-		setupMap();
+		await setupMap();
 
 		// eslint-disable-next-line svelte/infinite-reactive-loop
 		dataInitialized = true;
@@ -432,8 +463,6 @@
 		$users.length &&
 		$events &&
 		$events.length &&
-		$elements &&
-		$elements.length &&
 		initialRenderComplete &&
 		!dataInitialized &&
 		// eslint-disable-next-line svelte/infinite-reactive-loop
