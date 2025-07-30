@@ -103,7 +103,6 @@
 		window.history.back();
 	}
 
-
 	// alert for map errors
 	$: $elementError && errToast($elementError);
 
@@ -115,7 +114,6 @@
 			initialRenderComplete = true;
 		}
 	});
-
 </script>
 
 <svelte:head>

@@ -18,7 +18,7 @@ test.describe('Verify Location Page', () => {
 		// Check that merchant name loads correctly (may take a moment for server data)
 		const merchantNameInput = page.getByPlaceholder(/Merchant Name/);
 		await expect(merchantNameInput).toBeVisible();
-		
+
 		// Wait for merchant data to load and check it has the expected name
 		await expect(merchantNameInput).toHaveValue('Bitstop at Olive Mart Valero', { timeout: 10000 });
 
@@ -34,7 +34,7 @@ test.describe('Verify Location Page', () => {
 
 		// Wait for captcha to load and form to become enabled
 		await page.waitForTimeout(3000);
-		
+
 		// Verify form inputs become enabled after captcha loads
 		const currentCheckbox = page.getByRole('checkbox', { name: 'Current information is correct' });
 		await expect(currentCheckbox).toBeEnabled({ timeout: 10000 });
