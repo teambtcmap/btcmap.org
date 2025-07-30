@@ -74,7 +74,13 @@
 	};
 
 	// Initialize data when all stores are loaded
-	$: if ($elements?.length && $users?.length && $events?.length && $areas?.length && !dataInitalized) {
+	$: if (
+		$elements?.length &&
+		$users?.length &&
+		$events?.length &&
+		$areas?.length &&
+		!dataInitalized
+	) {
 		initializeData();
 		dataInitalized = true;
 	}
