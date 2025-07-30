@@ -49,8 +49,6 @@
 	};
 
 	const initializeData = async () => {
-		if (dataInitalized) return;
-
 		const boostedMerchants = $elements
 			.filter((place) => place.boosted_until)
 			.sort((a, b) => Date.parse(b.boosted_until || '0') - Date.parse(a.boosted_until || '0'))
@@ -73,13 +71,12 @@
 		populateLeaderboard();
 
 		communities = $areas.filter((area) => featuredCommunities.includes(area.id));
-
-		dataInitalized = true;
 	};
 
 	// Initialize data when all stores are loaded
 	$: if ($elements?.length && $users?.length && $events?.length && $areas?.length && !dataInitalized) {
 		initializeData();
+		dataInitalized = true;
 	}
 
 	let supertaggers: { id: number; username: string; avatar: string; total: number }[] = [];
