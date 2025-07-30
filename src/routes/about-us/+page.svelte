@@ -22,7 +22,7 @@
 		users
 	} from '$lib/store';
 	import type { Area, Place } from '$lib/types';
-	import { errToast } from '$lib/utils';
+	import { errToast, formatElementID } from '$lib/utils';
 
 	// alert for all errors
 	$: {
@@ -37,13 +37,38 @@
 	let merchants: Place[] = [];
 	let communities: Area[] = [];
 
-	const initializeData = () => {
+	const fetchMerchantName = async (placeId: number): Promise<string> => {
+		try {
+			const response = await fetch(`https://api.btcmap.org/v4/places/${placeId}?fields=name`);
+			if (!response.ok) throw new Error('API call failed');
+			const data = await response.json();
+			return data.name || formatElementID(`node:${placeId}`);
+		} catch {
+			return formatElementID(`node:${placeId}`);
+		}
+	};
+
+	const initializeData = async () => {
 		if (dataInitalized) return;
 
-		merchants = $elements
+		const boostedMerchants = $elements
 			.filter((place) => place.boosted_until)
 			.sort((a, b) => Date.parse(b.boosted_until || '0') - Date.parse(a.boosted_until || '0'))
 			.slice(0, 6);
+
+		// Fetch names for merchants
+		const merchantPromises = boostedMerchants.map(async (merchant) => {
+			const name = await fetchMerchantName(merchant.id);
+			return { ...merchant, name };
+		});
+
+		try {
+			merchants = await Promise.all(merchantPromises);
+		} catch (error) {
+			console.error('Error fetching merchant names:', error);
+			// Fallback: use merchants without names
+			merchants = boostedMerchants;
+		}
 
 		populateLeaderboard();
 
