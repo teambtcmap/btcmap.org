@@ -26,7 +26,6 @@
 
 	const maintainDropdownLinks = [
 		{ title: 'Add Location', url: '/add-location', icon: 'add' },
-		{ title: 'Verify Location', url: '/verify-location', icon: 'verify' },
 		{ title: 'Add Community', url: '/communities/add', icon: 'communities' },
 		{ title: 'Open Tickets', url: '/tickets', icon: 'ticket' },
 		{ title: 'Tagging Activity', url: '/activity', icon: 'activity' },
