@@ -61,17 +61,16 @@ test.describe('Map Popup', () => {
 
 		// Wait for the API request to complete after clicking marker with retry
 		// Sometimes the API call might be cached or already completed, so we'll check for popup appearance instead
-		let apiResponseReceived = false;
 		try {
 			// Try to wait for API response, but don't fail if it doesn't come
 			await page.waitForResponse(response => 
 				response.url().includes('api.btcmap.org/v4/places/') && response.status() === 200,
 				{ timeout: 8000 }
 			);
-			apiResponseReceived = true;
 			console.log('API response received');
 		} catch (error) {
-			console.log('API response wait failed, but continuing - popup might already be loading:', error.message);
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			console.log('API response wait failed, but continuing - popup might already be loading:', errorMessage);
 			// Continue anyway, the popup might already be loading from cache or previous request
 		}
 
