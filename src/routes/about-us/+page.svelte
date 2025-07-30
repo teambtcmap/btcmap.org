@@ -21,7 +21,7 @@
 		userError,
 		users
 	} from '$lib/store';
-	import type { Area, Element } from '$lib/types';
+	import type { Area, Place } from '$lib/types';
 	import { errToast } from '$lib/utils';
 
 	// alert for all errors
@@ -34,18 +34,15 @@
 
 	let dataInitalized = false;
 
-	let merchants: Element[] = [];
+	let merchants: Place[] = [];
 	let communities: Area[] = [];
 
 	const initializeData = () => {
 		if (dataInitalized) return;
 
 		merchants = $elements
-			.filter((element) => element.tags['boost:expires'])
-			.sort(
-				(a, b) =>
-					Date.parse(b.tags['boost:expires'] || '0') - Date.parse(a.tags['boost:expires'] || '0')
-			)
+			.filter((place) => place.boosted_until)
+			.sort((a, b) => Date.parse(b.boosted_until || '0') - Date.parse(a.boosted_until || '0'))
 			.slice(0, 6);
 
 		populateLeaderboard();
@@ -267,9 +264,9 @@
 					{#if merchants.length}
 						{#each merchants as merchant (merchant.id)}
 							<AboutMerchant
-								id={merchant.id}
-								icon={merchant.tags['icon:android']}
-								tooltip={merchant['osm_json'].tags?.name}
+								id={merchant.id.toString()}
+								icon={merchant.icon}
+								tooltip={merchant.name}
 							/>
 						{/each}
 					{:else}
