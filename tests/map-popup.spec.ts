@@ -21,20 +21,20 @@ test.describe('Map Popup', () => {
 			// First, try to find individual (non-cluster) markers
 			const individualMarkers = page.locator('.leaflet-marker-pane > div:not([class*="cluster"])');
 			const individualCount = await individualMarkers.count();
-			
+
 			if (individualCount > 0) {
 				console.log(`Found ${individualCount} individual markers`);
 				await individualMarkers.first().click();
 				return true;
 			}
-			
+
 			// If no individual markers, try clusters
 			const clusterSelectors = [
 				'.leaflet-marker-cluster-small',
-				'.leaflet-marker-cluster-medium', 
+				'.leaflet-marker-cluster-medium',
 				'.leaflet-marker-cluster-large'
 			];
-			
+
 			for (const selector of clusterSelectors) {
 				const count = await page.locator(selector).count();
 				if (count > 0) {
@@ -42,7 +42,7 @@ test.describe('Map Popup', () => {
 					const cluster = page.locator(selector).first();
 					await cluster.click();
 					await page.waitForTimeout(3000); // Wait for cluster expansion
-					
+
 					// Check for expanded individual markers
 					const expandedCount = await individualMarkers.count();
 					if (expandedCount > 0) {
@@ -52,7 +52,7 @@ test.describe('Map Popup', () => {
 					}
 				}
 			}
-			
+
 			throw new Error('No clickable markers found');
 		};
 
@@ -63,14 +63,18 @@ test.describe('Map Popup', () => {
 		// Sometimes the API call might be cached or already completed, so we'll check for popup appearance instead
 		try {
 			// Try to wait for API response, but don't fail if it doesn't come
-			await page.waitForResponse(response => 
-				response.url().includes('api.btcmap.org/v4/places/') && response.status() === 200,
+			await page.waitForResponse(
+				(response) =>
+					response.url().includes('api.btcmap.org/v4/places/') && response.status() === 200,
 				{ timeout: 8000 }
 			);
 			console.log('API response received');
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : String(error);
-			console.log('API response wait failed, but continuing - popup might already be loading:', errorMessage);
+			console.log(
+				'API response wait failed, but continuing - popup might already be loading:',
+				errorMessage
+			);
 			// Continue anyway, the popup might already be loading from cache or previous request
 		}
 
@@ -99,7 +103,10 @@ test.describe('Map Popup', () => {
 
 		if (!merchantLink) {
 			// Debug: log popup content if merchant link not found
-			const popupContent = await page.locator('.leaflet-popup-content').innerHTML().catch(() => 'Could not get popup content');
+			const popupContent = await page
+				.locator('.leaflet-popup-content')
+				.innerHTML()
+				.catch(() => 'Could not get popup content');
 			console.log('Popup content:', popupContent);
 			throw new Error('Merchant link not found in popup');
 		}

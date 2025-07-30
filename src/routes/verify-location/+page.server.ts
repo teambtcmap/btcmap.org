@@ -19,7 +19,7 @@ export interface VerifyLocationPageData {
 
 export const load: PageServerLoad<VerifyLocationPageData> = async ({ url }) => {
 	const id = url.searchParams.get('id');
-	
+
 	if (!id) {
 		error(400, 'Merchant ID parameter is required');
 	}

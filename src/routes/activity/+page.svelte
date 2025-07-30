@@ -49,11 +49,7 @@
 		}
 	};
 
-	const supertaggerSync = async (
-		status: boolean,
-		users: User[],
-		events: Event[]
-	) => {
+	const supertaggerSync = async (status: boolean, users: User[], events: Event[]) => {
 		if (events.length && users.length && !status) {
 			let recentEvents = events
 				.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']))
