@@ -78,12 +78,8 @@
 	};
 
 	// Initialize data when all stores are loaded
-	$: {
-		const allDataLoaded = $elements?.length && $users?.length && $events?.length && $areas?.length;
-
-		if (allDataLoaded && !dataInitalized) {
-			initializeData();
-		}
+	$: if ($elements?.length && $users?.length && $events?.length && $areas?.length && !dataInitalized) {
+		initializeData();
 	}
 
 	let supertaggers: { id: number; username: string; avatar: string; total: number }[] = [];
