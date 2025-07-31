@@ -68,8 +68,21 @@ test.describe('Areas', () => {
 		await page.waitForLoadState('domcontentloaded');
 		await expect(page).toHaveURL(/\/community\/[^/]+\/merchants$/); // App redirects to merchants section
 
+		// Wait for the merchants data to load by waiting for network idle and then checking for merchant links
+		await page.waitForLoadState('networkidle', { timeout: 30000 });
+
+		// Wait for merchant data to populate
+		await page.waitForFunction(
+			() => {
+				const merchantLinks = document.querySelectorAll('a[href^="/merchant/node:"]');
+				return merchantLinks.length > 0;
+			},
+			{ timeout: 45000 }
+		);
+
 		// Find the first merchant link matching the pattern and click it (should be first merchant)
 		const firstMerchantLink = page.locator('a[href^="/merchant/node:"]').first();
+		await expect(firstMerchantLink).toBeVisible({ timeout: 10000 });
 		await firstMerchantLink.click();
 		await expect(page).toHaveURL(/\/merchant\/node:[^/]+$/);
 
@@ -123,12 +136,19 @@ test.describe('Areas', () => {
 
 		// Wait for the table to be populated with data by checking for medal emojis
 		// This ensures the leaderboard data has fully loaded
-		await page.waitForFunction(() => {
-			const tableRows = document.querySelectorAll('tbody tr');
-			return tableRows.length > 0 && 
-				   tableRows[0].textContent && 
-				   (tableRows[0].textContent.includes('🥇') || tableRows[0].textContent.includes('🥈') || tableRows[0].textContent.includes('🥉'));
-		}, { timeout: 60000 });
+		await page.waitForFunction(
+			() => {
+				const tableRows = document.querySelectorAll('tbody tr');
+				return (
+					tableRows.length > 0 &&
+					tableRows[0].textContent &&
+					(tableRows[0].textContent.includes('🥇') ||
+						tableRows[0].textContent.includes('🥈') ||
+						tableRows[0].textContent.includes('🥉'))
+				);
+			},
+			{ timeout: 60000 }
+		);
 
 		const goldMedalCell = page.getByRole('cell', { name: '🥇' });
 
@@ -142,9 +162,12 @@ test.describe('Areas', () => {
 
 		// Wait for sorting to complete by checking that the medal is no longer in the first row
 		// or that the first position cell doesn't contain the gold medal
-		await page.waitForFunction(() => {
-			const firstRowPositionCell = document.querySelector('tbody tr:first-child td:first-child');
-			return firstRowPositionCell && !firstRowPositionCell.textContent?.includes('🥇');
-		}, { timeout: 10000 });
+		await page.waitForFunction(
+			() => {
+				const firstRowPositionCell = document.querySelector('tbody tr:first-child td:first-child');
+				return firstRowPositionCell && !firstRowPositionCell.textContent?.includes('🥇');
+			},
+			{ timeout: 10000 }
+		);
 	});
 });
