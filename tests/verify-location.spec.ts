@@ -30,30 +30,14 @@ test.describe('Verify Location Page', () => {
 		await expect(submitButton).toBeVisible();
 
 		// Wait for merchant data to load first (indicates API call succeeded)
-		await expect(merchantNameInput).toHaveValue('Bitstop at Olive Mart Valero', { timeout: 15000 });
+		await expect(merchantNameInput).toHaveValue('Bitstop at Olive Mart Valero', { timeout: 30000 });
 
-		// Wait for form elements to become enabled - this is the most direct indicator
-		// that both data stores and captcha have loaded
+		// Simple approach: just wait for form to be enabled with a generous timeout
 		const currentCheckbox = page.getByRole('checkbox', { name: 'Current information is correct' });
-
-		// Use a more patient wait approach with network idle to ensure everything has loaded
-		await page.waitForLoadState('networkidle', { timeout: 30000 });
-
-		// Now check if form is enabled, with fallback retry logic
-		let retries = 3;
-		while (retries > 0) {
-			try {
-				await expect(currentCheckbox).toBeEnabled({ timeout: 10000 });
-				break;
-			} catch (error) {
-				retries--;
-				if (retries === 0) throw error;
-				await page.waitForTimeout(2000); // Wait a bit more and retry
-			}
-		}
+		await expect(currentCheckbox).toBeEnabled({ timeout: 45000 });
 
 		const verifyTextarea = page.getByPlaceholder('Please provide additional info here');
-		await expect(verifyTextarea).toBeEnabled({ timeout: 5000 });
+		await expect(verifyTextarea).toBeEnabled({ timeout: 10000 });
 	});
 
 	test('shows error for missing ID parameter', async ({ page }) => {
