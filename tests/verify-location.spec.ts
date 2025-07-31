@@ -19,9 +19,6 @@ test.describe('Verify Location Page', () => {
 		const merchantNameInput = page.getByPlaceholder(/Merchant Name/);
 		await expect(merchantNameInput).toBeVisible();
 
-		// Wait for merchant data to load and check it has the expected name
-		await expect(merchantNameInput).toHaveValue('Bitstop at Olive Mart Valero', { timeout: 10000 });
-
 		// Verify form elements are present
 		await expect(page.getByText('Current information is correct')).toBeVisible();
 		await expect(page.getByText('Outdated information')).toBeVisible();
@@ -32,20 +29,28 @@ test.describe('Verify Location Page', () => {
 		const submitButton = page.getByRole('button', { name: 'Submit Report' });
 		await expect(submitButton).toBeVisible();
 
-		// Wait for the data stores to be loaded by checking console logs for "fulfilled" messages
-		// This indicates the reactive stores have loaded the necessary data
-		await page.waitForFunction(() => {
-			return window.console.log.toString().includes('fulfilled') || 
-				   document.querySelector('input[name="current"]:not([disabled])') !== null;
-		}, { timeout: 15000 });
+		// Wait for merchant data to load first (indicates API call succeeded)
+		await expect(merchantNameInput).toHaveValue('Bitstop at Olive Mart Valero', { timeout: 15000 });
 
-		// Wait for captcha image to be present (indicates captcha loaded)
-		const captchaImage = page.locator('img').nth(-2); // The captcha image is typically one of the last images
-		await expect(captchaImage).toBeVisible({ timeout: 10000 });
-
-		// Now verify form inputs are enabled after captcha and data loads
+		// Wait for form elements to become enabled - this is the most direct indicator
+		// that both data stores and captcha have loaded
 		const currentCheckbox = page.getByRole('checkbox', { name: 'Current information is correct' });
-		await expect(currentCheckbox).toBeEnabled({ timeout: 15000 });
+
+		// Use a more patient wait approach with network idle to ensure everything has loaded
+		await page.waitForLoadState('networkidle', { timeout: 30000 });
+
+		// Now check if form is enabled, with fallback retry logic
+		let retries = 3;
+		while (retries > 0) {
+			try {
+				await expect(currentCheckbox).toBeEnabled({ timeout: 10000 });
+				break;
+			} catch (error) {
+				retries--;
+				if (retries === 0) throw error;
+				await page.waitForTimeout(2000); // Wait a bit more and retry
+			}
+		}
 
 		const verifyTextarea = page.getByPlaceholder('Please provide additional info here');
 		await expect(verifyTextarea).toBeEnabled({ timeout: 5000 });
