@@ -134,8 +134,6 @@
 			const elementsResponse = await axios.get(`https://api.btcmap.org/v2/elements`);
 			const allElements = elementsResponse.data;
 
-			console.log(`Fetched ${allElements.length} global elements, filtering for area ${areaId}`);
-
 			// Use the same geo-filtering logic as used for filteredPlaces
 			const rewoundPoly = rewind(area.tags.geo_json, true);
 			const areaElements = allElements.filter((element: Element) => {
@@ -144,7 +142,6 @@
 				return geoContains(rewoundPoly, [lon, lat]);
 			});
 
-			console.log(`Filtered to ${areaElements.length} elements for area ${areaId}`);
 			return areaElements;
 		} catch (error) {
 			console.error('Failed to fetch elements for area:', areaId, error);
@@ -251,9 +248,7 @@
 
 		// Fetch elements in the background for rich components
 		if (browser) {
-			console.log('Fetching elements for area:', areaFound.id);
 			const elements = await fetchElementsForArea(areaFound.id);
-			console.log('Fetched elements:', elements.length, 'items');
 			filteredElements = elements;
 
 			// Process events after elements are loaded, only if events and users stores are populated

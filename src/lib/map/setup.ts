@@ -660,14 +660,10 @@ export const generateMarker = ({
 		} else {
 			// Fetch place details from v4 API
 			try {
-				console.log(`Fetching details for place ID: ${placeId}`);
-
 				const response = await axios.get(
 					`https://api.btcmap.org/v4/places/${placeId}?fields=id,name,address,phone,website,twitter,facebook,instagram,email,opening_hours,verified_at,osm_url,boosted_until,comments,osm:payment:onchain,osm:payment:lightning,osm:payment:lightning_contactless,osm:payment:bitcoin,osm:payment:uri,osm:payment:coinos,osm:payment:pouch,osm:amenity,osm:category,osm:survey:date,osm:check_date,osm:check_date:currency:XBT`
 				);
 				const placeDetails = response.data;
-
-				console.log('Place details:', placeDetails);
 
 				// Calculate verification status
 				const verifiedDate = calcVerifiedDate(); // 1 year ago

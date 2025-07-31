@@ -23,7 +23,6 @@ test.describe('Map Popup', () => {
 			const individualCount = await individualMarkers.count();
 
 			if (individualCount > 0) {
-				console.log(`Found ${individualCount} individual markers`);
 				await individualMarkers.first().click();
 				return true;
 			}
@@ -38,7 +37,6 @@ test.describe('Map Popup', () => {
 			for (const selector of clusterSelectors) {
 				const count = await page.locator(selector).count();
 				if (count > 0) {
-					console.log(`Found ${count} clusters with selector: ${selector}`);
 					const cluster = page.locator(selector).first();
 					await cluster.click();
 					await page.waitForTimeout(3000); // Wait for cluster expansion
@@ -46,7 +44,6 @@ test.describe('Map Popup', () => {
 					// Check for expanded individual markers
 					const expandedCount = await individualMarkers.count();
 					if (expandedCount > 0) {
-						console.log(`Found ${expandedCount} expanded individual markers`);
 						await individualMarkers.first().click();
 						return true;
 					}
@@ -68,10 +65,9 @@ test.describe('Map Popup', () => {
 					response.url().includes('api.btcmap.org/v4/places/') && response.status() === 200,
 				{ timeout: 8000 }
 			);
-			console.log('API response received');
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : String(error);
-			console.log(
+			console.error(
 				'API response wait failed, but continuing - popup might already be loading:',
 				errorMessage
 			);
@@ -95,7 +91,6 @@ test.describe('Map Popup', () => {
 		for (const selector of merchantLinkSelectors) {
 			const linkCount = await page.locator(selector).count();
 			if (linkCount > 0) {
-				console.log(`Found merchant link with selector: ${selector}`);
 				merchantLink = page.locator(selector).first();
 				break;
 			}
@@ -107,7 +102,7 @@ test.describe('Map Popup', () => {
 				.locator('.leaflet-popup-content')
 				.innerHTML()
 				.catch(() => 'Could not get popup content');
-			console.log('Popup content:', popupContent);
+			console.error('Popup content:', popupContent);
 			throw new Error('Merchant link not found in popup');
 		}
 
@@ -115,7 +110,7 @@ test.describe('Map Popup', () => {
 
 		// Get the href for verification
 		const merchantHref = await merchantLink.getAttribute('href');
-		console.log('Found merchant link:', merchantHref);
+		console.error('Found merchant link:', merchantHref);
 
 		// Click the merchant link
 		await merchantLink.click();
