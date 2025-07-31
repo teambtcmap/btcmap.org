@@ -39,65 +39,67 @@
 	let elementsLoaded = false;
 
 	let mapCenter: LatLng;
-	let elementsCopy: SearchElement[] = [];
+	// TODO: Search functionality disabled due to data migration from Element[] to Place[]
+	// Need to reimplement search using new Place structure with fields: name, address, phone, website, etc.
+	// let elementsCopy: SearchElement[] = [];
 
-	let customSearchBar: HTMLDivElement;
-	let clearSearchButton: HTMLButtonElement;
-	let showSearch = false;
-	let search: string;
-	let searchStatus: boolean;
-	let searchResults: SearchResult[] = [];
+	// let customSearchBar: HTMLDivElement;
+	// let clearSearchButton: HTMLButtonElement;
+	// let showSearch = false;
+	// let search: string;
+	// let searchStatus: boolean;
+	// let searchResults: SearchResult[] = [];
 
-	//search functions
-	const elementSearch = () => {
-		if (search.length < 3) {
-			searchResults = [];
-			searchStatus = false;
-			return;
-		}
+	// Search functions - commented out due to data migration
+	// const elementSearch = () => {
+	// 	if (search.length < 3) {
+	// 		searchResults = [];
+	// 		searchStatus = false;
+	// 		return;
+	// 	}
 
-		let filter = elementsCopy.filter((element) => {
-			let tags = element.tags;
+	// 	let filter = elementsCopy.filter((element) => {
+	// 		let tags = element.tags;
 
-			if (tags && tags.name) {
-				let splitWords = search.split(' ').filter((word) => word);
+	// 		if (tags && tags.name) {
+	// 			let splitWords = search.split(' ').filter((word) => word);
 
-				let values = Object.values(tags);
+	// 			let values = Object.values(tags);
 
-				return values.some((value: OSMTags) =>
-					splitWords.some((word) => value.toLowerCase().includes(word.toLowerCase()))
-				);
-			}
-		});
+	// 			return values.some((value: OSMTags) =>
+	// 				splitWords.some((word) => value.toLowerCase().includes(word.toLowerCase()))
+	// 			);
+	// 		}
+	// 	});
 
-		let distance: SearchResult[] = [];
-		filter.forEach((element) => {
-			const distanceKm = Number((mapCenter.distanceTo(element.latLng) / 1000).toFixed(1));
-			const distanceMi = Number((distanceKm * 0.6213712).toFixed(1));
-			distance.push({ ...element, distanceKm, distanceMi });
-		});
+	// 	let distance: SearchResult[] = [];
+	// 	filter.forEach((element) => {
+	// 		const distanceKm = Number((mapCenter.distanceTo(element.latLng) / 1000).toFixed(1));
+	// 		const distanceMi = Number((distanceKm * 0.6213712).toFixed(1));
+	// 		distance.push({ ...element, distanceKm, distanceMi });
+	// 	});
 
-		let sorted = distance.sort((a, b) => a.distanceKm - b.distanceKm);
+	// 	let sorted = distance.sort((a, b) => a.distanceKm - b.distanceKm);
 
-		searchResults = sorted.slice(0, 50);
+	// 	searchResults = sorted.slice(0, 50);
 
-		searchStatus = false;
-	};
+	// 	searchStatus = false;
+	// };
 
-	const searchDebounce = debounce(() => elementSearch());
+	// const searchDebounce = debounce(() => elementSearch());
 
-	const clearSearch = () => {
-		search = '';
-		searchResults = [];
-	};
+	// const clearSearch = () => {
+	// 	search = '';
+	// 	searchResults = [];
+	// };
 
-	const searchSelect = (result: SearchResult) => {
-		clearSearch();
-		map.flyTo(result.latLng, 19);
-		map.once('moveend', () => {
-			result.marker.openPopup();
-		});
-	};
+	// const searchSelect = (result: SearchResult) => {
+	// 	clearSearch();
+	// 	map.flyTo(result.latLng, 19);
+	// 	map.once('moveend', () => {
+	// 		result.marker.openPopup();
+	// 	});
+	// };
 
 	// allows for users to set initial view in a URL query
 	const urlLat = $page.url.searchParams.getAll('lat');
@@ -314,41 +316,41 @@
 						'leaflet-control'
 					);
 
-					// add search button to map
-					const searchButton = leaflet.DomUtil.create('a');
-					searchButton.classList.add('leaflet-control-search-toggle');
-					searchButton.title = 'Search toggle';
-					searchButton.role = 'button';
-					searchButton.ariaLabel = 'Search toggle';
-					searchButton.ariaDisabled = 'false';
-					searchButton.innerHTML = `<img src=${
-						theme === 'dark' ? '/icons/search-white.svg' : '/icons/search.svg'
-					} alt='search' class='inline' id='search-button'/>`;
-					searchButton.style.borderRadius = '8px 8px 0 0';
-					searchButton.onclick = async function toggleSearch() {
-						showSearch = !showSearch;
-						if (showSearch) {
-							await tick();
-							const searchInput: HTMLInputElement | null = document.querySelector('#search-input');
-							searchInput?.focus();
-						} else {
-							search = '';
-							searchResults = [];
-						}
-					};
-					if (theme === 'light') {
-						searchButton.onmouseenter = () => {
-							// @ts-expect-error
-							document.querySelector('#search-button').src = '/icons/search-black.svg';
-						};
-						searchButton.onmouseleave = () => {
-							// @ts-expect-error
-							document.querySelector('#search-button').src = '/icons/search.svg';
-						};
-					}
-					searchButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+					// Search button - commented out due to data migration
+					// const searchButton = leaflet.DomUtil.create('a');
+					// searchButton.classList.add('leaflet-control-search-toggle');
+					// searchButton.title = 'Search toggle';
+					// searchButton.role = 'button';
+					// searchButton.ariaLabel = 'Search toggle';
+					// searchButton.ariaDisabled = 'false';
+					// searchButton.innerHTML = `<img src=${
+					// 	theme === 'dark' ? '/icons/search-white.svg' : '/icons/search.svg'
+					// } alt='search' class='inline' id='search-button'/>`;
+					// searchButton.style.borderRadius = '8px 8px 0 0';
+					// searchButton.onclick = async function toggleSearch() {
+					// 	showSearch = !showSearch;
+					// 	if (showSearch) {
+					// 		await tick();
+					// 		const searchInput: HTMLInputElement | null = document.querySelector('#search-input');
+					// 		searchInput?.focus();
+					// 	} else {
+					// 		search = '';
+					// 		searchResults = [];
+					// 	}
+					// };
+					// if (theme === 'light') {
+					// 	searchButton.onmouseenter = () => {
+					// 		// @ts-expect-error
+					// 		document.querySelector('#search-button').src = '/icons/search-black.svg';
+					// 	};
+					// 	searchButton.onmouseleave = () => {
+					// 		// @ts-expect-error
+					// 		document.querySelector('#search-button').src = '/icons/search.svg';
+					// 	};
+					// }
+					// searchButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
 
-					addControlDiv.append(searchButton);
+					// addControlDiv.append(searchButton);
 
 					// add boost layer button
 					const boostLayerButton = leaflet.DomUtil.create('a');
@@ -405,44 +407,44 @@
 				DomEvent.disableClickPropagation(boostLayer as HTMLElement);
 			}
 
-			// add search bar to map
-			// @ts-expect-error
-			map._controlCorners['topcenter'] = leaflet.DomUtil.create(
-				'div',
-				'leaflet-top leaflet-center',
-				// @ts-expect-error
-				map._controlContainer
-			);
+			// Search bar control - commented out due to data migration
+			// // @ts-expect-error
+			// map._controlCorners['topcenter'] = leaflet.DomUtil.create(
+			// 	'div',
+			// 	'leaflet-top leaflet-center',
+			// 	// @ts-expect-error
+			// 	map._controlContainer
+			// );
 
-			// @ts-expect-error
-			leaflet.Control.Search = leaflet.Control.extend({
-				options: {
-					position: 'topcenter'
-				},
-				onAdd: () => {
-					const searchBarDiv = leaflet.DomUtil.create('div');
-					searchBarDiv.classList.add('leafet-control', 'search-bar-div');
+			// // @ts-expect-error
+			// leaflet.Control.Search = leaflet.Control.extend({
+			// 	options: {
+			// 		position: 'topcenter'
+			// 	},
+			// 	onAdd: () => {
+			// 		const searchBarDiv = leaflet.DomUtil.create('div');
+			// 		searchBarDiv.classList.add('leafet-control', 'search-bar-div');
 
-					searchBarDiv.append(customSearchBar);
+			// 		searchBarDiv.append(customSearchBar);
 
-					return searchBarDiv;
-				}
-			});
+			// 		return searchBarDiv;
+			// 	}
+			// });
 
-			// @ts-expect-error
-			new leaflet.Control.Search().addTo(map);
+			// // @ts-expect-error
+			// new leaflet.Control.Search().addTo(map);
 
-			// disable map events
-			if (customSearchBar) {
-				DomEvent.disableClickPropagation(customSearchBar as HTMLElement);
-			}
-			const searchToggle = document.querySelector('.leaflet-control-search-toggle');
-			if (searchToggle) {
-				DomEvent.disableClickPropagation(searchToggle as HTMLElement);
-			}
-			if (clearSearchButton) {
-				DomEvent.disableClickPropagation(clearSearchButton as HTMLElement);
-			}
+			// // disable map events
+			// if (customSearchBar) {
+			// 	DomEvent.disableClickPropagation(customSearchBar as HTMLElement);
+			// }
+			// const searchToggle = document.querySelector('.leaflet-control-search-toggle');
+			// if (searchToggle) {
+			// 	DomEvent.disableClickPropagation(searchToggle as HTMLElement);
+			// }
+			// if (clearSearchButton) {
+			// 	DomEvent.disableClickPropagation(clearSearchButton as HTMLElement);
+			// }
 
 			// add home and marker buttons to map
 			homeMarkerButtons(leaflet, map, DomEvent, true);
@@ -486,7 +488,8 @@
 
 	<MapLoadingMain progress={mapLoading} />
 
-	<div
+	<!-- Search UI - commented out due to data migration -->
+	<!-- <div
 		id="search-div"
 		bind:this={customSearchBar}
 		class="absolute left-[60px] top-0 w-[50vw] md:w-[350px] {showSearch ? 'block' : 'hidden'}"
@@ -597,7 +600,7 @@
 				</div>
 			</OutClick>
 		{/if}
-	</div>
+	</div> -->
 
 	{#if browser}
 		<Boost />
