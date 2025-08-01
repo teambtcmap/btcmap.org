@@ -319,12 +319,7 @@
 		}
 	};
 
-	$: $areas &&
-		$areas.length &&
-		$places &&
-		$places.length &&
-		!dataInitialized &&
-		initializeData();
+	$: $areas && $areas.length && $places && $places.length && !dataInitialized && initializeData();
 
 	let area: AreaTags;
 	let filteredElements: Element[] = [];

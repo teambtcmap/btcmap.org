@@ -51,7 +51,10 @@
 	const initializeData = async () => {
 		const boostedMerchants = $places
 			.filter((place: Place) => place.boosted_until)
-			.sort((a: Place, b: Place) => Date.parse(b.boosted_until || '0') - Date.parse(a.boosted_until || '0'))
+			.sort(
+				(a: Place, b: Place) =>
+					Date.parse(b.boosted_until || '0') - Date.parse(a.boosted_until || '0')
+			)
 			.slice(0, 6);
 
 		// Fetch names for merchants
