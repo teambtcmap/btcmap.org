@@ -13,8 +13,8 @@
 	import {
 		areaError,
 		areas,
-		elementError,
-		elements,
+		placesError,
+		places,
 		eventError,
 		events,
 		excludeLeader,
@@ -26,7 +26,7 @@
 
 	// alert for all errors
 	$: {
-		if ($elementError) errToast($elementError);
+		if ($placesError) errToast($placesError);
 		if ($userError) errToast($userError);
 		if ($eventError) errToast($eventError);
 		if ($areaError) errToast($areaError);
@@ -49,13 +49,13 @@
 	};
 
 	const initializeData = async () => {
-		const boostedMerchants = $elements
-			.filter((place) => place.boosted_until)
-			.sort((a, b) => Date.parse(b.boosted_until || '0') - Date.parse(a.boosted_until || '0'))
+		const boostedMerchants = $places
+			.filter((place: Place) => place.boosted_until)
+			.sort((a: Place, b: Place) => Date.parse(b.boosted_until || '0') - Date.parse(a.boosted_until || '0'))
 			.slice(0, 6);
 
 		// Fetch names for merchants
-		const merchantPromises = boostedMerchants.map(async (merchant) => {
+		const merchantPromises = boostedMerchants.map(async (merchant: Place) => {
 			const name = await fetchMerchantName(merchant.id);
 			return { ...merchant, name };
 		});
@@ -75,7 +75,7 @@
 
 	// Initialize data when all stores are loaded
 	$: if (
-		$elements?.length &&
+		$places?.length &&
 		$users?.length &&
 		$events?.length &&
 		$areas?.length &&

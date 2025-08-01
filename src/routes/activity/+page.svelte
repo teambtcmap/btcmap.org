@@ -7,15 +7,7 @@
 		TaggerSkeleton,
 		TopButton
 	} from '$lib/comp';
-	import {
-		elementError,
-		eventError,
-		events,
-		syncStatus,
-		theme,
-		userError,
-		users
-	} from '$lib/store';
+	import { placesError, eventError, events, syncStatus, theme, userError, users } from '$lib/store';
 	import type { ActivityEvent, Event, User } from '$lib/types';
 	import { detectTheme, errToast, formatElementID } from '$lib/utils';
 
@@ -24,7 +16,7 @@
 	// alert for event errors
 	$: $eventError && errToast($eventError);
 	// alert for element errors
-	$: $elementError && errToast($elementError);
+	$: $placesError && errToast($placesError);
 
 	let elementsLoading: boolean;
 	let supertaggers: ActivityEvent[];

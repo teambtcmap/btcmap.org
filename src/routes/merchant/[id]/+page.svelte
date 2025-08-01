@@ -33,8 +33,8 @@
 	import {
 		areaError,
 		areas,
-		elementError,
-		elements,
+		placesError,
+		places,
 		eventError,
 		events,
 		reportError,
@@ -68,7 +68,7 @@
 	// alert for event errors
 	$: $eventError && errToast($eventError);
 	// alert for element errors
-	$: $elementError && errToast($elementError);
+	$: $placesError && errToast($placesError);
 	// alert for area errors
 	$: $areaError && errToast($areaError);
 	// alert for report errors

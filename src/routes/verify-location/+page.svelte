@@ -9,7 +9,7 @@
 		InfoTooltip,
 		PrimaryButton
 	} from '$lib/comp';
-	import { elementError, theme } from '$lib/store';
+	import { placesError, theme } from '$lib/store';
 	import { detectTheme, errToast } from '$lib/utils';
 	import axios from 'axios';
 	import { onDestroy, onMount } from 'svelte';
@@ -104,7 +104,7 @@
 	}
 
 	// alert for map errors
-	$: $elementError && errToast($elementError);
+	$: $placesError && errToast($placesError);
 
 	onMount(async () => {
 		if (browser) {
