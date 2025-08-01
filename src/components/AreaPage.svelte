@@ -147,13 +147,16 @@
 
 			// Convert Place objects to Element objects to maintain compatibility
 			const areaElements = areaPlaces.map((place: Place) => ({
-				id: place.id,
-				created_at: place.created_at,
-				updated_at: place.updated_at,
-				deleted_at: place.deleted_at,
+				id: place.id.toString(),
+				created_at: place.created_at || '',
+				updated_at: place.updated_at || '',
+				deleted_at: place.deleted_at || '',
 				osm_json: {
+					type: 'node' as const,
+					id: place.id,
 					lat: place.lat,
 					lon: place.lon,
+					bounds: null,
 					tags: {
 						name: place.name,
 						'addr:full': place.address,
@@ -165,6 +168,7 @@
 				tags: {
 					'boost:expires': place.boosted_until,
 					'icon:android': place.icon || '',
+					category: 'unknown', // Places don't have category, use default
 					verified_at: place.verified_at
 				}
 			}));

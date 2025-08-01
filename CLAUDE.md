@@ -26,6 +26,14 @@ yarn run format:fix
 
 Run this command to automatically format code according to project standards. Always run this before committing changes.
 
+### Type Checking
+
+```bash
+yarn run check
+```
+
+Run this command to perform comprehensive TypeScript type checking and Svelte validation. Always run this before committing changes.
+
 ## Git Commit Guidelines
 
 Follow [Conventional Commits](https://www.conventionalcommits.org/) format for all commits:
@@ -62,9 +70,10 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 1. Make your changes
 2. Run `yarn run format:fix`
-3. Run `yarn run lint` to verify no errors
-4. Stage and commit with conventional format
-5. Include issue number if applicable (e.g., `#276`)
+3. Run `yarn run check` to perform type checking
+4. Run `yarn run lint` to verify no errors
+5. Stage and commit with conventional format
+6. Include issue number if applicable (e.g., `#276`)
 
 ## Project Structure Notes
 
