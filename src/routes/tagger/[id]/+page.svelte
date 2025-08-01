@@ -431,14 +431,13 @@
 
 				let divIcon = generateIcon(leaflet, icon, boosted ? true : false, commentsCount);
 
-				// Extract numeric placeId from string ID (e.g., "node:13037531674" -> 13037531674)
-				const numericPlaceId = parseInt(element.id.split(':')[1]);
+				// Use OSM ID directly - v4 API supports "node:12345" format
 
 				let marker = generateMarker({
 					lat,
 					long,
 					icon: divIcon,
-					placeId: numericPlaceId,
+					placeId: element.id,
 					leaflet,
 					verify: true,
 					boosted

@@ -643,7 +643,7 @@ export const generateMarker = ({
 	lat: number;
 	long: number;
 	icon: DivIcon;
-	placeId: number;
+	placeId: number | string;
 	// element: ElementOSM;
 	// payment: PayMerchant;
 	leaflet: Leaflet;
