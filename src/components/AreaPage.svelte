@@ -130,7 +130,7 @@
 				return [];
 			}
 
-			// Use existing global places from the store (elements.ts always runs first)
+			// Use existing global places from the store (places.ts always runs first)
 			const allPlaces = $elements;
 
 			// Use geographic filtering (same as proven working approach)
