@@ -118,12 +118,12 @@
 	let dataInitialized = false;
 	let elementsLoading = false;
 
-	// Fetch elements for area using geographic filtering (proven working approach)
+	// Fetch elements for area using existing global elements data for efficiency
 	const fetchElementsForArea = async (areaId: string): Promise<Element[]> => {
 		try {
 			elementsLoading = true;
 
-			console.log(`Fetching elements for area: ${areaId} using geographic filtering`);
+			console.log(`Fetching elements for area: ${areaId} using global elements data`);
 
 			// Find the area by ID
 			const area = $areas.find((a) => a.id === areaId);
@@ -132,19 +132,59 @@
 				return [];
 			}
 
-			// Fetch all elements from v2 API (same as proven working approach)
-			const elementsResponse = await axios.get('https://api.btcmap.org/v2/elements');
-			const allElements = elementsResponse.data;
+			// Use existing global elements from the store instead of making new API calls
+			let allElements = $elements;
+			
+			if (!allElements || allElements.length === 0) {
+				console.warn('No elements found in global store, falling back to API call');
+				// Fallback to API call if store is empty
+				const elementsResponse = await axios.get('https://api.btcmap.org/v2/elements');
+				allElements = elementsResponse.data;
+			}
 
-			// Use geographic filtering (same as old working approach)
+			// Use geographic filtering (same as proven working approach)
 			const rewoundPoly = rewind(area.tags.geo_json, true);
-			const areaElements = allElements.filter((element: any) => {
-				const lat = element.osm_json.lat;
-				const lon = element.osm_json.lon;
-				return geoContains(rewoundPoly, [lon, lat]);
+			const areaPlaces = allElements.filter((element: any) => {
+				const lat = element.osm_json?.lat || element.lat;
+				const lon = element.osm_json?.lon || element.lon;
+				return lat && lon && geoContains(rewoundPoly, [lon, lat]);
 			});
 
-			console.log(`Geographic filtering found ${areaElements.length} elements for ${areaId}`);
+			console.log(`Geographic filtering found ${areaPlaces.length} places for ${areaId} from ${allElements.length} total elements`);
+
+			// Convert Place objects to Element objects to maintain compatibility
+			const areaElements = areaPlaces.map((place: any) => {
+				// If it's already an Element object (from fallback API), return as-is
+				if (place.osm_json && place.tags) {
+					return place;
+				}
+				
+				// Convert Place to Element format
+				return {
+					id: place.id,
+					created_at: place.created_at,
+					updated_at: place.updated_at,
+					deleted_at: place.deleted_at,
+					osm_json: {
+						lat: place.lat,
+						lon: place.lon,
+						tags: {
+							name: place.name,
+							'addr:full': place.address,
+							opening_hours: place.opening_hours,
+							phone: place.phone,
+							website: place.website
+						}
+					},
+					tags: {
+						'boost:expires': place.boosted_until,
+						'icon:android': place.icon || '',
+						verified_at: place.verified_at
+					}
+				};
+			});
+
+			console.log(`Converted ${areaElements.length} elements for ${areaId}`);
 			return areaElements;
 		} catch (error) {
 			console.error('Failed to fetch elements for area:', areaId, error);
