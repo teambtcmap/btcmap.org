@@ -25,7 +25,7 @@
 		toggleMapButtons
 	} from '$lib/map/setup';
 	import {
-		elementError,
+		placesError,
 		eventError,
 		events,
 		excludeLeader,
@@ -54,7 +54,7 @@
 	// alert for event errors
 	$: $eventError && errToast($eventError);
 	// alert for element errors
-	$: $elementError && errToast($elementError);
+	$: $placesError && errToast($placesError);
 
 	let dataInitialized = false;
 	let initialRenderComplete = false;

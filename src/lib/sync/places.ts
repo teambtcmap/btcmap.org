@@ -1,4 +1,4 @@
-import { elementError, elements, elementsSyncCount, mapUpdates } from '$lib/store';
+import { placesError, places, placesSyncCount, mapUpdates } from '$lib/store';
 import { clearTables } from '$lib/sync/clearTables';
 import type { Place } from '$lib/types';
 import axios from 'axios';
@@ -24,8 +24,8 @@ export const elementsSync = async () => {
 		.getItem<Place[]>('places_v4')
 		.then(async function (cachedPlaces) {
 			// add to sync count to only show data refresh after initial load
-			const count = get(elementsSyncCount);
-			elementsSyncCount.set(count + 1);
+			const count = get(placesSyncCount);
+			placesSyncCount.set(count + 1);
 
 			let placesData: Place[] = [];
 
@@ -37,7 +37,7 @@ export const elementsSync = async () => {
 					);
 					placesData = staticResponse.data;
 				} catch (error) {
-					elementError.set(
+					placesError.set(
 						'Could not load places from static CDN, please try again or contact BTC Map.'
 					);
 					console.error(error);
@@ -78,14 +78,14 @@ export const elementsSync = async () => {
 			} catch (error) {
 				// If API fails but we have cached data, continue with cached data
 				if (!cachedPlaces) {
-					elementError.set(
+					placesError.set(
 						'Could not load recent updates from API, please try again or contact BTC Map.'
 					);
 					console.error(error);
 					return;
 				}
 
-				elementError.set('Could not update places from API, using cached data.');
+				placesError.set('Could not update places from API, using cached data.');
 				console.error(error);
 			}
 
@@ -95,24 +95,22 @@ export const elementsSync = async () => {
 					.setItem('places_v4', placesData)
 					.then(function () {
 						// set response to store
-						elements.set(placesData);
+						places.set(placesData);
 					})
 					.catch(function (err) {
-						elements.set(placesData);
-						elementError.set(
-							'Could not store places locally, please try again or contact BTC Map.'
-						);
+						places.set(placesData);
+						placesError.set('Could not store places locally, please try again or contact BTC Map.');
 						console.error(err);
 					});
 			}
 		})
 		.catch(async function (err) {
-			elementError.set('Could not load places locally, please try again or contact BTC Map.');
+			placesError.set('Could not load places locally, please try again or contact BTC Map.');
 			console.error(err);
 
 			// Fallback: try to load from static CDN
-			const count = get(elementsSyncCount);
-			elementsSyncCount.set(count + 1);
+			const count = get(placesSyncCount);
+			placesSyncCount.set(count + 1);
 
 			try {
 				const staticResponse = await axios.get<Place[]>(
@@ -120,10 +118,10 @@ export const elementsSync = async () => {
 				);
 
 				if (staticResponse.data.length > 0) {
-					elements.set(staticResponse.data);
+					places.set(staticResponse.data);
 				}
 			} catch (error) {
-				elementError.set(
+				placesError.set(
 					'Could not load places from static CDN, please try again or contact BTC Map.'
 				);
 				console.error(error);

@@ -19,8 +19,8 @@
 		support,
 		verifiedArr
 	} from '$lib/map/setup';
-	import { elementError, elements, elementsSyncCount, mapUpdates } from '$lib/store';
-	import type { Leaflet, MapGroups, OSMTags, SearchElement, SearchResult } from '$lib/types';
+	import { placesError, places, placesSyncCount, mapUpdates } from '$lib/store';
+	import type { Leaflet, MapGroups, OSMTags, Place, SearchElement, SearchResult } from '$lib/types';
 	import { debounce, detectTheme, errToast } from '$lib/utils';
 	import type { Control, LatLng, LatLngBounds, Map } from 'leaflet';
 	import localforage from 'localforage';
@@ -126,10 +126,10 @@
 		refreshDiv.style.display = 'block';
 	};
 
-	$: map && mapLoaded && $mapUpdates && $elementsSyncCount > 1 && showDataRefresh();
+	$: map && mapLoaded && $mapUpdates && $placesSyncCount > 1 && showDataRefresh();
 
 	// alert for map errors
-	$: $elementError && errToast($elementError);
+	$: $placesError && errToast($placesError);
 
 	const initializeElements = () => {
 		if (elementsLoaded) return;
@@ -145,7 +145,7 @@
 		let upToDateLayer = leaflet.featureGroup.subGroup(markers);
 
 		// add location information
-		$elements.forEach((element) => {
+		$places.forEach((element: Place) => {
 			const commentsCount = element.comments || 0;
 			const icon = element.icon;
 			const boosted = element.boosted_until
@@ -173,7 +173,7 @@
 		elementsLoaded = true;
 	};
 
-	$: $elements && $elements.length && mapLoaded && !elementsLoaded && initializeElements();
+	$: $places && $places.length && mapLoaded && !elementsLoaded && initializeElements();
 
 	onMount(async () => {
 		if (browser) {

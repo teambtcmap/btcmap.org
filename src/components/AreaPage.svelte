@@ -39,8 +39,8 @@
 	import {
 		areaError,
 		areas,
-		elementError,
-		elements,
+		placesError,
+		places,
 		eventError,
 		events,
 		reportError,
@@ -70,7 +70,7 @@
 	// alert for event errors
 	$: $eventError && errToast($eventError);
 	// alert for element errors
-	$: $elementError && errToast($elementError);
+	$: $placesError && errToast($placesError);
 	// alert for area errors
 	$: $areaError && errToast($areaError);
 	// alert for report errors
@@ -131,7 +131,7 @@
 			}
 
 			// Use existing global places from the store (places.ts always runs first)
-			const allPlaces = $elements;
+			const allPlaces = $places;
 
 			// Use geographic filtering (same as proven working approach)
 			const rewoundPoly = rewind(area.tags.geo_json, true);
@@ -259,7 +259,7 @@
 		const rewoundPoly = rewind(area.geo_json, true);
 
 		// For AreaMap, filter places from client store
-		filteredPlaces = $elements.filter((place) => {
+		filteredPlaces = $places.filter((place: Place) => {
 			if (geoContains(rewoundPoly, [place.lon, place.lat])) {
 				return true;
 			} else {
@@ -321,8 +321,8 @@
 
 	$: $areas &&
 		$areas.length &&
-		$elements &&
-		$elements.length &&
+		$places &&
+		$places.length &&
 		!dataInitialized &&
 		initializeData();
 

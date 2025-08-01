@@ -36,9 +36,9 @@ export const apps = readable([
 	}
 ]);
 
-export const elements: Writable<Place[]> = writable([]);
-export const elementError = writable('');
-export const elementsSyncCount = writable(0);
+export const places: Writable<Place[]> = writable([]);
+export const placesError = writable('');
+export const placesSyncCount = writable(0);
 
 export const users: Writable<User[]> = writable([]);
 export const userError = writable('');

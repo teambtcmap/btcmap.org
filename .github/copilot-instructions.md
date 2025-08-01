@@ -87,7 +87,7 @@ export const elementsSync = async () => {
 	// Always clear old table versions first
 	clearTables(['elements', 'elements_v2', 'elements_v3']);
 	// Check local cache, then API if needed
-	await localforage.getItem<Element[]>('elements_v4').then(async function (value) {
+	await localforage.getItem<Place[]>('places_v4').then(async function (value) {
 		/* sync logic */
 	});
 };
