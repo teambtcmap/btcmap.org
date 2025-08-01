@@ -18,20 +18,11 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 		const lon = longCalc(data.osm_json);
 
 		if (data && data.id && lat && lon && !data['deleted_at']) {
-			// Parse numeric ID from "node:12345" format for v4 comments API
-			let numericId: number;
-			if (id.includes(':')) {
-				const parts = id.split(':');
-				numericId = parseInt(parts[1], 10);
-			} else {
-				numericId = parseInt(id, 10);
-			}
-
 			let comments: MerchantComment[] = [];
 			try {
-				// Use same API approach as popup - get place details with comments field
+				// Use OSM ID directly - v4 API supports "node:12345" format
 				const placeResponse = await axios.get(
-					`https://api.btcmap.org/v4/places/${numericId}?fields=comments`
+					`https://api.btcmap.org/v4/places/${id}?fields=comments`
 				);
 				const placeData = placeResponse.data;
 
@@ -41,7 +32,7 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 				} else if (placeData.comments > 0) {
 					// If it's a count, fetch full comments from dedicated endpoint
 					const commentsResponse = await axios.get(
-						`https://api.btcmap.org/v4/places/${numericId}/comments`
+						`https://api.btcmap.org/v4/places/${id}/comments`
 					);
 					comments = commentsResponse.data;
 				}
