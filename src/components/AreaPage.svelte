@@ -118,84 +118,36 @@
 	let dataInitialized = false;
 	let elementsLoading = false;
 
-	// Fetch elements for area using v3 area-elements API with client-side filtering
+	// Fetch elements for area using geographic filtering (proven working approach)
 	const fetchElementsForArea = async (areaId: string): Promise<Element[]> => {
 		try {
 			elementsLoading = true;
 
-			// Find area to get numeric btcmap:id (e.g., "220" for Germany)
+			console.log(`Fetching elements for area: ${areaId} using geographic filtering`);
+
+			// Find the area by ID
 			const area = $areas.find((a) => a.id === areaId);
-			if (!area?.tags['btcmap:id']) {
-				console.log(`No btcmap:id found for area: ${areaId}`);
+			if (!area || !area.tags.geo_json) {
+				console.error('Area not found or missing geo_json:', areaId);
 				return [];
 			}
 
-			const numericAreaId = area.tags['btcmap:id']; // "220" for Germany
+			// Fetch all elements from v2 API (same as proven working approach)
+			const elementsResponse = await axios.get('https://api.btcmap.org/v2/elements');
+			const allElements = elementsResponse.data;
 
-			// Fetch ALL area-element relationships (server-side filtering doesn't work)
-			const relationshipsResponse = await axios.get(
-				'https://api.btcmap.org/v3/area-elements?updated_since=2000-01-01T00:00:00Z&limit=1000000'
-			);
-			const relationships = relationshipsResponse.data;
+			// Use geographic filtering (same as old working approach)
+			const rewoundPoly = rewind(area.tags.geo_json, true);
+			const areaElements = allElements.filter((element: any) => {
+				const lat = element.osm_json.lat;
+				const lon = element.osm_json.lon;
+				return geoContains(rewoundPoly, [lon, lat]);
+			});
 
-			console.log(`Total relationships fetched: ${relationships.length}`);
-
-			// Client-side filter for our specific area
-			const areaRelationships = relationships.filter(
-				(rel: { area_id: number | null }) => rel.area_id && (rel.area_id === parseInt(numericAreaId) || rel.area_id.toString() === numericAreaId)
-			);
-
-			if (areaRelationships.length === 0) {
-				console.log(`No elements found for area: ${areaId} (btcmap:id: ${numericAreaId})`);
-				return [];
-			}
-
-			// Extract element IDs and fetch individual elements from v2 API
-			const elementIds = areaRelationships.map((rel: { element_id: number }) => rel.element_id);
-			console.log(`Found ${elementIds.length} elements for ${areaId}:`, elementIds.slice(0, 10));
-
-			// Batch requests to avoid overwhelming the API (process 50 at a time)
-			const batchSize = 50;
-			const elementBatches = [];
-			for (let i = 0; i < elementIds.length; i += batchSize) {
-				elementBatches.push(elementIds.slice(i, i + batchSize));
-			}
-
-			console.log(`Processing ${elementBatches.length} batches of ${batchSize} elements each`);
-			
-			const areaElements: any[] = [];
-			for (let batchIndex = 0; batchIndex < elementBatches.length; batchIndex++) {
-				const batch = elementBatches[batchIndex];
-				console.log(`Processing batch ${batchIndex + 1}/${elementBatches.length} (${batch.length} elements)`);
-				
-				const batchPromises = batch.map((elementId: number) =>
-					axios.get(`https://api.btcmap.org/v2/elements/${elementId}`)
-						.then(response => response.data)
-						.catch(error => {
-							console.warn(`Failed to fetch element ${elementId}:`, error.response?.status);
-							return null;
-						})
-				);
-
-				const batchResults = await Promise.all(batchPromises);
-				const validElements = batchResults
-					.filter(Boolean) // Remove failed requests
-					.filter((element) => element && !element.deleted_at); // Remove deleted elements
-				
-				areaElements.push(...validElements);
-				console.log(`Batch ${batchIndex + 1} completed: ${validElements.length}/${batch.length} successful`);
-				
-				// Small delay between batches to be nice to the API
-				if (batchIndex < elementBatches.length - 1) {
-					await new Promise(resolve => setTimeout(resolve, 100));
-				}
-			}
-
-			console.log(`Successfully fetched ${areaElements.length} elements for ${areaId}`);
+			console.log(`Geographic filtering found ${areaElements.length} elements for ${areaId}`);
 			return areaElements;
 		} catch (error) {
 			console.error('Failed to fetch elements for area:', areaId, error);
-			// Fallback to empty array - could implement old geographic method as fallback if needed
 			return [];
 		} finally {
 			elementsLoading = false;
