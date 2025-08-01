@@ -69,11 +69,13 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ### Workflow:
 
 1. Make your changes
-2. Run `yarn run format:fix`
+2. Run `yarn run format:fix` (REQUIRED before every commit)
 3. Run `yarn run check` to perform type checking
 4. Run `yarn run lint` to verify no errors
 5. Stage and commit with conventional format
 6. Include issue number if applicable (e.g., `#276`)
+
+**IMPORTANT**: Always run `yarn run format:fix` before staging any commit to ensure consistent code formatting.
 
 ## Project Structure Notes
 
