@@ -123,8 +123,6 @@
 		try {
 			elementsLoading = true;
 
-			console.log(`Fetching elements for area: ${areaId} using global elements data`);
-
 			// Find the area by ID
 			const area = $areas.find((a) => a.id === areaId);
 			if (!area || !area.tags.geo_json) {
@@ -140,10 +138,6 @@
 			const areaPlaces = allPlaces.filter((place: Place) => {
 				return place.lat && place.lon && geoContains(rewoundPoly, [place.lon, place.lat]);
 			});
-
-			console.log(
-				`Geographic filtering found ${areaPlaces.length} places for ${areaId} from ${allPlaces.length} total places`
-			);
 
 			// Convert Place objects to Element objects to maintain compatibility
 			const areaElements = areaPlaces.map((place: Place) => ({
@@ -173,7 +167,6 @@
 				}
 			}));
 
-			console.log(`Converted ${areaElements.length} elements for ${areaId}`);
 			return areaElements;
 		} catch (error) {
 			console.error('Failed to fetch elements for area:', areaId, error);
