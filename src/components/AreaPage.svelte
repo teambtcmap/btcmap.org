@@ -118,33 +118,40 @@
 	let dataInitialized = false;
 	let elementsLoading = false;
 
-	// Fetch elements from v2 API and filter by geographic area (client-side)
+	// Fetch elements for area using efficient v3 area-elements API
 	const fetchElementsForArea = async (areaId: string): Promise<Element[]> => {
 		try {
 			elementsLoading = true;
 
-			// Find the area by ID
-			const area = $areas.find((a) => a.id === areaId);
-			if (!area || !area.tags.geo_json) {
-				console.error('Area not found or missing geo_json:', areaId);
+			// Get area-element relationships from v3 API (server-side optimized)
+			const relationshipsResponse = await axios.get(
+				`https://api.btcmap.org/v3/area-elements?area_id=${areaId}`
+			);
+			const relationships = relationshipsResponse.data;
+
+			if (!relationships || relationships.length === 0) {
+				console.log(`No elements found for area: ${areaId}`);
 				return [];
 			}
 
-			// Fetch all elements from v2 API
-			const elementsResponse = await axios.get(`https://api.btcmap.org/v2/elements`);
-			const allElements = elementsResponse.data;
+			// Extract element IDs from relationships
+			const elementIds = relationships.map((rel: { element_id: string }) => rel.element_id);
 
-			// Use the same geo-filtering logic as used for filteredPlaces
-			const rewoundPoly = rewind(area.tags.geo_json, true);
-			const areaElements = allElements.filter((element: Element) => {
-				const lat = element.osm_json.lat;
-				const lon = element.osm_json.lon;
-				return geoContains(rewoundPoly, [lon, lat]);
-			});
+			// Fetch only the specific elements we need (much more efficient)
+			const elementPromises = elementIds.map((elementId: string) =>
+				axios.get(`https://api.btcmap.org/v2/elements/${elementId}`).catch(() => null)
+			);
+
+			const elementResponses = await Promise.all(elementPromises);
+			const areaElements = elementResponses
+				.filter(Boolean) // Remove failed requests
+				.map((response) => response!.data)
+				.filter((element) => element && !element.deleted_at); // Remove deleted elements
 
 			return areaElements;
 		} catch (error) {
 			console.error('Failed to fetch elements for area:', areaId, error);
+			// Fallback to empty array - could implement old method as fallback if needed
 			return [];
 		} finally {
 			elementsLoading = false;
