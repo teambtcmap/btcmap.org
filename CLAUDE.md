@@ -77,7 +77,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ## Project Structure Notes
 
-- `src/lib/sync/elements.ts` always runs first and populates the `$elements` store with `Place[]` data
+- `src/lib/sync/places.ts` always runs first and populates the `$elements` store with `Place[]` data
 - Use `Place` type for v4 API data, `Element` type for v2 API data
 - Prefer editing existing files over creating new ones
 - Only create documentation files when explicitly requested
