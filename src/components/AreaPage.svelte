@@ -134,7 +134,7 @@
 
 			// Use existing global elements from the store instead of making new API calls
 			let allElements = $elements;
-			
+
 			if (!allElements || allElements.length === 0) {
 				console.warn('No elements found in global store, falling back to API call');
 				// Fallback to API call if store is empty
@@ -150,7 +150,9 @@
 				return lat && lon && geoContains(rewoundPoly, [lon, lat]);
 			});
 
-			console.log(`Geographic filtering found ${areaPlaces.length} places for ${areaId} from ${allElements.length} total elements`);
+			console.log(
+				`Geographic filtering found ${areaPlaces.length} places for ${areaId} from ${allElements.length} total elements`
+			);
 
 			// Convert Place objects to Element objects to maintain compatibility
 			const areaElements = areaPlaces.map((place: any) => {
@@ -158,7 +160,7 @@
 				if (place.osm_json && place.tags) {
 					return place;
 				}
-				
+
 				// Convert Place to Element format
 				return {
 					id: place.id,
