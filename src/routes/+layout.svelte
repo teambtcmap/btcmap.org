@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { syncStatus } from '$lib/store';
 	import { areasSync } from '$lib/sync/areas';
-	import { elementsSync } from '$lib/sync/elements';
+	import { elementsSync } from '$lib/sync/places';
 	import { eventsSync } from '$lib/sync/events';
 	import { reportsSync } from '$lib/sync/reports';
 	import { usersSync } from '$lib/sync/users';

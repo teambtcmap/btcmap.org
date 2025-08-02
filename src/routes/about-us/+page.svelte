@@ -13,20 +13,20 @@
 	import {
 		areaError,
 		areas,
-		elementError,
-		elements,
+		placesError,
+		places,
 		eventError,
 		events,
 		excludeLeader,
 		userError,
 		users
 	} from '$lib/store';
-	import type { Area, Element } from '$lib/types';
-	import { errToast } from '$lib/utils';
+	import type { Area, Place } from '$lib/types';
+	import { errToast, formatElementID } from '$lib/utils';
 
 	// alert for all errors
 	$: {
-		if ($elementError) errToast($elementError);
+		if ($placesError) errToast($placesError);
 		if ($userError) errToast($userError);
 		if ($eventError) errToast($eventError);
 		if ($areaError) errToast($areaError);
@@ -34,34 +34,58 @@
 
 	let dataInitalized = false;
 
-	let merchants: Element[] = [];
+	let merchants: Place[] = [];
 	let communities: Area[] = [];
 
-	const initializeData = () => {
-		if (dataInitalized) return;
+	const fetchMerchantName = async (placeId: number): Promise<string> => {
+		try {
+			const response = await fetch(`https://api.btcmap.org/v4/places/${placeId}?fields=name`);
+			if (!response.ok) throw new Error('API call failed');
+			const data = await response.json();
+			return data.name || formatElementID(`node:${placeId}`);
+		} catch {
+			return formatElementID(`node:${placeId}`);
+		}
+	};
 
-		merchants = $elements
-			.filter((element) => element.tags['boost:expires'])
+	const initializeData = async () => {
+		const boostedMerchants = $places
+			.filter((place: Place) => place.boosted_until)
 			.sort(
-				(a, b) =>
-					Date.parse(b.tags['boost:expires'] || '0') - Date.parse(a.tags['boost:expires'] || '0')
+				(a: Place, b: Place) =>
+					Date.parse(b.boosted_until || '0') - Date.parse(a.boosted_until || '0')
 			)
 			.slice(0, 6);
+
+		// Fetch names for merchants
+		const merchantPromises = boostedMerchants.map(async (merchant: Place) => {
+			const name = await fetchMerchantName(merchant.id);
+			return { ...merchant, name };
+		});
+
+		try {
+			merchants = await Promise.all(merchantPromises);
+		} catch (error) {
+			console.error('Error fetching merchant names:', error);
+			// Fallback: use merchants without names
+			merchants = boostedMerchants;
+		}
 
 		populateLeaderboard();
 
 		communities = $areas.filter((area) => featuredCommunities.includes(area.id));
-
-		dataInitalized = true;
 	};
 
 	// Initialize data when all stores are loaded
-	$: {
-		const allDataLoaded = $elements?.length && $users?.length && $events?.length && $areas?.length;
-
-		if (allDataLoaded && !dataInitalized) {
-			initializeData();
-		}
+	$: if (
+		$places?.length &&
+		$users?.length &&
+		$events?.length &&
+		$areas?.length &&
+		!dataInitalized
+	) {
+		initializeData();
+		dataInitalized = true;
 	}
 
 	let supertaggers: { id: number; username: string; avatar: string; total: number }[] = [];
@@ -267,9 +291,9 @@
 					{#if merchants.length}
 						{#each merchants as merchant (merchant.id)}
 							<AboutMerchant
-								id={merchant.id}
-								icon={merchant.tags['icon:android']}
-								tooltip={merchant['osm_json'].tags?.name}
+								id={merchant.id.toString()}
+								icon={merchant.icon}
+								tooltip={merchant.name}
 							/>
 						{/each}
 					{:else}

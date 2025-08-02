@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import axios from 'axios';
 
 	export let type: 'country' | 'community';
 	export let data: AreaPageProps;
@@ -38,8 +39,8 @@
 	import {
 		areaError,
 		areas,
-		elementError,
-		elements,
+		placesError,
+		places,
 		eventError,
 		events,
 		reportError,
@@ -55,6 +56,7 @@
 		type AreaType,
 		type Element,
 		type Event,
+		type Place,
 		type Report,
 		type RpcIssue,
 		type User
@@ -68,7 +70,7 @@
 	// alert for event errors
 	$: $eventError && errToast($eventError);
 	// alert for element errors
-	$: $elementError && errToast($elementError);
+	$: $placesError && errToast($placesError);
 	// alert for area errors
 	$: $areaError && errToast($areaError);
 	// alert for report errors
@@ -114,8 +116,67 @@
 	// No need for hash handling anymore - sections are handled by route parameters
 
 	let dataInitialized = false;
+	let elementsLoading = false;
 
-	const initializeData = () => {
+	// Fetch elements for area using existing global elements data for efficiency
+	const fetchElementsForArea = async (areaId: string): Promise<Element[]> => {
+		try {
+			elementsLoading = true;
+
+			// Find the area by ID
+			const area = $areas.find((a) => a.id === areaId);
+			if (!area || !area.tags.geo_json) {
+				console.error('Area not found or missing geo_json:', areaId);
+				return [];
+			}
+
+			// Use existing global places from the store (places.ts always runs first)
+			const allPlaces = $places;
+
+			// Use geographic filtering (same as proven working approach)
+			const rewoundPoly = rewind(area.tags.geo_json, true);
+			const areaPlaces = allPlaces.filter((place: Place) => {
+				return place.lat && place.lon && geoContains(rewoundPoly, [place.lon, place.lat]);
+			});
+
+			// Convert Place objects to Element objects to maintain compatibility
+			const areaElements = areaPlaces.map((place: Place) => ({
+				id: place.id.toString(),
+				created_at: place.created_at || '',
+				updated_at: place.updated_at || '',
+				deleted_at: place.deleted_at || '',
+				osm_json: {
+					type: 'node' as const,
+					id: place.id,
+					lat: place.lat,
+					lon: place.lon,
+					bounds: null,
+					tags: {
+						name: place.name,
+						'addr:full': place.address,
+						opening_hours: place.opening_hours,
+						phone: place.phone,
+						website: place.website
+					}
+				},
+				tags: {
+					'boost:expires': place.boosted_until,
+					'icon:android': place.icon || '',
+					category: 'unknown', // Places don't have category, use default
+					verified_at: place.verified_at
+				}
+			}));
+
+			return areaElements;
+		} catch (error) {
+			console.error('Failed to fetch elements for area:', areaId, error);
+			return [];
+		} finally {
+			elementsLoading = false;
+		}
+	};
+
+	const initializeData = async () => {
 		if (dataInitialized) return;
 
 		const areaFound = $areas.find((area) => {
@@ -149,8 +210,10 @@
 		}
 
 		areaReports = $reports
-			.filter((report) => report.area_id === data.id)
-			.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
+			? $reports
+					.filter((report) => report.area_id === data.id)
+					.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']))
+			: [];
 
 		area = areaFound.tags;
 
@@ -195,76 +258,72 @@
 
 		const rewoundPoly = rewind(area.geo_json, true);
 
-		// filter elements within area
-		filteredElements = $elements.filter((element) => {
-			let lat = latCalc(element['osm_json']);
-			let long = longCalc(element['osm_json']);
-
-			if (geoContains(rewoundPoly, [long, lat])) {
+		// For AreaMap, filter places from client store
+		filteredPlaces = $places.filter((place: Place) => {
+			if (geoContains(rewoundPoly, [place.lon, place.lat])) {
 				return true;
 			} else {
 				return false;
 			}
 		});
 
-		const areaEvents = $events.filter((event) =>
-			filteredElements.find((element) => element.id === event.element_id)
-		);
-
-		areaEvents.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
-
-		const findUser = (tagger: Event) => {
-			let foundUser = $users.find((user) => user.id == tagger['user_id']);
-
-			if (foundUser) {
-				if (!taggers.find((tagger) => tagger.id === foundUser?.id)) {
-					taggers.push(foundUser);
-				}
-
-				return foundUser;
-			} else {
-				return undefined;
-			}
-		};
-
-		areaEvents.forEach((event) => {
-			let elementMatch = filteredElements.find((element) => element.id === event['element_id']);
-
-			let location = elementMatch?.['osm_json'].tags?.name || undefined;
-
-			let tagger = findUser(event);
-
-			eventElements.push({
-				...event,
-				location: location || formatElementID(event['element_id']),
-				merchantId: event['element_id'],
-				tagger
-			});
-		});
-
-		eventElements = eventElements;
-		taggers = taggers;
-
 		issues = data.issues;
 
 		dataInitialized = true;
+
+		// Fetch elements in the background for rich components
+		if (browser) {
+			const elements = await fetchElementsForArea(areaFound.id);
+			filteredElements = elements;
+
+			// Process events after elements are loaded, only if events and users stores are populated
+			if ($events.length && $users.length) {
+				const areaEvents = $events.filter((event) =>
+					filteredElements.find((element) => element.id === event.element_id)
+				);
+
+				areaEvents.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
+
+				const findUser = (tagger: Event) => {
+					let foundUser = $users.find((user) => user.id == tagger['user_id']);
+
+					if (foundUser) {
+						if (!taggers.find((tagger) => tagger.id === foundUser?.id)) {
+							taggers.push(foundUser);
+						}
+
+						return foundUser;
+					} else {
+						return undefined;
+					}
+				};
+
+				areaEvents.forEach((event) => {
+					let elementMatch = filteredElements.find((element) => element.id === event['element_id']);
+
+					let location = elementMatch?.osm_json.tags?.name || undefined;
+
+					let tagger = findUser(event);
+
+					eventElements.push({
+						...event,
+						location: location || formatElementID(event['element_id']),
+						merchantId: event['element_id'],
+						tagger
+					});
+				});
+
+				eventElements = eventElements;
+				taggers = taggers;
+			}
+		}
 	};
 
-	$: $users &&
-		$users.length &&
-		$events &&
-		$events.length &&
-		$elements &&
-		$elements.length &&
-		$areas &&
-		$areas.length &&
-		$reports &&
-		$reports.length &&
-		!dataInitialized &&
-		initializeData();
+	$: $areas && $areas.length && $places && $places.length && !dataInitialized && initializeData();
 
 	let area: AreaTags;
-	let filteredElements: Element[];
+	let filteredElements: Element[] = [];
+	let filteredPlaces: Place[] = [];
 	let areaReports: Report[];
 
 	let avatar: string;
@@ -414,8 +473,11 @@
 	</div>
 
 	{#if activeSection === Sections.merchants}
-		<AreaMap {name} geoJSON={area?.geo_json} {filteredElements} />
-		<AreaMerchantHighlights {dataInitialized} {filteredElements} />
+		<AreaMap {name} geoJSON={area?.geo_json} {filteredPlaces} />
+		<AreaMerchantHighlights
+			dataInitialized={dataInitialized && !elementsLoading}
+			{filteredElements}
+		/>
 		{#if browser}
 			<Boost />
 		{/if}
@@ -428,12 +490,18 @@
 			</div>
 		{/if}
 	{:else if activeSection === Sections.activity}
-		<AreaActivity {alias} {name} {dataInitialized} {eventElements} {taggers} />
+		<AreaActivity
+			{alias}
+			{name}
+			dataInitialized={dataInitialized && !elementsLoading}
+			{eventElements}
+			{taggers}
+		/>
 	{:else if activeSection === Sections.maintain}
 		<IssuesTable
 			title="{name || 'BTC Map Area'} Tagging Issues"
 			{issues}
-			loading={!dataInitialized}
+			loading={!(dataInitialized && !elementsLoading)}
 		/>
 		<AreaTickets tickets={data.tickets} title="{name || 'BTC Map Area'} Open Tickets" />
 	{/if}
