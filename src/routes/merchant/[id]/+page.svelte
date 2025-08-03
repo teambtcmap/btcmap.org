@@ -571,8 +571,8 @@
 						{#if twitter}
 							<MerchantLink
 								link={twitter.startsWith('http') ? twitter : `https://twitter.com/${twitter}`}
-								icon="twitter"
-								text="Twitter"
+								icon="x"
+								text="X"
 							/>
 						{/if}
 
