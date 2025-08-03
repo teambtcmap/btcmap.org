@@ -20,24 +20,13 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 		if (data && data.id && lat && lon && !data['deleted_at']) {
 			let comments: MerchantComment[] = [];
 			try {
-				// Use OSM ID directly - v4 API supports "node:12345" format
-				const placeResponse = await axios.get(
-					`https://api.btcmap.org/v4/places/${id}?fields=comments`
+				// Fetch comments directly from the dedicated comments endpoint
+				const commentsResponse = await axios.get(
+					`https://api.btcmap.org/v4/places/${id}/comments`
 				);
-				const placeData = placeResponse.data;
-
-				// If comments field exists and is an array, use it; otherwise fetch from comments endpoint
-				if (Array.isArray(placeData.comments)) {
-					comments = placeData.comments;
-				} else if (placeData.comments > 0) {
-					// If it's a count, fetch full comments from dedicated endpoint
-					const commentsResponse = await axios.get(
-						`https://api.btcmap.org/v4/places/${id}/comments`
-					);
-					comments = commentsResponse.data;
-				}
+				comments = commentsResponse.data;
 			} catch {
-				// Place doesn't exist in v4 API or comments failed - use empty array
+				// Comments endpoint failed - use empty array
 				comments = [];
 			}
 
