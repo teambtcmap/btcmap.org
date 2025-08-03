@@ -21,9 +21,7 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 			let comments: MerchantComment[] = [];
 			try {
 				// Fetch comments directly from the dedicated comments endpoint
-				const commentsResponse = await axios.get(
-					`https://api.btcmap.org/v4/places/${id}/comments`
-				);
+				const commentsResponse = await axios.get(`https://api.btcmap.org/v4/places/${id}/comments`);
 				comments = commentsResponse.data;
 			} catch {
 				// Comments endpoint failed - use empty array
