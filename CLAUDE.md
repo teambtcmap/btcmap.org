@@ -2,6 +2,17 @@
 
 This file contains project-specific guidelines and commands for Claude Code to follow when working on this codebase.
 
+## ⚠️ PRE-COMMIT CHECKLIST
+
+**BEFORE EVERY COMMIT, YOU MUST:**
+
+1. **🎨 Format code:** Run `yarn run format:fix` (REQUIRED - NO EXCEPTIONS)
+2. **🔍 Type check:** Run `yarn run check`
+3. **🧹 Lint:** Run `yarn run lint`
+4. **📝 Commit format:** Use conventional commit format with issue number
+
+**Failure to run `yarn run format:fix` before committing will result in inconsistent code formatting.**
+
 ## Additional Documentation
 
 For comprehensive project architecture, patterns, and development workflows, see:
@@ -36,6 +47,8 @@ Run this command to perform comprehensive TypeScript type checking and Svelte va
 
 ## Git Commit Guidelines
 
+**⚠️ CRITICAL: Always run `yarn run format:fix` before committing!**
+
 Follow [Conventional Commits](https://www.conventionalcommits.org/) format for all commits:
 
 ```
@@ -69,13 +82,13 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ### Workflow:
 
 1. Make your changes
-2. Run `yarn run format:fix` (REQUIRED before every commit)
+2. **🎨 MANDATORY:** Run `yarn run format:fix` ⚠️ **THIS IS REQUIRED BEFORE EVERY COMMIT** ⚠️
 3. Run `yarn run check` to perform type checking
 4. Run `yarn run lint` to verify no errors
 5. Stage and commit with conventional format
 6. Include issue number if applicable (e.g., `#276`)
 
-**IMPORTANT**: Always run `yarn run format:fix` before staging any commit to ensure consistent code formatting.
+**🚨 CRITICAL REMINDER:** You MUST run `yarn run format:fix` before staging any commit. This is non-negotiable and ensures consistent code formatting across the entire project.
 
 ## Project Structure Notes
 
