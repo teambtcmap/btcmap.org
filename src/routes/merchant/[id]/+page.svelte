@@ -714,7 +714,13 @@
 							</div>
 
 							<div slot="footer">
-								<CommentAddButton elementId={data.id} />
+								{#if data.comments.length}
+									<PrimaryButton link="#comments" style="w-40 rounded-xl p-3">
+										View Comments
+									</PrimaryButton>
+								{:else}
+									<CommentAddButton elementId={data.id} />
+								{/if}
 							</div>
 						</Card>
 					</div>
