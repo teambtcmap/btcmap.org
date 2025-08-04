@@ -743,9 +743,12 @@
 
 			<section id="comments">
 				<Card>
-					<h3 slot="header" class="text-lg font-semibold">
-						{name || 'Merchant'} Comments
-					</h3>
+					<div slot="header" class="flex items-center justify-between">
+						<h3 class="text-lg font-semibold">
+							{name || 'Merchant'} Comments
+						</h3>
+						<CommentAddButton elementId={data.id} />
+					</div>
 
 					<div slot="body" class="w-full">
 						<div class="hide-scroll relative max-h-[300px] space-y-2 overflow-y-scroll">
