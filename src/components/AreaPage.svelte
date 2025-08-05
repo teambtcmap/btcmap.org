@@ -118,7 +118,7 @@
 	let dataInitialized = false;
 	let elementsLoading = false;
 
-	// Fetch elements for area using existing global elements data for efficiency
+	// Fetch elements for area using geographic filtering + individual place API calls for complete data
 	const fetchElementsForArea = async (areaId: string): Promise<Element[]> => {
 		try {
 			elementsLoading = true;
@@ -130,44 +130,83 @@
 				return [];
 			}
 
-			// Use existing global places from the store (places.ts always runs first)
+			// Use existing global places from the store for initial geographic filtering
 			const allPlaces = $places;
 
-			// Use geographic filtering (same as proven working approach)
+			// Use geographic filtering to get place IDs in the area
 			const rewoundPoly = rewind(area.tags.geo_json, true);
 			const areaPlaces = allPlaces.filter((place: Place) => {
 				return place.lat && place.lon && geoContains(rewoundPoly, [place.lon, place.lat]);
 			});
 
-			// Convert Place objects to Element objects to maintain compatibility
-			const areaElements = areaPlaces.map((place: Place) => ({
-				id: place.id.toString(),
-				created_at: place.created_at || '',
-				updated_at: place.updated_at || '',
-				deleted_at: place.deleted_at || '',
-				osm_json: {
-					type: 'node' as const,
-					id: place.id,
-					lat: place.lat,
-					lon: place.lon,
-					bounds: null,
-					tags: {
-						name: place.name,
-						'addr:full': place.address,
-						opening_hours: place.opening_hours,
-						phone: place.phone,
-						website: place.website
-					}
-				},
-				tags: {
-					'boost:expires': place.boosted_until,
-					'icon:android': place.icon || '',
-					category: 'unknown', // Places don't have category, use default
-					verified_at: place.verified_at
-				}
-			}));
+			console.log(`Geographic filtering found ${areaPlaces.length} places for ${areaId}`);
 
-			return areaElements;
+			// Fetch detailed data for each place using individual API calls
+			const placeIds = areaPlaces.map((place) => place.id);
+
+			// Batch requests to avoid overwhelming the API (process 20 at a time)
+			const batchSize = 20;
+			const placeBatches = [];
+			for (let i = 0; i < placeIds.length; i += batchSize) {
+				placeBatches.push(placeIds.slice(i, i + batchSize));
+			}
+
+			console.log(
+				`Fetching detailed data for ${placeIds.length} places in ${placeBatches.length} batches`
+			);
+
+			const detailedElements: Element[] = [];
+			for (let batchIndex = 0; batchIndex < placeBatches.length; batchIndex++) {
+				const batch = placeBatches[batchIndex];
+				console.log(
+					`Processing batch ${batchIndex + 1}/${placeBatches.length} (${batch.length} places)`
+				);
+
+				const batchPromises = batch.map((placeId: number) =>
+					axios
+						.get(`https://api.btcmap.org/v4/places/${placeId}?fields=id,osm_id`)
+						.then((response) => {
+							const place = response.data;
+							if (!place.osm_id) {
+								console.warn(`Place ${placeId} has no osm_id`);
+								return null;
+							}
+							// Now fetch the full element data using the OSM ID (which already includes the node: prefix)
+							return axios
+								.get(`https://api.btcmap.org/v2/elements/${place.osm_id}`)
+								.then((elementResponse) => elementResponse.data)
+								.catch((error) => {
+									console.warn(`Failed to fetch element ${place.osm_id}:`, error.response?.status);
+									return null;
+								});
+						})
+						.catch((error) => {
+							console.warn(`Failed to fetch place ${placeId}:`, error.response?.status);
+							return null;
+						})
+				);
+
+				const batchResults = await Promise.all(batchPromises);
+				const validElements = batchResults
+					.filter(Boolean) // Remove failed requests
+					.filter((element) => element && !element.deleted_at); // Remove deleted elements
+
+				detailedElements.push(...validElements);
+				console.log(
+					`Batch ${batchIndex + 1} completed: ${validElements.length}/${batch.length} successful`
+				);
+
+				// Small delay between batches to be nice to the API
+				if (batchIndex < placeBatches.length - 1) {
+					await new Promise((resolve) => setTimeout(resolve, 100));
+				}
+			}
+
+			// Return the detailed elements directly (no conversion needed since v2/elements API returns Element objects)
+			console.log(
+				`Successfully fetched ${detailedElements.length} detailed elements for ${areaId}`
+			);
+			return detailedElements;
 		} catch (error) {
 			console.error('Failed to fetch elements for area:', areaId, error);
 			return [];
