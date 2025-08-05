@@ -38,6 +38,8 @@
 		type ActivityEvent,
 		type DomEventType,
 		type EarnedBadge,
+		type Element,
+		type Event,
 		type Leaflet,
 		type ProfileLeaderboard
 	} from '$lib/types.js';
@@ -277,38 +279,79 @@
 			Number((deleted / (total / 100)).toFixed(0))
 		);
 
-		const fetchMerchantName = async (elementId: string): Promise<string> => {
-			try {
-				const response = await fetch(`https://api.btcmap.org/v2/elements/${elementId}`);
-				if (!response.ok) throw new Error('API call failed');
-				const data = await response.json();
-				return data.osm_json?.tags?.name || formatElementID(elementId);
-			} catch {
-				return formatElementID(elementId);
+		// Consolidated element fetching with batching to eliminate duplicate API calls
+		const fetchElementsData = async (events: Event[]) => {
+			// Get unique element IDs to avoid duplicate fetches
+			const uniqueElementIds = [...new Set(events.map((event) => event.element_id))];
+			console.log(
+				`Fetching data for ${uniqueElementIds.length} unique elements from ${events.length} events`
+			);
+
+			// Batch requests to avoid overwhelming the API (process 20 at a time)
+			const batchSize = 20;
+			const elementBatches = [];
+			for (let i = 0; i < uniqueElementIds.length; i += batchSize) {
+				elementBatches.push(uniqueElementIds.slice(i, i + batchSize));
 			}
+
+			console.log(
+				`Processing ${uniqueElementIds.length} elements in ${elementBatches.length} batches`
+			);
+
+			const elementDataMap: Record<string, Element | null> = {};
+
+			for (let batchIndex = 0; batchIndex < elementBatches.length; batchIndex++) {
+				const batch = elementBatches[batchIndex];
+				console.log(
+					`Processing batch ${batchIndex + 1}/${elementBatches.length} (${batch.length} elements)`
+				);
+
+				const batchPromises = batch.map(async (elementId: string) => {
+					try {
+						const response = await fetch(`https://api.btcmap.org/v2/elements/${elementId}`);
+						if (!response.ok) throw new Error('API call failed');
+						const data = await response.json();
+						return { elementId, data };
+					} catch (error) {
+						console.warn(`Failed to fetch element ${elementId}:`, error);
+						return { elementId, data: null };
+					}
+				});
+
+				const batchResults = await Promise.all(batchPromises);
+
+				// Store results in map for quick lookup
+				batchResults.forEach(({ elementId, data }) => {
+					elementDataMap[elementId] = data;
+				});
+
+				const successCount = batchResults.filter((result) => result.data !== null).length;
+				console.log(
+					`Batch ${batchIndex + 1} completed: ${successCount}/${batch.length} successful`
+				);
+
+				// Small delay between batches to be nice to the API
+				if (batchIndex < elementBatches.length - 1) {
+					await new Promise((resolve) => setTimeout(resolve, 100));
+				}
+			}
+
+			return elementDataMap;
 		};
 
-		// Fetch merchant names for activity events
-		const activityPromises = userEvents.map(async (event) => {
-			const location = await fetchMerchantName(event['element_id']);
+		// Fetch all element data once and cache it
+		const elementDataMap = await fetchElementsData(userEvents);
+
+		// Create activity events using cached element data
+		eventElements = userEvents.map((event) => {
+			const elementData = elementDataMap[event.element_id];
+			const location = elementData?.osm_json?.tags?.name || formatElementID(event.element_id);
 			return {
 				...event,
 				location,
-				merchantId: event['element_id']
+				merchantId: event.element_id
 			};
 		});
-
-		try {
-			eventElements = await Promise.all(activityPromises);
-		} catch (error) {
-			console.error('Error fetching activity merchant names:', error);
-			// Fallback: create entries with element IDs only
-			eventElements = userEvents.map((event) => ({
-				...event,
-				location: formatElementID(event['element_id']),
-				merchantId: event['element_id']
-			}));
-		}
 
 		// add markdown support for profile description
 		const markdown = await marked.parse(filteredDesc || '');
@@ -385,25 +428,16 @@
 			// get date from 1 year ago to add verified check if survey is current
 			let verifiedDate = calcVerifiedDate();
 
-			// fetch elements edited by user from API
-			const elementPromises = userEvents.map(async (event) => {
-				try {
-					const response = await fetch(`https://api.btcmap.org/v2/elements/${event['element_id']}`);
-					if (!response.ok) throw new Error('API call failed');
-					return await response.json();
-				} catch {
-					return null;
+			// Use cached element data instead of making duplicate API calls
+			const filteredElements: Element[] = [];
+			userEvents.forEach((event) => {
+				const elementData = elementDataMap[event.element_id];
+				if (elementData) {
+					filteredElements.push(elementData);
 				}
 			});
 
-			let filteredElements = [];
-			try {
-				const allElements = await Promise.all(elementPromises);
-				filteredElements = allElements.filter(Boolean);
-			} catch (error) {
-				console.error('Error fetching map elements:', error);
-				filteredElements = [];
-			}
+			console.log(`Using ${filteredElements.length} cached elements for map display`);
 
 			// add location information
 			let bounds: { lat: number; long: number }[] = [];
@@ -439,8 +473,7 @@
 					icon: divIcon,
 					placeId: element.id,
 					leaflet,
-					verify: true,
-					boosted
+					verify: true
 				});
 
 				markers.addLayer(marker);
