@@ -221,7 +221,7 @@
 			title: 'Project Manager',
 			avatar: 'nathan',
 			socials: [
-				{ url: 'https://twitter.com/nathan_day', name: 'twitter' },
+				{ url: 'https://twitter.com/nathan_day', name: 'x' },
 				{ url: 'https://github.com/dadofsambonzuki', name: 'github' }
 			]
 		},
@@ -231,7 +231,7 @@
 			avatar: 'secondl1ght',
 			socials: [
 				{ url: 'https://secondl1ght.site', name: 'website' },
-				{ url: 'https://twitter.com/secondl1ght', name: 'twitter' },
+				{ url: 'https://twitter.com/secondl1ght', name: 'x' },
 				{ url: 'https://github.com/secondl1ght', name: 'github' }
 			]
 		},
@@ -240,7 +240,7 @@
 			title: 'Lead Designer',
 			avatar: 'karnage',
 			socials: [
-				{ url: 'https://twitter.com/KarnageBitcoin', name: 'twitter' },
+				{ url: 'https://twitter.com/KarnageBitcoin', name: 'x' },
 				{ url: 'https://github.com/cogentgene', name: 'github' }
 			]
 		}
