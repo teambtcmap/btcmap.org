@@ -8,11 +8,41 @@ import { get } from 'svelte/store';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
-// Helper function to get date 2 weeks ago
+// Helper function to get date 2 weeks ago (fallback)
 const getTwoWeeksAgoDate = (): string => {
 	const twoWeeksAgo = new Date();
 	twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
 	return twoWeeksAgo.toISOString();
+};
+
+// Helper function to get static file's last modified date
+const getStaticFileDate = async (): Promise<string> => {
+	try {
+		// Use HEAD request to get headers without downloading the full file
+		const headResponse = await axios.head('https://static.btcmap.org/api/v4/places.json');
+		const lastModified = headResponse.headers['last-modified'];
+
+		if (lastModified) {
+			const staticDate = new Date(lastModified);
+
+			// Validate date is reasonable (not in future, not older than 90 days)
+			const now = new Date();
+			const ninetyDaysAgo = new Date();
+			ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+			if (staticDate <= now && staticDate >= ninetyDaysAgo) {
+				console.log(`Using static file date for updates: ${staticDate.toISOString()}`);
+				return staticDate.toISOString();
+			} else {
+				console.warn(`Static file date invalid (${staticDate.toISOString()}), using fallback`);
+			}
+		}
+	} catch (error) {
+		console.warn('Failed to get static file date, using fallback:', error);
+	}
+
+	// Fallback to 2 weeks ago
+	return getTwoWeeksAgoDate();
 };
 
 export const elementsSync = async () => {
@@ -48,12 +78,12 @@ export const elementsSync = async () => {
 				placesData = [...cachedPlaces];
 			}
 
-			// Step 2: Get recent updates from API (last 2 weeks)
-			const twoWeeksAgo = getTwoWeeksAgoDate();
+			// Step 2: Get recent updates from API (since static file was last updated)
+			const updatesSince = await getStaticFileDate();
 
 			try {
 				const apiResponse = await axios.get<Place[]>(
-					`https://api.btcmap.org/v4/places?fields=id,lat,lon,icon,comments,deleted_at,updated_at&updated_since=${twoWeeksAgo}&include_deleted=true`
+					`https://api.btcmap.org/v4/places?fields=id,lat,lon,icon,comments,deleted_at,updated_at&updated_since=${updatesSince}&include_deleted=true`
 				);
 
 				const recentUpdates = apiResponse.data;
