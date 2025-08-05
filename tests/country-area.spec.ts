@@ -2,6 +2,9 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Country Area Pages', () => {
 	test('loads country page and redirects to merchants', async ({ page }) => {
+		// Increase timeout for this slow test due to heavy API calls
+		test.setTimeout(60000);
+
 		await page.goto('http://127.0.0.1:5173/country/za');
 		await expect(page).toHaveURL(/\/country\/za\/merchants$/);
 		await page.waitForLoadState('networkidle');
@@ -15,6 +18,9 @@ test.describe('Country Area Pages', () => {
 	});
 
 	test('handles section navigation', async ({ page }) => {
+		// Increase timeout for this slow test due to heavy API calls
+		test.setTimeout(60000);
+
 		const testSections = ['merchants', 'stats', 'activity', 'maintain'];
 
 		for (const section of testSections) {
