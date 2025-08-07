@@ -26,7 +26,7 @@
 		OSMTags,
 		Place,
 		SearchPlaceResult,
-		SearchResponse
+		SearchRpcResponse
 	} from '$lib/types';
 	import { debounce, detectTheme, errToast } from '$lib/utils';
 	import type { Control, LatLng, LatLngBounds, Map } from 'leaflet';
@@ -55,7 +55,7 @@
 	let searchStatus: boolean;
 	let searchResults: SearchPlaceResult[] = [];
 
-	// API-based search functions using v4/search REST API
+	// API-based search functions using JSON-RPC search API
 	const apiSearch = async () => {
 		if (search.length < 3) {
 			searchResults = [];
@@ -66,24 +66,41 @@
 		searchStatus = true;
 
 		try {
-			const response = await fetch(
-				`https://api.btcmap.org/v4/search/?q=${encodeURIComponent(search)}&limit=50`
-			);
-			const data = await response.json();
+			const response = await fetch('https://api.btcmap.org/rpc', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					jsonrpc: '2.0',
+					method: 'search',
+					params: {
+						query: search,
+						limit: 50
+					},
+					id: 1
+				})
+			});
 
-			if (!response.ok) {
+			const data: SearchRpcResponse = await response.json();
+
+			if (!response.ok || data.jsonrpc !== '2.0') {
 				throw new Error('Search API error');
 			}
 
 			// Convert API results to our format (without coordinates for now)
-			searchResults = data.results.map((item: any) => ({
-				id: item.id,
-				name: item.name,
-				type: item.type,
-				// Skip coordinates and distance for now
-				distanceKm: 0,
-				distanceMi: 0
-			}));
+			searchResults = data.result.items
+				.filter((item) => item.type === 'element') // Only show elements for now
+				.map((item) => ({
+					id: item.id,
+					name: item.name,
+					type: item.type,
+					description: item.description,
+					score: item.score,
+					// Skip coordinates and distance for now
+					distanceKm: 0,
+					distanceMi: 0
+				}));
 		} catch (error) {
 			console.error('Search error:', error);
 			errToast('Search temporarily unavailable');
@@ -103,8 +120,11 @@
 	const searchSelect = async (result: SearchPlaceResult) => {
 		clearSearch();
 
+		// Convert string ID to number for comparison with places store
+		const placeId = parseInt(result.id, 10);
+
 		// First, try to find the place in our local places store
-		const localPlace = $places.find((p) => p.id === result.id);
+		const localPlace = $places.find((p) => p.id === placeId);
 
 		if (localPlace && localPlace.lat && localPlace.lon) {
 			// Use local data if available
