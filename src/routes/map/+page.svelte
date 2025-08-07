@@ -118,9 +118,6 @@
 		if (localPlace && localPlace.lat && localPlace.lon) {
 			// Use local data if available
 			map.flyTo([localPlace.lat, localPlace.lon], 19);
-			console.log(
-				`Flying to ${result.name} at [${localPlace.lat}, ${localPlace.lon}] (from local store)`
-			);
 		} else {
 			// If not in local store, fetch from v4/places API
 			try {
@@ -131,11 +128,7 @@
 
 				if (response.ok && placeData.lat && placeData.lon) {
 					map.flyTo([placeData.lat, placeData.lon], 19);
-					console.log(
-						`Flying to ${result.name} at [${placeData.lat}, ${placeData.lon}] (from API)`
-					);
 				} else {
-					console.log('Could not get coordinates for place:', result);
 					errToast('Could not navigate to location');
 				}
 			} catch (error) {
