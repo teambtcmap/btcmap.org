@@ -1,13 +1,13 @@
 import type { GeoJSON, Polygon, MultiPolygon } from 'geojson';
 import type leaflet from 'leaflet';
 import type {
+	DivIcon,
 	DomEvent,
 	FeatureGroup,
 	LatLng,
 	LayerGroup,
 	Marker,
 	TileLayer,
-	// @ts-ignore
 	MaplibreGL
 } from 'leaflet';
 
@@ -319,7 +319,7 @@ export interface SearchPlaceResult extends SearchItem {
 	distanceKm: number;
 	distanceMi: number;
 	latLng?: LatLng;
-	marker?: Marker<any>;
+	marker?: Marker<DivIcon>;
 }
 
 export interface SearchRpcResponse {
