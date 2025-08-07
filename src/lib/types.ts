@@ -314,13 +314,6 @@ export interface SearchItem {
 	score: number;
 }
 
-export interface SearchPlaceResult extends SearchItem {
-	distanceKm: number;
-	distanceMi: number;
-	latLng?: LatLng;
-	marker?: Marker<any>;
-}
-
 export interface SearchRpcResponse {
 	jsonrpc: '2.0';
 	result: {
