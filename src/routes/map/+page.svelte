@@ -25,7 +25,7 @@
 		MapGroups,
 		OSMTags,
 		Place,
-		SearchPlaceResult,
+		SearchItem,
 		SearchRpcResponse
 	} from '$lib/types';
 	import { debounce, detectTheme, errToast } from '$lib/utils';
@@ -53,7 +53,7 @@
 	let showSearch = false;
 	let search: string;
 	let searchStatus: boolean;
-	let searchResults: SearchPlaceResult[] = [];
+	let searchResults: SearchItem[] = [];
 
 	// API-based search functions using JSON-RPC search API
 	const apiSearch = async () => {
@@ -88,19 +88,8 @@
 				throw new Error('Search API error');
 			}
 
-			// Convert API results to our format (without coordinates for now)
-			searchResults = data.result.items
-				.filter((item) => item.type === 'element') // Only show elements for now
-				.map((item) => ({
-					id: item.id,
-					name: item.name,
-					type: item.type,
-					description: item.description,
-					score: item.score,
-					// Skip coordinates and distance for now
-					distanceKm: 0,
-					distanceMi: 0
-				}));
+			// Filter API results to only show elements
+			searchResults = data.result.items.filter((item) => item.type === 'element');
 		} catch (error) {
 			console.error('Search error:', error);
 			errToast('Search temporarily unavailable');
@@ -117,7 +106,7 @@
 		searchResults = [];
 	};
 
-	const searchSelect = async (result: SearchPlaceResult) => {
+	const searchSelect = async (result: SearchItem) => {
 		clearSearch();
 
 		// Convert string ID to number for comparison with places store
