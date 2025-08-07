@@ -55,7 +55,7 @@
 	let searchStatus: boolean;
 	let searchResults: SearchPlaceResult[] = [];
 
-	// API-based search functions
+	// API-based search functions using v4/search REST API
 	const apiSearch = async () => {
 		if (search.length < 3) {
 			searchResults = [];
@@ -66,29 +66,24 @@
 		searchStatus = true;
 
 		try {
-			const response = await fetch(`/api/search?query=${encodeURIComponent(search)}`);
-			const data: SearchResponse = await response.json();
+			const response = await fetch(
+				`https://api.btcmap.org/v4/search/?q=${encodeURIComponent(search)}&limit=50`
+			);
+			const data = await response.json();
 
 			if (!response.ok) {
 				throw new Error('Search API error');
 			}
 
-			// Calculate distances and create SearchPlaceResult objects
-			const resultsWithDistance: SearchPlaceResult[] = data.results.map((place) => {
-				const latLng = leaflet.latLng(place.lat, place.lon);
-				const distanceKm = Number((mapCenter.distanceTo(latLng) / 1000).toFixed(1));
-				const distanceMi = Number((distanceKm * 0.6213712).toFixed(1));
-
-				return {
-					...place,
-					distanceKm,
-					distanceMi,
-					latLng
-				};
-			});
-
-			// Sort by distance and limit to 50 results
-			searchResults = resultsWithDistance.sort((a, b) => a.distanceKm - b.distanceKm).slice(0, 50);
+			// Convert API results to our format (without coordinates for now)
+			searchResults = data.results.map((item: any) => ({
+				id: item.id,
+				name: item.name,
+				type: item.type,
+				// Skip coordinates and distance for now
+				distanceKm: 0,
+				distanceMi: 0
+			}));
 		} catch (error) {
 			console.error('Search error:', error);
 			errToast('Search temporarily unavailable');
@@ -105,12 +100,39 @@
 		searchResults = [];
 	};
 
-	const searchSelect = (result: SearchPlaceResult) => {
+	const searchSelect = async (result: SearchPlaceResult) => {
 		clearSearch();
-		if (result.latLng) {
-			map.flyTo(result.latLng, 19);
-			// Note: We'll need to find the marker for this place to open popup
-			// This will be implemented when we add marker integration
+
+		// First, try to find the place in our local places store
+		const localPlace = $places.find((p) => p.id === result.id);
+
+		if (localPlace && localPlace.lat && localPlace.lon) {
+			// Use local data if available
+			map.flyTo([localPlace.lat, localPlace.lon], 19);
+			console.log(
+				`Flying to ${result.name} at [${localPlace.lat}, ${localPlace.lon}] (from local store)`
+			);
+		} else {
+			// If not in local store, fetch from v4/places API
+			try {
+				const response = await fetch(
+					`https://api.btcmap.org/v4/places/${result.id}?fields=id,lat,lon,name`
+				);
+				const placeData = await response.json();
+
+				if (response.ok && placeData.lat && placeData.lon) {
+					map.flyTo([placeData.lat, placeData.lon], 19);
+					console.log(
+						`Flying to ${result.name} at [${placeData.lat}, ${placeData.lon}] (from API)`
+					);
+				} else {
+					console.log('Could not get coordinates for place:', result);
+					errToast('Could not navigate to location');
+				}
+			} catch (error) {
+				console.error('Error fetching place coordinates:', error);
+				errToast('Could not navigate to location');
+			}
 		}
 	};
 
@@ -566,42 +588,23 @@
 								<Icon
 									w="20"
 									h="20"
-									style="mx-auto md:mx-0 mt-1 {result.boosted
-										? 'text-bitcoin animate-wiggle'
-										: 'text-mapButton dark:text-white opacity-50'}"
-									icon={result.icon !== 'question_mark' ? result.icon : 'currency_bitcoin'}
+									style="mx-auto md:mx-0 mt-1 text-mapButton dark:text-white opacity-50"
+									icon="currency_bitcoin"
 									type="material"
 								/>
 
-								<div class="mx-auto md:max-w-[210px]">
+								<div class="mx-auto md:max-w-[280px]">
 									<p
-										class="text-sm {result.boosted
-											? 'font-semibold text-bitcoin'
-											: 'text-mapButton dark:text-white'} {result.name.match('([^ ]{21})')
+										class="text-sm text-mapButton dark:text-white {result.name.match('([^ ]{21})')
 											? 'break-all'
 											: ''}"
 									>
 										{result.name}
 									</p>
-									<p
-										class="text-xs {result.boosted
-											? 'text-bitcoin'
-											: 'text-searchSubtext'} {result.address && result.address.match('([^ ]{21})')
-											? 'break-all'
-											: ''}"
-									>
-										{result.address || 'No address available'}
+									<p class="text-xs text-searchSubtext">
+										{result.type === 'element' ? 'Bitcoin merchant' : result.type}
 									</p>
 								</div>
-							</div>
-
-							<div
-								class="text-xs {result.boosted
-									? 'text-bitcoin'
-									: 'text-searchSubtext'} mx-auto w-[80px] text-center md:mx-0 md:text-right"
-							>
-								<p>{result.distanceKm} km</p>
-								<p>{result.distanceMi} mi</p>
 							</div>
 						</button>
 					{/each}
