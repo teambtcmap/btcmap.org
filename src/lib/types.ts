@@ -7,6 +7,7 @@ import type {
 	LayerGroup,
 	Marker,
 	TileLayer,
+	// @ts-ignore
 	MaplibreGL
 } from 'leaflet';
 
