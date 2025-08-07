@@ -1,7 +1,6 @@
 import type { GeoJSON, Polygon, MultiPolygon } from 'geojson';
 import type leaflet from 'leaflet';
 import type {
-	DivIcon,
 	DomEvent,
 	FeatureGroup,
 	LatLng,
@@ -319,7 +318,7 @@ export interface SearchPlaceResult extends SearchItem {
 	distanceKm: number;
 	distanceMi: number;
 	latLng?: LatLng;
-	marker?: Marker<DivIcon>;
+	marker?: Marker<any>;
 }
 
 export interface SearchRpcResponse {
