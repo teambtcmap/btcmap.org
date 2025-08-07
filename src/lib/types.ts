@@ -306,6 +306,28 @@ export interface SearchResult extends SearchElement {
 	distanceMi: number;
 }
 
+// New search types for API-based search
+export interface SearchPlace {
+	id: number;
+	name: string;
+	lat: number;
+	lon: number;
+	icon: string;
+	address?: string;
+	boosted?: boolean;
+}
+
+export interface SearchPlaceResult extends SearchPlace {
+	distanceKm: number;
+	distanceMi: number;
+	latLng?: LatLng;
+	marker?: Marker<any>;
+}
+
+export interface SearchResponse {
+	results: SearchPlace[];
+}
+
 export type PayMerchant = { type: string; url?: string; username?: string } | undefined;
 
 // leaderboards
