@@ -122,7 +122,7 @@
 			// If not in local store, fetch from v4/places API
 			try {
 				const response = await fetch(
-					`https://api.btcmap.org/v4/places/${result.id}?fields=id,lat,lon,name`
+					`https://api.btcmap.org/v4/places/${result.id}?fields=lat,lon`
 				);
 				const placeData = await response.json();
 
