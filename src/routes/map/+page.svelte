@@ -20,7 +20,14 @@
 		verifiedArr
 	} from '$lib/map/setup';
 	import { placesError, places, placesSyncCount, mapUpdates } from '$lib/store';
-	import type { Leaflet, MapGroups, OSMTags, Place, SearchElement, SearchResult } from '$lib/types';
+	import type {
+		Leaflet,
+		MapGroups,
+		OSMTags,
+		Place,
+		SearchPlaceResult,
+		SearchResponse
+	} from '$lib/types';
 	import { debounce, detectTheme, errToast } from '$lib/utils';
 	import type { Control, LatLng, LatLngBounds, Map } from 'leaflet';
 	import localforage from 'localforage';
@@ -39,67 +46,73 @@
 	let elementsLoaded = false;
 
 	let mapCenter: LatLng;
-	// TODO: Search functionality disabled due to data migration from Element[] to Place[]
-	// Need to reimplement search using new Place structure with fields: name, address, phone, website, etc.
-	// let elementsCopy: SearchElement[] = [];
 
-	// let customSearchBar: HTMLDivElement;
-	// let clearSearchButton: HTMLButtonElement;
-	// let showSearch = false;
-	// let search: string;
-	// let searchStatus: boolean;
-	// let searchResults: SearchResult[] = [];
+	// Search functionality re-enabled with API-based search
+	let customSearchBar: HTMLDivElement;
+	let clearSearchButton: HTMLButtonElement;
+	let showSearch = false;
+	let search: string;
+	let searchStatus: boolean;
+	let searchResults: SearchPlaceResult[] = [];
 
-	// Search functions - commented out due to data migration
-	// const elementSearch = () => {
-	// 	if (search.length < 3) {
-	// 		searchResults = [];
-	// 		searchStatus = false;
-	// 		return;
-	// 	}
+	// API-based search functions
+	const apiSearch = async () => {
+		if (search.length < 3) {
+			searchResults = [];
+			searchStatus = false;
+			return;
+		}
 
-	// 	let filter = elementsCopy.filter((element) => {
-	// 		let tags = element.tags;
+		searchStatus = true;
 
-	// 		if (tags && tags.name) {
-	// 			let splitWords = search.split(' ').filter((word) => word);
+		try {
+			const response = await fetch(`/api/search?query=${encodeURIComponent(search)}`);
+			const data: SearchResponse = await response.json();
 
-	// 			let values = Object.values(tags);
+			if (!response.ok) {
+				throw new Error('Search API error');
+			}
 
-	// 			return values.some((value: OSMTags) =>
-	// 				splitWords.some((word) => value.toLowerCase().includes(word.toLowerCase()))
-	// 			);
-	// 		}
-	// 	});
+			// Calculate distances and create SearchPlaceResult objects
+			const resultsWithDistance: SearchPlaceResult[] = data.results.map((place) => {
+				const latLng = leaflet.latLng(place.lat, place.lon);
+				const distanceKm = Number((mapCenter.distanceTo(latLng) / 1000).toFixed(1));
+				const distanceMi = Number((distanceKm * 0.6213712).toFixed(1));
 
-	// 	let distance: SearchResult[] = [];
-	// 	filter.forEach((element) => {
-	// 		const distanceKm = Number((mapCenter.distanceTo(element.latLng) / 1000).toFixed(1));
-	// 		const distanceMi = Number((distanceKm * 0.6213712).toFixed(1));
-	// 		distance.push({ ...element, distanceKm, distanceMi });
-	// 	});
+				return {
+					...place,
+					distanceKm,
+					distanceMi,
+					latLng
+				};
+			});
 
-	// 	let sorted = distance.sort((a, b) => a.distanceKm - b.distanceKm);
+			// Sort by distance and limit to 50 results
+			searchResults = resultsWithDistance.sort((a, b) => a.distanceKm - b.distanceKm).slice(0, 50);
+		} catch (error) {
+			console.error('Search error:', error);
+			errToast('Search temporarily unavailable');
+			searchResults = [];
+		}
 
-	// 	searchResults = sorted.slice(0, 50);
+		searchStatus = false;
+	};
 
-	// 	searchStatus = false;
-	// };
+	const searchDebounce = debounce(() => apiSearch(), 300);
 
-	// const searchDebounce = debounce(() => elementSearch());
+	const clearSearch = () => {
+		search = '';
+		searchResults = [];
+	};
 
-	// const clearSearch = () => {
-	// 	search = '';
-	// 	searchResults = [];
-	// };
-
-	// const searchSelect = (result: SearchResult) => {
-	// 	clearSearch();
-	// 	map.flyTo(result.latLng, 19);
-	// 	map.once('moveend', () => {
-	// 		result.marker.openPopup();
-	// 	});
-	// };
+	const searchSelect = (result: SearchPlaceResult) => {
+		clearSearch();
+		if (result.latLng) {
+			map.flyTo(result.latLng, 19);
+			// Note: We'll need to find the marker for this place to open popup
+			// This will be implemented when we add marker integration
+		}
+	};
 
 	// allows for users to set initial view in a URL query
 	const urlLat = $page.url.searchParams.getAll('lat');
@@ -316,41 +329,41 @@
 						'leaflet-control'
 					);
 
-					// Search button - commented out due to data migration
-					// const searchButton = leaflet.DomUtil.create('a');
-					// searchButton.classList.add('leaflet-control-search-toggle');
-					// searchButton.title = 'Search toggle';
-					// searchButton.role = 'button';
-					// searchButton.ariaLabel = 'Search toggle';
-					// searchButton.ariaDisabled = 'false';
-					// searchButton.innerHTML = `<img src=${
-					// 	theme === 'dark' ? '/icons/search-white.svg' : '/icons/search.svg'
-					// } alt='search' class='inline' id='search-button'/>`;
-					// searchButton.style.borderRadius = '8px 8px 0 0';
-					// searchButton.onclick = async function toggleSearch() {
-					// 	showSearch = !showSearch;
-					// 	if (showSearch) {
-					// 		await tick();
-					// 		const searchInput: HTMLInputElement | null = document.querySelector('#search-input');
-					// 		searchInput?.focus();
-					// 	} else {
-					// 		search = '';
-					// 		searchResults = [];
-					// 	}
-					// };
-					// if (theme === 'light') {
-					// 	searchButton.onmouseenter = () => {
-					// 		// @ts-expect-error
-					// 		document.querySelector('#search-button').src = '/icons/search-black.svg';
-					// 	};
-					// 	searchButton.onmouseleave = () => {
-					// 		// @ts-expect-error
-					// 		document.querySelector('#search-button').src = '/icons/search.svg';
-					// 	};
-					// }
-					// searchButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+					// Search button - re-enabled with API-based search
+					const searchButton = leaflet.DomUtil.create('a');
+					searchButton.classList.add('leaflet-control-search-toggle');
+					searchButton.title = 'Search toggle';
+					searchButton.role = 'button';
+					searchButton.ariaLabel = 'Search toggle';
+					searchButton.ariaDisabled = 'false';
+					searchButton.innerHTML = `<img src=${
+						theme === 'dark' ? '/icons/search-white.svg' : '/icons/search.svg'
+					} alt='search' class='inline' id='search-button'/>`;
+					searchButton.style.borderRadius = '8px 8px 0 0';
+					searchButton.onclick = async function toggleSearch() {
+						showSearch = !showSearch;
+						if (showSearch) {
+							await tick();
+							const searchInput: HTMLInputElement | null = document.querySelector('#search-input');
+							searchInput?.focus();
+						} else {
+							search = '';
+							searchResults = [];
+						}
+					};
+					if (theme === 'light') {
+						searchButton.onmouseenter = () => {
+							// @ts-expect-error
+							document.querySelector('#search-button').src = '/icons/search-black.svg';
+						};
+						searchButton.onmouseleave = () => {
+							// @ts-expect-error
+							document.querySelector('#search-button').src = '/icons/search.svg';
+						};
+					}
+					searchButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
 
-					// addControlDiv.append(searchButton);
+					addControlDiv.append(searchButton);
 
 					// add boost layer button
 					const boostLayerButton = leaflet.DomUtil.create('a');
@@ -407,44 +420,44 @@
 				DomEvent.disableClickPropagation(boostLayer as HTMLElement);
 			}
 
-			// Search bar control - commented out due to data migration
-			// // @ts-expect-error
-			// map._controlCorners['topcenter'] = leaflet.DomUtil.create(
-			// 	'div',
-			// 	'leaflet-top leaflet-center',
-			// 	// @ts-expect-error
-			// 	map._controlContainer
-			// );
+			// Search bar control - re-enabled for API-based search
+			// @ts-expect-error
+			map._controlCorners['topcenter'] = leaflet.DomUtil.create(
+				'div',
+				'leaflet-top leaflet-center',
+				// @ts-expect-error
+				map._controlContainer
+			);
 
-			// // @ts-expect-error
-			// leaflet.Control.Search = leaflet.Control.extend({
-			// 	options: {
-			// 		position: 'topcenter'
-			// 	},
-			// 	onAdd: () => {
-			// 		const searchBarDiv = leaflet.DomUtil.create('div');
-			// 		searchBarDiv.classList.add('leafet-control', 'search-bar-div');
+			// @ts-expect-error
+			leaflet.Control.Search = leaflet.Control.extend({
+				options: {
+					position: 'topcenter'
+				},
+				onAdd: () => {
+					const searchBarDiv = leaflet.DomUtil.create('div');
+					searchBarDiv.classList.add('leaflet-control', 'search-bar-div');
 
-			// 		searchBarDiv.append(customSearchBar);
+					searchBarDiv.append(customSearchBar);
 
-			// 		return searchBarDiv;
-			// 	}
-			// });
+					return searchBarDiv;
+				}
+			});
 
-			// // @ts-expect-error
-			// new leaflet.Control.Search().addTo(map);
+			// @ts-expect-error
+			new leaflet.Control.Search().addTo(map);
 
-			// // disable map events
-			// if (customSearchBar) {
-			// 	DomEvent.disableClickPropagation(customSearchBar as HTMLElement);
-			// }
-			// const searchToggle = document.querySelector('.leaflet-control-search-toggle');
-			// if (searchToggle) {
-			// 	DomEvent.disableClickPropagation(searchToggle as HTMLElement);
-			// }
-			// if (clearSearchButton) {
-			// 	DomEvent.disableClickPropagation(clearSearchButton as HTMLElement);
-			// }
+			// disable map events for search controls
+			if (customSearchBar) {
+				DomEvent.disableClickPropagation(customSearchBar as HTMLElement);
+			}
+			const searchToggle = document.querySelector('.leaflet-control-search-toggle');
+			if (searchToggle) {
+				DomEvent.disableClickPropagation(searchToggle as HTMLElement);
+			}
+			if (clearSearchButton) {
+				DomEvent.disableClickPropagation(clearSearchButton as HTMLElement);
+			}
 
 			// add home and marker buttons to map
 			homeMarkerButtons(leaflet, map, DomEvent, true);
@@ -488,8 +501,8 @@
 
 	<MapLoadingMain progress={mapLoading} />
 
-	<!-- Search UI - commented out due to data migration -->
-	<!-- <div
+	<!-- Search UI - re-enabled with API-based search -->
+	<div
 		id="search-div"
 		bind:this={customSearchBar}
 		class="absolute left-[60px] top-0 w-[50vw] md:w-[350px] {showSearch ? 'block' : 'hidden'}"
@@ -508,7 +521,7 @@
 					}
 				}}
 				bind:value={search}
-				disabled={!elementsLoaded}
+				disabled={!mapLoaded}
 			/>
 
 			<button
@@ -564,21 +577,20 @@
 									<p
 										class="text-sm {result.boosted
 											? 'font-semibold text-bitcoin'
-											: 'text-mapButton dark:text-white'} {result.tags?.name.match('([^ ]{21})')
+											: 'text-mapButton dark:text-white'} {result.name.match('([^ ]{21})')
 											? 'break-all'
 											: ''}"
 									>
-										{result.tags?.name}
+										{result.name}
 									</p>
 									<p
-										class="text-xs {result.boosted ? 'text-bitcoin' : 'text-searchSubtext'} {(result
-											.tags?.['addr:street'] &&
-											result.tags['addr:street'].match('([^ ]{21})')) ||
-										(result.tags?.['addr:city'] && result.tags['addr:city'].match('([^ ]{21})'))
+										class="text-xs {result.boosted
+											? 'text-bitcoin'
+											: 'text-searchSubtext'} {result.address && result.address.match('([^ ]{21})')
 											? 'break-all'
 											: ''}"
 									>
-										{result.tags ? checkAddress(result.tags) : ''}
+										{result.address || 'No address available'}
 									</p>
 								</div>
 							</div>
@@ -600,7 +612,7 @@
 				</div>
 			</OutClick>
 		{/if}
-	</div> -->
+	</div>
 
 	{#if browser}
 		<Boost />
