@@ -306,15 +306,11 @@ export interface SearchResult extends SearchElement {
 	distanceMi: number;
 }
 
-// New search types for API-based search
+// New search types for v4/search API
 export interface SearchPlace {
 	id: number;
 	name: string;
-	lat: number;
-	lon: number;
-	icon: string;
-	address?: string;
-	boosted?: boolean;
+	type: string;
 }
 
 export interface SearchPlaceResult extends SearchPlace {
@@ -326,6 +322,14 @@ export interface SearchPlaceResult extends SearchPlace {
 
 export interface SearchResponse {
 	results: SearchPlace[];
+	total_count: number;
+	has_more: boolean;
+	query: string;
+	pagination: {
+		offset: number;
+		limit: number;
+		total: number;
+	};
 }
 
 export type PayMerchant = { type: string; url?: string; username?: string } | undefined;
