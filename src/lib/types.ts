@@ -1,5 +1,7 @@
 import type { GeoJSON, Polygon, MultiPolygon } from 'geojson';
 import type leaflet from 'leaflet';
+// Import to enable MaplibreGL module augmentation
+import '@maplibre/maplibre-gl-leaflet';
 import type {
 	DomEvent,
 	FeatureGroup,
