@@ -29,6 +29,7 @@
 		eventError,
 		events,
 		excludeLeader,
+		places,
 		theme,
 		userError,
 		users
@@ -279,76 +280,11 @@
 			Number((deleted / (total / 100)).toFixed(0))
 		);
 
-		// Consolidated element fetching with batching to eliminate duplicate API calls
-		const fetchElementsData = async (events: Event[]) => {
-			// Get unique element IDs to avoid duplicate fetches
-			const uniqueElementIds = [...new Set(events.map((event) => event.element_id))];
-			console.log(
-				`Fetching data for ${uniqueElementIds.length} unique elements from ${events.length} events`
-			);
-
-			// Batch requests to avoid overwhelming the API (process 20 at a time)
-			const batchSize = 20;
-			const elementBatches = [];
-			for (let i = 0; i < uniqueElementIds.length; i += batchSize) {
-				elementBatches.push(uniqueElementIds.slice(i, i + batchSize));
-			}
-
-			console.log(
-				`Processing ${uniqueElementIds.length} elements in ${elementBatches.length} batches`
-			);
-
-			const elementDataMap: Record<string, Element | null> = {};
-
-			for (let batchIndex = 0; batchIndex < elementBatches.length; batchIndex++) {
-				const batch = elementBatches[batchIndex];
-				console.log(
-					`Processing batch ${batchIndex + 1}/${elementBatches.length} (${batch.length} elements)`
-				);
-
-				const batchPromises = batch.map(async (elementId: string) => {
-					try {
-						const response = await fetch(`https://api.btcmap.org/v2/elements/${elementId}`);
-						if (!response.ok) throw new Error('API call failed');
-						const data = await response.json();
-						return { elementId, data };
-					} catch (error) {
-						console.warn(`Failed to fetch element ${elementId}:`, error);
-						return { elementId, data: null };
-					}
-				});
-
-				const batchResults = await Promise.all(batchPromises);
-
-				// Store results in map for quick lookup
-				batchResults.forEach(({ elementId, data }) => {
-					elementDataMap[elementId] = data;
-				});
-
-				const successCount = batchResults.filter((result) => result.data !== null).length;
-				console.log(
-					`Batch ${batchIndex + 1} completed: ${successCount}/${batch.length} successful`
-				);
-
-				// Small delay between batches to be nice to the API
-				if (batchIndex < elementBatches.length - 1) {
-					await new Promise((resolve) => setTimeout(resolve, 100));
-				}
-			}
-
-			return elementDataMap;
-		};
-
-		// Fetch all element data once and cache it
-		const elementDataMap = await fetchElementsData(userEvents);
-
-		// Create activity events using cached element data
+		// Create activity events without fetching element data - names will be fetched on-demand
 		eventElements = userEvents.map((event) => {
-			const elementData = elementDataMap[event.element_id];
-			const location = elementData?.osm_json?.tags?.name || formatElementID(event.element_id);
 			return {
 				...event,
-				location,
+				location: formatElementID(event.element_id), // Will be updated with actual names on-demand
 				merchantId: event.element_id
 			};
 		});
@@ -428,50 +364,37 @@
 			// get date from 1 year ago to add verified check if survey is current
 			let verifiedDate = calcVerifiedDate();
 
-			// Use cached element data instead of making duplicate API calls
-			const filteredElements: Element[] = [];
-			userEvents.forEach((event) => {
-				const elementData = elementDataMap[event.element_id];
-				if (elementData) {
-					filteredElements.push(elementData);
-				}
+			// Use Places cache for map markers - match event.element_id (OSM format) with place.osm_id
+			const uniqueElementIds = [...new Set(userEvents.map((event) => event.element_id))];
+
+			console.log('Sample element_ids:', uniqueElementIds.slice(0, 5));
+			console.log('Sample place osm_ids:', $places.slice(0, 5).map(p => p.osm_id));
+
+			// Filter places that match element_id with osm_id
+			const placesFromCache = $places.filter((place) => {
+				return place.osm_id && uniqueElementIds.includes(place.osm_id);
 			});
 
-			console.log(`Using ${filteredElements.length} cached elements for map display`);
+			console.log(`Using ${placesFromCache.length} places from cache for map display`);
 
 			// add location information
 			let bounds: { lat: number; long: number }[] = [];
 
-			filteredElements.forEach((element) => {
-				let icon = element.tags['icon:android'];
-				let payment = element.tags['payment:uri']
-					? { type: 'uri', url: element.tags['payment:uri'] }
-					: element.tags['payment:pouch']
-						? { type: 'pouch', username: element.tags['payment:pouch'] }
-						: element.tags['payment:coinos']
-							? { type: 'coinos', username: element.tags['payment:coinos'] }
-							: undefined;
-				let boosted =
-					element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now()
-						? element.tags['boost:expires']
-						: undefined;
+			placesFromCache.forEach((place) => {
+				let icon = place.icon;
+				let boosted = false; // Places cache doesn't have boost info, will be fetched on click
+				let commentsCount = place.comments || 0;
 
-				const elementOSM = element['osm_json'];
+				const lat = place.lat;
+				const long = place.lon;
 
-				const lat = latCalc(elementOSM);
-				const long = longCalc(elementOSM);
-
-				const commentsCount = element.tags.comments || 0;
-
-				let divIcon = generateIcon(leaflet, icon, boosted ? true : false, commentsCount);
-
-				// Use OSM ID directly - v4 API supports "node:12345" format
+				let divIcon = generateIcon(leaflet, icon, boosted, commentsCount);
 
 				let marker = generateMarker({
 					lat,
 					long,
 					icon: divIcon,
-					placeId: element.id,
+					placeId: place.id,
 					leaflet,
 					verify: true
 				});
@@ -481,7 +404,14 @@
 			});
 
 			map.addLayer(markers);
-			map.fitBounds(bounds.map(({ lat, long }) => [lat, long]));
+
+			// Only fit bounds if we have valid coordinates
+			if (bounds.length > 0) {
+				map.fitBounds(bounds.map(({ lat, long }) => [lat, long]));
+			} else {
+				// Set a default view if no places found
+				map.setView([0, 0], 2);
+			}
 
 			mapLoaded = true;
 		};
@@ -495,6 +425,8 @@
 		$users.length &&
 		$events &&
 		$events.length &&
+		$places &&
+		$places.length &&
 		initialRenderComplete &&
 		!dataInitialized &&
 		// eslint-disable-next-line svelte/infinite-reactive-loop
@@ -529,8 +461,55 @@
 	let activityDiv;
 	let eventElements: ActivityEvent[] = [];
 
-	let eventCount = 50;
-	$: eventElementsPaginated = eventElements.slice(0, eventCount);
+	let currentPage = 1;
+	let itemsPerPage = 10;
+	let loadingNames = false;
+	let nameCache: Record<string, string> = {};
+
+	$: totalPages = Math.ceil(eventElements.length / itemsPerPage);
+	$: paginatedEvents = eventElements.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+	// Fetch place names for current page
+	const fetchPageNames = async (events: ActivityEvent[]) => {
+		if (loadingNames) return;
+		loadingNames = true;
+
+		const uniqueIds = [...new Set(events.map(event => event.element_id))];
+		const idsToFetch = uniqueIds.filter(id => !nameCache[id]);
+
+		if (idsToFetch.length > 0) {
+			const promises = idsToFetch.map(async (id) => {
+				try {
+					const response = await fetch(`https://api.btcmap.org/v4/places/${id}?fields=name`);
+					if (response.ok) {
+						const data = await response.json();
+						return { id, name: data.name || formatElementID(id) };
+					}
+					return { id, name: formatElementID(id) };
+				} catch (error) {
+					console.warn(`Failed to fetch name for ${id}:`, error);
+					return { id, name: formatElementID(id) };
+				}
+			});
+
+			const results = await Promise.all(promises);
+			results.forEach(({ id, name }) => {
+				nameCache[id] = name;
+			});
+
+			// Update eventElements with new names
+			eventElements = eventElements.map(event => ({
+				...event,
+				location: nameCache[event.element_id] || event.location
+			}));
+		}
+
+		loadingNames = false;
+	};
+
+	$: if (paginatedEvents.length > 0 && dataInitialized) {
+		fetchPageNames(paginatedEvents);
+	}
 
 	let mapElement: HTMLDivElement;
 	let map: Map;
@@ -733,54 +712,86 @@
 						{username || 'BTC Map Supertagger'}'s Activity
 					</h3>
 
-					<div
-						bind:this={activityDiv}
-						class="hide-scroll space-y-2 {eventElements.length > 5
-							? 'h-[375px]'
-							: ''} relative overflow-y-scroll"
-						on:scroll={() => {
-							if (dataInitialized && !hideArrow) {
-								hideArrow = true;
-							}
-						}}
-					>
-						{#if eventElements && eventElements.length && dataInitialized}
-							{#each eventElementsPaginated as event (event['created_at'])}
-								<ProfileActivity
-									location={event.location}
-									action={event.type}
-									time={event['created_at']}
-									latest={event === eventElements[0] ? true : false}
-									merchantId={event.merchantId}
-								/>
-							{/each}
+					{#if eventElements && eventElements.length && dataInitialized}
+						<div class="overflow-x-auto">
+							<table class="w-full">
+								<thead>
+									<tr class="border-b border-statBorder text-left">
+										<th class="px-5 py-3 text-sm font-semibold text-primary dark:text-white">Location</th>
+										<th class="px-5 py-3 text-sm font-semibold text-primary dark:text-white">Action</th>
+										<th class="px-5 py-3 text-sm font-semibold text-primary dark:text-white">Date</th>
+									</tr>
+								</thead>
+								<tbody>
+									{#each paginatedEvents as event, index (event['created_at'])}
+										<tr class="border-b border-statBorder/50 hover:bg-gray-50 dark:hover:bg-white/5">
+											<td class="px-5 py-3">
+												<a 
+													href="/merchant/{event.merchantId}" 
+													class="text-link hover:text-hover transition-colors"
+												>
+													{event.location}
+												</a>
+											</td>
+											<td class="px-5 py-3">
+												<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+													{event.type === 'create' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+													 event.type === 'update' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+													 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}">
+													{event.type}
+												</span>
+											</td>
+											<td class="px-5 py-3 text-sm text-body dark:text-white">
+												{format(new Date(event['created_at']), 'MMM d, yyyy HH:mm')}
+											</td>
+										</tr>
+									{/each}
+								</tbody>
+							</table>
+						</div>
 
-							{#if eventElementsPaginated.length !== eventElements.length}
-								<button
-									class="mx-auto !mb-5 block text-xl font-semibold text-link transition-colors hover:text-hover"
-									on:click={() => (eventCount = eventCount + 50)}>Load More</button
-								>
-							{:else if eventElements.length > 10}
-								<TopButton scroll={activityDiv} style="!mb-5" />
-							{/if}
-
-							{#if !hideArrow && eventElements.length > 5}
-								<svg
-									class="absolute bottom-4 left-[calc(50%-8px)] z-20 h-4 w-4 animate-bounce text-primary dark:text-white"
-									fill="currentColor"
-									xmlns="http://www.w3.org/2000/svg"
-									viewBox="0 0 512 512"
-									><!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path
-										d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
-									/></svg
-								>
-							{/if}
-						{:else}
-							{#each Array(5) as _, i (i)}
-								<ProfileActivitySkeleton />
-							{/each}
+						{#if totalPages > 1}
+							<div class="flex items-center justify-between border-t border-statBorder px-5 py-3">
+								<div class="text-sm text-body dark:text-white">
+									Page {currentPage} of {totalPages} ({eventElements.length} total)
+								</div>
+								<div class="flex space-x-2">
+									<button
+										on:click={() => currentPage = Math.max(1, currentPage - 1)}
+										disabled={currentPage === 1}
+										class="px-3 py-1 text-sm border border-statBorder rounded 
+										       disabled:opacity-50 disabled:cursor-not-allowed
+										       hover:bg-gray-50 dark:hover:bg-white/5 transition-colors
+										       text-primary dark:text-white"
+									>
+										Previous
+									</button>
+									<button
+										on:click={() => currentPage = Math.min(totalPages, currentPage + 1)}
+										disabled={currentPage === totalPages}
+										class="px-3 py-1 text-sm border border-statBorder rounded 
+										       disabled:opacity-50 disabled:cursor-not-allowed
+										       hover:bg-gray-50 dark:hover:bg-white/5 transition-colors
+										       text-primary dark:text-white"
+									>
+										Next
+									</button>
+								</div>
+							</div>
 						{/if}
-					</div>
+					{:else}
+						<div class="p-5">
+							{#each Array(10) as _, i (i)}
+								<div class="mb-3 animate-pulse">
+									<div class="flex space-x-4">
+										<div class="flex-1 h-4 bg-link/20 rounded"></div>
+										<div class="w-16 h-4 bg-link/20 rounded"></div>
+										<div class="w-24 h-4 bg-link/20 rounded"></div>
+									</div>
+								</div>
+							{/each}
+						</div>
+					{/if}
 				</div>
 			</section>
 
