@@ -655,10 +655,10 @@
   resolved "https://registry.yarnpkg.com/@sveltejs/acorn-typescript/-/acorn-typescript-1.0.5.tgz#f518101d1b2e12ce80854f1cd850d3b9fb91d710"
   integrity sha512-IwQk4yfwLdibDlrXVE04jTZYlLnwsTT2PIOQQGNLWfjavGifnk1JD1LcZjZaBTRcxZu2FfPfNLOE04DSu9lqtQ==
 
-"@sveltejs/adapter-netlify@^5.0.0":
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/@sveltejs/adapter-netlify/-/adapter-netlify-5.1.0.tgz#b51e1698fd309f90837090d55973c361d75b96ae"
-  integrity sha512-Nj9rA9eluknNX5UftRFVLbsFSHsn2O2L+GNrQ5ivW+Xc6++1FyemK3eVEhkRArwCq+Zh8wqgxsWHRUWOLolHAA==
+"@sveltejs/adapter-netlify@^5.1.1":
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/@sveltejs/adapter-netlify/-/adapter-netlify-5.1.1.tgz#57127ef88dc98af8ffb65210074627174d37b3cc"
+  integrity sha512-VYiQydwks3aLBWeiHlxtVUbemE4J0qcjmeY7aQqThKlyi2Xb2s1wWvR/laMkMOZ0NpZwnazHmbmGae+1oA30Rw==
   dependencies:
     "@iarna/toml" "^2.2.5"
     esbuild "^0.25.4"
