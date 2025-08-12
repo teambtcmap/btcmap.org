@@ -3,16 +3,7 @@
 
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import {
-		Footer,
-		Header,
-		MapLoadingEmbed,
-		ProfileActivity,
-		ProfileActivitySkeleton,
-		ProfileStat,
-		Tip,
-		TopButton
-	} from '$lib/comp';
+	import { Footer, Header, MapLoadingEmbed, ProfileActivity, ProfileStat, Tip } from '$lib/comp';
 	import {
 		attribution,
 		calcVerifiedDate,
@@ -20,8 +11,6 @@
 		generateIcon,
 		generateMarker,
 		geolocate,
-		latCalc,
-		longCalc,
 		toggleMapButtons
 	} from '$lib/map/setup';
 	import {
@@ -39,8 +28,6 @@
 		type ActivityEvent,
 		type DomEventType,
 		type EarnedBadge,
-		type Element,
-		type Event,
 		type Leaflet,
 		type ProfileLeaderboard
 	} from '$lib/types.js';
@@ -460,20 +447,10 @@
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	let tagTypeChart;
 
-	let hideArrow = false;
-	let activityDiv;
 	let eventElements: ActivityEvent[] = [];
 
-	let currentPage = 1;
-	let itemsPerPage = 10;
 	let loadingNames = false;
 	let nameCache: Record<string, string> = {};
-
-	$: totalPages = Math.ceil(eventElements.length / itemsPerPage);
-	$: paginatedEvents = eventElements.slice(
-		(currentPage - 1) * itemsPerPage,
-		currentPage * itemsPerPage
-	);
 
 	// Fetch place names for current page
 	const fetchPageNames = async (events: ActivityEvent[]) => {
@@ -513,9 +490,10 @@
 		loadingNames = false;
 	};
 
-	$: if (paginatedEvents.length > 0 && dataInitialized) {
-		fetchPageNames(paginatedEvents);
-	}
+	// Handle fetch names event from ProfileActivity component
+	const handleFetchNames = (event: CustomEvent) => {
+		fetchPageNames(event.detail.events);
+	};
 
 	let mapElement: HTMLDivElement;
 	let map: Map;
@@ -711,106 +689,13 @@
 			</section>
 
 			<section id="activity" class="my-16">
-				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
-					<h3
-						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
-					>
-						{username || 'BTC Map Supertagger'}'s Activity
-					</h3>
-
-					{#if eventElements && eventElements.length && dataInitialized}
-						<div class="overflow-x-auto">
-							<table class="w-full">
-								<thead>
-									<tr class="border-b border-statBorder text-left">
-										<th class="px-5 py-3 text-sm font-semibold text-primary dark:text-white"
-											>Location</th
-										>
-										<th class="px-5 py-3 text-sm font-semibold text-primary dark:text-white"
-											>Action</th
-										>
-										<th class="px-5 py-3 text-sm font-semibold text-primary dark:text-white"
-											>Date</th
-										>
-									</tr>
-								</thead>
-								<tbody>
-									{#each paginatedEvents as event, index (event['created_at'])}
-										<tr
-											class="border-b border-statBorder/50 hover:bg-gray-50 dark:hover:bg-white/5"
-										>
-											<td class="px-5 py-3">
-												<a
-													href="/merchant/{event.merchantId}"
-													class="text-link transition-colors hover:text-hover"
-												>
-													{event.location}
-												</a>
-											</td>
-											<td class="px-5 py-3">
-												<span
-													class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium
-													{event.type === 'create'
-														? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-														: event.type === 'update'
-															? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-															: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}"
-												>
-													{event.type}
-												</span>
-											</td>
-											<td class="px-5 py-3 text-sm text-body dark:text-white">
-												{format(new Date(event['created_at']), 'MMM d, yyyy HH:mm')}
-											</td>
-										</tr>
-									{/each}
-								</tbody>
-							</table>
-						</div>
-
-						{#if totalPages > 1}
-							<div class="flex items-center justify-between border-t border-statBorder px-5 py-3">
-								<div class="text-sm text-body dark:text-white">
-									Page {currentPage} of {totalPages} ({eventElements.length} total)
-								</div>
-								<div class="flex space-x-2">
-									<button
-										on:click={() => (currentPage = Math.max(1, currentPage - 1))}
-										disabled={currentPage === 1}
-										class="rounded border border-statBorder px-3 py-1 text-sm
-										       text-primary transition-colors
-										       hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50
-										       dark:text-white dark:hover:bg-white/5"
-									>
-										Previous
-									</button>
-									<button
-										on:click={() => (currentPage = Math.min(totalPages, currentPage + 1))}
-										disabled={currentPage === totalPages}
-										class="rounded border border-statBorder px-3 py-1 text-sm
-										       text-primary transition-colors
-										       hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50
-										       dark:text-white dark:hover:bg-white/5"
-									>
-										Next
-									</button>
-								</div>
-							</div>
-						{/if}
-					{:else}
-						<div class="p-5">
-							{#each Array(10) as _, i (i)}
-								<div class="mb-3 animate-pulse">
-									<div class="flex space-x-4">
-										<div class="h-4 flex-1 rounded bg-link/20"></div>
-										<div class="h-4 w-16 rounded bg-link/20"></div>
-										<div class="h-4 w-24 rounded bg-link/20"></div>
-									</div>
-								</div>
-							{/each}
-						</div>
-					{/if}
-				</div>
+				<ProfileActivity
+					{eventElements}
+					{username}
+					{dataInitialized}
+					{loadingNames}
+					on:fetchNames={handleFetchNames}
+				/>
 			</section>
 
 			<section id="map-section">
