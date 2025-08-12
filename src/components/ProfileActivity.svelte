@@ -43,15 +43,21 @@
 			<table class="w-full">
 				<thead>
 					<tr class="border-b border-statBorder text-left">
-						<th class="px-5 py-3 text-sm font-semibold text-primary dark:text-white">Location</th>
-						<th class="px-5 py-3 text-sm font-semibold text-primary dark:text-white">Action</th>
-						<th class="px-5 py-3 text-sm font-semibold text-primary dark:text-white">Date</th>
+						<th class="w-2/3 px-5 py-3 text-left text-sm font-semibold text-primary dark:text-white"
+							>Location</th
+						>
+						<th class="w-1/6 px-5 py-3 text-left text-sm font-semibold text-primary dark:text-white"
+							>Action</th
+						>
+						<th class="w-1/6 px-5 py-3 text-left text-sm font-semibold text-primary dark:text-white"
+							>Date</th
+						>
 					</tr>
 				</thead>
 				<tbody>
 					{#each paginatedEvents as event, index (event['created_at'])}
 						<tr class="border-b border-statBorder/50 hover:bg-gray-50 dark:hover:bg-white/5">
-							<td class="px-5 py-3">
+							<td class="w-2/3 px-5 py-3 text-left">
 								<a
 									href="/merchant/{event.merchantId}"
 									class="text-link transition-colors hover:text-hover"
@@ -59,7 +65,7 @@
 									{event.location}
 								</a>
 							</td>
-							<td class="px-5 py-3">
+							<td class="w-1/6 px-5 py-3 text-left">
 								<span
 									class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium
 									{event.type === 'create'
@@ -71,7 +77,7 @@
 									{event.type}
 								</span>
 							</td>
-							<td class="px-5 py-3 text-sm text-body dark:text-white">
+							<td class="w-1/6 px-5 py-3 text-left text-sm text-body dark:text-white">
 								{format(new Date(event['created_at']), 'MMM d, yyyy HH:mm')}
 							</td>
 						</tr>
@@ -114,9 +120,9 @@
 			{#each Array(10) as _, i (i)}
 				<div class="mb-3 animate-pulse">
 					<div class="flex space-x-4">
-						<div class="h-4 flex-1 rounded bg-link/20"></div>
-						<div class="h-4 w-16 rounded bg-link/20"></div>
-						<div class="h-4 w-24 rounded bg-link/20"></div>
+						<div class="h-4 w-2/3 rounded bg-link/20"></div>
+						<div class="h-4 w-1/6 rounded bg-link/20"></div>
+						<div class="h-4 w-1/6 rounded bg-link/20"></div>
 					</div>
 				</div>
 			{/each}
