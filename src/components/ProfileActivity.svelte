@@ -8,7 +8,9 @@
 	export let dataInitialized: boolean = false;
 	export let loadingNames: boolean = false;
 
-	const dispatch = createEventDispatcher();
+	const dispatch = createEventDispatcher<{
+		fetchNames: { events: ActivityEvent[] };
+	}>();
 
 	let currentPage = 1;
 	let itemsPerPage = 10;
@@ -71,7 +73,7 @@
 							</tr>
 						{/each}
 					{:else}
-						{#each paginatedEvents as event, index (event['created_at'])}
+						{#each paginatedEvents as event, _ (event['created_at'])}
 							<tr class="border-b border-statBorder/50 hover:bg-gray-50 dark:hover:bg-white/5">
 								<td class="w-2/3 px-5 py-3 text-left">
 									<a
