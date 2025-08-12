@@ -368,7 +368,10 @@
 			const uniqueElementIds = [...new Set(userEvents.map((event) => event.element_id))];
 
 			console.log('Sample element_ids:', uniqueElementIds.slice(0, 5));
-			console.log('Sample place osm_ids:', $places.slice(0, 5).map(p => p.osm_id));
+			console.log(
+				'Sample place osm_ids:',
+				$places.slice(0, 5).map((p) => p.osm_id)
+			);
 
 			// Filter places that match element_id with osm_id
 			const placesFromCache = $places.filter((place) => {
@@ -467,15 +470,18 @@
 	let nameCache: Record<string, string> = {};
 
 	$: totalPages = Math.ceil(eventElements.length / itemsPerPage);
-	$: paginatedEvents = eventElements.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+	$: paginatedEvents = eventElements.slice(
+		(currentPage - 1) * itemsPerPage,
+		currentPage * itemsPerPage
+	);
 
 	// Fetch place names for current page
 	const fetchPageNames = async (events: ActivityEvent[]) => {
 		if (loadingNames) return;
 		loadingNames = true;
 
-		const uniqueIds = [...new Set(events.map(event => event.element_id))];
-		const idsToFetch = uniqueIds.filter(id => !nameCache[id]);
+		const uniqueIds = [...new Set(events.map((event) => event.element_id))];
+		const idsToFetch = uniqueIds.filter((id) => !nameCache[id]);
 
 		if (idsToFetch.length > 0) {
 			const promises = idsToFetch.map(async (id) => {
@@ -498,7 +504,7 @@
 			});
 
 			// Update eventElements with new names
-			eventElements = eventElements.map(event => ({
+			eventElements = eventElements.map((event) => ({
 				...event,
 				location: nameCache[event.element_id] || event.location
 			}));
@@ -717,27 +723,39 @@
 							<table class="w-full">
 								<thead>
 									<tr class="border-b border-statBorder text-left">
-										<th class="px-5 py-3 text-sm font-semibold text-primary dark:text-white">Location</th>
-										<th class="px-5 py-3 text-sm font-semibold text-primary dark:text-white">Action</th>
-										<th class="px-5 py-3 text-sm font-semibold text-primary dark:text-white">Date</th>
+										<th class="px-5 py-3 text-sm font-semibold text-primary dark:text-white"
+											>Location</th
+										>
+										<th class="px-5 py-3 text-sm font-semibold text-primary dark:text-white"
+											>Action</th
+										>
+										<th class="px-5 py-3 text-sm font-semibold text-primary dark:text-white"
+											>Date</th
+										>
 									</tr>
 								</thead>
 								<tbody>
 									{#each paginatedEvents as event, index (event['created_at'])}
-										<tr class="border-b border-statBorder/50 hover:bg-gray-50 dark:hover:bg-white/5">
+										<tr
+											class="border-b border-statBorder/50 hover:bg-gray-50 dark:hover:bg-white/5"
+										>
 											<td class="px-5 py-3">
-												<a 
-													href="/merchant/{event.merchantId}" 
-													class="text-link hover:text-hover transition-colors"
+												<a
+													href="/merchant/{event.merchantId}"
+													class="text-link transition-colors hover:text-hover"
 												>
 													{event.location}
 												</a>
 											</td>
 											<td class="px-5 py-3">
-												<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
-													{event.type === 'create' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-													 event.type === 'update' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-													 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}">
+												<span
+													class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium
+													{event.type === 'create'
+														? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+														: event.type === 'update'
+															? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+															: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}"
+												>
 													{event.type}
 												</span>
 											</td>
@@ -757,22 +775,22 @@
 								</div>
 								<div class="flex space-x-2">
 									<button
-										on:click={() => currentPage = Math.max(1, currentPage - 1)}
+										on:click={() => (currentPage = Math.max(1, currentPage - 1))}
 										disabled={currentPage === 1}
-										class="px-3 py-1 text-sm border border-statBorder rounded 
-										       disabled:opacity-50 disabled:cursor-not-allowed
-										       hover:bg-gray-50 dark:hover:bg-white/5 transition-colors
-										       text-primary dark:text-white"
+										class="rounded border border-statBorder px-3 py-1 text-sm
+										       text-primary transition-colors
+										       hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50
+										       dark:text-white dark:hover:bg-white/5"
 									>
 										Previous
 									</button>
 									<button
-										on:click={() => currentPage = Math.min(totalPages, currentPage + 1)}
+										on:click={() => (currentPage = Math.min(totalPages, currentPage + 1))}
 										disabled={currentPage === totalPages}
-										class="px-3 py-1 text-sm border border-statBorder rounded 
-										       disabled:opacity-50 disabled:cursor-not-allowed
-										       hover:bg-gray-50 dark:hover:bg-white/5 transition-colors
-										       text-primary dark:text-white"
+										class="rounded border border-statBorder px-3 py-1 text-sm
+										       text-primary transition-colors
+										       hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50
+										       dark:text-white dark:hover:bg-white/5"
 									>
 										Next
 									</button>
@@ -784,9 +802,9 @@
 							{#each Array(10) as _, i (i)}
 								<div class="mb-3 animate-pulse">
 									<div class="flex space-x-4">
-										<div class="flex-1 h-4 bg-link/20 rounded"></div>
-										<div class="w-16 h-4 bg-link/20 rounded"></div>
-										<div class="w-24 h-4 bg-link/20 rounded"></div>
+										<div class="h-4 flex-1 rounded bg-link/20"></div>
+										<div class="h-4 w-16 rounded bg-link/20"></div>
+										<div class="h-4 w-24 rounded bg-link/20"></div>
 									</div>
 								</div>
 							{/each}
