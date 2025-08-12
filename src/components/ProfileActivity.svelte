@@ -55,33 +55,50 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#each paginatedEvents as event, index (event['created_at'])}
-						<tr class="border-b border-statBorder/50 hover:bg-gray-50 dark:hover:bg-white/5">
-							<td class="w-2/3 px-5 py-3 text-left">
-								<a
-									href="/merchant/{event.merchantId}"
-									class="text-link transition-colors hover:text-hover"
-								>
-									{event.location}
-								</a>
-							</td>
-							<td class="w-1/6 px-5 py-3 text-left">
-								<span
-									class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium
-									{event.type === 'create'
-										? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-										: event.type === 'update'
-											? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-											: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}"
-								>
-									{event.type}
-								</span>
-							</td>
-							<td class="w-1/6 px-5 py-3 text-left text-sm text-body dark:text-white">
-								{format(new Date(event['created_at']), 'MMM d, yyyy HH:mm')}
-							</td>
-						</tr>
-					{/each}
+					{#if loadingNames}
+						<!-- Show loading skeleton rows while fetching names -->
+						{#each Array(itemsPerPage) as _, i (i)}
+							<tr class="border-b border-statBorder/50">
+								<td class="w-2/3 px-5 py-3">
+									<div class="h-6 animate-pulse rounded bg-link/20"></div>
+								</td>
+								<td class="w-1/6 px-5 py-3">
+									<div class="h-6 animate-pulse rounded bg-link/20"></div>
+								</td>
+								<td class="w-1/6 px-5 py-3">
+									<div class="h-6 animate-pulse rounded bg-link/20"></div>
+								</td>
+							</tr>
+						{/each}
+					{:else}
+						{#each paginatedEvents as event, index (event['created_at'])}
+							<tr class="border-b border-statBorder/50 hover:bg-gray-50 dark:hover:bg-white/5">
+								<td class="w-2/3 px-5 py-3 text-left">
+									<a
+										href="/merchant/{event.merchantId}"
+										class="text-link transition-colors hover:text-hover"
+									>
+										{event.location}
+									</a>
+								</td>
+								<td class="w-1/6 px-5 py-3 text-left">
+									<span
+										class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium
+										{event.type === 'create'
+											? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+											: event.type === 'update'
+												? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+												: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}"
+									>
+										{event.type}
+									</span>
+								</td>
+								<td class="w-1/6 px-5 py-3 text-left text-sm text-body dark:text-white">
+									{format(new Date(event['created_at']), 'MMM d, yyyy HH:mm')}
+								</td>
+							</tr>
+						{/each}
+					{/if}
 				</tbody>
 			</table>
 		</div>
