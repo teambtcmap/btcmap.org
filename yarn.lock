@@ -364,10 +364,10 @@
   resolved "https://registry.yarnpkg.com/@iarna/toml/-/toml-2.2.5.tgz#b32366c89b43c6f8cefbdefac778b9c828e3ba8c"
   integrity sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==
 
-"@iconify/svelte@^4.2.0":
-  version "4.2.0"
-  resolved "https://registry.npmjs.org/@iconify/svelte/-/svelte-4.2.0.tgz"
-  integrity sha512-fEl0T7SAPonK7xk6xUlRPDmFDZVDe2Z7ZstlqeDS/sS8ve2uyU+Qa8rTWbIqzZJlRvONkK5kVXiUf9nIc+6OOQ==
+"@iconify/svelte@^5.0.1":
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/@iconify/svelte/-/svelte-5.0.1.tgz#4c3e0daa8159e64e6229e5195297f708d000da82"
+  integrity sha512-nR1ApafyeRDcsx6ytd+0mzaY0ASYfG5YBW9dN8rUWxwi792/HX401qAZEkXSjT0iHm2Dgua+PwXDs/3ttJhkqQ==
   dependencies:
     "@iconify/types" "^2.0.0"
 
