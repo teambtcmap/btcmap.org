@@ -89,7 +89,9 @@
 					</legend>
 
 					<div>
-						<label for="comment" class="mb-2 block font-semibold">Your comment</label>
+						<label for="comment" class="mb-2 block font-semibold text-primary dark:text-white"
+							>Your comment</label
+						>
 						<textarea
 							name="comment"
 							rows="3"
