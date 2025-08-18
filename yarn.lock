@@ -659,10 +659,10 @@
     esbuild "^0.25.4"
     set-cookie-parser "^2.6.0"
 
-"@sveltejs/kit@^2.27.3":
-  version "2.29.1"
-  resolved "https://registry.yarnpkg.com/@sveltejs/kit/-/kit-2.29.1.tgz#a676b8f679aa1d6c9bc3115081c52ea574267419"
-  integrity sha512-0D3dkz5ay5OslGSv8hyZJY892kTw+1G16zFR/ZXbV9XOd6s6Y9wW66vbkr0AtV0BXYtsXCXyt15H/OshAWKfDA==
+"@sveltejs/kit@^2.31.1":
+  version "2.31.1"
+  resolved "https://registry.yarnpkg.com/@sveltejs/kit/-/kit-2.31.1.tgz#6e8da5c53cae54c52191ed843630c6bcae0abdd2"
+  integrity sha512-Iv98PKh81amOjIWZ6Flqr6E7xYcrrYZ4mY9XwYUvaCDiQ4hYt5+jXR9CivcgLOTK+RcJ3K4guEYF4lFYQfTxaA==
   dependencies:
     "@standard-schema/spec" "^1.0.0"
     "@sveltejs/acorn-typescript" "^1.0.5"
