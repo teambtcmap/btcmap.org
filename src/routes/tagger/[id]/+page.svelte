@@ -3,16 +3,7 @@
 
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import {
-		Footer,
-		Header,
-		MapLoadingEmbed,
-		ProfileActivity,
-		ProfileActivitySkeleton,
-		ProfileStat,
-		Tip,
-		TopButton
-	} from '$lib/comp';
+	import { Footer, Header, MapLoadingEmbed, ProfileActivity, ProfileStat, Tip } from '$lib/comp';
 	import {
 		attribution,
 		calcVerifiedDate,
@@ -20,16 +11,14 @@
 		generateIcon,
 		generateMarker,
 		geolocate,
-		latCalc,
-		longCalc,
 		toggleMapButtons
 	} from '$lib/map/setup';
 	import {
-		elementError,
-		elements,
+		placesError,
 		eventError,
 		events,
 		excludeLeader,
+		places,
 		theme,
 		userError,
 		users
@@ -55,7 +44,7 @@
 	// alert for event errors
 	$: $eventError && errToast($eventError);
 	// alert for element errors
-	$: $elementError && errToast($elementError);
+	$: $placesError && errToast($placesError);
 
 	let dataInitialized = false;
 	let initialRenderComplete = false;
@@ -278,22 +267,14 @@
 			Number((deleted / (total / 100)).toFixed(0))
 		);
 
-		userEvents.forEach((event) => {
-			let elementMatch = $elements.find((element) => element.id === event['element_id']);
-
-			let location =
-				elementMatch?.['osm_json'].tags && elementMatch['osm_json'].tags.name
-					? elementMatch['osm_json'].tags.name
-					: undefined;
-
-			eventElements.push({
+		// Create activity events without fetching element data - names will be fetched on-demand
+		eventElements = userEvents.map((event) => {
+			return {
 				...event,
-				location: location || formatElementID(event['element_id']),
-				merchantId: event['element_id']
-			});
+				location: formatElementID(event.element_id), // Will be updated with actual names on-demand
+				merchantId: event.element_id
+			};
 		});
-
-		eventElements = eventElements;
 
 		// add markdown support for profile description
 		const markdown = await marked.parse(filteredDesc || '');
@@ -329,7 +310,7 @@
 		};
 		setupChart();
 
-		const setupMap = () => {
+		const setupMap = async () => {
 			const theme = detectTheme();
 
 			// add map and tiles
@@ -370,59 +351,61 @@
 			// get date from 1 year ago to add verified check if survey is current
 			let verifiedDate = calcVerifiedDate();
 
-			// filter elements edited by user
-			let filteredElements = $elements.filter((element) =>
-				userEvents.find((event) => event['element_id'] === element.id)
+			// Use Places cache for map markers - match event.element_id (OSM format) with place.osm_id
+			const uniqueElementIds = [...new Set(userEvents.map((event) => event.element_id))];
+
+			console.log('Sample element_ids:', uniqueElementIds.slice(0, 5));
+			console.log(
+				'Sample place osm_ids:',
+				$places.slice(0, 5).map((p) => p.osm_id)
 			);
+
+			// Filter places that match element_id with osm_id
+			const placesFromCache = $places.filter((place) => {
+				return place.osm_id && uniqueElementIds.includes(place.osm_id);
+			});
+
+			console.log(`Using ${placesFromCache.length} places from cache for map display`);
 
 			// add location information
 			let bounds: { lat: number; long: number }[] = [];
 
-			filteredElements.forEach((element) => {
-				let icon = element.tags['icon:android'];
-				let payment = element.tags['payment:uri']
-					? { type: 'uri', url: element.tags['payment:uri'] }
-					: element.tags['payment:pouch']
-						? { type: 'pouch', username: element.tags['payment:pouch'] }
-						: element.tags['payment:coinos']
-							? { type: 'coinos', username: element.tags['payment:coinos'] }
-							: undefined;
-				let boosted =
-					element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now()
-						? element.tags['boost:expires']
-						: undefined;
+			placesFromCache.forEach((place) => {
+				let icon = place.icon;
+				let boosted = false; // Places cache doesn't have boost info, will be fetched on click
+				let commentsCount = place.comments || 0;
 
-				const elementOSM = element['osm_json'];
+				const lat = place.lat;
+				const long = place.lon;
 
-				const lat = latCalc(elementOSM);
-				const long = longCalc(elementOSM);
+				let divIcon = generateIcon(leaflet, icon, boosted, commentsCount);
 
-				const commentsCount = element.tags.comments || 0;
-
-				let divIcon = generateIcon(leaflet, icon, boosted ? true : false, commentsCount);
-
-				let marker = generateMarker(
+				let marker = generateMarker({
 					lat,
 					long,
-					divIcon,
-					elementOSM,
-					payment,
+					icon: divIcon,
+					placeId: place.id,
 					leaflet,
-					verifiedDate,
-					true,
-					boosted
-				);
+					verify: true
+				});
 
 				markers.addLayer(marker);
 				bounds.push({ lat, long });
 			});
 
 			map.addLayer(markers);
-			map.fitBounds(bounds.map(({ lat, long }) => [lat, long]));
+
+			// Only fit bounds if we have valid coordinates
+			if (bounds.length > 0) {
+				map.fitBounds(bounds.map(({ lat, long }) => [lat, long]));
+			} else {
+				// Set a default view if no places found
+				map.setView([0, 0], 2);
+			}
 
 			mapLoaded = true;
 		};
-		setupMap();
+		await setupMap();
 
 		// eslint-disable-next-line svelte/infinite-reactive-loop
 		dataInitialized = true;
@@ -432,8 +415,8 @@
 		$users.length &&
 		$events &&
 		$events.length &&
-		$elements &&
-		$elements.length &&
+		$places &&
+		$places.length &&
 		initialRenderComplete &&
 		!dataInitialized &&
 		// eslint-disable-next-line svelte/infinite-reactive-loop
@@ -464,12 +447,53 @@
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	let tagTypeChart;
 
-	let hideArrow = false;
-	let activityDiv;
 	let eventElements: ActivityEvent[] = [];
 
-	let eventCount = 50;
-	$: eventElementsPaginated = eventElements.slice(0, eventCount);
+	let loadingNames = false;
+	let nameCache: Record<string, string> = {};
+
+	// Fetch place names for current page
+	const fetchPageNames = async (events: ActivityEvent[]) => {
+		if (loadingNames) return;
+		loadingNames = true;
+
+		const uniqueIds = [...new Set(events.map((event) => event.element_id))];
+		const idsToFetch = uniqueIds.filter((id) => !nameCache[id]);
+
+		if (idsToFetch.length > 0) {
+			const promises = idsToFetch.map(async (id) => {
+				try {
+					const response = await fetch(`https://api.btcmap.org/v4/places/${id}?fields=name`);
+					if (response.ok) {
+						const data = await response.json();
+						return { id, name: data.name || formatElementID(id) };
+					}
+					return { id, name: formatElementID(id) };
+				} catch (error) {
+					console.warn(`Failed to fetch name for ${id}:`, error);
+					return { id, name: formatElementID(id) };
+				}
+			});
+
+			const results = await Promise.all(promises);
+			results.forEach(({ id, name }) => {
+				nameCache[id] = name;
+			});
+
+			// Update eventElements with new names
+			eventElements = eventElements.map((event) => ({
+				...event,
+				location: nameCache[event.element_id] || event.location
+			}));
+		}
+
+		loadingNames = false;
+	};
+
+	// Handle fetch names event from ProfileActivity component
+	const handleFetchNames = (event: CustomEvent) => {
+		fetchPageNames(event.detail.events);
+	};
 
 	let mapElement: HTMLDivElement;
 	let map: Map;
@@ -665,62 +689,13 @@
 			</section>
 
 			<section id="activity" class="my-16">
-				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
-					<h3
-						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
-					>
-						{username || 'BTC Map Supertagger'}'s Activity
-					</h3>
-
-					<div
-						bind:this={activityDiv}
-						class="hide-scroll space-y-2 {eventElements.length > 5
-							? 'h-[375px]'
-							: ''} relative overflow-y-scroll"
-						on:scroll={() => {
-							if (dataInitialized && !hideArrow) {
-								hideArrow = true;
-							}
-						}}
-					>
-						{#if eventElements && eventElements.length && dataInitialized}
-							{#each eventElementsPaginated as event (event['created_at'])}
-								<ProfileActivity
-									location={event.location}
-									action={event.type}
-									time={event['created_at']}
-									latest={event === eventElements[0] ? true : false}
-									merchantId={event.merchantId}
-								/>
-							{/each}
-
-							{#if eventElementsPaginated.length !== eventElements.length}
-								<button
-									class="mx-auto !mb-5 block text-xl font-semibold text-link transition-colors hover:text-hover"
-									on:click={() => (eventCount = eventCount + 50)}>Load More</button
-								>
-							{:else if eventElements.length > 10}
-								<TopButton scroll={activityDiv} style="!mb-5" />
-							{/if}
-
-							{#if !hideArrow && eventElements.length > 5}
-								<svg
-									class="absolute bottom-4 left-[calc(50%-8px)] z-20 h-4 w-4 animate-bounce text-primary dark:text-white"
-									fill="currentColor"
-									xmlns="http://www.w3.org/2000/svg"
-									viewBox="0 0 512 512"
-									><!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path
-										d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
-									/></svg
-								>
-							{/if}
-						{:else}
-							{#each Array(5) as _, i (i)}
-								<ProfileActivitySkeleton />
-							{/each}
-						{/if}
-					</div>
-				</div>
+				<ProfileActivity
+					{eventElements}
+					{username}
+					{dataInitialized}
+					{loadingNames}
+					on:fetchNames={handleFetchNames}
+				/>
 			</section>
 
 			<section id="map-section">

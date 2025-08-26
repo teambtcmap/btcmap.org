@@ -1,84 +1,150 @@
 <script lang="ts">
-	import type { EventType } from '$lib/types';
-	import Time from 'svelte-time';
+	import type { ActivityEvent } from '$lib/types';
+	import { format } from 'date-fns';
+	import { createEventDispatcher } from 'svelte';
 
-	export let location: string;
-	export let action: EventType;
-	export let time: string;
-	export let latest: boolean;
-	export let merchantId: string;
+	export let eventElements: ActivityEvent[] = [];
+	export let username: string;
+	export let dataInitialized: boolean = false;
+	export let loadingNames: boolean = false;
 
-	$: deleteLink = merchantId.split(':');
+	const dispatch = createEventDispatcher<{
+		fetchNames: { events: ActivityEvent[] };
+	}>();
 
-	const capitalizeFirstLetter = (string: string) => {
-		return string.charAt(0).toUpperCase() + string.slice(1);
+	let currentPage = 1;
+	let itemsPerPage = 10;
+
+	$: totalPages = Math.ceil(eventElements.length / itemsPerPage);
+	$: paginatedEvents = eventElements.slice(
+		(currentPage - 1) * itemsPerPage,
+		currentPage * itemsPerPage
+	);
+
+	// Fetch place names for current page
+	const fetchPageNames = async (events: ActivityEvent[]) => {
+		if (loadingNames) return;
+
+		dispatch('fetchNames', { events });
 	};
+
+	$: if (paginatedEvents.length > 0 && dataInitialized) {
+		fetchPageNames(paginatedEvents);
+	}
 </script>
 
-<div
-	class="items-center space-y-2 p-5 text-center text-xl lg:flex lg:space-x-5 lg:space-y-0 lg:text-left"
->
-	<!-- dot -->
-	<span class="relative mx-auto mb-2 flex h-3 w-3 lg:mx-0 lg:mb-0">
-		<span
-			class="{latest
-				? 'animate-ping'
-				: ''} absolute inline-flex h-full w-full rounded-full {action === 'create'
-				? 'bg-created'
-				: action === 'delete'
-					? 'bg-deleted'
-					: 'bg-link'} opacity-75"
-		/>
-		<span
-			class="relative inline-flex h-3 w-3 rounded-full {action === 'create'
-				? 'bg-created'
-				: action === 'delete'
-					? 'bg-deleted'
-					: 'bg-link'}"
-		/>
-	</span>
+<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
+	<h3
+		class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
+	>
+		{username || 'BTC Map Supertagger'}'s Activity
+	</h3>
 
-	<div class="w-full flex-wrap items-center justify-between space-y-2 lg:flex lg:space-y-0">
-		<!-- event information -->
-		<div class="space-y-2 lg:space-y-0">
-			<span class="text-primary dark:text-white lg:mr-5">
-				<!-- action -->
-				<span>{capitalizeFirstLetter(action)}d</span>
-
-				<!-- location -->
-				<a
-					href={action === 'delete'
-						? `https://www.openstreetmap.org/${deleteLink[0]}/${deleteLink[1]}`
-						: `/merchant/${merchantId}`}
-					target={action === 'delete' ? '_blank' : null}
-					rel={action === 'delete' ? 'noreferrer' : null}
-					class="break-all text-link transition-colors hover:text-hover"
-					>{location}
-					{#if action === 'delete'}
-						<svg
-							class="inline"
-							width="16"
-							height="16"
-							viewBox="0 0 16 16"
-							fill="none"
-							xmlns="http://www.w3.org/2000/svg"
+	{#if eventElements && eventElements.length && dataInitialized}
+		<div class="overflow-x-auto">
+			<table class="w-full">
+				<thead>
+					<tr class="border-b border-statBorder text-left">
+						<th class="w-2/3 px-5 py-3 text-left text-sm font-semibold text-primary dark:text-white"
+							>Location</th
 						>
-							<path
-								d="M3 13L13 3M13 3H5.5M13 3V10.5"
-								stroke="currentColor"
-								stroke-width="1.5"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							/>
-						</svg>
+						<th class="w-1/6 px-5 py-3 text-left text-sm font-semibold text-primary dark:text-white"
+							>Action</th
+						>
+						<th class="w-1/6 px-5 py-3 text-left text-sm font-semibold text-primary dark:text-white"
+							>Date</th
+						>
+					</tr>
+				</thead>
+				<tbody>
+					{#if loadingNames}
+						<!-- Show loading skeleton rows while fetching names -->
+						{#each Array(itemsPerPage) as _, i (i)}
+							<tr class="border-b border-statBorder/50">
+								<td class="w-2/3 px-5 py-3">
+									<div class="h-6 animate-pulse rounded bg-link/20"></div>
+								</td>
+								<td class="w-1/6 px-5 py-3">
+									<div class="h-6 animate-pulse rounded bg-link/20"></div>
+								</td>
+								<td class="w-1/6 px-5 py-3">
+									<div class="h-6 animate-pulse rounded bg-link/20"></div>
+								</td>
+							</tr>
+						{/each}
+					{:else}
+						{#each paginatedEvents as event, _ (event['created_at'])}
+							<tr class="border-b border-statBorder/50 hover:bg-gray-50 dark:hover:bg-white/5">
+								<td class="w-2/3 px-5 py-3 text-left">
+									<a
+										href="/merchant/{event.merchantId}"
+										class="text-link transition-colors hover:text-hover"
+									>
+										{event.location}
+									</a>
+								</td>
+								<td class="w-1/6 px-5 py-3 text-left">
+									<span
+										class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium
+										{event.type === 'create'
+											? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+											: event.type === 'update'
+												? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+												: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}"
+									>
+										{event.type}
+									</span>
+								</td>
+								<td class="w-1/6 px-5 py-3 text-left text-sm text-body dark:text-white">
+									{format(new Date(event['created_at']), 'MMM d, yyyy HH:mm')}
+								</td>
+							</tr>
+						{/each}
 					{/if}
-				</a>
-			</span>
+				</tbody>
+			</table>
 		</div>
 
-		<!-- time ago -->
-		<span class="block text-center text-taggerTime lg:inline">
-			<Time live={3000} relative timestamp={time} />
-		</span>
-	</div>
+		{#if totalPages > 1}
+			<div class="flex items-center justify-between border-t border-statBorder px-5 py-3">
+				<div class="text-sm text-body dark:text-white">
+					Page {currentPage} of {totalPages} ({eventElements.length} total)
+				</div>
+				<div class="flex space-x-2">
+					<button
+						on:click={() => (currentPage = Math.max(1, currentPage - 1))}
+						disabled={currentPage === 1}
+						class="rounded border border-statBorder px-3 py-1 text-sm
+						       text-primary transition-colors
+						       hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50
+						       dark:text-white dark:hover:bg-white/5"
+					>
+						Previous
+					</button>
+					<button
+						on:click={() => (currentPage = Math.min(totalPages, currentPage + 1))}
+						disabled={currentPage === totalPages}
+						class="rounded border border-statBorder px-3 py-1 text-sm
+						       text-primary transition-colors
+						       hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50
+						       dark:text-white dark:hover:bg-white/5"
+					>
+						Next
+					</button>
+				</div>
+			</div>
+		{/if}
+	{:else}
+		<div class="p-5">
+			{#each Array(10) as _, i (i)}
+				<div class="mb-3 animate-pulse">
+					<div class="flex space-x-4">
+						<div class="h-4 w-2/3 rounded bg-link/20"></div>
+						<div class="h-4 w-1/6 rounded bg-link/20"></div>
+						<div class="h-4 w-1/6 rounded bg-link/20"></div>
+					</div>
+				</div>
+			{/each}
+		</div>
+	{/if}
 </div>
