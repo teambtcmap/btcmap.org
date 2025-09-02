@@ -306,23 +306,6 @@ export interface SearchResult extends SearchElement {
 	distanceMi: number;
 }
 
-// Search types for JSON-RPC search API
-export interface SearchItem {
-	type: 'element' | 'user';
-	id: string;
-	name: string;
-	description?: string;
-	score: number;
-}
-
-export interface SearchRpcResponse {
-	jsonrpc: '2.0';
-	result: {
-		items: SearchItem[];
-	};
-	id: number;
-}
-
 export type PayMerchant = { type: string; url?: string; username?: string } | undefined;
 
 // leaderboards
