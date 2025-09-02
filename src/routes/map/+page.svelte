@@ -75,8 +75,7 @@
 					jsonrpc: '2.0',
 					method: 'search',
 					params: {
-						query: search,
-						limit: 50
+						query: search
 					},
 					id: 1
 				})
