@@ -67,7 +67,6 @@ test.describe('Areas', () => {
 
 		// Get href to verify it's a valid community link
 		const href = await communityLinks.first().getAttribute('href');
-		console.log('Community link href:', href);
 
 		// Click the first community and verify navigation works
 		await communityLinks.first().click();

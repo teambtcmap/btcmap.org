@@ -48,7 +48,6 @@ test.describe('Community Area Pages', () => {
 
 		// Get the community href for URL verification
 		const communityHref = await firstCommunityLink.getAttribute('href');
-		console.log('Community link href:', communityHref);
 		await firstCommunityLink.click();
 
 		// Wait for navigation to complete
