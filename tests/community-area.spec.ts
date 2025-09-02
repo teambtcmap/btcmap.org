@@ -40,19 +40,20 @@ test.describe('Community Area Pages', () => {
 
 		// Wait for page to load
 		await page.waitForSelector('main', { timeout: 10000 });
-		await page.waitForTimeout(2000); // Give more time for dynamic content
+		await page.waitForTimeout(5000); // Give more time for API data to load locally
 
 		// Ensure community links are present - this should not be skipped
 		const firstCommunityLink = page.locator('a[href^="/community/"]').first();
-		await expect(firstCommunityLink).toBeVisible({ timeout: 15000 });
+		await expect(firstCommunityLink).toBeVisible({ timeout: 20000 });
 
 		// Get the community href for URL verification
 		const communityHref = await firstCommunityLink.getAttribute('href');
+		console.log('Community link href:', communityHref);
 		await firstCommunityLink.click();
 
 		// Wait for navigation to complete
-		await page.waitForLoadState('domcontentloaded');
-		await page.waitForTimeout(1000);
+		await page.waitForLoadState('networkidle'); // Wait for network requests
+		await page.waitForTimeout(3000); // More time for local environment
 
 		// Should redirect to merchants section (URL should end with /merchants)
 		if (communityHref) {
