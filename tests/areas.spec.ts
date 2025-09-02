@@ -65,9 +65,6 @@ test.describe('Areas', () => {
 		// Check that at least some communities are visible
 		await expect(communityLinks.first()).toBeVisible({ timeout: 20000 });
 
-		// Get href to verify it's a valid community link
-		const href = await communityLinks.first().getAttribute('href');
-
 		// Click the first community and verify navigation works
 		await communityLinks.first().click();
 		await page.waitForLoadState('networkidle'); // Wait for network requests to complete
