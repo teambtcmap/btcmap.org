@@ -7,17 +7,8 @@
 		TaggerSkeleton,
 		TopButton
 	} from '$lib/comp';
-	import {
-		elementError,
-		elements,
-		eventError,
-		events,
-		syncStatus,
-		theme,
-		userError,
-		users
-	} from '$lib/store';
-	import type { ActivityEvent, Element, Event, User } from '$lib/types';
+	import { placesError, eventError, events, syncStatus, theme, userError, users } from '$lib/store';
+	import type { ActivityEvent, Event, User } from '$lib/types';
 	import { detectTheme, errToast, formatElementID } from '$lib/utils';
 
 	// alert for user errors
@@ -25,7 +16,7 @@
 	// alert for event errors
 	$: $eventError && errToast($eventError);
 	// alert for element errors
-	$: $elementError && errToast($elementError);
+	$: $placesError && errToast($placesError);
 
 	let elementsLoading: boolean;
 	let supertaggers: ActivityEvent[];
@@ -39,13 +30,19 @@
 		}
 	};
 
-	const supertaggerSync = (
-		status: boolean,
-		users: User[],
-		events: Event[],
-		elements: Element[]
-	) => {
-		if (elements.length && events.length && users.length && !status) {
+	const fetchMerchantName = async (elementId: string): Promise<string> => {
+		try {
+			const response = await fetch(`https://api.btcmap.org/v2/elements/${elementId}`);
+			if (!response.ok) throw new Error('API call failed');
+			const data = await response.json();
+			return data.osm_json?.tags?.name || formatElementID(elementId);
+		} catch {
+			return formatElementID(elementId);
+		}
+	};
+
+	const supertaggerSync = async (status: boolean, users: User[], events: Event[]) => {
+		if (events.length && users.length && !status) {
 			let recentEvents = events
 				.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']))
 				.slice(0, 50);
@@ -53,30 +50,37 @@
 			elementsLoading = true;
 			supertaggers = [];
 
-			recentEvents.forEach((event) => {
-				let elementMatch = elements.find((element) => element.id === event['element_id']);
+			// Fetch merchant names concurrently
+			const supertaggerPromises = recentEvents.map(async (event) => {
+				const location = await fetchMerchantName(event['element_id']);
+				const tagger = findUser(event);
 
-				let location =
-					elementMatch?.['osm_json'].tags && elementMatch['osm_json'].tags.name
-						? elementMatch['osm_json'].tags.name
-						: undefined;
-
-				let tagger = findUser(event);
-
-				supertaggers.push({
+				return {
 					...event,
-					location: location || formatElementID(event['element_id']),
+					location,
 					merchantId: event['element_id'],
 					tagger
-				});
+				};
 			});
 
-			supertaggers = supertaggers;
+			try {
+				supertaggers = await Promise.all(supertaggerPromises);
+			} catch (error) {
+				console.error('Error fetching merchant names:', error);
+				// Fallback: create entries with element IDs only
+				supertaggers = recentEvents.map((event) => ({
+					...event,
+					location: formatElementID(event['element_id']),
+					merchantId: event['element_id'],
+					tagger: findUser(event)
+				}));
+			}
+
 			elementsLoading = false;
 		}
 	};
 
-	$: supertaggerSync($syncStatus, $users, $events, $elements);
+	$: supertaggerSync($syncStatus, $users, $events);
 
 	$: latestTaggers = supertaggers && supertaggers.length && !elementsLoading ? true : false;
 </script>

@@ -62,7 +62,6 @@ export { default as OpenTicketSkeleton } from '../components/OpenTicketSkeleton.
 export { default as OrgBadge } from '../components/OrgBadge.svelte';
 export { default as PrimaryButton } from '../components/PrimaryButton.svelte';
 export { default as ProfileActivity } from '../components/ProfileActivity.svelte';
-export { default as ProfileActivitySkeleton } from '../components/ProfileActivitySkeleton.svelte';
 export { default as ProfileStat } from '../components/ProfileStat.svelte';
 export { default as ShowTags } from '../components/ShowTags.svelte';
 export { default as SocialLink } from '../components/SocialLink.svelte';
