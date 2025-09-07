@@ -19,7 +19,7 @@ const getTwoWeeksAgoDate = (): string => {
 const getStaticFileDate = async (): Promise<string> => {
 	try {
 		// Use HEAD request to get headers without downloading the full file
-		const headResponse = await axios.head('https://static.btcmap.org/api/v4/places.json');
+		const headResponse = await axios.head('https://cdn.static.btcmap.org/api/v4/places.json');
 		const lastModified = headResponse.headers['last-modified'];
 
 		if (lastModified) {
@@ -63,7 +63,7 @@ export const elementsSync = async () => {
 			if (!cachedPlaces) {
 				try {
 					const staticResponse = await axios.get<Place[]>(
-						'https://static.btcmap.org/api/v4/places.json'
+						'https://cdn.static.btcmap.org/api/v4/places.json'
 					);
 					placesData = staticResponse.data;
 				} catch (error) {
@@ -144,7 +144,7 @@ export const elementsSync = async () => {
 
 			try {
 				const staticResponse = await axios.get<Place[]>(
-					'https://static.btcmap.org/api/v4/places.json'
+					'https://cdn.static.btcmap.org/api/v4/places.json'
 				);
 
 				if (staticResponse.data.length > 0) {
