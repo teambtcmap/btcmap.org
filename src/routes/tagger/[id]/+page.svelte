@@ -3,41 +3,28 @@
 
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import { Footer, Header, MapLoadingEmbed, ProfileActivity, ProfileStat, Tip } from '$lib/comp';
-	import {
-		attribution,
-		calcVerifiedDate,
-		changeDefaultIcons,
-		generateIcon,
-		generateMarker,
-		geolocate,
-		toggleMapButtons
-	} from '$lib/map/setup';
+	import { Footer, Header, ProfileActivity, ProfileStat, Tip } from '$lib/comp';
 	import {
 		placesError,
 		eventError,
 		events,
 		excludeLeader,
 		places,
-		theme,
 		userError,
 		users
 	} from '$lib/store';
 	import {
 		BadgeType,
 		type ActivityEvent,
-		type DomEventType,
 		type EarnedBadge,
-		type Leaflet,
 		type ProfileLeaderboard
 	} from '$lib/types.js';
-	import { detectTheme, errToast, formatElementID } from '$lib/utils';
+	import { errToast, formatElementID } from '$lib/utils';
 	import Chart from 'chart.js/auto';
 	import { format } from 'date-fns';
 	import DOMPurify from 'dompurify';
-	import type { Map, MaplibreGL } from 'leaflet';
 	import { marked } from 'marked';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 
 	// alert for user errors
 	$: $userError && errToast($userError);
@@ -48,9 +35,6 @@
 
 	let dataInitialized = false;
 	let initialRenderComplete = false;
-
-	let leaflet: Leaflet;
-	let DomEvent: DomEventType;
 
 	let filteredDesc: string | undefined;
 	let sanitizedMarkdown: string = '';
@@ -310,103 +294,6 @@
 		};
 		setupChart();
 
-		const setupMap = async () => {
-			const theme = detectTheme();
-
-			// add map and tiles
-			map = leaflet.map(mapElement, { attributionControl: false, maxZoom: 19 });
-
-			openFreeMapLiberty = window.L.maplibreGL({
-				style: 'https://tiles.openfreemap.org/styles/liberty'
-			});
-
-			openFreeMapDark = window.L.maplibreGL({
-				style: 'https://static.btcmap.org/map-styles/dark.json'
-			});
-
-			if (theme === 'dark') {
-				openFreeMapDark.addTo(map);
-			} else {
-				openFreeMapLiberty.addTo(map);
-			}
-
-			// change broken marker image path in prod
-			leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
-
-			// add OSM attribution
-			attribution(leaflet, map);
-
-			// add locate button to map
-			geolocate(leaflet, map);
-
-			// change default icons
-			changeDefaultIcons(false, leaflet, mapElement, DomEvent);
-
-			// create marker cluster group
-			/* eslint-disable no-undef */
-			// @ts-expect-error
-			let markers = L.markerClusterGroup();
-			/* eslint-enable no-undef */
-
-			// get date from 1 year ago to add verified check if survey is current
-			let verifiedDate = calcVerifiedDate();
-
-			// Use Places cache for map markers - match event.element_id (OSM format) with place.osm_id
-			const uniqueElementIds = [...new Set(userEvents.map((event) => event.element_id))];
-
-			console.log('Sample element_ids:', uniqueElementIds.slice(0, 5));
-			console.log(
-				'Sample place osm_ids:',
-				$places.slice(0, 5).map((p) => p.osm_id)
-			);
-
-			// Filter places that match element_id with osm_id
-			const placesFromCache = $places.filter((place) => {
-				return place.osm_id && uniqueElementIds.includes(place.osm_id);
-			});
-
-			console.log(`Using ${placesFromCache.length} places from cache for map display`);
-
-			// add location information
-			let bounds: { lat: number; long: number }[] = [];
-
-			placesFromCache.forEach((place) => {
-				let icon = place.icon;
-				let boosted = false; // Places cache doesn't have boost info, will be fetched on click
-				let commentsCount = place.comments || 0;
-
-				const lat = place.lat;
-				const long = place.lon;
-
-				let divIcon = generateIcon(leaflet, icon, boosted, commentsCount);
-
-				let marker = generateMarker({
-					lat,
-					long,
-					icon: divIcon,
-					placeId: place.id,
-					leaflet,
-					verify: true
-				});
-
-				markers.addLayer(marker);
-				bounds.push({ lat, long });
-			});
-
-			map.addLayer(markers);
-
-			// Only fit bounds if we have valid coordinates
-			if (bounds.length > 0) {
-				map.fitBounds(bounds.map(({ lat, long }) => [lat, long]));
-			} else {
-				// Set a default view if no places found
-				map.setView([0, 0], 2);
-			}
-
-			mapLoaded = true;
-		};
-		await setupMap();
-
 		// eslint-disable-next-line svelte/infinite-reactive-loop
 		dataInitialized = true;
 	};
@@ -495,57 +382,12 @@
 		fetchPageNames(event.detail.events);
 	};
 
-	let mapElement: HTMLDivElement;
-	let map: Map;
-	let mapLoaded = false;
-
-	let openFreeMapLiberty: MaplibreGL;
-	let openFreeMapDark: MaplibreGL;
-
 	onMount(async () => {
 		if (browser) {
 			// setup chart
 			tagTypeChartCanvas.getContext('2d');
 
-			//import packages
-			leaflet = await import('leaflet');
-			const domEventModule = await import('leaflet/src/dom/DomEvent');
-			DomEvent = domEventModule.default;
-			/* eslint-disable @typescript-eslint/no-unused-vars */
-			const maplibreGl = await import('maplibre-gl');
-			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
-			const leafletMarkerCluster = await import('leaflet.markercluster');
-			const leafletLocateControl = await import('leaflet.locatecontrol');
-			/* eslint-enable @typescript-eslint/no-unused-vars */
-
 			initialRenderComplete = true;
-		}
-	});
-
-	$: $theme !== undefined && mapLoaded && toggleMapButtons();
-
-	const closePopup = () => {
-		map.closePopup();
-	};
-
-	$: $theme !== undefined && mapLoaded && closePopup();
-
-	const toggleTheme = () => {
-		if ($theme === 'dark') {
-			openFreeMapLiberty.remove();
-			openFreeMapDark.addTo(map);
-		} else {
-			openFreeMapDark.remove();
-			openFreeMapLiberty.addTo(map);
-		}
-	};
-
-	$: $theme !== undefined && mapLoaded && toggleTheme();
-
-	onDestroy(async () => {
-		if (map) {
-			console.info('Unloading Leaflet map.');
-			map.remove();
 		}
 	});
 </script>
@@ -696,30 +538,6 @@
 					{loadingNames}
 					on:fetchNames={handleFetchNames}
 				/>
-			</section>
-
-			<section id="map-section">
-				<h3
-					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary dark:bg-white/10 dark:text-white md:text-left"
-				>
-					{username || 'BTC Map Supertagger'}'s Map
-				</h3>
-
-				<div class="relative">
-					<div
-						bind:this={mapElement}
-						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal text-left dark:!bg-[#202f33] md:h-[600px]"
-					/>
-					{#if !mapLoaded}
-						<MapLoadingEmbed
-							style="h-[300px] md:h-[600px] border border-statBorder rounded-b-3xl"
-						/>
-					{/if}
-				</div>
-
-				<p class="text-center text-sm text-body dark:text-white lg:text-left">
-					*Does not display deleted merchants.
-				</p>
 			</section>
 		</main>
 
