@@ -26,6 +26,7 @@
 
 <div class="flex flex-wrap items-center justify-center {style || ''}">
 	{#if website}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a href={website} target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-bitcoin">
 				<i class="fa-solid fa-globe h-7 w-7 text-white" />
@@ -33,6 +34,7 @@
 		</a>
 	{/if}
 	{#if email}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a href="mailto:{email}" target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-[#53C5D5]">
 				<i class="fa-solid fa-envelope h-7 w-7 text-white" />
@@ -40,6 +42,7 @@
 		</a>
 	{/if}
 	{#if nostr}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a href="https://nostr.com/{nostr}" target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-nostr">
 				<Icon w="28" h="28" icon="nostr" type="socials" style="text-white" />
@@ -47,6 +50,7 @@
 		</a>
 	{/if}
 	{#if twitter}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a href={twitter} target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-black">
 				<Icon w="25" h="25" icon="x" type="socials" style="text-white" />
@@ -54,6 +58,7 @@
 		</a>
 	{/if}
 	{#if secondTwitter}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a href={secondTwitter} target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-black">
 				<Icon w="25" h="25" icon="x" type="socials" style="text-white" />
@@ -61,61 +66,73 @@
 		</a>
 	{/if}
 	{#if meetup}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a href={meetup} target="_blank" rel="noreferrer" class="m-1">
 			<img src="/icons/socials/meetup.jpg" alt="meetup" class="h-10 w-10 rounded-full" />
 		</a>
 	{/if}
 	{#if eventbrite}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a href={eventbrite} target="_blank" rel="noreferrer" class="m-1">
 			<img src="/icons/socials/eventbrite.png" alt="eventbrite" class="h-10 w-10 rounded-full" />
 		</a>
 	{/if}
 	{#if telegram}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a href={telegram} target="_blank" rel="noreferrer" class="m-1">
 			<img src="/icons/socials/telegram.svg" alt="telegram" />
 		</a>
 	{/if}
 	{#if discord}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a href={discord} target="_blank" rel="noreferrer" class="m-1">
 			<img src="/icons/socials/discord.svg" alt="discord" />
 		</a>
 	{/if}
 	{#if youtube}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a href={youtube} target="_blank" rel="noreferrer" class="m-1">
 			<img src="/icons/socials/youtube.svg" alt="youtube" />
 		</a>
 	{/if}
 	{#if github}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a href={github} target="_blank" rel="noreferrer" class="m-1">
 			<img src="/icons/socials/github.svg" alt="github" />
 		</a>
 	{/if}
 	{#if reddit}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a href={reddit} target="_blank" rel="noreferrer" class="m-1">
 			<img src="/icons/socials/reddit.svg" alt="reddit" />
 		</a>
 	{/if}
 	{#if instagram}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a href={instagram} target="_blank" rel="noreferrer" class="m-1">
 			<img src="/icons/socials/instagram.svg" alt="instagram" class="h-10 w-10 rounded-full" />
 		</a>
 	{/if}
 	{#if whatsapp}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a href={whatsapp} target="_blank" rel="noreferrer" class="m-1">
 			<img src="/icons/socials/whatsapp.svg" alt="whatsapp" />
 		</a>
 	{/if}
 	{#if facebook}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a href={facebook} target="_blank" rel="noreferrer" class="m-1">
 			<img src="/icons/socials/facebook.svg" alt="facebook" />
 		</a>
 	{/if}
 	{#if linkedin}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a href={linkedin} target="_blank" rel="noreferrer" class="m-1">
 			<img src="/icons/socials/linkedin.svg" alt="linkedin" />
 		</a>
 	{/if}
 	{#if rss}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a href={rss} target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-orange-500">
 				<i class="fa-solid fa-rss h-7 w-7 text-white" />
@@ -123,11 +140,13 @@
 		</a>
 	{/if}
 	{#if signal}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a href={signal} target="_blank" rel="noreferrer" class="m-1">
 			<img src="/icons/socials/signal.svg" alt="signal" class="h-10 w-10 rounded-full" />
 		</a>
 	{/if}
 	{#if simplex}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a href={simplex} target="_blank" rel="noreferrer" class="m-1">
 			<img src="/icons/socials/simplex.jpg" alt="simplex" class="h-10 w-10 rounded-full" />
 		</a>

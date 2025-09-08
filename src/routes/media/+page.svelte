@@ -81,6 +81,7 @@
 					<h2 class="text-3xl font-semibold">Assets</h2>
 
 					<a
+						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 						href="/assets/btcmap-media-assets.zip"
 						download
 						class="mx-auto block w-36 rounded-lg bg-link py-3 font-semibold text-white transition-colors hover:bg-hover"
@@ -95,7 +96,11 @@
 							<ul class="ml-5 list-disc space-y-1">
 								{#each section.data as asset (asset.name)}
 									<li>
-										<a href={asset.link} class="text-link transition-colors hover:text-hover">
+										<a
+										<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+										href={asset.link}
+										class="text-link transition-colors hover:text-hover"
+									>
 											{asset.name}
 										</a>
 									</li>

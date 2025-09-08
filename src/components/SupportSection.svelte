@@ -10,6 +10,7 @@
 	<div class="mx-auto w-full grid-cols-3 gap-10 space-y-10 lg:grid lg:w-[830px] lg:space-y-0">
 		{#each supporters as supporter (supporter.url)}
 			<a
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 				href={supporter.url}
 				target="_blank"
 				rel="noreferrer"
