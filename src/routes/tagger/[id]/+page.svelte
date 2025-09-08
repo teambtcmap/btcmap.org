@@ -3,65 +3,38 @@
 
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
+	import { Footer, Header, ProfileActivity, ProfileStat, Tip } from '$lib/comp';
 	import {
-		Footer,
-		Header,
-		MapLoadingEmbed,
-		ProfileActivity,
-		ProfileActivitySkeleton,
-		ProfileStat,
-		Tip,
-		TopButton
-	} from '$lib/comp';
-	import {
-		attribution,
-		calcVerifiedDate,
-		changeDefaultIcons,
-		generateIcon,
-		generateMarker,
-		geolocate,
-		latCalc,
-		longCalc,
-		toggleMapButtons
-	} from '$lib/map/setup';
-	import {
-		elementError,
-		elements,
+		placesError,
 		eventError,
 		events,
 		excludeLeader,
-		theme,
+		places,
 		userError,
 		users
 	} from '$lib/store';
 	import {
 		BadgeType,
 		type ActivityEvent,
-		type DomEventType,
 		type EarnedBadge,
-		type Leaflet,
 		type ProfileLeaderboard
 	} from '$lib/types.js';
-	import { detectTheme, errToast, formatElementID } from '$lib/utils';
+	import { errToast, formatElementID } from '$lib/utils';
 	import Chart from 'chart.js/auto';
 	import { format } from 'date-fns';
 	import DOMPurify from 'dompurify';
-	import type { Map, MaplibreGL } from 'leaflet';
 	import { marked } from 'marked';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 
 	// alert for user errors
 	$: $userError && errToast($userError);
 	// alert for event errors
 	$: $eventError && errToast($eventError);
 	// alert for element errors
-	$: $elementError && errToast($elementError);
+	$: $placesError && errToast($placesError);
 
 	let dataInitialized = false;
 	let initialRenderComplete = false;
-
-	let leaflet: Leaflet;
-	let DomEvent: DomEventType;
 
 	let filteredDesc: string | undefined;
 	let sanitizedMarkdown: string = '';
@@ -278,22 +251,14 @@
 			Number((deleted / (total / 100)).toFixed(0))
 		);
 
-		userEvents.forEach((event) => {
-			let elementMatch = $elements.find((element) => element.id === event['element_id']);
-
-			let location =
-				elementMatch?.['osm_json'].tags && elementMatch['osm_json'].tags.name
-					? elementMatch['osm_json'].tags.name
-					: undefined;
-
-			eventElements.push({
+		// Create activity events without fetching element data - names will be fetched on-demand
+		eventElements = userEvents.map((event) => {
+			return {
 				...event,
-				location: location || formatElementID(event['element_id']),
-				merchantId: event['element_id']
-			});
+				location: formatElementID(event.element_id), // Will be updated with actual names on-demand
+				merchantId: event.element_id
+			};
 		});
-
-		eventElements = eventElements;
 
 		// add markdown support for profile description
 		const markdown = await marked.parse(filteredDesc || '');
@@ -329,101 +294,6 @@
 		};
 		setupChart();
 
-		const setupMap = () => {
-			const theme = detectTheme();
-
-			// add map and tiles
-			map = leaflet.map(mapElement, { attributionControl: false, maxZoom: 19 });
-
-			openFreeMapLiberty = window.L.maplibreGL({
-				style: 'https://tiles.openfreemap.org/styles/liberty'
-			});
-
-			openFreeMapDark = window.L.maplibreGL({
-				style: 'https://static.btcmap.org/map-styles/dark.json'
-			});
-
-			if (theme === 'dark') {
-				openFreeMapDark.addTo(map);
-			} else {
-				openFreeMapLiberty.addTo(map);
-			}
-
-			// change broken marker image path in prod
-			leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
-
-			// add OSM attribution
-			attribution(leaflet, map);
-
-			// add locate button to map
-			geolocate(leaflet, map);
-
-			// change default icons
-			changeDefaultIcons(false, leaflet, mapElement, DomEvent);
-
-			// create marker cluster group
-			/* eslint-disable no-undef */
-			// @ts-expect-error
-			let markers = L.markerClusterGroup();
-			/* eslint-enable no-undef */
-
-			// get date from 1 year ago to add verified check if survey is current
-			let verifiedDate = calcVerifiedDate();
-
-			// filter elements edited by user
-			let filteredElements = $elements.filter((element) =>
-				userEvents.find((event) => event['element_id'] === element.id)
-			);
-
-			// add location information
-			let bounds: { lat: number; long: number }[] = [];
-
-			filteredElements.forEach((element) => {
-				let icon = element.tags['icon:android'];
-				let payment = element.tags['payment:uri']
-					? { type: 'uri', url: element.tags['payment:uri'] }
-					: element.tags['payment:pouch']
-						? { type: 'pouch', username: element.tags['payment:pouch'] }
-						: element.tags['payment:coinos']
-							? { type: 'coinos', username: element.tags['payment:coinos'] }
-							: undefined;
-				let boosted =
-					element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now()
-						? element.tags['boost:expires']
-						: undefined;
-
-				const elementOSM = element['osm_json'];
-
-				const lat = latCalc(elementOSM);
-				const long = longCalc(elementOSM);
-
-				const commentsCount = element.tags.comments || 0;
-
-				let divIcon = generateIcon(leaflet, icon, boosted ? true : false, commentsCount);
-
-				let marker = generateMarker(
-					lat,
-					long,
-					divIcon,
-					elementOSM,
-					payment,
-					leaflet,
-					verifiedDate,
-					true,
-					boosted
-				);
-
-				markers.addLayer(marker);
-				bounds.push({ lat, long });
-			});
-
-			map.addLayer(markers);
-			map.fitBounds(bounds.map(({ lat, long }) => [lat, long]));
-
-			mapLoaded = true;
-		};
-		setupMap();
-
 		// eslint-disable-next-line svelte/infinite-reactive-loop
 		dataInitialized = true;
 	};
@@ -432,8 +302,8 @@
 		$users.length &&
 		$events &&
 		$events.length &&
-		$elements &&
-		$elements.length &&
+		$places &&
+		$places.length &&
 		initialRenderComplete &&
 		!dataInitialized &&
 		// eslint-disable-next-line svelte/infinite-reactive-loop
@@ -464,64 +334,60 @@
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	let tagTypeChart;
 
-	let hideArrow = false;
-	let activityDiv;
 	let eventElements: ActivityEvent[] = [];
 
-	let eventCount = 50;
-	$: eventElementsPaginated = eventElements.slice(0, eventCount);
+	let loadingNames = false;
+	let nameCache: Record<string, string> = {};
 
-	let mapElement: HTMLDivElement;
-	let map: Map;
-	let mapLoaded = false;
+	// Fetch place names for current page
+	const fetchPageNames = async (events: ActivityEvent[]) => {
+		if (loadingNames) return;
+		loadingNames = true;
 
-	let openFreeMapLiberty: MaplibreGL;
-	let openFreeMapDark: MaplibreGL;
+		const uniqueIds = [...new Set(events.map((event) => event.element_id))];
+		const idsToFetch = uniqueIds.filter((id) => !nameCache[id]);
+
+		if (idsToFetch.length > 0) {
+			const promises = idsToFetch.map(async (id) => {
+				try {
+					const response = await fetch(`https://api.btcmap.org/v4/places/${id}?fields=name`);
+					if (response.ok) {
+						const data = await response.json();
+						return { id, name: data.name || formatElementID(id) };
+					}
+					return { id, name: formatElementID(id) };
+				} catch (error) {
+					console.warn(`Failed to fetch name for ${id}:`, error);
+					return { id, name: formatElementID(id) };
+				}
+			});
+
+			const results = await Promise.all(promises);
+			results.forEach(({ id, name }) => {
+				nameCache[id] = name;
+			});
+
+			// Update eventElements with new names
+			eventElements = eventElements.map((event) => ({
+				...event,
+				location: nameCache[event.element_id] || event.location
+			}));
+		}
+
+		loadingNames = false;
+	};
+
+	// Handle fetch names event from ProfileActivity component
+	const handleFetchNames = (event: CustomEvent) => {
+		fetchPageNames(event.detail.events);
+	};
 
 	onMount(async () => {
 		if (browser) {
 			// setup chart
 			tagTypeChartCanvas.getContext('2d');
 
-			//import packages
-			leaflet = await import('leaflet');
-			const domEventModule = await import('leaflet/src/dom/DomEvent');
-			DomEvent = domEventModule.default;
-			/* eslint-disable @typescript-eslint/no-unused-vars */
-			const maplibreGl = await import('maplibre-gl');
-			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
-			const leafletMarkerCluster = await import('leaflet.markercluster');
-			const leafletLocateControl = await import('leaflet.locatecontrol');
-			/* eslint-enable @typescript-eslint/no-unused-vars */
-
 			initialRenderComplete = true;
-		}
-	});
-
-	$: $theme !== undefined && mapLoaded && toggleMapButtons();
-
-	const closePopup = () => {
-		map.closePopup();
-	};
-
-	$: $theme !== undefined && mapLoaded && closePopup();
-
-	const toggleTheme = () => {
-		if ($theme === 'dark') {
-			openFreeMapLiberty.remove();
-			openFreeMapDark.addTo(map);
-		} else {
-			openFreeMapDark.remove();
-			openFreeMapLiberty.addTo(map);
-		}
-	};
-
-	$: $theme !== undefined && mapLoaded && toggleTheme();
-
-	onDestroy(async () => {
-		if (map) {
-			console.info('Unloading Leaflet map.');
-			map.remove();
 		}
 	});
 </script>
@@ -665,86 +531,13 @@
 			</section>
 
 			<section id="activity" class="my-16">
-				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
-					<h3
-						class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
-					>
-						{username || 'BTC Map Supertagger'}'s Activity
-					</h3>
-
-					<div
-						bind:this={activityDiv}
-						class="hide-scroll space-y-2 {eventElements.length > 5
-							? 'h-[375px]'
-							: ''} relative overflow-y-scroll"
-						on:scroll={() => {
-							if (dataInitialized && !hideArrow) {
-								hideArrow = true;
-							}
-						}}
-					>
-						{#if eventElements && eventElements.length && dataInitialized}
-							{#each eventElementsPaginated as event (event['created_at'])}
-								<ProfileActivity
-									location={event.location}
-									action={event.type}
-									time={event['created_at']}
-									latest={event === eventElements[0] ? true : false}
-									merchantId={event.merchantId}
-								/>
-							{/each}
-
-							{#if eventElementsPaginated.length !== eventElements.length}
-								<button
-									class="mx-auto !mb-5 block text-xl font-semibold text-link transition-colors hover:text-hover"
-									on:click={() => (eventCount = eventCount + 50)}>Load More</button
-								>
-							{:else if eventElements.length > 10}
-								<TopButton scroll={activityDiv} style="!mb-5" />
-							{/if}
-
-							{#if !hideArrow && eventElements.length > 5}
-								<svg
-									class="absolute bottom-4 left-[calc(50%-8px)] z-20 h-4 w-4 animate-bounce text-primary dark:text-white"
-									fill="currentColor"
-									xmlns="http://www.w3.org/2000/svg"
-									viewBox="0 0 512 512"
-									><!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path
-										d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
-									/></svg
-								>
-							{/if}
-						{:else}
-							{#each Array(5) as _, i (i)}
-								<ProfileActivitySkeleton />
-							{/each}
-						{/if}
-					</div>
-				</div>
-			</section>
-
-			<section id="map-section">
-				<h3
-					class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary dark:bg-white/10 dark:text-white md:text-left"
-				>
-					{username || 'BTC Map Supertagger'}'s Map
-				</h3>
-
-				<div class="relative">
-					<div
-						bind:this={mapElement}
-						class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal text-left dark:!bg-[#202f33] md:h-[600px]"
-					/>
-					{#if !mapLoaded}
-						<MapLoadingEmbed
-							style="h-[300px] md:h-[600px] border border-statBorder rounded-b-3xl"
-						/>
-					{/if}
-				</div>
-
-				<p class="text-center text-sm text-body dark:text-white lg:text-left">
-					*Does not display deleted merchants.
-				</p>
+				<ProfileActivity
+					{eventElements}
+					{username}
+					{dataInitialized}
+					{loadingNames}
+					on:fetchNames={handleFetchNames}
+				/>
 			</section>
 		</main>
 

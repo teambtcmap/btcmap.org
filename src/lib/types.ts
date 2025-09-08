@@ -141,6 +141,29 @@ export interface MerchantPageData {
 	lat: number;
 	lon: number;
 	comments: MerchantComment[];
+	// Additional fields from Element data
+	icon?: string;
+	address?: string;
+	description?: string;
+	note?: string;
+	hours?: string;
+	payment?: PayMerchant;
+	boosted?: string;
+	verified: string[];
+	phone?: string;
+	website?: string;
+	email?: string;
+	twitter?: string;
+	instagram?: string;
+	facebook?: string;
+	thirdParty?: boolean;
+	paymentMethod?: string;
+	// OSM data for edit links and tag functionality
+	osmType: string;
+	osmId: number;
+	osmTags: OSMTags;
+	// Element data for complex client logic (communities, events, etc.)
+	elementData: Element;
 }
 
 export type RpcIssue = {
@@ -366,4 +389,54 @@ export type DropdownLink = { url: string; external?: boolean; icon: string; titl
 
 export type ChartHistory = '7D' | '1M' | '3M' | '6M' | 'YTD' | '1Y' | 'ALL';
 
-export type AreaPageProps = { id: string; name: string; tickets: Tickets; issues: RpcIssue[] };
+export type AreaPageProps = {
+	id: string;
+	name: string;
+	tickets: Tickets;
+	issues: RpcIssue[];
+	elements?: Element[];
+};
+
+// V4 API Types
+export type Place = {
+	id: number;
+	lat: number;
+	lon: number;
+	icon: string;
+	comments?: number;
+	deleted_at?: string; // Only present when fetching with include_deleted=true
+	updated_at?: string; // Only present when fetching with updated_since parameter
+	boosted_until?: string; // Only present when location is boosted
+	// Standard documented fields
+	name?: string;
+	address?: string;
+	opening_hours?: string;
+	created_at?: string;
+	verified_at?: string;
+	osm_id?: string;
+	osm_url?: string;
+	phone?: string;
+	website?: string;
+	twitter?: string;
+	facebook?: string;
+	instagram?: string;
+	line?: string;
+	email?: string;
+	// OSM payment method fields
+	'osm:payment:onchain'?: 'yes';
+	'osm:payment:lightning'?: 'yes';
+	'osm:payment:lightning_contactless'?: 'yes';
+	'osm:payment:bitcoin'?: 'yes';
+	'osm:payment:uri'?: string;
+	'osm:payment:coinos'?: string;
+	'osm:payment:pouch'?: string;
+	'osm:payment:lightning:requires_companion_app'?: 'yes';
+	'osm:payment:lightning:companion_app_url'?: string;
+	// OSM category fields
+	'osm:amenity'?: string;
+	'osm:category'?: string;
+	// OSM tags that might be useful
+	'osm:survey:date'?: string;
+	'osm:check_date'?: string;
+	'osm:check_date:currency:XBT'?: string;
+};

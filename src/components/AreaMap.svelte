@@ -3,22 +3,16 @@
 	import { GradeTable, MapLoadingEmbed, ShowTags, TaggingIssues } from '$lib/comp';
 	import {
 		attribution,
-		calcVerifiedDate,
 		changeDefaultIcons,
 		generateIcon,
 		generateMarker,
 		geolocate,
-		latCalc,
 		layers,
-		longCalc,
-		toggleMapButtons,
-		verifiedArr
+		toggleMapButtons
 	} from '$lib/map/setup';
 	import { theme } from '$lib/store';
-	import type { BaseMaps, DomEventType, Grade, Leaflet } from '$lib/types';
-	import { type Element } from '$lib/types.js';
+	import type { BaseMaps, DomEventType, Grade, Leaflet, Place } from '$lib/types';
 	import { getGrade } from '$lib/utils';
-	import { elements } from 'chart.js';
 	import type { GeoJSON } from 'geojson';
 	import type { Map } from 'leaflet';
 	import { onDestroy, onMount } from 'svelte';
@@ -26,7 +20,7 @@
 
 	export let name: string;
 	export let geoJSON: GeoJSON;
-	export let filteredElements: Element[];
+	export let filteredPlaces: Place[];
 
 	let total: number | undefined;
 	let upToDate: number | undefined;
@@ -75,8 +69,7 @@
 		if (browser) {
 			//import packages
 			leaflet = await import('leaflet');
-			const domEventModule = await import('leaflet/src/dom/DomEvent');
-			DomEvent = domEventModule.default;
+			DomEvent = leaflet.DomEvent;
 			/* eslint-disable @typescript-eslint/no-unused-vars */
 			const maplibreGl = await import('maplibre-gl');
 			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
@@ -118,20 +111,10 @@
 			// create marker cluster groups
 
 			/* eslint-disable no-undef */
-			// @ts-expect-error
+			// @ts-expect-error L is injected globally by leaflet.markercluster
 			let markers = L.markerClusterGroup();
 			/* eslint-enable no-undef */
 			let upToDateLayer = leaflet.featureGroup.subGroup(markers);
-			let outdatedLayer = leaflet.featureGroup.subGroup(markers);
-			let legacyLayer = leaflet.featureGroup.subGroup(markers);
-
-			let overlayMaps = {
-				'Up-To-Date': upToDateLayer,
-				Outdated: outdatedLayer,
-				Legacy: legacyLayer
-			};
-
-			leaflet.control.layers(baseMaps, overlayMaps).addTo(map);
 
 			// add locate button to map
 			geolocate(leaflet, map);
@@ -139,64 +122,31 @@
 			// change default icons
 			changeDefaultIcons(true, leaflet, mapElement, DomEvent);
 
-			// get date from 1 year ago to add verified check if survey is current
-			let verifiedDate = calcVerifiedDate();
-
 			// add area poly to map
 			leaflet.geoJSON(geoJSON, { style: { fill: false } }).addTo(map);
 
-			// add elements to map
-			filteredElements.forEach((element) => {
-				let icon = element.tags['icon:android'];
-				let payment = element.tags['payment:uri']
-					? { type: 'uri', url: element.tags['payment:uri'] }
-					: element.tags['payment:pouch']
-						? { type: 'pouch', username: element.tags['payment:pouch'] }
-						: element.tags['payment:coinos']
-							? { type: 'coinos', username: element.tags['payment:coinos'] }
-							: undefined;
-				let boosted =
-					element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now()
-						? element.tags['boost:expires']
-						: undefined;
+			// add places to map
+			filteredPlaces.forEach((place) => {
+				const commentsCount = place.comments || 0;
+				const boosted = place.boosted_until ? Date.parse(place.boosted_until) > Date.now() : false;
 
-				const elementOSM = element['osm_json'];
+				let divIcon = generateIcon(leaflet, place.icon, boosted, commentsCount);
 
-				const lat = latCalc(elementOSM);
-				const long = longCalc(elementOSM);
-
-				const commentsCount = element.tags.comments || 0;
-
-				let divIcon = generateIcon(leaflet, icon, boosted ? true : false, commentsCount);
-
-				let marker = generateMarker(
-					lat,
-					long,
-					divIcon,
-					elementOSM,
-					payment,
+				let marker = generateMarker({
+					lat: place.lat,
+					long: place.lon,
+					icon: divIcon,
+					placeId: place.id,
 					leaflet,
-					verifiedDate,
-					true,
-					boosted
-				);
+					verify: true
+				});
 
-				let verified = verifiedArr(elementOSM);
+				upToDateLayer.addLayer(marker);
 
-				if (verified.length && Date.parse(verified[0]) > verifiedDate) {
-					upToDateLayer.addLayer(marker);
-
-					if (upToDate === undefined) {
-						upToDate = 1;
-					} else {
-						upToDate++;
-					}
+				if (upToDate === undefined) {
+					upToDate = 1;
 				} else {
-					outdatedLayer.addLayer(marker);
-				}
-
-				if (elementOSM.tags && elementOSM.tags['payment:bitcoin']) {
-					legacyLayer.addLayer(marker);
+					upToDate++;
 				}
 
 				if (total === undefined) {
@@ -208,8 +158,6 @@
 
 			map.addLayer(markers);
 			map.addLayer(upToDateLayer);
-			map.addLayer(outdatedLayer);
-			map.addLayer(legacyLayer);
 
 			map.fitBounds(leaflet.geoJSON(geoJSON).getBounds());
 
@@ -233,7 +181,7 @@
 		dataInitialized = true;
 	};
 
-	$: geoJSON && filteredElements && initialRenderComplete && !dataInitialized && initializeData();
+	$: geoJSON && filteredPlaces && initialRenderComplete && !dataInitialized && initializeData();
 </script>
 
 <section id="map-section">
