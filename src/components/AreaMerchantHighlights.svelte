@@ -2,6 +2,7 @@
 	import { MerchantCard } from '$lib/comp';
 	import type { Element } from '$lib/types';
 	import { isBoosted } from '$lib/utils';
+	import { resolve } from '$app/paths';
 
 	export let dataInitialized: boolean;
 	export let filteredElements: Element[];
@@ -76,7 +77,7 @@
 			{:else}
 				<p class="text-center text-primary dark:text-white sm:text-left">
 					No latest added in this area. You can <a
-						href="/add-location"
+						href={resolve('/add-location')}
 						class="text-link transition-colors hover:text-hover">add a new merchant</a
 					> now!
 				</p>

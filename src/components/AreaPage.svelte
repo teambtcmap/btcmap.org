@@ -64,6 +64,7 @@
 	import { errToast, formatElementID, validateContinents } from '$lib/utils';
 	import rewind from '@mapbox/geojson-rewind';
 	import { geoContains } from 'd3-geo';
+	import { resolve } from '$app/paths';
 
 	// alert for user errors
 	$: $userError && errToast($userError);

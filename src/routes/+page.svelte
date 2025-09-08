@@ -2,6 +2,7 @@
 	import { Footer, Header, HeaderPlaceholder, Icon } from '$lib/comp';
 	import { apps, theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
+	import { resolve } from '$app/paths';
 </script>
 
 <svelte:head>
@@ -34,12 +35,12 @@
 				{/if}
 				<div class="my-8 flex flex-wrap justify-center gap-4">
 					<a
-						href="/map"
+						href={resolve('/map')}
 						class="rounded-full bg-link px-7 py-3.5 text-lg font-semibold text-white transition-colors hover:bg-hover"
 						>Open Map</a
 					>
 					<a
-						href="/add-location"
+						href={resolve('/map')}
 						class="rounded-full bg-link px-7 py-3.5 text-lg font-semibold text-white transition-colors hover:bg-hover"
 						>Add Location</a
 					>
@@ -85,7 +86,7 @@
 				</h2>
 			</div>
 			{#if typeof window !== 'undefined'}
-				<a href="/map">
+				<a href={resolve('/map')}>
 					<img
 						src={detectTheme() === 'dark' || $theme === 'dark'
 							? '/images/hero-mobile-example-dark.webp'

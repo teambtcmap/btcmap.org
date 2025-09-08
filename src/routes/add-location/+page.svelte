@@ -18,6 +18,7 @@
 	import type { Map, MaplibreGL, Marker } from 'leaflet';
 	import { onDestroy, onMount, tick } from 'svelte';
 	import DOMPurify from 'dompurify';
+	import { resolve } from '$app/paths';
 
 	let captchaContent = '';
 	let isCaptchaLoading = true;
@@ -359,7 +360,10 @@
 										class="mx-auto mb-4 md:mx-0 md:mb-0 md:mr-4"
 									/>
 									Show up on the
-									<a href="/map" class="ml-1 text-link transition-colors hover:text-hover">map</a>!
+									<a
+										href={resolve('/map')}
+										class="ml-1 text-link transition-colors hover:text-hover">map</a
+									>!
 								</li>
 							</ol>
 						</div>

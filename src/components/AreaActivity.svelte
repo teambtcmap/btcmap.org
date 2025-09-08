@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { LatestTagger, TaggerSkeleton, TopButton } from '$lib/comp';
 	import { type ActivityEvent, type User } from '$lib/types.js';
+	import { resolve } from '$app/paths';
 
 	export let alias: string;
 	export let name: string;
@@ -32,7 +33,7 @@
 				<div class="flex flex-wrap items-center justify-center">
 					{#each taggersPaginated as tagger (tagger.id)}
 						<div class="m-4 space-y-1 transition-transform hover:scale-110">
-							<a href="/tagger/{tagger.id}">
+							<a href={resolve(`/tagger/${tagger.id}`)}>
 								<img
 									src={tagger.osm_json.img
 										? tagger.osm_json.img.href

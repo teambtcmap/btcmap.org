@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	export let icon: string;
 	export let text: string;
 </script>
