@@ -3,6 +3,7 @@
 </script>
 
 <div class="space-y-2">
+	<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 	<a
 		href={integration.url}
 		target="_blank"

@@ -24,6 +24,7 @@
 							<p>{issue.description}</p>
 							{#if getIssueHelpLink(issue.type)}
 								<a
+									<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 									href={getIssueHelpLink(issue.type)}
 									target="_blank"
 									rel="noreferrer"

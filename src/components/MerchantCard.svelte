@@ -65,6 +65,7 @@
 			{#if address}
 				<div class="flex items-center space-x-2 font-medium">
 					<Icon w="16" h="16" icon="location_on" type="material" style="shrink-0" />
+					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 					<a
 						href="geo:{merchant.osm_json.lat},{merchant.osm_json.lon}"
 						class="text-sm underline decoration-primary decoration-1 underline-offset-4 dark:decoration-white"
@@ -78,6 +79,7 @@
 				<div class="flex items-center space-x-2">
 					<Icon w="16" h="16" icon="globe" type="popup" style="shrink-0" />
 					<a
+						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 						href={website.startsWith('http') ? website : `https://${website}`}
 						target="_blank"
 						rel="noreferrer"
@@ -103,6 +105,7 @@
 			{#if phone}
 				<div class="flex items-center space-x-2">
 					<Icon w="16" h="16" icon="phone" type="popup" style="shrink-0" />
+					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 					<a
 						href="tel:{phone}"
 						class="text-sm underline decoration-primary decoration-1 underline-offset-4 dark:decoration-white"
@@ -115,6 +118,7 @@
 			{#if email}
 				<div class="flex items-center space-x-2">
 					<Icon w="16" h="16" icon="email" type="popup" style="shrink-0" />
+					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 					<a
 						href="mailto:{email}"
 						class="text-sm underline decoration-primary decoration-1 underline-offset-4 dark:decoration-white"
@@ -127,6 +131,7 @@
 			<div class="flex items-center space-x-2">
 				{#if twitter}
 					<a
+						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 						href={twitter.startsWith('http') ? twitter : `https://twitter.com/${twitter}`}
 						target="_blank"
 						rel="noreferrer"
@@ -137,6 +142,7 @@
 
 				{#if instagram}
 					<a
+						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 						href={instagram.startsWith('http') ? instagram : `https://instagram.com/${instagram}`}
 						target="_blank"
 						rel="noreferrer"
@@ -147,6 +153,7 @@
 
 				{#if facebook}
 					<a
+						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 						href={facebook.startsWith('http') ? facebook : `https://facebook.com/${facebook}`}
 						target="_blank"
 						rel="noreferrer"

@@ -49,6 +49,7 @@
 			<span class="text-primary dark:text-white lg:mr-5">
 				<!-- location -->
 				<a
+					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 					href={action === 'delete'
 						? `https://www.openstreetmap.org/${deleteLink[0]}/${deleteLink[1]}`
 						: `/merchant/${merchantId}`}

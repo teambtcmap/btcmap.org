@@ -6,6 +6,7 @@
 </script>
 
 <a
+	<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 	href={link}
 	target="_blank"
 	rel="noreferrer"

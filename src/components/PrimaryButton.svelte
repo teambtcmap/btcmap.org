@@ -16,6 +16,7 @@
 
 {#if link}
 	<a
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		href={link}
 		target={external ? '_blank' : undefined}
 		rel={external ? 'noreferrer' : undefined}

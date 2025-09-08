@@ -31,6 +31,7 @@
 			loading="lazy"
 		/>
 		<a
+			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 			href={`/${type}/${id}`}
 			class="font-medium text-link transition-colors hover:text-hover {hasLongName
 				? 'break-all'

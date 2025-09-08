@@ -9,6 +9,7 @@
 
 <div>
 	{#if link}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a
 			href={link}
 			target={text === 'Web' ? null : '_blank'}

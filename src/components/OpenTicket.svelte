@@ -22,6 +22,7 @@
 		<div>
 			<p>
 				<a
+					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 					href={url}
 					target="_blank"
 					rel="noreferrer"
@@ -41,6 +42,7 @@
 				<br class="block md:hidden" />
 				by
 				<a
+					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 					href={user.html_url}
 					target="_blank"
 					rel="noreferrer"
@@ -53,7 +55,12 @@
 	<div class="space-y-1 md:flex md:space-x-2 md:space-y-0">
 		<div class="flex flex-wrap justify-center md:justify-start">
 			{#each assignees || [] as assignee, index (index)}
-				<a href={assignee?.html_url} target="_blank" rel="noreferrer" class="mb-1 mr-1">
+				<a 
+					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+					href={assignee?.html_url} 
+					target="_blank" 
+					rel="noreferrer" 
+					class="mb-1 mr-1">
 					<img
 						src={assignee?.avatar_url}
 						alt="avatar"

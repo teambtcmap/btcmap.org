@@ -33,6 +33,7 @@
 		<div class="ml-7 space-y-2">
 			{#each links as link (link.url)}
 				<a
+					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 					href={link.url}
 					target={link.external ? '_blank' : null}
 					rel={link.external ? 'noreferrer' : null}

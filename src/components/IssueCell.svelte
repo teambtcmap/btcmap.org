@@ -12,6 +12,7 @@
 {:else if id === 'type'}
 	{value}
 {:else if id === 'viewLink'}
+	<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 	<a
 		href="https://www.openstreetmap.org/{value}"
 		target="_blank"
@@ -21,6 +22,7 @@
 		View
 	</a>
 {:else if id === 'editLink'}
+	<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 	<a
 		href="https://www.openstreetmap.org/edit?{value}"
 		target="_blank"
@@ -31,6 +33,7 @@
 	</a>
 {:else if id === 'helpLink' && value}
 	<a
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		href={value}
 		target="_blank"
 		rel="noreferrer"

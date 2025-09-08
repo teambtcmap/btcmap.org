@@ -49,6 +49,7 @@
 			<!-- Row 2: Name (centered and prominent) -->
 			<div class="text-center">
 				<a
+					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 					href={`/${type}/${area.tags?.url_alias || area.id || ''}`}
 					class="text-lg font-semibold text-link transition-colors hover:text-hover {area.tags?.name?.match(
 						/[^ ]{21}/

@@ -82,6 +82,7 @@
 				<p><strong>Do not</strong> submit any personal or private information.</p>
 				<p>
 					If you include an X handle, we may post about your submission from the <a
+						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 						href={$socials.x}
 						class="text-link transition-colors hover:text-hover">@btcmap</a
 					> X account.
