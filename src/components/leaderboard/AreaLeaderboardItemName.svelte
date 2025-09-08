@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	import type { AreaType } from '$lib/types';
 	import { resolve } from '$app/paths';
 
@@ -31,7 +32,6 @@
 			loading="lazy"
 		/>
 		<a
-			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 			href={`/${type}/${id}`}
 			class="font-medium text-link transition-colors hover:text-hover {hasLongName
 				? 'break-all'

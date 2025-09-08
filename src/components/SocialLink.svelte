@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	export let url: string;
 	export let social: string;
 
@@ -6,7 +7,6 @@
 </script>
 
 <a
-	<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 	href={url}
 	target="_blank"
 	rel="noreferrer"

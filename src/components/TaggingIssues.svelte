@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { CloseButton, IssueIcon } from '$lib/comp';
 	import { taggingIssues } from '$lib/store';
 	import { getIssueHelpLink, getIssueIcon } from '$lib/utils';
@@ -24,7 +25,6 @@
 							<p>{issue.description}</p>
 							{#if getIssueHelpLink(issue.type)}
 								<a
-									<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 									href={getIssueHelpLink(issue.type)}
 									target="_blank"
 									rel="noreferrer"

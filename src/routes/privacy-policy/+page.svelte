@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { Footer, Header } from '$lib/comp';
 	import { apps, socials } from '$lib/store';
 </script>
@@ -82,7 +83,6 @@
 				<p><strong>Do not</strong> submit any personal or private information.</p>
 				<p>
 					If you include an X handle, we may post about your submission from the <a
-						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 						href={$socials.x}
 						class="text-link transition-colors hover:text-hover">@btcmap</a
 					> X account.
