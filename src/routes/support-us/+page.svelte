@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	import {
 		CloseButton,
 		DonationOption,
@@ -90,10 +91,7 @@
 							/>
 
 							<!-- qr -->
-							<a
-								<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-								href={network === 'Lightning' ? `lightning:${lnurlp}` : `bitcoin:${onchain}`}
-							>
+							<a href={network === 'Lightning' ? `lightning:${lnurlp}` : `bitcoin:${onchain}`}>
 								<canvas
 									use:renderQr
 									class="mx-auto h-[200px] w-[200px] rounded-xl border-4 border-link transition-colors hover:border-hover sm:h-[256px] sm:w-[256px]"

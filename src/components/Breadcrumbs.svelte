@@ -1,11 +1,11 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	type Routes = { name: string; url: string }[];
 	export let routes: Routes;
 </script>
 
 <div class="mx-auto flex w-full flex-wrap items-center gap-3 px-4 py-5 xl:w-[1200px] xl:px-0">
 	{#each routes as route, index (index)}
-		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a
 			href={route.url}
 			class="text-sm text-link transition-colors hover:text-hover {index === routes.length - 1

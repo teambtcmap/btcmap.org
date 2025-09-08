@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	export let member: {
 		avatar: string;
 		name: string;
@@ -26,7 +27,6 @@
 
 	<div class="flex justify-center space-x-2">
 		{#each member.socials as social (social.url)}
-			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 			<a
 				href={social.url}
 				target="_blank"

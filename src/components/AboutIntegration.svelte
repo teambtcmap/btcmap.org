@@ -1,9 +1,9 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	export let integration: { url: string; icon: string; name: string };
 </script>
 
 <div class="space-y-2">
-	<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 	<a
 		href={integration.url}
 		target="_blank"

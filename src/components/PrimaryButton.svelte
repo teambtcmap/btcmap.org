@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { LoadingSpinner } from '$lib/comp';
 
 	export let style: string;
@@ -16,7 +17,6 @@
 
 {#if link}
 	<a
-		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		href={link}
 		target={external ? '_blank' : undefined}
 		rel={external ? 'noreferrer' : undefined}

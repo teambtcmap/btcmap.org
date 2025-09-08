@@ -1,8 +1,8 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	export let contributor: { url: string; name: string; file: string; title: string };
 </script>
 
-<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 <a
 	href={contributor.url}
 	target="_blank"

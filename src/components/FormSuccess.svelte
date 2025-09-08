@@ -24,7 +24,6 @@
 		{/if}
 		<p class="mb-5 w-full text-primary dark:text-white md:w-[500px]">
 			{text} You may also monitor the progress of your submission here:
-			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 			<a
 				href="https://gitea.btcmap.org/teambtcmap/btcmap-data/issues/{issue}"
 				target="_blank"

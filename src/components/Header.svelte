@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { Icon, NavDropdownDesktop, NavDropdownMobile, ThemeToggle } from '$lib/comp';
 
 	const navLinks = [
@@ -42,7 +43,6 @@
 
 <!-- desktop header -->
 <header class="relative z-30 mx-auto hidden w-[1200px] items-center justify-between py-5 xl:flex">
-	<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 	<a href="/">
 		<img src="/images/logo.svg" alt="logo" class="w-16" />
 	</a>
@@ -87,7 +87,6 @@
 			{:else}
 				<!-- regular links -->
 				<a
-					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 					href={link.url}
 					class="text-xl font-semibold text-link transition-colors hover:text-hover dark:text-white dark:hover:text-link"
 					>{link.title}
@@ -105,7 +104,6 @@
 		? 'bg-teal dark:bg-dark'
 		: 'bg-teal/90 dark:bg-dark/90'}"
 >
-	<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 	<a href="/">
 		<img src="/images/logo.svg" alt="logo" class="w-16" />
 	</a>
@@ -151,7 +149,6 @@
 
 				<!-- regular links -->
 			{:else}
-				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 				<a href={link.url} class="flex w-full items-center text-xl text-link dark:text-white">
 					<span
 						class="mr-4 rounded-full bg-mobileButtons p-3 transition-colors active:bg-mobileButtonsActive"
