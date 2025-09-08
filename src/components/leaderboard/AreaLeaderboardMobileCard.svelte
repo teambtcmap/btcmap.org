@@ -3,6 +3,7 @@
 	import type { Table } from '@tanstack/svelte-table';
 	import { isEven } from '$lib/utils';
 	import GradeDisplay from './GradeDisplay.svelte';
+	import { resolve } from '$app/paths';
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let table: Table<any>;
@@ -48,7 +49,7 @@
 			<!-- Row 2: Name (centered and prominent) -->
 			<div class="text-center">
 				<a
-					href="/{type}/{area.tags?.url_alias || area.id || ''}"
+					href={`/${type}/${area.tags?.url_alias || area.id || ''}`}
 					class="text-lg font-semibold text-link transition-colors hover:text-hover {area.tags?.name?.match(
 						/[^ ]{21}/
 					)

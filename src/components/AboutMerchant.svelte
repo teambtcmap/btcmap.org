@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Icon } from '$lib/comp';
 	import tippy from 'tippy.js';
+	import { resolve } from '$app/paths';
 
 	export let id: string;
 	export let icon: string;
@@ -18,7 +19,7 @@
 
 <a
 	bind:this={merchantTooltip}
-	href="/merchant/{id}"
+	href={resolve('/merchant/{id}')}
 	class="flex h-24 w-24 items-center justify-center rounded-full bg-bitcoin hover:animate-wiggle"
 >
 	<Icon

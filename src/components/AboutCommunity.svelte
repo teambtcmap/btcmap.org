@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Area } from '$lib/types';
 	import tippy from 'tippy.js';
+	import { resolve } from '$app/paths';
 
 	export let community: Area;
 
@@ -12,7 +13,7 @@
 		});
 </script>
 
-<a bind:this={communityTooltip} href="/community/{community.id}">
+<a bind:this={communityTooltip} href={resolve(`/community/${community.id}`)}>
 	<img
 		src={`https://btcmap.org/.netlify/images?url=${community.tags['icon:square']}&fit=cover&w=256&h=256`}
 		alt="avatar"
