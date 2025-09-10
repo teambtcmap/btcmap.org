@@ -1,5 +1,4 @@
 <script lang="ts">
-	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { SocialLink } from '$lib/comp';
 	import { socials } from '$lib/store';
 
@@ -26,6 +25,7 @@
 
 	<div class="flex flex-wrap justify-center xl:block">
 		{#each links as link (link.name)}
+			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 			<a
 				href={link.link}
 				target={link.external ? '_blank' : null}
