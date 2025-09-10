@@ -1,11 +1,11 @@
 <script lang="ts">
-	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { resolve } from '$app/paths';
 	export let link: string;
 	export let icon: string;
 	export let text: string;
 </script>
 
+<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 <a
 	href={link}
 	target="_blank"

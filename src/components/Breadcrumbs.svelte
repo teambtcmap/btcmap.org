@@ -1,5 +1,4 @@
 <script lang="ts">
-	/* eslint-disable svelte/no-navigation-without-resolve */
 	type Routes = { name: string; url: string }[];
 	export let routes: Routes;
 </script>

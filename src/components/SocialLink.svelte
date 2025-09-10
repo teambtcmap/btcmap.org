@@ -1,11 +1,11 @@
 <script lang="ts">
-	/* eslint-disable svelte/no-navigation-without-resolve */
 	export let url: string;
 	export let social: string;
 
 	import { Icon } from '$lib/comp';
 </script>
 
+<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 <a
 	href={url}
 	target="_blank"
