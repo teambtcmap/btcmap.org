@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	import type { DropdownLink } from '$lib/types';
 	import OutClick from 'svelte-outclick';
 

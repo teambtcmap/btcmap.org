@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { TipType } from '$lib/types';
 
 	export let user: undefined | string = undefined;

@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	export let website: undefined | string = undefined;
 	export let email: undefined | string = undefined;
 	export let nostr: undefined | string = undefined;

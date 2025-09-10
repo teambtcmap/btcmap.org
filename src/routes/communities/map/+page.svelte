@@ -18,6 +18,7 @@
 	import { geoArea } from 'd3-geo';
 	import type { Map } from 'leaflet';
 	import { onDestroy, onMount } from 'svelte';
+	import { resolve } from '$app/paths';
 
 	let mapLoading = 0;
 
@@ -104,9 +105,9 @@
 					<div id='socials'>
 					</div>
 
-					<a href='/community/${
+					<a href={resolve('/community/${
 						community.id
-					}' class='block bg-link hover:bg-hover !text-white text-center font-semibold py-3 rounded-xl transition-colors' title='Community page'>View Community</a>
+					}')} class='block bg-link hover:bg-hover !text-white text-center font-semibold py-3 rounded-xl transition-colors' title='Community page'>View Community</a>
 				</div>
 
 				${

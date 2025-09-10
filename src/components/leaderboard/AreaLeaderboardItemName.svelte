@@ -1,5 +1,7 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	import type { AreaType } from '$lib/types';
+	import { resolve } from '$app/paths';
 
 	export let type: AreaType;
 	export let avatar: string;
@@ -30,7 +32,7 @@
 			loading="lazy"
 		/>
 		<a
-			href="/{type}/{id}"
+			href={`/${type}/${id}`}
 			class="font-medium text-link transition-colors hover:text-hover {hasLongName
 				? 'break-all'
 				: ''}"

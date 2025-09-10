@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { SocialLink } from '$lib/comp';
 	import { socials } from '$lib/store';
 

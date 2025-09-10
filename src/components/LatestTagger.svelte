@@ -1,7 +1,9 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { Tip } from '$lib/comp';
 	import type { EventType, User } from '$lib/types';
 	import Time from 'svelte-time';
+	import { resolve } from '$app/paths';
 
 	export let location: string;
 	export let action: EventType;
@@ -82,7 +84,7 @@
 				<!-- user -->
 				{#if user && username}
 					by <a
-						href="/tagger/{user.id}"
+						href={resolve('/tagger/{user.id}')}
 						class="block break-all text-link transition-colors hover:text-hover lg:inline"
 						>{username}
 					</a>

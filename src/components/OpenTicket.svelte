@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	import Time from 'svelte-time';
 
 	import { TicketLabel } from '$lib/comp';

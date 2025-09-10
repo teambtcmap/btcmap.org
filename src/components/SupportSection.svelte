@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	export let supporters: { url: string; logoDark?: string; logo: string; title: string }[];
 	export let placeholders: number;
 

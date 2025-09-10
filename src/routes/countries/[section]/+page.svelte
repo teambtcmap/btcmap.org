@@ -1,9 +1,11 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { goto } from '$app/navigation';
 	import { CountrySection, Footer, Header, HeaderPlaceholder, PrimaryButton } from '$lib/comp';
 	import { areaError, areas, theme } from '$lib/store';
 	import { detectTheme, errToast, validateContinents } from '$lib/utils';
 	import type { PageData } from './$types';
+	import { resolve } from '$app/paths';
 
 	export let data: PageData;
 
@@ -130,7 +132,7 @@
 						<h2
 							class="mb-2 text-3xl font-semibold text-primary dark:text-white md:mb-0 md:text-left"
 						>
-							<a href="/countries/{data.section}"
+							<a href={resolve('/countries/{data.section}')}
 								>{continentDisplayNames[data.section] || data.section}</a
 							>
 						</h2>

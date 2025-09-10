@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -10,6 +11,7 @@
 	import Chart from 'chart.js/auto';
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
+	import { resolve } from '$app/paths';
 
 	export let data: PageData;
 
@@ -328,7 +330,7 @@
 						<h2
 							class="mb-2 text-3xl font-semibold text-primary dark:text-white md:mb-0 md:text-left"
 						>
-							<a href="/communities/{data.section}">
+							<a href={resolve('/communities/{data.section}')}>
 								{organizationSections.find((org) => org.id === data.section)?.displayName ||
 									continentDisplayNames[data.section] ||
 									data.section}

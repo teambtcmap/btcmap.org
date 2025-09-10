@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { LoadingSpinner } from '$lib/comp';
 
 	export let style: string;

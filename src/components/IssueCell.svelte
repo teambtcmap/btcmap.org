@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { IssueIcon } from '$lib/comp';
 
 	export let id: 'icon' | 'name' | 'type' | 'viewLink' | 'editLink' | 'helpLink';

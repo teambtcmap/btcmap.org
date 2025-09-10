@@ -21,6 +21,7 @@
 		userError,
 		users
 	} from '$lib/store';
+	import { resolve } from '$app/paths';
 	import type { Area, Place } from '$lib/types';
 	import { errToast, formatElementID } from '$lib/utils';
 
@@ -279,7 +280,7 @@
 						<p>
 							<strong>Accept bitcoin?</strong>
 							<a
-								href="/add-location"
+								href={resolve('/add-location')}
 								class="font-semibold text-link transition-colors hover:text-hover"
 								>Get listed on BTC Map</a
 							>!
@@ -329,7 +330,7 @@
 					</div>
 
 					<a
-						href="/leaderboard"
+						href={resolve('/leaderboard')}
 						class="inline-block font-semibold underline underline-offset-4 hover:no-underline"
 						>View leaderboard</a
 					>
@@ -345,7 +346,7 @@
 						<p>
 							<strong>Don’t see your community?</strong>
 							<a
-								href="/communities/add"
+								href={resolve('/communities/add')}
 								class="font-semibold text-link transition-colors hover:text-hover"
 								>Add it to BTC Map</a
 							>.
@@ -368,7 +369,7 @@
 
 					<div class="mt-5 flex justify-center">
 						<a
-							href="/communities"
+							href={resolve('/communities')}
 							class="font-semibold text-link transition-colors hover:text-hover"
 							>See all communities</a
 						>

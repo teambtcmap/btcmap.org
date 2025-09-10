@@ -9,6 +9,7 @@
 	export let tip: string;
 
 	import { Tip } from '$lib/comp';
+	import { resolve } from '$app/paths';
 
 	$: stats = [
 		{ stat: created, title: 'C' },
@@ -50,7 +51,7 @@
 		/>
 
 		<a
-			href="/tagger/{id}"
+			href={resolve('/tagger/{id}')}
 			class="text-link hover:text-hover lg:text-left {tagger.match('([^ ]{16})')
 				? 'break-all'
 				: ''} transition-colors">{tagger}</a
