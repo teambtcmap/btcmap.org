@@ -1,5 +1,4 @@
 <script lang="ts">
-	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -91,6 +90,7 @@
 	$: if (data.isOrganization && organizationSections.length > 0) {
 		const isValidOrganization = organizationSections.some((org) => org.id === data.section);
 		if (!isValidOrganization) {
+			// eslint-disable-next-line svelte/no-navigation-without-resolve
 			goto('/communities/africa', { replaceState: true });
 		}
 	}
@@ -244,6 +244,7 @@
 
 	// Handle section changes via dropdown
 	const handleSectionChange = (newSection: string) => {
+		// eslint-disable-next-line svelte/no-navigation-without-resolve
 		goto(`/communities/${newSection}`, { replaceState: false });
 	};
 

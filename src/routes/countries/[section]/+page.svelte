@@ -1,5 +1,4 @@
 <script lang="ts">
-	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { goto } from '$app/navigation';
 	import { CountrySection, Footer, Header, HeaderPlaceholder, PrimaryButton } from '$lib/comp';
 	import { areaError, areas, theme } from '$lib/store';
@@ -89,6 +88,7 @@
 	function handleSectionChange(event: Event) {
 		const target = event.target as HTMLSelectElement;
 		const newSection = target.value;
+		// eslint-disable-next-line svelte/no-navigation-without-resolve
 		goto(`/countries/${newSection}`);
 	}
 

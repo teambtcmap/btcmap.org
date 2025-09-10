@@ -1,5 +1,4 @@
 <script lang="ts">
-	/* eslint-disable svelte/no-navigation-without-resolve */
 	export let data: MerchantPageData;
 
 	import { browser } from '$app/environment';
@@ -378,6 +377,7 @@
 					{/if}
 
 					{#if lat && long}
+						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 						<a
 							href={`/map?lat=${lat}&long=${long}`}
 							class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
@@ -433,6 +433,7 @@
 							<h4 class="uppercase text-primary dark:text-white">Accepted Payments</h4>
 							<div class="mt-1 flex items-center justify-center space-x-2">
 								{#if !paymentMethod}
+									<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 									<a
 										bind:this={thirdPartyTooltip}
 										href={data.osmTags?.['payment:lightning:companion_app_url']}
