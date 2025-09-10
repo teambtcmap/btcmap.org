@@ -1,5 +1,4 @@
 <script lang="ts">
-	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { BoostButton, Icon, InfoTooltip } from '$lib/comp';
 	import { calcVerifiedDate, checkAddress, verifiedArr } from '$lib/map/setup';
 	import type { Element } from '$lib/types';
@@ -78,6 +77,7 @@
 			{#if website}
 				<div class="flex items-center space-x-2">
 					<Icon w="16" h="16" icon="globe" type="popup" style="shrink-0" />
+					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 					<a
 						href={website.startsWith('http') ? website : `https://${website}`}
 						target="_blank"
@@ -127,6 +127,7 @@
 
 			<div class="flex items-center space-x-2">
 				{#if twitter}
+					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 					<a
 						href={twitter.startsWith('http') ? twitter : `https://twitter.com/${twitter}`}
 						target="_blank"
@@ -137,6 +138,7 @@
 				{/if}
 
 				{#if instagram}
+					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 					<a
 						href={instagram.startsWith('http') ? instagram : `https://instagram.com/${instagram}`}
 						target="_blank"
@@ -147,6 +149,7 @@
 				{/if}
 
 				{#if facebook}
+					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 					<a
 						href={facebook.startsWith('http') ? facebook : `https://facebook.com/${facebook}`}
 						target="_blank"

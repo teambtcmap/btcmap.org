@@ -1,5 +1,4 @@
 <script lang="ts">
-	/* eslint-disable svelte/no-navigation-without-resolve */
 	export let image: string;
 	export let text: string;
 	export let desc: string;
@@ -10,6 +9,7 @@
 
 <div>
 	{#if link}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a
 			href={link}
 			target={text === 'Web' ? null : '_blank'}

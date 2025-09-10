@@ -1,5 +1,4 @@
 <script lang="ts">
-	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { TipType } from '$lib/types';
 
 	export let user: undefined | string = undefined;
@@ -10,6 +9,7 @@
 
 {#if user}
 	<div class="!my-12">
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a
 			href={type === 'url' ? destination : `lightning:${destination}`}
 			target={type === 'url' ? '_blank' : null}
@@ -37,6 +37,7 @@
 		</a>
 	</div>
 {:else}
+	<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 	<a
 		href={type === 'url' ? destination : `lightning:${destination}`}
 		target={type === 'url' ? '_blank' : null}

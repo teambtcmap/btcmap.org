@@ -1,5 +1,4 @@
 <script lang="ts">
-	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { Tip } from '$lib/comp';
 	import type { EventType, User } from '$lib/types';
 	import Time from 'svelte-time';
@@ -49,6 +48,7 @@
 		<div class="space-y-2 lg:space-y-0">
 			<span class="text-primary dark:text-white lg:mr-5">
 				<!-- location -->
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 				<a
 					href={action === 'delete'
 						? `https://www.openstreetmap.org/${deleteLink[0]}/${deleteLink[1]}`

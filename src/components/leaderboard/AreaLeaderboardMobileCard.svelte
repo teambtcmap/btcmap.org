@@ -1,5 +1,4 @@
 <script lang="ts">
-	/* eslint-disable svelte/no-navigation-without-resolve */
 	import type { AreaType, LeaderboardArea } from '$lib/types';
 	import type { Table } from '@tanstack/svelte-table';
 	import { isEven } from '$lib/utils';
@@ -49,6 +48,7 @@
 
 			<!-- Row 2: Name (centered and prominent) -->
 			<div class="text-center">
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 				<a
 					href={`/${type}/${area.tags?.url_alias || area.id || ''}`}
 					class="text-lg font-semibold text-link transition-colors hover:text-hover {area.tags?.name?.match(

@@ -1,5 +1,4 @@
 <script lang="ts">
-	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { CloseButton, IssueIcon } from '$lib/comp';
 	import { taggingIssues } from '$lib/store';
 	import { getIssueHelpLink, getIssueIcon } from '$lib/utils';

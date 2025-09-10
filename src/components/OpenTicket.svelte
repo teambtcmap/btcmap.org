@@ -1,5 +1,4 @@
 <script lang="ts">
-	/* eslint-disable svelte/no-navigation-without-resolve */
 	import Time from 'svelte-time';
 
 	import { TicketLabel } from '$lib/comp';
@@ -22,6 +21,7 @@
 
 		<div>
 			<p>
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 				<a
 					href={url}
 					target="_blank"
@@ -41,6 +41,7 @@
 				#{id} opened <Time live={3000} relative timestamp={created} />
 				<br class="block md:hidden" />
 				by
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 				<a
 					href={user.html_url}
 					target="_blank"
@@ -54,6 +55,7 @@
 	<div class="space-y-1 md:flex md:space-x-2 md:space-y-0">
 		<div class="flex flex-wrap justify-center md:justify-start">
 			{#each assignees || [] as assignee, index (index)}
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 				<a href={assignee?.html_url} target="_blank" rel="noreferrer" class="mb-1 mr-1">
 					<img
 						src={assignee?.avatar_url}
