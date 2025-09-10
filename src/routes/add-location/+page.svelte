@@ -1,5 +1,4 @@
 <script lang="ts">
-	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { browser } from '$app/environment';
 	import {
 		Footer,
@@ -385,7 +384,7 @@
 							Still have questions?
 						</h3>
 						<p class="text-justify">
-							Ask for help in our <a
+							Ask for help in our <!-- eslint-disable-next-line svelte/no-navigation-without-resolve --><a
 								href={$socials.discord}
 								target="_blank"
 								rel="noreferrer"

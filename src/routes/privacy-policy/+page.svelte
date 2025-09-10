@@ -1,5 +1,5 @@
 <script lang="ts">
-	/* eslint-disable svelte/no-navigation-without-resolve */
+
 	import { Footer, Header } from '$lib/comp';
 	import { apps, socials } from '$lib/store';
 </script>

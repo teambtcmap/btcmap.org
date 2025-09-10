@@ -1,5 +1,4 @@
 <script lang="ts">
-	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { Footer, Header, HeaderPlaceholder, Icon } from '$lib/comp';
 	import { apps, theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
@@ -54,6 +53,7 @@
 							class="mx-2 my-2 space-y-1 text-center font-semibold text-body dark:text-white md:my-0"
 						>
 							<p>{app.type}</p>
+							<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 							<a
 								href={app.link}
 								target={app.type === 'Web' ? null : '_blank'}

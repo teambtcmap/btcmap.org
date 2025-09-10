@@ -1,5 +1,5 @@
 <script lang="ts">
-	/* eslint-disable svelte/no-navigation-without-resolve */
+
 	import { Footer, Header } from '$lib/comp';
 	import { resolve } from '$app/paths';
 
@@ -81,6 +81,7 @@
 				<div class="space-y-5">
 					<h2 class="text-3xl font-semibold">Assets</h2>
 
+					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 					<a
 						href="/assets/btcmap-media-assets.zip"
 						download
@@ -96,6 +97,7 @@
 							<ul class="ml-5 list-disc space-y-1">
 								{#each section.data as asset (asset.name)}
 									<li>
+										<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 										<a href={asset.link} class="text-link transition-colors hover:text-hover">
 											{asset.name}
 										</a>
