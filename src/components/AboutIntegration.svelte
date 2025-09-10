@@ -1,5 +1,4 @@
 <script lang="ts">
-	/* eslint-disable svelte/no-navigation-without-resolve */
 	export let integration: { url: string; icon: string; name: string };
 </script>
 

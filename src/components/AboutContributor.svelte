@@ -1,5 +1,4 @@
 <script lang="ts">
-	/* eslint-disable svelte/no-navigation-without-resolve */
 	export let contributor: { url: string; name: string; file: string; title: string };
 </script>
 

@@ -1,5 +1,4 @@
 <script lang="ts">
-	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { Icon } from '$lib/comp';
 	import type { DropdownLink } from '$lib/types';
 	import OutClick from 'svelte-outclick';
@@ -33,6 +32,7 @@
 	>
 		<div class="ml-7 space-y-2">
 			{#each links as link (link.url)}
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 				<a
 					href={link.url}
 					target={link.external ? '_blank' : null}
