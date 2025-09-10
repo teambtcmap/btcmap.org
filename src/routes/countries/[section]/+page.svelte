@@ -132,7 +132,7 @@
 						<h2
 							class="mb-2 text-3xl font-semibold text-primary dark:text-white md:mb-0 md:text-left"
 						>
-							<a href={resolve('/countries/{data.section}')}
+							<a href={resolve(`/countries/${data.section}`)}
 								>{continentDisplayNames[data.section] || data.section}</a
 							>
 						</h2>

@@ -330,7 +330,7 @@
 						<h2
 							class="mb-2 text-3xl font-semibold text-primary dark:text-white md:mb-0 md:text-left"
 						>
-							<a href={resolve('/communities/{data.section}')}>
+							<a href={resolve(`/communities/${data.section}`)}>
 								{organizationSections.find((org) => org.id === data.section)?.displayName ||
 									continentDisplayNames[data.section] ||
 									data.section}

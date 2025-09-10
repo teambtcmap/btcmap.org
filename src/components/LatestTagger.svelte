@@ -84,7 +84,7 @@
 				<!-- user -->
 				{#if user && username}
 					by <a
-						href={resolve('/tagger/{user.id}')}
+						href={resolve(`/tagger/${user.id}`)}
 						class="block break-all text-link transition-colors hover:text-hover lg:inline"
 						>{username}
 					</a>

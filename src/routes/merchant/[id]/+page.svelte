@@ -845,7 +845,7 @@
 							{#if filteredCommunities && filteredCommunities.length}
 								{#each filteredCommunities as community (community.id)}
 									<div class="m-4 space-y-1 transition-transform hover:scale-110">
-										<a href={resolve('/community/{community.id}')}>
+										<a href={resolve(`/community/${community.id}`)}>
 											<img
 												src={`https://btcmap.org/.netlify/images?url=${community.tags['icon:square']}&fit=cover&w=256&h=256`}
 												alt="logo"
@@ -865,7 +865,7 @@
 							{:else}
 								<p class="p-5 text-body dark:text-white">
 									This location is not part of a communtiy, but one can be <a
-										href={resolve('/community/{community.id}')}
+										href={resolve('/communities')}
 										class="text-link transition-colors hover:text-hover">created</a
 									> to help maintain this local area.
 								</p>

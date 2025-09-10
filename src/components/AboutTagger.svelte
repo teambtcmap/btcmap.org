@@ -12,7 +12,7 @@
 		});
 </script>
 
-<a bind:this={taggerTooltip} href={resolve('/tagger/{tagger.id}')}>
+<a bind:this={taggerTooltip} href={resolve(`/tagger/${tagger.id}`)}>
 	<img
 		src={tagger.avatar}
 		alt="avatar"

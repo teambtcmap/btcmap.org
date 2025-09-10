@@ -19,7 +19,7 @@
 
 <a
 	bind:this={merchantTooltip}
-	href={resolve('/merchant/{id}')}
+	href={resolve(`/merchant/${id}`)}
 	class="flex h-24 w-24 items-center justify-center rounded-full bg-bitcoin hover:animate-wiggle"
 >
 	<Icon

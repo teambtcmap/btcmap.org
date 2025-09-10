@@ -40,7 +40,7 @@
 >
 	<div class="my-4 space-y-2 p-4">
 		<a
-			href={resolve('/community/{id}')}
+			href={resolve(`/community/${id}`)}
 			class="space-y-2 text-link transition-colors hover:text-hover"
 		>
 			<img
