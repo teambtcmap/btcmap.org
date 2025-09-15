@@ -90,6 +90,7 @@
 							/>
 
 							<!-- qr -->
+							<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 							<a href={network === 'Lightning' ? `lightning:${lnurlp}` : `bitcoin:${onchain}`}>
 								<canvas
 									use:renderQr

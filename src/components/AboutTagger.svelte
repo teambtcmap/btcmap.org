@@ -1,5 +1,6 @@
 <script lang="ts">
 	import tippy from 'tippy.js';
+	import { resolve } from '$app/paths';
 
 	export let tagger: { id: number; avatar: string; username: string };
 
@@ -11,7 +12,7 @@
 		});
 </script>
 
-<a bind:this={taggerTooltip} href="/tagger/{tagger.id}">
+<a bind:this={taggerTooltip} href={resolve(`/tagger/${tagger.id}`)}>
 	<img
 		src={tagger.avatar}
 		alt="avatar"

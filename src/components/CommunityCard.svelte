@@ -2,6 +2,7 @@
 	import { Socials, SponsorBadge, Tip, OrgBadge } from '$lib/comp';
 	import { TipType, type AreaTags } from '$lib/types';
 	import { getOrganizationDisplayName } from '$lib/organizationDisplayNames';
+	import { resolve } from '$app/paths';
 
 	export let id: string;
 	export let tags: AreaTags;
@@ -38,7 +39,10 @@
 	class="rounded-3xl border border-statBorder shadow transition-shadow hover:shadow-2xl dark:bg-white/10"
 >
 	<div class="my-4 space-y-2 p-4">
-		<a href="/community/{id}" class="space-y-2 text-link transition-colors hover:text-hover">
+		<a
+			href={resolve(`/community/${id}`)}
+			class="space-y-2 text-link transition-colors hover:text-hover"
+		>
 			<img
 				src={image
 					? `https://btcmap.org/.netlify/images?url=${image}&fit=cover&w=256&h=256`

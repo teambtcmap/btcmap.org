@@ -64,6 +64,7 @@
 	import { errToast, formatElementID, validateContinents } from '$lib/utils';
 	import rewind from '@mapbox/geojson-rewind';
 	import { geoContains } from 'd3-geo';
+	import { resolve } from '$app/paths';
 
 	// alert for user errors
 	$: $userError && errToast($userError);
@@ -110,6 +111,7 @@
 	const handleSectionChange = (section: Sections) => {
 		const slug = sectionSlugs[section];
 		const areaId = data.id;
+		// eslint-disable-next-line svelte/no-navigation-without-resolve
 		goto(`/${type}/${areaId}/${slug}`);
 	};
 
@@ -244,6 +246,7 @@
 
 		if (!areaFound) {
 			console.error(`Could not find ${type}, please try again or contact BTC Map.`);
+			// eslint-disable-next-line svelte/no-navigation-without-resolve
 			goto('/404');
 			return;
 		}
@@ -426,6 +429,7 @@
 				<p class="text-xl text-primary dark:text-white">{description}</p>
 			{/if}
 			{#if alias && type === 'community'}
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href={`/communities/map?community=${alias}`}
 					class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
@@ -446,6 +450,7 @@
 						/>
 					</svg></a
 				>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			{/if}
 		</div>
 

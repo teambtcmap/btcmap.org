@@ -21,13 +21,16 @@
 
 		<div>
 			<p>
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href={url}
 					target="_blank"
 					rel="noreferrer"
 					class="mr-1 text-lg font-semibold text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
-					>{name}</a
 				>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
+					{name}
+				</a>
 
 				<span class="block md:inline">
 					{#each labels || [] as label, index (index)}
@@ -40,12 +43,16 @@
 				#{id} opened <Time live={3000} relative timestamp={created} />
 				<br class="block md:hidden" />
 				by
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href={user.html_url}
 					target="_blank"
 					rel="noreferrer"
-					class="transition-colors hover:text-link">{user.login}</a
+					class="transition-colors hover:text-link"
 				>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
+					{user.login}
+				</a>
 			</p>
 		</div>
 	</div>
@@ -53,6 +60,7 @@
 	<div class="space-y-1 md:flex md:space-x-2 md:space-y-0">
 		<div class="flex flex-wrap justify-center md:justify-start">
 			{#each assignees || [] as assignee, index (index)}
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 				<a href={assignee?.html_url} target="_blank" rel="noreferrer" class="mb-1 mr-1">
 					<img
 						src={assignee?.avatar_url}

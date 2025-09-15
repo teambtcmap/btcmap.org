@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Footer, Header } from '$lib/comp';
+	import { resolve } from '$app/paths';
 
 	const brandColors = ['#10B981', '#53C5D5', '#051173', '#0891B2', '#E4EBEC', '#164E63', '#155E75'];
 
@@ -79,11 +80,13 @@
 				<div class="space-y-5">
 					<h2 class="text-3xl font-semibold">Assets</h2>
 
+					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href="/assets/btcmap-media-assets.zip"
 						download
 						class="mx-auto block w-36 rounded-lg bg-link py-3 font-semibold text-white transition-colors hover:bg-hover"
 					>
+						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 						Download All
 					</a>
 
@@ -94,6 +97,7 @@
 							<ul class="ml-5 list-disc space-y-1">
 								{#each section.data as asset (asset.name)}
 									<li>
+										<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 										<a href={asset.link} class="text-link transition-colors hover:text-hover">
 											{asset.name}
 										</a>
