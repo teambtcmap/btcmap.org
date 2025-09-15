@@ -2019,10 +2019,10 @@ jiti@^1.21.6:
   resolved "https://registry.npmjs.org/jiti/-/jiti-1.21.7.tgz"
   integrity sha512-/imKNG4EbWNrVjoNC/1H5/9GFy+tqjGBHCaSsN+P2RnPqjsLmv6UD3Ej+Kj8nBWaRAwyk7kK5ZUc+OEatnTR3A==
 
-js-confetti@^0.12.0:
-  version "0.12.0"
-  resolved "https://registry.npmjs.org/js-confetti/-/js-confetti-0.12.0.tgz"
-  integrity sha512-1R0Akxn3Zn82pMqW65N1V2NwKkZJ75bvBN/VAb36Ya0YHwbaSiAJZVRr/19HBxH/O8x2x01UFAbYI18VqlDN6g==
+js-confetti@^0.13.1:
+  version "0.13.1"
+  resolved "https://registry.yarnpkg.com/js-confetti/-/js-confetti-0.13.1.tgz#0f171b8242dae9ce1a17fa4e09251f26a75800b1"
+  integrity sha512-Kau3apum0zYIvELfZv0lL5VY7dvzpbKi4Oq0XdfjDKdNZc/O+IeGRyLEej7GJ/1APbASvb+ZTWDxmTxxSFkTOg==
 
 js-yaml@^4.1.0:
   version "4.1.0"
