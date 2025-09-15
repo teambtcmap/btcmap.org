@@ -16,10 +16,21 @@ test.describe('Community Area Pages', () => {
 
 		await firstCommunityLink.click();
 		// Wait for navigation to complete
-		await page.waitForLoadState('domcontentloaded');
+		await page.waitForLoadState('networkidle');
+		await page.waitForTimeout(1000); // Give extra time for redirect
 
 		// Verify we're on a community area page (app redirects to merchants section)
 		await expect(page).toHaveURL(/\/community\/[^/]+\/merchants$/);
+
+		// If still on communities page, try clicking again (flaky navigation)
+		if (page.url().includes('/communities/')) {
+			const retryLink = page.locator('a[href^="/community/"]').first();
+			await expect(retryLink).toBeVisible({ timeout: 5000 });
+			await retryLink.click();
+			await page.waitForLoadState('networkidle');
+			await page.waitForTimeout(1000);
+			await expect(page).toHaveURL(/\/community\/[^/]+\/merchants$/);
+		}
 
 		// Check that the page has loaded with basic elements (skip breadcrumbs if not present)
 		const breadcrumbs = page.locator(
