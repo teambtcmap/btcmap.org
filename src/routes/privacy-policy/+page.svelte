@@ -81,10 +81,10 @@
 				</p>
 				<p><strong>Do not</strong> submit any personal or private information.</p>
 				<p>
-					If you include an X handle, we may post about your submission from the <!-- eslint-disable-next-line svelte/no-navigation-without-resolve --><a
-						href={$socials.x}
-						class="text-link transition-colors hover:text-hover">@btcmap</a
-					> X account.
+					If you include an X handle, we may post about your submission from the
+					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+					<a href={$socials.x} class="text-link transition-colors hover:text-hover">@btcmap</a>
+					X account.
 				</p>
 			</div>
 
@@ -93,16 +93,20 @@
 				<p>
 					We use privacy respecting analytics provided by <a
 						href="https://www.netlify.com/"
-						class="text-link transition-colors hover:text-hover">Netlify</a
-					> in order to see activity on BTC Map. For example, how many users are visiting the website
+						class="text-link transition-colors hover:text-hover"
+					>
+						Netlify
+					</a> in order to see activity on BTC Map. For example, how many users are visiting the website
 					and the performance.
 				</p>
 				<p>
 					These analytics do not use any cookies or trackers. There is no personally identifiable
 					information included. All of the data is anonymous and complies with the <a
 						href="https://www.netlify.com/gdpr-ccpa/"
-						class="text-link transition-colors hover:text-hover">GDPR</a
-					>. This data is deleted after 30 days.
+						class="text-link transition-colors hover:text-hover"
+					>
+						GDPR
+					</a>. This data is deleted after 30 days.
 				</p>
 				<p>Below are some links to read more about Netlify Analytics:</p>
 				<ul class="ml-5 list-disc space-y-2">
@@ -169,8 +173,10 @@
 				<p>
 					If you have any questions or feedback about our privacy policy, please contact us at <a
 						href="mailto:hello@btcmap.org"
-						class="text-link transition-colors hover:text-hover">hello@btcmap.org</a
-					> or on any of our social platforms.
+						class="text-link transition-colors hover:text-hover"
+					>
+						hello@btcmap.org
+					</a> or on any of our social platforms.
 				</p>
 			</div>
 		</main>

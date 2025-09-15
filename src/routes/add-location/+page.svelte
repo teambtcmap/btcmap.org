@@ -384,14 +384,19 @@
 							Still have questions?
 						</h3>
 						<p class="text-justify">
-							Ask for help in our <!-- eslint-disable-next-line svelte/no-navigation-without-resolve --><a
+							Ask for help in our
+							<!-- eslint-disable svelte/no-navigation-without-resolve -->
+							<a
 								href={$socials.discord}
 								target="_blank"
 								rel="noreferrer"
-								class="text-link transition-colors hover:text-hover">Discord</a
-							> server and a community member will be happy to assist. Alternatively, you can fill out
-							the form below. This method is not recommended if you would like to be added to the map
-							right away.
+								class="text-link transition-colors hover:text-hover"
+							>
+								<!-- eslint-enable svelte/no-navigation-without-resolve -->
+								Discord
+							</a> server and a community member will be happy to assist. Alternatively, you can fill
+							out the form below. This method is not recommended if you would like to be added to the
+							map right away.
 						</p>
 					</div>
 				</section>
