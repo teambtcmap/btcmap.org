@@ -175,7 +175,7 @@ test.describe('Map Popup', () => {
 		// Check that we're on the merchant detail page by looking for merchant-specific content
 		await expect(page.getByText('Last Surveyed')).toBeVisible();
 		await expect(page.getByRole('heading', { name: 'Boost' })).toBeVisible();
-		await expect(page.getByRole('heading', { name: 'Comments', exact: true })).toBeVisible();
+		await expect(page.getByRole('heading', { name: /^Comments\s*$/ })).toBeVisible();
 	});
 
 	test('popup shows Comments button with count', async ({ page }) => {
