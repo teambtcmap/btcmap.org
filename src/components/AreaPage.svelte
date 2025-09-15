@@ -429,7 +429,7 @@
 				<p class="text-xl text-primary dark:text-white">{description}</p>
 			{/if}
 			{#if alias && type === 'community'}
-				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href={`/communities/map?community=${alias}`}
 					class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
@@ -450,6 +450,7 @@
 						/>
 					</svg></a
 				>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			{/if}
 		</div>
 

@@ -30,7 +30,7 @@
 			on:error={handleImageError}
 			loading="lazy"
 		/>
-		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+		<!-- eslint-disable svelte/no-navigation-without-resolve -->
 		<a
 			href={`/${type}/${id}`}
 			class="font-medium text-link transition-colors hover:text-hover {hasLongName
@@ -38,6 +38,7 @@
 				: ''}"
 			aria-label="View {displayName} details"
 		>
+			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			{displayName}
 		</a>
 	</div>

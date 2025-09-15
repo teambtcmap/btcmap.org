@@ -25,7 +25,7 @@
 
 	<div class="flex flex-wrap justify-center xl:block">
 		{#each links as link (link.name)}
-			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+			<!-- eslint-disable svelte/no-navigation-without-resolve -->
 			<a
 				href={link.link}
 				target={link.external ? '_blank' : null}
@@ -33,8 +33,10 @@
 				class="mx-2.5 {link.name !== 'Cypherpunks'
 					? 'mb-2.5 xl:mb-0'
 					: ''} text-sm text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link"
-				>{link.name}</a
 			>
+				{link.name}
+			</a>
+			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		{/each}
 	</div>
 </footer>

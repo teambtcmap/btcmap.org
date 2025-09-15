@@ -30,13 +30,14 @@
 		Edit
 	</a>
 {:else if id === 'helpLink' && value}
-	<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+	<!-- eslint-disable svelte/no-navigation-without-resolve -->
 	<a
 		href={value}
 		target="_blank"
 		rel="noreferrer"
 		class="text-link transition-colors hover:text-hover"
 	>
+		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		Help
 	</a>
 {/if}

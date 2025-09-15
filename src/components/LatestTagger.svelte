@@ -48,7 +48,7 @@
 		<div class="space-y-2 lg:space-y-0">
 			<span class="text-primary dark:text-white lg:mr-5">
 				<!-- location -->
-				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href={action === 'delete'
 						? `https://www.openstreetmap.org/${deleteLink[0]}/${deleteLink[1]}`
@@ -56,7 +56,9 @@
 					target={action === 'delete' ? '_blank' : null}
 					rel={action === 'delete' ? 'noreferrer' : null}
 					class="break-all text-link transition-colors hover:text-hover"
-					>{location}
+				>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
+					{location}
 					{#if action === 'delete'}
 						<svg
 							class="inline"

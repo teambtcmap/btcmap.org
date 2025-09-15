@@ -53,13 +53,14 @@
 							class="mx-2 my-2 space-y-1 text-center font-semibold text-body dark:text-white md:my-0"
 						>
 							<p>{app.type}</p>
-							<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+							<!-- eslint-disable svelte/no-navigation-without-resolve -->
 							<a
 								href={app.link}
 								target={app.type === 'Web' ? null : '_blank'}
 								rel={app.type === 'Web' ? null : 'noreferrer'}
 								class="block rounded-full bg-link p-3 text-white transition-colors hover:bg-hover"
 							>
+								<!-- eslint-enable svelte/no-navigation-without-resolve -->
 								<Icon
 									w="32"
 									h="32"

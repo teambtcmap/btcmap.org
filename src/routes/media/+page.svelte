@@ -80,12 +80,13 @@
 				<div class="space-y-5">
 					<h2 class="text-3xl font-semibold">Assets</h2>
 
-					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href="/assets/btcmap-media-assets.zip"
 						download
 						class="mx-auto block w-36 rounded-lg bg-link py-3 font-semibold text-white transition-colors hover:bg-hover"
 					>
+						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 						Download All
 					</a>
 

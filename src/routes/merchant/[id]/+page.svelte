@@ -377,11 +377,12 @@
 					{/if}
 
 					{#if lat && long}
-						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+						<!-- eslint-disable svelte/no-navigation-without-resolve -->
 						<a
 							href={`/map?lat=${lat}&long=${long}`}
 							class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
 						>
+							<!-- eslint-enable svelte/no-navigation-without-resolve -->
 							View on main map
 							<svg
 								class="ml-1 w-3"
@@ -433,13 +434,14 @@
 							<h4 class="uppercase text-primary dark:text-white">Accepted Payments</h4>
 							<div class="mt-1 flex items-center justify-center space-x-2">
 								{#if !paymentMethod}
-									<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+									<!-- eslint-disable svelte/no-navigation-without-resolve -->
 									<a
 										bind:this={thirdPartyTooltip}
 										href={data.osmTags?.['payment:lightning:companion_app_url']}
 										target="_blank"
 										rel="noreferrer"
 									>
+										<!-- eslint-enable svelte/no-navigation-without-resolve -->
 										<i
 											class="fa-solid fa-mobile-screen-button h-8 w-8 text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
 										>

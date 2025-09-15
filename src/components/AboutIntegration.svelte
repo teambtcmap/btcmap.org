@@ -3,13 +3,14 @@
 </script>
 
 <div class="space-y-2">
-	<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+	<!-- eslint-disable svelte/no-navigation-without-resolve -->
 	<a
 		href={integration.url}
 		target="_blank"
 		rel="noreferrer"
 		class="space-y-2 transition-colors hover:text-link"
 	>
+		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		<img
 			src="/images/integrations/{integration.icon}{integration.icon === 'voltage' ||
 			integration.icon === 'adopting'

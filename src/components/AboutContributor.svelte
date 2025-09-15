@@ -2,13 +2,14 @@
 	export let contributor: { url: string; name: string; file: string; title: string };
 </script>
 
-<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+<!-- eslint-disable svelte/no-navigation-without-resolve -->
 <a
 	href={contributor.url}
 	target="_blank"
 	rel="noreferrer"
 	class="space-y-2 text-center transition-colors hover:text-link"
 >
+	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 	<img
 		src="/images/contributors/{contributor.name}.{contributor.file}"
 		alt="avatar"

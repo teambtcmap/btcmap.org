@@ -9,13 +9,14 @@
 
 <div>
 	{#if link}
-		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+		<!-- eslint-disable svelte/no-navigation-without-resolve -->
 		<a
 			href={link}
 			target={text === 'Web' ? null : '_blank'}
 			rel={text === 'Web' ? null : 'noreferrer'}
 			class="text-2xl font-semibold text-link transition-colors hover:text-hover"
 		>
+			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			<div
 				class="mb-5 flex h-60 items-center justify-center rounded-2xl bg-offwhite dark:bg-white/[0.15]"
 			>

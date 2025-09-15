@@ -48,7 +48,7 @@
 
 			<!-- Row 2: Name (centered and prominent) -->
 			<div class="text-center">
-				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href={`/${type}/${area.tags?.url_alias || area.id || ''}`}
 					class="text-lg font-semibold text-link transition-colors hover:text-hover {area.tags?.name?.match(
@@ -58,6 +58,7 @@
 						: ''}"
 					aria-label="View {area.tags?.name || 'Unknown'} details"
 				>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
 					{area.tags?.name || 'Unknown'}
 				</a>
 			</div>

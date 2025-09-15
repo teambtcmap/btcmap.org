@@ -42,10 +42,11 @@
 
 <!-- desktop header -->
 <header class="relative z-30 mx-auto hidden w-[1200px] items-center justify-between py-5 xl:flex">
-	<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+	<!-- eslint-disable svelte/no-navigation-without-resolve -->
 	<a href="/">
 		<img src="/images/logo.svg" alt="logo" class="w-16" />
 	</a>
+	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
 	<nav class="flex flex-wrap space-x-16">
 		{#each navLinks as link (link.title)}
@@ -86,12 +87,14 @@
 				/>
 			{:else}
 				<!-- regular links -->
-				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href={link.url}
 					class="text-xl font-semibold text-link transition-colors hover:text-hover dark:text-white dark:hover:text-link"
-					>{link.title}
+				>
+					{link.title}
 				</a>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			{/if}
 		{/each}
 	</nav>

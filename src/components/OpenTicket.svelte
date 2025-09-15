@@ -21,14 +21,16 @@
 
 		<div>
 			<p>
-				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href={url}
 					target="_blank"
 					rel="noreferrer"
 					class="mr-1 text-lg font-semibold text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
-					>{name}</a
 				>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
+					{name}
+				</a>
 
 				<span class="block md:inline">
 					{#each labels || [] as label, index (index)}
@@ -41,13 +43,16 @@
 				#{id} opened <Time live={3000} relative timestamp={created} />
 				<br class="block md:hidden" />
 				by
-				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href={user.html_url}
 					target="_blank"
 					rel="noreferrer"
-					class="transition-colors hover:text-link">{user.login}</a
+					class="transition-colors hover:text-link"
 				>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
+					{user.login}
+				</a>
 			</p>
 		</div>
 	</div>

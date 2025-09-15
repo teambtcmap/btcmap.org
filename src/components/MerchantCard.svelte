@@ -77,13 +77,14 @@
 			{#if website}
 				<div class="flex items-center space-x-2">
 					<Icon w="16" h="16" icon="globe" type="popup" style="shrink-0" />
-					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href={website.startsWith('http') ? website : `https://${website}`}
 						target="_blank"
 						rel="noreferrer"
 						class="text-sm underline decoration-primary decoration-1 underline-offset-4 dark:decoration-white"
 					>
+						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 						{website}
 					</a>
 				</div>
@@ -127,34 +128,40 @@
 
 			<div class="flex items-center space-x-2">
 				{#if twitter}
-					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href={twitter.startsWith('http') ? twitter : `https://twitter.com/${twitter}`}
 						target="_blank"
 						rel="noreferrer"
 					>
+						<!-- eslint-enable svelte/no-navigation-without-resolve -->
+
 						<Icon w="16" h="16" icon="twitter" type="popup" />
 					</a>
 				{/if}
 
 				{#if instagram}
-					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href={instagram.startsWith('http') ? instagram : `https://instagram.com/${instagram}`}
 						target="_blank"
 						rel="noreferrer"
 					>
+						<!-- eslint-enable svelte/no-navigation-without-resolve -->
+
 						<Icon w="16" h="16" icon="instagram" type="popup" />
 					</a>
 				{/if}
 
 				{#if facebook}
-					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href={facebook.startsWith('http') ? facebook : `https://facebook.com/${facebook}`}
 						target="_blank"
 						rel="noreferrer"
 					>
+						<!-- eslint-enable svelte/no-navigation-without-resolve -->
+
 						<Icon w="16" h="16" icon="facebook" type="popup" />
 					</a>
 				{/if}
