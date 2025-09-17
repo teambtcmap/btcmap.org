@@ -306,21 +306,23 @@ export interface SearchResult extends SearchElement {
 	distanceMi: number;
 }
 
-// Search types for JSON-RPC search API
+// Search types for REST search API
 export interface SearchItem {
 	type: 'element' | 'user';
-	id: string;
+	id: number;
 	name: string;
-	description?: string;
-	score: number;
 }
 
-export interface SearchRpcResponse {
-	jsonrpc: '2.0';
-	result: {
-		items: SearchItem[];
+export interface SearchRestResponse {
+	results: SearchItem[];
+	total_count: number;
+	has_more: boolean;
+	query: string;
+	pagination: {
+		offset: number;
+		limit: number;
+		total: number;
 	};
-	id: number;
 }
 
 export type PayMerchant = { type: string; url?: string; username?: string } | undefined;

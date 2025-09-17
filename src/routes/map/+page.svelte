@@ -26,7 +26,7 @@
 		OSMTags,
 		Place,
 		SearchItem,
-		SearchRpcResponse
+		SearchRestResponse
 	} from '$lib/types';
 	import { debounce, detectTheme, errToast } from '$lib/utils';
 	import type { Control, LatLng, LatLngBounds, Map } from 'leaflet';
@@ -55,7 +55,7 @@
 	let searchStatus: boolean;
 	let searchResults: SearchItem[] = [];
 
-	// API-based search functions using JSON-RPC search API
+	// API-based search functions using REST search API
 	const apiSearch = async () => {
 		if (search.length < 3) {
 			searchResults = [];
@@ -66,29 +66,18 @@
 		searchStatus = true;
 
 		try {
-			const response = await fetch('https://api.btcmap.org/rpc', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					jsonrpc: '2.0',
-					method: 'search',
-					params: {
-						query: search
-					},
-					id: 1
-				})
-			});
+			const response = await fetch(
+				`https://api.btcmap.org/v4/search/?q=${encodeURIComponent(search)}`
+			);
 
-			const data: SearchRpcResponse = await response.json();
-
-			if (!response.ok || data.jsonrpc !== '2.0') {
+			if (!response.ok) {
 				throw new Error('Search API error');
 			}
 
+			const data: SearchRestResponse = await response.json();
+
 			// Filter API results to only show elements
-			searchResults = data.result.items.filter((item) => item.type === 'element');
+			searchResults = data.results.filter((item) => item.type === 'element');
 		} catch (error) {
 			console.error('Search error:', error);
 			errToast('Search temporarily unavailable');
@@ -108,8 +97,8 @@
 	const searchSelect = async (result: SearchItem) => {
 		clearSearch();
 
-		// Convert string ID to number for comparison with places store
-		const placeId = parseInt(result.id, 10);
+		// Use the numeric ID from the API response
+		const placeId = result.id;
 
 		// First, try to find the place in our local places store
 		const localPlace = $places.find((p) => p.id === placeId);
