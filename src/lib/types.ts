@@ -310,7 +310,7 @@ export interface SearchResult extends SearchElement {
 export interface SearchItem {
 	type: 'element' | 'user';
 	id: number;
-	name: string;
+	name: string | null;
 }
 
 export interface SearchRestResponse {

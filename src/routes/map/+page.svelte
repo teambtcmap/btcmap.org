@@ -633,11 +633,11 @@
 
 								<div class="mx-auto md:max-w-[280px]">
 									<p
-										class="text-sm text-mapButton dark:text-white {result.name.match('([^ ]{21})')
+										class="text-sm text-mapButton dark:text-white {result.name?.match('([^ ]{21})')
 											? 'break-all'
 											: ''}"
 									>
-										{result.name}
+										{result.name || 'Unknown'}
 									</p>
 									<p class="text-xs text-searchSubtext">
 										{result.type === 'element' ? 'Bitcoin merchant' : result.type}
