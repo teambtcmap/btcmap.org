@@ -25,7 +25,6 @@
 		MapGroups,
 		OSMTags,
 		Place,
-		PlaceCoordinatesResponse,
 		SearchItem,
 		SearchRestResponse
 	} from '$lib/types';
@@ -144,7 +143,7 @@
 			}
 
 			// Parse and validate response
-			let placeData: PlaceCoordinatesResponse;
+			let placeData: Pick<Place, 'lat' | 'lon'>;
 			try {
 				placeData = await response.json();
 			} catch (parseError) {
