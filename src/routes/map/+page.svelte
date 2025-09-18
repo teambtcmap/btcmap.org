@@ -25,6 +25,7 @@
 		MapGroups,
 		OSMTags,
 		Place,
+		PlaceCoordinatesResponse,
 		SearchItem,
 		SearchRestResponse
 	} from '$lib/types';
@@ -94,6 +95,20 @@
 		searchResults = [];
 	};
 
+	// Helper function to validate coordinate values
+	const isValidCoordinate = (lat: unknown, lon: unknown): lat is number => {
+		return (
+			typeof lat === 'number' &&
+			typeof lon === 'number' &&
+			!isNaN(lat) &&
+			!isNaN(lon) &&
+			lat >= -90 &&
+			lat <= 90 &&
+			lon >= -180 &&
+			lon <= 180
+		);
+	};
+
 	const searchSelect = async (result: SearchItem) => {
 		clearSearch();
 
@@ -103,24 +118,57 @@
 		// First, try to find the place in our local places store
 		const localPlace = $places.find((p) => p.id === placeId);
 
-		if (localPlace && localPlace.lat && localPlace.lon) {
+		if (localPlace && isValidCoordinate(localPlace.lat, localPlace.lon)) {
 			// Use local data if available
 			map.flyTo([localPlace.lat, localPlace.lon], 19);
-		} else {
-			// If not in local store, fetch from v4/places API
-			try {
-				const response = await fetch(
-					`https://api.btcmap.org/v4/places/${result.id}?fields=lat,lon`
-				);
-				const placeData = await response.json();
+			return;
+		}
 
-				if (response.ok && placeData.lat && placeData.lon) {
-					map.flyTo([placeData.lat, placeData.lon], 19);
+		// If not in local store, fetch from v4/places API
+		try {
+			const response = await fetch(`https://api.btcmap.org/v4/places/${result.id}?fields=lat,lon`);
+
+			// Handle different HTTP status codes
+			if (!response.ok) {
+				if (response.status === 404) {
+					console.error(`Place not found: ${result.id}`);
+					errToast('Location not found');
+				} else if (response.status >= 500) {
+					console.error(`Server error: ${response.status}`);
+					errToast('Server temporarily unavailable');
 				} else {
-					errToast('Could not navigate to location');
+					console.error(`API error: ${response.status}`);
+					errToast('Location data unavailable');
 				}
-			} catch (error) {
-				console.error('Error fetching place coordinates:', error);
+				return;
+			}
+
+			// Parse and validate response
+			let placeData: PlaceCoordinatesResponse;
+			try {
+				placeData = await response.json();
+			} catch (parseError) {
+				console.error('Failed to parse place coordinates response:', parseError);
+				errToast('Invalid location data received');
+				return;
+			}
+
+			// Validate coordinates
+			if (!isValidCoordinate(placeData.lat, placeData.lon)) {
+				console.error('Invalid coordinates received:', placeData);
+				errToast('Invalid location coordinates');
+				return;
+			}
+
+			// Navigate to location
+			map.flyTo([placeData.lat, placeData.lon], 19);
+		} catch (error) {
+			// Differentiate between network errors and other errors
+			if (error instanceof TypeError && error.message.includes('fetch')) {
+				console.error('Network error fetching place coordinates:', error);
+				errToast('Network connection error');
+			} else {
+				console.error('Unexpected error fetching place coordinates:', error);
 				errToast('Could not navigate to location');
 			}
 		}

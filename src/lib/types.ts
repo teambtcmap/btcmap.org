@@ -325,6 +325,12 @@ export interface SearchRestResponse {
 	};
 }
 
+// Minimal response type for place coordinate lookups
+export interface PlaceCoordinatesResponse {
+	lat: number;
+	lon: number;
+}
+
 export type PayMerchant = { type: string; url?: string; username?: string } | undefined;
 
 // leaderboards
