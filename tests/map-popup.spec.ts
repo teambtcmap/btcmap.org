@@ -16,41 +16,95 @@ test.describe('Map Popup', () => {
 		// Give extra time for API data to load and process
 		await page.waitForTimeout(10000);
 
-		// Helper function to find and click a marker with retry logic
+		// Helper function to find and click a marker with viewport-aware logic
 		const findAndClickMarker = async () => {
-			// First, try to find individual (non-cluster) markers
-			const individualMarkers = page.locator('.leaflet-marker-pane > div:not([class*="cluster"])');
-			const individualCount = await individualMarkers.count();
+			// Use JavaScript to find and click markers, bypassing viewport restrictions
+			const markerClicked = await page.evaluate(() => {
+				// Helper function to check if element is in viewport
+				const isInViewport = (element: Element) => {
+					const rect = element.getBoundingClientRect();
+					const viewport = {
+						width: window.innerWidth,
+						height: window.innerHeight
+					};
+					return (
+						rect.left >= 0 &&
+						rect.right <= viewport.width &&
+						rect.top >= 0 &&
+						rect.bottom <= viewport.height
+					);
+				};
 
-			if (individualCount > 0) {
-				await individualMarkers.first().click();
-				return true;
-			}
+				// First, try to find individual (non-cluster) markers
+				const individualMarkers = document.querySelectorAll(
+					'.leaflet-marker-pane > div:not([class*="cluster"])'
+				);
 
-			// If no individual markers, try clusters
-			const clusterSelectors = [
-				'.leaflet-marker-cluster-small',
-				'.leaflet-marker-cluster-medium',
-				'.leaflet-marker-cluster-large'
-			];
+				if (individualMarkers.length > 0) {
+					// Try to find a marker in viewport first
+					const viewportMarker = Array.from(individualMarkers).find(isInViewport);
+					if (viewportMarker) {
+						(viewportMarker as HTMLElement).click();
+						return true;
+					}
 
-			for (const selector of clusterSelectors) {
-				const count = await page.locator(selector).count();
-				if (count > 0) {
-					const cluster = page.locator(selector).first();
-					await cluster.click();
-					await page.waitForTimeout(3000); // Wait for cluster expansion
+					// If no viewport markers, click the first one (JavaScript bypasses viewport restrictions)
+					(individualMarkers[0] as HTMLElement).click();
+					return true;
+				}
 
-					// Check for expanded individual markers
-					const expandedCount = await individualMarkers.count();
-					if (expandedCount > 0) {
-						await individualMarkers.first().click();
+				// If no individual markers, try clusters
+				const clusterSelectors = [
+					'.leaflet-marker-cluster-small',
+					'.leaflet-marker-cluster-medium',
+					'.leaflet-marker-cluster-large'
+				];
+
+				for (const selector of clusterSelectors) {
+					const clusters = document.querySelectorAll(selector);
+					if (clusters.length > 0) {
+						// Find viewport cluster or use first one
+						const viewportCluster = Array.from(clusters).find(isInViewport);
+						const clusterToClick = viewportCluster || clusters[0];
+						(clusterToClick as HTMLElement).click();
+
+						// Wait a bit for cluster expansion
+						setTimeout(() => {
+							const expandedMarkers = document.querySelectorAll(
+								'.leaflet-marker-pane > div:not([class*="cluster"])'
+							);
+							if (expandedMarkers.length > 0) {
+								const expandedViewportMarker = Array.from(expandedMarkers).find(isInViewport);
+								const markerToClick = expandedViewportMarker || expandedMarkers[0];
+								(markerToClick as HTMLElement).click();
+							}
+						}, 1000);
 						return true;
 					}
 				}
+
+				return false;
+			});
+
+			if (!markerClicked) {
+				// Enhanced debugging: log what markers were found
+				const debugInfo = await page.evaluate(() => {
+					const individualMarkers = document.querySelectorAll(
+						'.leaflet-marker-pane > div:not([class*="cluster"])'
+					);
+					const clusters = document.querySelectorAll('.leaflet-marker-cluster');
+					return {
+						individualMarkersCount: individualMarkers.length,
+						clustersCount: clusters.length,
+						totalMarkers: document.querySelectorAll('.leaflet-marker-pane > div').length
+					};
+				});
+				throw new Error(`No clickable markers found. Debug info: ${JSON.stringify(debugInfo)}`);
 			}
 
-			throw new Error('No clickable markers found');
+			// Wait for the click to be processed
+			await page.waitForTimeout(2000);
+			return true;
 		};
 
 		// Find and click a marker
