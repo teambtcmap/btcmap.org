@@ -308,7 +308,7 @@ export interface SearchResult extends SearchElement {
 
 // Search types for REST search API
 export interface SearchItem {
-	type: 'element' | 'user';
+	type: 'element' | 'user' | 'area';
 	id: number;
 	name: string | null;
 }
