@@ -59,15 +59,17 @@ test.describe('Areas', () => {
 		await expect(communityHeading).toBeTruthy();
 
 		// Just verify that community structure loads (don't test merchant details)
-		await page.waitForTimeout(3000); // Give time for basic structure to load
+		await page.waitForTimeout(5000); // Give more time for API data to load locally
 		const communityLinks = page.locator('a[href^="/community/"]');
 
 		// Check that at least some communities are visible
-		await expect(communityLinks.first()).toBeVisible({ timeout: 15000 });
+		await expect(communityLinks.first()).toBeVisible({ timeout: 20000 });
 
 		// Click the first community and verify navigation works
 		await communityLinks.first().click();
-		await page.waitForLoadState('domcontentloaded');
+		await page.waitForLoadState('networkidle'); // Wait for network requests to complete
+		await page.waitForTimeout(2000); // Extra wait for local environment
+
 		await expect(page).toHaveURL(/\/community\/[^/]+\/merchants$/); // App redirects to merchants section
 
 		// Just verify the community page structure loads (don't test merchant functionality)

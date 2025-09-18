@@ -26,6 +26,7 @@
 
 <div class="flex flex-wrap items-center justify-center {style || ''}">
 	{#if website}
+		<!-- eslint-disable svelte/no-navigation-without-resolve -->
 		<a href={website} target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-bitcoin">
 				<i class="fa-solid fa-globe h-7 w-7 text-white" />
@@ -129,6 +130,7 @@
 	{/if}
 	{#if simplex}
 		<a href={simplex} target="_blank" rel="noreferrer" class="m-1">
+			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			<img src="/icons/socials/simplex.jpg" alt="simplex" class="h-10 w-10 rounded-full" />
 		</a>
 	{/if}

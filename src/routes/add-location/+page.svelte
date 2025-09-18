@@ -18,6 +18,7 @@
 	import type { Map, MaplibreGL, Marker } from 'leaflet';
 	import { onDestroy, onMount, tick } from 'svelte';
 	import DOMPurify from 'dompurify';
+	import { resolve } from '$app/paths';
 
 	let captchaContent = '';
 	let isCaptchaLoading = true;
@@ -359,7 +360,10 @@
 										class="mx-auto mb-4 md:mx-0 md:mb-0 md:mr-4"
 									/>
 									Show up on the
-									<a href="/map" class="ml-1 text-link transition-colors hover:text-hover">map</a>!
+									<a
+										href={resolve('/map')}
+										class="ml-1 text-link transition-colors hover:text-hover">map</a
+									>!
 								</li>
 							</ol>
 						</div>
@@ -380,14 +384,19 @@
 							Still have questions?
 						</h3>
 						<p class="text-justify">
-							Ask for help in our <a
+							Ask for help in our
+							<!-- eslint-disable svelte/no-navigation-without-resolve -->
+							<a
 								href={$socials.discord}
 								target="_blank"
 								rel="noreferrer"
-								class="text-link transition-colors hover:text-hover">Discord</a
-							> server and a community member will be happy to assist. Alternatively, you can fill out
-							the form below. This method is not recommended if you would like to be added to the map
-							right away.
+								class="text-link transition-colors hover:text-hover"
+							>
+								<!-- eslint-enable svelte/no-navigation-without-resolve -->
+								Discord
+							</a> server and a community member will be happy to assist. Alternatively, you can fill
+							out the form below. This method is not recommended if you would like to be added to the
+							map right away.
 						</p>
 					</div>
 				</section>

@@ -5,7 +5,7 @@
 	export let buttonWidth = 'w-52';
 
 	import { HeaderPlaceholder, PrimaryButton } from '$lib/comp';
-	import { socials, theme } from '$lib/store';
+	import { theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
 </script>
 

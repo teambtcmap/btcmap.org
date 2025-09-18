@@ -3,6 +3,7 @@
 	import { SocialLink } from '$lib/comp';
 	import { socials } from '$lib/store';
 	import { onMount } from 'svelte';
+	import { resolve } from '$app/paths';
 
 	onMount(() => {
 		if ($page.status === 500 && !navigator.onLine) {
@@ -21,13 +22,15 @@
 <div class="bg-teal dark:bg-dark">
 	<div class="relative mx-auto w-10/12 xl:w-[1200px]">
 		<header>
-			<a href="/">
+			<a href={resolve('/')}>
 				<img src="/images/logo.svg" alt="logo" class="mx-auto w-32 py-5" />
 			</a>
 		</header>
 
 		<div class="space-y-10 py-10 text-center">
-			<a href="/" class="text-xl font-semibold text-link transition-colors hover:text-hover"
+			<a
+				href={resolve('/')}
+				class="text-xl font-semibold text-link transition-colors hover:text-hover"
 				><i class="fa-solid fa-house mr-2" /> Home</a
 			>
 			<h1 class="text-4xl dark:text-white md:text-5xl">{$page.status}: {$page.error?.message}</h1>

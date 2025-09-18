@@ -2,6 +2,7 @@
 	import { Tip } from '$lib/comp';
 	import type { EventType, User } from '$lib/types';
 	import Time from 'svelte-time';
+	import { resolve } from '$app/paths';
 
 	export let action: EventType;
 	export let user: User | undefined;
@@ -48,7 +49,7 @@
 				<!-- user -->
 				{#if user && username}
 					by <a
-						href="/tagger/{user.id}"
+						href={resolve(`/tagger/${user.id}`)}
 						class="block break-all text-link transition-colors hover:text-hover lg:inline"
 						>{username}
 					</a>

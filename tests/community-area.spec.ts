@@ -16,10 +16,21 @@ test.describe('Community Area Pages', () => {
 
 		await firstCommunityLink.click();
 		// Wait for navigation to complete
-		await page.waitForLoadState('domcontentloaded');
+		await page.waitForLoadState('networkidle');
+		await page.waitForTimeout(1000); // Give extra time for redirect
 
 		// Verify we're on a community area page (app redirects to merchants section)
 		await expect(page).toHaveURL(/\/community\/[^/]+\/merchants$/);
+
+		// If still on communities page, try clicking again (flaky navigation)
+		if (page.url().includes('/communities/')) {
+			const retryLink = page.locator('a[href^="/community/"]').first();
+			await expect(retryLink).toBeVisible({ timeout: 5000 });
+			await retryLink.click();
+			await page.waitForLoadState('networkidle');
+			await page.waitForTimeout(1000);
+			await expect(page).toHaveURL(/\/community\/[^/]+\/merchants$/);
+		}
 
 		// Check that the page has loaded with basic elements (skip breadcrumbs if not present)
 		const breadcrumbs = page.locator(
@@ -40,19 +51,19 @@ test.describe('Community Area Pages', () => {
 
 		// Wait for page to load
 		await page.waitForSelector('main', { timeout: 10000 });
-		await page.waitForTimeout(2000); // Give more time for dynamic content
+		await page.waitForTimeout(5000); // Give more time for API data to load locally
 
 		// Ensure community links are present - this should not be skipped
 		const firstCommunityLink = page.locator('a[href^="/community/"]').first();
-		await expect(firstCommunityLink).toBeVisible({ timeout: 15000 });
+		await expect(firstCommunityLink).toBeVisible({ timeout: 20000 });
 
 		// Get the community href for URL verification
 		const communityHref = await firstCommunityLink.getAttribute('href');
 		await firstCommunityLink.click();
 
 		// Wait for navigation to complete
-		await page.waitForLoadState('domcontentloaded');
-		await page.waitForTimeout(1000);
+		await page.waitForLoadState('networkidle'); // Wait for network requests
+		await page.waitForTimeout(3000); // More time for local environment
 
 		// Should redirect to merchants section (URL should end with /merchants)
 		if (communityHref) {

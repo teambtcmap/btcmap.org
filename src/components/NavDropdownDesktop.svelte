@@ -30,6 +30,7 @@
 		>
 			<div class="absolute right-0 top-8 z-50 w-[185px] rounded-2xl shadow-lg">
 				{#each links as link (link.url)}
+					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href={link.url}
 						target={link.external ? '_blank' : null}
@@ -41,6 +42,7 @@
 								? 'rounded-b-2xl'
 								: ''} transition-colors"
 					>
+						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 						{link.title}
 						{#if link.external}
 							<i class="fa-solid fa-arrow-up-right-from-square ml-1 h-4 w-4" />

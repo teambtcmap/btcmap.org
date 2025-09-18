@@ -15,12 +15,14 @@
 </script>
 
 {#if link}
+	<!-- eslint-disable svelte/no-navigation-without-resolve -->
 	<a
 		href={link}
 		target={external ? '_blank' : undefined}
 		rel={external ? 'noreferrer' : undefined}
 		class={combinedStyles}
 	>
+		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		<slot />
 	</a>
 {:else}

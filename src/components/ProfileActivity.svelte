@@ -2,6 +2,7 @@
 	import type { ActivityEvent } from '$lib/types';
 	import { format } from 'date-fns';
 	import { createEventDispatcher } from 'svelte';
+	import { resolve } from '$app/paths';
 
 	export let eventElements: ActivityEvent[] = [];
 	export let username: string;
@@ -77,7 +78,7 @@
 							<tr class="border-b border-statBorder/50 hover:bg-gray-50 dark:hover:bg-white/5">
 								<td class="w-2/3 px-5 py-3 text-left">
 									<a
-										href="/merchant/{event.merchantId}"
+										href={resolve(`/merchant/${event.merchantId}`)}
 										class="text-link transition-colors hover:text-hover"
 									>
 										{event.location}

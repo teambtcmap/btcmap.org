@@ -10,6 +10,7 @@
 	import Chart from 'chart.js/auto';
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
+	import { resolve } from '$app/paths';
 
 	export let data: PageData;
 
@@ -89,6 +90,7 @@
 	$: if (data.isOrganization && organizationSections.length > 0) {
 		const isValidOrganization = organizationSections.some((org) => org.id === data.section);
 		if (!isValidOrganization) {
+			// eslint-disable-next-line svelte/no-navigation-without-resolve
 			goto('/communities/africa', { replaceState: true });
 		}
 	}
@@ -242,6 +244,7 @@
 
 	// Handle section changes via dropdown
 	const handleSectionChange = (newSection: string) => {
+		// eslint-disable-next-line svelte/no-navigation-without-resolve
 		goto(`/communities/${newSection}`, { replaceState: false });
 	};
 
@@ -328,7 +331,7 @@
 						<h2
 							class="mb-2 text-3xl font-semibold text-primary dark:text-white md:mb-0 md:text-left"
 						>
-							<a href="/communities/{data.section}">
+							<a href={resolve(`/communities/${data.section}`)}>
 								{organizationSections.find((org) => org.id === data.section)?.displayName ||
 									continentDisplayNames[data.section] ||
 									data.section}

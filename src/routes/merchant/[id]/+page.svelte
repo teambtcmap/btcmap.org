@@ -62,6 +62,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import Time from 'svelte-time';
 	import tippy from 'tippy.js';
+	import { resolve } from '$app/paths';
 
 	// alert for user errors
 	$: $userError && errToast($userError);
@@ -376,10 +377,12 @@
 					{/if}
 
 					{#if lat && long}
+						<!-- eslint-disable svelte/no-navigation-without-resolve -->
 						<a
 							href={`/map?lat=${lat}&long=${long}`}
 							class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
 						>
+							<!-- eslint-enable svelte/no-navigation-without-resolve -->
 							View on main map
 							<svg
 								class="ml-1 w-3"
@@ -431,12 +434,14 @@
 							<h4 class="uppercase text-primary dark:text-white">Accepted Payments</h4>
 							<div class="mt-1 flex items-center justify-center space-x-2">
 								{#if !paymentMethod}
+									<!-- eslint-disable svelte/no-navigation-without-resolve -->
 									<a
 										bind:this={thirdPartyTooltip}
 										href={data.osmTags?.['payment:lightning:companion_app_url']}
 										target="_blank"
 										rel="noreferrer"
 									>
+										<!-- eslint-enable svelte/no-navigation-without-resolve -->
 										<i
 											class="fa-solid fa-mobile-screen-button h-8 w-8 text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
 										>
@@ -843,7 +848,7 @@
 							{#if filteredCommunities && filteredCommunities.length}
 								{#each filteredCommunities as community (community.id)}
 									<div class="m-4 space-y-1 transition-transform hover:scale-110">
-										<a href="/community/{community.id}">
+										<a href={resolve(`/community/${community.id}`)}>
 											<img
 												src={`https://btcmap.org/.netlify/images?url=${community.tags['icon:square']}&fit=cover&w=256&h=256`}
 												alt="logo"
@@ -863,7 +868,7 @@
 							{:else}
 								<p class="p-5 text-body dark:text-white">
 									This location is not part of a communtiy, but one can be <a
-										href="/communities/add"
+										href={resolve('/communities')}
 										class="text-link transition-colors hover:text-hover">created</a
 									> to help maintain this local area.
 								</p>

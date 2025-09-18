@@ -2,6 +2,7 @@
 	import { Tip } from '$lib/comp';
 	import type { EventType, User } from '$lib/types';
 	import Time from 'svelte-time';
+	import { resolve } from '$app/paths';
 
 	export let location: string;
 	export let action: EventType;
@@ -47,6 +48,7 @@
 		<div class="space-y-2 lg:space-y-0">
 			<span class="text-primary dark:text-white lg:mr-5">
 				<!-- location -->
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href={action === 'delete'
 						? `https://www.openstreetmap.org/${deleteLink[0]}/${deleteLink[1]}`
@@ -54,7 +56,9 @@
 					target={action === 'delete' ? '_blank' : null}
 					rel={action === 'delete' ? 'noreferrer' : null}
 					class="break-all text-link transition-colors hover:text-hover"
-					>{location}
+				>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
+					{location}
 					{#if action === 'delete'}
 						<svg
 							class="inline"
@@ -82,7 +86,7 @@
 				<!-- user -->
 				{#if user && username}
 					by <a
-						href="/tagger/{user.id}"
+						href={resolve(`/tagger/${user.id}`)}
 						class="block break-all text-link transition-colors hover:text-hover lg:inline"
 						>{username}
 					</a>

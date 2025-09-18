@@ -5,7 +5,7 @@
 	import QRCode from 'qrcode';
 	import { tick } from 'svelte';
 	import OutClick from 'svelte-outclick';
-	import { fade, fly } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
 	import type { MerchantPageData } from '$lib/types.js';
 
 	export let open: boolean = false;
