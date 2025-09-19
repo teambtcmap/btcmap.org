@@ -13,7 +13,7 @@
 	import QRCode from 'qrcode';
 	import type { Action } from 'svelte/action';
 
-	const onchain = 'bc1qqmy5c03clt6a72aq0ys5jzm2sjnws3qr05nvmz';
+	const onchain = 'bc1qt4g28vq480ec4ncl4h67qu4q4k2zel7xu0c2wg';
 	const lnurlp = 'LNURL1DP68GURN8GHJ7CM0WFJJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQPSYZ34';
 
 	let showQr = false;
