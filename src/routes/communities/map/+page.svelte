@@ -105,9 +105,7 @@
 					<div id='socials'>
 					</div>
 
-					<a href={resolve('/community/${
-						community.id
-					}')} class='block bg-link hover:bg-hover !text-white text-center font-semibold py-3 rounded-xl transition-colors' title='Community page'>View Community</a>
+					<a href="${resolve(`/community/${community.id}`)}" class='block bg-link hover:bg-hover !text-white text-center font-semibold py-3 rounded-xl transition-colors' title='Community page'>View Community</a>
 				</div>
 
 				${
