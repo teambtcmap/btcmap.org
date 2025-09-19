@@ -306,6 +306,25 @@ export interface SearchResult extends SearchElement {
 	distanceMi: number;
 }
 
+// Search types for REST search API
+export interface SearchItem {
+	type: 'element' | 'user' | 'area';
+	id: number;
+	name: string | null;
+}
+
+export interface SearchRestResponse {
+	results: SearchItem[];
+	total_count: number;
+	has_more: boolean;
+	query: string;
+	pagination: {
+		offset: number;
+		limit: number;
+		total: number;
+	};
+}
+
 export type PayMerchant = { type: string; url?: string; username?: string } | undefined;
 
 // leaderboards
