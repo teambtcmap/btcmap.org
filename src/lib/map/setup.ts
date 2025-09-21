@@ -2,6 +2,7 @@ import { Icon } from '$lib/comp';
 import { boost, exchangeRate, resetBoost, theme } from '$lib/store';
 import type { DomEventType, ElementOSM, Leaflet, OSMTags } from '$lib/types';
 import { detectTheme, errToast } from '$lib/utils';
+import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import type { Map } from 'leaflet';
@@ -661,7 +662,7 @@ export const generateMarker = ({
 			// Fetch place details from v4 API
 			try {
 				const response = await axios.get(
-					`https://api.btcmap.org/v4/places/${placeId}?fields=id,name,address,phone,website,twitter,facebook,instagram,email,opening_hours,verified_at,osm_url,boosted_until,comments,osm:payment:onchain,osm:payment:lightning,osm:payment:lightning_contactless,osm:payment:bitcoin,osm:payment:uri,osm:payment:coinos,osm:payment:pouch,osm:amenity,osm:category,osm:survey:date,osm:check_date,osm:check_date:currency:XBT`
+					`https://api.btcmap.org/v4/places/${placeId}?fields=${buildFieldsParam(PLACE_FIELD_SETS.FULL_POPUP)}`
 				);
 				const placeDetails = response.data;
 
