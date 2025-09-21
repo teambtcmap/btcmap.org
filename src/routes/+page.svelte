@@ -40,7 +40,7 @@
 						>Open Map</a
 					>
 					<a
-						href={resolve('/map')}
+						href={resolve('/add-location')}
 						class="rounded-full bg-link px-7 py-3.5 text-lg font-semibold text-white transition-colors hover:bg-hover"
 						>Add Location</a
 					>
