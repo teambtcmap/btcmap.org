@@ -83,7 +83,7 @@ export const elementsSync = async () => {
 
 			try {
 				const apiResponse = await axios.get<Place[]>(
-					`https://api.btcmap.org/v4/places?fields=id,lat,lon,icon,comments,deleted_at,updated_at&updated_since=${updatesSince}&include_deleted=true`
+					`https://api.btcmap.org/v4/places?fields=id,lat,lon,icon,comments,deleted_at,updated_at,boosted_until&updated_since=${updatesSince}&include_deleted=true`
 				);
 
 				const recentUpdates = apiResponse.data;
