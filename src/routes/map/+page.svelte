@@ -2,7 +2,11 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import { Boost, Icon, MapLoadingMain, ShowTags, TaggingIssues } from '$lib/comp';
-	import { mapWorkerManager } from '$lib/workers/worker-manager';
+	import {
+		processPlaces,
+		isSupported as isWorkerSupported,
+		terminate as terminateWorker
+	} from '$lib/workers/worker-manager';
 	import type { ProcessedPlace } from '$lib/workers/map-worker';
 	import {
 		attribution,
@@ -272,11 +276,11 @@
 			}
 
 			// Check if web workers are supported before trying to use them
-			if (mapWorkerManager.isSupported()) {
+			if (isWorkerSupported()) {
 				console.info(`Loading ${newPlaces.length} new markers using web worker`);
 
 				// Process new places using web worker
-				await mapWorkerManager.processPlaces(
+				await processPlaces(
 					newPlaces,
 					VIEWPORT_BATCH_SIZE, // Smaller batch size since dataset is much smaller
 					(progress: number, batch?: ProcessedPlace[]) => {
@@ -710,7 +714,7 @@
 			map.remove();
 		}
 		// Clean up web worker
-		mapWorkerManager.terminate();
+		terminateWorker();
 	});
 </script>
 
