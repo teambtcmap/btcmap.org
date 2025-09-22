@@ -266,7 +266,9 @@
 	const initializeElements = async () => {
 		if (elementsLoaded) return;
 
-		console.info(`Initializing combined viewport + web worker loading for ${$places.length} places`);
+		console.info(
+			`Initializing combined viewport + web worker loading for ${$places.length} places`
+		);
 
 		// create marker cluster group and layers
 		/* eslint-disable no-undef */
