@@ -73,6 +73,22 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
 	}
 };
 
+// Utility function to yield control back to the event loop
+// Uses scheduler API if available, otherwise falls back to MessageChannel
+function yieldToEventLoop(): Promise<void> {
+	// Use scheduler.postTask if available (modern browsers)
+	if (typeof scheduler !== 'undefined' && scheduler.postTask) {
+		return scheduler.postTask(() => {}, { priority: 'user-blocking' });
+	}
+	
+	// Use MessageChannel for more reliable yielding than setTimeout
+	return new Promise((resolve) => {
+		const channel = new MessageChannel();
+		channel.port2.onmessage = () => resolve();
+		channel.port1.postMessage(null);
+	});
+}
+
 // Process places in batches to avoid blocking
 async function processPlacesInBatches(places: Place[], batchSize: number = 50, requestId: string) {
 	const totalBatches = Math.ceil(places.length / batchSize);
@@ -108,8 +124,8 @@ async function processPlacesInBatches(places: Place[], batchSize: number = 50, r
 			id: requestId
 		} as WorkerResponse);
 
-		// Yield control to prevent worker blocking
-		await new Promise((resolve) => setTimeout(resolve, 0));
+		// Yield control to prevent worker blocking - use proper scheduler
+		await yieldToEventLoop();
 	}
 
 	// Signal completion
