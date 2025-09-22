@@ -1,6 +1,7 @@
 # BTC Map Development Guide
 
 ## Build/Test Commands
+
 - `yarn dev` - Start development server with HMR
 - `yarn build` - Production build
 - `yarn check` - TypeScript + Svelte validation
@@ -13,6 +14,7 @@
 - `yarn playwright test --headed` - Run tests with browser UI
 
 ## Code Style (Auto-enforced)
+
 - **Tabs** for indentation, **single quotes**, **no trailing commas**
 - **100 char line limit**, TailwindCSS class sorting enabled
 - **TypeScript required** - avoid `any`, create types in `src/lib/types.ts`
@@ -21,12 +23,14 @@
 - **Imports**: Barrel exports from `src/lib/comp.ts`, absolute paths preferred
 
 ## Architecture
+
 - **SvelteKit** file-based routing, SSR for SEO pages
 - **Leaflet + MapLibre** for interactive maps with clustering
 - **LocalForage** client-side caching, sync every 10min from API
 - **Mobile-first PWA** with offline support via service worker
 
 ## Map Performance Optimizations
+
 - **Hybrid viewport + web worker loading**: Only load markers visible in current viewport
 - **Lazy worker initialization**: Web workers initialized only when needed with proper feature detection
 - **Viewport-based filtering**: 20% buffer around visible area for smooth panning
@@ -36,6 +40,7 @@
 - **MessageChannel yielding**: Proper event loop yielding in workers (no setTimeout)
 
 ## Performance Constants (Configurable)
+
 ```javascript
 const MAX_LOADED_MARKERS = 200; // Memory cleanup threshold
 const VIEWPORT_BATCH_SIZE = 25; // Worker batch size for viewport
@@ -44,6 +49,7 @@ const DEBOUNCE_DELAY = 300; // Map movement debounce (ms)
 ```
 
 ## Error Handling
+
 - Use `@zerodevx/svelte-toast` for user notifications
 - Axios retry logic for API failures, graceful offline degradation
 - Proper TypeScript error types, avoid silent failures
