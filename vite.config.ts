@@ -41,6 +41,9 @@ export default defineConfig({
 			}
 		])
 	],
+	worker: {
+		format: 'es'
+	},
 	server: {
 		host: '0.0.0.0',
 		allowedHosts: ['btcmap.org', '.replit.dev', '.replit.app']
