@@ -1,5 +1,5 @@
-import { generateOptimizedIcon } from './optimized-icons';
 import { boost, exchangeRate, resetBoost, theme } from '$lib/store';
+import { Icon } from '$lib/comp';
 import type { DomEventType, ElementOSM, Leaflet, OSMTags } from '$lib/types';
 import { detectTheme, errToast } from '$lib/utils';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
@@ -563,8 +563,42 @@ export const longCalc = (element: ElementOSM) => {
 };
 
 export const generateIcon = (L: Leaflet, icon: string, boosted: boolean, commentsCount: number) => {
-	// Use functional icon generator with smart caching
-	return generateOptimizedIcon(L, icon, boosted, commentsCount);
+	const className = boosted ? 'animate-wiggle' : '';
+	const iconTmp = icon !== 'question_mark' ? icon : 'currency_bitcoin';
+
+	const iconContainer = document.createElement('div');
+	iconContainer.className = 'icon-container relative flex items-center justify-center';
+
+	const iconElement = document.createElement('div');
+	new Icon({
+		target: iconElement,
+		props: {
+			w: '20',
+			h: '20',
+			style: `${className} mt-[5.75px] text-white`,
+			icon: iconTmp,
+			type: 'material'
+		}
+	});
+	iconContainer.appendChild(iconElement);
+
+	if (commentsCount > 0) {
+		const commentsCountSpan = document.createElement('span');
+		commentsCountSpan.textContent = `${commentsCount}`;
+		commentsCountSpan.className =
+			'absolute top-1 right-1 transform translate-x-1/2 -translate-y-1/2 ' +
+			'bg-green-600 text-white text-[10px] font-bold ' +
+			'rounded-full w-4 h-4 flex items-center justify-center';
+		iconContainer.appendChild(commentsCountSpan);
+	}
+
+	return L.divIcon({
+		className: boosted ? 'boosted-icon' : 'div-icon',
+		iconSize: [32, 43],
+		iconAnchor: [16, 43],
+		popupAnchor: [0, -43],
+		html: iconContainer.outerHTML
+	});
 };
 
 export const verifiedArr = (element: ElementOSM) => {
