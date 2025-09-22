@@ -23,6 +23,7 @@
 	import localforage from 'localforage';
 	import { onDestroy, onMount } from 'svelte';
 	import OutClick from 'svelte-outclick';
+	import type { FeatureGroup } from 'leaflet';
 
 	let mapLoading = 0;
 
@@ -240,7 +241,7 @@
 	};
 
 	// Process a batch of places on the main thread (DOM operations only)
-	const processBatchOnMainThread = (batch: ProcessedPlace[], layer: any) => {
+	const processBatchOnMainThread = (batch: ProcessedPlace[], layer: FeatureGroup.SubGroup) => {
 		batch.forEach((element: ProcessedPlace) => {
 			const { iconData } = element;
 
@@ -266,7 +267,7 @@
 	};
 
 	// Fallback to original synchronous processing if worker fails
-	const initializeElementsFallback = (upToDateLayer: any) => {
+	const initializeElementsFallback = (upToDateLayer: FeatureGroup.SubGroup) => {
 		console.warn('Falling back to synchronous processing');
 
 		$places.forEach((element: Place) => {
@@ -294,7 +295,18 @@
 		elementsLoaded = true;
 	};
 
-	$: if ($places && $places.length && mapLoaded && !elementsLoaded) {
+	// Reactive statement to initialize elements when data is ready
+	// Use a more controlled approach to prevent infinite loops
+	let shouldInitialize = false;
+	$: {
+		if ($places && $places.length && mapLoaded && !elementsLoaded) {
+			shouldInitialize = true;
+		}
+	}
+
+	// Watch for shouldInitialize flag and run initialization once
+	$: if (shouldInitialize) {
+		shouldInitialize = false;
 		initializeElements();
 	}
 
@@ -362,9 +374,9 @@
 					.then(function (value) {
 						if (value) {
 							map.fitBounds([
-								// @ts-expect-error
+								// @ts-expect-error - LatLngBounds internal structure access
 								[value._northEast.lat, value._northEast.lng],
-								// @ts-expect-error
+								// @ts-expect-error - LatLngBounds internal structure access
 								[value._southWest.lat, value._southWest.lng]
 							]);
 						} else {
@@ -504,13 +516,13 @@
 					};
 					if (theme === 'light') {
 						boostLayerButton.onmouseenter = () => {
-							// @ts-expect-error
+							// @ts-expect-error - LatLngBounds internal structure access
 							document.querySelector('#boost-layer').src = boosts
 								? '/icons/boost-solid-black.svg'
 								: '/icons/boost-black.svg';
 						};
 						boostLayerButton.onmouseleave = () => {
-							// @ts-expect-error
+							// @ts-expect-error - LatLngBounds internal structure access
 							document.querySelector('#boost-layer').src = boosts
 								? '/icons/boost-solid.svg'
 								: '/icons/boost.svg';
