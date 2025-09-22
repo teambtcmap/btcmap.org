@@ -1,4 +1,4 @@
-import { getIconGenerator } from './optimized-icons';
+import { generateOptimizedIcon } from './optimized-icons';
 import { boost, exchangeRate, resetBoost, theme } from '$lib/store';
 import type { DomEventType, ElementOSM, Leaflet, OSMTags } from '$lib/types';
 import { detectTheme, errToast } from '$lib/utils';
@@ -563,9 +563,8 @@ export const longCalc = (element: ElementOSM) => {
 };
 
 export const generateIcon = (L: Leaflet, icon: string, boosted: boolean, commentsCount: number) => {
-	// Use optimized icon generator with Svelte components (but cached)
-	const iconGenerator = getIconGenerator(L);
-	return iconGenerator.generateIcon(icon, boosted, commentsCount);
+	// Use functional icon generator with smart caching
+	return generateOptimizedIcon(L, icon, boosted, commentsCount);
 };
 
 export const verifiedArr = (element: ElementOSM) => {

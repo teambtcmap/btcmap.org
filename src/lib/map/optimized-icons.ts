@@ -156,27 +156,7 @@ export const getIconCacheStats = () => ({
 });
 
 /**
- * Legacy class-based interface for backward compatibility
- * @deprecated Use generateOptimizedIcon function instead
- */
-export class OptimizedIconGenerator {
-	constructor(private leaflet: Leaflet) {}
-
-	generateIcon(iconType: string, boosted: boolean, commentsCount: number): DivIcon {
-		return generateOptimizedIcon(this.leaflet, iconType, boosted, commentsCount);
-	}
-
-	clearCache(): void {
-		clearIconCache();
-	}
-
-	getCacheStats() {
-		return getIconCacheStats();
-	}
-}
-
-/**
- * Factory function for creating icon generator (more functional approach)
+ * Factory function for creating icon generator (recommended approach)
  */
 export const createIconGenerator = (leaflet: Leaflet) => ({
 	generateIcon: (iconType: string, boosted: boolean, commentsCount: number) =>
@@ -184,13 +164,3 @@ export const createIconGenerator = (leaflet: Leaflet) => ({
 	clearCache: clearIconCache,
 	getCacheStats: getIconCacheStats
 });
-
-// Singleton instance for backward compatibility
-let iconGenerator: OptimizedIconGenerator | null = null;
-
-export const getIconGenerator = (leaflet: Leaflet): OptimizedIconGenerator => {
-	if (!iconGenerator) {
-		iconGenerator = new OptimizedIconGenerator(leaflet);
-	}
-	return iconGenerator;
-};
