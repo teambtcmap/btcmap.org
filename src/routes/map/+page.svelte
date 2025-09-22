@@ -2,7 +2,11 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import { Boost, MapLoadingMain, ShowTags, TaggingIssues } from '$lib/comp';
-	import { processPlaces, isSupported as isWorkerSupported, terminate as terminateWorker } from '$lib/workers/worker-manager';
+	import {
+		processPlaces,
+		isSupported as isWorkerSupported,
+		terminate as terminateWorker
+	} from '$lib/workers/worker-manager';
 	import type { ProcessedPlace } from '$lib/workers/map-worker';
 	import {
 		attribution,
