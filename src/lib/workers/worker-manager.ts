@@ -32,10 +32,8 @@ export class MapWorkerManager {
 		}
 
 		// Feature detection for Web Workers
-		this.workerSupported = 
-			typeof Worker !== 'undefined' && 
-			typeof window !== 'undefined' && 
-			'Worker' in window;
+		this.workerSupported =
+			typeof Worker !== 'undefined' && typeof window !== 'undefined' && 'Worker' in window;
 
 		return this.workerSupported;
 	}
@@ -125,7 +123,7 @@ export class MapWorkerManager {
 	): Promise<PlacesProcessedPayload> {
 		// Lazy initialization
 		const workerReady = await this.initWorker();
-		
+
 		if (!workerReady || !this.worker) {
 			throw new Error('Web Worker not supported or failed to initialize');
 		}
@@ -155,7 +153,7 @@ export class MapWorkerManager {
 	async generateIconData(places: Place[]): Promise<unknown[]> {
 		// Lazy initialization
 		const workerReady = await this.initWorker();
-		
+
 		if (!workerReady || !this.worker) {
 			throw new Error('Web Worker not supported or failed to initialize');
 		}
