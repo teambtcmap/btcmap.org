@@ -50,7 +50,7 @@
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.35.0",
-		"@iconify/svelte": "^4.2.0",
+		"@iconify/svelte": "^5.0.2",
 		"@playwright/test": "^1.55.0",
 		"@sveltejs/adapter-netlify": "^5.2.2",
 		"@sveltejs/kit": "^2.37.1",
