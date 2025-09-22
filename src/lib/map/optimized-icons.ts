@@ -83,9 +83,9 @@ const createIconHtml = (iconType: string, boosted: boolean, commentsCount: numbe
 	const iconContainer = document.createElement('div');
 	iconContainer.className = 'icon-container relative flex items-center justify-center';
 
-	// Create icon element with Svelte component
+	// Create icon element with Svelte component and render it synchronously
 	const iconElement = document.createElement('div');
-	new Icon({
+	const iconComponent = new Icon({
 		target: iconElement,
 		props: {
 			w: '20',
@@ -95,6 +95,11 @@ const createIconHtml = (iconType: string, boosted: boolean, commentsCount: numbe
 			type: 'material'
 		}
 	});
+
+	// Force component to render by triggering a tick
+	iconComponent.$$.fragment?.c?.();
+	iconComponent.$$.fragment?.m?.(iconElement, null);
+
 	iconContainer.appendChild(iconElement);
 
 	// Add comment badge if needed
