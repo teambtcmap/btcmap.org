@@ -179,17 +179,6 @@
 	const urlLat = $page.url.searchParams.getAll('lat');
 	const urlLong = $page.url.searchParams.getAll('long');
 
-	// alow for users to query by payment method with URL search params
-	// const onchain = $page.url.searchParams.has('onchain');
-	// const lightning = $page.url.searchParams.has('lightning');
-	// const nfc = $page.url.searchParams.has('nfc');
-
-	// allow to view map with only legacy nodes
-	// const legacy = $page.url.searchParams.has('legacy');
-
-	// allow to view map with only outdated nodes
-	// const outdated = $page.url.searchParams.has('outdated');
-
 	// allow to view map with only boosted locations
 	const boosts = $page.url.searchParams.has('boosts');
 
@@ -279,7 +268,7 @@
 			// Check if web workers are supported before trying to use them
 			if (mapWorkerManager.isSupported()) {
 				console.info(`Loading ${newPlaces.length} new markers using web worker`);
-				
+
 				// Process new places using web worker
 				await mapWorkerManager.processPlaces(
 					newPlaces,
