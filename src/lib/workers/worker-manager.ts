@@ -9,9 +9,6 @@ import type {
 } from './map-worker';
 import type { Place } from '../types';
 
-// Union type for all possible worker response payloads
-type WorkerResponsePayload = PlacesProcessedPayload | unknown[];
-
 export class MapWorkerManager {
 	private worker: Worker | null = null;
 	private messageId = 0;
