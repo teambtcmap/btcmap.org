@@ -433,15 +433,21 @@
 			// add map and tiles
 			map = window.L.map(mapElement, { maxZoom: 19 });
 
+			// Helper function to set mapLoaded after view is set
+			const setMapViewAndMarkLoaded = () => {
+				mapCenter = map.getCenter();
+				mapLoaded = true;
+			};
+
 			// use url hash if present
 			if (location.hash) {
 				try {
 					const coords = location.hash.split('/');
 					map.setView([Number(coords[1]), Number(coords[2])], Number(coords[0].slice(1)));
-					mapCenter = map.getCenter();
+					setMapViewAndMarkLoaded();
 				} catch (error) {
 					map.setView([0, 0], 3);
-					mapCenter = map.getCenter();
+					setMapViewAndMarkLoaded();
 					errToast(
 						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
 					);
@@ -457,14 +463,14 @@
 							[Number(urlLat[0]), Number(urlLong[0])],
 							[Number(urlLat[1]), Number(urlLong[1])]
 						]);
-						mapCenter = map.getCenter();
+						setMapViewAndMarkLoaded();
 					} else {
 						map.fitBounds([[Number(urlLat[0]), Number(urlLong[0])]]);
-						mapCenter = map.getCenter();
+						setMapViewAndMarkLoaded();
 					}
 				} catch (error) {
 					map.setView([0, 0], 3);
-					mapCenter = map.getCenter();
+					setMapViewAndMarkLoaded();
 					errToast(
 						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
 					);
@@ -487,9 +493,11 @@
 						} else {
 							map.setView([0, 0], 3);
 						}
+						setMapViewAndMarkLoaded();
 					})
 					.catch(function (err) {
 						map.setView([0, 0], 3);
+						setMapViewAndMarkLoaded();
 						errToast(
 							'Could not set map view to cached coords, please try again or contact BTC Map.'
 						);
@@ -703,8 +711,6 @@
 			});
 
 			mapLoading = 40;
-
-			mapLoaded = true;
 		}
 	});
 
