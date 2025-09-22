@@ -54,3 +54,7 @@ const DEBOUNCE_DELAY = 300; // Map movement debounce (ms)
 - Axios retry logic for API failures, graceful offline degradation
 - Proper TypeScript error types, avoid silent failures
 - Web worker fallback to synchronous processing when workers unavailable
+- Use `@zerodevx/svelte-toast` for user notifications
+- Axios retry logic for API failures, graceful offline degradation
+- Proper TypeScript error types, avoid silent failures
+- Web worker fallback to synchronous processing when workers unavailable
