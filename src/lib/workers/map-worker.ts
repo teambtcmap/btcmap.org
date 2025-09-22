@@ -1,4 +1,3 @@
-// src/lib/workers/map-worker.ts
 import type { Place } from '../types';
 
 export interface ProcessPlacesPayload {
