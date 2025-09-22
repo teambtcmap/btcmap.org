@@ -9,13 +9,16 @@ import type {
 } from './map-worker';
 import type { Place } from '../types';
 
+// Union type for all possible worker response payloads
+type WorkerResponsePayload = PlacesProcessedPayload | unknown[];
+
 export class MapWorkerManager {
 	private worker: Worker | null = null;
 	private messageId = 0;
 	private pendingRequests = new Map<
 		string,
 		{
-			resolve: (value: any) => void;
+			resolve: (value: unknown) => void;
 			reject: (error: unknown) => void;
 			onProgress?: (progress: number, batch?: ProcessedPlace[]) => void;
 		}
@@ -97,7 +100,11 @@ export class MapWorkerManager {
 		const id = this.generateMessageId();
 
 		return new Promise<PlacesProcessedPayload>((resolve, reject) => {
-			this.pendingRequests.set(id, { resolve, reject, onProgress });
+			this.pendingRequests.set(id, {
+				resolve: resolve as (value: unknown) => void,
+				reject,
+				onProgress
+			});
 
 			const message: WorkerMessage = {
 				type: 'PROCESS_PLACES',
@@ -119,8 +126,11 @@ export class MapWorkerManager {
 
 		const id = this.generateMessageId();
 
-		return new Promise((resolve, reject) => {
-			this.pendingRequests.set(id, { resolve, reject });
+		return new Promise<unknown[]>((resolve, reject) => {
+			this.pendingRequests.set(id, {
+				resolve: resolve as (value: unknown) => void,
+				reject
+			});
 
 			const message: WorkerMessage = {
 				type: 'GENERATE_ICONS',
