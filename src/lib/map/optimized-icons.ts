@@ -4,138 +4,188 @@ import type { Leaflet } from '$lib/types';
 import type { DivIcon } from 'leaflet';
 
 interface IconCacheEntry {
-	htmlContent: string; // Cache HTML string instead of DivIcon
+	htmlContent: string;
 	timestamp: number;
 }
 
-export class OptimizedIconGenerator {
-	private cache = new Map<string, IconCacheEntry>();
-	private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-	private readonly MAX_CACHE_SIZE = 1000;
+// Cache configuration
+const CACHE_CONFIG = {
+	TTL: 5 * 60 * 1000, // 5 minutes
+	MAX_SIZE: 1000
+} as const;
 
+// Global cache - using Map for better performance than object
+const iconCache = new Map<string, IconCacheEntry>();
+
+/**
+ * Generate cache key for icon configuration
+ */
+const getCacheKey = (iconType: string, boosted: boolean, commentsCount: number): string =>
+	`${iconType}_${boosted ? 'boosted' : 'normal'}_${commentsCount}`;
+
+/**
+ * Check if cache entry is still valid
+ */
+const isCacheEntryValid = (entry: IconCacheEntry): boolean =>
+	Date.now() - entry.timestamp <= CACHE_CONFIG.TTL;
+
+/**
+ * Get HTML content from cache if valid
+ */
+const getHtmlFromCache = (key: string): string | null => {
+	const entry = iconCache.get(key);
+
+	if (!entry || !isCacheEntryValid(entry)) {
+		iconCache.delete(key);
+		return null;
+	}
+
+	return entry.htmlContent;
+};
+
+/**
+ * Add HTML content to cache with LRU eviction
+ */
+const addHtmlToCache = (key: string, htmlContent: string): void => {
+	// Simple LRU: remove oldest entry if cache is full
+	if (iconCache.size >= CACHE_CONFIG.MAX_SIZE) {
+		const oldestKey = iconCache.keys().next().value;
+		if (oldestKey) {
+			iconCache.delete(oldestKey);
+		}
+	}
+
+	iconCache.set(key, {
+		htmlContent,
+		timestamp: Date.now()
+	});
+};
+
+/**
+ * Create DivIcon from HTML content
+ */
+const createDivIconFromHtml = (leaflet: Leaflet, htmlContent: string, boosted: boolean): DivIcon =>
+	leaflet.divIcon({
+		className: boosted ? 'boosted-icon' : 'div-icon',
+		iconSize: [32, 43],
+		iconAnchor: [16, 43],
+		popupAnchor: [0, -43],
+		html: htmlContent
+	});
+
+/**
+ * Generate HTML content for icon using Svelte component
+ */
+const createIconHtml = (iconType: string, boosted: boolean, commentsCount: number): string => {
+	const className = boosted ? 'animate-wiggle' : '';
+	const iconTmp = iconType !== 'question_mark' ? iconType : 'currency_bitcoin';
+
+	// Create container element
+	const iconContainer = document.createElement('div');
+	iconContainer.className = 'icon-container relative flex items-center justify-center';
+
+	// Create icon element with Svelte component
+	const iconElement = document.createElement('div');
+	new Icon({
+		target: iconElement,
+		props: {
+			w: '20',
+			h: '20',
+			style: `${className} mt-[5.75px] text-white`,
+			icon: iconTmp,
+			type: 'material'
+		}
+	});
+	iconContainer.appendChild(iconElement);
+
+	// Add comment badge if needed
+	if (commentsCount > 0) {
+		const commentsCountSpan = document.createElement('span');
+		commentsCountSpan.textContent = `${commentsCount}`;
+		commentsCountSpan.className = [
+			'absolute top-1 right-1 transform translate-x-1/2 -translate-y-1/2',
+			'bg-green-600 text-white text-[10px] font-bold',
+			'rounded-full w-4 h-4 flex items-center justify-center'
+		].join(' ');
+		iconContainer.appendChild(commentsCountSpan);
+	}
+
+	return iconContainer.outerHTML;
+};
+
+/**
+ * Main icon generation function with smart caching
+ */
+export const generateOptimizedIcon = (
+	leaflet: Leaflet,
+	iconType: string,
+	boosted: boolean,
+	commentsCount: number
+): DivIcon => {
+	const key = getCacheKey(iconType, boosted, commentsCount);
+
+	// Try cache first
+	const cachedHtml = getHtmlFromCache(key);
+	if (cachedHtml) {
+		console.log(`Cache HIT for ${key}`);
+		return createDivIconFromHtml(leaflet, cachedHtml, boosted);
+	}
+
+	// Generate new icon and cache the HTML
+	console.log(`Cache MISS for ${key} - generating new icon`);
+	const htmlContent = createIconHtml(iconType, boosted, commentsCount);
+	addHtmlToCache(key, htmlContent);
+
+	return createDivIconFromHtml(leaflet, htmlContent, boosted);
+};
+
+/**
+ * Clear the icon cache (useful for memory management)
+ */
+export const clearIconCache = (): void => {
+	iconCache.clear();
+};
+
+/**
+ * Get cache statistics for monitoring
+ */
+export const getIconCacheStats = () => ({
+	size: iconCache.size,
+	maxSize: CACHE_CONFIG.MAX_SIZE,
+	ttl: CACHE_CONFIG.TTL
+});
+
+/**
+ * Legacy class-based interface for backward compatibility
+ * @deprecated Use generateOptimizedIcon function instead
+ */
+export class OptimizedIconGenerator {
 	constructor(private leaflet: Leaflet) {}
 
-	/**
-	 * Generate optimized icon using templates instead of Svelte components
-	 */
 	generateIcon(iconType: string, boosted: boolean, commentsCount: number): DivIcon {
-		const key = this.getCacheKey(iconType, boosted, commentsCount);
-
-		// Check cache for HTML content first
-		const cachedHtml = this.getHtmlFromCache(key);
-		if (cachedHtml) {
-			console.log(`Cache HIT for ${key}`);
-			return this.createDivIconFromHtml(cachedHtml, boosted);
-		}
-
-		console.log(`Cache MISS for ${key} - generating new icon`);
-		// Generate new icon and cache the HTML content
-		const htmlContent = this.createIconHtml(iconType, boosted, commentsCount);
-		this.addHtmlToCache(key, htmlContent);
-
-		return this.createDivIconFromHtml(htmlContent, boosted);
+		return generateOptimizedIcon(this.leaflet, iconType, boosted, commentsCount);
 	}
 
-	private getCacheKey(iconType: string, boosted: boolean, commentsCount: number): string {
-		return `${iconType}_${boosted ? 'boosted' : 'normal'}_${commentsCount}`;
-	}
-
-	private getHtmlFromCache(key: string): string | null {
-		const entry = this.cache.get(key);
-
-		if (!entry) {
-			return null;
-		}
-
-		// Check if cache entry is still valid
-		if (Date.now() - entry.timestamp > this.CACHE_TTL) {
-			this.cache.delete(key);
-			return null;
-		}
-
-		return entry.htmlContent;
-	}
-
-	private addHtmlToCache(key: string, htmlContent: string): void {
-		// Prevent cache from growing too large
-		if (this.cache.size >= this.MAX_CACHE_SIZE) {
-			// Remove oldest entries (simple LRU)
-			const oldestKey = this.cache.keys().next().value;
-			if (oldestKey) {
-				this.cache.delete(oldestKey);
-			}
-		}
-
-		this.cache.set(key, {
-			htmlContent,
-			timestamp: Date.now()
-		});
-	}
-
-	private createDivIconFromHtml(htmlContent: string, boosted: boolean): DivIcon {
-		return this.leaflet.divIcon({
-			className: boosted ? 'boosted-icon' : 'div-icon',
-			iconSize: [32, 43],
-			iconAnchor: [16, 43],
-			popupAnchor: [0, -43],
-			html: htmlContent
-		});
-	}
-
-	private createIconHtml(iconType: string, boosted: boolean, commentsCount: number): string {
-		const className = boosted ? 'animate-wiggle' : '';
-		const iconTmp = iconType !== 'question_mark' ? iconType : 'currency_bitcoin';
-
-		const iconContainer = document.createElement('div');
-		iconContainer.className = 'icon-container relative flex items-center justify-center';
-
-		const iconElement = document.createElement('div');
-		// Create Svelte Icon component (but cache the result)
-		new Icon({
-			target: iconElement,
-			props: {
-				w: '20',
-				h: '20',
-				style: `${className} mt-[5.75px] text-white`,
-				icon: iconTmp,
-				type: 'material'
-			}
-		});
-		iconContainer.appendChild(iconElement);
-
-		if (commentsCount > 0) {
-			const commentsCountSpan = document.createElement('span');
-			commentsCountSpan.textContent = `${commentsCount}`;
-			commentsCountSpan.className =
-				'absolute top-1 right-1 transform translate-x-1/2 -translate-y-1/2 ' + // Positioning
-				'bg-green-600 text-white text-[10px] font-bold ' + // Colors and text
-				'rounded-full w-4 h-4 flex items-center justify-center'; // Shape and alignment
-			iconContainer.appendChild(commentsCountSpan);
-		}
-
-		// Return HTML string instead of DivIcon
-		return iconContainer.outerHTML;
-	}
-
-	/**
-	 * Clear cache (useful for memory management)
-	 */
 	clearCache(): void {
-		this.cache.clear();
+		clearIconCache();
 	}
 
-	/**
-	 * Get cache statistics for monitoring
-	 */
-	getCacheStats(): { size: number; maxSize: number; hitRate?: number } {
-		return {
-			size: this.cache.size,
-			maxSize: this.MAX_CACHE_SIZE
-		};
+	getCacheStats() {
+		return getIconCacheStats();
 	}
 }
 
-// Singleton instance
+/**
+ * Factory function for creating icon generator (more functional approach)
+ */
+export const createIconGenerator = (leaflet: Leaflet) => ({
+	generateIcon: (iconType: string, boosted: boolean, commentsCount: number) =>
+		generateOptimizedIcon(leaflet, iconType, boosted, commentsCount),
+	clearCache: clearIconCache,
+	getCacheStats: getIconCacheStats
+});
+
+// Singleton instance for backward compatibility
 let iconGenerator: OptimizedIconGenerator | null = null;
 
 export const getIconGenerator = (leaflet: Leaflet): OptimizedIconGenerator => {
