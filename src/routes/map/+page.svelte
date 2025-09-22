@@ -19,7 +19,7 @@
 	import { placesError, places, placesSyncCount, mapUpdates } from '$lib/store';
 	import type { Leaflet, Place, SearchItem } from '$lib/types';
 	import { debounce, detectTheme, errToast } from '$lib/utils';
-	import type { Control, LatLng, LatLngBounds, Map } from 'leaflet';
+	import type { Control, LatLng, LatLngBounds, Map, Marker, MarkerClusterGroup } from 'leaflet';
 	import localforage from 'localforage';
 	import { onDestroy, onMount } from 'svelte';
 	import OutClick from 'svelte-outclick';
@@ -35,6 +35,13 @@
 	let map: Map;
 	let mapLoaded = false;
 	let elementsLoaded = false;
+
+	// Viewport-based loading state
+	let markers: MarkerClusterGroup;
+	let upToDateLayer: FeatureGroup.SubGroup;
+	let loadedMarkers: Record<string, Marker> = {}; // placeId -> marker
+	let currentBounds: LatLngBounds | null = null;
+	let isLoadingMarkers = false;
 
 	let mapCenter: LatLng;
 
@@ -198,31 +205,84 @@
 	// alert for map errors
 	$: $placesError && errToast($placesError);
 
-	const initializeElements = async () => {
-		if (elementsLoaded) return;
+	// Get places visible in current viewport with buffer
+	const getVisiblePlaces = (
+		places: Place[],
+		bounds: LatLngBounds,
+		bufferPercent = 0.2
+	): Place[] => {
+		if (!bounds) return [];
 
-		console.log(`Starting to process ${$places.length} places with batched rendering`);
+		// Add buffer to bounds to preload markers slightly outside viewport
+		const latDiff = bounds.getNorth() - bounds.getSouth();
+		const lngDiff = bounds.getEast() - bounds.getWest();
+		const latBuffer = latDiff * bufferPercent;
+		const lngBuffer = lngDiff * bufferPercent;
 
-		// create marker cluster group and layers
-		/* eslint-disable no-undef */
-		// @ts-expect-error - L is global from Leaflet
-		let markers = L.markerClusterGroup({ maxClusterRadius: 80, disableClusteringAtZoom: 17 });
-		/* eslint-enable no-undef */
-		let upToDateLayer = leaflet.featureGroup.subGroup(markers);
+		const bufferedBounds = leaflet.latLngBounds([
+			[bounds.getSouth() - latBuffer, bounds.getWest() - lngBuffer],
+			[bounds.getNorth() + latBuffer, bounds.getEast() + lngBuffer]
+		]);
 
-		// Add layers to map immediately so batches can be added
-		map.addLayer(markers);
-		map.addLayer(upToDateLayer);
+		return places.filter((place) => bufferedBounds.contains([place.lat, place.lon]));
+	};
+
+	// Remove markers that are no longer in viewport
+	const cleanupOutOfBoundsMarkers = (bounds: LatLngBounds) => {
+		const markersToRemove: string[] = [];
+
+		Object.entries(loadedMarkers).forEach(([placeId, marker]) => {
+			const markerLatLng = marker.getLatLng();
+			if (!bounds.contains(markerLatLng)) {
+				upToDateLayer.removeLayer(marker);
+				markersToRemove.push(placeId);
+			}
+		});
+
+		markersToRemove.forEach((placeId) => {
+			delete loadedMarkers[placeId];
+		});
+
+		if (markersToRemove.length > 0) {
+			console.info(`Cleaned up ${markersToRemove.length} out-of-bounds markers`);
+		}
+	};
+
+	// Load markers for places in current viewport using web workers
+	const loadMarkersInViewport = async () => {
+		if (!map || !$places.length || isLoadingMarkers) return;
+
+		isLoadingMarkers = true;
+		const bounds = map.getBounds();
+		currentBounds = bounds;
 
 		try {
-			// Process places in batches using web worker
-			await mapWorkerManager.processPlaces(
-				$places,
-				50, // batch size - adjust based on device performance
-				(progress: number, batch?: ProcessedPlace[]) => {
-					// Update progress bar
-					mapLoading = 40 + progress * 0.6; // 40-100% range
+			// Get visible places (viewport filtering)
+			const visiblePlaces = getVisiblePlaces($places, bounds);
+			console.info(
+				`Processing ${visiblePlaces.length} places in viewport (filtered from ${$places.length} total)`
+			);
 
+			// Filter out places that already have markers loaded
+			const newPlaces = visiblePlaces.filter((place) => !loadedMarkers[place.id.toString()]);
+
+			if (newPlaces.length === 0) {
+				isLoadingMarkers = false;
+				return;
+			}
+
+			console.info(`Loading ${newPlaces.length} new markers using web worker`);
+
+			// Clean up markers outside viewport if we have many loaded
+			if (Object.keys(loadedMarkers).length > 200) {
+				cleanupOutOfBoundsMarkers(bounds);
+			}
+
+			// Process new places using web worker
+			await mapWorkerManager.processPlaces(
+				newPlaces,
+				25, // Smaller batch size since dataset is much smaller
+				(progress: number, batch?: ProcessedPlace[]) => {
 					// Process batch on main thread (DOM operations)
 					if (batch) {
 						processBatchOnMainThread(batch, upToDateLayer);
@@ -230,30 +290,96 @@
 				}
 			);
 
-			mapLoading = 100;
-			elementsLoaded = true;
-			console.log('All places processed successfully');
+			console.info(`Successfully loaded ${newPlaces.length} markers in viewport`);
 		} catch (error) {
-			console.error('Error processing places:', error);
-			// Fallback to synchronous processing
-			initializeElementsFallback(upToDateLayer);
+			console.error('Error loading markers in viewport:', error);
+			// Fallback to synchronous processing for viewport
+			loadMarkersInViewportFallback(bounds);
+		} finally {
+			isLoadingMarkers = false;
 		}
+	};
+
+	// Fallback synchronous loading for viewport (much smaller dataset)
+	const loadMarkersInViewportFallback = (bounds: LatLngBounds) => {
+		console.warn('Falling back to synchronous viewport loading');
+
+		const visiblePlaces = getVisiblePlaces($places, bounds);
+		const newPlaces = visiblePlaces.filter((place) => !loadedMarkers[place.id.toString()]);
+
+		newPlaces.forEach((place: Place) => {
+			const commentsCount = place.comments || 0;
+			const icon = place.icon;
+			const boosted = place.boosted_until ? Date.parse(place.boosted_until) > Date.now() : false;
+
+			const divIcon = generateIcon(leaflet, icon, boosted, commentsCount);
+
+			const marker = generateMarker({
+				lat: place.lat,
+				long: place.lon,
+				icon: divIcon,
+				placeId: place.id,
+				leaflet,
+				verify: true
+			});
+
+			upToDateLayer.addLayer(marker);
+			loadedMarkers[place.id.toString()] = marker;
+		});
+
+		console.info(`Fallback: loaded ${newPlaces.length} markers synchronously`);
+	};
+
+	// Debounced version to prevent excessive loading during rapid pan/zoom
+	const debouncedLoadMarkers = debounce(loadMarkersInViewport, 300);
+
+	const initializeElements = async () => {
+		if (elementsLoaded) return;
+
+		console.info(
+			`Initializing combined viewport + web worker loading for ${$places.length} places`
+		);
+
+		// create marker cluster group and layers
+		/* eslint-disable no-undef */
+		// @ts-expect-error - L is global from Leaflet
+		markers = L.markerClusterGroup({ maxClusterRadius: 80, disableClusteringAtZoom: 17 });
+		/* eslint-enable no-undef */
+		upToDateLayer = leaflet.featureGroup.subGroup(markers);
+
+		// Add layers to map immediately so batches can be added
+		map.addLayer(markers);
+		map.addLayer(upToDateLayer);
+
+		// Set up map event listeners for viewport loading
+		map.on('moveend', debouncedLoadMarkers);
+		map.on('zoomend', debouncedLoadMarkers);
+
+		// Load initial markers for current viewport
+		await loadMarkersInViewport();
+
+		mapLoading = 100;
+		elementsLoaded = true;
 	};
 
 	// Process a batch of places on the main thread (DOM operations only)
 	const processBatchOnMainThread = (batch: ProcessedPlace[], layer: FeatureGroup.SubGroup) => {
 		batch.forEach((element: ProcessedPlace) => {
 			const { iconData } = element;
+			const placeId = element.id.toString();
 
-			// Generate icon using pre-calculated data
-			let divIcon = generateIcon(
+			// Skip if marker already loaded (double-check)
+			if (loadedMarkers[placeId]) return;
+
+			// Generate icon using pre-calculated data from worker
+			const divIcon = generateIcon(
 				leaflet,
 				iconData.iconTmp,
 				iconData.boosted,
 				iconData.commentsCount
 			);
 
-			let marker = generateMarker({
+			const marker = generateMarker({
 				lat: element.lat,
 				long: element.lon,
 				icon: divIcon,
@@ -263,36 +389,8 @@
 			});
 
 			layer.addLayer(marker);
+			loadedMarkers[placeId] = marker;
 		});
-	};
-
-	// Fallback to original synchronous processing if worker fails
-	const initializeElementsFallback = (upToDateLayer: FeatureGroup.SubGroup) => {
-		console.warn('Falling back to synchronous processing');
-
-		$places.forEach((element: Place) => {
-			const commentsCount = element.comments || 0;
-			const icon = element.icon;
-			const boosted = element.boosted_until
-				? Date.parse(element.boosted_until) > Date.now()
-				: false;
-
-			let divIcon = generateIcon(leaflet, icon, boosted ? true : false, commentsCount);
-
-			let marker = generateMarker({
-				lat: element.lat,
-				long: element.lon,
-				icon: divIcon,
-				placeId: element.id,
-				leaflet,
-				verify: true
-			});
-
-			upToDateLayer.addLayer(marker);
-		});
-
-		mapLoading = 100;
-		elementsLoaded = true;
 	};
 
 	// Reactive statement to initialize elements when data is ready
