@@ -53,7 +53,7 @@
 		"@iconify/svelte": "^4.2.0",
 		"@playwright/test": "^1.55.0",
 		"@sveltejs/adapter-netlify": "^5.2.2",
-		"@sveltejs/kit": "^2.37.1",
+		"@sveltejs/kit": "^2.42.2",
 		"@sveltejs/vite-plugin-svelte": "^3.1.0",
 		"@types/d3-geo": "^3.1.0",
 		"@types/dompurify": "^3.2.0",
