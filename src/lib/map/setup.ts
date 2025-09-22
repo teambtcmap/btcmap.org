@@ -1,4 +1,3 @@
-import { Icon } from '$lib/comp';
 import { getIconGenerator } from './optimized-icons';
 import { boost, exchangeRate, resetBoost, theme } from '$lib/store';
 import type { DomEventType, ElementOSM, Leaflet, OSMTags } from '$lib/types';
