@@ -130,6 +130,12 @@ export async function processPlaces(
 	const id = generateMessageId();
 
 	return new Promise<PlacesProcessedPayload>((resolve, reject) => {
+		// Double-check worker is still available
+		if (!worker) {
+			reject(new Error('Worker became unavailable'));
+			return;
+		}
+
 		pendingRequests.set(id, {
 			resolve: resolve as (value: unknown) => void,
 			reject,
@@ -142,7 +148,7 @@ export async function processPlaces(
 			id
 		};
 
-		worker!.postMessage(message);
+		worker.postMessage(message);
 	});
 }
 
@@ -160,6 +166,12 @@ export async function generateIconData(places: Place[]): Promise<unknown[]> {
 	const id = generateMessageId();
 
 	return new Promise<unknown[]>((resolve, reject) => {
+		// Double-check worker is still available
+		if (!worker) {
+			reject(new Error('Worker became unavailable'));
+			return;
+		}
+
 		pendingRequests.set(id, {
 			resolve: resolve as (value: unknown) => void,
 			reject
@@ -171,7 +183,7 @@ export async function generateIconData(places: Place[]): Promise<unknown[]> {
 			id
 		};
 
-		worker!.postMessage(message);
+		worker.postMessage(message);
 	});
 }
 
