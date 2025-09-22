@@ -226,7 +226,7 @@ test.describe('Map Popup', () => {
 				}
 				return false;
 			});
-			
+
 			if (!expandedMarkerClicked) {
 				throw new Error('No individual markers found after expanding cluster');
 			}
