@@ -1,4 +1,3 @@
-// src/lib/workers/worker-manager.ts
 import type {
 	WorkerMessage,
 	WorkerResponse,

@@ -1,4 +1,3 @@
-// src/lib/map/optimized-icons.ts
 import { Icon } from '$lib/comp';
 import type { Leaflet } from '$lib/types';
 import type { DivIcon } from 'leaflet';
