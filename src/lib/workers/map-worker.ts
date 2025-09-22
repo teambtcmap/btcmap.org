@@ -74,14 +74,9 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
 };
 
 // Utility function to yield control back to the event loop
-// Uses scheduler API if available, otherwise falls back to MessageChannel
+// Uses MessageChannel for reliable yielding without setTimeout delays
 function yieldToEventLoop(): Promise<void> {
-	// Use scheduler.postTask if available (modern browsers)
-	if (typeof scheduler !== 'undefined' && scheduler.postTask) {
-		return scheduler.postTask(() => {}, { priority: 'user-blocking' });
-	}
-	
-	// Use MessageChannel for more reliable yielding than setTimeout
+	// Use MessageChannel for immediate, reliable yielding
 	return new Promise((resolve) => {
 		const channel = new MessageChannel();
 		channel.port2.onmessage = () => resolve();
