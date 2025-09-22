@@ -21,19 +21,21 @@ export class OptimizedIconGenerator {
 	generateIcon(iconType: string, boosted: boolean, commentsCount: number): DivIcon {
 		const key = this.getCacheKey(iconType, boosted, commentsCount);
 
-		// Check cache first
-		const cached = this.getFromCache(key);
-		if (cached) {
-			return cached;
-		}
-
-		// Generate new icon using template
+		// TEMPORARY: Disable caching to debug missing icons
+		console.log(`Generating icon for ${key}`);
 		const divIcon = this.createIconFromTemplate(iconType, boosted, commentsCount);
-
-		// Cache the result
-		this.addToCache(key, divIcon);
-
 		return divIcon;
+
+		// TODO: Re-enable caching once we fix the DOM element issue
+		// const cached = this.getFromCache(key);
+		// if (cached) {
+		// 	console.log(`Cache HIT for ${key}`);
+		// 	return cached;
+		// }
+		// console.log(`Cache MISS for ${key} - generating new icon`);
+		// const divIcon = this.createIconFromTemplate(iconType, boosted, commentsCount);
+		// this.addToCache(key, divIcon);
+		// return divIcon;
 	}
 
 	private getCacheKey(iconType: string, boosted: boolean, commentsCount: number): string {
@@ -112,7 +114,7 @@ export class OptimizedIconGenerator {
 			iconSize: [32, 43],
 			iconAnchor: [16, 43],
 			popupAnchor: [0, -43],
-			html: iconContainer
+			html: iconContainer.outerHTML // Convert DOM element to HTML string
 		});
 	}
 
