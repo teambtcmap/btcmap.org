@@ -27,6 +27,12 @@
 
 	let mapLoading = 0;
 
+	// Configuration constants for viewport-based loading
+	const MAX_LOADED_MARKERS = 200; // Maximum markers to keep in memory before cleanup
+	const VIEWPORT_BATCH_SIZE = 25; // Batch size for processing markers in viewport
+	const VIEWPORT_BUFFER_PERCENT = 0.2; // Buffer around viewport (20%)
+	const DEBOUNCE_DELAY = 300; // Debounce delay for map movement (ms)
+
 	let leaflet: Leaflet;
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	let controlLayers: Control.Layers;
@@ -198,7 +204,7 @@
 	const getVisiblePlaces = (
 		places: Place[],
 		bounds: LatLngBounds,
-		bufferPercent = 0.2
+		bufferPercent = VIEWPORT_BUFFER_PERCENT
 	): Place[] => {
 		if (!bounds) return [];
 
@@ -261,7 +267,7 @@
 			}
 
 			// Clean up markers outside viewport if we have many loaded
-			if (Object.keys(loadedMarkers).length > 200) {
+			if (Object.keys(loadedMarkers).length > MAX_LOADED_MARKERS) {
 				cleanupOutOfBoundsMarkers(bounds);
 			}
 
@@ -272,7 +278,7 @@
 				// Process new places using web worker
 				await mapWorkerManager.processPlaces(
 					newPlaces,
-					25, // Smaller batch size since dataset is much smaller
+					VIEWPORT_BATCH_SIZE, // Smaller batch size since dataset is much smaller
 					(progress: number, batch?: ProcessedPlace[]) => {
 						// Process batch on main thread (DOM operations)
 						if (batch) {
@@ -328,7 +334,7 @@
 	};
 
 	// Debounced version to prevent excessive loading during rapid pan/zoom
-	const debouncedLoadMarkers = debounce(loadMarkersInViewport, 300);
+	const debouncedLoadMarkers = debounce(loadMarkersInViewport, DEBOUNCE_DELAY);
 
 	const initializeElements = async () => {
 		if (elementsLoaded) return;
