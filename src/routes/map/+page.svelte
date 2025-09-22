@@ -38,6 +38,13 @@
 	let mapLoaded = false;
 	let elementsLoaded = false;
 
+	// Viewport-based loading state
+	let markers: any; // MarkerClusterGroup
+	let upToDateLayer: any; // FeatureGroup.SubGroup
+	let loadedMarkers: Record<string, any> = {}; // placeId -> marker
+	let currentBounds: LatLngBounds | null = null;
+	let isLoadingMarkers = false;
+
 	let mapCenter: LatLng;
 	// TODO: Search functionality disabled due to data migration from Element[] to Place[]
 	// Need to reimplement search using new Place structure with fields: name, address, phone, website, etc.
@@ -131,45 +138,136 @@
 	// alert for map errors
 	$: $placesError && errToast($placesError);
 
+	// Get places visible in current viewport with buffer
+	const getVisiblePlaces = (
+		places: Place[],
+		bounds: LatLngBounds,
+		bufferPercent = 0.2
+	): Place[] => {
+		if (!bounds) return [];
+
+		// Add buffer to bounds to preload markers slightly outside viewport
+		const latDiff = bounds.getNorth() - bounds.getSouth();
+		const lngDiff = bounds.getEast() - bounds.getWest();
+		const latBuffer = latDiff * bufferPercent;
+		const lngBuffer = lngDiff * bufferPercent;
+
+		const bufferedBounds = leaflet.latLngBounds([
+			[bounds.getSouth() - latBuffer, bounds.getWest() - lngBuffer],
+			[bounds.getNorth() + latBuffer, bounds.getEast() + lngBuffer]
+		]);
+
+		return places.filter((place) => bufferedBounds.contains([place.lat, place.lon]));
+	};
+
+	// Remove markers that are no longer in viewport
+	const cleanupOutOfBoundsMarkers = (bounds: LatLngBounds) => {
+		const markersToRemove: string[] = [];
+
+		Object.entries(loadedMarkers).forEach(([placeId, marker]) => {
+			const markerLatLng = marker.getLatLng();
+			if (!bounds.contains(markerLatLng)) {
+				upToDateLayer.removeLayer(marker);
+				markersToRemove.push(placeId);
+			}
+		});
+
+		markersToRemove.forEach((placeId) => {
+			delete loadedMarkers[placeId];
+		});
+
+		if (markersToRemove.length > 0) {
+			console.log(`Cleaned up ${markersToRemove.length} out-of-bounds markers`);
+		}
+	};
+
+	// Load markers for places in current viewport
+	const loadMarkersInViewport = async () => {
+		if (!map || !$places.length || isLoadingMarkers) return;
+
+		isLoadingMarkers = true;
+		const bounds = map.getBounds();
+		currentBounds = bounds;
+
+		try {
+			// Get visible places
+			const visiblePlaces = getVisiblePlaces($places, bounds);
+			console.log(`Loading ${visiblePlaces.length} markers in viewport`);
+
+			// Clean up markers outside viewport (with some delay to avoid flickering)
+			if (Object.keys(loadedMarkers).length > 200) {
+				// Only cleanup if we have many markers loaded
+				cleanupOutOfBoundsMarkers(bounds);
+			}
+
+			// Add new markers for places not already loaded
+			let newMarkersCount = 0;
+			const verifiedDate = calcVerifiedDate();
+
+			visiblePlaces.forEach((place: Place) => {
+				const placeId = place.id.toString();
+
+				// Skip if marker already loaded
+				if (loadedMarkers[placeId]) return;
+
+				const commentsCount = place.comments || 0;
+				const icon = place.icon;
+				const boosted = place.boosted_until ? Date.parse(place.boosted_until) > Date.now() : false;
+
+				const divIcon = generateIcon(leaflet, icon, boosted, commentsCount);
+
+				const marker = generateMarker({
+					lat: place.lat,
+					long: place.lon,
+					icon: divIcon,
+					placeId: place.id,
+					leaflet,
+					verify: true
+				});
+
+				upToDateLayer.addLayer(marker);
+				loadedMarkers[placeId] = marker;
+				newMarkersCount++;
+			});
+
+			if (newMarkersCount > 0) {
+				console.log(`Added ${newMarkersCount} new markers to map`);
+			}
+		} catch (error) {
+			console.error('Error loading markers in viewport:', error);
+		} finally {
+			isLoadingMarkers = false;
+		}
+	};
+
+	// Debounced version to prevent excessive loading during rapid pan/zoom
+	const debouncedLoadMarkers = debounce(loadMarkersInViewport, 300);
+
+	// Initialize map layers and set up viewport loading
 	const initializeElements = () => {
 		if (elementsLoaded) return;
 
-		// get date from 1 year ago to add verified check if survey is current
-		let verifiedDate = calcVerifiedDate();
+		console.log(`Initializing viewport-based loading for ${$places.length} places`);
 
-		// create marker cluster group and layers
+		// Create marker cluster group and layers
 		/* eslint-disable no-undef */
-		// @ts-expect-error
-		let markers = L.markerClusterGroup({ maxClusterRadius: 80, disableClusteringAtZoom: 17 });
+		// @ts-expect-error - L is global from Leaflet
+		markers = L.markerClusterGroup({ maxClusterRadius: 80, disableClusteringAtZoom: 17 });
 		/* eslint-enable no-undef */
-		let upToDateLayer = leaflet.featureGroup.subGroup(markers);
+		upToDateLayer = leaflet.featureGroup.subGroup(markers);
 
-		// add location information
-		$places.forEach((element: Place) => {
-			const commentsCount = element.comments || 0;
-			const icon = element.icon;
-			const boosted = element.boosted_until
-				? Date.parse(element.boosted_until) > Date.now()
-				: false;
-
-			let divIcon = generateIcon(leaflet, icon, boosted ? true : false, commentsCount);
-
-			let marker = generateMarker({
-				lat: element.lat,
-				long: element.lon,
-				icon: divIcon,
-				placeId: element.id,
-				leaflet,
-				verify: true
-			});
-
-			upToDateLayer.addLayer(marker);
-		});
-
+		// Add layers to map
 		map.addLayer(markers);
 		map.addLayer(upToDateLayer);
-		mapLoading = 100;
 
+		// Set up map event listeners for viewport loading
+		map.on('moveend', debouncedLoadMarkers);
+		map.on('zoomend', debouncedLoadMarkers);
+
+		// Load initial markers
+		loadMarkersInViewport();
+
+		mapLoading = 100;
 		elementsLoaded = true;
 	};
 
@@ -471,8 +569,13 @@
 	onDestroy(async () => {
 		if (map) {
 			console.info('Unloading Leaflet map.');
+			// Clean up event listeners
+			map.off('moveend', debouncedLoadMarkers);
+			map.off('zoomend', debouncedLoadMarkers);
 			map.remove();
 		}
+		// Clear loaded markers
+		loadedMarkers = {};
 	});
 </script>
 
