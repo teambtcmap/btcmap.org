@@ -1,4 +1,5 @@
 import { boost, exchangeRate, resetBoost, theme } from '$lib/store';
+import { Icon } from '$lib/comp';
 import type { DomEventType, ElementOSM, Leaflet, OSMTags } from '$lib/types';
 import { detectTheme, errToast } from '$lib/utils';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
@@ -561,38 +562,24 @@ export const longCalc = (element: ElementOSM) => {
 	}
 };
 
-const getIconifyIconName = (icon: string): string => {
-	const exceptions: Record<string, string> = {
-		camping: 'material-symbols:camping-rounded',
-		gate: 'material-symbols:gate',
-		cooking: 'material-symbols:cooking',
-		dentistry: 'material-symbols:dentistry',
-		sauna: 'material-symbols:sauna',
-		info_outline: 'material-symbols:info-outline',
-		close_round: 'ic:round-close'
-	};
-
-	if (exceptions[icon]) {
-		return exceptions[icon];
-	}
-
-	return `ic:outline-${icon.replace(/_/g, '-')}`;
-};
-
 export const generateIcon = (L: Leaflet, icon: string, boosted: boolean, commentsCount: number) => {
 	const className = boosted ? 'animate-wiggle' : '';
 	const iconTmp = icon !== 'question_mark' ? icon : 'currency_bitcoin';
-	const iconifyName = getIconifyIconName(iconTmp);
 
 	const iconContainer = document.createElement('div');
 	iconContainer.className = 'icon-container relative flex items-center justify-center';
 
-	// Create iconify icon directly as SVG
-	const iconElement = document.createElement('iconify-icon');
-	iconElement.setAttribute('icon', iconifyName);
-	iconElement.setAttribute('width', '20');
-	iconElement.setAttribute('height', '20');
-	iconElement.className = `${className} mt-[5.75px] text-white`;
+	const iconElement = document.createElement('div');
+	new Icon({
+		target: iconElement,
+		props: {
+			w: '20',
+			h: '20',
+			style: `${className} mt-[5.75px] text-white`,
+			icon: iconTmp,
+			type: 'material'
+		}
+	});
 	iconContainer.appendChild(iconElement);
 
 	if (commentsCount > 0) {
@@ -610,7 +597,7 @@ export const generateIcon = (L: Leaflet, icon: string, boosted: boolean, comment
 		iconSize: [32, 43],
 		iconAnchor: [16, 43],
 		popupAnchor: [0, -43],
-		html: iconContainer.outerHTML
+		html: iconContainer
 	});
 };
 
