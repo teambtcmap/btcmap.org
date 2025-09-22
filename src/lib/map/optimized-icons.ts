@@ -1,4 +1,5 @@
 // src/lib/map/optimized-icons.ts
+import { Icon } from '$lib/comp';
 import type { Leaflet } from '$lib/types';
 import type { DivIcon } from 'leaflet';
 
@@ -76,24 +77,42 @@ export class OptimizedIconGenerator {
 		boosted: boolean,
 		commentsCount: number
 	): DivIcon {
-		const iconClass = iconType !== 'question_mark' ? iconType : 'currency_bitcoin';
-		const containerClass = boosted ? 'marker-boosted animate-wiggle' : 'marker-normal';
+		const className = boosted ? 'animate-wiggle' : '';
+		const iconTmp = iconType !== 'question_mark' ? iconType : 'currency_bitcoin';
 
-		const html = `
-			<div class="${containerClass}">
-				<div class="marker-background">
-					<i class="material-icons marker-icon">${iconClass}</i>
-				</div>
-				${commentsCount > 0 ? `<span class="comment-badge">${commentsCount}</span>` : ''}
-			</div>
-		`;
+		const iconContainer = document.createElement('div');
+		iconContainer.className = 'icon-container relative flex items-center justify-center';
+
+		const iconElement = document.createElement('div');
+		// Create Svelte Icon component (but cache the result)
+		new Icon({
+			target: iconElement,
+			props: {
+				w: '20',
+				h: '20',
+				style: `${className} mt-[5.75px] text-white`,
+				icon: iconTmp,
+				type: 'material'
+			}
+		});
+		iconContainer.appendChild(iconElement);
+
+		if (commentsCount > 0) {
+			const commentsCountSpan = document.createElement('span');
+			commentsCountSpan.textContent = `${commentsCount}`;
+			commentsCountSpan.className =
+				'absolute top-1 right-1 transform translate-x-1/2 -translate-y-1/2 ' + // Positioning
+				'bg-green-600 text-white text-[10px] font-bold ' + // Colors and text
+				'rounded-full w-4 h-4 flex items-center justify-center'; // Shape and alignment
+			iconContainer.appendChild(commentsCountSpan);
+		}
 
 		return this.leaflet.divIcon({
 			className: boosted ? 'boosted-icon' : 'div-icon',
 			iconSize: [32, 43],
 			iconAnchor: [16, 43],
 			popupAnchor: [0, -43],
-			html
+			html: iconContainer
 		});
 	}
 
