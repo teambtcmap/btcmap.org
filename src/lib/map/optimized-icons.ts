@@ -4,7 +4,7 @@ import type { Leaflet } from '$lib/types';
 import type { DivIcon } from 'leaflet';
 
 interface IconCacheEntry {
-	divIcon: DivIcon;
+	htmlContent: string; // Cache HTML string instead of DivIcon
 	timestamp: number;
 }
 
@@ -21,28 +21,26 @@ export class OptimizedIconGenerator {
 	generateIcon(iconType: string, boosted: boolean, commentsCount: number): DivIcon {
 		const key = this.getCacheKey(iconType, boosted, commentsCount);
 
-		// TEMPORARY: Disable caching to debug missing icons
-		console.log(`Generating icon for ${key}`);
-		const divIcon = this.createIconFromTemplate(iconType, boosted, commentsCount);
-		return divIcon;
+		// Check cache for HTML content first
+		const cachedHtml = this.getHtmlFromCache(key);
+		if (cachedHtml) {
+			console.log(`Cache HIT for ${key}`);
+			return this.createDivIconFromHtml(cachedHtml, boosted);
+		}
 
-		// TODO: Re-enable caching once we fix the DOM element issue
-		// const cached = this.getFromCache(key);
-		// if (cached) {
-		// 	console.log(`Cache HIT for ${key}`);
-		// 	return cached;
-		// }
-		// console.log(`Cache MISS for ${key} - generating new icon`);
-		// const divIcon = this.createIconFromTemplate(iconType, boosted, commentsCount);
-		// this.addToCache(key, divIcon);
-		// return divIcon;
+		console.log(`Cache MISS for ${key} - generating new icon`);
+		// Generate new icon and cache the HTML content
+		const htmlContent = this.createIconHtml(iconType, boosted, commentsCount);
+		this.addHtmlToCache(key, htmlContent);
+
+		return this.createDivIconFromHtml(htmlContent, boosted);
 	}
 
 	private getCacheKey(iconType: string, boosted: boolean, commentsCount: number): string {
 		return `${iconType}_${boosted ? 'boosted' : 'normal'}_${commentsCount}`;
 	}
 
-	private getFromCache(key: string): DivIcon | null {
+	private getHtmlFromCache(key: string): string | null {
 		const entry = this.cache.get(key);
 
 		if (!entry) {
@@ -55,10 +53,10 @@ export class OptimizedIconGenerator {
 			return null;
 		}
 
-		return entry.divIcon;
+		return entry.htmlContent;
 	}
 
-	private addToCache(key: string, divIcon: DivIcon): void {
+	private addHtmlToCache(key: string, htmlContent: string): void {
 		// Prevent cache from growing too large
 		if (this.cache.size >= this.MAX_CACHE_SIZE) {
 			// Remove oldest entries (simple LRU)
@@ -69,16 +67,22 @@ export class OptimizedIconGenerator {
 		}
 
 		this.cache.set(key, {
-			divIcon,
+			htmlContent,
 			timestamp: Date.now()
 		});
 	}
 
-	private createIconFromTemplate(
-		iconType: string,
-		boosted: boolean,
-		commentsCount: number
-	): DivIcon {
+	private createDivIconFromHtml(htmlContent: string, boosted: boolean): DivIcon {
+		return this.leaflet.divIcon({
+			className: boosted ? 'boosted-icon' : 'div-icon',
+			iconSize: [32, 43],
+			iconAnchor: [16, 43],
+			popupAnchor: [0, -43],
+			html: htmlContent
+		});
+	}
+
+	private createIconHtml(iconType: string, boosted: boolean, commentsCount: number): string {
 		const className = boosted ? 'animate-wiggle' : '';
 		const iconTmp = iconType !== 'question_mark' ? iconType : 'currency_bitcoin';
 
@@ -109,13 +113,8 @@ export class OptimizedIconGenerator {
 			iconContainer.appendChild(commentsCountSpan);
 		}
 
-		return this.leaflet.divIcon({
-			className: boosted ? 'boosted-icon' : 'div-icon',
-			iconSize: [32, 43],
-			iconAnchor: [16, 43],
-			popupAnchor: [0, -43],
-			html: iconContainer.outerHTML // Convert DOM element to HTML string
-		});
+		// Return HTML string instead of DivIcon
+		return iconContainer.outerHTML;
 	}
 
 	/**
