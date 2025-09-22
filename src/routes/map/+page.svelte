@@ -2,29 +2,26 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import { Boost, Icon, MapLoadingMain, ShowTags, TaggingIssues } from '$lib/comp';
+	import { mapWorkerManager } from '$lib/workers/worker-manager';
+	import type { ProcessedPlace } from '$lib/workers/map-worker';
 	import {
 		attribution,
-		calcVerifiedDate,
 		changeDefaultIcons,
-		checkAddress,
 		dataRefresh,
 		generateIcon,
 		generateMarker,
 		geolocate,
 		homeMarkerButtons,
-		latCalc,
 		layers,
-		longCalc,
 		scaleBars,
-		support,
-		verifiedArr
+		support
 	} from '$lib/map/setup';
 	import { placesError, places, placesSyncCount, mapUpdates } from '$lib/store';
-	import type { Leaflet, MapGroups, OSMTags, Place, SearchItem } from '$lib/types';
+	import type { Leaflet, Place, SearchItem } from '$lib/types';
 	import { debounce, detectTheme, errToast } from '$lib/utils';
 	import type { Control, LatLng, LatLngBounds, Map } from 'leaflet';
 	import localforage from 'localforage';
-	import { onDestroy, onMount, tick } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import OutClick from 'svelte-outclick';
 
 	let mapLoading = 0;
@@ -175,15 +172,15 @@
 	const urlLong = $page.url.searchParams.getAll('long');
 
 	// alow for users to query by payment method with URL search params
-	const onchain = $page.url.searchParams.has('onchain');
-	const lightning = $page.url.searchParams.has('lightning');
-	const nfc = $page.url.searchParams.has('nfc');
+	// const onchain = $page.url.searchParams.has('onchain');
+	// const lightning = $page.url.searchParams.has('lightning');
+	// const nfc = $page.url.searchParams.has('nfc');
 
 	// allow to view map with only legacy nodes
-	const legacy = $page.url.searchParams.has('legacy');
+	// const legacy = $page.url.searchParams.has('legacy');
 
 	// allow to view map with only outdated nodes
-	const outdated = $page.url.searchParams.has('outdated');
+	// const outdated = $page.url.searchParams.has('outdated');
 
 	// allow to view map with only boosted locations
 	const boosts = $page.url.searchParams.has('boosts');
@@ -200,20 +197,78 @@
 	// alert for map errors
 	$: $placesError && errToast($placesError);
 
-	const initializeElements = () => {
+	const initializeElements = async () => {
 		if (elementsLoaded) return;
 
-		// get date from 1 year ago to add verified check if survey is current
-		let verifiedDate = calcVerifiedDate();
+		console.log(`Starting to process ${$places.length} places with batched rendering`);
 
 		// create marker cluster group and layers
 		/* eslint-disable no-undef */
-		// @ts-expect-error
+		// @ts-expect-error - L is global from Leaflet
 		let markers = L.markerClusterGroup({ maxClusterRadius: 80, disableClusteringAtZoom: 17 });
 		/* eslint-enable no-undef */
 		let upToDateLayer = leaflet.featureGroup.subGroup(markers);
 
-		// add location information
+		// Add layers to map immediately so batches can be added
+		map.addLayer(markers);
+		map.addLayer(upToDateLayer);
+
+		try {
+			// Process places in batches using web worker
+			await mapWorkerManager.processPlaces(
+				$places,
+				50, // batch size - adjust based on device performance
+				(progress: number, batch?: ProcessedPlace[]) => {
+					// Update progress bar
+					mapLoading = 40 + progress * 0.6; // 40-100% range
+
+					// Process batch on main thread (DOM operations)
+					if (batch) {
+						processBatchOnMainThread(batch, upToDateLayer);
+					}
+				}
+			);
+
+			mapLoading = 100;
+			elementsLoaded = true;
+			console.log('All places processed successfully');
+		} catch (error) {
+			console.error('Error processing places:', error);
+			// Fallback to synchronous processing
+			initializeElementsFallback(upToDateLayer);
+		}
+	};
+
+	// Process a batch of places on the main thread (DOM operations only)
+	const processBatchOnMainThread = (batch: ProcessedPlace[], layer: any) => {
+		batch.forEach((element: ProcessedPlace) => {
+			const { iconData } = element;
+
+			// Generate icon using pre-calculated data
+			let divIcon = generateIcon(
+				leaflet,
+				iconData.iconTmp,
+				iconData.boosted,
+				iconData.commentsCount
+			);
+
+			let marker = generateMarker({
+				lat: element.lat,
+				long: element.lon,
+				icon: divIcon,
+				placeId: element.id,
+				leaflet,
+				verify: true
+			});
+
+			layer.addLayer(marker);
+		});
+	};
+
+	// Fallback to original synchronous processing if worker fails
+	const initializeElementsFallback = (upToDateLayer: any) => {
+		console.warn('Falling back to synchronous processing');
+
 		$places.forEach((element: Place) => {
 			const commentsCount = element.comments || 0;
 			const icon = element.icon;
@@ -235,14 +290,13 @@
 			upToDateLayer.addLayer(marker);
 		});
 
-		map.addLayer(markers);
-		map.addLayer(upToDateLayer);
 		mapLoading = 100;
-
 		elementsLoaded = true;
 	};
 
-	$: $places && $places.length && mapLoaded && !elementsLoaded && initializeElements();
+	$: if ($places && $places.length && mapLoaded && !elementsLoaded) {
+		initializeElements();
+	}
 
 	onMount(async () => {
 		if (browser) {
@@ -542,6 +596,8 @@
 			console.info('Unloading Leaflet map.');
 			map.remove();
 		}
+		// Clean up web worker
+		mapWorkerManager.terminate();
 	});
 </script>
 
