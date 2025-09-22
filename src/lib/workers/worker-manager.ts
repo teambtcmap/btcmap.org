@@ -10,6 +10,8 @@ import type { Place } from '../types';
 
 export class MapWorkerManager {
 	private worker: Worker | null = null;
+	private workerInitialized = false;
+	private workerSupported: boolean | null = null;
 	private messageId = 0;
 	private pendingRequests = new Map<
 		string,
@@ -21,11 +23,36 @@ export class MapWorkerManager {
 	>();
 
 	constructor() {
-		this.initWorker();
+		// Don't initialize worker immediately - use lazy initialization
 	}
 
-	private initWorker() {
-		if (typeof Worker !== 'undefined') {
+	private isWorkerSupported(): boolean {
+		if (this.workerSupported !== null) {
+			return this.workerSupported;
+		}
+
+		// Feature detection for Web Workers
+		this.workerSupported = 
+			typeof Worker !== 'undefined' && 
+			typeof window !== 'undefined' && 
+			'Worker' in window;
+
+		return this.workerSupported;
+	}
+
+	private async initWorker(): Promise<boolean> {
+		if (this.workerInitialized) {
+			return this.worker !== null;
+		}
+
+		this.workerInitialized = true;
+
+		if (!this.isWorkerSupported()) {
+			console.warn('Web Workers not supported, falling back to synchronous processing');
+			return false;
+		}
+
+		try {
 			this.worker = new Worker(new URL('./map-worker.ts', import.meta.url), {
 				type: 'module'
 			});
@@ -36,7 +63,14 @@ export class MapWorkerManager {
 
 			this.worker.onerror = (error) => {
 				console.error('Map worker error:', error);
+				// Don't terminate on error, let individual operations handle fallback
 			};
+
+			return true;
+		} catch (error) {
+			console.warn('Failed to initialize web worker:', error);
+			this.worker = null;
+			return false;
 		}
 	}
 
@@ -89,8 +123,11 @@ export class MapWorkerManager {
 		batchSize: number = 50,
 		onProgress?: (progress: number, batch?: ProcessedPlace[]) => void
 	): Promise<PlacesProcessedPayload> {
-		if (!this.worker) {
-			throw new Error('Web Worker not supported');
+		// Lazy initialization
+		const workerReady = await this.initWorker();
+		
+		if (!workerReady || !this.worker) {
+			throw new Error('Web Worker not supported or failed to initialize');
 		}
 
 		const id = this.generateMessageId();
@@ -116,8 +153,11 @@ export class MapWorkerManager {
 	 * Generate icon data for places
 	 */
 	async generateIconData(places: Place[]): Promise<unknown[]> {
-		if (!this.worker) {
-			throw new Error('Web Worker not supported');
+		// Lazy initialization
+		const workerReady = await this.initWorker();
+		
+		if (!workerReady || !this.worker) {
+			throw new Error('Web Worker not supported or failed to initialize');
 		}
 
 		const id = this.generateMessageId();
@@ -136,6 +176,13 @@ export class MapWorkerManager {
 
 			this.worker!.postMessage(message);
 		});
+	}
+
+	/**
+	 * Check if web workers are supported without initializing
+	 */
+	isSupported(): boolean {
+		return this.isWorkerSupported();
 	}
 
 	/**

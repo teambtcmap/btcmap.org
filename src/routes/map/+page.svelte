@@ -271,24 +271,32 @@
 				return;
 			}
 
-			console.info(`Loading ${newPlaces.length} new markers using web worker`);
-
 			// Clean up markers outside viewport if we have many loaded
 			if (Object.keys(loadedMarkers).length > 200) {
 				cleanupOutOfBoundsMarkers(bounds);
 			}
 
-			// Process new places using web worker
-			await mapWorkerManager.processPlaces(
-				newPlaces,
-				25, // Smaller batch size since dataset is much smaller
-				(progress: number, batch?: ProcessedPlace[]) => {
-					// Process batch on main thread (DOM operations)
-					if (batch) {
-						processBatchOnMainThread(batch, upToDateLayer);
+			// Check if web workers are supported before trying to use them
+			if (mapWorkerManager.isSupported()) {
+				console.info(`Loading ${newPlaces.length} new markers using web worker`);
+				
+				// Process new places using web worker
+				await mapWorkerManager.processPlaces(
+					newPlaces,
+					25, // Smaller batch size since dataset is much smaller
+					(progress: number, batch?: ProcessedPlace[]) => {
+						// Process batch on main thread (DOM operations)
+						if (batch) {
+							processBatchOnMainThread(batch, upToDateLayer);
+						}
 					}
-				}
-			);
+				);
+			} else {
+				console.info(`Loading ${newPlaces.length} new markers synchronously (no worker support)`);
+				// Fallback to synchronous processing
+				loadMarkersInViewportFallback(bounds);
+				return;
+			}
 
 			console.info(`Successfully loaded ${newPlaces.length} markers in viewport`);
 		} catch (error) {
