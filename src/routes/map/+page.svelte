@@ -37,6 +37,11 @@
 	const VIEWPORT_BUFFER_PERCENT = 0.2; // Buffer around viewport (20%)
 	const DEBOUNCE_DELAY = 300; // Debounce delay for map movement (ms)
 
+	// Default map view constants
+	const DEFAULT_LAT = 0;
+	const DEFAULT_LNG = 0;
+	const DEFAULT_ZOOM = 3;
+
 	let leaflet: Leaflet;
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	let controlLayers: Control.Layers;
@@ -446,7 +451,7 @@
 					map.setView([Number(coords[1]), Number(coords[2])], Number(coords[0].slice(1)));
 					setMapViewAndMarkLoaded();
 				} catch (error) {
-					map.setView([0, 0], 3);
+					map.setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
 					setMapViewAndMarkLoaded();
 					errToast(
 						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
@@ -469,7 +474,7 @@
 						setMapViewAndMarkLoaded();
 					}
 				} catch (error) {
-					map.setView([0, 0], 3);
+					map.setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
 					setMapViewAndMarkLoaded();
 					errToast(
 						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
@@ -491,12 +496,12 @@
 								[value._southWest.lat, value._southWest.lng]
 							]);
 						} else {
-							map.setView([0, 0], 3);
+							map.setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
 						}
 						setMapViewAndMarkLoaded();
 					})
 					.catch(function (err) {
-						map.setView([0, 0], 3);
+						map.setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
 						setMapViewAndMarkLoaded();
 						errToast(
 							'Could not set map view to cached coords, please try again or contact BTC Map.'
