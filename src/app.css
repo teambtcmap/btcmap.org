@@ -58,4 +58,55 @@
 	.boosted-icon {
 		background-image: url('/icons/boosted-icon-pin.svg');
 	}
+
+	/* Optimized marker styles for performance */
+	.marker-normal,
+	.marker-boosted {
+		@apply relative flex items-center justify-center;
+		width: 32px;
+		height: 43px;
+	}
+
+	.marker-background {
+		@apply flex h-8 w-8 items-center justify-center rounded-full;
+		background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	}
+
+	.marker-boosted .marker-background {
+		background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+		box-shadow: 0 2px 12px rgba(251, 191, 36, 0.5);
+	}
+
+	.marker-icon {
+		@apply text-white;
+		font-size: 20px;
+		line-height: 1;
+		margin-top: 2px;
+	}
+
+	.comment-badge {
+		@apply absolute -right-1 -top-1 bg-green-600 text-xs font-bold text-white;
+		@apply flex h-4 w-4 items-center justify-center rounded-full;
+		transform: translate(50%, -50%);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+	}
+
+	/* Animation for boosted markers */
+	@keyframes wiggle {
+		0%,
+		100% {
+			transform: rotate(0deg);
+		}
+		25% {
+			transform: rotate(-3deg);
+		}
+		75% {
+			transform: rotate(3deg);
+		}
+	}
+
+	.animate-wiggle {
+		animation: wiggle 2s ease-in-out infinite;
+	}
 }

@@ -179,21 +179,21 @@ test.describe('Map Popup', () => {
 	});
 
 	test('popup shows Comments button with count', async ({ page }) => {
-		// Wait for API responses to complete
-		await page.goto('http://127.0.0.1:5173/map', { waitUntil: 'networkidle' });
+		// Navigate to a specific location with known merchants (San Salvador, El Salvador)
+		await page.goto('http://127.0.0.1:5173/map#15/13.6929/-89.2182', { waitUntil: 'networkidle' });
 		await expect(page).toHaveTitle(/BTC Map/);
 
 		// Wait for map to load
 		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
 		await expect(zoomInButton).toBeVisible();
 
-		// Wait for map to be fully initialized and for markers to appear
-		// Give extra time for API data to load and process
-		await page.waitForTimeout(10000);
+		// Wait for map to be fully initialized and for viewport-based markers to load
+		// Give extra time for API data to load and viewport markers to render
+		await page.waitForTimeout(8000);
 
-		// Use JavaScript to click a marker directly (bypassing viewport issues)
+		// Use JavaScript to click a marker directly
 		const markerClicked = await page.evaluate(() => {
-			// Find any individual marker (not cluster)
+			// Find any individual marker (not cluster) - should be visible at zoom 15
 			const markers = document.querySelectorAll(
 				'.leaflet-marker-pane > div:not([class*="cluster"])'
 			);
@@ -203,31 +203,39 @@ test.describe('Map Popup', () => {
 				return true;
 			}
 
-			// If no individual markers, try clusters
+			// If no individual markers, try to expand clusters first
 			const clusters = document.querySelectorAll('.leaflet-marker-cluster');
 			if (clusters.length > 0) {
 				// Click cluster to expand
 				(clusters[0] as HTMLElement).click();
-				// Wait a bit and try individual markers again
-				setTimeout(() => {
-					const expandedMarkers = document.querySelectorAll(
-						'.leaflet-marker-pane > div:not([class*="cluster"])'
-					);
-					if (expandedMarkers.length > 0) {
-						(expandedMarkers[0] as HTMLElement).click();
-					}
-				}, 1000);
-				return true;
+				return 'cluster';
 			}
 			return false;
 		});
 
-		if (markerClicked) {
-			// Wait for popup to appear after JavaScript click
-			await page.waitForTimeout(3000);
-		} else {
+		// If we clicked a cluster, wait for it to expand and then click a marker
+		if (markerClicked === 'cluster') {
+			await page.waitForTimeout(1000);
+			const expandedMarkerClicked = await page.evaluate(() => {
+				const expandedMarkers = document.querySelectorAll(
+					'.leaflet-marker-pane > div:not([class*="cluster"])'
+				);
+				if (expandedMarkers.length > 0) {
+					(expandedMarkers[0] as HTMLElement).click();
+					return true;
+				}
+				return false;
+			});
+
+			if (!expandedMarkerClicked) {
+				throw new Error('No individual markers found after expanding cluster');
+			}
+		} else if (!markerClicked) {
 			throw new Error('No markers found to click');
 		}
+
+		// Wait for popup to appear after marker click
+		await page.waitForTimeout(2000);
 
 		// Wait for popup to appear and check Comments button
 		const commentsButton = page.locator('a[href*="#comments"]');

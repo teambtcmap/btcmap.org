@@ -1,5 +1,5 @@
-import { Icon } from '$lib/comp';
 import { boost, exchangeRate, resetBoost, theme } from '$lib/store';
+import { Icon } from '$lib/comp';
 import type { DomEventType, ElementOSM, Leaflet, OSMTags } from '$lib/types';
 import { detectTheme, errToast } from '$lib/utils';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
@@ -586,9 +586,9 @@ export const generateIcon = (L: Leaflet, icon: string, boosted: boolean, comment
 		const commentsCountSpan = document.createElement('span');
 		commentsCountSpan.textContent = `${commentsCount}`;
 		commentsCountSpan.className =
-			'absolute top-1 right-1 transform translate-x-1/2 -translate-y-1/2 ' + // Positioning
-			'bg-green-600 text-white text-[10px] font-bold ' + // Colors and text
-			'rounded-full w-4 h-4 flex items-center justify-center'; // Shape and alignment
+			'absolute top-1 right-1 transform translate-x-1/2 -translate-y-1/2 ' +
+			'bg-green-600 text-white text-[10px] font-bold ' +
+			'rounded-full w-4 h-4 flex items-center justify-center';
 		iconContainer.appendChild(commentsCountSpan);
 	}
 
