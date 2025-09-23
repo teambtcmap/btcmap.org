@@ -84,6 +84,18 @@ function yieldToEventLoop(): Promise<void> {
 	});
 }
 
+// Extract common icon data calculation logic
+function calculateIconData(place: Place) {
+	const isBoosted = place.boosted_until ? Date.parse(place.boosted_until) > Date.now() : false;
+
+	return {
+		className: isBoosted ? 'animate-wiggle' : '',
+		iconTmp: place.icon !== 'question_mark' ? place.icon : 'currency_bitcoin',
+		commentsCount: place.comments || 0,
+		boosted: isBoosted
+	};
+}
+
 // Process places in batches to avoid blocking
 async function processPlacesInBatches(places: Place[], batchSize: number = 50, requestId: string) {
 	const totalBatches = Math.ceil(places.length / batchSize);
@@ -96,15 +108,7 @@ async function processPlacesInBatches(places: Place[], batchSize: number = 50, r
 		// Process batch
 		const processedBatch: ProcessedPlace[] = batch.map((place) => ({
 			...place,
-			iconData: {
-				className:
-					place.boosted_until && Date.parse(place.boosted_until) > Date.now()
-						? 'animate-wiggle'
-						: '',
-				iconTmp: place.icon !== 'question_mark' ? place.icon : 'currency_bitcoin',
-				commentsCount: place.comments || 0,
-				boosted: place.boosted_until ? Date.parse(place.boosted_until) > Date.now() : false
-			}
+			iconData: calculateIconData(place)
 		}));
 
 		// Send batch back to main thread
@@ -135,13 +139,7 @@ function generateIconData(places: Place[], requestId: string) {
 	// Pre-calculate icon data without DOM manipulation
 	const iconData = places.map((place) => ({
 		id: place.id,
-		iconData: {
-			className:
-				place.boosted_until && Date.parse(place.boosted_until) > Date.now() ? 'animate-wiggle' : '',
-			iconTmp: place.icon !== 'question_mark' ? place.icon : 'currency_bitcoin',
-			commentsCount: place.comments || 0,
-			boosted: place.boosted_until ? Date.parse(place.boosted_until) > Date.now() : false
-		}
+		iconData: calculateIconData(place)
 	}));
 
 	self.postMessage({

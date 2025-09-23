@@ -113,13 +113,13 @@ function generateMessageId(): string {
 }
 
 /**
- * Process places in batches using web worker
+ * Generic function to send messages to worker and handle responses
  */
-export async function processPlaces(
-	places: Place[],
-	batchSize: number = 50,
+async function sendWorkerMessage<T>(
+	messageType: WorkerMessage['type'],
+	payload: WorkerMessage['payload'],
 	onProgress?: (progress: number, batch?: ProcessedPlace[]) => void
-): Promise<PlacesProcessedPayload> {
+): Promise<T> {
 	// Lazy initialization
 	const workerReady = await initWorker();
 
@@ -129,7 +129,7 @@ export async function processPlaces(
 
 	const id = generateMessageId();
 
-	return new Promise<PlacesProcessedPayload>((resolve, reject) => {
+	return new Promise<T>((resolve, reject) => {
 		// Double-check worker is still available
 		if (!worker) {
 			reject(new Error('Worker became unavailable'));
@@ -143,8 +143,8 @@ export async function processPlaces(
 		});
 
 		const message: WorkerMessage = {
-			type: 'PROCESS_PLACES',
-			payload: { places, batchSize },
+			type: messageType,
+			payload,
 			id
 		};
 
@@ -153,38 +153,25 @@ export async function processPlaces(
 }
 
 /**
+ * Process places in batches using web worker
+ */
+export async function processPlaces(
+	places: Place[],
+	batchSize: number = 50,
+	onProgress?: (progress: number, batch?: ProcessedPlace[]) => void
+): Promise<PlacesProcessedPayload> {
+	return sendWorkerMessage<PlacesProcessedPayload>(
+		'PROCESS_PLACES',
+		{ places, batchSize },
+		onProgress
+	);
+}
+
+/**
  * Generate icon data for places
  */
 export async function generateIconData(places: Place[]): Promise<unknown[]> {
-	// Lazy initialization
-	const workerReady = await initWorker();
-
-	if (!workerReady || !worker) {
-		throw new Error('Web Worker not supported or failed to initialize');
-	}
-
-	const id = generateMessageId();
-
-	return new Promise<unknown[]>((resolve, reject) => {
-		// Double-check worker is still available
-		if (!worker) {
-			reject(new Error('Worker became unavailable'));
-			return;
-		}
-
-		pendingRequests.set(id, {
-			resolve: resolve as (value: unknown) => void,
-			reject
-		});
-
-		const message: WorkerMessage = {
-			type: 'GENERATE_ICONS',
-			payload: { places },
-			id
-		};
-
-		worker.postMessage(message);
-	});
+	return sendWorkerMessage<unknown[]>('GENERATE_ICONS', { places });
 }
 
 /**
