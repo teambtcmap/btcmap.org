@@ -38,9 +38,9 @@
 	const DEBOUNCE_DELAY = 300; // Debounce delay for map movement (ms)
 
 	// Default map view constants
-	const DEFAULT_LAT = 0;
-	const DEFAULT_LNG = 0;
-	const DEFAULT_ZOOM = 3;
+	const DEFAULT_LAT = 12.11209;
+	const DEFAULT_LNG = -68.91119;
+	const DEFAULT_ZOOM = 15;
 
 	let leaflet: Leaflet;
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
