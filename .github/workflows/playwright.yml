@@ -4,7 +4,8 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    # Run on PRs targeting any branch (including sub-PRs and feature branch PRs)
+    branches: ['**']
 
 jobs:
   test:
