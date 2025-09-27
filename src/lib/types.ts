@@ -3,9 +3,7 @@ import type leaflet from 'leaflet';
 import type {
 	DomEvent,
 	FeatureGroup,
-	LatLng,
 	LayerGroup,
-	Marker,
 	TileLayer,
 	// @ts-ignore
 	MaplibreGL

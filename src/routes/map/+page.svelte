@@ -20,13 +20,7 @@
 		verifiedArr
 	} from '$lib/map/setup';
 	import { placesError, places, placesSyncCount, mapUpdates } from '$lib/store';
-	import type {
-		Leaflet,
-		MapGroups,
-		OSMTags,
-		Place,
-		SearchItem
-	} from '$lib/types';
+	import type { Leaflet, MapGroups, OSMTags, Place, SearchItem } from '$lib/types';
 	import { debounce, detectTheme, errToast } from '$lib/utils';
 	import type { Control, LatLng, LatLngBounds, Map } from 'leaflet';
 	import localforage from 'localforage';
