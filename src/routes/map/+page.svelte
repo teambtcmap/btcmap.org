@@ -20,7 +20,7 @@
 		verifiedArr
 	} from '$lib/map/setup';
 	import { placesError, places, placesSyncCount, mapUpdates } from '$lib/store';
-	import type { Leaflet, MapGroups, OSMTags, Place, SearchElement, SearchResult } from '$lib/types';
+	import type { Leaflet, MapGroups, OSMTags, Place, SearchItem } from '$lib/types';
 	import { debounce, detectTheme, errToast } from '$lib/utils';
 	import type { Control, LatLng, LatLngBounds, Map } from 'leaflet';
 	import localforage from 'localforage';
@@ -39,67 +39,136 @@
 	let elementsLoaded = false;
 
 	let mapCenter: LatLng;
-	// TODO: Search functionality disabled due to data migration from Element[] to Place[]
-	// Need to reimplement search using new Place structure with fields: name, address, phone, website, etc.
-	// let elementsCopy: SearchElement[] = [];
 
-	// let customSearchBar: HTMLDivElement;
-	// let clearSearchButton: HTMLButtonElement;
-	// let showSearch = false;
-	// let search: string;
-	// let searchStatus: boolean;
-	// let searchResults: SearchResult[] = [];
+	// Search functionality re-enabled with API-based search
+	let customSearchBar: HTMLDivElement;
+	let clearSearchButton: HTMLButtonElement;
+	let showSearch = false;
+	let search: string;
+	let searchStatus: boolean;
+	let searchResults: SearchItem[] = [];
 
-	// Search functions - commented out due to data migration
-	// const elementSearch = () => {
-	// 	if (search.length < 3) {
-	// 		searchResults = [];
-	// 		searchStatus = false;
-	// 		return;
-	// 	}
+	// API-based search functions using documented places search API
+	const apiSearch = async () => {
+		if (search.length < 3) {
+			searchResults = [];
+			searchStatus = false;
+			return;
+		}
 
-	// 	let filter = elementsCopy.filter((element) => {
-	// 		let tags = element.tags;
+		searchStatus = true;
 
-	// 		if (tags && tags.name) {
-	// 			let splitWords = search.split(' ').filter((word) => word);
+		try {
+			const response = await fetch(
+				`https://api.btcmap.org/v4/places/search/?name=${encodeURIComponent(search)}`
+			);
 
-	// 			let values = Object.values(tags);
+			if (!response.ok) {
+				throw new Error('Search API error');
+			}
 
-	// 			return values.some((value: OSMTags) =>
-	// 				splitWords.some((word) => value.toLowerCase().includes(word.toLowerCase()))
-	// 			);
-	// 		}
-	// 	});
+			const places: Place[] = await response.json();
 
-	// 	let distance: SearchResult[] = [];
-	// 	filter.forEach((element) => {
-	// 		const distanceKm = Number((mapCenter.distanceTo(element.latLng) / 1000).toFixed(1));
-	// 		const distanceMi = Number((distanceKm * 0.6213712).toFixed(1));
-	// 		distance.push({ ...element, distanceKm, distanceMi });
-	// 	});
+			// Convert Place[] to SearchItem[] format expected by UI
+			searchResults = places.map((place) => ({
+				type: 'element' as const,
+				id: place.id,
+				name: place.name || 'Unknown'
+			}));
+		} catch (error) {
+			console.error('Search error:', error);
+			errToast('Search temporarily unavailable');
+			searchResults = [];
+		}
 
-	// 	let sorted = distance.sort((a, b) => a.distanceKm - b.distanceKm);
+		searchStatus = false;
+	};
 
-	// 	searchResults = sorted.slice(0, 50);
+	const searchDebounce = debounce(() => apiSearch(), 300);
 
-	// 	searchStatus = false;
-	// };
+	const clearSearch = () => {
+		search = '';
+		searchResults = [];
+	};
 
-	// const searchDebounce = debounce(() => elementSearch());
+	// Helper function to validate coordinate values
+	const isValidCoordinate = (lat: unknown, lon: unknown): lat is number => {
+		return (
+			typeof lat === 'number' &&
+			typeof lon === 'number' &&
+			!isNaN(lat) &&
+			!isNaN(lon) &&
+			lat >= -90 &&
+			lat <= 90 &&
+			lon >= -180 &&
+			lon <= 180
+		);
+	};
 
-	// const clearSearch = () => {
-	// 	search = '';
-	// 	searchResults = [];
-	// };
+	const searchSelect = async (result: SearchItem) => {
+		clearSearch();
 
-	// const searchSelect = (result: SearchResult) => {
-	// 	clearSearch();
-	// 	map.flyTo(result.latLng, 19);
-	// 	map.once('moveend', () => {
-	// 		result.marker.openPopup();
-	// 	});
-	// };
+		// Use the numeric ID from the API response
+		const placeId = result.id;
+
+		// First, try to find the place in our local places store
+		const localPlace = $places.find((p) => p.id === placeId);
+
+		if (localPlace && isValidCoordinate(localPlace.lat, localPlace.lon)) {
+			// Use local data if available
+			map.flyTo([localPlace.lat, localPlace.lon], 19);
+			return;
+		}
+
+		// If not in local store, fetch from v4/places API
+		try {
+			const response = await fetch(`https://api.btcmap.org/v4/places/${result.id}?fields=lat,lon`);
+
+			// Handle different HTTP status codes
+			if (!response.ok) {
+				if (response.status === 404) {
+					console.error(`Place not found: ${result.id}`);
+					errToast('Location not found');
+				} else if (response.status >= 500) {
+					console.error(`Server error: ${response.status}`);
+					errToast('Server temporarily unavailable');
+				} else {
+					console.error(`API error: ${response.status}`);
+					errToast('Location data unavailable');
+				}
+				return;
+			}
+
+			// Parse and validate response
+			let placeData: Pick<Place, 'lat' | 'lon'>;
+			try {
+				placeData = await response.json();
+			} catch (parseError) {
+				console.error('Failed to parse place coordinates response:', parseError);
+				errToast('Invalid location data received');
+				return;
+			}
+
+			// Validate coordinates
+			if (!isValidCoordinate(placeData.lat, placeData.lon)) {
+				console.error('Invalid coordinates received:', placeData);
+				errToast('Invalid location coordinates');
+				return;
+			}
+
+			// Navigate to location
+			map.flyTo([placeData.lat, placeData.lon], 19);
+		} catch (error) {
+			// Differentiate between network errors and other errors
+			if (error instanceof TypeError && error.message.includes('fetch')) {
+				console.error('Network error fetching place coordinates:', error);
+				errToast('Network connection error');
+			} else {
+				console.error('Unexpected error fetching place coordinates:', error);
+				errToast('Could not navigate to location');
+			}
+		}
+	};
 
 	// allows for users to set initial view in a URL query
 	const urlLat = $page.url.searchParams.getAll('lat');
@@ -316,41 +385,41 @@
 						'leaflet-control'
 					);
 
-					// Search button - commented out due to data migration
-					// const searchButton = leaflet.DomUtil.create('a');
-					// searchButton.classList.add('leaflet-control-search-toggle');
-					// searchButton.title = 'Search toggle';
-					// searchButton.role = 'button';
-					// searchButton.ariaLabel = 'Search toggle';
-					// searchButton.ariaDisabled = 'false';
-					// searchButton.innerHTML = `<img src=${
-					// 	theme === 'dark' ? '/icons/search-white.svg' : '/icons/search.svg'
-					// } alt='search' class='inline' id='search-button'/>`;
-					// searchButton.style.borderRadius = '8px 8px 0 0';
-					// searchButton.onclick = async function toggleSearch() {
-					// 	showSearch = !showSearch;
-					// 	if (showSearch) {
-					// 		await tick();
-					// 		const searchInput: HTMLInputElement | null = document.querySelector('#search-input');
-					// 		searchInput?.focus();
-					// 	} else {
-					// 		search = '';
-					// 		searchResults = [];
-					// 	}
-					// };
-					// if (theme === 'light') {
-					// 	searchButton.onmouseenter = () => {
-					// 		// @ts-expect-error
-					// 		document.querySelector('#search-button').src = '/icons/search-black.svg';
-					// 	};
-					// 	searchButton.onmouseleave = () => {
-					// 		// @ts-expect-error
-					// 		document.querySelector('#search-button').src = '/icons/search.svg';
-					// 	};
-					// }
-					// searchButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+					// Search button - re-enabled with API-based search
+					const searchButton = leaflet.DomUtil.create('a');
+					searchButton.classList.add('leaflet-control-search-toggle');
+					searchButton.title = 'Search toggle';
+					searchButton.role = 'button';
+					searchButton.ariaLabel = 'Search toggle';
+					searchButton.ariaDisabled = 'false';
+					searchButton.innerHTML = `<img src=${
+						theme === 'dark' ? '/icons/search-white.svg' : '/icons/search.svg'
+					} alt='search' class='inline' id='search-button'/>`;
+					searchButton.style.borderRadius = '8px 8px 0 0';
+					searchButton.onclick = async function toggleSearch() {
+						showSearch = !showSearch;
+						if (showSearch) {
+							await tick();
+							const searchInput: HTMLInputElement | null = document.querySelector('#search-input');
+							searchInput?.focus();
+						} else {
+							search = '';
+							searchResults = [];
+						}
+					};
+					if (theme === 'light') {
+						searchButton.onmouseenter = () => {
+							// @ts-expect-error
+							document.querySelector('#search-button').src = '/icons/search-black.svg';
+						};
+						searchButton.onmouseleave = () => {
+							// @ts-expect-error
+							document.querySelector('#search-button').src = '/icons/search.svg';
+						};
+					}
+					searchButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
 
-					// addControlDiv.append(searchButton);
+					addControlDiv.append(searchButton);
 
 					// add boost layer button
 					const boostLayerButton = leaflet.DomUtil.create('a');
@@ -407,44 +476,44 @@
 				DomEvent.disableClickPropagation(boostLayer as HTMLElement);
 			}
 
-			// Search bar control - commented out due to data migration
-			// // @ts-expect-error
-			// map._controlCorners['topcenter'] = leaflet.DomUtil.create(
-			// 	'div',
-			// 	'leaflet-top leaflet-center',
-			// 	// @ts-expect-error
-			// 	map._controlContainer
-			// );
+			// Search bar control - re-enabled for API-based search
+			// @ts-expect-error
+			map._controlCorners['topcenter'] = leaflet.DomUtil.create(
+				'div',
+				'leaflet-top leaflet-center',
+				// @ts-expect-error
+				map._controlContainer
+			);
 
-			// // @ts-expect-error
-			// leaflet.Control.Search = leaflet.Control.extend({
-			// 	options: {
-			// 		position: 'topcenter'
-			// 	},
-			// 	onAdd: () => {
-			// 		const searchBarDiv = leaflet.DomUtil.create('div');
-			// 		searchBarDiv.classList.add('leafet-control', 'search-bar-div');
+			// @ts-expect-error
+			leaflet.Control.Search = leaflet.Control.extend({
+				options: {
+					position: 'topcenter'
+				},
+				onAdd: () => {
+					const searchBarDiv = leaflet.DomUtil.create('div');
+					searchBarDiv.classList.add('leaflet-control', 'search-bar-div');
 
-			// 		searchBarDiv.append(customSearchBar);
+					searchBarDiv.append(customSearchBar);
 
-			// 		return searchBarDiv;
-			// 	}
-			// });
+					return searchBarDiv;
+				}
+			});
 
-			// // @ts-expect-error
-			// new leaflet.Control.Search().addTo(map);
+			// @ts-expect-error
+			new leaflet.Control.Search().addTo(map);
 
-			// // disable map events
-			// if (customSearchBar) {
-			// 	DomEvent.disableClickPropagation(customSearchBar as HTMLElement);
-			// }
-			// const searchToggle = document.querySelector('.leaflet-control-search-toggle');
-			// if (searchToggle) {
-			// 	DomEvent.disableClickPropagation(searchToggle as HTMLElement);
-			// }
-			// if (clearSearchButton) {
-			// 	DomEvent.disableClickPropagation(clearSearchButton as HTMLElement);
-			// }
+			// disable map events for search controls
+			if (customSearchBar) {
+				DomEvent.disableClickPropagation(customSearchBar as HTMLElement);
+			}
+			const searchToggle = document.querySelector('.leaflet-control-search-toggle');
+			if (searchToggle) {
+				DomEvent.disableClickPropagation(searchToggle as HTMLElement);
+			}
+			if (clearSearchButton) {
+				DomEvent.disableClickPropagation(clearSearchButton as HTMLElement);
+			}
 
 			// add home and marker buttons to map
 			homeMarkerButtons(leaflet, map, DomEvent, true);
@@ -488,8 +557,8 @@
 
 	<MapLoadingMain progress={mapLoading} />
 
-	<!-- Search UI - commented out due to data migration -->
-	<!-- <div
+	<!-- Search UI - re-enabled with API-based search -->
+	<div
 		id="search-div"
 		bind:this={customSearchBar}
 		class="absolute left-[60px] top-0 w-[50vw] md:w-[350px] {showSearch ? 'block' : 'hidden'}"
@@ -508,7 +577,7 @@
 					}
 				}}
 				bind:value={search}
-				disabled={!elementsLoaded}
+				disabled={!mapLoaded}
 			/>
 
 			<button
@@ -553,43 +622,23 @@
 								<Icon
 									w="20"
 									h="20"
-									style="mx-auto md:mx-0 mt-1 {result.boosted
-										? 'text-bitcoin animate-wiggle'
-										: 'text-mapButton dark:text-white opacity-50'}"
-									icon={result.icon !== 'question_mark' ? result.icon : 'currency_bitcoin'}
+									style="mx-auto md:mx-0 mt-1 text-mapButton dark:text-white opacity-50"
+									icon="currency_bitcoin"
 									type="material"
 								/>
 
-								<div class="mx-auto md:max-w-[210px]">
+								<div class="mx-auto md:max-w-[280px]">
 									<p
-										class="text-sm {result.boosted
-											? 'font-semibold text-bitcoin'
-											: 'text-mapButton dark:text-white'} {result.tags?.name.match('([^ ]{21})')
+										class="text-sm text-mapButton dark:text-white {result.name?.match('([^ ]{21})')
 											? 'break-all'
 											: ''}"
 									>
-										{result.tags?.name}
+										{result.name || 'Unknown'}
 									</p>
-									<p
-										class="text-xs {result.boosted ? 'text-bitcoin' : 'text-searchSubtext'} {(result
-											.tags?.['addr:street'] &&
-											result.tags['addr:street'].match('([^ ]{21})')) ||
-										(result.tags?.['addr:city'] && result.tags['addr:city'].match('([^ ]{21})'))
-											? 'break-all'
-											: ''}"
-									>
-										{result.tags ? checkAddress(result.tags) : ''}
+									<p class="text-xs text-searchSubtext">
+										{result.type === 'element' ? 'Bitcoin merchant' : result.type}
 									</p>
 								</div>
-							</div>
-
-							<div
-								class="text-xs {result.boosted
-									? 'text-bitcoin'
-									: 'text-searchSubtext'} mx-auto w-[80px] text-center md:mx-0 md:text-right"
-							>
-								<p>{result.distanceKm} km</p>
-								<p>{result.distanceMi} mi</p>
 							</div>
 						</button>
 					{/each}
@@ -600,7 +649,7 @@
 				</div>
 			</OutClick>
 		{/if}
-	</div> -->
+	</div>
 
 	{#if browser}
 		<Boost />
