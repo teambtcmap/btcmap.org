@@ -25,8 +25,7 @@
 		MapGroups,
 		OSMTags,
 		Place,
-		SearchItem,
-		SearchRestResponse
+		SearchItem
 	} from '$lib/types';
 	import { debounce, detectTheme, errToast } from '$lib/utils';
 	import type { Control, LatLng, LatLngBounds, Map } from 'leaflet';
@@ -55,7 +54,7 @@
 	let searchStatus: boolean;
 	let searchResults: SearchItem[] = [];
 
-	// API-based search functions using REST search API
+	// API-based search functions using documented places search API
 	const apiSearch = async () => {
 		if (search.length < 3) {
 			searchResults = [];
@@ -67,17 +66,21 @@
 
 		try {
 			const response = await fetch(
-				`https://api.btcmap.org/v4/search/?q=${encodeURIComponent(search)}`
+				`https://api.btcmap.org/v4/places/search/?name=${encodeURIComponent(search)}`
 			);
 
 			if (!response.ok) {
 				throw new Error('Search API error');
 			}
 
-			const data: SearchRestResponse = await response.json();
+			const places: Place[] = await response.json();
 
-			// Filter API results to only show elements
-			searchResults = data.results.filter((item) => item.type === 'element');
+			// Convert Place[] to SearchItem[] format expected by UI
+			searchResults = places.map((place) => ({
+				type: 'element' as const,
+				id: place.id,
+				name: place.name || 'Unknown'
+			}));
 		} catch (error) {
 			console.error('Search error:', error);
 			errToast('Search temporarily unavailable');

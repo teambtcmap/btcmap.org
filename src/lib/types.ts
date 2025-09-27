@@ -292,37 +292,11 @@ export type BaseMaps = {
 
 export type Boost = { id: string; name: string; boost: string } | undefined;
 
-/* eslint-disable  @typescript-eslint/no-explicit-any */
-export interface SearchElement extends ElementOSM {
-	latLng: LatLng;
-	marker: Marker<any>;
-	icon: string;
-	boosted: string | undefined;
-}
-/* eslint-enable  @typescript-eslint/no-explicit-any */
-
-export interface SearchResult extends SearchElement {
-	distanceKm: number;
-	distanceMi: number;
-}
-
-// Search types for REST search API
+// Search types for places search API
 export interface SearchItem {
 	type: 'element' | 'user' | 'area';
 	id: number;
 	name: string | null;
-}
-
-export interface SearchRestResponse {
-	results: SearchItem[];
-	total_count: number;
-	has_more: boolean;
-	query: string;
-	pagination: {
-		offset: number;
-		limit: number;
-		total: number;
-	};
 }
 
 export type PayMerchant = { type: string; url?: string; username?: string } | undefined;
