@@ -116,7 +116,7 @@
 
 		if (localPlace && isValidCoordinate(localPlace.lat, localPlace.lon)) {
 			// Use local data if available
-			map.flyTo([localPlace.lat, localPlace.lon], 19);
+			map.setView([localPlace.lat, localPlace.lon], 19);
 			return;
 		}
 
@@ -157,7 +157,7 @@
 			}
 
 			// Navigate to location
-			map.flyTo([placeData.lat, placeData.lon], 19);
+			map.setView([placeData.lat, placeData.lon], 19);
 		} catch (error) {
 			// Differentiate between network errors and other errors
 			if (error instanceof TypeError && error.message.includes('fetch')) {
