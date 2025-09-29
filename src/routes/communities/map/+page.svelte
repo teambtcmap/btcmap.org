@@ -9,7 +9,8 @@
 		homeMarkerButtons,
 		layers,
 		scaleBars,
-		support
+		support,
+		updateMapHash
 	} from '$lib/map/setup';
 	import { areaError, areas, reportError, reports } from '$lib/store';
 	import type { Leaflet, Theme } from '$lib/types';
@@ -236,7 +237,7 @@
 				if (!communityQuery) {
 					const zoom = map.getZoom();
 					const mapCenter = map.getCenter();
-					location.hash = zoom + '/' + mapCenter.lat.toFixed(5) + '/' + mapCenter.lng.toFixed(5);
+					updateMapHash(zoom, mapCenter);
 				}
 			});
 

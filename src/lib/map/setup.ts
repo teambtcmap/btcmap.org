@@ -5,12 +5,19 @@ import { detectTheme, errToast } from '$lib/utils';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
-import type { Map } from 'leaflet';
+import type { Map, LatLng } from 'leaflet';
 import { get } from 'svelte/store';
 import type { DivIcon } from 'leaflet';
 import Time from 'svelte-time';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
+
+export const updateMapHash = (zoom: number, center: LatLng): void => {
+	const newHash = `#${zoom}/${center.lat.toFixed(5)}/${center.lng.toFixed(5)}`;
+	// Use history.replaceState for hash-only updates to avoid history pollution
+	// This is appropriate for SvelteKit as hash changes don't affect routing
+	history.replaceState(null, '', newHash);
+};
 
 export const toggleMapButtons = () => {
 	const zoomInBtn: HTMLAnchorElement | null = document.querySelector('.leaflet-control-zoom-in');
@@ -528,11 +535,9 @@ export const calcVerifiedDate = () => {
 
 export const checkAddress = (element: OSMTags) => {
 	if (element['addr:housenumber'] && element['addr:street'] && element['addr:city']) {
-		return `${
-			element['addr:housenumber'] + ' ' + element['addr:street'] + ', ' + element['addr:city']
-		}`;
+		return `${element['addr:housenumber']} ${element['addr:street']}, ${element['addr:city']}`;
 	} else if (element['addr:street'] && element['addr:city']) {
-		return `${element['addr:street'] + ', ' + element['addr:city']}`;
+		return `${element['addr:street']}, ${element['addr:city']}`;
 	} else if (element['addr:city']) {
 		return `${element['addr:city']}`;
 	} else {

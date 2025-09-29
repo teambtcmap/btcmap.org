@@ -18,7 +18,9 @@
 		homeMarkerButtons,
 		layers,
 		scaleBars,
-		support
+		support,
+		updateMapHash,
+		verifiedArr
 	} from '$lib/map/setup';
 	import { placesError, places, placesSyncCount, mapUpdates } from '$lib/store';
 	import type { Leaflet, Place, SearchItem } from '$lib/types';
@@ -531,7 +533,7 @@
 
 				if (!urlLat.length && !urlLong.length) {
 					const zoom = map.getZoom();
-					location.hash = zoom + '/' + mapCenter.lat.toFixed(5) + '/' + mapCenter.lng.toFixed(5);
+					updateMapHash(zoom, mapCenter);
 				}
 
 				localforage.setItem('coords', coords).catch(function (err) {
