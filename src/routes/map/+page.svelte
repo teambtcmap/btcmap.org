@@ -3,31 +3,44 @@
 	import { page } from '$app/stores';
 	import { Boost, Icon, MapLoadingMain, ShowTags, TaggingIssues } from '$lib/comp';
 	import {
+		processPlaces,
+		isSupported as isWorkerSupported,
+		terminate as terminateWorker
+	} from '$lib/workers/worker-manager';
+	import type { ProcessedPlace } from '$lib/workers/map-worker';
+	import {
 		attribution,
-		calcVerifiedDate,
 		changeDefaultIcons,
-		checkAddress,
 		dataRefresh,
 		generateIcon,
 		generateMarker,
 		geolocate,
 		homeMarkerButtons,
-		latCalc,
 		layers,
-		longCalc,
 		scaleBars,
-		support,
-		verifiedArr
+		support
 	} from '$lib/map/setup';
 	import { placesError, places, placesSyncCount, mapUpdates } from '$lib/store';
-	import type { Leaflet, MapGroups, OSMTags, Place, SearchItem } from '$lib/types';
+	import type { Leaflet, Place, SearchItem } from '$lib/types';
 	import { debounce, detectTheme, errToast } from '$lib/utils';
-	import type { Control, LatLng, LatLngBounds, Map } from 'leaflet';
+	import type { Control, LatLng, LatLngBounds, Map, Marker, MarkerClusterGroup } from 'leaflet';
 	import localforage from 'localforage';
 	import { onDestroy, onMount, tick } from 'svelte';
 	import OutClick from 'svelte-outclick';
+	import type { FeatureGroup } from 'leaflet';
 
 	let mapLoading = 0;
+
+	// Configuration constants for viewport-based loading
+	const MAX_LOADED_MARKERS = 200; // Maximum markers to keep in memory before cleanup
+	const VIEWPORT_BATCH_SIZE = 25; // Batch size for processing markers in viewport
+	const VIEWPORT_BUFFER_PERCENT = 0.2; // Buffer around viewport (20%)
+	const DEBOUNCE_DELAY = 300; // Debounce delay for map movement (ms)
+
+	// Default map view constants
+	const DEFAULT_LAT = 12.11209;
+	const DEFAULT_LNG = -68.91119;
+	const DEFAULT_ZOOM = 15;
 
 	let leaflet: Leaflet;
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -37,6 +50,13 @@
 	let map: Map;
 	let mapLoaded = false;
 	let elementsLoaded = false;
+
+	// Viewport-based loading state
+	let markers: MarkerClusterGroup;
+	let upToDateLayer: FeatureGroup.SubGroup;
+	let loadedMarkers: Record<string, Marker> = {}; // placeId -> marker
+	let currentBounds: LatLngBounds | null = null;
+	let isLoadingMarkers = false;
 
 	let mapCenter: LatLng;
 
@@ -174,17 +194,6 @@
 	const urlLat = $page.url.searchParams.getAll('lat');
 	const urlLong = $page.url.searchParams.getAll('long');
 
-	// alow for users to query by payment method with URL search params
-	const onchain = $page.url.searchParams.has('onchain');
-	const lightning = $page.url.searchParams.has('lightning');
-	const nfc = $page.url.searchParams.has('nfc');
-
-	// allow to view map with only legacy nodes
-	const legacy = $page.url.searchParams.has('legacy');
-
-	// allow to view map with only outdated nodes
-	const outdated = $page.url.searchParams.has('outdated');
-
 	// allow to view map with only boosted locations
 	const boosts = $page.url.searchParams.has('boosts');
 
@@ -200,30 +209,189 @@
 	// alert for map errors
 	$: $placesError && errToast($placesError);
 
-	const initializeElements = () => {
+	// Get places visible in current viewport with buffer
+	const getVisiblePlaces = (
+		places: Place[],
+		bounds: LatLngBounds,
+		bufferPercent = VIEWPORT_BUFFER_PERCENT
+	): Place[] => {
+		if (!bounds) return [];
+
+		// Add buffer to bounds to preload markers slightly outside viewport
+		const latDiff = bounds.getNorth() - bounds.getSouth();
+		const lngDiff = bounds.getEast() - bounds.getWest();
+		const latBuffer = latDiff * bufferPercent;
+		const lngBuffer = lngDiff * bufferPercent;
+
+		const bufferedBounds = leaflet.latLngBounds([
+			[bounds.getSouth() - latBuffer, bounds.getWest() - lngBuffer],
+			[bounds.getNorth() + latBuffer, bounds.getEast() + lngBuffer]
+		]);
+
+		return places.filter((place) => bufferedBounds.contains([place.lat, place.lon]));
+	};
+
+	// Remove markers that are no longer in viewport
+	const cleanupOutOfBoundsMarkers = (bounds: LatLngBounds) => {
+		const markersToRemove: string[] = [];
+
+		Object.entries(loadedMarkers).forEach(([placeId, marker]) => {
+			const markerLatLng = marker.getLatLng();
+			if (!bounds.contains(markerLatLng)) {
+				upToDateLayer.removeLayer(marker);
+				markersToRemove.push(placeId);
+			}
+		});
+
+		markersToRemove.forEach((placeId) => {
+			delete loadedMarkers[placeId];
+		});
+
+		if (markersToRemove.length > 0) {
+			console.info(`Cleaned up ${markersToRemove.length} out-of-bounds markers`);
+		}
+	};
+
+	// Load markers for places in current viewport using web workers
+	const loadMarkersInViewport = async () => {
+		if (!map || !$places.length || isLoadingMarkers) return;
+
+		isLoadingMarkers = true;
+		const bounds = map.getBounds();
+		currentBounds = bounds;
+
+		try {
+			// Get visible places (viewport filtering)
+			const visiblePlaces = getVisiblePlaces($places, bounds);
+			console.info(
+				`Processing ${visiblePlaces.length} places in viewport (filtered from ${$places.length} total)`
+			);
+
+			// Filter out places that already have markers loaded
+			const newPlaces = visiblePlaces.filter((place) => !loadedMarkers[place.id.toString()]);
+
+			if (newPlaces.length === 0) {
+				isLoadingMarkers = false;
+				return;
+			}
+
+			// Clean up markers outside viewport if we have many loaded
+			if (Object.keys(loadedMarkers).length > MAX_LOADED_MARKERS) {
+				cleanupOutOfBoundsMarkers(bounds);
+			}
+
+			// Check if web workers are supported before trying to use them
+			if (isWorkerSupported()) {
+				console.info(`Loading ${newPlaces.length} new markers using web worker`);
+
+				// Process new places using web worker
+				await processPlaces(
+					newPlaces,
+					VIEWPORT_BATCH_SIZE, // Smaller batch size since dataset is much smaller
+					(progress: number, batch?: ProcessedPlace[]) => {
+						// Process batch on main thread (DOM operations)
+						if (batch) {
+							processBatchOnMainThread(batch, upToDateLayer);
+						}
+					}
+				);
+			} else {
+				console.info(`Loading ${newPlaces.length} new markers synchronously (no worker support)`);
+				// Fallback to synchronous processing
+				loadMarkersInViewportFallback(bounds);
+				return;
+			}
+
+			console.info(`Successfully loaded ${newPlaces.length} markers in viewport`);
+		} catch (error) {
+			console.error('Error loading markers in viewport:', error);
+			// Fallback to synchronous processing for viewport
+			loadMarkersInViewportFallback(bounds);
+		} finally {
+			isLoadingMarkers = false;
+		}
+	};
+
+	// Fallback synchronous loading for viewport (much smaller dataset)
+	const loadMarkersInViewportFallback = (bounds: LatLngBounds) => {
+		console.warn('Falling back to synchronous viewport loading');
+
+		const visiblePlaces = getVisiblePlaces($places, bounds);
+		const newPlaces = visiblePlaces.filter((place) => !loadedMarkers[place.id.toString()]);
+
+		newPlaces.forEach((place: Place) => {
+			const commentsCount = place.comments || 0;
+			const icon = place.icon;
+			const boosted = place.boosted_until ? Date.parse(place.boosted_until) > Date.now() : false;
+
+			const divIcon = generateIcon(leaflet, icon, boosted, commentsCount);
+
+			const marker = generateMarker({
+				lat: place.lat,
+				long: place.lon,
+				icon: divIcon,
+				placeId: place.id,
+				leaflet,
+				verify: true
+			});
+
+			upToDateLayer.addLayer(marker);
+			loadedMarkers[place.id.toString()] = marker;
+		});
+
+		console.info(`Fallback: loaded ${newPlaces.length} markers synchronously`);
+	};
+
+	// Debounced version to prevent excessive loading during rapid pan/zoom
+	const debouncedLoadMarkers = debounce(loadMarkersInViewport, DEBOUNCE_DELAY);
+
+	const initializeElements = async () => {
 		if (elementsLoaded) return;
 
-		// get date from 1 year ago to add verified check if survey is current
-		let verifiedDate = calcVerifiedDate();
+		console.info(
+			`Initializing combined viewport + web worker loading for ${$places.length} places`
+		);
 
 		// create marker cluster group and layers
 		/* eslint-disable no-undef */
-		// @ts-expect-error
-		let markers = L.markerClusterGroup({ maxClusterRadius: 80, disableClusteringAtZoom: 17 });
+		// @ts-expect-error - L is global from Leaflet
+		markers = L.markerClusterGroup({ maxClusterRadius: 80, disableClusteringAtZoom: 17 });
 		/* eslint-enable no-undef */
-		let upToDateLayer = leaflet.featureGroup.subGroup(markers);
+		upToDateLayer = leaflet.featureGroup.subGroup(markers);
 
-		// add location information
-		$places.forEach((element: Place) => {
-			const commentsCount = element.comments || 0;
-			const icon = element.icon;
-			const boosted = element.boosted_until
-				? Date.parse(element.boosted_until) > Date.now()
-				: false;
+		// Add layers to map immediately so batches can be added
+		map.addLayer(markers);
+		map.addLayer(upToDateLayer);
 
-			let divIcon = generateIcon(leaflet, icon, boosted ? true : false, commentsCount);
+		// Set up map event listeners for viewport loading
+		map.on('moveend', debouncedLoadMarkers);
+		map.on('zoomend', debouncedLoadMarkers);
 
-			let marker = generateMarker({
+		// Load initial markers for current viewport
+		await loadMarkersInViewport();
+
+		mapLoading = 100;
+		elementsLoaded = true;
+	};
+
+	// Process a batch of places on the main thread (DOM operations only)
+	const processBatchOnMainThread = (batch: ProcessedPlace[], layer: FeatureGroup.SubGroup) => {
+		batch.forEach((element: ProcessedPlace) => {
+			const { iconData } = element;
+			const placeId = element.id.toString();
+
+			// Skip if marker already loaded (double-check)
+			if (loadedMarkers[placeId]) return;
+
+			// Generate icon using pre-calculated data from worker
+			const divIcon = generateIcon(
+				leaflet,
+				iconData.iconTmp,
+				iconData.boosted,
+				iconData.commentsCount
+			);
+
+			const marker = generateMarker({
 				lat: element.lat,
 				long: element.lon,
 				icon: divIcon,
@@ -232,17 +400,25 @@
 				verify: true
 			});
 
-			upToDateLayer.addLayer(marker);
+			layer.addLayer(marker);
+			loadedMarkers[placeId] = marker;
 		});
-
-		map.addLayer(markers);
-		map.addLayer(upToDateLayer);
-		mapLoading = 100;
-
-		elementsLoaded = true;
 	};
 
-	$: $places && $places.length && mapLoaded && !elementsLoaded && initializeElements();
+	// Reactive statement to initialize elements when data is ready
+	// Use a more controlled approach to prevent infinite loops
+	let shouldInitialize = false;
+	$: {
+		if ($places && $places.length && mapLoaded && !elementsLoaded) {
+			shouldInitialize = true;
+		}
+	}
+
+	// Watch for shouldInitialize flag and run initialization once
+	$: if (shouldInitialize) {
+		shouldInitialize = false;
+		initializeElements();
+	}
 
 	onMount(async () => {
 		if (browser) {
@@ -262,15 +438,21 @@
 			// add map and tiles
 			map = window.L.map(mapElement, { maxZoom: 19 });
 
+			// Helper function to set mapLoaded after view is set
+			const setMapViewAndMarkLoaded = () => {
+				mapCenter = map.getCenter();
+				mapLoaded = true;
+			};
+
 			// use url hash if present
 			if (location.hash) {
 				try {
 					const coords = location.hash.split('/');
 					map.setView([Number(coords[1]), Number(coords[2])], Number(coords[0].slice(1)));
-					mapCenter = map.getCenter();
+					setMapViewAndMarkLoaded();
 				} catch (error) {
-					map.setView([0, 0], 3);
-					mapCenter = map.getCenter();
+					map.setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
+					setMapViewAndMarkLoaded();
 					errToast(
 						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
 					);
@@ -286,14 +468,14 @@
 							[Number(urlLat[0]), Number(urlLong[0])],
 							[Number(urlLat[1]), Number(urlLong[1])]
 						]);
-						mapCenter = map.getCenter();
+						setMapViewAndMarkLoaded();
 					} else {
 						map.fitBounds([[Number(urlLat[0]), Number(urlLong[0])]]);
-						mapCenter = map.getCenter();
+						setMapViewAndMarkLoaded();
 					}
 				} catch (error) {
-					map.setView([0, 0], 3);
-					mapCenter = map.getCenter();
+					map.setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
+					setMapViewAndMarkLoaded();
 					errToast(
 						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
 					);
@@ -308,17 +490,19 @@
 					.then(function (value) {
 						if (value) {
 							map.fitBounds([
-								// @ts-expect-error
+								// @ts-expect-error - LatLngBounds internal structure access
 								[value._northEast.lat, value._northEast.lng],
-								// @ts-expect-error
+								// @ts-expect-error - LatLngBounds internal structure access
 								[value._southWest.lat, value._southWest.lng]
 							]);
 						} else {
-							map.setView([0, 0], 3);
+							map.setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
 						}
+						setMapViewAndMarkLoaded();
 					})
 					.catch(function (err) {
-						map.setView([0, 0], 3);
+						map.setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
+						setMapViewAndMarkLoaded();
 						errToast(
 							'Could not set map view to cached coords, please try again or contact BTC Map.'
 						);
@@ -450,13 +634,13 @@
 					};
 					if (theme === 'light') {
 						boostLayerButton.onmouseenter = () => {
-							// @ts-expect-error
+							// @ts-expect-error - LatLngBounds internal structure access
 							document.querySelector('#boost-layer').src = boosts
 								? '/icons/boost-solid-black.svg'
 								: '/icons/boost-black.svg';
 						};
 						boostLayerButton.onmouseleave = () => {
-							// @ts-expect-error
+							// @ts-expect-error - LatLngBounds internal structure access
 							document.querySelector('#boost-layer').src = boosts
 								? '/icons/boost-solid.svg'
 								: '/icons/boost.svg';
@@ -532,8 +716,6 @@
 			});
 
 			mapLoading = 40;
-
-			mapLoaded = true;
 		}
 	});
 
@@ -542,6 +724,8 @@
 			console.info('Unloading Leaflet map.');
 			map.remove();
 		}
+		// Clean up web worker
+		terminateWorker();
 	});
 </script>
 
