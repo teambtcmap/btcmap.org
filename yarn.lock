@@ -2081,10 +2081,10 @@ leaflet.featuregroup.subgroup@^1.0.2:
   resolved "https://registry.npmjs.org/leaflet.featuregroup.subgroup/-/leaflet.featuregroup.subgroup-1.0.2.tgz"
   integrity sha512-9nCVg8nUe686+BtPbUT7ALOe/IA+8Mum+rkA8pfPpCkH0WvKevRrH+JMcMTjAoNQKVI0uxrWrLV5w298SS3ESA==
 
-leaflet.locatecontrol@^0.81.0:
-  version "0.81.1"
-  resolved "https://registry.npmjs.org/leaflet.locatecontrol/-/leaflet.locatecontrol-0.81.1.tgz"
-  integrity sha512-ZtsdScGufPw330X3UIaGGjnfQ1NrhLySnlruWufIMnfzsHgQPz0+mSxsCQMVh7QgOBoefCGb/lioSejiaNx1EQ==
+leaflet.locatecontrol@^0.85.1:
+  version "0.85.1"
+  resolved "https://registry.yarnpkg.com/leaflet.locatecontrol/-/leaflet.locatecontrol-0.85.1.tgz#4a4a5b9b0550eeacc1c3b51bfafcad3eaac939e5"
+  integrity sha512-aB2qrwZO7Vs4EbWja6pyGy6Y1Mr2yeOqH3PN+Ocnjb4pgpiwYsX1AOI0mppVYzUTO2zwjafxVTOffiwEE32udA==
 
 leaflet.markercluster@^1.5.3:
   version "1.5.3"
