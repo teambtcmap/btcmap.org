@@ -2935,10 +2935,10 @@ svelte-hmr@^0.16.0:
   resolved "https://registry.npmjs.org/svelte-hmr/-/svelte-hmr-0.16.0.tgz"
   integrity sha512-Gyc7cOS3VJzLlfj7wKS0ZnzDVdv3Pn2IuVeJPk9m2skfhcu5bq3wtIZyQGggr7/Iim5rH5cncyQft/kRLupcnA==
 
-svelte-outclick@^3.7.1:
-  version "3.7.1"
-  resolved "https://registry.npmjs.org/svelte-outclick/-/svelte-outclick-3.7.1.tgz"
-  integrity sha512-+TmDaG8yX4cIhmvflujvgV+NbFHxkUdYfeSczp67UJvkkMO9m6x1ugBQSDnjHD6J1z4tE5alkp5pC5LpoNqOKg==
+svelte-outclick@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/svelte-outclick/-/svelte-outclick-4.0.0.tgz#140baa3ee4b1068bd3edd9d95354e3ff84695180"
+  integrity sha512-lm+176QpWlCspHRqBpXPyySp6mkRE2EqSYJOtjkIVZv8UKSTLX2IyJGeHSncGLhsojFt3H51+yuqnTgWf/YgeQ==
 
 svelte-preprocess@^6.0.3:
   version "6.0.3"
