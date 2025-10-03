@@ -14,6 +14,7 @@
 	let stage = 0;
 	let commentValue: string = '';
 	let invoice = '';
+	let invoiceId = '';
 	let qr: HTMLCanvasElement;
 	let loading = false;
 
@@ -21,6 +22,7 @@
 		open = false;
 		stage = 0;
 		invoice = '';
+		invoiceId = '';
 		loading = false;
 	};
 
@@ -33,11 +35,12 @@
 		loading = true;
 		axios
 			.post('/comment/invoice/generate', {
-				element_id: elementId,
+				place_id: elementId,
 				comment: commentValue.trim()
 			})
 			.then(async function (response) {
-				invoice = response.data.payment_request;
+				invoice = response.data.invoice;
+				invoiceId = response.data.invoice_id;
 				stage = 1;
 
 				await tick();
