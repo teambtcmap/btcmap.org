@@ -7,24 +7,19 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 export const POST: RequestHandler = async ({ request }) => {
 	const data = await request.json();
-	const { element_id, comment } = data;
+	const { place_id, comment } = data;
 
-	if (!element_id || !comment) {
-		error(400, 'Missing required parameters: element_id and comment');
+	if (!place_id || !comment) {
+		error(400, 'Missing required parameters: place_id and comment');
 	}
 
 	const response = await axios
-		.post('https://api.btcmap.org/rpc', {
-			jsonrpc: '2.0',
-			method: 'paywall_add_element_comment',
-			params: {
-				element_id,
-				comment
-			},
-			id: 1
+		.post('https://api.btcmap.org/v4/place-comments', {
+			place_id,
+			comment
 		})
 		.then(function (response) {
-			return response.data.result;
+			return response.data;
 		})
 		.catch(function (err) {
 			console.error(err);
