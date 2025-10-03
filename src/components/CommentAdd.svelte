@@ -17,6 +17,8 @@
 	let invoiceId = '';
 	let qr: HTMLCanvasElement;
 	let loading = false;
+	let polling = false;
+	let pollInterval: ReturnType<typeof setInterval>;
 
 	const closeModal = () => {
 		open = false;
@@ -24,6 +26,8 @@
 		invoice = '';
 		invoiceId = '';
 		loading = false;
+		polling = false;
+		if (pollInterval) clearInterval(pollInterval);
 	};
 
 	const generateInvoice = () => {
@@ -58,12 +62,49 @@
 				);
 
 				loading = false;
+				startPolling();
 			})
 			.catch(function (error) {
 				errToast('Could not generate invoice, please try again or contact BTC Map.');
 				console.error(error);
 				loading = false;
 			});
+	};
+
+	const checkInvoiceStatus = async () => {
+		if (!invoiceId) return;
+
+		try {
+			const response = await axios.get(`https://api.btcmap.org/v4/invoices/${invoiceId}`);
+			if (response.data.status === 'paid') {
+				polling = false;
+				clearInterval(pollInterval);
+				// Comment will be published automatically by the backend
+				errToast('Payment confirmed! Your comment will be published shortly.');
+				setTimeout(() => closeModal(), 2000);
+			}
+		} catch (error) {
+			console.error('Error checking invoice status:', error);
+		}
+	};
+
+	const startPolling = () => {
+		polling = true;
+		pollInterval = setInterval(checkInvoiceStatus, 3000); // Check every 3 seconds
+
+		// Stop polling after 15 minutes
+		setTimeout(
+			() => {
+				if (polling) {
+					polling = false;
+					clearInterval(pollInterval);
+					errToast(
+						'Payment timeout. Please try again or contact BTC Map if you believe this is an error.'
+					);
+				}
+			},
+			15 * 60 * 1000
+		);
 	};
 </script>
 
@@ -139,7 +180,11 @@
 
 					<p class="rounded-md border p-1 text-sm text-body dark:text-white">
 						<Icon w="16" h="16" icon="info" style="inline-block" />
-						Your comment will be published<br /> when our bots have confirmed the payment.
+						{#if polling}
+							Checking payment status...
+						{:else}
+							Your comment will be published<br /> when our bots have confirmed the payment.
+						{/if}
 					</p>
 
 					<PrimaryButton style="w-full rounded-xl p-3" on:click={closeModal}>Close</PrimaryButton>
