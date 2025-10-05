@@ -96,20 +96,6 @@
 	const startPolling = () => {
 		polling = true;
 		pollInterval = setInterval(checkInvoiceStatus, 3000); // Check every 3 seconds
-
-		// Stop polling after 15 minutes
-		setTimeout(
-			() => {
-				if (polling) {
-					polling = false;
-					clearInterval(pollInterval);
-					errToast(
-						'Payment timeout. Please try again or contact BTC Map if you believe this is an error.'
-					);
-				}
-			},
-			15 * 60 * 1000
-		);
 	};
 </script>
 
