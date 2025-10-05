@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { CloseButton, CopyButton, Icon, PrimaryButton } from '$lib/comp';
+	import { CONFETTI_CANVAS_Z_INDEX } from '$lib/constants';
 	import { boost, boostHash, exchangeRate, resetBoost } from '$lib/store';
 	import { errToast, warningToast } from '$lib/utils';
 	import axios from 'axios';
@@ -45,8 +46,8 @@
 	let loading = false;
 
 	const jsConfetti = new JSConfetti();
-	// @ts-expect-error
-	document.querySelector('canvas').style.zIndex = '2001';
+	// @ts-expect-error: Required for js-confetti canvas z-index manipulation
+	document.querySelector('canvas').style.zIndex = CONFETTI_CANVAS_Z_INDEX;
 
 	const checkInvoice = () => {
 		axios

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { CloseButton, CopyButton, Icon, PrimaryButton } from '$lib/comp';
+	import { CONFETTI_CANVAS_Z_INDEX } from '$lib/constants';
 	import { errToast } from '$lib/utils';
 	import axios from 'axios';
 	import QRCode from 'qrcode';
@@ -23,7 +24,7 @@
 
 	const jsConfetti = new JSConfetti();
 	// @ts-expect-error: Required for js-confetti canvas z-index manipulation
-	document.querySelector('canvas').style.zIndex = '2001';
+	document.querySelector('canvas').style.zIndex = CONFETTI_CANVAS_Z_INDEX;
 	const closeModal = () => {
 		open = false;
 		stage = 0;
