@@ -3,6 +3,7 @@
 	import { errToast } from '$lib/utils';
 	import axios from 'axios';
 	import QRCode from 'qrcode';
+	import JSConfetti from 'js-confetti';
 	import { tick } from 'svelte';
 	import OutClick from 'svelte-outclick';
 	import { fly } from 'svelte/transition';
@@ -20,6 +21,9 @@
 	let polling = false;
 	let pollInterval: ReturnType<typeof setInterval>;
 
+	const jsConfetti = new JSConfetti();
+	// @ts-expect-error: Required for js-confetti canvas z-index manipulation
+	document.querySelector('canvas').style.zIndex = '2001';
 	const closeModal = () => {
 		open = false;
 		stage = 0;
@@ -28,6 +32,7 @@
 		loading = false;
 		polling = false;
 		if (pollInterval) clearInterval(pollInterval);
+		jsConfetti.clearCanvas();
 	};
 
 	const generateInvoice = () => {
@@ -80,8 +85,8 @@
 				polling = false;
 				clearInterval(pollInterval);
 				// Comment will be published automatically by the backend
-				errToast('Payment confirmed! Your comment will be published shortly.');
-				setTimeout(() => closeModal(), 2000);
+				stage = 2;
+				jsConfetti.addConfetti();
 			}
 		} catch (error) {
 			console.error('Error checking invoice status:', error);
@@ -186,6 +191,14 @@
 							Your comment will be published<br /> when our bots have confirmed the payment.
 						{/if}
 					</p>
+
+					<PrimaryButton style="w-full rounded-xl p-3" on:click={closeModal}>Close</PrimaryButton>
+				</div>
+			{:else}
+				<div class="space-y-4 text-center">
+					<p class="text-xl font-bold text-primary dark:text-white">Thank you for your comment!</p>
+
+					<p class="text-body dark:text-white">Your comment will be published shortly.</p>
 
 					<PrimaryButton style="w-full rounded-xl p-3" on:click={closeModal}>Close</PrimaryButton>
 				</div>
