@@ -46,6 +46,13 @@ export default defineConfig({
 	},
 	server: {
 		host: '0.0.0.0',
-		allowedHosts: ['btcmap.org', '.replit.dev', '.replit.app']
+		allowedHosts: ['btcmap.org', '.replit.dev', '.replit.app'],
+		proxy: {
+			'/api/btcmap': {
+				target: 'https://api.btcmap.org',
+				changeOrigin: true,
+				rewrite: (path) => path.replace(/^\/api\/btcmap/, '')
+			}
+		}
 	}
 });

@@ -18,7 +18,7 @@ export const createPaymentApi = () => {
  */
 export const pollInvoiceStatus = async (invoiceId: string) => {
 	const api = createPaymentApi();
-	return api.get(`https://api.btcmap.org/v4/invoices/${invoiceId}`);
+	return api.get(`/api/btcmap/v4/invoices/${invoiceId}`);
 };
 
 /**

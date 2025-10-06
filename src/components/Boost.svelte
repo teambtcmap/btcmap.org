@@ -45,7 +45,7 @@
 		$boostHash = invoiceId;
 
 		axios
-			.get(`https://api.btcmap.org/v4/invoices/${invoiceId}`)
+			.get(`/api/btcmap/v4/invoices/${invoiceId}`)
 			.then(function (response) {
 				if (response.data.status === 'paid') {
 					stage = 2;
@@ -90,7 +90,7 @@
 						: selectedBoost?.time;
 
 		axios
-			.post('https://api.btcmap.org/v4/place-boosts', {
+			.post('/api/btcmap/v4/place-boosts', {
 				place_id: $boost?.id,
 				sats_amount: satsAmount,
 				days: days
