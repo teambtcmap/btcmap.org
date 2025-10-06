@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { CloseButton, CopyButton, Icon, PrimaryButton, InvoicePayment } from '$lib/comp';
+	import { PAYMENT_ERROR_MESSAGE } from '$lib/constants';
 	import { errToast } from '$lib/utils';
 	import axios from 'axios';
 	import OutClick from 'svelte-outclick';
@@ -41,7 +42,7 @@
 				loading = false;
 			})
 			.catch(function (error) {
-				errToast('Could not generate invoice, please try again or contact BTC Map.');
+				errToast(PAYMENT_ERROR_MESSAGE);
 				console.error(error);
 				loading = false;
 			});

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import { CloseButton, CopyButton, Icon, PrimaryButton, InvoicePayment } from '$lib/comp';
+	import { PAYMENT_ERROR_MESSAGE, STATUS_CHECK_ERROR_MESSAGE } from '$lib/constants';
 	import { boost, boostHash, exchangeRate, resetBoost } from '$lib/store';
 	import { errToast, warningToast } from '$lib/utils';
 	import axios from 'axios';
@@ -63,7 +64,7 @@
 	};
 
 	const handleStatusCheckError = (error: unknown) => {
-		errToast('Could not check invoice status, please try again or contact BTC Map.');
+		errToast(STATUS_CHECK_ERROR_MESSAGE);
 		console.error(error);
 	};
 	const generateInvoice = () => {
@@ -81,7 +82,7 @@
 				loading = false;
 			})
 			.catch(function (error) {
-				errToast('Could not generate invoice, please try again or contact BTC Map.');
+				errToast(PAYMENT_ERROR_MESSAGE);
 				console.error(error);
 				loading = false;
 			});
