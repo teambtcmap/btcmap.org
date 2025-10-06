@@ -45,15 +45,13 @@
 		$boostHash = invoiceId;
 
 		axios
-			.get(`/api/btcmap/v4/invoices/${invoiceId}`)
+			.post('/api/boost/post', {
+				invoice_id: invoiceId
+			})
 			.then(function (response) {
-				if (response.data.status === 'paid') {
-					stage = 2;
-					boostComplete = true;
-					console.info(response);
-				} else {
-					warningToast('Payment not confirmed yet, please try again.');
-				}
+				stage = 2;
+				boostComplete = true;
+				console.info(response);
 			})
 			.catch(function (error) {
 				warningToast('Could not finalize boost, please contact BTC Map.');
@@ -90,10 +88,11 @@
 						: selectedBoost?.time;
 
 		axios
-			.post('/api/btcmap/v4/place-boosts', {
+			.post('/api/boost/invoice/generate', {
 				place_id: $boost?.id,
-				sats_amount: satsAmount,
-				days: days
+				amount: satsAmount,
+				time: days,
+				name: $boost?.name || 'location'
 			})
 			.then(function (response) {
 				invoice = response.data.invoice;
