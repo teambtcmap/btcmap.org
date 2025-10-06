@@ -16,6 +16,9 @@ import type { DivIcon, Map } from 'leaflet';
 import Time from 'svelte-time';
 import { get } from 'svelte/store';
 
+const BORDER_BOTTOM_STYLE = '1.5px solid #ccc';
+const BOTTOM_BUTTON_RADIUS = '0 0 8px 8px';
+
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 export const toggleMapButtons = () => {
@@ -383,7 +386,7 @@ export const changeDefaultIcons = (
 	fullscreenButton.innerHTML = `<img src=${
 		theme === 'dark' ? '/icons/expand-white.svg' : '/icons/expand.svg'
 	} alt='fullscreen' class='inline' id='fullscreen'/>`;
-	fullscreenButton.style.borderRadius = '0 0 8px 8px';
+	fullscreenButton.style.borderRadius = BOTTOM_BUTTON_RADIUS;
 	fullscreenButton.onclick = function toggleFullscreen() {
 		if (!document.fullscreenElement) {
 			mapElement.requestFullscreen().catch((err) => {
@@ -404,7 +407,7 @@ export const changeDefaultIcons = (
 		};
 	}
 	fullscreenButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
-	fullscreenButton.style.borderBottom = '1.5px solid #ccc';
+	fullscreenButton.style.borderBottom = BORDER_BOTTOM_STYLE;
 
 	leafletBar?.append(fullscreenButton);
 
@@ -434,7 +437,7 @@ export const geolocate = (L: Leaflet, map: Map) => {
 	);
 	if (locateButton) {
 		locateButton.style.borderRadius = '8px';
-		locateButton.style.borderBottom = '1.5px solid #ccc';
+		locateButton.style.borderBottom = BORDER_BOTTOM_STYLE;
 		if (theme === 'light') {
 			const locateIcon: HTMLImageElement | null = document.querySelector('#locatebutton');
 			if (locateIcon) {
@@ -530,7 +533,7 @@ export const homeMarkerButtons = (
 				communityMapButton.innerHTML = `<img src=${
 					theme === 'dark' ? '/icons/group-white.svg' : '/icons/group.svg'
 				} alt='group' class='inline' id='group'/>`;
-				communityMapButton.style.borderRadius = '0 0 8px 8px';
+				communityMapButton.style.borderRadius = BOTTOM_BUTTON_RADIUS;
 				if (theme === 'light') {
 					communityMapButton.onmouseenter = () => {
 						// @ts-expect-error
@@ -542,7 +545,7 @@ export const homeMarkerButtons = (
 					};
 				}
 				communityMapButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
-				communityMapButton.style.borderBottom = '1.5px solid #ccc';
+				communityMapButton.style.borderBottom = BORDER_BOTTOM_STYLE;
 
 				addControlDiv.append(communityMapButton);
 			} else {
@@ -556,8 +559,8 @@ export const homeMarkerButtons = (
 				merchantMapButton.innerHTML = `<img src=${
 					theme === 'dark' ? '/icons/shopping-white.svg' : '/icons/shopping.svg'
 				} alt='shopping' class='inline' id='shopping'/>`;
-				merchantMapButton.style.borderRadius = '0 0 8px 8px';
-				merchantMapButton.style.borderBottom = '1.5px solid #ccc';
+				merchantMapButton.style.borderRadius = BOTTOM_BUTTON_RADIUS;
+				merchantMapButton.style.borderBottom = BORDER_BOTTOM_STYLE;
 				if (theme === 'light') {
 					merchantMapButton.onmouseenter = () => {
 						// @ts-expect-error
