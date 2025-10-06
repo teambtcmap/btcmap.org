@@ -8,6 +8,7 @@
 	import { tick } from 'svelte';
 	import OutClick from 'svelte-outclick';
 	import { fly } from 'svelte/transition';
+	import { invalidateAll } from '$app/navigation';
 	import type { MerchantPageData } from '$lib/types.js';
 
 	export let open: boolean = false;
@@ -86,6 +87,7 @@
 				polling = false;
 				clearInterval(pollInterval);
 				// Comment will be published automatically by the backend
+				invalidateAll(); // Refresh comments immediately
 				stage = 2;
 				jsConfetti.addConfetti();
 			}
@@ -185,7 +187,7 @@
 				<div class="space-y-4 text-center">
 					<p class="text-xl font-bold text-primary dark:text-white">Thank you for your comment!</p>
 
-					<p class="text-body dark:text-white">Your comment will be published shortly.</p>
+					<p class="text-body dark:text-white">Your comment has been published!</p>
 
 					<PrimaryButton style="w-full rounded-xl p-3" on:click={closeModal}>Close</PrimaryButton>
 				</div>
