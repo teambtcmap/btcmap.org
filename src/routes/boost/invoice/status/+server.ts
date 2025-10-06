@@ -1,19 +1,17 @@
-import { LNBITS_API_KEY, LNBITS_URL } from '$env/static/private';
 import { error } from '@sveltejs/kit';
 import axios from 'axios';
 import type { RequestHandler } from './$types';
 
 // check the status of an invoice
 export const GET: RequestHandler = async ({ url }) => {
-	const hash = url.searchParams.get('hash');
+	const invoiceId = url.searchParams.get('invoice_id');
 
-	const headers = {
-		'X-API-Key': `${LNBITS_API_KEY}`,
-		'Content-type': 'application/json'
-	};
+	if (!invoiceId) {
+		error(400, 'Missing required parameter: invoice_id');
+	}
 
 	const status = await axios
-		.get(`https://${LNBITS_URL}/api/v1/payments/${hash}`, { headers })
+		.get(`https://api.btcmap.org/v4/invoices/${invoiceId}`)
 		.then(function (response) {
 			return response.data;
 		})

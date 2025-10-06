@@ -1,4 +1,3 @@
-import { BTCMAP_KEY } from '$env/static/private';
 import { error, json } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -9,46 +8,33 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 const used: string[] = [];
 
 export const POST: RequestHandler = async ({ request }) => {
-	const { element, time, hash } = await request.json();
+	const { invoice_id } = await request.json();
 
-	// check that time is valid
-	const validTimes = [1, 3, 12];
-	if (!validTimes.includes(time)) {
-		error(418);
+	// check that invoice_id is provided
+	if (!invoice_id) {
+		error(400, 'Missing required parameter: invoice_id');
 	}
 
 	// verify that the invoice has been paid
-	if (used.includes(hash)) {
-		error(418);
+	if (used.includes(invoice_id)) {
+		error(418, 'Invoice already processed');
 	}
 
-	const boost = await axios
-		.get(`https://btcmap.org/boost/invoice/status?hash=${hash}`)
+	const invoiceStatus = await axios
+		.get(`https://api.btcmap.org/v4/invoices/${invoice_id}`)
 		.then(function (response) {
-			if (response.data.paid === true) {
-				used.push(hash);
-				return axios
-					.post(`https://api.btcmap.org/rpc`, {
-						jsonrpc: '2.0',
-						method: 'boost_element',
-						params: { password: BTCMAP_KEY, id: element, days: time * 30 },
-						id: 1
-					})
-					.then(function (response) {
-						return response.status;
-					})
-					.catch(function (err) {
-						console.error(err);
-						error(400, 'Could not finalize boost, please contact BTC Map.');
-					});
-			} else {
-				return;
-			}
+			return response.data;
 		})
 		.catch(function (err) {
 			console.error(err);
-			error(400, 'Could not finalize boost, please contact BTC Map.');
+			error(400, 'Could not verify invoice status, please try again or contact BTC Map.');
 		});
 
-	return json({ status: boost });
+	if (invoiceStatus.status !== 'paid') {
+		error(400, 'Invoice not paid');
+	}
+
+	used.push(invoice_id);
+
+	return json({ status: 200 });
 };

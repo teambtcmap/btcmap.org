@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { invalidateAll } from '$app/navigation';
 	import { CloseButton, CopyButton, Icon, PrimaryButton } from '$lib/comp';
+
 	import { CONFETTI_CANVAS_Z_INDEX } from '$lib/constants';
 	import { boost, boostHash, exchangeRate, resetBoost } from '$lib/store';
 	import { errToast, warningToast } from '$lib/utils';
@@ -21,17 +23,16 @@
 	let tooltip = false;
 	let selectedBoost: { fiat: number; sats: string; time: number; expires: Date } | undefined;
 	let boostComplete = false;
-
 	const closeModal = () => {
 		if (boostComplete) {
-			location.reload();
+			invalidateAll();
 		}
 		$boost = undefined;
 		$exchangeRate = undefined;
 		selectedBoost = undefined;
 		stage = 0;
 		invoice = '';
-		hash = '';
+		invoiceId = '';
 		clearInterval(checkInvoiceInterval);
 		jsConfetti.clearCanvas();
 		tooltip = false;
@@ -40,7 +41,7 @@
 	};
 
 	let invoice = '';
-	let hash = '';
+	let invoiceId = '';
 	let qr: HTMLCanvasElement;
 	let checkInvoiceInterval: ReturnType<typeof setInterval>;
 	let loading = false;
@@ -51,21 +52,19 @@
 
 	const checkInvoice = () => {
 		axios
-			.get(`/boost/invoice/status?hash=${hash}`)
+			.get(`/boost/invoice/status?invoice_id=${invoiceId}`)
 			.then(function (response) {
-				if (response.data.paid === true && $boost && selectedBoost) {
+				if (response.data.status === 'paid' && $boost && selectedBoost) {
 					clearInterval(checkInvoiceInterval);
 
-					if ($boostHash === hash) {
+					if ($boostHash === invoiceId) {
 						return;
 					}
-					$boostHash = hash;
+					$boostHash = invoiceId;
 
 					axios
 						.post('/boost/post', {
-							element: $boost.id,
-							time: selectedBoost.time,
-							hash
+							invoice_id: invoiceId
 						})
 						.then(function (response) {
 							stage = 2;
@@ -84,16 +83,17 @@
 				console.error(error);
 			});
 	};
-
 	const generateInvoice = () => {
 		loading = true;
 		axios
-			.get(
-				`/boost/invoice/generate?amount=${selectedBoost?.sats}&name=${encodeURIComponent($boost?.name || 'location')}&time=${selectedBoost?.time}`
-			)
+			.post('/boost/invoice/generate', {
+				place_id: $boost?.id,
+				sats_amount: parseInt(selectedBoost?.sats || '0'),
+				months: selectedBoost?.time
+			})
 			.then(async function (response) {
-				invoice = response.data['bolt11'];
-				hash = response.data['payment_hash'];
+				invoice = response.data.invoice;
+				invoiceId = response.data.invoice_id;
 
 				stage = 1;
 
