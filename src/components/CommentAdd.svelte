@@ -1,11 +1,14 @@
 <script lang="ts">
 	import { CloseButton, CopyButton, Icon, PrimaryButton } from '$lib/comp';
+	import { CONFETTI_CANVAS_Z_INDEX } from '$lib/constants';
 	import { errToast } from '$lib/utils';
 	import axios from 'axios';
 	import QRCode from 'qrcode';
+	import JSConfetti from 'js-confetti';
 	import { tick } from 'svelte';
 	import OutClick from 'svelte-outclick';
 	import { fly } from 'svelte/transition';
+	import { invalidateAll } from '$app/navigation';
 	import type { MerchantPageData } from '$lib/types.js';
 
 	export let open: boolean = false;
@@ -14,14 +17,24 @@
 	let stage = 0;
 	let commentValue: string = '';
 	let invoice = '';
+	let invoiceId = '';
 	let qr: HTMLCanvasElement;
 	let loading = false;
+	let polling = false;
+	let pollInterval: ReturnType<typeof setInterval>;
 
+	const jsConfetti = new JSConfetti();
+	// @ts-expect-error: Required for js-confetti canvas z-index manipulation
+	document.querySelector('canvas').style.zIndex = CONFETTI_CANVAS_Z_INDEX;
 	const closeModal = () => {
 		open = false;
 		stage = 0;
 		invoice = '';
+		invoiceId = '';
 		loading = false;
+		polling = false;
+		if (pollInterval) clearInterval(pollInterval);
+		jsConfetti.clearCanvas();
 	};
 
 	const generateInvoice = () => {
@@ -33,11 +46,12 @@
 		loading = true;
 		axios
 			.post('/comment/invoice/generate', {
-				element_id: elementId,
+				place_id: elementId,
 				comment: commentValue.trim()
 			})
 			.then(async function (response) {
-				invoice = response.data.payment_request;
+				invoice = response.data.invoice;
+				invoiceId = response.data.invoice_id;
 				stage = 1;
 
 				await tick();
@@ -55,12 +69,36 @@
 				);
 
 				loading = false;
+				startPolling();
 			})
 			.catch(function (error) {
 				errToast('Could not generate invoice, please try again or contact BTC Map.');
 				console.error(error);
 				loading = false;
 			});
+	};
+
+	const checkInvoiceStatus = async () => {
+		if (!invoiceId) return;
+
+		try {
+			const response = await axios.get(`https://api.btcmap.org/v4/invoices/${invoiceId}`);
+			if (response.data.status === 'paid') {
+				polling = false;
+				clearInterval(pollInterval);
+				// Comment will be published automatically by the backend
+				invalidateAll(); // Refresh comments immediately
+				stage = 2;
+				jsConfetti.addConfetti();
+			}
+		} catch (error) {
+			console.error('Error checking invoice status:', error);
+		}
+	};
+
+	const startPolling = () => {
+		polling = true;
+		pollInterval = setInterval(checkInvoiceStatus, 3000); // Check every 3 seconds
 	};
 </script>
 
@@ -136,8 +174,20 @@
 
 					<p class="rounded-md border p-1 text-sm text-body dark:text-white">
 						<Icon w="16" h="16" icon="info" style="inline-block" />
-						Your comment will be published<br /> when our bots have confirmed the payment.
+						{#if polling}
+							Checking payment status...
+						{:else}
+							Your comment will be published<br /> when our bots have confirmed the payment.
+						{/if}
 					</p>
+
+					<PrimaryButton style="w-full rounded-xl p-3" on:click={closeModal}>Close</PrimaryButton>
+				</div>
+			{:else}
+				<div class="space-y-4 text-center">
+					<p class="text-xl font-bold text-primary dark:text-white">Thank you for your comment!</p>
+
+					<p class="text-body dark:text-white">Your comment has been published!</p>
 
 					<PrimaryButton style="w-full rounded-xl p-3" on:click={closeModal}>Close</PrimaryButton>
 				</div>
