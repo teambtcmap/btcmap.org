@@ -16,11 +16,18 @@ export const GET: RequestHandler = async ({ url }) => {
 		error(400, 'Missing required parameters: amount, name, time, place_id');
 	}
 
+	const satsAmount = parseInt(amount);
+	const months = parseInt(time);
+
+	if (isNaN(satsAmount) || isNaN(months) || satsAmount <= 0 || months <= 0) {
+		error(400, 'Invalid numeric parameters: amount and time must be positive integers');
+	}
+
 	const invoice = await axios
 		.post('https://api.btcmap.org/v4/place-boosts', {
 			place_id: placeId,
-			sats_amount: parseInt(amount),
-			months: parseInt(time)
+			sats_amount: satsAmount,
+			months: months
 		})
 		.then(function (response) {
 			return response.data;

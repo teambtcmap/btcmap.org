@@ -23,8 +23,10 @@
 	let pollInterval: ReturnType<typeof setInterval>;
 
 	const jsConfetti = new JSConfetti();
-	// @ts-expect-error: Required for js-confetti canvas z-index manipulation
-	document.querySelector('canvas').style.zIndex = CONFETTI_CANVAS_Z_INDEX;
+	const confettiCanvas = document.querySelector('canvas');
+	if (confettiCanvas) {
+		confettiCanvas.style.zIndex = CONFETTI_CANVAS_Z_INDEX;
+	}
 
 	const generateQR = async () => {
 		await tick();

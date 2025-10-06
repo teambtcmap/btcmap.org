@@ -69,10 +69,18 @@
 	};
 	const generateInvoice = () => {
 		loading = true;
+		const satsAmount = parseInt(selectedBoost?.sats || '0');
+
+		if (isNaN(satsAmount) || satsAmount <= 0) {
+			errToast('Invalid sats amount');
+			loading = false;
+			return;
+		}
+
 		axios
 			.post('/boost/invoice/generate', {
 				place_id: $boost?.id,
-				sats_amount: parseInt(selectedBoost?.sats || '0'),
+				sats_amount: satsAmount,
 				months: selectedBoost?.time
 			})
 			.then(function (response) {
