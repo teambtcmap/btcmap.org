@@ -1,14 +1,9 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
-	import { CloseButton, CopyButton, Icon, PrimaryButton } from '$lib/comp';
-
-	import { CONFETTI_CANVAS_Z_INDEX } from '$lib/constants';
+	import { CloseButton, CopyButton, Icon, PrimaryButton, InvoicePayment } from '$lib/comp';
 	import { boost, boostHash, exchangeRate, resetBoost } from '$lib/store';
 	import { errToast, warningToast } from '$lib/utils';
 	import axios from 'axios';
-	import JSConfetti from 'js-confetti';
-	import QRCode from 'qrcode';
-	import { tick } from 'svelte';
 	import OutClick from 'svelte-outclick';
 	import { fade, fly } from 'svelte/transition';
 
@@ -33,8 +28,6 @@
 		stage = 0;
 		invoice = '';
 		invoiceId = '';
-		clearInterval(checkInvoiceInterval);
-		jsConfetti.clearCanvas();
 		tooltip = false;
 		loading = false;
 		$resetBoost = $resetBoost + 1;
@@ -42,46 +35,36 @@
 
 	let invoice = '';
 	let invoiceId = '';
-	let qr: HTMLCanvasElement;
-	let checkInvoiceInterval: ReturnType<typeof setInterval>;
 	let loading = false;
 
-	const jsConfetti = new JSConfetti();
-	// @ts-expect-error: Required for js-confetti canvas z-index manipulation
-	document.querySelector('canvas').style.zIndex = CONFETTI_CANVAS_Z_INDEX;
+	const handlePaymentSuccess = () => {
+		if ($boostHash === invoiceId) {
+			return;
+		}
+		$boostHash = invoiceId;
 
-	const checkInvoice = () => {
 		axios
-			.get(`/boost/invoice/status?invoice_id=${invoiceId}`)
+			.post('/boost/post', {
+				invoice_id: invoiceId
+			})
 			.then(function (response) {
-				if (response.data.status === 'paid' && $boost && selectedBoost) {
-					clearInterval(checkInvoiceInterval);
-
-					if ($boostHash === invoiceId) {
-						return;
-					}
-					$boostHash = invoiceId;
-
-					axios
-						.post('/boost/post', {
-							invoice_id: invoiceId
-						})
-						.then(function (response) {
-							stage = 2;
-							jsConfetti.addConfetti();
-							boostComplete = true;
-							console.info(response);
-						})
-						.catch(function (error) {
-							warningToast('Could not finalize boost, please contact BTC Map.');
-							console.error(error);
-						});
-				}
+				stage = 2;
+				boostComplete = true;
+				console.info(response);
 			})
 			.catch(function (error) {
-				errToast('Could not check invoice status, please try again or contact BTC Map.');
+				warningToast('Could not finalize boost, please contact BTC Map.');
 				console.error(error);
 			});
+	};
+
+	const handlePaymentError = (error: unknown) => {
+		console.error('Payment error:', error);
+	};
+
+	const handleStatusCheckError = (error: unknown) => {
+		errToast('Could not check invoice status, please try again or contact BTC Map.');
+		console.error(error);
 	};
 	const generateInvoice = () => {
 		loading = true;
@@ -91,28 +74,10 @@
 				sats_amount: parseInt(selectedBoost?.sats || '0'),
 				months: selectedBoost?.time
 			})
-			.then(async function (response) {
+			.then(function (response) {
 				invoice = response.data.invoice;
 				invoiceId = response.data.invoice_id;
-
 				stage = 1;
-
-				await tick();
-
-				QRCode.toCanvas(
-					qr,
-					invoice,
-					{ width: window.innerWidth > 768 ? 275 : 200 },
-					function (error: Error | null | undefined) {
-						if (error) {
-							errToast('Could not generate QR, please try again or contact BTC Map.');
-							console.error(error);
-						}
-					}
-				);
-
-				checkInvoiceInterval = setInterval(checkInvoice, 2500);
-
 				loading = false;
 			})
 			.catch(function (error) {
@@ -227,9 +192,12 @@
 					</p>
 
 					<a href="lightning:{invoice}" class="inline-block">
-						<canvas
-							class="mx-auto h-[200px] w-[200px] rounded-2xl border-2 border-mapBorder transition-colors hover:border-link md:h-[275px] md:w-[275px]"
-							bind:this={qr}
+						<InvoicePayment
+							{invoice}
+							{invoiceId}
+							onSuccess={handlePaymentSuccess}
+							onError={handlePaymentError}
+							onStatusCheckError={handleStatusCheckError}
 						/>
 					</a>
 
