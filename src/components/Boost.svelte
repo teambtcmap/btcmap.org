@@ -78,14 +78,10 @@
 		}
 
 		// Convert months to days (1 month = 30 days, 3 months = 90 days, 12 months = 365 days)
-		const days =
-			selectedBoost?.time === 1
-				? 30
-				: selectedBoost?.time === 3
-					? 90
-					: selectedBoost?.time === 12
-						? 365
-						: selectedBoost?.time;
+		const timeToDays: Record<number, number> = { 1: 30, 3: 90, 12: 365 };
+		const days = selectedBoost?.time
+			? timeToDays[selectedBoost.time] || selectedBoost.time
+			: undefined;
 
 		axios
 			.post('/api/boost/invoice/generate', {

@@ -23,10 +23,6 @@
 	let pollInterval: ReturnType<typeof setInterval>;
 
 	const jsConfetti = new JSConfetti();
-	const confettiCanvas = document.querySelector('canvas');
-	if (confettiCanvas) {
-		confettiCanvas.style.zIndex = CONFETTI_CANVAS_Z_INDEX;
-	}
 
 	const generateQR = async () => {
 		await tick();
@@ -76,6 +72,14 @@
 	// Start polling when invoiceId is set
 	$: if (invoiceId && !polling) {
 		startPolling();
+	}
+
+	// Set up confetti canvas z-index when QR canvas is ready
+	$: if (qr) {
+		const confettiCanvas = document.querySelector('canvas');
+		if (confettiCanvas) {
+			confettiCanvas.style.zIndex = CONFETTI_CANVAS_Z_INDEX;
+		}
 	}
 </script>
 
