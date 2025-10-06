@@ -17,9 +17,9 @@ export const GET: RequestHandler = async ({ url }) => {
 	}
 
 	const satsAmount = parseInt(amount);
-	const months = parseInt(time);
+	const days = parseInt(time);
 
-	if (isNaN(satsAmount) || isNaN(months) || satsAmount <= 0 || months <= 0) {
+	if (isNaN(satsAmount) || isNaN(days) || satsAmount <= 0 || days <= 0) {
 		error(400, 'Invalid numeric parameters: amount and time must be positive integers');
 	}
 
@@ -27,7 +27,7 @@ export const GET: RequestHandler = async ({ url }) => {
 		.post('https://api.btcmap.org/v4/place-boosts', {
 			place_id: placeId,
 			sats_amount: satsAmount,
-			months: months
+			days: days
 		})
 		.then(function (response) {
 			return response.data;
