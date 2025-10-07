@@ -5,7 +5,6 @@
 		getSortedRowModel,
 		getPaginationRowModel,
 		getFilteredRowModel,
-		flexRender,
 		type ColumnDef,
 		type TableOptions,
 		type SortingState,
@@ -14,7 +13,7 @@
 		type FilterFn
 	} from '@tanstack/svelte-table';
 	import { writable, derived } from 'svelte/store';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import { areaError, areas, reportError, reports, syncStatus, theme } from '$lib/store';
 	import type { AreaType, LeaderboardArea, Report } from '$lib/types';
 	import { errToast, getGrade, validateContinents, detectTheme, debounce } from '$lib/utils';
@@ -26,7 +25,7 @@
 	import SortHeaderButton from './SortHeaderButton.svelte';
 	import { rankItem } from '@tanstack/match-sorter-utils';
 	import tippy from 'tippy.js';
-	import type { Instance } from 'tippy.js';
+
 	import { GradeTable } from '$lib/comp';
 
 	export let type: AreaType;
@@ -34,7 +33,6 @@
 
 	const pageSizes = [10, 20, 30, 40, 50];
 	let globalFilter = '';
-	let searchInput: HTMLInputElement;
 
 	// Tooltip references for header tooltips only
 	let totalTooltip: HTMLButtonElement;

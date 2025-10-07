@@ -34,7 +34,7 @@ export default tseslint.config(
 			'svelte/no-dupe-style-properties': 'warn', // mainly because of tailwind (v4 will fix this)
 			'@typescript-eslint/no-unused-expressions': 'warn',
 			'@typescript-eslint/no-unused-vars': [
-				'warn',
+				'error',
 				{ argsIgnorePattern: '^_', varsIgnorePattern: '^_' }
 			]
 		}

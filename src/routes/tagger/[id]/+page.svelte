@@ -26,7 +26,6 @@
 	import DOMPurify from 'dompurify';
 	import { marked } from 'marked';
 	import { onMount } from 'svelte';
-	import { resolve } from '$app/paths';
 
 	// alert for user errors
 	$: $userError && errToast($userError);

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { AreaType, LeaderboardArea } from '$lib/types';
+	import type { AreaType } from '$lib/types';
 	import type { Table } from '@tanstack/svelte-table';
 	import { flexRender } from '@tanstack/svelte-table';
 	import { isEven } from '$lib/utils';

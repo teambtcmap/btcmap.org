@@ -19,8 +19,7 @@
 		layers,
 		scaleBars,
 		support,
-		updateMapHash,
-		verifiedArr
+		updateMapHash
 	} from '$lib/map/setup';
 	import { placesError, places, placesSyncCount, mapUpdates } from '$lib/store';
 	import type { Leaflet, Place, SearchItem } from '$lib/types';
@@ -57,7 +56,7 @@
 	let markers: MarkerClusterGroup;
 	let upToDateLayer: FeatureGroup.SubGroup;
 	let loadedMarkers: Record<string, Marker> = {}; // placeId -> marker
-	let currentBounds: LatLngBounds | null = null;
+
 	let isLoadingMarkers = false;
 
 	let mapCenter: LatLng;
@@ -260,7 +259,6 @@
 
 		isLoadingMarkers = true;
 		const bounds = map.getBounds();
-		currentBounds = bounds;
 
 		try {
 			// Get visible places (viewport filtering)
