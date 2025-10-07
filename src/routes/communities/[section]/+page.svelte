@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+
 	import { CommunitySection, Footer, Header, HeaderPlaceholder, PrimaryButton } from '$lib/comp';
-	import { areaError, areas, reportError, reports, syncStatus, theme } from '$lib/store';
+	import { areaError, areas, reportError, syncStatus, theme } from '$lib/store';
 	import { detectTheme, errToast } from '$lib/utils';
 	import { getOrganizationDisplayName } from '$lib/organizationDisplayNames';
 	import type { Community } from '$lib/types';

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { AreaType } from '$lib/types';
-	import { resolve } from '$app/paths';
 
 	export let type: AreaType;
 	export let avatar: string;

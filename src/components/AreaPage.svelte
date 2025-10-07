@@ -2,26 +2,12 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
+
 	import axios from 'axios';
 
 	export let type: 'country' | 'community';
 	export let data: AreaPageProps;
 
-	$: filteredAddTickets =
-		data.tickets !== undefined && data.tickets !== 'error' && Array.isArray(data.tickets)
-			? data.tickets.filter((ticket) => ticket.labels.some((l) => l.name === 'add-location'))
-			: [];
-
-	$: filteredVerifyTickets =
-		data.tickets !== undefined && data.tickets !== 'error' && Array.isArray(data.tickets)
-			? data.tickets.filter((ticket) => ticket.labels.some((l) => l.name === 'verify-location'))
-			: [];
-
-	$: filteredCommunityTickets =
-		data.tickets !== undefined && data.tickets !== 'error' && Array.isArray(data.tickets)
-			? data.tickets.filter((ticket) => ticket.labels.some((l) => l.name === 'add-community'))
-			: [];
 	import {
 		AreaActivity,
 		AreaMap,
@@ -35,7 +21,7 @@
 		SponsorBadge,
 		Tip
 	} from '$lib/comp';
-	import { latCalc, longCalc } from '$lib/map/setup';
+
 	import {
 		areaError,
 		areas,
@@ -53,7 +39,6 @@
 		type ActivityEvent,
 		type AreaPageProps,
 		type AreaTags,
-		type AreaType,
 		type Element,
 		type Event,
 		type Place,
@@ -64,7 +49,6 @@
 	import { errToast, formatElementID, validateContinents } from '$lib/utils';
 	import rewind from '@mapbox/geojson-rewind';
 	import { geoContains } from 'd3-geo';
-	import { resolve } from '$app/paths';
 
 	// alert for user errors
 	$: $userError && errToast($userError);

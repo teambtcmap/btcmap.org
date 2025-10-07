@@ -12,9 +12,9 @@
 	import { attribution, changeDefaultIcons, geolocate, toggleMapButtons } from '$lib/map/setup';
 	import { socials, theme } from '$lib/store';
 	import { detectTheme, errToast } from '$lib/utils';
-	import rewind from '@mapbox/geojson-rewind';
+
 	import axios from 'axios';
-	import { geoContains } from 'd3-geo';
+
 	import type { Map, MaplibreGL, Marker } from 'leaflet';
 	import { onDestroy, onMount, tick } from 'svelte';
 	import DOMPurify from 'dompurify';
@@ -86,8 +86,6 @@
 		// Import required packages
 		const leaflet = await import('leaflet');
 		const DomEvent = await import('leaflet/src/dom/DomEvent');
-		const maplibreGl = await import('maplibre-gl');
-		const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
 
 		// Make sure to import the locate control plugin
 		try {

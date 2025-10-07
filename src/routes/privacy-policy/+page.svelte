@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Footer, Header } from '$lib/comp';
-	import { apps, socials } from '$lib/store';
+	import { socials } from '$lib/store';
 </script>
 
 <svelte:head>

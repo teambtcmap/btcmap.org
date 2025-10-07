@@ -12,10 +12,8 @@
 	import { placesError, theme } from '$lib/store';
 	import { detectTheme, errToast } from '$lib/utils';
 	import axios from 'axios';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import DOMPurify from 'dompurify';
-
-	let initialRenderComplete = false;
 
 	// Initialize from server data
 	let name = data?.name || '';
@@ -110,8 +108,6 @@
 		if (browser) {
 			// fetch and add captcha
 			fetchCaptcha();
-
-			initialRenderComplete = true;
 		}
 	});
 </script>
