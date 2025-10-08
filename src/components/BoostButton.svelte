@@ -25,7 +25,10 @@
 
 		$boost = {
 			id: String(merchant.id),
-			name: ('osm_json' in merchant ? merchant.osm_json.tags?.name : merchant.name) || '',
+			name:
+				('osm_json' in merchant ? '' : merchant.name) ||
+				('osm_json' in merchant ? merchant.osm_json.tags?.name : '') ||
+				'',
 			boost: boosted || ''
 		};
 
