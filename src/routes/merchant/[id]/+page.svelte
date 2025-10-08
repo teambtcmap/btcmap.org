@@ -134,7 +134,7 @@
 			return false;
 		});
 
-		merchantEvents = $events.filter((event) => event.element_id === data.elementData?.id);
+		merchantEvents = $events.filter((event) => event.element_id === data.id);
 
 		merchantEvents.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
 
@@ -614,7 +614,7 @@
 
 						<span id="tagging-issues">
 							<MerchantButton
-								on:click={() => ($taggingIssues = data.elementData?.tags?.issues || [])}
+								on:click={() => ($taggingIssues = data.osmTags?.issues || [])}
 								icon="issues"
 								text="Tag Issues"
 							/>
@@ -705,7 +705,7 @@
 								{/if}
 							</div>
 
-							<BoostButton slot="footer" merchant={data.elementData} {boosted} />
+							<BoostButton slot="footer" merchant={data.placeData} {boosted} />
 						</Card>
 
 						<Card headerAlign="center">

@@ -17,53 +17,58 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 		const isNumericId = /^\d+$/.test(id);
 
 		if (isNumericId) {
-			// For numeric Place IDs, fetch from v4 Places API first to get OSM ID, then v2 Elements
+			// For numeric Place IDs, fetch complete data from v4 Places API
 			try {
 				const placeResponse = await axios.get(
-					`https://api.btcmap.org/v4/places/${id}?fields=id,osm_id,osm_url,name,address,phone,website,twitter,facebook,instagram,email,opening_hours,verified_at,lat,lon,icon`
+					`https://api.btcmap.org/v4/places/${id}?fields=id,osm_id,osm_url,name,address,phone,website,twitter,facebook,instagram,email,opening_hours,verified_at,lat,lon,icon,payment:uri,payment:pouch,payment:coinos,boost:expires,payment:lightning,payment:onchain,payment:lightning_contactless,osm:contact:phone,osm:contact:website,osm:contact:email,osm:contact:twitter,osm:contact:facebook,osm:contact:instagram,required_app_url`
 				);
 				placeData = placeResponse.data;
 
-				if (placeData && placeData.osm_id) {
-					// Use the OSM ID to fetch complete Element data
-					const elementResponse = await axios.get(
-						`https://api.btcmap.org/v2/elements/${placeData.osm_id}`
-					);
-					data = elementResponse.data;
-				} else if (placeData) {
-					// No OSM ID available, construct data from Place API (limited fields)
-					const now = new Date().toISOString();
-					data = {
-						id: placeData.id.toString(),
-						osm_json: {
-							type: 'node', // Default assumption
-							id: placeData.id,
-							lat: placeData.lat,
-							lon: placeData.lon,
-							bounds: null, // Not applicable for nodes
-							tags: {
-								name: placeData.name,
-								'addr:full': placeData.address,
-								phone: placeData.phone,
-								website: placeData.website,
-								twitter: placeData.twitter,
-								facebook: placeData.facebook,
-								instagram: placeData.instagram,
-								email: placeData.email,
-								opening_hours: placeData.opening_hours
-							}
-						},
-						tags: {
-							'icon:android': placeData.icon || 'question_mark',
-							category: 'merchant' // Default category
-						},
-						created_at: now,
-						updated_at: now,
-						deleted_at: ''
-					};
-				} else {
+				if (!placeData) {
 					throw new Error('Place data not found');
 				}
+
+				// Construct Element-like data structure from Place data for backward compatibility
+				const now = new Date().toISOString();
+				data = {
+					id: placeData.id.toString(),
+					osm_json: {
+						type: 'node', // Default assumption
+						id: Number(placeData.osm_id || placeData.id),
+						lat: placeData.lat,
+						lon: placeData.lon,
+						bounds: null, // Not applicable for nodes
+						tags: {
+							name: placeData.name,
+							'addr:full': placeData.address,
+							phone: placeData.phone || placeData['osm:contact:phone'],
+							website: placeData.website || placeData['osm:contact:website'],
+							email: placeData.email || placeData['osm:contact:email'],
+							twitter: placeData.twitter || placeData['osm:contact:twitter'],
+							facebook: placeData.facebook || placeData['osm:contact:facebook'],
+							instagram: placeData.instagram || placeData['osm:contact:instagram'],
+							opening_hours: placeData.opening_hours,
+							'payment:lightning:requires_companion_app': placeData.required_app_url
+								? 'yes'
+								: undefined,
+							'payment:lightning:companion_app_url': placeData.required_app_url
+						}
+					},
+					tags: {
+						'icon:android': placeData.icon || 'question_mark',
+						category: 'merchant', // Default category
+						'payment:uri': placeData['payment:uri'],
+						'payment:pouch': placeData['payment:pouch'],
+						'payment:coinos': placeData['payment:coinos'],
+						'boost:expires': placeData['boost:expires'],
+						'payment:lightning': placeData['payment:lightning'],
+						'payment:onchain': placeData['payment:onchain'],
+						'payment:lightning_contactless': placeData['payment:lightning_contactless']
+					},
+					created_at: now,
+					updated_at: now,
+					deleted_at: ''
+				};
 			} catch {
 				// If Place API fails, try v2 Elements API as fallback (might work for some IDs)
 				const response = await axios.get(`https://api.btcmap.org/v2/elements/${id}`);
@@ -153,8 +158,8 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 				osmType: data.osm_json.type,
 				osmId: data.osm_json.id,
 				osmTags: data.osm_json.tags || {},
-				// Full element data for complex client logic
-				elementData: data
+				// Place data for BoostButton and other components
+				placeData: placeData!
 			};
 		}
 		error(404, 'Merchant Not Found');
