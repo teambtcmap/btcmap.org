@@ -270,7 +270,7 @@ export async function fetchEnhancedPlace(placeId: string): Promise<Place | null>
 		}
 
 		const basePlace: Place = await response.json();
-		let enhancedPlace: Place = { ...basePlace };
+		const enhancedPlace: Place = { ...basePlace };
 
 		// Map osm:contact fields to official fields as fallback
 		if (!enhancedPlace.instagram && enhancedPlace['osm:contact:instagram']) {
@@ -289,58 +289,8 @@ export async function fetchEnhancedPlace(placeId: string): Promise<Place | null>
 				: `https://facebook.com/${enhancedPlace['osm:contact:facebook']}`;
 		}
 
-		// If the place has an OSM ID, also fetch from v2 Elements API to get any remaining contact:* fields
-		// that might not be mapped in the v4 Places API
-		if (enhancedPlace.osm_id) {
-			try {
-				const elementsResponse = await fetch(
-					`https://api.btcmap.org/v2/elements/${enhancedPlace.osm_id}`
-				);
-				if (elementsResponse.ok) {
-					const elementsData = await elementsResponse.json();
-					const osmTags = elementsData.osm_json?.tags || {};
-
-					// Merge any remaining contact:* fields into the place data
-					const mergedPlace = { ...enhancedPlace };
-					if (osmTags['contact:instagram'] && !mergedPlace.instagram) {
-						mergedPlace.instagram = osmTags['contact:instagram'].startsWith('http')
-							? osmTags['contact:instagram']
-							: `https://instagram.com/${osmTags['contact:instagram']}`;
-					}
-					if (osmTags['contact:twitter'] && !mergedPlace.twitter) {
-						mergedPlace.twitter = osmTags['contact:twitter'].startsWith('http')
-							? osmTags['contact:twitter']
-							: `https://twitter.com/${osmTags['contact:twitter']}`;
-					}
-					if (osmTags['contact:facebook'] && !mergedPlace.facebook) {
-						mergedPlace.facebook = osmTags['contact:facebook'].startsWith('http')
-							? osmTags['contact:facebook']
-							: `https://facebook.com/${osmTags['contact:facebook']}`;
-					}
-
-					// Also check for direct social media fields in OSM
-					if (osmTags.instagram && !mergedPlace.instagram) {
-						mergedPlace.instagram = osmTags.instagram.startsWith('http')
-							? osmTags.instagram
-							: `https://instagram.com/${osmTags.instagram}`;
-					}
-					if (osmTags.twitter && !mergedPlace.twitter) {
-						mergedPlace.twitter = osmTags.twitter.startsWith('http')
-							? osmTags.twitter
-							: `https://twitter.com/${osmTags.twitter}`;
-					}
-					if (osmTags.facebook && !mergedPlace.facebook) {
-						mergedPlace.facebook = osmTags.facebook.startsWith('http')
-							? osmTags.facebook
-							: `https://facebook.com/${osmTags.facebook}`;
-					}
-					enhancedPlace = mergedPlace;
-				}
-			} catch (elementsError) {
-				// Ignore errors from v2 Elements API - we still have v4 data
-				console.warn(`Failed to fetch additional OSM data for place ${placeId}:`, elementsError);
-			}
-		}
+		// v4 Places API provides all necessary contact information through osm:contact:* fields
+		// No additional API calls needed
 
 		// Cache the result
 		enhancedPlacesCache.set(placeId, enhancedPlace);
