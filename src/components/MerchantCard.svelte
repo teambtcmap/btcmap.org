@@ -1,28 +1,27 @@
 <script lang="ts">
 	import { BoostButton, Icon, InfoTooltip } from '$lib/comp';
 	import { calcVerifiedDate, checkAddress, verifiedArr } from '$lib/map/setup';
-	import type { Element } from '$lib/types';
+	import type { Place } from '$lib/types';
 	import { isBoosted, formatOpeningHours } from '$lib/utils';
 	import Time from 'svelte-time';
 	import tippy from 'tippy.js';
 	import { resolve } from '$app/paths';
 
-	export let merchant: Element;
+	export let merchant: Place;
 
 	const boosted = isBoosted(merchant);
-	const icon = merchant.tags['icon:android'];
-	const { tags } = merchant.osm_json;
-	const description = tags?.description;
-	const note = tags?.note;
-	const address = tags ? checkAddress(tags) : undefined;
-	const website = tags?.website || tags?.['contact:website'];
-	const openingHours = tags?.['opening_hours'];
-	const phone = tags?.phone || tags?.['contact:phone'];
-	const email = tags?.email || tags?.['contact:email'];
-	const twitter = tags?.twitter || tags?.['contact:twitter'];
-	const instagram = tags?.instagram || tags?.['contact:instagram'];
-	const facebook = tags?.facebook || tags?.['contact:facebook'];
-	const verified = verifiedArr(merchant.osm_json);
+	const icon = merchant.icon;
+	const description = undefined; // Not available in Place API
+	const note = undefined; // Not available in Place API
+	const address = merchant.address;
+	const website = merchant.website;
+	const openingHours = merchant.opening_hours;
+	const phone = merchant.phone;
+	const email = merchant.email;
+	const twitter = merchant.twitter;
+	const instagram = merchant.instagram;
+	const facebook = merchant.facebook;
+	const verified = merchant.verified_at ? [merchant.verified_at] : [];
 	const verifiedDate = calcVerifiedDate();
 
 	let outdatedTooltip: HTMLDivElement;
@@ -53,12 +52,10 @@
 					type="material"
 					style="shrink-0"
 				/>
-				<p class="break-all text-lg">{merchant.osm_json.tags?.name || 'BTC Map Merchant'}</p>
+				<p class="break-all text-lg">{merchant.name || 'BTC Map Merchant'}</p>
 			</a>
 
-			{#if description || note}
-				<InfoTooltip tooltip={description || note} />
-			{/if}
+			<!-- Description/note tooltips not available in Place API -->
 		</div>
 
 		<div class="mb-3 w-full space-y-2 break-all text-primary dark:text-white">
@@ -66,7 +63,7 @@
 				<div class="flex items-center space-x-2 font-medium">
 					<Icon w="16" h="16" icon="location_on" type="material" style="shrink-0" />
 					<a
-						href="geo:{merchant.osm_json.lat},{merchant.osm_json.lon}"
+						href="geo:{merchant.lat},{merchant.lon}"
 						class="text-sm underline decoration-primary decoration-1 underline-offset-4 dark:decoration-white"
 					>
 						{address}
@@ -193,7 +190,7 @@
 			<div class="flex items-center space-x-1">
 				<p class="text-sm font-semibold text-gray-500 dark:text-gray-400">
 					Boost Expires: <span class="text-primary dark:text-white"
-						><Time live={3000} relative={true} timestamp={merchant.tags['boost:expires']} /></span
+						><Time live={3000} relative={true} timestamp={merchant.boosted_until} /></span
 					>
 				</p>
 			</div>
@@ -209,11 +206,7 @@
 				<p class="text-sm">Verify</p>
 			</a>
 
-			<BoostButton
-				{merchant}
-				boosted={boosted ? merchant.tags['boost:expires'] : undefined}
-				style="link"
-			/>
+			<BoostButton {merchant} boosted={boosted ? merchant.boosted_until : undefined} style="link" />
 		</div>
 	</div>
 </div>
