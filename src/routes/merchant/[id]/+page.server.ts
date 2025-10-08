@@ -20,7 +20,7 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 			// For numeric Place IDs, fetch complete data from v4 Places API
 			try {
 				const placeResponse = await axios.get(
-					`https://api.btcmap.org/v4/places/${id}?fields=id,osm_id,osm_url,name,address,phone,website,twitter,facebook,instagram,email,opening_hours,verified_at,lat,lon,icon,payment:uri,payment:pouch,payment:coinos,boosted_until,payment:lightning,payment:onchain,payment:lightning_contactless,osm:contact:phone,osm:contact:website,osm:contact:email,osm:contact:twitter,osm:contact:facebook,osm:contact:instagram,required_app_url`
+					`https://api.btcmap.org/v4/places/${id}?fields=id,osm_id,osm_url,name,address,phone,website,twitter,facebook,instagram,email,opening_hours,verified_at,lat,lon,icon,payment:uri,payment:pouch,payment:coinos,boosted_until,payment:lightning,payment:onchain,payment:lightning_contactless,osm:contact:phone,osm:contact:website,osm:contact:email,osm:contact:twitter,osm:contact:facebook,osm:contact:instagram,required_app_url,osm:payment:lightning,osm:payment:onchain,osm:payment:lightning_contactless`
 				);
 				placeData = placeResponse.data;
 
@@ -51,7 +51,13 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 							'payment:lightning:requires_companion_app': placeData.required_app_url
 								? 'yes'
 								: undefined,
-							'payment:lightning:companion_app_url': placeData.required_app_url
+							'payment:lightning:companion_app_url': placeData.required_app_url,
+							'payment:lightning':
+								placeData['payment:lightning'] || placeData['osm:payment:lightning'],
+							'payment:onchain': placeData['payment:onchain'] || placeData['osm:payment:onchain'],
+							'payment:lightning_contactless':
+								placeData['payment:lightning_contactless'] ||
+								placeData['osm:payment:lightning_contactless']
 						}
 					},
 					tags: {
@@ -61,9 +67,12 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 						'payment:pouch': placeData['payment:pouch'],
 						'payment:coinos': placeData['payment:coinos'],
 						'boost:expires': placeData.boosted_until,
-						'payment:lightning': placeData['payment:lightning'],
-						'payment:onchain': placeData['payment:onchain'],
-						'payment:lightning_contactless': placeData['payment:lightning_contactless']
+						'payment:lightning':
+							placeData['payment:lightning'] || placeData['osm:payment:lightning'],
+						'payment:onchain': placeData['payment:onchain'] || placeData['osm:payment:onchain'],
+						'payment:lightning_contactless':
+							placeData['payment:lightning_contactless'] ||
+							placeData['osm:payment:lightning_contactless']
 					},
 					created_at: now,
 					updated_at: now,
