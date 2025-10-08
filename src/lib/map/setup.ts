@@ -719,7 +719,7 @@ export const generateMarker = ({
 				popupContent.innerHTML = `
 					${
 						placeDetails.name
-							? `<a href='/merchant/${osmType}:${osmId}' class='inline-block font-bold text-lg leading-snug max-w-[300px]' title='Merchant name'>
+							? `<a href='/merchant/${placeId}' class='inline-block font-bold text-lg leading-snug max-w-[300px]' title='Merchant name'>
 							<span class='!text-link hover:!text-hover transition-colors'>${placeDetails.name}</span>
 						   </a>`
 							: ''
@@ -755,14 +755,14 @@ export const generateMarker = ({
 							<span class='block text-xs text-center mt-1'>Edit</span>
 						</a>
 
-						<a id='share' href='/merchant/${osmType}:${osmId}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+						<a id='share' href='/merchant/${placeId}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
 								<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#share"></use>
 							</svg>
 							<span class='block text-xs text-center mt-1'>Share</span>
 						</a>
 
-						<a href='/merchant/${osmType}:${osmId}#comments' class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+						<a href='/merchant/${placeId}#comments' class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<div class='flex items-center justify-center h-6 text-lg font-bold mx-auto'>
 								${typeof placeDetails.comments === 'number' ? placeDetails.comments : placeDetails.comments?.length || 0}
 							</div>
@@ -863,7 +863,7 @@ export const generateMarker = ({
 							
 							${
 								location.pathname === '/map'
-									? `<a href="/verify-location?id=${osmType}:${osmId}" class='!text-link hover:!text-hover text-xs transition-colors' title="Help improve the data for everyone">Verify Location</a>`
+									? `<a href="/verify-location?id=${placeId}" class='!text-link hover:!text-hover text-xs transition-colors' title="Help improve the data for everyone">Verify Location</a>`
 									: ''
 							}
 						</div>
