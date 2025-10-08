@@ -56,18 +56,10 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/) format for a
 
 [optional body]
 
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-```
-
-**Note:** When using opencode, use:
-
-```
 🤖 Generated with [opencode](https://opencode.ai)
 ```
 
-<!-- Note: When using opencode, we do not set a co-author attribution -->
+**Note:** When using opencode, we do not set a co-author attribution
 
 ### Examples:
 
