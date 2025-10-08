@@ -3,8 +3,6 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 
-	import axios from 'axios';
-
 	export let type: 'country' | 'community';
 	export let data: AreaPageProps;
 

@@ -671,7 +671,7 @@ export const generateMarker = ({
 			// Fetch place details from v4 API
 			try {
 				const response = await axios.get(
-					`https://api.btcmap.org/v4/places/${placeId}?fields=${buildFieldsParam(PLACE_FIELD_SETS.FULL_POPUP)}`
+					`https://api.btcmap.org/v4/places/${placeId}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`
 				);
 				const placeDetails = response.data;
 
