@@ -30,11 +30,30 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 
 				// Construct Element-like data structure from Place data for backward compatibility
 				const now = new Date().toISOString();
+
+				// Extract OSM type and ID from osm_url or osm_id
+				let osmType = 'node'; // default
+				let osmIdNum = Number(placeData.id); // fallback
+
+				if (placeData.osm_url) {
+					const osmMatch = placeData.osm_url.match(/openstreetmap\.org\/([^/]+)\/(\d+)/);
+					if (osmMatch) {
+						osmType = osmMatch[1];
+						osmIdNum = Number(osmMatch[2]);
+					}
+				} else if (placeData.osm_id) {
+					const parts = placeData.osm_id.split(':');
+					if (parts.length === 2) {
+						osmType = parts[0];
+						osmIdNum = Number(parts[1]);
+					}
+				}
+
 				data = {
 					id: placeData.id.toString(),
 					osm_json: {
-						type: 'node', // Default assumption
-						id: Number(placeData.osm_id || placeData.id),
+						type: osmType as 'node' | 'way' | 'relation',
+						id: osmIdNum,
 						lat: placeData.lat,
 						lon: placeData.lon,
 						bounds: null, // Not applicable for nodes
