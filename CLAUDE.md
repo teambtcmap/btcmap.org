@@ -67,6 +67,8 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 🤖 Generated with [opencode](https://opencode.ai)
 ```
 
+<!-- Note: When using opencode, we do not set a co-author attribution -->
+
 ### Examples:
 
 - `feat(map): add dark mode toggle #276`

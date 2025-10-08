@@ -173,7 +173,8 @@ export const validateContinents = (continent: Continents) =>
 		'South America'
 	].includes(continent);
 
-export const isBoosted = (item: Element | Place) =>
+export const isBoosted = (item: Element | Place | undefined | null) =>
+	item &&
 	('tags' in item ? item.tags['boost:expires'] : item.boosted_until) &&
 	Date.parse(('tags' in item ? item.tags['boost:expires'] : item.boosted_until) || '') > Date.now();
 
@@ -268,7 +269,78 @@ export async function fetchEnhancedPlace(placeId: string): Promise<Place | null>
 			return null;
 		}
 
-		const enhancedPlace: Place = await response.json();
+		const basePlace: Place = await response.json();
+		let enhancedPlace: Place = { ...basePlace };
+
+		// Map osm:contact fields to official fields as fallback
+		if (!enhancedPlace.instagram && enhancedPlace['osm:contact:instagram']) {
+			enhancedPlace.instagram = enhancedPlace['osm:contact:instagram'].startsWith('http')
+				? enhancedPlace['osm:contact:instagram']
+				: `https://instagram.com/${enhancedPlace['osm:contact:instagram']}`;
+		}
+		if (!enhancedPlace.twitter && enhancedPlace['osm:contact:twitter']) {
+			enhancedPlace.twitter = enhancedPlace['osm:contact:twitter'].startsWith('http')
+				? enhancedPlace['osm:contact:twitter']
+				: `https://twitter.com/${enhancedPlace['osm:contact:twitter']}`;
+		}
+		if (!enhancedPlace.facebook && enhancedPlace['osm:contact:facebook']) {
+			enhancedPlace.facebook = enhancedPlace['osm:contact:facebook'].startsWith('http')
+				? enhancedPlace['osm:contact:facebook']
+				: `https://facebook.com/${enhancedPlace['osm:contact:facebook']}`;
+		}
+
+		// If the place has an OSM ID, also fetch from v2 Elements API to get any remaining contact:* fields
+		// that might not be mapped in the v4 Places API
+		if (enhancedPlace.osm_id) {
+			try {
+				const elementsResponse = await fetch(
+					`https://api.btcmap.org/v2/elements/${enhancedPlace.osm_id}`
+				);
+				if (elementsResponse.ok) {
+					const elementsData = await elementsResponse.json();
+					const osmTags = elementsData.osm_json?.tags || {};
+
+					// Merge any remaining contact:* fields into the place data
+					const mergedPlace = { ...enhancedPlace };
+					if (osmTags['contact:instagram'] && !mergedPlace.instagram) {
+						mergedPlace.instagram = osmTags['contact:instagram'].startsWith('http')
+							? osmTags['contact:instagram']
+							: `https://instagram.com/${osmTags['contact:instagram']}`;
+					}
+					if (osmTags['contact:twitter'] && !mergedPlace.twitter) {
+						mergedPlace.twitter = osmTags['contact:twitter'].startsWith('http')
+							? osmTags['contact:twitter']
+							: `https://twitter.com/${osmTags['contact:twitter']}`;
+					}
+					if (osmTags['contact:facebook'] && !mergedPlace.facebook) {
+						mergedPlace.facebook = osmTags['contact:facebook'].startsWith('http')
+							? osmTags['contact:facebook']
+							: `https://facebook.com/${osmTags['contact:facebook']}`;
+					}
+
+					// Also check for direct social media fields in OSM
+					if (osmTags.instagram && !mergedPlace.instagram) {
+						mergedPlace.instagram = osmTags.instagram.startsWith('http')
+							? osmTags.instagram
+							: `https://instagram.com/${osmTags.instagram}`;
+					}
+					if (osmTags.twitter && !mergedPlace.twitter) {
+						mergedPlace.twitter = osmTags.twitter.startsWith('http')
+							? osmTags.twitter
+							: `https://twitter.com/${osmTags.twitter}`;
+					}
+					if (osmTags.facebook && !mergedPlace.facebook) {
+						mergedPlace.facebook = osmTags.facebook.startsWith('http')
+							? osmTags.facebook
+							: `https://facebook.com/${osmTags.facebook}`;
+					}
+					enhancedPlace = mergedPlace;
+				}
+			} catch (elementsError) {
+				// Ignore errors from v2 Elements API - we still have v4 data
+				console.warn(`Failed to fetch additional OSM data for place ${placeId}:`, elementsError);
+			}
+		}
 
 		// Cache the result
 		enhancedPlacesCache.set(placeId, enhancedPlace);

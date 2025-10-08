@@ -413,6 +413,13 @@ export type Place = {
 	instagram?: string;
 	line?: string;
 	email?: string;
+	// OSM contact fields
+	'osm:contact:instagram'?: string;
+	'osm:contact:twitter'?: string;
+	'osm:contact:facebook'?: string;
+	'osm:contact:phone'?: string;
+	'osm:contact:website'?: string;
+	'osm:contact:email'?: string;
 	// OSM payment method fields
 	'osm:payment:onchain'?: 'yes';
 	'osm:payment:lightning'?: 'yes';

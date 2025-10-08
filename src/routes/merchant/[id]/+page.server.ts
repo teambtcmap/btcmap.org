@@ -1,5 +1,5 @@
 import { latCalc, longCalc, checkAddress, verifiedArr } from '$lib/map/setup';
-import type { Element, MerchantPageData, MerchantComment, PayMerchant } from '$lib/types';
+import type { Element, MerchantPageData, MerchantComment, PayMerchant, Place } from '$lib/types';
 import { error } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -10,10 +10,70 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 	const { id } = params;
 	try {
-		// Use v2 Elements API for comprehensive merchant data
-		const response = await axios.get(`https://api.btcmap.org/v2/elements/${id}`);
+		let data: Element;
+		let placeData: Place | null = null;
 
-		const data: Element = response.data;
+		// Check if ID is numeric (Place ID) or OSM-style (node:123, way:123, etc.)
+		const isNumericId = /^\d+$/.test(id);
+
+		if (isNumericId) {
+			// For numeric Place IDs, fetch from v4 Places API first to get OSM ID, then v2 Elements
+			try {
+				const placeResponse = await axios.get(
+					`https://api.btcmap.org/v4/places/${id}?fields=id,osm_id,osm_url,name,address,phone,website,twitter,facebook,instagram,email,opening_hours,verified_at,lat,lon,icon`
+				);
+				placeData = placeResponse.data;
+
+				if (placeData && placeData.osm_id) {
+					// Use the OSM ID to fetch complete Element data
+					const elementResponse = await axios.get(
+						`https://api.btcmap.org/v2/elements/${placeData.osm_id}`
+					);
+					data = elementResponse.data;
+				} else if (placeData) {
+					// No OSM ID available, construct data from Place API (limited fields)
+					const now = new Date().toISOString();
+					data = {
+						id: placeData.id.toString(),
+						osm_json: {
+							type: 'node', // Default assumption
+							id: placeData.id,
+							lat: placeData.lat,
+							lon: placeData.lon,
+							bounds: null, // Not applicable for nodes
+							tags: {
+								name: placeData.name,
+								'addr:full': placeData.address,
+								phone: placeData.phone,
+								website: placeData.website,
+								twitter: placeData.twitter,
+								facebook: placeData.facebook,
+								instagram: placeData.instagram,
+								email: placeData.email,
+								opening_hours: placeData.opening_hours
+							}
+						},
+						tags: {
+							'icon:android': placeData.icon || 'question_mark',
+							category: 'merchant' // Default category
+						},
+						created_at: now,
+						updated_at: now,
+						deleted_at: ''
+					};
+				} else {
+					throw new Error('Place data not found');
+				}
+			} catch {
+				// If Place API fails, try v2 Elements API as fallback (might work for some IDs)
+				const response = await axios.get(`https://api.btcmap.org/v2/elements/${id}`);
+				data = response.data;
+			}
+		} else {
+			// Use v2 Elements API for OSM-style IDs
+			const response = await axios.get(`https://api.btcmap.org/v2/elements/${id}`);
+			data = response.data;
+		}
 		const lat = latCalc(data.osm_json);
 		const lon = longCalc(data.osm_json);
 
