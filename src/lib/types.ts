@@ -118,6 +118,9 @@ export type Element = {
 		['payment:uri']?: string;
 		['payment:coinos']?: string;
 		['payment:pouch']?: string;
+		['payment:lightning']?: 'yes';
+		['payment:onchain']?: 'yes';
+		['payment:lightning_contactless']?: 'yes';
 		issues?: Issue[];
 		areas?: Array<{ id: number; url_alias: string }>;
 		comments?: number;
@@ -160,8 +163,8 @@ export interface MerchantPageData {
 	osmType: string;
 	osmId: number;
 	osmTags: OSMTags;
-	// Element data for complex client logic (communities, events, etc.)
-	elementData: Element;
+	// Place data for BoostButton and other components
+	placeData: Place;
 }
 
 export type RpcIssue = {
@@ -420,6 +423,18 @@ export type Place = {
 	'osm:contact:phone'?: string;
 	'osm:contact:website'?: string;
 	'osm:contact:email'?: string;
+	// Payment methods
+	'payment:uri'?: string;
+	'payment:pouch'?: string;
+	'payment:coinos'?: string;
+	// Boost data
+	'boost:expires'?: string;
+	// Payment capabilities
+	'payment:lightning'?: 'yes';
+	'payment:onchain'?: 'yes';
+	'payment:lightning_contactless'?: 'yes';
+	// Third party app requirement
+	required_app_url?: string;
 	// OSM payment method fields
 	'osm:payment:onchain'?: 'yes';
 	'osm:payment:lightning'?: 'yes';
