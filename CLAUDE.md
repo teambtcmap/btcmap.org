@@ -65,9 +65,9 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ```
 🤖 Generated with [opencode](https://opencode.ai)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
 ```
+
+<!-- Note: When using opencode, we do not set a co-author attribution -->
 
 ### Examples:
 

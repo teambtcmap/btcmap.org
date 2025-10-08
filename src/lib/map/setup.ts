@@ -538,15 +538,31 @@ export const calcVerifiedDate = () => {
 };
 
 export const checkAddress = (element: OSMTags) => {
-	if (element['addr:housenumber'] && element['addr:street'] && element['addr:city']) {
-		return `${element['addr:housenumber']} ${element['addr:street']}, ${element['addr:city']}`;
-	} else if (element['addr:street'] && element['addr:city']) {
-		return `${element['addr:street']}, ${element['addr:city']}`;
-	} else if (element['addr:city']) {
-		return `${element['addr:city']}`;
-	} else {
-		return '';
+	let address = '';
+
+	if (element['addr:housenumber'] && element['addr:street']) {
+		address = `${element['addr:housenumber']} ${element['addr:street']}`;
+	} else if (element['addr:street']) {
+		address = element['addr:street'];
 	}
+
+	if (element['addr:city']) {
+		if (address) {
+			address += `, ${element['addr:city']}`;
+		} else {
+			address = element['addr:city'];
+		}
+	}
+
+	if (element['addr:postcode']) {
+		if (address) {
+			address += ` ${element['addr:postcode']}`;
+		} else {
+			address = element['addr:postcode'];
+		}
+	}
+
+	return address;
 };
 
 export const latCalc = (element: ElementOSM) => {

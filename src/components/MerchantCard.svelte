@@ -15,7 +15,12 @@
 	let isEnhancing = false;
 
 	// Check if we need to fetch enhanced data
-	$: needsEnhancement = !merchant.name || !merchant.address;
+	$: needsEnhancement =
+		!merchant.name ||
+		!merchant.address ||
+		!merchant.twitter ||
+		!merchant.instagram ||
+		!merchant.facebook;
 
 	// Fetch enhanced data when needed
 	async function enhanceMerchantData() {
@@ -44,17 +49,23 @@
 	// Use enhanced data if available, otherwise fall back to original
 	$: displayMerchant = enhancedMerchant || merchant;
 
-	const boosted = isBoosted(displayMerchant);
-	const icon = displayMerchant.icon;
-	const address = displayMerchant.address;
-	const website = displayMerchant.website;
-	const openingHours = displayMerchant.opening_hours;
-	const phone = displayMerchant.phone;
-	const email = displayMerchant.email;
-	const twitter = displayMerchant.twitter;
-	const instagram = displayMerchant.instagram;
-	const facebook = displayMerchant.facebook;
-	const verified = displayMerchant.verified_at ? [displayMerchant.verified_at] : [];
+	// Make boosted reactive and handle undefined displayMerchant
+	$: boosted = displayMerchant ? isBoosted(displayMerchant) : false;
+
+	// Use OSM ID for merchant link if available, otherwise use Place ID
+	$: merchantLinkId = displayMerchant?.osm_id || merchant.id;
+
+	// Make all displayMerchant property accesses reactive with safe defaults
+	$: icon = displayMerchant?.icon || 'question_mark';
+	$: address = displayMerchant?.address;
+	$: website = displayMerchant?.website;
+	$: openingHours = displayMerchant?.opening_hours;
+	$: phone = displayMerchant?.phone;
+	$: email = displayMerchant?.email;
+	$: twitter = displayMerchant?.twitter;
+	$: instagram = displayMerchant?.instagram;
+	$: facebook = displayMerchant?.facebook;
+	$: verified = displayMerchant?.verified_at ? [displayMerchant.verified_at] : [];
 	const verifiedDate = calcVerifiedDate();
 
 	let outdatedTooltip: HTMLDivElement;
@@ -73,7 +84,7 @@
 	<div>
 		<div class="mb-3 flex w-full flex-col items-center justify-between gap-2 sm:flex-row">
 			<a
-				href={resolve(`/merchant/${merchant.id}`)}
+				href={resolve(`/merchant/${merchantLinkId}`)}
 				class="inline-flex w-full flex-col items-center gap-2 font-bold transition-colors sm:w-auto sm:flex-row {boosted
 					? 'text-bitcoin hover:text-bitcoinHover'
 					: 'text-link hover:text-hover'}"
@@ -87,8 +98,6 @@
 				/>
 				<p class="break-all text-lg">{displayMerchant.name || 'BTC Map Merchant'}</p>
 			</a>
-
-			<!-- Description/note tooltips not available in Place API -->
 		</div>
 
 		<div class="mb-3 w-full space-y-2 break-all text-primary dark:text-white">
@@ -231,7 +240,7 @@
 
 		<div class="flex justify-between space-x-2 sm:justify-start">
 			<a
-				href={resolve(`/merchant/${merchant.id}`)}
+				href={resolve(`/merchant/${merchantLinkId}`)}
 				class="inline-flex items-center space-x-1 font-semibold text-link transition-colors hover:text-hover"
 				title="Help improve the data for everyone"
 			>
