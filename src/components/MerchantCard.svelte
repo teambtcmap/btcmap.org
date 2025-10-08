@@ -1,27 +1,60 @@
 <script lang="ts">
-	import { BoostButton, Icon, InfoTooltip } from '$lib/comp';
-	import { calcVerifiedDate, checkAddress, verifiedArr } from '$lib/map/setup';
+	import { BoostButton, Icon } from '$lib/comp';
+	import { calcVerifiedDate } from '$lib/map/setup';
 	import type { Place } from '$lib/types';
-	import { isBoosted, formatOpeningHours } from '$lib/utils';
+	import { isBoosted, formatOpeningHours, fetchEnhancedPlace } from '$lib/utils';
 	import Time from 'svelte-time';
 	import tippy from 'tippy.js';
 	import { resolve } from '$app/paths';
+	import { onMount } from 'svelte';
 
 	export let merchant: Place;
 
-	const boosted = isBoosted(merchant);
-	const icon = merchant.icon;
-	const description = undefined; // Not available in Place API
-	const note = undefined; // Not available in Place API
-	const address = merchant.address;
-	const website = merchant.website;
-	const openingHours = merchant.opening_hours;
-	const phone = merchant.phone;
-	const email = merchant.email;
-	const twitter = merchant.twitter;
-	const instagram = merchant.instagram;
-	const facebook = merchant.facebook;
-	const verified = merchant.verified_at ? [merchant.verified_at] : [];
+	// Enhanced merchant data (fetched on-demand if basic data is missing)
+	let enhancedMerchant: Place | null = null;
+	let isEnhancing = false;
+
+	// Check if we need to fetch enhanced data
+	$: needsEnhancement = !merchant.name || !merchant.address;
+
+	// Fetch enhanced data when needed
+	async function enhanceMerchantData() {
+		if (!needsEnhancement || isEnhancing) return;
+
+		isEnhancing = true;
+		try {
+			const enhanced = await fetchEnhancedPlace(merchant.id.toString());
+			if (enhanced) {
+				enhancedMerchant = enhanced;
+			}
+		} catch (error) {
+			console.error('Failed to enhance merchant data:', error);
+		} finally {
+			isEnhancing = false;
+		}
+	}
+
+	// Auto-enhance on mount if needed
+	onMount(() => {
+		if (needsEnhancement) {
+			enhanceMerchantData();
+		}
+	});
+
+	// Use enhanced data if available, otherwise fall back to original
+	$: displayMerchant = enhancedMerchant || merchant;
+
+	const boosted = isBoosted(displayMerchant);
+	const icon = displayMerchant.icon;
+	const address = displayMerchant.address;
+	const website = displayMerchant.website;
+	const openingHours = displayMerchant.opening_hours;
+	const phone = displayMerchant.phone;
+	const email = displayMerchant.email;
+	const twitter = displayMerchant.twitter;
+	const instagram = displayMerchant.instagram;
+	const facebook = displayMerchant.facebook;
+	const verified = displayMerchant.verified_at ? [displayMerchant.verified_at] : [];
 	const verifiedDate = calcVerifiedDate();
 
 	let outdatedTooltip: HTMLDivElement;
@@ -52,7 +85,7 @@
 					type="material"
 					style="shrink-0"
 				/>
-				<p class="break-all text-lg">{merchant.name || 'BTC Map Merchant'}</p>
+				<p class="break-all text-lg">{displayMerchant.name || 'BTC Map Merchant'}</p>
 			</a>
 
 			<!-- Description/note tooltips not available in Place API -->
