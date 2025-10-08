@@ -78,10 +78,9 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 					updated_at: now,
 					deleted_at: ''
 				};
-			} catch {
-				// If Place API fails, try v2 Elements API as fallback (might work for some IDs)
-				const response = await axios.get(`https://api.btcmap.org/v2/elements/${id}`);
-				data = response.data;
+			} catch (error) {
+				console.error(`Failed to fetch Place data for ID ${id}:`, error);
+				throw error; // Re-throw to be handled by outer catch
 			}
 		} else {
 			// Use v2 Elements API for OSM-style IDs
