@@ -20,7 +20,7 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 			// For numeric Place IDs, fetch complete data from v4 Places API
 			try {
 				const placeResponse = await axios.get(
-					`https://api.btcmap.org/v4/places/${id}?fields=id,osm_id,osm_url,name,address,phone,website,twitter,facebook,instagram,email,opening_hours,verified_at,lat,lon,icon,payment:uri,payment:pouch,payment:coinos,boost:expires,payment:lightning,payment:onchain,payment:lightning_contactless,osm:contact:phone,osm:contact:website,osm:contact:email,osm:contact:twitter,osm:contact:facebook,osm:contact:instagram,required_app_url`
+					`https://api.btcmap.org/v4/places/${id}?fields=id,osm_id,osm_url,name,address,phone,website,twitter,facebook,instagram,email,opening_hours,verified_at,lat,lon,icon,payment:uri,payment:pouch,payment:coinos,boosted_until,payment:lightning,payment:onchain,payment:lightning_contactless,osm:contact:phone,osm:contact:website,osm:contact:email,osm:contact:twitter,osm:contact:facebook,osm:contact:instagram,required_app_url`
 				);
 				placeData = placeResponse.data;
 
@@ -60,7 +60,7 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 						'payment:uri': placeData['payment:uri'],
 						'payment:pouch': placeData['payment:pouch'],
 						'payment:coinos': placeData['payment:coinos'],
-						'boost:expires': placeData['boost:expires'],
+						'boost:expires': placeData.boosted_until,
 						'payment:lightning': placeData['payment:lightning'],
 						'payment:onchain': placeData['payment:onchain'],
 						'payment:lightning_contactless': placeData['payment:lightning_contactless']
