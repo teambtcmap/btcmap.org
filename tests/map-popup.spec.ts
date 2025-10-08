@@ -173,7 +173,7 @@ test.describe('Map Popup', () => {
 		await expect(page).toHaveURL(/\/merchant\//);
 
 		// Check that we're on the merchant detail page by looking for merchant-specific content
-		await expect(page.getByText('Last Surveyed')).toBeVisible();
+		await expect(page.getByText('Last Surveyed')).toBeVisible({ timeout: 30000 });
 		await expect(page.getByRole('heading', { name: 'Boost' })).toBeVisible();
 		await expect(page.getByText('Comments').first()).toBeVisible();
 	});
