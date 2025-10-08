@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { Icon } from '$lib/comp';
 	import { boost, exchangeRate, resetBoost } from '$lib/store';
-	import type { Element } from '$lib/types';
+	import type { Element, Place } from '$lib/types';
 	import { errToast } from '$lib/utils';
 	import axios from 'axios';
 	import axiosRetry from 'axios-retry';
 
-	export let merchant: Element | undefined;
+	export let merchant: Element | Place | undefined;
 	export let boosted: string | undefined;
 	export let style: 'button' | 'link' = 'button';
 
@@ -24,8 +24,8 @@
 		boostLoading = true;
 
 		$boost = {
-			id: merchant.id,
-			name: merchant.osm_json.tags?.name || '',
+			id: String(merchant.id),
+			name: ('osm_json' in merchant ? merchant.osm_json.tags?.name : merchant.name) || '',
 			boost: boosted || ''
 		};
 

@@ -1,6 +1,6 @@
 import { theme, areas } from '$lib/store';
 import { areasSync } from '$lib/sync/areas';
-import type { Continents, Element, Grade, IssueIcon } from '$lib/types';
+import type { Continents, Element, Grade, IssueIcon, Place } from '$lib/types';
 import { toast } from '@zerodevx/svelte-toast';
 import type { Chart } from 'chart.js';
 import { get } from 'svelte/store';
@@ -172,8 +172,9 @@ export const validateContinents = (continent: Continents) =>
 		'South America'
 	].includes(continent);
 
-export const isBoosted = (element: Element) =>
-	element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now();
+export const isBoosted = (item: Element | Place) =>
+	('tags' in item ? item.tags['boost:expires'] : item.boosted_until) &&
+	Date.parse(('tags' in item ? item.tags['boost:expires'] : item.boosted_until) || '') > Date.now();
 
 export async function getAreaIdsByCoordinates(lat: number, long: number): Promise<string[]> {
 	console.debug('Checking areas with coordinates:', { lat, long });
