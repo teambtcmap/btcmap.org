@@ -514,7 +514,7 @@
 								Hours
 							</h4>
 
-							<div class="justify-center justify-items-start md:flex">
+							<div class="flex items-start justify-center md:justify-center">
 								<!-- eslint-disable-next-line svelte/no-at-html-tags - we even sanitize the captcha content above -->
 								<time class="flex flex-col items-start">{@html formatOpeningHours(hours)}</time>
 							</div>
