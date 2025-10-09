@@ -131,7 +131,7 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 					? data.tags['boost:expires']
 					: undefined;
 
-			const verified = verifiedArr(data.osm_json);
+			const verified = verifiedArr(placeData);
 			const phone = data.osm_json.tags?.phone || data.osm_json.tags?.['contact:phone'];
 			const website = data.osm_json.tags?.website || data.osm_json.tags?.['contact:website'];
 			const email = data.osm_json.tags?.email || data.osm_json.tags?.['contact:email'];

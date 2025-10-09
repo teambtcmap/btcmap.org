@@ -1,7 +1,7 @@
 import { boost, exchangeRate, resetBoost, theme } from '$lib/store';
 import { Icon } from '$lib/comp';
-import type { DomEventType, ElementOSM, Leaflet, OSMTags } from '$lib/types';
 import { detectTheme, errToast, formatVerifiedHuman } from '$lib/utils';
+import type { DomEventType, ElementOSM, Leaflet, OSMTags, Place } from '$lib/types';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -626,28 +626,23 @@ export const generateIcon = (L: Leaflet, icon: string, boosted: boolean, comment
 	});
 };
 
-export const verifiedArr = (element: ElementOSM) => {
+export const verifiedArr = (place: Place) => {
 	const verified = [];
 
-	if (element.tags) {
-		if (element.tags['survey:date'] && Date.parse(element.tags['survey:date'])) {
-			verified.push(element.tags['survey:date']);
-		}
+	if (place['osm:survey:date'] && Date.parse(place['osm:survey:date'])) {
+		verified.push(place['osm:survey:date']);
+	}
 
-		if (element.tags['check_date'] && Date.parse(element.tags['check_date'])) {
-			verified.push(element.tags['check_date']);
-		}
+	if (place['osm:check_date'] && Date.parse(place['osm:check_date'])) {
+		verified.push(place['osm:check_date']);
+	}
 
-		if (
-			element.tags['check_date:currency:XBT'] &&
-			Date.parse(element.tags['check_date:currency:XBT'])
-		) {
-			verified.push(element.tags['check_date:currency:XBT']);
-		}
+	if (place['osm:check_date:currency:XBT'] && Date.parse(place['osm:check_date:currency:XBT'])) {
+		verified.push(place['osm:check_date:currency:XBT']);
+	}
 
-		if (verified.length > 1) {
-			verified.sort((a, b) => Date.parse(b) - Date.parse(a));
-		}
+	if (verified.length > 1) {
+		verified.sort((a, b) => Date.parse(b) - Date.parse(a));
 	}
 
 	return verified;

@@ -443,7 +443,7 @@
 		{/if}
 	{:else if activeSection === Sections.stats}
 		{#if areaReports && areaReports.length > 0}
-			<AreaStats {name} {filteredElements} {areaReports} areaTags={area} />
+			<AreaStats {name} {filteredPlaces} {areaReports} areaTags={area} />
 		{:else}
 			<div class="text-center text-primary dark:text-white">
 				<p class="text-xl">Data will appear within 24 hours.</p>
