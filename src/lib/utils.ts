@@ -173,10 +173,27 @@ export const validateContinents = (continent: Continents) =>
 		'South America'
 	].includes(continent);
 
-export const isBoosted = (item: Element | Place | undefined | null) =>
-	item &&
-	('tags' in item ? item.tags['boost:expires'] : item.boosted_until) &&
-	Date.parse(('tags' in item ? item.tags['boost:expires'] : item.boosted_until) || '') > Date.now();
+export const isBoosted = (item: Element | Place | undefined | null) => {
+	if (!item) return false;
+	const boostExpiry = 'tags' in item ? item.tags['boost:expires'] : item.boosted_until;
+	return boostExpiry && Date.parse(boostExpiry || '') > Date.now();
+};
+
+/**
+ * Normalizes social media URLs by ensuring they start with https://
+ * If the URL doesn't start with http, prepends the platform's base URL
+ */
+const normalizeSocialUrl = (url: string, platform: string): string => {
+	if (url.startsWith('http')) {
+		return url;
+	}
+	const platformUrls: Record<string, string> = {
+		instagram: 'https://instagram.com/',
+		twitter: 'https://twitter.com/',
+		facebook: 'https://facebook.com/'
+	};
+	return platformUrls[platform] + url;
+};
 
 export async function getAreaIdsByCoordinates(lat: number, long: number): Promise<string[]> {
 	console.debug('Checking areas with coordinates:', { lat, long });
@@ -274,19 +291,19 @@ export async function fetchEnhancedPlace(placeId: string): Promise<Place | null>
 
 		// Map osm:contact fields to official fields as fallback
 		if (!enhancedPlace.instagram && enhancedPlace['osm:contact:instagram']) {
-			enhancedPlace.instagram = enhancedPlace['osm:contact:instagram'].startsWith('http')
-				? enhancedPlace['osm:contact:instagram']
-				: `https://instagram.com/${enhancedPlace['osm:contact:instagram']}`;
+			enhancedPlace.instagram = normalizeSocialUrl(
+				enhancedPlace['osm:contact:instagram'],
+				'instagram'
+			);
 		}
 		if (!enhancedPlace.twitter && enhancedPlace['osm:contact:twitter']) {
-			enhancedPlace.twitter = enhancedPlace['osm:contact:twitter'].startsWith('http')
-				? enhancedPlace['osm:contact:twitter']
-				: `https://twitter.com/${enhancedPlace['osm:contact:twitter']}`;
+			enhancedPlace.twitter = normalizeSocialUrl(enhancedPlace['osm:contact:twitter'], 'twitter');
 		}
 		if (!enhancedPlace.facebook && enhancedPlace['osm:contact:facebook']) {
-			enhancedPlace.facebook = enhancedPlace['osm:contact:facebook'].startsWith('http')
-				? enhancedPlace['osm:contact:facebook']
-				: `https://facebook.com/${enhancedPlace['osm:contact:facebook']}`;
+			enhancedPlace.facebook = normalizeSocialUrl(
+				enhancedPlace['osm:contact:facebook'],
+				'facebook'
+			);
 		}
 
 		// v4 Places API provides all necessary contact information through osm:contact:* fields

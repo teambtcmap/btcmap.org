@@ -14,13 +14,8 @@
 	let enhancedMerchant: Place | null = null;
 	let isEnhancing = false;
 
-	// Check if we need to fetch enhanced data
-	$: needsEnhancement =
-		!merchant.name ||
-		!merchant.address ||
-		!merchant.twitter ||
-		!merchant.instagram ||
-		!merchant.facebook;
+	// Check if we need to fetch enhanced data (only essential fields)
+	$: needsEnhancement = !merchant.name || !merchant.address;
 
 	// Fetch enhanced data when needed
 	async function enhanceMerchantData() {
