@@ -1,5 +1,6 @@
 import { latCalc, longCalc, checkAddress, verifiedArr } from '$lib/map/setup';
 import type { Element, MerchantPageData, MerchantComment, PayMerchant, Place } from '$lib/types';
+import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 import { error } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -16,7 +17,7 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 		// Fetch complete data from v4 Places API (supports both numeric Place IDs and OSM-style IDs)
 		try {
 			const placeResponse = await axios.get(
-				`https://api.btcmap.org/v4/places/${id}?fields=id,osm_id,osm_url,name,address,phone,website,twitter,facebook,instagram,email,opening_hours,verified_at,lat,lon,icon,payment:uri,payment:pouch,payment:coinos,boosted_until,payment:lightning,payment:onchain,payment:lightning_contactless,osm:contact:phone,osm:contact:website,osm:contact:email,osm:contact:twitter,osm:contact:facebook,osm:contact:instagram,required_app_url,osm:payment:lightning,osm:payment:onchain,osm:payment:lightning_contactless`
+				`https://api.btcmap.org/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`
 			);
 			placeData = placeResponse.data;
 
@@ -88,9 +89,9 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 						placeData['payment:lightning_contactless'] ||
 						placeData['osm:payment:lightning_contactless']
 				},
-				created_at: now,
-				updated_at: now,
-				deleted_at: ''
+				created_at: placeData.created_at || now,
+				updated_at: placeData.updated_at || now,
+				deleted_at: placeData.deleted_at || ''
 			};
 		} catch (fetchError) {
 			console.error(`Failed to fetch Place data for ID ${id}:`, fetchError);
