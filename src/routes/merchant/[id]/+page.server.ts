@@ -92,9 +92,9 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 				updated_at: now,
 				deleted_at: ''
 			};
-		} catch (error) {
-			console.error(`Failed to fetch Place data for ID ${id}:`, error);
-			throw error; // Re-throw to be handled by outer catch
+		} catch (fetchError) {
+			console.error(`Failed to fetch Place data for ID ${id}:`, fetchError);
+			throw fetchError; // Re-throw to be handled by outer catch
 		}
 		const lat = latCalc(data.osm_json);
 		const lon = longCalc(data.osm_json);
