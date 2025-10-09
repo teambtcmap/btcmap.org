@@ -37,7 +37,6 @@
 		type ActivityEvent,
 		type AreaPageProps,
 		type AreaTags,
-		type Element,
 		type Event,
 		type Place,
 		type Report,
@@ -270,10 +269,10 @@
 			const places = await fetchPlacesForArea(areaFound.id);
 			filteredPlaces = places;
 
-			// Process events after elements are loaded, only if events and users stores are populated
+			// Process events after places are loaded, only if events and users stores are populated
 			if ($events.length && $users.length) {
 				const areaEvents = $events.filter((event) =>
-					filteredElements.find((element) => element.id === event.element_id)
+					filteredPlaces.find((place) => place.osm_id === event.element_id)
 				);
 
 				areaEvents.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
@@ -293,9 +292,9 @@
 				};
 
 				areaEvents.forEach((event) => {
-					let elementMatch = filteredElements.find((element) => element.id === event['element_id']);
+					let placeMatch = filteredPlaces.find((place) => place.osm_id === event['element_id']);
 
-					let location = elementMatch?.osm_json.tags?.name || undefined;
+					let location = placeMatch?.name || undefined;
 
 					let tagger = findUser(event);
 
@@ -316,7 +315,6 @@
 	$: $areas && $areas.length && $places && $places.length && !dataInitialized && initializeData();
 
 	let area: AreaTags;
-	let filteredElements: Element[] = [];
 	let filteredPlaces: Place[] = [];
 	let areaReports: Report[];
 
