@@ -264,7 +264,20 @@
 		dataInitialized = true;
 	};
 
-	$: filteredPlaces && areaReports && initialRenderComplete && !dataInitialized && initializeData();
+	// Check if places have verification data (indicator that enrichment is complete)
+	$: hasVerificationData =
+		filteredPlaces &&
+		filteredPlaces.length > 0 &&
+		filteredPlaces.some(
+			(p) => p['osm:survey:date'] || p['osm:check_date'] || p['osm:check_date:currency:XBT']
+		);
+
+	// Only initialize when we have verification data
+	$: hasVerificationData &&
+		areaReports &&
+		initialRenderComplete &&
+		!dataInitialized &&
+		initializeData();
 
 	let total: number | undefined;
 	let upToDate: number | undefined;
