@@ -45,8 +45,13 @@
 		type User
 	} from '$lib/types.js';
 	import { errToast, formatElementID, validateContinents } from '$lib/utils';
+	import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
+	import axios from 'axios';
+	import axiosRetry from 'axios-retry';
 	import rewind from '@mapbox/geojson-rewind';
 	import { geoContains } from 'd3-geo';
+
+	axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 	// alert for user errors
 	$: $userError && errToast($userError);
@@ -102,29 +107,60 @@
 	let dataInitialized = false;
 	let elementsLoading = false;
 
-	// Fetch places for area using geographic filtering (no API calls needed)
+	// Fetch places for area using geographic filtering + enrichment with verification data
 	const fetchPlacesForArea = async (areaId: string): Promise<Place[]> => {
 		try {
 			elementsLoading = true;
 
-			// Find the area by ID
+			// Step 1: Geographic filtering (fast, uses existing store)
 			const area = $areas.find((a) => a.id === areaId);
 			if (!area || !area.tags.geo_json) {
 				console.error('Area not found or missing geo_json:', areaId);
 				return [];
 			}
 
-			// Use existing global places from the store for geographic filtering
 			const allPlaces = $places;
-
-			// Use geographic filtering to get places in the area
 			const rewoundPoly = rewind(area.tags.geo_json, true);
 			const areaPlaces = allPlaces.filter((place: Place) => {
 				return place.lat && place.lon && geoContains(rewoundPoly, [place.lon, place.lat]);
 			});
 
 			console.log(`Geographic filtering found ${areaPlaces.length} places for ${areaId}`);
-			return areaPlaces;
+
+			// Step 2: Enrich with verification data from API (batched requests)
+			const placeIds = areaPlaces.map((p) => p.id);
+			const batchSize = 20;
+			const enrichedPlaces: Place[] = [];
+
+			console.log(
+				`Enriching ${placeIds.length} places with verification data in ${Math.ceil(placeIds.length / batchSize)} batches`
+			);
+
+			for (let i = 0; i < placeIds.length; i += batchSize) {
+				const batch = placeIds.slice(i, i + batchSize);
+				const batchPromises = batch.map((id) =>
+					axios
+						.get<Place>(
+							`https://api.btcmap.org/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`
+						)
+						.then((response) => response.data)
+						.catch((error) => {
+							console.warn(`Failed to fetch place ${id}:`, error.response?.status);
+							return null;
+						})
+				);
+
+				const batchResults = await Promise.all(batchPromises);
+				const validPlaces = batchResults.filter((place): place is Place => place !== null);
+				enrichedPlaces.push(...validPlaces);
+
+				console.log(
+					`Batch ${Math.floor(i / batchSize) + 1} completed: ${validPlaces.length}/${batch.length} successful`
+				);
+			}
+
+			console.log(`Successfully enriched ${enrichedPlaces.length} places for ${areaId}`);
+			return enrichedPlaces;
 		} catch (error) {
 			console.error('Failed to fetch places for area:', areaId, error);
 			return [];
