@@ -3,13 +3,13 @@
 	import { ProfileStat } from '$lib/comp';
 	import { calcVerifiedDate, verifiedArr } from '$lib/map/setup';
 	import { theme } from '$lib/store';
-	import { type Element, type Report, type AreaTags } from '$lib/types.js';
+	import { type Place, type Report, type AreaTags } from '$lib/types.js';
 	import { detectTheme, updateChartThemes } from '$lib/utils';
 	import Chart from 'chart.js/auto';
 	import { onMount } from 'svelte';
 
 	export let name: string;
-	export let filteredElements: Element[];
+	export let filteredPlaces: Place[];
 	export let areaReports: Report[];
 	export let areaTags: AreaTags | undefined = undefined;
 
@@ -28,10 +28,10 @@
 	const initializeData = () => {
 		if (dataInitialized) return;
 
-		filteredElements.forEach((element) => {
+		filteredPlaces.forEach((place) => {
 			// get date from 1 year ago to add verified check if survey is current
 			let verifiedDate = calcVerifiedDate();
-			let verified = verifiedArr(element.osm_json);
+			let verified = verifiedArr(place);
 
 			if (verified.length && Date.parse(verified[0]) > verifiedDate) {
 				if (upToDate === undefined) {
@@ -47,7 +47,7 @@
 				}
 			}
 
-			if (element.osm_json.tags && element.osm_json.tags['payment:bitcoin']) {
+			if (place['osm:payment:bitcoin']) {
 				if (legacy === undefined) {
 					legacy = 1;
 				} else {
@@ -264,11 +264,7 @@
 		dataInitialized = true;
 	};
 
-	$: filteredElements &&
-		areaReports &&
-		initialRenderComplete &&
-		!dataInitialized &&
-		initializeData();
+	$: filteredPlaces && areaReports && initialRenderComplete && !dataInitialized && initializeData();
 
 	let total: number | undefined;
 	let upToDate: number | undefined;
