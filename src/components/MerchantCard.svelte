@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { BoostButton, Icon } from '$lib/comp';
-	import { calcVerifiedDate } from '$lib/map/setup';
+	import { calcVerifiedDate, verifiedArr } from '$lib/map/setup';
 	import type { Place } from '$lib/types';
 	import { isBoosted, formatOpeningHours, fetchEnhancedPlace } from '$lib/utils';
 	import Time from 'svelte-time';
@@ -60,7 +60,7 @@
 	$: twitter = displayMerchant?.twitter;
 	$: instagram = displayMerchant?.instagram;
 	$: facebook = displayMerchant?.facebook;
-	$: verified = displayMerchant?.verified_at ? [displayMerchant.verified_at] : [];
+	$: verified = displayMerchant ? verifiedArr(displayMerchant) : [];
 	const verifiedDate = calcVerifiedDate();
 
 	let outdatedTooltip: HTMLDivElement;
