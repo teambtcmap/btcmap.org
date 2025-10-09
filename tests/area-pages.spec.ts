@@ -2,12 +2,16 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Area Pages', () => {
 	test('country stats page displays actual data and charts', async ({ page }) => {
+		// Stats view requires store sync (areas, places, reports) which is slow in CI
+		const timeout = process.env.CI ? 120000 : 30000; // 2 min for CI, 30s for local
+		test.setTimeout(process.env.CI ? 180000 : 90000); // 3 min for CI, 1.5 min for local
+
 		// Navigate to El Salvador stats (known to have good data)
 		await page.goto('http://127.0.0.1:5173/country/sv/stats', { waitUntil: 'load' });
 		await expect(page).toHaveTitle(/BTC Map/);
 
-		// Wait for stats to load with actual numbers
-		await expect(page.getByText('Total Locations')).toBeVisible({ timeout: 30000 });
+		// Wait for stats to load with actual numbers (requires full store sync)
+		await expect(page.getByText('Total Locations')).toBeVisible({ timeout });
 		await expect(page.getByText('Recently Verified Locations')).toBeVisible();
 
 		// Verify actual numeric data appears (not just 0 or loading state)
@@ -29,13 +33,17 @@ test.describe('Area Pages', () => {
 	});
 
 	test('country activity page displays actual taggers and events', async ({ page }) => {
+		// Activity view requires store sync (areas, places, events, users) which is slow in CI
+		const timeout = process.env.CI ? 120000 : 30000; // 2 min for CI, 30s for local
+		test.setTimeout(process.env.CI ? 180000 : 90000); // 3 min for CI, 1.5 min for local
+
 		// Navigate to El Salvador activity (known to have activity)
 		await page.goto('http://127.0.0.1:5173/country/sv/activity', { waitUntil: 'load' });
 		await expect(page).toHaveTitle(/BTC Map/);
 
 		// Wait for activity sections to appear
-		await expect(page.getByText('Taggers', { exact: false })).toBeVisible({ timeout: 30000 });
-		await expect(page.getByText('Latest Activity', { exact: false })).toBeVisible();
+		await expect(page.getByText('Taggers', { exact: false })).toBeVisible({ timeout });
+		await expect(page.getByText('Latest Activity', { exact: false })).toBeVisible({ timeout });
 
 		// Verify actual tagger avatars/profiles appear (not loading skeletons)
 		// Taggers section should have clickable links to tagger profiles
@@ -50,13 +58,17 @@ test.describe('Area Pages', () => {
 	});
 
 	test('country merchants page displays actual merchant data', async ({ page }) => {
+		// Merchants view requires store sync (areas, places) which is slow in CI
+		const timeout = process.env.CI ? 120000 : 30000; // 2 min for CI, 30s for local
+		test.setTimeout(process.env.CI ? 180000 : 90000); // 3 min for CI, 1.5 min for local
+
 		// Navigate to El Salvador merchants
 		await page.goto('http://127.0.0.1:5173/country/sv/merchants', { waitUntil: 'load' });
 		await expect(page).toHaveTitle(/BTC Map/);
 
 		// Wait for merchant section to load
 		await expect(page.getByText('Merchant Highlights', { exact: false })).toBeVisible({
-			timeout: 30000
+			timeout
 		});
 
 		// Verify merchant cards appear (not just loading state)
@@ -81,6 +93,10 @@ test.describe('Area Pages', () => {
 	});
 
 	test('community stats page displays actual data', async ({ page }) => {
+		// Communities require same store sync as countries (slow in CI)
+		const timeout = process.env.CI ? 120000 : 30000; // 2 min for CI, 30s for local
+		test.setTimeout(process.env.CI ? 180000 : 90000); // 3 min for CI, 1.5 min for local
+
 		// Navigate to a known community with stats (bitcoin-jungle in Costa Rica)
 		await page.goto('http://127.0.0.1:5173/community/bitcoin-jungle/stats', {
 			waitUntil: 'load'
@@ -88,7 +104,7 @@ test.describe('Area Pages', () => {
 		await expect(page).toHaveTitle(/BTC Map/);
 
 		// Communities use the same components as countries, so same checks apply
-		await expect(page.getByText('Total Locations')).toBeVisible({ timeout: 30000 });
+		await expect(page.getByText('Total Locations')).toBeVisible({ timeout });
 
 		// Verify numeric data appears
 		await expect(page.getByText(/%/)).toBeVisible({ timeout: 10000 });
@@ -99,6 +115,10 @@ test.describe('Area Pages', () => {
 	});
 
 	test('community activity page displays actual events', async ({ page }) => {
+		// Communities require same store sync as countries (slow in CI)
+		const timeout = process.env.CI ? 120000 : 30000; // 2 min for CI, 30s for local
+		test.setTimeout(process.env.CI ? 180000 : 90000); // 3 min for CI, 1.5 min for local
+
 		// Navigate to bitcoin-jungle activity
 		await page.goto('http://127.0.0.1:5173/community/bitcoin-jungle/activity', {
 			waitUntil: 'load'
@@ -106,7 +126,7 @@ test.describe('Area Pages', () => {
 		await expect(page).toHaveTitle(/BTC Map/);
 
 		// Wait for activity sections
-		await expect(page.getByText('Taggers', { exact: false })).toBeVisible({ timeout: 30000 });
+		await expect(page.getByText('Taggers', { exact: false })).toBeVisible({ timeout });
 
 		// Verify tagger links appear
 		const taggerLinks = page.locator('a[href*="/tagger/"]');
