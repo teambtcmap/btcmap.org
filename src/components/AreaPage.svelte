@@ -150,7 +150,9 @@
 				);
 
 				const batchResults = await Promise.all(batchPromises);
-				const validPlaces = batchResults.filter((place): place is Place => place !== null);
+				const validPlaces = batchResults
+					.filter((place): place is Place => place !== null)
+					.filter((place) => !place.deleted_at);
 				enrichedPlaces.push(...validPlaces);
 
 				console.log(
