@@ -173,8 +173,8 @@ test.describe('Map Popup', () => {
 		await expect(page).toHaveURL(/\/merchant\//);
 
 		// Check that we're on the merchant detail page by looking for merchant-specific content
-		// Use longer timeout in CI where data sync takes significantly longer
-		const timeout = process.env.CI ? 120000 : 60000; // 2 minutes for CI, 1 minute for local
+		// Cards now render immediately with server data (no store sync needed)
+		const timeout = process.env.CI ? 30000 : 10000; // 30s for CI, 10s for local
 		await expect(page.getByText('Last Surveyed')).toBeVisible({ timeout });
 		await expect(page.getByRole('heading', { name: 'Boost' })).toBeVisible();
 		await expect(page.getByText('Comments').first()).toBeVisible();
