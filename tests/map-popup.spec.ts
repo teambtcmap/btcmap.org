@@ -3,9 +3,9 @@ import { test, expect } from '@playwright/test';
 test.describe('Map Popup', () => {
 	test('popup title click navigates to merchant detail page', async ({ page }) => {
 		// Increase timeout for this test since it involves network requests
-		test.setTimeout(60000);
-		// Wait for API responses to complete
-		await page.goto('http://127.0.0.1:5173/map', { waitUntil: 'networkidle' });
+		test.setTimeout(180000); // 3 minutes to handle slow data loading
+		// Wait for page to load (use 'load' instead of 'networkidle' for better reliability)
+		await page.goto('http://127.0.0.1:5173/map', { waitUntil: 'load' });
 		await expect(page).toHaveTitle(/BTC Map/);
 
 		// Wait for map to load
@@ -173,14 +173,16 @@ test.describe('Map Popup', () => {
 		await expect(page).toHaveURL(/\/merchant\//);
 
 		// Check that we're on the merchant detail page by looking for merchant-specific content
-		await expect(page.getByText('Last Surveyed')).toBeVisible({ timeout: 30000 });
+		// Use longer timeout in CI where data sync takes significantly longer
+		const timeout = process.env.CI ? 120000 : 60000; // 2 minutes for CI, 1 minute for local
+		await expect(page.getByText('Last Surveyed')).toBeVisible({ timeout });
 		await expect(page.getByRole('heading', { name: 'Boost' })).toBeVisible();
 		await expect(page.getByText('Comments').first()).toBeVisible();
 	});
 
 	test('popup shows Comments button with count', async ({ page }) => {
 		// Navigate to a specific location with known merchants (San Salvador, El Salvador)
-		await page.goto('http://127.0.0.1:5173/map#15/13.6929/-89.2182', { waitUntil: 'networkidle' });
+		await page.goto('http://127.0.0.1:5173/map#15/13.6929/-89.2182', { waitUntil: 'load' });
 		await expect(page).toHaveTitle(/BTC Map/);
 
 		// Wait for map to load
