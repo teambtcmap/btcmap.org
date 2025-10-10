@@ -4,7 +4,7 @@ test.describe('Area Pages', () => {
 	test('country stats page displays actual data and charts', async ({ page }) => {
 		// Stats view requires store sync (areas, places, reports) which is slow in CI
 		const timeout = process.env.CI ? 120000 : 30000; // 2 min for CI, 30s for local
-		test.setTimeout(process.env.CI ? 180000 : 90000); // 3 min for CI, 1.5 min for local
+		test.setTimeout(process.env.CI ? 120000 : 90000); // 2 min for CI, 1.5 min for local
 
 		// Navigate to El Salvador stats (known to have good data)
 		await page.goto('http://127.0.0.1:5173/country/sv/stats', { waitUntil: 'load' });
@@ -35,7 +35,7 @@ test.describe('Area Pages', () => {
 	test('country activity page displays actual taggers and events', async ({ page }) => {
 		// Activity view requires store sync (areas, places, events, users) which is slow in CI
 		const timeout = process.env.CI ? 120000 : 30000; // 2 min for CI, 30s for local
-		test.setTimeout(process.env.CI ? 180000 : 90000); // 3 min for CI, 1.5 min for local
+		test.setTimeout(process.env.CI ? 120000 : 90000); // 2 min for CI, 1.5 min for local
 
 		// Navigate to El Salvador activity (known to have activity)
 		await page.goto('http://127.0.0.1:5173/country/sv/activity', { waitUntil: 'load' });
@@ -60,7 +60,7 @@ test.describe('Area Pages', () => {
 	test('country merchants page displays actual merchant data', async ({ page }) => {
 		// Merchants view requires store sync (areas, places) which is slow in CI
 		const timeout = process.env.CI ? 120000 : 30000; // 2 min for CI, 30s for local
-		test.setTimeout(process.env.CI ? 180000 : 90000); // 3 min for CI, 1.5 min for local
+		test.setTimeout(process.env.CI ? 120000 : 90000); // 2 min for CI, 1.5 min for local
 
 		// Navigate to El Salvador merchants
 		await page.goto('http://127.0.0.1:5173/country/sv/merchants', { waitUntil: 'load' });
@@ -95,7 +95,7 @@ test.describe('Area Pages', () => {
 	test('community stats page displays actual data', async ({ page }) => {
 		// Communities require same store sync as countries (slow in CI)
 		const timeout = process.env.CI ? 120000 : 30000; // 2 min for CI, 30s for local
-		test.setTimeout(process.env.CI ? 180000 : 90000); // 3 min for CI, 1.5 min for local
+		test.setTimeout(process.env.CI ? 120000 : 90000); // 2 min for CI, 1.5 min for local
 
 		// Navigate to a known community with stats (bitcoin-jungle in Costa Rica)
 		await page.goto('http://127.0.0.1:5173/community/bitcoin-jungle/stats', {
@@ -117,7 +117,7 @@ test.describe('Area Pages', () => {
 	test('community activity page displays actual events', async ({ page }) => {
 		// Communities require same store sync as countries (slow in CI)
 		const timeout = process.env.CI ? 120000 : 30000; // 2 min for CI, 30s for local
-		test.setTimeout(process.env.CI ? 180000 : 90000); // 3 min for CI, 1.5 min for local
+		test.setTimeout(process.env.CI ? 120000 : 90000); // 2 min for CI, 1.5 min for local
 
 		// Navigate to bitcoin-jungle activity
 		await page.goto('http://127.0.0.1:5173/community/bitcoin-jungle/activity', {
