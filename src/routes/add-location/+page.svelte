@@ -86,6 +86,10 @@
 		// Import required packages
 		const leaflet = await import('leaflet');
 		const DomEvent = await import('leaflet/src/dom/DomEvent');
+		/* eslint-disable @typescript-eslint/no-unused-vars */
+		const maplibreGl = await import('maplibre-gl');
+		const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
+		/* eslint-enable @typescript-eslint/no-unused-vars */
 
 		// Make sure to import the locate control plugin
 		try {
