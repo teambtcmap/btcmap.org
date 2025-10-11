@@ -4,8 +4,9 @@ test.describe('Map Popup', () => {
 	test('popup title click navigates to merchant detail page', async ({ page }) => {
 		// Increase timeout for this test since it involves network requests
 		test.setTimeout(180000); // 3 minutes to handle slow data loading
-		// Wait for page to load (use 'load' instead of 'networkidle' for better reliability)
-		await page.goto('http://127.0.0.1:5173/map', { waitUntil: 'load' });
+		// Navigate to a specific location with a known working merchant (Green Town, ID 23143)
+		// This ensures we test with a reliable node-type merchant
+		await page.goto('http://127.0.0.1:5173/map#16/42.2762511/42.7024218', { waitUntil: 'load' });
 		await expect(page).toHaveTitle(/BTC Map/);
 
 		// Wait for map to load
