@@ -1,25 +1,22 @@
 <script lang="ts">
 	import { MerchantCard } from '$lib/comp';
-	import type { Element } from '$lib/types';
+	import type { Place } from '$lib/types';
 	import { isBoosted } from '$lib/utils';
 	import { resolve } from '$app/paths';
 
 	export let dataInitialized: boolean;
-	export let filteredElements: Element[];
+	export let filteredPlaces: Place[];
 
 	$: boosts =
-		filteredElements &&
-		filteredElements
-			.filter((e) => isBoosted(e))
-			.toSorted(
-				(a, b) =>
-					Date.parse(b.tags['boost:expires'] || '') - Date.parse(a.tags['boost:expires'] || '')
-			);
+		filteredPlaces &&
+		filteredPlaces
+			.filter((p) => isBoosted(p))
+			.toSorted((a, b) => Date.parse(b.boosted_until || '') - Date.parse(a.boosted_until || ''));
 
 	$: latest =
-		filteredElements &&
-		filteredElements
-			.toSorted((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']))
+		filteredPlaces &&
+		filteredPlaces
+			.toSorted((a, b) => Date.parse(b.created_at || '') - Date.parse(a.created_at || ''))
 			.slice(0, 6);
 </script>
 
