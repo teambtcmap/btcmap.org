@@ -61,6 +61,7 @@
 	import Time from 'svelte-time';
 	import tippy from 'tippy.js';
 	import { resolve } from '$app/paths';
+	import { parseISO, isThisYear, isAfter, subDays, format, formatDistanceToNow } from 'date-fns';
 
 	// alert for user errors
 	$: $userError && errToast($userError);
@@ -199,6 +200,31 @@
 	let boosted: string | undefined;
 	let verified: string[] = [];
 	const verifiedDate = calcVerifiedDate();
+	const formatVerifiedHuman = (iso?: string) => {
+		if (!iso) return '';
+		let d: Date;
+
+		try {
+			d = parseISO(iso);
+			if (Number.isNaN(d.getTime())) return iso;
+		} catch {
+			return iso;
+		}
+
+		// ≤30 days → "d days ago"
+		if (isAfter(d, subDays(new Date(), 30))) {
+			return formatDistanceToNow(d, { addSuffix: true });
+		}
+
+		// Same year → "date Month"
+		if (isThisYear(d)) {
+			return format(d, 'd MMMM');
+		}
+
+		// otherwise → "Date Month Year"
+		return format(d, 'd MMMM yyyy');
+	};
+
 	let phone: string | undefined;
 	let website: string | undefined;
 	let email: string | undefined;
@@ -662,7 +688,7 @@
 												/>
 											</span>
 										{/if}
-										<strong>{verified[0]}</strong>
+										<strong>{formatVerifiedHuman(verified?.[0])}</strong>
 									</div>
 								{:else}
 									<p class="font-semibold dark:text-white">This location needs to be surveyed!</p>
