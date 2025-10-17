@@ -53,7 +53,13 @@
 		PayMerchant,
 		MerchantPageData
 	} from '$lib/types.js';
-	import { detectTheme, errToast, successToast, formatOpeningHours } from '$lib/utils';
+	import {
+		detectTheme,
+		errToast,
+		successToast,
+		formatOpeningHours,
+		formatVerifiedHuman
+	} from '$lib/utils';
 	import rewind from '@mapbox/geojson-rewind';
 	import { geoContains } from 'd3-geo';
 	import type { Map } from 'leaflet';
@@ -61,7 +67,6 @@
 	import Time from 'svelte-time';
 	import tippy from 'tippy.js';
 	import { resolve } from '$app/paths';
-	import { parseISO, isThisYear, isAfter, subDays, format, formatDistanceToNow } from 'date-fns';
 
 	// alert for user errors
 	$: $userError && errToast($userError);
@@ -200,30 +205,6 @@
 	let boosted: string | undefined;
 	let verified: string[] = [];
 	const verifiedDate = calcVerifiedDate();
-	const formatVerifiedHuman = (iso?: string) => {
-		if (!iso) return '';
-		let d: Date;
-
-		try {
-			d = parseISO(iso);
-			if (Number.isNaN(d.getTime())) return iso;
-		} catch {
-			return iso;
-		}
-
-		// ≤30 days → "d days ago"
-		if (isAfter(d, subDays(new Date(), 30))) {
-			return formatDistanceToNow(d, { addSuffix: true });
-		}
-
-		// Same year → "date Month"
-		if (isThisYear(d)) {
-			return format(d, 'd MMMM');
-		}
-
-		// otherwise → "Date Month Year"
-		return format(d, 'd MMMM yyyy');
-	};
 
 	let phone: string | undefined;
 	let website: string | undefined;

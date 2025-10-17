@@ -1,7 +1,7 @@
 import { boost, exchangeRate, resetBoost, theme } from '$lib/store';
 import { Icon } from '$lib/comp';
 import type { DomEventType, ElementOSM, Leaflet, OSMTags } from '$lib/types';
-import { detectTheme, errToast } from '$lib/utils';
+import { detectTheme, errToast, formatVerifiedHuman } from '$lib/utils';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -9,7 +9,6 @@ import type { Map, LatLng } from 'leaflet';
 import { get } from 'svelte/store';
 import type { DivIcon } from 'leaflet';
 import Time from 'svelte-time';
-import { parseISO, isThisYear, isAfter, subDays, format, formatDistanceToNow } from 'date-fns';
 
 const BORDER_BOTTOM_STYLE = '1.5px solid #ccc';
 const BOTTOM_BUTTON_RADIUS = '0 0 8px 8px';
@@ -678,20 +677,6 @@ export const generateMarker = ({
 
 				// Calculate verification status
 				const verifiedDate = calcVerifiedDate(); // 1 year ago
-				const formatVerifiedHuman = (iso?: string) => {
-					if (!iso) return '';
-					let d: Date;
-					try {
-						d = parseISO(iso);
-						if (Number.isNaN(d.getTime())) return iso;
-					} catch {
-						return iso;
-					}
-					if (isAfter(d, subDays(new Date(), 30)))
-						return formatDistanceToNow(d, { addSuffix: true });
-					if (isThisYear(d)) return format(d, 'd MMMM');
-					return format(d, 'd MMMM yyyy');
-				};
 
 				const isUpToDate =
 					placeDetails.verified_at && Date.parse(placeDetails.verified_at) > verifiedDate;
