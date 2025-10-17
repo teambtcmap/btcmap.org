@@ -1,7 +1,7 @@
 import { boost, exchangeRate, resetBoost, theme } from '$lib/store';
 import { Icon } from '$lib/comp';
-import type { DomEventType, ElementOSM, Leaflet, OSMTags } from '$lib/types';
 import { detectTheme, errToast, formatVerifiedHuman } from '$lib/utils';
+import type { DomEventType, ElementOSM, Leaflet, OSMTags, Place } from '$lib/types';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -538,15 +538,31 @@ export const calcVerifiedDate = () => {
 };
 
 export const checkAddress = (element: OSMTags) => {
-	if (element['addr:housenumber'] && element['addr:street'] && element['addr:city']) {
-		return `${element['addr:housenumber']} ${element['addr:street']}, ${element['addr:city']}`;
-	} else if (element['addr:street'] && element['addr:city']) {
-		return `${element['addr:street']}, ${element['addr:city']}`;
-	} else if (element['addr:city']) {
-		return `${element['addr:city']}`;
-	} else {
-		return '';
+	let address = '';
+
+	if (element['addr:housenumber'] && element['addr:street']) {
+		address = `${element['addr:housenumber']} ${element['addr:street']}`;
+	} else if (element['addr:street']) {
+		address = element['addr:street'];
 	}
+
+	if (element['addr:city']) {
+		if (address) {
+			address += `, ${element['addr:city']}`;
+		} else {
+			address = element['addr:city'];
+		}
+	}
+
+	if (element['addr:postcode']) {
+		if (address) {
+			address += ` ${element['addr:postcode']}`;
+		} else {
+			address = element['addr:postcode'];
+		}
+	}
+
+	return address;
 };
 
 export const latCalc = (element: ElementOSM) => {
@@ -610,28 +626,23 @@ export const generateIcon = (L: Leaflet, icon: string, boosted: boolean, comment
 	});
 };
 
-export const verifiedArr = (element: ElementOSM) => {
+export const verifiedArr = (place: Place) => {
 	const verified = [];
 
-	if (element.tags) {
-		if (element.tags['survey:date'] && Date.parse(element.tags['survey:date'])) {
-			verified.push(element.tags['survey:date']);
-		}
+	if (place['osm:survey:date'] && Date.parse(place['osm:survey:date'])) {
+		verified.push(place['osm:survey:date']);
+	}
 
-		if (element.tags['check_date'] && Date.parse(element.tags['check_date'])) {
-			verified.push(element.tags['check_date']);
-		}
+	if (place['osm:check_date'] && Date.parse(place['osm:check_date'])) {
+		verified.push(place['osm:check_date']);
+	}
 
-		if (
-			element.tags['check_date:currency:XBT'] &&
-			Date.parse(element.tags['check_date:currency:XBT'])
-		) {
-			verified.push(element.tags['check_date:currency:XBT']);
-		}
+	if (place['osm:check_date:currency:XBT'] && Date.parse(place['osm:check_date:currency:XBT'])) {
+		verified.push(place['osm:check_date:currency:XBT']);
+	}
 
-		if (verified.length > 1) {
-			verified.sort((a, b) => Date.parse(b) - Date.parse(a));
-		}
+	if (verified.length > 1) {
+		verified.sort((a, b) => Date.parse(b) - Date.parse(a));
 	}
 
 	return verified;
@@ -671,7 +682,7 @@ export const generateMarker = ({
 			// Fetch place details from v4 API
 			try {
 				const response = await axios.get(
-					`https://api.btcmap.org/v4/places/${placeId}?fields=${buildFieldsParam(PLACE_FIELD_SETS.FULL_POPUP)}`
+					`https://api.btcmap.org/v4/places/${placeId}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`
 				);
 				const placeDetails = response.data;
 
@@ -703,7 +714,7 @@ export const generateMarker = ({
 				popupContent.innerHTML = `
 					${
 						placeDetails.name
-							? `<a href='/merchant/${osmType}:${osmId}' class='inline-block font-bold text-lg leading-snug max-w-[300px]' title='Merchant name'>
+							? `<a href='/merchant/${placeId}' class='inline-block font-bold text-lg leading-snug max-w-[300px]' title='Merchant name'>
 							<span class='!text-link hover:!text-hover transition-colors'>${placeDetails.name}</span>
 						   </a>`
 							: ''
@@ -739,14 +750,14 @@ export const generateMarker = ({
 							<span class='block text-xs text-center mt-1'>Edit</span>
 						</a>
 
-						<a id='share' href='/merchant/${osmType}:${osmId}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+						<a id='share' href='/merchant/${placeId}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
 								<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#share"></use>
 							</svg>
 							<span class='block text-xs text-center mt-1'>Share</span>
 						</a>
 
-						<a href='/merchant/${osmType}:${osmId}#comments' class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+						<a href='/merchant/${placeId}#comments' class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<div class='flex items-center justify-center h-6 text-lg font-bold mx-auto'>
 								${typeof placeDetails.comments === 'number' ? placeDetails.comments : placeDetails.comments?.length || 0}
 							</div>
@@ -847,7 +858,7 @@ export const generateMarker = ({
 							
 							${
 								location.pathname === '/map'
-									? `<a href="/verify-location?id=${osmType}:${osmId}" class='!text-link hover:!text-hover text-xs transition-colors' title="Help improve the data for everyone">Verify Location</a>`
+									? `<a href="/verify-location?id=${placeId}" class='!text-link hover:!text-hover text-xs transition-colors' title="Help improve the data for everyone">Verify Location</a>`
 									: ''
 							}
 						</div>

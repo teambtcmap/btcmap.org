@@ -1,5 +1,3 @@
-import { latCalc, longCalc } from '$lib/map/setup';
-import type { Element } from '$lib/types';
 import { error } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -25,30 +23,48 @@ export const load: PageServerLoad<VerifyLocationPageData> = async ({ url }) => {
 	}
 
 	try {
-		// Use v2 Elements API to fetch merchant data
-		const response = await axios.get(`https://api.btcmap.org/v2/elements/${id}`);
+		// Fetch from v4 Places API (supports both numeric Place IDs and OSM-style IDs)
+		const response = await axios.get(
+			`https://api.btcmap.org/v4/places/${id}?fields=id,osm_id,osm_url,name,address,lat,lon`
+		);
+		const placeData = response.data;
 
-		const data: Element = response.data;
-		const lat = latCalc(data.osm_json);
-		const long = longCalc(data.osm_json);
-
-		if (data && data.id && lat && long && !data['deleted_at']) {
-			const name = data.osm_json.tags?.name;
-			const location = `https://btcmap.org/map?lat=${lat}&long=${long}`;
-			const edit = `https://www.openstreetmap.org/edit?${data.osm_json.type}=${data.osm_json.id}`;
-			const merchantId = `${data.osm_json.type}:${data.osm_json.id}`;
-
-			return {
-				id: data.id,
-				name,
-				lat,
-				long,
-				location,
-				edit,
-				merchantId
-			};
+		if (!placeData) {
+			error(404, 'Merchant Not Found');
 		}
-		error(404, 'Merchant Not Found');
+
+		// Extract OSM type and ID from osm_url
+		let osmType = 'node';
+		let osmId = id; // fallback
+
+		if (placeData.osm_url) {
+			const osmMatch = placeData.osm_url.match(/openstreetmap\.org\/([^/]+)\/(\d+)/);
+			if (osmMatch) {
+				osmType = osmMatch[1];
+				osmId = osmMatch[2];
+			}
+		} else if (placeData.osm_id) {
+			// Fallback to parsing osm_id string
+			const parts = placeData.osm_id.split(':');
+			if (parts.length === 2) {
+				osmType = parts[0];
+				osmId = parts[1];
+			}
+		}
+
+		const location = `https://btcmap.org/map?lat=${placeData.lat}&long=${placeData.lon}`;
+		const edit = `https://www.openstreetmap.org/edit?${osmType}=${osmId}`;
+		const merchantId = placeData.id.toString();
+
+		return {
+			id: placeData.id.toString(),
+			name: placeData.name,
+			lat: placeData.lat,
+			long: placeData.lon,
+			location,
+			edit,
+			merchantId
+		};
 	} catch (err) {
 		console.error(err);
 		error(404, 'Merchant Not Found');

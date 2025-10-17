@@ -3,8 +3,6 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 
-	import axios from 'axios';
-
 	export let type: 'country' | 'community';
 	export let data: AreaPageProps;
 
@@ -39,7 +37,6 @@
 		type ActivityEvent,
 		type AreaPageProps,
 		type AreaTags,
-		type Element,
 		type Event,
 		type Place,
 		type Report,
@@ -47,8 +44,13 @@
 		type User
 	} from '$lib/types.js';
 	import { errToast, formatElementID, validateContinents } from '$lib/utils';
+	import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
+	import axios from 'axios';
+	import axiosRetry from 'axios-retry';
 	import rewind from '@mapbox/geojson-rewind';
 	import { geoContains } from 'd3-geo';
+
+	axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 	// alert for user errors
 	$: $userError && errToast($userError);
@@ -104,97 +106,64 @@
 	let dataInitialized = false;
 	let elementsLoading = false;
 
-	// Fetch elements for area using geographic filtering + individual place API calls for complete data
-	const fetchElementsForArea = async (areaId: string): Promise<Element[]> => {
+	// Fetch places for area using geographic filtering + enrichment with verification data
+	const fetchPlacesForArea = async (areaId: string): Promise<Place[]> => {
 		try {
 			elementsLoading = true;
 
-			// Find the area by ID
+			// Step 1: Geographic filtering (fast, uses existing store)
 			const area = $areas.find((a) => a.id === areaId);
 			if (!area || !area.tags.geo_json) {
 				console.error('Area not found or missing geo_json:', areaId);
 				return [];
 			}
 
-			// Use existing global places from the store for initial geographic filtering
 			const allPlaces = $places;
-
-			// Use geographic filtering to get place IDs in the area
 			const rewoundPoly = rewind(area.tags.geo_json, true);
 			const areaPlaces = allPlaces.filter((place: Place) => {
 				return place.lat && place.lon && geoContains(rewoundPoly, [place.lon, place.lat]);
 			});
 
-			console.log(`Geographic filtering found ${areaPlaces.length} places for ${areaId}`);
+			console.info(`Geographic filtering found ${areaPlaces.length} places for ${areaId}`);
 
-			// Fetch detailed data for each place using individual API calls
-			const placeIds = areaPlaces.map((place) => place.id);
-
-			// Batch requests to avoid overwhelming the API (process 20 at a time)
+			// Step 2: Enrich with verification data from API (batched requests)
+			const placeIds = areaPlaces.map((p) => p.id);
 			const batchSize = 20;
-			const placeBatches = [];
-			for (let i = 0; i < placeIds.length; i += batchSize) {
-				placeBatches.push(placeIds.slice(i, i + batchSize));
-			}
+			const enrichedPlaces: Place[] = [];
 
-			console.log(
-				`Fetching detailed data for ${placeIds.length} places in ${placeBatches.length} batches`
+			console.info(
+				`Enriching ${placeIds.length} places with verification data in ${Math.ceil(placeIds.length / batchSize)} batches`
 			);
 
-			const detailedElements: Element[] = [];
-			for (let batchIndex = 0; batchIndex < placeBatches.length; batchIndex++) {
-				const batch = placeBatches[batchIndex];
-				console.log(
-					`Processing batch ${batchIndex + 1}/${placeBatches.length} (${batch.length} places)`
-				);
-
-				const batchPromises = batch.map((placeId: number) =>
+			for (let i = 0; i < placeIds.length; i += batchSize) {
+				const batch = placeIds.slice(i, i + batchSize);
+				const batchPromises = batch.map((id) =>
 					axios
-						.get(`https://api.btcmap.org/v4/places/${placeId}?fields=id,osm_id`)
-						.then((response) => {
-							const place = response.data;
-							if (!place.osm_id) {
-								console.warn(`Place ${placeId} has no osm_id`);
-								return null;
-							}
-							// Now fetch the full element data using the OSM ID (which already includes the node: prefix)
-							return axios
-								.get(`https://api.btcmap.org/v2/elements/${place.osm_id}`)
-								.then((elementResponse) => elementResponse.data)
-								.catch((error) => {
-									console.warn(`Failed to fetch element ${place.osm_id}:`, error.response?.status);
-									return null;
-								});
-						})
+						.get<Place>(
+							`https://api.btcmap.org/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`
+						)
+						.then((response) => response.data)
 						.catch((error) => {
-							console.warn(`Failed to fetch place ${placeId}:`, error.response?.status);
+							console.warn(`Failed to fetch place ${id}:`, error.response?.status);
 							return null;
 						})
 				);
 
 				const batchResults = await Promise.all(batchPromises);
-				const validElements = batchResults
-					.filter(Boolean) // Remove failed requests
-					.filter((element) => element && !element.deleted_at); // Remove deleted elements
+				const validPlaces = batchResults
+					.filter((place): place is Place => place !== null)
+					.filter((place) => !place.deleted_at);
+				enrichedPlaces.push(...validPlaces);
 
-				detailedElements.push(...validElements);
-				console.log(
-					`Batch ${batchIndex + 1} completed: ${validElements.length}/${batch.length} successful`
+				console.info(
+					`Batch ${Math.floor(i / batchSize) + 1} completed: ${validPlaces.length}/${batch.length} successful`
 				);
-
-				// Small delay between batches to be nice to the API
-				if (batchIndex < placeBatches.length - 1) {
-					await new Promise((resolve) => setTimeout(resolve, 100));
-				}
 			}
 
-			// Return the detailed elements directly (no conversion needed since v2/elements API returns Element objects)
-			console.log(
-				`Successfully fetched ${detailedElements.length} detailed elements for ${areaId}`
-			);
-			return detailedElements;
+			console.info(`Successfully enriched ${enrichedPlaces.length} places for ${areaId}`);
+			return enrichedPlaces;
 		} catch (error) {
-			console.error('Failed to fetch elements for area:', areaId, error);
+			console.error('Failed to fetch places for area:', areaId, error);
 			return [];
 		} finally {
 			elementsLoading = false;
@@ -297,15 +266,15 @@
 
 		dataInitialized = true;
 
-		// Fetch elements in the background for rich components
+		// Fetch places in the background for rich components
 		if (browser) {
-			const elements = await fetchElementsForArea(areaFound.id);
-			filteredElements = elements;
+			const places = await fetchPlacesForArea(areaFound.id);
+			filteredPlaces = places;
 
-			// Process events after elements are loaded, only if events and users stores are populated
+			// Process events after places are loaded, only if events and users stores are populated
 			if ($events.length && $users.length) {
 				const areaEvents = $events.filter((event) =>
-					filteredElements.find((element) => element.id === event.element_id)
+					filteredPlaces.find((place) => place.osm_id === event.element_id)
 				);
 
 				areaEvents.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
@@ -325,9 +294,9 @@
 				};
 
 				areaEvents.forEach((event) => {
-					let elementMatch = filteredElements.find((element) => element.id === event['element_id']);
+					let placeMatch = filteredPlaces.find((place) => place.osm_id === event['element_id']);
 
-					let location = elementMatch?.osm_json.tags?.name || undefined;
+					let location = placeMatch?.name || undefined;
 
 					let tagger = findUser(event);
 
@@ -348,7 +317,6 @@
 	$: $areas && $areas.length && $places && $places.length && !dataInitialized && initializeData();
 
 	let area: AreaTags;
-	let filteredElements: Element[] = [];
 	let filteredPlaces: Place[] = [];
 	let areaReports: Report[];
 
@@ -504,14 +472,14 @@
 		<AreaMap {name} geoJSON={area?.geo_json} {filteredPlaces} />
 		<AreaMerchantHighlights
 			dataInitialized={dataInitialized && !elementsLoading}
-			{filteredElements}
+			{filteredPlaces}
 		/>
 		{#if browser}
 			<Boost />
 		{/if}
 	{:else if activeSection === Sections.stats}
 		{#if areaReports && areaReports.length > 0}
-			<AreaStats {name} {filteredElements} {areaReports} areaTags={area} />
+			<AreaStats {name} {filteredPlaces} {areaReports} areaTags={area} />
 		{:else}
 			<div class="text-center text-primary dark:text-white">
 				<p class="text-xl">Data will appear within 24 hours.</p>

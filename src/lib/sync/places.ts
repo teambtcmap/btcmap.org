@@ -32,7 +32,7 @@ const getStaticFileDate = async (): Promise<string> => {
 			ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
 
 			if (staticDate <= now && staticDate >= ninetyDaysAgo) {
-				console.log(`Using static file date for updates: ${staticDate.toISOString()}`);
+				console.info(`Using static file date for updates: ${staticDate.toISOString()}`);
 				return staticDate.toISOString();
 			} else {
 				console.warn(`Static file date invalid (${staticDate.toISOString()}), using fallback`);

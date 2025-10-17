@@ -1,28 +1,66 @@
 <script lang="ts">
-	import { BoostButton, Icon, InfoTooltip } from '$lib/comp';
-	import { calcVerifiedDate, checkAddress, verifiedArr } from '$lib/map/setup';
-	import type { Element } from '$lib/types';
-	import { isBoosted, formatOpeningHours } from '$lib/utils';
+	import { BoostButton, Icon } from '$lib/comp';
+	import { calcVerifiedDate, verifiedArr } from '$lib/map/setup';
+	import type { Place } from '$lib/types';
+	import { isBoosted, formatOpeningHours, fetchEnhancedPlace } from '$lib/utils';
 	import Time from 'svelte-time';
 	import tippy from 'tippy.js';
 	import { resolve } from '$app/paths';
+	import { onMount } from 'svelte';
 
-	export let merchant: Element;
+	export let merchant: Place;
 
-	const boosted = isBoosted(merchant);
-	const icon = merchant.tags['icon:android'];
-	const { tags } = merchant.osm_json;
-	const description = tags?.description;
-	const note = tags?.note;
-	const address = tags ? checkAddress(tags) : undefined;
-	const website = tags?.website || tags?.['contact:website'];
-	const openingHours = tags?.['opening_hours'];
-	const phone = tags?.phone || tags?.['contact:phone'];
-	const email = tags?.email || tags?.['contact:email'];
-	const twitter = tags?.twitter || tags?.['contact:twitter'];
-	const instagram = tags?.instagram || tags?.['contact:instagram'];
-	const facebook = tags?.facebook || tags?.['contact:facebook'];
-	const verified = verifiedArr(merchant.osm_json);
+	// Enhanced merchant data (fetched on-demand if basic data is missing)
+	let enhancedMerchant: Place | null = null;
+	let isEnhancing = false;
+
+	// Check if we need to fetch enhanced data (only essential fields)
+	$: needsEnhancement = !merchant.name || !merchant.address;
+
+	// Fetch enhanced data when needed
+	async function enhanceMerchantData() {
+		if (!needsEnhancement || isEnhancing) return;
+
+		isEnhancing = true;
+		try {
+			const enhanced = await fetchEnhancedPlace(merchant.id.toString());
+			if (enhanced) {
+				enhancedMerchant = enhanced;
+			}
+		} catch (error) {
+			console.error('Failed to enhance merchant data:', error);
+		} finally {
+			isEnhancing = false;
+		}
+	}
+
+	// Auto-enhance on mount if needed
+	onMount(() => {
+		if (needsEnhancement) {
+			enhanceMerchantData();
+		}
+	});
+
+	// Use enhanced data if available, otherwise fall back to original
+	$: displayMerchant = enhancedMerchant || merchant;
+
+	// Make boosted reactive and handle undefined displayMerchant
+	$: boosted = displayMerchant ? isBoosted(displayMerchant) : false;
+
+	// Use OSM ID for merchant link if available, otherwise use Place ID
+	$: merchantLinkId = displayMerchant?.osm_id || merchant.id;
+
+	// Make all displayMerchant property accesses reactive with safe defaults
+	$: icon = displayMerchant?.icon || 'question_mark';
+	$: address = displayMerchant?.address;
+	$: website = displayMerchant?.website;
+	$: openingHours = displayMerchant?.opening_hours;
+	$: phone = displayMerchant?.phone;
+	$: email = displayMerchant?.email;
+	$: twitter = displayMerchant?.twitter;
+	$: instagram = displayMerchant?.instagram;
+	$: facebook = displayMerchant?.facebook;
+	$: verified = displayMerchant ? verifiedArr(displayMerchant) : [];
 	const verifiedDate = calcVerifiedDate();
 
 	let outdatedTooltip: HTMLDivElement;
@@ -41,7 +79,7 @@
 	<div>
 		<div class="mb-3 flex w-full flex-col items-center justify-between gap-2 sm:flex-row">
 			<a
-				href={resolve(`/merchant/${merchant.id}`)}
+				href={resolve(`/merchant/${merchantLinkId}`)}
 				class="inline-flex w-full flex-col items-center gap-2 font-bold transition-colors sm:w-auto sm:flex-row {boosted
 					? 'text-bitcoin hover:text-bitcoinHover'
 					: 'text-link hover:text-hover'}"
@@ -53,12 +91,8 @@
 					type="material"
 					style="shrink-0"
 				/>
-				<p class="break-all text-lg">{merchant.osm_json.tags?.name || 'BTC Map Merchant'}</p>
+				<p class="break-all text-lg">{displayMerchant.name || 'BTC Map Merchant'}</p>
 			</a>
-
-			{#if description || note}
-				<InfoTooltip tooltip={description || note} />
-			{/if}
 		</div>
 
 		<div class="mb-3 w-full space-y-2 break-all text-primary dark:text-white">
@@ -66,7 +100,7 @@
 				<div class="flex items-center space-x-2 font-medium">
 					<Icon w="16" h="16" icon="location_on" type="material" style="shrink-0" />
 					<a
-						href="geo:{merchant.osm_json.lat},{merchant.osm_json.lon}"
+						href="geo:{merchant.lat},{merchant.lon}"
 						class="text-sm underline decoration-primary decoration-1 underline-offset-4 dark:decoration-white"
 					>
 						{address}
@@ -193,7 +227,7 @@
 			<div class="flex items-center space-x-1">
 				<p class="text-sm font-semibold text-gray-500 dark:text-gray-400">
 					Boost Expires: <span class="text-primary dark:text-white"
-						><Time live={3000} relative={true} timestamp={merchant.tags['boost:expires']} /></span
+						><Time live={3000} relative={true} timestamp={merchant.boosted_until} /></span
 					>
 				</p>
 			</div>
@@ -201,7 +235,7 @@
 
 		<div class="flex justify-between space-x-2 sm:justify-start">
 			<a
-				href={resolve(`/merchant/${merchant.id}`)}
+				href={resolve(`/merchant/${merchantLinkId}`)}
 				class="inline-flex items-center space-x-1 font-semibold text-link transition-colors hover:text-hover"
 				title="Help improve the data for everyone"
 			>
@@ -209,11 +243,7 @@
 				<p class="text-sm">Verify</p>
 			</a>
 
-			<BoostButton
-				{merchant}
-				boosted={boosted ? merchant.tags['boost:expires'] : undefined}
-				style="link"
-			/>
+			<BoostButton {merchant} boosted={boosted ? merchant.boosted_until : undefined} style="link" />
 		</div>
 	</div>
 </div>

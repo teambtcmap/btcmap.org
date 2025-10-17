@@ -20,8 +20,24 @@ export const PLACE_FIELDS = {
 		'instagram',
 		'email',
 		'opening_hours',
+		'created_at',
 		'verified_at',
+		'osm_id',
 		'osm_url',
+		'osm:contact:instagram',
+		'osm:contact:twitter',
+		'osm:contact:facebook',
+		'osm:contact:phone',
+		'osm:contact:website',
+		'osm:contact:email',
+		'payment:uri',
+		'payment:pouch',
+		'payment:coinos',
+		'boost:expires',
+		'payment:lightning',
+		'payment:onchain',
+		'payment:lightning_contactless',
+		'required_app_url',
 		'osm:payment:onchain',
 		'osm:payment:lightning',
 		'osm:payment:lightning_contactless',
@@ -39,7 +55,7 @@ export const PLACE_FIELDS = {
 
 export const PLACE_FIELD_SETS = {
 	MAP_SYNC: [...PLACE_FIELDS.CORE, ...PLACE_FIELDS.SYNC],
-	FULL_POPUP: [...PLACE_FIELDS.CORE, ...PLACE_FIELDS.POPUP]
+	COMPLETE_PLACE: [...PLACE_FIELDS.CORE, ...PLACE_FIELDS.POPUP]
 } as const;
 
 export const buildFieldsParam = (fields: readonly string[]) => fields.join(',');

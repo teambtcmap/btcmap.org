@@ -1,6 +1,7 @@
 import { theme, areas } from '$lib/store';
 import { areasSync } from '$lib/sync/areas';
-import type { Continents, Element, Grade, IssueIcon } from '$lib/types';
+import { PLACE_FIELD_SETS } from '$lib/api-fields';
+import type { Continents, Element, Grade, IssueIcon, Place } from '$lib/types';
 import { toast } from '@zerodevx/svelte-toast';
 import type { Chart } from 'chart.js';
 import { get } from 'svelte/store';
@@ -172,8 +173,27 @@ export const validateContinents = (continent: Continents) =>
 		'South America'
 	].includes(continent);
 
-export const isBoosted = (element: Element) =>
-	element.tags['boost:expires'] && Date.parse(element.tags['boost:expires']) > Date.now();
+export const isBoosted = (item: Element | Place | undefined | null) => {
+	if (!item) return false;
+	const boostExpiry = 'tags' in item ? item.tags['boost:expires'] : item.boosted_until;
+	return boostExpiry && Date.parse(boostExpiry || '') > Date.now();
+};
+
+/**
+ * Normalizes social media URLs by ensuring they start with https://
+ * If the URL doesn't start with http, prepends the platform's base URL
+ */
+const normalizeSocialUrl = (url: string, platform: string): string => {
+	if (url.startsWith('http')) {
+		return url;
+	}
+	const platformUrls: Record<string, string> = {
+		instagram: 'https://instagram.com/',
+		twitter: 'https://twitter.com/',
+		facebook: 'https://facebook.com/'
+	};
+	return platformUrls[platform] + url;
+};
 
 export async function getAreaIdsByCoordinates(lat: number, long: number): Promise<string[]> {
 	console.debug('Checking areas with coordinates:', { lat, long });
@@ -242,3 +262,59 @@ export const formatVerifiedHuman = (isoDateString?: string): string => {
 	// Different year → "15 October 2023"
 	return format(parsedDate, 'd MMMM yyyy');
 };
+
+// Cache for enhanced place data to avoid repeated API calls
+const enhancedPlacesCache = new Map<string, Place>();
+
+/**
+ * Fetches enhanced place data (name, address, etc.) for a specific place ID
+ * Uses caching to avoid repeated API calls for the same place
+ */
+export async function fetchEnhancedPlace(placeId: string): Promise<Place | null> {
+	// Check cache first
+	if (enhancedPlacesCache.has(placeId)) {
+		return enhancedPlacesCache.get(placeId)!;
+	}
+
+	try {
+		const response = await fetch(
+			`https://api.btcmap.org/v4/places/${placeId}?fields=${PLACE_FIELD_SETS.COMPLETE_PLACE.join(',')}`
+		);
+
+		if (!response.ok) {
+			console.warn(`Failed to fetch enhanced data for place ${placeId}:`, response.status);
+			return null;
+		}
+
+		const basePlace: Place = await response.json();
+		const enhancedPlace: Place = { ...basePlace };
+
+		// Map osm:contact fields to official fields as fallback
+		if (!enhancedPlace.instagram && enhancedPlace['osm:contact:instagram']) {
+			enhancedPlace.instagram = normalizeSocialUrl(
+				enhancedPlace['osm:contact:instagram'],
+				'instagram'
+			);
+		}
+		if (!enhancedPlace.twitter && enhancedPlace['osm:contact:twitter']) {
+			enhancedPlace.twitter = normalizeSocialUrl(enhancedPlace['osm:contact:twitter'], 'twitter');
+		}
+		if (!enhancedPlace.facebook && enhancedPlace['osm:contact:facebook']) {
+			enhancedPlace.facebook = normalizeSocialUrl(
+				enhancedPlace['osm:contact:facebook'],
+				'facebook'
+			);
+		}
+
+		// v4 Places API provides all necessary contact information through osm:contact:* fields
+		// No additional API calls needed
+
+		// Cache the result
+		enhancedPlacesCache.set(placeId, enhancedPlace);
+
+		return enhancedPlace;
+	} catch (error) {
+		console.error(`Error fetching enhanced place data for ${placeId}:`, error);
+		return null;
+	}
+}

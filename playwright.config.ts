@@ -19,8 +19,8 @@ export default defineConfig({
 	forbidOnly: !!process.env.CI,
 	/* Retry on CI only */
 	retries: process.env.CI ? 2 : 0,
-	/* Opt out of parallel tests on CI. */
-	workers: process.env.CI ? 1 : undefined,
+	/* Use 3 workers in CI for faster parallel execution */
+	workers: process.env.CI ? 3 : undefined,
 	/* Reporter to use. See https://playwright.dev/docs/test-reporters */
 	reporter: 'html',
 	/* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -29,7 +29,11 @@ export default defineConfig({
 		// baseURL: 'http://127.0.0.1:3000',
 
 		/* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-		trace: 'on-first-retry'
+		trace: 'on-first-retry',
+
+		/* CI-specific timeouts for slower environments */
+		actionTimeout: process.env.CI ? 15000 : 5000,
+		navigationTimeout: process.env.CI ? 60000 : 10000
 	},
 
 	/* Configure projects for major browsers */
@@ -75,5 +79,8 @@ export default defineConfig({
 		command: 'yarn dev',
 		url: 'http://127.0.0.1:5173',
 		reuseExistingServer: !process.env.CI
-	}
+	},
+
+	/* Configure timeouts */
+	timeout: process.env.CI ? 180000 : 60000 // 3 minutes for CI, 1 minute for local
 });
