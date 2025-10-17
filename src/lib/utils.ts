@@ -7,6 +7,7 @@ import { get } from 'svelte/store';
 import rewind from '@mapbox/geojson-rewind';
 import { geoContains } from 'd3-geo';
 import DOMPurify from 'dompurify';
+import { parseISO, isThisYear, isAfter, subDays, format, formatDistanceToNow } from 'date-fns';
 
 export const errToast = (m: string) => {
 	toast.push(m, {
@@ -203,4 +204,41 @@ export const formatOpeningHours = (str: string): string => {
 		.join('');
 
 	return DOMPurify.sanitize(html, { ALLOWED_TAGS: ['span'] });
+};
+
+const RECENT_DATE_THRESHOLD_DAYS = 30;
+
+const isValidDate = (date: Date): boolean => !Number.isNaN(date.getTime());
+
+const parseDateSafely = (isoString: string): Date | null => {
+	try {
+		const date = parseISO(isoString);
+		return isValidDate(date) ? date : null;
+	} catch {
+		return null;
+	}
+};
+
+const isRecentDate = (date: Date, thresholdDays: number = RECENT_DATE_THRESHOLD_DAYS): boolean => {
+	return isAfter(date, subDays(new Date(), thresholdDays));
+};
+
+export const formatVerifiedHuman = (isoDateString?: string): string => {
+	if (!isoDateString) return '';
+
+	const parsedDate = parseDateSafely(isoDateString);
+	if (!parsedDate) return isoDateString;
+
+	// Recent dates (≤30 days) → "3 days ago"
+	if (isRecentDate(parsedDate)) {
+		return formatDistanceToNow(parsedDate, { addSuffix: true });
+	}
+
+	// Same year → "15 October"
+	if (isThisYear(parsedDate)) {
+		return format(parsedDate, 'd MMMM');
+	}
+
+	// Different year → "15 October 2023"
+	return format(parsedDate, 'd MMMM yyyy');
 };
