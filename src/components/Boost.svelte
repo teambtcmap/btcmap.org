@@ -34,6 +34,12 @@
 		$resetBoost = $resetBoost + 1;
 	};
 
+	const handleOutClick = () => {
+		// Never close the boost modal on outside clicks to prevent accidental loss of progress
+		// Users must explicitly use the close button or complete the boost flow
+		// This protects against accidental clicks during any stage of the boost process
+	};
+
 	let invoice = '';
 	let invoiceId = '';
 	let loading = false;
@@ -105,7 +111,7 @@
 </script>
 
 {#if $boost && $exchangeRate}
-	<OutClick excludeQuerySelectorAll="#boost-button" on:outclick={closeModal}>
+	<OutClick on:outclick={handleOutClick}>
 		<div
 			transition:fly={{ y: 200, duration: 300 }}
 			class="center-fixed z-[2000] max-h-[90vh] w-[90vw] overflow-auto rounded-xl border border-mapBorder bg-white p-6 text-left shadow-2xl dark:bg-dark md:w-[430px]"
