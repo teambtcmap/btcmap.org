@@ -41,6 +41,7 @@ export { default as Header } from '../components/Header.svelte';
 export { default as HeaderPlaceholder } from '../components/HeaderPlaceholder.svelte';
 export { default as Icon } from '../components/Icon.svelte';
 export { default as InfoTooltip } from '../components/InfoTooltip.svelte';
+export { default as InvoicePayment } from '../components/InvoicePayment.svelte';
 export { default as IssueCell } from '../components/IssueCell.svelte';
 export { default as IssueIcon } from '../components/IssueIcon.svelte';
 export { default as IssuesTable } from '../components/IssuesTable.svelte';

@@ -1,12 +1,10 @@
 <script lang="ts">
-	import { CloseButton, CopyButton, Icon, PrimaryButton } from '$lib/comp';
-	import { CONFETTI_CANVAS_Z_INDEX } from '$lib/constants';
+	import { invalidateAll } from '$app/navigation';
+	import { CloseButton, CopyButton, Icon, PrimaryButton, InvoicePayment } from '$lib/comp';
+	import { PAYMENT_ERROR_MESSAGE, STATUS_CHECK_ERROR_MESSAGE } from '$lib/constants';
 	import { boost, boostHash, exchangeRate, resetBoost } from '$lib/store';
 	import { errToast, warningToast } from '$lib/utils';
 	import axios from 'axios';
-	import JSConfetti from 'js-confetti';
-	import QRCode from 'qrcode';
-	import { tick } from 'svelte';
 	import OutClick from 'svelte-outclick';
 	import { fade, fly } from 'svelte/transition';
 
@@ -21,102 +19,91 @@
 	let tooltip = false;
 	let selectedBoost: { fiat: number; sats: string; time: number; expires: Date } | undefined;
 	let boostComplete = false;
-
 	const closeModal = () => {
 		if (boostComplete) {
-			location.reload();
+			invalidateAll();
 		}
 		$boost = undefined;
 		$exchangeRate = undefined;
 		selectedBoost = undefined;
 		stage = 0;
 		invoice = '';
-		hash = '';
-		clearInterval(checkInvoiceInterval);
-		jsConfetti.clearCanvas();
+		invoiceId = '';
 		tooltip = false;
 		loading = false;
 		$resetBoost = $resetBoost + 1;
 	};
 
+	const handleOutClick = () => {
+		// Never close the boost modal on outside clicks to prevent accidental loss of progress
+		// Users must explicitly use the close button or complete the boost flow
+		// This protects against accidental clicks during any stage of the boost process
+	};
+
 	let invoice = '';
-	let hash = '';
-	let qr: HTMLCanvasElement;
-	let checkInvoiceInterval: ReturnType<typeof setInterval>;
+	let invoiceId = '';
 	let loading = false;
 
-	const jsConfetti = new JSConfetti();
-	// @ts-expect-error: Required for js-confetti canvas z-index manipulation
-	document.querySelector('canvas').style.zIndex = CONFETTI_CANVAS_Z_INDEX;
+	const handlePaymentSuccess = () => {
+		if ($boostHash === invoiceId) {
+			return;
+		}
+		$boostHash = invoiceId;
 
-	const checkInvoice = () => {
 		axios
-			.get(`/boost/invoice/status?hash=${hash}`)
+			.post('/api/boost/post', {
+				invoice_id: invoiceId
+			})
 			.then(function (response) {
-				if (response.data.paid === true && $boost && selectedBoost) {
-					clearInterval(checkInvoiceInterval);
-
-					if ($boostHash === hash) {
-						return;
-					}
-					$boostHash = hash;
-
-					axios
-						.post('/boost/post', {
-							element: $boost.id,
-							time: selectedBoost.time,
-							hash
-						})
-						.then(function (response) {
-							stage = 2;
-							jsConfetti.addConfetti();
-							boostComplete = true;
-							console.info(response);
-						})
-						.catch(function (error) {
-							warningToast('Could not finalize boost, please contact BTC Map.');
-							console.error(error);
-						});
-				}
+				stage = 2;
+				boostComplete = true;
+				console.info(response);
 			})
 			.catch(function (error) {
-				errToast('Could not check invoice status, please try again or contact BTC Map.');
+				warningToast('Could not finalize boost, please contact BTC Map.');
 				console.error(error);
 			});
 	};
 
+	const handlePaymentError = (error: unknown) => {
+		console.error('Payment error:', error);
+	};
+
+	const handleStatusCheckError = (error: unknown) => {
+		errToast(STATUS_CHECK_ERROR_MESSAGE);
+		console.error(error);
+	};
 	const generateInvoice = () => {
 		loading = true;
+		const satsAmount = parseInt(selectedBoost?.sats || '0');
+
+		if (isNaN(satsAmount) || satsAmount <= 0) {
+			errToast('Invalid sats amount');
+			loading = false;
+			return;
+		}
+
+		// Convert months to days (1 month = 30 days, 3 months = 90 days, 12 months = 365 days)
+		const timeToDays: Record<number, number> = { 1: 30, 3: 90, 12: 365 };
+		const days = selectedBoost?.time
+			? timeToDays[selectedBoost.time] || selectedBoost.time
+			: undefined;
+
 		axios
-			.get(
-				`/boost/invoice/generate?amount=${selectedBoost?.sats}&name=${encodeURIComponent($boost?.name || 'location')}&time=${selectedBoost?.time}`
-			)
-			.then(async function (response) {
-				invoice = response.data['bolt11'];
-				hash = response.data['payment_hash'];
-
+			.post('/api/boost/invoice/generate', {
+				place_id: $boost?.id,
+				amount: satsAmount,
+				time: days,
+				name: $boost?.name || 'location'
+			})
+			.then(function (response) {
+				invoice = response.data.invoice;
+				invoiceId = response.data.invoice_id;
 				stage = 1;
-
-				await tick();
-
-				QRCode.toCanvas(
-					qr,
-					invoice,
-					{ width: window.innerWidth > 768 ? 275 : 200 },
-					function (error: Error | null | undefined) {
-						if (error) {
-							errToast('Could not generate QR, please try again or contact BTC Map.');
-							console.error(error);
-						}
-					}
-				);
-
-				checkInvoiceInterval = setInterval(checkInvoice, 2500);
-
 				loading = false;
 			})
 			.catch(function (error) {
-				errToast('Could not generate invoice, please try again or contact BTC Map.');
+				errToast(PAYMENT_ERROR_MESSAGE);
 				console.error(error);
 				loading = false;
 			});
@@ -124,7 +111,7 @@
 </script>
 
 {#if $boost && $exchangeRate}
-	<OutClick excludeQuerySelectorAll="#boost-button" on:outclick={closeModal}>
+	<OutClick on:outclick={handleOutClick}>
 		<div
 			transition:fly={{ y: 200, duration: 300 }}
 			class="center-fixed z-[2000] max-h-[90vh] w-[90vw] overflow-auto rounded-xl border border-mapBorder bg-white p-6 text-left shadow-2xl dark:bg-dark md:w-[430px]"
@@ -227,9 +214,12 @@
 					</p>
 
 					<a href="lightning:{invoice}" class="inline-block">
-						<canvas
-							class="mx-auto h-[200px] w-[200px] rounded-2xl border-2 border-mapBorder transition-colors hover:border-link md:h-[275px] md:w-[275px]"
-							bind:this={qr}
+						<InvoicePayment
+							{invoice}
+							{invoiceId}
+							onSuccess={handlePaymentSuccess}
+							onError={handlePaymentError}
+							onStatusCheckError={handleStatusCheckError}
 						/>
 					</a>
 
