@@ -9,6 +9,7 @@ export default tseslint.config(
 	js.configs.recommended,
 	...tseslint.configs.recommended,
 	...eslintPluginSvelte.configs.recommended,
+	...eslintPluginSvelte.configs['flat/prettier'],
 	{
 		// Override the TypeScript ESLint recommended config
 		name: 'typescript-eslint/disable-ban-ts-comment',
@@ -17,6 +18,7 @@ export default tseslint.config(
 		}
 	},
 	{
+		name: 'project/svelte-config',
 		files: ['**/*.svelte'],
 		languageOptions: {
 			parser: svelteParser,
@@ -37,6 +39,13 @@ export default tseslint.config(
 				'error',
 				{ argsIgnorePattern: '^_', varsIgnorePattern: '^_' }
 			]
+		}
+	},
+	{
+		name: 'project/no-console',
+		files: ['**/*.js', '**/*.ts', '**/*.svelte'],
+		rules: {
+			'no-console': ['error', { allow: ['info', 'warn', 'error', 'debug'] }]
 		}
 	},
 	{
