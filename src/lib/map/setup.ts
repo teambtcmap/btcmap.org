@@ -9,6 +9,7 @@ import type { Map, LatLng } from 'leaflet';
 import { get } from 'svelte/store';
 import type { DivIcon } from 'leaflet';
 import Time from 'svelte-time';
+import { parseISO, isThisYear, isAfter, subDays, format, formatDistanceToNow } from 'date-fns';
 
 const BORDER_BOTTOM_STYLE = '1.5px solid #ccc';
 const BOTTOM_BUTTON_RADIUS = '0 0 8px 8px';
@@ -677,6 +678,21 @@ export const generateMarker = ({
 
 				// Calculate verification status
 				const verifiedDate = calcVerifiedDate(); // 1 year ago
+				const formatVerifiedHuman = (iso?: string) => {
+					if (!iso) return '';
+					let d: Date;
+					try {
+						d = parseISO(iso);
+						if (Number.isNaN(d.getTime())) return iso;
+					} catch {
+						return iso;
+					}
+					if (isAfter(d, subDays(new Date(), 30)))
+						return formatDistanceToNow(d, { addSuffix: true });
+					if (isThisYear(d)) return format(d, 'd MMMM');
+					return format(d, 'd MMMM yyyy');
+				};
+
 				const isUpToDate =
 					placeDetails.verified_at && Date.parse(placeDetails.verified_at) > verifiedDate;
 
@@ -831,7 +847,7 @@ export const generateMarker = ({
 							<span class='block text-body dark:text-white'>
 								${
 									placeDetails.verified_at
-										? `${placeDetails.verified_at} ${
+										? `${formatVerifiedHuman(placeDetails.verified_at)} ${
 												isUpToDate
 													? `<span title="Verified within the last year"><svg width='16px' height='16px' class='inline text-primary dark:text-white'>
 												<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#verified"></use>
