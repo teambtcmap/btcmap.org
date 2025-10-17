@@ -124,14 +124,14 @@
 				return place.lat && place.lon && geoContains(rewoundPoly, [place.lon, place.lat]);
 			});
 
-			console.log(`Geographic filtering found ${areaPlaces.length} places for ${areaId}`);
+			console.info(`Geographic filtering found ${areaPlaces.length} places for ${areaId}`);
 
 			// Step 2: Enrich with verification data from API (batched requests)
 			const placeIds = areaPlaces.map((p) => p.id);
 			const batchSize = 20;
 			const enrichedPlaces: Place[] = [];
 
-			console.log(
+			console.info(
 				`Enriching ${placeIds.length} places with verification data in ${Math.ceil(placeIds.length / batchSize)} batches`
 			);
 
@@ -155,12 +155,12 @@
 					.filter((place) => !place.deleted_at);
 				enrichedPlaces.push(...validPlaces);
 
-				console.log(
+				console.info(
 					`Batch ${Math.floor(i / batchSize) + 1} completed: ${validPlaces.length}/${batch.length} successful`
 				);
 			}
 
-			console.log(`Successfully enriched ${enrichedPlaces.length} places for ${areaId}`);
+			console.info(`Successfully enriched ${enrichedPlaces.length} places for ${areaId}`);
 			return enrichedPlaces;
 		} catch (error) {
 			console.error('Failed to fetch places for area:', areaId, error);
