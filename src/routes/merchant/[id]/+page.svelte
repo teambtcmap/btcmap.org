@@ -95,7 +95,6 @@
 		note = data.note;
 		hours = data.hours;
 		payment = data.payment;
-		// boosted and verified are now initialized reactively above
 		phone = data.phone;
 		website = data.website;
 		email = data.email;
