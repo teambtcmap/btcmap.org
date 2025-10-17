@@ -205,12 +205,9 @@
 	let verified: string[] = [];
 	const verifiedDate = calcVerifiedDate();
 
-<<<<<<< HEAD
-=======
 	// Initialize verified and boosted immediately from server data (don't wait for store sync)
 	$: verified = data.verified || [];
 	$: boosted = data.boosted;
->>>>>>> 287007d (fix(test): remove store sync dependency for merchant detail cards #181)
 	let phone: string | undefined;
 	let website: string | undefined;
 	let email: string | undefined;
