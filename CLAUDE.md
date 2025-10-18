@@ -45,6 +45,32 @@ yarn run check
 
 Run this command to perform comprehensive TypeScript type checking and Svelte validation. Always run this before committing changes.
 
+## Code Style Guidelines
+
+### Comments
+
+- **Avoid JSDoc comments** (`/** */` with `@param`, `@returns`, `@description`, etc.)
+- Use inline `//` comments for explaining complex logic
+- Keep code self-documenting with clear variable and function names
+- TypeScript types serve as documentation - explicit JSDoc is redundant
+
+### Example:
+
+```typescript
+// ❌ Don't use JSDoc
+/**
+ * Updates a single place in the store
+ * @param placeId - The ID of the place
+ * @returns The updated place or null
+ */
+export const updatePlace = async (placeId: string): Promise<Place | null> => {
+
+// ✅ Do use inline comments when needed
+export const updateSinglePlace = async (placeId: string | number): Promise<Place | null> => {
+	// Fetch the updated place from the API
+	const response = await axios.get<Place>(...);
+```
+
 ## Git Commit Guidelines
 
 **⚠️ CRITICAL: Always run `yarn run format:fix` before committing!**

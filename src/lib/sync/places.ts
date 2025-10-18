@@ -159,3 +159,46 @@ export const elementsSync = async () => {
 			}
 		});
 };
+
+export const updateSinglePlace = async (placeId: string | number): Promise<Place | null> => {
+	try {
+		// Fetch the updated place from the API
+		const response = await axios.get<Place>(
+			`https://api.btcmap.org/v4/places/${placeId}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`
+		);
+		const updatedPlace = response.data;
+
+		// Get current places from localforage
+		const cachedPlaces = await localforage.getItem<Place[]>('places_v4');
+
+		if (!cachedPlaces) {
+			console.warn('No cached places found, cannot update single place');
+			return null;
+		}
+
+		// Find and update the place in the array
+		const placeIndex = cachedPlaces.findIndex((p) => p.id === updatedPlace.id);
+
+		let updatedPlaces: Place[];
+		if (placeIndex !== -1) {
+			// Update existing place
+			updatedPlaces = [...cachedPlaces];
+			updatedPlaces[placeIndex] = updatedPlace;
+		} else {
+			// Place not found in cache, add it
+			updatedPlaces = [...cachedPlaces, updatedPlace];
+		}
+
+		// Save to localforage
+		await localforage.setItem('places_v4', updatedPlaces);
+
+		// Update the store
+		places.set(updatedPlaces);
+
+		console.info(`Successfully updated place ${placeId} in localforage and store`);
+		return updatedPlace;
+	} catch (error) {
+		console.error(`Failed to update single place ${placeId}:`, error);
+		return null;
+	}
+};

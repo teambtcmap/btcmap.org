@@ -21,6 +21,7 @@
 		TaggingIssues,
 		TopButton
 	} from '$lib/comp';
+	import { updateSinglePlace } from '$lib/sync/places';
 	import {
 		attribution,
 		calcVerifiedDate,
@@ -33,6 +34,7 @@
 	import {
 		areaError,
 		areas,
+		places,
 		placesError,
 		eventError,
 		events,
@@ -53,12 +55,14 @@
 		PayMerchant,
 		MerchantPageData
 	} from '$lib/types.js';
+	import type { Marker } from 'leaflet';
 	import {
 		detectTheme,
 		errToast,
 		successToast,
 		formatOpeningHours,
-		formatVerifiedHuman
+		formatVerifiedHuman,
+		isBoosted
 	} from '$lib/utils';
 	import rewind from '@mapbox/geojson-rewind';
 	import { geoContains } from 'd3-geo';
@@ -107,7 +111,7 @@
 		lat = data.lat;
 		long = data.lon;
 
-		const commentsCount = data.comments.length;
+		const commentsCount = comments.length;
 
 		const communities = $areas.filter(
 			(area) =>
@@ -166,8 +170,8 @@
 			);
 
 			if (typeof lat === 'number' && typeof long === 'number') {
-				const marker = leaflet.marker([lat, long], { icon: divIcon });
-				map.addLayer(marker);
+				merchantMarker = leaflet.marker([lat, long], { icon: divIcon });
+				map.addLayer(merchantMarker);
 				map.fitBounds([[lat, long]]);
 			}
 
@@ -204,9 +208,19 @@
 	let verified: string[] = [];
 	const verifiedDate = calcVerifiedDate();
 
+	// Make comments reactive to server data updates (from invalidateAll() after adding comment)
+	let comments = data.comments;
+	$: comments = data.comments;
+
 	// Initialize verified and boosted immediately from server data (don't wait for store sync)
 	$: verified = data.verified || [];
-	$: boosted = data.boosted;
+	// Make boosted reactive to both server data and store updates, but only if boost is still active
+	$: {
+		const placeInStore = $places.find((p) => p.id === Number(data.id));
+		const mergedPlace = placeInStore || data.placeData;
+		// Only set boosted if the place is actually boosted (expiry in future)
+		boosted = mergedPlace && isBoosted(mergedPlace) ? mergedPlace.boosted_until : undefined;
+	}
 	let phone: string | undefined;
 	let website: string | undefined;
 	let email: string | undefined;
@@ -299,6 +313,7 @@
 	let mapElement: HTMLDivElement;
 	let map: Map;
 	let mapLoaded = false;
+	let merchantMarker: Marker | undefined; // Store marker reference for reactive updates
 
 	let baseMaps: BaseMaps;
 
@@ -314,6 +329,15 @@
 			/* eslint-enable @typescript-eslint/no-unused-vars */
 
 			initialRenderComplete = true;
+
+			// Update localforage with fresh place data to sync comment counts, boosts, etc.
+			// This ensures the map shows current data when navigating back
+			try {
+				await updateSinglePlace(data.id);
+			} catch (error) {
+				// Silent failure - page still works with server data even if cache update fails
+				console.error('Could not update place in localforage:', error);
+			}
 		}
 	});
 
@@ -330,6 +354,18 @@
 	$: $theme !== undefined && mapLoaded && toggleMapButtons();
 
 	$: $theme !== undefined && mapLoaded && toggleTheme();
+
+	// Update marker icon when boost or comment state changes
+	$: if (merchantMarker && leaflet && mapLoaded && icon) {
+		const commentsCount = comments.length;
+		const newIcon = generateIcon(
+			leaflet,
+			icon !== 'question_mark' ? icon : 'currency_bitcoin',
+			boosted ? true : false,
+			commentsCount
+		);
+		merchantMarker.setIcon(newIcon);
+	}
 
 	onDestroy(async () => {
 		if (map) {
@@ -711,12 +747,12 @@
 
 					<Card headerAlign="center">
 						<h3 slot="header" class="text-2xl font-semibold">
-							Comments {#if data.comments.length}({data.comments.length}){/if}
+							Comments {#if comments.length}({comments.length}){/if}
 						</h3>
 
 						<div slot="body" class="p-4">
 							<p class="mx-auto font-semibold dark:text-white">
-								{#if data.comments.length}
+								{#if comments.length}
 									Let others know your thoughts about this merchant.
 								{:else}
 									No comments yet. Be the first to leave a comment!
@@ -725,7 +761,7 @@
 						</div>
 
 						<div slot="footer">
-							{#if data.comments.length}
+							{#if comments.length}
 								<PrimaryButton link="#comments" style="w-40 rounded-xl p-3">
 									View Comments
 								</PrimaryButton>
@@ -769,8 +805,8 @@
 					<div slot="body" class="w-full">
 						<div class="hide-scroll relative max-h-[300px] space-y-2 overflow-y-scroll">
 							<div class="relative space-y-2">
-								{#if data.comments && data.comments.length}
-									{#each [...data.comments].reverse() as comment (comment.id)}
+								{#if comments && comments.length}
+									{#each [...comments].reverse() as comment (comment.id)}
 										<MerchantComment text={comment.text} time={comment['created_at']} />
 									{/each}
 								{:else}
