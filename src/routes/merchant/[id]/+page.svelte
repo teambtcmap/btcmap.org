@@ -21,6 +21,7 @@
 		TaggingIssues,
 		TopButton
 	} from '$lib/comp';
+	import { updateSinglePlace } from '$lib/sync/places';
 	import {
 		attribution,
 		calcVerifiedDate,
@@ -324,6 +325,15 @@
 			/* eslint-enable @typescript-eslint/no-unused-vars */
 
 			initialRenderComplete = true;
+
+			// Update localforage with fresh place data to sync comment counts, boosts, etc.
+			// This ensures the map shows current data when navigating back
+			try {
+				await updateSinglePlace(data.id);
+			} catch (error) {
+				// Silent failure - page still works with server data even if cache update fails
+				console.error('Could not update place in localforage:', error);
+			}
 		}
 	});
 
