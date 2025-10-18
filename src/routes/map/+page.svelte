@@ -21,9 +21,9 @@
 		support,
 		updateMapHash
 	} from '$lib/map/setup';
-	import { placesError, places, placesSyncCount, mapUpdates } from '$lib/store';
+	import { placesError, places, placesSyncCount, mapUpdates, lastUpdatedPlaceId } from '$lib/store';
 	import type { Leaflet, Place, SearchItem } from '$lib/types';
-	import { debounce, detectTheme, errToast } from '$lib/utils';
+	import { debounce, detectTheme, errToast, isBoosted } from '$lib/utils';
 	import type { Control, LatLng, LatLngBounds, Map, Marker, MarkerClusterGroup } from 'leaflet';
 	import localforage from 'localforage';
 	import { onDestroy, onMount, tick } from 'svelte';
@@ -209,6 +209,37 @@
 
 	// alert for map errors
 	$: $placesError && errToast($placesError);
+
+	// Update marker icon when place is updated (boost or comment)
+	$: if ($lastUpdatedPlaceId && leaflet && loadedMarkers) {
+		const placeIdStr = $lastUpdatedPlaceId.toString();
+		const marker = loadedMarkers[placeIdStr];
+
+		if (marker) {
+			// Find the updated place in the store
+			const updatedPlace = $places.find((p) => p.id === $lastUpdatedPlaceId);
+
+			if (updatedPlace) {
+				// Regenerate icon with fresh data
+				const commentsCount = typeof updatedPlace.comments === 'number' ? updatedPlace.comments : 0;
+				const boosted = isBoosted(updatedPlace) ? true : false;
+
+				const newIcon = generateIcon(
+					leaflet,
+					updatedPlace.icon || 'question_mark',
+					boosted,
+					commentsCount
+				);
+
+				// Update the marker icon
+				marker.setIcon(newIcon);
+				console.info(`Updated marker icon for place ${$lastUpdatedPlaceId}`);
+			}
+		}
+
+		// Reset the signal
+		$lastUpdatedPlaceId = undefined;
+	}
 
 	// Get places visible in current viewport with buffer
 	const getVisiblePlaces = (

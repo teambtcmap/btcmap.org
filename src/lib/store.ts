@@ -64,6 +64,7 @@ export const boost: Writable<Boost> = writable();
 export const exchangeRate: Writable<number | undefined> = writable();
 export const resetBoost = writable(0);
 export const boostHash: Writable<string> = writable();
+export const lastUpdatedPlaceId: Writable<number | undefined> = writable();
 
 export const showTags: Writable<OSMTags | undefined> = writable();
 export const taggingIssues: Writable<Issue[] | undefined> = writable();

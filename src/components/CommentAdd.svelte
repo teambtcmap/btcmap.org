@@ -2,6 +2,8 @@
 	import { invalidateAll } from '$app/navigation';
 	import { CloseButton, CopyButton, Icon, PrimaryButton, InvoicePayment } from '$lib/comp';
 	import { PAYMENT_ERROR_MESSAGE } from '$lib/constants';
+	import { lastUpdatedPlaceId } from '$lib/store';
+	import { updateSinglePlace } from '$lib/sync/places';
 	import { errToast } from '$lib/utils';
 	import axios from 'axios';
 	import OutClick from 'svelte-outclick';
@@ -27,6 +29,7 @@
 		invoiceId = '';
 		loading = false;
 		commentComplete = false;
+		$lastUpdatedPlaceId = undefined;
 	};
 
 	const generateInvoice = () => {
@@ -54,10 +57,17 @@
 			});
 	};
 
-	const handlePaymentSuccess = () => {
+	const handlePaymentSuccess = async () => {
 		// Comment will be published automatically by the backend
 		stage = 2;
 		commentComplete = true;
+
+		// Update the place in localforage and store immediately
+		if (elementId) {
+			await updateSinglePlace(elementId);
+			// Signal map to update marker icon
+			lastUpdatedPlaceId.set(Number(elementId));
+		}
 	};
 
 	const handlePaymentError = (error: unknown) => {

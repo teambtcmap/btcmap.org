@@ -2,7 +2,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import { CloseButton, CopyButton, Icon, PrimaryButton, InvoicePayment } from '$lib/comp';
 	import { PAYMENT_ERROR_MESSAGE, STATUS_CHECK_ERROR_MESSAGE } from '$lib/constants';
-	import { boost, boostHash, exchangeRate, resetBoost } from '$lib/store';
+	import { boost, boostHash, exchangeRate, lastUpdatedPlaceId, resetBoost } from '$lib/store';
 	import { updateSinglePlace } from '$lib/sync/places';
 	import { errToast, warningToast } from '$lib/utils';
 	import axios from 'axios';
@@ -33,6 +33,7 @@
 		tooltip = false;
 		loading = false;
 		$resetBoost = $resetBoost + 1;
+		$lastUpdatedPlaceId = undefined;
 	};
 
 	const handleOutClick = () => {
@@ -63,6 +64,8 @@
 			// Update the place in localforage and store immediately
 			if ($boost?.id) {
 				await updateSinglePlace($boost.id);
+				// Signal map to update marker icon
+				lastUpdatedPlaceId.set(Number($boost.id));
 			}
 		} catch (error) {
 			warningToast('Could not finalize boost, please contact BTC Map.');
