@@ -8,7 +8,15 @@ import { get } from 'svelte/store';
 import rewind from '@mapbox/geojson-rewind';
 import { geoContains } from 'd3-geo';
 import DOMPurify from 'dompurify';
-import { parseISO, isThisYear, isAfter, subDays, format, formatDistanceToNow } from 'date-fns';
+import {
+	parseISO,
+	isThisYear,
+	isAfter,
+	subDays,
+	format,
+	formatDistanceToNow,
+	isToday
+} from 'date-fns';
 
 export const errToast = (m: string) => {
 	toast.push(m, {
@@ -248,6 +256,11 @@ export const formatVerifiedHuman = (isoDateString?: string): string => {
 
 	const parsedDate = parseDateSafely(isoDateString);
 	if (!parsedDate) return isoDateString;
+
+	// Today → "Today"
+	if (isToday(parsedDate)) {
+		return 'Today';
+	}
 
 	// Recent dates (≤30 days) → "3 days ago"
 	if (isRecentDate(parsedDate)) {
