@@ -33,6 +33,7 @@
 	import {
 		areaError,
 		areas,
+		places,
 		placesError,
 		eventError,
 		events,
@@ -53,12 +54,14 @@
 		PayMerchant,
 		MerchantPageData
 	} from '$lib/types.js';
+	import type { Marker } from 'leaflet';
 	import {
 		detectTheme,
 		errToast,
 		successToast,
 		formatOpeningHours,
-		formatVerifiedHuman
+		formatVerifiedHuman,
+		isBoosted
 	} from '$lib/utils';
 	import rewind from '@mapbox/geojson-rewind';
 	import { geoContains } from 'd3-geo';
@@ -166,8 +169,8 @@
 			);
 
 			if (typeof lat === 'number' && typeof long === 'number') {
-				const marker = leaflet.marker([lat, long], { icon: divIcon });
-				map.addLayer(marker);
+				merchantMarker = leaflet.marker([lat, long], { icon: divIcon });
+				map.addLayer(merchantMarker);
 				map.fitBounds([[lat, long]]);
 			}
 
@@ -206,7 +209,13 @@
 
 	// Initialize verified and boosted immediately from server data (don't wait for store sync)
 	$: verified = data.verified || [];
-	$: boosted = data.boosted;
+	// Make boosted reactive to both server data and store updates, but only if boost is still active
+	$: {
+		const placeInStore = $places.find((p) => p.id === Number(data.id));
+		const mergedPlace = placeInStore || data.placeData;
+		// Only set boosted if the place is actually boosted (expiry in future)
+		boosted = mergedPlace && isBoosted(mergedPlace) ? mergedPlace.boosted_until : undefined;
+	}
 	let phone: string | undefined;
 	let website: string | undefined;
 	let email: string | undefined;
@@ -299,6 +308,7 @@
 	let mapElement: HTMLDivElement;
 	let map: Map;
 	let mapLoaded = false;
+	let merchantMarker: Marker | undefined; // Store marker reference for reactive updates
 
 	let baseMaps: BaseMaps;
 
@@ -330,6 +340,18 @@
 	$: $theme !== undefined && mapLoaded && toggleMapButtons();
 
 	$: $theme !== undefined && mapLoaded && toggleTheme();
+
+	// Update marker icon when boost state changes
+	$: if (merchantMarker && leaflet && mapLoaded && icon) {
+		const commentsCount = data.comments.length;
+		const newIcon = generateIcon(
+			leaflet,
+			icon !== 'question_mark' ? icon : 'currency_bitcoin',
+			boosted ? true : false,
+			commentsCount
+		);
+		merchantMarker.setIcon(newIcon);
+	}
 
 	onDestroy(async () => {
 		if (map) {
