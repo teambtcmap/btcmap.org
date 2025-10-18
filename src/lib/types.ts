@@ -291,7 +291,7 @@ export type BaseMaps = {
 
 // map
 
-export type Boost = { id: string; name: string; boost: string } | undefined;
+export type Boost = { id: number; name: string; boost: string } | undefined;
 
 // Search types for places search API
 export interface SearchItem {

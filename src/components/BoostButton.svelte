@@ -24,7 +24,7 @@
 		boostLoading = true;
 
 		$boost = {
-			id: String(merchant.id),
+			id: merchant.id,
 			name: merchant.name || '',
 			boost: boosted || ''
 		};
