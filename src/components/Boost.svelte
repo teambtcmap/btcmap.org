@@ -65,7 +65,7 @@
 			if ($boost?.id) {
 				await updateSinglePlace($boost.id);
 				// Signal map to update marker icon
-				lastUpdatedPlaceId.set(Number($boost.id));
+				lastUpdatedPlaceId.set($boost.id);
 			}
 		} catch (error) {
 			warningToast('Could not finalize boost, please contact BTC Map.');
