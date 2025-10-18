@@ -162,6 +162,28 @@ yarn playwright test  # E2E testing
 - Use provided types: `Element`, `Area`, `User`, `Event` for API data
 - Leaflet types imported but some custom extensions needed for plugins
 
+### Code Comments
+
+- **Avoid JSDoc comments** (`/** */` with `@param`, `@returns`, `@description`, etc.)
+- Use inline `//` comments for explaining complex logic
+- Keep code self-documenting with clear variable and function names
+- TypeScript types serve as documentation - explicit JSDoc is redundant
+
+```typescript
+// ❌ Don't use JSDoc
+/**
+ * Updates a single place in the store
+ * @param placeId - The ID of the place
+ * @returns The updated place or null
+ */
+export const updatePlace = async (placeId: string): Promise<Place | null> => {
+
+// ✅ Do use inline comments when needed
+export const updateSinglePlace = async (placeId: string | number): Promise<Place | null> => {
+	// Fetch the updated place from the API
+	const response = await axios.get<Place>(...);
+```
+
 ## Testing & Deployment
 
 - **Playwright E2E tests** in `tests/` directory cover critical user flows
