@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { invalidateAll } from '$app/navigation';
 	import { CloseButton, CopyButton, Icon, PrimaryButton, InvoicePayment } from '$lib/comp';
 	import { PAYMENT_ERROR_MESSAGE } from '$lib/constants';
 	import { errToast } from '$lib/utils';
@@ -15,12 +16,17 @@
 	let invoice = '';
 	let invoiceId = '';
 	let loading = false;
+	let commentComplete = false;
 	const closeModal = () => {
+		if (commentComplete) {
+			invalidateAll();
+		}
 		open = false;
 		stage = 0;
 		invoice = '';
 		invoiceId = '';
 		loading = false;
+		commentComplete = false;
 	};
 
 	const generateInvoice = () => {
@@ -51,6 +57,7 @@
 	const handlePaymentSuccess = () => {
 		// Comment will be published automatically by the backend
 		stage = 2;
+		commentComplete = true;
 	};
 
 	const handlePaymentError = (error: unknown) => {

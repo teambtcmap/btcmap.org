@@ -111,7 +111,7 @@
 		lat = data.lat;
 		long = data.lon;
 
-		const commentsCount = data.comments.length;
+		const commentsCount = comments.length;
 
 		const communities = $areas.filter(
 			(area) =>
@@ -207,6 +207,10 @@
 	let boosted: string | undefined;
 	let verified: string[] = [];
 	const verifiedDate = calcVerifiedDate();
+
+	// Make comments reactive to server data updates (from invalidateAll() after adding comment)
+	let comments = data.comments;
+	$: comments = data.comments;
 
 	// Initialize verified and boosted immediately from server data (don't wait for store sync)
 	$: verified = data.verified || [];
@@ -351,9 +355,9 @@
 
 	$: $theme !== undefined && mapLoaded && toggleTheme();
 
-	// Update marker icon when boost state changes
+	// Update marker icon when boost or comment state changes
 	$: if (merchantMarker && leaflet && mapLoaded && icon) {
-		const commentsCount = data.comments.length;
+		const commentsCount = comments.length;
 		const newIcon = generateIcon(
 			leaflet,
 			icon !== 'question_mark' ? icon : 'currency_bitcoin',
@@ -743,12 +747,12 @@
 
 					<Card headerAlign="center">
 						<h3 slot="header" class="text-2xl font-semibold">
-							Comments {#if data.comments.length}({data.comments.length}){/if}
+							Comments {#if comments.length}({comments.length}){/if}
 						</h3>
 
 						<div slot="body" class="p-4">
 							<p class="mx-auto font-semibold dark:text-white">
-								{#if data.comments.length}
+								{#if comments.length}
 									Let others know your thoughts about this merchant.
 								{:else}
 									No comments yet. Be the first to leave a comment!
@@ -757,7 +761,7 @@
 						</div>
 
 						<div slot="footer">
-							{#if data.comments.length}
+							{#if comments.length}
 								<PrimaryButton link="#comments" style="w-40 rounded-xl p-3">
 									View Comments
 								</PrimaryButton>
@@ -801,8 +805,8 @@
 					<div slot="body" class="w-full">
 						<div class="hide-scroll relative max-h-[300px] space-y-2 overflow-y-scroll">
 							<div class="relative space-y-2">
-								{#if data.comments && data.comments.length}
-									{#each [...data.comments].reverse() as comment (comment.id)}
+								{#if comments && comments.length}
+									{#each [...comments].reverse() as comment (comment.id)}
 										<MerchantComment text={comment.text} time={comment['created_at']} />
 									{/each}
 								{:else}
