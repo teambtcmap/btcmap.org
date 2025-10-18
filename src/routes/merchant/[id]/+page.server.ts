@@ -1,4 +1,4 @@
-import { latCalc, longCalc, checkAddress, verifiedArr } from '$lib/map/setup';
+import { checkAddress, verifiedArr } from '$lib/map/setup';
 import type { Element, MerchantPageData, MerchantComment, PayMerchant, Place } from '$lib/types';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 import { error } from '@sveltejs/kit';
@@ -97,8 +97,8 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 			console.error(`Failed to fetch Place data for ID ${id}:`, fetchError);
 			throw fetchError; // Re-throw to be handled by outer catch
 		}
-		const lat = latCalc(data.osm_json);
-		const lon = longCalc(data.osm_json);
+		const lat = placeData.lat;
+		const lon = placeData.lon;
 
 		if (data && data.id && lat && lon && !data['deleted_at']) {
 			let comments: MerchantComment[] = [];
