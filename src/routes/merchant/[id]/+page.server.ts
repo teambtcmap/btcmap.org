@@ -1,5 +1,5 @@
 import { verifiedArr } from '$lib/map/setup';
-import type { Element, MerchantPageData, MerchantComment, PayMerchant, Place } from '$lib/types';
+import type { MerchantPageData, MerchantComment, PayMerchant, Place } from '$lib/types';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 import { error } from '@sveltejs/kit';
 import axios from 'axios';
@@ -11,95 +11,38 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 	const { id } = params;
 	try {
-		let data: Element;
-		let placeData: Place | null = null;
-
 		// Fetch complete data from v4 Places API (supports both numeric Place IDs and OSM-style IDs)
-		try {
-			const placeResponse = await axios.get(
-				`https://api.btcmap.org/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`
-			);
-			placeData = placeResponse.data;
+		const placeResponse = await axios.get(
+			`https://api.btcmap.org/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`
+		);
+		const placeData: Place = placeResponse.data;
 
-			if (!placeData) {
-				throw new Error('Place data not found');
-			}
-
-			// Construct Element-like data structure from Place data for backward compatibility
-			const now = new Date().toISOString();
-
-			// Extract OSM type and ID from osm_url or osm_id
-			let osmType = 'node'; // default
-			let osmIdNum = Number(placeData.id); // fallback
-
-			if (placeData.osm_url) {
-				const osmMatch = placeData.osm_url.match(/openstreetmap\.org\/([^/]+)\/(\d+)/);
-				if (osmMatch) {
-					osmType = osmMatch[1];
-					osmIdNum = Number(osmMatch[2]);
-				}
-			} else if (placeData.osm_id) {
-				const parts = placeData.osm_id.split(':');
-				if (parts.length === 2) {
-					osmType = parts[0];
-					osmIdNum = Number(parts[1]);
-				}
-			}
-
-			data = {
-				id: placeData.id.toString(),
-				osm_json: {
-					type: osmType as 'node' | 'way' | 'relation',
-					id: osmIdNum,
-					lat: placeData.lat,
-					lon: placeData.lon,
-					bounds: null, // Not applicable for nodes
-					tags: {
-						name: placeData.name,
-						phone: placeData.phone || placeData['osm:contact:phone'],
-						website: placeData.website || placeData['osm:contact:website'],
-						email: placeData.email || placeData['osm:contact:email'],
-						twitter: placeData.twitter || placeData['osm:contact:twitter'],
-						facebook: placeData.facebook || placeData['osm:contact:facebook'],
-						instagram: placeData.instagram || placeData['osm:contact:instagram'],
-						opening_hours: placeData.opening_hours,
-						'payment:lightning:requires_companion_app': placeData.required_app_url
-							? 'yes'
-							: undefined,
-						'payment:lightning:companion_app_url': placeData.required_app_url,
-						'payment:lightning':
-							placeData['payment:lightning'] || placeData['osm:payment:lightning'],
-						'payment:onchain': placeData['payment:onchain'] || placeData['osm:payment:onchain'],
-						'payment:lightning_contactless':
-							placeData['payment:lightning_contactless'] ||
-							placeData['osm:payment:lightning_contactless']
-					}
-				},
-				tags: {
-					'icon:android': placeData.icon || 'question_mark',
-					category: 'merchant', // Default category
-					'payment:uri': placeData['payment:uri'],
-					'payment:pouch': placeData['payment:pouch'],
-					'payment:coinos': placeData['payment:coinos'],
-					'boost:expires': placeData.boosted_until,
-					'payment:lightning': placeData['payment:lightning'] || placeData['osm:payment:lightning'],
-					'payment:onchain': placeData['payment:onchain'] || placeData['osm:payment:onchain'],
-					'payment:lightning_contactless':
-						placeData['payment:lightning_contactless'] ||
-						placeData['osm:payment:lightning_contactless']
-				},
-				created_at: placeData.created_at || now,
-				updated_at: placeData.updated_at || now,
-				deleted_at: placeData.deleted_at || ''
-			};
-		} catch (fetchError) {
-			console.error(`Failed to fetch Place data for ID ${id}:`, fetchError);
-			throw fetchError; // Re-throw to be handled by outer catch
+		if (!placeData) {
+			throw error(404, 'Merchant Not Found');
 		}
+
+		// Extract OSM type and ID from osm_url or osm_id for edit links
+		let osmType: 'node' | 'way' | 'relation' = 'node'; // default
+		let osmIdNum = Number(placeData.id); // fallback
+
+		if (placeData.osm_url) {
+			const osmMatch = placeData.osm_url.match(/openstreetmap\.org\/([^/]+)\/(\d+)/);
+			if (osmMatch) {
+				osmType = osmMatch[1] as 'node' | 'way' | 'relation';
+				osmIdNum = Number(osmMatch[2]);
+			}
+		} else if (placeData.osm_id) {
+			const parts = placeData.osm_id.split(':');
+			if (parts.length === 2) {
+				osmType = parts[0] as 'node' | 'way' | 'relation';
+				osmIdNum = Number(parts[1]);
+			}
+		}
+
 		const lat = placeData.lat;
 		const lon = placeData.lon;
 
-		if (data && data.id && lat && lon && !data['deleted_at']) {
+		if (!placeData.deleted_at) {
 			let comments: MerchantComment[] = [];
 			try {
 				// Fetch comments directly from the dedicated comments endpoint
@@ -110,55 +53,53 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 				comments = [];
 			}
 
-			// Process all merchant data server-side (same logic as client initializeData)
-			const icon = data.tags['icon:android'];
+			// Process all merchant data server-side
+			const icon = placeData.icon || 'question_mark';
 			const address = placeData.address;
-			const description = data.osm_json.tags?.description;
-			const note = data.osm_json.tags?.note;
-			const hours = data.osm_json.tags?.['opening_hours'];
+			const hours = placeData.opening_hours;
 
-			const payment: PayMerchant = data.tags['payment:uri']
-				? { type: 'uri', url: data.tags['payment:uri'] }
-				: data.tags['payment:pouch']
-					? { type: 'pouch', username: data.tags['payment:pouch'] }
-					: data.tags['payment:coinos']
-						? { type: 'coinos', username: data.tags['payment:coinos'] }
+			const payment: PayMerchant = placeData['payment:uri']
+				? { type: 'uri', url: placeData['payment:uri'] }
+				: placeData['payment:pouch']
+					? { type: 'pouch', username: placeData['payment:pouch'] }
+					: placeData['payment:coinos']
+						? { type: 'coinos', username: placeData['payment:coinos'] }
 						: undefined;
 
 			const boosted =
-				data.tags['boost:expires'] && Date.parse(data.tags['boost:expires']) > Date.now()
-					? data.tags['boost:expires']
+				placeData.boosted_until && Date.parse(placeData.boosted_until) > Date.now()
+					? placeData.boosted_until
 					: undefined;
 
 			const verified = verifiedArr(placeData);
-			const phone = data.osm_json.tags?.phone || data.osm_json.tags?.['contact:phone'];
-			const website = data.osm_json.tags?.website || data.osm_json.tags?.['contact:website'];
-			const email = data.osm_json.tags?.email || data.osm_json.tags?.['contact:email'];
-			const twitter = data.osm_json.tags?.twitter || data.osm_json.tags?.['contact:twitter'];
-			const instagram = data.osm_json.tags?.instagram || data.osm_json.tags?.['contact:instagram'];
-			const facebook = data.osm_json.tags?.facebook || data.osm_json.tags?.['contact:facebook'];
+			const phone = placeData.phone || placeData['osm:contact:phone'];
+			const website = placeData.website || placeData['osm:contact:website'];
+			const email = placeData.email || placeData['osm:contact:email'];
+			const twitter = placeData.twitter || placeData['osm:contact:twitter'];
+			const instagram = placeData.instagram || placeData['osm:contact:instagram'];
+			const facebook = placeData.facebook || placeData['osm:contact:facebook'];
 
-			const thirdParty =
-				data.osm_json.tags?.['payment:lightning:requires_companion_app'] === 'yes' &&
-				data.osm_json.tags['payment:lightning:companion_app_url'];
+			const thirdParty = placeData.required_app_url ? true : undefined;
 
 			const paymentMethod =
-				data.osm_json.tags &&
-				(data.osm_json.tags['payment:onchain'] ||
-					data.osm_json.tags['payment:lightning'] ||
-					data.osm_json.tags['payment:lightning_contactless']);
+				placeData['payment:onchain'] ||
+				placeData['payment:lightning'] ||
+				placeData['payment:lightning_contactless'] ||
+				placeData['osm:payment:onchain'] ||
+				placeData['osm:payment:lightning'] ||
+				placeData['osm:payment:lightning_contactless'];
 
 			return {
-				id: data.id,
-				name: data.osm_json.tags?.name,
+				id: placeData.id.toString(),
+				name: placeData.name,
 				lat,
 				lon,
 				comments,
 				// Additional processed fields
 				icon,
 				address,
-				description,
-				note,
+				description: undefined, // Not available in v4 API
+				note: undefined, // Not available in v4 API
 				hours,
 				payment,
 				boosted,
@@ -172,11 +113,11 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 				thirdParty,
 				paymentMethod,
 				// OSM data for edit links and tag functionality
-				osmType: data.osm_json.type,
-				osmId: data.osm_json.id,
-				osmTags: data.osm_json.tags || {},
+				osmType,
+				osmId: osmIdNum,
+				osmTags: {}, // OSM tags not directly available in v4 Places API
 				// Place data for BoostButton and other components
-				placeData: placeData!
+				placeData
 			};
 		}
 		error(404, 'Merchant Not Found');
