@@ -146,7 +146,9 @@ export const attribution = (L: Leaflet, map: Map) => {
 	OSMAttribution.classList.add(
 		'dark:!bg-dark',
 		'dark:!text-white',
+		'dark:border-t',
 		'dark:border-t-white/95',
+		'dark:border-r',
 		'dark:border-r-white/95'
 	);
 };
@@ -165,7 +167,9 @@ export const support = () => {
 	supportAttribution.classList.add(
 		'dark:!bg-dark',
 		'dark:!text-white',
+		'dark:border-t',
 		'dark:border-t-white/95',
+		'dark:border-l',
 		'dark:border-l-white/95'
 	);
 };
