@@ -186,7 +186,7 @@
 
 <section id="map-section">
 	<h3
-		class="border-statBorder rounded-t-3xl border border-b-0 p-5 text-center text-lg font-semibold text-primary md:text-left dark:bg-white/10 dark:text-white"
+		class="border-statBorder-0 rounded-t-3xl border border-b p-5 text-center text-lg font-semibold text-primary md:text-left dark:bg-white/10 dark:text-white"
 	>
 		{name || 'BTC Map Area'} Map
 		<div class="flex items-center space-x-1 text-link">
