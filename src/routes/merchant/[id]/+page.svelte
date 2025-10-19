@@ -374,7 +374,7 @@
 		}
 	});
 
-	const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
+	const ogImage = `https://api.btcmap.org/og/element/${data.osmType}:${data.osmId}`;
 </script>
 
 <svelte:head>
