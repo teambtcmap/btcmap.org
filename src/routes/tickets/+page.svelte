@@ -80,7 +80,7 @@
 
 			<section id="tickets">
 				<div
-					class="w-full rounded-3xl border border-gray-200 dark:border-white/95 dark:bg-white/10"
+					class="w-full rounded-3xl border border-gray-300 dark:border-white/95 dark:bg-white/10"
 				>
 					<div class="p-5 text-center text-2xl font-semibold text-primary dark:text-white">
 						{#each ticketTypes as type (type)}
@@ -112,7 +112,7 @@
 								{/each}
 							{:else}
 								<p
-									class="border-t border-gray-200 p-5 text-center text-body dark:border-white/95 dark:text-white"
+									class="border-t border-gray-300 p-5 text-center text-body dark:border-white/95 dark:text-white"
 								>
 									No open <strong>add</strong> tickets.
 								</p>
@@ -133,7 +133,7 @@
 								{/each}
 							{:else}
 								<p
-									class="border-t border-gray-200 p-5 text-center text-body dark:border-white/95 dark:text-white"
+									class="border-t border-gray-300 p-5 text-center text-body dark:border-white/95 dark:text-white"
 								>
 									No open <strong>verify</strong> tickets.
 								</p>
@@ -154,7 +154,7 @@
 								{/each}
 							{:else}
 								<p
-									class="border-t border-gray-200 p-5 text-center text-body dark:border-white/95 dark:text-white"
+									class="border-t border-gray-300 p-5 text-center text-body dark:border-white/95 dark:text-white"
 								>
 									No open <strong>community</strong> tickets.
 								</p>
@@ -163,7 +163,7 @@
 
 						{#if tickets.length === 100}
 							<p
-								class="border-t border-gray-200 p-5 text-center font-semibold text-primary dark:border-white/95 dark:text-white"
+								class="border-t border-gray-300 p-5 text-center font-semibold text-primary dark:border-white/95 dark:text-white"
 							>
 								View all open tickets directly on <a
 									href="https://github.com/teambtcmap/btcmap-data/issues"
