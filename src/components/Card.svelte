@@ -5,10 +5,10 @@
 </script>
 
 <!-- prettier-ignore -->
-<div class="flex w-full flex-col rounded-3xl border border-statBorder dark:border-white/40 dark:bg-white/10">
+<div class="flex w-full flex-col rounded-3xl border border-statBorder dark:border-white dark:bg-white/10">
 	<!-- prettier-ignore -->
 	<div
-		class="border-b border-statBorder p-5 text-lg font-semibold text-primary dark:border-white/40 dark:text-white {headerAlign ===
+		class="border-b border-statBorder p-5 text-lg font-semibold text-primary dark:border-white dark:text-white {headerAlign ===
 		'center'
 			? 'text-center'
 			: 'text-center lg:text-left'}"
