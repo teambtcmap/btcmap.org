@@ -226,7 +226,12 @@ export const changeDefaultIcons = (
 				};
 			}
 		}
-		zoomIn.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border-white/95');
+		zoomIn.classList.add(
+			'dark:!bg-dark',
+			'dark:hover:!bg-dark/75',
+			'dark:border',
+			'dark:border-white/95'
+		);
 	}
 
 	const zoomOut: HTMLAnchorElement | null = document.querySelector('.leaflet-control-zoom-out');
@@ -245,7 +250,12 @@ export const changeDefaultIcons = (
 				};
 			}
 		}
-		zoomOut.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border-white/95');
+		zoomOut.classList.add(
+			'dark:!bg-dark',
+			'dark:hover:!bg-dark/75',
+			'dark:border',
+			'dark:border-white/95'
+		);
 	}
 
 	const fullscreenButton = L.DomUtil.create('a');
@@ -281,7 +291,12 @@ export const changeDefaultIcons = (
 			}
 		};
 	}
-	fullscreenButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border-white/95');
+	fullscreenButton.classList.add(
+		'dark:!bg-dark',
+		'dark:hover:!bg-dark/75',
+		'dark:border',
+		'dark:border-white/95'
+	);
 	fullscreenButton.style.borderBottom = BORDER_BOTTOM_STYLE;
 
 	leafletBar?.append(fullscreenButton);
@@ -326,7 +341,12 @@ export const geolocate = (L: Leaflet, map: Map) => {
 				};
 			}
 		}
-		locateButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border-white/95');
+		locateButton.classList.add(
+			'dark:!bg-dark',
+			'dark:hover:!bg-dark/75',
+			'dark:border',
+			'dark:border-white/95'
+		);
 	}
 };
 
@@ -377,6 +397,7 @@ export const homeMarkerButtons = (
 			addHomeButton.classList.add(
 				'dark:!bg-dark',
 				'dark:hover:!bg-dark/75',
+				'dark:border',
 				'dark:border-white/95'
 			);
 
@@ -411,6 +432,7 @@ export const homeMarkerButtons = (
 				addLocationButton.classList.add(
 					'dark:!bg-dark',
 					'dark:hover:!bg-dark/75',
+					'dark:border',
 					'dark:border-white/95'
 				);
 
@@ -444,6 +466,7 @@ export const homeMarkerButtons = (
 				communityMapButton.classList.add(
 					'dark:!bg-dark',
 					'dark:hover:!bg-dark/75',
+					'dark:border',
 					'dark:border-white/95'
 				);
 				communityMapButton.style.borderBottom = BORDER_BOTTOM_STYLE;
@@ -479,6 +502,7 @@ export const homeMarkerButtons = (
 				merchantMapButton.classList.add(
 					'dark:!bg-dark',
 					'dark:hover:!bg-dark/75',
+					'dark:border',
 					'dark:border-white/95'
 				);
 
@@ -538,6 +562,7 @@ export const dataRefresh = (L: Leaflet, map: Map, DomEvent: DomEventType) => {
 			dataRefreshButton.classList.add(
 				'dark:!bg-dark',
 				'dark:hover:!bg-dark/75',
+				'dark:border',
 				'dark:border-white/95'
 			);
 
