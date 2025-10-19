@@ -14,3 +14,26 @@ externalPort = 80
 
 [agent]
 expertMode = true
+
+[workflows]
+
+[[workflows.workflow]]
+name = "Pre-commit Checks"
+mode = "parallel"
+author = 23073448
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run format:fix"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "yarn run eslint"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "yarn run typecheck"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "yarn run check"
