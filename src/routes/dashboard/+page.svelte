@@ -294,12 +294,12 @@
 <div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
-		<main class="mb-20 mt-10 space-y-10">
+		<main class="mt-10 mb-20 space-y-10">
 			{#if typeof window !== 'undefined'}
 				<h1
 					class="{detectTheme() === 'dark' || $theme === 'dark'
 						? 'text-white'
-						: 'gradient'} text-center text-4xl font-semibold !leading-tight md:text-left md:text-5xl"
+						: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-left md:text-5xl"
 				>
 					Dashboard
 				</h1>
@@ -315,7 +315,7 @@
 
 			<section id="stats">
 				<div
-					class="grid rounded-3xl border border-statBorder dark:bg-white/10 md:grid-cols-2 xl:grid-cols-2"
+					class="border-statBorder grid rounded-3xl border md:grid-cols-2 xl:grid-cols-2 dark:bg-white/10"
 				>
 					<DashboardStat
 						title="Total Locations"
@@ -333,7 +333,7 @@
 
 			<section id="charts" class="space-y-10">
 				<div
-					class="flex flex-wrap justify-end gap-3 font-semibold text-primary dark:text-white md:gap-5"
+					class="flex flex-wrap justify-end gap-3 font-semibold text-primary md:gap-5 dark:text-white"
 				>
 					{#each chartHistory as history (history)}
 						<button
@@ -377,7 +377,7 @@
 				</div>
 			</section>
 
-			<p class="text-center text-sm text-body dark:text-white md:text-left">
+			<p class="text-center text-sm text-body md:text-left dark:text-white">
 				*More information on bitcoin mapping tags can be found <a
 					href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#tagging-guidance"
 					target="_blank"

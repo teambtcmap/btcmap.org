@@ -34,7 +34,7 @@
 				<h1
 					class="{detectTheme() === 'dark' || $theme === 'dark'
 						? 'text-white'
-						: 'gradient'} text-center text-4xl font-semibold !leading-tight md:text-5xl"
+						: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl"
 				>
 					Top Communities
 				</h1>
@@ -43,7 +43,7 @@
 			{/if}
 
 			<h2
-				class="mx-auto w-full text-center text-xl font-semibold text-primary dark:text-white lg:w-[800px]"
+				class="mx-auto w-full text-center text-xl font-semibold text-primary lg:w-[800px] dark:text-white"
 			>
 				Bitcoin mapping communities maintain their local datasets and strive to have the most
 				accurate information. They also help onboard new merchants in their area!
@@ -54,7 +54,7 @@
 					Directory
 				</PrimaryButton>
 
-				<div class="items-center justify-center space-y-5 md:flex md:space-x-5 md:space-y-0">
+				<div class="items-center justify-center space-y-5 md:flex md:space-y-0 md:space-x-5">
 					<PrimaryButton
 						style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
 						link="/communities/add"

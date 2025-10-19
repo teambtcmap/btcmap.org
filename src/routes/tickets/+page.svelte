@@ -48,12 +48,12 @@
 <div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
-		<main class="mb-20 mt-10 space-y-10">
+		<main class="mt-10 mb-20 space-y-10">
 			{#if typeof window !== 'undefined'}
 				<h1
 					class="{detectTheme() === 'dark' || $theme === 'dark'
 						? 'text-white'
-						: 'gradient'} text-center text-4xl font-semibold !leading-tight md:text-5xl lg:text-left"
+						: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl lg:text-left"
 				>
 					Open Tickets
 					{#if totalTickets}
@@ -65,13 +65,13 @@
 			{/if}
 
 			<h2
-				class="w-full text-center text-xl font-semibold text-primary dark:text-white lg:w-[675px] lg:text-left"
+				class="w-full text-center text-xl font-semibold text-primary lg:w-[675px] lg:text-left dark:text-white"
 			>
 				Tickets up for grabs from our noob forms! Anyone can help add or verify location submissions
 				and help vet communities.
 			</h2>
 
-			<p class="text-center text-xl text-primary dark:text-white lg:text-left">
+			<p class="text-center text-xl text-primary lg:text-left dark:text-white">
 				More information on how to get involved can be found in our <a
 					href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers"
 					class="text-link transition-colors hover:text-hover">Tagging Merchant Instructions</a
@@ -79,7 +79,7 @@
 			</p>
 
 			<section id="tickets">
-				<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
+				<div class="border-statBorder w-full rounded-3xl border dark:bg-white/10">
 					<div class="p-5 text-center text-2xl font-semibold text-primary dark:text-white">
 						{#each ticketTypes as type (type)}
 							<button
@@ -109,7 +109,7 @@
 									/>
 								{/each}
 							{:else}
-								<p class="border-t border-statBorder p-5 text-center text-body dark:text-white">
+								<p class="border-statBorder border-t p-5 text-center text-body dark:text-white">
 									No open <strong>add</strong> tickets.
 								</p>
 							{/if}
@@ -128,7 +128,7 @@
 									/>
 								{/each}
 							{:else}
-								<p class="border-t border-statBorder p-5 text-center text-body dark:text-white">
+								<p class="border-statBorder border-t p-5 text-center text-body dark:text-white">
 									No open <strong>verify</strong> tickets.
 								</p>
 							{/if}
@@ -147,7 +147,7 @@
 									/>
 								{/each}
 							{:else}
-								<p class="border-t border-statBorder p-5 text-center text-body dark:text-white">
+								<p class="border-statBorder border-t p-5 text-center text-body dark:text-white">
 									No open <strong>community</strong> tickets.
 								</p>
 							{/if}
@@ -155,7 +155,7 @@
 
 						{#if tickets.length === 100}
 							<p
-								class="border-t border-statBorder p-5 text-center font-semibold text-primary dark:text-white"
+								class="border-statBorder border-t p-5 text-center font-semibold text-primary dark:text-white"
 							>
 								View all open tickets directly on <a
 									href="https://github.com/teambtcmap/btcmap-data/issues"
@@ -171,7 +171,7 @@
 						{/each}
 					{/if}
 				</div>
-				<p class="text-center text-sm text-body dark:text-white lg:text-left">
+				<p class="text-center text-sm text-body lg:text-left dark:text-white">
 					*Data updated every 10 minutes.
 				</p>
 				<div class="mt-10 flex justify-center">

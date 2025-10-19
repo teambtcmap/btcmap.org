@@ -8,7 +8,7 @@
 
 <!-- Pagination -->
 <div
-	class="flex w-full flex-col gap-5 px-5 pb-5 pt-2.5 text-primary dark:text-white md:flex-row md:items-center md:justify-between"
+	class="flex w-full flex-col gap-5 px-5 pt-2.5 pb-5 text-primary md:flex-row md:items-center md:justify-between dark:text-white"
 >
 	<select
 		value={table?.getState().pagination.pageSize}

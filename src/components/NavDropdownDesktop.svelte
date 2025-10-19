@@ -17,7 +17,7 @@
 		on:click={() => (show = !show)}
 		class="{show
 			? 'dark:!text-link'
-			: ''} mr-4 mt-4 flex items-center text-xl font-semibold text-link transition-colors hover:text-hover dark:text-white dark:hover:text-link md:mr-0 md:mt-0"
+			: ''} mt-4 mr-4 flex items-center text-xl font-semibold text-link transition-colors hover:text-hover md:mt-0 md:mr-0 dark:text-white dark:hover:text-link"
 	>
 		{title} <i class="fa-solid fa-chevron-down ml-1 h-4 w-4" />
 	</button>
@@ -28,7 +28,7 @@
 			excludeQuerySelectorAll={`#dropdown-${title.toLowerCase()}`}
 			on:outclick={() => (show = false)}
 		>
-			<div class="absolute right-0 top-8 z-50 w-[185px] rounded-2xl shadow-lg">
+			<div class="absolute top-8 right-0 z-50 w-[185px] rounded-2xl shadow-lg">
 				{#each links as link (link.url)}
 					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a

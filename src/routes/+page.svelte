@@ -16,17 +16,17 @@
 	<img
 		src="/images/street-map.svg"
 		alt="roads"
-		class="absolute right-0 top-0 dark:opacity-10 xl:hidden"
+		class="absolute top-0 right-0 xl:hidden dark:opacity-10"
 	/>
 	<Header />
 	<div class="relative mx-auto w-10/12 xl:w-[1200px]">
-		<section id="hero" class="items-center justify-between pb-20 pt-10 xl:flex xl:pt-0">
+		<section id="hero" class="items-center justify-between pt-10 pb-20 xl:flex xl:pt-0">
 			<div class="mx-auto w-full xl:mx-0 xl:w-[500px]">
 				{#if typeof window !== 'undefined'}
 					<h1
 						class="{detectTheme() === 'dark' || $theme === 'dark'
 							? 'text-white'
-							: 'gradient'} text-center text-4xl font-semibold !leading-tight md:text-5xl xl:text-left"
+							: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl xl:text-left"
 					>
 						Find places to spend sats wherever you are.
 					</h1>
@@ -50,7 +50,7 @@
 				>
 					{#each $apps as app (app.link)}
 						<div
-							class="mx-2 my-2 space-y-1 text-center font-semibold text-body dark:text-white md:my-0"
+							class="mx-2 my-2 space-y-1 text-center font-semibold text-body md:my-0 dark:text-white"
 						>
 							<p>{app.type}</p>
 							<!-- eslint-disable svelte/no-navigation-without-resolve -->
@@ -72,7 +72,7 @@
 						</div>
 					{/each}
 				</div>
-				<h2 class="text-center text-xl font-semibold text-primary dark:text-white xl:text-left">
+				<h2 class="text-center text-xl font-semibold text-primary xl:text-left dark:text-white">
 					We use
 					<a
 						href="https://www.openstreetmap.org/about"

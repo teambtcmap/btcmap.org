@@ -308,7 +308,7 @@
 				<HeaderPlaceholder />
 			{/if}
 
-			<p class="mt-10 text-center text-lg font-semibold text-primary dark:text-white md:text-xl">
+			<p class="mt-10 text-center text-lg font-semibold text-primary md:text-xl dark:text-white">
 				If you're a business owner, please read our <a
 					href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Merchant-Best-Practices"
 					target="_blank"
@@ -332,7 +332,7 @@
 									<img
 										src="/icons/pin-1.svg"
 										alt="pin"
-										class="mx-auto mb-4 md:mx-0 md:mb-0 md:mr-4"
+										class="mx-auto mb-4 md:mx-0 md:mr-4 md:mb-0"
 									/>
 									Create an
 									<a
@@ -346,7 +346,7 @@
 									<img
 										src="/icons/pin-2.svg"
 										alt="pin"
-										class="mx-auto mb-4 md:mx-0 md:mb-0 md:mr-4"
+										class="mx-auto mb-4 md:mx-0 md:mr-4 md:mb-0"
 									/>
 									<a
 										href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants"
@@ -359,7 +359,7 @@
 									<img
 										src="/icons/pin-3.svg"
 										alt="pin"
-										class="mx-auto mb-4 md:mx-0 md:mb-0 md:mr-4"
+										class="mx-auto mb-4 md:mx-0 md:mr-4 md:mb-0"
 									/>
 									Show up on the
 									<a
@@ -370,7 +370,7 @@
 							</ol>
 						</div>
 
-						<h3 class="mb-5 mt-16 text-center text-2xl font-semibold md:mt-10">
+						<h3 class="mt-16 mb-5 text-center text-2xl font-semibold md:mt-10">
 							See how it's done
 						</h3>
 						<!-- svelte-ignore a11y-media-has-caption -->
@@ -382,7 +382,7 @@
 							class="w-full border-2 border-input"
 						/>
 
-						<h3 class="mb-5 mt-16 text-center text-2xl font-semibold md:mt-10">
+						<h3 class="mt-16 mb-5 text-center text-2xl font-semibold md:mt-10">
 							Still have questions?
 						</h3>
 						<p class="text-justify">
@@ -406,7 +406,7 @@
 				<section id="noob" class="mx-auto w-full pt-14">
 					<div class="mx-auto max-w-xl">
 						<h2
-							class="mb-5 text-center text-3xl font-semibold text-primary dark:text-white md:text-left"
+							class="mb-5 text-center text-3xl font-semibold text-primary md:text-left dark:text-white"
 						>
 							Form Option
 						</h2>
@@ -447,7 +447,7 @@
 								<div class="relative mb-2">
 									<div
 										bind:this={mapElement}
-										class="z-10 h-[300px] !cursor-crosshair rounded-2xl border-2 border-input !bg-teal dark:!bg-dark md:h-[400px]"
+										class="z-10 h-[300px] !cursor-crosshair rounded-2xl border-2 border-input !bg-teal md:h-[400px] dark:!bg-dark"
 									/>
 									{#if !mapLoaded}
 										<MapLoadingEmbed

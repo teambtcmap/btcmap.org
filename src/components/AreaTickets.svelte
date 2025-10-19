@@ -32,7 +32,7 @@
 </script>
 
 <section id="tickets">
-	<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
+	<div class="border-statBorder w-full rounded-3xl border dark:bg-white/10">
 		<div class="p-5 text-lg font-semibold text-primary dark:text-white">
 			<h3 class="mb-2 text-center md:text-left">
 				{title}
@@ -75,7 +75,7 @@
 						/>
 					{/each}
 				{:else}
-					<p class="border-t border-statBorder p-5 text-center text-body dark:text-white">
+					<p class="border-statBorder border-t p-5 text-center text-body dark:text-white">
 						No open <strong>add</strong> tickets.
 					</p>
 				{/if}
@@ -94,7 +94,7 @@
 						/>
 					{/each}
 				{:else}
-					<p class="border-t border-statBorder p-5 text-center text-body dark:text-white">
+					<p class="border-statBorder border-t p-5 text-center text-body dark:text-white">
 						No open <strong>verify</strong> tickets.
 					</p>
 				{/if}
@@ -113,13 +113,13 @@
 						/>
 					{/each}
 				{:else}
-					<p class="border-t border-statBorder p-5 text-center text-body dark:text-white">
+					<p class="border-statBorder border-t p-5 text-center text-body dark:text-white">
 						No open <strong>community</strong> tickets.
 					</p>
 				{/if}
 			{/if}
 		{:else if ticketError}
-			<p class="border-t border-statBorder p-5 text-center text-body dark:text-white">
+			<p class="border-statBorder border-t p-5 text-center text-body dark:text-white">
 				Error fetching tickets. Please try again or contact BTC Map support.
 			</p>
 		{/if}

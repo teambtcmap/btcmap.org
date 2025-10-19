@@ -15,14 +15,14 @@
 </script>
 
 <div class="hidden lg:block" role="region" aria-label="Leaderboard table">
-	<table class="w-full text-left text-xs text-primary dark:text-white lg:text-sm xl:text-lg">
+	<table class="w-full text-left text-xs text-primary lg:text-sm xl:text-lg dark:text-white">
 		<thead>
 			{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
 				<tr>
 					{#each headerGroup.headers as header (header.id)}
 						<th
 							colSpan={header.colSpan}
-							class="px-2 pb-2.5 pt-5 md:px-5"
+							class="px-2 pt-5 pb-2.5 md:px-5"
 							class:text-center={header.column.id !== 'name'}
 							aria-sort={header.column.getIsSorted() === 'asc'
 								? 'ascending'
@@ -33,7 +33,7 @@
 							{#if !header.isPlaceholder}
 								<button
 									type="button"
-									class="flex select-none items-center gap-x-1 leading-tight md:gap-x-2"
+									class="flex items-center gap-x-1 leading-tight select-none md:gap-x-2"
 									class:mx-auto={header.column.id !== 'name'}
 									class:cursor-pointer={header.column.getCanSort()}
 									class:justify-center={header.column.id !== 'name'}

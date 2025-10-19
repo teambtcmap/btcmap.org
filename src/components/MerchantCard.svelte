@@ -72,7 +72,7 @@
 </script>
 
 <div
-	class="flex flex-col justify-between rounded-2xl border bg-white/50 p-4 text-left transition-shadow hover:shadow-lg dark:bg-white/5 sm:p-6 {boosted
+	class="flex flex-col justify-between rounded-2xl border bg-white/50 p-4 text-left transition-shadow hover:shadow-lg sm:p-6 dark:bg-white/5 {boosted
 		? 'border-bitcoin'
 		: 'border-statBorder'}"
 >
@@ -81,7 +81,7 @@
 			<a
 				href={resolve(`/merchant/${merchantLinkId}`)}
 				class="inline-flex w-full flex-col items-center gap-2 font-bold transition-colors sm:w-auto sm:flex-row {boosted
-					? 'text-bitcoin hover:text-bitcoinHover'
+					? 'hover:text-bitcoinHover text-bitcoin'
 					: 'text-link hover:text-hover'}"
 			>
 				<Icon
@@ -91,7 +91,7 @@
 					type="material"
 					style="shrink-0"
 				/>
-				<p class="break-all text-lg">{displayMerchant.name || 'BTC Map Merchant'}</p>
+				<p class="text-lg break-all">{displayMerchant.name || 'BTC Map Merchant'}</p>
 			</a>
 		</div>
 

@@ -21,9 +21,9 @@
 </script>
 
 <section id="boosted">
-	<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
+	<div class="border-statBorder w-full rounded-3xl border dark:bg-white/10">
 		<h3
-			class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
+			class="border-statBorder border-b p-5 text-center text-lg font-semibold text-primary md:text-left dark:text-white"
 		>
 			Boosted Merchants
 		</h3>
@@ -42,7 +42,7 @@
 					{/each}
 				</div>
 			{:else}
-				<p class="text-center text-primary dark:text-white sm:text-left">
+				<p class="text-center text-primary sm:text-left dark:text-white">
 					No boosted merchants in this area.
 				</p>
 			{/if}
@@ -51,9 +51,9 @@
 </section>
 
 <section id="latest">
-	<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
+	<div class="border-statBorder w-full rounded-3xl border dark:bg-white/10">
 		<h3
-			class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
+			class="border-statBorder border-b p-5 text-center text-lg font-semibold text-primary md:text-left dark:text-white"
 		>
 			Latest Added
 		</h3>
@@ -72,7 +72,7 @@
 					{/each}
 				</div>
 			{:else}
-				<p class="text-center text-primary dark:text-white sm:text-left">
+				<p class="text-center text-primary sm:text-left dark:text-white">
 					No latest added in this area. You can <a
 						href={resolve('/add-location')}
 						class="text-link transition-colors hover:text-hover">add a new merchant</a

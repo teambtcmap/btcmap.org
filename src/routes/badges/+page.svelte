@@ -176,7 +176,7 @@
 				<h1
 					class="{detectTheme() === 'dark' || $theme === 'dark'
 						? 'text-white'
-						: 'gradient'} mb-8 text-4xl font-semibold !leading-tight md:text-5xl"
+						: 'gradient'} mb-8 text-4xl !leading-tight font-semibold md:text-5xl"
 				>
 					Badges
 				</h1>
@@ -184,12 +184,12 @@
 				<HeaderPlaceholder />
 			{/if}
 
-			<p class="mx-auto w-full text-lg text-primary dark:text-white lg:w-[700px]">
+			<p class="mx-auto w-full text-lg text-primary lg:w-[700px] dark:text-white">
 				You can earn badges for your BTC Map contributions that will be displayed on your profile.
 				Have a badge idea? Let us know!
 			</p>
 
-			<section id="achievements" class="mb-20 mt-16 space-y-8">
+			<section id="achievements" class="mt-16 mb-20 space-y-8">
 				<h2 class="text-center text-3xl font-semibold text-primary dark:text-white">
 					Achievements
 				</h2>

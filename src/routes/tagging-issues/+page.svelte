@@ -18,12 +18,12 @@
 <div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
-		<main class="mb-20 mt-10 space-y-10">
+		<main class="mt-10 mb-20 space-y-10">
 			{#if typeof window !== 'undefined'}
 				<h1
 					class="{detectTheme() === 'dark' || $theme === 'dark'
 						? 'text-white'
-						: 'gradient'} text-center text-4xl font-semibold !leading-tight md:text-5xl lg:text-left"
+						: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl lg:text-left"
 				>
 					Tagging Issues
 				</h1>
@@ -32,12 +32,12 @@
 			{/if}
 
 			<h2
-				class="w-full text-center text-xl font-semibold text-primary dark:text-white lg:w-[675px] lg:text-left"
+				class="w-full text-center text-xl font-semibold text-primary lg:w-[675px] lg:text-left dark:text-white"
 			>
 				Contribute to THE map by resolving tagging issues!
 			</h2>
 
-			<p class="text-center text-xl text-primary dark:text-white lg:text-left">
+			<p class="text-center text-xl text-primary lg:text-left dark:text-white">
 				More information about how to get involved can be found on our <a
 					href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants"
 					class="text-link transition-colors hover:text-hover">Tagging Instructions</a

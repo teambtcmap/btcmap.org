@@ -34,9 +34,9 @@
 	}
 </script>
 
-<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
+<div class="border-statBorder w-full rounded-3xl border dark:bg-white/10">
 	<h3
-		class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
+		class="border-statBorder border-b p-5 text-center text-lg font-semibold text-primary md:text-left dark:text-white"
 	>
 		{username || 'BTC Map Supertagger'}'s Activity
 	</h3>
@@ -45,7 +45,7 @@
 		<div class="overflow-x-auto">
 			<table class="w-full">
 				<thead>
-					<tr class="border-b border-statBorder text-left">
+					<tr class="border-statBorder border-b text-left">
 						<th class="w-2/3 px-5 py-3 text-left text-sm font-semibold text-primary dark:text-white"
 							>Location</th
 						>
@@ -61,7 +61,7 @@
 					{#if loadingNames}
 						<!-- Show loading skeleton rows while fetching names -->
 						{#each Array(itemsPerPage) as _, i (i)}
-							<tr class="border-b border-statBorder/50">
+							<tr class="border-statBorder/50 border-b">
 								<td class="w-2/3 px-5 py-3">
 									<div class="h-6 animate-pulse rounded bg-link/20"></div>
 								</td>
@@ -75,7 +75,7 @@
 						{/each}
 					{:else}
 						{#each paginatedEvents as event, _ (event['created_at'])}
-							<tr class="border-b border-statBorder/50 hover:bg-gray-50 dark:hover:bg-white/5">
+							<tr class="border-statBorder/50 border-b hover:bg-gray-50 dark:hover:bg-white/5">
 								<td class="w-2/3 px-5 py-3 text-left">
 									<a
 										href={resolve(`/merchant/${event.merchantId}`)}
@@ -107,7 +107,7 @@
 		</div>
 
 		{#if totalPages > 1}
-			<div class="flex items-center justify-between border-t border-statBorder px-5 py-3">
+			<div class="border-statBorder flex items-center justify-between border-t px-5 py-3">
 				<div class="text-sm text-body dark:text-white">
 					Page {currentPage} of {totalPages} ({eventElements.length} total)
 				</div>
@@ -115,7 +115,7 @@
 					<button
 						on:click={() => (currentPage = Math.max(1, currentPage - 1))}
 						disabled={currentPage === 1}
-						class="rounded border border-statBorder px-3 py-1 text-sm
+						class="border-statBorder rounded border px-3 py-1 text-sm
 						       text-primary transition-colors
 						       hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50
 						       dark:text-white dark:hover:bg-white/5"
@@ -125,7 +125,7 @@
 					<button
 						on:click={() => (currentPage = Math.min(totalPages, currentPage + 1))}
 						disabled={currentPage === totalPages}
-						class="rounded border border-statBorder px-3 py-1 text-sm
+						class="border-statBorder rounded border px-3 py-1 text-sm
 						       text-primary transition-colors
 						       hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50
 						       dark:text-white dark:hover:bg-white/5"

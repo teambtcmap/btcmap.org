@@ -271,7 +271,7 @@
 				<h1
 					class="{detectTheme() === 'dark' || $theme === 'dark'
 						? 'text-white'
-						: 'gradient'} text-4xl font-semibold !leading-tight md:text-5xl"
+						: 'gradient'} text-4xl !leading-tight font-semibold md:text-5xl"
 				>
 					Join the bitcoin map community.
 				</h1>
@@ -279,7 +279,7 @@
 				<HeaderPlaceholder />
 			{/if}
 
-			<h2 class="mx-auto w-full text-xl font-semibold text-primary dark:text-white lg:w-[800px]">
+			<h2 class="mx-auto w-full text-xl font-semibold text-primary lg:w-[800px] dark:text-white">
 				Take ownership of your local bitcoin mapping data and help drive adoption. Bitcoin
 				communities are the spark that ignites the movement. Join your friends, onboard businesses
 				and have fun!
@@ -293,7 +293,7 @@
 					Leaderboard
 				</PrimaryButton>
 
-				<div class="items-center justify-center space-y-5 md:flex md:space-x-5 md:space-y-0">
+				<div class="items-center justify-center space-y-5 md:flex md:space-y-0 md:space-x-5">
 					<PrimaryButton
 						style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
 						link="/communities/add"
@@ -311,7 +311,7 @@
 
 			<div class="relative">
 				{#if !initialRenderComplete || !communities}
-					<div class="absolute left-0 top-0 flex h-full w-full flex-col justify-between">
+					<div class="absolute top-0 left-0 flex h-full w-full flex-col justify-between">
 						<div class="flex flex-wrap justify-center">
 							{#each Array(6) as _, i (i)}
 								<div class="m-2 w-[94px] animate-pulse rounded-sm bg-link/50 py-2" />
@@ -329,7 +329,7 @@
 				<div class="mb-5 justify-between md:flex">
 					{#if data.section}
 						<h2
-							class="mb-2 text-3xl font-semibold text-primary dark:text-white md:mb-0 md:text-left"
+							class="mb-2 text-3xl font-semibold text-primary md:mb-0 md:text-left dark:text-white"
 						>
 							<a href={resolve(`/communities/${data.section}`)}>
 								{organizationSections.find((org) => org.id === data.section)?.displayName ||
@@ -339,7 +339,7 @@
 						</h2>
 
 						<select
-							class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link dark:bg-white/[0.15] dark:text-white md:w-auto"
+							class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link md:w-auto dark:bg-white/[0.15] dark:text-white"
 							bind:value={data.section}
 							on:change={(e) => {
 								// @ts-expect-error
