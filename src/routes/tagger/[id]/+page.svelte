@@ -496,30 +496,30 @@
 
 			<section id="stats" class="mt-10 mb-16">
 				<div
-					class="grid rounded-t-3xl border border-gray-200 md:grid-cols-2 xl:grid-cols-4 dark:border-white/95 dark:bg-white/10"
+					class="grid rounded-t-3xl border border-gray-300 md:grid-cols-2 xl:grid-cols-4 dark:border-white/95 dark:bg-white/10"
 				>
 					<ProfileStat
 						title="Total Tags"
 						stat={total}
-						border="border-b xl:border-b-0 md:border-r border-gray-200 dark:border-white/95"
+						border="border-b xl:border-b-0 md:border-r border-gray-300 dark:border-white/95"
 					/>
 					<ProfileStat
 						title="Created"
 						stat={created}
 						percent={createdPercent}
-						border="border-b xl:border-b-0 xl:border-r border-gray-200 dark:border-white/95"
+						border="border-b xl:border-b-0 xl:border-r border-gray-300 dark:border-white/95"
 					/>
 					<ProfileStat
 						title="Updated"
 						stat={updated}
 						percent={updatedPercent}
-						border="border-b md:border-b-0 md:border-r border-gray-200 dark:border-white/95"
+						border="border-b md:border-b-0 md:border-r border-gray-300 dark:border-white/95"
 					/>
 					<ProfileStat title="Deleted" stat={deleted} percent={deletedPercent} />
 				</div>
 
 				<div
-					class="relative rounded-b-3xl border border-t border-gray-200 p-5 dark:border-white/95 dark:bg-white/10"
+					class="relative rounded-b-3xl border border-t border-gray-300 p-5 dark:border-white/95 dark:bg-white/10"
 				>
 					{#if !dataInitialized}
 						<div>

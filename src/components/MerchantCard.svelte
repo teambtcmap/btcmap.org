@@ -74,7 +74,7 @@
 <div
 	class="flex flex-col justify-between rounded-2xl border bg-white/50 p-4 text-left transition-shadow hover:shadow-lg sm:p-6 dark:bg-white/5 {boosted
 		? 'border-bitcoin'
-		: 'border-gray-200 dark:border-white/95'}"
+		: 'border-gray-300 dark:border-white/95'}"
 >
 	<div>
 		<div class="mb-3 flex w-full flex-col items-center justify-between gap-2 sm:flex-row">
@@ -203,7 +203,7 @@
 		</div>
 	</div>
 
-	<div class="w-full space-y-2 border-t border-gray-200 pt-3 dark:border-gray-200/25">
+	<div class="w-full space-y-2 border-t border-gray-300 pt-3 dark:border-gray-300/25">
 		{#if verified.length}
 			<div class="flex items-center space-x-1">
 				<p class="text-sm font-semibold text-gray-500 dark:text-gray-400">

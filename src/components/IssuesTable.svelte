@@ -200,9 +200,9 @@
 </script>
 
 <section id="issues">
-	<div class="w-full rounded-3xl border border-gray-200 dark:border-white/95 dark:bg-white/10">
+	<div class="w-full rounded-3xl border border-gray-300 dark:border-white/95 dark:bg-white/10">
 		<h3
-			class="border-b border-gray-200 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
+			class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
 		>
 			{title}
 
