@@ -1,7 +1,7 @@
 import { boost, exchangeRate, resetBoost, theme } from '$lib/store';
 import { Icon } from '$lib/comp';
 import { detectTheme, errToast, formatVerifiedHuman } from '$lib/utils';
-import type { DomEventType, ElementOSM, Leaflet, Place } from '$lib/types';
+import type { DomEventType, Leaflet, Place } from '$lib/types';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -535,28 +535,6 @@ export const calcVerifiedDate = () => {
 	const verifiedDate = new Date();
 	const previousYear = verifiedDate.getFullYear() - 1;
 	return verifiedDate.setFullYear(previousYear);
-};
-
-export const latCalc = (element: ElementOSM) => {
-	if (element.type === 'node') {
-		return element.lat;
-	} else {
-		if (element.bounds && 'minlat' in element.bounds && 'maxlat' in element.bounds) {
-			return (element.bounds.minlat + element.bounds.maxlat) / 2;
-		}
-		return 0;
-	}
-};
-
-export const longCalc = (element: ElementOSM) => {
-	if (element.type === 'node') {
-		return element.lon;
-	} else {
-		if (element.bounds && 'minlon' in element.bounds && 'maxlon' in element.bounds) {
-			return (element.bounds.minlon + element.bounds.maxlon) / 2;
-		}
-		return 0;
-	}
 };
 
 export const generateIcon = (L: Leaflet, icon: string, boosted: boolean, commentsCount: number) => {
