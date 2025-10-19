@@ -1,7 +1,7 @@
 import { boost, exchangeRate, resetBoost, theme } from '$lib/store';
 import { Icon } from '$lib/comp';
 import { detectTheme, errToast, formatVerifiedHuman } from '$lib/utils';
-import type { DomEventType, ElementOSM, Leaflet, OSMTags, Place } from '$lib/types';
+import type { DomEventType, ElementOSM, Leaflet, Place } from '$lib/types';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -535,34 +535,6 @@ export const calcVerifiedDate = () => {
 	const verifiedDate = new Date();
 	const previousYear = verifiedDate.getFullYear() - 1;
 	return verifiedDate.setFullYear(previousYear);
-};
-
-export const checkAddress = (element: OSMTags) => {
-	let address = '';
-
-	if (element['addr:housenumber'] && element['addr:street']) {
-		address = `${element['addr:housenumber']} ${element['addr:street']}`;
-	} else if (element['addr:street']) {
-		address = element['addr:street'];
-	}
-
-	if (element['addr:city']) {
-		if (address) {
-			address += `, ${element['addr:city']}`;
-		} else {
-			address = element['addr:city'];
-		}
-	}
-
-	if (element['addr:postcode']) {
-		if (address) {
-			address += ` ${element['addr:postcode']}`;
-		} else {
-			address = element['addr:postcode'];
-		}
-	}
-
-	return address;
 };
 
 export const latCalc = (element: ElementOSM) => {
