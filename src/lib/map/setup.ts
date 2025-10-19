@@ -131,7 +131,7 @@ export const layers = (leaflet: Leaflet, map: Map) => {
 };
 
 export const attribution = (L: Leaflet, map: Map) => {
-	L.control.attribution({ position: 'bottomleft' }).addTo(map);
+	L.control.attribution({ position: 'bottomleft', prefix: false }).addTo(map);
 
 	const OSMAttribution: HTMLDivElement | null = document.querySelector(
 		'.leaflet-bottom.leaflet-left > .leaflet-control-attribution'
