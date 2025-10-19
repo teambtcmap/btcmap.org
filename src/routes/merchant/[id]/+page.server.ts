@@ -1,4 +1,4 @@
-import { checkAddress, verifiedArr } from '$lib/map/setup';
+import { verifiedArr } from '$lib/map/setup';
 import type { Element, MerchantPageData, MerchantComment, PayMerchant, Place } from '$lib/types';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 import { error } from '@sveltejs/kit';
@@ -56,7 +56,6 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 					bounds: null, // Not applicable for nodes
 					tags: {
 						name: placeData.name,
-						'addr:full': placeData.address,
 						phone: placeData.phone || placeData['osm:contact:phone'],
 						website: placeData.website || placeData['osm:contact:website'],
 						email: placeData.email || placeData['osm:contact:email'],
@@ -113,7 +112,7 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 
 			// Process all merchant data server-side (same logic as client initializeData)
 			const icon = data.tags['icon:android'];
-			const address = data.osm_json.tags && checkAddress(data.osm_json.tags);
+			const address = placeData.address;
 			const description = data.osm_json.tags?.description;
 			const note = data.osm_json.tags?.note;
 			const hours = data.osm_json.tags?.['opening_hours'];
