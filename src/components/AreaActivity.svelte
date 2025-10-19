@@ -22,10 +22,10 @@
 
 <section id="taggers">
 	<!-- prettier-ignore -->
-	<div class="w-full rounded-3xl border border-statBorder dark:border-white/20 dark:bg-white/10">
+	<div class="w-full rounded-3xl border border-statBorder dark:border-white/40 dark:bg-white/10">
 		<!-- prettier-ignore -->
 		<h3
-			class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/20 dark:text-white"
+			class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/40 dark:text-white"
 		>
 			{name || 'BTC Map Area'} Supertaggers
 		</h3>
@@ -80,10 +80,10 @@
 
 <section id="activity">
 	<!-- prettier-ignore -->
-	<div class="w-full rounded-3xl border border-statBorder dark:border-white/20 dark:bg-white/10">
+	<div class="w-full rounded-3xl border border-statBorder dark:border-white/40 dark:bg-white/10">
 		<!-- prettier-ignore -->
 		<h3
-			class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/20 dark:text-white"
+			class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/40 dark:text-white"
 		>
 			{name || 'BTC Map Area'} Activity
 		</h3>
@@ -142,10 +142,10 @@
 
 <section id="atom">
 	<!-- prettier-ignore -->
-	<div class="w-full rounded-3xl border border-statBorder dark:border-white/20 dark:bg-white/10">
+	<div class="w-full rounded-3xl border border-statBorder dark:border-white/40 dark:bg-white/10">
 		<!-- prettier-ignore -->
 		<h3
-			class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/20 dark:text-white"
+			class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/40 dark:text-white"
 		>
 			{name || 'BTC Map Area'} Atom Feeds
 		</h3>
