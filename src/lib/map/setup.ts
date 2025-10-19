@@ -948,7 +948,7 @@ export const generateMarker = ({
 
 						// Set the boost data in the global store
 						boost.set({
-							id: placeDetails.id.toString(),
+							id: placeDetails.id,
 							name: placeDetails.name || '',
 							boost: isBoosted ? placeDetails.boosted_until || '' : ''
 						});
