@@ -87,7 +87,7 @@
 			<div class="mt-8 space-y-4">
 				<!-- Merchant name -->
 				{#if merchant.name}
-					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href="/merchant/{merchant.id}"
 						class="inline-block text-xl font-bold leading-snug text-link transition-colors hover:text-hover"
@@ -95,6 +95,7 @@
 					>
 						{merchant.name}
 					</a>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
 				{/if}
 
 				<!-- Address -->
@@ -128,6 +129,7 @@
 						<span class="mt-1 text-xs">Navigate</span>
 					</a>
 
+					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href={merchant.osm_url || `https://www.openstreetmap.org/node/${merchant.id}`}
 						target="_blank"
@@ -137,8 +139,9 @@
 						<Icon w="24" h="24" icon="pencil" type="popup" />
 						<span class="mt-1 text-xs">Edit</span>
 					</a>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
-					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href="/merchant/{merchant.id}"
 						class="flex flex-col items-center rounded-lg border border-mapBorder py-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
@@ -147,7 +150,6 @@
 						<span class="mt-1 text-xs">Share</span>
 					</a>
 
-					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 					<a
 						href="/merchant/{merchant.id}#comments"
 						class="flex flex-col items-center rounded-lg border border-mapBorder py-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
@@ -157,6 +159,7 @@
 						</div>
 						<span class="mt-1 text-xs">Comments</span>
 					</a>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
 				</div>
 
 				<div class="border-t border-mapBorder pt-4">
@@ -248,7 +251,7 @@
 								<span title="Not verified">---</span>
 							{/if}
 						</span>
-						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+						<!-- eslint-disable svelte/no-navigation-without-resolve -->
 						<a
 							href="/verify-location?id={merchant.id}"
 							class="text-xs text-link transition-colors hover:text-hover"
@@ -256,6 +259,7 @@
 						>
 							Verify Location
 						</a>
+						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 					</div>
 
 					<!-- Boost Section -->
@@ -286,13 +290,14 @@
 				</div>
 
 				<!-- View Full Details -->
-				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href="/merchant/{merchant.id}"
 					class="mt-4 block rounded-lg bg-link py-3 text-center text-white transition-colors hover:bg-hover"
 				>
 					View Full Details
 				</a>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			</div>
 		</div>
 	</OutClick>
