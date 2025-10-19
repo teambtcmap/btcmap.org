@@ -58,12 +58,12 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 			const address = placeData.address;
 			const hours = placeData.opening_hours;
 
-			const payment: PayMerchant = placeData['payment:uri']
-				? { type: 'uri', url: placeData['payment:uri'] }
-				: placeData['payment:pouch']
-					? { type: 'pouch', username: placeData['payment:pouch'] }
-					: placeData['payment:coinos']
-						? { type: 'coinos', username: placeData['payment:coinos'] }
+			const payment: PayMerchant = placeData['osm:payment:uri']
+				? { type: 'uri', url: placeData['osm:payment:uri'] }
+				: placeData['osm:payment:pouch']
+					? { type: 'pouch', username: placeData['osm:payment:pouch'] }
+					: placeData['osm:payment:coinos']
+						? { type: 'coinos', username: placeData['osm:payment:coinos'] }
 						: undefined;
 
 			const boosted =
@@ -82,12 +82,21 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 			const thirdParty = placeData.required_app_url ? true : undefined;
 
 			const paymentMethod =
-				placeData['payment:onchain'] ||
-				placeData['payment:lightning'] ||
-				placeData['payment:lightning_contactless'] ||
 				placeData['osm:payment:onchain'] ||
 				placeData['osm:payment:lightning'] ||
 				placeData['osm:payment:lightning_contactless'];
+
+			// Map osm:payment:* fields to payment:* for osmTags (UI expects payment:* keys)
+			const osmTags: Record<string, string> = {};
+			if (placeData['osm:payment:onchain'])
+				osmTags['payment:onchain'] = placeData['osm:payment:onchain'];
+			if (placeData['osm:payment:lightning'])
+				osmTags['payment:lightning'] = placeData['osm:payment:lightning'];
+			if (placeData['osm:payment:lightning_contactless'])
+				osmTags['payment:lightning_contactless'] = placeData['osm:payment:lightning_contactless'];
+			if (placeData['osm:payment:lightning:companion_app_url'])
+				osmTags['payment:lightning:companion_app_url'] =
+					placeData['osm:payment:lightning:companion_app_url'];
 
 			return {
 				id: placeData.id.toString(),
@@ -115,7 +124,7 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 				// OSM data for edit links and tag functionality
 				osmType,
 				osmId: osmIdNum,
-				osmTags: {}, // OSM tags not directly available in v4 Places API
+				osmTags,
 				// Place data for BoostButton and other components
 				placeData
 			};
