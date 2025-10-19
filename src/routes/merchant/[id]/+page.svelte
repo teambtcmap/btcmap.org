@@ -136,7 +136,7 @@
 			return false;
 		});
 
-		merchantEvents = $events.filter((event) => event.element_id === data.id);
+		merchantEvents = $events.filter((event) => event.element_id === data.placeData.osm_id);
 
 		merchantEvents.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
 
