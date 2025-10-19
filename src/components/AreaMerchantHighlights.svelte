@@ -22,10 +22,10 @@
 
 <section id="boosted">
 	<!-- prettier-ignore -->
-	<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
+	<div class="w-full rounded-3xl border border-statBorder dark:border-white/20 dark:bg-white/10">
 		<!-- prettier-ignore -->
 		<h3
-			class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left dark:text-white"
+			class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/20 dark:text-white"
 		>
 			Boosted Merchants
 		</h3>
@@ -54,10 +54,10 @@
 
 <section id="latest">
 	<!-- prettier-ignore -->
-	<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
+	<div class="w-full rounded-3xl border border-statBorder dark:border-white/20 dark:bg-white/10">
 		<!-- prettier-ignore -->
 		<h3
-			class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left dark:text-white"
+			class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/20 dark:text-white"
 		>
 			Latest Added
 		</h3>
