@@ -431,7 +431,7 @@
 									id="name"
 									placeholder="Satoshi's Comics"
 									required
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 									bind:this={name}
 								/>
 							</div>
@@ -465,7 +465,7 @@
 										type="number"
 										name="lat"
 										placeholder="Latitude"
-										class="w-full rounded-2xl border-2 border-input p-3 focus:outline-link"
+										class="w-full rounded-2xl border-2 border-input p-3 focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 									/>
 									<input
 										required
@@ -475,7 +475,7 @@
 										type="number"
 										name="long"
 										placeholder="Longitude"
-										class="w-full rounded-2xl border-2 border-input p-3 focus:outline-link"
+										class="w-full rounded-2xl border-2 border-input p-3 focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 									/>
 									<!-- 	eslint-enable svelte/no-reactive-reassign -->
 								</div>
@@ -494,7 +494,7 @@
 									name="address"
 									id="address"
 									placeholder="2100 Freedom Drive..."
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 									bind:this={address}
 								/>
 							</div>
@@ -507,7 +507,7 @@
 									name="category"
 									id="category"
 									placeholder="Restaurant etc."
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 									bind:this={category}
 								/>
 							</div>
@@ -599,7 +599,7 @@
 									type="url"
 									name="website"
 									placeholder="https://bitcoin.org"
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 									bind:this={website}
 								/>
 							</div>
@@ -613,7 +613,7 @@
 									type="tel"
 									name="phone"
 									placeholder="Number"
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 									bind:this={phone}
 								/>
 							</div>
@@ -627,7 +627,7 @@
 									type="text"
 									name="hours"
 									placeholder="Mo-Fr 08:30-20:00"
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 									bind:this={hours}
 								/>
 							</div>
@@ -641,7 +641,7 @@
 									name="notes"
 									placeholder="Please add further details here like additional merchant details, contacts, socials, etc."
 									rows="3"
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 									bind:this={notes}
 								/>
 							</div>
@@ -652,7 +652,7 @@
 									disabled={!captchaSecret || !mapLoaded}
 									name="source"
 									required
-									class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+									class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 									bind:value={source}
 									on:change={async () => {
 										if (source === 'Other') {
@@ -675,7 +675,7 @@
 										required
 										name="source-other"
 										placeholder="Local knowledge, online etc."
-										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 										bind:value={sourceOther}
 										bind:this={sourceOtherElement}
 									/>
@@ -695,7 +695,7 @@
 									type="email"
 									name="contact"
 									placeholder="hello@btcmap.org"
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 									bind:this={contact}
 								/>
 							</div>
@@ -728,7 +728,7 @@
 										type="text"
 										name="captcha"
 										placeholder="Please enter the captcha text."
-										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 										bind:this={captchaInput}
 									/>
 								</div>

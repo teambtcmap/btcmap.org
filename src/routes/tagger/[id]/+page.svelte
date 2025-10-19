@@ -519,7 +519,7 @@
 				</div>
 
 				<div
-					class="border-statBorder relative rounded-b-3xl border border-t-0 p-5 dark:bg-white/10"
+					class="border-statBorder-0 relative rounded-b-3xl border border-t p-5 dark:bg-white/10"
 				>
 					{#if !dataInitialized}
 						<div>

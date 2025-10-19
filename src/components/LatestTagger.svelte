@@ -21,7 +21,7 @@
 </script>
 
 <div
-	class="items-center space-y-2 p-5 text-center text-xl lg:flex lg:space-y-0 lg:space-x-5 lg:text-left"
+	class="flex flex-col items-center gap-2 p-5 text-center text-xl lg:flex-row lg:gap-5 lg:text-left"
 >
 	<!-- dot -->
 	<span class="relative mx-auto mb-2 flex h-3 w-3 lg:mx-0 lg:mb-0">
