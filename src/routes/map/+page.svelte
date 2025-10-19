@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
-	import { Boost, Icon, MapLoadingMain, ShowTags, TaggingIssues } from '$lib/comp';
+	import { Boost, Icon, MapLoadingMain, MerchantDrawer, ShowTags, TaggingIssues } from '$lib/comp';
 	import {
 		processPlaces,
 		isSupported as isWorkerSupported,
@@ -929,6 +929,7 @@
 
 	<ShowTags />
 	<TaggingIssues />
+	<MerchantDrawer />
 
 	<div bind:this={mapElement} class="absolute h-[100%] w-full !bg-teal dark:!bg-dark" />
 </main>

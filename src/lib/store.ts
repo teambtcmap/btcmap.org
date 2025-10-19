@@ -60,6 +60,8 @@ export const syncStatus: Writable<boolean> = writable();
 
 export const mapUpdates = writable(false);
 
+export const selectedMerchant: Writable<Place | null> = writable(null);
+
 export const excludeLeader = readable([
 	2104834, 9451067, 1722488, 81735, 18545877, 232801, 19880430, 1778799, 21749653
 ]);
