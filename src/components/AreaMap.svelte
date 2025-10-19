@@ -187,7 +187,7 @@
 <section id="map-section">
 	<!-- prettier-ignore -->
 	<h3
-		class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/60 dark:bg-white/10 dark:text-white"
+		class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/75 dark:bg-white/10 dark:text-white"
 	>
 		{name || 'BTC Map Area'} Map
 		<div class="flex items-center space-x-1 text-link">
@@ -221,11 +221,11 @@
 		<!-- prettier-ignore -->
 		<div
 			bind:this={mapElement}
-			class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal text-left md:h-[600px] dark:border-white/60 dark:!bg-[#202f33]"
+			class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal text-left md:h-[600px] dark:border-white/75 dark:!bg-[#202f33]"
 		/>
 		{#if !mapLoaded}
 			<MapLoadingEmbed
-				style="h-[300px] md:h-[600px] rounded-b-3xl border border-statBorder dark:border-white/60"
+				style="h-[300px] md:h-[600px] rounded-b-3xl border border-statBorder dark:border-white/75"
 			/>
 		{/if}
 	</div>
