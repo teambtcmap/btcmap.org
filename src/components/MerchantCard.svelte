@@ -74,7 +74,7 @@
 <div
 	class="flex flex-col justify-between rounded-2xl border bg-white/50 p-4 text-left transition-shadow hover:shadow-lg sm:p-6 dark:bg-white/5 {boosted
 		? 'border-bitcoin'
-		: 'border-statBorder dark:border-white/75'}"
+		: 'border-statBorder dark:border-white/80'}"
 >
 	<div>
 		<div class="mb-3 flex w-full flex-col items-center justify-between gap-2 sm:flex-row">
