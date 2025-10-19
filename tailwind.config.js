@@ -44,7 +44,6 @@ export default {
 				mobileButtonsActive: '#C3DCDF',
 				statPositive: '#0B9072',
 				statNegative: '#EB5757',
-				statBorder: '#C8DCDF',
 				taggerTime: '#7C9CA0',
 				created: '#10B791',
 				deleted: '#EB5757',

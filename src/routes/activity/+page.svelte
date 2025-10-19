@@ -123,9 +123,11 @@
 			</p>
 
 			<section id="taggers">
-				<div class="border-statBorder w-full rounded-3xl border dark:bg-white/10">
+				<div
+					class="w-full rounded-3xl border border-gray-200 dark:border-white/95 dark:bg-white/10"
+				>
 					<h3
-						class="border-statBorder border-b p-5 text-center text-2xl font-semibold text-primary lg:text-left dark:text-white"
+						class="border-b border-gray-200 p-5 text-center text-2xl font-semibold text-primary lg:text-left dark:border-white/95 dark:text-white"
 					>
 						Latest Supertaggers
 					</h3>

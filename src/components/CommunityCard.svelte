@@ -36,7 +36,7 @@
 </script>
 
 <div
-	class="border-statBorder rounded-3xl border shadow transition-shadow hover:shadow-2xl dark:bg-white/10"
+	class="rounded-3xl border border-gray-200 shadow transition-shadow hover:shadow-2xl dark:border-white/95 dark:bg-white/10"
 >
 	<div class="my-4 space-y-2 p-4">
 		<a
@@ -87,6 +87,6 @@
 		{rss}
 		{signal}
 		{simplex}
-		style="border-t border-t-statBorder p-4 w-full"
+		style="border-t border-t-gray-200 p-4 w-full dark:border-t-white/95"
 	/>
 </div>
