@@ -1,7 +1,7 @@
 import { theme, areas } from '$lib/store';
 import { areasSync } from '$lib/sync/areas';
 import { PLACE_FIELD_SETS } from '$lib/api-fields';
-import type { Continents, Element, Grade, IssueIcon, Place } from '$lib/types';
+import type { Continents, Grade, IssueIcon, Place } from '$lib/types';
 import { toast } from '@zerodevx/svelte-toast';
 import type { Chart } from 'chart.js';
 import { get } from 'svelte/store';
@@ -181,10 +181,9 @@ export const validateContinents = (continent: Continents) =>
 		'South America'
 	].includes(continent);
 
-export const isBoosted = (item: Element | Place | undefined | null) => {
+export const isBoosted = (item: Place | undefined | null) => {
 	if (!item) return false;
-	const boostExpiry = 'tags' in item ? item.tags['boost:expires'] : item.boosted_until;
-	return boostExpiry && Date.parse(boostExpiry || '') > Date.now();
+	return item.boosted_until && Date.parse(item.boosted_until) > Date.now();
 };
 
 /**

@@ -388,7 +388,6 @@ export type AreaPageProps = {
 	name: string;
 	tickets: Tickets;
 	issues: RpcIssue[];
-	elements?: Element[];
 };
 
 // V4 API Types
