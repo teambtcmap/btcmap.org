@@ -22,7 +22,7 @@
 </script>
 
 <div
-	class="border-statBorder grid-cols-6 space-y-5 border-t border-b py-5 text-center text-lg font-semibold lg:grid lg:space-y-0 lg:border-none lg:py-0"
+	class="grid-cols-6 space-y-5 border-t border-b border-gray-200 py-5 text-center text-lg font-semibold lg:grid lg:space-y-0 lg:border-none lg:py-0 dark:border-white/95"
 >
 	<span
 		class="my-auto text-link {position > 3

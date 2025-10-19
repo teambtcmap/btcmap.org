@@ -315,12 +315,12 @@
 
 			<section id="stats">
 				<div
-					class="border-statBorder grid rounded-3xl border md:grid-cols-2 xl:grid-cols-2 dark:bg-white/10"
+					class="grid rounded-3xl border border-gray-200 md:grid-cols-2 xl:grid-cols-2 dark:border-white/95 dark:bg-white/10"
 				>
 					<DashboardStat
 						title="Total Locations"
 						stat={areaDashboard?.total_elements}
-						border="md:border-r border-statBorder"
+						border="md:border-r border-gray-200 dark:border-white/95"
 						loading={false}
 					/>
 					<DashboardStat

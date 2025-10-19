@@ -146,8 +146,8 @@ export const attribution = (L: Leaflet, map: Map) => {
 	OSMAttribution.classList.add(
 		'dark:!bg-dark',
 		'dark:!text-white',
-		'dark:border-t',
-		'dark:border-r'
+		'dark:border-t-white/95',
+		'dark:border-r-white/95'
 	);
 };
 
@@ -165,8 +165,8 @@ export const support = () => {
 	supportAttribution.classList.add(
 		'dark:!bg-dark',
 		'dark:!text-white',
-		'dark:border-t',
-		'dark:border-l'
+		'dark:border-t-white/95',
+		'dark:border-l-white/95'
 	);
 };
 
@@ -226,7 +226,7 @@ export const changeDefaultIcons = (
 				};
 			}
 		}
-		zoomIn.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+		zoomIn.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border-white/95');
 	}
 
 	const zoomOut: HTMLAnchorElement | null = document.querySelector('.leaflet-control-zoom-out');
@@ -245,7 +245,7 @@ export const changeDefaultIcons = (
 				};
 			}
 		}
-		zoomOut.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+		zoomOut.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border-white/95');
 	}
 
 	const fullscreenButton = L.DomUtil.create('a');
@@ -281,7 +281,7 @@ export const changeDefaultIcons = (
 			}
 		};
 	}
-	fullscreenButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+	fullscreenButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border-white/95');
 	fullscreenButton.style.borderBottom = BORDER_BOTTOM_STYLE;
 
 	leafletBar?.append(fullscreenButton);
@@ -326,7 +326,7 @@ export const geolocate = (L: Leaflet, map: Map) => {
 				};
 			}
 		}
-		locateButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+		locateButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border-white/95');
 	}
 };
 
@@ -374,7 +374,11 @@ export const homeMarkerButtons = (
 					}
 				};
 			}
-			addHomeButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+			addHomeButton.classList.add(
+				'dark:!bg-dark',
+				'dark:hover:!bg-dark/75',
+				'dark:border-white/95'
+			);
 
 			addControlDiv.append(addHomeButton);
 
@@ -404,7 +408,11 @@ export const homeMarkerButtons = (
 						}
 					};
 				}
-				addLocationButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+				addLocationButton.classList.add(
+					'dark:!bg-dark',
+					'dark:hover:!bg-dark/75',
+					'dark:border-white/95'
+				);
 
 				addControlDiv.append(addLocationButton);
 
@@ -433,7 +441,11 @@ export const homeMarkerButtons = (
 						}
 					};
 				}
-				communityMapButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+				communityMapButton.classList.add(
+					'dark:!bg-dark',
+					'dark:hover:!bg-dark/75',
+					'dark:border-white/95'
+				);
 				communityMapButton.style.borderBottom = BORDER_BOTTOM_STYLE;
 
 				addControlDiv.append(communityMapButton);
@@ -464,7 +476,11 @@ export const homeMarkerButtons = (
 						}
 					};
 				}
-				merchantMapButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+				merchantMapButton.classList.add(
+					'dark:!bg-dark',
+					'dark:hover:!bg-dark/75',
+					'dark:border-white/95'
+				);
 
 				addControlDiv.append(merchantMapButton);
 			}
@@ -519,7 +535,11 @@ export const dataRefresh = (L: Leaflet, map: Map, DomEvent: DomEventType) => {
 					}
 				};
 			}
-			dataRefreshButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+			dataRefreshButton.classList.add(
+				'dark:!bg-dark',
+				'dark:hover:!bg-dark/75',
+				'dark:border-white/95'
+			);
 
 			dataRefreshDiv.append(dataRefreshButton);
 

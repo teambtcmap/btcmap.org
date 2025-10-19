@@ -313,7 +313,7 @@
 <section id="stats">
 	{#if areaTags && (areaTags.population || areaTags.area_km2)}
 		<div
-			class="border-statBorder mb-5 grid gap-4 rounded-3xl border p-6 md:grid-cols-2 dark:bg-white/10"
+			class="mb-5 grid gap-4 rounded-3xl border border-gray-200 p-6 md:grid-cols-2 dark:border-white/95 dark:bg-white/10"
 		>
 			{#if areaTags.population}
 				<div class="flex flex-col">
@@ -342,20 +342,20 @@
 	{/if}
 
 	<div
-		class="border-statBorder border dark:bg-white/10 {total === 0
+		class="border border-gray-200 dark:border-white/95 dark:bg-white/10 {total === 0
 			? 'rounded-3xl'
 			: 'rounded-t-3xl'} grid md:grid-cols-2 xl:grid-cols-2"
 	>
 		<ProfileStat
 			title="Total Locations"
 			stat={total}
-			border="border-b xl:border-b-0 md:border-r border-statBorder"
+			border="border-b xl:border-b-0 md:border-r border-gray-200 dark:border-white/95"
 		/>
 		<ProfileStat
 			title="Recently Verified Locations"
 			stat={upToDate}
 			percent={total && total > 0 ? upToDatePercent : undefined}
-			border="border-b xl:border-b-0 xl:border-r border-statBorder"
+			border="border-b xl:border-b-0 xl:border-r border-gray-200 dark:border-white/95"
 			tooltip="Locations that have been verified within one year."
 		/>
 	</div>
@@ -363,7 +363,7 @@
 	<div
 		class="{total === 0
 			? 'hidden'
-			: ''} border-statBorder relative rounded-b-3xl border border-t-0 p-5 dark:bg-white/10"
+			: ''} relative rounded-b-3xl border border-t-0 border-gray-200 p-5 dark:border-white/95 dark:bg-white/10"
 	>
 		{#if chartsLoading}
 			<div>
@@ -378,14 +378,14 @@
 </section>
 
 <section id="charts" class="space-y-10">
-	<div class="border-statBorder w-full rounded-3xl border dark:bg-white/10">
+	<div class="w-full rounded-3xl border border-gray-200 dark:border-white/95 dark:bg-white/10">
 		<h3
-			class="border-statBorder border-b p-5 text-center text-lg font-semibold text-primary md:text-left dark:text-white"
+			class="border-b border-gray-200 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
 		>
 			{name || 'BTC Map Area'} Charts
 		</h3>
 
-		<div class="border-statBorder border-b p-5">
+		<div class="border-b border-gray-200 p-5 dark:border-white/95">
 			<div class="relative">
 				{#if chartsLoading}
 					<div
@@ -401,7 +401,7 @@
 			</p>
 		</div>
 
-		<div class="border-statBorder p-5">
+		<div class="border-gray-200 p-5 dark:border-white/95">
 			<div class="relative">
 				{#if chartsLoading}
 					<div
