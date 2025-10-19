@@ -21,7 +21,7 @@
 </script>
 
 <div
-	class="items-center space-y-2 p-5 text-center text-xl lg:flex lg:space-x-5 lg:space-y-0 lg:text-left"
+	class="items-center space-y-2 p-5 text-center text-xl lg:flex lg:space-y-0 lg:space-x-5 lg:text-left"
 >
 	<!-- dot -->
 	<span class="relative mx-auto mb-2 flex h-3 w-3 lg:mx-0 lg:mb-0">
@@ -46,7 +46,7 @@
 	<div class="w-full flex-wrap items-center justify-between space-y-2 lg:flex lg:space-y-0">
 		<!-- event information -->
 		<div class="space-y-2 lg:space-y-0">
-			<span class="text-primary dark:text-white lg:mr-5">
+			<span class="text-primary lg:mr-5 dark:text-white">
 				<!-- location -->
 				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
@@ -95,7 +95,7 @@
 
 			<!-- time ago -->
 			<span
-				class="block text-center font-semibold text-taggerTime lg:inline {lightning
+				class="text-taggerTime block text-center font-semibold lg:inline {lightning
 					? 'lg:mr-5'
 					: ''}"
 			>

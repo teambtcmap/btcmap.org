@@ -21,9 +21,9 @@
 </script>
 
 <section id="taggers">
-	<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
+	<div class="border-statBorder w-full rounded-3xl border dark:bg-white/10">
 		<h3
-			class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
+			class="border-statBorder border-b p-5 text-center text-lg font-semibold text-primary md:text-left dark:text-white"
 		>
 			{name || 'BTC Map Area'} Supertaggers
 		</h3>
@@ -77,9 +77,9 @@
 </section>
 
 <section id="activity">
-	<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
+	<div class="border-statBorder w-full rounded-3xl border dark:bg-white/10">
 		<h3
-			class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
+			class="border-statBorder border-b p-5 text-center text-lg font-semibold text-primary md:text-left dark:text-white"
 		>
 			{name || 'BTC Map Area'} Activity
 		</h3>
@@ -137,9 +137,9 @@
 </section>
 
 <section id="atom">
-	<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
+	<div class="border-statBorder w-full rounded-3xl border dark:bg-white/10">
 		<h3
-			class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
+			class="border-statBorder border-b p-5 text-center text-lg font-semibold text-primary md:text-left dark:text-white"
 		>
 			{name || 'BTC Map Area'} Atom Feeds
 		</h3>

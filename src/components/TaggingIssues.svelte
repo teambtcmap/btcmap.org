@@ -12,7 +12,7 @@
 	<OutClick excludeQuerySelectorAll="#tagging-issues" on:outclick={closeModal}>
 		<div
 			transition:fly={{ y: 200, duration: 300 }}
-			class="center-fixed z-[2000] max-h-[90vh] w-[90vw] overflow-auto rounded-xl border border-mapBorder bg-white p-6 text-left shadow-2xl dark:bg-dark md:h-[400px] md:w-[430px]"
+			class="center-fixed border-mapBorder z-[2000] max-h-[90vh] w-[90vw] overflow-auto rounded-xl border bg-white p-6 text-left shadow-2xl md:h-[400px] md:w-[430px] dark:bg-dark"
 		>
 			<CloseButton on:click={closeModal} />
 

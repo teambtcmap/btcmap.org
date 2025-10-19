@@ -186,7 +186,7 @@
 
 <section id="map-section">
 	<h3
-		class="rounded-t-3xl border border-b-0 border-statBorder p-5 text-center text-lg font-semibold text-primary dark:bg-white/10 dark:text-white md:text-left"
+		class="border-statBorder rounded-t-3xl border border-b-0 p-5 text-center text-lg font-semibold text-primary md:text-left dark:bg-white/10 dark:text-white"
 	>
 		{name || 'BTC Map Area'} Map
 		<div class="flex items-center space-x-1 text-link">
@@ -219,7 +219,7 @@
 	<div class="relative">
 		<div
 			bind:this={mapElement}
-			class="z-10 h-[300px] rounded-b-3xl border border-statBorder !bg-teal text-left dark:!bg-[#202f33] md:h-[600px]"
+			class="border-statBorder z-10 h-[300px] rounded-b-3xl border !bg-teal text-left md:h-[600px] dark:!bg-[#202f33]"
 		/>
 		{#if !mapLoaded}
 			<MapLoadingEmbed style="h-[300px] md:h-[600px] border border-statBorder rounded-b-3xl" />

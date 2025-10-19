@@ -313,11 +313,11 @@
 <section id="stats">
 	{#if areaTags && (areaTags.population || areaTags.area_km2)}
 		<div
-			class="mb-5 grid gap-4 rounded-3xl border border-statBorder p-6 dark:bg-white/10 md:grid-cols-2"
+			class="border-statBorder mb-5 grid gap-4 rounded-3xl border p-6 md:grid-cols-2 dark:bg-white/10"
 		>
 			{#if areaTags.population}
 				<div class="flex flex-col">
-					<span class="text-sm uppercase tracking-wide text-gray-600 dark:text-gray-300"
+					<span class="text-sm tracking-wide text-gray-600 uppercase dark:text-gray-300"
 						>Population</span
 					>
 					<span class="text-2xl font-bold text-primary dark:text-white">
@@ -332,7 +332,7 @@
 			{/if}
 			{#if areaTags.area_km2}
 				<div class="flex flex-col">
-					<span class="text-sm uppercase tracking-wide text-gray-600 dark:text-gray-300">Area</span>
+					<span class="text-sm tracking-wide text-gray-600 uppercase dark:text-gray-300">Area</span>
 					<span class="text-2xl font-bold text-primary dark:text-white">
 						{areaTags.area_km2.toLocaleString()} km²
 					</span>
@@ -342,7 +342,7 @@
 	{/if}
 
 	<div
-		class="border border-statBorder dark:bg-white/10 {total === 0
+		class="border-statBorder border dark:bg-white/10 {total === 0
 			? 'rounded-3xl'
 			: 'rounded-t-3xl'} grid md:grid-cols-2 xl:grid-cols-2"
 	>
@@ -363,12 +363,12 @@
 	<div
 		class="{total === 0
 			? 'hidden'
-			: ''} relative rounded-b-3xl border border-t-0 border-statBorder p-5 dark:bg-white/10"
+			: ''} border-statBorder relative rounded-b-3xl border border-t-0 p-5 dark:bg-white/10"
 	>
 		{#if chartsLoading}
 			<div>
 				<i
-					class="fa-solid fa-chart-pie absolute left-1/2 top-1/2 h-52 w-52 -translate-x-1/2 -translate-y-1/2 animate-pulse text-link/50 md:h-60 md:w-60"
+					class="fa-solid fa-chart-pie absolute top-1/2 left-1/2 h-52 w-52 -translate-x-1/2 -translate-y-1/2 animate-pulse text-link/50 md:h-60 md:w-60"
 				/>
 			</div>
 		{/if}
@@ -378,18 +378,18 @@
 </section>
 
 <section id="charts" class="space-y-10">
-	<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
+	<div class="border-statBorder w-full rounded-3xl border dark:bg-white/10">
 		<h3
-			class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
+			class="border-statBorder border-b p-5 text-center text-lg font-semibold text-primary md:text-left dark:text-white"
 		>
 			{name || 'BTC Map Area'} Charts
 		</h3>
 
-		<div class="border-b border-statBorder p-5">
+		<div class="border-statBorder border-b p-5">
 			<div class="relative">
 				{#if chartsLoading}
 					<div
-						class="absolute left-0 top-0 flex h-[400px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
+						class="absolute top-0 left-0 flex h-[400px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
 					>
 						<i class="fa-solid fa-chart-area h-24 w-24 animate-pulse text-link/50" />
 					</div>
@@ -405,7 +405,7 @@
 			<div class="relative">
 				{#if chartsLoading}
 					<div
-						class="absolute left-0 top-0 flex h-[400px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
+						class="absolute top-0 left-0 flex h-[400px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
 					>
 						<i class="fa-solid fa-chart-area h-24 w-24 animate-pulse text-link/50" />
 					</div>
@@ -420,7 +420,7 @@
 	</div>
 </section>
 
-<p class="text-center text-sm text-body dark:text-white md:text-left">
+<p class="text-center text-sm text-body md:text-left dark:text-white">
 	*More information on bitcoin mapping tags can be found <a
 		href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#tagging-guidance"
 		target="_blank"

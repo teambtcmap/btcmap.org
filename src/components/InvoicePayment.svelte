@@ -84,6 +84,6 @@
 </script>
 
 <canvas
-	class="mx-auto h-[200px] w-[200px] rounded-2xl border-2 border-mapBorder transition-colors hover:border-link md:h-[275px] md:w-[275px]"
+	class="border-mapBorder mx-auto h-[200px] w-[200px] rounded-2xl border-2 transition-colors hover:border-link md:h-[275px] md:w-[275px]"
 	bind:this={qr}
 />

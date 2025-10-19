@@ -61,7 +61,7 @@
 				<h1
 					class="{detectTheme() === 'dark' || $theme === 'dark'
 						? 'text-white'
-						: 'gradient'} text-4xl font-semibold !leading-tight md:text-5xl"
+						: 'gradient'} text-4xl !leading-tight font-semibold md:text-5xl"
 				>
 					Help place bitcoin on the map.
 				</h1>
@@ -69,7 +69,7 @@
 				<HeaderPlaceholder />
 			{/if}
 
-			<h2 class="mx-auto w-full text-xl font-semibold text-primary dark:text-white lg:w-[800px]">
+			<h2 class="mx-auto w-full text-xl font-semibold text-primary lg:w-[800px] dark:text-white">
 				BTCMap.org is a free and open source project (FOSS). We rely on donations and sponsorship to
 				continue.
 
@@ -80,7 +80,7 @@
 			<section id="donate">
 				{#if showQr}
 					<div
-						class="relative mx-auto flex h-[450px] w-full items-center justify-center rounded-xl bg-lightBlue drop-shadow-xl dark:bg-white/[0.15] md:h-[380px] md:w-[475px]"
+						class="bg-lightBlue relative mx-auto flex h-[450px] w-full items-center justify-center rounded-xl drop-shadow-xl md:h-[380px] md:w-[475px] dark:bg-white/[0.15]"
 					>
 						<div class="space-y-5">
 							<CloseButton
@@ -124,7 +124,7 @@
 			</section>
 
 			<section id="supporters">
-				<h2 class="text-xl font-semibold uppercase text-primary dark:text-white">
+				<h2 class="text-xl font-semibold text-primary uppercase dark:text-white">
 					Our amazing supporters
 				</h2>
 				<a href="mailto:hello@btcmap.org" class="text-link transition-colors hover:text-hover"
@@ -137,7 +137,7 @@
 			<section id="node">
 				<!-- channel -->
 				<div>
-					<h3 class="text-lg font-semibold uppercase text-body dark:text-white">
+					<h3 class="text-lg font-semibold text-body uppercase dark:text-white">
 						Open a lightning channel to us
 					</h3>
 					<a

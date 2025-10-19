@@ -125,7 +125,7 @@
 				icon={showMobileMenu ? 'close' : 'bars'}
 				type="mobile-nav"
 			/>
-			<span class="font-semibold uppercase text-mobileMenu dark:text-white">Menu</span>
+			<span class="text-mobileMenu font-semibold uppercase dark:text-white">Menu</span>
 		</button>
 	</div>
 
@@ -157,7 +157,7 @@
 				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 				<a href={link.url} class="flex w-full items-center text-xl text-link dark:text-white">
 					<span
-						class="mr-4 rounded-full bg-mobileButtons p-3 transition-colors active:bg-mobileButtonsActive"
+						class="bg-mobileButtons active:bg-mobileButtonsActive mr-4 rounded-full p-3 transition-colors"
 					>
 						<Icon w="24" h="24" icon={link.icon} type="mobile-nav" />
 					</span>

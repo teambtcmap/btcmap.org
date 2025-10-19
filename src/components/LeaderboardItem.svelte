@@ -22,7 +22,7 @@
 </script>
 
 <div
-	class="grid-cols-6 space-y-5 border-b border-t border-statBorder py-5 text-center text-lg font-semibold lg:grid lg:space-y-0 lg:border-none lg:py-0"
+	class="border-statBorder grid-cols-6 space-y-5 border-t border-b py-5 text-center text-lg font-semibold lg:grid lg:space-y-0 lg:border-none lg:py-0"
 >
 	<span
 		class="my-auto text-link {position > 3
@@ -59,7 +59,7 @@
 	</div>
 
 	{#each stats as stat (stat.title)}
-		<span class="mx-5 inline-block text-link lg:!my-auto lg:mx-0">
+		<span class="mx-5 inline-block text-link lg:mx-0 lg:!my-auto">
 			<span
 				class="mr-1 inline-block h-3 w-3 rounded-full {stat.title === 'C'
 					? 'bg-created'

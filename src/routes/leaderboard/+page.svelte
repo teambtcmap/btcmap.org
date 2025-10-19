@@ -74,7 +74,7 @@
 				<h1
 					class="{detectTheme() === 'dark' || $theme === 'dark'
 						? 'text-white'
-						: 'gradient'} text-center text-4xl font-semibold !leading-tight md:text-5xl"
+						: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl"
 				>
 					Top Editors
 				</h1>

@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@config '../tailwind.config.js';
 
 @font-face {
 	font-family: 'Manrope';
@@ -42,11 +41,11 @@
 	}
 
 	.center {
-		@apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2;
+		@apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
 	}
 
 	.center-fixed {
-		@apply fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2;
+		@apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
 	}
 }
 
@@ -86,7 +85,7 @@
 	}
 
 	.comment-badge {
-		@apply absolute -right-1 -top-1 bg-green-600 text-xs font-bold text-white;
+		@apply absolute -top-1 -right-1 bg-green-600 text-xs font-bold text-white;
 		@apply flex h-4 w-4 items-center justify-center rounded-full;
 		transform: translate(50%, -50%);
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);

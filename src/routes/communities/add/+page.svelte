@@ -231,7 +231,7 @@
 							<span class="font-semibold text-error">Please select a location...</span>
 						{/if}
 
-						<div class="space-y-2 md:flex md:space-x-2 md:space-y-0">
+						<div class="space-y-2 md:flex md:space-y-0 md:space-x-2">
 							<input
 								on:keydown={(e) => {
 									if (e.key === 'Enter') {
@@ -271,12 +271,12 @@
 											on:click={() => setLocation(area)}
 											class="{index !== searchResults.length - 1
 												? 'border-b'
-												: ''} block whitespace-nowrap p-3 hover:bg-link/50"
+												: ''} block p-3 whitespace-nowrap hover:bg-link/50"
 											>{area.display_name}</button
 										>
 									{/each}
 								{:else}
-									<p class="whitespace-nowrap p-3 font-semibold">{location}</p>
+									<p class="p-3 font-semibold whitespace-nowrap">{location}</p>
 								{/if}
 							</div>
 						{/if}
