@@ -55,7 +55,7 @@ export const PLACE_FIELDS = {
 
 export const PLACE_FIELD_SETS = {
 	MAP_SYNC: [...PLACE_FIELDS.CORE, ...PLACE_FIELDS.SYNC],
-	COMPLETE_PLACE: [...PLACE_FIELDS.CORE, ...PLACE_FIELDS.POPUP]
+	COMPLETE_PLACE: [...PLACE_FIELDS.CORE, ...PLACE_FIELDS.SYNC, ...PLACE_FIELDS.POPUP]
 } as const;
 
 export const buildFieldsParam = (fields: readonly string[]) => fields.join(',');
