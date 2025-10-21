@@ -773,7 +773,7 @@ export const generateMarker = ({
 							placeDetails['osm:payment:lightning_contactless'] ||
 							placeDetails['osm:payment:bitcoin']
 								? `<div>
-									<span class='block text-mapLabel text-xs'>Payment Methods</span>
+									<span class='block text-mapLabel text-xs dark:text-white/70'>Payment Methods</span>
 									<div class='w-full flex space-x-2 mt-0.5'>
 										<img src="${
 											placeDetails['osm:payment:onchain'] === 'yes'
@@ -838,7 +838,7 @@ export const generateMarker = ({
 						}
 
 						<div>
-							<span class='block text-mapLabel text-xs' title="Completed by BTC Map community members">Last Surveyed</span>
+							<span class='block text-mapLabel text-xs dark:text-white/70' title="Completed by BTC Map community members">Last Surveyed</span>
 							<span class='block text-body dark:text-white'>
 								${
 									placeDetails.verified_at
@@ -865,7 +865,7 @@ export const generateMarker = ({
 						<div>
 							${
 								isBoosted
-									? `<span class='block text-mapLabel text-xs' title="This location is boosted!">Boost Expires</span>
+									? `<span class='block text-mapLabel text-xs dark:text-white/70' title="This location is boosted!">Boost Expires</span>
 									   <span class='block text-body dark:text-white'><span id="boosted-time"></span></span>`
 									: ''
 							}
