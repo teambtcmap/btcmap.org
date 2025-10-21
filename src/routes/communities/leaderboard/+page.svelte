@@ -54,7 +54,7 @@
 					Directory
 				</PrimaryButton>
 
-				<div class="items-center justify-center space-y-5 md:flex md:space-y-0 md:space-x-5">
+				<div class="flex flex-col items-center justify-center gap-5 md:flex-row">
 					<PrimaryButton
 						style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
 						link="/communities/add"
