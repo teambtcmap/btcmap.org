@@ -40,11 +40,11 @@
 		{/if}
 	</span>
 
-	<div class="items-center lg:flex lg:space-x-2">
+	<div class="flex flex-col items-center gap-2 lg:flex-row">
 		<img
 			src={avatar}
 			alt="avatar"
-			class="mx-auto mb-2 h-20 w-20 rounded-full object-cover lg:mx-0 lg:mb-0 lg:h-14 lg:w-14"
+			class="h-20 w-20 rounded-full object-cover lg:h-14 lg:w-14"
 			on:error={function () {
 				this.src = '/images/satoshi-nakamoto.png';
 			}}
