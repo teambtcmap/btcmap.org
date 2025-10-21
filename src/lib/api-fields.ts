@@ -13,6 +13,7 @@ export const PLACE_FIELDS = {
 	POPUP: [
 		'name',
 		'address',
+		'description',
 		'phone',
 		'website',
 		'twitter',
@@ -49,7 +50,8 @@ export const PLACE_FIELDS = {
 		'osm:category',
 		'osm:survey:date',
 		'osm:check_date',
-		'osm:check_date:currency:XBT'
+		'osm:check_date:currency:XBT',
+		'osm:note'
 	] as const satisfies (keyof Place)[]
 } as const;
 

@@ -113,8 +113,8 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 			// Process all merchant data server-side (same logic as client initializeData)
 			const icon = data.tags['icon:android'];
 			const address = placeData.address;
-			const description = data.osm_json.tags?.description;
-			const note = data.osm_json.tags?.note;
+			const description = placeData.description;
+			const note = placeData['osm:note'];
 			const hours = data.osm_json.tags?.['opening_hours'];
 
 			const payment: PayMerchant = data.tags['payment:uri']

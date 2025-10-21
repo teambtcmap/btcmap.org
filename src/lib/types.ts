@@ -404,6 +404,7 @@ export type Place = {
 	// Standard documented fields
 	name?: string;
 	address?: string;
+	description?: string;
 	opening_hours?: string;
 	created_at?: string;
 	verified_at?: string;
@@ -452,4 +453,5 @@ export type Place = {
 	'osm:survey:date'?: string;
 	'osm:check_date'?: string;
 	'osm:check_date:currency:XBT'?: string;
+	'osm:note'?: string;
 };
