@@ -58,7 +58,7 @@
 
 			<!-- time ago -->
 			<span
-				class="text-taggerTime block text-center font-semibold lg:inline {lightning
+				class="block text-center font-semibold text-taggerTime lg:inline {lightning
 					? 'lg:mr-5'
 					: ''}"
 			>
