@@ -142,12 +142,14 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 
 		if (data && data.id && lat && lon) {
 			let comments: MerchantComment[] = [];
-			
+
 			// Only fetch comments if merchant is not deleted
 			if (!data.deleted_at) {
 				try {
 					// Fetch comments directly from the dedicated comments endpoint
-					const commentsResponse = await axios.get(`https://api.btcmap.org/v4/places/${id}/comments`);
+					const commentsResponse = await axios.get(
+						`https://api.btcmap.org/v4/places/${id}/comments`
+					);
 					comments = commentsResponse.data;
 				} catch {
 					// Comments endpoint failed - use empty array

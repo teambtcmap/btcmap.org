@@ -164,7 +164,7 @@
 			// add element to map
 			const divIcon = generateIcon(
 				leaflet,
-				data.placeData.deleted_at ? 'skull' : (icon || 'question_mark'),
+				data.placeData.deleted_at ? 'skull' : icon || 'question_mark',
 				boosted ? true : false,
 				commentsCount
 			);
@@ -358,15 +358,12 @@
 	// Update marker icon when boost or comment state changes
 	$: if (merchantMarker && leaflet && mapLoaded && icon) {
 		const commentsCount = comments.length;
-		const displayIcon = data.placeData.deleted_at 
-			? 'skull' 
-			: icon !== 'question_mark' ? icon : 'currency_bitcoin';
-		const newIcon = generateIcon(
-			leaflet,
-			displayIcon,
-			boosted ? true : false,
-			commentsCount
-		);
+		const displayIcon = data.placeData.deleted_at
+			? 'skull'
+			: icon !== 'question_mark'
+				? icon
+				: 'currency_bitcoin';
+		const newIcon = generateIcon(leaflet, displayIcon, boosted ? true : false, commentsCount);
 		merchantMarker.setIcon(newIcon);
 	}
 
@@ -392,16 +389,10 @@
 	{#if data.placeData.deleted_at}
 		<div class="bg-red-600 py-4 text-center text-white">
 			<p class="text-lg font-semibold">
-				<Icon
-					w="20"
-					h="20"
-					style="inline-block text-white mr-2"
-					icon="skull"
-					type="material"
-				/>
+				<Icon w="20" h="20" style="inline-block text-white mr-2" icon="skull" type="material" />
 				This merchant has been removed from BTC Map and may no longer accept Bitcoin.
 			</p>
-			<p class="text-sm mt-1">The data shown below is outdated and for reference only.</p>
+			<p class="mt-1 text-sm">The data shown below is outdated and for reference only.</p>
 		</div>
 	{/if}
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
@@ -421,7 +412,11 @@
 								w="60"
 								h="60"
 								style="text-white"
-								icon={data.placeData.deleted_at ? 'skull' : icon !== 'question_mark' ? icon : 'currency_bitcoin'}
+								icon={data.placeData.deleted_at
+									? 'skull'
+									: icon !== 'question_mark'
+										? icon
+										: 'currency_bitcoin'}
 								type="material"
 							/>
 						</div>
