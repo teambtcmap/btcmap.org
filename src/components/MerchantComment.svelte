@@ -15,7 +15,7 @@
 				{text}
 			</span>
 
-			<span class="text-taggerTime block text-center font-semibold lg:inline">
+			<span class="block text-center font-semibold text-taggerTime lg:inline">
 				<Time timestamp={time} />
 			</span>
 		</div>
