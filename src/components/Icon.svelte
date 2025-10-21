@@ -37,6 +37,7 @@
 						dentistry: 'material-symbols:dentistry',
 						sauna: 'material-symbols:sauna',
 						info_outline: 'material-symbols:info-outline',
+						skull: 'material-symbols:skull',
 
 						// general app icons
 						close_round: 'ic:round-close'
