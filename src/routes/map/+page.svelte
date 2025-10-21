@@ -632,7 +632,12 @@
 							document.querySelector('#search-button').src = '/icons/search.svg';
 						};
 					}
-					searchButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+					searchButton.classList.add(
+					'dark:!bg-dark',
+					'dark:hover:!bg-dark/75',
+					'dark:border',
+					'dark:border-white/95'
+				);
 
 					addControlDiv.append(searchButton);
 
@@ -677,7 +682,12 @@
 								: '/icons/boost.svg';
 						};
 					}
-					boostLayerButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+					boostLayerButton.classList.add(
+					'dark:!bg-dark',
+					'dark:hover:!bg-dark/75',
+					'dark:border',
+					'dark:border-white/95'
+				);
 
 					addControlDiv.append(boostLayerButton);
 
