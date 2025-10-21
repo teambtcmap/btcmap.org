@@ -164,7 +164,7 @@
 			// add element to map
 			const divIcon = generateIcon(
 				leaflet,
-				data.placeData.deleted_at ? 'skull' : (icon || 'question_mark'),
+				data.placeData.deleted_at ? 'cancel' : (icon || 'question_mark'),
 				boosted ? true : false,
 				commentsCount
 			);
@@ -359,7 +359,7 @@
 	$: if (merchantMarker && leaflet && mapLoaded && icon) {
 		const commentsCount = comments.length;
 		const displayIcon = data.placeData.deleted_at 
-			? 'skull' 
+			? 'cancel' 
 			: icon !== 'question_mark' ? icon : 'currency_bitcoin';
 		const newIcon = generateIcon(
 			leaflet,
@@ -396,7 +396,7 @@
 					w="20"
 					h="20"
 					style="inline-block text-white mr-2"
-					icon="skull"
+					icon="cancel"
 					type="material"
 				/>
 				This merchant has been removed from BTC Map and may no longer accept Bitcoin.
@@ -421,7 +421,7 @@
 								w="60"
 								h="60"
 								style="text-white"
-								icon={data.placeData.deleted_at ? 'skull' : icon !== 'question_mark' ? icon : 'currency_bitcoin'}
+								icon={data.placeData.deleted_at ? 'cancel' : icon !== 'question_mark' ? icon : 'currency_bitcoin'}
 								type="material"
 							/>
 						</div>
