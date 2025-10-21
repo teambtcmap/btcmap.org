@@ -140,15 +140,19 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 		const lat = placeData.lat;
 		const lon = placeData.lon;
 
-		if (data && data.id && lat && lon && !data['deleted_at']) {
+		if (data && data.id && lat && lon) {
 			let comments: MerchantComment[] = [];
-			try {
-				// Fetch comments directly from the dedicated comments endpoint
-				const commentsResponse = await axios.get(`https://api.btcmap.org/v4/places/${id}/comments`);
-				comments = commentsResponse.data;
-			} catch {
-				// Comments endpoint failed - use empty array
-				comments = [];
+			
+			// Only fetch comments if merchant is not deleted
+			if (!data.deleted_at) {
+				try {
+					// Fetch comments directly from the dedicated comments endpoint
+					const commentsResponse = await axios.get(`https://api.btcmap.org/v4/places/${id}/comments`);
+					comments = commentsResponse.data;
+				} catch {
+					// Comments endpoint failed - use empty array
+					comments = [];
+				}
 			}
 
 			// Process all merchant data server-side (same logic as client initializeData)
