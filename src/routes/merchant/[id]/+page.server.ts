@@ -54,26 +54,67 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 					lat: placeData.lat,
 					lon: placeData.lon,
 					bounds: null, // Not applicable for nodes
-					tags: {
-						name: placeData.name,
-						phone: placeData.phone || placeData['osm:contact:phone'],
-						website: placeData.website || placeData['osm:contact:website'],
-						email: placeData.email || placeData['osm:contact:email'],
-						twitter: placeData.twitter || placeData['osm:contact:twitter'],
-						facebook: placeData.facebook || placeData['osm:contact:facebook'],
-						instagram: placeData.instagram || placeData['osm:contact:instagram'],
-						opening_hours: placeData.opening_hours,
-						'payment:lightning:requires_companion_app': placeData.required_app_url
-							? 'yes'
-							: undefined,
-						'payment:lightning:companion_app_url': placeData.required_app_url,
-						'payment:lightning':
-							placeData['payment:lightning'] || placeData['osm:payment:lightning'],
-						'payment:onchain': placeData['payment:onchain'] || placeData['osm:payment:onchain'],
-						'payment:lightning_contactless':
-							placeData['payment:lightning_contactless'] ||
-							placeData['osm:payment:lightning_contactless']
-					}
+					tags: Object.fromEntries(
+						Object.entries({
+							// Core info
+							name: placeData.name,
+							'addr:full': placeData.address,
+							description: placeData.description,
+							note: placeData['osm:note'],
+							opening_hours: placeData.opening_hours,
+
+							// Contact info
+							phone: placeData.phone || placeData['osm:contact:phone'],
+							website: placeData.website || placeData['osm:contact:website'],
+							email: placeData.email || placeData['osm:contact:email'],
+							'contact:twitter': placeData.twitter || placeData['osm:contact:twitter'],
+							'contact:facebook': placeData.facebook || placeData['osm:contact:facebook'],
+							'contact:instagram': placeData.instagram || placeData['osm:contact:instagram'],
+							'contact:line': placeData.line,
+
+							// Payment methods
+							'payment:lightning':
+								placeData['payment:lightning'] || placeData['osm:payment:lightning'],
+							'payment:onchain': placeData['payment:onchain'] || placeData['osm:payment:onchain'],
+							'payment:lightning_contactless':
+								placeData['payment:lightning_contactless'] ||
+								placeData['osm:payment:lightning_contactless'],
+							'payment:bitcoin': placeData['osm:payment:bitcoin'],
+							'payment:uri': placeData['payment:uri'] || placeData['osm:payment:uri'],
+							'payment:pouch': placeData['payment:pouch'] || placeData['osm:payment:pouch'],
+							'payment:coinos': placeData['payment:coinos'] || placeData['osm:payment:coinos'],
+							'payment:lightning:requires_companion_app':
+								placeData.required_app_url ||
+								placeData['osm:payment:lightning:requires_companion_app']
+									? 'yes'
+									: undefined,
+							'payment:lightning:companion_app_url':
+								placeData.required_app_url || placeData['osm:payment:lightning:companion_app_url'],
+
+							// Survey/verification dates
+							'survey:date': placeData['osm:survey:date'],
+							check_date: placeData['osm:check_date'],
+							'check_date:currency:XBT': placeData['osm:check_date:currency:XBT'],
+							verified_at: placeData.verified_at,
+
+							// Metadata
+							'icon:android': placeData.icon,
+							amenity: placeData['osm:amenity'],
+							category: placeData['osm:category'],
+
+							// IDs
+							osm_id: placeData.osm_id,
+							osm_url: placeData.osm_url,
+							btcmap_id: placeData.id.toString(),
+
+							// Boost
+							'boost:expires': placeData.boosted_until,
+
+							// Timestamps
+							created_at: placeData.created_at,
+							updated_at: placeData.updated_at
+						}).filter(([, value]) => value !== undefined && value !== null && value !== '')
+					)
 				},
 				tags: {
 					'icon:android': placeData.icon || 'question_mark',
