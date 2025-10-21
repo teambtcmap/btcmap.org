@@ -140,8 +140,9 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 		const lat = placeData.lat;
 		const lon = placeData.lon;
 
-		if (data && data.id && lat && lon && !data['deleted_at']) {
+		if (data && data.id && lat && lon) {
 			let comments: MerchantComment[] = [];
+
 			try {
 				// Fetch comments directly from the dedicated comments endpoint
 				const commentsResponse = await axios.get(`https://api.btcmap.org/v4/places/${id}/comments`);

@@ -164,7 +164,7 @@
 			// add element to map
 			const divIcon = generateIcon(
 				leaflet,
-				icon || 'question_mark',
+				data.placeData.deleted_at ? 'skull' : icon || 'question_mark',
 				boosted ? true : false,
 				commentsCount
 			);
@@ -358,12 +358,12 @@
 	// Update marker icon when boost or comment state changes
 	$: if (merchantMarker && leaflet && mapLoaded && icon) {
 		const commentsCount = comments.length;
-		const newIcon = generateIcon(
-			leaflet,
-			icon !== 'question_mark' ? icon : 'currency_bitcoin',
-			boosted ? true : false,
-			commentsCount
-		);
+		const displayIcon = data.placeData.deleted_at
+			? 'skull'
+			: icon !== 'question_mark'
+				? icon
+				: 'currency_bitcoin';
+		const newIcon = generateIcon(leaflet, displayIcon, boosted ? true : false, commentsCount);
 		merchantMarker.setIcon(newIcon);
 	}
 
@@ -386,21 +386,37 @@
 
 <div class="bg-teal dark:bg-dark">
 	<Header />
+	{#if data.placeData.deleted_at}
+		<div class="bg-red-600 py-4 text-center text-white">
+			<p class="text-lg font-semibold">
+				<Icon w="20" h="20" style="inline-block text-white mr-2" icon="skull" type="material" />
+				This merchant has been removed from BTC Map and may no longer accept Bitcoin.
+			</p>
+			<p class="mt-1 text-sm">The data shown below is outdated and for reference only.</p>
+		</div>
+	{/if}
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
 		<main class="my-10 space-y-16 text-center md:my-20">
 			<section id="profile" class="space-y-8">
 				<div class="space-y-2">
 					{#if icon}
 						<div
-							class="mx-auto flex h-32 w-32 items-center justify-center rounded-full {boosted
-								? 'bg-bitcoin hover:animate-wiggle'
-								: 'bg-link'}"
+							class="mx-auto flex h-32 w-32 items-center justify-center rounded-full {data.placeData
+								.deleted_at
+								? 'bg-gray-400 dark:bg-gray-600'
+								: boosted
+									? 'bg-bitcoin hover:animate-wiggle'
+									: 'bg-link'}"
 						>
 							<Icon
 								w="60"
 								h="60"
 								style="text-white"
-								icon={icon !== 'question_mark' ? icon : 'currency_bitcoin'}
+								icon={data.placeData.deleted_at
+									? 'skull'
+									: icon !== 'question_mark'
+										? icon
+										: 'currency_bitcoin'}
 								type="material"
 							/>
 						</div>
@@ -410,6 +426,9 @@
 
 					<h1 class="text-4xl font-semibold !leading-tight text-primary dark:text-white">
 						{name || 'BTC Map Merchant'}
+						{#if data.placeData.deleted_at}
+							<span class="text-2xl text-red-600 dark:text-red-400">(Deleted)</span>
+						{/if}
 					</h1>
 
 					{#if address}
