@@ -735,28 +735,28 @@ export const generateMarker = ({
 					}
 
 					<div class='flex space-x-2 mt-2.5 mb-1'>
-						<a id='navigate' href='geo:${lat},${long}' class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+						<a id='navigate' href='geo:${lat},${long}' class='border border-gray-300 dark:border-white/95 hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
 								<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#compass"></use>
 							</svg>
 							<span class='block text-xs text-center mt-1'>Navigate</span>
 						</a>
 
-						<a id='edit' href='${placeDetails.osm_url || `https://www.openstreetmap.org/edit?${osmType}=${osmId}`}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+						<a id='edit' href='${placeDetails.osm_url || `https://www.openstreetmap.org/edit?${osmType}=${osmId}`}' target="_blank" rel="noreferrer" class='border border-gray-300 dark:border-white/95 hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
 								<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#pencil"></use>
 							</svg>
 							<span class='block text-xs text-center mt-1'>Edit</span>
 						</a>
 
-						<a id='share' href='/merchant/${placeId}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+						<a id='share' href='/merchant/${placeId}' target="_blank" rel="noreferrer" class='border border-gray-300 dark:border-white/95 hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
 								<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#share"></use>
 							</svg>
 							<span class='block text-xs text-center mt-1'>Share</span>
 						</a>
 
-						<a href='/merchant/${placeId}#comments' class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+						<a href='/merchant/${placeId}#comments' class='border border-gray-300 dark:border-white/95 hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<div class='flex items-center justify-center h-6 text-lg font-bold mx-auto'>
 								${typeof placeDetails.comments === 'number' ? placeDetails.comments : placeDetails.comments?.length || 0}
 							</div>
@@ -764,7 +764,7 @@ export const generateMarker = ({
 						</a>
 					</div>
 
-					<div class='w-full border-t-[0.5px] border-mapBorder mt-3 mb-2 opacity-80'></div>
+					<div class='w-full border-t-[0.5px] border-gray-300 dark:border-white/95 mt-3 mb-2 opacity-80'></div>
 
 					<div class='flex space-x-4'>
 						${
@@ -870,7 +870,7 @@ export const generateMarker = ({
 									: ''
 							}
 
-							<button title='${isBoosted ? 'Extend Boost' : 'Boost'}' id='boost-button' class='flex justify-center items-center space-x-2 text-primary dark:text-white hover:text-link dark:hover:text-link border border-mapBorder hover:border-link rounded-lg px-3 h-[32px] transition-colors mt-1'>
+							<button title='${isBoosted ? 'Extend Boost' : 'Boost'}' id='boost-button' class='flex justify-center items-center space-x-2 text-primary dark:text-white hover:text-link dark:hover:text-link border border-gray-300 dark:border-white/95 hover:border-link rounded-lg px-3 h-[32px] transition-colors mt-1'>
 								<svg width='16px' height='16px' class='text-primary dark:text-white'>
 									<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#${
 										isBoosted ? 'boost-solid' : 'boost'

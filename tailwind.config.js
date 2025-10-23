@@ -34,7 +34,6 @@ export default {
 				supporter: '#095D73',
 				map: '#333333',
 				mapButton: '#5F5F5F',
-				mapBorder: '#E8E8E8',
 				mapHighlight: '#1C4347',
 				mapLabel: '#A4A4A4',
 				searchHover: '#F8F8F8',

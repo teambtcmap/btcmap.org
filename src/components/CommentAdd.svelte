@@ -83,7 +83,7 @@
 	<OutClick excludeQuerySelectorAll="#boost-button" on:outclick={closeModal}>
 		<div
 			transition:fly={{ y: 200, duration: 300 }}
-			class="center-fixed border-mapBorder z-[2000] max-h-[90vh] w-[90vw] overflow-auto rounded-xl border bg-white p-6 text-left shadow-2xl md:w-[430px] dark:bg-dark"
+			class="center-fixed z-[2000] max-h-[90vh] w-[90vw] overflow-auto rounded-xl border border-gray-300 dark:border-white/95 bg-white p-6 text-left shadow-2xl md:w-[430px] dark:bg-dark"
 		>
 			<CloseButton
 				position="flex justify-end"
@@ -136,7 +136,7 @@
 					</a>
 
 					<div
-						class="border-mapBorder flex w-full items-center justify-between space-x-2 rounded-xl border-2 p-2 md:justify-center"
+						class="flex w-full items-center justify-between space-x-2 rounded-xl border-2 border-gray-300 dark:border-white/95 p-2 md:justify-center"
 					>
 						<p class="hidden text-sm text-body md:block dark:text-white">
 							{invoice.slice(0, 39)}...
