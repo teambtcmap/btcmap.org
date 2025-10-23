@@ -80,7 +80,7 @@
 			<section id="donate">
 				{#if showQr}
 					<div
-						class="relative mx-auto flex h-[450px] w-full items-center justify-center rounded-xl drop-shadow-xl md:h-[380px] md:w-[475px] bg-slate-100 dark:bg-white/[0.15]"
+						class="relative mx-auto flex h-[450px] w-full items-center justify-center rounded-xl bg-slate-100 drop-shadow-xl md:h-[380px] md:w-[475px] dark:bg-white/[0.15]"
 					>
 						<div class="space-y-5">
 							<CloseButton

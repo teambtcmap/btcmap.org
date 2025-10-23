@@ -633,11 +633,11 @@
 						};
 					}
 					searchButton.classList.add(
-					'dark:!bg-dark',
-					'dark:hover:!bg-dark/75',
-					'dark:border',
-					'dark:border-white/95'
-				);
+						'dark:!bg-dark',
+						'dark:hover:!bg-dark/75',
+						'dark:border',
+						'dark:border-white/95'
+					);
 
 					addControlDiv.append(searchButton);
 
@@ -683,11 +683,11 @@
 						};
 					}
 					boostLayerButton.classList.add(
-					'dark:!bg-dark',
-					'dark:hover:!bg-dark/75',
-					'dark:border',
-					'dark:border-white/95'
-				);
+						'dark:!bg-dark',
+						'dark:hover:!bg-dark/75',
+						'dark:border',
+						'dark:border-white/95'
+					);
 
 					addControlDiv.append(boostLayerButton);
 
