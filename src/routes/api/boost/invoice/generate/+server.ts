@@ -7,29 +7,26 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 interface BoostInvoiceRequest {
 	place_id: number;
-	amount: number;
-	time: number;
-	name: string;
+	days: number;
 }
 
 // generate and return invoice
 export const POST: RequestHandler = async ({ request }) => {
 	const data: BoostInvoiceRequest = await request.json();
-	const { place_id, amount, time, name } = data;
+	const { place_id, days } = data;
 
-	if (!place_id || !amount || !time || !name) {
-		error(400, 'Missing required parameters: place_id, amount, time, name');
+	if (!place_id || !days) {
+		error(400, 'Missing required parameters: place_id, days');
 	}
 
-	if (amount <= 0 || time <= 0) {
-		error(400, 'Invalid numeric parameters: amount and time must be positive integers');
+	if (days <= 0) {
+		error(400, 'Invalid days parameter: must be a positive integer (30, 90, or 365)');
 	}
 
 	const invoice = await axios
 		.post('https://api.btcmap.org/v4/place-boosts', {
-			place_id: place_id,
-			sats_amount: amount,
-			days: time
+			place_id: place_id.toString(),
+			days: days
 		})
 		.then(function (response) {
 			return response.data;
