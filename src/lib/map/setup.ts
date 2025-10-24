@@ -871,7 +871,7 @@ export const generateMarker = ({
 							}
 
 							<button title='${isBoosted ? 'Extend Boost' : 'Boost'}' id='boost-button' class='flex justify-center items-center space-x-2 text-primary dark:text-white hover:text-link dark:hover:text-link border border-gray-300 dark:border-white/95 hover:border-link rounded-lg px-3 h-[32px] transition-colors mt-1'>
-								<svg width='16px' height='16px' class='text-primary dark:text-white'>
+								<svg width='16px' height='16px' fill='currentColor' class='text-primary dark:text-white'>
 									<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#${
 										isBoosted ? 'boost-solid' : 'boost'
 									}"></use>
