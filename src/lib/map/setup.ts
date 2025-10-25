@@ -147,7 +147,9 @@ export const attribution = (L: Leaflet, map: Map) => {
 		'dark:!bg-dark',
 		'dark:!text-white',
 		'dark:border-t',
-		'dark:border-r'
+		'dark:border-t-white/95',
+		'dark:border-r',
+		'dark:border-r-white/95'
 	);
 };
 
@@ -166,7 +168,9 @@ export const support = () => {
 		'dark:!bg-dark',
 		'dark:!text-white',
 		'dark:border-t',
-		'dark:border-l'
+		'dark:border-t-white/95',
+		'dark:border-l',
+		'dark:border-l-white/95'
 	);
 };
 
@@ -226,7 +230,12 @@ export const changeDefaultIcons = (
 				};
 			}
 		}
-		zoomIn.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+		zoomIn.classList.add(
+			'dark:!bg-dark',
+			'dark:hover:!bg-dark/75',
+			'dark:border',
+			'dark:border-white/95'
+		);
 	}
 
 	const zoomOut: HTMLAnchorElement | null = document.querySelector('.leaflet-control-zoom-out');
@@ -245,7 +254,12 @@ export const changeDefaultIcons = (
 				};
 			}
 		}
-		zoomOut.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+		zoomOut.classList.add(
+			'dark:!bg-dark',
+			'dark:hover:!bg-dark/75',
+			'dark:border',
+			'dark:border-white/95'
+		);
 	}
 
 	const fullscreenButton = L.DomUtil.create('a');
@@ -281,7 +295,12 @@ export const changeDefaultIcons = (
 			}
 		};
 	}
-	fullscreenButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+	fullscreenButton.classList.add(
+		'dark:!bg-dark',
+		'dark:hover:!bg-dark/75',
+		'dark:border',
+		'dark:border-white/95'
+	);
 	fullscreenButton.style.borderBottom = BORDER_BOTTOM_STYLE;
 
 	leafletBar?.append(fullscreenButton);
@@ -326,7 +345,12 @@ export const geolocate = (L: Leaflet, map: Map) => {
 				};
 			}
 		}
-		locateButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+		locateButton.classList.add(
+			'dark:!bg-dark',
+			'dark:hover:!bg-dark/75',
+			'dark:border',
+			'dark:border-white/95'
+		);
 	}
 };
 
@@ -374,7 +398,12 @@ export const homeMarkerButtons = (
 					}
 				};
 			}
-			addHomeButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+			addHomeButton.classList.add(
+				'dark:!bg-dark',
+				'dark:hover:!bg-dark/75',
+				'dark:border',
+				'dark:border-white/95'
+			);
 
 			addControlDiv.append(addHomeButton);
 
@@ -404,7 +433,12 @@ export const homeMarkerButtons = (
 						}
 					};
 				}
-				addLocationButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+				addLocationButton.classList.add(
+					'dark:!bg-dark',
+					'dark:hover:!bg-dark/75',
+					'dark:border',
+					'dark:border-white/95'
+				);
 
 				addControlDiv.append(addLocationButton);
 
@@ -433,7 +467,12 @@ export const homeMarkerButtons = (
 						}
 					};
 				}
-				communityMapButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+				communityMapButton.classList.add(
+					'dark:!bg-dark',
+					'dark:hover:!bg-dark/75',
+					'dark:border',
+					'dark:border-white/95'
+				);
 				communityMapButton.style.borderBottom = BORDER_BOTTOM_STYLE;
 
 				addControlDiv.append(communityMapButton);
@@ -464,7 +503,12 @@ export const homeMarkerButtons = (
 						}
 					};
 				}
-				merchantMapButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+				merchantMapButton.classList.add(
+					'dark:!bg-dark',
+					'dark:hover:!bg-dark/75',
+					'dark:border',
+					'dark:border-white/95'
+				);
 
 				addControlDiv.append(merchantMapButton);
 			}
@@ -519,7 +563,12 @@ export const dataRefresh = (L: Leaflet, map: Map, DomEvent: DomEventType) => {
 					}
 				};
 			}
-			dataRefreshButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+			dataRefreshButton.classList.add(
+				'dark:!bg-dark',
+				'dark:hover:!bg-dark/75',
+				'dark:border',
+				'dark:border-white/95'
+			);
 
 			dataRefreshDiv.append(dataRefreshButton);
 
@@ -686,28 +735,28 @@ export const generateMarker = ({
 					}
 
 					<div class='flex space-x-2 mt-2.5 mb-1'>
-						<a id='navigate' href='geo:${lat},${long}' class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+						<a id='navigate' href='geo:${lat},${long}' class='border border-gray-300 dark:border-white/95 hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
 								<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#compass"></use>
 							</svg>
 							<span class='block text-xs text-center mt-1'>Navigate</span>
 						</a>
 
-						<a id='edit' href='${placeDetails.osm_url || `https://www.openstreetmap.org/edit?${osmType}=${osmId}`}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+						<a id='edit' href='${placeDetails.osm_url || `https://www.openstreetmap.org/edit?${osmType}=${osmId}`}' target="_blank" rel="noreferrer" class='border border-gray-300 dark:border-white/95 hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
 								<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#pencil"></use>
 							</svg>
 							<span class='block text-xs text-center mt-1'>Edit</span>
 						</a>
 
-						<a id='share' href='/merchant/${placeId}' target="_blank" rel="noreferrer" class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+						<a id='share' href='/merchant/${placeId}' target="_blank" rel="noreferrer" class='border border-gray-300 dark:border-white/95 hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<svg width='24px' height='24px' class='mx-auto'>
 								<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#share"></use>
 							</svg>
 							<span class='block text-xs text-center mt-1'>Share</span>
 						</a>
 
-						<a href='/merchant/${placeId}#comments' class='border border-mapBorder hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
+						<a href='/merchant/${placeId}#comments' class='border border-gray-300 dark:border-white/95 hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
 							<div class='flex items-center justify-center h-6 text-lg font-bold mx-auto'>
 								${typeof placeDetails.comments === 'number' ? placeDetails.comments : placeDetails.comments?.length || 0}
 							</div>
@@ -715,7 +764,7 @@ export const generateMarker = ({
 						</a>
 					</div>
 
-					<div class='w-full border-t-[0.5px] border-mapBorder mt-3 mb-2 opacity-80'></div>
+					<div class='w-full border-t-[0.5px] border-gray-300 dark:border-white/95 mt-3 mb-2 opacity-80'></div>
 
 					<div class='flex space-x-4'>
 						${
@@ -724,7 +773,7 @@ export const generateMarker = ({
 							placeDetails['osm:payment:lightning_contactless'] ||
 							placeDetails['osm:payment:bitcoin']
 								? `<div>
-									<span class='block text-mapLabel text-xs'>Payment Methods</span>
+									<span class='block text-mapLabel text-xs dark:text-white/70'>Payment Methods</span>
 									<div class='w-full flex space-x-2 mt-0.5'>
 										<img src="${
 											placeDetails['osm:payment:onchain'] === 'yes'
@@ -789,7 +838,7 @@ export const generateMarker = ({
 						}
 
 						<div>
-							<span class='block text-mapLabel text-xs' title="Completed by BTC Map community members">Last Surveyed</span>
+							<span class='block text-mapLabel text-xs dark:text-white/70' title="Completed by BTC Map community members">Last Surveyed</span>
 							<span class='block text-body dark:text-white'>
 								${
 									placeDetails.verified_at
@@ -816,13 +865,13 @@ export const generateMarker = ({
 						<div>
 							${
 								isBoosted
-									? `<span class='block text-mapLabel text-xs' title="This location is boosted!">Boost Expires</span>
+									? `<span class='block text-mapLabel text-xs dark:text-white/70' title="This location is boosted!">Boost Expires</span>
 									   <span class='block text-body dark:text-white'><span id="boosted-time"></span></span>`
 									: ''
 							}
 
-							<button title='${isBoosted ? 'Extend Boost' : 'Boost'}' id='boost-button' class='flex justify-center items-center space-x-2 text-primary dark:text-white hover:text-link dark:hover:text-link border border-mapBorder hover:border-link rounded-lg px-3 h-[32px] transition-colors mt-1'>
-								<svg width='16px' height='16px'>
+							<button title='${isBoosted ? 'Extend Boost' : 'Boost'}' id='boost-button' class='flex justify-center items-center space-x-2 text-primary dark:text-white hover:text-link dark:hover:text-link border border-gray-300 dark:border-white/95 hover:border-link rounded-lg px-3 h-[32px] transition-colors mt-1'>
+								<svg width='16px' height='16px' style='color: inherit; fill: currentColor;' class='text-primary dark:text-white'>
 									<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#${
 										isBoosted ? 'boost-solid' : 'boost'
 									}"></use>

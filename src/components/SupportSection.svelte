@@ -36,7 +36,7 @@
 			<div
 				class="mx-auto flex h-[90px] w-full items-center justify-center self-center rounded-xl bg-supporter/50 drop-shadow-xl md:w-[250px]"
 			>
-				<a href="mailto:hello@btcmap.org" class="uppercase text-white">Apply here</a>
+				<a href="mailto:hello@btcmap.org" class="text-white uppercase">Apply here</a>
 			</div>
 		{/each}
 	</div>

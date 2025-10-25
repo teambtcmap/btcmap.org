@@ -200,9 +200,9 @@
 </script>
 
 <section id="issues">
-	<div class="w-full rounded-3xl border border-statBorder dark:bg-white/10">
+	<div class="w-full rounded-3xl border border-gray-300 dark:border-white/95 dark:bg-white/10">
 		<h3
-			class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
+			class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
 		>
 			{title}
 
@@ -233,7 +233,7 @@
 				/>
 				{#if globalFilter}
 					<button
-						class="absolute right-3 top-1/2 -translate-y-1/2"
+						class="absolute top-1/2 right-3 -translate-y-1/2"
 						on:click={() => {
 							globalFilter = '';
 							$table?.setGlobalFilter('');
@@ -243,7 +243,7 @@
 					</button>
 				{:else}
 					<button
-						class="absolute right-3 top-1/2 -translate-y-1/2"
+						class="absolute top-1/2 right-3 -translate-y-1/2"
 						on:click={() => {
 							searchInput.focus();
 						}}
@@ -256,15 +256,15 @@
 				<p class="w-full p-5 text-center text-primary dark:text-white">No results found.</p>
 			{:else}
 				<div class="overflow-x-auto">
-					<table class="w-full whitespace-nowrap text-left text-primary dark:text-white">
+					<table class="w-full text-left whitespace-nowrap text-primary dark:text-white">
 						<thead>
 							{#each $table.getHeaderGroups() as headerGroup, index (index)}
 								<tr>
 									{#each headerGroup.headers as header, index (index)}
-										<th colSpan={header.colSpan} class="px-5 pb-2.5 pt-5">
+										<th colSpan={header.colSpan} class="px-5 pt-5 pb-2.5">
 											{#if !header.isPlaceholder}
 												<button
-													class="flex select-none items-center gap-x-2"
+													class="flex items-center gap-x-2 select-none"
 													on:click={header.column.getToggleSortingHandler()}
 												>
 													<svelte:component
@@ -315,7 +315,7 @@
 				</div>
 
 				<div
-					class="flex w-full flex-col gap-5 px-5 pb-5 pt-2.5 text-primary dark:text-white md:flex-row md:items-center md:justify-between"
+					class="flex w-full flex-col gap-5 px-5 pt-2.5 pb-5 text-primary md:flex-row md:items-center md:justify-between dark:text-white"
 				>
 					<select
 						value={$table?.getState().pagination.pageSize}

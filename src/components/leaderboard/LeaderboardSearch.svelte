@@ -31,7 +31,7 @@
 	{#if globalFilter}
 		<button
 			type="button"
-			class="absolute right-3 top-1/2 -translate-y-1/2"
+			class="absolute top-1/2 right-3 -translate-y-1/2"
 			on:click={clearSearch}
 			aria-label="Clear search"
 		>
@@ -40,7 +40,7 @@
 	{:else}
 		<button
 			type="button"
-			class="absolute right-3 top-1/2 -translate-y-1/2"
+			class="absolute top-1/2 right-3 -translate-y-1/2"
 			on:click={focusSearch}
 			aria-label="Focus search"
 		>

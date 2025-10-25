@@ -632,7 +632,12 @@
 							document.querySelector('#search-button').src = '/icons/search.svg';
 						};
 					}
-					searchButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+					searchButton.classList.add(
+						'dark:!bg-dark',
+						'dark:hover:!bg-dark/75',
+						'dark:border',
+						'dark:border-white/95'
+					);
 
 					addControlDiv.append(searchButton);
 
@@ -677,7 +682,12 @@
 								: '/icons/boost.svg';
 						};
 					}
-					boostLayerButton.classList.add('dark:!bg-dark', 'dark:hover:!bg-dark/75', 'dark:border');
+					boostLayerButton.classList.add(
+						'dark:!bg-dark',
+						'dark:hover:!bg-dark/75',
+						'dark:border',
+						'dark:border-white/95'
+					);
 
 					addControlDiv.append(boostLayerButton);
 
@@ -776,13 +786,13 @@
 	<div
 		id="search-div"
 		bind:this={customSearchBar}
-		class="absolute left-[60px] top-0 w-[50vw] md:w-[350px] {showSearch ? 'block' : 'hidden'}"
+		class="absolute top-0 left-[60px] w-[50vw] md:w-[350px] {showSearch ? 'block' : 'hidden'}"
 	>
 		<div class="relative">
 			<input
 				id="search-input"
 				type="text"
-				class="w-full rounded-lg px-5 py-2.5 text-[16px] text-mapButton drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:outline-none focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] dark:border dark:bg-dark dark:text-white"
+				class="text-mapButton w-full rounded-lg px-5 py-2.5 text-[16px] drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:outline-hidden focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] dark:border dark:bg-dark dark:text-white"
 				placeholder="Search..."
 				on:keyup={searchDebounce}
 				on:keydown={(e) => {
@@ -798,7 +808,7 @@
 			<button
 				bind:this={clearSearchButton}
 				on:click={clearSearch}
-				class="absolute right-[8px] top-[10px] bg-white text-mapButton hover:text-black dark:bg-dark dark:text-white dark:hover:text-white/80 {search
+				class="text-mapButton absolute top-[10px] right-[8px] bg-white hover:text-black dark:bg-dark dark:text-white dark:hover:text-white/80 {search
 					? 'block'
 					: 'hidden'}"
 			>
@@ -831,7 +841,7 @@
 					{#each searchResults as result (result.id)}
 						<button
 							on:click={() => searchSelect(result)}
-							class="block w-full justify-between px-4 py-2 hover:bg-searchHover dark:border-b dark:hover:bg-white/[0.15] md:flex md:text-left"
+							class="hover:bg-searchHover block w-full justify-between px-4 py-2 md:flex md:text-left dark:border-b dark:hover:bg-white/[0.15]"
 						>
 							<div class="items-start md:flex md:space-x-2">
 								<Icon
@@ -844,13 +854,13 @@
 
 								<div class="mx-auto md:max-w-[280px]">
 									<p
-										class="text-sm text-mapButton dark:text-white {result.name?.match('([^ ]{21})')
+										class="text-mapButton text-sm dark:text-white {result.name?.match('([^ ]{21})')
 											? 'break-all'
 											: ''}"
 									>
 										{result.name || 'Unknown'}
 									</p>
-									<p class="text-xs text-searchSubtext">
+									<p class="text-searchSubtext text-xs">
 										{result.type === 'element' ? 'Bitcoin merchant' : result.type}
 									</p>
 								</div>
@@ -859,7 +869,7 @@
 					{/each}
 
 					{#if !searchStatus && searchResults.length === 0}
-						<p class="w-full px-4 py-2 text-center text-sm text-searchSubtext">No results found.</p>
+						<p class="text-searchSubtext w-full px-4 py-2 text-center text-sm">No results found.</p>
 					{/if}
 				</div>
 			</OutClick>

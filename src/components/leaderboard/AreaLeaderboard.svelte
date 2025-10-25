@@ -317,11 +317,13 @@
 </script>
 
 <section id="leaderboard" aria-labelledby="leaderboard-title">
-	<div class="w-full rounded-3xl border border-statBorder bg-white dark:bg-white/10">
+	<div
+		class="w-full rounded-3xl border border-gray-300 bg-white dark:border-white/95 dark:bg-white/10"
+	>
 		<header>
 			<h2
 				id="leaderboard-title"
-				class="border-b border-statBorder p-5 text-center text-lg font-semibold text-primary dark:text-white md:text-left"
+				class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
 			>
 				{type === 'community' ? 'Community' : 'Country'} Leaderboard
 				{#if !loading && $leaderboardWithPositions.length > 0}
@@ -351,7 +353,7 @@
 				<!-- Mobile: Three-row card layout with sorting headers -->
 				<div class="block lg:hidden">
 					<!-- Mobile sorting headers -->
-					<div class="border-b border-statBorder bg-primary/5 dark:bg-white/5">
+					<div class="border-b border-gray-300 bg-primary/5 dark:border-white/95 dark:bg-white/5">
 						<div class="grid grid-cols-4 gap-3 px-4 py-3 text-center text-xs">
 							<SortHeaderButton
 								column={$table?.getColumn('position')}
@@ -393,7 +395,9 @@
 				<LeaderboardPagination table={$table} {pageSizes} />
 			{/if}
 
-			<footer class="border-t border-statBorder px-5 pb-5 pt-2.5 text-sm text-body dark:text-white">
+			<footer
+				class="border-t border-gray-300 px-5 pt-2.5 pb-5 text-sm text-body dark:border-white/95 dark:text-white"
+			>
 				<p>Position is calculated as follows:</p>
 
 				<ul class="list-inside list-disc">

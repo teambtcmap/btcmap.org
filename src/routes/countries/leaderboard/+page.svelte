@@ -33,7 +33,7 @@
 				<h1
 					class="{detectTheme() === 'dark' || $theme === 'dark'
 						? 'text-white'
-						: 'gradient'} text-center text-4xl font-semibold !leading-tight md:text-5xl"
+						: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl"
 				>
 					Top Countries
 				</h1>
@@ -42,7 +42,7 @@
 			{/if}
 
 			<h2
-				class="mx-auto w-full text-center text-xl font-semibold text-primary dark:text-white lg:w-[800px]"
+				class="mx-auto w-full text-center text-xl font-semibold text-primary lg:w-[800px] dark:text-white"
 			>
 				Insights into bitcoin adoption worldwide!
 			</h2>

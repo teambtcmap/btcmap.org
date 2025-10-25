@@ -12,7 +12,7 @@
 <div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
-		<main class="mb-20 mt-10 space-y-5 text-body dark:text-white">
+		<main class="mt-10 mb-20 space-y-5 text-body dark:text-white">
 			<p class="text-center font-semibold text-primary dark:text-white">
 				BTC Map - Easily find places to spend sats anywhere on the planet.
 				<br />
@@ -37,7 +37,7 @@
 			</p>
 
 			<h1
-				class="text-center text-4xl font-semibold !leading-tight text-primary dark:text-white md:text-5xl"
+				class="text-center text-4xl !leading-tight font-semibold text-primary md:text-5xl dark:text-white"
 			>
 				GNU AFFERO GENERAL PUBLIC LICENSE
 				<span class="block text-base">Version 3, 19 November 2007</span>

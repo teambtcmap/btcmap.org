@@ -13,9 +13,9 @@
 <div class="bg-teal dark:bg-dark">
 	<Header />
 	<div class="mx-auto w-10/12 xl:w-[1200px]">
-		<main class="mb-20 mt-10 space-y-10">
+		<main class="mt-10 mb-20 space-y-10">
 			<div class="space-y-5 text-xl text-body dark:text-white">
-				<h1 class="text-4xl font-semibold !leading-tight text-primary dark:text-white md:text-5xl">
+				<h1 class="text-4xl !leading-tight font-semibold text-primary md:text-5xl dark:text-white">
 					Privacy Policy
 				</h1>
 				<p>

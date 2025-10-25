@@ -9,7 +9,7 @@
 
 <button
 	type="button"
-	class="flex cursor-pointer select-none items-center justify-center gap-1 text-body transition-colors hover:text-primary dark:text-white/70 dark:hover:text-white"
+	class="flex cursor-pointer items-center justify-center gap-1 text-body transition-colors select-none hover:text-primary dark:text-white/70 dark:hover:text-white"
 	on:click={(e) => column?.getToggleSortingHandler()?.(e)}
 	aria-label={ariaLabel}
 	disabled={!column}

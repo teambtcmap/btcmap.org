@@ -424,7 +424,7 @@
 						<div class="mx-auto h-32 w-32 animate-pulse rounded-full bg-link/50" />
 					{/if}
 
-					<h1 class="text-4xl font-semibold !leading-tight text-primary dark:text-white">
+					<h1 class="text-4xl !leading-tight font-semibold text-primary dark:text-white">
 						{name || 'BTC Map Merchant'}
 						{#if data.placeData.deleted_at}
 							<span class="text-2xl text-red-600 dark:text-red-400">(Deleted)</span>
@@ -470,7 +470,7 @@
 				<div class="grid-cols-3 gap-12 space-y-12 lg:grid lg:space-y-0">
 					{#if phone}
 						<div class="text-primary dark:text-white">
-							<h4 class="uppercase text-primary dark:text-white">
+							<h4 class="text-primary uppercase dark:text-white">
 								<Icon
 									w="16"
 									h="16"
@@ -492,7 +492,7 @@
 
 					{#if (paymentMethod || thirdParty) && data}
 						<div class="text-primary dark:text-white">
-							<h4 class="uppercase text-primary dark:text-white">Accepted Payments</h4>
+							<h4 class="text-primary uppercase dark:text-white">Accepted Payments</h4>
 							<div class="mt-1 flex items-center justify-center space-x-2">
 								{#if !paymentMethod}
 									<!-- eslint-disable svelte/no-navigation-without-resolve -->
@@ -566,7 +566,7 @@
 
 					{#if hours}
 						<div class="text-primary dark:text-white">
-							<h4 class="uppercase text-primary dark:text-white">
+							<h4 class="text-primary uppercase dark:text-white">
 								<Icon
 									w="16"
 									h="16"
@@ -802,7 +802,7 @@
 						<div class="relative overflow-hidden">
 							<div
 								bind:this={mapElement}
-								class="z-10 h-[300px] rounded-b-3xl !bg-teal text-left dark:!bg-[#202f33] md:h-[600px]"
+								class="z-10 h-[300px] rounded-b-3xl !bg-teal text-left md:h-[600px] dark:!bg-[#202f33]"
 							/>
 							{#if !mapLoaded}
 								<MapLoadingEmbed style="h-[300px] md:h-[600px]  rounded-b-3xl" />
@@ -938,7 +938,7 @@
 				</Card>
 			</section>
 
-			<p class="text-center text-sm text-body dark:text-white md:text-left">
+			<p class="text-center text-sm text-body md:text-left dark:text-white">
 				*More information on bitcoin mapping tags can be found <a
 					href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#tagging-guidance"
 					target="_blank"
