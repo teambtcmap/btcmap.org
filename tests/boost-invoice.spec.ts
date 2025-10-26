@@ -25,20 +25,22 @@ test.describe('Boost Invoice Generation', () => {
 		await expect(page.getByRole('heading', { name: 'Green Town', exact: true })).toBeVisible();
 		await expect(page.getByText('Last Surveyed')).toBeVisible();
 
-		// Wait for boost button and ensure merchant data prop is available
+		// Wait for boost button to be interactive
 		const boostButton = page.locator('#boost-button');
 		await expect(boostButton).toBeVisible();
-		await page.waitForTimeout(1000);
+		await expect(boostButton).toBeEnabled();
+
+		// Small delay for Svelte component hydration - the button can be enabled before the merchant
+		// prop is passed down from SSR data, which causes the click handler to return early
+		await page.waitForTimeout(800);
 
 		// Click boost button and wait for modal
 		await boostButton.click();
 		await expect(page.locator('text=Boost Location')).toBeVisible({ timeout: 10000 });
 
-		// Wait for modal animation to complete
-		await page.waitForTimeout(500);
-
 		// Select first boost option (30 days / $5)
 		const boostOption = page.locator('button').filter({ hasText: /\$5/ }).first();
+		await expect(boostOption).toBeVisible();
 		await boostOption.click({ force: true });
 
 		// Wait for confirm button and set up API interception
