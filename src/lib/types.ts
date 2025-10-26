@@ -108,28 +108,6 @@ export type Continents =
 	| 'Oceania'
 	| 'South America';
 
-export type Element = {
-	id: string;
-	osm_json: ElementOSM;
-	tags: {
-		['icon:android']: string;
-		category: string;
-		['boost:expires']?: string;
-		['payment:uri']?: string;
-		['payment:coinos']?: string;
-		['payment:pouch']?: string;
-		['payment:lightning']?: 'yes';
-		['payment:onchain']?: 'yes';
-		['payment:lightning_contactless']?: 'yes';
-		issues?: Issue[];
-		areas?: Array<{ id: number; url_alias: string }>;
-		comments?: number;
-	};
-	created_at: string;
-	updated_at: string;
-	deleted_at: string;
-};
-
 export interface MerchantComment {
 	id: number;
 	text: string;
@@ -206,15 +184,6 @@ export type RpcGetMostActiveUsersItem = {
 	created: number;
 	updated: number;
 	deleted: number;
-};
-
-export type ElementOSM = {
-	type: 'node' | 'way' | 'relation';
-	id: number;
-	lat: number;
-	lon: number;
-	bounds: { minlat: number; minlon: number; maxlat: number; maxlon: number } | null;
-	tags?: OSMTags;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
