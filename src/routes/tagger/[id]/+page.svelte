@@ -420,7 +420,7 @@
 				{/if}
 
 				<div class="space-y-1">
-					<h1 class="text-4xl font-semibold !leading-tight text-primary dark:text-white">
+					<h1 class="text-4xl !leading-tight font-semibold text-primary dark:text-white">
 						{username || 'BTC Map Supertagger'}
 					</h1>
 					<p
@@ -457,7 +457,7 @@
 					{/if}
 				</div>
 
-				<h2 class="mx-auto w-full break-all text-xl text-body dark:text-white lg:w-[800px]">
+				<h2 class="mx-auto w-full text-xl break-all text-body lg:w-[800px] dark:text-white">
 					<!-- eslint-disable-next-line svelte/no-at-html-tags - we even sanitize the captcha content above -->
 					{@html sanitizedMarkdown}
 				</h2>
@@ -494,37 +494,37 @@
 				</div>
 			</section>
 
-			<section id="stats" class="mb-16 mt-10">
+			<section id="stats" class="mt-10 mb-16">
 				<div
-					class="grid rounded-t-3xl border border-statBorder dark:bg-white/10 md:grid-cols-2 xl:grid-cols-4"
+					class="grid rounded-t-3xl border border-gray-300 md:grid-cols-2 xl:grid-cols-4 dark:border-white/95 dark:bg-white/10"
 				>
 					<ProfileStat
 						title="Total Tags"
 						stat={total}
-						border="border-b xl:border-b-0 md:border-r border-statBorder"
+						border="border-b xl:border-b-0 md:border-r border-gray-300 dark:border-white/95"
 					/>
 					<ProfileStat
 						title="Created"
 						stat={created}
 						percent={createdPercent}
-						border="border-b xl:border-b-0 xl:border-r border-statBorder"
+						border="border-b xl:border-b-0 xl:border-r border-gray-300 dark:border-white/95"
 					/>
 					<ProfileStat
 						title="Updated"
 						stat={updated}
 						percent={updatedPercent}
-						border="border-b md:border-b-0 md:border-r border-statBorder"
+						border="border-b md:border-b-0 md:border-r border-gray-300 dark:border-white/95"
 					/>
 					<ProfileStat title="Deleted" stat={deleted} percent={deletedPercent} />
 				</div>
 
 				<div
-					class="relative rounded-b-3xl border border-t-0 border-statBorder p-5 dark:bg-white/10"
+					class="relative rounded-b-3xl border border-t border-gray-300 p-5 dark:border-white/95 dark:bg-white/10"
 				>
 					{#if !dataInitialized}
 						<div>
 							<i
-								class="fa-solid fa-chart-pie absolute left-1/2 top-1/2 h-52 w-52 -translate-x-1/2 -translate-y-1/2 animate-pulse text-link/50 md:h-60 md:w-60"
+								class="fa-solid fa-chart-pie absolute top-1/2 left-1/2 h-52 w-52 -translate-x-1/2 -translate-y-1/2 animate-pulse text-link/50 md:h-60 md:w-60"
 							/>
 						</div>
 					{/if}

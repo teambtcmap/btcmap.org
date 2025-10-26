@@ -368,7 +368,7 @@
 			{:else}
 				<div class="mx-auto h-32 w-32 animate-pulse rounded-full bg-link/50" />
 			{/if}
-			<h1 class="text-4xl font-semibold !leading-tight text-primary dark:text-white">
+			<h1 class="text-4xl !leading-tight font-semibold text-primary dark:text-white">
 				{name || 'BTC Map Area'}
 			</h1>
 			{#if org}
@@ -461,7 +461,7 @@
 
 		{#if !scrolled}
 			<div
-				class="absolute right-0 top-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#cce3e6] sm:hidden"
+				class="absolute top-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#cce3e6] sm:hidden"
 			>
 				<i class="fa-solid fa-chevron-right text-link" />
 			</div>

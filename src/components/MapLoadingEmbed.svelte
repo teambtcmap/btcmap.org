@@ -5,7 +5,7 @@
 </script>
 
 <div
-	class="w-full {style} absolute left-0 top-0 z-[25] flex items-center justify-center bg-teal dark:bg-dark"
+	class="w-full {style} absolute top-0 left-0 z-[25] flex items-center justify-center bg-teal dark:bg-dark"
 >
 	<div class="space-y-6">
 		<LoadingSpinner color="text-link" />

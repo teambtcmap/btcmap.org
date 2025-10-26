@@ -22,7 +22,7 @@
 </script>
 
 <div
-	class="grid-cols-6 space-y-5 border-b border-t border-statBorder py-5 text-center text-lg font-semibold lg:grid lg:space-y-0 lg:border-none lg:py-0"
+	class="grid-cols-6 space-y-5 border-t border-b border-gray-300 py-5 text-center text-lg font-semibold lg:grid lg:space-y-0 lg:border-none lg:py-0 dark:border-white/95"
 >
 	<span
 		class="my-auto text-link {position > 3
@@ -40,11 +40,11 @@
 		{/if}
 	</span>
 
-	<div class="items-center lg:flex lg:space-x-2">
+	<div class="flex flex-col items-center gap-2 lg:flex-row">
 		<img
 			src={avatar}
 			alt="avatar"
-			class="mx-auto mb-2 h-20 w-20 rounded-full object-cover lg:mx-0 lg:mb-0 lg:h-14 lg:w-14"
+			class="h-20 w-20 rounded-full object-cover lg:h-14 lg:w-14"
 			on:error={function () {
 				this.src = '/images/satoshi-nakamoto.png';
 			}}
@@ -59,7 +59,7 @@
 	</div>
 
 	{#each stats as stat (stat.title)}
-		<span class="mx-5 inline-block text-link lg:!my-auto lg:mx-0">
+		<span class="mx-5 inline-block text-link lg:mx-0 lg:!my-auto">
 			<span
 				class="mr-1 inline-block h-3 w-3 rounded-full {stat.title === 'C'
 					? 'bg-created'

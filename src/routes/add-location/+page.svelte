@@ -308,7 +308,7 @@
 				<HeaderPlaceholder />
 			{/if}
 
-			<p class="mt-10 text-center text-lg font-semibold text-primary dark:text-white md:text-xl">
+			<p class="mt-10 text-center text-lg font-semibold text-primary md:text-xl dark:text-white">
 				If you're a business owner, please read our <a
 					href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Merchant-Best-Practices"
 					target="_blank"
@@ -332,7 +332,7 @@
 									<img
 										src="/icons/pin-1.svg"
 										alt="pin"
-										class="mx-auto mb-4 md:mx-0 md:mb-0 md:mr-4"
+										class="mx-auto mb-4 md:mx-0 md:mr-4 md:mb-0"
 									/>
 									Create an
 									<a
@@ -346,7 +346,7 @@
 									<img
 										src="/icons/pin-2.svg"
 										alt="pin"
-										class="mx-auto mb-4 md:mx-0 md:mb-0 md:mr-4"
+										class="mx-auto mb-4 md:mx-0 md:mr-4 md:mb-0"
 									/>
 									<a
 										href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants"
@@ -359,7 +359,7 @@
 									<img
 										src="/icons/pin-3.svg"
 										alt="pin"
-										class="mx-auto mb-4 md:mx-0 md:mb-0 md:mr-4"
+										class="mx-auto mb-4 md:mx-0 md:mr-4 md:mb-0"
 									/>
 									Show up on the
 									<a
@@ -370,7 +370,7 @@
 							</ol>
 						</div>
 
-						<h3 class="mb-5 mt-16 text-center text-2xl font-semibold md:mt-10">
+						<h3 class="mt-16 mb-5 text-center text-2xl font-semibold md:mt-10">
 							See how it's done
 						</h3>
 						<!-- svelte-ignore a11y-media-has-caption -->
@@ -382,7 +382,7 @@
 							class="w-full border-2 border-input"
 						/>
 
-						<h3 class="mb-5 mt-16 text-center text-2xl font-semibold md:mt-10">
+						<h3 class="mt-16 mb-5 text-center text-2xl font-semibold md:mt-10">
 							Still have questions?
 						</h3>
 						<p class="text-justify">
@@ -406,7 +406,7 @@
 				<section id="noob" class="mx-auto w-full pt-14">
 					<div class="mx-auto max-w-xl">
 						<h2
-							class="mb-5 text-center text-3xl font-semibold text-primary dark:text-white md:text-left"
+							class="mb-5 text-center text-3xl font-semibold text-primary md:text-left dark:text-white"
 						>
 							Form Option
 						</h2>
@@ -431,7 +431,7 @@
 									id="name"
 									placeholder="Satoshi's Comics"
 									required
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 									bind:this={name}
 								/>
 							</div>
@@ -447,7 +447,7 @@
 								<div class="relative mb-2">
 									<div
 										bind:this={mapElement}
-										class="z-10 h-[300px] !cursor-crosshair rounded-2xl border-2 border-input !bg-teal dark:!bg-dark md:h-[400px]"
+										class="z-10 h-[300px] !cursor-crosshair rounded-2xl border-2 border-input !bg-teal md:h-[400px] dark:!bg-dark"
 									/>
 									{#if !mapLoaded}
 										<MapLoadingEmbed
@@ -465,7 +465,7 @@
 										type="number"
 										name="lat"
 										placeholder="Latitude"
-										class="w-full rounded-2xl border-2 border-input p-3 focus:outline-link"
+										class="w-full rounded-2xl border-2 border-input p-3 focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 									/>
 									<input
 										required
@@ -475,7 +475,7 @@
 										type="number"
 										name="long"
 										placeholder="Longitude"
-										class="w-full rounded-2xl border-2 border-input p-3 focus:outline-link"
+										class="w-full rounded-2xl border-2 border-input p-3 focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 									/>
 									<!-- 	eslint-enable svelte/no-reactive-reassign -->
 								</div>
@@ -494,7 +494,7 @@
 									name="address"
 									id="address"
 									placeholder="2100 Freedom Drive..."
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 									bind:this={address}
 								/>
 							</div>
@@ -507,7 +507,7 @@
 									name="category"
 									id="category"
 									placeholder="Restaurant etc."
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 									bind:this={category}
 								/>
 							</div>
@@ -599,7 +599,7 @@
 									type="url"
 									name="website"
 									placeholder="https://bitcoin.org"
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 									bind:this={website}
 								/>
 							</div>
@@ -613,7 +613,7 @@
 									type="tel"
 									name="phone"
 									placeholder="Number"
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 									bind:this={phone}
 								/>
 							</div>
@@ -627,7 +627,7 @@
 									type="text"
 									name="hours"
 									placeholder="Mo-Fr 08:30-20:00"
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 									bind:this={hours}
 								/>
 							</div>
@@ -641,7 +641,7 @@
 									name="notes"
 									placeholder="Please add further details here like additional merchant details, contacts, socials, etc."
 									rows="3"
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 									bind:this={notes}
 								/>
 							</div>
@@ -652,7 +652,7 @@
 									disabled={!captchaSecret || !mapLoaded}
 									name="source"
 									required
-									class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+									class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 									bind:value={source}
 									on:change={async () => {
 										if (source === 'Other') {
@@ -675,7 +675,7 @@
 										required
 										name="source-other"
 										placeholder="Local knowledge, online etc."
-										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 										bind:value={sourceOther}
 										bind:this={sourceOtherElement}
 									/>
@@ -695,7 +695,7 @@
 									type="email"
 									name="contact"
 									placeholder="hello@btcmap.org"
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 									bind:this={contact}
 								/>
 							</div>
@@ -728,7 +728,7 @@
 										type="text"
 										name="captcha"
 										placeholder="Please enter the captcha text."
-										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
+										class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 										bind:this={captchaInput}
 									/>
 								</div>

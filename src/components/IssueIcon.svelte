@@ -4,7 +4,7 @@
 	export let icon: IssueIcon | string;
 </script>
 
-<div class="w-3 flex-shrink-0">
+<div class="w-3 shrink-0">
 	{#if icon === 'fa-calendar-days'}
 		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor"
 			><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path

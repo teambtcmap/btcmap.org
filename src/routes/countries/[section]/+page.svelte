@@ -110,7 +110,7 @@
 				<h1
 					class="{detectTheme() === 'dark' || $theme === 'dark'
 						? 'text-white'
-						: 'gradient'} text-4xl font-semibold !leading-tight md:text-5xl"
+						: 'gradient'} text-4xl !leading-tight font-semibold md:text-5xl"
 				>
 					Bitcoin adoption by countries.
 				</h1>
@@ -118,7 +118,7 @@
 				<HeaderPlaceholder />
 			{/if}
 
-			<h2 class="mx-auto w-full text-xl font-semibold text-primary dark:text-white lg:w-[800px]">
+			<h2 class="mx-auto w-full text-xl font-semibold text-primary lg:w-[800px] dark:text-white">
 				Your country? Your map!
 			</h2>
 
@@ -130,7 +130,7 @@
 				<div class="mb-5 justify-between md:flex">
 					{#if data.section}
 						<h2
-							class="mb-2 text-3xl font-semibold text-primary dark:text-white md:mb-0 md:text-left"
+							class="mb-2 text-3xl font-semibold text-primary md:mb-0 md:text-left dark:text-white"
 						>
 							<a href={resolve(`/countries/${data.section}`)}
 								>{continentDisplayNames[data.section] || data.section}</a
@@ -138,7 +138,7 @@
 						</h2>
 
 						<select
-							class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link dark:bg-white/[0.15] dark:text-white md:w-auto"
+							class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link md:w-auto dark:bg-white/[0.15] dark:text-white"
 							value={data.section}
 							on:change={handleSectionChange}
 						>
