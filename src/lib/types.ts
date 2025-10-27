@@ -396,8 +396,6 @@ export type Place = {
 	'payment:uri'?: string;
 	'payment:pouch'?: string;
 	'payment:coinos'?: string;
-	// Boost data
-	'boost:expires'?: string;
 	// Payment capabilities
 	'payment:lightning'?: 'yes';
 	'payment:onchain'?: 'yes';

@@ -105,7 +105,9 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 			if (facebook) osmTags['contact:facebook'] = facebook;
 			if (instagram) osmTags['contact:instagram'] = instagram;
 
-			// Payment methods (map osm:payment:* to payment:* for UI compatibility)
+			// Payment methods - The v4 API returns osm:payment:* fields, but the UI
+			// and OSM tag modal expect the standard OSM tag format (payment:*), so we
+			// map them here for display compatibility
 			if (placeData['osm:payment:onchain'])
 				osmTags['payment:onchain'] = placeData['osm:payment:onchain'];
 			if (placeData['osm:payment:lightning'])

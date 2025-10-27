@@ -31,7 +31,6 @@ export const PLACE_FIELDS = {
 		'osm:contact:phone',
 		'osm:contact:website',
 		'osm:contact:email',
-		'boost:expires',
 		'required_app_url',
 		'osm:payment:onchain',
 		'osm:payment:lightning',
