@@ -17,6 +17,6 @@
 		icon="circle-info"
 		w="16"
 		h="16"
-		style="text-base text-primary inline align-text-bottom dark:text-white"
+		style="text-base text-primary inline align-middle dark:text-white"
 	/>
 </button>
