@@ -160,7 +160,7 @@
 				>
 					New Places
 				</a>
-				<Icon type="fa" icon="location-pin" w="16" h="16" style="ml-1" />
+				<Icon type="fa" icon="location-pin" w="18" h="18" style="ml-1" />
 			</li>
 			<li>
 				<a
@@ -171,7 +171,7 @@
 				>
 					New Comments
 				</a>
-				<Icon type="fa" icon="comment" w="16" h="16" style="ml-1" />
+				<Icon type="fa" icon="comment" w="18" h="18" style="ml-1" />
 			</li>
 		</ul>
 	</div>
