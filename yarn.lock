@@ -2880,10 +2880,10 @@ svelte-preprocess@^6.0.3:
   resolved "https://registry.yarnpkg.com/svelte-preprocess/-/svelte-preprocess-6.0.3.tgz#fdc1f9dc41b6f22bf8b1f059e9f21eaaae181eeb"
   integrity sha512-PLG2k05qHdhmRG7zR/dyo5qKvakhm8IJ+hD2eFRQmMLHp7X3eJnjeupUtvuRpbNiF31RjVw45W+abDwHEmP5OA==
 
-svelte-time@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/svelte-time/-/svelte-time-1.0.0.tgz#fa9ee3bcbb63ea6c83bf8f08195077c06f12b668"
-  integrity sha512-Igcx5odkvgnQ+jSawFdKFJT4mFVxvZzj2nJs6onHyp9ooDZpph8Vg6G42lUHBoqMxX/3hcKHw8/Orecp+OedHg==
+svelte-time@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/svelte-time/-/svelte-time-2.0.2.tgz#c1205a0764e5d6b5d2c382b69e9d73cb41d7148e"
+  integrity sha512-Ne3eG92bxvttZV3lrMfL5/Vs3PSEJiNpPOqpY90rorXBLXsbmdS7HScXZt7mb42mX/eTCRJyAKgyBlgzlcYLrQ==
   dependencies:
     dayjs "^1.11.13"
 
