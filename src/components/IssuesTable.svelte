@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { IssueCell } from '$lib/comp';
+	import { Icon, IssueCell } from '$lib/comp';
 	import { theme } from '$lib/store';
 	import type { RpcIssue } from '$lib/types';
 	import { debounce, detectTheme, getIssueHelpLink, getIssueIcon, isEven } from '$lib/utils';
@@ -216,7 +216,7 @@
 				<div
 					class="flex h-[572px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
 				>
-					<i class="fa-solid fa-table h-24 w-24 animate-pulse text-link/50" />
+					<Icon type="fa" icon="table" w="96" h="96" style="animate-pulse text-link/50" />
 				</div>
 			</div>
 		{:else if !issues.length}
@@ -239,7 +239,7 @@
 							$table?.setGlobalFilter('');
 						}}
 					>
-						<i class="fa-solid fa-circle-xmark" />
+						<Icon type="fa" icon="circle-xmark" w="16" h="16" />
 					</button>
 				{:else}
 					<button
@@ -248,7 +248,7 @@
 							searchInput.focus();
 						}}
 					>
-						<i class="fa-solid fa-magnifying-glass" />
+						<Icon type="fa" icon="magnifying-glass" w="16" h="16" />
 					</button>
 				{/if}
 			</div>

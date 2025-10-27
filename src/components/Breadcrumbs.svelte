@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Icon } from '$lib/comp';
 	type Routes = { name: string; url: string }[];
 	export let routes: Routes;
 </script>
@@ -16,7 +17,7 @@
 			{route.name}
 		</a>
 		{#if index !== routes.length - 1}
-			<i class="fa-solid fa-chevron-right w-2 text-link" />
+			<Icon type="fa" icon="chevron-right" w="8" h="8" style="text-link" />
 		{/if}
 	{/each}
 </div>

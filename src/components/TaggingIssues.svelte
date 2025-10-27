@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CloseButton, IssueIcon } from '$lib/comp';
+	import { CloseButton, Icon, IssueIcon } from '$lib/comp';
 	import { taggingIssues } from '$lib/store';
 	import { getIssueHelpLink, getIssueIcon } from '$lib/utils';
 	import OutClick from 'svelte-outclick';
@@ -38,7 +38,7 @@
 					{/each}
 				{:else}
 					<div class="flex items-center space-x-2">
-						<i class="fa-solid fa-thumbs-up w-3" />
+						<Icon type="fa" icon="thumbs-up" w="12" h="12" />
 						<p>No tagging issues!</p>
 					</div>
 				{/if}

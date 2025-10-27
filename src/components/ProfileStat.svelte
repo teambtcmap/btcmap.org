@@ -1,5 +1,6 @@
 <script lang="ts">
 	import tippy from 'tippy.js';
+	import { Icon } from '$lib/comp';
 
 	export let title: string;
 	export let stat: number | undefined;
@@ -21,7 +22,7 @@
 		{title}
 		{#if tooltip}
 			<button bind:this={tooltipElement}>
-				<i class="fa-solid fa-circle-info text-base" />
+				<Icon type="fa" icon="circle-info" w="16" h="16" style="text-base" />
 			</button>
 		{/if}
 	</h3>

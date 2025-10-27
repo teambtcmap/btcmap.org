@@ -4,7 +4,7 @@
 
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import { Footer, Header, ProfileActivity, ProfileStat, Tip } from '$lib/comp';
+	import { Footer, Header, ProfileActivity, ProfileStat, Tip, Icon } from '$lib/comp';
 	import {
 		placesError,
 		eventError,
@@ -426,7 +426,7 @@
 					<p
 						class="flex items-center justify-center space-x-1 text-sm text-primary dark:text-white"
 					>
-						<i class="fa-solid fa-map-pin" />
+						<Icon type="fa" icon="map-pin" w="16" h="16" />
 						<span class="block">
 							Mapping Since: {mappingSince ? format(new Date(mappingSince), 'yyyy-MM-dd') : '-'}
 						</span>
@@ -523,8 +523,12 @@
 				>
 					{#if !dataInitialized}
 						<div>
-							<i
-								class="fa-solid fa-chart-pie absolute top-1/2 left-1/2 h-52 w-52 -translate-x-1/2 -translate-y-1/2 animate-pulse text-link/50 md:h-60 md:w-60"
+							<Icon
+								type="fa"
+								icon="chart-pie"
+								w="208"
+								h="208"
+								style="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse text-link/50 md:h-60 md:w-60"
 							/>
 						</div>
 					{/if}

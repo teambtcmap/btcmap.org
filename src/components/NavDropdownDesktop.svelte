@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { DropdownLink } from '$lib/types';
 	import OutClick from 'svelte-outclick';
+	import { Icon } from '$lib/comp';
 
 	export let title: string;
 	export let links: DropdownLink[];
@@ -19,7 +20,8 @@
 			? 'dark:!text-link'
 			: ''} mt-4 mr-4 flex items-center text-xl font-semibold text-link transition-colors hover:text-hover md:mt-0 md:mr-0 dark:text-white dark:hover:text-link"
 	>
-		{title} <i class="fa-solid fa-chevron-down ml-1 h-4 w-4" />
+		{title}
+		<Icon type="fa" icon="chevron-down" w="16" h="16" style="ml-1" />
 	</button>
 
 	<!-- dropdown items -->
@@ -45,7 +47,7 @@
 						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 						{link.title}
 						{#if link.external}
-							<i class="fa-solid fa-arrow-up-right-from-square ml-1 h-4 w-4" />
+							<Icon type="fa" icon="arrow-up-right-from-square" w="16" h="16" style="ml-1" />
 						{/if}
 					</a>
 				{/each}

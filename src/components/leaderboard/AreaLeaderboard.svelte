@@ -26,7 +26,7 @@
 	import { rankItem } from '@tanstack/match-sorter-utils';
 	import tippy from 'tippy.js';
 
-	import { GradeTable } from '$lib/comp';
+	import { GradeTable, Icon } from '$lib/comp';
 
 	export let type: AreaType;
 	export let initialPageSize = 10;
@@ -339,7 +339,7 @@
 					role="status"
 					aria-live="polite"
 				>
-					<i class="fa-solid fa-table h-24 w-24 animate-pulse text-link/50" />
+					<Icon type="fa" icon="table" w="96" h="96" style="animate-pulse text-link/50" />
 				</div>
 			</div>
 		{:else if $leaderboardWithPositions.length === 0}

@@ -5,6 +5,7 @@
 	import { isEven } from '$lib/utils';
 	import AreaLeaderboardItemName from './AreaLeaderboardItemName.svelte';
 	import GradeDisplay from './GradeDisplay.svelte';
+	import { Icon } from '$lib/comp';
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let table: Table<any>;
@@ -67,7 +68,7 @@
 											class="ml-1 cursor-default"
 											aria-label="Information about total locations"
 										>
-											<i class="fa-solid fa-circle-info text-sm" />
+											<Icon type="fa" icon="circle-info" w="14" h="14" style="text-sm" />
 										</button>
 									{:else if header.column.id === 'upToDateElements'}
 										<button
@@ -76,7 +77,7 @@
 											class="ml-1 cursor-default"
 											aria-label="Information about verified locations"
 										>
-											<i class="fa-solid fa-circle-info text-sm" />
+											<Icon type="fa" icon="circle-info" w="14" h="14" style="text-sm" />
 										</button>
 									{:else if header.column.id === 'grade'}
 										<button
@@ -85,7 +86,7 @@
 											class="ml-1 cursor-default"
 											aria-label="Information about Grade metric"
 										>
-											<i class="fa-solid fa-circle-info text-sm" />
+											<Icon type="fa" icon="circle-info" w="14" h="14" style="text-sm" />
 										</button>
 									{/if}
 									{#if header.column.getIsSorted().toString() === 'asc'}

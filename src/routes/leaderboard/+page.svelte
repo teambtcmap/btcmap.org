@@ -4,6 +4,7 @@
 		Footer,
 		Header,
 		HeaderPlaceholder,
+		Icon,
 		LeaderboardItem,
 		LeaderboardSkeleton,
 		PrimaryButton
@@ -99,7 +100,8 @@
 								<a
 									href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Lightning-Tips"
 									target="_blank"
-									rel="noreferrer"><i class="fa-solid fa-circle-info text-sm" /></a
+									rel="noreferrer"
+									><Icon type="fa" icon="circle-info" w="14" h="14" style="text-sm inline" /></a
 								>
 							{/if}
 						</h3>

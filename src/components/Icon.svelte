@@ -8,6 +8,7 @@
 
 	type IconProps =
 		| { type: 'material'; icon: string; w: string; h: string; style?: string }
+		| { type: 'fa'; icon: string; w: string; h: string; style?: string }
 		| { type: 'socials'; icon: IconNameSocials; w: string; h: string; style?: string }
 		| { type: 'apps'; icon: IconNameApps; w: string; h: string; style?: string }
 		| { type: 'popup'; icon: IconNamePopup; w: string; h: string; style?: string }
@@ -17,7 +18,7 @@
 	export let h: string;
 	export let style: undefined | string = undefined;
 	export let icon: string | IconNameApps | IconNamePopup | IconNameMobileNav | IconNameSocials;
-	export let type: 'apps' | 'material' | 'mobile-nav' | 'popup' | 'socials' = 'material';
+	export let type: 'apps' | 'fa' | 'material' | 'mobile-nav' | 'popup' | 'socials' = 'material';
 
 	// this is AI code
 	// Type assertion to make TypeScript happy
@@ -25,7 +26,7 @@
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const props = { type, icon, w, h, style } as IconProps;
 
-	$: formattedMaterialIcon =
+	$: formattedIconifyIcon =
 		type === 'material'
 			? (() => {
 					// Handle exceptions for specific icons
@@ -51,7 +52,9 @@
 					// Default handling
 					return `ic:outline-${(icon as string).replace(/_/g, '-')}`;
 				})()
-			: icon;
+			: type === 'fa'
+				? `fa6-solid:${icon as string}`
+				: icon;
 
 	$: spriteHref =
 		{
@@ -59,11 +62,11 @@
 			apps: '/icons/spritesheet-apps.svg',
 			popup: '/icons/spritesheet-popup.svg',
 			'mobile-nav': '/icons/spritesheet-mobile-nav.svg'
-		}[type as Exclude<typeof type, 'material'>] || '';
+		}[type as Exclude<typeof type, 'material' | 'fa'>] || '';
 </script>
 
-{#if type === 'material'}
-	<IconIconify icon={formattedMaterialIcon} width={w} height={h} class={style} />
+{#if type === 'material' || type === 'fa'}
+	<IconIconify icon={formattedIconifyIcon} width={w} height={h} class={style} />
 {:else}
 	<svg width="{w}px" height="{h}px" class={style}>
 		<use width="{w}px" height="{h}px" href={`${spriteHref}#${icon}`} />

@@ -29,14 +29,14 @@
 		<!-- eslint-disable svelte/no-navigation-without-resolve -->
 		<a href={website} target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-bitcoin">
-				<i class="fa-solid fa-globe h-7 w-7 text-white" />
+				<Icon type="fa" icon="globe" w="28" h="28" style="text-white" />
 			</span>
 		</a>
 	{/if}
 	{#if email}
 		<a href="mailto:{email}" target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-[#53C5D5]">
-				<i class="fa-solid fa-envelope h-7 w-7 text-white" />
+				<Icon type="fa" icon="envelope" w="28" h="28" style="text-white" />
 			</span>
 		</a>
 	{/if}
@@ -119,7 +119,7 @@
 	{#if rss}
 		<a href={rss} target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-orange-500">
-				<i class="fa-solid fa-rss h-7 w-7 text-white" />
+				<Icon type="fa" icon="rss" w="28" h="28" style="text-white" />
 			</span>
 		</a>
 	{/if}

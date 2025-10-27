@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Table } from '@tanstack/svelte-table';
+	import { Icon } from '$lib/comp';
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let table: Table<any>;
@@ -35,7 +36,7 @@
 			on:click={clearSearch}
 			aria-label="Clear search"
 		>
-			<i class="fa-solid fa-circle-xmark" />
+			<Icon type="fa" icon="circle-xmark" w="16" h="16" />
 		</button>
 	{:else}
 		<button
@@ -44,7 +45,7 @@
 			on:click={focusSearch}
 			aria-label="Focus search"
 		>
-			<i class="fa-solid fa-magnifying-glass" />
+			<Icon type="fa" icon="magnifying-glass" w="16" h="16" />
 		</button>
 	{/if}
 </div>
