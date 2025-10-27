@@ -15,8 +15,8 @@
 	<Icon
 		type="fa"
 		icon="circle-info"
-		w="18"
-		h="18"
-		style="text-base text-primary inline align-middle dark:text-white"
+		w="16"
+		h="16"
+		style="text-base text-primary inline align-text-bottom dark:text-white"
 	/>
 </button>
