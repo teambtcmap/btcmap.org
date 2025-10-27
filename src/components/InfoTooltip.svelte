@@ -12,5 +12,11 @@
 </script>
 
 <button bind:this={infoTooltip}>
-	<Icon type="fa" icon="circle-info" w="16" h="16" style="text-base text-primary dark:text-white" />
+	<Icon
+		type="fa"
+		icon="circle-info"
+		w="18"
+		h="18"
+		style="text-base text-primary inline align-middle dark:text-white"
+	/>
 </button>
