@@ -664,10 +664,7 @@ export const generateMarker = ({
 	long: number;
 	icon: DivIcon;
 	placeId: number | string;
-	// element: ElementOSM;
-	// payment: PayMerchant;
 	leaflet: Leaflet;
-	// verifiedDate: number;
 	verify: boolean;
 	boosted?: boolean;
 	// issues?: Issue[];
