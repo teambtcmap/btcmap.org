@@ -528,7 +528,7 @@
 								icon="chart-pie"
 								w="208"
 								h="208"
-								style="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse text-link/50 md:h-60 md:w-60"
+								style="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse text-link/50"
 							/>
 						</div>
 					{/if}
