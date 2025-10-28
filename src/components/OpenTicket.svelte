@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Time from 'svelte-time';
 
-	import { TicketLabel } from '$lib/comp';
+	import { Icon, TicketLabel } from '$lib/comp';
 
 	export let assignees: { html_url: string; avatar_url: string; login: string }[] = [];
 	export let comments: number = 0;
@@ -17,7 +17,7 @@
 	class="border-t-statBorder w-full items-center justify-between space-y-1 border-t p-5 text-center md:flex md:space-y-0 md:text-left"
 >
 	<div class="items-center space-y-1 md:flex md:space-y-0 md:space-x-2">
-		<i class="fa-solid fa-ticket text-xl text-link" />
+		<Icon type="fa" icon="ticket" w="20" h="20" style="text-xl text-link" />
 
 		<div>
 			<p>
@@ -73,7 +73,7 @@
 		</div>
 
 		<div class="items-center md:flex">
-			<i class="fa-solid fa-comment text-link md:mr-1" />
+			<Icon type="fa" icon="comment" w="16" h="16" style="text-link md:mr-1" />
 			<strong class="text-primary dark:text-white">{comments}</strong>
 		</div>
 	</div>

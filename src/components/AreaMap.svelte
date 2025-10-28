@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { GradeTable, MapLoadingEmbed, ShowTags, TaggingIssues } from '$lib/comp';
+	import { GradeTable, Icon, MapLoadingEmbed, ShowTags, TaggingIssues } from '$lib/comp';
 	import {
 		attribution,
 		changeDefaultIcons,
@@ -194,25 +194,25 @@
 			{#if dataInitialized}
 				<div class="flex items-center space-x-1">
 					{#each Array(grade) as _, index (index)}
-						<i class="fa-solid fa-star" />
+						<Icon type="fa" icon="star" w="16" h="16" />
 					{/each}
 				</div>
 
 				<div class="flex items-center space-x-1">
 					{#each Array(5 - grade) as _, index (index)}
-						<i class="fa-solid fa-star opacity-25" />
+						<Icon type="fa" icon="star" w="16" h="16" style="opacity-25" />
 					{/each}
 				</div>
 			{:else}
 				<div class="flex items-center space-x-1">
 					{#each Array(5) as _, index (index)}
-						<i class="fa-solid fa-star animate-pulse text-link/50" />
+						<Icon type="fa" icon="star" w="16" h="16" style="animate-pulse text-link/50" />
 					{/each}
 				</div>
 			{/if}
 
 			<button bind:this={gradeTooltip}>
-				<i class="fa-solid fa-circle-info text-sm" />
+				<Icon type="fa" icon="circle-info" w="14" h="14" style="text-sm" />
 			</button>
 		</div>
 	</h3>

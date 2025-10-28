@@ -13,6 +13,7 @@
 		AreaStats,
 		AreaTickets,
 		Boost,
+		Icon,
 		IssuesTable,
 		OrgBadge,
 		Socials,
@@ -463,7 +464,7 @@
 			<div
 				class="absolute top-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#cce3e6] sm:hidden"
 			>
-				<i class="fa-solid fa-chevron-right text-link" />
+				<Icon type="fa" icon="chevron-right" w="16" h="16" style="text-link" />
 			</div>
 		{/if}
 	</div>

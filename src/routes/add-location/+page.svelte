@@ -5,6 +5,7 @@
 		FormSuccess,
 		Header,
 		HeaderPlaceholder,
+		Icon,
 		InfoTooltip,
 		MapLoadingEmbed,
 		PrimaryButton
@@ -707,7 +708,7 @@
 									>
 									{#if captchaSecret}
 										<button type="button" on:click={fetchCaptcha}>
-											<i class="fa-solid fa-arrows-rotate" />
+											<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
 										</button>
 									{/if}
 								</div>

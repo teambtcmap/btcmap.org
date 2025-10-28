@@ -6,6 +6,7 @@
 		FormSuccess,
 		Header,
 		HeaderPlaceholder,
+		Icon,
 		InfoTooltip,
 		PrimaryButton
 	} from '$lib/comp';
@@ -401,7 +402,7 @@
 							>
 							{#if captchaSecret}
 								<button type="button" on:click={fetchCaptcha}>
-									<i class="fa-solid fa-arrows-rotate" />
+									<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
 								</button>
 							{/if}
 						</div>

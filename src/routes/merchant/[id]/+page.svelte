@@ -503,10 +503,13 @@
 										rel="noreferrer"
 									>
 										<!-- eslint-enable svelte/no-navigation-without-resolve -->
-										<i
-											class="fa-solid fa-mobile-screen-button h-8 w-8 text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
-										>
-										</i>
+										<Icon
+											type="fa"
+											icon="mobile-screen-button"
+											w="32"
+											h="32"
+											style="text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
+										/>
 									</a>
 								{:else if typeof window !== 'undefined'}
 									<img

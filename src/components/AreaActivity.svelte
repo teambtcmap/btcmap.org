@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { LatestTagger, TaggerSkeleton, TopButton } from '$lib/comp';
+	import { LatestTagger, TaggerSkeleton, TopButton, Icon } from '$lib/comp';
 	import { type ActivityEvent, type User } from '$lib/types.js';
 	import { resolve } from '$app/paths';
 
@@ -160,7 +160,7 @@
 				>
 					New Places
 				</a>
-				<i class="fa-solid fa-location-pin ml-1" />
+				<Icon type="fa" icon="location-pin" w="18" h="18" style="ml-1 inline align-middle" />
 			</li>
 			<li>
 				<a
@@ -171,7 +171,7 @@
 				>
 					New Comments
 				</a>
-				<i class="fa-solid fa-comment ml-1"></i>
+				<Icon type="fa" icon="comment" w="18" h="18" style="ml-1 inline align-middle" />
 			</li>
 		</ul>
 	</div>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { SocialLink } from '$lib/comp';
+	import { Icon, SocialLink } from '$lib/comp';
 	import { socials } from '$lib/store';
 	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';
@@ -31,7 +31,7 @@
 			<a
 				href={resolve('/')}
 				class="text-xl font-semibold text-link transition-colors hover:text-hover"
-				><i class="fa-solid fa-house mr-2" /> Home</a
+				><Icon type="fa" icon="house" w="16" h="16" style="mr-2 inline" /> Home</a
 			>
 			<h1 class="text-4xl md:text-5xl dark:text-white">{$page.status}: {$page.error?.message}</h1>
 			<h2 class="text-xl font-semibold text-primary dark:text-white">
