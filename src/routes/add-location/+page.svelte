@@ -670,7 +670,7 @@
 
 				<section
 					id="supertagger"
-					class="mx-auto w-full border-t border-input pt-14 lg:w-1/2 lg:border-t-0 lg:pt-0 lg:pl-10"
+					class="mx-auto mt-14 w-full border-t border-input pt-14 lg:mt-0 lg:w-1/2 lg:border-t-0 lg:pt-0 lg:pl-10"
 				>
 					<div class="lg:flex lg:justify-start">
 						<div class="mx-auto max-w-xl text-primary dark:text-white">
