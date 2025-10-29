@@ -686,15 +686,12 @@
 								alt="shadowy supertagger"
 								class="mx-auto mb-10 h-[220px] w-[220px]"
 							/>
-							<PrimaryButton style="w-full py-3 rounded-xl">
-								<a
-									href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants"
-									target="_blank"
-									rel="noreferrer"
-									class="block w-full"
-								>
-									See Wiki for instructions
-								</a>
+							<PrimaryButton
+								style="w-full py-3 rounded-xl"
+								link="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants"
+								external={true}
+							>
+								See Wiki for instructions
 							</PrimaryButton>
 						</div>
 					</div>
