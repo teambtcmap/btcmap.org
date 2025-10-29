@@ -713,6 +713,11 @@
 </div>
 
 {#if typeof window !== 'undefined'}
+	<style>
+		select option {
+			background-color: rgb(209 213 219);
+		}
+	</style>
 	{#if detectTheme() === 'dark' || $theme === 'dark'}
 		<style>
 			select option {
