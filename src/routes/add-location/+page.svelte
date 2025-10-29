@@ -688,7 +688,7 @@
 							/>
 							<PrimaryButton
 								style="w-full py-3 rounded-xl"
-								link="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants"
+								link="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers-"
 								external={true}
 							>
 								See Wiki for instructions
