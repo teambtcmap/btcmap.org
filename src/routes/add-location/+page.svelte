@@ -712,19 +712,3 @@
 		<Footer />
 	</div>
 </div>
-
-{#if typeof window !== 'undefined'}
-	{#if detectTheme() === 'dark' || $theme === 'dark'}
-		<style>
-			select option {
-				background-color: rgb(55 65 81) !important;
-			}
-		</style>
-	{:else}
-		<style>
-			select option {
-				background-color: rgb(209 213 219) !important;
-			}
-		</style>
-	{/if}
-{/if}
