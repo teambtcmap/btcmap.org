@@ -716,8 +716,7 @@
 	{#if detectTheme() === 'dark' || $theme === 'dark'}
 		<style>
 			select option {
-				--tw-bg-opacity: 1;
-				background-color: rgb(55 65 81 / var(--tw-bg-opacity));
+				background-color: rgb(55 65 81);
 			}
 		</style>
 	{/if}
