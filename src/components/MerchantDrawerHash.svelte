@@ -158,6 +158,12 @@
 		}
 	};
 
+	// Svelte action to focus element on mount (for keyboard events)
+	function focusOnMount(node: HTMLElement) {
+		node.focus();
+		return {};
+	}
+
 	// Listen for hash changes (back/forward navigation)
 	onMount(() => {
 		parseHash();
@@ -203,8 +209,8 @@
 
 	<!-- Drawer -->
 	<div
-		transition:fly={{ x: 400, duration: 300 }}
-		class="fixed right-0 top-0 z-[1002] h-full w-full overflow-y-auto bg-white shadow-2xl dark:bg-dark md:w-[400px]"
+		transition:fly={{ x: -400, duration: 300 }}
+		class="fixed left-0 top-0 z-[1002] h-full w-full overflow-y-auto bg-white shadow-2xl dark:bg-dark md:w-[400px]"
 		on:keydown={(e) => {
 			if (e.key === 'Escape') {
 				if (drawerView !== 'details') {
@@ -216,6 +222,8 @@
 		}}
 		role="dialog"
 		aria-modal="true"
+		tabindex="-1"
+		use:focusOnMount
 	>
 			<div
 				class="sticky top-0 z-10 flex items-center justify-between border-b border-mapBorder bg-white p-4 dark:bg-dark"
