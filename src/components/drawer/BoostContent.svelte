@@ -64,13 +64,6 @@
 
 	const generateInvoice = () => {
 		loading = true;
-		const satsAmount = parseInt(selectedBoost?.sats || '0');
-
-		if (isNaN(satsAmount) || satsAmount <= 0) {
-			errToast('Invalid sats amount');
-			loading = false;
-			return;
-		}
 
 		// Convert months to days (1 month = 30 days, 3 months = 90 days, 12 months = 365 days)
 		const timeToDays: Record<number, number> = { 1: 30, 3: 90, 12: 365 };
@@ -78,12 +71,16 @@
 			? timeToDays[selectedBoost.time] || selectedBoost.time
 			: undefined;
 
+		if (!days || days <= 0) {
+			errToast('Invalid boost duration');
+			loading = false;
+			return;
+		}
+
 		axios
 			.post('/api/boost/invoice/generate', {
 				place_id: $boost?.id,
-				amount: satsAmount,
-				time: days,
-				name: $boost?.name || 'location'
+				days: days
 			})
 			.then(function (response) {
 				invoice = response.data.invoice;
