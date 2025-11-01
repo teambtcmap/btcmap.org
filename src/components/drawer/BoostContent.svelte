@@ -6,6 +6,7 @@
 	import { errToast, warningToast } from '$lib/utils';
 	import axios from 'axios';
 	import { fade } from 'svelte/transition';
+	import { onDestroy } from 'svelte';
 
 	export let merchantId: number | string;
 	export let onComplete: (() => void) | undefined = undefined;
@@ -23,6 +24,16 @@
 	let invoice = '';
 	let invoiceId = '';
 	let loading = false;
+
+	// Reset all state when component unmounts
+	onDestroy(() => {
+		stage = 0;
+		invoice = '';
+		invoiceId = '';
+		loading = false;
+		selectedBoost = undefined;
+		tooltip = false;
+	});
 
 	const handlePaymentSuccess = async () => {
 		if ($boostHash === invoiceId) {
