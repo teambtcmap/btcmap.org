@@ -3,7 +3,6 @@
 	import { places, boost, exchangeRate, resetBoost } from '$lib/store';
 	import { CloseButton, Icon } from '$lib/comp';
 	import { fly } from 'svelte/transition';
-	import OutClick from 'svelte-outclick';
 	import { formatVerifiedHuman } from '$lib/utils';
 	import Time from 'svelte-time';
 	import axios from 'axios';
@@ -112,14 +111,6 @@
 		boostLoading = false;
 	}
 
-	const handleOutClick = () => {
-		if (drawerView !== 'details') {
-			goBack();
-		} else {
-			closeDrawer();
-		}
-	};
-
 	const handleBoost = async () => {
 		if (!merchant) return;
 
@@ -204,22 +195,28 @@
 </script>
 
 {#if isOpen && merchant}
-	<!-- Backdrop overlay -->
+	<!-- Backdrop overlay - no click handler, only for visual dimming -->
 	<div
 		class="fixed inset-0 z-[1001] bg-black/30"
 		transition:fly={{ x: 0, duration: 0 }}
-		on:click={handleOutClick}
-		on:keydown={(e) => e.key === 'Escape' && handleOutClick()}
-		role="button"
-		tabindex="-1"
 	/>
 
 	<!-- Drawer -->
-	<OutClick on:outclick={handleOutClick}>
-		<div
-			transition:fly={{ x: 400, duration: 300 }}
-			class="fixed right-0 top-0 z-[1002] h-full w-full overflow-y-auto bg-white shadow-2xl dark:bg-dark md:w-[400px]"
-		>
+	<div
+		transition:fly={{ x: 400, duration: 300 }}
+		class="fixed right-0 top-0 z-[1002] h-full w-full overflow-y-auto bg-white shadow-2xl dark:bg-dark md:w-[400px]"
+		on:keydown={(e) => {
+			if (e.key === 'Escape') {
+				if (drawerView !== 'details') {
+					goBack();
+				} else {
+					closeDrawer();
+				}
+			}
+		}}
+		role="dialog"
+		aria-modal="true"
+	>
 			<div
 				class="sticky top-0 z-10 flex items-center justify-between border-b border-mapBorder bg-white p-4 dark:bg-dark"
 			>
@@ -476,5 +473,4 @@
 				{/if}
 			</div>
 		</div>
-	</OutClick>
 {/if}
