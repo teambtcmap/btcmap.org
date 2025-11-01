@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
-	import { Boost, Icon, MapLoadingMain, ShowTags, TaggingIssues } from '$lib/comp';
+	import { Icon, MapLoadingMain, MerchantDrawerHash } from '$lib/comp';
 	import {
 		processPlaces,
 		isSupported as isWorkerSupported,
@@ -42,6 +42,22 @@
 	const DEFAULT_LAT = 12.11209;
 	const DEFAULT_LNG = -68.91119;
 	const DEFAULT_ZOOM = 15;
+
+	// Function to open drawer via hash
+	function openMerchantDrawer(id: number) {
+		const hash = window.location.hash.substring(1); // Remove leading #
+		const ampIndex = hash.indexOf('&');
+		const mapPart = ampIndex !== -1 ? hash.substring(0, ampIndex) : hash; // Keep map position
+		const params = new URLSearchParams();
+		params.set('merchant', String(id));
+		
+		// If there's a map part, join with &, otherwise just use params
+		if (mapPart) {
+			window.location.hash = `${mapPart}&${params.toString()}`;
+		} else {
+			window.location.hash = params.toString();
+		}
+	}
 
 	let leaflet: Leaflet;
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -363,7 +379,8 @@
 				icon: divIcon,
 				placeId: place.id,
 				leaflet,
-				verify: true
+				verify: true,
+				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
 
 			upToDateLayer.addLayer(marker);
@@ -428,7 +445,8 @@
 				icon: divIcon,
 				placeId: element.id,
 				leaflet,
-				verify: true
+				verify: true,
+				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
 
 			layer.addLayer(marker);
@@ -478,7 +496,9 @@
 			// use url hash if present
 			if (location.hash) {
 				try {
-					const coords = location.hash.split('/');
+					// Extract only the map coordinates part (before any & parameters)
+					const hashPart = location.hash.split('&')[0];
+					const coords = hashPart.split('/');
 					map.setView([Number(coords[1]), Number(coords[2])], Number(coords[0].slice(1)));
 					setMapViewAndMarkLoaded();
 				} catch (error) {
@@ -876,12 +896,7 @@
 		{/if}
 	</div>
 
-	{#if browser}
-		<Boost />
-	{/if}
-
-	<ShowTags />
-	<TaggingIssues />
+	<MerchantDrawerHash />
 
 	<div bind:this={mapElement} class="absolute h-[100%] w-full !bg-teal dark:!bg-dark" />
 </main>
