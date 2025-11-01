@@ -60,9 +60,15 @@
 			if (newView !== 'details') {
 				params.set('view', newView);
 			}
-			window.location.hash = `${mapPart}&${params.toString()}`;
+			
+			// If there's a map part, join with &, otherwise just use params
+			if (mapPart) {
+				window.location.hash = `${mapPart}&${params.toString()}`;
+			} else {
+				window.location.hash = params.toString();
+			}
 		} else {
-			window.location.hash = mapPart || '#';
+			window.location.hash = mapPart || '';
 		}
 	}
 
