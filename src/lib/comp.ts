@@ -55,6 +55,7 @@ export { default as MerchantButton } from '../components/MerchantButton.svelte';
 export { default as MerchantCard } from '../components/MerchantCard.svelte';
 export { default as MerchantComment } from '../components/MerchantComment.svelte';
 export { default as MerchantDrawer } from '../components/MerchantDrawer.svelte';
+export { default as MerchantDrawerHash } from '../components/MerchantDrawerHash.svelte';
 export { default as MerchantEvent } from '../components/MerchantEvent.svelte';
 export { default as MerchantLink } from '../components/MerchantLink.svelte';
 export { default as NavDropdownDesktop } from '../components/NavDropdownDesktop.svelte';

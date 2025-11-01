@@ -653,7 +653,8 @@ export const generateMarker = ({
 	placeId,
 	// element,
 	// payment,
-	leaflet: L
+	leaflet: L,
+	onMarkerClick
 	// verifiedDate,
 	// verify,
 	// boosted
@@ -664,6 +665,8 @@ export const generateMarker = ({
 	icon: DivIcon;
 	placeId: number | string;
 	leaflet: Leaflet;
+	onMarkerClick?: (placeId: number | string) => void;
+	// verifiedDate: number;
 	verify: boolean;
 	boosted?: boolean;
 	// issues?: Issue[];
@@ -671,18 +674,20 @@ export const generateMarker = ({
 	const marker = L.marker([lat, long], { icon });
 
 	marker.on('click', async () => {
-		// Fetch place details from v4 API and set the selectedMerchant store
-		try {
-			const response = await axios.get(
-				`https://api.btcmap.org/v4/places/${placeId}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`
-			);
-			const placeDetails = response.data;
-
-			// Set the selected merchant to open the drawer
-			selectedMerchant.set(placeDetails);
-		} catch (error) {
-			console.error('Error fetching place details:', error);
-			errToast('Error loading merchant details. Please try again.');
+		if (onMarkerClick) {
+			onMarkerClick(placeId);
+		} else {
+			// Fallback to old store-based behavior
+			try {
+				const response = await axios.get(
+					`https://api.btcmap.org/v4/places/${placeId}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`
+				);
+				const placeDetails = response.data;
+				selectedMerchant.set(placeDetails);
+			} catch (error) {
+				console.error('Error fetching place details:', error);
+				errToast('Error loading merchant details. Please try again.');
+			}
 		}
 	});
 
