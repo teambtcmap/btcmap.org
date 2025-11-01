@@ -440,7 +440,7 @@
 					{#if lat && long}
 						<!-- eslint-disable svelte/no-navigation-without-resolve -->
 						<a
-							href={`/map?lat=${lat}&long=${long}`}
+							href={`/map#18/${lat}/${long}`}
 							class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
 						>
 							<!-- eslint-enable svelte/no-navigation-without-resolve -->

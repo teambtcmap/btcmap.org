@@ -83,7 +83,13 @@
 		const mapPart = ampIndex !== -1 ? hash.substring(0, ampIndex) : hash; // Keep map position
 		const params = new URLSearchParams();
 		params.set('merchant', String(id));
-		window.location.hash = `${mapPart}&${params.toString()}`;
+		
+		// If there's a map part, join with &, otherwise just use params
+		if (mapPart) {
+			window.location.hash = `${mapPart}&${params.toString()}`;
+		} else {
+			window.location.hash = params.toString();
+		}
 	}
 
 	let leaflet: Leaflet;

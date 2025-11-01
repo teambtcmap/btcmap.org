@@ -52,7 +52,7 @@ export const load: PageServerLoad<VerifyLocationPageData> = async ({ url }) => {
 			}
 		}
 
-		const location = `https://btcmap.org/map?lat=${placeData.lat}&long=${placeData.lon}`;
+		const location = `https://btcmap.org/map#18/${placeData.lat}/${placeData.lon}`;
 		const edit = `https://www.openstreetmap.org/edit?${osmType}=${osmId}`;
 		const merchantId = placeData.id.toString();
 
