@@ -9,7 +9,7 @@
 	import { errToast } from '$lib/utils';
 	import JSConfetti from 'js-confetti';
 	import QRCode from 'qrcode';
-	import { tick } from 'svelte';
+	import { tick, onDestroy } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 
 	export let invoice = '';
@@ -64,6 +64,13 @@
 		pollInterval = setInterval(checkInvoiceStatus, POLLING_INTERVAL);
 	};
 
+	const stopPolling = () => {
+		if (pollInterval) {
+			clearInterval(pollInterval);
+			polling = false;
+		}
+	};
+
 	// Generate QR when invoice changes
 	$: if (invoice && qr) {
 		generateQR();
@@ -81,6 +88,11 @@
 			confettiCanvas.style.zIndex = CONFETTI_CANVAS_Z_INDEX;
 		}
 	}
+
+	// Cleanup polling on component destroy
+	onDestroy(() => {
+		stopPolling();
+	});
 </script>
 
 <canvas
