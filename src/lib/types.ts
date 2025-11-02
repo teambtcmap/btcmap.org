@@ -422,7 +422,7 @@ export type Place = {
 	'osm:note'?: string;
 	// Tags object for additional OSM data
 	tags?: {
-		issues?: string[];
+		issues?: Issue[];
 		[key: string]: unknown;
 	};
 };
