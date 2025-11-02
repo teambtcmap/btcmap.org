@@ -20,17 +20,24 @@
 	let isOpen = false;
 	let merchant: Place | null = null;
 	let fetchingMerchant = false;
+	let lastFetchedId: number | null = null;
 
 	// Fetch merchant from API if not in store
 	async function fetchMerchantDetails(id: number) {
-		if (fetchingMerchant) return;
-		
+		if (fetchingMerchant || lastFetchedId === id) return;
+
+		lastFetchedId = id;
 		fetchingMerchant = true;
+		merchant = null; // Clear old data to show loading state
+		
 		try {
 			const response = await axios.get(
 				`https://api.btcmap.org/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`
 			);
-			merchant = response.data;
+			if (merchantId === id) {
+				// eslint-disable-next-line svelte/infinite-reactive-loop
+				merchant = response.data;
+			}
 		} catch (error) {
 			console.error('Error fetching merchant details:', error);
 			errToast('Error loading merchant details. Please try again.');
@@ -39,19 +46,20 @@
 		}
 	}
 
-	// Try to find merchant in store, fallback to API
+	// Watch for merchant ID changes and load data
 	$: if (merchantId && isOpen) {
 		const foundInStore = $places.find((p) => p.id === merchantId);
-		
+
 		// Only use store data if it has complete fields (name, address, etc.)
 		// Store may have basic data (MAP_SYNC) but drawer needs COMPLETE_PLACE
-		if (foundInStore && foundInStore.name !== undefined) {
+		if (foundInStore && foundInStore.name !== undefined && merchant?.id !== foundInStore.id) {
+			// Found complete data in store, use it
 			merchant = foundInStore;
-			fetchingMerchant = false;
-		} else if (!fetchingMerchant && (!merchant || merchant.id !== merchantId)) {
-			// Clear old merchant data to show loading state
-			merchant = null;
+			lastFetchedId = merchantId;
+		} else if (lastFetchedId !== merchantId) {
 			// Not in store or incomplete data, or different merchant, fetch from API
+			// Safe: lastFetchedId prevents infinite loop
+			// eslint-disable-next-line svelte/infinite-reactive-loop
 			fetchMerchantDetails(merchantId);
 		}
 	}
@@ -198,7 +206,7 @@
 	// Listen for escape key globally when drawer is open
 	function handleKeydown(event: KeyboardEvent) {
 		if (!isOpen) return;
-		
+
 		if (event.key === 'Escape') {
 			event.preventDefault();
 			if (drawerView !== 'details') {
@@ -253,7 +261,7 @@
 	<!-- Drawer - no backdrop, keep map interactive -->
 	<div
 		transition:fly={{ x: -400, duration: 300 }}
-		class="fixed left-0 top-0 z-[1002] h-full w-[85vw] overflow-y-auto bg-white shadow-2xl dark:bg-dark md:w-[400px]"
+		class="fixed top-0 left-0 z-[1002] h-full w-[85vw] overflow-y-auto bg-white shadow-2xl md:w-[400px] dark:bg-dark"
 		role="dialog"
 		aria-modal="true"
 	>
@@ -302,244 +310,244 @@
 		{:else if merchant}
 			<!-- Merchant content -->
 			<div class="p-6">
-			{#if drawerView === 'boost'}
-				<BoostContent merchantId={merchant.id} onComplete={handleBoostComplete} />
-			{:else if drawerView === 'tags'}
-				<div class="space-y-4">
-					<h2 class="text-xl font-bold text-primary dark:text-white">All OSM Tags</h2>
-					<TagsContent tags={merchant.tags || {}} />
-				</div>
-			{:else if drawerView === 'issues'}
-				<div class="space-y-4">
-					<h2 class="text-xl font-bold text-primary dark:text-white">Tagging Issues</h2>
-					<IssuesContent issues={merchant.tags?.issues || []} />
-				</div>
-			{:else}
-				<!-- Merchant Details -->
-				<div class="space-y-4">
-					{#if merchant.name}
-						<!-- eslint-disable svelte/no-navigation-without-resolve -->
-						<a
-							href="/merchant/{merchant.id}"
-							class="inline-block text-xl leading-snug font-bold text-link transition-colors hover:text-hover"
-							title="Merchant name"
-						>
-							{merchant.name}
-						</a>
-						<!-- eslint-enable svelte/no-navigation-without-resolve -->
-					{/if}
-
-					{#if merchant.address}
-						<p class="text-body dark:text-white" title="Address">
-							{merchant.address}
-						</p>
-					{/if}
-
-					{#if merchant.opening_hours}
-						<div class="flex items-start space-x-2" title="Opening hours">
-							<Icon
-								w="16"
-								h="16"
-								style="mt-1 text-primary dark:text-white"
-								icon="clock"
-								type="popup"
-							/>
-							<span class="text-body dark:text-white">{merchant.opening_hours}</span>
-						</div>
-					{/if}
-
-					<div class="grid grid-cols-2 gap-2">
-						<a
-							href="geo:{merchant.lat},{merchant.lon}"
-							class="border-mapBorder flex flex-col items-center rounded-lg border py-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
-						>
-							<Icon w="24" h="24" icon="compass" type="popup" />
-							<span class="mt-1 text-xs">Navigate</span>
-						</a>
-
-						<!-- eslint-disable svelte/no-navigation-without-resolve -->
-						<a
-							href={merchant.osm_url || `https://www.openstreetmap.org/node/${merchant.id}`}
-							target="_blank"
-							rel="noreferrer"
-							class="border-mapBorder flex flex-col items-center rounded-lg border py-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
-						>
-							<Icon w="24" h="24" icon="pencil" type="popup" />
-							<span class="mt-1 text-xs">Edit</span>
-						</a>
-
-						<a
-							href="/merchant/{merchant.id}"
-							class="border-mapBorder flex flex-col items-center rounded-lg border py-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
-						>
-							<Icon w="24" h="24" icon="share" type="popup" />
-							<span class="mt-1 text-xs">Share</span>
-						</a>
-
-						<a
-							href="/merchant/{merchant.id}#comments"
-							class="border-mapBorder flex flex-col items-center rounded-lg border py-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
-						>
-							<div class="text-lg font-bold">
-								{merchant.comments || 0}
-							</div>
-							<span class="mt-1 text-xs">Comments</span>
-						</a>
-						<!-- eslint-enable svelte/no-navigation-without-resolve -->
+				{#if drawerView === 'boost'}
+					<BoostContent merchantId={merchant.id} onComplete={handleBoostComplete} />
+				{:else if drawerView === 'tags'}
+					<div class="space-y-4">
+						<h2 class="text-xl font-bold text-primary dark:text-white">All OSM Tags</h2>
+						<TagsContent tags={merchant.tags || {}} />
 					</div>
+				{:else if drawerView === 'issues'}
+					<div class="space-y-4">
+						<h2 class="text-xl font-bold text-primary dark:text-white">Tagging Issues</h2>
+						<IssuesContent issues={merchant.tags?.issues || []} />
+					</div>
+				{:else}
+					<!-- Merchant Details -->
+					<div class="space-y-4">
+						{#if merchant.name}
+							<!-- eslint-disable svelte/no-navigation-without-resolve -->
+							<a
+								href="/merchant/{merchant.id}"
+								class="inline-block text-xl leading-snug font-bold text-link transition-colors hover:text-hover"
+								title="Merchant name"
+							>
+								{merchant.name}
+							</a>
+							<!-- eslint-enable svelte/no-navigation-without-resolve -->
+						{/if}
 
-					<div class="border-mapBorder border-t pt-4">
-						{#if merchant['osm:payment:onchain'] || merchant['osm:payment:lightning'] || merchant['osm:payment:lightning_contactless'] || merchant['osm:payment:bitcoin']}
-							<div class="mb-4">
-								<span class="text-mapLabel block text-xs">Payment Methods</span>
-								<div class="mt-1 flex space-x-2">
-									<img
-										src={merchant['osm:payment:onchain'] === 'yes'
-											? '/icons/btc-highlight.svg'
-											: merchant['osm:payment:onchain'] === 'no'
-												? '/icons/btc-no.svg'
-												: '/icons/btc.svg'}
-										alt="bitcoin"
-										class="h-6 w-6 dark:rounded-full {merchant['osm:payment:onchain'] !== 'yes'
-											? 'dark:bg-white dark:p-0.5'
-											: ''}"
-										title={merchant['osm:payment:onchain'] === 'yes'
-											? 'On-chain accepted'
-											: merchant['osm:payment:onchain'] === 'no'
-												? 'On-chain not accepted'
-												: 'On-chain unknown'}
-									/>
-									<img
-										src={merchant['osm:payment:lightning'] === 'yes'
-											? '/icons/ln-highlight.svg'
-											: merchant['osm:payment:lightning'] === 'no'
-												? '/icons/ln-no.svg'
-												: '/icons/ln.svg'}
-										alt="lightning"
-										class="h-6 w-6 dark:rounded-full {merchant['osm:payment:lightning'] !== 'yes'
-											? 'dark:bg-white dark:p-0.5'
-											: ''}"
-										title={merchant['osm:payment:lightning'] === 'yes'
-											? 'Lightning accepted'
-											: merchant['osm:payment:lightning'] === 'no'
-												? 'Lightning not accepted'
-												: 'Lightning unknown'}
-									/>
-									<img
-										src={merchant['osm:payment:lightning_contactless'] === 'yes'
-											? '/icons/nfc-highlight.svg'
-											: merchant['osm:payment:lightning_contactless'] === 'no'
-												? '/icons/nfc-no.svg'
-												: '/icons/nfc.svg'}
-										alt="nfc"
-										class="h-6 w-6 dark:rounded-full {merchant[
-											'osm:payment:lightning_contactless'
-										] !== 'yes'
-											? 'dark:bg-white dark:p-0.5'
-											: ''}"
-										title={merchant['osm:payment:lightning_contactless'] === 'yes'
-											? 'Lightning Contactless accepted'
-											: merchant['osm:payment:lightning_contactless'] === 'no'
-												? 'Lightning contactless not accepted'
-												: 'Lightning contactless unknown'}
-									/>
-								</div>
+						{#if merchant.address}
+							<p class="text-body dark:text-white" title="Address">
+								{merchant.address}
+							</p>
+						{/if}
+
+						{#if merchant.opening_hours}
+							<div class="flex items-start space-x-2" title="Opening hours">
+								<Icon
+									w="16"
+									h="16"
+									style="mt-1 text-primary dark:text-white"
+									icon="clock"
+									type="popup"
+								/>
+								<span class="text-body dark:text-white">{merchant.opening_hours}</span>
 							</div>
 						{/if}
 
-						<div class="mb-4">
-							<span
-								class="text-mapLabel block text-xs"
-								title="Completed by BTC Map community members">Last Surveyed</span
+						<div class="grid grid-cols-2 gap-2">
+							<a
+								href="geo:{merchant.lat},{merchant.lon}"
+								class="border-mapBorder flex flex-col items-center rounded-lg border py-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
 							>
-							<span class="block text-body dark:text-white">
-								{#if merchant.verified_at}
-									{formatVerifiedHuman(merchant.verified_at)}
-									{#if isUpToDate}
-										<Icon
-											w="16"
-											h="16"
-											style="inline text-primary dark:text-white"
-											icon="verified"
-											type="popup"
-										/>
-									{:else}
-										<Icon
-											w="16"
-											h="16"
-											style="inline text-primary dark:text-white"
-											icon="outdated"
-											type="popup"
-										/>
-									{/if}
-								{:else}
-									<span title="Not verified">---</span>
-								{/if}
-							</span>
+								<Icon w="24" h="24" icon="compass" type="popup" />
+								<span class="mt-1 text-xs">Navigate</span>
+							</a>
+
 							<!-- eslint-disable svelte/no-navigation-without-resolve -->
 							<a
-								href="/verify-location?id={merchant.id}"
-								class="text-xs text-link transition-colors hover:text-hover"
-								title="Help improve the data for everyone"
+								href={merchant.osm_url || `https://www.openstreetmap.org/node/${merchant.id}`}
+								target="_blank"
+								rel="noreferrer"
+								class="border-mapBorder flex flex-col items-center rounded-lg border py-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
 							>
-								Verify Location
+								<Icon w="24" h="24" icon="pencil" type="popup" />
+								<span class="mt-1 text-xs">Edit</span>
+							</a>
+
+							<a
+								href="/merchant/{merchant.id}"
+								class="border-mapBorder flex flex-col items-center rounded-lg border py-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
+							>
+								<Icon w="24" h="24" icon="share" type="popup" />
+								<span class="mt-1 text-xs">Share</span>
+							</a>
+
+							<a
+								href="/merchant/{merchant.id}#comments"
+								class="border-mapBorder flex flex-col items-center rounded-lg border py-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
+							>
+								<div class="text-lg font-bold">
+									{merchant.comments || 0}
+								</div>
+								<span class="mt-1 text-xs">Comments</span>
 							</a>
 							<!-- eslint-enable svelte/no-navigation-without-resolve -->
 						</div>
 
-						<div>
-							{#if isBoosted && merchant.boosted_until}
-								<span class="text-mapLabel block text-xs" title="This location is boosted!"
-									>Boost Expires</span
-								>
-								<span class="block text-body dark:text-white">
-									<Time live={3000} relative={true} timestamp={merchant.boosted_until} />
-								</span>
+						<div class="border-mapBorder border-t pt-4">
+							{#if merchant['osm:payment:onchain'] || merchant['osm:payment:lightning'] || merchant['osm:payment:lightning_contactless'] || merchant['osm:payment:bitcoin']}
+								<div class="mb-4">
+									<span class="text-mapLabel block text-xs">Payment Methods</span>
+									<div class="mt-1 flex space-x-2">
+										<img
+											src={merchant['osm:payment:onchain'] === 'yes'
+												? '/icons/btc-highlight.svg'
+												: merchant['osm:payment:onchain'] === 'no'
+													? '/icons/btc-no.svg'
+													: '/icons/btc.svg'}
+											alt="bitcoin"
+											class="h-6 w-6 dark:rounded-full {merchant['osm:payment:onchain'] !== 'yes'
+												? 'dark:bg-white dark:p-0.5'
+												: ''}"
+											title={merchant['osm:payment:onchain'] === 'yes'
+												? 'On-chain accepted'
+												: merchant['osm:payment:onchain'] === 'no'
+													? 'On-chain not accepted'
+													: 'On-chain unknown'}
+										/>
+										<img
+											src={merchant['osm:payment:lightning'] === 'yes'
+												? '/icons/ln-highlight.svg'
+												: merchant['osm:payment:lightning'] === 'no'
+													? '/icons/ln-no.svg'
+													: '/icons/ln.svg'}
+											alt="lightning"
+											class="h-6 w-6 dark:rounded-full {merchant['osm:payment:lightning'] !== 'yes'
+												? 'dark:bg-white dark:p-0.5'
+												: ''}"
+											title={merchant['osm:payment:lightning'] === 'yes'
+												? 'Lightning accepted'
+												: merchant['osm:payment:lightning'] === 'no'
+													? 'Lightning not accepted'
+													: 'Lightning unknown'}
+										/>
+										<img
+											src={merchant['osm:payment:lightning_contactless'] === 'yes'
+												? '/icons/nfc-highlight.svg'
+												: merchant['osm:payment:lightning_contactless'] === 'no'
+													? '/icons/nfc-no.svg'
+													: '/icons/nfc.svg'}
+											alt="nfc"
+											class="h-6 w-6 dark:rounded-full {merchant[
+												'osm:payment:lightning_contactless'
+											] !== 'yes'
+												? 'dark:bg-white dark:p-0.5'
+												: ''}"
+											title={merchant['osm:payment:lightning_contactless'] === 'yes'
+												? 'Lightning Contactless accepted'
+												: merchant['osm:payment:lightning_contactless'] === 'no'
+													? 'Lightning contactless not accepted'
+													: 'Lightning contactless unknown'}
+										/>
+									</div>
+								</div>
 							{/if}
 
-							<button
-								title={isBoosted ? 'Extend Boost' : 'Boost'}
-								on:click={handleBoost}
-								disabled={boostLoading}
-								class="border-mapBorder mt-2 flex h-[32px] items-center justify-center space-x-2 rounded-lg border px-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
-							>
-								{#if !boostLoading}
-									<Icon w="16" h="16" icon={isBoosted ? 'boost-solid' : 'boost'} type="popup" />
-								{/if}
-								<span class="text-xs"
-									>{boostLoading ? 'Boosting...' : isBoosted ? 'Extend' : 'Boost'}</span
+							<div class="mb-4">
+								<span
+									class="text-mapLabel block text-xs"
+									title="Completed by BTC Map community members">Last Surveyed</span
 								>
-							</button>
-						</div>
-					</div>
+								<span class="block text-body dark:text-white">
+									{#if merchant.verified_at}
+										{formatVerifiedHuman(merchant.verified_at)}
+										{#if isUpToDate}
+											<Icon
+												w="16"
+												h="16"
+												style="inline text-primary dark:text-white"
+												icon="verified"
+												type="popup"
+											/>
+										{:else}
+											<Icon
+												w="16"
+												h="16"
+												style="inline text-primary dark:text-white"
+												icon="outdated"
+												type="popup"
+											/>
+										{/if}
+									{:else}
+										<span title="Not verified">---</span>
+									{/if}
+								</span>
+								<!-- eslint-disable svelte/no-navigation-without-resolve -->
+								<a
+									href="/verify-location?id={merchant.id}"
+									class="text-xs text-link transition-colors hover:text-hover"
+									title="Help improve the data for everyone"
+								>
+									Verify Location
+								</a>
+								<!-- eslint-enable svelte/no-navigation-without-resolve -->
+							</div>
 
-					<div class="border-mapBorder flex space-x-4 border-t pt-4">
-						<button
-							on:click={showTags}
-							class="text-sm text-link transition-colors hover:text-hover"
-						>
-							View All Tags
-						</button>
-						{#if merchant.tags?.issues && merchant.tags.issues.length > 0}
+							<div>
+								{#if isBoosted && merchant.boosted_until}
+									<span class="text-mapLabel block text-xs" title="This location is boosted!"
+										>Boost Expires</span
+									>
+									<span class="block text-body dark:text-white">
+										<Time live={3000} relative={true} timestamp={merchant.boosted_until} />
+									</span>
+								{/if}
+
+								<button
+									title={isBoosted ? 'Extend Boost' : 'Boost'}
+									on:click={handleBoost}
+									disabled={boostLoading}
+									class="border-mapBorder mt-2 flex h-[32px] items-center justify-center space-x-2 rounded-lg border px-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
+								>
+									{#if !boostLoading}
+										<Icon w="16" h="16" icon={isBoosted ? 'boost-solid' : 'boost'} type="popup" />
+									{/if}
+									<span class="text-xs"
+										>{boostLoading ? 'Boosting...' : isBoosted ? 'Extend' : 'Boost'}</span
+									>
+								</button>
+							</div>
+						</div>
+
+						<div class="border-mapBorder flex space-x-4 border-t pt-4">
 							<button
-								on:click={showIssues}
+								on:click={showTags}
 								class="text-sm text-link transition-colors hover:text-hover"
 							>
-								View Issues ({merchant.tags.issues.length})
+								View All Tags
 							</button>
-						{/if}
-					</div>
+							{#if merchant.tags?.issues && merchant.tags.issues.length > 0}
+								<button
+									on:click={showIssues}
+									class="text-sm text-link transition-colors hover:text-hover"
+								>
+									View Issues ({merchant.tags.issues.length})
+								</button>
+							{/if}
+						</div>
 
-					<!-- eslint-disable svelte/no-navigation-without-resolve -->
-					<a
-						href="/merchant/{merchant.id}"
-						class="mt-4 block rounded-lg bg-link py-3 text-center text-white transition-colors hover:bg-hover"
-					>
-						View Full Details
-					</a>
-					<!-- eslint-enable svelte/no-navigation-without-resolve -->
-				</div>
-			{/if}
+						<!-- eslint-disable svelte/no-navigation-without-resolve -->
+						<a
+							href="/merchant/{merchant.id}"
+							class="mt-4 block rounded-lg bg-link py-3 text-center text-white transition-colors hover:bg-hover"
+						>
+							View Full Details
+						</a>
+						<!-- eslint-enable svelte/no-navigation-without-resolve -->
+					</div>
+				{/if}
 			</div>
 		{/if}
 	</div>
