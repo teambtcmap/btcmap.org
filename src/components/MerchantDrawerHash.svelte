@@ -12,12 +12,43 @@
 	import IssuesContent from './drawer/IssuesContent.svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import type { Place } from '$lib/types';
+	import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/constants';
 
 	let merchantId: number | null = null;
 	let drawerView: 'details' | 'boost' | 'tags' | 'issues' = 'details';
 	let isOpen = false;
+	let merchant: Place | null = null;
+	let fetchingMerchant = false;
 
-	$: merchant = merchantId ? $places.find((p) => p.id === merchantId) : null;
+	// Fetch merchant from API if not in store
+	async function fetchMerchantDetails(id: number) {
+		if (fetchingMerchant) return;
+		
+		fetchingMerchant = true;
+		try {
+			const response = await axios.get(
+				`https://api.btcmap.org/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`
+			);
+			merchant = response.data;
+		} catch (error) {
+			console.error('Error fetching merchant details:', error);
+			errToast('Error loading merchant details. Please try again.');
+		} finally {
+			fetchingMerchant = false;
+		}
+	}
+
+	// Try to find merchant in store, fallback to API
+	$: if (merchantId && isOpen) {
+		const foundInStore = $places.find((p) => p.id === merchantId);
+		if (foundInStore) {
+			merchant = foundInStore;
+		} else if (!fetchingMerchant) {
+			// Not in store yet, fetch from API
+			fetchMerchantDetails(merchantId);
+		}
+	}
 
 	// Parse hash to get drawer state
 	function parseHash() {
