@@ -47,7 +47,10 @@
 		// Store may have basic data (MAP_SYNC) but drawer needs COMPLETE_PLACE
 		if (foundInStore && foundInStore.name !== undefined) {
 			merchant = foundInStore;
+			fetchingMerchant = false;
 		} else if (!fetchingMerchant && (!merchant || merchant.id !== merchantId)) {
+			// Clear old merchant data to show loading state
+			merchant = null;
 			// Not in store or incomplete data, or different merchant, fetch from API
 			fetchMerchantDetails(merchantId);
 		}
@@ -246,7 +249,7 @@
 	}
 </script>
 
-{#if isOpen && merchant}
+{#if isOpen}
 	<!-- Drawer - no backdrop, keep map interactive -->
 	<div
 		transition:fly={{ x: -400, duration: 300 }}
@@ -275,7 +278,30 @@
 			<CloseButton on:click={closeDrawer} />
 		</div>
 
-		<div class="p-6">
+		{#if !merchant && fetchingMerchant}
+			<!-- Loading skeleton -->
+			<div class="space-y-4 p-6">
+				<!-- Title skeleton -->
+				<div class="h-7 w-3/4 animate-pulse rounded-lg bg-link/50"></div>
+				<!-- Address skeleton -->
+				<div class="h-5 w-1/2 animate-pulse rounded bg-link/50"></div>
+				<!-- Payment methods skeleton -->
+				<div class="flex space-x-2">
+					<div class="h-8 w-16 animate-pulse rounded bg-link/50"></div>
+					<div class="h-8 w-16 animate-pulse rounded bg-link/50"></div>
+					<div class="h-8 w-16 animate-pulse rounded bg-link/50"></div>
+				</div>
+				<!-- Stats grid skeleton -->
+				<div class="grid grid-cols-2 gap-2">
+					<div class="h-20 animate-pulse rounded-lg bg-link/50"></div>
+					<div class="h-20 animate-pulse rounded-lg bg-link/50"></div>
+				</div>
+				<!-- Large content skeleton -->
+				<div class="h-32 animate-pulse rounded-lg bg-link/50"></div>
+			</div>
+		{:else if merchant}
+			<!-- Merchant content -->
+			<div class="p-6">
 			{#if drawerView === 'boost'}
 				<BoostContent merchantId={merchant.id} onComplete={handleBoostComplete} />
 			{:else if drawerView === 'tags'}
