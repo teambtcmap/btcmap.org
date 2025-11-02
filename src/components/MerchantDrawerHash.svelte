@@ -29,7 +29,7 @@
 		lastFetchedId = id;
 		fetchingMerchant = true;
 		merchant = null; // Clear old data to show loading state
-		
+
 		try {
 			const response = await axios.get(
 				`https://api.btcmap.org/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`

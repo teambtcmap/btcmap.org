@@ -178,7 +178,9 @@
 					{/if}
 
 					<p>${value.fiat}</p>
-					<p class="text-xs">{(value.fiat / ($exchangeRate / 100000000)).toFixed(0)} sats</p>
+					<p class="text-xs">
+						{$exchangeRate ? (value.fiat / ($exchangeRate / 100000000)).toFixed(0) : '...'} sats
+					</p>
 					<p class="text-xs">{value.time} month</p>
 				</button>
 			{/each}
