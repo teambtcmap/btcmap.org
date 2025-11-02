@@ -540,6 +540,7 @@
 					<!-- eslint-enable svelte/no-navigation-without-resolve -->
 				</div>
 			{/if}
-		</div>
+			</div>
+		{/if}
 	</div>
 {/if}
