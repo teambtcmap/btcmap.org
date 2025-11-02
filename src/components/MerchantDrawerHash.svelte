@@ -13,7 +13,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import type { Place } from '$lib/types';
-	import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/constants';
+	import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 
 	let merchantId: number | null = null;
 	let drawerView: 'details' | 'boost' | 'tags' | 'issues' = 'details';
