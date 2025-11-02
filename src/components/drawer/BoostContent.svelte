@@ -88,9 +88,17 @@
 			return;
 		}
 
+		// Ensure we have a valid merchant ID
+		const placeId = Number(merchantId);
+		if (!placeId || isNaN(placeId)) {
+			errToast('Invalid merchant ID');
+			loading = false;
+			return;
+		}
+
 		axios
 			.post('/api/boost/invoice/generate', {
-				place_id: $boost?.id,
+				place_id: placeId,
 				days: days
 			})
 			.then(function (response) {
