@@ -47,8 +47,8 @@
 		// Store may have basic data (MAP_SYNC) but drawer needs COMPLETE_PLACE
 		if (foundInStore && foundInStore.name !== undefined) {
 			merchant = foundInStore;
-		} else if (!fetchingMerchant && !merchant) {
-			// Not in store or incomplete data, fetch from API
+		} else if (!fetchingMerchant && (!merchant || merchant.id !== merchantId)) {
+			// Not in store or incomplete data, or different merchant, fetch from API
 			fetchMerchantDetails(merchantId);
 		}
 	}
@@ -192,17 +192,29 @@
 		}
 	};
 
-	// Svelte action to focus element on mount (for keyboard events)
-	function focusOnMount(node: HTMLElement) {
-		node.focus();
-		return {};
+	// Listen for escape key globally when drawer is open
+	function handleKeydown(event: KeyboardEvent) {
+		if (!isOpen) return;
+		
+		if (event.key === 'Escape') {
+			event.preventDefault();
+			if (drawerView !== 'details') {
+				goBack();
+			} else {
+				closeDrawer();
+			}
+		}
 	}
 
 	// Listen for hash changes (back/forward navigation)
 	onMount(() => {
 		parseHash();
 		window.addEventListener('hashchange', parseHash);
-		return () => window.removeEventListener('hashchange', parseHash);
+		window.addEventListener('keydown', handleKeydown);
+		return () => {
+			window.removeEventListener('hashchange', parseHash);
+			window.removeEventListener('keydown', handleKeydown);
+		};
 	});
 
 	// Fetch exchange rate when boost view is active and rate is not set
@@ -239,19 +251,8 @@
 	<div
 		transition:fly={{ x: -400, duration: 300 }}
 		class="fixed left-0 top-0 z-[1002] h-full w-[85vw] overflow-y-auto bg-white shadow-2xl dark:bg-dark md:w-[400px]"
-		on:keydown={(e) => {
-			if (e.key === 'Escape') {
-				if (drawerView !== 'details') {
-					goBack();
-				} else {
-					closeDrawer();
-				}
-			}
-		}}
 		role="dialog"
 		aria-modal="true"
-		tabindex="-1"
-		use:focusOnMount
 	>
 		<div
 			class="border-mapBorder sticky top-0 z-10 flex items-center justify-between border-b bg-white p-4 dark:bg-dark"
