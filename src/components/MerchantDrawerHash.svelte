@@ -42,10 +42,13 @@
 	// Try to find merchant in store, fallback to API
 	$: if (merchantId && isOpen) {
 		const foundInStore = $places.find((p) => p.id === merchantId);
-		if (foundInStore) {
+		
+		// Only use store data if it has complete fields (name, address, etc.)
+		// Store may have basic data (MAP_SYNC) but drawer needs COMPLETE_PLACE
+		if (foundInStore && foundInStore.name !== undefined) {
 			merchant = foundInStore;
-		} else if (!fetchingMerchant) {
-			// Not in store yet, fetch from API
+		} else if (!fetchingMerchant && !merchant) {
+			// Not in store or incomplete data, fetch from API
 			fetchMerchantDetails(merchantId);
 		}
 	}
