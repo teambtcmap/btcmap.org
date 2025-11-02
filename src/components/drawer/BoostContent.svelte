@@ -113,8 +113,8 @@
 			<p class="mb-2 text-xl font-bold text-primary dark:text-white">Boost Location</p>
 
 			<p class="text-sm text-body dark:text-white">
-				Make this merchant stand out in bitcoin orange on the map, shine in the search results,
-				and be discovered in the exclusive boosted locations map!
+				Make this merchant stand out in bitcoin orange on the map, shine in the search results, and
+				be discovered in the exclusive boosted locations map!
 			</p>
 
 			<button
@@ -125,7 +125,7 @@
 				{#if tooltip}
 					<div
 						transition:fade={{ delay: 0, duration: 100 }}
-						class="absolute -top-16 left-[26px] w-[52px] rounded-lg border border-mapBorder bg-white py-2 shadow-lg dark:bg-dark"
+						class="border-mapBorder absolute -top-16 left-[26px] w-[52px] rounded-lg border bg-white py-2 shadow-lg dark:bg-dark"
 					>
 						<Icon w="32" h="43" style="mx-auto" icon="boosted-icon-pin" type="popup" />
 						<Icon
@@ -140,7 +140,7 @@
 			</button>
 		</div>
 
-		<div class="space-y-2 md:flex md:space-x-2 md:space-y-0">
+		<div class="space-y-2 md:flex md:space-y-0 md:space-x-2">
 			{#each values as value, index (index)}
 				<button
 					on:click={() => {
@@ -166,7 +166,7 @@
 						: 'border-mapBorder text-primary dark:text-white'} text-center transition-colors hover:border-link hover:text-link dark:hover:text-link"
 				>
 					{#if value.time === 3}
-						<img src="/icons/star.svg" alt="star" class="absolute right-1 top-1" />
+						<img src="/icons/star.svg" alt="star" class="absolute top-1 right-1" />
 					{/if}
 
 					<p>${value.fiat}</p>
@@ -222,12 +222,12 @@
 		{/if}
 
 		<div
-			class="flex w-full items-center justify-between space-x-2 rounded-xl border-2 border-mapBorder p-2 md:justify-center"
+			class="border-mapBorder flex w-full items-center justify-between space-x-2 rounded-xl border-2 p-2 md:justify-center"
 		>
-			<p class="hidden text-sm text-body dark:text-white md:block">
+			<p class="hidden text-sm text-body md:block dark:text-white">
 				{invoice.slice(0, 39)}...
 			</p>
-			<p class="block text-sm uppercase text-body dark:text-white md:hidden">
+			<p class="block text-sm text-body uppercase md:hidden dark:text-white">
 				Invoice <img
 					src="/icons/ln-highlight.svg"
 					alt="protocol"

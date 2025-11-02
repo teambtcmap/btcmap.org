@@ -80,7 +80,7 @@
 	<OutClick on:outclick={handleOutClick}>
 		<div
 			transition:fly={{ x: 400, duration: 300 }}
-			class="fixed right-0 top-0 z-[1002] h-full w-full overflow-y-auto bg-white p-6 shadow-2xl dark:bg-dark md:w-[400px]"
+			class="fixed top-0 right-0 z-[1002] h-full w-full overflow-y-auto bg-white p-6 shadow-2xl md:w-[400px] dark:bg-dark"
 		>
 			<CloseButton on:click={closeDrawer} />
 
@@ -90,7 +90,7 @@
 					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href="/merchant/{merchant.id}"
-						class="inline-block text-xl font-bold leading-snug text-link transition-colors hover:text-hover"
+						class="inline-block text-xl leading-snug font-bold text-link transition-colors hover:text-hover"
 						title="Merchant name"
 					>
 						{merchant.name}
@@ -123,7 +123,7 @@
 				<div class="grid grid-cols-2 gap-2">
 					<a
 						href="geo:{merchant.lat},{merchant.lon}"
-						class="flex flex-col items-center rounded-lg border border-mapBorder py-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
+						class="border-mapBorder flex flex-col items-center rounded-lg border py-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
 					>
 						<Icon w="24" h="24" icon="compass" type="popup" />
 						<span class="mt-1 text-xs">Navigate</span>
@@ -134,7 +134,7 @@
 						href={merchant.osm_url || `https://www.openstreetmap.org/node/${merchant.id}`}
 						target="_blank"
 						rel="noreferrer"
-						class="flex flex-col items-center rounded-lg border border-mapBorder py-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
+						class="border-mapBorder flex flex-col items-center rounded-lg border py-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
 					>
 						<Icon w="24" h="24" icon="pencil" type="popup" />
 						<span class="mt-1 text-xs">Edit</span>
@@ -144,7 +144,7 @@
 					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href="/merchant/{merchant.id}"
-						class="flex flex-col items-center rounded-lg border border-mapBorder py-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
+						class="border-mapBorder flex flex-col items-center rounded-lg border py-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
 					>
 						<Icon w="24" h="24" icon="share" type="popup" />
 						<span class="mt-1 text-xs">Share</span>
@@ -152,7 +152,7 @@
 
 					<a
 						href="/merchant/{merchant.id}#comments"
-						class="flex flex-col items-center rounded-lg border border-mapBorder py-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
+						class="border-mapBorder flex flex-col items-center rounded-lg border py-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
 					>
 						<div class="text-lg font-bold">
 							{merchant.comments || 0}
@@ -162,11 +162,11 @@
 					<!-- eslint-enable svelte/no-navigation-without-resolve -->
 				</div>
 
-				<div class="border-t border-mapBorder pt-4">
+				<div class="border-mapBorder border-t pt-4">
 					<!-- Payment Methods -->
 					{#if merchant['osm:payment:onchain'] || merchant['osm:payment:lightning'] || merchant['osm:payment:lightning_contactless'] || merchant['osm:payment:bitcoin']}
 						<div class="mb-4">
-							<span class="block text-xs text-mapLabel">Payment Methods</span>
+							<span class="text-mapLabel block text-xs">Payment Methods</span>
 							<div class="mt-1 flex space-x-2">
 								<img
 									src={merchant['osm:payment:onchain'] === 'yes'
@@ -224,7 +224,7 @@
 
 					<!-- Last Surveyed -->
 					<div class="mb-4">
-						<span class="block text-xs text-mapLabel" title="Completed by BTC Map community members"
+						<span class="text-mapLabel block text-xs" title="Completed by BTC Map community members"
 							>Last Surveyed</span
 						>
 						<span class="block text-body dark:text-white">
@@ -265,7 +265,7 @@
 					<!-- Boost Section -->
 					<div>
 						{#if isBoosted && merchant.boosted_until}
-							<span class="block text-xs text-mapLabel" title="This location is boosted!"
+							<span class="text-mapLabel block text-xs" title="This location is boosted!"
 								>Boost Expires</span
 							>
 							<span class="block text-body dark:text-white">
@@ -277,7 +277,7 @@
 							title={isBoosted ? 'Extend Boost' : 'Boost'}
 							on:click={handleBoost}
 							disabled={boostLoading}
-							class="mt-2 flex h-[32px] items-center justify-center space-x-2 rounded-lg border border-mapBorder px-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
+							class="border-mapBorder mt-2 flex h-[32px] items-center justify-center space-x-2 rounded-lg border px-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
 						>
 							{#if !boostLoading}
 								<Icon w="16" h="16" icon={isBoosted ? 'boost-solid' : 'boost'} type="popup" />
