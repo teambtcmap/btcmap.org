@@ -31,7 +31,7 @@
 		"d3-geo": "^3.1.1",
 		"date-fns": "^4.1.0",
 		"dompurify": "^3.2.5",
-		"globals": "^16.0.0",
+		"globals": "^16.5.0",
 		"js-confetti": "^0.13.1",
 		"leaflet": "^1.9.4",
 		"leaflet.featuregroup.subgroup": "^1.0.2",
