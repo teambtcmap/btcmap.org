@@ -133,7 +133,7 @@
 				{#if tooltip}
 					<div
 						transition:fade={{ delay: 0, duration: 100 }}
-						class="border-mapBorder absolute -top-16 left-[26px] w-[52px] rounded-lg border bg-white py-2 shadow-lg dark:bg-dark"
+						class="absolute -top-16 left-[26px] w-[52px] rounded-lg border border-gray-300 bg-white py-2 shadow-lg dark:border-white/95 dark:bg-dark"
 					>
 						<Icon w="32" h="43" style="mx-auto" icon="boosted-icon-pin" type="popup" />
 						<Icon
@@ -171,7 +171,7 @@
 					class="relative w-full space-y-0.5 rounded-xl border-2 py-1 {selectedBoost &&
 					selectedBoost.time === value.time
 						? 'border-link text-link'
-						: 'border-mapBorder text-primary dark:text-white'} text-center transition-colors hover:border-link hover:text-link dark:hover:text-link"
+						: 'border-gray-300 text-primary dark:border-white/95 dark:text-white'} text-center transition-colors hover:border-link hover:text-link dark:hover:text-link"
 				>
 					{#if value.time === 3}
 						<img src="/icons/star.svg" alt="star" class="absolute top-1 right-1" />
@@ -232,7 +232,7 @@
 		{/if}
 
 		<div
-			class="border-mapBorder flex w-full items-center justify-between space-x-2 rounded-xl border-2 p-2 md:justify-center"
+			class="flex w-full items-center justify-between space-x-2 rounded-xl border-2 border-gray-300 p-2 dark:border-white/95 md:justify-center"
 		>
 			<p class="hidden text-sm text-body md:block dark:text-white">
 				{invoice.slice(0, 39)}...

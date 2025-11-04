@@ -266,7 +266,7 @@
 		aria-modal="true"
 	>
 		<div
-			class="border-mapBorder sticky top-0 z-10 flex items-center justify-between border-b bg-white p-4 dark:bg-dark"
+			class="sticky top-0 z-10 flex items-center justify-between border-b border-gray-300 bg-white p-4 dark:border-white/95 dark:bg-dark"
 		>
 			{#if drawerView !== 'details'}
 				<!-- Back button for nested views -->
@@ -359,7 +359,7 @@
 						<div class="grid grid-cols-2 gap-2">
 							<a
 								href="geo:{merchant.lat},{merchant.lon}"
-								class="border-mapBorder flex flex-col items-center rounded-lg border py-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
+								class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
 							>
 								<Icon w="24" h="24" icon="compass" type="popup" />
 								<span class="mt-1 text-xs">Navigate</span>
@@ -370,7 +370,7 @@
 								href={merchant.osm_url || `https://www.openstreetmap.org/node/${merchant.id}`}
 								target="_blank"
 								rel="noreferrer"
-								class="border-mapBorder flex flex-col items-center rounded-lg border py-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
+								class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
 							>
 								<Icon w="24" h="24" icon="pencil" type="popup" />
 								<span class="mt-1 text-xs">Edit</span>
@@ -378,7 +378,7 @@
 
 							<a
 								href="/merchant/{merchant.id}"
-								class="border-mapBorder flex flex-col items-center rounded-lg border py-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
+								class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
 							>
 								<Icon w="24" h="24" icon="share" type="popup" />
 								<span class="mt-1 text-xs">Share</span>
@@ -386,7 +386,7 @@
 
 							<a
 								href="/merchant/{merchant.id}#comments"
-								class="border-mapBorder flex flex-col items-center rounded-lg border py-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
+								class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
 							>
 								<div class="text-lg font-bold">
 									{merchant.comments || 0}
@@ -396,10 +396,10 @@
 							<!-- eslint-enable svelte/no-navigation-without-resolve -->
 						</div>
 
-						<div class="border-mapBorder border-t pt-4">
+						<div class="border-t border-gray-300 pt-4 dark:border-white/95">
 							{#if merchant['osm:payment:onchain'] || merchant['osm:payment:lightning'] || merchant['osm:payment:lightning_contactless'] || merchant['osm:payment:bitcoin']}
 								<div class="mb-4">
-									<span class="text-mapLabel block text-xs">Payment Methods</span>
+									<span class="block text-xs text-mapLabel dark:text-white/70">Payment Methods</span>
 									<div class="mt-1 flex space-x-2">
 										<img
 											src={merchant['osm:payment:onchain'] === 'yes'
@@ -457,7 +457,7 @@
 
 							<div class="mb-4">
 								<span
-									class="text-mapLabel block text-xs"
+									class="block text-xs text-mapLabel dark:text-white/70"
 									title="Completed by BTC Map community members">Last Surveyed</span
 								>
 								<span class="block text-body dark:text-white">
@@ -497,7 +497,7 @@
 
 							<div>
 								{#if isBoosted && merchant.boosted_until}
-									<span class="text-mapLabel block text-xs" title="This location is boosted!"
+									<span class="block text-xs text-mapLabel dark:text-white/70" title="This location is boosted!"
 										>Boost Expires</span
 									>
 									<span class="block text-body dark:text-white">
@@ -509,7 +509,7 @@
 									title={isBoosted ? 'Extend Boost' : 'Boost'}
 									on:click={handleBoost}
 									disabled={boostLoading}
-									class="border-mapBorder mt-2 flex h-[32px] items-center justify-center space-x-2 rounded-lg border px-3 text-primary transition-colors hover:border-link hover:text-link dark:text-white dark:hover:text-link"
+									class="mt-2 flex h-[32px] items-center justify-center space-x-2 rounded-lg border border-gray-300 px-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
 								>
 									{#if !boostLoading}
 										<Icon w="16" h="16" icon={isBoosted ? 'boost-solid' : 'boost'} type="popup" />
@@ -521,7 +521,7 @@
 							</div>
 						</div>
 
-						<div class="border-mapBorder flex space-x-4 border-t pt-4">
+						<div class="flex space-x-4 border-t border-gray-300 pt-4 dark:border-white/95">
 							<button
 								on:click={showTags}
 								class="text-sm text-link transition-colors hover:text-hover"
