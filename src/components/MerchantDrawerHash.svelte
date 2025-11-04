@@ -22,7 +22,8 @@
 	let fetchingMerchant = false;
 	let lastFetchedId: number | null = null;
 
-	$: currentTheme = detectTheme();
+	// Call detectTheme directly in template instead of reactive statement
+	const getTheme = detectTheme;
 
 	// Fetch merchant from API if not in store
 	async function fetchMerchantDetails(id: number) {
@@ -190,18 +191,6 @@
 
 		if (merchantId) {
 			updateHash(merchantId, 'details');
-		}
-	};
-
-	const showTags = () => {
-		if (merchantId) {
-			updateHash(merchantId, 'tags');
-		}
-	};
-
-	const showIssues = () => {
-		if (merchantId) {
-			updateHash(merchantId, 'issues');
 		}
 	};
 
@@ -406,14 +395,14 @@
 									<div class="mt-1 flex space-x-2">
 										<img
 											src={merchant['osm:payment:onchain'] === 'yes'
-												? currentTheme === 'dark'
+												? getTheme() === 'dark'
 													? '/icons/btc-highlight-dark.svg'
 													: '/icons/btc-highlight.svg'
 												: merchant['osm:payment:onchain'] === 'no'
-													? currentTheme === 'dark'
+													? getTheme() === 'dark'
 														? '/icons/btc-no-dark.svg'
 														: '/icons/btc-no.svg'
-													: currentTheme === 'dark'
+													: getTheme() === 'dark'
 														? '/icons/btc-dark.svg'
 														: '/icons/btc.svg'}
 											alt="bitcoin"
@@ -426,14 +415,14 @@
 										/>
 										<img
 											src={merchant['osm:payment:lightning'] === 'yes'
-												? currentTheme === 'dark'
+												? getTheme() === 'dark'
 													? '/icons/ln-highlight-dark.svg'
 													: '/icons/ln-highlight.svg'
 												: merchant['osm:payment:lightning'] === 'no'
-													? currentTheme === 'dark'
+													? getTheme() === 'dark'
 														? '/icons/ln-no-dark.svg'
 														: '/icons/ln-no.svg'
-													: currentTheme === 'dark'
+													: getTheme() === 'dark'
 														? '/icons/ln-dark.svg'
 														: '/icons/ln.svg'}
 											alt="lightning"
@@ -446,14 +435,14 @@
 										/>
 										<img
 											src={merchant['osm:payment:lightning_contactless'] === 'yes'
-												? currentTheme === 'dark'
+												? getTheme() === 'dark'
 													? '/icons/nfc-highlight-dark.svg'
 													: '/icons/nfc-highlight.svg'
 												: merchant['osm:payment:lightning_contactless'] === 'no'
-													? currentTheme === 'dark'
+													? getTheme() === 'dark'
 														? '/icons/nfc-no-dark.svg'
 														: '/icons/nfc-no.svg'
-													: currentTheme === 'dark'
+													: getTheme() === 'dark'
 														? '/icons/nfc-dark.svg'
 														: '/icons/nfc.svg'}
 											alt="nfc"
