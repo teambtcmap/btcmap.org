@@ -9,9 +9,19 @@ test.describe('Map Drawer', () => {
 		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
 		await expect(zoomInButton).toBeVisible();
 
-		await page.waitForTimeout(10000);
+		// Wait longer for map initialization and marker loading
+		await page.waitForTimeout(15000);
 
 		const findAndClickMarker = async () => {
+			// Wait for markers to actually exist in DOM
+			await page.waitForFunction(
+				() => {
+					const markers = document.querySelectorAll('.leaflet-marker-pane > div');
+					return markers.length > 0;
+				},
+				{ timeout: 30000 }
+			);
+
 			const markerClicked = await page.evaluate(() => {
 				const isInViewport = (element: Element) => {
 					const rect = element.getBoundingClientRect();
@@ -134,7 +144,17 @@ test.describe('Map Drawer', () => {
 		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
 		await expect(zoomInButton).toBeVisible();
 
-		await page.waitForTimeout(8000);
+		// Wait longer for markers to load
+		await page.waitForTimeout(15000);
+
+		// Wait for markers to exist
+		await page.waitForFunction(
+			() => {
+				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
+				return markers.length > 0;
+			},
+			{ timeout: 30000 }
+		);
 
 		const markerClicked = await page.evaluate(() => {
 			const markers = document.querySelectorAll(
