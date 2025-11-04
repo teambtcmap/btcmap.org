@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { selectedMerchant, boost, exchangeRate, resetBoost, theme } from '$lib/store';
+	import { selectedMerchant, boost, exchangeRate, resetBoost } from '$lib/store';
 	import { CloseButton, Icon } from '$lib/comp';
-	import { formatVerifiedHuman } from '$lib/utils';
+	import { formatVerifiedHuman, detectTheme } from '$lib/utils';
 	import OutClick from 'svelte-outclick';
 	import { fly } from 'svelte/transition';
 	import Time from 'svelte-time';
@@ -10,6 +10,7 @@
 	import { errToast } from '$lib/utils';
 
 	$: merchant = $selectedMerchant;
+	$: currentTheme = detectTheme();
 
 	const closeDrawer = () => {
 		selectedMerchant.set(null);
@@ -170,14 +171,14 @@
 							<div class="mt-1 flex space-x-2">
 								<img
 									src={merchant['osm:payment:onchain'] === 'yes'
-										? $theme === 'dark'
+										? currentTheme === 'dark'
 											? '/icons/btc-highlight-dark.svg'
 											: '/icons/btc-highlight.svg'
 										: merchant['osm:payment:onchain'] === 'no'
-											? $theme === 'dark'
+											? currentTheme === 'dark'
 												? '/icons/btc-no-dark.svg'
 												: '/icons/btc-no.svg'
-											: $theme === 'dark'
+											: currentTheme === 'dark'
 												? '/icons/btc-dark.svg'
 												: '/icons/btc.svg'}
 									alt="bitcoin"
@@ -190,14 +191,14 @@
 								/>
 								<img
 									src={merchant['osm:payment:lightning'] === 'yes'
-										? $theme === 'dark'
+										? currentTheme === 'dark'
 											? '/icons/ln-highlight-dark.svg'
 											: '/icons/ln-highlight.svg'
 										: merchant['osm:payment:lightning'] === 'no'
-											? $theme === 'dark'
+											? currentTheme === 'dark'
 												? '/icons/ln-no-dark.svg'
 												: '/icons/ln-no.svg'
-											: $theme === 'dark'
+											: currentTheme === 'dark'
 												? '/icons/ln-dark.svg'
 												: '/icons/ln.svg'}
 									alt="lightning"
@@ -210,14 +211,14 @@
 								/>
 								<img
 									src={merchant['osm:payment:lightning_contactless'] === 'yes'
-										? $theme === 'dark'
+										? currentTheme === 'dark'
 											? '/icons/nfc-highlight-dark.svg'
 											: '/icons/nfc-highlight.svg'
 										: merchant['osm:payment:lightning_contactless'] === 'no'
-											? $theme === 'dark'
+											? currentTheme === 'dark'
 												? '/icons/nfc-no-dark.svg'
 												: '/icons/nfc-no.svg'
-											: $theme === 'dark'
+											: currentTheme === 'dark'
 												? '/icons/nfc-dark.svg'
 												: '/icons/nfc.svg'}
 									alt="nfc"
