@@ -108,4 +108,39 @@
 	.animate-wiggle {
 		animation: wiggle 2s ease-in-out infinite;
 	}
+
+	/* Selected marker highlight */
+	.selected-marker {
+		position: relative;
+		z-index: 1000 !important;
+	}
+
+	.selected-marker::before {
+		content: '';
+		position: absolute;
+		top: -4px;
+		left: -4px;
+		right: -4px;
+		bottom: -4px;
+		border: 3px solid #00b7d2;
+		border-radius: 50% 50% 50% 0;
+		transform: rotate(-45deg);
+		animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+		pointer-events: none;
+	}
+
+	@keyframes pulse-ring {
+		0% {
+			opacity: 1;
+			transform: rotate(-45deg) scale(0.95);
+		}
+		50% {
+			opacity: 0.7;
+			transform: rotate(-45deg) scale(1.05);
+		}
+		100% {
+			opacity: 1;
+			transform: rotate(-45deg) scale(0.95);
+		}
+	}
 }

@@ -78,6 +78,25 @@
 
 	// Function to open drawer via hash
 	function openMerchantDrawer(id: number) {
+		// Remove selection from previous marker
+		if (selectedMarkerId && loadedMarkers[selectedMarkerId.toString()]) {
+			const prevMarker = loadedMarkers[selectedMarkerId.toString()];
+			const prevIcon = prevMarker.getElement();
+			if (prevIcon) {
+				prevIcon.classList.remove('selected-marker');
+			}
+		}
+
+		// Add selection to new marker
+		selectedMarkerId = id;
+		if (loadedMarkers[id.toString()]) {
+			const marker = loadedMarkers[id.toString()];
+			const markerIcon = marker.getElement();
+			if (markerIcon) {
+				markerIcon.classList.add('selected-marker');
+			}
+		}
+
 		const hash = window.location.hash.substring(1); // Remove leading #
 		const ampIndex = hash.indexOf('&');
 		const mapPart = ampIndex !== -1 ? hash.substring(0, ampIndex) : hash; // Keep map position
@@ -105,10 +124,30 @@
 	let markers: MarkerClusterGroup;
 	let upToDateLayer: FeatureGroup.SubGroup;
 	let loadedMarkers: Record<string, Marker> = {}; // placeId -> marker
+	let selectedMarkerId: number | null = null; // Track selected marker
 
 	let isLoadingMarkers = false;
 
 	let mapCenter: LatLng;
+
+	// Hash change handler for clearing marker selection
+	const handleHashChange = () => {
+		if (!browser) return;
+		const hash = window.location.hash.substring(1);
+		const hasDrawer = hash.includes('merchant=');
+
+		if (!hasDrawer && selectedMarkerId) {
+			// Drawer closed, clear selection
+			if (loadedMarkers[selectedMarkerId.toString()]) {
+				const marker = loadedMarkers[selectedMarkerId.toString()];
+				const markerIcon = marker.getElement();
+				if (markerIcon) {
+					markerIcon.classList.remove('selected-marker');
+				}
+			}
+			selectedMarkerId = null;
+		}
+	};
 
 	// Search functionality re-enabled with API-based search
 	let customSearchBar: HTMLDivElement;
@@ -820,6 +859,9 @@
 				mapCenter = map.getCenter();
 				mapLoaded = true;
 			});
+
+			// Watch for hash changes to clear marker selection when drawer closes
+			window.addEventListener('hashchange', handleHashChange);
 		}
 	});
 
@@ -834,6 +876,11 @@
 		// Reset loading progress when leaving map page to avoid stale states
 		placesLoadingProgress.set(0);
 		placesLoadingStatus.set('');
+
+		// Remove hash change listener
+		if (browser) {
+			window.removeEventListener('hashchange', handleHashChange);
+		}
 	});
 </script>
 
