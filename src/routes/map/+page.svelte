@@ -84,6 +84,7 @@
 			const prevIcon = prevMarker.getElement();
 			if (prevIcon) {
 				prevIcon.classList.remove('selected-marker');
+				prevIcon.classList.remove('selected-marker-boosted');
 			}
 		}
 
@@ -93,7 +94,9 @@
 			const marker = loadedMarkers[id.toString()];
 			const markerIcon = marker.getElement();
 			if (markerIcon) {
-				markerIcon.classList.add('selected-marker');
+				// Check if marker is boosted by looking for boosted-icon class
+				const isBoosted = markerIcon.classList.contains('boosted-icon');
+				markerIcon.classList.add(isBoosted ? 'selected-marker-boosted' : 'selected-marker');
 			}
 		}
 
@@ -143,6 +146,7 @@
 				const markerIcon = marker.getElement();
 				if (markerIcon) {
 					markerIcon.classList.remove('selected-marker');
+					markerIcon.classList.remove('selected-marker-boosted');
 				}
 			}
 			selectedMarkerId = null;

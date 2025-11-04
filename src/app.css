@@ -111,17 +111,32 @@
 
 	/* Selected marker highlight */
 	.selected-marker {
-		filter: drop-shadow(0 0 8px #00b7d2) drop-shadow(0 0 16px #00b7d2) !important;
+		filter: drop-shadow(0 0 4px #00b7d2) drop-shadow(0 0 8px #00b7d2) !important;
 		animation: pulse-glow 2s ease-in-out infinite;
+	}
+
+	.selected-marker-boosted {
+		filter: drop-shadow(0 0 4px #f7931a) drop-shadow(0 0 8px #f7931a) !important;
+		animation: pulse-glow-boosted 2s ease-in-out infinite;
 	}
 
 	@keyframes pulse-glow {
 		0%,
 		100% {
-			filter: drop-shadow(0 0 8px #00b7d2) drop-shadow(0 0 16px #00b7d2);
+			filter: drop-shadow(0 0 4px #00b7d2) drop-shadow(0 0 8px #00b7d2);
 		}
 		50% {
-			filter: drop-shadow(0 0 12px #00b7d2) drop-shadow(0 0 24px #00b7d2);
+			filter: drop-shadow(0 0 6px #00b7d2) drop-shadow(0 0 12px #00b7d2);
+		}
+	}
+
+	@keyframes pulse-glow-boosted {
+		0%,
+		100% {
+			filter: drop-shadow(0 0 4px #f7931a) drop-shadow(0 0 8px #f7931a);
+		}
+		50% {
+			filter: drop-shadow(0 0 6px #f7931a) drop-shadow(0 0 12px #f7931a);
 		}
 	}
 }
