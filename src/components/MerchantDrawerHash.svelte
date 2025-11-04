@@ -50,9 +50,11 @@
 	$: if (merchantId && isOpen) {
 		const foundInStore = $places.find((p) => p.id === merchantId);
 
-		const hasCompleteData = (place: Place | undefined): boolean => {
+		const hasCompleteData = (place: Place | undefined): place is Place => {
 			if (!place) return false;
-			return place.name !== undefined && place.address !== undefined && place.verified_at !== undefined;
+			return (
+				place.name !== undefined && place.address !== undefined && place.verified_at !== undefined
+			);
 		};
 
 		if (hasCompleteData(foundInStore) && merchant?.id !== foundInStore.id) {
