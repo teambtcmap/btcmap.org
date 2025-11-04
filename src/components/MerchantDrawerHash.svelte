@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { places, boost, exchangeRate, resetBoost } from '$lib/store';
+	import { places, boost, exchangeRate, resetBoost, theme } from '$lib/store';
 	import { CloseButton, Icon } from '$lib/comp';
 	import { fly } from 'svelte/transition';
 	import { formatVerifiedHuman } from '$lib/utils';
@@ -403,14 +403,18 @@
 									<div class="mt-1 flex space-x-2">
 										<img
 											src={merchant['osm:payment:onchain'] === 'yes'
-												? '/icons/btc-highlight.svg'
+												? $theme === 'dark'
+													? '/icons/btc-highlight-dark.svg'
+													: '/icons/btc-highlight.svg'
 												: merchant['osm:payment:onchain'] === 'no'
-													? '/icons/btc-no.svg'
-													: '/icons/btc.svg'}
+													? $theme === 'dark'
+														? '/icons/btc-no-dark.svg'
+														: '/icons/btc-no.svg'
+													: $theme === 'dark'
+														? '/icons/btc-dark.svg'
+														: '/icons/btc.svg'}
 											alt="bitcoin"
-											class="h-6 w-6 dark:rounded-full {merchant['osm:payment:onchain'] !== 'yes'
-												? 'dark:bg-white dark:p-0.5'
-												: ''}"
+											class="h-6 w-6"
 											title={merchant['osm:payment:onchain'] === 'yes'
 												? 'On-chain accepted'
 												: merchant['osm:payment:onchain'] === 'no'
@@ -419,14 +423,18 @@
 										/>
 										<img
 											src={merchant['osm:payment:lightning'] === 'yes'
-												? '/icons/ln-highlight.svg'
+												? $theme === 'dark'
+													? '/icons/ln-highlight-dark.svg'
+													: '/icons/ln-highlight.svg'
 												: merchant['osm:payment:lightning'] === 'no'
-													? '/icons/ln-no.svg'
-													: '/icons/ln.svg'}
+													? $theme === 'dark'
+														? '/icons/ln-no-dark.svg'
+														: '/icons/ln-no.svg'
+													: $theme === 'dark'
+														? '/icons/ln-dark.svg'
+														: '/icons/ln.svg'}
 											alt="lightning"
-											class="h-6 w-6 dark:rounded-full {merchant['osm:payment:lightning'] !== 'yes'
-												? 'dark:bg-white dark:p-0.5'
-												: ''}"
+											class="h-6 w-6"
 											title={merchant['osm:payment:lightning'] === 'yes'
 												? 'Lightning accepted'
 												: merchant['osm:payment:lightning'] === 'no'
@@ -435,16 +443,18 @@
 										/>
 										<img
 											src={merchant['osm:payment:lightning_contactless'] === 'yes'
-												? '/icons/nfc-highlight.svg'
+												? $theme === 'dark'
+													? '/icons/nfc-highlight-dark.svg'
+													: '/icons/nfc-highlight.svg'
 												: merchant['osm:payment:lightning_contactless'] === 'no'
-													? '/icons/nfc-no.svg'
-													: '/icons/nfc.svg'}
+													? $theme === 'dark'
+														? '/icons/nfc-no-dark.svg'
+														: '/icons/nfc-no.svg'
+													: $theme === 'dark'
+														? '/icons/nfc-dark.svg'
+														: '/icons/nfc.svg'}
 											alt="nfc"
-											class="h-6 w-6 dark:rounded-full {merchant[
-												'osm:payment:lightning_contactless'
-											] !== 'yes'
-												? 'dark:bg-white dark:p-0.5'
-												: ''}"
+											class="h-6 w-6"
 											title={merchant['osm:payment:lightning_contactless'] === 'yes'
 												? 'Lightning Contactless accepted'
 												: merchant['osm:payment:lightning_contactless'] === 'no'
