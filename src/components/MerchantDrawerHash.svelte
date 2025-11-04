@@ -521,23 +521,6 @@
 							</div>
 						</div>
 
-						<div class="flex space-x-4 border-t border-gray-300 pt-4 dark:border-white/95">
-							<button
-								on:click={showTags}
-								class="text-sm text-link transition-colors hover:text-hover"
-							>
-								View All Tags
-							</button>
-							{#if merchant.tags?.issues && merchant.tags.issues.length > 0}
-								<button
-									on:click={showIssues}
-									class="text-sm text-link transition-colors hover:text-hover"
-								>
-									View Issues ({merchant.tags.issues.length})
-								</button>
-							{/if}
-						</div>
-
 						<!-- eslint-disable svelte/no-navigation-without-resolve -->
 						<a
 							href="/merchant/{merchant.id}"
