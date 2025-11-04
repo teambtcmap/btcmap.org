@@ -10,7 +10,7 @@
 	import { errToast } from '$lib/utils';
 
 	$: merchant = $selectedMerchant;
-	
+
 	// Call detectTheme directly in template instead of reactive statement
 	const getTheme = detectTheme;
 
