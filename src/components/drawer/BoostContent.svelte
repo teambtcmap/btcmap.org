@@ -232,7 +232,7 @@
 		{/if}
 
 		<div
-			class="flex w-full items-center justify-between space-x-2 rounded-xl border-2 border-gray-300 p-2 dark:border-white/95 md:justify-center"
+			class="flex w-full items-center justify-between space-x-2 rounded-xl border-2 border-gray-300 p-2 md:justify-center dark:border-white/95"
 		>
 			<p class="hidden text-sm text-body md:block dark:text-white">
 				{invoice.slice(0, 39)}...
