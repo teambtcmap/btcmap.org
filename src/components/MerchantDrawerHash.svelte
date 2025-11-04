@@ -252,7 +252,7 @@
 	<!-- Drawer - no backdrop, keep map interactive -->
 	<div
 		transition:fly={{ x: -400, duration: 300 }}
-		class="fixed top-0 left-0 z-[1002] h-full w-[85vw] overflow-y-auto bg-white shadow-2xl md:w-[400px] dark:bg-dark"
+		class="fixed top-0 left-0 z-[1002] h-full w-full overflow-y-auto bg-white shadow-2xl md:w-[400px] dark:bg-dark"
 		role="dialog"
 		aria-modal="true"
 	>
