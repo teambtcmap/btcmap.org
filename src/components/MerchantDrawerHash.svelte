@@ -22,16 +22,14 @@
 	let fetchingMerchant = false;
 	let lastFetchedId: number | null = null;
 
-	// Call detectTheme directly in template instead of reactive statement
 	const getTheme = detectTheme;
 
-	// Fetch merchant from API if not in store
 	async function fetchMerchantDetails(id: number) {
 		if (fetchingMerchant || lastFetchedId === id) return;
 
 		lastFetchedId = id;
 		fetchingMerchant = true;
-		merchant = null; // Clear old data to show loading state
+		merchant = null;
 
 		try {
 			const response = await axios.get(
@@ -49,35 +47,31 @@
 		}
 	}
 
-	// Watch for merchant ID changes and load data
 	$: if (merchantId && isOpen) {
 		const foundInStore = $places.find((p) => p.id === merchantId);
 
-		// Only use store data if it has complete fields (name, address, etc.)
-		// Store may have basic data (MAP_SYNC) but drawer needs COMPLETE_PLACE
-		if (foundInStore && foundInStore.name !== undefined && merchant?.id !== foundInStore.id) {
-			// Found complete data in store, use it
+		const hasCompleteData = (place: Place | undefined): boolean => {
+			if (!place) return false;
+			return place.name !== undefined && place.address !== undefined && place.verified_at !== undefined;
+		};
+
+		if (hasCompleteData(foundInStore) && merchant?.id !== foundInStore.id) {
 			merchant = foundInStore;
 			lastFetchedId = merchantId;
 		} else if (lastFetchedId !== merchantId) {
-			// Not in store or incomplete data, or different merchant, fetch from API
-			// Safe: lastFetchedId prevents infinite loop
 			// eslint-disable-next-line svelte/infinite-reactive-loop
 			fetchMerchantDetails(merchantId);
 		}
 	}
 
-	// Parse hash to get drawer state
 	function parseHash() {
 		if (!browser) return;
 
-		const hash = window.location.hash.substring(1); // Remove leading #
+		const hash = window.location.hash.substring(1);
 
-		// Check if there are parameters after the map coordinates
 		const ampIndex = hash.indexOf('&');
 
 		if (ampIndex !== -1) {
-			// Has drawer params
 			const params = new URLSearchParams(hash.substring(ampIndex + 1));
 			const merchantParam = params.get('merchant');
 			const viewParam = params.get('view') as typeof drawerView | null;
@@ -86,20 +80,18 @@
 			drawerView = viewParam || 'details';
 			isOpen = Boolean(merchantId);
 		} else {
-			// No drawer params
 			merchantId = null;
 			drawerView = 'details';
 			isOpen = false;
 		}
 	}
 
-	// Update hash with drawer state
 	function updateHash(newMerchantId: number | null, newView: typeof drawerView = 'details') {
 		if (!browser) return;
 
-		const hash = window.location.hash.substring(1); // Remove leading #
+		const hash = window.location.hash.substring(1);
 		const ampIndex = hash.indexOf('&');
-		const mapPart = ampIndex !== -1 ? hash.substring(0, ampIndex) : hash; // Keep map position
+		const mapPart = ampIndex !== -1 ? hash.substring(0, ampIndex) : hash;
 
 		if (newMerchantId) {
 			const params = new URLSearchParams();
@@ -108,7 +100,6 @@
 				params.set('view', newView);
 			}
 
-			// If there's a map part, join with &, otherwise just use params
 			if (mapPart) {
 				window.location.hash = `${mapPart}&${params.toString()}`;
 			} else {
@@ -133,7 +124,6 @@
 	let boostLoading = false;
 
 	const closeDrawer = () => {
-		// Reset all state when closing
 		$boost = undefined;
 		$exchangeRate = undefined;
 		boostLoading = false;
@@ -141,8 +131,6 @@
 	};
 
 	const goBack = () => {
-		// Always reset boost state when going back
-		// (safe to reset even if not in boost view)
 		$boost = undefined;
 		$exchangeRate = undefined;
 		boostLoading = false;
@@ -152,7 +140,6 @@
 		}
 	};
 
-	// Watch for view changes and reset boost state if leaving boost view
 	$: if (drawerView !== 'boost' && $boost !== undefined) {
 		$boost = undefined;
 		$exchangeRate = undefined;
@@ -194,7 +181,6 @@
 		}
 	};
 
-	// Listen for escape key globally when drawer is open
 	function handleKeydown(event: KeyboardEvent) {
 		if (!isOpen) return;
 
@@ -208,7 +194,6 @@
 		}
 	}
 
-	// Listen for hash changes (back/forward navigation)
 	onMount(() => {
 		parseHash();
 		window.addEventListener('hashchange', parseHash);
@@ -219,9 +204,7 @@
 		};
 	});
 
-	// Fetch exchange rate when boost view is active and rate is not set
 	$: if (drawerView === 'boost' && !$exchangeRate && merchant) {
-		// Set boost store if not already set
 		if (!$boost) {
 			boost.set({
 				id: merchant.id,
@@ -230,7 +213,6 @@
 			});
 		}
 
-		// Fetch exchange rate
 		axios
 			.get('https://blockchain.info/ticker')
 			.then((response) => {
@@ -242,7 +224,6 @@
 			});
 	}
 
-	// Export function to open drawer from outside
 	export function openDrawer(id: number) {
 		updateHash(id, 'details');
 	}

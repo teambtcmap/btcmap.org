@@ -39,18 +39,16 @@
 		if (!merchant) return;
 
 		const boostStore = get(boost);
-		if (boostStore) return; // Prevent multiple boost flows
+		if (boostStore) return;
 
 		boostLoading = true;
 
-		// Set the boost data in the global store
 		boost.set({
 			id: merchant.id,
 			name: merchant.name || '',
 			boost: isBoosted ? merchant.boosted_until || '' : ''
 		});
 
-		// Fetch exchange rate
 		try {
 			const response = await axios.get('https://blockchain.info/ticker');
 			exchangeRate.set(response.data['USD']['15m']);
@@ -62,7 +60,6 @@
 		}
 	};
 
-	// Subscribe to resetBoost store for external resets
 	resetBoost.subscribe(() => {
 		boostLoading = false;
 	});

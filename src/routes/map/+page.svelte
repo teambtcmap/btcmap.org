@@ -65,20 +65,16 @@
 		}
 	}
 
-	// Configuration constants for viewport-based loading
-	const MAX_LOADED_MARKERS = 200; // Maximum markers to keep in memory before cleanup
-	const VIEWPORT_BATCH_SIZE = 25; // Batch size for processing markers in viewport
-	const VIEWPORT_BUFFER_PERCENT = 0.2; // Buffer around viewport (20%)
-	const DEBOUNCE_DELAY = 300; // Debounce delay for map movement (ms)
+	const MAX_LOADED_MARKERS = 200;
+	const VIEWPORT_BATCH_SIZE = 25;
+	const VIEWPORT_BUFFER_PERCENT = 0.2;
+	const DEBOUNCE_DELAY = 300;
 
-	// Default map view constants
 	const DEFAULT_LAT = 12.11209;
 	const DEFAULT_LNG = -68.91119;
 	const DEFAULT_ZOOM = 15;
 
-	// Function to open drawer via hash
 	function openMerchantDrawer(id: number) {
-		// Remove selection from previous marker
 		if (selectedMarkerId && loadedMarkers[selectedMarkerId.toString()]) {
 			const prevMarker = loadedMarkers[selectedMarkerId.toString()];
 			const prevIcon = prevMarker.getElement();
@@ -88,21 +84,19 @@
 			}
 		}
 
-		// Add selection to new marker
 		selectedMarkerId = id;
 		if (loadedMarkers[id.toString()]) {
 			const marker = loadedMarkers[id.toString()];
 			const markerIcon = marker.getElement();
 			if (markerIcon) {
-				// Check if marker is boosted by looking for boosted-icon class
 				const isBoosted = markerIcon.classList.contains('boosted-icon');
 				markerIcon.classList.add(isBoosted ? 'selected-marker-boosted' : 'selected-marker');
 			}
 		}
 
-		const hash = window.location.hash.substring(1); // Remove leading #
+		const hash = window.location.hash.substring(1);
 		const ampIndex = hash.indexOf('&');
-		const mapPart = ampIndex !== -1 ? hash.substring(0, ampIndex) : hash; // Keep map position
+		const mapPart = ampIndex !== -1 ? hash.substring(0, ampIndex) : hash;
 		const params = new URLSearchParams();
 		params.set('merchant', String(id));
 
@@ -123,17 +117,15 @@
 	let mapLoaded = false;
 	let elementsLoaded = false;
 
-	// Viewport-based loading state
 	let markers: MarkerClusterGroup;
 	let upToDateLayer: FeatureGroup.SubGroup;
-	let loadedMarkers: Record<string, Marker> = {}; // placeId -> marker
-	let selectedMarkerId: number | null = null; // Track selected marker
+	let loadedMarkers: Record<string, Marker> = {};
+	let selectedMarkerId: number | null = null;
 
 	let isLoadingMarkers = false;
 
 	let mapCenter: LatLng;
 
-	// Hash change handler for clearing marker selection
 	const handleHashChange = () => {
 		if (!browser) return;
 		const hash = window.location.hash.substring(1);
@@ -153,7 +145,6 @@
 		}
 	};
 
-	// Search functionality re-enabled with API-based search
 	let customSearchBar: HTMLDivElement;
 	let clearSearchButton: HTMLButtonElement;
 	let showSearch = false;
