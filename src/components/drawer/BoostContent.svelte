@@ -9,6 +9,7 @@
 	import { onDestroy } from 'svelte';
 
 	export let merchantId: number | string;
+	export let merchantName: string | undefined = undefined;
 	export let onComplete: (() => void) | undefined = undefined;
 
 	let stage = 0;
@@ -25,7 +26,6 @@
 	let invoiceId = '';
 	let loading = false;
 
-	// Reset all state when component unmounts
 	onDestroy(() => {
 		stage = 0;
 		invoice = '';
@@ -49,10 +49,9 @@
 			stage = 2;
 			console.info(response);
 
-			// Update the place in localforage and store immediately
-			if ($boost?.id) {
-				await updateSinglePlace($boost.id);
-				lastUpdatedPlaceId.set($boost.id);
+			if (merchantId) {
+				await updateSinglePlace(merchantId);
+				lastUpdatedPlaceId.set(Number(merchantId));
 			}
 
 			if (onComplete) {
@@ -76,7 +75,6 @@
 	const generateInvoice = () => {
 		loading = true;
 
-		// Convert months to days (1 month = 30 days, 3 months = 90 days, 12 months = 365 days)
 		const timeToDays: Record<number, number> = { 1: 30, 3: 90, 12: 365 };
 		const days = selectedBoost?.time
 			? timeToDays[selectedBoost.time] || selectedBoost.time
@@ -88,7 +86,6 @@
 			return;
 		}
 
-		// Ensure we have a valid merchant ID
 		const placeId = Number(merchantId);
 		if (!placeId || isNaN(placeId)) {
 			errToast('Invalid merchant ID');
@@ -251,11 +248,11 @@
 {:else}
 	<div class="space-y-4 text-center">
 		<p
-			class="text-xl font-bold text-primary dark:text-white {$boost?.name?.match('([^ ]{14})')
+			class="text-xl font-bold text-primary dark:text-white {merchantName?.match('([^ ]{14})')
 				? 'break-all'
 				: ''}"
 		>
-			Thank you for supporting {$boost?.name ? $boost.name : 'this location'} & BTC Map!
+			Thank you for supporting {merchantName || 'this location'} & BTC Map!
 		</p>
 
 		<p class="text-body dark:text-white">
@@ -270,9 +267,9 @@
 		</p>
 
 		<a
-			href="https://twitter.com/share?text=I just boosted {$boost?.name
-				? encodeURIComponent($boost.name)
-				: 'this location'} on @btcmap. Check them out!&url=https://btcmap.org/merchant/{$boost?.id}&hashtags=bitcoin"
+			href="https://twitter.com/share?text=I just boosted {merchantName
+				? encodeURIComponent(merchantName)
+				: 'this location'} on @btcmap. Check them out!&url=https://btcmap.org/merchant/{merchantId}&hashtags=bitcoin"
 			target="_blank"
 			rel="noreferrer"
 			class="mx-auto flex w-[200px] items-center justify-center rounded-xl bg-twitter py-3 text-white"
