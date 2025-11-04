@@ -53,6 +53,7 @@ export function getRandomColor() {
 }
 
 export const detectTheme = () => {
+	if (typeof window === 'undefined') return 'light'; // SSR fallback
 	if (
 		localStorage.theme === 'dark' ||
 		(!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
