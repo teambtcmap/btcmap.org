@@ -125,7 +125,7 @@ test.describe('Map Drawer', () => {
 		await expect(viewDetailsButton).toBeVisible({ timeout: 10000 });
 
 		const merchantHref = await viewDetailsButton.getAttribute('href');
-		console.log('Found merchant link:', merchantHref);
+		console.info('Found merchant link:', merchantHref);
 
 		await viewDetailsButton.click();
 
