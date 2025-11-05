@@ -132,7 +132,7 @@
 				{/if}
 			</span>
 			<a
-				href={resolve(`/verify-location?id=${merchant.id}`)}
+				href={`${resolve('/verify-location')}?id=${merchant.id}`}
 				class="text-xs text-link transition-colors hover:text-hover"
 				title="Help improve the data for everyone"
 			>
