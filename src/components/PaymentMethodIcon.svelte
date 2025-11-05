@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
+	import { onMount } from 'svelte';
 	import { detectTheme } from '$lib/utils';
 
 	export let status: 'yes' | 'no' | undefined;
@@ -38,7 +38,12 @@
 		}
 	};
 
-	$: isDark = browser ? detectTheme() === 'dark' : false;
+	let isDark = false;
+
+	onMount(() => {
+		isDark = detectTheme() === 'dark';
+	});
+
 	$: statusKey = (status === 'yes' ? 'yes' : status === 'no' ? 'no' : 'unknown') as
 		| 'yes'
 		| 'no'
