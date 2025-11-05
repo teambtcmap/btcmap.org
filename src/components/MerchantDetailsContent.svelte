@@ -11,6 +11,8 @@
 	export let isBoosted: boolean;
 	export let boostLoading: boolean;
 	export let onBoostClick: () => void;
+
+	$: verifyLocationUrl = `${resolve('/verify-location')}?id=${merchant.id}`;
 </script>
 
 <div class="space-y-4">
@@ -131,13 +133,15 @@
 					<span title="Not verified">---</span>
 				{/if}
 			</span>
+			<!-- eslint-disable svelte/no-navigation-without-resolve -->
 			<a
-				href={`${resolve('/verify-location')}?id=${merchant.id}`}
+				href={verifyLocationUrl}
 				class="text-xs text-link transition-colors hover:text-hover"
 				title="Help improve the data for everyone"
 			>
 				Verify Location
 			</a>
+			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		</div>
 
 		<div>
