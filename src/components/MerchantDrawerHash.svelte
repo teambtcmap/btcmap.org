@@ -6,7 +6,7 @@
 	import { formatVerifiedHuman, detectTheme } from '$lib/utils';
 	import Time from 'svelte-time';
 	import axios from 'axios';
-	import { errToast } from '$lib/utils';
+	import { errToast, fetchExchangeRate } from '$lib/utils';
 	import BoostContent from './BoostContent.svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
@@ -158,15 +158,13 @@
 		});
 
 		try {
-			const response = await axios.get('https://blockchain.info/ticker');
-			exchangeRate.set(response.data['USD']['15m']);
+			const rate = await fetchExchangeRate();
+			exchangeRate.set(rate);
 			updateHash(merchantId, 'boost');
 			boostLoading = false;
 		} catch (error) {
-			console.error('Error fetching exchange rate:', error);
 			boost.set(undefined);
 			boostLoading = false;
-			errToast('Could not fetch bitcoin exchange rate, please try again or contact BTC Map.');
 		}
 	};
 
@@ -213,14 +211,12 @@
 			});
 		}
 
-		axios
-			.get('https://blockchain.info/ticker')
-			.then((response) => {
-				exchangeRate.set(response.data['USD']['15m']);
+		fetchExchangeRate()
+			.then((rate) => {
+				exchangeRate.set(rate);
 			})
-			.catch((error) => {
-				console.error('Error fetching exchange rate:', error);
-				errToast('Could not fetch bitcoin exchange rate, please try again or contact BTC Map.');
+			.catch(() => {
+				// Error already handled by fetchExchangeRate
 			});
 	}
 
