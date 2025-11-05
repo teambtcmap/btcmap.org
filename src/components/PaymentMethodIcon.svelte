@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { detectTheme } from '$lib/utils';
 
 	export let status: 'yes' | 'no' | undefined;
@@ -9,8 +10,6 @@
 
 	let imgElement: HTMLImageElement | undefined = undefined;
 	export { imgElement as element };
-
-	const getTheme = detectTheme;
 
 	const iconPaths = {
 		btc: {
@@ -39,7 +38,7 @@
 		}
 	};
 
-	const isDark = getTheme() === 'dark';
+	$: isDark = browser ? detectTheme() === 'dark' : false;
 	$: statusKey = (status === 'yes' ? 'yes' : status === 'no' ? 'no' : 'unknown') as
 		| 'yes'
 		| 'no'
