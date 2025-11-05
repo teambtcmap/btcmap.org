@@ -1,16 +1,15 @@
 <script lang="ts">
 	import { Icon } from '$lib/comp';
-	import { formatVerifiedHuman, detectTheme } from '$lib/utils';
+	import { formatVerifiedHuman } from '$lib/utils';
 	import Time from 'svelte-time';
 	import type { Place } from '$lib/types';
+	import PaymentMethodIcon from './PaymentMethodIcon.svelte';
 
 	export let merchant: Place;
 	export let isUpToDate: boolean;
 	export let isBoosted: boolean;
 	export let boostLoading: boolean;
 	export let onBoostClick: () => void;
-
-	const getTheme = detectTheme;
 </script>
 
 <div class="space-y-4">
@@ -84,65 +83,20 @@
 			<div class="mb-4">
 				<span class="text-mapLabel block text-xs dark:text-white/70">Payment Methods</span>
 				<div class="mt-1 flex space-x-2">
-					<img
-						src={merchant['osm:payment:onchain'] === 'yes'
-							? getTheme() === 'dark'
-								? '/icons/btc-highlight-dark.svg'
-								: '/icons/btc-highlight.svg'
-							: merchant['osm:payment:onchain'] === 'no'
-								? getTheme() === 'dark'
-									? '/icons/btc-no-dark.svg'
-									: '/icons/btc-no.svg'
-								: getTheme() === 'dark'
-									? '/icons/btc-dark.svg'
-									: '/icons/btc.svg'}
-						alt="bitcoin"
-						class="h-6 w-6"
-						title={merchant['osm:payment:onchain'] === 'yes'
-							? 'On-chain accepted'
-							: merchant['osm:payment:onchain'] === 'no'
-								? 'On-chain not accepted'
-								: 'On-chain unknown'}
+					<PaymentMethodIcon
+						status={merchant['osm:payment:onchain']}
+						method="btc"
+						label="On-chain"
 					/>
-					<img
-						src={merchant['osm:payment:lightning'] === 'yes'
-							? getTheme() === 'dark'
-								? '/icons/ln-highlight-dark.svg'
-								: '/icons/ln-highlight.svg'
-							: merchant['osm:payment:lightning'] === 'no'
-								? getTheme() === 'dark'
-									? '/icons/ln-no-dark.svg'
-									: '/icons/ln-no.svg'
-								: getTheme() === 'dark'
-									? '/icons/ln-dark.svg'
-									: '/icons/ln.svg'}
-						alt="lightning"
-						class="h-6 w-6"
-						title={merchant['osm:payment:lightning'] === 'yes'
-							? 'Lightning accepted'
-							: merchant['osm:payment:lightning'] === 'no'
-								? 'Lightning not accepted'
-								: 'Lightning unknown'}
+					<PaymentMethodIcon
+						status={merchant['osm:payment:lightning']}
+						method="ln"
+						label="Lightning"
 					/>
-					<img
-						src={merchant['osm:payment:lightning_contactless'] === 'yes'
-							? getTheme() === 'dark'
-								? '/icons/nfc-highlight-dark.svg'
-								: '/icons/nfc-highlight.svg'
-							: merchant['osm:payment:lightning_contactless'] === 'no'
-								? getTheme() === 'dark'
-									? '/icons/nfc-no-dark.svg'
-									: '/icons/nfc-no.svg'
-								: getTheme() === 'dark'
-									? '/icons/nfc-dark.svg'
-									: '/icons/nfc.svg'}
-						alt="nfc"
-						class="h-6 w-6"
-						title={merchant['osm:payment:lightning_contactless'] === 'yes'
-							? 'Lightning Contactless accepted'
-							: merchant['osm:payment:lightning_contactless'] === 'no'
-								? 'Lightning contactless not accepted'
-								: 'Lightning contactless unknown'}
+					<PaymentMethodIcon
+						status={merchant['osm:payment:lightning_contactless']}
+						method="nfc"
+						label="Lightning contactless"
 					/>
 				</div>
 			</div>
