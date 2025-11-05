@@ -142,6 +142,34 @@
 				}
 			}
 			selectedMarkerId = null;
+		} else if (hasDrawer) {
+			// Drawer opened via hash change, highlight marker
+			const params = new URLSearchParams(hash.substring(hash.indexOf('&') + 1));
+			const merchantParam = params.get('merchant');
+			if (merchantParam) {
+				const merchantId = Number(merchantParam);
+				if (merchantId !== selectedMarkerId) {
+					// Clear previous selection if any
+					if (selectedMarkerId && loadedMarkers[selectedMarkerId.toString()]) {
+						const prevMarker = loadedMarkers[selectedMarkerId.toString()];
+						const prevIcon = prevMarker.getElement();
+						if (prevIcon) {
+							prevIcon.classList.remove('selected-marker');
+							prevIcon.classList.remove('selected-marker-boosted');
+						}
+					}
+					// Highlight new marker
+					selectedMarkerId = merchantId;
+					if (loadedMarkers[merchantId.toString()]) {
+						const marker = loadedMarkers[merchantId.toString()];
+						const markerIcon = marker.getElement();
+						if (markerIcon) {
+							const isBoosted = markerIcon.classList.contains('boosted-icon');
+							markerIcon.classList.add(isBoosted ? 'selected-marker-boosted' : 'selected-marker');
+						}
+					}
+				}
+			}
 		}
 	};
 
@@ -496,8 +524,26 @@
 
 		elementsLoaded = true;
 
-		// Status will be cleared by reactive statement above
-		// No manual timeout needed - reactive state management handles it
+		// Check if URL has merchant parameter and highlight marker
+		if (browser) {
+			const hash = window.location.hash.substring(1);
+			if (hash.includes('merchant=')) {
+				const params = new URLSearchParams(hash.substring(hash.indexOf('&') + 1));
+				const merchantParam = params.get('merchant');
+				if (merchantParam) {
+					const merchantId = Number(merchantParam);
+					selectedMarkerId = merchantId;
+					if (loadedMarkers[merchantId.toString()]) {
+						const marker = loadedMarkers[merchantId.toString()];
+						const markerIcon = marker.getElement();
+						if (markerIcon) {
+							const isBoosted = markerIcon.classList.contains('boosted-icon');
+							markerIcon.classList.add(isBoosted ? 'selected-marker-boosted' : 'selected-marker');
+						}
+					}
+				}
+			}
+		}
 	};
 
 	// Process a batch of places on the main thread (DOM operations only)
