@@ -7,7 +7,7 @@
 	export let variant: 'default' | 'teal' = 'default';
 	export let size: 'sm' | 'md' = 'sm';
 
-	let imgElement: HTMLImageElement;
+	let imgElement: HTMLImageElement | undefined = undefined;
 	export { imgElement as element };
 
 	const getTheme = detectTheme;
@@ -40,7 +40,7 @@
 	};
 
 	const isDark = getTheme() === 'dark';
-	$: statusKey = status === 'yes' ? 'yes' : status === 'no' ? 'no' : 'unknown';
+	$: statusKey = (status === 'yes' ? 'yes' : status === 'no' ? 'no' : 'unknown') as 'yes' | 'no' | 'unknown';
 	$: iconSrc = isDark ? iconPaths[method][statusKey].dark : iconPaths[method][statusKey].light;
 	$: titleText =
 		status === 'yes'
