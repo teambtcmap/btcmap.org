@@ -40,7 +40,10 @@
 	};
 
 	const isDark = getTheme() === 'dark';
-	$: statusKey = (status === 'yes' ? 'yes' : status === 'no' ? 'no' : 'unknown') as 'yes' | 'no' | 'unknown';
+	$: statusKey = (status === 'yes' ? 'yes' : status === 'no' ? 'no' : 'unknown') as
+		| 'yes'
+		| 'no'
+		| 'unknown';
 	$: iconSrc = isDark ? iconPaths[method][statusKey].dark : iconPaths[method][statusKey].light;
 	$: titleText =
 		status === 'yes'
