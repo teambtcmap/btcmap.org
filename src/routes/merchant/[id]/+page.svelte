@@ -21,6 +21,7 @@
 		TaggingIssues,
 		TopButton
 	} from '$lib/comp';
+	import PaymentMethodIcon from '$components/PaymentMethodIcon.svelte';
 	import { updateSinglePlace } from '$lib/sync/places';
 	import {
 		attribution,
@@ -57,7 +58,6 @@
 	} from '$lib/types.js';
 	import type { Marker } from 'leaflet';
 	import {
-		detectTheme,
 		errToast,
 		successToast,
 		formatOpeningHours,
@@ -512,55 +512,31 @@
 										/>
 									</a>
 								{:else if typeof window !== 'undefined'}
-									<img
-										bind:this={onchainTooltip}
-										src={data.osmTags?.['payment:onchain'] === 'yes'
-											? detectTheme() === 'dark' || $theme === 'dark'
-												? '/icons/btc-highlight-dark.svg'
-												: '/icons/btc-highlight.svg'
-											: data.osmTags?.['payment:onchain'] === 'no'
-												? detectTheme() === 'dark' || $theme === 'dark'
-													? '/icons/btc-no-dark.svg'
-													: '/icons/btc-no-teal.svg'
-												: detectTheme() === 'dark' || $theme === 'dark'
-													? '/icons/btc-dark.svg'
-													: '/icons/btc.svg'}
-										alt="bitcoin"
-										class="h-8 w-8"
+									<PaymentMethodIcon
+										bind:element={onchainTooltip}
+										status={data.osmTags?.['payment:onchain']}
+										method="btc"
+										label="On-chain"
+										variant="teal"
+										size="md"
 									/>
 
-									<img
-										bind:this={lnTooltip}
-										src={data.osmTags?.['payment:lightning'] === 'yes'
-											? detectTheme() === 'dark' || $theme === 'dark'
-												? '/icons/ln-highlight-dark.svg'
-												: '/icons/ln-highlight.svg'
-											: data.osmTags?.['payment:lightning'] === 'no'
-												? detectTheme() === 'dark' || $theme === 'dark'
-													? '/icons/ln-no-dark.svg'
-													: '/icons/ln-no-teal.svg'
-												: detectTheme() === 'dark' || $theme === 'dark'
-													? '/icons/ln-dark.svg'
-													: '/icons/ln.svg'}
-										alt="lightning"
-										class="h-8 w-8"
+									<PaymentMethodIcon
+										bind:element={lnTooltip}
+										status={data.osmTags?.['payment:lightning']}
+										method="ln"
+										label="Lightning"
+										variant="teal"
+										size="md"
 									/>
 
-									<img
-										bind:this={nfcTooltip}
-										src={data.osmTags?.['payment:lightning_contactless'] === 'yes'
-											? detectTheme() === 'dark' || $theme === 'dark'
-												? '/icons/nfc-highlight-dark.svg'
-												: '/icons/nfc-highlight.svg'
-											: data.osmTags?.['payment:lightning_contactless'] === 'no'
-												? detectTheme() === 'dark' || $theme === 'dark'
-													? '/icons/nfc-no-dark.svg'
-													: '/icons/nfc-no-teal.svg'
-												: detectTheme() === 'dark' || $theme === 'dark'
-													? '/icons/nfc-dark.svg'
-													: '/icons/nfc.svg'}
-										alt="nfc"
-										class="h-8 w-8"
+									<PaymentMethodIcon
+										bind:element={nfcTooltip}
+										status={data.osmTags?.['payment:lightning_contactless']}
+										method="nfc"
+										label="Lightning contactless"
+										variant="teal"
+										size="md"
 									/>
 								{/if}
 							</div>
