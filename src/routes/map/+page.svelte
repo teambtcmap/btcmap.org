@@ -668,6 +668,22 @@
 				});
 			});
 
+			// Close drawer when clicking on map (not on markers)
+			map.on('click', () => {
+				if (selectedMarkerId) {
+					const hash = window.location.hash.substring(1);
+					const ampIndex = hash.indexOf('&');
+					const mapPart = ampIndex !== -1 ? hash.substring(0, ampIndex) : hash;
+					
+					// Remove merchant parameter and reset hash to just map location
+					if (mapPart) {
+						window.location.hash = mapPart;
+					} else {
+						window.location.hash = '';
+					}
+				}
+			});
+
 			// change broken marker image path in prod
 			leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
 
