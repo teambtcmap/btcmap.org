@@ -7,26 +7,23 @@
 	export let onError: (error: unknown) => void;
 	export let onStatusCheckError: (error: unknown) => void;
 	export let description: string = '';
+
+	// HTML description is controlled by the parent components (BoostContent)
+	// Content is generated from trusted variables, not user input
+	$: descriptionHtml = description;
 </script>
 
 <div class="space-y-4 text-center">
-	<p class="text-xl font-bold text-primary dark:text-white">
-		Scan or click to pay with lightning
-	</p>
+	<p class="text-xl font-bold text-primary dark:text-white">Scan or click to pay with lightning</p>
 
 	<a href="lightning:{invoice}" class="inline-block">
-		<InvoicePayment
-			{invoice}
-			{invoiceId}
-			{onSuccess}
-			{onError}
-			{onStatusCheckError}
-		/>
+		<InvoicePayment {invoice} {invoiceId} {onSuccess} {onError} {onStatusCheckError} />
 	</a>
 
-	{#if description}
+	{#if descriptionHtml}
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 		<p class="text-body dark:text-white">
-			{@html description}
+			{@html descriptionHtml}
 		</p>
 	{/if}
 

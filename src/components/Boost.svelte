@@ -7,7 +7,7 @@
 	import BoostContent from './drawer/BoostContent.svelte';
 
 	let boostComplete = false;
-	
+
 	const closeModal = () => {
 		if (boostComplete) {
 			invalidateAll();

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
-	import { CloseButton, CopyButton, Icon, PrimaryButton, InvoicePayment } from '$lib/comp';
+	import { CloseButton, Icon, PrimaryButton } from '$lib/comp';
 	import { PAYMENT_ERROR_MESSAGE } from '$lib/constants';
 	import { lastUpdatedPlaceId } from '$lib/store';
 	import { updateSinglePlace } from '$lib/sync/places';
