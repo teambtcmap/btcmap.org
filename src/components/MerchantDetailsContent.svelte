@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Icon } from '$lib/comp';
 	import { formatVerifiedHuman } from '$lib/utils';
+	import { resolve } from '$app/paths';
 	import Time from 'svelte-time';
 	import type { Place } from '$lib/types';
 	import PaymentMethodIcon from './PaymentMethodIcon.svelte';
@@ -14,15 +15,13 @@
 
 <div class="space-y-4">
 	{#if merchant.name}
-		<!-- eslint-disable svelte/no-navigation-without-resolve -->
 		<a
-			href="/merchant/{merchant.id}"
+			href={resolve(`/merchant/${merchant.id}`)}
 			class="inline-block text-xl leading-snug font-bold text-link transition-colors hover:text-hover"
 			title="Merchant name"
 		>
 			{merchant.name}
 		</a>
-		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 	{/if}
 
 	{#if merchant.address}
@@ -48,6 +47,7 @@
 		</a>
 
 		<!-- eslint-disable svelte/no-navigation-without-resolve -->
+		<!-- External link to OpenStreetMap -->
 		<a
 			href={merchant.osm_url || `https://www.openstreetmap.org/node/${merchant.id}`}
 			target="_blank"
@@ -57,9 +57,10 @@
 			<Icon w="24" h="24" icon="pencil" type="popup" />
 			<span class="mt-1 text-xs">Edit</span>
 		</a>
+		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
 		<a
-			href="/merchant/{merchant.id}"
+			href={resolve(`/merchant/${merchant.id}`)}
 			class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
 		>
 			<Icon w="24" h="24" icon="share" type="popup" />
@@ -67,7 +68,7 @@
 		</a>
 
 		<a
-			href="/merchant/{merchant.id}#comments"
+			href={resolve(`/merchant/${merchant.id}#comments`)}
 			class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
 		>
 			<div class="text-lg font-bold">
@@ -75,7 +76,6 @@
 			</div>
 			<span class="mt-1 text-xs">Comments</span>
 		</a>
-		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 	</div>
 
 	<div class="border-t border-gray-300 pt-4 dark:border-white/95">
@@ -131,15 +131,13 @@
 					<span title="Not verified">---</span>
 				{/if}
 			</span>
-			<!-- eslint-disable svelte/no-navigation-without-resolve -->
 			<a
-				href="/verify-location?id={merchant.id}"
+				href={resolve(`/verify-location?id=${merchant.id}`)}
 				class="text-xs text-link transition-colors hover:text-hover"
 				title="Help improve the data for everyone"
 			>
 				Verify Location
 			</a>
-			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		</div>
 
 		<div>
@@ -167,12 +165,10 @@
 		</div>
 	</div>
 
-	<!-- eslint-disable svelte/no-navigation-without-resolve -->
 	<a
-		href="/merchant/{merchant.id}"
+		href={resolve(`/merchant/${merchant.id}`)}
 		class="mt-4 block rounded-lg bg-link py-3 text-center text-white transition-colors hover:bg-hover"
 	>
 		View Full Details
 	</a>
-	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 </div>
