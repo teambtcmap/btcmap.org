@@ -21,8 +21,8 @@
 	</a>
 
 	{#if descriptionHtml}
-		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 		<p class="text-body dark:text-white">
+			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 			{@html descriptionHtml}
 		</p>
 	{/if}
