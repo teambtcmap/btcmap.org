@@ -7,7 +7,7 @@
 	import Time from 'svelte-time';
 	import axios from 'axios';
 	import { errToast } from '$lib/utils';
-	import BoostContent from './drawer/BoostContent.svelte';
+	import BoostContent from './BoostContent.svelte';
 	import TagsContent from './drawer/TagsContent.svelte';
 	import IssuesContent from './drawer/IssuesContent.svelte';
 	import { invalidateAll } from '$app/navigation';

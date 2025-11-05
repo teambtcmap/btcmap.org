@@ -4,7 +4,7 @@
 	import { boost, exchangeRate, resetBoost, lastUpdatedPlaceId } from '$lib/store';
 	import OutClick from 'svelte-outclick';
 	import { fly } from 'svelte/transition';
-	import BoostContent from './drawer/BoostContent.svelte';
+	import BoostContent from './BoostContent.svelte';
 
 	let boostComplete = false;
 
