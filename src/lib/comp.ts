@@ -63,6 +63,7 @@ export { default as NavDropdownMobile } from '../components/NavDropdownMobile.sv
 export { default as OpenTicket } from '../components/OpenTicket.svelte';
 export { default as OpenTicketSkeleton } from '../components/OpenTicketSkeleton.svelte';
 export { default as OrgBadge } from '../components/OrgBadge.svelte';
+export { default as PaymentMethodIcon } from '../components/PaymentMethodIcon.svelte';
 export { default as PrimaryButton } from '../components/PrimaryButton.svelte';
 export { default as ProfileActivity } from '../components/ProfileActivity.svelte';
 export { default as ProfileStat } from '../components/ProfileStat.svelte';

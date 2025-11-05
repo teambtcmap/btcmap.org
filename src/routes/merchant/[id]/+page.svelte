@@ -15,13 +15,13 @@
 		MerchantEvent,
 		MerchantComment,
 		MerchantLink,
+		PaymentMethodIcon,
 		PrimaryButton,
 		ShowTags,
 		TaggerSkeleton,
 		TaggingIssues,
 		TopButton
 	} from '$lib/comp';
-	import PaymentMethodIcon from '$components/PaymentMethodIcon.svelte';
 	import { updateSinglePlace } from '$lib/sync/places';
 	import {
 		attribution,
