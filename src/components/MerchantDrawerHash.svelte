@@ -8,15 +8,13 @@
 	import axios from 'axios';
 	import { errToast } from '$lib/utils';
 	import BoostContent from './BoostContent.svelte';
-	import TagsContent from './drawer/TagsContent.svelte';
-	import IssuesContent from './drawer/IssuesContent.svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import type { Place } from '$lib/types';
 	import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 
 	let merchantId: number | null = null;
-	let drawerView: 'details' | 'boost' | 'tags' | 'issues' = 'details';
+	let drawerView: 'details' | 'boost' = 'details';
 	let isOpen = false;
 	let merchant: Place | null = null;
 	let fetchingMerchant = false;
@@ -286,16 +284,6 @@
 			<div class="p-6">
 				{#if drawerView === 'boost'}
 					<BoostContent merchantId={merchant.id} onComplete={handleBoostComplete} />
-				{:else if drawerView === 'tags'}
-					<div class="space-y-4">
-						<h2 class="text-xl font-bold text-primary dark:text-white">All OSM Tags</h2>
-						<TagsContent tags={merchant.tags || {}} />
-					</div>
-				{:else if drawerView === 'issues'}
-					<div class="space-y-4">
-						<h2 class="text-xl font-bold text-primary dark:text-white">Tagging Issues</h2>
-						<IssuesContent issues={merchant.tags?.issues || []} />
-					</div>
 				{:else}
 					<!-- Merchant Details -->
 					<div class="space-y-4">
