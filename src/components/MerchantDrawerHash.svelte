@@ -115,8 +115,8 @@
 	};
 
 	const verifiedDate = calcVerifiedDate();
-	$: isUpToDate = merchant?.verified_at && Date.parse(merchant.verified_at) > verifiedDate;
-	$: isBoosted = merchant?.boosted_until && Date.parse(merchant.boosted_until) > Date.now();
+	$: isUpToDate = !!(merchant?.verified_at && Date.parse(merchant.verified_at) > verifiedDate);
+	$: isBoosted = !!(merchant?.boosted_until && Date.parse(merchant.boosted_until) > Date.now());
 
 	let boostLoading = false;
 

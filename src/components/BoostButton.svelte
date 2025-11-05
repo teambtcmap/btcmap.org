@@ -18,7 +18,7 @@
 		boostLoading = false;
 	};
 
-	const startBoost = () => {
+	const startBoost = async () => {
 		if (!merchant) return;
 
 		boostLoading = true;
