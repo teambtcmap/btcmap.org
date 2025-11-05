@@ -3,7 +3,6 @@
 	import { places, boost, exchangeRate, resetBoost } from '$lib/store';
 	import { CloseButton, Icon } from '$lib/comp';
 	import { fly } from 'svelte/transition';
-	import { detectTheme } from '$lib/utils';
 	import axios from 'axios';
 	import { errToast, fetchExchangeRate } from '$lib/utils';
 	import BoostContent from './BoostContent.svelte';
@@ -19,8 +18,6 @@
 	let merchant: Place | null = null;
 	let fetchingMerchant = false;
 	let lastFetchedId: number | null = null;
-
-	const getTheme = detectTheme;
 
 	async function fetchMerchantDetails(id: number) {
 		if (fetchingMerchant || lastFetchedId === id) return;
@@ -162,7 +159,7 @@
 			exchangeRate.set(rate);
 			updateHash(merchantId, 'boost');
 			boostLoading = false;
-		} catch (error) {
+		} catch {
 			boost.set(undefined);
 			boostLoading = false;
 		}

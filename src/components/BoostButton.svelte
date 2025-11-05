@@ -2,7 +2,7 @@
 	import { Icon } from '$lib/comp';
 	import { boost, exchangeRate, resetBoost } from '$lib/store';
 	import type { Place } from '$lib/types';
-	import { errToast, fetchExchangeRate } from '$lib/utils';
+	import { fetchExchangeRate } from '$lib/utils';
 	import axios from 'axios';
 	import axiosRetry from 'axios-retry';
 
@@ -31,7 +31,7 @@
 
 		try {
 			$exchangeRate = await fetchExchangeRate();
-		} catch (error) {
+		} catch {
 			resetBoostLoading();
 		}
 	};

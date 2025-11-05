@@ -157,9 +157,21 @@
 				{#if merchant.verified_at}
 					{formatVerifiedHuman(merchant.verified_at)}
 					{#if isUpToDate}
-						<Icon w="16" h="16" style="inline text-primary dark:text-white" icon="verified" type="popup" />
+						<Icon
+							w="16"
+							h="16"
+							style="inline text-primary dark:text-white"
+							icon="verified"
+							type="popup"
+						/>
 					{:else}
-						<Icon w="16" h="16" style="inline text-primary dark:text-white" icon="outdated" type="popup" />
+						<Icon
+							w="16"
+							h="16"
+							style="inline text-primary dark:text-white"
+							icon="outdated"
+							type="popup"
+						/>
 					{/if}
 				{:else}
 					<span title="Not verified">---</span>
@@ -178,8 +190,9 @@
 
 		<div>
 			{#if isBoosted && merchant.boosted_until}
-				<span class="text-mapLabel block text-xs dark:text-white/70" title="This location is boosted!"
-					>Boost Expires</span
+				<span
+					class="text-mapLabel block text-xs dark:text-white/70"
+					title="This location is boosted!">Boost Expires</span
 				>
 				<span class="block text-body dark:text-white">
 					<Time live={3000} relative={true} timestamp={merchant.boosted_until} />
@@ -195,8 +208,7 @@
 				{#if !boostLoading}
 					<Icon w="16" h="16" icon={isBoosted ? 'boost-solid' : 'boost'} type="popup" />
 				{/if}
-				<span class="text-xs">{boostLoading ? 'Boosting...' : isBoosted ? 'Extend' : 'Boost'}</span
-				>
+				<span class="text-xs">{boostLoading ? 'Boosting...' : isBoosted ? 'Extend' : 'Boost'}</span>
 			</button>
 		</div>
 	</div>
