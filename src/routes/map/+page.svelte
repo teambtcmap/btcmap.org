@@ -75,24 +75,12 @@
 	const DEFAULT_ZOOM = 15;
 
 	function openMerchantDrawer(id: number) {
-		if (selectedMarkerId && loadedMarkers[selectedMarkerId.toString()]) {
-			const prevMarker = loadedMarkers[selectedMarkerId.toString()];
-			const prevIcon = prevMarker.getElement();
-			if (prevIcon) {
-				prevIcon.classList.remove('selected-marker');
-				prevIcon.classList.remove('selected-marker-boosted');
-			}
+		if (selectedMarkerId) {
+			clearMarkerSelection(selectedMarkerId);
 		}
 
 		selectedMarkerId = id;
-		if (loadedMarkers[id.toString()]) {
-			const marker = loadedMarkers[id.toString()];
-			const markerIcon = marker.getElement();
-			if (markerIcon) {
-				const isBoosted = markerIcon.classList.contains('boosted-icon');
-				markerIcon.classList.add(isBoosted ? 'selected-marker-boosted' : 'selected-marker');
-			}
-		}
+		highlightMarker(id);
 
 		const hash = window.location.hash.substring(1);
 		const ampIndex = hash.indexOf('&');
@@ -100,7 +88,6 @@
 		const params = new URLSearchParams();
 		params.set('merchant', String(id));
 
-		// If there's a map part, join with &, otherwise just use params
 		if (mapPart) {
 			window.location.hash = `${mapPart}&${params.toString()}`;
 		} else {
@@ -126,48 +113,46 @@
 
 	let mapCenter: LatLng;
 
+	const clearMarkerSelection = (markerId: number) => {
+		const marker = loadedMarkers[markerId.toString()];
+		if (!marker) return;
+
+		const markerIcon = marker.getElement();
+		if (markerIcon) {
+			markerIcon.classList.remove('selected-marker', 'selected-marker-boosted');
+		}
+	};
+
+	const highlightMarker = (markerId: number) => {
+		const marker = loadedMarkers[markerId.toString()];
+		if (!marker) return;
+
+		const markerIcon = marker.getElement();
+		if (markerIcon) {
+			const isBoosted = markerIcon.classList.contains('boosted-icon');
+			markerIcon.classList.add(isBoosted ? 'selected-marker-boosted' : 'selected-marker');
+		}
+	};
+
 	const handleHashChange = () => {
 		if (!browser) return;
 		const hash = window.location.hash.substring(1);
 		const hasDrawer = hash.includes('merchant=');
 
 		if (!hasDrawer && selectedMarkerId) {
-			// Drawer closed, clear selection
-			if (loadedMarkers[selectedMarkerId.toString()]) {
-				const marker = loadedMarkers[selectedMarkerId.toString()];
-				const markerIcon = marker.getElement();
-				if (markerIcon) {
-					markerIcon.classList.remove('selected-marker');
-					markerIcon.classList.remove('selected-marker-boosted');
-				}
-			}
+			clearMarkerSelection(selectedMarkerId);
 			selectedMarkerId = null;
 		} else if (hasDrawer) {
-			// Drawer opened via hash change, highlight marker
 			const params = new URLSearchParams(hash.substring(hash.indexOf('&') + 1));
 			const merchantParam = params.get('merchant');
 			if (merchantParam) {
 				const merchantId = Number(merchantParam);
 				if (merchantId !== selectedMarkerId) {
-					// Clear previous selection if any
-					if (selectedMarkerId && loadedMarkers[selectedMarkerId.toString()]) {
-						const prevMarker = loadedMarkers[selectedMarkerId.toString()];
-						const prevIcon = prevMarker.getElement();
-						if (prevIcon) {
-							prevIcon.classList.remove('selected-marker');
-							prevIcon.classList.remove('selected-marker-boosted');
-						}
+					if (selectedMarkerId) {
+						clearMarkerSelection(selectedMarkerId);
 					}
-					// Highlight new marker
 					selectedMarkerId = merchantId;
-					if (loadedMarkers[merchantId.toString()]) {
-						const marker = loadedMarkers[merchantId.toString()];
-						const markerIcon = marker.getElement();
-						if (markerIcon) {
-							const isBoosted = markerIcon.classList.contains('boosted-icon');
-							markerIcon.classList.add(isBoosted ? 'selected-marker-boosted' : 'selected-marker');
-						}
-					}
+					highlightMarker(merchantId);
 				}
 			}
 		}
@@ -524,7 +509,6 @@
 
 		elementsLoaded = true;
 
-		// Check if URL has merchant parameter and highlight marker
 		if (browser) {
 			const hash = window.location.hash.substring(1);
 			if (hash.includes('merchant=')) {
@@ -533,14 +517,7 @@
 				if (merchantParam) {
 					const merchantId = Number(merchantParam);
 					selectedMarkerId = merchantId;
-					if (loadedMarkers[merchantId.toString()]) {
-						const marker = loadedMarkers[merchantId.toString()];
-						const markerIcon = marker.getElement();
-						if (markerIcon) {
-							const isBoosted = markerIcon.classList.contains('boosted-icon');
-							markerIcon.classList.add(isBoosted ? 'selected-marker-boosted' : 'selected-marker');
-						}
-					}
+					highlightMarker(merchantId);
 				}
 			}
 		}
