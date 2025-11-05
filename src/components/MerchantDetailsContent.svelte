@@ -81,7 +81,7 @@
 	<div class="border-t border-gray-300 pt-4 dark:border-white/95">
 		{#if merchant['osm:payment:onchain'] || merchant['osm:payment:lightning'] || merchant['osm:payment:lightning_contactless'] || merchant['osm:payment:bitcoin']}
 			<div class="mb-4">
-				<span class="block text-xs text-mapLabel dark:text-white/90">Payment Methods</span>
+				<span class="block text-xs text-mapLabel dark:text-white/70">Payment Methods</span>
 				<div class="mt-1 flex space-x-2">
 					<PaymentMethodIcon
 						status={merchant['osm:payment:onchain']}
@@ -104,7 +104,7 @@
 
 		<div class="mb-4">
 			<span
-				class="block text-xs text-mapLabel dark:text-white/90"
+				class="block text-xs text-mapLabel dark:text-white/70"
 				title="Completed by BTC Map community members">Last Surveyed</span
 			>
 			<span class="block text-body dark:text-white">
@@ -145,7 +145,7 @@
 		<div>
 			{#if isBoosted && merchant.boosted_until}
 				<span
-					class="block text-xs text-mapLabel dark:text-white/90"
+					class="block text-xs text-mapLabel dark:text-white/70"
 					title="This location is boosted!">Boost Expires</span
 				>
 				<span class="block text-body dark:text-white">
