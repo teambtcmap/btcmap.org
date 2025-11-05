@@ -7,6 +7,7 @@
 	import axios from 'axios';
 	import { fade } from 'svelte/transition';
 	import { onDestroy } from 'svelte';
+	import InvoicePaymentStage from '../InvoicePaymentStage.svelte';
 
 	export let merchantId: number | string;
 	export let merchantName: string | undefined = undefined;
@@ -203,48 +204,16 @@
 		</PrimaryButton>
 	</div>
 {:else if stage === 1}
-	<div class="space-y-4 text-center">
-		<p class="text-xl font-bold text-primary dark:text-white">
-			Scan or click to pay with lightning
-		</p>
-
-		<a href="lightning:{invoice}" class="inline-block">
-			<InvoicePayment
-				{invoice}
-				{invoiceId}
-				onSuccess={handlePaymentSuccess}
-				onError={handlePaymentError}
-				onStatusCheckError={handleStatusCheckError}
-			/>
-		</a>
-
-		{#if selectedBoost}
-			<p class="text-body dark:text-white">
-				Boost this location for <strong
-					>{selectedBoost.time} month{selectedBoost.time > 1 ? 's' : ''} <br />
-					${selectedBoost.fiat}</strong
-				>
-				(<strong>{selectedBoost.sats} sats</strong>)
-			</p>
-		{/if}
-
-		<div
-			class="flex w-full items-center justify-between space-x-2 rounded-xl border-2 border-gray-300 p-2 md:justify-center dark:border-white/95"
-		>
-			<p class="hidden text-sm text-body md:block dark:text-white">
-				{invoice.slice(0, 39)}...
-			</p>
-			<p class="block text-sm text-body uppercase md:hidden dark:text-white">
-				Invoice <img
-					src="/icons/ln-highlight.svg"
-					alt="protocol"
-					class="mb-1 inline dark:rounded-full dark:bg-white dark:p-0.5"
-				/>
-			</p>
-
-			<CopyButton value={invoice} />
-		</div>
-	</div>
+	<InvoicePaymentStage
+		{invoice}
+		{invoiceId}
+		onSuccess={handlePaymentSuccess}
+		onError={handlePaymentError}
+		onStatusCheckError={handleStatusCheckError}
+		description={selectedBoost
+			? `Boost this location for <strong>${selectedBoost.time} month${selectedBoost.time > 1 ? 's' : ''} <br /> $${selectedBoost.fiat}</strong> (<strong>${selectedBoost.sats} sats</strong>)`
+			: ''}
+	/>
 {:else}
 	<div class="space-y-4 text-center">
 		<p
