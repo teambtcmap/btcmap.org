@@ -420,11 +420,6 @@ export type Place = {
 	'osm:check_date'?: string;
 	'osm:check_date:currency:XBT'?: string;
 	'osm:note'?: string;
-	// Tags object for additional OSM data
-	tags?: {
-		issues?: Issue[];
-		[key: string]: unknown;
-	};
 };
 
 // Worker progress tracking
