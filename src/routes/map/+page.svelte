@@ -674,7 +674,7 @@
 					const hash = window.location.hash.substring(1);
 					const ampIndex = hash.indexOf('&');
 					const mapPart = ampIndex !== -1 ? hash.substring(0, ampIndex) : hash;
-					
+
 					// Remove merchant parameter and reset hash to just map location
 					if (mapPart) {
 						window.location.hash = mapPart;
