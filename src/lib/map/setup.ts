@@ -9,6 +9,8 @@ import type { Map, LatLng } from 'leaflet';
 import { get } from 'svelte/store';
 import type { DivIcon } from 'leaflet';
 import Time from 'svelte-time';
+import { replaceState } from '$app/navigation';
+import { resolveRoute } from '$app/paths';
 
 const BORDER_BOTTOM_STYLE = '1.5px solid #ccc';
 const BOTTOM_BUTTON_RADIUS = '0 0 8px 8px';
@@ -17,9 +19,11 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 export const updateMapHash = (zoom: number, center: LatLng): void => {
 	const newHash = `#${zoom}/${center.lat.toFixed(5)}/${center.lng.toFixed(5)}`;
-	// Use history.replaceState for hash-only updates to avoid history pollution
-	// This is appropriate for SvelteKit as hash changes don't affect routing
-	history.replaceState(null, '', newHash);
+	// Use SvelteKit's replaceState to avoid conflicts with the router
+	// resolveRoute ensures proper path resolution for SvelteKit routing
+	const url = resolveRoute('/map') + newHash;
+	// eslint-disable-next-line svelte/no-navigation-without-resolve
+	replaceState(url, {});
 };
 
 export const toggleMapButtons = () => {
