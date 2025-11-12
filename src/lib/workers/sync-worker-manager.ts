@@ -193,6 +193,7 @@ export async function mergeUpdates<T extends Area | User | Event | Report>(
 		return await sendWorkerMessage<T[]>('MERGE_UPDATES', { cached, updates, type });
 	} catch {
 		// Fallback to synchronous merging
+		// Type-safe: T is constrained to Area | User | Event | Report, all have id and deleted_at
 		console.warn('Worker merging failed, using synchronous fallback');
 		const updatesMap = new Map(updates.map((item) => [item.id, item]));
 		const filtered = cached.filter((item) => !updatesMap.has(item.id));

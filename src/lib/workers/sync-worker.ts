@@ -1,5 +1,13 @@
 import type { Place, Area, User, Event, Report } from '../types';
 
+// Type constraint to ensure items have required properties
+type ItemWithId = Area | User | Event | Report;
+
+// Helper to ensure all items have id and deleted_at properties
+function hasRequiredProperties(item: ItemWithId): item is ItemWithId {
+	return 'id' in item && 'deleted_at' in item;
+}
+
 export interface ParseJSONPayload {
 	json: string;
 	type: 'places' | 'areas' | 'users' | 'events' | 'reports';
@@ -17,8 +25,8 @@ export interface FilterDeletedPayload {
 }
 
 export interface MergeUpdatesPayload {
-	cached: (Area | User | Event | Report)[];
-	updates: (Area | User | Event | Report)[];
+	cached: ItemWithId[];
+	updates: ItemWithId[];
 	type: 'areas' | 'users' | 'events' | 'reports';
 }
 
@@ -168,15 +176,25 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
 
 			case 'MERGE_UPDATES': {
 				const mergePayload = payload as MergeUpdatesPayload;
-				const updatesMap = new Map(mergePayload.updates.map((item) => [item.id, item]));
+
+				// Type-safe mapping: handle both string and number IDs
+				const updatesMap = new Map<string | number, ItemWithId>();
+				mergePayload.updates.forEach((item) => {
+					if (hasRequiredProperties(item)) {
+						updatesMap.set(item.id, item);
+					}
+				});
 
 				// Filter out items that have updates
-				const filtered = mergePayload.cached.filter((item) => !updatesMap.has(item.id));
+				const filtered = mergePayload.cached.filter((item) => {
+					if (!hasRequiredProperties(item)) return false;
+					return !updatesMap.has(item.id);
+				});
 
 				// Add non-deleted updates
 				const merged = [...filtered];
 				mergePayload.updates.forEach((item) => {
-					if (!item.deleted_at) {
+					if (hasRequiredProperties(item) && !item.deleted_at) {
 						merged.push(item);
 					}
 				});
