@@ -35,15 +35,24 @@
 		const dataSync = async () => {
 			$syncStatus = true;
 
-			await Promise.allSettled([
-				elementsSync(),
-				eventsSync(),
-				usersSync(),
-				areasSync(),
-				reportsSync()
-			]).then((results) => results.forEach((result) => console.info(result.status)));
+			// CRITICAL: Load places first (map is primary use case)
+			await elementsSync();
 
 			$syncStatus = false;
+
+			// DEFER: Non-critical data can wait - schedule during idle time
+			const syncNonCritical = () => {
+				Promise.allSettled([eventsSync(), usersSync(), areasSync(), reportsSync()]).then(
+					(results) => results.forEach((result) => console.info(result.status))
+				);
+			};
+
+			// Use requestIdleCallback if available, otherwise defer with timeout
+			if ('requestIdleCallback' in window) {
+				requestIdleCallback(syncNonCritical, { timeout: 5000 });
+			} else {
+				setTimeout(syncNonCritical, 2000);
+			}
 		};
 
 		dataSync();

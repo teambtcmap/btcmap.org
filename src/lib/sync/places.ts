@@ -6,6 +6,7 @@ import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import localforage from 'localforage';
 import { get } from 'svelte/store';
+import { parseJSON, filterPlaces } from '$lib/workers/sync-worker-manager';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
@@ -63,10 +64,14 @@ export const elementsSync = async () => {
 			// Step 1: Get base data from static CDN if no cache exists
 			if (!cachedPlaces) {
 				try {
-					const staticResponse = await axios.get<Place[]>(
-						'https://cdn.static.btcmap.org/api/v4/places.json'
+					// Fetch as text to parse in worker
+					const staticResponse = await axios.get(
+						'https://cdn.static.btcmap.org/api/v4/places.json',
+						{ responseType: 'text' }
 					);
-					placesData = staticResponse.data;
+
+					// Parse JSON in worker thread to avoid blocking main thread
+					placesData = await parseJSON<Place[]>(staticResponse.data, 'places');
 				} catch (error) {
 					placesError.set(
 						'Could not load places from static CDN, please try again or contact BTC Map.'
@@ -90,16 +95,9 @@ export const elementsSync = async () => {
 				const recentUpdates = apiResponse.data;
 
 				if (recentUpdates.length > 0) {
-					// Remove existing places that have updates to avoid duplicates
-					const updatedPlaceIds = new Set(recentUpdates.map((place) => place.id));
-					placesData = placesData.filter((place) => !updatedPlaceIds.has(place.id));
-
-					// Add recent updates (exclude deleted ones for the final dataset)
-					recentUpdates.forEach((place) => {
-						if (!place.deleted_at) {
-							placesData.push(place);
-						}
-					});
+					// Use worker to filter and merge updates to avoid blocking main thread
+					const updatedPlaceIds = recentUpdates.map((place) => place.id);
+					placesData = await filterPlaces(placesData, updatedPlaceIds, recentUpdates);
 
 					// Show refresh indicator if we got updates and had cached data
 					if (cachedPlaces) {
@@ -144,12 +142,16 @@ export const elementsSync = async () => {
 			placesSyncCount.set(count + 1);
 
 			try {
-				const staticResponse = await axios.get<Place[]>(
-					'https://cdn.static.btcmap.org/api/v4/places.json'
-				);
+				// Fetch as text to parse in worker
+				const staticResponse = await axios.get('https://cdn.static.btcmap.org/api/v4/places.json', {
+					responseType: 'text'
+				});
 
-				if (staticResponse.data.length > 0) {
-					places.set(staticResponse.data);
+				// Parse JSON in worker thread
+				const parsedPlaces = await parseJSON<Place[]>(staticResponse.data, 'places');
+
+				if (parsedPlaces.length > 0) {
+					places.set(parsedPlaces);
 				}
 			} catch (error) {
 				placesError.set(
