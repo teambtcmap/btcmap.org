@@ -20,6 +20,7 @@ type: description #issue_number
 ```
 
 **Examples:**
+
 - `feat: add lightning address support #123`
 - `fix: correct marker clustering on mobile #456`
 - `perf: defer non-critical syncs and offload parsing to workers #490`
