@@ -28,8 +28,15 @@ export interface WorkerMessage {
 	id: string;
 }
 
+export interface ProgressUpdate {
+	percent: number;
+	itemsParsed?: number;
+	totalItems?: number;
+	status: 'downloading' | 'parsing' | 'filtering' | 'complete';
+}
+
 export interface WorkerResponse {
-	type: 'PARSED' | 'FILTERED' | 'MERGED' | 'ERROR';
+	type: 'PARSED' | 'FILTERED' | 'MERGED' | 'ERROR' | 'PROGRESS';
 	payload: unknown;
 	id: string;
 }
@@ -41,7 +48,37 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
 		switch (type) {
 			case 'PARSE_JSON': {
 				const parsePayload = payload as ParseJSONPayload;
+
+				// Send initial progress
+				self.postMessage({
+					type: 'PROGRESS',
+					payload: {
+						percent: 0,
+						status: 'parsing'
+					} as ProgressUpdate,
+					id
+				} as WorkerResponse);
+
+				// Parse JSON with progress tracking
+				const startTime = performance.now();
 				const parsed = JSON.parse(parsePayload.json);
+				const parseTime = performance.now() - startTime;
+
+				// Send progress update after parsing
+				const itemCount = Array.isArray(parsed) ? parsed.length : 0;
+				self.postMessage({
+					type: 'PROGRESS',
+					payload: {
+						percent: 100,
+						itemsParsed: itemCount,
+						totalItems: itemCount,
+						status: 'complete'
+					} as ProgressUpdate,
+					id
+				} as WorkerResponse);
+
+				console.info(`Worker parsed ${itemCount} items in ${parseTime.toFixed(2)}ms`);
+
 				self.postMessage({
 					type: 'PARSED',
 					payload: parsed,
@@ -52,6 +89,17 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
 
 			case 'FILTER_PLACES': {
 				const filterPayload = payload as FilterPlacesPayload;
+
+				// Send progress update
+				self.postMessage({
+					type: 'PROGRESS',
+					payload: {
+						percent: 50,
+						status: 'filtering'
+					} as ProgressUpdate,
+					id
+				} as WorkerResponse);
+
 				const updatedIds = new Set(filterPayload.updatedPlaceIds);
 
 				// Filter out places that will be updated
@@ -64,6 +112,17 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
 						merged.push(place);
 					}
 				});
+
+				self.postMessage({
+					type: 'PROGRESS',
+					payload: {
+						percent: 100,
+						itemsParsed: merged.length,
+						totalItems: merged.length,
+						status: 'complete'
+					} as ProgressUpdate,
+					id
+				} as WorkerResponse);
 
 				self.postMessage({
 					type: 'FILTERED',

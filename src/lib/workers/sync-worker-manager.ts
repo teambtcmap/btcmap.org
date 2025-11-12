@@ -5,11 +5,19 @@ let worker: Worker | null = null;
 let workerInitialized = false;
 let workerSupported: boolean | null = null;
 let messageId = 0;
+export interface ProgressUpdate {
+	percent: number;
+	itemsParsed?: number;
+	totalItems?: number;
+	status: 'downloading' | 'parsing' | 'filtering' | 'complete';
+}
+
 const pendingRequests = new Map<
 	string,
 	{
 		resolve: (value: unknown) => void;
 		reject: (error: unknown) => void;
+		onProgress?: (progress: ProgressUpdate) => void;
 	}
 >();
 
@@ -29,6 +37,13 @@ function handleWorkerMessage(response: WorkerResponse) {
 	if (!request) return;
 
 	switch (response.type) {
+		case 'PROGRESS':
+			// Don't resolve/reject, just call progress callback
+			if (request.onProgress) {
+				request.onProgress(response.payload as ProgressUpdate);
+			}
+			break;
+
 		case 'PARSED':
 		case 'FILTERED':
 		case 'MERGED':
@@ -82,7 +97,8 @@ function generateMessageId(): string {
 
 async function sendWorkerMessage<T>(
 	messageType: WorkerMessage['type'],
-	payload: WorkerMessage['payload']
+	payload: WorkerMessage['payload'],
+	onProgress?: (progress: ProgressUpdate) => void
 ): Promise<T> {
 	const workerReady = await initWorker();
 
@@ -101,7 +117,8 @@ async function sendWorkerMessage<T>(
 
 		pendingRequests.set(id, {
 			resolve: resolve as (value: unknown) => void,
-			reject
+			reject,
+			onProgress
 		});
 
 		const message: WorkerMessage = {
@@ -116,11 +133,12 @@ async function sendWorkerMessage<T>(
 
 export async function parseJSON<T>(
 	json: string,
-	type: 'places' | 'areas' | 'users' | 'events' | 'reports'
+	type: 'places' | 'areas' | 'users' | 'events' | 'reports',
+	onProgress?: (progress: ProgressUpdate) => void
 ): Promise<T> {
 	try {
-		return await sendWorkerMessage<T>('PARSE_JSON', { json, type });
-	} catch (error) {
+		return await sendWorkerMessage<T>('PARSE_JSON', { json, type }, onProgress);
+	} catch {
 		// Fallback to synchronous parsing
 		console.warn('Worker parsing failed, using synchronous fallback');
 		return JSON.parse(json);
@@ -138,7 +156,7 @@ export async function filterPlaces(
 			updatedPlaceIds,
 			recentUpdates
 		});
-	} catch (error) {
+	} catch {
 		// Fallback to synchronous filtering
 		console.warn('Worker filtering failed, using synchronous fallback');
 		const updatedIds = new Set(updatedPlaceIds);
@@ -159,10 +177,10 @@ export async function filterDeleted<T extends Place | Area | User | Event | Repo
 ): Promise<T[]> {
 	try {
 		return await sendWorkerMessage<T[]>('FILTER_DELETED', { items, type });
-	} catch (error) {
+	} catch {
 		// Fallback to synchronous filtering
 		console.warn('Worker filtering failed, using synchronous fallback');
-		return items.filter((item: any) => !item.deleted_at);
+		return items.filter((item) => !item.deleted_at);
 	}
 }
 
@@ -173,13 +191,13 @@ export async function mergeUpdates<T extends Area | User | Event | Report>(
 ): Promise<T[]> {
 	try {
 		return await sendWorkerMessage<T[]>('MERGE_UPDATES', { cached, updates, type });
-	} catch (error) {
+	} catch {
 		// Fallback to synchronous merging
 		console.warn('Worker merging failed, using synchronous fallback');
-		const updatesMap = new Map(updates.map((item: any) => [item.id, item]));
-		const filtered = cached.filter((item: any) => !updatesMap.has(item.id));
+		const updatesMap = new Map(updates.map((item) => [item.id, item]));
+		const filtered = cached.filter((item) => !updatesMap.has(item.id));
 		const merged = [...filtered];
-		updates.forEach((item: any) => {
+		updates.forEach((item) => {
 			if (!item.deleted_at) {
 				merged.push(item);
 			}

@@ -21,7 +21,15 @@
 		support,
 		updateMapHash
 	} from '$lib/map/setup';
-	import { placesError, places, placesSyncCount, mapUpdates, lastUpdatedPlaceId } from '$lib/store';
+	import {
+		placesError,
+		places,
+		placesSyncCount,
+		mapUpdates,
+		lastUpdatedPlaceId,
+		placesLoadingStatus,
+		placesLoadingProgress
+	} from '$lib/store';
 	import type { Leaflet, Place, SearchItem } from '$lib/types';
 	import { debounce, detectTheme, errToast, isBoosted } from '$lib/utils';
 	import type { Control, LatLng, LatLngBounds, Map, Marker, MarkerClusterGroup } from 'leaflet';
@@ -31,6 +39,24 @@
 	import type { FeatureGroup } from 'leaflet';
 
 	let mapLoading = 0;
+	let mapLoadingStatus = '';
+
+	// Combine map loading progress with places loading progress
+	$: {
+		if ($placesLoadingProgress > 0) {
+			// Places are loading (0-100%), this takes priority
+			mapLoading = $placesLoadingProgress;
+			mapLoadingStatus = $placesLoadingStatus;
+		} else if (mapLoaded && !elementsLoaded) {
+			// Map tiles loaded, waiting to initialize markers
+			mapLoading = 40;
+			mapLoadingStatus = 'Preparing map...';
+		} else if (isLoadingMarkers) {
+			// Loading markers progressively
+			mapLoading = 70;
+			mapLoadingStatus = 'Loading places...';
+		}
+	}
 
 	// Configuration constants for viewport-based loading
 	const MAX_LOADED_MARKERS = 200; // Maximum markers to keep in memory before cleanup
@@ -383,6 +409,9 @@
 			`Initializing combined viewport + web worker loading for ${$places.length} places`
 		);
 
+		mapLoadingStatus = 'Initializing markers...';
+		isLoadingMarkers = true;
+
 		// create marker cluster group and layers
 		/* eslint-disable no-undef */
 		// @ts-expect-error - L is global from Leaflet
@@ -398,11 +427,21 @@
 		map.on('moveend', debouncedLoadMarkers);
 		map.on('zoomend', debouncedLoadMarkers);
 
+		mapLoadingStatus = 'Loading places in view...';
+
 		// Load initial markers for current viewport
 		await loadMarkersInViewport();
 
+		isLoadingMarkers = false;
 		mapLoading = 100;
+		mapLoadingStatus = 'Complete!';
 		elementsLoaded = true;
+
+		// Clear status after brief delay
+		setTimeout(() => {
+			mapLoadingStatus = '';
+			mapLoading = 0;
+		}, 500);
 	};
 
 	// Process a batch of places on the main thread (DOM operations only)
@@ -757,6 +796,8 @@
 			});
 
 			mapLoading = 40;
+			mapLoadingStatus = 'Map loaded';
+			mapLoaded = true;
 		}
 	});
 
@@ -780,7 +821,7 @@
 <main>
 	<h1 class="hidden">Map</h1>
 
-	<MapLoadingMain progress={mapLoading} />
+	<MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
 
 	<!-- Search UI - re-enabled with API-based search -->
 	<div

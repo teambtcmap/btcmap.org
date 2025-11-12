@@ -1,8 +1,15 @@
-import { placesError, places, placesSyncCount, mapUpdates } from '$lib/store';
+import {
+	placesError,
+	places,
+	placesSyncCount,
+	mapUpdates,
+	placesLoadingStatus,
+	placesLoadingProgress
+} from '$lib/store';
 import { clearTables } from '$lib/sync/clearTables';
 import type { Place } from '$lib/types';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
-import axios from 'axios';
+import axios, { type AxiosProgressEvent } from 'axios';
 import axiosRetry from 'axios-retry';
 import localforage from 'localforage';
 import { get } from 'svelte/store';
@@ -51,6 +58,10 @@ export const elementsSync = async () => {
 	// clear old tables if present
 	clearTables(['elements', 'elements_v2', 'elements_v3', 'places_v4']);
 
+	// Initialize progress
+	placesLoadingProgress.set(0);
+	placesLoadingStatus.set('Initializing...');
+
 	// get places from local storage
 	await localforage
 		.getItem<Place[]>('places_v4')
@@ -64,27 +75,66 @@ export const elementsSync = async () => {
 			// Step 1: Get base data from static CDN if no cache exists
 			if (!cachedPlaces) {
 				try {
+					placesLoadingStatus.set('Downloading places data...');
+					placesLoadingProgress.set(10);
+
 					// Fetch as text to parse in worker
 					const staticResponse = await axios.get(
 						'https://cdn.static.btcmap.org/api/v4/places.json',
-						{ responseType: 'text' }
+						{
+							responseType: 'text',
+							onDownloadProgress: (progressEvent: AxiosProgressEvent) => {
+								if (progressEvent.total) {
+									const downloadPercent = (progressEvent.loaded / progressEvent.total) * 100;
+									// Map download progress to 10-50% range
+									const scaledProgress = 10 + downloadPercent * 0.4;
+									placesLoadingProgress.set(Math.round(scaledProgress));
+
+									const loadedMB = (progressEvent.loaded / (1024 * 1024)).toFixed(1);
+									const totalMB = (progressEvent.total / (1024 * 1024)).toFixed(1);
+									placesLoadingStatus.set(`Downloading ${loadedMB} MB / ${totalMB} MB...`);
+								}
+							}
+						}
 					);
 
+					placesLoadingStatus.set('Processing places data...');
+					placesLoadingProgress.set(50);
+
 					// Parse JSON in worker thread to avoid blocking main thread
-					placesData = await parseJSON<Place[]>(staticResponse.data, 'places');
+					placesData = await parseJSON<Place[]>(staticResponse.data, 'places', (progress) => {
+						// Map parsing progress to 50-80% range
+						const scaledProgress = 50 + progress.percent * 0.3;
+						placesLoadingProgress.set(Math.round(scaledProgress));
+
+						if (progress.itemsParsed) {
+							placesLoadingStatus.set(
+								`Processing ${progress.itemsParsed.toLocaleString()} places...`
+							);
+						}
+					});
+
+					placesLoadingProgress.set(80);
 				} catch (error) {
 					placesError.set(
 						'Could not load places from static CDN, please try again or contact BTC Map.'
 					);
+					placesLoadingStatus.set('');
+					placesLoadingProgress.set(0);
 					console.error(error);
 					return;
 				}
 			} else {
 				// Use cached data as base
 				placesData = [...cachedPlaces];
+				placesLoadingStatus.set('Loading from cache...');
+				placesLoadingProgress.set(60);
 			}
 
 			// Step 2: Get recent updates from API (since static file was last updated)
+			placesLoadingStatus.set('Checking for updates...');
+			placesLoadingProgress.set(cachedPlaces ? 70 : 85);
+
 			const updatesSince = await getStaticFileDate();
 
 			try {
@@ -95,6 +145,9 @@ export const elementsSync = async () => {
 				const recentUpdates = apiResponse.data;
 
 				if (recentUpdates.length > 0) {
+					placesLoadingStatus.set('Merging updates...');
+					placesLoadingProgress.set(cachedPlaces ? 80 : 90);
+
 					// Use worker to filter and merge updates to avoid blocking main thread
 					const updatedPlaceIds = recentUpdates.map((place) => place.id);
 					placesData = await filterPlaces(placesData, updatedPlaceIds, recentUpdates);
@@ -110,6 +163,8 @@ export const elementsSync = async () => {
 					placesError.set(
 						'Could not load recent updates from API, please try again or contact BTC Map.'
 					);
+					placesLoadingStatus.set('');
+					placesLoadingProgress.set(0);
 					console.error(error);
 					return;
 				}
@@ -119,16 +174,29 @@ export const elementsSync = async () => {
 			}
 
 			// Step 3: Save to local storage and update store
+			placesLoadingStatus.set('Finalizing...');
+			placesLoadingProgress.set(95);
+
 			if (placesData.length > 0) {
 				localforage
 					.setItem('places_v4', placesData)
 					.then(function () {
 						// set response to store
 						places.set(placesData);
+						placesLoadingStatus.set('Complete!');
+						placesLoadingProgress.set(100);
+
+						// Clear status after brief delay
+						setTimeout(() => {
+							placesLoadingStatus.set('');
+							placesLoadingProgress.set(0);
+						}, 500);
 					})
 					.catch(function (err) {
 						places.set(placesData);
 						placesError.set('Could not store places locally, please try again or contact BTC Map.');
+						placesLoadingStatus.set('');
+						placesLoadingProgress.set(0);
 						console.error(err);
 					});
 			}
