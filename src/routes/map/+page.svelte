@@ -42,19 +42,32 @@
 	let mapLoadingStatus = '';
 
 	// Combine map loading progress with places loading progress
+	// Using independent checks to avoid stuck states when progress resets
 	$: {
-		if ($placesLoadingProgress > 0) {
-			// Places are loading (0-100%), this takes priority
+		// Priority 1: Places are actively loading
+		if ($placesLoadingProgress > 0 && $placesLoadingProgress < 100) {
 			mapLoading = $placesLoadingProgress;
 			mapLoadingStatus = $placesLoadingStatus;
-		} else if (mapLoaded && !elementsLoaded) {
-			// Map tiles loaded, waiting to initialize markers
+		}
+		// Priority 2: Places loading complete but map not initialized
+		else if ($placesLoadingProgress === 100 && !elementsLoaded) {
+			mapLoading = $placesLoadingProgress;
+			mapLoadingStatus = $placesLoadingStatus;
+		}
+		// Priority 3: Map tiles loaded, waiting to initialize markers
+		else if (mapLoaded && !elementsLoaded && $placesLoadingProgress === 0) {
 			mapLoading = 40;
 			mapLoadingStatus = 'Preparing map...';
-		} else if (isLoadingMarkers) {
-			// Loading markers progressively
+		}
+		// Priority 4: Loading markers progressively
+		else if (isLoadingMarkers) {
 			mapLoading = 70;
 			mapLoadingStatus = 'Loading places...';
+		}
+		// Reset when everything is done
+		else if (elementsLoaded && !isLoadingMarkers && $placesLoadingProgress === 0) {
+			mapLoading = 0;
+			mapLoadingStatus = '';
 		}
 	}
 
@@ -433,15 +446,10 @@
 		await loadMarkersInViewport();
 
 		isLoadingMarkers = false;
-		mapLoading = 100;
-		mapLoadingStatus = 'Complete!';
 		elementsLoaded = true;
 
-		// Clear status after brief delay
-		setTimeout(() => {
-			mapLoadingStatus = '';
-			mapLoading = 0;
-		}, 500);
+		// Status will be cleared by reactive statement above
+		// No manual timeout needed - reactive state management handles it
 	};
 
 	// Process a batch of places on the main thread (DOM operations only)

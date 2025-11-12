@@ -6,9 +6,14 @@
 
 	let shouldHide = false;
 
-	// Watch for 100% completion
+	// Watch for 100% completion to hide
 	$: if (progress === 100) {
 		shouldHide = true;
+	}
+
+	// Reset shouldHide when progress is active again
+	$: if (progress !== undefined && progress < 100) {
+		shouldHide = false;
 	}
 </script>
 
@@ -23,7 +28,7 @@
 
 		<div class="mx-auto w-[200px] rounded-full bg-link/25">
 			<div
-				class="h-2 rounded-full bg-link transition-all duration-300"
+				class="h-2 rounded-full bg-link transition-all duration-500"
 				style:width={progress.toString() + '%'}
 			/>
 		</div>

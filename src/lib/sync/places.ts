@@ -17,6 +17,24 @@ import { parseJSON, filterPlaces } from '$lib/workers/sync-worker-manager';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
+// Progress range constants for clear progress mapping
+const PROGRESS_RANGES = {
+	INIT: 0,
+	DOWNLOAD_START: 10,
+	DOWNLOAD_END: 50,
+	PARSE_START: 50,
+	PARSE_END: 80,
+	CACHE_LOAD: 60,
+	UPDATE_CHECK: 70,
+	UPDATE_CHECK_NO_CACHE: 85,
+	MERGE_START: 80,
+	MERGE_START_NO_CACHE: 90,
+	FINALIZE: 95,
+	COMPLETE: 100
+} as const;
+
+const STATUS_CLEAR_DELAY = 500; // ms to show completion status before clearing
+
 // Helper function to get date 2 weeks ago (fallback)
 const getTwoWeeksAgoDate = (): string => {
 	const twoWeeksAgo = new Date();
@@ -76,7 +94,7 @@ export const elementsSync = async () => {
 			if (!cachedPlaces) {
 				try {
 					placesLoadingStatus.set('Downloading places data...');
-					placesLoadingProgress.set(10);
+					placesLoadingProgress.set(PROGRESS_RANGES.DOWNLOAD_START);
 
 					// Fetch as text to parse in worker
 					const staticResponse = await axios.get(
@@ -86,8 +104,11 @@ export const elementsSync = async () => {
 							onDownloadProgress: (progressEvent: AxiosProgressEvent) => {
 								if (progressEvent.total) {
 									const downloadPercent = (progressEvent.loaded / progressEvent.total) * 100;
-									// Map download progress to 10-50% range
-									const scaledProgress = 10 + downloadPercent * 0.4;
+									// Map 0-100% download to DOWNLOAD_START-DOWNLOAD_END range
+									const downloadRange =
+										PROGRESS_RANGES.DOWNLOAD_END - PROGRESS_RANGES.DOWNLOAD_START;
+									const scaledProgress =
+										PROGRESS_RANGES.DOWNLOAD_START + (downloadPercent / 100) * downloadRange;
 									placesLoadingProgress.set(Math.round(scaledProgress));
 
 									const loadedMB = (progressEvent.loaded / (1024 * 1024)).toFixed(1);
@@ -99,12 +120,14 @@ export const elementsSync = async () => {
 					);
 
 					placesLoadingStatus.set('Processing places data...');
-					placesLoadingProgress.set(50);
+					placesLoadingProgress.set(PROGRESS_RANGES.PARSE_START);
 
 					// Parse JSON in worker thread to avoid blocking main thread
 					placesData = await parseJSON<Place[]>(staticResponse.data, 'places', (progress) => {
-						// Map parsing progress to 50-80% range
-						const scaledProgress = 50 + progress.percent * 0.3;
+						// Map 0-100% parsing to PARSE_START-PARSE_END range
+						const parseRange = PROGRESS_RANGES.PARSE_END - PROGRESS_RANGES.PARSE_START;
+						const scaledProgress =
+							PROGRESS_RANGES.PARSE_START + (progress.percent / 100) * parseRange;
 						placesLoadingProgress.set(Math.round(scaledProgress));
 
 						if (progress.itemsParsed) {
@@ -114,7 +137,7 @@ export const elementsSync = async () => {
 						}
 					});
 
-					placesLoadingProgress.set(80);
+					placesLoadingProgress.set(PROGRESS_RANGES.PARSE_END);
 				} catch (error) {
 					placesError.set(
 						'Could not load places from static CDN, please try again or contact BTC Map.'
@@ -128,12 +151,14 @@ export const elementsSync = async () => {
 				// Use cached data as base
 				placesData = [...cachedPlaces];
 				placesLoadingStatus.set('Loading from cache...');
-				placesLoadingProgress.set(60);
+				placesLoadingProgress.set(PROGRESS_RANGES.CACHE_LOAD);
 			}
 
 			// Step 2: Get recent updates from API (since static file was last updated)
 			placesLoadingStatus.set('Checking for updates...');
-			placesLoadingProgress.set(cachedPlaces ? 70 : 85);
+			placesLoadingProgress.set(
+				cachedPlaces ? PROGRESS_RANGES.UPDATE_CHECK : PROGRESS_RANGES.UPDATE_CHECK_NO_CACHE
+			);
 
 			const updatesSince = await getStaticFileDate();
 
@@ -146,7 +171,9 @@ export const elementsSync = async () => {
 
 				if (recentUpdates.length > 0) {
 					placesLoadingStatus.set('Merging updates...');
-					placesLoadingProgress.set(cachedPlaces ? 80 : 90);
+					placesLoadingProgress.set(
+						cachedPlaces ? PROGRESS_RANGES.MERGE_START : PROGRESS_RANGES.MERGE_START_NO_CACHE
+					);
 
 					// Use worker to filter and merge updates to avoid blocking main thread
 					const updatedPlaceIds = recentUpdates.map((place) => place.id);
@@ -175,7 +202,7 @@ export const elementsSync = async () => {
 
 			// Step 3: Save to local storage and update store
 			placesLoadingStatus.set('Finalizing...');
-			placesLoadingProgress.set(95);
+			placesLoadingProgress.set(PROGRESS_RANGES.FINALIZE);
 
 			if (placesData.length > 0) {
 				localforage
@@ -184,13 +211,13 @@ export const elementsSync = async () => {
 						// set response to store
 						places.set(placesData);
 						placesLoadingStatus.set('Complete!');
-						placesLoadingProgress.set(100);
+						placesLoadingProgress.set(PROGRESS_RANGES.COMPLETE);
 
 						// Clear status after brief delay
 						setTimeout(() => {
 							placesLoadingStatus.set('');
-							placesLoadingProgress.set(0);
-						}, 500);
+							placesLoadingProgress.set(PROGRESS_RANGES.INIT);
+						}, STATUS_CLEAR_DELAY);
 					})
 					.catch(function (err) {
 						places.set(placesData);

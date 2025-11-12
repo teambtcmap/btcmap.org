@@ -138,9 +138,9 @@ export async function parseJSON<T>(
 ): Promise<T> {
 	try {
 		return await sendWorkerMessage<T>('PARSE_JSON', { json, type }, onProgress);
-	} catch {
+	} catch (error) {
 		// Fallback to synchronous parsing
-		console.warn('Worker parsing failed, using synchronous fallback');
+		console.warn('Worker parsing failed, using synchronous fallback:', error);
 		return JSON.parse(json);
 	}
 }
@@ -156,9 +156,9 @@ export async function filterPlaces(
 			updatedPlaceIds,
 			recentUpdates
 		});
-	} catch {
+	} catch (error) {
 		// Fallback to synchronous filtering
-		console.warn('Worker filtering failed, using synchronous fallback');
+		console.warn('Worker filtering failed, using synchronous fallback:', error);
 		const updatedIds = new Set(updatedPlaceIds);
 		const filtered = places.filter((place) => !updatedIds.has(place.id));
 		const merged = [...filtered];
@@ -177,9 +177,9 @@ export async function filterDeleted<T extends Place | Area | User | Event | Repo
 ): Promise<T[]> {
 	try {
 		return await sendWorkerMessage<T[]>('FILTER_DELETED', { items, type });
-	} catch {
+	} catch (error) {
 		// Fallback to synchronous filtering
-		console.warn('Worker filtering failed, using synchronous fallback');
+		console.warn('Worker filtering failed, using synchronous fallback:', error);
 		return items.filter((item) => !item.deleted_at);
 	}
 }
@@ -191,10 +191,10 @@ export async function mergeUpdates<T extends Area | User | Event | Report>(
 ): Promise<T[]> {
 	try {
 		return await sendWorkerMessage<T[]>('MERGE_UPDATES', { cached, updates, type });
-	} catch {
+	} catch (error) {
 		// Fallback to synchronous merging
 		// Type-safe: T is constrained to Area | User | Event | Report, all have id and deleted_at
-		console.warn('Worker merging failed, using synchronous fallback');
+		console.warn('Worker merging failed, using synchronous fallback:', error);
 		const updatesMap = new Map(updates.map((item) => [item.id, item]));
 		const filtered = cached.filter((item) => !updatesMap.has(item.id));
 		const merged = [...filtered];
