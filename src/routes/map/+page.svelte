@@ -59,13 +59,13 @@
 			mapLoading = 40;
 			mapLoadingStatus = 'Preparing map...';
 		}
-		// Priority 4: Loading markers progressively
-		else if (isLoadingMarkers) {
+		// Priority 4: Loading initial markers (only during first load, not viewport updates)
+		else if (isLoadingMarkers && !elementsLoaded) {
 			mapLoading = 70;
 			mapLoadingStatus = 'Loading places...';
 		}
 		// Reset when everything is done
-		else if (elementsLoaded && !isLoadingMarkers) {
+		else if (elementsLoaded) {
 			mapLoading = 0;
 			mapLoadingStatus = '';
 		}
