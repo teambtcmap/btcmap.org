@@ -11,13 +11,16 @@
 		shouldHide = true;
 	}
 
-	// Reset shouldHide when progress is active again
-	$: if (progress !== undefined && progress < 100) {
+	// Reset shouldHide when progress is actively loading (> 0 and < 100)
+	$: if (progress !== undefined && progress > 0 && progress < 100) {
 		shouldHide = false;
 	}
+
+	// Show loading indicator only when actively loading (progress > 0) and not hidden
+	$: shouldShow = progress !== undefined && progress > 0 && !shouldHide;
 </script>
 
-{#if progress !== undefined && !shouldHide}
+{#if shouldShow}
 	<div
 		out:fade={{ delay: 1000 }}
 		class="absolute top-1/2 left-1/2 z-[10000] -translate-x-1/2 -translate-y-1/2 space-y-2 rounded-lg border-2 border-primary bg-teal p-4 drop-shadow-2xl dark:border-white dark:bg-dark"
