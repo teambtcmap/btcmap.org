@@ -421,3 +421,11 @@ export type Place = {
 	'osm:check_date:currency:XBT'?: string;
 	'osm:note'?: string;
 };
+
+// Worker progress tracking
+export interface ProgressUpdate {
+	percent: number;
+	itemsParsed?: number;
+	totalItems?: number;
+	status: 'downloading' | 'parsing' | 'filtering' | 'complete';
+}

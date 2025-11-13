@@ -1,16 +1,10 @@
 import type { WorkerMessage, WorkerResponse } from './sync-worker';
-import type { Place, Area, User, Event, Report } from '../types';
+import type { Place, Area, User, Event, Report, ProgressUpdate } from '../types';
 
 let worker: Worker | null = null;
 let workerInitialized = false;
 let workerSupported: boolean | null = null;
 let messageId = 0;
-export interface ProgressUpdate {
-	percent: number;
-	itemsParsed?: number;
-	totalItems?: number;
-	status: 'downloading' | 'parsing' | 'filtering' | 'complete';
-}
 
 const pendingRequests = new Map<
 	string,

@@ -1,11 +1,19 @@
-import type { Place, Area, User, Event, Report } from '../types';
+import type { Place, Area, User, Event, Report, ProgressUpdate } from '../types';
 
 // Type constraint to ensure items have required properties
 type ItemWithId = Area | User | Event | Report;
 
-// Helper to ensure all items have id and deleted_at properties
-function hasRequiredProperties(item: ItemWithId): item is ItemWithId {
-	return 'id' in item && 'deleted_at' in item;
+// Type guard to validate runtime types
+function hasRequiredProperties(item: unknown): item is ItemWithId {
+	return (
+		typeof item === 'object' &&
+		item !== null &&
+		'id' in item &&
+		'deleted_at' in item &&
+		(typeof (item as ItemWithId).id === 'string' || typeof (item as ItemWithId).id === 'number') &&
+		(typeof (item as ItemWithId).deleted_at === 'string' ||
+			(item as ItemWithId).deleted_at === null)
+	);
 }
 
 export interface ParseJSONPayload {
@@ -36,17 +44,27 @@ export interface WorkerMessage {
 	id: string;
 }
 
-export interface ProgressUpdate {
-	percent: number;
-	itemsParsed?: number;
-	totalItems?: number;
-	status: 'downloading' | 'parsing' | 'filtering' | 'complete';
-}
-
 export interface WorkerResponse {
 	type: 'PARSED' | 'FILTERED' | 'MERGED' | 'ERROR' | 'PROGRESS';
 	payload: unknown;
 	id: string;
+}
+
+function serializeError(error: unknown): string {
+	if (error instanceof Error) {
+		return error.message;
+	}
+	if (typeof error === 'string') {
+		return error;
+	}
+	if (typeof error === 'object' && error !== null) {
+		try {
+			return JSON.stringify(error);
+		} catch {
+			return String(error);
+		}
+	}
+	return String(error);
 }
 
 self.onmessage = (event: MessageEvent<WorkerMessage>) => {
@@ -213,7 +231,7 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
 	} catch (error) {
 		self.postMessage({
 			type: 'ERROR',
-			payload: { error: error instanceof Error ? error.message : String(error) },
+			payload: { error: serializeError(error) },
 			id
 		} as WorkerResponse);
 	}

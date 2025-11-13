@@ -47,11 +47,11 @@
 				);
 			};
 
-			// Use requestIdleCallback if available, otherwise defer with timeout
+			// Use requestIdleCallback if available, otherwise defer with shorter timeout for Safari
 			if ('requestIdleCallback' in window) {
 				requestIdleCallback(syncNonCritical, { timeout: 5000 });
 			} else {
-				setTimeout(syncNonCritical, 2000);
+				setTimeout(syncNonCritical, 500);
 			}
 		};
 
