@@ -41,6 +41,13 @@
 	let mapLoading = 0;
 	let mapLoadingStatus = '';
 
+	// Log all loading state changes for debugging
+	$: if (mapLoading !== undefined || mapLoadingStatus !== undefined) {
+		console.log(
+			`[LOADING STATE] Progress: ${mapLoading}% | Status: "${mapLoadingStatus}" | elementsLoaded: ${elementsLoaded} | isLoadingMarkers: ${isLoadingMarkers} | placesProgress: ${$placesLoadingProgress}% | placesStatus: "${$placesLoadingStatus}"`
+		);
+	}
+
 	// Combine map loading progress with places loading progress
 	// Using independent checks to avoid stuck states when progress resets
 	$: {
@@ -54,8 +61,8 @@
 			mapLoading = $placesLoadingProgress;
 			mapLoadingStatus = $placesLoadingStatus;
 		}
-		// Priority 3: Map tiles loaded, waiting to initialize markers
-		else if (mapLoaded && !elementsLoaded && $placesLoadingProgress === 0) {
+		// Priority 3: Map tiles loaded, waiting to initialize markers (even after places progress resets)
+		else if (mapLoaded && !elementsLoaded && $places.length > 0) {
 			mapLoading = 40;
 			mapLoadingStatus = 'Preparing map...';
 		}
@@ -65,7 +72,7 @@
 			mapLoadingStatus = 'Loading places...';
 		}
 		// Reset when everything is done
-		else if (elementsLoaded && !isLoadingMarkers && $placesLoadingProgress === 0) {
+		else if (elementsLoaded && !isLoadingMarkers) {
 			mapLoading = 0;
 			mapLoadingStatus = '';
 		}
@@ -325,8 +332,14 @@
 
 	// Load markers for places in current viewport using web workers
 	const loadMarkersInViewport = async () => {
-		if (!map || !$places.length || isLoadingMarkers) return;
+		if (!map || !$places.length || isLoadingMarkers) {
+			console.warn(
+				`[VIEWPORT] Skipping load - map: ${!!map} | places: ${$places.length} | isLoadingMarkers: ${isLoadingMarkers}`
+			);
+			return;
+		}
 
+		console.info('[VIEWPORT] Starting viewport marker load');
 		isLoadingMarkers = true;
 		const bounds = map.getBounds();
 
@@ -334,51 +347,65 @@
 			// Get visible places (viewport filtering)
 			const visiblePlaces = getVisiblePlaces($places, bounds);
 			console.info(
-				`Processing ${visiblePlaces.length} places in viewport (filtered from ${$places.length} total)`
+				`[VIEWPORT] Found ${visiblePlaces.length} places in viewport (filtered from ${$places.length} total)`
 			);
 
 			// Filter out places that already have markers loaded
 			const newPlaces = visiblePlaces.filter((place) => !loadedMarkers[place.id.toString()]);
 
+			console.info(
+				`[VIEWPORT] ${newPlaces.length} new markers to load (${Object.keys(loadedMarkers).length} already loaded)`
+			);
+
 			if (newPlaces.length === 0) {
+				console.info('[VIEWPORT] No new markers to load');
 				isLoadingMarkers = false;
 				return;
 			}
 
 			// Clean up markers outside viewport if we have many loaded
 			if (Object.keys(loadedMarkers).length > MAX_LOADED_MARKERS) {
+				console.info(
+					`[VIEWPORT] Cleaning up markers (current: ${Object.keys(loadedMarkers).length} > max: ${MAX_LOADED_MARKERS})`
+				);
 				cleanupOutOfBoundsMarkers(bounds);
 			}
 
 			// Check if web workers are supported before trying to use them
 			if (isWorkerSupported()) {
-				console.info(`Loading ${newPlaces.length} new markers using web worker`);
+				console.info(`[VIEWPORT] Loading ${newPlaces.length} markers using web worker`);
 
 				// Process new places using web worker
 				await processPlaces(
 					newPlaces,
-					VIEWPORT_BATCH_SIZE, // Smaller batch size since dataset is much smaller
+					VIEWPORT_BATCH_SIZE,
 					(progress: number, batch?: ProcessedPlace[]) => {
 						// Process batch on main thread (DOM operations)
 						if (batch) {
+							console.info(`[VIEWPORT] Processing batch of ${batch.length} markers`);
 							processBatchOnMainThread(batch, upToDateLayer);
 						}
 					}
 				);
 			} else {
-				console.info(`Loading ${newPlaces.length} new markers synchronously (no worker support)`);
+				console.info(
+					`[VIEWPORT] Loading ${newPlaces.length} markers synchronously (no worker support)`
+				);
 				// Fallback to synchronous processing
 				loadMarkersInViewportFallback(bounds);
 				return;
 			}
 
-			console.info(`Successfully loaded ${newPlaces.length} markers in viewport`);
+			console.info(`[VIEWPORT] Successfully loaded ${newPlaces.length} markers`);
 		} catch (error) {
-			console.error('Error loading markers in viewport:', error);
+			console.error('[VIEWPORT] Error loading markers:', error);
 			// Fallback to synchronous processing for viewport
 			loadMarkersInViewportFallback(bounds);
 		} finally {
 			isLoadingMarkers = false;
+			console.info(
+				`[VIEWPORT COMPLETE] Total loaded: ${Object.keys(loadedMarkers).length} markers | isLoadingMarkers: ${isLoadingMarkers}`
+			);
 		}
 	};
 
@@ -416,10 +443,13 @@
 	const debouncedLoadMarkers = debounce(loadMarkersInViewport, DEBOUNCE_DELAY);
 
 	const initializeElements = async () => {
-		if (elementsLoaded) return;
+		if (elementsLoaded) {
+			console.warn('[INIT] Already initialized, skipping');
+			return;
+		}
 
 		console.info(
-			`Initializing combined viewport + web worker loading for ${$places.length} places`
+			`[INIT] Starting initialization for ${$places.length} places | isLoadingMarkers: ${isLoadingMarkers}`
 		);
 
 		mapLoadingStatus = 'Initializing markers...';
@@ -432,21 +462,32 @@
 		/* eslint-enable no-undef */
 		upToDateLayer = leaflet.featureGroup.subGroup(markers);
 
+		console.info('[INIT] Created marker cluster group and layers');
+
 		// Add layers to map immediately so batches can be added
 		map.addLayer(markers);
 		map.addLayer(upToDateLayer);
+
+		console.info('[INIT] Added layers to map');
 
 		// Set up map event listeners for viewport loading
 		map.on('moveend', debouncedLoadMarkers);
 		map.on('zoomend', debouncedLoadMarkers);
 
+		console.info('[INIT] Set up map event listeners');
+
 		mapLoadingStatus = 'Loading places in view...';
 
 		// Load initial markers for current viewport
+		console.info('[INIT] About to call loadMarkersInViewport()...');
 		await loadMarkersInViewport();
 
 		isLoadingMarkers = false;
 		elementsLoaded = true;
+
+		console.info(
+			`[INIT COMPLETE] Markers initialized | elementsLoaded: ${elementsLoaded} | isLoadingMarkers: ${isLoadingMarkers}`
+		);
 
 		// Status will be cleared by reactive statement above
 		// No manual timeout needed - reactive state management handles it
@@ -488,6 +529,9 @@
 	let shouldInitialize = false;
 	$: {
 		if ($places && $places.length && mapLoaded && !elementsLoaded) {
+			console.info(
+				`[INIT TRIGGER] places: ${$places.length} | mapLoaded: ${mapLoaded} | elementsLoaded: ${elementsLoaded} → Setting shouldInitialize = true`
+			);
 			shouldInitialize = true;
 		}
 	}
@@ -495,6 +539,9 @@
 	// Watch for shouldInitialize flag and run initialization once
 	$: if (shouldInitialize) {
 		shouldInitialize = false;
+		console.info(
+			'[INIT START] Triggering initializeElements() - places loaded, map ready, starting marker initialization'
+		);
 		initializeElements();
 	}
 
