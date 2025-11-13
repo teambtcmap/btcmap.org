@@ -341,7 +341,21 @@
 
 		console.info('[VIEWPORT] Starting viewport marker load');
 		isLoadingMarkers = true;
-		const bounds = map.getBounds();
+
+		// Check if map has valid bounds (center and zoom are set)
+		let bounds;
+		try {
+			bounds = map.getBounds();
+			if (!bounds) {
+				console.warn('[VIEWPORT] Map bounds not available yet, skipping');
+				isLoadingMarkers = false;
+				return;
+			}
+		} catch (error) {
+			console.warn('[VIEWPORT] Error getting map bounds, map not ready yet:', error);
+			isLoadingMarkers = false;
+			return;
+		}
 
 		try {
 			// Get visible places (viewport filtering)
@@ -847,11 +861,13 @@
 			// final map setup
 			map.on('load', () => {
 				mapCenter = map.getCenter();
-			});
+				console.info('[MAP] Map load event fired - map is ready');
 
-			mapLoading = 40;
-			mapLoadingStatus = 'Map loaded';
-			mapLoaded = true;
+				// Set mapLoaded here instead of immediately after map creation
+				mapLoading = 40;
+				mapLoadingStatus = 'Map loaded';
+				mapLoaded = true;
+			});
 		}
 	});
 
