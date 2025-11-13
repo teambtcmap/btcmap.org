@@ -19,7 +19,6 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 // Progress range constants for clear progress mapping
 const PROGRESS_RANGES = {
-	INIT: 0,
 	DOWNLOAD_START: 10,
 	DOWNLOAD_END: 50,
 	PARSE_START: 50,

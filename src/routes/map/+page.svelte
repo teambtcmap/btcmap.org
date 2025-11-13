@@ -383,9 +383,6 @@
 			loadMarkersInViewportFallback(bounds);
 		} finally {
 			isLoadingMarkers = false;
-			console.info(
-				`[VIEWPORT COMPLETE] Total loaded: ${Object.keys(loadedMarkers).length} markers | isLoadingMarkers: ${isLoadingMarkers}`
-			);
 		}
 	};
 
