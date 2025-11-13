@@ -801,10 +801,6 @@
 			// final map setup
 			map.on('load', () => {
 				mapCenter = map.getCenter();
-
-				// Set mapLoaded here instead of immediately after map creation
-				mapLoading = 40;
-				mapLoadingStatus = 'Map loaded';
 				mapLoaded = true;
 			});
 		}
