@@ -453,7 +453,6 @@
 		);
 
 		mapLoadingStatus = 'Initializing markers...';
-		isLoadingMarkers = true;
 
 		// create marker cluster group and layers
 		/* eslint-disable no-undef */
@@ -479,10 +478,10 @@
 		mapLoadingStatus = 'Loading places in view...';
 
 		// Load initial markers for current viewport
+		// NOTE: Don't set isLoadingMarkers=true here, let loadMarkersInViewport handle it
 		console.info('[INIT] About to call loadMarkersInViewport()...');
 		await loadMarkersInViewport();
 
-		isLoadingMarkers = false;
 		elementsLoaded = true;
 
 		console.info(
