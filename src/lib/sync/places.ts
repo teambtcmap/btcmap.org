@@ -212,12 +212,9 @@ export const elementsSync = async () => {
 						places.set(placesData);
 						placesLoadingStatus.set('Complete!');
 						placesLoadingProgress.set(PROGRESS_RANGES.COMPLETE);
-
-						// Clear status after brief delay
-						setTimeout(() => {
-							placesLoadingStatus.set('');
-							placesLoadingProgress.set(PROGRESS_RANGES.INIT);
-						}, STATUS_CLEAR_DELAY);
+						
+						// Keep progress at 100% - don't reset to avoid confusing loading states
+						// The map component will handle hiding the indicator when elementsLoaded = true
 					})
 					.catch(function (err) {
 						places.set(placesData);

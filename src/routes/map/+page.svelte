@@ -42,26 +42,20 @@
 	let mapLoadingStatus = '';
 
 	// Combine map loading progress with places loading progress
-	// Using independent checks to avoid stuck states when progress resets
 	$: {
-		// Priority 1: Places are actively loading
+		// Priority 1: Places are actively loading (1-99%)
 		if ($placesLoadingProgress > 0 && $placesLoadingProgress < 100) {
 			mapLoading = $placesLoadingProgress;
 			mapLoadingStatus = $placesLoadingStatus;
 		}
-		// Priority 2: Places loading complete but map not initialized
+		// Priority 2: Places complete (100%), map ready, initializing markers
 		else if ($placesLoadingProgress === 100 && !elementsLoaded) {
-			mapLoading = $placesLoadingProgress;
+			mapLoading = 100;
 			mapLoadingStatus = $placesLoadingStatus;
 		}
-		// Priority 3: Map tiles loaded, waiting to initialize markers (even after places progress resets)
-		else if (mapLoaded && !elementsLoaded && $places.length > 0) {
-			mapLoading = 40;
-			mapLoadingStatus = 'Preparing map...';
-		}
-		// Priority 4: Loading initial markers (only during first load, not viewport updates)
+		// Priority 3: Loading initial markers (only during first load, not viewport updates)
 		else if (isLoadingMarkers && !elementsLoaded) {
-			mapLoading = 70;
+			mapLoading = 100;
 			mapLoadingStatus = 'Loading places...';
 		}
 		// Reset when everything is done
@@ -823,6 +817,10 @@
 		}
 		// Clean up web worker
 		terminateWorker();
+		
+		// Reset loading progress when leaving map page to avoid stale states
+		placesLoadingProgress.set(0);
+		placesLoadingStatus.set('');
 	});
 </script>
 
