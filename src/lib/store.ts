@@ -29,7 +29,7 @@ export const apps = readable([
 		desc: 'Direct Download'
 	},
 	{
-		link: 'https://apps.apple.com/app/btc-world-map/id6443604345',
+		link: 'https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666',
 		type: 'iOS',
 		icon: 'ios',
 		desc: 'Walled Garden Option'
