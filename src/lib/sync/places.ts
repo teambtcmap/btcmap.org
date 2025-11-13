@@ -33,8 +33,6 @@ const PROGRESS_RANGES = {
 	COMPLETE: 100
 } as const;
 
-const STATUS_CLEAR_DELAY = 500; // ms to show completion status before clearing
-
 // Helper function to get date 2 weeks ago (fallback)
 const getTwoWeeksAgoDate = (): string => {
 	const twoWeeksAgo = new Date();
@@ -212,7 +210,7 @@ export const elementsSync = async () => {
 						places.set(placesData);
 						placesLoadingStatus.set('Complete!');
 						placesLoadingProgress.set(PROGRESS_RANGES.COMPLETE);
-						
+
 						// Keep progress at 100% - don't reset to avoid confusing loading states
 						// The map component will handle hiding the indicator when elementsLoaded = true
 					})

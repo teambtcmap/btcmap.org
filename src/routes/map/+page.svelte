@@ -817,7 +817,7 @@
 		}
 		// Clean up web worker
 		terminateWorker();
-		
+
 		// Reset loading progress when leaving map page to avoid stale states
 		placesLoadingProgress.set(0);
 		placesLoadingStatus.set('');
