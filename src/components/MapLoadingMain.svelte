@@ -17,7 +17,9 @@
 	}
 
 	// Show loading indicator only when actively loading (progress > 0) and not hidden
+	// Also create a typed variable for use in template
 	$: shouldShow = progress !== undefined && progress > 0 && !shouldHide;
+	$: displayProgress = progress ?? 0; // Provide fallback for template usage
 </script>
 
 {#if shouldShow}
@@ -32,13 +34,13 @@
 		<div class="mx-auto w-[200px] rounded-full bg-link/25">
 			<div
 				class="h-2 rounded-full bg-link transition-all duration-500"
-				style:width={progress.toString() + '%'}
+				style:width={displayProgress.toString() + '%'}
 			/>
 		</div>
 
-		{#if progress > 0 && progress < 100}
+		{#if displayProgress > 0 && displayProgress < 100}
 			<p class="text-center text-xs text-primary/75 dark:text-white/75">
-				{Math.round(progress)}%
+				{Math.round(displayProgress)}%
 			</p>
 		{/if}
 	</div>
