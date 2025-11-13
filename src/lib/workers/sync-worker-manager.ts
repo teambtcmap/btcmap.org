@@ -45,10 +45,12 @@ function handleWorkerMessage(response: WorkerResponse) {
 			pendingRequests.delete(response.id);
 			break;
 
-		case 'ERROR':
-			request.reject(new Error(String(response.payload)));
+		case 'ERROR': {
+			const errorPayload = response.payload as { error: string };
+			request.reject(new Error(errorPayload.error));
 			pendingRequests.delete(response.id);
 			break;
+		}
 	}
 }
 
@@ -75,6 +77,11 @@ async function initWorker(): Promise<boolean> {
 
 		worker.onerror = (error) => {
 			console.error('Sync worker error:', error);
+			// Reject all pending requests to prevent memory leaks
+			pendingRequests.forEach(({ reject }) => {
+				reject(new Error('Worker encountered an error'));
+			});
+			pendingRequests.clear();
 		};
 
 		return true;
