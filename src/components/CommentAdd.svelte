@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
-	import CloseButton from '$lib/components/CloseButton.svelte';
-	import Icon from '$lib/components/Icon.svelte';
-	import PrimaryButton from '$lib/components/PrimaryButton.svelte';
+	import CloseButton from '$components/CloseButton.svelte';
+	import Icon from '$components/Icon.svelte';
+	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import { PAYMENT_ERROR_MESSAGE } from '$lib/constants';
 	import { lastUpdatedPlaceId } from '$lib/store';
 	import { updateSinglePlace } from '$lib/sync/places';

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import CopyButton from '$lib/components/CopyButton.svelte';
-	import InvoicePayment from '$lib/components/InvoicePayment.svelte';
+	import CopyButton from '$components/CopyButton.svelte';
+	import InvoicePayment from '$components/InvoicePayment.svelte';
 
 	export let invoice: string;
 	export let invoiceId: string;

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import BoostButton from '$lib/components/BoostButton.svelte';
-	import Icon from '$lib/components/Icon.svelte';
+	import BoostButton from '$components/BoostButton.svelte';
+	import Icon from '$components/Icon.svelte';
 	import { calcVerifiedDate, verifiedArr } from '$lib/map/setup';
 	import type { Place } from '$lib/types';
 	import { isBoosted, formatOpeningHours, fetchEnhancedPlace } from '$lib/utils';

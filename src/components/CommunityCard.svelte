@@ -1,8 +1,8 @@
 <script lang="ts">
-	import Socials from '$lib/components/Socials.svelte';
-	import SponsorBadge from '$lib/components/SponsorBadge.svelte';
-	import Tip from '$lib/components/Tip.svelte';
-	import OrgBadge from '$lib/components/OrgBadge.svelte';
+	import Socials from '$components/Socials.svelte';
+	import SponsorBadge from '$components/SponsorBadge.svelte';
+	import Tip from '$components/Tip.svelte';
+	import OrgBadge from '$components/OrgBadge.svelte';
 	import { TipType, type AreaTags } from '$lib/types';
 	import { getOrganizationDisplayName } from '$lib/organizationDisplayNames';
 	import { resolve } from '$app/paths';

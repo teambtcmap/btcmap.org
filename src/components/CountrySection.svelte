@@ -1,8 +1,8 @@
 <script lang="ts">
 	export let countries: Area[] | undefined;
 
-	import CountryCard from '$lib/components/CountryCard.svelte';
-	import CountrySkeleton from '$lib/components/CountrySkeleton.svelte';
+	import CountryCard from '$components/CountryCard.svelte';
+	import CountrySkeleton from '$components/CountrySkeleton.svelte';
 	import type { Area } from '$lib/types';
 </script>
 

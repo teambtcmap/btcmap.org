@@ -1,5 +1,5 @@
 import { selectedMerchant, theme } from '$lib/store';
-import Icon from '$lib/components/Icon.svelte';
+import Icon from '$components/Icon.svelte';
 import { detectTheme, errToast } from '$lib/utils';
 import type { DomEventType, Leaflet, Place } from '$lib/types';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';

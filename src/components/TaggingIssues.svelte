@@ -1,7 +1,7 @@
 <script lang="ts">
-	import CloseButton from '$lib/components/CloseButton.svelte';
-	import Icon from '$lib/components/Icon.svelte';
-	import IssueIcon from '$lib/components/IssueIcon.svelte';
+	import CloseButton from '$components/CloseButton.svelte';
+	import Icon from '$components/Icon.svelte';
+	import IssueIcon from '$components/IssueIcon.svelte';
 	import { taggingIssues } from '$lib/store';
 	import { getIssueHelpLink, getIssueIcon } from '$lib/utils';
 	import OutClick from 'svelte-outclick';

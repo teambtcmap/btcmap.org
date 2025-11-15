@@ -8,7 +8,7 @@
 	export let deleted: number;
 	export let tip: string;
 
-	import Tip from '$lib/components/Tip.svelte';
+	import Tip from '$components/Tip.svelte';
 	import { resolve } from '$app/paths';
 
 	$: stats = [

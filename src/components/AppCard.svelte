@@ -4,7 +4,7 @@
 	export let desc: string;
 	export let link: string;
 
-	import Icon from '$lib/components/Icon.svelte';
+	import Icon from '$components/Icon.svelte';
 </script>
 
 <div>

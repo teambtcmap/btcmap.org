@@ -1,13 +1,13 @@
 <script lang="ts">
-	import AboutCommunity from '$lib/components/AboutCommunity.svelte';
-	import AboutContributor from '$lib/components/AboutContributor.svelte';
-	import AboutCore from '$lib/components/AboutCore.svelte';
-	import AboutIntegration from '$lib/components/AboutIntegration.svelte';
-	import AboutMerchant from '$lib/components/AboutMerchant.svelte';
-	import AboutPlus from '$lib/components/AboutPlus.svelte';
-	import AboutTagger from '$lib/components/AboutTagger.svelte';
-	import Footer from '$lib/components/Footer.svelte';
-	import Header from '$lib/components/Header.svelte';
+	import AboutCommunity from '$components/AboutCommunity.svelte';
+	import AboutContributor from '$components/AboutContributor.svelte';
+	import AboutCore from '$components/AboutCore.svelte';
+	import AboutIntegration from '$components/AboutIntegration.svelte';
+	import AboutMerchant from '$components/AboutMerchant.svelte';
+	import AboutPlus from '$components/AboutPlus.svelte';
+	import AboutTagger from '$components/AboutTagger.svelte';
+	import Footer from '$components/Footer.svelte';
+	import Header from '$components/Header.svelte';
 	import {
 		areaError,
 		areas,

@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import Footer from '$lib/components/Footer.svelte';
-	import FormSuccess from '$lib/components/FormSuccess.svelte';
-	import Header from '$lib/components/Header.svelte';
-	import HeaderPlaceholder from '$lib/components/HeaderPlaceholder.svelte';
-	import Icon from '$lib/components/Icon.svelte';
-	import InfoTooltip from '$lib/components/InfoTooltip.svelte';
-	import MapLoadingEmbed from '$lib/components/MapLoadingEmbed.svelte';
-	import PrimaryButton from '$lib/components/PrimaryButton.svelte';
+	import Footer from '$components/Footer.svelte';
+	import FormSuccess from '$components/FormSuccess.svelte';
+	import Header from '$components/Header.svelte';
+	import HeaderPlaceholder from '$components/HeaderPlaceholder.svelte';
+	import Icon from '$components/Icon.svelte';
+	import InfoTooltip from '$components/InfoTooltip.svelte';
+	import MapLoadingEmbed from '$components/MapLoadingEmbed.svelte';
+	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import { attribution, changeDefaultIcons, geolocate, toggleMapButtons } from '$lib/map/setup';
 	import { socials, theme } from '$lib/store';
 	import { detectTheme, errToast } from '$lib/utils';

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import Icon from '$lib/components/Icon.svelte';
-	import SocialLink from '$lib/components/SocialLink.svelte';
+	import Icon from '$components/Icon.svelte';
+	import SocialLink from '$components/SocialLink.svelte';
 	import { socials } from '$lib/store';
 	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';

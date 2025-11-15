@@ -6,18 +6,18 @@
 	export let type: 'country' | 'community';
 	export let data: AreaPageProps;
 
-	import AreaActivity from '$lib/components/AreaActivity.svelte';
-	import AreaMap from '$lib/components/AreaMap.svelte';
-	import AreaMerchantHighlights from '$lib/components/AreaMerchantHighlights.svelte';
-	import AreaStats from '$lib/components/AreaStats.svelte';
-	import AreaTickets from '$lib/components/AreaTickets.svelte';
-	import Boost from '$lib/components/Boost.svelte';
-	import Icon from '$lib/components/Icon.svelte';
-	import IssuesTable from '$lib/components/IssuesTable.svelte';
-	import OrgBadge from '$lib/components/OrgBadge.svelte';
-	import Socials from '$lib/components/Socials.svelte';
-	import SponsorBadge from '$lib/components/SponsorBadge.svelte';
-	import Tip from '$lib/components/Tip.svelte';
+	import AreaActivity from '$components/AreaActivity.svelte';
+	import AreaMap from '$components/AreaMap.svelte';
+	import AreaMerchantHighlights from '$components/AreaMerchantHighlights.svelte';
+	import AreaStats from '$components/AreaStats.svelte';
+	import AreaTickets from '$components/AreaTickets.svelte';
+	import Boost from '$components/Boost.svelte';
+	import Icon from '$components/Icon.svelte';
+	import IssuesTable from '$components/IssuesTable.svelte';
+	import OrgBadge from '$components/OrgBadge.svelte';
+	import Socials from '$components/Socials.svelte';
+	import SponsorBadge from '$components/SponsorBadge.svelte';
+	import Tip from '$components/Tip.svelte';
 
 	import {
 		areaError,

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
-	import Icon from '$lib/components/Icon.svelte';
-	import MapLoadingMain from '$lib/components/MapLoadingMain.svelte';
-	import MerchantDrawerHash from '$lib/components/MerchantDrawerHash.svelte';
+	import Icon from '$components/Icon.svelte';
+	import MapLoadingMain from '$components/MapLoadingMain.svelte';
+	import MerchantDrawerHash from '$components/MerchantDrawerHash.svelte';
 	import {
 		processPlaces,
 		isSupported as isWorkerSupported,

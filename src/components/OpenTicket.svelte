@@ -1,8 +1,8 @@
 <script lang="ts">
 	import Time from 'svelte-time';
 
-	import Icon from '$lib/components/Icon.svelte';
-	import TicketLabel from '$lib/components/TicketLabel.svelte';
+	import Icon from '$components/Icon.svelte';
+	import TicketLabel from '$components/TicketLabel.svelte';
 
 	export let assignees: { html_url: string; avatar_url: string; login: string }[] = [];
 	export let comments: number = 0;

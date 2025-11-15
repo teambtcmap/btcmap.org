@@ -27,7 +27,7 @@
 	import tippy from 'tippy.js';
 
 	import { GradeTable } from '$lib/constants';
-	import Icon from '$lib/components/Icon.svelte';
+	import Icon from '$components/Icon.svelte';
 
 	export let type: AreaType;
 	export let initialPageSize = 10;

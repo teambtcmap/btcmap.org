@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Tip from '$lib/components/Tip.svelte';
+	import Tip from '$components/Tip.svelte';
 	import type { EventType, User } from '$lib/types';
 	import Time from 'svelte-time';
 	import { resolve } from '$app/paths';

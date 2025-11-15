@@ -1,8 +1,8 @@
 <script lang="ts">
-	import AppCard from '$lib/components/AppCard.svelte';
-	import Footer from '$lib/components/Footer.svelte';
-	import Header from '$lib/components/Header.svelte';
-	import HeaderPlaceholder from '$lib/components/HeaderPlaceholder.svelte';
+	import AppCard from '$components/AppCard.svelte';
+	import Footer from '$components/Footer.svelte';
+	import Header from '$components/Header.svelte';
+	import HeaderPlaceholder from '$components/HeaderPlaceholder.svelte';
 	import { apps, theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
 

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import CountrySection from '$lib/components/CountrySection.svelte';
-	import Footer from '$lib/components/Footer.svelte';
-	import Header from '$lib/components/Header.svelte';
-	import HeaderPlaceholder from '$lib/components/HeaderPlaceholder.svelte';
-	import PrimaryButton from '$lib/components/PrimaryButton.svelte';
+	import CountrySection from '$components/CountrySection.svelte';
+	import Footer from '$components/Footer.svelte';
+	import Header from '$components/Header.svelte';
+	import HeaderPlaceholder from '$components/HeaderPlaceholder.svelte';
+	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import { areaError, areas, theme } from '$lib/store';
 	import { detectTheme, errToast, validateContinents } from '$lib/utils';
 	import type { PageData } from './$types';

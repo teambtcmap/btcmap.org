@@ -1,5 +1,5 @@
 <script lang="ts">
-	import SocialLink from '$lib/components/SocialLink.svelte';
+	import SocialLink from '$components/SocialLink.svelte';
 	import { socials } from '$lib/store';
 
 	const links = [

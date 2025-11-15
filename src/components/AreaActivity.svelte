@@ -1,8 +1,8 @@
 <script lang="ts">
-	import LatestTagger from '$lib/components/LatestTagger.svelte';
-	import TaggerSkeleton from '$lib/components/TaggerSkeleton.svelte';
-	import TopButton from '$lib/components/TopButton.svelte';
-	import Icon from '$lib/components/Icon.svelte';
+	import LatestTagger from '$components/LatestTagger.svelte';
+	import TaggerSkeleton from '$components/TaggerSkeleton.svelte';
+	import TopButton from '$components/TopButton.svelte';
+	import Icon from '$components/Icon.svelte';
 	import { type ActivityEvent, type User } from '$lib/types.js';
 	import { resolve } from '$app/paths';
 

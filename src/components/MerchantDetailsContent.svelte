@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Icon from '$lib/components/Icon.svelte';
+	import Icon from '$components/Icon.svelte';
 	import { formatVerifiedHuman } from '$lib/utils';
 	import { resolve } from '$app/paths';
 	import Time from 'svelte-time';
