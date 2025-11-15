@@ -42,6 +42,7 @@ export { default as HeaderPlaceholder } from '../components/HeaderPlaceholder.sv
 export { default as Icon } from '../components/Icon.svelte';
 export { default as InfoTooltip } from '../components/InfoTooltip.svelte';
 export { default as InvoicePayment } from '../components/InvoicePayment.svelte';
+export { default as InvoicePaymentStage } from '../components/InvoicePaymentStage.svelte';
 export { default as IssueCell } from '../components/IssueCell.svelte';
 export { default as IssueIcon } from '../components/IssueIcon.svelte';
 export { default as IssuesTable } from '../components/IssuesTable.svelte';
@@ -54,6 +55,7 @@ export { default as MapLoadingMain } from '../components/MapLoadingMain.svelte';
 export { default as MerchantButton } from '../components/MerchantButton.svelte';
 export { default as MerchantCard } from '../components/MerchantCard.svelte';
 export { default as MerchantComment } from '../components/MerchantComment.svelte';
+export { default as MerchantDrawerHash } from '../components/MerchantDrawerHash.svelte';
 export { default as MerchantEvent } from '../components/MerchantEvent.svelte';
 export { default as MerchantLink } from '../components/MerchantLink.svelte';
 export { default as NavDropdownDesktop } from '../components/NavDropdownDesktop.svelte';
@@ -61,6 +63,7 @@ export { default as NavDropdownMobile } from '../components/NavDropdownMobile.sv
 export { default as OpenTicket } from '../components/OpenTicket.svelte';
 export { default as OpenTicketSkeleton } from '../components/OpenTicketSkeleton.svelte';
 export { default as OrgBadge } from '../components/OrgBadge.svelte';
+export { default as PaymentMethodIcon } from '../components/PaymentMethodIcon.svelte';
 export { default as PrimaryButton } from '../components/PrimaryButton.svelte';
 export { default as ProfileActivity } from '../components/ProfileActivity.svelte';
 export { default as ProfileStat } from '../components/ProfileStat.svelte';

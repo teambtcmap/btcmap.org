@@ -1,6 +1,6 @@
-import { boost, exchangeRate, resetBoost, theme } from '$lib/store';
+import { selectedMerchant, theme } from '$lib/store';
 import { Icon } from '$lib/comp';
-import { detectTheme, errToast, formatVerifiedHuman } from '$lib/utils';
+import { detectTheme, errToast } from '$lib/utils';
 import type { DomEventType, Leaflet, Place } from '$lib/types';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 import axios from 'axios';
@@ -8,7 +8,6 @@ import axiosRetry from 'axios-retry';
 import type { Map, LatLng } from 'leaflet';
 import { get } from 'svelte/store';
 import type { DivIcon } from 'leaflet';
-import Time from 'svelte-time';
 import { replaceState } from '$app/navigation';
 
 const BORDER_BOTTOM_STYLE = '1.5px solid #ccc';
@@ -656,7 +655,8 @@ export const generateMarker = ({
 	placeId,
 	// element,
 	// payment,
-	leaflet: L
+	leaflet: L,
+	onMarkerClick
 	// verifiedDate,
 	// verify,
 	// boosted
@@ -667,6 +667,8 @@ export const generateMarker = ({
 	icon: DivIcon;
 	placeId: number | string;
 	leaflet: Leaflet;
+	onMarkerClick?: (placeId: number | string) => void;
+	// verifiedDate: number;
 	verify: boolean;
 	boosted?: boolean;
 	// issues?: Issue[];
@@ -674,320 +676,19 @@ export const generateMarker = ({
 	const marker = L.marker([lat, long], { icon });
 
 	marker.on('click', async () => {
-		if (marker.isPopupOpen()) {
-			marker.closePopup();
+		if (onMarkerClick) {
+			onMarkerClick(placeId);
 		} else {
-			// Fetch place details from v4 API
+			// Fallback to old store-based behavior
 			try {
 				const response = await axios.get(
 					`https://api.btcmap.org/v4/places/${placeId}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`
 				);
 				const placeDetails = response.data;
-
-				// Calculate verification status
-				const verifiedDate = calcVerifiedDate(); // 1 year ago
-
-				const isUpToDate =
-					placeDetails.verified_at && Date.parse(placeDetails.verified_at) > verifiedDate;
-
-				// Calculate boosted status
-				const isBoosted =
-					placeDetails.boosted_until && Date.parse(placeDetails.boosted_until) > Date.now();
-
-				// Create popup with proper styling structure
-				const popupContent = L.DomUtil.create('div');
-				const theme = detectTheme();
-
-				// Check if we have an OSM URL to extract type and id for links
-				let osmType = 'node';
-				let osmId = placeDetails.id;
-				if (placeDetails.osm_url) {
-					const osmMatch = placeDetails.osm_url.match(/openstreetmap\.org\/([^/]+)\/(\d+)/);
-					if (osmMatch) {
-						osmType = osmMatch[1];
-						osmId = osmMatch[2];
-					}
-				}
-
-				popupContent.innerHTML = `
-					${
-						placeDetails.name
-							? `<a href='/merchant/${placeId}' class='inline-block font-bold text-lg leading-snug max-w-[300px]' title='Merchant name'>
-							<span class='!text-link hover:!text-hover transition-colors'>${placeDetails.name}</span>
-						   </a>`
-							: ''
-					}
-
-					<span class='block text-body dark:text-white max-w-[300px]' title='Address'>${
-						placeDetails.address || ''
-					}</span>
-
-					${
-						placeDetails.opening_hours
-							? `<div class='my-1 w-full max-w-[300px]' title='Opening hours'>
-							<svg width='16px' height='16px' class='inline text-primary dark:text-white'>
-								<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#clock"></use>
-							</svg>
-							<span class='text-body dark:text-white'>${placeDetails.opening_hours}</span>
-						   </div>`
-							: ''
-					}
-
-					<div class='flex space-x-2 mt-2.5 mb-1'>
-						<a id='navigate' href='geo:${lat},${long}' class='border border-gray-300 dark:border-white/95 hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
-							<svg width='24px' height='24px' class='mx-auto'>
-								<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#compass"></use>
-							</svg>
-							<span class='block text-xs text-center mt-1'>Navigate</span>
-						</a>
-
-						<a id='edit' href='${placeDetails.osm_url || `https://www.openstreetmap.org/edit?${osmType}=${osmId}`}' target="_blank" rel="noreferrer" class='border border-gray-300 dark:border-white/95 hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
-							<svg width='24px' height='24px' class='mx-auto'>
-								<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#pencil"></use>
-							</svg>
-							<span class='block text-xs text-center mt-1'>Edit</span>
-						</a>
-
-						<a id='share' href='/merchant/${placeId}' target="_blank" rel="noreferrer" class='border border-gray-300 dark:border-white/95 hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
-							<svg width='24px' height='24px' class='mx-auto'>
-								<use width='24px' height='24px' href="/icons/spritesheet-popup.svg#share"></use>
-							</svg>
-							<span class='block text-xs text-center mt-1'>Share</span>
-						</a>
-
-						<a href='/merchant/${placeId}#comments' class='border border-gray-300 dark:border-white/95 hover:border-link !text-primary dark:!text-white hover:!text-link dark:hover:!text-link rounded-lg py-1 w-full transition-colors'>
-							<div class='flex items-center justify-center h-6 text-lg font-bold mx-auto'>
-								${typeof placeDetails.comments === 'number' ? placeDetails.comments : placeDetails.comments?.length || 0}
-							</div>
-							<span class='block text-xs text-center mt-1'>Comments</span>
-						</a>
-					</div>
-
-					<div class='w-full border-t-[0.5px] border-gray-300 dark:border-white/95 mt-3 mb-2 opacity-80'></div>
-
-					<div class='flex space-x-4'>
-						${
-							placeDetails['osm:payment:onchain'] ||
-							placeDetails['osm:payment:lightning'] ||
-							placeDetails['osm:payment:lightning_contactless'] ||
-							placeDetails['osm:payment:bitcoin']
-								? `<div>
-									<span class='block text-mapLabel text-xs dark:text-white/70'>Payment Methods</span>
-									<div class='w-full flex space-x-2 mt-0.5'>
-										<img src="${
-											placeDetails['osm:payment:onchain'] === 'yes'
-												? theme === 'dark'
-													? '/icons/btc-highlight-dark.svg'
-													: '/icons/btc-highlight.svg'
-												: placeDetails['osm:payment:onchain'] === 'no'
-													? theme === 'dark'
-														? '/icons/btc-no-dark.svg'
-														: '/icons/btc-no.svg'
-													: theme === 'dark'
-														? '/icons/btc-dark.svg'
-														: '/icons/btc.svg'
-										}" alt="bitcoin" class="w-6 h-6" title="${
-											placeDetails['osm:payment:onchain'] === 'yes'
-												? 'On-chain accepted'
-												: placeDetails['osm:payment:onchain'] === 'no'
-													? 'On-chain not accepted'
-													: 'On-chain unknown'
-										}"/>
-										<img src="${
-											placeDetails['osm:payment:lightning'] === 'yes'
-												? theme === 'dark'
-													? '/icons/ln-highlight-dark.svg'
-													: '/icons/ln-highlight.svg'
-												: placeDetails['osm:payment:lightning'] === 'no'
-													? theme === 'dark'
-														? '/icons/ln-no-dark.svg'
-														: '/icons/ln-no.svg'
-													: theme === 'dark'
-														? '/icons/ln-dark.svg'
-														: '/icons/ln.svg'
-										}" alt="lightning" class="w-6 h-6" title="${
-											placeDetails['osm:payment:lightning'] === 'yes'
-												? 'Lightning accepted'
-												: placeDetails['osm:payment:lightning'] === 'no'
-													? 'Lightning not accepted'
-													: 'Lightning unknown'
-										}"/>
-										<img src="${
-											placeDetails['osm:payment:lightning_contactless'] === 'yes'
-												? theme === 'dark'
-													? '/icons/nfc-highlight-dark.svg'
-													: '/icons/nfc-highlight.svg'
-												: placeDetails['osm:payment:lightning_contactless'] === 'no'
-													? theme === 'dark'
-														? '/icons/nfc-no-dark.svg'
-														: '/icons/nfc-no.svg'
-													: theme === 'dark'
-														? '/icons/nfc-dark.svg'
-														: '/icons/nfc.svg'
-										}" alt="nfc" class="w-6 h-6" title="${
-											placeDetails['osm:payment:lightning_contactless'] === 'yes'
-												? 'Lightning Contactless accepted'
-												: placeDetails['osm:payment:lightning_contactless'] === 'no'
-													? 'Lightning contactless not accepted'
-													: 'Lightning contactless unknown'
-										}"/>
-									</div>
-								   </div>`
-								: ''
-						}
-
-						<div>
-							<span class='block text-mapLabel text-xs dark:text-white/70' title="Completed by BTC Map community members">Last Surveyed</span>
-							<span class='block text-body dark:text-white'>
-								${
-									placeDetails.verified_at
-										? `${formatVerifiedHuman(placeDetails.verified_at)} ${
-												isUpToDate
-													? `<span title="Verified within the last year"><svg width='16px' height='16px' class='inline text-primary dark:text-white'>
-												<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#verified"></use>
-											</svg></span>`
-													: `<span title="Outdated please re-verify"><svg width='16px' height='16px' class='inline text-primary dark:text-white'>
-												<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#outdated"></use>
-											</svg></span>`
-											}`
-										: '<span title="Not verified">---</span>'
-								}
-							</span>
-							
-							${
-								location.pathname === '/map'
-									? `<a href="/verify-location?id=${placeId}" class='!text-link hover:!text-hover text-xs transition-colors' title="Help improve the data for everyone">Verify Location</a>`
-									: ''
-							}
-						</div>
-
-						<div>
-							${
-								isBoosted
-									? `<span class='block text-mapLabel text-xs dark:text-white/70' title="This location is boosted!">Boost Expires</span>
-									   <span class='block text-body dark:text-white'><span id="boosted-time"></span></span>`
-									: ''
-							}
-
-							<button title='${isBoosted ? 'Extend Boost' : 'Boost'}' id='boost-button' class='flex justify-center items-center space-x-2 text-primary dark:text-white hover:text-link dark:hover:text-link border border-gray-300 dark:border-white/95 hover:border-link rounded-lg px-3 h-[32px] transition-colors mt-1'>
-								<svg width='16px' height='16px' style='color: inherit; fill: currentColor;' class='text-primary dark:text-white'>
-									<use width='16px' height='16px' href="/icons/spritesheet-popup.svg#${
-										isBoosted ? 'boost-solid' : 'boost'
-									}"></use>
-								</svg>
-								<span class='text-xs'>${isBoosted ? 'Extend' : 'Boost'}</span>
-							</button>
-						</div>
-					</div>
-
-					${
-						theme === 'dark'
-							? `<style>
-							.leaflet-popup-content-wrapper, .leaflet-popup-tip {
-								background-color: #06171C;
-								border: 1px solid #e5e7eb
-							}
-						   </style>`
-							: ''
-					}
-				`;
-
-				marker
-					.bindPopup(popupContent, { closeButton: false, maxWidth: 1000, minWidth: 300 })
-					.openPopup()
-					.on('popupclose', () => {
-						marker.unbindPopup();
-					});
-
-				// Hydrate the boost expiration time with the Time component
-				if (isBoosted) {
-					const boostedTimeElement = popupContent.querySelector('#boosted-time');
-					if (boostedTimeElement) {
-						new Time({
-							target: boostedTimeElement,
-							props: {
-								live: 3000,
-								relative: true,
-								timestamp: placeDetails.boosted_until
-							}
-						});
-					}
-				}
-
-				// Boost button event handler
-				const boostBtn: HTMLButtonElement | null = popupContent.querySelector('#boost-button');
-				if (boostBtn) {
-					const boostButtonText: HTMLSpanElement | null = boostBtn.querySelector('span');
-					const boostButtonIcon: SVGElement | null = boostBtn.querySelector('svg');
-
-					const resetButton = () => {
-						if (boostBtn && boostButtonText && boostButtonIcon) {
-							boostBtn.disabled = false;
-							boostButtonText.innerText = isBoosted ? 'Extend' : 'Boost';
-							boostBtn.classList.add('space-x-2');
-							boostButtonIcon.classList.remove('hidden');
-						}
-					};
-
-					boostBtn.onclick = async (e) => {
-						e.preventDefault();
-
-						// Set up boost data similar to BoostButton.svelte
-						const boostStore = get(boost);
-						if (boostStore) return; // Prevent multiple boost flows
-
-						// Update button to loading state
-						if (boostBtn && boostButtonText && boostButtonIcon) {
-							boostBtn.disabled = true;
-							boostButtonIcon.classList.add('hidden');
-							boostBtn.classList.remove('space-x-2');
-							boostButtonText.innerText = 'Boosting...';
-						}
-
-						// Set the boost data in the global store
-						boost.set({
-							id: placeDetails.id,
-							name: placeDetails.name || '',
-							boost: isBoosted ? placeDetails.boosted_until || '' : ''
-						});
-
-						// Fetch exchange rate
-						try {
-							const response = await axios.get('https://blockchain.info/ticker');
-							exchangeRate.set(response.data['USD']['15m']);
-						} catch (error) {
-							console.error('Error fetching exchange rate:', error);
-							// Reset boost store on error
-							boost.set(undefined);
-							resetButton();
-							errToast(
-								'Could not fetch bitcoin exchange rate, please try again or contact BTC Map.'
-							);
-						}
-					};
-
-					// Subscribe to resetBoost store for external resets
-					resetBoost.subscribe(resetButton);
-				}
+				selectedMerchant.set(placeDetails);
 			} catch (error) {
 				console.error('Error fetching place details:', error);
-
-				// Fallback popup with basic info
-				const errorPopup = L.DomUtil.create('div');
-				errorPopup.innerHTML = `
-					<div style="padding: 10px;">
-						<h3>Place ${placeId}</h3>
-						<p>Error loading details. Please try again.</p>
-						<p>Lat: ${lat}, Lon: ${long}</p>
-					</div>
-				`;
-
-				marker
-					.bindPopup(errorPopup, { closeButton: true, maxWidth: 250 })
-					.openPopup()
-					.on('popupclose', () => {
-						marker.unbindPopup();
-					});
+				errToast('Error loading merchant details. Please try again.');
 			}
 		}
 	});

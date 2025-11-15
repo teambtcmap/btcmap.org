@@ -2,7 +2,7 @@
 	import { Icon } from '$lib/comp';
 	import { boost, exchangeRate, resetBoost } from '$lib/store';
 	import type { Place } from '$lib/types';
-	import { errToast } from '$lib/utils';
+	import { fetchExchangeRate } from '$lib/utils';
 	import axios from 'axios';
 	import axiosRetry from 'axios-retry';
 
@@ -18,7 +18,7 @@
 		boostLoading = false;
 	};
 
-	const startBoost = () => {
+	const startBoost = async () => {
 		if (!merchant) return;
 
 		boostLoading = true;
@@ -29,16 +29,11 @@
 			boost: boosted || ''
 		};
 
-		axios
-			.get('https://blockchain.info/ticker')
-			.then(function (response) {
-				$exchangeRate = response.data['USD']['15m'];
-			})
-			.catch(function (error) {
-				errToast('Could not fetch bitcoin exchange rate, please try again or contact BTC Map.');
-				console.error(error);
-				resetBoostLoading();
-			});
+		try {
+			$exchangeRate = await fetchExchangeRate();
+		} catch {
+			resetBoostLoading();
+		}
 	};
 
 	$: $resetBoost && resetBoostLoading();

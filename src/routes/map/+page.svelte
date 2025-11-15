@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
-	import { Boost, Icon, MapLoadingMain, ShowTags, TaggingIssues } from '$lib/comp';
+	import { Icon, MapLoadingMain, MerchantDrawerHash } from '$lib/comp';
 	import {
 		processPlaces,
 		isSupported as isWorkerSupported,
@@ -65,16 +65,35 @@
 		}
 	}
 
-	// Configuration constants for viewport-based loading
-	const MAX_LOADED_MARKERS = 200; // Maximum markers to keep in memory before cleanup
-	const VIEWPORT_BATCH_SIZE = 25; // Batch size for processing markers in viewport
-	const VIEWPORT_BUFFER_PERCENT = 0.2; // Buffer around viewport (20%)
-	const DEBOUNCE_DELAY = 300; // Debounce delay for map movement (ms)
+	const MAX_LOADED_MARKERS = 200;
+	const VIEWPORT_BATCH_SIZE = 25;
+	const VIEWPORT_BUFFER_PERCENT = 0.2;
+	const DEBOUNCE_DELAY = 300;
 
-	// Default map view constants
 	const DEFAULT_LAT = 12.11209;
 	const DEFAULT_LNG = -68.91119;
 	const DEFAULT_ZOOM = 15;
+
+	function openMerchantDrawer(id: number) {
+		if (selectedMarkerId) {
+			clearMarkerSelection(selectedMarkerId);
+		}
+
+		selectedMarkerId = id;
+		highlightMarker(id);
+
+		const hash = window.location.hash.substring(1);
+		const ampIndex = hash.indexOf('&');
+		const mapPart = ampIndex !== -1 ? hash.substring(0, ampIndex) : hash;
+		const params = new URLSearchParams();
+		params.set('merchant', String(id));
+
+		if (mapPart) {
+			window.location.hash = `${mapPart}&${params.toString()}`;
+		} else {
+			window.location.hash = params.toString();
+		}
+	}
 
 	let leaflet: Leaflet;
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -85,16 +104,60 @@
 	let mapLoaded = false;
 	let elementsLoaded = false;
 
-	// Viewport-based loading state
 	let markers: MarkerClusterGroup;
 	let upToDateLayer: FeatureGroup.SubGroup;
-	let loadedMarkers: Record<string, Marker> = {}; // placeId -> marker
+	let loadedMarkers: Record<string, Marker> = {};
+	let selectedMarkerId: number | null = null;
 
 	let isLoadingMarkers = false;
 
 	let mapCenter: LatLng;
 
-	// Search functionality re-enabled with API-based search
+	const clearMarkerSelection = (markerId: number) => {
+		const marker = loadedMarkers[markerId.toString()];
+		if (!marker) return;
+
+		const markerIcon = marker.getElement();
+		if (markerIcon) {
+			markerIcon.classList.remove('selected-marker', 'selected-marker-boosted');
+		}
+	};
+
+	const highlightMarker = (markerId: number) => {
+		const marker = loadedMarkers[markerId.toString()];
+		if (!marker) return;
+
+		const markerIcon = marker.getElement();
+		if (markerIcon) {
+			const isBoosted = markerIcon.classList.contains('boosted-icon');
+			markerIcon.classList.add(isBoosted ? 'selected-marker-boosted' : 'selected-marker');
+		}
+	};
+
+	const handleHashChange = () => {
+		if (!browser) return;
+		const hash = window.location.hash.substring(1);
+		const hasDrawer = hash.includes('merchant=');
+
+		if (!hasDrawer && selectedMarkerId) {
+			clearMarkerSelection(selectedMarkerId);
+			selectedMarkerId = null;
+		} else if (hasDrawer) {
+			const params = new URLSearchParams(hash.substring(hash.indexOf('&') + 1));
+			const merchantParam = params.get('merchant');
+			if (merchantParam) {
+				const merchantId = Number(merchantParam);
+				if (merchantId !== selectedMarkerId) {
+					if (selectedMarkerId) {
+						clearMarkerSelection(selectedMarkerId);
+					}
+					selectedMarkerId = merchantId;
+					highlightMarker(merchantId);
+				}
+			}
+		}
+	};
+
 	let customSearchBar: HTMLDivElement;
 	let clearSearchButton: HTMLButtonElement;
 	let showSearch = false;
@@ -404,7 +467,8 @@
 				icon: divIcon,
 				placeId: place.id,
 				leaflet,
-				verify: true
+				verify: true,
+				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
 
 			upToDateLayer.addLayer(marker);
@@ -445,8 +509,18 @@
 
 		elementsLoaded = true;
 
-		// Status will be cleared by reactive statement above
-		// No manual timeout needed - reactive state management handles it
+		if (browser) {
+			const hash = window.location.hash.substring(1);
+			if (hash.includes('merchant=')) {
+				const params = new URLSearchParams(hash.substring(hash.indexOf('&') + 1));
+				const merchantParam = params.get('merchant');
+				if (merchantParam) {
+					const merchantId = Number(merchantParam);
+					selectedMarkerId = merchantId;
+					highlightMarker(merchantId);
+				}
+			}
+		}
 	};
 
 	// Process a batch of places on the main thread (DOM operations only)
@@ -472,7 +546,8 @@
 				icon: divIcon,
 				placeId: element.id,
 				leaflet,
-				verify: true
+				verify: true,
+				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
 
 			layer.addLayer(marker);
@@ -522,7 +597,9 @@
 			// use url hash if present
 			if (location.hash) {
 				try {
-					const coords = location.hash.split('/');
+					// Extract only the map coordinates part (before any & parameters)
+					const hashPart = location.hash.split('&')[0];
+					const coords = hashPart.split('/');
 					map.setView([Number(coords[1]), Number(coords[2])], Number(coords[0].slice(1)));
 					setMapViewAndMarkLoaded();
 				} catch (error) {
@@ -612,6 +689,22 @@
 				localforage.setItem('coords', coords).catch(function (err) {
 					console.error(err);
 				});
+			});
+
+			// Close drawer when clicking on map (not on markers)
+			map.on('click', () => {
+				if (selectedMarkerId) {
+					const hash = window.location.hash.substring(1);
+					const ampIndex = hash.indexOf('&');
+					const mapPart = ampIndex !== -1 ? hash.substring(0, ampIndex) : hash;
+
+					// Remove merchant parameter and reset hash to just map location
+					if (mapPart) {
+						window.location.hash = mapPart;
+					} else {
+						window.location.hash = '';
+					}
+				}
 			});
 
 			// change broken marker image path in prod
@@ -800,6 +893,9 @@
 				mapCenter = map.getCenter();
 				mapLoaded = true;
 			});
+
+			// Watch for hash changes to clear marker selection when drawer closes
+			window.addEventListener('hashchange', handleHashChange);
 		}
 	});
 
@@ -814,6 +910,11 @@
 		// Reset loading progress when leaving map page to avoid stale states
 		placesLoadingProgress.set(0);
 		placesLoadingStatus.set('');
+
+		// Remove hash change listener
+		if (browser) {
+			window.removeEventListener('hashchange', handleHashChange);
+		}
 	});
 </script>
 
@@ -923,12 +1024,7 @@
 		{/if}
 	</div>
 
-	{#if browser}
-		<Boost />
-	{/if}
-
-	<ShowTags />
-	<TaggingIssues />
+	<MerchantDrawerHash />
 
 	<div bind:this={mapElement} class="absolute h-[100%] w-full !bg-teal dark:!bg-dark" />
 </main>

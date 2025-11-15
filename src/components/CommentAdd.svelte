@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
-	import { CloseButton, CopyButton, Icon, PrimaryButton, InvoicePayment } from '$lib/comp';
+	import { CloseButton, Icon, PrimaryButton } from '$lib/comp';
 	import { PAYMENT_ERROR_MESSAGE } from '$lib/constants';
 	import { lastUpdatedPlaceId } from '$lib/store';
 	import { updateSinglePlace } from '$lib/sync/places';
@@ -9,6 +9,7 @@
 	import OutClick from 'svelte-outclick';
 	import { fly } from 'svelte/transition';
 	import type { MerchantPageData } from '$lib/types.js';
+	import InvoicePaymentStage from './InvoicePaymentStage.svelte';
 
 	export let open: boolean = false;
 	export let elementId: MerchantPageData['id'] | undefined;
@@ -120,45 +121,20 @@
 					</PrimaryButton>
 				</form>
 			{:else if stage === 1}
-				<div class="space-y-4 text-center">
-					<p class="text-xl font-bold text-primary dark:text-white">
-						Scan or click to pay with lightning
-					</p>
-
-					<a href="lightning:{invoice}" class="inline-block">
-						<InvoicePayment
-							{invoice}
-							{invoiceId}
-							onSuccess={handlePaymentSuccess}
-							onError={handlePaymentError}
-							onStatusCheckError={handleStatusCheckError}
-						/>
-					</a>
-
-					<div
-						class="flex w-full items-center justify-between space-x-2 rounded-xl border-2 border-gray-300 p-2 md:justify-center dark:border-white/95"
-					>
-						<p class="hidden text-sm text-body md:block dark:text-white">
-							{invoice.slice(0, 39)}...
-						</p>
-						<p class="block text-sm text-body uppercase md:hidden dark:text-white">
-							Invoice <img
-								src="/icons/ln-highlight.svg"
-								alt="protocol"
-								class="mb-1 inline dark:rounded-full dark:bg-white dark:p-0.5"
-							/>
-						</p>
-
-						<CopyButton value={invoice} />
-					</div>
-
+				<InvoicePaymentStage
+					{invoice}
+					{invoiceId}
+					onSuccess={handlePaymentSuccess}
+					onError={handlePaymentError}
+					onStatusCheckError={handleStatusCheckError}
+				>
 					<p class="rounded-md border p-1 text-sm text-body dark:text-white">
 						<Icon w="16" h="16" icon="info" style="inline-block" />
 						Your comment will be published when our bots have confirmed the payment.
 					</p>
 
 					<PrimaryButton style="w-full rounded-xl p-3" on:click={closeModal}>Close</PrimaryButton>
-				</div>
+				</InvoicePaymentStage>
 			{:else}
 				<div class="space-y-4 text-center">
 					<p class="text-xl font-bold text-primary dark:text-white">Thank you for your comment!</p>
