@@ -4,7 +4,8 @@
 	export let issue: number;
 	export let buttonWidth = 'w-52';
 
-	import { HeaderPlaceholder, PrimaryButton } from '$lib/comp';
+	import HeaderPlaceholder from '$lib/components/HeaderPlaceholder.svelte';
+	import PrimaryButton from '$lib/components/PrimaryButton.svelte';
 	import { theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
 </script>

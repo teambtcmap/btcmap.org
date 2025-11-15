@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { Icon, ProfileStat } from '$lib/comp';
+	import Icon from '$lib/components/Icon.svelte';
+	import ProfileStat from '$lib/components/ProfileStat.svelte';
 	import { calcVerifiedDate, verifiedArr } from '$lib/map/setup';
 	import { theme } from '$lib/store';
 	import { type Place, type Report, type AreaTags } from '$lib/types.js';

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { LoadingSpinner } from '$lib/comp';
+	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 
 	export let style: string;
 	export let link: undefined | string = undefined;

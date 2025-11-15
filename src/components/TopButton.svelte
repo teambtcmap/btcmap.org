@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Icon } from '$lib/comp';
+	import Icon from '$lib/components/Icon.svelte';
 	export let scroll: undefined | HTMLElement = undefined;
 	export let style: undefined | string = undefined;
 </script>

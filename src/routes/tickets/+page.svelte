@@ -1,12 +1,10 @@
 <script lang="ts">
-	import {
-		Footer,
-		Header,
-		HeaderPlaceholder,
-		OpenTicket,
-		OpenTicketSkeleton,
-		TopButton
-	} from '$lib/comp';
+	import Footer from '$lib/components/Footer.svelte';
+	import Header from '$lib/components/Header.svelte';
+	import HeaderPlaceholder from '$lib/components/HeaderPlaceholder.svelte';
+	import OpenTicket from '$lib/components/OpenTicket.svelte';
+	import OpenTicketSkeleton from '$lib/components/OpenTicketSkeleton.svelte';
+	import TopButton from '$lib/components/TopButton.svelte';
 	import { theme } from '$lib/store';
 	import { detectTheme, errToast } from '$lib/utils';
 	import type { GiteaLabel } from '$lib/types';

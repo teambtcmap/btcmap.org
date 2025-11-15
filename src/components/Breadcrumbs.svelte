@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Icon } from '$lib/comp';
+	import Icon from '$lib/components/Icon.svelte';
 	type Routes = { name: string; url: string }[];
 	export let routes: Routes;
 </script>

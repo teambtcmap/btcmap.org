@@ -2,7 +2,11 @@
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 
-	import { CommunitySection, Footer, Header, HeaderPlaceholder, PrimaryButton } from '$lib/comp';
+	import CommunitySection from '$lib/components/CommunitySection.svelte';
+	import Footer from '$lib/components/Footer.svelte';
+	import Header from '$lib/components/Header.svelte';
+	import HeaderPlaceholder from '$lib/components/HeaderPlaceholder.svelte';
+	import PrimaryButton from '$lib/components/PrimaryButton.svelte';
 	import { areaError, areas, reportError, syncStatus, theme } from '$lib/store';
 	import { detectTheme, errToast } from '$lib/utils';
 	import { getOrganizationDisplayName } from '$lib/organizationDisplayNames';

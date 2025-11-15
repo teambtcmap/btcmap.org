@@ -1,12 +1,10 @@
 <script lang="ts">
-	import {
-		Footer,
-		Header,
-		HeaderPlaceholder,
-		LatestTagger,
-		TaggerSkeleton,
-		TopButton
-	} from '$lib/comp';
+	import Footer from '$lib/components/Footer.svelte';
+	import Header from '$lib/components/Header.svelte';
+	import HeaderPlaceholder from '$lib/components/HeaderPlaceholder.svelte';
+	import LatestTagger from '$lib/components/LatestTagger.svelte';
+	import TaggerSkeleton from '$lib/components/TaggerSkeleton.svelte';
+	import TopButton from '$lib/components/TopButton.svelte';
 	import { placesError, eventError, events, syncStatus, theme, userError, users } from '$lib/store';
 	import type { ActivityEvent, Event, User } from '$lib/types';
 	import { detectTheme, errToast, formatElementID } from '$lib/utils';

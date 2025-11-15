@@ -1,12 +1,10 @@
 <script lang="ts">
-	import {
-		AreaLeaderboard,
-		Breadcrumbs,
-		Footer,
-		Header,
-		HeaderPlaceholder,
-		PrimaryButton
-	} from '$lib/comp';
+	import AreaLeaderboard from '$lib/components/leaderboard/AreaLeaderboard.svelte';
+	import Breadcrumbs from '$lib/components/Breadcrumbs.svelte';
+	import Footer from '$lib/components/Footer.svelte';
+	import Header from '$lib/components/Header.svelte';
+	import HeaderPlaceholder from '$lib/components/HeaderPlaceholder.svelte';
+	import PrimaryButton from '$lib/components/PrimaryButton.svelte';
 	import { theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
 

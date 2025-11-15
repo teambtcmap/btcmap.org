@@ -1,15 +1,13 @@
 <script lang="ts">
 	export let data: import('./+page.server').VerifyLocationPageData;
 	import { browser } from '$app/environment';
-	import {
-		Footer,
-		FormSuccess,
-		Header,
-		HeaderPlaceholder,
-		Icon,
-		InfoTooltip,
-		PrimaryButton
-	} from '$lib/comp';
+	import Footer from '$lib/components/Footer.svelte';
+	import FormSuccess from '$lib/components/FormSuccess.svelte';
+	import Header from '$lib/components/Header.svelte';
+	import HeaderPlaceholder from '$lib/components/HeaderPlaceholder.svelte';
+	import Icon from '$lib/components/Icon.svelte';
+	import InfoTooltip from '$lib/components/InfoTooltip.svelte';
+	import PrimaryButton from '$lib/components/PrimaryButton.svelte';
 	import { placesError, theme } from '$lib/store';
 	import { detectTheme, errToast } from '$lib/utils';
 	import axios from 'axios';

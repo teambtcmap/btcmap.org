@@ -6,20 +6,18 @@
 	export let type: 'country' | 'community';
 	export let data: AreaPageProps;
 
-	import {
-		AreaActivity,
-		AreaMap,
-		AreaMerchantHighlights,
-		AreaStats,
-		AreaTickets,
-		Boost,
-		Icon,
-		IssuesTable,
-		OrgBadge,
-		Socials,
-		SponsorBadge,
-		Tip
-	} from '$lib/comp';
+	import AreaActivity from '$lib/components/AreaActivity.svelte';
+	import AreaMap from '$lib/components/AreaMap.svelte';
+	import AreaMerchantHighlights from '$lib/components/AreaMerchantHighlights.svelte';
+	import AreaStats from '$lib/components/AreaStats.svelte';
+	import AreaTickets from '$lib/components/AreaTickets.svelte';
+	import Boost from '$lib/components/Boost.svelte';
+	import Icon from '$lib/components/Icon.svelte';
+	import IssuesTable from '$lib/components/IssuesTable.svelte';
+	import OrgBadge from '$lib/components/OrgBadge.svelte';
+	import Socials from '$lib/components/Socials.svelte';
+	import SponsorBadge from '$lib/components/SponsorBadge.svelte';
+	import Tip from '$lib/components/Tip.svelte';
 
 	import {
 		areaError,

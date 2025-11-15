@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { GradeTable, Icon, MapLoadingEmbed, ShowTags, TaggingIssues } from '$lib/comp';
+	import { GradeTable } from '$lib/comp';
+	import Icon from '$lib/components/Icon.svelte';
+	import MapLoadingEmbed from '$lib/components/MapLoadingEmbed.svelte';
+	import ShowTags from '$lib/components/ShowTags.svelte';
+	import TaggingIssues from '$lib/components/TaggingIssues.svelte';
 	import {
 		attribution,
 		changeDefaultIcons,

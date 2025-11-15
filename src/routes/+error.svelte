@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { Icon, SocialLink } from '$lib/comp';
+	import Icon from '$lib/components/Icon.svelte';
+	import SocialLink from '$lib/components/SocialLink.svelte';
 	import { socials } from '$lib/store';
 	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';

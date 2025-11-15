@@ -4,7 +4,12 @@
 
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import { Footer, Header, ProfileActivity, ProfileStat, Tip, Icon } from '$lib/comp';
+	import Footer from '$lib/components/Footer.svelte';
+	import Header from '$lib/components/Header.svelte';
+	import ProfileActivity from '$lib/components/ProfileActivity.svelte';
+	import ProfileStat from '$lib/components/ProfileStat.svelte';
+	import Tip from '$lib/components/Tip.svelte';
+	import Icon from '$lib/components/Icon.svelte';
 	import {
 		placesError,
 		eventError,

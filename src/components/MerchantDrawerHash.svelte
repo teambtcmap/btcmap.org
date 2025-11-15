@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { places, boost, exchangeRate, resetBoost } from '$lib/store';
-	import { CloseButton, Icon } from '$lib/comp';
+	import CloseButton from '$lib/components/CloseButton.svelte';
+	import Icon from '$lib/components/Icon.svelte';
 	import { fly } from 'svelte/transition';
 	import axios from 'axios';
 	import { errToast, fetchExchangeRate } from '$lib/utils';

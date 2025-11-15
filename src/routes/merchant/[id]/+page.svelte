@@ -2,26 +2,24 @@
 	export let data: MerchantPageData;
 
 	import { browser } from '$app/environment';
-	import {
-		Boost,
-		BoostButton,
-		Card,
-		CommentAddButton,
-		Footer,
-		Header,
-		Icon,
-		MapLoadingEmbed,
-		MerchantButton,
-		MerchantEvent,
-		MerchantComment,
-		MerchantLink,
-		PaymentMethodIcon,
-		PrimaryButton,
-		ShowTags,
-		TaggerSkeleton,
-		TaggingIssues,
-		TopButton
-	} from '$lib/comp';
+	import Boost from '$lib/components/Boost.svelte';
+	import BoostButton from '$lib/components/BoostButton.svelte';
+	import Card from '$lib/components/Card.svelte';
+	import CommentAddButton from '$lib/components/CommentAddButton.svelte';
+	import Footer from '$lib/components/Footer.svelte';
+	import Header from '$lib/components/Header.svelte';
+	import Icon from '$lib/components/Icon.svelte';
+	import MapLoadingEmbed from '$lib/components/MapLoadingEmbed.svelte';
+	import MerchantButton from '$lib/components/MerchantButton.svelte';
+	import MerchantEvent from '$lib/components/MerchantEvent.svelte';
+	import MerchantComment from '$lib/components/MerchantComment.svelte';
+	import MerchantLink from '$lib/components/MerchantLink.svelte';
+	import PaymentMethodIcon from '$lib/components/PaymentMethodIcon.svelte';
+	import PrimaryButton from '$lib/components/PrimaryButton.svelte';
+	import ShowTags from '$lib/components/ShowTags.svelte';
+	import TaggerSkeleton from '$lib/components/TaggerSkeleton.svelte';
+	import TaggingIssues from '$lib/components/TaggingIssues.svelte';
+	import TopButton from '$lib/components/TopButton.svelte';
 	import { updateSinglePlace } from '$lib/sync/places';
 	import {
 		attribution,

@@ -21,7 +21,7 @@
 
 	export let style: undefined | string = undefined;
 
-	import { Icon } from '$lib/comp';
+	import Icon from '$lib/components/Icon.svelte';
 </script>
 
 <div class="flex flex-wrap items-center justify-center {style || ''}">

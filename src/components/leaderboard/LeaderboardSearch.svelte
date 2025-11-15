@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Table } from '@tanstack/svelte-table';
-	import { Icon } from '$lib/comp';
+	import Icon from '$lib/components/Icon.svelte';
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let table: Table<any>;

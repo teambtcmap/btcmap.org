@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { InfoTooltip, OpenTicket } from '$lib/comp';
+	import InfoTooltip from '$lib/components/InfoTooltip.svelte';
+	import OpenTicket from '$lib/components/OpenTicket.svelte';
 	import { type Tickets } from '$lib/types.js';
 	import { errToast } from '$lib/utils';
 

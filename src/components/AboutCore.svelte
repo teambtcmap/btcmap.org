@@ -6,7 +6,7 @@
 		socials: { url: string; name: string }[];
 	};
 
-	import { Icon } from '$lib/comp';
+	import Icon from '$lib/components/Icon.svelte';
 </script>
 
 <div class="space-y-2 text-center">

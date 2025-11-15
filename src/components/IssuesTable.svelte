@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Icon, IssueCell } from '$lib/comp';
+	import Icon from '$lib/components/Icon.svelte';
+	import IssueCell from '$lib/components/IssueCell.svelte';
 	import { theme } from '$lib/store';
 	import type { RpcIssue } from '$lib/types';
 	import { debounce, detectTheme, getIssueHelpLink, getIssueIcon, isEven } from '$lib/utils';

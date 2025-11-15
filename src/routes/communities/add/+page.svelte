@@ -1,15 +1,13 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import {
-		Breadcrumbs,
-		Footer,
-		FormSuccess,
-		Header,
-		HeaderPlaceholder,
-		Icon,
-		InfoTooltip,
-		PrimaryButton
-	} from '$lib/comp';
+	import Breadcrumbs from '$lib/components/Breadcrumbs.svelte';
+	import Footer from '$lib/components/Footer.svelte';
+	import FormSuccess from '$lib/components/FormSuccess.svelte';
+	import Header from '$lib/components/Header.svelte';
+	import HeaderPlaceholder from '$lib/components/HeaderPlaceholder.svelte';
+	import Icon from '$lib/components/Icon.svelte';
+	import InfoTooltip from '$lib/components/InfoTooltip.svelte';
+	import PrimaryButton from '$lib/components/PrimaryButton.svelte';
 	import { theme } from '$lib/store';
 	import type { NominatimResponse } from '$lib/types';
 	import { detectTheme, errToast, successToast, warningToast } from '$lib/utils';
