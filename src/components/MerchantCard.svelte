@@ -48,8 +48,8 @@
 	// Make boosted reactive and handle undefined displayMerchant
 	$: boosted = displayMerchant ? isBoosted(displayMerchant) : false;
 
-	// Use OSM ID for merchant link if available, otherwise use Place ID
-	$: merchantLinkId = displayMerchant?.osm_id || merchant.id;
+	// Use internal Place ID for merchant link, fallback to OSM ID
+	$: merchantLinkId = merchant.id || displayMerchant?.osm_id;
 
 	// Make all displayMerchant property accesses reactive with safe defaults
 	$: icon = displayMerchant?.icon || 'question_mark';
