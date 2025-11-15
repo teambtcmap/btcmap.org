@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
-	import { MapLoadingMain, Socials } from '$lib/comp';
+	import MapLoadingMain from '$lib/components/MapLoadingMain.svelte';
+	import Socials from '$lib/components/Socials.svelte';
 	import {
 		attribution,
 		changeDefaultIcons,
