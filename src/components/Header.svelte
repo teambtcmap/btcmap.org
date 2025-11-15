@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { Icon, NavDropdownDesktop, NavDropdownMobile, ThemeToggle } from '$lib/comp';
+	import Icon from '$components/Icon.svelte';
+	import NavDropdownDesktop from '$components/NavDropdownDesktop.svelte';
+	import NavDropdownMobile from '$components/NavDropdownMobile.svelte';
+	import ThemeToggle from '$components/ThemeToggle.svelte';
 
 	const navLinks = [
 		{ title: 'Maps', url: '', icon: 'map' },

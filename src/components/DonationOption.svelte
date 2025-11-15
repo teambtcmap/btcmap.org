@@ -3,7 +3,7 @@
 	export let text: DonationType;
 	export let showQrToggle: (type: DonationType) => void;
 
-	import { CopyButton } from '$lib/comp';
+	import CopyButton from '$components/CopyButton.svelte';
 	import type { DonationType } from '$lib/types';
 </script>
 

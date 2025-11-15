@@ -2,7 +2,7 @@
 	export let url: string;
 	export let social: string;
 
-	import { Icon } from '$lib/comp';
+	import Icon from '$components/Icon.svelte';
 </script>
 
 <!-- eslint-disable svelte/no-navigation-without-resolve -->

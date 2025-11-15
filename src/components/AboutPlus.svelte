@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Icon } from '$lib/comp';
+	import Icon from '$components/Icon.svelte';
 </script>
 
 <div class="space-y-2">

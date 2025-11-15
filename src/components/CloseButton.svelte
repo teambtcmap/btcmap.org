@@ -3,7 +3,7 @@
 	export let colors: string =
 		'text-primary dark:text-white dark:hover:text-white/80 hover:text-link';
 
-	import { Icon } from '$lib/comp';
+	import Icon from '$components/Icon.svelte';
 </script>
 
 <div class={position}>

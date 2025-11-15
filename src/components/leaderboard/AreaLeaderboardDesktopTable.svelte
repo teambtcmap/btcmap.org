@@ -5,7 +5,7 @@
 	import { isEven } from '$lib/utils';
 	import AreaLeaderboardItemName from './AreaLeaderboardItemName.svelte';
 	import GradeDisplay from './GradeDisplay.svelte';
-	import { Icon } from '$lib/comp';
+	import Icon from '$components/Icon.svelte';
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let table: Table<any>;

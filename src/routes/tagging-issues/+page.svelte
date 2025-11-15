@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { Footer, Header, HeaderPlaceholder, IssuesTable } from '$lib/comp';
+	import Footer from '$components/Footer.svelte';
+	import Header from '$components/Header.svelte';
+	import HeaderPlaceholder from '$components/HeaderPlaceholder.svelte';
+	import IssuesTable from '$components/IssuesTable.svelte';
 	import { theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
 	import type { RpcIssue } from '$lib/types';

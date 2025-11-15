@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { Footer, Header, HeaderPlaceholder, Icon } from '$lib/comp';
+	import Footer from '$components/Footer.svelte';
+	import Header from '$components/Header.svelte';
+	import HeaderPlaceholder from '$components/HeaderPlaceholder.svelte';
+	import Icon from '$components/Icon.svelte';
 	import { apps, theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
 	import { resolve } from '$app/paths';

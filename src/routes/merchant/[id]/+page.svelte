@@ -2,26 +2,24 @@
 	export let data: MerchantPageData;
 
 	import { browser } from '$app/environment';
-	import {
-		Boost,
-		BoostButton,
-		Card,
-		CommentAddButton,
-		Footer,
-		Header,
-		Icon,
-		MapLoadingEmbed,
-		MerchantButton,
-		MerchantEvent,
-		MerchantComment,
-		MerchantLink,
-		PaymentMethodIcon,
-		PrimaryButton,
-		ShowTags,
-		TaggerSkeleton,
-		TaggingIssues,
-		TopButton
-	} from '$lib/comp';
+	import Boost from '$components/Boost.svelte';
+	import BoostButton from '$components/BoostButton.svelte';
+	import Card from '$components/Card.svelte';
+	import CommentAddButton from '$components/CommentAddButton.svelte';
+	import Footer from '$components/Footer.svelte';
+	import Header from '$components/Header.svelte';
+	import Icon from '$components/Icon.svelte';
+	import MapLoadingEmbed from '$components/MapLoadingEmbed.svelte';
+	import MerchantButton from '$components/MerchantButton.svelte';
+	import MerchantEvent from '$components/MerchantEvent.svelte';
+	import MerchantComment from '$components/MerchantComment.svelte';
+	import MerchantLink from '$components/MerchantLink.svelte';
+	import PaymentMethodIcon from '$components/PaymentMethodIcon.svelte';
+	import PrimaryButton from '$components/PrimaryButton.svelte';
+	import ShowTags from '$components/ShowTags.svelte';
+	import TaggerSkeleton from '$components/TaggerSkeleton.svelte';
+	import TaggingIssues from '$components/TaggingIssues.svelte';
+	import TopButton from '$components/TopButton.svelte';
 	import { updateSinglePlace } from '$lib/sync/places';
 	import {
 		attribution,

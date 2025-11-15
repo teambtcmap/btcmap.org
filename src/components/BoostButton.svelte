@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Icon } from '$lib/comp';
+	import Icon from '$components/Icon.svelte';
 	import { boost, exchangeRate, resetBoost } from '$lib/store';
 	import type { Place } from '$lib/types';
 	import { fetchExchangeRate } from '$lib/utils';

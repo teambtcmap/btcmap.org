@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { DropdownLink } from '$lib/types';
 	import OutClick from 'svelte-outclick';
-	import { Icon } from '$lib/comp';
+	import Icon from '$components/Icon.svelte';
 
 	export let title: string;
 	export let links: DropdownLink[];

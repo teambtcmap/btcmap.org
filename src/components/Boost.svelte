@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
-	import { CloseButton } from '$lib/comp';
+	import CloseButton from '$components/CloseButton.svelte';
 	import { boost, exchangeRate, resetBoost, lastUpdatedPlaceId } from '$lib/store';
 	import OutClick from 'svelte-outclick';
 	import { fly } from 'svelte/transition';

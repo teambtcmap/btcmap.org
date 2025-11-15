@@ -1,6 +1,6 @@
 <script lang="ts">
 	import tippy from 'tippy.js';
-	import { Icon } from '$lib/comp';
+	import Icon from '$components/Icon.svelte';
 
 	export let title: string;
 	export let stat: number | undefined;

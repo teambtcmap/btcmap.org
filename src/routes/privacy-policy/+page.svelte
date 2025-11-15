@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Footer, Header } from '$lib/comp';
+	import Footer from '$components/Footer.svelte';
+	import Header from '$components/Header.svelte';
 	import { socials } from '$lib/store';
 </script>
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Icon } from '$lib/comp';
+	import Icon from '$components/Icon.svelte';
 	import type { DropdownLink } from '$lib/types';
 	import OutClick from 'svelte-outclick';
 

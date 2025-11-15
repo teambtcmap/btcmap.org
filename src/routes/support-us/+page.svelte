@@ -1,12 +1,10 @@
 <script lang="ts">
-	import {
-		CloseButton,
-		DonationOption,
-		Footer,
-		Header,
-		HeaderPlaceholder,
-		SupportSection
-	} from '$lib/comp';
+	import CloseButton from '$components/CloseButton.svelte';
+	import DonationOption from '$components/DonationOption.svelte';
+	import Footer from '$components/Footer.svelte';
+	import Header from '$components/Header.svelte';
+	import HeaderPlaceholder from '$components/HeaderPlaceholder.svelte';
+	import SupportSection from '$components/SupportSection.svelte';
 	import { theme } from '$lib/store';
 	import type { DonationType } from '$lib/types';
 	import { detectTheme, warningToast } from '$lib/utils';

@@ -1,14 +1,12 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import {
-		Footer,
-		Header,
-		HeaderPlaceholder,
-		Icon,
-		LeaderboardItem,
-		LeaderboardSkeleton,
-		PrimaryButton
-	} from '$lib/comp';
+	import Footer from '$components/Footer.svelte';
+	import Header from '$components/Header.svelte';
+	import HeaderPlaceholder from '$components/HeaderPlaceholder.svelte';
+	import Icon from '$components/Icon.svelte';
+	import LeaderboardItem from '$components/LeaderboardItem.svelte';
+	import LeaderboardSkeleton from '$components/LeaderboardSkeleton.svelte';
+	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import { theme } from '$lib/store';
 	import type { RpcGetMostActiveUsersItem, TaggerLeaderboard } from '$lib/types';
 	import { detectTheme } from '$lib/utils';
