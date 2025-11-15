@@ -26,7 +26,7 @@
 	import { rankItem } from '@tanstack/match-sorter-utils';
 	import tippy from 'tippy.js';
 
-	import { GradeTable } from '$lib/comp';
+	import { GradeTable } from '$lib/constants';
 	import Icon from '$lib/components/Icon.svelte';
 
 	export let type: AreaType;

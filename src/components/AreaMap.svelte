@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { GradeTable } from '$lib/comp';
+	import { GradeTable } from '$lib/constants';
 	import Icon from '$lib/components/Icon.svelte';
 	import MapLoadingEmbed from '$lib/components/MapLoadingEmbed.svelte';
 	import ShowTags from '$lib/components/ShowTags.svelte';
