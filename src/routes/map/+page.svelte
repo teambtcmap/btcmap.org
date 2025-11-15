@@ -21,7 +21,15 @@
 		support,
 		updateMapHash
 	} from '$lib/map/setup';
-	import { placesError, places, placesSyncCount, mapUpdates, lastUpdatedPlaceId } from '$lib/store';
+	import {
+		placesError,
+		places,
+		placesSyncCount,
+		mapUpdates,
+		lastUpdatedPlaceId,
+		placesLoadingStatus,
+		placesLoadingProgress
+	} from '$lib/store';
 	import type { Leaflet, Place, SearchItem } from '$lib/types';
 	import { debounce, detectTheme, errToast, isBoosted } from '$lib/utils';
 	import type { Control, LatLng, LatLngBounds, Map, Marker, MarkerClusterGroup } from 'leaflet';
@@ -31,6 +39,31 @@
 	import type { FeatureGroup } from 'leaflet';
 
 	let mapLoading = 0;
+	let mapLoadingStatus = '';
+
+	// Combine map loading progress with places loading progress
+	$: {
+		// Priority 1: Places are actively loading (1-99%)
+		if ($placesLoadingProgress > 0 && $placesLoadingProgress < 100) {
+			mapLoading = $placesLoadingProgress;
+			mapLoadingStatus = $placesLoadingStatus;
+		}
+		// Priority 2: Places complete (100%), map ready, initializing markers
+		else if ($placesLoadingProgress === 100 && !elementsLoaded) {
+			mapLoading = 100;
+			mapLoadingStatus = $placesLoadingStatus;
+		}
+		// Priority 3: Loading initial markers (only during first load, not viewport updates)
+		else if (isLoadingMarkers && !elementsLoaded) {
+			mapLoading = 100;
+			mapLoadingStatus = 'Loading places...';
+		}
+		// Reset when everything is done
+		else if (elementsLoaded) {
+			mapLoading = 0;
+			mapLoadingStatus = '';
+		}
+	}
 
 	// Configuration constants for viewport-based loading
 	const MAX_LOADED_MARKERS = 200; // Maximum markers to keep in memory before cleanup
@@ -286,17 +319,29 @@
 
 	// Load markers for places in current viewport using web workers
 	const loadMarkersInViewport = async () => {
-		if (!map || !$places.length || isLoadingMarkers) return;
+		if (!map || !$places.length || isLoadingMarkers) {
+			return;
+		}
 
 		isLoadingMarkers = true;
-		const bounds = map.getBounds();
+
+		// Check if map has valid bounds (center and zoom are set)
+		let bounds;
+		try {
+			bounds = map.getBounds();
+			if (!bounds) {
+				isLoadingMarkers = false;
+				return;
+			}
+		} catch (error) {
+			console.warn('Error getting map bounds, map not ready yet:', error);
+			isLoadingMarkers = false;
+			return;
+		}
 
 		try {
 			// Get visible places (viewport filtering)
 			const visiblePlaces = getVisiblePlaces($places, bounds);
-			console.info(
-				`Processing ${visiblePlaces.length} places in viewport (filtered from ${$places.length} total)`
-			);
 
 			// Filter out places that already have markers loaded
 			const newPlaces = visiblePlaces.filter((place) => !loadedMarkers[place.id.toString()]);
@@ -313,12 +358,10 @@
 
 			// Check if web workers are supported before trying to use them
 			if (isWorkerSupported()) {
-				console.info(`Loading ${newPlaces.length} new markers using web worker`);
-
 				// Process new places using web worker
 				await processPlaces(
 					newPlaces,
-					VIEWPORT_BATCH_SIZE, // Smaller batch size since dataset is much smaller
+					VIEWPORT_BATCH_SIZE,
 					(progress: number, batch?: ProcessedPlace[]) => {
 						// Process batch on main thread (DOM operations)
 						if (batch) {
@@ -327,15 +370,15 @@
 					}
 				);
 			} else {
-				console.info(`Loading ${newPlaces.length} new markers synchronously (no worker support)`);
+				console.warn('Web workers not supported, using synchronous fallback');
 				// Fallback to synchronous processing
 				loadMarkersInViewportFallback(bounds);
 				return;
 			}
 
-			console.info(`Successfully loaded ${newPlaces.length} markers in viewport`);
+			console.info(`[VIEWPORT] Successfully loaded ${newPlaces.length} markers`);
 		} catch (error) {
-			console.error('Error loading markers in viewport:', error);
+			console.error('[VIEWPORT] Error loading markers:', error);
 			// Fallback to synchronous processing for viewport
 			loadMarkersInViewportFallback(bounds);
 		} finally {
@@ -345,8 +388,6 @@
 
 	// Fallback synchronous loading for viewport (much smaller dataset)
 	const loadMarkersInViewportFallback = (bounds: LatLngBounds) => {
-		console.warn('Falling back to synchronous viewport loading');
-
 		const visiblePlaces = getVisiblePlaces($places, bounds);
 		const newPlaces = visiblePlaces.filter((place) => !loadedMarkers[place.id.toString()]);
 
@@ -369,19 +410,17 @@
 			upToDateLayer.addLayer(marker);
 			loadedMarkers[place.id.toString()] = marker;
 		});
-
-		console.info(`Fallback: loaded ${newPlaces.length} markers synchronously`);
 	};
 
 	// Debounced version to prevent excessive loading during rapid pan/zoom
 	const debouncedLoadMarkers = debounce(loadMarkersInViewport, DEBOUNCE_DELAY);
 
 	const initializeElements = async () => {
-		if (elementsLoaded) return;
+		if (elementsLoaded) {
+			return;
+		}
 
-		console.info(
-			`Initializing combined viewport + web worker loading for ${$places.length} places`
-		);
+		mapLoadingStatus = 'Initializing markers...';
 
 		// create marker cluster group and layers
 		/* eslint-disable no-undef */
@@ -398,11 +437,16 @@
 		map.on('moveend', debouncedLoadMarkers);
 		map.on('zoomend', debouncedLoadMarkers);
 
+		mapLoadingStatus = 'Loading places in view...';
+
 		// Load initial markers for current viewport
+		// NOTE: Don't set isLoadingMarkers=true here, let loadMarkersInViewport handle it
 		await loadMarkersInViewport();
 
-		mapLoading = 100;
 		elementsLoaded = true;
+
+		// Status will be cleared by reactive statement above
+		// No manual timeout needed - reactive state management handles it
 	};
 
 	// Process a batch of places on the main thread (DOM operations only)
@@ -754,9 +798,8 @@
 			// final map setup
 			map.on('load', () => {
 				mapCenter = map.getCenter();
+				mapLoaded = true;
 			});
-
-			mapLoading = 40;
 		}
 	});
 
@@ -767,6 +810,10 @@
 		}
 		// Clean up web worker
 		terminateWorker();
+
+		// Reset loading progress when leaving map page to avoid stale states
+		placesLoadingProgress.set(0);
+		placesLoadingStatus.set('');
 	});
 </script>
 
@@ -780,7 +827,7 @@
 <main>
 	<h1 class="hidden">Map</h1>
 
-	<MapLoadingMain progress={mapLoading} />
+	<MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
 
 	<!-- Search UI - re-enabled with API-based search -->
 	<div

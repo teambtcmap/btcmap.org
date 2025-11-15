@@ -40,6 +40,10 @@ export const places: Writable<Place[]> = writable([]);
 export const placesError = writable('');
 export const placesSyncCount = writable(0);
 
+// Progress tracking for places sync
+export const placesLoadingStatus = writable<string>(''); // e.g. "Downloading places...", "Processing data..."
+export const placesLoadingProgress = writable<number>(0); // 0-100 percentage
+
 export const users: Writable<User[]> = writable([]);
 export const userError = writable('');
 

@@ -94,6 +94,8 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/) format for a
 - `refactor(api): optimize data fetching logic #123`
 - `docs(readme): update installation instructions #456`
 
+**Note:** Use `#123` not `(#123)` or `[#123]` for issue references.
+
 ### Commit Types:
 
 - `feat`: New feature
