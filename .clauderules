@@ -17,3 +17,10 @@ feat, fix, refactor, docs, test, chore, style, perf
 ## Framework Versions (DO NOT UPGRADE)
 - Svelte v4 (not v5)
 - TailwindCSS v3 (not v4)
+
+## Additional Documentation
+For comprehensive guidelines, see:
+- `CLAUDE.md` - Full development guidelines and detailed commit format
+- `.github/copilot-instructions.md` - Project architecture, patterns, and conventions
+- `README.md` - Setup instructions and project overview
+- `CONTRIBUTING.md` - Contribution workflow
