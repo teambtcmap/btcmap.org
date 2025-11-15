@@ -1,0 +1,19 @@
+# Critical Rules - Read First
+
+## Before Every Commit
+1. Run `yarn run format:fix` (MANDATORY)
+2. Run `yarn run check`
+3. Run `yarn run lint`
+4. Use conventional commits: `type(scope): description #issue`
+
+## Conventional Commit Types
+feat, fix, refactor, docs, test, chore, style, perf
+
+## Code Style
+- NO JSDoc comments - use inline // comments only
+- TypeScript types are documentation
+- Keep code self-documenting with clear names
+
+## Framework Versions (DO NOT UPGRADE)
+- Svelte v4 (not v5)
+- TailwindCSS v3 (not v4)
