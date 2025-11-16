@@ -273,16 +273,6 @@
 </script>
 
 {#if isOpen}
-	<!-- Backdrop - only covers area above drawer, marked as decorative for a11y -->
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<div
-		class="fixed right-0 left-0 z-[1001]"
-		style="top: 0; bottom: {$drawerHeight}px;"
-		on:click={closeDrawer}
-		aria-hidden="true"
-	></div>
-
 	<!-- Bottom sheet drawer: gestures for touch/mouse, keyboard uses ESC + Close button -->
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
