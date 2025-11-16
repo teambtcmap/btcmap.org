@@ -308,16 +308,18 @@
 </script>
 
 {#if isOpen}
-	<!-- Backdrop - only covers area above the drawer to close on click -->
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<!-- svelte-ignore a11y-no-static-element-interactions -->
+	<!-- Backdrop - only covers area above drawer, marked as decorative for a11y -->
 	<div
 		class="fixed right-0 left-0 z-[1001]"
 		style="top: 0; bottom: {$drawerHeight}px;"
 		on:click={closeDrawer}
+		aria-hidden="true"
 	></div>
 
-	<!-- Bottom sheet drawer -->
+	<!-- Bottom sheet drawer: gestures for touch/mouse, keyboard uses ESC + Close button -->
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<!-- eslint-disable-next-line svelte/no-unused-svelte-ignore -->
+	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div
 		class="fixed right-0 bottom-0 left-0 z-[1002] flex flex-col bg-white shadow-2xl transition-shadow dark:bg-dark"
 		class:rounded-t-[10px]={!expanded}
@@ -329,6 +331,7 @@
 		on:click|stopPropagation
 		role="dialog"
 		aria-modal="false"
+		aria-label="Merchant details"
 	>
 		<!-- Drag handle -->
 		<div
