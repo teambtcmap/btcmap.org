@@ -210,8 +210,9 @@
 		window.addEventListener('keydown', handleKeydown);
 
 		// Calculate expanded height based on window size
+		// Use 96% to leave small gap at top for status bar/notch
 		if (browser) {
-			EXPANDED_HEIGHT = Math.min(window.innerHeight * 0.8, 600);
+			EXPANDED_HEIGHT = window.innerHeight * 0.96;
 		}
 
 		return () => {
