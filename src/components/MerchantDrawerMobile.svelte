@@ -3,7 +3,6 @@
 	import { pan } from 'svelte-gestures';
 	import { spring } from 'svelte/motion';
 	import { places, boost, exchangeRate } from '$lib/store';
-	import CloseButton from '$components/CloseButton.svelte';
 	import Icon from '$components/Icon.svelte';
 	import axios from 'axios';
 	import { errToast, fetchExchangeRate } from '$lib/utils';
@@ -75,7 +74,7 @@
 	function parseHash() {
 		const state = parseMerchantHash();
 		const previousMerchantId = merchantId;
-		
+
 		merchantId = state.merchantId;
 		drawerView = state.drawerView;
 		isOpen = state.isOpen;
@@ -313,7 +312,23 @@
 			{:else}
 				<span class="text-sm font-semibold text-primary dark:text-white">Merchant Details</span>
 			{/if}
-			<CloseButton on:click={closeDrawer} />
+
+			<!-- Only show close/collapse button when expanded -->
+			{#if expanded}
+				<button
+					on:click={() => {
+						expanded = false;
+						drawerHeight.set(PEEK_HEIGHT);
+					}}
+					class="rounded-full p-2 text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
+					aria-label="Collapse drawer"
+				>
+					<Icon w="20" h="20" icon="keyboard_arrow_down" type="material" />
+				</button>
+			{:else}
+				<!-- Empty space to maintain layout when minimized -->
+				<div class="w-9"></div>
+			{/if}
 		</div>
 
 		<!-- Scrollable content area -->
