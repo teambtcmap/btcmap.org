@@ -309,6 +309,10 @@
 
 {#if isOpen}
 	<!-- Backdrop - only covers area above drawer, marked as decorative for a11y -->
+	<!-- eslint-disable-next-line svelte/no-unused-svelte-ignore -->
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<!-- eslint-disable-next-line svelte/no-unused-svelte-ignore -->
+	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div
 		class="fixed right-0 left-0 z-[1001]"
 		style="top: 0; bottom: {$drawerHeight}px;"
