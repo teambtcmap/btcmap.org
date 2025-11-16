@@ -74,12 +74,14 @@
 
 	function parseHash() {
 		const state = parseMerchantHash();
+		const previousMerchantId = merchantId;
+		
 		merchantId = state.merchantId;
 		drawerView = state.drawerView;
 		isOpen = state.isOpen;
 
-		// Reset to peek state when opening
-		if (isOpen && state.drawerView === 'details') {
+		// Only reset to peek state when initially opening a merchant (not when switching views)
+		if (isOpen && state.drawerView === 'details' && previousMerchantId !== merchantId) {
 			expanded = false;
 			drawerHeight.set(PEEK_HEIGHT, { hard: true });
 		}
