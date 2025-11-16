@@ -20,12 +20,6 @@
 					{merchant.name}
 				</h3>
 			{/if}
-
-			{#if merchant.category}
-				<p class="mt-1 truncate text-sm text-body dark:text-white/70">
-					{merchant.category}
-				</p>
-			{/if}
 		</div>
 
 		<!-- Boost badge if boosted -->
