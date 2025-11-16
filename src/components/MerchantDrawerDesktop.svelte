@@ -12,9 +12,10 @@
 	import { onMount } from 'svelte';
 	import type { Place } from '$lib/types';
 	import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
+	import { parseMerchantHash, updateMerchantHash, type DrawerView } from '$lib/merchantDrawerHash';
 
 	let merchantId: number | null = null;
-	let drawerView: 'details' | 'boost' = 'details';
+	let drawerView: DrawerView = 'details';
 	let isOpen = false;
 	let merchant: Place | null = null;
 	let fetchingMerchant = false;
@@ -63,49 +64,10 @@
 	}
 
 	function parseHash() {
-		if (!browser) return;
-
-		const hash = window.location.hash.substring(1);
-
-		const ampIndex = hash.indexOf('&');
-
-		if (ampIndex !== -1) {
-			const params = new URLSearchParams(hash.substring(ampIndex + 1));
-			const merchantParam = params.get('merchant');
-			const viewParam = params.get('view') as typeof drawerView | null;
-
-			merchantId = merchantParam ? Number(merchantParam) : null;
-			drawerView = viewParam || 'details';
-			isOpen = Boolean(merchantId);
-		} else {
-			merchantId = null;
-			drawerView = 'details';
-			isOpen = false;
-		}
-	}
-
-	function updateHash(newMerchantId: number | null, newView: typeof drawerView = 'details') {
-		if (!browser) return;
-
-		const hash = window.location.hash.substring(1);
-		const ampIndex = hash.indexOf('&');
-		const mapPart = ampIndex !== -1 ? hash.substring(0, ampIndex) : hash;
-
-		if (newMerchantId) {
-			const params = new URLSearchParams();
-			params.set('merchant', String(newMerchantId));
-			if (newView !== 'details') {
-				params.set('view', newView);
-			}
-
-			if (mapPart) {
-				window.location.hash = `${mapPart}&${params.toString()}`;
-			} else {
-				window.location.hash = params.toString();
-			}
-		} else {
-			window.location.hash = mapPart || '';
-		}
+		const state = parseMerchantHash();
+		merchantId = state.merchantId;
+		drawerView = state.drawerView;
+		isOpen = state.isOpen;
 	}
 
 	// Calculate verification status
@@ -125,7 +87,7 @@
 		$boost = undefined;
 		$exchangeRate = undefined;
 		boostLoading = false;
-		updateHash(null);
+		updateMerchantHash(null);
 	};
 
 	const goBack = () => {
@@ -134,7 +96,7 @@
 		boostLoading = false;
 
 		if (merchantId) {
-			updateHash(merchantId, 'details');
+			updateMerchantHash(merchantId, 'details');
 		}
 	};
 
@@ -158,7 +120,7 @@
 		try {
 			const rate = await fetchExchangeRate();
 			exchangeRate.set(rate);
-			updateHash(merchantId, 'boost');
+			updateMerchantHash(merchantId, 'boost');
 			boostLoading = false;
 		} catch {
 			boost.set(undefined);
@@ -173,7 +135,7 @@
 		$resetBoost = $resetBoost + 1;
 
 		if (merchantId) {
-			updateHash(merchantId, 'details');
+			updateMerchantHash(merchantId, 'details');
 		}
 	};
 
@@ -219,7 +181,7 @@
 	}
 
 	export function openDrawer(id: number) {
-		updateHash(id, 'details');
+		updateMerchantHash(id, 'details');
 	}
 </script>
 
