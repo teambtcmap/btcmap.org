@@ -210,9 +210,9 @@
 		window.addEventListener('keydown', handleKeydown);
 
 		// Calculate expanded height based on window size
-		// Subtract small offset for visual breathing room at top
+		// Use full screen height to match Google Maps behavior
 		if (browser) {
-			EXPANDED_HEIGHT = window.innerHeight - 10; // Leave just 10px at top
+			EXPANDED_HEIGHT = window.innerHeight;
 		}
 
 		return () => {
@@ -318,7 +318,8 @@
 
 	<!-- Bottom sheet drawer -->
 	<div
-		class="fixed right-0 bottom-0 left-0 z-[1002] flex flex-col rounded-t-[10px] bg-white shadow-2xl transition-shadow dark:bg-dark"
+		class="fixed right-0 bottom-0 left-0 z-[1002] flex flex-col bg-white shadow-2xl transition-shadow dark:bg-dark"
+		class:rounded-t-[10px]={!expanded}
 		style="height: {$drawerHeight}px;"
 		use:pan={{ delay: 0, touchAction: 'none' }}
 		on:pan={handlePan}
