@@ -307,6 +307,14 @@
 </script>
 
 {#if isOpen}
+	<!-- Backdrop - clickable to close drawer -->
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<!-- svelte-ignore a11y-no-static-element-interactions -->
+	<div
+		class="fixed inset-0 z-[1001]"
+		on:click={closeDrawer}
+	></div>
+
 	<!-- Bottom sheet drawer -->
 	<div
 		class="fixed right-0 bottom-0 left-0 z-[1002] flex flex-col rounded-t-[10px] bg-white shadow-2xl transition-shadow dark:bg-dark"
@@ -315,6 +323,7 @@
 		on:pan={handlePan}
 		on:pandown={handlePanDown}
 		on:panup={handlePanUp}
+		on:click|stopPropagation
 		role="dialog"
 		aria-modal="false"
 	>
