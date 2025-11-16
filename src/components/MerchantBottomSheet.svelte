@@ -308,11 +308,12 @@
 </script>
 
 {#if isOpen}
-	<!-- Backdrop - clickable to close drawer -->
+	<!-- Backdrop - only covers area above the drawer to close on click -->
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div
-		class="fixed inset-0 z-[1001]"
+		class="fixed right-0 left-0 z-[1001]"
+		style="top: 0; bottom: {$drawerHeight}px;"
 		on:click={closeDrawer}
 	></div>
 
