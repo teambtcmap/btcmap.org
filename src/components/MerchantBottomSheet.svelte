@@ -309,9 +309,7 @@
 
 {#if isOpen}
 	<!-- Backdrop - only covers area above drawer, marked as decorative for a11y -->
-	<!-- eslint-disable-next-line svelte/no-unused-svelte-ignore -->
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<!-- eslint-disable-next-line svelte/no-unused-svelte-ignore -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div
 		class="fixed right-0 left-0 z-[1001]"
@@ -322,8 +320,8 @@
 
 	<!-- Bottom sheet drawer: gestures for touch/mouse, keyboard uses ESC + Close button -->
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<!-- eslint-disable-next-line svelte/no-unused-svelte-ignore -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
+	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 	<div
 		class="fixed right-0 bottom-0 left-0 z-[1002] flex flex-col bg-white shadow-2xl transition-shadow dark:bg-dark"
 		class:rounded-t-[10px]={!expanded}
