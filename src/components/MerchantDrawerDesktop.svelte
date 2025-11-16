@@ -3,15 +3,24 @@
 	import CloseButton from '$components/CloseButton.svelte';
 	import Icon from '$components/Icon.svelte';
 	import { fly } from 'svelte/transition';
-	import axios from 'axios';
-	import { errToast, fetchExchangeRate } from '$lib/utils';
 	import BoostContent from './BoostContent.svelte';
 	import MerchantDetailsContent from './MerchantDetailsContent.svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import type { Place } from '$lib/types';
-	import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 	import { parseMerchantHash, updateMerchantHash, type DrawerView } from '$lib/merchantDrawerHash';
+	import {
+		calcVerifiedDate,
+		isUpToDate as checkUpToDate,
+		isBoosted as checkBoosted,
+		handleBoost as boostMerchant,
+		handleBoostComplete as completeBoost,
+		handleCloseDrawer as closeDrawerUtil,
+		handleGoBack as goBackUtil,
+		ensureBoostData,
+		fetchMerchantDetails as fetchMerchant,
+		hasCompleteData
+	} from '$lib/merchantDrawerLogic';
 
 	let merchantId: number | null = null;
 	let drawerView: DrawerView = 'details';
@@ -23,41 +32,28 @@
 	async function fetchMerchantDetails(id: number) {
 		if (fetchingMerchant || lastFetchedId === id) return;
 
-		lastFetchedId = id;
-		fetchingMerchant = true;
-		merchant = null;
-
-		try {
-			const response = await axios.get(
-				`https://api.btcmap.org/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`
-			);
-			if (merchantId === id) {
-				// eslint-disable-next-line svelte/infinite-reactive-loop
-				merchant = response.data;
+		await fetchMerchant(
+			id,
+			merchantId,
+			(m) => {
+				merchant = m;
+			},
+			(f) => {
+				fetchingMerchant = f;
+			},
+			(id) => {
+				lastFetchedId = id;
 			}
-		} catch (error) {
-			console.error('Error fetching merchant details:', error);
-			errToast('Error loading merchant details. Please try again.');
-		} finally {
-			fetchingMerchant = false;
-		}
+		);
 	}
 
 	$: if (merchantId && isOpen) {
 		const foundInStore = $places.find((p) => p.id === merchantId);
 
-		const hasCompleteData = (place: Place | undefined): place is Place => {
-			if (!place) return false;
-			return (
-				place.name !== undefined && place.address !== undefined && place.verified_at !== undefined
-			);
-		};
-
 		if (hasCompleteData(foundInStore) && merchant?.id !== foundInStore.id) {
 			merchant = foundInStore;
 			lastFetchedId = merchantId;
 		} else if (lastFetchedId !== merchantId) {
-			// eslint-disable-next-line svelte/infinite-reactive-loop
 			fetchMerchantDetails(merchantId);
 		}
 	}
@@ -69,35 +65,17 @@
 		isOpen = state.isOpen;
 	}
 
-	// Calculate verification status
-	const calcVerifiedDate = () => {
-		const verifiedDate = new Date();
-		const previousYear = verifiedDate.getFullYear() - 1;
-		return verifiedDate.setFullYear(previousYear);
-	};
-
 	const verifiedDate = calcVerifiedDate();
-	$: isUpToDate = !!(merchant?.verified_at && Date.parse(merchant.verified_at) > verifiedDate);
-	$: isBoosted = !!(merchant?.boosted_until && Date.parse(merchant.boosted_until) > Date.now());
+	$: isUpToDate = checkUpToDate(merchant, verifiedDate);
+	$: isBoosted = checkBoosted(merchant);
 
 	let boostLoading = false;
-
-	const closeDrawer = () => {
-		$boost = undefined;
-		$exchangeRate = undefined;
-		boostLoading = false;
-		updateMerchantHash(null);
+	const setBoostLoading = (loading: boolean) => {
+		boostLoading = loading;
 	};
 
-	const goBack = () => {
-		$boost = undefined;
-		$exchangeRate = undefined;
-		boostLoading = false;
-
-		if (merchantId) {
-			updateMerchantHash(merchantId, 'details');
-		}
-	};
+	const closeDrawer = () => closeDrawerUtil(setBoostLoading);
+	const goBack = () => goBackUtil(merchantId, setBoostLoading);
 
 	$: if (drawerView !== 'boost' && $boost !== undefined) {
 		$boost = undefined;
@@ -105,38 +83,8 @@
 		boostLoading = false;
 	}
 
-	const handleBoost = async () => {
-		if (!merchant) return;
-
-		boostLoading = true;
-
-		boost.set({
-			id: merchant.id,
-			name: merchant.name || '',
-			boost: isBoosted ? merchant.boosted_until || '' : ''
-		});
-
-		try {
-			const rate = await fetchExchangeRate();
-			exchangeRate.set(rate);
-			updateMerchantHash(merchantId, 'boost');
-			boostLoading = false;
-		} catch {
-			boost.set(undefined);
-			boostLoading = false;
-		}
-	};
-
-	const handleBoostComplete = async () => {
-		await invalidateAll();
-		$boost = undefined;
-		$exchangeRate = undefined;
-		$resetBoost = $resetBoost + 1;
-
-		if (merchantId) {
-			updateMerchantHash(merchantId, 'details');
-		}
-	};
+	const handleBoost = () => boostMerchant(merchant, merchantId, setBoostLoading);
+	const handleBoostComplete = () => completeBoost(merchantId, invalidateAll, resetBoost);
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (!isOpen) return;
@@ -161,22 +109,8 @@
 		};
 	});
 
-	$: if (drawerView === 'boost' && !$exchangeRate && merchant) {
-		if (!$boost) {
-			boost.set({
-				id: merchant.id,
-				name: merchant.name || '',
-				boost: isBoosted ? merchant.boosted_until || '' : ''
-			});
-		}
-
-		fetchExchangeRate()
-			.then((rate) => {
-				exchangeRate.set(rate);
-			})
-			.catch(() => {
-				// Error already handled by fetchExchangeRate
-			});
+	$: if (drawerView === 'boost' && merchant) {
+		ensureBoostData(merchant, $exchangeRate, $boost);
 	}
 
 	export function openDrawer(id: number) {
