@@ -178,9 +178,7 @@
 		searchStatus = true;
 
 		try {
-			const response = await fetch(
-				`https://api.btcmap.org/v4/places/search/?name=${encodeURIComponent(search)}`
-			);
+			const response = await fetch(`/api/search/places?name=${encodeURIComponent(search)}`);
 
 			if (!response.ok) {
 				throw new Error('Search API error');
