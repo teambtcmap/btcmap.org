@@ -8,17 +8,10 @@
 	let desktopDrawer: MerchantDrawerDesktop;
 	let mobileDrawer: MerchantDrawerMobile;
 
-	function checkMobile() {
-		if (!browser) return;
-		isMobile = window.innerWidth < 768; // md breakpoint
-	}
-
 	onMount(() => {
-		checkMobile();
-		window.addEventListener('resize', checkMobile);
-		return () => {
-			window.removeEventListener('resize', checkMobile);
-		};
+		if (!browser) return;
+		// Lock isMobile on initial mount to prevent component swapping mid-session
+		isMobile = window.innerWidth < 768; // md breakpoint
 	});
 
 	export function openDrawer(id: number) {
