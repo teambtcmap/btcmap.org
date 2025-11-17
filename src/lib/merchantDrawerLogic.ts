@@ -21,6 +21,15 @@ export function isBoosted(merchant: Place | null): boolean {
 	return !!(merchant?.boosted_until && Date.parse(merchant.boosted_until) > Date.now());
 }
 
+function createBoostObject(merchant: Place) {
+	const boostedUntil = isBoosted(merchant) ? merchant.boosted_until || '' : '';
+	return {
+		id: merchant.id,
+		name: merchant.name || '',
+		boost: boostedUntil
+	};
+}
+
 export async function fetchMerchantDetails(
 	id: number,
 	currentMerchantId: number | null,
@@ -60,14 +69,7 @@ export async function handleBoost(
 	if (!merchant) return;
 
 	setBoostLoading(true);
-
-	const boostedUntil = isBoosted(merchant) ? merchant.boosted_until || '' : '';
-
-	boost.set({
-		id: merchant.id,
-		name: merchant.name || '',
-		boost: boostedUntil
-	});
+	boost.set(createBoostObject(merchant));
 
 	try {
 		const rate = await fetchExchangeRate();
@@ -135,13 +137,7 @@ export async function ensureBoostData(
 	if (!merchant || currentExchangeRate) return;
 
 	if (!currentBoost) {
-		const boostedUntil = isBoosted(merchant) ? merchant.boosted_until || '' : '';
-
-		boost.set({
-			id: merchant.id,
-			name: merchant.name || '',
-			boost: boostedUntil
-		});
+		boost.set(createBoostObject(merchant));
 	}
 
 	try {
