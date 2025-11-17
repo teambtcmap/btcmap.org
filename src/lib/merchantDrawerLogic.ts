@@ -21,6 +21,11 @@ export function isBoosted(merchant: Place | null): boolean {
 	return !!(merchant?.boosted_until && Date.parse(merchant.boosted_until) > Date.now());
 }
 
+export function clearBoostState(): void {
+	boost.set(undefined);
+	exchangeRate.set(undefined);
+}
+
 function createBoostObject(merchant: Place) {
 	const boostedUntil = isBoosted(merchant) ? merchant.boosted_until || '' : '';
 	return {
@@ -88,8 +93,7 @@ export async function handleBoostComplete(
 	resetBoostStore?: Writable<number>
 ): Promise<void> {
 	await invalidateAll();
-	boost.set(undefined);
-	exchangeRate.set(undefined);
+	clearBoostState();
 
 	if (resetBoostStore) {
 		const currentValue = get(resetBoostStore) as number;
@@ -105,8 +109,7 @@ export function handleCloseDrawer(
 	setBoostLoading: (loading: boolean) => void,
 	additionalCleanup?: () => void
 ): void {
-	boost.set(undefined);
-	exchangeRate.set(undefined);
+	clearBoostState();
 	setBoostLoading(false);
 
 	if (additionalCleanup) {
@@ -120,8 +123,7 @@ export function handleGoBack(
 	merchantId: number | null,
 	setBoostLoading: (loading: boolean) => void
 ): void {
-	boost.set(undefined);
-	exchangeRate.set(undefined);
+	clearBoostState();
 	setBoostLoading(false);
 
 	if (merchantId) {
