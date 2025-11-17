@@ -5,6 +5,7 @@
 	import Header from '$components/Header.svelte';
 	import HeaderPlaceholder from '$components/HeaderPlaceholder.svelte';
 	import SupportSection from '$components/SupportSection.svelte';
+	import { BREAKPOINTS } from '$lib/constants';
 	import { theme } from '$lib/store';
 	import type { DonationType } from '$lib/types';
 	import { detectTheme, warningToast } from '$lib/utils';
@@ -26,7 +27,7 @@
 		QRCode.toCanvas(
 			node,
 			network === 'Lightning' ? 'lightning:' + lnurlp : 'bitcoin:' + onchain,
-			{ width: window.innerWidth > 640 ? 256 : 200 },
+			{ width: window.innerWidth > BREAKPOINTS.sm ? 256 : 200 },
 			function (error: Error | null | undefined) {
 				if (error) {
 					warningToast('Could not generate QR, please try again or contact BTC Map.');

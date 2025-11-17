@@ -3,6 +3,7 @@
 	import MerchantDrawerDesktop from './MerchantDrawerDesktop.svelte';
 	import MerchantDrawerMobile from './MerchantDrawerMobile.svelte';
 	import { onMount } from 'svelte';
+	import { BREAKPOINTS } from '$lib/constants';
 
 	let isMobile = false;
 	let desktopDrawer: MerchantDrawerDesktop;
@@ -11,7 +12,7 @@
 	onMount(() => {
 		if (!browser) return;
 		// Lock isMobile on initial mount to prevent component swapping mid-session
-		isMobile = window.innerWidth < 768; // md breakpoint
+		isMobile = window.innerWidth < BREAKPOINTS.md;
 	});
 
 	export function openDrawer(id: number) {
