@@ -134,9 +134,9 @@ export async function ensureBoostData(
 	currentExchangeRate: number | undefined,
 	currentBoost: Boost
 ): Promise<void> {
-	if (!merchant || currentExchangeRate) return;
+	if (!merchant || currentExchangeRate !== undefined) return;
 
-	if (!currentBoost) {
+	if (currentBoost === undefined) {
 		boost.set(createBoostObject(merchant));
 	}
 
