@@ -78,8 +78,8 @@
 	const goBack = () => goBackUtil(merchantId, setBoostLoading);
 
 	$: if (drawerView !== 'boost' && $boost !== undefined) {
-		$boost = undefined;
-		$exchangeRate = undefined;
+		boost.set(undefined);
+		exchangeRate.set(undefined);
 		boostLoading = false;
 	}
 
