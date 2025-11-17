@@ -2865,11 +2865,6 @@ svelte-eslint-parser@^1.4.0:
     postcss-scss "^4.0.9"
     postcss-selector-parser "^7.0.0"
 
-svelte-gestures@4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/svelte-gestures/-/svelte-gestures-4.0.0.tgz#c36ccac9697e98bbccef3a7b6e2bfafc06431459"
-  integrity sha512-YrryRlKGY2CJm3AtEjFt9+RdQ7/pqNio4O7Apb9ed6oMBEkd6BFoOuv9mBApAEBIx08+iBDXQujbYCvakGePPw==
-
 svelte-hmr@^0.16.0:
   version "0.16.0"
   resolved "https://registry.npmjs.org/svelte-hmr/-/svelte-hmr-0.16.0.tgz"
