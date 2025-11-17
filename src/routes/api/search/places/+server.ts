@@ -12,10 +12,6 @@ export const GET: RequestHandler = async ({ url }) => {
 		error(400, 'Missing required parameter: name');
 	}
 
-	if (query.length < 2) {
-		error(400, 'Search query must be at least 2 characters long');
-	}
-
 	try {
 		const response = await axios.get(
 			`https://api.btcmap.org/v4/places/search/?name=${encodeURIComponent(query)}`
