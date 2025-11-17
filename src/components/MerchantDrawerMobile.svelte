@@ -233,7 +233,7 @@
 		style="height: {$drawerHeight}px;"
 		on:click|stopPropagation
 		role="dialog"
-		aria-modal="false"
+		aria-modal={expanded}
 		aria-label="Merchant details"
 	>
 		<!-- Drag handle and header area - draggable -->
