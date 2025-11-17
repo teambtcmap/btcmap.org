@@ -19,10 +19,16 @@ export function parseMerchantHash(): MerchantHashState {
 	if (ampIndex !== -1) {
 		const params = new URLSearchParams(hash.substring(ampIndex + 1));
 		const merchantParam = params.get('merchant');
-		const viewParam = params.get('view') as DrawerView | null;
+		const viewParam = params.get('view');
 
 		const merchantId = merchantParam ? Number(merchantParam) : null;
-		const drawerView = viewParam || 'details';
+		
+		// Validate view parameter against allowed values
+		const validViews: DrawerView[] = ['details', 'boost', 'comments'];
+		const drawerView: DrawerView = viewParam && validViews.includes(viewParam as DrawerView) 
+			? (viewParam as DrawerView) 
+			: 'details';
+		
 		const isOpen = Boolean(merchantId);
 
 		return { merchantId, drawerView, isOpen };
