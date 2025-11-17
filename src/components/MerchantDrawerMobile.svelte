@@ -161,10 +161,9 @@
 	let initialHeight = PEEK_HEIGHT;
 
 	function handlePanDown() {
-		// Pan started - record initial state
-		isDragging = false; // Will be set true on first pan
-		initialHeight = $drawerHeight;
-		panStartY = 0; // Will be set on first pan
+		// Pan started - will be initialized on first pan event
+		isDragging = false;
+		panStartY = 0;
 	}
 
 	function handlePan(event: CustomEvent) {
