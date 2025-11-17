@@ -3,7 +3,8 @@
 		CONFETTI_CANVAS_Z_INDEX,
 		POLLING_INTERVAL,
 		QR_CODE_SIZE,
-		PAYMENT_ERROR_MESSAGE
+		PAYMENT_ERROR_MESSAGE,
+		BREAKPOINTS
 	} from '$lib/constants';
 	import { pollInvoiceStatus, isInvoicePaid } from '$lib/payment';
 	import { errToast } from '$lib/utils';
@@ -30,7 +31,7 @@
 		QRCode.toCanvas(
 			qr,
 			invoice,
-			{ width: window.innerWidth > 768 ? QR_CODE_SIZE.desktop : QR_CODE_SIZE.mobile },
+			{ width: window.innerWidth > BREAKPOINTS.md ? QR_CODE_SIZE.desktop : QR_CODE_SIZE.mobile },
 			function (error: Error | null | undefined) {
 				if (error) {
 					errToast(PAYMENT_ERROR_MESSAGE);
