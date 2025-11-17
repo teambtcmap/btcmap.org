@@ -129,7 +129,21 @@
 		// Calculate expanded height based on window size
 		// Use full screen height to match Google Maps behavior
 		if (browser) {
-			EXPANDED_HEIGHT = window.innerHeight;
+			const updateHeight = () => {
+				EXPANDED_HEIGHT = window.innerHeight;
+				if (expanded) {
+					drawerHeight.set(EXPANDED_HEIGHT);
+				}
+			};
+
+			updateHeight();
+			window.addEventListener('resize', updateHeight);
+
+			return () => {
+				window.removeEventListener('hashchange', parseHash);
+				window.removeEventListener('keydown', handleKeydown);
+				window.removeEventListener('resize', updateHeight);
+			};
 		}
 
 		return () => {
