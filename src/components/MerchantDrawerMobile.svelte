@@ -214,29 +214,33 @@
 	<!-- Bottom sheet drawer: gestures for touch/mouse, keyboard uses ESC + Close button -->
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 	<div
 		class="fixed right-0 bottom-0 left-0 z-[1002] flex flex-col bg-white shadow-2xl transition-shadow dark:bg-dark"
 		class:rounded-t-[10px]={!expanded}
 		style="height: {$drawerHeight}px;"
-		use:pan={{ delay: 0, touchAction: 'none' }}
-		on:pan={handlePan}
-		on:pandown={handlePanDown}
-		on:panup={handlePanUp}
 		on:click|stopPropagation
 		role="dialog"
 		aria-modal="false"
 		aria-label="Merchant details"
 	>
-		<!-- Drag handle -->
+		<!-- Drag handle and header area - draggable -->
+		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div
-			class="mx-auto mt-4 h-1.5 w-12 flex-shrink-0 rounded-full bg-gray-300 dark:bg-white/30"
-		></div>
-
-		<!-- Header - sticky at top -->
-		<div
-			class="flex flex-shrink-0 items-center justify-between border-b border-gray-300 bg-white px-4 py-3 dark:border-white/95 dark:bg-dark"
+			class="flex-shrink-0"
+			use:pan={{ delay: 0, touchAction: 'pan-y' }}
+			on:pan={handlePan}
+			on:pandown={handlePanDown}
+			on:panup={handlePanUp}
 		>
+			<!-- Drag handle -->
+			<div
+				class="mx-auto mt-4 h-1.5 w-12 rounded-full bg-gray-300 dark:bg-white/30"
+			></div>
+
+			<!-- Header - sticky at top -->
+			<div
+				class="flex items-center justify-between border-b border-gray-300 bg-white px-4 py-3 dark:border-white/95 dark:bg-dark"
+			>
 			{#if drawerView !== 'details'}
 				<button
 					on:click={goBack}
@@ -268,6 +272,7 @@
 				<!-- Empty space to maintain layout when minimized -->
 				<div class="w-9"></div>
 			{/if}
+			</div>
 		</div>
 
 		<!-- Scrollable content area -->
