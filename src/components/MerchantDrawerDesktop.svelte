@@ -19,7 +19,8 @@
 		handleGoBack as goBackUtil,
 		ensureBoostData,
 		fetchMerchantDetails as fetchMerchant,
-		hasCompleteData
+		hasCompleteData,
+		clearBoostState
 	} from '$lib/merchantDrawerLogic';
 
 	let merchantId: number | null = null;
@@ -78,8 +79,7 @@
 	const goBack = () => goBackUtil(merchantId, setBoostLoading);
 
 	$: if (drawerView !== 'boost' && $boost !== undefined) {
-		boost.set(undefined);
-		exchangeRate.set(undefined);
+		clearBoostState();
 		boostLoading = false;
 	}
 
