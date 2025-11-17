@@ -6,9 +6,6 @@
 	export let merchant: Place;
 	export let isUpToDate: boolean;
 	export let isBoosted: boolean;
-
-	// Determine open/closed status
-	$: isOpen = merchant.opening_hours?.toLowerCase().includes('open');
 </script>
 
 <div class="space-y-3">
@@ -73,17 +70,8 @@
 		</div>
 	</div>
 
-	<!-- Hours and tap hint -->
-	<div class="flex items-center justify-between border-t border-gray-200 pt-3 dark:border-white/10">
-		{#if merchant.opening_hours}
-			<div class="flex items-center gap-1.5 text-sm text-body dark:text-white/70">
-				<Icon w="14" h="14" icon="clock" type="popup" />
-				<span class:text-green-600={isOpen} class:dark:text-green-400={isOpen}>
-					{isOpen ? 'Open' : 'Closed'}
-				</span>
-			</div>
-		{/if}
-
+	<!-- Tap hint -->
+	<div class="flex items-center justify-end border-t border-gray-200 pt-3 dark:border-white/10">
 		<!-- Tap/swipe hint -->
 		<div class="flex items-center gap-1 text-xs text-body dark:text-white/50">
 			<Icon w="14" h="14" icon="arrow_upward" type="material" />
