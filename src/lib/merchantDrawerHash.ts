@@ -22,13 +22,14 @@ export function parseMerchantHash(): MerchantHashState {
 		const viewParam = params.get('view');
 
 		const merchantId = merchantParam ? Number(merchantParam) : null;
-		
+
 		// Validate view parameter against allowed values
 		const validViews: DrawerView[] = ['details', 'boost', 'comments'];
-		const drawerView: DrawerView = viewParam && validViews.includes(viewParam as DrawerView) 
-			? (viewParam as DrawerView) 
-			: 'details';
-		
+		const drawerView: DrawerView =
+			viewParam && validViews.includes(viewParam as DrawerView)
+				? (viewParam as DrawerView)
+				: 'details';
+
 		const isOpen = Boolean(merchantId);
 
 		return { merchantId, drawerView, isOpen };

@@ -226,8 +226,8 @@
 
 {#if isOpen}
 	<!-- Bottom sheet drawer: gestures for touch/mouse, keyboard uses ESC + Close button -->
+	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div
 		class="fixed right-0 bottom-0 left-0 z-[1002] flex flex-col bg-white shadow-2xl transition-shadow dark:bg-dark"
 		class:rounded-t-[10px]={!expanded}
@@ -247,45 +247,43 @@
 			on:panup={handlePanUp}
 		>
 			<!-- Drag handle -->
-			<div
-				class="mx-auto mt-4 h-1.5 w-12 rounded-full bg-gray-300 dark:bg-white/30"
-			></div>
+			<div class="mx-auto mt-4 h-1.5 w-12 rounded-full bg-gray-300 dark:bg-white/30"></div>
 
 			<!-- Header - sticky at top -->
 			<div
 				class="flex items-center justify-between border-b border-gray-300 bg-white px-4 py-3 dark:border-white/95 dark:bg-dark"
 			>
-			{#if drawerView !== 'details'}
-				<button
-					on:click={goBack}
-					class="flex items-center space-x-2 text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
-				>
-					<Icon w="20" h="20" icon="arrow_back" type="material" />
-					<span class="text-sm font-semibold">Back</span>
-				</button>
-				<span class="text-sm font-semibold text-primary capitalize dark:text-white"
-					>{drawerView}</span
-				>
-			{:else}
-				<span class="text-sm font-semibold text-primary dark:text-white">Merchant Details</span>
-			{/if}
+				{#if drawerView !== 'details'}
+					<button
+						on:click={goBack}
+						class="flex items-center space-x-2 text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
+					>
+						<Icon w="20" h="20" icon="arrow_back" type="material" />
+						<span class="text-sm font-semibold">Back</span>
+					</button>
+					<span class="text-sm font-semibold text-primary capitalize dark:text-white"
+						>{drawerView}</span
+					>
+				{:else}
+					<span class="text-sm font-semibold text-primary dark:text-white">Merchant Details</span>
+				{/if}
 
-			<!-- Only show close/collapse button when expanded -->
-			{#if expanded}
-				<button
-					on:click={() => {
-						expanded = false;
-						drawerHeight.set(PEEK_HEIGHT);
-					}}
-					class="rounded-full p-2 text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
-					aria-label="Collapse drawer"
-				>
-					<Icon w="20" h="20" icon="keyboard_arrow_down" type="material" />
-				</button>
-			{:else}
-				<!-- Empty space to maintain layout when minimized -->
-				<div class="w-9"></div>
-			{/if}
+				<!-- Only show close/collapse button when expanded -->
+				{#if expanded}
+					<button
+						on:click={() => {
+							expanded = false;
+							drawerHeight.set(PEEK_HEIGHT);
+						}}
+						class="rounded-full p-2 text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
+						aria-label="Collapse drawer"
+					>
+						<Icon w="20" h="20" icon="keyboard_arrow_down" type="material" />
+					</button>
+				{:else}
+					<!-- Empty space to maintain layout when minimized -->
+					<div class="w-9"></div>
+				{/if}
 			</div>
 		</div>
 
