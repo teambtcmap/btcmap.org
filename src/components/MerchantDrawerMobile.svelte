@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { pan } from 'svelte-gestures';
 	import { spring } from 'svelte/motion';
 	import { places, boost, exchangeRate } from '$lib/store';
 	import Icon from '$components/Icon.svelte';
@@ -25,6 +24,15 @@
 		clearBoostState
 	} from '$lib/merchantDrawerLogic';
 
+	// Gesture constants
+	const PEEK_HEIGHT = 200;
+	const VELOCITY_THRESHOLD = 0.5; // px/ms - fast flick detection
+	const DISTANCE_THRESHOLD = 80; // px - significant drag
+	const POSITION_THRESHOLD_PERCENT = 0.3; // 30% of travel for snap decision
+	const VELOCITY_SAMPLE_COUNT = 5;
+	const SPRING_CONFIG = { stiffness: 0.2, damping: 0.75 };
+
+	// Component state
 	let merchantId: number | null = null;
 	let drawerView: DrawerView = 'details';
 	let isOpen = false;
@@ -32,12 +40,23 @@
 	let fetchingMerchant = false;
 	let lastFetchedId: number | null = null;
 
-	// Bottom sheet heights
-	const PEEK_HEIGHT = 200;
+	// Bottom sheet state
 	let EXPANDED_HEIGHT = 500;
 	let expanded = false;
-	let drawerHeight = spring(PEEK_HEIGHT, { stiffness: 0.3, damping: 0.8 });
+	let drawerHeight = spring(PEEK_HEIGHT, SPRING_CONFIG);
 	let isDragging = false;
+
+	// Pointer tracking state
+	let activePointerId: number | null = null;
+	let startY = 0;
+	let initialHeight = PEEK_HEIGHT;
+	let lastY = 0;
+	let lastTime = 0;
+	let velocitySamples: number[] = [];
+	let velocity = 0;
+
+	// DOM reference
+	let handleElement: HTMLDivElement;
 
 	async function fetchMerchantDetails(id: number) {
 		if (fetchingMerchant || lastFetchedId === id) return;
@@ -51,8 +70,8 @@
 			(f) => {
 				fetchingMerchant = f;
 			},
-			(id) => {
-				lastFetchedId = id;
+			(fetchedId) => {
+				lastFetchedId = fetchedId;
 			}
 		);
 	}
@@ -111,13 +130,46 @@
 	function handleKeydown(event: KeyboardEvent) {
 		if (!isOpen) return;
 
-		if (event.key === 'Escape') {
-			event.preventDefault();
-			if (drawerView !== 'details') {
-				goBack();
-			} else {
-				closeDrawer();
-			}
+		switch (event.key) {
+			case 'Escape':
+				event.preventDefault();
+				if (drawerView !== 'details') {
+					goBack();
+				} else if (expanded) {
+					expanded = false;
+					drawerHeight.set(PEEK_HEIGHT);
+				} else {
+					closeDrawer();
+				}
+				break;
+			case 'ArrowUp':
+				event.preventDefault();
+				if (!expanded) {
+					expanded = true;
+					drawerHeight.set(EXPANDED_HEIGHT);
+				}
+				break;
+			case 'ArrowDown':
+				event.preventDefault();
+				if (expanded) {
+					expanded = false;
+					drawerHeight.set(PEEK_HEIGHT);
+				}
+				break;
+			case 'Enter':
+			case ' ':
+				// Only toggle if focus is on the handle element
+				if (document.activeElement === handleElement) {
+					event.preventDefault();
+					if (expanded) {
+						expanded = false;
+						drawerHeight.set(PEEK_HEIGHT);
+					} else {
+						expanded = true;
+						drawerHeight.set(EXPANDED_HEIGHT);
+					}
+				}
+				break;
 		}
 	}
 
@@ -126,8 +178,6 @@
 		window.addEventListener('hashchange', parseHash);
 		window.addEventListener('keydown', handleKeydown);
 
-		// Calculate expanded height based on window size
-		// Use full screen height to match Google Maps behavior
 		if (browser) {
 			const updateHeight = () => {
 				EXPANDED_HEIGHT = window.innerHeight;
@@ -156,65 +206,117 @@
 		ensureBoostData(merchant, $exchangeRate, $boost);
 	}
 
-	// Gesture handlers for dragging
-	let panStartY = 0;
-	let initialHeight = PEEK_HEIGHT;
+	// Pointer event handlers for dragging
+	function handlePointerDown(event: PointerEvent) {
+		if (activePointerId !== null) return;
 
-	function handlePanDown() {
-		// Pan started - will be initialized on first pan event
-		isDragging = false;
-		panStartY = 0;
+		activePointerId = event.pointerId;
+		isDragging = true;
+		startY = event.clientY;
+		initialHeight = $drawerHeight;
+		lastY = event.clientY;
+		lastTime = Date.now();
+		velocitySamples = [];
+		velocity = 0;
+
+		if (handleElement) {
+			try {
+				handleElement.setPointerCapture(event.pointerId);
+			} catch {
+				// Pointer capture not supported or failed
+			}
+		}
 	}
 
-	function handlePan(event: CustomEvent) {
-		const currentY = event.detail.y;
+	function handlePointerMove(event: PointerEvent) {
+		if (event.pointerId !== activePointerId || !isDragging) return;
 
-		if (!isDragging) {
-			// First pan event, record start
-			isDragging = true;
-			panStartY = currentY;
-			initialHeight = $drawerHeight;
-			return;
+		const currentY = event.clientY;
+		const currentTime = Date.now();
+
+		// Calculate instantaneous velocity
+		const timeDelta = currentTime - lastTime;
+		if (timeDelta > 0) {
+			const yDelta = lastY - currentY; // positive = moving up
+			const instantVelocity = yDelta / timeDelta;
+
+			velocitySamples.push(instantVelocity);
+			if (velocitySamples.length > VELOCITY_SAMPLE_COUNT) {
+				velocitySamples.shift();
+			}
+			velocity = velocitySamples.reduce((a, b) => a + b, 0) / velocitySamples.length;
 		}
 
-		// Calculate delta: INVERTED LOGIC
-		// When dragging UP (y decreases), we want to EXPAND (increase height) - like Google Maps
-		// When dragging DOWN (y increases), we want to COLLAPSE (decrease height)
-		const deltaY = panStartY - currentY; // Positive when dragging UP
+		lastY = currentY;
+		lastTime = currentTime;
+
+		// Calculate new height - 1:1 tracking with finger
+		const deltaY = startY - currentY;
 		const newHeight = Math.max(PEEK_HEIGHT, Math.min(EXPANDED_HEIGHT, initialHeight + deltaY));
 
 		drawerHeight.set(newHeight, { hard: true });
 	}
 
-	function handlePanUp() {
-		if (!isDragging) return;
+	function handlePointerUp(event: PointerEvent) {
+		if (event.pointerId !== activePointerId) return;
+
+		const finalHeight = $drawerHeight;
+		const totalDelta = finalHeight - initialHeight;
+
+		// Release pointer capture safely
+		if (handleElement) {
+			try {
+				handleElement.releasePointerCapture(event.pointerId);
+			} catch {
+				// Already released or invalid
+			}
+		}
+		activePointerId = null;
 		isDragging = false;
 
-		// Snap based on final position and direction of movement
-		const currentHeight = $drawerHeight;
-		const totalDelta = currentHeight - initialHeight;
-
-		// Determine snap based on how far we moved
-		const SNAP_THRESHOLD = 30; // Lowered from 50px to 30px for easier triggering
-
-		if (totalDelta > SNAP_THRESHOLD) {
-			// Swiped up enough → EXPAND
-			expanded = true;
-			drawerHeight.set(EXPANDED_HEIGHT);
-		} else if (totalDelta < -SNAP_THRESHOLD) {
-			// Swiped down enough → COLLAPSE to peek
-			expanded = false;
-			drawerHeight.set(PEEK_HEIGHT);
-		} else {
-			// Small movement - stay in current state or snap to nearest
-			const midPoint = (PEEK_HEIGHT + EXPANDED_HEIGHT) / 2;
-			if (currentHeight > midPoint) {
+		// Snap decision based on velocity first, then distance
+		if (Math.abs(velocity) > VELOCITY_THRESHOLD) {
+			if (velocity > 0) {
 				expanded = true;
 				drawerHeight.set(EXPANDED_HEIGHT);
 			} else {
 				expanded = false;
 				drawerHeight.set(PEEK_HEIGHT);
 			}
+		} else if (totalDelta > DISTANCE_THRESHOLD) {
+			expanded = true;
+			drawerHeight.set(EXPANDED_HEIGHT);
+		} else if (totalDelta < -DISTANCE_THRESHOLD) {
+			expanded = false;
+			drawerHeight.set(PEEK_HEIGHT);
+		} else {
+			// Small movement - snap to nearest based on current position
+			const threshold = PEEK_HEIGHT + (EXPANDED_HEIGHT - PEEK_HEIGHT) * POSITION_THRESHOLD_PERCENT;
+			if (finalHeight > threshold) {
+				expanded = true;
+				drawerHeight.set(EXPANDED_HEIGHT);
+			} else {
+				expanded = false;
+				drawerHeight.set(PEEK_HEIGHT);
+			}
+		}
+
+		// Reset velocity
+		velocity = 0;
+		velocitySamples = [];
+	}
+
+	function handlePointerCancel(event: PointerEvent) {
+		if (event.pointerId !== activePointerId) return;
+
+		activePointerId = null;
+		isDragging = false;
+
+		// Snap back to previous state
+		if (expanded) {
+			drawerHeight.set(EXPANDED_HEIGHT);
+		} else {
+			drawerHeight.set(PEEK_HEIGHT);
 		}
 	}
 
@@ -224,7 +326,7 @@
 </script>
 
 {#if isOpen}
-	<!-- Bottom sheet drawer: gestures for touch/mouse, keyboard uses ESC + Close button -->
+	<!-- Bottom sheet drawer -->
 	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<div
@@ -236,19 +338,23 @@
 		aria-modal={expanded}
 		aria-label="Merchant details"
 	>
-		<!-- Drag handle and header area - draggable -->
-		<!-- svelte-ignore a11y-no-static-element-interactions -->
+		<!-- Drag handle and header area -->
 		<div
-			class="flex-shrink-0"
-			use:pan={{ delay: 0, touchAction: 'pan-y' }}
-			on:pan={handlePan}
-			on:pandown={handlePanDown}
-			on:panup={handlePanUp}
+			class="flex-shrink-0 touch-none"
+			bind:this={handleElement}
+			on:pointerdown={handlePointerDown}
+			on:pointermove={handlePointerMove}
+			on:pointerup={handlePointerUp}
+			on:pointercancel={handlePointerCancel}
+			tabindex="0"
+			role="button"
+			aria-label={expanded ? 'Collapse drawer' : 'Expand drawer'}
+			aria-expanded={expanded}
 		>
 			<!-- Drag handle -->
 			<div class="mx-auto mt-4 h-1.5 w-12 rounded-full bg-gray-300 dark:bg-white/30"></div>
 
-			<!-- Header - sticky at top -->
+			<!-- Header -->
 			<div
 				class="flex items-center justify-between border-b border-gray-300 bg-white px-4 py-3 dark:border-white/95 dark:bg-dark"
 			>
@@ -267,7 +373,6 @@
 					<span class="text-sm font-semibold text-primary dark:text-white">Merchant Details</span>
 				{/if}
 
-				<!-- Only show close/collapse button when expanded -->
 				{#if expanded}
 					<button
 						on:click={() => {
@@ -280,7 +385,6 @@
 						<Icon w="20" h="20" icon="keyboard_arrow_down" type="material" />
 					</button>
 				{:else}
-					<!-- Empty space to maintain layout when minimized -->
 					<div class="w-9"></div>
 				{/if}
 			</div>
@@ -289,7 +393,6 @@
 		<!-- Scrollable content area -->
 		<div class="min-h-0 flex-1 overflow-y-auto">
 			{#if !merchant && fetchingMerchant}
-				<!-- Loading skeleton -->
 				<div class="space-y-4 p-4">
 					<div class="h-6 w-3/4 animate-pulse rounded-lg bg-link/50"></div>
 					<div class="h-4 w-1/2 animate-pulse rounded bg-link/50"></div>
@@ -299,13 +402,11 @@
 					</div>
 				</div>
 			{:else if merchant}
-				<!-- Show peek content when collapsed -->
 				{#if !expanded}
 					<div class="p-4">
 						<MerchantPeekContentMobile {merchant} {isUpToDate} {isBoosted} />
 					</div>
 				{:else}
-					<!-- Show full content when expanded -->
 					<div class="p-6">
 						{#if drawerView === 'boost'}
 							<BoostContent merchantId={merchant.id} onComplete={handleBoostComplete} />
