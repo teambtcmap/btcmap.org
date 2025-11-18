@@ -350,8 +350,8 @@
 
 {#if isOpen}
 	<!-- Bottom sheet drawer -->
-	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<!-- svelte-ignore a11y-no-noninteractive-element-interactions - Click handler only prevents event bubbling, not for interaction -->
+	<!-- svelte-ignore a11y-click-events-have-key-events - Dialog interaction handled by focusable handle element below -->
 	<div
 		class="fixed right-0 bottom-0 left-0 z-[1002] flex flex-col bg-white shadow-2xl transition-shadow dark:bg-dark"
 		class:rounded-t-[10px]={!expanded}
