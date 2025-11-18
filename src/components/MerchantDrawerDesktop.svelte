@@ -6,7 +6,7 @@
 	import BoostContent from './BoostContent.svelte';
 	import MerchantDetailsContent from './MerchantDetailsContent.svelte';
 	import { invalidateAll } from '$app/navigation';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import type { Place } from '$lib/types';
 	import { parseMerchantHash, updateMerchantHash, type DrawerView } from '$lib/merchantDrawerHash';
 	import {
@@ -29,9 +29,18 @@
 	let merchant: Place | null = null;
 	let fetchingMerchant = false;
 	let lastFetchedId: number | null = null;
+	let abortController: AbortController | null = null;
 
 	async function fetchMerchantDetails(id: number) {
 		if (fetchingMerchant || lastFetchedId === id) return;
+
+		// Cancel previous request if still pending
+		if (abortController) {
+			abortController.abort();
+		}
+
+		// Create new abort controller for this request
+		abortController = new AbortController();
 
 		await fetchMerchant(
 			id,
@@ -44,9 +53,17 @@
 			},
 			(id) => {
 				lastFetchedId = id;
-			}
+			},
+			abortController.signal
 		);
 	}
+
+	onDestroy(() => {
+		// Cancel any pending requests when component unmounts
+		if (abortController) {
+			abortController.abort();
+		}
+	});
 
 	$: if (merchantId && isOpen) {
 		const foundInStore = $places.find((p) => p.id === merchantId);

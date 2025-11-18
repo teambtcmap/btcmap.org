@@ -7,7 +7,7 @@
 	import MerchantDetailsContent from './MerchantDetailsContent.svelte';
 	import MerchantPeekContentMobile from './MerchantPeekContentMobile.svelte';
 	import { invalidateAll } from '$app/navigation';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import type { Place } from '$lib/types';
 	import { parseMerchantHash, updateMerchantHash, type DrawerView } from '$lib/merchantDrawerHash';
 	import {
@@ -68,6 +68,7 @@
 	let merchant: Place | null = null;
 	let fetchingMerchant = false;
 	let lastFetchedId: number | null = null;
+	let abortController: AbortController | null = null;
 
 	// Bottom sheet state
 	let EXPANDED_HEIGHT = 500;
@@ -90,6 +91,14 @@
 	async function fetchMerchantDetails(id: number) {
 		if (fetchingMerchant || lastFetchedId === id) return;
 
+		// Cancel previous request if still pending
+		if (abortController) {
+			abortController.abort();
+		}
+
+		// Create new abort controller for this request
+		abortController = new AbortController();
+
 		await fetchMerchant(
 			id,
 			merchantId,
@@ -101,7 +110,8 @@
 			},
 			(fetchedId) => {
 				lastFetchedId = fetchedId;
-			}
+			},
+			abortController.signal
 		);
 	}
 
@@ -228,6 +238,13 @@
 				window.removeEventListener('resize', updateHeight);
 			}
 		};
+	});
+
+	onDestroy(() => {
+		// Cancel any pending requests when component unmounts
+		if (abortController) {
+			abortController.abort();
+		}
 	});
 
 	$: if (drawerView === 'boost' && merchant) {

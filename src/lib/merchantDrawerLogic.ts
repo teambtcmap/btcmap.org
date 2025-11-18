@@ -40,7 +40,8 @@ export async function fetchMerchantDetails(
 	currentMerchantId: number | null,
 	setMerchant: (merchant: Place | null) => void,
 	setFetching: (fetching: boolean) => void,
-	setLastFetched: (id: number) => void
+	setLastFetched: (id: number) => void,
+	abortSignal?: AbortSignal
 ): Promise<void> {
 	setLastFetched(id);
 	setFetching(true);
@@ -48,12 +49,20 @@ export async function fetchMerchantDetails(
 
 	try {
 		const response = await axios.get(
-			`https://api.btcmap.org/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`
+			`https://api.btcmap.org/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`,
+			{
+				timeout: 10000, // 10 second timeout
+				signal: abortSignal // Support request cancellation
+			}
 		);
 		if (currentMerchantId === id) {
 			setMerchant(response.data);
 		}
 	} catch (error) {
+		// Don't show error if request was cancelled (expected behavior)
+		if (axios.isCancel(error)) {
+			return;
+		}
 		console.error('Error fetching merchant details:', error);
 		errToast('Error loading merchant details. Please try again.');
 	} finally {
