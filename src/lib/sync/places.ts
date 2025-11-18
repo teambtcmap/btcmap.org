@@ -182,17 +182,7 @@ export const elementsSync = async () => {
 					}
 				}
 			} catch (error) {
-				// If API fails but we have cached data, continue with cached data
-				if (!cachedPlaces) {
-					placesError.set(
-						'Could not load recent updates from API, please try again or contact BTC Map.'
-					);
-					placesLoadingStatus.set('');
-					placesLoadingProgress.set(0);
-					console.error(error);
-					return;
-				}
-
+				// If API fails, continue with existing data (either cached or CDN)
 				placesError.set('Could not update places from API, using cached data.');
 				console.error(error);
 			}
