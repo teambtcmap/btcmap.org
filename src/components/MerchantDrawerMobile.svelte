@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { spring } from 'svelte/motion';
-	import { places, boost, exchangeRate } from '$lib/store';
+	import { places, boost, exchangeRate, resetBoost } from '$lib/store';
 	import Icon from '$components/Icon.svelte';
 	import BoostContent from './BoostContent.svelte';
 	import MerchantDetailsContent from './MerchantDetailsContent.svelte';
@@ -164,7 +164,7 @@
 	}
 
 	const handleBoost = () => boostMerchant(merchant, merchantId, setBoostLoading);
-	const handleBoostComplete = () => completeBoost(merchantId, invalidateAll);
+	const handleBoostComplete = () => completeBoost(merchantId, invalidateAll, resetBoost);
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (!isOpen) return;
