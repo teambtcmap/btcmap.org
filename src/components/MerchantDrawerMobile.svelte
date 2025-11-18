@@ -32,6 +32,35 @@
 	const VELOCITY_SAMPLE_COUNT = 5;
 	const SPRING_CONFIG = { stiffness: 0.2, damping: 0.75 };
 
+	// Helper function to determine snap state based on gesture
+	function determineSnapState(
+		velocity: number,
+		totalDelta: number,
+		finalHeight: number,
+		EXPANDED_HEIGHT: number
+	): { expanded: boolean; height: number } {
+		// Snap decision based on velocity first, then distance
+		if (Math.abs(velocity) > VELOCITY_THRESHOLD) {
+			if (velocity > 0) {
+				return { expanded: true, height: EXPANDED_HEIGHT };
+			} else {
+				return { expanded: false, height: PEEK_HEIGHT };
+			}
+		} else if (totalDelta > DISTANCE_THRESHOLD) {
+			return { expanded: true, height: EXPANDED_HEIGHT };
+		} else if (totalDelta < -DISTANCE_THRESHOLD) {
+			return { expanded: false, height: PEEK_HEIGHT };
+		} else {
+			// Small movement - snap to nearest based on current position
+			const threshold = PEEK_HEIGHT + (EXPANDED_HEIGHT - PEEK_HEIGHT) * POSITION_THRESHOLD_PERCENT;
+			if (finalHeight > threshold) {
+				return { expanded: true, height: EXPANDED_HEIGHT };
+			} else {
+				return { expanded: false, height: PEEK_HEIGHT };
+			}
+		}
+	}
+
 	// Component state
 	let merchantId: number | null = null;
 	let drawerView: DrawerView = 'details';
@@ -273,32 +302,10 @@
 		activePointerId = null;
 		isDragging = false;
 
-		// Snap decision based on velocity first, then distance
-		if (Math.abs(velocity) > VELOCITY_THRESHOLD) {
-			if (velocity > 0) {
-				expanded = true;
-				drawerHeight.set(EXPANDED_HEIGHT);
-			} else {
-				expanded = false;
-				drawerHeight.set(PEEK_HEIGHT);
-			}
-		} else if (totalDelta > DISTANCE_THRESHOLD) {
-			expanded = true;
-			drawerHeight.set(EXPANDED_HEIGHT);
-		} else if (totalDelta < -DISTANCE_THRESHOLD) {
-			expanded = false;
-			drawerHeight.set(PEEK_HEIGHT);
-		} else {
-			// Small movement - snap to nearest based on current position
-			const threshold = PEEK_HEIGHT + (EXPANDED_HEIGHT - PEEK_HEIGHT) * POSITION_THRESHOLD_PERCENT;
-			if (finalHeight > threshold) {
-				expanded = true;
-				drawerHeight.set(EXPANDED_HEIGHT);
-			} else {
-				expanded = false;
-				drawerHeight.set(PEEK_HEIGHT);
-			}
-		}
+		// Determine snap state using helper function
+		const snapState = determineSnapState(velocity, totalDelta, finalHeight, EXPANDED_HEIGHT);
+		expanded = snapState.expanded;
+		drawerHeight.set(snapState.height);
 
 		// Reset velocity
 		velocity = 0;
