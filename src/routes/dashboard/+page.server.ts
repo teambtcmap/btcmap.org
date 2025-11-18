@@ -1,40 +1,26 @@
 import type { PageServerLoad } from './$types';
+import { error } from '@sveltejs/kit';
 
-export const load: PageServerLoad = async () => {
-	try {
-		const response = await fetch('https://api.btcmap.org/rpc', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				jsonrpc: '2.0',
-				id: 1,
-				method: 'get_area_dashboard',
-				params: {
-					area_id: 662
-				}
-			})
-		});
+interface DashboardData {
+	total_merchants: number;
+	total_merchants_chart: Array<ChartEntry>;
+	verified_merchants_1y: number;
+	verified_merchants_1y_chart: Array<ChartEntry>;
+}
 
-		const data = await response.json();
+interface ChartEntry {
+	date: string;
+	value: number;
+}
 
-		if (data.error) {
-			const errorMessage = data.error.message || 'RPC Error';
-			const errorDetails = data.error.data ? `: ${JSON.stringify(data.error.data)}` : '';
-			return {
-				error: errorMessage + errorDetails,
-				areaDashboard: null
-			};
-		}
+export const load: PageServerLoad = async ({ fetch }) => {
+	const response = await fetch('https://api.btcmap.org/v4/dashboard');
 
-		return {
-			areaDashboard: data.result
-		};
-	} catch (err) {
-		return {
-			error: err instanceof Error ? err.message : 'Failed to load dashboard data',
-			areaDashboard: null
-		};
+	if (!response.ok) {
+		throw error(response.status, 'Failed to fetch dashboard data');
 	}
+
+	const areaDashboard: DashboardData = await response.json();
+
+	return { areaDashboard };
 };

@@ -72,6 +72,12 @@ sw.addEventListener('fetch', (event) => {
 		const url = new URL(event.request.url);
 		const cache = await caches.open(CACHE);
 
+		// Don't cache external map tile/style/sprite resources to prevent stale map data
+		// Map styles and sprites can change, and caching them causes issues like missing icons
+		const isMapResource =
+			url.hostname === 'tiles.openfreemap.org' ||
+			(url.hostname === 'static.btcmap.org' && url.pathname.includes('map-styles'));
+
 		// `build`/`files` can always be served from the cache
 		if (ASSETS.includes(url.pathname)) {
 			const res = await cache.match(url.pathname);
@@ -83,7 +89,8 @@ sw.addEventListener('fetch', (event) => {
 		try {
 			const response = await fetch(event.request);
 
-			if (response.status === 200) {
+			// Only cache non-map resources to avoid serving stale map styles/sprites
+			if (response.status === 200 && !isMapResource) {
 				cache.put(event.request, response.clone());
 			}
 

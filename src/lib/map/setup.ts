@@ -116,10 +116,13 @@ export const layers = (leaflet: Leaflet, map: Map) => {
 		style: 'https://static.btcmap.org/map-styles/dark.json'
 	});
 
+	let activeLayer;
 	if (theme === 'dark') {
 		openFreeMapDark.addTo(map);
+		activeLayer = openFreeMapDark;
 	} else {
 		openFreeMapLiberty.addTo(map);
+		activeLayer = openFreeMapLiberty;
 	}
 
 	const baseMaps = {
@@ -128,7 +131,7 @@ export const layers = (leaflet: Leaflet, map: Map) => {
 		OpenStreetMap: osm
 	};
 
-	return baseMaps;
+	return { baseMaps, activeLayer };
 };
 
 export const attribution = (L: Leaflet, map: Map) => {
