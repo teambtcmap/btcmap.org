@@ -25,12 +25,12 @@
 	} from '$lib/merchantDrawerLogic';
 
 	// Gesture constants
-	const PEEK_HEIGHT = 200;
-	const VELOCITY_THRESHOLD = 0.5; // px/ms - fast flick detection
-	const DISTANCE_THRESHOLD = 80; // px - significant drag
-	const POSITION_THRESHOLD_PERCENT = 0.3; // 30% of travel for snap decision
-	const VELOCITY_SAMPLE_COUNT = 5;
-	const SPRING_CONFIG = { stiffness: 0.2, damping: 0.75 };
+	const PEEK_HEIGHT = 200; // Collapsed state height - shows merchant name and quick info
+	const VELOCITY_THRESHOLD = 0.5; // px/ms - minimum velocity for flick gesture detection
+	const DISTANCE_THRESHOLD = 80; // px - minimum drag distance to trigger snap
+	const POSITION_THRESHOLD_PERCENT = 0.3; // When to snap up vs down (30% of total height)
+	const VELOCITY_SAMPLE_COUNT = 5; // Number of velocity samples for smoothing
+	const SPRING_CONFIG = { stiffness: 0.2, damping: 0.75 }; // Animation feel - smooth but responsive
 
 	// Helper function to determine snap state based on gesture
 	function determineSnapState(
@@ -71,8 +71,8 @@
 	let abortController: AbortController | null = null;
 
 	// Bottom sheet state
-	let EXPANDED_HEIGHT = 500;
-	let expanded = false;
+	let EXPANDED_HEIGHT = 500; // Initial value, updated to window.innerHeight on mount
+	let expanded = false; // Whether drawer is in expanded (full screen) state
 	let drawerHeight = spring(PEEK_HEIGHT, SPRING_CONFIG);
 	let isDragging = false;
 
