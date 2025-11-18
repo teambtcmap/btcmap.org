@@ -14,17 +14,15 @@
 	export let data;
 
 	let areaDashboard = data.areaDashboard;
-	let error = data.error;
 
 	const chartHistory: ChartHistory[] = ['7D', '1M', '3M', '6M', 'YTD', '1Y', 'ALL'];
 	let chartHistorySelected: ChartHistory = '3M';
 
-	let upToDateChartCanvas: HTMLCanvasElement;
-	let upToDateChart: Chart<'line', number[], string>;
 	let totalChartCanvas: HTMLCanvasElement;
 	let totalChart: Chart<'line', number[], string>;
-	let daysSinceVerifiedChartCanvas: HTMLCanvasElement;
-	let daysSinceVerifiedChart: Chart<'line', number[], string>;
+
+	let upToDateChartCanvas: HTMLCanvasElement;
+	let upToDateChart: Chart<'line', number[], string>;
 
 	const populateCharts = () => {
 		const theme = detectTheme();
@@ -36,15 +34,15 @@
 		upToDateChart = new Chart(upToDateChartCanvas, {
 			type: 'line',
 			data: {
-				labels: filterData(areaDashboard?.verified_elements_365d_chart || [])
-					.map((item) => format(new Date(item.date), 'yyyy-MM-dd'))
-					.reverse(),
+				labels: filterData(areaDashboard?.verified_merchants_1y_chart || []).map((item) =>
+					format(new Date(item.date), 'yyyy-MM-dd')
+				),
 				datasets: [
 					{
-						label: 'Recently Verified Locations',
-						data: filterData(areaDashboard?.verified_elements_365d_chart || [])
-							.map((item) => item.value)
-							.reverse(),
+						label: 'Recently Verified Merchants',
+						data: filterData(areaDashboard?.verified_merchants_1y_chart || []).map(
+							(item) => item.value
+						),
 						fill: {
 							target: 'origin',
 							above: 'rgba(11, 144, 114, 0.2)'
@@ -99,15 +97,13 @@
 		totalChart = new Chart(totalChartCanvas, {
 			type: 'line',
 			data: {
-				labels: filterData(areaDashboard?.total_elements_chart || [])
-					.map((item) => format(new Date(item.date), 'yyyy-MM-dd'))
-					.reverse(),
+				labels: filterData(areaDashboard?.total_merchants_chart || []).map((item) =>
+					format(new Date(item.date), 'yyyy-MM-dd')
+				),
 				datasets: [
 					{
-						label: 'Total Locations',
-						data: filterData(areaDashboard?.total_elements_chart || [])
-							.map((item) => item.value)
-							.reverse(),
+						label: 'Total Merchants',
+						data: filterData(areaDashboard?.total_merchants_chart || []).map((item) => item.value),
 						fill: {
 							target: 'origin',
 							above: 'rgba(0, 153, 175, 0.2)'
@@ -158,78 +154,14 @@
 				}
 			}
 		});
-
-		daysSinceVerifiedChart = new Chart(daysSinceVerifiedChartCanvas, {
-			type: 'line',
-			data: {
-				labels: filterData(areaDashboard?.days_since_verified_chart || [])
-					.map((item) => format(new Date(item.date), 'yyyy-MM-dd'))
-					.reverse(),
-				datasets: [
-					{
-						label: 'Average Last Verification Age',
-						data: filterData(areaDashboard?.days_since_verified_chart || [])
-							.map((item) => item.value)
-							.reverse(),
-						fill: {
-							target: 'origin',
-							above: 'rgba(247, 147, 26, 0.3)'
-						},
-						borderColor: 'rgb(247, 147, 26)',
-						tension: 0.1,
-						pointStyle: false
-					}
-				]
-			},
-			options: {
-				animation: false,
-				maintainAspectRatio: false,
-				plugins: {
-					legend: {
-						labels: {
-							font: {
-								weight: 600
-							}
-						}
-					}
-				},
-				scales: {
-					x: {
-						ticks: {
-							maxTicksLimit: 5,
-							font: {
-								weight: 600
-							}
-						},
-						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
-						}
-					},
-					y: {
-						ticks: {
-							font: {
-								weight: 600
-							}
-						},
-						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
-						}
-					}
-				},
-				interaction: {
-					intersect: false
-				}
-			}
-		});
 	};
 
-	$: $theme !== undefined && updateChartThemes([upToDateChart, totalChart, daysSinceVerifiedChart]);
+	$: $theme !== undefined && updateChartThemes([upToDateChart, totalChart]);
 
 	onMount(async () => {
 		if (browser) {
 			upToDateChartCanvas.getContext('2d');
 			totalChartCanvas.getContext('2d');
-			daysSinceVerifiedChartCanvas.getContext('2d');
 			populateCharts();
 		}
 	});
@@ -260,7 +192,7 @@
 	};
 
 	$: {
-		if (chartHistorySelected && upToDateChart && totalChart && daysSinceVerifiedChart) {
+		if (chartHistorySelected && upToDateChart && totalChart) {
 			const cutoffDate = getChartHistoryDate();
 
 			const filterData = (data: ChartDataItem[] = []) =>
@@ -268,22 +200,18 @@
 
 			const updateChart = (chart: Chart<'line', number[], string>, data: ChartDataItem[]) => {
 				const filtered = filterData(data);
-				chart.data.labels = filtered
-					.map((item) => format(new Date(item.date), 'yyyy-MM-dd'))
-					.reverse();
-				chart.data.datasets[0].data = filtered.map((item) => item.value).reverse();
+				chart.data.labels = filtered.map((item) => format(new Date(item.date), 'yyyy-MM-dd'));
+				chart.data.datasets[0].data = filtered.map((item) => item.value);
 				chart.update();
 			};
 
-			updateChart(upToDateChart, areaDashboard?.verified_elements_365d_chart || []);
-			updateChart(totalChart, areaDashboard?.total_elements_chart || []);
-			updateChart(daysSinceVerifiedChart, areaDashboard?.days_since_verified_chart || []);
+			updateChart(upToDateChart, areaDashboard?.verified_merchants_1y_chart || []);
+			updateChart(totalChart, areaDashboard?.total_merchants_chart || []);
 		}
 	}
 
 	$: {
 		areaDashboard = data.areaDashboard;
-		error = data.error;
 	}
 </script>
 
@@ -310,25 +238,19 @@
 				<HeaderPlaceholder />
 			{/if}
 
-			{#if error}
-				<div class="rounded-lg bg-red-100 p-4 text-red-700 dark:bg-red-900/50 dark:text-red-100">
-					<p>Error loading dashboard data: {error}</p>
-				</div>
-			{/if}
-
 			<section id="stats">
 				<div
 					class="grid rounded-3xl border border-gray-300 md:grid-cols-2 xl:grid-cols-2 dark:border-white/95 dark:bg-white/10"
 				>
 					<DashboardStat
-						title="Total Locations"
-						stat={areaDashboard?.total_elements}
+						title="Total Merchants"
+						stat={areaDashboard?.total_merchants}
 						border="md:border-r border-gray-300 dark:border-white/95"
 						loading={false}
 					/>
 					<DashboardStat
-						title="Recently Verified Locations"
-						stat={areaDashboard?.verified_elements_365d}
+						title="Recently Verified Merchants"
+						stat={areaDashboard?.verified_merchants_1y}
 						loading={false}
 					/>
 				</div>
@@ -355,7 +277,7 @@
 						<canvas bind:this={totalChartCanvas} width="100%" height="400" />
 					</div>
 					<p class="mt-1 text-center text-sm text-body dark:text-white">
-						*Elements accepting any bitcoin method.
+						*Merchants accepting any bitcoin method.
 					</p>
 				</div>
 
@@ -364,18 +286,8 @@
 						<canvas bind:this={upToDateChartCanvas} width="100%" height="400" />
 					</div>
 					<p class="mt-1 text-center text-sm text-body dark:text-white">
-						*Elements with a <em>survey:date</em>, <em>check_date</em>, or
+						*Merchants with a <em>survey:date</em>, <em>check_date</em>, or
 						<em>check_date:currency:XBT</em> tag less than one year old.
-					</p>
-				</div>
-
-				<div>
-					<div class="relative">
-						<canvas bind:this={daysSinceVerifiedChartCanvas} width="100%" height="400" />
-					</div>
-					<p class="mt-1 text-center text-sm text-body dark:text-white">
-						*Based on <em>survey:date</em>, <em>check_date</em>, or
-						<em>check_date:currency:XBT</em>.
 					</p>
 				</div>
 			</section>
