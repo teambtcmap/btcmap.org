@@ -104,7 +104,8 @@
 			map = leaflet.map(mapElement, { attributionControl: false, maxZoom: 19 });
 
 			// add tiles and basemaps
-			baseMaps = layers(leaflet, map);
+			const layersResult = layers(leaflet, map);
+			baseMaps = layersResult.baseMaps;
 
 			// change broken marker image path in prod
 			leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
