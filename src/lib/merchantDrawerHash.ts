@@ -1,6 +1,6 @@
 import { browser } from '$app/environment';
 
-export type DrawerView = 'details' | 'boost' | 'comments';
+export type DrawerView = 'details' | 'boost';
 
 export interface MerchantHashState {
 	merchantId: number | null;
@@ -31,7 +31,7 @@ export function parseMerchantHash(): MerchantHashState {
 		}
 
 		// Validate view parameter against allowed values
-		const validViews: DrawerView[] = ['details', 'boost', 'comments'];
+		const validViews: DrawerView[] = ['details', 'boost'];
 		const drawerView: DrawerView =
 			viewParam && validViews.includes(viewParam as DrawerView)
 				? (viewParam as DrawerView)
