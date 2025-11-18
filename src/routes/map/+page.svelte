@@ -4,6 +4,7 @@
 	import Icon from '$components/Icon.svelte';
 	import MapLoadingMain from '$components/MapLoadingMain.svelte';
 	import MerchantDrawerHash from '$components/MerchantDrawerHash.svelte';
+	import { updateMerchantHash } from '$lib/merchantDrawerHash';
 	import {
 		processPlaces,
 		isSupported as isWorkerSupported,
@@ -88,18 +89,7 @@
 
 		selectedMarkerId = id;
 		highlightMarker(id);
-
-		const hash = window.location.hash.substring(1);
-		const ampIndex = hash.indexOf('&');
-		const mapPart = ampIndex !== -1 ? hash.substring(0, ampIndex) : hash;
-		const params = new URLSearchParams();
-		params.set('merchant', String(id));
-
-		if (mapPart) {
-			window.location.hash = `${mapPart}&${params.toString()}`;
-		} else {
-			window.location.hash = params.toString();
-		}
+		updateMerchantHash(id, 'details');
 	}
 
 	let leaflet: Leaflet;
