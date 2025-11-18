@@ -178,8 +178,10 @@
 		window.addEventListener('hashchange', parseHash);
 		window.addEventListener('keydown', handleKeydown);
 
+		let updateHeight: (() => void) | null = null;
+
 		if (browser) {
-			const updateHeight = () => {
+			updateHeight = () => {
 				EXPANDED_HEIGHT = window.innerHeight;
 				if (expanded) {
 					drawerHeight.set(EXPANDED_HEIGHT);
@@ -188,17 +190,14 @@
 
 			updateHeight();
 			window.addEventListener('resize', updateHeight);
-
-			return () => {
-				window.removeEventListener('hashchange', parseHash);
-				window.removeEventListener('keydown', handleKeydown);
-				window.removeEventListener('resize', updateHeight);
-			};
 		}
 
 		return () => {
 			window.removeEventListener('hashchange', parseHash);
 			window.removeEventListener('keydown', handleKeydown);
+			if (updateHeight) {
+				window.removeEventListener('resize', updateHeight);
+			}
 		};
 	});
 
