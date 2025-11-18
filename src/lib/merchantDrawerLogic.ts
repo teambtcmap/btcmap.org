@@ -81,7 +81,9 @@ export async function handleBoost(
 		exchangeRate.set(rate);
 		updateMerchantHash(merchantId, 'boost');
 		setBoostLoading(false);
-	} catch {
+	} catch (error) {
+		console.error('Error fetching exchange rate for boost:', error);
+		errToast('Failed to load boost information. Please try again.');
 		boost.set(undefined);
 		setBoostLoading(false);
 	}
@@ -92,7 +94,13 @@ export async function handleBoostComplete(
 	invalidateAll: () => Promise<void>,
 	resetBoostStore?: Writable<number>
 ): Promise<void> {
-	await invalidateAll();
+	try {
+		await invalidateAll();
+	} catch (error) {
+		console.error('Error invalidating data after boost:', error);
+		// Continue with cleanup even if invalidation fails
+	}
+
 	clearBoostState();
 
 	if (resetBoostStore) {
@@ -145,7 +153,8 @@ export async function ensureBoostData(
 	try {
 		const rate = await fetchExchangeRate();
 		exchangeRate.set(rate);
-	} catch {
-		// Error already handled by fetchExchangeRate
+	} catch (error) {
+		console.error('Error ensuring boost data:', error);
+		// Don't show toast here as this is a background operation
 	}
 }
