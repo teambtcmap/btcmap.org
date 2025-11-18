@@ -15,7 +15,6 @@
 	$: email = tags['contact:email'] && tags['contact:email'];
 	$: nostr = tags['contact:nostr'] && tags['contact:nostr'];
 	$: twitter = tags['contact:twitter'] && tags['contact:twitter'];
-	$: secondTwitter = tags['contact:second_twitter'] && tags['contact:second_twitter'];
 	$: meetup = tags['contact:meetup'] && tags['contact:meetup'];
 	$: eventbrite = tags['contact:eventbrite'] && tags['contact:eventbrite'];
 	$: telegram = tags['contact:telegram'] && tags['contact:telegram'];
@@ -75,7 +74,6 @@
 		{email}
 		{nostr}
 		{twitter}
-		{secondTwitter}
 		{meetup}
 		{eventbrite}
 		{telegram}

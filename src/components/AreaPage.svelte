@@ -224,7 +224,6 @@
 			email = area['contact:email'];
 			nostr = area['contact:nostr'];
 			twitter = area['contact:twitter'];
-			secondTwitter = area['contact:second_twitter'];
 			meetup = area['contact:meetup'];
 			eventbrite = area['contact:eventbrite'];
 			telegram = area['contact:telegram'];
@@ -329,7 +328,6 @@
 	let email: string | undefined;
 	let nostr: string | undefined;
 	let twitter: string | undefined;
-	let secondTwitter: string | undefined;
 	let meetup: string | undefined;
 	let eventbrite: string | undefined;
 	let telegram: string | undefined;
@@ -412,7 +410,6 @@
 					{email}
 					{nostr}
 					{twitter}
-					{secondTwitter}
 					{meetup}
 					{eventbrite}
 					{telegram}
