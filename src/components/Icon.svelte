@@ -39,6 +39,7 @@
 						sauna: 'material-symbols:sauna',
 						info_outline: 'material-symbols:info-outline',
 						skull: 'material-symbols:skull',
+						currency_bitcoin: 'material-symbols:currency-bitcoin',
 
 						// general app icons
 						close_round: 'ic:round-close'
