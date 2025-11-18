@@ -58,7 +58,6 @@ export type AreaTags = {
 	['contact:email']?: string;
 	['contact:nostr']?: string;
 	['contact:twitter']?: string;
-	['contact:second_twitter']?: string;
 	['contact:meetup']?: string;
 	['contact:eventbrite']?: string;
 	['contact:telegram']?: string;

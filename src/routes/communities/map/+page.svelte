@@ -137,7 +137,6 @@
 						email: community.tags['contact:email'],
 						nostr: community.tags['contact:nostr'],
 						twitter: community.tags['contact:twitter'],
-						secondTwitter: community.tags['contact:second_twitter'],
 						meetup: community.tags['contact:meetup'],
 						eventbrite: community.tags['contact:eventbrite'],
 						telegram: community.tags['contact:telegram'],

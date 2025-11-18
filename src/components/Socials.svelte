@@ -3,7 +3,6 @@
 	export let email: undefined | string = undefined;
 	export let nostr: undefined | string = undefined;
 	export let twitter: undefined | string = undefined;
-	export let secondTwitter: undefined | string = undefined;
 	export let meetup: undefined | string = undefined;
 	export let eventbrite: undefined | string = undefined;
 	export let telegram: undefined | string = undefined;
@@ -49,13 +48,6 @@
 	{/if}
 	{#if twitter}
 		<a href={twitter} target="_blank" rel="noreferrer" class="m-1">
-			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-black">
-				<Icon w="25" h="25" icon="x" type="socials" style="text-white" />
-			</span>
-		</a>
-	{/if}
-	{#if secondTwitter}
-		<a href={secondTwitter} target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-black">
 				<Icon w="25" h="25" icon="x" type="socials" style="text-white" />
 			</span>
