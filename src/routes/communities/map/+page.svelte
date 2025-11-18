@@ -231,7 +231,7 @@
 			}
 
 			// add tiles and basemaps
-			const baseMaps = layers(leaflet, map);
+			const { baseMaps } = layers(leaflet, map);
 
 			map.on('moveend', () => {
 				if (!communityQuery) {

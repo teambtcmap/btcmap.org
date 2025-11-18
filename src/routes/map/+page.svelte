@@ -60,8 +60,13 @@
 			mapLoading = 100;
 			mapLoadingStatus = 'Loading places...';
 		}
+		// Priority 4: Waiting for map tiles to render
+		else if (elementsLoaded && !mapTilesLoaded) {
+			mapLoading = 100;
+			mapLoadingStatus = 'Preparing map...';
+		}
 		// Reset when everything is done
-		else if (elementsLoaded) {
+		else if (elementsLoaded && mapTilesLoaded) {
 			mapLoading = 0;
 			mapLoadingStatus = '';
 		}
@@ -105,6 +110,7 @@
 	let map: Map;
 	let mapLoaded = false;
 	let elementsLoaded = false;
+	let mapTilesLoaded = false;
 
 	let markers: MarkerClusterGroup;
 	let upToDateLayer: FeatureGroup.SubGroup;
@@ -663,7 +669,27 @@
 			}
 
 			// add tiles and basemaps
-			const baseMaps = layers(leaflet, map);
+			const { baseMaps, activeLayer } = layers(leaflet, map);
+
+			// Hook into MapLibre GL tile loading events
+			if (activeLayer && activeLayer.getMaplibreMap) {
+				// MapLibre GL map might not be ready immediately, poll for it
+				const checkGlMap = () => {
+					const glMap = activeLayer.getMaplibreMap();
+					if (glMap) {
+						glMap.on('idle', () => {
+							mapTilesLoaded = true;
+						});
+					} else {
+						// GL map not ready yet, check again after a short delay
+						setTimeout(checkGlMap, 100);
+					}
+				};
+				checkGlMap();
+			} else {
+				// Fallback: if not using MapLibre GL layer, mark tiles as loaded immediately
+				mapTilesLoaded = true;
+			}
 
 			// add events to cache last viewed location so it can be used on next map launch
 			map.on('zoomend', () => {
