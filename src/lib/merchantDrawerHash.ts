@@ -21,7 +21,14 @@ export function parseMerchantHash(): MerchantHashState {
 		const merchantParam = params.get('merchant');
 		const viewParam = params.get('view');
 
-		const merchantId = merchantParam ? Number(merchantParam) : null;
+		// Validate merchant ID: must be a positive integer
+		let merchantId: number | null = null;
+		if (merchantParam) {
+			const parsedId = Number(merchantParam);
+			if (!isNaN(parsedId) && parsedId > 0 && Number.isInteger(parsedId)) {
+				merchantId = parsedId;
+			}
+		}
 
 		// Validate view parameter against allowed values
 		const validViews: DrawerView[] = ['details', 'boost', 'comments'];
