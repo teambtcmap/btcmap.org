@@ -17,6 +17,9 @@ import { parseJSON, filterPlaces } from '$lib/workers/sync-worker-manager';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
+// Concurrency protection to prevent multiple simultaneous syncs
+let syncInProgress = false;
+
 // Progress range constants for clear progress mapping
 const PROGRESS_RANGES = {
 	DOWNLOAD_START: 10,
@@ -70,175 +73,196 @@ const getStaticFileDate = async (): Promise<string> => {
 };
 
 export const elementsSync = async () => {
-	// clear old tables if present
-	clearTables(['elements', 'elements_v2', 'elements_v3', 'places_v4']);
+	// Prevent concurrent syncs - if already running, skip this invocation
+	if (syncInProgress) {
+		console.info('Sync already in progress, skipping concurrent invocation');
+		return;
+	}
 
-	// Initialize progress
-	placesLoadingProgress.set(0);
-	placesLoadingStatus.set('Initializing...');
+	syncInProgress = true;
 
-	// get places from local storage
-	await localforage
-		.getItem<Place[]>('places_v4')
-		.then(async function (cachedPlaces) {
-			// add to sync count to only show data refresh after initial load
-			const count = get(placesSyncCount);
-			placesSyncCount.set(count + 1);
+	try {
+		// clear old tables if present
+		clearTables(['elements', 'elements_v2', 'elements_v3', 'places_v4']);
 
-			let placesData: Place[] = [];
+		// Initialize progress
+		placesLoadingProgress.set(0);
+		placesLoadingStatus.set('Initializing...');
 
-			// Step 1: Get base data from static CDN if no cache exists
-			if (!cachedPlaces) {
+		// get places from local storage
+		await localforage
+			.getItem<Place[]>('places_v4')
+			.then(async function (cachedPlaces) {
+				// add to sync count to only show data refresh after initial load
+				const count = get(placesSyncCount);
+				placesSyncCount.set(count + 1);
+
+				let placesData: Place[] = [];
+
+				// Step 1: Get base data from static CDN if no cache exists
+				if (!cachedPlaces) {
+					try {
+						placesLoadingStatus.set('Downloading places data...');
+						placesLoadingProgress.set(PROGRESS_RANGES.DOWNLOAD_START);
+
+						// Fetch as text to parse in worker
+						const staticResponse = await axios.get(
+							'https://cdn.static.btcmap.org/api/v4/places.json',
+							{
+								responseType: 'text',
+								onDownloadProgress: (progressEvent: AxiosProgressEvent) => {
+									if (progressEvent.total) {
+										const downloadPercent = (progressEvent.loaded / progressEvent.total) * 100;
+										// Map 0-100% download to DOWNLOAD_START-DOWNLOAD_END range
+										const downloadRange =
+											PROGRESS_RANGES.DOWNLOAD_END - PROGRESS_RANGES.DOWNLOAD_START;
+										const scaledProgress =
+											PROGRESS_RANGES.DOWNLOAD_START + (downloadPercent / 100) * downloadRange;
+										placesLoadingProgress.set(Math.round(scaledProgress));
+
+										const loadedMB = (progressEvent.loaded / (1024 * 1024)).toFixed(1);
+										const totalMB = (progressEvent.total / (1024 * 1024)).toFixed(1);
+										placesLoadingStatus.set(`Downloading ${loadedMB} MB / ${totalMB} MB...`);
+									}
+								}
+							}
+						);
+
+						placesLoadingStatus.set('Processing places data...');
+						placesLoadingProgress.set(PROGRESS_RANGES.PARSE_START);
+
+						// Parse JSON in worker thread to avoid blocking main thread
+						placesData = await parseJSON<Place[]>(staticResponse.data, 'places', (progress) => {
+							// Map 0-100% parsing to PARSE_START-PARSE_END range
+							const parseRange = PROGRESS_RANGES.PARSE_END - PROGRESS_RANGES.PARSE_START;
+							const scaledProgress =
+								PROGRESS_RANGES.PARSE_START + (progress.percent / 100) * parseRange;
+							placesLoadingProgress.set(Math.round(scaledProgress));
+
+							if (progress.itemsParsed) {
+								placesLoadingStatus.set(
+									`Processing ${progress.itemsParsed.toLocaleString()} places...`
+								);
+							}
+						});
+
+						placesLoadingProgress.set(PROGRESS_RANGES.PARSE_END);
+					} catch (error) {
+						placesError.set(
+							'Could not load places from static CDN, please try again or contact BTC Map.'
+						);
+						placesLoadingStatus.set('');
+						placesLoadingProgress.set(0);
+						console.error(error);
+						return;
+					}
+				} else {
+					// Use cached data as base
+					placesData = [...cachedPlaces];
+					placesLoadingStatus.set('Loading from cache...');
+					placesLoadingProgress.set(PROGRESS_RANGES.CACHE_LOAD);
+				}
+
+				// Step 2: Get recent updates from API (since static file was last updated)
+				placesLoadingStatus.set('Checking for updates...');
+				placesLoadingProgress.set(
+					cachedPlaces ? PROGRESS_RANGES.UPDATE_CHECK : PROGRESS_RANGES.UPDATE_CHECK_NO_CACHE
+				);
+
+				const updatesSince = await getStaticFileDate();
+
 				try {
-					placesLoadingStatus.set('Downloading places data...');
-					placesLoadingProgress.set(PROGRESS_RANGES.DOWNLOAD_START);
+					const apiResponse = await axios.get<Place[]>(
+						`https://api.btcmap.org/v4/places?fields=${buildFieldsParam(PLACE_FIELD_SETS.MAP_SYNC)}&updated_since=${updatesSince}&include_deleted=true`
+					);
 
+					const recentUpdates = apiResponse.data;
+
+					if (recentUpdates.length > 0) {
+						placesLoadingStatus.set('Merging updates...');
+						placesLoadingProgress.set(
+							cachedPlaces ? PROGRESS_RANGES.MERGE_START : PROGRESS_RANGES.MERGE_START_NO_CACHE
+						);
+
+						// Use worker to filter and merge updates to avoid blocking main thread
+						const updatedPlaceIds = recentUpdates.map((place) => place.id);
+						placesData = await filterPlaces(placesData, updatedPlaceIds, recentUpdates);
+
+						// Show refresh indicator if we got updates and had cached data
+						if (cachedPlaces) {
+							mapUpdates.set(true);
+						}
+					}
+				} catch (error) {
+					// If API fails, continue with existing data (either cached or CDN)
+					// Don't return early - let execution continue to Step 3 to finalize and complete progress
+					const errorMsg = cachedPlaces
+						? 'Could not update places from API, using cached data.'
+						: 'Could not fetch recent updates. Showing baseline data from CDN.';
+					placesError.set(errorMsg);
+					console.error(error);
+				}
+
+				// Step 3: Save to local storage and update store
+				placesLoadingStatus.set('Finalizing...');
+				placesLoadingProgress.set(PROGRESS_RANGES.FINALIZE);
+
+				if (placesData.length > 0) {
+					localforage
+						.setItem('places_v4', placesData)
+						.then(function () {
+							// set response to store
+							places.set(placesData);
+							placesLoadingStatus.set('Complete!');
+							placesLoadingProgress.set(PROGRESS_RANGES.COMPLETE);
+
+							// Keep progress at 100% - don't reset to avoid confusing loading states
+							// The map component will handle hiding the indicator when elementsLoaded = true
+						})
+						.catch(function (err) {
+							places.set(placesData);
+							placesError.set(
+								'Could not store places locally, please try again or contact BTC Map.'
+							);
+							placesLoadingStatus.set('');
+							placesLoadingProgress.set(0);
+							console.error(err);
+						});
+				}
+			})
+			.catch(async function (err) {
+				placesError.set('Could not load places locally, please try again or contact BTC Map.');
+				console.error(err);
+
+				// Fallback: try to load from static CDN
+				const count = get(placesSyncCount);
+				placesSyncCount.set(count + 1);
+
+				try {
 					// Fetch as text to parse in worker
 					const staticResponse = await axios.get(
 						'https://cdn.static.btcmap.org/api/v4/places.json',
 						{
-							responseType: 'text',
-							onDownloadProgress: (progressEvent: AxiosProgressEvent) => {
-								if (progressEvent.total) {
-									const downloadPercent = (progressEvent.loaded / progressEvent.total) * 100;
-									// Map 0-100% download to DOWNLOAD_START-DOWNLOAD_END range
-									const downloadRange =
-										PROGRESS_RANGES.DOWNLOAD_END - PROGRESS_RANGES.DOWNLOAD_START;
-									const scaledProgress =
-										PROGRESS_RANGES.DOWNLOAD_START + (downloadPercent / 100) * downloadRange;
-									placesLoadingProgress.set(Math.round(scaledProgress));
-
-									const loadedMB = (progressEvent.loaded / (1024 * 1024)).toFixed(1);
-									const totalMB = (progressEvent.total / (1024 * 1024)).toFixed(1);
-									placesLoadingStatus.set(`Downloading ${loadedMB} MB / ${totalMB} MB...`);
-								}
-							}
+							responseType: 'text'
 						}
 					);
 
-					placesLoadingStatus.set('Processing places data...');
-					placesLoadingProgress.set(PROGRESS_RANGES.PARSE_START);
+					// Parse JSON in worker thread
+					const parsedPlaces = await parseJSON<Place[]>(staticResponse.data, 'places');
 
-					// Parse JSON in worker thread to avoid blocking main thread
-					placesData = await parseJSON<Place[]>(staticResponse.data, 'places', (progress) => {
-						// Map 0-100% parsing to PARSE_START-PARSE_END range
-						const parseRange = PROGRESS_RANGES.PARSE_END - PROGRESS_RANGES.PARSE_START;
-						const scaledProgress =
-							PROGRESS_RANGES.PARSE_START + (progress.percent / 100) * parseRange;
-						placesLoadingProgress.set(Math.round(scaledProgress));
-
-						if (progress.itemsParsed) {
-							placesLoadingStatus.set(
-								`Processing ${progress.itemsParsed.toLocaleString()} places...`
-							);
-						}
-					});
-
-					placesLoadingProgress.set(PROGRESS_RANGES.PARSE_END);
+					if (parsedPlaces.length > 0) {
+						places.set(parsedPlaces);
+					}
 				} catch (error) {
 					placesError.set(
 						'Could not load places from static CDN, please try again or contact BTC Map.'
 					);
-					placesLoadingStatus.set('');
-					placesLoadingProgress.set(0);
 					console.error(error);
-					return;
 				}
-			} else {
-				// Use cached data as base
-				placesData = [...cachedPlaces];
-				placesLoadingStatus.set('Loading from cache...');
-				placesLoadingProgress.set(PROGRESS_RANGES.CACHE_LOAD);
-			}
-
-			// Step 2: Get recent updates from API (since static file was last updated)
-			placesLoadingStatus.set('Checking for updates...');
-			placesLoadingProgress.set(
-				cachedPlaces ? PROGRESS_RANGES.UPDATE_CHECK : PROGRESS_RANGES.UPDATE_CHECK_NO_CACHE
-			);
-
-			const updatesSince = await getStaticFileDate();
-
-			try {
-				const apiResponse = await axios.get<Place[]>(
-					`https://api.btcmap.org/v4/places?fields=${buildFieldsParam(PLACE_FIELD_SETS.MAP_SYNC)}&updated_since=${updatesSince}&include_deleted=true`
-				);
-
-				const recentUpdates = apiResponse.data;
-
-				if (recentUpdates.length > 0) {
-					placesLoadingStatus.set('Merging updates...');
-					placesLoadingProgress.set(
-						cachedPlaces ? PROGRESS_RANGES.MERGE_START : PROGRESS_RANGES.MERGE_START_NO_CACHE
-					);
-
-					// Use worker to filter and merge updates to avoid blocking main thread
-					const updatedPlaceIds = recentUpdates.map((place) => place.id);
-					placesData = await filterPlaces(placesData, updatedPlaceIds, recentUpdates);
-
-					// Show refresh indicator if we got updates and had cached data
-					if (cachedPlaces) {
-						mapUpdates.set(true);
-					}
-				}
-			} catch (error) {
-				// If API fails, continue with existing data (either cached or CDN)
-				placesError.set('Could not update places from API, using cached data.');
-				console.error(error);
-			}
-
-			// Step 3: Save to local storage and update store
-			placesLoadingStatus.set('Finalizing...');
-			placesLoadingProgress.set(PROGRESS_RANGES.FINALIZE);
-
-			if (placesData.length > 0) {
-				localforage
-					.setItem('places_v4', placesData)
-					.then(function () {
-						// set response to store
-						places.set(placesData);
-						placesLoadingStatus.set('Complete!');
-						placesLoadingProgress.set(PROGRESS_RANGES.COMPLETE);
-
-						// Keep progress at 100% - don't reset to avoid confusing loading states
-						// The map component will handle hiding the indicator when elementsLoaded = true
-					})
-					.catch(function (err) {
-						places.set(placesData);
-						placesError.set('Could not store places locally, please try again or contact BTC Map.');
-						placesLoadingStatus.set('');
-						placesLoadingProgress.set(0);
-						console.error(err);
-					});
-			}
-		})
-		.catch(async function (err) {
-			placesError.set('Could not load places locally, please try again or contact BTC Map.');
-			console.error(err);
-
-			// Fallback: try to load from static CDN
-			const count = get(placesSyncCount);
-			placesSyncCount.set(count + 1);
-
-			try {
-				// Fetch as text to parse in worker
-				const staticResponse = await axios.get('https://cdn.static.btcmap.org/api/v4/places.json', {
-					responseType: 'text'
-				});
-
-				// Parse JSON in worker thread
-				const parsedPlaces = await parseJSON<Place[]>(staticResponse.data, 'places');
-
-				if (parsedPlaces.length > 0) {
-					places.set(parsedPlaces);
-				}
-			} catch (error) {
-				placesError.set(
-					'Could not load places from static CDN, please try again or contact BTC Map.'
-				);
-				console.error(error);
-			}
-		});
+			});
+	} finally {
+		syncInProgress = false;
+	}
 };
 
 export const updateSinglePlace = async (placeId: string | number): Promise<Place | null> => {
