@@ -146,6 +146,17 @@ export const elementsSync = async () => {
 							}
 						});
 
+						// Validate parsed data
+						if (!Array.isArray(placesData) || placesData.length === 0) {
+							console.error('CDN data parsing failed:', {
+								isArray: Array.isArray(placesData),
+								length: placesData?.length
+							});
+							throw new Error('CDN data parsing returned invalid format');
+						}
+
+						console.info(`Successfully parsed ${placesData.length} places from CDN`);
+
 						placesLoadingProgress.set(PROGRESS_RANGES.PARSE_END);
 					} catch (error) {
 						placesError.set(
@@ -177,6 +188,14 @@ export const elementsSync = async () => {
 					);
 
 					const recentUpdates = apiResponse.data;
+
+					// Validate response is actually an array
+					if (!Array.isArray(recentUpdates)) {
+						console.error('API returned invalid data format:', typeof recentUpdates, recentUpdates);
+						throw new Error('API returned invalid data format');
+					}
+
+					console.info(`Fetched ${recentUpdates.length} updates from API since ${updatesSince}`);
 
 					if (recentUpdates.length > 0) {
 						placesLoadingStatus.set('Merging updates...');
@@ -249,6 +268,11 @@ export const elementsSync = async () => {
 
 					// Parse JSON in worker thread
 					const parsedPlaces = await parseJSON<Place[]>(staticResponse.data, 'places');
+
+					// Validate fallback CDN data
+					if (!Array.isArray(parsedPlaces) || parsedPlaces.length === 0) {
+						throw new Error('Fallback CDN data invalid');
+					}
 
 					if (parsedPlaces.length > 0) {
 						places.set(parsedPlaces);
