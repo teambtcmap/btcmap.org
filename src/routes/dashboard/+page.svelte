@@ -245,12 +245,24 @@
 					<DashboardStat
 						title="Total Merchants"
 						stat={areaDashboard?.total_merchants}
-						border="md:border-r border-gray-300 dark:border-white/95"
+						border="border-b dark:border-b-white/95"
 						loading={false}
 					/>
 					<DashboardStat
-						title="Recently Verified Merchants"
+						title="Recently Verified"
 						stat={areaDashboard?.verified_merchants_1y}
+						border="border-b dark:border-b-white/95"
+						loading={false}
+					/>
+					<DashboardStat
+						title="Total Exchanges"
+						stat={areaDashboard?.total_exchanges}
+						border="border-b dark:border-b-white/95 md:border-b-0"
+						loading={false}
+					/>
+					<DashboardStat
+						title="Recently Verified"
+						stat={areaDashboard?.verified_exchanges_1y}
 						loading={false}
 					/>
 				</div>
