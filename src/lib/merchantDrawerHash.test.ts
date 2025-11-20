@@ -10,8 +10,8 @@ import { parseMerchantHash, updateMerchantHash } from './merchantDrawerHash';
 describe('parseMerchantHash', () => {
 	beforeEach(() => {
 		// Mock window.location.hash before each test
-		delete (window as any).location;
-		(window as any).location = { hash: '' };
+		delete (window as unknown as { location: unknown }).location;
+		(window as unknown as { location: { hash: string } }).location = { hash: '' };
 	});
 
 	describe('parsing merchant without map coordinates', () => {
@@ -136,8 +136,8 @@ describe('parseMerchantHash', () => {
 describe('updateMerchantHash', () => {
 	beforeEach(() => {
 		// Mock window.location
-		delete (window as any).location;
-		(window as any).location = { hash: '' };
+		delete (window as unknown as { location: unknown }).location;
+		(window as unknown as { location: { hash: string } }).location = { hash: '' };
 	});
 
 	describe('setting merchant hash', () => {
