@@ -168,13 +168,18 @@ export const isEven = (number: number) => {
 export function debounce(func: (e?: any) => void, timeout = 500) {
 	let timer: ReturnType<typeof setTimeout>;
 	// @ts-expect-error: introducing typecheck, this was failing, so ingoring for now
-	return (...args) => {
+	const debouncedFn = (...args) => {
 		clearTimeout(timer);
 		timer = setTimeout(() => {
 			// @ts-expect-error: introducing typecheck, this was failing, so ingoring for now
 			func.apply(this, args);
 		}, timeout);
 	};
+	// Add cleanup method to cancel pending execution
+	debouncedFn.cancel = () => {
+		clearTimeout(timer);
+	};
+	return debouncedFn;
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
