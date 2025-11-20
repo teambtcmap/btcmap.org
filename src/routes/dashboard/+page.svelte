@@ -238,19 +238,37 @@
 				<HeaderPlaceholder />
 			{/if}
 
-			<section id="stats">
+			<section id="merchant-stats">
 				<div
-					class="grid rounded-3xl border border-gray-300 md:grid-cols-2 xl:grid-cols-2 dark:border-white/95 dark:bg-white/10"
+					class="grid rounded-3xl border border-gray-200 md:grid-cols-2 xl:grid-cols-2 dark:border-white/95 dark:bg-white/10"
 				>
 					<DashboardStat
 						title="Total Merchants"
 						stat={areaDashboard?.total_merchants}
-						border="md:border-r border-gray-300 dark:border-white/95"
+						border="border-b md:border-b-0 border-gray-300"
 						loading={false}
 					/>
 					<DashboardStat
-						title="Recently Verified Merchants"
+						title="Recently Verified"
 						stat={areaDashboard?.verified_merchants_1y}
+						loading={false}
+					/>
+				</div>
+			</section>
+
+			<section id="exchange-stats">
+				<div
+					class="grid rounded-3xl border border-gray-300 md:grid-cols-2 xl:grid-cols-2 dark:border-white/95 dark:bg-white/10"
+				>
+					<DashboardStat
+						title="Total Exchanges"
+						stat={areaDashboard?.total_exchanges}
+						border="border-b md:border-b-0 border-gray-300"
+						loading={false}
+					/>
+					<DashboardStat
+						title="Recently Verified"
+						stat={areaDashboard?.verified_exchanges_1y}
 						loading={false}
 					/>
 				</div>
