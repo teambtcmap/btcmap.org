@@ -15,6 +15,7 @@ vite.config.ts.timestamp-*
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+.playwright-mcp
 
 # ignore unintended npm lock file
 package-lock.json
