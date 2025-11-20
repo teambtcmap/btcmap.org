@@ -298,16 +298,10 @@
 				</PrimaryButton>
 
 				<div class="flex flex-col items-center justify-center gap-5 md:flex-row">
-					<PrimaryButton
-						style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
-						link="/communities/add"
-					>
+					<PrimaryButton style="md:w-[200px] py-3 rounded-xl w-full" link="/communities/add">
 						Add community
 					</PrimaryButton>
-					<PrimaryButton
-						style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
-						link="/communities/map"
-					>
+					<PrimaryButton style="md:w-[200px] py-3 rounded-xl w-full" link="/communities/map">
 						View community map
 					</PrimaryButton>
 				</div>

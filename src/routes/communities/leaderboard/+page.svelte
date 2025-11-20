@@ -48,21 +48,15 @@
 			</h2>
 
 			<div>
-				<PrimaryButton style="md:w-[200px] mx-auto py-3 rounded-xl mb-5" link="/communities">
+				<PrimaryButton style="w-full md:w-[200px] mx-auto py-3 rounded-xl mb-5" link="/communities">
 					Directory
 				</PrimaryButton>
 
 				<div class="flex flex-col items-center justify-center gap-5 md:flex-row">
-					<PrimaryButton
-						style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
-						link="/communities/add"
-					>
+					<PrimaryButton style="w-full md:w-[200px] py-3 rounded-xl" link="/communities/add">
 						Add community
 					</PrimaryButton>
-					<PrimaryButton
-						style="md:w-[200px] mx-auto md:mx-0 py-3 rounded-xl"
-						link="/communities/map"
-					>
+					<PrimaryButton style="w-full md:w-[200px] py-3 rounded-xl" link="/communities/map">
 						View community map
 					</PrimaryButton>
 				</div>
