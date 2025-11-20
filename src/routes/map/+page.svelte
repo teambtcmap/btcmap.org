@@ -485,6 +485,13 @@
 	// Debounced version to prevent excessive loading during rapid pan/zoom
 	const debouncedLoadMarkers = debounce(loadMarkersInViewport, DEBOUNCE_DELAY);
 
+	// Debounced coords caching to prevent IndexedDB overflow during continuous movement
+	const debouncedCacheCoords = debounce((coords: LatLngBounds) => {
+		localforage.setItem('coords', coords).catch(function (err) {
+			console.error('Error caching coords:', err);
+		});
+	}, 1000); // 1 second debounce for IndexedDB writes
+
 	const initializeElements = async () => {
 		if (elementsLoaded) {
 			return;
@@ -503,9 +510,30 @@
 		map.addLayer(markers);
 		map.addLayer(upToDateLayer);
 
-		// Set up map event listeners for viewport loading
-		map.on('moveend', debouncedLoadMarkers);
-		map.on('zoomend', debouncedLoadMarkers);
+		// Set up consolidated map event listeners
+		map.on('moveend', () => {
+			const coords = map.getBounds();
+			mapCenter = map.getCenter();
+
+			// Update hash if not using URL parameters
+			if (!urlLat.length && !urlLong.length) {
+				const zoom = map.getZoom();
+				updateMapHash(zoom, mapCenter);
+			}
+
+			// Debounced operations
+			debouncedCacheCoords(coords);
+			debouncedLoadMarkers();
+		});
+
+		map.on('zoomend', () => {
+			const coords = map.getBounds();
+			mapCenter = map.getCenter();
+
+			// Debounced operations
+			debouncedCacheCoords(coords);
+			debouncedLoadMarkers();
+		});
 
 		mapLoadingStatus = 'Loading places in view...';
 
@@ -690,32 +718,6 @@
 				// Fallback: if not using MapLibre GL layer, mark tiles as loaded immediately
 				mapTilesLoaded = true;
 			}
-
-			// add events to cache last viewed location so it can be used on next map launch
-			map.on('zoomend', () => {
-				const coords = map.getBounds();
-
-				mapCenter = map.getCenter();
-
-				localforage.setItem('coords', coords).catch(function (err) {
-					console.error(err);
-				});
-			});
-
-			map.on('moveend', () => {
-				const coords = map.getBounds();
-
-				mapCenter = map.getCenter();
-
-				if (!urlLat.length && !urlLong.length) {
-					const zoom = map.getZoom();
-					updateMapHash(zoom, mapCenter);
-				}
-
-				localforage.setItem('coords', coords).catch(function (err) {
-					console.error(err);
-				});
-			});
 
 			// Close drawer when clicking on map (not on markers)
 			map.on('click', () => {
@@ -926,6 +928,10 @@
 	});
 
 	onDestroy(async () => {
+		// Cancel pending debounced operations to prevent memory leaks
+		if (debouncedLoadMarkers?.cancel) debouncedLoadMarkers.cancel();
+		if (debouncedCacheCoords?.cancel) debouncedCacheCoords.cancel();
+
 		if (map) {
 			console.info('Unloading Leaflet map.');
 			map.remove();
