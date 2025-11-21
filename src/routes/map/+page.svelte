@@ -4,6 +4,7 @@
 	import Icon from '$components/Icon.svelte';
 	import MapLoadingMain from '$components/MapLoadingMain.svelte';
 	import MerchantDrawerHash from '$components/MerchantDrawerHash.svelte';
+	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import {
 		processPlaces,
 		isSupported as isWorkerSupported,
@@ -81,25 +82,29 @@
 	const DEFAULT_LNG = -68.91119;
 	const DEFAULT_ZOOM = 15;
 
+	// Throttled marker drawer opening to prevent freeze on rapid clicks
+	let lastMarkerClickTime = 0;
+	const MARKER_CLICK_THROTTLE = 100; // ms
+
 	function openMerchantDrawer(id: number) {
-		if (selectedMarkerId) {
-			clearMarkerSelection(selectedMarkerId);
-		}
+		// Skip if same marker already selected
+		if (selectedMarkerId === id) return;
 
-		selectedMarkerId = id;
-		highlightMarker(id);
+		// Throttle rapid clicks
+		const now = Date.now();
+		if (now - lastMarkerClickTime < MARKER_CLICK_THROTTLE) return;
+		lastMarkerClickTime = now;
 
-		const hash = window.location.hash.substring(1);
-		const ampIndex = hash.indexOf('&');
-		const mapPart = ampIndex !== -1 ? hash.substring(0, ampIndex) : hash;
-		const params = new URLSearchParams();
-		params.set('merchant', String(id));
+		// Batch DOM operations with requestAnimationFrame
+		requestAnimationFrame(() => {
+			if (selectedMarkerId) {
+				clearMarkerSelection(selectedMarkerId);
+			}
+			selectedMarkerId = id;
+			highlightMarker(id);
+		});
 
-		if (mapPart) {
-			window.location.hash = `${mapPart}&${params.toString()}`;
-		} else {
-			window.location.hash = params.toString();
-		}
+		merchantDrawer.open(id, 'details');
 	}
 
 	let leaflet: Leaflet;
@@ -118,6 +123,7 @@
 	let selectedMarkerId: number | null = null;
 
 	let isLoadingMarkers = false;
+	let isZooming = false;
 
 	let mapCenter: LatLng;
 
@@ -144,6 +150,10 @@
 
 	const handleHashChange = () => {
 		if (!browser) return;
+
+		// Sync store from hash - single source of truth
+		merchantDrawer.syncFromHash();
+
 		const hash = window.location.hash.substring(1);
 		const hasDrawer = hash.includes('merchant=');
 
@@ -388,7 +398,8 @@
 
 	// Load markers for places in current viewport using web workers
 	const loadMarkersInViewport = async () => {
-		if (!map || !$places.length || isLoadingMarkers) {
+		// Skip if zooming, not ready, or already loading
+		if (!map || !$places.length || isLoadingMarkers || isZooming) {
 			return;
 		}
 
@@ -502,7 +513,13 @@
 		// create marker cluster group and layers
 		/* eslint-disable no-undef */
 		// @ts-expect-error - L is global from Leaflet
-		markers = L.markerClusterGroup({ maxClusterRadius: 80, disableClusteringAtZoom: 17 });
+		markers = L.markerClusterGroup({
+			maxClusterRadius: 80,
+			disableClusteringAtZoom: 17,
+			chunkedLoading: true,
+			chunkInterval: 50,
+			chunkDelay: 50
+		});
 		/* eslint-enable no-undef */
 		upToDateLayer = leaflet.featureGroup.subGroup(markers);
 
@@ -510,8 +527,14 @@
 		map.addLayer(markers);
 		map.addLayer(upToDateLayer);
 
-		// Set up consolidated map event listeners
+		// Set up zoom guard - prevent marker loading during zoom animation
+		map.on('zoomstart', () => {
+			isZooming = true;
+		});
+
+		// Consolidated map event listener - moveend fires after both pan and zoom
 		map.on('moveend', () => {
+			isZooming = false;
 			const coords = map.getBounds();
 			mapCenter = map.getCenter();
 
@@ -520,15 +543,6 @@
 				const zoom = map.getZoom();
 				updateMapHash(zoom, mapCenter);
 			}
-
-			// Debounced operations
-			debouncedCacheCoords(coords);
-			debouncedLoadMarkers();
-		});
-
-		map.on('zoomend', () => {
-			const coords = map.getBounds();
-			mapCenter = map.getCenter();
 
 			// Debounced operations
 			debouncedCacheCoords(coords);
@@ -558,7 +572,9 @@
 	};
 
 	// Process a batch of places on the main thread (DOM operations only)
-	const processBatchOnMainThread = (batch: ProcessedPlace[], layer: FeatureGroup.SubGroup) => {
+	const processBatchOnMainThread = (batch: ProcessedPlace[], _layer: FeatureGroup.SubGroup) => {
+		const markersToAdd: Marker[] = [];
+
 		batch.forEach((element: ProcessedPlace) => {
 			const { iconData } = element;
 			const placeId = element.id.toString();
@@ -584,9 +600,14 @@
 				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
 
-			layer.addLayer(marker);
+			markersToAdd.push(marker);
 			loadedMarkers[placeId] = marker;
 		});
+
+		// Batch add markers - use parent cluster group's addLayers for efficiency
+		if (markersToAdd.length > 0 && markers) {
+			markers.addLayers(markersToAdd);
+		}
 	};
 
 	// Reactive statement to initialize elements when data is ready
@@ -722,6 +743,9 @@
 			// Close drawer when clicking on map (not on markers)
 			map.on('click', () => {
 				if (selectedMarkerId) {
+					clearMarkerSelection(selectedMarkerId);
+					selectedMarkerId = null;
+
 					const hash = window.location.hash.substring(1);
 					const ampIndex = hash.indexOf('&');
 					const mapPart = ampIndex !== -1 ? hash.substring(0, ampIndex) : hash;

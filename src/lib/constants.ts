@@ -6,6 +6,15 @@ export const PAYMENT_ERROR_MESSAGE =
 export const STATUS_CHECK_ERROR_MESSAGE =
 	'Could not check invoice status, please try again or contact BTC Map.';
 
+// Tailwind breakpoints (must match tailwind.config.js default breakpoints)
+export const BREAKPOINTS = {
+	sm: 640,
+	md: 768,
+	lg: 1024,
+	xl: 1280,
+	'2xl': 1536
+} as const;
+
 export const GradeTable = `<table>
 <thead>
     <tr>

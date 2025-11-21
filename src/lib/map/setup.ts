@@ -16,7 +16,12 @@ const BOTTOM_BUTTON_RADIUS = '0 0 8px 8px';
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 export const updateMapHash = (zoom: number, center: LatLng): void => {
-	const newHash = `#${zoom}/${center.lat.toFixed(5)}/${center.lng.toFixed(5)}`;
+	// Preserve any existing query parameters (like &merchant=123)
+	const currentHash = window.location.hash.substring(1);
+	const ampIndex = currentHash.indexOf('&');
+	const existingParams = ampIndex !== -1 ? currentHash.substring(ampIndex) : '';
+
+	const newHash = `#${zoom}/${center.lat.toFixed(5)}/${center.lng.toFixed(5)}${existingParams}`;
 	// Use SvelteKit's replaceState to preserve current pathname while updating hash
 	const url = window.location.pathname + newHash;
 	// eslint-disable-next-line svelte/no-navigation-without-resolve

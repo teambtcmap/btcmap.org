@@ -1,4 +1,4 @@
-name: ESLint, Prettier, build CI
+name: ESLint, Prettier, build, test CI
 
 on:
   push:
@@ -34,3 +34,6 @@ jobs:
 
       - name: run check
         run: yarn run check
+
+      - name: run tests
+        run: yarn run test
