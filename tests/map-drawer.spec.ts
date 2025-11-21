@@ -1,6 +1,28 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Map Drawer', () => {
+	// Collect console errors during tests - map JS errors should fail the test
+	test.beforeEach(async ({ page }) => {
+		const errors: string[] = [];
+		page.on('console', (msg) => {
+			if (msg.type() === 'error') {
+				errors.push(msg.text());
+			}
+		});
+		page.on('pageerror', (error) => {
+			errors.push(error.message);
+		});
+		// Store errors on page object for access in afterEach
+		(page as unknown as { _consoleErrors: string[] })._consoleErrors = errors;
+	});
+
+	test.afterEach(async ({ page }) => {
+		const errors = (page as unknown as { _consoleErrors: string[] })._consoleErrors || [];
+		if (errors.length > 0) {
+			throw new Error(`Console errors detected:\n${errors.join('\n')}`);
+		}
+	});
+
 	test('drawer opens on marker click and navigates to merchant detail page', async ({ page }) => {
 		test.setTimeout(180000);
 		await page.goto('http://127.0.0.1:5173/map#16/42.2762511/42.7024218', { waitUntil: 'load' });
