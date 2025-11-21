@@ -6,7 +6,7 @@ test.describe('Community Area Pages', () => {
 		test.setTimeout(60000);
 
 		// Navigate directly to a known community (Bitcoin Jungle Costa Rica)
-		await page.goto('http://127.0.0.1:5173/community/bitcoin-jungle-cr');
+		await page.goto('/community/bitcoin-jungle-cr');
 		await expect(page).toHaveURL(/\/community\/bitcoin-jungle-cr\/merchants$/);
 		await page.waitForLoadState('domcontentloaded');
 
@@ -23,7 +23,7 @@ test.describe('Community Area Pages', () => {
 		const testSections = ['merchants', 'stats', 'activity', 'maintain'];
 
 		for (const section of testSections) {
-			await page.goto(`http://127.0.0.1:5173/community/bitcoin-jungle-cr/${section}`);
+			await page.goto(`/community/bitcoin-jungle-cr/${section}`);
 
 			// Verify URL matches
 			await expect(page).toHaveURL(new RegExp(`/community/bitcoin-jungle-cr/${section}$`));

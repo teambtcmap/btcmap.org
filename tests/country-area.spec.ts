@@ -5,7 +5,7 @@ test.describe('Country Area Pages', () => {
 		// Increase timeout for this slow test due to heavy API calls
 		test.setTimeout(60000);
 
-		await page.goto('http://127.0.0.1:5173/country/za');
+		await page.goto('/country/za');
 		await expect(page).toHaveURL(/\/country\/za\/merchants$/);
 		await page.waitForLoadState('networkidle');
 
@@ -24,7 +24,7 @@ test.describe('Country Area Pages', () => {
 		const testSections = ['merchants', 'stats', 'activity', 'maintain'];
 
 		for (const section of testSections) {
-			await page.goto(`http://127.0.0.1:5173/country/za/${section}`);
+			await page.goto(`/country/za/${section}`);
 
 			// Verify URL matches
 			await expect(page).toHaveURL(new RegExp(`/country/za/${section}$`));

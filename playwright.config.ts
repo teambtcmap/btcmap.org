@@ -40,7 +40,10 @@ export default defineConfig({
 	projects: [
 		{
 			name: 'chromium',
-			use: { ...devices['Desktop Chrome'] }
+			use: {
+				...devices['Desktop Chrome'],
+				baseURL: 'http://127.0.0.1:4173'
+			}
 		}
 
 		// {
@@ -74,11 +77,12 @@ export default defineConfig({
 		// },
 	],
 
-	/* Run your local dev server before starting the tests */
+	/* Run production build for e2e tests to catch production-only errors */
 	webServer: {
-		command: 'yarn dev',
-		url: 'http://127.0.0.1:5173',
-		reuseExistingServer: !process.env.CI
+		command: 'yarn build && yarn preview',
+		url: 'http://127.0.0.1:4173',
+		reuseExistingServer: !process.env.CI,
+		timeout: 120000
 	},
 
 	/* Configure timeouts */
