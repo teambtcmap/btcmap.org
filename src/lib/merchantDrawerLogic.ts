@@ -7,10 +7,21 @@ import type { Place, Boost } from '$lib/types';
 import type { Writable } from 'svelte/store';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 
+// Memoize verified date calculation - recompute only once per day
+let cachedVerifiedDate: number | null = null;
+let cachedDay: number | null = null;
+
 export function calcVerifiedDate(): number {
+	const today = new Date().getDate();
+	if (cachedVerifiedDate !== null && cachedDay === today) {
+		return cachedVerifiedDate;
+	}
+
 	const verifiedDate = new Date();
 	const previousYear = verifiedDate.getFullYear() - 1;
-	return verifiedDate.setFullYear(previousYear);
+	cachedVerifiedDate = verifiedDate.setFullYear(previousYear);
+	cachedDay = today;
+	return cachedVerifiedDate;
 }
 
 export function isUpToDate(merchant: Place | null, verifiedDate: number): boolean {

@@ -390,7 +390,7 @@
 	<div
 		class="fixed right-0 bottom-0 left-0 z-[1002] flex flex-col bg-white shadow-2xl transition-shadow dark:bg-dark"
 		class:rounded-t-[10px]={!expanded}
-		style="height: {$drawerHeight}px;"
+		style="height: {$drawerHeight}px; will-change: height;"
 		on:click|stopPropagation
 		role="dialog"
 		aria-modal={expanded}
