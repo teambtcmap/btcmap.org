@@ -1,5 +1,5 @@
 import type { Area, Boost, Event, Issue, OSMTags, Place, Report, Theme, User } from '$lib/types';
-import { readable, writable, type Writable } from 'svelte/store';
+import { derived, readable, writable, type Writable } from 'svelte/store';
 
 export const socials = readable({
 	x: 'https://x.com/btcmap',
@@ -37,6 +37,7 @@ export const apps = readable([
 ]);
 
 export const places: Writable<Place[]> = writable([]);
+export const placesById = derived(places, ($places) => new Map($places.map((p) => [p.id, p])));
 export const placesError = writable('');
 export const placesSyncCount = writable(0);
 

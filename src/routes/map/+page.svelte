@@ -27,6 +27,7 @@
 	import {
 		placesError,
 		places,
+		placesById,
 		placesSyncCount,
 		mapUpdates,
 		lastUpdatedPlaceId,
@@ -245,7 +246,7 @@
 		const placeId = result.id;
 
 		// First, try to find the place in our local places store
-		const localPlace = $places.find((p) => p.id === placeId);
+		const localPlace = $placesById.get(placeId);
 
 		if (localPlace && isValidCoordinate(localPlace.lat, localPlace.lon)) {
 			// Use local data if available
@@ -329,7 +330,7 @@
 
 		if (marker) {
 			// Find the updated place in the store
-			const updatedPlace = $places.find((p) => p.id === $lastUpdatedPlaceId);
+			const updatedPlace = $placesById.get($lastUpdatedPlaceId);
 
 			if (updatedPlace) {
 				// Regenerate icon with fresh data
