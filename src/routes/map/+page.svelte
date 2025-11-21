@@ -108,6 +108,7 @@
 	let selectedMarkerId: number | null = null;
 
 	let isLoadingMarkers = false;
+	let isZooming = false;
 
 	let mapCenter: LatLng;
 
@@ -378,7 +379,8 @@
 
 	// Load markers for places in current viewport using web workers
 	const loadMarkersInViewport = async () => {
-		if (!map || !$places.length || isLoadingMarkers) {
+		// Skip if zooming, not ready, or already loading
+		if (!map || !$places.length || isLoadingMarkers || isZooming) {
 			return;
 		}
 
@@ -492,7 +494,13 @@
 		// create marker cluster group and layers
 		/* eslint-disable no-undef */
 		// @ts-expect-error - L is global from Leaflet
-		markers = L.markerClusterGroup({ maxClusterRadius: 80, disableClusteringAtZoom: 17 });
+		markers = L.markerClusterGroup({
+			maxClusterRadius: 80,
+			disableClusteringAtZoom: 17,
+			chunkedLoading: true,
+			chunkInterval: 50,
+			chunkDelay: 50
+		});
 		/* eslint-enable no-undef */
 		upToDateLayer = leaflet.featureGroup.subGroup(markers);
 
@@ -500,8 +508,14 @@
 		map.addLayer(markers);
 		map.addLayer(upToDateLayer);
 
-		// Set up consolidated map event listeners
+		// Set up zoom guard - prevent marker loading during zoom animation
+		map.on('zoomstart', () => {
+			isZooming = true;
+		});
+
+		// Consolidated map event listener - moveend fires after both pan and zoom
 		map.on('moveend', () => {
+			isZooming = false;
 			const coords = map.getBounds();
 			mapCenter = map.getCenter();
 
@@ -510,15 +524,6 @@
 				const zoom = map.getZoom();
 				updateMapHash(zoom, mapCenter);
 			}
-
-			// Debounced operations
-			debouncedCacheCoords(coords);
-			debouncedLoadMarkers();
-		});
-
-		map.on('zoomend', () => {
-			const coords = map.getBounds();
-			mapCenter = map.getCenter();
 
 			// Debounced operations
 			debouncedCacheCoords(coords);
@@ -548,7 +553,9 @@
 	};
 
 	// Process a batch of places on the main thread (DOM operations only)
-	const processBatchOnMainThread = (batch: ProcessedPlace[], layer: FeatureGroup.SubGroup) => {
+	const processBatchOnMainThread = (batch: ProcessedPlace[], _layer: FeatureGroup.SubGroup) => {
+		const markersToAdd: Marker[] = [];
+
 		batch.forEach((element: ProcessedPlace) => {
 			const { iconData } = element;
 			const placeId = element.id.toString();
@@ -574,9 +581,14 @@
 				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
 
-			layer.addLayer(marker);
+			markersToAdd.push(marker);
 			loadedMarkers[placeId] = marker;
 		});
+
+		// Batch add markers - use parent cluster group's addLayers for efficiency
+		if (markersToAdd.length > 0 && markers) {
+			markers.addLayers(markersToAdd);
+		}
 	};
 
 	// Reactive statement to initialize elements when data is ready
