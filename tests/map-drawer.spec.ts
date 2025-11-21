@@ -25,7 +25,7 @@ test.describe('Map Drawer', () => {
 
 	test('drawer opens on marker click and navigates to merchant detail page', async ({ page }) => {
 		test.setTimeout(180000);
-		await page.goto('http://127.0.0.1:5173/map#16/42.2762511/42.7024218', { waitUntil: 'load' });
+		await page.goto('/map#16/42.2762511/42.7024218', { waitUntil: 'load' });
 		await expect(page).toHaveTitle(/BTC Map/);
 
 		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
@@ -160,7 +160,7 @@ test.describe('Map Drawer', () => {
 	});
 
 	test('drawer shows Comments button with count', async ({ page }) => {
-		await page.goto('http://127.0.0.1:5173/map#15/13.6929/-89.2182', { waitUntil: 'load' });
+		await page.goto('/map#15/13.6929/-89.2182', { waitUntil: 'load' });
 		await expect(page).toHaveTitle(/BTC Map/);
 
 		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });

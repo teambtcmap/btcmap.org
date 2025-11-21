@@ -41,6 +41,11 @@ jobs:
         run: yarn playwright install-deps
 
       - name: Run Playwright tests
+        env:
+          GITEA_API_KEY: 'test-key'
+          GITEA_API_URL: 'https://example.com'
+          SERVER_CRYPTO_KEY: 'test-crypto-key-32-chars-long!!'
+          SERVER_INIT_VECTOR: 'test-iv-16char!'
         run: yarn playwright test
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}

@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Communities Page', () => {
 	test('loads communities page successfully', async ({ page }) => {
-		await page.goto('http://127.0.0.1:5173/communities');
+		await page.goto('/communities');
 
 		// Wait for page to load
 		await page.waitForSelector('main', { timeout: 10000 });
@@ -29,7 +29,7 @@ test.describe('Communities Page', () => {
 	});
 
 	test('displays navigation buttons', async ({ page }) => {
-		await page.goto('http://127.0.0.1:5173/communities');
+		await page.goto('/communities');
 		await page.waitForSelector('main', { timeout: 10000 });
 		await page.waitForTimeout(500);
 
@@ -48,7 +48,7 @@ test.describe('Communities Page', () => {
 	});
 
 	test('renders communities chart', async ({ page }) => {
-		await page.goto('http://127.0.0.1:5173/communities');
+		await page.goto('/communities');
 		await page.waitForSelector('main', { timeout: 10000 });
 		await page.waitForTimeout(500);
 
@@ -68,7 +68,7 @@ test.describe('Communities Page', () => {
 	});
 
 	test('defaults to Africa section', async ({ page }) => {
-		await page.goto('http://127.0.0.1:5173/communities');
+		await page.goto('/communities');
 		await page.waitForSelector('main', { timeout: 10000 });
 		await page.waitForTimeout(500);
 

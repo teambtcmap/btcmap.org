@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Countries', () => {
 	test('redirects to Africa section by default', async ({ page }) => {
-		await page.goto('http://127.0.0.1:5173/countries');
+		await page.goto('/countries');
 
 		// Should redirect to /countries/africa
 		await expect(page).toHaveURL(/countries\/africa/);
@@ -25,7 +25,7 @@ test.describe('Countries', () => {
 	});
 
 	test('updates URL when dropdown selection changes', async ({ page }) => {
-		await page.goto('http://127.0.0.1:5173/countries/africa');
+		await page.goto('/countries/africa');
 
 		// Wait for the page to load
 		const heading = page.getByRole('heading', {

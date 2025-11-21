@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Home Page', () => {
 	test('add location opens', async ({ page }) => {
-		await page.goto('http://127.0.0.1:5173');
+		await page.goto('');
 
 		await page.waitForLoadState('domcontentloaded');
 
