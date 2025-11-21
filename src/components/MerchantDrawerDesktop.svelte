@@ -9,6 +9,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import type { Place } from '$lib/types';
 	import { parseMerchantHash, updateMerchantHash, type DrawerView } from '$lib/merchantDrawerHash';
+	import { debounce } from '$lib/utils';
 	import {
 		calcVerifiedDate,
 		isUpToDate as checkUpToDate,
@@ -30,6 +31,18 @@
 	let fetchingMerchant = false;
 	let lastFetchedId: number | null = null;
 	let abortController: AbortController | null = null;
+
+	// Settling guard to prevent rapid state transitions
+	let isSettling = false;
+	let settlingTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	function setSettling(duration = 150) {
+		isSettling = true;
+		if (settlingTimeout) clearTimeout(settlingTimeout);
+		settlingTimeout = setTimeout(() => {
+			isSettling = false;
+		}, duration);
+	}
 
 	async function fetchMerchantDetails(id: number) {
 		if (fetchingMerchant || lastFetchedId === id) return;
@@ -63,6 +76,14 @@
 		if (abortController) {
 			abortController.abort();
 		}
+		// Clean up settling timeout
+		if (settlingTimeout) {
+			clearTimeout(settlingTimeout);
+		}
+		// Cancel pending debounced calls
+		if (parseHash?.cancel) {
+			parseHash.cancel();
+		}
 	});
 
 	$: if (merchantId && isOpen) {
@@ -76,12 +97,26 @@
 		}
 	}
 
-	function parseHash() {
+	function parseHashImmediate() {
+		// Skip if we're in the middle of a transition
+		if (isSettling) return;
+
 		const state = parseMerchantHash();
+		const wasOpen = isOpen;
+		const previousMerchantId = merchantId;
+
 		merchantId = state.merchantId;
 		drawerView = state.drawerView;
 		isOpen = state.isOpen;
+
+		// Set settling guard on state change to prevent rapid transitions
+		if (wasOpen !== isOpen || previousMerchantId !== merchantId) {
+			setSettling();
+		}
 	}
+
+	// Debounced version to prevent rapid hash changes from overwhelming the UI
+	const parseHash = debounce(parseHashImmediate, 50);
 
 	const verifiedDate = calcVerifiedDate();
 	$: isUpToDate = checkUpToDate(merchant, verifiedDate);
@@ -117,7 +152,8 @@
 	}
 
 	onMount(() => {
-		parseHash();
+		// Use immediate version for initial load, debounced for subsequent changes
+		parseHashImmediate();
 		window.addEventListener('hashchange', parseHash);
 		window.addEventListener('keydown', handleKeydown);
 		return () => {

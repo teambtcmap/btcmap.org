@@ -10,6 +10,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import type { Place } from '$lib/types';
 	import { parseMerchantHash, updateMerchantHash, type DrawerView } from '$lib/merchantDrawerHash';
+	import { debounce } from '$lib/utils';
 	import {
 		calcVerifiedDate,
 		isUpToDate as checkUpToDate,
@@ -88,6 +89,18 @@
 	// DOM reference
 	let handleElement: HTMLDivElement;
 
+	// Settling guard to prevent rapid state transitions
+	let isSettling = false;
+	let settlingTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	function setSettling(duration = 150) {
+		isSettling = true;
+		if (settlingTimeout) clearTimeout(settlingTimeout);
+		settlingTimeout = setTimeout(() => {
+			isSettling = false;
+		}, duration);
+	}
+
 	async function fetchMerchantDetails(id: number) {
 		if (fetchingMerchant || lastFetchedId === id) return;
 
@@ -126,13 +139,23 @@
 		}
 	}
 
-	function parseHash() {
+	function parseHashImmediate() {
+		// Skip if we're in the middle of a transition
+		if (isSettling) return;
+
 		const state = parseMerchantHash();
 		const previousMerchantId = merchantId;
+		const wasOpen = isOpen;
 
 		merchantId = state.merchantId;
 		drawerView = state.drawerView;
 		isOpen = state.isOpen;
+
+		// Cancel any running spring animation immediately on state change
+		if (wasOpen !== isOpen || previousMerchantId !== merchantId) {
+			drawerHeight.set($drawerHeight, { hard: true });
+			setSettling();
+		}
 
 		// Only reset to peek state when initially opening a merchant (not when switching views)
 		if (isOpen && state.drawerView === 'details' && previousMerchantId !== merchantId) {
@@ -140,6 +163,9 @@
 			drawerHeight.set(PEEK_HEIGHT, { hard: true });
 		}
 	}
+
+	// Debounced version to prevent rapid hash changes from overwhelming the UI
+	const parseHash = debounce(parseHashImmediate, 50);
 
 	const verifiedDate = calcVerifiedDate();
 	$: isUpToDate = checkUpToDate(merchant, verifiedDate);
@@ -213,7 +239,8 @@
 	}
 
 	onMount(() => {
-		parseHash();
+		// Use immediate version for initial load, debounced for subsequent changes
+		parseHashImmediate();
 		window.addEventListener('hashchange', parseHash);
 		window.addEventListener('keydown', handleKeydown);
 
@@ -244,6 +271,14 @@
 		// Cancel any pending requests when component unmounts
 		if (abortController) {
 			abortController.abort();
+		}
+		// Clean up settling timeout
+		if (settlingTimeout) {
+			clearTimeout(settlingTimeout);
+		}
+		// Cancel pending debounced calls
+		if (parseHash?.cancel) {
+			parseHash.cancel();
 		}
 	});
 
