@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import MapLoadingMain from '$components/MapLoadingMain.svelte';
 	import Socials from '$components/Socials.svelte';
+	import { loadMapDependencies } from '$lib/map/imports';
 	import {
 		attribution,
 		changeDefaultIcons,
@@ -25,6 +26,7 @@
 	let mapLoading = 0;
 
 	let leaflet: Leaflet;
+	let DomEvent: typeof import('leaflet/src/dom/DomEvent');
 	let theme: Theme;
 
 	let mapElement: HTMLDivElement;
@@ -200,16 +202,9 @@
 		if (browser) {
 			theme = detectTheme();
 
-			//import packages
-			leaflet = await import('leaflet');
-			const DomEvent = await import('leaflet/src/dom/DomEvent');
-
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			const leafletLocateControl = await import('leaflet.locatecontrol');
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			const maplibreGL = await import('maplibre-gl');
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
+			const deps = await loadMapDependencies();
+			leaflet = deps.leaflet;
+			DomEvent = deps.DomEvent;
 
 			// add map and tiles
 			map = leaflet.map(mapElement);
