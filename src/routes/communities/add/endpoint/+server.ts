@@ -1,4 +1,4 @@
-import { SERVER_CRYPTO_KEY, SERVER_INIT_VECTOR } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import { error } from '@sveltejs/kit';
 import crypto from 'crypto';
 import type { RequestHandler } from './$types';
@@ -32,8 +32,11 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	// verify that captcha is correct
-	const initVector = Buffer.from(SERVER_INIT_VECTOR, 'hex');
-	const serverKey = Buffer.from(SERVER_CRYPTO_KEY, 'hex');
+	if (!env.SERVER_CRYPTO_KEY || !env.SERVER_INIT_VECTOR) {
+		error(503, 'Service unavailable');
+	}
+	const initVector = Buffer.from(env.SERVER_INIT_VECTOR, 'hex');
+	const serverKey = Buffer.from(env.SERVER_CRYPTO_KEY, 'hex');
 
 	const algorithm = 'aes-256-cbc' as string;
 	const key = serverKey as unknown as CipherKey;

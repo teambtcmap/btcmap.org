@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { GITEA_API_KEY, GITEA_API_URL } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import { getRandomColor } from '$lib/utils';
 import { get } from 'svelte/store';
 import { areas } from '$lib/store';
@@ -18,7 +18,7 @@ const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
 
 async function syncIssuesFromGitea(): Promise<IssuesCache> {
 	// Check if required environment variables are available
-	if (!GITEA_API_URL || !GITEA_API_KEY) {
+	if (!env.GITEA_API_URL || !env.GITEA_API_KEY) {
 		console.warn(
 			'Gitea API configuration missing (GITEA_API_URL or GITEA_API_KEY). Returning empty cache.'
 		);
@@ -30,14 +30,14 @@ async function syncIssuesFromGitea(): Promise<IssuesCache> {
 	}
 
 	const headers = {
-		Authorization: `token ${GITEA_API_KEY}`
+		Authorization: `token ${env.GITEA_API_KEY}`
 	};
 
 	const [issuesResponse, repoResponse] = await Promise.all([
-		axios.get(`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues?state=open`, {
+		axios.get(`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues?state=open`, {
 			headers
 		}),
-		axios.get(`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data`, { headers })
+		axios.get(`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data`, { headers })
 	]);
 
 	const giteaIssues = issuesResponse.data.map((issue: GiteaIssue) => ({
@@ -98,12 +98,12 @@ export async function getIssues(
 
 async function getLabels(): Promise<GiteaLabel[]> {
 	const headers = {
-		Authorization: `token ${GITEA_API_KEY}`
+		Authorization: `token ${env.GITEA_API_KEY}`
 	};
 
 	try {
 		const response = await axios.get(
-			`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/labels`,
+			`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/labels`,
 			{ headers }
 		);
 		return response.data;
@@ -115,7 +115,7 @@ async function getLabels(): Promise<GiteaLabel[]> {
 
 async function createLabel(name: string): Promise<number | null> {
 	const headers = {
-		Authorization: `token ${GITEA_API_KEY}`
+		Authorization: `token ${env.GITEA_API_KEY}`
 	};
 
 	try {
@@ -143,7 +143,7 @@ async function createLabel(name: string): Promise<number | null> {
 		}
 
 		const response = await axios.post(
-			`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/labels`,
+			`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/labels`,
 			{
 				name,
 				color,
@@ -161,7 +161,7 @@ async function createLabel(name: string): Promise<number | null> {
 export async function createIssueWithLabels(title: string, body: string, labelNames: string[]) {
 	console.debug('createIssueWithLabels - Input:', { title, labelNames });
 	const headers = {
-		Authorization: `token ${GITEA_API_KEY}`
+		Authorization: `token ${env.GITEA_API_KEY}`
 	};
 
 	try {
@@ -171,7 +171,7 @@ export async function createIssueWithLabels(title: string, body: string, labelNa
 		console.debug('Label IDs resolved:', labelIds);
 
 		const response = await axios.post(
-			`${GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues`,
+			`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues`,
 			{ title, body, labels: labelIds },
 			{ headers }
 		);
