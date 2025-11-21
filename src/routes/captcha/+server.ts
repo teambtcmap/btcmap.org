@@ -1,4 +1,4 @@
-import { SERVER_CRYPTO_KEY, SERVER_INIT_VECTOR } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import { error, json } from '@sveltejs/kit';
 import crypto from 'crypto';
 import svgCaptcha from 'svg-captcha';
@@ -6,8 +6,12 @@ import type { CipherKey, BinaryLike } from 'crypto';
 
 // generate and return captcha
 export function GET() {
-	const initVector = Buffer.from(SERVER_INIT_VECTOR, 'hex');
-	const serverKey = Buffer.from(SERVER_CRYPTO_KEY, 'hex');
+	if (!env.SERVER_CRYPTO_KEY || !env.SERVER_INIT_VECTOR) {
+		error(503, 'Captcha service unavailable');
+	}
+
+	const initVector = Buffer.from(env.SERVER_INIT_VECTOR, 'hex');
+	const serverKey = Buffer.from(env.SERVER_CRYPTO_KEY, 'hex');
 
 	svgCaptcha.options.width = 275;
 	svgCaptcha.options.height = 100;
