@@ -4,7 +4,7 @@
 	import Icon from '$components/Icon.svelte';
 	import MapLoadingMain from '$components/MapLoadingMain.svelte';
 	import MerchantDrawerHash from '$components/MerchantDrawerHash.svelte';
-	import { updateMerchantHash } from '$lib/merchantDrawerHash';
+	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import {
 		processPlaces,
 		isSupported as isWorkerSupported,
@@ -104,7 +104,7 @@
 			highlightMarker(id);
 		});
 
-		updateMerchantHash(id, 'details');
+		merchantDrawer.open(id, 'details');
 	}
 
 	let leaflet: Leaflet;
@@ -150,6 +150,10 @@
 
 	const handleHashChange = () => {
 		if (!browser) return;
+
+		// Sync store from hash - single source of truth
+		merchantDrawer.syncFromHash();
+
 		const hash = window.location.hash.substring(1);
 		const hasDrawer = hash.includes('merchant=');
 

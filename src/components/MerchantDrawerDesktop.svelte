@@ -1,128 +1,29 @@
 <script lang="ts">
-	import { places, boost, exchangeRate, resetBoost } from '$lib/store';
+	import { boost, exchangeRate, resetBoost } from '$lib/store';
 	import CloseButton from '$components/CloseButton.svelte';
 	import Icon from '$components/Icon.svelte';
 	import { fly } from 'svelte/transition';
 	import BoostContent from './BoostContent.svelte';
 	import MerchantDetailsContent from './MerchantDetailsContent.svelte';
 	import { invalidateAll } from '$app/navigation';
-	import { onMount, onDestroy } from 'svelte';
-	import type { Place } from '$lib/types';
-	import { parseMerchantHash, updateMerchantHash, type DrawerView } from '$lib/merchantDrawerHash';
-	import { debounce } from '$lib/utils';
+	import { onMount } from 'svelte';
+	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import {
 		calcVerifiedDate,
 		isUpToDate as checkUpToDate,
 		isBoosted as checkBoosted,
 		handleBoost as boostMerchant,
 		handleBoostComplete as completeBoost,
-		handleCloseDrawer as closeDrawerUtil,
-		handleGoBack as goBackUtil,
 		ensureBoostData,
-		fetchMerchantDetails as fetchMerchant,
-		hasCompleteData,
 		clearBoostState
 	} from '$lib/merchantDrawerLogic';
 
-	let merchantId: number | null = null;
-	let drawerView: DrawerView = 'details';
-	let isOpen = false;
-	let merchant: Place | null = null;
-	let fetchingMerchant = false;
-	let lastFetchedId: number | null = null;
-	let abortController: AbortController | null = null;
-
-	// Settling guard to prevent rapid state transitions
-	let isSettling = false;
-	let settlingTimeout: ReturnType<typeof setTimeout> | null = null;
-
-	function setSettling(duration = 150) {
-		isSettling = true;
-		if (settlingTimeout) clearTimeout(settlingTimeout);
-		settlingTimeout = setTimeout(() => {
-			isSettling = false;
-		}, duration);
-	}
-
-	async function fetchMerchantDetails(id: number) {
-		if (fetchingMerchant || lastFetchedId === id) return;
-
-		// Cancel previous request if still pending
-		if (abortController) {
-			abortController.abort();
-		}
-
-		// Create new abort controller for this request
-		abortController = new AbortController();
-
-		await fetchMerchant(
-			id,
-			merchantId,
-			(m) => {
-				merchant = m;
-			},
-			(f) => {
-				fetchingMerchant = f;
-			},
-			(id) => {
-				lastFetchedId = id;
-			},
-			abortController.signal
-		);
-	}
-
-	onDestroy(() => {
-		// Cancel any pending requests when component unmounts
-		if (abortController) {
-			abortController.abort();
-		}
-		// Clean up settling timeout
-		if (settlingTimeout) {
-			clearTimeout(settlingTimeout);
-		}
-		// Cancel pending debounced calls
-		if (parseHash?.cancel) {
-			parseHash.cancel();
-		}
-	});
-
-	$: if (merchantId && isOpen) {
-		const foundInStore = $places.find((p) => p.id === merchantId);
-
-		if (hasCompleteData(foundInStore) && merchant?.id !== foundInStore.id) {
-			merchant = foundInStore;
-			lastFetchedId = merchantId;
-		} else if (lastFetchedId !== merchantId) {
-			fetchMerchantDetails(merchantId);
-		}
-	}
-
-	function parseHashImmediate() {
-		// Skip if we're in the middle of a transition
-		if (isSettling) return;
-
-		const state = parseMerchantHash();
-		const wasOpen = isOpen;
-		const previousMerchantId = merchantId;
-
-		merchantId = state.merchantId;
-		drawerView = state.drawerView;
-		isOpen = state.isOpen;
-
-		// Set settling guard on state change to prevent rapid transitions
-		if (wasOpen !== isOpen || previousMerchantId !== merchantId) {
-			setSettling();
-		}
-
-		// Cancel pending API request when drawer closes
-		if (wasOpen && !isOpen && abortController) {
-			abortController.abort();
-			abortController = null;
-		}
-	}
-
-	// Debounced version to prevent rapid hash changes from overwhelming the UI
-	const parseHash = debounce(parseHashImmediate, 100);
+	// Derive state from centralized store
+	$: isOpen = $merchantDrawer.isOpen;
+	$: merchantId = $merchantDrawer.merchantId;
+	$: drawerView = $merchantDrawer.drawerView;
+	$: merchant = $merchantDrawer.merchant;
+	$: fetchingMerchant = $merchantDrawer.isLoading;
 
 	const verifiedDate = calcVerifiedDate();
 	$: isUpToDate = checkUpToDate(merchant, verifiedDate);
@@ -133,8 +34,17 @@
 		boostLoading = loading;
 	};
 
-	const closeDrawer = () => closeDrawerUtil(setBoostLoading);
-	const goBack = () => goBackUtil(merchantId, setBoostLoading);
+	const closeDrawer = () => {
+		clearBoostState();
+		boostLoading = false;
+		merchantDrawer.close();
+	};
+
+	const goBack = () => {
+		clearBoostState();
+		boostLoading = false;
+		merchantDrawer.setView('details');
+	};
 
 	$: if (drawerView !== 'boost' && $boost !== undefined) {
 		clearBoostState();
@@ -158,12 +68,8 @@
 	}
 
 	onMount(() => {
-		// Use immediate version for initial load, debounced for subsequent changes
-		parseHashImmediate();
-		window.addEventListener('hashchange', parseHash);
 		window.addEventListener('keydown', handleKeydown);
 		return () => {
-			window.removeEventListener('hashchange', parseHash);
 			window.removeEventListener('keydown', handleKeydown);
 		};
 	});
@@ -173,7 +79,7 @@
 	}
 
 	export function openDrawer(id: number) {
-		updateMerchantHash(id, 'details');
+		merchantDrawer.open(id, 'details');
 	}
 </script>
 

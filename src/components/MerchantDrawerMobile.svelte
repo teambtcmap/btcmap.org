@@ -1,27 +1,21 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { spring } from 'svelte/motion';
-	import { places, boost, exchangeRate, resetBoost } from '$lib/store';
+	import { boost, exchangeRate, resetBoost } from '$lib/store';
 	import Icon from '$components/Icon.svelte';
 	import BoostContent from './BoostContent.svelte';
 	import MerchantDetailsContent from './MerchantDetailsContent.svelte';
 	import MerchantPeekContentMobile from './MerchantPeekContentMobile.svelte';
 	import { invalidateAll } from '$app/navigation';
-	import { onMount, onDestroy } from 'svelte';
-	import type { Place } from '$lib/types';
-	import { parseMerchantHash, updateMerchantHash, type DrawerView } from '$lib/merchantDrawerHash';
-	import { debounce } from '$lib/utils';
+	import { onMount } from 'svelte';
+	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import {
 		calcVerifiedDate,
 		isUpToDate as checkUpToDate,
 		isBoosted as checkBoosted,
 		handleBoost as boostMerchant,
 		handleBoostComplete as completeBoost,
-		handleCloseDrawer as closeDrawerUtil,
-		handleGoBack as goBackUtil,
 		ensureBoostData,
-		fetchMerchantDetails as fetchMerchant,
-		hasCompleteData,
 		clearBoostState
 	} from '$lib/merchantDrawerLogic';
 
@@ -62,14 +56,12 @@
 		}
 	}
 
-	// Component state
-	let merchantId: number | null = null;
-	let drawerView: DrawerView = 'details';
-	let isOpen = false;
-	let merchant: Place | null = null;
-	let fetchingMerchant = false;
-	let lastFetchedId: number | null = null;
-	let abortController: AbortController | null = null;
+	// Derive state from centralized store
+	$: isOpen = $merchantDrawer.isOpen;
+	$: merchantId = $merchantDrawer.merchantId;
+	$: drawerView = $merchantDrawer.drawerView;
+	$: merchant = $merchantDrawer.merchant;
+	$: fetchingMerchant = $merchantDrawer.isLoading;
 
 	// Bottom sheet state
 	let EXPANDED_HEIGHT = 500; // Initial value, updated to window.innerHeight on mount
@@ -89,89 +81,13 @@
 	// DOM reference
 	let handleElement: HTMLDivElement;
 
-	// Settling guard to prevent rapid state transitions
-	let isSettling = false;
-	let settlingTimeout: ReturnType<typeof setTimeout> | null = null;
-
-	function setSettling(duration = 150) {
-		isSettling = true;
-		if (settlingTimeout) clearTimeout(settlingTimeout);
-		settlingTimeout = setTimeout(() => {
-			isSettling = false;
-		}, duration);
+	// Track previous state to reset drawer when merchant changes
+	let previousMerchantId: number | null = null;
+	$: if (isOpen && merchantId !== previousMerchantId) {
+		previousMerchantId = merchantId;
+		expanded = false;
+		drawerHeight.set(PEEK_HEIGHT, { hard: true });
 	}
-
-	async function fetchMerchantDetails(id: number) {
-		if (fetchingMerchant || lastFetchedId === id) return;
-
-		// Cancel previous request if still pending
-		if (abortController) {
-			abortController.abort();
-		}
-
-		// Create new abort controller for this request
-		abortController = new AbortController();
-
-		await fetchMerchant(
-			id,
-			merchantId,
-			(m) => {
-				merchant = m;
-			},
-			(f) => {
-				fetchingMerchant = f;
-			},
-			(fetchedId) => {
-				lastFetchedId = fetchedId;
-			},
-			abortController.signal
-		);
-	}
-
-	$: if (merchantId && isOpen) {
-		const foundInStore = $places.find((p) => p.id === merchantId);
-
-		if (hasCompleteData(foundInStore) && merchant?.id !== foundInStore.id) {
-			merchant = foundInStore;
-			lastFetchedId = merchantId;
-		} else if (lastFetchedId !== merchantId) {
-			fetchMerchantDetails(merchantId);
-		}
-	}
-
-	function parseHashImmediate() {
-		// Skip if we're in the middle of a transition
-		if (isSettling) return;
-
-		const state = parseMerchantHash();
-		const previousMerchantId = merchantId;
-		const wasOpen = isOpen;
-
-		merchantId = state.merchantId;
-		drawerView = state.drawerView;
-		isOpen = state.isOpen;
-
-		// Cancel any running spring animation immediately on state change
-		if (wasOpen !== isOpen || previousMerchantId !== merchantId) {
-			drawerHeight.set($drawerHeight, { hard: true });
-			setSettling();
-		}
-
-		// Cancel pending API request when drawer closes
-		if (wasOpen && !isOpen && abortController) {
-			abortController.abort();
-			abortController = null;
-		}
-
-		// Only reset to peek state when initially opening a merchant (not when switching views)
-		if (isOpen && state.drawerView === 'details' && previousMerchantId !== merchantId) {
-			expanded = false;
-			drawerHeight.set(PEEK_HEIGHT, { hard: true });
-		}
-	}
-
-	// Debounced version to prevent rapid hash changes from overwhelming the UI
-	const parseHash = debounce(parseHashImmediate, 100);
 
 	const verifiedDate = calcVerifiedDate();
 	$: isUpToDate = checkUpToDate(merchant, verifiedDate);
@@ -182,13 +98,19 @@
 		boostLoading = loading;
 	};
 
-	const closeDrawer = () =>
-		closeDrawerUtil(setBoostLoading, () => {
-			expanded = false;
-			drawerHeight.set(PEEK_HEIGHT);
-		});
+	const closeDrawer = () => {
+		clearBoostState();
+		boostLoading = false;
+		expanded = false;
+		drawerHeight.set(PEEK_HEIGHT);
+		merchantDrawer.close();
+	};
 
-	const goBack = () => goBackUtil(merchantId, setBoostLoading);
+	const goBack = () => {
+		clearBoostState();
+		boostLoading = false;
+		merchantDrawer.setView('details');
+	};
 
 	$: if (drawerView !== 'boost' && $boost !== undefined) {
 		clearBoostState();
@@ -245,9 +167,6 @@
 	}
 
 	onMount(() => {
-		// Use immediate version for initial load, debounced for subsequent changes
-		parseHashImmediate();
-		window.addEventListener('hashchange', parseHash);
 		window.addEventListener('keydown', handleKeydown);
 
 		let updateHeight: (() => void) | null = null;
@@ -265,27 +184,11 @@
 		}
 
 		return () => {
-			window.removeEventListener('hashchange', parseHash);
 			window.removeEventListener('keydown', handleKeydown);
 			if (updateHeight) {
 				window.removeEventListener('resize', updateHeight);
 			}
 		};
-	});
-
-	onDestroy(() => {
-		// Cancel any pending requests when component unmounts
-		if (abortController) {
-			abortController.abort();
-		}
-		// Clean up settling timeout
-		if (settlingTimeout) {
-			clearTimeout(settlingTimeout);
-		}
-		// Cancel pending debounced calls
-		if (parseHash?.cancel) {
-			parseHash.cancel();
-		}
 	});
 
 	$: if (drawerView === 'boost' && merchant) {
@@ -385,7 +288,7 @@
 	}
 
 	export function openDrawer(id: number) {
-		updateMerchantHash(id, 'details');
+		merchantDrawer.open(id, 'details');
 	}
 </script>
 
@@ -468,7 +371,12 @@
 			{:else if merchant}
 				{#if !expanded}
 					<div class="p-4">
-						<MerchantPeekContentMobile {merchant} {isUpToDate} {isBoosted} />
+						<MerchantPeekContentMobile
+							{merchant}
+							{isUpToDate}
+							{isBoosted}
+							isLoading={fetchingMerchant}
+						/>
 					</div>
 				{:else}
 					<div class="p-6">
