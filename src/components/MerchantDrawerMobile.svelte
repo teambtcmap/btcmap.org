@@ -171,7 +171,7 @@
 	}
 
 	// Debounced version to prevent rapid hash changes from overwhelming the UI
-	const parseHash = debounce(parseHashImmediate, 50);
+	const parseHash = debounce(parseHashImmediate, 100);
 
 	const verifiedDate = calcVerifiedDate();
 	$: isUpToDate = checkUpToDate(merchant, verifiedDate);

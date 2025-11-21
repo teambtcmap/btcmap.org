@@ -82,13 +82,28 @@
 	const DEFAULT_LNG = -68.91119;
 	const DEFAULT_ZOOM = 15;
 
-	function openMerchantDrawer(id: number) {
-		if (selectedMarkerId) {
-			clearMarkerSelection(selectedMarkerId);
-		}
+	// Throttled marker drawer opening to prevent freeze on rapid clicks
+	let lastMarkerClickTime = 0;
+	const MARKER_CLICK_THROTTLE = 100; // ms
 
-		selectedMarkerId = id;
-		highlightMarker(id);
+	function openMerchantDrawer(id: number) {
+		// Skip if same marker already selected
+		if (selectedMarkerId === id) return;
+
+		// Throttle rapid clicks
+		const now = Date.now();
+		if (now - lastMarkerClickTime < MARKER_CLICK_THROTTLE) return;
+		lastMarkerClickTime = now;
+
+		// Batch DOM operations with requestAnimationFrame
+		requestAnimationFrame(() => {
+			if (selectedMarkerId) {
+				clearMarkerSelection(selectedMarkerId);
+			}
+			selectedMarkerId = id;
+			highlightMarker(id);
+		});
+
 		updateMerchantHash(id, 'details');
 	}
 
