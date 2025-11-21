@@ -157,6 +157,12 @@
 			setSettling();
 		}
 
+		// Cancel pending API request when drawer closes
+		if (wasOpen && !isOpen && abortController) {
+			abortController.abort();
+			abortController = null;
+		}
+
 		// Only reset to peek state when initially opening a merchant (not when switching views)
 		if (isOpen && state.drawerView === 'details' && previousMerchantId !== merchantId) {
 			expanded = false;

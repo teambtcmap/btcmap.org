@@ -113,6 +113,12 @@
 		if (wasOpen !== isOpen || previousMerchantId !== merchantId) {
 			setSettling();
 		}
+
+		// Cancel pending API request when drawer closes
+		if (wasOpen && !isOpen && abortController) {
+			abortController.abort();
+			abortController = null;
+		}
 	}
 
 	// Debounced version to prevent rapid hash changes from overwhelming the UI
