@@ -31,9 +31,8 @@ export const usersSync = async () => {
 
 						updatedSince = response.data[response.data.length - 1]['updated_at'];
 						responseCount = response.data.length;
-						const usersUpdated = usersData.filter(
-							(user) => !response.data.find((data) => data.id === user.id)
-						);
+						const responseIds = new Set(response.data.map((data) => data.id));
+						const usersUpdated = usersData.filter((user) => !responseIds.has(user.id));
 						usersData = usersUpdated;
 						response.data.forEach((data) => usersData.push(data));
 					} catch (error) {
@@ -85,13 +84,8 @@ export const usersSync = async () => {
 							updatedSince = newUsers[newUsers.length - 1]['updated_at'];
 							responseCount = newUsers.length;
 
-							const usersUpdated = usersData.filter((value) => {
-								if (newUsers.find((user) => user.id == value.id)) {
-									return false;
-								} else {
-									return true;
-								}
-							});
+							const newUserIds = new Set(newUsers.map((user) => user.id));
+							const usersUpdated = usersData.filter((value) => !newUserIds.has(value.id));
 							usersData = usersUpdated;
 
 							// add new users
@@ -152,9 +146,8 @@ export const usersSync = async () => {
 
 					updatedSince = response.data[response.data.length - 1]['updated_at'];
 					responseCount = response.data.length;
-					const usersUpdated = usersData.filter(
-						(user) => !response.data.find((data) => data.id === user.id)
-					);
+					const responseIds = new Set(response.data.map((data) => data.id));
+					const usersUpdated = usersData.filter((user) => !responseIds.has(user.id));
 					usersData = usersUpdated;
 					response.data.forEach((data) => usersData.push(data));
 				} catch (error) {

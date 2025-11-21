@@ -31,9 +31,8 @@ export const reportsSync = async () => {
 
 						updatedSince = response.data[response.data.length - 1]['updated_at'];
 						responseCount = response.data.length;
-						const reportsUpdated = reportsData.filter(
-							(report) => !response.data.find((data) => data.id === report.id)
-						);
+						const responseIds = new Set(response.data.map((data) => data.id));
+						const reportsUpdated = reportsData.filter((report) => !responseIds.has(report.id));
 						reportsData = reportsUpdated;
 						response.data.forEach((data) => reportsData.push(data));
 					} catch (error) {
@@ -89,13 +88,8 @@ export const reportsSync = async () => {
 							updatedSince = newReports[newReports.length - 1]['updated_at'];
 							responseCount = newReports.length;
 
-							const reportsUpdated = reportsData.filter((value) => {
-								if (newReports.find((report) => report.id === value.id)) {
-									return false;
-								} else {
-									return true;
-								}
-							});
+							const newReportIds = new Set(newReports.map((report) => report.id));
+							const reportsUpdated = reportsData.filter((value) => !newReportIds.has(value.id));
 							reportsData = reportsUpdated;
 
 							// add new reports
@@ -160,9 +154,8 @@ export const reportsSync = async () => {
 
 					updatedSince = response.data[response.data.length - 1]['updated_at'];
 					responseCount = response.data.length;
-					const reportsUpdated = reportsData.filter(
-						(report) => !response.data.find((data) => data.id === report.id)
-					);
+					const responseIds = new Set(response.data.map((data) => data.id));
+					const reportsUpdated = reportsData.filter((report) => !responseIds.has(report.id));
 					reportsData = reportsUpdated;
 					response.data.forEach((data) => reportsData.push(data));
 				} catch (error) {

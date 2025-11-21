@@ -31,9 +31,8 @@ export const eventsSync = async () => {
 
 						updatedSince = response.data[response.data.length - 1]['updated_at'];
 						responseCount = response.data.length;
-						const eventsUpdated = eventsData.filter(
-							(event) => !response.data.find((data) => data.id === event.id)
-						);
+						const responseIds = new Set(response.data.map((data) => data.id));
+						const eventsUpdated = eventsData.filter((event) => !responseIds.has(event.id));
 						eventsData = eventsUpdated;
 						response.data.forEach((data) => eventsData.push(data));
 					} catch (error) {
@@ -87,13 +86,8 @@ export const eventsSync = async () => {
 							updatedSince = newEvents[newEvents.length - 1]['updated_at'];
 							responseCount = newEvents.length;
 
-							const eventsUpdated = eventsData.filter((value) => {
-								if (newEvents.find((event) => event.id === value.id)) {
-									return false;
-								} else {
-									return true;
-								}
-							});
+							const newEventIds = new Set(newEvents.map((event) => event.id));
+							const eventsUpdated = eventsData.filter((value) => !newEventIds.has(value.id));
 							eventsData = eventsUpdated;
 
 							// add new events
@@ -158,9 +152,8 @@ export const eventsSync = async () => {
 
 					updatedSince = response.data[response.data.length - 1]['updated_at'];
 					responseCount = response.data.length;
-					const eventsUpdated = eventsData.filter(
-						(event) => !response.data.find((data) => data.id === event.id)
-					);
+					const responseIds = new Set(response.data.map((data) => data.id));
+					const eventsUpdated = eventsData.filter((event) => !responseIds.has(event.id));
 					eventsData = eventsUpdated;
 					response.data.forEach((data) => eventsData.push(data));
 				} catch (error) {
