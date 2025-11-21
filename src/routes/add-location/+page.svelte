@@ -9,7 +9,7 @@
 	import MapLoadingEmbed from '$components/MapLoadingEmbed.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import { attribution, changeDefaultIcons, geolocate, toggleMapButtons } from '$lib/map/setup';
-	import { socials, theme } from '$lib/store';
+	import { theme } from '$lib/store';
 	import { detectTheme, errToast } from '$lib/utils';
 
 	import axios from 'axios';
@@ -17,7 +17,6 @@
 	import type { Map, MaplibreGL, Marker } from 'leaflet';
 	import { onDestroy, onMount, tick } from 'svelte';
 	import DOMPurify from 'dompurify';
-	import { resolve } from '$app/paths';
 
 	let captchaContent = '';
 	let isCaptchaLoading = true;
@@ -316,98 +315,13 @@
 				> guide.
 			</p>
 
-			<div class="mt-16 pb-20 md:pb-32">
-				<section id="supertagger" class="mx-auto w-full border-b border-input pb-14">
-					<div class="mx-auto max-w-xl text-primary dark:text-white">
-						<h2 class="mb-5 text-center text-3xl font-semibold md:text-left">Start Here</h2>
-						<p class="mb-10 w-full text-justify">
-							We use OpenStreetMap to tag locations. Follow the steps below to quickly add a
-							merchant to BTC Map.
-						</p>
-
-						<div class="flex justify-center">
-							<ol class="space-y-10 text-center text-xl font-semibold md:space-y-8 md:text-left">
-								<li class="items-center md:flex">
-									<img
-										src="/icons/pin-1.svg"
-										alt="pin"
-										class="mx-auto mb-4 md:mx-0 md:mr-4 md:mb-0"
-									/>
-									Create an
-									<a
-										href="https://www.openstreetmap.org/user/new"
-										target="_blank"
-										rel="noreferrer"
-										class="mx-1 text-link transition-colors hover:text-hover">OpenStreetMap</a
-									> account
-								</li>
-								<li class="items-center md:flex">
-									<img
-										src="/icons/pin-2.svg"
-										alt="pin"
-										class="mx-auto mb-4 md:mx-0 md:mr-4 md:mb-0"
-									/>
-									<a
-										href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants"
-										target="_blank"
-										rel="noreferrer"
-										class="mr-1 text-link transition-colors hover:text-hover">Tag</a
-									> the location
-								</li>
-								<li class="items-center md:flex">
-									<img
-										src="/icons/pin-3.svg"
-										alt="pin"
-										class="mx-auto mb-4 md:mx-0 md:mr-4 md:mb-0"
-									/>
-									Show up on the
-									<a
-										href={resolve('/map')}
-										class="ml-1 text-link transition-colors hover:text-hover">map</a
-									>!
-								</li>
-							</ol>
-						</div>
-
-						<h3 class="mt-16 mb-5 text-center text-2xl font-semibold md:mt-10">
-							See how it's done
-						</h3>
-						<!-- svelte-ignore a11y-media-has-caption -->
-						<video
-							controls
-							playsinline
-							preload="auto"
-							src="/videos/osm-tagging-tutorial.webm"
-							class="w-full border-2 border-input"
-						/>
-
-						<h3 class="mt-16 mb-5 text-center text-2xl font-semibold md:mt-10">
-							Still have questions?
-						</h3>
-						<p class="text-justify">
-							Ask for help in our
-							<!-- eslint-disable svelte/no-navigation-without-resolve -->
-							<a
-								href={$socials.discord}
-								target="_blank"
-								rel="noreferrer"
-								class="text-link transition-colors hover:text-hover"
-							>
-								<!-- eslint-enable svelte/no-navigation-without-resolve -->
-								Discord
-							</a> server and a community member will be happy to assist. Alternatively, you can fill
-							out the form below. This method is not recommended if you would like to be added to the
-							map right away.
-						</p>
-					</div>
-				</section>
-
-				<section id="noob" class="mx-auto w-full pt-14">
+			<div class="mt-16 pb-20 md:pb-32 lg:flex lg:justify-between lg:gap-10">
+				<section id="form" class="mx-auto w-full lg:w-1/2 lg:border-r lg:border-input lg:pr-10">
 					<div class="mx-auto max-w-xl">
 						<h2
 							class="mb-5 text-center text-3xl font-semibold text-primary md:text-left dark:text-white"
 						>
-							Form Option
+							Done-for-you
 						</h2>
 
 						<p class="mb-10 w-full text-justify text-primary dark:text-white">
@@ -648,6 +562,7 @@
 							<div>
 								<label for="source" class="mb-2 block font-semibold">Data Source</label>
 								<select
+									id="source"
 									disabled={!captchaSecret || !mapLoaded}
 									name="source"
 									required
@@ -751,6 +666,34 @@
 						</form>
 					</div>
 				</section>
+
+				<section
+					id="supertagger"
+					class="mx-auto mt-14 w-full border-t border-input pt-14 lg:mt-0 lg:w-1/2 lg:border-t-0 lg:pt-0 lg:pl-10"
+				>
+					<div class="lg:flex lg:justify-start">
+						<div class="mx-auto max-w-xl text-primary dark:text-white">
+							<h2 class="mb-5 text-center text-3xl font-semibold md:text-left">
+								Shadowy Supertagger?
+							</h2>
+							<p class="mb-10 w-full text-justify md:text-left">
+								Contribute changes directly to OSM - like a 😎 boss. Who needs forms anyway.
+							</p>
+							<img
+								src="/images/supertagger.svg"
+								alt="shadowy supertagger"
+								class="mx-auto mb-10 h-[220px] w-[220px]"
+							/>
+							<PrimaryButton
+								style="w-full py-3 rounded-xl"
+								link="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers-"
+								external={true}
+							>
+								See Wiki for instructions
+							</PrimaryButton>
+						</div>
+					</div>
+				</section>
 			</div>
 		{:else}
 			<FormSuccess
@@ -764,14 +707,3 @@
 		<Footer />
 	</div>
 </div>
-
-{#if typeof window !== 'undefined'}
-	{#if detectTheme() === 'dark' || $theme === 'dark'}
-		<style>
-			select option {
-				--tw-bg-opacity: 1;
-				background-color: rgb(55 65 81 / var(--tw-bg-opacity));
-			}
-		</style>
-	{/if}
-{/if}
