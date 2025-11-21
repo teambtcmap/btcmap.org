@@ -33,7 +33,7 @@
 	import {
 		areaError,
 		areas,
-		places,
+		placesById,
 		placesError,
 		eventError,
 		events,
@@ -215,7 +215,7 @@
 	$: verified = data.verified || [];
 	// Make boosted reactive to both server data and store updates, but only if boost is still active
 	$: {
-		const placeInStore = $places.find((p) => p.id === Number(data.id));
+		const placeInStore = $placesById.get(Number(data.id));
 		const mergedPlace = placeInStore || data.placeData;
 		// Only set boosted if the place is actually boosted (expiry in future)
 		boosted = mergedPlace && isBoosted(mergedPlace) ? mergedPlace.boosted_until : undefined;

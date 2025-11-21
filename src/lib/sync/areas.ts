@@ -43,7 +43,8 @@ export const areasSync = async () => {
 						updatedSince = newAreas[newAreas.length - 1]['updated_at'];
 						responseCount = newAreas.length;
 
-						areasData = areasData.filter((value) => !newAreas.find((area) => area.id === value.id));
+						const newAreaIds = new Set(newAreas.map((area) => area.id));
+						areasData = areasData.filter((value) => !newAreaIds.has(value.id));
 						newAreas.forEach((area) => {
 							if (!area.deleted_at && area.tags.type !== 'trash') {
 								areasData.push(area);
@@ -89,9 +90,8 @@ export const areasSync = async () => {
 
 					updatedSince = response.data[response.data.length - 1]['updated_at'];
 					responseCount = response.data.length;
-					const areasUpdated = areasData.filter(
-						(area) => !response.data.find((data) => data.id === area.id)
-					);
+					const responseIds = new Set(response.data.map((data) => data.id));
+					const areasUpdated = areasData.filter((area) => !responseIds.has(area.id));
 					areasData = areasUpdated;
 					response.data.forEach((data) => areasData.push(data));
 				} catch (error) {
@@ -140,12 +140,8 @@ export const areasSync = async () => {
 						updatedSince = newAreas[newAreas.length - 1]['updated_at'];
 						responseCount = newAreas.length;
 
-						const areasUpdated = areasData.filter((value) => {
-							if (newAreas.find((area) => area.id === value.id)) {
-								return false;
-							}
-							return true;
-						});
+						const newAreaIds = new Set(newAreas.map((area) => area.id));
+						const areasUpdated = areasData.filter((value) => !newAreaIds.has(value.id));
 						areasData = areasUpdated;
 
 						newAreas.forEach((area) => {
