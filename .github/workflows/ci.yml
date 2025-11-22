@@ -78,11 +78,11 @@ jobs:
       - name: Install dependencies
         run: yarn
 
-      - name: Run TypeScript type check
-        run: yarn run typecheck
-
       - name: Run Svelte check
         run: yarn run check
+
+      - name: Run TypeScript type check
+        run: yarn run typecheck
 
   # Job 4: Unit tests
   unit-tests:
