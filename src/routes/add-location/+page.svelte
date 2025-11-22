@@ -8,6 +8,7 @@
 	import InfoTooltip from '$components/InfoTooltip.svelte';
 	import MapLoadingEmbed from '$components/MapLoadingEmbed.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
+	import { loadMapDependencies } from '$lib/map/imports';
 	import { attribution, changeDefaultIcons, geolocate, toggleMapButtons } from '$lib/map/setup';
 	import { theme } from '$lib/store';
 	import { detectTheme, errToast } from '$lib/utils';
@@ -81,21 +82,9 @@
 	 * Initialize the map with all required settings and controls
 	 */
 	async function initializeMap() {
-		// Import required packages
-		const leaflet = await import('leaflet');
-		const DomEvent = await import('leaflet/src/dom/DomEvent');
-		/* eslint-disable @typescript-eslint/no-unused-vars */
-		const maplibreGl = await import('maplibre-gl');
-		const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
-		/* eslint-enable @typescript-eslint/no-unused-vars */
-
-		// Make sure to import the locate control plugin
-		try {
-			// Import the locate control plugin dynamically
-			await import('leaflet.locatecontrol');
-		} catch (e) {
-			console.error('Could not load leaflet.locatecontrol', e);
-		}
+		const deps = await loadMapDependencies();
+		const leaflet = deps.leaflet;
+		const DomEvent = deps.DomEvent;
 
 		// Create map instance
 		if (map) map.remove(); // Clean up any existing map

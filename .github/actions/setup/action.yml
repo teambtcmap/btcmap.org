@@ -1,0 +1,35 @@
+name: 'Setup Node and Dependencies'
+description: 'Common setup steps for CI workflows'
+inputs:
+  needs-env:
+    description: 'Create .env file from .env.example'
+    required: false
+    default: 'false'
+  needs-sync:
+    description: 'Run svelte-kit sync'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: lts/*
+        cache: 'yarn'
+
+    - name: Create .env
+      if: ${{ inputs.needs-env == 'true' }}
+      shell: bash
+      run: cp .env.example .env
+
+    - name: Install dependencies
+      shell: bash
+      run: yarn
+
+    - name: Sync SvelteKit
+      if: ${{ inputs.needs-sync == 'true' }}
+      shell: bash
+      run: yarn svelte-kit sync

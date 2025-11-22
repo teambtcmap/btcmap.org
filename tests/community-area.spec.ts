@@ -5,9 +5,9 @@ test.describe('Community Area Pages', () => {
 		// Reasonable timeout - focus on navigation, not heavy data loading
 		test.setTimeout(60000);
 
-		// Navigate directly to a known community (Bitcoin Jungle Costa Rica)
-		await page.goto('http://127.0.0.1:5173/community/bitcoin-jungle-cr');
-		await expect(page).toHaveURL(/\/community\/bitcoin-jungle-cr\/merchants$/);
+		// Navigate directly to a known community (Bitcoin Bulgaria)
+		await page.goto('/community/bitcoin-bulgaria');
+		await expect(page).toHaveURL(/\/community\/bitcoin-bulgaria\/merchants$/);
 		await page.waitForLoadState('domcontentloaded');
 
 		// Verify basic page structure loads (before heavy API data)
@@ -23,10 +23,10 @@ test.describe('Community Area Pages', () => {
 		const testSections = ['merchants', 'stats', 'activity', 'maintain'];
 
 		for (const section of testSections) {
-			await page.goto(`http://127.0.0.1:5173/community/bitcoin-jungle-cr/${section}`);
+			await page.goto(`/community/bitcoin-bulgaria/${section}`);
 
 			// Verify URL matches
-			await expect(page).toHaveURL(new RegExp(`/community/bitcoin-jungle-cr/${section}$`));
+			await expect(page).toHaveURL(new RegExp(`/community/bitcoin-bulgaria/${section}$`));
 
 			// Don't wait for heavy data loading - just verify navigation works
 			await page.waitForLoadState('domcontentloaded');

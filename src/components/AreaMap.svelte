@@ -5,6 +5,7 @@
 	import MapLoadingEmbed from '$components/MapLoadingEmbed.svelte';
 	import ShowTags from '$components/ShowTags.svelte';
 	import TaggingIssues from '$components/TaggingIssues.svelte';
+	import { loadMapDependencies } from '$lib/map/imports';
 	import {
 		attribution,
 		changeDefaultIcons,
@@ -71,16 +72,9 @@
 
 	onMount(async () => {
 		if (browser) {
-			//import packages
-			leaflet = await import('leaflet');
-			DomEvent = leaflet.DomEvent;
-			/* eslint-disable @typescript-eslint/no-unused-vars */
-			const maplibreGl = await import('maplibre-gl');
-			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
-			const leafletMarkerCluster = await import('leaflet.markercluster');
-			const leafletFeaturegroupSubgroup = await import('leaflet.featuregroup.subgroup');
-			const leafletLocateControl = await import('leaflet.locatecontrol');
-			/* eslint-enable @typescript-eslint/no-unused-vars */
+			const deps = await loadMapDependencies();
+			leaflet = deps.leaflet;
+			DomEvent = deps.leaflet.DomEvent;
 
 			initialRenderComplete = true;
 		}

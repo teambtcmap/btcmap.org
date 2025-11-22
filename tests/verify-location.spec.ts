@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Verify Location Page', () => {
 	test('loads page structure and basic form elements', async ({ page }) => {
 		// Navigate to verify-location with a valid merchant ID
-		await page.goto('http://127.0.0.1:5173/verify-location?id=node:9135176628');
+		await page.goto('/verify-location?id=node:9135176628');
 
 		// Wait for page to load
 		await page.waitForLoadState('domcontentloaded');
@@ -39,7 +39,7 @@ test.describe('Verify Location Page', () => {
 
 	test('shows error for missing ID parameter', async ({ page }) => {
 		// Navigate to verify-location without ID parameter
-		await page.goto('http://127.0.0.1:5173/verify-location');
+		await page.goto('/verify-location');
 
 		// Should get a 400 error page for missing ID
 		await expect(page.getByText('400')).toBeVisible();
@@ -48,7 +48,7 @@ test.describe('Verify Location Page', () => {
 
 	test('shows error for invalid merchant ID', async ({ page }) => {
 		// Navigate to verify-location with invalid ID
-		await page.goto('http://127.0.0.1:5173/verify-location?id=invalid-id-123');
+		await page.goto('/verify-location?id=invalid-id-123');
 
 		// Should get a 404 error page for invalid merchant
 		await expect(page.getByText('404')).toBeVisible();

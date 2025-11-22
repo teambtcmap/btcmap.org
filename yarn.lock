@@ -1239,12 +1239,12 @@
   dependencies:
     "@types/leaflet" "^1.9"
 
-"@types/leaflet.locatecontrol@^0.74.6":
-  version "0.74.6"
-  resolved "https://registry.npmjs.org/@types/leaflet.locatecontrol/-/leaflet.locatecontrol-0.74.6.tgz"
-  integrity sha512-IMnp6zSkiEKx5fwZSfySIyQWJWR/tpF00jRZC6BmFU//ygVRChakQpGPMpHIjQOnP3UMTmTXgztvQ2AwlHL8Mg==
+"@types/leaflet.locatecontrol@^0.82.1":
+  version "0.82.1"
+  resolved "https://registry.yarnpkg.com/@types/leaflet.locatecontrol/-/leaflet.locatecontrol-0.82.1.tgz#05cbdcf46c5b553ec2586f65bac124c88edcb4d7"
+  integrity sha512-AcDyhhPDrF48iRa0/ShKgtAgR7a6ts2SzsoUUM9/+IwTZl/1iPP/JIg+wpwoobTMfx+bF2mUUkXKRwieveVgNQ==
   dependencies:
-    "@types/leaflet" "*"
+    "@types/leaflet" "^1.9"
 
 "@types/leaflet.markercluster@^1.5.5":
   version "1.5.6"
@@ -1253,7 +1253,7 @@
   dependencies:
     "@types/leaflet" "^1.9"
 
-"@types/leaflet@*", "@types/leaflet@1.9.20", "@types/leaflet@^1.9":
+"@types/leaflet@1.9.20", "@types/leaflet@^1.9":
   version "1.9.20"
   resolved "https://registry.yarnpkg.com/@types/leaflet/-/leaflet-1.9.20.tgz#a7feef4b0a4b36335dfc98456e76c0a86ab8462c"
   integrity sha512-rooalPMlk61LCaLOvBF2VIf9M47HgMQqi5xQ9QRi7c8PkdIe0WrIi5IxXUXQjAdL0c+vcQ01mYWbthzmp9GHWw==
@@ -2660,10 +2660,10 @@ leaflet.featuregroup.subgroup@^1.0.2:
   resolved "https://registry.npmjs.org/leaflet.featuregroup.subgroup/-/leaflet.featuregroup.subgroup-1.0.2.tgz"
   integrity sha512-9nCVg8nUe686+BtPbUT7ALOe/IA+8Mum+rkA8pfPpCkH0WvKevRrH+JMcMTjAoNQKVI0uxrWrLV5w298SS3ESA==
 
-leaflet.locatecontrol@^0.81.0:
-  version "0.81.1"
-  resolved "https://registry.npmjs.org/leaflet.locatecontrol/-/leaflet.locatecontrol-0.81.1.tgz"
-  integrity sha512-ZtsdScGufPw330X3UIaGGjnfQ1NrhLySnlruWufIMnfzsHgQPz0+mSxsCQMVh7QgOBoefCGb/lioSejiaNx1EQ==
+leaflet.locatecontrol@0.85.1:
+  version "0.85.1"
+  resolved "https://registry.yarnpkg.com/leaflet.locatecontrol/-/leaflet.locatecontrol-0.85.1.tgz#4a4a5b9b0550eeacc1c3b51bfafcad3eaac939e5"
+  integrity sha512-aB2qrwZO7Vs4EbWja6pyGy6Y1Mr2yeOqH3PN+Ocnjb4pgpiwYsX1AOI0mppVYzUTO2zwjafxVTOffiwEE32udA==
 
 leaflet.markercluster@^1.5.3:
   version "1.5.3"
