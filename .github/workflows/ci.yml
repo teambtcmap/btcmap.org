@@ -53,6 +53,9 @@ jobs:
       - name: Install dependencies
         run: yarn
 
+      - name: Sync SvelteKit
+        run: yarn svelte-kit sync
+
       - name: Run Prettier
         run: yarn run format
 
@@ -103,6 +106,9 @@ jobs:
       - name: Install dependencies
         run: yarn
 
+      - name: Sync SvelteKit
+        run: yarn svelte-kit sync
+
       - name: Run Vitest tests
         run: yarn run test
 
@@ -126,6 +132,9 @@ jobs:
 
       - name: Install dependencies
         run: yarn
+
+      - name: Sync SvelteKit
+        run: yarn svelte-kit sync
 
       - name: Download build artifact
         uses: actions/download-artifact@v4
