@@ -18,7 +18,6 @@
 		"lint:fix": "eslint --fix",
 		"preview": "vite preview",
 		"test": "vitest",
-		"test:ui": "vitest --ui",
 		"typecheck": "tsc --project ./tsconfig.json --noEmit --pretty"
 	},
 	"dependencies": {
@@ -41,7 +40,7 @@
 		"leaflet.markercluster": "^1.5.3",
 		"localforage": "^1.10.0",
 		"maplibre-gl": "^4.7.1",
-		"marked": "^17.0.0",
+		"marked": "^17.0.1",
 		"qrcode": "^1.5.4",
 		"svelte-eslint-parser": "^1.4.0",
 		"svelte-outclick": "^3.7.1",
@@ -54,7 +53,7 @@
 		"@iconify/svelte": "^4.2.0",
 		"@playwright/test": "^1.55.0",
 		"@sveltejs/adapter-netlify": "^5.2.2",
-		"@sveltejs/kit": "^2.48.0",
+		"@sveltejs/kit": "^2.49.0",
 		"@sveltejs/vite-plugin-svelte": "^3.1.0",
 		"@tailwindcss/postcss": "^4.1.11",
 		"@tailwindcss/vite": "^4.1.11",
@@ -65,11 +64,10 @@
 		"@types/leaflet.featuregroup.subgroup": "^1.0.3",
 		"@types/leaflet.locatecontrol": "^0.74.6",
 		"@types/leaflet.markercluster": "^1.5.5",
-		"@types/node": "^24.10.0",
+		"@types/node": "^24.10.1",
 		"@types/qrcode": "^1.5.5",
-		"@typescript-eslint/eslint-plugin": "^8.45.0",
-		"@typescript-eslint/parser": "^8.45.0",
-		"@vitest/ui": "^4.0.12",
+		"@typescript-eslint/eslint-plugin": "^8.47.0",
+		"@typescript-eslint/parser": "^8.47.0",
 		"eslint": "^9.39.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.13.0",
@@ -79,13 +77,13 @@
 		"prettier-plugin-svelte": "^3.3.3",
 		"prettier-plugin-tailwindcss": "^0.7.1",
 		"svelte": "^4.2.18",
-		"svelte-check": "^4.3.1",
+		"svelte-check": "^4.3.4",
 		"svelte-preprocess": "^6.0.3",
 		"tailwindcss": "^4.1.11",
 		"typescript": "^5.8.3",
-		"typescript-eslint": "^8.45.0",
+		"typescript-eslint": "^8.47.0",
 		"vite": "^5.4.21",
 		"vite-plugin-icons-spritesheet": "^3.0.1",
-		"vitest": "^4.0.12"
+		"vitest": "^4.0.13"
 	}
 }
