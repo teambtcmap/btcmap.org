@@ -30,15 +30,6 @@ jobs:
       - name: Build app
         run: yarn run build
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-output
-          path: |
-            build/
-            .svelte-kit/
-          retention-days: 1
-
   # Job 2: Format and lint checks
   format-and-lint:
     runs-on: ubuntu-latest
@@ -114,9 +105,8 @@ jobs:
       - name: Run Vitest tests
         run: yarn run test
 
-  # Job 5: E2E tests (depends on build artifact)
+  # Job 5: E2E tests
   e2e-tests:
-    needs: build
     timeout-minutes: 20
     runs-on: ubuntu-latest
     env:
@@ -134,12 +124,6 @@ jobs:
 
       - name: Install dependencies
         run: yarn
-
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: build-output
-          path: .
 
       - name: Cache Playwright browsers
         id: playwright-cache
