@@ -1,0 +1,24 @@
+name: Type Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: ['**']
+
+jobs:
+  type-checks:
+    runs-on: ubuntu-latest
+    env:
+      NODE_OPTIONS: --max-old-space-size=4096
+    steps:
+      - uses: ./.github/actions/setup
+        with:
+          needs-env: 'true'
+          needs-sync: 'false'
+
+      - name: Run Svelte check
+        run: yarn run check
+
+      - name: Run TypeScript type check
+        run: yarn run typecheck

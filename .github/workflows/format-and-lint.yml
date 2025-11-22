@@ -1,0 +1,24 @@
+name: Format and Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: ['**']
+
+jobs:
+  format-and-lint:
+    runs-on: ubuntu-latest
+    env:
+      NODE_OPTIONS: --max-old-space-size=4096
+    steps:
+      - uses: ./.github/actions/setup
+        with:
+          needs-env: 'false'
+          needs-sync: 'true'
+
+      - name: Run Prettier
+        run: yarn run format
+
+      - name: Run ESLint
+        run: yarn run lint
