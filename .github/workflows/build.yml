@@ -1,0 +1,21 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: ['**']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      NODE_OPTIONS: --max-old-space-size=4096
+    steps:
+      - uses: ./.github/actions/setup
+        with:
+          needs-env: 'true'
+          needs-sync: 'false'
+
+      - name: Build app
+        run: yarn run build
