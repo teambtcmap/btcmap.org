@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
 
 const MERCHANT_ID = 23143;
-const BASE_URL = '';
 const API_ENDPOINT = '/api/boost/invoice/generate';
 
 test.describe('Boost Invoice Generation', () => {
@@ -18,7 +17,7 @@ test.describe('Boost Invoice Generation', () => {
 		});
 
 		// Navigate to merchant detail page
-		await page.goto(`${BASE_URL}/merchant/${MERCHANT_ID}`);
+		await page.goto(`/merchant/${MERCHANT_ID}`);
 		await expect(page).toHaveTitle(/BTC Map/);
 
 		// Wait for merchant data to load completely
@@ -79,7 +78,7 @@ test.describe('Boost Invoice Generation', () => {
 	});
 
 	test('validates missing required parameters', async ({ page }) => {
-		const response = await page.request.post(`${BASE_URL}${API_ENDPOINT}`, {
+		const response = await page.request.post(API_ENDPOINT, {
 			data: { place_id: MERCHANT_ID }
 		});
 
@@ -89,7 +88,7 @@ test.describe('Boost Invoice Generation', () => {
 	});
 
 	test('validates invalid days parameter', async ({ page }) => {
-		const response = await page.request.post(`${BASE_URL}${API_ENDPOINT}`, {
+		const response = await page.request.post(API_ENDPOINT, {
 			data: {
 				place_id: MERCHANT_ID,
 				days: -1
