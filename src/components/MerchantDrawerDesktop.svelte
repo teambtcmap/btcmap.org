@@ -92,7 +92,9 @@
 		aria-modal="true"
 	>
 		<div
-			class="sticky top-0 z-10 flex items-center justify-between border-b border-gray-300 bg-white p-4 dark:border-white/95 dark:bg-dark"
+			class="sticky top-0 z-10 flex items-center bg-white dark:bg-dark {drawerView === 'details'
+				? 'justify-end p-2'
+				: 'justify-between border-b border-gray-300 p-4 dark:border-white/95'}"
 		>
 			{#if drawerView !== 'details'}
 				<!-- Back button for nested views -->
@@ -106,15 +108,13 @@
 				<span class="text-sm font-semibold text-primary capitalize dark:text-white"
 					>{drawerView}</span
 				>
-			{:else}
-				<span class="text-sm font-semibold text-primary dark:text-white">Merchant Details</span>
 			{/if}
 			<CloseButton on:click={closeDrawer} />
 		</div>
 
 		{#if !merchant && fetchingMerchant}
 			<!-- Loading skeleton -->
-			<div class="space-y-4 p-6">
+			<div class="space-y-4 px-6 pt-3 pb-6">
 				<!-- Title skeleton -->
 				<div class="h-7 w-3/4 animate-pulse rounded-lg bg-link/50"></div>
 				<!-- Address skeleton -->
@@ -134,7 +134,7 @@
 				<div class="h-32 animate-pulse rounded-lg bg-link/50"></div>
 			</div>
 		{:else if merchant}
-			<div class="p-6">
+			<div class="px-6 pt-3 pb-6">
 				{#if drawerView === 'boost'}
 					<BoostContent merchantId={merchant.id} onComplete={handleBoostComplete} />
 				{:else}
