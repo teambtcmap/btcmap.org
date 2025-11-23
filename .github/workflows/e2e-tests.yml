@@ -13,6 +13,8 @@ jobs:
     env:
       NODE_OPTIONS: --max-old-space-size=4096
     steps:
+      - uses: actions/checkout@v4
+
       - uses: ./.github/actions/setup
         with:
           needs-env: 'true'

@@ -1,6 +1,6 @@
 # Setup Composite Action
 
-Shared setup steps used across all CI workflows.
+Shared setup steps used across all CI workflows (after checkout).
 
 ## Inputs
 
@@ -9,16 +9,19 @@ Shared setup steps used across all CI workflows.
 
 ## What it does
 
-1. Checks out the repository
-2. Sets up Node.js with yarn caching
-3. Optionally creates .env file (if `needs-env: 'true'`)
-4. Installs dependencies with `yarn`
-5. Optionally runs `yarn svelte-kit sync` (if `needs-sync: 'true'`)
+1. Sets up Node.js with yarn caching
+2. Optionally creates .env file (if `needs-env: 'true'`)
+3. Installs dependencies with `yarn`
+4. Optionally runs `yarn svelte-kit sync` (if `needs-sync: 'true'`)
 
 ## Usage
 
+**Important:** You must checkout the repository before using this action.
+
 ```yaml
 steps:
+  - uses: actions/checkout@v4
+
   - uses: ./.github/actions/setup
     with:
       needs-env: 'true'

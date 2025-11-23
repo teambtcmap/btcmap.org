@@ -1,5 +1,5 @@
 name: 'Setup Node and Dependencies'
-description: 'Common setup steps for CI workflows'
+description: 'Common setup steps for CI workflows (after checkout)'
 inputs:
   needs-env:
     description: 'Create .env file from .env.example'
@@ -13,8 +13,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - uses: actions/checkout@v4
-
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
