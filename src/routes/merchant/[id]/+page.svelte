@@ -87,6 +87,7 @@
 
 	let leaflet: Leaflet;
 	let DomEvent: DomEventType;
+	let LocateControl: typeof import('leaflet.locatecontrol').LocateControl;
 
 	const initializeData = () => {
 		if (dataInitialized) return;
@@ -156,7 +157,7 @@
 			leaflet.control.layers(baseMaps).addTo(map);
 
 			// add locate button to map
-			geolocate(leaflet, map);
+			geolocate(leaflet, map, LocateControl);
 
 			// change default icons
 			changeDefaultIcons(true, leaflet, mapElement, DomEvent);
@@ -322,6 +323,7 @@
 			const deps = await loadMapDependencies();
 			leaflet = deps.leaflet;
 			DomEvent = deps.DomEvent;
+			LocateControl = deps.LocateControl;
 
 			initialRenderComplete = true;
 

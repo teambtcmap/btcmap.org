@@ -635,6 +635,7 @@
 			const deps = await loadMapDependencies();
 			leaflet = deps.leaflet;
 			DomEvent = deps.DomEvent;
+			const LocateControl = deps.LocateControl;
 
 			// add map and tiles
 			map = window.L.map(mapElement, { maxZoom: 19 });
@@ -768,7 +769,7 @@
 			scaleBars(leaflet, map);
 
 			// add locate button to map
-			geolocate(leaflet, map);
+			geolocate(leaflet, map, LocateControl);
 
 			// add new control container for search and boost
 			const customControls = leaflet.Control.extend({

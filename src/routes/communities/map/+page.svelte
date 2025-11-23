@@ -205,6 +205,7 @@
 			const deps = await loadMapDependencies();
 			leaflet = deps.leaflet;
 			DomEvent = deps.DomEvent;
+			const LocateControl = deps.LocateControl;
 
 			// add map and tiles
 			map = leaflet.map(mapElement);
@@ -246,7 +247,7 @@
 			scaleBars(leaflet, map);
 
 			// add locate button to map
-			geolocate(leaflet, map);
+			geolocate(leaflet, map, LocateControl);
 
 			// add home and marker buttons to map
 			homeMarkerButtons(leaflet, map, DomEvent);

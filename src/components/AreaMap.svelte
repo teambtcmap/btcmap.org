@@ -49,6 +49,7 @@
 
 	let leaflet: Leaflet;
 	let DomEvent: DomEventType;
+	let LocateControl: typeof import('leaflet.locatecontrol').LocateControl;
 
 	$: $theme !== undefined && mapLoaded && toggleMapButtons();
 
@@ -75,6 +76,7 @@
 			const deps = await loadMapDependencies();
 			leaflet = deps.leaflet;
 			DomEvent = deps.leaflet.DomEvent;
+			LocateControl = deps.LocateControl;
 
 			initialRenderComplete = true;
 		}
@@ -116,7 +118,7 @@
 			let upToDateLayer = leaflet.featureGroup.subGroup(markers);
 
 			// add locate button to map
-			geolocate(leaflet, map);
+			geolocate(leaflet, map, LocateControl);
 
 			// change default icons
 			changeDefaultIcons(true, leaflet, mapElement, DomEvent);

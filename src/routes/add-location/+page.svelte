@@ -85,6 +85,7 @@
 		const deps = await loadMapDependencies();
 		const leaflet = deps.leaflet;
 		const DomEvent = deps.DomEvent;
+		const LocateControl = deps.LocateControl;
 
 		// Create map instance
 		if (map) map.remove(); // Clean up any existing map
@@ -124,13 +125,9 @@
 			}
 		});
 
-		// Add map controls and settings - with safety check
+		// Add map controls and settings
 		try {
-			if (typeof leaflet.control.locate === 'function') {
-				geolocate(leaflet, map);
-			} else {
-				console.warn('Leaflet locate control not available');
-			}
+			geolocate(leaflet, map, LocateControl);
 		} catch (e) {
 			console.error('Error adding locate control:', e);
 		}
