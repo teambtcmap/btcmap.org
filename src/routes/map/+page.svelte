@@ -43,8 +43,8 @@
 	import OutClick from 'svelte-outclick';
 	import type { FeatureGroup } from 'leaflet';
 
-	let mapLoading = 0;
-	let mapLoadingStatus = '';
+	let mapLoading = 1;
+	let mapLoadingStatus = 'Loading map...';
 
 	// Combine map loading progress with places loading progress
 	$: {
