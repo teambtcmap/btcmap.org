@@ -319,13 +319,13 @@
 			aria-expanded={expanded}
 		>
 			<!-- Drag handle -->
-			<div class="mx-auto mt-4 h-1.5 w-12 rounded-full bg-gray-300 dark:bg-white/30"></div>
+			<div class="mx-auto mt-2 h-1.5 w-12 rounded-full bg-gray-300 dark:bg-white/30"></div>
 
 			<!-- Header -->
 			<div
-				class="flex items-center bg-white px-4 py-3 dark:bg-dark {drawerView === 'details'
-					? 'justify-end'
-					: 'justify-between border-b border-gray-300 dark:border-white/95'}"
+				class="flex items-center bg-white px-4 dark:bg-dark {drawerView === 'details'
+					? 'justify-end py-1'
+					: 'justify-between border-b border-gray-300 py-3 dark:border-white/95'}"
 			>
 				{#if drawerView !== 'details'}
 					<button
@@ -360,7 +360,7 @@
 		<!-- Scrollable content area -->
 		<div class="min-h-0 flex-1 overflow-y-auto">
 			{#if !merchant && fetchingMerchant}
-				<div class="space-y-4 p-4">
+				<div class="space-y-4 px-4 pt-2 pb-4">
 					<div class="h-6 w-3/4 animate-pulse rounded-lg bg-link/50"></div>
 					<div class="h-4 w-1/2 animate-pulse rounded bg-link/50"></div>
 					<div class="flex space-x-2">
@@ -370,7 +370,7 @@
 				</div>
 			{:else if merchant}
 				{#if !expanded}
-					<div class="p-4">
+					<div class="px-4 pt-2 pb-4">
 						<MerchantPeekContentMobile
 							{merchant}
 							{isUpToDate}
@@ -379,7 +379,7 @@
 						/>
 					</div>
 				{:else}
-					<div class="p-6">
+					<div class="px-6 pt-3 pb-6">
 						{#if drawerView === 'boost'}
 							<BoostContent merchantId={merchant.id} onComplete={handleBoostComplete} />
 						{:else}
