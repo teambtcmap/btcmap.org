@@ -92,8 +92,9 @@
 		aria-modal="true"
 	>
 		<div
-			class="sticky top-0 z-10 flex items-center justify-end border-b border-gray-300 bg-white p-4 dark:border-white/95 dark:bg-dark"
-			class:justify-between={drawerView !== 'details'}
+			class="sticky top-0 z-10 flex items-center bg-white p-4 dark:bg-dark {drawerView === 'details'
+				? 'justify-end'
+				: 'justify-between border-b border-gray-300 dark:border-white/95'}"
 		>
 			{#if drawerView !== 'details'}
 				<!-- Back button for nested views -->

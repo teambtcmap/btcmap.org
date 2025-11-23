@@ -323,8 +323,9 @@
 
 			<!-- Header -->
 			<div
-				class="flex items-center justify-end border-b border-gray-300 bg-white px-4 py-3 dark:border-white/95 dark:bg-dark"
-				class:justify-between={drawerView !== 'details'}
+				class="flex items-center bg-white px-4 py-3 dark:bg-dark {drawerView === 'details'
+					? 'justify-end'
+					: 'justify-between border-b border-gray-300 dark:border-white/95'}"
 			>
 				{#if drawerView !== 'details'}
 					<button
