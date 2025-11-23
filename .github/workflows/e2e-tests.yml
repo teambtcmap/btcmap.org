@@ -1,26 +1,25 @@
-name: Playwright Tests
+name: E2E Tests
 
 on:
   push:
     branches: [main]
   pull_request:
-    # Run on PRs targeting any branch (including sub-PRs and feature branch PRs)
     branches: ['**']
 
 jobs:
-  test:
+  e2e-tests:
     timeout-minutes: 20
     runs-on: ubuntu-latest
+    env:
+      NODE_OPTIONS: --max-old-space-size=4096
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-          cache: 'yarn'
-      - name: Install dependencies
-        run: npm install -g yarn && yarn
 
-      # Cache Playwright browsers (just Chromium)
+      - uses: ./.github/actions/setup
+        with:
+          needs-env: 'true'
+          needs-sync: 'false'
+
       - name: Cache Playwright browsers
         id: playwright-cache
         uses: actions/cache@v3
@@ -30,18 +29,17 @@ jobs:
           restore-keys: |
             playwright-chromium-${{ runner.os }}-
 
-      # Only install Chromium if cache missed
       - name: Install Playwright Browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: yarn playwright install --with-deps chromium
 
-      # If cache hit, just install dependencies without browsers
       - name: Install Playwright Dependencies
         if: steps.playwright-cache.outputs.cache-hit == 'true'
         run: yarn playwright install-deps
 
       - name: Run Playwright tests
         run: yarn playwright test
+
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:

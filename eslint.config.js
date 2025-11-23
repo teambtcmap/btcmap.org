@@ -18,6 +18,16 @@ export default tseslint.config(
 		}
 	},
 	{
+		name: 'project/typescript-config',
+		files: ['**/*.ts'],
+		rules: {
+			'@typescript-eslint/no-unused-vars': [
+				'error',
+				{ argsIgnorePattern: '^_', varsIgnorePattern: '^_' }
+			]
+		}
+	},
+	{
 		name: 'project/svelte-config',
 		files: ['**/*.svelte'],
 		languageOptions: {

@@ -11,6 +11,7 @@
 		terminate as terminateWorker
 	} from '$lib/workers/worker-manager';
 	import type { ProcessedPlace } from '$lib/workers/map-worker';
+	import { loadMapDependencies } from '$lib/map/imports';
 	import {
 		attribution,
 		changeDefaultIcons,
@@ -109,6 +110,7 @@
 	}
 
 	let leaflet: Leaflet;
+	let DomEvent: typeof import('leaflet/src/dom/DomEvent');
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	let controlLayers: Control.Layers;
 
@@ -630,16 +632,10 @@
 		if (browser) {
 			const theme = detectTheme();
 
-			//import packages
-			leaflet = await import('leaflet');
-			const DomEvent = leaflet.DomEvent;
-			/* eslint-disable @typescript-eslint/no-unused-vars */
-			const maplibreGl = await import('maplibre-gl');
-			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
-			const leafletLocateControl = await import('leaflet.locatecontrol');
-			const leafletMarkerCluster = await import('leaflet.markercluster');
-			const leafletFeaturegroupSubgroup = await import('leaflet.featuregroup.subgroup');
-			/* eslint-enable @typescript-eslint/no-unused-vars */
+			const deps = await loadMapDependencies();
+			leaflet = deps.leaflet;
+			DomEvent = deps.DomEvent;
+			const LocateControl = deps.LocateControl;
 
 			// add map and tiles
 			map = window.L.map(mapElement, { maxZoom: 19 });
@@ -773,7 +769,7 @@
 			scaleBars(leaflet, map);
 
 			// add locate button to map
-			geolocate(leaflet, map);
+			geolocate(leaflet, map, LocateControl);
 
 			// add new control container for search and boost
 			const customControls = leaflet.Control.extend({

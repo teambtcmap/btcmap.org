@@ -21,6 +21,7 @@
 	import TaggingIssues from '$components/TaggingIssues.svelte';
 	import TopButton from '$components/TopButton.svelte';
 	import { updateSinglePlace } from '$lib/sync/places';
+	import { loadMapDependencies } from '$lib/map/imports';
 	import {
 		attribution,
 		calcVerifiedDate,
@@ -86,6 +87,7 @@
 
 	let leaflet: Leaflet;
 	let DomEvent: DomEventType;
+	let LocateControl: typeof import('leaflet.locatecontrol').LocateControl;
 
 	const initializeData = () => {
 		if (dataInitialized) return;
@@ -155,7 +157,7 @@
 			leaflet.control.layers(baseMaps).addTo(map);
 
 			// add locate button to map
-			geolocate(leaflet, map);
+			geolocate(leaflet, map, LocateControl);
 
 			// change default icons
 			changeDefaultIcons(true, leaflet, mapElement, DomEvent);
@@ -318,14 +320,10 @@
 
 	onMount(async () => {
 		if (browser) {
-			//import packages
-			leaflet = await import('leaflet');
-			DomEvent = await import('leaflet/src/dom/DomEvent');
-			/* eslint-disable @typescript-eslint/no-unused-vars */
-			const maplibreGl = await import('maplibre-gl');
-			const maplibreGlLeaflet = await import('@maplibre/maplibre-gl-leaflet');
-			const leafletLocateControl = await import('leaflet.locatecontrol');
-			/* eslint-enable @typescript-eslint/no-unused-vars */
+			const deps = await loadMapDependencies();
+			leaflet = deps.leaflet;
+			DomEvent = deps.DomEvent;
+			LocateControl = deps.LocateControl;
 
 			initialRenderComplete = true;
 

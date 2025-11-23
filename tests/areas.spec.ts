@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Areas', () => {
 	test('opens country area', async ({ page }) => {
-		await page.goto('http://127.0.0.1:5173');
+		await page.goto('');
 
 		const heading = page.getByRole('heading', {
 			name: 'Find places to spend sats wherever you are.'
@@ -40,7 +40,7 @@ test.describe('Areas', () => {
 	});
 
 	test('navigates through communities structure', async ({ page }) => {
-		await page.goto('http://127.0.0.1:5173');
+		await page.goto('');
 
 		const heading = page.getByRole('heading', {
 			name: 'Find places to spend sats wherever you are.'
@@ -78,7 +78,7 @@ test.describe('Areas', () => {
 	});
 
 	test('community leaderboard structure loads', async ({ page }) => {
-		await page.goto('http://127.0.0.1:5173');
+		await page.goto('');
 
 		const heading = page.getByRole('heading', {
 			name: 'Find places to spend sats wherever you are.'

@@ -319,10 +319,14 @@ export const changeDefaultIcons = (
 	}
 };
 
-export const geolocate = (L: Leaflet, map: Map) => {
+export const geolocate = (
+	L: Leaflet,
+	map: Map,
+	LocateControl: typeof import('leaflet.locatecontrol').LocateControl
+) => {
 	const theme = detectTheme();
 
-	L.control.locate({ position: 'topleft' }).addTo(map);
+	new LocateControl({ position: 'topleft' }).addTo(map);
 
 	const newLocateIcon = L.DomUtil.create('img');
 	newLocateIcon.src = theme === 'dark' ? '/icons/locate-white.svg' : '/icons/locate.svg';
