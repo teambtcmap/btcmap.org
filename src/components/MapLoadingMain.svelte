@@ -33,7 +33,7 @@
 
 		<div class="mx-auto w-[200px] rounded-full bg-link/25">
 			<div
-				class="h-2 rounded-full bg-link transition-all duration-500"
+				class="h-2 min-w-2 rounded-full bg-link transition-all duration-500"
 				style:width={displayProgress.toString() + '%'}
 			/>
 		</div>
