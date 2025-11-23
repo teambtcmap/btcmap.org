@@ -11,6 +11,7 @@
 	export let isBoosted: boolean;
 	export let boostLoading: boolean;
 	export let onBoostClick: () => void;
+	export let isLoading: boolean = false;
 </script>
 
 <div class="space-y-4">
@@ -22,12 +23,16 @@
 		>
 			{merchant.name}
 		</a>
+	{:else if isLoading}
+		<div class="h-7 w-3/4 animate-pulse rounded-lg bg-link/50"></div>
 	{/if}
 
 	{#if merchant.address}
 		<p class="text-body dark:text-white" title="Address">
 			{merchant.address}
 		</p>
+	{:else if isLoading}
+		<div class="h-5 w-1/2 animate-pulse rounded bg-link/50"></div>
 	{/if}
 
 	{#if merchant.opening_hours}
@@ -100,6 +105,15 @@
 					/>
 				</div>
 			</div>
+		{:else if isLoading}
+			<div class="mb-4">
+				<div class="h-3 w-24 animate-pulse rounded bg-link/50"></div>
+				<div class="mt-1 flex space-x-2">
+					<div class="h-8 w-16 animate-pulse rounded bg-link/50"></div>
+					<div class="h-8 w-16 animate-pulse rounded bg-link/50"></div>
+					<div class="h-8 w-16 animate-pulse rounded bg-link/50"></div>
+				</div>
+			</div>
 		{/if}
 
 		<div class="mb-4">
@@ -107,8 +121,8 @@
 				class="text-mapLabel block text-xs dark:text-white/70"
 				title="Completed by BTC Map community members">Last Surveyed</span
 			>
-			<span class="block text-body dark:text-white">
-				{#if merchant.verified_at}
+			{#if merchant.verified_at}
+				<span class="block text-body dark:text-white">
 					{formatVerifiedHuman(merchant.verified_at)}
 					{#if isUpToDate}
 						<Icon
@@ -127,10 +141,12 @@
 							type="popup"
 						/>
 					{/if}
-				{:else}
-					<span title="Not verified">---</span>
-				{/if}
-			</span>
+				</span>
+			{:else if isLoading}
+				<div class="mt-1 h-5 w-32 animate-pulse rounded bg-link/50"></div>
+			{:else}
+				<span class="block text-body dark:text-white" title="Not verified">---</span>
+			{/if}
 			<!-- eslint-disable svelte/no-navigation-without-resolve -->
 			<a
 				href={`${resolve('/verify-location')}?id=${merchant.id}`}
