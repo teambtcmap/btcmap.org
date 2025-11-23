@@ -144,6 +144,7 @@
 						{isBoosted}
 						{boostLoading}
 						onBoostClick={handleBoost}
+						isLoading={fetchingMerchant}
 					/>
 				{/if}
 			</div>
