@@ -85,8 +85,8 @@ export const elementsSync = async () => {
 		// clear old tables if present
 		clearTables(['elements', 'elements_v2', 'elements_v3', 'places_v4']);
 
-		// Initialize progress
-		placesLoadingProgress.set(0);
+		// Initialize progress to 1 to show loader immediately
+		placesLoadingProgress.set(1);
 		placesLoadingStatus.set('Initializing...');
 
 		// get places from local storage
