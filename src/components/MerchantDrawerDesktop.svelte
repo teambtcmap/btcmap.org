@@ -92,7 +92,8 @@
 		aria-modal="true"
 	>
 		<div
-			class="sticky top-0 z-10 flex items-center justify-between border-b border-gray-300 bg-white p-4 dark:border-white/95 dark:bg-dark"
+			class="sticky top-0 z-10 flex items-center justify-end border-b border-gray-300 bg-white p-4 dark:border-white/95 dark:bg-dark"
+			class:justify-between={drawerView !== 'details'}
 		>
 			{#if drawerView !== 'details'}
 				<!-- Back button for nested views -->
@@ -106,8 +107,6 @@
 				<span class="text-sm font-semibold text-primary capitalize dark:text-white"
 					>{drawerView}</span
 				>
-			{:else}
-				<span class="text-sm font-semibold text-primary dark:text-white">Merchant Details</span>
 			{/if}
 			<CloseButton on:click={closeDrawer} />
 		</div>

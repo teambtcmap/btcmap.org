@@ -323,7 +323,8 @@
 
 			<!-- Header -->
 			<div
-				class="flex items-center justify-between border-b border-gray-300 bg-white px-4 py-3 dark:border-white/95 dark:bg-dark"
+				class="flex items-center justify-end border-b border-gray-300 bg-white px-4 py-3 dark:border-white/95 dark:bg-dark"
+				class:justify-between={drawerView !== 'details'}
 			>
 				{#if drawerView !== 'details'}
 					<button
@@ -336,11 +337,9 @@
 					<span class="text-sm font-semibold text-primary capitalize dark:text-white"
 						>{drawerView}</span
 					>
-				{:else}
-					<span class="text-sm font-semibold text-primary dark:text-white">Merchant Details</span>
 				{/if}
 
-				{#if expanded}
+				{#if expanded && drawerView === 'details'}
 					<button
 						on:click={() => {
 							expanded = false;
@@ -351,7 +350,7 @@
 					>
 						<Icon w="20" h="20" icon="keyboard_arrow_down" type="material" />
 					</button>
-				{:else}
+				{:else if drawerView === 'details'}
 					<div class="w-9"></div>
 				{/if}
 			</div>
