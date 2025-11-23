@@ -230,4 +230,98 @@ test.describe('Map Drawer', () => {
 		const trimmedCount = countText?.trim() || '';
 		expect(trimmedCount).toMatch(/^\d+$/);
 	});
+
+	test('drawer opens from URL hash on initial page load (desktop)', async ({ page }) => {
+		// Navigate directly to map with merchant hash parameter
+		await page.goto('/map#15/53.55573/10.00825&merchant=6556', { waitUntil: 'load' });
+		await expect(page).toHaveTitle(/BTC Map/);
+
+		// Wait for map to load
+		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
+		await expect(zoomInButton).toBeVisible();
+
+		// Wait for drawer to open automatically
+		const drawer = page.locator('[role="dialog"]');
+		await expect(drawer).toBeVisible({ timeout: 15000 });
+
+		// Wait for merchant data to load
+		try {
+			await page.waitForResponse(
+				(response) =>
+					response.url().includes('api.btcmap.org/v4/places/6556') && response.status() === 200,
+				{ timeout: 10000 }
+			);
+		} catch (error) {
+			console.error('API response wait failed:', error);
+		}
+
+		// Verify "View Full Details" button appears (confirms drawer has content)
+		const viewDetailsButton = page.locator('a:has-text("View Full Details")');
+		await expect(viewDetailsButton).toBeVisible({ timeout: 10000 });
+
+		// Verify the correct merchant is displayed
+		const merchantHref = await viewDetailsButton.getAttribute('href');
+		expect(merchantHref).toContain('/merchant/6556');
+	});
+
+	test('drawer opens from URL hash on initial page load (mobile)', async ({ page }) => {
+		// Set mobile viewport
+		await page.setViewportSize({ width: 375, height: 667 });
+
+		// Navigate directly to map with merchant hash parameter
+		await page.goto('/map#15/53.55573/10.00825&merchant=6556', { waitUntil: 'load' });
+		await expect(page).toHaveTitle(/BTC Map/);
+
+		// Wait for map to load
+		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
+		await expect(zoomInButton).toBeVisible();
+
+		// Wait for mobile drawer to open (appears at bottom)
+		const drawer = page.locator('[role="dialog"]');
+		await expect(drawer).toBeVisible({ timeout: 15000 });
+
+		// Wait for merchant data
+		try {
+			await page.waitForResponse(
+				(response) =>
+					response.url().includes('api.btcmap.org/v4/places/6556') && response.status() === 200,
+				{ timeout: 10000 }
+			);
+		} catch (error) {
+			console.error('API response wait failed:', error);
+		}
+
+		// Mobile drawer should show merchant content
+		// Check for merchant name or details to be visible
+		await page.waitForTimeout(2000);
+
+		// Verify drawer has content (merchant should be loaded)
+		const drawerContent = drawer.locator('h3, a');
+		await expect(drawerContent.first()).toBeVisible({ timeout: 10000 });
+	});
+
+	test('boost view opens from hash parameter', async ({ page }) => {
+		// Navigate with boost view parameter
+		await page.goto('/map#15/53.55573/10.00825&merchant=6556&view=boost', { waitUntil: 'load' });
+		await expect(page).toHaveTitle(/BTC Map/);
+
+		// Wait for map to load
+		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
+		await expect(zoomInButton).toBeVisible();
+
+		// Wait for drawer to open
+		const drawer = page.locator('[role="dialog"]');
+		await expect(drawer).toBeVisible({ timeout: 15000 });
+
+		// Wait for data
+		await page.waitForTimeout(2000);
+
+		// Verify "Back" button is visible (indicates we're in a nested view like boost)
+		const backButton = page.getByRole('button', { name: /back/i });
+		await expect(backButton).toBeVisible({ timeout: 10000 });
+
+		// Verify "Boost" text appears in header or content
+		const boostText = page.locator('span:has-text("boost"), span:has-text("Boost")');
+		await expect(boostText.first()).toBeVisible({ timeout: 10000 });
+	});
 });
