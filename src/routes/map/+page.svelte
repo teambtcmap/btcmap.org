@@ -945,6 +945,9 @@
 
 			// Watch for hash changes to clear marker selection when drawer closes
 			window.addEventListener('hashchange', handleHashChange);
+
+			// Sync drawer state from URL hash on initial page load
+			merchantDrawer.syncFromHash();
 		}
 	});
 
