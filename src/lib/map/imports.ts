@@ -8,13 +8,16 @@ export async function loadMapDependencies() {
 	]);
 
 	// Plugins depend on window.L - load after leaflet
-	const [, , { LocateControl }] = await Promise.all([
+	// Most imports are for side effects only (setting up window.L plugins)
+	const [, , locateControlModule] = await Promise.all([
 		import('maplibre-gl'),
 		import('@maplibre/maplibre-gl-leaflet'),
 		import('leaflet.locatecontrol'),
 		import('leaflet.markercluster'),
 		import('leaflet.featuregroup.subgroup')
 	]);
+
+	const { LocateControl } = locateControlModule;
 
 	return { leaflet, DomEvent, LocateControl };
 }
