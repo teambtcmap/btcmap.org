@@ -1,9 +1,6 @@
 import { error } from '@sveltejs/kit';
 import axios from 'axios';
-import axiosRetry from 'axios-retry';
 import type { PageServerLoad } from './$types';
-
-axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 export interface VerifyLocationPageData {
 	id: string;
