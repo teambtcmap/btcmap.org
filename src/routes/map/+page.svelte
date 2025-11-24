@@ -942,6 +942,7 @@
 			// disable map events for search controls
 			if (searchContainer) {
 				DomEvent.disableClickPropagation(searchContainer as HTMLElement);
+				DomEvent.disableScrollPropagation(searchContainer as HTMLElement);
 			}
 			const searchToggle = document.querySelector('.leaflet-control-search-toggle');
 			if (searchToggle) {
@@ -1059,57 +1060,67 @@
 		</div>
 
 		{#if isDropdownOpen}
-			<ul
-				class="hide-scroll mt-0.5 max-h-[204px] w-full overflow-y-scroll rounded-lg bg-white drop-shadow-[0px_2px_6px_rgba(0,0,0,0.15)] dark:bg-dark"
+			<div
+				class="mt-0.5 w-full rounded-lg bg-white drop-shadow-[0px_2px_6px_rgba(0,0,0,0.15)] dark:bg-dark"
 			>
-				{#if searchStatus}
-					<li role="status" aria-live="polite" class="w-full px-4 py-6">
-						<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
-					</li>
-				{:else if searchResults.length > 0}
-					{#each searchResults as result (result.id)}
-						<li>
-							<button
-								on:click={() => searchSelect(result)}
-								class="hover:bg-searchHover block w-full cursor-pointer border-b border-gray-200 px-4 py-2 text-left dark:border-white/10 dark:hover:bg-white/[0.15]"
-							>
-								<div class="flex items-start space-x-2">
-									<Icon
-										w="20"
-										h="20"
-										style="mt-1 text-mapButton dark:text-white opacity-50"
-										icon="currency_bitcoin"
-										type="material"
-									/>
-
-									<div class="max-w-[280px]">
-										<p
-											class="text-mapButton text-sm dark:text-white {result.name?.match(
-												'([^ ]{21})'
-											)
-												? 'break-all'
-												: ''}"
-										>
-											{result.name || 'Unknown'}
-										</p>
-										<p class="text-searchSubtext text-xs dark:text-white/70">
-											{#if result.address}
-												{result.address}
-											{:else}
-												{result.type === 'element' ? 'Bitcoin merchant' : result.type}
-											{/if}
-										</p>
-									</div>
-								</div>
-							</button>
-						</li>
-					{/each}
-				{:else}
-					<li class="text-searchSubtext w-full px-4 py-2 text-center text-sm dark:text-white/70">
-						No results found.
-					</li>
+				{#if !searchStatus && searchResults.length > 0}
+					<div
+						class="border-b border-gray-200 px-4 py-2 text-xs text-gray-600 dark:border-white/10 dark:text-white/70"
+					>
+						{searchResults.length} result{searchResults.length === 1 ? '' : 's'}
+					</div>
 				{/if}
-			</ul>
+
+				<ul class="max-h-[204px] w-full overflow-y-scroll">
+					{#if searchStatus}
+						<li role="status" aria-live="polite" class="w-full px-4 py-6">
+							<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
+						</li>
+					{:else if searchResults.length > 0}
+						{#each searchResults as result (result.id)}
+							<li>
+								<button
+									on:click={() => searchSelect(result)}
+									class="hover:bg-searchHover block w-full cursor-pointer border-b border-gray-200 px-4 py-2 text-left dark:border-white/10 dark:hover:bg-white/[0.15]"
+								>
+									<div class="flex items-start space-x-2">
+										<Icon
+											w="20"
+											h="20"
+											style="mt-1 text-mapButton dark:text-white opacity-50"
+											icon="currency_bitcoin"
+											type="material"
+										/>
+
+										<div class="max-w-[280px]">
+											<p
+												class="text-mapButton text-sm dark:text-white {result.name?.match(
+													'([^ ]{21})'
+												)
+													? 'break-all'
+													: ''}"
+											>
+												{result.name || 'Unknown'}
+											</p>
+											<p class="text-searchSubtext text-xs dark:text-white/70">
+												{#if result.address}
+													{result.address}
+												{:else}
+													{result.type === 'element' ? 'Bitcoin merchant' : result.type}
+												{/if}
+											</p>
+										</div>
+									</div>
+								</button>
+							</li>
+						{/each}
+					{:else}
+						<li class="text-searchSubtext w-full px-4 py-2 text-center text-sm dark:text-white/70">
+							No results found.
+						</li>
+					{/if}
+				</ul>
+			</div>
 		{/if}
 	</div>
 
