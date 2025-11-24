@@ -39,7 +39,7 @@
 		"leaflet.locatecontrol": "0.85.1",
 		"leaflet.markercluster": "^1.5.3",
 		"localforage": "^1.10.0",
-		"maplibre-gl": "^4.7.1",
+		"maplibre-gl": "^5.13.0",
 		"marked": "^17.0.1",
 		"qrcode": "^1.5.4",
 		"svelte-eslint-parser": "^1.4.0",
