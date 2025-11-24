@@ -1023,7 +1023,7 @@
 				id="search-input"
 				type="search"
 				aria-label="Search for Bitcoin merchants"
-				class="text-mapButton w-full rounded-lg bg-white px-5 py-2.5 text-[16px] drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:outline-hidden focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] dark:border dark:bg-dark dark:text-white"
+				class="text-mapButton w-full rounded-lg bg-white px-5 py-2.5 text-[16px] drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:outline-hidden focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] dark:border dark:bg-dark dark:text-white [&::-webkit-search-cancel-button]:hidden"
 				placeholder="Search..."
 				on:keyup={searchDebounce}
 				on:keydown={handleSearchKeyDown}
@@ -1071,18 +1071,18 @@
 						<li>
 							<button
 								on:click={() => searchSelect(result)}
-								class="hover:bg-searchHover block w-full cursor-pointer px-4 py-2 text-left dark:border-b dark:hover:bg-white/[0.15]"
+								class="hover:bg-searchHover block w-full cursor-pointer border-b border-gray-200 px-4 py-2 text-left dark:border-white/10 dark:hover:bg-white/[0.15]"
 							>
-								<div class="items-start md:flex md:space-x-2">
+								<div class="flex items-start space-x-2">
 									<Icon
 										w="20"
 										h="20"
-										style="mx-auto md:mx-0 mt-1 text-mapButton dark:text-white opacity-50"
+										style="mt-1 text-mapButton dark:text-white opacity-50"
 										icon="currency_bitcoin"
 										type="material"
 									/>
 
-									<div class="mx-auto md:max-w-[280px]">
+									<div class="max-w-[280px]">
 										<p
 											class="text-mapButton text-sm dark:text-white {result.name?.match(
 												'([^ ]{21})'
