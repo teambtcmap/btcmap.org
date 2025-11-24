@@ -213,7 +213,8 @@
 				type: 'element' as const,
 				id: place.id,
 				name: place.name || 'Unknown',
-				address: place.address
+				address: place.address,
+				icon: place.icon
 			}));
 		} catch (error) {
 			console.error('Search error:', error);
@@ -1088,7 +1089,9 @@
 											w="20"
 											h="20"
 											style="mt-1 text-mapButton dark:text-white opacity-50"
-											icon="currency_bitcoin"
+											icon={result.icon && result.icon !== 'question_mark'
+												? result.icon
+												: 'currency_bitcoin'}
 											type="material"
 										/>
 
@@ -1102,13 +1105,11 @@
 											>
 												{result.name || 'Unknown'}
 											</p>
-											<p class="text-searchSubtext text-xs dark:text-white/70">
-												{#if result.address}
+											{#if result.address}
+												<p class="text-searchSubtext text-xs dark:text-white/70">
 													{result.address}
-												{:else}
-													{result.type === 'element' ? 'Bitcoin merchant' : result.type}
-												{/if}
-											</p>
+												</p>
+											{/if}
 										</div>
 									</div>
 								</button>

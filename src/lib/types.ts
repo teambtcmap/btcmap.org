@@ -267,6 +267,7 @@ export interface SearchItem {
 	id: number;
 	name: string | null;
 	address?: string;
+	icon?: string;
 }
 
 export type PayMerchant = { type: string; url?: string; username?: string } | undefined;
