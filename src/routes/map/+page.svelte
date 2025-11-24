@@ -209,7 +209,8 @@
 			searchResults = places.map((place) => ({
 				type: 'element' as const,
 				id: place.id,
-				name: place.name || 'Unknown'
+				name: place.name || 'Unknown',
+				address: place.address
 			}));
 		} catch (error) {
 			console.error('Search error:', error);
@@ -1065,7 +1066,11 @@
 										{result.name || 'Unknown'}
 									</p>
 									<p class="text-searchSubtext text-xs dark:text-white/70">
-										{result.type === 'element' ? 'Bitcoin merchant' : result.type}
+										{#if result.address}
+											{result.address}
+										{:else}
+											{result.type === 'element' ? 'Bitcoin merchant' : result.type}
+										{/if}
 									</p>
 								</div>
 							</div>
