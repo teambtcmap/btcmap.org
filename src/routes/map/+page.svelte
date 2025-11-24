@@ -996,7 +996,7 @@
 			<input
 				id="search-input"
 				type="text"
-				class="text-mapButton w-full rounded-lg px-5 py-2.5 text-[16px] drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:outline-hidden focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] dark:border dark:bg-dark dark:text-white"
+				class="text-mapButton w-full rounded-lg bg-white px-5 py-2.5 text-[16px] drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:outline-hidden focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] dark:border dark:bg-dark dark:text-white"
 				placeholder="Search..."
 				on:keyup={searchDebounce}
 				on:keydown={(e) => {
