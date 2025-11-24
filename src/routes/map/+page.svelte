@@ -267,9 +267,10 @@
 				break;
 
 			case 'Enter':
-				if (focusedIndex >= 0 && searchResults[focusedIndex]) {
+				if (searchResults.length > 0) {
 					e.preventDefault();
-					searchSelect(searchResults[focusedIndex]);
+					const resultIndex = focusedIndex >= 0 ? focusedIndex : 0;
+					searchSelect(searchResults[resultIndex]);
 				}
 				break;
 
