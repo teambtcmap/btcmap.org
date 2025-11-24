@@ -41,7 +41,6 @@
 	import type { Control, LatLng, LatLngBounds, Map, Marker, MarkerClusterGroup } from 'leaflet';
 	import localforage from 'localforage';
 	import { onDestroy, onMount, tick } from 'svelte';
-	import OutClick from 'svelte-outclick';
 	import type { FeatureGroup } from 'leaflet';
 
 	let mapLoading = 1;
@@ -180,22 +179,29 @@
 		}
 	};
 
-	let customSearchBar: HTMLDivElement;
+	let searchContainer: HTMLDivElement;
 	let clearSearchButton: HTMLButtonElement;
 	let showSearch = false;
 	let search: string;
 	let searchStatus: boolean;
 	let searchResults: SearchItem[] = [];
+	let isDropdownOpen = false;
+	let focusedIndex = -1;
+	let focusedOptionId: string | null = null;
 
 	// API-based search functions using documented places search API
 	const apiSearch = async () => {
 		if (search.length < 3) {
 			searchResults = [];
 			searchStatus = false;
+			isDropdownOpen = false;
+			focusedIndex = -1;
+			focusedOptionId = null;
 			return;
 		}
 
 		searchStatus = true;
+		isDropdownOpen = true;
 
 		try {
 			const response = await fetch(`/api/search/places?name=${encodeURIComponent(search)}`);
@@ -227,6 +233,84 @@
 	const clearSearch = () => {
 		search = '';
 		searchResults = [];
+		isDropdownOpen = false;
+		focusedIndex = -1;
+		focusedOptionId = null;
+	};
+
+	const updateActivedescendant = () => {
+		focusedOptionId =
+			focusedIndex >= 0 && searchResults[focusedIndex]
+				? `option-${searchResults[focusedIndex].id}`
+				: null;
+	};
+
+	const handleSearchKeyDown = (e: KeyboardEvent) => {
+		switch (e.key) {
+			case 'ArrowDown':
+				e.preventDefault();
+				if (!isDropdownOpen && search.length >= 3) {
+					isDropdownOpen = true;
+				}
+				if (searchResults.length > 0) {
+					focusedIndex = Math.min(focusedIndex + 1, searchResults.length - 1);
+					updateActivedescendant();
+				}
+				break;
+
+			case 'ArrowUp':
+				e.preventDefault();
+				if (searchResults.length > 0) {
+					focusedIndex = Math.max(focusedIndex - 1, -1);
+					updateActivedescendant();
+				}
+				break;
+
+			case 'Enter':
+				if (focusedIndex >= 0 && searchResults[focusedIndex]) {
+					e.preventDefault();
+					searchSelect(searchResults[focusedIndex]);
+				}
+				break;
+
+			case 'Escape':
+				e.preventDefault();
+				if (isDropdownOpen) {
+					isDropdownOpen = false;
+					focusedIndex = -1;
+					focusedOptionId = null;
+				} else {
+					clearSearch();
+				}
+				break;
+
+			case 'Home':
+				if (isDropdownOpen && searchResults.length > 0) {
+					e.preventDefault();
+					focusedIndex = 0;
+					updateActivedescendant();
+				}
+				break;
+
+			case 'End':
+				if (isDropdownOpen && searchResults.length > 0) {
+					e.preventDefault();
+					focusedIndex = searchResults.length - 1;
+					updateActivedescendant();
+				}
+				break;
+		}
+	};
+
+	const handleSearchFocusOut = (_e: FocusEvent) => {
+		// Small timeout to allow click events to fire first
+		setTimeout(() => {
+			if (searchContainer && !searchContainer.contains(document.activeElement)) {
+				isDropdownOpen = false;
+				focusedIndex = -1;
+				focusedOptionId = null;
+			}
+		}, 200);
 	};
 
 	// Helper function to validate coordinate values
@@ -907,7 +991,7 @@
 					const searchBarDiv = leaflet.DomUtil.create('div');
 					searchBarDiv.classList.add('leaflet-control', 'search-bar-div');
 
-					searchBarDiv.append(customSearchBar);
+					searchBarDiv.append(searchContainer);
 
 					return searchBarDiv;
 				}
@@ -917,8 +1001,8 @@
 			new leaflet.Control.Search().addTo(map);
 
 			// disable map events for search controls
-			if (customSearchBar) {
-				DomEvent.disableClickPropagation(customSearchBar as HTMLElement);
+			if (searchContainer) {
+				DomEvent.disableClickPropagation(searchContainer as HTMLElement);
 			}
 			const searchToggle = document.querySelector('.leaflet-control-search-toggle');
 			if (searchToggle) {
@@ -991,27 +1075,32 @@
 	<!-- Search UI - re-enabled with API-based search -->
 	<div
 		id="search-div"
-		bind:this={customSearchBar}
+		bind:this={searchContainer}
 		class="absolute top-0 left-[60px] w-[50vw] md:w-[350px] {showSearch ? 'block' : 'hidden'}"
+		on:focusout={handleSearchFocusOut}
 	>
 		<div class="relative">
 			<input
 				id="search-input"
 				type="text"
+				role="combobox"
+				aria-autocomplete="list"
+				aria-expanded={isDropdownOpen}
+				aria-controls="search-listbox"
+				aria-activedescendant={focusedOptionId || undefined}
+				aria-label="Search for Bitcoin merchants"
 				class="text-mapButton w-full rounded-lg bg-white px-5 py-2.5 text-[16px] drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:outline-hidden focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] dark:border dark:bg-dark dark:text-white"
 				placeholder="Search..."
 				on:keyup={searchDebounce}
-				on:keydown={(e) => {
-					searchStatus = true;
-					if (e.key === 'Escape') {
-						clearSearch();
-					}
-				}}
+				on:keydown={handleSearchKeyDown}
 				bind:value={search}
 				disabled={!mapLoaded}
 			/>
 
 			<button
+				type="button"
+				tabindex="-1"
+				aria-label="Clear search"
 				bind:this={clearSearchButton}
 				on:click={clearSearch}
 				class="text-mapButton absolute top-[10px] right-[8px] bg-white hover:text-black dark:bg-dark dark:text-white dark:hover:text-white/80 {search
@@ -1036,61 +1125,72 @@
 			</button>
 		</div>
 
-		{#if search && search.length > 2}
-			<OutClick
-				excludeQuerySelectorAll="#search-button, #search-div, #search-input"
-				on:outclick={clearSearch}
+		{#if isDropdownOpen}
+			<ul
+				id="search-listbox"
+				role="listbox"
+				aria-label="Search results"
+				class="hide-scroll mt-0.5 max-h-[204px] w-full overflow-y-scroll rounded-lg bg-white drop-shadow-[0px_2px_6px_rgba(0,0,0,0.15)] dark:bg-dark"
 			>
-				<div
-					class="hide-scroll mt-0.5 max-h-[204px] w-full overflow-y-scroll rounded-lg bg-white drop-shadow-[0px_2px_6px_rgba(0,0,0,0.15)] dark:bg-dark"
-				>
-					{#if searchStatus}
-						<div class="w-full px-4 py-6">
-							<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
-						</div>
-					{:else if searchResults.length > 0}
-						{#each searchResults as result (result.id)}
-							<button
-								on:click={() => searchSelect(result)}
-								class="hover:bg-searchHover block w-full justify-between px-4 py-2 md:flex md:text-left dark:border-b dark:hover:bg-white/[0.15]"
-							>
-								<div class="items-start md:flex md:space-x-2">
-									<Icon
-										w="20"
-										h="20"
-										style="mx-auto md:mx-0 mt-1 text-mapButton dark:text-white opacity-50"
-										icon="currency_bitcoin"
-										type="material"
-									/>
+				{#if searchStatus}
+					<li role="status" aria-live="polite" class="w-full px-4 py-6">
+						<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
+					</li>
+				{:else if searchResults.length > 0}
+					{#each searchResults as result, index (result.id)}
+						<li
+							id="option-{result.id}"
+							role="option"
+							aria-selected={focusedIndex === index}
+							on:click={() => searchSelect(result)}
+							on:keydown={(e) => {
+								if (e.key === 'Enter' || e.key === ' ') {
+									e.preventDefault();
+									searchSelect(result);
+								}
+							}}
+							class="hover:bg-searchHover block w-full cursor-pointer px-4 py-2 dark:border-b dark:hover:bg-white/[0.15] {focusedIndex ===
+							index
+								? 'bg-searchHover dark:bg-white/[0.15]'
+								: ''}"
+						>
+							<div class="items-start md:flex md:space-x-2">
+								<Icon
+									w="20"
+									h="20"
+									style="mx-auto md:mx-0 mt-1 text-mapButton dark:text-white opacity-50"
+									icon="currency_bitcoin"
+									type="material"
+								/>
 
-									<div class="mx-auto md:max-w-[280px]">
-										<p
-											class="text-mapButton text-sm dark:text-white {result.name?.match(
-												'([^ ]{21})'
-											)
-												? 'break-all'
-												: ''}"
-										>
-											{result.name || 'Unknown'}
-										</p>
-										<p class="text-searchSubtext text-xs dark:text-white/70">
-											{#if result.address}
-												{result.address}
-											{:else}
-												{result.type === 'element' ? 'Bitcoin merchant' : result.type}
-											{/if}
-										</p>
-									</div>
+								<div class="mx-auto md:max-w-[280px]">
+									<p
+										class="text-mapButton text-sm dark:text-white {result.name?.match('([^ ]{21})')
+											? 'break-all'
+											: ''}"
+									>
+										{result.name || 'Unknown'}
+									</p>
+									<p class="text-searchSubtext text-xs dark:text-white/70">
+										{#if result.address}
+											{result.address}
+										{:else}
+											{result.type === 'element' ? 'Bitcoin merchant' : result.type}
+										{/if}
+									</p>
 								</div>
-							</button>
-						{/each}
-					{:else}
-						<p class="text-searchSubtext w-full px-4 py-2 text-center text-sm dark:text-white/70">
-							No results found.
-						</p>
-					{/if}
-				</div>
-			</OutClick>
+							</div>
+						</li>
+					{/each}
+				{:else}
+					<li
+						role="status"
+						class="text-searchSubtext w-full px-4 py-2 text-center text-sm dark:text-white/70"
+					>
+						No results found.
+					</li>
+				{/if}
+			</ul>
 		{/if}
 	</div>
 
