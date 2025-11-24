@@ -1064,7 +1064,7 @@
 									>
 										{result.name || 'Unknown'}
 									</p>
-									<p class="text-searchSubtext text-xs">
+									<p class="text-searchSubtext text-xs dark:text-white/70">
 										{result.type === 'element' ? 'Bitcoin merchant' : result.type}
 									</p>
 								</div>
@@ -1073,7 +1073,9 @@
 					{/each}
 
 					{#if !searchStatus && searchResults.length === 0}
-						<p class="text-searchSubtext w-full px-4 py-2 text-center text-sm">No results found.</p>
+						<p class="text-searchSubtext w-full px-4 py-2 text-center text-sm dark:text-white/70">
+							No results found.
+						</p>
 					{/if}
 				</div>
 			</OutClick>
