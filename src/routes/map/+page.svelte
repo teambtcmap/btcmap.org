@@ -2,6 +2,7 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import Icon from '$components/Icon.svelte';
+	import LoadingSpinner from '$components/LoadingSpinner.svelte';
 	import MapLoadingMain from '$components/MapLoadingMain.svelte';
 	import MerchantDrawerHash from '$components/MerchantDrawerHash.svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
@@ -1043,41 +1044,47 @@
 				<div
 					class="hide-scroll mt-0.5 max-h-[204px] w-full overflow-y-scroll rounded-lg bg-white drop-shadow-[0px_2px_6px_rgba(0,0,0,0.15)] dark:bg-dark"
 				>
-					{#each searchResults as result (result.id)}
-						<button
-							on:click={() => searchSelect(result)}
-							class="hover:bg-searchHover block w-full justify-between px-4 py-2 md:flex md:text-left dark:border-b dark:hover:bg-white/[0.15]"
-						>
-							<div class="items-start md:flex md:space-x-2">
-								<Icon
-									w="20"
-									h="20"
-									style="mx-auto md:mx-0 mt-1 text-mapButton dark:text-white opacity-50"
-									icon="currency_bitcoin"
-									type="material"
-								/>
+					{#if searchStatus}
+						<div class="w-full px-4 py-6">
+							<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
+						</div>
+					{:else if searchResults.length > 0}
+						{#each searchResults as result (result.id)}
+							<button
+								on:click={() => searchSelect(result)}
+								class="hover:bg-searchHover block w-full justify-between px-4 py-2 md:flex md:text-left dark:border-b dark:hover:bg-white/[0.15]"
+							>
+								<div class="items-start md:flex md:space-x-2">
+									<Icon
+										w="20"
+										h="20"
+										style="mx-auto md:mx-0 mt-1 text-mapButton dark:text-white opacity-50"
+										icon="currency_bitcoin"
+										type="material"
+									/>
 
-								<div class="mx-auto md:max-w-[280px]">
-									<p
-										class="text-mapButton text-sm dark:text-white {result.name?.match('([^ ]{21})')
-											? 'break-all'
-											: ''}"
-									>
-										{result.name || 'Unknown'}
-									</p>
-									<p class="text-searchSubtext text-xs dark:text-white/70">
-										{#if result.address}
-											{result.address}
-										{:else}
-											{result.type === 'element' ? 'Bitcoin merchant' : result.type}
-										{/if}
-									</p>
+									<div class="mx-auto md:max-w-[280px]">
+										<p
+											class="text-mapButton text-sm dark:text-white {result.name?.match(
+												'([^ ]{21})'
+											)
+												? 'break-all'
+												: ''}"
+										>
+											{result.name || 'Unknown'}
+										</p>
+										<p class="text-searchSubtext text-xs dark:text-white/70">
+											{#if result.address}
+												{result.address}
+											{:else}
+												{result.type === 'element' ? 'Bitcoin merchant' : result.type}
+											{/if}
+										</p>
+									</div>
 								</div>
-							</div>
-						</button>
-					{/each}
-
-					{#if !searchStatus && searchResults.length === 0}
+							</button>
+						{/each}
+					{:else}
 						<p class="text-searchSubtext w-full px-4 py-2 text-center text-sm dark:text-white/70">
 							No results found.
 						</p>
