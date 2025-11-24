@@ -44,7 +44,7 @@
 		"qrcode": "^1.5.4",
 		"svelte-eslint-parser": "^1.4.0",
 		"svelte-outclick": "^3.7.1",
-		"svelte-time": "^1.0.0",
+		"svelte-time": "^2.0.2",
 		"svg-captcha": "^1.4.0",
 		"tippy.js": "^6.3.7"
 	},
