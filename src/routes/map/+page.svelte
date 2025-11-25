@@ -7,6 +7,8 @@
 	import TileLoadingIndicator from '$components/TileLoadingIndicator.svelte';
 	import MerchantDrawerHash from '$components/MerchantDrawerHash.svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
+	import { merchantList } from '$lib/merchantListStore';
+	import { BREAKPOINTS } from '$lib/constants';
 	import {
 		processPlaces,
 		isSupported as isWorkerSupported,
@@ -84,6 +86,10 @@
 	const DEFAULT_LAT = 12.11209;
 	const DEFAULT_LNG = -68.91119;
 	const DEFAULT_ZOOM = 15;
+
+	// List panel shows when zoom >= this threshold (clustering disabled at 17)
+	const LIST_ZOOM_THRESHOLD = 17;
+	let currentZoom = DEFAULT_ZOOM;
 
 	// Throttled marker drawer opening to prevent freeze on rapid clicks
 	let lastMarkerClickTime = 0;
@@ -355,6 +361,20 @@
 	// alert for map errors
 	$: $placesError && errToast($placesError);
 
+	// Pan to merchant when drawer opens from list click
+	$: if (
+		$merchantDrawer.isOpen &&
+		$merchantDrawer.merchantId &&
+		mapLoaded &&
+		$merchantList.isOpen
+	) {
+		const place = $placesById.get($merchantDrawer.merchantId);
+		if (place) {
+			// Small delay to ensure drawer state is updated
+			setTimeout(() => panToMerchantIfNeeded(place), 50);
+		}
+	}
+
 	// Update marker icon when place is updated (boost or comment)
 	$: if ($lastUpdatedPlaceId && leaflet && loadedMarkers) {
 		const placeIdStr = $lastUpdatedPlaceId.toString();
@@ -536,6 +556,85 @@
 		});
 	}, 1000); // 1 second debounce for IndexedDB writes
 
+	// Update merchant list panel based on zoom level and visible places
+	const updateMerchantList = () => {
+		if (!browser) return;
+
+		// Only show list on desktop
+		if (window.innerWidth < BREAKPOINTS.md) {
+			merchantList.close();
+			return;
+		}
+
+		if (currentZoom >= LIST_ZOOM_THRESHOLD) {
+			const bounds = map.getBounds();
+			// Get places that are loaded and within current viewport
+			const visiblePlaces = $places.filter((place) => {
+				const markerId = place.id.toString();
+				if (!loadedMarkers[markerId]) return false;
+				return bounds.contains([place.lat, place.lon]);
+			});
+
+			merchantList.setMerchants(visiblePlaces);
+			merchantList.open();
+		} else {
+			merchantList.close();
+		}
+	};
+
+	// Debounced version to prevent excessive updates during pan/zoom
+	const debouncedUpdateMerchantList = debounce(updateMerchantList, DEBOUNCE_DELAY);
+
+	// Pan map to show selected merchant if it's hidden behind drawers
+	const panToMerchantIfNeeded = (place: Place) => {
+		if (!map || !browser) return;
+
+		const point = map.latLngToContainerPoint([place.lat, place.lon]);
+		const mapSize = map.getSize();
+
+		// Calculate left offset based on open panels
+		const listWidth = $merchantList.isOpen ? 280 : 0;
+		const drawerWidth = $merchantDrawer.isOpen ? 400 : 0;
+		const leftOffset = listWidth + drawerWidth;
+
+		// Effective visible bounds with padding
+		const padding = 50;
+		const effectiveBounds = {
+			left: leftOffset + padding,
+			right: mapSize.x - padding,
+			top: padding,
+			bottom: mapSize.y - padding
+		};
+
+		// Check if marker is outside effective bounds
+		const isOutside =
+			point.x < effectiveBounds.left ||
+			point.x > effectiveBounds.right ||
+			point.y < effectiveBounds.top ||
+			point.y > effectiveBounds.bottom;
+
+		if (isOutside) {
+			// Calculate the center of the effective visible area
+			const effectiveCenterX = leftOffset + (mapSize.x - leftOffset) / 2;
+			const effectiveCenterY = mapSize.y / 2;
+
+			// Calculate offset needed to put marker at effective center
+			const offsetX = point.x - effectiveCenterX;
+			const offsetY = point.y - effectiveCenterY;
+
+			// Get current center and apply offset
+			const currentCenter = map.getCenter();
+			const currentCenterPoint = map.latLngToContainerPoint(currentCenter);
+			const newCenterPoint = leaflet.point(
+				currentCenterPoint.x + offsetX,
+				currentCenterPoint.y + offsetY
+			);
+			const newCenter = map.containerPointToLatLng(newCenterPoint);
+
+			map.panTo(newCenter, { animate: true, duration: 0.3 });
+		}
+	};
+
 	const initializeElements = async () => {
 		if (elementsLoaded) {
 			return;
@@ -570,16 +669,17 @@
 			isZooming = false;
 			const coords = map.getBounds();
 			mapCenter = map.getCenter();
+			currentZoom = map.getZoom();
 
 			// Update hash if not using URL parameters
 			if (!urlLat.length && !urlLong.length) {
-				const zoom = map.getZoom();
-				updateMapHash(zoom, mapCenter);
+				updateMapHash(currentZoom, mapCenter);
 			}
 
 			// Debounced operations
 			debouncedCacheCoords(coords);
 			debouncedLoadMarkers();
+			debouncedUpdateMerchantList();
 		});
 
 		mapLoadingStatus = 'Loading places in view...';
@@ -601,6 +701,10 @@
 					highlightMarker(merchantId);
 				}
 			}
+
+			// Initialize merchant list if already zoomed in
+			currentZoom = map.getZoom();
+			updateMerchantList();
 		}
 	};
 
@@ -1014,6 +1118,10 @@
 		if (debouncedCacheCoords?.cancel) debouncedCacheCoords.cancel();
 		if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
 		if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
+		if (debouncedUpdateMerchantList?.cancel) debouncedUpdateMerchantList.cancel();
+
+		// Reset merchant list
+		merchantList.reset();
 
 		if (map) {
 			console.info('Unloading Leaflet map.');

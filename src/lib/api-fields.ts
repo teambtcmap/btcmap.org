@@ -51,7 +51,15 @@ export const PLACE_FIELDS = {
 
 export const PLACE_FIELD_SETS = {
 	MAP_SYNC: [...PLACE_FIELDS.CORE, ...PLACE_FIELDS.SYNC],
-	COMPLETE_PLACE: [...PLACE_FIELDS.CORE, ...PLACE_FIELDS.SYNC, ...PLACE_FIELDS.POPUP]
+	COMPLETE_PLACE: [...PLACE_FIELDS.CORE, ...PLACE_FIELDS.SYNC, ...PLACE_FIELDS.POPUP],
+	LIST_ITEM: [
+		'name',
+		'address',
+		'verified_at',
+		'osm:payment:onchain',
+		'osm:payment:lightning',
+		'osm:payment:lightning_contactless'
+	] as const satisfies (keyof Place)[]
 } as const;
 
 export const buildFieldsParam = (fields: readonly string[]) => fields.join(',');

@@ -2,6 +2,7 @@
 	import { browser } from '$app/environment';
 	import MerchantDrawerDesktop from './MerchantDrawerDesktop.svelte';
 	import MerchantDrawerMobile from './MerchantDrawerMobile.svelte';
+	import MerchantListPanel from './MerchantListPanel.svelte';
 	import { BREAKPOINTS } from '$lib/constants';
 
 	// Initialize immediately to prevent component flash on mount
@@ -28,5 +29,7 @@
 {#if isMobile}
 	<MerchantDrawerMobile bind:this={mobileDrawer} />
 {:else}
+	<!-- Desktop: List panel + Detail drawer side by side -->
+	<MerchantListPanel />
 	<MerchantDrawerDesktop bind:this={desktopDrawer} />
 {/if}
