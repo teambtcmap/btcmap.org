@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { fly } from 'svelte/transition';
 	import { merchantList } from '$lib/merchantListStore';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import MerchantListItem from '$components/MerchantListItem.svelte';
@@ -46,9 +45,8 @@
 </script>
 
 {#if isOpen}
-	<div
-		transition:fly={{ x: -280, duration: 300 }}
-		class="fixed top-0 left-0 z-[1001] hidden h-full w-[280px] flex-col overflow-hidden bg-white shadow-xl md:flex dark:bg-dark"
+	<section
+		class="hidden w-[280px] flex-none flex-col overflow-hidden border-r border-white/10 bg-white md:flex dark:border-white/5 dark:bg-dark"
 		role="complementary"
 		aria-label="Merchant list"
 	>
@@ -88,5 +86,5 @@
 				</ul>
 			{/if}
 		</div>
-	</div>
+	</section>
 {/if}

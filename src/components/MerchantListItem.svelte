@@ -41,12 +41,21 @@
 	<button
 		on:click={handleClick}
 		on:keydown={handleKeydown}
-		class="w-full border-l-4 px-3 py-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-white/5 {isSelected
-			? 'border-link bg-link/5 dark:bg-link/10'
-			: 'border-transparent'}"
+		class="w-full px-3 py-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-white/5 {isSelected
+			? 'bg-link/5 dark:bg-link/10'
+			: ''}"
 		aria-pressed={isSelected}
 	>
-		<div class="flex items-start gap-2">
+		<div class="flex items-start gap-3">
+			<!-- Icon -->
+			<div
+				class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg {isBoosted
+					? 'bg-bitcoin/10 text-bitcoin'
+					: 'bg-primary/10 text-primary dark:bg-white/10 dark:text-white'}"
+			>
+				<Icon w="22" h="22" icon={merchant.icon || 'currency_bitcoin'} type="material" />
+			</div>
+
 			<div class="min-w-0 flex-1">
 				<!-- Name with badges -->
 				<div class="flex items-center gap-1">
