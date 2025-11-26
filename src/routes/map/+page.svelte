@@ -6,6 +6,7 @@
 	import MapLoadingMain from '$components/MapLoadingMain.svelte';
 	import TileLoadingIndicator from '$components/TileLoadingIndicator.svelte';
 	import MerchantDrawerHash from '$components/MerchantDrawerHash.svelte';
+	import MerchantListPanel from '$components/MerchantListPanel.svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import { merchantList } from '$lib/merchantListStore';
 	import { BREAKPOINTS } from '$lib/constants';
@@ -1148,126 +1149,136 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/map.png" />
 </svelte:head>
 
-<main>
+<main class="flex h-screen w-full">
 	<h1 class="hidden">Map</h1>
 
 	<MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
 
-	<!-- Search UI - re-enabled with API-based search -->
-	<div
-		id="search-div"
-		bind:this={searchContainer}
-		class="absolute top-0 left-[60px] w-[50vw] md:w-[350px] {showSearch ? 'block' : 'hidden'}"
-		on:focusout={handleSearchFocusOut}
-	>
-		<div class="relative">
-			<input
-				id="search-input"
-				type="search"
-				aria-label="Search for Bitcoin merchants"
-				class="text-mapButton w-full rounded-lg bg-white px-5 py-2.5 text-[16px] drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:outline-hidden focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] dark:border dark:bg-dark dark:text-white [&::-webkit-search-cancel-button]:hidden"
-				placeholder="Search..."
-				on:keyup={searchDebounce}
-				on:keydown={handleSearchKeyDown}
-				bind:value={search}
-				disabled={!mapLoaded}
-			/>
+	<!-- Desktop: Merchant list panel (flexbox, not overlay) -->
+	<MerchantListPanel />
 
-			<button
-				type="button"
-				aria-label="Clear search"
-				bind:this={clearSearchButton}
-				on:click={clearSearch}
-				class="text-mapButton absolute top-[10px] right-[8px] bg-white hover:text-black dark:bg-dark dark:text-white dark:hover:text-white/80 {search
-					? 'block'
-					: 'hidden'}"
-			>
-				<svg
-					width="20"
-					height="20"
-					viewBox="0 0 20 20"
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
+	<!-- Map container -->
+	<div class="relative flex-1">
+		<!-- Search UI - re-enabled with API-based search -->
+		<div
+			id="search-div"
+			bind:this={searchContainer}
+			class="absolute top-0 left-[60px] z-[1000] w-[50vw] md:w-[350px] {showSearch
+				? 'block'
+				: 'hidden'}"
+			on:focusout={handleSearchFocusOut}
+		>
+			<div class="relative">
+				<input
+					id="search-input"
+					type="search"
+					aria-label="Search for Bitcoin merchants"
+					class="text-mapButton w-full rounded-lg bg-white px-5 py-2.5 text-[16px] drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:outline-hidden focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] dark:border dark:bg-dark dark:text-white [&::-webkit-search-cancel-button]:hidden"
+					placeholder="Search..."
+					on:keyup={searchDebounce}
+					on:keydown={handleSearchKeyDown}
+					bind:value={search}
+					disabled={!mapLoaded}
+				/>
+
+				<button
+					type="button"
+					aria-label="Clear search"
+					bind:this={clearSearchButton}
+					on:click={clearSearch}
+					class="text-mapButton absolute top-[10px] right-[8px] bg-white hover:text-black dark:bg-dark dark:text-white dark:hover:text-white/80 {search
+						? 'block'
+						: 'hidden'}"
 				>
-					<path
-						d="M14.1668 5.8335L5.8335 14.1668M5.8335 5.8335L14.1668 14.1668"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					/>
-				</svg>
-			</button>
+					<svg
+						width="20"
+						height="20"
+						viewBox="0 0 20 20"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							d="M14.1668 5.8335L5.8335 14.1668M5.8335 5.8335L14.1668 14.1668"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						/>
+					</svg>
+				</button>
+			</div>
+
+			{#if isDropdownOpen}
+				<div
+					class="mt-0.5 w-full rounded-lg bg-white drop-shadow-[0px_2px_6px_rgba(0,0,0,0.15)] dark:bg-dark"
+				>
+					{#if !searchStatus && searchResults.length > 0}
+						<div
+							class="border-b border-gray-200 px-4 py-2 text-xs text-gray-600 dark:border-white/10 dark:text-white/70"
+						>
+							{searchResults.length} result{searchResults.length === 1 ? '' : 's'}
+						</div>
+					{/if}
+
+					<ul class="max-h-[204px] w-full overflow-y-scroll">
+						{#if searchStatus}
+							<li role="status" aria-live="polite" class="w-full px-4 py-6">
+								<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
+							</li>
+						{:else if searchResults.length > 0}
+							{#each searchResults as result (result.id)}
+								<li>
+									<button
+										on:click={() => searchSelect(result)}
+										class="hover:bg-searchHover block w-full cursor-pointer border-b border-gray-200 px-4 py-2 text-left dark:border-white/10 dark:hover:bg-white/[0.15]"
+									>
+										<div class="flex items-start space-x-2">
+											<Icon
+												w="20"
+												h="20"
+												style="mt-1 text-mapButton dark:text-white opacity-50"
+												icon={result.icon && result.icon !== 'question_mark'
+													? result.icon
+													: 'currency_bitcoin'}
+												type="material"
+											/>
+
+											<div class="max-w-[280px]">
+												<p
+													class="text-mapButton text-sm dark:text-white {result.name?.match(
+														'([^ ]{21})'
+													)
+														? 'break-all'
+														: ''}"
+												>
+													{result.name || 'Unknown'}
+												</p>
+												{#if result.address}
+													<p class="text-searchSubtext text-xs dark:text-white/70">
+														{result.address}
+													</p>
+												{/if}
+											</div>
+										</div>
+									</button>
+								</li>
+							{/each}
+						{:else}
+							<li
+								class="text-searchSubtext w-full px-4 py-2 text-center text-sm dark:text-white/70"
+							>
+								No results found.
+							</li>
+						{/if}
+					</ul>
+				</div>
+			{/if}
 		</div>
 
-		{#if isDropdownOpen}
-			<div
-				class="mt-0.5 w-full rounded-lg bg-white drop-shadow-[0px_2px_6px_rgba(0,0,0,0.15)] dark:bg-dark"
-			>
-				{#if !searchStatus && searchResults.length > 0}
-					<div
-						class="border-b border-gray-200 px-4 py-2 text-xs text-gray-600 dark:border-white/10 dark:text-white/70"
-					>
-						{searchResults.length} result{searchResults.length === 1 ? '' : 's'}
-					</div>
-				{/if}
-
-				<ul class="max-h-[204px] w-full overflow-y-scroll">
-					{#if searchStatus}
-						<li role="status" aria-live="polite" class="w-full px-4 py-6">
-							<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
-						</li>
-					{:else if searchResults.length > 0}
-						{#each searchResults as result (result.id)}
-							<li>
-								<button
-									on:click={() => searchSelect(result)}
-									class="hover:bg-searchHover block w-full cursor-pointer border-b border-gray-200 px-4 py-2 text-left dark:border-white/10 dark:hover:bg-white/[0.15]"
-								>
-									<div class="flex items-start space-x-2">
-										<Icon
-											w="20"
-											h="20"
-											style="mt-1 text-mapButton dark:text-white opacity-50"
-											icon={result.icon && result.icon !== 'question_mark'
-												? result.icon
-												: 'currency_bitcoin'}
-											type="material"
-										/>
-
-										<div class="max-w-[280px]">
-											<p
-												class="text-mapButton text-sm dark:text-white {result.name?.match(
-													'([^ ]{21})'
-												)
-													? 'break-all'
-													: ''}"
-											>
-												{result.name || 'Unknown'}
-											</p>
-											{#if result.address}
-												<p class="text-searchSubtext text-xs dark:text-white/70">
-													{result.address}
-												</p>
-											{/if}
-										</div>
-									</div>
-								</button>
-							</li>
-						{/each}
-					{:else}
-						<li class="text-searchSubtext w-full px-4 py-2 text-center text-sm dark:text-white/70">
-							No results found.
-						</li>
-					{/if}
-				</ul>
-			</div>
-		{/if}
+		<div bind:this={mapElement} class="absolute inset-0 !bg-teal dark:!bg-dark" />
 	</div>
 
 	<MerchantDrawerHash />
 
 	<TileLoadingIndicator visible={tilesLoading} />
-
-	<div bind:this={mapElement} class="absolute h-[100%] w-full !bg-teal dark:!bg-dark" />
 </main>
