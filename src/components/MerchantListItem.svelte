@@ -3,6 +3,7 @@
 	import Icon from '$components/Icon.svelte';
 	import PaymentMethodIcon from '$components/PaymentMethodIcon.svelte';
 	import type { Place } from '$lib/types';
+	import { formatVerifiedHuman } from '$lib/utils';
 
 	export let merchant: Place;
 	export let enrichedData: Place | null = null;
@@ -116,6 +117,31 @@
 						<div class="h-5 w-5 animate-pulse rounded bg-link/50"></div>
 						<div class="h-5 w-5 animate-pulse rounded bg-link/50"></div>
 					</div>
+				{/if}
+
+				<!-- Status badges -->
+				{#if enrichedData}
+					<div class="mt-1.5 flex flex-wrap items-center gap-2 text-xs">
+						{#if isBoosted}
+							<span
+								class="flex items-center gap-1 rounded-full bg-bitcoin/10 px-2 py-0.5 text-bitcoin"
+							>
+								<Icon w="12" h="12" icon="boost-solid" type="popup" />
+								Boosted
+							</span>
+						{/if}
+						<span class="flex items-center gap-1 text-gray-500 dark:text-white/60">
+							<Icon w="12" h="12" icon={isVerified ? 'check' : 'alert'} type="popup" />
+							{isVerified ? 'Verified' : 'Outdated'}
+							{#if enrichedData.verified_at}
+								<span class="text-gray-400 dark:text-white/40"
+									>· {formatVerifiedHuman(enrichedData.verified_at)}</span
+								>
+							{/if}
+						</span>
+					</div>
+				{:else if showSkeleton}
+					<div class="mt-1.5 h-4 w-20 animate-pulse rounded bg-link/50"></div>
 				{/if}
 			</div>
 

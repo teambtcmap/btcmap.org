@@ -46,7 +46,7 @@
 
 {#if isOpen}
 	<section
-		class="hidden w-[280px] flex-none flex-col overflow-hidden border-r border-white/10 bg-white md:flex dark:border-white/5 dark:bg-dark"
+		class="hidden w-[320px] flex-none flex-col overflow-hidden border-r border-white/10 bg-white md:flex dark:border-white/5 dark:bg-dark"
 		role="complementary"
 		aria-label="Merchant list"
 	>
