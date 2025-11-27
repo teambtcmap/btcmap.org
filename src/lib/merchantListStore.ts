@@ -2,6 +2,7 @@ import { writable, get } from 'svelte/store';
 import axios from 'axios';
 import type { Place } from '$lib/types';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
+import { calcVerifiedDate } from '$lib/merchantDrawerLogic';
 
 export interface MerchantListState {
 	isOpen: boolean;
@@ -22,7 +23,7 @@ const initialState: MerchantListState = {
 // Sort merchants: boosted first, then verified, then alphabetically
 function sortMerchants(merchants: Place[]): Place[] {
 	const now = Date.now();
-	const oneYearAgo = now - 365 * 24 * 60 * 60 * 1000;
+	const verifiedDate = calcVerifiedDate();
 
 	return [...merchants].sort((a, b) => {
 		const aBoosted = a.boosted_until && Date.parse(a.boosted_until) > now;
@@ -30,8 +31,8 @@ function sortMerchants(merchants: Place[]): Place[] {
 		if (aBoosted && !bBoosted) return -1;
 		if (!aBoosted && bBoosted) return 1;
 
-		const aVerified = a.verified_at && Date.parse(a.verified_at) > oneYearAgo;
-		const bVerified = b.verified_at && Date.parse(b.verified_at) > oneYearAgo;
+		const aVerified = a.verified_at && Date.parse(a.verified_at) > verifiedDate;
+		const bVerified = b.verified_at && Date.parse(b.verified_at) > verifiedDate;
 		if (aVerified && !bVerified) return -1;
 		if (!aVerified && bVerified) return 1;
 

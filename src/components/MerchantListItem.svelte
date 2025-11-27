@@ -4,6 +4,11 @@
 	import PaymentMethodIcon from '$components/PaymentMethodIcon.svelte';
 	import type { Place } from '$lib/types';
 	import { formatVerifiedHuman } from '$lib/utils';
+	import {
+		calcVerifiedDate,
+		isUpToDate as checkUpToDate,
+		isBoosted as checkBoosted
+	} from '$lib/merchantDrawerLogic';
 
 	export let merchant: Place;
 	export let enrichedData: Place | null = null;
@@ -11,8 +16,7 @@
 
 	const dispatch = createEventDispatcher<{ click: Place }>();
 
-	const now = Date.now();
-	const oneYearAgo = now - 365 * 24 * 60 * 60 * 1000;
+	const verifiedDate = calcVerifiedDate();
 
 	// Show skeleton when we don't have enriched data yet
 	// Only show "Unknown" when enriched data exists but has no name
@@ -23,8 +27,8 @@
 		enrichedData?.['osm:payment:lightning'] !== undefined ||
 		enrichedData?.['osm:payment:lightning_contactless'] !== undefined;
 
-	$: isVerified = displayData.verified_at && Date.parse(displayData.verified_at) > oneYearAgo;
-	$: isBoosted = merchant.boosted_until && Date.parse(merchant.boosted_until) > now;
+	$: isVerified = checkUpToDate(displayData, verifiedDate);
+	$: isBoosted = checkBoosted(merchant);
 
 	function handleClick() {
 		dispatch('click', merchant);
