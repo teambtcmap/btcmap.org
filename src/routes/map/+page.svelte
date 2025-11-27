@@ -9,7 +9,7 @@
 	import MerchantListPanel from '$components/MerchantListPanel.svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import { merchantList } from '$lib/merchantListStore';
-	import { BREAKPOINTS } from '$lib/constants';
+	import { BREAKPOINTS, MERCHANT_LIST_WIDTH, MERCHANT_DRAWER_WIDTH } from '$lib/constants';
 	import {
 		processPlaces,
 		isSupported as isWorkerSupported,
@@ -135,6 +135,7 @@
 	let upToDateLayer: FeatureGroup.SubGroup;
 	let loadedMarkers: Record<string, Marker> = {};
 	let selectedMarkerId: number | null = null;
+	let panTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	let isLoadingMarkers = false;
 	let isZooming = false;
@@ -371,8 +372,10 @@
 	) {
 		const place = $placesById.get($merchantDrawer.merchantId);
 		if (place) {
+			// Clear any pending pan timeout to prevent overlapping timers
+			if (panTimeout) clearTimeout(panTimeout);
 			// Small delay to ensure drawer state is updated
-			setTimeout(() => panToMerchantIfNeeded(place), 50);
+			panTimeout = setTimeout(() => panToMerchantIfNeeded(place), 50);
 		}
 	}
 
@@ -594,8 +597,8 @@
 		const mapSize = map.getSize();
 
 		// Calculate left offset based on open panels
-		const listWidth = $merchantList.isOpen ? 280 : 0;
-		const drawerWidth = $merchantDrawer.isOpen ? 400 : 0;
+		const listWidth = $merchantList.isOpen ? MERCHANT_LIST_WIDTH : 0;
+		const drawerWidth = $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0;
 		const leftOffset = listWidth + drawerWidth;
 
 		// Effective visible bounds with padding
