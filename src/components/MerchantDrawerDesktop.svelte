@@ -9,6 +9,7 @@
 	import { onMount } from 'svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import { merchantList } from '$lib/merchantListStore';
+	import { MERCHANT_LIST_WIDTH } from '$lib/constants';
 	import {
 		calcVerifiedDate,
 		isUpToDate as checkUpToDate,
@@ -87,12 +88,11 @@
 
 {#if isOpen}
 	<!-- Drawer - no backdrop, keep map interactive -->
-	<!-- Position at left-[280px] when merchant list panel is open -->
+	<!-- Position offset by MERCHANT_LIST_WIDTH when list panel is open -->
 	<div
 		transition:fly={{ x: -400, duration: 300 }}
 		class="fixed top-0 z-[1002] h-full w-full overflow-y-auto bg-white shadow-2xl md:w-[400px] dark:bg-dark"
-		class:left-0={!listIsOpen}
-		class:left-[280px]={listIsOpen}
+		style="left: {listIsOpen ? MERCHANT_LIST_WIDTH : 0}px"
 		role="dialog"
 		aria-modal="true"
 	>

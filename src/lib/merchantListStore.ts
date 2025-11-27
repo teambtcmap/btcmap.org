@@ -40,7 +40,8 @@ function sortMerchants(merchants: Place[]): Place[] {
 }
 
 function createMerchantListStore() {
-	const { subscribe, set, update } = writable<MerchantListState>(initialState);
+	const store = writable<MerchantListState>(initialState);
+	const { subscribe, set, update } = store;
 
 	let abortController: AbortController | null = null;
 
@@ -68,7 +69,13 @@ function createMerchantListStore() {
 				abortController.abort();
 				abortController = null;
 			}
-			update((state) => ({ ...state, isOpen: false, merchants: [] }));
+			update((state) => ({
+				...state,
+				isOpen: false,
+				merchants: [],
+				enrichedPlaces: new Map(),
+				isFetchingDetails: false
+			}));
 		},
 
 		setMerchants(merchants: Place[], limit: number = 50) {
@@ -82,7 +89,7 @@ function createMerchantListStore() {
 		},
 
 		async fetchDetails(placeIds: number[]) {
-			const currentState = get({ subscribe });
+			const currentState = get(store);
 
 			// Filter out already-fetched places
 			const idsToFetch = placeIds.filter((id) => !currentState.enrichedPlaces.has(id));
@@ -97,28 +104,28 @@ function createMerchantListStore() {
 
 			update((state) => ({ ...state, isFetchingDetails: true }));
 
-			// Fetch in parallel with concurrency limit of 5
-			const concurrencyLimit = 5;
-			for (let i = 0; i < idsToFetch.length; i += concurrencyLimit) {
-				if (signal.aborted) break;
+			try {
+				// Fetch in parallel with concurrency limit of 5
+				const concurrencyLimit = 5;
+				for (let i = 0; i < idsToFetch.length; i += concurrencyLimit) {
+					if (signal.aborted) break;
 
-				const batch = idsToFetch.slice(i, i + concurrencyLimit);
-				const results = await Promise.all(batch.map((id) => fetchSinglePlace(id, signal)));
+					const batch = idsToFetch.slice(i, i + concurrencyLimit);
+					const results = await Promise.all(batch.map((id) => fetchSinglePlace(id, signal)));
 
-				if (signal.aborted) break;
+					if (signal.aborted) break;
 
-				update((state) => {
-					const newEnrichedPlaces = new Map(state.enrichedPlaces);
-					results.forEach((place, idx) => {
-						if (place) {
-							newEnrichedPlaces.set(batch[idx], place);
-						}
+					update((state) => {
+						const newEnrichedPlaces = new Map(state.enrichedPlaces);
+						results.forEach((place, idx) => {
+							if (place) {
+								newEnrichedPlaces.set(batch[idx], place);
+							}
+						});
+						return { ...state, enrichedPlaces: newEnrichedPlaces };
 					});
-					return { ...state, enrichedPlaces: newEnrichedPlaces };
-				});
-			}
-
-			if (!signal.aborted) {
+				}
+			} finally {
 				update((state) => ({ ...state, isFetchingDetails: false }));
 			}
 		},

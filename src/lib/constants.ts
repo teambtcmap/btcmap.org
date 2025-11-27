@@ -15,6 +15,10 @@ export const BREAKPOINTS = {
 	'2xl': 1536
 } as const;
 
+// Layout widths for merchant list and drawer (in pixels)
+export const MERCHANT_LIST_WIDTH = 320;
+export const MERCHANT_DRAWER_WIDTH = 400;
+
 export const GradeTable = `<table>
 <thead>
     <tr>

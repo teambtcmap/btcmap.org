@@ -1,11 +1,13 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
+	import { onDestroy } from 'svelte';
 	import { merchantList } from '$lib/merchantListStore';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import MerchantListItem from '$components/MerchantListItem.svelte';
 	import CloseButton from '$components/CloseButton.svelte';
 	import LoadingSpinner from '$components/LoadingSpinner.svelte';
 	import type { Place } from '$lib/types';
-	import { onMount } from 'svelte';
+	import { MERCHANT_LIST_WIDTH } from '$lib/constants';
 
 	$: isOpen = $merchantList.isOpen;
 	$: merchants = $merchantList.merchants;
@@ -28,25 +30,32 @@
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
-		if (!isOpen) return;
-
 		if (event.key === 'Escape') {
 			event.preventDefault();
 			handleClose();
 		}
 	}
 
-	onMount(() => {
-		window.addEventListener('keydown', handleKeydown);
-		return () => {
+	// Scope keydown listener to when panel is open
+	$: if (browser) {
+		if (isOpen) {
+			window.addEventListener('keydown', handleKeydown);
+		} else {
 			window.removeEventListener('keydown', handleKeydown);
-		};
+		}
+	}
+
+	onDestroy(() => {
+		if (browser) {
+			window.removeEventListener('keydown', handleKeydown);
+		}
 	});
 </script>
 
 {#if isOpen}
 	<section
-		class="hidden w-[320px] flex-none flex-col overflow-hidden border-r border-white/10 bg-white md:flex dark:border-white/5 dark:bg-dark"
+		class="hidden flex-none flex-col overflow-hidden border-r border-white/10 bg-white md:flex dark:border-white/5 dark:bg-dark"
+		style="width: {MERCHANT_LIST_WIDTH}px"
 		role="complementary"
 		aria-label="Merchant list"
 	>
