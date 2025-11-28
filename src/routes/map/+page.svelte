@@ -572,6 +572,7 @@
 
 		if (currentZoom >= LIST_ZOOM_THRESHOLD) {
 			const bounds = map.getBounds();
+			const center = map.getCenter();
 			// Get places that are loaded and within current viewport
 			const visiblePlaces = $places.filter((place) => {
 				const markerId = place.id.toString();
@@ -579,7 +580,7 @@
 				return bounds.contains([place.lat, place.lon]);
 			});
 
-			merchantList.setMerchants(visiblePlaces);
+			merchantList.setMerchants(visiblePlaces, center.lat, center.lng);
 			merchantList.open();
 		} else {
 			merchantList.close();
