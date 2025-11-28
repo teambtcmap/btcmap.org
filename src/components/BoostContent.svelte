@@ -17,13 +17,13 @@
 	let stage = 0;
 
 	const values = [
-		{ fiat: 5, time: 1 },
-		{ fiat: 10, time: 3 },
-		{ fiat: 30, time: 12 }
+		{ sats: 5000, time: 1 },
+		{ sats: 10000, time: 3 },
+		{ sats: 30000, time: 12 }
 	];
 
 	let tooltip = false;
-	let selectedBoost: { fiat: number; sats: string; time: number; expires: Date } | undefined;
+	let selectedBoost: { sats: number; fiat: string; time: number; expires: Date } | undefined;
 	let invoice = '';
 	let invoiceId = '';
 	let loading = false;
@@ -159,13 +159,13 @@
 								? new Date($boost.boost)
 								: undefined;
 						selectedBoost = {
-							fiat: value.fiat,
-							sats: (value.fiat / ($exchangeRate / 100000000)).toFixed(0),
-							time: value.time,
-							expires: currentBoost
-								? new Date(currentBoost.setMonth(currentBoost.getMonth() + value.time))
-								: new Date(dateNow.setMonth(dateNow.getMonth() + value.time))
-						};
+						sats: value.sats,
+						fiat: $exchangeRate ? (value.sats * ($exchangeRate / 100000000)).toFixed(2) : '...',
+						time: value.time,
+						expires: currentBoost
+							? new Date(currentBoost.setMonth(currentBoost.getMonth() + value.time))
+							: new Date(dateNow.setMonth(dateNow.getMonth() + value.time))
+					};
 					}}
 					class="relative w-full space-y-0.5 rounded-xl border-2 py-1 {selectedBoost &&
 					selectedBoost.time === value.time
@@ -173,14 +173,14 @@
 						: 'border-gray-300 text-primary dark:border-white/95 dark:text-white'} text-center transition-colors hover:border-link hover:text-link dark:hover:text-link"
 				>
 					{#if value.time === 3}
-						<img src="/icons/star.svg" alt="star" class="absolute top-1 right-1" />
+						<img src="/icons/star.svg" alt="star" class="absolute top-1 md:top-6 right-1" />
 					{/if}
 
-					<p>${value.fiat}</p>
+					<p>{value.sats.toLocaleString()} sats</p>
 					<p class="text-xs">
-						{$exchangeRate ? (value.fiat / ($exchangeRate / 100000000)).toFixed(0) : '...'} sats
+						≈${$exchangeRate ? (value.sats * ($exchangeRate / 100000000)).toFixed(2) : '...'}
 					</p>
-					<p class="text-xs">{value.time} month</p>
+					<p class="text-xs">{value.time} month{value.time > 1 ? 's' : ''}</p>
 				</button>
 			{/each}
 		</div>
@@ -189,9 +189,6 @@
 			The fee is used to support the BTC Map open source project and continue it's development.
 		</p>
 
-		<p class="text-xs text-body dark:text-white">
-			*Fiat exchange rates may change during payment flow.
-		</p>
 
 		<PrimaryButton
 			style="w-full rounded-xl p-3 {!selectedBoost ? 'opacity-50 hover:bg-link' : ''}"
@@ -212,7 +209,7 @@
 		onError={handlePaymentError}
 		onStatusCheckError={handleStatusCheckError}
 		description={selectedBoost
-			? `Boost this location for <strong>${selectedBoost.time} month${selectedBoost.time > 1 ? 's' : ''} <br /> $${selectedBoost.fiat}</strong> (<strong>${selectedBoost.sats} sats</strong>)`
+			? `Boost this location for <strong>${selectedBoost.time} month${selectedBoost.time > 1 ? 's' : ''} <br /> ${selectedBoost.sats.toLocaleString()} sats</strong> (<strong>≈$${selectedBoost.fiat}</strong>)`
 			: ''}
 	/>
 {:else}
