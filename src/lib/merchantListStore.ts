@@ -2,7 +2,7 @@ import { writable, get } from 'svelte/store';
 import axios from 'axios';
 import type { Place } from '$lib/types';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
-import { calcVerifiedDate } from '$lib/merchantDrawerLogic';
+import { isBoosted } from '$lib/merchantDrawerLogic';
 
 export interface MerchantListState {
 	isOpen: boolean;
@@ -20,22 +20,28 @@ const initialState: MerchantListState = {
 	isFetchingDetails: false
 };
 
-// Sort merchants: boosted first, then verified, then alphabetically
-function sortMerchants(merchants: Place[]): Place[] {
-	const now = Date.now();
-	const verifiedDate = calcVerifiedDate();
+// Distance calculation (squared - fine for sorting)
+function getDistanceSquared(lat1: number, lon1: number, lat2: number, lon2: number): number {
+	const dx = (lon2 - lon1) * Math.cos(((lat1 + lat2) / 2) * (Math.PI / 180));
+	const dy = lat2 - lat1;
+	return dx * dx + dy * dy;
+}
 
+// Sort merchants: boosted first, then by distance, then alphabetically
+function sortMerchants(merchants: Place[], centerLat?: number, centerLon?: number): Place[] {
 	return [...merchants].sort((a, b) => {
-		const aBoosted = a.boosted_until && Date.parse(a.boosted_until) > now;
-		const bBoosted = b.boosted_until && Date.parse(b.boosted_until) > now;
-		if (aBoosted && !bBoosted) return -1;
-		if (!aBoosted && bBoosted) return 1;
+		// Boosted first
+		if (isBoosted(a) && !isBoosted(b)) return -1;
+		if (!isBoosted(a) && isBoosted(b)) return 1;
 
-		const aVerified = a.verified_at && Date.parse(a.verified_at) > verifiedDate;
-		const bVerified = b.verified_at && Date.parse(b.verified_at) > verifiedDate;
-		if (aVerified && !bVerified) return -1;
-		if (!aVerified && bVerified) return 1;
+		// Then by distance (if center provided)
+		if (centerLat !== undefined && centerLon !== undefined) {
+			const distA = getDistanceSquared(centerLat, centerLon, a.lat, a.lon);
+			const distB = getDistanceSquared(centerLat, centerLon, b.lat, b.lon);
+			return distA - distB;
+		}
 
+		// Fallback to alphabetical
 		return (a.name || '').localeCompare(b.name || '');
 	});
 }
@@ -79,8 +85,8 @@ function createMerchantListStore() {
 			}));
 		},
 
-		setMerchants(merchants: Place[], limit: number = 50) {
-			const sorted = sortMerchants(merchants);
+		setMerchants(merchants: Place[], centerLat?: number, centerLon?: number, limit: number = 50) {
+			const sorted = sortMerchants(merchants, centerLat, centerLon);
 			const limited = sorted.slice(0, limit);
 			update((state) => ({ ...state, merchants: limited, isLoading: false }));
 		},
