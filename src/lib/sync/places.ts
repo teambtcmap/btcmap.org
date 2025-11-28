@@ -14,6 +14,7 @@ import axiosRetry from 'axios-retry';
 import localforage from 'localforage';
 import { get } from 'svelte/store';
 import { parseJSON, filterPlaces } from '$lib/workers/sync-worker-manager';
+import { yieldToMain } from '$lib/utils';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
@@ -229,7 +230,9 @@ export const elementsSync = async () => {
 				if (placesData.length > 0) {
 					localforage
 						.setItem('places_v4', placesData)
-						.then(function () {
+						.then(async function () {
+							// Yield to main thread before updating store to prevent UI freeze
+							await yieldToMain();
 							// set response to store
 							places.set(placesData);
 							placesLoadingStatus.set('Complete!');
@@ -238,7 +241,9 @@ export const elementsSync = async () => {
 							// Keep progress at 100% - don't reset to avoid confusing loading states
 							// The map component will handle hiding the indicator when elementsLoaded = true
 						})
-						.catch(function (err) {
+						.catch(async function (err) {
+							// Yield to main thread before updating store to prevent UI freeze
+							await yieldToMain();
 							places.set(placesData);
 							placesError.set(
 								'Could not store places locally, please try again or contact BTC Map.'
@@ -275,6 +280,8 @@ export const elementsSync = async () => {
 					}
 
 					if (parsedPlaces.length > 0) {
+						// Yield to main thread before updating store to prevent UI freeze
+						await yieldToMain();
 						places.set(parsedPlaces);
 					}
 				} catch (error) {
@@ -320,6 +327,9 @@ export const updateSinglePlace = async (placeId: string | number): Promise<Place
 
 		// Save to localforage
 		await localforage.setItem('places_v4', updatedPlaces);
+
+		// Yield to main thread before updating store to prevent UI freeze
+		await yieldToMain();
 
 		// Update the store
 		places.set(updatedPlaces);
