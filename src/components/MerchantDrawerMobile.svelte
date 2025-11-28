@@ -80,6 +80,7 @@
 
 	// DOM reference
 	let handleElement: HTMLDivElement;
+	let capturedElement: HTMLElement | null = null;
 
 	// Track previous state to reset drawer when merchant changes
 	let previousMerchantId: number | null = null;
@@ -208,9 +209,11 @@
 		velocitySamples = [];
 		velocity = 0;
 
-		if (handleElement) {
+		const target = event.currentTarget as HTMLElement;
+		if (target) {
 			try {
-				handleElement.setPointerCapture(event.pointerId);
+				target.setPointerCapture(event.pointerId);
+				capturedElement = target;
 			} catch {
 				// Pointer capture not supported or failed
 			}
@@ -253,13 +256,14 @@
 		const totalDelta = finalHeight - initialHeight;
 
 		// Release pointer capture safely
-		if (handleElement) {
+		if (capturedElement) {
 			try {
-				handleElement.releasePointerCapture(event.pointerId);
+				capturedElement.releasePointerCapture(event.pointerId);
 			} catch {
 				// Already released or invalid
 			}
 		}
+		capturedElement = null;
 		activePointerId = null;
 		isDragging = false;
 
@@ -276,6 +280,7 @@
 	function handlePointerCancel(event: PointerEvent) {
 		if (event.pointerId !== activePointerId) return;
 
+		capturedElement = null;
 		activePointerId = null;
 		isDragging = false;
 
@@ -370,7 +375,14 @@
 				</div>
 			{:else if merchant}
 				{#if !expanded}
-					<div class="px-4 pt-2 pb-4">
+					<!-- Peek content wrapper with swipe handlers - allows swiping from anywhere when collapsed -->
+					<div
+						class="touch-none px-4 pt-2 pb-4"
+						on:pointerdown={handlePointerDown}
+						on:pointermove={handlePointerMove}
+						on:pointerup={handlePointerUp}
+						on:pointercancel={handlePointerCancel}
+					>
 						<MerchantPeekContentMobile
 							{merchant}
 							{isUpToDate}
