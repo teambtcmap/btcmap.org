@@ -20,7 +20,7 @@ const initialState: MerchantListState = {
 	isFetchingDetails: false
 };
 
-// Distance calculation (squared - fine for sorting)
+// Equirectangular approximation - accurate for local sorting, not precise distance
 function getDistanceSquared(lat1: number, lon1: number, lat2: number, lon2: number): number {
 	const dx = (lon2 - lon1) * Math.cos(((lat1 + lat2) / 2) * (Math.PI / 180));
 	const dy = lat2 - lat1;
