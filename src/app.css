@@ -15,6 +15,10 @@
 	::selection {
 		@apply bg-[#53c5d5] text-white;
 	}
+
+	button {
+		cursor: pointer;
+	}
 }
 
 @layer utilities {
