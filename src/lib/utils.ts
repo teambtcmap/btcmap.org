@@ -19,6 +19,24 @@ import {
 	isToday
 } from 'date-fns';
 
+// Yields to main thread to prevent UI freezes during heavy operations (browser-only)
+export function yieldToMain(): Promise<void> {
+	// SSR guard - window not available during server rendering
+	if (typeof window === 'undefined') return Promise.resolve();
+
+	return new Promise((resolve) => {
+		// Use scheduler.yield() if available (Chrome 115+), otherwise setTimeout
+		if (
+			'scheduler' in window &&
+			'yield' in (window as { scheduler?: { yield?: () => Promise<void> } }).scheduler!
+		) {
+			(window as { scheduler: { yield: () => Promise<void> } }).scheduler.yield().then(resolve);
+		} else {
+			setTimeout(resolve, 0);
+		}
+	});
+}
+
 export const errToast = (m: string) => {
 	toast.push(m, {
 		theme: {
