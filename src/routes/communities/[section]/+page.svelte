@@ -8,6 +8,7 @@
 	import HeaderPlaceholder from '$components/HeaderPlaceholder.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import { areaError, areas, reportError, syncStatus, theme } from '$lib/store';
+	import { areasSync } from '$lib/sync/areas';
 	import { detectTheme, errToast } from '$lib/utils';
 	import { getOrganizationDisplayName } from '$lib/organizationDisplayNames';
 	import type { Community } from '$lib/types';
@@ -253,6 +254,8 @@
 	};
 
 	onMount(() => {
+		areasSync();
+
 		if (browser) {
 			continentChartCanvas.getContext('2d');
 			initialRenderComplete = true;
