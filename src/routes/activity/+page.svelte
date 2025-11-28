@@ -6,8 +6,16 @@
 	import TaggerSkeleton from '$components/TaggerSkeleton.svelte';
 	import TopButton from '$components/TopButton.svelte';
 	import { placesError, eventError, events, syncStatus, theme, userError, users } from '$lib/store';
+	import { eventsSync } from '$lib/sync/events';
+	import { usersSync } from '$lib/sync/users';
 	import type { ActivityEvent, Event, User } from '$lib/types';
 	import { detectTheme, errToast, formatElementID } from '$lib/utils';
+	import { onMount } from 'svelte';
+
+	onMount(() => {
+		eventsSync();
+		usersSync();
+	});
 
 	// alert for user errors
 	$: $userError && errToast($userError);

@@ -46,6 +46,10 @@
 		userError,
 		users
 	} from '$lib/store';
+	import { areasSync } from '$lib/sync/areas';
+	import { eventsSync } from '$lib/sync/events';
+	import { reportsSync } from '$lib/sync/reports';
+	import { usersSync } from '$lib/sync/users';
 	import type {
 		Area,
 		BaseMaps,
@@ -319,6 +323,11 @@
 	let baseMaps: BaseMaps;
 
 	onMount(async () => {
+		eventsSync();
+		usersSync();
+		areasSync();
+		reportsSync();
+
 		if (browser) {
 			const deps = await loadMapDependencies();
 			leaflet = deps.leaflet;
