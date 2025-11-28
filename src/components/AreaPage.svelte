@@ -35,6 +35,7 @@
 	import { eventsSync } from '$lib/sync/events';
 	import { reportsSync } from '$lib/sync/reports';
 	import { usersSync } from '$lib/sync/users';
+	import { batchSync } from '$lib/sync/batchSync';
 	import {
 		TipType,
 		type ActivityEvent,
@@ -57,10 +58,7 @@
 	axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 	onMount(() => {
-		areasSync();
-		reportsSync();
-		eventsSync();
-		usersSync();
+		batchSync([areasSync, reportsSync, eventsSync, usersSync]);
 	});
 
 	// alert for user errors

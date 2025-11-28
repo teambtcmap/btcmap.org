@@ -23,16 +23,14 @@
 	import { eventsSync } from '$lib/sync/events';
 	import { reportsSync } from '$lib/sync/reports';
 	import { usersSync } from '$lib/sync/users';
+	import { batchSync } from '$lib/sync/batchSync';
 	import { resolve } from '$app/paths';
 	import type { Area, Place } from '$lib/types';
 	import { errToast, formatElementID } from '$lib/utils';
 	import { onMount } from 'svelte';
 
 	onMount(() => {
-		eventsSync();
-		usersSync();
-		areasSync();
-		reportsSync();
+		batchSync([eventsSync, usersSync, areasSync, reportsSync]);
 	});
 
 	// alert for all errors

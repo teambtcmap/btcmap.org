@@ -8,13 +8,13 @@
 	import { placesError, eventError, events, syncStatus, theme, userError, users } from '$lib/store';
 	import { eventsSync } from '$lib/sync/events';
 	import { usersSync } from '$lib/sync/users';
+	import { batchSync } from '$lib/sync/batchSync';
 	import type { ActivityEvent, Event, User } from '$lib/types';
 	import { detectTheme, errToast, formatElementID } from '$lib/utils';
 	import { onMount } from 'svelte';
 
 	onMount(() => {
-		eventsSync();
-		usersSync();
+		batchSync([eventsSync, usersSync]);
 	});
 
 	// alert for user errors

@@ -27,6 +27,7 @@
 	} from '$lib/types.js';
 	import { eventsSync } from '$lib/sync/events';
 	import { usersSync } from '$lib/sync/users';
+	import { batchSync } from '$lib/sync/batchSync';
 	import { errToast, formatElementID } from '$lib/utils';
 	import Chart from 'chart.js/auto';
 	import { format } from 'date-fns';
@@ -392,8 +393,7 @@
 	};
 
 	onMount(async () => {
-		eventsSync();
-		usersSync();
+		batchSync([eventsSync, usersSync]);
 
 		if (browser) {
 			// setup chart

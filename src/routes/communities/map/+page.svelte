@@ -17,6 +17,7 @@
 	import { areaError, areas, reportError, reports } from '$lib/store';
 	import { areasSync } from '$lib/sync/areas';
 	import { reportsSync } from '$lib/sync/reports';
+	import { batchSync } from '$lib/sync/batchSync';
 	import type { Leaflet, Theme } from '$lib/types';
 	import { detectTheme, errToast } from '$lib/utils';
 	import rewind from '@mapbox/geojson-rewind';
@@ -201,8 +202,7 @@
 		initializeCommunities();
 
 	onMount(async () => {
-		areasSync();
-		reportsSync();
+		batchSync([areasSync, reportsSync]);
 
 		if (browser) {
 			theme = detectTheme();
