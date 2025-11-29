@@ -18,10 +18,36 @@ test.describe('Map Drawer', () => {
 
 	test.afterEach(async ({ page }) => {
 		const errors = (page as unknown as { _consoleErrors: string[] })._consoleErrors || [];
-		if (errors.length > 0) {
-			throw new Error(`Console errors detected:\n${errors.join('\n')}`);
+		// Filter out non-critical errors (resource loading failures from external services)
+		const criticalErrors = errors.filter((error) => {
+			if (error.includes('Failed to load resource')) return false;
+			if (error.includes('net::ERR_')) return false;
+			return true;
+		});
+		if (criticalErrors.length > 0) {
+			throw new Error(`Console errors detected:\n${criticalErrors.join('\n')}`);
 		}
 	});
+
+	// Helper: wait for places API response, then for markers to render
+	async function waitForMarkersToLoad(page: import('@playwright/test').Page) {
+		// First wait for the places API to respond
+		try {
+			await page.waitForResponse(
+				(response) => response.url().includes('api.btcmap.org/v4/places') && response.ok(),
+				{ timeout: 30000 }
+			);
+		} catch {
+			// API may have already responded before we started waiting
+			// Continue and check if markers exist
+		}
+
+		// Then wait for markers to render in DOM
+		await page.waitForFunction(
+			() => document.querySelectorAll('.leaflet-marker-pane > div').length > 0,
+			{ timeout: 15000 }
+		);
+	}
 
 	test('drawer opens on marker click and navigates to merchant detail page', async ({ page }) => {
 		test.setTimeout(180000);
@@ -31,19 +57,10 @@ test.describe('Map Drawer', () => {
 		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
 		await expect(zoomInButton).toBeVisible();
 
-		// Wait longer for map initialization and marker loading
-		await page.waitForTimeout(15000);
+		// Wait for API response and markers to render
+		await waitForMarkersToLoad(page);
 
 		const findAndClickMarker = async () => {
-			// Wait for markers to actually exist in DOM
-			await page.waitForFunction(
-				() => {
-					const markers = document.querySelectorAll('.leaflet-marker-pane > div');
-					return markers.length > 0;
-				},
-				{ timeout: 30000 }
-			);
-
 			const markerClicked = await page.evaluate(() => {
 				const isInViewport = (element: Element) => {
 					const rect = element.getBoundingClientRect();
@@ -166,17 +183,8 @@ test.describe('Map Drawer', () => {
 		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
 		await expect(zoomInButton).toBeVisible();
 
-		// Wait longer for markers to load
-		await page.waitForTimeout(15000);
-
-		// Wait for markers to exist
-		await page.waitForFunction(
-			() => {
-				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
-				return markers.length > 0;
-			},
-			{ timeout: 30000 }
-		);
+		// Wait for API response and markers to render
+		await waitForMarkersToLoad(page);
 
 		const markerClicked = await page.evaluate(() => {
 			const markers = document.querySelectorAll(
@@ -291,10 +299,6 @@ test.describe('Map Drawer', () => {
 			console.error('API response wait failed:', error);
 		}
 
-		// Mobile drawer should show merchant content
-		// Check for merchant name or details to be visible
-		await page.waitForTimeout(2000);
-
 		// Verify drawer has content (merchant should be loaded)
 		const drawerContent = drawer.locator('h3, a');
 		await expect(drawerContent.first()).toBeVisible({ timeout: 10000 });
@@ -312,9 +316,6 @@ test.describe('Map Drawer', () => {
 		// Wait for drawer to open
 		const drawer = page.locator('[role="dialog"]');
 		await expect(drawer).toBeVisible({ timeout: 15000 });
-
-		// Wait for data
-		await page.waitForTimeout(2000);
 
 		// Verify "Back" button is visible (indicates we're in a nested view like boost)
 		const backButton = page.getByRole('button', { name: /back/i });

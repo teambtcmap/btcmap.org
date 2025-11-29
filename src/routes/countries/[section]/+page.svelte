@@ -6,11 +6,17 @@
 	import HeaderPlaceholder from '$components/HeaderPlaceholder.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import { areaError, areas, theme } from '$lib/store';
+	import { areasSync } from '$lib/sync/areas';
 	import { detectTheme, errToast, validateContinents } from '$lib/utils';
 	import type { PageData } from './$types';
 	import { resolve } from '$app/paths';
+	import { onMount } from 'svelte';
 
 	export let data: PageData;
+
+	onMount(() => {
+		areasSync();
+	});
 
 	// alert for area errors
 	$: $areaError && errToast($areaError);

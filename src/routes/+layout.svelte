@@ -1,10 +1,6 @@
 <script lang="ts">
 	import { syncStatus } from '$lib/store';
-	import { areasSync } from '$lib/sync/areas';
 	import { elementsSync } from '$lib/sync/places';
-	import { eventsSync } from '$lib/sync/events';
-	import { reportsSync } from '$lib/sync/reports';
-	import { usersSync } from '$lib/sync/users';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
 	import axios from 'axios';
 	import 'leaflet.locatecontrol/dist/L.Control.Locate.min.css';
@@ -35,24 +31,11 @@
 		const dataSync = async () => {
 			$syncStatus = true;
 
-			// CRITICAL: Load places first (map is primary use case)
+			// Load places (map is primary use case)
+			// Other syncs (events, users, areas, reports) are lazy-loaded by pages that need them
 			await elementsSync();
 
 			$syncStatus = false;
-
-			// DEFER: Non-critical data can wait - schedule during idle time
-			const syncNonCritical = () => {
-				Promise.allSettled([eventsSync(), usersSync(), areasSync(), reportsSync()]).then(
-					(results) => results.forEach((result) => console.info(result.status))
-				);
-			};
-
-			// Use requestIdleCallback if available, otherwise defer with shorter timeout for Safari
-			if ('requestIdleCallback' in window) {
-				requestIdleCallback(syncNonCritical, { timeout: 5000 });
-			} else {
-				setTimeout(syncNonCritical, 500);
-			}
 		};
 
 		dataSync();
