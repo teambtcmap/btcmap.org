@@ -1140,6 +1140,13 @@
 	<!-- Desktop: Merchant list panel (flexbox, not overlay) -->
 	<MerchantListPanel
 		onPanToPlace={panToMerchantIfNeeded}
+		onHoverStart={(place) => highlightMarker(place.id)}
+		onHoverEnd={(place) => {
+			// Don't clear if this is the selected marker
+			if (selectedMarkerId !== place.id) {
+				clearMarkerSelection(place.id);
+			}
+		}}
 		mapCenter={mapCenter ? { lat: mapCenter.lat, lon: mapCenter.lng } : undefined}
 		{mapRadiusKm}
 	/>
