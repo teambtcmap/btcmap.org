@@ -19,6 +19,7 @@
 	export let mapRadiusKm: number | undefined = undefined;
 
 	$: isOpen = $merchantList.isOpen;
+	$: isExpanded = $merchantList.isExpanded;
 	$: merchants = $merchantList.merchants;
 	$: enrichedPlaces = $merchantList.enrichedPlaces;
 	$: isLoading = $merchantList.isLoading;
@@ -45,7 +46,7 @@
 	}
 
 	function handleClose() {
-		merchantList.close();
+		merchantList.collapse();
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -71,7 +72,7 @@
 	});
 </script>
 
-{#if isOpen}
+{#if isOpen && isExpanded}
 	<section
 		class="hidden flex-none flex-col overflow-hidden border-r border-white/10 bg-white md:flex dark:border-white/5 dark:bg-dark"
 		style="width: {MERCHANT_LIST_WIDTH}px"

@@ -1279,6 +1279,19 @@
 			{/if}
 		</div>
 
+		<!-- Floating expand button when merchant list is collapsed -->
+		{#if $merchantList.isOpen && !$merchantList.isExpanded}
+			<button
+				on:click={() => merchantList.expand()}
+				class="absolute top-[10px] left-[60px] z-[1000] hidden items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-medium shadow-lg transition-colors hover:bg-gray-50 md:flex dark:bg-dark dark:hover:bg-white/10"
+				style="filter: drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3));"
+				aria-label="Show merchant list"
+			>
+				<Icon w="18" h="18" icon="menu" style="outline" type="material" />
+				<span class="text-primary dark:text-white">{$merchantList.merchants.length} Nearby</span>
+			</button>
+		{/if}
+
 		<div bind:this={mapElement} class="absolute inset-0 !bg-teal dark:!bg-dark" />
 	</div>
 

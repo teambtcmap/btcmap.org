@@ -6,6 +6,7 @@ import { isBoosted } from '$lib/merchantDrawerLogic';
 
 export interface MerchantListState {
 	isOpen: boolean;
+	isExpanded: boolean;
 	merchants: Place[];
 	enrichedPlaces: Map<number, Place>;
 	isLoading: boolean;
@@ -14,6 +15,7 @@ export interface MerchantListState {
 
 const initialState: MerchantListState = {
 	isOpen: false,
+	isExpanded: true,
 	merchants: [],
 	enrichedPlaces: new Map(),
 	isLoading: false,
@@ -67,10 +69,19 @@ function createMerchantListStore() {
 			update((state) => ({
 				...state,
 				isOpen: false,
+				isExpanded: true,
 				merchants: [],
 				enrichedPlaces: new Map(),
 				isFetchingDetails: false
 			}));
+		},
+
+		collapse() {
+			update((state) => ({ ...state, isExpanded: false }));
+		},
+
+		expand() {
+			update((state) => ({ ...state, isExpanded: true }));
 		},
 
 		setMerchants(merchants: Place[], centerLat?: number, centerLon?: number, limit: number = 50) {
