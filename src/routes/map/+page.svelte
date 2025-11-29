@@ -9,7 +9,13 @@
 	import MerchantListPanel from '$components/MerchantListPanel.svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import { merchantList } from '$lib/merchantListStore';
-	import { BREAKPOINTS, MERCHANT_LIST_WIDTH, MERCHANT_DRAWER_WIDTH } from '$lib/constants';
+	import {
+		BREAKPOINTS,
+		MERCHANT_LIST_WIDTH,
+		MERCHANT_DRAWER_WIDTH,
+		CLUSTERING_DISABLED_ZOOM
+	} from '$lib/constants';
+	import { panToLocationIfNeeded } from '$lib/mapPanUtils';
 	import {
 		processPlaces,
 		isSupported as isWorkerSupported,
@@ -88,8 +94,6 @@
 	const DEFAULT_LNG = -68.91119;
 	const DEFAULT_ZOOM = 15;
 
-	// List panel shows when zoom >= this threshold (clustering disabled at 17)
-	const LIST_ZOOM_THRESHOLD = 17;
 	let currentZoom = DEFAULT_ZOOM;
 
 	// Throttled marker drawer opening to prevent freeze on rapid clicks
@@ -570,7 +574,7 @@
 			return;
 		}
 
-		if (currentZoom >= LIST_ZOOM_THRESHOLD) {
+		if (currentZoom >= CLUSTERING_DISABLED_ZOOM) {
 			const bounds = map.getBounds();
 			const center = map.getCenter();
 			// Get places that are loaded and within current viewport
@@ -594,50 +598,15 @@
 	const panToMerchantIfNeeded = (place: Place) => {
 		if (!map || !browser) return;
 
-		const point = map.latLngToContainerPoint([place.lat, place.lon]);
-		const mapSize = map.getSize();
-
-		// Calculate left offset based on open panels
-		const listWidth = $merchantList.isOpen ? MERCHANT_LIST_WIDTH : 0;
-		const drawerWidth = $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0;
-		const leftOffset = listWidth + drawerWidth;
-
-		// Effective visible bounds with padding
-		const padding = 50;
-		const effectiveBounds = {
-			left: leftOffset + padding,
-			right: mapSize.x - padding,
-			top: padding,
-			bottom: mapSize.y - padding
-		};
-
-		// Check if marker is outside effective bounds
-		const isOutside =
-			point.x < effectiveBounds.left ||
-			point.x > effectiveBounds.right ||
-			point.y < effectiveBounds.top ||
-			point.y > effectiveBounds.bottom;
-
-		if (isOutside) {
-			// Calculate the center of the effective visible area
-			const effectiveCenterX = leftOffset + (mapSize.x - leftOffset) / 2;
-			const effectiveCenterY = mapSize.y / 2;
-
-			// Calculate offset needed to put marker at effective center
-			const offsetX = point.x - effectiveCenterX;
-			const offsetY = point.y - effectiveCenterY;
-
-			// Get current center and apply offset
-			const currentCenter = map.getCenter();
-			const currentCenterPoint = map.latLngToContainerPoint(currentCenter);
-			const newCenterPoint = leaflet.point(
-				currentCenterPoint.x + offsetX,
-				currentCenterPoint.y + offsetY
-			);
-			const newCenter = map.containerPointToLatLng(newCenterPoint);
-
-			map.panTo(newCenter, { animate: true, duration: 0.3 });
-		}
+		panToLocationIfNeeded(
+			map,
+			leaflet,
+			{ lat: place.lat, lon: place.lon },
+			{
+				listWidth: $merchantList.isOpen ? MERCHANT_LIST_WIDTH : 0,
+				drawerWidth: $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0
+			}
+		);
 	};
 
 	const initializeElements = async () => {
@@ -652,7 +621,7 @@
 		// @ts-expect-error - L is global from Leaflet
 		markers = L.markerClusterGroup({
 			maxClusterRadius: 80,
-			disableClusteringAtZoom: 17,
+			disableClusteringAtZoom: CLUSTERING_DISABLED_ZOOM,
 			chunkedLoading: true,
 			chunkInterval: 50,
 			chunkDelay: 50
@@ -1124,6 +1093,9 @@
 		if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
 		if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
 		if (debouncedUpdateMerchantList?.cancel) debouncedUpdateMerchantList.cancel();
+
+		// Clear pending pan timeout
+		if (panTimeout) clearTimeout(panTimeout);
 
 		// Reset merchant list
 		merchantList.reset();
