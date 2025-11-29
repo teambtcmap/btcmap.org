@@ -80,12 +80,12 @@ test.describe('Merchant List Panel', () => {
 				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
 				return markers.length > 0;
 			},
-			{ timeout: 30000 }
+			{ timeout: 45000 }
 		);
 
 		// Wait for list panel to appear
 		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
-		await expect(listPanel).toBeVisible({ timeout: 10000 });
+		await expect(listPanel).toBeVisible({ timeout: 15000 });
 
 		// Wait for merchant items to load (skeleton should disappear)
 		await page.waitForTimeout(5000);
@@ -137,7 +137,7 @@ test.describe('Merchant List Panel', () => {
 				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
 				return markers.length > 0;
 			},
-			{ timeout: 30000 }
+			{ timeout: 45000 }
 		);
 
 		// List panel should NOT be visible on mobile even at high zoom

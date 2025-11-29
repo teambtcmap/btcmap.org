@@ -1,4 +1,4 @@
-import { writable, get } from 'svelte/store';
+import { writable } from 'svelte/store';
 import axios from 'axios';
 import type { Place } from '$lib/types';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
@@ -19,9 +19,6 @@ const initialState: MerchantListState = {
 	isLoading: false,
 	isFetchingDetails: false
 };
-
-// Maximum number of enriched places to cache (FIFO eviction)
-const MAX_ENRICHED_CACHE = 200;
 
 // Equirectangular approximation - accurate for local sorting, not precise distance
 function getDistanceSquared(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -55,18 +52,6 @@ function createMerchantListStore() {
 
 	let abortController: AbortController | null = null;
 
-	async function fetchSinglePlace(id: number, signal: AbortSignal): Promise<Place | null> {
-		try {
-			const response = await axios.get<Place>(
-				`https://api.btcmap.org/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.LIST_ITEM)}`,
-				{ timeout: 10000, signal }
-			);
-			return response.data;
-		} catch {
-			return null;
-		}
-	}
-
 	return {
 		subscribe,
 
@@ -98,53 +83,29 @@ function createMerchantListStore() {
 			update((state) => ({ ...state, isLoading }));
 		},
 
-		async fetchDetails(placeIds: number[]) {
-			const currentState = get(store);
-
-			// Filter out already-fetched places
-			const idsToFetch = placeIds.filter((id) => !currentState.enrichedPlaces.has(id));
-			if (idsToFetch.length === 0) return;
-
+		async fetchByRadius(center: { lat: number; lon: number }, radiusKm: number) {
 			// Cancel any pending requests
 			if (abortController) {
 				abortController.abort();
 			}
 			abortController = new AbortController();
-			const signal = abortController.signal;
 
 			update((state) => ({ ...state, isFetchingDetails: true }));
 
 			try {
-				// Fetch in parallel with concurrency limit of 5
-				const concurrencyLimit = 5;
-				for (let i = 0; i < idsToFetch.length; i += concurrencyLimit) {
-					if (signal.aborted) break;
+				const fields = buildFieldsParam(PLACE_FIELD_SETS.LIST_ITEM);
+				const response = await axios.get<Place[]>(
+					`https://api.btcmap.org/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=${fields}`,
+					{ timeout: 10000, signal: abortController.signal }
+				);
 
-					const batch = idsToFetch.slice(i, i + concurrencyLimit);
-					const results = await Promise.all(batch.map((id) => fetchSinglePlace(id, signal)));
+				// Build enriched places map (no caching - just replace)
+				const enrichedPlaces = new Map<number, Place>();
+				response.data.forEach((place) => enrichedPlaces.set(place.id, place));
 
-					if (signal.aborted) break;
-
-					update((state) => {
-						const newEnrichedPlaces = new Map(state.enrichedPlaces);
-						results.forEach((place, idx) => {
-							if (place) {
-								newEnrichedPlaces.set(batch[idx], place);
-							}
-						});
-
-						// Evict oldest entries if cache exceeds limit (FIFO)
-						if (newEnrichedPlaces.size > MAX_ENRICHED_CACHE) {
-							const keysToDelete = [...newEnrichedPlaces.keys()].slice(
-								0,
-								newEnrichedPlaces.size - MAX_ENRICHED_CACHE
-							);
-							keysToDelete.forEach((k) => newEnrichedPlaces.delete(k));
-						}
-
-						return { ...state, enrichedPlaces: newEnrichedPlaces };
-					});
-				}
+				update((state) => ({ ...state, enrichedPlaces }));
+			} catch {
+				// Silently fail - list will show without enriched data
 			} finally {
 				update((state) => ({ ...state, isFetchingDetails: false }));
 			}
