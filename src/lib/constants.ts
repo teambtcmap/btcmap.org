@@ -15,6 +15,14 @@ export const BREAKPOINTS = {
 	'2xl': 1536
 } as const;
 
+// Layout widths for merchant list and drawer (in pixels)
+export const MERCHANT_LIST_WIDTH = 320;
+export const MERCHANT_DRAWER_WIDTH = 400;
+
+// Zoom level at which marker clustering is disabled and individual markers are shown
+// Also used as threshold for showing the merchant list panel
+export const CLUSTERING_DISABLED_ZOOM = 17;
+
 export const GradeTable = `<table>
 <thead>
     <tr>
