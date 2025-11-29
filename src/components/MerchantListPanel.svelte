@@ -11,6 +11,9 @@
 
 	// Callback to pan map when a merchant is clicked from the list
 	export let onPanToPlace: ((place: Place) => void) | undefined = undefined;
+	// Callbacks for hover highlighting
+	export let onHoverStart: ((place: Place) => void) | undefined = undefined;
+	export let onHoverEnd: ((place: Place) => void) | undefined = undefined;
 	// Map center and radius for fetching enriched data via search API
 	export let mapCenter: { lat: number; lon: number } | undefined = undefined;
 	export let mapRadiusKm: number | undefined = undefined;
@@ -31,6 +34,14 @@
 		merchantDrawer.open(place.id, 'details');
 		// Pan to merchant only when clicked from list (not from map markers)
 		onPanToPlace?.(place);
+	}
+
+	function handleMouseEnter(event: CustomEvent<Place>) {
+		onHoverStart?.(event.detail);
+	}
+
+	function handleMouseLeave(event: CustomEvent<Place>) {
+		onHoverEnd?.(event.detail);
 	}
 
 	function handleClose() {
@@ -98,6 +109,8 @@
 							enrichedData={enrichedPlaces.get(merchant.id) || null}
 							isSelected={selectedId === merchant.id}
 							on:click={handleItemClick}
+							on:mouseenter={handleMouseEnter}
+							on:mouseleave={handleMouseLeave}
 						/>
 					{/each}
 				</ul>

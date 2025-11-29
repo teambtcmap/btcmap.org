@@ -14,7 +14,7 @@
 	export let enrichedData: Place | null = null;
 	export let isSelected: boolean = false;
 
-	const dispatch = createEventDispatcher<{ click: Place }>();
+	const dispatch = createEventDispatcher<{ click: Place; mouseenter: Place; mouseleave: Place }>();
 
 	const verifiedDate = calcVerifiedDate();
 
@@ -46,6 +46,8 @@
 	<button
 		on:click={handleClick}
 		on:keydown={handleKeydown}
+		on:mouseenter={() => dispatch('mouseenter', merchant)}
+		on:mouseleave={() => dispatch('mouseleave', merchant)}
 		class="w-full px-3 py-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-white/5 {isSelected
 			? 'bg-link/5 dark:bg-link/10'
 			: ''}"
