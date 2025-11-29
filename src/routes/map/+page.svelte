@@ -372,6 +372,12 @@
 
 	$: map && mapLoaded && $mapUpdates && $placesSyncCount > 1 && showDataRefresh();
 
+	// Reload markers and update merchant list when places sync completes after initial load
+	$: if (elementsLoaded && $places.length && currentZoom >= CLUSTERING_DISABLED_ZOOM) {
+		debouncedLoadMarkers();
+		debouncedUpdateMerchantList();
+	}
+
 	// alert for map errors
 	$: $placesError && errToast($placesError);
 
@@ -663,6 +669,10 @@
 		});
 
 		mapLoadingStatus = 'Loading places in view...';
+
+		// Initialize mapCenter and mapRadiusKm for merchant list panel
+		mapCenter = map.getCenter();
+		mapRadiusKm = calculateRadiusKm(map.getBounds());
 
 		// Load initial markers for current viewport
 		// NOTE: Don't set isLoadingMarkers=true here, let loadMarkersInViewport handle it
