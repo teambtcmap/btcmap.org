@@ -10,7 +10,6 @@
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import { merchantList } from '$lib/merchantListStore';
 	import { BREAKPOINTS, MERCHANT_DRAWER_WIDTH, CLUSTERING_DISABLED_ZOOM } from '$lib/constants';
-	import { panToLocationIfNeeded } from '$lib/mapPanUtils';
 	import {
 		processPlaces,
 		isSupported as isWorkerSupported,
@@ -591,19 +590,32 @@
 	// Debounced version to prevent excessive updates during pan/zoom
 	const debouncedUpdateMerchantList = debounce(updateMerchantList, DEBOUNCE_DELAY);
 
-	// Pan map to show selected merchant if it's hidden behind drawers
+	// Pan map to center selected merchant when clicked from list
 	const panToMerchantIfNeeded = (place: Place) => {
 		if (!map || !browser) return;
 
-		panToLocationIfNeeded(
-			map,
-			leaflet,
-			{ lat: place.lat, lon: place.lon },
-			{
-				listWidth: 0, // List uses flexbox, doesn't overlay map
-				drawerWidth: $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0
-			}
+		// Always center the map on the merchant for clear visual feedback
+		// Account for drawer width by offsetting the center point
+		const drawerWidth = $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0;
+		const mapSize = map.getSize();
+
+		// Calculate the center of the visible area (excluding drawer)
+		const visibleCenterX = (mapSize.x - drawerWidth) / 2;
+		const targetPoint = map.latLngToContainerPoint([place.lat, place.lon]);
+
+		// Calculate offset to center merchant in visible area
+		const offsetX = targetPoint.x - visibleCenterX;
+		const offsetY = targetPoint.y - mapSize.y / 2;
+
+		const currentCenter = map.getCenter();
+		const currentCenterPoint = map.latLngToContainerPoint(currentCenter);
+		const newCenterPoint = leaflet.point(
+			currentCenterPoint.x + offsetX,
+			currentCenterPoint.y + offsetY
 		);
+		const newCenter = map.containerPointToLatLng(newCenterPoint);
+
+		map.panTo(newCenter, { animate: true, duration: 0.3 });
 	};
 
 	const initializeElements = async () => {
