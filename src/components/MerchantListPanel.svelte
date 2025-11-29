@@ -11,6 +11,9 @@
 
 	// Callback to pan map when a merchant is clicked from the list
 	export let onPanToPlace: ((place: Place) => void) | undefined = undefined;
+	// Map center and radius for fetching enriched data via search API
+	export let mapCenter: { lat: number; lon: number } | undefined = undefined;
+	export let mapRadiusKm: number | undefined = undefined;
 
 	$: isOpen = $merchantList.isOpen;
 	$: merchants = $merchantList.merchants;
@@ -18,10 +21,9 @@
 	$: isLoading = $merchantList.isLoading;
 	$: selectedId = $merchantDrawer.merchantId;
 
-	// Trigger fetch when merchants change
-	$: if (isOpen && merchants.length > 0) {
-		const placeIds = merchants.map((m) => m.id);
-		merchantList.fetchDetails(placeIds);
+	// Fetch enriched data using search API when panel opens
+	$: if (isOpen && mapCenter && mapRadiusKm) {
+		merchantList.fetchByRadius(mapCenter, mapRadiusKm);
 	}
 
 	function handleItemClick(event: CustomEvent<Place>) {

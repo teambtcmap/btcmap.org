@@ -139,6 +139,25 @@
 	let isZooming = false;
 
 	let mapCenter: LatLng;
+	let mapRadiusKm: number | undefined;
+
+	// Calculate radius from map center to corner (Haversine formula)
+	const calculateRadiusKm = (bounds: LatLngBounds): number => {
+		const center = bounds.getCenter();
+		const corner = bounds.getNorthEast();
+
+		const R = 6371; // Earth radius in km
+		const dLat = ((corner.lat - center.lat) * Math.PI) / 180;
+		const dLon = ((corner.lng - center.lng) * Math.PI) / 180;
+		const a =
+			Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+			Math.cos((center.lat * Math.PI) / 180) *
+				Math.cos((corner.lat * Math.PI) / 180) *
+				Math.sin(dLon / 2) *
+				Math.sin(dLon / 2);
+		const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+		return R * c * 1.1; // Add 10% buffer
+	};
 
 	const clearMarkerSelection = (markerId: number) => {
 		const marker = loadedMarkers[markerId.toString()];
@@ -621,6 +640,7 @@
 			isZooming = false;
 			const coords = map.getBounds();
 			mapCenter = map.getCenter();
+			mapRadiusKm = calculateRadiusKm(coords);
 			currentZoom = map.getZoom();
 
 			// Update hash if not using URL parameters
@@ -1106,7 +1126,11 @@
 	<MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
 
 	<!-- Desktop: Merchant list panel (flexbox, not overlay) -->
-	<MerchantListPanel onPanToPlace={panToMerchantIfNeeded} />
+	<MerchantListPanel
+		onPanToPlace={panToMerchantIfNeeded}
+		mapCenter={mapCenter ? { lat: mapCenter.lat, lon: mapCenter.lng } : undefined}
+		{mapRadiusKm}
+	/>
 
 	<!-- Map container -->
 	<div class="relative flex-1">
