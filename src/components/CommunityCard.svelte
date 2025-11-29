@@ -46,6 +46,7 @@
 			class="space-y-2 text-link transition-colors hover:text-hover"
 		>
 			<img
+				loading="lazy"
 				src={image
 					? `https://btcmap.org/.netlify/images?url=${image}&fit=cover&w=256&h=256`
 					: '/images/bitcoin.svg'}
