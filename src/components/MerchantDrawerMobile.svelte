@@ -20,7 +20,7 @@
 	} from '$lib/merchantDrawerLogic';
 
 	// Gesture constants
-	const PEEK_HEIGHT = 200; // Collapsed state height - shows merchant name and quick info
+	const PEEK_HEIGHT = 140; // Collapsed state height - shows merchant name and quick info
 	const VELOCITY_THRESHOLD = 0.5; // px/ms - minimum velocity for flick gesture detection
 	const DISTANCE_THRESHOLD = 80; // px - minimum drag distance to trigger snap
 	const POSITION_THRESHOLD_PERCENT = 0.3; // When to snap up vs down (30% of total height)
