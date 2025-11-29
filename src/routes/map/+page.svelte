@@ -1287,7 +1287,7 @@
 				style="filter: drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3));"
 				aria-label="Show merchant list"
 			>
-				<Icon w="18" h="18" icon="menu" style="outline" type="material" />
+				<Icon w="18" h="18" icon="menu" type="material" style="text-primary dark:text-white" />
 				<span class="text-primary dark:text-white">{$merchantList.merchants.length} Nearby</span>
 			</button>
 		{/if}
