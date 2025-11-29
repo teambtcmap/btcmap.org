@@ -139,7 +139,6 @@
 	let upToDateLayer: FeatureGroup.SubGroup;
 	let loadedMarkers: Record<string, Marker> = {};
 	let selectedMarkerId: number | null = null;
-	let panTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	let isLoadingMarkers = false;
 	let isZooming = false;
@@ -366,22 +365,6 @@
 
 	// alert for map errors
 	$: $placesError && errToast($placesError);
-
-	// Pan to merchant when drawer opens from list click
-	$: if (
-		$merchantDrawer.isOpen &&
-		$merchantDrawer.merchantId &&
-		mapLoaded &&
-		$merchantList.isOpen
-	) {
-		const place = $placesById.get($merchantDrawer.merchantId);
-		if (place) {
-			// Clear any pending pan timeout to prevent overlapping timers
-			if (panTimeout) clearTimeout(panTimeout);
-			// Small delay to ensure drawer state is updated
-			panTimeout = setTimeout(() => panToMerchantIfNeeded(place), 50);
-		}
-	}
 
 	// Update marker icon when place is updated (boost or comment)
 	$: if ($lastUpdatedPlaceId && leaflet && loadedMarkers) {
@@ -1094,9 +1077,6 @@
 		if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
 		if (debouncedUpdateMerchantList?.cancel) debouncedUpdateMerchantList.cancel();
 
-		// Clear pending pan timeout
-		if (panTimeout) clearTimeout(panTimeout);
-
 		// Reset merchant list
 		merchantList.reset();
 
@@ -1131,7 +1111,7 @@
 	<MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
 
 	<!-- Desktop: Merchant list panel (flexbox, not overlay) -->
-	<MerchantListPanel />
+	<MerchantListPanel onPanToPlace={panToMerchantIfNeeded} />
 
 	<!-- Map container -->
 	<div class="relative flex-1">

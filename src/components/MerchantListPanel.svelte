@@ -9,6 +9,9 @@
 	import type { Place } from '$lib/types';
 	import { MERCHANT_LIST_WIDTH } from '$lib/constants';
 
+	// Callback to pan map when a merchant is clicked from the list
+	export let onPanToPlace: ((place: Place) => void) | undefined = undefined;
+
 	$: isOpen = $merchantList.isOpen;
 	$: merchants = $merchantList.merchants;
 	$: enrichedPlaces = $merchantList.enrichedPlaces;
@@ -22,7 +25,10 @@
 	}
 
 	function handleItemClick(event: CustomEvent<Place>) {
-		merchantDrawer.open(event.detail.id, 'details');
+		const place = event.detail;
+		merchantDrawer.open(place.id, 'details');
+		// Pan to merchant only when clicked from list (not from map markers)
+		onPanToPlace?.(place);
 	}
 
 	function handleClose() {
