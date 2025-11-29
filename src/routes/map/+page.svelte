@@ -9,12 +9,7 @@
 	import MerchantListPanel from '$components/MerchantListPanel.svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import { merchantList } from '$lib/merchantListStore';
-	import {
-		BREAKPOINTS,
-		MERCHANT_LIST_WIDTH,
-		MERCHANT_DRAWER_WIDTH,
-		CLUSTERING_DISABLED_ZOOM
-	} from '$lib/constants';
+	import { BREAKPOINTS, MERCHANT_DRAWER_WIDTH, CLUSTERING_DISABLED_ZOOM } from '$lib/constants';
 	import { panToLocationIfNeeded } from '$lib/mapPanUtils';
 	import {
 		processPlaces,
@@ -586,7 +581,7 @@
 			leaflet,
 			{ lat: place.lat, lon: place.lon },
 			{
-				listWidth: $merchantList.isOpen ? MERCHANT_LIST_WIDTH : 0,
+				listWidth: 0, // List uses flexbox, doesn't overlay map
 				drawerWidth: $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0
 			}
 		);
