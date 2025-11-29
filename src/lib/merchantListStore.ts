@@ -20,6 +20,9 @@ const initialState: MerchantListState = {
 	isFetchingDetails: false
 };
 
+// Maximum number of enriched places to cache (FIFO eviction)
+const MAX_ENRICHED_CACHE = 200;
+
 // Equirectangular approximation - accurate for local sorting, not precise distance
 function getDistanceSquared(lat1: number, lon1: number, lat2: number, lon2: number): number {
 	const dx = (lon2 - lon1) * Math.cos(((lat1 + lat2) / 2) * (Math.PI / 180));
@@ -129,6 +132,16 @@ function createMerchantListStore() {
 								newEnrichedPlaces.set(batch[idx], place);
 							}
 						});
+
+						// Evict oldest entries if cache exceeds limit (FIFO)
+						if (newEnrichedPlaces.size > MAX_ENRICHED_CACHE) {
+							const keysToDelete = [...newEnrichedPlaces.keys()].slice(
+								0,
+								newEnrichedPlaces.size - MAX_ENRICHED_CACHE
+							);
+							keysToDelete.forEach((k) => newEnrichedPlaces.delete(k));
+						}
+
 						return { ...state, enrichedPlaces: newEnrichedPlaces };
 					});
 				}
