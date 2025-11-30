@@ -8,7 +8,6 @@ import { get } from 'svelte/store';
 import rewind from '@mapbox/geojson-rewind';
 import { geoContains } from 'd3-geo';
 import DOMPurify from 'dompurify';
-import axios from 'axios';
 import {
 	parseISO,
 	isThisYear,
@@ -61,17 +60,6 @@ export const successToast = (m: string) => {
 		}
 	});
 };
-
-export async function fetchExchangeRate(): Promise<number> {
-	try {
-		const response = await axios.get('https://blockchain.info/ticker');
-		return response.data['USD']['15m'];
-	} catch (error) {
-		console.error('Error fetching exchange rate:', error);
-		errToast('Could not fetch bitcoin exchange rate, please try again or contact BTC Map.');
-		throw error;
-	}
-}
 
 export function getRandomColor() {
 	const letters = '0123456789ABCDEF';

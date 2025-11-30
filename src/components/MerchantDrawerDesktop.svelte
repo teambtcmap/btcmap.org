@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { boost, exchangeRate, resetBoost } from '$lib/store';
+	import { boost, resetBoost } from '$lib/store';
 	import CloseButton from '$components/CloseButton.svelte';
 	import Icon from '$components/Icon.svelte';
 	import { fly } from 'svelte/transition';
@@ -75,7 +75,7 @@
 	});
 
 	$: if (drawerView === 'boost' && merchant) {
-		ensureBoostData(merchant, $exchangeRate, $boost);
+		ensureBoostData(merchant, $boost);
 	}
 
 	export function openDrawer(id: number) {

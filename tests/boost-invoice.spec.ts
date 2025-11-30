@@ -38,7 +38,7 @@ test.describe('Boost Invoice Generation', () => {
 		await expect(page.locator('text=Boost Location')).toBeVisible({ timeout: 10000 });
 
 		// Select first boost option (30 days / $5)
-		const boostOption = page.locator('button').filter({ hasText: /\$5/ }).first();
+		const boostOption = page.locator('button').filter({ hasText: '5,000 sats' }).first();
 		await expect(boostOption).toBeVisible();
 		await boostOption.click({ force: true });
 

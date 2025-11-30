@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import CloseButton from '$components/CloseButton.svelte';
-	import { boost, exchangeRate, resetBoost, lastUpdatedPlaceId } from '$lib/store';
+	import { boost, resetBoost, lastUpdatedPlaceId } from '$lib/store';
 	import OutClick from 'svelte-outclick';
 	import { fly } from 'svelte/transition';
 	import BoostContent from './BoostContent.svelte';
@@ -13,7 +13,6 @@
 			invalidateAll();
 		}
 		$boost = undefined;
-		$exchangeRate = undefined;
 		$resetBoost = $resetBoost + 1;
 		$lastUpdatedPlaceId = undefined;
 		boostComplete = false;
@@ -28,7 +27,7 @@
 	};
 </script>
 
-{#if $boost && $exchangeRate}
+{#if $boost}
 	<OutClick on:outclick={handleOutClick}>
 		<div
 			transition:fly={{ y: 200, duration: 300 }}
