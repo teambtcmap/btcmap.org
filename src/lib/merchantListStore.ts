@@ -7,7 +7,9 @@ import { isBoosted } from '$lib/merchantDrawerLogic';
 export interface MerchantListState {
 	isOpen: boolean;
 	isExpanded: boolean;
+	userCollapsed: boolean;
 	merchants: Place[];
+	totalCount: number;
 	enrichedPlaces: Map<number, Place>;
 	isLoading: boolean;
 	isFetchingDetails: boolean;
@@ -16,7 +18,9 @@ export interface MerchantListState {
 const initialState: MerchantListState = {
 	isOpen: false,
 	isExpanded: true,
+	userCollapsed: false,
 	merchants: [],
+	totalCount: 0,
 	enrichedPlaces: new Map(),
 	isLoading: false,
 	isFetchingDetails: false
@@ -70,24 +74,35 @@ function createMerchantListStore() {
 				...state,
 				isOpen: false,
 				isExpanded: true,
+				userCollapsed: false,
 				merchants: [],
+				totalCount: 0,
 				enrichedPlaces: new Map(),
 				isFetchingDetails: false
 			}));
 		},
 
 		collapse() {
-			update((state) => ({ ...state, isExpanded: false }));
+			update((state) => ({ ...state, isExpanded: false, userCollapsed: true }));
 		},
 
 		expand() {
-			update((state) => ({ ...state, isExpanded: true }));
+			update((state) => ({ ...state, isExpanded: true, userCollapsed: false }));
+		},
+
+		resetUserCollapsed() {
+			update((state) => ({ ...state, userCollapsed: false }));
 		},
 
 		setMerchants(merchants: Place[], centerLat?: number, centerLon?: number, limit: number = 50) {
 			const sorted = sortMerchants(merchants, centerLat, centerLon);
 			const limited = sorted.slice(0, limit);
-			update((state) => ({ ...state, merchants: limited, isLoading: false }));
+			update((state) => ({
+				...state,
+				merchants: limited,
+				totalCount: merchants.length,
+				isLoading: false
+			}));
 		},
 
 		setLoading(isLoading: boolean) {

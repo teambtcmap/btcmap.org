@@ -9,7 +9,12 @@
 	import MerchantListPanel from '$components/MerchantListPanel.svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import { merchantList } from '$lib/merchantListStore';
-	import { BREAKPOINTS, MERCHANT_DRAWER_WIDTH, CLUSTERING_DISABLED_ZOOM } from '$lib/constants';
+	import {
+		BREAKPOINTS,
+		MERCHANT_DRAWER_WIDTH,
+		CLUSTERING_DISABLED_ZOOM,
+		MERCHANT_LIST_MIN_ZOOM
+	} from '$lib/constants';
 	import {
 		processPlaces,
 		isSupported as isWorkerSupported,
@@ -377,7 +382,7 @@
 	$: map && mapLoaded && $mapUpdates && $placesSyncCount > 1 && showDataRefresh();
 
 	// Reload markers and update merchant list when places sync completes after initial load
-	$: if (elementsLoaded && $places.length && currentZoom >= CLUSTERING_DISABLED_ZOOM) {
+	$: if (elementsLoaded && $places.length && currentZoom >= MERCHANT_LIST_MIN_ZOOM) {
 		debouncedLoadMarkers();
 		debouncedUpdateMerchantList();
 	}
@@ -576,7 +581,8 @@
 			return;
 		}
 
-		if (currentZoom >= CLUSTERING_DISABLED_ZOOM) {
+		// Update merchant data when zoomed in enough (for toggle button count)
+		if (currentZoom >= MERCHANT_LIST_MIN_ZOOM) {
 			const bounds = map.getBounds();
 			const center = map.getCenter();
 			// Get places that are loaded and within current viewport
@@ -587,9 +593,9 @@
 			});
 
 			merchantList.setMerchants(visiblePlaces, center.lat, center.lng);
-			merchantList.open();
 		} else {
-			merchantList.close();
+			// Clear merchants when below min zoom, but don't close (user might have it open manually)
+			merchantList.setMerchants([], 0, 0);
 		}
 	};
 
@@ -600,28 +606,41 @@
 	const panToMerchantIfNeeded = (place: Place) => {
 		if (!map || !browser) return;
 
-		// Always center the map on the merchant for clear visual feedback
-		// Account for drawer width by offsetting the center point
-		const drawerWidth = $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0;
-		const mapSize = map.getSize();
+		const panToPlace = () => {
+			// Always center the map on the merchant for clear visual feedback
+			// Account for drawer width by offsetting the center point
+			const drawerWidth = $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0;
+			const mapSize = map.getSize();
 
-		// Calculate the center of the visible area (excluding drawer)
-		const visibleCenterX = (mapSize.x - drawerWidth) / 2;
-		const targetPoint = map.latLngToContainerPoint([place.lat, place.lon]);
+			// Calculate the center of the visible area (excluding drawer)
+			const visibleCenterX = (mapSize.x - drawerWidth) / 2;
+			const targetPoint = map.latLngToContainerPoint([place.lat, place.lon]);
 
-		// Calculate offset to center merchant in visible area
-		const offsetX = targetPoint.x - visibleCenterX;
-		const offsetY = targetPoint.y - mapSize.y / 2;
+			// Calculate offset to center merchant in visible area
+			const offsetX = targetPoint.x - visibleCenterX;
+			const offsetY = targetPoint.y - mapSize.y / 2;
 
-		const currentCenter = map.getCenter();
-		const currentCenterPoint = map.latLngToContainerPoint(currentCenter);
-		const newCenterPoint = leaflet.point(
-			currentCenterPoint.x + offsetX,
-			currentCenterPoint.y + offsetY
-		);
-		const newCenter = map.containerPointToLatLng(newCenterPoint);
+			const currentCenter = map.getCenter();
+			const currentCenterPoint = map.latLngToContainerPoint(currentCenter);
+			const newCenterPoint = leaflet.point(
+				currentCenterPoint.x + offsetX,
+				currentCenterPoint.y + offsetY
+			);
+			const newCenter = map.containerPointToLatLng(newCenterPoint);
 
-		map.panTo(newCenter, { animate: true, duration: 0.3 });
+			map.panTo(newCenter, { animate: true, duration: 0.3 });
+		};
+
+		// If marker exists and is in a cluster, spiderfy the cluster to show the marker
+		const marker = loadedMarkers[place.id.toString()];
+		if (marker && markers) {
+			const cluster = markers.getVisibleParent(marker);
+			// If marker is inside a cluster (not directly visible), spiderfy it
+			if (cluster && cluster !== marker && 'spiderfy' in cluster) {
+				(cluster as { spiderfy: () => void }).spiderfy();
+			}
+		}
+		panToPlace();
 	};
 
 	const initializeElements = async () => {
@@ -1159,6 +1178,7 @@
 		}}
 		mapCenter={mapCenter ? { lat: mapCenter.lat, lon: mapCenter.lng } : undefined}
 		{mapRadiusKm}
+		{currentZoom}
 	/>
 
 	<!-- Map container -->
@@ -1279,16 +1299,26 @@
 			{/if}
 		</div>
 
-		<!-- Floating expand button when merchant list is collapsed -->
-		{#if $merchantList.isOpen && !$merchantList.isExpanded}
+		<!-- Floating toggle button for merchant list (always visible on desktop) -->
+		{#if !($merchantList.isOpen && $merchantList.isExpanded)}
 			<button
-				on:click={() => merchantList.expand()}
+				on:click={() => {
+					if ($merchantList.isOpen) {
+						merchantList.expand();
+					} else {
+						merchantList.open();
+					}
+				}}
 				class="absolute top-[10px] left-[60px] z-[1000] hidden items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-medium shadow-lg transition-colors hover:bg-gray-50 md:flex dark:bg-dark dark:hover:bg-white/10"
 				style="filter: drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3));"
-				aria-label="Show merchant list"
+				aria-label={$merchantList.isOpen ? 'Show merchant list' : 'Open merchant list'}
 			>
 				<Icon w="18" h="18" icon="menu" type="material" style="text-primary dark:text-white" />
-				<span class="text-primary dark:text-white">{$merchantList.merchants.length} Nearby</span>
+				{#if currentZoom >= MERCHANT_LIST_MIN_ZOOM && $merchantList.merchants.length > 0}
+					<span class="text-primary dark:text-white">{$merchantList.merchants.length} Nearby</span>
+				{:else}
+					<span class="text-primary dark:text-white">Nearby</span>
+				{/if}
 			</button>
 		{/if}
 

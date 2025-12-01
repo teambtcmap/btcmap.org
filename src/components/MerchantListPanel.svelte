@@ -6,8 +6,9 @@
 	import MerchantListItem from '$components/MerchantListItem.svelte';
 	import CloseButton from '$components/CloseButton.svelte';
 	import LoadingSpinner from '$components/LoadingSpinner.svelte';
+	import Icon from '$components/Icon.svelte';
 	import type { Place } from '$lib/types';
-	import { MERCHANT_LIST_WIDTH } from '$lib/constants';
+	import { MERCHANT_LIST_WIDTH, MERCHANT_LIST_MIN_ZOOM } from '$lib/constants';
 
 	// Callback to pan map when a merchant is clicked from the list
 	export let onPanToPlace: ((place: Place) => void) | undefined = undefined;
@@ -17,13 +18,18 @@
 	// Map center and radius for fetching enriched data via search API
 	export let mapCenter: { lat: number; lon: number } | undefined = undefined;
 	export let mapRadiusKm: number | undefined = undefined;
+	// Current zoom level to determine if we should show "zoom in" message
+	export let currentZoom: number = 0;
 
 	$: isOpen = $merchantList.isOpen;
 	$: isExpanded = $merchantList.isExpanded;
 	$: merchants = $merchantList.merchants;
+	$: totalCount = $merchantList.totalCount;
 	$: enrichedPlaces = $merchantList.enrichedPlaces;
 	$: isLoading = $merchantList.isLoading;
 	$: selectedId = $merchantDrawer.merchantId;
+	$: isBelowMinZoom = currentZoom < MERCHANT_LIST_MIN_ZOOM;
+	$: isTruncated = totalCount > merchants.length;
 
 	// Fetch enriched data using search API when panel opens
 	$: if (isOpen && mapCenter && mapRadiusKm) {
@@ -85,16 +91,42 @@
 		>
 			<div>
 				<h2 class="text-sm font-semibold text-primary dark:text-white">Nearby Merchants</h2>
-				<p class="text-xs text-body dark:text-white/70">
-					{merchants.length} location{merchants.length !== 1 ? 's' : ''} in view
-				</p>
+				{#if isBelowMinZoom}
+					<p class="text-xs text-body dark:text-white/70">Zoom in to see list</p>
+				{:else if isTruncated}
+					<p class="text-xs text-body dark:text-white/70">
+						Showing {merchants.length} nearest of {totalCount}
+					</p>
+				{:else}
+					<p class="text-xs text-body dark:text-white/70">
+						{merchants.length} location{merchants.length !== 1 ? 's' : ''} in view
+					</p>
+				{/if}
 			</div>
 			<CloseButton on:click={handleClose} />
 		</div>
 
 		<!-- List content -->
 		<div class="flex-1 overflow-y-auto">
-			{#if isLoading}
+			{#if isBelowMinZoom}
+				<div class="flex flex-col items-center justify-center gap-3 px-4 py-12 text-center">
+					<Icon
+						w="48"
+						h="48"
+						icon="zoom_in"
+						type="material"
+						style="text-gray-300 dark:text-white/30"
+					/>
+					<div>
+						<p class="text-sm font-medium text-primary dark:text-white">
+							Zoom in to see nearby merchants
+						</p>
+						<p class="mt-1 text-xs text-body dark:text-white/70">
+							The merchant list shows locations when zoomed in closer
+						</p>
+					</div>
+				</div>
+			{:else if isLoading}
 				<div class="flex items-center justify-center py-8">
 					<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
 				</div>
