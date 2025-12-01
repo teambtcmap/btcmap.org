@@ -1,11 +1,11 @@
 <script lang="ts">
-	import AboutCommunity from './_components/AboutCommunity.svelte';
-	import AboutContributor from './_components/AboutContributor.svelte';
-	import AboutCore from './_components/AboutCore.svelte';
-	import AboutIntegration from './_components/AboutIntegration.svelte';
-	import AboutMerchant from './_components/AboutMerchant.svelte';
-	import AboutPlus from './_components/AboutPlus.svelte';
-	import AboutTagger from './_components/AboutTagger.svelte';
+	import AboutCommunity from './components/AboutCommunity.svelte';
+	import AboutContributor from './components/AboutContributor.svelte';
+	import AboutCore from './components/AboutCore.svelte';
+	import AboutIntegration from './components/AboutIntegration.svelte';
+	import AboutMerchant from './components/AboutMerchant.svelte';
+	import AboutPlus from './components/AboutPlus.svelte';
+	import AboutTagger from './components/AboutTagger.svelte';
 	import Footer from '$components/Footer.svelte';
 	import Header from '$components/Header.svelte';
 	import {
