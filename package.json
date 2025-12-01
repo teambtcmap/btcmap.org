@@ -22,7 +22,10 @@
 		"typecheck": "tsc --project ./tsconfig.json --noEmit --pretty"
 	},
 	"lint-staged": {
-		"*": "eslint"
+		"*": [
+			"eslint",
+			"prettier --check"
+		]
 	},
 	"dependencies": {
 		"@mapbox/geojson-rewind": "^0.5.2",
