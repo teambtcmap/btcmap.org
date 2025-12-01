@@ -1,7 +1,7 @@
 import { get } from 'svelte/store';
 import axios from 'axios';
-import { boost, exchangeRate } from '$lib/store';
-import { fetchExchangeRate, errToast } from '$lib/utils';
+import { boost } from '$lib/store';
+import { errToast } from '$lib/utils';
 import { updateMerchantHash } from '$lib/merchantDrawerHash';
 import type { Place, Boost } from '$lib/types';
 import type { Writable } from 'svelte/store';
@@ -34,7 +34,6 @@ export function isBoosted(merchant: Place | null): boolean {
 
 export function clearBoostState(): void {
 	boost.set(undefined);
-	exchangeRate.set(undefined);
 }
 
 function createBoostObject(merchant: Place) {
@@ -97,8 +96,6 @@ export async function handleBoost(
 	boost.set(createBoostObject(merchant));
 
 	try {
-		const rate = await fetchExchangeRate();
-		exchangeRate.set(rate);
 		updateMerchantHash(merchantId, 'boost');
 		setBoostLoading(false);
 	} catch (error) {
@@ -159,22 +156,10 @@ export function handleGoBack(
 	}
 }
 
-export async function ensureBoostData(
-	merchant: Place | null,
-	currentExchangeRate: number | undefined,
-	currentBoost: Boost
-): Promise<void> {
-	if (!merchant || currentExchangeRate !== undefined) return;
+export async function ensureBoostData(merchant: Place | null, currentBoost: Boost): Promise<void> {
+	if (!merchant) return;
 
 	if (currentBoost === undefined) {
 		boost.set(createBoostObject(merchant));
-	}
-
-	try {
-		const rate = await fetchExchangeRate();
-		exchangeRate.set(rate);
-	} catch (error) {
-		console.error('Error ensuring boost data:', error);
-		// Don't show toast here as this is a background operation
 	}
 }

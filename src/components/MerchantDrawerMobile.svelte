@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { spring } from 'svelte/motion';
-	import { boost, exchangeRate, resetBoost } from '$lib/store';
+	import { boost, resetBoost } from '$lib/store';
 	import Icon from '$components/Icon.svelte';
 	import BoostContent from './BoostContent.svelte';
 	import MerchantDetailsContent from './MerchantDetailsContent.svelte';
@@ -193,7 +193,7 @@
 	});
 
 	$: if (drawerView === 'boost' && merchant) {
-		ensureBoostData(merchant, $exchangeRate, $boost);
+		ensureBoostData(merchant, $boost);
 	}
 
 	// Pointer event handlers for dragging
