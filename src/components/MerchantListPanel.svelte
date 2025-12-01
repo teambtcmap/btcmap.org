@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { onDestroy } from 'svelte';
+	import { fly } from 'svelte/transition';
 	import { merchantList } from '$lib/merchantListStore';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import MerchantListItem from '$components/MerchantListItem.svelte';
@@ -88,6 +89,7 @@
 		style="width: {MERCHANT_LIST_WIDTH}px"
 		role="complementary"
 		aria-label="Merchant list"
+		transition:fly={{ x: -MERCHANT_LIST_WIDTH, duration: 200 }}
 	>
 		<!-- Header -->
 		<div
