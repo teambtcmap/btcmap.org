@@ -143,7 +143,6 @@
 	let isZooming = false;
 
 	let mapCenter: LatLng;
-	let mapRadiusKm: number | undefined;
 
 	// Calculate radius from map center to corner (Haversine formula)
 	const calculateRadiusKm = (bounds: LatLngBounds): number => {
@@ -683,7 +682,6 @@
 			isZooming = false;
 			const coords = map.getBounds();
 			mapCenter = map.getCenter();
-			mapRadiusKm = calculateRadiusKm(coords);
 			currentZoom = map.getZoom();
 
 			// Update hash if not using URL parameters
@@ -699,9 +697,8 @@
 
 		mapLoadingStatus = 'Loading places in view...';
 
-		// Initialize mapCenter and mapRadiusKm for merchant list panel
+		// Initialize mapCenter for merchant list panel
 		mapCenter = map.getCenter();
-		mapRadiusKm = calculateRadiusKm(map.getBounds());
 
 		// Load initial markers for current viewport
 		// NOTE: Don't set isLoadingMarkers=true here, let loadMarkersInViewport handle it
