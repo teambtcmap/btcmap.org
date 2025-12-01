@@ -15,6 +15,14 @@
 	::selection {
 		@apply bg-[#53c5d5] text-white;
 	}
+
+	button {
+		cursor: pointer;
+	}
+
+	button:disabled {
+		cursor: not-allowed;
+	}
 }
 
 @layer utilities {
