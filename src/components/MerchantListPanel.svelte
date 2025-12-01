@@ -9,6 +9,10 @@
 	import Icon from '$components/Icon.svelte';
 	import type { Place } from '$lib/types';
 	import { MERCHANT_LIST_WIDTH, MERCHANT_LIST_MIN_ZOOM } from '$lib/constants';
+	import { calcVerifiedDate } from '$lib/merchantDrawerLogic';
+
+	// Compute once for all list items
+	const verifiedDate = calcVerifiedDate();
 
 	// Callback to pan map when a merchant is clicked from the list
 	export let onPanToPlace: ((place: Place) => void) | undefined = undefined;
@@ -141,6 +145,7 @@
 							{merchant}
 							enrichedData={enrichedPlaces.get(merchant.id) || null}
 							isSelected={selectedId === merchant.id}
+							{verifiedDate}
 							on:click={handleItemClick}
 							on:mouseenter={handleMouseEnter}
 							on:mouseleave={handleMouseLeave}

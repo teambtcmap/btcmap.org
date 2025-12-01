@@ -4,19 +4,14 @@
 	import PaymentMethodIcon from '$components/PaymentMethodIcon.svelte';
 	import type { Place } from '$lib/types';
 	import { formatVerifiedHuman } from '$lib/utils';
-	import {
-		calcVerifiedDate,
-		isUpToDate as checkUpToDate,
-		isBoosted as checkBoosted
-	} from '$lib/merchantDrawerLogic';
+	import { isUpToDate as checkUpToDate, isBoosted as checkBoosted } from '$lib/merchantDrawerLogic';
 
 	export let merchant: Place;
 	export let enrichedData: Place | null = null;
 	export let isSelected: boolean = false;
+	export let verifiedDate: number;
 
 	const dispatch = createEventDispatcher<{ click: Place; mouseenter: Place; mouseleave: Place }>();
-
-	const verifiedDate = calcVerifiedDate();
 
 	// Show skeleton when we don't have enriched data yet
 	// Only show "Unknown" when enriched data exists but has no name
