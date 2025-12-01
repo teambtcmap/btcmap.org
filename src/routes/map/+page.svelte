@@ -593,6 +593,12 @@
 			});
 
 			merchantList.setMerchants(visiblePlaces, center.lat, center.lng);
+
+			// Fetch enriched data if panel is open (debounced via this function)
+			if ($merchantList.isOpen) {
+				const radiusKm = calculateRadiusKm(bounds);
+				merchantList.fetchByRadius({ lat: center.lat, lon: center.lng }, radiusKm);
+			}
 		} else {
 			// Clear merchants when below min zoom, but don't close (user might have it open manually)
 			merchantList.setMerchants([], 0, 0);
@@ -1176,8 +1182,6 @@
 				clearMarkerSelection(place.id);
 			}
 		}}
-		mapCenter={mapCenter ? { lat: mapCenter.lat, lon: mapCenter.lng } : undefined}
-		{mapRadiusKm}
 		{currentZoom}
 	/>
 

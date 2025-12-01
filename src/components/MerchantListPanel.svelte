@@ -20,9 +20,6 @@
 	// Callbacks for hover highlighting
 	export let onHoverStart: ((place: Place) => void) | undefined = undefined;
 	export let onHoverEnd: ((place: Place) => void) | undefined = undefined;
-	// Map center and radius for fetching enriched data via search API
-	export let mapCenter: { lat: number; lon: number } | undefined = undefined;
-	export let mapRadiusKm: number | undefined = undefined;
 	// Current zoom level to determine if we should show "zoom in" message
 	export let currentZoom: number = 0;
 
@@ -35,11 +32,6 @@
 	$: selectedId = $merchantDrawer.merchantId;
 	$: isBelowMinZoom = currentZoom < MERCHANT_LIST_MIN_ZOOM;
 	$: isTruncated = totalCount > merchants.length;
-
-	// Fetch enriched data using search API when panel opens
-	$: if (isOpen && mapCenter && mapRadiusKm) {
-		merchantList.fetchByRadius(mapCenter, mapRadiusKm);
-	}
 
 	function handleItemClick(event: CustomEvent<Place>) {
 		const place = event.detail;
@@ -67,18 +59,24 @@
 		}
 	}
 
+	// Track listener state to prevent accumulation
+	let listenerAttached = false;
+
 	// Scope keydown listener to when panel is open
 	$: if (browser) {
-		if (isOpen) {
+		if (isOpen && !listenerAttached) {
 			window.addEventListener('keydown', handleKeydown);
-		} else {
+			listenerAttached = true;
+		} else if (!isOpen && listenerAttached) {
 			window.removeEventListener('keydown', handleKeydown);
+			listenerAttached = false;
 		}
 	}
 
 	onDestroy(() => {
-		if (browser) {
+		if (browser && listenerAttached) {
 			window.removeEventListener('keydown', handleKeydown);
+			listenerAttached = false;
 		}
 	});
 </script>

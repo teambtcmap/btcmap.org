@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 
+const MARKER_LOAD_TIMEOUT = 60000;
+
 test.describe('Merchant List Panel', () => {
 	// Collect console errors during tests
 	test.beforeEach(async ({ page }) => {
@@ -48,7 +50,7 @@ test.describe('Merchant List Panel', () => {
 				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
 				return markers.length > 0;
 			},
-			{ timeout: 60000 }
+			{ timeout: MARKER_LOAD_TIMEOUT }
 		);
 
 		// List panel should NOT be visible initially (auto-open disabled)
@@ -88,7 +90,7 @@ test.describe('Merchant List Panel', () => {
 				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
 				return markers.length > 0;
 			},
-			{ timeout: 60000 }
+			{ timeout: MARKER_LOAD_TIMEOUT }
 		);
 
 		// Click toggle button to open list panel
@@ -149,7 +151,7 @@ test.describe('Merchant List Panel', () => {
 				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
 				return markers.length > 0;
 			},
-			{ timeout: 60000 }
+			{ timeout: MARKER_LOAD_TIMEOUT }
 		);
 
 		// Toggle button should NOT be visible on mobile (has md:flex)
