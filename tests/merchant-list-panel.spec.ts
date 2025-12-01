@@ -30,37 +30,38 @@ test.describe('Merchant List Panel', () => {
 		}
 	});
 
-	test('list panel appears when zoomed in above threshold', async ({ page }) => {
+	test('list panel opens via toggle button and shows merchants', async ({ page }) => {
 		// Desktop viewport
 		await page.setViewportSize({ width: 1280, height: 720 });
 
-		// Navigate to map at zoom level 15 (below threshold)
-		await page.goto('/map#15/42.2762511/42.7024218', { waitUntil: 'load' });
+		// Navigate to map at zoom level 17 (above threshold)
+		await page.goto('/map#17/42.2762511/42.7024218', { waitUntil: 'load' });
 		await expect(page).toHaveTitle(/BTC Map/);
 
 		// Wait for map to initialize
 		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
 		await expect(zoomInButton).toBeVisible();
-		await page.waitForTimeout(10000);
 
-		// List panel should NOT be visible at zoom 15
-		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
-		await expect(listPanel).not.toBeVisible();
-
-		// Zoom in twice to get to zoom 17 (above threshold)
-		await zoomInButton.click();
-		await page.waitForTimeout(2000);
-		await zoomInButton.click();
-		await page.waitForTimeout(5000);
-
-		// Wait for markers to load at new zoom level
+		// Wait for markers to load
 		await page.waitForFunction(
 			() => {
 				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
 				return markers.length > 0;
 			},
-			{ timeout: 30000 }
+			{ timeout: 60000 }
 		);
+
+		// List panel should NOT be visible initially (auto-open disabled)
+		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
+		await expect(listPanel).not.toBeVisible();
+
+		// Toggle button should be visible
+		const toggleButton = page.getByRole('button', { name: /merchant list/i });
+		await expect(toggleButton).toBeVisible({ timeout: 15000 });
+
+		// Click toggle to open the panel
+		await toggleButton.click();
+		await page.waitForTimeout(500);
 
 		// List panel should now be visible
 		await expect(listPanel).toBeVisible({ timeout: 10000 });
@@ -80,7 +81,6 @@ test.describe('Merchant List Panel', () => {
 		// Wait for map to initialize
 		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
 		await expect(zoomInButton).toBeVisible();
-		await page.waitForTimeout(10000);
 
 		// Wait for markers to load
 		await page.waitForFunction(
@@ -88,15 +88,20 @@ test.describe('Merchant List Panel', () => {
 				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
 				return markers.length > 0;
 			},
-			{ timeout: 45000 }
+			{ timeout: 60000 }
 		);
+
+		// Click toggle button to open list panel
+		const toggleButton = page.getByRole('button', { name: /merchant list/i });
+		await expect(toggleButton).toBeVisible({ timeout: 15000 });
+		await toggleButton.click();
 
 		// Wait for list panel to appear
 		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
-		await expect(listPanel).toBeVisible({ timeout: 15000 });
+		await expect(listPanel).toBeVisible({ timeout: 10000 });
 
-		// Wait for merchant items to load (skeleton should disappear)
-		await page.waitForTimeout(5000);
+		// Wait for merchant items to load
+		await page.waitForTimeout(3000);
 
 		// Find and click first merchant item in list
 		const merchantItems = listPanel.locator('li button');
@@ -126,7 +131,7 @@ test.describe('Merchant List Panel', () => {
 		await expect(viewDetailsButton).toBeVisible({ timeout: 10000 });
 	});
 
-	test('list panel only visible on desktop', async ({ page }) => {
+	test('list panel and toggle only visible on desktop', async ({ page }) => {
 		// Mobile viewport
 		await page.setViewportSize({ width: 375, height: 667 });
 
@@ -137,7 +142,6 @@ test.describe('Merchant List Panel', () => {
 		// Wait for map to initialize
 		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
 		await expect(zoomInButton).toBeVisible();
-		await page.waitForTimeout(10000);
 
 		// Wait for markers to load
 		await page.waitForFunction(
@@ -145,15 +149,15 @@ test.describe('Merchant List Panel', () => {
 				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
 				return markers.length > 0;
 			},
-			{ timeout: 45000 }
+			{ timeout: 60000 }
 		);
 
-		// List panel should NOT be visible on mobile even at high zoom
-		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
-		await expect(listPanel).not.toBeVisible();
+		// Toggle button should NOT be visible on mobile (has md:flex)
+		const toggleButton = page.getByRole('button', { name: /merchant list/i });
+		await expect(toggleButton).not.toBeVisible();
 
-		// Wait a bit more to ensure it doesn't appear
-		await page.waitForTimeout(3000);
+		// List panel should NOT be visible on mobile
+		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
 		await expect(listPanel).not.toBeVisible();
 	});
 });

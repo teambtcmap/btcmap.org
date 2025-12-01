@@ -1311,7 +1311,7 @@
 				}}
 				class="absolute top-[10px] left-[60px] z-[1000] hidden items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-medium shadow-lg transition-colors hover:bg-gray-50 md:flex dark:bg-dark dark:hover:bg-white/10"
 				style="filter: drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3));"
-				aria-label={$merchantList.isOpen ? 'Show merchant list' : 'Open merchant list'}
+				aria-label="Open merchant list"
 			>
 				<Icon w="18" h="18" icon="menu" type="material" style="text-primary dark:text-white" />
 				{#if currentZoom >= MERCHANT_LIST_MIN_ZOOM && $merchantList.merchants.length > 0}
