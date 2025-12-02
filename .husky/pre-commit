@@ -1,0 +1,4 @@
+if [ "$CI" = "true" ]; then
+  exit 0
+fi
+npx lint-staged
