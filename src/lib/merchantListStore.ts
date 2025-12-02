@@ -11,7 +11,6 @@ export interface MerchantListState {
 	totalCount: number;
 	enrichedPlaces: Map<number, Place>;
 	isLoading: boolean;
-	isFetchingDetails: boolean;
 }
 
 const initialState: MerchantListState = {
@@ -20,8 +19,7 @@ const initialState: MerchantListState = {
 	merchants: [],
 	totalCount: 0,
 	enrichedPlaces: new Map(),
-	isLoading: false,
-	isFetchingDetails: false
+	isLoading: false
 };
 
 // Equirectangular approximation - accurate for local sorting, not precise distance
@@ -74,8 +72,7 @@ function createMerchantListStore() {
 				isExpanded: true,
 				merchants: [],
 				totalCount: 0,
-				enrichedPlaces: new Map(),
-				isFetchingDetails: false
+				enrichedPlaces: new Map()
 			}));
 		},
 
@@ -102,14 +99,16 @@ function createMerchantListStore() {
 			update((state) => ({ ...state, isLoading }));
 		},
 
-		async fetchByRadius(center: { lat: number; lon: number }, radiusKm: number) {
+		async fetchByRadius(
+			center: { lat: number; lon: number },
+			radiusKm: number,
+			options?: { useAsSource?: boolean }
+		) {
 			// Cancel any pending requests
 			if (abortController) {
 				abortController.abort();
 			}
 			abortController = new AbortController();
-
-			update((state) => ({ ...state, isFetchingDetails: true }));
 
 			try {
 				const fields = buildFieldsParam(PLACE_FIELD_SETS.LIST_ITEM);
@@ -122,11 +121,23 @@ function createMerchantListStore() {
 				const enrichedPlaces = new Map<number, Place>();
 				response.data.forEach((place) => enrichedPlaces.set(place.id, place));
 
-				update((state) => ({ ...state, enrichedPlaces }));
-			} catch {
-				// Silently fail - list will show without enriched data
-			} finally {
-				update((state) => ({ ...state, isFetchingDetails: false }));
+				// If useAsSource, also populate the merchant list from API results
+				if (options?.useAsSource) {
+					const sorted = sortMerchants(response.data, center.lat, center.lon);
+					const limited = sorted.slice(0, 50);
+					update((state) => ({
+						...state,
+						merchants: limited,
+						totalCount: response.data.length,
+						enrichedPlaces
+					}));
+				} else {
+					update((state) => ({ ...state, enrichedPlaces }));
+				}
+			} catch (error) {
+				if (error instanceof Error && error.name !== 'AbortError') {
+					console.warn('Failed to fetch enriched merchant data:', error.message);
+				}
 			}
 		},
 

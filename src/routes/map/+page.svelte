@@ -586,19 +586,30 @@
 		if (currentZoom >= MERCHANT_LIST_MIN_ZOOM) {
 			const bounds = map.getBounds();
 			const center = map.getCenter();
-			// Get places that are loaded and within current viewport
-			const visiblePlaces = $places.filter((place) => {
-				const markerId = place.id.toString();
-				if (!loadedMarkers[markerId]) return false;
-				return bounds.contains([place.lat, place.lon]);
-			});
 
-			merchantList.setMerchants(visiblePlaces, center.lat, center.lng);
+			// At high zoom (clustering disabled), use API results directly for extended range
+			if (currentZoom >= CLUSTERING_DISABLED_ZOOM && $merchantList.isOpen) {
+				// Use minimum 1km radius to show nearby places even at very high zoom
+				const viewportRadius = calculateRadiusKm(bounds);
+				const radiusKm = Math.max(viewportRadius * 2, 1);
+				merchantList.fetchByRadius({ lat: center.lat, lon: center.lng }, radiusKm, {
+					useAsSource: true
+				});
+			} else {
+				// Normal behavior: filter by loaded markers in viewport
+				const visiblePlaces = $places.filter((place) => {
+					const markerId = place.id.toString();
+					if (!loadedMarkers[markerId]) return false;
+					return bounds.contains([place.lat, place.lon]);
+				});
 
-			// Fetch enriched data if panel is open (debounced via this function)
-			if ($merchantList.isOpen) {
-				const radiusKm = calculateRadiusKm(bounds);
-				merchantList.fetchByRadius({ lat: center.lat, lon: center.lng }, radiusKm);
+				merchantList.setMerchants(visiblePlaces, center.lat, center.lng);
+
+				// Fetch enriched data if panel is open (debounced via this function)
+				if ($merchantList.isOpen) {
+					const radiusKm = calculateRadiusKm(bounds);
+					merchantList.fetchByRadius({ lat: center.lat, lon: center.lng }, radiusKm);
+				}
 			}
 		} else {
 			// Clear merchants when below min zoom, but don't close (user might have it open manually)

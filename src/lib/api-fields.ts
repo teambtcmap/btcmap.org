@@ -55,6 +55,8 @@ export const PLACE_FIELD_SETS = {
 	LIST_ITEM: [
 		'name',
 		'address',
+		'icon',
+		'boosted_until',
 		'verified_at',
 		'osm:payment:onchain',
 		'osm:payment:lightning',

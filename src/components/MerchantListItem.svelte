@@ -28,25 +28,17 @@
 	function handleClick() {
 		dispatch('click', merchant);
 	}
-
-	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === 'Enter' || event.key === ' ') {
-			event.preventDefault();
-			handleClick();
-		}
-	}
 </script>
 
 <li class="list-none">
 	<button
 		on:click={handleClick}
-		on:keydown={handleKeydown}
 		on:mouseenter={() => dispatch('mouseenter', merchant)}
 		on:mouseleave={() => dispatch('mouseleave', merchant)}
 		class="w-full px-3 py-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-white/5 {isSelected
 			? 'bg-link/5 dark:bg-link/10'
 			: ''}"
-		aria-pressed={isSelected}
+		aria-current={isSelected ? 'true' : undefined}
 	>
 		<div class="flex items-start gap-3">
 			<!-- Icon -->
