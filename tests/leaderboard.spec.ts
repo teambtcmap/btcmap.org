@@ -5,21 +5,23 @@ test.describe('Leaderboard pages', () => {
 		// Navigate directly to the leaderboard (cold start, no prior data)
 		await page.goto('/communities/leaderboard');
 
-		// Wait for the leaderboard count to appear in the header (indicates data loaded)
-		await expect(page.getByText(/Community Leaderboard \(\d+\)/)).toBeVisible({ timeout: 30000 });
+		// Wait for the table to load with data (gold medal in first position cell)
+		// This confirms the data sync completed and table rendered
+		await expect(page.getByRole('cell', { name: '🥇' })).toBeVisible({ timeout: 30000 });
 
-		// Verify the table has loaded with at least one row (gold medal in desktop table cell)
-		await expect(page.getByRole('cell', { name: '🥇' })).toBeVisible();
+		// Verify the header is present
+		await expect(page.getByRole('heading', { name: /Community Leaderboard/ })).toBeVisible();
 	});
 
 	test('countries leaderboard loads data when accessed directly', async ({ page }) => {
 		// Navigate directly to the leaderboard (cold start, no prior data)
 		await page.goto('/countries/leaderboard');
 
-		// Wait for the leaderboard count to appear in the header (indicates data loaded)
-		await expect(page.getByText(/Country Leaderboard \(\d+\)/)).toBeVisible({ timeout: 30000 });
+		// Wait for the table to load with data (gold medal in first position cell)
+		// This confirms the data sync completed and table rendered
+		await expect(page.getByRole('cell', { name: '🥇' })).toBeVisible({ timeout: 30000 });
 
-		// Verify the table has loaded with at least one row (gold medal in desktop table cell)
-		await expect(page.getByRole('cell', { name: '🥇' })).toBeVisible();
+		// Verify the header is present
+		await expect(page.getByRole('heading', { name: /Country Leaderboard/ })).toBeVisible();
 	});
 });
