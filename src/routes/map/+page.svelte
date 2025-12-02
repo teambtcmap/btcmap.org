@@ -1362,7 +1362,7 @@
 				aria-label="Open merchant list"
 			>
 				<Icon w="18" h="18" icon="menu" type="material" style="text-primary dark:text-white" />
-				{#if currentZoom >= MERCHANT_LIST_LOW_ZOOM && $merchantList.isLoading}
+				{#if currentZoom >= MERCHANT_LIST_LOW_ZOOM && $merchantList.isLoadingList}
 					<LoadingSpinner size="h-4 w-4" color="text-primary dark:text-white" />
 					<span class="text-primary dark:text-white">Nearby</span>
 				{:else if currentZoom >= MERCHANT_LIST_LOW_ZOOM && $merchantList.totalCount > 0}

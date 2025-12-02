@@ -32,7 +32,7 @@
 	$: merchants = $merchantList.merchants;
 	$: totalCount = $merchantList.totalCount;
 	$: placeDetailsCache = $merchantList.placeDetailsCache;
-	$: isLoading = $merchantList.isLoading;
+	$: isLoadingList = $merchantList.isLoadingList;
 	$: selectedId = $merchantDrawer.merchantId;
 	// Show "zoom in" message when:
 	// 1. Below zoom 11 (always - no data fetched at this level)
@@ -139,7 +139,7 @@
 						</p>
 					</div>
 				</div>
-			{:else if isLoading}
+			{:else if isLoadingList}
 				<div class="flex items-center justify-center py-8">
 					<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
 				</div>

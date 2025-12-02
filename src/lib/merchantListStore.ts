@@ -12,7 +12,10 @@ export interface MerchantListState {
 	totalCount: number;
 	// Cache of full Place data by ID, used to show icons/addresses without re-fetching
 	placeDetailsCache: Map<number, Place>;
-	isLoading: boolean;
+	// True when fetching/replacing the merchant list (shows spinner)
+	isLoadingList: boolean;
+	// True when fetching enriched details in background (no spinner)
+	isEnrichingDetails: boolean;
 }
 
 const initialState: MerchantListState = {
@@ -21,7 +24,8 @@ const initialState: MerchantListState = {
 	merchants: [],
 	totalCount: 0,
 	placeDetailsCache: new Map(),
-	isLoading: false
+	isLoadingList: false,
+	isEnrichingDetails: false
 };
 
 // Equirectangular approximation for local distance sorting
@@ -56,14 +60,27 @@ function createMerchantListStore() {
 	const store = writable<MerchantListState>(initialState);
 	const { subscribe, set, update } = store;
 
-	let abortController: AbortController | null = null;
+	// Separate abort controllers so list and detail fetches don't cancel each other
+	let listAbortController: AbortController | null = null;
+	let detailsAbortController: AbortController | null = null;
 
-	// Cancel any in-flight API requests
-	function cancelPendingRequests() {
-		if (abortController) {
-			abortController.abort();
-			abortController = null;
+	function cancelListRequest() {
+		if (listAbortController) {
+			listAbortController.abort();
+			listAbortController = null;
 		}
+	}
+
+	function cancelDetailsRequest() {
+		if (detailsAbortController) {
+			detailsAbortController.abort();
+			detailsAbortController = null;
+		}
+	}
+
+	function cancelAllRequests() {
+		cancelListRequest();
+		cancelDetailsRequest();
 	}
 
 	return {
@@ -74,7 +91,7 @@ function createMerchantListStore() {
 		},
 
 		close() {
-			cancelPendingRequests();
+			cancelAllRequests();
 			update((state) => ({
 				...state,
 				isOpen: false,
@@ -106,12 +123,8 @@ function createMerchantListStore() {
 				...state,
 				merchants: limited,
 				totalCount: merchants.length,
-				isLoading: false
+				isLoadingList: false
 			}));
-		},
-
-		setLoading(isLoading: boolean) {
-			update((state) => ({ ...state, isLoading }));
 		},
 
 		// Fetch merchants from API and replace the current list
@@ -122,17 +135,17 @@ function createMerchantListStore() {
 			radiusKm: number,
 			options?: { hideIfExceeds?: number }
 		) {
-			cancelPendingRequests();
-			abortController = new AbortController();
+			cancelListRequest();
+			listAbortController = new AbortController();
 
 			// Keep previous merchants visible while loading (prevents flicker)
-			update((state) => ({ ...state, isLoading: true }));
+			update((state) => ({ ...state, isLoadingList: true }));
 
 			try {
 				const fields = buildFieldsParam(PLACE_FIELD_SETS.LIST_ITEM);
 				const response = await axios.get<Place[]>(
 					`https://api.btcmap.org/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=${fields}`,
-					{ timeout: 10000, signal: abortController.signal }
+					{ timeout: 10000, signal: listAbortController.signal }
 				);
 
 				// Build cache for enriched display (icons, addresses, etc.)
@@ -147,7 +160,7 @@ function createMerchantListStore() {
 						...state,
 						merchants: [],
 						totalCount: response.data.length,
-						isLoading: false
+						isLoadingList: false
 					}));
 				} else {
 					const sorted = sortMerchants(response.data, center.lat, center.lon);
@@ -157,47 +170,49 @@ function createMerchantListStore() {
 						merchants: limited,
 						totalCount: response.data.length,
 						placeDetailsCache,
-						isLoading: false
+						isLoadingList: false
 					}));
 				}
 			} catch (error) {
 				if (error instanceof Error && error.name !== 'AbortError') {
 					console.warn('Failed to fetch merchant list:', error.message);
 				}
-				update((state) => ({ ...state, isLoading: false }));
+				update((state) => ({ ...state, isLoadingList: false }));
 			}
 		},
 
 		// Fetch full Place data to enrich existing list items (doesn't change the list)
 		// Used at zoom 15-16 when panel is open - adds icons/addresses to skeleton items
+		// Runs silently in background without showing spinner
 		async fetchEnrichedDetails(center: { lat: number; lon: number }, radiusKm: number) {
-			cancelPendingRequests();
-			abortController = new AbortController();
+			cancelDetailsRequest();
+			detailsAbortController = new AbortController();
 
-			update((state) => ({ ...state, isLoading: true }));
+			update((state) => ({ ...state, isEnrichingDetails: true }));
 
 			try {
 				const fields = buildFieldsParam(PLACE_FIELD_SETS.LIST_ITEM);
 				const response = await axios.get<Place[]>(
 					`https://api.btcmap.org/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=${fields}`,
-					{ timeout: 10000, signal: abortController.signal }
+					{ timeout: 10000, signal: detailsAbortController.signal }
 				);
 
-				// Build cache - existing merchants will use this for display
-				const placeDetailsCache = new Map<number, Place>();
-				response.data.forEach((place) => placeDetailsCache.set(place.id, place));
-
-				update((state) => ({ ...state, placeDetailsCache, isLoading: false }));
+				// Merge new results into existing cache (preserves previously loaded details)
+				update((state) => {
+					const mergedCache = new Map(state.placeDetailsCache);
+					response.data.forEach((place) => mergedCache.set(place.id, place));
+					return { ...state, placeDetailsCache: mergedCache, isEnrichingDetails: false };
+				});
 			} catch (error) {
 				if (error instanceof Error && error.name !== 'AbortError') {
 					console.warn('Failed to fetch enriched details:', error.message);
 				}
-				update((state) => ({ ...state, isLoading: false }));
+				update((state) => ({ ...state, isEnrichingDetails: false }));
 			}
 		},
 
 		reset() {
-			cancelPendingRequests();
+			cancelAllRequests();
 			set(initialState);
 		}
 	};
