@@ -735,7 +735,7 @@
 							</p>
 
 							{#if boosted}
-								<p>
+								<p class="dark:text-white">
 									Boost Expires:
 									<span class="underline decoration-bitcoin decoration-4 underline-offset-8">
 										<Time live={3000} relative={true} timestamp={boosted} />
