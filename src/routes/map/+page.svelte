@@ -15,7 +15,9 @@
 		CLUSTERING_DISABLED_ZOOM,
 		MERCHANT_LIST_MIN_ZOOM,
 		MERCHANT_LIST_LOW_ZOOM,
-		MERCHANT_LIST_MAX_ITEMS
+		MERCHANT_LIST_MAX_ITEMS,
+		HIGH_ZOOM_RADIUS_MULTIPLIER,
+		MIN_SEARCH_RADIUS_KM
 	} from '$lib/constants';
 	import {
 		processPlaces,
@@ -574,6 +576,17 @@
 		});
 	}, 1000); // 1 second debounce for IndexedDB writes
 
+	// Determines which fetch strategy to use based on current zoom level
+	// See constants.ts for zoom behavior documentation
+	type ZoomBehavior = 'none' | 'api-with-limit' | 'local-markers' | 'api-extended';
+
+	function getZoomBehavior(zoom: number): ZoomBehavior {
+		if (zoom >= CLUSTERING_DISABLED_ZOOM) return 'api-extended'; // Zoom 17+
+		if (zoom >= MERCHANT_LIST_MIN_ZOOM) return 'local-markers'; // Zoom 15-16
+		if (zoom >= MERCHANT_LIST_LOW_ZOOM) return 'api-with-limit'; // Zoom 11-14
+		return 'none'; // Below zoom 11
+	}
+
 	// Update merchant list panel based on zoom level and visible places
 	const updateMerchantList = () => {
 		if (!browser) return;
@@ -584,44 +597,54 @@
 			return;
 		}
 
-		// Update merchant data when zoomed in enough (for toggle button count)
-		// At lower zoom (11-14), only show if there are few places in the area
 		const bounds = map.getBounds();
 		const center = map.getCenter();
+		const behavior = getZoomBehavior(currentZoom);
 
-		if (currentZoom >= CLUSTERING_DISABLED_ZOOM) {
-			// At high zoom (clustering disabled), always use API for consistent count
-			// Use minimum 1km radius to show nearby places even at very high zoom
-			const viewportRadius = calculateRadiusKm(bounds);
-			const radiusKm = Math.max(viewportRadius * 2, 1);
-			merchantList.fetchByRadius({ lat: center.lat, lon: center.lng }, radiusKm, {
-				useAsSource: true
-			});
-		} else if (currentZoom >= MERCHANT_LIST_MIN_ZOOM) {
-			// Normal behavior (zoom 15-16): filter by loaded markers in viewport
-			const visiblePlaces = $places.filter((place) => {
-				const markerId = place.id.toString();
-				if (!loadedMarkers[markerId]) return false;
-				return bounds.contains([place.lat, place.lon]);
-			});
-
-			merchantList.setMerchants(visiblePlaces, center.lat, center.lng);
-
-			// Fetch enriched data if panel is open (debounced via this function)
-			if ($merchantList.isOpen) {
-				const radiusKm = calculateRadiusKm(bounds);
-				merchantList.fetchByRadius({ lat: center.lat, lon: center.lng }, radiusKm);
+		switch (behavior) {
+			case 'api-extended': {
+				// Zoom 17+: Clustering disabled, use API for accurate nearby count
+				// Extended radius shows nearby places beyond immediate viewport
+				const viewportRadius = calculateRadiusKm(bounds);
+				const radiusKm = Math.max(
+					viewportRadius * HIGH_ZOOM_RADIUS_MULTIPLIER,
+					MIN_SEARCH_RADIUS_KM
+				);
+				merchantList.fetchAndReplaceList({ lat: center.lat, lon: center.lng }, radiusKm);
+				break;
 			}
-		} else if (currentZoom >= MERCHANT_LIST_LOW_ZOOM) {
-			// At lower zoom (11-14), use API search and only show if <= max results
-			const radiusKm = calculateRadiusKm(bounds);
-			merchantList.fetchByRadius({ lat: center.lat, lon: center.lng }, radiusKm, {
-				useAsSource: true,
-				maxForLowZoom: MERCHANT_LIST_MAX_ITEMS
-			});
-		} else {
-			// Clear merchants when below minimum zoom
-			merchantList.setMerchants([], 0, 0);
+
+			case 'local-markers': {
+				// Zoom 15-16: Use already-loaded markers, fetch details when panel is open
+				const visiblePlaces = $places.filter((place) => {
+					const markerId = place.id.toString();
+					if (!loadedMarkers[markerId]) return false;
+					return bounds.contains([place.lat, place.lon]);
+				});
+
+				merchantList.setMerchants(visiblePlaces, center.lat, center.lng);
+
+				// Fetch enriched data (icons, addresses) only when panel is visible
+				if ($merchantList.isOpen) {
+					const radiusKm = calculateRadiusKm(bounds);
+					merchantList.fetchEnrichedDetails({ lat: center.lat, lon: center.lng }, radiusKm);
+				}
+				break;
+			}
+
+			case 'api-with-limit': {
+				// Zoom 11-14: Use API but hide list if too many results (dense area)
+				const radiusKm = calculateRadiusKm(bounds);
+				merchantList.fetchAndReplaceList({ lat: center.lat, lon: center.lng }, radiusKm, {
+					hideIfExceeds: MERCHANT_LIST_MAX_ITEMS
+				});
+				break;
+			}
+
+			case 'none':
+			default:
+				// Below zoom 11: clear the list
+				merchantList.setMerchants([], 0, 0);
 		}
 	};
 

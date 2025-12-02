@@ -31,7 +31,7 @@
 	$: isExpanded = $merchantList.isExpanded;
 	$: merchants = $merchantList.merchants;
 	$: totalCount = $merchantList.totalCount;
-	$: enrichedPlaces = $merchantList.enrichedPlaces;
+	$: placeDetailsCache = $merchantList.placeDetailsCache;
 	$: isLoading = $merchantList.isLoading;
 	$: selectedId = $merchantDrawer.merchantId;
 	// Show "zoom in" message when:
@@ -152,7 +152,7 @@
 					{#each merchants as merchant (merchant.id)}
 						<MerchantListItem
 							{merchant}
-							enrichedData={enrichedPlaces.get(merchant.id) || null}
+							enrichedData={placeDetailsCache.get(merchant.id) || null}
 							isSelected={selectedId === merchant.id}
 							{verifiedDate}
 							on:click={handleItemClick}
