@@ -183,6 +183,34 @@ function createMerchantListStore() {
 			}
 		},
 
+		// Fetch only IDs to get count (minimal payload for button badge)
+		// Used at zoom 11-14 when panel is closed - avoids fetching full data unnecessarily
+		async fetchCountOnly(center: { lat: number; lon: number }, radiusKm: number) {
+			cancelListRequest();
+			listAbortController = new AbortController();
+
+			update((state) => ({ ...state, isLoadingList: true }));
+
+			try {
+				const response = await axios.get<{ id: number }[]>(
+					`https://api.btcmap.org/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=id`,
+					{ timeout: 10000, signal: listAbortController.signal }
+				);
+
+				update((state) => ({
+					...state,
+					merchants: [],
+					totalCount: response.data.length,
+					isLoadingList: false
+				}));
+			} catch (error) {
+				if (error instanceof Error && error.name !== 'AbortError') {
+					console.warn('Failed to fetch merchant count:', error.message);
+				}
+				update((state) => ({ ...state, isLoadingList: false }));
+			}
+		},
+
 		// Fetch full Place data to enrich existing list items (doesn't change the list)
 		// Used at zoom 15-16 when panel is open - adds icons/addresses to skeleton items
 		// Runs silently in background without showing spinner

@@ -635,9 +635,16 @@
 			case 'api-with-limit': {
 				// Zoom 11-14: Use API but hide list if too many results (dense area)
 				const radiusKm = calculateRadiusKm(bounds);
-				merchantList.fetchAndReplaceList({ lat: center.lat, lon: center.lng }, radiusKm, {
-					hideIfExceeds: MERCHANT_LIST_MAX_ITEMS
-				});
+
+				if (!$merchantList.isOpen) {
+					// Panel closed: fetch IDs only (minimal payload for badge count)
+					merchantList.fetchCountOnly({ lat: center.lat, lon: center.lng }, radiusKm);
+				} else {
+					// Panel open: fetch full data with hideIfExceeds check
+					merchantList.fetchAndReplaceList({ lat: center.lat, lon: center.lng }, radiusKm, {
+						hideIfExceeds: MERCHANT_LIST_MAX_ITEMS
+					});
+				}
 				break;
 			}
 
