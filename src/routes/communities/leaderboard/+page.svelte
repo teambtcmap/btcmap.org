@@ -1,11 +1,14 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import AreaLeaderboard from '$components/leaderboard/AreaLeaderboard.svelte';
 	import Breadcrumbs from '$components/Breadcrumbs.svelte';
 	import Footer from '$components/Footer.svelte';
 	import Header from '$components/Header.svelte';
 	import HeaderPlaceholder from '$components/HeaderPlaceholder.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
-
+	import { areasSync } from '$lib/sync/areas';
+	import { reportsSync } from '$lib/sync/reports';
+	import { batchSync } from '$lib/sync/batchSync';
 	import { theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
 
@@ -13,6 +16,10 @@
 		{ name: 'Communities', url: '/communities' },
 		{ name: 'Leaderboard', url: '/communities/leaderboard' }
 	];
+
+	onMount(() => {
+		batchSync([areasSync, reportsSync]);
+	});
 </script>
 
 <svelte:head>
