@@ -13,7 +13,9 @@
 		BREAKPOINTS,
 		MERCHANT_DRAWER_WIDTH,
 		CLUSTERING_DISABLED_ZOOM,
-		MERCHANT_LIST_MIN_ZOOM
+		MERCHANT_LIST_MIN_ZOOM,
+		MERCHANT_LIST_LOW_ZOOM,
+		MERCHANT_LIST_MAX_ITEMS
 	} from '$lib/constants';
 	import {
 		processPlaces,
@@ -383,7 +385,7 @@
 	$: map && mapLoaded && $mapUpdates && $placesSyncCount > 1 && showDataRefresh();
 
 	// Reload markers and update merchant list when places sync completes after initial load
-	$: if (elementsLoaded && $places.length && currentZoom >= MERCHANT_LIST_MIN_ZOOM) {
+	$: if (elementsLoaded && $places.length && currentZoom >= MERCHANT_LIST_LOW_ZOOM) {
 		debouncedLoadMarkers();
 		debouncedUpdateMerchantList();
 	}
@@ -583,36 +585,42 @@
 		}
 
 		// Update merchant data when zoomed in enough (for toggle button count)
-		if (currentZoom >= MERCHANT_LIST_MIN_ZOOM) {
-			const bounds = map.getBounds();
-			const center = map.getCenter();
+		// At lower zoom (11-14), only show if there are few places in the area
+		const bounds = map.getBounds();
+		const center = map.getCenter();
 
-			// At high zoom (clustering disabled), use API results directly for extended range
-			if (currentZoom >= CLUSTERING_DISABLED_ZOOM && $merchantList.isOpen) {
-				// Use minimum 1km radius to show nearby places even at very high zoom
-				const viewportRadius = calculateRadiusKm(bounds);
-				const radiusKm = Math.max(viewportRadius * 2, 1);
-				merchantList.fetchByRadius({ lat: center.lat, lon: center.lng }, radiusKm, {
-					useAsSource: true
-				});
-			} else {
-				// Normal behavior: filter by loaded markers in viewport
-				const visiblePlaces = $places.filter((place) => {
-					const markerId = place.id.toString();
-					if (!loadedMarkers[markerId]) return false;
-					return bounds.contains([place.lat, place.lon]);
-				});
+		if (currentZoom >= CLUSTERING_DISABLED_ZOOM) {
+			// At high zoom (clustering disabled), always use API for consistent count
+			// Use minimum 1km radius to show nearby places even at very high zoom
+			const viewportRadius = calculateRadiusKm(bounds);
+			const radiusKm = Math.max(viewportRadius * 2, 1);
+			merchantList.fetchByRadius({ lat: center.lat, lon: center.lng }, radiusKm, {
+				useAsSource: true
+			});
+		} else if (currentZoom >= MERCHANT_LIST_MIN_ZOOM) {
+			// Normal behavior (zoom 15-16): filter by loaded markers in viewport
+			const visiblePlaces = $places.filter((place) => {
+				const markerId = place.id.toString();
+				if (!loadedMarkers[markerId]) return false;
+				return bounds.contains([place.lat, place.lon]);
+			});
 
-				merchantList.setMerchants(visiblePlaces, center.lat, center.lng);
+			merchantList.setMerchants(visiblePlaces, center.lat, center.lng);
 
-				// Fetch enriched data if panel is open (debounced via this function)
-				if ($merchantList.isOpen) {
-					const radiusKm = calculateRadiusKm(bounds);
-					merchantList.fetchByRadius({ lat: center.lat, lon: center.lng }, radiusKm);
-				}
+			// Fetch enriched data if panel is open (debounced via this function)
+			if ($merchantList.isOpen) {
+				const radiusKm = calculateRadiusKm(bounds);
+				merchantList.fetchByRadius({ lat: center.lat, lon: center.lng }, radiusKm);
 			}
+		} else if (currentZoom >= MERCHANT_LIST_LOW_ZOOM) {
+			// At lower zoom (11-14), use API search and only show if <= max results
+			const radiusKm = calculateRadiusKm(bounds);
+			merchantList.fetchByRadius({ lat: center.lat, lon: center.lng }, radiusKm, {
+				useAsSource: true,
+				maxForLowZoom: MERCHANT_LIST_MAX_ITEMS
+			});
 		} else {
-			// Clear merchants when below min zoom, but don't close (user might have it open manually)
+			// Clear merchants when below minimum zoom
 			merchantList.setMerchants([], 0, 0);
 		}
 	};
@@ -1316,13 +1324,14 @@
 		<!-- Floating toggle button for merchant list (always visible on desktop) -->
 		{#if !($merchantList.isOpen && $merchantList.isExpanded)}
 			<button
-				on:click={() => {
+				on:click={async () => {
 					if ($merchantList.isOpen) {
 						merchantList.expand();
 					} else {
 						merchantList.open();
 					}
-					// Trigger immediate update to fetch enriched data
+					// Wait for store update to propagate before fetching
+					await tick();
 					updateMerchantList();
 				}}
 				class="absolute top-[10px] left-[60px] z-[1000] hidden items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-medium shadow-lg transition-colors hover:bg-gray-50 md:flex dark:bg-dark dark:hover:bg-white/10"
@@ -1330,8 +1339,11 @@
 				aria-label="Open merchant list"
 			>
 				<Icon w="18" h="18" icon="menu" type="material" style="text-primary dark:text-white" />
-				{#if currentZoom >= MERCHANT_LIST_MIN_ZOOM && $merchantList.merchants.length > 0}
-					<span class="text-primary dark:text-white">{$merchantList.merchants.length} Nearby</span>
+				{#if currentZoom >= MERCHANT_LIST_LOW_ZOOM && $merchantList.isLoading}
+					<LoadingSpinner size="h-4 w-4" color="text-primary dark:text-white" />
+					<span class="text-primary dark:text-white">Nearby</span>
+				{:else if currentZoom >= MERCHANT_LIST_LOW_ZOOM && $merchantList.totalCount > 0}
+					<span class="text-primary dark:text-white">{$merchantList.totalCount} Nearby</span>
 				{:else}
 					<span class="text-primary dark:text-white">Nearby</span>
 				{/if}

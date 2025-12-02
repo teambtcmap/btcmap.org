@@ -9,7 +9,11 @@
 	import LoadingSpinner from '$components/LoadingSpinner.svelte';
 	import Icon from '$components/Icon.svelte';
 	import type { Place } from '$lib/types';
-	import { MERCHANT_LIST_WIDTH, MERCHANT_LIST_MIN_ZOOM } from '$lib/constants';
+	import {
+		MERCHANT_LIST_WIDTH,
+		MERCHANT_LIST_MIN_ZOOM,
+		MERCHANT_LIST_LOW_ZOOM
+	} from '$lib/constants';
 	import { calcVerifiedDate } from '$lib/merchantDrawerLogic';
 
 	// Compute once for all list items
@@ -30,7 +34,12 @@
 	$: enrichedPlaces = $merchantList.enrichedPlaces;
 	$: isLoading = $merchantList.isLoading;
 	$: selectedId = $merchantDrawer.merchantId;
-	$: isBelowMinZoom = currentZoom < MERCHANT_LIST_MIN_ZOOM;
+	// Show "zoom in" message when:
+	// 1. Below zoom 11 (always - no data fetched at this level)
+	// 2. Between zoom 11-14 with no merchants (too many results in dense area)
+	$: showZoomInMessage =
+		currentZoom < MERCHANT_LIST_LOW_ZOOM ||
+		(currentZoom < MERCHANT_LIST_MIN_ZOOM && merchants.length === 0);
 	$: isTruncated = totalCount > merchants.length;
 
 	function handleItemClick(event: CustomEvent<Place>) {
@@ -95,7 +104,7 @@
 		>
 			<div>
 				<h2 class="text-sm font-semibold text-primary dark:text-white">Nearby Merchants</h2>
-				{#if isBelowMinZoom}
+				{#if showZoomInMessage}
 					<p class="text-xs text-body dark:text-white/70">Zoom in to see list</p>
 				{:else if isTruncated}
 					<p class="text-xs text-body dark:text-white/70">
@@ -112,7 +121,7 @@
 
 		<!-- List content -->
 		<div class="flex-1 overflow-y-auto">
-			{#if isBelowMinZoom}
+			{#if showZoomInMessage}
 				<div class="flex flex-col items-center justify-center gap-3 px-4 py-12 text-center">
 					<Icon
 						w="48"

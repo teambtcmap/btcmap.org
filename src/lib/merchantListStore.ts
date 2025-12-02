@@ -102,13 +102,16 @@ function createMerchantListStore() {
 		async fetchByRadius(
 			center: { lat: number; lon: number },
 			radiusKm: number,
-			options?: { useAsSource?: boolean }
+			options?: { useAsSource?: boolean; maxForLowZoom?: number }
 		) {
 			// Cancel any pending requests
 			if (abortController) {
 				abortController.abort();
 			}
 			abortController = new AbortController();
+
+			// Set loading state (keep previous merchants visible)
+			update((state) => ({ ...state, isLoading: true }));
 
 			try {
 				const fields = buildFieldsParam(PLACE_FIELD_SETS.LIST_ITEM);
@@ -123,21 +126,35 @@ function createMerchantListStore() {
 
 				// If useAsSource, also populate the merchant list from API results
 				if (options?.useAsSource) {
-					const sorted = sortMerchants(response.data, center.lat, center.lon);
-					const limited = sorted.slice(0, 50);
-					update((state) => ({
-						...state,
-						merchants: limited,
-						totalCount: response.data.length,
-						enrichedPlaces
-					}));
+					// For low zoom, only show if total count is within limit
+					if (options.maxForLowZoom && response.data.length > options.maxForLowZoom) {
+						// Too many results at low zoom - store count but clear merchants
+						// Button will show count, panel will show "zoom in"
+						update((state) => ({
+							...state,
+							merchants: [],
+							totalCount: response.data.length,
+							isLoading: false
+						}));
+					} else {
+						const sorted = sortMerchants(response.data, center.lat, center.lon);
+						const limited = sorted.slice(0, 50);
+						update((state) => ({
+							...state,
+							merchants: limited,
+							totalCount: response.data.length,
+							enrichedPlaces,
+							isLoading: false
+						}));
+					}
 				} else {
-					update((state) => ({ ...state, enrichedPlaces }));
+					update((state) => ({ ...state, enrichedPlaces, isLoading: false }));
 				}
 			} catch (error) {
 				if (error instanceof Error && error.name !== 'AbortError') {
 					console.warn('Failed to fetch enriched merchant data:', error.message);
 				}
+				update((state) => ({ ...state, isLoading: false }));
 			}
 		},
 

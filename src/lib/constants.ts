@@ -25,6 +25,12 @@ export const CLUSTERING_DISABLED_ZOOM = 17;
 // Minimum zoom level for the merchant list panel to show content
 export const MERCHANT_LIST_MIN_ZOOM = 15;
 
+// Minimum zoom level for merchant list at low density areas (when <= MAX results)
+export const MERCHANT_LIST_LOW_ZOOM = 11;
+
+// Maximum number of merchants to show in the list
+export const MERCHANT_LIST_MAX_ITEMS = 50;
+
 export const GradeTable = `<table>
 <thead>
     <tr>
