@@ -5,24 +5,21 @@ test.describe('Leaderboard pages', () => {
 		// Navigate directly to the leaderboard (cold start, no prior data)
 		await page.goto('/communities/leaderboard');
 
-		// Wait for the leaderboard table to appear with actual data
-		// The table should have at least one row with position data (🥇 for first place)
-		const firstPosition = page.locator('text=🥇');
-		await expect(firstPosition).toBeVisible({ timeout: 30000 });
+		// Wait for the leaderboard count to appear in the header (indicates data loaded)
+		await expect(page.getByText(/Community Leaderboard \(\d+\)/)).toBeVisible({ timeout: 30000 });
 
-		// Verify the leaderboard count is shown in the header
-		await expect(page.getByText(/Community Leaderboard \(\d+\)/)).toBeVisible();
+		// Verify the table has loaded with at least one row (gold medal in desktop table cell)
+		await expect(page.getByRole('cell', { name: '🥇' })).toBeVisible();
 	});
 
 	test('countries leaderboard loads data when accessed directly', async ({ page }) => {
 		// Navigate directly to the leaderboard (cold start, no prior data)
 		await page.goto('/countries/leaderboard');
 
-		// Wait for the leaderboard table to appear with actual data
-		const firstPosition = page.locator('text=🥇');
-		await expect(firstPosition).toBeVisible({ timeout: 30000 });
+		// Wait for the leaderboard count to appear in the header (indicates data loaded)
+		await expect(page.getByText(/Country Leaderboard \(\d+\)/)).toBeVisible({ timeout: 30000 });
 
-		// Verify the leaderboard count is shown in the header
-		await expect(page.getByText(/Country Leaderboard \(\d+\)/)).toBeVisible();
+		// Verify the table has loaded with at least one row (gold medal in desktop table cell)
+		await expect(page.getByRole('cell', { name: '🥇' })).toBeVisible();
 	});
 });
