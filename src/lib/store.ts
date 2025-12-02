@@ -4,7 +4,7 @@ import { derived, readable, writable, type Writable } from 'svelte/store';
 export const socials = readable({
 	x: 'https://x.com/btcmap',
 	nostr: 'https://nosta.me/nprofile1qqsra2ey033mkdwl5w8q0jss9ak69zafh82xsuvhwsaauw3trkq2amgax6f75',
-	discord: 'https://discord.com/invite/9mHeTgX2zb',
+	matrix: 'https://matrix.to/#/#btcmap:matrix.org',
 	github: 'https://github.com/teambtcmap',
 	amboss: 'https://amboss.space/community/edf8d227-9bc7-4cb2-af2a-66c1b455109a'
 });
