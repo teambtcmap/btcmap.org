@@ -4,6 +4,7 @@ import type { Place } from '$lib/types';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 import { isBoosted } from '$lib/merchantDrawerLogic';
 import { MERCHANT_LIST_MAX_ITEMS } from '$lib/constants';
+import { errToast } from '$lib/utils';
 
 export interface MerchantListState {
 	isOpen: boolean;
@@ -176,6 +177,7 @@ function createMerchantListStore() {
 			} catch (error) {
 				if (error instanceof Error && error.name !== 'AbortError') {
 					console.warn('Failed to fetch merchant list:', error.message);
+					errToast('Failed to load nearby merchants');
 				}
 				update((state) => ({ ...state, isLoadingList: false }));
 			}
