@@ -26,7 +26,7 @@
 	$: drawerView = $merchantDrawer.drawerView;
 	$: merchant = $merchantDrawer.merchant;
 	$: fetchingMerchant = $merchantDrawer.isLoading;
-	$: listIsOpen = $merchantList.isOpen;
+	$: listIsOpen = $merchantList.isOpen && $merchantList.isExpanded;
 
 	const verifiedDate = calcVerifiedDate();
 	$: isUpToDate = checkUpToDate(merchant, verifiedDate);
@@ -91,7 +91,7 @@
 	<!-- Position offset by MERCHANT_LIST_WIDTH when list panel is open -->
 	<div
 		transition:fly={{ x: -MERCHANT_DRAWER_WIDTH, duration: 300 }}
-		class="fixed top-0 z-[1002] h-full w-full overflow-y-auto bg-white shadow-2xl dark:bg-dark"
+		class="fixed top-0 z-[1002] h-full w-full overflow-y-auto bg-white shadow-2xl transition-[left] duration-200 dark:bg-dark"
 		style="left: {listIsOpen ? MERCHANT_LIST_WIDTH : 0}px; max-width: {MERCHANT_DRAWER_WIDTH}px"
 		role="dialog"
 		aria-modal="true"
