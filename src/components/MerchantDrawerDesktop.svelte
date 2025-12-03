@@ -8,6 +8,8 @@
 	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
+	import { merchantList } from '$lib/merchantListStore';
+	import { MERCHANT_LIST_WIDTH, MERCHANT_DRAWER_WIDTH } from '$lib/constants';
 	import {
 		calcVerifiedDate,
 		isUpToDate as checkUpToDate,
@@ -24,6 +26,7 @@
 	$: drawerView = $merchantDrawer.drawerView;
 	$: merchant = $merchantDrawer.merchant;
 	$: fetchingMerchant = $merchantDrawer.isLoading;
+	$: listIsOpen = $merchantList.isOpen && $merchantList.isExpanded;
 
 	const verifiedDate = calcVerifiedDate();
 	$: isUpToDate = checkUpToDate(merchant, verifiedDate);
@@ -85,9 +88,11 @@
 
 {#if isOpen}
 	<!-- Drawer - no backdrop, keep map interactive -->
+	<!-- Position offset by MERCHANT_LIST_WIDTH when list panel is open -->
 	<div
-		transition:fly={{ x: -400, duration: 300 }}
-		class="fixed top-0 left-0 z-[1002] h-full w-full overflow-y-auto bg-white shadow-2xl md:w-[400px] dark:bg-dark"
+		transition:fly={{ x: -MERCHANT_DRAWER_WIDTH, duration: 300 }}
+		class="fixed top-0 z-[1002] h-full w-full overflow-y-auto bg-white shadow-2xl transition-[left] duration-200 dark:bg-dark"
+		style="left: {listIsOpen ? MERCHANT_LIST_WIDTH : 0}px; max-width: {MERCHANT_DRAWER_WIDTH}px"
 		role="dialog"
 		aria-modal="true"
 	>

@@ -6,7 +6,19 @@
 	import MapLoadingMain from '$components/MapLoadingMain.svelte';
 	import TileLoadingIndicator from '$components/TileLoadingIndicator.svelte';
 	import MerchantDrawerHash from '$components/MerchantDrawerHash.svelte';
+	import MerchantListPanel from '$components/MerchantListPanel.svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
+	import { merchantList } from '$lib/merchantListStore';
+	import {
+		BREAKPOINTS,
+		MERCHANT_DRAWER_WIDTH,
+		CLUSTERING_DISABLED_ZOOM,
+		MERCHANT_LIST_MIN_ZOOM,
+		MERCHANT_LIST_LOW_ZOOM,
+		MERCHANT_LIST_MAX_ITEMS,
+		HIGH_ZOOM_RADIUS_MULTIPLIER,
+		MIN_SEARCH_RADIUS_KM
+	} from '$lib/constants';
 	import {
 		processPlaces,
 		isSupported as isWorkerSupported,
@@ -85,6 +97,8 @@
 	const DEFAULT_LNG = -68.91119;
 	const DEFAULT_ZOOM = 15;
 
+	let currentZoom = DEFAULT_ZOOM;
+
 	// Throttled marker drawer opening to prevent freeze on rapid clicks
 	let lastMarkerClickTime = 0;
 	const MARKER_CLICK_THROTTLE = 100; // ms
@@ -133,6 +147,24 @@
 	let isZooming = false;
 
 	let mapCenter: LatLng;
+
+	// Calculate radius from map center to corner (Haversine formula)
+	const calculateRadiusKm = (bounds: LatLngBounds): number => {
+		const center = bounds.getCenter();
+		const corner = bounds.getNorthEast();
+
+		const R = 6371; // Earth radius in km
+		const dLat = ((corner.lat - center.lat) * Math.PI) / 180;
+		const dLon = ((corner.lng - center.lng) * Math.PI) / 180;
+		const a =
+			Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+			Math.cos((center.lat * Math.PI) / 180) *
+				Math.cos((corner.lat * Math.PI) / 180) *
+				Math.sin(dLon / 2) *
+				Math.sin(dLon / 2);
+		const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+		return R * c * 1.1; // Add 10% buffer
+	};
 
 	const clearMarkerSelection = (markerId: number) => {
 		const marker = loadedMarkers[markerId.toString()];
@@ -283,6 +315,7 @@
 		if (localPlace && isValidCoordinate(localPlace.lat, localPlace.lon)) {
 			// Use local data if available
 			map.setView([localPlace.lat, localPlace.lon], 19);
+			showSearch = false;
 			return;
 		}
 
@@ -324,6 +357,7 @@
 
 			// Navigate to location
 			map.setView([placeData.lat, placeData.lon], 19);
+			showSearch = false;
 		} catch (error) {
 			// Differentiate between network errors and other errors
 			if (error instanceof TypeError && error.message.includes('fetch')) {
@@ -351,6 +385,12 @@
 	};
 
 	$: map && mapLoaded && $mapUpdates && $placesSyncCount > 1 && showDataRefresh();
+
+	// Reload markers and update merchant list when places sync completes after initial load
+	$: if (elementsLoaded && $places.length && currentZoom >= MERCHANT_LIST_LOW_ZOOM) {
+		debouncedLoadMarkers();
+		debouncedUpdateMerchantList();
+	}
 
 	// alert for map errors
 	$: $placesError && errToast($placesError);
@@ -536,6 +576,129 @@
 		});
 	}, 1000); // 1 second debounce for IndexedDB writes
 
+	// Determines which fetch strategy to use based on current zoom level
+	// See constants.ts for zoom behavior documentation
+	type ZoomBehavior = 'none' | 'api-with-limit' | 'local-markers' | 'api-extended';
+
+	function getZoomBehavior(zoom: number): ZoomBehavior {
+		if (zoom >= CLUSTERING_DISABLED_ZOOM) return 'api-extended'; // Zoom 17+
+		if (zoom >= MERCHANT_LIST_MIN_ZOOM) return 'local-markers'; // Zoom 15-16
+		if (zoom >= MERCHANT_LIST_LOW_ZOOM) return 'api-with-limit'; // Zoom 11-14
+		return 'none'; // Below zoom 11
+	}
+
+	// Update merchant list panel based on zoom level and visible places
+	const updateMerchantList = () => {
+		if (!browser) return;
+
+		// Only show list on desktop
+		if (window.innerWidth < BREAKPOINTS.md) {
+			merchantList.close();
+			return;
+		}
+
+		const bounds = map.getBounds();
+		const center = map.getCenter();
+		const behavior = getZoomBehavior(currentZoom);
+
+		switch (behavior) {
+			case 'api-extended': {
+				// Zoom 17+: Clustering disabled, use API for accurate nearby count
+				// Extended radius shows nearby places beyond immediate viewport
+				const viewportRadius = calculateRadiusKm(bounds);
+				const radiusKm = Math.max(
+					viewportRadius * HIGH_ZOOM_RADIUS_MULTIPLIER,
+					MIN_SEARCH_RADIUS_KM
+				);
+				merchantList.fetchAndReplaceList({ lat: center.lat, lon: center.lng }, radiusKm);
+				break;
+			}
+
+			case 'local-markers': {
+				// Zoom 15-16: Use already-loaded markers, fetch details when panel is open
+				const visiblePlaces = $places.filter((place) => {
+					const markerId = place.id.toString();
+					if (!loadedMarkers[markerId]) return false;
+					return bounds.contains([place.lat, place.lon]);
+				});
+
+				merchantList.setMerchants(visiblePlaces, center.lat, center.lng);
+
+				// Fetch enriched data (icons, addresses) only when panel is visible
+				if ($merchantList.isOpen) {
+					const radiusKm = calculateRadiusKm(bounds);
+					merchantList.fetchEnrichedDetails({ lat: center.lat, lon: center.lng }, radiusKm);
+				}
+				break;
+			}
+
+			case 'api-with-limit': {
+				// Zoom 11-14: Use API but hide list if too many results (dense area)
+				const radiusKm = calculateRadiusKm(bounds);
+
+				if (!$merchantList.isOpen) {
+					// Panel closed: fetch IDs only (minimal payload for badge count)
+					merchantList.fetchCountOnly({ lat: center.lat, lon: center.lng }, radiusKm);
+				} else {
+					// Panel open: fetch full data with hideIfExceeds check
+					merchantList.fetchAndReplaceList({ lat: center.lat, lon: center.lng }, radiusKm, {
+						hideIfExceeds: MERCHANT_LIST_MAX_ITEMS
+					});
+				}
+				break;
+			}
+
+			case 'none':
+			default:
+				// Below zoom 11: clear the list
+				merchantList.setMerchants([], 0, 0);
+		}
+	};
+
+	// Debounced version to prevent excessive updates during pan/zoom
+	const debouncedUpdateMerchantList = debounce(updateMerchantList, DEBOUNCE_DELAY);
+
+	// Pan map to center selected merchant when clicked from list
+	const panToMerchantIfNeeded = (place: Place) => {
+		if (!map || !browser) return;
+
+		const panToPlace = () => {
+			// Always center the map on the merchant for clear visual feedback
+			// Account for drawer width by offsetting the center point
+			const drawerWidth = $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0;
+			const mapSize = map.getSize();
+
+			// Calculate the center of the visible area (excluding drawer)
+			const visibleCenterX = (mapSize.x - drawerWidth) / 2;
+			const targetPoint = map.latLngToContainerPoint([place.lat, place.lon]);
+
+			// Calculate offset to center merchant in visible area
+			const offsetX = targetPoint.x - visibleCenterX;
+			const offsetY = targetPoint.y - mapSize.y / 2;
+
+			const currentCenter = map.getCenter();
+			const currentCenterPoint = map.latLngToContainerPoint(currentCenter);
+			const newCenterPoint = leaflet.point(
+				currentCenterPoint.x + offsetX,
+				currentCenterPoint.y + offsetY
+			);
+			const newCenter = map.containerPointToLatLng(newCenterPoint);
+
+			map.panTo(newCenter, { animate: true, duration: 0.3 });
+		};
+
+		// If marker exists and is in a cluster, spiderfy the cluster to show the marker
+		const marker = loadedMarkers[place.id.toString()];
+		if (marker && markers) {
+			const cluster = markers.getVisibleParent(marker);
+			// If marker is inside a cluster (not directly visible), spiderfy it
+			if (cluster && cluster !== marker && 'spiderfy' in cluster) {
+				(cluster as { spiderfy: () => void }).spiderfy();
+			}
+		}
+		panToPlace();
+	};
+
 	const initializeElements = async () => {
 		if (elementsLoaded) {
 			return;
@@ -548,7 +711,7 @@
 		// @ts-expect-error - L is global from Leaflet
 		markers = L.markerClusterGroup({
 			maxClusterRadius: 80,
-			disableClusteringAtZoom: 17,
+			disableClusteringAtZoom: CLUSTERING_DISABLED_ZOOM,
 			chunkedLoading: true,
 			chunkInterval: 50,
 			chunkDelay: 50
@@ -570,19 +733,23 @@
 			isZooming = false;
 			const coords = map.getBounds();
 			mapCenter = map.getCenter();
+			currentZoom = map.getZoom();
 
 			// Update hash if not using URL parameters
 			if (!urlLat.length && !urlLong.length) {
-				const zoom = map.getZoom();
-				updateMapHash(zoom, mapCenter);
+				updateMapHash(currentZoom, mapCenter);
 			}
 
 			// Debounced operations
 			debouncedCacheCoords(coords);
 			debouncedLoadMarkers();
+			debouncedUpdateMerchantList();
 		});
 
 		mapLoadingStatus = 'Loading places in view...';
+
+		// Initialize mapCenter for merchant list panel
+		mapCenter = map.getCenter();
 
 		// Load initial markers for current viewport
 		// NOTE: Don't set isLoadingMarkers=true here, let loadMarkersInViewport handle it
@@ -601,6 +768,10 @@
 					highlightMarker(merchantId);
 				}
 			}
+
+			// Initialize merchant list if already zoomed in
+			currentZoom = map.getZoom();
+			updateMerchantList();
 		}
 	};
 
@@ -1014,6 +1185,10 @@
 		if (debouncedCacheCoords?.cancel) debouncedCacheCoords.cancel();
 		if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
 		if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
+		if (debouncedUpdateMerchantList?.cancel) debouncedUpdateMerchantList.cancel();
+
+		// Reset merchant list
+		merchantList.reset();
 
 		if (map) {
 			console.info('Unloading Leaflet map.');
@@ -1040,126 +1215,175 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/map.png" />
 </svelte:head>
 
-<main>
+<main class="flex h-screen w-full">
 	<h1 class="hidden">Map</h1>
 
 	<MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
 
-	<!-- Search UI - re-enabled with API-based search -->
-	<div
-		id="search-div"
-		bind:this={searchContainer}
-		class="absolute top-0 left-[60px] w-[50vw] md:w-[350px] {showSearch ? 'block' : 'hidden'}"
-		on:focusout={handleSearchFocusOut}
-	>
-		<div class="relative">
-			<input
-				id="search-input"
-				type="search"
-				aria-label="Search for Bitcoin merchants"
-				class="text-mapButton w-full rounded-lg bg-white px-5 py-2.5 text-[16px] drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:outline-hidden focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] dark:border dark:bg-dark dark:text-white [&::-webkit-search-cancel-button]:hidden"
-				placeholder="Search..."
-				on:keyup={searchDebounce}
-				on:keydown={handleSearchKeyDown}
-				bind:value={search}
-				disabled={!mapLoaded}
-			/>
+	<!-- Desktop: Merchant list panel (flexbox, not overlay) -->
+	<MerchantListPanel
+		onPanToPlace={panToMerchantIfNeeded}
+		onHoverStart={(place) => highlightMarker(place.id)}
+		onHoverEnd={(place) => {
+			// Don't clear if this is the selected marker
+			if (selectedMarkerId !== place.id) {
+				clearMarkerSelection(place.id);
+			}
+		}}
+		{currentZoom}
+	/>
 
-			<button
-				type="button"
-				aria-label="Clear search"
-				bind:this={clearSearchButton}
-				on:click={clearSearch}
-				class="text-mapButton absolute top-[10px] right-[8px] bg-white hover:text-black dark:bg-dark dark:text-white dark:hover:text-white/80 {search
-					? 'block'
-					: 'hidden'}"
-			>
-				<svg
-					width="20"
-					height="20"
-					viewBox="0 0 20 20"
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
+	<!-- Map container -->
+	<div class="relative flex-1">
+		<!-- Search UI - re-enabled with API-based search -->
+		<div
+			id="search-div"
+			bind:this={searchContainer}
+			class="absolute top-0 left-[60px] z-[1000] w-[50vw] md:w-[350px] {showSearch
+				? 'block'
+				: 'hidden'}"
+			on:focusout={handleSearchFocusOut}
+		>
+			<div class="relative">
+				<input
+					id="search-input"
+					type="search"
+					aria-label="Search for Bitcoin merchants"
+					class="text-mapButton w-full rounded-lg bg-white px-5 py-2.5 text-[16px] drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:outline-hidden focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] dark:border dark:bg-dark dark:text-white [&::-webkit-search-cancel-button]:hidden"
+					placeholder="Search..."
+					on:keyup={searchDebounce}
+					on:keydown={handleSearchKeyDown}
+					bind:value={search}
+					disabled={!mapLoaded}
+				/>
+
+				<button
+					type="button"
+					aria-label="Clear search"
+					bind:this={clearSearchButton}
+					on:click={clearSearch}
+					class="text-mapButton absolute top-[10px] right-[8px] bg-white hover:text-black dark:bg-dark dark:text-white dark:hover:text-white/80 {search
+						? 'block'
+						: 'hidden'}"
 				>
-					<path
-						d="M14.1668 5.8335L5.8335 14.1668M5.8335 5.8335L14.1668 14.1668"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					/>
-				</svg>
-			</button>
+					<svg
+						width="20"
+						height="20"
+						viewBox="0 0 20 20"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							d="M14.1668 5.8335L5.8335 14.1668M5.8335 5.8335L14.1668 14.1668"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						/>
+					</svg>
+				</button>
+			</div>
+
+			{#if isDropdownOpen}
+				<div
+					class="mt-0.5 w-full rounded-lg bg-white drop-shadow-[0px_2px_6px_rgba(0,0,0,0.15)] dark:bg-dark"
+				>
+					{#if !searchStatus && searchResults.length > 0}
+						<div
+							class="border-b border-gray-200 px-4 py-2 text-xs text-gray-600 dark:border-white/10 dark:text-white/70"
+						>
+							{searchResults.length} result{searchResults.length === 1 ? '' : 's'}
+						</div>
+					{/if}
+
+					<ul class="max-h-[204px] w-full overflow-y-scroll">
+						{#if searchStatus}
+							<li role="status" aria-live="polite" class="w-full px-4 py-6">
+								<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
+							</li>
+						{:else if searchResults.length > 0}
+							{#each searchResults as result (result.id)}
+								<li>
+									<button
+										on:click={() => searchSelect(result)}
+										class="hover:bg-searchHover block w-full cursor-pointer border-b border-gray-200 px-4 py-2 text-left dark:border-white/10 dark:hover:bg-white/[0.15]"
+									>
+										<div class="flex items-start space-x-2">
+											<Icon
+												w="20"
+												h="20"
+												style="mt-1 text-mapButton dark:text-white opacity-50"
+												icon={result.icon && result.icon !== 'question_mark'
+													? result.icon
+													: 'currency_bitcoin'}
+												type="material"
+											/>
+
+											<div class="max-w-[280px]">
+												<p
+													class="text-mapButton text-sm dark:text-white {result.name?.match(
+														'([^ ]{21})'
+													)
+														? 'break-all'
+														: ''}"
+												>
+													{result.name || 'Unknown'}
+												</p>
+												{#if result.address}
+													<p class="text-searchSubtext text-xs dark:text-white/70">
+														{result.address}
+													</p>
+												{/if}
+											</div>
+										</div>
+									</button>
+								</li>
+							{/each}
+						{:else}
+							<li
+								class="text-searchSubtext w-full px-4 py-2 text-center text-sm dark:text-white/70"
+							>
+								No results found.
+							</li>
+						{/if}
+					</ul>
+				</div>
+			{/if}
 		</div>
 
-		{#if isDropdownOpen}
-			<div
-				class="mt-0.5 w-full rounded-lg bg-white drop-shadow-[0px_2px_6px_rgba(0,0,0,0.15)] dark:bg-dark"
+		<!-- Floating toggle button for merchant list (always visible on desktop) -->
+		{#if !($merchantList.isOpen && $merchantList.isExpanded)}
+			<button
+				on:click={async () => {
+					if ($merchantList.isOpen) {
+						merchantList.expand();
+					} else {
+						merchantList.open();
+					}
+					// Wait for store update to propagate before fetching
+					await tick();
+					updateMerchantList();
+				}}
+				class="absolute top-[10px] left-[60px] z-[1000] hidden items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-medium shadow-lg transition-colors hover:bg-gray-50 md:flex dark:bg-dark dark:hover:bg-white/10"
+				style="filter: drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3));"
+				aria-label="Open merchant list"
 			>
-				{#if !searchStatus && searchResults.length > 0}
-					<div
-						class="border-b border-gray-200 px-4 py-2 text-xs text-gray-600 dark:border-white/10 dark:text-white/70"
-					>
-						{searchResults.length} result{searchResults.length === 1 ? '' : 's'}
-					</div>
+				<Icon w="18" h="18" icon="menu" type="material" style="text-primary dark:text-white" />
+				{#if currentZoom >= MERCHANT_LIST_LOW_ZOOM && $merchantList.isLoadingList}
+					<LoadingSpinner size="h-4 w-4" color="text-primary dark:text-white" />
+					<span class="text-primary dark:text-white">Nearby</span>
+				{:else if currentZoom >= MERCHANT_LIST_LOW_ZOOM && $merchantList.totalCount > 0}
+					<span class="text-primary dark:text-white">{$merchantList.totalCount} Nearby</span>
+				{:else}
+					<span class="text-primary dark:text-white">Nearby</span>
 				{/if}
-
-				<ul class="max-h-[204px] w-full overflow-y-scroll">
-					{#if searchStatus}
-						<li role="status" aria-live="polite" class="w-full px-4 py-6">
-							<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
-						</li>
-					{:else if searchResults.length > 0}
-						{#each searchResults as result (result.id)}
-							<li>
-								<button
-									on:click={() => searchSelect(result)}
-									class="hover:bg-searchHover block w-full cursor-pointer border-b border-gray-200 px-4 py-2 text-left dark:border-white/10 dark:hover:bg-white/[0.15]"
-								>
-									<div class="flex items-start space-x-2">
-										<Icon
-											w="20"
-											h="20"
-											style="mt-1 text-mapButton dark:text-white opacity-50"
-											icon={result.icon && result.icon !== 'question_mark'
-												? result.icon
-												: 'currency_bitcoin'}
-											type="material"
-										/>
-
-										<div class="max-w-[280px]">
-											<p
-												class="text-mapButton text-sm dark:text-white {result.name?.match(
-													'([^ ]{21})'
-												)
-													? 'break-all'
-													: ''}"
-											>
-												{result.name || 'Unknown'}
-											</p>
-											{#if result.address}
-												<p class="text-searchSubtext text-xs dark:text-white/70">
-													{result.address}
-												</p>
-											{/if}
-										</div>
-									</div>
-								</button>
-							</li>
-						{/each}
-					{:else}
-						<li class="text-searchSubtext w-full px-4 py-2 text-center text-sm dark:text-white/70">
-							No results found.
-						</li>
-					{/if}
-				</ul>
-			</div>
+			</button>
 		{/if}
+
+		<div bind:this={mapElement} class="absolute inset-0 !bg-teal dark:!bg-dark" />
 	</div>
 
 	<MerchantDrawerHash />
 
 	<TileLoadingIndicator visible={tilesLoading} />
-
-	<div bind:this={mapElement} class="absolute h-[100%] w-full !bg-teal dark:!bg-dark" />
 </main>
