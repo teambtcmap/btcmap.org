@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { GradeTable } from '$lib/constants';
-	import AreaMerchantDrawer from '$components/AreaMerchantDrawer.svelte';
+	import AreaMerchantDrawer from './AreaMerchantDrawer.svelte';
 	import Icon from '$components/Icon.svelte';
 	import MapLoadingEmbed from '$components/MapLoadingEmbed.svelte';
 	import ShowTags from '$components/ShowTags.svelte';

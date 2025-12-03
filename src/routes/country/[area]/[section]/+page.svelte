@@ -1,5 +1,5 @@
 <script lang="ts">
-	import AreaPage from '$components/AreaPage.svelte';
+	import AreaPage from '$components/area/AreaPage.svelte';
 	import Breadcrumbs from '$components/Breadcrumbs.svelte';
 	import Footer from '$components/Footer.svelte';
 	import Header from '$components/Header.svelte';
