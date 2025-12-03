@@ -148,6 +148,9 @@
 
 	let mapCenter: LatLng;
 
+	// Timer for search focus out (tracked for cleanup)
+	let searchFocusOutTimer: ReturnType<typeof setTimeout> | null = null;
+
 	// Calculate radius from map center to corner (Haversine formula)
 	const calculateRadiusKm = (bounds: LatLngBounds): number => {
 		const center = bounds.getCenter();
@@ -281,8 +284,10 @@
 	};
 
 	const handleSearchFocusOut = (_e: FocusEvent) => {
+		// Clear any pending timer to avoid stacking
+		if (searchFocusOutTimer) clearTimeout(searchFocusOutTimer);
 		// Small timeout to allow click events to fire first
-		setTimeout(() => {
+		searchFocusOutTimer = setTimeout(() => {
 			if (searchContainer && !searchContainer.contains(document.activeElement)) {
 				isDropdownOpen = false;
 			}
@@ -1186,6 +1191,10 @@
 		if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
 		if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
 		if (debouncedUpdateMerchantList?.cancel) debouncedUpdateMerchantList.cancel();
+		if (searchDebounce?.cancel) searchDebounce.cancel();
+
+		// Clear pending search focus out timer
+		if (searchFocusOutTimer) clearTimeout(searchFocusOutTimer);
 
 		// Reset merchant list
 		merchantList.reset();
