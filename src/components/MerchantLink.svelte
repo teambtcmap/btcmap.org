@@ -1,7 +1,26 @@
 <script lang="ts">
+	import Icon from '$components/Icon.svelte';
+
 	export let link: string;
 	export let icon: string;
 	export let text: string;
+
+	// Map popup spritesheet icon names to material icons
+	const iconMap: Record<string, string> = {
+		compass: 'explore',
+		pencil: 'edit',
+		share: 'share',
+		bolt: 'bolt',
+		phone: 'phone',
+		email: 'email',
+		globe: 'language',
+		x: 'open_in_new',
+		instagram: 'open_in_new',
+		facebook: 'open_in_new',
+		external: 'open_in_new'
+	};
+
+	$: materialIcon = iconMap[icon] || icon;
 </script>
 
 <!-- eslint-disable svelte/no-navigation-without-resolve -->
@@ -13,9 +32,7 @@
 >
 	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 	<div>
-		<svg width="30px" height="30px" class="mx-auto">
-			<use width="30px" height="30px" href="/icons/spritesheet-popup.svg#{icon}" />
-		</svg>
+		<Icon w="30" h="30" icon={materialIcon} type="material" style="mx-auto" />
 		<span class="mt-1 block text-center text-xs font-semibold">{text}</span>
 	</div>
 </a>
