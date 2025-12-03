@@ -4,6 +4,7 @@
 	import Icon from '$components/Icon.svelte';
 	import LoadingSpinner from '$components/LoadingSpinner.svelte';
 	import MapLoadingMain from '$components/MapLoadingMain.svelte';
+	import TileLoadingIndicator from '$components/TileLoadingIndicator.svelte';
 	import MerchantDrawerHash from '$components/MerchantDrawerHash.svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import {
@@ -119,6 +120,9 @@
 	let mapLoaded = false;
 	let elementsLoaded = false;
 	let mapTilesLoaded = false;
+	let tilesLoading = true;
+	let tilesLoadingTimer: ReturnType<typeof setTimeout> | null = null;
+	let tilesLoadingFallback: ReturnType<typeof setTimeout> | null = null;
 
 	let markers: MarkerClusterGroup;
 	let upToDateLayer: FeatureGroup.SubGroup;
@@ -750,7 +754,16 @@
 					const glMap = activeLayer.getMaplibreMap();
 					if (glMap) {
 						glMap.on('idle', () => {
+							if (tilesLoadingTimer) {
+								clearTimeout(tilesLoadingTimer);
+								tilesLoadingTimer = null;
+							}
+							if (tilesLoadingFallback) {
+								clearTimeout(tilesLoadingFallback);
+								tilesLoadingFallback = null;
+							}
 							mapTilesLoaded = true;
+							tilesLoading = false;
 						});
 					} else {
 						// GL map not ready yet, check again after a short delay
@@ -761,7 +774,24 @@
 			} else {
 				// Fallback: if not using MapLibre GL layer, mark tiles as loaded immediately
 				mapTilesLoaded = true;
+				tilesLoading = false;
 			}
+
+			// Show tile loading indicator on pan/zoom (debounced to prevent flickering)
+			map.on('movestart', () => {
+				if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
+				if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
+
+				// Only show indicator if loading takes > 150ms
+				tilesLoadingTimer = setTimeout(() => {
+					tilesLoading = true;
+				}, 150);
+
+				// Fallback: hide indicator after 5s if idle never fires
+				tilesLoadingFallback = setTimeout(() => {
+					tilesLoading = false;
+				}, 5000);
+			});
 
 			// Close drawer when clicking on map (not on markers)
 			map.on('click', () => {
@@ -982,6 +1012,8 @@
 		// Cancel pending debounced operations to prevent memory leaks
 		if (debouncedLoadMarkers?.cancel) debouncedLoadMarkers.cancel();
 		if (debouncedCacheCoords?.cancel) debouncedCacheCoords.cancel();
+		if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
+		if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
 
 		if (map) {
 			console.info('Unloading Leaflet map.');
@@ -1126,6 +1158,8 @@
 	</div>
 
 	<MerchantDrawerHash />
+
+	<TileLoadingIndicator visible={tilesLoading} />
 
 	<div bind:this={mapElement} class="absolute h-[100%] w-full !bg-teal dark:!bg-dark" />
 </main>
