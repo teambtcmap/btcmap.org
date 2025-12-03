@@ -111,7 +111,7 @@
 
 			{#if website}
 				<div class="flex items-center space-x-2">
-					<Icon w="16" h="16" icon="globe" type="popup" style="shrink-0" />
+					<Icon w="16" h="16" icon="language" type="material" style="shrink-0" />
 					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href={website.startsWith('http') ? website : `https://${website}`}
@@ -127,7 +127,7 @@
 
 			{#if openingHours}
 				<div class="flex items-center space-x-2">
-					<Icon w="16" h="16" icon="clock" type="popup" style="shrink-0" />
+					<Icon w="16" h="16" icon="schedule" type="material" style="shrink-0" />
 					<div class="text-sm">
 						<time class="flex flex-col items-start">
 							<!-- eslint-disable-next-line svelte/no-at-html-tags - we sanitize the content in formatOpeningHours -->
@@ -139,7 +139,7 @@
 
 			{#if phone}
 				<div class="flex items-center space-x-2">
-					<Icon w="16" h="16" icon="phone" type="popup" style="shrink-0" />
+					<Icon w="16" h="16" icon="phone" type="material" style="shrink-0" />
 					<a
 						href="tel:{phone}"
 						class="text-sm underline decoration-primary decoration-1 underline-offset-4 dark:decoration-white"
@@ -151,7 +151,7 @@
 
 			{#if email}
 				<div class="flex items-center space-x-2">
-					<Icon w="16" h="16" icon="email" type="popup" style="shrink-0" />
+					<Icon w="16" h="16" icon="email" type="material" style="shrink-0" />
 					<a
 						href="mailto:{email}"
 						class="text-sm underline decoration-primary decoration-1 underline-offset-4 dark:decoration-white"
@@ -171,7 +171,7 @@
 					>
 						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
-						<Icon w="16" h="16" icon="twitter" type="popup" />
+						<Icon w="16" h="16" icon="x-twitter" type="fa" />
 					</a>
 				{/if}
 
@@ -184,7 +184,7 @@
 					>
 						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
-						<Icon w="16" h="16" icon="instagram" type="popup" />
+						<Icon w="16" h="16" icon="instagram" type="fa" />
 					</a>
 				{/if}
 
@@ -197,7 +197,7 @@
 					>
 						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
-						<Icon w="16" h="16" icon="facebook" type="popup" />
+						<Icon w="16" h="16" icon="facebook" type="fa" />
 					</a>
 				{/if}
 			</div>
@@ -213,7 +213,7 @@
 
 				{#if !(Date.parse(verified[0]) > verifiedDate)}
 					<div bind:this={outdatedTooltip} class="text-primary dark:text-white">
-						<Icon w="16" h="16" icon="outdated" type="popup" style="shrink-0" />
+						<Icon w="16" h="16" icon="error_outline" type="material" style="shrink-0" />
 					</div>
 				{/if}
 			</div>
@@ -240,7 +240,7 @@
 				class="inline-flex items-center space-x-1 font-semibold text-link transition-colors hover:text-hover"
 				title="Help improve the data for everyone"
 			>
-				<Icon w="16" h="16" icon="verified" type="popup" style="shrink-0" />
+				<Icon w="16" h="16" icon="verified" type="material" style="shrink-0" />
 				<p class="text-sm">Verify</p>
 			</a>
 

@@ -41,13 +41,7 @@
 			? 'hover:bg-bitcoinHover bg-bitcoin'
 			: 'bg-link hover:bg-hover'} mx-auto flex w-40 items-center justify-center rounded-xl p-3 text-center font-semibold text-white transition-colors"
 	>
-		<Icon
-			w="20"
-			h="20"
-			style="text-white mr-1"
-			icon={boosted ? 'boost-solid' : 'boost'}
-			type="popup"
-		/>
+		<Icon w="20" h="20" style="text-white mr-1" icon="arrow_circle_up" type="material" />
 		{boostLoading ? 'Boosting...' : boosted ? 'Extend Boost' : 'Boost'}
 	</button>
 {:else}
@@ -57,7 +51,7 @@
 		disabled={boostLoading || Boolean($boost)}
 		class="inline-flex items-center space-x-1 font-semibold text-link transition-colors hover:text-hover"
 	>
-		<Icon w="16" h="16" icon="boost" style="shrink-0" type="popup" />
+		<Icon w="16" h="16" icon="arrow_circle_up" style="shrink-0" type="material" />
 		<p class="text-sm">{boostLoading ? 'Boosting...' : boosted ? 'Extend Boost' : 'Boost'}</p>
 	</button>
 {/if}

@@ -480,7 +480,7 @@
 									h="16"
 									style="text-primary dark:text-white inline-block"
 									icon="phone"
-									type="popup"
+									type="material"
 								/>
 								Contact
 							</h4>
@@ -554,8 +554,8 @@
 									w="16"
 									h="16"
 									style="text-primary dark:text-white inline"
-									icon="clock"
-									type="popup"
+									icon="schedule"
+									type="material"
 								/>
 								Hours
 							</h4>
@@ -694,7 +694,7 @@
 												h="30"
 												style="text-primary dark:text-white mr-2"
 												icon="verified"
-												type="popup"
+												type="material"
 											/>
 										</span>
 									{:else}
@@ -703,8 +703,8 @@
 												w="30"
 												h="30"
 												style="text-primary dark:text-white mr-2"
-												icon="outdated"
-												type="popup"
+												icon="error_outline"
+												type="material"
 											/>
 										</span>
 									{/if}

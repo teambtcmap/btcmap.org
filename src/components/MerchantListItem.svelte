@@ -62,10 +62,16 @@
 							{enrichedData.name}
 						</span>
 						{#if isVerified}
-							<Icon w="12" h="12" icon="verified" type="popup" style="shrink-0 text-link" />
+							<Icon w="12" h="12" icon="verified" type="material" style="shrink-0 text-link" />
 						{/if}
 						{#if isBoosted}
-							<Icon w="12" h="12" icon="boost-solid" type="popup" style="shrink-0 text-bitcoin" />
+							<Icon
+								w="12"
+								h="12"
+								icon="arrow_circle_up"
+								type="material"
+								style="shrink-0 text-bitcoin"
+							/>
 						{/if}
 					{:else if showSkeleton}
 						<div class="h-4 w-32 animate-pulse rounded bg-link/50"></div>
@@ -119,12 +125,12 @@
 							<span
 								class="flex items-center gap-1 rounded-full bg-bitcoin/10 px-2 py-0.5 text-bitcoin"
 							>
-								<Icon w="12" h="12" icon="boost-solid" type="popup" />
+								<Icon w="12" h="12" icon="arrow_circle_up" type="material" />
 								Boosted
 							</span>
 						{/if}
 						<span class="flex items-center gap-1 text-gray-500 dark:text-white/60">
-							<Icon w="12" h="12" icon={isVerified ? 'check' : 'alert'} type="popup" />
+							<Icon w="12" h="12" icon={isVerified ? 'check' : 'warning'} type="material" />
 							{isVerified ? 'Verified' : 'Outdated'}
 							{#if enrichedData.verified_at}
 								<span class="text-gray-400 dark:text-white/40"

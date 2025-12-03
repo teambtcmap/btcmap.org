@@ -1,7 +1,33 @@
 <script lang="ts">
+	import Icon from '$components/Icon.svelte';
+
 	export let link: string;
 	export let icon: string;
 	export let text: string;
+
+	// Social icons use FA brands
+	const faIcons = ['x', 'instagram', 'facebook'];
+
+	// Map icon names to their respective icons
+	const materialIconMap: Record<string, string> = {
+		compass: 'explore',
+		pencil: 'edit',
+		share: 'share',
+		bolt: 'bolt',
+		phone: 'phone',
+		email: 'email',
+		globe: 'language',
+		external: 'open_in_new'
+	};
+
+	const faIconMap: Record<string, string> = {
+		x: 'x-twitter',
+		instagram: 'instagram',
+		facebook: 'facebook'
+	};
+
+	$: isFaIcon = faIcons.includes(icon);
+	$: resolvedIcon = isFaIcon ? faIconMap[icon] || icon : materialIconMap[icon] || icon;
 </script>
 
 <!-- eslint-disable svelte/no-navigation-without-resolve -->
@@ -13,9 +39,7 @@
 >
 	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 	<div>
-		<svg width="30px" height="30px" class="mx-auto">
-			<use width="30px" height="30px" href="/icons/spritesheet-popup.svg#{icon}" />
-		</svg>
+		<Icon w="30" h="30" icon={resolvedIcon} type={isFaIcon ? 'fa' : 'material'} style="mx-auto" />
 		<span class="mt-1 block text-center text-xs font-semibold">{text}</span>
 	</div>
 </a>
