@@ -53,7 +53,7 @@
 			href="geo:{merchant.lat},{merchant.lon}"
 			class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
 		>
-			<Icon w="24" h="24" icon="compass" type="popup" />
+			<Icon w="24" h="24" icon="explore" type="material" />
 			<span class="mt-1 text-xs">Navigate</span>
 		</a>
 
@@ -65,7 +65,7 @@
 			rel="noreferrer"
 			class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
 		>
-			<Icon w="24" h="24" icon="pencil" type="popup" />
+			<Icon w="24" h="24" icon="edit" type="material" />
 			<span class="mt-1 text-xs">Edit</span>
 		</a>
 		<!-- eslint-enable svelte/no-navigation-without-resolve -->
@@ -74,7 +74,7 @@
 			href={resolve(`/merchant/${merchant.id}`)}
 			class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
 		>
-			<Icon w="24" h="24" icon="share" type="popup" />
+			<Icon w="24" h="24" icon="share" type="material" />
 			<span class="mt-1 text-xs">Share</span>
 		</a>
 
@@ -136,15 +136,15 @@
 							h="16"
 							style="inline text-primary dark:text-white"
 							icon="verified"
-							type="popup"
+							type="material"
 						/>
 					{:else}
 						<Icon
 							w="16"
 							h="16"
 							style="inline text-primary dark:text-white"
-							icon="outdated"
-							type="popup"
+							icon="error_outline"
+							type="material"
 						/>
 					{/if}
 				</span>
@@ -182,7 +182,7 @@
 				class="mt-2 flex h-[32px] items-center justify-center space-x-2 rounded-lg border border-gray-300 px-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
 			>
 				{#if !boostLoading}
-					<Icon w="16" h="16" icon={isBoosted ? 'boost-solid' : 'boost'} type="popup" />
+					<Icon w="16" h="16" icon="arrow_circle_up" type="material" />
 				{/if}
 				<span class="text-xs">{boostLoading ? 'Boosting...' : isBoosted ? 'Extend' : 'Boost'}</span>
 			</button>

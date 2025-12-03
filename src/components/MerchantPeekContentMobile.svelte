@@ -36,7 +36,7 @@
 				class="flex-shrink-0 rounded-full bg-link px-2.5 py-1 text-xs font-semibold text-white"
 				title="Boosted merchant"
 			>
-				<Icon w="14" h="14" icon="zap" type="popup" style="inline mr-1" />
+				<Icon w="14" h="14" icon="bolt" type="material" style="inline mr-1" />
 				Boosted
 			</div>
 		{/if}
@@ -81,12 +81,12 @@
 			{#if hasVerification}
 				{#if isUpToDate}
 					<div class="flex items-center gap-1 text-green-600 dark:text-green-400">
-						<Icon w="14" h="14" icon="check" type="popup" />
+						<Icon w="14" h="14" icon="check" type="material" />
 						<span>Verified</span>
 					</div>
 				{:else}
 					<div class="flex items-center gap-1 text-orange-600 dark:text-orange-400">
-						<Icon w="14" h="14" icon="alert" type="popup" />
+						<Icon w="14" h="14" icon="warning" type="material" />
 						<span>Outdated</span>
 					</div>
 				{/if}

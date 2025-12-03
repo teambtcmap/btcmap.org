@@ -54,7 +54,14 @@
 					return `ic:outline-${(icon as string).replace(/_/g, '-')}`;
 				})()
 			: type === 'fa'
-				? `fa6-solid:${icon as string}`
+				? (() => {
+						// FA brands icons need fa6-brands prefix
+						const brandIcons = ['x-twitter', 'instagram', 'facebook', 'twitter'];
+						if (brandIcons.includes(icon as string)) {
+							return `fa6-brands:${icon as string}`;
+						}
+						return `fa6-solid:${icon as string}`;
+					})()
 				: icon;
 
 	$: spriteHref =
