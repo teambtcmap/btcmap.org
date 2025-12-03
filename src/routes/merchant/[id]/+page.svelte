@@ -5,7 +5,7 @@
 	import Boost from '$components/Boost.svelte';
 	import BoostButton from '$components/BoostButton.svelte';
 	import Card from '$components/Card.svelte';
-	import CommentAddButton from '$components/CommentAddButton.svelte';
+	import CommentAddButton from './components/CommentAddButton.svelte';
 	import Footer from '$components/Footer.svelte';
 	import Header from '$components/Header.svelte';
 	import Icon from '$components/Icon.svelte';

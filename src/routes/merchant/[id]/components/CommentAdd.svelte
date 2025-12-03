@@ -2,6 +2,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import CloseButton from '$components/CloseButton.svelte';
 	import Icon from '$components/Icon.svelte';
+	import InvoicePaymentStage from '$components/InvoicePaymentStage.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import { PAYMENT_ERROR_MESSAGE } from '$lib/constants';
 	import { lastUpdatedPlaceId } from '$lib/store';
@@ -11,7 +12,6 @@
 	import OutClick from 'svelte-outclick';
 	import { fly } from 'svelte/transition';
 	import type { MerchantPageData } from '$lib/types.js';
-	import InvoicePaymentStage from './InvoicePaymentStage.svelte';
 
 	export let open: boolean = false;
 	export let elementId: MerchantPageData['id'] | undefined;

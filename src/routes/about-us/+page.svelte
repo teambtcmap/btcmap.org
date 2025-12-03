@@ -468,8 +468,8 @@
 						<p>
 							<strong>Karnage</strong> is the lead designer on the web app and created the BTC Map brand.
 							He has contributed to many high profile bitcoin open source projects. His mission is to
-							help startup founders succeed and creates products to achieve this goal. Pixel-perfect product
-							design every time. Get it shipped.
+							help startup founders succeed and creates products to achieve this goal. Pixel-perfect
+							product design every time. Get it shipped.
 						</p>
 					</div>
 				</div>
