@@ -37,7 +37,13 @@
 
 	{#if merchant.opening_hours}
 		<div class="flex items-start space-x-2" title="Opening hours">
-			<Icon w="16" h="16" style="mt-1 text-primary dark:text-white" icon="clock" type="popup" />
+			<Icon
+				w="16"
+				h="16"
+				style="mt-1 shrink-0 text-primary dark:text-white"
+				icon="schedule"
+				type="material"
+			/>
 			<span class="text-body dark:text-white">{merchant.opening_hours}</span>
 		</div>
 	{/if}

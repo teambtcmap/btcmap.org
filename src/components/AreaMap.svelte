@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { GradeTable } from '$lib/constants';
+	import AreaMerchantDrawer from '$components/AreaMerchantDrawer.svelte';
 	import Icon from '$components/Icon.svelte';
 	import MapLoadingEmbed from '$components/MapLoadingEmbed.svelte';
 	import ShowTags from '$components/ShowTags.svelte';
@@ -26,6 +27,17 @@
 	export let name: string;
 	export let geoJSON: GeoJSON;
 	export let filteredPlaces: Place[];
+
+	// Local drawer state
+	let selectedMerchantId: number | null = null;
+
+	const openDrawer = (id: number) => {
+		selectedMerchantId = id;
+	};
+
+	const closeDrawer = () => {
+		selectedMerchantId = null;
+	};
 
 	let total: number | undefined;
 	let upToDate: number | undefined;
@@ -139,7 +151,8 @@
 					icon: divIcon,
 					placeId: place.id,
 					leaflet,
-					verify: true
+					verify: true,
+					onMarkerClick: (id) => openDrawer(Number(id))
 				});
 
 				upToDateLayer.addLayer(marker);
@@ -161,6 +174,13 @@
 			map.addLayer(upToDateLayer);
 
 			map.fitBounds(leaflet.geoJSON(geoJSON).getBounds());
+
+			// Close drawer when clicking on map (not on markers)
+			map.on('click', () => {
+				if (selectedMerchantId) {
+					closeDrawer();
+				}
+			});
 
 			mapLoaded = true;
 		};
@@ -219,16 +239,19 @@
 	</h3>
 
 	<div class="relative">
-		<!-- prettier-ignore -->
-		<div
-			bind:this={mapElement}
-			class="z-10 h-[300px] rounded-b-3xl border border-gray-300 !bg-teal text-left md:h-[600px] dark:border-white/95 dark:!bg-[#202f33]"
-		/>
-		{#if !mapLoaded}
-			<MapLoadingEmbed
-				style="h-[300px] md:h-[600px] rounded-b-3xl border border-gray-300 dark:border-white/95"
+		<div class="overflow-hidden rounded-b-3xl">
+			<!-- prettier-ignore -->
+			<div
+				bind:this={mapElement}
+				class="z-10 h-[300px] border border-gray-300 !bg-teal text-left md:h-[600px] dark:border-white/95 dark:!bg-[#202f33]"
 			/>
-		{/if}
+			{#if !mapLoaded}
+				<MapLoadingEmbed
+					style="h-[300px] md:h-[600px] border border-gray-300 dark:border-white/95"
+				/>
+			{/if}
+		</div>
+		<AreaMerchantDrawer merchantId={selectedMerchantId} onClose={closeDrawer} />
 	</div>
 
 	<ShowTags />
