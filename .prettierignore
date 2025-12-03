@@ -18,4 +18,3 @@ spritesheet-*.ts
 
 # icons
 static/icons/font-awesome/
-static/icons/**/*.svg
