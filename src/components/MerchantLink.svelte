@@ -5,8 +5,11 @@
 	export let icon: string;
 	export let text: string;
 
-	// Map popup spritesheet icon names to material icons
-	const iconMap: Record<string, string> = {
+	// Social icons use FA brands
+	const faIcons = ['x', 'instagram', 'facebook'];
+
+	// Map icon names to their respective icons
+	const materialIconMap: Record<string, string> = {
 		compass: 'explore',
 		pencil: 'edit',
 		share: 'share',
@@ -14,13 +17,17 @@
 		phone: 'phone',
 		email: 'email',
 		globe: 'language',
-		x: 'open_in_new',
-		instagram: 'open_in_new',
-		facebook: 'open_in_new',
 		external: 'open_in_new'
 	};
 
-	$: materialIcon = iconMap[icon] || icon;
+	const faIconMap: Record<string, string> = {
+		x: 'x-twitter',
+		instagram: 'instagram',
+		facebook: 'facebook'
+	};
+
+	$: isFaIcon = faIcons.includes(icon);
+	$: resolvedIcon = isFaIcon ? faIconMap[icon] || icon : materialIconMap[icon] || icon;
 </script>
 
 <!-- eslint-disable svelte/no-navigation-without-resolve -->
@@ -32,7 +39,7 @@
 >
 	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 	<div>
-		<Icon w="30" h="30" icon={materialIcon} type="material" style="mx-auto" />
+		<Icon w="30" h="30" icon={resolvedIcon} type={isFaIcon ? 'fa' : 'material'} style="mx-auto" />
 		<span class="mt-1 block text-center text-xs font-semibold">{text}</span>
 	</div>
 </a>
