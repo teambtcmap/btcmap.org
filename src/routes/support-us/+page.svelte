@@ -41,7 +41,7 @@
 		{ url: 'https://coinos.io/', title: 'coinos', logo: 'coinos.svg', logoDark: 'coinos-dark.svg' },
 		{ url: 'https://www.walletofsatoshi.com/', title: 'Wallet of Satoshi', logo: 'wos.png' },
 		{ url: 'https://btccuracao.com/', title: 'BTC Curacao', logo: 'btccuracao.png' },
-		{ url: 'https://satsnfacts.btc.pub/', title: 'Sats n Facts', logo: 'satsnfacts.png' }
+		{ url: 'https://geyser.fund/project/satsnfacts', title: 'Sats n Facts', logo: 'satsnfacts.png' }
 	];
 </script>
 
