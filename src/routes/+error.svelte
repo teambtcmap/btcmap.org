@@ -41,7 +41,7 @@
 		</div>
 
 		<footer class="flex flex-wrap justify-center gap-5 pb-5">
-			<SocialLink url={$socials.discord} social="discord" />
+			<SocialLink url={$socials.matrix} social="matrix" />
 			<SocialLink url={$socials.github} social="github" />
 			<SocialLink url={$socials.amboss} social="amboss" />
 			<SocialLink url={$socials.nostr} social="nostr" />
