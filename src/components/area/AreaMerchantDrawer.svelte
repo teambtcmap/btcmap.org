@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 	import CloseButton from '$components/CloseButton.svelte';
-	import MerchantDetailsContent from './MerchantDetailsContent.svelte';
+	import MerchantDetailsContent from '$components/MerchantDetailsContent.svelte';
 	import { boost } from '$lib/store';
 	import {
 		calcVerifiedDate,

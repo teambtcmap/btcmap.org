@@ -6,11 +6,11 @@
 	export let type: 'country' | 'community';
 	export let data: AreaPageProps;
 
-	import AreaActivity from '$components/AreaActivity.svelte';
-	import AreaMap from '$components/AreaMap.svelte';
-	import AreaMerchantHighlights from '$components/AreaMerchantHighlights.svelte';
-	import AreaStats from '$components/AreaStats.svelte';
-	import AreaTickets from '$components/AreaTickets.svelte';
+	import AreaActivity from './AreaActivity.svelte';
+	import AreaMap from './AreaMap.svelte';
+	import AreaMerchantHighlights from './AreaMerchantHighlights.svelte';
+	import AreaStats from './AreaStats.svelte';
+	import AreaTickets from './AreaTickets.svelte';
 	import Boost from '$components/Boost.svelte';
 	import Icon from '$components/Icon.svelte';
 	import IssuesTable from '$components/IssuesTable.svelte';
