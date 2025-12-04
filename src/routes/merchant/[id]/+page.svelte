@@ -6,8 +6,8 @@
 	import BoostButton from '$components/BoostButton.svelte';
 	import Card from '$components/Card.svelte';
 	import CommentAddButton from './components/CommentAddButton.svelte';
-	import Footer from '$components/Footer.svelte';
-	import Header from '$components/Header.svelte';
+	import Footer from '$components/layout/Footer.svelte';
+	import Header from '$components/layout/Header.svelte';
 	import Icon from '$components/Icon.svelte';
 	import MapLoadingEmbed from '$components/MapLoadingEmbed.svelte';
 	import MerchantButton from './components/MerchantButton.svelte';

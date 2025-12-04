@@ -1,10 +1,10 @@
 <script lang="ts">
 	export let data: import('./+page.server').VerifyLocationPageData;
 	import { browser } from '$app/environment';
-	import Footer from '$components/Footer.svelte';
+	import Footer from '$components/layout/Footer.svelte';
 	import FormSuccess from '$components/FormSuccess.svelte';
-	import Header from '$components/Header.svelte';
-	import HeaderPlaceholder from '$components/HeaderPlaceholder.svelte';
+	import Header from '$components/layout/Header.svelte';
+	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import Icon from '$components/Icon.svelte';
 	import InfoTooltip from '$components/InfoTooltip.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';

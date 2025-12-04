@@ -8,7 +8,7 @@
 	import axios from 'axios';
 	import { fade } from 'svelte/transition';
 	import { onDestroy } from 'svelte';
-	import InvoicePaymentStage from './InvoicePaymentStage.svelte';
+	import InvoicePaymentStage from '$components/InvoicePaymentStage.svelte';
 
 	export let merchantId: number | string;
 	export let merchantName: string | undefined = undefined;

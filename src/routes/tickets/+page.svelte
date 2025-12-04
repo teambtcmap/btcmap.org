@@ -1,7 +1,7 @@
 <script lang="ts">
-	import Footer from '$components/Footer.svelte';
-	import Header from '$components/Header.svelte';
-	import HeaderPlaceholder from '$components/HeaderPlaceholder.svelte';
+	import Footer from '$components/layout/Footer.svelte';
+	import Header from '$components/layout/Header.svelte';
+	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import OpenTicket from '$components/OpenTicket.svelte';
 	import OpenTicketSkeleton from './components/OpenTicketSkeleton.svelte';
 	import TopButton from '$components/TopButton.svelte';

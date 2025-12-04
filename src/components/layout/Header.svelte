@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Icon from '$components/Icon.svelte';
-	import NavDropdownDesktop from '$components/NavDropdownDesktop.svelte';
-	import NavDropdownMobile from '$components/NavDropdownMobile.svelte';
+	import NavDropdownDesktop from '$components/layout/NavDropdownDesktop.svelte';
+	import NavDropdownMobile from '$components/layout/NavDropdownMobile.svelte';
 	import ThemeToggle from '$components/ThemeToggle.svelte';
 
 	const navLinks = [
