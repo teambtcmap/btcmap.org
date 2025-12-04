@@ -10,10 +10,10 @@
 	import Header from '$components/Header.svelte';
 	import Icon from '$components/Icon.svelte';
 	import MapLoadingEmbed from '$components/MapLoadingEmbed.svelte';
-	import MerchantButton from '$components/MerchantButton.svelte';
-	import MerchantEvent from '$components/MerchantEvent.svelte';
-	import MerchantComment from '$components/MerchantComment.svelte';
-	import MerchantLink from '$components/MerchantLink.svelte';
+	import MerchantButton from './components/MerchantButton.svelte';
+	import MerchantEvent from './components/MerchantEvent.svelte';
+	import MerchantComment from './components/MerchantComment.svelte';
+	import MerchantLink from './components/MerchantLink.svelte';
 	import PaymentMethodIcon from '$components/PaymentMethodIcon.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import ShowTags from '$components/ShowTags.svelte';

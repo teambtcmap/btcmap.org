@@ -3,7 +3,7 @@
 	import Header from '$components/Header.svelte';
 	import HeaderPlaceholder from '$components/HeaderPlaceholder.svelte';
 	import OpenTicket from '$components/OpenTicket.svelte';
-	import OpenTicketSkeleton from '$components/OpenTicketSkeleton.svelte';
+	import OpenTicketSkeleton from './components/OpenTicketSkeleton.svelte';
 	import TopButton from '$components/TopButton.svelte';
 	import { theme } from '$lib/store';
 	import { detectTheme, errToast } from '$lib/utils';

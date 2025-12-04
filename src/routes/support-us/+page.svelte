@@ -1,10 +1,10 @@
 <script lang="ts">
 	import CloseButton from '$components/CloseButton.svelte';
-	import DonationOption from '$components/DonationOption.svelte';
+	import DonationOption from './components/DonationOption.svelte';
 	import Footer from '$components/Footer.svelte';
 	import Header from '$components/Header.svelte';
 	import HeaderPlaceholder from '$components/HeaderPlaceholder.svelte';
-	import SupportSection from '$components/SupportSection.svelte';
+	import SupportSection from './components/SupportSection.svelte';
 	import { BREAKPOINTS } from '$lib/constants';
 	import { theme } from '$lib/store';
 	import type { DonationType } from '$lib/types';
@@ -23,7 +23,7 @@
 		showQr = true;
 	};
 
-	const renderQr: Action<HTMLCanvasElement> = (node) => {
+	const renderQr: Action = (node) => {
 		QRCode.toCanvas(
 			node,
 			network === 'Lightning' ? 'lightning:' + lnurlp : 'bitcoin:' + onchain,

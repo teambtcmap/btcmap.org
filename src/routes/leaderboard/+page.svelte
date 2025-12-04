@@ -4,8 +4,8 @@
 	import Header from '$components/Header.svelte';
 	import HeaderPlaceholder from '$components/HeaderPlaceholder.svelte';
 	import Icon from '$components/Icon.svelte';
-	import LeaderboardItem from '$components/LeaderboardItem.svelte';
-	import LeaderboardSkeleton from '$components/LeaderboardSkeleton.svelte';
+	import LeaderboardItem from './components/LeaderboardItem.svelte';
+	import LeaderboardSkeleton from './components/LeaderboardSkeleton.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import { theme } from '$lib/store';
 	import type { RpcGetMostActiveUsersItem, TaggerLeaderboard } from '$lib/types';

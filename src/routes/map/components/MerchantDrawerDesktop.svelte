@@ -3,8 +3,8 @@
 	import CloseButton from '$components/CloseButton.svelte';
 	import Icon from '$components/Icon.svelte';
 	import { fly } from 'svelte/transition';
-	import BoostContent from './BoostContent.svelte';
-	import MerchantDetailsContent from './MerchantDetailsContent.svelte';
+	import BoostContent from '$components/BoostContent.svelte';
+	import MerchantDetailsContent from '$components/MerchantDetailsContent.svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';

@@ -5,7 +5,7 @@
 	import Icon from '$components/Icon.svelte';
 	import MapLoadingEmbed from '$components/MapLoadingEmbed.svelte';
 	import ShowTags from '$components/ShowTags.svelte';
-	import TaggingIssues from '$components/TaggingIssues.svelte';
+	import TaggingIssues from '../TaggingIssues.svelte';
 	import { loadMapDependencies } from '$lib/map/imports';
 	import {
 		attribution,

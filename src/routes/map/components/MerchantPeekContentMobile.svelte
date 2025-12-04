@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Icon from '$components/Icon.svelte';
 	import type { Place } from '$lib/types';
-	import PaymentMethodIcon from './PaymentMethodIcon.svelte';
+	import PaymentMethodIcon from '$components/PaymentMethodIcon.svelte';
 
 	export let merchant: Place;
 	export let isUpToDate: boolean;

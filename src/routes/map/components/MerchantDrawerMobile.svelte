@@ -3,8 +3,8 @@
 	import { spring } from 'svelte/motion';
 	import { boost, resetBoost } from '$lib/store';
 	import Icon from '$components/Icon.svelte';
-	import BoostContent from './BoostContent.svelte';
-	import MerchantDetailsContent from './MerchantDetailsContent.svelte';
+	import BoostContent from '$components/BoostContent.svelte';
+	import MerchantDetailsContent from '$components/MerchantDetailsContent.svelte';
 	import MerchantPeekContentMobile from './MerchantPeekContentMobile.svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';

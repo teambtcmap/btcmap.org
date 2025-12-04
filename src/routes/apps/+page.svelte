@@ -1,5 +1,5 @@
 <script lang="ts">
-	import AppCard from '$components/AppCard.svelte';
+	import AppCard from './components/AppCard.svelte';
 	import Footer from '$components/Footer.svelte';
 	import Header from '$components/Header.svelte';
 	import HeaderPlaceholder from '$components/HeaderPlaceholder.svelte';
