@@ -175,4 +175,62 @@ test.describe('Merchant List Panel', () => {
 		// Should show "Nearby Merchants" heading
 		await expect(page.locator('h2:has-text("Nearby Merchants")')).toBeVisible();
 	});
+
+	test('mobile: selecting merchant closes list and opens drawer', async ({ page }) => {
+		// Mobile viewport
+		await page.setViewportSize({ width: 375, height: 667 });
+
+		// Navigate to map at high zoom
+		await page.goto('/map#17/42.2762511/42.7024218', { waitUntil: 'load' });
+		await expect(page).toHaveTitle(/BTC Map/);
+
+		// Wait for map to initialize
+		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
+		await expect(zoomInButton).toBeVisible();
+
+		// Wait for markers to load
+		await page.waitForFunction(
+			() => {
+				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
+				return markers.length > 0;
+			},
+			{ timeout: MARKER_LOAD_TIMEOUT }
+		);
+
+		// Open mobile list
+		const toggleButton = page.getByRole('button', { name: /merchant list/i });
+		await expect(toggleButton).toBeVisible({ timeout: 15000 });
+		await toggleButton.click();
+
+		// Wait for mobile list to appear
+		const mobileList = page.locator('[role="dialog"][aria-labelledby="merchant-list-title"]');
+		await expect(mobileList).toBeVisible({ timeout: 5000 });
+
+		// Wait for merchant items to load
+		await page.waitForTimeout(3000);
+
+		// Find and click first merchant item
+		const merchantItems = mobileList.locator('li button');
+		const firstMerchant = merchantItems.first();
+		await expect(firstMerchant).toBeVisible({ timeout: 10000 });
+		await firstMerchant.click();
+
+		// Wait for API call
+		try {
+			await page.waitForResponse(
+				(response) =>
+					response.url().includes('api.btcmap.org/v4/places/') && response.status() === 200,
+				{ timeout: 10000 }
+			);
+		} catch (error) {
+			console.error('API response wait failed, but continuing:', error);
+		}
+
+		// Mobile list should close
+		await expect(mobileList).not.toBeVisible({ timeout: 5000 });
+
+		// Mobile drawer should open (peek state with merchant info)
+		const mobileDrawer = page.locator('[role="dialog"]:has(a:has-text("View Full Details"))');
+		await expect(mobileDrawer).toBeVisible({ timeout: 10000 });
+	});
 });
