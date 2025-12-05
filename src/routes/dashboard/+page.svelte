@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import DashboardStat from '$components/DashboardStat.svelte';
-	import Footer from '$components/Footer.svelte';
-	import Header from '$components/Header.svelte';
-	import HeaderPlaceholder from '$components/HeaderPlaceholder.svelte';
+	import DashboardStat from './components/DashboardStat.svelte';
+	import Footer from '$components/layout/Footer.svelte';
+	import Header from '$components/layout/Header.svelte';
+	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import { theme } from '$lib/store';
 	import type { ChartHistory } from '$lib/types';
 	import { detectTheme, updateChartThemes } from '$lib/utils';

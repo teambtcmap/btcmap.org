@@ -1,5 +1,5 @@
 <script lang="ts">
-	import MerchantCard from '$components/MerchantCard.svelte';
+	import MerchantCard from '$components/area/MerchantCard.svelte';
 	import type { Place } from '$lib/types';
 	import { isBoosted } from '$lib/utils';
 	import { resolve } from '$app/paths';

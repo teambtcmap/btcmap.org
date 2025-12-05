@@ -4,7 +4,7 @@
 	import { fly } from 'svelte/transition';
 	import { merchantList } from '$lib/merchantListStore';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
-	import MerchantListItem from '$components/MerchantListItem.svelte';
+	import MerchantListItem from './MerchantListItem.svelte';
 	import CloseButton from '$components/CloseButton.svelte';
 	import LoadingSpinner from '$components/LoadingSpinner.svelte';
 	import Icon from '$components/Icon.svelte';

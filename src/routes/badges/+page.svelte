@@ -1,8 +1,8 @@
 <script lang="ts">
-	import BadgeCard from '$components/BadgeCard.svelte';
-	import Footer from '$components/Footer.svelte';
-	import Header from '$components/Header.svelte';
-	import HeaderPlaceholder from '$components/HeaderPlaceholder.svelte';
+	import BadgeCard from './components/BadgeCard.svelte';
+	import Footer from '$components/layout/Footer.svelte';
+	import Header from '$components/layout/Header.svelte';
+	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import { theme } from '$lib/store';
 	import { BadgeType } from '$lib/types';
 	import { detectTheme } from '$lib/utils';

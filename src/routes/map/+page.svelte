@@ -4,9 +4,9 @@
 	import Icon from '$components/Icon.svelte';
 	import LoadingSpinner from '$components/LoadingSpinner.svelte';
 	import MapLoadingMain from '$components/MapLoadingMain.svelte';
-	import TileLoadingIndicator from '$components/TileLoadingIndicator.svelte';
-	import MerchantDrawerHash from '$components/MerchantDrawerHash.svelte';
-	import MerchantListPanel from '$components/MerchantListPanel.svelte';
+	import TileLoadingIndicator from './components/TileLoadingIndicator.svelte';
+	import MerchantDrawerHash from './components/MerchantDrawerHash.svelte';
+	import MerchantListPanel from './components/MerchantListPanel.svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import { merchantList } from '$lib/merchantListStore';
 	import {

@@ -2,7 +2,7 @@
 	import type { AreaType } from '$lib/types';
 	import type { Table } from '@tanstack/svelte-table';
 	import { isEven } from '$lib/utils';
-	import GradeDisplay from './GradeDisplay.svelte';
+	import GradeDisplay from '$components/leaderboard/GradeDisplay.svelte';
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let table: Table<any>;

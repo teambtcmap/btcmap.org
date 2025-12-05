@@ -4,7 +4,7 @@
 	import { resolve } from '$app/paths';
 	import Time from 'svelte-time';
 	import type { Place } from '$lib/types';
-	import PaymentMethodIcon from './PaymentMethodIcon.svelte';
+	import PaymentMethodIcon from '$components/PaymentMethodIcon.svelte';
 
 	export let merchant: Place;
 	export let isUpToDate: boolean;

@@ -18,11 +18,11 @@
 	import type { AreaType, LeaderboardArea, Report } from '$lib/types';
 	import { errToast, getGrade, validateContinents, detectTheme, debounce } from '$lib/utils';
 
-	import AreaLeaderboardMobileCard from './AreaLeaderboardMobileCard.svelte';
-	import AreaLeaderboardDesktopTable from './AreaLeaderboardDesktopTable.svelte';
-	import LeaderboardSearch from './LeaderboardSearch.svelte';
-	import LeaderboardPagination from './LeaderboardPagination.svelte';
-	import SortHeaderButton from './SortHeaderButton.svelte';
+	import AreaLeaderboardMobileCard from '$components/leaderboard/AreaLeaderboardMobileCard.svelte';
+	import AreaLeaderboardDesktopTable from '$components/leaderboard/AreaLeaderboardDesktopTable.svelte';
+	import LeaderboardSearch from '$components/leaderboard/LeaderboardSearch.svelte';
+	import LeaderboardPagination from '$components/leaderboard/LeaderboardPagination.svelte';
+	import SortHeaderButton from '$components/leaderboard/SortHeaderButton.svelte';
 	import { rankItem } from '@tanstack/match-sorter-utils';
 	import tippy from 'tippy.js';
 
