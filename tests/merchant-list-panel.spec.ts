@@ -124,16 +124,18 @@ test.describe('Merchant List Panel', () => {
 			console.error('API response wait failed, but continuing:', error);
 		}
 
-		// Drawer should open
-		const drawer = page.locator('[role="dialog"]');
+		// Drawer should open (use specific selector to exclude mobile list dialog)
+		const drawer = page.locator('[role="dialog"]:has(a:has-text("View Full Details"))');
 		await expect(drawer).toBeVisible({ timeout: 10000 });
 
 		// Drawer should have View Full Details button
-		const viewDetailsButton = page.locator('a:has-text("View Full Details")');
+		const viewDetailsButton = drawer.locator('a:has-text("View Full Details")');
 		await expect(viewDetailsButton).toBeVisible({ timeout: 10000 });
 	});
 
-	test('list panel and toggle only visible on desktop', async ({ page }) => {
+	test('desktop list panel hidden on mobile, mobile list available via button', async ({
+		page
+	}) => {
 		// Mobile viewport
 		await page.setViewportSize({ width: 375, height: 667 });
 
@@ -154,12 +156,23 @@ test.describe('Merchant List Panel', () => {
 			{ timeout: MARKER_LOAD_TIMEOUT }
 		);
 
-		// Toggle button should NOT be visible on mobile (has md:flex)
+		// Toggle button IS visible on mobile (shared button for both mobile and desktop)
 		const toggleButton = page.getByRole('button', { name: /merchant list/i });
-		await expect(toggleButton).not.toBeVisible();
+		await expect(toggleButton).toBeVisible({ timeout: 15000 });
 
-		// List panel should NOT be visible on mobile
-		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
-		await expect(listPanel).not.toBeVisible();
+		// Desktop list panel (role="complementary") should NOT be visible on mobile
+		const desktopListPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
+		await expect(desktopListPanel).not.toBeVisible();
+
+		// Click toggle to open mobile full-screen list
+		await toggleButton.click();
+		await page.waitForTimeout(500);
+
+		// Mobile list (full-screen dialog) should be visible
+		const mobileList = page.locator('[role="dialog"][aria-labelledby="merchant-list-title"]');
+		await expect(mobileList).toBeVisible({ timeout: 5000 });
+
+		// Should show "Nearby Merchants" heading
+		await expect(page.locator('h2:has-text("Nearby Merchants")')).toBeVisible();
 	});
 });
