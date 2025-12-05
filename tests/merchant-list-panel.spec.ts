@@ -172,8 +172,8 @@ test.describe('Merchant List Panel', () => {
 		const mobileList = page.locator('[role="dialog"][aria-labelledby="merchant-list-title"]');
 		await expect(mobileList).toBeVisible({ timeout: 5000 });
 
-		// Should show "Nearby Merchants" heading
-		await expect(page.locator('h2:has-text("Nearby Merchants")')).toBeVisible();
+		// Should show "Nearby Merchants" heading (within mobile list)
+		await expect(mobileList.locator('h2:has-text("Nearby Merchants")')).toBeVisible();
 	});
 
 	test('mobile: selecting merchant closes list and opens drawer', async ({ page }) => {
@@ -229,8 +229,8 @@ test.describe('Merchant List Panel', () => {
 		// Mobile list should close
 		await expect(mobileList).not.toBeVisible({ timeout: 5000 });
 
-		// Mobile drawer should open (peek state with merchant info)
-		const mobileDrawer = page.locator('[role="dialog"]:has(a:has-text("View Full Details"))');
+		// Mobile drawer should open in peek state (shows "Swipe up for details")
+		const mobileDrawer = page.locator('text="Swipe up for details"');
 		await expect(mobileDrawer).toBeVisible({ timeout: 10000 });
 	});
 });
