@@ -26,7 +26,14 @@
 		currentZoom < MERCHANT_LIST_LOW_ZOOM ||
 		(currentZoom < MERCHANT_LIST_MIN_ZOOM && merchants.length === 0 && !isLoadingList);
 
+	// Reduced motion support
+	let prefersReducedMotion = false;
+	if (browser) {
+		prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	}
+
 	// Focus management
+	let dialogElement: HTMLDivElement | null = null;
 	let closeButtonElement: HTMLDivElement | null = null;
 	let previouslyFocusedElement: HTMLElement | null = null;
 
@@ -41,10 +48,38 @@
 		merchantList.close();
 	}
 
+	// Focus trap - keep focus within dialog
+	function getFocusableElements(): HTMLElement[] {
+		if (!dialogElement) return [];
+		return Array.from(
+			dialogElement.querySelectorAll<HTMLElement>(
+				'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+			)
+		).filter((el) => !el.hasAttribute('disabled') && el.offsetParent !== null);
+	}
+
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Escape') {
 			event.preventDefault();
 			handleClose();
+			return;
+		}
+
+		// Focus trap on Tab
+		if (event.key === 'Tab') {
+			const focusable = getFocusableElements();
+			if (focusable.length === 0) return;
+
+			const first = focusable[0];
+			const last = focusable[focusable.length - 1];
+
+			if (event.shiftKey && document.activeElement === first) {
+				event.preventDefault();
+				last.focus();
+			} else if (!event.shiftKey && document.activeElement === last) {
+				event.preventDefault();
+				first.focus();
+			}
 		}
 	}
 
@@ -109,8 +144,9 @@
 
 {#if isOpen}
 	<div
+		bind:this={dialogElement}
 		class="pt-safe pb-safe fixed inset-0 z-[1001] flex flex-col bg-white md:hidden dark:bg-dark"
-		transition:fly={{ y: 800, duration: 300 }}
+		transition:fly={{ y: prefersReducedMotion ? 0 : 800, duration: prefersReducedMotion ? 0 : 300 }}
 		role="dialog"
 		aria-modal="true"
 		aria-labelledby="merchant-list-title"
