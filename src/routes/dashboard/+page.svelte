@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import DashboardStat from './components/DashboardStat.svelte';
-	import Footer from '$components/layout/Footer.svelte';
-	import Header from '$components/layout/Header.svelte';
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import { theme } from '$lib/store';
 	import type { ChartHistory } from '$lib/types';
@@ -222,104 +220,97 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/dash.png" />
 </svelte:head>
 
-<div class="bg-teal dark:bg-dark">
-	<Header />
-	<div class="mx-auto w-10/12 xl:w-[1200px]">
-		<main class="mt-10 mb-20 space-y-10">
-			{#if typeof window !== 'undefined'}
-				<h1
-					class="{detectTheme() === 'dark' || $theme === 'dark'
-						? 'text-white'
-						: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-left md:text-5xl"
+<main class="mt-10 mb-20 space-y-10">
+	{#if typeof window !== 'undefined'}
+		<h1
+			class="{detectTheme() === 'dark' || $theme === 'dark'
+				? 'text-white'
+				: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-left md:text-5xl"
+		>
+			Dashboard
+		</h1>
+	{:else}
+		<HeaderPlaceholder />
+	{/if}
+
+	<section id="merchant-stats">
+		<div
+			class="grid rounded-3xl border border-gray-200 md:grid-cols-2 xl:grid-cols-2 dark:border-white/95 dark:bg-white/10"
+		>
+			<DashboardStat
+				title="Total Merchants"
+				stat={areaDashboard?.total_merchants}
+				border="border-b md:border-b-0 border-gray-300"
+				loading={false}
+			/>
+			<DashboardStat
+				title="Recently Verified"
+				stat={areaDashboard?.verified_merchants_1y}
+				loading={false}
+			/>
+		</div>
+	</section>
+
+	<section id="exchange-stats">
+		<div
+			class="grid rounded-3xl border border-gray-300 md:grid-cols-2 xl:grid-cols-2 dark:border-white/95 dark:bg-white/10"
+		>
+			<DashboardStat
+				title="Total Exchanges"
+				stat={areaDashboard?.total_exchanges}
+				border="border-b md:border-b-0 border-gray-300"
+				loading={false}
+			/>
+			<DashboardStat
+				title="Recently Verified"
+				stat={areaDashboard?.verified_exchanges_1y}
+				loading={false}
+			/>
+		</div>
+	</section>
+
+	<section id="charts" class="space-y-10">
+		<div
+			class="flex flex-wrap justify-end gap-3 font-semibold text-primary md:gap-5 dark:text-white"
+		>
+			{#each chartHistory as history (history)}
+				<button
+					class={chartHistorySelected === history
+						? 'underline decoration-primary decoration-4 underline-offset-8 dark:decoration-white'
+						: ''}
+					on:click={() => (chartHistorySelected = history)}
 				>
-					Dashboard
-				</h1>
-			{:else}
-				<HeaderPlaceholder />
-			{/if}
+					{history}
+				</button>
+			{/each}
+		</div>
 
-			<section id="merchant-stats">
-				<div
-					class="grid rounded-3xl border border-gray-200 md:grid-cols-2 xl:grid-cols-2 dark:border-white/95 dark:bg-white/10"
-				>
-					<DashboardStat
-						title="Total Merchants"
-						stat={areaDashboard?.total_merchants}
-						border="border-b md:border-b-0 border-gray-300"
-						loading={false}
-					/>
-					<DashboardStat
-						title="Recently Verified"
-						stat={areaDashboard?.verified_merchants_1y}
-						loading={false}
-					/>
-				</div>
-			</section>
-
-			<section id="exchange-stats">
-				<div
-					class="grid rounded-3xl border border-gray-300 md:grid-cols-2 xl:grid-cols-2 dark:border-white/95 dark:bg-white/10"
-				>
-					<DashboardStat
-						title="Total Exchanges"
-						stat={areaDashboard?.total_exchanges}
-						border="border-b md:border-b-0 border-gray-300"
-						loading={false}
-					/>
-					<DashboardStat
-						title="Recently Verified"
-						stat={areaDashboard?.verified_exchanges_1y}
-						loading={false}
-					/>
-				</div>
-			</section>
-
-			<section id="charts" class="space-y-10">
-				<div
-					class="flex flex-wrap justify-end gap-3 font-semibold text-primary md:gap-5 dark:text-white"
-				>
-					{#each chartHistory as history (history)}
-						<button
-							class={chartHistorySelected === history
-								? 'underline decoration-primary decoration-4 underline-offset-8 dark:decoration-white'
-								: ''}
-							on:click={() => (chartHistorySelected = history)}
-						>
-							{history}
-						</button>
-					{/each}
-				</div>
-
-				<div>
-					<div class="relative">
-						<canvas bind:this={totalChartCanvas} width="100%" height="400" />
-					</div>
-					<p class="mt-1 text-center text-sm text-body dark:text-white">
-						*Merchants accepting any bitcoin method.
-					</p>
-				</div>
-
-				<div>
-					<div class="relative">
-						<canvas bind:this={upToDateChartCanvas} width="100%" height="400" />
-					</div>
-					<p class="mt-1 text-center text-sm text-body dark:text-white">
-						*Merchants with a <em>survey:date</em>, <em>check_date</em>, or
-						<em>check_date:currency:XBT</em> tag less than one year old.
-					</p>
-				</div>
-			</section>
-
-			<p class="text-center text-sm text-body md:text-left dark:text-white">
-				*More information on bitcoin mapping tags can be found <a
-					href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#tagging-guidance"
-					target="_blank"
-					rel="noreferrer"
-					class="text-link transition-colors hover:text-hover">here</a
-				>.
+		<div>
+			<div class="relative">
+				<canvas bind:this={totalChartCanvas} width="100%" height="400" />
+			</div>
+			<p class="mt-1 text-center text-sm text-body dark:text-white">
+				*Merchants accepting any bitcoin method.
 			</p>
-		</main>
+		</div>
 
-		<Footer />
-	</div>
-</div>
+		<div>
+			<div class="relative">
+				<canvas bind:this={upToDateChartCanvas} width="100%" height="400" />
+			</div>
+			<p class="mt-1 text-center text-sm text-body dark:text-white">
+				*Merchants with a <em>survey:date</em>, <em>check_date</em>, or
+				<em>check_date:currency:XBT</em> tag less than one year old.
+			</p>
+		</div>
+	</section>
+
+	<p class="text-center text-sm text-body md:text-left dark:text-white">
+		*More information on bitcoin mapping tags can be found <a
+			href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#tagging-guidance"
+			target="_blank"
+			rel="noreferrer"
+			class="text-link transition-colors hover:text-hover">here</a
+		>.
+	</p>
+</main>

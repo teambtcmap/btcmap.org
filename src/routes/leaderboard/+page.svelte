@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import Footer from '$components/layout/Footer.svelte';
-	import Header from '$components/layout/Header.svelte';
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import Icon from '$components/Icon.svelte';
 	import LeaderboardItem from './components/LeaderboardItem.svelte';
@@ -58,80 +56,74 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/leader.png" />
 </svelte:head>
 
-<div class="bg-teal dark:bg-dark">
-	<Header />
-
-	<main class="mt-10">
-		<div class="mb-10 flex justify-center">
-			<div id="hero" class="flex h-[324px] w-full items-end justify-center">
-				<img src="/images/supertagger-king.svg" alt="ultimate supertagger" />
-			</div>
+<main class="my-10 space-y-10 text-center">
+	<div class="flex justify-center">
+		<div id="hero" class="flex h-[324px] w-full items-end justify-center">
+			<img src="/images/supertagger-king.svg" alt="ultimate supertagger" />
 		</div>
+	</div>
 
-		<div class="mx-auto w-10/12 space-y-10 xl:w-[1200px]">
-			{#if typeof window !== 'undefined'}
-				<h1
-					class="{detectTheme() === 'dark' || $theme === 'dark'
-						? 'text-white'
-						: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl"
-				>
-					Top Editors
-				</h1>
-			{:else}
-				<HeaderPlaceholder />
-			{/if}
-
-			<PrimaryButton
-				style="w-[207px] mx-auto py-3 rounded-xl"
-				link="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers-"
-				external
+	<div class="space-y-10">
+		{#if typeof window !== 'undefined'}
+			<h1
+				class="{detectTheme() === 'dark' || $theme === 'dark'
+					? 'text-white'
+					: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl"
 			>
-				Join Them
-			</PrimaryButton>
+				Top Editors
+			</h1>
+		{:else}
+			<HeaderPlaceholder />
+		{/if}
 
-			<section id="leaderboard" class="dark:lg:rounded dark:lg:bg-white/10 dark:lg:py-8">
-				<div class="mb-5 hidden grid-cols-6 text-center lg:grid">
-					{#each headings as heading (heading)}
-						<h3 class="text-lg font-semibold text-primary dark:text-white">
-							{heading}
-							{#if heading === 'Tip'}
-								<a
-									href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Lightning-Tips"
-									target="_blank"
-									rel="noreferrer"
-									><Icon type="fa" icon="circle-info" w="14" h="14" style="text-sm inline" /></a
-								>
-							{/if}
-						</h3>
+		<PrimaryButton
+			style="w-[207px] mx-auto py-3 rounded-xl"
+			link="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers-"
+			external
+		>
+			Join Them
+		</PrimaryButton>
+
+		<section id="leaderboard" class="dark:lg:rounded dark:lg:bg-white/10 dark:lg:py-8">
+			<div class="mb-5 hidden grid-cols-6 text-center lg:grid">
+				{#each headings as heading (heading)}
+					<h3 class="text-lg font-semibold text-primary dark:text-white">
+						{heading}
+						{#if heading === 'Tip'}
+							<a
+								href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Lightning-Tips"
+								target="_blank"
+								rel="noreferrer"
+								><Icon type="fa" icon="circle-info" w="14" h="14" style="text-sm inline" /></a
+							>
+						{/if}
+					</h3>
+				{/each}
+			</div>
+
+			<div class="space-y-10 lg:space-y-5">
+				{#if leaderboard && leaderboard.length && !loading}
+					{#each leaderboard as item, index (item.id)}
+						<LeaderboardItem
+							position={index + 1}
+							avatar={item.avatar}
+							tagger={item.tagger}
+							id={item.id}
+							created={item.created}
+							updated={item.updated}
+							deleted={item.deleted}
+							tip={item.tip}
+						/>
 					{/each}
-				</div>
-
-				<div class="space-y-10 lg:space-y-5">
-					{#if leaderboard && leaderboard.length && !loading}
-						{#each leaderboard as item, index (item.id)}
-							<LeaderboardItem
-								position={index + 1}
-								avatar={item.avatar}
-								tagger={item.tagger}
-								id={item.id}
-								created={item.created}
-								updated={item.updated}
-								deleted={item.deleted}
-								tip={item.tip}
-							/>
-						{/each}
-					{:else}
-						{#each Array(50) as _, i (i)}
-							<LeaderboardSkeleton />
-						{/each}
-					{/if}
-				</div>
-			</section>
-
-			<Footer />
-		</div>
-	</main>
-</div>
+				{:else}
+					{#each Array(50) as _, i (i)}
+						<LeaderboardSkeleton />
+					{/each}
+				{/if}
+			</div>
+		</section>
+	</div>
+</main>
 
 <style>
 	#hero {

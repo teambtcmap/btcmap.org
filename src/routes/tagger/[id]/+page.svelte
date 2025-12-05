@@ -4,8 +4,6 @@
 
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import Footer from '$components/layout/Footer.svelte';
-	import Header from '$components/layout/Header.svelte';
 	import ProfileActivity from './components/ProfileActivity.svelte';
 	import ProfileStat from '$components/ProfileStat.svelte';
 	import Tip from '$components/Tip.svelte';
@@ -411,153 +409,144 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/supertagger.png" />
 </svelte:head>
 
-<div class="bg-teal dark:bg-dark">
-	<Header />
-	<div class="mx-auto w-10/12 xl:w-[1200px]">
-		<main class="my-10 text-center md:my-20">
-			<section id="profile" class="space-y-8">
-				{#if avatar}
-					<img
-						src={avatar}
-						alt="avatar"
-						class="mx-auto h-32 w-32 rounded-full object-cover"
-						on:error={function () {
-							this.src = '/images/satoshi-nakamoto.png';
-						}}
-					/>
-				{:else}
-					<div class="mx-auto h-32 w-32 animate-pulse rounded-full bg-link/50" />
-				{/if}
+<main class="my-10 text-center md:my-20">
+	<section id="profile" class="space-y-8">
+		{#if avatar}
+			<img
+				src={avatar}
+				alt="avatar"
+				class="mx-auto h-32 w-32 rounded-full object-cover"
+				on:error={function () {
+					this.src = '/images/satoshi-nakamoto.png';
+				}}
+			/>
+		{:else}
+			<div class="mx-auto h-32 w-32 animate-pulse rounded-full bg-link/50" />
+		{/if}
 
-				<div class="space-y-1">
-					<h1 class="text-4xl !leading-tight font-semibold text-primary dark:text-white">
-						{username || 'BTC Map Supertagger'}
-					</h1>
-					<p
-						class="flex items-center justify-center space-x-1 text-sm text-primary dark:text-white"
+		<div class="space-y-1">
+			<h1 class="text-4xl !leading-tight font-semibold text-primary dark:text-white">
+				{username || 'BTC Map Supertagger'}
+			</h1>
+			<p class="flex items-center justify-center space-x-1 text-sm text-primary dark:text-white">
+				<Icon type="fa" icon="map-pin" w="16" h="16" />
+				<span class="block">
+					Mapping Since: {mappingSince ? format(new Date(mappingSince), 'yyyy-MM-dd') : '-'}
+				</span>
+			</p>
+			{#if username}
+				<a
+					href="https://www.openstreetmap.org/user/{username}"
+					target="_blank"
+					rel="noreferrer"
+					class="mx-auto flex w-24 items-center justify-center text-xs text-link transition-colors hover:text-hover"
+					>OSM Profile <svg
+						class="ml-1 w-3"
+						width="16"
+						height="16"
+						viewBox="0 0 16 16"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
 					>
-						<Icon type="fa" icon="map-pin" w="16" h="16" />
-						<span class="block">
-							Mapping Since: {mappingSince ? format(new Date(mappingSince), 'yyyy-MM-dd') : '-'}
-						</span>
-					</p>
-					{#if username}
-						<a
-							href="https://www.openstreetmap.org/user/{username}"
-							target="_blank"
-							rel="noreferrer"
-							class="mx-auto flex w-24 items-center justify-center text-xs text-link transition-colors hover:text-hover"
-							>OSM Profile <svg
-								class="ml-1 w-3"
-								width="16"
-								height="16"
-								viewBox="0 0 16 16"
-								fill="none"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									d="M3 13L13 3M13 3H5.5M13 3V10.5"
-									stroke="currentColor"
-									stroke-width="1.5"
-									stroke-linecap="round"
-									stroke-linejoin="round"
-								/>
-							</svg></a
-						>
-					{/if}
-				</div>
-
-				<h2 class="mx-auto w-full text-xl break-all text-body lg:w-[800px] dark:text-white">
-					<!-- eslint-disable-next-line svelte/no-at-html-tags - we even sanitize the captcha content above -->
-					{@html sanitizedMarkdown}
-				</h2>
-
-				{#if lightning}
-					<Tip destination={lightning} user={username} />
-				{/if}
-			</section>
-
-			<section id="badges" class="mt-16">
-				<div class="flex flex-wrap items-center justify-center">
-					{#if dataInitialized}
-						{#each earnedBadges as badge (badge.title)}
-							<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-							<a href="/badges#{badge.icon}" class="transition-transform hover:scale-110">
-								<div class="mx-3 mb-6">
-									<img
-										src="/icons/badges/{badge.icon}.svg"
-										alt={badge.title}
-										class="mx-auto mb-1 h-24 w-24"
-									/>
-									<p class="text-center text-sm dark:text-white">{badge.title}</p>
-								</div>
-							</a>
-						{/each}
-					{:else}
-						{#each Array(3) as _, i (i)}
-							<div class="mx-3 mb-6">
-								<div class="mx-auto mb-1 h-24 w-24 animate-pulse rounded-full bg-link/50" />
-								<div class="mx-auto h-5 w-20 animate-pulse rounded bg-link/50" />
-							</div>
-						{/each}
-					{/if}
-				</div>
-			</section>
-
-			<section id="stats" class="mt-10 mb-16">
-				<div
-					class="grid rounded-t-3xl border border-gray-300 md:grid-cols-2 xl:grid-cols-4 dark:border-white/95 dark:bg-white/10"
+						<path
+							d="M3 13L13 3M13 3H5.5M13 3V10.5"
+							stroke="currentColor"
+							stroke-width="1.5"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						/>
+					</svg></a
 				>
-					<ProfileStat
-						title="Total Tags"
-						stat={total}
-						border="border-b xl:border-b-0 md:border-r border-gray-300 dark:border-white/95"
-					/>
-					<ProfileStat
-						title="Created"
-						stat={created}
-						percent={createdPercent}
-						border="border-b xl:border-b-0 xl:border-r border-gray-300 dark:border-white/95"
-					/>
-					<ProfileStat
-						title="Updated"
-						stat={updated}
-						percent={updatedPercent}
-						border="border-b md:border-b-0 md:border-r border-gray-300 dark:border-white/95"
-					/>
-					<ProfileStat title="Deleted" stat={deleted} percent={deletedPercent} />
-				</div>
+			{/if}
+		</div>
 
-				<div
-					class="relative rounded-b-3xl border border-t border-gray-300 p-5 dark:border-white/95 dark:bg-white/10"
-				>
-					{#if !dataInitialized}
-						<div>
-							<Icon
-								type="fa"
-								icon="chart-pie"
-								w="208"
-								h="208"
-								style="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse text-link/50"
+		<h2 class="mx-auto w-full text-xl break-all text-body lg:w-[800px] dark:text-white">
+			<!-- eslint-disable-next-line svelte/no-at-html-tags - we even sanitize the captcha content above -->
+			{@html sanitizedMarkdown}
+		</h2>
+
+		{#if lightning}
+			<Tip destination={lightning} user={username} />
+		{/if}
+	</section>
+
+	<section id="badges" class="mt-16">
+		<div class="flex flex-wrap items-center justify-center">
+			{#if dataInitialized}
+				{#each earnedBadges as badge (badge.title)}
+					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+					<a href="/badges#{badge.icon}" class="transition-transform hover:scale-110">
+						<div class="mx-3 mb-6">
+							<img
+								src="/icons/badges/{badge.icon}.svg"
+								alt={badge.title}
+								class="mx-auto mb-1 h-24 w-24"
 							/>
+							<p class="text-center text-sm dark:text-white">{badge.title}</p>
 						</div>
-					{/if}
+					</a>
+				{/each}
+			{:else}
+				{#each Array(3) as _, i (i)}
+					<div class="mx-3 mb-6">
+						<div class="mx-auto mb-1 h-24 w-24 animate-pulse rounded-full bg-link/50" />
+						<div class="mx-auto h-5 w-20 animate-pulse rounded bg-link/50" />
+					</div>
+				{/each}
+			{/if}
+		</div>
+	</section>
 
-					<canvas bind:this={tagTypeChartCanvas} width="100%" height="250" />
+	<section id="stats" class="mt-10 mb-16">
+		<div
+			class="grid rounded-t-3xl border border-gray-300 md:grid-cols-2 xl:grid-cols-4 dark:border-white/95 dark:bg-white/10"
+		>
+			<ProfileStat
+				title="Total Tags"
+				stat={total}
+				border="border-b xl:border-b-0 md:border-r border-gray-300 dark:border-white/95"
+			/>
+			<ProfileStat
+				title="Created"
+				stat={created}
+				percent={createdPercent}
+				border="border-b xl:border-b-0 xl:border-r border-gray-300 dark:border-white/95"
+			/>
+			<ProfileStat
+				title="Updated"
+				stat={updated}
+				percent={updatedPercent}
+				border="border-b md:border-b-0 md:border-r border-gray-300 dark:border-white/95"
+			/>
+			<ProfileStat title="Deleted" stat={deleted} percent={deletedPercent} />
+		</div>
+
+		<div
+			class="relative rounded-b-3xl border border-t border-gray-300 p-5 dark:border-white/95 dark:bg-white/10"
+		>
+			{#if !dataInitialized}
+				<div>
+					<Icon
+						type="fa"
+						icon="chart-pie"
+						w="208"
+						h="208"
+						style="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse text-link/50"
+					/>
 				</div>
-			</section>
+			{/if}
 
-			<section id="activity" class="my-16">
-				<ProfileActivity
-					{eventElements}
-					{username}
-					{dataInitialized}
-					{loadingNames}
-					on:fetchNames={handleFetchNames}
-				/>
-			</section>
-		</main>
+			<canvas bind:this={tagTypeChartCanvas} width="100%" height="250" />
+		</div>
+	</section>
 
-		<Footer />
-	</div>
-</div>
+	<section id="activity" class="my-16">
+		<ProfileActivity
+			{eventElements}
+			{username}
+			{dataInitialized}
+			{loadingNames}
+			on:fetchNames={handleFetchNames}
+		/>
+	</section>
+</main>

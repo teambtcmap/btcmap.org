@@ -1,7 +1,5 @@
 <script lang="ts">
 	import BadgeCard from './components/BadgeCard.svelte';
-	import Footer from '$components/layout/Footer.svelte';
-	import Header from '$components/layout/Header.svelte';
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import { theme } from '$lib/store';
 	import { BadgeType } from '$lib/types';
@@ -171,62 +169,51 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/badges.png" />
 </svelte:head>
 
-<div class="bg-teal dark:bg-dark">
-	<Header />
-	<div class="mx-auto w-10/12 xl:w-[1200px]">
-		<main class="my-10 text-center md:my-20">
-			{#if typeof window !== 'undefined'}
-				<h1
-					class="{detectTheme() === 'dark' || $theme === 'dark'
-						? 'text-white'
-						: 'gradient'} mb-8 text-4xl !leading-tight font-semibold md:text-5xl"
-				>
-					Badges
-				</h1>
-			{:else}
-				<HeaderPlaceholder />
-			{/if}
+<main class="my-10 text-center md:my-20">
+	{#if typeof window !== 'undefined'}
+		<h1
+			class="{detectTheme() === 'dark' || $theme === 'dark'
+				? 'text-white'
+				: 'gradient'} mb-8 text-4xl !leading-tight font-semibold md:text-5xl"
+		>
+			Badges
+		</h1>
+	{:else}
+		<HeaderPlaceholder />
+	{/if}
 
-			<p class="mx-auto w-full text-lg text-primary lg:w-[700px] dark:text-white">
-				You can earn badges for your BTC Map contributions that will be displayed on your profile.
-				Have a badge idea? Let us know!
-			</p>
+	<p class="mx-auto w-full text-lg text-primary lg:w-[700px] dark:text-white">
+		You can earn badges for your BTC Map contributions that will be displayed on your profile. Have
+		a badge idea? Let us know!
+	</p>
 
-			<section id="achievements" class="mt-16 mb-20 space-y-8">
-				<h2 class="text-center text-3xl font-semibold text-primary dark:text-white">
-					Achievements
-				</h2>
+	<section id="achievements" class="mt-16 mb-20 space-y-8">
+		<h2 class="text-center text-3xl font-semibold text-primary dark:text-white">Achievements</h2>
 
-				<div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-					{#each achievements.reverse() as achievement (achievement.title)}
-						<BadgeCard
-							icon={achievement.icon}
-							title={achievement.title}
-							desc={achievement.desc}
-							type={BadgeType.Achievement}
-						/>
-					{/each}
-				</div>
-			</section>
+		<div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+			{#each achievements.reverse() as achievement (achievement.title)}
+				<BadgeCard
+					icon={achievement.icon}
+					title={achievement.title}
+					desc={achievement.desc}
+					type={BadgeType.Achievement}
+				/>
+			{/each}
+		</div>
+	</section>
 
-			<section id="contributions" class="space-y-8">
-				<h2 class="text-center text-3xl font-semibold text-primary dark:text-white">
-					Contributions
-				</h2>
+	<section id="contributions" class="space-y-8">
+		<h2 class="text-center text-3xl font-semibold text-primary dark:text-white">Contributions</h2>
 
-				<div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-					{#each contributions.reverse() as contribution (contribution.title)}
-						<BadgeCard
-							icon={contribution.icon}
-							title={contribution.title}
-							desc={contribution.desc}
-							type={BadgeType.Contribution}
-						/>
-					{/each}
-				</div>
-			</section>
-		</main>
-
-		<Footer />
-	</div>
-</div>
+		<div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+			{#each contributions.reverse() as contribution (contribution.title)}
+				<BadgeCard
+					icon={contribution.icon}
+					title={contribution.title}
+					desc={contribution.desc}
+					type={BadgeType.Contribution}
+				/>
+			{/each}
+		</div>
+	</section>
+</main>

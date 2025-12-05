@@ -1,8 +1,6 @@
 <script lang="ts">
 	import AreaPage from '$components/area/AreaPage.svelte';
 	import Breadcrumbs from '$components/Breadcrumbs.svelte';
-	import Footer from '$components/layout/Footer.svelte';
-	import Header from '$components/layout/Header.svelte';
 	import type { AreaPageProps } from '$lib/types';
 	import type { PageData } from './$types';
 
@@ -23,12 +21,5 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/countries.png" />
 </svelte:head>
 
-<div class="bg-teal dark:bg-dark">
-	<Header />
-	<Breadcrumbs {routes} />
-	<div class="mx-auto w-10/12 xl:w-[1200px]">
-		<AreaPage type="country" {data} />
-
-		<Footer />
-	</div>
-</div>
+<Breadcrumbs {routes} />
+<AreaPage type="country" {data} />

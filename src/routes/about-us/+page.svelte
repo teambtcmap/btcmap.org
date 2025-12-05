@@ -6,8 +6,6 @@
 	import AboutMerchant from './components/AboutMerchant.svelte';
 	import AboutPlus from './components/AboutPlus.svelte';
 	import AboutTagger from './components/AboutTagger.svelte';
-	import Footer from '$components/layout/Footer.svelte';
-	import Header from '$components/layout/Header.svelte';
 	import {
 		areaError,
 		areas,
@@ -263,224 +261,212 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
-<div class="bg-teal dark:bg-dark">
-	<Header />
-	<div class="mx-auto w-10/12 xl:w-[1200px]">
-		<main class="mt-10 mb-20 space-y-20 text-primary md:space-y-40 dark:text-white">
-			<div class="space-y-5 text-center text-xl">
-				<h1 class="text-4xl !leading-tight font-semibold md:text-5xl">About Us</h1>
-				<p class="mx-auto md:w-[600px]">
-					BTC Map is a free and open source project powered by volunteer bitcoiners and
-					bitcoin-friendly merchants around the world.
-				</p>
-			</div>
+<main class="mt-10 mb-20 space-y-20 text-primary md:space-y-40 dark:text-white">
+	<div class="space-y-5 text-center text-xl">
+		<h1 class="text-4xl !leading-tight font-semibold md:text-5xl">About Us</h1>
+		<p class="mx-auto md:w-[600px]">
+			BTC Map is a free and open source project powered by volunteer bitcoiners and bitcoin-friendly
+			merchants around the world.
+		</p>
+	</div>
 
-			<section class="w-full justify-center space-y-10 lg:flex lg:space-y-0 lg:space-x-10">
-				<div class="lg:w-[475px]">
-					<h2 class="mb-5 text-3xl font-semibold">Merchants</h2>
+	<section class="w-full justify-center space-y-10 lg:flex lg:space-y-0 lg:space-x-10">
+		<div class="lg:w-[475px]">
+			<h2 class="mb-5 text-3xl font-semibold">Merchants</h2>
 
-					<div class="space-y-5">
-						<p>
-							Merchants are at the heart of BTC Map. These businesses are front-running the paradigm
-							change and positioning themselves for continued success. Any merchant who accepts
-							bitcoin can be listed on BTC Map.
-						</p>
-						<p>
-							<strong>Accept bitcoin?</strong>
-							<a
-								href={resolve('/add-location')}
-								class="font-semibold text-link transition-colors hover:text-hover"
-								>Get listed on BTC Map</a
-							>!
-						</p>
-					</div>
-				</div>
-
-				<div class="flex grid-cols-3 flex-wrap justify-center gap-5 lg:grid">
-					{#if merchants.length}
-						{#each merchants as merchant (merchant.id)}
-							<AboutMerchant
-								id={merchant.id.toString()}
-								icon={merchant.icon}
-								tooltip={merchant.name}
-							/>
-						{/each}
-					{:else}
-						{#each Array(6) as _, index (index)}
-							<span class="h-24 w-24 animate-pulse rounded-full bg-link/50" />
-						{/each}
-					{/if}
-				</div>
-			</section>
-
-			<section class="w-full space-y-10 rounded-xl bg-[#164E63] p-5 text-center text-white md:p-10">
-				<h2 class="text-3xl font-semibold">Shadowy Supertaggers</h2>
-
-				<p class="mx-auto lg:w-[650px]">
-					Shadowy Supertaggers are people who power this project. They are volunteers who selflessly
-					take the time to update business locations with new information. Without them, BTC Map
-					would not be sustainable!
-				</p>
-
-				<div class="space-y-5">
-					<p class="font-semibold uppercase">Our top supertaggers</p>
-
-					<div class="flex flex-wrap justify-center gap-5">
-						{#if supertaggers.length}
-							{#each supertaggers.map((t) => ({ ...t, total: undefined })) as tagger (tagger.id)}
-								<AboutTagger {tagger} />
-							{/each}
-						{:else}
-							{#each Array(6) as _, index (index)}
-								<span class="h-24 w-24 animate-pulse rounded-full bg-link/50" />
-							{/each}
-						{/if}
-					</div>
-
-					<a
-						href={resolve('/leaderboard')}
-						class="inline-block font-semibold underline underline-offset-4 hover:no-underline"
-						>View leaderboard</a
-					>
-				</div>
-			</section>
-
-			<section class="w-full justify-center space-y-10 lg:flex lg:space-y-0 lg:space-x-10">
-				<div class="lg:w-[475px]">
-					<h2 class="mb-5 text-3xl font-semibold">Communities</h2>
-
-					<div class="space-y-5">
-						<p>Bitcoin communities help drive global adoption by onboarding new users locally!</p>
-						<p>
-							<strong>Don’t see your community?</strong>
-							<a
-								href={resolve('/communities/add')}
-								class="font-semibold text-link transition-colors hover:text-hover"
-								>Add it to BTC Map</a
-							>.
-						</p>
-					</div>
-				</div>
-
-				<div>
-					<div class="flex grid-cols-3 flex-wrap justify-center gap-5 lg:grid">
-						{#if communities.length}
-							{#each communities as community (community.id)}
-								<AboutCommunity {community} />
-							{/each}
-						{:else}
-							{#each Array(6) as _, index (index)}
-								<span class="h-24 w-24 animate-pulse rounded-full bg-link/50" />
-							{/each}
-						{/if}
-					</div>
-
-					<div class="mt-5 flex justify-center">
-						<a
-							href={resolve('/communities')}
-							class="font-semibold text-link transition-colors hover:text-hover"
-							>See all communities</a
-						>
-					</div>
-				</div>
-			</section>
-
-			<section
-				class="w-full space-y-10 rounded-xl bg-[#F1F7FC] p-5 text-center md:p-10 dark:bg-white/[0.15]"
-			>
-				<h2 class="text-3xl font-semibold">Integrations</h2>
-
-				<p class="font-semibold uppercase">
-					Community integrations <span class="block text-sm font-normal normal-case"
-						>Projects using BTC Map</span
-					>
-				</p>
-
-				<div class="flex flex-wrap justify-center gap-10">
-					{#each communityIntegrations as integration (integration.url)}
-						<AboutIntegration {integration} />
-					{/each}
-					<AboutPlus />
-				</div>
-
-				<p class="font-semibold uppercase">
-					Project integrations <span class="block text-sm font-normal normal-case"
-						>BTC Map uses these projects</span
-					>
-				</p>
-
-				<div class="flex flex-wrap justify-center gap-10">
-					{#each projectIntegrations as integration (integration.url)}
-						<AboutIntegration {integration} />
-					{/each}
-					<AboutPlus />
-				</div>
-
+			<div class="space-y-5">
 				<p>
-					If you are interested in integrating with us please <a
-						href="mailto:hello@btcmap.org"
-						class="font-semibold text-link transition-colors hover:text-hover">reach out</a
+					Merchants are at the heart of BTC Map. These businesses are front-running the paradigm
+					change and positioning themselves for continued success. Any merchant who accepts bitcoin
+					can be listed on BTC Map.
+				</p>
+				<p>
+					<strong>Accept bitcoin?</strong>
+					<a
+						href={resolve('/add-location')}
+						class="font-semibold text-link transition-colors hover:text-hover"
+						>Get listed on BTC Map</a
 					>!
 				</p>
-			</section>
+			</div>
+		</div>
 
-			<section class="w-full justify-center space-y-10 lg:flex lg:space-y-0 lg:space-x-10">
-				<div class="lg:w-[475px]">
-					<h2 class="mb-5 text-3xl font-semibold">Contributors</h2>
+		<div class="flex grid-cols-3 flex-wrap justify-center gap-5 lg:grid">
+			{#if merchants.length}
+				{#each merchants as merchant (merchant.id)}
+					<AboutMerchant id={merchant.id.toString()} icon={merchant.icon} tooltip={merchant.name} />
+				{/each}
+			{:else}
+				{#each Array(6) as _, index (index)}
+					<span class="h-24 w-24 animate-pulse rounded-full bg-link/50" />
+				{/each}
+			{/if}
+		</div>
+	</section>
 
-					<p>
-						Anybody can contribute to BTC Map in many different ways. If you would like to get
-						involved please don't hesitate and come join the fun!
-					</p>
-				</div>
+	<section class="w-full space-y-10 rounded-xl bg-[#164E63] p-5 text-center text-white md:p-10">
+		<h2 class="text-3xl font-semibold">Shadowy Supertaggers</h2>
 
-				<div class="flex grid-cols-3 flex-wrap justify-center gap-5 lg:grid">
-					{#each contributors as contributor (contributor.url)}
-						<AboutContributor {contributor} />
+		<p class="mx-auto lg:w-[650px]">
+			Shadowy Supertaggers are people who power this project. They are volunteers who selflessly
+			take the time to update business locations with new information. Without them, BTC Map would
+			not be sustainable!
+		</p>
+
+		<div class="space-y-5">
+			<p class="font-semibold uppercase">Our top supertaggers</p>
+
+			<div class="flex flex-wrap justify-center gap-5">
+				{#if supertaggers.length}
+					{#each supertaggers.map((t) => ({ ...t, total: undefined })) as tagger (tagger.id)}
+						<AboutTagger {tagger} />
 					{/each}
-				</div>
-			</section>
+				{:else}
+					{#each Array(6) as _, index (index)}
+						<span class="h-24 w-24 animate-pulse rounded-full bg-link/50" />
+					{/each}
+				{/if}
+			</div>
 
-			<section
-				class="w-full justify-center space-y-10 rounded-xl bg-[#EBEFF2] p-5 md:p-10 lg:flex lg:space-y-0 lg:space-x-10 dark:bg-white/[0.15]"
+			<a
+				href={resolve('/leaderboard')}
+				class="inline-block font-semibold underline underline-offset-4 hover:no-underline"
+				>View leaderboard</a
 			>
-				<div class="lg:w-[475px]">
-					<h2 class="mb-10 text-3xl font-semibold">Core Team</h2>
+		</div>
+	</section>
 
-					<div class="space-y-10">
-						<p>
-							<strong>Igor</strong> is a long time bitcoiner, mapper, and digital nomad living abroad.
-							He created BTC Map as an Android application and the project has since gained worldwide
-							momentum from there. He now also maintains all of the backend infrastructure for the project.
-						</p>
-						<p>
-							<strong>Nathan</strong> is a tech entrepreneur turned pleb-at-large. He brought the core
-							team together to accelerate app development. Having built, sold, invested in and advised
-							tech businesses over the years he is now focused on bitcoin, building BTCMap.org, gamertron.net
-							and delivering bitcoin education for kids.
-						</p>
-						<p>
-							A self-taught Web Developer, <strong>secondl1ght</strong> dove head first down the bitcoin
-							rabbit hole and left his fiat career to focus on bitcoin development full-time. He created
-							and maintains the BTC Map web application, as well as an encrypted messaging app called
-							Cipherchat, and works on lightning network tools at Amboss Technologies.
-						</p>
-						<p>
-							<strong>Karnage</strong> is the lead designer on the web app and created the BTC Map brand.
-							He has contributed to many high profile bitcoin open source projects. His mission is to
-							help startup founders succeed and creates products to achieve this goal. Pixel-perfect product
-							design every time. Get it shipped.
-						</p>
-					</div>
-				</div>
+	<section class="w-full justify-center space-y-10 lg:flex lg:space-y-0 lg:space-x-10">
+		<div class="lg:w-[475px]">
+			<h2 class="mb-5 text-3xl font-semibold">Communities</h2>
 
-				<div class="flex grid-cols-2 flex-wrap items-center justify-center gap-10 lg:grid">
-					{#each coreTeam as member (member.name)}
-						<AboutCore {member} />
+			<div class="space-y-5">
+				<p>Bitcoin communities help drive global adoption by onboarding new users locally!</p>
+				<p>
+					<strong>Don’t see your community?</strong>
+					<a
+						href={resolve('/communities/add')}
+						class="font-semibold text-link transition-colors hover:text-hover">Add it to BTC Map</a
+					>.
+				</p>
+			</div>
+		</div>
+
+		<div>
+			<div class="flex grid-cols-3 flex-wrap justify-center gap-5 lg:grid">
+				{#if communities.length}
+					{#each communities as community (community.id)}
+						<AboutCommunity {community} />
 					{/each}
-				</div>
-			</section>
-		</main>
-		<Footer />
-	</div>
-</div>
+				{:else}
+					{#each Array(6) as _, index (index)}
+						<span class="h-24 w-24 animate-pulse rounded-full bg-link/50" />
+					{/each}
+				{/if}
+			</div>
+
+			<div class="mt-5 flex justify-center">
+				<a
+					href={resolve('/communities')}
+					class="font-semibold text-link transition-colors hover:text-hover">See all communities</a
+				>
+			</div>
+		</div>
+	</section>
+
+	<section
+		class="w-full space-y-10 rounded-xl bg-[#F1F7FC] p-5 text-center md:p-10 dark:bg-white/[0.15]"
+	>
+		<h2 class="text-3xl font-semibold">Integrations</h2>
+
+		<p class="font-semibold uppercase">
+			Community integrations <span class="block text-sm font-normal normal-case"
+				>Projects using BTC Map</span
+			>
+		</p>
+
+		<div class="flex flex-wrap justify-center gap-10">
+			{#each communityIntegrations as integration (integration.url)}
+				<AboutIntegration {integration} />
+			{/each}
+			<AboutPlus />
+		</div>
+
+		<p class="font-semibold uppercase">
+			Project integrations <span class="block text-sm font-normal normal-case"
+				>BTC Map uses these projects</span
+			>
+		</p>
+
+		<div class="flex flex-wrap justify-center gap-10">
+			{#each projectIntegrations as integration (integration.url)}
+				<AboutIntegration {integration} />
+			{/each}
+			<AboutPlus />
+		</div>
+
+		<p>
+			If you are interested in integrating with us please <a
+				href="mailto:hello@btcmap.org"
+				class="font-semibold text-link transition-colors hover:text-hover">reach out</a
+			>!
+		</p>
+	</section>
+
+	<section class="w-full justify-center space-y-10 lg:flex lg:space-y-0 lg:space-x-10">
+		<div class="lg:w-[475px]">
+			<h2 class="mb-5 text-3xl font-semibold">Contributors</h2>
+
+			<p>
+				Anybody can contribute to BTC Map in many different ways. If you would like to get involved
+				please don't hesitate and come join the fun!
+			</p>
+		</div>
+
+		<div class="flex grid-cols-3 flex-wrap justify-center gap-5 lg:grid">
+			{#each contributors as contributor (contributor.url)}
+				<AboutContributor {contributor} />
+			{/each}
+		</div>
+	</section>
+
+	<section
+		class="w-full justify-center space-y-10 rounded-xl bg-[#EBEFF2] p-5 md:p-10 lg:flex lg:space-y-0 lg:space-x-10 dark:bg-white/[0.15]"
+	>
+		<div class="lg:w-[475px]">
+			<h2 class="mb-10 text-3xl font-semibold">Core Team</h2>
+
+			<div class="space-y-10">
+				<p>
+					<strong>Igor</strong> is a long time bitcoiner, mapper, and digital nomad living abroad. He
+					created BTC Map as an Android application and the project has since gained worldwide momentum
+					from there. He now also maintains all of the backend infrastructure for the project.
+				</p>
+				<p>
+					<strong>Nathan</strong> is a tech entrepreneur turned pleb-at-large. He brought the core team
+					together to accelerate app development. Having built, sold, invested in and advised tech businesses
+					over the years he is now focused on bitcoin, building BTCMap.org, gamertron.net and delivering
+					bitcoin education for kids.
+				</p>
+				<p>
+					A self-taught Web Developer, <strong>secondl1ght</strong> dove head first down the bitcoin rabbit
+					hole and left his fiat career to focus on bitcoin development full-time. He created and maintains
+					the BTC Map web application, as well as an encrypted messaging app called Cipherchat, and works
+					on lightning network tools at Amboss Technologies.
+				</p>
+				<p>
+					<strong>Karnage</strong> is the lead designer on the web app and created the BTC Map brand.
+					He has contributed to many high profile bitcoin open source projects. His mission is to help
+					startup founders succeed and creates products to achieve this goal. Pixel-perfect product design
+					every time. Get it shipped.
+				</p>
+			</div>
+		</div>
+
+		<div class="flex grid-cols-2 flex-wrap items-center justify-center gap-10 lg:grid">
+			{#each coreTeam as member (member.name)}
+				<AboutCore {member} />
+			{/each}
+		</div>
+	</section>
+</main>
