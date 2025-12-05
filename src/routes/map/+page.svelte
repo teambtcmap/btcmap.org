@@ -603,11 +603,9 @@
 		const isDesktop = window.innerWidth >= BREAKPOINTS.md;
 
 		// Determine if we should fetch full data or just count
-		// - Desktop: always fetch full data
-		// - Force flag: explicit request for full data (e.g., button click)
-		// - Mobile with list open and expanded: user is viewing the list
-		const allowHeavyFetch =
-			isDesktop || opts?.force || (!isDesktop && $merchantList.isOpen && $merchantList.isExpanded);
+		// - Desktop: always fetch full data (list panel visible alongside map)
+		// - Force flag: explicit user action (e.g., button click on mobile)
+		const allowHeavyFetch = isDesktop || opts?.force;
 
 		switch (behavior) {
 			case 'api-extended': {
