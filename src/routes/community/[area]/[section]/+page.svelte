@@ -1,8 +1,8 @@
 <script lang="ts">
-	import AreaPage from '$components/area/AreaPage.svelte';
+	import AreaPage from '$components/AreaPage.svelte';
 	import Breadcrumbs from '$components/Breadcrumbs.svelte';
-	import Footer from '$components/layout/Footer.svelte';
-	import Header from '$components/layout/Header.svelte';
+	import Footer from '$components/Footer.svelte';
+	import Header from '$components/Header.svelte';
 	import type { AreaPageProps } from '$lib/types';
 	import type { PageData } from './$types';
 

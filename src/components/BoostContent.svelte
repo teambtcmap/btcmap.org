@@ -8,7 +8,7 @@
 	import axios from 'axios';
 	import { fade } from 'svelte/transition';
 	import { onDestroy } from 'svelte';
-	import InvoicePaymentStage from '$components/InvoicePaymentStage.svelte';
+	import InvoicePaymentStage from './InvoicePaymentStage.svelte';
 
 	export let merchantId: number | string;
 	export let merchantName: string | undefined = undefined;
@@ -134,13 +134,7 @@
 						transition:fade={{ delay: 0, duration: 100 }}
 						class="absolute -top-16 left-[26px] w-[52px] rounded-lg border border-gray-300 bg-white py-2 shadow-lg dark:border-white/95 dark:bg-dark"
 					>
-						<img
-							src="/icons/boosted-icon-pin.svg"
-							alt="Boosted pin"
-							class="mx-auto"
-							width="32"
-							height="43"
-						/>
+						<Icon w="32" h="43" style="mx-auto" icon="boosted-icon-pin" type="popup" />
 						<Icon
 							w="20"
 							h="20"

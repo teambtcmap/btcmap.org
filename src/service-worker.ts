@@ -26,6 +26,7 @@ sw.addEventListener('install', (event) => {
 			'/images/logo.svg',
 			'/icons/spritesheet-socials.svg',
 			'/icons/spritesheet-apps.svg',
+			'/icons/spritesheet-popup.svg',
 			'/icons/spritesheet-mobile-nav.svg'
 		]);
 	}

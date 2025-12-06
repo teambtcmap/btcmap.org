@@ -4,7 +4,7 @@
 	import { resolve } from '$app/paths';
 	import Time from 'svelte-time';
 	import type { Place } from '$lib/types';
-	import PaymentMethodIcon from '$components/PaymentMethodIcon.svelte';
+	import PaymentMethodIcon from './PaymentMethodIcon.svelte';
 
 	export let merchant: Place;
 	export let isUpToDate: boolean;
@@ -37,13 +37,7 @@
 
 	{#if merchant.opening_hours}
 		<div class="flex items-start space-x-2" title="Opening hours">
-			<Icon
-				w="16"
-				h="16"
-				style="mt-1 shrink-0 text-primary dark:text-white"
-				icon="schedule"
-				type="material"
-			/>
+			<Icon w="16" h="16" style="mt-1 text-primary dark:text-white" icon="clock" type="popup" />
 			<span class="text-body dark:text-white">{merchant.opening_hours}</span>
 		</div>
 	{/if}
@@ -53,7 +47,7 @@
 			href="geo:{merchant.lat},{merchant.lon}"
 			class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
 		>
-			<Icon w="24" h="24" icon="explore" type="material" />
+			<Icon w="24" h="24" icon="compass" type="popup" />
 			<span class="mt-1 text-xs">Navigate</span>
 		</a>
 
@@ -65,7 +59,7 @@
 			rel="noreferrer"
 			class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
 		>
-			<Icon w="24" h="24" icon="edit" type="material" />
+			<Icon w="24" h="24" icon="pencil" type="popup" />
 			<span class="mt-1 text-xs">Edit</span>
 		</a>
 		<!-- eslint-enable svelte/no-navigation-without-resolve -->
@@ -74,7 +68,7 @@
 			href={resolve(`/merchant/${merchant.id}`)}
 			class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
 		>
-			<Icon w="24" h="24" icon="share" type="material" />
+			<Icon w="24" h="24" icon="share" type="popup" />
 			<span class="mt-1 text-xs">Share</span>
 		</a>
 
@@ -136,15 +130,15 @@
 							h="16"
 							style="inline text-primary dark:text-white"
 							icon="verified"
-							type="material"
+							type="popup"
 						/>
 					{:else}
 						<Icon
 							w="16"
 							h="16"
 							style="inline text-primary dark:text-white"
-							icon="error_outline"
-							type="material"
+							icon="outdated"
+							type="popup"
 						/>
 					{/if}
 				</span>
@@ -182,7 +176,7 @@
 				class="mt-2 flex h-[32px] items-center justify-center space-x-2 rounded-lg border border-gray-300 px-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
 			>
 				{#if !boostLoading}
-					<Icon w="16" h="16" icon="arrow_circle_up" type="material" />
+					<Icon w="16" h="16" icon={isBoosted ? 'boost-solid' : 'boost'} type="popup" />
 				{/if}
 				<span class="text-xs">{boostLoading ? 'Boosting...' : isBoosted ? 'Extend' : 'Boost'}</span>
 			</button>
