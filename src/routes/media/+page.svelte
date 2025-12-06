@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Footer from '$components/Footer.svelte';
-	import Header from '$components/Header.svelte';
+	import Footer from '$components/layout/Footer.svelte';
+	import Header from '$components/layout/Header.svelte';
 
 	const brandColors = ['#10B981', '#53C5D5', '#051173', '#0891B2', '#E4EBEC', '#164E63', '#155E75'];
 

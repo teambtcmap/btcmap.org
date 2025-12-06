@@ -9,6 +9,7 @@ export const iconNames = [
   "signal",
   "reddit",
   "nostr",
+  "matrix",
   "linkedin",
   "instagram",
   "github",

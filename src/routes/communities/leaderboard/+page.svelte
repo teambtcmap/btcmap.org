@@ -2,9 +2,9 @@
 	import { onMount } from 'svelte';
 	import AreaLeaderboard from '$components/leaderboard/AreaLeaderboard.svelte';
 	import Breadcrumbs from '$components/Breadcrumbs.svelte';
-	import Footer from '$components/Footer.svelte';
-	import Header from '$components/Header.svelte';
-	import HeaderPlaceholder from '$components/HeaderPlaceholder.svelte';
+	import Footer from '$components/layout/Footer.svelte';
+	import Header from '$components/layout/Header.svelte';
+	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import { areasSync } from '$lib/sync/areas';
 	import { reportsSync } from '$lib/sync/reports';

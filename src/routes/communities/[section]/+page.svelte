@@ -2,10 +2,10 @@
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 
-	import CommunitySection from '$components/CommunitySection.svelte';
-	import Footer from '$components/Footer.svelte';
-	import Header from '$components/Header.svelte';
-	import HeaderPlaceholder from '$components/HeaderPlaceholder.svelte';
+	import CommunitySection from './components/CommunitySection.svelte';
+	import Footer from '$components/layout/Footer.svelte';
+	import Header from '$components/layout/Header.svelte';
+	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import { areaError, areas, reportError, syncStatus, theme } from '$lib/store';
 	import { areasSync } from '$lib/sync/areas';

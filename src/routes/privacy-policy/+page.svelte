@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Footer from '$components/Footer.svelte';
-	import Header from '$components/Header.svelte';
+	import Footer from '$components/layout/Footer.svelte';
+	import Header from '$components/layout/Header.svelte';
 	import { socials } from '$lib/store';
 </script>
 

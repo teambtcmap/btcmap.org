@@ -3,8 +3,8 @@
 	import type { Table } from '@tanstack/svelte-table';
 	import { flexRender } from '@tanstack/svelte-table';
 	import { isEven } from '$lib/utils';
-	import AreaLeaderboardItemName from './AreaLeaderboardItemName.svelte';
-	import GradeDisplay from './GradeDisplay.svelte';
+	import AreaLeaderboardItemName from '$components/leaderboard/AreaLeaderboardItemName.svelte';
+	import GradeDisplay from '$components/leaderboard/GradeDisplay.svelte';
 	import Icon from '$components/Icon.svelte';
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any

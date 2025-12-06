@@ -4,9 +4,9 @@
 
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import Footer from '$components/Footer.svelte';
-	import Header from '$components/Header.svelte';
-	import ProfileActivity from '$components/ProfileActivity.svelte';
+	import Footer from '$components/layout/Footer.svelte';
+	import Header from '$components/layout/Header.svelte';
+	import ProfileActivity from './components/ProfileActivity.svelte';
 	import ProfileStat from '$components/ProfileStat.svelte';
 	import Tip from '$components/Tip.svelte';
 	import Icon from '$components/Icon.svelte';

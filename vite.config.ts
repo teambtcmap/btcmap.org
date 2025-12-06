@@ -27,14 +27,6 @@ export default defineConfig({
 			},
 			{
 				withTypes: true,
-				inputDir: './static/icons/popup',
-				outputDir: './static/icons',
-				typesOutputFile: './src/lib/spritesheet-popup.ts',
-				fileName: 'spritesheet-popup.svg',
-				iconNameTransformer: (iconName) => iconName.toLowerCase()
-			},
-			{
-				withTypes: true,
 				inputDir: './static/icons/mobile-nav',
 				outputDir: './static/icons',
 				typesOutputFile: './src/lib/spritesheet-mobile-nav.ts',

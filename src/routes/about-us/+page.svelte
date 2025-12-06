@@ -6,8 +6,8 @@
 	import AboutMerchant from './components/AboutMerchant.svelte';
 	import AboutPlus from './components/AboutPlus.svelte';
 	import AboutTagger from './components/AboutTagger.svelte';
-	import Footer from '$components/Footer.svelte';
-	import Header from '$components/Header.svelte';
+	import Footer from '$components/layout/Footer.svelte';
+	import Header from '$components/layout/Header.svelte';
 	import {
 		areaError,
 		areas,
