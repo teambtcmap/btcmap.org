@@ -255,6 +255,13 @@
 		merchantList.clearSearch();
 	};
 
+	const handleModeChange = (mode: MerchantListMode) => {
+		merchantList.setMode(mode);
+		if (mode === 'nearby') {
+			updateMerchantList();
+		}
+	};
+
 	// allows for users to set initial view in a URL query
 	const urlLat = $page.url.searchParams.getAll('lat');
 	const urlLong = $page.url.searchParams.getAll('long');
@@ -1115,6 +1122,7 @@
 		}}
 		onSearch={handlePanelSearch}
 		onClearSearch={clearSearch}
+		onModeChange={handleModeChange}
 		{currentZoom}
 	/>
 

@@ -6,6 +6,8 @@ import { isBoosted } from '$lib/merchantDrawerLogic';
 import { MERCHANT_LIST_MAX_ITEMS } from '$lib/constants';
 import { errToast } from '$lib/utils';
 
+export type MerchantListMode = 'nearby' | 'search';
+
 export interface MerchantListState {
 	isOpen: boolean;
 	isExpanded: boolean;
@@ -18,7 +20,7 @@ export interface MerchantListState {
 	// True when fetching enriched details in background (no spinner)
 	isEnrichingDetails: boolean;
 	// Panel mode: 'nearby' for location-based list, 'search' for search results
-	mode: 'nearby' | 'search';
+	mode: MerchantListMode;
 	// Search state
 	searchQuery: string;
 	searchResults: Place[];
@@ -298,6 +300,16 @@ function createMerchantListStore() {
 				searchQuery: '',
 				searchResults: [],
 				isSearching: false
+			}));
+		},
+
+		// Switch between modes
+		setMode(mode: MerchantListMode) {
+			update((state) => ({
+				...state,
+				mode,
+				// Clear search state when switching to nearby
+				...(mode === 'nearby' ? { searchQuery: '', searchResults: [], isSearching: false } : {})
 			}));
 		},
 
