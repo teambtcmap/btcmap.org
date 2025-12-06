@@ -218,7 +218,8 @@
 	// Core search function
 	const executeSearch = async (query: string) => {
 		if (query.length < 3) {
-			merchantList.clearSearch();
+			// Clear results but keep search mode (user is still typing)
+			merchantList.clearSearchResults();
 			return;
 		}
 
