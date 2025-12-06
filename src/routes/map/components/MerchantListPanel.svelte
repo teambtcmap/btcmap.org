@@ -206,13 +206,14 @@
 			<!-- Mode toggle buttons -->
 			<div
 				class="mt-3 flex rounded-lg bg-gray-100 p-1 dark:bg-white/5"
-				role="group"
+				role="radiogroup"
 				aria-label="View mode"
 			>
 				<button
 					type="button"
+					role="radio"
 					on:click={() => handleModeSwitch('search')}
-					aria-pressed={mode === 'search'}
+					aria-checked={mode === 'search'}
 					class="flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors
 						{mode === 'search'
 						? 'bg-white text-primary shadow-sm dark:bg-white/10 dark:text-white'
@@ -222,8 +223,9 @@
 				</button>
 				<button
 					type="button"
+					role="radio"
 					on:click={() => handleModeSwitch('nearby')}
-					aria-pressed={mode === 'nearby'}
+					aria-checked={mode === 'nearby'}
 					class="flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors
 						{mode === 'nearby'
 						? 'bg-white text-primary shadow-sm dark:bg-white/10 dark:text-white'
