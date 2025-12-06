@@ -228,6 +228,8 @@
 			return;
 		}
 
+		// Close any open merchant drawer so it doesn't cover the search results
+		merchantDrawer.close();
 		merchantList.setSearching(true);
 
 		try {
