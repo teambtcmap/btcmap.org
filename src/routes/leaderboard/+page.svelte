@@ -11,6 +11,7 @@
 	import TaggerLeaderboardDesktopTable from '$components/leaderboard/TaggerLeaderboardDesktopTable.svelte';
 	import TaggerLeaderboardMobileCard from '$components/leaderboard/TaggerLeaderboardMobileCard.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
+	import LoadingSpinner from '$components/LoadingSpinner.svelte';
 	import {
 		createSvelteTable,
 		getCoreRowModel,
@@ -51,6 +52,7 @@
 	const pageSizes = [10, 20, 30, 40, 50];
 	let globalFilter = '';
 	let loading = true;
+	let periodLoading = false;
 	let errorMessage: string | null = data?.error ?? null;
 	let leaderboardRows: TaggerRow[] = [];
 	let totalTaggers = 0;
@@ -132,11 +134,13 @@
 			leaderboardRows = normalizeUsers(data.rpcResult.users, excluded);
 			totalTaggers = leaderboardRows.length;
 			loading = false;
+			periodLoading = false;
 			errorMessage = null;
 		} else if (data?.error) {
 			leaderboardRows = [];
 			totalTaggers = 0;
 			loading = false;
+			periodLoading = false;
 			errorMessage = data.error;
 		} else {
 			leaderboardRows = [];
@@ -271,6 +275,7 @@
 		}
 		const query = search.toString();
 		selectedPeriod = nextValue;
+		periodLoading = true;
 		// @ts-expect-error resolve function returns union type that doesn't match goto's strict route types
 		await goto(resolve(query ? `/leaderboard?${query}` : '/leaderboard'), {
 			replaceState: true,
@@ -304,9 +309,6 @@
 						: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl"
 				>
 					Top Editors
-					{#if !loading && !errorMessage && totalTaggers}
-						<span class="ml-2 text-lg text-primary dark:text-white">({totalTaggers})</span>
-					{/if}
 				</h1>
 			{:else}
 				<HeaderPlaceholder />
@@ -320,88 +322,121 @@
 				Join Them
 			</PrimaryButton>
 
-			<section id="leaderboard" class="dark:lg:rounded dark:lg:bg-white/10 dark:lg:py-8">
-				{#if loading}
-					<div class="p-5">
-						<div
-							class="flex h-[572px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
-							role="status"
-							aria-live="polite"
+			<section id="leaderboard" aria-labelledby="leaderboard-title">
+				<div
+					class="w-full rounded-3xl border border-gray-300 bg-white dark:border-white/95 dark:bg-white/10"
+				>
+					<header>
+						<h2
+							id="leaderboard-title"
+							class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
 						>
-							<Icon type="fa" icon="table" w="96" h="96" style="animate-pulse text-link/50" />
-						</div>
-					</div>
-				{:else if errorMessage}
-					<p class="w-full p-5 text-center text-primary dark:text-white">
-						Failed to load leaderboard: {errorMessage}
-					</p>
-				{:else if !leaderboardRows.length}
-					<p class="w-full p-5 text-center text-primary dark:text-white">No data available</p>
-				{:else}
-					<div class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-						<div class="text-center md:text-left">
-							<p class="text-lg font-semibold text-primary dark:text-white">Time period</p>
-							<p class="text-sm text-primary/80 dark:text-white/80">
-								Showing {periodLabels[selectedPeriod]}
-							</p>
-						</div>
-						<label
-							class="flex flex-col gap-2 text-sm font-medium text-primary md:flex-row md:items-center md:gap-3 dark:text-white"
-						>
-							<span>Period</span>
-							<select
-								class="rounded-xl border border-primary/40 bg-white/80 px-4 py-2 text-primary focus:border-primary focus:outline-none dark:border-white/50 dark:bg-dark/40 dark:text-white"
-								value={selectedPeriod}
-								on:change={handlePeriodChange}
-								aria-label="Select leaderboard period"
-							>
-								{#each periodOptions as option (option)}
-									<option value={option}>{periodLabels[option]}</option>
-								{/each}
-							</select>
-						</label>
-					</div>
+							Top Editors
+							{#if !loading && !errorMessage && totalTaggers}
+								({totalTaggers})
+							{/if}
+						</h2>
+					</header>
 
-					<LeaderboardSearch table={$table} bind:globalFilter {searchDebounce} />
-
-					{#if $table.getFilteredRowModel().rows.length === 0}
-						<p class="w-full p-5 text-center text-primary dark:text-white">No results found.</p>
-					{:else}
-						<div class="block lg:hidden">
+					{#if loading}
+						<div class="p-5">
 							<div
-								class="border-b border-gray-300 bg-primary/5 dark:border-white/95 dark:bg-white/5"
+								class="flex h-[572px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
+								role="status"
+								aria-live="polite"
 							>
-								<div class="grid grid-cols-4 gap-3 px-4 py-3 text-center text-xs">
-									<SortHeaderButton
-										column={$table?.getColumn('position')}
-										label="Position"
-										ariaLabel="Sort by position"
-									/>
-									<SortHeaderButton
-										column={$table?.getColumn('total')}
-										label="Total"
-										ariaLabel="Sort by total edits"
-									/>
-									<SortHeaderButton
-										column={$table?.getColumn('created')}
-										label="Created"
-										ariaLabel="Sort by created edits"
-									/>
-									<SortHeaderButton
-										column={$table?.getColumn('updated')}
-										label="Updated"
-										ariaLabel="Sort by updated edits"
-									/>
+								<Icon type="fa" icon="table" w="96" h="96" style="animate-pulse text-link/50" />
+							</div>
+						</div>
+					{:else if periodLoading}
+						<div class="p-5">
+							<div
+								class="flex h-[572px] w-full items-center justify-center rounded-3xl border border-link/50"
+								role="status"
+								aria-live="polite"
+							>
+								<div class="flex flex-col items-center gap-4">
+									<LoadingSpinner color="text-link" size="h-12 w-12" />
+									<p class="text-lg font-medium text-primary dark:text-white">
+										Loading {periodLabels[selectedPeriod].toLowerCase()} data...
+									</p>
 								</div>
 							</div>
-
-							<TaggerLeaderboardMobileCard table={$table} />
 						</div>
+					{:else if errorMessage}
+						<p class="w-full p-5 text-center text-primary dark:text-white">
+							Failed to load leaderboard: {errorMessage}
+						</p>
+					{:else if !leaderboardRows.length}
+						<p class="w-full p-5 text-center text-primary dark:text-white">No data available</p>
+					{:else}
+						<div class="p-5">
+							<div class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+								<div class="px-4 py-3 text-center md:text-left">
+									<p class="text-lg font-semibold text-primary dark:text-white">Time period</p>
+									<p class="text-sm text-primary/80 dark:text-white/80">
+										Showing {periodLabels[selectedPeriod]}
+									</p>
+								</div>
+								<label
+									class="flex flex-col gap-2 px-4 py-3 text-sm font-medium text-primary md:flex-row md:items-center md:gap-3 dark:text-white"
+								>
+									<span>Period</span>
+									<select
+										class="rounded-xl border border-primary/40 bg-white/80 px-4 py-2 text-primary focus:border-primary focus:outline-none dark:border-white/50 dark:bg-dark/40 dark:text-white"
+										value={selectedPeriod}
+										on:change={handlePeriodChange}
+										aria-label="Select leaderboard period"
+									>
+										{#each periodOptions as option (option)}
+											<option value={option}>{periodLabels[option]}</option>
+										{/each}
+									</select>
+								</label>
+							</div>
 
-						<TaggerLeaderboardDesktopTable table={$table} />
-						<LeaderboardPagination table={$table} {pageSizes} />
+							<LeaderboardSearch table={$table} bind:globalFilter {searchDebounce} />
+
+							{#if $table.getFilteredRowModel().rows.length === 0}
+								<p class="w-full p-5 text-center text-primary dark:text-white">No results found.</p>
+							{:else}
+								<div class="block lg:hidden">
+									<div
+										class="border-b border-gray-300 bg-primary/5 dark:border-white/95 dark:bg-white/5"
+									>
+										<div class="grid grid-cols-4 gap-3 px-4 py-3 text-center text-xs">
+											<SortHeaderButton
+												column={$table?.getColumn('position')}
+												label="Position"
+												ariaLabel="Sort by position"
+											/>
+											<SortHeaderButton
+												column={$table?.getColumn('total')}
+												label="Total"
+												ariaLabel="Sort by total edits"
+											/>
+											<SortHeaderButton
+												column={$table?.getColumn('created')}
+												label="Created"
+												ariaLabel="Sort by created edits"
+											/>
+											<SortHeaderButton
+												column={$table?.getColumn('updated')}
+												label="Updated"
+												ariaLabel="Sort by updated edits"
+											/>
+										</div>
+									</div>
+
+									<TaggerLeaderboardMobileCard table={$table} />
+								</div>
+
+								<TaggerLeaderboardDesktopTable table={$table} />
+								<LeaderboardPagination table={$table} {pageSizes} />
+							{/if}
+						</div>
 					{/if}
-				{/if}
+				</div>
 			</section>
 
 			<Footer />
