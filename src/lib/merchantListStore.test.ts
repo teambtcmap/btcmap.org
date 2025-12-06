@@ -437,4 +437,83 @@ describe('merchantListStore', () => {
 			expect(detailsAborted).toBe(true);
 		});
 	});
+
+	describe('search state', () => {
+		it('setSearching() should set searching state and open panel in search mode', () => {
+			merchantList.setSearching(true);
+			const state = get(merchantList);
+
+			expect(state.isSearching).toBe(true);
+			expect(state.mode).toBe('search');
+			expect(state.isOpen).toBe(true);
+			expect(state.isExpanded).toBe(true);
+		});
+
+		it('openWithSearchResults() should set mode, query, and results', () => {
+			const results = [createMockPlace({ id: 1 }), createMockPlace({ id: 2 })];
+			merchantList.openWithSearchResults('pizza', results);
+			const state = get(merchantList);
+
+			expect(state.mode).toBe('search');
+			expect(state.searchQuery).toBe('pizza');
+			expect(state.searchResults.length).toBe(2);
+			expect(state.isSearching).toBe(false);
+			expect(state.isOpen).toBe(true);
+			expect(state.isExpanded).toBe(true);
+		});
+
+		it('openWithSearchResults() should sort boosted merchants first', () => {
+			const futureDate = new Date(Date.now() + 86400000).toISOString();
+			const boosted = createMockPlace({ id: 1, name: 'Boosted', boosted_until: futureDate });
+			const regular = createMockPlace({ id: 2, name: 'Regular' });
+
+			merchantList.openWithSearchResults('test', [regular, boosted]);
+			const state = get(merchantList);
+
+			expect(state.searchResults[0].id).toBe(1); // Boosted first
+			expect(state.searchResults[1].id).toBe(2);
+		});
+
+		it('clearSearchResults() should clear results but keep search mode', () => {
+			merchantList.openWithSearchResults('test', [createMockPlace()]);
+			merchantList.clearSearchResults();
+			const state = get(merchantList);
+
+			expect(state.mode).toBe('search'); // Mode preserved
+			expect(state.searchQuery).toBe('');
+			expect(state.searchResults).toEqual([]);
+			expect(state.isSearching).toBe(false);
+		});
+
+		it('clearSearch() should switch to nearby mode and clear search state', () => {
+			merchantList.openWithSearchResults('test', [createMockPlace()]);
+			merchantList.clearSearch();
+			const state = get(merchantList);
+
+			expect(state.mode).toBe('nearby');
+			expect(state.searchQuery).toBe('');
+			expect(state.searchResults).toEqual([]);
+			expect(state.isSearching).toBe(false);
+		});
+
+		it('setMode() should switch to search mode', () => {
+			merchantList.setMode('search');
+			const state = get(merchantList);
+
+			expect(state.mode).toBe('search');
+		});
+
+		it('setMode() should switch to nearby mode and clear search state', () => {
+			// Set up search state first
+			merchantList.openWithSearchResults('pizza', [createMockPlace()]);
+
+			merchantList.setMode('nearby');
+			const state = get(merchantList);
+
+			expect(state.mode).toBe('nearby');
+			expect(state.searchQuery).toBe('');
+			expect(state.searchResults).toEqual([]);
+			expect(state.isSearching).toBe(false);
+		});
+	});
 });
