@@ -447,6 +447,11 @@
 
 			upToDateLayer.addLayer(marker);
 			loadedMarkers[place.id.toString()] = marker;
+
+			// Highlight if this is the selected marker (may be pending from search result click)
+			if (selectedMarkerId === place.id) {
+				highlightMarker(place.id);
+			}
 		});
 	};
 
@@ -712,6 +717,11 @@
 		// Batch add markers - use parent cluster group's addLayers for efficiency
 		if (markersToAdd.length > 0 && markers) {
 			markers.addLayers(markersToAdd);
+
+			// Highlight the selected marker if it was just loaded (may be pending from search result click)
+			if (selectedMarkerId) {
+				highlightMarker(selectedMarkerId);
+			}
 		}
 	};
 
