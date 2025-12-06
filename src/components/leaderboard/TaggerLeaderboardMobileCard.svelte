@@ -15,12 +15,12 @@
 
 <!-- Mobile cards -->
 <div class="space-y-1 lg:hidden">
-	{#each table.getRowModel().rows as row, index (row.id)}
+	{#each table.getRowModel().rows as row (row.id)}
 		{@const tagger = row.original}
 
 		<!-- Card with three-row layout -->
 		<div
-			class="space-y-4 p-4 {isEven(index)
+			class="space-y-4 p-4 {isEven(tagger.position)
 				? 'bg-primary/5 dark:bg-white/5'
 				: 'bg-white dark:bg-transparent'}"
 			role="row"

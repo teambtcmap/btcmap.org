@@ -74,8 +74,8 @@
 			{/each}
 		</thead>
 		<tbody>
-			{#each table.getRowModel().rows as row, index (row.id)}
-				<tr class={isEven(index) ? 'bg-primary/5 dark:bg-white/5' : ''}>
+			{#each table.getRowModel().rows as row (row.id)}
+				<tr class={isEven(row.original.position - 1) ? 'bg-primary/5 dark:bg-white/5' : ''}>
 					{#each row.getVisibleCells() as cell (cell.id)}
 						<td class="px-2 py-3 md:px-5" class:text-center={cell.column.id !== 'name'}>
 							{#if cell.column.id === 'position'}
