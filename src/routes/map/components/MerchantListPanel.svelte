@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { onDestroy, tick } from 'svelte';
+	import { tick } from 'svelte';
 	import { fly } from 'svelte/transition';
 	import { merchantList, type MerchantListMode } from '$lib/merchantListStore';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
@@ -114,34 +114,16 @@
 		merchantList.collapse();
 	}
 
-	function handleKeydown(event: KeyboardEvent) {
+	function handleWindowKeydown(event: KeyboardEvent) {
+		if (!isOpen) return;
 		if (event.key === 'Escape') {
 			event.preventDefault();
 			handleClose();
 		}
 	}
-
-	// Track listener state to prevent accumulation
-	let listenerAttached = false;
-
-	// Scope keydown listener to when panel is open
-	$: if (browser) {
-		if (isOpen && !listenerAttached) {
-			window.addEventListener('keydown', handleKeydown);
-			listenerAttached = true;
-		} else if (!isOpen && listenerAttached) {
-			window.removeEventListener('keydown', handleKeydown);
-			listenerAttached = false;
-		}
-	}
-
-	onDestroy(() => {
-		if (browser && listenerAttached) {
-			window.removeEventListener('keydown', handleKeydown);
-			listenerAttached = false;
-		}
-	});
 </script>
+
+<svelte:window on:keydown={handleWindowKeydown} />
 
 {#if isOpen && isExpanded}
 	<section
