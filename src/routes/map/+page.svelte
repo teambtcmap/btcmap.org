@@ -6,6 +6,7 @@
 	import MapLoadingMain from '$components/MapLoadingMain.svelte';
 	import TileLoadingIndicator from './components/TileLoadingIndicator.svelte';
 	import MerchantDrawerHash from './components/MerchantDrawerHash.svelte';
+	import MerchantListMobile from './components/MerchantListMobile.svelte';
 	import MerchantListPanel from './components/MerchantListPanel.svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import { merchantList } from '$lib/merchantListStore';
@@ -593,34 +594,36 @@
 	}
 
 	// Update merchant list panel based on zoom level and visible places
-	const updateMerchantList = () => {
-		if (!browser) return;
-
-		// Only show list on desktop
-		if (window.innerWidth < BREAKPOINTS.md) {
-			merchantList.close();
-			return;
-		}
+	const updateMerchantList = (opts?: { force?: boolean }) => {
+		if (!browser || !map) return;
 
 		const bounds = map.getBounds();
 		const center = map.getCenter();
 		const behavior = getZoomBehavior(currentZoom);
+		const isDesktop = window.innerWidth >= BREAKPOINTS.md;
+
+		// Determine if we should fetch full data or just count
+		// - Desktop: always fetch full data (list panel visible alongside map)
+		// - Force flag: explicit user action (e.g., button click)
+		// - List open: user is actively viewing the list (mobile or desktop)
+		const allowHeavyFetch = isDesktop || opts?.force || $merchantList.isOpen;
 
 		switch (behavior) {
 			case 'api-extended': {
-				// Zoom 17+: Clustering disabled, use API for accurate nearby count
-				// Extended radius shows nearby places beyond immediate viewport
 				const viewportRadius = calculateRadiusKm(bounds);
 				const radiusKm = Math.max(
 					viewportRadius * HIGH_ZOOM_RADIUS_MULTIPLIER,
 					MIN_SEARCH_RADIUS_KM
 				);
-				merchantList.fetchAndReplaceList({ lat: center.lat, lon: center.lng }, radiusKm);
+				if (!$merchantList.isOpen && !allowHeavyFetch) {
+					merchantList.fetchCountOnly({ lat: center.lat, lon: center.lng }, radiusKm);
+				} else {
+					merchantList.fetchAndReplaceList({ lat: center.lat, lon: center.lng }, radiusKm);
+				}
 				break;
 			}
 
 			case 'local-markers': {
-				// Zoom 15-16: Use already-loaded markers, fetch details when panel is open
 				const visiblePlaces = $places.filter((place) => {
 					const markerId = place.id.toString();
 					if (!loadedMarkers[markerId]) return false;
@@ -629,8 +632,7 @@
 
 				merchantList.setMerchants(visiblePlaces, center.lat, center.lng);
 
-				// Fetch enriched data (icons, addresses) only when panel is visible
-				if ($merchantList.isOpen) {
+				if ($merchantList.isOpen && allowHeavyFetch) {
 					const radiusKm = calculateRadiusKm(bounds);
 					merchantList.fetchEnrichedDetails({ lat: center.lat, lon: center.lng }, radiusKm);
 				}
@@ -638,14 +640,11 @@
 			}
 
 			case 'api-with-limit': {
-				// Zoom 11-14: Use API but hide list if too many results (dense area)
 				const radiusKm = calculateRadiusKm(bounds);
 
-				if (!$merchantList.isOpen) {
-					// Panel closed: fetch IDs only (minimal payload for badge count)
+				if (!$merchantList.isOpen || !allowHeavyFetch) {
 					merchantList.fetchCountOnly({ lat: center.lat, lon: center.lng }, radiusKm);
 				} else {
-					// Panel open: fetch full data with hideIfExceeds check
 					merchantList.fetchAndReplaceList({ lat: center.lat, lon: center.lng }, radiusKm, {
 						hideIfExceeds: MERCHANT_LIST_MAX_ITEMS
 					});
@@ -655,7 +654,6 @@
 
 			case 'none':
 			default:
-				// Below zoom 11: clear the list
 				merchantList.setMerchants([], 0, 0);
 		}
 	};
@@ -1360,8 +1358,10 @@
 			{/if}
 		</div>
 
-		<!-- Floating toggle button for merchant list (always visible on desktop) -->
-		{#if !($merchantList.isOpen && $merchantList.isExpanded)}
+		<!-- Floating toggle button for merchant list (responsive positioning) -->
+		<!-- Desktop: hide when list is open and expanded -->
+		<!-- Mobile: hide when list is open or drawer is open -->
+		{#if mapLoaded && !($merchantList.isOpen && $merchantList.isExpanded)}
 			<button
 				on:click={async () => {
 					if ($merchantList.isOpen) {
@@ -1369,13 +1369,16 @@
 					} else {
 						merchantList.open();
 					}
-					// Wait for store update to propagate before fetching
 					await tick();
-					updateMerchantList();
+					updateMerchantList({ force: true });
 				}}
-				class="absolute top-[10px] left-[60px] z-[1000] hidden items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-medium shadow-lg transition-colors hover:bg-gray-50 md:flex dark:bg-dark dark:hover:bg-white/10"
+				class="fixed right-4 bottom-[40px] z-[1000] flex items-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-medium
+					shadow-lg transition-colors hover:bg-gray-50 md:top-[10px] md:right-auto
+					md:bottom-auto md:left-[60px] md:rounded-lg md:px-3 md:py-2 dark:bg-dark dark:hover:bg-white/10
+					{$merchantList.isOpen || $merchantDrawer.isOpen ? 'max-md:hidden' : ''}"
 				style="filter: drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3));"
-				aria-label="Open merchant list"
+				aria-label={$merchantList.isOpen ? 'Close merchant list' : 'Open merchant list'}
+				aria-expanded={$merchantList.isOpen}
 			>
 				<Icon w="18" h="18" icon="menu" type="material" style="text-primary dark:text-white" />
 				{#if currentZoom >= MERCHANT_LIST_LOW_ZOOM && $merchantList.isLoadingList}
@@ -1393,6 +1396,18 @@
 	</div>
 
 	<MerchantDrawerHash />
+
+	<MerchantListMobile
+		{currentZoom}
+		onSelectMerchant={(place) => {
+			panToMerchantIfNeeded(place);
+			if (selectedMarkerId) {
+				clearMarkerSelection(selectedMarkerId);
+			}
+			selectedMarkerId = place.id;
+			highlightMarker(place.id);
+		}}
+	/>
 
 	<TileLoadingIndicator visible={tilesLoading} />
 </main>

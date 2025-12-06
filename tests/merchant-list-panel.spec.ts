@@ -63,7 +63,6 @@ test.describe('Merchant List Panel', () => {
 
 		// Click toggle to open the panel
 		await toggleButton.click();
-		await page.waitForTimeout(500);
 
 		// List panel should now be visible
 		await expect(listPanel).toBeVisible({ timeout: 10000 });
@@ -102,13 +101,10 @@ test.describe('Merchant List Panel', () => {
 		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
 		await expect(listPanel).toBeVisible({ timeout: 10000 });
 
-		// Wait for merchant items to load
-		await page.waitForTimeout(3000);
-
-		// Find and click first merchant item in list
+		// Find and click first merchant item in list (wait for items to load)
 		const merchantItems = listPanel.locator('li button');
 		const firstMerchant = merchantItems.first();
-		await expect(firstMerchant).toBeVisible({ timeout: 10000 });
+		await expect(firstMerchant).toBeVisible({ timeout: 15000 });
 
 		// Click the merchant
 		await firstMerchant.click();
@@ -124,16 +120,18 @@ test.describe('Merchant List Panel', () => {
 			console.error('API response wait failed, but continuing:', error);
 		}
 
-		// Drawer should open
-		const drawer = page.locator('[role="dialog"]');
+		// Drawer should open (use specific selector to exclude mobile list dialog)
+		const drawer = page.locator('[role="dialog"]:has(a:has-text("View Full Details"))');
 		await expect(drawer).toBeVisible({ timeout: 10000 });
 
 		// Drawer should have View Full Details button
-		const viewDetailsButton = page.locator('a:has-text("View Full Details")');
+		const viewDetailsButton = drawer.locator('a:has-text("View Full Details")');
 		await expect(viewDetailsButton).toBeVisible({ timeout: 10000 });
 	});
 
-	test('list panel and toggle only visible on desktop', async ({ page }) => {
+	test('desktop list panel hidden on mobile, mobile list available via button', async ({
+		page
+	}) => {
 		// Mobile viewport
 		await page.setViewportSize({ width: 375, height: 667 });
 
@@ -154,12 +152,77 @@ test.describe('Merchant List Panel', () => {
 			{ timeout: MARKER_LOAD_TIMEOUT }
 		);
 
-		// Toggle button should NOT be visible on mobile (has md:flex)
+		// Toggle button IS visible on mobile (shared button for both mobile and desktop)
 		const toggleButton = page.getByRole('button', { name: /merchant list/i });
-		await expect(toggleButton).not.toBeVisible();
+		await expect(toggleButton).toBeVisible({ timeout: 15000 });
 
-		// List panel should NOT be visible on mobile
-		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
-		await expect(listPanel).not.toBeVisible();
+		// Desktop list panel (role="complementary") should NOT be visible on mobile
+		const desktopListPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
+		await expect(desktopListPanel).not.toBeVisible();
+
+		// Click toggle to open mobile full-screen list
+		await toggleButton.click();
+
+		// Mobile list (full-screen dialog) should be visible
+		const mobileList = page.locator('[role="dialog"][aria-labelledby="merchant-list-title"]');
+		await expect(mobileList).toBeVisible({ timeout: 5000 });
+
+		// Should show "Nearby Merchants" heading (within mobile list)
+		await expect(mobileList.locator('h2:has-text("Nearby Merchants")')).toBeVisible();
+	});
+
+	test('mobile: selecting merchant closes list and opens drawer', async ({ page }) => {
+		// Mobile viewport
+		await page.setViewportSize({ width: 375, height: 667 });
+
+		// Navigate to map at high zoom
+		await page.goto('/map#17/42.2762511/42.7024218', { waitUntil: 'load' });
+		await expect(page).toHaveTitle(/BTC Map/);
+
+		// Wait for map to initialize
+		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
+		await expect(zoomInButton).toBeVisible();
+
+		// Wait for markers to load
+		await page.waitForFunction(
+			() => {
+				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
+				return markers.length > 0;
+			},
+			{ timeout: MARKER_LOAD_TIMEOUT }
+		);
+
+		// Open mobile list
+		const toggleButton = page.getByRole('button', { name: /merchant list/i });
+		await expect(toggleButton).toBeVisible({ timeout: 15000 });
+		await toggleButton.click();
+
+		// Wait for mobile list to appear
+		const mobileList = page.locator('[role="dialog"][aria-labelledby="merchant-list-title"]');
+		await expect(mobileList).toBeVisible({ timeout: 5000 });
+
+		// Find and click first merchant item (wait for items to load)
+		const merchantItems = mobileList.locator('li button');
+		const firstMerchant = merchantItems.first();
+		await expect(firstMerchant).toBeVisible({ timeout: 15000 });
+		await firstMerchant.click();
+
+		// Wait for API call
+		try {
+			await page.waitForResponse(
+				(response) =>
+					response.url().includes('api.btcmap.org/v4/places/') && response.status() === 200,
+				{ timeout: 10000 }
+			);
+		} catch (error) {
+			console.error('API response wait failed, but continuing:', error);
+		}
+
+		// Mobile list should close
+		await expect(mobileList).not.toBeVisible({ timeout: 5000 });
+
+		// Mobile drawer should open in peek state (shows "Swipe up for details")
+		const mobileDrawer = page.locator('text="Swipe up for details"');
+		await expect(mobileDrawer).toBeVisible({ timeout: 10000 });
 	});
 });

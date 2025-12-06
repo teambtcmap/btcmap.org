@@ -55,6 +55,15 @@
 	.center-fixed {
 		@apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
 	}
+
+	/* Safe area insets for notched devices (iPhone X+) */
+	.pt-safe {
+		padding-top: env(safe-area-inset-top);
+	}
+
+	.pb-safe {
+		padding-bottom: env(safe-area-inset-bottom);
+	}
 }
 
 @layer components {
