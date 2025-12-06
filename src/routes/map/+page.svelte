@@ -50,7 +50,7 @@
 		placesLoadingStatus,
 		placesLoadingProgress
 	} from '$lib/store';
-	import type { Leaflet, Place, SearchItem } from '$lib/types';
+	import type { Leaflet, Place } from '$lib/types';
 	import { debounce, detectTheme, errToast, isBoosted } from '$lib/utils';
 	import type { Control, LatLng, LatLngBounds, Map, Marker, MarkerClusterGroup } from 'leaflet';
 	import localforage from 'localforage';
@@ -149,9 +149,6 @@
 
 	let mapCenter: LatLng;
 
-	// Timer for search focus out (tracked for cleanup)
-	let searchFocusOutTimer: ReturnType<typeof setTimeout> | null = null;
-
 	// Calculate radius from map center to corner (Haversine formula)
 	const calculateRadiusKm = (bounds: LatLngBounds): number => {
 		const center = bounds.getCenter();
@@ -223,22 +220,14 @@
 	let clearSearchButton: HTMLButtonElement;
 	let showSearch = false;
 	let search: string;
-	let searchStatus: boolean;
-	let searchResults: SearchItem[] = [];
-	let isDropdownOpen = false;
 
 	// API-based search functions using documented places search API
 	const apiSearch = async () => {
 		if (search.length < 3) {
-			searchResults = [];
-			searchStatus = false;
-			isDropdownOpen = false;
 			merchantList.clearSearch();
 			return;
 		}
 
-		searchStatus = true;
-		isDropdownOpen = true;
 		merchantList.setSearching(true);
 
 		try {
@@ -249,137 +238,25 @@
 			}
 
 			const places: Place[] = await response.json();
-
-			// Convert Place[] to SearchItem[] format expected by UI
-			searchResults = places.map((place) => ({
-				type: 'element' as const,
-				id: place.id,
-				name: place.name || 'Unknown',
-				address: place.address,
-				icon: place.icon
-			}));
-
-			// Show results in panel
 			merchantList.openWithSearchResults(search, places);
 		} catch (error) {
 			console.error('Search error:', error);
 			errToast('Search temporarily unavailable');
-			searchResults = [];
 			merchantList.clearSearch();
 		}
-
-		searchStatus = false;
 	};
 
 	const searchDebounce = debounce(() => apiSearch(), 300);
 
 	const clearSearch = () => {
 		search = '';
-		searchResults = [];
-		isDropdownOpen = false;
 		merchantList.clearSearch();
 	};
 
 	const handleSearchKeyDown = (e: KeyboardEvent) => {
 		if (e.key === 'Escape') {
 			e.preventDefault();
-			if (isDropdownOpen) {
-				isDropdownOpen = false;
-			} else {
-				clearSearch();
-			}
-		}
-	};
-
-	const handleSearchFocusOut = (_e: FocusEvent) => {
-		// Clear any pending timer to avoid stacking
-		if (searchFocusOutTimer) clearTimeout(searchFocusOutTimer);
-		// Small timeout to allow click events to fire first
-		searchFocusOutTimer = setTimeout(() => {
-			if (searchContainer && !searchContainer.contains(document.activeElement)) {
-				isDropdownOpen = false;
-			}
-		}, 200);
-	};
-
-	// Helper function to validate coordinate values
-	const isValidCoordinate = (lat: unknown, lon: unknown): lat is number => {
-		return (
-			typeof lat === 'number' &&
-			typeof lon === 'number' &&
-			!isNaN(lat) &&
-			!isNaN(lon) &&
-			lat >= -90 &&
-			lat <= 90 &&
-			lon >= -180 &&
-			lon <= 180
-		);
-	};
-
-	const searchSelect = async (result: SearchItem) => {
-		clearSearch();
-
-		// Use the numeric ID from the API response
-		const placeId = result.id;
-
-		// First, try to find the place in our local places store
-		const localPlace = $placesById.get(placeId);
-
-		if (localPlace && isValidCoordinate(localPlace.lat, localPlace.lon)) {
-			// Use local data if available
-			map.setView([localPlace.lat, localPlace.lon], 19);
-			showSearch = false;
-			return;
-		}
-
-		// If not in local store, fetch from v4/places API
-		try {
-			const response = await fetch(`https://api.btcmap.org/v4/places/${result.id}?fields=lat,lon`);
-
-			// Handle different HTTP status codes
-			if (!response.ok) {
-				if (response.status === 404) {
-					console.error(`Place not found: ${result.id}`);
-					errToast('Location not found');
-				} else if (response.status >= 500) {
-					console.error(`Server error: ${response.status}`);
-					errToast('Server temporarily unavailable');
-				} else {
-					console.error(`API error: ${response.status}`);
-					errToast('Location data unavailable');
-				}
-				return;
-			}
-
-			// Parse and validate response
-			let placeData: Pick<Place, 'lat' | 'lon'>;
-			try {
-				placeData = await response.json();
-			} catch (parseError) {
-				console.error('Failed to parse place coordinates response:', parseError);
-				errToast('Invalid location data received');
-				return;
-			}
-
-			// Validate coordinates
-			if (!isValidCoordinate(placeData.lat, placeData.lon)) {
-				console.error('Invalid coordinates received:', placeData);
-				errToast('Invalid location coordinates');
-				return;
-			}
-
-			// Navigate to location
-			map.setView([placeData.lat, placeData.lon], 19);
-			showSearch = false;
-		} catch (error) {
-			// Differentiate between network errors and other errors
-			if (error instanceof TypeError && error.message.includes('fetch')) {
-				console.error('Network error fetching place coordinates:', error);
-				errToast('Network connection error');
-			} else {
-				console.error('Unexpected error fetching place coordinates:', error);
-				errToast('Could not navigate to location');
-			}
+			clearSearch();
 		}
 	};
 
@@ -668,45 +545,60 @@
 	// Debounced version to prevent excessive updates during pan/zoom
 	const debouncedUpdateMerchantList = debounce(updateMerchantList, DEBOUNCE_DELAY);
 
-	// Pan map to center selected merchant when clicked from list
-	const panToMerchantIfNeeded = (place: Place) => {
+	// Pan to a nearby merchant (user is already zoomed in, just center the marker)
+	const panToNearbyMerchant = (place: Place) => {
 		if (!map || !browser) return;
 
-		const panToPlace = () => {
-			// Always center the map on the merchant for clear visual feedback
-			// Account for drawer width by offsetting the center point
-			const drawerWidth = $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0;
-			const mapSize = map.getSize();
+		// Account for drawer width by offsetting the center point
+		const drawerWidth = $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0;
+		const mapSize = map.getSize();
 
-			// Calculate the center of the visible area (excluding drawer)
-			const visibleCenterX = (mapSize.x - drawerWidth) / 2;
-			const targetPoint = map.latLngToContainerPoint([place.lat, place.lon]);
+		// Calculate the center of the visible area (excluding drawer)
+		const visibleCenterX = (mapSize.x - drawerWidth) / 2;
+		const targetPoint = map.latLngToContainerPoint([place.lat, place.lon]);
 
-			// Calculate offset to center merchant in visible area
-			const offsetX = targetPoint.x - visibleCenterX;
-			const offsetY = targetPoint.y - mapSize.y / 2;
+		// Calculate offset to center merchant in visible area
+		const offsetX = targetPoint.x - visibleCenterX;
+		const offsetY = targetPoint.y - mapSize.y / 2;
 
-			const currentCenter = map.getCenter();
-			const currentCenterPoint = map.latLngToContainerPoint(currentCenter);
-			const newCenterPoint = leaflet.point(
-				currentCenterPoint.x + offsetX,
-				currentCenterPoint.y + offsetY
-			);
-			const newCenter = map.containerPointToLatLng(newCenterPoint);
+		const currentCenter = map.getCenter();
+		const currentCenterPoint = map.latLngToContainerPoint(currentCenter);
+		const newCenterPoint = leaflet.point(
+			currentCenterPoint.x + offsetX,
+			currentCenterPoint.y + offsetY
+		);
+		const newCenter = map.containerPointToLatLng(newCenterPoint);
 
-			map.panTo(newCenter, { animate: true, duration: 0.3 });
-		};
-
-		// If marker exists and is in a cluster, spiderfy the cluster to show the marker
+		// If marker exists and is in a cluster, spiderfy the cluster
 		const marker = loadedMarkers[place.id.toString()];
 		if (marker && markers) {
 			const cluster = markers.getVisibleParent(marker);
-			// If marker is inside a cluster (not directly visible), spiderfy it
 			if (cluster && cluster !== marker && 'spiderfy' in cluster) {
 				(cluster as { spiderfy: () => void }).spiderfy();
 			}
 		}
-		panToPlace();
+
+		map.panTo(newCenter, { animate: true, duration: 0.3 });
+	};
+
+	// Zoom to a search result (user may be far away, fly to the location)
+	const zoomToSearchResult = (place: Place) => {
+		if (!map || !browser) return;
+
+		const targetZoom = 19;
+
+		// Account for drawer width by offsetting the target
+		const drawerWidth = $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0;
+		const mapSize = map.getSize();
+		const visibleCenterX = (mapSize.x - drawerWidth) / 2;
+		const offsetX = mapSize.x / 2 - visibleCenterX;
+
+		// Calculate offset in lat/lng at target zoom level
+		const targetPoint = map.project([place.lat, place.lon], targetZoom);
+		const offsetPoint = leaflet.point(targetPoint.x + offsetX, targetPoint.y);
+		const offsetLatLng = map.unproject(offsetPoint, targetZoom);
+
+		map.setView(offsetLatLng, targetZoom, { animate: true, duration: 0.3 });
 	};
 
 	const initializeElements = async () => {
@@ -1042,7 +934,7 @@
 							searchInput?.focus();
 						} else {
 							search = '';
-							searchResults = [];
+							merchantList.clearSearch();
 						}
 					};
 					if (theme === 'light') {
@@ -1198,9 +1090,6 @@
 		if (debouncedUpdateMerchantList?.cancel) debouncedUpdateMerchantList.cancel();
 		if (searchDebounce?.cancel) searchDebounce.cancel();
 
-		// Clear pending search focus out timer
-		if (searchFocusOutTimer) clearTimeout(searchFocusOutTimer);
-
 		// Reset merchant list
 		merchantList.reset();
 
@@ -1236,7 +1125,8 @@
 
 	<!-- Desktop: Merchant list panel (flexbox, not overlay) -->
 	<MerchantListPanel
-		onPanToPlace={panToMerchantIfNeeded}
+		onPanToNearbyMerchant={panToNearbyMerchant}
+		onZoomToSearchResult={zoomToSearchResult}
 		onHoverStart={(place) => highlightMarker(place.id)}
 		onHoverEnd={(place) => {
 			// Don't clear if this is the selected marker
@@ -1256,7 +1146,6 @@
 			class="absolute top-0 left-[60px] z-[1000] w-[50vw] md:w-[350px] {showSearch
 				? 'block'
 				: 'hidden'}"
-			on:focusout={handleSearchFocusOut}
 		>
 			<div class="relative">
 				<input
@@ -1297,72 +1186,6 @@
 					</svg>
 				</button>
 			</div>
-
-			{#if isDropdownOpen}
-				<div
-					class="mt-0.5 w-full rounded-lg bg-white drop-shadow-[0px_2px_6px_rgba(0,0,0,0.15)] dark:bg-dark"
-				>
-					{#if !searchStatus && searchResults.length > 0}
-						<div
-							class="border-b border-gray-200 px-4 py-2 text-xs text-gray-600 dark:border-white/10 dark:text-white/70"
-						>
-							{searchResults.length} result{searchResults.length === 1 ? '' : 's'}
-						</div>
-					{/if}
-
-					<ul class="max-h-[204px] w-full overflow-y-scroll">
-						{#if searchStatus}
-							<li role="status" aria-live="polite" class="w-full px-4 py-6">
-								<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
-							</li>
-						{:else if searchResults.length > 0}
-							{#each searchResults as result (result.id)}
-								<li>
-									<button
-										on:click={() => searchSelect(result)}
-										class="hover:bg-searchHover block w-full cursor-pointer border-b border-gray-200 px-4 py-2 text-left dark:border-white/10 dark:hover:bg-white/[0.15]"
-									>
-										<div class="flex items-start space-x-2">
-											<Icon
-												w="20"
-												h="20"
-												style="mt-1 text-mapButton dark:text-white opacity-50"
-												icon={result.icon && result.icon !== 'question_mark'
-													? result.icon
-													: 'currency_bitcoin'}
-												type="material"
-											/>
-
-											<div class="max-w-[280px]">
-												<p
-													class="text-mapButton text-sm dark:text-white {result.name?.match(
-														'([^ ]{21})'
-													)
-														? 'break-all'
-														: ''}"
-												>
-													{result.name || 'Unknown'}
-												</p>
-												{#if result.address}
-													<p class="text-searchSubtext text-xs dark:text-white/70">
-														{result.address}
-													</p>
-												{/if}
-											</div>
-										</div>
-									</button>
-								</li>
-							{/each}
-						{:else}
-							<li
-								class="text-searchSubtext w-full px-4 py-2 text-center text-sm dark:text-white/70"
-							>
-								No results found.
-							</li>
-						{/if}
-					</ul>
-				</div>
-			{/if}
 		</div>
 
 		<!-- Floating toggle button for merchant list (responsive positioning) -->

@@ -19,8 +19,10 @@
 	// Compute once for all list items
 	const verifiedDate = calcVerifiedDate();
 
-	// Callback to pan map when a merchant is clicked from the list
-	export let onPanToPlace: ((place: Place) => void) | undefined = undefined;
+	// Callback to pan to a nearby merchant (already zoomed in, just center it)
+	export let onPanToNearbyMerchant: ((place: Place) => void) | undefined = undefined;
+	// Callback to zoom to a search result (may be far away, need to fly there)
+	export let onZoomToSearchResult: ((place: Place) => void) | undefined = undefined;
 	// Callbacks for hover highlighting
 	export let onHoverStart: ((place: Place) => void) | undefined = undefined;
 	export let onHoverEnd: ((place: Place) => void) | undefined = undefined;
@@ -49,8 +51,14 @@
 	function handleItemClick(event: CustomEvent<Place>) {
 		const place = event.detail;
 		merchantDrawer.open(place.id, 'details');
-		// Pan to merchant only when clicked from list (not from map markers)
-		onPanToPlace?.(place);
+
+		if (mode === 'search') {
+			// Search result: zoom to location (may be far from current view)
+			onZoomToSearchResult?.(place);
+		} else {
+			// Nearby merchant: pan only (already zoomed in)
+			onPanToNearbyMerchant?.(place);
+		}
 	}
 
 	function handleMouseEnter(event: CustomEvent<Place>) {
