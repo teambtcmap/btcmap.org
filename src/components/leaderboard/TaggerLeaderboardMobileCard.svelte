@@ -13,7 +13,7 @@
 </script>
 
 <div class="space-y-1 lg:hidden">
-	{#each table.getRowModel().rows as row}
+	{#each table.getRowModel().rows as row (row.id)}
 		{@const tagger = row.original}
 		<div class="space-y-4 border-b border-gray-300 p-4 dark:border-white/20">
 			<div class="flex items-center gap-3">
@@ -43,12 +43,13 @@
 				/>
 				<div class="flex-1">
 					<a
-						href={`/tagger/${tagger.id}`}
+						href={resolve(`/tagger/${tagger.id}`)}
 						class="text-lg font-semibold text-link transition-colors hover:text-hover"
 					>
 						{tagger.tagger}
 					</a>
 				</div>
+
 				{#if tagger.tipDestination}
 					<Tip destination={tagger.tipDestination} style="h-[34px] px-5" />
 				{/if}
