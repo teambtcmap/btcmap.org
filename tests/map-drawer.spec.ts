@@ -18,10 +18,8 @@ test.describe('Map Drawer', () => {
 
 	test.afterEach(async ({ page }) => {
 		const errors = (page as unknown as { _consoleErrors: string[] })._consoleErrors || [];
-		// Filter out non-critical errors (resource loading failures, minified JS noise)
+		// Filter out non-critical errors (resource loading failures from external services)
 		const criticalErrors = errors.filter((error) => {
-			// Skip single-character errors (minified JS noise)
-			if (error.length <= 2) return false;
 			if (error.includes('Failed to load resource')) return false;
 			if (error.includes('net::ERR_')) return false;
 			return true;
@@ -47,7 +45,7 @@ test.describe('Map Drawer', () => {
 		// Then wait for markers to render in DOM
 		await page.waitForFunction(
 			() => document.querySelectorAll('.leaflet-marker-pane > div').length > 0,
-			{ timeout: 45000 }
+			{ timeout: 15000 }
 		);
 	}
 

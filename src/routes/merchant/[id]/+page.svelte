@@ -5,15 +5,15 @@
 	import Boost from '$components/Boost.svelte';
 	import BoostButton from '$components/BoostButton.svelte';
 	import Card from '$components/Card.svelte';
-	import CommentAddButton from './components/CommentAddButton.svelte';
-	import Footer from '$components/layout/Footer.svelte';
-	import Header from '$components/layout/Header.svelte';
+	import CommentAddButton from '$components/CommentAddButton.svelte';
+	import Footer from '$components/Footer.svelte';
+	import Header from '$components/Header.svelte';
 	import Icon from '$components/Icon.svelte';
 	import MapLoadingEmbed from '$components/MapLoadingEmbed.svelte';
-	import MerchantButton from './components/MerchantButton.svelte';
-	import MerchantEvent from './components/MerchantEvent.svelte';
-	import MerchantComment from './components/MerchantComment.svelte';
-	import MerchantLink from './components/MerchantLink.svelte';
+	import MerchantButton from '$components/MerchantButton.svelte';
+	import MerchantEvent from '$components/MerchantEvent.svelte';
+	import MerchantComment from '$components/MerchantComment.svelte';
+	import MerchantLink from '$components/MerchantLink.svelte';
 	import PaymentMethodIcon from '$components/PaymentMethodIcon.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import ShowTags from '$components/ShowTags.svelte';
@@ -480,7 +480,7 @@
 									h="16"
 									style="text-primary dark:text-white inline-block"
 									icon="phone"
-									type="material"
+									type="popup"
 								/>
 								Contact
 							</h4>
@@ -554,8 +554,8 @@
 									w="16"
 									h="16"
 									style="text-primary dark:text-white inline"
-									icon="schedule"
-									type="material"
+									icon="clock"
+									type="popup"
 								/>
 								Hours
 							</h4>
@@ -694,7 +694,7 @@
 												h="30"
 												style="text-primary dark:text-white mr-2"
 												icon="verified"
-												type="material"
+												type="popup"
 											/>
 										</span>
 									{:else}
@@ -703,8 +703,8 @@
 												w="30"
 												h="30"
 												style="text-primary dark:text-white mr-2"
-												icon="error_outline"
-												type="material"
+												icon="outdated"
+												type="popup"
 											/>
 										</span>
 									{/if}

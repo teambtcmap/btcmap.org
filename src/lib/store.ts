@@ -4,7 +4,7 @@ import { derived, readable, writable, type Writable } from 'svelte/store';
 export const socials = readable({
 	x: 'https://x.com/btcmap',
 	nostr: 'https://nosta.me/nprofile1qqsra2ey033mkdwl5w8q0jss9ak69zafh82xsuvhwsaauw3trkq2amgax6f75',
-	matrix: 'https://matrix.to/#/#btcmap:matrix.org',
+	discord: 'https://discord.com/invite/9mHeTgX2zb',
 	github: 'https://github.com/teambtcmap',
 	amboss: 'https://amboss.space/community/edf8d227-9bc7-4cb2-af2a-66c1b455109a'
 });
@@ -63,9 +63,18 @@ export const mapUpdates = writable(false);
 
 export const selectedMerchant: Writable<Place | null> = writable(null);
 
-export const excludeLeader = readable([
-	2104834, 9451067, 1722488, 81735, 18545877, 232801, 19880430, 1778799, 21749653
-]);
+const excludedTaggers = [
+	{ id: 9451067, note: 'b-jaz bot' },
+	{ id: 18545877, note: 'BTC Map account' },
+	{ id: 232801, note: 'CENTSOARER' },
+	{ id: 19880430, note: 'Qerko bot' },
+	{ id: 1778799, note: 'SomeoneElse_Revert - DWG' },
+	{ id: 21749653, note: 'Kinso - Steak&Shake Revert' },
+	{ id: 242345, note: 'confusedbuffalo bot' }
+];
+
+export const excludeLeader = readable(excludedTaggers.map(({ id }) => id));
+export const excludedTaggerNotes = readable(excludedTaggers);
 
 export const boost: Writable<Boost> = writable();
 export const resetBoost = writable(0);
