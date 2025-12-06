@@ -63,9 +63,18 @@ export const mapUpdates = writable(false);
 
 export const selectedMerchant: Writable<Place | null> = writable(null);
 
-export const excludeLeader = readable([
-	2104834, 9451067, 1722488, 81735, 18545877, 232801, 19880430, 1778799, 21749653
-]);
+const excludedTaggers = [
+	{ id: 9451067, note: 'b-jaz bot' },
+	{ id: 18545877, note: 'BTC Map account' },
+	{ id: 232801, note: 'CENTSOARER' },
+	{ id: 19880430, note: 'Qerko bot' },
+	{ id: 1778799, note: 'SomeoneElse_Revert - DWG' },
+	{ id: 21749653, note: 'Kinso - Steak&Shake Revert' },
+	{ id: 242345, note: 'confusedbuffalo bot'}
+];
+
+export const excludeLeader = readable(excludedTaggers.map(({ id }) => id));
+export const excludedTaggerNotes = readable(excludedTaggers);
 
 export const boost: Writable<Boost> = writable();
 export const resetBoost = writable(0);
