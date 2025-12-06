@@ -6,10 +6,9 @@
 	import MapLoadingMain from '$components/MapLoadingMain.svelte';
 	import TileLoadingIndicator from './components/TileLoadingIndicator.svelte';
 	import MerchantDrawerHash from './components/MerchantDrawerHash.svelte';
-	import MerchantListMobile from './components/MerchantListMobile.svelte';
 	import MerchantListPanel from './components/MerchantListPanel.svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
-	import { merchantList } from '$lib/merchantListStore';
+	import { merchantList, type MerchantListMode } from '$lib/merchantListStore';
 	import {
 		BREAKPOINTS,
 		MERCHANT_DRAWER_WIDTH,
@@ -216,14 +215,9 @@
 		}
 	};
 
-	let searchContainer: HTMLDivElement;
-	let clearSearchButton: HTMLButtonElement;
-	let showSearch = false;
-	let search: string;
-
-	// API-based search functions using documented places search API
-	const apiSearch = async () => {
-		if (search.length < 3) {
+	// Core search function
+	const executeSearch = async (query: string) => {
+		if (query.length < 3) {
 			merchantList.clearSearch();
 			return;
 		}
@@ -233,14 +227,14 @@
 		merchantList.setSearching(true);
 
 		try {
-			const response = await fetch(`/api/search/places?name=${encodeURIComponent(search)}`);
+			const response = await fetch(`/api/search/places?name=${encodeURIComponent(query)}`);
 
 			if (!response.ok) {
 				throw new Error('Search API error');
 			}
 
 			const places: Place[] = await response.json();
-			merchantList.openWithSearchResults(search, places);
+			merchantList.openWithSearchResults(query, places);
 		} catch (error) {
 			console.error('Search error:', error);
 			errToast('Search temporarily unavailable');
@@ -248,18 +242,16 @@
 		}
 	};
 
-	const searchDebounce = debounce(() => apiSearch(), 300);
+	// Debounced search for panel input
+	const debouncedPanelSearch = debounce((query: string) => executeSearch(query), 300);
 
-	const clearSearch = () => {
-		search = '';
-		merchantList.clearSearch();
+	// Handler for panel search input
+	const handlePanelSearch = (query: string) => {
+		debouncedPanelSearch(query);
 	};
 
-	const handleSearchKeyDown = (e: KeyboardEvent) => {
-		if (e.key === 'Escape') {
-			e.preventDefault();
-			clearSearch();
-		}
+	const clearSearch = () => {
+		merchantList.clearSearch();
 	};
 
 	// allows for users to set initial view in a URL query
@@ -922,27 +914,21 @@
 						'leaflet-control'
 					);
 
-					// Search button - re-enabled with API-based search
+					// Search button - opens panel in search mode
 					const searchButton = leaflet.DomUtil.create('a');
 					searchButton.classList.add('leaflet-control-search-toggle');
-					searchButton.title = 'Search toggle';
+					searchButton.title = 'Search';
 					searchButton.role = 'button';
-					searchButton.ariaLabel = 'Search toggle';
+					searchButton.ariaLabel = 'Search';
 					searchButton.ariaDisabled = 'false';
 					searchButton.innerHTML = `<img src=${
 						theme === 'dark' ? '/icons/search-white.svg' : '/icons/search.svg'
 					} alt='search' class='inline' id='search-button'/>`;
 					searchButton.style.borderRadius = '8px 8px 0 0';
-					searchButton.onclick = async function toggleSearch() {
-						showSearch = !showSearch;
-						if (showSearch) {
-							await tick();
-							const searchInput: HTMLInputElement | null = document.querySelector('#search-input');
-							searchInput?.focus();
-						} else {
-							search = '';
-							merchantList.clearSearch();
-						}
+					searchButton.onclick = function openSearch() {
+						// Open panel in search mode (will auto-focus input)
+						// setSearching sets mode='search', isOpen=true, isExpanded=true
+						merchantList.setSearching(false);
 					};
 					if (theme === 'light') {
 						searchButton.onmouseenter = () => {
@@ -1032,35 +1018,10 @@
 				map._controlContainer
 			);
 
-			// @ts-expect-error
-			leaflet.Control.Search = leaflet.Control.extend({
-				options: {
-					position: 'topcenter'
-				},
-				onAdd: () => {
-					const searchBarDiv = leaflet.DomUtil.create('div');
-					searchBarDiv.classList.add('leaflet-control', 'search-bar-div');
-
-					searchBarDiv.append(searchContainer);
-
-					return searchBarDiv;
-				}
-			});
-
-			// @ts-expect-error
-			new leaflet.Control.Search().addTo(map);
-
-			// disable map events for search controls
-			if (searchContainer) {
-				DomEvent.disableClickPropagation(searchContainer as HTMLElement);
-				DomEvent.disableScrollPropagation(searchContainer as HTMLElement);
-			}
+			// disable map events for search toggle
 			const searchToggle = document.querySelector('.leaflet-control-search-toggle');
 			if (searchToggle) {
 				DomEvent.disableClickPropagation(searchToggle as HTMLElement);
-			}
-			if (clearSearchButton) {
-				DomEvent.disableClickPropagation(clearSearchButton as HTMLElement);
 			}
 
 			// add home and marker buttons to map
@@ -1095,7 +1056,7 @@
 		if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
 		if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
 		if (debouncedUpdateMerchantList?.cancel) debouncedUpdateMerchantList.cancel();
-		if (searchDebounce?.cancel) searchDebounce.cancel();
+		if (debouncedPanelSearch?.cancel) debouncedPanelSearch.cancel();
 
 		// Reset merchant list
 		merchantList.reset();
@@ -1130,7 +1091,7 @@
 
 	<MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
 
-	<!-- Desktop: Merchant list panel (flexbox, not overlay) -->
+	<!-- Merchant list panel (search results + nearby merchants) -->
 	<MerchantListPanel
 		onPanToNearbyMerchant={panToNearbyMerchant}
 		onZoomToSearchResult={zoomToSearchResult}
@@ -1141,60 +1102,13 @@
 				clearMarkerSelection(place.id);
 			}
 		}}
+		onSearch={handlePanelSearch}
+		onClearSearch={clearSearch}
 		{currentZoom}
 	/>
 
 	<!-- Map container -->
 	<div class="relative flex-1">
-		<!-- Search UI - re-enabled with API-based search -->
-		<div
-			id="search-div"
-			bind:this={searchContainer}
-			class="absolute top-0 left-[60px] z-[1000] w-[50vw] md:w-[350px] {showSearch
-				? 'block'
-				: 'hidden'}"
-		>
-			<div class="relative">
-				<input
-					id="search-input"
-					type="search"
-					aria-label="Search for Bitcoin merchants"
-					class="text-mapButton w-full rounded-lg bg-white px-5 py-2.5 text-[16px] drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:outline-hidden focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] dark:border dark:bg-dark dark:text-white [&::-webkit-search-cancel-button]:hidden"
-					placeholder="Search..."
-					on:keyup={searchDebounce}
-					on:keydown={handleSearchKeyDown}
-					bind:value={search}
-					disabled={!mapLoaded}
-				/>
-
-				<button
-					type="button"
-					aria-label="Clear search"
-					bind:this={clearSearchButton}
-					on:click={clearSearch}
-					class="text-mapButton absolute top-[10px] right-[8px] bg-white hover:text-black dark:bg-dark dark:text-white dark:hover:text-white/80 {search
-						? 'block'
-						: 'hidden'}"
-				>
-					<svg
-						width="20"
-						height="20"
-						viewBox="0 0 20 20"
-						fill="none"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							d="M14.1668 5.8335L5.8335 14.1668M5.8335 5.8335L14.1668 14.1668"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						/>
-					</svg>
-				</button>
-			</div>
-		</div>
-
 		<!-- Floating toggle button for merchant list (responsive positioning) -->
 		<!-- Desktop: hide when list is open and expanded -->
 		<!-- Mobile: hide when list is open or drawer is open -->
@@ -1206,6 +1120,8 @@
 					} else {
 						merchantList.open();
 					}
+					// Reset to nearby mode when opening via toggle button
+					merchantList.setMode('nearby');
 					await tick();
 					updateMerchantList({ force: true });
 				}}
@@ -1214,7 +1130,7 @@
 					md:bottom-auto md:left-[60px] md:rounded-lg md:px-3 md:py-2 dark:bg-dark dark:hover:bg-white/10
 					{$merchantList.isOpen || $merchantDrawer.isOpen ? 'max-md:hidden' : ''}"
 				style="filter: drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3));"
-				aria-label={$merchantList.isOpen ? 'Close merchant list' : 'Open merchant list'}
+				aria-label={$merchantList.isOpen ? 'Expand merchant list' : 'Open merchant list'}
 				aria-expanded={$merchantList.isOpen}
 			>
 				<Icon w="18" h="18" icon="menu" type="material" style="text-primary dark:text-white" />
@@ -1233,18 +1149,6 @@
 	</div>
 
 	<MerchantDrawerHash />
-
-	<MerchantListMobile
-		{currentZoom}
-		onSelectMerchant={(place) => {
-			panToMerchantIfNeeded(place);
-			if (selectedMarkerId) {
-				clearMarkerSelection(selectedMarkerId);
-			}
-			selectedMarkerId = place.id;
-			highlightMarker(place.id);
-		}}
-	/>
 
 	<TileLoadingIndicator visible={tilesLoading} />
 </main>

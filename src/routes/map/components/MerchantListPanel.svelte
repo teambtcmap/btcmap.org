@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, tick } from 'svelte';
 	import { fly } from 'svelte/transition';
 	import { merchantList } from '$lib/merchantListStore';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
@@ -28,6 +28,37 @@
 	export let onHoverEnd: ((place: Place) => void) | undefined = undefined;
 	// Current zoom level to determine if we should show "zoom in" message
 	export let currentZoom: number = 0;
+	// Search callback - called when user types in search input
+	export let onSearch: ((query: string) => void) | undefined = undefined;
+	// Clear search callback
+	export let onClearSearch: (() => void) | undefined = undefined;
+
+	// Local search input value
+	let searchInputValue = '';
+	let searchInput: HTMLInputElement;
+
+	// Focus search input when panel opens in search mode
+	$: if (browser && isOpen && isExpanded && mode === 'search' && searchInput) {
+		tick().then(() => searchInput?.focus());
+	}
+
+	function handleSearchInput() {
+		onSearch?.(searchInputValue);
+	}
+
+	function handleClearSearch() {
+		searchInputValue = '';
+		onClearSearch?.();
+		searchInput?.focus();
+	}
+
+	function handleSearchKeyDown(event: KeyboardEvent) {
+		if (event.key === 'Escape' && searchInputValue) {
+			event.preventDefault();
+			event.stopPropagation();
+			handleClearSearch();
+		}
+	}
 
 	$: isOpen = $merchantList.isOpen;
 	$: isExpanded = $merchantList.isExpanded;
@@ -37,7 +68,6 @@
 	$: isLoadingList = $merchantList.isLoadingList;
 	$: selectedId = $merchantDrawer.merchantId;
 	$: mode = $merchantList.mode;
-	$: searchQuery = $merchantList.searchQuery;
 	$: searchResults = $merchantList.searchResults;
 	$: isSearching = $merchantList.isSearching;
 	// Show "zoom in" message when:
@@ -111,34 +141,74 @@
 	>
 		<!-- Header -->
 		<div
-			class="flex shrink-0 items-center justify-between border-b border-gray-200 bg-white px-3 py-3 dark:border-white/10 dark:bg-dark"
+			class="shrink-0 border-b border-gray-200 bg-white px-3 py-3 dark:border-white/10 dark:bg-dark"
 		>
-			<div>
-				{#if mode === 'search'}
-					<h2 class="text-sm font-semibold text-primary dark:text-white">Search Results</h2>
-					<p class="text-xs text-body dark:text-white/70">
+			{#if mode === 'search'}
+				<!-- Search mode: search input -->
+				<div class="flex items-center gap-2">
+					<div class="relative flex-1">
+						<Icon
+							w="16"
+							h="16"
+							icon="search"
+							type="material"
+							style="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/50 pointer-events-none"
+						/>
+						<input
+							bind:this={searchInput}
+							bind:value={searchInputValue}
+							on:input={handleSearchInput}
+							on:keydown={handleSearchKeyDown}
+							type="search"
+							placeholder="e.g. pizza, cafe, atm..."
+							aria-label="Search for Bitcoin merchants"
+							class="w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pr-8 pl-9 text-sm text-primary focus:border-link focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus:border-white/30 [&::-webkit-search-cancel-button]:hidden"
+						/>
+						{#if searchInputValue}
+							<button
+								type="button"
+								on:click={handleClearSearch}
+								class="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:text-white/50 dark:hover:text-white/70"
+								aria-label="Clear search"
+							>
+								<Icon w="14" h="14" icon="close" type="material" />
+							</button>
+						{/if}
+					</div>
+					<CloseButton on:click={handleClose} />
+				</div>
+				<!-- Result count -->
+				{#if isSearching || searchResults.length > 0 || searchInputValue.length >= 3}
+					<p class="mt-2 text-xs text-body dark:text-white/70">
 						{#if isSearching}
 							Searching...
+						{:else if searchResults.length === 0}
+							No results found
 						{:else}
-							{searchResults.length} result{searchResults.length !== 1 ? 's' : ''} for "{searchQuery}"
+							{searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
 						{/if}
 					</p>
-				{:else}
-					<h2 class="text-sm font-semibold text-primary dark:text-white">Nearby Merchants</h2>
-					{#if showZoomInMessage}
-						<p class="text-xs text-body dark:text-white/70">Zoom in to see list</p>
-					{:else if isTruncated}
-						<p class="text-xs text-body dark:text-white/70">
-							Showing {merchants.length} nearest of {totalCount}
-						</p>
-					{:else}
-						<p class="text-xs text-body dark:text-white/70">
-							{merchants.length} location{merchants.length !== 1 ? 's' : ''} in view
-						</p>
-					{/if}
 				{/if}
-			</div>
-			<CloseButton on:click={handleClose} />
+			{:else}
+				<!-- Nearby mode: title + count -->
+				<div class="flex items-center justify-between">
+					<div>
+						<h2 class="text-sm font-semibold text-primary dark:text-white">Nearby Merchants</h2>
+						{#if showZoomInMessage}
+							<p class="text-xs text-body dark:text-white/70">Zoom in to see list</p>
+						{:else if isTruncated}
+							<p class="text-xs text-body dark:text-white/70">
+								Showing {merchants.length} nearest of {totalCount}
+							</p>
+						{:else}
+							<p class="text-xs text-body dark:text-white/70">
+								{merchants.length} location{merchants.length !== 1 ? 's' : ''} in view
+							</p>
+						{/if}
+					</div>
+					<CloseButton on:click={handleClose} />
+				</div>
+			{/if}
 		</div>
 
 		<!-- List content -->
@@ -149,9 +219,21 @@
 					<div class="flex items-center justify-center py-8">
 						<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
 					</div>
-				{:else if searchResults.length === 0}
+				{:else if searchResults.length === 0 && searchInputValue.length >= 3}
 					<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
-						No results found for "{searchQuery}"
+						No results found
+					</div>
+				{:else if searchResults.length === 0}
+					<!-- Empty state: user hasn't searched yet -->
+					<div class="flex flex-col items-center justify-center gap-3 px-4 py-12 text-center">
+						<Icon
+							w="48"
+							h="48"
+							icon="search"
+							type="material"
+							style="text-gray-300 dark:text-white/30"
+						/>
+						<p class="text-sm text-body dark:text-white/70">Search for merchants by name</p>
 					</div>
 				{:else}
 					<ul class="divide-y divide-gray-100 dark:divide-white/5">
