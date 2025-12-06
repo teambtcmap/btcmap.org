@@ -4,9 +4,6 @@
 	import { resolve } from '$app/paths';
 	import { isEven } from '$lib/utils';
 	import Icon from '$components/Icon.svelte';
-	import { theme } from '$lib/store';
-
-	$: currentTheme = $theme;
 
 	type TaggerRow = TaggerLeaderboard & {
 		position: number;
