@@ -280,6 +280,16 @@ function createMerchantListStore() {
 			}));
 		},
 
+		// Clear search results only (keeps mode as 'search')
+		clearSearchResults() {
+			update((state) => ({
+				...state,
+				searchQuery: '',
+				searchResults: [],
+				isSearching: false
+			}));
+		},
+
 		// Clear search and return to nearby mode
 		clearSearch() {
 			update((state) => ({
