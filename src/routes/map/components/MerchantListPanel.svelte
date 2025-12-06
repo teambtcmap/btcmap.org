@@ -2,7 +2,7 @@
 	import { browser } from '$app/environment';
 	import { onDestroy, tick } from 'svelte';
 	import { fly } from 'svelte/transition';
-	import { merchantList } from '$lib/merchantListStore';
+	import { merchantList, type MerchantListMode } from '$lib/merchantListStore';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import MerchantListItem from './MerchantListItem.svelte';
 	import CloseButton from '$components/CloseButton.svelte';
@@ -32,6 +32,8 @@
 	export let onSearch: ((query: string) => void) | undefined = undefined;
 	// Clear search callback
 	export let onClearSearch: (() => void) | undefined = undefined;
+	// Mode change callback
+	export let onModeChange: ((mode: MerchantListMode) => void) | undefined = undefined;
 
 	// Local search input value
 	let searchInputValue = '';
@@ -58,6 +60,15 @@
 			event.stopPropagation();
 			handleClearSearch();
 		}
+	}
+
+	function handleModeSwitch(newMode: MerchantListMode) {
+		if (newMode === mode) return;
+		// Clear local search input when switching modes
+		if (newMode === 'nearby') {
+			searchInputValue = '';
+		}
+		onModeChange?.(newMode);
 	}
 
 	$: isOpen = $merchantList.isOpen;
@@ -209,6 +220,30 @@
 					<CloseButton on:click={handleClose} />
 				</div>
 			{/if}
+
+			<!-- Mode toggle buttons -->
+			<div class="mt-3 flex rounded-lg bg-gray-100 p-1 dark:bg-white/5">
+				<button
+					type="button"
+					on:click={() => handleModeSwitch('search')}
+					class="flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors
+						{mode === 'search'
+						? 'bg-white text-primary shadow-sm dark:bg-white/10 dark:text-white'
+						: 'text-body hover:text-primary dark:text-white/70 dark:hover:text-white'}"
+				>
+					Search
+				</button>
+				<button
+					type="button"
+					on:click={() => handleModeSwitch('nearby')}
+					class="flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors
+						{mode === 'nearby'
+						? 'bg-white text-primary shadow-sm dark:bg-white/10 dark:text-white'
+						: 'text-body hover:text-primary dark:text-white/70 dark:hover:text-white'}"
+				>
+					Nearby
+				</button>
+			</div>
 		</div>
 
 		<!-- List content -->

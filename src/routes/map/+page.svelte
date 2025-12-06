@@ -8,7 +8,7 @@
 	import MerchantDrawerHash from './components/MerchantDrawerHash.svelte';
 	import MerchantListPanel from './components/MerchantListPanel.svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
-	import { merchantList } from '$lib/merchantListStore';
+	import { merchantList, type MerchantListMode } from '$lib/merchantListStore';
 	import {
 		BREAKPOINTS,
 		MERCHANT_DRAWER_WIDTH,
@@ -253,6 +253,13 @@
 
 	const clearSearch = () => {
 		merchantList.clearSearch();
+	};
+
+	const handleModeChange = (mode: MerchantListMode) => {
+		merchantList.setMode(mode);
+		if (mode === 'nearby') {
+			updateMerchantList();
+		}
 	};
 
 	// allows for users to set initial view in a URL query
@@ -1118,6 +1125,7 @@
 		}}
 		onSearch={handlePanelSearch}
 		onClearSearch={clearSearch}
+		onModeChange={handleModeChange}
 		{currentZoom}
 	/>
 
