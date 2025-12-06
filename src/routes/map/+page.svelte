@@ -569,19 +569,20 @@
 	// Debounced version to prevent excessive updates during pan/zoom
 	const debouncedUpdateMerchantList = debounce(updateMerchantList, DEBOUNCE_DELAY);
 
+	// Calculate drawer width for map offset (desktop only - mobile drawer is at bottom)
+	const getDrawerOffset = () => {
+		const mapSize = map!.getSize();
+		const isDesktop = mapSize.x >= BREAKPOINTS.md;
+		const drawerWidth = isDesktop && $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0;
+		const visibleCenterX = (mapSize.x - drawerWidth) / 2;
+		return { drawerWidth, visibleCenterX, mapSize };
+	};
+
 	// Pan to a nearby merchant (user is already zoomed in, just center the marker)
 	const panToNearbyMerchant = (place: Place) => {
 		if (!map || !browser) return;
 
-		const mapSize = map.getSize();
-
-		// Only offset for desktop side drawer (md+ breakpoint)
-		// On mobile, drawer is at bottom so no horizontal offset needed
-		const isDesktop = mapSize.x >= BREAKPOINTS.md;
-		const drawerWidth = isDesktop && $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0;
-
-		// Calculate the center of the visible area (excluding drawer)
-		const visibleCenterX = (mapSize.x - drawerWidth) / 2;
+		const { visibleCenterX, mapSize } = getDrawerOffset();
 		const targetPoint = map.latLngToContainerPoint([place.lat, place.lon]);
 
 		// Calculate offset to center merchant in visible area
@@ -613,13 +614,7 @@
 		if (!map || !browser) return;
 
 		const targetZoom = 19;
-		const mapSize = map.getSize();
-
-		// Only offset for desktop side drawer (md+ breakpoint)
-		// On mobile, drawer is at bottom so no horizontal offset needed
-		const isDesktop = mapSize.x >= BREAKPOINTS.md;
-		const drawerWidth = isDesktop && $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0;
-		const visibleCenterX = (mapSize.x - drawerWidth) / 2;
+		const { visibleCenterX, mapSize } = getDrawerOffset();
 		const offsetX = mapSize.x / 2 - visibleCenterX;
 
 		// Calculate offset in lat/lng at target zoom level
@@ -1163,8 +1158,8 @@
 				}}
 				class="absolute top-[10px] left-[60px] z-[1000] hidden items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-medium shadow-lg transition-colors hover:bg-gray-50 md:flex dark:bg-dark dark:hover:bg-white/10"
 				style="filter: drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3));"
-				aria-expanded="false"
-				aria-label="Open merchant list"
+				aria-expanded={$merchantList.isOpen}
+				aria-label={$merchantList.isOpen ? 'Expand merchant list' : 'Open merchant list'}
 			>
 				<Icon w="18" h="18" icon="menu" type="material" style="text-primary dark:text-white" />
 				{#if currentZoom >= MERCHANT_LIST_LOW_ZOOM && $merchantList.isLoadingList}
