@@ -39,11 +39,6 @@
 	let searchInputValue = '';
 	let searchInput: HTMLInputElement;
 
-	// Focus search input when panel opens in search mode
-	$: if (browser && isOpen && isExpanded && mode === 'search' && searchInput) {
-		tick().then(() => searchInput?.focus());
-	}
-
 	function handleSearchInput() {
 		onSearch?.(searchInputValue);
 	}
@@ -88,6 +83,11 @@
 		currentZoom < MERCHANT_LIST_LOW_ZOOM ||
 		(currentZoom < MERCHANT_LIST_MIN_ZOOM && merchants.length === 0);
 	$: isTruncated = totalCount > merchants.length;
+
+	// Focus search input when panel opens in search mode
+	$: if (browser && isOpen && isExpanded && mode === 'search' && searchInput) {
+		tick().then(() => searchInput?.focus());
+	}
 
 	function handleItemClick(event: CustomEvent<Place>) {
 		const place = event.detail;
@@ -222,10 +222,15 @@
 			{/if}
 
 			<!-- Mode toggle buttons -->
-			<div class="mt-3 flex rounded-lg bg-gray-100 p-1 dark:bg-white/5">
+			<div
+				class="mt-3 flex rounded-lg bg-gray-100 p-1 dark:bg-white/5"
+				role="group"
+				aria-label="View mode"
+			>
 				<button
 					type="button"
 					on:click={() => handleModeSwitch('search')}
+					aria-pressed={mode === 'search'}
 					class="flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors
 						{mode === 'search'
 						? 'bg-white text-primary shadow-sm dark:bg-white/10 dark:text-white'
@@ -236,6 +241,7 @@
 				<button
 					type="button"
 					on:click={() => handleModeSwitch('nearby')}
+					aria-pressed={mode === 'nearby'}
 					class="flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors
 						{mode === 'nearby'
 						? 'bg-white text-primary shadow-sm dark:bg-white/10 dark:text-white'

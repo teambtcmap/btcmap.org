@@ -566,19 +566,20 @@
 	// Debounced version to prevent excessive updates during pan/zoom
 	const debouncedUpdateMerchantList = debounce(updateMerchantList, DEBOUNCE_DELAY);
 
+	// Calculate drawer width for map offset (desktop only - mobile drawer is at bottom)
+	const getDrawerOffset = () => {
+		const mapSize = map!.getSize();
+		const isDesktop = mapSize.x >= BREAKPOINTS.md;
+		const drawerWidth = isDesktop && $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0;
+		const visibleCenterX = (mapSize.x - drawerWidth) / 2;
+		return { drawerWidth, visibleCenterX, mapSize };
+	};
+
 	// Pan to a nearby merchant (user is already zoomed in, just center the marker)
 	const panToNearbyMerchant = (place: Place) => {
 		if (!map || !browser) return;
 
-		const mapSize = map.getSize();
-
-		// Only offset for desktop side drawer (md+ breakpoint)
-		// On mobile, drawer is at bottom so no horizontal offset needed
-		const isDesktop = mapSize.x >= BREAKPOINTS.md;
-		const drawerWidth = isDesktop && $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0;
-
-		// Calculate the center of the visible area (excluding drawer)
-		const visibleCenterX = (mapSize.x - drawerWidth) / 2;
+		const { visibleCenterX, mapSize } = getDrawerOffset();
 		const targetPoint = map.latLngToContainerPoint([place.lat, place.lon]);
 
 		// Calculate offset to center merchant in visible area
@@ -610,13 +611,7 @@
 		if (!map || !browser) return;
 
 		const targetZoom = 19;
-		const mapSize = map.getSize();
-
-		// Only offset for desktop side drawer (md+ breakpoint)
-		// On mobile, drawer is at bottom so no horizontal offset needed
-		const isDesktop = mapSize.x >= BREAKPOINTS.md;
-		const drawerWidth = isDesktop && $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0;
-		const visibleCenterX = (mapSize.x - drawerWidth) / 2;
+		const { visibleCenterX, mapSize } = getDrawerOffset();
 		const offsetX = mapSize.x / 2 - visibleCenterX;
 
 		// Calculate offset in lat/lng at target zoom level
