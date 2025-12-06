@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Table } from '@tanstack/svelte-table';
 	import { flexRender } from '@tanstack/svelte-table';
+	import { resolve } from '$app/paths';
 	import type { TaggerLeaderboard } from '$lib/types';
 	import { isEven } from '$lib/utils';
 	import Tip from '$components/Tip.svelte';
@@ -99,7 +100,7 @@
 										loading="lazy"
 									/>
 									<a
-										href={`/tagger/${row.original.id}`}
+										href={resolve(`/tagger/${row.original.id}`)}
 										class="text-link transition-colors hover:text-hover"
 									>
 										{row.original.tagger}
