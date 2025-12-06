@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import Footer from '$components/layout/Footer.svelte';
 	import Header from '$components/layout/Header.svelte';
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
@@ -260,8 +261,6 @@
 
 	const searchDebounce = debounce((e) => handleKeyUp(e));
 
-	const resolveLeaderboardPath = (path: string) => new URL(path, $page.url).pathname;
-
 	const handlePeriodChange = async (event: Event) => {
 		const nextValue = (event.target as HTMLSelectElement).value as PeriodOption;
 		const search = new URLSearchParams($page.url.searchParams);
@@ -272,12 +271,11 @@
 		}
 		const query = search.toString();
 		selectedPeriod = nextValue;
-		await goto(resolveLeaderboardPath(query ? `/leaderboard?${query}` : '/leaderboard'), {
+		await goto(resolve(query ? `/leaderboard?${query}` : '/leaderboard'), {
 			replaceState: true,
 			noScroll: true
 		});
 	};
-} 🧵
 </script>
 
 <svelte:head>
