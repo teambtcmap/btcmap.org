@@ -271,7 +271,8 @@
 		}
 		const query = search.toString();
 		selectedPeriod = nextValue;
-		await goto(resolve(query ? `/leaderboard?${query}` : '/leaderboard'), {
+		const targetUrl = resolve(query ? `/leaderboard?${query}` : '/leaderboard');
+		await goto(targetUrl, {
 			replaceState: true,
 			noScroll: true
 		});
