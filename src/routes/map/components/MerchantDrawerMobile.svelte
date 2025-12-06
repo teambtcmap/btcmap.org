@@ -23,6 +23,7 @@
 	const PEEK_HEIGHT = 140; // Collapsed state height - shows merchant name and quick info
 	const VELOCITY_THRESHOLD = 0.5; // px/ms - minimum velocity for flick gesture detection
 	const DISTANCE_THRESHOLD = 80; // px - minimum drag distance to trigger snap
+	const DISMISS_THRESHOLD = 60; // px - drag distance below peek to trigger dismiss
 	const POSITION_THRESHOLD_PERCENT = 0.3; // When to snap up vs down (30% of total height)
 	const VELOCITY_SAMPLE_COUNT = 5; // Number of velocity samples for smoothing
 	const SPRING_CONFIG = { stiffness: 0.2, damping: 0.75 }; // Animation feel - smooth but responsive
@@ -243,8 +244,10 @@
 		lastTime = currentTime;
 
 		// Calculate new height - 1:1 tracking with finger
+		// Allow going below PEEK_HEIGHT when in peek state for dismiss gesture
 		const deltaY = startY - currentY;
-		const newHeight = Math.max(PEEK_HEIGHT, Math.min(EXPANDED_HEIGHT, initialHeight + deltaY));
+		const minHeight = expanded ? PEEK_HEIGHT : 0;
+		const newHeight = Math.max(minHeight, Math.min(EXPANDED_HEIGHT, initialHeight + deltaY));
 
 		drawerHeight.set(newHeight, { hard: true });
 	}
@@ -267,10 +270,19 @@
 		activePointerId = null;
 		isDragging = false;
 
-		// Determine snap state using helper function
-		const snapState = determineSnapState(velocity, totalDelta, finalHeight, EXPANDED_HEIGHT);
-		expanded = snapState.expanded;
-		drawerHeight.set(snapState.height);
+		// Check for dismiss gesture when in peek state
+		const shouldDismiss =
+			!expanded &&
+			(velocity < -VELOCITY_THRESHOLD || finalHeight < PEEK_HEIGHT - DISMISS_THRESHOLD);
+
+		if (shouldDismiss) {
+			closeDrawer();
+		} else {
+			// Determine snap state using helper function
+			const snapState = determineSnapState(velocity, totalDelta, finalHeight, EXPANDED_HEIGHT);
+			expanded = snapState.expanded;
+			drawerHeight.set(snapState.height);
+		}
 
 		// Reset velocity
 		velocity = 0;
