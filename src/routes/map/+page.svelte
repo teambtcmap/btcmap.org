@@ -233,11 +233,13 @@
 			searchResults = [];
 			searchStatus = false;
 			isDropdownOpen = false;
+			merchantList.clearSearch();
 			return;
 		}
 
 		searchStatus = true;
 		isDropdownOpen = true;
+		merchantList.setSearching(true);
 
 		try {
 			const response = await fetch(`/api/search/places?name=${encodeURIComponent(search)}`);
@@ -256,10 +258,14 @@
 				address: place.address,
 				icon: place.icon
 			}));
+
+			// Show results in panel
+			merchantList.openWithSearchResults(search, places);
 		} catch (error) {
 			console.error('Search error:', error);
 			errToast('Search temporarily unavailable');
 			searchResults = [];
+			merchantList.clearSearch();
 		}
 
 		searchStatus = false;
@@ -271,6 +277,7 @@
 		search = '';
 		searchResults = [];
 		isDropdownOpen = false;
+		merchantList.clearSearch();
 	};
 
 	const handleSearchKeyDown = (e: KeyboardEvent) => {

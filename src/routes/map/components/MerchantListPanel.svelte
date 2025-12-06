@@ -34,6 +34,10 @@
 	$: placeDetailsCache = $merchantList.placeDetailsCache;
 	$: isLoadingList = $merchantList.isLoadingList;
 	$: selectedId = $merchantDrawer.merchantId;
+	$: mode = $merchantList.mode;
+	$: searchQuery = $merchantList.searchQuery;
+	$: searchResults = $merchantList.searchResults;
+	$: isSearching = $merchantList.isSearching;
 	// Show "zoom in" message when:
 	// 1. Below zoom 11 (always - no data fetched at this level)
 	// 2. Between zoom 11-14 with no merchants (too many results in dense area)
@@ -92,8 +96,7 @@
 
 {#if isOpen && isExpanded}
 	<section
-		class="hidden flex-none flex-col overflow-hidden border-r border-white/10 bg-white md:flex dark:border-white/5 dark:bg-dark"
-		style="width: {MERCHANT_LIST_WIDTH}px"
+		class="absolute inset-0 z-[1000] flex flex-col overflow-hidden bg-white md:relative md:inset-auto md:z-auto md:w-80 md:flex-none md:border-r md:border-white/10 dark:border-white/5 dark:bg-dark"
 		role="complementary"
 		aria-label="Merchant list"
 		transition:fly={{ x: -MERCHANT_LIST_WIDTH, duration: 200 }}
@@ -103,17 +106,28 @@
 			class="flex shrink-0 items-center justify-between border-b border-gray-200 bg-white px-3 py-3 dark:border-white/10 dark:bg-dark"
 		>
 			<div>
-				<h2 class="text-sm font-semibold text-primary dark:text-white">Nearby Merchants</h2>
-				{#if showZoomInMessage}
-					<p class="text-xs text-body dark:text-white/70">Zoom in to see list</p>
-				{:else if isTruncated}
+				{#if mode === 'search'}
+					<h2 class="text-sm font-semibold text-primary dark:text-white">Search Results</h2>
 					<p class="text-xs text-body dark:text-white/70">
-						Showing {merchants.length} nearest of {totalCount}
+						{#if isSearching}
+							Searching...
+						{:else}
+							{searchResults.length} result{searchResults.length !== 1 ? 's' : ''} for "{searchQuery}"
+						{/if}
 					</p>
 				{:else}
-					<p class="text-xs text-body dark:text-white/70">
-						{merchants.length} location{merchants.length !== 1 ? 's' : ''} in view
-					</p>
+					<h2 class="text-sm font-semibold text-primary dark:text-white">Nearby Merchants</h2>
+					{#if showZoomInMessage}
+						<p class="text-xs text-body dark:text-white/70">Zoom in to see list</p>
+					{:else if isTruncated}
+						<p class="text-xs text-body dark:text-white/70">
+							Showing {merchants.length} nearest of {totalCount}
+						</p>
+					{:else}
+						<p class="text-xs text-body dark:text-white/70">
+							{merchants.length} location{merchants.length !== 1 ? 's' : ''} in view
+						</p>
+					{/if}
 				{/if}
 			</div>
 			<CloseButton on:click={handleClose} />
@@ -121,7 +135,33 @@
 
 		<!-- List content -->
 		<div class="flex-1 overflow-y-auto">
-			{#if showZoomInMessage}
+			{#if mode === 'search'}
+				<!-- Search results -->
+				{#if isSearching}
+					<div class="flex items-center justify-center py-8">
+						<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
+					</div>
+				{:else if searchResults.length === 0}
+					<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
+						No results found for "{searchQuery}"
+					</div>
+				{:else}
+					<ul class="divide-y divide-gray-100 dark:divide-white/5">
+						{#each searchResults as merchant (merchant.id)}
+							<MerchantListItem
+								{merchant}
+								enrichedData={merchant}
+								isSelected={selectedId === merchant.id}
+								{verifiedDate}
+								on:click={handleItemClick}
+								on:mouseenter={handleMouseEnter}
+								on:mouseleave={handleMouseLeave}
+							/>
+						{/each}
+					</ul>
+				{/if}
+			{:else if showZoomInMessage}
+				<!-- Nearby mode: zoom in message -->
 				<div class="flex flex-col items-center justify-center gap-3 px-4 py-12 text-center">
 					<Icon
 						w="48"
@@ -148,6 +188,7 @@
 					No merchants visible in current view
 				</div>
 			{:else}
+				<!-- Nearby mode: merchant list -->
 				<ul class="divide-y divide-gray-100 dark:divide-white/5">
 					{#each merchants as merchant (merchant.id)}
 						<MerchantListItem
