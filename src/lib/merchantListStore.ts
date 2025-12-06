@@ -255,15 +255,16 @@ function createMerchantListStore() {
 			}
 		},
 
-		// Open panel with search results
+		// Open panel with search results (sorted with boosted first)
 		openWithSearchResults(query: string, results: Place[]) {
+			const sortedResults = sortMerchants(results);
 			update((state) => ({
 				...state,
 				isOpen: true,
 				isExpanded: true,
 				mode: 'search',
 				searchQuery: query,
-				searchResults: results,
+				searchResults: sortedResults,
 				isSearching: false
 			}));
 		},
