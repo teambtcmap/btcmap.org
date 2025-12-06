@@ -70,7 +70,7 @@ const excludedTaggers = [
 	{ id: 19880430, note: 'Qerko bot' },
 	{ id: 1778799, note: 'SomeoneElse_Revert - DWG' },
 	{ id: 21749653, note: 'Kinso - Steak&Shake Revert' },
-	{ id: 242345, note: 'confusedbuffalo bot'}
+	{ id: 242345, note: 'confusedbuffalo bot' }
 ];
 
 export const excludeLeader = readable(excludedTaggers.map(({ id }) => id));
