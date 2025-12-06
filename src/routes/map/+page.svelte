@@ -1376,7 +1376,8 @@
 					md:bottom-auto md:left-[60px] md:rounded-lg md:px-3 md:py-2 dark:bg-dark dark:hover:bg-white/10
 					{$merchantList.isOpen || $merchantDrawer.isOpen ? 'max-md:hidden' : ''}"
 				style="filter: drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3));"
-				aria-label="Open merchant list"
+				aria-label={$merchantList.isOpen ? 'Close merchant list' : 'Open merchant list'}
+				aria-expanded={$merchantList.isOpen}
 			>
 				<Icon w="18" h="18" icon="menu" type="material" style="text-primary dark:text-white" />
 				{#if currentZoom >= MERCHANT_LIST_LOW_ZOOM && $merchantList.isLoadingList}

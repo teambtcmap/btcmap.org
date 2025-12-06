@@ -118,15 +118,17 @@
 	}
 
 	// Body scroll lock - prevent background scroll when list is open
-	let bodyOverflowBackup: string | null = null;
+	let bodyOverflowBackup = '';
+	let bodyScrollLocked = false;
 
 	$: if (browser) {
-		if (isOpen && bodyOverflowBackup === null) {
+		if (isOpen && !bodyScrollLocked) {
 			bodyOverflowBackup = document.body.style.overflow;
 			document.body.style.overflow = 'hidden';
-		} else if (!isOpen && bodyOverflowBackup !== null) {
+			bodyScrollLocked = true;
+		} else if (!isOpen && bodyScrollLocked) {
 			document.body.style.overflow = bodyOverflowBackup;
-			bodyOverflowBackup = null;
+			bodyScrollLocked = false;
 		}
 	}
 
@@ -135,9 +137,9 @@
 			window.removeEventListener('keydown', handleKeydown);
 			listenerAttached = false;
 		}
-		if (browser && bodyOverflowBackup !== null) {
+		if (browser && bodyScrollLocked) {
 			document.body.style.overflow = bodyOverflowBackup;
-			bodyOverflowBackup = null;
+			bodyScrollLocked = false;
 		}
 	});
 </script>

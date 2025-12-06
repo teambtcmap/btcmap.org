@@ -63,7 +63,6 @@ test.describe('Merchant List Panel', () => {
 
 		// Click toggle to open the panel
 		await toggleButton.click();
-		await page.waitForTimeout(500);
 
 		// List panel should now be visible
 		await expect(listPanel).toBeVisible({ timeout: 10000 });
@@ -102,13 +101,10 @@ test.describe('Merchant List Panel', () => {
 		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
 		await expect(listPanel).toBeVisible({ timeout: 10000 });
 
-		// Wait for merchant items to load
-		await page.waitForTimeout(3000);
-
-		// Find and click first merchant item in list
+		// Find and click first merchant item in list (wait for items to load)
 		const merchantItems = listPanel.locator('li button');
 		const firstMerchant = merchantItems.first();
-		await expect(firstMerchant).toBeVisible({ timeout: 10000 });
+		await expect(firstMerchant).toBeVisible({ timeout: 15000 });
 
 		// Click the merchant
 		await firstMerchant.click();
@@ -166,7 +162,6 @@ test.describe('Merchant List Panel', () => {
 
 		// Click toggle to open mobile full-screen list
 		await toggleButton.click();
-		await page.waitForTimeout(500);
 
 		// Mobile list (full-screen dialog) should be visible
 		const mobileList = page.locator('[role="dialog"][aria-labelledby="merchant-list-title"]');
@@ -206,13 +201,10 @@ test.describe('Merchant List Panel', () => {
 		const mobileList = page.locator('[role="dialog"][aria-labelledby="merchant-list-title"]');
 		await expect(mobileList).toBeVisible({ timeout: 5000 });
 
-		// Wait for merchant items to load
-		await page.waitForTimeout(3000);
-
-		// Find and click first merchant item
+		// Find and click first merchant item (wait for items to load)
 		const merchantItems = mobileList.locator('li button');
 		const firstMerchant = merchantItems.first();
-		await expect(firstMerchant).toBeVisible({ timeout: 10000 });
+		await expect(firstMerchant).toBeVisible({ timeout: 15000 });
 		await firstMerchant.click();
 
 		// Wait for API call
