@@ -17,6 +17,12 @@ export interface MerchantListState {
 	isLoadingList: boolean;
 	// True when fetching enriched details in background (no spinner)
 	isEnrichingDetails: boolean;
+	// Panel mode: 'nearby' for location-based list, 'search' for search results
+	mode: 'nearby' | 'search';
+	// Search state
+	searchQuery: string;
+	searchResults: Place[];
+	isSearching: boolean;
 }
 
 const initialState: MerchantListState = {
@@ -26,7 +32,11 @@ const initialState: MerchantListState = {
 	totalCount: 0,
 	placeDetailsCache: new Map(),
 	isLoadingList: false,
-	isEnrichingDetails: false
+	isEnrichingDetails: false,
+	mode: 'nearby',
+	searchQuery: '',
+	searchResults: [],
+	isSearching: false
 };
 
 // Equirectangular approximation for local distance sorting
@@ -99,7 +109,11 @@ function createMerchantListStore() {
 				isExpanded: true,
 				merchants: [],
 				totalCount: 0,
-				placeDetailsCache: new Map()
+				placeDetailsCache: new Map(),
+				mode: 'nearby',
+				searchQuery: '',
+				searchResults: [],
+				isSearching: false
 			}));
 		},
 
@@ -239,6 +253,41 @@ function createMerchantListStore() {
 				}
 				update((state) => ({ ...state, isEnrichingDetails: false }));
 			}
+		},
+
+		// Open panel with search results
+		openWithSearchResults(query: string, results: Place[]) {
+			update((state) => ({
+				...state,
+				isOpen: true,
+				isExpanded: true,
+				mode: 'search',
+				searchQuery: query,
+				searchResults: results,
+				isSearching: false
+			}));
+		},
+
+		// Set searching state (shows spinner)
+		setSearching(isSearching: boolean) {
+			update((state) => ({
+				...state,
+				isSearching,
+				mode: 'search',
+				isOpen: true,
+				isExpanded: true
+			}));
+		},
+
+		// Clear search and return to nearby mode
+		clearSearch() {
+			update((state) => ({
+				...state,
+				mode: 'nearby',
+				searchQuery: '',
+				searchResults: [],
+				isSearching: false
+			}));
 		},
 
 		reset() {
