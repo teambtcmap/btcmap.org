@@ -190,7 +190,7 @@
 				</div>
 				<!-- Result count -->
 				{#if isSearching || searchResults.length > 0 || searchInputValue.length >= 3}
-					<p class="mt-2 text-xs text-body dark:text-white/70">
+					<p class="mt-2 text-xs text-body dark:text-white/70" aria-live="polite">
 						{#if isSearching}
 							Searching...
 						{:else if searchResults.length === 0}

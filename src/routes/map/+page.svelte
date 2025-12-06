@@ -215,20 +215,30 @@
 		}
 	};
 
+	// Track current search request for cancellation
+	let searchAbortController: AbortController | null = null;
+
 	// Core search function
 	const executeSearch = async (query: string) => {
+		// Cancel any in-flight search request
+		searchAbortController?.abort();
+
 		if (query.length < 3) {
 			// Clear results but keep search mode (user is still typing)
 			merchantList.clearSearchResults();
 			return;
 		}
 
+		searchAbortController = new AbortController();
+
 		// Close any open merchant drawer so it doesn't cover the search results
 		merchantDrawer.close();
 		merchantList.setSearching(true);
 
 		try {
-			const response = await fetch(`/api/search/places?name=${encodeURIComponent(query)}`);
+			const response = await fetch(`/api/search/places?name=${encodeURIComponent(query)}`, {
+				signal: searchAbortController.signal
+			});
 
 			if (!response.ok) {
 				throw new Error('Search API error');
@@ -237,6 +247,10 @@
 			const places: Place[] = await response.json();
 			merchantList.openWithSearchResults(query, places);
 		} catch (error) {
+			// Ignore aborted requests (user typed new query)
+			if (error instanceof Error && error.name === 'AbortError') {
+				return;
+			}
 			console.error('Search error:', error);
 			errToast('Search temporarily unavailable');
 			merchantList.clearSearch();
@@ -1078,6 +1092,7 @@
 		if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
 		if (debouncedUpdateMerchantList?.cancel) debouncedUpdateMerchantList.cancel();
 		if (debouncedPanelSearch?.cancel) debouncedPanelSearch.cancel();
+		searchAbortController?.abort();
 
 		// Reset merchant list
 		merchantList.reset();
@@ -1148,6 +1163,7 @@
 				}}
 				class="absolute top-[10px] left-[60px] z-[1000] hidden items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-medium shadow-lg transition-colors hover:bg-gray-50 md:flex dark:bg-dark dark:hover:bg-white/10"
 				style="filter: drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3));"
+				aria-expanded="false"
 				aria-label="Open merchant list"
 			>
 				<Icon w="18" h="18" icon="menu" type="material" style="text-primary dark:text-white" />
