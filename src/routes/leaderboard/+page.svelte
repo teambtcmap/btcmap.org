@@ -371,13 +371,14 @@
 						<p class="w-full p-5 text-center text-primary dark:text-white">No data available</p>
 					{:else}
 						<div class="p-5">
+							<div class="mb-6 px-4 py-3 text-center md:text-left">
+								<p class="text-lg font-semibold text-primary dark:text-white">Time period</p>
+								<p class="text-sm text-primary/80 dark:text-white/80">
+									Showing {periodLabels[selectedPeriod]}
+								</p>
+							</div>
+
 							<div class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-								<div class="px-4 py-3 text-center md:text-left">
-									<p class="text-lg font-semibold text-primary dark:text-white">Time period</p>
-									<p class="text-sm text-primary/80 dark:text-white/80">
-										Showing {periodLabels[selectedPeriod]}
-									</p>
-								</div>
 								<label
 									class="flex flex-col gap-2 px-4 py-3 text-sm font-medium text-primary md:flex-row md:items-center md:gap-3 dark:text-white"
 								>
@@ -393,9 +394,9 @@
 										{/each}
 									</select>
 								</label>
-							</div>
 
-							<LeaderboardSearch table={$table} bind:globalFilter {searchDebounce} />
+								<LeaderboardSearch table={$table} bind:globalFilter {searchDebounce} />
+							</div>
 
 							{#if $table.getFilteredRowModel().rows.length === 0}
 								<p class="w-full p-5 text-center text-primary dark:text-white">No results found.</p>
