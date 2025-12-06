@@ -1140,6 +1140,8 @@
 					} else {
 						merchantList.open();
 					}
+					// Reset to nearby mode when opening via toggle button
+					merchantList.setMode('nearby');
 					// Wait for store update to propagate before fetching
 					await tick();
 					updateMerchantList();
