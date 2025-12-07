@@ -345,6 +345,7 @@
 								role="status"
 								aria-live="polite"
 							>
+								<span class="sr-only">Loading leaderboard data</span>
 								<Icon type="fa" icon="table" w="96" h="96" style="animate-pulse text-link/50" />
 							</div>
 						</div>
