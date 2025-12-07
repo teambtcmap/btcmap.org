@@ -107,7 +107,7 @@
 			.filter((user) => !excluded.has(user.id))
 			.map((user) => {
 				const avatar = user.image_url || '/images/satoshi-nakamoto.png';
-				const totalEdits = user.edits ?? user.created + user.updated + user.deleted;
+				const totalEdits = user.edits;
 				return {
 					avatar,
 					tagger: user.name,
