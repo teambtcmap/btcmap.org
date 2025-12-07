@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { tick } from 'svelte';
+	import { tick, onDestroy } from 'svelte';
 	import { fly } from 'svelte/transition';
 	import { merchantList, type MerchantListMode } from '$lib/merchantListStore';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
@@ -12,9 +12,13 @@
 	import {
 		MERCHANT_LIST_WIDTH,
 		MERCHANT_LIST_MIN_ZOOM,
-		MERCHANT_LIST_LOW_ZOOM
+		MERCHANT_LIST_LOW_ZOOM,
+		BREAKPOINTS
 	} from '$lib/constants';
 	import { calcVerifiedDate } from '$lib/merchantDrawerLogic';
+
+	// Reduced motion preference for animations
+	const reducedMotion = browser && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 	// Compute once for all list items
 	const verifiedDate = calcVerifiedDate();
@@ -38,6 +42,12 @@
 	// Local search input value
 	let searchInputValue = '';
 	let searchInput: HTMLInputElement;
+
+	// Body scroll lock for mobile (prevents iOS background scroll)
+	let scrollLockActive = false;
+
+	// Reference for focus trap
+	let panelElement: HTMLElement;
 
 	function handleSearchInput() {
 		onSearch?.(searchInputValue);
@@ -84,6 +94,19 @@
 		(currentZoom < MERCHANT_LIST_MIN_ZOOM && merchants.length === 0);
 	$: isTruncated = totalCount > merchants.length;
 
+	// Body scroll lock on mobile when panel is open
+	$: if (browser && isOpen !== undefined && isExpanded !== undefined) {
+		const isMobile = window.innerWidth < BREAKPOINTS.md;
+		const shouldLock = isOpen && isExpanded && isMobile;
+		if (shouldLock && !scrollLockActive) {
+			document.body.style.overflow = 'hidden';
+			scrollLockActive = true;
+		} else if (!shouldLock && scrollLockActive) {
+			document.body.style.overflow = '';
+			scrollLockActive = false;
+		}
+	}
+
 	// Focus search input when panel opens in search mode
 	$: if (browser && isOpen && isExpanded && mode === 'search' && searchInput) {
 		tick().then(() => searchInput?.focus());
@@ -116,21 +139,48 @@
 
 	function handleWindowKeydown(event: KeyboardEvent) {
 		if (!isOpen) return;
+
+		// Focus trap on mobile: cycle Tab within the panel
+		const isMobileView = browser && window.innerWidth < BREAKPOINTS.md;
+		if (event.key === 'Tab' && isMobileView && panelElement) {
+			const focusable = panelElement.querySelectorAll<HTMLElement>(
+				'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+			);
+			const first = focusable[0];
+			const last = focusable[focusable.length - 1];
+
+			if (event.shiftKey && document.activeElement === first) {
+				event.preventDefault();
+				last?.focus();
+			} else if (!event.shiftKey && document.activeElement === last) {
+				event.preventDefault();
+				first?.focus();
+			}
+		}
+
 		if (event.key === 'Escape') {
 			event.preventDefault();
 			handleClose();
 		}
 	}
+
+	// Cleanup scroll lock when component is destroyed
+	onDestroy(() => {
+		if (browser && scrollLockActive) {
+			document.body.style.overflow = '';
+		}
+	});
 </script>
 
 <svelte:window on:keydown={handleWindowKeydown} />
 
 {#if isOpen && isExpanded}
 	<section
+		bind:this={panelElement}
 		class="absolute inset-0 z-[1000] flex flex-col overflow-hidden bg-white md:relative md:inset-auto md:z-auto md:w-80 md:flex-none md:border-r md:border-white/10 dark:border-white/5 dark:bg-dark"
 		role="complementary"
 		aria-label="Merchant list"
-		transition:fly={{ x: -MERCHANT_LIST_WIDTH, duration: 200 }}
+		transition:fly={{ x: -MERCHANT_LIST_WIDTH, duration: reducedMotion ? 0 : 200 }}
 	>
 		<!-- Header -->
 		<div
