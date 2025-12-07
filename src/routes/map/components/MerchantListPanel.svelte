@@ -182,7 +182,7 @@
 {#if isOpen && isExpanded}
 	<section
 		bind:this={panelElement}
-		class="absolute inset-0 z-[1000] flex flex-col overflow-hidden bg-white md:relative md:inset-auto md:z-auto md:w-80 md:flex-none md:border-r md:border-white/10 dark:border-white/5 dark:bg-dark"
+		class="absolute inset-0 z-[1001] flex flex-col overflow-hidden bg-white md:relative md:inset-auto md:z-auto md:w-80 md:flex-none md:border-r md:border-white/10 dark:border-white/5 dark:bg-dark"
 		role="complementary"
 		aria-label="Merchant list"
 		transition:fly={{ x: -MERCHANT_LIST_WIDTH, duration: reducedMotion ? 0 : 200 }}
