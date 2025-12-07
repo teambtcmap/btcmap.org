@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import Footer from '$components/layout/Footer.svelte';
 	import Header from '$components/layout/Header.svelte';
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
@@ -49,7 +50,6 @@
 	export let data;
 
 	const pageSizes = [10, 20, 30, 40, 50];
-	let globalFilter = '';
 	let loading = true;
 	let periodLoading = false;
 	let errorMessage: string | null = data?.error ?? null;
@@ -275,9 +275,9 @@
 		const query = search.toString();
 		selectedPeriod = nextValue;
 		periodLoading = true;
-		await goto(query ? `/leaderboard?${query}` : '/leaderboard', {
-			replaceState: true,
-			noScroll: true
+		await goto(resolve(query ? `/leaderboard?${query}` : '/leaderboard'), {
+		  replaceState: true,
+		  noScroll: true
 		});
 	};
 </script>
