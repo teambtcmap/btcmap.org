@@ -276,8 +276,8 @@
 		selectedPeriod = nextValue;
 		periodLoading = true;
 		await goto(resolve(query ? `/leaderboard?${query}` : '/leaderboard'), {
-		  replaceState: true,
-		  noScroll: true
+			replaceState: true,
+			noScroll: true
 		});
 	};
 </script>
