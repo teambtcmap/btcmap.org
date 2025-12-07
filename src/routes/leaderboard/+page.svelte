@@ -276,8 +276,7 @@
 		const query = search.toString();
 		selectedPeriod = nextValue;
 		periodLoading = true;
-		// @ts-expect-error resolve function returns union type that doesn't match goto's strict route types
-		await goto(resolve(query ? `/leaderboard?${query}` : '/leaderboard'), {
+		await goto(query ? `/leaderboard?${query}` : '/leaderboard', {
 			replaceState: true,
 			noScroll: true
 		});
