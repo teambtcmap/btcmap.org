@@ -59,7 +59,7 @@
 		userCreated = userFound['created_at'];
 		supporter = Boolean(
 			userFound.tags['supporter:expires'] &&
-			Date.parse(userFound.tags['supporter:expires']) > Date.now()
+				Date.parse(userFound.tags['supporter:expires']) > Date.now()
 		);
 		const user = userFound['osm_json'];
 		avatar = user.img ? user.img.href : '/images/satoshi-nakamoto.png';
