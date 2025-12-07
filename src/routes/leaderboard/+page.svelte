@@ -395,7 +395,12 @@
 									</select>
 								</label>
 
-								<LeaderboardSearch table={$table} bind:globalFilter {searchDebounce} />
+								<LeaderboardSearch
+									table={$table}
+									globalFilter={$table.getState().globalFilter}
+									on:globalFilterChange={(e) => $table?.setGlobalFilter(e.detail)}
+									{searchDebounce}
+								/>
 							</div>
 
 							{#if $table.getFilteredRowModel().rows.length === 0}
