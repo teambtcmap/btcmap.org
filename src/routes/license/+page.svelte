@@ -127,18 +127,19 @@
 				<strong>"based on"</strong> the earlier work.
 			</p>
 			<p>
-				A <strong>"covered work"</strong> means either the unmodified Program or a work based on the Program.
+				A <strong>"covered work"</strong> means either the unmodified Program or a work based on the
+				Program.
 			</p>
 			<p>
 				To <strong>"propagate"</strong> a work means to do anything with it that, without permission,
 				would make you directly or secondarily liable for infringement under applicable copyright law,
-				except executing it on a computer or modifying a private copy. Propagation includes copying, distribution
-				(with or without modification), making available to the public, and in some countries other activities
-				as well.
+				except executing it on a computer or modifying a private copy. Propagation includes copying,
+				distribution (with or without modification), making available to the public, and in some countries
+				other activities as well.
 			</p>
 			<p>
-				To <strong>"convey"</strong> a work means any kind of propagation that enables other parties to
-				make or receive copies. Mere interaction with a user through a computer network, with no transfer
+				To <strong>"convey"</strong> a work means any kind of propagation that enables other parties
+				to make or receive copies. Mere interaction with a user through a computer network, with no transfer
 				of a copy, is not conveying.
 			</p>
 			<p>
@@ -350,18 +351,18 @@
 				household purposes, or (2) anything designed or sold for incorporation into a dwelling. In
 				determining whether a product is a consumer product, doubtful cases shall be resolved in
 				favor of coverage. For a particular product received by a particular user,
-				<strong>"normally used"</strong> refers to a typical or common use of that class of product, regardless
-				of the status of the particular user or of the way in which the particular user actually uses,
-				or expects or is expected to use, the product. A product is a consumer product regardless of whether
-				the product has substantial commercial, industrial or non-consumer uses, unless such uses represent
-				the only significant mode of use of the product.
+				<strong>"normally used"</strong> refers to a typical or common use of that class of product,
+				regardless of the status of the particular user or of the way in which the particular user actually
+				uses, or expects or is expected to use, the product. A product is a consumer product regardless
+				of whether the product has substantial commercial, industrial or non-consumer uses, unless such
+				uses represent the only significant mode of use of the product.
 			</p>
 			<p>
 				<strong>"Installation Information"</strong> for a User Product means any methods, procedures,
 				authorization keys, or other information required to install and execute modified versions of
-				a covered work in that User Product from a modified version of its Corresponding Source. The information
-				must suffice to ensure that the continued functioning of the modified object code is in no case
-				prevented or interfered with solely because modification has been made.
+				a covered work in that User Product from a modified version of its Corresponding Source. The
+				information must suffice to ensure that the continued functioning of the modified object code
+				is in no case prevented or interfered with solely because modification has been made.
 			</p>
 			<p>
 				If you convey an object code work under this section in, or with, or specifically for use
@@ -521,8 +522,8 @@
 				If propagation of a covered work results from an entity transaction, each party to that transaction
 				who receives a copy of the work also receives whatever licenses to the work the party's predecessor
 				in interest had or could give under the previous paragraph, plus a right to possession of the
-				Corresponding Source of the work from the predecessor in interest, if the predecessor has it or
-				can get it with reasonable efforts.
+				Corresponding Source of the work from the predecessor in interest, if the predecessor has it
+				or can get it with reasonable efforts.
 			</p>
 			<p>
 				You may not impose any further restrictions on the exercise of the rights granted or
@@ -558,8 +559,8 @@
 				In the following three paragraphs, a <strong>"patent license"</strong> is any express
 				agreement or commitment, however denominated, not to enforce a patent (such as an express
 				permission to practice a patent or covenant not to sue for patent infringement). To
-				<strong>"grant"</strong> such a patent license to a party means to make such an agreement or commitment
-				not to enforce a patent against the party.
+				<strong>"grant"</strong> such a patent license to a party means to make such an agreement or
+				commitment not to enforce a patent against the party.
 			</p>
 			<p>
 				If you convey a covered work, knowingly relying on a patent license, and the Corresponding
@@ -568,10 +569,10 @@
 				means, then you must either (1) cause the Corresponding Source to be so available, or (2)
 				arrange to deprive yourself of the benefit of the patent license for this particular work,
 				or (3) arrange, in a manner consistent with the requirements of this License, to extend the
-				patent license to downstream recipients. <strong>"Knowingly relying"</strong> means you have actual
-				knowledge that, but for the patent license, your conveying the covered work in a country, or your
-				recipient's use of the covered work in a country, would infringe one or more identifiable patents
-				in that country that you have reason to believe are valid.
+				patent license to downstream recipients. <strong>"Knowingly relying"</strong> means you have
+				actual knowledge that, but for the patent license, your conveying the covered work in a country,
+				or your recipient's use of the covered work in a country, would infringe one or more identifiable
+				patents in that country that you have reason to believe are valid.
 			</p>
 			<p>
 				If, pursuant to or in connection with a single transaction or arrangement, you convey, or
@@ -583,14 +584,14 @@
 			<p>
 				A patent license is <strong>"discriminatory"</strong> if it does not include within the scope
 				of its coverage, prohibits the exercise of, or is conditioned on the non-exercise of one or more
-				of the rights that are specifically granted under this License. You may not convey a covered work
-				if you are a party to an arrangement with a third party that is in the business of distributing
+				of the rights that are specifically granted under this License. You may not convey a covered
+				work if you are a party to an arrangement with a third party that is in the business of distributing
 				software, under which you make payment to the third party based on the extent of your activity
 				of conveying the work, and under which the third party grants, to any of the parties who would
 				receive the covered work from you, a discriminatory patent license (a) in connection with copies
-				of the covered work conveyed by you (or copies made from those copies), or (b) primarily for and
-				in connection with specific products or compilations that contain the covered work, unless you
-				entered into that arrangement, or that patent license was granted, prior to 28 March 2007.
+				of the covered work conveyed by you (or copies made from those copies), or (b) primarily for
+				and in connection with specific products or compilations that contain the covered work, unless
+				you entered into that arrangement, or that patent license was granted, prior to 28 March 2007.
 			</p>
 			<p>
 				Nothing in this License shall be construed as excluding or limiting any implied license or

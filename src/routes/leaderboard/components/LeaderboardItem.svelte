@@ -51,6 +51,7 @@
 		/>
 
 		<a
+			+
 			href={resolve(`/tagger/${id}`)}
 			class="text-link hover:text-hover lg:text-left {tagger.match('([^ ]{16})')
 				? 'break-all'
@@ -71,6 +72,6 @@
 	{/each}
 
 	{#if lightning}
-		<Tip destination={lightning} style="mx-auto lg:!my-auto lg:h-[30px] block lg:inline" />
+		<Tip destination={lightning} style="mx-auto lg:!my-auto lg:h-[30px] block" />
 	{/if}
 </div>
