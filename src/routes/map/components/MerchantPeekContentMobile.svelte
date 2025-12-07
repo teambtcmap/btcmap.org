@@ -103,7 +103,7 @@
 			<span>Swipe up for details</span>
 			<span class="mx-1">·</span>
 			<Icon w="14" h="14" icon="arrow_downward" type="material" />
-			<span>down to close</span>
+			<span>Swipe down to close</span>
 		</div>
 	</div>
 </div>
