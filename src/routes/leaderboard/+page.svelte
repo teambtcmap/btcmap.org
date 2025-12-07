@@ -275,11 +275,14 @@
 		const query = search.toString();
 		selectedPeriod = nextValue;
 		periodLoading = true;
-		await goto(resolve(query ? `/leaderboard?${query}` : '/leaderboard'), {
+		const path = query ? `/leaderboard?${query}` : '/leaderboard';
+
+		await goto(resolve(path) ?? path, {
 			replaceState: true,
 			noScroll: true
 		});
 	};
+
 </script>
 
 <svelte:head>
