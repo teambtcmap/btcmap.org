@@ -40,6 +40,7 @@ export default defineConfig({
 	},
 	server: {
 		host: '0.0.0.0',
-		allowedHosts: ['btcmap.org', '.replit.dev', '.replit.app']
+		port: 5000,
+		allowedHosts: true
 	}
 });

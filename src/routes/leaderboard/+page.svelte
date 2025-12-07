@@ -282,7 +282,6 @@
 			noScroll: true
 		});
 	};
-
 </script>
 
 <svelte:head>
