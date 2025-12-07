@@ -74,8 +74,6 @@ const excludedTaggers = [
 ];
 
 export const excludeLeader = readable(excludedTaggers.map(({ id }) => id));
-export const excludedTaggerNotes = readable(excludedTaggers);
-
 export const boost: Writable<Boost> = writable();
 export const resetBoost = writable(0);
 export const boostHash: Writable<string> = writable();
