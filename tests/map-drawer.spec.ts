@@ -327,4 +327,32 @@ test.describe('Map Drawer', () => {
 		const boostText = page.locator('span:has-text("boost"), span:has-text("Boost")');
 		await expect(boostText.first()).toBeVisible({ timeout: 10000 });
 	});
+
+	test('drawer dismisses on swipe down from peek state (mobile)', async ({ page }) => {
+		// Set mobile viewport
+		await page.setViewportSize({ width: 375, height: 667 });
+
+		// Navigate with merchant hash to open drawer directly
+		await page.goto('/map#15/53.55573/10.00825&merchant=6556', { waitUntil: 'load' });
+
+		// Wait for drawer to open
+		const drawer = page.locator('[role="dialog"]');
+		await expect(drawer).toBeVisible({ timeout: 15000 });
+
+		// Get drawer position
+		const box = await drawer.boundingBox();
+		if (!box) throw new Error('Drawer not found');
+
+		// Simulate swipe down gesture from peek state
+		const startX = box.x + box.width / 2;
+		const startY = box.y + 20;
+
+		await page.mouse.move(startX, startY);
+		await page.mouse.down();
+		await page.mouse.move(startX, startY + 100, { steps: 5 });
+		await page.mouse.up();
+
+		// Drawer should be dismissed
+		await expect(drawer).not.toBeVisible({ timeout: 5000 });
+	});
 });
