@@ -20,7 +20,7 @@
 
 		<!-- Card with three-row layout -->
 		<div
-			class="space-y-4 p-4 {isEven(tagger.position)
+			class="space-y-4 p-4 {isEven(tagger.position - 1)
 				? 'bg-primary/5 dark:bg-white/5'
 				: 'bg-white dark:bg-transparent'}"
 			role="row"
