@@ -123,6 +123,11 @@
 			// Nearby merchant: pan only (already zoomed in)
 			onPanToNearbyMerchant?.(place);
 		}
+
+		// On mobile, close the list panel so the drawer is visible
+		if (browser && window.innerWidth < BREAKPOINTS.md) {
+			merchantList.collapse();
+		}
 	}
 
 	function handleMouseEnter(event: CustomEvent<Place>) {
