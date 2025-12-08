@@ -200,7 +200,7 @@
 		on:click|stopPropagation
 		on:focusout={handleFocusOut}
 		role="dialog"
-		aria-modal={$expanded}
+		aria-modal="true"
 		aria-label="Merchant details"
 	>
 		<!-- Drag handle and header area -->
@@ -258,7 +258,7 @@
 			id="drawer-content"
 			bind:this={contentScrollElement}
 			class="min-h-0 flex-1 overflow-y-auto"
-			style="overscroll-behavior-y: contain;"
+			style="overscroll-behavior-y: contain; touch-action: pan-y;"
 			on:touchstart={drawerGesture.handleContentTouchStart}
 			on:touchmove={onContentTouchMove}
 			on:touchend={drawerGesture.handleContentTouchEnd}

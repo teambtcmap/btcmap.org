@@ -73,7 +73,7 @@ function createDrawerGestureController() {
 		isDragging.set(true);
 		internal.startY = event.clientY;
 		internal.initialHeight = get(drawerHeight);
-		internal.velocityState = createVelocityState(event.clientY, Date.now());
+		internal.velocityState = createVelocityState(event.clientY, event.timeStamp);
 
 		if (captureTarget) {
 			try {
@@ -88,7 +88,7 @@ function createDrawerGestureController() {
 		if (event.pointerId !== internal.activePointerId || !get(isDragging)) return;
 
 		const currentY = event.clientY;
-		internal.velocityState = updateVelocity(currentY, Date.now(), internal.velocityState);
+		internal.velocityState = updateVelocity(currentY, event.timeStamp, internal.velocityState);
 
 		const isExpanded = get(expanded);
 		const maxHeight = get(expandedHeight);
@@ -167,10 +167,10 @@ function createDrawerGestureController() {
 				internal.startY = touch.clientY;
 				internal.touchStartY = touch.clientY;
 				internal.initialHeight = get(drawerHeight);
-				internal.velocityState = createVelocityState(touch.clientY, Date.now());
+				internal.velocityState = createVelocityState(touch.clientY, event.timeStamp);
 			} else {
 				const currentY = touch.clientY;
-				internal.velocityState = updateVelocity(currentY, Date.now(), internal.velocityState);
+				internal.velocityState = updateVelocity(currentY, event.timeStamp, internal.velocityState);
 
 				const maxHeight = get(expandedHeight);
 				const dragDelta = internal.startY - currentY;
