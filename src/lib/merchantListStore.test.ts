@@ -45,7 +45,7 @@ describe('merchantListStore', () => {
 			expect(state.isOpen).toBe(true);
 		});
 
-		it('close() should reset state and clear merchants', () => {
+		it('close() should hide panel but keep data', () => {
 			// Set up some state first
 			merchantList.open();
 			merchantList.setMerchants([createMockPlace()], 0, 0);
@@ -54,35 +54,19 @@ describe('merchantListStore', () => {
 			const state = get(merchantList);
 
 			expect(state.isOpen).toBe(false);
-			expect(state.isExpanded).toBe(true);
-			expect(state.merchants).toEqual([]);
-			expect(state.totalCount).toBe(0);
-			expect(state.placeDetailsCache.size).toBe(0);
+			// Data should be preserved (count visible on button)
+			expect(state.merchants.length).toBe(1);
+			expect(state.totalCount).toBe(1);
 		});
 
-		it('collapse() should set isExpanded to false', () => {
-			merchantList.collapse();
-			const state = get(merchantList);
-			expect(state.isExpanded).toBe(false);
-		});
-
-		it('expand() should set isExpanded to true', () => {
-			merchantList.collapse();
-			merchantList.expand();
-			const state = get(merchantList);
-			expect(state.isExpanded).toBe(true);
-		});
-
-		it('reset() should restore initial state', () => {
+		it('reset() should restore initial state and clear all data', () => {
 			merchantList.open();
-			merchantList.collapse();
 			merchantList.setMerchants([createMockPlace()], 0, 0);
 
 			merchantList.reset();
 			const state = get(merchantList);
 
 			expect(state.isOpen).toBe(false);
-			expect(state.isExpanded).toBe(true);
 			expect(state.merchants).toEqual([]);
 			expect(state.totalCount).toBe(0);
 			expect(state.isLoadingList).toBe(false);
@@ -396,7 +380,7 @@ describe('merchantListStore', () => {
 			expect(detailsAborted).toBe(false);
 		});
 
-		it('should cancel all requests on close()', async () => {
+		it('should cancel all requests on reset()', async () => {
 			let listAborted = false;
 			let detailsAborted = false;
 
@@ -428,13 +412,38 @@ describe('merchantListStore', () => {
 			const list = merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
 			const details = merchantList.fetchEnrichedDetails({ lat: 0, lon: 0 }, 10);
 
-			// Close should cancel both
-			merchantList.close();
+			// Reset should cancel both
+			merchantList.reset();
 
 			await Promise.all([list.catch(() => {}), details.catch(() => {})]);
 
 			expect(listAborted).toBe(true);
 			expect(detailsAborted).toBe(true);
+		});
+
+		it('close() should NOT cancel requests (just hide panel)', async () => {
+			let requestAborted = false;
+
+			(axios.get as Mock).mockImplementationOnce(
+				(_url: string, config: { signal: AbortSignal }) =>
+					new Promise((resolve) => {
+						config.signal.addEventListener('abort', () => {
+							requestAborted = true;
+						});
+						// Resolve after a short delay
+						setTimeout(() => resolve({ data: [] }), 50);
+					})
+			);
+
+			// Start a request
+			const list = merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
+
+			// Close should NOT cancel the request
+			merchantList.close();
+
+			await list;
+
+			expect(requestAborted).toBe(false);
 		});
 	});
 
@@ -446,7 +455,6 @@ describe('merchantListStore', () => {
 			expect(state.isSearching).toBe(true);
 			expect(state.mode).toBe('search');
 			expect(state.isOpen).toBe(true);
-			expect(state.isExpanded).toBe(true);
 		});
 
 		it('openSearchMode() without argument should not show spinner', () => {
@@ -468,7 +476,6 @@ describe('merchantListStore', () => {
 			expect(state.searchResults.length).toBe(2);
 			expect(state.isSearching).toBe(false);
 			expect(state.isOpen).toBe(true);
-			expect(state.isExpanded).toBe(true);
 		});
 
 		it('openWithSearchResults() should sort boosted merchants first', () => {

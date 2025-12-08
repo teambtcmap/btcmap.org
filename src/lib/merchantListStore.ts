@@ -10,7 +10,6 @@ export type MerchantListMode = 'nearby' | 'search';
 
 export interface MerchantListState {
 	isOpen: boolean;
-	isExpanded: boolean;
 	merchants: Place[];
 	totalCount: number;
 	// Cache of full Place data by ID, used to show icons/addresses without re-fetching
@@ -29,7 +28,6 @@ export interface MerchantListState {
 
 const initialState: MerchantListState = {
 	isOpen: false,
-	isExpanded: true,
 	merchants: [],
 	totalCount: 0,
 	placeDetailsCache: new Map(),
@@ -108,28 +106,9 @@ function createMerchantListStore() {
 			update((state) => ({ ...state, isOpen: true }));
 		},
 
+		// Hide the panel but keep all data (count stays visible on button)
 		close() {
-			cancelAllRequests();
-			update((state) => ({
-				...state,
-				isOpen: false,
-				isExpanded: true,
-				merchants: [],
-				totalCount: 0,
-				placeDetailsCache: new Map(),
-				mode: 'nearby',
-				searchQuery: '',
-				searchResults: [],
-				isSearching: false
-			}));
-		},
-
-		collapse() {
-			update((state) => ({ ...state, isExpanded: false }));
-		},
-
-		expand() {
-			update((state) => ({ ...state, isExpanded: true }));
+			update((state) => ({ ...state, isOpen: false }));
 		},
 
 		// Set merchants from locally-loaded markers (used at zoom 15-16)
@@ -285,7 +264,6 @@ function createMerchantListStore() {
 			update((state) => ({
 				...state,
 				isOpen: true,
-				isExpanded: true,
 				mode: 'search',
 				searchQuery: query,
 				searchResults: sortedResults,
@@ -301,8 +279,7 @@ function createMerchantListStore() {
 				...state,
 				isSearching,
 				mode: 'search',
-				isOpen: true,
-				isExpanded: true
+				isOpen: true
 			}));
 		},
 

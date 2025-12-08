@@ -77,7 +77,6 @@
 	}
 
 	$: isOpen = $merchantList.isOpen;
-	$: isExpanded = $merchantList.isExpanded;
 	$: merchants = $merchantList.merchants;
 	$: totalCount = $merchantList.totalCount;
 	$: placeDetailsCache = $merchantList.placeDetailsCache;
@@ -105,9 +104,9 @@
 	$: isTruncated = totalCount > merchants.length;
 
 	// Body scroll lock on mobile when panel is open
-	$: if (browser && isOpen !== undefined && isExpanded !== undefined) {
+	$: if (browser && isOpen !== undefined) {
 		const isMobile = window.innerWidth < BREAKPOINTS.md;
-		const shouldLock = isOpen && isExpanded && isMobile;
+		const shouldLock = isOpen && isMobile;
 		if (shouldLock && !scrollLockActive) {
 			document.body.style.overflow = 'hidden';
 			scrollLockActive = true;
@@ -118,7 +117,7 @@
 	}
 
 	// Focus search input when panel opens in search mode
-	$: if (browser && isOpen && isExpanded && mode === 'search' && searchInput) {
+	$: if (browser && isOpen && mode === 'search' && searchInput) {
 		tick().then(() => searchInput?.focus());
 	}
 
@@ -134,10 +133,8 @@
 			onPanToNearbyMerchant?.(place);
 		}
 
-		// On mobile, collapse the list panel so the drawer is visible
-		if (browser && window.innerWidth < BREAKPOINTS.md) {
-			merchantList.collapse();
-		}
+		// Close panel so drawer is visible (keeps data for quick reopen)
+		merchantList.close();
 	}
 
 	function handleMouseEnter(event: CustomEvent<Place>) {
@@ -149,7 +146,7 @@
 	}
 
 	function handleClose() {
-		merchantList.collapse();
+		merchantList.close();
 	}
 
 	function handleWindowKeydown(event: KeyboardEvent) {
@@ -188,7 +185,7 @@
 
 <svelte:window on:keydown={handleWindowKeydown} />
 
-{#if isOpen && isExpanded}
+{#if isOpen}
 	<section
 		bind:this={panelElement}
 		class="absolute inset-0 z-[1001] flex flex-col overflow-hidden bg-white md:relative md:inset-auto md:z-auto md:w-80 md:flex-none md:border-r md:border-white/10 dark:border-white/5 dark:bg-dark"

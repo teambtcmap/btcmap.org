@@ -26,7 +26,7 @@
 	$: drawerView = $merchantDrawer.drawerView;
 	$: merchant = $merchantDrawer.merchant;
 	$: fetchingMerchant = $merchantDrawer.isLoading;
-	$: listIsOpen = $merchantList.isOpen && $merchantList.isExpanded;
+	$: listIsOpen = $merchantList.isOpen;
 
 	const verifiedDate = calcVerifiedDate();
 	$: isUpToDate = checkUpToDate(merchant, verifiedDate);

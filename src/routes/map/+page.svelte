@@ -1163,16 +1163,11 @@
 	<!-- Map container -->
 	<div class="relative flex-1">
 		<!-- Floating toggle button for merchant list (responsive positioning) -->
-		<!-- Desktop: hide when list is open and expanded -->
-		<!-- Mobile: hide when list is open or drawer is open -->
-		{#if mapLoaded && !($merchantList.isOpen && $merchantList.isExpanded)}
+		<!-- Hide when list is open, or on mobile when drawer is open -->
+		{#if mapLoaded && !$merchantList.isOpen}
 			<button
 				on:click={async () => {
-					if ($merchantList.isOpen) {
-						merchantList.expand();
-					} else {
-						merchantList.open();
-					}
+					merchantList.open();
 					// Reset to nearby mode when opening via toggle button
 					merchantList.setMode('nearby');
 					// Wait for store update to propagate before fetching
@@ -1182,11 +1177,9 @@
 				class="fixed right-4 bottom-[40px] z-[1000] flex items-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-medium
 					shadow-lg transition-colors hover:bg-gray-50 md:top-[10px] md:right-auto
 					md:bottom-auto md:left-[60px] md:rounded-lg md:px-3 md:py-2 dark:bg-dark dark:hover:bg-white/10
-					{($merchantList.isOpen && $merchantList.isExpanded) || $merchantDrawer.isOpen
-					? 'max-md:hidden'
-					: ''}"
+					{$merchantDrawer.isOpen ? 'max-md:hidden' : ''}"
 				style="filter: drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3));"
-				aria-label={$merchantList.isOpen ? 'Expand merchant list' : 'Open merchant list'}
+				aria-label="Open merchant list"
 				aria-expanded={$merchantList.isOpen}
 			>
 				<Icon w="18" h="18" icon="menu" type="material" style="text-primary dark:text-white" />
