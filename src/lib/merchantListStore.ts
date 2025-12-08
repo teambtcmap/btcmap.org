@@ -165,6 +165,11 @@ function createMerchantListStore() {
 					{ timeout: 10000, signal: listAbortController.signal }
 				);
 
+				// Validate response is an array (API may return HTML error page)
+				if (!Array.isArray(response.data)) {
+					throw new Error('API returned invalid data format');
+				}
+
 				// Build cache for enriched display (icons, addresses, etc.)
 				const placeDetailsCache = new Map<number, Place>();
 				response.data.forEach((place) => placeDetailsCache.set(place.id, place));
@@ -213,6 +218,10 @@ function createMerchantListStore() {
 					{ timeout: 10000, signal: listAbortController.signal }
 				);
 
+				// Validate response is an array (API may return HTML error page)
+				if (!Array.isArray(response.data)) {
+					throw new Error('API returned invalid data format');
+				}
 				update((state) => ({
 					...state,
 					merchants: [],
