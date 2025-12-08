@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { spring } from 'svelte/motion';
 	import { boost, resetBoost } from '$lib/store';
 	import Icon from '$components/Icon.svelte';
 	import BoostContent from '$components/BoostContent.svelte';
@@ -18,16 +17,7 @@
 		ensureBoostData,
 		clearBoostState
 	} from '$lib/merchantDrawerLogic';
-	import {
-		PEEK_HEIGHT,
-		VELOCITY_THRESHOLD,
-		VELOCITY_SAMPLE_COUNT,
-		SPRING_CONFIG,
-		DISMISS_THRESHOLD,
-		SCROLL_DRAG_THRESHOLD,
-		SCROLL_TOP_THRESHOLD
-	} from '$lib/drawerConfig';
-	import { determineSnapState } from '$lib/drawerGestureUtils';
+	import { drawerGesture } from '$lib/drawerGestureController';
 
 	// Derive state from centralized store
 	$: isOpen = $merchantDrawer.isOpen;
@@ -36,22 +26,10 @@
 	$: merchant = $merchantDrawer.merchant;
 	$: fetchingMerchant = $merchantDrawer.isLoading;
 
-	// Bottom sheet state
-	let EXPANDED_HEIGHT = 500; // Initial value, updated to window.innerHeight on mount
-	let expanded = false; // Whether drawer is in expanded (full screen) state
-	let drawerHeight = spring(PEEK_HEIGHT, SPRING_CONFIG);
-	let isDragging = false;
+	// Get gesture state from controller
+	const { expanded, drawerHeight } = drawerGesture;
 
-	// Pointer tracking state
-	let activePointerId: number | null = null;
-	let startY = 0;
-	let initialHeight = PEEK_HEIGHT;
-	let lastY = 0;
-	let lastTime = 0;
-	let velocitySamples: number[] = [];
-	let velocity = 0;
-
-	// DOM reference
+	// DOM references
 	let drawerElement: HTMLDivElement;
 	let handleElement: HTMLDivElement;
 	let capturedElement: HTMLElement | null = null;
@@ -60,44 +38,20 @@
 	// Focus management for accessibility
 	let previouslyFocusedElement: HTMLElement | null = null;
 
-	// Scroll-aware drag state for expanded mode (touch-based for better control)
-	let touchStartY: number | null = null;
-	let isInCollapseDrag = false;
-
-	// Velocity tracking helper (mutates local state for efficiency)
-	function updateVelocityTracking(currentY: number, currentTime: number) {
-		const timeDelta = currentTime - lastTime;
-		if (timeDelta > 0) {
-			const yDelta = lastY - currentY; // positive = moving up
-			const instantVelocity = yDelta / timeDelta;
-			velocitySamples.push(instantVelocity);
-			if (velocitySamples.length > VELOCITY_SAMPLE_COUNT) {
-				velocitySamples.shift();
-			}
-			velocity = velocitySamples.reduce((a, b) => a + b, 0) / velocitySamples.length;
-		}
-		lastY = currentY;
-		lastTime = currentTime;
-	}
-
 	// Track previous state to reset drawer when merchant changes
 	let previousMerchantId: number | null = null;
 	$: if (isOpen && merchantId !== previousMerchantId) {
 		previousMerchantId = merchantId;
-		expanded = false;
-		drawerHeight.set(PEEK_HEIGHT, { hard: true });
+		drawerGesture.resetToPeek();
 	}
 
 	// Focus management: save/restore focus when expanding/collapsing
 	let wasExpanded = false;
-	$: if (expanded && !wasExpanded) {
-		// Expanding: save current focus and move to drawer
+	$: if ($expanded && !wasExpanded) {
 		previouslyFocusedElement = document.activeElement as HTMLElement;
-		// Use tick to ensure DOM is updated before focusing
 		setTimeout(() => handleElement?.focus(), 0);
 		wasExpanded = true;
-	} else if (!expanded && wasExpanded) {
-		// Collapsing: return focus to previously focused element
+	} else if (!$expanded && wasExpanded) {
 		if (previouslyFocusedElement && typeof previouslyFocusedElement.focus === 'function') {
 			previouslyFocusedElement.focus();
 		}
@@ -107,10 +61,9 @@
 
 	// Focus trap: keep focus inside drawer when expanded
 	function handleFocusOut(event: FocusEvent) {
-		if (expanded && drawerElement && event.relatedTarget) {
+		if ($expanded && drawerElement && event.relatedTarget) {
 			const focusMovingOutside = !drawerElement.contains(event.relatedTarget as Node);
 			if (focusMovingOutside) {
-				// Redirect focus back to handle
 				handleElement?.focus();
 			}
 		}
@@ -128,8 +81,7 @@
 	const closeDrawer = () => {
 		clearBoostState();
 		boostLoading = false;
-		expanded = false;
-		drawerHeight.set(PEEK_HEIGHT);
+		drawerGesture.collapse();
 		merchantDrawer.close();
 	};
 
@@ -155,57 +107,65 @@
 				event.preventDefault();
 				if (drawerView !== 'details') {
 					goBack();
-				} else if (expanded) {
-					expanded = false;
-					drawerHeight.set(PEEK_HEIGHT);
+				} else if ($expanded) {
+					drawerGesture.collapse();
 				} else {
 					closeDrawer();
 				}
 				break;
 			case 'ArrowUp':
 				event.preventDefault();
-				if (!expanded) {
-					expanded = true;
-					drawerHeight.set(EXPANDED_HEIGHT);
+				if (!$expanded) {
+					drawerGesture.expand();
 				}
 				break;
 			case 'ArrowDown':
 				event.preventDefault();
-				if (expanded) {
-					expanded = false;
-					drawerHeight.set(PEEK_HEIGHT);
+				if ($expanded) {
+					drawerGesture.collapse();
 				}
 				break;
 			case 'Enter':
 			case ' ':
-				// Only toggle if focus is on the handle element
 				if (document.activeElement === handleElement) {
 					event.preventDefault();
-					if (expanded) {
-						expanded = false;
-						drawerHeight.set(PEEK_HEIGHT);
-					} else {
-						expanded = true;
-						drawerHeight.set(EXPANDED_HEIGHT);
-					}
+					drawerGesture.toggle();
 				}
 				break;
 		}
 	}
 
+	// Wire up pointer event handlers with capture target
+	function onPointerDown(event: PointerEvent) {
+		const target = event.currentTarget as HTMLElement;
+		capturedElement = target;
+		drawerGesture.handlePointerDown(event, target);
+	}
+
+	function onPointerUp(event: PointerEvent) {
+		drawerGesture.handlePointerUp(event, capturedElement);
+		capturedElement = null;
+	}
+
+	// Wire up touch handler with scroll position
+	function onContentTouchMove(event: TouchEvent) {
+		const scrollTop = contentScrollElement?.scrollTop ?? 0;
+		drawerGesture.handleContentTouchMove(event, scrollTop);
+	}
+
 	onMount(() => {
+		// Set dismiss callback
+		drawerGesture.setDismissCallback(closeDrawer);
+
+		// Keyboard listener
 		window.addEventListener('keydown', handleKeydown);
 
+		// Window resize handler
 		let updateHeight: (() => void) | null = null;
-
 		if (browser) {
 			updateHeight = () => {
-				EXPANDED_HEIGHT = window.innerHeight;
-				if (expanded) {
-					drawerHeight.set(EXPANDED_HEIGHT);
-				}
+				drawerGesture.setExpandedHeight(window.innerHeight);
 			};
-
 			updateHeight();
 			window.addEventListener('resize', updateHeight);
 		}
@@ -222,172 +182,6 @@
 		ensureBoostData(merchant, $boost);
 	}
 
-	// Pointer event handlers for dragging
-	function handlePointerDown(event: PointerEvent) {
-		if (activePointerId !== null) return;
-
-		activePointerId = event.pointerId;
-		isDragging = true;
-		startY = event.clientY;
-		initialHeight = $drawerHeight;
-		lastY = event.clientY;
-		lastTime = Date.now();
-		velocitySamples = [];
-		velocity = 0;
-
-		const target = event.currentTarget as HTMLElement;
-		if (target) {
-			try {
-				target.setPointerCapture(event.pointerId);
-				capturedElement = target;
-			} catch {
-				// Pointer capture not supported or failed
-			}
-		}
-	}
-
-	function handlePointerMove(event: PointerEvent) {
-		if (event.pointerId !== activePointerId || !isDragging) return;
-
-		const currentY = event.clientY;
-		updateVelocityTracking(currentY, Date.now());
-
-		// Calculate new height - 1:1 tracking with finger
-		// Allow going below PEEK_HEIGHT when in peek state for dismiss gesture
-		const deltaY = startY - currentY;
-		const minHeight = expanded ? PEEK_HEIGHT : 0;
-		const newHeight = Math.max(minHeight, Math.min(EXPANDED_HEIGHT, initialHeight + deltaY));
-
-		drawerHeight.set(newHeight, { hard: true });
-	}
-
-	function handlePointerUp(event: PointerEvent) {
-		if (event.pointerId !== activePointerId) return;
-
-		const finalHeight = $drawerHeight;
-		const totalDelta = finalHeight - initialHeight;
-
-		// Release pointer capture safely
-		if (capturedElement) {
-			try {
-				capturedElement.releasePointerCapture(event.pointerId);
-			} catch {
-				// Already released or invalid
-			}
-		}
-		capturedElement = null;
-		activePointerId = null;
-		isDragging = false;
-
-		// Check for dismiss gesture when in peek state
-		const shouldDismiss =
-			!expanded &&
-			(velocity < -VELOCITY_THRESHOLD || finalHeight < PEEK_HEIGHT - DISMISS_THRESHOLD);
-
-		if (shouldDismiss) {
-			closeDrawer();
-		} else {
-			// Determine snap state using helper function
-			const snapState = determineSnapState(velocity, totalDelta, finalHeight, EXPANDED_HEIGHT);
-			expanded = snapState.expanded;
-			drawerHeight.set(snapState.height);
-		}
-
-		// Reset velocity
-		velocity = 0;
-		velocitySamples = [];
-	}
-
-	function handlePointerCancel(event: PointerEvent) {
-		if (event.pointerId !== activePointerId) return;
-
-		capturedElement = null;
-		activePointerId = null;
-		isDragging = false;
-
-		// Snap back to previous state
-		if (expanded) {
-			drawerHeight.set(EXPANDED_HEIGHT);
-		} else {
-			drawerHeight.set(PEEK_HEIGHT);
-		}
-	}
-
-	// Touch-based handlers for expanded content area (Google Maps style)
-	// Using touch events gives us control to preventDefault() and stop native scroll
-	function handleContentTouchStart(event: TouchEvent) {
-		if (!expanded || event.touches.length !== 1) return;
-		touchStartY = event.touches[0].clientY;
-		isInCollapseDrag = false;
-	}
-
-	function handleContentTouchMove(event: TouchEvent) {
-		if (!expanded || touchStartY === null || event.touches.length !== 1) return;
-
-		const touch = event.touches[0];
-		const scrollTop = contentScrollElement?.scrollTop ?? 0;
-		const deltaY = touch.clientY - touchStartY;
-
-		// At scroll top AND dragging down → enter collapse drag mode
-		if (scrollTop <= SCROLL_TOP_THRESHOLD && deltaY > SCROLL_DRAG_THRESHOLD) {
-			// Prevent native scroll/pull-to-refresh
-			event.preventDefault();
-
-			if (!isInCollapseDrag) {
-				// Initialize drag state
-				isInCollapseDrag = true;
-				isDragging = true;
-				startY = touch.clientY;
-				touchStartY = touch.clientY; // Sync to prevent height jump
-				initialHeight = $drawerHeight;
-				lastY = touch.clientY;
-				lastTime = Date.now();
-				velocitySamples = [];
-				velocity = 0;
-			} else {
-				// Continue drag - update velocity and height
-				const currentY = touch.clientY;
-				updateVelocityTracking(currentY, Date.now());
-
-				// Calculate new height
-				const dragDelta = startY - currentY;
-				const newHeight = Math.max(
-					PEEK_HEIGHT,
-					Math.min(EXPANDED_HEIGHT, initialHeight + dragDelta)
-				);
-				drawerHeight.set(newHeight, { hard: true });
-			}
-		} else if (isInCollapseDrag && scrollTop > SCROLL_TOP_THRESHOLD) {
-			// User scrolled back up during collapse drag - cancel it
-			isInCollapseDrag = false;
-			isDragging = false;
-			velocity = 0;
-			velocitySamples = [];
-			drawerHeight.set(EXPANDED_HEIGHT);
-		}
-	}
-
-	function handleContentTouchEnd() {
-		if (isInCollapseDrag) {
-			// Determine snap state
-			const finalHeight = $drawerHeight;
-			const totalDelta = finalHeight - initialHeight;
-			const snapState = determineSnapState(velocity, totalDelta, finalHeight, EXPANDED_HEIGHT);
-			expanded = snapState.expanded;
-			drawerHeight.set(snapState.height);
-
-			// Reset all shared state to prevent corruption with pointer handlers
-			isDragging = false;
-			velocity = 0;
-			velocitySamples = [];
-			activePointerId = null;
-			lastY = 0;
-			lastTime = 0;
-		}
-		touchStartY = null;
-		isInCollapseDrag = false;
-	}
-
 	export function openDrawer(id: number) {
 		merchantDrawer.open(id, 'details');
 	}
@@ -400,26 +194,26 @@
 	<div
 		bind:this={drawerElement}
 		class="fixed right-0 bottom-0 left-0 z-[1002] flex flex-col bg-white shadow-2xl transition-shadow dark:bg-dark"
-		class:rounded-t-[10px]={!expanded}
+		class:rounded-t-[10px]={!$expanded}
 		style="height: {$drawerHeight}px; will-change: height;"
 		on:click|stopPropagation
 		on:focusout={handleFocusOut}
 		role="dialog"
-		aria-modal={expanded}
+		aria-modal={$expanded}
 		aria-label="Merchant details"
 	>
 		<!-- Drag handle and header area -->
 		<div
 			class="flex-shrink-0 touch-none"
 			bind:this={handleElement}
-			on:pointerdown={handlePointerDown}
-			on:pointermove={handlePointerMove}
-			on:pointerup={handlePointerUp}
-			on:pointercancel={handlePointerCancel}
+			on:pointerdown={onPointerDown}
+			on:pointermove={drawerGesture.handlePointerMove}
+			on:pointerup={onPointerUp}
+			on:pointercancel={drawerGesture.handlePointerCancel}
 			tabindex="0"
 			role="button"
-			aria-label={expanded ? 'Collapse drawer' : 'Expand drawer'}
-			aria-expanded={expanded}
+			aria-label={$expanded ? 'Collapse drawer' : 'Expand drawer'}
+			aria-expanded={$expanded}
 			aria-controls="drawer-content"
 		>
 			<!-- Drag handle -->
@@ -444,12 +238,9 @@
 					>
 				{/if}
 
-				{#if expanded && drawerView === 'details'}
+				{#if $expanded && drawerView === 'details'}
 					<button
-						on:click={() => {
-							expanded = false;
-							drawerHeight.set(PEEK_HEIGHT);
-						}}
+						on:click={drawerGesture.collapse}
 						class="rounded-full p-2 text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
 						aria-label="Collapse drawer"
 					>
@@ -467,10 +258,10 @@
 			bind:this={contentScrollElement}
 			class="min-h-0 flex-1 overflow-y-auto"
 			style="overscroll-behavior-y: contain;"
-			on:touchstart={handleContentTouchStart}
-			on:touchmove={handleContentTouchMove}
-			on:touchend={handleContentTouchEnd}
-			on:touchcancel={handleContentTouchEnd}
+			on:touchstart={drawerGesture.handleContentTouchStart}
+			on:touchmove={onContentTouchMove}
+			on:touchend={drawerGesture.handleContentTouchEnd}
+			on:touchcancel={drawerGesture.handleContentTouchEnd}
 		>
 			{#if !merchant && fetchingMerchant}
 				<div class="space-y-4 px-4 pt-2 pb-4">
@@ -482,14 +273,14 @@
 					</div>
 				</div>
 			{:else if merchant}
-				{#if !expanded}
+				{#if !$expanded}
 					<!-- Peek content wrapper with swipe handlers - allows swiping from anywhere when collapsed -->
 					<div
 						class="touch-none px-4 pt-2 pb-4"
-						on:pointerdown={handlePointerDown}
-						on:pointermove={handlePointerMove}
-						on:pointerup={handlePointerUp}
-						on:pointercancel={handlePointerCancel}
+						on:pointerdown={onPointerDown}
+						on:pointermove={drawerGesture.handlePointerMove}
+						on:pointerup={onPointerUp}
+						on:pointercancel={drawerGesture.handlePointerCancel}
 					>
 						<MerchantPeekContentMobile
 							{merchant}
