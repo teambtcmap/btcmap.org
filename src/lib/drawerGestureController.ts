@@ -6,13 +6,17 @@ import { spring } from 'svelte/motion';
 import {
 	PEEK_HEIGHT,
 	VELOCITY_THRESHOLD,
-	VELOCITY_SAMPLE_COUNT,
 	SPRING_CONFIG,
 	DISMISS_THRESHOLD,
 	SCROLL_DRAG_THRESHOLD,
 	SCROLL_TOP_THRESHOLD
 } from './drawerConfig';
-import { determineSnapState } from './drawerGestureUtils';
+import {
+	determineSnapState,
+	updateVelocity,
+	createVelocityState,
+	type VelocityState
+} from './drawerGestureUtils';
 
 export interface DrawerGestureState {
 	expanded: boolean;
@@ -24,10 +28,7 @@ interface InternalGestureState {
 	activePointerId: number | null;
 	startY: number;
 	initialHeight: number;
-	lastY: number;
-	lastTime: number;
-	velocitySamples: number[];
-	velocity: number;
+	velocityState: VelocityState;
 	touchStartY: number | null;
 	isInCollapseDrag: boolean;
 }
@@ -46,10 +47,7 @@ function createDrawerGestureController() {
 		activePointerId: null,
 		startY: 0,
 		initialHeight: PEEK_HEIGHT,
-		lastY: 0,
-		lastTime: 0,
-		velocitySamples: [],
-		velocity: 0,
+		velocityState: createVelocityState(0, 0),
 		touchStartY: null,
 		isInCollapseDrag: false
 	};
@@ -57,31 +55,11 @@ function createDrawerGestureController() {
 	// Callbacks for external actions
 	let onDismiss: (() => void) | null = null;
 
-	// Velocity tracking helper
-	function updateVelocityTracking(currentY: number, currentTime: number) {
-		const timeDelta = currentTime - internal.lastTime;
-		if (timeDelta > 0) {
-			const yDelta = internal.lastY - currentY;
-			const instantVelocity = yDelta / timeDelta;
-			internal.velocitySamples.push(instantVelocity);
-			if (internal.velocitySamples.length > VELOCITY_SAMPLE_COUNT) {
-				internal.velocitySamples.shift();
-			}
-			internal.velocity =
-				internal.velocitySamples.reduce((a, b) => a + b, 0) / internal.velocitySamples.length;
-		}
-		internal.lastY = currentY;
-		internal.lastTime = currentTime;
-	}
-
 	// Reset internal state
 	function resetInternalState() {
 		internal.activePointerId = null;
 		internal.startY = 0;
-		internal.lastY = 0;
-		internal.lastTime = 0;
-		internal.velocitySamples = [];
-		internal.velocity = 0;
+		internal.velocityState = createVelocityState(0, 0);
 		internal.touchStartY = null;
 		internal.isInCollapseDrag = false;
 		isDragging.set(false);
@@ -95,10 +73,7 @@ function createDrawerGestureController() {
 		isDragging.set(true);
 		internal.startY = event.clientY;
 		internal.initialHeight = get(drawerHeight);
-		internal.lastY = event.clientY;
-		internal.lastTime = Date.now();
-		internal.velocitySamples = [];
-		internal.velocity = 0;
+		internal.velocityState = createVelocityState(event.clientY, Date.now());
 
 		if (captureTarget) {
 			try {
@@ -113,7 +88,7 @@ function createDrawerGestureController() {
 		if (event.pointerId !== internal.activePointerId || !get(isDragging)) return;
 
 		const currentY = event.clientY;
-		updateVelocityTracking(currentY, Date.now());
+		internal.velocityState = updateVelocity(currentY, Date.now(), internal.velocityState);
 
 		const isExpanded = get(expanded);
 		const maxHeight = get(expandedHeight);
@@ -142,14 +117,15 @@ function createDrawerGestureController() {
 		}
 
 		// Check for dismiss gesture when in peek state
+		const velocity = internal.velocityState.velocity;
 		const shouldDismiss =
 			!isExpanded &&
-			(internal.velocity < -VELOCITY_THRESHOLD || finalHeight < PEEK_HEIGHT - DISMISS_THRESHOLD);
+			(velocity < -VELOCITY_THRESHOLD || finalHeight < PEEK_HEIGHT - DISMISS_THRESHOLD);
 
 		if (shouldDismiss) {
 			onDismiss?.();
 		} else {
-			const snapState = determineSnapState(internal.velocity, totalDelta, finalHeight, maxHeight);
+			const snapState = determineSnapState(velocity, totalDelta, finalHeight, maxHeight);
 			expanded.set(snapState.expanded);
 			drawerHeight.set(snapState.height);
 		}
@@ -191,13 +167,10 @@ function createDrawerGestureController() {
 				internal.startY = touch.clientY;
 				internal.touchStartY = touch.clientY;
 				internal.initialHeight = get(drawerHeight);
-				internal.lastY = touch.clientY;
-				internal.lastTime = Date.now();
-				internal.velocitySamples = [];
-				internal.velocity = 0;
+				internal.velocityState = createVelocityState(touch.clientY, Date.now());
 			} else {
 				const currentY = touch.clientY;
-				updateVelocityTracking(currentY, Date.now());
+				internal.velocityState = updateVelocity(currentY, Date.now(), internal.velocityState);
 
 				const maxHeight = get(expandedHeight);
 				const dragDelta = internal.startY - currentY;
@@ -211,8 +184,7 @@ function createDrawerGestureController() {
 			// User scrolled back up during collapse drag - cancel it
 			internal.isInCollapseDrag = false;
 			isDragging.set(false);
-			internal.velocity = 0;
-			internal.velocitySamples = [];
+			internal.velocityState = createVelocityState(0, 0);
 			drawerHeight.set(get(expandedHeight));
 		}
 	}
@@ -222,7 +194,8 @@ function createDrawerGestureController() {
 			const finalHeight = get(drawerHeight);
 			const totalDelta = finalHeight - internal.initialHeight;
 			const maxHeight = get(expandedHeight);
-			const snapState = determineSnapState(internal.velocity, totalDelta, finalHeight, maxHeight);
+			const velocity = internal.velocityState.velocity;
+			const snapState = determineSnapState(velocity, totalDelta, finalHeight, maxHeight);
 			expanded.set(snapState.expanded);
 			drawerHeight.set(snapState.height);
 		}
@@ -261,7 +234,7 @@ function createDrawerGestureController() {
 		}
 	}
 
-	function setDismissCallback(callback: () => void) {
+	function setDismissCallback(callback: (() => void) | null) {
 		onDismiss = callback;
 	}
 

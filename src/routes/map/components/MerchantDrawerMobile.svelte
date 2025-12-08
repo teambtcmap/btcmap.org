@@ -171,6 +171,7 @@
 		}
 
 		return () => {
+			drawerGesture.setDismissCallback(null);
 			window.removeEventListener('keydown', handleKeydown);
 			if (updateHeight) {
 				window.removeEventListener('resize', updateHeight);
