@@ -498,6 +498,58 @@
 		return 'none'; // Below zoom 11
 	}
 
+	// Zoom 17+: Fetch full merchant data from API with extended radius
+	const updateListApiExtended = (
+		center: LatLng,
+		bounds: LatLngBounds,
+		allowHeavyFetch: boolean
+	) => {
+		const viewportRadius = calculateRadiusKm(bounds);
+		const radiusKm = Math.max(viewportRadius * HIGH_ZOOM_RADIUS_MULTIPLIER, MIN_SEARCH_RADIUS_KM);
+		if (!$merchantList.isOpen && !allowHeavyFetch) {
+			merchantList.fetchCountOnly({ lat: center.lat, lon: center.lng }, radiusKm);
+		} else {
+			merchantList.fetchAndReplaceList({ lat: center.lat, lon: center.lng }, radiusKm);
+		}
+	};
+
+	// Zoom 15-16: Use locally loaded markers, optionally enrich with API data
+	const updateListLocalMarkers = (
+		center: LatLng,
+		bounds: LatLngBounds,
+		allowHeavyFetch: boolean
+	) => {
+		const visiblePlaces = $places.filter((place) => {
+			const markerId = place.id.toString();
+			if (!loadedMarkers[markerId]) return false;
+			return bounds.contains([place.lat, place.lon]);
+		});
+
+		merchantList.setMerchants(visiblePlaces, center.lat, center.lng);
+
+		if ($merchantList.isOpen && allowHeavyFetch) {
+			const radiusKm = calculateRadiusKm(bounds);
+			merchantList.fetchEnrichedDetails({ lat: center.lat, lon: center.lng }, radiusKm);
+		}
+	};
+
+	// Zoom 11-14: Fetch from API with result limit (may show "zoom in" message)
+	const updateListApiWithLimit = (
+		center: LatLng,
+		bounds: LatLngBounds,
+		allowHeavyFetch: boolean
+	) => {
+		const radiusKm = calculateRadiusKm(bounds);
+
+		if (!$merchantList.isOpen || !allowHeavyFetch) {
+			merchantList.fetchCountOnly({ lat: center.lat, lon: center.lng }, radiusKm);
+		} else {
+			merchantList.fetchAndReplaceList({ lat: center.lat, lon: center.lng }, radiusKm, {
+				hideIfExceeds: MERCHANT_LIST_MAX_ITEMS
+			});
+		}
+	};
+
 	// Update merchant list panel based on zoom level and visible places
 	const updateMerchantList = (opts?: { force?: boolean }) => {
 		if (!browser || !map) return;
@@ -514,49 +566,15 @@
 		const allowHeavyFetch = isDesktop || opts?.force || $merchantList.isOpen;
 
 		switch (behavior) {
-			case 'api-extended': {
-				const viewportRadius = calculateRadiusKm(bounds);
-				const radiusKm = Math.max(
-					viewportRadius * HIGH_ZOOM_RADIUS_MULTIPLIER,
-					MIN_SEARCH_RADIUS_KM
-				);
-				if (!$merchantList.isOpen && !allowHeavyFetch) {
-					merchantList.fetchCountOnly({ lat: center.lat, lon: center.lng }, radiusKm);
-				} else {
-					merchantList.fetchAndReplaceList({ lat: center.lat, lon: center.lng }, radiusKm);
-				}
+			case 'api-extended':
+				updateListApiExtended(center, bounds, allowHeavyFetch);
 				break;
-			}
-
-			case 'local-markers': {
-				const visiblePlaces = $places.filter((place) => {
-					const markerId = place.id.toString();
-					if (!loadedMarkers[markerId]) return false;
-					return bounds.contains([place.lat, place.lon]);
-				});
-
-				merchantList.setMerchants(visiblePlaces, center.lat, center.lng);
-
-				if ($merchantList.isOpen && allowHeavyFetch) {
-					const radiusKm = calculateRadiusKm(bounds);
-					merchantList.fetchEnrichedDetails({ lat: center.lat, lon: center.lng }, radiusKm);
-				}
+			case 'local-markers':
+				updateListLocalMarkers(center, bounds, allowHeavyFetch);
 				break;
-			}
-
-			case 'api-with-limit': {
-				const radiusKm = calculateRadiusKm(bounds);
-
-				if (!$merchantList.isOpen || !allowHeavyFetch) {
-					merchantList.fetchCountOnly({ lat: center.lat, lon: center.lng }, radiusKm);
-				} else {
-					merchantList.fetchAndReplaceList({ lat: center.lat, lon: center.lng }, radiusKm, {
-						hideIfExceeds: MERCHANT_LIST_MAX_ITEMS
-					});
-				}
+			case 'api-with-limit':
+				updateListApiWithLimit(center, bounds, allowHeavyFetch);
 				break;
-			}
-
 			case 'none':
 			default:
 				merchantList.setMerchants([], 0, 0);
@@ -575,51 +593,59 @@
 		return { drawerWidth, visibleCenterX, mapSize };
 	};
 
-	// Pan to a nearby merchant (user is already zoomed in, just center the marker)
-	const panToNearbyMerchant = (place: Place) => {
+	// Shared helper: navigate map to a place with drawer offset compensation
+	const navigateToPlace = (
+		place: Place,
+		options: { targetZoom?: number; spiderfyCluster?: boolean } = {}
+	) => {
 		if (!map || !browser) return;
 
 		const { visibleCenterX, mapSize } = getDrawerOffset();
-		const targetPoint = map.latLngToContainerPoint([place.lat, place.lon]);
+		const { targetZoom, spiderfyCluster = false } = options;
 
-		// Calculate offset to center merchant in visible area
-		const offsetX = targetPoint.x - visibleCenterX;
-		const offsetY = targetPoint.y - mapSize.y / 2;
+		if (targetZoom !== undefined) {
+			// Zoom to specific level: calculate offset at target zoom
+			const offsetX = mapSize.x / 2 - visibleCenterX;
+			const targetPoint = map.project([place.lat, place.lon], targetZoom);
+			const offsetPoint = leaflet.point(targetPoint.x + offsetX, targetPoint.y);
+			const offsetLatLng = map.unproject(offsetPoint, targetZoom);
+			map.setView(offsetLatLng, targetZoom, { animate: true, duration: 0.3 });
+		} else {
+			// Pan only: calculate offset at current zoom
+			const targetPoint = map.latLngToContainerPoint([place.lat, place.lon]);
+			const offsetX = targetPoint.x - visibleCenterX;
+			const offsetY = targetPoint.y - mapSize.y / 2;
 
-		const currentCenter = map.getCenter();
-		const currentCenterPoint = map.latLngToContainerPoint(currentCenter);
-		const newCenterPoint = leaflet.point(
-			currentCenterPoint.x + offsetX,
-			currentCenterPoint.y + offsetY
-		);
-		const newCenter = map.containerPointToLatLng(newCenterPoint);
-
-		// If marker exists and is in a cluster, spiderfy the cluster
-		const marker = loadedMarkers[place.id.toString()];
-		if (marker && markers) {
-			const cluster = markers.getVisibleParent(marker);
-			if (cluster && cluster !== marker && 'spiderfy' in cluster) {
-				(cluster as { spiderfy: () => void }).spiderfy();
-			}
+			const currentCenter = map.getCenter();
+			const currentCenterPoint = map.latLngToContainerPoint(currentCenter);
+			const newCenterPoint = leaflet.point(
+				currentCenterPoint.x + offsetX,
+				currentCenterPoint.y + offsetY
+			);
+			const newCenter = map.containerPointToLatLng(newCenterPoint);
+			map.panTo(newCenter, { animate: true, duration: 0.3 });
 		}
 
-		map.panTo(newCenter, { animate: true, duration: 0.3 });
+		// Optionally spiderfy cluster containing the marker
+		if (spiderfyCluster) {
+			const marker = loadedMarkers[place.id.toString()];
+			if (marker && markers) {
+				const cluster = markers.getVisibleParent(marker);
+				if (cluster && cluster !== marker && 'spiderfy' in cluster) {
+					(cluster as { spiderfy: () => void }).spiderfy();
+				}
+			}
+		}
+	};
+
+	// Pan to a nearby merchant (user is already zoomed in, just center the marker)
+	const panToNearbyMerchant = (place: Place) => {
+		navigateToPlace(place, { spiderfyCluster: true });
 	};
 
 	// Zoom to a search result (user may be far away, fly to the location)
 	const zoomToSearchResult = (place: Place) => {
-		if (!map || !browser) return;
-
-		const targetZoom = 19;
-		const { visibleCenterX, mapSize } = getDrawerOffset();
-		const offsetX = mapSize.x / 2 - visibleCenterX;
-
-		// Calculate offset in lat/lng at target zoom level
-		const targetPoint = map.project([place.lat, place.lon], targetZoom);
-		const offsetPoint = leaflet.point(targetPoint.x + offsetX, targetPoint.y);
-		const offsetLatLng = map.unproject(offsetPoint, targetZoom);
-
-		map.setView(offsetLatLng, targetZoom, { animate: true, duration: 0.3 });
+		navigateToPlace(place, { targetZoom: 19 });
 	};
 
 	const initializeElements = async () => {
@@ -678,6 +704,7 @@
 		// NOTE: Don't set isLoadingMarkers=true here, let loadMarkersInViewport handle it
 		await loadMarkersInViewport();
 
+		// eslint-disable-next-line svelte/infinite-reactive-loop -- this breaks the loop, not causes it
 		elementsLoaded = true;
 
 		if (browser) {
@@ -742,18 +769,10 @@
 		}
 	};
 
-	// Reactive statement to initialize elements when data is ready
-	// Use a more controlled approach to prevent infinite loops
-	let shouldInitialize = false;
-	$: {
-		if ($places && $places.length && mapLoaded && !elementsLoaded) {
-			shouldInitialize = true;
-		}
-	}
-
-	// Watch for shouldInitialize flag and run initialization once
-	$: if (shouldInitialize) {
-		shouldInitialize = false;
+	// Initialize elements when places data is ready and map is loaded
+	// The guard inside initializeElements() prevents multiple calls
+	$: if ($places?.length && mapLoaded && !elementsLoaded) {
+		// eslint-disable-next-line svelte/infinite-reactive-loop -- elementsLoaded=true stops the loop
 		initializeElements();
 	}
 

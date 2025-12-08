@@ -145,9 +145,8 @@
 	function handleWindowKeydown(event: KeyboardEvent) {
 		if (!isOpen) return;
 
-		// Focus trap on mobile: cycle Tab within the panel
-		const isMobileView = browser && window.innerWidth < BREAKPOINTS.md;
-		if (event.key === 'Tab' && isMobileView && panelElement) {
+		// Focus trap: cycle Tab within the panel to prevent focus escaping to background
+		if (event.key === 'Tab' && panelElement) {
 			const focusable = panelElement.querySelectorAll<HTMLElement>(
 				'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
 			);
@@ -296,7 +295,7 @@
 			{#if mode === 'search'}
 				<!-- Search results -->
 				{#if isSearching}
-					<div class="flex items-center justify-center py-8">
+					<div class="flex items-center justify-center py-8" role="status" aria-label="Searching">
 						<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
 					</div>
 				{:else if searchResults.length === 0 && searchInputValue.length >= 3}
@@ -350,7 +349,11 @@
 					</div>
 				</div>
 			{:else if isLoadingList}
-				<div class="flex items-center justify-center py-8">
+				<div
+					class="flex items-center justify-center py-8"
+					role="status"
+					aria-label="Loading nearby merchants"
+				>
 					<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
 				</div>
 			{:else if merchants.length === 0}
