@@ -88,6 +88,23 @@
 	let touchStartY: number | null = null;
 	let isInCollapseDrag = false;
 	const SCROLL_DRAG_THRESHOLD = 10; // px to decide drag vs scroll
+	const SCROLL_TOP_THRESHOLD = 1; // px tolerance for scroll position (handles browser rounding)
+
+	// Shared velocity tracking helper to reduce duplication
+	function updateVelocityTracking(currentY: number, currentTime: number) {
+		const timeDelta = currentTime - lastTime;
+		if (timeDelta > 0) {
+			const yDelta = lastY - currentY; // positive = moving up
+			const instantVelocity = yDelta / timeDelta;
+			velocitySamples.push(instantVelocity);
+			if (velocitySamples.length > VELOCITY_SAMPLE_COUNT) {
+				velocitySamples.shift();
+			}
+			velocity = velocitySamples.reduce((a, b) => a + b, 0) / velocitySamples.length;
+		}
+		lastY = currentY;
+		lastTime = currentTime;
+	}
 
 	// Track previous state to reset drawer when merchant changes
 	let previousMerchantId: number | null = null;
@@ -231,23 +248,7 @@
 		if (event.pointerId !== activePointerId || !isDragging) return;
 
 		const currentY = event.clientY;
-		const currentTime = Date.now();
-
-		// Calculate instantaneous velocity
-		const timeDelta = currentTime - lastTime;
-		if (timeDelta > 0) {
-			const yDelta = lastY - currentY; // positive = moving up
-			const instantVelocity = yDelta / timeDelta;
-
-			velocitySamples.push(instantVelocity);
-			if (velocitySamples.length > VELOCITY_SAMPLE_COUNT) {
-				velocitySamples.shift();
-			}
-			velocity = velocitySamples.reduce((a, b) => a + b, 0) / velocitySamples.length;
-		}
-
-		lastY = currentY;
-		lastTime = currentTime;
+		updateVelocityTracking(currentY, Date.now());
 
 		// Calculate new height - 1:1 tracking with finger
 		// Allow going below PEEK_HEIGHT when in peek state for dismiss gesture
@@ -326,7 +327,7 @@
 		const deltaY = touch.clientY - touchStartY;
 
 		// At scroll top AND dragging down → enter collapse drag mode
-		if (scrollTop <= 0 && deltaY > SCROLL_DRAG_THRESHOLD) {
+		if (scrollTop <= SCROLL_TOP_THRESHOLD && deltaY > SCROLL_DRAG_THRESHOLD) {
 			// Prevent native scroll/pull-to-refresh
 			event.preventDefault();
 
@@ -335,6 +336,7 @@
 				isInCollapseDrag = true;
 				isDragging = true;
 				startY = touch.clientY;
+				touchStartY = touch.clientY; // Sync to prevent height jump
 				initialHeight = $drawerHeight;
 				lastY = touch.clientY;
 				lastTime = Date.now();
@@ -343,21 +345,7 @@
 			} else {
 				// Continue drag - update velocity and height
 				const currentY = touch.clientY;
-				const currentTime = Date.now();
-
-				const timeDelta = currentTime - lastTime;
-				if (timeDelta > 0) {
-					const yDelta = lastY - currentY;
-					const instantVelocity = yDelta / timeDelta;
-					velocitySamples.push(instantVelocity);
-					if (velocitySamples.length > VELOCITY_SAMPLE_COUNT) {
-						velocitySamples.shift();
-					}
-					velocity = velocitySamples.reduce((a, b) => a + b, 0) / velocitySamples.length;
-				}
-
-				lastY = currentY;
-				lastTime = currentTime;
+				updateVelocityTracking(currentY, Date.now());
 
 				// Calculate new height
 				const dragDelta = startY - currentY;
@@ -367,6 +355,13 @@
 				);
 				drawerHeight.set(newHeight, { hard: true });
 			}
+		} else if (isInCollapseDrag && scrollTop > SCROLL_TOP_THRESHOLD) {
+			// User scrolled back up during collapse drag - cancel it
+			isInCollapseDrag = false;
+			isDragging = false;
+			velocity = 0;
+			velocitySamples = [];
+			drawerHeight.set(EXPANDED_HEIGHT);
 		}
 	}
 
@@ -379,10 +374,13 @@
 			expanded = snapState.expanded;
 			drawerHeight.set(snapState.height);
 
-			// Reset state
+			// Reset all shared state to prevent corruption with pointer handlers
 			isDragging = false;
 			velocity = 0;
 			velocitySamples = [];
+			activePointerId = null;
+			lastY = 0;
+			lastTime = 0;
 		}
 		touchStartY = null;
 		isInCollapseDrag = false;
