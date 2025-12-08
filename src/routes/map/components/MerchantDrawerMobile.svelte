@@ -80,9 +80,13 @@
 	let velocity = 0;
 
 	// DOM reference
+	let drawerElement: HTMLDivElement;
 	let handleElement: HTMLDivElement;
 	let capturedElement: HTMLElement | null = null;
 	let contentScrollElement: HTMLDivElement | null = null;
+
+	// Focus management for accessibility
+	let previouslyFocusedElement: HTMLElement | null = null;
 
 	// Scroll-aware drag state for expanded mode (touch-based for better control)
 	let touchStartY: number | null = null;
@@ -112,6 +116,34 @@
 		previousMerchantId = merchantId;
 		expanded = false;
 		drawerHeight.set(PEEK_HEIGHT, { hard: true });
+	}
+
+	// Focus management: save/restore focus when expanding/collapsing
+	let wasExpanded = false;
+	$: if (expanded && !wasExpanded) {
+		// Expanding: save current focus and move to drawer
+		previouslyFocusedElement = document.activeElement as HTMLElement;
+		// Use tick to ensure DOM is updated before focusing
+		setTimeout(() => handleElement?.focus(), 0);
+		wasExpanded = true;
+	} else if (!expanded && wasExpanded) {
+		// Collapsing: return focus to previously focused element
+		if (previouslyFocusedElement && typeof previouslyFocusedElement.focus === 'function') {
+			previouslyFocusedElement.focus();
+		}
+		previouslyFocusedElement = null;
+		wasExpanded = false;
+	}
+
+	// Focus trap: keep focus inside drawer when expanded
+	function handleFocusOut(event: FocusEvent) {
+		if (expanded && drawerElement && event.relatedTarget) {
+			const focusMovingOutside = !drawerElement.contains(event.relatedTarget as Node);
+			if (focusMovingOutside) {
+				// Redirect focus back to handle
+				handleElement?.focus();
+			}
+		}
 	}
 
 	const verifiedDate = calcVerifiedDate();
@@ -396,10 +428,12 @@
 	<!-- svelte-ignore a11y-no-noninteractive-element-interactions - Click handler only prevents event bubbling, not for interaction -->
 	<!-- svelte-ignore a11y-click-events-have-key-events - Dialog interaction handled by focusable handle element below -->
 	<div
+		bind:this={drawerElement}
 		class="fixed right-0 bottom-0 left-0 z-[1002] flex flex-col bg-white shadow-2xl transition-shadow dark:bg-dark"
 		class:rounded-t-[10px]={!expanded}
 		style="height: {$drawerHeight}px; will-change: height;"
 		on:click|stopPropagation
+		on:focusout={handleFocusOut}
 		role="dialog"
 		aria-modal={expanded}
 		aria-label="Merchant details"
@@ -416,6 +450,7 @@
 			role="button"
 			aria-label={expanded ? 'Collapse drawer' : 'Expand drawer'}
 			aria-expanded={expanded}
+			aria-controls="drawer-content"
 		>
 			<!-- Drag handle -->
 			<div class="mx-auto mt-2 h-1.5 w-12 rounded-full bg-gray-300 dark:bg-white/30"></div>
@@ -458,6 +493,7 @@
 
 		<!-- Scrollable content area -->
 		<div
+			id="drawer-content"
 			bind:this={contentScrollElement}
 			class="min-h-0 flex-1 overflow-y-auto"
 			style="overscroll-behavior-y: contain;"
