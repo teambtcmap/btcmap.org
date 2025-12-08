@@ -233,7 +233,7 @@
 
 		// Close any open merchant drawer so it doesn't cover the search results
 		merchantDrawer.close();
-		merchantList.setSearching(true);
+		merchantList.openSearchMode(true);
 
 		try {
 			const response = await fetch(`/api/search/places?name=${encodeURIComponent(query)}`, {
@@ -266,10 +266,16 @@
 	};
 
 	const clearSearchInput = () => {
+		// Abort any in-flight search request when clearing input
+		searchAbortController?.abort();
 		merchantList.clearSearchResults();
 	};
 
 	const handleModeChange = (mode: MerchantListMode) => {
+		// Abort any in-flight search when switching away from search mode
+		if (mode === 'nearby') {
+			searchAbortController?.abort();
+		}
 		merchantList.setMode(mode);
 		if (mode === 'nearby') {
 			updateMerchantList();
@@ -973,8 +979,7 @@
 					searchButton.style.borderRadius = '8px 8px 0 0';
 					searchButton.onclick = function openSearch() {
 						// Open panel in search mode (will auto-focus input)
-						// setSearching sets mode='search', isOpen=true, isExpanded=true
-						merchantList.setSearching(false);
+						merchantList.openSearchMode();
 					};
 					if (theme === 'light') {
 						searchButton.onmouseenter = () => {

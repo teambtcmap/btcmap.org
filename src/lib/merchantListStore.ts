@@ -69,6 +69,11 @@ function sortMerchants(merchants: Place[], centerLat?: number, centerLon?: numbe
 	});
 }
 
+// Filter out invalid API response items missing required id field
+function filterValidPlaces<T extends { id?: unknown }>(items: T[]): T[] {
+	return items.filter((item): item is T => typeof item?.id === 'number');
+}
+
 function createMerchantListStore() {
 	const store = writable<MerchantListState>(initialState);
 	const { subscribe, set, update } = store;
@@ -170,27 +175,30 @@ function createMerchantListStore() {
 					throw new Error('API returned invalid data format');
 				}
 
+				// Filter out invalid items missing required id field
+				const validPlaces = filterValidPlaces(response.data);
+
 				// Build cache for enriched display (icons, addresses, etc.)
 				const placeDetailsCache = new Map<number, Place>();
-				response.data.forEach((place) => placeDetailsCache.set(place.id, place));
+				validPlaces.forEach((place) => placeDetailsCache.set(place.id, place));
 
 				// Check if we should hide results (too many at low zoom)
-				if (options?.hideIfExceeds && response.data.length > options.hideIfExceeds) {
+				if (options?.hideIfExceeds && validPlaces.length > options.hideIfExceeds) {
 					// Too many results - store count but show empty list
 					// The panel will display "zoom in" message, button shows count
 					update((state) => ({
 						...state,
 						merchants: [],
-						totalCount: response.data.length,
+						totalCount: validPlaces.length,
 						isLoadingList: false
 					}));
 				} else {
-					const sorted = sortMerchants(response.data, center.lat, center.lon);
+					const sorted = sortMerchants(validPlaces, center.lat, center.lon);
 					const limited = sorted.slice(0, MERCHANT_LIST_MAX_ITEMS);
 					update((state) => ({
 						...state,
 						merchants: limited,
-						totalCount: response.data.length,
+						totalCount: validPlaces.length,
 						placeDetailsCache,
 						isLoadingList: false
 					}));
@@ -222,10 +230,14 @@ function createMerchantListStore() {
 				if (!Array.isArray(response.data)) {
 					throw new Error('API returned invalid data format');
 				}
+
+				// Filter out invalid items missing required id field
+				const validItems = filterValidPlaces(response.data);
+
 				update((state) => ({
 					...state,
 					merchants: [],
-					totalCount: response.data.length,
+					totalCount: validItems.length,
 					isLoadingList: false
 				}));
 			} catch (error) {
@@ -252,10 +264,11 @@ function createMerchantListStore() {
 					{ timeout: 10000, signal: detailsAbortController.signal }
 				);
 
-				// Merge new results into existing cache (preserves previously loaded details)
+				// Filter out invalid items and merge into existing cache
+				const validPlaces = filterValidPlaces(response.data);
 				update((state) => {
 					const mergedCache = new Map(state.placeDetailsCache);
-					response.data.forEach((place) => mergedCache.set(place.id, place));
+					validPlaces.forEach((place) => mergedCache.set(place.id, place));
 					return { ...state, placeDetailsCache: mergedCache, isEnrichingDetails: false };
 				});
 			} catch (error) {
@@ -280,8 +293,10 @@ function createMerchantListStore() {
 			}));
 		},
 
-		// Set searching state (shows spinner)
-		setSearching(isSearching: boolean) {
+		// Open panel in search mode, optionally showing spinner
+		// Use openSearchMode() to open panel ready for input (no spinner)
+		// Use openSearchMode(true) when a search is in progress (shows spinner)
+		openSearchMode(isSearching: boolean = false) {
 			update((state) => ({
 				...state,
 				isSearching,

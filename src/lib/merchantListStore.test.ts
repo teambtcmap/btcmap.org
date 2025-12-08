@@ -439,14 +439,23 @@ describe('merchantListStore', () => {
 	});
 
 	describe('search state', () => {
-		it('setSearching() should set searching state and open panel in search mode', () => {
-			merchantList.setSearching(true);
+		it('openSearchMode() should open panel in search mode with optional spinner', () => {
+			merchantList.openSearchMode(true);
 			const state = get(merchantList);
 
 			expect(state.isSearching).toBe(true);
 			expect(state.mode).toBe('search');
 			expect(state.isOpen).toBe(true);
 			expect(state.isExpanded).toBe(true);
+		});
+
+		it('openSearchMode() without argument should not show spinner', () => {
+			merchantList.openSearchMode();
+			const state = get(merchantList);
+
+			expect(state.isSearching).toBe(false);
+			expect(state.mode).toBe('search');
+			expect(state.isOpen).toBe(true);
 		});
 
 		it('openWithSearchResults() should set mode, query, and results', () => {
