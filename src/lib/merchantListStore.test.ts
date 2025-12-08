@@ -490,9 +490,9 @@ describe('merchantListStore', () => {
 			expect(state.searchResults[1].id).toBe(2);
 		});
 
-		it('clearSearchResults() should clear results but keep search mode', () => {
+		it('clearSearchInput() should clear results but keep search mode', () => {
 			merchantList.openWithSearchResults('test', [createMockPlace()]);
-			merchantList.clearSearchResults();
+			merchantList.clearSearchInput();
 			const state = get(merchantList);
 
 			expect(state.mode).toBe('search'); // Mode preserved
@@ -501,9 +501,9 @@ describe('merchantListStore', () => {
 			expect(state.isSearching).toBe(false);
 		});
 
-		it('clearSearch() should switch to nearby mode and clear search state', () => {
+		it('exitSearchMode() should switch to nearby mode and clear search state', () => {
 			merchantList.openWithSearchResults('test', [createMockPlace()]);
-			merchantList.clearSearch();
+			merchantList.exitSearchMode();
 			const state = get(merchantList);
 
 			expect(state.mode).toBe('nearby');
@@ -519,17 +519,17 @@ describe('merchantListStore', () => {
 			expect(state.mode).toBe('search');
 		});
 
-		it('setMode() should switch to nearby mode and clear search state', () => {
+		it('setMode() should switch to nearby mode without clearing search state', () => {
 			// Set up search state first
 			merchantList.openWithSearchResults('pizza', [createMockPlace()]);
 
 			merchantList.setMode('nearby');
 			const state = get(merchantList);
 
+			// Mode changes but search state is preserved (no side effects)
 			expect(state.mode).toBe('nearby');
-			expect(state.searchQuery).toBe('');
-			expect(state.searchResults).toEqual([]);
-			expect(state.isSearching).toBe(false);
+			expect(state.searchQuery).toBe('pizza');
+			expect(state.searchResults.length).toBe(1);
 		});
 	});
 });

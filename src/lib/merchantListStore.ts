@@ -283,10 +283,14 @@ function createMerchantListStore() {
 			}));
 		},
 
-		// Clear search results but stay in search mode
+		// Update the search query (used when binding input to store)
+		setSearchQuery(query: string) {
+			update((state) => ({ ...state, searchQuery: query }));
+		},
+
+		// Clear search input and results but stay in search mode
 		// Use when: user clears the search input to type a new query (e.g., clicking X button)
-		// The panel stays open in search mode, ready for new input
-		clearSearchResults() {
+		clearSearchInput() {
 			update((state) => ({
 				...state,
 				searchQuery: '',
@@ -295,10 +299,9 @@ function createMerchantListStore() {
 			}));
 		},
 
-		// Clear search and exit to nearby mode
+		// Exit search mode and return to nearby mode
 		// Use when: user explicitly switches away from search (e.g., clicking "Nearby" tab)
-		// Resets to the default nearby merchant list view
-		clearSearch() {
+		exitSearchMode() {
 			update((state) => ({
 				...state,
 				mode: 'nearby',
@@ -308,14 +311,9 @@ function createMerchantListStore() {
 			}));
 		},
 
-		// Switch between modes
+		// Switch between modes (no side effects - just sets mode)
 		setMode(mode: MerchantListMode) {
-			update((state) => ({
-				...state,
-				mode,
-				// Clear search state when switching to nearby
-				...(mode === 'nearby' ? { searchQuery: '', searchResults: [], isSearching: false } : {})
-			}));
+			update((state) => ({ ...state, mode }));
 		},
 
 		reset() {

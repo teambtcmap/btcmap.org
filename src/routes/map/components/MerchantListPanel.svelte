@@ -34,13 +34,10 @@
 	export let currentZoom: number = 0;
 	// Search callback - called when user types in search input
 	export let onSearch: ((query: string) => void) | undefined = undefined;
-	// Clear search callback
-	export let onClearSearch: (() => void) | undefined = undefined;
-	// Mode change callback
+	// Mode change callback (called for nearby mode switch)
 	export let onModeChange: ((mode: MerchantListMode) => void) | undefined = undefined;
 
-	// Local search input value
-	let searchInputValue = '';
+	// Reference for search input element
 	let searchInput: HTMLInputElement;
 
 	// Body scroll lock for mobile (prevents iOS background scroll)
@@ -50,17 +47,18 @@
 	let panelElement: HTMLElement;
 
 	function handleSearchInput() {
-		onSearch?.(searchInputValue);
+		onSearch?.($merchantList.searchQuery);
 	}
 
 	function handleClearSearch() {
-		searchInputValue = '';
-		onClearSearch?.();
+		merchantList.clearSearchInput();
+		// Trigger onSearch to abort any pending request (same as typing empty query)
+		onSearch?.('');
 		searchInput?.focus();
 	}
 
 	function handleSearchKeyDown(event: KeyboardEvent) {
-		if (event.key === 'Escape' && searchInputValue) {
+		if (event.key === 'Escape' && $merchantList.searchQuery) {
 			event.preventDefault();
 			event.stopPropagation();
 			handleClearSearch();
@@ -69,11 +67,12 @@
 
 	function handleModeSwitch(newMode: MerchantListMode) {
 		if (newMode === mode) return;
-		// Clear local search input when switching modes
 		if (newMode === 'nearby') {
-			searchInputValue = '';
+			merchantList.exitSearchMode();
+			onModeChange?.(newMode);
+		} else {
+			merchantList.setMode(newMode);
 		}
-		onModeChange?.(newMode);
 	}
 
 	$: isOpen = $merchantList.isOpen;
@@ -85,16 +84,8 @@
 	$: mode = $merchantList.mode;
 	$: searchResults = $merchantList.searchResults;
 	$: isSearching = $merchantList.isSearching;
+	$: searchQuery = $merchantList.searchQuery;
 
-	// Track previous mode to detect changes from external sources (e.g., nearby button on map)
-	let previousMode: MerchantListMode = 'nearby';
-	$: if (mode !== previousMode) {
-		// When switching from search to nearby (from any source), clear local search input
-		if (previousMode === 'search' && mode === 'nearby') {
-			searchInputValue = '';
-		}
-		previousMode = mode;
-	}
 	// Show "zoom in" message when:
 	// 1. Below zoom 11 (always - no data fetched at this level)
 	// 2. Between zoom 11-14 with no merchants (too many results in dense area)
@@ -210,15 +201,18 @@
 						/>
 						<input
 							bind:this={searchInput}
-							bind:value={searchInputValue}
-							on:input={handleSearchInput}
+							value={searchQuery}
+							on:input={(e) => {
+								merchantList.setSearchQuery(e.currentTarget.value);
+								handleSearchInput();
+							}}
 							on:keydown={handleSearchKeyDown}
 							type="search"
 							placeholder="e.g. pizza, cafe, atm..."
 							aria-label="Search for Bitcoin merchants"
 							class="w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pr-8 pl-9 text-sm text-primary focus:border-link focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus:border-white/30 [&::-webkit-search-cancel-button]:hidden"
 						/>
-						{#if searchInputValue}
+						{#if searchQuery}
 							<button
 								type="button"
 								on:click={handleClearSearch}
@@ -232,7 +226,7 @@
 					<CloseButton on:click={handleClose} />
 				</div>
 				<!-- Result count -->
-				{#if isSearching || searchResults.length > 0 || searchInputValue.length >= 3}
+				{#if isSearching || searchResults.length > 0 || searchQuery.length >= 3}
 					<p class="mt-2 text-xs text-body dark:text-white/70" aria-live="polite">
 						{#if isSearching}
 							Searching...
@@ -305,7 +299,7 @@
 					<div class="flex items-center justify-center py-8" role="status" aria-label="Searching">
 						<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
 					</div>
-				{:else if searchResults.length === 0 && searchInputValue.length >= 3}
+				{:else if searchResults.length === 0 && searchQuery.length >= 3}
 					<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
 						No results found
 					</div>

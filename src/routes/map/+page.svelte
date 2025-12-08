@@ -225,7 +225,7 @@
 
 		if (query.length < 3) {
 			// Clear results but keep search mode (user is still typing)
-			merchantList.clearSearchResults();
+			merchantList.clearSearchInput();
 			return;
 		}
 
@@ -253,7 +253,7 @@
 			}
 			console.error('Search error:', error);
 			errToast('Search temporarily unavailable');
-			merchantList.clearSearch();
+			merchantList.exitSearchMode();
 		}
 	};
 
@@ -265,19 +265,10 @@
 		debouncedPanelSearch(query);
 	};
 
-	const clearSearchInput = () => {
-		// Abort any in-flight search request when clearing input
-		searchAbortController?.abort();
-		merchantList.clearSearchResults();
-	};
-
 	const handleModeChange = (mode: MerchantListMode) => {
-		// Abort any in-flight search when switching away from search mode
+		// Panel already handled the mode change via exitSearchMode(), just update the list
 		if (mode === 'nearby') {
 			searchAbortController?.abort();
-		}
-		merchantList.setMode(mode);
-		if (mode === 'nearby') {
 			updateMerchantList();
 		}
 	};
@@ -1155,7 +1146,6 @@
 			}
 		}}
 		onSearch={handlePanelSearch}
-		onClearSearch={clearSearchInput}
 		onModeChange={handleModeChange}
 		{currentZoom}
 	/>
