@@ -265,8 +265,8 @@
 		debouncedPanelSearch(query);
 	};
 
-	const clearSearch = () => {
-		merchantList.clearSearch();
+	const clearSearchInput = () => {
+		merchantList.clearSearchResults();
 	};
 
 	const handleModeChange = (mode: MerchantListMode) => {
@@ -1131,7 +1131,7 @@
 			}
 		}}
 		onSearch={handlePanelSearch}
-		onClearSearch={clearSearch}
+		onClearSearch={clearSearchInput}
 		onModeChange={handleModeChange}
 		{currentZoom}
 	/>
