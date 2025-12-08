@@ -50,7 +50,7 @@
 		"maplibre-gl": "^4.7.1",
 		"marked": "^17.0.1",
 		"qrcode": "^1.5.4",
-		"svelte-eslint-parser": "^1.4.0",
+		"svelte-eslint-parser": "^1.4.1",
 		"svelte-outclick": "^3.7.1",
 		"svelte-time": "^1.0.0",
 		"svg-captcha": "^1.4.0",
