@@ -124,8 +124,11 @@
 			onPanToNearbyMerchant?.(place);
 		}
 
-		// Close panel so drawer is visible (keeps data for quick reopen)
-		merchantList.close();
+		// On mobile, close panel so drawer is visible (panel is fullscreen)
+		// On desktop, keep panel open (list and drawer coexist side by side)
+		if (browser && window.innerWidth < BREAKPOINTS.md) {
+			merchantList.close();
+		}
 	}
 
 	function handleMouseEnter(event: CustomEvent<Place>) {
