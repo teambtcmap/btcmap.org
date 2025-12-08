@@ -1182,7 +1182,9 @@
 				class="fixed right-4 bottom-[40px] z-[1000] flex items-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-medium
 					shadow-lg transition-colors hover:bg-gray-50 md:top-[10px] md:right-auto
 					md:bottom-auto md:left-[60px] md:rounded-lg md:px-3 md:py-2 dark:bg-dark dark:hover:bg-white/10
-					{$merchantList.isOpen || $merchantDrawer.isOpen ? 'max-md:hidden' : ''}"
+					{($merchantList.isOpen && $merchantList.isExpanded) || $merchantDrawer.isOpen
+					? 'max-md:hidden'
+					: ''}"
 				style="filter: drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3));"
 				aria-label={$merchantList.isOpen ? 'Expand merchant list' : 'Open merchant list'}
 				aria-expanded={$merchantList.isOpen}

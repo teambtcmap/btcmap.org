@@ -86,6 +86,16 @@
 	$: mode = $merchantList.mode;
 	$: searchResults = $merchantList.searchResults;
 	$: isSearching = $merchantList.isSearching;
+
+	// Track previous mode to detect changes from external sources (e.g., nearby button on map)
+	let previousMode: MerchantListMode = 'nearby';
+	$: if (mode !== previousMode) {
+		// When switching from search to nearby (from any source), clear local search input
+		if (previousMode === 'search' && mode === 'nearby') {
+			searchInputValue = '';
+		}
+		previousMode = mode;
+	}
 	// Show "zoom in" message when:
 	// 1. Below zoom 11 (always - no data fetched at this level)
 	// 2. Between zoom 11-14 with no merchants (too many results in dense area)
@@ -124,7 +134,7 @@
 			onPanToNearbyMerchant?.(place);
 		}
 
-		// On mobile, close the list panel so the drawer is visible
+		// On mobile, collapse the list panel so the drawer is visible
 		if (browser && window.innerWidth < BREAKPOINTS.md) {
 			merchantList.collapse();
 		}
