@@ -18,44 +18,16 @@
 		ensureBoostData,
 		clearBoostState
 	} from '$lib/merchantDrawerLogic';
-
-	// Gesture constants
-	const PEEK_HEIGHT = 140; // Collapsed state height - shows merchant name and quick info
-	const VELOCITY_THRESHOLD = 0.5; // px/ms - minimum velocity for flick gesture detection
-	const DISTANCE_THRESHOLD = 80; // px - minimum drag distance to trigger snap
-	const DISMISS_THRESHOLD = 60; // px - drag distance below peek to trigger dismiss
-	const POSITION_THRESHOLD_PERCENT = 0.3; // When to snap up vs down (30% of total height)
-	const VELOCITY_SAMPLE_COUNT = 5; // Number of velocity samples for smoothing
-	const SPRING_CONFIG = { stiffness: 0.2, damping: 0.75 }; // Animation feel - smooth but responsive
-
-	// Helper function to determine snap state based on gesture
-	function determineSnapState(
-		velocity: number,
-		totalDelta: number,
-		finalHeight: number,
-		EXPANDED_HEIGHT: number
-	): { expanded: boolean; height: number } {
-		// Snap decision based on velocity first, then distance
-		if (Math.abs(velocity) > VELOCITY_THRESHOLD) {
-			if (velocity > 0) {
-				return { expanded: true, height: EXPANDED_HEIGHT };
-			} else {
-				return { expanded: false, height: PEEK_HEIGHT };
-			}
-		} else if (totalDelta > DISTANCE_THRESHOLD) {
-			return { expanded: true, height: EXPANDED_HEIGHT };
-		} else if (totalDelta < -DISTANCE_THRESHOLD) {
-			return { expanded: false, height: PEEK_HEIGHT };
-		} else {
-			// Small movement - snap to nearest based on current position
-			const threshold = PEEK_HEIGHT + (EXPANDED_HEIGHT - PEEK_HEIGHT) * POSITION_THRESHOLD_PERCENT;
-			if (finalHeight > threshold) {
-				return { expanded: true, height: EXPANDED_HEIGHT };
-			} else {
-				return { expanded: false, height: PEEK_HEIGHT };
-			}
-		}
-	}
+	import {
+		PEEK_HEIGHT,
+		VELOCITY_THRESHOLD,
+		VELOCITY_SAMPLE_COUNT,
+		SPRING_CONFIG,
+		DISMISS_THRESHOLD,
+		SCROLL_DRAG_THRESHOLD,
+		SCROLL_TOP_THRESHOLD
+	} from '$lib/drawerConfig';
+	import { determineSnapState } from '$lib/drawerGestureUtils';
 
 	// Derive state from centralized store
 	$: isOpen = $merchantDrawer.isOpen;
@@ -91,10 +63,8 @@
 	// Scroll-aware drag state for expanded mode (touch-based for better control)
 	let touchStartY: number | null = null;
 	let isInCollapseDrag = false;
-	const SCROLL_DRAG_THRESHOLD = 10; // px to decide drag vs scroll
-	const SCROLL_TOP_THRESHOLD = 1; // px tolerance for scroll position (handles browser rounding)
 
-	// Shared velocity tracking helper to reduce duplication
+	// Velocity tracking helper (mutates local state for efficiency)
 	function updateVelocityTracking(currentY: number, currentTime: number) {
 		const timeDelta = currentTime - lastTime;
 		if (timeDelta > 0) {
