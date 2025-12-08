@@ -82,6 +82,12 @@
 	// DOM reference
 	let handleElement: HTMLDivElement;
 	let capturedElement: HTMLElement | null = null;
+	let contentScrollElement: HTMLDivElement | null = null;
+
+	// Scroll-aware drag state for expanded mode
+	let pendingDragStart: { y: number; time: number } | null = null;
+	let isScrollDragMode = false;
+	const SCROLL_DRAG_THRESHOLD = 10; // px to decide drag vs scroll
 
 	// Track previous state to reset drawer when merchant changes
 	let previousMerchantId: number | null = null;
@@ -304,6 +310,65 @@
 		}
 	}
 
+	// Scroll-aware handlers for expanded content area (Google Maps style)
+	function handleContentPointerDown(event: PointerEvent) {
+		if (!expanded || activePointerId !== null) return;
+		pendingDragStart = { y: event.clientY, time: Date.now() };
+		isScrollDragMode = false;
+	}
+
+	function handleContentPointerMove(event: PointerEvent) {
+		if (!expanded || !pendingDragStart) return;
+
+		const scrollTop = contentScrollElement?.scrollTop ?? 0;
+		const deltaY = event.clientY - pendingDragStart.y;
+
+		// At scroll top AND dragging down past threshold → enter drag mode
+		if (scrollTop === 0 && deltaY > SCROLL_DRAG_THRESHOLD && !isScrollDragMode) {
+			isScrollDragMode = true;
+
+			// Initialize standard drag state
+			activePointerId = event.pointerId;
+			isDragging = true;
+			startY = event.clientY;
+			initialHeight = $drawerHeight;
+			lastY = event.clientY;
+			lastTime = Date.now();
+			velocitySamples = [];
+			velocity = 0;
+
+			// Capture pointer
+			const target = event.currentTarget as HTMLElement;
+			if (target) {
+				try {
+					target.setPointerCapture(event.pointerId);
+					capturedElement = target;
+				} catch {
+					// Pointer capture not supported or failed
+				}
+			}
+			event.preventDefault();
+		} else if (isScrollDragMode && activePointerId === event.pointerId) {
+			handlePointerMove(event);
+		}
+	}
+
+	function handleContentPointerUp(event: PointerEvent) {
+		if (isScrollDragMode && activePointerId === event.pointerId) {
+			handlePointerUp(event);
+		}
+		pendingDragStart = null;
+		isScrollDragMode = false;
+	}
+
+	function handleContentPointerCancel(event: PointerEvent) {
+		if (isScrollDragMode && activePointerId === event.pointerId) {
+			handlePointerCancel(event);
+		}
+		pendingDragStart = null;
+		isScrollDragMode = false;
+	}
+
 	export function openDrawer(id: number) {
 		merchantDrawer.open(id, 'details');
 	}
@@ -375,7 +440,7 @@
 		</div>
 
 		<!-- Scrollable content area -->
-		<div class="min-h-0 flex-1 overflow-y-auto">
+		<div bind:this={contentScrollElement} class="min-h-0 flex-1 overflow-y-auto">
 			{#if !merchant && fetchingMerchant}
 				<div class="space-y-4 px-4 pt-2 pb-4">
 					<div class="h-6 w-3/4 animate-pulse rounded-lg bg-link/50"></div>
@@ -403,7 +468,15 @@
 						/>
 					</div>
 				{:else}
-					<div class="px-6 pt-3 pb-6">
+					<!-- Expanded content wrapper with scroll-aware swipe handlers -->
+					<div
+						class="px-6 pt-3 pb-6"
+						style="touch-action: pan-y;"
+						on:pointerdown={handleContentPointerDown}
+						on:pointermove={handleContentPointerMove}
+						on:pointerup={handleContentPointerUp}
+						on:pointercancel={handleContentPointerCancel}
+					>
 						{#if drawerView === 'boost'}
 							<BoostContent merchantId={merchant.id} onComplete={handleBoostComplete} />
 						{:else}
