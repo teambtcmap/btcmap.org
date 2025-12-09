@@ -4,7 +4,9 @@
 	export let routes: Routes;
 </script>
 
-<div class="mx-auto flex w-full flex-wrap items-center gap-3 px-4 py-5 xl:w-[1200px] xl:px-0">
+<div
+	class="-mx-10 flex w-full flex-wrap items-center gap-3 px-4 py-5 md:mx-auto xl:w-[1200px] xl:px-0"
+>
 	{#each routes as route, index (index)}
 		<!-- eslint-disable svelte/no-navigation-without-resolve -->
 		<a

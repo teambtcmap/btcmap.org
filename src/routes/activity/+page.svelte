@@ -1,6 +1,4 @@
 <script lang="ts">
-	import Footer from '$components/layout/Footer.svelte';
-	import Header from '$components/layout/Header.svelte';
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import LatestTagger from '$components/LatestTagger.svelte';
 	import TaggerSkeleton from '$components/TaggerSkeleton.svelte';
@@ -98,74 +96,65 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/activity.png" />
 </svelte:head>
 
-<div class="bg-teal dark:bg-dark">
-	<Header />
-	<div class="mx-auto w-10/12 xl:w-[1200px]">
-		<main class="mt-10 mb-20 space-y-10">
-			{#if typeof window !== 'undefined'}
-				<h1
-					class="{detectTheme() === 'dark' || $theme === 'dark'
-						? 'text-white'
-						: 'gradient'} text-center text-4xl !leading-tight font-semibold text-primary md:text-5xl lg:text-left dark:text-white"
-				>
-					Activity
-				</h1>
-			{:else}
-				<HeaderPlaceholder />
-			{/if}
+<main class="mt-10 mb-20 space-y-10">
+	{#if typeof window !== 'undefined'}
+		<h1
+			class="{detectTheme() === 'dark' || $theme === 'dark'
+				? 'text-white'
+				: 'gradient'} text-center text-4xl !leading-tight font-semibold text-primary md:text-5xl lg:text-left dark:text-white"
+		>
+			Activity
+		</h1>
+	{:else}
+		<HeaderPlaceholder />
+	{/if}
 
-			<h2
-				class="w-full text-center text-xl font-semibold text-primary lg:w-[675px] lg:text-left dark:text-white"
+	<h2
+		class="w-full text-center text-xl font-semibold text-primary lg:w-[675px] lg:text-left dark:text-white"
+	>
+		Shadowy Supertaggers don’t sleep. They are up all night, tagging away. The world we want is a
+		tag away.
+	</h2>
+
+	<p class="text-center text-xl text-primary lg:text-left dark:text-white">
+		You too can be a shadowy supertagging legend! What are you waiting for? <a
+			href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers-"
+			class="text-link transition-colors hover:text-hover">Get taggin’!</a
+		>
+	</p>
+
+	<section id="taggers">
+		<div class="w-full rounded-3xl border border-gray-300 dark:border-white/95 dark:bg-white/10">
+			<h3
+				class="border-b border-gray-300 p-5 text-center text-2xl font-semibold text-primary lg:text-left dark:border-white/95 dark:text-white"
 			>
-				Shadowy Supertaggers don’t sleep. They are up all night, tagging away. The world we want is
-				a tag away.
-			</h2>
+				Latest Supertaggers
+			</h3>
 
-			<p class="text-center text-xl text-primary lg:text-left dark:text-white">
-				You too can be a shadowy supertagging legend! What are you waiting for? <a
-					href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers-"
-					class="text-link transition-colors hover:text-hover">Get taggin’!</a
-				>
-			</p>
-
-			<section id="taggers">
-				<div
-					class="w-full rounded-3xl border border-gray-300 dark:border-white/95 dark:bg-white/10"
-				>
-					<h3
-						class="border-b border-gray-300 p-5 text-center text-2xl font-semibold text-primary lg:text-left dark:border-white/95 dark:text-white"
-					>
-						Latest Supertaggers
-					</h3>
-
-					<div class="space-y-5">
-						{#if latestTaggers}
-							{#each supertaggers as tagger (tagger['created_at'])}
-								<LatestTagger
-									location={tagger.location}
-									action={tagger.type}
-									user={tagger.tagger}
-									time={tagger['created_at']}
-									latest={tagger === supertaggers[0] ? true : false}
-									merchantId={tagger.merchantId}
-								/>
-							{/each}
-						{:else}
-							{#each Array(50) as _, index (index)}
-								<TaggerSkeleton />
-							{/each}
-						{/if}
-					</div>
-				</div>
-				<p class="text-center text-sm text-body lg:text-left dark:text-white">
-					*Data updated every 10 minutes
-				</p>
-				<div class="mt-10 flex justify-center">
-					<TopButton />
-				</div>
-			</section>
-		</main>
-
-		<Footer />
-	</div>
-</div>
+			<div class="space-y-5">
+				{#if latestTaggers}
+					{#each supertaggers as tagger (tagger['created_at'])}
+						<LatestTagger
+							location={tagger.location}
+							action={tagger.type}
+							user={tagger.tagger}
+							time={tagger['created_at']}
+							latest={tagger === supertaggers[0] ? true : false}
+							merchantId={tagger.merchantId}
+						/>
+					{/each}
+				{:else}
+					{#each Array(50) as _, index (index)}
+						<TaggerSkeleton />
+					{/each}
+				{/if}
+			</div>
+		</div>
+		<p class="text-center text-sm text-body lg:text-left dark:text-white">
+			*Data updated every 10 minutes
+		</p>
+		<div class="mt-10 flex justify-center">
+			<TopButton />
+		</div>
+	</section>
+</main>

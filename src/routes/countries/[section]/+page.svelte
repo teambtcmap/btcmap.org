@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import CountrySection from './components/CountrySection.svelte';
-	import Footer from '$components/layout/Footer.svelte';
-	import Header from '$components/layout/Header.svelte';
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import { areaError, areas, theme } from '$lib/store';
@@ -112,64 +110,55 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/countries.png" />
 </svelte:head>
 
-<div class="bg-teal dark:bg-dark">
-	<Header />
-	<div class="mx-auto w-10/12 xl:w-[1200px]">
-		<main class="my-10 space-y-10 text-center md:my-20">
-			{#if typeof window !== 'undefined'}
-				<h1
-					class="{detectTheme() === 'dark' || $theme === 'dark'
-						? 'text-white'
-						: 'gradient'} text-4xl !leading-tight font-semibold md:text-5xl"
+<main class="my-10 space-y-10 text-center md:my-20">
+	{#if typeof window !== 'undefined'}
+		<h1
+			class="{detectTheme() === 'dark' || $theme === 'dark'
+				? 'text-white'
+				: 'gradient'} text-4xl !leading-tight font-semibold md:text-5xl"
+		>
+			Bitcoin adoption by countries.
+		</h1>
+	{:else}
+		<HeaderPlaceholder />
+	{/if}
+
+	<h2 class="mx-auto w-full text-xl font-semibold text-primary lg:w-[800px] dark:text-white">
+		Your country? Your map!
+	</h2>
+
+	<PrimaryButton style="md:w-[200px] mx-auto py-3 rounded-xl" link="/countries/leaderboard">
+		View leaderboard
+	</PrimaryButton>
+
+	<div>
+		<div class="mb-5 justify-between md:flex">
+			{#if data.section}
+				<h2 class="mb-2 text-3xl font-semibold text-primary md:mb-0 md:text-left dark:text-white">
+					<a href={resolve(`/countries/${data.section}`)}
+						>{continentDisplayNames[data.section] || data.section}</a
+					>
+				</h2>
+
+				<select
+					class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link md:w-auto dark:bg-white/[0.15] dark:text-white"
+					value={data.section}
+					on:change={handleSectionChange}
 				>
-					Bitcoin adoption by countries.
-				</h1>
-			{:else}
-				<HeaderPlaceholder />
+					{#each sections as option (option)}
+						<option value={option}>{continentDisplayNames[option] || option}</option>
+					{/each}
+				</select>
 			{/if}
+		</div>
 
-			<h2 class="mx-auto w-full text-xl font-semibold text-primary lg:w-[800px] dark:text-white">
-				Your country? Your map!
-			</h2>
-
-			<PrimaryButton style="md:w-[200px] mx-auto py-3 rounded-xl" link="/countries/leaderboard">
-				View leaderboard
-			</PrimaryButton>
-
-			<div>
-				<div class="mb-5 justify-between md:flex">
-					{#if data.section}
-						<h2
-							class="mb-2 text-3xl font-semibold text-primary md:mb-0 md:text-left dark:text-white"
-						>
-							<a href={resolve(`/countries/${data.section}`)}
-								>{continentDisplayNames[data.section] || data.section}</a
-							>
-						</h2>
-
-						<select
-							class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link md:w-auto dark:bg-white/[0.15] dark:text-white"
-							value={data.section}
-							on:change={handleSectionChange}
-						>
-							{#each sections as option (option)}
-								<option value={option}>{continentDisplayNames[option] || option}</option>
-							{/each}
-						</select>
-					{/if}
-				</div>
-
-				{#each countrySections as item (item.section)}
-					{#if continentDisplayNames[data.section] === item.section}
-						<CountrySection countries={item.countries} />
-					{/if}
-				{/each}
-			</div>
-		</main>
-
-		<Footer />
+		{#each countrySections as item (item.section)}
+			{#if continentDisplayNames[data.section] === item.section}
+				<CountrySection countries={item.countries} />
+			{/if}
+		{/each}
 	</div>
-</div>
+</main>
 
 {#if typeof window !== 'undefined'}
 	{#if detectTheme() === 'dark' || $theme === 'dark'}

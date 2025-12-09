@@ -9,6 +9,12 @@
 	export let bottom: string;
 
 	let show = false;
+
+	import { afterNavigate } from '$app/navigation';
+
+	afterNavigate(() => {
+		show = false;
+	});
 </script>
 
 <!-- dropdown menu -->
