@@ -8,15 +8,13 @@ import { get } from 'svelte/store';
 import rewind from '@mapbox/geojson-rewind';
 import { geoContains } from 'd3-geo';
 import DOMPurify from 'dompurify';
-import {
-	parseISO,
-	isThisYear,
-	isAfter,
-	subDays,
-	format,
-	formatDistanceToNow,
-	isToday
-} from 'date-fns';
+import { parseISO } from 'date-fns/parseISO';
+import { isThisYear } from 'date-fns/isThisYear';
+import { isAfter } from 'date-fns/isAfter';
+import { subDays } from 'date-fns/subDays';
+import { format } from 'date-fns/format';
+import { formatDistanceToNow } from 'date-fns/formatDistanceToNow';
+import { isToday } from 'date-fns/isToday';
 
 // Yields to main thread to prevent UI freezes during heavy operations (browser-only)
 export function yieldToMain(): Promise<void> {

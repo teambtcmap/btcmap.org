@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { ActivityEvent } from '$lib/types';
-	import { format } from 'date-fns';
+	import { format } from 'date-fns/format';
 	import { createEventDispatcher } from 'svelte';
 	import { resolve } from '$app/paths';
 

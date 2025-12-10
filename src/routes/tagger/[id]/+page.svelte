@@ -30,7 +30,7 @@
 	import { batchSync } from '$lib/sync/batchSync';
 	import { errToast, formatElementID } from '$lib/utils';
 	import Chart from 'chart.js/auto';
-	import { format } from 'date-fns';
+	import { format } from 'date-fns/format';
 	import DOMPurify from 'dompurify';
 	import { marked } from 'marked';
 	import { onMount } from 'svelte';
