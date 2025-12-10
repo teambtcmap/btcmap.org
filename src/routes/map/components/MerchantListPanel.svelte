@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { onDestroy } from 'svelte';
+	import { tick, onDestroy } from 'svelte';
 	import { fly } from 'svelte/transition';
-	import { merchantList } from '$lib/merchantListStore';
+	import { merchantList, type MerchantListMode } from '$lib/merchantListStore';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import MerchantListItem from './MerchantListItem.svelte';
 	import CloseButton from '$components/CloseButton.svelte';
@@ -12,28 +12,80 @@
 	import {
 		MERCHANT_LIST_WIDTH,
 		MERCHANT_LIST_MIN_ZOOM,
-		MERCHANT_LIST_LOW_ZOOM
+		MERCHANT_LIST_LOW_ZOOM,
+		BREAKPOINTS
 	} from '$lib/constants';
 	import { calcVerifiedDate } from '$lib/merchantDrawerLogic';
+
+	// Reduced motion preference for animations
+	const reducedMotion = browser && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 	// Compute once for all list items
 	const verifiedDate = calcVerifiedDate();
 
-	// Callback to pan map when a merchant is clicked from the list
-	export let onPanToPlace: ((place: Place) => void) | undefined = undefined;
+	// Callback to pan to a nearby merchant (already zoomed in, just center it)
+	export let onPanToNearbyMerchant: ((place: Place) => void) | undefined = undefined;
+	// Callback to zoom to a search result (may be far away, need to fly there)
+	export let onZoomToSearchResult: ((place: Place) => void) | undefined = undefined;
 	// Callbacks for hover highlighting
 	export let onHoverStart: ((place: Place) => void) | undefined = undefined;
 	export let onHoverEnd: ((place: Place) => void) | undefined = undefined;
 	// Current zoom level to determine if we should show "zoom in" message
 	export let currentZoom: number = 0;
+	// Search callback - called when user types in search input
+	export let onSearch: ((query: string) => void) | undefined = undefined;
+	// Mode change callback (called for nearby mode switch)
+	export let onModeChange: ((mode: MerchantListMode) => void) | undefined = undefined;
+
+	// Reference for search input element
+	let searchInput: HTMLInputElement;
+
+	// Body scroll lock for mobile (prevents iOS background scroll)
+	let scrollLockActive = false;
+
+	// Reference for focus trap
+	let panelElement: HTMLElement;
+
+	function handleSearchInput() {
+		onSearch?.($merchantList.searchQuery);
+	}
+
+	function handleClearSearch() {
+		merchantList.clearSearchInput();
+		// Trigger onSearch to abort any pending request (same as typing empty query)
+		onSearch?.('');
+		searchInput?.focus();
+	}
+
+	function handleSearchKeyDown(event: KeyboardEvent) {
+		if (event.key === 'Escape' && $merchantList.searchQuery) {
+			event.preventDefault();
+			event.stopPropagation();
+			handleClearSearch();
+		}
+	}
+
+	function handleModeSwitch(newMode: MerchantListMode) {
+		if (newMode === mode) return;
+		if (newMode === 'nearby') {
+			merchantList.exitSearchMode();
+			onModeChange?.(newMode);
+		} else {
+			merchantList.setMode(newMode);
+		}
+	}
 
 	$: isOpen = $merchantList.isOpen;
-	$: isExpanded = $merchantList.isExpanded;
 	$: merchants = $merchantList.merchants;
 	$: totalCount = $merchantList.totalCount;
 	$: placeDetailsCache = $merchantList.placeDetailsCache;
 	$: isLoadingList = $merchantList.isLoadingList;
 	$: selectedId = $merchantDrawer.merchantId;
+	$: mode = $merchantList.mode;
+	$: searchResults = $merchantList.searchResults;
+	$: isSearching = $merchantList.isSearching;
+	$: searchQuery = $merchantList.searchQuery;
+
 	// Show "zoom in" message when:
 	// 1. Below zoom 11 (always - no data fetched at this level)
 	// 2. Between zoom 11-14 with no merchants (too many results in dense area)
@@ -42,11 +94,41 @@
 		(currentZoom < MERCHANT_LIST_MIN_ZOOM && merchants.length === 0);
 	$: isTruncated = totalCount > merchants.length;
 
+	// Body scroll lock on mobile when panel is open
+	$: if (browser && isOpen !== undefined) {
+		const isMobile = window.innerWidth < BREAKPOINTS.md;
+		const shouldLock = isOpen && isMobile;
+		if (shouldLock && !scrollLockActive) {
+			document.body.style.overflow = 'hidden';
+			scrollLockActive = true;
+		} else if (!shouldLock && scrollLockActive) {
+			document.body.style.overflow = '';
+			scrollLockActive = false;
+		}
+	}
+
+	// Focus search input when panel opens in search mode
+	$: if (browser && isOpen && mode === 'search' && searchInput) {
+		tick().then(() => searchInput?.focus());
+	}
+
 	function handleItemClick(event: CustomEvent<Place>) {
 		const place = event.detail;
 		merchantDrawer.open(place.id, 'details');
-		// Pan to merchant only when clicked from list (not from map markers)
-		onPanToPlace?.(place);
+
+		if (mode === 'search') {
+			// Search result: zoom to location (may be far from current view)
+			onZoomToSearchResult?.(place);
+		} else {
+			// Nearby merchant: pan only (already zoomed in)
+			onPanToNearbyMerchant?.(place);
+		}
+
+		// On mobile, close panel so drawer is visible (panel is fullscreen)
+		// On desktop, keep panel open (list and drawer coexist side by side)
+		if (browser && window.innerWidth < BREAKPOINTS.md) {
+			merchantList.close();
+		}
 	}
 
 	function handleMouseEnter(event: CustomEvent<Place>) {
@@ -58,70 +140,201 @@
 	}
 
 	function handleClose() {
-		merchantList.collapse();
+		merchantList.close();
 	}
 
-	function handleKeydown(event: KeyboardEvent) {
+	function handleWindowKeydown(event: KeyboardEvent) {
+		if (!isOpen) return;
+
+		// Focus trap: cycle Tab within the panel to prevent focus escaping to background
+		if (event.key === 'Tab' && panelElement) {
+			const focusable = panelElement.querySelectorAll<HTMLElement>(
+				'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+			);
+			const first = focusable[0];
+			const last = focusable[focusable.length - 1];
+
+			if (event.shiftKey && document.activeElement === first) {
+				event.preventDefault();
+				last?.focus();
+			} else if (!event.shiftKey && document.activeElement === last) {
+				event.preventDefault();
+				first?.focus();
+			}
+		}
+
 		if (event.key === 'Escape') {
 			event.preventDefault();
 			handleClose();
 		}
 	}
 
-	// Track listener state to prevent accumulation
-	let listenerAttached = false;
-
-	// Scope keydown listener to when panel is open
-	$: if (browser) {
-		if (isOpen && !listenerAttached) {
-			window.addEventListener('keydown', handleKeydown);
-			listenerAttached = true;
-		} else if (!isOpen && listenerAttached) {
-			window.removeEventListener('keydown', handleKeydown);
-			listenerAttached = false;
-		}
-	}
-
+	// Cleanup scroll lock when component is destroyed
 	onDestroy(() => {
-		if (browser && listenerAttached) {
-			window.removeEventListener('keydown', handleKeydown);
-			listenerAttached = false;
+		if (browser && scrollLockActive) {
+			document.body.style.overflow = '';
 		}
 	});
 </script>
 
-{#if isOpen && isExpanded}
+<svelte:window on:keydown={handleWindowKeydown} />
+
+{#if isOpen}
 	<section
-		class="hidden flex-none flex-col overflow-hidden border-r border-white/10 bg-white md:flex dark:border-white/5 dark:bg-dark"
-		style="width: {MERCHANT_LIST_WIDTH}px"
+		bind:this={panelElement}
+		class="absolute inset-0 z-[1001] flex flex-col overflow-hidden bg-white md:relative md:inset-auto md:z-auto md:w-80 md:flex-none md:border-r md:border-white/10 dark:border-white/5 dark:bg-dark"
 		role="complementary"
 		aria-label="Merchant list"
-		transition:fly={{ x: -MERCHANT_LIST_WIDTH, duration: 200 }}
+		transition:fly={{ x: -MERCHANT_LIST_WIDTH, duration: reducedMotion ? 0 : 200 }}
 	>
 		<!-- Header -->
 		<div
-			class="flex shrink-0 items-center justify-between border-b border-gray-200 bg-white px-3 py-3 dark:border-white/10 dark:bg-dark"
+			class="shrink-0 border-b border-gray-200 bg-white px-3 py-3 dark:border-white/10 dark:bg-dark"
 		>
-			<div>
-				<h2 class="text-sm font-semibold text-primary dark:text-white">Nearby Merchants</h2>
-				{#if showZoomInMessage}
-					<p class="text-xs text-body dark:text-white/70">Zoom in to see list</p>
-				{:else if isTruncated}
-					<p class="text-xs text-body dark:text-white/70">
-						Showing {merchants.length} nearest of {totalCount}
-					</p>
-				{:else}
-					<p class="text-xs text-body dark:text-white/70">
-						{merchants.length} location{merchants.length !== 1 ? 's' : ''} in view
+			{#if mode === 'search'}
+				<!-- Search mode: search input -->
+				<div class="flex items-center gap-2">
+					<div class="relative flex-1">
+						<Icon
+							w="16"
+							h="16"
+							icon="search"
+							type="material"
+							style="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/50 pointer-events-none"
+						/>
+						<input
+							bind:this={searchInput}
+							value={searchQuery}
+							on:input={(e) => {
+								merchantList.setSearchQuery(e.currentTarget.value);
+								handleSearchInput();
+							}}
+							on:keydown={handleSearchKeyDown}
+							type="search"
+							placeholder="e.g. pizza, cafe, atm..."
+							aria-label="Search for Bitcoin merchants"
+							class="w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pr-8 pl-9 text-sm text-primary focus:border-link focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus:border-white/30 [&::-webkit-search-cancel-button]:hidden"
+						/>
+						{#if searchQuery}
+							<button
+								type="button"
+								on:click={handleClearSearch}
+								class="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:text-white/50 dark:hover:text-white/70"
+								aria-label="Clear search"
+							>
+								<Icon w="14" h="14" icon="close" type="material" />
+							</button>
+						{/if}
+					</div>
+					<CloseButton on:click={handleClose} />
+				</div>
+				<!-- Result count -->
+				{#if isSearching || searchResults.length > 0 || searchQuery.length >= 3}
+					<p class="mt-2 text-xs text-body dark:text-white/70" aria-live="polite">
+						{#if isSearching}
+							Searching...
+						{:else if searchResults.length === 0}
+							No results found
+						{:else}
+							{searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
+						{/if}
 					</p>
 				{/if}
+			{:else}
+				<!-- Nearby mode: title + count -->
+				<div class="flex items-center justify-between">
+					<div>
+						<h2 class="text-sm font-semibold text-primary dark:text-white">Nearby Merchants</h2>
+						{#if showZoomInMessage}
+							<p class="text-xs text-body dark:text-white/70">Zoom in to see list</p>
+						{:else if isTruncated}
+							<p class="text-xs text-body dark:text-white/70">
+								Showing {merchants.length} nearest of {totalCount}
+							</p>
+						{:else}
+							<p class="text-xs text-body dark:text-white/70">
+								{merchants.length} location{merchants.length !== 1 ? 's' : ''} in view
+							</p>
+						{/if}
+					</div>
+					<CloseButton on:click={handleClose} />
+				</div>
+			{/if}
+
+			<!-- Mode toggle buttons -->
+			<div
+				class="mt-3 flex rounded-lg bg-gray-100 p-1 dark:bg-white/5"
+				role="radiogroup"
+				aria-label="View mode"
+			>
+				<button
+					type="button"
+					role="radio"
+					on:click={() => handleModeSwitch('search')}
+					aria-checked={mode === 'search'}
+					class="flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors
+						{mode === 'search'
+						? 'bg-white text-primary shadow-sm dark:bg-white/10 dark:text-white'
+						: 'text-body hover:text-primary dark:text-white/70 dark:hover:text-white'}"
+				>
+					Search
+				</button>
+				<button
+					type="button"
+					role="radio"
+					on:click={() => handleModeSwitch('nearby')}
+					aria-checked={mode === 'nearby'}
+					class="flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors
+						{mode === 'nearby'
+						? 'bg-white text-primary shadow-sm dark:bg-white/10 dark:text-white'
+						: 'text-body hover:text-primary dark:text-white/70 dark:hover:text-white'}"
+				>
+					Nearby
+				</button>
 			</div>
-			<CloseButton on:click={handleClose} />
 		</div>
 
 		<!-- List content -->
 		<div class="flex-1 overflow-y-auto">
-			{#if showZoomInMessage}
+			{#if mode === 'search'}
+				<!-- Search results -->
+				{#if isSearching}
+					<div class="flex items-center justify-center py-8" role="status" aria-label="Searching">
+						<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
+					</div>
+				{:else if searchResults.length === 0 && searchQuery.length >= 3}
+					<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
+						No results found
+					</div>
+				{:else if searchResults.length === 0}
+					<!-- Empty state: user hasn't searched yet -->
+					<div class="flex flex-col items-center justify-center gap-3 px-4 py-12 text-center">
+						<Icon
+							w="48"
+							h="48"
+							icon="search"
+							type="material"
+							style="text-gray-300 dark:text-white/30"
+						/>
+						<p class="text-sm text-body dark:text-white/70">Search for merchants by name</p>
+					</div>
+				{:else}
+					<ul class="divide-y divide-gray-100 dark:divide-white/5">
+						{#each searchResults as merchant (merchant.id)}
+							<MerchantListItem
+								{merchant}
+								enrichedData={merchant}
+								isSelected={selectedId === merchant.id}
+								{verifiedDate}
+								on:click={handleItemClick}
+								on:mouseenter={handleMouseEnter}
+								on:mouseleave={handleMouseLeave}
+							/>
+						{/each}
+					</ul>
+				{/if}
+			{:else if showZoomInMessage}
+				<!-- Nearby mode: zoom in message -->
 				<div class="flex flex-col items-center justify-center gap-3 px-4 py-12 text-center">
 					<Icon
 						w="48"
@@ -140,7 +353,11 @@
 					</div>
 				</div>
 			{:else if isLoadingList}
-				<div class="flex items-center justify-center py-8">
+				<div
+					class="flex items-center justify-center py-8"
+					role="status"
+					aria-label="Loading nearby merchants"
+				>
 					<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
 				</div>
 			{:else if merchants.length === 0}
@@ -148,6 +365,7 @@
 					No merchants visible in current view
 				</div>
 			{:else}
+				<!-- Nearby mode: merchant list -->
 				<ul class="divide-y divide-gray-100 dark:divide-white/5">
 					{#each merchants as merchant (merchant.id)}
 						<MerchantListItem

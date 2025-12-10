@@ -6,10 +6,9 @@
 	import MapLoadingMain from '$components/MapLoadingMain.svelte';
 	import TileLoadingIndicator from './components/TileLoadingIndicator.svelte';
 	import MerchantDrawerHash from './components/MerchantDrawerHash.svelte';
-	import MerchantListMobile from './components/MerchantListMobile.svelte';
 	import MerchantListPanel from './components/MerchantListPanel.svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
-	import { merchantList } from '$lib/merchantListStore';
+	import { merchantList, type MerchantListMode } from '$lib/merchantListStore';
 	import {
 		BREAKPOINTS,
 		MERCHANT_DRAWER_WIDTH,
@@ -50,7 +49,7 @@
 		placesLoadingStatus,
 		placesLoadingProgress
 	} from '$lib/store';
-	import type { Leaflet, Place, SearchItem } from '$lib/types';
+	import type { Leaflet, Place } from '$lib/types';
 	import { debounce, detectTheme, errToast, isBoosted } from '$lib/utils';
 	import type { Control, LatLng, LatLngBounds, Map, Marker, MarkerClusterGroup } from 'leaflet';
 	import localforage from 'localforage';
@@ -149,9 +148,6 @@
 
 	let mapCenter: LatLng;
 
-	// Timer for search focus out (tracked for cleanup)
-	let searchFocusOutTimer: ReturnType<typeof setTimeout> | null = null;
-
 	// Calculate radius from map center to corner (Haversine formula)
 	const calculateRadiusKm = (bounds: LatLngBounds): number => {
 		const center = bounds.getCenter();
@@ -219,160 +215,59 @@
 		}
 	};
 
-	let searchContainer: HTMLDivElement;
-	let clearSearchButton: HTMLButtonElement;
-	let showSearch = false;
-	let search: string;
-	let searchStatus: boolean;
-	let searchResults: SearchItem[] = [];
-	let isDropdownOpen = false;
+	// Track current search request for cancellation
+	let searchAbortController: AbortController | null = null;
 
-	// API-based search functions using documented places search API
-	const apiSearch = async () => {
-		if (search.length < 3) {
-			searchResults = [];
-			searchStatus = false;
-			isDropdownOpen = false;
+	// Core search function
+	const executeSearch = async (query: string) => {
+		// Cancel any in-flight search request
+		searchAbortController?.abort();
+
+		if (query.length < 3) {
 			return;
 		}
 
-		searchStatus = true;
-		isDropdownOpen = true;
+		searchAbortController = new AbortController();
+
+		// Close any open merchant drawer so it doesn't cover the search results
+		merchantDrawer.close();
+		merchantList.openSearchMode(true);
 
 		try {
-			const response = await fetch(`/api/search/places?name=${encodeURIComponent(search)}`);
+			const response = await fetch(`/api/search/places?name=${encodeURIComponent(query)}`, {
+				signal: searchAbortController.signal
+			});
 
 			if (!response.ok) {
 				throw new Error('Search API error');
 			}
 
 			const places: Place[] = await response.json();
-
-			// Convert Place[] to SearchItem[] format expected by UI
-			searchResults = places.map((place) => ({
-				type: 'element' as const,
-				id: place.id,
-				name: place.name || 'Unknown',
-				address: place.address,
-				icon: place.icon
-			}));
+			merchantList.openWithSearchResults(query, places);
 		} catch (error) {
+			// Ignore aborted requests (user typed new query)
+			if (error instanceof Error && error.name === 'AbortError') {
+				return;
+			}
 			console.error('Search error:', error);
 			errToast('Search temporarily unavailable');
-			searchResults = [];
-		}
-
-		searchStatus = false;
-	};
-
-	const searchDebounce = debounce(() => apiSearch(), 300);
-
-	const clearSearch = () => {
-		search = '';
-		searchResults = [];
-		isDropdownOpen = false;
-	};
-
-	const handleSearchKeyDown = (e: KeyboardEvent) => {
-		if (e.key === 'Escape') {
-			e.preventDefault();
-			if (isDropdownOpen) {
-				isDropdownOpen = false;
-			} else {
-				clearSearch();
-			}
+			merchantList.exitSearchMode();
 		}
 	};
 
-	const handleSearchFocusOut = (_e: FocusEvent) => {
-		// Clear any pending timer to avoid stacking
-		if (searchFocusOutTimer) clearTimeout(searchFocusOutTimer);
-		// Small timeout to allow click events to fire first
-		searchFocusOutTimer = setTimeout(() => {
-			if (searchContainer && !searchContainer.contains(document.activeElement)) {
-				isDropdownOpen = false;
-			}
-		}, 200);
+	// Debounced search for panel input
+	const debouncedPanelSearch = debounce((query: string) => executeSearch(query), 300);
+
+	// Handler for panel search input
+	const handlePanelSearch = (query: string) => {
+		debouncedPanelSearch(query);
 	};
 
-	// Helper function to validate coordinate values
-	const isValidCoordinate = (lat: unknown, lon: unknown): lat is number => {
-		return (
-			typeof lat === 'number' &&
-			typeof lon === 'number' &&
-			!isNaN(lat) &&
-			!isNaN(lon) &&
-			lat >= -90 &&
-			lat <= 90 &&
-			lon >= -180 &&
-			lon <= 180
-		);
-	};
-
-	const searchSelect = async (result: SearchItem) => {
-		clearSearch();
-
-		// Use the numeric ID from the API response
-		const placeId = result.id;
-
-		// First, try to find the place in our local places store
-		const localPlace = $placesById.get(placeId);
-
-		if (localPlace && isValidCoordinate(localPlace.lat, localPlace.lon)) {
-			// Use local data if available
-			map.setView([localPlace.lat, localPlace.lon], 19);
-			showSearch = false;
-			return;
-		}
-
-		// If not in local store, fetch from v4/places API
-		try {
-			const response = await fetch(`https://api.btcmap.org/v4/places/${result.id}?fields=lat,lon`);
-
-			// Handle different HTTP status codes
-			if (!response.ok) {
-				if (response.status === 404) {
-					console.error(`Place not found: ${result.id}`);
-					errToast('Location not found');
-				} else if (response.status >= 500) {
-					console.error(`Server error: ${response.status}`);
-					errToast('Server temporarily unavailable');
-				} else {
-					console.error(`API error: ${response.status}`);
-					errToast('Location data unavailable');
-				}
-				return;
-			}
-
-			// Parse and validate response
-			let placeData: Pick<Place, 'lat' | 'lon'>;
-			try {
-				placeData = await response.json();
-			} catch (parseError) {
-				console.error('Failed to parse place coordinates response:', parseError);
-				errToast('Invalid location data received');
-				return;
-			}
-
-			// Validate coordinates
-			if (!isValidCoordinate(placeData.lat, placeData.lon)) {
-				console.error('Invalid coordinates received:', placeData);
-				errToast('Invalid location coordinates');
-				return;
-			}
-
-			// Navigate to location
-			map.setView([placeData.lat, placeData.lon], 19);
-			showSearch = false;
-		} catch (error) {
-			// Differentiate between network errors and other errors
-			if (error instanceof TypeError && error.message.includes('fetch')) {
-				console.error('Network error fetching place coordinates:', error);
-				errToast('Network connection error');
-			} else {
-				console.error('Unexpected error fetching place coordinates:', error);
-				errToast('Could not navigate to location');
-			}
+	const handleModeChange = (mode: MerchantListMode) => {
+		// Panel already handled the mode change via exitSearchMode(), just update the list
+		if (mode === 'nearby') {
+			searchAbortController?.abort();
+			updateMerchantList();
 		}
 	};
 
@@ -569,6 +464,11 @@
 
 			upToDateLayer.addLayer(marker);
 			loadedMarkers[place.id.toString()] = marker;
+
+			// Highlight if this is the selected marker (may be pending from search result click)
+			if (selectedMarkerId === place.id) {
+				highlightMarker(place.id);
+			}
 		});
 	};
 
@@ -593,6 +493,58 @@
 		return 'none'; // Below zoom 11
 	}
 
+	// Zoom 17+: Fetch full merchant data from API with extended radius
+	const updateListApiExtended = (
+		center: LatLng,
+		bounds: LatLngBounds,
+		allowHeavyFetch: boolean
+	) => {
+		const viewportRadius = calculateRadiusKm(bounds);
+		const radiusKm = Math.max(viewportRadius * HIGH_ZOOM_RADIUS_MULTIPLIER, MIN_SEARCH_RADIUS_KM);
+		if (!$merchantList.isOpen && !allowHeavyFetch) {
+			merchantList.fetchCountOnly({ lat: center.lat, lon: center.lng }, radiusKm);
+		} else {
+			merchantList.fetchAndReplaceList({ lat: center.lat, lon: center.lng }, radiusKm);
+		}
+	};
+
+	// Zoom 15-16: Use locally loaded markers, optionally enrich with API data
+	const updateListLocalMarkers = (
+		center: LatLng,
+		bounds: LatLngBounds,
+		allowHeavyFetch: boolean
+	) => {
+		const visiblePlaces = $places.filter((place) => {
+			const markerId = place.id.toString();
+			if (!loadedMarkers[markerId]) return false;
+			return bounds.contains([place.lat, place.lon]);
+		});
+
+		merchantList.setMerchants(visiblePlaces, center.lat, center.lng);
+
+		if ($merchantList.isOpen && allowHeavyFetch) {
+			const radiusKm = calculateRadiusKm(bounds);
+			merchantList.fetchEnrichedDetails({ lat: center.lat, lon: center.lng }, radiusKm);
+		}
+	};
+
+	// Zoom 11-14: Fetch from API with result limit (may show "zoom in" message)
+	const updateListApiWithLimit = (
+		center: LatLng,
+		bounds: LatLngBounds,
+		allowHeavyFetch: boolean
+	) => {
+		const radiusKm = calculateRadiusKm(bounds);
+
+		if (!$merchantList.isOpen || !allowHeavyFetch) {
+			merchantList.fetchCountOnly({ lat: center.lat, lon: center.lng }, radiusKm);
+		} else {
+			merchantList.fetchAndReplaceList({ lat: center.lat, lon: center.lng }, radiusKm, {
+				hideIfExceeds: MERCHANT_LIST_MAX_ITEMS
+			});
+		}
+	};
+
 	// Update merchant list panel based on zoom level and visible places
 	const updateMerchantList = (opts?: { force?: boolean }) => {
 		if (!browser || !map) return;
@@ -609,49 +561,15 @@
 		const allowHeavyFetch = isDesktop || opts?.force || $merchantList.isOpen;
 
 		switch (behavior) {
-			case 'api-extended': {
-				const viewportRadius = calculateRadiusKm(bounds);
-				const radiusKm = Math.max(
-					viewportRadius * HIGH_ZOOM_RADIUS_MULTIPLIER,
-					MIN_SEARCH_RADIUS_KM
-				);
-				if (!$merchantList.isOpen && !allowHeavyFetch) {
-					merchantList.fetchCountOnly({ lat: center.lat, lon: center.lng }, radiusKm);
-				} else {
-					merchantList.fetchAndReplaceList({ lat: center.lat, lon: center.lng }, radiusKm);
-				}
+			case 'api-extended':
+				updateListApiExtended(center, bounds, allowHeavyFetch);
 				break;
-			}
-
-			case 'local-markers': {
-				const visiblePlaces = $places.filter((place) => {
-					const markerId = place.id.toString();
-					if (!loadedMarkers[markerId]) return false;
-					return bounds.contains([place.lat, place.lon]);
-				});
-
-				merchantList.setMerchants(visiblePlaces, center.lat, center.lng);
-
-				if ($merchantList.isOpen && allowHeavyFetch) {
-					const radiusKm = calculateRadiusKm(bounds);
-					merchantList.fetchEnrichedDetails({ lat: center.lat, lon: center.lng }, radiusKm);
-				}
+			case 'local-markers':
+				updateListLocalMarkers(center, bounds, allowHeavyFetch);
 				break;
-			}
-
-			case 'api-with-limit': {
-				const radiusKm = calculateRadiusKm(bounds);
-
-				if (!$merchantList.isOpen || !allowHeavyFetch) {
-					merchantList.fetchCountOnly({ lat: center.lat, lon: center.lng }, radiusKm);
-				} else {
-					merchantList.fetchAndReplaceList({ lat: center.lat, lon: center.lng }, radiusKm, {
-						hideIfExceeds: MERCHANT_LIST_MAX_ITEMS
-					});
-				}
+			case 'api-with-limit':
+				updateListApiWithLimit(center, bounds, allowHeavyFetch);
 				break;
-			}
-
 			case 'none':
 			default:
 				merchantList.setMerchants([], 0, 0);
@@ -661,21 +579,35 @@
 	// Debounced version to prevent excessive updates during pan/zoom
 	const debouncedUpdateMerchantList = debounce(updateMerchantList, DEBOUNCE_DELAY);
 
-	// Pan map to center selected merchant when clicked from list
-	const panToMerchantIfNeeded = (place: Place) => {
+	// Calculate drawer width for map offset (desktop only - mobile drawer is at bottom)
+	const getDrawerOffset = () => {
+		const mapSize = map!.getSize();
+		const isDesktop = mapSize.x >= BREAKPOINTS.md;
+		const drawerWidth = isDesktop && $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0;
+		const visibleCenterX = (mapSize.x - drawerWidth) / 2;
+		return { drawerWidth, visibleCenterX, mapSize };
+	};
+
+	// Shared helper: navigate map to a place with drawer offset compensation
+	const navigateToPlace = (
+		place: Place,
+		options: { targetZoom?: number; spiderfyCluster?: boolean } = {}
+	) => {
 		if (!map || !browser) return;
 
-		const panToPlace = () => {
-			// Always center the map on the merchant for clear visual feedback
-			// Account for drawer width by offsetting the center point
-			const drawerWidth = $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0;
-			const mapSize = map.getSize();
+		const { visibleCenterX, mapSize } = getDrawerOffset();
+		const { targetZoom, spiderfyCluster = false } = options;
 
-			// Calculate the center of the visible area (excluding drawer)
-			const visibleCenterX = (mapSize.x - drawerWidth) / 2;
+		if (targetZoom !== undefined) {
+			// Zoom to specific level: calculate offset at target zoom
+			const offsetX = mapSize.x / 2 - visibleCenterX;
+			const targetPoint = map.project([place.lat, place.lon], targetZoom);
+			const offsetPoint = leaflet.point(targetPoint.x + offsetX, targetPoint.y);
+			const offsetLatLng = map.unproject(offsetPoint, targetZoom);
+			map.setView(offsetLatLng, targetZoom, { animate: true, duration: 0.3 });
+		} else {
+			// Pan only: calculate offset at current zoom
 			const targetPoint = map.latLngToContainerPoint([place.lat, place.lon]);
-
-			// Calculate offset to center merchant in visible area
 			const offsetX = targetPoint.x - visibleCenterX;
 			const offsetY = targetPoint.y - mapSize.y / 2;
 
@@ -686,20 +618,29 @@
 				currentCenterPoint.y + offsetY
 			);
 			const newCenter = map.containerPointToLatLng(newCenterPoint);
-
 			map.panTo(newCenter, { animate: true, duration: 0.3 });
-		};
+		}
 
-		// If marker exists and is in a cluster, spiderfy the cluster to show the marker
-		const marker = loadedMarkers[place.id.toString()];
-		if (marker && markers) {
-			const cluster = markers.getVisibleParent(marker);
-			// If marker is inside a cluster (not directly visible), spiderfy it
-			if (cluster && cluster !== marker && 'spiderfy' in cluster) {
-				(cluster as { spiderfy: () => void }).spiderfy();
+		// Optionally spiderfy cluster containing the marker
+		if (spiderfyCluster) {
+			const marker = loadedMarkers[place.id.toString()];
+			if (marker && markers) {
+				const cluster = markers.getVisibleParent(marker);
+				if (cluster && cluster !== marker && 'spiderfy' in cluster) {
+					(cluster as { spiderfy: () => void }).spiderfy();
+				}
 			}
 		}
-		panToPlace();
+	};
+
+	// Pan to a nearby merchant (user is already zoomed in, just center the marker)
+	const panToNearbyMerchant = (place: Place) => {
+		navigateToPlace(place, { spiderfyCluster: true });
+	};
+
+	// Zoom to a search result (user may be far away, fly to the location)
+	const zoomToSearchResult = (place: Place) => {
+		navigateToPlace(place, { targetZoom: 19 });
 	};
 
 	const initializeElements = async () => {
@@ -758,6 +699,7 @@
 		// NOTE: Don't set isLoadingMarkers=true here, let loadMarkersInViewport handle it
 		await loadMarkersInViewport();
 
+		// eslint-disable-next-line svelte/infinite-reactive-loop -- this breaks the loop, not causes it
 		elementsLoaded = true;
 
 		if (browser) {
@@ -814,21 +756,18 @@
 		// Batch add markers - use parent cluster group's addLayers for efficiency
 		if (markersToAdd.length > 0 && markers) {
 			markers.addLayers(markersToAdd);
+
+			// Highlight the selected marker if it was just loaded (may be pending from search result click)
+			if (selectedMarkerId) {
+				highlightMarker(selectedMarkerId);
+			}
 		}
 	};
 
-	// Reactive statement to initialize elements when data is ready
-	// Use a more controlled approach to prevent infinite loops
-	let shouldInitialize = false;
-	$: {
-		if ($places && $places.length && mapLoaded && !elementsLoaded) {
-			shouldInitialize = true;
-		}
-	}
-
-	// Watch for shouldInitialize flag and run initialization once
-	$: if (shouldInitialize) {
-		shouldInitialize = false;
+	// Initialize elements when places data is ready and map is loaded
+	// The guard inside initializeElements() prevents multiple calls
+	$: if ($places?.length && mapLoaded && !elementsLoaded) {
+		// eslint-disable-next-line svelte/infinite-reactive-loop -- elementsLoaded=true stops the loop
 		initializeElements();
 	}
 
@@ -1016,27 +955,20 @@
 						'leaflet-control'
 					);
 
-					// Search button - re-enabled with API-based search
+					// Search button - opens panel in search mode
 					const searchButton = leaflet.DomUtil.create('a');
 					searchButton.classList.add('leaflet-control-search-toggle');
-					searchButton.title = 'Search toggle';
+					searchButton.title = 'Search';
 					searchButton.role = 'button';
-					searchButton.ariaLabel = 'Search toggle';
+					searchButton.ariaLabel = 'Search';
 					searchButton.ariaDisabled = 'false';
 					searchButton.innerHTML = `<img src=${
 						theme === 'dark' ? '/icons/search-white.svg' : '/icons/search.svg'
 					} alt='search' class='inline' id='search-button'/>`;
 					searchButton.style.borderRadius = '8px 8px 0 0';
-					searchButton.onclick = async function toggleSearch() {
-						showSearch = !showSearch;
-						if (showSearch) {
-							await tick();
-							const searchInput: HTMLInputElement | null = document.querySelector('#search-input');
-							searchInput?.focus();
-						} else {
-							search = '';
-							searchResults = [];
-						}
+					searchButton.onclick = function openSearch() {
+						// Open panel in search mode (will auto-focus input)
+						merchantList.openSearchMode();
 					};
 					if (theme === 'light') {
 						searchButton.onmouseenter = () => {
@@ -1126,35 +1058,10 @@
 				map._controlContainer
 			);
 
-			// @ts-expect-error
-			leaflet.Control.Search = leaflet.Control.extend({
-				options: {
-					position: 'topcenter'
-				},
-				onAdd: () => {
-					const searchBarDiv = leaflet.DomUtil.create('div');
-					searchBarDiv.classList.add('leaflet-control', 'search-bar-div');
-
-					searchBarDiv.append(searchContainer);
-
-					return searchBarDiv;
-				}
-			});
-
-			// @ts-expect-error
-			new leaflet.Control.Search().addTo(map);
-
-			// disable map events for search controls
-			if (searchContainer) {
-				DomEvent.disableClickPropagation(searchContainer as HTMLElement);
-				DomEvent.disableScrollPropagation(searchContainer as HTMLElement);
-			}
+			// disable map events for search toggle
 			const searchToggle = document.querySelector('.leaflet-control-search-toggle');
 			if (searchToggle) {
 				DomEvent.disableClickPropagation(searchToggle as HTMLElement);
-			}
-			if (clearSearchButton) {
-				DomEvent.disableClickPropagation(clearSearchButton as HTMLElement);
 			}
 
 			// add home and marker buttons to map
@@ -1189,10 +1096,8 @@
 		if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
 		if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
 		if (debouncedUpdateMerchantList?.cancel) debouncedUpdateMerchantList.cancel();
-		if (searchDebounce?.cancel) searchDebounce.cancel();
-
-		// Clear pending search focus out timer
-		if (searchFocusOutTimer) clearTimeout(searchFocusOutTimer);
+		if (debouncedPanelSearch?.cancel) debouncedPanelSearch.cancel();
+		searchAbortController?.abort();
 
 		// Reset merchant list
 		merchantList.reset();
@@ -1227,9 +1132,10 @@
 
 	<MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
 
-	<!-- Desktop: Merchant list panel (flexbox, not overlay) -->
+	<!-- Merchant list panel (search results + nearby merchants) -->
 	<MerchantListPanel
-		onPanToPlace={panToMerchantIfNeeded}
+		onPanToNearbyMerchant={panToNearbyMerchant}
+		onZoomToSearchResult={zoomToSearchResult}
 		onHoverStart={(place) => highlightMarker(place.id)}
 		onHoverEnd={(place) => {
 			// Don't clear if this is the selected marker
@@ -1237,147 +1143,31 @@
 				clearMarkerSelection(place.id);
 			}
 		}}
+		onSearch={handlePanelSearch}
+		onModeChange={handleModeChange}
 		{currentZoom}
 	/>
 
 	<!-- Map container -->
 	<div class="relative flex-1">
-		<!-- Search UI - re-enabled with API-based search -->
-		<div
-			id="search-div"
-			bind:this={searchContainer}
-			class="absolute top-0 left-[60px] z-[1000] w-[50vw] md:w-[350px] {showSearch
-				? 'block'
-				: 'hidden'}"
-			on:focusout={handleSearchFocusOut}
-		>
-			<div class="relative">
-				<input
-					id="search-input"
-					type="search"
-					aria-label="Search for Bitcoin merchants"
-					class="text-mapButton w-full rounded-lg bg-white px-5 py-2.5 text-[16px] drop-shadow-[0px_0px_4px_rgba(0,0,0,0.2)] focus:outline-hidden focus:drop-shadow-[0px_2px_6px_rgba(0,0,0,0.3)] dark:border dark:bg-dark dark:text-white [&::-webkit-search-cancel-button]:hidden"
-					placeholder="Search..."
-					on:keyup={searchDebounce}
-					on:keydown={handleSearchKeyDown}
-					bind:value={search}
-					disabled={!mapLoaded}
-				/>
-
-				<button
-					type="button"
-					aria-label="Clear search"
-					bind:this={clearSearchButton}
-					on:click={clearSearch}
-					class="text-mapButton absolute top-[10px] right-[8px] bg-white hover:text-black dark:bg-dark dark:text-white dark:hover:text-white/80 {search
-						? 'block'
-						: 'hidden'}"
-				>
-					<svg
-						width="20"
-						height="20"
-						viewBox="0 0 20 20"
-						fill="none"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							d="M14.1668 5.8335L5.8335 14.1668M5.8335 5.8335L14.1668 14.1668"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						/>
-					</svg>
-				</button>
-			</div>
-
-			{#if isDropdownOpen}
-				<div
-					class="mt-0.5 w-full rounded-lg bg-white drop-shadow-[0px_2px_6px_rgba(0,0,0,0.15)] dark:bg-dark"
-				>
-					{#if !searchStatus && searchResults.length > 0}
-						<div
-							class="border-b border-gray-200 px-4 py-2 text-xs text-gray-600 dark:border-white/10 dark:text-white/70"
-						>
-							{searchResults.length} result{searchResults.length === 1 ? '' : 's'}
-						</div>
-					{/if}
-
-					<ul class="max-h-[204px] w-full overflow-y-scroll">
-						{#if searchStatus}
-							<li role="status" aria-live="polite" class="w-full px-4 py-6">
-								<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
-							</li>
-						{:else if searchResults.length > 0}
-							{#each searchResults as result (result.id)}
-								<li>
-									<button
-										on:click={() => searchSelect(result)}
-										class="hover:bg-searchHover block w-full cursor-pointer border-b border-gray-200 px-4 py-2 text-left dark:border-white/10 dark:hover:bg-white/[0.15]"
-									>
-										<div class="flex items-start space-x-2">
-											<Icon
-												w="20"
-												h="20"
-												style="mt-1 text-mapButton dark:text-white opacity-50"
-												icon={result.icon && result.icon !== 'question_mark'
-													? result.icon
-													: 'currency_bitcoin'}
-												type="material"
-											/>
-
-											<div class="max-w-[280px]">
-												<p
-													class="text-mapButton text-sm dark:text-white {result.name?.match(
-														'([^ ]{21})'
-													)
-														? 'break-all'
-														: ''}"
-												>
-													{result.name || 'Unknown'}
-												</p>
-												{#if result.address}
-													<p class="text-searchSubtext text-xs dark:text-white/70">
-														{result.address}
-													</p>
-												{/if}
-											</div>
-										</div>
-									</button>
-								</li>
-							{/each}
-						{:else}
-							<li
-								class="text-searchSubtext w-full px-4 py-2 text-center text-sm dark:text-white/70"
-							>
-								No results found.
-							</li>
-						{/if}
-					</ul>
-				</div>
-			{/if}
-		</div>
-
 		<!-- Floating toggle button for merchant list (responsive positioning) -->
-		<!-- Desktop: hide when list is open and expanded -->
-		<!-- Mobile: hide when list is open or drawer is open -->
-		{#if mapLoaded && !($merchantList.isOpen && $merchantList.isExpanded)}
+		<!-- Hide when list is open, or on mobile when drawer is open -->
+		{#if mapLoaded && !$merchantList.isOpen}
 			<button
 				on:click={async () => {
-					if ($merchantList.isOpen) {
-						merchantList.expand();
-					} else {
-						merchantList.open();
-					}
+					merchantList.open();
+					// Reset to nearby mode when opening via toggle button
+					merchantList.setMode('nearby');
+					// Wait for store update to propagate before fetching
 					await tick();
 					updateMerchantList({ force: true });
 				}}
 				class="fixed right-4 bottom-[40px] z-[1000] flex items-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-medium
 					shadow-lg transition-colors hover:bg-gray-50 md:top-[10px] md:right-auto
 					md:bottom-auto md:left-[60px] md:rounded-lg md:px-3 md:py-2 dark:bg-dark dark:hover:bg-white/10
-					{$merchantList.isOpen || $merchantDrawer.isOpen ? 'max-md:hidden' : ''}"
+					{$merchantDrawer.isOpen ? 'max-md:hidden' : ''}"
 				style="filter: drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3));"
-				aria-label={$merchantList.isOpen ? 'Close merchant list' : 'Open merchant list'}
+				aria-label="Open merchant list"
 				aria-expanded={$merchantList.isOpen}
 			>
 				<Icon w="18" h="18" icon="menu" type="material" style="text-primary dark:text-white" />
@@ -1396,18 +1186,6 @@
 	</div>
 
 	<MerchantDrawerHash />
-
-	<MerchantListMobile
-		{currentZoom}
-		onSelectMerchant={(place) => {
-			panToMerchantIfNeeded(place);
-			if (selectedMarkerId) {
-				clearMarkerSelection(selectedMarkerId);
-			}
-			selectedMarkerId = place.id;
-			highlightMarker(place.id);
-		}}
-	/>
 
 	<TileLoadingIndicator visible={tilesLoading} />
 </main>

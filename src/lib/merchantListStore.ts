@@ -6,9 +6,10 @@ import { isBoosted } from '$lib/merchantDrawerLogic';
 import { MERCHANT_LIST_MAX_ITEMS } from '$lib/constants';
 import { errToast } from '$lib/utils';
 
+export type MerchantListMode = 'nearby' | 'search';
+
 export interface MerchantListState {
 	isOpen: boolean;
-	isExpanded: boolean;
 	merchants: Place[];
 	totalCount: number;
 	// Cache of full Place data by ID, used to show icons/addresses without re-fetching
@@ -17,16 +18,25 @@ export interface MerchantListState {
 	isLoadingList: boolean;
 	// True when fetching enriched details in background (no spinner)
 	isEnrichingDetails: boolean;
+	// Panel mode: 'nearby' for location-based list, 'search' for search results
+	mode: MerchantListMode;
+	// Search state
+	searchQuery: string;
+	searchResults: Place[];
+	isSearching: boolean;
 }
 
 const initialState: MerchantListState = {
 	isOpen: false,
-	isExpanded: true,
 	merchants: [],
 	totalCount: 0,
 	placeDetailsCache: new Map(),
 	isLoadingList: false,
-	isEnrichingDetails: false
+	isEnrichingDetails: false,
+	mode: 'nearby',
+	searchQuery: '',
+	searchResults: [],
+	isSearching: false
 };
 
 // Equirectangular approximation for local distance sorting
@@ -55,6 +65,11 @@ function sortMerchants(merchants: Place[], centerLat?: number, centerLon?: numbe
 		// Fallback to alphabetical
 		return (a.name || '').localeCompare(b.name || '');
 	});
+}
+
+// Filter out invalid API response items missing required id field
+function filterValidPlaces<T extends { id?: unknown }>(items: T[]): T[] {
+	return items.filter((item): item is T => typeof item?.id === 'number');
 }
 
 function createMerchantListStore() {
@@ -91,24 +106,9 @@ function createMerchantListStore() {
 			update((state) => ({ ...state, isOpen: true }));
 		},
 
+		// Hide the panel but keep all data (count stays visible on button)
 		close() {
-			cancelAllRequests();
-			update((state) => ({
-				...state,
-				isOpen: false,
-				isExpanded: true,
-				merchants: [],
-				totalCount: 0,
-				placeDetailsCache: new Map()
-			}));
-		},
-
-		collapse() {
-			update((state) => ({ ...state, isExpanded: false }));
-		},
-
-		expand() {
-			update((state) => ({ ...state, isExpanded: true }));
+			update((state) => ({ ...state, isOpen: false }));
 		},
 
 		// Set merchants from locally-loaded markers (used at zoom 15-16)
@@ -149,27 +149,35 @@ function createMerchantListStore() {
 					{ timeout: 10000, signal: listAbortController.signal }
 				);
 
+				// Validate response is an array (API may return HTML error page)
+				if (!Array.isArray(response.data)) {
+					throw new Error('API returned invalid data format');
+				}
+
+				// Filter out invalid items missing required id field
+				const validPlaces = filterValidPlaces(response.data);
+
 				// Build cache for enriched display (icons, addresses, etc.)
 				const placeDetailsCache = new Map<number, Place>();
-				response.data.forEach((place) => placeDetailsCache.set(place.id, place));
+				validPlaces.forEach((place) => placeDetailsCache.set(place.id, place));
 
 				// Check if we should hide results (too many at low zoom)
-				if (options?.hideIfExceeds && response.data.length > options.hideIfExceeds) {
+				if (options?.hideIfExceeds && validPlaces.length > options.hideIfExceeds) {
 					// Too many results - store count but show empty list
 					// The panel will display "zoom in" message, button shows count
 					update((state) => ({
 						...state,
 						merchants: [],
-						totalCount: response.data.length,
+						totalCount: validPlaces.length,
 						isLoadingList: false
 					}));
 				} else {
-					const sorted = sortMerchants(response.data, center.lat, center.lon);
+					const sorted = sortMerchants(validPlaces, center.lat, center.lon);
 					const limited = sorted.slice(0, MERCHANT_LIST_MAX_ITEMS);
 					update((state) => ({
 						...state,
 						merchants: limited,
-						totalCount: response.data.length,
+						totalCount: validPlaces.length,
 						placeDetailsCache,
 						isLoadingList: false
 					}));
@@ -197,10 +205,18 @@ function createMerchantListStore() {
 					{ timeout: 10000, signal: listAbortController.signal }
 				);
 
+				// Validate response is an array (API may return HTML error page)
+				if (!Array.isArray(response.data)) {
+					throw new Error('API returned invalid data format');
+				}
+
+				// Filter out invalid items missing required id field
+				const validItems = filterValidPlaces(response.data);
+
 				update((state) => ({
 					...state,
 					merchants: [],
-					totalCount: response.data.length,
+					totalCount: validItems.length,
 					isLoadingList: false
 				}));
 			} catch (error) {
@@ -227,10 +243,11 @@ function createMerchantListStore() {
 					{ timeout: 10000, signal: detailsAbortController.signal }
 				);
 
-				// Merge new results into existing cache (preserves previously loaded details)
+				// Filter out invalid items and merge into existing cache
+				const validPlaces = filterValidPlaces(response.data);
 				update((state) => {
 					const mergedCache = new Map(state.placeDetailsCache);
-					response.data.forEach((place) => mergedCache.set(place.id, place));
+					validPlaces.forEach((place) => mergedCache.set(place.id, place));
 					return { ...state, placeDetailsCache: mergedCache, isEnrichingDetails: false };
 				});
 			} catch (error) {
@@ -239,6 +256,64 @@ function createMerchantListStore() {
 				}
 				update((state) => ({ ...state, isEnrichingDetails: false }));
 			}
+		},
+
+		// Open panel with search results (sorted with boosted first)
+		openWithSearchResults(query: string, results: Place[]) {
+			const sortedResults = sortMerchants(results);
+			update((state) => ({
+				...state,
+				isOpen: true,
+				mode: 'search',
+				searchQuery: query,
+				searchResults: sortedResults,
+				isSearching: false
+			}));
+		},
+
+		// Open panel in search mode, optionally showing spinner
+		// Use openSearchMode() to open panel ready for input (no spinner)
+		// Use openSearchMode(true) when a search is in progress (shows spinner)
+		openSearchMode(isSearching: boolean = false) {
+			update((state) => ({
+				...state,
+				isSearching,
+				mode: 'search',
+				isOpen: true
+			}));
+		},
+
+		// Update the search query (used when binding input to store)
+		setSearchQuery(query: string) {
+			update((state) => ({ ...state, searchQuery: query }));
+		},
+
+		// Clear search input and results but stay in search mode
+		// Use when: user clears the search input to type a new query (e.g., clicking X button)
+		clearSearchInput() {
+			update((state) => ({
+				...state,
+				searchQuery: '',
+				searchResults: [],
+				isSearching: false
+			}));
+		},
+
+		// Exit search mode and return to nearby mode
+		// Use when: user explicitly switches away from search (e.g., clicking "Nearby" tab)
+		exitSearchMode() {
+			update((state) => ({
+				...state,
+				mode: 'nearby',
+				searchQuery: '',
+				searchResults: [],
+				isSearching: false
+			}));
+		},
+
+		// Switch between modes (no side effects - just sets mode)
+		setMode(mode: MerchantListMode) {
+			update((state) => ({ ...state, mode }));
 		},
 
 		reset() {

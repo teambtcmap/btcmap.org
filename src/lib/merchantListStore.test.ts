@@ -45,7 +45,7 @@ describe('merchantListStore', () => {
 			expect(state.isOpen).toBe(true);
 		});
 
-		it('close() should reset state and clear merchants', () => {
+		it('close() should hide panel but keep data', () => {
 			// Set up some state first
 			merchantList.open();
 			merchantList.setMerchants([createMockPlace()], 0, 0);
@@ -54,35 +54,19 @@ describe('merchantListStore', () => {
 			const state = get(merchantList);
 
 			expect(state.isOpen).toBe(false);
-			expect(state.isExpanded).toBe(true);
-			expect(state.merchants).toEqual([]);
-			expect(state.totalCount).toBe(0);
-			expect(state.placeDetailsCache.size).toBe(0);
+			// Data should be preserved (count visible on button)
+			expect(state.merchants.length).toBe(1);
+			expect(state.totalCount).toBe(1);
 		});
 
-		it('collapse() should set isExpanded to false', () => {
-			merchantList.collapse();
-			const state = get(merchantList);
-			expect(state.isExpanded).toBe(false);
-		});
-
-		it('expand() should set isExpanded to true', () => {
-			merchantList.collapse();
-			merchantList.expand();
-			const state = get(merchantList);
-			expect(state.isExpanded).toBe(true);
-		});
-
-		it('reset() should restore initial state', () => {
+		it('reset() should restore initial state and clear all data', () => {
 			merchantList.open();
-			merchantList.collapse();
 			merchantList.setMerchants([createMockPlace()], 0, 0);
 
 			merchantList.reset();
 			const state = get(merchantList);
 
 			expect(state.isOpen).toBe(false);
-			expect(state.isExpanded).toBe(true);
 			expect(state.merchants).toEqual([]);
 			expect(state.totalCount).toBe(0);
 			expect(state.isLoadingList).toBe(false);
@@ -396,7 +380,7 @@ describe('merchantListStore', () => {
 			expect(detailsAborted).toBe(false);
 		});
 
-		it('should cancel all requests on close()', async () => {
+		it('should cancel all requests on reset()', async () => {
 			let listAborted = false;
 			let detailsAborted = false;
 
@@ -428,13 +412,124 @@ describe('merchantListStore', () => {
 			const list = merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
 			const details = merchantList.fetchEnrichedDetails({ lat: 0, lon: 0 }, 10);
 
-			// Close should cancel both
-			merchantList.close();
+			// Reset should cancel both
+			merchantList.reset();
 
 			await Promise.all([list.catch(() => {}), details.catch(() => {})]);
 
 			expect(listAborted).toBe(true);
 			expect(detailsAborted).toBe(true);
+		});
+
+		it('close() should NOT cancel requests (just hide panel)', async () => {
+			let requestAborted = false;
+
+			(axios.get as Mock).mockImplementationOnce(
+				(_url: string, config: { signal: AbortSignal }) =>
+					new Promise((resolve) => {
+						config.signal.addEventListener('abort', () => {
+							requestAborted = true;
+						});
+						// Resolve after a short delay
+						setTimeout(() => resolve({ data: [] }), 50);
+					})
+			);
+
+			// Start a request
+			const list = merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
+
+			// Close should NOT cancel the request
+			merchantList.close();
+
+			await list;
+
+			expect(requestAborted).toBe(false);
+		});
+	});
+
+	describe('search state', () => {
+		it('openSearchMode() should open panel in search mode with optional spinner', () => {
+			merchantList.openSearchMode(true);
+			const state = get(merchantList);
+
+			expect(state.isSearching).toBe(true);
+			expect(state.mode).toBe('search');
+			expect(state.isOpen).toBe(true);
+		});
+
+		it('openSearchMode() without argument should not show spinner', () => {
+			merchantList.openSearchMode();
+			const state = get(merchantList);
+
+			expect(state.isSearching).toBe(false);
+			expect(state.mode).toBe('search');
+			expect(state.isOpen).toBe(true);
+		});
+
+		it('openWithSearchResults() should set mode, query, and results', () => {
+			const results = [createMockPlace({ id: 1 }), createMockPlace({ id: 2 })];
+			merchantList.openWithSearchResults('pizza', results);
+			const state = get(merchantList);
+
+			expect(state.mode).toBe('search');
+			expect(state.searchQuery).toBe('pizza');
+			expect(state.searchResults.length).toBe(2);
+			expect(state.isSearching).toBe(false);
+			expect(state.isOpen).toBe(true);
+		});
+
+		it('openWithSearchResults() should sort boosted merchants first', () => {
+			const futureDate = new Date(Date.now() + 86400000).toISOString();
+			const boosted = createMockPlace({ id: 1, name: 'Boosted', boosted_until: futureDate });
+			const regular = createMockPlace({ id: 2, name: 'Regular' });
+
+			merchantList.openWithSearchResults('test', [regular, boosted]);
+			const state = get(merchantList);
+
+			expect(state.searchResults[0].id).toBe(1); // Boosted first
+			expect(state.searchResults[1].id).toBe(2);
+		});
+
+		it('clearSearchInput() should clear results but keep search mode', () => {
+			merchantList.openWithSearchResults('test', [createMockPlace()]);
+			merchantList.clearSearchInput();
+			const state = get(merchantList);
+
+			expect(state.mode).toBe('search'); // Mode preserved
+			expect(state.searchQuery).toBe('');
+			expect(state.searchResults).toEqual([]);
+			expect(state.isSearching).toBe(false);
+		});
+
+		it('exitSearchMode() should switch to nearby mode and clear search state', () => {
+			merchantList.openWithSearchResults('test', [createMockPlace()]);
+			merchantList.exitSearchMode();
+			const state = get(merchantList);
+
+			expect(state.mode).toBe('nearby');
+			expect(state.searchQuery).toBe('');
+			expect(state.searchResults).toEqual([]);
+			expect(state.isSearching).toBe(false);
+		});
+
+		it('setMode() should switch to search mode', () => {
+			merchantList.setMode('search');
+			const state = get(merchantList);
+
+			expect(state.mode).toBe('search');
+		});
+
+		it('setMode() should switch to nearby mode without clearing search state', () => {
+			// Set up search state first
+			merchantList.openWithSearchResults('pizza', [createMockPlace()]);
+
+			merchantList.setMode('nearby');
+			const state = get(merchantList);
+
+			// Mode changes but search state is preserved (no side effects)
+			expect(state.mode).toBe('nearby');
+			expect(state.searchQuery).toBe('pizza');
+			expect(state.searchResults.length).toBe(1);
 		});
 	});
 });
