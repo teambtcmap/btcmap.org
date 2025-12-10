@@ -224,8 +224,6 @@
 		searchAbortController?.abort();
 
 		if (query.length < 3) {
-			// Clear results but keep search mode (user is still typing)
-			merchantList.clearSearchInput();
 			return;
 		}
 
