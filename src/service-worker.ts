@@ -73,8 +73,11 @@ sw.addEventListener('fetch', (event) => {
 
 		// Don't cache external map tile/style/sprite resources to prevent stale map data
 		// Map styles and sprites can change, and caching them causes issues like missing icons
+		// Exception: fonts are stable and benefit from caching for repeat visitors
+		const isFontResource =
+			url.hostname === 'tiles.openfreemap.org' && url.pathname.includes('/fonts/');
 		const isMapResource =
-			url.hostname === 'tiles.openfreemap.org' ||
+			(url.hostname === 'tiles.openfreemap.org' && !isFontResource) ||
 			(url.hostname === 'static.btcmap.org' && url.pathname.includes('map-styles'));
 
 		// `build`/`files` can always be served from the cache
