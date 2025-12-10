@@ -9,6 +9,7 @@
 	import LoadingSpinner from '$components/LoadingSpinner.svelte';
 	import Icon from '$components/Icon.svelte';
 	import type { Place } from '$lib/types';
+	import { CATEGORY_GROUPS, type CategoryKey } from '$lib/categoryMapping';
 	import {
 		MERCHANT_LIST_WIDTH,
 		MERCHANT_LIST_MIN_ZOOM,
@@ -36,6 +37,8 @@
 	export let onSearch: ((query: string) => void) | undefined = undefined;
 	// Mode change callback (called for nearby mode switch)
 	export let onModeChange: ((mode: MerchantListMode) => void) | undefined = undefined;
+	// Refresh callback for category filtering
+	export let onRefresh: (() => void) | undefined = undefined;
 
 	// Reference for search input element
 	let searchInput: HTMLInputElement;
@@ -71,6 +74,10 @@
 		}
 	}
 
+	function handleCategorySelect(category: CategoryKey) {
+		merchantList.setSelectedCategory(category, onRefresh);
+	}
+
 	$: isOpen = $merchantList.isOpen;
 	$: merchants = $merchantList.merchants;
 	$: totalCount = $merchantList.totalCount;
@@ -81,6 +88,19 @@
 	$: searchResults = $merchantList.searchResults;
 	$: isSearching = $merchantList.isSearching;
 	$: searchQuery = $merchantList.searchQuery;
+	$: selectedCategory = $merchantList.selectedCategory;
+	$: categoryCounts = $merchantList.categoryCounts;
+
+	// Helper function to cast string to CategoryKey
+	function getCategoryKey(key: string): CategoryKey {
+		return key as CategoryKey;
+	}
+
+	// Helper function to check if a category has matching merchants
+	function hasMatchingMerchants(categoryKey: CategoryKey): boolean {
+		if (categoryKey === 'all') return true;
+		return (categoryCounts?.[categoryKey] ?? 0) > 0;
+	}
 
 	// Show "zoom in" message when:
 	// 1. Below zoom 11 (always - no data fetched at this level)
@@ -287,6 +307,31 @@
 					Nearby
 				</button>
 			</div>
+
+			<!-- Category filter (only shown in nearby mode) -->
+			{#if mode === 'nearby'}
+				<div class="mt-3">
+					<h3 class="sr-only">Filter by category</h3>
+					<div class="flex flex-wrap gap-2">
+						{#each Object.entries(CATEGORY_GROUPS) as [key, category] (key)}
+							<button
+								type="button"
+								on:click={() => handleCategorySelect(getCategoryKey(key))}
+								disabled={!hasMatchingMerchants(getCategoryKey(key))}
+								class="rounded-full px-3 py-1 text-xs font-medium transition-colors
+							{selectedCategory === key
+									? 'bg-primary text-white'
+									: hasMatchingMerchants(getCategoryKey(key))
+										? 'bg-gray-100 text-body hover:bg-gray-200 dark:bg-white/5 dark:text-white/70 dark:hover:bg-white/10'
+										: 'cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-white/30'}"
+								aria-pressed={selectedCategory === key}
+							>
+								{category.label}
+							</button>
+						{/each}
+					</div>
+				</div>
+			{/if}
 		</div>
 
 		<!-- List content -->
