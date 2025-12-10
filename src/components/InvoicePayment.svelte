@@ -9,7 +9,6 @@
 	import { pollInvoiceStatus, isInvoicePaid } from '$lib/payment';
 	import { errToast } from '$lib/utils';
 	import JSConfetti from 'js-confetti';
-	import QRCode from 'qrcode';
 	import { tick, onDestroy } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 
@@ -28,7 +27,8 @@
 	const generateQR = async () => {
 		await tick();
 
-		QRCode.toCanvas(
+		const QRCode = await import('qrcode');
+		QRCode.default.toCanvas(
 			qr,
 			invoice,
 			{ width: window.innerWidth > BREAKPOINTS.md ? QR_CODE_SIZE.desktop : QR_CODE_SIZE.mobile },
