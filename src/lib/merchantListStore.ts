@@ -5,6 +5,13 @@ import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 import { isBoosted } from '$lib/merchantDrawerLogic';
 import { MERCHANT_LIST_MAX_ITEMS } from '$lib/constants';
 import { errToast } from '$lib/utils';
+import {
+	countMerchantsByCategory,
+	createEmptyCategoryCounts,
+	filterMerchantsByCategory,
+	type CategoryCounts,
+	type CategoryKey
+} from '$lib/categoryMapping';
 
 export type MerchantListMode = 'nearby' | 'search';
 
@@ -24,6 +31,9 @@ export interface MerchantListState {
 	searchQuery: string;
 	searchResults: Place[];
 	isSearching: boolean;
+	// Category filter
+	selectedCategory: CategoryKey;
+	categoryCounts: CategoryCounts;
 }
 
 const initialState: MerchantListState = {
@@ -36,7 +46,9 @@ const initialState: MerchantListState = {
 	mode: 'nearby',
 	searchQuery: '',
 	searchResults: [],
-	isSearching: false
+	isSearching: false,
+	selectedCategory: 'all',
+	categoryCounts: createEmptyCategoryCounts()
 };
 
 // Equirectangular approximation for local distance sorting
@@ -118,13 +130,32 @@ function createMerchantListStore() {
 			centerLon?: number,
 			limit: number = MERCHANT_LIST_MAX_ITEMS
 		) {
-			const sorted = sortMerchants(merchants, centerLat, centerLon);
+			// Calculate category counts before any filtering
+			const categoryCounts = countMerchantsByCategory(merchants);
+
+			// Get current state to access selected category
+			let currentState: MerchantListState | undefined;
+			const unsubscribe = store.subscribe((state) => {
+				currentState = state;
+			});
+			unsubscribe();
+
+			// Apply category filtering
+			const filtered =
+				currentState?.selectedCategory && currentState.selectedCategory !== 'all'
+					? filterMerchantsByCategory(merchants, currentState.selectedCategory)
+					: merchants;
+
+			const sorted = sortMerchants(filtered, centerLat, centerLon);
 			const limited = sorted.slice(0, limit);
+
+			// Update the store with merchants, counts, and ensure isLoading is false
 			update((state) => ({
 				...state,
 				merchants: limited,
-				totalCount: merchants.length,
-				isLoadingList: false
+				totalCount: filtered.length,
+				isLoadingList: false,
+				categoryCounts
 			}));
 		},
 
@@ -161,6 +192,8 @@ function createMerchantListStore() {
 				const placeDetailsCache = new Map<number, Place>();
 				validPlaces.forEach((place) => placeDetailsCache.set(place.id, place));
 
+				const categoryCounts = countMerchantsByCategory(validPlaces);
+
 				// Check if we should hide results (too many at low zoom)
 				if (options?.hideIfExceeds && validPlaces.length > options.hideIfExceeds) {
 					// Too many results - store count but show empty list
@@ -169,17 +202,32 @@ function createMerchantListStore() {
 						...state,
 						merchants: [],
 						totalCount: validPlaces.length,
-						isLoadingList: false
+						isLoadingList: false,
+						categoryCounts
 					}));
 				} else {
-					const sorted = sortMerchants(validPlaces, center.lat, center.lon);
+					// Get current state to access selected category
+					let currentState: MerchantListState | undefined;
+					const unsubscribe = store.subscribe((state) => {
+						currentState = state;
+					});
+					unsubscribe();
+
+					// Apply category filtering
+					const filtered =
+						currentState?.selectedCategory && currentState.selectedCategory !== 'all'
+							? filterMerchantsByCategory(validPlaces, currentState.selectedCategory)
+							: validPlaces;
+
+					const sorted = sortMerchants(filtered, center.lat, center.lon);
 					const limited = sorted.slice(0, MERCHANT_LIST_MAX_ITEMS);
 					update((state) => ({
 						...state,
 						merchants: limited,
-						totalCount: validPlaces.length,
+						totalCount: filtered.length,
 						placeDetailsCache,
-						isLoadingList: false
+						isLoadingList: false,
+						categoryCounts
 					}));
 				}
 			} catch (error) {
@@ -218,6 +266,7 @@ function createMerchantListStore() {
 					merchants: [],
 					totalCount: validItems.length,
 					isLoadingList: false
+					// Preserve existing categoryCounts since we don't have actual merchant data to recalculate them
 				}));
 			} catch (error) {
 				if (error instanceof Error && error.name !== 'AbortError') {
@@ -267,7 +316,8 @@ function createMerchantListStore() {
 				mode: 'search',
 				searchQuery: query,
 				searchResults: sortedResults,
-				isSearching: false
+				isSearching: false,
+				selectedCategory: 'all'
 			}));
 		},
 
@@ -295,7 +345,8 @@ function createMerchantListStore() {
 				...state,
 				searchQuery: '',
 				searchResults: [],
-				isSearching: false
+				isSearching: false,
+				selectedCategory: 'all'
 			}));
 		},
 
@@ -307,13 +358,29 @@ function createMerchantListStore() {
 				mode: 'nearby',
 				searchQuery: '',
 				searchResults: [],
-				isSearching: false
+				isSearching: false,
+				selectedCategory: 'all'
 			}));
 		},
 
 		// Switch between modes (no side effects - just sets mode)
 		setMode(mode: MerchantListMode) {
 			update((state) => ({ ...state, mode }));
+		},
+
+		// Set the selected category filter and trigger a refresh callback
+		setSelectedCategory(category: CategoryKey, refreshCallback?: () => void) {
+			update((state) => ({ ...state, selectedCategory: category }));
+
+			// If a refresh callback is provided, call it to refresh the merchant list
+			if (refreshCallback) {
+				refreshCallback();
+			}
+		},
+
+		// Reset the selected category to 'all'
+		resetCategory() {
+			update((state) => ({ ...state, selectedCategory: 'all' }));
 		},
 
 		reset() {

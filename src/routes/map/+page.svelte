@@ -1137,6 +1137,7 @@
 		}}
 		onSearch={handlePanelSearch}
 		onModeChange={handleModeChange}
+		onRefresh={() => updateMerchantList({ force: true })}
 		{currentZoom}
 	/>
 
