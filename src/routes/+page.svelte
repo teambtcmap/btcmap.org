@@ -61,7 +61,7 @@
 								href={app.link}
 								target={app.type === 'Web' ? null : '_blank'}
 								rel={app.type === 'Web' ? null : 'noreferrer'}
-								aria-label={`Download for ${app.type}`}
+								aria-label={app.type === 'Web' ? 'Open web app' : `Download for ${app.type}`}
 								class="block rounded-full bg-link p-3 text-white transition-colors hover:bg-hover"
 							>
 								<!-- eslint-enable svelte/no-navigation-without-resolve -->

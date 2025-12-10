@@ -18,7 +18,7 @@
 	href={url}
 	target="_blank"
 	rel="noreferrer"
-	aria-label={socialLabels[social] || social}
+	aria-label={`Visit us on ${socialLabels[social] || social}`}
 	class="inline-block rounded-full bg-link p-2 text-white transition-colors hover:bg-hover dark:bg-white/[0.15] dark:hover:bg-link"
 >
 	<!-- eslint-enable svelte/no-navigation-without-resolve -->

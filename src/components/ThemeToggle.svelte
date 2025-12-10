@@ -28,8 +28,16 @@
 <button
 	on:click={toggleTheme}
 	disabled={!currentTheme}
-	aria-label={currentTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-	title={currentTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+	aria-label={!currentTheme
+		? 'Theme toggle loading'
+		: currentTheme === 'dark'
+			? 'Switch to light mode'
+			: 'Switch to dark mode'}
+	title={!currentTheme
+		? 'Theme toggle loading'
+		: currentTheme === 'dark'
+			? 'Switch to light mode'
+			: 'Switch to dark mode'}
 	class="h-10 w-10 text-link transition-colors hover:text-hover dark:text-white dark:hover:text-link"
 >
 	{#if currentTheme === 'dark'}
