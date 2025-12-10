@@ -9,7 +9,6 @@
 	import { pollInvoiceStatus, isInvoicePaid } from '$lib/payment';
 	import { errToast } from '$lib/utils';
 	import JSConfetti from 'js-confetti';
-	import QRCode from 'qrcode';
 	import { tick, onDestroy } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 
@@ -28,18 +27,25 @@
 	const generateQR = async () => {
 		await tick();
 
-		QRCode.toCanvas(
-			qr,
-			invoice,
-			{ width: window.innerWidth > BREAKPOINTS.md ? QR_CODE_SIZE.desktop : QR_CODE_SIZE.mobile },
-			function (error: Error | null | undefined) {
-				if (error) {
-					errToast(PAYMENT_ERROR_MESSAGE);
-					console.error(error);
-					onError(error);
+		try {
+			const QRCode = await import('qrcode');
+			QRCode.default.toCanvas(
+				qr,
+				invoice,
+				{ width: window.innerWidth > BREAKPOINTS.md ? QR_CODE_SIZE.desktop : QR_CODE_SIZE.mobile },
+				function (error: Error | null | undefined) {
+					if (error) {
+						errToast(PAYMENT_ERROR_MESSAGE);
+						console.error(error);
+						onError(error);
+					}
 				}
-			}
-		);
+			);
+		} catch (error) {
+			errToast('Could not load QR generator. Please try again.');
+			console.error('Failed to load QRCode module:', error);
+			onError(error);
+		}
 	};
 
 	const checkInvoiceStatus = async () => {

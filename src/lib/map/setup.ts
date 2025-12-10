@@ -1,6 +1,6 @@
 import { selectedMerchant, theme } from '$lib/store';
 import Icon from '$components/Icon.svelte';
-import { detectTheme, errToast } from '$lib/utils';
+import { detectTheme, errToast, humanizeIconName } from '$lib/utils';
 import type { DomEventType, Leaflet, Place } from '$lib/types';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 import axios from 'axios';
@@ -628,6 +628,12 @@ export const generateIcon = (L: Leaflet, icon: string, boosted: boolean, comment
 			'rounded-full w-4 h-4 flex items-center justify-center';
 		iconContainer.appendChild(commentsCountSpan);
 	}
+
+	// Accessible label for screen readers
+	const accessibleLabel = document.createElement('span');
+	accessibleLabel.className = 'sr-only';
+	accessibleLabel.textContent = humanizeIconName(icon);
+	iconContainer.appendChild(accessibleLabel);
 
 	return L.divIcon({
 		className: boosted ? 'boosted-icon' : 'div-icon',

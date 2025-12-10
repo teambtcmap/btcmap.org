@@ -5,11 +5,10 @@
 	import Header from '$components/layout/Header.svelte';
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import SupportSection from './components/SupportSection.svelte';
-	import { BREAKPOINTS } from '$lib/constants';
+	import { BREAKPOINTS, QR_CODE_SIZE } from '$lib/constants';
 	import { theme } from '$lib/store';
 	import type { DonationType } from '$lib/types';
 	import { detectTheme, warningToast } from '$lib/utils';
-	import QRCode from 'qrcode';
 	import type { Action } from 'svelte/action';
 
 	const onchain = 'bc1qt4g28vq480ec4ncl4h67qu4q4k2zel7xu0c2wg';
@@ -24,17 +23,26 @@
 	};
 
 	const renderQr: Action<HTMLCanvasElement> = (node) => {
-		QRCode.toCanvas(
-			node,
-			network === 'Lightning' ? 'lightning:' + lnurlp : 'bitcoin:' + onchain,
-			{ width: window.innerWidth > BREAKPOINTS.sm ? 256 : 200 },
-			function (error: Error | null | undefined) {
-				if (error) {
-					warningToast('Could not generate QR, please try again or contact BTC Map.');
-					console.error(error);
-				}
-			}
-		);
+		import('qrcode')
+			.then((QRCode) => {
+				QRCode.default.toCanvas(
+					node,
+					network === 'Lightning' ? 'lightning:' + lnurlp : 'bitcoin:' + onchain,
+					{
+						width: window.innerWidth > BREAKPOINTS.md ? QR_CODE_SIZE.desktop : QR_CODE_SIZE.mobile
+					},
+					function (error: Error | null | undefined) {
+						if (error) {
+							warningToast('Could not generate QR, please try again or contact BTC Map.');
+							console.error(error);
+						}
+					}
+				);
+			})
+			.catch((error) => {
+				warningToast('Could not load QR generator. Please try again.');
+				console.error('Failed to load QRCode module:', error);
+			});
 	};
 
 	const supporters = [

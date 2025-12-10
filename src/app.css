@@ -4,6 +4,7 @@
 @font-face {
 	font-family: 'Manrope';
 	src: url('/fonts/Manrope-Regular.ttf') format('truetype');
+	font-display: swap;
 }
 
 @layer base {

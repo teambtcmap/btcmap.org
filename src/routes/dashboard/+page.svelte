@@ -8,7 +8,11 @@
 	import type { ChartHistory } from '$lib/types';
 	import { detectTheme, updateChartThemes } from '$lib/utils';
 	import Chart from 'chart.js/auto';
-	import { format, startOfYear, subDays, subMonths, subYears } from 'date-fns';
+	import { format } from 'date-fns/format';
+	import { startOfYear } from 'date-fns/startOfYear';
+	import { subDays } from 'date-fns/subDays';
+	import { subMonths } from 'date-fns/subMonths';
+	import { subYears } from 'date-fns/subYears';
 	import { onMount } from 'svelte';
 
 	export let data;

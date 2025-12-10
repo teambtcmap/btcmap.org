@@ -8,15 +8,27 @@ import { get } from 'svelte/store';
 import rewind from '@mapbox/geojson-rewind';
 import { geoContains } from 'd3-geo';
 import DOMPurify from 'dompurify';
-import {
-	parseISO,
-	isThisYear,
-	isAfter,
-	subDays,
-	format,
-	formatDistanceToNow,
-	isToday
-} from 'date-fns';
+import { parseISO } from 'date-fns/parseISO';
+import { isThisYear } from 'date-fns/isThisYear';
+import { isAfter } from 'date-fns/isAfter';
+import { subDays } from 'date-fns/subDays';
+import { format } from 'date-fns/format';
+import { formatDistanceToNow } from 'date-fns/formatDistanceToNow';
+import { isToday } from 'date-fns/isToday';
+
+// Converts Material Design icon names to human-readable labels
+export const humanizeIconName = (icon: string): string => {
+	const specialCases: Record<string, string> = {
+		content_cut: 'Barber',
+		local_atm: 'ATM'
+	};
+	if (specialCases[icon]) return specialCases[icon];
+
+	return icon
+		.replace(/^local_/, '')
+		.replace(/_/g, ' ')
+		.replace(/\b\w/g, (c) => c.toUpperCase());
+};
 
 // Yields to main thread to prevent UI freezes during heavy operations (browser-only)
 export function yieldToMain(): Promise<void> {
