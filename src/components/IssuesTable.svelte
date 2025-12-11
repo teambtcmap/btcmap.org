@@ -90,7 +90,7 @@
 				accessorKey: 'name',
 				header: 'Merchant Name',
 				cell: (info) => flexRender(IssueCell, { id: 'name', value: info.getValue() }),
-				// @ts-expect-error
+				// @ts-expect-error fuzzy filter is registered via filterFns option
 				filterFn: 'fuzzy',
 				enableGlobalFilter: true
 			},
@@ -321,7 +321,7 @@
 					<select
 						value={$table?.getState().pagination.pageSize}
 						on:change={(e) => {
-							// @ts-expect-error
+							// @ts-expect-error e.target is the select element
 							$table?.setPageSize(Number(e.target?.value));
 						}}
 						class="cursor-pointer bg-transparent focus:outline-primary dark:focus:outline-white"
