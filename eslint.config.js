@@ -11,13 +11,6 @@ export default tseslint.config(
 	...eslintPluginSvelte.configs.recommended,
 	...eslintPluginSvelte.configs['flat/prettier'],
 	{
-		// Override the TypeScript ESLint recommended config
-		name: 'typescript-eslint/disable-ban-ts-comment',
-		rules: {
-			'@typescript-eslint/ban-ts-comment': 'error'
-		}
-	},
-	{
 		name: 'project/typescript-config',
 		files: ['**/*.ts'],
 		rules: {
