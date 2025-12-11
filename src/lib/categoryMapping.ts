@@ -37,6 +37,7 @@ export const CATEGORY_GROUPS = {
 
 export type CategoryKey = keyof typeof CATEGORY_GROUPS;
 
+// Explicit array for guaranteed order and clarity (could derive from CATEGORY_GROUPS but kept explicit)
 export const CATEGORIES: readonly CategoryKey[] = [
 	'all',
 	'restaurants',
@@ -55,6 +56,16 @@ export const CATEGORY_ENTRIES = Object.entries(CATEGORY_GROUPS) as [
 
 export type CategoryCounts = Record<CategoryKey, number>;
 
+// Build icon -> category lookup map once at module initialization
+// (avoids rebuilding on every countMerchantsByCategory call during pan/zoom)
+const ICON_TO_CATEGORY = new Map<string, CategoryKey>();
+for (const [key, group] of Object.entries(CATEGORY_GROUPS)) {
+	if (key === 'all') continue;
+	for (const icon of group.icons) {
+		ICON_TO_CATEGORY.set(icon, key as CategoryKey);
+	}
+}
+
 export const createEmptyCategoryCounts = (): CategoryCounts => {
 	return CATEGORIES.reduce((acc, category) => {
 		acc[category] = 0;
@@ -67,19 +78,9 @@ export const countMerchantsByCategory = (merchants: Place[]): CategoryCounts => 
 
 	counts.all = merchants.length;
 
-	// Build a reverse lookup map for icon -> category
-	const iconToCategory = new Map<string, CategoryKey>();
-	for (const [key, group] of Object.entries(CATEGORY_GROUPS)) {
-		if (key === 'all') continue;
-		for (const icon of group.icons) {
-			iconToCategory.set(icon, key as CategoryKey);
-		}
-	}
-
-	// Count merchants by category using the lookup map
 	for (const merchant of merchants) {
 		if (!merchant.icon) continue;
-		const category = iconToCategory.get(merchant.icon);
+		const category = ICON_TO_CATEGORY.get(merchant.icon);
 		if (category) {
 			counts[category] += 1;
 		}
