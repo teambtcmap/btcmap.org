@@ -1,13 +1,6 @@
 import type { GeoJSON, Polygon, MultiPolygon } from 'geojson';
 import type leaflet from 'leaflet';
-import type {
-	DomEvent,
-	FeatureGroup,
-	LayerGroup,
-	TileLayer,
-	// @ts-ignore
-	MaplibreGL
-} from 'leaflet';
+import type { DomEvent, FeatureGroup, LayerGroup, TileLayer, MaplibreGL } from 'leaflet';
 
 // nominatim.openstreetmap.org API
 // https://nominatim.org/release-docs/latest/api/Search

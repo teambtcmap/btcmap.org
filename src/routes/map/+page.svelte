@@ -972,11 +972,11 @@
 					};
 					if (theme === 'light') {
 						searchButton.onmouseenter = () => {
-							// @ts-expect-error
+							// @ts-expect-error src property exists on img element
 							document.querySelector('#search-button').src = '/icons/search-black.svg';
 						};
 						searchButton.onmouseleave = () => {
-							// @ts-expect-error
+							// @ts-expect-error src property exists on img element
 							document.querySelector('#search-button').src = '/icons/search.svg';
 						};
 					}
@@ -1050,11 +1050,11 @@
 			}
 
 			// Search bar control - re-enabled for API-based search
-			// @ts-expect-error
+			// @ts-expect-error accessing private Leaflet map internals for custom control placement
 			map._controlCorners['topcenter'] = leaflet.DomUtil.create(
 				'div',
 				'leaflet-top leaflet-center',
-				// @ts-expect-error
+				// @ts-expect-error accessing private Leaflet map internals
 				map._controlContainer
 			);
 

@@ -14,7 +14,7 @@ export default tseslint.config(
 		// Override the TypeScript ESLint recommended config
 		name: 'typescript-eslint/disable-ban-ts-comment',
 		rules: {
-			'@typescript-eslint/ban-ts-comment': 'warn'
+			'@typescript-eslint/ban-ts-comment': 'error'
 		}
 	},
 	{

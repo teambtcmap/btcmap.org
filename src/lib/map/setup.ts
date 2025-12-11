@@ -111,12 +111,10 @@ export const layers = (leaflet: Leaflet, map: Map) => {
 		maxZoom: 19
 	});
 
-	// @ts-ignore
 	const openFreeMapLiberty = window.L.maplibreGL({
 		style: 'https://tiles.openfreemap.org/styles/liberty'
 	});
 
-	// @ts-ignore
 	const openFreeMapDark = window.L.maplibreGL({
 		style: 'https://static.btcmap.org/map-styles/dark.json'
 	});

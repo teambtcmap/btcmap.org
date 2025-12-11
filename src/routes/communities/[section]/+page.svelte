@@ -343,7 +343,7 @@
 							class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link md:w-auto dark:bg-white/[0.15] dark:text-white"
 							bind:value={data.section}
 							on:change={(e) => {
-								// @ts-expect-error
+								// @ts-expect-error e.target is the select element
 								const newSection = e.target?.value;
 								if (newSection) {
 									handleSectionChange(newSection);
