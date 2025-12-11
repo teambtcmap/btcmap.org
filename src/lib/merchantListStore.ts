@@ -1,4 +1,4 @@
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 import axios from 'axios';
 import type { Place } from '$lib/types';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
@@ -50,6 +50,11 @@ const initialState: MerchantListState = {
 	selectedCategory: 'all',
 	categoryCounts: createEmptyCategoryCounts()
 };
+
+// Helper function to reset category state
+function resetCategoryState<T extends MerchantListState>(state: T): T {
+	return { ...state, selectedCategory: 'all' };
+}
 
 // Equirectangular approximation for local distance sorting
 // Uses squared distance (avoids sqrt) since we only need relative ordering
@@ -134,11 +139,7 @@ function createMerchantListStore() {
 			const categoryCounts = countMerchantsByCategory(merchants);
 
 			// Get current state to access selected category
-			let currentState: MerchantListState | undefined;
-			const unsubscribe = store.subscribe((state) => {
-				currentState = state;
-			});
-			unsubscribe();
+			const currentState = get(store);
 
 			// Apply category filtering
 			const filtered =
@@ -207,11 +208,7 @@ function createMerchantListStore() {
 					}));
 				} else {
 					// Get current state to access selected category
-					let currentState: MerchantListState | undefined;
-					const unsubscribe = store.subscribe((state) => {
-						currentState = state;
-					});
-					unsubscribe();
+					const currentState = get(store);
 
 					// Apply category filtering
 					const filtered =
@@ -311,13 +308,12 @@ function createMerchantListStore() {
 		openWithSearchResults(query: string, results: Place[]) {
 			const sortedResults = sortMerchants(results);
 			update((state) => ({
-				...state,
+				...resetCategoryState(state),
 				isOpen: true,
 				mode: 'search',
 				searchQuery: query,
 				searchResults: sortedResults,
-				isSearching: false,
-				selectedCategory: 'all'
+				isSearching: false
 			}));
 		},
 
@@ -342,11 +338,10 @@ function createMerchantListStore() {
 		// Use when: user clears the search input to type a new query (e.g., clicking X button)
 		clearSearchInput() {
 			update((state) => ({
-				...state,
+				...resetCategoryState(state),
 				searchQuery: '',
 				searchResults: [],
-				isSearching: false,
-				selectedCategory: 'all'
+				isSearching: false
 			}));
 		},
 
@@ -354,12 +349,11 @@ function createMerchantListStore() {
 		// Use when: user explicitly switches away from search (e.g., clicking "Nearby" tab)
 		exitSearchMode() {
 			update((state) => ({
-				...state,
+				...resetCategoryState(state),
 				mode: 'nearby',
 				searchQuery: '',
 				searchResults: [],
-				isSearching: false,
-				selectedCategory: 'all'
+				isSearching: false
 			}));
 		},
 
@@ -368,19 +362,14 @@ function createMerchantListStore() {
 			update((state) => ({ ...state, mode }));
 		},
 
-		// Set the selected category filter and trigger a refresh callback
-		setSelectedCategory(category: CategoryKey, refreshCallback?: () => void) {
+		// Set the selected category filter
+		setSelectedCategory(category: CategoryKey) {
 			update((state) => ({ ...state, selectedCategory: category }));
-
-			// If a refresh callback is provided, call it to refresh the merchant list
-			if (refreshCallback) {
-				refreshCallback();
-			}
 		},
 
 		// Reset the selected category to 'all'
 		resetCategory() {
-			update((state) => ({ ...state, selectedCategory: 'all' }));
+			update((state) => resetCategoryState(state));
 		},
 
 		reset() {

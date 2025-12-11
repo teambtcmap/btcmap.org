@@ -9,7 +9,7 @@
 	import LoadingSpinner from '$components/LoadingSpinner.svelte';
 	import Icon from '$components/Icon.svelte';
 	import type { Place } from '$lib/types';
-	import { CATEGORY_GROUPS, type CategoryKey } from '$lib/categoryMapping';
+	import { CATEGORY_ENTRIES, type CategoryKey } from '$lib/categoryMapping';
 	import {
 		MERCHANT_LIST_WIDTH,
 		MERCHANT_LIST_MIN_ZOOM,
@@ -75,7 +75,10 @@
 	}
 
 	function handleCategorySelect(category: CategoryKey) {
-		merchantList.setSelectedCategory(category, onRefresh);
+		merchantList.setSelectedCategory(category);
+		if (onRefresh) {
+			onRefresh();
+		}
 	}
 
 	$: isOpen = $merchantList.isOpen;
@@ -91,15 +94,19 @@
 	$: selectedCategory = $merchantList.selectedCategory;
 	$: categoryCounts = $merchantList.categoryCounts;
 
-	// Helper function to cast string to CategoryKey
-	function getCategoryKey(key: string): CategoryKey {
-		return key as CategoryKey;
-	}
-
 	// Helper function to check if a category has matching merchants
 	function hasMatchingMerchants(categoryKey: CategoryKey): boolean {
 		if (categoryKey === 'all') return true;
 		return (categoryCounts?.[categoryKey] ?? 0) > 0;
+	}
+
+	// Helper function to get category button classes
+	function getCategoryButtonClass(key: CategoryKey, selectedCategory: CategoryKey): string {
+		if (selectedCategory === key) return 'bg-primary text-white';
+		if (hasMatchingMerchants(key)) {
+			return 'bg-gray-100 text-body hover:bg-gray-200 dark:bg-white/5 dark:text-white/70 dark:hover:bg-white/10';
+		}
+		return 'cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-white/30';
 	}
 
 	// Show "zoom in" message when:
@@ -261,13 +268,15 @@
 					<div>
 						<h2 class="text-sm font-semibold text-primary dark:text-white">Nearby Merchants</h2>
 						{#if showZoomInMessage}
-							<p class="text-xs text-body dark:text-white/70">Zoom in to see list</p>
+							<p class="text-xs text-body dark:text-white/70" aria-live="polite">
+								Zoom in to see list
+							</p>
 						{:else if isTruncated}
-							<p class="text-xs text-body dark:text-white/70">
+							<p class="text-xs text-body dark:text-white/70" aria-live="polite">
 								Showing {merchants.length} nearest of {totalCount}
 							</p>
 						{:else}
-							<p class="text-xs text-body dark:text-white/70">
+							<p class="text-xs text-body dark:text-white/70" aria-live="polite">
 								{merchants.length} location{merchants.length !== 1 ? 's' : ''} in view
 							</p>
 						{/if}
@@ -310,21 +319,21 @@
 
 			<!-- Category filter (only shown in nearby mode) -->
 			{#if mode === 'nearby'}
-				<div class="mt-3">
+				<div class="mt-3" role="radiogroup" aria-label="Filter by category">
 					<h3 class="sr-only">Filter by category</h3>
 					<div class="flex flex-wrap gap-2">
-						{#each Object.entries(CATEGORY_GROUPS) as [key, category] (key)}
+						{#each CATEGORY_ENTRIES as [key, category] (key)}
 							<button
 								type="button"
-								on:click={() => handleCategorySelect(getCategoryKey(key))}
-								disabled={!hasMatchingMerchants(getCategoryKey(key))}
-								class="rounded-full px-3 py-1 text-xs font-medium transition-colors
-							{selectedCategory === key
-									? 'bg-primary text-white'
-									: hasMatchingMerchants(getCategoryKey(key))
-										? 'bg-gray-100 text-body hover:bg-gray-200 dark:bg-white/5 dark:text-white/70 dark:hover:bg-white/10'
-										: 'cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-white/30'}"
-								aria-pressed={selectedCategory === key}
+								role="radio"
+								on:click={() => handleCategorySelect(key)}
+								disabled={!hasMatchingMerchants(key)}
+								aria-disabled={!hasMatchingMerchants(key)}
+								aria-checked={selectedCategory === key}
+								class="rounded-full px-3 py-1 text-xs font-medium transition-colors {getCategoryButtonClass(
+									key,
+									selectedCategory
+								)}"
 							>
 								{category.label}
 							</button>
