@@ -144,7 +144,7 @@
 						<Icon
 							w="20"
 							h="20"
-							style="animate-wiggle absolute top-3.5 left-[15px] text-white"
+							class="absolute top-3.5 left-[15px] animate-wiggle text-white"
 							icon="currency_bitcoin"
 							type="material"
 						/>
@@ -239,7 +239,7 @@
 			target="_blank"
 			rel="noreferrer"
 			class="mx-auto flex w-[200px] items-center justify-center rounded-xl bg-twitter py-3 text-white"
-			>Share on Twitter <Icon w="24" h="24" style="ml-2" icon="twitter" type="socials" /></a
+			>Share on Twitter <Icon w="24" h="24" class="ml-2" icon="twitter" type="socials" /></a
 		>
 
 		<p class="text-sm text-body dark:text-white">

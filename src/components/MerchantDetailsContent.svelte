@@ -40,7 +40,7 @@
 			<Icon
 				w="16"
 				h="16"
-				style="mt-1 shrink-0 text-primary dark:text-white"
+				class="mt-1 shrink-0 text-primary dark:text-white"
 				icon="schedule"
 				type="material"
 			/>
@@ -134,7 +134,7 @@
 						<Icon
 							w="16"
 							h="16"
-							style="inline text-primary dark:text-white"
+							class="inline text-primary dark:text-white"
 							icon="verified"
 							type="material"
 						/>
@@ -142,7 +142,7 @@
 						<Icon
 							w="16"
 							h="16"
-							style="inline text-primary dark:text-white"
+							class="inline text-primary dark:text-white"
 							icon="error_outline"
 							type="material"
 						/>

@@ -22,7 +22,7 @@
 		{title}
 		{#if tooltip}
 			<button bind:this={tooltipElement}>
-				<Icon type="fa" icon="circle-info" w="16" h="16" style="text-base" />
+				<Icon type="fa" icon="circle-info" w="16" h="16" class="text-base" />
 			</button>
 		{/if}
 	</h3>

@@ -62,7 +62,7 @@
 							{enrichedData.name}
 						</span>
 						{#if isVerified}
-							<Icon w="12" h="12" icon="verified" type="material" style="shrink-0 text-link" />
+							<Icon w="12" h="12" icon="verified" type="material" class="shrink-0 text-link" />
 						{/if}
 						{#if isBoosted}
 							<Icon
@@ -70,7 +70,7 @@
 								h="12"
 								icon="arrow_circle_up"
 								type="material"
-								style="shrink-0 text-bitcoin"
+								class="shrink-0 text-bitcoin"
 							/>
 						{/if}
 					{:else if showSkeleton}
@@ -150,7 +150,7 @@
 				h="16"
 				icon="chevron_right"
 				type="material"
-				style="mt-0.5 shrink-0 text-gray-400 dark:text-white/40"
+				class="mt-0.5 shrink-0 text-gray-400 dark:text-white/40"
 			/>
 		</div>
 	</button>

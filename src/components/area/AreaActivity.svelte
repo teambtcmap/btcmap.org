@@ -163,7 +163,7 @@
 				>
 					New Places
 				</a>
-				<Icon type="fa" icon="location-pin" w="18" h="18" style="ml-1 inline align-middle" />
+				<Icon type="fa" icon="location-pin" w="18" h="18" class="ml-1 inline align-middle" />
 			</li>
 			<li>
 				<a
@@ -174,7 +174,7 @@
 				>
 					New Comments
 				</a>
-				<Icon type="fa" icon="comment" w="18" h="18" style="ml-1 inline align-middle" />
+				<Icon type="fa" icon="comment" w="18" h="18" class="ml-1 inline align-middle" />
 			</li>
 		</ul>
 	</div>

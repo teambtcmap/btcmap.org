@@ -3,7 +3,8 @@
 
 	export let user: undefined | string = undefined;
 	export let destination: string;
-	export let style: undefined | string = undefined;
+	let className: undefined | string = undefined;
+	export { className as class };
 	export let type: TipType = TipType.Address;
 </script>
 
@@ -43,7 +44,7 @@
 		href={type === 'url' ? destination : `lightning:${destination}`}
 		target={type === 'url' ? '_blank' : null}
 		rel={type === 'url' ? 'noreferrer' : null}
-		class="w-full rounded-lg border border-link py-2 text-center text-sm font-semibold text-link hover:border-white hover:bg-link hover:text-white md:w-20 md:py-1 {style} transition-colors"
+		class="w-full rounded-lg border border-link py-2 text-center text-sm font-semibold text-link hover:border-white hover:bg-link hover:text-white md:w-20 md:py-1 {className} transition-colors"
 	>
 		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		<!--  lightning icon -->

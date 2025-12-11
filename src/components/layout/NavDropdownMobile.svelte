@@ -47,7 +47,7 @@
 					</span>
 					<span>{link.title}</span>
 					{#if link.external}
-						<Icon type="fa" icon="arrow-up-right-from-square" w="16" h="16" style="ml-1" />
+						<Icon type="fa" icon="arrow-up-right-from-square" w="16" h="16" class="ml-1" />
 					{/if}
 				</a>
 			{/each}

@@ -124,7 +124,7 @@
 			<Icon
 				w={showMobileMenu ? '28' : '34'}
 				h={showMobileMenu ? '27' : '12'}
-				style="mx-auto mb-3 text-mobileMenu dark:text-white"
+				class="text-mobileMenu mx-auto mb-3 dark:text-white"
 				icon={showMobileMenu ? 'close' : 'bars'}
 				type="mobile-nav"
 			/>

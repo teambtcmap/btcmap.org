@@ -200,7 +200,7 @@
 							h="16"
 							icon="search"
 							type="material"
-							style="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/50 pointer-events-none"
+							class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-400 dark:text-white/50"
 						/>
 						<input
 							bind:this={searchInput}
@@ -314,7 +314,7 @@
 							h="48"
 							icon="search"
 							type="material"
-							style="text-gray-300 dark:text-white/30"
+							class="text-gray-300 dark:text-white/30"
 						/>
 						<p class="text-sm text-body dark:text-white/70">Search for merchants by name</p>
 					</div>
@@ -341,7 +341,7 @@
 						h="48"
 						icon="zoom_in"
 						type="material"
-						style="text-gray-300 dark:text-white/30"
+						class="text-gray-300 dark:text-white/30"
 					/>
 					<div>
 						<p class="text-sm font-medium text-primary dark:text-white">

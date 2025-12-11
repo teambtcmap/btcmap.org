@@ -90,7 +90,7 @@
 					h="24"
 					icon={icon !== 'question_mark' ? icon : 'currency_bitcoin'}
 					type="material"
-					style="shrink-0"
+					class="shrink-0"
 				/>
 				<p class="text-lg break-all">{displayMerchant.name || 'BTC Map Merchant'}</p>
 			</a>
@@ -99,7 +99,7 @@
 		<div class="mb-3 w-full space-y-2 break-all text-primary dark:text-white">
 			{#if address}
 				<div class="flex items-center space-x-2 font-medium">
-					<Icon w="16" h="16" icon="location_on" type="material" style="shrink-0" />
+					<Icon w="16" h="16" icon="location_on" type="material" class="shrink-0" />
 					<a
 						href="geo:{merchant.lat},{merchant.lon}"
 						class="text-sm underline decoration-primary decoration-1 underline-offset-4 dark:decoration-white"
@@ -111,7 +111,7 @@
 
 			{#if website}
 				<div class="flex items-center space-x-2">
-					<Icon w="16" h="16" icon="language" type="material" style="shrink-0" />
+					<Icon w="16" h="16" icon="language" type="material" class="shrink-0" />
 					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href={website.startsWith('http') ? website : `https://${website}`}
@@ -127,7 +127,7 @@
 
 			{#if openingHours}
 				<div class="flex items-center space-x-2">
-					<Icon w="16" h="16" icon="schedule" type="material" style="shrink-0" />
+					<Icon w="16" h="16" icon="schedule" type="material" class="shrink-0" />
 					<div class="text-sm">
 						<time class="flex flex-col items-start">
 							<!-- eslint-disable-next-line svelte/no-at-html-tags - we sanitize the content in formatOpeningHours -->
@@ -139,7 +139,7 @@
 
 			{#if phone}
 				<div class="flex items-center space-x-2">
-					<Icon w="16" h="16" icon="phone" type="material" style="shrink-0" />
+					<Icon w="16" h="16" icon="phone" type="material" class="shrink-0" />
 					<a
 						href="tel:{phone}"
 						class="text-sm underline decoration-primary decoration-1 underline-offset-4 dark:decoration-white"
@@ -151,7 +151,7 @@
 
 			{#if email}
 				<div class="flex items-center space-x-2">
-					<Icon w="16" h="16" icon="email" type="material" style="shrink-0" />
+					<Icon w="16" h="16" icon="email" type="material" class="shrink-0" />
 					<a
 						href="mailto:{email}"
 						class="text-sm underline decoration-primary decoration-1 underline-offset-4 dark:decoration-white"
@@ -213,13 +213,13 @@
 
 				{#if !(Date.parse(verified[0]) > verifiedDate)}
 					<div bind:this={outdatedTooltip} class="text-primary dark:text-white">
-						<Icon w="16" h="16" icon="error_outline" type="material" style="shrink-0" />
+						<Icon w="16" h="16" icon="error_outline" type="material" class="shrink-0" />
 					</div>
 				{/if}
 			</div>
 		{:else}
 			<div class="flex items-center space-x-1 text-gray-500 dark:text-gray-400">
-				<Icon w="16" h="16" icon="sentiment_dissatisfied" type="material" style="shrink-0" />
+				<Icon w="16" h="16" icon="sentiment_dissatisfied" type="material" class="shrink-0" />
 				<p class="text-sm font-semibold">Not Verified</p>
 			</div>
 		{/if}
@@ -240,7 +240,7 @@
 				class="inline-flex items-center space-x-1 font-semibold text-link transition-colors hover:text-hover"
 				title="Help improve the data for everyone"
 			>
-				<Icon w="16" h="16" icon="verified" type="material" style="shrink-0" />
+				<Icon w="16" h="16" icon="verified" type="material" class="shrink-0" />
 				<p class="text-sm">Verify</p>
 			</a>
 

@@ -373,7 +373,7 @@
 					icon="chart-pie"
 					w="208"
 					h="208"
-					style="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse text-link/50"
+					class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse text-link/50"
 				/>
 			</div>
 		{/if}
@@ -396,7 +396,7 @@
 					<div
 						class="absolute top-0 left-0 flex h-[400px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
 					>
-						<Icon type="fa" icon="chart-area" w="96" h="96" style="animate-pulse text-link/50" />
+						<Icon type="fa" icon="chart-area" w="96" h="96" class="animate-pulse text-link/50" />
 					</div>
 				{/if}
 				<canvas bind:this={totalChartCanvas} width="100%" height="400" />
@@ -412,7 +412,7 @@
 					<div
 						class="absolute top-0 left-0 flex h-[400px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
 					>
-						<Icon type="fa" icon="chart-area" w="96" h="96" style="animate-pulse text-link/50" />
+						<Icon type="fa" icon="chart-area" w="96" h="96" class="animate-pulse text-link/50" />
 					</div>
 				{/if}
 				<canvas bind:this={upToDateChartCanvas} width="100%" height="400" />

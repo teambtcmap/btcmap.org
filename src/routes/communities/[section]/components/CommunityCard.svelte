@@ -66,7 +66,7 @@
 			<SponsorBadge />
 		{/if}
 		{#if tip}
-			<Tip destination={tip.destination} type={tip.type} style="mx-auto block" />
+			<Tip destination={tip.destination} type={tip.type} class="mx-auto block" />
 		{/if}
 	</div>
 

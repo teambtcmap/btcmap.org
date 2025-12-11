@@ -393,7 +393,7 @@
 	{#if data.placeData.deleted_at}
 		<div class="bg-red-600 py-4 text-center text-white">
 			<p class="text-lg font-semibold">
-				<Icon w="20" h="20" style="inline-block text-white mr-2" icon="skull" type="material" />
+				<Icon w="20" h="20" class="mr-2 inline-block text-white" icon="skull" type="material" />
 				This merchant has been removed from BTC Map and may no longer accept Bitcoin.
 			</p>
 			<p class="mt-1 text-sm">The data shown below is outdated and for reference only.</p>
@@ -415,7 +415,7 @@
 							<Icon
 								w="60"
 								h="60"
-								style="text-white"
+								class="text-white"
 								icon={data.placeData.deleted_at
 									? 'skull'
 									: icon !== 'question_mark'
@@ -478,7 +478,7 @@
 								<Icon
 									w="16"
 									h="16"
-									style="text-primary dark:text-white inline-block"
+									class="inline-block text-primary dark:text-white"
 									icon="phone"
 									type="material"
 								/>
@@ -512,7 +512,7 @@
 											icon="mobile-screen-button"
 											w="32"
 											h="32"
-											style="text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
+											class="text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
 										/>
 									</a>
 								{:else if typeof window !== 'undefined'}
@@ -553,7 +553,7 @@
 								<Icon
 									w="16"
 									h="16"
-									style="text-primary dark:text-white inline"
+									class="inline text-primary dark:text-white"
 									icon="schedule"
 									type="material"
 								/>
@@ -692,7 +692,7 @@
 											<Icon
 												w="30"
 												h="30"
-												style="text-primary dark:text-white mr-2"
+												class="mr-2 text-primary dark:text-white"
 												icon="verified"
 												type="material"
 											/>
@@ -702,7 +702,7 @@
 											<Icon
 												w="30"
 												h="30"
-												style="text-primary dark:text-white mr-2"
+												class="mr-2 text-primary dark:text-white"
 												icon="error_outline"
 												type="material"
 											/>

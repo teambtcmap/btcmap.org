@@ -340,7 +340,7 @@
 					role="status"
 					aria-live="polite"
 				>
-					<Icon type="fa" icon="table" w="96" h="96" style="animate-pulse text-link/50" />
+					<Icon type="fa" icon="table" w="96" h="96" class="animate-pulse text-link/50" />
 				</div>
 			</div>
 		{:else if $leaderboardWithPositions.length === 0}

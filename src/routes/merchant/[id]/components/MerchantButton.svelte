@@ -19,7 +19,7 @@
 	class="flex h-20 min-w-24 items-center justify-center rounded-lg border border-primary py-1 !text-primary transition-colors hover:border-link hover:!text-link dark:border-white/95 dark:!text-white dark:hover:border-link dark:hover:!text-link"
 >
 	<div>
-		<Icon w="30" h="30" icon={materialIcon} type="material" style="mx-auto" />
+		<Icon w="30" h="30" icon={materialIcon} type="material" class="mx-auto" />
 		<span class="mt-1 block text-center text-xs font-semibold">{text}</span>
 	</div>
 </button>

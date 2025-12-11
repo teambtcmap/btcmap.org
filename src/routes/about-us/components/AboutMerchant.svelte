@@ -25,7 +25,7 @@
 	<Icon
 		w="40"
 		h="40"
-		style="text-white"
+		class="text-white"
 		icon={icon !== 'question_mark' ? icon : 'currency_bitcoin'}
 		type="material"
 	/>
