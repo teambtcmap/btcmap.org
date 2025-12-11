@@ -18,7 +18,7 @@
 	class="border-t-statBorder w-full items-center justify-between space-y-1 border-t p-5 text-center md:flex md:space-y-0 md:text-left"
 >
 	<div class="items-center space-y-1 md:flex md:space-y-0 md:space-x-2">
-		<Icon type="fa" icon="ticket" w="20" h="20" style="text-xl text-link" />
+		<Icon type="fa" icon="ticket" w="20" h="20" class="text-xl text-link" />
 
 		<div>
 			<p>
@@ -74,7 +74,7 @@
 		</div>
 
 		<div class="items-center md:flex">
-			<Icon type="fa" icon="comment" w="16" h="16" style="text-link md:mr-1" />
+			<Icon type="fa" icon="comment" w="16" h="16" class="text-link md:mr-1" />
 			<strong class="text-primary dark:text-white">{comments}</strong>
 		</div>
 	</div>

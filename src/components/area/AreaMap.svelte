@@ -221,19 +221,19 @@
 
 				<div class="flex items-center space-x-1">
 					{#each Array(5 - grade) as _, index (index)}
-						<Icon type="fa" icon="star" w="16" h="16" style="opacity-25" />
+						<Icon type="fa" icon="star" w="16" h="16" class="opacity-25" />
 					{/each}
 				</div>
 			{:else}
 				<div class="flex items-center space-x-1">
 					{#each Array(5) as _, index (index)}
-						<Icon type="fa" icon="star" w="16" h="16" style="animate-pulse text-link/50" />
+						<Icon type="fa" icon="star" w="16" h="16" class="animate-pulse text-link/50" />
 					{/each}
 				</div>
 			{/if}
 
 			<button bind:this={gradeTooltip}>
-				<Icon type="fa" icon="circle-info" w="14" h="14" style="text-sm" />
+				<Icon type="fa" icon="circle-info" w="14" h="14" class="text-sm" />
 			</button>
 		</div>
 	</h3>

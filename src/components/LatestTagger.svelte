@@ -105,7 +105,7 @@
 
 		<!-- lightning tip button -->
 		{#if lightning}
-			<Tip destination={lightning} style="block lg:inline mx-auto lg:mx-0" />
+			<Tip destination={lightning} class="mx-auto block lg:mx-0 lg:inline" />
 		{/if}
 	</div>
 </div>

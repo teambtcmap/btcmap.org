@@ -6,15 +6,16 @@
 	import type { IconName as IconNameMobileNav } from '$lib/spritesheet-mobile-nav.ts';
 
 	type IconProps =
-		| { type: 'material'; icon: string; w: string; h: string; style?: string }
-		| { type: 'fa'; icon: string; w: string; h: string; style?: string }
-		| { type: 'socials'; icon: IconNameSocials; w: string; h: string; style?: string }
-		| { type: 'apps'; icon: IconNameApps; w: string; h: string; style?: string }
-		| { type: 'mobile-nav'; icon: IconNameMobileNav; w: string; h: string; style?: string };
+		| { type: 'material'; icon: string; w: string; h: string; class?: string }
+		| { type: 'fa'; icon: string; w: string; h: string; class?: string }
+		| { type: 'socials'; icon: IconNameSocials; w: string; h: string; class?: string }
+		| { type: 'apps'; icon: IconNameApps; w: string; h: string; class?: string }
+		| { type: 'mobile-nav'; icon: IconNameMobileNav; w: string; h: string; class?: string };
 
 	export let w: string;
 	export let h: string;
-	export let style: undefined | string = undefined;
+	let className: undefined | string = undefined;
+	export { className as class };
 	export let icon: string | IconNameApps | IconNameMobileNav | IconNameSocials;
 	export let type: 'apps' | 'fa' | 'material' | 'mobile-nav' | 'socials' = 'material';
 
@@ -22,7 +23,7 @@
 	// Type assertion to make TypeScript happy
 	// we want to make sure that if the type is 'material', the icon can be any string
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const props = { type, icon, w, h, style } as IconProps;
+	const props = { type, icon, w, h, class: className } as IconProps;
 
 	$: formattedIconifyIcon =
 		type === 'material'
@@ -71,9 +72,9 @@
 </script>
 
 {#if type === 'material' || type === 'fa'}
-	<IconIconify icon={formattedIconifyIcon} width={w} height={h} class={style} />
+	<IconIconify icon={formattedIconifyIcon} width={w} height={h} class={className} />
 {:else}
-	<svg width="{w}px" height="{h}px" class={style}>
+	<svg width="{w}px" height="{h}px" class={className}>
 		<use width="{w}px" height="{h}px" href={`${spriteHref}#${icon}`} />
 	</svg>
 {/if}

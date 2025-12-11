@@ -131,7 +131,7 @@
 					onStatusCheckError={handleStatusCheckError}
 				>
 					<p class="rounded-md border p-1 text-sm text-body dark:text-white">
-						<Icon w="16" h="16" icon="info" style="inline-block" />
+						<Icon w="16" h="16" icon="info" class="inline-block" />
 						Your comment will be published when our bots have confirmed the payment.
 					</p>
 

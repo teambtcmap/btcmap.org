@@ -612,7 +612,7 @@ export const generateIcon = (L: Leaflet, icon: string, boosted: boolean, comment
 		props: {
 			w: '20',
 			h: '20',
-			style: `${className} mt-[5.75px] text-white`,
+			class: `${className} mt-[5.75px] text-white`,
 			icon: iconTmp,
 			type: 'material'
 		}

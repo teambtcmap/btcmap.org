@@ -28,28 +28,28 @@
 		<!-- eslint-disable svelte/no-navigation-without-resolve -->
 		<a href={website} target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-bitcoin">
-				<Icon type="fa" icon="globe" w="28" h="28" style="text-white" />
+				<Icon type="fa" icon="globe" w="28" h="28" class="text-white" />
 			</span>
 		</a>
 	{/if}
 	{#if email}
 		<a href="mailto:{email}" target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-[#53C5D5]">
-				<Icon type="fa" icon="envelope" w="28" h="28" style="text-white" />
+				<Icon type="fa" icon="envelope" w="28" h="28" class="text-white" />
 			</span>
 		</a>
 	{/if}
 	{#if nostr}
 		<a href="https://nostr.com/{nostr}" target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-nostr">
-				<Icon w="28" h="28" icon="nostr" type="socials" style="text-white" />
+				<Icon w="28" h="28" icon="nostr" type="socials" class="text-white" />
 			</span>
 		</a>
 	{/if}
 	{#if twitter}
 		<a href={twitter} target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-black">
-				<Icon w="25" h="25" icon="x" type="socials" style="text-white" />
+				<Icon w="25" h="25" icon="x" type="socials" class="text-white" />
 			</span>
 		</a>
 	{/if}
@@ -111,7 +111,7 @@
 	{#if rss}
 		<a href={rss} target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-orange-500">
-				<Icon type="fa" icon="rss" w="28" h="28" style="text-white" />
+				<Icon type="fa" icon="rss" w="28" h="28" class="text-white" />
 			</span>
 		</a>
 	{/if}

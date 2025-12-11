@@ -17,7 +17,7 @@
 			{route.name}
 		</a>
 		{#if index !== routes.length - 1}
-			<Icon type="fa" icon="chevron-right" w="8" h="8" style="text-link" />
+			<Icon type="fa" icon="chevron-right" w="8" h="8" class="text-link" />
 		{/if}
 	{/each}
 </div>

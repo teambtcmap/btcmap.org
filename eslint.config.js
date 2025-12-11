@@ -43,7 +43,6 @@ export default tseslint.config(
 			}
 		},
 		rules: {
-			'svelte/no-dupe-style-properties': 'warn', // mainly because of tailwind (v4 will fix this)
 			'svelte/no-unused-svelte-ignore': 'off', // These are used by vite-plugin-svelte/svelte-check, not ESLint
 			'@typescript-eslint/no-unused-expressions': 'warn',
 			'@typescript-eslint/no-unused-vars': [

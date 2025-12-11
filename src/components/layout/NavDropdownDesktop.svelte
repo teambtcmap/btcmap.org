@@ -21,7 +21,7 @@
 			: ''} mt-4 mr-4 flex items-center text-xl font-semibold text-link transition-colors hover:text-hover md:mt-0 md:mr-0 dark:text-white dark:hover:text-link"
 	>
 		{title}
-		<Icon type="fa" icon="chevron-down" w="16" h="16" style="ml-1" />
+		<Icon type="fa" icon="chevron-down" w="16" h="16" class="ml-1" />
 	</button>
 
 	<!-- dropdown items -->
@@ -47,7 +47,7 @@
 						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 						{link.title}
 						{#if link.external}
-							<Icon type="fa" icon="arrow-up-right-from-square" w="16" h="16" style="ml-1" />
+							<Icon type="fa" icon="arrow-up-right-from-square" w="16" h="16" class="ml-1" />
 						{/if}
 					</a>
 				{/each}

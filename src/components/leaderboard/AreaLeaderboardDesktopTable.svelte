@@ -68,7 +68,7 @@
 											class="ml-1 cursor-default"
 											aria-label="Information about total locations"
 										>
-											<Icon type="fa" icon="circle-info" w="14" h="14" style="text-sm" />
+											<Icon type="fa" icon="circle-info" w="14" h="14" class="text-sm" />
 										</button>
 									{:else if header.column.id === 'upToDateElements'}
 										<button
@@ -77,7 +77,7 @@
 											class="ml-1 cursor-default"
 											aria-label="Information about verified locations"
 										>
-											<Icon type="fa" icon="circle-info" w="14" h="14" style="text-sm" />
+											<Icon type="fa" icon="circle-info" w="14" h="14" class="text-sm" />
 										</button>
 									{:else if header.column.id === 'grade'}
 										<button
@@ -86,7 +86,7 @@
 											class="ml-1 cursor-default"
 											aria-label="Information about Grade metric"
 										>
-											<Icon type="fa" icon="circle-info" w="14" h="14" style="text-sm" />
+											<Icon type="fa" icon="circle-info" w="14" h="14" class="text-sm" />
 										</button>
 									{/if}
 									{#if header.column.getIsSorted().toString() === 'asc'}

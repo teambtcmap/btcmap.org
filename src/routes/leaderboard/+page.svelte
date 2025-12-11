@@ -99,7 +99,7 @@
 									href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Lightning-Tips"
 									target="_blank"
 									rel="noreferrer"
-									><Icon type="fa" icon="circle-info" w="14" h="14" style="text-sm inline" /></a
+									><Icon type="fa" icon="circle-info" w="14" h="14" class="inline text-sm" /></a
 								>
 							{/if}
 						</h3>

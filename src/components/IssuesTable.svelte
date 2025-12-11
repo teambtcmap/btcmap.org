@@ -217,7 +217,7 @@
 				<div
 					class="flex h-[572px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
 				>
-					<Icon type="fa" icon="table" w="96" h="96" style="animate-pulse text-link/50" />
+					<Icon type="fa" icon="table" w="96" h="96" class="animate-pulse text-link/50" />
 				</div>
 			</div>
 		{:else if !issues.length}

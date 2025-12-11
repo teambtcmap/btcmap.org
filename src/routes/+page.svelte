@@ -68,7 +68,7 @@
 								<Icon
 									w="32"
 									h="32"
-									style={app.icon === 'play' ? 'pl-0.5' : ''}
+									class={app.icon === 'play' ? 'pl-0.5' : ''}
 									icon={app.icon}
 									type="apps"
 								/>
