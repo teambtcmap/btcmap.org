@@ -31,6 +31,10 @@ export const MERCHANT_DRAWER_WIDTH = 400;
 // At this zoom, we use API search for accurate nearby count
 export const CLUSTERING_DISABLED_ZOOM = 17;
 
+// Zoom 1-5: Boosted markers are clustered (too zoomed out, would be crowded)
+// Zoom 6-16: Boosted markers are NOT clustered (stand out from regular markers)
+export const BOOSTED_CLUSTERING_MAX_ZOOM = 5;
+
 // Zoom 15-16: "Normal" mode - filter by loaded viewport markers
 // Fetches enriched Place data (icons, addresses) only when panel is open
 export const MERCHANT_LIST_MIN_ZOOM = 15;

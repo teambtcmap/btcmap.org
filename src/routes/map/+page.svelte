@@ -14,6 +14,7 @@
 		BREAKPOINTS,
 		MERCHANT_DRAWER_WIDTH,
 		CLUSTERING_DISABLED_ZOOM,
+		BOOSTED_CLUSTERING_MAX_ZOOM,
 		MERCHANT_LIST_MIN_ZOOM,
 		MERCHANT_LIST_LOW_ZOOM,
 		MERCHANT_LIST_MAX_ITEMS,
@@ -99,6 +100,7 @@
 	const DEFAULT_ZOOM = 15;
 
 	let currentZoom = DEFAULT_ZOOM;
+	let previousZoom = DEFAULT_ZOOM;
 
 	// Throttled marker drawer opening to prevent freeze on rapid clicks
 	let lastMarkerClickTime = 0;
@@ -142,7 +144,9 @@
 
 	let markers: MarkerClusterGroup;
 	let upToDateLayer: FeatureGroup.SubGroup;
+	let boostedLayer: FeatureGroup;
 	let loadedMarkers: Record<string, Marker> = {};
+	let boostedMarkerIds: Set<string> = new Set();
 	let selectedMarkerId: number | null = null;
 
 	let isLoadingMarkers = false;
@@ -321,18 +325,36 @@
 			if (updatedPlace) {
 				// Regenerate icon with fresh data
 				const commentsCount = typeof updatedPlace.comments === 'number' ? updatedPlace.comments : 0;
-				const boosted = isBoosted(updatedPlace) ? true : false;
+				const nowBoosted = isBoosted(updatedPlace) ? true : false;
+				const wasBoosted = boostedMarkerIds.has(placeIdStr);
 
 				const newIcon = generateIcon(
 					leaflet,
 					updatedPlace.icon || 'question_mark',
-					boosted,
+					nowBoosted,
 					commentsCount
 				);
 
 				// Update the marker icon
 				marker.setIcon(newIcon);
-				console.info(`Updated marker icon for place ${$lastUpdatedPlaceId}`);
+
+				// Handle layer transition if boost status changed
+				if (nowBoosted && !wasBoosted) {
+					// Place became boosted - move to non-clustered layer
+					upToDateLayer.removeLayer(marker);
+					markers.removeLayer(marker);
+					boostedLayer.addLayer(marker);
+					boostedMarkerIds.add(placeIdStr);
+					console.info(`Moved marker ${placeIdStr} to boosted layer`);
+				} else if (!nowBoosted && wasBoosted) {
+					// Boost expired - move to clustered layer
+					boostedLayer.removeLayer(marker);
+					boostedMarkerIds.delete(placeIdStr);
+					upToDateLayer.addLayer(marker);
+					console.info(`Moved marker ${placeIdStr} to clustered layer`);
+				} else {
+					console.info(`Updated marker icon for place ${$lastUpdatedPlaceId}`);
+				}
 			}
 		}
 
@@ -369,7 +391,13 @@
 		Object.entries(loadedMarkers).forEach(([placeId, marker]) => {
 			const markerLatLng = marker.getLatLng();
 			if (!bounds.contains(markerLatLng)) {
-				upToDateLayer.removeLayer(marker);
+				// Remove from appropriate layer based on boost status
+				if (boostedMarkerIds.has(placeId)) {
+					boostedLayer.removeLayer(marker);
+					boostedMarkerIds.delete(placeId);
+				} else {
+					upToDateLayer.removeLayer(marker);
+				}
 				markersToRemove.push(placeId);
 			}
 		});
@@ -395,6 +423,8 @@
 				// Remove from both the subgroup and the parent cluster group
 				upToDateLayer.removeLayer(marker);
 				markers.removeLayer(marker);
+				boostedLayer.removeLayer(marker);
+				boostedMarkerIds.delete(placeId);
 				markersToRemove.push(placeId);
 			}
 		});
@@ -402,6 +432,52 @@
 		markersToRemove.forEach((placeId) => {
 			delete loadedMarkers[placeId];
 		});
+	};
+
+	// Move boosted markers between layers when zoom crosses the threshold
+	const handleBoostedLayerTransition = (fromZoom: number, toZoom: number) => {
+		const crossedThreshold =
+			(fromZoom <= BOOSTED_CLUSTERING_MAX_ZOOM && toZoom > BOOSTED_CLUSTERING_MAX_ZOOM) ||
+			(fromZoom > BOOSTED_CLUSTERING_MAX_ZOOM && toZoom <= BOOSTED_CLUSTERING_MAX_ZOOM);
+
+		if (!crossedThreshold || !markers || !boostedLayer) return;
+
+		const shouldClusterBoosted = toZoom <= BOOSTED_CLUSTERING_MAX_ZOOM;
+
+		if (shouldClusterBoosted) {
+			// Moving from zoom 6+ to zoom 5-: move boosted markers to cluster layer
+			const markersToMove: Marker[] = [];
+			boostedMarkerIds.forEach((placeId) => {
+				const marker = loadedMarkers[placeId];
+				if (marker) {
+					boostedLayer.removeLayer(marker);
+					markersToMove.push(marker);
+				}
+			});
+			if (markersToMove.length > 0) {
+				markers.addLayers(markersToMove);
+				boostedMarkerIds.clear();
+				console.info(`Moved ${markersToMove.length} boosted markers to clustered layer`);
+			}
+		} else {
+			// Moving from zoom 5- to zoom 6+: move boosted markers to non-clustered layer
+			const markersToMove: Array<{ marker: Marker; placeId: string }> = [];
+			Object.entries(loadedMarkers).forEach(([placeId, marker]) => {
+				const place = $placesById.get(Number(placeId));
+				if (place && isBoosted(place)) {
+					markersToMove.push({ marker, placeId });
+				}
+			});
+			markersToMove.forEach(({ marker, placeId }) => {
+				markers.removeLayer(marker);
+				upToDateLayer.removeLayer(marker);
+				boostedLayer.addLayer(marker);
+				boostedMarkerIds.add(placeId);
+			});
+			if (markersToMove.length > 0) {
+				console.info(`Moved ${markersToMove.length} boosted markers to non-clustered layer`);
+			}
+		}
 	};
 
 	// Load markers for places in current viewport using web workers
@@ -504,7 +580,15 @@
 				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
 
-			upToDateLayer.addLayer(marker);
+			// Route to appropriate layer based on boost status and zoom level
+			// At low zoom (1-5), boosted markers are also clustered to avoid crowding
+			const shouldClusterBoosted = currentZoom <= BOOSTED_CLUSTERING_MAX_ZOOM;
+			if (boosted && !shouldClusterBoosted) {
+				boostedLayer.addLayer(marker);
+				boostedMarkerIds.add(place.id.toString());
+			} else {
+				upToDateLayer.addLayer(marker);
+			}
 			loadedMarkers[place.id.toString()] = marker;
 
 			// Highlight if this is the selected marker (may be pending from search result click)
@@ -660,8 +744,8 @@
 			map.panTo(newCenter, { animate: true, duration: 0.3 });
 		}
 
-		// Optionally spiderfy cluster containing the marker
-		if (spiderfyCluster) {
+		// Optionally spiderfy cluster containing the marker (skip for boosted markers - they're not clustered)
+		if (spiderfyCluster && !boostedMarkerIds.has(place.id.toString())) {
 			const marker = loadedMarkers[place.id.toString()];
 			if (marker && markers) {
 				const cluster = markers.getVisibleParent(marker);
@@ -701,10 +785,12 @@
 		});
 		/* eslint-enable no-undef */
 		upToDateLayer = leaflet.featureGroup.subGroup(markers);
+		boostedLayer = leaflet.featureGroup();
 
 		// Add layers to map immediately so batches can be added
 		map.addLayer(markers);
 		map.addLayer(upToDateLayer);
+		map.addLayer(boostedLayer); // Added last to render on top of clusters
 
 		// Set up zoom guard - prevent marker loading during zoom animation
 		map.on('zoomstart', () => {
@@ -716,7 +802,12 @@
 			isZooming = false;
 			const coords = map.getBounds();
 			mapCenter = map.getCenter();
-			currentZoom = map.getZoom();
+			const newZoom = map.getZoom();
+
+			// Handle boosted marker layer transitions when crossing zoom threshold
+			handleBoostedLayerTransition(previousZoom, newZoom);
+			previousZoom = newZoom;
+			currentZoom = newZoom;
 
 			// Update hash if not using URL parameters
 			if (!urlLat.length && !urlLong.length) {
@@ -755,13 +846,15 @@
 
 			// Initialize merchant list if already zoomed in
 			currentZoom = map.getZoom();
+			previousZoom = currentZoom;
 			updateMerchantList();
 		}
 	};
 
 	// Process a batch of places on the main thread (DOM operations only)
 	const processBatchOnMainThread = (batch: ProcessedPlace[], _layer: FeatureGroup.SubGroup) => {
-		const markersToAdd: Marker[] = [];
+		const regularMarkersToAdd: Marker[] = [];
+		const boostedMarkersToAdd: Marker[] = [];
 
 		batch.forEach((element: ProcessedPlace) => {
 			const { iconData } = element;
@@ -788,18 +881,31 @@
 				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
 
-			markersToAdd.push(marker);
+			// Route to appropriate layer based on boost status and zoom level
+			// At low zoom (1-5), boosted markers are also clustered to avoid crowding
+			const shouldClusterBoosted = currentZoom <= BOOSTED_CLUSTERING_MAX_ZOOM;
+			if (iconData.boosted && !shouldClusterBoosted) {
+				boostedMarkersToAdd.push(marker);
+				boostedMarkerIds.add(placeId);
+			} else {
+				regularMarkersToAdd.push(marker);
+			}
 			loadedMarkers[placeId] = marker;
 		});
 
-		// Batch add markers - use parent cluster group's addLayers for efficiency
-		if (markersToAdd.length > 0 && markers) {
-			markers.addLayers(markersToAdd);
+		// Batch add regular markers to cluster group
+		if (regularMarkersToAdd.length > 0 && markers) {
+			markers.addLayers(regularMarkersToAdd);
+		}
 
-			// Highlight the selected marker if it was just loaded (may be pending from search result click)
-			if (selectedMarkerId) {
-				highlightMarker(selectedMarkerId);
-			}
+		// Add boosted markers to non-clustered layer (only at zoom > 5)
+		if (boostedMarkersToAdd.length > 0 && boostedLayer) {
+			boostedMarkersToAdd.forEach((m) => boostedLayer.addLayer(m));
+		}
+
+		// Highlight the selected marker if it was just loaded (may be pending from search result click)
+		if ((regularMarkersToAdd.length > 0 || boostedMarkersToAdd.length > 0) && selectedMarkerId) {
+			highlightMarker(selectedMarkerId);
 		}
 	};
 
