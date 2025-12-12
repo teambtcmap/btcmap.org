@@ -75,10 +75,10 @@
 	}
 
 	function handleCategorySelect(category: CategoryKey) {
+		// Guard against clicks on disabled buttons (Svelte fires click even when disabled)
+		if (!hasMatchingMerchants(category)) return;
 		merchantList.setSelectedCategory(category);
-		if (onRefresh) {
-			onRefresh();
-		}
+		onRefresh?.();
 	}
 
 	$: isOpen = $merchantList.isOpen;
