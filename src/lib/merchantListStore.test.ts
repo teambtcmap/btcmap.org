@@ -532,4 +532,294 @@ describe('merchantListStore', () => {
 			expect(state.searchResults.length).toBe(1);
 		});
 	});
+
+	describe('category filtering', () => {
+		// Helper to create places with specific icons for category testing
+		function createPlaceWithIcon(icon: string, overrides: Partial<Place> = {}): Place {
+			return createMockPlace({ icon, ...overrides });
+		}
+
+		describe('setSelectedCategory and resetCategory', () => {
+			it('setSelectedCategory() should update selectedCategory in state', () => {
+				merchantList.setSelectedCategory('restaurants');
+				const state = get(merchantList);
+				expect(state.selectedCategory).toBe('restaurants');
+			});
+
+			it('setSelectedCategory() should allow setting any valid category', () => {
+				const categories = [
+					'all',
+					'restaurants',
+					'shopping',
+					'groceries',
+					'coffee',
+					'atms',
+					'hotels',
+					'beauty'
+				] as const;
+
+				for (const category of categories) {
+					merchantList.setSelectedCategory(category);
+					const state = get(merchantList);
+					expect(state.selectedCategory).toBe(category);
+				}
+			});
+
+			it('resetCategory() should reset selectedCategory to all', () => {
+				merchantList.setSelectedCategory('coffee');
+				merchantList.resetCategory();
+				const state = get(merchantList);
+				expect(state.selectedCategory).toBe('all');
+			});
+		});
+
+		describe('category state reset on close', () => {
+			it('close() should reset category to all', () => {
+				merchantList.open();
+				merchantList.setSelectedCategory('restaurants');
+				merchantList.close();
+				const state = get(merchantList);
+				expect(state.selectedCategory).toBe('all');
+			});
+
+			it('close() should preserve merchants while resetting category', () => {
+				const merchants = [createPlaceWithIcon('restaurant', { id: 1 })];
+				merchantList.setMerchants(merchants, 0, 0);
+				merchantList.setSelectedCategory('restaurants');
+				merchantList.close();
+				const state = get(merchantList);
+
+				expect(state.selectedCategory).toBe('all');
+				expect(state.merchants.length).toBe(1);
+			});
+		});
+
+		describe('category state reset on search actions', () => {
+			it('openWithSearchResults() should reset category to all', () => {
+				merchantList.setSelectedCategory('coffee');
+				merchantList.openWithSearchResults('test', [createMockPlace()]);
+				const state = get(merchantList);
+				expect(state.selectedCategory).toBe('all');
+			});
+
+			it('clearSearchInput() should reset category to all', () => {
+				merchantList.openSearchMode();
+				merchantList.setSelectedCategory('atms');
+				merchantList.clearSearchInput();
+				const state = get(merchantList);
+				expect(state.selectedCategory).toBe('all');
+			});
+
+			it('exitSearchMode() should reset category to all', () => {
+				merchantList.openSearchMode();
+				merchantList.setSelectedCategory('hotels');
+				merchantList.exitSearchMode();
+				const state = get(merchantList);
+				expect(state.selectedCategory).toBe('all');
+			});
+		});
+
+		describe('category counts', () => {
+			it('setMerchants() should calculate category counts', () => {
+				const merchants = [
+					createPlaceWithIcon('restaurant', { id: 1 }),
+					createPlaceWithIcon('restaurant', { id: 2 }),
+					createPlaceWithIcon('local_cafe', { id: 3 }),
+					createPlaceWithIcon('local_atm', { id: 4 })
+				];
+
+				merchantList.setMerchants(merchants, 0, 0);
+				const state = get(merchantList);
+
+				expect(state.categoryCounts.all).toBe(4);
+				expect(state.categoryCounts.restaurants).toBe(2);
+				expect(state.categoryCounts.coffee).toBe(1);
+				expect(state.categoryCounts.atms).toBe(1);
+				expect(state.categoryCounts.shopping).toBe(0);
+			});
+
+			it('setMerchants() should handle merchants without icons', () => {
+				const merchants = [
+					createPlaceWithIcon('restaurant', { id: 1 }),
+					createMockPlace({ id: 2 }), // No icon
+					createMockPlace({ id: 3, icon: undefined })
+				];
+
+				merchantList.setMerchants(merchants, 0, 0);
+				const state = get(merchantList);
+
+				expect(state.categoryCounts.all).toBe(3);
+				expect(state.categoryCounts.restaurants).toBe(1);
+			});
+		});
+
+		describe('category filtering in setMerchants', () => {
+			it('should filter merchants by selected category', () => {
+				merchantList.setSelectedCategory('restaurants');
+
+				const merchants = [
+					createPlaceWithIcon('restaurant', { id: 1, name: 'Restaurant A' }),
+					createPlaceWithIcon('local_cafe', { id: 2, name: 'Cafe B' }),
+					createPlaceWithIcon('restaurant', { id: 3, name: 'Restaurant C' })
+				];
+
+				merchantList.setMerchants(merchants, 0, 0);
+				const state = get(merchantList);
+
+				expect(state.merchants.length).toBe(2);
+				expect(state.merchants.every((m) => m.icon === 'restaurant')).toBe(true);
+				expect(state.totalCount).toBe(2);
+			});
+
+			it('should show all merchants when category is all', () => {
+				merchantList.setSelectedCategory('all');
+
+				const merchants = [
+					createPlaceWithIcon('restaurant', { id: 1 }),
+					createPlaceWithIcon('local_cafe', { id: 2 }),
+					createPlaceWithIcon('local_atm', { id: 3 })
+				];
+
+				merchantList.setMerchants(merchants, 0, 0);
+				const state = get(merchantList);
+
+				expect(state.merchants.length).toBe(3);
+				expect(state.totalCount).toBe(3);
+			});
+		});
+
+		describe('auto-reset category when no matches', () => {
+			it('should auto-reset to all when selected category has no matches but other merchants exist', () => {
+				// First set up with restaurants
+				merchantList.setSelectedCategory('restaurants');
+				const initialMerchants = [
+					createPlaceWithIcon('restaurant', { id: 1 }),
+					createPlaceWithIcon('local_cafe', { id: 2 })
+				];
+				merchantList.setMerchants(initialMerchants, 0, 0);
+
+				// Now update with merchants that have no restaurants
+				const newMerchants = [
+					createPlaceWithIcon('local_cafe', { id: 3 }),
+					createPlaceWithIcon('local_atm', { id: 4 })
+				];
+				merchantList.setMerchants(newMerchants, 0, 0);
+
+				const state = get(merchantList);
+
+				// Should auto-reset to 'all' since there are no restaurants
+				expect(state.selectedCategory).toBe('all');
+				expect(state.merchants.length).toBe(2);
+				expect(state.categoryCounts.restaurants).toBe(0);
+				expect(state.categoryCounts.all).toBe(2);
+			});
+
+			it('should NOT auto-reset when selected category still has matches', () => {
+				merchantList.setSelectedCategory('restaurants');
+
+				const merchants = [
+					createPlaceWithIcon('restaurant', { id: 1 }),
+					createPlaceWithIcon('local_cafe', { id: 2 })
+				];
+				merchantList.setMerchants(merchants, 0, 0);
+
+				const state = get(merchantList);
+
+				expect(state.selectedCategory).toBe('restaurants');
+				expect(state.merchants.length).toBe(1);
+			});
+
+			it('should NOT auto-reset when no merchants exist at all (empty area)', () => {
+				merchantList.setSelectedCategory('restaurants');
+
+				// Simulate panning to empty area
+				merchantList.setMerchants([], 0, 0);
+
+				const state = get(merchantList);
+
+				// Should keep restaurants selected - no point resetting when area is empty
+				expect(state.selectedCategory).toBe('restaurants');
+				expect(state.merchants.length).toBe(0);
+				expect(state.categoryCounts.all).toBe(0);
+			});
+
+			it('should NOT auto-reset when category is already all', () => {
+				merchantList.setSelectedCategory('all');
+
+				const merchants = [createPlaceWithIcon('local_cafe', { id: 1 })];
+				merchantList.setMerchants(merchants, 0, 0);
+
+				const state = get(merchantList);
+
+				expect(state.selectedCategory).toBe('all');
+			});
+		});
+
+		describe('fetchAndReplaceList with categories', () => {
+			it('should calculate category counts from API response', async () => {
+				const mockPlaces = [
+					createPlaceWithIcon('restaurant', { id: 1 }),
+					createPlaceWithIcon('restaurant', { id: 2 }),
+					createPlaceWithIcon('local_cafe', { id: 3 })
+				];
+				(axios.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
+
+				await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
+				const state = get(merchantList);
+
+				expect(state.categoryCounts.all).toBe(3);
+				expect(state.categoryCounts.restaurants).toBe(2);
+				expect(state.categoryCounts.coffee).toBe(1);
+			});
+
+			it('should apply category filter to API results', async () => {
+				merchantList.setSelectedCategory('restaurants');
+
+				const mockPlaces = [
+					createPlaceWithIcon('restaurant', { id: 1 }),
+					createPlaceWithIcon('local_cafe', { id: 2 }),
+					createPlaceWithIcon('restaurant', { id: 3 })
+				];
+				(axios.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
+
+				await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
+				const state = get(merchantList);
+
+				expect(state.merchants.length).toBe(2);
+				expect(state.totalCount).toBe(2);
+				expect(state.categoryCounts.all).toBe(3); // Full counts preserved
+			});
+
+			it('should auto-reset category when API returns no matches for selected category', async () => {
+				merchantList.setSelectedCategory('restaurants');
+
+				const mockPlaces = [
+					createPlaceWithIcon('local_cafe', { id: 1 }),
+					createPlaceWithIcon('local_atm', { id: 2 })
+				];
+				(axios.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
+
+				await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
+				const state = get(merchantList);
+
+				expect(state.selectedCategory).toBe('all');
+				expect(state.merchants.length).toBe(2);
+			});
+
+			it('should still calculate category counts when hideIfExceeds is triggered', async () => {
+				const mockPlaces = Array.from({ length: 60 }, (_, i) =>
+					createPlaceWithIcon(i % 2 === 0 ? 'restaurant' : 'local_cafe', { id: i })
+				);
+				(axios.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
+
+				await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10, { hideIfExceeds: 50 });
+				const state = get(merchantList);
+
+				expect(state.merchants).toEqual([]);
+				expect(state.categoryCounts.all).toBe(60);
+				expect(state.categoryCounts.restaurants).toBe(30);
+				expect(state.categoryCounts.coffee).toBe(30);
+			});
+		});
+	});
 });
