@@ -150,6 +150,7 @@
 	let mapCenter: LatLng;
 
 	// Track selected category for marker filtering
+	let previousCategory: CategoryKey = 'all';
 	$: selectedCategory = $merchantList.selectedCategory;
 
 	// Calculate radius from map center to corner (Haversine formula)
@@ -298,7 +299,8 @@
 	}
 
 	// Filter map markers when category filter changes
-	$: if (elementsLoaded && upToDateLayer && selectedCategory) {
+	$: if (elementsLoaded && upToDateLayer && selectedCategory !== previousCategory) {
+		previousCategory = selectedCategory;
 		clearNonMatchingMarkers(selectedCategory);
 		debouncedLoadMarkers();
 	}
@@ -389,7 +391,9 @@
 		Object.entries(loadedMarkers).forEach(([placeId, marker]) => {
 			const place = $placesById.get(Number(placeId));
 			if (place && !placeMatchesCategory(place, category)) {
+				// Remove from both the subgroup and the parent cluster group
 				upToDateLayer.removeLayer(marker);
+				markers.removeLayer(marker);
 				markersToRemove.push(placeId);
 			}
 		});
