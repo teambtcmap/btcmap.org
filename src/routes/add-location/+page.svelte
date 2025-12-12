@@ -171,7 +171,8 @@
 	$: latFixed = lat && lat.toFixed(5);
 	$: longFixed = long && long.toFixed(5);
 
-	const submitForm = () => {
+	const submitForm = (event: SubmitEvent) => {
+		event.preventDefault();
 		if (!selected) {
 			noLocationSelected = true;
 			errToast('Please select a location...');
@@ -312,10 +313,7 @@
 					/>
 				</p>
 
-				<form
-					on:submit|preventDefault={submitForm}
-					class="w-full space-y-5 text-primary dark:text-white"
-				>
+				<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
 					<div>
 						<label for="name" class="mb-2 block font-semibold">Merchant Name</label>
 						<input

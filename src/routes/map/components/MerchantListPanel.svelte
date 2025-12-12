@@ -46,10 +46,6 @@
 	// Reference for focus trap
 	let panelElement: HTMLElement;
 
-	function handleSearchInput() {
-		onSearch?.($merchantList.searchQuery);
-	}
-
 	function handleClearSearch() {
 		merchantList.clearSearchInput();
 		// Trigger onSearch to abort any pending request (same as typing empty query)
@@ -112,8 +108,7 @@
 		tick().then(() => searchInput?.focus());
 	}
 
-	function handleItemClick(event: CustomEvent<Place>) {
-		const place = event.detail;
+	function handleItemClick(place: Place) {
 		merchantDrawer.open(place.id, 'details');
 
 		if (mode === 'search') {
@@ -131,12 +126,12 @@
 		}
 	}
 
-	function handleMouseEnter(event: CustomEvent<Place>) {
-		onHoverStart?.(event.detail);
+	function handleMouseEnter(place: Place) {
+		onHoverStart?.(place);
 	}
 
-	function handleMouseLeave(event: CustomEvent<Place>) {
-		onHoverEnd?.(event.detail);
+	function handleMouseLeave(place: Place) {
+		onHoverEnd?.(place);
 	}
 
 	function handleClose() {
@@ -207,7 +202,7 @@
 							value={searchQuery}
 							on:input={(e) => {
 								merchantList.setSearchQuery(e.currentTarget.value);
-								handleSearchInput();
+								onSearch?.($merchantList.searchQuery);
 							}}
 							on:keydown={handleSearchKeyDown}
 							type="search"
@@ -326,9 +321,9 @@
 								enrichedData={merchant}
 								isSelected={selectedId === merchant.id}
 								{verifiedDate}
-								on:click={handleItemClick}
-								on:mouseenter={handleMouseEnter}
-								on:mouseleave={handleMouseLeave}
+								onclick={handleItemClick}
+								onmouseenter={handleMouseEnter}
+								onmouseleave={handleMouseLeave}
 							/>
 						{/each}
 					</ul>
@@ -373,9 +368,9 @@
 							enrichedData={placeDetailsCache.get(merchant.id) || null}
 							isSelected={selectedId === merchant.id}
 							{verifiedDate}
-							on:click={handleItemClick}
-							on:mouseenter={handleMouseEnter}
-							on:mouseleave={handleMouseLeave}
+							onclick={handleItemClick}
+							onmouseenter={handleMouseEnter}
+							onmouseleave={handleMouseLeave}
 						/>
 					{/each}
 				</ul>

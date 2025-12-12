@@ -1,17 +1,13 @@
 <script lang="ts">
 	import type { ActivityEvent } from '$lib/types';
 	import { format } from 'date-fns/format';
-	import { createEventDispatcher } from 'svelte';
 	import { resolve } from '$app/paths';
 
 	export let eventElements: ActivityEvent[] = [];
 	export let username: string;
 	export let dataInitialized: boolean = false;
 	export let loadingNames: boolean = false;
-
-	const dispatch = createEventDispatcher<{
-		fetchNames: { events: ActivityEvent[] };
-	}>();
+	export let onfetchNames: (data: { events: ActivityEvent[] }) => void = () => {};
 
 	let currentPage = 1;
 	let itemsPerPage = 10;
@@ -22,11 +18,10 @@
 		currentPage * itemsPerPage
 	);
 
-	// Fetch place names for current page
-	const fetchPageNames = async (events: ActivityEvent[]) => {
+	const fetchPageNames = (events: ActivityEvent[]) => {
 		if (loadingNames) return;
 
-		dispatch('fetchNames', { events });
+		onfetchNames({ events });
 	};
 
 	$: if (paginatedEvents.length > 0 && dataInitialized) {

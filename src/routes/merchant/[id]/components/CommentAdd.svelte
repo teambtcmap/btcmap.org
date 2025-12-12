@@ -14,6 +14,7 @@
 	import type { MerchantPageData } from '$lib/types.js';
 
 	export let open: boolean = false;
+	export let onOpenChange: (value: boolean) => void = () => {};
 	export let elementId: MerchantPageData['id'] | undefined;
 
 	let stage = 0;
@@ -26,7 +27,7 @@
 		if (commentComplete) {
 			invalidateAll();
 		}
-		open = false;
+		onOpenChange(false);
 		stage = 0;
 		invoice = '';
 		invoiceId = '';
@@ -35,7 +36,8 @@
 		$lastUpdatedPlaceId = undefined;
 	};
 
-	const generateInvoice = () => {
+	const generateInvoice = (event: SubmitEvent) => {
+		event.preventDefault();
 		if (!elementId || !commentValue.trim()) {
 			errToast('Please enter a comment');
 			return;
@@ -95,7 +97,7 @@
 			/>
 
 			{#if stage === 0}
-				<form class="space-y-4" on:submit|preventDefault={generateInvoice}>
+				<form class="space-y-4" on:submit={generateInvoice}>
 					<legend>
 						<p class="mb-2 text-xl font-bold text-primary dark:text-white">Add Comment</p>
 
