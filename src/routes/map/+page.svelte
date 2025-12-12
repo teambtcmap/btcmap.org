@@ -555,13 +555,10 @@
 		bounds: LatLngBounds,
 		allowHeavyFetch: boolean
 	) => {
-		const visiblePlaces = $places.filter((place) => {
-			const markerId = place.id.toString();
-			if (!loadedMarkers[markerId]) return false;
-			return bounds.contains([place.lat, place.lon]);
-		});
+		// Get ALL places in bounds (not just loaded markers) for accurate category counts
+		const allVisiblePlaces = $places.filter((place) => bounds.contains([place.lat, place.lon]));
 
-		merchantList.setMerchants(visiblePlaces, center.lat, center.lng);
+		merchantList.setMerchants(allVisiblePlaces, center.lat, center.lng);
 
 		if ($merchantList.isOpen && allowHeavyFetch) {
 			const radiusKm = calculateRadiusKm(bounds);
