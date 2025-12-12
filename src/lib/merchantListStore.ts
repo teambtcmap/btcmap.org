@@ -1,10 +1,17 @@
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 import axios from 'axios';
 import type { Place } from '$lib/types';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 import { isBoosted } from '$lib/merchantDrawerLogic';
 import { MERCHANT_LIST_MAX_ITEMS } from '$lib/constants';
 import { errToast } from '$lib/utils';
+import {
+	countMerchantsByCategory,
+	createEmptyCategoryCounts,
+	filterMerchantsByCategory,
+	type CategoryCounts,
+	type CategoryKey
+} from '$lib/categoryMapping';
 
 export type MerchantListMode = 'nearby' | 'search';
 
@@ -24,6 +31,9 @@ export interface MerchantListState {
 	searchQuery: string;
 	searchResults: Place[];
 	isSearching: boolean;
+	// Category filter
+	selectedCategory: CategoryKey;
+	categoryCounts: CategoryCounts;
 }
 
 const initialState: MerchantListState = {
@@ -36,8 +46,36 @@ const initialState: MerchantListState = {
 	mode: 'nearby',
 	searchQuery: '',
 	searchResults: [],
-	isSearching: false
+	isSearching: false,
+	selectedCategory: 'all',
+	categoryCounts: createEmptyCategoryCounts()
 };
+
+// Helper function to reset category state
+function resetCategoryState<T extends MerchantListState>(state: T): T {
+	return { ...state, selectedCategory: 'all' };
+}
+
+// Helper to apply category filtering with auto-reset when selected category has no matches
+// Returns filtered merchants and the effective category (may be reset to 'all')
+function applyCategoryFilter(
+	merchants: Place[],
+	selectedCategory: CategoryKey,
+	categoryCounts: CategoryCounts
+): { filtered: Place[]; effectiveCategory: CategoryKey } {
+	// Auto-reset if selected category has no matches but other merchants exist
+	const shouldReset =
+		selectedCategory !== 'all' && categoryCounts.all > 0 && categoryCounts[selectedCategory] === 0;
+
+	const effectiveCategory = shouldReset ? 'all' : selectedCategory;
+
+	const filtered =
+		effectiveCategory !== 'all'
+			? filterMerchantsByCategory(merchants, effectiveCategory)
+			: merchants;
+
+	return { filtered, effectiveCategory };
+}
 
 // Equirectangular approximation for local distance sorting
 // Uses squared distance (avoids sqrt) since we only need relative ordering
@@ -106,9 +144,9 @@ function createMerchantListStore() {
 			update((state) => ({ ...state, isOpen: true }));
 		},
 
-		// Hide the panel but keep all data (count stays visible on button)
+		// Hide the panel, reset category filter, but keep merchant data (count visible on button)
 		close() {
-			update((state) => ({ ...state, isOpen: false }));
+			update((state) => ({ ...resetCategoryState(state), isOpen: false }));
 		},
 
 		// Set merchants from locally-loaded markers (used at zoom 15-16)
@@ -118,13 +156,24 @@ function createMerchantListStore() {
 			centerLon?: number,
 			limit: number = MERCHANT_LIST_MAX_ITEMS
 		) {
-			const sorted = sortMerchants(merchants, centerLat, centerLon);
+			const categoryCounts = countMerchantsByCategory(merchants);
+			const { selectedCategory } = get(store);
+			const { filtered, effectiveCategory } = applyCategoryFilter(
+				merchants,
+				selectedCategory,
+				categoryCounts
+			);
+
+			const sorted = sortMerchants(filtered, centerLat, centerLon);
 			const limited = sorted.slice(0, limit);
+
 			update((state) => ({
 				...state,
 				merchants: limited,
-				totalCount: merchants.length,
-				isLoadingList: false
+				totalCount: filtered.length,
+				isLoadingList: false,
+				categoryCounts,
+				selectedCategory: effectiveCategory
 			}));
 		},
 
@@ -161,6 +210,8 @@ function createMerchantListStore() {
 				const placeDetailsCache = new Map<number, Place>();
 				validPlaces.forEach((place) => placeDetailsCache.set(place.id, place));
 
+				const categoryCounts = countMerchantsByCategory(validPlaces);
+
 				// Check if we should hide results (too many at low zoom)
 				if (options?.hideIfExceeds && validPlaces.length > options.hideIfExceeds) {
 					// Too many results - store count but show empty list
@@ -169,17 +220,27 @@ function createMerchantListStore() {
 						...state,
 						merchants: [],
 						totalCount: validPlaces.length,
-						isLoadingList: false
+						isLoadingList: false,
+						categoryCounts
 					}));
 				} else {
-					const sorted = sortMerchants(validPlaces, center.lat, center.lon);
+					const { selectedCategory } = get(store);
+					const { filtered, effectiveCategory } = applyCategoryFilter(
+						validPlaces,
+						selectedCategory,
+						categoryCounts
+					);
+
+					const sorted = sortMerchants(filtered, center.lat, center.lon);
 					const limited = sorted.slice(0, MERCHANT_LIST_MAX_ITEMS);
 					update((state) => ({
 						...state,
 						merchants: limited,
-						totalCount: validPlaces.length,
+						totalCount: filtered.length,
 						placeDetailsCache,
-						isLoadingList: false
+						isLoadingList: false,
+						categoryCounts,
+						selectedCategory: effectiveCategory
 					}));
 				}
 			} catch (error) {
@@ -218,6 +279,7 @@ function createMerchantListStore() {
 					merchants: [],
 					totalCount: validItems.length,
 					isLoadingList: false
+					// Preserve existing categoryCounts since we don't have actual merchant data to recalculate them
 				}));
 			} catch (error) {
 				if (error instanceof Error && error.name !== 'AbortError') {
@@ -262,7 +324,7 @@ function createMerchantListStore() {
 		openWithSearchResults(query: string, results: Place[]) {
 			const sortedResults = sortMerchants(results);
 			update((state) => ({
-				...state,
+				...resetCategoryState(state),
 				isOpen: true,
 				mode: 'search',
 				searchQuery: query,
@@ -292,7 +354,7 @@ function createMerchantListStore() {
 		// Use when: user clears the search input to type a new query (e.g., clicking X button)
 		clearSearchInput() {
 			update((state) => ({
-				...state,
+				...resetCategoryState(state),
 				searchQuery: '',
 				searchResults: [],
 				isSearching: false
@@ -303,7 +365,7 @@ function createMerchantListStore() {
 		// Use when: user explicitly switches away from search (e.g., clicking "Nearby" tab)
 		exitSearchMode() {
 			update((state) => ({
-				...state,
+				...resetCategoryState(state),
 				mode: 'nearby',
 				searchQuery: '',
 				searchResults: [],
@@ -314,6 +376,16 @@ function createMerchantListStore() {
 		// Switch between modes (no side effects - just sets mode)
 		setMode(mode: MerchantListMode) {
 			update((state) => ({ ...state, mode }));
+		},
+
+		// Set the selected category filter
+		setSelectedCategory(category: CategoryKey) {
+			update((state) => ({ ...state, selectedCategory: category }));
+		},
+
+		// Reset the selected category to 'all'
+		resetCategory() {
+			update((state) => resetCategoryState(state));
 		},
 
 		reset() {
