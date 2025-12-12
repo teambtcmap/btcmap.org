@@ -908,20 +908,12 @@
 
 			// Close drawer when clicking on map (not on markers)
 			map.on('click', () => {
-				if (selectedMarkerId) {
-					clearMarkerSelection(selectedMarkerId);
-					selectedMarkerId = null;
-
-					const hash = window.location.hash.substring(1);
-					const ampIndex = hash.indexOf('&');
-					const mapPart = ampIndex !== -1 ? hash.substring(0, ampIndex) : hash;
-
-					// Remove merchant parameter and reset hash to just map location
-					if (mapPart) {
-						window.location.hash = mapPart;
-					} else {
-						window.location.hash = '';
+				if ($merchantDrawer.isOpen) {
+					if (selectedMarkerId) {
+						clearMarkerSelection(selectedMarkerId);
+						selectedMarkerId = null;
 					}
+					merchantDrawer.close();
 				}
 			});
 
