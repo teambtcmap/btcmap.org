@@ -9,7 +9,7 @@
 	import LoadingSpinner from '$components/LoadingSpinner.svelte';
 	import Icon from '$components/Icon.svelte';
 	import type { Place } from '$lib/types';
-	import { CATEGORY_ENTRIES, type CategoryKey } from '$lib/categoryMapping';
+	import { CATEGORY_ENTRIES, type CategoryKey, type CategoryCounts } from '$lib/categoryMapping';
 	import {
 		MERCHANT_LIST_WIDTH,
 		MERCHANT_LIST_MIN_ZOOM,
@@ -101,9 +101,15 @@
 	}
 
 	// Helper function to get category button classes
-	function getCategoryButtonClass(key: CategoryKey, selectedCategory: CategoryKey): string {
+	// Note: categoryCounts param required for Svelte reactivity (indirect deps aren't tracked)
+	function getCategoryButtonClass(
+		key: CategoryKey,
+		selectedCategory: CategoryKey,
+		counts: CategoryCounts
+	): string {
 		if (selectedCategory === key) return 'bg-primary text-white';
-		if (hasMatchingMerchants(key)) {
+		const hasMatches = key === 'all' || (counts?.[key] ?? 0) > 0;
+		if (hasMatches) {
 			return 'bg-gray-100 text-body hover:bg-gray-200 dark:bg-white/5 dark:text-white/70 dark:hover:bg-white/10';
 		}
 		return 'cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-white/30';
@@ -332,7 +338,8 @@
 								aria-checked={selectedCategory === key}
 								class="rounded-full px-3 py-1 text-xs font-medium transition-colors {getCategoryButtonClass(
 									key,
-									selectedCategory
+									selectedCategory,
+									categoryCounts
 								)}"
 							>
 								{category.label}
