@@ -21,5 +21,5 @@
 </PrimaryButton>
 
 {#if browser}
-	<CommentAdd bind:open {elementId} />
+	<CommentAdd {open} onOpenChange={(val) => (open = val)} {elementId} />
 {/if}

@@ -14,6 +14,7 @@
 	import type { MerchantPageData } from '$lib/types.js';
 
 	export let open: boolean = false;
+	export let onOpenChange: (value: boolean) => void = () => {};
 	export let elementId: MerchantPageData['id'] | undefined;
 
 	let stage = 0;
@@ -26,7 +27,7 @@
 		if (commentComplete) {
 			invalidateAll();
 		}
-		open = false;
+		onOpenChange(false);
 		stage = 0;
 		invoice = '';
 		invoiceId = '';
