@@ -56,6 +56,27 @@ function resetCategoryState<T extends MerchantListState>(state: T): T {
 	return { ...state, selectedCategory: 'all' };
 }
 
+// Helper to apply category filtering with auto-reset when selected category has no matches
+// Returns filtered merchants and the effective category (may be reset to 'all')
+function applyCategoryFilter(
+	merchants: Place[],
+	selectedCategory: CategoryKey,
+	categoryCounts: CategoryCounts
+): { filtered: Place[]; effectiveCategory: CategoryKey } {
+	// Auto-reset if selected category has no matches but other merchants exist
+	const shouldReset =
+		selectedCategory !== 'all' && categoryCounts.all > 0 && categoryCounts[selectedCategory] === 0;
+
+	const effectiveCategory = shouldReset ? 'all' : selectedCategory;
+
+	const filtered =
+		effectiveCategory !== 'all'
+			? filterMerchantsByCategory(merchants, effectiveCategory)
+			: merchants;
+
+	return { filtered, effectiveCategory };
+}
+
 // Equirectangular approximation for local distance sorting
 // Uses squared distance (avoids sqrt) since we only need relative ordering
 // Cosine adjustment accounts for longitude distortion at different latitudes
@@ -135,30 +156,17 @@ function createMerchantListStore() {
 			centerLon?: number,
 			limit: number = MERCHANT_LIST_MAX_ITEMS
 		) {
-			// Calculate category counts before any filtering
 			const categoryCounts = countMerchantsByCategory(merchants);
-
-			// Get current state to access selected category
-			const currentState = get(store);
-
-			// Auto-reset category if selected category has no matches but other merchants exist
-			const shouldResetCategory =
-				currentState.selectedCategory !== 'all' &&
-				categoryCounts.all > 0 &&
-				categoryCounts[currentState.selectedCategory] === 0;
-
-			const effectiveCategory = shouldResetCategory ? 'all' : currentState.selectedCategory;
-
-			// Apply category filtering
-			const filtered =
-				effectiveCategory !== 'all'
-					? filterMerchantsByCategory(merchants, effectiveCategory)
-					: merchants;
+			const { selectedCategory } = get(store);
+			const { filtered, effectiveCategory } = applyCategoryFilter(
+				merchants,
+				selectedCategory,
+				categoryCounts
+			);
 
 			const sorted = sortMerchants(filtered, centerLat, centerLon);
 			const limited = sorted.slice(0, limit);
 
-			// Update the store with merchants, counts, and reset category if needed
 			update((state) => ({
 				...state,
 				merchants: limited,
@@ -216,22 +224,12 @@ function createMerchantListStore() {
 						categoryCounts
 					}));
 				} else {
-					// Get current state to access selected category
-					const currentState = get(store);
-
-					// Auto-reset category if selected category has no matches but other merchants exist
-					const shouldResetCategory =
-						currentState.selectedCategory !== 'all' &&
-						categoryCounts.all > 0 &&
-						categoryCounts[currentState.selectedCategory] === 0;
-
-					const effectiveCategory = shouldResetCategory ? 'all' : currentState.selectedCategory;
-
-					// Apply category filtering
-					const filtered =
-						effectiveCategory !== 'all'
-							? filterMerchantsByCategory(validPlaces, effectiveCategory)
-							: validPlaces;
+					const { selectedCategory } = get(store);
+					const { filtered, effectiveCategory } = applyCategoryFilter(
+						validPlaces,
+						selectedCategory,
+						categoryCounts
+					);
 
 					const sorted = sortMerchants(filtered, center.lat, center.lon);
 					const limited = sorted.slice(0, MERCHANT_LIST_MAX_ITEMS);
