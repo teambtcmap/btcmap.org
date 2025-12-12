@@ -46,10 +46,6 @@
 	// Reference for focus trap
 	let panelElement: HTMLElement;
 
-	function handleSearchInput() {
-		onSearch?.($merchantList.searchQuery);
-	}
-
 	function handleClearSearch() {
 		merchantList.clearSearchInput();
 		// Trigger onSearch to abort any pending request (same as typing empty query)
@@ -206,7 +202,7 @@
 							value={searchQuery}
 							on:input={(e) => {
 								merchantList.setSearchQuery(e.currentTarget.value);
-								handleSearchInput();
+								onSearch?.($merchantList.searchQuery);
 							}}
 							on:keydown={handleSearchKeyDown}
 							type="search"
