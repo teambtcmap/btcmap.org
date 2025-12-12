@@ -385,9 +385,8 @@
 		loadingNames = false;
 	};
 
-	// Handle fetch names event from ProfileActivity component
-	const handleFetchNames = (event: CustomEvent) => {
-		fetchPageNames(event.detail.events);
+	const handleFetchNames = (data: { events: ActivityEvent[] }) => {
+		fetchPageNames(data.events);
 	};
 
 	onMount(async () => {
@@ -546,7 +545,7 @@
 			{username}
 			{dataInitialized}
 			{loadingNames}
-			on:fetchNames={handleFetchNames}
+			onfetchNames={handleFetchNames}
 		/>
 	</section>
 </main>

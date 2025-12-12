@@ -56,7 +56,8 @@
 	let submissionIssueNumber: number;
 	let merchantId = data?.merchantId || '';
 
-	const submitForm = () => {
+	const submitForm = (event: SubmitEvent) => {
+		event.preventDefault();
 		if (!selected) {
 			errToast('Please select a location...');
 		} else {
@@ -156,10 +157,7 @@
 			/>
 		</p>
 
-		<form
-			on:submit|preventDefault={submitForm}
-			class="w-full space-y-5 text-primary dark:text-white"
-		>
+		<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
 			<div>
 				<input
 					disabled

@@ -35,7 +35,8 @@
 		$lastUpdatedPlaceId = undefined;
 	};
 
-	const generateInvoice = () => {
+	const generateInvoice = (event: SubmitEvent) => {
+		event.preventDefault();
 		if (!elementId || !commentValue.trim()) {
 			errToast('Please enter a comment');
 			return;
@@ -95,7 +96,7 @@
 			/>
 
 			{#if stage === 0}
-				<form class="space-y-4" on:submit|preventDefault={generateInvoice}>
+				<form class="space-y-4" on:submit={generateInvoice}>
 					<legend>
 						<p class="mb-2 text-xl font-bold text-primary dark:text-white">Add Comment</p>
 

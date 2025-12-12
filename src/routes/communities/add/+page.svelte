@@ -96,7 +96,8 @@
 		successToast('Location selected!');
 	};
 
-	const submitForm = () => {
+	const submitForm = (event: SubmitEvent) => {
+		event.preventDefault();
 		if (!selected) {
 			noLocationSelected = true;
 			errToast('Please select a location...');
@@ -210,10 +211,7 @@
 			</ul>
 		</div>
 
-		<form
-			on:submit|preventDefault={submitForm}
-			class="w-full space-y-5 text-primary dark:text-white"
-		>
+		<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
 			<div class="space-y-2">
 				<label for="location-picker" class="block font-semibold">Select Location</label>
 				<p class="text-sm">Search for an area and select an option from the results.</p>

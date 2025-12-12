@@ -197,7 +197,7 @@
 		class="fixed right-0 bottom-0 left-0 z-[1002] flex flex-col bg-white shadow-2xl transition-shadow dark:bg-dark"
 		class:rounded-t-[10px]={!$expanded}
 		style="height: {$drawerHeight}px; will-change: height;"
-		on:click|stopPropagation
+		on:click={(e) => e.stopPropagation()}
 		on:focusout={handleFocusOut}
 		role="dialog"
 		aria-modal="true"

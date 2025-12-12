@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import Icon from '$components/Icon.svelte';
 	import PaymentMethodIcon from '$components/PaymentMethodIcon.svelte';
 	import type { Place } from '$lib/types';
@@ -10,11 +9,10 @@
 	export let enrichedData: Place | null = null;
 	export let isSelected: boolean = false;
 	export let verifiedDate: number;
+	export let onclick: (merchant: Place) => void = () => {};
+	export let onmouseenter: (merchant: Place) => void = () => {};
+	export let onmouseleave: (merchant: Place) => void = () => {};
 
-	const dispatch = createEventDispatcher<{ click: Place; mouseenter: Place; mouseleave: Place }>();
-
-	// Show skeleton when we don't have enriched data yet
-	// Only show "Unknown" when enriched data exists but has no name
 	$: showSkeleton = !enrichedData;
 	$: displayData = enrichedData || merchant;
 	$: hasPaymentMethods =
@@ -26,15 +24,15 @@
 	$: isBoosted = checkBoosted(merchant);
 
 	function handleClick() {
-		dispatch('click', merchant);
+		onclick(merchant);
 	}
 </script>
 
 <li class="list-none">
 	<button
 		on:click={handleClick}
-		on:mouseenter={() => dispatch('mouseenter', merchant)}
-		on:mouseleave={() => dispatch('mouseleave', merchant)}
+		on:mouseenter={() => onmouseenter(merchant)}
+		on:mouseleave={() => onmouseleave(merchant)}
 		class="w-full px-3 py-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-white/5 {isSelected
 			? 'bg-link/5 dark:bg-link/10'
 			: ''}"

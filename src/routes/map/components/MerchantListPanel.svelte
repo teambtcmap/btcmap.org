@@ -112,8 +112,7 @@
 		tick().then(() => searchInput?.focus());
 	}
 
-	function handleItemClick(event: CustomEvent<Place>) {
-		const place = event.detail;
+	function handleItemClick(place: Place) {
 		merchantDrawer.open(place.id, 'details');
 
 		if (mode === 'search') {
@@ -131,12 +130,12 @@
 		}
 	}
 
-	function handleMouseEnter(event: CustomEvent<Place>) {
-		onHoverStart?.(event.detail);
+	function handleMouseEnter(place: Place) {
+		onHoverStart?.(place);
 	}
 
-	function handleMouseLeave(event: CustomEvent<Place>) {
-		onHoverEnd?.(event.detail);
+	function handleMouseLeave(place: Place) {
+		onHoverEnd?.(place);
 	}
 
 	function handleClose() {
@@ -326,9 +325,9 @@
 								enrichedData={merchant}
 								isSelected={selectedId === merchant.id}
 								{verifiedDate}
-								on:click={handleItemClick}
-								on:mouseenter={handleMouseEnter}
-								on:mouseleave={handleMouseLeave}
+								onclick={handleItemClick}
+								onmouseenter={handleMouseEnter}
+								onmouseleave={handleMouseLeave}
 							/>
 						{/each}
 					</ul>
@@ -373,9 +372,9 @@
 							enrichedData={placeDetailsCache.get(merchant.id) || null}
 							isSelected={selectedId === merchant.id}
 							{verifiedDate}
-							on:click={handleItemClick}
-							on:mouseenter={handleMouseEnter}
-							on:mouseleave={handleMouseLeave}
+							onclick={handleItemClick}
+							onmouseenter={handleMouseEnter}
+							onmouseleave={handleMouseLeave}
 						/>
 					{/each}
 				</ul>
