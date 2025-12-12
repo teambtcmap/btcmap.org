@@ -43,6 +43,9 @@
 	// Reference for search input element
 	let searchInput: HTMLInputElement;
 
+	// Local filter for nearby mode (client-side filtering by name)
+	let nearbyFilter = '';
+
 	// Body scroll lock for mobile (prevents iOS background scroll)
 	let scrollLockActive = false;
 
@@ -66,6 +69,7 @@
 
 	function handleModeSwitch(newMode: MerchantListMode) {
 		if (newMode === mode) return;
+		nearbyFilter = ''; // Clear filter when switching modes
 		if (newMode === 'nearby') {
 			merchantList.exitSearchMode();
 			onModeChange?.(newMode);
@@ -168,6 +172,7 @@
 	}
 
 	function handleClose() {
+		nearbyFilter = ''; // Clear filter when closing
 		merchantList.close();
 	}
 
@@ -307,7 +312,7 @@
 						? 'bg-white text-primary shadow-sm dark:bg-white/10 dark:text-white'
 						: 'text-body hover:text-primary dark:text-white/70 dark:hover:text-white'}"
 				>
-					Search
+					Worldwide
 				</button>
 				<button
 					type="button"
@@ -346,6 +351,34 @@
 							</button>
 						{/each}
 					</div>
+				</div>
+
+				<!-- Name filter input -->
+				<div class="relative mt-3">
+					<Icon
+						w="14"
+						h="14"
+						icon="filter_list"
+						type="material"
+						class="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-gray-400 dark:text-white/50"
+					/>
+					<input
+						bind:value={nearbyFilter}
+						type="text"
+						placeholder="Filter by name..."
+						aria-label="Filter nearby merchants by name"
+						class="w-full rounded-lg border border-gray-200 bg-gray-50 py-1.5 pr-7 pl-8 text-xs text-primary focus:border-link focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus:border-white/30"
+					/>
+					{#if nearbyFilter}
+						<button
+							type="button"
+							on:click={() => (nearbyFilter = '')}
+							class="absolute top-1/2 right-2 -translate-y-1/2 p-0.5 text-gray-400 hover:text-gray-600 dark:text-white/50 dark:hover:text-white/70"
+							aria-label="Clear filter"
+						>
+							<Icon w="12" h="12" icon="close" type="material" />
+						</button>
+					{/if}
 				</div>
 			{/if}
 		</div>
@@ -422,19 +455,28 @@
 				</div>
 			{:else}
 				<!-- Nearby mode: merchant list -->
-				<ul class="divide-y divide-gray-100 dark:divide-white/5">
-					{#each merchants as merchant (merchant.id)}
-						<MerchantListItem
-							{merchant}
-							enrichedData={placeDetailsCache.get(merchant.id) || null}
-							isSelected={selectedId === merchant.id}
-							{verifiedDate}
-							onclick={handleItemClick}
-							onmouseenter={handleMouseEnter}
-							onmouseleave={handleMouseLeave}
-						/>
-					{/each}
-				</ul>
+				{@const filteredMerchants = nearbyFilter
+					? merchants.filter((m) => m.name?.toLowerCase().includes(nearbyFilter.toLowerCase()))
+					: merchants}
+				{#if filteredMerchants.length === 0 && nearbyFilter}
+					<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
+						No merchants match "{nearbyFilter}"
+					</div>
+				{:else}
+					<ul class="divide-y divide-gray-100 dark:divide-white/5">
+						{#each filteredMerchants as merchant (merchant.id)}
+							<MerchantListItem
+								{merchant}
+								enrichedData={placeDetailsCache.get(merchant.id) || null}
+								isSelected={selectedId === merchant.id}
+								{verifiedDate}
+								onclick={handleItemClick}
+								onmouseenter={handleMouseEnter}
+								onmouseleave={handleMouseLeave}
+							/>
+						{/each}
+					</ul>
+				{/if}
 			{/if}
 		</div>
 	</section>
