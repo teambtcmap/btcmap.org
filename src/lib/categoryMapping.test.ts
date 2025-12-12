@@ -7,6 +7,7 @@ import {
 	createEmptyCategoryCounts,
 	countMerchantsByCategory,
 	filterMerchantsByCategory,
+	placeMatchesCategory,
 	type CategoryKey
 } from './categoryMapping';
 
@@ -278,6 +279,63 @@ describe('categoryMapping', () => {
 				const filtered = filterMerchantsByCategory(testMerchants, category);
 				expect(filtered.length).toBe(expectedCount);
 			}
+		});
+	});
+
+	describe('placeMatchesCategory', () => {
+		it('should return true for "all" category regardless of icon', () => {
+			expect(placeMatchesCategory(createMockPlace({ icon: 'restaurant' }), 'all')).toBe(true);
+			expect(placeMatchesCategory(createMockPlace({ icon: 'unknown' }), 'all')).toBe(true);
+			expect(placeMatchesCategory(createMockPlace({}), 'all')).toBe(true);
+		});
+
+		it('should return false for places without icons (except "all")', () => {
+			expect(placeMatchesCategory(createMockPlace({}), 'restaurants')).toBe(false);
+			expect(placeMatchesCategory(createMockPlace({ icon: undefined }), 'coffee')).toBe(false);
+		});
+
+		it('should correctly match restaurant icons', () => {
+			expect(placeMatchesCategory(createMockPlace({ icon: 'restaurant' }), 'restaurants')).toBe(
+				true
+			);
+			expect(placeMatchesCategory(createMockPlace({ icon: 'local_pizza' }), 'restaurants')).toBe(
+				true
+			);
+			expect(placeMatchesCategory(createMockPlace({ icon: 'lunch_dining' }), 'restaurants')).toBe(
+				true
+			);
+			expect(placeMatchesCategory(createMockPlace({ icon: 'local_cafe' }), 'restaurants')).toBe(
+				false
+			);
+		});
+
+		it('should correctly match each category', () => {
+			const categoryIconTests: [CategoryKey, string, boolean][] = [
+				['shopping', 'storefront', true],
+				['shopping', 'local_mall', true],
+				['shopping', 'restaurant', false],
+				['groceries', 'local_grocery_store', true],
+				['groceries', 'storefront', false],
+				['coffee', 'local_cafe', true],
+				['coffee', 'restaurant', false],
+				['atms', 'local_atm', true],
+				['atms', 'hotel', false],
+				['hotels', 'hotel', true],
+				['hotels', 'local_atm', false],
+				['beauty', 'content_cut', true],
+				['beauty', 'restaurant', false]
+			];
+
+			for (const [category, icon, expected] of categoryIconTests) {
+				expect(placeMatchesCategory(createMockPlace({ icon }), category)).toBe(expected);
+			}
+		});
+
+		it('should return false for unknown icons in specific categories', () => {
+			expect(placeMatchesCategory(createMockPlace({ icon: 'unknown_icon' }), 'restaurants')).toBe(
+				false
+			);
+			expect(placeMatchesCategory(createMockPlace({ icon: 'random' }), 'coffee')).toBe(false);
 		});
 	});
 });

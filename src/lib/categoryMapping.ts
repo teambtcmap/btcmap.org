@@ -95,3 +95,11 @@ export const filterMerchantsByCategory = (merchants: Place[], category: Category
 	const categoryIcons = CATEGORY_GROUPS[category].icons;
 	return merchants.filter((merchant) => categoryIcons.some((icon) => merchant.icon === icon));
 };
+
+// Check if a single place matches a category (used for map marker filtering)
+export const placeMatchesCategory = (place: Place, category: CategoryKey): boolean => {
+	if (category === 'all') return true;
+	if (!place.icon) return false;
+	const categoryIcons = CATEGORY_GROUPS[category].icons as readonly string[];
+	return categoryIcons.includes(place.icon);
+};

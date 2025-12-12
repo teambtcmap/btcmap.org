@@ -9,6 +9,7 @@
 	import MerchantListPanel from './components/MerchantListPanel.svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import { merchantList, type MerchantListMode } from '$lib/merchantListStore';
+	import { placeMatchesCategory, type CategoryKey } from '$lib/categoryMapping';
 	import {
 		BREAKPOINTS,
 		MERCHANT_DRAWER_WIDTH,
@@ -147,6 +148,9 @@
 	let isZooming = false;
 
 	let mapCenter: LatLng;
+
+	// Track selected category for marker filtering
+	$: selectedCategory = $merchantList.selectedCategory;
 
 	// Calculate radius from map center to corner (Haversine formula)
 	const calculateRadiusKm = (bounds: LatLngBounds): number => {
@@ -293,6 +297,12 @@
 		debouncedUpdateMerchantList();
 	}
 
+	// Filter map markers when category filter changes
+	$: if (elementsLoaded && upToDateLayer && selectedCategory) {
+		clearNonMatchingMarkers(selectedCategory);
+		debouncedLoadMarkers();
+	}
+
 	// alert for map errors
 	$: $placesError && errToast($placesError);
 
@@ -370,6 +380,29 @@
 		}
 	};
 
+	// Remove markers that don't match the selected category filter
+	const clearNonMatchingMarkers = (category: CategoryKey) => {
+		if (category === 'all') return;
+
+		const markersToRemove: string[] = [];
+
+		Object.entries(loadedMarkers).forEach(([placeId, marker]) => {
+			const place = $placesById.get(Number(placeId));
+			if (place && !placeMatchesCategory(place, category)) {
+				upToDateLayer.removeLayer(marker);
+				markersToRemove.push(placeId);
+			}
+		});
+
+		markersToRemove.forEach((placeId) => {
+			delete loadedMarkers[placeId];
+		});
+
+		if (markersToRemove.length > 0) {
+			console.info(`Cleared ${markersToRemove.length} markers not matching category: ${category}`);
+		}
+	};
+
 	// Load markers for places in current viewport using web workers
 	const loadMarkersInViewport = async () => {
 		// Skip if zooming, not ready, or already loading
@@ -394,11 +427,15 @@
 		}
 
 		try {
-			// Get visible places (viewport filtering)
+			// Get visible places (viewport + category filtering)
 			const visiblePlaces = getVisiblePlaces($places, bounds);
+			const categoryFiltered =
+				selectedCategory === 'all'
+					? visiblePlaces
+					: visiblePlaces.filter((place) => placeMatchesCategory(place, selectedCategory));
 
 			// Filter out places that already have markers loaded
-			const newPlaces = visiblePlaces.filter((place) => !loadedMarkers[place.id.toString()]);
+			const newPlaces = categoryFiltered.filter((place) => !loadedMarkers[place.id.toString()]);
 
 			if (newPlaces.length === 0) {
 				isLoadingMarkers = false;
@@ -443,7 +480,11 @@
 	// Fallback synchronous loading for viewport (much smaller dataset)
 	const loadMarkersInViewportFallback = (bounds: LatLngBounds) => {
 		const visiblePlaces = getVisiblePlaces($places, bounds);
-		const newPlaces = visiblePlaces.filter((place) => !loadedMarkers[place.id.toString()]);
+		const categoryFiltered =
+			selectedCategory === 'all'
+				? visiblePlaces
+				: visiblePlaces.filter((place) => placeMatchesCategory(place, selectedCategory));
+		const newPlaces = categoryFiltered.filter((place) => !loadedMarkers[place.id.toString()]);
 
 		newPlaces.forEach((place: Place) => {
 			const commentsCount = place.comments || 0;
