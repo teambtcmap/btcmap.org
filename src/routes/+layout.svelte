@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { syncStatus } from '$lib/store';
 	import { elementsSync } from '$lib/sync/places';
+	import Header from '$components/layout/Header.svelte';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
 	import axios from 'axios';
 	import 'leaflet.locatecontrol/dist/L.Control.Locate.min.css';
@@ -11,6 +12,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import 'tippy.js/dist/tippy.css';
 	import '../app.css';
+	import Footer from '$components/layout/Footer.svelte';
 
 	axios.defaults.timeout = 600000;
 
@@ -45,6 +47,8 @@
 	onDestroy(() => {
 		clearInterval(dataSyncInterval);
 	});
+
+	export let data;
 </script>
 
 <svelte:head>
@@ -56,7 +60,18 @@
 	<meta property="alby:name" content="BTC Map" />
 </svelte:head>
 
-<slot />
+{#if !['/', '/map', '/communities/map', '/communities', '/countries'].includes(data.pathname)}
+	<div class="bg-teal dark:bg-dark">
+		<Header />
+		<div class="mx-auto w-10/12 xl:w-[1200px]">
+			<slot />
+			<Footer />
+		</div>
+	</div>
+{:else}
+	<slot />
+{/if}
+
 <SvelteToast {options} />
 
 <style>

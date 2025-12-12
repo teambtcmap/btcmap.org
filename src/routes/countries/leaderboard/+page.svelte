@@ -2,8 +2,6 @@
 	import { onMount } from 'svelte';
 	import AreaLeaderboard from '$components/leaderboard/AreaLeaderboard.svelte';
 	import Breadcrumbs from '$components/Breadcrumbs.svelte';
-	import Footer from '$components/layout/Footer.svelte';
-	import Header from '$components/layout/Header.svelte';
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import { areasSync } from '$lib/sync/areas';
@@ -29,37 +27,30 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/top-countries.png" />
 </svelte:head>
 
-<div class="bg-teal dark:bg-dark">
-	<Header />
-	<Breadcrumbs {routes} />
+<Breadcrumbs {routes} />
 
-	<main class="mt-10">
-		<div class="mx-auto w-10/12 space-y-10 xl:w-[1200px]">
-			{#if typeof window !== 'undefined'}
-				<h1
-					class="{detectTheme() === 'dark' || $theme === 'dark'
-						? 'text-white'
-						: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl"
-				>
-					Top Countries
-				</h1>
-			{:else}
-				<HeaderPlaceholder />
-			{/if}
+<main class="my-10 space-y-10">
+	{#if typeof window !== 'undefined'}
+		<h1
+			class="{detectTheme() === 'dark' || $theme === 'dark'
+				? 'text-white'
+				: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl"
+		>
+			Top Countries
+		</h1>
+	{:else}
+		<HeaderPlaceholder />
+	{/if}
 
-			<h2
-				class="mx-auto w-full text-center text-xl font-semibold text-primary lg:w-[800px] dark:text-white"
-			>
-				Insights into bitcoin adoption worldwide!
-			</h2>
+	<h2
+		class="mx-auto w-full text-center text-xl font-semibold text-primary lg:w-[800px] dark:text-white"
+	>
+		Insights into bitcoin adoption worldwide!
+	</h2>
 
-			<PrimaryButton style="md:w-[200px] mx-auto py-3 rounded-xl" link="/countries">
-				View directory
-			</PrimaryButton>
+	<PrimaryButton style="md:w-[200px] mx-auto py-3 rounded-xl" link="/countries">
+		View directory
+	</PrimaryButton>
 
-			<AreaLeaderboard type="country" />
-
-			<Footer />
-		</div>
-	</main>
-</div>
+	<AreaLeaderboard type="country" />
+</main>

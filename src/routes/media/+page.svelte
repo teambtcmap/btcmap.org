@@ -1,7 +1,4 @@
 <script lang="ts">
-	import Footer from '$components/layout/Footer.svelte';
-	import Header from '$components/layout/Header.svelte';
-
 	const brandColors = ['#10B981', '#53C5D5', '#051173', '#0891B2', '#E4EBEC', '#164E63', '#155E75'];
 
 	const brand = [
@@ -52,63 +49,57 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
-<div class="bg-teal dark:bg-dark">
-	<Header />
-	<div class="mx-auto w-10/12 xl:w-[1200px]">
-		<main class="mt-10 mb-20 space-y-10 text-center text-primary dark:text-white">
-			<div class="space-y-5 text-xl">
-				<h1 class="text-4xl !leading-tight font-semibold md:text-5xl">Media</h1>
-				<p>Media assets are available for free to use for promotional purposes.</p>
-			</div>
-
-			<section>
-				<h2 class="mb-5 text-3xl font-semibold">Brand Colors</h2>
-
-				<div class="flex flex-wrap justify-center gap-5">
-					{#each brandColors as color (color)}
-						<div
-							class="flex h-24 w-24 items-center justify-center"
-							style="background-color: {color}; border: 1px solid black;"
-						>
-							<p class="text-black">{color}</p>
-						</div>
-					{/each}
-				</div>
-			</section>
-
-			<section class="flex justify-center">
-				<div class="space-y-5">
-					<h2 class="text-3xl font-semibold">Assets</h2>
-
-					<!-- eslint-disable svelte/no-navigation-without-resolve -->
-					<a
-						href="/assets/btcmap-media-assets.zip"
-						download
-						class="mx-auto block w-36 rounded-lg bg-link py-3 font-semibold text-white transition-colors hover:bg-hover"
-					>
-						<!-- eslint-enable svelte/no-navigation-without-resolve -->
-						Download All
-					</a>
-
-					{#each assetSections as section (section.title)}
-						<div class="space-y-2 text-left">
-							<h3 class="text-xl font-semibold">{section.title}</h3>
-
-							<ul class="ml-5 list-disc space-y-1">
-								{#each section.data as asset (asset.name)}
-									<li>
-										<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-										<a href={asset.link} class="text-link transition-colors hover:text-hover">
-											{asset.name}
-										</a>
-									</li>
-								{/each}
-							</ul>
-						</div>
-					{/each}
-				</div>
-			</section>
-		</main>
-		<Footer />
+<main class="mt-10 mb-20 space-y-10 text-center text-primary dark:text-white">
+	<div class="space-y-5 text-xl">
+		<h1 class="text-4xl !leading-tight font-semibold md:text-5xl">Media</h1>
+		<p>Media assets are available for free to use for promotional purposes.</p>
 	</div>
-</div>
+
+	<section>
+		<h2 class="mb-5 text-3xl font-semibold">Brand Colors</h2>
+
+		<div class="flex flex-wrap justify-center gap-5">
+			{#each brandColors as color (color)}
+				<div
+					class="flex h-24 w-24 items-center justify-center"
+					style="background-color: {color}; border: 1px solid black;"
+				>
+					<p class="text-black">{color}</p>
+				</div>
+			{/each}
+		</div>
+	</section>
+
+	<section class="flex justify-center">
+		<div class="space-y-5">
+			<h2 class="text-3xl font-semibold">Assets</h2>
+
+			<!-- eslint-disable svelte/no-navigation-without-resolve -->
+			<a
+				href="/assets/btcmap-media-assets.zip"
+				download
+				class="mx-auto block w-36 rounded-lg bg-link py-3 font-semibold text-white transition-colors hover:bg-hover"
+			>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
+				Download All
+			</a>
+
+			{#each assetSections as section (section.title)}
+				<div class="space-y-2 text-left">
+					<h3 class="text-xl font-semibold">{section.title}</h3>
+
+					<ul class="ml-5 list-disc space-y-1">
+						{#each section.data as asset (asset.name)}
+							<li>
+								<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+								<a href={asset.link} class="text-link transition-colors hover:text-hover">
+									{asset.name}
+								</a>
+							</li>
+						{/each}
+					</ul>
+				</div>
+			{/each}
+		</div>
+	</section>
+</main>

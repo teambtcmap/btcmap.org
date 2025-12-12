@@ -3,6 +3,7 @@
 	import NavDropdownDesktop from '$components/layout/NavDropdownDesktop.svelte';
 	import NavDropdownMobile from '$components/layout/NavDropdownMobile.svelte';
 	import ThemeToggle from '$components/ThemeToggle.svelte';
+	import { afterNavigate } from '$app/navigation';
 
 	const navLinks = [
 		{ title: 'Maps', url: '', icon: 'map' },
@@ -41,6 +42,10 @@
 	];
 
 	let showMobileMenu = false;
+
+	afterNavigate(() => {
+		showMobileMenu = false;
+	});
 </script>
 
 <!-- desktop header -->
