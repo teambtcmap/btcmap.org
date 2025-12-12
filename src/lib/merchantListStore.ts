@@ -123,9 +123,9 @@ function createMerchantListStore() {
 			update((state) => ({ ...state, isOpen: true }));
 		},
 
-		// Hide the panel but keep all data (count stays visible on button)
+		// Hide the panel, reset category filter, but keep merchant data (count visible on button)
 		close() {
-			update((state) => ({ ...state, isOpen: false }));
+			update((state) => ({ ...resetCategoryState(state), isOpen: false }));
 		},
 
 		// Set merchants from locally-loaded markers (used at zoom 15-16)
