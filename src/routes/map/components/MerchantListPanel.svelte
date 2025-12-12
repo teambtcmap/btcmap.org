@@ -456,7 +456,11 @@
 			{:else}
 				<!-- Nearby mode: merchant list -->
 				{@const filteredMerchants = nearbyFilter
-					? merchants.filter((m) => m.name?.toLowerCase().includes(nearbyFilter.toLowerCase()))
+					? merchants.filter((m) => {
+							const enriched = placeDetailsCache.get(m.id);
+							const name = enriched?.name || m.name || '';
+							return name.toLowerCase().includes(nearbyFilter.toLowerCase());
+						})
 					: merchants}
 				{#if filteredMerchants.length === 0 && nearbyFilter}
 					<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
