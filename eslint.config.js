@@ -37,7 +37,7 @@ export default tseslint.config(
 		},
 		rules: {
 			'svelte/no-unused-svelte-ignore': 'off', // These are used by vite-plugin-svelte/svelte-check, not ESLint
-			'@typescript-eslint/no-unused-expressions': 'warn',
+			'@typescript-eslint/no-unused-expressions': ['error', { allowShortCircuit: true }],
 			'@typescript-eslint/no-unused-vars': [
 				'error',
 				{ argsIgnorePattern: '^_', varsIgnorePattern: '^_' }
