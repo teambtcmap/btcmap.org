@@ -17,7 +17,7 @@
 	class="w-full {show ? 'text-[#144046]' : 'text-link'} flex items-center text-xl dark:text-white"
 >
 	<span
-		class="bg-mobileButtons active:bg-mobileButtonsActive mr-4 rounded-full p-3 transition-colors"
+		class="mr-4 rounded-full bg-mobileButtons p-3 transition-colors active:bg-mobileButtonsActive"
 	>
 		<Icon w="24" h="24" icon={show ? `${icon}-highlight` : `${icon}`} type="mobile-nav" />
 	</span>
@@ -41,7 +41,7 @@
 				>
 					<!-- eslint-enable svelte/no-navigation-without-resolve -->
 					<span
-						class="bg-mobileButtons active:bg-mobileButtonsActive mr-4 rounded-full p-3 transition-colors"
+						class="mr-4 rounded-full bg-mobileButtons p-3 transition-colors active:bg-mobileButtonsActive"
 					>
 						<Icon w="24" h="24" icon={link.icon} type="mobile-nav" />
 					</span>

@@ -82,7 +82,7 @@
 			<a
 				href={resolve(`/merchant/${merchantLinkId}`)}
 				class="inline-flex w-full flex-col items-center gap-2 font-bold transition-colors sm:w-auto sm:flex-row {boosted
-					? 'hover:text-bitcoinHover text-bitcoin'
+					? 'text-bitcoin hover:text-bitcoinHover'
 					: 'text-link hover:text-hover'}"
 			>
 				<Icon

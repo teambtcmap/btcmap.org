@@ -38,7 +38,7 @@
 		on:click={startBoost}
 		disabled={boostLoading}
 		class="{boosted
-			? 'hover:bg-bitcoinHover bg-bitcoin'
+			? 'bg-bitcoin hover:bg-bitcoinHover'
 			: 'bg-link hover:bg-hover'} mx-auto flex w-40 items-center justify-center rounded-xl p-3 text-center font-semibold text-white transition-colors"
 	>
 		<Icon w="20" h="20" class="mr-1 text-white" icon="arrow_circle_up" type="material" />
