@@ -141,22 +141,31 @@ function createMerchantListStore() {
 			// Get current state to access selected category
 			const currentState = get(store);
 
+			// Auto-reset category if selected category has no matches but other merchants exist
+			const shouldResetCategory =
+				currentState.selectedCategory !== 'all' &&
+				categoryCounts.all > 0 &&
+				categoryCounts[currentState.selectedCategory] === 0;
+
+			const effectiveCategory = shouldResetCategory ? 'all' : currentState.selectedCategory;
+
 			// Apply category filtering
 			const filtered =
-				currentState?.selectedCategory && currentState.selectedCategory !== 'all'
-					? filterMerchantsByCategory(merchants, currentState.selectedCategory)
+				effectiveCategory !== 'all'
+					? filterMerchantsByCategory(merchants, effectiveCategory)
 					: merchants;
 
 			const sorted = sortMerchants(filtered, centerLat, centerLon);
 			const limited = sorted.slice(0, limit);
 
-			// Update the store with merchants, counts, and ensure isLoading is false
+			// Update the store with merchants, counts, and reset category if needed
 			update((state) => ({
 				...state,
 				merchants: limited,
 				totalCount: filtered.length,
 				isLoadingList: false,
-				categoryCounts
+				categoryCounts,
+				selectedCategory: effectiveCategory
 			}));
 		},
 
@@ -210,10 +219,18 @@ function createMerchantListStore() {
 					// Get current state to access selected category
 					const currentState = get(store);
 
+					// Auto-reset category if selected category has no matches but other merchants exist
+					const shouldResetCategory =
+						currentState.selectedCategory !== 'all' &&
+						categoryCounts.all > 0 &&
+						categoryCounts[currentState.selectedCategory] === 0;
+
+					const effectiveCategory = shouldResetCategory ? 'all' : currentState.selectedCategory;
+
 					// Apply category filtering
 					const filtered =
-						currentState?.selectedCategory && currentState.selectedCategory !== 'all'
-							? filterMerchantsByCategory(validPlaces, currentState.selectedCategory)
+						effectiveCategory !== 'all'
+							? filterMerchantsByCategory(validPlaces, effectiveCategory)
 							: validPlaces;
 
 					const sorted = sortMerchants(filtered, center.lat, center.lon);
@@ -224,7 +241,8 @@ function createMerchantListStore() {
 						totalCount: filtered.length,
 						placeDetailsCache,
 						isLoadingList: false,
-						categoryCounts
+						categoryCounts,
+						selectedCategory: effectiveCategory
 					}));
 				}
 			} catch (error) {
