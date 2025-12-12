@@ -138,6 +138,7 @@
 	let tilesLoading = true;
 	let tilesLoadingTimer: ReturnType<typeof setTimeout> | null = null;
 	let tilesLoadingFallback: ReturnType<typeof setTimeout> | null = null;
+	let glMapPollingTimer: ReturnType<typeof setTimeout> | null = null;
 
 	let markers: MarkerClusterGroup;
 	let upToDateLayer: FeatureGroup.SubGroup;
@@ -908,6 +909,11 @@
 				const checkGlMap = () => {
 					const glMap = activeLayer.getMaplibreMap();
 					if (glMap) {
+						// Clear polling timer now that GL map is ready
+						if (glMapPollingTimer) {
+							clearTimeout(glMapPollingTimer);
+							glMapPollingTimer = null;
+						}
 						glMap.on('idle', () => {
 							if (tilesLoadingTimer) {
 								clearTimeout(tilesLoadingTimer);
@@ -922,7 +928,7 @@
 						});
 					} else {
 						// GL map not ready yet, check again after a short delay
-						setTimeout(checkGlMap, 100);
+						glMapPollingTimer = setTimeout(checkGlMap, 100);
 					}
 				};
 				checkGlMap();
@@ -1129,6 +1135,7 @@
 		if (debouncedCacheCoords?.cancel) debouncedCacheCoords.cancel();
 		if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
 		if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
+		if (glMapPollingTimer) clearTimeout(glMapPollingTimer);
 		if (debouncedUpdateMerchantList?.cancel) debouncedUpdateMerchantList.cancel();
 		if (debouncedPanelSearch?.cancel) debouncedPanelSearch.cancel();
 		searchAbortController?.abort();
