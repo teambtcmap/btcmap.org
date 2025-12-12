@@ -100,6 +100,5 @@ export const filterMerchantsByCategory = (merchants: Place[], category: Category
 export const placeMatchesCategory = (place: Place, category: CategoryKey): boolean => {
 	if (category === 'all') return true;
 	if (!place.icon) return false;
-	const categoryIcons = CATEGORY_GROUPS[category].icons as readonly string[];
-	return categoryIcons.includes(place.icon);
+	return ICON_TO_CATEGORY.get(place.icon) === category;
 };

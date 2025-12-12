@@ -402,10 +402,6 @@
 		markersToRemove.forEach((placeId) => {
 			delete loadedMarkers[placeId];
 		});
-
-		if (markersToRemove.length > 0) {
-			console.info(`Cleared ${markersToRemove.length} markers not matching category: ${category}`);
-		}
 	};
 
 	// Load markers for places in current viewport using web workers
