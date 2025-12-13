@@ -339,8 +339,11 @@
 				marker.setIcon(newIcon);
 
 				// Handle layer transition if boost status changed
-				if (nowBoosted && !wasBoosted) {
-					// Place became boosted - move to non-clustered layer
+				// At zoom 1-5, boosted markers stay clustered, so no layer change needed
+				const shouldClusterBoosted = currentZoom <= BOOSTED_CLUSTERING_MAX_ZOOM;
+
+				if (nowBoosted && !wasBoosted && !shouldClusterBoosted) {
+					// Place became boosted at zoom 6+ - move to non-clustered layer
 					upToDateLayer.removeLayer(marker);
 					markers.removeLayer(marker);
 					boostedLayer.addLayer(marker);
@@ -744,8 +747,11 @@
 			map.panTo(newCenter, { animate: true, duration: 0.3 });
 		}
 
-		// Optionally spiderfy cluster containing the marker (skip for boosted markers - they're not clustered)
-		if (spiderfyCluster && !boostedMarkerIds.has(place.id.toString())) {
+		// Optionally spiderfy cluster containing the marker
+		// Skip only if marker is boosted AND at zoom > 5 (where boosted markers are not clustered)
+		const isBoostedAndUnclustered =
+			boostedMarkerIds.has(place.id.toString()) && currentZoom > BOOSTED_CLUSTERING_MAX_ZOOM;
+		if (spiderfyCluster && !isBoostedAndUnclustered) {
 			const marker = loadedMarkers[place.id.toString()];
 			if (marker && markers) {
 				const cluster = markers.getVisibleParent(marker);
