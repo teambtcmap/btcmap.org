@@ -146,7 +146,7 @@
 	let upToDateLayer: FeatureGroup.SubGroup;
 	let boostedLayer: FeatureGroup;
 	let loadedMarkers: Record<string, Marker> = {};
-	let boostedMarkerIds: Set<string> = new Set();
+	let boostedLayerMarkerIds: Set<string> = new Set();
 	let selectedMarkerId: number | null = null;
 
 	let isLoadingMarkers = false;
@@ -175,6 +175,11 @@
 		const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 		return R * c * 1.1; // Add 10% buffer
 	};
+
+	// Check if boosted markers should be clustered at current zoom level
+	// At zoom 1-5: boosted markers cluster with regular markers
+	// At zoom 6+: boosted markers are in separate non-clustered layer
+	const shouldClusterBoostedMarkers = () => currentZoom <= BOOSTED_CLUSTERING_MAX_ZOOM;
 
 	const clearMarkerSelection = (markerId: number) => {
 		const marker = loadedMarkers[markerId.toString()];
@@ -326,7 +331,7 @@
 				// Regenerate icon with fresh data
 				const commentsCount = typeof updatedPlace.comments === 'number' ? updatedPlace.comments : 0;
 				const nowBoosted = isBoosted(updatedPlace) ? true : false;
-				const wasBoosted = boostedMarkerIds.has(placeIdStr);
+				const wasBoosted = boostedLayerMarkerIds.has(placeIdStr);
 
 				const newIcon = generateIcon(
 					leaflet,
@@ -340,19 +345,17 @@
 
 				// Handle layer transition if boost status changed
 				// At zoom 1-5, boosted markers stay clustered, so no layer change needed
-				const shouldClusterBoosted = currentZoom <= BOOSTED_CLUSTERING_MAX_ZOOM;
-
-				if (nowBoosted && !wasBoosted && !shouldClusterBoosted) {
+				if (nowBoosted && !wasBoosted && !shouldClusterBoostedMarkers()) {
 					// Place became boosted at zoom 6+ - move to non-clustered layer
 					upToDateLayer.removeLayer(marker);
 					markers.removeLayer(marker);
 					boostedLayer.addLayer(marker);
-					boostedMarkerIds.add(placeIdStr);
+					boostedLayerMarkerIds.add(placeIdStr);
 					console.info(`Moved marker ${placeIdStr} to boosted layer`);
 				} else if (!nowBoosted && wasBoosted) {
 					// Boost expired - move to clustered layer
 					boostedLayer.removeLayer(marker);
-					boostedMarkerIds.delete(placeIdStr);
+					boostedLayerMarkerIds.delete(placeIdStr);
 					upToDateLayer.addLayer(marker);
 					console.info(`Moved marker ${placeIdStr} to clustered layer`);
 				} else {
@@ -362,7 +365,7 @@
 		}
 
 		// Reset the signal
-		$lastUpdatedPlaceId = undefined;
+		lastUpdatedPlaceId.set(undefined);
 	}
 
 	// Get places visible in current viewport with buffer
@@ -395,9 +398,9 @@
 			const markerLatLng = marker.getLatLng();
 			if (!bounds.contains(markerLatLng)) {
 				// Remove from appropriate layer based on boost status
-				if (boostedMarkerIds.has(placeId)) {
+				if (boostedLayerMarkerIds.has(placeId)) {
 					boostedLayer.removeLayer(marker);
-					boostedMarkerIds.delete(placeId);
+					boostedLayerMarkerIds.delete(placeId);
 				} else {
 					upToDateLayer.removeLayer(marker);
 				}
@@ -450,7 +453,7 @@
 		if (shouldClusterBoosted) {
 			// Moving from zoom 6+ to zoom 5-: move boosted markers to cluster layer
 			const markersToMove: Marker[] = [];
-			boostedMarkerIds.forEach((placeId) => {
+			boostedLayerMarkerIds.forEach((placeId) => {
 				const marker = loadedMarkers[placeId];
 				if (marker) {
 					boostedLayer.removeLayer(marker);
@@ -459,7 +462,7 @@
 			});
 			if (markersToMove.length > 0) {
 				markers.addLayers(markersToMove);
-				boostedMarkerIds.clear();
+				boostedLayerMarkerIds.clear();
 				console.info(`Moved ${markersToMove.length} boosted markers to clustered layer`);
 			}
 		} else {
@@ -475,7 +478,7 @@
 				markers.removeLayer(marker);
 				upToDateLayer.removeLayer(marker);
 				boostedLayer.addLayer(marker);
-				boostedMarkerIds.add(placeId);
+				boostedLayerMarkerIds.add(placeId);
 			});
 			if (markersToMove.length > 0) {
 				console.info(`Moved ${markersToMove.length} boosted markers to non-clustered layer`);
@@ -584,11 +587,9 @@
 			});
 
 			// Route to appropriate layer based on boost status and zoom level
-			// At low zoom (1-5), boosted markers are also clustered to avoid crowding
-			const shouldClusterBoosted = currentZoom <= BOOSTED_CLUSTERING_MAX_ZOOM;
-			if (boosted && !shouldClusterBoosted) {
+			if (boosted && !shouldClusterBoostedMarkers()) {
 				boostedLayer.addLayer(marker);
-				boostedMarkerIds.add(place.id.toString());
+				boostedLayerMarkerIds.add(place.id.toString());
 			} else {
 				upToDateLayer.addLayer(marker);
 			}
@@ -748,10 +749,10 @@
 		}
 
 		// Optionally spiderfy cluster containing the marker
-		// Skip only if marker is boosted AND at zoom > 5 (where boosted markers are not clustered)
-		const isBoostedAndUnclustered =
-			boostedMarkerIds.has(place.id.toString()) && currentZoom > BOOSTED_CLUSTERING_MAX_ZOOM;
-		if (spiderfyCluster && !isBoostedAndUnclustered) {
+		// Skip only if marker is in boosted layer (not clustered)
+		const isInBoostedLayer =
+			boostedLayerMarkerIds.has(place.id.toString()) && !shouldClusterBoostedMarkers();
+		if (spiderfyCluster && !isInBoostedLayer) {
 			const marker = loadedMarkers[place.id.toString()];
 			if (marker && markers) {
 				const cluster = markers.getVisibleParent(marker);
@@ -888,11 +889,9 @@
 			});
 
 			// Route to appropriate layer based on boost status and zoom level
-			// At low zoom (1-5), boosted markers are also clustered to avoid crowding
-			const shouldClusterBoosted = currentZoom <= BOOSTED_CLUSTERING_MAX_ZOOM;
-			if (iconData.boosted && !shouldClusterBoosted) {
+			if (iconData.boosted && !shouldClusterBoostedMarkers()) {
 				boostedMarkersToAdd.push(marker);
-				boostedMarkerIds.add(placeId);
+				boostedLayerMarkerIds.add(placeId);
 			} else {
 				regularMarkersToAdd.push(marker);
 			}
