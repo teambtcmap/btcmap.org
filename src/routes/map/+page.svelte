@@ -330,13 +330,13 @@
 			if (updatedPlace) {
 				// Regenerate icon with fresh data
 				const commentsCount = typeof updatedPlace.comments === 'number' ? updatedPlace.comments : 0;
-				const nowBoosted = isBoosted(updatedPlace) ? true : false;
-				const wasBoosted = boostedLayerMarkerIds.has(placeIdStr);
+				const placeIsBoosted = isBoosted(updatedPlace) ? true : false;
+				const markerInBoostedLayer = boostedLayerMarkerIds.has(placeIdStr);
 
 				const newIcon = generateIcon(
 					leaflet,
 					updatedPlace.icon || 'question_mark',
-					nowBoosted,
+					placeIsBoosted,
 					commentsCount
 				);
 
@@ -345,14 +345,14 @@
 
 				// Handle layer transition if boost status changed
 				// At zoom 1-5, boosted markers stay clustered, so no layer change needed
-				if (nowBoosted && !wasBoosted && !shouldClusterBoostedMarkers()) {
+				if (placeIsBoosted && !markerInBoostedLayer && !shouldClusterBoostedMarkers()) {
 					// Place became boosted at zoom 6+ - move to non-clustered layer
 					upToDateLayer.removeLayer(marker);
 					markers.removeLayer(marker);
 					boostedLayer.addLayer(marker);
 					boostedLayerMarkerIds.add(placeIdStr);
 					console.info(`Moved marker ${placeIdStr} to boosted layer`);
-				} else if (!nowBoosted && wasBoosted) {
+				} else if (!placeIsBoosted && markerInBoostedLayer) {
 					// Boost expired - move to clustered layer
 					boostedLayer.removeLayer(marker);
 					boostedLayerMarkerIds.delete(placeIdStr);
@@ -430,7 +430,7 @@
 				upToDateLayer.removeLayer(marker);
 				markers.removeLayer(marker);
 				boostedLayer.removeLayer(marker);
-				boostedMarkerIds.delete(placeId);
+				boostedLayerMarkerIds.delete(placeId);
 				markersToRemove.push(placeId);
 			}
 		});
