@@ -9,6 +9,7 @@
 	import LoadingSpinner from '$components/LoadingSpinner.svelte';
 	import Icon from '$components/Icon.svelte';
 	import type { Place } from '$lib/types';
+	import { CATEGORY_ENTRIES, type CategoryKey, type CategoryCounts } from '$lib/categoryMapping';
 	import {
 		MERCHANT_LIST_WIDTH,
 		MERCHANT_LIST_MIN_ZOOM,
@@ -36,9 +37,14 @@
 	export let onSearch: ((query: string) => void) | undefined = undefined;
 	// Mode change callback (called for nearby mode switch)
 	export let onModeChange: ((mode: MerchantListMode) => void) | undefined = undefined;
+	// Refresh callback for category filtering
+	export let onRefresh: (() => void) | undefined = undefined;
 
 	// Reference for search input element
 	let searchInput: HTMLInputElement;
+
+	// Local filter for nearby mode (client-side filtering by name)
+	let nearbyFilter = '';
 
 	// Body scroll lock for mobile (prevents iOS background scroll)
 	let scrollLockActive = false;
@@ -63,12 +69,20 @@
 
 	function handleModeSwitch(newMode: MerchantListMode) {
 		if (newMode === mode) return;
+		nearbyFilter = ''; // Clear filter when switching modes
 		if (newMode === 'nearby') {
 			merchantList.exitSearchMode();
 			onModeChange?.(newMode);
 		} else {
 			merchantList.setMode(newMode);
 		}
+	}
+
+	function handleCategorySelect(category: CategoryKey) {
+		// Guard against clicks on disabled buttons (Svelte fires click even when disabled)
+		if (!hasMatchingMerchants(category)) return;
+		merchantList.setSelectedCategory(category);
+		onRefresh?.();
 	}
 
 	$: isOpen = $merchantList.isOpen;
@@ -81,6 +95,29 @@
 	$: searchResults = $merchantList.searchResults;
 	$: isSearching = $merchantList.isSearching;
 	$: searchQuery = $merchantList.searchQuery;
+	$: selectedCategory = $merchantList.selectedCategory;
+	$: categoryCounts = $merchantList.categoryCounts;
+
+	// Helper function to check if a category has matching merchants
+	function hasMatchingMerchants(categoryKey: CategoryKey): boolean {
+		if (categoryKey === 'all') return true;
+		return (categoryCounts?.[categoryKey] ?? 0) > 0;
+	}
+
+	// Helper function to get category button classes
+	// Note: categoryCounts param required for Svelte reactivity (indirect deps aren't tracked)
+	function getCategoryButtonClass(
+		key: CategoryKey,
+		selectedCategory: CategoryKey,
+		counts: CategoryCounts
+	): string {
+		if (selectedCategory === key) return 'bg-primary text-white';
+		const hasMatches = key === 'all' || (counts?.[key] ?? 0) > 0;
+		if (hasMatches) {
+			return 'bg-gray-100 text-body hover:bg-gray-200 dark:bg-white/5 dark:text-white/70 dark:hover:bg-white/10';
+		}
+		return 'cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-white/30';
+	}
 
 	// Show "zoom in" message when:
 	// 1. Below zoom 11 (always - no data fetched at this level)
@@ -135,6 +172,7 @@
 	}
 
 	function handleClose() {
+		nearbyFilter = ''; // Clear filter when closing
 		merchantList.close();
 	}
 
@@ -241,13 +279,15 @@
 					<div>
 						<h2 class="text-sm font-semibold text-primary dark:text-white">Nearby Merchants</h2>
 						{#if showZoomInMessage}
-							<p class="text-xs text-body dark:text-white/70">Zoom in to see list</p>
+							<p class="text-xs text-body dark:text-white/70" aria-live="polite">
+								Zoom in to see list
+							</p>
 						{:else if isTruncated}
-							<p class="text-xs text-body dark:text-white/70">
+							<p class="text-xs text-body dark:text-white/70" aria-live="polite">
 								Showing {merchants.length} nearest of {totalCount}
 							</p>
 						{:else}
-							<p class="text-xs text-body dark:text-white/70">
+							<p class="text-xs text-body dark:text-white/70" aria-live="polite">
 								{merchants.length} location{merchants.length !== 1 ? 's' : ''} in view
 							</p>
 						{/if}
@@ -272,7 +312,7 @@
 						? 'bg-white text-primary shadow-sm dark:bg-white/10 dark:text-white'
 						: 'text-body hover:text-primary dark:text-white/70 dark:hover:text-white'}"
 				>
-					Search
+					Worldwide
 				</button>
 				<button
 					type="button"
@@ -287,6 +327,60 @@
 					Nearby
 				</button>
 			</div>
+
+			<!-- Category filter (only shown in nearby mode) -->
+			{#if mode === 'nearby'}
+				<div class="mt-3" role="radiogroup" aria-label="Filter by category">
+					<h3 class="sr-only">Filter by category</h3>
+					<div class="flex flex-wrap gap-2">
+						{#each CATEGORY_ENTRIES as [key, category] (key)}
+							<button
+								type="button"
+								role="radio"
+								on:click={() => handleCategorySelect(key)}
+								disabled={!hasMatchingMerchants(key)}
+								aria-disabled={!hasMatchingMerchants(key)}
+								aria-checked={selectedCategory === key}
+								class="rounded-full px-3 py-1 text-xs font-medium transition-colors {getCategoryButtonClass(
+									key,
+									selectedCategory,
+									categoryCounts
+								)}"
+							>
+								{category.label}
+							</button>
+						{/each}
+					</div>
+				</div>
+
+				<!-- Name filter input -->
+				<div class="relative mt-3">
+					<Icon
+						w="14"
+						h="14"
+						icon="filter_list"
+						type="material"
+						class="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-gray-400 dark:text-white/50"
+					/>
+					<input
+						bind:value={nearbyFilter}
+						type="text"
+						placeholder="Filter by name..."
+						aria-label="Filter nearby merchants by name"
+						class="w-full rounded-lg border border-gray-200 bg-gray-50 py-1.5 pr-7 pl-8 text-xs text-primary focus:border-link focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus:border-white/30"
+					/>
+					{#if nearbyFilter}
+						<button
+							type="button"
+							on:click={() => (nearbyFilter = '')}
+							class="absolute top-1/2 right-2 -translate-y-1/2 p-0.5 text-gray-400 hover:text-gray-600 dark:text-white/50 dark:hover:text-white/70"
+							aria-label="Clear filter"
+						>
+							<Icon w="12" h="12" icon="close" type="material" />
+						</button>
+					{/if}
+				</div>
+			{/if}
 		</div>
 
 		<!-- List content -->
@@ -361,19 +455,32 @@
 				</div>
 			{:else}
 				<!-- Nearby mode: merchant list -->
-				<ul class="divide-y divide-gray-100 dark:divide-white/5">
-					{#each merchants as merchant (merchant.id)}
-						<MerchantListItem
-							{merchant}
-							enrichedData={placeDetailsCache.get(merchant.id) || null}
-							isSelected={selectedId === merchant.id}
-							{verifiedDate}
-							onclick={handleItemClick}
-							onmouseenter={handleMouseEnter}
-							onmouseleave={handleMouseLeave}
-						/>
-					{/each}
-				</ul>
+				{@const filteredMerchants = nearbyFilter
+					? merchants.filter((m) => {
+							const enriched = placeDetailsCache.get(m.id);
+							const name = enriched?.name || m.name || '';
+							return name.toLowerCase().includes(nearbyFilter.toLowerCase());
+						})
+					: merchants}
+				{#if filteredMerchants.length === 0 && nearbyFilter}
+					<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
+						No merchants match "{nearbyFilter}"
+					</div>
+				{:else}
+					<ul class="divide-y divide-gray-100 dark:divide-white/5">
+						{#each filteredMerchants as merchant (merchant.id)}
+							<MerchantListItem
+								{merchant}
+								enrichedData={placeDetailsCache.get(merchant.id) || null}
+								isSelected={selectedId === merchant.id}
+								{verifiedDate}
+								onclick={handleItemClick}
+								onmouseenter={handleMouseEnter}
+								onmouseleave={handleMouseLeave}
+							/>
+						{/each}
+					</ul>
+				{/if}
 			{/if}
 		</div>
 	</section>

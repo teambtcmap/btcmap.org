@@ -9,6 +9,7 @@
 	import MerchantListPanel from './components/MerchantListPanel.svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import { merchantList, type MerchantListMode } from '$lib/merchantListStore';
+	import { placeMatchesCategory, type CategoryKey } from '$lib/categoryMapping';
 	import {
 		BREAKPOINTS,
 		MERCHANT_DRAWER_WIDTH,
@@ -137,6 +138,7 @@
 	let tilesLoading = true;
 	let tilesLoadingTimer: ReturnType<typeof setTimeout> | null = null;
 	let tilesLoadingFallback: ReturnType<typeof setTimeout> | null = null;
+	let glMapPollingTimer: ReturnType<typeof setTimeout> | null = null;
 
 	let markers: MarkerClusterGroup;
 	let upToDateLayer: FeatureGroup.SubGroup;
@@ -147,6 +149,10 @@
 	let isZooming = false;
 
 	let mapCenter: LatLng;
+
+	// Track selected category for marker filtering
+	let previousCategory: CategoryKey = 'all';
+	$: selectedCategory = $merchantList.selectedCategory;
 
 	// Calculate radius from map center to corner (Haversine formula)
 	const calculateRadiusKm = (bounds: LatLngBounds): number => {
@@ -293,6 +299,13 @@
 		debouncedUpdateMerchantList();
 	}
 
+	// Filter map markers when category filter changes
+	$: if (elementsLoaded && upToDateLayer && selectedCategory !== previousCategory) {
+		previousCategory = selectedCategory;
+		clearNonMatchingMarkers(selectedCategory);
+		debouncedLoadMarkers();
+	}
+
 	// alert for map errors
 	$: $placesError && errToast($placesError);
 
@@ -370,6 +383,27 @@
 		}
 	};
 
+	// Remove markers that don't match the selected category filter
+	const clearNonMatchingMarkers = (category: CategoryKey) => {
+		if (category === 'all') return;
+
+		const markersToRemove: string[] = [];
+
+		Object.entries(loadedMarkers).forEach(([placeId, marker]) => {
+			const place = $placesById.get(Number(placeId));
+			if (place && !placeMatchesCategory(place, category)) {
+				// Remove from both the subgroup and the parent cluster group
+				upToDateLayer.removeLayer(marker);
+				markers.removeLayer(marker);
+				markersToRemove.push(placeId);
+			}
+		});
+
+		markersToRemove.forEach((placeId) => {
+			delete loadedMarkers[placeId];
+		});
+	};
+
 	// Load markers for places in current viewport using web workers
 	const loadMarkersInViewport = async () => {
 		// Skip if zooming, not ready, or already loading
@@ -394,11 +428,15 @@
 		}
 
 		try {
-			// Get visible places (viewport filtering)
+			// Get visible places (viewport + category filtering)
 			const visiblePlaces = getVisiblePlaces($places, bounds);
+			const categoryFiltered =
+				selectedCategory === 'all'
+					? visiblePlaces
+					: visiblePlaces.filter((place) => placeMatchesCategory(place, selectedCategory));
 
 			// Filter out places that already have markers loaded
-			const newPlaces = visiblePlaces.filter((place) => !loadedMarkers[place.id.toString()]);
+			const newPlaces = categoryFiltered.filter((place) => !loadedMarkers[place.id.toString()]);
 
 			if (newPlaces.length === 0) {
 				isLoadingMarkers = false;
@@ -443,7 +481,11 @@
 	// Fallback synchronous loading for viewport (much smaller dataset)
 	const loadMarkersInViewportFallback = (bounds: LatLngBounds) => {
 		const visiblePlaces = getVisiblePlaces($places, bounds);
-		const newPlaces = visiblePlaces.filter((place) => !loadedMarkers[place.id.toString()]);
+		const categoryFiltered =
+			selectedCategory === 'all'
+				? visiblePlaces
+				: visiblePlaces.filter((place) => placeMatchesCategory(place, selectedCategory));
+		const newPlaces = categoryFiltered.filter((place) => !loadedMarkers[place.id.toString()]);
 
 		newPlaces.forEach((place: Place) => {
 			const commentsCount = place.comments || 0;
@@ -514,13 +556,10 @@
 		bounds: LatLngBounds,
 		allowHeavyFetch: boolean
 	) => {
-		const visiblePlaces = $places.filter((place) => {
-			const markerId = place.id.toString();
-			if (!loadedMarkers[markerId]) return false;
-			return bounds.contains([place.lat, place.lon]);
-		});
+		// Get ALL places in bounds (not just loaded markers) for accurate category counts
+		const allVisiblePlaces = $places.filter((place) => bounds.contains([place.lat, place.lon]));
 
-		merchantList.setMerchants(visiblePlaces, center.lat, center.lng);
+		merchantList.setMerchants(allVisiblePlaces, center.lat, center.lng);
 
 		if ($merchantList.isOpen && allowHeavyFetch) {
 			const radiusKm = calculateRadiusKm(bounds);
@@ -866,6 +905,11 @@
 				const checkGlMap = () => {
 					const glMap = activeLayer.getMaplibreMap();
 					if (glMap) {
+						// Clear polling timer now that GL map is ready
+						if (glMapPollingTimer) {
+							clearTimeout(glMapPollingTimer);
+							glMapPollingTimer = null;
+						}
 						glMap.on('idle', () => {
 							if (tilesLoadingTimer) {
 								clearTimeout(tilesLoadingTimer);
@@ -880,7 +924,7 @@
 						});
 					} else {
 						// GL map not ready yet, check again after a short delay
-						setTimeout(checkGlMap, 100);
+						glMapPollingTimer = setTimeout(checkGlMap, 100);
 					}
 				};
 				checkGlMap();
@@ -1087,6 +1131,7 @@
 		if (debouncedCacheCoords?.cancel) debouncedCacheCoords.cancel();
 		if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
 		if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
+		if (glMapPollingTimer) clearTimeout(glMapPollingTimer);
 		if (debouncedUpdateMerchantList?.cancel) debouncedUpdateMerchantList.cancel();
 		if (debouncedPanelSearch?.cancel) debouncedPanelSearch.cancel();
 		searchAbortController?.abort();
@@ -1137,6 +1182,7 @@
 		}}
 		onSearch={handlePanelSearch}
 		onModeChange={handleModeChange}
+		onRefresh={() => updateMerchantList({ force: true })}
 		{currentZoom}
 	/>
 
