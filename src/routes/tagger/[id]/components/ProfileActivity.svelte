@@ -3,6 +3,7 @@
 	import { format } from 'date-fns/format';
 	import { resolve } from '$app/paths';
 	import LeaderboardSearch from '$components/leaderboard/LeaderboardSearch.svelte';
+	import LeaderboardPagination from '$components/leaderboard/LeaderboardPagination.svelte';
 	import {
 		createSvelteTable,
 		getCoreRowModel,
@@ -42,15 +43,7 @@
 			accessorFn: (row) => row.location,
 			enableSorting: false,
 			filterFn: fuzzyFilter,
-			enableGlobalFilter: true,
-			cell: ({ row }) => {
-				const event = row.original;
-				return `
-					<a href="${resolve(`/merchant/${event.merchantId}`)}" class="text-link transition-colors hover:text-hover">
-						${event.location}
-					</a>
-				`;
-			}
+			enableGlobalFilter: true
 		},
 		{
 			id: 'type',
@@ -58,21 +51,7 @@
 			accessorFn: (row) => row.type,
 			enableSorting: true,
 			filterFn: fuzzyFilter,
-			enableGlobalFilter: true,
-			cell: ({ row }) => {
-				const event = row.original;
-				const colorClass =
-					event.type === 'create'
-						? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-						: event.type === 'update'
-							? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-							: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-				return `
-					<span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${colorClass}">
-						${event.type}
-					</span>
-				`;
-			}
+			enableGlobalFilter: true
 		},
 		{
 			id: 'created_at',
@@ -80,10 +59,7 @@
 			accessorFn: (row) => row.created_at,
 			enableSorting: true,
 			filterFn: fuzzyFilter,
-			enableGlobalFilter: true,
-			cell: ({ row }) => {
-				return format(new Date(row.original.created_at), 'MMM d, yyyy HH:mm');
-			}
+			enableGlobalFilter: true
 		}
 	];
 
@@ -286,87 +262,7 @@
 				</table>
 			</div>
 
-			<!-- Pagination -->
-			<div
-				class="flex w-full flex-col gap-5 px-5 pt-2.5 pb-5 text-primary md:flex-row md:items-center md:justify-between dark:text-white"
-			>
-				<select
-					value={$table?.getState().pagination.pageSize}
-					on:change={(e) => {
-						// @ts-expect-error Select onChange event target type assertion for page size change
-						$table?.setPageSize(Number(e.target?.value));
-					}}
-					class="cursor-pointer bg-transparent focus:outline-primary dark:focus:outline-white"
-					aria-label="Items per page"
-				>
-					{#each pageSizes as pageSize (pageSize)}
-						<option value={pageSize}>
-							Show {pageSize}
-						</option>
-					{/each}
-				</select>
-
-				<div class="flex flex-col gap-5 md:flex-row md:items-center">
-					<div class="flex items-center justify-between gap-5 md:justify-start">
-						<div class="flex items-center gap-5">
-							<button
-								type="button"
-								class="text-xl font-bold {!$table?.getCanPreviousPage()
-									? 'cursor-not-allowed opacity-50'
-									: ''}"
-								on:click={() => $table?.firstPage()}
-								disabled={!$table?.getCanPreviousPage()}
-								aria-label="Go to first page"
-							>
-								&lt;&lt;
-							</button>
-							<button
-								type="button"
-								class="text-xl font-bold {!$table?.getCanPreviousPage()
-									? 'cursor-not-allowed opacity-50'
-									: ''}"
-								on:click={() => $table?.previousPage()}
-								disabled={!$table?.getCanPreviousPage()}
-								aria-label="Go to previous page"
-							>
-								&lt;
-							</button>
-						</div>
-						<div class="flex items-center gap-5">
-							<button
-								type="button"
-								class="text-xl font-bold {!$table?.getCanNextPage()
-									? 'cursor-not-allowed opacity-50'
-									: ''}"
-								on:click={() => $table?.nextPage()}
-								disabled={!$table?.getCanNextPage()}
-								aria-label="Go to next page"
-							>
-								&gt;
-							</button>
-							<button
-								type="button"
-								class="text-xl font-bold {!$table?.getCanNextPage()
-									? 'cursor-not-allowed opacity-50'
-									: ''}"
-								on:click={() => $table?.lastPage()}
-								disabled={!$table?.getCanNextPage()}
-								aria-label="Go to last page"
-							>
-								&gt;&gt;
-							</button>
-						</div>
-					</div>
-
-					<span class="flex items-center justify-center gap-1 md:justify-start" aria-live="polite">
-						<div>Page</div>
-						<strong>
-							{$table?.getState().pagination.pageIndex + 1} of
-							{$table?.getPageCount().toLocaleString()}
-						</strong>
-					</span>
-				</div>
-			</div>
+			<LeaderboardPagination table={$table} {pageSizes} />
 		{/if}
 	{:else}
 		<div class="p-5">

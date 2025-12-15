@@ -1,8 +1,5 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-
-	import Header from '$components/layout/Header.svelte';
-	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import Icon from '$components/Icon.svelte';
 	import LeaderboardPagination from '$components/leaderboard/LeaderboardPagination.svelte';
 	import LeaderboardSearch from '$components/leaderboard/LeaderboardSearch.svelte';
@@ -291,163 +288,155 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/leader.png" />
 </svelte:head>
 
-<div class="bg-teal dark:bg-dark">
-	<Header />
-
-	<main class="mt-10">
-		<div class="mb-10 flex justify-center">
-			<div id="hero" class="flex h-[324px] w-full items-end justify-center">
-				<img src="/images/supertagger-king.svg" alt="ultimate supertagger" />
-			</div>
+<main class="mt-10 mb-20">
+	<div class="mb-10 flex justify-center">
+		<div id="hero" class="flex h-[324px] w-full items-end justify-center">
+			<img src="/images/supertagger-king.svg" alt="ultimate supertagger" />
 		</div>
+	</div>
 
-		<div class="mx-auto w-10/12 space-y-10 xl:w-[1200px]">
-			{#if typeof window !== 'undefined'}
-				<h1
-					class="{detectTheme() === 'dark' || $theme === 'dark'
-						? 'text-white'
-						: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl"
-				>
-					Top Editors
-				</h1>
-			{:else}
-				<HeaderPlaceholder />
-			{/if}
+	<div class="mx-auto w-10/12 space-y-10 xl:w-[1200px]">
+		<h1
+			class="{detectTheme() === 'dark' || $theme === 'dark'
+				? 'text-white'
+				: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl"
+		>
+			Top Editors
+		</h1>
 
-			<PrimaryButton
-				style="w-[207px] mx-auto py-3 rounded-xl"
-				link="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers-"
-				external
+		<PrimaryButton
+			style="w-[207px] mx-auto py-3 rounded-xl"
+			link="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers-"
+			external
+		>
+			Join Them
+		</PrimaryButton>
+
+		<section id="leaderboard" aria-labelledby="leaderboard-title">
+			<div
+				class="w-full rounded-3xl border border-gray-300 bg-white dark:border-white/95 dark:bg-white/10"
 			>
-				Join Them
-			</PrimaryButton>
+				<header>
+					<h2
+						id="leaderboard-title"
+						class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
+					>
+						Top Editors
+						{#if !loading && !errorMessage && totalTaggers}
+							({totalTaggers})
+						{/if}
+					</h2>
+				</header>
 
-			<section id="leaderboard" aria-labelledby="leaderboard-title">
-				<div
-					class="w-full rounded-3xl border border-gray-300 bg-white dark:border-white/95 dark:bg-white/10"
-				>
-					<header>
-						<h2
-							id="leaderboard-title"
-							class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
+				{#if loading}
+					<div class="p-5">
+						<div
+							class="flex h-[572px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
+							role="status"
+							aria-live="polite"
 						>
-							Top Editors
-							{#if !loading && !errorMessage && totalTaggers}
-								({totalTaggers})
-							{/if}
-						</h2>
-					</header>
-
-					{#if loading}
-						<div class="p-5">
-							<div
-								class="flex h-[572px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
-								role="status"
-								aria-live="polite"
-							>
-								<span class="sr-only">Loading leaderboard data</span>
-								<Icon type="fa" icon="table" w="96" h="96" class="animate-pulse text-link/50" />
-							</div>
+							<span class="sr-only">Loading leaderboard data</span>
+							<Icon type="fa" icon="table" w="96" h="96" class="animate-pulse text-link/50" />
 						</div>
-					{:else if periodLoading}
-						<div class="p-5">
-							<div
-								class="flex h-[572px] w-full items-center justify-center rounded-3xl border border-link/50"
-								role="status"
-								aria-live="polite"
-							>
-								<div class="flex flex-col items-center gap-4">
-									<LoadingSpinner color="text-link" size="h-12 w-12" />
-									<p class="text-lg font-medium text-primary dark:text-white">
-										Loading {periodLabels[selectedPeriod].toLowerCase()} data...
-									</p>
-								</div>
-							</div>
-						</div>
-					{:else if errorMessage}
-						<p class="w-full p-5 text-center text-primary dark:text-white">
-							Failed to load leaderboard: {errorMessage}
-						</p>
-					{:else if !leaderboardRows.length}
-						<p class="w-full p-5 text-center text-primary dark:text-white">No data available</p>
-					{:else}
-						<div class="p-5">
-							<div class="mb-6 px-4 py-3 text-center md:text-left">
-								<p class="text-lg font-semibold text-primary dark:text-white">Time period</p>
-								<p class="text-sm text-primary/80 dark:text-white/80">
-									Showing {periodLabels[selectedPeriod]}
+					</div>
+				{:else if periodLoading}
+					<div class="p-5">
+						<div
+							class="flex h-[572px] w-full items-center justify-center rounded-3xl border border-link/50"
+							role="status"
+							aria-live="polite"
+						>
+							<div class="flex flex-col items-center gap-4">
+								<LoadingSpinner color="text-link" size="h-12 w-12" />
+								<p class="text-lg font-medium text-primary dark:text-white">
+									Loading {periodLabels[selectedPeriod].toLowerCase()} data...
 								</p>
 							</div>
+						</div>
+					</div>
+				{:else if errorMessage}
+					<p class="w-full p-5 text-center text-primary dark:text-white">
+						Failed to load leaderboard: {errorMessage}
+					</p>
+				{:else if !leaderboardRows.length}
+					<p class="w-full p-5 text-center text-primary dark:text-white">No data available</p>
+				{:else}
+					<div class="p-5">
+						<div class="mb-6 px-4 py-3 text-center md:text-left">
+							<p class="text-lg font-semibold text-primary dark:text-white">Time period</p>
+							<p class="text-sm text-primary/80 dark:text-white/80">
+								Showing {periodLabels[selectedPeriod]}
+							</p>
+						</div>
 
-							<div class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-								<label
-									class="flex flex-col gap-2 px-4 py-3 text-sm font-medium text-primary md:flex-row md:items-center md:gap-3 dark:text-white"
+						<div class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+							<label
+								class="flex flex-col gap-2 px-4 py-3 text-sm font-medium text-primary md:flex-row md:items-center md:gap-3 dark:text-white"
+							>
+								<span>Period</span>
+								<select
+									class="rounded-xl border border-primary/40 bg-white/80 px-4 py-2 text-primary focus:border-primary focus:outline-none dark:border-white/50 dark:bg-dark/40 dark:text-white"
+									value={selectedPeriod}
+									on:change={handlePeriodChange}
+									aria-label="Select leaderboard period"
 								>
-									<span>Period</span>
-									<select
-										class="rounded-xl border border-primary/40 bg-white/80 px-4 py-2 text-primary focus:border-primary focus:outline-none dark:border-white/50 dark:bg-dark/40 dark:text-white"
-										value={selectedPeriod}
-										on:change={handlePeriodChange}
-										aria-label="Select leaderboard period"
-									>
-										{#each periodOptions as option (option)}
-											<option value={option}>{periodLabels[option]}</option>
-										{/each}
-									</select>
-								</label>
+									{#each periodOptions as option (option)}
+										<option value={option}>{periodLabels[option]}</option>
+									{/each}
+								</select>
+							</label>
 
-								<LeaderboardSearch
-									table={$table}
-									globalFilter={$table.getState().globalFilter}
-									on:globalFilterChange={(e) => $table?.setGlobalFilter(e.detail)}
-									{searchDebounce}
-								/>
-							</div>
+							<LeaderboardSearch
+								table={$table}
+								globalFilter={$table.getState().globalFilter}
+								on:globalFilterChange={(e) => $table?.setGlobalFilter(e.detail)}
+								{searchDebounce}
+							/>
+						</div>
 
-							{#if $table.getFilteredRowModel().rows.length === 0}
-								<p class="w-full p-5 text-center text-primary dark:text-white">No results found.</p>
-							{:else}
-								<div class="block lg:hidden">
-									<div
-										class="border-b border-gray-300 bg-primary/5 dark:border-white/95 dark:bg-white/5"
-									>
-										<div class="grid grid-cols-4 gap-3 px-4 py-3 text-center text-xs">
-											<SortHeaderButton
-												column={$table?.getColumn('position')}
-												label="Position"
-												ariaLabel="Sort by position"
-											/>
-											<SortHeaderButton
-												column={$table?.getColumn('total')}
-												label="Total"
-												ariaLabel="Sort by total edits"
-											/>
-											<SortHeaderButton
-												column={$table?.getColumn('created')}
-												label="Created"
-												ariaLabel="Sort by created edits"
-											/>
-											<SortHeaderButton
-												column={$table?.getColumn('updated')}
-												label="Updated"
-												ariaLabel="Sort by updated edits"
-											/>
-										</div>
+						{#if $table.getFilteredRowModel().rows.length === 0}
+							<p class="w-full p-5 text-center text-primary dark:text-white">No results found.</p>
+						{:else}
+							<div class="block lg:hidden">
+								<div
+									class="border-b border-gray-300 bg-primary/5 dark:border-white/95 dark:bg-white/5"
+								>
+									<div class="grid grid-cols-4 gap-3 px-4 py-3 text-center text-xs">
+										<SortHeaderButton
+											column={$table?.getColumn('position')}
+											label="Position"
+											ariaLabel="Sort by position"
+										/>
+										<SortHeaderButton
+											column={$table?.getColumn('total')}
+											label="Total"
+											ariaLabel="Sort by total edits"
+										/>
+										<SortHeaderButton
+											column={$table?.getColumn('created')}
+											label="Created"
+											ariaLabel="Sort by created edits"
+										/>
+										<SortHeaderButton
+											column={$table?.getColumn('updated')}
+											label="Updated"
+											ariaLabel="Sort by updated edits"
+										/>
 									</div>
-
-									<TaggerLeaderboardMobileCard table={$table} />
 								</div>
 
-								<TaggerLeaderboardDesktopTable table={$table} />
-								<LeaderboardPagination table={$table} {pageSizes} />
-							{/if}
-						</div>
-					{/if}
-				</div>
-			</section>
-		</div>
-	</main>
-</div>
+								<TaggerLeaderboardMobileCard table={$table} />
+							</div>
+
+							<TaggerLeaderboardDesktopTable table={$table} />
+							<LeaderboardPagination table={$table} {pageSizes} />
+						{/if}
+					</div>
+				{/if}
+			</div>
+		</section>
+	</div>
+</main>
 
 <style>
 	#hero {
