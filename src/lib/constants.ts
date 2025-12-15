@@ -52,6 +52,18 @@ export const HIGH_ZOOM_RADIUS_MULTIPLIER = 2;
 // Minimum search radius in km (ensures results even at very high zoom levels)
 export const MIN_SEARCH_RADIUS_KM = 1;
 
+// Map viewport marker loading
+export const MAX_LOADED_MARKERS = 200;
+export const VIEWPORT_BATCH_SIZE = 25;
+export const VIEWPORT_BUFFER_PERCENT = 0.2;
+export const MAP_DEBOUNCE_DELAY = 300;
+export const MARKER_CLICK_THROTTLE = 100;
+
+// Default map position (Curaçao)
+export const DEFAULT_MAP_LAT = 12.11209;
+export const DEFAULT_MAP_LNG = -68.91119;
+export const DEFAULT_MAP_ZOOM = 15;
+
 export const GradeTable = `<table>
 <thead>
     <tr>
