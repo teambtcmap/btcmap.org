@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import Icon from '$components/Icon.svelte';
-	import SocialLink from '$components/SocialLink.svelte';
-	import { socials } from '$lib/store';
 	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';
 
@@ -39,13 +37,5 @@
 				Please try again or contact BTC Map.
 			</h2>
 		</div>
-
-		<footer class="flex flex-wrap justify-center gap-5 pb-5">
-			<SocialLink url={$socials.matrix} social="matrix" />
-			<SocialLink url={$socials.github} social="github" />
-			<SocialLink url={$socials.amboss} social="amboss" />
-			<SocialLink url={$socials.nostr} social="nostr" />
-			<SocialLink url={$socials.x} social="x" />
-		</footer>
 	</div>
 </div>
