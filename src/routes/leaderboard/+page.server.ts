@@ -58,8 +58,7 @@ export const load: PageServerLoad = async ({ url }) => {
 				id: 1,
 				method: 'get_most_active_users',
 				params: {
-					...range,
-					limit: 100
+					...range
 				}
 			})
 		});
