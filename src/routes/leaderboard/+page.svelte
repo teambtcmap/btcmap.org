@@ -102,7 +102,7 @@
 			.filter((user) => !excluded.has(user.id))
 			.map((user) => {
 				const avatar = user.image_url || '/images/satoshi-nakamoto.png';
-				const totalEdits = user.edits;
+				const totalEdits = user.edits ?? user.created + user.updated + user.deleted;
 				return {
 					avatar,
 					tagger: user.name,
@@ -120,6 +120,7 @@
 				if (b.updated !== a.updated) return b.updated - a.updated;
 				return a.tagger.localeCompare(b.tagger);
 			})
+			.filter((user) => user.total > 0)
 			.map((item, index) => ({ ...item, position: index + 1 }));
 	};
 
