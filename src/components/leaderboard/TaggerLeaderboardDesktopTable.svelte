@@ -108,7 +108,7 @@
 								</div>
 							{:else if cell.column.id === 'tip'}
 								{#if row.original.tipDestination}
-									<Tip destination={row.original.tipDestination} style="mx-auto block" />
+									<Tip destination={row.original.tipDestination} class="mx-auto block" />
 								{/if}
 							{:else}
 								<svelte:component

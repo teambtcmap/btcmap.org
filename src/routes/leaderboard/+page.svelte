@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import Footer from '$components/layout/Footer.svelte';
 	import Header from '$components/layout/Header.svelte';
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
@@ -272,12 +271,13 @@
 		} else {
 			search.set('period', nextValue);
 		}
-		const query = search.toString();
+		const nextSearch = search.toString();
+		const nextUrl = nextSearch ? `/leaderboard?${nextSearch}` : '/leaderboard';
 		selectedPeriod = nextValue;
 		periodLoading = true;
-		const path = query ? `/leaderboard?${query}` : '/leaderboard';
 
-		await goto(resolve(path), {
+		// eslint-disable-next-line svelte/no-navigation-without-resolve
+		await goto(nextUrl, {
 			replaceState: true,
 			noScroll: true
 		});
@@ -346,7 +346,7 @@
 								aria-live="polite"
 							>
 								<span class="sr-only">Loading leaderboard data</span>
-								<Icon type="fa" icon="table" w="96" h="96" style="animate-pulse text-link/50" />
+								<Icon type="fa" icon="table" w="96" h="96" class="animate-pulse text-link/50" />
 							</div>
 						</div>
 					{:else if periodLoading}
