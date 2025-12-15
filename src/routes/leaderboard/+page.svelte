@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import Footer from '$components/layout/Footer.svelte';
+
 	import Header from '$components/layout/Header.svelte';
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import Icon from '$components/Icon.svelte';
@@ -445,8 +445,6 @@
 					{/if}
 				</div>
 			</section>
-
-			<Footer />
 		</div>
 	</main>
 </div>
