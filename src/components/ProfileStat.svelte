@@ -1,7 +1,7 @@
 <script lang="ts">
-import tippy from 'tippy.js';
+import tippy from "tippy.js";
 
-import Icon from '$components/Icon.svelte';
+import Icon from "$components/Icon.svelte";
 
 export let title: string;
 export let stat: number | undefined;
@@ -14,7 +14,7 @@ let tooltipElement: HTMLButtonElement;
 $: tooltipElement &&
 	tippy([tooltipElement], {
 		content: tooltip,
-		allowHTML: true
+		allowHTML: true,
 	});
 </script>
 

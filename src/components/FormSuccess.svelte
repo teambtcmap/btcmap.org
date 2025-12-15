@@ -2,12 +2,12 @@
 export let type: string;
 export let text: string;
 export let issue: number;
-export let buttonWidth = 'w-52';
+export let buttonWidth = "w-52";
 
-import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-import PrimaryButton from '$components/PrimaryButton.svelte';
-import { theme } from '$lib/store';
-import { detectTheme } from '$lib/utils';
+import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import PrimaryButton from "$components/PrimaryButton.svelte";
+import { theme } from "$lib/store";
+import { detectTheme } from "$lib/utils";
 </script>
 
 <div class="mt-10 flex items-center justify-center pb-20 text-center md:pb-32">

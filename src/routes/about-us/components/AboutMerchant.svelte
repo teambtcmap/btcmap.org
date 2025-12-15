@@ -1,9 +1,9 @@
 <script lang="ts">
-import tippy from 'tippy.js';
+import tippy from "tippy.js";
 
-import Icon from '$components/Icon.svelte';
+import Icon from "$components/Icon.svelte";
 
-import { resolve } from '$app/paths';
+import { resolve } from "$app/paths";
 
 export let id: string;
 export let icon: string;
@@ -15,7 +15,7 @@ $: merchantTooltip &&
 	tooltip &&
 	tooltip.length &&
 	tippy([merchantTooltip], {
-		content: tooltip
+		content: tooltip,
 	});
 </script>
 

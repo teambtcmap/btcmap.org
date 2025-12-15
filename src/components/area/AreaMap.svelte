@@ -1,16 +1,16 @@
 <script lang="ts">
-import type { GeoJSON } from 'geojson';
-import type { Map } from 'leaflet';
-import { onDestroy, onMount } from 'svelte';
-import tippy from 'tippy.js';
+import type { GeoJSON } from "geojson";
+import type { Map } from "leaflet";
+import { onDestroy, onMount } from "svelte";
+import tippy from "tippy.js";
 
-import AreaMerchantDrawer from '$components/area/AreaMerchantDrawer.svelte';
-import Icon from '$components/Icon.svelte';
-import MapLoadingEmbed from '$components/MapLoadingEmbed.svelte';
-import ShowTags from '$components/ShowTags.svelte';
-import TaggingIssues from '$components/TaggingIssues.svelte';
-import { GradeTable } from '$lib/constants';
-import { loadMapDependencies } from '$lib/map/imports';
+import AreaMerchantDrawer from "$components/area/AreaMerchantDrawer.svelte";
+import Icon from "$components/Icon.svelte";
+import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
+import ShowTags from "$components/ShowTags.svelte";
+import TaggingIssues from "$components/TaggingIssues.svelte";
+import { GradeTable } from "$lib/constants";
+import { loadMapDependencies } from "$lib/map/imports";
 import {
 	attribution,
 	changeDefaultIcons,
@@ -18,13 +18,13 @@ import {
 	generateMarker,
 	geolocate,
 	layers,
-	toggleMapButtons
-} from '$lib/map/setup';
-import { theme } from '$lib/store';
-import type { BaseMaps, DomEventType, Grade, Leaflet, Place } from '$lib/types';
-import { getGrade } from '$lib/utils';
+	toggleMapButtons,
+} from "$lib/map/setup";
+import { theme } from "$lib/store";
+import type { BaseMaps, DomEventType, Grade, Leaflet, Place } from "$lib/types";
+import { getGrade } from "$lib/utils";
 
-import { browser } from '$app/environment';
+import { browser } from "$app/environment";
 
 export let name: string;
 export let geoJSON: GeoJSON;
@@ -52,7 +52,7 @@ let gradeTooltip: HTMLButtonElement;
 $: gradeTooltip &&
 	tippy([gradeTooltip], {
 		content: GradeTable,
-		allowHTML: true
+		allowHTML: true,
 	});
 
 let mapElement: HTMLDivElement;
@@ -63,7 +63,7 @@ let baseMaps: BaseMaps;
 
 let leaflet: Leaflet;
 let DomEvent: DomEventType;
-let LocateControl: typeof import('leaflet.locatecontrol').LocateControl;
+let LocateControl: typeof import("leaflet.locatecontrol").LocateControl;
 
 $: $theme !== undefined && mapLoaded && toggleMapButtons();
 
@@ -74,12 +74,12 @@ const closePopup = () => {
 $: $theme !== undefined && mapLoaded && closePopup();
 
 const toggleTheme = () => {
-	if ($theme === 'dark') {
-		baseMaps['OpenFreeMap Liberty'].remove();
-		baseMaps['OpenFreeMap Dark'].addTo(map);
+	if ($theme === "dark") {
+		baseMaps["OpenFreeMap Liberty"].remove();
+		baseMaps["OpenFreeMap Dark"].addTo(map);
 	} else {
-		baseMaps['OpenFreeMap Dark'].remove();
-		baseMaps['OpenFreeMap Liberty'].addTo(map);
+		baseMaps["OpenFreeMap Dark"].remove();
+		baseMaps["OpenFreeMap Liberty"].addTo(map);
 	}
 };
 
@@ -98,7 +98,7 @@ onMount(async () => {
 
 onDestroy(async () => {
 	if (map) {
-		console.info('Unloading Leaflet map.');
+		console.info("Unloading Leaflet map.");
 		map.remove();
 	}
 });
@@ -118,7 +118,7 @@ const initializeData = () => {
 		baseMaps = layersResult.baseMaps;
 
 		// change broken marker image path in prod
-		leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
+		leaflet.Icon.Default.prototype.options.imagePath = "/icons/";
 
 		// add OSM attribution
 		attribution(leaflet, map);
@@ -143,7 +143,9 @@ const initializeData = () => {
 		// add places to map
 		filteredPlaces.forEach((place) => {
 			const commentsCount = place.comments || 0;
-			const boosted = place.boosted_until ? Date.parse(place.boosted_until) > Date.now() : false;
+			const boosted = place.boosted_until
+				? Date.parse(place.boosted_until) > Date.now()
+				: false;
 
 			let divIcon = generateIcon(leaflet, place.icon, boosted, commentsCount);
 
@@ -154,7 +156,7 @@ const initializeData = () => {
 				placeId: place.id,
 				leaflet,
 				verify: true,
-				onMarkerClick: (id) => openDrawer(Number(id))
+				onMarkerClick: (id) => openDrawer(Number(id)),
 			});
 
 			upToDateLayer.addLayer(marker);
@@ -178,7 +180,7 @@ const initializeData = () => {
 		map.fitBounds(leaflet.geoJSON(geoJSON).getBounds());
 
 		// Close drawer when clicking on map (not on markers)
-		map.on('click', () => {
+		map.on("click", () => {
 			if (selectedMerchantId) {
 				closeDrawer();
 			}
@@ -197,14 +199,18 @@ const initializeData = () => {
 		total = 0;
 	}
 
-	upToDatePercent = upToDate ? (upToDate / (total / 100)).toFixed(0) : '0';
+	upToDatePercent = upToDate ? (upToDate / (total / 100)).toFixed(0) : "0";
 
 	grade = getGrade(Number(upToDatePercent));
 
 	dataInitialized = true;
 };
 
-$: geoJSON && filteredPlaces && initialRenderComplete && !dataInitialized && initializeData();
+$: geoJSON &&
+	filteredPlaces &&
+	initialRenderComplete &&
+	!dataInitialized &&
+	initializeData();
 </script>
 
 <section id="map-section">

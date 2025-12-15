@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { Column } from '@tanstack/svelte-table';
+import type { Column } from "@tanstack/svelte-table";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export let column: Column<any> | undefined;

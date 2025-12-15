@@ -1,8 +1,8 @@
 /**
  * Shared payment utilities for comment and boost flows
  */
-import axios from 'axios';
-import axiosRetry from 'axios-retry';
+import axios from "axios";
+import axiosRetry from "axios-retry";
 
 /**
  * Create a configured axios instance for payment API calls
@@ -25,5 +25,5 @@ export const pollInvoiceStatus = async (invoiceId: string) => {
  * Check if invoice is paid
  */
 export const isInvoicePaid = (status: string) => {
-	return status === 'paid';
+	return status === "paid";
 };

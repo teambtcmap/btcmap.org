@@ -1,7 +1,7 @@
 <script lang="ts">
-import { fade } from 'svelte/transition';
+import { fade } from "svelte/transition";
 
-import LoadingSpinner from '$components/LoadingSpinner.svelte';
+import LoadingSpinner from "$components/LoadingSpinner.svelte";
 
 export let visible = false;
 </script>

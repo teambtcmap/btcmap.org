@@ -1,15 +1,15 @@
 <script lang="ts">
-import { onMount } from 'svelte';
-import Time from 'svelte-time';
-import tippy from 'tippy.js';
+import { onMount } from "svelte";
+import Time from "svelte-time";
+import tippy from "tippy.js";
 
-import BoostButton from '$components/BoostButton.svelte';
-import Icon from '$components/Icon.svelte';
-import { calcVerifiedDate, verifiedArr } from '$lib/map/setup';
-import type { Place } from '$lib/types';
-import { fetchEnhancedPlace, formatOpeningHours, isBoosted } from '$lib/utils';
+import BoostButton from "$components/BoostButton.svelte";
+import Icon from "$components/Icon.svelte";
+import { calcVerifiedDate, verifiedArr } from "$lib/map/setup";
+import type { Place } from "$lib/types";
+import { fetchEnhancedPlace, formatOpeningHours, isBoosted } from "$lib/utils";
 
-import { resolve } from '$app/paths';
+import { resolve } from "$app/paths";
 
 export let merchant: Place;
 
@@ -31,7 +31,7 @@ async function enhanceMerchantData() {
 			enhancedMerchant = enhanced;
 		}
 	} catch (error) {
-		console.error('Failed to enhance merchant data:', error);
+		console.error("Failed to enhance merchant data:", error);
 	} finally {
 		isEnhancing = false;
 	}
@@ -54,7 +54,7 @@ $: boosted = displayMerchant ? isBoosted(displayMerchant) : false;
 $: merchantLinkId = merchant.id || displayMerchant?.osm_id;
 
 // Make all displayMerchant property accesses reactive with safe defaults
-$: icon = displayMerchant?.icon || 'question_mark';
+$: icon = displayMerchant?.icon || "question_mark";
 $: address = displayMerchant?.address;
 $: website = displayMerchant?.website;
 $: openingHours = displayMerchant?.opening_hours;
@@ -70,7 +70,7 @@ let outdatedTooltip: HTMLDivElement;
 
 $: outdatedTooltip &&
 	tippy([outdatedTooltip], {
-		content: 'Outdated please re-verify'
+		content: "Outdated please re-verify",
 	});
 </script>
 

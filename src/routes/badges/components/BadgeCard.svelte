@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { BadgeType } from '$lib/types';
+import type { BadgeType } from "$lib/types";
 
 export let icon: string;
 export let title: string;

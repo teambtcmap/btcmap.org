@@ -1,35 +1,36 @@
 <script lang="ts">
-import { SvelteToast } from '@zerodevx/svelte-toast';
-import axios from 'axios';
+import { SvelteToast } from "@zerodevx/svelte-toast";
+import axios from "axios";
 
-import Header from '$components/layout/Header.svelte';
-import { syncStatus } from '$lib/store';
-import { elementsSync } from '$lib/sync/places';
-import 'leaflet.locatecontrol/dist/L.Control.Locate.min.css';
-import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
-import 'leaflet.markercluster/dist/MarkerCluster.css';
-import 'leaflet/dist/leaflet.css';
-import localforage from 'localforage';
-import { onDestroy, onMount } from 'svelte';
-import 'tippy.js/dist/tippy.css';
-import '../app.css';
+import Header from "$components/layout/Header.svelte";
+import { syncStatus } from "$lib/store";
+import { elementsSync } from "$lib/sync/places";
+import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet/dist/leaflet.css";
+import localforage from "localforage";
+import { onDestroy, onMount } from "svelte";
+import "tippy.js/dist/tippy.css";
+import "../app.css";
 
-import Footer from '$components/layout/Footer.svelte';
+import Footer from "$components/layout/Footer.svelte";
 
 axios.defaults.timeout = 600000;
 
 const options = {
 	reversed: true,
 	intro: { y: 192 },
-	pausable: true
+	pausable: true,
 };
 
 let dataSyncInterval: ReturnType<typeof setInterval>;
 
 onMount(async () => {
 	localforage.config({
-		name: 'BTC Map',
-		description: 'The Times 03/Jan/2009 Chancellor on brink of second bailout for banks'
+		name: "BTC Map",
+		description:
+			"The Times 03/Jan/2009 Chancellor on brink of second bailout for banks",
 	});
 
 	const dataSync = async () => {

@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { IssueIcon } from '$lib/types';
+import type { IssueIcon } from "$lib/types";
 
 export let icon: IssueIcon | string;
 </script>

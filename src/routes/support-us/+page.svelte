@@ -1,18 +1,19 @@
 <script lang="ts">
-import type { Action } from 'svelte/action';
+import type { Action } from "svelte/action";
 
-import CloseButton from '$components/CloseButton.svelte';
-import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-import { BREAKPOINTS, QR_CODE_SIZE } from '$lib/constants';
-import { theme } from '$lib/store';
-import type { DonationType } from '$lib/types';
-import { detectTheme, warningToast } from '$lib/utils';
+import CloseButton from "$components/CloseButton.svelte";
+import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import { BREAKPOINTS, QR_CODE_SIZE } from "$lib/constants";
+import { theme } from "$lib/store";
+import type { DonationType } from "$lib/types";
+import { detectTheme, warningToast } from "$lib/utils";
 
-import DonationOption from './components/DonationOption.svelte';
-import SupportSection from './components/SupportSection.svelte';
+import DonationOption from "./components/DonationOption.svelte";
+import SupportSection from "./components/SupportSection.svelte";
 
-const onchain = 'bc1qt4g28vq480ec4ncl4h67qu4q4k2zel7xu0c2wg';
-const lnurlp = 'LNURL1DP68GURN8GHJ7CM0WFJJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQPSYZ34';
+const onchain = "bc1qt4g28vq480ec4ncl4h67qu4q4k2zel7xu0c2wg";
+const lnurlp =
+	"LNURL1DP68GURN8GHJ7CM0WFJJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQPSYZ34";
 
 let showQr = false;
 let network: DonationType;
@@ -23,50 +24,55 @@ const showQrToggle = (type: DonationType) => {
 };
 
 const renderQr: Action<HTMLCanvasElement> = (node) => {
-	import('qrcode')
+	import("qrcode")
 		.then((QRCode) => {
 			QRCode.default.toCanvas(
 				node,
-				network === 'Lightning' ? `lightning:${lnurlp}` : `bitcoin:${onchain}`,
+				network === "Lightning" ? `lightning:${lnurlp}` : `bitcoin:${onchain}`,
 				{
-					width: window.innerWidth > BREAKPOINTS.md ? QR_CODE_SIZE.desktop : QR_CODE_SIZE.mobile
+					width:
+						window.innerWidth > BREAKPOINTS.md
+							? QR_CODE_SIZE.desktop
+							: QR_CODE_SIZE.mobile,
 				},
 				(error: Error | null | undefined) => {
 					if (error) {
-						warningToast('Could not generate QR, please try again or contact BTC Map.');
+						warningToast(
+							"Could not generate QR, please try again or contact BTC Map.",
+						);
 						console.error(error);
 					}
-				}
+				},
 			);
 		})
 		.catch((error) => {
-			warningToast('Could not load QR generator. Please try again.');
-			console.error('Failed to load QRCode module:', error);
+			warningToast("Could not load QR generator. Please try again.");
+			console.error("Failed to load QRCode module:", error);
 		});
 };
 
 const supporters = [
 	{
-		url: 'https://coinos.io/',
-		title: 'coinos',
-		logo: 'coinos.svg',
-		logoDark: 'coinos-dark.svg'
+		url: "https://coinos.io/",
+		title: "coinos",
+		logo: "coinos.svg",
+		logoDark: "coinos-dark.svg",
 	},
 	{
-		url: 'https://www.walletofsatoshi.com/',
-		title: 'Wallet of Satoshi',
-		logo: 'wos.png'
+		url: "https://www.walletofsatoshi.com/",
+		title: "Wallet of Satoshi",
+		logo: "wos.png",
 	},
 	{
-		url: 'https://btccuracao.com/',
-		title: 'BTC Curacao',
-		logo: 'btccuracao.png'
+		url: "https://btccuracao.com/",
+		title: "BTC Curacao",
+		logo: "btccuracao.png",
 	},
 	{
-		url: 'https://geyser.fund/project/satsnfacts',
-		title: 'Sats n Facts',
-		logo: 'satsnfacts.png'
-	}
+		url: "https://geyser.fund/project/satsnfacts",
+		title: "Sats n Facts",
+		logo: "satsnfacts.png",
+	},
 ];
 </script>
 

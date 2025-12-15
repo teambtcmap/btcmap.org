@@ -1,17 +1,17 @@
 <script lang="ts">
-import AreaPage from '$components/area/AreaPage.svelte';
-import Breadcrumbs from '$components/Breadcrumbs.svelte';
-import type { AreaPageProps } from '$lib/types';
+import AreaPage from "$components/area/AreaPage.svelte";
+import Breadcrumbs from "$components/Breadcrumbs.svelte";
+import type { AreaPageProps } from "$lib/types";
 
-import type { PageData } from './$types';
+import type { PageData } from "./$types";
 
 export let data: PageData & AreaPageProps;
 
 const { name, id } = data;
 
 const routes = [
-	{ name: 'Countries', url: '/countries' },
-	{ name, url: `/country/${id}` }
+	{ name: "Countries", url: "/countries" },
+	{ name, url: `/country/${id}` },
 ];
 </script>
 

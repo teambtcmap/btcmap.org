@@ -1,18 +1,18 @@
 <script lang="ts">
-import { fly } from 'svelte/transition';
+import { fly } from "svelte/transition";
 
-import CloseButton from '$components/CloseButton.svelte';
-import MerchantDetailsContent from '$components/MerchantDetailsContent.svelte';
+import CloseButton from "$components/CloseButton.svelte";
+import MerchantDetailsContent from "$components/MerchantDetailsContent.svelte";
 import {
 	handleBoost as boostMerchant,
 	calcVerifiedDate,
 	isBoosted as checkBoosted,
 	isUpToDate as checkUpToDate,
 	clearBoostState,
-	fetchMerchantDetails
-} from '$lib/merchantDrawerLogic';
-import { boost } from '$lib/store';
-import type { Place } from '$lib/types';
+	fetchMerchantDetails,
+} from "$lib/merchantDrawerLogic";
+import { boost } from "$lib/store";
+import type { Place } from "$lib/types";
 
 export let merchantId: number | null = null;
 export let onClose: () => void;
@@ -45,7 +45,7 @@ $: if (merchantId && merchantId !== lastFetchedId) {
 		(m) => (merchant = m),
 		(f) => (isLoading = f),
 		(id) => (lastFetchedId = id),
-		abortController.signal
+		abortController.signal,
 	);
 }
 
@@ -71,13 +71,13 @@ $: if ($boost !== undefined && merchant) {
 			merchantId,
 			(m) => (merchant = m),
 			(f) => (isLoading = f),
-			(id) => (lastFetchedId = id)
+			(id) => (lastFetchedId = id),
 		);
 	}
 }
 
 function handleKeydown(event: KeyboardEvent) {
-	if (event.key === 'Escape') {
+	if (event.key === "Escape") {
 		event.preventDefault();
 		closeDrawer();
 	}

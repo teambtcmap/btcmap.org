@@ -1,16 +1,16 @@
 <script lang="ts">
-import type { PageData } from './$types';
+import type { PageData } from "./$types";
 export let data: PageData;
 
-import Chart from 'chart.js/auto';
-import { format } from 'date-fns/format';
-import DOMPurify from 'dompurify';
-import { marked } from 'marked';
-import { onMount } from 'svelte';
+import Chart from "chart.js/auto";
+import { format } from "date-fns/format";
+import DOMPurify from "dompurify";
+import { marked } from "marked";
+import { onMount } from "svelte";
 
-import Icon from '$components/Icon.svelte';
-import ProfileStat from '$components/ProfileStat.svelte';
-import Tip from '$components/Tip.svelte';
+import Icon from "$components/Icon.svelte";
+import ProfileStat from "$components/ProfileStat.svelte";
+import Tip from "$components/Tip.svelte";
 import {
 	eventError,
 	events,
@@ -18,22 +18,22 @@ import {
 	places,
 	placesError,
 	userError,
-	users
-} from '$lib/store';
-import { batchSync } from '$lib/sync/batchSync';
-import { eventsSync } from '$lib/sync/events';
-import { usersSync } from '$lib/sync/users';
+	users,
+} from "$lib/store";
+import { batchSync } from "$lib/sync/batchSync";
+import { eventsSync } from "$lib/sync/events";
+import { usersSync } from "$lib/sync/users";
 import {
 	type ActivityEvent,
 	BadgeType,
 	type EarnedBadge,
-	type ProfileLeaderboard
-} from '$lib/types.js';
-import { errToast, formatElementID } from '$lib/utils';
+	type ProfileLeaderboard,
+} from "$lib/types.js";
+import { errToast, formatElementID } from "$lib/utils";
 
-import ProfileActivity from './components/ProfileActivity.svelte';
-import { browser } from '$app/environment';
-import { goto } from '$app/navigation';
+import ProfileActivity from "./components/ProfileActivity.svelte";
+import { browser } from "$app/environment";
+import { goto } from "$app/navigation";
 
 // alert for user errors
 $: $userError && errToast($userError);
@@ -46,45 +46,47 @@ let dataInitialized = false;
 let initialRenderComplete = false;
 
 let filteredDesc: string | undefined;
-let sanitizedMarkdown: string = '';
+let sanitizedMarkdown: string = "";
 
 const initializeData = async () => {
 	if (dataInitialized) return;
 
 	const userFound = $users.find((user) => user.id === data.user);
 	if (!userFound) {
-		console.error('Could not find user, please try again or contact BTC Map.');
+		console.error("Could not find user, please try again or contact BTC Map.");
 		// eslint-disable-next-line svelte/no-navigation-without-resolve
-		goto('/404');
+		goto("/404");
 		return;
 	}
 	userCreated = userFound.created_at;
 	supporter = Boolean(
-		userFound.tags['supporter:expires'] &&
-			Date.parse(userFound.tags['supporter:expires']) > Date.now()
+		userFound.tags["supporter:expires"] &&
+			Date.parse(userFound.tags["supporter:expires"]) > Date.now(),
 	);
 	const user = userFound.osm_json;
-	avatar = user.img ? user.img.href : '/images/satoshi-nakamoto.png';
+	avatar = user.img ? user.img.href : "/images/satoshi-nakamoto.png";
 	mappingSince = user.account_created;
 	const description = user.description;
 	const removeLightning = description.match(/(\[⚡]\(lightning:[^)]+\))/g);
 	filteredDesc = removeLightning?.length
-		? description.replaceAll(removeLightning[0], '')
+		? description.replaceAll(removeLightning[0], "")
 		: description;
-	const regexMatch = description.match('(lightning:[^)]+)');
+	const regexMatch = description.match("(lightning:[^)]+)");
 	lightning = regexMatch?.[0].slice(10);
 
 	const userEvents = $events.filter((event) => event.user_id === user.id);
-	userEvents.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+	userEvents.sort(
+		(a, b) => Date.parse(b.created_at) - Date.parse(a.created_at),
+	);
 	created =
 		user.id === 17221642
-			? userEvents.filter((event) => event.type === 'create').length + 100
-			: userEvents.filter((event) => event.type === 'create').length;
+			? userEvents.filter((event) => event.type === "create").length + 100
+			: userEvents.filter((event) => event.type === "create").length;
 	updated =
 		user.id === 17221642
-			? userEvents.filter((event) => event.type === 'update').length + 20
-			: userEvents.filter((event) => event.type === 'update').length;
-	deleted = userEvents.filter((event) => event.type === 'delete').length;
+			? userEvents.filter((event) => event.type === "update").length + 20
+			: userEvents.filter((event) => event.type === "update").length;
+	deleted = userEvents.filter((event) => event.type === "delete").length;
 	total = created + updated + deleted;
 
 	const populateLeaderboard = () => {
@@ -98,7 +100,8 @@ const initializeData = async () => {
 			if (userEvents.length) {
 				leaderboard.push({
 					id: user.id,
-					total: user.id === 17221642 ? userEvents.length + 120 : userEvents.length
+					total:
+						user.id === 17221642 ? userEvents.length + 120 : userEvents.length,
 				});
 			}
 		});
@@ -111,192 +114,202 @@ const initializeData = async () => {
 	const badges = [
 		{
 			check: [
-				10396321, 17441326, 17199501, 668096, 17462838, 17221642, 5432507, 17354902, 18452174,
-				18360665, 616774, 18062435, 7522075, 18380975, 1697546, 19288099, 11903494, 18552145,
-				1836965, 19795869, 17872, 19768735, 17573979, 2929493, 19714509, 1851550, 18244560,
-				19756689, 527105, 2339960, 17322349, 17300693, 1236325, 1787080
+				10396321, 17441326, 17199501, 668096, 17462838, 17221642, 5432507,
+				17354902, 18452174, 18360665, 616774, 18062435, 7522075, 18380975,
+				1697546, 19288099, 11903494, 18552145, 1836965, 19795869, 17872,
+				19768735, 17573979, 2929493, 19714509, 1851550, 18244560, 19756689,
+				527105, 2339960, 17322349, 17300693, 1236325, 1787080,
 			].includes(user.id),
-			title: 'Geyser Tournament',
-			icon: 'geyser',
-			type: BadgeType.Achievement
+			title: "Geyser Tournament",
+			icon: "geyser",
+			type: BadgeType.Achievement,
 		},
 		{
 			check: supporter,
-			title: 'Supporter',
-			icon: 'supporter',
-			type: BadgeType.Achievement
+			title: "Supporter",
+			icon: "supporter",
+			type: BadgeType.Achievement,
 		},
 		{
 			check: leaderboard[0].id === user.id,
-			title: 'Top Tagger',
-			icon: 'top-tagger',
-			type: BadgeType.Achievement
+			title: "Top Tagger",
+			icon: "top-tagger",
+			type: BadgeType.Achievement,
 		},
 		{
-			check: Boolean(leaderboard.slice(0, 3).find((item) => item.id === user.id)),
-			title: 'Podium',
-			icon: 'podium',
-			type: BadgeType.Achievement
+			check: Boolean(
+				leaderboard.slice(0, 3).find((item) => item.id === user.id),
+			),
+			title: "Podium",
+			icon: "podium",
+			type: BadgeType.Achievement,
 		},
 		{
 			check: Boolean(leaderboard.find((item) => item.id === user.id)),
-			title: 'High Rank',
-			icon: 'high-rank',
-			type: BadgeType.Achievement
+			title: "High Rank",
+			icon: "high-rank",
+			type: BadgeType.Achievement,
 		},
 		{
-			check: Date.parse(userCreated) < new Date('December 26, 2022 00:00:00').getTime(),
-			title: 'OG Supertagger',
-			icon: 'og-supertagger',
-			type: BadgeType.Achievement
+			check:
+				Date.parse(userCreated) <
+				new Date("December 26, 2022 00:00:00").getTime(),
+			title: "OG Supertagger",
+			icon: "og-supertagger",
+			type: BadgeType.Achievement,
 		},
 		{
 			check: Boolean(lightning),
-			title: 'Lightning Junkie',
-			icon: 'lightning-junkie',
-			type: BadgeType.Achievement
+			title: "Lightning Junkie",
+			icon: "lightning-junkie",
+			type: BadgeType.Achievement,
 		},
 		{
 			check: Boolean(user.img),
-			title: 'Hello World',
-			icon: 'hello-world',
-			type: BadgeType.Achievement
+			title: "Hello World",
+			icon: "hello-world",
+			type: BadgeType.Achievement,
 		},
 		{
 			check: created > updated && created > deleted,
-			title: 'Creator',
-			icon: 'creator',
-			type: BadgeType.Achievement
+			title: "Creator",
+			icon: "creator",
+			type: BadgeType.Achievement,
 		},
 		{
 			check: updated > created && updated > deleted,
-			title: 'Update Maxi',
-			icon: 'update-maxi',
-			type: BadgeType.Achievement
+			title: "Update Maxi",
+			icon: "update-maxi",
+			type: BadgeType.Achievement,
 		},
 		{
 			check: deleted > created && deleted > updated,
-			title: 'Demolition Specialist',
-			icon: 'demolition-specialist',
-			type: BadgeType.Achievement
+			title: "Demolition Specialist",
+			icon: "demolition-specialist",
+			type: BadgeType.Achievement,
 		},
 		{
 			check: total >= 21000000,
-			title: 'Hyperbitcoinisation',
-			icon: 'hyperbitcoinisation',
-			type: BadgeType.Contribution
+			title: "Hyperbitcoinisation",
+			icon: "hyperbitcoinisation",
+			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 10000,
-			title: 'Pizza Time',
-			icon: 'pizza-time',
-			type: BadgeType.Contribution
+			title: "Pizza Time",
+			icon: "pizza-time",
+			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 7777,
-			title: 'Godly',
-			icon: 'godly',
-			type: BadgeType.Contribution
+			title: "Godly",
+			icon: "godly",
+			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 5000,
-			title: 'Shadow',
-			icon: 'shadow',
-			type: BadgeType.Contribution
+			title: "Shadow",
+			icon: "shadow",
+			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 3110,
-			title: 'Whitepaper',
-			icon: 'whitepaper',
-			type: BadgeType.Contribution
+			title: "Whitepaper",
+			icon: "whitepaper",
+			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 1984,
-			title: 'Winston',
-			icon: 'winston',
-			type: BadgeType.Contribution
+			title: "Winston",
+			icon: "winston",
+			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 1000,
-			title: 'Whale',
-			icon: 'whale',
-			type: BadgeType.Contribution
+			title: "Whale",
+			icon: "whale",
+			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 821,
-			title: 'Infinity',
-			icon: 'infinity',
-			type: BadgeType.Contribution
+			title: "Infinity",
+			icon: "infinity",
+			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 500,
-			title: 'Legend',
-			icon: 'legend',
-			type: BadgeType.Contribution
+			title: "Legend",
+			icon: "legend",
+			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 301,
-			title: 'Chancellor',
-			icon: 'chancellor',
-			type: BadgeType.Contribution
+			title: "Chancellor",
+			icon: "chancellor",
+			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 256,
-			title: 'SHA',
-			icon: 'sha',
-			type: BadgeType.Contribution
+			title: "SHA",
+			icon: "sha",
+			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 210,
-			title: 'No Bailouts',
-			icon: 'no-bailouts',
-			type: BadgeType.Contribution
+			title: "No Bailouts",
+			icon: "no-bailouts",
+			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 100,
-			title: 'Supertagger',
-			icon: 'supertagger',
-			type: BadgeType.Contribution
+			title: "Supertagger",
+			icon: "supertagger",
+			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 69,
-			title: 'ATH',
-			icon: 'ath',
-			type: BadgeType.Contribution
+			title: "ATH",
+			icon: "ath",
+			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 51,
-			title: 'Longest Chain',
-			icon: 'longest-chain',
-			type: BadgeType.Contribution
+			title: "Longest Chain",
+			icon: "longest-chain",
+			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 21,
-			title: 'Satoshi',
-			icon: 'satoshi',
-			type: BadgeType.Contribution
+			title: "Satoshi",
+			icon: "satoshi",
+			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 10,
-			title: 'Heartbeat',
-			icon: 'heartbeat',
-			type: BadgeType.Contribution
+			title: "Heartbeat",
+			icon: "heartbeat",
+			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 4,
-			title: 'Segwit',
-			icon: 'segwit',
-			type: BadgeType.Contribution
+			title: "Segwit",
+			icon: "segwit",
+			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 1,
-			title: 'Whole Tagger',
-			icon: 'whole-tagger',
-			type: BadgeType.Contribution
-		}
+			title: "Whole Tagger",
+			icon: "whole-tagger",
+			type: BadgeType.Contribution,
+		},
 	];
 
-	const addBadge = (check: boolean, title: string, icon: string, type: BadgeType) => {
+	const addBadge = (
+		check: boolean,
+		title: string,
+		icon: string,
+		type: BadgeType,
+	) => {
 		if (check) {
 			earnedBadges.push({ title, icon, type });
 		}
@@ -309,16 +322,16 @@ const initializeData = async () => {
 		addBadge(Boolean(badge.check), badge.title, badge.icon, badge.type);
 	});
 
-	createdPercent = new Intl.NumberFormat('en-US').format(
-		Number((created / (total / 100)).toFixed(0))
+	createdPercent = new Intl.NumberFormat("en-US").format(
+		Number((created / (total / 100)).toFixed(0)),
 	);
 
-	updatedPercent = new Intl.NumberFormat('en-US').format(
-		Number((updated / (total / 100)).toFixed(0))
+	updatedPercent = new Intl.NumberFormat("en-US").format(
+		Number((updated / (total / 100)).toFixed(0)),
 	);
 
-	deletedPercent = new Intl.NumberFormat('en-US').format(
-		Number((deleted / (total / 100)).toFixed(0))
+	deletedPercent = new Intl.NumberFormat("en-US").format(
+		Number((deleted / (total / 100)).toFixed(0)),
 	);
 
 	// Create activity events without fetching element data - names will be fetched on-demand
@@ -326,27 +339,31 @@ const initializeData = async () => {
 		return {
 			...event,
 			location: formatElementID(event.element_id), // Will be updated with actual names on-demand
-			merchantId: event.element_id
+			merchantId: event.element_id,
 		};
 	});
 
 	// add markdown support for profile description
-	const markdown = await marked.parse(filteredDesc || '');
+	const markdown = await marked.parse(filteredDesc || "");
 	sanitizedMarkdown = DOMPurify.sanitize(markdown);
 
 	const setupChart = () => {
 		tagTypeChart = new Chart(tagTypeChartCanvas, {
-			type: 'pie',
+			type: "pie",
 			data: {
-				labels: ['Created', 'Updated', 'Deleted'],
+				labels: ["Created", "Updated", "Deleted"],
 				datasets: [
 					{
-						label: 'Tag Types',
+						label: "Tag Types",
 						data: [created, updated, deleted],
-						backgroundColor: ['rgb(16, 183, 145)', 'rgb(0, 153, 175)', 'rgb(235, 87, 87)'],
-						hoverOffset: 4
-					}
-				]
+						backgroundColor: [
+							"rgb(16, 183, 145)",
+							"rgb(0, 153, 175)",
+							"rgb(235, 87, 87)",
+						],
+						hoverOffset: 4,
+					},
+				],
 			},
 			options: {
 				maintainAspectRatio: false,
@@ -354,12 +371,12 @@ const initializeData = async () => {
 					legend: {
 						labels: {
 							font: {
-								weight: 600
-							}
-						}
-					}
-				}
-			}
+								weight: 600,
+							},
+						},
+					},
+				},
+			},
 		});
 	};
 	setupChart();
@@ -419,7 +436,9 @@ const fetchPageNames = async (events: ActivityEvent[]) => {
 	if (idsToFetch.length > 0) {
 		const promises = idsToFetch.map(async (id) => {
 			try {
-				const response = await fetch(`https://api.btcmap.org/v4/places/${id}?fields=name`);
+				const response = await fetch(
+					`https://api.btcmap.org/v4/places/${id}?fields=name`,
+				);
 				if (response.ok) {
 					const data = await response.json();
 					return { id, name: data.name || formatElementID(id) };
@@ -439,7 +458,7 @@ const fetchPageNames = async (events: ActivityEvent[]) => {
 		// Update eventElements with new names
 		eventElements = eventElements.map((event) => ({
 			...event,
-			location: nameCache[event.element_id] || event.location
+			location: nameCache[event.element_id] || event.location,
 		}));
 	}
 
@@ -455,7 +474,7 @@ onMount(async () => {
 
 	if (browser) {
 		// setup chart
-		tagTypeChartCanvas.getContext('2d');
+		tagTypeChartCanvas.getContext("2d");
 
 		initialRenderComplete = true;
 	}

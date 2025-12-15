@@ -1,19 +1,24 @@
 <script lang="ts">
-import MerchantCard from '$components/area/MerchantCard.svelte';
-import type { Place } from '$lib/types';
-import { isBoosted } from '$lib/utils';
+import MerchantCard from "$components/area/MerchantCard.svelte";
+import type { Place } from "$lib/types";
+import { isBoosted } from "$lib/utils";
 
-import { resolve } from '$app/paths';
+import { resolve } from "$app/paths";
 
 export let dataInitialized: boolean;
 export let filteredPlaces: Place[];
 
 $: boosts = filteredPlaces
 	?.filter((p) => isBoosted(p))
-	.toSorted((a, b) => Date.parse(b.boosted_until || '') - Date.parse(a.boosted_until || ''));
+	.toSorted(
+		(a, b) =>
+			Date.parse(b.boosted_until || "") - Date.parse(a.boosted_until || ""),
+	);
 
 $: latest = filteredPlaces
-	?.toSorted((a, b) => Date.parse(b.created_at || '') - Date.parse(a.created_at || ''))
+	?.toSorted(
+		(a, b) => Date.parse(b.created_at || "") - Date.parse(a.created_at || ""),
+	)
 	.slice(0, 6);
 </script>
 

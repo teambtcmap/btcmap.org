@@ -1,9 +1,9 @@
 <script lang="ts">
-import { onMount } from 'svelte';
+import { onMount } from "svelte";
 
-import { theme } from '$lib/store';
-import type { Theme } from '$lib/types';
-import { detectTheme } from '$lib/utils';
+import { theme } from "$lib/store";
+import type { Theme } from "$lib/types";
+import { detectTheme } from "$lib/utils";
 
 let currentTheme: undefined | Theme;
 
@@ -12,16 +12,16 @@ onMount(() => {
 });
 
 const toggleTheme = () => {
-	if (detectTheme() === 'dark') {
-		localStorage.theme = 'light';
-		document.documentElement.classList.remove('dark');
-		currentTheme = 'light';
-		$theme = 'light';
+	if (detectTheme() === "dark") {
+		localStorage.theme = "light";
+		document.documentElement.classList.remove("dark");
+		currentTheme = "light";
+		$theme = "light";
 	} else {
-		localStorage.theme = 'dark';
-		document.documentElement.classList.add('dark');
-		currentTheme = 'dark';
-		$theme = 'dark';
+		localStorage.theme = "dark";
+		document.documentElement.classList.add("dark");
+		currentTheme = "dark";
+		$theme = "dark";
 	}
 };
 </script>

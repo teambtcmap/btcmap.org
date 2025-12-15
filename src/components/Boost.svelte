@@ -1,12 +1,12 @@
 <script lang="ts">
-import { fly } from 'svelte/transition';
-import OutClick from 'svelte-outclick';
+import { fly } from "svelte/transition";
+import OutClick from "svelte-outclick";
 
-import BoostContent from '$components/BoostContent.svelte';
-import CloseButton from '$components/CloseButton.svelte';
-import { boost, lastUpdatedPlaceId, resetBoost } from '$lib/store';
+import BoostContent from "$components/BoostContent.svelte";
+import CloseButton from "$components/CloseButton.svelte";
+import { boost, lastUpdatedPlaceId, resetBoost } from "$lib/store";
 
-import { invalidateAll } from '$app/navigation';
+import { invalidateAll } from "$app/navigation";
 
 let boostComplete = false;
 

@@ -1,14 +1,14 @@
 <script lang="ts">
-import axios from 'axios';
-import axiosRetry from 'axios-retry';
+import axios from "axios";
+import axiosRetry from "axios-retry";
 
-import Icon from '$components/Icon.svelte';
-import { boost, resetBoost } from '$lib/store';
-import type { Place } from '$lib/types';
+import Icon from "$components/Icon.svelte";
+import { boost, resetBoost } from "$lib/store";
+import type { Place } from "$lib/types";
 
 export let merchant: Place | undefined;
 export let boosted: string | undefined;
-export let style: 'button' | 'link' = 'button';
+export let style: "button" | "link" = "button";
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
@@ -25,8 +25,8 @@ const startBoost = async () => {
 
 	$boost = {
 		id: merchant.id,
-		name: merchant.name || '',
-		boost: boosted || ''
+		name: merchant.name || "",
+		boost: boosted || "",
 	};
 };
 

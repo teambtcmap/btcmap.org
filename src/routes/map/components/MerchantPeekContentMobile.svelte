@@ -1,7 +1,7 @@
 <script lang="ts">
-import Icon from '$components/Icon.svelte';
-import PaymentMethodIcon from '$components/PaymentMethodIcon.svelte';
-import type { Place } from '$lib/types';
+import Icon from "$components/Icon.svelte";
+import PaymentMethodIcon from "$components/PaymentMethodIcon.svelte";
+import type { Place } from "$lib/types";
 
 export let merchant: Place;
 export let isUpToDate: boolean;
@@ -11,9 +11,9 @@ export let isLoading: boolean = false;
 // Check if we have the detailed data needed for display
 $: hasName = merchant.name !== undefined;
 $: hasPaymentMethods =
-	merchant['osm:payment:onchain'] !== undefined ||
-	merchant['osm:payment:lightning'] !== undefined ||
-	merchant['osm:payment:lightning_contactless'] !== undefined;
+	merchant["osm:payment:onchain"] !== undefined ||
+	merchant["osm:payment:lightning"] !== undefined ||
+	merchant["osm:payment:lightning_contactless"] !== undefined;
 $: hasVerification = merchant.verified_at !== undefined;
 </script>
 

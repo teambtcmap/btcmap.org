@@ -1,9 +1,9 @@
 <script lang="ts">
-import { format } from 'date-fns/format';
+import { format } from "date-fns/format";
 
-import type { ActivityEvent } from '$lib/types';
+import type { ActivityEvent } from "$lib/types";
 
-import { resolve } from '$app/paths';
+import { resolve } from "$app/paths";
 
 export let eventElements: ActivityEvent[] = [];
 export let username: string;
@@ -17,7 +17,7 @@ let itemsPerPage = 10;
 $: totalPages = Math.ceil(eventElements.length / itemsPerPage);
 $: paginatedEvents = eventElements.slice(
 	(currentPage - 1) * itemsPerPage,
-	currentPage * itemsPerPage
+	currentPage * itemsPerPage,
 );
 
 const fetchPageNames = (events: ActivityEvent[]) => {

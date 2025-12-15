@@ -1,23 +1,23 @@
 <script lang="ts">
-import IconIconify from '@iconify/svelte';
+import IconIconify from "@iconify/svelte";
 
-import type { IconName as IconNameApps } from '$lib/spritesheet-apps.ts';
-import type { IconName as IconNameMobileNav } from '$lib/spritesheet-mobile-nav.ts';
-import type { IconName as IconNameSocials } from '$lib/spritesheet-socials.ts';
+import type { IconName as IconNameApps } from "$lib/spritesheet-apps.ts";
+import type { IconName as IconNameMobileNav } from "$lib/spritesheet-mobile-nav.ts";
+import type { IconName as IconNameSocials } from "$lib/spritesheet-socials.ts";
 
 type IconProps =
-	| { type: 'material'; icon: string; w: string; h: string; class?: string }
-	| { type: 'fa'; icon: string; w: string; h: string; class?: string }
+	| { type: "material"; icon: string; w: string; h: string; class?: string }
+	| { type: "fa"; icon: string; w: string; h: string; class?: string }
 	| {
-			type: 'socials';
+			type: "socials";
 			icon: IconNameSocials;
 			w: string;
 			h: string;
 			class?: string;
 	  }
-	| { type: 'apps'; icon: IconNameApps; w: string; h: string; class?: string }
+	| { type: "apps"; icon: IconNameApps; w: string; h: string; class?: string }
 	| {
-			type: 'mobile-nav';
+			type: "mobile-nav";
 			icon: IconNameMobileNav;
 			w: string;
 			h: string;
@@ -29,7 +29,8 @@ export let h: string;
 let className: undefined | string;
 export { className as class };
 export let icon: string | IconNameApps | IconNameMobileNav | IconNameSocials;
-export let type: 'apps' | 'fa' | 'material' | 'mobile-nav' | 'socials' = 'material';
+export let type: "apps" | "fa" | "material" | "mobile-nav" | "socials" =
+	"material";
 
 // this is AI code
 // Type assertion to make TypeScript happy
@@ -38,22 +39,22 @@ export let type: 'apps' | 'fa' | 'material' | 'mobile-nav' | 'socials' = 'materi
 const props = { type, icon, w, h, class: className } as IconProps;
 
 $: formattedIconifyIcon =
-	type === 'material'
+	type === "material"
 		? (() => {
 				// Handle exceptions for specific icons
 				const exceptions: Record<string, string> = {
 					// map icons
-					camping: 'material-symbols:camping-rounded',
-					gate: 'material-symbols:gate',
-					cooking: 'material-symbols:cooking',
-					dentistry: 'material-symbols:dentistry',
-					sauna: 'material-symbols:sauna',
-					info_outline: 'material-symbols:info-outline',
-					skull: 'material-symbols:skull',
-					currency_bitcoin: 'material-symbols:currency-bitcoin',
+					camping: "material-symbols:camping-rounded",
+					gate: "material-symbols:gate",
+					cooking: "material-symbols:cooking",
+					dentistry: "material-symbols:dentistry",
+					sauna: "material-symbols:sauna",
+					info_outline: "material-symbols:info-outline",
+					skull: "material-symbols:skull",
+					currency_bitcoin: "material-symbols:currency-bitcoin",
 
 					// general app icons
-					close_round: 'ic:round-close'
+					close_round: "ic:round-close",
 				};
 
 				// Check if this icon has an exception
@@ -62,12 +63,12 @@ $: formattedIconifyIcon =
 				}
 
 				// Default handling
-				return `ic:outline-${(icon as string).replace(/_/g, '-')}`;
+				return `ic:outline-${(icon as string).replace(/_/g, "-")}`;
 			})()
-		: type === 'fa'
+		: type === "fa"
 			? (() => {
 					// FA brands icons need fa6-brands prefix
-					const brandIcons = ['x-twitter', 'instagram', 'facebook', 'twitter'];
+					const brandIcons = ["x-twitter", "instagram", "facebook", "twitter"];
 					if (brandIcons.includes(icon as string)) {
 						return `fa6-brands:${icon as string}`;
 					}
@@ -77,10 +78,10 @@ $: formattedIconifyIcon =
 
 $: spriteHref =
 	{
-		socials: '/icons/spritesheet-socials.svg',
-		apps: '/icons/spritesheet-apps.svg',
-		'mobile-nav': '/icons/spritesheet-mobile-nav.svg'
-	}[type as Exclude<typeof type, 'material' | 'fa'>] || '';
+		socials: "/icons/spritesheet-socials.svg",
+		apps: "/icons/spritesheet-apps.svg",
+		"mobile-nav": "/icons/spritesheet-mobile-nav.svg",
+	}[type as Exclude<typeof type, "material" | "fa">] || "";
 </script>
 
 {#if type === "material" || type === "fa"}

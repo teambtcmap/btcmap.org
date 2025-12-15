@@ -1,9 +1,9 @@
 <script lang="ts">
-import type { Table } from '@tanstack/svelte-table';
+import type { Table } from "@tanstack/svelte-table";
 
-import GradeDisplay from '$components/leaderboard/GradeDisplay.svelte';
-import type { AreaType } from '$lib/types';
-import { isEven } from '$lib/utils';
+import GradeDisplay from "$components/leaderboard/GradeDisplay.svelte";
+import type { AreaType } from "$lib/types";
+import { isEven } from "$lib/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export let table: Table<any>;

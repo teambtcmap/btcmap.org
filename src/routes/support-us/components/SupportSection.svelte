@@ -7,8 +7,8 @@ export let supporters: {
 }[];
 export let placeholders: number;
 
-import { theme } from '$lib/store';
-import { detectTheme } from '$lib/utils';
+import { theme } from "$lib/store";
+import { detectTheme } from "$lib/utils";
 </script>
 
 <div class="mt-4">

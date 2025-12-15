@@ -1,11 +1,11 @@
 <script lang="ts">
-import Icon from '$components/Icon.svelte';
-import LatestTagger from '$components/LatestTagger.svelte';
-import TaggerSkeleton from '$components/TaggerSkeleton.svelte';
-import TopButton from '$components/TopButton.svelte';
-import { type ActivityEvent, type User } from '$lib/types.js';
+import Icon from "$components/Icon.svelte";
+import LatestTagger from "$components/LatestTagger.svelte";
+import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
+import TopButton from "$components/TopButton.svelte";
+import { type ActivityEvent, type User } from "$lib/types.js";
 
-import { resolve } from '$app/paths';
+import { resolve } from "$app/paths";
 
 export let alias: string;
 export let name: string;

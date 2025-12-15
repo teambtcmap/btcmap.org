@@ -1,39 +1,39 @@
 <script lang="ts">
-export let data: import('./+page.server').VerifyLocationPageData;
+export let data: import("./+page.server").VerifyLocationPageData;
 
-import axios from 'axios';
-import DOMPurify from 'dompurify';
-import { onMount } from 'svelte';
+import axios from "axios";
+import DOMPurify from "dompurify";
+import { onMount } from "svelte";
 
-import FormSuccess from '$components/FormSuccess.svelte';
-import Icon from '$components/Icon.svelte';
-import InfoTooltip from '$components/InfoTooltip.svelte';
-import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-import PrimaryButton from '$components/PrimaryButton.svelte';
-import { placesError, theme } from '$lib/store';
-import { detectTheme, errToast } from '$lib/utils';
+import FormSuccess from "$components/FormSuccess.svelte";
+import Icon from "$components/Icon.svelte";
+import InfoTooltip from "$components/InfoTooltip.svelte";
+import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import PrimaryButton from "$components/PrimaryButton.svelte";
+import { placesError, theme } from "$lib/store";
+import { detectTheme, errToast } from "$lib/utils";
 
-import { browser } from '$app/environment';
+import { browser } from "$app/environment";
 
 // Initialize from server data
-let name = data?.name || '';
+let name = data?.name || "";
 let lat = data?.lat;
 let long = data?.long;
-let location = data?.location || '';
-let edit = data?.edit || '';
+let location = data?.location || "";
+let edit = data?.edit || "";
 
 let captcha: HTMLDivElement;
 let captchaSecret: string;
 let captchaInput: HTMLInputElement;
 let honeyInput: HTMLInputElement;
 
-let captchaContent = '';
+let captchaContent = "";
 let isCaptchaLoading = true;
 
 const fetchCaptcha = () => {
 	isCaptchaLoading = true;
 	axios
-		.get('/captcha')
+		.get("/captcha")
 		.then((response) => {
 			// handle success
 			captchaSecret = response.data.captchaSecret;
@@ -41,7 +41,7 @@ const fetchCaptcha = () => {
 		})
 		.catch((error) => {
 			// handle error
-			errToast('Could not fetch captcha, please try again or contact BTC Map.');
+			errToast("Could not fetch captcha, please try again or contact BTC Map.");
 			console.error(error);
 		})
 		.finally(() => {
@@ -57,39 +57,41 @@ let selected = !!data; // Set to true if we have server data
 let submitted = false;
 let submitting = false;
 let submissionIssueNumber: number;
-let merchantId = data?.merchantId || '';
+let merchantId = data?.merchantId || "";
 
 const submitForm = (event: SubmitEvent) => {
 	event.preventDefault();
 	if (!selected) {
-		errToast('Please select a location...');
+		errToast("Please select a location...");
 	} else {
 		submitting = true;
 
 		axios
-			.post('/verify-location/endpoint', {
+			.post("/verify-location/endpoint", {
 				captchaSecret,
 				captchaTest: captchaInput.value,
 				honey: honeyInput.value,
 				name: name,
 				location: location,
 				edit: edit,
-				current: current ? 'Yes' : 'No',
-				outdated: outdated ? outdated : '',
+				current: current ? "Yes" : "No",
+				outdated: outdated ? outdated : "",
 				verified: verify.value,
 				merchantId: merchantId,
 				lat: lat,
-				long: long
+				long: long,
 			})
 			.then((response) => {
 				submissionIssueNumber = response.data.number;
 				submitted = true;
 			})
 			.catch((error) => {
-				if (error.response.data.message.includes('Captcha')) {
+				if (error.response.data.message.includes("Captcha")) {
 					errToast(error.response.data.message);
 				} else {
-					errToast('Form submission failed, please try again or contact BTC Map.');
+					errToast(
+						"Form submission failed, please try again or contact BTC Map.",
+					);
 				}
 
 				console.error(error);

@@ -1,11 +1,11 @@
 <script lang="ts">
-import PrimaryButton from '$components/PrimaryButton.svelte';
-import type { MerchantPageData } from '$lib/types.js';
+import PrimaryButton from "$components/PrimaryButton.svelte";
+import type { MerchantPageData } from "$lib/types.js";
 
-import CommentAdd from './CommentAdd.svelte';
-import { browser } from '$app/environment';
+import CommentAdd from "./CommentAdd.svelte";
+import { browser } from "$app/environment";
 
-export let elementId: MerchantPageData['id'] | undefined;
+export let elementId: MerchantPageData["id"] | undefined;
 let open = false;
 </script>
 

@@ -1,14 +1,14 @@
 <script lang="ts">
-import Icon from '$components/Icon.svelte';
+import Icon from "$components/Icon.svelte";
 
 export let icon: string;
 export let text: string;
 
 // Map popup spritesheet icon names to material icons
 const iconMap: Record<string, string> = {
-	share: 'share',
-	tags: 'sell',
-	issues: 'warning'
+	share: "share",
+	tags: "sell",
+	issues: "warning",
 };
 
 $: materialIcon = iconMap[icon] || icon;

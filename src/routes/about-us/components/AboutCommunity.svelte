@@ -1,9 +1,9 @@
 <script lang="ts">
-import tippy from 'tippy.js';
+import tippy from "tippy.js";
 
-import type { Area } from '$lib/types';
+import type { Area } from "$lib/types";
 
-import { resolve } from '$app/paths';
+import { resolve } from "$app/paths";
 
 export let community: Area;
 
@@ -11,7 +11,7 @@ let communityTooltip: HTMLAnchorElement;
 
 $: communityTooltip &&
 	tippy([communityTooltip], {
-		content: community.tags.name
+		content: community.tags.name,
 	});
 </script>
 

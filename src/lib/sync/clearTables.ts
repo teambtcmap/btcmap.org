@@ -1,4 +1,4 @@
-import localforage from 'localforage';
+import localforage from "localforage";
 
 export const clearTables = (tables: string[]) => {
 	for (const table of tables) {
@@ -9,7 +9,7 @@ export const clearTables = (tables: string[]) => {
 					localforage
 						.removeItem(table)
 						.then(() => {
-							console.info('Key is cleared!');
+							console.info("Key is cleared!");
 						})
 						.catch((err) => {
 							console.error(err);

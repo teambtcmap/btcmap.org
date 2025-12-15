@@ -1,12 +1,12 @@
 <script lang="ts">
-import Time from 'svelte-time';
+import Time from "svelte-time";
 
-import Icon from '$components/Icon.svelte';
-import PaymentMethodIcon from '$components/PaymentMethodIcon.svelte';
-import type { Place } from '$lib/types';
-import { formatVerifiedHuman } from '$lib/utils';
+import Icon from "$components/Icon.svelte";
+import PaymentMethodIcon from "$components/PaymentMethodIcon.svelte";
+import type { Place } from "$lib/types";
+import { formatVerifiedHuman } from "$lib/utils";
 
-import { resolve } from '$app/paths';
+import { resolve } from "$app/paths";
 
 export let merchant: Place;
 export let isUpToDate: boolean;

@@ -1,17 +1,17 @@
 <script lang="ts">
-import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-import { apps, theme } from '$lib/store';
-import { detectTheme } from '$lib/utils';
+import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import { apps, theme } from "$lib/store";
+import { detectTheme } from "$lib/utils";
 
-import AppCard from './components/AppCard.svelte';
+import AppCard from "./components/AppCard.svelte";
 
 const communityApps = [
 	{
-		link: 'https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666',
-		type: 'BitLocal',
-		icon: 'ios',
-		desc: 'iOS'
-	}
+		link: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
+		type: "BitLocal",
+		icon: "ios",
+		desc: "iOS",
+	},
 ];
 </script>
 

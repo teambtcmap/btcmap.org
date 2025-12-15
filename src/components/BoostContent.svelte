@@ -1,15 +1,18 @@
 <script lang="ts">
-import axios from 'axios';
-import { onDestroy } from 'svelte';
-import { fade } from 'svelte/transition';
+import axios from "axios";
+import { onDestroy } from "svelte";
+import { fade } from "svelte/transition";
 
-import Icon from '$components/Icon.svelte';
-import InvoicePaymentStage from '$components/InvoicePaymentStage.svelte';
-import PrimaryButton from '$components/PrimaryButton.svelte';
-import { PAYMENT_ERROR_MESSAGE, STATUS_CHECK_ERROR_MESSAGE } from '$lib/constants';
-import { boost, boostHash, lastUpdatedPlaceId } from '$lib/store';
-import { updateSinglePlace } from '$lib/sync/places';
-import { errToast, warningToast } from '$lib/utils';
+import Icon from "$components/Icon.svelte";
+import InvoicePaymentStage from "$components/InvoicePaymentStage.svelte";
+import PrimaryButton from "$components/PrimaryButton.svelte";
+import {
+	PAYMENT_ERROR_MESSAGE,
+	STATUS_CHECK_ERROR_MESSAGE,
+} from "$lib/constants";
+import { boost, boostHash, lastUpdatedPlaceId } from "$lib/store";
+import { updateSinglePlace } from "$lib/sync/places";
+import { errToast, warningToast } from "$lib/utils";
 
 export let merchantId: number | string;
 export let merchantName: string | undefined = undefined;
@@ -20,19 +23,19 @@ let stage = 0;
 const values = [
 	{ sats: 5000, time: 1 },
 	{ sats: 10000, time: 3 },
-	{ sats: 30000, time: 12 }
+	{ sats: 30000, time: 12 },
 ];
 
 let tooltip = false;
 let selectedBoost: { sats: number; time: number; expires: Date } | undefined;
-let invoice = '';
-let invoiceId = '';
+let invoice = "";
+let invoiceId = "";
 let loading = false;
 
 onDestroy(() => {
 	stage = 0;
-	invoice = '';
-	invoiceId = '';
+	invoice = "";
+	invoiceId = "";
 	loading = false;
 	selectedBoost = undefined;
 	tooltip = false;
@@ -45,8 +48,8 @@ const handlePaymentSuccess = async () => {
 	$boostHash = invoiceId;
 
 	try {
-		const response = await axios.post('/api/boost/post', {
-			invoice_id: invoiceId
+		const response = await axios.post("/api/boost/post", {
+			invoice_id: invoiceId,
 		});
 
 		stage = 2;
@@ -61,13 +64,13 @@ const handlePaymentSuccess = async () => {
 			onComplete();
 		}
 	} catch (error) {
-		warningToast('Could not finalize boost, please contact BTC Map.');
+		warningToast("Could not finalize boost, please contact BTC Map.");
 		console.error(error);
 	}
 };
 
 const handlePaymentError = (error: unknown) => {
-	console.error('Payment error:', error);
+	console.error("Payment error:", error);
 };
 
 const handleStatusCheckError = (error: unknown) => {
@@ -84,22 +87,22 @@ const generateInvoice = () => {
 		: undefined;
 
 	if (!days || days <= 0) {
-		errToast('Invalid boost duration');
+		errToast("Invalid boost duration");
 		loading = false;
 		return;
 	}
 
 	const placeId = Number(merchantId);
 	if (!placeId || Number.isNaN(placeId)) {
-		errToast('Invalid merchant ID');
+		errToast("Invalid merchant ID");
 		loading = false;
 		return;
 	}
 
 	axios
-		.post('/api/boost/invoice/generate', {
+		.post("/api/boost/invoice/generate", {
 			place_id: placeId,
-			days: days
+			days: days,
 		})
 		.then((response) => {
 			invoice = response.data.invoice;

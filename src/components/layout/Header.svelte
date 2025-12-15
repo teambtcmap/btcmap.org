@@ -1,57 +1,57 @@
 <script lang="ts">
-import Icon from '$components/Icon.svelte';
-import NavDropdownDesktop from '$components/layout/NavDropdownDesktop.svelte';
-import NavDropdownMobile from '$components/layout/NavDropdownMobile.svelte';
-import ThemeToggle from '$components/ThemeToggle.svelte';
+import Icon from "$components/Icon.svelte";
+import NavDropdownDesktop from "$components/layout/NavDropdownDesktop.svelte";
+import NavDropdownMobile from "$components/layout/NavDropdownMobile.svelte";
+import ThemeToggle from "$components/ThemeToggle.svelte";
 
-import { afterNavigate } from '$app/navigation';
+import { afterNavigate } from "$app/navigation";
 
 const navLinks = [
-	{ title: 'Maps', url: '', icon: 'map' },
-	{ title: 'Apps', url: '/apps', icon: 'apps' },
-	{ title: 'Stats', url: '', icon: 'stats' },
-	{ title: 'Areas', url: '', icon: 'areas' },
-	{ title: 'Maintain', url: '', icon: 'contribute' },
+	{ title: "Maps", url: "", icon: "map" },
+	{ title: "Apps", url: "/apps", icon: "apps" },
+	{ title: "Stats", url: "", icon: "stats" },
+	{ title: "Areas", url: "", icon: "areas" },
+	{ title: "Maintain", url: "", icon: "contribute" },
 	{
-		title: 'Wiki',
-		url: 'https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki',
-		icon: 'wiki'
+		title: "Wiki",
+		url: "https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki",
+		icon: "wiki",
 	},
-	{ title: 'Blog', url: 'https://blog.btcmap.org', icon: 'dash' },
-	{ title: 'Support Us', url: '/support-us', icon: 'support' }
+	{ title: "Blog", url: "https://blog.btcmap.org", icon: "dash" },
+	{ title: "Support Us", url: "/support-us", icon: "support" },
 ];
 
 const mapsDropdownLinks = [
-	{ title: 'Merchant Map', url: '/map', icon: 'add' },
-	{ title: 'Community Map', url: '/communities/map', icon: 'communities' }
+	{ title: "Merchant Map", url: "/map", icon: "add" },
+	{ title: "Community Map", url: "/communities/map", icon: "communities" },
 ];
 
 const statsDropdownLinks = [
-	{ title: 'Dashboard', url: '/dashboard', icon: 'dash' },
-	{ title: 'Tagger Leaderboard', url: '/leaderboard', icon: 'leader' },
+	{ title: "Dashboard", url: "/dashboard", icon: "dash" },
+	{ title: "Tagger Leaderboard", url: "/leaderboard", icon: "leader" },
 	{
-		title: 'Community Leaderboard',
-		url: '/communities/leaderboard',
-		icon: 'communities'
+		title: "Community Leaderboard",
+		url: "/communities/leaderboard",
+		icon: "communities",
 	},
 	{
-		title: 'Country Leaderboard',
-		url: '/countries/leaderboard',
-		icon: 'countries'
-	}
+		title: "Country Leaderboard",
+		url: "/countries/leaderboard",
+		icon: "countries",
+	},
 ];
 
 const maintainDropdownLinks = [
-	{ title: 'Add Location', url: '/add-location', icon: 'add' },
-	{ title: 'Add Community', url: '/communities/add', icon: 'communities' },
-	{ title: 'Open Tickets', url: '/tickets', icon: 'ticket' },
-	{ title: 'Tagging Activity', url: '/activity', icon: 'activity' },
-	{ title: 'Tagging Issues', url: '/tagging-issues', icon: 'issue' }
+	{ title: "Add Location", url: "/add-location", icon: "add" },
+	{ title: "Add Community", url: "/communities/add", icon: "communities" },
+	{ title: "Open Tickets", url: "/tickets", icon: "ticket" },
+	{ title: "Tagging Activity", url: "/activity", icon: "activity" },
+	{ title: "Tagging Issues", url: "/tagging-issues", icon: "issue" },
 ];
 
 const areasDropdownLinks = [
-	{ title: 'Communities', url: '/communities', icon: 'communities' },
-	{ title: 'Countries', url: '/countries', icon: 'countries' }
+	{ title: "Communities", url: "/communities", icon: "communities" },
+	{ title: "Countries", url: "/countries", icon: "countries" },
 ];
 
 let showMobileMenu = false;

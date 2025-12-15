@@ -1,12 +1,12 @@
 <script lang="ts">
-import { onMount } from 'svelte';
+import { onMount } from "svelte";
 
-import Icon from '$components/Icon.svelte';
-import SocialLink from '$components/SocialLink.svelte';
-import { socials } from '$lib/store';
+import Icon from "$components/Icon.svelte";
+import SocialLink from "$components/SocialLink.svelte";
+import { socials } from "$lib/store";
 
-import { resolve } from '$app/paths';
-import { page } from '$app/stores';
+import { resolve } from "$app/paths";
+import { page } from "$app/stores";
 
 onMount(() => {
 	if ($page.status === 500 && !navigator.onLine) {

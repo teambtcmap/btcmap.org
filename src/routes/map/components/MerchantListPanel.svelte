@@ -1,35 +1,42 @@
 <script lang="ts">
-import { onDestroy, tick } from 'svelte';
-import { fly } from 'svelte/transition';
+import { onDestroy, tick } from "svelte";
+import { fly } from "svelte/transition";
 
-import CloseButton from '$components/CloseButton.svelte';
-import Icon from '$components/Icon.svelte';
-import LoadingSpinner from '$components/LoadingSpinner.svelte';
-import { CATEGORY_ENTRIES, type CategoryCounts, type CategoryKey } from '$lib/categoryMapping';
+import CloseButton from "$components/CloseButton.svelte";
+import Icon from "$components/Icon.svelte";
+import LoadingSpinner from "$components/LoadingSpinner.svelte";
+import {
+	CATEGORY_ENTRIES,
+	type CategoryCounts,
+	type CategoryKey,
+} from "$lib/categoryMapping";
 import {
 	BREAKPOINTS,
 	MERCHANT_LIST_LOW_ZOOM,
 	MERCHANT_LIST_MIN_ZOOM,
-	MERCHANT_LIST_WIDTH
-} from '$lib/constants';
-import { calcVerifiedDate } from '$lib/merchantDrawerLogic';
-import { merchantDrawer } from '$lib/merchantDrawerStore';
-import { type MerchantListMode, merchantList } from '$lib/merchantListStore';
-import type { Place } from '$lib/types';
+	MERCHANT_LIST_WIDTH,
+} from "$lib/constants";
+import { calcVerifiedDate } from "$lib/merchantDrawerLogic";
+import { merchantDrawer } from "$lib/merchantDrawerStore";
+import { type MerchantListMode, merchantList } from "$lib/merchantListStore";
+import type { Place } from "$lib/types";
 
-import MerchantListItem from './MerchantListItem.svelte';
-import { browser } from '$app/environment';
+import MerchantListItem from "./MerchantListItem.svelte";
+import { browser } from "$app/environment";
 
 // Reduced motion preference for animations
-const reducedMotion = browser && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const reducedMotion =
+	browser && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 // Compute once for all list items
 const verifiedDate = calcVerifiedDate();
 
 // Callback to pan to a nearby merchant (already zoomed in, just center it)
-export let onPanToNearbyMerchant: ((place: Place) => void) | undefined = undefined;
+export let onPanToNearbyMerchant: ((place: Place) => void) | undefined =
+	undefined;
 // Callback to zoom to a search result (may be far away, need to fly there)
-export let onZoomToSearchResult: ((place: Place) => void) | undefined = undefined;
+export let onZoomToSearchResult: ((place: Place) => void) | undefined =
+	undefined;
 // Callbacks for hover highlighting
 export let onHoverStart: ((place: Place) => void) | undefined = undefined;
 export let onHoverEnd: ((place: Place) => void) | undefined = undefined;
@@ -38,7 +45,8 @@ export let currentZoom: number = 0;
 // Search callback - called when user types in search input
 export let onSearch: ((query: string) => void) | undefined = undefined;
 // Mode change callback (called for nearby mode switch)
-export let onModeChange: ((mode: MerchantListMode) => void) | undefined = undefined;
+export let onModeChange: ((mode: MerchantListMode) => void) | undefined =
+	undefined;
 // Refresh callback for category filtering
 export let onRefresh: (() => void) | undefined = undefined;
 
@@ -46,7 +54,7 @@ export let onRefresh: (() => void) | undefined = undefined;
 let searchInput: HTMLInputElement;
 
 // Local filter for nearby mode (client-side filtering by name)
-let nearbyFilter = '';
+let nearbyFilter = "";
 
 // Body scroll lock for mobile (prevents iOS background scroll)
 let scrollLockActive = false;
@@ -57,12 +65,12 @@ let panelElement: HTMLElement;
 function handleClearSearch() {
 	merchantList.clearSearchInput();
 	// Trigger onSearch to abort any pending request (same as typing empty query)
-	onSearch?.('');
+	onSearch?.("");
 	searchInput?.focus();
 }
 
 function handleSearchKeyDown(event: KeyboardEvent) {
-	if (event.key === 'Escape' && $merchantList.searchQuery) {
+	if (event.key === "Escape" && $merchantList.searchQuery) {
 		event.preventDefault();
 		event.stopPropagation();
 		handleClearSearch();
@@ -71,8 +79,8 @@ function handleSearchKeyDown(event: KeyboardEvent) {
 
 function handleModeSwitch(newMode: MerchantListMode) {
 	if (newMode === mode) return;
-	nearbyFilter = ''; // Clear filter when switching modes
-	if (newMode === 'nearby') {
+	nearbyFilter = ""; // Clear filter when switching modes
+	if (newMode === "nearby") {
 		merchantList.exitSearchMode();
 		onModeChange?.(newMode);
 	} else {
@@ -102,7 +110,7 @@ $: categoryCounts = $merchantList.categoryCounts;
 
 // Helper function to check if a category has matching merchants
 function hasMatchingMerchants(categoryKey: CategoryKey): boolean {
-	if (categoryKey === 'all') return true;
+	if (categoryKey === "all") return true;
 	return (categoryCounts?.[categoryKey] ?? 0) > 0;
 }
 
@@ -111,14 +119,14 @@ function hasMatchingMerchants(categoryKey: CategoryKey): boolean {
 function getCategoryButtonClass(
 	key: CategoryKey,
 	selectedCategory: CategoryKey,
-	counts: CategoryCounts
+	counts: CategoryCounts,
 ): string {
-	if (selectedCategory === key) return 'bg-primary text-white';
-	const hasMatches = key === 'all' || (counts?.[key] ?? 0) > 0;
+	if (selectedCategory === key) return "bg-primary text-white";
+	const hasMatches = key === "all" || (counts?.[key] ?? 0) > 0;
 	if (hasMatches) {
-		return 'bg-gray-100 text-body hover:bg-gray-200 dark:bg-white/5 dark:text-white/70 dark:hover:bg-white/10';
+		return "bg-gray-100 text-body hover:bg-gray-200 dark:bg-white/5 dark:text-white/70 dark:hover:bg-white/10";
 	}
-	return 'cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-white/30';
+	return "cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-white/30";
 }
 
 // Show "zoom in" message when:
@@ -134,23 +142,23 @@ $: if (browser && isOpen !== undefined) {
 	const isMobile = window.innerWidth < BREAKPOINTS.md;
 	const shouldLock = isOpen && isMobile;
 	if (shouldLock && !scrollLockActive) {
-		document.body.style.overflow = 'hidden';
+		document.body.style.overflow = "hidden";
 		scrollLockActive = true;
 	} else if (!shouldLock && scrollLockActive) {
-		document.body.style.overflow = '';
+		document.body.style.overflow = "";
 		scrollLockActive = false;
 	}
 }
 
 // Focus search input when panel opens in search mode
-$: if (browser && isOpen && mode === 'search' && searchInput) {
+$: if (browser && isOpen && mode === "search" && searchInput) {
 	tick().then(() => searchInput?.focus());
 }
 
 function handleItemClick(place: Place) {
-	merchantDrawer.open(place.id, 'details');
+	merchantDrawer.open(place.id, "details");
 
-	if (mode === 'search') {
+	if (mode === "search") {
 		// Search result: zoom to location (may be far from current view)
 		onZoomToSearchResult?.(place);
 	} else {
@@ -174,7 +182,7 @@ function handleMouseLeave(place: Place) {
 }
 
 function handleClose() {
-	nearbyFilter = ''; // Clear filter when closing
+	nearbyFilter = ""; // Clear filter when closing
 	merchantList.close();
 }
 
@@ -182,9 +190,9 @@ function handleWindowKeydown(event: KeyboardEvent) {
 	if (!isOpen) return;
 
 	// Focus trap: cycle Tab within the panel to prevent focus escaping to background
-	if (event.key === 'Tab' && panelElement) {
+	if (event.key === "Tab" && panelElement) {
 		const focusable = panelElement.querySelectorAll<HTMLElement>(
-			'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+			'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
 		);
 		const first = focusable[0];
 		const last = focusable[focusable.length - 1];
@@ -198,7 +206,7 @@ function handleWindowKeydown(event: KeyboardEvent) {
 		}
 	}
 
-	if (event.key === 'Escape') {
+	if (event.key === "Escape") {
 		event.preventDefault();
 		handleClose();
 	}
@@ -207,7 +215,7 @@ function handleWindowKeydown(event: KeyboardEvent) {
 // Cleanup scroll lock when component is destroyed
 onDestroy(() => {
 	if (browser && scrollLockActive) {
-		document.body.style.overflow = '';
+		document.body.style.overflow = "";
 	}
 });
 </script>

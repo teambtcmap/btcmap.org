@@ -17,11 +17,6 @@
 			"!src/error.html"
 		]
 	},
-	"formatter": {
-		"enabled": true,
-		"indentStyle": "tab",
-		"lineWidth": 100
-	},
 	"assist": {
 		"actions": {
 			"source": {
@@ -42,9 +37,7 @@
 		}
 	},
 	"linter": {
-		"enabled": true,
 		"rules": {
-			"recommended": true,
 			"style": {
 				"noUnusedTemplateLiteral": "off",
 				"noNonNullAssertion": "off"
@@ -70,24 +63,10 @@
 			}
 		}
 	},
-	"javascript": {
-		"formatter": {
-			"quoteStyle": "single",
-			"trailingCommas": "none"
-		}
-	},
 	"css": {
 		"parser": {
 			"tailwindDirectives": true
 		},
-		"formatter": {
-			"enabled": true
-		},
-		"linter": {
-			"enabled": true
-		}
-	},
-	"html": {
 		"formatter": {
 			"enabled": true
 		}

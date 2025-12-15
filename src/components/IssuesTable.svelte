@@ -1,5 +1,5 @@
 <script lang="ts">
-import { rankItem } from '@tanstack/match-sorter-utils';
+import { rankItem } from "@tanstack/match-sorter-utils";
 import type {
 	ColumnDef,
 	FilterFn,
@@ -7,23 +7,29 @@ import type {
 	PaginationState,
 	SortingState,
 	Table,
-	TableOptions
-} from '@tanstack/svelte-table';
+	TableOptions,
+} from "@tanstack/svelte-table";
 import {
 	createSvelteTable,
 	flexRender,
 	getCoreRowModel,
 	getFilteredRowModel,
 	getPaginationRowModel,
-	getSortedRowModel
-} from '@tanstack/svelte-table';
-import { type Readable, writable } from 'svelte/store';
+	getSortedRowModel,
+} from "@tanstack/svelte-table";
+import { type Readable, writable } from "svelte/store";
 
-import Icon from '$components/Icon.svelte';
-import IssueCell from '$components/IssueCell.svelte';
-import { theme } from '$lib/store';
-import type { RpcIssue } from '$lib/types';
-import { debounce, detectTheme, getIssueHelpLink, getIssueIcon, isEven } from '$lib/utils';
+import Icon from "$components/Icon.svelte";
+import IssueCell from "$components/IssueCell.svelte";
+import { theme } from "$lib/store";
+import type { RpcIssue } from "$lib/types";
+import {
+	debounce,
+	detectTheme,
+	getIssueHelpLink,
+	getIssueIcon,
+	isEven,
+} from "$lib/utils";
 
 export let title: string;
 export let issues: RpcIssue[];
@@ -44,7 +50,7 @@ let tableRendered = false;
 
 const pageSizes = [10, 20, 30, 40, 50];
 
-let globalFilter = '';
+let globalFilter = "";
 let searchInput: HTMLInputElement;
 
 const handleKeyUp = (e: KeyboardEvent) => {
@@ -57,18 +63,18 @@ const renderTable = () => {
 	const data = issues.map((issue) => {
 		const icon = getIssueIcon(issue.issue_code);
 		const name = issue.element_name;
-		var type: string = 'TODO';
-		if (issue.issue_code === 'missing_icon') {
-			type = 'Icon is missing';
-		} else if (issue.issue_code === 'not_verified') {
-			type = 'Last verification date is missing';
-		} else if (issue.issue_code === 'outdated') {
-			type = 'Outdated, needs re-verification';
-		} else if (issue.issue_code === 'outdated_soon') {
-			type = 'Soon to be outdated, needs re-verification';
-		} else if (issue.issue_code.startsWith('invalid_tag_value')) {
+		var type: string = "TODO";
+		if (issue.issue_code === "missing_icon") {
+			type = "Icon is missing";
+		} else if (issue.issue_code === "not_verified") {
+			type = "Last verification date is missing";
+		} else if (issue.issue_code === "outdated") {
+			type = "Outdated, needs re-verification";
+		} else if (issue.issue_code === "outdated_soon") {
+			type = "Soon to be outdated, needs re-verification";
+		} else if (issue.issue_code.startsWith("invalid_tag_value")) {
 			type = `Tag value is not formatted properly (${issue.issue_code})`;
-		} else if (issue.issue_code.startsWith('misspelled_tag_name')) {
+		} else if (issue.issue_code.startsWith("misspelled_tag_name")) {
 			type = `Spelling issue in tag name (${issue.issue_code})`;
 		} else {
 			type = issue.issue_code;
@@ -81,47 +87,53 @@ const renderTable = () => {
 
 	const columns: ColumnDef<IssueFormatted>[] = [
 		{
-			accessorKey: 'icon',
-			header: '',
-			cell: (info) => flexRender(IssueCell, { id: 'icon', value: info.getValue() }),
+			accessorKey: "icon",
+			header: "",
+			cell: (info) =>
+				flexRender(IssueCell, { id: "icon", value: info.getValue() }),
 			enableSorting: false,
-			enableGlobalFilter: false
+			enableGlobalFilter: false,
 		},
 		{
-			accessorKey: 'name',
-			header: 'Merchant Name',
-			cell: (info) => flexRender(IssueCell, { id: 'name', value: info.getValue() }),
+			accessorKey: "name",
+			header: "Merchant Name",
+			cell: (info) =>
+				flexRender(IssueCell, { id: "name", value: info.getValue() }),
 			// @ts-expect-error fuzzy filter is registered via filterFns option
-			filterFn: 'fuzzy',
-			enableGlobalFilter: true
+			filterFn: "fuzzy",
+			enableGlobalFilter: true,
 		},
 		{
-			accessorKey: 'type',
-			header: 'Description',
-			cell: (info) => flexRender(IssueCell, { id: 'type', value: info.getValue() }),
-			enableGlobalFilter: false
+			accessorKey: "type",
+			header: "Description",
+			cell: (info) =>
+				flexRender(IssueCell, { id: "type", value: info.getValue() }),
+			enableGlobalFilter: false,
 		},
 		{
-			accessorKey: 'viewLink',
-			header: '',
-			cell: (info) => flexRender(IssueCell, { id: 'viewLink', value: info.getValue() }),
+			accessorKey: "viewLink",
+			header: "",
+			cell: (info) =>
+				flexRender(IssueCell, { id: "viewLink", value: info.getValue() }),
 			enableSorting: false,
-			enableGlobalFilter: false
+			enableGlobalFilter: false,
 		},
 		{
-			accessorKey: 'editLink',
-			header: '',
-			cell: (info) => flexRender(IssueCell, { id: 'editLink', value: info.getValue() }),
+			accessorKey: "editLink",
+			header: "",
+			cell: (info) =>
+				flexRender(IssueCell, { id: "editLink", value: info.getValue() }),
 			enableSorting: false,
-			enableGlobalFilter: false
+			enableGlobalFilter: false,
 		},
 		{
-			accessorKey: 'helpLink',
-			header: '',
-			cell: (info) => flexRender(IssueCell, { id: 'helpLink', value: info.getValue() }),
+			accessorKey: "helpLink",
+			header: "",
+			cell: (info) =>
+				flexRender(IssueCell, { id: "helpLink", value: info.getValue() }),
 			enableSorting: false,
-			enableGlobalFilter: false
-		}
+			enableGlobalFilter: false,
+		},
 	];
 
 	let sorting: SortingState = [];
@@ -136,14 +148,14 @@ const renderTable = () => {
 			...old,
 			state: {
 				...old.state,
-				sorting
-			}
+				sorting,
+			},
 		}));
 	};
 
 	let pagination: PaginationState = {
 		pageIndex: 0,
-		pageSize: initialPageSize
+		pageSize: initialPageSize,
 	};
 
 	const setPagination: OnChangeFn<PaginationState> = (updater) => {
@@ -156,8 +168,8 @@ const renderTable = () => {
 			...old,
 			state: {
 				...old.state,
-				pagination
-			}
+				pagination,
+			},
 		}));
 	};
 
@@ -179,10 +191,10 @@ const renderTable = () => {
 		columns,
 		state: {
 			sorting,
-			pagination
+			pagination,
 		},
 		filterFns: {
-			fuzzy: fuzzyFilter
+			fuzzy: fuzzyFilter,
 		},
 		onSortingChange: setSorting,
 		onPaginationChange: setPagination,
@@ -190,7 +202,7 @@ const renderTable = () => {
 		getCoreRowModel: getCoreRowModel(),
 		getSortedRowModel: getSortedRowModel(),
 		getPaginationRowModel: getPaginationRowModel(),
-		getFilteredRowModel: getFilteredRowModel()
+		getFilteredRowModel: getFilteredRowModel(),
 	});
 
 	table = createSvelteTable(options);

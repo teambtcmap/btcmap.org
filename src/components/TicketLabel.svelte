@@ -2,14 +2,14 @@
 export let title: string;
 export let tooltip: string | undefined;
 
-import tippy from 'tippy.js';
+import tippy from "tippy.js";
 
 let labelTooltip: HTMLSpanElement;
 
 $: tooltip?.length &&
 	labelTooltip &&
 	tippy([labelTooltip], {
-		content: tooltip
+		content: tooltip,
 	});
 </script>
 

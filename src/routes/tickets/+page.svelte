@@ -1,15 +1,15 @@
 <script lang="ts">
-import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-import OpenTicket from '$components/OpenTicket.svelte';
-import TopButton from '$components/TopButton.svelte';
-import { theme } from '$lib/store';
-import type { GiteaLabel } from '$lib/types';
-import { detectTheme, errToast } from '$lib/utils';
+import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import OpenTicket from "$components/OpenTicket.svelte";
+import TopButton from "$components/TopButton.svelte";
+import { theme } from "$lib/store";
+import type { GiteaLabel } from "$lib/types";
+import { detectTheme, errToast } from "$lib/utils";
 
-import OpenTicketSkeleton from './components/OpenTicketSkeleton.svelte';
+import OpenTicketSkeleton from "./components/OpenTicketSkeleton.svelte";
 
-const ticketTypes = ['Add', 'Verify', 'Community'];
-let showType = 'Add';
+const ticketTypes = ["Add", "Verify", "Community"];
+let showType = "Add";
 
 export let data;
 
@@ -17,15 +17,21 @@ $: tickets = data.tickets;
 
 $: add =
 	tickets?.filter((issue) =>
-		issue?.labels?.some((label: GiteaLabel) => label?.name === 'location-submission')
+		issue?.labels?.some(
+			(label: GiteaLabel) => label?.name === "location-submission",
+		),
 	) || [];
 $: verify =
 	tickets?.filter((issue) =>
-		issue?.labels?.some((label: GiteaLabel) => label?.name === 'location-verification')
+		issue?.labels?.some(
+			(label: GiteaLabel) => label?.name === "location-verification",
+		),
 	) || [];
 $: community =
 	tickets?.filter((issue) =>
-		issue?.labels?.some((label: GiteaLabel) => label?.name === 'community-submission')
+		issue?.labels?.some(
+			(label: GiteaLabel) => label?.name === "community-submission",
+		),
 	) || [];
 
 let totalTickets = data.totalTickets;

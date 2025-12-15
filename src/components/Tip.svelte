@@ -1,5 +1,5 @@
 <script lang="ts">
-import { TipType } from '$lib/types';
+import { TipType } from "$lib/types";
 
 export let user: undefined | string = undefined;
 export let destination: string;

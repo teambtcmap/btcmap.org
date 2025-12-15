@@ -1,9 +1,12 @@
 <script lang="ts">
-import Icon from '$components/Icon.svelte';
-import PaymentMethodIcon from '$components/PaymentMethodIcon.svelte';
-import { isBoosted as checkBoosted, isUpToDate as checkUpToDate } from '$lib/merchantDrawerLogic';
-import type { Place } from '$lib/types';
-import { formatVerifiedHuman } from '$lib/utils';
+import Icon from "$components/Icon.svelte";
+import PaymentMethodIcon from "$components/PaymentMethodIcon.svelte";
+import {
+	isBoosted as checkBoosted,
+	isUpToDate as checkUpToDate,
+} from "$lib/merchantDrawerLogic";
+import type { Place } from "$lib/types";
+import { formatVerifiedHuman } from "$lib/utils";
 
 export let merchant: Place;
 export let enrichedData: Place | null = null;
@@ -16,9 +19,9 @@ export let onmouseleave: (merchant: Place) => void = () => {};
 $: showSkeleton = !enrichedData;
 $: displayData = enrichedData || merchant;
 $: hasPaymentMethods =
-	enrichedData?.['osm:payment:onchain'] !== undefined ||
-	enrichedData?.['osm:payment:lightning'] !== undefined ||
-	enrichedData?.['osm:payment:lightning_contactless'] !== undefined;
+	enrichedData?.["osm:payment:onchain"] !== undefined ||
+	enrichedData?.["osm:payment:lightning"] !== undefined ||
+	enrichedData?.["osm:payment:lightning_contactless"] !== undefined;
 
 $: isVerified = checkUpToDate(displayData, verifiedDate);
 $: isBoosted = checkBoosted(merchant);

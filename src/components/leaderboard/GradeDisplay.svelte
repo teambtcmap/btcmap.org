@@ -2,24 +2,27 @@
 export let grade: number = 0;
 export let percentage: number | undefined = undefined;
 export let avgDate: string | undefined = undefined;
-export let size: 'small' | 'medium' | 'large' = 'medium';
+export let size: "small" | "medium" | "large" = "medium";
 export let showTooltip: boolean = true;
 
 const sizeClasses = {
-	small: 'text-sm',
-	medium: 'text-base',
-	large: 'text-lg'
+	small: "text-sm",
+	medium: "text-base",
+	large: "text-lg",
 };
 
 // Svelte action for grade tooltips
-function gradeTooltipAction(node: HTMLElement, data: { percentage?: number; avgDate?: string }) {
+function gradeTooltipAction(
+	node: HTMLElement,
+	data: { percentage?: number; avgDate?: string },
+) {
 	// Tippy instance - using object with destroy method since tippy.js types are complex with dynamic imports
 	let instance: { destroy(): void } | undefined;
 
 	async function setup() {
 		if (showTooltip && data.percentage !== undefined) {
 			// Dynamic import for tippy.js to avoid SSR issues
-			const { default: tippy } = await import('tippy.js');
+			const { default: tippy } = await import("tippy.js");
 
 			let content = `${data.percentage.toFixed(1)}% up-to-date`;
 
@@ -33,7 +36,7 @@ function gradeTooltipAction(node: HTMLElement, data: { percentage?: number; avgD
 
 			instance = tippy(node, {
 				content,
-				allowHTML: true
+				allowHTML: true,
 			});
 		}
 	}
@@ -55,7 +58,7 @@ function gradeTooltipAction(node: HTMLElement, data: { percentage?: number; avgD
 		},
 		destroy() {
 			cleanup();
-		}
+		},
 	};
 }
 </script>

@@ -1,10 +1,10 @@
 <script lang="ts">
-import Time from 'svelte-time';
+import Time from "svelte-time";
 
-import Tip from '$components/Tip.svelte';
-import type { EventType, User } from '$lib/types';
+import Tip from "$components/Tip.svelte";
+import type { EventType, User } from "$lib/types";
 
-import { resolve } from '$app/paths';
+import { resolve } from "$app/paths";
 
 export let location: string;
 export let action: EventType;
@@ -13,10 +13,10 @@ export let time: string;
 export let latest: boolean;
 export let merchantId: string;
 
-$: deleteLink = merchantId.split(':');
+$: deleteLink = merchantId.split(":");
 
 $: profile = user?.osm_json;
-$: regexMatch = profile?.description.match('(lightning:[^)]+)');
+$: regexMatch = profile?.description.match("(lightning:[^)]+)");
 $: lightning = regexMatch?.[0].slice(10);
 
 $: username = profile?.display_name;

@@ -1,10 +1,17 @@
-import type { PageLoad } from './$types';
+import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async ({ params }) => {
 	const { section } = params;
 
 	// Define valid continent sections
-	const validContinents = ['africa', 'asia', 'europe', 'north-america', 'oceania', 'south-america'];
+	const validContinents = [
+		"africa",
+		"asia",
+		"europe",
+		"north-america",
+		"oceania",
+		"south-america",
+	];
 
 	// For now, we'll accept any section that's not a continent as a potential organization
 	// The actual validation will happen client-side once organization data is loaded
@@ -16,12 +23,12 @@ export const load: PageLoad = async ({ params }) => {
 		// This could be an organization section - validate client-side
 		return {
 			section,
-			isOrganization: true
+			isOrganization: true,
 		};
 	}
 
 	return {
 		section,
-		isOrganization: false
+		isOrganization: false,
 	};
 };

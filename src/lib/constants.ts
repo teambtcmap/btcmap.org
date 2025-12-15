@@ -1,10 +1,10 @@
-export const CONFETTI_CANVAS_Z_INDEX = '2001';
+export const CONFETTI_CANVAS_Z_INDEX = "2001";
 export const POLLING_INTERVAL = 2500;
 export const QR_CODE_SIZE = { mobile: 200, desktop: 275 };
 export const PAYMENT_ERROR_MESSAGE =
-	'Could not generate invoice, please try again or contact BTC Map.';
+	"Could not generate invoice, please try again or contact BTC Map.";
 export const STATUS_CHECK_ERROR_MESSAGE =
-	'Could not check invoice status, please try again or contact BTC Map.';
+	"Could not check invoice status, please try again or contact BTC Map.";
 
 // Tailwind breakpoints (must match tailwind.config.js default breakpoints)
 export const BREAKPOINTS = {
@@ -12,7 +12,7 @@ export const BREAKPOINTS = {
 	md: 768,
 	lg: 1024,
 	xl: 1280,
-	'2xl': 1536
+	"2xl": 1536,
 } as const;
 
 // Layout widths for merchant list and drawer (in pixels)

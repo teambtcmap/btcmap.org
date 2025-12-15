@@ -1,41 +1,41 @@
 <script lang="ts">
-import axios from 'axios';
-import DOMPurify from 'dompurify';
-import { onMount } from 'svelte';
+import axios from "axios";
+import DOMPurify from "dompurify";
+import { onMount } from "svelte";
 
-import Breadcrumbs from '$components/Breadcrumbs.svelte';
-import FormSuccess from '$components/FormSuccess.svelte';
-import Icon from '$components/Icon.svelte';
-import InfoTooltip from '$components/InfoTooltip.svelte';
-import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-import PrimaryButton from '$components/PrimaryButton.svelte';
-import { theme } from '$lib/store';
-import type { NominatimResponse } from '$lib/types';
-import { detectTheme, errToast, successToast, warningToast } from '$lib/utils';
+import Breadcrumbs from "$components/Breadcrumbs.svelte";
+import FormSuccess from "$components/FormSuccess.svelte";
+import Icon from "$components/Icon.svelte";
+import InfoTooltip from "$components/InfoTooltip.svelte";
+import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import PrimaryButton from "$components/PrimaryButton.svelte";
+import { theme } from "$lib/store";
+import type { NominatimResponse } from "$lib/types";
+import { detectTheme, errToast, successToast, warningToast } from "$lib/utils";
 
-import { browser } from '$app/environment';
+import { browser } from "$app/environment";
 
 const routes = [
-	{ name: 'Communities', url: '/communities' },
-	{ name: 'Add', url: '/communities/add' }
+	{ name: "Communities", url: "/communities" },
+	{ name: "Add", url: "/communities/add" },
 ];
 
-let captchaContent = '';
+let captchaContent = "";
 let isCaptchaLoading = true;
 let captchaSecret: string;
-let captchaValue: string = '';
+let captchaValue: string = "";
 let honeyInput: HTMLInputElement;
 
 const fetchCaptcha = () => {
 	isCaptchaLoading = true;
 	axios
-		.get('/captcha')
+		.get("/captcha")
 		.then((response) => {
 			captchaSecret = response.data.captchaSecret;
 			captchaContent = DOMPurify.sanitize(response.data.captcha);
 		})
 		.catch((error) => {
-			errToast('Could not fetch captcha, please try again or contact BTC Map.');
+			errToast("Could not fetch captcha, please try again or contact BTC Map.");
 			console.error(error);
 		})
 		.finally(() => {
@@ -69,19 +69,23 @@ const searchLocation = () => {
 
 	axios
 		.get<NominatimResponse[]>(
-			`https://nominatim.openstreetmap.org/search?q=${searchQuery}&format=json&polygon_geojson=1&email=hello@btcmap.org`
+			`https://nominatim.openstreetmap.org/search?q=${searchQuery}&format=json&polygon_geojson=1&email=hello@btcmap.org`,
 		)
 		.then((response) => {
 			searchResults = response.data.filter(
-				(area) => area.geojson?.type === 'Polygon' || area.geojson?.type === 'MultiPolygon'
+				(area) =>
+					area.geojson?.type === "Polygon" ||
+					area.geojson?.type === "MultiPolygon",
 			);
 			if (!searchResults.length) {
-				warningToast('No locations found, please adjust query.');
+				warningToast("No locations found, please adjust query.");
 			}
 			searchLoading = false;
 		})
 		.catch((error) => {
-			errToast('Could not search for locations, please try again or contact BTC Map.');
+			errToast(
+				"Could not search for locations, please try again or contact BTC Map.",
+			);
 			searchLoading = false;
 			console.error(error);
 		});
@@ -90,46 +94,52 @@ const searchLocation = () => {
 let selectedLat: number;
 let selectedLon: number;
 
-const setLocation = (area: { display_name: string; lat: string; lon: string }) => {
+const setLocation = (area: {
+	display_name: string;
+	lat: string;
+	lon: string;
+}) => {
 	location = area.display_name;
 	selectedLat = parseFloat(area.lat);
 	selectedLon = parseFloat(area.lon);
 	selected = true;
-	successToast('Location selected!');
+	successToast("Location selected!");
 };
 
 const submitForm = (event: SubmitEvent) => {
 	event.preventDefault();
 	if (!selected) {
 		noLocationSelected = true;
-		errToast('Please select a location...');
+		errToast("Please select a location...");
 	} else {
 		submitting = true;
 
 		axios
-			.post('/communities/add/endpoint', {
+			.post("/communities/add/endpoint", {
 				captchaSecret,
 				captchaTest: captchaValue,
 				honey: honeyInput,
 				location,
 				name,
-				icon: icon ? icon : '',
-				lightning: lightning ? lightning : '',
-				socialLinks: socialLinks ? socialLinks : '',
+				icon: icon ? icon : "",
+				lightning: lightning ? lightning : "",
+				socialLinks: socialLinks ? socialLinks : "",
 				contact,
-				notes: notes ? notes : '',
+				notes: notes ? notes : "",
 				lat: selectedLat,
-				long: selectedLon
+				long: selectedLon,
 			})
 			.then((response) => {
 				submissionIssueNumber = response.data.number;
 				submitted = true;
 			})
 			.catch((error) => {
-				if (error.response.data.message.includes('Captcha')) {
+				if (error.response.data.message.includes("Captcha")) {
 					errToast(error.response.data.message);
 				} else {
-					errToast('Form submission failed, please try again or contact BTC Map.');
+					errToast(
+						"Form submission failed, please try again or contact BTC Map.",
+					);
 				}
 
 				console.error(error);
@@ -144,19 +154,19 @@ const formReset = () => {
 	noLocationSelected = false;
 	submitted = false;
 	submitting = false;
-	searchQuery = '';
+	searchQuery = "";
 	searchResults = [];
 	searchLoading = false;
 
 	// Clear form fields
 	location = undefined;
-	name = '';
-	icon = '';
-	lightning = '';
-	socialLinks = '';
-	contact = '';
-	notes = '';
-	captchaValue = ''; // Reset the value directly
+	name = "";
+	icon = "";
+	lightning = "";
+	socialLinks = "";
+	contact = "";
+	notes = "";
+	captchaValue = ""; // Reset the value directly
 
 	// Refresh captcha
 	fetchCaptcha();

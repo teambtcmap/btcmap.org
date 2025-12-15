@@ -1,15 +1,15 @@
 <script lang="ts">
 export let tooltip: string;
 
-import tippy from 'tippy.js';
+import tippy from "tippy.js";
 
-import Icon from '$components/Icon.svelte';
+import Icon from "$components/Icon.svelte";
 
 let infoTooltip: HTMLButtonElement;
 
 $: infoTooltip &&
 	tippy([infoTooltip], {
-		content: tooltip
+		content: tooltip,
 	});
 </script>
 

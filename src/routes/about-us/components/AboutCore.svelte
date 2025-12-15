@@ -6,7 +6,7 @@ export let member: {
 	socials: { url: string; name: string }[];
 };
 
-import Icon from '$components/Icon.svelte';
+import Icon from "$components/Icon.svelte";
 </script>
 
 <div class="space-y-2 text-center">

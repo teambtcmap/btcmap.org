@@ -1,10 +1,10 @@
 <script lang="ts">
 export let countries: Area[] | undefined;
 
-import type { Area } from '$lib/types';
+import type { Area } from "$lib/types";
 
-import CountryCard from './CountryCard.svelte';
-import CountrySkeleton from './CountrySkeleton.svelte';
+import CountryCard from "./CountryCard.svelte";
+import CountrySkeleton from "./CountrySkeleton.svelte";
 </script>
 
 <section>

@@ -1,28 +1,28 @@
 <script lang="ts">
-import axios from 'axios';
-import { fly } from 'svelte/transition';
-import OutClick from 'svelte-outclick';
+import axios from "axios";
+import { fly } from "svelte/transition";
+import OutClick from "svelte-outclick";
 
-import CloseButton from '$components/CloseButton.svelte';
-import Icon from '$components/Icon.svelte';
-import InvoicePaymentStage from '$components/InvoicePaymentStage.svelte';
-import PrimaryButton from '$components/PrimaryButton.svelte';
-import { PAYMENT_ERROR_MESSAGE } from '$lib/constants';
-import { lastUpdatedPlaceId } from '$lib/store';
-import { updateSinglePlace } from '$lib/sync/places';
-import type { MerchantPageData } from '$lib/types.js';
-import { errToast } from '$lib/utils';
+import CloseButton from "$components/CloseButton.svelte";
+import Icon from "$components/Icon.svelte";
+import InvoicePaymentStage from "$components/InvoicePaymentStage.svelte";
+import PrimaryButton from "$components/PrimaryButton.svelte";
+import { PAYMENT_ERROR_MESSAGE } from "$lib/constants";
+import { lastUpdatedPlaceId } from "$lib/store";
+import { updateSinglePlace } from "$lib/sync/places";
+import type { MerchantPageData } from "$lib/types.js";
+import { errToast } from "$lib/utils";
 
-import { invalidateAll } from '$app/navigation';
+import { invalidateAll } from "$app/navigation";
 
 export let open: boolean = false;
 export let onOpenChange: (value: boolean) => void = () => {};
-export let elementId: MerchantPageData['id'] | undefined;
+export let elementId: MerchantPageData["id"] | undefined;
 
 let stage = 0;
-let commentValue: string = '';
-let invoice = '';
-let invoiceId = '';
+let commentValue: string = "";
+let invoice = "";
+let invoiceId = "";
 let loading = false;
 let commentComplete = false;
 const closeModal = () => {
@@ -31,8 +31,8 @@ const closeModal = () => {
 	}
 	onOpenChange(false);
 	stage = 0;
-	invoice = '';
-	invoiceId = '';
+	invoice = "";
+	invoiceId = "";
 	loading = false;
 	commentComplete = false;
 	$lastUpdatedPlaceId = undefined;
@@ -41,15 +41,15 @@ const closeModal = () => {
 const generateInvoice = (event: SubmitEvent) => {
 	event.preventDefault();
 	if (!elementId || !commentValue.trim()) {
-		errToast('Please enter a comment');
+		errToast("Please enter a comment");
 		return;
 	}
 
 	loading = true;
 	axios
-		.post('/comment/invoice/generate', {
+		.post("/comment/invoice/generate", {
 			place_id: elementId,
-			comment: commentValue.trim()
+			comment: commentValue.trim(),
 		})
 		.then((response) => {
 			invoice = response.data.invoice;
@@ -78,11 +78,11 @@ const handlePaymentSuccess = async () => {
 };
 
 const handlePaymentError = (error: unknown) => {
-	console.error('Payment error:', error);
+	console.error("Payment error:", error);
 };
 
 const handleStatusCheckError = (error: unknown) => {
-	console.error('Status check error:', error);
+	console.error("Status check error:", error);
 };
 </script>
 

@@ -1,16 +1,16 @@
 <script lang="ts">
-import { onMount } from 'svelte';
+import { onMount } from "svelte";
 
-import Icon from '$components/Icon.svelte';
-import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-import PrimaryButton from '$components/PrimaryButton.svelte';
-import { theme } from '$lib/store';
-import type { RpcGetMostActiveUsersItem, TaggerLeaderboard } from '$lib/types';
-import { detectTheme } from '$lib/utils';
+import Icon from "$components/Icon.svelte";
+import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import PrimaryButton from "$components/PrimaryButton.svelte";
+import { theme } from "$lib/store";
+import type { RpcGetMostActiveUsersItem, TaggerLeaderboard } from "$lib/types";
+import { detectTheme } from "$lib/utils";
 
-import LeaderboardItem from './components/LeaderboardItem.svelte';
-import LeaderboardSkeleton from './components/LeaderboardSkeleton.svelte';
-import { browser } from '$app/environment';
+import LeaderboardItem from "./components/LeaderboardItem.svelte";
+import LeaderboardSkeleton from "./components/LeaderboardSkeleton.svelte";
+import { browser } from "$app/environment";
 
 export let data;
 let users: RpcGetMostActiveUsersItem[] = data.rpcResult.users;
@@ -22,7 +22,7 @@ const populateLeaderboard = () => {
 	loading = true;
 	leaderboard = [];
 	users.forEach((user) => {
-		var image_url = 'satoshi';
+		var image_url = "satoshi";
 		if (user.image_url) {
 			image_url = user.image_url;
 		}
@@ -35,7 +35,7 @@ const populateLeaderboard = () => {
 			updated: user.updated,
 			deleted: user.deleted,
 			total: user.edits,
-			tip: user.tip_address
+			tip: user.tip_address,
 		});
 	});
 	leaderboard = leaderboard;
@@ -48,7 +48,7 @@ onMount(() => {
 	}
 });
 
-const headings = ['Position', 'Name', 'Created', 'Updated', 'Deleted', 'Tip'];
+const headings = ["Position", "Name", "Created", "Updated", "Deleted", "Tip"];
 </script>
 
 <svelte:head>

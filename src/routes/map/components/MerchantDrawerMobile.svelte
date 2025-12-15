@@ -1,10 +1,10 @@
 <script lang="ts">
-import { onMount } from 'svelte';
+import { onMount } from "svelte";
 
-import BoostContent from '$components/BoostContent.svelte';
-import Icon from '$components/Icon.svelte';
-import MerchantDetailsContent from '$components/MerchantDetailsContent.svelte';
-import { drawerGesture } from '$lib/drawerGestureController';
+import BoostContent from "$components/BoostContent.svelte";
+import Icon from "$components/Icon.svelte";
+import MerchantDetailsContent from "$components/MerchantDetailsContent.svelte";
+import { drawerGesture } from "$lib/drawerGestureController";
 import {
 	handleBoost as boostMerchant,
 	calcVerifiedDate,
@@ -12,14 +12,14 @@ import {
 	isUpToDate as checkUpToDate,
 	clearBoostState,
 	handleBoostComplete as completeBoost,
-	ensureBoostData
-} from '$lib/merchantDrawerLogic';
-import { merchantDrawer } from '$lib/merchantDrawerStore';
-import { boost, resetBoost } from '$lib/store';
+	ensureBoostData,
+} from "$lib/merchantDrawerLogic";
+import { merchantDrawer } from "$lib/merchantDrawerStore";
+import { boost, resetBoost } from "$lib/store";
 
-import MerchantPeekContentMobile from './MerchantPeekContentMobile.svelte';
-import { browser } from '$app/environment';
-import { invalidateAll } from '$app/navigation';
+import MerchantPeekContentMobile from "./MerchantPeekContentMobile.svelte";
+import { browser } from "$app/environment";
+import { invalidateAll } from "$app/navigation";
 
 // Derive state from centralized store
 $: isOpen = $merchantDrawer.isOpen;
@@ -54,7 +54,10 @@ $: if ($expanded && !wasExpanded) {
 	setTimeout(() => handleElement?.focus(), 0);
 	wasExpanded = true;
 } else if (!$expanded && wasExpanded) {
-	if (previouslyFocusedElement && typeof previouslyFocusedElement.focus === 'function') {
+	if (
+		previouslyFocusedElement &&
+		typeof previouslyFocusedElement.focus === "function"
+	) {
 		previouslyFocusedElement.focus();
 	}
 	previouslyFocusedElement = null;
@@ -64,7 +67,9 @@ $: if ($expanded && !wasExpanded) {
 // Focus trap: keep focus inside drawer when expanded
 function handleFocusOut(event: FocusEvent) {
 	if ($expanded && drawerElement && event.relatedTarget) {
-		const focusMovingOutside = !drawerElement.contains(event.relatedTarget as Node);
+		const focusMovingOutside = !drawerElement.contains(
+			event.relatedTarget as Node,
+		);
 		if (focusMovingOutside) {
 			handleElement?.focus();
 		}
@@ -90,24 +95,25 @@ const closeDrawer = () => {
 const goBack = () => {
 	clearBoostState();
 	boostLoading = false;
-	merchantDrawer.setView('details');
+	merchantDrawer.setView("details");
 };
 
-$: if (drawerView !== 'boost' && $boost !== undefined) {
+$: if (drawerView !== "boost" && $boost !== undefined) {
 	clearBoostState();
 	boostLoading = false;
 }
 
 const handleBoost = () => boostMerchant(merchant, merchantId, setBoostLoading);
-const handleBoostComplete = () => completeBoost(merchantId, invalidateAll, resetBoost);
+const handleBoostComplete = () =>
+	completeBoost(merchantId, invalidateAll, resetBoost);
 
 function handleKeydown(event: KeyboardEvent) {
 	if (!isOpen) return;
 
 	switch (event.key) {
-		case 'Escape':
+		case "Escape":
 			event.preventDefault();
-			if (drawerView !== 'details') {
+			if (drawerView !== "details") {
 				goBack();
 			} else if ($expanded) {
 				drawerGesture.collapse();
@@ -115,20 +121,20 @@ function handleKeydown(event: KeyboardEvent) {
 				closeDrawer();
 			}
 			break;
-		case 'ArrowUp':
+		case "ArrowUp":
 			event.preventDefault();
 			if (!$expanded) {
 				drawerGesture.expand();
 			}
 			break;
-		case 'ArrowDown':
+		case "ArrowDown":
 			event.preventDefault();
 			if ($expanded) {
 				drawerGesture.collapse();
 			}
 			break;
-		case 'Enter':
-		case ' ':
+		case "Enter":
+		case " ":
 			if (document.activeElement === handleElement) {
 				event.preventDefault();
 				drawerGesture.toggle();
@@ -160,7 +166,7 @@ onMount(() => {
 	drawerGesture.setDismissCallback(closeDrawer);
 
 	// Keyboard listener
-	window.addEventListener('keydown', handleKeydown);
+	window.addEventListener("keydown", handleKeydown);
 
 	// Window resize handler
 	let updateHeight: (() => void) | null = null;
@@ -169,24 +175,24 @@ onMount(() => {
 			drawerGesture.setExpandedHeight(window.innerHeight);
 		};
 		updateHeight();
-		window.addEventListener('resize', updateHeight);
+		window.addEventListener("resize", updateHeight);
 	}
 
 	return () => {
 		drawerGesture.setDismissCallback(null);
-		window.removeEventListener('keydown', handleKeydown);
+		window.removeEventListener("keydown", handleKeydown);
 		if (updateHeight) {
-			window.removeEventListener('resize', updateHeight);
+			window.removeEventListener("resize", updateHeight);
 		}
 	};
 });
 
-$: if (drawerView === 'boost' && merchant) {
+$: if (drawerView === "boost" && merchant) {
 	ensureBoostData(merchant, $boost);
 }
 
 export function openDrawer(id: number) {
-	merchantDrawer.open(id, 'details');
+	merchantDrawer.open(id, "details");
 }
 </script>
 

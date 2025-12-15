@@ -1,33 +1,35 @@
 <script lang="ts">
-import Icon from '$components/Icon.svelte';
+import Icon from "$components/Icon.svelte";
 
 export let link: string;
 export let icon: string;
 export let text: string;
 
 // Social icons use FA brands
-const faIcons = ['x', 'instagram', 'facebook'];
+const faIcons = ["x", "instagram", "facebook"];
 
 // Map icon names to their respective icons
 const materialIconMap: Record<string, string> = {
-	compass: 'explore',
-	pencil: 'edit',
-	share: 'share',
-	bolt: 'bolt',
-	phone: 'phone',
-	email: 'email',
-	globe: 'language',
-	external: 'open_in_new'
+	compass: "explore",
+	pencil: "edit",
+	share: "share",
+	bolt: "bolt",
+	phone: "phone",
+	email: "email",
+	globe: "language",
+	external: "open_in_new",
 };
 
 const faIconMap: Record<string, string> = {
-	x: 'x-twitter',
-	instagram: 'instagram',
-	facebook: 'facebook'
+	x: "x-twitter",
+	instagram: "instagram",
+	facebook: "facebook",
 };
 
 $: isFaIcon = faIcons.includes(icon);
-$: resolvedIcon = isFaIcon ? faIconMap[icon] || icon : materialIconMap[icon] || icon;
+$: resolvedIcon = isFaIcon
+	? faIconMap[icon] || icon
+	: materialIconMap[icon] || icon;
 </script>
 
 <!-- eslint-disable svelte/no-navigation-without-resolve -->

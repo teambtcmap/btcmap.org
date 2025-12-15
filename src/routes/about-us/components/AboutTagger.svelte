@@ -1,7 +1,7 @@
 <script lang="ts">
-import tippy from 'tippy.js';
+import tippy from "tippy.js";
 
-import { resolve } from '$app/paths';
+import { resolve } from "$app/paths";
 
 export let tagger: { id: number; avatar: string; username: string };
 
@@ -9,7 +9,7 @@ let taggerTooltip: HTMLAnchorElement;
 
 $: taggerTooltip &&
 	tippy([taggerTooltip], {
-		content: tagger.username
+		content: tagger.username,
 	});
 </script>
 

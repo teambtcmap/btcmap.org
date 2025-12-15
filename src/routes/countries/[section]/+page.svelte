@@ -1,16 +1,16 @@
 <script lang="ts">
-import { onMount } from 'svelte';
+import { onMount } from "svelte";
 
-import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-import PrimaryButton from '$components/PrimaryButton.svelte';
-import { areaError, areas, theme } from '$lib/store';
-import { areasSync } from '$lib/sync/areas';
-import { detectTheme, errToast, validateContinents } from '$lib/utils';
+import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import PrimaryButton from "$components/PrimaryButton.svelte";
+import { areaError, areas, theme } from "$lib/store";
+import { areasSync } from "$lib/sync/areas";
+import { detectTheme, errToast, validateContinents } from "$lib/utils";
 
-import type { PageData } from './$types';
-import CountrySection from './components/CountrySection.svelte';
-import { goto } from '$app/navigation';
-import { resolve } from '$app/paths';
+import type { PageData } from "./$types";
+import CountrySection from "./components/CountrySection.svelte";
+import { goto } from "$app/navigation";
+import { resolve } from "$app/paths";
 
 export let data: PageData;
 
@@ -25,12 +25,12 @@ $: countries = $areas?.length
 	? $areas
 			.filter(
 				(area) =>
-					area.tags.type === 'country' &&
+					area.tags.type === "country" &&
 					area.id.length === 2 &&
 					area.tags.geo_json &&
 					area.tags.name &&
 					area.tags.continent &&
-					validateContinents(area.tags.continent)
+					validateContinents(area.tags.continent),
 			)
 			.sort((a, b) => {
 				const nameA = a.tags.name.toUpperCase(); // ignore upper and lowercase
@@ -46,49 +46,62 @@ $: countries = $areas?.length
 			})
 	: undefined;
 
-$: africa = countries?.filter((country) => country.tags.continent === 'Africa');
-$: asia = countries?.filter((country) => country.tags.continent === 'Asia');
-$: europe = countries?.filter((country) => country.tags.continent === 'Europe');
-$: northAmerica = countries?.filter((country) => country.tags.continent === 'North America');
-$: oceania = countries?.filter((country) => country.tags.continent === 'Oceania');
-$: southAmerica = countries?.filter((country) => country.tags.continent === 'South America');
+$: africa = countries?.filter((country) => country.tags.continent === "Africa");
+$: asia = countries?.filter((country) => country.tags.continent === "Asia");
+$: europe = countries?.filter((country) => country.tags.continent === "Europe");
+$: northAmerica = countries?.filter(
+	(country) => country.tags.continent === "North America",
+);
+$: oceania = countries?.filter(
+	(country) => country.tags.continent === "Oceania",
+);
+$: southAmerica = countries?.filter(
+	(country) => country.tags.continent === "South America",
+);
 
-const sections = ['africa', 'asia', 'europe', 'north-america', 'oceania', 'south-america'];
+const sections = [
+	"africa",
+	"asia",
+	"europe",
+	"north-america",
+	"oceania",
+	"south-america",
+];
 $: countrySections = [
 	{
-		section: 'Africa',
-		countries: africa
+		section: "Africa",
+		countries: africa,
 	},
 	{
-		section: 'Asia',
-		countries: asia
+		section: "Asia",
+		countries: asia,
 	},
 	{
-		section: 'Europe',
-		countries: europe
+		section: "Europe",
+		countries: europe,
 	},
 	{
-		section: 'North America',
-		countries: northAmerica
+		section: "North America",
+		countries: northAmerica,
 	},
 	{
-		section: 'Oceania',
-		countries: oceania
+		section: "Oceania",
+		countries: oceania,
 	},
 	{
-		section: 'South America',
-		countries: southAmerica
-	}
+		section: "South America",
+		countries: southAmerica,
+	},
 ];
 
 // Map continent tag values to display names
 const continentDisplayNames: Record<string, string> = {
-	africa: 'Africa',
-	asia: 'Asia',
-	europe: 'Europe',
-	'north-america': 'North America',
-	oceania: 'Oceania',
-	'south-america': 'South America'
+	africa: "Africa",
+	asia: "Asia",
+	europe: "Europe",
+	"north-america": "North America",
+	oceania: "Oceania",
+	"south-america": "South America",
 };
 
 // Handle dropdown change

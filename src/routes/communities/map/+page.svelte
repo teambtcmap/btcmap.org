@@ -1,12 +1,12 @@
 <script lang="ts">
-import rewind from '@mapbox/geojson-rewind';
-import { geoArea } from 'd3-geo';
-import type { Map } from 'leaflet';
-import { onDestroy, onMount } from 'svelte';
+import rewind from "@mapbox/geojson-rewind";
+import { geoArea } from "d3-geo";
+import type { Map } from "leaflet";
+import { onDestroy, onMount } from "svelte";
 
-import MapLoadingMain from '$components/MapLoadingMain.svelte';
-import Socials from '$components/Socials.svelte';
-import { loadMapDependencies } from '$lib/map/imports';
+import MapLoadingMain from "$components/MapLoadingMain.svelte";
+import Socials from "$components/Socials.svelte";
+import { loadMapDependencies } from "$lib/map/imports";
 import {
 	attribution,
 	changeDefaultIcons,
@@ -15,23 +15,23 @@ import {
 	layers,
 	scaleBars,
 	support,
-	updateMapHash
-} from '$lib/map/setup';
-import { areaError, areas, reportError, reports } from '$lib/store';
-import { areasSync } from '$lib/sync/areas';
-import { batchSync } from '$lib/sync/batchSync';
-import { reportsSync } from '$lib/sync/reports';
-import type { Leaflet, Theme } from '$lib/types';
-import { detectTheme, errToast } from '$lib/utils';
+	updateMapHash,
+} from "$lib/map/setup";
+import { areaError, areas, reportError, reports } from "$lib/store";
+import { areasSync } from "$lib/sync/areas";
+import { batchSync } from "$lib/sync/batchSync";
+import { reportsSync } from "$lib/sync/reports";
+import type { Leaflet, Theme } from "$lib/types";
+import { detectTheme, errToast } from "$lib/utils";
 
-import { browser } from '$app/environment';
-import { resolve } from '$app/paths';
-import { page } from '$app/stores';
+import { browser } from "$app/environment";
+import { resolve } from "$app/paths";
+import { page } from "$app/stores";
 
 let mapLoading = 0;
 
 let leaflet: Leaflet;
-let DomEvent: typeof import('leaflet/src/dom/DomEvent');
+let DomEvent: typeof import("leaflet/src/dom/DomEvent");
 let theme: Theme;
 
 let mapElement: HTMLDivElement;
@@ -40,13 +40,13 @@ let mapLoaded = false;
 let communitiesLoaded = false;
 
 // allow to view map centered on a community
-const communityQuery = $page.url.searchParams.get('community');
+const communityQuery = $page.url.searchParams.get("community");
 
 // allow to view map with only certain language communities
-const language = $page.url.searchParams.get('language');
+const language = $page.url.searchParams.get("language");
 
 // allow to view map with only certain org communities
-const organization = $page.url.searchParams.get('organization');
+const organization = $page.url.searchParams.get("organization");
 
 // alert for area errors
 $: $areaError && errToast($areaError);
@@ -62,15 +62,15 @@ const initializeCommunities = () => {
 	// filter communities
 	const communitiesFiltered = $areas.filter(
 		(area) =>
-			area.tags.type === 'community' &&
+			area.tags.type === "community" &&
 			area.tags.geo_json &&
 			area.tags.name &&
-			area.tags['icon:square'] &&
+			area.tags["icon:square"] &&
 			area.tags.continent &&
-			Object.keys(area.tags).find((key) => key.includes('contact')) &&
+			Object.keys(area.tags).find((key) => key.includes("contact")) &&
 			$reports.find((report) => report.area_id === area.id) &&
 			(language ? area.tags.language === language : true) &&
-			(organization ? area.tags.organization === organization : true)
+			(organization ? area.tags.organization === organization : true),
 	);
 
 	// sort communities by largest to smallest
@@ -83,11 +83,11 @@ const initializeCommunities = () => {
 
 	// add communities to map
 	communities.forEach((community) => {
-		const popupContainer = leaflet.DomUtil.create('div');
+		const popupContainer = leaflet.DomUtil.create("div");
 
 		popupContainer.innerHTML = `
 				<div class='text-center space-y-2'>
-					<img loading='lazy' src=${`https://btcmap.org/.netlify/images?url=${community.tags['icon:square']}&fit=cover&w=256&h=256`} alt='avatar' class='w-24 h-24 rounded-full mx-auto' title='Community icon' onerror="this.src='/images/bitcoin.svg'" />
+					<img loading='lazy' src=${`https://btcmap.org/.netlify/images?url=${community.tags["icon:square"]}&fit=cover&w=256&h=256`} alt='avatar' class='w-24 h-24 rounded-full mx-auto' title='Community icon' onerror="this.src='/images/bitcoin.svg'" />
 
 					<span class='text-primary dark:text-white font-semibold text-xl' title='Community name'>${
 						community.tags.name
@@ -100,7 +100,7 @@ const initializeCommunities = () => {
 					>
 					${community.tags.organization}
 					</span>`
-							: ''
+							: ""
 					}
 
 					${
@@ -108,7 +108,7 @@ const initializeCommunities = () => {
 							? `<span class="block gradient-bg w-32 mx-auto py-1 text-xs text-white font-semibold rounded-full" title='Supporter'>
 						BTC Map Sponsor
 					</span>`
-							: ''
+							: ""
 					}
 
 					<div id='socials'>
@@ -118,7 +118,7 @@ const initializeCommunities = () => {
 				</div>
 
 				${
-					theme === 'dark'
+					theme === "dark"
 						? `
 							<style>
 								.leaflet-popup-content-wrapper, .leaflet-popup-tip {
@@ -132,44 +132,44 @@ const initializeCommunities = () => {
 									right: 4px !important;
 							}
 							</style>`
-						: ''
+						: ""
 				}`;
 
-		const socials = popupContainer.querySelector('#socials');
+		const socials = popupContainer.querySelector("#socials");
 		if (socials) {
 			new Socials({
 				target: socials,
 				props: {
-					website: community.tags['contact:website'],
-					email: community.tags['contact:email'],
-					nostr: community.tags['contact:nostr'],
-					twitter: community.tags['contact:twitter'],
-					meetup: community.tags['contact:meetup'],
-					eventbrite: community.tags['contact:eventbrite'],
-					telegram: community.tags['contact:telegram'],
-					discord: community.tags['contact:discord'],
-					youtube: community.tags['contact:youtube'],
-					github: community.tags['contact:github'],
-					reddit: community.tags['contact:reddit'],
-					instagram: community.tags['contact:instagram'],
-					whatsapp: community.tags['contact:whatsapp'],
-					facebook: community.tags['contact:facebook'],
-					linkedin: community.tags['contact:linkedin'],
-					rss: community.tags['contact:rss'],
-					signal: community.tags['contact:signal'],
-					simplex: community.tags['contact:simplex']
-				}
+					website: community.tags["contact:website"],
+					email: community.tags["contact:email"],
+					nostr: community.tags["contact:nostr"],
+					twitter: community.tags["contact:twitter"],
+					meetup: community.tags["contact:meetup"],
+					eventbrite: community.tags["contact:eventbrite"],
+					telegram: community.tags["contact:telegram"],
+					discord: community.tags["contact:discord"],
+					youtube: community.tags["contact:youtube"],
+					github: community.tags["contact:github"],
+					reddit: community.tags["contact:reddit"],
+					instagram: community.tags["contact:instagram"],
+					whatsapp: community.tags["contact:whatsapp"],
+					facebook: community.tags["contact:facebook"],
+					linkedin: community.tags["contact:linkedin"],
+					rss: community.tags["contact:rss"],
+					signal: community.tags["contact:signal"],
+					simplex: community.tags["contact:simplex"],
+				},
 			});
 		}
 
 		try {
 			let communityLayer = leaflet
 				.geoJSON(community.tags.geo_json, {
-					style: { color: '#000000', fillColor: '#F7931A', fillOpacity: 0.5 }
+					style: { color: "#000000", fillColor: "#F7931A", fillOpacity: 0.5 },
 				})
 				.bindPopup(popupContainer, { minWidth: 300 });
 
-			communityLayer.on('click', () => communityLayer.bringToBack());
+			communityLayer.on("click", () => communityLayer.bringToBack());
 
 			communityLayer.addTo(map);
 		} catch (error) {
@@ -180,11 +180,13 @@ const initializeCommunities = () => {
 	// set view to community if in url params
 	if (communityQuery && communitySelected) {
 		try {
-			map.fitBounds(leaflet.geoJSON(communitySelected.tags.geo_json).getBounds());
+			map.fitBounds(
+				leaflet.geoJSON(communitySelected.tags.geo_json).getBounds(),
+			);
 		} catch (error) {
 			map.setView([0, 0], 3);
 			errToast(
-				'Could not set map view to provided coordinates, please try again or contact BTC Map.'
+				"Could not set map view to provided coordinates, please try again or contact BTC Map.",
 			);
 			console.error(error);
 		}
@@ -219,12 +221,15 @@ onMount(async () => {
 		// use url hash if present
 		if (location.hash) {
 			try {
-				const coords = location.hash.split('/');
-				map.setView([Number(coords[1]), Number(coords[2])], Number(coords[0].slice(1)));
+				const coords = location.hash.split("/");
+				map.setView(
+					[Number(coords[1]), Number(coords[2])],
+					Number(coords[0].slice(1)),
+				);
 			} catch (error) {
 				map.setView([0, 0], 3);
 				errToast(
-					'Could not set map view to provided coordinates, please try again or contact BTC Map.'
+					"Could not set map view to provided coordinates, please try again or contact BTC Map.",
 				);
 				console.error(error);
 			}
@@ -235,7 +240,7 @@ onMount(async () => {
 		// add tiles and basemaps
 		const { baseMaps } = layers(leaflet, map);
 
-		map.on('moveend', () => {
+		map.on("moveend", () => {
 			if (!communityQuery) {
 				const zoom = map.getZoom();
 				const mapCenter = map.getCenter();
@@ -272,7 +277,7 @@ onMount(async () => {
 
 onDestroy(async () => {
 	if (map) {
-		console.info('Unloading Leaflet map.');
+		console.info("Unloading Leaflet map.");
 		map.remove();
 	}
 });

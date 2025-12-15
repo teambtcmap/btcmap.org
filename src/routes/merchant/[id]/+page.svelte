@@ -1,25 +1,25 @@
 <script lang="ts">
 export let data: MerchantPageData;
 
-import rewind from '@mapbox/geojson-rewind';
-import { geoContains } from 'd3-geo';
-import type { Map, Marker } from 'leaflet';
-import { onDestroy, onMount } from 'svelte';
-import Time from 'svelte-time';
-import tippy from 'tippy.js';
+import rewind from "@mapbox/geojson-rewind";
+import { geoContains } from "d3-geo";
+import type { Map, Marker } from "leaflet";
+import { onDestroy, onMount } from "svelte";
+import Time from "svelte-time";
+import tippy from "tippy.js";
 
-import Boost from '$components/Boost.svelte';
-import BoostButton from '$components/BoostButton.svelte';
-import Card from '$components/Card.svelte';
-import Icon from '$components/Icon.svelte';
-import MapLoadingEmbed from '$components/MapLoadingEmbed.svelte';
-import PaymentMethodIcon from '$components/PaymentMethodIcon.svelte';
-import PrimaryButton from '$components/PrimaryButton.svelte';
-import ShowTags from '$components/ShowTags.svelte';
-import TaggerSkeleton from '$components/TaggerSkeleton.svelte';
-import TaggingIssues from '$components/TaggingIssues.svelte';
-import TopButton from '$components/TopButton.svelte';
-import { loadMapDependencies } from '$lib/map/imports';
+import Boost from "$components/Boost.svelte";
+import BoostButton from "$components/BoostButton.svelte";
+import Card from "$components/Card.svelte";
+import Icon from "$components/Icon.svelte";
+import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
+import PaymentMethodIcon from "$components/PaymentMethodIcon.svelte";
+import PrimaryButton from "$components/PrimaryButton.svelte";
+import ShowTags from "$components/ShowTags.svelte";
+import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
+import TaggingIssues from "$components/TaggingIssues.svelte";
+import TopButton from "$components/TopButton.svelte";
+import { loadMapDependencies } from "$lib/map/imports";
 import {
 	attribution,
 	calcVerifiedDate,
@@ -27,8 +27,8 @@ import {
 	generateIcon,
 	geolocate,
 	layers,
-	toggleMapButtons
-} from '$lib/map/setup';
+	toggleMapButtons,
+} from "$lib/map/setup";
 import {
 	areaError,
 	areas,
@@ -42,14 +42,14 @@ import {
 	taggingIssues,
 	theme,
 	userError,
-	users
-} from '$lib/store';
-import { areasSync } from '$lib/sync/areas';
-import { batchSync } from '$lib/sync/batchSync';
-import { eventsSync } from '$lib/sync/events';
-import { updateSinglePlace } from '$lib/sync/places';
-import { reportsSync } from '$lib/sync/reports';
-import { usersSync } from '$lib/sync/users';
+	users,
+} from "$lib/store";
+import { areasSync } from "$lib/sync/areas";
+import { batchSync } from "$lib/sync/batchSync";
+import { eventsSync } from "$lib/sync/events";
+import { updateSinglePlace } from "$lib/sync/places";
+import { reportsSync } from "$lib/sync/reports";
+import { usersSync } from "$lib/sync/users";
 import type {
 	Area,
 	BaseMaps,
@@ -57,23 +57,23 @@ import type {
 	Event,
 	Leaflet,
 	MerchantPageData,
-	PayMerchant
-} from '$lib/types.js';
+	PayMerchant,
+} from "$lib/types.js";
 import {
 	errToast,
 	formatOpeningHours,
 	formatVerifiedHuman,
 	isBoosted,
-	successToast
-} from '$lib/utils';
+	successToast,
+} from "$lib/utils";
 
-import CommentAddButton from './components/CommentAddButton.svelte';
-import MerchantButton from './components/MerchantButton.svelte';
-import MerchantComment from './components/MerchantComment.svelte';
-import MerchantEvent from './components/MerchantEvent.svelte';
-import MerchantLink from './components/MerchantLink.svelte';
-import { browser } from '$app/environment';
-import { resolve } from '$app/paths';
+import CommentAddButton from "./components/CommentAddButton.svelte";
+import MerchantButton from "./components/MerchantButton.svelte";
+import MerchantComment from "./components/MerchantComment.svelte";
+import MerchantEvent from "./components/MerchantEvent.svelte";
+import MerchantLink from "./components/MerchantLink.svelte";
+import { browser } from "$app/environment";
+import { resolve } from "$app/paths";
 
 // alert for user errors
 $: $userError && errToast($userError);
@@ -91,7 +91,7 @@ let initialRenderComplete = false;
 
 let leaflet: Leaflet;
 let DomEvent: DomEventType;
-let LocateControl: typeof import('leaflet.locatecontrol').LocateControl;
+let LocateControl: typeof import("leaflet.locatecontrol").LocateControl;
 
 const initializeData = () => {
 	if (dataInitialized) return;
@@ -119,20 +119,20 @@ const initializeData = () => {
 
 	const communities = $areas.filter(
 		(area) =>
-			area.tags.type === 'community' &&
+			area.tags.type === "community" &&
 			area.tags.geo_json &&
 			area.tags.name &&
-			area.tags['icon:square'] &&
+			area.tags["icon:square"] &&
 			area.tags.continent &&
-			Object.keys(area.tags).find((key) => key.includes('contact')) &&
-			$reports.find((report) => report.area_id === area.id)
+			Object.keys(area.tags).find((key) => key.includes("contact")) &&
+			$reports.find((report) => report.area_id === area.id),
 	);
 
 	// filter communities containing element
 	filteredCommunities = communities.filter((community) => {
 		let rewoundPoly = rewind(community.tags.geo_json, true);
 
-		if (typeof lat === 'number' && typeof long === 'number') {
+		if (typeof lat === "number" && typeof long === "number") {
 			if (geoContains(rewoundPoly, [long, lat])) {
 				return true;
 			}
@@ -140,9 +140,13 @@ const initializeData = () => {
 		return false;
 	});
 
-	merchantEvents = $events.filter((event) => event.element_id === data.placeData.osm_id);
+	merchantEvents = $events.filter(
+		(event) => event.element_id === data.placeData.osm_id,
+	);
 
-	merchantEvents.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+	merchantEvents.sort(
+		(a, b) => Date.parse(b.created_at) - Date.parse(a.created_at),
+	);
 
 	const setupMap = () => {
 		// add map
@@ -153,7 +157,7 @@ const initializeData = () => {
 		baseMaps = layersResult.baseMaps;
 
 		// change broken marker image path in prod
-		leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
+		leaflet.Icon.Default.prototype.options.imagePath = "/icons/";
 
 		// add OSM attribution
 		attribution(leaflet, map);
@@ -169,12 +173,12 @@ const initializeData = () => {
 		// add element to map
 		const divIcon = generateIcon(
 			leaflet,
-			data.placeData.deleted_at ? 'skull' : icon || 'question_mark',
+			data.placeData.deleted_at ? "skull" : icon || "question_mark",
 			!!boosted,
-			commentsCount
+			commentsCount,
 		);
 
-		if (typeof lat === 'number' && typeof long === 'number') {
+		if (typeof lat === "number" && typeof long === "number") {
 			merchantMarker = leaflet.marker([lat, long], { icon: divIcon });
 			map.addLayer(merchantMarker);
 			map.fitBounds([[lat, long]]);
@@ -223,7 +227,10 @@ $: {
 	const placeInStore = $placesById.get(Number(data.id));
 	const mergedPlace = placeInStore || data.placeData;
 	// Only set boosted if the place is actually boosted (expiry in future)
-	boosted = mergedPlace && isBoosted(mergedPlace) ? mergedPlace.boosted_until : undefined;
+	boosted =
+		mergedPlace && isBoosted(mergedPlace)
+			? mergedPlace.boosted_until
+			: undefined;
 }
 let phone: string | undefined;
 let website: string | undefined;
@@ -245,50 +252,50 @@ let outdatedTooltip: HTMLSpanElement;
 $: thirdPartyTooltip &&
 	data &&
 	tippy([thirdPartyTooltip], {
-		content: 'Third party app required'
+		content: "Third party app required",
 	});
 
 $: onchainTooltip &&
 	data &&
 	tippy([onchainTooltip], {
 		content:
-			data.osmTags?.['payment:onchain'] === 'yes'
-				? 'On-chain accepted'
-				: data.osmTags?.['payment:onchain'] === 'no'
-					? 'On-chain not accepted'
-					: 'On-chain unknown'
+			data.osmTags?.["payment:onchain"] === "yes"
+				? "On-chain accepted"
+				: data.osmTags?.["payment:onchain"] === "no"
+					? "On-chain not accepted"
+					: "On-chain unknown",
 	});
 
 $: lnTooltip &&
 	data &&
 	tippy([lnTooltip], {
 		content:
-			data.osmTags?.['payment:lightning'] === 'yes'
-				? 'Lightning accepted'
-				: data.osmTags?.['payment:lightning'] === 'no'
-					? 'Lightning not accepted'
-					: 'Lightning unknown'
+			data.osmTags?.["payment:lightning"] === "yes"
+				? "Lightning accepted"
+				: data.osmTags?.["payment:lightning"] === "no"
+					? "Lightning not accepted"
+					: "Lightning unknown",
 	});
 
 $: nfcTooltip &&
 	data &&
 	tippy([nfcTooltip], {
 		content:
-			data.osmTags?.['payment:lightning_contactless'] === 'yes'
-				? 'Lightning Contactless accepted'
-				: data.osmTags?.['payment:lightning_contactless'] === 'no'
-					? 'Lightning contactless not accepted'
-					: 'Lightning contactless unknown'
+			data.osmTags?.["payment:lightning_contactless"] === "yes"
+				? "Lightning Contactless accepted"
+				: data.osmTags?.["payment:lightning_contactless"] === "no"
+					? "Lightning contactless not accepted"
+					: "Lightning contactless unknown",
 	});
 
 $: verifiedTooltip &&
 	tippy([verifiedTooltip], {
-		content: 'Verified within the last year'
+		content: "Verified within the last year",
 	});
 
 $: outdatedTooltip &&
 	tippy([outdatedTooltip], {
-		content: 'Outdated please re-verify'
+		content: "Outdated please re-verify",
 	});
 
 let lat: number | undefined;
@@ -338,18 +345,18 @@ onMount(async () => {
 			await updateSinglePlace(data.id);
 		} catch (error) {
 			// Silent failure - page still works with server data even if cache update fails
-			console.error('Could not update place in localforage:', error);
+			console.error("Could not update place in localforage:", error);
 		}
 	}
 });
 
 const toggleTheme = () => {
-	if ($theme === 'dark') {
-		baseMaps['OpenFreeMap Liberty'].remove();
-		baseMaps['OpenFreeMap Dark'].addTo(map);
+	if ($theme === "dark") {
+		baseMaps["OpenFreeMap Liberty"].remove();
+		baseMaps["OpenFreeMap Dark"].addTo(map);
 	} else {
-		baseMaps['OpenFreeMap Dark'].remove();
-		baseMaps['OpenFreeMap Liberty'].addTo(map);
+		baseMaps["OpenFreeMap Dark"].remove();
+		baseMaps["OpenFreeMap Liberty"].addTo(map);
 	}
 };
 
@@ -361,17 +368,17 @@ $: $theme !== undefined && mapLoaded && toggleTheme();
 $: if (merchantMarker && leaflet && mapLoaded && icon) {
 	const commentsCount = comments.length;
 	const displayIcon = data.placeData.deleted_at
-		? 'skull'
-		: icon !== 'question_mark'
+		? "skull"
+		: icon !== "question_mark"
 			? icon
-			: 'currency_bitcoin';
+			: "currency_bitcoin";
 	const newIcon = generateIcon(leaflet, displayIcon, !!boosted, commentsCount);
 	merchantMarker.setIcon(newIcon);
 }
 
 onDestroy(async () => {
 	if (map) {
-		console.info('Unloading Leaflet map.');
+		console.info("Unloading Leaflet map.");
 		map.remove();
 	}
 });

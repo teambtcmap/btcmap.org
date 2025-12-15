@@ -1,30 +1,30 @@
 <script lang="ts">
-import { browser } from '$app/environment';
-import { goto } from '$app/navigation';
-import { page } from '$app/stores';
+import { browser } from "$app/environment";
+import { goto } from "$app/navigation";
+import { page } from "$app/stores";
 
-export let type: 'country' | 'community';
+export let type: "country" | "community";
 export let data: AreaPageProps;
 
-import rewind from '@mapbox/geojson-rewind';
-import axios from 'axios';
-import axiosRetry from 'axios-retry';
-import { geoContains } from 'd3-geo';
-import { onMount } from 'svelte';
+import rewind from "@mapbox/geojson-rewind";
+import axios from "axios";
+import axiosRetry from "axios-retry";
+import { geoContains } from "d3-geo";
+import { onMount } from "svelte";
 
-import AreaActivity from '$components/area/AreaActivity.svelte';
-import AreaMap from '$components/area/AreaMap.svelte';
-import AreaMerchantHighlights from '$components/area/AreaMerchantHighlights.svelte';
-import AreaStats from '$components/area/AreaStats.svelte';
-import AreaTickets from '$components/area/AreaTickets.svelte';
-import Boost from '$components/Boost.svelte';
-import Icon from '$components/Icon.svelte';
-import IssuesTable from '$components/IssuesTable.svelte';
-import OrgBadge from '$components/OrgBadge.svelte';
-import Socials from '$components/Socials.svelte';
-import SponsorBadge from '$components/SponsorBadge.svelte';
-import Tip from '$components/Tip.svelte';
-import { buildFieldsParam, PLACE_FIELD_SETS } from '$lib/api-fields';
+import AreaActivity from "$components/area/AreaActivity.svelte";
+import AreaMap from "$components/area/AreaMap.svelte";
+import AreaMerchantHighlights from "$components/area/AreaMerchantHighlights.svelte";
+import AreaStats from "$components/area/AreaStats.svelte";
+import AreaTickets from "$components/area/AreaTickets.svelte";
+import Boost from "$components/Boost.svelte";
+import Icon from "$components/Icon.svelte";
+import IssuesTable from "$components/IssuesTable.svelte";
+import OrgBadge from "$components/OrgBadge.svelte";
+import Socials from "$components/Socials.svelte";
+import SponsorBadge from "$components/SponsorBadge.svelte";
+import Tip from "$components/Tip.svelte";
+import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
 import {
 	areaError,
 	areas,
@@ -35,13 +35,13 @@ import {
 	reportError,
 	reports,
 	userError,
-	users
-} from '$lib/store';
-import { areasSync } from '$lib/sync/areas';
-import { batchSync } from '$lib/sync/batchSync';
-import { eventsSync } from '$lib/sync/events';
-import { reportsSync } from '$lib/sync/reports';
-import { usersSync } from '$lib/sync/users';
+	users,
+} from "$lib/store";
+import { areasSync } from "$lib/sync/areas";
+import { batchSync } from "$lib/sync/batchSync";
+import { eventsSync } from "$lib/sync/events";
+import { reportsSync } from "$lib/sync/reports";
+import { usersSync } from "$lib/sync/users";
 import {
 	type ActivityEvent,
 	type AreaPageProps,
@@ -51,9 +51,9 @@ import {
 	type Report,
 	type RpcIssue,
 	TipType,
-	type User
-} from '$lib/types.js';
-import { errToast, formatElementID, validateContinents } from '$lib/utils';
+	type User,
+} from "$lib/types.js";
+import { errToast, formatElementID, validateContinents } from "$lib/utils";
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
@@ -73,10 +73,10 @@ $: $areaError && errToast($areaError);
 $: $reportError && errToast($reportError);
 
 enum Sections {
-	merchants = 'Merchants',
-	stats = 'Stats',
-	activity = 'Activity',
-	maintain = 'Maintain'
+	merchants = "Merchants",
+	stats = "Stats",
+	activity = "Activity",
+	maintain = "Maintain",
 }
 
 const sections = Object.values(Sections);
@@ -84,10 +84,10 @@ let scrolled = false;
 
 // Map section names to URL-friendly slugs
 const sectionSlugs: Record<Sections, string> = {
-	[Sections.merchants]: 'merchants',
-	[Sections.stats]: 'stats',
-	[Sections.activity]: 'activity',
-	[Sections.maintain]: 'maintain'
+	[Sections.merchants]: "merchants",
+	[Sections.stats]: "stats",
+	[Sections.activity]: "activity",
+	[Sections.maintain]: "maintain",
 };
 
 // Reverse mapping from slugs to sections
@@ -95,11 +95,11 @@ const slugToSection: Record<string, Sections> = {
 	merchants: Sections.merchants,
 	stats: Sections.stats,
 	activity: Sections.activity,
-	maintain: Sections.maintain
+	maintain: Sections.maintain,
 };
 
 // Get the current section from the route parameter
-$: currentSection = $page.params.section || 'merchants';
+$: currentSection = $page.params.section || "merchants";
 $: activeSection = slugToSection[currentSection] || Sections.merchants;
 
 // Handle section change
@@ -123,17 +123,23 @@ const fetchPlacesForArea = async (areaId: string): Promise<Place[]> => {
 		// Step 1: Geographic filtering (fast, uses existing store)
 		const area = $areas.find((a) => a.id === areaId);
 		if (!area || !area.tags.geo_json) {
-			console.error('Area not found or missing geo_json:', areaId);
+			console.error("Area not found or missing geo_json:", areaId);
 			return [];
 		}
 
 		const allPlaces = $places;
 		const rewoundPoly = rewind(area.tags.geo_json, true);
 		const areaPlaces = allPlaces.filter((place: Place) => {
-			return place.lat && place.lon && geoContains(rewoundPoly, [place.lon, place.lat]);
+			return (
+				place.lat &&
+				place.lon &&
+				geoContains(rewoundPoly, [place.lon, place.lat])
+			);
 		});
 
-		console.info(`Geographic filtering found ${areaPlaces.length} places for ${areaId}`);
+		console.info(
+			`Geographic filtering found ${areaPlaces.length} places for ${areaId}`,
+		);
 
 		// Step 2: Enrich with verification data from API (batched requests)
 		const placeIds = areaPlaces.map((p) => p.id);
@@ -141,7 +147,7 @@ const fetchPlacesForArea = async (areaId: string): Promise<Place[]> => {
 		const enrichedPlaces: Place[] = [];
 
 		console.info(
-			`Enriching ${placeIds.length} places with verification data in ${Math.ceil(placeIds.length / batchSize)} batches`
+			`Enriching ${placeIds.length} places with verification data in ${Math.ceil(placeIds.length / batchSize)} batches`,
 		);
 
 		for (let i = 0; i < placeIds.length; i += batchSize) {
@@ -149,13 +155,16 @@ const fetchPlacesForArea = async (areaId: string): Promise<Place[]> => {
 			const batchPromises = batch.map((id) =>
 				axios
 					.get<Place>(
-						`https://api.btcmap.org/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`
+						`https://api.btcmap.org/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`,
 					)
 					.then((response) => response.data)
 					.catch((error) => {
-						console.warn(`Failed to fetch place ${id}:`, error.response?.status);
+						console.warn(
+							`Failed to fetch place ${id}:`,
+							error.response?.status,
+						);
 						return null;
-					})
+					}),
 			);
 
 			const batchResults = await Promise.all(batchPromises);
@@ -165,14 +174,16 @@ const fetchPlacesForArea = async (areaId: string): Promise<Place[]> => {
 			enrichedPlaces.push(...validPlaces);
 
 			console.info(
-				`Batch ${Math.floor(i / batchSize) + 1} completed: ${validPlaces.length}/${batch.length} successful`
+				`Batch ${Math.floor(i / batchSize) + 1} completed: ${validPlaces.length}/${batch.length} successful`,
 			);
 		}
 
-		console.info(`Successfully enriched ${enrichedPlaces.length} places for ${areaId}`);
+		console.info(
+			`Successfully enriched ${enrichedPlaces.length} places for ${areaId}`,
+		);
 		return enrichedPlaces;
 	} catch (error) {
-		console.error('Failed to fetch places for area:', areaId, error);
+		console.error("Failed to fetch places for area:", areaId, error);
 		return [];
 	} finally {
 		elementsLoading = false;
@@ -183,20 +194,20 @@ const initializeData = async () => {
 	if (dataInitialized) return;
 
 	const areaFound = $areas.find((area) => {
-		if (type === 'community') {
+		if (type === "community") {
 			return (
 				area.id === data.id &&
-				area.tags.type === 'community' &&
+				area.tags.type === "community" &&
 				area.tags.geo_json &&
 				area.tags.name &&
-				area.tags['icon:square'] &&
+				area.tags["icon:square"] &&
 				area.tags.continent &&
-				Object.keys(area.tags).find((key) => key.includes('contact'))
+				Object.keys(area.tags).find((key) => key.includes("contact"))
 			);
 		} else {
 			return (
 				area.id === data.id &&
-				area.tags.type === 'country' &&
+				area.tags.type === "country" &&
 				area.id.length === 2 &&
 				area.tags.geo_json &&
 				area.tags.name &&
@@ -207,9 +218,11 @@ const initializeData = async () => {
 	});
 
 	if (!areaFound) {
-		console.error(`Could not find ${type}, please try again or contact BTC Map.`);
+		console.error(
+			`Could not find ${type}, please try again or contact BTC Map.`,
+		);
 		// eslint-disable-next-line svelte/no-navigation-without-resolve
-		goto('/404');
+		goto("/404");
 		return;
 	}
 
@@ -222,40 +235,40 @@ const initializeData = async () => {
 	area = areaFound.tags;
 
 	avatar =
-		type === 'community'
-			? `https://btcmap.org/.netlify/images?url=${area['icon:square']}&fit=cover&w=256&h=256`
+		type === "community"
+			? `https://btcmap.org/.netlify/images?url=${area["icon:square"]}&fit=cover&w=256&h=256`
 			: `https://static.btcmap.org/images/countries/${areaFound.id}.svg`;
 	description = area.description;
 
-	if (type === 'community') {
+	if (type === "community") {
 		org = area.organization;
 		sponsor = area.sponsor;
-		website = area['contact:website'];
-		email = area['contact:email'];
-		nostr = area['contact:nostr'];
-		twitter = area['contact:twitter'];
-		meetup = area['contact:meetup'];
-		eventbrite = area['contact:eventbrite'];
-		telegram = area['contact:telegram'];
-		discord = area['contact:discord'];
-		youtube = area['contact:youtube'];
-		github = area['contact:github'];
-		reddit = area['contact:reddit'];
-		instagram = area['contact:instagram'];
-		whatsapp = area['contact:whatsapp'];
-		facebook = area['contact:facebook'];
-		linkedin = area['contact:linkedin'];
-		rss = area['contact:rss'];
-		signal = area['contact:signal'];
-		simplex = area['contact:simplex'];
+		website = area["contact:website"];
+		email = area["contact:email"];
+		nostr = area["contact:nostr"];
+		twitter = area["contact:twitter"];
+		meetup = area["contact:meetup"];
+		eventbrite = area["contact:eventbrite"];
+		telegram = area["contact:telegram"];
+		discord = area["contact:discord"];
+		youtube = area["contact:youtube"];
+		github = area["contact:github"];
+		reddit = area["contact:reddit"];
+		instagram = area["contact:instagram"];
+		whatsapp = area["contact:whatsapp"];
+		facebook = area["contact:facebook"];
+		linkedin = area["contact:linkedin"];
+		rss = area["contact:rss"];
+		signal = area["contact:signal"];
+		simplex = area["contact:simplex"];
 
-		if (area['tips:lightning_address']) {
+		if (area["tips:lightning_address"]) {
 			lightning = {
-				destination: area['tips:lightning_address'],
-				type: TipType.Address
+				destination: area["tips:lightning_address"],
+				type: TipType.Address,
 			};
-		} else if (area['tips:url']) {
-			lightning = { destination: area['tips:url'], type: TipType.Url };
+		} else if (area["tips:url"]) {
+			lightning = { destination: area["tips:url"], type: TipType.Url };
 		}
 	}
 
@@ -282,10 +295,12 @@ const initializeData = async () => {
 		// Process events after places are loaded, only if events and users stores are populated
 		if ($events.length && $users.length) {
 			const areaEvents = $events.filter((event) =>
-				filteredPlaces.find((place) => place.osm_id === event.element_id)
+				filteredPlaces.find((place) => place.osm_id === event.element_id),
 			);
 
-			areaEvents.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+			areaEvents.sort(
+				(a, b) => Date.parse(b.created_at) - Date.parse(a.created_at),
+			);
 
 			const findUser = (tagger: Event) => {
 				let foundUser = $users.find((user) => user.id === tagger.user_id);
@@ -302,7 +317,9 @@ const initializeData = async () => {
 			};
 
 			areaEvents.forEach((event) => {
-				let placeMatch = filteredPlaces.find((place) => place.osm_id === event.element_id);
+				let placeMatch = filteredPlaces.find(
+					(place) => place.osm_id === event.element_id,
+				);
 
 				let location = placeMatch?.name || undefined;
 
@@ -312,7 +329,7 @@ const initializeData = async () => {
 					...event,
 					location: location || formatElementID(event.element_id),
 					merchantId: event.element_id,
-					tagger
+					tagger,
 				});
 			});
 
@@ -322,7 +339,11 @@ const initializeData = async () => {
 	}
 };
 
-$: $areas?.length && $places && $places.length && !dataInitialized && initializeData();
+$: $areas?.length &&
+	$places &&
+	$places.length &&
+	!dataInitialized &&
+	initializeData();
 
 let area: AreaTags;
 let filteredPlaces: Place[] = [];

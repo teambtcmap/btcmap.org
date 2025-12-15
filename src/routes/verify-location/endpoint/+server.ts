@@ -1,19 +1,19 @@
-import type { BinaryLike, CipherKey } from 'node:crypto';
-import crypto from 'node:crypto';
-import { error } from '@sveltejs/kit';
-import { get } from 'svelte/store';
+import type { BinaryLike, CipherKey } from "node:crypto";
+import crypto from "node:crypto";
+import { error } from "@sveltejs/kit";
+import { get } from "svelte/store";
 
-import { createIssueWithLabels } from '$lib/gitea';
-import { areas } from '$lib/store';
-import { getAreaIdsByCoordinates } from '$lib/utils';
+import { createIssueWithLabels } from "$lib/gitea";
+import { areas } from "$lib/store";
+import { getAreaIdsByCoordinates } from "$lib/utils";
 
-import type { RequestHandler } from './$types';
-import { env } from '$env/dynamic/private';
+import type { RequestHandler } from "./$types";
+import { env } from "$env/dynamic/private";
 
 const used: string[] = [];
 
 export const POST: RequestHandler = async ({ request }) => {
-	console.debug('Verify location POST endpoint called');
+	console.debug("Verify location POST endpoint called");
 	const {
 		captchaSecret,
 		captchaTest,
@@ -26,15 +26,15 @@ export const POST: RequestHandler = async ({ request }) => {
 		verified,
 		merchantId,
 		lat,
-		long
+		long,
 	} = await request.json();
 
-	console.debug('Request data:', {
+	console.debug("Request data:", {
 		name,
 		location,
 		current,
 		outdated,
-		merchantId
+		merchantId,
 	});
 
 	if (honey) {
@@ -42,33 +42,34 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	if (!env.SERVER_CRYPTO_KEY || !env.SERVER_INIT_VECTOR) {
-		error(503, 'Service unavailable');
+		error(503, "Service unavailable");
 	}
-	const initVector = Buffer.from(env.SERVER_INIT_VECTOR, 'hex');
-	const serverKey = Buffer.from(env.SERVER_CRYPTO_KEY, 'hex');
+	const initVector = Buffer.from(env.SERVER_INIT_VECTOR, "hex");
+	const serverKey = Buffer.from(env.SERVER_CRYPTO_KEY, "hex");
 
-	const algorithm = 'aes-256-cbc' as string;
+	const algorithm = "aes-256-cbc" as string;
 	const key = serverKey as unknown as CipherKey;
 	const iv = initVector as unknown as BinaryLike;
 	const decrypt = crypto.createDecipheriv(algorithm, key, iv);
 
-	let secret = decrypt.update(captchaSecret, 'hex', 'utf8');
-	secret += decrypt.final('utf8');
+	let secret = decrypt.update(captchaSecret, "hex", "utf8");
+	secret += decrypt.final("utf8");
 
 	if (captchaTest !== secret) {
-		error(400, 'Captcha test failed, please try again or contact BTC Map.');
+		error(400, "Captcha test failed, please try again or contact BTC Map.");
 	}
 
 	if (used.includes(captchaSecret)) {
-		error(400, 'Captcha has already been used, please try another.');
+		error(400, "Captcha has already been used, please try another.");
 	} else {
 		used.push(captchaSecret);
 	}
 
-	const standardLabels = ['location-verification'];
+	const standardLabels = ["location-verification"];
 
 	// Create filtered list of matched areas for reuse
-	const associatedAreaIds = lat && long ? await getAreaIdsByCoordinates(lat, long) : [];
+	const associatedAreaIds =
+		lat && long ? await getAreaIdsByCoordinates(lat, long) : [];
 	const areasData = get(areas);
 	const filteredAreas = associatedAreaIds
 		.map((id) => areasData.find((a) => a.id === id))
@@ -82,7 +83,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	const body = `Merchant name: ${name}
 Merchant location: ${location}
 Coordinates: ${lat}, ${long}
-Associated areas: ${filteredAreas.map((area) => `${area?.tags.name} (${area?.tags?.url_alias || area?.id})`).join(', ')}
+Associated areas: ${filteredAreas.map((area) => `${area?.tags.name} (${area?.tags?.url_alias || area?.id})`).join(", ")}
 Edit link: ${edit}
 Current information correct: ${current}
 Outdated information: ${outdated}

@@ -1,57 +1,57 @@
-import type { Place } from '$lib/types';
+import type { Place } from "$lib/types";
 
 export const CATEGORY_GROUPS = {
 	all: {
-		label: 'All',
-		icons: [] as string[]
+		label: "All",
+		icons: [] as string[],
 	},
 	restaurants: {
-		label: 'Restaurants',
-		icons: ['restaurant', 'local_pizza', 'lunch_dining']
+		label: "Restaurants",
+		icons: ["restaurant", "local_pizza", "lunch_dining"],
 	},
 	shopping: {
-		label: 'Shopping',
-		icons: ['storefront', 'local_mall']
+		label: "Shopping",
+		icons: ["storefront", "local_mall"],
 	},
 	groceries: {
-		label: 'Groceries',
-		icons: ['local_grocery_store']
+		label: "Groceries",
+		icons: ["local_grocery_store"],
 	},
 	coffee: {
-		label: 'Coffee',
-		icons: ['local_cafe']
+		label: "Coffee",
+		icons: ["local_cafe"],
 	},
 	atms: {
-		label: 'ATMs',
-		icons: ['local_atm']
+		label: "ATMs",
+		icons: ["local_atm"],
 	},
 	hotels: {
-		label: 'Hotels',
-		icons: ['hotel']
+		label: "Hotels",
+		icons: ["hotel"],
 	},
 	beauty: {
-		label: 'Beauty Salons',
-		icons: ['content_cut']
-	}
+		label: "Beauty Salons",
+		icons: ["content_cut"],
+	},
 } as const;
 
 export type CategoryKey = keyof typeof CATEGORY_GROUPS;
 
 // Explicit array for guaranteed order and clarity (could derive from CATEGORY_GROUPS but kept explicit)
 export const CATEGORIES: readonly CategoryKey[] = [
-	'all',
-	'restaurants',
-	'shopping',
-	'groceries',
-	'coffee',
-	'atms',
-	'hotels',
-	'beauty'
+	"all",
+	"restaurants",
+	"shopping",
+	"groceries",
+	"coffee",
+	"atms",
+	"hotels",
+	"beauty",
 ] as const;
 
 export const CATEGORY_ENTRIES = Object.entries(CATEGORY_GROUPS) as [
 	CategoryKey,
-	(typeof CATEGORY_GROUPS)[CategoryKey]
+	(typeof CATEGORY_GROUPS)[CategoryKey],
 ][];
 
 export type CategoryCounts = Record<CategoryKey, number>;
@@ -60,7 +60,7 @@ export type CategoryCounts = Record<CategoryKey, number>;
 // (avoids rebuilding on every countMerchantsByCategory call during pan/zoom)
 const ICON_TO_CATEGORY = new Map<string, CategoryKey>();
 for (const [key, group] of Object.entries(CATEGORY_GROUPS)) {
-	if (key === 'all') continue;
+	if (key === "all") continue;
 	for (const icon of group.icons) {
 		ICON_TO_CATEGORY.set(icon, key as CategoryKey);
 	}
@@ -73,7 +73,9 @@ export const createEmptyCategoryCounts = (): CategoryCounts => {
 	}, {} as CategoryCounts);
 };
 
-export const countMerchantsByCategory = (merchants: Place[]): CategoryCounts => {
+export const countMerchantsByCategory = (
+	merchants: Place[],
+): CategoryCounts => {
 	const counts = createEmptyCategoryCounts();
 
 	counts.all = merchants.length;
@@ -89,16 +91,24 @@ export const countMerchantsByCategory = (merchants: Place[]): CategoryCounts => 
 	return counts;
 };
 
-export const filterMerchantsByCategory = (merchants: Place[], category: CategoryKey): Place[] => {
-	if (category === 'all') return merchants;
+export const filterMerchantsByCategory = (
+	merchants: Place[],
+	category: CategoryKey,
+): Place[] => {
+	if (category === "all") return merchants;
 
 	const categoryIcons = CATEGORY_GROUPS[category].icons;
-	return merchants.filter((merchant) => categoryIcons.some((icon) => merchant.icon === icon));
+	return merchants.filter((merchant) =>
+		categoryIcons.some((icon) => merchant.icon === icon),
+	);
 };
 
 // Check if a single place matches a category (used for map marker filtering)
-export const placeMatchesCategory = (place: Place, category: CategoryKey): boolean => {
-	if (category === 'all') return true;
+export const placeMatchesCategory = (
+	place: Place,
+	category: CategoryKey,
+): boolean => {
+	if (category === "all") return true;
 	if (!place.icon) return false;
 	return ICON_TO_CATEGORY.get(place.icon) === category;
 };

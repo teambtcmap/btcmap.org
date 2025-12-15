@@ -1,15 +1,15 @@
 <script lang="ts">
-import Chart from 'chart.js/auto';
-import { onMount } from 'svelte';
+import Chart from "chart.js/auto";
+import { onMount } from "svelte";
 
-import Icon from '$components/Icon.svelte';
-import ProfileStat from '$components/ProfileStat.svelte';
-import { calcVerifiedDate, verifiedArr } from '$lib/map/setup';
-import { theme } from '$lib/store';
-import { type AreaTags, type Place, type Report } from '$lib/types.js';
-import { detectTheme, updateChartThemes } from '$lib/utils';
+import Icon from "$components/Icon.svelte";
+import ProfileStat from "$components/ProfileStat.svelte";
+import { calcVerifiedDate, verifiedArr } from "$lib/map/setup";
+import { theme } from "$lib/store";
+import { type AreaTags, type Place, type Report } from "$lib/types.js";
+import { detectTheme, updateChartThemes } from "$lib/utils";
 
-import { browser } from '$app/environment';
+import { browser } from "$app/environment";
 
 export let name: string;
 export let filteredPlaces: Place[];
@@ -20,8 +20,8 @@ const getPopulationDate = (tags: AreaTags | undefined): string | undefined => {
 	if (!tags) return undefined;
 	// Prefer population:date over population:year, convert year to string if needed
 	return (
-		tags['population:date'] ||
-		(tags['population:year'] ? String(tags['population:year']) : undefined)
+		tags["population:date"] ||
+		(tags["population:year"] ? String(tags["population:year"]) : undefined)
 	);
 };
 
@@ -50,7 +50,7 @@ const initializeData = () => {
 			}
 		}
 
-		if (place['osm:payment:bitcoin']) {
+		if (place["osm:payment:bitcoin"]) {
 			if (legacy === undefined) {
 				legacy = 1;
 			} else {
@@ -81,11 +81,11 @@ const initializeData = () => {
 		total = 0;
 	}
 
-	upToDatePercent = upToDate ? (upToDate / (total / 100)).toFixed(0) : '0';
+	upToDatePercent = upToDate ? (upToDate / (total / 100)).toFixed(0) : "0";
 
 	const populateCharts = () => {
 		const chartsReports = [...areaReports].sort(
-			(a, b) => Date.parse(a.created_at) - Date.parse(b.created_at)
+			(a, b) => Date.parse(a.created_at) - Date.parse(b.created_at),
 		);
 
 		const today = new Date();
@@ -102,24 +102,24 @@ const initializeData = () => {
 				id: latestReport.id + 1,
 				date: `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`,
 				created_at: today.toISOString(),
-				updated_at: today.toISOString()
+				updated_at: today.toISOString(),
 			});
 		}
 
 		const theme = detectTheme();
 
 		updatedChart = new Chart(updatedChartCanvas, {
-			type: 'pie',
+			type: "pie",
 			data: {
-				labels: ['Recently Verified', 'Outdated'],
+				labels: ["Recently Verified", "Outdated"],
 				datasets: [
 					{
-						label: 'Locations',
+						label: "Locations",
 						data: [upToDate, outdated],
-						backgroundColor: ['rgb(16, 183, 145)', 'rgb(235, 87, 87)'],
-						hoverOffset: 4
-					}
-				]
+						backgroundColor: ["rgb(16, 183, 145)", "rgb(235, 87, 87)"],
+						hoverOffset: 4,
+					},
+				],
 			},
 			options: {
 				maintainAspectRatio: false,
@@ -127,33 +127,37 @@ const initializeData = () => {
 					legend: {
 						labels: {
 							font: {
-								weight: 600
-							}
-						}
-					}
-				}
-			}
+								weight: 600,
+							},
+						},
+					},
+				},
+			},
 		});
 
-		let percents = chartsReports.filter((report) => report.tags.up_to_date_percent);
+		let percents = chartsReports.filter(
+			(report) => report.tags.up_to_date_percent,
+		);
 
 		upToDateChart = new Chart(upToDateChartCanvas, {
-			type: 'line',
+			type: "line",
 			data: {
 				labels: percents.map(({ date }) => date),
 				datasets: [
 					{
-						label: 'Recently Verified Percent',
-						data: percents.map(({ tags: { up_to_date_percent } }) => up_to_date_percent),
+						label: "Recently Verified Percent",
+						data: percents.map(
+							({ tags: { up_to_date_percent } }) => up_to_date_percent,
+						),
 						fill: {
-							target: 'origin',
-							above: 'rgba(11, 144, 114, 0.2)'
+							target: "origin",
+							above: "rgba(11, 144, 114, 0.2)",
 						},
-						borderColor: 'rgb(11, 144, 114)',
+						borderColor: "rgb(11, 144, 114)",
 						tension: 0.1,
-						pointStyle: false
-					}
-				]
+						pointStyle: false,
+					},
+				],
 			},
 			options: {
 				maintainAspectRatio: false,
@@ -161,22 +165,25 @@ const initializeData = () => {
 					legend: {
 						labels: {
 							font: {
-								weight: 600
-							}
-						}
-					}
+								weight: 600,
+							},
+						},
+					},
 				},
 				scales: {
 					x: {
 						ticks: {
 							maxTicksLimit: 5,
 							font: {
-								weight: 600
-							}
+								weight: 600,
+							},
 						},
 						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
-						}
+							color:
+								theme === "dark"
+									? "rgba(255, 255, 255, 0.15)"
+									: "rgba(0, 0, 0, 0.1)",
+						},
 					},
 					y: {
 						min: 0,
@@ -184,37 +191,42 @@ const initializeData = () => {
 						ticks: {
 							precision: 0,
 							font: {
-								weight: 600
-							}
+								weight: 600,
+							},
 						},
 						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
-						}
-					}
+							color:
+								theme === "dark"
+									? "rgba(255, 255, 255, 0.15)"
+									: "rgba(0, 0, 0, 0.1)",
+						},
+					},
 				},
 				interaction: {
-					intersect: false
-				}
-			}
+					intersect: false,
+				},
+			},
 		});
 
 		totalChart = new Chart(totalChartCanvas, {
-			type: 'line',
+			type: "line",
 			data: {
 				labels: chartsReports.map(({ date }) => date),
 				datasets: [
 					{
-						label: 'Total Locations',
-						data: chartsReports.map(({ tags: { total_elements } }) => total_elements),
+						label: "Total Locations",
+						data: chartsReports.map(
+							({ tags: { total_elements } }) => total_elements,
+						),
 						fill: {
-							target: 'origin',
-							above: 'rgba(0, 153, 175, 0.2)'
+							target: "origin",
+							above: "rgba(0, 153, 175, 0.2)",
 						},
-						borderColor: 'rgb(0, 153, 175)',
+						borderColor: "rgb(0, 153, 175)",
 						tension: 0.1,
-						pointStyle: false
-					}
-				]
+						pointStyle: false,
+					},
+				],
 			},
 			options: {
 				maintainAspectRatio: false,
@@ -222,41 +234,47 @@ const initializeData = () => {
 					legend: {
 						labels: {
 							font: {
-								weight: 600
-							}
-						}
-					}
+								weight: 600,
+							},
+						},
+					},
 				},
 				scales: {
 					x: {
 						ticks: {
 							maxTicksLimit: 5,
 							font: {
-								weight: 600
-							}
+								weight: 600,
+							},
 						},
 						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
-						}
+							color:
+								theme === "dark"
+									? "rgba(255, 255, 255, 0.15)"
+									: "rgba(0, 0, 0, 0.1)",
+						},
 					},
 					y: {
 						min: 0,
-						grace: '5%',
+						grace: "5%",
 						ticks: {
 							precision: 0,
 							font: {
-								weight: 600
-							}
+								weight: 600,
+							},
 						},
 						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
-						}
-					}
+							color:
+								theme === "dark"
+									? "rgba(255, 255, 255, 0.15)"
+									: "rgba(0, 0, 0, 0.1)",
+						},
+					},
 				},
 				interaction: {
-					intersect: false
-				}
-			}
+					intersect: false,
+				},
+			},
 		});
 
 		chartsLoading = false;
@@ -272,7 +290,10 @@ $: hasVerificationData =
 	filteredPlaces &&
 	filteredPlaces.length > 0 &&
 	filteredPlaces.some(
-		(p) => p['osm:survey:date'] || p['osm:check_date'] || p['osm:check_date:currency:XBT']
+		(p) =>
+			p["osm:survey:date"] ||
+			p["osm:check_date"] ||
+			p["osm:check_date:currency:XBT"],
 	);
 
 // Only initialize when we have verification data
@@ -295,18 +316,20 @@ let updatedChart;
 
 let chartsLoading = true;
 let upToDateChartCanvas: HTMLCanvasElement;
-let upToDateChart: Chart<'line', number[], string>;
+let upToDateChart: Chart<"line", number[], string>;
 let totalChartCanvas: HTMLCanvasElement;
-let totalChart: Chart<'line', number[], string>;
+let totalChart: Chart<"line", number[], string>;
 
-$: $theme !== undefined && !chartsLoading && updateChartThemes([upToDateChart, totalChart]);
+$: $theme !== undefined &&
+	!chartsLoading &&
+	updateChartThemes([upToDateChart, totalChart]);
 
 onMount(async () => {
 	if (browser) {
 		// setup charts
-		updatedChartCanvas.getContext('2d');
-		upToDateChartCanvas.getContext('2d');
-		totalChartCanvas.getContext('2d');
+		updatedChartCanvas.getContext("2d");
+		upToDateChartCanvas.getContext("2d");
+		totalChartCanvas.getContext("2d");
 
 		initialRenderComplete = true;
 	}

@@ -2,14 +2,14 @@
 export let url: string;
 export let social: string;
 
-import Icon from '$components/Icon.svelte';
+import Icon from "$components/Icon.svelte";
 
 const socialLabels: Record<string, string> = {
-	matrix: 'Matrix',
-	github: 'GitHub',
-	amboss: 'Amboss',
-	nostr: 'Nostr',
-	x: 'X (Twitter)'
+	matrix: "Matrix",
+	github: "GitHub",
+	amboss: "Amboss",
+	nostr: "Nostr",
+	x: "X (Twitter)",
 };
 </script>
 

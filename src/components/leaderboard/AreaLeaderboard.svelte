@@ -1,5 +1,5 @@
 <script lang="ts">
-import { rankItem } from '@tanstack/match-sorter-utils';
+import { rankItem } from "@tanstack/match-sorter-utils";
 import {
 	type ColumnDef,
 	createSvelteTable,
@@ -11,28 +11,41 @@ import {
 	type OnChangeFn,
 	type PaginationState,
 	type SortingState,
-	type TableOptions
-} from '@tanstack/svelte-table';
-import { onMount } from 'svelte';
-import { derived, writable } from 'svelte/store';
-import tippy from 'tippy.js';
+	type TableOptions,
+} from "@tanstack/svelte-table";
+import { onMount } from "svelte";
+import { derived, writable } from "svelte/store";
+import tippy from "tippy.js";
 
-import Icon from '$components/Icon.svelte';
-import AreaLeaderboardDesktopTable from '$components/leaderboard/AreaLeaderboardDesktopTable.svelte';
-import AreaLeaderboardMobileCard from '$components/leaderboard/AreaLeaderboardMobileCard.svelte';
-import LeaderboardPagination from '$components/leaderboard/LeaderboardPagination.svelte';
-import LeaderboardSearch from '$components/leaderboard/LeaderboardSearch.svelte';
-import SortHeaderButton from '$components/leaderboard/SortHeaderButton.svelte';
-import { GradeTable } from '$lib/constants';
-import { areaError, areas, reportError, reports, syncStatus, theme } from '$lib/store';
-import type { AreaType, LeaderboardArea, Report } from '$lib/types';
-import { debounce, detectTheme, errToast, getGrade, validateContinents } from '$lib/utils';
+import Icon from "$components/Icon.svelte";
+import AreaLeaderboardDesktopTable from "$components/leaderboard/AreaLeaderboardDesktopTable.svelte";
+import AreaLeaderboardMobileCard from "$components/leaderboard/AreaLeaderboardMobileCard.svelte";
+import LeaderboardPagination from "$components/leaderboard/LeaderboardPagination.svelte";
+import LeaderboardSearch from "$components/leaderboard/LeaderboardSearch.svelte";
+import SortHeaderButton from "$components/leaderboard/SortHeaderButton.svelte";
+import { GradeTable } from "$lib/constants";
+import {
+	areaError,
+	areas,
+	reportError,
+	reports,
+	syncStatus,
+	theme,
+} from "$lib/store";
+import type { AreaType, LeaderboardArea, Report } from "$lib/types";
+import {
+	debounce,
+	detectTheme,
+	errToast,
+	getGrade,
+	validateContinents,
+} from "$lib/utils";
 
 export let type: AreaType;
 export let initialPageSize = 10;
 
 const pageSizes = [10, 20, 30, 40, 50];
-let globalFilter = '';
+let globalFilter = "";
 
 // Tooltip references for header tooltips only
 let totalTooltip: HTMLButtonElement;
@@ -48,19 +61,19 @@ const areasFiltered = derived([areas, reports], ([$areas, $reports]) => {
 	if (!$reports?.length) return [];
 
 	return $areas.filter((area) => {
-		if (type === 'community') {
+		if (type === "community") {
 			return (
-				area.tags.type === 'community' &&
+				area.tags.type === "community" &&
 				area.tags.geo_json &&
 				area.tags.name &&
-				area.tags['icon:square'] &&
+				area.tags["icon:square"] &&
 				area.tags.continent &&
-				Object.keys(area.tags).find((key) => key.includes('contact')) &&
+				Object.keys(area.tags).find((key) => key.includes("contact")) &&
 				$reports.find((report) => report.area_id === area.id)
 			);
 		} else {
 			return (
-				area.tags.type === 'country' &&
+				area.tags.type === "country" &&
 				area.id.length === 2 &&
 				area.tags.geo_json &&
 				area.tags.name &&
@@ -71,17 +84,25 @@ const areasFiltered = derived([areas, reports], ([$areas, $reports]) => {
 	});
 });
 
-const areaReports = derived([areasFiltered, reports], ([$areasFiltered, $reports]) => {
-	if (!$areasFiltered?.length || !$reports?.length) return [];
+const areaReports = derived(
+	[areasFiltered, reports],
+	([$areasFiltered, $reports]) => {
+		if (!$areasFiltered?.length || !$reports?.length) return [];
 
-	return $reports
-		.filter((report) => $areasFiltered.find((area) => area.id === report.area_id))
-		.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
-});
+		return $reports
+			.filter((report) =>
+				$areasFiltered.find((area) => area.id === report.area_id),
+			)
+			.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+	},
+);
 
 // Scoring function for leaderboard
 const score = (report: Report): number => {
-	return Math.max(report.tags.total_elements - report.tags.outdated_elements * 5, 0);
+	return Math.max(
+		report.tags.total_elements - report.tags.outdated_elements * 5,
+		0,
+	);
 };
 
 // Derived store for leaderboard data
@@ -95,7 +116,9 @@ const leaderboard = derived(
 		const result: LeaderboardArea[] = [];
 
 		$areasFiltered.forEach((area) => {
-			const areaReport = $areaReports.find((report) => report.area_id === area.id);
+			const areaReport = $areaReports.find(
+				(report) => report.area_id === area.id,
+			);
 
 			if (areaReport) {
 				const grade = getGrade(areaReport.tags.up_to_date_percent);
@@ -116,14 +139,14 @@ const leaderboard = derived(
 			// Secondary sort: by total elements (descending - more locations first)
 			return b.report.tags.total_elements - a.report.tags.total_elements;
 		});
-	}
+	},
 );
 
 // Create a derived store for leaderboard with positions
 const leaderboardWithPositions = derived(leaderboard, ($leaderboard) => {
 	return $leaderboard.map((item, index) => ({
 		...item,
-		position: index + 1 // Position based on sorted order
+		position: index + 1, // Position based on sorted order
 	}));
 });
 
@@ -138,48 +161,48 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
 // Column definitions - static, defined once
 const columns: ColumnDef<LeaderboardArea & { position: number }>[] = [
 	{
-		id: 'position',
-		header: 'Position',
+		id: "position",
+		header: "Position",
 		accessorFn: (row) => row.position,
 		cell: (info) => {
 			const position = info.getValue() as number;
-			if (position === 1) return '🥇';
-			if (position === 2) return '🥈';
-			if (position === 3) return '🥉';
+			if (position === 1) return "🥇";
+			if (position === 2) return "🥈";
+			if (position === 3) return "🥉";
 			return position.toString();
 		},
 		enableSorting: true,
 		enableGlobalFilter: false,
 		sortingFn: (a, b) => {
 			return a.original.position - b.original.position;
-		}
+		},
 	},
 	{
-		id: 'name',
-		header: 'Name',
-		accessorFn: (row) => row.tags?.name || 'Unknown',
+		id: "name",
+		header: "Name",
+		accessorFn: (row) => row.tags?.name || "Unknown",
 		cell: (info) => info.row.original,
 		enableSorting: true,
 		// @ts-expect-error TanStack table expects string literal for filterFn but we're using custom fuzzy filter
-		filterFn: 'fuzzy',
-		enableGlobalFilter: true
+		filterFn: "fuzzy",
+		enableGlobalFilter: true,
 	},
 	{
-		id: 'total',
-		header: 'Total Locations',
+		id: "total",
+		header: "Total Locations",
 		accessorFn: (row) => row.report?.tags?.total_elements || 0,
 		enableSorting: true,
-		enableGlobalFilter: false
+		enableGlobalFilter: false,
 	},
 	{
-		id: 'upToDateElements',
-		header: 'Verified Locations',
+		id: "upToDateElements",
+		header: "Verified Locations",
 		accessorFn: (row) => row.report?.tags?.up_to_date_elements || 0,
 		enableSorting: true,
-		enableGlobalFilter: false
+		enableGlobalFilter: false,
 	},
 	{
-		id: 'grade',
+		id: "grade",
 		header: () => {
 			return `Grade`;
 		},
@@ -200,15 +223,15 @@ const columns: ColumnDef<LeaderboardArea & { position: number }>[] = [
 			return bPercent - aPercent;
 		},
 		enableSorting: true,
-		enableGlobalFilter: false
-	}
+		enableGlobalFilter: false,
+	},
 ];
 
 // Table state - initialized once
-let sorting: SortingState = [{ id: 'position', desc: false }];
+let sorting: SortingState = [{ id: "position", desc: false }];
 let pagination: PaginationState = {
 	pageIndex: 0,
-	pageSize: initialPageSize
+	pageSize: initialPageSize,
 };
 
 const setSorting: OnChangeFn<SortingState> = (updater) => {
@@ -221,8 +244,8 @@ const setSorting: OnChangeFn<SortingState> = (updater) => {
 		...old,
 		state: {
 			...old.state,
-			sorting
-		}
+			sorting,
+		},
 	}));
 };
 
@@ -236,8 +259,8 @@ const setPagination: OnChangeFn<PaginationState> = (updater) => {
 		...old,
 		state: {
 			...old.state,
-			pagination
-		}
+			pagination,
+		},
 	}));
 };
 
@@ -247,10 +270,10 @@ const options = writable<TableOptions<LeaderboardArea & { position: number }>>({
 	columns,
 	state: {
 		sorting,
-		pagination
+		pagination,
 	},
 	filterFns: {
-		fuzzy: fuzzyFilter
+		fuzzy: fuzzyFilter,
 	},
 	onSortingChange: setSorting,
 	onPaginationChange: setPagination,
@@ -258,7 +281,7 @@ const options = writable<TableOptions<LeaderboardArea & { position: number }>>({
 	getCoreRowModel: getCoreRowModel(),
 	getSortedRowModel: getSortedRowModel(),
 	getPaginationRowModel: getPaginationRowModel(),
-	getFilteredRowModel: getFilteredRowModel()
+	getFilteredRowModel: getFilteredRowModel(),
 });
 
 // Create table instance once
@@ -268,7 +291,7 @@ const table = createSvelteTable(options);
 $: if ($leaderboardWithPositions) {
 	options.update((current) => ({
 		...current,
-		data: $leaderboardWithPositions
+		data: $leaderboardWithPositions,
 	}));
 }
 
@@ -281,7 +304,8 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 
 // Loading state
 $: loading =
-	$syncStatus || ($leaderboardWithPositions.length === 0 && !$areaError && !$reportError);
+	$syncStatus ||
+	($leaderboardWithPositions.length === 0 && !$areaError && !$reportError);
 
 // Better lifecycle management
 onMount(() => {
@@ -292,22 +316,22 @@ onMount(() => {
 const setHeaderTooltips = () => {
 	if (totalTooltip) {
 		tippy(totalTooltip, {
-			content: 'All locations inc. ATMS',
-			allowHTML: true
+			content: "All locations inc. ATMS",
+			allowHTML: true,
 		});
 	}
 
 	if (upToDateTooltip) {
 		tippy(upToDateTooltip, {
-			content: 'Locations verified within the past year',
-			allowHTML: true
+			content: "Locations verified within the past year",
+			allowHTML: true,
 		});
 	}
 
 	if (gradeTooltip) {
 		tippy(gradeTooltip, {
 			content: GradeTable,
-			allowHTML: true
+			allowHTML: true,
 		});
 	}
 };

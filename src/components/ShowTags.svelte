@@ -1,9 +1,9 @@
 <script lang="ts">
-import { fly } from 'svelte/transition';
-import OutClick from 'svelte-outclick';
+import { fly } from "svelte/transition";
+import OutClick from "svelte-outclick";
 
-import CloseButton from '$components/CloseButton.svelte';
-import { showTags } from '$lib/store';
+import CloseButton from "$components/CloseButton.svelte";
+import { showTags } from "$lib/store";
 
 const closeModal = () => ($showTags = undefined);
 </script>

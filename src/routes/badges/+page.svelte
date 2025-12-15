@@ -1,165 +1,165 @@
 <script lang="ts">
-import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-import { theme } from '$lib/store';
-import { BadgeType } from '$lib/types';
-import { detectTheme } from '$lib/utils';
+import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import { theme } from "$lib/store";
+import { BadgeType } from "$lib/types";
+import { detectTheme } from "$lib/utils";
 
-import BadgeCard from './components/BadgeCard.svelte';
+import BadgeCard from "./components/BadgeCard.svelte";
 
 let achievements = [
 	{
-		title: 'Geyser Tournament',
-		desc: 'Participate in the 2023 Supertagger Event',
-		icon: 'geyser'
+		title: "Geyser Tournament",
+		desc: "Participate in the 2023 Supertagger Event",
+		icon: "geyser",
 	},
 	{
-		title: 'Top Tagger',
-		desc: '#1 on the leaderboard',
-		icon: 'top-tagger'
+		title: "Top Tagger",
+		desc: "#1 on the leaderboard",
+		icon: "top-tagger",
 	},
 	{
-		title: 'Podium',
-		desc: 'In the top 3 on the leaderboard',
-		icon: 'podium'
+		title: "Podium",
+		desc: "In the top 3 on the leaderboard",
+		icon: "podium",
 	},
 	{
-		title: 'High Rank',
-		desc: 'In the top 10 on the leaderboard',
-		icon: 'high-rank'
+		title: "High Rank",
+		desc: "In the top 10 on the leaderboard",
+		icon: "high-rank",
 	},
 	{
-		title: 'OG Supertagger',
-		desc: 'Contribute to BTC Map within the first 3 months',
-		icon: 'og-supertagger'
+		title: "OG Supertagger",
+		desc: "Contribute to BTC Map within the first 3 months",
+		icon: "og-supertagger",
 	},
 	{
-		title: 'Lightning Junkie',
-		desc: 'Add a tip button to your profile',
-		icon: 'lightning-junkie'
+		title: "Lightning Junkie",
+		desc: "Add a tip button to your profile",
+		icon: "lightning-junkie",
 	},
 	{
-		title: 'Hello World',
-		desc: 'Add an avatar to your profile',
-		icon: 'hello-world'
+		title: "Hello World",
+		desc: "Add an avatar to your profile",
+		icon: "hello-world",
 	},
 	{
-		title: 'Demolition Specialist',
-		desc: 'The majority of your contributions are deletions',
-		icon: 'demolition-specialist'
+		title: "Demolition Specialist",
+		desc: "The majority of your contributions are deletions",
+		icon: "demolition-specialist",
 	},
 	{
-		title: 'Update Maxi',
-		desc: 'The majority of your contributions are updates',
-		icon: 'update-maxi'
+		title: "Update Maxi",
+		desc: "The majority of your contributions are updates",
+		icon: "update-maxi",
 	},
 	{
-		title: 'Creator',
-		desc: 'The majority of your contributions are creations',
-		icon: 'creator'
+		title: "Creator",
+		desc: "The majority of your contributions are creations",
+		icon: "creator",
 	},
 	{
-		title: 'Supporter',
-		desc: 'Make an annual donation to BTC Map',
-		icon: 'supporter'
-	}
+		title: "Supporter",
+		desc: "Make an annual donation to BTC Map",
+		icon: "supporter",
+	},
 ];
 
 let contributions = [
 	{
-		title: 'Hyperbitcoinisation',
-		desc: '21M',
-		icon: 'hyperbitcoinisation'
+		title: "Hyperbitcoinisation",
+		desc: "21M",
+		icon: "hyperbitcoinisation",
 	},
 	{
-		title: 'Pizza Time',
-		desc: '10K',
-		icon: 'pizza-time'
+		title: "Pizza Time",
+		desc: "10K",
+		icon: "pizza-time",
 	},
 	{
-		title: 'Godly',
-		desc: '7777',
-		icon: 'godly'
+		title: "Godly",
+		desc: "7777",
+		icon: "godly",
 	},
 	{
-		title: 'Shadow',
-		desc: '5000',
-		icon: 'shadow'
+		title: "Shadow",
+		desc: "5000",
+		icon: "shadow",
 	},
 	{
-		title: 'Whitepaper',
-		desc: '3110',
-		icon: 'whitepaper'
+		title: "Whitepaper",
+		desc: "3110",
+		icon: "whitepaper",
 	},
 	{
-		title: 'Winston',
-		desc: '1984',
-		icon: 'winston'
+		title: "Winston",
+		desc: "1984",
+		icon: "winston",
 	},
 	{
-		title: 'Whale',
-		desc: '1000',
-		icon: 'whale'
+		title: "Whale",
+		desc: "1000",
+		icon: "whale",
 	},
 	{
-		title: 'Infinity',
-		desc: '821',
-		icon: 'infinity'
+		title: "Infinity",
+		desc: "821",
+		icon: "infinity",
 	},
 	{
-		title: 'Legend',
-		desc: '500',
-		icon: 'legend'
+		title: "Legend",
+		desc: "500",
+		icon: "legend",
 	},
 	{
-		title: 'Chancellor',
-		desc: '301',
-		icon: 'chancellor'
+		title: "Chancellor",
+		desc: "301",
+		icon: "chancellor",
 	},
 	{
-		title: 'SHA',
-		desc: '256',
-		icon: 'sha'
+		title: "SHA",
+		desc: "256",
+		icon: "sha",
 	},
 	{
-		title: 'No Bailouts',
-		desc: '210',
-		icon: 'no-bailouts'
+		title: "No Bailouts",
+		desc: "210",
+		icon: "no-bailouts",
 	},
 	{
-		title: 'Supertagger',
-		desc: '100',
-		icon: 'supertagger'
+		title: "Supertagger",
+		desc: "100",
+		icon: "supertagger",
 	},
 	{
-		title: 'ATH',
-		desc: '69',
-		icon: 'ath'
+		title: "ATH",
+		desc: "69",
+		icon: "ath",
 	},
 	{
-		title: 'Longest Chain',
-		desc: '51',
-		icon: 'longest-chain'
+		title: "Longest Chain",
+		desc: "51",
+		icon: "longest-chain",
 	},
 	{
-		title: 'Satoshi',
-		desc: '21',
-		icon: 'satoshi'
+		title: "Satoshi",
+		desc: "21",
+		icon: "satoshi",
 	},
 	{
-		title: 'Heartbeat',
-		desc: '10',
-		icon: 'heartbeat'
+		title: "Heartbeat",
+		desc: "10",
+		icon: "heartbeat",
 	},
 	{
-		title: 'Segwit',
-		desc: '4',
-		icon: 'segwit'
+		title: "Segwit",
+		desc: "4",
+		icon: "segwit",
 	},
 	{
-		title: 'Whole Tagger',
-		desc: '1',
-		icon: 'whole-tagger'
-	}
+		title: "Whole Tagger",
+		desc: "1",
+		icon: "whole-tagger",
+	},
 ];
 </script>
 

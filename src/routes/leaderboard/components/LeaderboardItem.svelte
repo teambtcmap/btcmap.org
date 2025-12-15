@@ -8,17 +8,17 @@ export let updated: number;
 export let deleted: number;
 export let tip: string;
 
-import Tip from '$components/Tip.svelte';
+import Tip from "$components/Tip.svelte";
 
-import { resolve } from '$app/paths';
+import { resolve } from "$app/paths";
 
 $: stats = [
-	{ stat: created, title: 'C' },
-	{ stat: updated, title: 'U' },
-	{ stat: deleted, title: 'D' }
+	{ stat: created, title: "C" },
+	{ stat: updated, title: "U" },
+	{ stat: deleted, title: "D" },
 ];
 
-$: regexMatch = tip?.match('(lightning:[^)]+)');
+$: regexMatch = tip?.match("(lightning:[^)]+)");
 $: lightning = regexMatch?.[0].slice(10);
 </script>
 

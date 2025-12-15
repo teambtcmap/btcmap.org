@@ -1,8 +1,8 @@
-import { error } from '@sveltejs/kit';
-import axios from 'axios';
-import axiosRetry from 'axios-retry';
+import { error } from "@sveltejs/kit";
+import axios from "axios";
+import axiosRetry from "axios-retry";
 
-import type { PageLoad } from './$types';
+import type { PageLoad } from "./$types";
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
@@ -18,6 +18,6 @@ export const load: PageLoad = async ({ params }) => {
 		}
 	} catch (err) {
 		console.error(err);
-		error(404, 'User Not Found');
+		error(404, "User Not Found");
 	}
 };

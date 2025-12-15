@@ -3,7 +3,7 @@ export let org: string;
 
 $: organizations = org
 	? org
-			.split(',')
+			.split(",")
 			.map((o) => o.trim())
 			.filter((o) => o.length > 0)
 	: [];

@@ -20,7 +20,7 @@ export let simplex: undefined | string = undefined;
 
 export let style: undefined | string = undefined;
 
-import Icon from '$components/Icon.svelte';
+import Icon from "$components/Icon.svelte";
 </script>
 
 <div class="flex flex-wrap items-center justify-center {style || ''}">

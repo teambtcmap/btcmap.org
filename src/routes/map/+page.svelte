@@ -6,15 +6,15 @@ import type {
 	LatLngBounds,
 	Map,
 	Marker,
-	MarkerClusterGroup
-} from 'leaflet';
-import localforage from 'localforage';
-import { onDestroy, onMount, tick } from 'svelte';
+	MarkerClusterGroup,
+} from "leaflet";
+import localforage from "localforage";
+import { onDestroy, onMount, tick } from "svelte";
 
-import Icon from '$components/Icon.svelte';
-import LoadingSpinner from '$components/LoadingSpinner.svelte';
-import MapLoadingMain from '$components/MapLoadingMain.svelte';
-import { type CategoryKey, placeMatchesCategory } from '$lib/categoryMapping';
+import Icon from "$components/Icon.svelte";
+import LoadingSpinner from "$components/LoadingSpinner.svelte";
+import MapLoadingMain from "$components/MapLoadingMain.svelte";
+import { type CategoryKey, placeMatchesCategory } from "$lib/categoryMapping";
 import {
 	BOOSTED_CLUSTERING_MAX_ZOOM,
 	BREAKPOINTS,
@@ -31,15 +31,15 @@ import {
 	MERCHANT_LIST_MAX_ITEMS,
 	MIN_SEARCH_RADIUS_KM,
 	VIEWPORT_BATCH_SIZE,
-	VIEWPORT_BUFFER_PERCENT
-} from '$lib/constants';
-import { loadMapDependencies } from '$lib/map/imports';
+	VIEWPORT_BUFFER_PERCENT,
+} from "$lib/constants";
+import { loadMapDependencies } from "$lib/map/imports";
 import {
 	cleanupOutOfBoundsMarkers,
 	clearMarkerSelection,
 	highlightMarker,
-	type LoadedMarkers
-} from '$lib/map/markers';
+	type LoadedMarkers,
+} from "$lib/map/markers";
 import {
 	attribution,
 	changeDefaultIcons,
@@ -51,11 +51,15 @@ import {
 	layers,
 	scaleBars,
 	support,
-	updateMapHash
-} from '$lib/map/setup';
-import { calculateRadiusKm, getVisiblePlaces, getZoomBehavior } from '$lib/map/viewport';
-import { merchantDrawer } from '$lib/merchantDrawerStore';
-import { type MerchantListMode, merchantList } from '$lib/merchantListStore';
+	updateMapHash,
+} from "$lib/map/setup";
+import {
+	calculateRadiusKm,
+	getVisiblePlaces,
+	getZoomBehavior,
+} from "$lib/map/viewport";
+import { merchantDrawer } from "$lib/merchantDrawerStore";
+import { type MerchantListMode, merchantList } from "$lib/merchantListStore";
 import {
 	lastUpdatedPlaceId,
 	mapUpdates,
@@ -64,25 +68,25 @@ import {
 	placesError,
 	placesLoadingProgress,
 	placesLoadingStatus,
-	placesSyncCount
-} from '$lib/store';
-import type { Leaflet, Place } from '$lib/types';
-import { debounce, detectTheme, errToast, isBoosted } from '$lib/utils';
-import type { ProcessedPlace } from '$lib/workers/map-worker';
+	placesSyncCount,
+} from "$lib/store";
+import type { Leaflet, Place } from "$lib/types";
+import { debounce, detectTheme, errToast, isBoosted } from "$lib/utils";
+import type { ProcessedPlace } from "$lib/workers/map-worker";
 import {
 	isSupported as isWorkerSupported,
 	processPlaces,
-	terminate as terminateWorker
-} from '$lib/workers/worker-manager';
+	terminate as terminateWorker,
+} from "$lib/workers/worker-manager";
 
-import MerchantDrawerHash from './components/MerchantDrawerHash.svelte';
-import MerchantListPanel from './components/MerchantListPanel.svelte';
-import TileLoadingIndicator from './components/TileLoadingIndicator.svelte';
-import { browser } from '$app/environment';
-import { page } from '$app/stores';
+import MerchantDrawerHash from "./components/MerchantDrawerHash.svelte";
+import MerchantListPanel from "./components/MerchantListPanel.svelte";
+import TileLoadingIndicator from "./components/TileLoadingIndicator.svelte";
+import { browser } from "$app/environment";
+import { page } from "$app/stores";
 
 let mapLoading = 1;
-let mapLoadingStatus = 'Loading map...';
+let mapLoadingStatus = "Loading map...";
 
 // Combine map loading progress with places loading progress
 $: {
@@ -99,17 +103,17 @@ $: {
 	// Priority 3: Loading initial markers (only during first load, not viewport updates)
 	else if (isLoadingMarkers && !elementsLoaded) {
 		mapLoading = 100;
-		mapLoadingStatus = 'Loading places...';
+		mapLoadingStatus = "Loading places...";
 	}
 	// Priority 4: Waiting for map tiles to render
 	else if (elementsLoaded && !mapTilesLoaded) {
 		mapLoading = 100;
-		mapLoadingStatus = 'Preparing map...';
+		mapLoadingStatus = "Preparing map...";
 	}
 	// Reset when everything is done
 	else if (elementsLoaded && mapTilesLoaded) {
 		mapLoading = 0;
-		mapLoadingStatus = '';
+		mapLoadingStatus = "";
 	}
 }
 
@@ -137,11 +141,11 @@ function openMerchantDrawer(id: number) {
 		highlightMarker(loadedMarkers, id);
 	});
 
-	merchantDrawer.open(id, 'details');
+	merchantDrawer.open(id, "details");
 }
 
 let leaflet: Leaflet;
-let DomEvent: typeof import('leaflet/src/dom/DomEvent');
+let DomEvent: typeof import("leaflet/src/dom/DomEvent");
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 let controlLayers: Control.Layers;
 
@@ -168,13 +172,14 @@ let isZooming = false;
 let mapCenter: LatLng;
 
 // Track selected category for marker filtering
-let previousCategory: CategoryKey = 'all';
+let previousCategory: CategoryKey = "all";
 $: selectedCategory = $merchantList.selectedCategory;
 
 // Check if boosted markers should be clustered at current zoom level
 // At zoom 1-5: boosted markers cluster with regular markers
 // At zoom 6+: boosted markers are in separate non-clustered layer
-const shouldClusterBoostedMarkers = () => currentZoom <= BOOSTED_CLUSTERING_MAX_ZOOM;
+const shouldClusterBoostedMarkers = () =>
+	currentZoom <= BOOSTED_CLUSTERING_MAX_ZOOM;
 
 const handleHashChange = () => {
 	if (!browser) return;
@@ -183,14 +188,14 @@ const handleHashChange = () => {
 	merchantDrawer.syncFromHash();
 
 	const hash = window.location.hash.substring(1);
-	const hasDrawer = hash.includes('merchant=');
+	const hasDrawer = hash.includes("merchant=");
 
 	if (!hasDrawer && selectedMarkerId) {
 		clearMarkerSelection(loadedMarkers, selectedMarkerId);
 		selectedMarkerId = null;
 	} else if (hasDrawer) {
-		const params = new URLSearchParams(hash.substring(hash.indexOf('&') + 1));
-		const merchantParam = params.get('merchant');
+		const params = new URLSearchParams(hash.substring(hash.indexOf("&") + 1));
+		const merchantParam = params.get("merchant");
 		if (merchantParam) {
 			const merchantId = Number(merchantParam);
 			if (merchantId !== selectedMarkerId) {
@@ -223,29 +228,35 @@ const executeSearch = async (query: string) => {
 	merchantList.openSearchMode(true);
 
 	try {
-		const response = await fetch(`/api/search/places?name=${encodeURIComponent(query)}`, {
-			signal: searchAbortController.signal
-		});
+		const response = await fetch(
+			`/api/search/places?name=${encodeURIComponent(query)}`,
+			{
+				signal: searchAbortController.signal,
+			},
+		);
 
 		if (!response.ok) {
-			throw new Error('Search API error');
+			throw new Error("Search API error");
 		}
 
 		const places: Place[] = await response.json();
 		merchantList.openWithSearchResults(query, places);
 	} catch (error) {
 		// Ignore aborted requests (user typed new query)
-		if (error instanceof Error && error.name === 'AbortError') {
+		if (error instanceof Error && error.name === "AbortError") {
 			return;
 		}
-		console.error('Search error:', error);
-		errToast('Search temporarily unavailable');
+		console.error("Search error:", error);
+		errToast("Search temporarily unavailable");
 		merchantList.exitSearchMode();
 	}
 };
 
 // Debounced search for panel input
-const debouncedPanelSearch = debounce((query: string) => executeSearch(query), 300);
+const debouncedPanelSearch = debounce(
+	(query: string) => executeSearch(query),
+	300,
+);
 
 // Handler for panel search input
 const handlePanelSearch = (query: string) => {
@@ -254,36 +265,45 @@ const handlePanelSearch = (query: string) => {
 
 const handleModeChange = (mode: MerchantListMode) => {
 	// Panel already handled the mode change via exitSearchMode(), just update the list
-	if (mode === 'nearby') {
+	if (mode === "nearby") {
 		searchAbortController?.abort();
 		updateMerchantList();
 	}
 };
 
 // allows for users to set initial view in a URL query
-const urlLat = $page.url.searchParams.getAll('lat');
-const urlLong = $page.url.searchParams.getAll('long');
+const urlLat = $page.url.searchParams.getAll("lat");
+const urlLong = $page.url.searchParams.getAll("long");
 
 // allow to view map with only boosted locations
-const boosts = $page.url.searchParams.has('boosts');
+const boosts = $page.url.searchParams.has("boosts");
 
 // displays a button in controls if there is new data available
 const showDataRefresh = () => {
-	const refreshDiv: HTMLDivElement | null = document.querySelector('.data-refresh-div');
+	const refreshDiv: HTMLDivElement | null =
+		document.querySelector(".data-refresh-div");
 	if (!refreshDiv) return;
-	refreshDiv.style.display = 'block';
+	refreshDiv.style.display = "block";
 };
 
 $: map && mapLoaded && $mapUpdates && $placesSyncCount > 1 && showDataRefresh();
 
 // Reload markers and update merchant list when places sync completes after initial load
-$: if (elementsLoaded && $places.length && currentZoom >= MERCHANT_LIST_LOW_ZOOM) {
+$: if (
+	elementsLoaded &&
+	$places.length &&
+	currentZoom >= MERCHANT_LIST_LOW_ZOOM
+) {
 	debouncedLoadMarkers();
 	debouncedUpdateMerchantList();
 }
 
 // Filter map markers when category filter changes
-$: if (elementsLoaded && upToDateLayer && selectedCategory !== previousCategory) {
+$: if (
+	elementsLoaded &&
+	upToDateLayer &&
+	selectedCategory !== previousCategory
+) {
 	previousCategory = selectedCategory;
 	clearNonMatchingMarkers(selectedCategory);
 	debouncedLoadMarkers();
@@ -303,15 +323,16 @@ $: if ($lastUpdatedPlaceId && leaflet && loadedMarkers) {
 
 		if (updatedPlace) {
 			// Regenerate icon with fresh data
-			const commentsCount = typeof updatedPlace.comments === 'number' ? updatedPlace.comments : 0;
+			const commentsCount =
+				typeof updatedPlace.comments === "number" ? updatedPlace.comments : 0;
 			const placeIsBoosted = !!isBoosted(updatedPlace);
 			const markerInBoostedLayer = boostedLayerMarkerIds.has(placeIdStr);
 
 			const newIcon = generateIcon(
 				leaflet,
-				updatedPlace.icon || 'question_mark',
+				updatedPlace.icon || "question_mark",
 				placeIsBoosted,
-				commentsCount
+				commentsCount,
 			);
 
 			// Update the marker icon
@@ -319,7 +340,11 @@ $: if ($lastUpdatedPlaceId && leaflet && loadedMarkers) {
 
 			// Handle layer transition if boost status changed
 			// At zoom 1-5, boosted markers stay clustered, so no layer change needed
-			if (placeIsBoosted && !markerInBoostedLayer && !shouldClusterBoostedMarkers()) {
+			if (
+				placeIsBoosted &&
+				!markerInBoostedLayer &&
+				!shouldClusterBoostedMarkers()
+			) {
 				// Place became boosted at zoom 6+ - move to non-clustered layer
 				upToDateLayer.removeLayer(marker);
 				markers.removeLayer(marker);
@@ -344,7 +369,7 @@ $: if ($lastUpdatedPlaceId && leaflet && loadedMarkers) {
 
 // Remove markers that don't match the selected category filter
 const clearNonMatchingMarkers = (category: CategoryKey) => {
-	if (category === 'all') return;
+	if (category === "all") return;
 
 	const markersToRemove: string[] = [];
 
@@ -368,8 +393,10 @@ const clearNonMatchingMarkers = (category: CategoryKey) => {
 // Move boosted markers between layers when zoom crosses the threshold
 const handleBoostedLayerTransition = (fromZoom: number, toZoom: number) => {
 	const crossedThreshold =
-		(fromZoom <= BOOSTED_CLUSTERING_MAX_ZOOM && toZoom > BOOSTED_CLUSTERING_MAX_ZOOM) ||
-		(fromZoom > BOOSTED_CLUSTERING_MAX_ZOOM && toZoom <= BOOSTED_CLUSTERING_MAX_ZOOM);
+		(fromZoom <= BOOSTED_CLUSTERING_MAX_ZOOM &&
+			toZoom > BOOSTED_CLUSTERING_MAX_ZOOM) ||
+		(fromZoom > BOOSTED_CLUSTERING_MAX_ZOOM &&
+			toZoom <= BOOSTED_CLUSTERING_MAX_ZOOM);
 
 	if (!crossedThreshold || !markers || !boostedLayer) return;
 
@@ -388,7 +415,9 @@ const handleBoostedLayerTransition = (fromZoom: number, toZoom: number) => {
 		if (markersToMove.length > 0) {
 			markers.addLayers(markersToMove);
 			boostedLayerMarkerIds.clear();
-			console.info(`Moved ${markersToMove.length} boosted markers to clustered layer`);
+			console.info(
+				`Moved ${markersToMove.length} boosted markers to clustered layer`,
+			);
 		}
 	} else {
 		// Moving from zoom 5- to zoom 6+: move boosted markers to non-clustered layer
@@ -406,7 +435,9 @@ const handleBoostedLayerTransition = (fromZoom: number, toZoom: number) => {
 			boostedLayerMarkerIds.add(placeId);
 		});
 		if (markersToMove.length > 0) {
-			console.info(`Moved ${markersToMove.length} boosted markers to non-clustered layer`);
+			console.info(
+				`Moved ${markersToMove.length} boosted markers to non-clustered layer`,
+			);
 		}
 	}
 };
@@ -429,21 +460,30 @@ const loadMarkersInViewport = async () => {
 			return;
 		}
 	} catch (error) {
-		console.warn('Error getting map bounds, map not ready yet:', error);
+		console.warn("Error getting map bounds, map not ready yet:", error);
 		isLoadingMarkers = false;
 		return;
 	}
 
 	try {
 		// Get visible places (viewport + category filtering)
-		const visiblePlaces = getVisiblePlaces(leaflet, $places, bounds, VIEWPORT_BUFFER_PERCENT);
+		const visiblePlaces = getVisiblePlaces(
+			leaflet,
+			$places,
+			bounds,
+			VIEWPORT_BUFFER_PERCENT,
+		);
 		const categoryFiltered =
-			selectedCategory === 'all'
+			selectedCategory === "all"
 				? visiblePlaces
-				: visiblePlaces.filter((place) => placeMatchesCategory(place, selectedCategory));
+				: visiblePlaces.filter((place) =>
+						placeMatchesCategory(place, selectedCategory),
+					);
 
 		// Filter out places that already have markers loaded
-		const newPlaces = categoryFiltered.filter((place) => !loadedMarkers[place.id.toString()]);
+		const newPlaces = categoryFiltered.filter(
+			(place) => !loadedMarkers[place.id.toString()],
+		);
 
 		if (newPlaces.length === 0) {
 			isLoadingMarkers = false;
@@ -457,7 +497,7 @@ const loadMarkersInViewport = async () => {
 				upToDateLayer,
 				boostedLayer,
 				boostedLayerMarkerIds,
-				bounds
+				bounds,
 			});
 		}
 
@@ -472,10 +512,10 @@ const loadMarkersInViewport = async () => {
 					if (batch) {
 						processBatchOnMainThread(batch, upToDateLayer);
 					}
-				}
+				},
 			);
 		} else {
-			console.warn('Web workers not supported, using synchronous fallback');
+			console.warn("Web workers not supported, using synchronous fallback");
 			// Fallback to synchronous processing
 			loadMarkersInViewportFallback(bounds);
 			return;
@@ -483,7 +523,7 @@ const loadMarkersInViewport = async () => {
 
 		console.info(`[VIEWPORT] Successfully loaded ${newPlaces.length} markers`);
 	} catch (error) {
-		console.error('[VIEWPORT] Error loading markers:', error);
+		console.error("[VIEWPORT] Error loading markers:", error);
 		// Fallback to synchronous processing for viewport
 		loadMarkersInViewportFallback(bounds);
 	} finally {
@@ -493,17 +533,28 @@ const loadMarkersInViewport = async () => {
 
 // Fallback synchronous loading for viewport (much smaller dataset)
 const loadMarkersInViewportFallback = (bounds: LatLngBounds) => {
-	const visiblePlaces = getVisiblePlaces(leaflet, $places, bounds, VIEWPORT_BUFFER_PERCENT);
+	const visiblePlaces = getVisiblePlaces(
+		leaflet,
+		$places,
+		bounds,
+		VIEWPORT_BUFFER_PERCENT,
+	);
 	const categoryFiltered =
-		selectedCategory === 'all'
+		selectedCategory === "all"
 			? visiblePlaces
-			: visiblePlaces.filter((place) => placeMatchesCategory(place, selectedCategory));
-	const newPlaces = categoryFiltered.filter((place) => !loadedMarkers[place.id.toString()]);
+			: visiblePlaces.filter((place) =>
+					placeMatchesCategory(place, selectedCategory),
+				);
+	const newPlaces = categoryFiltered.filter(
+		(place) => !loadedMarkers[place.id.toString()],
+	);
 
 	newPlaces.forEach((place: Place) => {
 		const commentsCount = place.comments || 0;
 		const icon = place.icon;
-		const boosted = place.boosted_until ? Date.parse(place.boosted_until) > Date.now() : false;
+		const boosted = place.boosted_until
+			? Date.parse(place.boosted_until) > Date.now()
+			: false;
 
 		const divIcon = generateIcon(leaflet, icon, boosted, commentsCount);
 
@@ -514,7 +565,7 @@ const loadMarkersInViewportFallback = (bounds: LatLngBounds) => {
 			placeId: place.id,
 			leaflet,
 			verify: true,
-			onMarkerClick: (id) => openMerchantDrawer(Number(id))
+			onMarkerClick: (id) => openMerchantDrawer(Number(id)),
 		});
 
 		// Route to appropriate layer based on boost status and zoom level
@@ -534,49 +585,79 @@ const loadMarkersInViewportFallback = (bounds: LatLngBounds) => {
 };
 
 // Debounced version to prevent excessive loading during rapid pan/zoom
-const debouncedLoadMarkers = debounce(loadMarkersInViewport, MAP_DEBOUNCE_DELAY);
+const debouncedLoadMarkers = debounce(
+	loadMarkersInViewport,
+	MAP_DEBOUNCE_DELAY,
+);
 
 // Debounced coords caching to prevent IndexedDB overflow during continuous movement
 const debouncedCacheCoords = debounce((coords: LatLngBounds) => {
-	localforage.setItem('coords', coords).catch((err) => {
-		console.error('Error caching coords:', err);
+	localforage.setItem("coords", coords).catch((err) => {
+		console.error("Error caching coords:", err);
 	});
 }, 1000); // 1 second debounce for IndexedDB writes
 
 // Zoom 17+: Fetch full merchant data from API with extended radius
-const updateListApiExtended = (center: LatLng, bounds: LatLngBounds, allowHeavyFetch: boolean) => {
+const updateListApiExtended = (
+	center: LatLng,
+	bounds: LatLngBounds,
+	allowHeavyFetch: boolean,
+) => {
 	const viewportRadius = calculateRadiusKm(bounds);
-	const radiusKm = Math.max(viewportRadius * HIGH_ZOOM_RADIUS_MULTIPLIER, MIN_SEARCH_RADIUS_KM);
+	const radiusKm = Math.max(
+		viewportRadius * HIGH_ZOOM_RADIUS_MULTIPLIER,
+		MIN_SEARCH_RADIUS_KM,
+	);
 	if (!$merchantList.isOpen && !allowHeavyFetch) {
 		merchantList.fetchCountOnly({ lat: center.lat, lon: center.lng }, radiusKm);
 	} else {
-		merchantList.fetchAndReplaceList({ lat: center.lat, lon: center.lng }, radiusKm);
+		merchantList.fetchAndReplaceList(
+			{ lat: center.lat, lon: center.lng },
+			radiusKm,
+		);
 	}
 };
 
 // Zoom 15-16: Use locally loaded markers, optionally enrich with API data
-const updateListLocalMarkers = (center: LatLng, bounds: LatLngBounds, allowHeavyFetch: boolean) => {
+const updateListLocalMarkers = (
+	center: LatLng,
+	bounds: LatLngBounds,
+	allowHeavyFetch: boolean,
+) => {
 	// Get ALL places in bounds (not just loaded markers) for accurate category counts
-	const allVisiblePlaces = $places.filter((place) => bounds.contains([place.lat, place.lon]));
+	const allVisiblePlaces = $places.filter((place) =>
+		bounds.contains([place.lat, place.lon]),
+	);
 
 	merchantList.setMerchants(allVisiblePlaces, center.lat, center.lng);
 
 	if ($merchantList.isOpen && allowHeavyFetch) {
 		const radiusKm = calculateRadiusKm(bounds);
-		merchantList.fetchEnrichedDetails({ lat: center.lat, lon: center.lng }, radiusKm);
+		merchantList.fetchEnrichedDetails(
+			{ lat: center.lat, lon: center.lng },
+			radiusKm,
+		);
 	}
 };
 
 // Zoom 11-14: Fetch from API with result limit (may show "zoom in" message)
-const updateListApiWithLimit = (center: LatLng, bounds: LatLngBounds, allowHeavyFetch: boolean) => {
+const updateListApiWithLimit = (
+	center: LatLng,
+	bounds: LatLngBounds,
+	allowHeavyFetch: boolean,
+) => {
 	const radiusKm = calculateRadiusKm(bounds);
 
 	if (!$merchantList.isOpen || !allowHeavyFetch) {
 		merchantList.fetchCountOnly({ lat: center.lat, lon: center.lng }, radiusKm);
 	} else {
-		merchantList.fetchAndReplaceList({ lat: center.lat, lon: center.lng }, radiusKm, {
-			hideIfExceeds: MERCHANT_LIST_MAX_ITEMS
-		});
+		merchantList.fetchAndReplaceList(
+			{ lat: center.lat, lon: center.lng },
+			radiusKm,
+			{
+				hideIfExceeds: MERCHANT_LIST_MAX_ITEMS,
+			},
+		);
 	}
 };
 
@@ -596,13 +677,13 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 	const allowHeavyFetch = isDesktop || opts?.force || $merchantList.isOpen;
 
 	switch (behavior) {
-		case 'api-extended':
+		case "api-extended":
 			updateListApiExtended(center, bounds, allowHeavyFetch);
 			break;
-		case 'local-markers':
+		case "local-markers":
 			updateListLocalMarkers(center, bounds, allowHeavyFetch);
 			break;
-		case 'api-with-limit':
+		case "api-with-limit":
 			updateListApiWithLimit(center, bounds, allowHeavyFetch);
 			break;
 		default:
@@ -611,13 +692,17 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 };
 
 // Debounced version to prevent excessive updates during pan/zoom
-const debouncedUpdateMerchantList = debounce(updateMerchantList, MAP_DEBOUNCE_DELAY);
+const debouncedUpdateMerchantList = debounce(
+	updateMerchantList,
+	MAP_DEBOUNCE_DELAY,
+);
 
 // Calculate drawer width for map offset (desktop only - mobile drawer is at bottom)
 const getDrawerOffset = () => {
 	const mapSize = map?.getSize();
 	const isDesktop = mapSize.x >= BREAKPOINTS.md;
-	const drawerWidth = isDesktop && $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0;
+	const drawerWidth =
+		isDesktop && $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0;
 	const visibleCenterX = (mapSize.x - drawerWidth) / 2;
 	return { drawerWidth, visibleCenterX, mapSize };
 };
@@ -625,7 +710,7 @@ const getDrawerOffset = () => {
 // Shared helper: navigate map to a place with drawer offset compensation
 const navigateToPlace = (
 	place: Place,
-	options: { targetZoom?: number; spiderfyCluster?: boolean } = {}
+	options: { targetZoom?: number; spiderfyCluster?: boolean } = {},
 ) => {
 	if (!map || !browser) return;
 
@@ -649,7 +734,7 @@ const navigateToPlace = (
 		const currentCenterPoint = map.latLngToContainerPoint(currentCenter);
 		const newCenterPoint = leaflet.point(
 			currentCenterPoint.x + offsetX,
-			currentCenterPoint.y + offsetY
+			currentCenterPoint.y + offsetY,
 		);
 		const newCenter = map.containerPointToLatLng(newCenterPoint);
 		map.panTo(newCenter, { animate: true, duration: 0.3 });
@@ -658,12 +743,13 @@ const navigateToPlace = (
 	// Optionally spiderfy cluster containing the marker
 	// Skip only if marker is in boosted layer (not clustered)
 	const isInBoostedLayer =
-		boostedLayerMarkerIds.has(place.id.toString()) && !shouldClusterBoostedMarkers();
+		boostedLayerMarkerIds.has(place.id.toString()) &&
+		!shouldClusterBoostedMarkers();
 	if (spiderfyCluster && !isInBoostedLayer) {
 		const marker = loadedMarkers[place.id.toString()];
 		if (marker && markers) {
 			const cluster = markers.getVisibleParent(marker);
-			if (cluster && cluster !== marker && 'spiderfy' in cluster) {
+			if (cluster && cluster !== marker && "spiderfy" in cluster) {
 				(cluster as { spiderfy: () => void }).spiderfy();
 			}
 		}
@@ -685,7 +771,7 @@ const initializeElements = async () => {
 		return;
 	}
 
-	mapLoadingStatus = 'Initializing markers...';
+	mapLoadingStatus = "Initializing markers...";
 
 	// create marker cluster group and layers
 	/* eslint-disable no-undef */
@@ -695,7 +781,7 @@ const initializeElements = async () => {
 		disableClusteringAtZoom: CLUSTERING_DISABLED_ZOOM,
 		chunkedLoading: true,
 		chunkInterval: 50,
-		chunkDelay: 50
+		chunkDelay: 50,
 	});
 	/* eslint-enable no-undef */
 	upToDateLayer = leaflet.featureGroup.subGroup(markers);
@@ -707,12 +793,12 @@ const initializeElements = async () => {
 	map.addLayer(boostedLayer); // Added last to render on top of clusters
 
 	// Set up zoom guard - prevent marker loading during zoom animation
-	map.on('zoomstart', () => {
+	map.on("zoomstart", () => {
 		isZooming = true;
 	});
 
 	// Consolidated map event listener - moveend fires after both pan and zoom
-	map.on('moveend', () => {
+	map.on("moveend", () => {
 		isZooming = false;
 		const coords = map.getBounds();
 		mapCenter = map.getCenter();
@@ -734,7 +820,7 @@ const initializeElements = async () => {
 		debouncedUpdateMerchantList();
 	});
 
-	mapLoadingStatus = 'Loading places in view...';
+	mapLoadingStatus = "Loading places in view...";
 
 	// Initialize mapCenter for merchant list panel
 	mapCenter = map.getCenter();
@@ -748,9 +834,9 @@ const initializeElements = async () => {
 
 	if (browser) {
 		const hash = window.location.hash.substring(1);
-		if (hash.includes('merchant=')) {
-			const params = new URLSearchParams(hash.substring(hash.indexOf('&') + 1));
-			const merchantParam = params.get('merchant');
+		if (hash.includes("merchant=")) {
+			const params = new URLSearchParams(hash.substring(hash.indexOf("&") + 1));
+			const merchantParam = params.get("merchant");
 			if (merchantParam) {
 				const merchantId = Number(merchantParam);
 				selectedMarkerId = merchantId;
@@ -766,7 +852,10 @@ const initializeElements = async () => {
 };
 
 // Process a batch of places on the main thread (DOM operations only)
-const processBatchOnMainThread = (batch: ProcessedPlace[], _layer: FeatureGroup.SubGroup) => {
+const processBatchOnMainThread = (
+	batch: ProcessedPlace[],
+	_layer: FeatureGroup.SubGroup,
+) => {
 	const regularMarkersToAdd: Marker[] = [];
 	const boostedMarkersToAdd: Marker[] = [];
 
@@ -782,7 +871,7 @@ const processBatchOnMainThread = (batch: ProcessedPlace[], _layer: FeatureGroup.
 			leaflet,
 			iconData.iconTmp,
 			iconData.boosted,
-			iconData.commentsCount
+			iconData.commentsCount,
 		);
 
 		const marker = generateMarker({
@@ -792,7 +881,7 @@ const processBatchOnMainThread = (batch: ProcessedPlace[], _layer: FeatureGroup.
 			placeId: element.id,
 			leaflet,
 			verify: true,
-			onMarkerClick: (id) => openMerchantDrawer(Number(id))
+			onMarkerClick: (id) => openMerchantDrawer(Number(id)),
 		});
 
 		// Route to appropriate layer based on boost status and zoom level
@@ -816,7 +905,10 @@ const processBatchOnMainThread = (batch: ProcessedPlace[], _layer: FeatureGroup.
 	}
 
 	// Highlight the selected marker if it was just loaded (may be pending from search result click)
-	if ((regularMarkersToAdd.length > 0 || boostedMarkersToAdd.length > 0) && selectedMarkerId) {
+	if (
+		(regularMarkersToAdd.length > 0 || boostedMarkersToAdd.length > 0) &&
+		selectedMarkerId
+	) {
 		highlightMarker(loadedMarkers, selectedMarkerId);
 	}
 };
@@ -850,15 +942,18 @@ onMount(async () => {
 		if (location.hash) {
 			try {
 				// Extract only the map coordinates part (before any & parameters)
-				const hashPart = location.hash.split('&')[0];
-				const coords = hashPart.split('/');
-				map.setView([Number(coords[1]), Number(coords[2])], Number(coords[0].slice(1)));
+				const hashPart = location.hash.split("&")[0];
+				const coords = hashPart.split("/");
+				map.setView(
+					[Number(coords[1]), Number(coords[2])],
+					Number(coords[0].slice(1)),
+				);
 				setMapViewAndMarkLoaded();
 			} catch (error) {
 				map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
 				setMapViewAndMarkLoaded();
 				errToast(
-					'Could not set map view to provided coordinates, please try again or contact BTC Map.'
+					"Could not set map view to provided coordinates, please try again or contact BTC Map.",
 				);
 				console.error(error);
 			}
@@ -870,7 +965,7 @@ onMount(async () => {
 				if (urlLat.length > 1 && urlLong.length > 1) {
 					map.fitBounds([
 						[Number(urlLat[0]), Number(urlLong[0])],
-						[Number(urlLat[1]), Number(urlLong[1])]
+						[Number(urlLat[1]), Number(urlLong[1])],
 					]);
 					setMapViewAndMarkLoaded();
 				} else {
@@ -881,7 +976,7 @@ onMount(async () => {
 				map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
 				setMapViewAndMarkLoaded();
 				errToast(
-					'Could not set map view to provided coordinates, please try again or contact BTC Map.'
+					"Could not set map view to provided coordinates, please try again or contact BTC Map.",
 				);
 				console.error(error);
 			}
@@ -890,14 +985,14 @@ onMount(async () => {
 		// set view to last location if it is present in the cache
 		else {
 			localforage
-				.getItem<LatLngBounds>('coords')
+				.getItem<LatLngBounds>("coords")
 				.then((value) => {
 					if (value) {
 						map.fitBounds([
 							// @ts-expect-error - LatLngBounds internal structure access
 							[value._northEast.lat, value._northEast.lng],
 							// @ts-expect-error - LatLngBounds internal structure access
-							[value._southWest.lat, value._southWest.lng]
+							[value._southWest.lat, value._southWest.lng],
 						]);
 					} else {
 						map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
@@ -907,7 +1002,9 @@ onMount(async () => {
 				.catch((err) => {
 					map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
 					setMapViewAndMarkLoaded();
-					errToast('Could not set map view to cached coords, please try again or contact BTC Map.');
+					errToast(
+						"Could not set map view to cached coords, please try again or contact BTC Map.",
+					);
 					console.error(err);
 				});
 		}
@@ -926,7 +1023,7 @@ onMount(async () => {
 						clearTimeout(glMapPollingTimer);
 						glMapPollingTimer = null;
 					}
-					glMap.on('idle', () => {
+					glMap.on("idle", () => {
 						if (tilesLoadingTimer) {
 							clearTimeout(tilesLoadingTimer);
 							tilesLoadingTimer = null;
@@ -951,7 +1048,7 @@ onMount(async () => {
 		}
 
 		// Show tile loading indicator on pan/zoom (debounced to prevent flickering)
-		map.on('movestart', () => {
+		map.on("movestart", () => {
 			if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
 			if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
 
@@ -967,7 +1064,7 @@ onMount(async () => {
 		});
 
 		// Close drawer when clicking on map (not on markers)
-		map.on('click', () => {
+		map.on("click", () => {
 			if ($merchantDrawer.isOpen) {
 				if (selectedMarkerId) {
 					clearMarkerSelection(loadedMarkers, selectedMarkerId);
@@ -978,7 +1075,7 @@ onMount(async () => {
 		});
 
 		// change broken marker image path in prod
-		leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
+		leaflet.Icon.Default.prototype.options.imagePath = "/icons/";
 
 		// add support attribution
 		support();
@@ -995,108 +1092,110 @@ onMount(async () => {
 		// add new control container for search and boost
 		const customControls = leaflet.Control.extend({
 			options: {
-				position: 'topleft'
+				position: "topleft",
 			},
 			onAdd: () => {
-				const addControlDiv = leaflet.DomUtil.create('div');
-				addControlDiv.style.border = 'none';
-				addControlDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+				const addControlDiv = leaflet.DomUtil.create("div");
+				addControlDiv.style.border = "none";
+				addControlDiv.style.filter =
+					"drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))";
 				addControlDiv.classList.add(
-					'leaflet-control-search-boost',
-					'leaflet-bar',
-					'leaflet-control'
+					"leaflet-control-search-boost",
+					"leaflet-bar",
+					"leaflet-control",
 				);
 
 				// Search button - opens panel in search mode
-				const searchButton = leaflet.DomUtil.create('a');
-				searchButton.classList.add('leaflet-control-search-toggle');
-				searchButton.title = 'Search';
-				searchButton.role = 'button';
-				searchButton.ariaLabel = 'Search';
-				searchButton.ariaDisabled = 'false';
+				const searchButton = leaflet.DomUtil.create("a");
+				searchButton.classList.add("leaflet-control-search-toggle");
+				searchButton.title = "Search";
+				searchButton.role = "button";
+				searchButton.ariaLabel = "Search";
+				searchButton.ariaDisabled = "false";
 				searchButton.innerHTML = `<img src=${
-					theme === 'dark' ? '/icons/search-white.svg' : '/icons/search.svg'
+					theme === "dark" ? "/icons/search-white.svg" : "/icons/search.svg"
 				} alt='search' class='inline' id='search-button'/>`;
-				searchButton.style.borderRadius = '8px 8px 0 0';
+				searchButton.style.borderRadius = "8px 8px 0 0";
 				searchButton.onclick = function openSearch() {
 					// Open panel in search mode (will auto-focus input)
 					merchantList.openSearchMode();
 				};
-				if (theme === 'light') {
+				if (theme === "light") {
 					searchButton.onmouseenter = () => {
 						// @ts-expect-error src property exists on img element
-						document.querySelector('#search-button').src = '/icons/search-black.svg';
+						document.querySelector("#search-button").src =
+							"/icons/search-black.svg";
 					};
 					searchButton.onmouseleave = () => {
 						// @ts-expect-error src property exists on img element
-						document.querySelector('#search-button').src = '/icons/search.svg';
+						document.querySelector("#search-button").src = "/icons/search.svg";
 					};
 				}
 				searchButton.classList.add(
-					'dark:!bg-dark',
-					'dark:hover:!bg-dark/75',
-					'dark:border',
-					'dark:border-white/95'
+					"dark:!bg-dark",
+					"dark:hover:!bg-dark/75",
+					"dark:border",
+					"dark:border-white/95",
 				);
 
 				addControlDiv.append(searchButton);
 
 				// add boost layer button
-				const boostLayerButton = leaflet.DomUtil.create('a');
-				boostLayerButton.classList.add('leaflet-control-boost-layer');
-				boostLayerButton.title = 'Boosted locations';
-				boostLayerButton.role = 'button';
-				boostLayerButton.ariaLabel = 'Boosted locations';
-				boostLayerButton.ariaDisabled = 'false';
+				const boostLayerButton = leaflet.DomUtil.create("a");
+				boostLayerButton.classList.add("leaflet-control-boost-layer");
+				boostLayerButton.title = "Boosted locations";
+				boostLayerButton.role = "button";
+				boostLayerButton.ariaLabel = "Boosted locations";
+				boostLayerButton.ariaDisabled = "false";
 				boostLayerButton.innerHTML = `<img src=${
 					boosts
-						? theme === 'dark'
-							? '/icons/boost-solid-white.svg'
-							: '/icons/boost-solid.svg'
-						: theme === 'dark'
-							? '/icons/boost-white.svg'
-							: '/icons/boost.svg'
+						? theme === "dark"
+							? "/icons/boost-solid-white.svg"
+							: "/icons/boost-solid.svg"
+						: theme === "dark"
+							? "/icons/boost-white.svg"
+							: "/icons/boost.svg"
 				} alt='boost' class='inline' id='boost-layer'/>`;
-				boostLayerButton.style.borderRadius = '0 0 8px 8px';
-				boostLayerButton.style.borderBottom = '1px solid #ccc';
+				boostLayerButton.style.borderRadius = "0 0 8px 8px";
+				boostLayerButton.style.borderBottom = "1px solid #ccc";
 				boostLayerButton.onclick = function toggleLayer() {
 					if (boosts) {
-						$page.url.searchParams.delete('boosts');
+						$page.url.searchParams.delete("boosts");
 						location.search = $page.url.search;
 					} else {
-						$page.url.searchParams.append('boosts', 'true');
+						$page.url.searchParams.append("boosts", "true");
 						location.search = $page.url.search;
 					}
 				};
-				if (theme === 'light') {
+				if (theme === "light") {
 					boostLayerButton.onmouseenter = () => {
 						// @ts-expect-error - LatLngBounds internal structure access
-						document.querySelector('#boost-layer').src = boosts
-							? '/icons/boost-solid-black.svg'
-							: '/icons/boost-black.svg';
+						document.querySelector("#boost-layer").src = boosts
+							? "/icons/boost-solid-black.svg"
+							: "/icons/boost-black.svg";
 					};
 					boostLayerButton.onmouseleave = () => {
 						// @ts-expect-error - LatLngBounds internal structure access
-						document.querySelector('#boost-layer').src = boosts
-							? '/icons/boost-solid.svg'
-							: '/icons/boost.svg';
+						document.querySelector("#boost-layer").src = boosts
+							? "/icons/boost-solid.svg"
+							: "/icons/boost.svg";
 					};
 				}
 				boostLayerButton.classList.add(
-					'dark:!bg-dark',
-					'dark:hover:!bg-dark/75',
-					'dark:border',
-					'dark:border-white/95'
+					"dark:!bg-dark",
+					"dark:hover:!bg-dark/75",
+					"dark:border",
+					"dark:border-white/95",
 				);
 
 				addControlDiv.append(boostLayerButton);
 
 				return addControlDiv;
-			}
+			},
 		});
 
 		map.addControl(new customControls());
-		const boostLayer = document.querySelector('.leaflet-control-boost-layer');
+		const boostLayer = document.querySelector(".leaflet-control-boost-layer");
 		if (boostLayer) {
 			DomEvent.disableClickPropagation(boostLayer as HTMLElement);
 		}
@@ -1104,14 +1203,16 @@ onMount(async () => {
 		// Search bar control - re-enabled for API-based search
 		// @ts-expect-error accessing private Leaflet map internals for custom control placement
 		map._controlCorners.topcenter = leaflet.DomUtil.create(
-			'div',
-			'leaflet-top leaflet-center',
+			"div",
+			"leaflet-top leaflet-center",
 			// @ts-expect-error accessing private Leaflet map internals
-			map._controlContainer
+			map._controlContainer,
 		);
 
 		// disable map events for search toggle
-		const searchToggle = document.querySelector('.leaflet-control-search-toggle');
+		const searchToggle = document.querySelector(
+			".leaflet-control-search-toggle",
+		);
 		if (searchToggle) {
 			DomEvent.disableClickPropagation(searchToggle as HTMLElement);
 		}
@@ -1128,13 +1229,13 @@ onMount(async () => {
 		changeDefaultIcons(true, leaflet, mapElement, DomEvent);
 
 		// final map setup
-		map.on('load', () => {
+		map.on("load", () => {
 			mapCenter = map.getCenter();
 			mapLoaded = true;
 		});
 
 		// Watch for hash changes to clear marker selection when drawer closes
-		window.addEventListener('hashchange', handleHashChange);
+		window.addEventListener("hashchange", handleHashChange);
 
 		// Sync drawer state from URL hash on initial page load
 		merchantDrawer.syncFromHash();
@@ -1156,7 +1257,7 @@ onDestroy(async () => {
 	merchantList.reset();
 
 	if (map) {
-		console.info('Unloading Leaflet map.');
+		console.info("Unloading Leaflet map.");
 		map.remove();
 	}
 	// Clean up web worker
@@ -1164,11 +1265,11 @@ onDestroy(async () => {
 
 	// Reset loading progress when leaving map page to avoid stale states
 	placesLoadingProgress.set(0);
-	placesLoadingStatus.set('');
+	placesLoadingStatus.set("");
 
 	// Remove hash change listener
 	if (browser) {
-		window.removeEventListener('hashchange', handleHashChange);
+		window.removeEventListener("hashchange", handleHashChange);
 	}
 });
 </script>

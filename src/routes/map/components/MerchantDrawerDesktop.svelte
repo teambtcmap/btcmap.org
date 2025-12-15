@@ -1,12 +1,12 @@
 <script lang="ts">
-import { onMount } from 'svelte';
-import { fly } from 'svelte/transition';
+import { onMount } from "svelte";
+import { fly } from "svelte/transition";
 
-import BoostContent from '$components/BoostContent.svelte';
-import CloseButton from '$components/CloseButton.svelte';
-import Icon from '$components/Icon.svelte';
-import MerchantDetailsContent from '$components/MerchantDetailsContent.svelte';
-import { MERCHANT_DRAWER_WIDTH, MERCHANT_LIST_WIDTH } from '$lib/constants';
+import BoostContent from "$components/BoostContent.svelte";
+import CloseButton from "$components/CloseButton.svelte";
+import Icon from "$components/Icon.svelte";
+import MerchantDetailsContent from "$components/MerchantDetailsContent.svelte";
+import { MERCHANT_DRAWER_WIDTH, MERCHANT_LIST_WIDTH } from "$lib/constants";
 import {
 	handleBoost as boostMerchant,
 	calcVerifiedDate,
@@ -14,13 +14,13 @@ import {
 	isUpToDate as checkUpToDate,
 	clearBoostState,
 	handleBoostComplete as completeBoost,
-	ensureBoostData
-} from '$lib/merchantDrawerLogic';
-import { merchantDrawer } from '$lib/merchantDrawerStore';
-import { merchantList } from '$lib/merchantListStore';
-import { boost, resetBoost } from '$lib/store';
+	ensureBoostData,
+} from "$lib/merchantDrawerLogic";
+import { merchantDrawer } from "$lib/merchantDrawerStore";
+import { merchantList } from "$lib/merchantListStore";
+import { boost, resetBoost } from "$lib/store";
 
-import { invalidateAll } from '$app/navigation';
+import { invalidateAll } from "$app/navigation";
 
 // Derive state from centralized store
 $: isOpen = $merchantDrawer.isOpen;
@@ -48,23 +48,24 @@ const closeDrawer = () => {
 const goBack = () => {
 	clearBoostState();
 	boostLoading = false;
-	merchantDrawer.setView('details');
+	merchantDrawer.setView("details");
 };
 
-$: if (drawerView !== 'boost' && $boost !== undefined) {
+$: if (drawerView !== "boost" && $boost !== undefined) {
 	clearBoostState();
 	boostLoading = false;
 }
 
 const handleBoost = () => boostMerchant(merchant, merchantId, setBoostLoading);
-const handleBoostComplete = () => completeBoost(merchantId, invalidateAll, resetBoost);
+const handleBoostComplete = () =>
+	completeBoost(merchantId, invalidateAll, resetBoost);
 
 function handleKeydown(event: KeyboardEvent) {
 	if (!isOpen) return;
 
-	if (event.key === 'Escape') {
+	if (event.key === "Escape") {
 		event.preventDefault();
-		if (drawerView !== 'details') {
+		if (drawerView !== "details") {
 			goBack();
 		} else {
 			closeDrawer();
@@ -73,18 +74,18 @@ function handleKeydown(event: KeyboardEvent) {
 }
 
 onMount(() => {
-	window.addEventListener('keydown', handleKeydown);
+	window.addEventListener("keydown", handleKeydown);
 	return () => {
-		window.removeEventListener('keydown', handleKeydown);
+		window.removeEventListener("keydown", handleKeydown);
 	};
 });
 
-$: if (drawerView === 'boost' && merchant) {
+$: if (drawerView === "boost" && merchant) {
 	ensureBoostData(merchant, $boost);
 }
 
 export function openDrawer(id: number) {
-	merchantDrawer.open(id, 'details');
+	merchantDrawer.open(id, "details");
 }
 </script>
 

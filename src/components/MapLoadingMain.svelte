@@ -2,7 +2,7 @@
 export let progress: number | undefined;
 export let status: string | undefined = undefined;
 
-import { fade } from 'svelte/transition';
+import { fade } from "svelte/transition";
 
 let shouldHide = false;
 
