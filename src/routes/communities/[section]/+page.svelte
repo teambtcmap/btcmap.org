@@ -86,7 +86,8 @@ $: uniqueOrganizations = communities
 					.filter((community) => community.tags.organization)
 					.flatMap((community) =>
 						community.tags.organization?.split(",").map((org) => org.trim()),
-					),
+					)
+					.filter((org): org is string => org !== undefined),
 			),
 		).sort()
 	: [];

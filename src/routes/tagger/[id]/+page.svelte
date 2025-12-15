@@ -72,7 +72,7 @@ const initializeData = async () => {
 		? description.replaceAll(removeLightning[0], "")
 		: description;
 	const regexMatch = description.match("(lightning:[^)]+)");
-	lightning = regexMatch?.[0].slice(10);
+	lightning = regexMatch?.[0].slice(10) ?? null;
 
 	const userEvents = $events.filter((event) => event.user_id === user.id);
 	userEvents.sort(

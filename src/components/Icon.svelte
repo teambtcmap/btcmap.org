@@ -26,7 +26,8 @@ type IconProps =
 
 export let w: string;
 export let h: string;
-let className: undefined | string;
+// biome-ignore lint/complexity/noUselessUndefinedInitialization: Required for Svelte optional prop
+let className: undefined | string = undefined;
 export { className as class };
 export let icon: string | IconNameApps | IconNameMobileNav | IconNameSocials;
 export let type: "apps" | "fa" | "material" | "mobile-nav" | "socials" =

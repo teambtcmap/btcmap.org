@@ -3,7 +3,8 @@ import { TipType } from "$lib/types";
 
 export let user: undefined | string = undefined;
 export let destination: string;
-let className: undefined | string;
+// biome-ignore lint/complexity/noUselessUndefinedInitialization: Required for Svelte optional prop
+let className: undefined | string = undefined;
 export { className as class };
 export let type: TipType = TipType.Address;
 </script>

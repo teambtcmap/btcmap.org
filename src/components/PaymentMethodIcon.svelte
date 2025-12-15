@@ -9,7 +9,8 @@ export let label: string;
 export let variant: "default" | "teal" = "default";
 export let size: "sm" | "md" = "sm";
 
-let imgElement: HTMLImageElement | undefined;
+// biome-ignore lint/complexity/noUselessUndefinedInitialization: Required for Svelte optional prop
+let imgElement: HTMLImageElement | undefined = undefined;
 export { imgElement as element };
 
 const iconPaths = {
