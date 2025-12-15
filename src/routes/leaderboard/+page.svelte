@@ -362,20 +362,23 @@
 					<p class="w-full p-5 text-center text-primary dark:text-white">No data available</p>
 				{:else}
 					<div class="p-5">
-						<div class="mb-6 px-4 py-3 text-center md:text-left">
-							<p class="text-lg font-semibold text-primary dark:text-white">Time period</p>
-							<p class="text-sm text-primary/80 dark:text-white/80">
-								Showing {periodLabels[selectedPeriod]}
-							</p>
-						</div>
-
-						<div class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+						<div
+							class="mb-6 flex flex-col gap-4 px-4 py-3 md:flex-row md:items-center md:justify-between"
+						>
+							<div class="flex-1">
+								<LeaderboardSearch
+									table={$table}
+									globalFilter={$table.getState().globalFilter}
+									on:globalFilterChange={(e) => $table?.setGlobalFilter(e.detail)}
+									{searchDebounce}
+								/>
+							</div>
 							<label
-								class="flex flex-col gap-2 px-4 py-3 text-sm font-medium text-primary md:flex-row md:items-center md:gap-3 dark:text-white"
+								class="flex flex-col gap-2 text-sm font-medium text-primary md:flex-row md:items-center md:gap-3 dark:text-white"
 							>
 								<span>Period</span>
 								<select
-									class="rounded-xl border border-primary/40 bg-white/80 px-4 py-2 text-primary focus:border-primary focus:outline-none dark:border-white/50 dark:bg-dark/40 dark:text-white"
+									class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link md:w-auto dark:bg-white/[0.15] dark:text-white"
 									value={selectedPeriod}
 									on:change={handlePeriodChange}
 									aria-label="Select leaderboard period"
@@ -385,13 +388,6 @@
 									{/each}
 								</select>
 							</label>
-
-							<LeaderboardSearch
-								table={$table}
-								globalFilter={$table.getState().globalFilter}
-								on:globalFilterChange={(e) => $table?.setGlobalFilter(e.detail)}
-								{searchDebounce}
-							/>
 						</div>
 
 						{#if $table.getFilteredRowModel().rows.length === 0}
