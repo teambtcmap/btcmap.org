@@ -71,6 +71,6 @@
 	{/each}
 
 	{#if lightning}
-		<Tip destination={lightning} class="mx-auto block lg:!my-auto lg:inline lg:h-[30px]" />
+		<Tip destination={lightning} class="mx-auto block lg:!my-auto lg:h-[30px]" />
 	{/if}
 </div>

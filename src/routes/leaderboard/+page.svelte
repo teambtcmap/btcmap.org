@@ -1,52 +1,284 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
+	import { goto } from '$app/navigation';
 	import Icon from '$components/Icon.svelte';
-	import LeaderboardItem from './components/LeaderboardItem.svelte';
-	import LeaderboardSkeleton from './components/LeaderboardSkeleton.svelte';
+	import LeaderboardPagination from '$components/leaderboard/LeaderboardPagination.svelte';
+	import LeaderboardSearch from '$components/leaderboard/LeaderboardSearch.svelte';
+	import SortHeaderButton from '$components/leaderboard/SortHeaderButton.svelte';
+	import TaggerLeaderboardDesktopTable from '$components/leaderboard/TaggerLeaderboardDesktopTable.svelte';
+	import TaggerLeaderboardMobileCard from '$components/leaderboard/TaggerLeaderboardMobileCard.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
-	import { theme } from '$lib/store';
+	import LoadingSpinner from '$components/LoadingSpinner.svelte';
+	import {
+		createSvelteTable,
+		getCoreRowModel,
+		getFilteredRowModel,
+		getPaginationRowModel,
+		getSortedRowModel,
+		type ColumnDef,
+		type FilterFn,
+		type OnChangeFn,
+		type PaginationState,
+		type SortingState,
+		type TableOptions
+	} from '@tanstack/svelte-table';
+	import { rankItem } from '@tanstack/match-sorter-utils';
+	import { page } from '$app/stores';
+	import { writable, get } from 'svelte/store';
+	import { excludeLeader, theme } from '$lib/store';
 	import type { RpcGetMostActiveUsersItem, TaggerLeaderboard } from '$lib/types';
-	import { detectTheme } from '$lib/utils';
-	import { onMount } from 'svelte';
+	import { debounce, detectTheme } from '$lib/utils';
 
-	export let data;
-	let users: RpcGetMostActiveUsersItem[] = data.rpcResult.users;
-
-	let loading: boolean;
-	let leaderboard: TaggerLeaderboard[];
-
-	const populateLeaderboard = () => {
-		loading = true;
-		leaderboard = [];
-		users.forEach((user) => {
-			var image_url = 'satoshi';
-			if (user.image_url) {
-				image_url = user.image_url;
-			}
-
-			leaderboard.push({
-				avatar: image_url,
-				tagger: user.name,
-				id: user.id,
-				created: user.created,
-				updated: user.updated,
-				deleted: user.deleted,
-				total: user.edits,
-				tip: user.tip_address
-			});
-		});
-		leaderboard = leaderboard;
-		loading = false;
+	type TaggerRow = TaggerLeaderboard & {
+		position: number;
+		tipDestination?: string;
 	};
 
-	onMount(() => {
-		if (browser) {
-			populateLeaderboard();
+	type PeriodOption = '3-months' | '6-months' | '12-months' | 'all-time';
+	const DEFAULT_PERIOD: PeriodOption = '12-months';
+	const DEFAULT_PERIOD_OPTIONS: PeriodOption[] = ['3-months', '6-months', '12-months', 'all-time'];
+	const periodLabels: Record<PeriodOption, string> = {
+		'3-months': 'Last 3 months',
+		'6-months': 'Last 6 months',
+		'12-months': 'Last 12 months',
+		'all-time': 'All Time'
+	};
+
+	export let data;
+
+	const pageSizes = [10, 20, 30, 40, 50];
+	let loading = true;
+	let periodLoading = false;
+	let errorMessage: string | null = data?.error ?? null;
+	let leaderboardRows: TaggerRow[] = [];
+	let totalTaggers = 0;
+
+	const validatePeriodOption = (value: unknown): value is PeriodOption => {
+		return typeof value === 'string' && DEFAULT_PERIOD_OPTIONS.includes(value as PeriodOption);
+	};
+
+	let periodOptions: PeriodOption[] = [...DEFAULT_PERIOD_OPTIONS];
+	let selectedPeriod: PeriodOption = DEFAULT_PERIOD;
+	let lastResolvedPeriod: PeriodOption = DEFAULT_PERIOD;
+
+	$: {
+		const incoming = Array.isArray(data?.periodOptions)
+			? data?.periodOptions
+			: DEFAULT_PERIOD_OPTIONS;
+		periodOptions = Array.from(
+			new Set(incoming.filter((option) => validatePeriodOption(option)))
+		) as PeriodOption[];
+		if (!periodOptions.length) {
+			periodOptions = [...DEFAULT_PERIOD_OPTIONS];
 		}
+	}
+
+	$: {
+		const periodFromData = validatePeriodOption(data?.period)
+			? (data.period as PeriodOption)
+			: DEFAULT_PERIOD;
+		const validPeriod = periodOptions.includes(periodFromData) ? periodFromData : DEFAULT_PERIOD;
+		if (validPeriod !== lastResolvedPeriod) {
+			lastResolvedPeriod = validPeriod;
+			selectedPeriod = validPeriod;
+		}
+	}
+
+	const extractLightningDestination = (tip?: string): string | undefined => {
+		if (!tip) return undefined;
+		const trimmed = tip.trim();
+		if (!trimmed) return undefined;
+		const lightningMatch = trimmed.match(/lightning:[^\s)]+/i);
+		if (lightningMatch) {
+			return lightningMatch[0].replace(/^lightning:/i, '');
+		}
+		return trimmed.replace(/^lightning:/i, '');
+	};
+
+	const normalizeUsers = (
+		users: RpcGetMostActiveUsersItem[],
+		excluded: Set<number>
+	): TaggerRow[] => {
+		return users
+			.filter((user) => !excluded.has(user.id))
+			.map((user) => {
+				const avatar = user.image_url || '/images/satoshi-nakamoto.png';
+				const totalEdits = user.edits;
+				return {
+					avatar,
+					tagger: user.name,
+					id: user.id,
+					created: user.created,
+					updated: user.updated,
+					deleted: user.deleted,
+					total: totalEdits,
+					tip: user.tip_address,
+					tipDestination: extractLightningDestination(user.tip_address)
+				};
+			})
+			.sort((a, b) => {
+				if (b.total !== a.total) return b.total - a.total;
+				if (b.updated !== a.updated) return b.updated - a.updated;
+				return a.tagger.localeCompare(b.tagger);
+			})
+			.map((item, index) => ({ ...item, position: index + 1 }));
+	};
+
+	$: {
+		if (data?.rpcResult?.users?.length) {
+			const excluded = new Set(get(excludeLeader));
+			leaderboardRows = normalizeUsers(data.rpcResult.users, excluded);
+			totalTaggers = leaderboardRows.length;
+			loading = false;
+			periodLoading = false;
+			errorMessage = null;
+		} else if (data?.error) {
+			leaderboardRows = [];
+			totalTaggers = 0;
+			loading = false;
+			periodLoading = false;
+			errorMessage = data.error;
+		} else {
+			leaderboardRows = [];
+			totalTaggers = 0;
+		}
+	}
+
+	const fuzzyFilter: FilterFn<TaggerRow> = (row, columnId, value, addMeta) => {
+		const itemRank = rankItem(row.getValue(columnId), value);
+		addMeta?.({ itemRank });
+		return itemRank.passed;
+	};
+
+	const columns: ColumnDef<TaggerRow>[] = [
+		{
+			id: 'position',
+			header: 'Position',
+			accessorFn: (row) => row.position,
+			enableSorting: true,
+			enableGlobalFilter: false,
+			sortingFn: (a, b) => a.original.position - b.original.position
+		},
+		{
+			id: 'name',
+			header: 'Name',
+			accessorFn: (row) => row.tagger,
+			enableSorting: true,
+			filterFn: fuzzyFilter,
+			enableGlobalFilter: true
+		},
+		{
+			id: 'total',
+			header: 'Total',
+			accessorFn: (row) => row.total,
+			enableSorting: true,
+			enableGlobalFilter: false
+		},
+		{
+			id: 'created',
+			header: 'Created',
+			accessorFn: (row) => row.created,
+			enableSorting: true,
+			enableGlobalFilter: false
+		},
+		{
+			id: 'updated',
+			header: 'Updated',
+			accessorFn: (row) => row.updated,
+			enableSorting: true,
+			enableGlobalFilter: false
+		},
+		{
+			id: 'deleted',
+			header: 'Deleted',
+			accessorFn: (row) => row.deleted,
+			enableSorting: true,
+			enableGlobalFilter: false
+		},
+		{
+			id: 'tip',
+			header: 'Tip',
+			accessorFn: (row) => row.tipDestination ?? '',
+			enableSorting: false,
+			enableGlobalFilter: false
+		}
+	];
+
+	let sorting: SortingState = [{ id: 'total', desc: true }];
+	let pagination: PaginationState = {
+		pageIndex: 0,
+		pageSize: pageSizes[0]
+	};
+
+	const setSorting: OnChangeFn<SortingState> = (updater) => {
+		sorting = updater instanceof Function ? updater(sorting) : updater;
+		options.update((old) => ({
+			...old,
+			state: {
+				...old.state,
+				sorting
+			}
+		}));
+	};
+
+	const setPagination: OnChangeFn<PaginationState> = (updater) => {
+		pagination = updater instanceof Function ? updater(pagination) : updater;
+		options.update((old) => ({
+			...old,
+			state: {
+				...old.state,
+				pagination
+			}
+		}));
+	};
+
+	const options = writable<TableOptions<TaggerRow>>({
+		data: leaderboardRows,
+		columns,
+		state: {
+			sorting,
+			pagination
+		},
+		onSortingChange: setSorting,
+		onPaginationChange: setPagination,
+		globalFilterFn: fuzzyFilter,
+		getCoreRowModel: getCoreRowModel(),
+		getSortedRowModel: getSortedRowModel(),
+		getPaginationRowModel: getPaginationRowModel(),
+		getFilteredRowModel: getFilteredRowModel()
 	});
 
-	const headings = ['Position', 'Name', 'Created', 'Updated', 'Deleted', 'Tip'];
+	const table = createSvelteTable(options);
+
+	$: options.update((current) => ({
+		...current,
+		data: leaderboardRows
+	}));
+
+	const handleKeyUp = (e: KeyboardEvent) => {
+		$table?.setGlobalFilter(String((e.target as HTMLInputElement)?.value));
+	};
+
+	const searchDebounce = debounce((e) => handleKeyUp(e));
+
+	const handlePeriodChange = async (event: Event) => {
+		const nextValue = (event.target as HTMLSelectElement).value as PeriodOption;
+		const search = new URLSearchParams($page.url.searchParams);
+		if (nextValue === DEFAULT_PERIOD) {
+			search.delete('period');
+		} else {
+			search.set('period', nextValue);
+		}
+		const nextSearch = search.toString();
+		const nextUrl = nextSearch ? `/leaderboard?${nextSearch}` : '/leaderboard';
+		selectedPeriod = nextValue;
+		periodLoading = true;
+
+		// eslint-disable-next-line svelte/no-navigation-without-resolve
+		await goto(nextUrl, {
+			replaceState: true,
+			noScroll: true
+		});
+	};
 </script>
 
 <svelte:head>
@@ -56,25 +288,21 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/leader.png" />
 </svelte:head>
 
-<main class="my-10 space-y-10 text-center">
-	<div class="flex justify-center">
+<main class="mt-10 mb-20">
+	<div class="mb-10 flex justify-center">
 		<div id="hero" class="flex h-[324px] w-full items-end justify-center">
 			<img src="/images/supertagger-king.svg" alt="ultimate supertagger" />
 		</div>
 	</div>
 
-	<div class="space-y-10">
-		{#if typeof window !== 'undefined'}
-			<h1
-				class="{detectTheme() === 'dark' || $theme === 'dark'
-					? 'text-white'
-					: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl"
-			>
-				Top Editors
-			</h1>
-		{:else}
-			<HeaderPlaceholder />
-		{/if}
+	<div class="mx-auto w-10/12 space-y-10 xl:w-[1200px]">
+		<h1
+			class="{detectTheme() === 'dark' || $theme === 'dark'
+				? 'text-white'
+				: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl"
+		>
+			Top Taggers
+		</h1>
 
 		<PrimaryButton
 			style="w-[207px] mx-auto py-3 rounded-xl"
@@ -84,46 +312,138 @@
 			Join Them
 		</PrimaryButton>
 
-		<section id="leaderboard" class="dark:lg:rounded dark:lg:bg-white/10 dark:lg:py-8">
-			<div class="mb-5 hidden grid-cols-6 text-center lg:grid">
-				{#each headings as heading (heading)}
-					<h3 class="text-lg font-semibold text-primary dark:text-white">
-						{heading}
-						{#if heading === 'Tip'}
-							<a
-								href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Lightning-Tips"
-								target="_blank"
-								rel="noreferrer"
-								><Icon type="fa" icon="circle-info" w="14" h="14" class="inline text-sm" /></a
-							>
+		<section id="leaderboard" aria-labelledby="leaderboard-title">
+			<div
+				class="w-full rounded-3xl border border-gray-300 bg-white dark:border-white/95 dark:bg-white/10"
+			>
+				<header>
+					<h2
+						id="leaderboard-title"
+						class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
+					>
+						Top Taggers
+						{#if !loading && !errorMessage && totalTaggers}
+							({totalTaggers})
 						{/if}
-					</h3>
-				{/each}
-			</div>
+					</h2>
+				</header>
 
-			<div class="space-y-10 lg:space-y-5">
-				{#if leaderboard && leaderboard.length && !loading}
-					{#each leaderboard as item, index (item.id)}
-						<LeaderboardItem
-							position={index + 1}
-							avatar={item.avatar}
-							tagger={item.tagger}
-							id={item.id}
-							created={item.created}
-							updated={item.updated}
-							deleted={item.deleted}
-							tip={item.tip}
-						/>
-					{/each}
+				{#if loading}
+					<div class="p-5">
+						<div
+							class="flex h-[572px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
+							role="status"
+							aria-live="polite"
+						>
+							<span class="sr-only">Loading leaderboard data</span>
+							<Icon type="fa" icon="table" w="96" h="96" class="animate-pulse text-link/50" />
+						</div>
+					</div>
+				{:else if periodLoading}
+					<div class="p-5">
+						<div
+							class="flex h-[572px] w-full items-center justify-center rounded-3xl border border-link/50"
+							role="status"
+							aria-live="polite"
+						>
+							<div class="flex flex-col items-center gap-4">
+								<LoadingSpinner color="text-link" size="h-12 w-12" />
+								<p class="text-lg font-medium text-primary dark:text-white">
+									Loading {periodLabels[selectedPeriod].toLowerCase()} data...
+								</p>
+							</div>
+						</div>
+					</div>
+				{:else if errorMessage}
+					<p class="w-full p-5 text-center text-primary dark:text-white">
+						Failed to load leaderboard: {errorMessage}
+					</p>
+				{:else if !leaderboardRows.length}
+					<p class="w-full p-5 text-center text-primary dark:text-white">No data available</p>
 				{:else}
-					{#each Array(50) as _, i (i)}
-						<LeaderboardSkeleton />
-					{/each}
+					<div class="p-5">
+						<div
+							class="mb-6 flex flex-col gap-4 px-4 py-3 md:flex-row md:items-center md:justify-between"
+						>
+							<div class="flex-1">
+								<LeaderboardSearch
+									table={$table}
+									globalFilter={$table.getState().globalFilter}
+									on:globalFilterChange={(e) => $table?.setGlobalFilter(e.detail)}
+									{searchDebounce}
+								/>
+							</div>
+							<label
+								class="flex flex-col gap-2 text-sm font-medium text-primary md:flex-row md:items-center md:gap-3 dark:text-white"
+							>
+								<span>Period</span>
+								<select
+									class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link md:w-auto dark:bg-white/[0.15] dark:text-white"
+									value={selectedPeriod}
+									on:change={handlePeriodChange}
+									aria-label="Select leaderboard period"
+								>
+									{#each periodOptions as option (option)}
+										<option value={option}>{periodLabels[option]}</option>
+									{/each}
+								</select>
+							</label>
+						</div>
+
+						{#if $table.getFilteredRowModel().rows.length === 0}
+							<p class="w-full p-5 text-center text-primary dark:text-white">No results found.</p>
+						{:else}
+							<div class="block lg:hidden">
+								<div
+									class="border-b border-gray-300 bg-primary/5 dark:border-white/95 dark:bg-white/5"
+								>
+									<div class="grid grid-cols-4 gap-3 px-4 py-3 text-center text-xs">
+										<SortHeaderButton
+											column={$table?.getColumn('position')}
+											label="Position"
+											ariaLabel="Sort by position"
+										/>
+										<SortHeaderButton
+											column={$table?.getColumn('total')}
+											label="Total"
+											ariaLabel="Sort by total edits"
+										/>
+										<SortHeaderButton
+											column={$table?.getColumn('created')}
+											label="Created"
+											ariaLabel="Sort by created edits"
+										/>
+										<SortHeaderButton
+											column={$table?.getColumn('updated')}
+											label="Updated"
+											ariaLabel="Sort by updated edits"
+										/>
+									</div>
+								</div>
+
+								<TaggerLeaderboardMobileCard table={$table} />
+							</div>
+
+							<TaggerLeaderboardDesktopTable table={$table} />
+							<LeaderboardPagination table={$table} {pageSizes} />
+						{/if}
+					</div>
 				{/if}
 			</div>
 		</section>
 	</div>
 </main>
+
+{#if typeof window !== 'undefined'}
+	{#if detectTheme() === 'dark' || $theme === 'dark'}
+		<style>
+			select option {
+				--tw-bg-opacity: 1;
+				background-color: rgb(55 65 81 / var(--tw-bg-opacity));
+			}
+		</style>
+	{/if}
+{/if}
 
 <style>
 	#hero {
