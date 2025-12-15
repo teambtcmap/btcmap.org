@@ -180,7 +180,7 @@
 												tabindex={header.column.getCanSort() ? 0 : -1}
 												aria-label={header.column.getCanSort()
 													? 'Sort by ' +
-														header.column.columnDef.header +
+														String(header.column.columnDef.header) +
 														', currently ' +
 														(header.column.getIsSorted() === 'asc'
 															? 'ascending'
