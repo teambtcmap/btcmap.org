@@ -76,7 +76,7 @@
 		"@types/qrcode": "^1.5.5",
 		"@typescript-eslint/eslint-plugin": "^8.49.0",
 		"@typescript-eslint/parser": "^8.49.0",
-		"eslint": "^9.39.0",
+		"eslint": "^9.39.2",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.13.1",
 		"jsdom": "^27.3.0",
