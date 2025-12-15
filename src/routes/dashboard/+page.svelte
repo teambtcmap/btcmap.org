@@ -239,7 +239,7 @@
 
 	<section id="merchant-stats">
 		<div
-			class="grid rounded-3xl border border-gray-200 md:grid-cols-2 xl:grid-cols-2 dark:border-white/95 dark:bg-white/10"
+			class="grid rounded-3xl border border-gray-300 md:grid-cols-2 xl:grid-cols-2 dark:border-white/95 dark:bg-white/10"
 		>
 			<DashboardStat
 				title="Total Merchants"
