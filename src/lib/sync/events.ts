@@ -1,5 +1,6 @@
 import { eventError, events } from '$lib/store';
 import type { Event } from '$lib/types';
+
 import { createSyncFunction } from './createSyncFactory';
 
 export const eventsSync = createSyncFunction<Event>({

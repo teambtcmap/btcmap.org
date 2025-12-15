@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit';
 import axios from 'axios';
+
 import type { PageServerLoad } from './$types';
 
 export interface VerifyLocationPageData {

@@ -1,10 +1,12 @@
-import { writable, get } from 'svelte/store';
-import { browser } from '$app/environment';
 import axios from 'axios';
+import { get, writable } from 'svelte/store';
+
+import { buildFieldsParam, PLACE_FIELD_SETS } from '$lib/api-fields';
+import { type DrawerView, parseMerchantHash, updateMerchantHash } from '$lib/merchantDrawerHash';
 import { places } from '$lib/store';
-import { updateMerchantHash, parseMerchantHash, type DrawerView } from '$lib/merchantDrawerHash';
-import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 import type { Place } from '$lib/types';
+
+import { browser } from '$app/environment';
 
 export interface MerchantDrawerState {
 	isOpen: boolean;
@@ -55,7 +57,12 @@ function createMerchantDrawerStore() {
 			// Only update if this merchant is still selected
 			update((state) => {
 				if (state.merchantId === id) {
-					return { ...state, merchant: response.data, isLoading: false, error: null };
+					return {
+						...state,
+						merchant: response.data,
+						isLoading: false,
+						error: null
+					};
 				}
 				return state;
 			});
@@ -65,7 +72,11 @@ function createMerchantDrawerStore() {
 			console.error('Error fetching merchant details:', error);
 			update((state) => {
 				if (state.merchantId === id) {
-					return { ...state, isLoading: false, error: 'Failed to load merchant details' };
+					return {
+						...state,
+						isLoading: false,
+						error: 'Failed to load merchant details'
+					};
 				}
 				return state;
 			});

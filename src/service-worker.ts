@@ -7,6 +7,7 @@
 /// <reference lib="webworker" />
 
 const sw = /** @type {ServiceWorkerGlobalScope} */ /** @type {unknown} */ self;
+
 import { build, files, version } from '$service-worker';
 
 // Create a unique cache name for this deployment

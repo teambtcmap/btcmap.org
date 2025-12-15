@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
+
+import type { Place } from '$lib/types';
+
 import {
 	calculateRadiusKm,
-	getZoomBehavior,
 	getBufferedBounds,
-	getVisiblePlaces
+	getVisiblePlaces,
+	getZoomBehavior
 } from './viewport';
-import type { Place } from '$lib/types';
 
 describe('getZoomBehavior', () => {
 	it('returns "none" for zoom levels below 11', () => {

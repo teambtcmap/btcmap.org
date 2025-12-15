@@ -1,5 +1,6 @@
 import { reportError, reports } from '$lib/store';
 import type { Report } from '$lib/types';
+
 import { createSyncFunction } from './createSyncFactory';
 
 export const reportsSync = createSyncFunction<Report>({

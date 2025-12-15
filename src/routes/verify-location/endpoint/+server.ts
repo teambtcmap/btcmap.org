@@ -1,12 +1,14 @@
-import { env } from '$env/dynamic/private';
+import type { BinaryLike, CipherKey } from 'node:crypto';
+import crypto from 'node:crypto';
 import { error } from '@sveltejs/kit';
-import crypto from 'crypto';
-import type { RequestHandler } from './$types';
-import type { CipherKey, BinaryLike } from 'crypto';
-import { getAreaIdsByCoordinates } from '$lib/utils';
-import { createIssueWithLabels } from '$lib/gitea';
 import { get } from 'svelte/store';
+
+import { createIssueWithLabels } from '$lib/gitea';
 import { areas } from '$lib/store';
+import { getAreaIdsByCoordinates } from '$lib/utils';
+
+import type { RequestHandler } from './$types';
+import { env } from '$env/dynamic/private';
 
 const used: string[] = [];
 

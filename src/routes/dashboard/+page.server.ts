@@ -1,5 +1,6 @@
-import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
+
+import type { PageServerLoad } from './$types';
 
 interface DashboardData {
 	total_merchants: number;

@@ -1,10 +1,10 @@
 import type {
-	WorkerMessage,
-	WorkerResponse,
-	ProcessedPlace,
 	BatchReadyPayload,
+	ErrorPayload,
 	PlacesProcessedPayload,
-	ErrorPayload
+	ProcessedPlace,
+	WorkerMessage,
+	WorkerResponse
 } from './map-worker';
 import type { Place } from '../types';
 

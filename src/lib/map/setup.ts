@@ -1,13 +1,14 @@
-import { selectedMerchant, theme } from '$lib/store';
-import Icon from '$components/Icon.svelte';
-import { detectTheme, errToast, humanizeIconName } from '$lib/utils';
-import type { DomEventType, Leaflet, Place } from '$lib/types';
-import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
-import type { Map, LatLng } from 'leaflet';
+import type { DivIcon, LatLng, Map } from 'leaflet';
 import { get } from 'svelte/store';
-import type { DivIcon } from 'leaflet';
+
+import Icon from '$components/Icon.svelte';
+import { buildFieldsParam, PLACE_FIELD_SETS } from '$lib/api-fields';
+import { selectedMerchant, theme } from '$lib/store';
+import type { DomEventType, Leaflet, Place } from '$lib/types';
+import { detectTheme, errToast, humanizeIconName } from '$lib/utils';
+
 import { replaceState } from '$app/navigation';
 
 const BORDER_BOTTOM_STYLE = '1.5px solid #ccc';

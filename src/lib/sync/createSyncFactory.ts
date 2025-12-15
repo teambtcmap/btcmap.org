@@ -1,7 +1,8 @@
-import type { Writable } from 'svelte/store';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import localforage from 'localforage';
+import type { Writable } from 'svelte/store';
+
 import { clearTables } from '$lib/sync/clearTables';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });

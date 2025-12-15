@@ -1,12 +1,13 @@
-import { describe, it, expect } from 'vitest';
-import {
-	determineSnapState,
-	updateVelocity,
-	createVelocityState,
-	resetVelocityState,
-	calculateDragHeight
-} from './drawerGestureUtils';
+import { describe, expect, it } from 'vitest';
+
 import { PEEK_HEIGHT } from './drawerConfig';
+import {
+	calculateDragHeight,
+	createVelocityState,
+	determineSnapState,
+	resetVelocityState,
+	updateVelocity
+} from './drawerGestureUtils';
 
 describe('determineSnapState', () => {
 	const EXPANDED = 667;

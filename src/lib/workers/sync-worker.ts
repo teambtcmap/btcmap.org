@@ -1,4 +1,4 @@
-import type { Place, Area, User, Event, Report, ProgressUpdate } from '../types';
+import type { Area, Event, Place, ProgressUpdate, Report, User } from '../types';
 
 // Type constraint to ensure items have required properties
 type ItemWithId = Area | User | Event | Report;

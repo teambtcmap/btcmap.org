@@ -1,10 +1,11 @@
 import axios from 'axios';
-import { env } from '$env/dynamic/private';
-import { getRandomColor } from '$lib/utils';
 import { get } from 'svelte/store';
-import { areas } from '$lib/store';
 
-import type { GiteaLabel, GiteaIssue } from '$lib/types';
+import { areas } from '$lib/store';
+import type { GiteaIssue, GiteaLabel } from '$lib/types';
+import { getRandomColor } from '$lib/utils';
+
+import { env } from '$env/dynamic/private';
 
 // Cache structure with TTL
 interface IssuesCache {
@@ -37,7 +38,9 @@ async function syncIssuesFromGitea(): Promise<IssuesCache> {
 		axios.get(`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues?state=open`, {
 			headers
 		}),
-		axios.get(`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data`, { headers })
+		axios.get(`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data`, {
+			headers
+		})
 	]);
 
 	const giteaIssues = issuesResponse.data.map((issue: GiteaIssue) => ({

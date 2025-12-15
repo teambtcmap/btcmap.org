@@ -37,7 +37,7 @@ export function parseMerchantHash(): MerchantHashState {
 	let merchantId: number | null = null;
 	if (merchantParam) {
 		const parsedId = Number(merchantParam);
-		if (!isNaN(parsedId) && parsedId > 0 && Number.isInteger(parsedId)) {
+		if (!Number.isNaN(parsedId) && parsedId > 0 && Number.isInteger(parsedId)) {
 			merchantId = parsedId;
 		}
 	}

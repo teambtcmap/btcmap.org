@@ -1,20 +1,21 @@
-import { theme, areas } from '$lib/store';
-import { areasSync } from '$lib/sync/areas';
-import { PLACE_FIELD_SETS } from '$lib/api-fields';
-import type { Continents, Grade, IssueIcon, Place } from '$lib/types';
+import rewind from '@mapbox/geojson-rewind';
 import { toast } from '@zerodevx/svelte-toast';
 import type { Chart } from 'chart.js';
-import { get } from 'svelte/store';
-import rewind from '@mapbox/geojson-rewind';
 import { geoContains } from 'd3-geo';
-import DOMPurify from 'dompurify';
-import { parseISO } from 'date-fns/parseISO';
-import { isThisYear } from 'date-fns/isThisYear';
-import { isAfter } from 'date-fns/isAfter';
-import { subDays } from 'date-fns/subDays';
 import { format } from 'date-fns/format';
 import { formatDistanceToNow } from 'date-fns/formatDistanceToNow';
+import { isAfter } from 'date-fns/isAfter';
+import { isThisYear } from 'date-fns/isThisYear';
 import { isToday } from 'date-fns/isToday';
+import { parseISO } from 'date-fns/parseISO';
+import { subDays } from 'date-fns/subDays';
+import DOMPurify from 'dompurify';
+import { get } from 'svelte/store';
+
+import { PLACE_FIELD_SETS } from '$lib/api-fields';
+import { areas, theme } from '$lib/store';
+import { areasSync } from '$lib/sync/areas';
+import type { Continents, Grade, IssueIcon, Place } from '$lib/types';
 
 // Converts Material Design icon names to human-readable labels
 export const humanizeIconName = (icon: string): string => {
@@ -137,7 +138,6 @@ export const getGrade = (upToDatePercent: number): Grade => {
 			return 3;
 		case upToDatePercent >= 25:
 			return 2;
-		case upToDatePercent >= 0:
 		default:
 			return 1;
 	}
@@ -150,23 +150,27 @@ export const getIssueIcon = (issue_code: string): IssueIcon => {
 	if (issue_code.startsWith('misspelled_tag_name')) {
 		return 'fa-spell-check';
 	}
-	if (issue_code == 'missing_icon') {
+	if (issue_code === 'missing_icon') {
 		return 'fa-icons';
 	}
-	if (issue_code == 'not_verified') {
+	if (issue_code === 'not_verified') {
 		return 'fa-clipboard-question';
 	}
-	if (issue_code == 'outdated') {
+	if (issue_code === 'outdated') {
 		return 'fa-hourglass-end';
 	}
-	if (issue_code == 'outdated_soon') {
+	if (issue_code === 'outdated_soon') {
 		return 'fa-hourglass-half';
 	}
 	return 'fa-list-check';
 };
 
 export const getIssueHelpLink = (issue_code: string) => {
-	if (issue_code == 'outdated' || issue_code == 'outdated_soon' || issue_code == 'not_verified') {
+	if (
+		issue_code === 'outdated' ||
+		issue_code === 'outdated_soon' ||
+		issue_code === 'not_verified'
+	) {
 		return 'https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Verifying-Existing-Merchants';
 	}
 	if (issue_code.startsWith('invalid_tag_value')) {

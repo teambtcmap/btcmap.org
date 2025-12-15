@@ -1,24 +1,34 @@
 <script lang="ts">
-	import AreaPage from '$components/area/AreaPage.svelte';
-	import Breadcrumbs from '$components/Breadcrumbs.svelte';
-	import type { AreaPageProps } from '$lib/types';
-	import type { PageData } from './$types';
+import AreaPage from '$components/area/AreaPage.svelte';
+import Breadcrumbs from '$components/Breadcrumbs.svelte';
+import type { AreaPageProps } from '$lib/types';
 
-	export let data: PageData & AreaPageProps;
+import type { PageData } from './$types';
 
-	const { name, id } = data;
+export let data: PageData & AreaPageProps;
 
-	const routes = [
-		{ name: 'Countries', url: '/countries' },
-		{ name, url: `/country/${id}` }
-	];
+const { name, id } = data;
+
+const routes = [
+	{ name: 'Countries', url: '/countries' },
+	{ name, url: `/country/${id}` }
+];
 </script>
 
 <svelte:head>
-	<title>{name ? name + ' - ' : ''}BTC Map Country</title>
-	<meta property="og:image" content="https://btcmap.org/images/og/countries.png" />
-	<meta property="twitter:title" content="{name ? name + ' - ' : ''}BTC Map Country" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/countries.png" />
+  <title>{name ? name + " - " : ""}BTC Map Country</title>
+  <meta
+    property="og:image"
+    content="https://btcmap.org/images/og/countries.png"
+  />
+  <meta
+    property="twitter:title"
+    content="{name ? name + ' - ' : ''}BTC Map Country"
+  />
+  <meta
+    property="twitter:image"
+    content="https://btcmap.org/images/og/countries.png"
+  />
 </svelte:head>
 
 <Breadcrumbs {routes} />

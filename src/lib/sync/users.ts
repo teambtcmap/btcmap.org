@@ -1,5 +1,6 @@
 import { userError, users } from '$lib/store';
 import type { User } from '$lib/types';
+
 import { createSyncFunction } from './createSyncFactory';
 
 export const usersSync = createSyncFunction<User>({

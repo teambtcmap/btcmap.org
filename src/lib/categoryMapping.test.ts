@@ -1,14 +1,16 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import type { Place } from '$lib/types';
+
 import {
-	CATEGORY_GROUPS,
 	CATEGORIES,
 	CATEGORY_ENTRIES,
-	createEmptyCategoryCounts,
+	CATEGORY_GROUPS,
+	type CategoryKey,
 	countMerchantsByCategory,
+	createEmptyCategoryCounts,
 	filterMerchantsByCategory,
-	placeMatchesCategory,
-	type CategoryKey
+	placeMatchesCategory
 } from './categoryMapping';
 
 // Helper to create mock Place objects with specific icons

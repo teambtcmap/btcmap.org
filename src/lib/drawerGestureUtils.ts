@@ -2,11 +2,11 @@
 // All functions are side-effect free and easily testable
 
 import {
-	PEEK_HEIGHT,
-	VELOCITY_THRESHOLD,
 	DISTANCE_THRESHOLD,
+	PEEK_HEIGHT,
 	POSITION_THRESHOLD_PERCENT,
-	VELOCITY_SAMPLE_COUNT
+	VELOCITY_SAMPLE_COUNT,
+	VELOCITY_THRESHOLD
 } from './drawerConfig';
 
 export interface SnapState {

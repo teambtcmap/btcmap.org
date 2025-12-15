@@ -1,8 +1,9 @@
-import { env } from '$env/dynamic/private';
+import type { BinaryLike, CipherKey } from 'node:crypto';
+import crypto from 'node:crypto';
 import { error, json } from '@sveltejs/kit';
-import crypto from 'crypto';
 import svgCaptcha from 'svg-captcha';
-import type { CipherKey, BinaryLike } from 'crypto';
+
+import { env } from '$env/dynamic/private';
 
 // generate and return captcha
 export function GET() {

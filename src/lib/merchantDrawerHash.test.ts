@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock SvelteKit's browser module
 vi.mock('$app/environment', () => ({
@@ -11,7 +11,9 @@ describe('parseMerchantHash', () => {
 	beforeEach(() => {
 		// Mock window.location.hash before each test
 		delete (window as unknown as { location: unknown }).location;
-		(window as unknown as { location: { hash: string } }).location = { hash: '' };
+		(window as unknown as { location: { hash: string } }).location = {
+			hash: ''
+		};
 	});
 
 	describe('parsing merchant without map coordinates', () => {
@@ -137,7 +139,9 @@ describe('updateMerchantHash', () => {
 	beforeEach(() => {
 		// Mock window.location
 		delete (window as unknown as { location: unknown }).location;
-		(window as unknown as { location: { hash: string } }).location = { hash: '' };
+		(window as unknown as { location: { hash: string } }).location = {
+			hash: ''
+		};
 	});
 
 	describe('setting merchant hash', () => {

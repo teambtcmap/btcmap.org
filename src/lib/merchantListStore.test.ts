@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
-import { get } from 'svelte/store';
 import axios from 'axios';
+import { get } from 'svelte/store';
+import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
+
 import type { Place } from '$lib/types';
 
 // Mock axios
@@ -17,9 +18,10 @@ vi.mock('$lib/merchantDrawerLogic', () => ({
 	isBoosted: (place: Place) => place.boosted_until && new Date(place.boosted_until) > new Date()
 }));
 
+import { errToast } from '$lib/utils';
+
 // Import after mocks are set up
 import { merchantList } from './merchantListStore';
-import { errToast } from '$lib/utils';
 
 // Helper to create mock Place objects
 function createMockPlace(overrides: Partial<Place> = {}): Place {
@@ -116,7 +118,11 @@ describe('merchantListStore', () => {
 	describe('merchant sorting', () => {
 		it('should place boosted merchants first', () => {
 			const futureDate = new Date(Date.now() + 86400000).toISOString(); // Tomorrow
-			const boosted = createMockPlace({ id: 1, name: 'Boosted', boosted_until: futureDate });
+			const boosted = createMockPlace({
+				id: 1,
+				name: 'Boosted',
+				boosted_until: futureDate
+			});
 			const regular = createMockPlace({ id: 2, name: 'Regular' });
 
 			merchantList.setMerchants([regular, boosted], 0, 0);
@@ -127,7 +133,12 @@ describe('merchantListStore', () => {
 		});
 
 		it('should sort by distance when center provided', () => {
-			const near = createMockPlace({ id: 1, name: 'Near', lat: 0.001, lon: 0.001 });
+			const near = createMockPlace({
+				id: 1,
+				name: 'Near',
+				lat: 0.001,
+				lon: 0.001
+			});
 			const far = createMockPlace({ id: 2, name: 'Far', lat: 1, lon: 1 });
 
 			merchantList.setMerchants([far, near], 0, 0);
@@ -204,7 +215,9 @@ describe('merchantListStore', () => {
 			const mockPlaces = Array.from({ length: 60 }, (_, i) => createMockPlace({ id: i }));
 			(axios.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
 
-			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10, { hideIfExceeds: 50 });
+			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10, {
+				hideIfExceeds: 50
+			});
 			const state = get(merchantList);
 
 			expect(state.merchants).toEqual([]);
@@ -215,7 +228,9 @@ describe('merchantListStore', () => {
 			const mockPlaces = Array.from({ length: 100 }, (_, i) => createMockPlace({ id: i }));
 			(axios.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
 
-			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10, { hideIfExceeds: 50 });
+			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10, {
+				hideIfExceeds: 50
+			});
 			const state = get(merchantList);
 
 			expect(state.totalCount).toBe(100);
@@ -480,7 +495,11 @@ describe('merchantListStore', () => {
 
 		it('openWithSearchResults() should sort boosted merchants first', () => {
 			const futureDate = new Date(Date.now() + 86400000).toISOString();
-			const boosted = createMockPlace({ id: 1, name: 'Boosted', boosted_until: futureDate });
+			const boosted = createMockPlace({
+				id: 1,
+				name: 'Boosted',
+				boosted_until: futureDate
+			});
 			const regular = createMockPlace({ id: 2, name: 'Regular' });
 
 			merchantList.openWithSearchResults('test', [regular, boosted]);
@@ -808,11 +827,15 @@ describe('merchantListStore', () => {
 
 			it('should still calculate category counts when hideIfExceeds is triggered', async () => {
 				const mockPlaces = Array.from({ length: 60 }, (_, i) =>
-					createPlaceWithIcon(i % 2 === 0 ? 'restaurant' : 'local_cafe', { id: i })
+					createPlaceWithIcon(i % 2 === 0 ? 'restaurant' : 'local_cafe', {
+						id: i
+					})
 				);
 				(axios.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
 
-				await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10, { hideIfExceeds: 50 });
+				await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10, {
+					hideIfExceeds: 50
+				});
 				const state = get(merchantList);
 
 				expect(state.merchants).toEqual([]);

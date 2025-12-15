@@ -1,111 +1,116 @@
 <script lang="ts">
-	import Tip from '$components/Tip.svelte';
-	import type { EventType, User } from '$lib/types';
-	import Time from 'svelte-time';
-	import { resolve } from '$app/paths';
+import Time from 'svelte-time';
 
-	export let location: string;
-	export let action: EventType;
-	export let user: User | undefined = undefined;
-	export let time: string;
-	export let latest: boolean;
-	export let merchantId: string;
+import Tip from '$components/Tip.svelte';
+import type { EventType, User } from '$lib/types';
 
-	$: deleteLink = merchantId.split(':');
+import { resolve } from '$app/paths';
 
-	$: profile = user && user['osm_json'];
-	$: regexMatch = profile && profile.description.match('(lightning:[^)]+)');
-	$: lightning = regexMatch && regexMatch[0].slice(10);
+export let location: string;
+export let action: EventType;
+export let user: User | undefined = undefined;
+export let time: string;
+export let latest: boolean;
+export let merchantId: string;
 
-	$: username = profile && profile['display_name'];
+$: deleteLink = merchantId.split(':');
+
+$: profile = user?.osm_json;
+$: regexMatch = profile?.description.match('(lightning:[^)]+)');
+$: lightning = regexMatch?.[0].slice(10);
+
+$: username = profile?.display_name;
 </script>
 
 <div
-	class="flex flex-col items-center gap-2 p-5 text-center text-xl lg:flex-row lg:gap-5 lg:text-left"
+  class="flex flex-col items-center gap-2 p-5 text-center text-xl lg:flex-row lg:gap-5 lg:text-left"
 >
-	<!-- dot -->
-	<span class="relative mx-auto mb-2 flex h-3 w-3 lg:mx-0 lg:mb-0">
-		<span
-			class="{latest
-				? 'animate-ping'
-				: ''} absolute inline-flex h-full w-full rounded-full {action === 'create'
-				? 'bg-created'
-				: action === 'delete'
-					? 'bg-deleted'
-					: 'bg-link'} opacity-75"
-		/>
-		<span
-			class="relative inline-flex h-3 w-3 rounded-full {action === 'create'
-				? 'bg-created'
-				: action === 'delete'
-					? 'bg-deleted'
-					: 'bg-link'}"
-		/>
-	</span>
+  <!-- dot -->
+  <span class="relative mx-auto mb-2 flex h-3 w-3 lg:mx-0 lg:mb-0">
+    <span
+      class="{latest
+        ? 'animate-ping'
+        : ''} absolute inline-flex h-full w-full rounded-full {action ===
+      'create'
+        ? 'bg-created'
+        : action === 'delete'
+          ? 'bg-deleted'
+          : 'bg-link'} opacity-75"
+    />
+    <span
+      class="relative inline-flex h-3 w-3 rounded-full {action === 'create'
+        ? 'bg-created'
+        : action === 'delete'
+          ? 'bg-deleted'
+          : 'bg-link'}"
+    />
+  </span>
 
-	<div class="w-full flex-wrap items-center justify-between space-y-2 lg:flex lg:space-y-0">
-		<!-- event information -->
-		<div class="space-y-2 lg:space-y-0">
-			<span class="text-primary lg:mr-5 dark:text-white">
-				<!-- location -->
-				<!-- eslint-disable svelte/no-navigation-without-resolve -->
-				<a
-					href={action === 'delete'
-						? `https://www.openstreetmap.org/${deleteLink[0]}/${deleteLink[1]}`
-						: `/merchant/${merchantId}`}
-					target={action === 'delete' ? '_blank' : null}
-					rel={action === 'delete' ? 'noreferrer' : null}
-					class="break-all text-link transition-colors hover:text-hover"
-				>
-					<!-- eslint-enable svelte/no-navigation-without-resolve -->
-					{location}
-					{#if action === 'delete'}
-						<svg
-							class="inline"
-							width="16"
-							height="16"
-							viewBox="0 0 16 16"
-							fill="none"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path
-								d="M3 13L13 3M13 3H5.5M13 3V10.5"
-								stroke="currentColor"
-								stroke-width="1.5"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							/>
-						</svg>
-					{/if}
-				</a>
+  <div
+    class="w-full flex-wrap items-center justify-between space-y-2 lg:flex lg:space-y-0"
+  >
+    <!-- event information -->
+    <div class="space-y-2 lg:space-y-0">
+      <span class="text-primary lg:mr-5 dark:text-white">
+        <!-- location -->
+        <!-- eslint-disable svelte/no-navigation-without-resolve -->
+        <a
+          href={action === "delete"
+            ? `https://www.openstreetmap.org/${deleteLink[0]}/${deleteLink[1]}`
+            : `/merchant/${merchantId}`}
+          target={action === "delete" ? "_blank" : null}
+          rel={action === "delete" ? "noreferrer" : null}
+          class="break-all text-link transition-colors hover:text-hover"
+        >
+          <!-- eslint-enable svelte/no-navigation-without-resolve -->
+          {location}
+          {#if action === "delete"}
+            <svg
+              class="inline"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M3 13L13 3M13 3H5.5M13 3V10.5"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          {/if}
+        </a>
 
-				<!-- action -->
-				was
-				<strong>{action}d</strong>
+        <!-- action -->
+        was
+        <strong>{action}d</strong>
 
-				<!-- user -->
-				{#if user && username}
-					by <a
-						href={resolve(`/tagger/${user.id}`)}
-						class="block break-all text-link transition-colors hover:text-hover lg:inline"
-						>{username}
-					</a>
-				{/if}
-			</span>
+        <!-- user -->
+        {#if user && username}
+          by <a
+            href={resolve(`/tagger/${user.id}`)}
+            class="block break-all text-link transition-colors hover:text-hover lg:inline"
+            >{username}
+          </a>
+        {/if}
+      </span>
 
-			<!-- time ago -->
-			<span
-				class="block text-center font-semibold text-taggerTime lg:inline dark:text-white/70 {lightning
-					? 'lg:mr-5'
-					: ''}"
-			>
-				<Time live={3000} relative timestamp={time} />
-			</span>
-		</div>
+      <!-- time ago -->
+      <span
+        class="block text-center font-semibold text-taggerTime lg:inline dark:text-white/70 {lightning
+          ? 'lg:mr-5'
+          : ''}"
+      >
+        <Time live={3000} relative timestamp={time} />
+      </span>
+    </div>
 
-		<!-- lightning tip button -->
-		{#if lightning}
-			<Tip destination={lightning} class="mx-auto block lg:mx-0 lg:inline" />
-		{/if}
-	</div>
+    <!-- lightning tip button -->
+    {#if lightning}
+      <Tip destination={lightning} class="mx-auto block lg:mx-0 lg:inline" />
+    {/if}
+  </div>
 </div>

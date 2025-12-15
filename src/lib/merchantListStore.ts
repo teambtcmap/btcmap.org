@@ -1,17 +1,18 @@
-import { writable, get } from 'svelte/store';
 import axios from 'axios';
-import type { Place } from '$lib/types';
-import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
-import { isBoosted } from '$lib/merchantDrawerLogic';
-import { MERCHANT_LIST_MAX_ITEMS } from '$lib/constants';
-import { errToast } from '$lib/utils';
+import { get, writable } from 'svelte/store';
+
+import { buildFieldsParam, PLACE_FIELD_SETS } from '$lib/api-fields';
 import {
+	type CategoryCounts,
+	type CategoryKey,
 	countMerchantsByCategory,
 	createEmptyCategoryCounts,
-	filterMerchantsByCategory,
-	type CategoryCounts,
-	type CategoryKey
+	filterMerchantsByCategory
 } from '$lib/categoryMapping';
+import { MERCHANT_LIST_MAX_ITEMS } from '$lib/constants';
+import { isBoosted } from '$lib/merchantDrawerLogic';
+import type { Place } from '$lib/types';
+import { errToast } from '$lib/utils';
 
 export type MerchantListMode = 'nearby' | 'search';
 
@@ -310,7 +311,11 @@ function createMerchantListStore() {
 				update((state) => {
 					const mergedCache = new Map(state.placeDetailsCache);
 					validPlaces.forEach((place) => mergedCache.set(place.id, place));
-					return { ...state, placeDetailsCache: mergedCache, isEnrichingDetails: false };
+					return {
+						...state,
+						placeDetailsCache: mergedCache,
+						isEnrichingDetails: false
+					};
 				});
 			} catch (error) {
 				if (error instanceof Error && error.name !== 'AbortError') {

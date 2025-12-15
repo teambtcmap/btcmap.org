@@ -1,20 +1,21 @@
-import {
-	placesError,
-	places,
-	placesSyncCount,
-	mapUpdates,
-	placesLoadingStatus,
-	placesLoadingProgress
-} from '$lib/store';
-import { clearTables } from '$lib/sync/clearTables';
-import type { Place } from '$lib/types';
-import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 import axios, { type AxiosProgressEvent } from 'axios';
 import axiosRetry from 'axios-retry';
 import localforage from 'localforage';
 import { get } from 'svelte/store';
-import { parseJSON, filterPlaces } from '$lib/workers/sync-worker-manager';
+
+import { buildFieldsParam, PLACE_FIELD_SETS } from '$lib/api-fields';
+import {
+	mapUpdates,
+	places,
+	placesError,
+	placesLoadingProgress,
+	placesLoadingStatus,
+	placesSyncCount
+} from '$lib/store';
+import { clearTables } from '$lib/sync/clearTables';
+import type { Place } from '$lib/types';
 import { yieldToMain } from '$lib/utils';
+import { filterPlaces, parseJSON } from '$lib/workers/sync-worker-manager';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
@@ -93,7 +94,7 @@ export const elementsSync = async () => {
 		// get places from local storage
 		await localforage
 			.getItem<Place[]>('places_v4')
-			.then(async function (cachedPlaces) {
+			.then(async (cachedPlaces) => {
 				// add to sync count to only show data refresh after initial load
 				const count = get(placesSyncCount);
 				placesSyncCount.set(count + 1);
@@ -230,7 +231,7 @@ export const elementsSync = async () => {
 				if (placesData.length > 0) {
 					localforage
 						.setItem('places_v4', placesData)
-						.then(async function () {
+						.then(async () => {
 							// Yield to main thread before updating store to prevent UI freeze
 							await yieldToMain();
 							// set response to store
@@ -241,7 +242,7 @@ export const elementsSync = async () => {
 							// Keep progress at 100% - don't reset to avoid confusing loading states
 							// The map component will handle hiding the indicator when elementsLoaded = true
 						})
-						.catch(async function (err) {
+						.catch(async (err) => {
 							// Yield to main thread before updating store to prevent UI freeze
 							await yieldToMain();
 							places.set(placesData);
@@ -254,7 +255,7 @@ export const elementsSync = async () => {
 						});
 				}
 			})
-			.catch(async function (err) {
+			.catch(async (err) => {
 				placesError.set('Could not load places locally, please try again or contact BTC Map.');
 				console.error(err);
 

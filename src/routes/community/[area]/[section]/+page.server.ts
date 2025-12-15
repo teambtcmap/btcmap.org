@@ -1,8 +1,10 @@
 import { error, redirect } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
-import type { PageServerLoad } from './$types';
+
 import { getIssues } from '$lib/gitea';
+
+import type { PageServerLoad } from './$types';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 

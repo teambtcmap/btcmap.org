@@ -1,9 +1,11 @@
-import { verifiedArr } from '$lib/map/setup';
-import type { MerchantPageData, MerchantComment, PayMerchant, Place } from '$lib/types';
-import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 import { error } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
+
+import { buildFieldsParam, PLACE_FIELD_SETS } from '$lib/api-fields';
+import { verifiedArr } from '$lib/map/setup';
+import type { MerchantComment, MerchantPageData, PayMerchant, Place } from '$lib/types';
+
 import type { PageServerLoad } from './$types';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
@@ -90,16 +92,16 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 		const osmTags: Record<string, string> = {};
 
 		// Core info
-		if (placeData.name) osmTags['name'] = placeData.name;
+		if (placeData.name) osmTags.name = placeData.name;
 		if (placeData.address) osmTags['addr:full'] = placeData.address;
-		if (placeData.description) osmTags['description'] = placeData.description;
-		if (placeData['osm:note']) osmTags['note'] = placeData['osm:note'];
-		if (placeData.opening_hours) osmTags['opening_hours'] = placeData.opening_hours;
+		if (placeData.description) osmTags.description = placeData.description;
+		if (placeData['osm:note']) osmTags.note = placeData['osm:note'];
+		if (placeData.opening_hours) osmTags.opening_hours = placeData.opening_hours;
 
 		// Contact info
-		if (phone) osmTags['phone'] = phone;
-		if (website) osmTags['website'] = website;
-		if (email) osmTags['email'] = email;
+		if (phone) osmTags.phone = phone;
+		if (website) osmTags.website = website;
+		if (email) osmTags.email = email;
 		if (twitter) osmTags['contact:twitter'] = twitter;
 		if (facebook) osmTags['contact:facebook'] = facebook;
 		if (instagram) osmTags['contact:instagram'] = instagram;
@@ -119,27 +121,27 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 
 		// Survey/verification dates
 		if (placeData['osm:survey:date']) osmTags['survey:date'] = placeData['osm:survey:date'];
-		if (placeData['osm:check_date']) osmTags['check_date'] = placeData['osm:check_date'];
+		if (placeData['osm:check_date']) osmTags.check_date = placeData['osm:check_date'];
 		if (placeData['osm:check_date:currency:XBT'])
 			osmTags['check_date:currency:XBT'] = placeData['osm:check_date:currency:XBT'];
-		if (placeData.verified_at) osmTags['verified_at'] = placeData.verified_at;
+		if (placeData.verified_at) osmTags.verified_at = placeData.verified_at;
 
 		// Metadata
 		if (placeData.icon) osmTags['icon:android'] = placeData.icon;
-		if (placeData['osm:amenity']) osmTags['amenity'] = placeData['osm:amenity'];
-		if (placeData['osm:category']) osmTags['category'] = placeData['osm:category'];
+		if (placeData['osm:amenity']) osmTags.amenity = placeData['osm:amenity'];
+		if (placeData['osm:category']) osmTags.category = placeData['osm:category'];
 
 		// IDs and URLs
-		if (placeData.osm_id) osmTags['osm_id'] = placeData.osm_id;
-		if (placeData.osm_url) osmTags['osm_url'] = placeData.osm_url;
-		osmTags['btcmap_id'] = placeData.id.toString();
+		if (placeData.osm_id) osmTags.osm_id = placeData.osm_id;
+		if (placeData.osm_url) osmTags.osm_url = placeData.osm_url;
+		osmTags.btcmap_id = placeData.id.toString();
 
 		// Boost
 		if (placeData.boosted_until) osmTags['boost:expires'] = placeData.boosted_until;
 
 		// Timestamps
-		if (placeData.created_at) osmTags['created_at'] = placeData.created_at;
-		if (placeData.updated_at) osmTags['updated_at'] = placeData.updated_at;
+		if (placeData.created_at) osmTags.created_at = placeData.created_at;
+		if (placeData.updated_at) osmTags.updated_at = placeData.updated_at;
 
 		return {
 			id: placeData.id.toString(),

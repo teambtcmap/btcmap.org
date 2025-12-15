@@ -1,5 +1,6 @@
+import { derived, readable, type Writable, writable } from 'svelte/store';
+
 import type { Area, Boost, Event, Issue, OSMTags, Place, Report, Theme, User } from '$lib/types';
-import { derived, readable, writable, type Writable } from 'svelte/store';
 
 export const socials = readable({
 	x: 'https://x.com/btcmap',

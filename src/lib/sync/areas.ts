@@ -1,6 +1,7 @@
-import { areaError, areas } from '$lib/store';
 import { serverCache } from '$lib/cache';
+import { areaError, areas } from '$lib/store';
 import type { Area } from '$lib/types';
+
 import { createSyncFunction } from './createSyncFactory';
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes

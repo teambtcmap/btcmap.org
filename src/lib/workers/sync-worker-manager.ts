@@ -1,5 +1,5 @@
 import type { WorkerMessage, WorkerResponse } from './sync-worker';
-import type { Place, Area, User, Event, Report, ProgressUpdate } from '../types';
+import type { Area, Event, Place, ProgressUpdate, Report, User } from '../types';
 
 let worker: Worker | null = null;
 let workerInitialized = false;
@@ -191,7 +191,11 @@ export async function mergeUpdates<T extends Area | User | Event | Report>(
 	type: 'areas' | 'users' | 'events' | 'reports'
 ): Promise<T[]> {
 	try {
-		return await sendWorkerMessage<T[]>('MERGE_UPDATES', { cached, updates, type });
+		return await sendWorkerMessage<T[]>('MERGE_UPDATES', {
+			cached,
+			updates,
+			type
+		});
 	} catch (error) {
 		// Fallback to synchronous merging
 		// Type-safe: T is constrained to Area | User | Event | Report, all have id and deleted_at

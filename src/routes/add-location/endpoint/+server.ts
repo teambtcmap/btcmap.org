@@ -1,15 +1,16 @@
-import { env } from '$env/dynamic/private';
+import type { BinaryLike, CipherKey } from 'node:crypto';
+import crypto from 'node:crypto';
 import { error } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
-import crypto from 'crypto';
-import type { RequestHandler } from './$types';
-import { getAreaIdsByCoordinates } from '$lib/utils';
 import { get } from 'svelte/store';
-import { areas } from '$lib/store';
-import { createIssueWithLabels } from '$lib/gitea';
 
-import type { CipherKey, BinaryLike } from 'crypto';
+import { createIssueWithLabels } from '$lib/gitea';
+import { areas } from '$lib/store';
+import { getAreaIdsByCoordinates } from '$lib/utils';
+
+import type { RequestHandler } from './$types';
+import { env } from '$env/dynamic/private';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 

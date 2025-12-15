@@ -1,4 +1,5 @@
 import { getIssues } from '$lib/gitea';
+
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {

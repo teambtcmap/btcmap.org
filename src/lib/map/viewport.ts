@@ -1,10 +1,11 @@
+import type { LatLngBounds } from 'leaflet';
+
 import {
 	CLUSTERING_DISABLED_ZOOM,
-	MERCHANT_LIST_MIN_ZOOM,
-	MERCHANT_LIST_LOW_ZOOM
+	MERCHANT_LIST_LOW_ZOOM,
+	MERCHANT_LIST_MIN_ZOOM
 } from '$lib/constants';
 import type { Leaflet, Place } from '$lib/types';
-import type { LatLngBounds } from 'leaflet';
 
 export type ZoomBehavior = 'none' | 'api-with-limit' | 'local-markers' | 'api-extended';
 

@@ -1,5 +1,4 @@
-import type { LatLngBounds, Marker } from 'leaflet';
-import type { FeatureGroup } from 'leaflet';
+import type { FeatureGroup, LatLngBounds, Marker } from 'leaflet';
 
 export type LoadedMarkers = Record<string, Marker>;
 

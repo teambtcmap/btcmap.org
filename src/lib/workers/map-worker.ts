@@ -67,7 +67,9 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
 	} catch (error) {
 		self.postMessage({
 			type: 'ERROR',
-			payload: { error: error instanceof Error ? error.message : String(error) } as ErrorPayload,
+			payload: {
+				error: error instanceof Error ? error.message : String(error)
+			} as ErrorPayload,
 			id
 		} as WorkerResponse);
 	}

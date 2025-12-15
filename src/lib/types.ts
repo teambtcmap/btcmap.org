@@ -1,6 +1,6 @@
-import type { GeoJSON, Polygon, MultiPolygon } from 'geojson';
+import type { GeoJSON, MultiPolygon, Polygon } from 'geojson';
 import type leaflet from 'leaflet';
-import type { DomEvent, FeatureGroup, LayerGroup, TileLayer, MaplibreGL } from 'leaflet';
+import type { DomEvent, FeatureGroup, LayerGroup, MaplibreGL, TileLayer } from 'leaflet';
 
 // nominatim.openstreetmap.org API
 // https://nominatim.org/release-docs/latest/api/Search
@@ -40,38 +40,38 @@ export type AreaTags = {
 	continent: Continents;
 	url_alias: string;
 	geo_json: GeoJSON;
-	['icon:square']: string; // countries don't have this tag yet
+	'icon:square': string; // countries don't have this tag yet
 	organization?: string;
 	language?: string;
 	population?: string;
 	area_km2?: number;
-	['population:date']?: string;
-	['population:year']?: number;
-	['contact:website']?: string;
-	['contact:email']?: string;
-	['contact:nostr']?: string;
-	['contact:twitter']?: string;
-	['contact:meetup']?: string;
-	['contact:eventbrite']?: string;
-	['contact:telegram']?: string;
-	['contact:discord']?: string;
-	['contact:youtube']?: string;
-	['contact:github']?: string;
-	['contact:reddit']?: string;
-	['contact:instagram']?: string;
-	['contact:whatsapp']?: string;
-	['contact:facebook']?: string;
-	['contact:linkedin']?: string;
-	['contact:rss']?: string;
-	['contact:signal']?: string;
-	['contact:simplex']?: string;
-	['tips:lightning_address']?: string;
-	['tips:url']?: string;
+	'population:date'?: string;
+	'population:year'?: number;
+	'contact:website'?: string;
+	'contact:email'?: string;
+	'contact:nostr'?: string;
+	'contact:twitter'?: string;
+	'contact:meetup'?: string;
+	'contact:eventbrite'?: string;
+	'contact:telegram'?: string;
+	'contact:discord'?: string;
+	'contact:youtube'?: string;
+	'contact:github'?: string;
+	'contact:reddit'?: string;
+	'contact:instagram'?: string;
+	'contact:whatsapp'?: string;
+	'contact:facebook'?: string;
+	'contact:linkedin'?: string;
+	'contact:rss'?: string;
+	'contact:signal'?: string;
+	'contact:simplex'?: string;
+	'tips:lightning_address'?: string;
+	'tips:url'?: string;
 	sponsor?: boolean;
-	['box:north']?: string;
-	['box:east']?: string;
-	['box:south']?: string;
-	['box:west']?: string;
+	'box:north'?: string;
+	'box:east'?: string;
+	'box:south'?: string;
+	'box:west'?: string;
 };
 
 export type AreaType = 'community' | 'country' | 'trash';
@@ -228,7 +228,7 @@ export type User = {
 		img: { href: string } | null;
 		account_created: string;
 	};
-	tags: { ['supporter:expires']?: string };
+	tags: { 'supporter:expires'?: string };
 	created_at: string;
 	updated_at: string;
 	deleted_at: string;
@@ -342,7 +342,12 @@ export type Theme = 'light' | 'dark';
 
 export type DonationType = 'On-chain' | 'Lightning';
 
-export type DropdownLink = { url: string; external?: boolean; icon: string; title: string };
+export type DropdownLink = {
+	url: string;
+	external?: boolean;
+	icon: string;
+	title: string;
+};
 
 export type ChartHistory = '7D' | '1M' | '3M' | '6M' | 'YTD' | '1Y' | 'ALL';
 

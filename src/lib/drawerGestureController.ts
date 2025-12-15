@@ -1,20 +1,21 @@
 // Store-based gesture controller for mobile drawer
 // Consolidates all gesture state and handlers in one place
 
-import { writable, derived, get } from 'svelte/store';
 import { spring } from 'svelte/motion';
+import { derived, get, writable } from 'svelte/store';
+
 import {
-	PEEK_HEIGHT,
-	VELOCITY_THRESHOLD,
-	SPRING_CONFIG,
 	DISMISS_THRESHOLD,
+	PEEK_HEIGHT,
 	SCROLL_DRAG_THRESHOLD,
-	SCROLL_TOP_THRESHOLD
+	SCROLL_TOP_THRESHOLD,
+	SPRING_CONFIG,
+	VELOCITY_THRESHOLD
 } from './drawerConfig';
 import {
+	createVelocityState,
 	determineSnapState,
 	updateVelocity,
-	createVelocityState,
 	type VelocityState
 } from './drawerGestureUtils';
 

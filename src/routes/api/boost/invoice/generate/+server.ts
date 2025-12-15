@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
+
 import type { RequestHandler } from './$types';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
@@ -28,10 +29,8 @@ export const POST: RequestHandler = async ({ request }) => {
 			place_id: place_id.toString(),
 			days: days
 		})
-		.then(function (response) {
-			return response.data;
-		})
-		.catch(function (err) {
+		.then((response) => response.data)
+		.catch((err) => {
 			console.error(err);
 			error(400, 'Could not generate boost invoice, please try again or contact BTC Map.');
 		});
