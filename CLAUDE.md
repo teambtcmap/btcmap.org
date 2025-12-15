@@ -27,7 +27,7 @@ For comprehensive project architecture, patterns, and development workflows, see
 yarn run lint
 ```
 
-Run this command to check for TypeScript and ESLint errors. Always run this before committing changes to ensure code quality.
+Run this command to check for Biome lint errors. Always run this before committing changes to ensure code quality.
 
 ### Formatting
 
@@ -35,7 +35,7 @@ Run this command to check for TypeScript and ESLint errors. Always run this befo
 yarn run format:fix
 ```
 
-Run this command to automatically format code according to project standards. Always run this before committing changes.
+Run this command to automatically format code with Biome and sort Tailwind classes with Prettier. Always run this before committing changes.
 
 ### Type Checking
 

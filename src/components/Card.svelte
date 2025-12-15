@@ -1,7 +1,7 @@
 <script lang="ts">
-	// we could get rid of this if we use container queries: https://tailwindcss.com/docs/responsive-design#container-queries
-	// but we would need to migrate to tailwindcss v4
-	export let headerAlign: 'center' | 'responsive' = 'responsive';
+// we could get rid of this if we use container queries: https://tailwindcss.com/docs/responsive-design#container-queries
+// but we would need to migrate to tailwindcss v4
+export let headerAlign: "center" | "responsive" = "responsive";
 </script>
 
 <!-- prettier-ignore -->

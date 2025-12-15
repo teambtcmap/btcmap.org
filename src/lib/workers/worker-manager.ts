@@ -1,12 +1,12 @@
 import type {
+	BatchReadyPayload,
+	ErrorPayload,
+	PlacesProcessedPayload,
+	ProcessedPlace,
 	WorkerMessage,
 	WorkerResponse,
-	ProcessedPlace,
-	BatchReadyPayload,
-	PlacesProcessedPayload,
-	ErrorPayload
-} from './map-worker';
-import type { Place } from '../types';
+} from "./map-worker";
+import type { Place } from "../types";
 
 // Worker state - using module-level variables instead of class properties
 let worker: Worker | null = null;
@@ -29,7 +29,9 @@ function isWorkerSupported(): boolean {
 	}
 
 	workerSupported =
-		typeof Worker !== 'undefined' && typeof window !== 'undefined' && 'Worker' in window;
+		typeof Worker !== "undefined" &&
+		typeof window !== "undefined" &&
+		"Worker" in window;
 
 	return workerSupported;
 }
@@ -40,7 +42,7 @@ function handleWorkerMessage(response: WorkerResponse) {
 	if (!request) return;
 
 	switch (response.type) {
-		case 'BATCH_READY': {
+		case "BATCH_READY": {
 			const batchPayload = response.payload as BatchReadyPayload;
 			// Call progress callback with batch data
 			if (request.onProgress) {
@@ -49,21 +51,21 @@ function handleWorkerMessage(response: WorkerResponse) {
 			break;
 		}
 
-		case 'PLACES_PROCESSED': {
+		case "PLACES_PROCESSED": {
 			const processedPayload = response.payload as PlacesProcessedPayload;
 			request.resolve(processedPayload);
 			pendingRequests.delete(response.id);
 			break;
 		}
 
-		case 'ICONS_GENERATED': {
+		case "ICONS_GENERATED": {
 			const iconsPayload = response.payload as unknown[];
 			request.resolve(iconsPayload);
 			pendingRequests.delete(response.id);
 			break;
 		}
 
-		case 'ERROR': {
+		case "ERROR": {
 			const errorPayload = response.payload as ErrorPayload;
 			request.reject(new Error(errorPayload.error));
 			pendingRequests.delete(response.id);
@@ -81,13 +83,15 @@ async function initWorker(): Promise<boolean> {
 	workerInitialized = true;
 
 	if (!isWorkerSupported()) {
-		console.warn('Web Workers not supported, falling back to synchronous processing');
+		console.warn(
+			"Web Workers not supported, falling back to synchronous processing",
+		);
 		return false;
 	}
 
 	try {
-		worker = new Worker(new URL('./map-worker.ts', import.meta.url), {
-			type: 'module'
+		worker = new Worker(new URL("./map-worker.ts", import.meta.url), {
+			type: "module",
 		});
 
 		worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
@@ -95,13 +99,13 @@ async function initWorker(): Promise<boolean> {
 		};
 
 		worker.onerror = (error) => {
-			console.error('Map worker error:', error);
+			console.error("Map worker error:", error);
 			// Don't terminate on error, let individual operations handle fallback
 		};
 
 		return true;
 	} catch (error) {
-		console.warn('Failed to initialize web worker:', error);
+		console.warn("Failed to initialize web worker:", error);
 		worker = null;
 		return false;
 	}
@@ -116,15 +120,15 @@ function generateMessageId(): string {
  * Generic function to send messages to worker and handle responses
  */
 async function sendWorkerMessage<T>(
-	messageType: WorkerMessage['type'],
-	payload: WorkerMessage['payload'],
-	onProgress?: (progress: number, batch?: ProcessedPlace[]) => void
+	messageType: WorkerMessage["type"],
+	payload: WorkerMessage["payload"],
+	onProgress?: (progress: number, batch?: ProcessedPlace[]) => void,
 ): Promise<T> {
 	// Lazy initialization
 	const workerReady = await initWorker();
 
 	if (!workerReady || !worker) {
-		throw new Error('Web Worker not supported or failed to initialize');
+		throw new Error("Web Worker not supported or failed to initialize");
 	}
 
 	const id = generateMessageId();
@@ -132,20 +136,20 @@ async function sendWorkerMessage<T>(
 	return new Promise<T>((resolve, reject) => {
 		// Double-check worker is still available
 		if (!worker) {
-			reject(new Error('Worker became unavailable'));
+			reject(new Error("Worker became unavailable"));
 			return;
 		}
 
 		pendingRequests.set(id, {
 			resolve: resolve as (value: unknown) => void,
 			reject,
-			onProgress
+			onProgress,
 		});
 
 		const message: WorkerMessage = {
 			type: messageType,
 			payload,
-			id
+			id,
 		};
 
 		worker.postMessage(message);
@@ -158,12 +162,12 @@ async function sendWorkerMessage<T>(
 export async function processPlaces(
 	places: Place[],
 	batchSize: number = 50,
-	onProgress?: (progress: number, batch?: ProcessedPlace[]) => void
+	onProgress?: (progress: number, batch?: ProcessedPlace[]) => void,
 ): Promise<PlacesProcessedPayload> {
 	return sendWorkerMessage<PlacesProcessedPayload>(
-		'PROCESS_PLACES',
+		"PROCESS_PLACES",
 		{ places, batchSize },
-		onProgress
+		onProgress,
 	);
 }
 
@@ -171,7 +175,7 @@ export async function processPlaces(
  * Generate icon data for places
  */
 export async function generateIconData(places: Place[]): Promise<unknown[]> {
-	return sendWorkerMessage<unknown[]>('GENERATE_ICONS', { places });
+	return sendWorkerMessage<unknown[]>("GENERATE_ICONS", { places });
 }
 
 /**

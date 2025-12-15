@@ -1,4 +1,4 @@
-import type { Area } from '$lib/types';
+import type { Area } from "$lib/types";
 
 class ServerCache {
 	private static instance: ServerCache;

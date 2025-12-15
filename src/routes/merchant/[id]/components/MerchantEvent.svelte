@@ -1,74 +1,82 @@
 <script lang="ts">
-	import Tip from '$components/Tip.svelte';
-	import type { EventType, User } from '$lib/types';
-	import Time from 'svelte-time';
-	import { resolve } from '$app/paths';
+import Time from "svelte-time";
 
-	export let action: EventType;
-	export let user: User | undefined;
-	export let time: string;
-	export let latest: boolean;
+import Tip from "$components/Tip.svelte";
+import type { EventType, User } from "$lib/types";
 
-	$: profile = user && user['osm_json'];
-	$: regexMatch = profile && profile.description.match('(lightning:[^)]+)');
-	$: lightning = regexMatch && regexMatch[0].slice(10);
+import { resolve } from "$app/paths";
 
-	$: username = profile && profile['display_name'];
+export let action: EventType;
+export let user: User | undefined;
+export let time: string;
+export let latest: boolean;
+
+$: profile = user?.osm_json;
+$: regexMatch = profile?.description.match("(lightning:[^)]+)");
+$: lightning = regexMatch?.[0].slice(10);
+
+$: username = profile?.display_name;
 </script>
 
 <div
-	class="flex flex-col items-center gap-2 p-5 text-center text-xl lg:flex-row lg:gap-5 lg:text-left"
+  class="flex flex-col items-center gap-2 p-5 text-center text-xl lg:flex-row lg:gap-5 lg:text-left"
 >
-	<!-- dot -->
-	<span class="relative mx-auto mb-2 flex h-3 w-3 lg:mx-0 lg:mb-0">
-		<span
-			class="{latest
-				? 'animate-ping'
-				: ''} absolute inline-flex h-full w-full rounded-full {action === 'create'
-				? 'bg-created'
-				: action === 'delete'
-					? 'bg-deleted'
-					: 'bg-link'} opacity-75"
-		/>
-		<span
-			class="relative inline-flex h-3 w-3 rounded-full {action === 'create'
-				? 'bg-created'
-				: action === 'delete'
-					? 'bg-deleted'
-					: 'bg-link'}"
-		/>
-	</span>
+  <!-- dot -->
+  <span class="relative mx-auto mb-2 flex h-3 w-3 lg:mx-0 lg:mb-0">
+    <span
+      class="{latest
+        ? 'animate-ping'
+        : ''} absolute inline-flex h-full w-full rounded-full {action ===
+      'create'
+        ? 'bg-created'
+        : action === 'delete'
+          ? 'bg-deleted'
+          : 'bg-link'} opacity-75"
+    />
+    <span
+      class="relative inline-flex h-3 w-3 rounded-full {action === 'create'
+        ? 'bg-created'
+        : action === 'delete'
+          ? 'bg-deleted'
+          : 'bg-link'}"
+    />
+  </span>
 
-	<div class="w-full flex-wrap items-center justify-between space-y-2 lg:flex lg:space-y-0">
-		<!-- event information -->
-		<div class="space-y-2 lg:space-y-0">
-			<span class="text-primary lg:mr-5 dark:text-white">
-				<!-- action -->
-				<strong>{action.charAt(0).toUpperCase() + action.slice(1, action.length)}d</strong>
+  <div
+    class="w-full flex-wrap items-center justify-between space-y-2 lg:flex lg:space-y-0"
+  >
+    <!-- event information -->
+    <div class="space-y-2 lg:space-y-0">
+      <span class="text-primary lg:mr-5 dark:text-white">
+        <!-- action -->
+        <strong
+          >{action.charAt(0).toUpperCase() +
+            action.slice(1, action.length)}d</strong
+        >
 
-				<!-- user -->
-				{#if user && username}
-					by <a
-						href={resolve(`/tagger/${user.id}`)}
-						class="block break-all text-link transition-colors hover:text-hover lg:inline"
-						>{username}
-					</a>
-				{/if}
-			</span>
+        <!-- user -->
+        {#if user && username}
+          by <a
+            href={resolve(`/tagger/${user.id}`)}
+            class="block break-all text-link transition-colors hover:text-hover lg:inline"
+            >{username}
+          </a>
+        {/if}
+      </span>
 
-			<!-- time ago -->
-			<span
-				class="block text-center font-semibold text-taggerTime lg:inline dark:text-white/70 {lightning
-					? 'lg:mr-5'
-					: ''}"
-			>
-				<Time live={3000} relative timestamp={time} />
-			</span>
-		</div>
+      <!-- time ago -->
+      <span
+        class="block text-center font-semibold text-taggerTime lg:inline dark:text-white/70 {lightning
+          ? 'lg:mr-5'
+          : ''}"
+      >
+        <Time live={3000} relative timestamp={time} />
+      </span>
+    </div>
 
-		<!-- lightning tip button -->
-		{#if lightning}
-			<Tip destination={lightning} class="mx-auto block lg:mx-0 lg:inline" />
-		{/if}
-	</div>
+    <!-- lightning tip button -->
+    {#if lightning}
+      <Tip destination={lightning} class="mx-auto block lg:mx-0 lg:inline" />
+    {/if}
+  </div>
 </div>

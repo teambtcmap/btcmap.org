@@ -1,11 +1,12 @@
-import { get } from 'svelte/store';
-import axios from 'axios';
-import { boost } from '$lib/store';
-import { errToast } from '$lib/utils';
-import { updateMerchantHash } from '$lib/merchantDrawerHash';
-import type { Place, Boost } from '$lib/types';
-import type { Writable } from 'svelte/store';
-import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
+import axios from "axios";
+import type { Writable } from "svelte/store";
+import { get } from "svelte/store";
+
+import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
+import { updateMerchantHash } from "$lib/merchantDrawerHash";
+import { boost } from "$lib/store";
+import type { Boost, Place } from "$lib/types";
+import { errToast } from "$lib/utils";
 
 // Memoize verified date calculation - recompute only once per day
 let cachedVerifiedDate: number | null = null;
@@ -24,12 +25,19 @@ export function calcVerifiedDate(): number {
 	return cachedVerifiedDate;
 }
 
-export function isUpToDate(merchant: Place | null, verifiedDate: number): boolean {
-	return !!(merchant?.verified_at && Date.parse(merchant.verified_at) > verifiedDate);
+export function isUpToDate(
+	merchant: Place | null,
+	verifiedDate: number,
+): boolean {
+	return !!(
+		merchant?.verified_at && Date.parse(merchant.verified_at) > verifiedDate
+	);
 }
 
 export function isBoosted(merchant: Place | null): boolean {
-	return !!(merchant?.boosted_until && Date.parse(merchant.boosted_until) > Date.now());
+	return !!(
+		merchant?.boosted_until && Date.parse(merchant.boosted_until) > Date.now()
+	);
 }
 
 export function clearBoostState(): void {
@@ -37,11 +45,11 @@ export function clearBoostState(): void {
 }
 
 function createBoostObject(merchant: Place) {
-	const boostedUntil = isBoosted(merchant) ? merchant.boosted_until || '' : '';
+	const boostedUntil = isBoosted(merchant) ? merchant.boosted_until || "" : "";
 	return {
 		id: merchant.id,
-		name: merchant.name || '',
-		boost: boostedUntil
+		name: merchant.name || "",
+		boost: boostedUntil,
 	};
 }
 
@@ -51,7 +59,7 @@ export async function fetchMerchantDetails(
 	setMerchant: (merchant: Place | null) => void,
 	setFetching: (fetching: boolean) => void,
 	setLastFetched: (id: number) => void,
-	abortSignal?: AbortSignal
+	abortSignal?: AbortSignal,
 ): Promise<void> {
 	setLastFetched(id);
 	setFetching(true);
@@ -62,8 +70,8 @@ export async function fetchMerchantDetails(
 			`https://api.btcmap.org/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`,
 			{
 				timeout: 10000, // 10 second timeout
-				signal: abortSignal // Support request cancellation
-			}
+				signal: abortSignal, // Support request cancellation
+			},
 		);
 		if (currentMerchantId === id) {
 			setMerchant(response.data);
@@ -73,8 +81,8 @@ export async function fetchMerchantDetails(
 		if (axios.isCancel(error)) {
 			return;
 		}
-		console.error('Error fetching merchant details:', error);
-		errToast('Error loading merchant details. Please try again.');
+		console.error("Error fetching merchant details:", error);
+		errToast("Error loading merchant details. Please try again.");
 	} finally {
 		setFetching(false);
 	}
@@ -82,13 +90,17 @@ export async function fetchMerchantDetails(
 
 export function hasCompleteData(place: Place | undefined): place is Place {
 	if (!place) return false;
-	return place.name !== undefined && place.address !== undefined && place.verified_at !== undefined;
+	return (
+		place.name !== undefined &&
+		place.address !== undefined &&
+		place.verified_at !== undefined
+	);
 }
 
 export async function handleBoost(
 	merchant: Place | null,
 	merchantId: number | null,
-	setBoostLoading: (loading: boolean) => void
+	setBoostLoading: (loading: boolean) => void,
 ): Promise<void> {
 	if (!merchant) return;
 
@@ -96,11 +108,11 @@ export async function handleBoost(
 	boost.set(createBoostObject(merchant));
 
 	try {
-		updateMerchantHash(merchantId, 'boost');
+		updateMerchantHash(merchantId, "boost");
 		setBoostLoading(false);
 	} catch (error) {
-		console.error('Error fetching exchange rate for boost:', error);
-		errToast('Failed to load boost information. Please try again.');
+		console.error("Error fetching exchange rate for boost:", error);
+		errToast("Failed to load boost information. Please try again.");
 		boost.set(undefined);
 		setBoostLoading(false);
 	}
@@ -109,12 +121,12 @@ export async function handleBoost(
 export async function handleBoostComplete(
 	merchantId: number | null,
 	invalidateAll: () => Promise<void>,
-	resetBoostStore?: Writable<number>
+	resetBoostStore?: Writable<number>,
 ): Promise<void> {
 	try {
 		await invalidateAll();
 	} catch (error) {
-		console.error('Error invalidating data after boost:', error);
+		console.error("Error invalidating data after boost:", error);
 		// Continue with cleanup even if invalidation fails
 	}
 
@@ -126,13 +138,13 @@ export async function handleBoostComplete(
 	}
 
 	if (merchantId) {
-		updateMerchantHash(merchantId, 'details');
+		updateMerchantHash(merchantId, "details");
 	}
 }
 
 export function handleCloseDrawer(
 	setBoostLoading: (loading: boolean) => void,
-	additionalCleanup?: () => void
+	additionalCleanup?: () => void,
 ): void {
 	clearBoostState();
 	setBoostLoading(false);
@@ -146,17 +158,20 @@ export function handleCloseDrawer(
 
 export function handleGoBack(
 	merchantId: number | null,
-	setBoostLoading: (loading: boolean) => void
+	setBoostLoading: (loading: boolean) => void,
 ): void {
 	clearBoostState();
 	setBoostLoading(false);
 
 	if (merchantId) {
-		updateMerchantHash(merchantId, 'details');
+		updateMerchantHash(merchantId, "details");
 	}
 }
 
-export async function ensureBoostData(merchant: Place | null, currentBoost: Boost): Promise<void> {
+export async function ensureBoostData(
+	merchant: Place | null,
+	currentBoost: Boost,
+): Promise<void> {
 	if (!merchant) return;
 
 	if (currentBoost === undefined) {

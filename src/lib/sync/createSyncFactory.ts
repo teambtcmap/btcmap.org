@@ -1,8 +1,9 @@
-import type { Writable } from 'svelte/store';
-import axios from 'axios';
-import axiosRetry from 'axios-retry';
-import localforage from 'localforage';
-import { clearTables } from '$lib/sync/clearTables';
+import axios from "axios";
+import axiosRetry from "axios-retry";
+import localforage from "localforage";
+import type { Writable } from "svelte/store";
+
+import { clearTables } from "$lib/sync/clearTables";
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
@@ -34,21 +35,23 @@ export interface SyncConfig<T extends SyncableEntity> {
 
 // Factory function that creates a sync function with its own state
 export function createSyncFunction<T extends SyncableEntity>(
-	config: SyncConfig<T>
+	config: SyncConfig<T>,
 ): () => Promise<void> {
 	// Each sync function maintains its own concurrency flag
 	let syncInProgress = false;
 
 	return async () => {
 		if (syncInProgress) {
-			console.info(`${config.name} sync already in progress, skipping concurrent invocation`);
+			console.info(
+				`${config.name} sync already in progress, skipping concurrent invocation`,
+			);
 			return;
 		}
 
 		syncInProgress = true;
 
 		try {
-			const isServerSide = typeof window === 'undefined';
+			const isServerSide = typeof window === "undefined";
 
 			// Server-side cache handling (only for areas)
 			if (isServerSide && config.serverCache && config.cacheDuration) {
@@ -67,7 +70,7 @@ export function createSyncFunction<T extends SyncableEntity>(
 						cachedData,
 						config.apiEndpoint,
 						config.limit,
-						config.filterDeleted
+						config.filterDeleted,
 					);
 					config.store.set(updatedData);
 					config.serverCache.set(updatedData);
@@ -88,7 +91,7 @@ export function createSyncFunction<T extends SyncableEntity>(
 				} catch (err) {
 					console.error(`Could not load ${config.name} locally:`, err);
 					config.errorStore.set(
-						`Could not load ${config.name} locally, please try again or contact BTC Map.`
+						`Could not load ${config.name} locally, please try again or contact BTC Map.`,
 					);
 				}
 			}
@@ -102,7 +105,7 @@ export function createSyncFunction<T extends SyncableEntity>(
 					config.limit,
 					config.filterDeleted,
 					config.errorStore,
-					config.name
+					config.name,
 				);
 			} else {
 				// Incremental sync - update from cached data
@@ -111,7 +114,7 @@ export function createSyncFunction<T extends SyncableEntity>(
 						cachedData,
 						config.apiEndpoint,
 						config.limit,
-						config.filterDeleted
+						config.filterDeleted,
 					);
 				} catch (err) {
 					// On error, fall back to cached data
@@ -141,7 +144,9 @@ export function createSyncFunction<T extends SyncableEntity>(
 			}
 		} catch (err) {
 			console.error(`${config.name} sync failed:`, err);
-			config.errorStore.set(`Could not sync ${config.name}, please try again or contact BTC Map.`);
+			config.errorStore.set(
+				`Could not sync ${config.name}, please try again or contact BTC Map.`,
+			);
 		} finally {
 			syncInProgress = false;
 		}
@@ -154,9 +159,9 @@ async function initialSync<T extends SyncableEntity>(
 	limit: number,
 	filterDeleted: (item: T) => boolean,
 	errorStore: Writable<string>,
-	name: string
+	name: string,
 ): Promise<T[]> {
-	let updatedSince = '2022-01-01T00:00:00.000Z';
+	let updatedSince = "2022-01-01T00:00:00.000Z";
 	let responseCount: number;
 	const allData: T[] = [];
 	const seenIds = new Set<string | number>();
@@ -164,7 +169,7 @@ async function initialSync<T extends SyncableEntity>(
 	do {
 		try {
 			const response = await axios.get<T[]>(
-				`https://api.btcmap.org/v2/${apiEndpoint}?updated_since=${updatedSince}&limit=${limit}`
+				`https://api.btcmap.org/v2/${apiEndpoint}?updated_since=${updatedSince}&limit=${limit}`,
 			);
 
 			const newItems = response.data;
@@ -187,7 +192,9 @@ async function initialSync<T extends SyncableEntity>(
 				}
 			}
 		} catch (error) {
-			errorStore.set(`Could not load ${name} from API, please try again or contact BTC Map.`);
+			errorStore.set(
+				`Could not load ${name} from API, please try again or contact BTC Map.`,
+			);
 			console.error(error);
 			break;
 		}
@@ -202,13 +209,15 @@ async function incrementalSync<T extends SyncableEntity>(
 	cachedData: T[],
 	apiEndpoint: string,
 	limit: number,
-	filterDeleted: (item: T) => boolean
+	filterDeleted: (item: T) => boolean,
 ): Promise<T[]> {
 	// Sort cache to find most recent updated_at
 	const cacheSorted = [...cachedData];
-	cacheSorted.sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at));
+	cacheSorted.sort(
+		(a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at),
+	);
 
-	let updatedSince = cacheSorted[0]?.updated_at || '2022-01-01T00:00:00.000Z';
+	let updatedSince = cacheSorted[0]?.updated_at || "2022-01-01T00:00:00.000Z";
 	let responseCount: number;
 
 	// Use Map for O(1) lookups instead of array operations
@@ -216,7 +225,7 @@ async function incrementalSync<T extends SyncableEntity>(
 
 	do {
 		const response = await axios.get<T[]>(
-			`https://api.btcmap.org/v2/${apiEndpoint}?updated_since=${updatedSince}&limit=${limit}`
+			`https://api.btcmap.org/v2/${apiEndpoint}?updated_since=${updatedSince}&limit=${limit}`,
 		);
 
 		const newItems = response.data;

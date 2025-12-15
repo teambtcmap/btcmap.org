@@ -1,22 +1,23 @@
 // Store-based gesture controller for mobile drawer
 // Consolidates all gesture state and handlers in one place
 
-import { writable, derived, get } from 'svelte/store';
-import { spring } from 'svelte/motion';
+import { spring } from "svelte/motion";
+import { derived, get, writable } from "svelte/store";
+
 import {
-	PEEK_HEIGHT,
-	VELOCITY_THRESHOLD,
-	SPRING_CONFIG,
 	DISMISS_THRESHOLD,
+	PEEK_HEIGHT,
 	SCROLL_DRAG_THRESHOLD,
-	SCROLL_TOP_THRESHOLD
-} from './drawerConfig';
+	SCROLL_TOP_THRESHOLD,
+	SPRING_CONFIG,
+	VELOCITY_THRESHOLD,
+} from "./drawerConfig";
 import {
+	createVelocityState,
 	determineSnapState,
 	updateVelocity,
-	createVelocityState,
-	type VelocityState
-} from './drawerGestureUtils';
+	type VelocityState,
+} from "./drawerGestureUtils";
 
 export interface DrawerGestureState {
 	expanded: boolean;
@@ -49,7 +50,7 @@ function createDrawerGestureController() {
 		initialHeight: PEEK_HEIGHT,
 		velocityState: createVelocityState(0, 0),
 		touchStartY: null,
-		isInCollapseDrag: false
+		isInCollapseDrag: false,
 	};
 
 	// Callbacks for external actions
@@ -66,14 +67,20 @@ function createDrawerGestureController() {
 	}
 
 	// Pointer event handlers (for handle/peek area)
-	function handlePointerDown(event: PointerEvent, captureTarget: HTMLElement | null) {
+	function handlePointerDown(
+		event: PointerEvent,
+		captureTarget: HTMLElement | null,
+	) {
 		if (internal.activePointerId !== null) return;
 
 		internal.activePointerId = event.pointerId;
 		isDragging.set(true);
 		internal.startY = event.clientY;
 		internal.initialHeight = get(drawerHeight);
-		internal.velocityState = createVelocityState(event.clientY, event.timeStamp);
+		internal.velocityState = createVelocityState(
+			event.clientY,
+			event.timeStamp,
+		);
 
 		if (captureTarget) {
 			try {
@@ -85,21 +92,32 @@ function createDrawerGestureController() {
 	}
 
 	function handlePointerMove(event: PointerEvent) {
-		if (event.pointerId !== internal.activePointerId || !get(isDragging)) return;
+		if (event.pointerId !== internal.activePointerId || !get(isDragging))
+			return;
 
 		const currentY = event.clientY;
-		internal.velocityState = updateVelocity(currentY, event.timeStamp, internal.velocityState);
+		internal.velocityState = updateVelocity(
+			currentY,
+			event.timeStamp,
+			internal.velocityState,
+		);
 
 		const isExpanded = get(expanded);
 		const maxHeight = get(expandedHeight);
 		const deltaY = internal.startY - currentY;
 		const minHeight = isExpanded ? PEEK_HEIGHT : 0;
-		const newHeight = Math.max(minHeight, Math.min(maxHeight, internal.initialHeight + deltaY));
+		const newHeight = Math.max(
+			minHeight,
+			Math.min(maxHeight, internal.initialHeight + deltaY),
+		);
 
 		drawerHeight.set(newHeight, { hard: true });
 	}
 
-	function handlePointerUp(event: PointerEvent, capturedElement: HTMLElement | null) {
+	function handlePointerUp(
+		event: PointerEvent,
+		capturedElement: HTMLElement | null,
+	) {
 		if (event.pointerId !== internal.activePointerId) return;
 
 		const finalHeight = get(drawerHeight);
@@ -120,12 +138,18 @@ function createDrawerGestureController() {
 		const velocity = internal.velocityState.velocity;
 		const shouldDismiss =
 			!isExpanded &&
-			(velocity < -VELOCITY_THRESHOLD || finalHeight < PEEK_HEIGHT - DISMISS_THRESHOLD);
+			(velocity < -VELOCITY_THRESHOLD ||
+				finalHeight < PEEK_HEIGHT - DISMISS_THRESHOLD);
 
 		if (shouldDismiss) {
 			onDismiss?.();
 		} else {
-			const snapState = determineSnapState(velocity, totalDelta, finalHeight, maxHeight);
+			const snapState = determineSnapState(
+				velocity,
+				totalDelta,
+				finalHeight,
+				maxHeight,
+			);
 			expanded.set(snapState.expanded);
 			drawerHeight.set(snapState.height);
 		}
@@ -152,7 +176,12 @@ function createDrawerGestureController() {
 	}
 
 	function handleContentTouchMove(event: TouchEvent, scrollTop: number) {
-		if (!get(expanded) || internal.touchStartY === null || event.touches.length !== 1) return;
+		if (
+			!get(expanded) ||
+			internal.touchStartY === null ||
+			event.touches.length !== 1
+		)
+			return;
 
 		const touch = event.touches[0];
 		const deltaY = touch.clientY - internal.touchStartY;
@@ -167,16 +196,23 @@ function createDrawerGestureController() {
 				internal.startY = touch.clientY;
 				internal.touchStartY = touch.clientY;
 				internal.initialHeight = get(drawerHeight);
-				internal.velocityState = createVelocityState(touch.clientY, event.timeStamp);
+				internal.velocityState = createVelocityState(
+					touch.clientY,
+					event.timeStamp,
+				);
 			} else {
 				const currentY = touch.clientY;
-				internal.velocityState = updateVelocity(currentY, event.timeStamp, internal.velocityState);
+				internal.velocityState = updateVelocity(
+					currentY,
+					event.timeStamp,
+					internal.velocityState,
+				);
 
 				const maxHeight = get(expandedHeight);
 				const dragDelta = internal.startY - currentY;
 				const newHeight = Math.max(
 					PEEK_HEIGHT,
-					Math.min(maxHeight, internal.initialHeight + dragDelta)
+					Math.min(maxHeight, internal.initialHeight + dragDelta),
 				);
 				drawerHeight.set(newHeight, { hard: true });
 			}
@@ -195,7 +231,12 @@ function createDrawerGestureController() {
 			const totalDelta = finalHeight - internal.initialHeight;
 			const maxHeight = get(expandedHeight);
 			const velocity = internal.velocityState.velocity;
-			const snapState = determineSnapState(velocity, totalDelta, finalHeight, maxHeight);
+			const snapState = determineSnapState(
+				velocity,
+				totalDelta,
+				finalHeight,
+				maxHeight,
+			);
 			expanded.set(snapState.expanded);
 			drawerHeight.set(snapState.height);
 		}
@@ -244,8 +285,8 @@ function createDrawerGestureController() {
 		([$expanded, $isDragging, $expandedHeight]) => ({
 			expanded: $expanded,
 			isDragging: $isDragging,
-			expandedHeight: $expandedHeight
-		})
+			expandedHeight: $expandedHeight,
+		}),
 	);
 
 	return {
@@ -273,7 +314,7 @@ function createDrawerGestureController() {
 		toggle,
 		resetToPeek,
 		setExpandedHeight,
-		setDismissCallback
+		setDismissCallback,
 	};
 }
 
@@ -281,4 +322,6 @@ function createDrawerGestureController() {
 export const drawerGesture = createDrawerGestureController();
 
 // Export type for component usage
-export type DrawerGestureController = ReturnType<typeof createDrawerGestureController>;
+export type DrawerGestureController = ReturnType<
+	typeof createDrawerGestureController
+>;

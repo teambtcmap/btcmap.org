@@ -1,31 +1,32 @@
 <script lang="ts">
-	import LatestTagger from '$components/LatestTagger.svelte';
-	import TaggerSkeleton from '$components/TaggerSkeleton.svelte';
-	import TopButton from '$components/TopButton.svelte';
-	import Icon from '$components/Icon.svelte';
-	import { type ActivityEvent, type User } from '$lib/types.js';
-	import { resolve } from '$app/paths';
+import Icon from "$components/Icon.svelte";
+import LatestTagger from "$components/LatestTagger.svelte";
+import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
+import TopButton from "$components/TopButton.svelte";
+import { type ActivityEvent, type User } from "$lib/types.js";
 
-	export let alias: string;
-	export let name: string;
-	export let dataInitialized: boolean;
-	export let eventElements: ActivityEvent[];
-	export let taggers: User[];
+import { resolve } from "$app/paths";
 
-	let hideArrow = false;
-	let activityDiv: HTMLDivElement;
+export let alias: string;
+export let name: string;
+export let dataInitialized: boolean;
+export let eventElements: ActivityEvent[];
+export let taggers: User[];
 
-	let eventCount = 25;
-	$: eventElementsPaginated = eventElements.slice(0, eventCount);
+let hideArrow = false;
+let activityDiv: HTMLDivElement;
 
-	let taggerCount = 25;
-	$: taggersPaginated = taggers.slice(0, taggerCount);
-	let taggerDiv: HTMLDivElement;
+let eventCount = 25;
+$: eventElementsPaginated = eventElements.slice(0, eventCount);
+
+let taggerCount = 25;
+$: taggersPaginated = taggers.slice(0, taggerCount);
+let taggerDiv: HTMLDivElement;
 </script>
 
 <section id="taggers">
-	<!-- prettier-ignore -->
-	<div class="w-full rounded-3xl border border-gray-300 dark:border-white/95 dark:bg-white/10">
+  <!-- prettier-ignore -->
+  <div class="w-full rounded-3xl border border-gray-300 dark:border-white/95 dark:bg-white/10">
 		<!-- prettier-ignore -->
 		<h3
 			class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
@@ -82,8 +83,8 @@
 </section>
 
 <section id="activity">
-	<!-- prettier-ignore -->
-	<div class="w-full rounded-3xl border border-gray-300 dark:border-white/95 dark:bg-white/10">
+  <!-- prettier-ignore -->
+  <div class="w-full rounded-3xl border border-gray-300 dark:border-white/95 dark:bg-white/10">
 		<!-- prettier-ignore -->
 		<h3
 			class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
@@ -144,8 +145,8 @@
 </section>
 
 <section id="atom">
-	<!-- prettier-ignore -->
-	<div class="w-full rounded-3xl border border-gray-300 dark:border-white/95 dark:bg-white/10">
+  <!-- prettier-ignore -->
+  <div class="w-full rounded-3xl border border-gray-300 dark:border-white/95 dark:bg-white/10">
 		<!-- prettier-ignore -->
 		<h3
 			class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
