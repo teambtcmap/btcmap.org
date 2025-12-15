@@ -15,12 +15,26 @@
 		MERCHANT_DRAWER_WIDTH,
 		CLUSTERING_DISABLED_ZOOM,
 		BOOSTED_CLUSTERING_MAX_ZOOM,
-		MERCHANT_LIST_MIN_ZOOM,
 		MERCHANT_LIST_LOW_ZOOM,
 		MERCHANT_LIST_MAX_ITEMS,
 		HIGH_ZOOM_RADIUS_MULTIPLIER,
-		MIN_SEARCH_RADIUS_KM
+		MIN_SEARCH_RADIUS_KM,
+		MAX_LOADED_MARKERS,
+		VIEWPORT_BATCH_SIZE,
+		VIEWPORT_BUFFER_PERCENT,
+		MAP_DEBOUNCE_DELAY,
+		MARKER_CLICK_THROTTLE,
+		DEFAULT_MAP_LAT,
+		DEFAULT_MAP_LNG,
+		DEFAULT_MAP_ZOOM
 	} from '$lib/constants';
+	import { calculateRadiusKm, getVisiblePlaces, getZoomBehavior } from '$lib/map/viewport';
+	import {
+		clearMarkerSelection,
+		highlightMarker,
+		cleanupOutOfBoundsMarkers,
+		type LoadedMarkers
+	} from '$lib/map/markers';
 	import {
 		processPlaces,
 		isSupported as isWorkerSupported,
@@ -90,21 +104,11 @@
 		}
 	}
 
-	const MAX_LOADED_MARKERS = 200;
-	const VIEWPORT_BATCH_SIZE = 25;
-	const VIEWPORT_BUFFER_PERCENT = 0.2;
-	const DEBOUNCE_DELAY = 300;
-
-	const DEFAULT_LAT = 12.11209;
-	const DEFAULT_LNG = -68.91119;
-	const DEFAULT_ZOOM = 15;
-
-	let currentZoom = DEFAULT_ZOOM;
-	let previousZoom = DEFAULT_ZOOM;
+	let currentZoom = DEFAULT_MAP_ZOOM;
+	let previousZoom = DEFAULT_MAP_ZOOM;
 
 	// Throttled marker drawer opening to prevent freeze on rapid clicks
 	let lastMarkerClickTime = 0;
-	const MARKER_CLICK_THROTTLE = 100; // ms
 
 	function openMerchantDrawer(id: number) {
 		// Skip if same marker already selected
@@ -118,10 +122,10 @@
 		// Batch DOM operations with requestAnimationFrame
 		requestAnimationFrame(() => {
 			if (selectedMarkerId) {
-				clearMarkerSelection(selectedMarkerId);
+				clearMarkerSelection(loadedMarkers, selectedMarkerId);
 			}
 			selectedMarkerId = id;
-			highlightMarker(id);
+			highlightMarker(loadedMarkers, id);
 		});
 
 		merchantDrawer.open(id, 'details');
@@ -145,7 +149,7 @@
 	let markers: MarkerClusterGroup;
 	let upToDateLayer: FeatureGroup.SubGroup;
 	let boostedLayer: FeatureGroup;
-	let loadedMarkers: Record<string, Marker> = {};
+	let loadedMarkers: LoadedMarkers = {};
 	let boostedLayerMarkerIds: Set<string> = new Set();
 	let selectedMarkerId: number | null = null;
 
@@ -158,49 +162,10 @@
 	let previousCategory: CategoryKey = 'all';
 	$: selectedCategory = $merchantList.selectedCategory;
 
-	// Calculate radius from map center to corner (Haversine formula)
-	const calculateRadiusKm = (bounds: LatLngBounds): number => {
-		const center = bounds.getCenter();
-		const corner = bounds.getNorthEast();
-
-		const R = 6371; // Earth radius in km
-		const dLat = ((corner.lat - center.lat) * Math.PI) / 180;
-		const dLon = ((corner.lng - center.lng) * Math.PI) / 180;
-		const a =
-			Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-			Math.cos((center.lat * Math.PI) / 180) *
-				Math.cos((corner.lat * Math.PI) / 180) *
-				Math.sin(dLon / 2) *
-				Math.sin(dLon / 2);
-		const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-		return R * c * 1.1; // Add 10% buffer
-	};
-
 	// Check if boosted markers should be clustered at current zoom level
 	// At zoom 1-5: boosted markers cluster with regular markers
 	// At zoom 6+: boosted markers are in separate non-clustered layer
 	const shouldClusterBoostedMarkers = () => currentZoom <= BOOSTED_CLUSTERING_MAX_ZOOM;
-
-	const clearMarkerSelection = (markerId: number) => {
-		const marker = loadedMarkers[markerId.toString()];
-		if (!marker) return;
-
-		const markerIcon = marker.getElement();
-		if (markerIcon) {
-			markerIcon.classList.remove('selected-marker', 'selected-marker-boosted');
-		}
-	};
-
-	const highlightMarker = (markerId: number) => {
-		const marker = loadedMarkers[markerId.toString()];
-		if (!marker) return;
-
-		const markerIcon = marker.getElement();
-		if (markerIcon) {
-			const isBoosted = markerIcon.classList.contains('boosted-icon');
-			markerIcon.classList.add(isBoosted ? 'selected-marker-boosted' : 'selected-marker');
-		}
-	};
 
 	const handleHashChange = () => {
 		if (!browser) return;
@@ -212,7 +177,7 @@
 		const hasDrawer = hash.includes('merchant=');
 
 		if (!hasDrawer && selectedMarkerId) {
-			clearMarkerSelection(selectedMarkerId);
+			clearMarkerSelection(loadedMarkers, selectedMarkerId);
 			selectedMarkerId = null;
 		} else if (hasDrawer) {
 			const params = new URLSearchParams(hash.substring(hash.indexOf('&') + 1));
@@ -221,10 +186,10 @@
 				const merchantId = Number(merchantParam);
 				if (merchantId !== selectedMarkerId) {
 					if (selectedMarkerId) {
-						clearMarkerSelection(selectedMarkerId);
+						clearMarkerSelection(loadedMarkers, selectedMarkerId);
 					}
 					selectedMarkerId = merchantId;
-					highlightMarker(merchantId);
+					highlightMarker(loadedMarkers, merchantId);
 				}
 			}
 		}
@@ -368,55 +333,6 @@
 		lastUpdatedPlaceId.set(undefined);
 	}
 
-	// Get places visible in current viewport with buffer
-	const getVisiblePlaces = (
-		places: Place[],
-		bounds: LatLngBounds,
-		bufferPercent = VIEWPORT_BUFFER_PERCENT
-	): Place[] => {
-		if (!bounds) return [];
-
-		// Add buffer to bounds to preload markers slightly outside viewport
-		const latDiff = bounds.getNorth() - bounds.getSouth();
-		const lngDiff = bounds.getEast() - bounds.getWest();
-		const latBuffer = latDiff * bufferPercent;
-		const lngBuffer = lngDiff * bufferPercent;
-
-		const bufferedBounds = leaflet.latLngBounds([
-			[bounds.getSouth() - latBuffer, bounds.getWest() - lngBuffer],
-			[bounds.getNorth() + latBuffer, bounds.getEast() + lngBuffer]
-		]);
-
-		return places.filter((place) => bufferedBounds.contains([place.lat, place.lon]));
-	};
-
-	// Remove markers that are no longer in viewport
-	const cleanupOutOfBoundsMarkers = (bounds: LatLngBounds) => {
-		const markersToRemove: string[] = [];
-
-		Object.entries(loadedMarkers).forEach(([placeId, marker]) => {
-			const markerLatLng = marker.getLatLng();
-			if (!bounds.contains(markerLatLng)) {
-				// Remove from appropriate layer based on boost status
-				if (boostedLayerMarkerIds.has(placeId)) {
-					boostedLayer.removeLayer(marker);
-					boostedLayerMarkerIds.delete(placeId);
-				} else {
-					upToDateLayer.removeLayer(marker);
-				}
-				markersToRemove.push(placeId);
-			}
-		});
-
-		markersToRemove.forEach((placeId) => {
-			delete loadedMarkers[placeId];
-		});
-
-		if (markersToRemove.length > 0) {
-			console.info(`Cleaned up ${markersToRemove.length} out-of-bounds markers`);
-		}
-	};
-
 	// Remove markers that don't match the selected category filter
 	const clearNonMatchingMarkers = (category: CategoryKey) => {
 		if (category === 'all') return;
@@ -511,7 +427,7 @@
 
 		try {
 			// Get visible places (viewport + category filtering)
-			const visiblePlaces = getVisiblePlaces($places, bounds);
+			const visiblePlaces = getVisiblePlaces(leaflet, $places, bounds, VIEWPORT_BUFFER_PERCENT);
 			const categoryFiltered =
 				selectedCategory === 'all'
 					? visiblePlaces
@@ -527,7 +443,13 @@
 
 			// Clean up markers outside viewport if we have many loaded
 			if (Object.keys(loadedMarkers).length > MAX_LOADED_MARKERS) {
-				cleanupOutOfBoundsMarkers(bounds);
+				cleanupOutOfBoundsMarkers({
+					loadedMarkers,
+					upToDateLayer,
+					boostedLayer,
+					boostedLayerMarkerIds,
+					bounds
+				});
 			}
 
 			// Check if web workers are supported before trying to use them
@@ -562,7 +484,7 @@
 
 	// Fallback synchronous loading for viewport (much smaller dataset)
 	const loadMarkersInViewportFallback = (bounds: LatLngBounds) => {
-		const visiblePlaces = getVisiblePlaces($places, bounds);
+		const visiblePlaces = getVisiblePlaces(leaflet, $places, bounds, VIEWPORT_BUFFER_PERCENT);
 		const categoryFiltered =
 			selectedCategory === 'all'
 				? visiblePlaces
@@ -597,13 +519,13 @@
 
 			// Highlight if this is the selected marker (may be pending from search result click)
 			if (selectedMarkerId === place.id) {
-				highlightMarker(place.id);
+				highlightMarker(loadedMarkers, place.id);
 			}
 		});
 	};
 
 	// Debounced version to prevent excessive loading during rapid pan/zoom
-	const debouncedLoadMarkers = debounce(loadMarkersInViewport, DEBOUNCE_DELAY);
+	const debouncedLoadMarkers = debounce(loadMarkersInViewport, MAP_DEBOUNCE_DELAY);
 
 	// Debounced coords caching to prevent IndexedDB overflow during continuous movement
 	const debouncedCacheCoords = debounce((coords: LatLngBounds) => {
@@ -611,17 +533,6 @@
 			console.error('Error caching coords:', err);
 		});
 	}, 1000); // 1 second debounce for IndexedDB writes
-
-	// Determines which fetch strategy to use based on current zoom level
-	// See constants.ts for zoom behavior documentation
-	type ZoomBehavior = 'none' | 'api-with-limit' | 'local-markers' | 'api-extended';
-
-	function getZoomBehavior(zoom: number): ZoomBehavior {
-		if (zoom >= CLUSTERING_DISABLED_ZOOM) return 'api-extended'; // Zoom 17+
-		if (zoom >= MERCHANT_LIST_MIN_ZOOM) return 'local-markers'; // Zoom 15-16
-		if (zoom >= MERCHANT_LIST_LOW_ZOOM) return 'api-with-limit'; // Zoom 11-14
-		return 'none'; // Below zoom 11
-	}
 
 	// Zoom 17+: Fetch full merchant data from API with extended radius
 	const updateListApiExtended = (
@@ -704,7 +615,7 @@
 	};
 
 	// Debounced version to prevent excessive updates during pan/zoom
-	const debouncedUpdateMerchantList = debounce(updateMerchantList, DEBOUNCE_DELAY);
+	const debouncedUpdateMerchantList = debounce(updateMerchantList, MAP_DEBOUNCE_DELAY);
 
 	// Calculate drawer width for map offset (desktop only - mobile drawer is at bottom)
 	const getDrawerOffset = () => {
@@ -847,7 +758,7 @@
 				if (merchantParam) {
 					const merchantId = Number(merchantParam);
 					selectedMarkerId = merchantId;
-					highlightMarker(merchantId);
+					highlightMarker(loadedMarkers, merchantId);
 				}
 			}
 
@@ -910,7 +821,7 @@
 
 		// Highlight the selected marker if it was just loaded (may be pending from search result click)
 		if ((regularMarkersToAdd.length > 0 || boostedMarkersToAdd.length > 0) && selectedMarkerId) {
-			highlightMarker(selectedMarkerId);
+			highlightMarker(loadedMarkers, selectedMarkerId);
 		}
 	};
 
@@ -948,7 +859,7 @@
 					map.setView([Number(coords[1]), Number(coords[2])], Number(coords[0].slice(1)));
 					setMapViewAndMarkLoaded();
 				} catch (error) {
-					map.setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
+					map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
 					setMapViewAndMarkLoaded();
 					errToast(
 						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
@@ -971,7 +882,7 @@
 						setMapViewAndMarkLoaded();
 					}
 				} catch (error) {
-					map.setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
+					map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
 					setMapViewAndMarkLoaded();
 					errToast(
 						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
@@ -993,12 +904,12 @@
 								[value._southWest.lat, value._southWest.lng]
 							]);
 						} else {
-							map.setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
+							map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
 						}
 						setMapViewAndMarkLoaded();
 					})
 					.catch(function (err) {
-						map.setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
+						map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
 						setMapViewAndMarkLoaded();
 						errToast(
 							'Could not set map view to cached coords, please try again or contact BTC Map.'
@@ -1065,7 +976,7 @@
 			map.on('click', () => {
 				if ($merchantDrawer.isOpen) {
 					if (selectedMarkerId) {
-						clearMarkerSelection(selectedMarkerId);
+						clearMarkerSelection(loadedMarkers, selectedMarkerId);
 						selectedMarkerId = null;
 					}
 					merchantDrawer.close();
@@ -1284,11 +1195,11 @@
 	<MerchantListPanel
 		onPanToNearbyMerchant={panToNearbyMerchant}
 		onZoomToSearchResult={zoomToSearchResult}
-		onHoverStart={(place) => highlightMarker(place.id)}
+		onHoverStart={(place) => highlightMarker(loadedMarkers, place.id)}
 		onHoverEnd={(place) => {
 			// Don't clear if this is the selected marker
 			if (selectedMarkerId !== place.id) {
-				clearMarkerSelection(place.id);
+				clearMarkerSelection(loadedMarkers, place.id);
 			}
 		}}
 		onSearch={handlePanelSearch}

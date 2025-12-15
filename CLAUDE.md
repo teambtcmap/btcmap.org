@@ -47,6 +47,28 @@ Run this command to perform comprehensive TypeScript type checking and Svelte va
 
 ## Code Style Guidelines
 
+### TypeScript: Prefer `type` over `interface`
+
+- **Prefer `type` for new type definitions** - more flexible, handles unions/primitives/mapped types
+- **Use `interface` only when needed** - declaration merging, or when a class must `implements` it
+- **Gradually migrate** existing `interface` to `type` when touching those files
+
+```typescript
+// Preferred: type
+type UserState = {
+	name: string;
+	isActive: boolean;
+};
+type ID = string | number;
+type Status = 'pending' | 'active' | 'closed';
+
+// Use interface only when necessary (e.g., class implementation)
+interface Disposable {
+	dispose(): void;
+}
+class Resource implements Disposable { ... }
+```
+
 ### Comments
 
 - **Avoid JSDoc comments** (`/** */` with `@param`, `@returns`, `@description`, etc.)
