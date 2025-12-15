@@ -301,7 +301,7 @@
 				? 'text-white'
 				: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl"
 		>
-			Top Editors
+			Top Taggers
 		</h1>
 
 		<PrimaryButton
@@ -321,7 +321,7 @@
 						id="leaderboard-title"
 						class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
 					>
-						Top Editors
+						Top Taggers
 						{#if !loading && !errorMessage && totalTaggers}
 							({totalTaggers})
 						{/if}
