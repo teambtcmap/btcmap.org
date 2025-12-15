@@ -26,14 +26,22 @@ export const highlightMarker = (loadedMarkers: LoadedMarkers, markerId: number):
 	}
 };
 
+export type CleanupMarkersOptions = {
+	loadedMarkers: LoadedMarkers;
+	upToDateLayer: FeatureGroup.SubGroup;
+	boostedLayer: FeatureGroup;
+	boostedLayerMarkerIds: Set<string>;
+	bounds: LatLngBounds;
+};
+
 // Remove markers that are no longer in viewport
-export const cleanupOutOfBoundsMarkers = (
-	loadedMarkers: LoadedMarkers,
-	upToDateLayer: FeatureGroup.SubGroup,
-	boostedLayer: FeatureGroup,
-	boostedLayerMarkerIds: Set<string>,
-	bounds: LatLngBounds
-): string[] => {
+export const cleanupOutOfBoundsMarkers = ({
+	loadedMarkers,
+	upToDateLayer,
+	boostedLayer,
+	boostedLayerMarkerIds,
+	bounds
+}: CleanupMarkersOptions): string[] => {
 	const markersToRemove: string[] = [];
 
 	Object.entries(loadedMarkers).forEach(([placeId, marker]) => {

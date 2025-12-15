@@ -443,13 +443,13 @@
 
 			// Clean up markers outside viewport if we have many loaded
 			if (Object.keys(loadedMarkers).length > MAX_LOADED_MARKERS) {
-				cleanupOutOfBoundsMarkers(
+				cleanupOutOfBoundsMarkers({
 					loadedMarkers,
 					upToDateLayer,
 					boostedLayer,
 					boostedLayerMarkerIds,
 					bounds
-				);
+				});
 			}
 
 			// Check if web workers are supported before trying to use them
