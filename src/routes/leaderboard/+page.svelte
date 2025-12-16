@@ -295,7 +295,7 @@
 		</div>
 	</div>
 
-	<div class="mx-auto w-[95%] space-y-10 xl:w-[1200px]">
+	<div class="mx-auto w-12/12 space-y-10 xl:w-[1200px]">
 		<h1
 			class="{detectTheme() === 'dark' || $theme === 'dark'
 				? 'text-white'
