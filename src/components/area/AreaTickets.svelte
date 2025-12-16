@@ -11,10 +11,10 @@
 	$: filteredTickets = tickets === 'error' ? [] : tickets;
 
 	$: add = filteredTickets.filter((issue: GiteaIssue) =>
-		issue.labels.some((label: GiteaLabel) => label.name === 'location-submission')
+		issue.labels.some((label: GiteaLabel) => label.name === 'type/add-location')
 	);
 	$: verify = filteredTickets.filter((issue: GiteaIssue) =>
-		issue.labels.some((label: GiteaLabel) => label.name === 'location-verification')
+		issue.labels.some((label: GiteaLabel) => label.name === 'type/verify-location')
 	);
 	$: community = filteredTickets.filter((issue: GiteaIssue) =>
 		issue.labels.some((label: GiteaLabel) => label.name === 'community-submission')

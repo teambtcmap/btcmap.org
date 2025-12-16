@@ -66,7 +66,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		used.push(captchaSecret);
 	}
 
-	const standardLabels = ['location-submission'];
+	const standardLabels = ['type/add-location'];
 
 	// Create filtered list of matched areas for reuse
 	const associatedAreaIds = lat && long ? await getAreaIdsByCoordinates(lat, long) : [];
