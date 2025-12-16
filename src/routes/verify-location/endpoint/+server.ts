@@ -3,15 +3,12 @@ import { error } from '@sveltejs/kit';
 import crypto from 'crypto';
 import type { RequestHandler } from './$types';
 import type { CipherKey, BinaryLike } from 'crypto';
-import { getAreaIdsByCoordinates } from '$lib/utils';
 import { createIssueWithLabels } from '$lib/gitea';
-import { get } from 'svelte/store';
-import { areas } from '$lib/store';
+import { GITEA_LABELS } from '$lib/constants';
 
 const used: string[] = [];
 
 export const POST: RequestHandler = async ({ request }) => {
-	console.debug('Verify location POST endpoint called');
 	const {
 		captchaSecret,
 		captchaTest,
@@ -22,18 +19,9 @@ export const POST: RequestHandler = async ({ request }) => {
 		current,
 		outdated,
 		verified,
-		merchantId,
 		lat,
 		long
 	} = await request.json();
-
-	console.debug('Request data:', {
-		name,
-		location,
-		current,
-		outdated,
-		merchantId
-	});
 
 	if (honey) {
 		error(418);
@@ -63,24 +51,9 @@ export const POST: RequestHandler = async ({ request }) => {
 		used.push(captchaSecret);
 	}
 
-	const standardLabels = ['type/verify-location'];
-
-	// Create filtered list of matched areas for reuse
-	const associatedAreaIds = lat && long ? await getAreaIdsByCoordinates(lat, long) : [];
-	const areasData = get(areas);
-	const filteredAreas = associatedAreaIds
-		.map((id) => areasData.find((a) => a.id === id))
-		.filter(Boolean);
-
-	const areaLabels = filteredAreas
-		.map((area) => area?.tags?.url_alias || area?.id)
-		.filter((label): label is string => Boolean(label));
-	const allLabels = [...standardLabels, ...areaLabels];
-
 	const body = `Merchant name: ${name}
 Merchant location: ${location}
 Coordinates: ${lat}, ${long}
-Associated areas: ${filteredAreas.map((area) => `${area?.tags.name} (${area?.tags?.url_alias || area?.id})`).join(', ')}
 Edit link: ${edit}
 Current information correct: ${current}
 Outdated information: ${outdated}
@@ -89,6 +62,6 @@ Created at: ${new Date(Date.now()).toISOString()}
 
 If you are a new contributor please read our Tagging Instructions [here](https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants).`;
 
-	const response = await createIssueWithLabels(name, body, allLabels);
+	const response = await createIssueWithLabels(name, body, [GITEA_LABELS.DATA.VERIFY_LOCATION]);
 	return new Response(JSON.stringify(response.data));
 };

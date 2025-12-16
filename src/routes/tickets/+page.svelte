@@ -16,11 +16,11 @@
 
 	$: add =
 		tickets?.filter((issue) =>
-			issue?.labels?.some((label: GiteaLabel) => label?.name === 'type/add-location')
+			issue?.labels?.some((label: GiteaLabel) => label?.name === 'location-submission')
 		) || [];
 	$: verify =
 		tickets?.filter((issue) =>
-			issue?.labels?.some((label: GiteaLabel) => label?.name === 'type/verify-location')
+			issue?.labels?.some((label: GiteaLabel) => label?.name === 'location-verification')
 		) || [];
 	$: community =
 		tickets?.filter((issue) =>

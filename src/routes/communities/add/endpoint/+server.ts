@@ -3,10 +3,8 @@ import { error } from '@sveltejs/kit';
 import crypto from 'crypto';
 import type { RequestHandler } from './$types';
 import type { CipherKey, BinaryLike } from 'crypto';
-import { getAreaIdsByCoordinates } from '$lib/utils';
 import { createIssueWithLabels } from '$lib/gitea';
-import { get } from 'svelte/store';
-import { areas } from '$lib/store';
+import { GITEA_LABELS } from '$lib/constants';
 
 const used: string[] = [];
 
@@ -21,9 +19,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		lightning,
 		socialLinks,
 		contact,
-		notes,
-		lat,
-		long
+		notes
 	} = await request.json();
 
 	// if honey field has value return
@@ -56,23 +52,8 @@ export const POST: RequestHandler = async ({ request }) => {
 		used.push(captchaSecret);
 	}
 
-	const standardLabels = ['community-submission'];
-
-	// Create filtered list of matched areas (i.e. countries or larger communities) for reuse
-	const associatedAreaIds = lat && long ? await getAreaIdsByCoordinates(lat, long) : [];
-	const areasData = get(areas);
-	const filteredAreas = associatedAreaIds
-		.map((id) => areasData.find((a) => a.id === id))
-		.filter(Boolean);
-
-	const areaLabels = filteredAreas
-		.map((area) => area?.tags?.url_alias || area?.id)
-		.filter((label): label is string => Boolean(label)); // Filter out undefined values
-	const labels = [...standardLabels, ...areaLabels];
-
 	const body = `Community name: ${name}
 Location: ${location}
-Associated areas: ${filteredAreas.map((area) => `${area?.tags.name} (${area?.tags?.url_alias || area?.id})`).join(', ')}
 GeoJSON: https://geojson.codingarena.top/?search=${encodeURIComponent(location)}
 Icon URL: ${icon}
 Lightning: ${lightning}
@@ -81,7 +62,9 @@ Community leader contact: ${contact}
 Notes: ${notes}
 Created at: ${new Date(Date.now()).toISOString()}`;
 
-	const response = await createIssueWithLabels(name, body, labels);
+	const response = await createIssueWithLabels(name, body, [
+		GITEA_LABELS.DATA.COMMUNITY_SUBMISSION
+	]);
 	const gitea = response.data;
 
 	return new Response(JSON.stringify(gitea));

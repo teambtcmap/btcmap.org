@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import type { RequestHandler } from './$types';
 import type { CipherKey, BinaryLike } from 'crypto';
 import { createIssueWithLabels } from '$lib/gitea';
+import { GITEA_LABELS } from '$lib/constants';
 
 const used: string[] = [];
 
@@ -38,14 +39,17 @@ export const POST: RequestHandler = async ({ request }) => {
 		used.push(captchaSecret);
 	}
 
-	const labels = ['type/tagger-onboarding'];
-
 	const body = `Name: ${name}
 Email: ${email}
 Created at: ${new Date(Date.now()).toISOString()}
 
 New tagger onboarding request.`;
 
-	const response = await createIssueWithLabels(name, body, labels);
+	const response = await createIssueWithLabels(
+		name,
+		body,
+		[GITEA_LABELS.INFRA.TAGGER_ONBOARDING],
+		'btcmap-infra'
+	);
 	return new Response(JSON.stringify(response.data));
 };

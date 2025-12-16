@@ -1,20 +1,19 @@
 import axios from 'axios';
 import { env } from '$env/dynamic/private';
-import { getRandomColor } from '$lib/utils';
-import { get } from 'svelte/store';
-import { areas } from '$lib/store';
 
-import type { GiteaLabel, GiteaIssue } from '$lib/types';
+import type { GiteaIssue } from '$lib/types';
 
 // Cache structure with TTL
-interface IssuesCache {
+type IssuesCache = {
 	timestamp: number;
 	data: GiteaIssue[];
 	totalCount: number;
-}
+};
 
 let issuesCache: IssuesCache | null = null;
 const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
+
+type GiteaRepo = 'btcmap-data' | 'btcmap-infra';
 
 async function syncIssuesFromGitea(): Promise<IssuesCache> {
 	// Check if required environment variables are available
@@ -96,92 +95,26 @@ export async function getIssues(
 	};
 }
 
-async function getLabels(): Promise<GiteaLabel[]> {
+export async function createIssueWithLabels(
+	title: string,
+	body: string,
+	labelIds: number[],
+	repo: GiteaRepo = 'btcmap-data'
+) {
 	const headers = {
 		Authorization: `token ${env.GITEA_API_KEY}`
 	};
 
-	try {
-		const response = await axios.get(
-			`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/labels`,
-			{ headers }
-		);
-		return response.data;
-	} catch (error) {
-		console.error('Failed to fetch labels:', error);
-		return [];
-	}
-}
+	const response = await axios.post(
+		`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/${repo}/issues`,
+		{ title, body, labels: labelIds },
+		{ headers }
+	);
 
-async function createLabel(name: string): Promise<number | null> {
-	const headers = {
-		Authorization: `token ${env.GITEA_API_KEY}`
-	};
-
-	try {
-		const existingLabels = await getLabels();
-		const existingLabel = existingLabels.find((l) => l.name === name);
-		if (existingLabel) {
-			return existingLabel.id;
-		}
-
-		const areaDetails = get(areas).find((area) => area.id === name);
-		const areaType = areaDetails?.tags?.type;
-		const areaName = areaDetails?.tags?.name || name;
-
-		if (!areaDetails) {
-			console.warn(`Area ${name} not found in store. Creating label without area details.`);
-		}
-
-		let color = '';
-		if (areaType === 'country') {
-			color = '4A90E2'; // Blue color for countries
-		} else if (areaType === 'community') {
-			color = '7ED321'; // Green color for communities
-		} else {
-			color = getRandomColor().substring(1); // Random color for other types
-		}
-
-		const response = await axios.post(
-			`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/labels`,
-			{
-				name,
-				color,
-				description: `Auto-generated label for ${areaName}${areaType ? ` (${areaType})` : ''}`
-			},
-			{ headers }
-		);
-		return response.data.id;
-	} catch (error) {
-		console.error(`Failed to create/get label ${name}:`, error);
-		throw error;
-	}
-}
-
-export async function createIssueWithLabels(title: string, body: string, labelNames: string[]) {
-	console.debug('createIssueWithLabels - Input:', { title, labelNames });
-	const headers = {
-		Authorization: `token ${env.GITEA_API_KEY}`
-	};
-
-	try {
-		console.debug('Attempting to create/get labels...');
-		const labelPromises = labelNames.map((name) => createLabel(name));
-		const labelIds = await Promise.all(labelPromises);
-		console.debug('Label IDs resolved:', labelIds);
-
-		const response = await axios.post(
-			`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues`,
-			{ title, body, labels: labelIds },
-			{ headers }
-		);
-
-		// Invalidate cache after creating new issue
+	// Only invalidate cache for btcmap-data repo
+	if (repo === 'btcmap-data') {
 		issuesCache = null;
-
-		return response;
-	} catch (error) {
-		console.error('Failed to create issue:', error);
-		throw error;
 	}
+
+	return response;
 }

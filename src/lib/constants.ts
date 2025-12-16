@@ -1,4 +1,17 @@
 export const CONFETTI_CANVAS_Z_INDEX = '2001';
+
+// Gitea label IDs grouped by repository
+export const GITEA_LABELS = {
+	DATA: {
+		ADD_LOCATION: 901, // location-submission
+		COMMUNITY_SUBMISSION: 902, // community-submission
+		VERIFY_LOCATION: 903 // location-verification
+	},
+	INFRA: {
+		TAGGER_ONBOARDING: 1410 // tagger-onboarding
+	}
+} as const;
+
 export const POLLING_INTERVAL = 2500;
 export const QR_CODE_SIZE = { mobile: 200, desktop: 275 };
 export const PAYMENT_ERROR_MESSAGE =
