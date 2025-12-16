@@ -15,15 +15,13 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 const used: string[] = [];
 
-type IssueType = 'add-location' | 'verify-location' | 'community' | 'tagger-onboarding';
-
 type IssueConfig = {
 	repo: GiteaRepo;
 	labelId: number;
 	hasAreaLabels: boolean;
 };
 
-const CONFIG: Record<IssueType, IssueConfig> = {
+const CONFIG = {
 	'add-location': {
 		repo: 'btcmap-data',
 		labelId: GITEA_LABELS.DATA.ADD_LOCATION,
@@ -44,7 +42,9 @@ const CONFIG: Record<IssueType, IssueConfig> = {
 		labelId: GITEA_LABELS.INFRA.TAGGER_ONBOARDING,
 		hasAreaLabels: false
 	}
-};
+} satisfies Record<string, IssueConfig>;
+
+type IssueType = keyof typeof CONFIG;
 
 function validateCaptcha(captchaSecret: string, captchaTest: string): void {
 	if (!env.SERVER_CRYPTO_KEY || !env.SERVER_INIT_VECTOR) {
