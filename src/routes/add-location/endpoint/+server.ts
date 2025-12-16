@@ -6,6 +6,9 @@ import crypto from 'crypto';
 import type { RequestHandler } from './$types';
 import { createIssueWithLabels } from '$lib/gitea';
 import { GITEA_LABELS } from '$lib/constants';
+import { getAreaIdsByCoordinates } from '$lib/utils';
+import { get } from 'svelte/store';
+import { areas } from '$lib/store';
 
 import type { CipherKey, BinaryLike } from 'crypto';
 
@@ -64,10 +67,22 @@ export const POST: RequestHandler = async ({ request }) => {
 		used.push(captchaSecret);
 	}
 
+	// Get associated areas based on coordinates
+	const associatedAreaIds = lat && long ? await getAreaIdsByCoordinates(lat, long) : [];
+	const areasData = get(areas);
+	const filteredAreas = associatedAreaIds
+		.map((id) => areasData.find((a) => a.id === id))
+		.filter(Boolean);
+
+	const areaLabels = filteredAreas
+		.map((area) => area?.tags?.url_alias || area?.id)
+		.filter((label): label is string => Boolean(label));
+
 	const body = `Merchant name: ${name}
 Address: ${address}
 Lat: ${lat}
 Long: ${long}
+Associated areas: ${filteredAreas.map((area) => `${area?.tags.name} (${area?.tags?.url_alias || area?.id})`).join(', ')}
 OSM: ${osm}
 Category: ${category}
 Payment methods: ${methods}
@@ -82,7 +97,13 @@ Created at: ${new Date(Date.now()).toISOString()}
 
 If you are a new contributor please read our Tagging Instructions [here](https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants).`;
 
-	const response = await createIssueWithLabels(name, body, [GITEA_LABELS.DATA.ADD_LOCATION]);
+	const response = await createIssueWithLabels(
+		name,
+		body,
+		[GITEA_LABELS.DATA.ADD_LOCATION],
+		'btcmap-data',
+		areaLabels
+	);
 	const gitea = response.data;
 
 	return new Response(JSON.stringify(gitea));
