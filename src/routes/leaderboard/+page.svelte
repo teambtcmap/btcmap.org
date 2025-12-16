@@ -282,9 +282,9 @@
 </script>
 
 <svelte:head>
-	<title>BTC Map - Leaderboard</title>
+	<title>BTC Map - Tagger Leaderboard</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/leader.png" />
-	<meta property="twitter:title" content="BTC Map - Leaderboard" />
+	<meta property="twitter:title" content="BTC Map - Tagger Leaderboard" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/leader.png" />
 </svelte:head>
 
@@ -295,13 +295,13 @@
 		</div>
 	</div>
 
-	<div class="mx-auto w-10/12 space-y-10 xl:w-[1200px]">
+	<div class="mx-auto w-12/12 space-y-10 xl:w-[1200px]">
 		<h1
 			class="{detectTheme() === 'dark' || $theme === 'dark'
 				? 'text-white'
 				: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl"
 		>
-			Top Taggers
+			Tagger Leaderboard
 		</h1>
 
 		<PrimaryButton
@@ -321,7 +321,7 @@
 						id="leaderboard-title"
 						class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
 					>
-						Top Taggers
+						Tagger Leaderboard
 						{#if !loading && !errorMessage && totalTaggers}
 							({totalTaggers})
 						{/if}

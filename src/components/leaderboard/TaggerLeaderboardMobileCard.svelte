@@ -55,7 +55,7 @@
 				<div class="min-w-0 flex-1">
 					<a
 						href={resolve(`/tagger/${tagger.id}`)}
-						class="truncate text-lg font-semibold text-link transition-colors hover:text-hover"
+						class="text-lg font-semibold break-words text-link transition-colors hover:text-hover"
 					>
 						{tagger.tagger}
 					</a>
