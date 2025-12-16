@@ -16,7 +16,7 @@ type IssuesCache = {
 let issuesCache: IssuesCache | null = null;
 const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
 
-type GiteaRepo = 'btcmap-data' | 'btcmap-infra';
+export type GiteaRepo = 'btcmap-data' | 'btcmap-infra';
 
 async function syncIssuesFromGitea(): Promise<IssuesCache> {
 	// Check if required environment variables are available

@@ -64,7 +64,8 @@
 			submitting = true;
 
 			axios
-				.post('/verify-location/endpoint', {
+				.post('/api/gitea/issue', {
+					type: 'verify-location',
 					captchaSecret,
 					captchaTest: captchaInput.value,
 					honey: honeyInput.value,

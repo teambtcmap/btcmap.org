@@ -47,7 +47,8 @@
 		submitting = true;
 
 		axios
-			.post('/tagger-onboarding/endpoint', {
+			.post('/api/gitea/issue', {
+				type: 'tagger-onboarding',
 				captchaSecret,
 				captchaTest: captchaInput.value,
 				honey: honeyInput.value,
