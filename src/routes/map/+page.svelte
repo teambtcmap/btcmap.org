@@ -179,8 +179,7 @@
 		if (
 			$merchantList.mode === 'search' &&
 			$merchantList.searchResults.length > 0 &&
-			$merchantList.isOpen &&
-			!$merchantDrawer.isOpen
+			$merchantList.isOpen
 		) {
 			// Filter by category if one is selected
 			const filtered =
@@ -189,7 +188,7 @@
 					: $merchantList.searchResults.filter((p) => placeMatchesCategory(p, selectedCategory));
 			searchResultIds = new Set(filtered.map((p) => p.id));
 		} else {
-			// Reset filtering when: switching to nearby, clearing search, closing panel/drawer, or 0 results
+			// Reset filtering when: switching to nearby, clearing search, closing panel, or 0 results
 			searchResultIds = new Set();
 		}
 	}
