@@ -384,7 +384,9 @@
 							{filteredSearchResults.length > 0
 							? 'border-gray-200 bg-white text-primary hover:bg-gray-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10'
 							: 'cursor-not-allowed border-gray-100 bg-gray-50 text-gray-400 dark:border-white/5 dark:bg-white/5 dark:text-white/30'}"
-						aria-label="Show all search results on map"
+						aria-label="Zoom map to show {filteredSearchResults.length === 1
+							? '1 result'
+							: `all ${filteredSearchResults.length} results`}"
 					>
 						<Icon w="14" h="14" icon="zoom_out_map" type="material" />
 						<span>Show all</span>

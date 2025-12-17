@@ -166,6 +166,7 @@
 
 	// Track mode transitions for search filtering
 	let previousMode: MerchantListMode = 'nearby';
+	let previousSearchResultCount = 0;
 	$: currentMode = $merchantList.mode;
 
 	// Set of search result IDs for efficient marker filtering (respects category filter)
@@ -309,22 +310,30 @@
 		debouncedLoadMarkers();
 	}
 
-	// Filter markers when entering/exiting search mode
-	$: if (elementsLoaded && upToDateLayer && currentMode !== previousMode) {
-		previousMode = currentMode;
-		if (currentMode === 'search' && searchResultIds.size > 0) {
+	// Consolidated reactive block for search mode transitions and result changes
+	// Handles: entering search mode, exiting search mode, and search results changing
+	$: if (elementsLoaded && upToDateLayer) {
+		const searchResultCount = searchResultIds.size;
+		const modeChanged = currentMode !== previousMode;
+		const resultsChanged = searchResultCount !== previousSearchResultCount;
+
+		if (modeChanged) {
+			previousMode = currentMode;
+			if (currentMode === 'search' && searchResultCount > 0) {
+				// Entering search mode with results
+				clearNonSearchResultMarkers();
+				loadSearchResultMarkers();
+			} else if (currentMode === 'nearby') {
+				// Exiting search mode: reload markers for current viewport
+				debouncedLoadMarkers();
+			}
+		} else if (currentMode === 'search' && resultsChanged && searchResultCount > 0) {
+			// Already in search mode but results changed (new search or category filter)
 			clearNonSearchResultMarkers();
 			loadSearchResultMarkers();
-		} else if (currentMode === 'nearby') {
-			// Exiting search mode: reload markers for current viewport
-			debouncedLoadMarkers();
 		}
-	}
 
-	// Load markers when search results arrive (while already in search mode)
-	$: if (elementsLoaded && upToDateLayer && currentMode === 'search' && searchResultIds.size > 0) {
-		clearNonSearchResultMarkers();
-		loadSearchResultMarkers();
+		previousSearchResultCount = searchResultCount;
 	}
 
 	// alert for map errors
@@ -380,16 +389,12 @@
 		lastUpdatedPlaceId.set(undefined);
 	}
 
-	// Remove markers that don't match the selected category filter
-	const clearNonMatchingMarkers = (category: CategoryKey) => {
-		if (category === 'all') return;
-
+	// Shared helper to remove markers by predicate
+	const removeMarkersByPredicate = (shouldRemove: (placeId: string) => boolean): number => {
 		const markersToRemove: string[] = [];
 
 		Object.entries(loadedMarkers).forEach(([placeId, marker]) => {
-			const place = $placesById.get(Number(placeId));
-			if (place && !placeMatchesCategory(place, category)) {
-				// Remove from both the subgroup and the parent cluster group
+			if (shouldRemove(placeId)) {
 				upToDateLayer.removeLayer(marker);
 				markers.removeLayer(marker);
 				boostedLayer.removeLayer(marker);
@@ -400,6 +405,18 @@
 
 		markersToRemove.forEach((placeId) => {
 			delete loadedMarkers[placeId];
+		});
+
+		return markersToRemove.length;
+	};
+
+	// Remove markers that don't match the selected category filter
+	const clearNonMatchingMarkers = (category: CategoryKey) => {
+		if (category === 'all') return;
+
+		removeMarkersByPredicate((placeId) => {
+			const place = $placesById.get(Number(placeId));
+			return place ? !placeMatchesCategory(place, category) : false;
 		});
 	};
 
@@ -419,24 +436,12 @@
 	const clearNonSearchResultMarkers = () => {
 		if (searchResultIds.size === 0) return;
 
-		const markersToRemove: string[] = [];
+		const removedCount = removeMarkersByPredicate(
+			(placeId) => !placeInSearchResults(Number(placeId))
+		);
 
-		Object.entries(loadedMarkers).forEach(([placeId, marker]) => {
-			if (!placeInSearchResults(Number(placeId))) {
-				upToDateLayer.removeLayer(marker);
-				markers.removeLayer(marker);
-				boostedLayer.removeLayer(marker);
-				boostedLayerMarkerIds.delete(placeId);
-				markersToRemove.push(placeId);
-			}
-		});
-
-		markersToRemove.forEach((placeId) => {
-			delete loadedMarkers[placeId];
-		});
-
-		console.info(
-			`Filtered to ${searchResultIds.size} search results, removed ${markersToRemove.length} markers`
+		console.debug(
+			`[SEARCH] Filtered to ${searchResultIds.size} search results, removed ${removedCount} markers`
 		);
 	};
 
@@ -481,47 +486,58 @@
 			}
 		});
 
-		console.info(`Loaded ${placesToLoad.length} search result markers`);
+		console.debug(`[SEARCH] Loaded ${placesToLoad.length} search result markers`);
 	};
+
+	// Helper to validate coordinates
+	const isValidCoordinate = (lat: number, lon: number): boolean =>
+		isFinite(lat) && isFinite(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
 
 	// Fit map bounds to show all search results (respects category filter)
 	const fitBoundsToSearchResults = () => {
 		if (!map || $merchantList.searchResults.length === 0) return;
 
-		// Filter by category if one is selected
-		const results =
-			selectedCategory === 'all'
-				? $merchantList.searchResults
-				: $merchantList.searchResults.filter((p) => placeMatchesCategory(p, selectedCategory));
+		try {
+			// Filter by category if one is selected
+			const categoryFiltered =
+				selectedCategory === 'all'
+					? $merchantList.searchResults
+					: $merchantList.searchResults.filter((p) => placeMatchesCategory(p, selectedCategory));
 
-		if (results.length === 0) return;
+			// Validate coordinates to prevent map errors
+			const results = categoryFiltered.filter((p) => isValidCoordinate(p.lat, p.lon));
 
-		// Single result: zoom to it
-		if (results.length === 1) {
-			map.setView([results[0].lat, results[0].lon], 17, { animate: true });
-			return;
+			if (results.length === 0) return;
+
+			// Single result: zoom to it
+			if (results.length === 1) {
+				map.setView([results[0].lat, results[0].lon], 17, { animate: true });
+				return;
+			}
+
+			// Multiple results: calculate bounds
+			const lats = results.map((p) => p.lat);
+			const lons = results.map((p) => p.lon);
+			const minLat = Math.min(...lats);
+			const maxLat = Math.max(...lats);
+			const minLon = Math.min(...lons);
+			const maxLon = Math.max(...lons);
+
+			const bounds = leaflet.latLngBounds([minLat, minLon], [maxLat, maxLon]);
+
+			// Account for panel width when open (desktop only)
+			const { panelWidth } = getDrawerOffset();
+			const paddingRight = MAP_FIT_BOUNDS_PADDING + panelWidth;
+
+			map.fitBounds(bounds, {
+				paddingTopLeft: [MAP_FIT_BOUNDS_PADDING, MAP_FIT_BOUNDS_PADDING],
+				paddingBottomRight: [paddingRight, MAP_FIT_BOUNDS_PADDING],
+				animate: true,
+				maxZoom: 17
+			});
+		} catch (error) {
+			console.debug('[SEARCH] Error fitting bounds to search results:', error);
 		}
-
-		// Multiple results: calculate bounds
-		const lats = results.map((p) => p.lat);
-		const lons = results.map((p) => p.lon);
-		const minLat = Math.min(...lats);
-		const maxLat = Math.max(...lats);
-		const minLon = Math.min(...lons);
-		const maxLon = Math.max(...lons);
-
-		const bounds = leaflet.latLngBounds([minLat, minLon], [maxLat, maxLon]);
-
-		// Account for panel width when open (desktop only)
-		const { panelWidth } = getDrawerOffset();
-		const paddingRight = MAP_FIT_BOUNDS_PADDING + panelWidth;
-
-		map.fitBounds(bounds, {
-			paddingTopLeft: [MAP_FIT_BOUNDS_PADDING, MAP_FIT_BOUNDS_PADDING],
-			paddingBottomRight: [paddingRight, MAP_FIT_BOUNDS_PADDING],
-			animate: true,
-			maxZoom: 17
-		});
 	};
 
 	// Move boosted markers between layers when zoom crosses the threshold
