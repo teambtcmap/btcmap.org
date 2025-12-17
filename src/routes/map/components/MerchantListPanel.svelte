@@ -23,6 +23,7 @@
 		BREAKPOINTS
 	} from '$lib/constants';
 	import { calcVerifiedDate } from '$lib/merchantDrawerLogic';
+	import { trackEvent } from '$lib/analytics';
 
 	// Reduced motion preference for animations
 	const reducedMotion = browser && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -82,6 +83,7 @@
 			merchantList.exitSearchMode();
 			onModeChange?.(newMode);
 		} else {
+			trackEvent('worldwide_mode_click');
 			merchantList.setMode(newMode);
 		}
 	}
@@ -89,6 +91,7 @@
 	function handleCategorySelect(category: CategoryKey) {
 		// Guard against clicks on disabled buttons (Svelte fires click even when disabled)
 		if (!hasMatchingMerchants(category, categoryCounts)) return;
+		trackEvent('category_filter', { category });
 		merchantList.setSelectedCategory(category);
 		// Only refresh in nearby mode - search mode filters client-side
 		if (mode === 'nearby') {
