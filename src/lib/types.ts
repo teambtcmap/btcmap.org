@@ -247,6 +247,8 @@ export type MapGroups = { [key: string]: LayerGroup | FeatureGroup.SubGroup };
 export type BaseMaps = {
 	'OpenFreeMap Liberty': MaplibreGL;
 	'OpenFreeMap Dark': MaplibreGL;
+	'Carto Positron': MaplibreGL;
+	'Carto Dark Matter': MaplibreGL;
 	OpenStreetMap: TileLayer;
 };
 
