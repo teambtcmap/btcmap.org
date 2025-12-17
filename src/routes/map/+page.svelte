@@ -168,7 +168,8 @@
 
 	// Track mode transitions for search filtering
 	let previousMode: MerchantListMode = 'nearby';
-	let previousSearchResultCount = 0;
+	let searchResultsRevision = 0;
+	let previousSearchResultsRevision = 0;
 	$: currentMode = $merchantList.mode;
 
 	// Set of search result IDs for efficient marker filtering (respects category filter)
@@ -187,9 +188,11 @@
 					? $merchantList.searchResults
 					: $merchantList.searchResults.filter((p) => placeMatchesCategory(p, selectedCategory));
 			searchResultIds = new Set(filtered.map((p) => p.id));
+			searchResultsRevision++;
 		} else {
 			// Reset filtering when: switching to nearby, clearing search, closing panel, or 0 results
 			searchResultIds = new Set();
+			searchResultsRevision++;
 		}
 	}
 
@@ -316,7 +319,7 @@
 	$: if (elementsLoaded && upToDateLayer) {
 		const searchResultCount = searchResultIds.size;
 		const modeChanged = currentMode !== previousMode;
-		const resultsChanged = searchResultCount !== previousSearchResultCount;
+		const resultsChanged = searchResultsRevision !== previousSearchResultsRevision;
 
 		if (modeChanged) {
 			previousMode = currentMode;
@@ -334,7 +337,7 @@
 			loadSearchResultMarkers();
 		}
 
-		previousSearchResultCount = searchResultCount;
+		previousSearchResultsRevision = searchResultsRevision;
 	}
 
 	// alert for map errors
@@ -527,7 +530,7 @@
 			const bounds = leaflet.latLngBounds([minLat, minLon], [maxLat, maxLon]);
 
 			// Account for panel width when open (desktop only)
-			const { panelWidth } = getDrawerOffset();
+			const { panelWidth } = getPanelOffset();
 			const paddingRight = MAP_FIT_BOUNDS_PADDING + panelWidth;
 
 			map.fitBounds(bounds, {
@@ -811,7 +814,7 @@
 
 	// Calculate panel width for map offset (desktop only - mobile panels are at bottom)
 	// Accounts for both MerchantListPanel (left) and MerchantDrawer (stacked to its right)
-	const getDrawerOffset = () => {
+	const getPanelOffset = () => {
 		const mapSize = map!.getSize();
 		const isDesktop = mapSize.x >= BREAKPOINTS.md;
 		const listWidth = isDesktop && $merchantList.isOpen ? MERCHANT_LIST_WIDTH : 0;
@@ -828,7 +831,7 @@
 	) => {
 		if (!map || !browser) return;
 
-		const { visibleCenterX, mapSize } = getDrawerOffset();
+		const { visibleCenterX, mapSize } = getPanelOffset();
 		const { targetZoom, spiderfyCluster = false } = options;
 
 		if (targetZoom !== undefined) {
