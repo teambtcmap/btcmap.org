@@ -80,6 +80,7 @@
 		if (newMode === mode) return;
 		nearbyFilter = ''; // Clear filter when switching modes
 		if (newMode === 'nearby') {
+			trackEvent('nearby_mode_click');
 			merchantList.exitSearchMode();
 			onModeChange?.(newMode);
 		} else {

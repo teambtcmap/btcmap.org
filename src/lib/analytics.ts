@@ -6,10 +6,12 @@ import { dev } from '$app/environment';
 
 type EventName =
 	| 'search_query'
+	| 'search_button_click'
 	| 'category_filter'
 	| 'boost_layer_toggle'
 	| 'nearby_button_click'
-	| 'worldwide_mode_click';
+	| 'worldwide_mode_click'
+	| 'nearby_mode_click';
 
 type CategoryFilterData = {
 	category: string;

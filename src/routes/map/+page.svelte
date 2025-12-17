@@ -1225,6 +1225,7 @@
 					} alt='search' class='inline' id='search-button'/>`;
 					searchButton.style.borderRadius = '8px 8px 0 0';
 					searchButton.onclick = function openSearch() {
+						trackEvent('search_button_click');
 						// Open panel in search mode (will auto-focus input)
 						merchantList.openSearchMode();
 					};
