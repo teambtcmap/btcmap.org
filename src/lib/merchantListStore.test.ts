@@ -490,6 +490,24 @@ describe('merchantListStore', () => {
 			expect(state.searchResults[1].id).toBe(2);
 		});
 
+		it('openWithSearchResults() should calculate category counts from results', () => {
+			const results = [
+				createMockPlace({ id: 1, icon: 'restaurant' }),
+				createMockPlace({ id: 2, icon: 'restaurant' }),
+				createMockPlace({ id: 3, icon: 'local_cafe' }),
+				createMockPlace({ id: 4, icon: 'local_atm' })
+			];
+
+			merchantList.openWithSearchResults('test query', results);
+			const state = get(merchantList);
+
+			expect(state.categoryCounts.all).toBe(4);
+			expect(state.categoryCounts.restaurants).toBe(2);
+			expect(state.categoryCounts.coffee).toBe(1);
+			expect(state.categoryCounts.atms).toBe(1);
+			expect(state.categoryCounts.shopping).toBe(0);
+		});
+
 		it('clearSearchInput() should clear results but keep search mode', () => {
 			merchantList.openWithSearchResults('test', [createMockPlace()]);
 			merchantList.clearSearchInput();
@@ -591,6 +609,32 @@ describe('merchantListStore', () => {
 
 				expect(state.selectedCategory).toBe('all');
 				expect(state.merchants.length).toBe(1);
+			});
+
+			it('close() should reset all search state (mode, query, results, isSearching)', () => {
+				// Set up search state
+				merchantList.openWithSearchResults('pizza', [
+					createPlaceWithIcon('restaurant', { id: 1 }),
+					createPlaceWithIcon('restaurant', { id: 2 })
+				]);
+
+				// Verify search state is set
+				let state = get(merchantList);
+				expect(state.mode).toBe('search');
+				expect(state.searchQuery).toBe('pizza');
+				expect(state.searchResults.length).toBe(2);
+				expect(state.isOpen).toBe(true);
+
+				// Close should reset all search state
+				merchantList.close();
+				state = get(merchantList);
+
+				expect(state.isOpen).toBe(false);
+				expect(state.mode).toBe('nearby');
+				expect(state.searchQuery).toBe('');
+				expect(state.searchResults).toEqual([]);
+				expect(state.isSearching).toBe(false);
+				expect(state.selectedCategory).toBe('all');
 			});
 		});
 
