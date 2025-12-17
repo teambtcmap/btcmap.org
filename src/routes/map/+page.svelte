@@ -12,7 +12,9 @@
 	import { placeMatchesCategory, type CategoryKey } from '$lib/categoryMapping';
 	import {
 		BREAKPOINTS,
+		MERCHANT_LIST_WIDTH,
 		MERCHANT_DRAWER_WIDTH,
+		MAP_FIT_BOUNDS_PADDING,
 		CLUSTERING_DISABLED_ZOOM,
 		BOOSTED_CLUSTERING_MAX_ZOOM,
 		MERCHANT_LIST_LOW_ZOOM,
@@ -498,13 +500,13 @@
 
 		const bounds = leaflet.latLngBounds([minLat, minLon], [maxLat, maxLon]);
 
-		// Account for drawer width when open (desktop only)
-		const { drawerWidth } = getDrawerOffset();
-		const paddingRight = 50 + drawerWidth;
+		// Account for panel width when open (desktop only)
+		const { panelWidth } = getDrawerOffset();
+		const paddingRight = MAP_FIT_BOUNDS_PADDING + panelWidth;
 
 		map.fitBounds(bounds, {
-			paddingTopLeft: [50, 50],
-			paddingBottomRight: [paddingRight, 50],
+			paddingTopLeft: [MAP_FIT_BOUNDS_PADDING, MAP_FIT_BOUNDS_PADDING],
+			paddingBottomRight: [paddingRight, MAP_FIT_BOUNDS_PADDING],
 			animate: true,
 			maxZoom: 17
 		});
@@ -775,13 +777,16 @@
 	// Debounced version to prevent excessive updates during pan/zoom
 	const debouncedUpdateMerchantList = debounce(updateMerchantList, MAP_DEBOUNCE_DELAY);
 
-	// Calculate drawer width for map offset (desktop only - mobile drawer is at bottom)
+	// Calculate panel width for map offset (desktop only - mobile panels are at bottom)
+	// Accounts for both MerchantListPanel (left) and MerchantDrawer (stacked to its right)
 	const getDrawerOffset = () => {
 		const mapSize = map!.getSize();
 		const isDesktop = mapSize.x >= BREAKPOINTS.md;
+		const listWidth = isDesktop && $merchantList.isOpen ? MERCHANT_LIST_WIDTH : 0;
 		const drawerWidth = isDesktop && $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0;
-		const visibleCenterX = (mapSize.x - drawerWidth) / 2;
-		return { drawerWidth, visibleCenterX, mapSize };
+		const panelWidth = listWidth + drawerWidth;
+		const visibleCenterX = (mapSize.x - panelWidth) / 2;
+		return { panelWidth, visibleCenterX, mapSize };
 	};
 
 	// Shared helper: navigate map to a place with drawer offset compensation
