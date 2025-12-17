@@ -9,7 +9,7 @@
 2. `yarn`\
    to install the packages
 3. `yarn dev`\
-   will open the app on: http://localhost:5173
+   will open the app on: http://localhost:5000
 
 ### Check your changes before commit/pushing
 
