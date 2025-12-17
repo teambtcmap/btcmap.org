@@ -9,7 +9,12 @@
 	import LoadingSpinner from '$components/LoadingSpinner.svelte';
 	import Icon from '$components/Icon.svelte';
 	import type { Place } from '$lib/types';
-	import { CATEGORY_ENTRIES, type CategoryKey, type CategoryCounts } from '$lib/categoryMapping';
+	import {
+		CATEGORY_ENTRIES,
+		placeMatchesCategory,
+		type CategoryKey,
+		type CategoryCounts
+	} from '$lib/categoryMapping';
 	import {
 		MERCHANT_LIST_WIDTH,
 		MERCHANT_LIST_MIN_ZOOM,
@@ -82,9 +87,12 @@
 
 	function handleCategorySelect(category: CategoryKey) {
 		// Guard against clicks on disabled buttons (Svelte fires click even when disabled)
-		if (!hasMatchingMerchants(category)) return;
+		if (!hasMatchingMerchants(category, categoryCounts)) return;
 		merchantList.setSelectedCategory(category);
-		onRefresh?.();
+		// Only refresh in nearby mode - search mode filters client-side
+		if (mode === 'nearby') {
+			onRefresh?.();
+		}
 	}
 
 	$: isOpen = $merchantList.isOpen;
@@ -100,10 +108,17 @@
 	$: selectedCategory = $merchantList.selectedCategory;
 	$: categoryCounts = $merchantList.categoryCounts;
 
+	// Filter search results by category
+	$: filteredSearchResults =
+		selectedCategory === 'all'
+			? searchResults
+			: searchResults.filter((p) => placeMatchesCategory(p, selectedCategory));
+
 	// Helper function to check if a category has matching merchants
-	function hasMatchingMerchants(categoryKey: CategoryKey): boolean {
+	// Note: counts param required for Svelte reactivity (indirect deps aren't tracked)
+	function hasMatchingMerchants(categoryKey: CategoryKey, counts: CategoryCounts): boolean {
 		if (categoryKey === 'all') return true;
-		return (categoryCounts?.[categoryKey] ?? 0) > 0;
+		return (counts?.[categoryKey] ?? 0) > 0;
 	}
 
 	// Helper function to get category button classes
@@ -263,30 +278,6 @@
 					</div>
 					<CloseButton on:click={handleClose} />
 				</div>
-				<!-- Result count -->
-				{#if isSearching || searchResults.length > 0 || searchQuery.length >= 3}
-					<p class="mt-2 text-xs text-body dark:text-white/70" aria-live="polite">
-						{#if isSearching}
-							Searching...
-						{:else if searchResults.length === 0}
-							No results found
-						{:else}
-							{searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
-						{/if}
-					</p>
-				{/if}
-				<!-- Show all on map button -->
-				{#if searchResults.length > 0}
-					<button
-						type="button"
-						on:click={() => onFitSearchResultBounds?.()}
-						class="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-gray-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
-						aria-label="Show all search results on map"
-					>
-						<Icon w="18" h="18" icon="zoom_out_map" type="material" />
-						<span>Show all on map</span>
-					</button>
-				{/if}
 			{:else}
 				<!-- Nearby mode: title + count -->
 				<div class="flex items-center justify-between">
@@ -342,32 +333,65 @@
 				</button>
 			</div>
 
-			<!-- Category filter (only shown in nearby mode) -->
-			{#if mode === 'nearby'}
-				<div class="mt-3" role="radiogroup" aria-label="Filter by category">
-					<h3 class="sr-only">Filter by category</h3>
-					<div class="flex flex-wrap gap-2">
-						{#each CATEGORY_ENTRIES as [key, category] (key)}
-							<button
-								type="button"
-								role="radio"
-								on:click={() => handleCategorySelect(key)}
-								disabled={!hasMatchingMerchants(key)}
-								aria-disabled={!hasMatchingMerchants(key)}
-								aria-checked={selectedCategory === key}
-								class="rounded-full px-3 py-1 text-xs font-medium transition-colors {getCategoryButtonClass(
-									key,
-									selectedCategory,
-									categoryCounts
-								)}"
-							>
-								{category.label}
-							</button>
-						{/each}
-					</div>
+			<!-- Category filter (shown in both nearby and search modes) -->
+			<div class="mt-3" role="radiogroup" aria-label="Filter by category">
+				<h3 class="sr-only">Filter by category</h3>
+				<div class="flex flex-wrap gap-2">
+					{#each CATEGORY_ENTRIES as [key, category] (key)}
+						<button
+							type="button"
+							role="radio"
+							on:click={() => handleCategorySelect(key)}
+							disabled={!hasMatchingMerchants(key, categoryCounts)}
+							aria-disabled={!hasMatchingMerchants(key, categoryCounts)}
+							aria-checked={selectedCategory === key}
+							class="rounded-full px-3 py-1 text-xs font-medium transition-colors {getCategoryButtonClass(
+								key,
+								selectedCategory,
+								categoryCounts
+							)}"
+						>
+							{category.label}
+						</button>
+					{/each}
 				</div>
+			</div>
 
-				<!-- Name filter input -->
+			{#if mode === 'search'}
+				<!-- Search status row: result count + show all on map -->
+				<div class="mt-3 flex items-center justify-between gap-2">
+					<p class="text-xs text-body dark:text-white/70" aria-live="polite">
+						{#if isSearching}
+							Searching...
+						{:else if searchResults.length === 0 && searchQuery.length >= 3}
+							No results found
+						{:else if searchResults.length === 0}
+							Search for merchants
+						{:else if selectedCategory !== 'all' && filteredSearchResults.length !== searchResults.length}
+							{filteredSearchResults.length} of {searchResults.length} result{searchResults.length !==
+							1
+								? 's'
+								: ''}
+						{:else}
+							{searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
+						{/if}
+					</p>
+					<button
+						type="button"
+						on:click={() => onFitSearchResultBounds?.()}
+						disabled={filteredSearchResults.length === 0}
+						class="flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors
+							{filteredSearchResults.length > 0
+							? 'border-gray-200 bg-white text-primary hover:bg-gray-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10'
+							: 'cursor-not-allowed border-gray-100 bg-gray-50 text-gray-400 dark:border-white/5 dark:bg-white/5 dark:text-white/30'}"
+						aria-label="Show all search results on map"
+					>
+						<Icon w="14" h="14" icon="zoom_out_map" type="material" />
+						<span>Show all</span>
+					</button>
+				</div>
+			{:else}
+				<!-- Name filter input (nearby mode only) -->
 				<div class="relative mt-3">
 					<Icon
 						w="14"
@@ -405,12 +429,8 @@
 					<div class="flex items-center justify-center py-8" role="status" aria-label="Searching">
 						<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
 					</div>
-				{:else if searchResults.length === 0 && searchQuery.length >= 3}
-					<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
-						No results found
-					</div>
 				{:else if searchResults.length === 0}
-					<!-- Empty state: user hasn't searched yet -->
+					<!-- Empty state: no results yet -->
 					<div class="flex flex-col items-center justify-center gap-3 px-4 py-12 text-center">
 						<Icon
 							w="48"
@@ -419,11 +439,22 @@
 							type="material"
 							class="text-gray-300 dark:text-white/30"
 						/>
-						<p class="text-sm text-body dark:text-white/70">Search for merchants by name</p>
+						<p class="text-sm text-body dark:text-white/70">
+							{#if searchQuery.length >= 3}
+								No results found for "{searchQuery}"
+							{:else}
+								Search for merchants by name
+							{/if}
+						</p>
+					</div>
+				{:else if filteredSearchResults.length === 0}
+					<!-- Has results but none match category filter -->
+					<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
+						No results in this category
 					</div>
 				{:else}
 					<ul class="divide-y divide-gray-100 dark:divide-white/5">
-						{#each searchResults as merchant (merchant.id)}
+						{#each filteredSearchResults as merchant (merchant.id)}
 							<MerchantListItem
 								{merchant}
 								enrichedData={merchant}

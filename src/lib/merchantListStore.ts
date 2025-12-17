@@ -144,9 +144,16 @@ function createMerchantListStore() {
 			update((state) => ({ ...state, isOpen: true }));
 		},
 
-		// Hide the panel, reset category filter, but keep merchant data (count visible on button)
+		// Hide the panel, reset category filter and search state, but keep merchant data (count visible on button)
 		close() {
-			update((state) => ({ ...resetCategoryState(state), isOpen: false }));
+			update((state) => ({
+				...resetCategoryState(state),
+				isOpen: false,
+				mode: 'nearby',
+				searchQuery: '',
+				searchResults: [],
+				isSearching: false
+			}));
 		},
 
 		// Set merchants from locally-loaded markers (used at zoom 15-16)
@@ -323,13 +330,15 @@ function createMerchantListStore() {
 		// Open panel with search results (sorted with boosted first)
 		openWithSearchResults(query: string, results: Place[]) {
 			const sortedResults = sortMerchants(results);
+			const categoryCounts = countMerchantsByCategory(sortedResults);
 			update((state) => ({
 				...resetCategoryState(state),
 				isOpen: true,
 				mode: 'search',
 				searchQuery: query,
 				searchResults: sortedResults,
-				isSearching: false
+				isSearching: false,
+				categoryCounts
 			}));
 		},
 
@@ -350,8 +359,9 @@ function createMerchantListStore() {
 			update((state) => ({ ...state, searchQuery: query }));
 		},
 
-		// Clear search input and results but stay in search mode
-		// Use when: user clears the search input to type a new query (e.g., clicking X button)
+		// Clear search input and results, but stay in search mode
+		// Use when: user clears the search input (e.g., clicking X button)
+		// Markers reset because searchResultIds becomes empty, triggering normal marker reload
 		clearSearchInput() {
 			update((state) => ({
 				...resetCategoryState(state),
