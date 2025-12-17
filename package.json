@@ -94,5 +94,6 @@
 		"vite": "^5.4.21",
 		"vite-plugin-icons-spritesheet": "^3.0.1",
 		"vitest": "^4.0.15"
-	}
+	},
+	"packageManager": "yarn@4.12.0"
 }
