@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
+import type { Mock } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { get } from 'svelte/store';
 import axios from 'axios';
 import type { Place } from '$lib/types';

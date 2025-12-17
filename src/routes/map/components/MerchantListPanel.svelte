@@ -2,7 +2,8 @@
 	import { browser } from '$app/environment';
 	import { tick, onDestroy } from 'svelte';
 	import { fly } from 'svelte/transition';
-	import { merchantList, type MerchantListMode } from '$lib/merchantListStore';
+	import type { MerchantListMode } from '$lib/merchantListStore';
+	import { merchantList } from '$lib/merchantListStore';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import MerchantListItem from './MerchantListItem.svelte';
 	import CloseButton from '$components/CloseButton.svelte';

@@ -3,7 +3,8 @@
 	import SponsorBadge from '$components/SponsorBadge.svelte';
 	import Tip from '$components/Tip.svelte';
 	import OrgBadge from '$components/OrgBadge.svelte';
-	import { TipType, type AreaTags } from '$lib/types';
+	import type { AreaTags } from '$lib/types';
+	import { TipType } from '$lib/types';
 	import { getOrganizationDisplayName } from '$lib/organizationDisplayNames';
 	import { resolve } from '$app/paths';
 

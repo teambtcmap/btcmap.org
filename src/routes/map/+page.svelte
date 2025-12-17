@@ -8,8 +8,10 @@
 	import MerchantDrawerHash from './components/MerchantDrawerHash.svelte';
 	import MerchantListPanel from './components/MerchantListPanel.svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
-	import { merchantList, type MerchantListMode } from '$lib/merchantListStore';
-	import { placeMatchesCategory, type CategoryKey } from '$lib/categoryMapping';
+	import type { MerchantListMode } from '$lib/merchantListStore';
+	import { merchantList } from '$lib/merchantListStore';
+	import type { CategoryKey } from '$lib/categoryMapping';
+	import { placeMatchesCategory } from '$lib/categoryMapping';
 	import {
 		BREAKPOINTS,
 		MERCHANT_LIST_WIDTH,

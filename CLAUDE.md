@@ -69,6 +69,25 @@ interface Disposable {
 class Resource implements Disposable { ... }
 ```
 
+### Imports: Separate Types from Values
+
+- **Never mix type and value imports** in the same statement
+- Use `import type { ... }` for types only (removed at compile time)
+- Use `import { ... }` for values only (needed at runtime)
+- This improves tree-shaking and makes code intent clearer
+
+```typescript
+// ❌ Don't mix types and values
+import { merchantList, type MerchantListMode } from '$lib/merchantListStore';
+
+// ✅ Separate type imports from value imports
+import type { MerchantListMode } from '$lib/merchantListStore';
+import { merchantList } from '$lib/merchantListStore';
+
+// ✅ Type-only imports use `import type`
+import type { Place, Report, AreaTags } from '$lib/types';
+```
+
 ### Comments
 
 - **Avoid JSDoc comments** (`/** */` with `@param`, `@returns`, `@description`, etc.)
