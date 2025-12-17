@@ -162,6 +162,28 @@
 	let previousCategory: CategoryKey = 'all';
 	$: selectedCategory = $merchantList.selectedCategory;
 
+	// Track mode transitions for search filtering
+	let previousMode: MerchantListMode = 'nearby';
+	$: currentMode = $merchantList.mode;
+
+	// Set of search result IDs for efficient marker filtering
+	let searchResultIds: Set<number> = new Set();
+
+	// Update search result IDs when search results change
+	$: {
+		if (
+			$merchantList.mode === 'search' &&
+			$merchantList.searchResults.length > 0 &&
+			$merchantList.isOpen &&
+			!$merchantDrawer.isOpen
+		) {
+			searchResultIds = new Set($merchantList.searchResults.map((p) => p.id));
+		} else {
+			// Reset filtering when: switching to nearby, clearing search, closing panel/drawer, or 0 results
+			searchResultIds = new Set();
+		}
+	}
+
 	// Check if boosted markers should be clustered at current zoom level
 	// At zoom 1-5: boosted markers cluster with regular markers
 	// At zoom 6+: boosted markers are in separate non-clustered layer
@@ -280,6 +302,24 @@
 		debouncedLoadMarkers();
 	}
 
+	// Filter markers when entering/exiting search mode
+	$: if (elementsLoaded && upToDateLayer && currentMode !== previousMode) {
+		previousMode = currentMode;
+		if (currentMode === 'search' && searchResultIds.size > 0) {
+			clearNonSearchResultMarkers();
+			loadSearchResultMarkers();
+		} else if (currentMode === 'nearby') {
+			// Exiting search mode: reload markers for current viewport
+			debouncedLoadMarkers();
+		}
+	}
+
+	// Load markers when search results arrive (while already in search mode)
+	$: if (elementsLoaded && upToDateLayer && currentMode === 'search' && searchResultIds.size > 0) {
+		clearNonSearchResultMarkers();
+		loadSearchResultMarkers();
+	}
+
 	// alert for map errors
 	$: $placesError && errToast($placesError);
 
@@ -353,6 +393,120 @@
 
 		markersToRemove.forEach((placeId) => {
 			delete loadedMarkers[placeId];
+		});
+	};
+
+	// Check if a place ID is in the current search results
+	const placeInSearchResults = (placeId: number): boolean => {
+		return searchResultIds.has(placeId);
+	};
+
+	// Apply search filter to places if in search mode
+	const applySearchFilter = (places: Place[]): Place[] => {
+		return currentMode === 'search' && searchResultIds.size > 0
+			? places.filter((place) => placeInSearchResults(place.id))
+			: places;
+	};
+
+	// Remove markers that are not in the search results
+	const clearNonSearchResultMarkers = () => {
+		if (searchResultIds.size === 0) return;
+
+		const markersToRemove: string[] = [];
+
+		Object.entries(loadedMarkers).forEach(([placeId, marker]) => {
+			if (!placeInSearchResults(Number(placeId))) {
+				upToDateLayer.removeLayer(marker);
+				markers.removeLayer(marker);
+				boostedLayer.removeLayer(marker);
+				boostedLayerMarkerIds.delete(placeId);
+				markersToRemove.push(placeId);
+			}
+		});
+
+		markersToRemove.forEach((placeId) => {
+			delete loadedMarkers[placeId];
+		});
+
+		console.info(
+			`Filtered to ${searchResultIds.size} search results, removed ${markersToRemove.length} markers`
+		);
+	};
+
+	// Load markers for all search results (even those outside viewport)
+	const loadSearchResultMarkers = () => {
+		if ($merchantList.searchResults.length === 0) return;
+
+		const newPlaces = $merchantList.searchResults.filter(
+			(place) => !loadedMarkers[place.id.toString()]
+		);
+
+		if (newPlaces.length === 0) return;
+
+		newPlaces.forEach((place: Place) => {
+			const commentsCount = place.comments || 0;
+			const icon = place.icon;
+			const boosted = place.boosted_until ? Date.parse(place.boosted_until) > Date.now() : false;
+
+			const divIcon = generateIcon(leaflet, icon, boosted, commentsCount);
+
+			const marker = generateMarker({
+				lat: place.lat,
+				long: place.lon,
+				icon: divIcon,
+				placeId: place.id,
+				leaflet,
+				verify: true,
+				onMarkerClick: (id) => openMerchantDrawer(Number(id))
+			});
+
+			if (boosted && !shouldClusterBoostedMarkers()) {
+				boostedLayer.addLayer(marker);
+				boostedLayerMarkerIds.add(place.id.toString());
+			} else {
+				upToDateLayer.addLayer(marker);
+			}
+			loadedMarkers[place.id.toString()] = marker;
+
+			if (selectedMarkerId === place.id) {
+				highlightMarker(loadedMarkers, place.id);
+			}
+		});
+
+		console.info(`Loaded ${newPlaces.length} search result markers`);
+	};
+
+	// Fit map bounds to show all search results
+	const fitBoundsToSearchResults = () => {
+		if (!map || $merchantList.searchResults.length === 0) return;
+
+		const results = $merchantList.searchResults;
+
+		// Single result: zoom to it
+		if (results.length === 1) {
+			map.setView([results[0].lat, results[0].lon], 17, { animate: true });
+			return;
+		}
+
+		// Multiple results: calculate bounds
+		const lats = results.map((p) => p.lat);
+		const lons = results.map((p) => p.lon);
+		const minLat = Math.min(...lats);
+		const maxLat = Math.max(...lats);
+		const minLon = Math.min(...lons);
+		const maxLon = Math.max(...lons);
+
+		const bounds = leaflet.latLngBounds([minLat, minLon], [maxLat, maxLon]);
+
+		// Account for drawer width when open (desktop only)
+		const { drawerWidth } = getDrawerOffset();
+		const paddingRight = 50 + drawerWidth;
+
+		map.fitBounds(bounds, {
+			paddingTopLeft: [50, 50],
+			paddingBottomRight: [paddingRight, 50],
+			animate: true,
+			maxZoom: 17
 		});
 	};
 
@@ -433,8 +587,11 @@
 					? visiblePlaces
 					: visiblePlaces.filter((place) => placeMatchesCategory(place, selectedCategory));
 
+			// Apply search filter if in search mode
+			const searchFiltered = applySearchFilter(categoryFiltered);
+
 			// Filter out places that already have markers loaded
-			const newPlaces = categoryFiltered.filter((place) => !loadedMarkers[place.id.toString()]);
+			const newPlaces = searchFiltered.filter((place) => !loadedMarkers[place.id.toString()]);
 
 			if (newPlaces.length === 0) {
 				isLoadingMarkers = false;
@@ -489,7 +646,8 @@
 			selectedCategory === 'all'
 				? visiblePlaces
 				: visiblePlaces.filter((place) => placeMatchesCategory(place, selectedCategory));
-		const newPlaces = categoryFiltered.filter((place) => !loadedMarkers[place.id.toString()]);
+		const searchFiltered = applySearchFilter(categoryFiltered);
+		const newPlaces = searchFiltered.filter((place) => !loadedMarkers[place.id.toString()]);
 
 		newPlaces.forEach((place: Place) => {
 			const commentsCount = place.comments || 0;
@@ -740,8 +898,10 @@
 
 		mapLoadingStatus = 'Loading places in view...';
 
-		// Initialize mapCenter for merchant list panel
+		// Initialize mapCenter and zoom for merchant list panel and marker layer decisions
 		mapCenter = map.getCenter();
+		currentZoom = map.getZoom();
+		previousZoom = currentZoom;
 
 		// Load initial markers for current viewport
 		// NOTE: Don't set isLoadingMarkers=true here, let loadMarkersInViewport handle it
@@ -763,8 +923,6 @@
 			}
 
 			// Initialize merchant list if already zoomed in
-			currentZoom = map.getZoom();
-			previousZoom = currentZoom;
 			updateMerchantList();
 		}
 	};
@@ -1195,6 +1353,7 @@
 	<MerchantListPanel
 		onPanToNearbyMerchant={panToNearbyMerchant}
 		onZoomToSearchResult={zoomToSearchResult}
+		onFitSearchResultBounds={fitBoundsToSearchResults}
 		onHoverStart={(place) => highlightMarker(loadedMarkers, place.id)}
 		onHoverEnd={(place) => {
 			// Don't clear if this is the selected marker

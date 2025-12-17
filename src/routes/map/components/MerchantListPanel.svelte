@@ -39,6 +39,8 @@
 	export let onModeChange: ((mode: MerchantListMode) => void) | undefined = undefined;
 	// Refresh callback for category filtering
 	export let onRefresh: (() => void) | undefined = undefined;
+	// Callback to fit map bounds to all search results
+	export let onFitSearchResultBounds: (() => void) | undefined = undefined;
 
 	// Reference for search input element
 	let searchInput: HTMLInputElement;
@@ -272,6 +274,18 @@
 							{searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
 						{/if}
 					</p>
+				{/if}
+				<!-- Show all on map button -->
+				{#if searchResults.length > 0}
+					<button
+						type="button"
+						on:click={() => onFitSearchResultBounds?.()}
+						class="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-gray-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
+						aria-label="Show all search results on map"
+					>
+						<Icon w="18" h="18" icon="zoom_out_map" type="material" />
+						<span>Show all on map</span>
+					</button>
 				{/if}
 			{:else}
 				<!-- Nearby mode: title + count -->
