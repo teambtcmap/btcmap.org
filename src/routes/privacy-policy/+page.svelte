@@ -95,7 +95,7 @@
 
 			and a self-hosted instance of
 			<a href="https://umami.is/" class="text-link transition-colors hover:text-hover"> Umami </a>
-			in order to track usage statistics over time and improve the use experience.
+			in order to track usage statistics over time and improve the user experience.
 		</p>
 		<p>
 			These analytics do not use any cookies or trackers. There is no personally identifiable
