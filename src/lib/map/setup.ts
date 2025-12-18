@@ -119,10 +119,18 @@ export const layers = (leaflet: Leaflet, map: Map) => {
 		style: 'https://static.btcmap.org/map-styles/dark.json'
 	});
 
+	const cartoPositron = window.L.maplibreGL({
+		style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
+	});
+
+	const cartoDarkMatter = window.L.maplibreGL({
+		style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+	});
+
 	let activeLayer;
 	if (theme === 'dark') {
-		openFreeMapDark.addTo(map);
-		activeLayer = openFreeMapDark;
+		cartoDarkMatter.addTo(map);
+		activeLayer = cartoDarkMatter;
 	} else {
 		openFreeMapLiberty.addTo(map);
 		activeLayer = openFreeMapLiberty;
@@ -131,6 +139,8 @@ export const layers = (leaflet: Leaflet, map: Map) => {
 	const baseMaps = {
 		'OpenFreeMap Liberty': openFreeMapLiberty,
 		'OpenFreeMap Dark': openFreeMapDark,
+		'Carto Positron': cartoPositron,
+		'Carto Dark Matter': cartoDarkMatter,
 		OpenStreetMap: osm
 	};
 
