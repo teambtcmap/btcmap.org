@@ -4,6 +4,8 @@
 
 import { dev } from '$app/environment';
 
+const ANALYTICS_HOSTNAME = 'btcmap.org';
+
 type EventName =
 	| 'search_query'
 	| 'search_button_click'
@@ -14,10 +16,6 @@ type EventName =
 	| 'nearby_mode_click'
 	| 'home_button_click';
 
-type CategoryFilterData = {
-	category: string;
-};
-
 declare global {
 	interface Window {
 		umami?: {
@@ -26,10 +24,10 @@ declare global {
 	}
 }
 
-export const trackEvent = (eventName: EventName, eventData?: CategoryFilterData): void => {
+export const trackEvent = (eventName: EventName, eventData?: Record<string, unknown>): void => {
 	if (dev) return;
 	if (typeof window === 'undefined') return;
-	if (window.location.hostname !== 'btcmap.org') return;
+	if (window.location.hostname !== ANALYTICS_HOSTNAME) return;
 	if (!window.umami) return;
 
 	window.umami.track(eventName, eventData);
