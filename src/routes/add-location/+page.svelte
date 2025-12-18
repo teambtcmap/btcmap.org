@@ -192,7 +192,8 @@
 			}
 
 			axios
-				.post('/add-location/endpoint', {
+				.post('/api/gitea/issue', {
+					type: 'add-location',
 					captchaSecret,
 					captchaTest: captchaInput.value,
 					honey: honeyInput.value,
