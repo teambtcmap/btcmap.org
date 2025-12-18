@@ -222,4 +222,56 @@ test.describe('Merchant List Panel', () => {
 		const mobileDrawer = page.locator('text="Swipe up for details"');
 		await expect(mobileDrawer).toBeVisible({ timeout: 10000 });
 	});
+
+	test('switches between Worldwide and Nearby modes', async ({ page }) => {
+		// Desktop viewport
+		await page.setViewportSize({ width: 1280, height: 720 });
+
+		// Navigate to map
+		await page.goto('/map#17/42.2762511/42.7024218', { waitUntil: 'load' });
+		await expect(page).toHaveTitle(/BTC Map/);
+
+		// Wait for map to initialize
+		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
+		await expect(zoomInButton).toBeVisible();
+
+		// Wait for markers to load
+		await page.waitForFunction(
+			() => {
+				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
+				return markers.length > 0;
+			},
+			{ timeout: MARKER_LOAD_TIMEOUT }
+		);
+
+		// Open the list panel
+		const toggleButton = page.getByRole('button', { name: /merchant list/i });
+		await expect(toggleButton).toBeVisible({ timeout: 15000 });
+		await toggleButton.click();
+
+		// Wait for list panel
+		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
+		await expect(listPanel).toBeVisible({ timeout: 10000 });
+
+		// Should start in Nearby mode - verify heading
+		await expect(listPanel.locator('h2:has-text("Nearby Merchants")')).toBeVisible();
+
+		// Click Worldwide button to switch to search mode
+		const worldwideButton = listPanel.getByRole('radio', { name: 'Worldwide' });
+		await expect(worldwideButton).toBeVisible();
+		await worldwideButton.click();
+
+		// Should show search input in search mode
+		const searchInput = listPanel.locator('input[type="search"]');
+		await expect(searchInput).toBeVisible({ timeout: 5000 });
+
+		// Click Nearby button to switch back
+		const nearbyButton = listPanel.getByRole('radio', { name: 'Nearby' });
+		await nearbyButton.click();
+
+		// Should show Nearby Merchants heading again
+		await expect(listPanel.locator('h2:has-text("Nearby Merchants")')).toBeVisible({
+			timeout: 5000
+		});
+	});
 });

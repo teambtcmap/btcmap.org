@@ -2,7 +2,8 @@ import { writable, get } from 'svelte/store';
 import { browser } from '$app/environment';
 import axios from 'axios';
 import { places } from '$lib/store';
-import { updateMerchantHash, parseMerchantHash, type DrawerView } from '$lib/merchantDrawerHash';
+import type { DrawerView } from '$lib/merchantDrawerHash';
+import { updateMerchantHash, parseMerchantHash } from '$lib/merchantDrawerHash';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 import type { Place } from '$lib/types';
 

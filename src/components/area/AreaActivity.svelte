@@ -3,7 +3,7 @@
 	import TaggerSkeleton from '$components/TaggerSkeleton.svelte';
 	import TopButton from '$components/TopButton.svelte';
 	import Icon from '$components/Icon.svelte';
-	import { type ActivityEvent, type User } from '$lib/types.js';
+	import type { ActivityEvent, User } from '$lib/types.js';
 	import { resolve } from '$app/paths';
 
 	export let alias: string;

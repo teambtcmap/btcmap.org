@@ -4,7 +4,7 @@
 	import ProfileStat from '$components/ProfileStat.svelte';
 	import { calcVerifiedDate, verifiedArr } from '$lib/map/setup';
 	import { theme } from '$lib/store';
-	import { type Place, type Report, type AreaTags } from '$lib/types.js';
+	import type { Place, Report, AreaTags } from '$lib/types.js';
 	import { detectTheme, updateChartThemes } from '$lib/utils';
 	import Chart from 'chart.js/auto';
 	import { onMount } from 'svelte';

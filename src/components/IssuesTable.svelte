@@ -22,7 +22,8 @@
 		getPaginationRowModel,
 		getSortedRowModel
 	} from '@tanstack/svelte-table';
-	import { writable, type Readable } from 'svelte/store';
+	import type { Readable } from 'svelte/store';
+	import { writable } from 'svelte/store';
 
 	export let title: string;
 	export let issues: RpcIssue[];

@@ -19,6 +19,9 @@ export const BREAKPOINTS = {
 export const MERCHANT_LIST_WIDTH = 320;
 export const MERCHANT_DRAWER_WIDTH = 400;
 
+// Base padding (px) for fitBounds - visual buffer from viewport edges
+export const MAP_FIT_BOUNDS_PADDING = 50;
+
 // MERCHANT LIST ZOOM BEHAVIOR:
 // ┌─────────────────────────────────────────────────────────────────────────┐
 // │ Zoom < 11  │ No data shown - "zoom in" message                          │
