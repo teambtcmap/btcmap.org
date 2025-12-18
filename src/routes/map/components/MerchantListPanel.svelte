@@ -168,6 +168,7 @@
 	}
 
 	function handleItemClick(place: Place) {
+		trackEvent('merchant_list_item_click', { mode });
 		merchantDrawer.open(place.id, 'details');
 
 		if (mode === 'search') {
@@ -383,7 +384,10 @@
 					</p>
 					<button
 						type="button"
-						on:click={() => onFitSearchResultBounds?.()}
+						on:click={() => {
+							trackEvent('show_all_on_map_click');
+							onFitSearchResultBounds?.();
+						}}
 						disabled={filteredSearchResults.length === 0}
 						class="flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors
 							{filteredSearchResults.length > 0
