@@ -11,7 +11,8 @@ type EventName =
 	| 'boost_layer_toggle'
 	| 'nearby_button_click'
 	| 'worldwide_mode_click'
-	| 'nearby_mode_click';
+	| 'nearby_mode_click'
+	| 'home_button_click';
 
 type CategoryFilterData = {
 	category: string;
@@ -28,6 +29,7 @@ declare global {
 export const trackEvent = (eventName: EventName, eventData?: CategoryFilterData): void => {
 	if (dev) return;
 	if (typeof window === 'undefined') return;
+	if (window.location.hostname !== 'btcmap.org') return;
 	if (!window.umami) return;
 
 	window.umami.track(eventName, eventData);

@@ -3,6 +3,7 @@ import Icon from '$components/Icon.svelte';
 import { detectTheme, errToast, humanizeIconName } from '$lib/utils';
 import type { DomEventType, Leaflet, Place } from '$lib/types';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
+import { trackEvent } from '$lib/analytics';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import type { Map, LatLng } from 'leaflet';
@@ -415,6 +416,9 @@ export const homeMarkerButtons = (
 				'dark:border',
 				'dark:border-white/95'
 			);
+			addHomeButton.onclick = () => {
+				trackEvent('home_button_click');
+			};
 
 			addControlDiv.append(addHomeButton);
 
