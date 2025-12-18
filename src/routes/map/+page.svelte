@@ -12,6 +12,7 @@
 	import { merchantList } from '$lib/merchantListStore';
 	import type { CategoryKey } from '$lib/categoryMapping';
 	import { placeMatchesCategory } from '$lib/categoryMapping';
+	import { trackEvent } from '$lib/analytics';
 	import {
 		BREAKPOINTS,
 		MERCHANT_LIST_WIDTH,
@@ -241,6 +242,7 @@
 			return;
 		}
 
+		trackEvent('search_query');
 		searchAbortController = new AbortController();
 
 		// Close any open merchant drawer so it doesn't cover the search results
@@ -1223,6 +1225,7 @@
 					} alt='search' class='inline' id='search-button'/>`;
 					searchButton.style.borderRadius = '8px 8px 0 0';
 					searchButton.onclick = function openSearch() {
+						trackEvent('search_button_click');
 						// Open panel in search mode (will auto-focus input)
 						merchantList.openSearchMode();
 					};
@@ -1264,6 +1267,7 @@
 					boostLayerButton.style.borderRadius = '0 0 8px 8px';
 					boostLayerButton.style.borderBottom = '1px solid #ccc';
 					boostLayerButton.onclick = function toggleLayer() {
+						trackEvent('boost_layer_toggle');
 						if (boosts) {
 							$page.url.searchParams.delete('boosts');
 							location.search = $page.url.search;
@@ -1414,6 +1418,7 @@
 		{#if mapLoaded && !$merchantList.isOpen}
 			<button
 				on:click={async () => {
+					trackEvent('nearby_button_click');
 					merchantList.open();
 					// Reset to nearby mode when opening via toggle button
 					merchantList.setMode('nearby');

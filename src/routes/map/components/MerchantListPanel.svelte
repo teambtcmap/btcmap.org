@@ -23,6 +23,7 @@
 		BREAKPOINTS
 	} from '$lib/constants';
 	import { calcVerifiedDate } from '$lib/merchantDrawerLogic';
+	import { trackEvent } from '$lib/analytics';
 
 	// Reduced motion preference for animations
 	const reducedMotion = browser && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -79,9 +80,11 @@
 		if (newMode === mode) return;
 		nearbyFilter = ''; // Clear filter when switching modes
 		if (newMode === 'nearby') {
+			trackEvent('nearby_mode_click');
 			merchantList.exitSearchMode();
 			onModeChange?.(newMode);
 		} else {
+			trackEvent('worldwide_mode_click');
 			merchantList.setMode(newMode);
 		}
 	}
@@ -89,6 +92,7 @@
 	function handleCategorySelect(category: CategoryKey) {
 		// Guard against clicks on disabled buttons (Svelte fires click even when disabled)
 		if (!hasMatchingMerchants(category, categoryCounts)) return;
+		trackEvent('category_filter', { category });
 		merchantList.setSelectedCategory(category);
 		// Only refresh in nearby mode - search mode filters client-side
 		if (mode === 'nearby') {
@@ -164,6 +168,7 @@
 	}
 
 	function handleItemClick(place: Place) {
+		trackEvent('merchant_list_item_click', { mode });
 		merchantDrawer.open(place.id, 'details');
 
 		if (mode === 'search') {
@@ -379,7 +384,10 @@
 					</p>
 					<button
 						type="button"
-						on:click={() => onFitSearchResultBounds?.()}
+						on:click={() => {
+							trackEvent('show_all_on_map_click');
+							onFitSearchResultBounds?.();
+						}}
 						disabled={filteredSearchResults.length === 0}
 						class="flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors
 							{filteredSearchResults.length > 0

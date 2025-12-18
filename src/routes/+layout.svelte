@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { dev } from '$app/environment';
 	import { syncStatus } from '$lib/store';
 	import { elementsSync } from '$lib/sync/places';
 	import Header from '$components/layout/Header.svelte';
@@ -58,6 +59,14 @@
 	/>
 	<meta property="alby:image" content="/images/logo.svg" />
 	<meta property="alby:name" content="BTC Map" />
+	<!-- Umami Analytics - privacy-focused, no cookies, production only -->
+	{#if !dev}
+		<script
+			defer
+			src="https://cloud.umami.is/script.js"
+			data-website-id="5678591b-8d03-4e8d-953a-9ac67ccd1a84"
+		></script>
+	{/if}
 </svelte:head>
 
 {#if !['/', '/map', '/communities/map', '/communities', '/countries'].includes(data.pathname)}
