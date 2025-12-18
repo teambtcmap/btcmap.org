@@ -31,10 +31,10 @@
 				> repo containing the form information.
 			</li>
 			<li>
-				A message is automatically sent in the <a
-					href="https://discord.gg/p8hj6SVx9X"
-					class="text-link transition-colors hover:text-hover">github-data</a
-				> channel on our Discord containing the form information.
+				A message is automatically sent to our <a
+					href="https://matrix.to/#/#btcmap:matrix.org"
+					class="text-link transition-colors hover:text-hover">Matrix Space</a
+				> .
 			</li>
 			<li>
 				If the submission is valid, it is added to <a
@@ -91,8 +91,11 @@
 				class="text-link transition-colors hover:text-hover"
 			>
 				Netlify
-			</a> in order to see activity on BTC Map. For example, how many users are visiting the website and
-			the performance.
+			</a>
+
+			and a self-hosted instance of
+			<a href="https://umami.is/" class="text-link transition-colors hover:text-hover"> Umami </a>
+			in order to track usage statistics over time and improve the use experience.
 		</p>
 		<p>
 			These analytics do not use any cookies or trackers. There is no personally identifiable
@@ -101,7 +104,7 @@
 				class="text-link transition-colors hover:text-hover"
 			>
 				GDPR
-			</a>. This data is deleted after 30 days.
+			</a>.
 		</p>
 		<p>Below are some links to read more about Netlify Analytics:</p>
 		<ul class="ml-5 list-disc space-y-2">
