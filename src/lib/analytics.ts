@@ -16,7 +16,8 @@ type EventName =
 	| 'nearby_mode_click'
 	| 'home_button_click'
 	| 'show_all_on_map_click'
-	| 'merchant_list_item_click';
+	| 'merchant_list_item_click'
+	| 'nearby_filter_input';
 
 declare global {
 	interface Window {

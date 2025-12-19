@@ -413,6 +413,7 @@
 					/>
 					<input
 						bind:value={nearbyFilter}
+						on:blur={() => nearbyFilter && trackEvent('nearby_filter_input')}
 						type="text"
 						placeholder="Filter by name..."
 						aria-label="Filter nearby merchants by name"
