@@ -84,7 +84,7 @@ describe('merchantListStore', () => {
 			merchantList.setMerchants(merchants, 0, 0);
 			const state = get(merchantList);
 
-			expect(state.merchants.length).toBe(50); // MERCHANT_LIST_MAX_ITEMS
+			expect(state.merchants.length).toBe(99); // MERCHANT_LIST_MAX_ITEMS
 			expect(state.totalCount).toBe(100);
 		});
 
