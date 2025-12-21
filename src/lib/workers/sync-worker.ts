@@ -143,11 +143,13 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
 				const seenIds = new Set<number>();
 				const deduplicated: Place[] = [];
 				for (let i = merged.length - 1; i >= 0; i--) {
-					if (!seenIds.has(merged[i].id)) {
-						seenIds.add(merged[i].id);
-						deduplicated.unshift(merged[i]);
+					const place = merged[i];
+					if (!seenIds.has(place.id)) {
+						seenIds.add(place.id);
+						deduplicated.push(place);
 					}
 				}
+				deduplicated.reverse();
 
 				self.postMessage({
 					type: 'PROGRESS',
