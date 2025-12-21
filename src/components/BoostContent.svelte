@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Icon from '$components/Icon.svelte';
+	import IconSocials from '$lib/icons/IconSocials.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import { PAYMENT_ERROR_MESSAGE, STATUS_CHECK_ERROR_MESSAGE } from '$lib/constants';
 	import { boost, boostHash, lastUpdatedPlaceId } from '$lib/store';
@@ -239,7 +240,7 @@
 			target="_blank"
 			rel="noreferrer"
 			class="mx-auto flex w-[200px] items-center justify-center rounded-xl bg-twitter py-3 text-white"
-			>Share on Twitter <Icon w="24" h="24" class="ml-2" icon="twitter" type="socials" /></a
+			>Share on Twitter <IconSocials w="24" h="24" class="ml-2" icon="x" /></a
 		>
 
 		<p class="text-sm text-body dark:text-white">

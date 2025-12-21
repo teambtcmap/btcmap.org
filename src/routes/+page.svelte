@@ -2,7 +2,7 @@
 	import Footer from '$components/layout/Footer.svelte';
 	import Header from '$components/layout/Header.svelte';
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-	import Icon from '$components/Icon.svelte';
+	import IconApps from '$lib/icons/IconApps.svelte';
 	import { apps, theme } from '$lib/store';
 	import { detectTheme } from '$lib/utils';
 	import { resolve } from '$app/paths';
@@ -65,12 +65,11 @@
 								class="block rounded-full bg-link p-3 text-white transition-colors hover:bg-hover"
 							>
 								<!-- eslint-enable svelte/no-navigation-without-resolve -->
-								<Icon
+								<IconApps
 									w="32"
 									h="32"
 									class={app.icon === 'play' ? 'pl-0.5' : ''}
 									icon={app.icon}
-									type="apps"
 								/>
 							</a>
 						</div>

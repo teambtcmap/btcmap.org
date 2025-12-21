@@ -1,11 +1,13 @@
 <script lang="ts">
-	import Icon from '$components/Icon.svelte';
+	import type { MobileNavIconName } from '$lib/icons/types';
+	import type { DropdownLink } from '$lib/types';
+	import IconMobileNav from '$lib/icons/IconMobileNav.svelte';
 	import NavDropdownDesktop from '$components/layout/NavDropdownDesktop.svelte';
 	import NavDropdownMobile from '$components/layout/NavDropdownMobile.svelte';
 	import ThemeToggle from '$components/ThemeToggle.svelte';
 	import { afterNavigate } from '$app/navigation';
 
-	const navLinks = [
+	const navLinks: { title: string; url: string; icon: MobileNavIconName }[] = [
 		{ title: 'Maps', url: '', icon: 'map' },
 		{ title: 'Apps', url: '/apps', icon: 'apps' },
 		{ title: 'Stats', url: '', icon: 'stats' },
@@ -16,19 +18,19 @@
 		{ title: 'Support Us', url: '/support-us', icon: 'support' }
 	];
 
-	const mapsDropdownLinks = [
+	const mapsDropdownLinks: DropdownLink[] = [
 		{ title: 'Merchant Map', url: '/map', icon: 'add' },
 		{ title: 'Community Map', url: '/communities/map', icon: 'communities' }
 	];
 
-	const statsDropdownLinks = [
+	const statsDropdownLinks: DropdownLink[] = [
 		{ title: 'Dashboard', url: '/dashboard', icon: 'dash' },
 		{ title: 'Tagger Leaderboard', url: '/leaderboard', icon: 'leader' },
 		{ title: 'Community Leaderboard', url: '/communities/leaderboard', icon: 'communities' },
 		{ title: 'Country Leaderboard', url: '/countries/leaderboard', icon: 'countries' }
 	];
 
-	const maintainDropdownLinks = [
+	const maintainDropdownLinks: DropdownLink[] = [
 		{ title: 'Add Location', url: '/add-location', icon: 'add' },
 		{ title: 'Add Community', url: '/communities/add', icon: 'communities' },
 		{ title: 'Open Tickets', url: '/tickets', icon: 'ticket' },
@@ -36,7 +38,7 @@
 		{ title: 'Tagging Issues', url: '/tagging-issues', icon: 'issue' }
 	];
 
-	const areasDropdownLinks = [
+	const areasDropdownLinks: DropdownLink[] = [
 		{ title: 'Communities', url: '/communities', icon: 'communities' },
 		{ title: 'Countries', url: '/countries', icon: 'countries' }
 	];
@@ -126,12 +128,11 @@
 
 		<!-- menu toggle -->
 		<button on:click={() => (showMobileMenu = !showMobileMenu)}>
-			<Icon
+			<IconMobileNav
 				w={showMobileMenu ? '28' : '34'}
 				h={showMobileMenu ? '27' : '12'}
 				class="mx-auto mb-3 text-mobileMenu dark:text-white"
 				icon={showMobileMenu ? 'close' : 'bars'}
-				type="mobile-nav"
 			/>
 			<span class="font-semibold text-mobileMenu uppercase dark:text-white">Menu</span>
 		</button>
@@ -167,7 +168,7 @@
 					<span
 						class="mr-4 rounded-full bg-mobileButtons p-3 transition-colors active:bg-mobileButtonsActive"
 					>
-						<Icon w="24" h="24" icon={link.icon} type="mobile-nav" />
+						<IconMobileNav w="24" h="24" icon={link.icon} />
 					</span>
 					<span>{link.title}</span>
 				</a>

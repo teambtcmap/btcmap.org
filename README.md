@@ -27,9 +27,8 @@ _NOTE:_ BTC Map uses the latest LTS version of [node](https://nodejs.org/). If y
 
 #### Icons
 
-- [Iconify](https://iconify.design/docs/icon-components/svelte/#iconify-for-svelte): for general material icons
-- [vite-plugin-icons-spritesheet](https://github.com/forge-42/vite-plugin-icons-spritesheet): for individual icons (i.e. apps) spritesheets are automatically generated  
-  During development the spritsheets might not update. Use a private-tab to check the latest version.
+- [Iconify](https://iconify.design/docs/icon-components/svelte/#iconify-for-svelte): for general material/fontawesome icons via `Icon.svelte`
+- Custom icons (socials, apps, mobile-nav): imported as raw SVGs in `src/lib/icons/` via wrapper components (`IconSocials.svelte`, `IconApps.svelte`, `IconMobileNav.svelte`)
 
 ### E2E tests
 

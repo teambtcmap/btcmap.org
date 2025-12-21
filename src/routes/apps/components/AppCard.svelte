@@ -1,10 +1,11 @@
 <script lang="ts">
-	export let image: string;
+	import type { AppIconName } from '$lib/icons/types';
+	import IconApps from '$lib/icons/IconApps.svelte';
+
+	export let image: AppIconName;
 	export let text: string;
 	export let desc: string;
 	export let link: string;
-
-	import Icon from '$components/Icon.svelte';
 </script>
 
 <div>
@@ -20,7 +21,7 @@
 			<div
 				class="mb-5 flex h-60 items-center justify-center rounded-2xl bg-offwhite dark:bg-white/[0.15]"
 			>
-				<Icon w="112" h="112" icon={image} type="apps" />
+				<IconApps w="112" h="112" icon={image} />
 			</div>
 			<p>{text}</p>
 			<p class="text-xl font-normal">{desc}</p>

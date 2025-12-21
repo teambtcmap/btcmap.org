@@ -1,80 +1,33 @@
 <script lang="ts">
 	import IconIconify from '@iconify/svelte';
 
-	import type { IconName as IconNameSocials } from '$lib/spritesheet-socials.ts';
-	import type { IconName as IconNameApps } from '$lib/spritesheet-apps.ts';
-	import type { IconName as IconNameMobileNav } from '$lib/spritesheet-mobile-nav.ts';
-
-	type IconProps =
-		| { type: 'material'; icon: string; w: string; h: string; class?: string }
-		| { type: 'fa'; icon: string; w: string; h: string; class?: string }
-		| { type: 'socials'; icon: IconNameSocials; w: string; h: string; class?: string }
-		| { type: 'apps'; icon: IconNameApps; w: string; h: string; class?: string }
-		| { type: 'mobile-nav'; icon: IconNameMobileNav; w: string; h: string; class?: string };
-
 	export let w: string;
 	export let h: string;
-	let className: undefined | string = undefined;
+	let className: string | undefined = undefined;
 	export { className as class };
-	export let icon: string | IconNameApps | IconNameMobileNav | IconNameSocials;
-	export let type: 'apps' | 'fa' | 'material' | 'mobile-nav' | 'socials' = 'material';
+	export let icon: string;
+	export let type: 'material' | 'fa' = 'material';
 
-	// this is AI code
-	// Type assertion to make TypeScript happy
-	// we want to make sure that if the type is 'material', the icon can be any string
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const props = { type, icon, w, h, class: className } as IconProps;
+	const materialExceptions: Record<string, string> = {
+		camping: 'material-symbols:camping-rounded',
+		gate: 'material-symbols:gate',
+		cooking: 'material-symbols:cooking',
+		dentistry: 'material-symbols:dentistry',
+		sauna: 'material-symbols:sauna',
+		info_outline: 'material-symbols:info-outline',
+		skull: 'material-symbols:skull',
+		currency_bitcoin: 'material-symbols:currency-bitcoin',
+		close_round: 'ic:round-close'
+	};
 
-	$: formattedIconifyIcon =
+	const faBrandIcons = ['x-twitter', 'instagram', 'facebook', 'twitter'];
+
+	$: formattedIcon =
 		type === 'material'
-			? (() => {
-					// Handle exceptions for specific icons
-					const exceptions: Record<string, string> = {
-						// map icons
-						camping: 'material-symbols:camping-rounded',
-						gate: 'material-symbols:gate',
-						cooking: 'material-symbols:cooking',
-						dentistry: 'material-symbols:dentistry',
-						sauna: 'material-symbols:sauna',
-						info_outline: 'material-symbols:info-outline',
-						skull: 'material-symbols:skull',
-						currency_bitcoin: 'material-symbols:currency-bitcoin',
-
-						// general app icons
-						close_round: 'ic:round-close'
-					};
-
-					// Check if this icon has an exception
-					if (exceptions[icon as string]) {
-						return exceptions[icon as string];
-					}
-
-					// Default handling
-					return `ic:outline-${(icon as string).replace(/_/g, '-')}`;
-				})()
-			: type === 'fa'
-				? (() => {
-						// FA brands icons need fa6-brands prefix
-						const brandIcons = ['x-twitter', 'instagram', 'facebook', 'twitter'];
-						if (brandIcons.includes(icon as string)) {
-							return `fa6-brands:${icon as string}`;
-						}
-						return `fa6-solid:${icon as string}`;
-					})()
-				: icon;
-
-	$: spriteHref =
-		{
-			socials: '/icons/spritesheet-socials.svg',
-			apps: '/icons/spritesheet-apps.svg',
-			'mobile-nav': '/icons/spritesheet-mobile-nav.svg'
-		}[type as Exclude<typeof type, 'material' | 'fa'>] || '';
+			? materialExceptions[icon] || `ic:outline-${icon.replace(/_/g, '-')}`
+			: faBrandIcons.includes(icon)
+				? `fa6-brands:${icon}`
+				: `fa6-solid:${icon}`;
 </script>
 
-{#if type === 'material' || type === 'fa'}
-	<IconIconify icon={formattedIconifyIcon} width={w} height={h} class={className} />
-{:else}
-	<svg width="{w}px" height="{h}px" class={className}>
-		<use width="{w}px" height="{h}px" href={`${spriteHref}#${icon}`} />
-	</svg>
-{/if}
+<IconIconify icon={formattedIcon} width={w} height={h} class={className} />

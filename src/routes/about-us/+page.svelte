@@ -23,6 +23,7 @@
 	import { usersSync } from '$lib/sync/users';
 	import { batchSync } from '$lib/sync/batchSync';
 	import { resolve } from '$app/paths';
+	import type { SocialIconName } from '$lib/icons/types';
 	import type { Area, Place } from '$lib/types';
 	import { errToast, formatElementID } from '$lib/utils';
 	import { onMount } from 'svelte';
@@ -213,7 +214,12 @@
 		}
 	];
 
-	const coreTeam = [
+	const coreTeam: {
+		name: string;
+		title: string;
+		avatar: string;
+		socials: { url: string; name: SocialIconName }[];
+	}[] = [
 		{
 			name: 'Igor',
 			title: 'Backend & Android',
