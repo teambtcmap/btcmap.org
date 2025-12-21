@@ -23,7 +23,6 @@
 		MERCHANT_LIST_LOW_ZOOM,
 		MERCHANT_LIST_MAX_ITEMS,
 		NEARBY_RADIUS_MULTIPLIER,
-		MIN_SEARCH_RADIUS_KM,
 		MAX_LOADED_MARKERS,
 		VIEWPORT_BATCH_SIZE,
 		VIEWPORT_BUFFER_PERCENT,
@@ -733,22 +732,7 @@
 		});
 	}, 1000); // 1 second debounce for IndexedDB writes
 
-	// Zoom 17+: Fetch full merchant data from API with extended radius
-	const updateListApiExtended = (
-		center: LatLng,
-		bounds: LatLngBounds,
-		allowHeavyFetch: boolean
-	) => {
-		const viewportRadius = calculateRadiusKm(bounds);
-		const radiusKm = Math.max(viewportRadius * NEARBY_RADIUS_MULTIPLIER, MIN_SEARCH_RADIUS_KM);
-		if (!$merchantList.isOpen && !allowHeavyFetch) {
-			merchantList.fetchCountOnly({ lat: center.lat, lon: center.lng }, radiusKm);
-		} else {
-			merchantList.fetchAndReplaceList({ lat: center.lat, lon: center.lng }, radiusKm);
-		}
-	};
-
-	// Zoom 15-16: Use locally loaded markers, optionally enrich with API data
+	// Zoom 15+: Use locally loaded markers, optionally enrich with API data
 	const updateListLocalMarkers = (
 		center: LatLng,
 		bounds: LatLngBounds,
@@ -804,9 +788,6 @@
 		const allowHeavyFetch = isDesktop || opts?.force || $merchantList.isOpen;
 
 		switch (behavior) {
-			case 'api-extended':
-				updateListApiExtended(center, bounds, allowHeavyFetch);
-				break;
 			case 'local-markers':
 				updateListLocalMarkers(center, bounds, allowHeavyFetch);
 				break;
