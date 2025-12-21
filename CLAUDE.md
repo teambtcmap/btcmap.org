@@ -9,7 +9,8 @@ This file contains project-specific guidelines and commands for Claude Code to f
 1. **🎨 Format code:** Run `yarn run format:fix` (REQUIRED - NO EXCEPTIONS)
 2. **🔍 Type check:** Run `yarn run check`
 3. **🧹 Lint:** Run `yarn run lint`
-4. **📝 Commit format:** Use conventional commit format with issue number
+4. **🧪 Unit tests:** Run `yarn run test --run`
+5. **📝 Commit format:** Use conventional commit format with issue number
 
 **Failure to run `yarn run format:fix` before committing will result in inconsistent code formatting.**
 
