@@ -1,12 +1,13 @@
 <script lang="ts">
+	import type { SocialIconName } from '$lib/icons/types';
+	import IconSocials from '$lib/icons/IconSocials.svelte';
+
 	export let member: {
 		avatar: string;
 		name: string;
 		title: string;
-		socials: { url: string; name: string }[];
+		socials: { url: string; name: SocialIconName }[];
 	};
-
-	import Icon from '$components/Icon.svelte';
 </script>
 
 <div class="space-y-2 text-center">
@@ -34,7 +35,7 @@
 				class="inline-block rounded-full bg-[#AFBBC9] p-2 text-white transition-opacity hover:opacity-80"
 			>
 				<!-- eslint-enable svelte/no-navigation-without-resolve -->
-				<Icon w="16" h="16" icon={social.name} type="socials" />
+				<IconSocials w="16" h="16" icon={social.name} />
 			</a>
 		{/each}
 	</div>

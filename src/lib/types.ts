@@ -1,6 +1,7 @@
 import type { GeoJSON, Polygon, MultiPolygon } from 'geojson';
 import type leaflet from 'leaflet';
 import type { DomEvent, FeatureGroup, LayerGroup, TileLayer, MaplibreGL } from 'leaflet';
+import type { MobileNavIconName } from '$lib/icons/types';
 
 // nominatim.openstreetmap.org API
 // https://nominatim.org/release-docs/latest/api/Search
@@ -344,7 +345,12 @@ export type Theme = 'light' | 'dark';
 
 export type DonationType = 'On-chain' | 'Lightning';
 
-export type DropdownLink = { url: string; external?: boolean; icon: string; title: string };
+export type DropdownLink = {
+	url: string;
+	external?: boolean;
+	icon: MobileNavIconName;
+	title: string;
+};
 
 export type ChartHistory = '7D' | '1M' | '3M' | '6M' | 'YTD' | '1Y' | 'ALL';
 

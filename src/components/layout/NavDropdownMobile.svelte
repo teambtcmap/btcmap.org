@@ -1,13 +1,18 @@
 <script lang="ts">
 	import Icon from '$components/Icon.svelte';
+	import type { MobileNavIconName } from '$lib/icons/types';
+	import IconMobileNav from '$lib/icons/IconMobileNav.svelte';
 	import type { DropdownLink } from '$lib/types';
 	import OutClick from 'svelte-outclick';
 
 	export let title: string;
-	export let icon: string;
+	export let icon: MobileNavIconName;
 	export let links: DropdownLink[];
 
 	let show = false;
+
+	// Type assertion needed because template literal creates union of all possible strings
+	$: displayIcon = (show ? `${icon}-highlight` : icon) as MobileNavIconName;
 </script>
 
 <!-- dropdown menu -->
@@ -19,7 +24,7 @@
 	<span
 		class="mr-4 rounded-full bg-mobileButtons p-3 transition-colors active:bg-mobileButtonsActive"
 	>
-		<Icon w="24" h="24" icon={show ? `${icon}-highlight` : `${icon}`} type="mobile-nav" />
+		<IconMobileNav w="24" h="24" icon={displayIcon} />
 	</span>
 	<span>{title}</span>
 </button>
@@ -43,7 +48,7 @@
 					<span
 						class="mr-4 rounded-full bg-mobileButtons p-3 transition-colors active:bg-mobileButtonsActive"
 					>
-						<Icon w="24" h="24" icon={link.icon} type="mobile-nav" />
+						<IconMobileNav w="24" h="24" icon={link.icon} />
 					</span>
 					<span>{link.title}</span>
 					{#if link.external}

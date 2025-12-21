@@ -21,6 +21,7 @@
 	export let style: undefined | string = undefined;
 
 	import Icon from '$components/Icon.svelte';
+	import IconSocials from '$lib/icons/IconSocials.svelte';
 </script>
 
 <div class="flex flex-wrap items-center justify-center {style || ''}">
@@ -42,14 +43,14 @@
 	{#if nostr}
 		<a href="https://nostr.com/{nostr}" target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-nostr">
-				<Icon w="28" h="28" icon="nostr" type="socials" class="text-white" />
+				<IconSocials w="28" h="28" icon="nostr" class="text-white" />
 			</span>
 		</a>
 	{/if}
 	{#if twitter}
 		<a href={twitter} target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-black">
-				<Icon w="25" h="25" icon="x" type="socials" class="text-white" />
+				<IconSocials w="25" h="25" icon="x" class="text-white" />
 			</span>
 		</a>
 	{/if}

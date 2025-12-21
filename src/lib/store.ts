@@ -1,3 +1,4 @@
+import type { AppIconName } from '$lib/icons/types';
 import type { Area, Boost, Event, Issue, OSMTags, Place, Report, Theme, User } from '$lib/types';
 import type { Writable } from 'svelte/store';
 import { derived, readable, writable } from 'svelte/store';
@@ -10,7 +11,7 @@ export const socials = readable({
 	amboss: 'https://amboss.space/community/edf8d227-9bc7-4cb2-af2a-66c1b455109a'
 });
 
-export const apps = readable([
+export const apps = readable<{ link: string; type: string; icon: AppIconName; desc: string }[]>([
 	{
 		link: '/map',
 		type: 'Web',
