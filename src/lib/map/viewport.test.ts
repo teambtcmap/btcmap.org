@@ -20,16 +20,12 @@ describe('getZoomBehavior', () => {
 		expect(getZoomBehavior(14)).toBe('api-with-limit');
 	});
 
-	it('returns "local-markers" for zoom levels 15-16', () => {
+	it('returns "local-markers" for zoom levels 15+', () => {
 		expect(getZoomBehavior(15)).toBe('local-markers');
 		expect(getZoomBehavior(16)).toBe('local-markers');
-	});
-
-	it('returns "api-extended" for zoom levels 17+', () => {
-		expect(getZoomBehavior(17)).toBe('api-extended');
-		expect(getZoomBehavior(18)).toBe('api-extended');
-		expect(getZoomBehavior(19)).toBe('api-extended');
-		expect(getZoomBehavior(20)).toBe('api-extended');
+		expect(getZoomBehavior(17)).toBe('local-markers');
+		expect(getZoomBehavior(18)).toBe('local-markers');
+		expect(getZoomBehavior(20)).toBe('local-markers');
 	});
 });
 
