@@ -139,12 +139,22 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
 					}
 				});
 
+				// Deduplicate by ID (keep last occurrence to preserve most recent data)
+				const seenIds = new Set<number>();
+				const deduplicated: Place[] = [];
+				for (let i = merged.length - 1; i >= 0; i--) {
+					if (!seenIds.has(merged[i].id)) {
+						seenIds.add(merged[i].id);
+						deduplicated.unshift(merged[i]);
+					}
+				}
+
 				self.postMessage({
 					type: 'PROGRESS',
 					payload: {
 						percent: 100,
-						itemsParsed: merged.length,
-						totalItems: merged.length,
+						itemsParsed: deduplicated.length,
+						totalItems: deduplicated.length,
 						status: 'complete'
 					} as ProgressUpdate,
 					id
@@ -152,7 +162,7 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
 
 				self.postMessage({
 					type: 'FILTERED',
-					payload: merged,
+					payload: deduplicated,
 					id
 				} as WorkerResponse);
 				break;

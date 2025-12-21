@@ -83,8 +83,8 @@ export const elementsSync = async () => {
 	syncInProgress = true;
 
 	try {
-		// clear old tables if present
-		clearTables(['elements', 'elements_v2', 'elements_v3', 'places_v4']);
+		// clear old migration tables if present (not places_v4 which is current)
+		clearTables(['elements', 'elements_v2', 'elements_v3']);
 
 		// Initialize progress to 1 to show loader immediately
 		placesLoadingProgress.set(1);
