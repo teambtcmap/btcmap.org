@@ -85,6 +85,10 @@
 	// alert for report errors
 	$: $reportError && errToast($reportError);
 
+	// Scroll indicator thresholds
+	const SCROLL_INDICATOR_MIN_ITEMS = 5;
+	const TOP_BUTTON_MIN_ITEMS = 10;
+
 	let dataInitialized = false;
 	let initialRenderComplete = false;
 
@@ -297,7 +301,10 @@
 	let filteredCommunities: Area[] = [];
 
 	let hideArrow = false;
-	let activityDiv;
+	let activityDiv: HTMLElement;
+
+	let hideCommentsArrow = false;
+	let commentsDiv: HTMLElement;
 
 	let merchantEvents: Event[] = [];
 
@@ -798,16 +805,36 @@
 			</div>
 
 			<div slot="body" class="w-full">
-				<div class="hide-scroll relative max-h-[300px] space-y-2 overflow-y-scroll">
-					<div class="relative space-y-2">
-						{#if comments && comments.length}
-							{#each [...comments].reverse() as comment (comment.id)}
-								<MerchantComment text={comment.text} time={comment['created_at']} />
-							{/each}
-						{:else}
-							<p class="p-5 text-body dark:text-white">No comments yet.</p>
+				<div
+					bind:this={commentsDiv}
+					class="hide-scroll relative max-h-[300px] space-y-2 overflow-y-scroll"
+					on:scroll={() => {
+						if (dataInitialized && !hideCommentsArrow) {
+							hideCommentsArrow = true;
+						}
+					}}
+				>
+					{#if comments && comments.length}
+						{#each [...comments].reverse() as comment (comment.id)}
+							<MerchantComment text={comment.text} time={comment['created_at']} />
+						{/each}
+
+						{#if comments.length > SCROLL_INDICATOR_MIN_ITEMS}
+							<TopButton scroll={commentsDiv} style="!mb-5" />
 						{/if}
-					</div>
+
+						{#if !hideCommentsArrow && comments.length > SCROLL_INDICATOR_MIN_ITEMS}
+							<Icon
+								type="fa"
+								icon="chevron-down"
+								w="16"
+								h="16"
+								class="absolute bottom-4 left-[calc(50%-8px)] z-20 animate-bounce text-primary dark:text-white"
+							/>
+						{/if}
+					{:else}
+						<p class="p-5 text-body dark:text-white">No comments yet.</p>
+					{/if}
 				</div>
 			</div>
 		</Card>
@@ -844,20 +871,18 @@
 								class="mx-auto !mb-5 block text-xl font-semibold text-link transition-colors hover:text-hover"
 								on:click={() => (eventCount = eventCount + 50)}>Load More</button
 							>
-						{:else if merchantEvents.length > 10}
+						{:else if merchantEvents.length > TOP_BUTTON_MIN_ITEMS}
 							<TopButton scroll={activityDiv} style="!mb-5" />
 						{/if}
 
-						{#if !hideArrow && merchantEvents.length > 5}
-							<svg
-								class="absolute bottom-4 left-[calc(50%-8px)] z-20 h-4 w-4 animate-bounce text-primary dark:text-white"
-								fill="currentColor"
-								xmlns="http://www.w3.org/2000/svg"
-								viewBox="0 0 512 512"
-								><!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path
-									d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
-								/></svg
-							>
+						{#if !hideArrow && merchantEvents.length > SCROLL_INDICATOR_MIN_ITEMS}
+							<Icon
+								type="fa"
+								icon="chevron-down"
+								w="16"
+								h="16"
+								class="absolute bottom-4 left-[calc(50%-8px)] z-20 animate-bounce text-primary dark:text-white"
+							/>
 						{/if}
 					{:else if !dataInitialized}
 						{#each Array(5) as _, i (i)}
