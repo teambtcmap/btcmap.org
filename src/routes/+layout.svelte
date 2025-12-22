@@ -63,8 +63,8 @@
 	{#if !dev}
 		<script
 			defer
-			src="https://cloud.umami.is/script.js"
-			data-website-id="5678591b-8d03-4e8d-953a-9ac67ccd1a84"
+			src="https://umami.btcmap.org/script.js"
+			data-website-id="01d98748-38ef-4cda-b7d9-6eaece0f74bd"
 		></script>
 	{/if}
 </svelte:head>
