@@ -157,4 +157,11 @@
 			filter: drop-shadow(0 0 6px #f7931a) drop-shadow(0 0 12px #f7931a);
 		}
 	}
+
+	/* Fix for Leaflet controls not visible on mobile Firefox/Brave */
+	/* Only apply to fullscreen map to avoid breaking embedded maps */
+	.map-fullscreen .leaflet-bottom {
+		position: fixed !important;
+		bottom: 0 !important;
+	}
 }
