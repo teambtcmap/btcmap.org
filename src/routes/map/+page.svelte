@@ -1439,7 +1439,7 @@
 			</button>
 		{/if}
 
-		<div bind:this={mapElement} class="absolute inset-0 !bg-teal dark:!bg-dark" />
+		<div bind:this={mapElement} class="map-fullscreen absolute inset-0 !bg-teal dark:!bg-dark" />
 	</div>
 
 	<MerchantDrawerHash />
