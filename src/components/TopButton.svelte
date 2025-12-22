@@ -6,7 +6,7 @@
 
 <button
 	on:click={() => (scroll ? scroll : window).scrollTo({ top: 0, behavior: 'smooth' })}
-	class="h-8 w-8 animate-bounce rounded-full bg-link text-white hover:bg-hover {style} flex items-center justify-center transition-colors"
+	class="mx-auto h-8 w-8 animate-bounce rounded-full bg-link text-white hover:bg-hover {style} flex items-center justify-center transition-colors"
 >
 	<Icon type="fa" icon="chevron-up" w="16" h="16" />
 </button>
