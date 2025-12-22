@@ -25,20 +25,19 @@ export const MAP_FIT_BOUNDS_PADDING = 50;
 // MERCHANT LIST ZOOM BEHAVIOR:
 // ┌─────────────────────────────────────────────────────────────────────────┐
 // │ Zoom < 11  │ No data shown - "zoom in" message                          │
-// │ Zoom 11-14 │ API search, but hide list if > 50 results (too dense)      │
-// │ Zoom 15-16 │ Use loaded markers, fetch enriched data when panel open    │
-// │ Zoom 17+   │ API search with extended radius (clustering disabled)      │
+// │ Zoom 11-14 │ API search with 1.5x radius, max 99 results                │
+// │ Zoom 15+   │ Use loaded markers with 1.5x bounds, enrich when open      │
 // └─────────────────────────────────────────────────────────────────────────┘
+// All zoom levels use 1.5x radius multiplier for consistent "nearby" count.
 
 // Zoom 17+: Leaflet clustering disabled, individual markers shown
-// At this zoom, we use API search for accurate nearby count
 export const CLUSTERING_DISABLED_ZOOM = 17;
 
 // Zoom 1-5: Boosted markers are clustered (too zoomed out, would be crowded)
 // Zoom 6-16: Boosted markers are NOT clustered (stand out from regular markers)
 export const BOOSTED_CLUSTERING_MAX_ZOOM = 5;
 
-// Zoom 15-16: "Normal" mode - filter by loaded viewport markers
+// Zoom 15+: Use loaded viewport markers (instant, no API latency)
 // Fetches enriched Place data (icons, addresses) only when panel is open
 export const MERCHANT_LIST_MIN_ZOOM = 15;
 
@@ -46,14 +45,13 @@ export const MERCHANT_LIST_MIN_ZOOM = 15;
 // If results exceed MERCHANT_LIST_MAX_ITEMS, we hide the list and show "zoom in"
 export const MERCHANT_LIST_LOW_ZOOM = 11;
 
-// Max merchants to display in list; API results exceeding this trigger "zoom in" message
-export const MERCHANT_LIST_MAX_ITEMS = 50;
+// Max merchants to display in list and count shown on button
+// When count exceeds this, button shows ">99" and list shows 99 items
+export const MERCHANT_LIST_MAX_ITEMS = 99;
 
-// Radius multiplier for API search at high zoom (extends beyond viewport for context)
-export const HIGH_ZOOM_RADIUS_MULTIPLIER = 2;
-
-// Minimum search radius in km (ensures results even at very high zoom levels)
-export const MIN_SEARCH_RADIUS_KM = 1;
+// Radius multiplier for "nearby" search (extends beyond viewport for context)
+// Used consistently across all zoom levels for predictable count behavior
+export const NEARBY_RADIUS_MULTIPLIER = 1.5;
 
 // Map viewport marker loading
 export const MAX_LOADED_MARKERS = 200;

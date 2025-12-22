@@ -22,8 +22,7 @@
 		BOOSTED_CLUSTERING_MAX_ZOOM,
 		MERCHANT_LIST_LOW_ZOOM,
 		MERCHANT_LIST_MAX_ITEMS,
-		HIGH_ZOOM_RADIUS_MULTIPLIER,
-		MIN_SEARCH_RADIUS_KM,
+		NEARBY_RADIUS_MULTIPLIER,
 		MAX_LOADED_MARKERS,
 		VIEWPORT_BATCH_SIZE,
 		VIEWPORT_BUFFER_PERCENT,
@@ -33,7 +32,12 @@
 		DEFAULT_MAP_LNG,
 		DEFAULT_MAP_ZOOM
 	} from '$lib/constants';
-	import { calculateRadiusKm, getVisiblePlaces, getZoomBehavior } from '$lib/map/viewport';
+	import {
+		calculateRadiusKm,
+		getBufferedBounds,
+		getVisiblePlaces,
+		getZoomBehavior
+	} from '$lib/map/viewport';
 	import {
 		clearMarkerSelection,
 		highlightMarker,
@@ -728,34 +732,22 @@
 		});
 	}, 1000); // 1 second debounce for IndexedDB writes
 
-	// Zoom 17+: Fetch full merchant data from API with extended radius
-	const updateListApiExtended = (
-		center: LatLng,
-		bounds: LatLngBounds,
-		allowHeavyFetch: boolean
-	) => {
-		const viewportRadius = calculateRadiusKm(bounds);
-		const radiusKm = Math.max(viewportRadius * HIGH_ZOOM_RADIUS_MULTIPLIER, MIN_SEARCH_RADIUS_KM);
-		if (!$merchantList.isOpen && !allowHeavyFetch) {
-			merchantList.fetchCountOnly({ lat: center.lat, lon: center.lng }, radiusKm);
-		} else {
-			merchantList.fetchAndReplaceList({ lat: center.lat, lon: center.lng }, radiusKm);
-		}
-	};
-
-	// Zoom 15-16: Use locally loaded markers, optionally enrich with API data
+	// Zoom 15+: Use locally loaded markers, optionally enrich with API data
 	const updateListLocalMarkers = (
 		center: LatLng,
 		bounds: LatLngBounds,
 		allowHeavyFetch: boolean
 	) => {
-		// Get ALL places in bounds (not just loaded markers) for accurate category counts
-		const allVisiblePlaces = $places.filter((place) => bounds.contains([place.lat, place.lon]));
+		// Expand bounds by 25% on each edge (equivalent to 1.5x radius for API calls)
+		const expandedBounds = getBufferedBounds(leaflet, bounds, 0.25);
+		const allVisiblePlaces = $places.filter((place) =>
+			expandedBounds.contains([place.lat, place.lon])
+		);
 
 		merchantList.setMerchants(allVisiblePlaces, center.lat, center.lng);
 
 		if ($merchantList.isOpen && allowHeavyFetch) {
-			const radiusKm = calculateRadiusKm(bounds);
+			const radiusKm = calculateRadiusKm(bounds) * NEARBY_RADIUS_MULTIPLIER;
 			merchantList.fetchEnrichedDetails({ lat: center.lat, lon: center.lng }, radiusKm);
 		}
 	};
@@ -766,7 +758,7 @@
 		bounds: LatLngBounds,
 		allowHeavyFetch: boolean
 	) => {
-		const radiusKm = calculateRadiusKm(bounds);
+		const radiusKm = calculateRadiusKm(bounds) * NEARBY_RADIUS_MULTIPLIER;
 
 		if (!$merchantList.isOpen || !allowHeavyFetch) {
 			merchantList.fetchCountOnly({ lat: center.lat, lon: center.lng }, radiusKm);
@@ -796,9 +788,6 @@
 		const allowHeavyFetch = isDesktop || opts?.force || $merchantList.isOpen;
 
 		switch (behavior) {
-			case 'api-extended':
-				updateListApiExtended(center, bounds, allowHeavyFetch);
-				break;
 			case 'local-markers':
 				updateListLocalMarkers(center, bounds, allowHeavyFetch);
 				break;
@@ -1439,7 +1428,11 @@
 					<LoadingSpinner size="h-4 w-4" color="text-primary dark:text-white" />
 					<span class="text-primary dark:text-white">Nearby</span>
 				{:else if currentZoom >= MERCHANT_LIST_LOW_ZOOM && $merchantList.totalCount > 0}
-					<span class="text-primary dark:text-white">{$merchantList.totalCount} Nearby</span>
+					<span class="text-primary dark:text-white"
+						>{$merchantList.totalCount > MERCHANT_LIST_MAX_ITEMS
+							? `>${MERCHANT_LIST_MAX_ITEMS}`
+							: $merchantList.totalCount} Nearby</span
+					>
 				{:else}
 					<span class="text-primary dark:text-white">Nearby</span>
 				{/if}

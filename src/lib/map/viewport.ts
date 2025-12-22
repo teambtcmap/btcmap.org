@@ -1,18 +1,13 @@
-import {
-	CLUSTERING_DISABLED_ZOOM,
-	MERCHANT_LIST_MIN_ZOOM,
-	MERCHANT_LIST_LOW_ZOOM
-} from '$lib/constants';
+import { MERCHANT_LIST_MIN_ZOOM, MERCHANT_LIST_LOW_ZOOM } from '$lib/constants';
 import type { Leaflet, Place } from '$lib/types';
 import type { LatLngBounds } from 'leaflet';
 
-export type ZoomBehavior = 'none' | 'api-with-limit' | 'local-markers' | 'api-extended';
+export type ZoomBehavior = 'none' | 'api-with-limit' | 'local-markers';
 
 // Determines which fetch strategy to use based on current zoom level
 // See constants.ts for zoom behavior documentation
 export function getZoomBehavior(zoom: number): ZoomBehavior {
-	if (zoom >= CLUSTERING_DISABLED_ZOOM) return 'api-extended'; // Zoom 17+
-	if (zoom >= MERCHANT_LIST_MIN_ZOOM) return 'local-markers'; // Zoom 15-16
+	if (zoom >= MERCHANT_LIST_MIN_ZOOM) return 'local-markers'; // Zoom 15+
 	if (zoom >= MERCHANT_LIST_LOW_ZOOM) return 'api-with-limit'; // Zoom 11-14
 	return 'none'; // Below zoom 11
 }
