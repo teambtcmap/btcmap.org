@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { tick, onDestroy } from 'svelte';
-	import { fly } from 'svelte/transition';
 	import type { MerchantListMode } from '$lib/merchantListStore';
 	import { merchantList } from '$lib/merchantListStore';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import MerchantListItem from './MerchantListItem.svelte';
-	import CloseButton from '$components/CloseButton.svelte';
 	import LoadingSpinner from '$components/LoadingSpinner.svelte';
 	import Icon from '$components/Icon.svelte';
 	import type { Place } from '$lib/types';
@@ -16,17 +14,9 @@
 		type CategoryKey,
 		type CategoryCounts
 	} from '$lib/categoryMapping';
-	import {
-		MERCHANT_LIST_WIDTH,
-		MERCHANT_LIST_MIN_ZOOM,
-		MERCHANT_LIST_LOW_ZOOM,
-		BREAKPOINTS
-	} from '$lib/constants';
+	import { MERCHANT_LIST_MIN_ZOOM, MERCHANT_LIST_LOW_ZOOM, BREAKPOINTS } from '$lib/constants';
 	import { calcVerifiedDate } from '$lib/merchantDrawerLogic';
 	import { trackEvent } from '$lib/analytics';
-
-	// Reduced motion preference for animations
-	const reducedMotion = browser && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 	// Compute once for all list items
 	const verifiedDate = calcVerifiedDate();
@@ -61,24 +51,54 @@
 	// Reference for focus trap
 	let panelElement: HTMLElement;
 
-	function handleClearSearch() {
-		merchantList.clearSearchInput();
-		// Trigger onSearch to abort any pending request (same as typing empty query)
-		onSearch?.('');
-		searchInput?.focus();
+	// Unified input handler - behaves differently based on mode
+	function handleUnifiedInput(e: Event) {
+		const value = (e.target as HTMLInputElement).value;
+		if (mode === 'search') {
+			merchantList.setSearchQuery(value);
+			onSearch?.($merchantList.searchQuery);
+		} else {
+			nearbyFilter = value;
+		}
 	}
 
-	function handleSearchKeyDown(event: KeyboardEvent) {
-		if (event.key === 'Escape' && $merchantList.searchQuery) {
+	// Unified keydown handler
+	function handleUnifiedKeyDown(event: KeyboardEvent) {
+		if (event.key === 'Escape') {
 			event.preventDefault();
 			event.stopPropagation();
-			handleClearSearch();
+			if (mode === 'search' && searchQuery) {
+				handleClearInput();
+			} else if (mode === 'nearby' && nearbyFilter) {
+				handleClearInput();
+			} else {
+				handleClose();
+			}
+		} else if (event.key === 'Enter' && mode === 'nearby' && nearbyFilter.length >= 3) {
+			// Switch to worldwide search on Enter in nearby mode
+			trackEvent('search_query');
+			merchantList.setSearchQuery(nearbyFilter);
+			merchantList.setMode('search');
+			onSearch?.(nearbyFilter);
+			nearbyFilter = '';
 		}
+	}
+
+	// Clear the current input (works for both modes)
+	function handleClearInput() {
+		if (mode === 'search') {
+			merchantList.clearSearchInput();
+			onSearch?.('');
+		} else {
+			nearbyFilter = '';
+		}
+		searchInput?.focus();
 	}
 
 	function handleModeSwitch(newMode: MerchantListMode) {
 		if (newMode === mode) return;
-		nearbyFilter = ''; // Clear filter when switching modes
+		// Clear both filters when switching modes
+		nearbyFilter = '';
 		if (newMode === 'nearby') {
 			trackEvent('nearby_mode_click');
 			merchantList.exitSearchMode();
@@ -86,6 +106,8 @@
 		} else {
 			trackEvent('worldwide_mode_click');
 			merchantList.setMode(newMode);
+			// Focus search input when switching to worldwide
+			tick().then(() => searchInput?.focus());
 		}
 	}
 
@@ -162,8 +184,8 @@
 		}
 	}
 
-	// Focus search input when panel opens in search mode
-	$: if (browser && isOpen && mode === 'search' && searchInput) {
+	// Focus search input when panel opens (always, since we now have unified search)
+	$: if (browser && isOpen && searchInput) {
 		tick().then(() => searchInput?.focus());
 	}
 
@@ -238,78 +260,57 @@
 {#if isOpen}
 	<section
 		bind:this={panelElement}
-		class="absolute inset-0 z-[1001] flex flex-col overflow-hidden bg-white md:relative md:inset-auto md:z-auto md:w-80 md:flex-none md:border-r md:border-white/10 dark:border-white/5 dark:bg-dark"
+		class="absolute inset-0 z-[1001] flex flex-col overflow-hidden bg-white md:absolute md:inset-auto md:top-3 md:bottom-4 md:left-3 md:w-80 md:rounded-lg md:shadow-lg dark:bg-dark dark:shadow-black/30"
 		role="complementary"
 		aria-label="Merchant list"
-		transition:fly={{ x: -MERCHANT_LIST_WIDTH, duration: reducedMotion ? 0 : 200 }}
 	>
-		<!-- Header -->
-		<div
-			class="shrink-0 border-b border-gray-200 bg-white px-3 py-3 dark:border-white/10 dark:bg-dark"
-		>
-			{#if mode === 'search'}
-				<!-- Search mode: search input -->
-				<div class="flex items-center gap-2">
-					<div class="relative flex-1">
-						<Icon
-							w="16"
-							h="16"
-							icon="search"
-							type="material"
-							class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-400 dark:text-white/50"
-						/>
-						<input
-							bind:this={searchInput}
-							value={searchQuery}
-							on:input={(e) => {
-								merchantList.setSearchQuery(e.currentTarget.value);
-								onSearch?.($merchantList.searchQuery);
-							}}
-							on:keydown={handleSearchKeyDown}
-							type="search"
-							placeholder="e.g. pizza, cafe, atm..."
-							aria-label="Search for Bitcoin merchants"
-							class="w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pr-8 pl-9 text-sm text-primary focus:border-link focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus:border-white/30 [&::-webkit-search-cancel-button]:hidden"
-						/>
-						{#if searchQuery}
-							<button
-								type="button"
-								on:click={handleClearSearch}
-								class="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:text-white/50 dark:hover:text-white/70"
-								aria-label="Clear search"
-							>
-								<Icon w="14" h="14" icon="close" type="material" />
-							</button>
-						{/if}
-					</div>
-					<CloseButton on:click={handleClose} />
-				</div>
+		<!-- Search input - identical styling to floating MapSearchBar -->
+		<div class="relative shrink-0 border-b border-gray-100 dark:border-white/10">
+			<Icon
+				w="18"
+				h="18"
+				icon="search"
+				type="material"
+				class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-400 dark:text-white/50"
+			/>
+			<input
+				bind:this={searchInput}
+				value={mode === 'search' ? searchQuery : nearbyFilter}
+				on:input={handleUnifiedInput}
+				on:keydown={handleUnifiedKeyDown}
+				type="search"
+				placeholder={mode === 'search' ? 'Search worldwide...' : 'Search nearby...'}
+				aria-label={mode === 'search'
+					? 'Search for Bitcoin merchants worldwide'
+					: 'Filter nearby merchants by name'}
+				class="w-full border-0 bg-transparent py-3 pr-10 pl-10 text-sm text-primary outline-none placeholder:text-gray-400 dark:text-white dark:placeholder:text-white/50 [&::-webkit-search-cancel-button]:hidden"
+			/>
+			{#if (mode === 'search' && searchQuery) || (mode === 'nearby' && nearbyFilter)}
+				<button
+					type="button"
+					on:click={handleClearInput}
+					class="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:text-white/50 dark:hover:text-white"
+					aria-label="Clear"
+				>
+					<Icon w="16" h="16" icon="close" type="material" />
+				</button>
 			{:else}
-				<!-- Nearby mode: title + count -->
-				<div class="flex items-center justify-between">
-					<div>
-						<h2 class="text-sm font-semibold text-primary dark:text-white">Nearby Merchants</h2>
-						{#if showZoomInMessage}
-							<p class="text-xs text-body dark:text-white/70" aria-live="polite">
-								Zoom in to see list
-							</p>
-						{:else if isTruncated}
-							<p class="text-xs text-body dark:text-white/70" aria-live="polite">
-								Showing {merchants.length} nearest of {totalCount}
-							</p>
-						{:else}
-							<p class="text-xs text-body dark:text-white/70" aria-live="polite">
-								{merchants.length} location{merchants.length !== 1 ? 's' : ''} in view
-							</p>
-						{/if}
-					</div>
-					<CloseButton on:click={handleClose} />
-				</div>
+				<button
+					type="button"
+					on:click={handleClose}
+					class="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:text-white/50 dark:hover:text-white"
+					aria-label="Close panel"
+				>
+					<Icon w="16" h="16" icon="close" type="material" />
+				</button>
 			{/if}
+		</div>
 
+		<!-- Filters and controls -->
+		<div class="shrink-0 border-b border-gray-100 px-3 py-3 dark:border-white/10">
 			<!-- Mode toggle buttons -->
 			<div
-				class="mt-3 flex rounded-lg bg-gray-100 p-1 dark:bg-white/5"
+				class="flex rounded-lg bg-gray-100 p-1 dark:bg-white/5"
 				role="radiogroup"
 				aria-label="View mode"
 			>
@@ -363,10 +364,10 @@
 				</div>
 			</div>
 
-			{#if mode === 'search'}
-				<!-- Search status row: result count + show all on map -->
-				<div class="mt-3 flex items-center justify-between gap-2">
-					<p class="text-xs text-body dark:text-white/70" aria-live="polite">
+			<!-- Status row -->
+			<div class="mt-3 flex items-center justify-between gap-2">
+				<p class="text-xs text-body dark:text-white/70" aria-live="polite">
+					{#if mode === 'search'}
 						{#if isSearching}
 							Searching...
 						{:else if searchResults.length === 0 && searchQuery.length >= 3}
@@ -381,7 +382,15 @@
 						{:else}
 							{searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
 						{/if}
-					</p>
+					{:else if showZoomInMessage}
+						Zoom in to see list
+					{:else if isTruncated}
+						Showing {merchants.length} nearest of {totalCount}
+					{:else}
+						{merchants.length} location{merchants.length !== 1 ? 's' : ''} in view
+					{/if}
+				</p>
+				{#if mode === 'search'}
 					<button
 						type="button"
 						on:click={() => {
@@ -400,37 +409,8 @@
 						<Icon w="14" h="14" icon="zoom_out_map" type="material" />
 						<span>Show all</span>
 					</button>
-				</div>
-			{:else}
-				<!-- Name filter input (nearby mode only) -->
-				<div class="relative mt-3">
-					<Icon
-						w="14"
-						h="14"
-						icon="filter_list"
-						type="material"
-						class="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-gray-400 dark:text-white/50"
-					/>
-					<input
-						bind:value={nearbyFilter}
-						on:blur={() => nearbyFilter && trackEvent('nearby_filter_input')}
-						type="text"
-						placeholder="Filter by name..."
-						aria-label="Filter nearby merchants by name"
-						class="w-full rounded-lg border border-gray-200 bg-gray-50 py-1.5 pr-7 pl-8 text-xs text-primary focus:border-link focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus:border-white/30"
-					/>
-					{#if nearbyFilter}
-						<button
-							type="button"
-							on:click={() => (nearbyFilter = '')}
-							class="absolute top-1/2 right-2 -translate-y-1/2 p-0.5 text-gray-400 hover:text-gray-600 dark:text-white/50 dark:hover:text-white/70"
-							aria-label="Clear filter"
-						>
-							<Icon w="12" h="12" icon="close" type="material" />
-						</button>
-					{/if}
-				</div>
-			{/if}
+				{/if}
+			</div>
 		</div>
 
 		<!-- List content -->
