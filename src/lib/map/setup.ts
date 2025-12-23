@@ -237,6 +237,9 @@ export const changeDefaultIcons = (
 		zoomIn.innerHTML = `<img src=${
 			theme === 'dark' ? '/icons/plus-white.svg' : '/icons/plus.svg'
 		} alt='zoomin' class='inline' id='zoomin'/>`;
+		zoomIn.addEventListener('click', () => {
+			trackEvent('zoom_in_click');
+		});
 		if (theme === 'light') {
 			const zoomInIcon: HTMLImageElement | null = document.querySelector('#zoomin');
 			if (zoomInIcon) {
@@ -261,6 +264,9 @@ export const changeDefaultIcons = (
 		zoomOut.innerHTML = `<img src=${
 			theme === 'dark' ? '/icons/minus-white.svg' : '/icons/minus.svg'
 		} alt='zoomout' class='inline' id='zoomout'/>`;
+		zoomOut.addEventListener('click', () => {
+			trackEvent('zoom_out_click');
+		});
 		if (theme === 'light') {
 			const zoomOutIcon: HTMLImageElement | null = document.querySelector('#zoomout');
 			if (zoomOutIcon) {
@@ -291,6 +297,7 @@ export const changeDefaultIcons = (
 	} alt='fullscreen' class='inline' id='fullscreen'/>`;
 	fullscreenButton.style.borderRadius = BOTTOM_BUTTON_RADIUS;
 	fullscreenButton.onclick = function toggleFullscreen() {
+		trackEvent('fullscreen_click');
 		if (!document.fullscreenElement) {
 			mapElement.requestFullscreen().catch((err) => {
 				errToast(`Error attempting to enable fullscreen mode: ${err.message} (${err.name})`);
@@ -356,6 +363,9 @@ export const geolocate = (
 	if (locateButton) {
 		locateButton.style.borderRadius = '8px';
 		locateButton.style.borderBottom = BORDER_BOTTOM_STYLE;
+		locateButton.addEventListener('click', () => {
+			trackEvent('locate_click');
+		});
 		if (theme === 'light') {
 			const locateIcon: HTMLImageElement | null = document.querySelector('#locatebutton');
 			if (locateIcon) {
@@ -464,6 +474,9 @@ export const homeMarkerButtons = (
 					'dark:border',
 					'dark:border-white/95'
 				);
+				addLocationButton.onclick = () => {
+					trackEvent('add_location_click');
+				};
 
 				addControlDiv.append(addLocationButton);
 
@@ -499,6 +512,9 @@ export const homeMarkerButtons = (
 					'dark:border-white/95'
 				);
 				communityMapButton.style.borderBottom = BORDER_BOTTOM_STYLE;
+				communityMapButton.onclick = () => {
+					trackEvent('community_map_click');
+				};
 
 				addControlDiv.append(communityMapButton);
 			} else {
@@ -572,6 +588,7 @@ export const dataRefresh = (L: Leaflet, map: Map, DomEvent: DomEventType) => {
 			} alt='refresh' class='inline' id='refresh'/>`;
 			dataRefreshButton.style.borderRadius = '8px';
 			dataRefreshButton.onclick = () => {
+				trackEvent('data_refresh_click');
 				location.reload();
 			};
 			if (theme === 'light') {

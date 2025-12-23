@@ -17,7 +17,15 @@ type EventName =
 	| 'home_button_click'
 	| 'show_all_on_map_click'
 	| 'merchant_list_item_click'
-	| 'nearby_filter_input';
+	| 'nearby_filter_input'
+	| 'zoom_in_click'
+	| 'zoom_out_click'
+	| 'fullscreen_click'
+	| 'locate_click'
+	| 'add_location_click'
+	| 'community_map_click'
+	| 'data_refresh_click'
+	| 'layer_change';
 
 declare global {
 	interface Window {

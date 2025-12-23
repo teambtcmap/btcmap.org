@@ -1321,6 +1321,11 @@
 
 			controlLayers = leaflet.control.layers(baseMaps).addTo(map);
 
+			// track layer changes
+			map.on('baselayerchange', (e: { name: string }) => {
+				trackEvent('layer_change', { layer: e.name });
+			});
+
 			// change default icons
 			changeDefaultIcons(true, leaflet, mapElement, DomEvent);
 
