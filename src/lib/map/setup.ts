@@ -225,10 +225,10 @@ export const changeDefaultIcons = (
 		}
 	}
 
-	const leafletBar: HTMLDivElement | null = document.querySelector('.leaflet-bar');
-	if (leafletBar) {
-		leafletBar.style.border = 'none';
-		leafletBar.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+	const zoomBar: HTMLDivElement | null = document.querySelector('.leaflet-control-zoom');
+	if (zoomBar) {
+		zoomBar.style.border = 'none';
+		zoomBar.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 	}
 
 	const zoomIn: HTMLAnchorElement | null = document.querySelector('.leaflet-control-zoom-in');
@@ -328,7 +328,7 @@ export const changeDefaultIcons = (
 	);
 	fullscreenButton.style.borderBottom = BORDER_BOTTOM_STYLE;
 
-	leafletBar?.append(fullscreenButton);
+	zoomBar?.append(fullscreenButton);
 
 	if (DomEvent) {
 		DomEvent.disableClickPropagation(fullscreenButton);
@@ -342,7 +342,7 @@ export const geolocate = (
 ) => {
 	const theme = detectTheme();
 
-	new LocateControl({ position: 'topleft' }).addTo(map);
+	new LocateControl({ position: 'bottomright' }).addTo(map);
 
 	const newLocateIcon = L.DomUtil.create('img');
 	newLocateIcon.src = theme === 'dark' ? '/icons/locate-white.svg' : '/icons/locate.svg';
@@ -398,7 +398,7 @@ export const homeMarkerButtons = (
 
 	const customControls = L.Control.extend({
 		options: {
-			position: 'topleft'
+			position: 'bottomright'
 		},
 		onAdd: () => {
 			addControlDiv.style.border = 'none';
@@ -569,7 +569,7 @@ export const dataRefresh = (L: Leaflet, map: Map, DomEvent: DomEventType) => {
 
 	const customDataRefreshButton = L.Control.extend({
 		options: {
-			position: 'topleft'
+			position: 'bottomright'
 		},
 		onAdd: () => {
 			const dataRefreshDiv = L.DomUtil.create('div');
