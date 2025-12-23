@@ -133,7 +133,7 @@ export const changeDefaultIcons = (
 		}
 	};
 
-	leafletBar?.append(fullscreenButton);
+	zoomBar?.append(fullscreenButton);
 
 	if (DomEvent) {
 		DomEvent.disableClickPropagation(fullscreenButton);
@@ -171,7 +171,7 @@ export const homeMarkerButtons = (
 
 	const customControls = L.Control.extend({
 		options: {
-			position: 'topleft'
+			position: 'bottomright'
 		},
 		onAdd: () => {
 			addControlDiv.classList.add('leaflet-control-site-links', 'leaflet-bar', 'leaflet-control');
@@ -236,7 +236,7 @@ export const dataRefresh = (L: Leaflet, map: Map, DomEvent: DomEventType) => {
 
 	const customDataRefreshButton = L.Control.extend({
 		options: {
-			position: 'topleft'
+			position: 'bottomright'
 		},
 		onAdd: () => {
 			const dataRefreshDiv = L.DomUtil.create('div');
