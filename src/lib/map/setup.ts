@@ -1,18 +1,15 @@
-import { selectedMerchant, theme } from '$lib/store';
-import Icon from '$components/Icon.svelte';
-import { detectTheme, errToast, humanizeIconName } from '$lib/utils';
-import type { DomEventType, Leaflet, Place } from '$lib/types';
-import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
-import { trackEvent } from '$lib/analytics';
+import type { Map, LatLng, DivIcon } from 'leaflet';
+
+import { replaceState } from '$app/navigation';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
-import type { Map, LatLng } from 'leaflet';
-import { get } from 'svelte/store';
-import type { DivIcon } from 'leaflet';
-import { replaceState } from '$app/navigation';
 
-const BORDER_BOTTOM_STYLE = '1.5px solid #ccc';
-const BOTTOM_BUTTON_RADIUS = '0 0 8px 8px';
+import Icon from '$components/Icon.svelte';
+import { trackEvent } from '$lib/analytics';
+import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
+import { selectedMerchant } from '$lib/store';
+import type { DomEventType, Leaflet, Place } from '$lib/types';
+import { detectTheme, errToast, humanizeIconName } from '$lib/utils';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
@@ -27,81 +24,6 @@ export const updateMapHash = (zoom: number, center: LatLng): void => {
 	const url = window.location.pathname + newHash;
 	// eslint-disable-next-line svelte/no-navigation-without-resolve
 	replaceState(url, {});
-};
-
-export const toggleMapButtons = () => {
-	const zoomInBtn: HTMLAnchorElement | null = document.querySelector('.leaflet-control-zoom-in');
-	const zoomOutBtn: HTMLAnchorElement | null = document.querySelector('.leaflet-control-zoom-out');
-	const fullScreenBtn: HTMLAnchorElement | null = document.querySelector(
-		'.leaflet-control-full-screen'
-	);
-	const locateBtn: HTMLAnchorElement | null = document.querySelector(
-		'.leaflet-bar-part.leaflet-bar-part-single'
-	);
-	const zoomInImg: HTMLImageElement | null = document.querySelector('#zoomin');
-	const zoomOutImg: HTMLImageElement | null = document.querySelector('#zoomout');
-	const fullScreenImg: HTMLImageElement | null = document.querySelector('#fullscreen');
-	const locateImg: HTMLImageElement | null = document.querySelector('#locatebutton');
-
-	if (
-		zoomInBtn &&
-		zoomOutBtn &&
-		fullScreenBtn &&
-		locateBtn &&
-		zoomInImg &&
-		zoomOutImg &&
-		fullScreenImg &&
-		locateImg
-	) {
-		if (get(theme) === 'dark') {
-			zoomInImg.src = '/icons/plus-white.svg';
-			zoomOutImg.src = '/icons/minus-white.svg';
-			fullScreenImg.src = '/icons/expand-white.svg';
-			locateImg.src = '/icons/locate-white.svg';
-
-			zoomInBtn.onmouseenter = null;
-			zoomInBtn.onmouseleave = null;
-			zoomOutBtn.onmouseenter = null;
-			zoomOutBtn.onmouseleave = null;
-			fullScreenBtn.onmouseenter = null;
-			fullScreenBtn.onmouseleave = null;
-			locateBtn.onmouseenter = null;
-			locateBtn.onmouseleave = null;
-		} else {
-			zoomInImg.src = '/icons/plus.svg';
-			zoomOutImg.src = '/icons/minus.svg';
-			fullScreenImg.src = '/icons/expand.svg';
-			locateImg.src = '/icons/locate.svg';
-
-			zoomInBtn.onmouseenter = () => {
-				zoomInImg.src = '/icons/plus-black.svg';
-			};
-			zoomInBtn.onmouseleave = () => {
-				zoomInImg.src = '/icons/plus.svg';
-			};
-
-			zoomOutBtn.onmouseenter = () => {
-				zoomOutImg.src = '/icons/minus-black.svg';
-			};
-			zoomOutBtn.onmouseleave = () => {
-				zoomOutImg.src = '/icons/minus.svg';
-			};
-
-			fullScreenBtn.onmouseenter = () => {
-				fullScreenImg.src = '/icons/expand-black.svg';
-			};
-			fullScreenBtn.onmouseleave = () => {
-				fullScreenImg.src = '/icons/expand.svg';
-			};
-
-			locateBtn.onmouseenter = () => {
-				locateImg.src = '/icons/locate-black.svg';
-			};
-			locateBtn.onmouseleave = () => {
-				locateImg.src = '/icons/locate.svg';
-			};
-		}
-	}
 };
 
 export const layers = (leaflet: Leaflet, map: Map) => {
@@ -149,153 +71,57 @@ export const layers = (leaflet: Leaflet, map: Map) => {
 };
 
 export const attribution = (L: Leaflet, map: Map) => {
+	// Use Leaflet's default attribution control
 	L.control.attribution({ position: 'bottomleft', prefix: false }).addTo(map);
-
-	const OSMAttribution: HTMLDivElement | null = document.querySelector(
-		'.leaflet-bottom.leaflet-left > .leaflet-control-attribution'
-	);
-
-	if (!OSMAttribution) return;
-
-	OSMAttribution.style.borderRadius = '0 8px 0 0';
-	OSMAttribution.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
-	OSMAttribution.innerHTML =
-		'<a href="http://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" class="!text-link hover:!text-hover !no-underline transition-colors block md:inline"><span class="text-map dark:text-white">&copy;</span> OpenStreetMap <span class="text-map dark:text-white">contributors</span></a>';
-	OSMAttribution.classList.add(
-		'dark:!bg-dark',
-		'dark:!text-white',
-		'dark:border-t',
-		'dark:border-t-white/95',
-		'dark:border-r',
-		'dark:border-r-white/95'
-	);
 };
 
 export const support = () => {
+	// Add "Support BTC Map" link to right attribution
 	const supportAttribution: HTMLDivElement | null = document.querySelector(
 		'.leaflet-bottom.leaflet-right > .leaflet-control-attribution'
 	);
 
 	if (!supportAttribution) return;
 
-	supportAttribution.style.borderRadius = '8px 0 0 0';
-	supportAttribution.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 	supportAttribution.innerHTML =
-		'<a href="/support-us" class="!text-link hover:!text-hover !no-underline transition-colors" title="Support with sats">Support</a> BTC Map';
-	supportAttribution.classList.add(
-		'dark:!bg-dark',
-		'dark:!text-white',
-		'dark:border-t',
-		'dark:border-t-white/95',
-		'dark:border-l',
-		'dark:border-l-white/95'
-	);
+		'<a href="/support-us" title="Support with sats">Support</a> BTC Map';
 };
 
 export const scaleBars = (L: Leaflet, map: Map) => {
-	const theme = detectTheme();
-
+	// Use Leaflet's default scale control
 	L.control.scale({ position: 'bottomleft' }).addTo(map);
-	const scaleBars: NodeListOf<HTMLDivElement> = document.querySelectorAll(
-		'.leaflet-control-scale-line'
-	);
-	scaleBars.forEach((bar) => {
-		bar.classList.add('dark:!bg-dark', 'dark:!text-white');
-		if (theme === 'dark') {
-			bar.style.textShadow = 'none';
-		}
-	});
 };
 
 export const changeDefaultIcons = (
-	layers: boolean,
+	_layers: boolean,
 	L: Leaflet,
 	mapElement: HTMLDivElement,
 	DomEvent: DomEventType
 ) => {
-	const theme = detectTheme();
-
-	if (layers) {
-		const layers: HTMLDivElement | null = document.querySelector('.leaflet-control-layers');
-		if (layers) {
-			layers.style.border = theme === 'dark' ? '1px solid #e5e7eb' : 'none';
-			layers.style.borderRadius = '8px';
-			layers.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
-			layers.classList.add('dark:!bg-dark', 'dark:!text-white');
-		}
-	}
-
-	const leafletBar: HTMLDivElement | null = document.querySelector('.leaflet-bar');
-	if (leafletBar) {
-		leafletBar.style.border = 'none';
-		leafletBar.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
-	}
-
+	// Add analytics tracking to zoom controls (keep Leaflet's default +/- text)
 	const zoomIn: HTMLAnchorElement | null = document.querySelector('.leaflet-control-zoom-in');
 	if (zoomIn) {
-		zoomIn.style.borderRadius = '8px 8px 0 0';
-		zoomIn.innerHTML = `<img src=${
-			theme === 'dark' ? '/icons/plus-white.svg' : '/icons/plus.svg'
-		} alt='zoomin' class='inline' id='zoomin'/>`;
 		zoomIn.addEventListener('click', () => {
 			trackEvent('zoom_in_click');
 		});
-		if (theme === 'light') {
-			const zoomInIcon: HTMLImageElement | null = document.querySelector('#zoomin');
-			if (zoomInIcon) {
-				zoomIn.onmouseenter = () => {
-					zoomInIcon.src = '/icons/plus-black.svg';
-				};
-				zoomIn.onmouseleave = () => {
-					zoomInIcon.src = '/icons/plus.svg';
-				};
-			}
-		}
-		zoomIn.classList.add(
-			'dark:!bg-dark',
-			'dark:hover:!bg-dark/75',
-			'dark:border',
-			'dark:border-white/95'
-		);
 	}
 
 	const zoomOut: HTMLAnchorElement | null = document.querySelector('.leaflet-control-zoom-out');
 	if (zoomOut) {
-		zoomOut.innerHTML = `<img src=${
-			theme === 'dark' ? '/icons/minus-white.svg' : '/icons/minus.svg'
-		} alt='zoomout' class='inline' id='zoomout'/>`;
 		zoomOut.addEventListener('click', () => {
 			trackEvent('zoom_out_click');
 		});
-		if (theme === 'light') {
-			const zoomOutIcon: HTMLImageElement | null = document.querySelector('#zoomout');
-			if (zoomOutIcon) {
-				zoomOut.onmouseenter = () => {
-					zoomOutIcon.src = '/icons/minus-black.svg';
-				};
-				zoomOut.onmouseleave = () => {
-					zoomOutIcon.src = '/icons/minus.svg';
-				};
-			}
-		}
-		zoomOut.classList.add(
-			'dark:!bg-dark',
-			'dark:hover:!bg-dark/75',
-			'dark:border',
-			'dark:border-white/95'
-		);
 	}
 
+	// Add fullscreen button (custom control, not native to Leaflet)
+	const leafletBar: HTMLDivElement | null = document.querySelector('.leaflet-bar');
 	const fullscreenButton = L.DomUtil.create('a');
 	fullscreenButton.classList.add('leaflet-control-full-screen');
 	fullscreenButton.title = 'Full screen';
 	fullscreenButton.role = 'button';
 	fullscreenButton.ariaLabel = 'Full screen';
 	fullscreenButton.ariaDisabled = 'false';
-	fullscreenButton.innerHTML = `<img src=${
-		theme === 'dark' ? '/icons/expand-white.svg' : '/icons/expand.svg'
-	} alt='fullscreen' class='inline' id='fullscreen'/>`;
-	fullscreenButton.style.borderRadius = BOTTOM_BUTTON_RADIUS;
+	fullscreenButton.innerHTML = `<img src='/icons/expand.svg' alt='fullscreen' class='inline' style='width: 16px; height: 16px;'/>`;
 	fullscreenButton.onclick = function toggleFullscreen() {
 		trackEvent('fullscreen_click');
 		if (!document.fullscreenElement) {
@@ -306,27 +132,6 @@ export const changeDefaultIcons = (
 			document.exitFullscreen();
 		}
 	};
-	if (theme === 'light') {
-		fullscreenButton.onmouseenter = () => {
-			const fullscreenIcon = document.querySelector('#fullscreen') as HTMLImageElement;
-			if (fullscreenIcon) {
-				fullscreenIcon.src = '/icons/expand-black.svg';
-			}
-		};
-		fullscreenButton.onmouseleave = () => {
-			const fullscreenIcon = document.querySelector('#fullscreen') as HTMLImageElement;
-			if (fullscreenIcon) {
-				fullscreenIcon.src = '/icons/expand.svg';
-			}
-		};
-	}
-	fullscreenButton.classList.add(
-		'dark:!bg-dark',
-		'dark:hover:!bg-dark/75',
-		'dark:border',
-		'dark:border-white/95'
-	);
-	fullscreenButton.style.borderBottom = BORDER_BOTTOM_STYLE;
 
 	leafletBar?.append(fullscreenButton);
 
@@ -336,53 +141,20 @@ export const changeDefaultIcons = (
 };
 
 export const geolocate = (
-	L: Leaflet,
+	_L: Leaflet,
 	map: Map,
 	LocateControl: typeof import('leaflet.locatecontrol').LocateControl
 ) => {
-	const theme = detectTheme();
-
+	// Use plugin defaults, just add analytics tracking
 	new LocateControl({ position: 'topleft' }).addTo(map);
-
-	const newLocateIcon = L.DomUtil.create('img');
-	newLocateIcon.src = theme === 'dark' ? '/icons/locate-white.svg' : '/icons/locate.svg';
-	newLocateIcon.alt = 'locate';
-	newLocateIcon.classList.add('inline');
-	newLocateIcon.id = 'locatebutton';
-	document.querySelector('.leaflet-control-locate-location-arrow')?.replaceWith(newLocateIcon);
-
-	const locateDiv: HTMLDivElement | null = document.querySelector('.leaflet-control-locate');
-	if (locateDiv) {
-		locateDiv.style.border = 'none';
-		locateDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
-	}
 
 	const locateButton: HTMLAnchorElement | null = document.querySelector(
 		'.leaflet-bar-part.leaflet-bar-part-single'
 	);
 	if (locateButton) {
-		locateButton.style.borderRadius = '8px';
-		locateButton.style.borderBottom = BORDER_BOTTOM_STYLE;
 		locateButton.addEventListener('click', () => {
 			trackEvent('locate_click');
 		});
-		if (theme === 'light') {
-			const locateIcon: HTMLImageElement | null = document.querySelector('#locatebutton');
-			if (locateIcon) {
-				locateButton.onmouseenter = () => {
-					locateIcon.src = '/icons/locate-black.svg';
-				};
-				locateButton.onmouseleave = () => {
-					locateIcon.src = '/icons/locate.svg';
-				};
-			}
-		}
-		locateButton.classList.add(
-			'dark:!bg-dark',
-			'dark:hover:!bg-dark/75',
-			'dark:border',
-			'dark:border-white/95'
-		);
 	}
 };
 
@@ -392,8 +164,6 @@ export const homeMarkerButtons = (
 	DomEvent: DomEventType,
 	mainMap?: boolean
 ) => {
-	const theme = detectTheme();
-
 	const addControlDiv = L.DomUtil.create('div');
 
 	const customControls = L.Control.extend({
@@ -401,156 +171,52 @@ export const homeMarkerButtons = (
 			position: 'topleft'
 		},
 		onAdd: () => {
-			addControlDiv.style.border = 'none';
-			addControlDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 			addControlDiv.classList.add('leaflet-control-site-links', 'leaflet-bar', 'leaflet-control');
 
+			// Home button
 			const addHomeButton = L.DomUtil.create('a');
-			addHomeButton.classList.add('leaflet-bar-part');
 			addHomeButton.href = '/';
 			addHomeButton.title = 'Go to home page';
 			addHomeButton.role = 'button';
 			addHomeButton.ariaLabel = 'Go to home page';
-			addHomeButton.ariaDisabled = 'false';
-			addHomeButton.innerHTML = `<img src=${
-				theme === 'dark' ? '/icons/home-white.svg' : '/icons/home.svg'
-			} alt='home' class='inline' id='homebutton'/>`;
-			addHomeButton.style.borderRadius = '8px 8px 0 0';
-			if (theme === 'light') {
-				addHomeButton.onmouseenter = () => {
-					const homeIcon = document.querySelector('#homebutton') as HTMLImageElement;
-					if (homeIcon) {
-						homeIcon.src = '/icons/home-black.svg';
-					}
-				};
-				addHomeButton.onmouseleave = () => {
-					const homeIcon = document.querySelector('#homebutton') as HTMLImageElement;
-					if (homeIcon) {
-						homeIcon.src = '/icons/home.svg';
-					}
-				};
-			}
-			addHomeButton.classList.add(
-				'dark:!bg-dark',
-				'dark:hover:!bg-dark/75',
-				'dark:border',
-				'dark:border-white/95'
-			);
+			addHomeButton.innerHTML = `<img src='/icons/home.svg' alt='home' style='width: 16px; height: 16px;'/>`;
 			addHomeButton.onclick = () => {
 				trackEvent('home_button_click');
 			};
-
 			addControlDiv.append(addHomeButton);
 
 			if (mainMap) {
+				// Add location button
 				const addLocationButton = L.DomUtil.create('a');
-				addLocationButton.classList.add('leaflet-bar-part');
 				addLocationButton.href = '/add-location';
 				addLocationButton.title = 'Add location';
 				addLocationButton.role = 'button';
 				addLocationButton.ariaLabel = 'Add location';
-				addLocationButton.ariaDisabled = 'false';
-				addLocationButton.innerHTML = `<img src=${
-					theme === 'dark' ? '/icons/marker-white.svg' : '/icons/marker.svg'
-				} alt='marker' class='inline' id='marker'/>`;
-				addLocationButton.style.borderRadius = '0';
-				if (theme === 'light') {
-					addLocationButton.onmouseenter = () => {
-						const markerIcon = document.querySelector('#marker') as HTMLImageElement;
-						if (markerIcon) {
-							markerIcon.src = '/icons/marker-black.svg';
-						}
-					};
-					addLocationButton.onmouseleave = () => {
-						const markerIcon = document.querySelector('#marker') as HTMLImageElement;
-						if (markerIcon) {
-							markerIcon.src = '/icons/marker.svg';
-						}
-					};
-				}
-				addLocationButton.classList.add(
-					'dark:!bg-dark',
-					'dark:hover:!bg-dark/75',
-					'dark:border',
-					'dark:border-white/95'
-				);
+				addLocationButton.innerHTML = `<img src='/icons/marker.svg' alt='marker' style='width: 16px; height: 16px;'/>`;
 				addLocationButton.onclick = () => {
 					trackEvent('add_location_click');
 				};
-
 				addControlDiv.append(addLocationButton);
 
+				// Community map button
 				const communityMapButton = L.DomUtil.create('a');
-				communityMapButton.classList.add('leaflet-bar-part');
 				communityMapButton.href = '/communities/map';
 				communityMapButton.title = 'Community map';
 				communityMapButton.role = 'button';
 				communityMapButton.ariaLabel = 'Community map';
-				communityMapButton.ariaDisabled = 'false';
-				communityMapButton.innerHTML = `<img src=${
-					theme === 'dark' ? '/icons/group-white.svg' : '/icons/group.svg'
-				} alt='group' class='inline' id='group'/>`;
-				communityMapButton.style.borderRadius = BOTTOM_BUTTON_RADIUS;
-				if (theme === 'light') {
-					communityMapButton.onmouseenter = () => {
-						const groupIcon = document.querySelector('#group') as HTMLImageElement;
-						if (groupIcon) {
-							groupIcon.src = '/icons/group-black.svg';
-						}
-					};
-					communityMapButton.onmouseleave = () => {
-						const groupIcon = document.querySelector('#group') as HTMLImageElement;
-						if (groupIcon) {
-							groupIcon.src = '/icons/group.svg';
-						}
-					};
-				}
-				communityMapButton.classList.add(
-					'dark:!bg-dark',
-					'dark:hover:!bg-dark/75',
-					'dark:border',
-					'dark:border-white/95'
-				);
-				communityMapButton.style.borderBottom = BORDER_BOTTOM_STYLE;
+				communityMapButton.innerHTML = `<img src='/icons/group.svg' alt='group' style='width: 16px; height: 16px;'/>`;
 				communityMapButton.onclick = () => {
 					trackEvent('community_map_click');
 				};
-
 				addControlDiv.append(communityMapButton);
 			} else {
+				// Merchant map button (for community map page)
 				const merchantMapButton = L.DomUtil.create('a');
-				merchantMapButton.classList.add('leaflet-bar-part');
 				merchantMapButton.href = '/map';
 				merchantMapButton.title = 'Merchant map';
 				merchantMapButton.role = 'button';
 				merchantMapButton.ariaLabel = 'Merchant map';
-				merchantMapButton.ariaDisabled = 'false';
-				merchantMapButton.innerHTML = `<img src=${
-					theme === 'dark' ? '/icons/shopping-white.svg' : '/icons/shopping.svg'
-				} alt='shopping' class='inline' id='shopping'/>`;
-				merchantMapButton.style.borderRadius = BOTTOM_BUTTON_RADIUS;
-				merchantMapButton.style.borderBottom = BORDER_BOTTOM_STYLE;
-				if (theme === 'light') {
-					merchantMapButton.onmouseenter = () => {
-						const shoppingIcon = document.querySelector('#shopping') as HTMLImageElement;
-						if (shoppingIcon) {
-							shoppingIcon.src = '/icons/shopping-black.svg';
-						}
-					};
-					merchantMapButton.onmouseleave = () => {
-						const shoppingIcon = document.querySelector('#shopping') as HTMLImageElement;
-						if (shoppingIcon) {
-							shoppingIcon.src = '/icons/shopping.svg';
-						}
-					};
-				}
-				merchantMapButton.classList.add(
-					'dark:!bg-dark',
-					'dark:hover:!bg-dark/75',
-					'dark:border',
-					'dark:border-white/95'
-				);
-
+				merchantMapButton.innerHTML = `<img src='/icons/shopping.svg' alt='shopping' style='width: 16px; height: 16px;'/>`;
 				addControlDiv.append(merchantMapButton);
 			}
 
@@ -563,8 +229,6 @@ export const homeMarkerButtons = (
 };
 
 export const dataRefresh = (L: Leaflet, map: Map, DomEvent: DomEventType) => {
-	const theme = detectTheme();
-
 	const dataRefreshButton = L.DomUtil.create('a');
 
 	const customDataRefreshButton = L.Control.extend({
@@ -573,9 +237,7 @@ export const dataRefresh = (L: Leaflet, map: Map, DomEvent: DomEventType) => {
 		},
 		onAdd: () => {
 			const dataRefreshDiv = L.DomUtil.create('div');
-			dataRefreshDiv.classList.add('leaflet-bar', 'leafet-control', 'data-refresh-div');
-			dataRefreshDiv.style.border = 'none';
-			dataRefreshDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
+			dataRefreshDiv.classList.add('leaflet-bar', 'leaflet-control', 'data-refresh-div');
 			dataRefreshDiv.style.display = 'none';
 
 			dataRefreshButton.classList.add('leaflet-control-data-refresh');
@@ -583,34 +245,11 @@ export const dataRefresh = (L: Leaflet, map: Map, DomEvent: DomEventType) => {
 			dataRefreshButton.role = 'button';
 			dataRefreshButton.ariaLabel = 'Data refresh available';
 			dataRefreshButton.ariaDisabled = 'false';
-			dataRefreshButton.innerHTML = `<img src=${
-				theme === 'dark' ? '/icons/refresh-white.svg' : '/icons/refresh.svg'
-			} alt='refresh' class='inline' id='refresh'/>`;
-			dataRefreshButton.style.borderRadius = '8px';
+			dataRefreshButton.innerHTML = `<img src='/icons/refresh.svg' alt='refresh' style='width: 16px; height: 16px;'/>`;
 			dataRefreshButton.onclick = () => {
 				trackEvent('data_refresh_click');
 				location.reload();
 			};
-			if (theme === 'light') {
-				dataRefreshButton.onmouseenter = () => {
-					const refreshIcon = document.querySelector('#refresh') as HTMLImageElement;
-					if (refreshIcon) {
-						refreshIcon.src = '/icons/refresh-black.svg';
-					}
-				};
-				dataRefreshButton.onmouseleave = () => {
-					const refreshIcon = document.querySelector('#refresh') as HTMLImageElement;
-					if (refreshIcon) {
-						refreshIcon.src = '/icons/refresh.svg';
-					}
-				};
-			}
-			dataRefreshButton.classList.add(
-				'dark:!bg-dark',
-				'dark:hover:!bg-dark/75',
-				'dark:border',
-				'dark:border-white/95'
-			);
 
 			dataRefreshDiv.append(dataRefreshButton);
 

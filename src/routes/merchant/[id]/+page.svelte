@@ -26,8 +26,7 @@
 		changeDefaultIcons,
 		generateIcon,
 		geolocate,
-		layers,
-		toggleMapButtons
+		layers
 	} from '$lib/map/setup';
 	import {
 		areaError,
@@ -359,8 +358,6 @@
 			baseMaps['OpenFreeMap Liberty'].addTo(map);
 		}
 	};
-
-	$: $theme !== undefined && mapLoaded && toggleMapButtons();
 
 	$: $theme !== undefined && mapLoaded && toggleTheme();
 

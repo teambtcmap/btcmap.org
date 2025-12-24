@@ -7,7 +7,7 @@
 	import MapLoadingEmbed from '$components/MapLoadingEmbed.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import { loadMapDependencies } from '$lib/map/imports';
-	import { attribution, changeDefaultIcons, geolocate, toggleMapButtons } from '$lib/map/setup';
+	import { attribution, changeDefaultIcons, geolocate } from '$lib/map/setup';
 	import { theme } from '$lib/store';
 	import { detectTheme, errToast } from '$lib/utils';
 
@@ -252,8 +252,6 @@
 			map.remove();
 		}
 	});
-
-	$: $theme !== undefined && mapLoaded === true && toggleMapButtons();
 
 	const toggleTheme = () => {
 		if ($theme === 'dark') {

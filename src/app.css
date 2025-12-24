@@ -165,3 +165,57 @@
 		bottom: 0 !important;
 	}
 }
+
+/* Center icons in Leaflet control buttons */
+.leaflet-bar a {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* Invert custom button icons in dark mode */
+.dark .leaflet-bar a img,
+.dark .leaflet-control-locate-location-arrow {
+	filter: invert(1);
+}
+
+/* Dark mode for Leaflet controls */
+.dark .leaflet-bar,
+.dark .leaflet-control-layers {
+	background-color: #1f2937;
+	border-color: #374151;
+}
+
+.dark .leaflet-bar a {
+	color: #f3f4f6;
+	background-color: #1f2937;
+	border-bottom-color: #374151;
+}
+
+.dark .leaflet-bar a:hover {
+	background-color: #374151;
+}
+
+.dark .leaflet-control-layers-toggle {
+	background-color: #1f2937;
+}
+
+.dark .leaflet-control-layers-list {
+	background-color: #1f2937;
+	color: #f3f4f6;
+}
+
+.dark .leaflet-control-attribution {
+	background-color: rgba(31, 41, 55, 0.8);
+	color: #9ca3af;
+}
+
+.dark .leaflet-control-attribution a {
+	color: #60a5fa;
+}
+
+.dark .leaflet-control-scale-line {
+	background-color: rgba(31, 41, 55, 0.8);
+	color: #f3f4f6;
+	border-color: #6b7280;
+}

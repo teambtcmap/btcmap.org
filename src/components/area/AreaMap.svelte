@@ -13,8 +13,7 @@
 		generateIcon,
 		generateMarker,
 		geolocate,
-		layers,
-		toggleMapButtons
+		layers
 	} from '$lib/map/setup';
 	import { theme } from '$lib/store';
 	import type { BaseMaps, DomEventType, Grade, Leaflet, Place } from '$lib/types';
@@ -62,8 +61,6 @@
 	let leaflet: Leaflet;
 	let DomEvent: DomEventType;
 	let LocateControl: typeof import('leaflet.locatecontrol').LocateControl;
-
-	$: $theme !== undefined && mapLoaded && toggleMapButtons();
 
 	const closePopup = () => {
 		map.closePopup();

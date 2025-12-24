@@ -75,7 +75,7 @@
 		placesLoadingProgress
 	} from '$lib/store';
 	import type { Leaflet, Place } from '$lib/types';
-	import { debounce, detectTheme, errToast, isBoosted } from '$lib/utils';
+	import { debounce, errToast, isBoosted } from '$lib/utils';
 	import type { Control, LatLng, LatLngBounds, Map, Marker, MarkerClusterGroup } from 'leaflet';
 	import localforage from 'localforage';
 	import { onDestroy, onMount, tick } from 'svelte';
@@ -1023,8 +1023,6 @@
 
 	onMount(async () => {
 		if (browser) {
-			const theme = detectTheme();
-
 			const deps = await loadMapDependencies();
 			leaflet = deps.leaflet;
 			DomEvent = deps.DomEvent;
@@ -1194,8 +1192,6 @@
 				},
 				onAdd: () => {
 					const addControlDiv = leaflet.DomUtil.create('div');
-					addControlDiv.style.border = 'none';
-					addControlDiv.style.filter = 'drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3))';
 					addControlDiv.classList.add(
 						'leaflet-control-search-boost',
 						'leaflet-bar',
@@ -1209,52 +1205,22 @@
 					searchButton.role = 'button';
 					searchButton.ariaLabel = 'Search';
 					searchButton.ariaDisabled = 'false';
-					searchButton.innerHTML = `<img src=${
-						theme === 'dark' ? '/icons/search-white.svg' : '/icons/search.svg'
-					} alt='search' class='inline' id='search-button'/>`;
-					searchButton.style.borderRadius = '8px 8px 0 0';
+					searchButton.innerHTML = `<img src='/icons/search.svg' alt='search' style='width: 16px; height: 16px;'/>`;
 					searchButton.onclick = function openSearch() {
 						trackEvent('search_button_click');
 						// Open panel in search mode (will auto-focus input)
 						merchantList.openSearchMode();
 					};
-					if (theme === 'light') {
-						searchButton.onmouseenter = () => {
-							// @ts-expect-error src property exists on img element
-							document.querySelector('#search-button').src = '/icons/search-black.svg';
-						};
-						searchButton.onmouseleave = () => {
-							// @ts-expect-error src property exists on img element
-							document.querySelector('#search-button').src = '/icons/search.svg';
-						};
-					}
-					searchButton.classList.add(
-						'dark:!bg-dark',
-						'dark:hover:!bg-dark/75',
-						'dark:border',
-						'dark:border-white/95'
-					);
-
 					addControlDiv.append(searchButton);
 
-					// add boost layer button
+					// Boost layer button
 					const boostLayerButton = leaflet.DomUtil.create('a');
 					boostLayerButton.classList.add('leaflet-control-boost-layer');
 					boostLayerButton.title = 'Boosted locations';
 					boostLayerButton.role = 'button';
 					boostLayerButton.ariaLabel = 'Boosted locations';
 					boostLayerButton.ariaDisabled = 'false';
-					boostLayerButton.innerHTML = `<img src=${
-						boosts
-							? theme === 'dark'
-								? '/icons/boost-solid-white.svg'
-								: '/icons/boost-solid.svg'
-							: theme === 'dark'
-								? '/icons/boost-white.svg'
-								: '/icons/boost.svg'
-					} alt='boost' class='inline' id='boost-layer'/>`;
-					boostLayerButton.style.borderRadius = '0 0 8px 8px';
-					boostLayerButton.style.borderBottom = '1px solid #ccc';
+					boostLayerButton.innerHTML = `<img src='${boosts ? '/icons/boost-solid.svg' : '/icons/boost.svg'}' alt='boost' id='boost-layer' style='width: 16px; height: 16px;'/>`;
 					boostLayerButton.onclick = function toggleLayer() {
 						trackEvent('boost_layer_toggle');
 						if (boosts) {
@@ -1265,27 +1231,6 @@
 							location.search = $page.url.search;
 						}
 					};
-					if (theme === 'light') {
-						boostLayerButton.onmouseenter = () => {
-							// @ts-expect-error - LatLngBounds internal structure access
-							document.querySelector('#boost-layer').src = boosts
-								? '/icons/boost-solid-black.svg'
-								: '/icons/boost-black.svg';
-						};
-						boostLayerButton.onmouseleave = () => {
-							// @ts-expect-error - LatLngBounds internal structure access
-							document.querySelector('#boost-layer').src = boosts
-								? '/icons/boost-solid.svg'
-								: '/icons/boost.svg';
-						};
-					}
-					boostLayerButton.classList.add(
-						'dark:!bg-dark',
-						'dark:hover:!bg-dark/75',
-						'dark:border',
-						'dark:border-white/95'
-					);
-
 					addControlDiv.append(boostLayerButton);
 
 					return addControlDiv;
