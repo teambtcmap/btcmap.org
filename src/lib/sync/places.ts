@@ -21,6 +21,9 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 // Concurrency protection to prevent multiple simultaneous syncs
 let syncInProgress = false;
 
+// Maximum age for cached sync timestamp (in days)
+const MAX_CACHE_AGE_DAYS = 90;
+
 // Progress range constants for clear progress mapping
 const PROGRESS_RANGES = {
 	DOWNLOAD_START: 10,
@@ -43,6 +46,15 @@ const getTwoWeeksAgoDate = (): string => {
 	return twoWeeksAgo.toISOString();
 };
 
+// Helper function to validate sync dates (not in future, not older than MAX_CACHE_AGE_DAYS)
+const isValidSyncDate = (dateStr: string): boolean => {
+	const date = new Date(dateStr);
+	const now = new Date();
+	const maxAgeDate = new Date();
+	maxAgeDate.setDate(maxAgeDate.getDate() - MAX_CACHE_AGE_DAYS);
+	return date <= now && date >= maxAgeDate;
+};
+
 // Helper function to get static file's last modified date
 const getStaticFileDate = async (): Promise<string> => {
 	try {
@@ -51,18 +63,13 @@ const getStaticFileDate = async (): Promise<string> => {
 		const lastModified = headResponse.headers['last-modified'];
 
 		if (lastModified) {
-			const staticDate = new Date(lastModified);
+			const staticDateStr = new Date(lastModified).toISOString();
 
-			// Validate date is reasonable (not in future, not older than 90 days)
-			const now = new Date();
-			const ninetyDaysAgo = new Date();
-			ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-
-			if (staticDate <= now && staticDate >= ninetyDaysAgo) {
-				console.info(`Using static file date for updates: ${staticDate.toISOString()}`);
-				return staticDate.toISOString();
+			if (isValidSyncDate(staticDateStr)) {
+				console.info(`Using static file date for updates: ${staticDateStr}`);
+				return staticDateStr;
 			} else {
-				console.warn(`Static file date invalid (${staticDate.toISOString()}), using fallback`);
+				console.warn(`Static file date invalid (${staticDateStr}), using fallback`);
 			}
 		}
 	} catch (error) {
@@ -90,9 +97,11 @@ export const elementsSync = async () => {
 		placesLoadingProgress.set(1);
 		placesLoadingStatus.set('Initializing...');
 
-		// get places from local storage
-		await localforage
-			.getItem<Place[]>('places_v4')
+		// get places and sync timestamp from local storage
+		const cachedPlaces = await localforage.getItem<Place[]>('places_v4');
+		const cachedSyncedAt = await localforage.getItem<string>('places_v4_synced_at');
+
+		await Promise.resolve(cachedPlaces)
 			.then(async function (cachedPlaces) {
 				// add to sync count to only show data refresh after initial load
 				const count = get(placesSyncCount);
@@ -175,13 +184,33 @@ export const elementsSync = async () => {
 					placesLoadingProgress.set(PROGRESS_RANGES.CACHE_LOAD);
 				}
 
-				// Step 2: Get recent updates from API (since static file was last updated)
+				// Step 2: Get recent updates from API
+				// Prefer cached sync timestamp if available and valid (not in future, not older than
+				// MAX_CACHE_AGE_DAYS); otherwise use static file date
 				placesLoadingStatus.set('Checking for updates...');
 				placesLoadingProgress.set(
 					cachedPlaces ? PROGRESS_RANGES.UPDATE_CHECK : PROGRESS_RANGES.UPDATE_CHECK_NO_CACHE
 				);
 
-				const updatesSince = await getStaticFileDate();
+				// Validate cachedSyncedAt before using
+				let validCachedSyncedAt: string | null = null;
+				if (cachedSyncedAt) {
+					if (isValidSyncDate(cachedSyncedAt)) {
+						validCachedSyncedAt = cachedSyncedAt;
+					} else {
+						console.warn(`Cached sync date invalid (${cachedSyncedAt}), ignoring`);
+					}
+				}
+
+				const useCachedSyncTimestamp = cachedPlaces && validCachedSyncedAt;
+				if (useCachedSyncTimestamp) {
+					console.info(`Using cached sync timestamp for updates: ${validCachedSyncedAt}`);
+				}
+				const updatesSince = useCachedSyncTimestamp
+					? validCachedSyncedAt
+					: await getStaticFileDate();
+
+				let apiSucceeded = false;
 
 				try {
 					const apiResponse = await axios.get<Place[]>(
@@ -213,6 +242,8 @@ export const elementsSync = async () => {
 							mapUpdates.set(true);
 						}
 					}
+
+					apiSucceeded = true;
 				} catch (error) {
 					// If API fails, continue with existing data (either cached or CDN)
 					// Don't return early - let execution continue to Step 3 to finalize and complete progress
@@ -231,6 +262,12 @@ export const elementsSync = async () => {
 					localforage
 						.setItem('places_v4', placesData)
 						.then(async function () {
+							// Only save sync timestamp if API succeeded, to avoid creating gaps
+							// where updates between old and new timestamp are permanently missed
+							if (apiSucceeded) {
+								await localforage.setItem('places_v4_synced_at', new Date().toISOString());
+							}
+
 							// Yield to main thread before updating store to prevent UI freeze
 							await yieldToMain();
 							// set response to store
