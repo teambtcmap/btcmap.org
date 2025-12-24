@@ -179,43 +179,53 @@
 	filter: invert(1);
 }
 
-/* Dark mode for Leaflet controls */
+/* Dark mode for Leaflet controls - Tailwind gray palette */
+.dark {
+	--leaflet-bg: #1f2937; /* gray-800 */
+	--leaflet-bg-transparent: rgba(31, 41, 55, 0.8);
+	--leaflet-border: #374151; /* gray-700 */
+	--leaflet-border-muted: #6b7280; /* gray-500 */
+	--leaflet-text: #f3f4f6; /* gray-100 */
+	--leaflet-text-muted: #9ca3af; /* gray-400 */
+	--leaflet-link: #60a5fa; /* blue-400 */
+}
+
 .dark .leaflet-bar,
 .dark .leaflet-control-layers {
-	background-color: #1f2937;
-	border-color: #374151;
+	background-color: var(--leaflet-bg);
+	border-color: var(--leaflet-border);
 }
 
 .dark .leaflet-bar a {
-	color: #f3f4f6;
-	background-color: #1f2937;
-	border-bottom-color: #374151;
+	color: var(--leaflet-text);
+	background-color: var(--leaflet-bg);
+	border-bottom-color: var(--leaflet-border);
 }
 
 .dark .leaflet-bar a:hover {
-	background-color: #374151;
+	background-color: var(--leaflet-border);
 }
 
 .dark .leaflet-control-layers-toggle {
-	background-color: #1f2937;
+	background-color: var(--leaflet-bg);
 }
 
 .dark .leaflet-control-layers-list {
-	background-color: #1f2937;
-	color: #f3f4f6;
+	background-color: var(--leaflet-bg);
+	color: var(--leaflet-text);
 }
 
 .dark .leaflet-control-attribution {
-	background-color: rgba(31, 41, 55, 0.8);
-	color: #9ca3af;
+	background-color: var(--leaflet-bg-transparent);
+	color: var(--leaflet-text-muted);
 }
 
 .dark .leaflet-control-attribution a {
-	color: #60a5fa;
+	color: var(--leaflet-link);
 }
 
 .dark .leaflet-control-scale-line {
-	background-color: rgba(31, 41, 55, 0.8);
-	color: #f3f4f6;
-	border-color: #6b7280;
+	background-color: var(--leaflet-bg-transparent);
+	color: var(--leaflet-text);
+	border-color: var(--leaflet-border-muted);
 }
