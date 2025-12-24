@@ -152,6 +152,9 @@ export const geolocate = (
 		'.leaflet-bar-part.leaflet-bar-part-single'
 	);
 	if (locateButton) {
+		// Replace default arrow icon with custom crosshairs icon
+		locateButton.innerHTML = `<img src='/icons/locate.svg' alt='locate' style='width: 16px; height: 16px;'/>`;
+
 		locateButton.addEventListener('click', () => {
 			trackEvent('locate_click');
 		});

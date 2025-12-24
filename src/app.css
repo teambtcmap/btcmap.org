@@ -174,8 +174,7 @@
 }
 
 /* Invert custom button icons in dark mode */
-.dark .leaflet-bar a img,
-.dark .leaflet-control-locate-location-arrow {
+.dark .leaflet-bar a img {
 	filter: invert(1);
 }
 
