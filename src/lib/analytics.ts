@@ -25,7 +25,11 @@ type EventName =
 	| 'add_location_click'
 	| 'community_map_click'
 	| 'data_refresh_click'
-	| 'layer_change';
+	| 'layer_change'
+	| 'drawer_swipe_expand'
+	| 'drawer_swipe_collapse'
+	| 'drawer_swipe_dismiss'
+	| 'drawer_collapse_button_click';
 
 declare global {
 	interface Window {

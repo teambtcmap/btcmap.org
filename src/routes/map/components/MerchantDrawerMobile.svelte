@@ -18,6 +18,7 @@
 		clearBoostState
 	} from '$lib/merchantDrawerLogic';
 	import { drawerGesture } from '$lib/drawerGestureController';
+	import { trackEvent } from '$lib/analytics';
 
 	// Derive state from centralized store
 	$: isOpen = $merchantDrawer.isOpen;
@@ -241,7 +242,10 @@
 
 				{#if $expanded && drawerView === 'details'}
 					<button
-						on:click={drawerGesture.collapse}
+						on:click={() => {
+							trackEvent('drawer_collapse_button_click');
+							drawerGesture.collapse();
+						}}
 						class="rounded-full p-2 text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
 						aria-label="Collapse drawer"
 					>

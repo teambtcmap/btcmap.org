@@ -11,6 +11,7 @@ import {
 	SCROLL_DRAG_THRESHOLD,
 	SCROLL_TOP_THRESHOLD
 } from './drawerConfig';
+import { trackEvent } from '$lib/analytics';
 import {
 	determineSnapState,
 	updateVelocity,
@@ -123,9 +124,14 @@ function createDrawerGestureController() {
 			(velocity < -VELOCITY_THRESHOLD || finalHeight < PEEK_HEIGHT - DISMISS_THRESHOLD);
 
 		if (shouldDismiss) {
+			trackEvent('drawer_swipe_dismiss');
 			onDismiss?.();
 		} else {
 			const snapState = determineSnapState(velocity, totalDelta, finalHeight, maxHeight);
+			// Track swipe expand/collapse only when state changes
+			if (snapState.expanded !== isExpanded) {
+				trackEvent(snapState.expanded ? 'drawer_swipe_expand' : 'drawer_swipe_collapse');
+			}
 			expanded.set(snapState.expanded);
 			drawerHeight.set(snapState.height);
 		}
@@ -196,6 +202,10 @@ function createDrawerGestureController() {
 			const maxHeight = get(expandedHeight);
 			const velocity = internal.velocityState.velocity;
 			const snapState = determineSnapState(velocity, totalDelta, finalHeight, maxHeight);
+			// Track collapse from content swipe (can only collapse, not expand, from content drag)
+			if (!snapState.expanded) {
+				trackEvent('drawer_swipe_collapse');
+			}
 			expanded.set(snapState.expanded);
 			drawerHeight.set(snapState.height);
 		}
