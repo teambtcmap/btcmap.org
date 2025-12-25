@@ -231,7 +231,7 @@
 					<button
 						on:pointerdown|stopPropagation
 						on:click={goBack}
-						class="flex items-center space-x-2 text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
+						class="flex touch-auto items-center space-x-2 text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
 					>
 						<Icon w="20" h="20" icon="arrow_back" type="material" />
 						<span class="text-sm font-semibold">Back</span>
@@ -248,7 +248,7 @@
 							trackEvent('drawer_collapse_button_click');
 							drawerGesture.collapse();
 						}}
-						class="rounded-full p-2 text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
+						class="touch-auto rounded-full p-2 text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
 						aria-label="Collapse drawer"
 					>
 						<Icon w="20" h="20" icon="keyboard_arrow_down" type="material" />
