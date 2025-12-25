@@ -229,6 +229,7 @@
 			>
 				{#if drawerView !== 'details'}
 					<button
+						on:pointerdown|stopPropagation
 						on:click={goBack}
 						class="flex items-center space-x-2 text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
 					>
@@ -242,6 +243,7 @@
 
 				{#if $expanded && drawerView === 'details'}
 					<button
+						on:pointerdown|stopPropagation
 						on:click={() => {
 							trackEvent('drawer_collapse_button_click');
 							drawerGesture.collapse();
