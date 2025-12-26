@@ -64,6 +64,7 @@
 		support,
 		updateMapHash
 	} from '$lib/map/setup';
+	import { detectTheme } from '$lib/utils';
 	import {
 		placesError,
 		places,
@@ -144,6 +145,7 @@
 	let DomEvent: typeof import('leaflet/src/dom/DomEvent');
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	let controlLayers: Control.Layers;
+	let currentLayerName: string | null = null;
 
 	let mapElement: HTMLDivElement;
 	let map: Map;
@@ -1108,6 +1110,9 @@
 			// add tiles and basemaps
 			const { baseMaps, activeLayer } = layers(leaflet, map);
 
+			// Initialize current layer name for deduplication tracking
+			currentLayerName = detectTheme() === 'dark' ? 'Carto Dark Matter' : 'OpenFreeMap Liberty';
+
 			// Hook into MapLibre GL tile loading events
 			if (activeLayer && activeLayer.getMaplibreMap) {
 				// MapLibre GL map might not be ready immediately, poll for it
@@ -1266,9 +1271,12 @@
 
 			controlLayers = leaflet.control.layers(baseMaps).addTo(map);
 
-			// track layer changes
+			// track layer changes (with deduplication to avoid tracking same layer selection)
 			map.on('baselayerchange', (e: { name: string }) => {
-				trackEvent('layer_change', { layer: e.name });
+				if (e.name !== currentLayerName) {
+					trackEvent('layer_change', { layer: e.name });
+					currentLayerName = e.name;
+				}
 			});
 
 			// change default icons
