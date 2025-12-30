@@ -14,7 +14,12 @@
 		type CategoryKey,
 		type CategoryCounts
 	} from '$lib/categoryMapping';
-	import { MERCHANT_LIST_MIN_ZOOM, MERCHANT_LIST_LOW_ZOOM, BREAKPOINTS } from '$lib/constants';
+	import {
+		MERCHANT_LIST_MIN_ZOOM,
+		MERCHANT_LIST_LOW_ZOOM,
+		BREAKPOINTS,
+		MERCHANT_LIST_MAX_ITEMS
+	} from '$lib/constants';
 	import { calcVerifiedDate } from '$lib/merchantDrawerLogic';
 	import { trackEvent } from '$lib/analytics';
 
@@ -336,7 +341,10 @@
 						? 'bg-white text-primary shadow-sm dark:bg-white/10 dark:text-white'
 						: 'text-body hover:text-primary dark:text-white/70 dark:hover:text-white'}"
 				>
-					Nearby
+					Nearby{#if isLoadingList}<span class="opacity-60"> ...</span>{:else if totalCount > 0}
+						({totalCount > MERCHANT_LIST_MAX_ITEMS
+							? `>${MERCHANT_LIST_MAX_ITEMS}`
+							: totalCount}){/if}
 				</button>
 			</div>
 
@@ -385,9 +393,7 @@
 					{:else if showZoomInMessage}
 						Zoom in to see list
 					{:else if isTruncated}
-						Showing {merchants.length} nearest of {totalCount}
-					{:else}
-						{merchants.length} location{merchants.length !== 1 ? 's' : ''} in view
+						Showing nearest {merchants.length}
 					{/if}
 				</p>
 				{#if mode === 'search'}
