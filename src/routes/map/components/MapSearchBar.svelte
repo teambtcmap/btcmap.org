@@ -38,10 +38,12 @@
 	}
 
 	function handleModeSwitch(newMode: 'nearby' | 'search') {
-		if (newMode === mode) return;
-		trackEvent(newMode === 'nearby' ? 'searchbar_nearby_click' : 'searchbar_worldwide_click');
-		merchantList.setMode(newMode);
-		// Open panel when clicking Nearby tab if there are results
+		const isSameMode = newMode === mode;
+		if (!isSameMode) {
+			trackEvent(newMode === 'nearby' ? 'searchbar_nearby_click' : 'searchbar_worldwide_click');
+			merchantList.setMode(newMode);
+		}
+		// Always open panel when clicking Nearby tab if there are results
 		if (newMode === 'nearby' && nearbyCount > 0) {
 			onNearbyClick?.();
 		}
