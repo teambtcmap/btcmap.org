@@ -133,7 +133,7 @@ export const changeDefaultIcons = (
 		}
 	};
 
-	zoomBar?.append(fullscreenButton);
+	leafletBar?.append(fullscreenButton);
 
 	if (DomEvent) {
 		DomEvent.disableClickPropagation(fullscreenButton);
@@ -146,7 +146,7 @@ export const geolocate = (
 	LocateControl: typeof import('leaflet.locatecontrol').LocateControl
 ) => {
 	// Use plugin defaults, just add analytics tracking
-	new LocateControl({ position: 'topleft' }).addTo(map);
+	new LocateControl({ position: 'bottomright' }).addTo(map);
 
 	const locateButton: HTMLAnchorElement | null = document.querySelector(
 		'.leaflet-bar-part.leaflet-bar-part-single'
