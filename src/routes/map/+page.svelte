@@ -82,6 +82,8 @@
 	import { onDestroy, onMount, tick } from 'svelte';
 	import type { FeatureGroup } from 'leaflet';
 
+	export let data: { geo?: { lat: number | null; lng: number | null } };
+
 	let mapLoading = 1;
 	let mapLoadingStatus = 'Loading map...';
 
@@ -1092,13 +1094,20 @@
 								// @ts-expect-error - LatLngBounds internal structure access
 								[value._southWest.lat, value._southWest.lng]
 							]);
+						} else if (data.geo?.lat != null && data.geo?.lng != null) {
+							// Use IP-based geolocation for first-time visitors
+							map.setView([data.geo.lat, data.geo.lng], DEFAULT_MAP_ZOOM);
 						} else {
 							map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
 						}
 						setMapViewAndMarkLoaded();
 					})
 					.catch(function (err) {
-						map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
+						if (data.geo?.lat != null && data.geo?.lng != null) {
+							map.setView([data.geo.lat, data.geo.lng], DEFAULT_MAP_ZOOM);
+						} else {
+							map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
+						}
 						setMapViewAndMarkLoaded();
 						errToast(
 							'Could not set map view to cached coords, please try again or contact BTC Map.'

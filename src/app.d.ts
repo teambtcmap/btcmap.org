@@ -4,7 +4,12 @@ declare global {
 	namespace App {
 		// interface Error {}
 		// interface Locals {}
-		// interface PageData {}
+		interface PageData {
+			geo?: {
+				lat: number | null;
+				lng: number | null;
+			};
+		}
 		// interface Platform {}
 	}
 
