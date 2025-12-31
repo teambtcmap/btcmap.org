@@ -1034,7 +1034,7 @@
 
 			// add map and tiles
 			map = window.L.map(mapElement, { maxZoom: 19, zoomControl: false });
-			leaflet.control.zoom({ position: 'bottomright' }).addTo(map);
+			leaflet.control.zoom({ position: 'topright' }).addTo(map);
 
 			// Helper function to set mapLoaded after view is set
 			const setMapViewAndMarkLoaded = () => {
@@ -1200,33 +1200,14 @@
 			// add locate button to map
 			geolocate(leaflet, map, LocateControl);
 
-			// add new control container for search and boost
+			// add boost button control
 			const customControls = leaflet.Control.extend({
 				options: {
-					position: 'bottomright'
+					position: 'topright'
 				},
 				onAdd: () => {
 					const addControlDiv = leaflet.DomUtil.create('div');
-					addControlDiv.classList.add(
-						'leaflet-control-search-boost',
-						'leaflet-bar',
-						'leaflet-control'
-					);
-
-					// Search button - opens panel in search mode
-					const searchButton = leaflet.DomUtil.create('a');
-					searchButton.classList.add('leaflet-control-search-toggle');
-					searchButton.title = 'Search';
-					searchButton.role = 'button';
-					searchButton.ariaLabel = 'Search';
-					searchButton.ariaDisabled = 'false';
-					searchButton.innerHTML = `<img src='/icons/search.svg' alt='search' style='width: 16px; height: 16px;'/>`;
-					searchButton.onclick = function openSearch() {
-						trackEvent('search_button_click');
-						// Open panel in search mode (will auto-focus input)
-						merchantList.openSearchMode();
-					};
-					addControlDiv.append(searchButton);
+					addControlDiv.classList.add('leaflet-control-boost', 'leaflet-bar', 'leaflet-control');
 
 					// Boost layer button
 					const boostLayerButton = leaflet.DomUtil.create('a');
@@ -1265,7 +1246,7 @@
 			dataRefresh(leaflet, map, DomEvent);
 
 			controlLayers = leaflet.control
-				.layers(baseMaps, undefined, { position: 'bottomright' })
+				.layers(baseMaps, undefined, { position: 'topright' })
 				.addTo(map);
 
 			// track layer changes (with deduplication to avoid tracking same layer selection)
@@ -1340,9 +1321,11 @@
 	<!-- Map takes full space -->
 	<div bind:this={mapElement} class="map-fullscreen absolute inset-0 !bg-teal dark:!bg-dark" />
 
-	<!-- Floating search bar - always visible over the map (desktop only) -->
+	<!-- Floating search bar - desktop: top-left, mobile: bottom-center -->
 	{#if mapLoaded}
-		<div class="pointer-events-none absolute top-3 left-3 z-[1002] hidden md:block">
+		<div
+			class="pointer-events-none absolute z-[1002] max-md:right-3 max-md:bottom-20 max-md:left-3 md:top-3 md:left-3"
+		>
 			<MapSearchBar
 				onSearch={handlePanelSearch}
 				onFocus={() => {
