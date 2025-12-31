@@ -9,12 +9,12 @@
 		{ link: '/license', name: 'License' },
 		{ link: '/privacy-policy', name: 'Privacy' },
 		{ link: 'https://stats.uptimerobot.com/7kgEVtzlV1', name: 'Status' },
-		{ link: 'https://bitcoin.rocks/business/', name: 'Bitcoin for Business', external: true },
-		{ link: '/bitcoin.pdf', name: 'White Paper' },
-		{ link: '/cypherpunks-manifesto.pdf', name: 'Cypherpunks' },
 		...(env.PUBLIC_UMAMI_URL
 			? [{ link: env.PUBLIC_UMAMI_URL, name: 'Analytics', external: true }]
-			: [])
+			: []),
+		{ link: 'https://bitcoin.rocks/business/', name: 'Bitcoin for Business', external: true },
+		{ link: '/bitcoin.pdf', name: 'White Paper' },
+		{ link: '/cypherpunks-manifesto.pdf', name: 'Cypherpunks' }
 	];
 </script>
 
