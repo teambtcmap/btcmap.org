@@ -14,14 +14,10 @@
 		type CategoryKey,
 		type CategoryCounts
 	} from '$lib/categoryMapping';
-	import {
-		MERCHANT_LIST_MIN_ZOOM,
-		MERCHANT_LIST_LOW_ZOOM,
-		BREAKPOINTS,
-		MERCHANT_LIST_MAX_ITEMS
-	} from '$lib/constants';
+	import { MERCHANT_LIST_MIN_ZOOM, MERCHANT_LIST_LOW_ZOOM, BREAKPOINTS } from '$lib/constants';
 	import { calcVerifiedDate } from '$lib/merchantDrawerLogic';
 	import { trackEvent } from '$lib/analytics';
+	import { formatNearbyCount } from '$lib/utils';
 
 	// Compute once for all list items
 	const verifiedDate = calcVerifiedDate();
@@ -341,10 +337,9 @@
 						? 'bg-white text-primary shadow-sm dark:bg-white/10 dark:text-white'
 						: 'text-body hover:text-primary dark:text-white/70 dark:hover:text-white'}"
 				>
-					Nearby{#if isLoadingList}<span class="opacity-60"> ...</span>{:else if totalCount > 0}
-						({totalCount > MERCHANT_LIST_MAX_ITEMS
-							? `>${MERCHANT_LIST_MAX_ITEMS}`
-							: totalCount}){/if}
+					Nearby{#if isLoadingList}<span class="opacity-60"> ...</span>{:else}{formatNearbyCount(
+							totalCount
+						)}{/if}
 				</button>
 			</div>
 

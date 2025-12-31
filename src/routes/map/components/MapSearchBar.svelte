@@ -1,8 +1,9 @@
 <script lang="ts">
+	import type { MerchantListMode } from '$lib/merchantListStore';
 	import { merchantList } from '$lib/merchantListStore';
 	import Icon from '$components/Icon.svelte';
 	import { trackEvent } from '$lib/analytics';
-	import { MERCHANT_LIST_MAX_ITEMS } from '$lib/constants';
+	import { formatNearbyCount } from '$lib/utils';
 
 	// Callback when search is used (opens panel)
 	export let onSearch: ((query: string) => void) | undefined = undefined;
@@ -11,13 +12,7 @@
 	export let nearbyCount = 0;
 	export let isLoadingCount = false;
 
-	// Format count: hide when 0, show ">99" when exceeds max
-	$: formattedCount =
-		nearbyCount === 0
-			? ''
-			: nearbyCount > MERCHANT_LIST_MAX_ITEMS
-				? `(>${MERCHANT_LIST_MAX_ITEMS})`
-				: `(${nearbyCount})`;
+	$: formattedCount = formatNearbyCount(nearbyCount);
 
 	let inputElement: HTMLInputElement;
 
@@ -37,7 +32,7 @@
 		onSearch?.(value);
 	}
 
-	function handleModeSwitch(newMode: 'nearby' | 'search') {
+	function handleModeSwitch(newMode: MerchantListMode) {
 		const isSameMode = newMode === mode;
 		if (!isSameMode) {
 			trackEvent(newMode === 'nearby' ? 'searchbar_nearby_click' : 'searchbar_worldwide_click');
