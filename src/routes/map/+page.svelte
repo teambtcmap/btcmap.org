@@ -1321,10 +1321,11 @@
 	<!-- Map takes full space -->
 	<div bind:this={mapElement} class="map-fullscreen absolute inset-0 !bg-teal dark:!bg-dark" />
 
-	<!-- Floating search bar - desktop: top-left, mobile: bottom-center -->
+	<!-- Floating search bar - desktop: top-left, mobile: bottom-center (hidden on mobile when merchant drawer open) -->
 	{#if mapLoaded}
 		<div
-			class="pointer-events-none z-[1002] max-md:fixed max-md:right-3 max-md:bottom-20 max-md:left-3 md:absolute md:top-3 md:left-3"
+			class="pointer-events-none z-[1002] max-md:fixed max-md:right-3 max-md:bottom-20 max-md:left-3 md:absolute md:top-3 md:left-3
+				{$merchantDrawer.isOpen ? 'max-md:hidden' : ''}"
 		>
 			<MapSearchBar
 				onSearch={handlePanelSearch}
