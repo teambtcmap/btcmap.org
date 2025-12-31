@@ -43,8 +43,8 @@
 			trackEvent(newMode === 'nearby' ? 'searchbar_nearby_click' : 'searchbar_worldwide_click');
 			merchantList.setMode(newMode);
 		}
-		// Always open panel when clicking Nearby tab if there are results
-		if (newMode === 'nearby' && nearbyCount > 0) {
+		// Always open panel when clicking Nearby tab (shows guidance if empty)
+		if (newMode === 'nearby') {
 			onNearbyClick?.();
 		}
 	}
@@ -66,7 +66,6 @@
 
 	function handleClear() {
 		merchantList.clearSearchInput();
-		merchantList.exitSearchMode();
 		onSearch?.('');
 		inputElement?.focus();
 	}
@@ -124,9 +123,11 @@
 		</div>
 
 		<!-- Segmented tabs (order matches panel: Worldwide, Nearby) -->
-		<div class="flex gap-1.5 md:gap-1.5">
+		<div class="flex gap-1.5 md:gap-1.5" role="radiogroup" aria-label="Search mode">
 			<button
 				type="button"
+				role="radio"
+				aria-checked={mode === 'search'}
 				on:click={() => handleModeSwitch('search')}
 				class="rounded-full px-4 py-2.5 text-sm font-medium shadow-sm transition-colors md:px-3 md:py-1.5 md:text-xs
 					{mode === 'search'
@@ -138,6 +139,8 @@
 			</button>
 			<button
 				type="button"
+				role="radio"
+				aria-checked={mode === 'nearby'}
 				on:click={() => handleModeSwitch('nearby')}
 				class="rounded-full px-4 py-2.5 text-sm font-medium shadow-sm transition-colors md:px-3 md:py-1.5 md:text-xs
 					{mode === 'nearby'
