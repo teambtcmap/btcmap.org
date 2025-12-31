@@ -6,6 +6,7 @@
 	import NavDropdownMobile from '$components/layout/NavDropdownMobile.svelte';
 	import ThemeToggle from '$components/ThemeToggle.svelte';
 	import { afterNavigate } from '$app/navigation';
+	import { env } from '$env/dynamic/public';
 
 	const navLinks: { title: string; url: string; icon: MobileNavIconName }[] = [
 		{ title: 'Maps', url: '', icon: 'map' },
@@ -30,7 +31,7 @@
 		{ title: 'Country Leaderboard', url: '/countries/leaderboard', icon: 'countries' },
 		{
 			title: 'Website Analytics',
-			url: PUBLIC_UMAMI_URL,
+			url: env.PUBLIC_UMAMI_URL ?? 'https://umami.btcmap.org/share/tdb5fH0C3McC1BdX',
 			icon: 'stats',
 			external: true,
 			rel: 'noopener noreferrer'
