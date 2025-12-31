@@ -36,7 +36,7 @@
 			on:outclick={() => (show = false)}
 		>
 			<div class="absolute top-8 right-0 z-50 w-[185px] rounded-2xl shadow-lg">
-				{#each links as link, i (link.title)}
+				{#each links as link, i (link.url)}
 					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href={link.url}

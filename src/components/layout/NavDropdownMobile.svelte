@@ -38,7 +38,7 @@
 		on:outclick={() => (show = false)}
 	>
 		<div class="ml-7 space-y-2">
-			{#each links as link (link.title)}
+			{#each links as link (link.url)}
 				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href={link.url}
