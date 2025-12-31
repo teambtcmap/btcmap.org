@@ -346,7 +346,7 @@ export type Theme = 'light' | 'dark';
 export type DonationType = 'On-chain' | 'Lightning';
 
 export type DropdownLink = {
-	url: string | undefined;
+	url: string;
 	external?: boolean;
 	icon: MobileNavIconName;
 	title: string;

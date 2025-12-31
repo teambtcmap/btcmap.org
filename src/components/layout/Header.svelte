@@ -29,13 +29,17 @@
 		{ title: 'Tagger Leaderboard', url: '/leaderboard', icon: 'leader' },
 		{ title: 'Community Leaderboard', url: '/communities/leaderboard', icon: 'communities' },
 		{ title: 'Country Leaderboard', url: '/countries/leaderboard', icon: 'countries' },
-		{
-			title: 'Website Analytics',
-			url: env.PUBLIC_UMAMI_URL,
-			icon: 'stats',
-			external: true,
-			rel: 'noopener noreferrer'
-		}
+		...(env.PUBLIC_UMAMI_URL
+			? [
+					{
+						title: 'Website Analytics',
+						url: env.PUBLIC_UMAMI_URL,
+						icon: 'stats' as const,
+						external: true,
+						rel: 'noopener noreferrer'
+					}
+				]
+			: [])
 	];
 
 	const maintainDropdownLinks: DropdownLink[] = [

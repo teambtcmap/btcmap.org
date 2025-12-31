@@ -5,7 +5,7 @@ node_modules
 /package
 .env
 .env.*
-.env.example
+.prettierignore
 .cache
 
 # Ignore files for PNPM, NPM and YARN

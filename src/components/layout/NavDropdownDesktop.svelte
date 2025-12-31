@@ -2,6 +2,7 @@
 	import type { DropdownLink } from '$lib/types';
 	import OutClick from 'svelte-outclick';
 	import Icon from '$components/Icon.svelte';
+	import { afterNavigate } from '$app/navigation';
 
 	export let title: string;
 	export let links: DropdownLink[];
@@ -9,8 +10,6 @@
 	export let bottom: string;
 
 	let show = false;
-
-	import { afterNavigate } from '$app/navigation';
 
 	afterNavigate(() => {
 		show = false;
@@ -22,12 +21,14 @@
 	<button
 		id="dropdown-{title.toLowerCase()}"
 		on:click={() => (show = !show)}
+		aria-expanded={show}
+		aria-haspopup="true"
 		class="{show
 			? 'dark:!text-link'
 			: ''} mt-4 mr-4 flex items-center text-xl font-semibold text-link transition-colors hover:text-hover md:mt-0 md:mr-0 dark:text-white dark:hover:text-link"
 	>
 		{title}
-		<Icon type="fa" icon="chevron-down" w="16" h="16" class="ml-1" />
+		<Icon type="fa" icon="chevron-down" w="16" h="16" class="ml-1" aria-hidden="true" />
 	</button>
 
 	<!-- dropdown items -->
@@ -37,12 +38,12 @@
 			on:outclick={() => (show = false)}
 		>
 			<div class="absolute top-8 right-0 z-50 w-[185px] rounded-2xl shadow-lg">
-				{#each links.filter((link) => link.url) as link (link.url)}
+				{#each links as link (link.title)}
 					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href={link.url}
 						target={link.external ? '_blank' : null}
-						rel={link.rel || (link.external ? 'noreferrer' : null)}
+						rel={link.rel || (link.external ? 'noopener noreferrer' : null)}
 						class="flex w-full items-center justify-center bg-link p-4 text-center text-xl font-semibold text-white hover:bg-hover {link.icon ===
 						top
 							? 'rounded-t-2xl'
@@ -53,7 +54,15 @@
 						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 						{link.title}
 						{#if link.external}
-							<Icon type="fa" icon="arrow-up-right-from-square" w="16" h="16" class="ml-1" />
+							<Icon
+								type="fa"
+								icon="arrow-up-right-from-square"
+								w="16"
+								h="16"
+								class="ml-1"
+								aria-hidden="true"
+							/>
+							<span class="sr-only">(opens in new tab)</span>
 						{/if}
 					</a>
 				{/each}
