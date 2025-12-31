@@ -37,12 +37,12 @@
 			on:outclick={() => (show = false)}
 		>
 			<div class="absolute top-8 right-0 z-50 w-[185px] rounded-2xl shadow-lg">
-				{#each links as link (link.url)}
+				{#each links.filter((link) => link.url) as link (link.url)}
 					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href={link.url}
 						target={link.external ? '_blank' : null}
-						rel={link.external ? 'noreferrer' : null}
+						rel={link.rel || (link.external ? 'noreferrer' : null)}
 						class="flex w-full items-center justify-center bg-link p-4 text-center text-xl font-semibold text-white hover:bg-hover {link.icon ===
 						top
 							? 'rounded-t-2xl'
