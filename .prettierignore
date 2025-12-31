@@ -8,6 +8,9 @@ node_modules
 !.env.example
 .cache
 
+# Netlify config
+netlify.toml
+
 # Ignore files for PNPM, NPM and YARN
 pnpm-lock.yaml
 package-lock.json

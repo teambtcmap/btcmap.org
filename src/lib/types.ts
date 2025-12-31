@@ -361,6 +361,12 @@ export type AreaPageProps = {
 	issues: RpcIssue[];
 };
 
+// Nullable geographic coordinates (for optional geo data like IP-based location)
+export type GeoLocation = {
+	lat: number | null;
+	lng: number | null;
+};
+
 // V4 API Types
 export type Place = {
 	id: number;
