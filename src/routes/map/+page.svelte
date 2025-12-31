@@ -81,8 +81,9 @@
 	import localforage from 'localforage';
 	import { onDestroy, onMount, tick } from 'svelte';
 	import type { FeatureGroup } from 'leaflet';
+	import type { PageData } from './$types';
 
-	export let data: { geo?: { lat: number | null; lng: number | null } };
+	export let data: PageData;
 
 	let mapLoading = 1;
 	let mapLoadingStatus = 'Loading map...';
