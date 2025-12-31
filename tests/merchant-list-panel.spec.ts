@@ -57,9 +57,9 @@ test.describe('Merchant List Panel', () => {
 		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
 		await expect(searchInput).toBeVisible({ timeout: 15000 });
 
-		// Mode toggle buttons should be visible
-		const worldwideButton = page.getByRole('button', { name: 'Worldwide' });
-		const nearbyButton = page.getByRole('button', { name: /nearby/i });
+		// Mode toggle buttons should be visible (they have role="radio" for accessibility)
+		const worldwideButton = page.getByRole('radio', { name: 'Worldwide' });
+		const nearbyButton = page.getByRole('radio', { name: /nearby/i });
 		await expect(worldwideButton).toBeVisible();
 		await expect(nearbyButton).toBeVisible();
 	});
@@ -184,8 +184,8 @@ test.describe('Merchant List Panel', () => {
 		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
 		await expect(searchInput).toBeVisible({ timeout: 15000 });
 
-		// Mode buttons should be visible
-		const nearbyButton = page.getByRole('button', { name: /nearby/i });
+		// Mode buttons should be visible (they have role="radio" for accessibility)
+		const nearbyButton = page.getByRole('radio', { name: /nearby/i });
 		await expect(nearbyButton).toBeVisible();
 
 		// List panel should NOT be visible before clicking
@@ -333,9 +333,9 @@ test.describe('Merchant List Panel', () => {
 			{ timeout: MARKER_LOAD_TIMEOUT }
 		);
 
-		// Floating search bar buttons should be visible
-		const worldwideButton = page.getByRole('button', { name: 'Worldwide' });
-		const nearbyButton = page.getByRole('button', { name: /nearby/i });
+		// Floating search bar buttons should be visible (they have role="radio" for accessibility)
+		const worldwideButton = page.getByRole('radio', { name: 'Worldwide' });
+		const nearbyButton = page.getByRole('radio', { name: /nearby/i });
 		await expect(worldwideButton).toBeVisible({ timeout: 15000 });
 		await expect(nearbyButton).toBeVisible();
 
