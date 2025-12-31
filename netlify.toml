@@ -7,3 +7,7 @@
 
 [functions]
   included_files = [".netlify/server/_app/immutable/assets/*.ttf"]
+
+[[edge_functions]]
+  path = "/map"
+  function = "inject-geo"
