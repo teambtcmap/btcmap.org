@@ -6,8 +6,6 @@
 
 	export let title: string;
 	export let links: DropdownLink[];
-	export let top: string;
-	export let bottom: string;
 
 	let show = false;
 
@@ -38,18 +36,18 @@
 			on:outclick={() => (show = false)}
 		>
 			<div class="absolute top-8 right-0 z-50 w-[185px] rounded-2xl shadow-lg">
-				{#each links as link (link.title)}
+				{#each links as link, i (link.title)}
 					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href={link.url}
 						target={link.external ? '_blank' : null}
 						rel={link.rel || (link.external ? 'noopener noreferrer' : null)}
-						class="flex w-full items-center justify-center bg-link p-4 text-center text-xl font-semibold text-white hover:bg-hover {link.icon ===
-						top
+						class="flex w-full items-center justify-center bg-link p-4 text-center text-xl font-semibold text-white transition-colors hover:bg-hover {i ===
+						0
 							? 'rounded-t-2xl'
-							: link.icon === bottom
+							: i === links.length - 1
 								? 'rounded-b-2xl'
-								: ''} transition-colors"
+								: ''}"
 					>
 						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 						{link.title}

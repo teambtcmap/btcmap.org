@@ -6,7 +6,6 @@
 	import NavDropdownMobile from '$components/layout/NavDropdownMobile.svelte';
 	import ThemeToggle from '$components/ThemeToggle.svelte';
 	import { afterNavigate } from '$app/navigation';
-	import { env } from '$env/dynamic/public';
 
 	const navLinks: { title: string; url: string; icon: MobileNavIconName }[] = [
 		{ title: 'Maps', url: '', icon: 'map' },
@@ -28,18 +27,7 @@
 		{ title: 'Dashboard', url: '/dashboard', icon: 'dash' },
 		{ title: 'Tagger Leaderboard', url: '/leaderboard', icon: 'leader' },
 		{ title: 'Community Leaderboard', url: '/communities/leaderboard', icon: 'communities' },
-		{ title: 'Country Leaderboard', url: '/countries/leaderboard', icon: 'countries' },
-		...(env.PUBLIC_UMAMI_URL
-			? [
-					{
-						title: 'Website Analytics',
-						url: env.PUBLIC_UMAMI_URL,
-						icon: 'stats' as const,
-						external: true,
-						rel: 'noopener noreferrer'
-					}
-				]
-			: [])
+		{ title: 'Country Leaderboard', url: '/countries/leaderboard', icon: 'countries' }
 	];
 
 	const maintainDropdownLinks: DropdownLink[] = [
@@ -74,39 +62,19 @@
 		{#each navLinks as link (link.title)}
 			<!-- dropdown menu -->
 			{#if link.title === 'Maps'}
-				<NavDropdownDesktop
-					title={link.title}
-					links={mapsDropdownLinks}
-					top="add"
-					bottom="communities"
-				/>
+				<NavDropdownDesktop title={link.title} links={mapsDropdownLinks} />
 
 				<!-- dropdown menu -->
 			{:else if link.title === 'Stats'}
-				<NavDropdownDesktop
-					title={link.title}
-					links={statsDropdownLinks}
-					top="dash"
-					bottom="stats"
-				/>
+				<NavDropdownDesktop title={link.title} links={statsDropdownLinks} />
 
 				<!-- dropdown menu -->
 			{:else if link.title === 'Maintain'}
-				<NavDropdownDesktop
-					title={link.title}
-					links={maintainDropdownLinks}
-					top="add"
-					bottom="issue"
-				/>
+				<NavDropdownDesktop title={link.title} links={maintainDropdownLinks} />
 
 				<!-- dropdown menu -->
 			{:else if link.title === 'Areas'}
-				<NavDropdownDesktop
-					title={link.title}
-					links={areasDropdownLinks}
-					top="communities"
-					bottom="countries"
-				/>
+				<NavDropdownDesktop title={link.title} links={areasDropdownLinks} />
 			{:else}
 				<!-- regular links -->
 				<!-- eslint-disable svelte/no-navigation-without-resolve -->
