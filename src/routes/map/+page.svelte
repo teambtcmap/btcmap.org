@@ -1324,7 +1324,7 @@
 	<!-- Floating search bar - desktop: top-left, mobile: bottom-center -->
 	{#if mapLoaded}
 		<div
-			class="pointer-events-none absolute z-[1002] max-md:right-3 max-md:bottom-20 max-md:left-3 md:top-3 md:left-3"
+			class="pointer-events-none z-[1002] max-md:fixed max-md:right-3 max-md:bottom-20 max-md:left-3 md:absolute md:top-3 md:left-3"
 		>
 			<MapSearchBar
 				onSearch={handlePanelSearch}
