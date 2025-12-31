@@ -157,10 +157,10 @@
 						class="border-t border-gray-300 p-5 text-center font-semibold text-primary dark:border-white/95 dark:text-white"
 					>
 						View all open tickets directly on <a
-							href="https://github.com/teambtcmap/btcmap-data/issues"
+							href="https://gitea.btcmap.org/teambtcmap/btcmap-data/issues"
 							target="_blank"
 							rel="noreferrer"
-							class="text-link transition-colors hover:text-hover">GitHub</a
+							class="text-link transition-colors hover:text-hover">Gitea</a
 						>.
 					</p>
 				{/if}

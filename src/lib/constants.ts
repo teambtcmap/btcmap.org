@@ -1,4 +1,16 @@
 export const CONFETTI_CANVAS_Z_INDEX = '2001';
+
+export const GITEA_LABELS = {
+	DATA: {
+		ADD_LOCATION: 901,
+		COMMUNITY_SUBMISSION: 902,
+		VERIFY_LOCATION: 903
+	},
+	INFRA: {
+		TAGGER_ONBOARDING: 1410
+	}
+} as const;
+
 export const POLLING_INTERVAL = 2500;
 export const QR_CODE_SIZE = { mobile: 200, desktop: 275 };
 export const PAYMENT_ERROR_MESSAGE =
