@@ -1033,7 +1033,7 @@
 			const LocateControl = deps.LocateControl;
 
 			// add map and tiles
-			map = window.L.map(mapElement, { maxZoom: 19, zoomControl: false });
+			map = leaflet.map(mapElement, { maxZoom: 19, zoomControl: false });
 			leaflet.control.zoom({ position: 'topright' }).addTo(map);
 
 			// Helper function to set mapLoaded after view is set
