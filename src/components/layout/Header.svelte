@@ -32,7 +32,8 @@
 			title: 'Website Analytics',
 			url: 'https://umami.btcmap.org/share/tdb5fH0C3McC1BdX',
 			icon: 'stats',
-			external: true
+			external: true,
+			rel: 'noopener noreferrer'
 		}
 	];
 
