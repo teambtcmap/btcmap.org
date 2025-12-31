@@ -346,11 +346,15 @@ test.describe('Merchant List Panel', () => {
 		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
 		await expect(searchInput).toHaveAttribute('placeholder', 'Search worldwide...');
 
-		// Click Nearby button to switch back
+		// Click Nearby button - this opens the panel when there are nearby merchants
 		await nearbyButton.click();
 
-		// Search input placeholder should indicate nearby mode
-		await expect(searchInput).toHaveAttribute('placeholder', 'Search nearby...');
+		// The panel opens, so check the panel's search input has the nearby placeholder
+		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
+		await expect(listPanel).toBeVisible({ timeout: 5000 });
+
+		const panelSearchInput = listPanel.locator('input[type="search"]');
+		await expect(panelSearchInput).toHaveAttribute('placeholder', 'Search nearby...');
 	});
 
 	test('switches between Worldwide and Nearby modes in panel', async ({ page }) => {
