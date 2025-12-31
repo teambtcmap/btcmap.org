@@ -10,18 +10,7 @@ declare global {
 				lng: number | null;
 			};
 		}
-		interface Platform {
-			context?: {
-				geo?: {
-					city?: string;
-					country?: { code?: string; name?: string };
-					latitude?: number;
-					longitude?: number;
-					subdivision?: { code?: string; name?: string };
-					timezone?: string;
-				};
-			};
-		}
+		// interface Platform {}
 	}
 
 	interface Window {

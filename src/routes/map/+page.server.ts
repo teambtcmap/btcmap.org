@@ -1,13 +1,20 @@
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ platform }) => {
+export const load: PageServerLoad = async ({ request }) => {
+	const geoHeader = request.headers.get('x-nf-geo');
+
 	const geo: { lat: number | null; lng: number | null } = { lat: null, lng: null };
 
-	// Netlify Edge provides geo on platform.context.geo
-	const netlifyGeo = platform?.context?.geo;
-	if (typeof netlifyGeo?.latitude === 'number' && typeof netlifyGeo?.longitude === 'number') {
-		geo.lat = netlifyGeo.latitude;
-		geo.lng = netlifyGeo.longitude;
+	if (geoHeader) {
+		try {
+			const geoData = JSON.parse(geoHeader);
+			if (typeof geoData.latitude === 'number' && typeof geoData.longitude === 'number') {
+				geo.lat = geoData.latitude;
+				geo.lng = geoData.longitude;
+			}
+		} catch {
+			// Silently fail - will use default
+		}
 	}
 
 	return { geo };
