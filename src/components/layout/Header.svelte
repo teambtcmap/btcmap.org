@@ -30,7 +30,7 @@
 		{ title: 'Country Leaderboard', url: '/countries/leaderboard', icon: 'countries' },
 		{
 			title: 'Website Analytics',
-			url: 'https://umami.btcmap.org/share/tdb5fH0C3McC1BdX',
+			url: PUBLIC_UMAMI_URL,
 			icon: 'stats',
 			external: true,
 			rel: 'noopener noreferrer'
