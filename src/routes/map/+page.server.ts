@@ -1,9 +1,5 @@
 import type { PageServerLoad } from './$types';
-
-type GeoLocation = {
-	lat: number | null;
-	lng: number | null;
-};
+import type { GeoLocation } from '$lib/types';
 
 export const load: PageServerLoad = async ({ request }) => {
 	const geoHeader = request.headers.get('x-nf-geo');
