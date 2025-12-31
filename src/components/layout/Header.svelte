@@ -27,7 +27,13 @@
 		{ title: 'Dashboard', url: '/dashboard', icon: 'dash' },
 		{ title: 'Tagger Leaderboard', url: '/leaderboard', icon: 'leader' },
 		{ title: 'Community Leaderboard', url: '/communities/leaderboard', icon: 'communities' },
-		{ title: 'Country Leaderboard', url: '/countries/leaderboard', icon: 'countries' }
+		{ title: 'Country Leaderboard', url: '/countries/leaderboard', icon: 'countries' },
+		{
+			title: 'Website Analytics',
+			url: 'https://umami.btcmap.org/share/tdb5fH0C3McC1BdX',
+			icon: 'stats',
+			external: true
+		}
 	];
 
 	const maintainDropdownLinks: DropdownLink[] = [
@@ -75,7 +81,7 @@
 					title={link.title}
 					links={statsDropdownLinks}
 					top="dash"
-					bottom="countries"
+					bottom="stats"
 				/>
 
 				<!-- dropdown menu -->
