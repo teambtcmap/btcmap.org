@@ -79,7 +79,7 @@
 
 <!-- Floating search bar - hidden when panel is open (panel has its own search in same position) -->
 {#if !isOpen}
-	<div class="pointer-events-auto flex w-80 flex-col gap-2">
+	<div class="pointer-events-auto flex w-full flex-col-reverse gap-2 md:w-80 md:flex-col">
 		<!-- Search input -->
 		<div
 			class="rounded-lg bg-white shadow-lg dark:bg-dark dark:shadow-black/30"
@@ -124,11 +124,11 @@
 		</div>
 
 		<!-- Segmented tabs (order matches panel: Worldwide, Nearby) -->
-		<div class="flex gap-1.5">
+		<div class="flex gap-1.5 md:gap-1.5">
 			<button
 				type="button"
 				on:click={() => handleModeSwitch('search')}
-				class="rounded-full px-3 py-1.5 text-xs font-medium shadow-sm transition-colors
+				class="rounded-full px-4 py-2.5 text-sm font-medium shadow-sm transition-colors md:px-3 md:py-1.5 md:text-xs
 					{mode === 'search'
 					? 'bg-link text-white'
 					: 'bg-white text-gray-600 hover:bg-gray-50 dark:bg-dark dark:text-white/70 dark:hover:bg-white/10'}"
@@ -139,7 +139,7 @@
 			<button
 				type="button"
 				on:click={() => handleModeSwitch('nearby')}
-				class="rounded-full px-3 py-1.5 text-xs font-medium shadow-sm transition-colors
+				class="rounded-full px-4 py-2.5 text-sm font-medium shadow-sm transition-colors md:px-3 md:py-1.5 md:text-xs
 					{mode === 'nearby'
 					? 'bg-link text-white'
 					: 'bg-white text-gray-600 hover:bg-gray-50 dark:bg-dark dark:text-white/70 dark:hover:bg-white/10'}"
