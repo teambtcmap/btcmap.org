@@ -293,7 +293,7 @@
 					class="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
 					aria-label="Clear"
 				>
-					<Icon w="16" h="16" icon="close" type="material" />
+					<Icon w="20" h="20" icon="close" type="material" />
 				</button>
 			{:else}
 				<button
@@ -302,7 +302,7 @@
 					class="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
 					aria-label="Close panel"
 				>
-					<Icon w="16" h="16" icon="close" type="material" />
+					<Icon w="20" h="20" icon="close" type="material" />
 				</button>
 			{/if}
 		</div>
