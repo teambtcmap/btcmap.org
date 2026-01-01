@@ -108,7 +108,11 @@
 						<Icon w="16" h="16" icon="close" type="material" />
 					</button>
 				{:else if isSearching}
-					<div class="absolute top-1/2 right-3 -translate-y-1/2">
+					<div
+						class="absolute top-1/2 right-3 -translate-y-1/2"
+						role="status"
+						aria-label="Searching"
+					>
 						<div
 							class="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-link dark:border-white/30 dark:border-t-white"
 						></div>

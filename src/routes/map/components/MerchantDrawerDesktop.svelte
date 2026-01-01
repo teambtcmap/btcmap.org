@@ -96,7 +96,7 @@
 			? 12 + MERCHANT_LIST_WIDTH + 16
 			: 12}px; max-width: {MERCHANT_DRAWER_WIDTH}px"
 		role="dialog"
-		aria-modal="true"
+		aria-label="Merchant details"
 	>
 		<div
 			class="sticky top-0 z-10 flex items-center rounded-t-lg bg-white dark:bg-dark {drawerView ===
