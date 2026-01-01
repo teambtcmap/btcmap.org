@@ -117,7 +117,7 @@
 					>{drawerView}</span
 				>
 			{/if}
-			<CloseButton on:click={closeDrawer} />
+			<CloseButton on:click={closeDrawer} ariaLabel="Close merchant details" />
 		</div>
 
 		{#if !merchant && fetchingMerchant}

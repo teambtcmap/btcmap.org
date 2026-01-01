@@ -291,7 +291,7 @@
 					type="button"
 					on:click={handleClearInput}
 					class="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
-					aria-label="Clear"
+					aria-label="Clear search"
 				>
 					<Icon w="20" h="20" icon="close" type="material" />
 				</button>
@@ -300,7 +300,7 @@
 					type="button"
 					on:click={handleClose}
 					class="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
-					aria-label="Close panel"
+					aria-label="Close merchant list"
 				>
 					<Icon w="20" h="20" icon="close" type="material" />
 				</button>
