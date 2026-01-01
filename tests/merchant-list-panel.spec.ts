@@ -445,7 +445,7 @@ test.describe('Merchant List Panel', () => {
 		await expect(floatingSearchInput).not.toBeVisible();
 
 		// Close the panel using the close button
-		const closeButton = listPanel.getByRole('button', { name: /close panel/i });
+		const closeButton = listPanel.getByRole('button', { name: /close merchant list/i });
 		await closeButton.click();
 
 		// Panel should close
