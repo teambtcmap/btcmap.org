@@ -8,6 +8,6 @@
 
 <div class={position}>
 	<button on:click type="button" aria-label="Close">
-		<Icon w="25" h="25" class="{colors} transition-colors" icon="close_round" />
+		<Icon w="20" h="20" class="{colors} transition-colors" icon="close_round" />
 	</button>
 </div>
