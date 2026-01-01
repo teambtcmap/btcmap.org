@@ -87,17 +87,20 @@
 </script>
 
 {#if isOpen}
-	<!-- Drawer - no backdrop, keep map interactive -->
+	<!-- Floating drawer card - no backdrop, keep map interactive -->
 	<!-- Position offset by MERCHANT_LIST_WIDTH when list panel is open -->
 	<div
 		transition:fly={{ x: -MERCHANT_DRAWER_WIDTH, duration: 300 }}
-		class="fixed top-0 z-[1002] h-full w-full overflow-y-auto bg-white shadow-2xl transition-[left] duration-200 dark:bg-dark"
-		style="left: {listIsOpen ? MERCHANT_LIST_WIDTH : 0}px; max-width: {MERCHANT_DRAWER_WIDTH}px"
+		class="absolute top-3 z-[1002] max-h-[calc(100%-1.5rem)] w-full overflow-y-auto rounded-lg bg-white shadow-lg transition-[left] duration-200 dark:bg-dark"
+		style="left: {listIsOpen
+			? 12 + MERCHANT_LIST_WIDTH + 16
+			: 12}px; max-width: {MERCHANT_DRAWER_WIDTH}px"
 		role="dialog"
 		aria-modal="true"
 	>
 		<div
-			class="sticky top-0 z-10 flex items-center bg-white dark:bg-dark {drawerView === 'details'
+			class="sticky top-0 z-10 flex items-center rounded-t-lg bg-white dark:bg-dark {drawerView ===
+			'details'
 				? 'justify-end p-2'
 				: 'justify-between border-b border-gray-300 p-4 dark:border-white/95'}"
 		>
