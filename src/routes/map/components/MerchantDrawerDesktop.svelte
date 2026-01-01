@@ -90,7 +90,7 @@
 	<!-- Floating drawer card - no backdrop, keep map interactive -->
 	<!-- Position offset by MERCHANT_LIST_WIDTH when list panel is open -->
 	<div
-		transition:fly={{ x: -MERCHANT_DRAWER_WIDTH, duration: 300 }}
+		in:fly={{ x: -MERCHANT_DRAWER_WIDTH, duration: 300 }}
 		class="absolute top-3 z-[1002] max-h-[calc(100%-1.5rem)] w-full overflow-y-auto rounded-lg bg-white shadow-lg transition-[left] duration-200 dark:bg-dark"
 		style="left: {listIsOpen
 			? 12 + MERCHANT_LIST_WIDTH + 16
