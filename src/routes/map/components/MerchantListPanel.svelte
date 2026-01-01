@@ -272,7 +272,7 @@
 				h="18"
 				icon="search"
 				type="material"
-				class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-400 dark:text-white/50"
+				class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-600 dark:text-white/70"
 			/>
 			<input
 				bind:this={searchInput}
@@ -290,7 +290,7 @@
 				<button
 					type="button"
 					on:click={handleClearInput}
-					class="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:text-white/50 dark:hover:text-white"
+					class="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
 					aria-label="Clear"
 				>
 					<Icon w="16" h="16" icon="close" type="material" />
@@ -299,7 +299,7 @@
 				<button
 					type="button"
 					on:click={handleClose}
-					class="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:text-white/50 dark:hover:text-white"
+					class="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
 					aria-label="Close panel"
 				>
 					<Icon w="16" h="16" icon="close" type="material" />
