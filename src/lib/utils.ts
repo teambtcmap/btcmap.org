@@ -1,6 +1,7 @@
 import { theme, areas } from '$lib/store';
 import { areasSync } from '$lib/sync/areas';
 import { PLACE_FIELD_SETS } from '$lib/api-fields';
+import { MERCHANT_LIST_MAX_ITEMS } from '$lib/constants';
 import type { Continents, Grade, IssueIcon, Place } from '$lib/types';
 import { toast } from '@zerodevx/svelte-toast';
 import type { Chart } from 'chart.js';
@@ -28,6 +29,13 @@ export const humanizeIconName = (icon: string): string => {
 		.replace(/^local_/, '')
 		.replace(/_/g, ' ')
 		.replace(/\b\w/g, (c) => c.toUpperCase());
+};
+
+// Formats nearby merchant count for display: '' when 0, '(>99)' when exceeds max, '(N)' otherwise
+export const formatNearbyCount = (count: number): string => {
+	if (count === 0) return '';
+	if (count > MERCHANT_LIST_MAX_ITEMS) return `(>${MERCHANT_LIST_MAX_ITEMS})`;
+	return `(${count})`;
 };
 
 // Yields to main thread to prevent UI freezes during heavy operations (browser-only)
