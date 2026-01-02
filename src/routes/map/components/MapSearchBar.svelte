@@ -56,6 +56,9 @@
 			} else {
 				inputElement?.blur();
 			}
+		} else if (e.key === 'Enter') {
+			e.preventDefault();
+			onSearch?.(searchQuery);
 		}
 	}
 

@@ -9,7 +9,12 @@
 	import { onMount } from 'svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import { merchantList } from '$lib/merchantListStore';
-	import { MERCHANT_LIST_WIDTH, MERCHANT_DRAWER_WIDTH } from '$lib/constants';
+	import {
+		MERCHANT_LIST_WIDTH,
+		MERCHANT_DRAWER_WIDTH,
+		MAP_PANEL_MARGIN,
+		PANEL_DRAWER_GAP
+	} from '$lib/constants';
 	import {
 		calcVerifiedDate,
 		isUpToDate as checkUpToDate,
@@ -93,8 +98,8 @@
 		in:fly={{ x: -MERCHANT_DRAWER_WIDTH, duration: 300 }}
 		class="absolute top-3 z-[1002] max-h-[calc(100%-1.5rem)] w-full overflow-y-auto rounded-lg bg-white shadow-lg transition-[left] duration-200 dark:bg-dark"
 		style="left: {listIsOpen
-			? 12 + MERCHANT_LIST_WIDTH + 16
-			: 12}px; max-width: {MERCHANT_DRAWER_WIDTH}px"
+			? MAP_PANEL_MARGIN + MERCHANT_LIST_WIDTH + PANEL_DRAWER_GAP
+			: MAP_PANEL_MARGIN}px; max-width: {MERCHANT_DRAWER_WIDTH}px"
 		role="dialog"
 		aria-label="Merchant details"
 	>

@@ -19,7 +19,6 @@ type EventName =
 	| 'home_button_click'
 	| 'show_all_on_map_click'
 	| 'merchant_list_item_click'
-	| 'nearby_filter_input'
 	| 'zoom_in_click'
 	| 'zoom_out_click'
 	| 'fullscreen_click'
