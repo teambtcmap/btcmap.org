@@ -104,10 +104,10 @@
 		aria-label="Merchant details"
 	>
 		<div
-			class="sticky top-0 z-10 flex items-center rounded-t-lg bg-white dark:bg-dark {drawerView ===
+			class="sticky top-0 z-10 flex items-center justify-between rounded-t-lg bg-white p-2 dark:bg-dark {drawerView !==
 			'details'
-				? 'justify-end p-2'
-				: 'justify-between border-b border-gray-300 p-4 dark:border-white/95'}"
+				? 'border-b border-gray-300 dark:border-white/95'
+				: ''}"
 		>
 			{#if drawerView !== 'details'}
 				<!-- Back button for nested views -->
@@ -121,6 +121,9 @@
 				<span class="text-sm font-semibold text-primary capitalize dark:text-white"
 					>{drawerView}</span
 				>
+			{:else}
+				<!-- Spacer to keep close button aligned -->
+				<div></div>
 			{/if}
 			<CloseButton on:click={closeDrawer} ariaLabel="Close merchant details" />
 		</div>
