@@ -350,6 +350,7 @@ export type DropdownLink = {
 	external?: boolean;
 	icon: MobileNavIconName;
 	title: string;
+	rel?: string;
 };
 
 export type ChartHistory = '7D' | '1M' | '3M' | '6M' | 'YTD' | '1Y' | 'ALL';

@@ -30,4 +30,4 @@
 				: `fa6-solid:${icon}`;
 </script>
 
-<IconIconify icon={formattedIcon} width={w} height={h} class={className} />
+<IconIconify icon={formattedIcon} width={w} height={h} class={className} {...$$restProps} />

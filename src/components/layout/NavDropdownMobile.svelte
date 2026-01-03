@@ -19,6 +19,8 @@
 <button
 	id="dropdown-{title.toLowerCase()}-mobile"
 	on:click={() => (show = !show)}
+	aria-expanded={show}
+	aria-haspopup="true"
 	class="w-full {show ? 'text-[#144046]' : 'text-link'} flex items-center text-xl dark:text-white"
 >
 	<span
@@ -41,7 +43,7 @@
 				<a
 					href={link.url}
 					target={link.external ? '_blank' : null}
-					rel={link.external ? 'noreferrer' : null}
+					rel={link.rel || (link.external ? 'noopener noreferrer' : null)}
 					class="flex w-full items-center text-xl text-link dark:text-white"
 				>
 					<!-- eslint-enable svelte/no-navigation-without-resolve -->
@@ -52,7 +54,15 @@
 					</span>
 					<span>{link.title}</span>
 					{#if link.external}
-						<Icon type="fa" icon="arrow-up-right-from-square" w="16" h="16" class="ml-1" />
+						<Icon
+							type="fa"
+							icon="arrow-up-right-from-square"
+							w="16"
+							h="16"
+							class="ml-1"
+							aria-hidden="true"
+						/>
+						<span class="sr-only">(opens in new tab)</span>
 					{/if}
 				</a>
 			{/each}
