@@ -36,6 +36,9 @@
 		$lastUpdatedPlaceId = undefined;
 	};
 
+	const handleOutClick = () => {
+		// Never close the modal on outside clicks to prevent accidental loss of progress
+	};
 	const generateInvoice = (event: SubmitEvent) => {
 		event.preventDefault();
 		if (!elementId || !commentValue.trim()) {
@@ -85,7 +88,7 @@
 </script>
 
 {#if open}
-	<OutClick excludeQuerySelectorAll="#boost-button" on:outclick={closeModal}>
+	<OutClick excludeQuerySelectorAll="#boost-button" on:outclick={handleOutClick}>
 		<div
 			transition:fly={{ y: 200, duration: 300 }}
 			class="center-fixed z-[2000] max-h-[90vh] w-[90vw] overflow-auto rounded-xl border border-gray-300 bg-white p-6 text-left shadow-2xl md:w-[430px] dark:border-white/95 dark:bg-dark"
