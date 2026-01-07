@@ -30,6 +30,25 @@
 	$: rss = tags['contact:rss'] && tags['contact:rss'];
 	$: signal = tags['contact:signal'] && tags['contact:signal'];
 	$: simplex = tags['contact:simplex'] && tags['contact:simplex'];
+	$: hasContact =
+		website ||
+		email ||
+		nostr ||
+		twitter ||
+		meetup ||
+		eventbrite ||
+		telegram ||
+		discord ||
+		youtube ||
+		github ||
+		reddit ||
+		instagram ||
+		whatsapp ||
+		facebook ||
+		linkedin ||
+		rss ||
+		signal ||
+		simplex;
 	$: tip =
 		(tags['tips:lightning_address'] && {
 			destination: tags['tips:lightning_address'],
@@ -71,25 +90,27 @@
 		{/if}
 	</div>
 
-	<Socials
-		{website}
-		{email}
-		{nostr}
-		{twitter}
-		{meetup}
-		{eventbrite}
-		{telegram}
-		{discord}
-		{youtube}
-		{github}
-		{reddit}
-		{instagram}
-		{whatsapp}
-		{facebook}
-		{linkedin}
-		{rss}
-		{signal}
-		{simplex}
-		style="border-t border-t-gray-200 p-4 w-full dark:border-t-white/95"
-	/>
+	{#if hasContact}
+		<Socials
+			{website}
+			{email}
+			{nostr}
+			{twitter}
+			{meetup}
+			{eventbrite}
+			{telegram}
+			{discord}
+			{youtube}
+			{github}
+			{reddit}
+			{instagram}
+			{whatsapp}
+			{facebook}
+			{linkedin}
+			{rss}
+			{signal}
+			{simplex}
+			style="border-t border-t-gray-200 p-4 w-full dark:border-t-white/95"
+		/>
+	{/if}
 </div>

@@ -65,7 +65,6 @@
 				area.tags.name &&
 				area.tags['icon:square'] &&
 				area.tags.continent &&
-				Object.keys(area.tags).find((key) => key.includes('contact')) &&
 				$reports.find((report) => report.area_id === area.id) &&
 				(language ? area.tags.language === language : true) &&
 				(organization ? area.tags.organization === organization : true)

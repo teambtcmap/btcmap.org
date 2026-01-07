@@ -197,8 +197,7 @@
 					area.tags.geo_json &&
 					area.tags.name &&
 					area.tags['icon:square'] &&
-					area.tags.continent &&
-					Object.keys(area.tags).find((key) => key.includes('contact'))
+					area.tags.continent
 				);
 			} else {
 				return (
@@ -255,6 +254,26 @@
 			rss = area['contact:rss'];
 			signal = area['contact:signal'];
 			simplex = area['contact:simplex'];
+			hasContact = !!(
+				website ||
+				email ||
+				nostr ||
+				twitter ||
+				meetup ||
+				eventbrite ||
+				telegram ||
+				discord ||
+				youtube ||
+				github ||
+				reddit ||
+				instagram ||
+				whatsapp ||
+				facebook ||
+				linkedin ||
+				rss ||
+				signal ||
+				simplex
+			);
 			verifiedDate = data.verifiedDate || area['verified:date'];
 			isVerifiedDateStale = calculateStaleness(verifiedDate);
 
@@ -362,6 +381,7 @@
 	let signal: string | undefined;
 	let simplex: string | undefined;
 	let verifiedDate: string | undefined = data.verifiedDate;
+	let hasContact = false;
 
 	const calculateStaleness = (dateStr: string | undefined): boolean => {
 		if (!dateStr) return false;
@@ -463,7 +483,7 @@
 		</div>
 
 		{#if type === 'community'}
-			{#if dataInitialized}
+			{#if dataInitialized && hasContact}
 				<Socials
 					{website}
 					{email}
@@ -484,7 +504,7 @@
 					{signal}
 					{simplex}
 				/>
-			{:else}
+			{:else if !dataInitialized}
 				<div class="flex flex-wrap items-center justify-center">
 					{#each Array(3) as _, index (index)}
 						<div class="m-1 h-10 w-10 animate-pulse rounded-full bg-link/50" />
