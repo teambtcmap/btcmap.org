@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 import axios from 'axios';
 import type { PageServerLoad } from './$types';
+import { isValidPlaceId } from '$lib/utils';
 
 export interface VerifyLocationPageData {
 	id: string;
@@ -19,10 +20,15 @@ export const load: PageServerLoad<VerifyLocationPageData> = async ({ url }) => {
 		error(400, 'Merchant ID parameter is required');
 	}
 
+	// Validate id parameter format (numeric or OSM-style type:id)
+	if (!isValidPlaceId(id)) {
+		error(404, 'Merchant Not Found');
+	}
+
 	try {
 		// Fetch from v4 Places API (supports both numeric Place IDs and OSM-style IDs)
 		const response = await axios.get(
-			`https://api.btcmap.org/v4/places/${id}?fields=id,osm_id,osm_url,name,address,lat,lon`
+			`https://api.btcmap.org/v4/places/${encodeURIComponent(id)}?fields=id,osm_id,osm_url,name,address,lat,lon`
 		);
 		const placeData = response.data;
 

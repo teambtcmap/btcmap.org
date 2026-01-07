@@ -1,6 +1,7 @@
 import { verifiedArr } from '$lib/map/setup';
 import type { MerchantPageData, MerchantComment, PayMerchant, Place } from '$lib/types';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
+import { isValidPlaceId } from '$lib/utils';
 import { error } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -10,10 +11,16 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 	const { id } = params;
+
+	// Validate id parameter format (numeric or OSM-style type:id)
+	if (!isValidPlaceId(id)) {
+		error(404, 'Merchant Not Found');
+	}
+
 	try {
 		// Fetch complete data from v4 Places API (supports both numeric Place IDs and OSM-style IDs)
 		const placeResponse = await axios.get(
-			`https://api.btcmap.org/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`
+			`https://api.btcmap.org/v4/places/${encodeURIComponent(id)}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`
 		);
 		const placeData: Place = placeResponse.data;
 
@@ -46,7 +53,9 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 
 		try {
 			// Fetch comments directly from the dedicated comments endpoint
-			const commentsResponse = await axios.get(`https://api.btcmap.org/v4/places/${id}/comments`);
+			const commentsResponse = await axios.get(
+				`https://api.btcmap.org/v4/places/${encodeURIComponent(id)}/comments`
+			);
 			comments = commentsResponse.data;
 		} catch {
 			// Comments endpoint failed - use empty array

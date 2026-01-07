@@ -10,13 +10,20 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 export const load: PageServerLoad = async ({ params }) => {
 	const { area, section } = params;
 
+	// Validate area parameter format (alphanumeric, underscores, hyphens only)
+	if (!/^[\w-]+$/.test(area)) {
+		throw error(404, 'Community Not Found');
+	}
+
 	// Validate section parameter
 	const validSections = ['merchants', 'stats', 'activity', 'maintain'];
 	if (!validSections.includes(section)) {
-		throw redirect(302, `/community/${area}/merchants`);
+		throw redirect(302, `/community/${encodeURIComponent(area)}/merchants`);
 	}
 	try {
-		const areaResponse = await axios.get(`https://api.btcmap.org/v3/areas/${area}`);
+		const areaResponse = await axios.get(
+			`https://api.btcmap.org/v3/areas/${encodeURIComponent(area)}`
+		);
 		const fetchedArea = areaResponse.data;
 
 		// Check if area is deleted (v3 returns no tags for deleted areas)

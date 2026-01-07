@@ -17,6 +17,9 @@ import { format } from 'date-fns/format';
 import { formatDistanceToNow } from 'date-fns/formatDistanceToNow';
 import { isToday } from 'date-fns/isToday';
 
+// Validates place ID format (numeric or OSM-style type:id like "node:123456")
+export const isValidPlaceId = (id: string): boolean => /^(\d+|(?:node|way|relation):\d+)$/.test(id);
+
 // Converts Material Design icon names to human-readable labels
 export const humanizeIconName = (icon: string): string => {
 	const specialCases: Record<string, string> = {
