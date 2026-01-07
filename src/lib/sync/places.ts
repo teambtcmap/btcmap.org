@@ -349,6 +349,18 @@ export const updateSinglePlace = async (placeId: string | number): Promise<Place
 			return null;
 		}
 
+		// Check if place was deleted - remove from cache if present
+		if (updatedPlace.deleted_at) {
+			const updatedPlaces = cachedPlaces.filter((p) => p.id !== Number(placeId));
+			if (updatedPlaces.length !== cachedPlaces.length) {
+				await localforage.setItem('places_v4', updatedPlaces);
+				await yieldToMain();
+				places.set(updatedPlaces);
+				console.info(`Removed deleted place ${placeId} from cache`);
+			}
+			return null;
+		}
+
 		// Find and update the place in the array
 		const placeIndex = cachedPlaces.findIndex((p) => p.id === updatedPlace.id);
 
