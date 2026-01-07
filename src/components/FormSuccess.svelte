@@ -1,9 +1,10 @@
 <script lang="ts">
 	export let type: string;
 	export let text: string;
-	export let issue: number;
+	export let issue: number | undefined = undefined;
 	export let buttonWidth = 'w-52';
 	export let repo: 'btcmap-data' | 'btcmap-infra' = 'btcmap-data';
+	export let showIssueLink = true;
 
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
@@ -25,13 +26,16 @@
 			<HeaderPlaceholder />
 		{/if}
 		<p class="mb-5 w-full text-primary md:w-[500px] dark:text-white">
-			{text} You may also monitor the progress of your submission here:
-			<a
-				href="https://gitea.btcmap.org/teambtcmap/{repo}/issues/{issue}"
-				target="_blank"
-				rel="noreferrer"
-				class="text-link transition-colors hover:text-hover">Issue #{issue}</a
-			>.
+			{text}
+			{#if showIssueLink && issue}
+				You may also monitor the progress of your submission here:
+				<a
+					href="https://gitea.btcmap.org/teambtcmap/{repo}/issues/{issue}"
+					target="_blank"
+					rel="noreferrer"
+					class="text-link transition-colors hover:text-hover">Issue #{issue}</a
+				>.
+			{/if}
 		</p>
 
 		<PrimaryButton on:click style="{buttonWidth} py-3 mx-auto mt-10 rounded-xl">

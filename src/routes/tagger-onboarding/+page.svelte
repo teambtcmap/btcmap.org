@@ -40,7 +40,6 @@
 
 	let submitted = false;
 	let submitting = false;
-	let submissionIssueNumber: number;
 
 	const submitForm = (event: SubmitEvent) => {
 		event.preventDefault();
@@ -55,8 +54,7 @@
 				name: nameInput.value,
 				email: emailInput.value
 			})
-			.then(function (response) {
-				submissionIssueNumber = response.data.number;
+			.then(function () {
 				submitted = true;
 			})
 			.catch(function (error) {
@@ -201,9 +199,8 @@
 {:else}
 	<FormSuccess
 		type="Application"
-		text="Thanks for your interest in becoming a tagger! We'll review your application and get back to you soon."
-		issue={submissionIssueNumber}
-		repo="btcmap-infra"
+		text="Thanks for your interest in becoming a tagger! We'll review your application and one of the team will be in contact via the email you provided. Contact hello@btcmap.org if you need to follow up."
+		showIssueLink={false}
 		on:click={resetForm}
 	/>
 {/if}
