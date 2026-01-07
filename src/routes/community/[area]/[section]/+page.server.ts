@@ -16,8 +16,13 @@ export const load: PageServerLoad = async ({ params }) => {
 		throw redirect(302, `/community/${area}/merchants`);
 	}
 	try {
-		const areaResponse = await axios.get(`https://api.btcmap.org/v2/areas/${area}`);
+		const areaResponse = await axios.get(`https://api.btcmap.org/v3/areas/${area}`);
 		const fetchedArea = areaResponse.data;
+
+		// Check if area is deleted (v3 returns no tags for deleted areas)
+		if (fetchedArea.deleted_at || !fetchedArea.tags) {
+			throw error(404, 'Community Not Found');
+		}
 
 		// Temporarily disabled during maintenance
 		// const { issues: tickets } = await getIssues([fetchedArea.tags.url_alias]).catch(() => ({
@@ -35,7 +40,7 @@ export const load: PageServerLoad = async ({ params }) => {
 				id: 1,
 				method: 'get_element_issues',
 				params: {
-					area_id: fetchedArea.tags['btcmap:id'],
+					area_id: fetchedArea.id,
 					limit: 10_000,
 					offset: 0
 				}
@@ -45,7 +50,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		const issues = await issuesResponse.json();
 
 		return {
-			id: fetchedArea.id,
+			id: fetchedArea.tags.url_alias,
 			name: fetchedArea.tags.name,
 			tickets: tickets,
 			issues: issues.result.requested_issues,
