@@ -15,6 +15,15 @@
 </script>
 
 <div class="space-y-4">
+	{#if merchant.deleted_at}
+		<div class="rounded-lg bg-red-600 p-3 text-center text-sm text-white">
+			<p class="font-semibold">
+				<Icon w="16" h="16" class="mr-1 inline-block text-white" icon="skull" type="material" />
+				This merchant has been removed.
+			</p>
+		</div>
+	{/if}
+
 	{#if merchant.name}
 		<a
 			href={resolve(`/merchant/${merchant.id}`)}
