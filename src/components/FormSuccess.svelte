@@ -3,6 +3,7 @@
 	export let text: string;
 	export let issue: number;
 	export let buttonWidth = 'w-52';
+	export let repo: 'btcmap-data' | 'btcmap-infra' = 'btcmap-data';
 
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
@@ -26,7 +27,7 @@
 		<p class="mb-5 w-full text-primary md:w-[500px] dark:text-white">
 			{text} You may also monitor the progress of your submission here:
 			<a
-				href="https://gitea.btcmap.org/teambtcmap/btcmap-data/issues/{issue}"
+				href="https://gitea.btcmap.org/teambtcmap/{repo}/issues/{issue}"
 				target="_blank"
 				rel="noreferrer"
 				class="text-link transition-colors hover:text-hover">Issue #{issue}</a

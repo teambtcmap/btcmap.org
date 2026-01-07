@@ -203,6 +203,7 @@
 		type="Application"
 		text="Thanks for your interest in becoming a tagger! We'll review your application and get back to you soon."
 		issue={submissionIssueNumber}
+		repo="btcmap-infra"
 		on:click={resetForm}
 	/>
 {/if}
