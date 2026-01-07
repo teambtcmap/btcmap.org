@@ -1,6 +1,7 @@
 <script lang="ts">
 	import SocialLink from '$components/SocialLink.svelte';
 	import { socials } from '$lib/store';
+	import { env } from '$env/dynamic/public';
 
 	const links = [
 		{ link: '/about-us', name: 'About Us' },
@@ -8,6 +9,9 @@
 		{ link: '/license', name: 'License' },
 		{ link: '/privacy-policy', name: 'Privacy' },
 		{ link: 'https://stats.uptimerobot.com/7kgEVtzlV1', name: 'Status' },
+		...(env.PUBLIC_UMAMI_URL
+			? [{ link: env.PUBLIC_UMAMI_URL, name: 'Analytics', external: true }]
+			: []),
 		{ link: 'https://bitcoin.rocks/business/', name: 'Bitcoin for Business', external: true },
 		{ link: '/bitcoin.pdf', name: 'White Paper' },
 		{ link: '/cypherpunks-manifesto.pdf', name: 'Cypherpunks' }
@@ -29,7 +33,7 @@
 			<a
 				href={link.link}
 				target={link.external ? '_blank' : null}
-				rel={link.external ? 'noreferrer' : null}
+				rel={link.external ? 'noopener noreferrer' : null}
 				class="mx-2.5 {link.name !== 'Cypherpunks'
 					? 'mb-2.5 xl:mb-0'
 					: ''} text-sm text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link"
