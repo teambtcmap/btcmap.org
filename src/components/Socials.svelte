@@ -1,22 +1,22 @@
-<script lang="ts">
-	export let website: undefined | string = undefined;
-	export let email: undefined | string = undefined;
-	export let nostr: undefined | string = undefined;
-	export let twitter: undefined | string = undefined;
-	export let meetup: undefined | string = undefined;
-	export let eventbrite: undefined | string = undefined;
-	export let telegram: undefined | string = undefined;
-	export let discord: undefined | string = undefined;
-	export let youtube: undefined | string = undefined;
-	export let github: undefined | string = undefined;
-	export let reddit: undefined | string = undefined;
-	export let instagram: undefined | string = undefined;
-	export let whatsapp: undefined | string = undefined;
-	export let facebook: undefined | string = undefined;
-	export let linkedin: undefined | string = undefined;
-	export let rss: undefined | string = undefined;
-	export let signal: undefined | string = undefined;
-	export let simplex: undefined | string = undefined;
+	<script lang="ts">
+		export let website: undefined | string = undefined;
+		export let email: undefined | string = undefined;
+		export let phone: undefined | string = undefined;
+		export let nostr: undefined | string = undefined;
+		export let twitter: undefined | string = undefined;
+		export let meetup: undefined | string = undefined;
+		export let telegram: undefined | string = undefined;
+		export let discord: undefined | string = undefined;
+		export let youtube: undefined | string = undefined;
+		export let github: undefined | string = undefined;
+		export let matrix: undefined | string = undefined;
+		export let geyser: undefined | string = undefined;
+		export let instagram: undefined | string = undefined;
+		export let whatsapp: undefined | string = undefined;
+		export let facebook: undefined | string = undefined;
+		export let linkedin: undefined | string = undefined;
+		export let rss: undefined | string = undefined;
+		export let signal: undefined | string = undefined;
 
 	export let style: undefined | string = undefined;
 
@@ -40,6 +40,13 @@
 			</span>
 		</a>
 	{/if}
+	{#if phone}
+		<a href="tel:{phone}" target="_blank" rel="noreferrer" class="m-1">
+			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-green-600">
+				<Icon type="fa" icon="phone" w="28" h="28" class="text-white" />
+			</span>
+		</a>
+	{/if}
 	{#if nostr}
 		<a href="https://nostr.com/{nostr}" target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-nostr">
@@ -57,11 +64,6 @@
 	{#if meetup}
 		<a href={meetup} target="_blank" rel="noreferrer" class="m-1">
 			<img src="/icons/socials/meetup.jpg" alt="meetup" class="h-10 w-10 rounded-full" />
-		</a>
-	{/if}
-	{#if eventbrite}
-		<a href={eventbrite} target="_blank" rel="noreferrer" class="m-1">
-			<img src="/icons/socials/eventbrite.png" alt="eventbrite" class="h-10 w-10 rounded-full" />
 		</a>
 	{/if}
 	{#if telegram}
@@ -84,9 +86,14 @@
 			<img src="/icons/socials/github.svg" alt="github" />
 		</a>
 	{/if}
-	{#if reddit}
-		<a href={reddit} target="_blank" rel="noreferrer" class="m-1">
-			<img src="/icons/socials/reddit.svg" alt="reddit" />
+	{#if matrix}
+		<a href={matrix} target="_blank" rel="noreferrer" class="m-1">
+			<img src="/icons/socials/matrix.svg" alt="matrix" class="h-10 w-10 rounded-full" />
+		</a>
+	{/if}
+	{#if geyser}
+		<a href={geyser} target="_blank" rel="noreferrer" class="m-1">
+			<img src="/icons/socials/geyser.svg" alt="geyser" class="h-10 w-10 rounded-full" />
 		</a>
 	{/if}
 	{#if instagram}
@@ -118,13 +125,8 @@
 	{/if}
 	{#if signal}
 		<a href={signal} target="_blank" rel="noreferrer" class="m-1">
-			<img src="/icons/socials/signal.svg" alt="signal" class="h-10 w-10 rounded-full" />
-		</a>
-	{/if}
-	{#if simplex}
-		<a href={simplex} target="_blank" rel="noreferrer" class="m-1">
 			<!-- eslint-enable svelte/no-navigation-without-resolve -->
-			<img src="/icons/socials/simplex.jpg" alt="simplex" class="h-10 w-10 rounded-full" />
+			<img src="/icons/socials/signal.svg" alt="signal" class="h-10 w-10 rounded-full" />
 		</a>
 	{/if}
 </div>

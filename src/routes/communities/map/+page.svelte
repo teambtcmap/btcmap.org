@@ -139,22 +139,22 @@
 					props: {
 						website: community.tags['contact:website'],
 						email: community.tags['contact:email'],
+						phone: community.tags['contact:phone'],
 						nostr: community.tags['contact:nostr'],
 						twitter: community.tags['contact:twitter'],
 						meetup: community.tags['contact:meetup'],
-						eventbrite: community.tags['contact:eventbrite'],
 						telegram: community.tags['contact:telegram'],
 						discord: community.tags['contact:discord'],
 						youtube: community.tags['contact:youtube'],
 						github: community.tags['contact:github'],
-						reddit: community.tags['contact:reddit'],
+						matrix: community.tags['contact:matrix'],
+						geyser: community.tags['contact:geyser'],
 						instagram: community.tags['contact:instagram'],
 						whatsapp: community.tags['contact:whatsapp'],
 						facebook: community.tags['contact:facebook'],
 						linkedin: community.tags['contact:linkedin'],
 						rss: community.tags['contact:rss'],
-						signal: community.tags['contact:signal'],
-						simplex: community.tags['contact:simplex']
+						signal: community.tags['contact:signal']
 					}
 				});
 			}

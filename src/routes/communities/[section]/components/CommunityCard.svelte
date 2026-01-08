@@ -14,41 +14,41 @@
 	$: image = tags['icon:square'] && tags['icon:square'];
 	$: website = tags['contact:website'] && tags['contact:website'];
 	$: email = tags['contact:email'] && tags['contact:email'];
+	$: phone = tags['contact:phone'] && tags['contact:phone'];
 	$: nostr = tags['contact:nostr'] && tags['contact:nostr'];
 	$: twitter = tags['contact:twitter'] && tags['contact:twitter'];
 	$: meetup = tags['contact:meetup'] && tags['contact:meetup'];
-	$: eventbrite = tags['contact:eventbrite'] && tags['contact:eventbrite'];
 	$: telegram = tags['contact:telegram'] && tags['contact:telegram'];
 	$: discord = tags['contact:discord'] && tags['contact:discord'];
 	$: youtube = tags['contact:youtube'] && tags['contact:youtube'];
 	$: github = tags['contact:github'] && tags['contact:github'];
-	$: reddit = tags['contact:reddit'] && tags['contact:reddit'];
+	$: matrix = tags['contact:matrix'] && tags['contact:matrix'];
+	$: geyser = tags['contact:geyser'] && tags['contact:geyser'];
 	$: instagram = tags['contact:instagram'] && tags['contact:instagram'];
 	$: whatsapp = tags['contact:whatsapp'] && tags['contact:whatsapp'];
 	$: facebook = tags['contact:facebook'] && tags['contact:facebook'];
 	$: linkedin = tags['contact:linkedin'] && tags['contact:linkedin'];
 	$: rss = tags['contact:rss'] && tags['contact:rss'];
 	$: signal = tags['contact:signal'] && tags['contact:signal'];
-	$: simplex = tags['contact:simplex'] && tags['contact:simplex'];
 	$: hasContact =
 		website ||
 		email ||
+		phone ||
 		nostr ||
 		twitter ||
 		meetup ||
-		eventbrite ||
 		telegram ||
 		discord ||
 		youtube ||
 		github ||
-		reddit ||
+		matrix ||
+		geyser ||
 		instagram ||
 		whatsapp ||
 		facebook ||
 		linkedin ||
 		rss ||
-		signal ||
-		simplex;
+		signal;
 	$: tip =
 		(tags['tips:lightning_address'] && {
 			destination: tags['tips:lightning_address'],
@@ -94,22 +94,22 @@
 		<Socials
 			{website}
 			{email}
+			{phone}
 			{nostr}
 			{twitter}
 			{meetup}
-			{eventbrite}
 			{telegram}
 			{discord}
 			{youtube}
 			{github}
-			{reddit}
+			{matrix}
+			{geyser}
 			{instagram}
 			{whatsapp}
 			{facebook}
 			{linkedin}
 			{rss}
 			{signal}
-			{simplex}
 			style="border-t border-t-gray-200 p-4 w-full dark:border-t-white/95"
 		/>
 	{/if}

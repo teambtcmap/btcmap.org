@@ -238,41 +238,41 @@
 			sponsor = area.sponsor;
 			website = area['contact:website'];
 			email = area['contact:email'];
+			phone = area['contact:phone'];
 			nostr = area['contact:nostr'];
 			twitter = area['contact:twitter'];
 			meetup = area['contact:meetup'];
-			eventbrite = area['contact:eventbrite'];
 			telegram = area['contact:telegram'];
 			discord = area['contact:discord'];
 			youtube = area['contact:youtube'];
 			github = area['contact:github'];
-			reddit = area['contact:reddit'];
+			matrix = area['contact:matrix'];
+			geyser = area['contact:geyser'];
 			instagram = area['contact:instagram'];
 			whatsapp = area['contact:whatsapp'];
 			facebook = area['contact:facebook'];
 			linkedin = area['contact:linkedin'];
 			rss = area['contact:rss'];
 			signal = area['contact:signal'];
-			simplex = area['contact:simplex'];
 			hasContact = !!(
 				website ||
 				email ||
+				phone ||
 				nostr ||
 				twitter ||
 				meetup ||
-				eventbrite ||
 				telegram ||
 				discord ||
 				youtube ||
 				github ||
-				reddit ||
+				matrix ||
+				geyser ||
 				instagram ||
 				whatsapp ||
 				facebook ||
 				linkedin ||
 				rss ||
-				signal ||
-				simplex
+				signal
 			);
 			verifiedDate = data.verifiedDate || area['verified:date'];
 			isVerifiedDateStale = calculateStaleness(verifiedDate);
@@ -364,22 +364,22 @@
 	let sponsor: boolean | undefined;
 	let website: string | undefined;
 	let email: string | undefined;
+	let phone: string | undefined;
 	let nostr: string | undefined;
 	let twitter: string | undefined;
 	let meetup: string | undefined;
-	let eventbrite: string | undefined;
 	let telegram: string | undefined;
 	let discord: string | undefined;
 	let youtube: string | undefined;
 	let github: string | undefined;
-	let reddit: string | undefined;
+	let matrix: string | undefined;
+	let geyser: string | undefined;
 	let instagram: string | undefined;
 	let whatsapp: string | undefined;
 	let facebook: string | undefined;
 	let linkedin: string | undefined;
 	let rss: string | undefined;
 	let signal: string | undefined;
-	let simplex: string | undefined;
 	let verifiedDate: string | undefined = data.verifiedDate;
 	let hasContact = false;
 
@@ -487,22 +487,22 @@
 				<Socials
 					{website}
 					{email}
+				{phone}
 					{nostr}
 					{twitter}
 					{meetup}
-					{eventbrite}
 					{telegram}
 					{discord}
 					{youtube}
 					{github}
-					{reddit}
+					{matrix}
+					{geyser}
 					{instagram}
 					{whatsapp}
 					{facebook}
 					{linkedin}
 					{rss}
 					{signal}
-					{simplex}
 				/>
 			{:else if !dataInitialized}
 				<div class="flex flex-wrap items-center justify-center">
