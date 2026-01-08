@@ -116,6 +116,12 @@
 		</p>
 
 		<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
+			{#if !captchaSecret}
+				<p class="text-center text-sm text-gray-500" role="status" aria-live="polite">
+					Loading form...
+				</p>
+			{/if}
+
 			<div>
 				<label for="name" class="mb-2 block font-semibold">Name</label>
 				<input
@@ -125,6 +131,7 @@
 					id="name"
 					name="name"
 					placeholder="Your name"
+					aria-describedby={!captchaSecret ? 'form-loading-status' : undefined}
 					class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 					bind:this={nameInput}
 				/>
@@ -194,6 +201,10 @@
 			>
 				Submit Application
 			</PrimaryButton>
+
+			{#if submitting}
+				<p class="sr-only" role="status" aria-live="polite">Submitting your application...</p>
+			{/if}
 		</form>
 	</section>
 {:else}
