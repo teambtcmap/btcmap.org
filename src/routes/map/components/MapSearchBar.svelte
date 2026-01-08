@@ -48,6 +48,7 @@
 	}
 
 	function handleFocus() {
+		trackEvent('search_input_focus', { source: 'floating_bar' });
 		onFocus?.();
 	}
 
