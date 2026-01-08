@@ -188,11 +188,15 @@ New tagger onboarding request.`;
 export const POST: RequestHandler = async ({ request }) => {
 	const { type, captchaSecret, captchaTest, honey, ...data } = await request.json();
 
+	console.debug('[gitea/issue] Processing request', { type, hasData: !!data.name });
+
 	if (honey) {
+		console.debug('[gitea/issue] Honeypot triggered');
 		error(418);
 	}
 
 	if (!isValidIssueType(type)) {
+		console.debug('[gitea/issue] Invalid issue type', { type });
 		error(400, 'Invalid issue type');
 	}
 
@@ -204,13 +208,17 @@ export const POST: RequestHandler = async ({ request }) => {
 	let areasText = '';
 
 	if (config.hasAreaLabels && data.lat && data.long) {
+		console.debug('[gitea/issue] Fetching area labels', { lat: data.lat, long: data.long });
 		const areaData = await getAreaLabelsFromCoordinates(data.lat, data.long);
 		areaLabels = areaData.labels;
 		areasText = areaData.text;
+		console.debug('[gitea/issue] Area labels resolved', { count: areaLabels.length });
 	}
 
 	const body = generateBody(type, data, areasText);
 	const title = String(data.name);
+
+	console.debug('[gitea/issue] Creating issue', { type, repo: config.repo, title });
 
 	const response = await createIssueWithLabels(
 		title,
@@ -219,6 +227,8 @@ export const POST: RequestHandler = async ({ request }) => {
 		config.repo,
 		areaLabels
 	);
+
+	console.debug('[gitea/issue] Issue created', { issueNumber: response.data.number });
 
 	return new Response(JSON.stringify(response.data));
 };
