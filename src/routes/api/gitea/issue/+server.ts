@@ -72,6 +72,10 @@ const CONFIG = {
 
 type IssueType = keyof typeof CONFIG;
 
+function isValidIssueType(type: unknown): type is IssueType {
+	return typeof type === 'string' && type in CONFIG;
+}
+
 function validateCaptcha(captchaSecret: string, captchaTest: string): void {
 	if (!env.SERVER_CRYPTO_KEY || !env.SERVER_INIT_VECTOR) {
 		error(503, 'Service unavailable');
@@ -188,13 +192,14 @@ export const POST: RequestHandler = async ({ request }) => {
 		error(418);
 	}
 
-	if (!type || !CONFIG[type as IssueType]) {
+	if (!isValidIssueType(type)) {
 		error(400, 'Invalid issue type');
 	}
 
 	validateCaptcha(captchaSecret, captchaTest);
 
-	const config = CONFIG[type as IssueType];
+	// type is now narrowed to IssueType after validation
+	const config = CONFIG[type];
 	let areaLabels: string[] = [];
 	let areasText = '';
 
@@ -204,7 +209,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		areasText = areaData.text;
 	}
 
-	const body = generateBody(type as IssueType, data, areasText);
+	const body = generateBody(type, data, areasText);
 	const title = String(data.name);
 
 	const response = await createIssueWithLabels(
