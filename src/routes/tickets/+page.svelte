@@ -3,8 +3,10 @@
 	import OpenTicket from '$components/OpenTicket.svelte';
 	import OpenTicketSkeleton from './components/OpenTicketSkeleton.svelte';
 	import TopButton from '$components/TopButton.svelte';
+	import { GITEA_LABELS } from '$lib/constants';
 	import { theme } from '$lib/store';
 	import { detectTheme, errToast } from '$lib/utils';
+
 	import type { GiteaLabel } from '$lib/types';
 
 	const ticketTypes = ['Add', 'Verify', 'Community'];
@@ -16,15 +18,17 @@
 
 	$: add =
 		tickets?.filter((issue) =>
-			issue?.labels?.some((label: GiteaLabel) => label?.name === 'location-submission')
+			issue?.labels?.some((label: GiteaLabel) => label?.id === GITEA_LABELS.DATA.ADD_LOCATION)
 		) || [];
 	$: verify =
 		tickets?.filter((issue) =>
-			issue?.labels?.some((label: GiteaLabel) => label?.name === 'location-verification')
+			issue?.labels?.some((label: GiteaLabel) => label?.id === GITEA_LABELS.DATA.VERIFY_LOCATION)
 		) || [];
 	$: community =
 		tickets?.filter((issue) =>
-			issue?.labels?.some((label: GiteaLabel) => label?.name === 'community-submission')
+			issue?.labels?.some(
+				(label: GiteaLabel) => label?.id === GITEA_LABELS.DATA.COMMUNITY_SUBMISSION
+			)
 		) || [];
 
 	let totalTickets = data.totalTickets;

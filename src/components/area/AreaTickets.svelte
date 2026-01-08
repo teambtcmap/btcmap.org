@@ -1,23 +1,25 @@
 <script lang="ts">
 	import InfoTooltip from '$components/InfoTooltip.svelte';
 	import OpenTicket from '$components/OpenTicket.svelte';
+	import { GITEA_LABELS } from '$lib/constants';
 	import type { Tickets } from '$lib/types.js';
 	import { errToast } from '$lib/utils';
 
+	import type { GiteaLabel, GiteaIssue } from '$lib/types';
+
 	export let title: string;
 	export let tickets: Tickets;
-	import type { GiteaLabel, GiteaIssue } from '$lib/types';
 
 	$: filteredTickets = tickets === 'error' ? [] : tickets;
 
 	$: add = filteredTickets.filter((issue: GiteaIssue) =>
-		issue.labels.some((label: GiteaLabel) => label.name === 'location-submission')
+		issue.labels.some((label: GiteaLabel) => label.id === GITEA_LABELS.DATA.ADD_LOCATION)
 	);
 	$: verify = filteredTickets.filter((issue: GiteaIssue) =>
-		issue.labels.some((label: GiteaLabel) => label.name === 'location-verification')
+		issue.labels.some((label: GiteaLabel) => label.id === GITEA_LABELS.DATA.VERIFY_LOCATION)
 	);
 	$: community = filteredTickets.filter((issue: GiteaIssue) =>
-		issue.labels.some((label: GiteaLabel) => label.name === 'community-submission')
+		issue.labels.some((label: GiteaLabel) => label.id === GITEA_LABELS.DATA.COMMUNITY_SUBMISSION)
 	);
 
 	const ticketTypes = ['Add', 'Verify', 'Community'];
