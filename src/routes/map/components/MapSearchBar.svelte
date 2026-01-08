@@ -2,6 +2,7 @@
 	import type { MerchantListMode } from '$lib/merchantListStore';
 	import { merchantList } from '$lib/merchantListStore';
 	import Icon from '$components/Icon.svelte';
+	import SearchInput from '$components/SearchInput.svelte';
 	import { trackEvent } from '$lib/analytics';
 	import { formatNearbyCount } from '$lib/utils';
 
@@ -14,7 +15,7 @@
 
 	$: formattedCount = formatNearbyCount(nearbyCount);
 
-	let inputElement: HTMLInputElement;
+	let searchInputComponent: SearchInput;
 
 	// Store subscriptions
 	$: searchQuery = $merchantList.searchQuery;
@@ -53,8 +54,6 @@
 			if (searchQuery) {
 				e.preventDefault();
 				handleClear();
-			} else {
-				inputElement?.blur();
 			}
 		} else if (e.key === 'Enter') {
 			e.preventDefault();
@@ -65,12 +64,12 @@
 	function handleClear() {
 		merchantList.clearSearchInput();
 		onSearch?.('');
-		inputElement?.focus();
+		searchInputComponent?.focus();
 	}
 
 	// Allow parent to focus the input
 	export function focus() {
-		inputElement?.focus();
+		searchInputComponent?.focus();
 	}
 </script>
 
@@ -79,46 +78,35 @@
 	<div class="pointer-events-auto flex w-full flex-col-reverse gap-2 md:w-80 md:flex-col">
 		<!-- Search input -->
 		<div class="rounded-lg bg-white shadow-lg dark:bg-dark dark:shadow-black/30">
-			<div class="relative">
-				<Icon
-					w="18"
-					h="18"
-					icon="search"
-					type="material"
-					class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-600 dark:text-white/70"
-				/>
-				<input
-					bind:this={inputElement}
-					value={searchQuery}
-					on:input={handleInput}
-					on:focus={handleFocus}
-					on:keydown={handleKeyDown}
-					type="search"
-					{placeholder}
-					aria-label="Search for Bitcoin merchants"
-					class="w-full rounded-lg border-0 bg-transparent py-3 pr-10 pl-10 text-sm text-primary outline-none placeholder:text-gray-400 dark:text-white dark:placeholder:text-white/50 [&::-webkit-search-cancel-button]:hidden"
-				/>
-				{#if searchQuery}
-					<button
-						type="button"
-						on:click={handleClear}
-						class="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
-						aria-label="Clear search"
-					>
-						<Icon w="20" h="20" icon="close" type="material" />
-					</button>
-				{:else if isSearching}
-					<div
-						class="absolute top-1/2 right-3 -translate-y-1/2"
-						role="status"
-						aria-label="Searching"
-					>
-						<div
-							class="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-link dark:border-white/30 dark:border-t-white"
-						></div>
-					</div>
-				{/if}
-			</div>
+			<SearchInput
+				bind:this={searchInputComponent}
+				value={searchQuery}
+				{placeholder}
+				ariaLabel="Search for Bitcoin merchants"
+				rounded
+				on:input={handleInput}
+				on:focus={handleFocus}
+				on:keydown={handleKeyDown}
+			>
+				<svelte:fragment slot="trailing">
+					{#if searchQuery}
+						<button
+							type="button"
+							on:click={handleClear}
+							class="p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
+							aria-label="Clear search"
+						>
+							<Icon w="20" h="20" icon="close" type="material" />
+						</button>
+					{:else if isSearching}
+						<div role="status" aria-label="Searching">
+							<div
+								class="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-link dark:border-white/30 dark:border-t-white"
+							></div>
+						</div>
+					{/if}
+				</svelte:fragment>
+			</SearchInput>
 		</div>
 
 		<!-- Segmented tabs (order matches panel: Worldwide, Nearby) -->

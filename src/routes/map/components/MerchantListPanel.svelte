@@ -7,6 +7,7 @@
 	import MerchantListItem from './MerchantListItem.svelte';
 	import LoadingSpinner from '$components/LoadingSpinner.svelte';
 	import Icon from '$components/Icon.svelte';
+	import SearchInput from '$components/SearchInput.svelte';
 	import type { Place } from '$lib/types';
 	import {
 		CATEGORY_ENTRIES,
@@ -40,8 +41,8 @@
 	// Callback to fit map bounds to all search results
 	export let onFitSearchResultBounds: (() => void) | undefined = undefined;
 
-	// Reference for search input element
-	let searchInput: HTMLInputElement;
+	// Reference for search input component
+	let searchInputComponent: SearchInput;
 
 	// Local filter for nearby mode (client-side filtering by name)
 	let nearbyFilter = '';
@@ -93,7 +94,7 @@
 		} else {
 			nearbyFilter = '';
 		}
-		searchInput?.focus();
+		searchInputComponent?.focus();
 	}
 
 	function handleModeSwitch(newMode: MerchantListMode) {
@@ -108,7 +109,7 @@
 			trackEvent('worldwide_mode_click');
 			merchantList.setMode(newMode);
 			// Focus search input when switching to worldwide
-			tick().then(() => searchInput?.focus());
+			tick().then(() => searchInputComponent?.focus());
 		}
 	}
 
@@ -186,8 +187,8 @@
 	}
 
 	// Focus search input when panel opens (always, since we now have unified search)
-	$: if (browser && isOpen && searchInput) {
-		tick().then(() => searchInput?.focus());
+	$: if (browser && isOpen && searchInputComponent) {
+		tick().then(() => searchInputComponent?.focus());
 	}
 
 	function handleItemClick(place: Place) {
@@ -265,46 +266,40 @@
 		role="complementary"
 		aria-label="Merchant list"
 	>
-		<!-- Search input - identical styling to floating MapSearchBar -->
-		<div class="relative shrink-0 border-b border-gray-100 dark:border-white/10">
-			<Icon
-				w="18"
-				h="18"
-				icon="search"
-				type="material"
-				class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-600 dark:text-white/70"
-			/>
-			<input
-				bind:this={searchInput}
+		<!-- Search input - uses shared SearchInput component -->
+		<div class="shrink-0 border-b border-gray-100 dark:border-white/10">
+			<SearchInput
+				bind:this={searchInputComponent}
 				value={mode === 'search' ? searchQuery : nearbyFilter}
-				on:input={handleUnifiedInput}
-				on:keydown={handleUnifiedKeyDown}
-				type="search"
 				placeholder={mode === 'search' ? 'Search worldwide...' : 'Search nearby...'}
-				aria-label={mode === 'search'
+				ariaLabel={mode === 'search'
 					? 'Search for Bitcoin merchants worldwide'
 					: 'Filter nearby merchants by name'}
-				class="w-full border-0 bg-transparent py-3 pr-10 pl-10 text-sm text-primary outline-none placeholder:text-gray-400 dark:text-white dark:placeholder:text-white/50 [&::-webkit-search-cancel-button]:hidden"
-			/>
-			{#if (mode === 'search' && searchQuery) || (mode === 'nearby' && nearbyFilter)}
-				<button
-					type="button"
-					on:click={handleClearInput}
-					class="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
-					aria-label="Clear search"
-				>
-					<Icon w="20" h="20" icon="close" type="material" />
-				</button>
-			{:else}
-				<button
-					type="button"
-					on:click={handleClose}
-					class="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
-					aria-label="Close merchant list"
-				>
-					<Icon w="20" h="20" icon="close" type="material" />
-				</button>
-			{/if}
+				on:input={handleUnifiedInput}
+				on:keydown={handleUnifiedKeyDown}
+			>
+				<svelte:fragment slot="trailing">
+					{#if (mode === 'search' && searchQuery) || (mode === 'nearby' && nearbyFilter)}
+						<button
+							type="button"
+							on:click={handleClearInput}
+							class="p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
+							aria-label="Clear search"
+						>
+							<Icon w="20" h="20" icon="close" type="material" />
+						</button>
+					{:else}
+						<button
+							type="button"
+							on:click={handleClose}
+							class="p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
+							aria-label="Close merchant list"
+						>
+							<Icon w="20" h="20" icon="close" type="material" />
+						</button>
+					{/if}
+				</svelte:fragment>
+			</SearchInput>
 		</div>
 
 		<!-- Filters and controls -->
