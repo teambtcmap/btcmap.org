@@ -118,7 +118,7 @@ async function getAreaLabelsFromCoordinates(
 		.filter((label): label is string => Boolean(label));
 
 	const text = filteredAreas
-		.map((area) => `${area?.tags.name} (${area?.tags?.url_alias || area?.id})`)
+		.map((area) => `${area?.tags?.name} (${area?.tags?.url_alias || area?.id})`)
 		.join(', ');
 
 	return { labels, text };
