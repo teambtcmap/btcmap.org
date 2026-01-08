@@ -68,11 +68,6 @@
 		onSearch?.('');
 		searchInputComponent?.focus();
 	}
-
-	// Allow parent to focus the input
-	export function focus() {
-		searchInputComponent?.focus();
-	}
 </script>
 
 <!-- Floating search bar - hidden when panel is open (panel has its own search in same position) -->
