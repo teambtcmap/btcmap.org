@@ -85,13 +85,8 @@
 			});
 	};
 
-	let _selectedLat: number;
-	let _selectedLon: number;
-
-	const setLocation = (area: { display_name: string; lat: string; lon: string }) => {
+	const setLocation = (area: { display_name: string }) => {
 		location = area.display_name;
-		_selectedLat = parseFloat(area.lat);
-		_selectedLon = parseFloat(area.lon);
 		selected = true;
 		successToast('Location selected!');
 	};
