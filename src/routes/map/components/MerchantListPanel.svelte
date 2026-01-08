@@ -116,7 +116,7 @@
 	function handleCategorySelect(category: CategoryKey) {
 		// Guard against clicks on disabled buttons (Svelte fires click even when disabled)
 		if (!hasMatchingMerchants(category, categoryCounts)) return;
-		trackEvent('category_filter', { category });
+		trackEvent('category_filter', { category, mode });
 		merchantList.setSelectedCategory(category);
 		// Only refresh in nearby mode - search mode filters client-side
 		if (mode === 'nearby') {
