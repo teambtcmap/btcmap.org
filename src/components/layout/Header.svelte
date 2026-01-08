@@ -33,6 +33,7 @@
 	const maintainDropdownLinks: DropdownLink[] = [
 		{ title: 'Add Location', url: '/add-location', icon: 'add' },
 		{ title: 'Add Community', url: '/communities/add', icon: 'communities' },
+		{ title: 'Become a Tagger', url: '/tagger-onboarding', icon: 'leader' },
 		{ title: 'Open Tickets', url: '/tickets', icon: 'ticket' },
 		{ title: 'Tagging Activity', url: '/activity', icon: 'activity' },
 		{ title: 'Tagging Issues', url: '/tagging-issues', icon: 'issue' }

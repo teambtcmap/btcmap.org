@@ -85,13 +85,8 @@
 			});
 	};
 
-	let selectedLat: number;
-	let selectedLon: number;
-
-	const setLocation = (area: { display_name: string; lat: string; lon: string }) => {
+	const setLocation = (area: { display_name: string }) => {
 		location = area.display_name;
-		selectedLat = parseFloat(area.lat);
-		selectedLon = parseFloat(area.lon);
 		selected = true;
 		successToast('Location selected!');
 	};
@@ -105,7 +100,8 @@
 			submitting = true;
 
 			axios
-				.post('/communities/add/endpoint', {
+				.post('/api/gitea/issue', {
+					type: 'community',
 					captchaSecret,
 					captchaTest: captchaValue,
 					honey: honeyInput,
@@ -115,9 +111,7 @@
 					lightning: lightning ? lightning : '',
 					socialLinks: socialLinks ? socialLinks : '',
 					contact,
-					notes: notes ? notes : '',
-					lat: selectedLat,
-					long: selectedLon
+					notes: notes ? notes : ''
 				})
 				.then(function (response) {
 					submissionIssueNumber = response.data.number;
