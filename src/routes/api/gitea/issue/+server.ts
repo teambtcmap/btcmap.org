@@ -13,7 +13,33 @@ import { areas } from '$lib/store';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
-const used: string[] = [];
+// TTL-based cache for used captcha secrets to prevent memory leaks
+const CAPTCHA_TTL_MS = 10 * 60 * 1000; // 10 minutes
+const usedCaptchas = new Map<string, number>();
+
+function addUsedCaptcha(secret: string): void {
+	usedCaptchas.set(secret, Date.now());
+	// Clean up expired entries periodically
+	if (usedCaptchas.size > 100) {
+		const now = Date.now();
+		for (const [key, timestamp] of usedCaptchas) {
+			if (now - timestamp > CAPTCHA_TTL_MS) {
+				usedCaptchas.delete(key);
+			}
+		}
+	}
+}
+
+function isCaptchaUsed(secret: string): boolean {
+	const timestamp = usedCaptchas.get(secret);
+	if (!timestamp) return false;
+	// Check if expired
+	if (Date.now() - timestamp > CAPTCHA_TTL_MS) {
+		usedCaptchas.delete(secret);
+		return false;
+	}
+	return true;
+}
 
 type IssueConfig = {
 	repo: GiteaRepo;
@@ -66,10 +92,10 @@ function validateCaptcha(captchaSecret: string, captchaTest: string): void {
 		error(400, 'Captcha test failed, please try again or contact BTC Map.');
 	}
 
-	if (used.includes(captchaSecret)) {
+	if (isCaptchaUsed(captchaSecret)) {
 		error(400, 'Captcha has already been used, please try another.');
 	} else {
-		used.push(captchaSecret);
+		addUsedCaptcha(captchaSecret);
 	}
 }
 
