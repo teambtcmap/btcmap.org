@@ -7,7 +7,7 @@
 	import MapLoadingEmbed from '$components/MapLoadingEmbed.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import { loadMapDependencies } from '$lib/map/imports';
-	import { attribution, changeDefaultIcons, geolocate } from '$lib/map/setup';
+	import { attribution, changeDefaultIcons, generateLocationIcon, geolocate } from '$lib/map/setup';
 	import { theme } from '$lib/store';
 	import { detectTheme, errToast } from '$lib/utils';
 
@@ -118,7 +118,8 @@
 					map.removeLayer(marker);
 				}
 
-				marker = leaflet.marker([lat, long]).addTo(map);
+				const locationIcon = generateLocationIcon(leaflet);
+				marker = leaflet.marker([lat, long], { icon: locationIcon }).addTo(map);
 				selected = true;
 			}
 		});
