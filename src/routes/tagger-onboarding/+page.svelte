@@ -58,8 +58,9 @@
 				submitted = true;
 			})
 			.catch(function (error) {
-				if (error.response.data.message.includes('Captcha')) {
-					errToast(error.response.data.message);
+				const message = error.response?.data?.message;
+				if (typeof message === 'string' && message.includes('Captcha')) {
+					errToast(message);
 				} else {
 					errToast('Form submission failed, please try again or contact BTC Map.');
 				}
@@ -157,7 +158,7 @@
 						>Bot protection <span class="font-normal">(case-sensitive)</span></label
 					>
 					{#if captchaSecret}
-						<button type="button" on:click={fetchCaptcha}>
+						<button type="button" on:click={fetchCaptcha} aria-label="Refresh captcha">
 							<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
 						</button>
 					{/if}
@@ -178,6 +179,7 @@
 						disabled={!captchaSecret}
 						required
 						type="text"
+						id="captcha"
 						name="captcha"
 						placeholder="Please enter the captcha text."
 						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
