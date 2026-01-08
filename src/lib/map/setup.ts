@@ -270,6 +270,15 @@ export const calcVerifiedDate = () => {
 	return verifiedDate.setFullYear(previousYear);
 };
 
+export const generateLocationIcon = (L: Leaflet) => {
+	return L.divIcon({
+		className: 'div-icon',
+		iconSize: [32, 43],
+		iconAnchor: [16, 43],
+		popupAnchor: [0, -43]
+	});
+};
+
 export const generateIcon = (L: Leaflet, icon: string, boosted: boolean, commentsCount: number) => {
 	const className = boosted ? 'animate-wiggle' : '';
 	const iconTmp = icon !== 'question_mark' ? icon : 'currency_bitcoin';
