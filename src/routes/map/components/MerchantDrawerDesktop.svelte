@@ -33,6 +33,11 @@
 	$: fetchingMerchant = $merchantDrawer.isLoading;
 	$: listIsOpen = $merchantList.isOpen;
 
+	// Calculate drawer position based on list panel state
+	$: drawerLeft = listIsOpen
+		? MAP_PANEL_MARGIN + MERCHANT_LIST_WIDTH + PANEL_DRAWER_GAP
+		: MAP_PANEL_MARGIN;
+
 	const verifiedDate = calcVerifiedDate();
 	$: isUpToDate = checkUpToDate(merchant, verifiedDate);
 	$: isBoosted = checkBoosted(merchant);
@@ -97,9 +102,7 @@
 	<div
 		in:fly={{ x: -MERCHANT_DRAWER_WIDTH, duration: 300 }}
 		class="absolute top-3 z-[1002] max-h-[calc(100%-1.5rem)] w-full overflow-y-auto rounded-lg bg-white shadow-lg transition-[left] duration-200 dark:bg-dark"
-		style="left: {listIsOpen
-			? MAP_PANEL_MARGIN + MERCHANT_LIST_WIDTH + PANEL_DRAWER_GAP
-			: MAP_PANEL_MARGIN}px; max-width: {MERCHANT_DRAWER_WIDTH}px"
+		style="left: {drawerLeft}px; max-width: {MERCHANT_DRAWER_WIDTH}px"
 		role="dialog"
 		aria-label="Merchant details"
 	>
