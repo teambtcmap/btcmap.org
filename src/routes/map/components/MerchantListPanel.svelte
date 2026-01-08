@@ -262,7 +262,7 @@
 {#if isOpen}
 	<section
 		bind:this={panelElement}
-		class="absolute inset-0 z-[1001] flex flex-col overflow-hidden bg-white md:absolute md:inset-auto md:top-3 md:bottom-4 md:left-3 md:w-80 md:rounded-lg md:shadow-lg dark:bg-dark dark:shadow-black/30"
+		class="pb-safe absolute inset-0 z-[1001] flex flex-col overflow-hidden bg-white md:absolute md:inset-auto md:top-3 md:bottom-4 md:left-3 md:w-80 md:rounded-lg md:pb-0 md:shadow-lg dark:bg-dark dark:shadow-black/30"
 		role="complementary"
 		aria-label="Merchant list"
 	>
