@@ -313,7 +313,7 @@
 			<div
 				class="flex rounded-lg bg-gray-100 p-1 dark:bg-white/5"
 				role="radiogroup"
-				aria-label="View mode"
+				aria-label="Search mode"
 			>
 				<button
 					type="button"
