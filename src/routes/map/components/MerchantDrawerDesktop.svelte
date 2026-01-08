@@ -6,7 +6,7 @@
 	import BoostContent from '$components/BoostContent.svelte';
 	import MerchantDetailsContent from '$components/MerchantDetailsContent.svelte';
 	import { invalidateAll } from '$app/navigation';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import { merchantList } from '$lib/merchantListStore';
 	import {
@@ -37,6 +37,15 @@
 	$: drawerLeft = listIsOpen
 		? MAP_PANEL_MARGIN + MERCHANT_LIST_WIDTH + PANEL_DRAWER_GAP
 		: MAP_PANEL_MARGIN;
+
+	// Focus management - move focus to drawer when it opens
+	let drawerElement: HTMLDivElement;
+	$: if (isOpen && drawerElement) {
+		tick().then(() => {
+			const closeBtn = drawerElement.querySelector('button');
+			closeBtn?.focus();
+		});
+	}
 
 	const verifiedDate = calcVerifiedDate();
 	$: isUpToDate = checkUpToDate(merchant, verifiedDate);
@@ -100,6 +109,7 @@
 	<!-- Floating drawer card - no backdrop, keep map interactive -->
 	<!-- Position offset by MERCHANT_LIST_WIDTH when list panel is open -->
 	<div
+		bind:this={drawerElement}
 		in:fly={{ x: -MERCHANT_DRAWER_WIDTH, duration: 300 }}
 		class="absolute top-3 z-[1002] max-h-[calc(100%-1.5rem)] w-full overflow-y-auto rounded-lg bg-white shadow-lg transition-[left] duration-200 dark:bg-dark"
 		style="left: {drawerLeft}px; max-width: {MERCHANT_DRAWER_WIDTH}px"
