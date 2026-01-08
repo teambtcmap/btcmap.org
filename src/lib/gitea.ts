@@ -167,22 +167,27 @@ export async function createIssueWithLabels(
 		Authorization: `token ${env.GITEA_API_KEY}`
 	};
 
-	// Get IDs for area labels (create if they don't exist)
-	const areaLabelIds = await Promise.all(areaLabels.map((name) => createLabel(name, repo)));
-	const validAreaLabelIds = areaLabelIds.filter((id): id is number => id !== null);
+	try {
+		// Get IDs for area labels (create if they don't exist)
+		const areaLabelIds = await Promise.all(areaLabels.map((name) => createLabel(name, repo)));
+		const validAreaLabelIds = areaLabelIds.filter((id): id is number => id !== null);
 
-	const allLabelIds = [...labelIds, ...validAreaLabelIds];
+		const allLabelIds = [...labelIds, ...validAreaLabelIds];
 
-	const response = await axios.post(
-		`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/${repo}/issues`,
-		{ title, body, labels: allLabelIds },
-		{ headers }
-	);
+		const response = await axios.post(
+			`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/${repo}/issues`,
+			{ title, body, labels: allLabelIds },
+			{ headers }
+		);
 
-	// Only invalidate cache for btcmap-data repo
-	if (repo === 'btcmap-data') {
-		issuesCache = null;
+		// Only invalidate cache for btcmap-data repo
+		if (repo === 'btcmap-data') {
+			issuesCache = null;
+		}
+
+		return response;
+	} catch (error) {
+		console.error(`Failed to create issue in ${repo}:`, error);
+		throw error;
 	}
-
-	return response;
 }
