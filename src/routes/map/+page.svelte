@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
-	import Icon from '$components/Icon.svelte';
-	import LoadingSpinner from '$components/LoadingSpinner.svelte';
 	import MapLoadingMain from '$components/MapLoadingMain.svelte';
 	import TileLoadingIndicator from './components/TileLoadingIndicator.svelte';
 	import MerchantDrawerHash from './components/MerchantDrawerHash.svelte';
 	import MerchantListPanel from './components/MerchantListPanel.svelte';
+	import MapSearchBar from './components/MapSearchBar.svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import type { MerchantListMode } from '$lib/merchantListStore';
 	import { merchantList } from '$lib/merchantListStore';
@@ -79,7 +78,7 @@
 	import { debounce, errToast, isBoosted } from '$lib/utils';
 	import type { Control, LatLng, LatLngBounds, Map, Marker, MarkerClusterGroup } from 'leaflet';
 	import localforage from 'localforage';
-	import { onDestroy, onMount, tick } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import type { FeatureGroup } from 'leaflet';
 	import type { PageData } from './$types';
 
@@ -1034,7 +1033,8 @@
 			const LocateControl = deps.LocateControl;
 
 			// add map and tiles
-			map = window.L.map(mapElement, { maxZoom: 19 });
+			map = leaflet.map(mapElement, { maxZoom: 19, zoomControl: false });
+			leaflet.control.zoom({ position: 'topright' }).addTo(map);
 
 			// Helper function to set mapLoaded after view is set
 			const setMapViewAndMarkLoaded = () => {
@@ -1200,33 +1200,14 @@
 			// add locate button to map
 			geolocate(leaflet, map, LocateControl);
 
-			// add new control container for search and boost
+			// add boost button control
 			const customControls = leaflet.Control.extend({
 				options: {
-					position: 'topleft'
+					position: 'topright'
 				},
 				onAdd: () => {
 					const addControlDiv = leaflet.DomUtil.create('div');
-					addControlDiv.classList.add(
-						'leaflet-control-search-boost',
-						'leaflet-bar',
-						'leaflet-control'
-					);
-
-					// Search button - opens panel in search mode
-					const searchButton = leaflet.DomUtil.create('a');
-					searchButton.classList.add('leaflet-control-search-toggle');
-					searchButton.title = 'Search';
-					searchButton.role = 'button';
-					searchButton.ariaLabel = 'Search';
-					searchButton.ariaDisabled = 'false';
-					searchButton.innerHTML = `<img src='/icons/search.svg' alt='search' style='width: 16px; height: 16px;'/>`;
-					searchButton.onclick = function openSearch() {
-						trackEvent('search_button_click');
-						// Open panel in search mode (will auto-focus input)
-						merchantList.openSearchMode();
-					};
-					addControlDiv.append(searchButton);
+					addControlDiv.classList.add('leaflet-control-boost', 'leaflet-bar', 'leaflet-control');
 
 					// Boost layer button
 					const boostLayerButton = leaflet.DomUtil.create('a');
@@ -1258,28 +1239,15 @@
 				DomEvent.disableClickPropagation(boostLayer as HTMLElement);
 			}
 
-			// Search bar control - re-enabled for API-based search
-			// @ts-expect-error accessing private Leaflet map internals for custom control placement
-			map._controlCorners['topcenter'] = leaflet.DomUtil.create(
-				'div',
-				'leaflet-top leaflet-center',
-				// @ts-expect-error accessing private Leaflet map internals
-				map._controlContainer
-			);
-
-			// disable map events for search toggle
-			const searchToggle = document.querySelector('.leaflet-control-search-toggle');
-			if (searchToggle) {
-				DomEvent.disableClickPropagation(searchToggle as HTMLElement);
-			}
-
 			// add home and marker buttons to map
 			homeMarkerButtons(leaflet, map, DomEvent, true);
 
 			// add data refresh button to map
 			dataRefresh(leaflet, map, DomEvent);
 
-			controlLayers = leaflet.control.layers(baseMaps).addTo(map);
+			controlLayers = leaflet.control
+				.layers(baseMaps, undefined, { position: 'topright' })
+				.addTo(map);
 
 			// track layer changes (with deduplication to avoid tracking same layer selection)
 			map.on('baselayerchange', (e: { name: string }) => {
@@ -1345,12 +1313,37 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/map.png" />
 </svelte:head>
 
-<main class="flex h-screen w-full">
+<main class="relative h-screen w-full">
 	<h1 class="hidden">Map</h1>
 
 	<MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
 
-	<!-- Merchant list panel (search results + nearby merchants) -->
+	<!-- Map takes full space -->
+	<div bind:this={mapElement} class="map-fullscreen absolute inset-0 !bg-teal dark:!bg-dark" />
+
+	<!-- Floating search bar - desktop: top-left, mobile: bottom-center (hidden on mobile when merchant drawer open) -->
+	{#if mapLoaded}
+		<div
+			class="pointer-events-none z-[1000] max-md:fixed max-md:right-3 max-md:bottom-[calc(5rem+env(safe-area-inset-bottom))] max-md:left-3 md:absolute md:top-3 md:left-3
+				{$merchantDrawer.isOpen ? 'max-md:hidden' : ''}"
+		>
+			<MapSearchBar
+				onSearch={handlePanelSearch}
+				onFocus={() => {
+					merchantList.open();
+					updateMerchantList({ force: true });
+				}}
+				onNearbyClick={() => {
+					merchantList.open();
+					updateMerchantList({ force: true });
+				}}
+				nearbyCount={$merchantList.totalCount}
+				isLoadingCount={$merchantList.isLoadingList}
+			/>
+		</div>
+	{/if}
+
+	<!-- Merchant list panel (overlays map, search input at same position as floating bar) -->
 	<MerchantListPanel
 		onPanToNearbyMerchant={panToNearbyMerchant}
 		onZoomToSearchResult={zoomToSearchResult}
@@ -1367,48 +1360,6 @@
 		onRefresh={() => updateMerchantList({ force: true })}
 		{currentZoom}
 	/>
-
-	<!-- Map container -->
-	<div class="relative flex-1">
-		<!-- Floating toggle button for merchant list (responsive positioning) -->
-		<!-- Hide when list is open, or on mobile when drawer is open -->
-		{#if mapLoaded && !$merchantList.isOpen}
-			<button
-				on:click={async () => {
-					trackEvent('nearby_button_click');
-					merchantList.open();
-					// Reset to nearby mode when opening via toggle button
-					merchantList.setMode('nearby');
-					// Wait for store update to propagate before fetching
-					await tick();
-					updateMerchantList({ force: true });
-				}}
-				class="fixed right-4 bottom-[40px] z-[1000] flex items-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-medium
-					shadow-lg transition-colors hover:bg-gray-50 md:top-[10px] md:right-auto
-					md:bottom-auto md:left-[60px] md:rounded-lg md:px-3 md:py-2 dark:bg-dark dark:hover:bg-white/10
-					{$merchantDrawer.isOpen ? 'max-md:hidden' : ''}"
-				style="filter: drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3));"
-				aria-label="Open merchant list"
-				aria-expanded={$merchantList.isOpen}
-			>
-				<Icon w="18" h="18" icon="menu" type="material" class="text-primary dark:text-white" />
-				{#if currentZoom >= MERCHANT_LIST_LOW_ZOOM && $merchantList.isLoadingList}
-					<LoadingSpinner size="h-4 w-4" color="text-primary dark:text-white" />
-					<span class="text-primary dark:text-white">Nearby</span>
-				{:else if currentZoom >= MERCHANT_LIST_LOW_ZOOM && $merchantList.totalCount > 0}
-					<span class="text-primary dark:text-white"
-						>{$merchantList.totalCount > MERCHANT_LIST_MAX_ITEMS
-							? `>${MERCHANT_LIST_MAX_ITEMS}`
-							: $merchantList.totalCount} Nearby</span
-					>
-				{:else}
-					<span class="text-primary dark:text-white">Nearby</span>
-				{/if}
-			</button>
-		{/if}
-
-		<div bind:this={mapElement} class="map-fullscreen absolute inset-0 !bg-teal dark:!bg-dark" />
-	</div>
 
 	<MerchantDrawerHash />
 

@@ -18,6 +18,10 @@ export const BREAKPOINTS = {
 // Layout widths for merchant list and drawer (in pixels)
 export const MERCHANT_LIST_WIDTH = 320;
 export const MERCHANT_DRAWER_WIDTH = 400;
+// Spacing from viewport edge for floating panels (Tailwind spacing-3: 0.75rem = 12px)
+export const MAP_PANEL_MARGIN = 12;
+// Gap between list panel and detail drawer (Tailwind spacing-4: 1rem = 16px)
+export const PANEL_DRAWER_GAP = 16;
 
 // Base padding (px) for fitBounds - visual buffer from viewport edges
 export const MAP_FIT_BOUNDS_PADDING = 50;

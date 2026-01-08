@@ -6,10 +6,15 @@
 	import BoostContent from '$components/BoostContent.svelte';
 	import MerchantDetailsContent from '$components/MerchantDetailsContent.svelte';
 	import { invalidateAll } from '$app/navigation';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { merchantDrawer } from '$lib/merchantDrawerStore';
 	import { merchantList } from '$lib/merchantListStore';
-	import { MERCHANT_LIST_WIDTH, MERCHANT_DRAWER_WIDTH } from '$lib/constants';
+	import {
+		MERCHANT_LIST_WIDTH,
+		MERCHANT_DRAWER_WIDTH,
+		MAP_PANEL_MARGIN,
+		PANEL_DRAWER_GAP
+	} from '$lib/constants';
 	import {
 		calcVerifiedDate,
 		isUpToDate as checkUpToDate,
@@ -27,6 +32,20 @@
 	$: merchant = $merchantDrawer.merchant;
 	$: fetchingMerchant = $merchantDrawer.isLoading;
 	$: listIsOpen = $merchantList.isOpen;
+
+	// Calculate drawer position based on list panel state
+	$: drawerLeft = listIsOpen
+		? MAP_PANEL_MARGIN + MERCHANT_LIST_WIDTH + PANEL_DRAWER_GAP
+		: MAP_PANEL_MARGIN;
+
+	// Focus management - move focus to drawer when it opens
+	let drawerElement: HTMLDivElement;
+	$: if (isOpen && drawerElement) {
+		tick().then(() => {
+			const closeBtn = drawerElement.querySelector('button');
+			closeBtn?.focus();
+		});
+	}
 
 	const verifiedDate = calcVerifiedDate();
 	$: isUpToDate = checkUpToDate(merchant, verifiedDate);
@@ -87,19 +106,21 @@
 </script>
 
 {#if isOpen}
-	<!-- Drawer - no backdrop, keep map interactive -->
+	<!-- Floating drawer card - no backdrop, keep map interactive -->
 	<!-- Position offset by MERCHANT_LIST_WIDTH when list panel is open -->
 	<div
-		transition:fly={{ x: -MERCHANT_DRAWER_WIDTH, duration: 300 }}
-		class="fixed top-0 z-[1002] h-full w-full overflow-y-auto bg-white shadow-2xl transition-[left] duration-200 dark:bg-dark"
-		style="left: {listIsOpen ? MERCHANT_LIST_WIDTH : 0}px; max-width: {MERCHANT_DRAWER_WIDTH}px"
+		bind:this={drawerElement}
+		in:fly={{ x: -MERCHANT_DRAWER_WIDTH, duration: 300 }}
+		class="absolute top-3 z-[1002] max-h-[calc(100%-1.5rem)] w-full overflow-y-auto rounded-lg bg-white shadow-lg transition-[left] duration-200 dark:bg-dark"
+		style="left: {drawerLeft}px; max-width: {MERCHANT_DRAWER_WIDTH}px"
 		role="dialog"
-		aria-modal="true"
+		aria-label="Merchant details"
 	>
 		<div
-			class="sticky top-0 z-10 flex items-center bg-white dark:bg-dark {drawerView === 'details'
-				? 'justify-end p-2'
-				: 'justify-between border-b border-gray-300 p-4 dark:border-white/95'}"
+			class="sticky top-0 z-10 flex items-center justify-between rounded-t-lg bg-white p-2 dark:bg-dark {drawerView !==
+			'details'
+				? 'border-b border-gray-300 dark:border-white/95'
+				: ''}"
 		>
 			{#if drawerView !== 'details'}
 				<!-- Back button for nested views -->
@@ -113,8 +134,11 @@
 				<span class="text-sm font-semibold text-primary capitalize dark:text-white"
 					>{drawerView}</span
 				>
+			{:else}
+				<!-- Spacer to keep close button aligned -->
+				<div></div>
 			{/if}
-			<CloseButton on:click={closeDrawer} />
+			<CloseButton on:click={closeDrawer} ariaLabel="Close merchant details" />
 		</div>
 
 		{#if !merchant && fetchingMerchant}

@@ -146,7 +146,7 @@ export const geolocate = (
 	LocateControl: typeof import('leaflet.locatecontrol').LocateControl
 ) => {
 	// Use plugin defaults, just add analytics tracking
-	new LocateControl({ position: 'topleft' }).addTo(map);
+	new LocateControl({ position: 'topright' }).addTo(map);
 
 	const locateButton: HTMLAnchorElement | null = document.querySelector(
 		'.leaflet-bar-part.leaflet-bar-part-single'
@@ -171,7 +171,7 @@ export const homeMarkerButtons = (
 
 	const customControls = L.Control.extend({
 		options: {
-			position: 'topleft'
+			position: 'topright'
 		},
 		onAdd: () => {
 			addControlDiv.classList.add('leaflet-control-site-links', 'leaflet-bar', 'leaflet-control');
@@ -236,7 +236,7 @@ export const dataRefresh = (L: Leaflet, map: Map, DomEvent: DomEventType) => {
 
 	const customDataRefreshButton = L.Control.extend({
 		options: {
-			position: 'topleft'
+			position: 'topright'
 		},
 		onAdd: () => {
 			const dataRefreshDiv = L.DomUtil.create('div');

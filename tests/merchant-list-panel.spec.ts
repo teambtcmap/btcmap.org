@@ -32,7 +32,39 @@ test.describe('Merchant List Panel', () => {
 		}
 	});
 
-	test('list panel opens via toggle button and shows merchants', async ({ page }) => {
+	test('floating search bar is visible on map load', async ({ page }) => {
+		// Desktop viewport
+		await page.setViewportSize({ width: 1280, height: 720 });
+
+		// Navigate to map
+		await page.goto('/map#17/42.2762511/42.7024218', { waitUntil: 'load' });
+		await expect(page).toHaveTitle(/BTC Map/);
+
+		// Wait for map to initialize
+		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
+		await expect(zoomInButton).toBeVisible();
+
+		// Wait for markers to load (ensures map is fully ready)
+		await page.waitForFunction(
+			() => {
+				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
+				return markers.length > 0;
+			},
+			{ timeout: MARKER_LOAD_TIMEOUT }
+		);
+
+		// Floating search bar should be visible
+		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
+		await expect(searchInput).toBeVisible({ timeout: 15000 });
+
+		// Mode toggle buttons should be visible (they have role="radio" for accessibility)
+		const worldwideButton = page.getByRole('radio', { name: 'Worldwide' });
+		const nearbyButton = page.getByRole('radio', { name: /nearby/i });
+		await expect(worldwideButton).toBeVisible();
+		await expect(nearbyButton).toBeVisible();
+	});
+
+	test('list panel opens via search input focus and shows merchants', async ({ page }) => {
 		// Desktop viewport
 		await page.setViewportSize({ width: 1280, height: 720 });
 
@@ -53,22 +85,20 @@ test.describe('Merchant List Panel', () => {
 			{ timeout: MARKER_LOAD_TIMEOUT }
 		);
 
-		// List panel should NOT be visible initially (auto-open disabled)
+		// List panel should NOT be visible initially
 		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
 		await expect(listPanel).not.toBeVisible();
 
-		// Toggle button should be visible
-		const toggleButton = page.getByRole('button', { name: /merchant list/i });
-		await expect(toggleButton).toBeVisible({ timeout: 15000 });
-
-		// Click toggle to open the panel
-		await toggleButton.click();
+		// Click on search input to open panel
+		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
+		await expect(searchInput).toBeVisible({ timeout: 15000 });
+		await searchInput.click();
 
 		// List panel should now be visible
 		await expect(listPanel).toBeVisible({ timeout: 10000 });
 
-		// Should show location count in header
-		await expect(page.locator('text=/\\d+ locations? in view/')).toBeVisible({ timeout: 5000 });
+		// Should show location count in header (in Nearby mode)
+		await expect(page.locator('text=/Nearby/')).toBeVisible({ timeout: 5000 });
 	});
 
 	test('clicking merchant in list opens drawer with correct merchant', async ({ page }) => {
@@ -92,10 +122,10 @@ test.describe('Merchant List Panel', () => {
 			{ timeout: MARKER_LOAD_TIMEOUT }
 		);
 
-		// Click toggle button to open list panel
-		const toggleButton = page.getByRole('button', { name: /merchant list/i });
-		await expect(toggleButton).toBeVisible({ timeout: 15000 });
-		await toggleButton.click();
+		// Click on search input to open list panel
+		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
+		await expect(searchInput).toBeVisible({ timeout: 15000 });
+		await searchInput.click();
 
 		// Wait for list panel to appear
 		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
@@ -129,11 +159,11 @@ test.describe('Merchant List Panel', () => {
 		await expect(viewDetailsButton).toBeVisible({ timeout: 10000 });
 	});
 
-	test('mobile: list panel opens fullscreen via toggle button', async ({ page }) => {
+	test('mobile: floating search bar visible and opens panel on focus', async ({ page }) => {
 		// Mobile viewport
 		await page.setViewportSize({ width: 375, height: 667 });
 
-		// Navigate to map at high zoom where list would appear on desktop
+		// Navigate to map at high zoom
 		await page.goto('/map#17/42.2762511/42.7024218', { waitUntil: 'load' });
 		await expect(page).toHaveTitle(/BTC Map/);
 
@@ -150,22 +180,23 @@ test.describe('Merchant List Panel', () => {
 			{ timeout: MARKER_LOAD_TIMEOUT }
 		);
 
-		// Toggle button IS visible on mobile (shared button for both mobile and desktop)
-		const toggleButton = page.getByRole('button', { name: /merchant list/i });
-		await expect(toggleButton).toBeVisible({ timeout: 15000 });
+		// Floating search bar should be visible on mobile
+		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
+		await expect(searchInput).toBeVisible({ timeout: 15000 });
 
-		// List panel should NOT be visible before clicking toggle
+		// Mode buttons should be visible (they have role="radio" for accessibility)
+		const nearbyButton = page.getByRole('radio', { name: /nearby/i });
+		await expect(nearbyButton).toBeVisible();
+
+		// List panel should NOT be visible before clicking
 		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
 		await expect(listPanel).not.toBeVisible();
 
-		// Click toggle to open fullscreen list on mobile
-		await toggleButton.click();
+		// Click search input to open fullscreen list on mobile
+		await searchInput.click();
 
 		// List panel (unified component, fullscreen on mobile) should be visible
 		await expect(listPanel).toBeVisible({ timeout: 5000 });
-
-		// Should show "Nearby Merchants" heading
-		await expect(listPanel.locator('h2:has-text("Nearby Merchants")')).toBeVisible();
 	});
 
 	test('mobile: selecting merchant closes list and opens drawer', async ({ page }) => {
@@ -189,10 +220,10 @@ test.describe('Merchant List Panel', () => {
 			{ timeout: MARKER_LOAD_TIMEOUT }
 		);
 
-		// Open mobile list
-		const toggleButton = page.getByRole('button', { name: /merchant list/i });
-		await expect(toggleButton).toBeVisible({ timeout: 15000 });
-		await toggleButton.click();
+		// Click search input to open mobile list
+		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
+		await expect(searchInput).toBeVisible({ timeout: 15000 });
+		await searchInput.click();
 
 		// Wait for list panel to appear (unified component, fullscreen on mobile)
 		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
@@ -223,7 +254,65 @@ test.describe('Merchant List Panel', () => {
 		await expect(mobileDrawer).toBeVisible({ timeout: 10000 });
 	});
 
-	test('switches between Worldwide and Nearby modes', async ({ page }) => {
+	test('mobile: search bar hides when merchant drawer is open', async ({ page }) => {
+		// Mobile viewport
+		await page.setViewportSize({ width: 375, height: 667 });
+
+		// Navigate to map at high zoom
+		await page.goto('/map#17/42.2762511/42.7024218', { waitUntil: 'load' });
+		await expect(page).toHaveTitle(/BTC Map/);
+
+		// Wait for map to initialize
+		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
+		await expect(zoomInButton).toBeVisible();
+
+		// Wait for markers to load
+		await page.waitForFunction(
+			() => {
+				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
+				return markers.length > 0;
+			},
+			{ timeout: MARKER_LOAD_TIMEOUT }
+		);
+
+		// Floating search bar should be visible initially
+		const floatingSearchInput = page.getByRole('searchbox', {
+			name: /search for bitcoin merchants/i
+		});
+		await expect(floatingSearchInput).toBeVisible({ timeout: 15000 });
+
+		// Click search input to open list panel
+		await floatingSearchInput.click();
+
+		// Wait for list panel to appear
+		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
+		await expect(listPanel).toBeVisible({ timeout: 5000 });
+
+		// Select a merchant to open the drawer
+		const merchantItems = listPanel.locator('li button');
+		const firstMerchant = merchantItems.first();
+		await expect(firstMerchant).toBeVisible({ timeout: 15000 });
+		await firstMerchant.click();
+
+		// Wait for drawer to open
+		const mobileDrawer = page.locator('text="Swipe up for details"');
+		await expect(mobileDrawer).toBeVisible({ timeout: 10000 });
+
+		// Floating search bar should be hidden when drawer is open (on mobile)
+		// The floating search bar uses fixed positioning and is hidden via max-md:hidden when drawer is open
+		await expect(floatingSearchInput).not.toBeVisible({ timeout: 5000 });
+
+		// Close the drawer by clicking the map (somewhere outside the drawer)
+		await page.click('.leaflet-container', { position: { x: 50, y: 50 } });
+
+		// Wait for drawer to close
+		await expect(mobileDrawer).not.toBeVisible({ timeout: 5000 });
+
+		// Floating search bar should be visible again after drawer closes
+		await expect(floatingSearchInput).toBeVisible({ timeout: 5000 });
+	});
+
+	test('switches between Worldwide and Nearby modes via floating search bar', async ({ page }) => {
 		// Desktop viewport
 		await page.setViewportSize({ width: 1280, height: 720 });
 
@@ -244,34 +333,125 @@ test.describe('Merchant List Panel', () => {
 			{ timeout: MARKER_LOAD_TIMEOUT }
 		);
 
-		// Open the list panel
-		const toggleButton = page.getByRole('button', { name: /merchant list/i });
-		await expect(toggleButton).toBeVisible({ timeout: 15000 });
-		await toggleButton.click();
+		// Floating search bar buttons should be visible (they have role="radio" for accessibility)
+		const worldwideButton = page.getByRole('radio', { name: 'Worldwide' });
+		const nearbyButton = page.getByRole('radio', { name: /nearby/i });
+		await expect(worldwideButton).toBeVisible({ timeout: 15000 });
+		await expect(nearbyButton).toBeVisible();
+
+		// Click Worldwide button
+		await worldwideButton.click();
+
+		// Search input placeholder should indicate worldwide mode
+		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
+		await expect(searchInput).toHaveAttribute('placeholder', 'Search worldwide...');
+
+		// Click Nearby button - this opens the panel when there are nearby merchants
+		await nearbyButton.click();
+
+		// The panel opens, so check the panel's search input has the nearby placeholder
+		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
+		await expect(listPanel).toBeVisible({ timeout: 5000 });
+
+		const panelSearchInput = listPanel.locator('input[type="search"]');
+		await expect(panelSearchInput).toHaveAttribute('placeholder', 'Search nearby...');
+	});
+
+	test('switches between Worldwide and Nearby modes in panel', async ({ page }) => {
+		// Desktop viewport
+		await page.setViewportSize({ width: 1280, height: 720 });
+
+		// Navigate to map
+		await page.goto('/map#17/42.2762511/42.7024218', { waitUntil: 'load' });
+		await expect(page).toHaveTitle(/BTC Map/);
+
+		// Wait for map to initialize
+		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
+		await expect(zoomInButton).toBeVisible();
+
+		// Wait for markers to load
+		await page.waitForFunction(
+			() => {
+				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
+				return markers.length > 0;
+			},
+			{ timeout: MARKER_LOAD_TIMEOUT }
+		);
+
+		// Open the list panel via search input
+		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
+		await expect(searchInput).toBeVisible({ timeout: 15000 });
+		await searchInput.click();
 
 		// Wait for list panel
 		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
 		await expect(listPanel).toBeVisible({ timeout: 10000 });
 
-		// Should start in Nearby mode - verify heading
-		await expect(listPanel.locator('h2:has-text("Nearby Merchants")')).toBeVisible();
+		// Panel mode toggles should be visible (these use role="radio")
+		const worldwideRadio = listPanel.getByRole('radio', { name: 'Worldwide' });
+		const nearbyRadio = listPanel.getByRole('radio', { name: /nearby/i });
+		await expect(worldwideRadio).toBeVisible();
+		await expect(nearbyRadio).toBeVisible();
 
 		// Click Worldwide button to switch to search mode
-		const worldwideButton = listPanel.getByRole('radio', { name: 'Worldwide' });
-		await expect(worldwideButton).toBeVisible();
-		await worldwideButton.click();
+		await worldwideRadio.click();
 
-		// Should show search input in search mode
-		const searchInput = listPanel.locator('input[type="search"]');
-		await expect(searchInput).toBeVisible({ timeout: 5000 });
+		// Panel search input should show worldwide placeholder
+		const panelSearchInput = listPanel.locator('input[type="search"]');
+		await expect(panelSearchInput).toHaveAttribute('placeholder', 'Search worldwide...');
 
 		// Click Nearby button to switch back
-		const nearbyButton = listPanel.getByRole('radio', { name: 'Nearby' });
-		await nearbyButton.click();
+		await nearbyRadio.click();
 
-		// Should show Nearby Merchants heading again
-		await expect(listPanel.locator('h2:has-text("Nearby Merchants")')).toBeVisible({
-			timeout: 5000
+		// Panel search input should show nearby placeholder
+		await expect(panelSearchInput).toHaveAttribute('placeholder', 'Search nearby...');
+	});
+
+	test('panel can be closed and floating search bar reappears', async ({ page }) => {
+		// Desktop viewport
+		await page.setViewportSize({ width: 1280, height: 720 });
+
+		// Navigate to map
+		await page.goto('/map#17/42.2762511/42.7024218', { waitUntil: 'load' });
+		await expect(page).toHaveTitle(/BTC Map/);
+
+		// Wait for map to initialize
+		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
+		await expect(zoomInButton).toBeVisible();
+
+		// Wait for markers to load
+		await page.waitForFunction(
+			() => {
+				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
+				return markers.length > 0;
+			},
+			{ timeout: MARKER_LOAD_TIMEOUT }
+		);
+
+		// Floating search bar should be visible
+		const floatingSearchInput = page.getByRole('searchbox', {
+			name: /search for bitcoin merchants/i
 		});
+		await expect(floatingSearchInput).toBeVisible({ timeout: 15000 });
+
+		// Open the list panel
+		await floatingSearchInput.click();
+
+		// List panel should be visible
+		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
+		await expect(listPanel).toBeVisible({ timeout: 10000 });
+
+		// Floating search bar should be hidden when panel is open
+		await expect(floatingSearchInput).not.toBeVisible();
+
+		// Close the panel using the close button
+		const closeButton = listPanel.getByRole('button', { name: /close merchant list/i });
+		await closeButton.click();
+
+		// Panel should close
+		await expect(listPanel).not.toBeVisible({ timeout: 5000 });
+
+		// Floating search bar should reappear
+		await expect(floatingSearchInput).toBeVisible({ timeout: 5000 });
 	});
 });

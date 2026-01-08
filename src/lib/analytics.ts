@@ -8,7 +8,7 @@ const ANALYTICS_HOSTNAME = 'btcmap.org';
 
 type EventName =
 	| 'search_query'
-	| 'search_button_click'
+	| 'search_input_focus'
 	| 'category_filter'
 	| 'boost_layer_toggle'
 	| 'nearby_button_click'
@@ -17,7 +17,6 @@ type EventName =
 	| 'home_button_click'
 	| 'show_all_on_map_click'
 	| 'merchant_list_item_click'
-	| 'nearby_filter_input'
 	| 'zoom_in_click'
 	| 'zoom_out_click'
 	| 'fullscreen_click'
