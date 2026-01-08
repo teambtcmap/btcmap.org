@@ -102,11 +102,11 @@
 		// Clear both filters when switching modes
 		nearbyFilter = '';
 		if (newMode === 'nearby') {
-			trackEvent('nearby_mode_click');
+			trackEvent('nearby_mode_click', { source: 'panel' });
 			merchantList.exitSearchMode();
 			onModeChange?.(newMode);
 		} else {
-			trackEvent('worldwide_mode_click');
+			trackEvent('worldwide_mode_click', { source: 'panel' });
 			merchantList.setMode(newMode);
 			// Focus search input when switching to worldwide
 			tick().then(() => searchInputComponent?.focus());

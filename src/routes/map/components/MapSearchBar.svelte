@@ -36,7 +36,9 @@
 	function handleModeSwitch(newMode: MerchantListMode) {
 		const isSameMode = newMode === mode;
 		if (!isSameMode) {
-			trackEvent(newMode === 'nearby' ? 'searchbar_nearby_click' : 'searchbar_worldwide_click');
+			trackEvent(newMode === 'nearby' ? 'nearby_mode_click' : 'worldwide_mode_click', {
+				source: 'floating_bar'
+			});
 			merchantList.setMode(newMode);
 		}
 		// Always open panel when clicking Nearby tab (shows guidance if empty)

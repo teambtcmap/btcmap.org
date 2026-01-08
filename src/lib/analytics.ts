@@ -14,8 +14,6 @@ type EventName =
 	| 'nearby_button_click'
 	| 'worldwide_mode_click'
 	| 'nearby_mode_click'
-	| 'searchbar_nearby_click'
-	| 'searchbar_worldwide_click'
 	| 'home_button_click'
 	| 'show_all_on_map_click'
 	| 'merchant_list_item_click'
