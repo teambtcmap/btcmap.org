@@ -78,10 +78,7 @@
 {#if !isOpen}
 	<div class="pointer-events-auto flex w-full flex-col-reverse gap-2 md:w-80 md:flex-col">
 		<!-- Search input -->
-		<div
-			class="rounded-lg bg-white shadow-lg dark:bg-dark dark:shadow-black/30"
-			style="filter: drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.15));"
-		>
+		<div class="rounded-lg bg-white shadow-lg dark:bg-dark dark:shadow-black/30">
 			<div class="relative">
 				<Icon
 					w="18"
@@ -135,7 +132,6 @@
 					{mode === 'search'
 					? 'bg-link text-white'
 					: 'bg-white text-gray-600 hover:bg-gray-50 dark:bg-dark dark:text-white/70 dark:hover:bg-white/10'}"
-				style="filter: drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.1));"
 			>
 				Worldwide
 			</button>
@@ -148,7 +144,6 @@
 					{mode === 'nearby'
 					? 'bg-link text-white'
 					: 'bg-white text-gray-600 hover:bg-gray-50 dark:bg-dark dark:text-white/70 dark:hover:bg-white/10'}"
-				style="filter: drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.1));"
 			>
 				Nearby{#if isLoadingCount}<span class="opacity-60"> ...</span>{:else if formattedCount}
 					{formattedCount}{/if}
