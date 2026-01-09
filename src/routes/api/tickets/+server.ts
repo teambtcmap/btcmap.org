@@ -19,7 +19,8 @@ async function fetchAllIssuesFromGitea(): Promise<GiteaIssue[]> {
 
 	const allIssues: GiteaIssue[] = [];
 	let page = 1;
-	const limit = 100;
+	// Gitea default max is often 50, request 50 per page to be safe
+	const limit = 50;
 
 	while (true) {
 		const response = await axios.get(
@@ -45,6 +46,7 @@ async function fetchAllIssuesFromGitea(): Promise<GiteaIssue[]> {
 
 		allIssues.push(...issues);
 
+		// If we got fewer than requested, we've reached the end
 		if (response.data.length < limit) break;
 		page++;
 	}
