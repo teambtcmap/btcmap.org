@@ -34,7 +34,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		// Fetch from cached /api/tickets endpoint and filter by area label
 		let tickets: Tickets;
 		try {
-			const ticketsResponse = await fetch('/api/tickets');
+			const ticketsResponse = await fetch('/api/tickets?v=2');
 			const ticketsData: TicketsResponse = await ticketsResponse.json();
 			tickets = filterIssuesByLabel(ticketsData.issues, fetchedArea.tags.url_alias);
 		} catch {
