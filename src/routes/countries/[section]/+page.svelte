@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import CountrySection from './components/CountrySection.svelte';
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
+	import FormSelect from '$components/form/FormSelect.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import { areaError, areas, theme } from '$lib/store';
 	import { areasSync } from '$lib/sync/areas';
@@ -140,15 +141,11 @@
 					>
 				</h2>
 
-				<select
-					class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link md:w-auto dark:bg-white/[0.15] dark:text-white"
-					value={data.section}
-					on:change={handleSectionChange}
-				>
+				<FormSelect value={data.section} on:change={handleSectionChange} style="md:w-auto">
 					{#each sections as option (option)}
 						<option value={option}>{continentDisplayNames[option] || option}</option>
 					{/each}
-				</select>
+				</FormSelect>
 			{/if}
 		</div>
 

@@ -5,6 +5,7 @@
 	import Icon from '$components/Icon.svelte';
 	import InfoTooltip from '$components/InfoTooltip.svelte';
 	import MapLoadingEmbed from '$components/MapLoadingEmbed.svelte';
+	import FormSelect from '$components/form/FormSelect.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import { loadMapDependencies } from '$lib/map/imports';
 	import { attribution, changeDefaultIcons, generateLocationIcon, geolocate } from '$lib/map/setup';
@@ -537,12 +538,11 @@
 
 					<div>
 						<label for="source" class="mb-2 block font-semibold">Data Source</label>
-						<select
+						<FormSelect
 							id="source"
 							disabled={!captchaSecret || !mapLoaded}
 							name="source"
 							required
-							class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:text-white dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 							bind:value={source}
 							on:change={async () => {
 								if (source === 'Other') {
@@ -555,7 +555,7 @@
 							<option value="Business Owner">I am the business owner</option>
 							<option value="Customer">I visited as a customer</option>
 							<option value="Other">Other method</option>
-						</select>
+						</FormSelect>
 						{#if source === 'Other'}
 							<p class="my-2 text-justify text-sm">
 								How did you verify this information? Please provide as much detail as possible.
