@@ -542,7 +542,7 @@
 							disabled={!captchaSecret || !mapLoaded}
 							name="source"
 							required
-							class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+							class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:text-white dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 							bind:value={source}
 							on:change={async () => {
 								if (source === 'Other') {
