@@ -4,6 +4,7 @@
 
 	import CommunitySection from './components/CommunitySection.svelte';
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
+	import FormSelect from '$components/form/FormSelect.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import { areaError, areas, reportError, syncStatus, theme } from '$lib/store';
 	import { areasSync } from '$lib/sync/areas';
@@ -331,8 +332,7 @@
 					</a>
 				</h2>
 
-				<select
-					class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link md:w-auto dark:bg-white/[0.15] dark:text-white"
+				<FormSelect
 					bind:value={data.section}
 					on:change={(e) => {
 						// @ts-expect-error e.target is the select element
@@ -341,6 +341,7 @@
 							handleSectionChange(newSection);
 						}
 					}}
+					style="md:w-auto"
 				>
 					{#each sections as option (option)}
 						<option disabled={option.startsWith('--')} value={option}>
@@ -351,7 +352,7 @@
 									option}
 						</option>
 					{/each}
-				</select>
+				</FormSelect>
 			{/if}
 		</div>
 
@@ -362,14 +363,3 @@
 		{/each}
 	</div>
 </main>
-
-{#if typeof window !== 'undefined'}
-	{#if detectTheme() === 'dark' || $theme === 'dark'}
-		<style>
-			select option {
-				--tw-bg-opacity: 1;
-				background-color: rgb(55 65 81 / var(--tw-bg-opacity));
-			}
-		</style>
-	{/if}
-{/if}

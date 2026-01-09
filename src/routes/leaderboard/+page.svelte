@@ -6,6 +6,7 @@
 	import SortHeaderButton from '$components/leaderboard/SortHeaderButton.svelte';
 	import TaggerLeaderboardDesktopTable from '$components/leaderboard/TaggerLeaderboardDesktopTable.svelte';
 	import TaggerLeaderboardMobileCard from '$components/leaderboard/TaggerLeaderboardMobileCard.svelte';
+	import FormSelect from '$components/form/FormSelect.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import LoadingSpinner from '$components/LoadingSpinner.svelte';
 	import {
@@ -377,16 +378,16 @@
 								class="flex flex-col gap-2 text-sm font-medium text-primary md:flex-row md:items-center md:gap-3 dark:text-white"
 							>
 								<span>Period</span>
-								<select
-									class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link md:w-auto dark:bg-white/[0.15] dark:text-white"
+								<FormSelect
 									value={selectedPeriod}
 									on:change={handlePeriodChange}
-									aria-label="Select leaderboard period"
+									ariaLabel="Select leaderboard period"
+									style="md:w-auto"
 								>
 									{#each periodOptions as option (option)}
 										<option value={option}>{periodLabels[option]}</option>
 									{/each}
-								</select>
+								</FormSelect>
 							</label>
 						</div>
 
@@ -433,17 +434,6 @@
 		</section>
 	</div>
 </main>
-
-{#if typeof window !== 'undefined'}
-	{#if detectTheme() === 'dark' || $theme === 'dark'}
-		<style>
-			select option {
-				--tw-bg-opacity: 1;
-				background-color: rgb(55 65 81 / var(--tw-bg-opacity));
-			}
-		</style>
-	{/if}
-{/if}
 
 <style>
 	#hero {
