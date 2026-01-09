@@ -9,7 +9,7 @@ type TicketsResponse = {
 
 export const load: PageServerLoad = async ({ fetch }) => {
 	try {
-		const response = await fetch('/api/tickets?v=2');
+		const response = await fetch('/api/tickets');
 		const data: TicketsResponse = await response.json();
 
 		return {
