@@ -363,14 +363,3 @@
 		{/each}
 	</div>
 </main>
-
-{#if typeof window !== 'undefined'}
-	{#if detectTheme() === 'dark' || $theme === 'dark'}
-		<style>
-			select option {
-				--tw-bg-opacity: 1;
-				background-color: rgb(55 65 81 / var(--tw-bg-opacity));
-			}
-		</style>
-	{/if}
-{/if}

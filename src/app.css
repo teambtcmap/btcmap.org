@@ -229,3 +229,8 @@
 	border-color: var(--leaflet-border-muted);
 	text-shadow: none;
 }
+
+/* Dark mode for select dropdown options (Windows/Linux native rendering fix) */
+.dark select option {
+	background-color: rgb(55 65 81); /* gray-700 */
+}
