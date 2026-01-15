@@ -61,7 +61,7 @@
 		"@iconify/svelte": "^4.2.0",
 		"@playwright/test": "^1.57.0",
 		"@sveltejs/adapter-netlify": "^5.2.4",
-		"@sveltejs/kit": "^2.49.4",
+		"@sveltejs/kit": "^2.49.5",
 		"@sveltejs/vite-plugin-svelte": "^3.1.2",
 		"@tailwindcss/postcss": "^4.1.18",
 		"@tailwindcss/vite": "^4.1.18",
