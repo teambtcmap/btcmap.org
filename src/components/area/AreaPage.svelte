@@ -47,13 +47,20 @@
 		type RpcIssue,
 		type User
 	} from '$lib/types.js';
-	import { errToast, formatElementID, validateContinents } from '$lib/utils';
+	import {
+		errToast,
+		formatElementID,
+		validateContinents,
+		formatVerifiedHuman,
+		parseDateSafely
+	} from '$lib/utils';
 	import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 	import axios from 'axios';
 	import axiosRetry from 'axios-retry';
 	import rewind from '@mapbox/geojson-rewind';
 	import { geoContains } from 'd3-geo';
-	import { differenceInMonths, parseISO } from 'date-fns';
+	import { differenceInMonths } from 'date-fns/differenceInMonths';
+	import { parseISO } from 'date-fns/parseISO';
 	import { onMount } from 'svelte';
 
 	axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
@@ -360,9 +367,15 @@
 	let signal: string | undefined;
 	let simplex: string | undefined;
 	let verifiedDate: string | undefined = data.verifiedDate;
-	let isVerifiedDateStale: boolean = data.verifiedDate
-		? differenceInMonths(new Date(), parseISO(data.verifiedDate)) > 12
-		: false;
+
+	const calculateStaleness = (dateStr: string | undefined): boolean => {
+		if (!dateStr) return false;
+		const date = parseDateSafely(dateStr);
+		if (!date) return false;
+		return differenceInMonths(new Date(), date) > 12;
+	};
+
+	let isVerifiedDateStale: boolean = calculateStaleness(data.verifiedDate);
 	let lightning: { destination: string; type: TipType } | undefined;
 
 	let eventElements: ActivityEvent[] = [];
@@ -430,14 +443,14 @@
 								class="flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300"
 							>
 								<Icon type="fa" icon="triangle-exclamation" w="14" h="14" />
-								<span>Verified over a year ago: {verifiedDate}</span>
+								<span>Verified over a year ago: {formatVerifiedHuman(verifiedDate)}</span>
 							</div>
 						{:else}
 							<div
 								class="flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-green-700 dark:bg-green-900/30 dark:text-green-300"
 							>
 								<Icon type="fa" icon="circle-check" w="14" h="14" />
-								<span>Verified: {verifiedDate}</span>
+								<span>Verified: {formatVerifiedHuman(verifiedDate)}</span>
 							</div>
 						{/if}
 					</div>

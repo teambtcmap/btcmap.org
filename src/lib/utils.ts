@@ -281,7 +281,7 @@ const RECENT_DATE_THRESHOLD_DAYS = 30;
 
 const isValidDate = (date: Date): boolean => !Number.isNaN(date.getTime());
 
-const parseDateSafely = (isoString: string): Date | null => {
+export const parseDateSafely = (isoString: string): Date | null => {
 	try {
 		const date = parseISO(isoString);
 		return isValidDate(date) ? date : null;
