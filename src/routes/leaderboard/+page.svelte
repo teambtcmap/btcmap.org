@@ -376,9 +376,11 @@
 							</div>
 							<label
 								class="flex flex-col gap-2 text-sm font-medium text-primary md:flex-row md:items-center md:gap-3 dark:text-white"
+								for="period-select"
 							>
 								<span>Period</span>
 								<FormSelect
+									id="period-select"
 									value={selectedPeriod}
 									on:change={handlePeriodChange}
 									ariaLabel="Select leaderboard period"

@@ -46,6 +46,7 @@ export type AreaTags = {
 	language?: string;
 	population?: string;
 	area_km2?: number;
+	['verified:date']?: string;
 	['population:date']?: string;
 	['population:year']?: number;
 	['contact:website']?: string;
@@ -360,6 +361,7 @@ export type AreaPageProps = {
 	name: string;
 	tickets: Tickets;
 	issues: RpcIssue[];
+	verifiedDate?: string;
 };
 
 // Nullable geographic coordinates (for optional geo data like IP-based location)
