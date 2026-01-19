@@ -10,7 +10,7 @@
 	export let title: string;
 	export let tickets: Tickets;
 
-	$: filteredTickets = tickets === 'error' ? [] : tickets;
+	$: filteredTickets = tickets === 'error' || tickets === 'maintenance' ? [] : tickets;
 
 	$: add = filteredTickets.filter((issue: GiteaIssue) =>
 		issue.labels.some((label: GiteaLabel) => label.id === GITEA_LABELS.DATA.ADD_LOCATION)
@@ -26,6 +26,7 @@
 	let showType = 'Add';
 
 	$: ticketError = tickets === 'error';
+	$: ticketMaintenance = tickets === 'maintenance';
 
 	$: if (ticketError) {
 		errToast('Could not load open tickets, please try again or contact BTC Map.');
@@ -55,7 +56,7 @@
 							? 'rounded-b md:rounded-r md:rounded-bl-none'
 							: ''} {showType === type ? 'bg-link text-white' : ''} transition-colors"
 					on:click={() => (showType = type)}
-					disabled={!filteredTickets.length || ticketError}
+					disabled={!filteredTickets.length || ticketError || ticketMaintenance}
 				>
 					{type}
 				</button>
@@ -127,6 +128,17 @@
 					</p>
 				{/if}
 			{/if}
+		{:else if ticketMaintenance}
+			<p
+				class="border-t border-gray-300 p-5 text-center text-body dark:border-white/95 dark:text-white"
+			>
+				Issues are currently under maintenance. <a
+					href="https://gitea.btcmap.org/teambtcmap/btcmap-data/issues"
+					target="_blank"
+					rel="noreferrer"
+					class="text-link transition-colors hover:text-hover">View issues directly on Gitea</a
+				>.
+			</p>
 		{:else if ticketError}
 			<p
 				class="border-t border-gray-300 p-5 text-center text-body dark:border-white/95 dark:text-white"

@@ -339,7 +339,7 @@ export interface GiteaIssue {
 	}[];
 }
 
-export type Tickets = GiteaIssue[] | 'error';
+export type Tickets = GiteaIssue[] | 'error' | 'maintenance';
 
 export type Theme = 'light' | 'dark';
 
