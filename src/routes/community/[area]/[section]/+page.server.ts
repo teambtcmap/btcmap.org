@@ -2,7 +2,8 @@ import { error, redirect } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import type { PageServerLoad } from './$types';
-import { getIssues } from '$lib/gitea';
+// Temporarily disabled during maintenance
+// import { getIssues } from '$lib/gitea';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
@@ -18,9 +19,11 @@ export const load: PageServerLoad = async ({ params }) => {
 		const areaResponse = await axios.get(`https://api.btcmap.org/v2/areas/${area}`);
 		const fetchedArea = areaResponse.data;
 
-		const { issues: tickets } = await getIssues([fetchedArea.tags.url_alias]).catch(() => ({
-			issues: 'error'
-		}));
+		// Temporarily disabled during maintenance
+		// const { issues: tickets } = await getIssues([fetchedArea.tags.url_alias]).catch(() => ({
+		// 	issues: 'error'
+		// }));
+		const tickets = 'maintenance';
 
 		const issuesResponse = await fetch('https://api.btcmap.org/rpc', {
 			method: 'POST',
