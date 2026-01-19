@@ -138,12 +138,11 @@
 			>
 			{#if merchant.verified_at}
 				<span class="block text-body dark:text-white">
-					{formatVerifiedHuman(merchant.verified_at)}
 					{#if isUpToDate}
 						<Icon
 							w="16"
 							h="16"
-							class="inline text-primary dark:text-white"
+							class="mr-1 inline text-primary dark:text-white"
 							icon="verified"
 							type="material"
 						/>
@@ -151,11 +150,12 @@
 						<Icon
 							w="16"
 							h="16"
-							class="inline text-primary dark:text-white"
+							class="mr-1 inline text-primary dark:text-white"
 							icon="error_outline"
 							type="material"
 						/>
 					{/if}
+					{formatVerifiedHuman(merchant.verified_at)}
 				</span>
 			{:else if isLoading}
 				<div class="mt-1 h-5 w-32 animate-pulse rounded bg-link/50"></div>

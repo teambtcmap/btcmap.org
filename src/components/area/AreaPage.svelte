@@ -60,7 +60,6 @@
 	import rewind from '@mapbox/geojson-rewind';
 	import { geoContains } from 'd3-geo';
 	import { differenceInMonths } from 'date-fns/differenceInMonths';
-	import { parseISO } from 'date-fns/parseISO';
 	import { onMount } from 'svelte';
 
 	axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
@@ -257,11 +256,7 @@
 			signal = area['contact:signal'];
 			simplex = area['contact:simplex'];
 			verifiedDate = data.verifiedDate || area['verified:date'];
-
-			if (verifiedDate) {
-				const date = parseISO(verifiedDate);
-				isVerifiedDateStale = differenceInMonths(new Date(), date) > 12;
-			}
+			isVerifiedDateStale = calculateStaleness(verifiedDate);
 
 			if (area['tips:lightning_address']) {
 				lightning = {
