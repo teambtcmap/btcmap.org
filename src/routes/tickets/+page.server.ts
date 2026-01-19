@@ -1,12 +1,20 @@
-import { getIssues } from '$lib/gitea';
+import type { GiteaIssue } from '$lib/types';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async () => {
+type TicketsResponse = {
+	issues: GiteaIssue[];
+	totalCount: number;
+	error?: string;
+};
+
+export const load: PageServerLoad = async ({ fetch }) => {
 	try {
-		const { issues, totalCount } = await getIssues();
+		const response = await fetch('/api/tickets');
+		const data: TicketsResponse = await response.json();
+
 		return {
-			tickets: issues,
-			totalTickets: totalCount
+			tickets: data.issues,
+			totalTickets: data.totalCount
 		};
 	} catch (error) {
 		console.error('Failed to fetch issues:', error);

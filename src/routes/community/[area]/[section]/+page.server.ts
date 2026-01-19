@@ -1,12 +1,25 @@
 import { error, redirect } from '@sveltejs/kit';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
+
 import type { PageServerLoad } from './$types';
-import { getIssues } from '$lib/gitea';
+import type { GiteaIssue, Tickets } from '$lib/types';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
-export const load: PageServerLoad = async ({ params }) => {
+type TicketsResponse = {
+	issues: GiteaIssue[];
+	totalCount: number;
+	error?: string;
+};
+
+function filterIssuesByLabel(issues: GiteaIssue[], labelName: string): GiteaIssue[] {
+	return issues.filter((issue) =>
+		issue.labels.some((label) => label.name.toLowerCase() === labelName.toLowerCase())
+	);
+}
+
+export const load: PageServerLoad = async ({ params, fetch }) => {
 	const { area, section } = params;
 
 	// Validate section parameter
@@ -18,9 +31,15 @@ export const load: PageServerLoad = async ({ params }) => {
 		const areaResponse = await axios.get(`https://api.btcmap.org/v2/areas/${area}`);
 		const fetchedArea = areaResponse.data;
 
-		const { issues: tickets } = await getIssues([fetchedArea.tags.url_alias]).catch(() => ({
-			issues: 'error'
-		}));
+		// Fetch from cached /api/tickets endpoint and filter by area label
+		let tickets: Tickets;
+		try {
+			const ticketsResponse = await fetch('/api/tickets');
+			const ticketsData: TicketsResponse = await ticketsResponse.json();
+			tickets = filterIssuesByLabel(ticketsData.issues, fetchedArea.tags.url_alias);
+		} catch {
+			tickets = 'error';
+		}
 
 		const issuesResponse = await fetch('https://api.btcmap.org/rpc', {
 			method: 'POST',
