@@ -5,16 +5,18 @@
 	import TopButton from '$components/TopButton.svelte';
 	import { GITEA_LABELS } from '$lib/constants';
 	import { theme } from '$lib/store';
-	import { detectTheme, errToast } from '$lib/utils';
+	import { detectTheme } from '$lib/utils';
+	// Temporarily disabled during maintenance
+	// import { errToast } from '$lib/utils';
 
-	import type { GiteaLabel } from '$lib/types';
+	import type { GiteaLabel, GiteaIssue } from '$lib/types';
 
 	const ticketTypes = ['Add', 'Verify', 'Community'];
 	let showType = 'Add';
 
 	export let data;
 
-	$: tickets = data.tickets;
+	$: tickets = data.tickets as GiteaIssue[];
 
 	$: add =
 		tickets?.filter((issue) =>
@@ -33,9 +35,10 @@
 
 	let totalTickets = data.totalTickets;
 
-	if (data.error) {
-		errToast(data.error);
-	}
+	// Temporarily disabled during maintenance
+	// if (data.error) {
+	// 	errToast(data.error);
+	// }
 
 	const isMaintenance = data.maintenance ?? false;
 </script>
