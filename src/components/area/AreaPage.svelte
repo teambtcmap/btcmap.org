@@ -47,12 +47,19 @@
 		type RpcIssue,
 		type User
 	} from '$lib/types.js';
-	import { errToast, formatElementID, validateContinents } from '$lib/utils';
+	import {
+		errToast,
+		formatElementID,
+		validateContinents,
+		formatVerifiedHuman,
+		parseDateSafely
+	} from '$lib/utils';
 	import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 	import axios from 'axios';
 	import axiosRetry from 'axios-retry';
 	import rewind from '@mapbox/geojson-rewind';
 	import { geoContains } from 'd3-geo';
+	import { differenceInMonths } from 'date-fns/differenceInMonths';
 	import { onMount } from 'svelte';
 
 	axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
@@ -248,6 +255,8 @@
 			rss = area['contact:rss'];
 			signal = area['contact:signal'];
 			simplex = area['contact:simplex'];
+			verifiedDate = data.verifiedDate || area['verified:date'];
+			isVerifiedDateStale = calculateStaleness(verifiedDate);
 
 			if (area['tips:lightning_address']) {
 				lightning = {
@@ -352,6 +361,16 @@
 	let rss: string | undefined;
 	let signal: string | undefined;
 	let simplex: string | undefined;
+	let verifiedDate: string | undefined = data.verifiedDate;
+
+	const calculateStaleness = (dateStr: string | undefined): boolean => {
+		if (!dateStr) return false;
+		const date = parseDateSafely(dateStr);
+		if (!date) return false;
+		return differenceInMonths(new Date(), date) > 12;
+	};
+
+	let isVerifiedDateStale: boolean = calculateStaleness(data.verifiedDate);
 	let lightning: { destination: string; type: TipType } | undefined;
 
 	let eventElements: ActivityEvent[] = [];
@@ -410,6 +429,36 @@
 					</svg></a
 				>
 				<!-- eslint-enable svelte/no-navigation-without-resolve -->
+			{/if}
+			{#if type === 'community'}
+				{#if verifiedDate}
+					<div class="flex items-center justify-center gap-2 text-sm font-semibold">
+						{#if isVerifiedDateStale}
+							<div
+								class="flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300"
+							>
+								<Icon type="fa" icon="circle-exclamation" w="14" h="14" />
+								<span>Verified over a year ago</span>
+							</div>
+						{:else}
+							<div
+								class="flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+							>
+								<Icon type="material" icon="verified" w="14" h="14" />
+								<span>Verified: {formatVerifiedHuman(verifiedDate)}</span>
+							</div>
+						{/if}
+					</div>
+				{:else}
+					<div class="flex items-center justify-center gap-2 text-sm font-semibold">
+						<div
+							class="flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-red-700 dark:bg-red-900/30 dark:text-red-300"
+						>
+							<Icon type="fa" icon="circle-xmark" w="14" h="14" />
+							<span>Not Verified</span>
+						</div>
+					</div>
+				{/if}
 			{/if}
 		</div>
 

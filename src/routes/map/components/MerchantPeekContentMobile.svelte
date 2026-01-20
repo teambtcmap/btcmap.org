@@ -81,7 +81,7 @@
 			{#if hasVerification}
 				{#if isUpToDate}
 					<div class="flex items-center gap-1 text-green-600 dark:text-green-400">
-						<Icon w="14" h="14" icon="check" type="material" />
+						<Icon w="14" h="14" icon="verified" type="material" />
 						<span>Verified</span>
 					</div>
 				{:else}
