@@ -128,7 +128,7 @@
 							</span>
 						{/if}
 						<span class="flex items-center gap-1 text-gray-500 dark:text-white/60">
-							<Icon w="12" h="12" icon={isVerified ? 'check' : 'warning'} type="material" />
+							<Icon w="12" h="12" icon={isVerified ? 'verified' : 'warning'} type="material" />
 							{isVerified ? 'Verified' : 'Outdated'}
 							{#if enrichedData.verified_at}
 								<span class="text-gray-400 dark:text-white/40"

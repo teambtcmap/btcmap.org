@@ -437,14 +437,14 @@
 							<div
 								class="flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300"
 							>
-								<Icon type="fa" icon="triangle-exclamation" w="14" h="14" />
-								<span>Verified over a year ago: {formatVerifiedHuman(verifiedDate)}</span>
+								<Icon type="fa" icon="circle-exclamation" w="14" h="14" />
+								<span>Verified over a year ago</span>
 							</div>
 						{:else}
 							<div
 								class="flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-green-700 dark:bg-green-900/30 dark:text-green-300"
 							>
-								<Icon type="fa" icon="circle-check" w="14" h="14" />
+								<Icon type="material" icon="verified" w="14" h="14" />
 								<span>Verified: {formatVerifiedHuman(verifiedDate)}</span>
 							</div>
 						{/if}
