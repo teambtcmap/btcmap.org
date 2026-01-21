@@ -487,7 +487,7 @@
 				<Socials
 					{website}
 					{email}
-				{phone}
+					{phone}
 					{nostr}
 					{twitter}
 					{meetup}
