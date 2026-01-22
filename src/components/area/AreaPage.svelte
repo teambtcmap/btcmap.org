@@ -554,16 +554,16 @@
 			<Boost />
 		{/if}
 	{:else if activeSection === Sections.stats}
-		{#if $syncStatus}
-			<div class="text-center text-primary dark:text-white">
-				<p>Loading data...</p>
-			</div>
-		{:else if $reportError}
+		{#if $reportError}
 			<div class="text-center text-primary dark:text-white">
 				<p>Error loading data. Please try again later.</p>
 			</div>
 		{:else if areaReports && areaReports.length > 0}
 			<AreaStats {name} {filteredPlaces} {areaReports} areaTags={area} />
+		{:else if $syncStatus}
+			<div class="text-center text-primary dark:text-white">
+				<p>Loading data...</p>
+			</div>
 		{:else}
 			<div class="text-center text-primary dark:text-white">
 				<p class="text-xl">Data will appear within 24 hours.</p>
