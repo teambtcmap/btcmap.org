@@ -553,7 +553,15 @@
 			<Boost />
 		{/if}
 	{:else if activeSection === Sections.stats}
-		{#if areaReports && areaReports.length > 0}
+		{#if $reportError}
+			<div class="text-center text-primary dark:text-white">
+				<p>Error loading data. Please try again later.</p>
+			</div>
+		{:else if areaReports === undefined && !dataInitialized}
+			<div class="text-center text-primary dark:text-white">
+				<p>Loading data...</p>
+			</div>
+		{:else if areaReports && areaReports.length > 0}
 			<AreaStats {name} {filteredPlaces} {areaReports} areaTags={area} />
 		{:else}
 			<div class="text-center text-primary dark:text-white">
