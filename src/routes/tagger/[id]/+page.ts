@@ -7,8 +7,14 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 export const load: PageLoad = async ({ params }) => {
 	const { id } = params;
+
+	// Validate id parameter format (numeric only)
+	if (!/^\d+$/.test(id)) {
+		error(404, 'User Not Found');
+	}
+
 	try {
-		const response = await axios.get(`https://api.btcmap.org/v2/users/${id}`);
+		const response = await axios.get(`https://api.btcmap.org/v2/users/${encodeURIComponent(id)}`);
 
 		const data = response.data;
 
