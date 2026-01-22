@@ -557,7 +557,7 @@
 			<div class="text-center text-primary dark:text-white">
 				<p>Error loading data. Please try again later.</p>
 			</div>
-		{:else if !$reports || $reports.length === 0 || (areaReports === undefined && !dataInitialized)}
+		{:else if areaReports === undefined && !dataInitialized}
 			<div class="text-center text-primary dark:text-white">
 				<p>Loading data...</p>
 			</div>
