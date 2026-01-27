@@ -1756,12 +1756,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/leaflet.locatecontrol@npm:^0.82.1":
-  version: 0.82.1
-  resolution: "@types/leaflet.locatecontrol@npm:0.82.1"
+"@types/leaflet.locatecontrol@npm:^0.85.1":
+  version: 0.85.1
+  resolution: "@types/leaflet.locatecontrol@npm:0.85.1"
   dependencies:
-    "@types/leaflet": "npm:^1.9"
-  checksum: 10c0/b886660b50e703e5dbe220ef5ed8b2a7627d8fb44766373ebbf4a90272f53c4c62742a6ee7bb5b7c50b5840319c686fc1684aa3a783af2039392cc32ab258b9f
+    leaflet.locatecontrol: "npm:*"
+  checksum: 10c0/d3407ee9ab279116a64a4143a9bdf5fbb4fe7ce89b7fc6d1defab85a99cfa39ae7867e4beb8897b8bc44ae5e94766500218d76086ef800ca34289649d7eb7a04
   languageName: node
   linkType: hard
 
@@ -2280,7 +2280,7 @@ __metadata:
     "@types/geojson": "npm:^7946.0.16"
     "@types/leaflet": "npm:1.9.21"
     "@types/leaflet.featuregroup.subgroup": "npm:^1.0.4"
-    "@types/leaflet.locatecontrol": "npm:^0.82.1"
+    "@types/leaflet.locatecontrol": "npm:^0.85.1"
     "@types/leaflet.markercluster": "npm:^1.5.6"
     "@types/node": "npm:^25.0.9"
     "@types/qrcode": "npm:^1.5.6"
@@ -3923,7 +3923,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"leaflet.locatecontrol@npm:0.86.0":
+"leaflet.locatecontrol@npm:*, leaflet.locatecontrol@npm:0.86.0":
   version: 0.86.0
   resolution: "leaflet.locatecontrol@npm:0.86.0"
   checksum: 10c0/4e1fabeaf3ffd656c4d2e17a0e1de9dcc2bc97d3bbae4d512ee565317374dc34fe942b9755ceadc0038f0a8f1a1f052007893c11b83db8b529262f2680aa6fe8
