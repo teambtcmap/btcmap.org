@@ -27,6 +27,8 @@
 	export let onPanToNearbyMerchant: ((place: Place) => void) | undefined = undefined;
 	// Callback to zoom to a search result (may be far away, need to fly there)
 	export let onZoomToSearchResult: ((place: Place) => void) | undefined = undefined;
+	// Callback to zoom to nearby level (when user clicks "zoom in" message)
+	export let onZoomToNearbyLevel: (() => void) | undefined = undefined;
 	// Callbacks for hover highlighting
 	export let onHoverStart: ((place: Place) => void) | undefined = undefined;
 	export let onHoverEnd: ((place: Place) => void) | undefined = undefined;
@@ -456,15 +458,15 @@
 					</ul>
 				{/if}
 			{:else if showZoomInMessage}
-				<!-- Nearby mode: zoom in message -->
+				<!-- Nearby mode: zoom in message (only icon is clickable) -->
 				<div class="flex flex-col items-center justify-center gap-3 px-4 py-12 text-center">
-					<Icon
-						w="48"
-						h="48"
-						icon="zoom_in"
-						type="material"
-						class="text-gray-300 dark:text-white/30"
-					/>
+					<button
+						on:click={onZoomToNearbyLevel}
+						class="rounded-full p-2 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-primary/20 focus:outline-none dark:hover:bg-white/10"
+						aria-label="Zoom in to see nearby merchants"
+					>
+						<Icon w="48" h="48" icon="zoom_in" type="material" class="text-link dark:text-white" />
+					</button>
 					<div>
 						<p class="text-sm font-medium text-primary dark:text-white">
 							Zoom in to see nearby merchants
