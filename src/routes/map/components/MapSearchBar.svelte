@@ -3,6 +3,7 @@
 	import { merchantList } from '$lib/merchantListStore';
 	import Icon from '$components/Icon.svelte';
 	import SearchInput from '$components/SearchInput.svelte';
+	import MapCategoryFilters from './MapCategoryFilters.svelte';
 	import { trackEvent } from '$lib/analytics';
 	import { formatNearbyCount } from '$lib/utils';
 
@@ -12,6 +13,7 @@
 	export let onNearbyClick: (() => void) | undefined = undefined;
 	export let nearbyCount = 0;
 	export let isLoadingCount = false;
+	export let zoomLevel = 0;
 
 	$: formattedCount = formatNearbyCount(nearbyCount);
 
@@ -22,6 +24,7 @@
 	$: mode = $merchantList.mode;
 	$: isSearching = $merchantList.isSearching;
 	$: isOpen = $merchantList.isOpen;
+	$: selectedCategory = $merchantList.selectedCategory;
 
 	// Placeholder based on mode
 	$: placeholder = mode === 'search' ? 'Search worldwide...' : 'Search nearby...';
@@ -73,7 +76,9 @@
 
 <!-- Floating search bar - hidden when panel is open (panel has its own search in same position) -->
 {#if !isOpen}
-	<div class="pointer-events-auto flex w-full flex-col-reverse gap-2 md:w-80 md:flex-col">
+	<div
+		class="pointer-events-auto flex w-full flex-col-reverse gap-2 md:relative md:w-80 md:flex-col"
+	>
 		<!-- Search input -->
 		<div class="rounded-lg bg-white shadow-lg dark:bg-dark dark:shadow-black/30">
 			<SearchInput
@@ -115,7 +120,7 @@
 				aria-checked={mode === 'search'}
 				on:click={() => handleModeSwitch('search')}
 				class="rounded-full px-4 py-2.5 text-sm font-medium shadow-sm transition-colors md:px-3 md:py-1.5 md:text-xs
-					{mode === 'search'
+        {mode === 'search'
 					? 'bg-link text-white'
 					: 'bg-white text-gray-600 hover:bg-gray-50 dark:bg-dark dark:text-white/70 dark:hover:bg-white/10'}"
 			>
@@ -127,7 +132,7 @@
 				aria-checked={mode === 'nearby'}
 				on:click={() => handleModeSwitch('nearby')}
 				class="rounded-full px-4 py-2.5 text-sm font-medium shadow-sm transition-colors md:px-3 md:py-1.5 md:text-xs
-					{mode === 'nearby'
+        {mode === 'nearby'
 					? 'bg-link text-white'
 					: 'bg-white text-gray-600 hover:bg-gray-50 dark:bg-dark dark:text-white/70 dark:hover:bg-white/10'}"
 			>
@@ -135,5 +140,25 @@
 					{formattedCount}{/if}
 			</button>
 		</div>
+		<!-- Category filters - shown when zoomed in enough -->
+		<div class="category-filters-container">
+			<MapCategoryFilters {zoomLevel} activeCategory={selectedCategory} />
+		</div>
+
+		<style>
+			.category-filters-container {
+				position: absolute;
+				top: 8px;
+				right: 0;
+				transform: translateX(calc(100% + 1rem));
+				z-index: 1000;
+			}
+
+			@media (max-width: 1024px) {
+				.category-filters-container {
+					display: none !important;
+				}
+			}
+		</style>
 	</div>
 {/if}
