@@ -1020,6 +1020,68 @@
 		}
 	};
 
+	// Update marker labels based on zoom level and enriched names
+	const updateMarkerLabels = () => {
+		if (!map || !leaflet || currentZoom < LABEL_VISIBLE_ZOOM) {
+			// Clear all tooltips when zoom is below threshold
+			Object.values(loadedMarkers).forEach((marker) => {
+				if (marker.getTooltip()) {
+					marker.unbindTooltip();
+				}
+			});
+			return;
+		}
+
+		// Get names from merchant list enriched details
+		const nameMap = $merchantList.placeDetailsCache;
+
+		// Update tooltip for each loaded marker
+		Object.entries(loadedMarkers).forEach(([placeId, marker]) => {
+			const placeIdNum = Number(placeId);
+			const place = nameMap.get(placeIdNum);
+
+			if (place?.name) {
+				// Bind tooltip if it doesn't exist yet
+				if (!marker.getTooltip()) {
+					marker.bindTooltip(place.name, {
+						permanent: true,
+						direction: 'center',
+						className: 'marker-label',
+						offset: [0, 0]
+					});
+				} else {
+					// Update the content of existing tooltip
+					marker.setTooltipContent(place.name);
+				}
+			} else if (marker.getTooltip()) {
+				// Unbind tooltip if no name is available
+				marker.unbindTooltip();
+			}
+		});
+
+		// Add tooltips to any markers added but not yet processed
+		$merchantList.merchants.forEach((place) => {
+			const marker = loadedMarkers[place.id.toString()];
+			if (marker && place.name) {
+				if (!marker.getTooltip()) {
+					marker.bindTooltip(place.name, {
+						permanent: true,
+						direction: 'center',
+						className: 'marker-label',
+						offset: [0, 0]
+					});
+				} else {
+					marker.setTooltipContent(place.name);
+				}
+			}
+		});
+	};
+
+	// Reactive statement to trigger label updates
+	$: if (mapLoaded && elementsLoaded) {
+		updateMarkerLabels();
+	}
+
 	// Initialize elements when places data is ready and map is loaded
 	// The guard inside initializeElements() prevents multiple calls
 	$: if ($places?.length && mapLoaded && !elementsLoaded) {
