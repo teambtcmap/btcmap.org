@@ -491,7 +491,9 @@
 			// Try to get the actual place name from the enriched details cache before binding tooltip
 			if (currentZoom >= LABEL_VISIBLE_ZOOM) {
 				const placeFromCache = $merchantList.placeDetailsCache.get(place.id);
-				const displayName = placeFromCache?.name || place.name || `Location ${place.id}`;
+				// Also check for other possible name fields from the place record itself
+				const displayName =
+					placeFromCache?.name || place.name || place['osm:amenity'] || `${place.id}`;
 
 				marker.bindTooltip(displayName, {
 					permanent: true,
@@ -737,7 +739,9 @@
 			// Try to get the actual place name from the enriched details cache before binding tooltip
 			if (currentZoom >= LABEL_VISIBLE_ZOOM) {
 				const placeFromCache = $merchantList.placeDetailsCache.get(place.id);
-				const displayName = placeFromCache?.name || place.name || `Location ${place.id}`;
+				// Also check for other possible name fields from the place record itself
+				const displayName =
+					placeFromCache?.name || place.name || place['osm:amenity'] || `${place.id}`;
 
 				marker.bindTooltip(displayName, {
 					permanent: true,
@@ -1030,12 +1034,18 @@
 				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
 
-			// Try to get the actual place name from the global places store before binding tooltip
+			// Try to get the actual place name from the enriched details before binding tooltip
 			if (currentZoom >= LABEL_VISIBLE_ZOOM) {
-				const placeFromGlobalStore = $places.find((p) => p.id === element.id);
 				const placeFromCache = $merchantList.placeDetailsCache.get(element.id);
+				// Also check the local places store for basic name info
+				const placeFromGlobalStore = $places.find((p) => p.id === element.id);
+
+				// Look for name in different fields
 				const displayName =
-					placeFromCache?.name || placeFromGlobalStore?.name || `Location ${element.id}`;
+					placeFromCache?.name ||
+					placeFromGlobalStore?.name ||
+					placeFromGlobalStore?.['osm:amenity'] ||
+					`${element.id}`;
 
 				marker.bindTooltip(displayName, {
 					permanent: true,
@@ -1104,17 +1114,22 @@
 					// Update the content of existing tooltip
 					marker.setTooltipContent(place.name);
 				}
-			} else if (marker.getTooltip()) {
-				// For test/debug: use fallback test name if real name isn't available
-				marker.setTooltipContent(`Debug Location ${placeId}`);
-			} else if (!marker.getTooltip()) {
-				// Bind a placeholder tooltip for debug if none exists
-				marker.bindTooltip(`Debug Location ${placeId}`, {
-					permanent: true,
-					direction: 'center',
-					className: 'marker-label',
-					offset: [0, 0]
-				});
+			} else {
+				// Attempt to find name elsewhere - might come from global places store
+				const globalPlace = $places.find((p) => p.id === placeIdNum);
+				const fallbackName = globalPlace?.name || globalPlace?.['osm:amenity'] || `${placeId}`;
+				if (marker.getTooltip()) {
+					// Update existing tooltip with fallback name
+					marker.setTooltipContent(fallbackName);
+				} else {
+					// Bind a fallback tooltip if none exists
+					marker.bindTooltip(fallbackName, {
+						permanent: true,
+						direction: 'center',
+						className: 'marker-label',
+						offset: [0, 0]
+					});
+				}
 			}
 		});
 
@@ -1136,8 +1151,19 @@
 		});
 	};
 
-	// Reactive statement to trigger label updates
+	// Reactive statement to trigger label updates - watch for any changes that might provide names
 	$: if (mapLoaded && elementsLoaded) {
+		updateMarkerLabels();
+	}
+
+	// Also update labels when enriched details change
+	$: if (
+		mapLoaded &&
+		elementsLoaded &&
+		currentZoom >= LABEL_VISIBLE_ZOOM &&
+		$merchantList.isEnrichingDetails === false
+	) {
+		// Only trigger updates when enrichment finishes to avoid flickering
 		updateMarkerLabels();
 	}
 
@@ -1488,3 +1514,20 @@
 
 	<TileLoadingIndicator visible={tilesLoading} />
 </main>
+
+<style>
+	.marker-label {
+		background-color: rgba(0, 0, 0, 0.8) !important;
+		color: white !important;
+		border: none !important;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+		font-size: 11px !important;
+		padding: 2px 6px !important;
+		border-radius: 3px !important;
+		text-align: center !important;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 150px;
+	}
+</style>
