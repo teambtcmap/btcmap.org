@@ -83,6 +83,21 @@
 	import type { FeatureGroup } from 'leaflet';
 	import type { PageData } from './$types';
 
+	// Shared tooltip configuration to avoid duplication across functions
+	type Direction = 'top' | 'bottom' | 'left' | 'right' | 'center' | 'auto';
+
+	const getMarkerLabelTooltipOptions = () => ({
+		permanent: true,
+		direction: 'right' as Direction,
+		className: 'marker-label',
+		offset: leaflet.point(17, -25) // Create proper Leaflet Point object for the offset
+	});
+
+	// Centralized handler for binding tooltips to markers
+	const bindMarkerLabelTooltip = (marker: Marker, labelText: string) => {
+		marker.bindTooltip(labelText, getMarkerLabelTooltipOptions());
+	};
+
 	export let data: PageData;
 
 	let mapLoading = 1;
@@ -495,12 +510,7 @@
 				const displayName =
 					placeFromCache?.name || place.name || place['osm:amenity'] || `${place.id}`;
 
-				marker.bindTooltip(displayName, {
-					permanent: true,
-					direction: 'center',
-					className: 'marker-label',
-					offset: [0, 0]
-				});
+				bindMarkerLabelTooltip(marker, displayName);
 			}
 
 			if (boosted && !shouldClusterBoostedMarkers()) {
@@ -733,12 +743,7 @@
 				const displayName =
 					placeFromCache?.name || place.name || place['osm:amenity'] || `${place.id}`;
 
-				marker.bindTooltip(displayName, {
-					permanent: true,
-					direction: 'center',
-					className: 'marker-label',
-					offset: [0, 0]
-				});
+				bindMarkerLabelTooltip(marker, displayName);
 			}
 
 			// Route to appropriate layer based on boost status and zoom level
@@ -1037,12 +1042,7 @@
 					placeFromGlobalStore?.['osm:amenity'] ||
 					`${element.id}`;
 
-				marker.bindTooltip(displayName, {
-					permanent: true,
-					direction: 'right',
-					className: 'marker-label',
-					offset: [17, -25]
-				});
+				bindMarkerLabelTooltip(marker, displayName);
 			}
 
 			// Route to appropriate layer based on boost status and zoom level
@@ -1096,12 +1096,7 @@
 			if (place?.name) {
 				// Bind tooltip if it doesn't exist yet
 				if (!marker.getTooltip()) {
-					marker.bindTooltip(place.name, {
-						permanent: true,
-						direction: 'right',
-						className: 'marker-label',
-						offset: [17, -25]
-					});
+					bindMarkerLabelTooltip(marker, place.name);
 				} else {
 					// Update the content of existing tooltip
 					marker.setTooltipContent(place.name);
@@ -1115,12 +1110,7 @@
 					marker.setTooltipContent(fallbackName);
 				} else {
 					// Bind a fallback tooltip if none exists
-					marker.bindTooltip(fallbackName, {
-						permanent: true,
-						direction: 'right',
-						className: 'marker-label',
-						offset: [17, -25]
-					});
+					bindMarkerLabelTooltip(marker, fallbackName);
 				}
 			}
 		});
@@ -1130,12 +1120,7 @@
 			const marker = loadedMarkers[place.id.toString()];
 			if (marker && place.name) {
 				if (!marker.getTooltip()) {
-					marker.bindTooltip(place.name, {
-						permanent: true,
-						direction: 'right',
-						className: 'marker-label',
-						offset: [17, -25]
-					});
+					bindMarkerLabelTooltip(marker, place.name);
 				} else {
 					marker.setTooltipContent(place.name);
 				}
