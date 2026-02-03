@@ -1039,9 +1039,9 @@
 
 				marker.bindTooltip(displayName, {
 					permanent: true,
-					direction: 'center',
+					direction: 'right',
 					className: 'marker-label',
-					offset: [0, 0]
+					offset: [17, -25]
 				});
 			}
 
@@ -1098,9 +1098,9 @@
 				if (!marker.getTooltip()) {
 					marker.bindTooltip(place.name, {
 						permanent: true,
-						direction: 'center',
+						direction: 'right',
 						className: 'marker-label',
-						offset: [0, 0]
+						offset: [17, -25]
 					});
 				} else {
 					// Update the content of existing tooltip
@@ -1117,9 +1117,9 @@
 					// Bind a fallback tooltip if none exists
 					marker.bindTooltip(fallbackName, {
 						permanent: true,
-						direction: 'center',
+						direction: 'right',
 						className: 'marker-label',
-						offset: [0, 0]
+						offset: [17, -25]
 					});
 				}
 			}
@@ -1132,9 +1132,9 @@
 				if (!marker.getTooltip()) {
 					marker.bindTooltip(place.name, {
 						permanent: true,
-						direction: 'center',
+						direction: 'right',
 						className: 'marker-label',
-						offset: [0, 0]
+						offset: [17, -25]
 					});
 				} else {
 					marker.setTooltipContent(place.name);
@@ -1497,3 +1497,7 @@
 
 	<TileLoadingIndicator visible={tilesLoading} />
 </main>
+
+<style>
+	/* Used for dynamic marker labels in Leaflet - styles defined in global CSS */
+</style>

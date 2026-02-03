@@ -234,3 +234,62 @@
 .dark select option {
 	background-color: rgb(55 65 81); /* gray-700 */
 }
+
+/* Marker label styles for Leaflet permanent tooltips */
+.leaflet-tooltip.marker-label {
+	background: none !important;
+	color: #0d9488 !important; /* darker teal color - Tailwind's teal-600 */
+	border: none !important;
+	outline: none !important;
+	box-shadow: none !important;
+	font-size: 14px !important;
+	padding: 2px 4px !important;
+	margin: 0 !important;
+	border-radius: 0 !important;
+	text-align: left !important;
+	white-space: nowrap !important;
+	overflow: hidden !important;
+	text-overflow: ellipsis !important;
+	display: inline-block !important;
+	max-width: 160px !important;
+	min-width: unset !important;
+	width: auto !important;
+	height: auto !important;
+	-webkit-font-weight: 500 !important;
+	font-weight: 500 !important;
+	line-height: 1.2 !important;
+	text-shadow:
+		-1px -1px 0 white,
+		1px -1px 0 white,
+		-1px 1px 0 white,
+		1px 1px 0 white !important;
+}
+
+/* Ensure tooltip pane is behind marker pane */
+.leaflet-map-pane .leaflet-tooltip-pane {
+	z-index: 300 !important;
+}
+
+.leaflet-map-pane .leaflet-marker-pane {
+	z-index: 400 !important;
+}
+
+.leaflet-map-pane .leaflet-shadow-pane {
+	z-index: 450 !important;
+}
+
+.leaflet-map-pane .leaflet-overlay-pane {
+	z-index: 460 !important;
+}
+
+/* Explicitly set marker icon and shadow to be above tooltips */
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	z-index: 400 !important;
+}
+
+/* Hide the tooltip arrow/pointer for permanent labels */
+.leaflet-tooltip.marker-label::before,
+.leaflet-tooltip-tip-container {
+	display: none !important;
+}
