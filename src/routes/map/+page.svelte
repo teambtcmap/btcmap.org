@@ -29,7 +29,8 @@
 		MARKER_CLICK_THROTTLE,
 		DEFAULT_MAP_LAT,
 		DEFAULT_MAP_LNG,
-		DEFAULT_MAP_ZOOM
+		DEFAULT_MAP_ZOOM,
+		LABEL_VISIBLE_ZOOM // eslint-disable-line @typescript-eslint/no-unused-vars
 	} from '$lib/constants';
 	import {
 		calculateRadiusKm,
