@@ -8,10 +8,9 @@
 	import CommentAddButton from './components/CommentAddButton.svelte';
 	import Icon from '$components/Icon.svelte';
 	import MapLoadingEmbed from '$components/MapLoadingEmbed.svelte';
-	import MerchantButton from './components/MerchantButton.svelte';
+	import MerchantAction from './components/MerchantAction.svelte';
 	import MerchantEvent from './components/MerchantEvent.svelte';
 	import MerchantComment from './components/MerchantComment.svelte';
-	import MerchantLink from './components/MerchantLink.svelte';
 	import PaymentMethodIcon from '$components/PaymentMethodIcon.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import ShowTags from '$components/ShowTags.svelte';
@@ -568,15 +567,15 @@
 
 		<div class="flex flex-wrap items-center justify-center gap-4">
 			{#if dataInitialized}
-				<MerchantLink link={`geo:${lat},${long}`} icon="compass" text="Navigate" />
+				<MerchantAction link={`geo:${lat},${long}`} icon="compass" text="Navigate" />
 
-				<MerchantLink
+				<MerchantAction
 					link={`https://www.openstreetmap.org/edit?${data.osmType}=${data.osmId}`}
 					icon="pencil"
 					text="Edit"
 				/>
 
-				<MerchantButton
+				<MerchantAction
 					on:click={() => {
 						navigator.clipboard.writeText(`https://btcmap.org/merchant/${data.id}`);
 						successToast('Link copied to clipboard!');
@@ -586,7 +585,7 @@
 				/>
 
 				{#if payment}
-					<MerchantLink
+					<MerchantAction
 						link={payment.type === 'uri'
 							? payment.url || '#'
 							: payment.type === 'pouch'
@@ -600,15 +599,15 @@
 				{/if}
 
 				{#if phone}
-					<MerchantLink link={`tel:${phone}`} icon="phone" text="Call" />
+					<MerchantAction link={`tel:${phone}`} icon="phone" text="Call" />
 				{/if}
 
 				{#if email}
-					<MerchantLink link={`mailto:${email}`} icon="email" text="Email" />
+					<MerchantAction link={`mailto:${email}`} icon="email" text="Email" />
 				{/if}
 
 				{#if website}
-					<MerchantLink
+					<MerchantAction
 						link={website.startsWith('http') ? website : `https://${website}`}
 						icon="globe"
 						text="Website"
@@ -616,7 +615,7 @@
 				{/if}
 
 				{#if twitter}
-					<MerchantLink
+					<MerchantAction
 						link={twitter.startsWith('http') ? twitter : `https://twitter.com/${twitter}`}
 						icon="x"
 						text="X"
@@ -624,7 +623,7 @@
 				{/if}
 
 				{#if instagram}
-					<MerchantLink
+					<MerchantAction
 						link={instagram.startsWith('http') ? instagram : `https://instagram.com/${instagram}`}
 						icon="instagram"
 						text="Instagram"
@@ -632,7 +631,7 @@
 				{/if}
 
 				{#if facebook}
-					<MerchantLink
+					<MerchantAction
 						link={facebook.startsWith('http') ? facebook : `https://facebook.com/${facebook}`}
 						icon="facebook"
 						text="Facebook"
@@ -640,7 +639,7 @@
 				{/if}
 
 				<span id="show-tags">
-					<MerchantButton
+					<MerchantAction
 						on:click={() => ($showTags = data.osmTags)}
 						icon="tags"
 						text="Show Tags"
@@ -648,14 +647,14 @@
 				</span>
 
 				<span id="tagging-issues">
-					<MerchantButton
+					<MerchantAction
 						on:click={() => ($taggingIssues = data.osmTags?.issues || [])}
 						icon="issues"
 						text="Tag Issues"
 					/>
 				</span>
 
-				<MerchantLink
+				<MerchantAction
 					link={`https://www.openstreetmap.org/${data.osmType}/${data.osmId}`}
 					icon="external"
 					text="View OSM"
