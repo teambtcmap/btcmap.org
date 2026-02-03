@@ -783,13 +783,11 @@
 		const bounds = map.getBounds();
 		const center = map.getCenter();
 		const behavior = getZoomBehavior(currentZoom);
-		const isDesktop = window.innerWidth >= BREAKPOINTS.md;
 
 		// Determine if we should fetch full data or just count
-		// - Desktop: always fetch full data (list panel visible alongside map)
 		// - Force flag: explicit user action (e.g., button click)
 		// - List open: user is actively viewing the list (mobile or desktop)
-		const allowHeavyFetch = isDesktop || opts?.force || $merchantList.isOpen;
+		const allowHeavyFetch = opts?.force || $merchantList.isOpen;
 
 		switch (behavior) {
 			case 'local-markers':
