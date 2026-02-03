@@ -150,7 +150,7 @@
 	let controlLayers: Control.Layers;
 	let currentLayerName: string | null = null;
 
-	let mapElement: HTMLDivElement;
+	let mapElement: HTMLDivElement | undefined;
 	let map: Map;
 	let mapLoaded = false;
 	let elementsLoaded = false;
@@ -726,16 +726,6 @@
 				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
 
-			// For testing purposes: add debug labels
-			if (currentZoom >= LABEL_VISIBLE_ZOOM) {
-				marker.bindTooltip(`Debug Location ${place.id}`, {
-					permanent: true,
-					direction: 'center',
-					className: 'marker-label',
-					offset: [0, 0]
-				});
-			}
-
 			// Try to get the actual place name from the enriched details cache before binding tooltip
 			if (currentZoom >= LABEL_VISIBLE_ZOOM) {
 				const placeFromCache = $merchantList.placeDetailsCache.get(place.id);
@@ -1083,7 +1073,9 @@
 
 	// Update marker labels based on zoom level and enriched names
 	const updateMarkerLabels = () => {
-		if (!map || !leaflet || currentZoom < LABEL_VISIBLE_ZOOM) {
+		if (!map || !leaflet) return;
+
+		if (currentZoom < LABEL_VISIBLE_ZOOM) {
 			// Clear all tooltips when zoom is below threshold
 			Object.values(loadedMarkers).forEach((marker) => {
 				if (marker.getTooltip()) {
@@ -1151,19 +1143,12 @@
 		});
 	};
 
-	// Reactive statement to trigger label updates - watch for any changes that might provide names
-	$: if (mapLoaded && elementsLoaded) {
-		updateMarkerLabels();
-	}
-
-	// Also update labels when enriched details change
+	// Reactive statement to trigger label updates when zoom changes or enriched data is available
 	$: if (
 		mapLoaded &&
 		elementsLoaded &&
-		currentZoom >= LABEL_VISIBLE_ZOOM &&
-		$merchantList.isEnrichingDetails === false
+		(currentZoom || $merchantList.placeDetailsCache || $merchantList.isEnrichingDetails === false)
 	) {
-		// Only trigger updates when enrichment finishes to avoid flickering
 		updateMarkerLabels();
 	}
 
@@ -1182,7 +1167,7 @@
 			const LocateControl = deps.LocateControl;
 
 			// add map and tiles
-			map = leaflet.map(mapElement, { maxZoom: 19, zoomControl: false });
+			map = leaflet.map(mapElement!, { maxZoom: 19, zoomControl: false });
 			leaflet.control.zoom({ position: 'topright' }).addTo(map);
 
 			// Helper function to set mapLoaded after view is set
@@ -1407,7 +1392,7 @@
 			});
 
 			// change default icons
-			changeDefaultIcons(true, leaflet, mapElement, DomEvent);
+			changeDefaultIcons(true, leaflet, mapElement!, DomEvent);
 
 			// final map setup
 			map.on('load', () => {
@@ -1462,9 +1447,7 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/map.png" />
 </svelte:head>
 
-<main class="relative h-screen w-full">
-	<h1 class="hidden">Map</h1>
-
+<main class="relative h-[calc(100vh-68px)] w-screen">
 	<MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
 
 	<!-- Map takes full space -->
@@ -1514,20 +1497,3 @@
 
 	<TileLoadingIndicator visible={tilesLoading} />
 </main>
-
-<style>
-	.marker-label {
-		background-color: rgba(0, 0, 0, 0.8) !important;
-		color: white !important;
-		border: none !important;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
-		font-size: 11px !important;
-		padding: 2px 6px !important;
-		border-radius: 3px !important;
-		text-align: center !important;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		max-width: 150px;
-	}
-</style>
