@@ -488,9 +488,12 @@
 				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
 
-			// For testing purposes: add debug labels
+			// Try to get the actual place name from the enriched details cache before binding tooltip
 			if (currentZoom >= LABEL_VISIBLE_ZOOM) {
-				marker.bindTooltip(`Debug Location ${place.id}`, {
+				const placeFromCache = $merchantList.placeDetailsCache.get(place.id);
+				const displayName = placeFromCache?.name || place.name || `Location ${place.id}`;
+
+				marker.bindTooltip(displayName, {
 					permanent: true,
 					direction: 'center',
 					className: 'marker-label',
@@ -724,6 +727,19 @@
 			// For testing purposes: add debug labels
 			if (currentZoom >= LABEL_VISIBLE_ZOOM) {
 				marker.bindTooltip(`Debug Location ${place.id}`, {
+					permanent: true,
+					direction: 'center',
+					className: 'marker-label',
+					offset: [0, 0]
+				});
+			}
+
+			// Try to get the actual place name from the enriched details cache before binding tooltip
+			if (currentZoom >= LABEL_VISIBLE_ZOOM) {
+				const placeFromCache = $merchantList.placeDetailsCache.get(place.id);
+				const displayName = placeFromCache?.name || place.name || `Location ${place.id}`;
+
+				marker.bindTooltip(displayName, {
 					permanent: true,
 					direction: 'center',
 					className: 'marker-label',
@@ -1014,9 +1030,14 @@
 				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
 
-			// For testing purposes: add debug labels
+			// Try to get the actual place name from the global places store before binding tooltip
 			if (currentZoom >= LABEL_VISIBLE_ZOOM) {
-				marker.bindTooltip(`Debug Location ${element.id}`, {
+				const placeFromGlobalStore = $places.find((p) => p.id === element.id);
+				const placeFromCache = $merchantList.placeDetailsCache.get(element.id);
+				const displayName =
+					placeFromCache?.name || placeFromGlobalStore?.name || `Location ${element.id}`;
+
+				marker.bindTooltip(displayName, {
 					permanent: true,
 					direction: 'center',
 					className: 'marker-label',
