@@ -49,6 +49,9 @@ export const MAP_FIT_BOUNDS_PADDING = 50;
 // Zoom 17+: Leaflet clustering disabled, individual markers shown
 export const CLUSTERING_DISABLED_ZOOM = 17;
 
+// Zoom 17+: Show place name labels on markers
+export const LABEL_VISIBLE_ZOOM = 17;
+
 // Zoom 1-5: Boosted markers are clustered (too zoomed out, would be crowded)
 // Zoom 6-16: Boosted markers are NOT clustered (stand out from regular markers)
 export const BOOSTED_CLUSTERING_MAX_ZOOM = 5;
