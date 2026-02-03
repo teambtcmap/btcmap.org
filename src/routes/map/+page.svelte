@@ -506,11 +506,12 @@
 			// Try to get the actual place name from the enriched details cache before binding tooltip
 			if (currentZoom >= LABEL_VISIBLE_ZOOM) {
 				const placeFromCache = $merchantList.placeDetailsCache.get(place.id);
-				// Also check for other possible name fields from the place record itself
-				const displayName =
-					placeFromCache?.name || place.name || place['osm:amenity'] || `${place.id}`;
+				// Only display label if we have a proper name (not just the ID)
+				const displayName = placeFromCache?.name || place.name || place['osm:amenity'];
 
-				bindMarkerLabelTooltip(marker, displayName);
+				if (displayName) {
+					bindMarkerLabelTooltip(marker, displayName);
+				}
 			}
 
 			if (boosted && !shouldClusterBoostedMarkers()) {
@@ -739,11 +740,12 @@
 			// Try to get the actual place name from the enriched details cache before binding tooltip
 			if (currentZoom >= LABEL_VISIBLE_ZOOM) {
 				const placeFromCache = $merchantList.placeDetailsCache.get(place.id);
-				// Also check for other possible name fields from the place record itself
-				const displayName =
-					placeFromCache?.name || place.name || place['osm:amenity'] || `${place.id}`;
+				// Only display label if we have a proper name (not just the ID)
+				const displayName = placeFromCache?.name || place.name || place['osm:amenity'];
 
-				bindMarkerLabelTooltip(marker, displayName);
+				if (displayName) {
+					bindMarkerLabelTooltip(marker, displayName);
+				}
 			}
 
 			// Route to appropriate layer based on boost status and zoom level
@@ -1039,10 +1041,11 @@
 				const displayName =
 					placeFromCache?.name ||
 					placeFromGlobalStore?.name ||
-					placeFromGlobalStore?.['osm:amenity'] ||
-					`${element.id}`;
+					placeFromGlobalStore?.['osm:amenity'];
 
-				bindMarkerLabelTooltip(marker, displayName);
+				if (displayName) {
+					bindMarkerLabelTooltip(marker, displayName);
+				}
 			}
 
 			// Route to appropriate layer based on boost status and zoom level
@@ -1104,13 +1107,20 @@
 			} else {
 				// Attempt to find name elsewhere - might come from global places store
 				const globalPlace = $places.find((p) => p.id === placeIdNum);
-				const fallbackName = globalPlace?.name || globalPlace?.['osm:amenity'] || `${placeId}`;
-				if (marker.getTooltip()) {
-					// Update existing tooltip with fallback name
-					marker.setTooltipContent(fallbackName);
+				const fallbackName = globalPlace?.name || globalPlace?.['osm:amenity'];
+				if (fallbackName) {
+					if (marker.getTooltip()) {
+						// Update existing tooltip with fallback name
+						marker.setTooltipContent(fallbackName);
+					} else {
+						// Bind a fallback tooltip if none exists
+						bindMarkerLabelTooltip(marker, fallbackName);
+					}
 				} else {
-					// Bind a fallback tooltip if none exists
-					bindMarkerLabelTooltip(marker, fallbackName);
+					// Unbind tooltip if no proper name is available (we only had the ID)
+					if (marker.getTooltip()) {
+						marker.unbindTooltip();
+					}
 				}
 			}
 		});
