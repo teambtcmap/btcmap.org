@@ -488,6 +488,16 @@
 				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
 
+			// For testing purposes: add debug labels
+			if (currentZoom >= LABEL_VISIBLE_ZOOM) {
+				marker.bindTooltip(`Debug Location ${place.id}`, {
+					permanent: true,
+					direction: 'center',
+					className: 'marker-label',
+					offset: [0, 0]
+				});
+			}
+
 			if (boosted && !shouldClusterBoostedMarkers()) {
 				boostedLayer.addLayer(marker);
 				boostedLayerMarkerIds.add(place.id.toString());
@@ -710,6 +720,16 @@
 				verify: true,
 				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
+
+			// For testing purposes: add debug labels
+			if (currentZoom >= LABEL_VISIBLE_ZOOM) {
+				marker.bindTooltip(`Debug Location ${place.id}`, {
+					permanent: true,
+					direction: 'center',
+					className: 'marker-label',
+					offset: [0, 0]
+				});
+			}
 
 			// Route to appropriate layer based on boost status and zoom level
 			if (boosted && !shouldClusterBoostedMarkers()) {
@@ -994,6 +1014,16 @@
 				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
 
+			// For testing purposes: add debug labels
+			if (currentZoom >= LABEL_VISIBLE_ZOOM) {
+				marker.bindTooltip(`Debug Location ${element.id}`, {
+					permanent: true,
+					direction: 'center',
+					className: 'marker-label',
+					offset: [0, 0]
+				});
+			}
+
 			// Route to appropriate layer based on boost status and zoom level
 			if (iconData.boosted && !shouldClusterBoostedMarkers()) {
 				boostedMarkersToAdd.push(marker);
@@ -1054,8 +1084,16 @@
 					marker.setTooltipContent(place.name);
 				}
 			} else if (marker.getTooltip()) {
-				// Unbind tooltip if no name is available
-				marker.unbindTooltip();
+				// For test/debug: use fallback test name if real name isn't available
+				marker.setTooltipContent(`Debug Location ${placeId}`);
+			} else if (!marker.getTooltip()) {
+				// Bind a placeholder tooltip for debug if none exists
+				marker.bindTooltip(`Debug Location ${placeId}`, {
+					permanent: true,
+					direction: 'center',
+					className: 'marker-label',
+					offset: [0, 0]
+				});
 			}
 		});
 
