@@ -30,7 +30,7 @@
 		DEFAULT_MAP_LAT,
 		DEFAULT_MAP_LNG,
 		DEFAULT_MAP_ZOOM,
-		LABEL_VISIBLE_ZOOM // eslint-disable-line @typescript-eslint/no-unused-vars
+		LABEL_VISIBLE_ZOOM
 	} from '$lib/constants';
 	import {
 		calculateRadiusKm,
@@ -751,9 +751,12 @@
 
 		merchantList.setMerchants(allVisiblePlaces, center.lat, center.lng);
 
-		if ($merchantList.isOpen && allowHeavyFetch) {
-			const radiusKm = calculateRadiusKm(bounds) * NEARBY_RADIUS_MULTIPLIER;
-			merchantList.fetchEnrichedDetails({ lat: center.lat, lon: center.lng }, radiusKm);
+		// Fetch names if panel is open OR zoom is 17+ (for labels)
+		if ($merchantList.isOpen || currentZoom >= LABEL_VISIBLE_ZOOM) {
+			if (allowHeavyFetch || currentZoom >= LABEL_VISIBLE_ZOOM) {
+				const radiusKm = calculateRadiusKm(bounds) * NEARBY_RADIUS_MULTIPLIER;
+				merchantList.fetchEnrichedDetails({ lat: center.lat, lon: center.lng }, radiusKm);
+			}
 		}
 	};
 
