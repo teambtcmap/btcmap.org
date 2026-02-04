@@ -1459,7 +1459,7 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/map.png" />
 </svelte:head>
 
-<main class="relative h-[calc(100vh-68px)] w-screen">
+<main class="relative h-screen w-full">
 	<MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
 
 	<!-- Map takes full space -->
