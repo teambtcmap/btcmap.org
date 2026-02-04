@@ -92,7 +92,8 @@ function calculateIconData(place: Place) {
 		className: isBoosted ? 'animate-wiggle' : '',
 		iconTmp: place.icon !== 'question_mark' ? place.icon : 'currency_bitcoin',
 		commentsCount: place.comments || 0,
-		boosted: isBoosted
+		boosted: isBoosted,
+		labelBoosted: isBoosted
 	};
 }
 

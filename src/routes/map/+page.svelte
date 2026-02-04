@@ -86,16 +86,31 @@
 	// Shared tooltip configuration to avoid duplication across functions
 	type Direction = 'top' | 'bottom' | 'left' | 'right' | 'center' | 'auto';
 
-	const getMarkerLabelTooltipOptions = () => ({
+	// Get appropriate tooltip options based on whether the place is boosted
+	const getMarkerLabelTooltipOptions = (boosted: boolean = false) => ({
 		permanent: true,
 		direction: 'right' as Direction,
-		className: 'marker-label',
+		className: boosted ? 'marker-label marker-label-boosted' : 'marker-label',
 		offset: leaflet.point(17, -25) // Create proper Leaflet Point object for the offset
 	});
 
+	const isPlaceBoosted = (place?: Place | null) =>
+		place?.boosted_until ? Date.parse(place.boosted_until) > Date.now() : false;
+
 	// Centralized handler for binding tooltips to markers
-	const bindMarkerLabelTooltip = (marker: Marker, labelText: string) => {
-		marker.bindTooltip(labelText, getMarkerLabelTooltipOptions());
+	const bindMarkerLabelTooltip = (marker: Marker, labelText: string, boosted = false) => {
+		const tooltip = marker.getTooltip();
+		if (tooltip) {
+			const currentClass = tooltip.options.className || '';
+			const hasBoosted = currentClass.includes('marker-label-boosted');
+			const needsClassUpdate = boosted ? !hasBoosted : hasBoosted;
+			const needsContentUpdate = tooltip.getContent() !== labelText;
+			if (!needsClassUpdate && !needsContentUpdate) {
+				return;
+			}
+			marker.unbindTooltip();
+		}
+		marker.bindTooltip(labelText, getMarkerLabelTooltipOptions(boosted));
 	};
 
 	export let data: PageData;
@@ -510,7 +525,7 @@
 				const displayName = placeFromCache?.name || place.name || place['osm:amenity'];
 
 				if (displayName) {
-					bindMarkerLabelTooltip(marker, displayName);
+					bindMarkerLabelTooltip(marker, displayName, boosted);
 				}
 			}
 
@@ -744,7 +759,7 @@
 				const displayName = placeFromCache?.name || place.name || place['osm:amenity'];
 
 				if (displayName) {
-					bindMarkerLabelTooltip(marker, displayName);
+					bindMarkerLabelTooltip(marker, displayName, boosted);
 				}
 			}
 
@@ -1044,7 +1059,7 @@
 					placeFromGlobalStore?.['osm:amenity'];
 
 				if (displayName) {
-					bindMarkerLabelTooltip(marker, displayName);
+					bindMarkerLabelTooltip(marker, displayName, Boolean(iconData.boosted));
 				}
 			}
 
@@ -1095,18 +1110,19 @@
 		Object.entries(loadedMarkers).forEach(([placeId, marker]) => {
 			const placeIdNum = Number(placeId);
 			const place = nameMap.get(placeIdNum);
+			const globalPlace = place ?? $places.find((p) => p.id === placeIdNum);
+			const boosted = isPlaceBoosted(globalPlace) || boostedLayerMarkerIds.has(placeId);
 
 			if (place?.name) {
 				// Bind tooltip if it doesn't exist yet
 				if (!marker.getTooltip()) {
-					bindMarkerLabelTooltip(marker, place.name);
+					bindMarkerLabelTooltip(marker, place.name, boosted);
 				} else {
 					// Update the content of existing tooltip
 					marker.setTooltipContent(place.name);
 				}
 			} else {
 				// Attempt to find name elsewhere - might come from global places store
-				const globalPlace = $places.find((p) => p.id === placeIdNum);
 				const fallbackName = globalPlace?.name || globalPlace?.['osm:amenity'];
 				if (fallbackName) {
 					if (marker.getTooltip()) {
@@ -1114,7 +1130,7 @@
 						marker.setTooltipContent(fallbackName);
 					} else {
 						// Bind a fallback tooltip if none exists
-						bindMarkerLabelTooltip(marker, fallbackName);
+						bindMarkerLabelTooltip(marker, fallbackName, boosted);
 					}
 				} else {
 					// Unbind tooltip if no proper name is available (we only had the ID)
@@ -1129,8 +1145,9 @@
 		$merchantList.merchants.forEach((place) => {
 			const marker = loadedMarkers[place.id.toString()];
 			if (marker && place.name) {
+				const boosted = isPlaceBoosted(place);
 				if (!marker.getTooltip()) {
-					bindMarkerLabelTooltip(marker, place.name);
+					bindMarkerLabelTooltip(marker, place.name, boosted);
 				} else {
 					marker.setTooltipContent(place.name);
 				}
