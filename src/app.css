@@ -304,20 +304,17 @@
 
 /* Z-index layering for marker labels and tooltips
  * - Tooltips (350): Below markers to prevent interaction blocking
- * - Markers (400): Above tooltips for clickability
+ * - Markers: Use Leaflet's default z-index management for proper interaction states
  * - Clusters: Default Leaflet z-index (higher, not modified)
  */
 .leaflet-map-pane .leaflet-tooltip-pane {
 	z-index: 350 !important;
 }
 
-.leaflet-marker-icon,
-.leaflet-marker-shadow {
-	z-index: 400 !important;
-}
-
 /* Hide the tooltip arrow/pointer for permanent labels */
 .leaflet-tooltip.marker-label::before,
-.leaflet-tooltip-tip-container {
+.leaflet-tooltip.marker-label .leaflet-tooltip-tip-container,
+.leaflet-tooltip.marker-label-boosted::before,
+.leaflet-tooltip.marker-label-boosted .leaflet-tooltip-tip-container {
 	display: none !important;
 }
