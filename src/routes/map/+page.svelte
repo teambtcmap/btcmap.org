@@ -77,21 +77,26 @@
 	} from '$lib/store';
 	import type { Leaflet, Place } from '$lib/types';
 	import { debounce, errToast, isBoosted } from '$lib/utils';
-	import type { Control, LatLng, LatLngBounds, Map, Marker, MarkerClusterGroup } from 'leaflet';
+	import type {
+		Control,
+		LatLng,
+		LatLngBounds,
+		Map,
+		Marker,
+		MarkerClusterGroup,
+		TooltipOptions
+	} from 'leaflet';
 	import localforage from 'localforage';
 	import { onDestroy, onMount } from 'svelte';
 	import type { FeatureGroup } from 'leaflet';
 	import type { PageData } from './$types';
 
 	// Shared tooltip configuration to avoid duplication across functions
-	type Direction = 'top' | 'bottom' | 'left' | 'right' | 'center' | 'auto';
-
-	// Get appropriate tooltip options based on whether the place is boosted
-	const getMarkerLabelTooltipOptions = (boosted: boolean = false) => ({
+	const getMarkerLabelTooltipOptions = (boosted: boolean = false): TooltipOptions => ({
 		permanent: true,
-		direction: 'right' as Direction,
+		direction: 'right',
 		className: boosted ? 'marker-label marker-label-boosted' : 'marker-label',
-		offset: leaflet.point(17, -25) // Create proper Leaflet Point object for the offset
+		offset: leaflet.point(17, -25)
 	});
 
 	const isPlaceBoosted = (place?: Place | null) =>
@@ -140,19 +145,20 @@
 		marker: Marker,
 		placeId: number,
 		fallbackPlace: Place | undefined,
-		boosted: boolean
+		boosted: boolean,
+		signalUpdate = true
 	) => {
 		if (currentZoom < LABEL_VISIBLE_ZOOM) return false;
 		const labelText = getLabelText(placeId, fallbackPlace);
 		if (labelText) {
 			bindMarkerLabelTooltip(marker, labelText, boosted);
-			labelUpdateRevision++;
+			if (signalUpdate) {
+				labelVersion += 1;
+			}
 			return true;
 		}
 		return false;
 	};
-
-	let labelUpdateRevision = 0;
 
 	export let data: PageData;
 
@@ -221,7 +227,13 @@
 	let controlLayers: Control.Layers;
 	let currentLayerName: string | null = null;
 
-	let mapElement: HTMLDivElement | undefined;
+	let mapElement: HTMLDivElement | null = null;
+	const ensureMapElement = () => {
+		if (!mapElement) {
+			throw new Error('Map element not initialized');
+		}
+		return mapElement;
+	};
 	let map: Map;
 	let mapLoaded = false;
 	let elementsLoaded = false;
@@ -559,9 +571,7 @@
 				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
 
-			if (attachMarkerLabelIfVisible(marker, place.id, place, boosted)) {
-				labelUpdateRevision++;
-			}
+			attachMarkerLabelIfVisible(marker, place.id, place, boosted, false);
 
 			if (boosted && !shouldClusterBoostedMarkers()) {
 				boostedLayer.addLayer(marker);
@@ -1074,7 +1084,7 @@
 			attachMarkerLabelIfVisible(
 				marker,
 				element.id,
-				$places.find((p) => p.id === element.id),
+				$placesById.get(element.id),
 				Boolean(iconData.boosted)
 			);
 
@@ -1119,16 +1129,17 @@
 
 		Object.entries(loadedMarkers).forEach(([placeId, marker]) => {
 			const placeIdNum = Number(placeId);
-			const sourcePlace = $places.find((p) => p.id === placeIdNum);
+			const sourcePlace = $placesById.get(placeIdNum);
 			const boosted = isPlaceBoosted(sourcePlace) || boostedLayerMarkerIds.has(placeId);
-			attachMarkerLabelIfVisible(marker, placeIdNum, sourcePlace, boosted);
+			attachMarkerLabelIfVisible(marker, placeIdNum, sourcePlace, boosted, false);
 		});
 	};
 
 	let lastLabelZoomState = currentZoom >= LABEL_VISIBLE_ZOOM;
 	let lastCacheRevision = $merchantList.placeDetailsCache.size;
 	let lastEnrichingState = $merchantList.isEnrichingDetails;
-	let lastLabelRevision = labelUpdateRevision;
+	let labelVersion = 0;
+	let lastLabelVersion = labelVersion;
 
 	$: if (mapLoaded && elementsLoaded) {
 		const nowVisible = currentZoom >= LABEL_VISIBLE_ZOOM;
@@ -1137,13 +1148,13 @@
 		const zoomStateChanged = nowVisible !== lastLabelZoomState;
 		const cacheChanged = cacheSize !== lastCacheRevision;
 		const enrichmentCompleted = lastEnrichingState && !enriching;
-		const revisionChanged = labelUpdateRevision !== lastLabelRevision;
+		const revisionChanged = labelVersion !== lastLabelVersion;
 
 		if (zoomStateChanged || cacheChanged || enrichmentCompleted || revisionChanged) {
 			updateMarkerLabels();
 			lastLabelZoomState = nowVisible;
 			lastCacheRevision = cacheSize;
-			lastLabelRevision = labelUpdateRevision;
+			lastLabelVersion = labelVersion;
 		}
 
 		lastEnrichingState = enriching;
@@ -1164,7 +1175,8 @@
 			const LocateControl = deps.LocateControl;
 
 			// add map and tiles
-			map = leaflet.map(mapElement!, { maxZoom: 19, zoomControl: false });
+			const targetElement = ensureMapElement();
+			map = leaflet.map(targetElement, { maxZoom: 19, zoomControl: false });
 			leaflet.control.zoom({ position: 'topright' }).addTo(map);
 
 			// Helper function to set mapLoaded after view is set
@@ -1389,7 +1401,7 @@
 			});
 
 			// change default icons
-			changeDefaultIcons(true, leaflet, mapElement!, DomEvent);
+			changeDefaultIcons(true, leaflet, ensureMapElement(), DomEvent);
 
 			// final map setup
 			map.on('load', () => {

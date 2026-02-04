@@ -191,6 +191,13 @@
 }
 
 /* Dark mode for Leaflet controls - Tailwind gray palette */
+:root {
+	--marker-label-color: #0d9488;
+	--marker-label-shadow: #ffffff;
+	--marker-label-boosted-color: #f59e0b;
+	--marker-label-boosted-shadow: #fff7ed;
+}
+
 .dark {
 	--leaflet-bg: #1f2937; /* gray-800 */
 	--leaflet-bg-transparent: rgba(31, 41, 55, 0.8);
@@ -199,6 +206,9 @@
 	--leaflet-text: #f3f4f6; /* gray-100 */
 	--leaflet-text-muted: #9ca3af; /* gray-400 */
 	--leaflet-link: #60a5fa; /* blue-400 */
+	--marker-label-shadow: rgba(15, 23, 42, 0.9);
+	--marker-label-boosted-color: #fbbf24;
+	--marker-label-boosted-shadow: rgba(15, 23, 42, 0.9);
 }
 
 .dark .leaflet-bar,
@@ -248,62 +258,47 @@
 }
 
 /* Marker label styles for Leaflet permanent tooltips */
-.leaflet-tooltip.marker-label {
+.leaflet-tooltip.marker-label,
+.leaflet-tooltip.marker-label-boosted {
 	background: none !important;
-	color: #0d9488 !important; /* teal for standard markers */
 	border: none !important;
 	outline: none !important;
 	box-shadow: none !important;
-	font-size: 14px !important;
-	padding: 2px 4px !important;
-	margin: 0 !important;
-	border-radius: 0 !important;
-	text-align: left !important;
-	white-space: nowrap !important;
-	overflow: hidden !important;
-	text-overflow: ellipsis !important;
-	display: inline-block !important;
-	max-width: 160px !important;
-	min-width: unset !important;
-	width: auto !important;
-	height: auto !important;
-	-webkit-font-weight: 500 !important;
-	font-weight: 500 !important;
-	line-height: 1.2 !important;
-	text-shadow:
-		-1px -1px 0 white,
-		1px -1px 0 white,
-		-1px 1px 0 white,
-		1px 1px 0 white !important;
+	font-size: 14px;
+	padding: 2px 4px;
+	margin: 0;
+	border-radius: 0;
+	text-align: left;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: inline-block;
+	max-width: 160px;
+	min-width: unset;
+	width: auto;
+	height: auto;
+	font-weight: 500;
+	line-height: 1.2;
 }
 
-.dark .leaflet-tooltip.marker-label {
+.leaflet-tooltip.marker-label {
+	color: var(--marker-label-color);
 	text-shadow:
-		-1px -1px 0 rgba(15, 23, 42, 0.9),
-		1px -1px 0 rgba(15, 23, 42, 0.9),
-		-1px 1px 0 rgba(15, 23, 42, 0.9),
-		1px 1px 0 rgba(15, 23, 42, 0.9) !important;
+		-1px -1px 0 var(--marker-label-shadow),
+		1px -1px 0 var(--marker-label-shadow),
+		-1px 1px 0 var(--marker-label-shadow),
+		1px 1px 0 var(--marker-label-shadow);
 }
 
 .leaflet-tooltip.marker-label-boosted {
-	color: #f59e0b !important; /* boosted amber */
-	font-weight: 600 !important;
+	color: var(--marker-label-boosted-color);
+	font-weight: 600;
 	text-shadow:
-		-1px -1px 0 #fff7ed,
-		1px -1px 0 #fff7ed,
-		-1px 1px 0 #fff7ed,
-		1px 1px 0 #fff7ed !important;
+		-1px -1px 0 var(--marker-label-boosted-shadow),
+		1px -1px 0 var(--marker-label-boosted-shadow),
+		-1px 1px 0 var(--marker-label-boosted-shadow),
+		1px 1px 0 var(--marker-label-boosted-shadow);
 	filter: drop-shadow(0 1px 2px rgba(255, 193, 7, 0.35));
-}
-
-.dark .leaflet-tooltip.marker-label-boosted {
-	color: #fbbf24 !important;
-	text-shadow:
-		-1px -1px 0 rgba(15, 23, 42, 0.9),
-		1px -1px 0 rgba(15, 23, 42, 0.9),
-		-1px 1px 0 rgba(15, 23, 42, 0.9),
-		1px 1px 0 rgba(15, 23, 42, 0.9) !important;
-	filter: drop-shadow(0 1px 3px rgba(250, 204, 21, 0.4));
 }
 
 /* Ensure tooltips stay behind markers without conflicting with cluster overlays */
