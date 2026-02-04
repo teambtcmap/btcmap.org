@@ -294,24 +294,11 @@
 	filter: drop-shadow(0 1px 3px rgba(250, 204, 21, 0.4));
 }
 
-/* Ensure tooltip pane is behind marker pane */
+/* Ensure tooltips stay behind markers without conflicting with cluster overlays */
 .leaflet-map-pane .leaflet-tooltip-pane {
-	z-index: 300 !important;
+	z-index: 350 !important;
 }
 
-.leaflet-map-pane .leaflet-marker-pane {
-	z-index: 400 !important;
-}
-
-.leaflet-map-pane .leaflet-shadow-pane {
-	z-index: 450 !important;
-}
-
-.leaflet-map-pane .leaflet-overlay-pane {
-	z-index: 460 !important;
-}
-
-/* Explicitly set marker icon and shadow to be above tooltips */
 .leaflet-marker-icon,
 .leaflet-marker-shadow {
 	z-index: 400 !important;
