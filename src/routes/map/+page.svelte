@@ -765,6 +765,14 @@
 		});
 	}, 1000); // 1 second debounce for IndexedDB writes
 
+	// Debounced enriched details fetch to prevent excessive API calls during zoom/pan
+	const debouncedFetchEnrichedDetails = debounce(
+		(args: { coords: { lat: number; lon: number }; radiusKm: number }) => {
+			merchantList.fetchEnrichedDetails(args.coords, args.radiusKm);
+		},
+		500
+	); // 500ms debounce for API calls
+
 	// Zoom 15+: Use locally loaded markers, optionally enrich with API data
 	const updateListLocalMarkers = (
 		center: LatLng,
@@ -783,7 +791,10 @@
 		if ($merchantList.isOpen || currentZoom >= LABEL_VISIBLE_ZOOM) {
 			if (allowHeavyFetch || currentZoom >= LABEL_VISIBLE_ZOOM) {
 				const radiusKm = calculateRadiusKm(bounds) * NEARBY_RADIUS_MULTIPLIER;
-				merchantList.fetchEnrichedDetails({ lat: center.lat, lon: center.lng }, radiusKm);
+				debouncedFetchEnrichedDetails({
+					coords: { lat: center.lat, lon: center.lng },
+					radiusKm
+				});
 			}
 		}
 	};
@@ -1345,6 +1356,7 @@
 		// Cancel pending debounced operations to prevent memory leaks
 		if (debouncedLoadMarkers?.cancel) debouncedLoadMarkers.cancel();
 		if (debouncedCacheCoords?.cancel) debouncedCacheCoords.cancel();
+		if (debouncedFetchEnrichedDetails?.cancel) debouncedFetchEnrichedDetails.cancel();
 		if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
 		if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
 		if (glMapPollingTimer) clearTimeout(glMapPollingTimer);
