@@ -28,15 +28,15 @@
 
 @layer utilities {
 	.sr-only {
-		position: absolute !important;
-		width: 1px !important;
-		height: 1px !important;
-		padding: 0 !important;
-		margin: -1px !important;
-		overflow: hidden !important;
-		clip: rect(0, 0, 0, 0) !important;
-		white-space: nowrap !important;
-		border: 0 !important;
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
 	}
 
 	.gradient {
@@ -192,10 +192,11 @@
 
 /* Dark mode for Leaflet controls - Tailwind gray palette */
 :root {
-	--marker-label-color: #0d9488;
-	--marker-label-shadow: #ffffff;
-	--marker-label-boosted-color: #f59e0b;
-	--marker-label-boosted-shadow: #fff7ed;
+	/* Marker label colors - Light mode (Tailwind palette references) */
+	--marker-label-color: #0d9488; /* teal-600 */
+	--marker-label-shadow: #ffffff; /* white */
+	--marker-label-boosted-color: #f59e0b; /* amber-500 */
+	--marker-label-boosted-shadow: #fff7ed; /* orange-50 */
 }
 
 .dark {
@@ -301,7 +302,11 @@
 	filter: drop-shadow(0 1px 2px rgba(255, 193, 7, 0.35));
 }
 
-/* Ensure tooltips stay behind markers without conflicting with cluster overlays */
+/* Z-index layering for marker labels and tooltips
+ * - Tooltips (350): Below markers to prevent interaction blocking
+ * - Markers (400): Above tooltips for clickability
+ * - Clusters: Default Leaflet z-index (higher, not modified)
+ */
 .leaflet-map-pane .leaflet-tooltip-pane {
 	z-index: 350 !important;
 }

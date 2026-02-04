@@ -91,75 +91,6 @@
 	import type { FeatureGroup } from 'leaflet';
 	import type { PageData } from './$types';
 
-	// Shared tooltip configuration to avoid duplication across functions
-	const getMarkerLabelTooltipOptions = (boosted: boolean = false): TooltipOptions => ({
-		permanent: true,
-		direction: 'right',
-		className: boosted ? 'marker-label marker-label-boosted' : 'marker-label',
-		offset: leaflet.point(17, -25)
-	});
-
-	const isPlaceBoosted = (place?: Place | null) =>
-		place?.boosted_until ? Date.parse(place.boosted_until) > Date.now() : false;
-
-	// Centralized handler for binding tooltips to markers
-	const bindMarkerLabelTooltip = (marker: Marker, labelText: string, boosted = false) => {
-		const tooltip = marker.getTooltip();
-		if (tooltip) {
-			const options = getMarkerLabelTooltipOptions(boosted);
-			const currentClass = tooltip.options.className || '';
-			const needsClassUpdate = currentClass !== options.className;
-			const needsContentUpdate = tooltip.getContent() !== labelText;
-			if (!needsClassUpdate && !needsContentUpdate) {
-				return;
-			}
-			if (needsClassUpdate) {
-				tooltip.options.className = options.className;
-			}
-			if (needsContentUpdate) {
-				tooltip.setContent(labelText);
-			}
-			tooltip.update();
-			return;
-		}
-		marker.bindTooltip(labelText, getMarkerLabelTooltipOptions(boosted));
-	};
-
-	const getLabelText = (placeId: number, fallbackPlace?: Place) => {
-		const sources: Array<Place | undefined> = [
-			$merchantList.placeDetailsCache.get(placeId),
-			fallbackPlace,
-			$placesById.get(placeId)
-		];
-
-		for (const source of sources) {
-			if (!source) continue;
-			if (source.name) return source.name;
-			if (source['osm:amenity']) return source['osm:amenity'];
-		}
-
-		return null;
-	};
-
-	const attachMarkerLabelIfVisible = (
-		marker: Marker,
-		placeId: number,
-		fallbackPlace: Place | undefined,
-		boosted: boolean,
-		signalUpdate = true
-	) => {
-		if (currentZoom < LABEL_VISIBLE_ZOOM) return false;
-		const labelText = getLabelText(placeId, fallbackPlace);
-		if (labelText) {
-			bindMarkerLabelTooltip(marker, labelText, boosted);
-			if (signalUpdate) {
-				labelVersion += 1;
-			}
-			return true;
-		}
-		return false;
-	};
-
 	export let data: PageData;
 
 	let mapLoading = 1;
@@ -227,13 +158,7 @@
 	let controlLayers: Control.Layers;
 	let currentLayerName: string | null = null;
 
-	let mapElement: HTMLDivElement | null = null;
-	const ensureMapElement = () => {
-		if (!mapElement) {
-			throw new Error('Map element not initialized');
-		}
-		return mapElement;
-	};
+	let mapElement: HTMLDivElement;
 	let map: Map;
 	let mapLoaded = false;
 	let elementsLoaded = false;
@@ -267,6 +192,118 @@
 
 	// Set of search result IDs for efficient marker filtering (respects category filter)
 	let searchResultIds: Set<number> = new Set();
+
+	// ============================================================================
+	// Marker Label Helpers
+	// ============================================================================
+
+	/**
+	 * Shared tooltip configuration to avoid duplication across functions
+	 */
+	const getMarkerLabelTooltipOptions = (boosted: boolean = false): TooltipOptions => ({
+		permanent: true,
+		direction: 'right',
+		className: boosted ? 'marker-label marker-label-boosted' : 'marker-label',
+		// Position label to the right of marker (17px) and above center (-25px)
+		// to avoid overlapping with the marker icon tip
+		offset: leaflet.point(17, -25)
+	});
+
+	const isPlaceBoosted = (place?: Place | null) =>
+		place?.boosted_until ? Date.parse(place.boosted_until) > Date.now() : false;
+
+	/**
+	 * Centralized handler for binding tooltips to markers
+	 * Only updates tooltip if content or styling has changed
+	 */
+	const bindMarkerLabelTooltip = (marker: Marker, labelText: string, boosted = false) => {
+		const tooltip = marker.getTooltip();
+		if (tooltip) {
+			const options = getMarkerLabelTooltipOptions(boosted);
+			const currentClass = tooltip.options.className || '';
+			const needsClassUpdate = currentClass !== options.className;
+			const needsContentUpdate = tooltip.getContent() !== labelText;
+			if (!needsClassUpdate && !needsContentUpdate) {
+				return;
+			}
+			if (needsClassUpdate) {
+				tooltip.options.className = options.className;
+			}
+			if (needsContentUpdate) {
+				tooltip.setContent(labelText);
+			}
+			tooltip.update();
+			return;
+		}
+		marker.bindTooltip(labelText, getMarkerLabelTooltipOptions(boosted));
+	};
+
+	/**
+	 * Get label text for a place from multiple sources (with fallback chain)
+	 */
+	const getLabelText = (placeId: number, fallbackPlace?: Place) => {
+		const sources: Array<Place | undefined> = [
+			$merchantList.placeDetailsCache.get(placeId),
+			fallbackPlace,
+			$placesById.get(placeId)
+		];
+
+		for (const source of sources) {
+			if (!source) continue;
+			if (source.name) return source.name;
+			if (source['osm:amenity']) return source['osm:amenity'];
+		}
+
+		return null;
+	};
+
+	/**
+	 * Attach label tooltip to marker if zoom level allows visibility
+	 */
+	const attachMarkerLabelIfVisible = (
+		marker: Marker,
+		placeId: number,
+		fallbackPlace: Place | undefined,
+		boosted: boolean,
+		signalUpdate = true
+	) => {
+		if (currentZoom < LABEL_VISIBLE_ZOOM) return false;
+		const labelText = getLabelText(placeId, fallbackPlace);
+		if (labelText) {
+			bindMarkerLabelTooltip(marker, labelText, boosted);
+			if (signalUpdate) {
+				labelVersion += 1;
+			}
+			return true;
+		}
+		return false;
+	};
+
+	/**
+	 * Determines if marker labels need updating based on state changes
+	 */
+	function handleLabelUpdates(
+		visible: boolean,
+		currentCacheSize: number,
+		enriching: boolean,
+		currentVersion: number
+	) {
+		const zoomStateChanged = visible !== lastLabelZoomState;
+		const cacheChanged = currentCacheSize !== lastCacheRevision;
+		const enrichmentCompleted = lastEnrichingState && !enriching;
+		const versionChanged = currentVersion !== lastLabelVersion;
+
+		const shouldUpdate = zoomStateChanged || cacheChanged || enrichmentCompleted || versionChanged;
+
+		if (shouldUpdate) {
+			updateMarkerLabels();
+			lastLabelZoomState = visible;
+			lastCacheRevision = currentCacheSize;
+			lastLabelVersion = currentVersion;
+		}
+
+		lastEnrichingState = enriching;
+	}
 
 	// Update search result IDs when search results or category filter changes
 	$: {
@@ -838,7 +875,7 @@
 
 		merchantList.setMerchants(allVisiblePlaces, center.lat, center.lng);
 
-		// Fetch names if panel is open OR zoom is 17+ (for labels)
+		// Fetch names if panel is open OR zoom is 15+ (for labels)
 		if ($merchantList.isOpen || currentZoom >= LABEL_VISIBLE_ZOOM) {
 			if (allowHeavyFetch || currentZoom >= LABEL_VISIBLE_ZOOM) {
 				const radiusKm = calculateRadiusKm(bounds) * NEARBY_RADIUS_MULTIPLIER;
@@ -1135,29 +1172,21 @@
 		});
 	};
 
+	// State tracking for label updates
 	let lastLabelZoomState = currentZoom >= LABEL_VISIBLE_ZOOM;
 	let lastCacheRevision = $merchantList.placeDetailsCache.size;
 	let lastEnrichingState = $merchantList.isEnrichingDetails;
 	let labelVersion = 0;
 	let lastLabelVersion = labelVersion;
 
+	// Derived reactive state for label visibility
+	$: labelsVisible = currentZoom >= LABEL_VISIBLE_ZOOM;
+	$: cacheSize = $merchantList.placeDetailsCache.size;
+	$: isEnriching = $merchantList.isEnrichingDetails;
+
+	// Update marker labels when relevant state changes
 	$: if (mapLoaded && elementsLoaded) {
-		const nowVisible = currentZoom >= LABEL_VISIBLE_ZOOM;
-		const cacheSize = $merchantList.placeDetailsCache.size;
-		const enriching = $merchantList.isEnrichingDetails;
-		const zoomStateChanged = nowVisible !== lastLabelZoomState;
-		const cacheChanged = cacheSize !== lastCacheRevision;
-		const enrichmentCompleted = lastEnrichingState && !enriching;
-		const revisionChanged = labelVersion !== lastLabelVersion;
-
-		if (zoomStateChanged || cacheChanged || enrichmentCompleted || revisionChanged) {
-			updateMarkerLabels();
-			lastLabelZoomState = nowVisible;
-			lastCacheRevision = cacheSize;
-			lastLabelVersion = labelVersion;
-		}
-
-		lastEnrichingState = enriching;
+		handleLabelUpdates(labelsVisible, cacheSize, isEnriching, labelVersion);
 	}
 
 	// Initialize elements when places data is ready and map is loaded
@@ -1175,8 +1204,7 @@
 			const LocateControl = deps.LocateControl;
 
 			// add map and tiles
-			const targetElement = ensureMapElement();
-			map = leaflet.map(targetElement, { maxZoom: 19, zoomControl: false });
+			map = leaflet.map(mapElement, { maxZoom: 19, zoomControl: false });
 			leaflet.control.zoom({ position: 'topright' }).addTo(map);
 
 			// Helper function to set mapLoaded after view is set
@@ -1401,7 +1429,7 @@
 			});
 
 			// change default icons
-			changeDefaultIcons(true, leaflet, ensureMapElement(), DomEvent);
+			changeDefaultIcons(true, leaflet, mapElement, DomEvent);
 
 			// final map setup
 			map.on('load', () => {
@@ -1456,8 +1484,8 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/map.png" />
 </svelte:head>
 
-<main class="relative h-screen w-full" aria-label="Map">
-	<h1 class="sr-only">BTC Map</h1>
+<main class="relative h-screen w-full">
+	<h1 class="sr-only">Bitcoin Merchant Map</h1>
 	<MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
 
 	<!-- Map takes full space -->
