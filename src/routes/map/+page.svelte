@@ -45,6 +45,11 @@
 		type LoadedMarkers
 	} from '$lib/map/markers';
 	import {
+		attachMarkerLabelIfVisible,
+		updateMarkerLabels,
+		LabelUpdateTracker
+	} from '$lib/map/labels';
+	import {
 		processPlaces,
 		isSupported as isWorkerSupported,
 		terminate as terminateWorker
@@ -77,15 +82,7 @@
 	} from '$lib/store';
 	import type { Leaflet, Place } from '$lib/types';
 	import { debounce, errToast, isBoosted } from '$lib/utils';
-	import type {
-		Control,
-		LatLng,
-		LatLngBounds,
-		Map,
-		Marker,
-		MarkerClusterGroup,
-		TooltipOptions
-	} from 'leaflet';
+	import type { Control, LatLng, LatLngBounds, Map, Marker, MarkerClusterGroup } from 'leaflet';
 	import localforage from 'localforage';
 	import { onDestroy, onMount } from 'svelte';
 	import type { FeatureGroup } from 'leaflet';
@@ -192,126 +189,6 @@
 
 	// Set of search result IDs for efficient marker filtering (respects category filter)
 	let searchResultIds: Set<number> = new Set();
-
-	// ============================================================================
-	// Marker Label Helpers
-	// ============================================================================
-
-	/**
-	 * Shared tooltip configuration to avoid duplication across functions
-	 */
-	const getMarkerLabelTooltipOptions = (boosted: boolean = false): TooltipOptions => ({
-		permanent: true,
-		direction: 'right',
-		className: boosted ? 'marker-label marker-label-boosted' : 'marker-label',
-		// Position label to the right of marker (17px) and above center (-25px)
-		// to avoid overlapping with the marker icon tip
-		offset: leaflet.point(17, -25)
-	});
-
-	const isPlaceBoosted = (place?: Place | null) =>
-		place?.boosted_until ? Date.parse(place.boosted_until) > Date.now() : false;
-
-	/**
-	 * Centralized handler for binding tooltips to markers
-	 * Only updates tooltip if content or styling has changed
-	 */
-	const bindMarkerLabelTooltip = (marker: Marker, labelText: string, boosted = false) => {
-		const tooltip = marker.getTooltip();
-		if (tooltip) {
-			const options = getMarkerLabelTooltipOptions(boosted);
-			const currentClass = tooltip.options.className || '';
-			const needsClassUpdate = currentClass !== options.className;
-			const needsContentUpdate = tooltip.getContent() !== labelText;
-
-			// No changes needed
-			if (!needsClassUpdate && !needsContentUpdate) {
-				return;
-			}
-
-			// If class needs to change, recreate the tooltip using Leaflet's public API
-			// (Leaflet doesn't provide a way to update tooltip classes after creation)
-			if (needsClassUpdate) {
-				marker.unbindTooltip();
-				marker.bindTooltip(labelText, options);
-				return;
-			}
-
-			// Only content needs updating - setContent() automatically updates the DOM
-			if (needsContentUpdate) {
-				tooltip.setContent(labelText);
-			}
-			return;
-		}
-		marker.bindTooltip(labelText, getMarkerLabelTooltipOptions(boosted));
-	};
-
-	/**
-	 * Get label text for a place from multiple sources (with fallback chain)
-	 */
-	const getLabelText = (placeId: number, fallbackPlace?: Place) => {
-		const sources: Array<Place | undefined> = [
-			$merchantList.placeDetailsCache.get(placeId),
-			fallbackPlace,
-			$placesById.get(placeId)
-		];
-
-		for (const source of sources) {
-			if (!source) continue;
-			if (source.name) return source.name;
-			if (source['osm:amenity']) return source['osm:amenity'];
-		}
-
-		return null;
-	};
-
-	/**
-	 * Attach label tooltip to marker if zoom level allows visibility
-	 */
-	const attachMarkerLabelIfVisible = (
-		marker: Marker,
-		placeId: number,
-		fallbackPlace: Place | undefined,
-		boosted: boolean,
-		signalUpdate = true
-	) => {
-		if (currentZoom < LABEL_VISIBLE_ZOOM) return false;
-		const labelText = getLabelText(placeId, fallbackPlace);
-		if (labelText) {
-			bindMarkerLabelTooltip(marker, labelText, boosted);
-			if (signalUpdate) {
-				labelVersion += 1;
-			}
-			return true;
-		}
-		return false;
-	};
-
-	/**
-	 * Determines if marker labels need updating based on state changes
-	 */
-	function handleLabelUpdates(
-		visible: boolean,
-		currentCacheSize: number,
-		enriching: boolean,
-		currentVersion: number
-	) {
-		const zoomStateChanged = visible !== lastLabelZoomState;
-		const cacheChanged = currentCacheSize !== lastCacheRevision;
-		const enrichmentCompleted = lastEnrichingState && !enriching;
-		const versionChanged = currentVersion !== lastLabelVersion;
-
-		const shouldUpdate = zoomStateChanged || cacheChanged || enrichmentCompleted || versionChanged;
-
-		if (shouldUpdate) {
-			updateMarkerLabels();
-			lastLabelZoomState = visible;
-			lastCacheRevision = currentCacheSize;
-			lastLabelVersion = currentVersion;
-		}
-
-		lastEnrichingState = enriching;
-	}
 
 	// Update search result IDs when search results or category filter changes
 	$: {
@@ -616,7 +493,16 @@
 				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
 
-			attachMarkerLabelIfVisible(marker, place.id, place, boosted, false);
+			attachMarkerLabelIfVisible(
+				marker,
+				place.id,
+				currentZoom,
+				$merchantList.placeDetailsCache,
+				$placesById,
+				boosted,
+				leaflet,
+				place
+			);
 
 			if (boosted && !shouldClusterBoostedMarkers()) {
 				boostedLayer.addLayer(marker);
@@ -841,7 +727,17 @@
 				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
 
-			attachMarkerLabelIfVisible(marker, place.id, place, boosted);
+			attachMarkerLabelIfVisible(
+				marker,
+				place.id,
+				currentZoom,
+				$merchantList.placeDetailsCache,
+				$placesById,
+				boosted,
+				leaflet,
+				place,
+				() => labelTracker.incrementVersion()
+			);
 
 			// Route to appropriate layer based on boost status and zoom level
 			if (boosted && !shouldClusterBoostedMarkers()) {
@@ -1129,8 +1025,12 @@
 			attachMarkerLabelIfVisible(
 				marker,
 				element.id,
-				$placesById.get(element.id),
-				Boolean(iconData.boosted)
+				currentZoom,
+				$merchantList.placeDetailsCache,
+				$placesById,
+				Boolean(iconData.boosted),
+				leaflet,
+				$placesById.get(element.id)
 			);
 
 			// Route to appropriate layer based on boost status and zoom level
@@ -1159,33 +1059,12 @@
 		}
 	};
 
-	// Update marker labels based on zoom level and enriched names
-	const updateMarkerLabels = () => {
-		if (!map || !leaflet) return;
-
-		if (currentZoom < LABEL_VISIBLE_ZOOM) {
-			Object.values(loadedMarkers).forEach((marker) => {
-				if (marker.getTooltip()) {
-					marker.unbindTooltip();
-				}
-			});
-			return;
-		}
-
-		Object.entries(loadedMarkers).forEach(([placeId, marker]) => {
-			const placeIdNum = Number(placeId);
-			const sourcePlace = $placesById.get(placeIdNum);
-			const boosted = isPlaceBoosted(sourcePlace) || boostedLayerMarkerIds.has(placeId);
-			attachMarkerLabelIfVisible(marker, placeIdNum, sourcePlace, boosted, false);
-		});
-	};
-
-	// State tracking for label updates
-	let lastLabelZoomState = currentZoom >= LABEL_VISIBLE_ZOOM;
-	let lastCacheRevision = $merchantList.placeDetailsCache.size;
-	let lastEnrichingState = $merchantList.isEnrichingDetails;
-	let labelVersion = 0;
-	let lastLabelVersion = labelVersion;
+	// Label update tracker - manages state changes and triggers updates
+	let labelTracker = new LabelUpdateTracker(
+		currentZoom,
+		$merchantList.placeDetailsCache.size,
+		$merchantList.isEnrichingDetails
+	);
 
 	// Derived reactive state for label visibility
 	$: labelsVisible = currentZoom >= LABEL_VISIBLE_ZOOM;
@@ -1193,8 +1072,17 @@
 	$: isEnriching = $merchantList.isEnrichingDetails;
 
 	// Update marker labels when relevant state changes
-	$: if (mapLoaded && elementsLoaded) {
-		handleLabelUpdates(labelsVisible, cacheSize, isEnriching, labelVersion);
+	$: if (mapLoaded && elementsLoaded && leaflet) {
+		labelTracker.shouldUpdate(labelsVisible, cacheSize, isEnriching, () => {
+			updateMarkerLabels(
+				loadedMarkers,
+				currentZoom,
+				$merchantList.placeDetailsCache,
+				$placesById,
+				boostedLayerMarkerIds,
+				leaflet
+			);
+		});
 	}
 
 	// Initialize elements when places data is ready and map is loaded
