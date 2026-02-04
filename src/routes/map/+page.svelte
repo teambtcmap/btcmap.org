@@ -101,17 +101,58 @@
 	const bindMarkerLabelTooltip = (marker: Marker, labelText: string, boosted = false) => {
 		const tooltip = marker.getTooltip();
 		if (tooltip) {
+			const options = getMarkerLabelTooltipOptions(boosted);
 			const currentClass = tooltip.options.className || '';
-			const hasBoosted = currentClass.includes('marker-label-boosted');
-			const needsClassUpdate = boosted ? !hasBoosted : hasBoosted;
+			const needsClassUpdate = currentClass !== options.className;
 			const needsContentUpdate = tooltip.getContent() !== labelText;
 			if (!needsClassUpdate && !needsContentUpdate) {
 				return;
 			}
-			marker.unbindTooltip();
+			if (needsClassUpdate) {
+				tooltip.options.className = options.className;
+			}
+			if (needsContentUpdate) {
+				tooltip.setContent(labelText);
+			}
+			tooltip.update();
+			return;
 		}
 		marker.bindTooltip(labelText, getMarkerLabelTooltipOptions(boosted));
 	};
+
+	const getLabelText = (placeId: number, fallbackPlace?: Place) => {
+		const sources: Array<Place | undefined> = [
+			$merchantList.placeDetailsCache.get(placeId),
+			fallbackPlace,
+			$placesById.get(placeId)
+		];
+
+		for (const source of sources) {
+			if (!source) continue;
+			if (source.name) return source.name;
+			if (source['osm:amenity']) return source['osm:amenity'];
+		}
+
+		return null;
+	};
+
+	const attachMarkerLabelIfVisible = (
+		marker: Marker,
+		placeId: number,
+		fallbackPlace: Place | undefined,
+		boosted: boolean
+	) => {
+		if (currentZoom < LABEL_VISIBLE_ZOOM) return false;
+		const labelText = getLabelText(placeId, fallbackPlace);
+		if (labelText) {
+			bindMarkerLabelTooltip(marker, labelText, boosted);
+			labelUpdateRevision++;
+			return true;
+		}
+		return false;
+	};
+
+	let labelUpdateRevision = 0;
 
 	export let data: PageData;
 
@@ -518,15 +559,8 @@
 				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
 
-			// Try to get the actual place name from the enriched details cache before binding tooltip
-			if (currentZoom >= LABEL_VISIBLE_ZOOM) {
-				const placeFromCache = $merchantList.placeDetailsCache.get(place.id);
-				// Only display label if we have a proper name (not just the ID)
-				const displayName = placeFromCache?.name || place.name || place['osm:amenity'];
-
-				if (displayName) {
-					bindMarkerLabelTooltip(marker, displayName, boosted);
-				}
+			if (attachMarkerLabelIfVisible(marker, place.id, place, boosted)) {
+				labelUpdateRevision++;
 			}
 
 			if (boosted && !shouldClusterBoostedMarkers()) {
@@ -752,16 +786,7 @@
 				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
 
-			// Try to get the actual place name from the enriched details cache before binding tooltip
-			if (currentZoom >= LABEL_VISIBLE_ZOOM) {
-				const placeFromCache = $merchantList.placeDetailsCache.get(place.id);
-				// Only display label if we have a proper name (not just the ID)
-				const displayName = placeFromCache?.name || place.name || place['osm:amenity'];
-
-				if (displayName) {
-					bindMarkerLabelTooltip(marker, displayName, boosted);
-				}
-			}
+			attachMarkerLabelIfVisible(marker, place.id, place, boosted);
 
 			// Route to appropriate layer based on boost status and zoom level
 			if (boosted && !shouldClusterBoostedMarkers()) {
@@ -1046,22 +1071,12 @@
 				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
 
-			// Try to get the actual place name from the enriched details before binding tooltip
-			if (currentZoom >= LABEL_VISIBLE_ZOOM) {
-				const placeFromCache = $merchantList.placeDetailsCache.get(element.id);
-				// Also check the local places store for basic name info
-				const placeFromGlobalStore = $places.find((p) => p.id === element.id);
-
-				// Look for name in different fields
-				const displayName =
-					placeFromCache?.name ||
-					placeFromGlobalStore?.name ||
-					placeFromGlobalStore?.['osm:amenity'];
-
-				if (displayName) {
-					bindMarkerLabelTooltip(marker, displayName, Boolean(iconData.boosted));
-				}
-			}
+			attachMarkerLabelIfVisible(
+				marker,
+				element.id,
+				$places.find((p) => p.id === element.id),
+				Boolean(iconData.boosted)
+			);
 
 			// Route to appropriate layer based on boost status and zoom level
 			if (iconData.boosted && !shouldClusterBoostedMarkers()) {
@@ -1094,7 +1109,6 @@
 		if (!map || !leaflet) return;
 
 		if (currentZoom < LABEL_VISIBLE_ZOOM) {
-			// Clear all tooltips when zoom is below threshold
 			Object.values(loadedMarkers).forEach((marker) => {
 				if (marker.getTooltip()) {
 					marker.unbindTooltip();
@@ -1103,65 +1117,36 @@
 			return;
 		}
 
-		// Get names from merchant list enriched details
-		const nameMap = $merchantList.placeDetailsCache;
-
-		// Update tooltip for each loaded marker
 		Object.entries(loadedMarkers).forEach(([placeId, marker]) => {
 			const placeIdNum = Number(placeId);
-			const place = nameMap.get(placeIdNum);
-			const globalPlace = place ?? $places.find((p) => p.id === placeIdNum);
-			const boosted = isPlaceBoosted(globalPlace) || boostedLayerMarkerIds.has(placeId);
-
-			if (place?.name) {
-				// Bind tooltip if it doesn't exist yet
-				if (!marker.getTooltip()) {
-					bindMarkerLabelTooltip(marker, place.name, boosted);
-				} else {
-					// Update the content of existing tooltip
-					marker.setTooltipContent(place.name);
-				}
-			} else {
-				// Attempt to find name elsewhere - might come from global places store
-				const fallbackName = globalPlace?.name || globalPlace?.['osm:amenity'];
-				if (fallbackName) {
-					if (marker.getTooltip()) {
-						// Update existing tooltip with fallback name
-						marker.setTooltipContent(fallbackName);
-					} else {
-						// Bind a fallback tooltip if none exists
-						bindMarkerLabelTooltip(marker, fallbackName, boosted);
-					}
-				} else {
-					// Unbind tooltip if no proper name is available (we only had the ID)
-					if (marker.getTooltip()) {
-						marker.unbindTooltip();
-					}
-				}
-			}
-		});
-
-		// Add tooltips to any markers added but not yet processed
-		$merchantList.merchants.forEach((place) => {
-			const marker = loadedMarkers[place.id.toString()];
-			if (marker && place.name) {
-				const boosted = isPlaceBoosted(place);
-				if (!marker.getTooltip()) {
-					bindMarkerLabelTooltip(marker, place.name, boosted);
-				} else {
-					marker.setTooltipContent(place.name);
-				}
-			}
+			const sourcePlace = $places.find((p) => p.id === placeIdNum);
+			const boosted = isPlaceBoosted(sourcePlace) || boostedLayerMarkerIds.has(placeId);
+			attachMarkerLabelIfVisible(marker, placeIdNum, sourcePlace, boosted);
 		});
 	};
 
-	// Reactive statement to trigger label updates when zoom changes or enriched data is available
-	$: if (
-		mapLoaded &&
-		elementsLoaded &&
-		(currentZoom || $merchantList.placeDetailsCache || $merchantList.isEnrichingDetails === false)
-	) {
-		updateMarkerLabels();
+	let lastLabelZoomState = currentZoom >= LABEL_VISIBLE_ZOOM;
+	let lastCacheRevision = $merchantList.placeDetailsCache.size;
+	let lastEnrichingState = $merchantList.isEnrichingDetails;
+	let lastLabelRevision = labelUpdateRevision;
+
+	$: if (mapLoaded && elementsLoaded) {
+		const nowVisible = currentZoom >= LABEL_VISIBLE_ZOOM;
+		const cacheSize = $merchantList.placeDetailsCache.size;
+		const enriching = $merchantList.isEnrichingDetails;
+		const zoomStateChanged = nowVisible !== lastLabelZoomState;
+		const cacheChanged = cacheSize !== lastCacheRevision;
+		const enrichmentCompleted = lastEnrichingState && !enriching;
+		const revisionChanged = labelUpdateRevision !== lastLabelRevision;
+
+		if (zoomStateChanged || cacheChanged || enrichmentCompleted || revisionChanged) {
+			updateMarkerLabels();
+			lastLabelZoomState = nowVisible;
+			lastCacheRevision = cacheSize;
+			lastLabelRevision = labelUpdateRevision;
+		}
+
+		lastEnrichingState = enriching;
 	}
 
 	// Initialize elements when places data is ready and map is loaded
@@ -1459,7 +1444,8 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/map.png" />
 </svelte:head>
 
-<main class="relative h-screen w-full">
+<main class="relative h-screen w-full" aria-label="Map">
+	<h1 class="sr-only">BTC Map</h1>
 	<MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
 
 	<!-- Map takes full space -->
