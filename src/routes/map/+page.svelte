@@ -1339,6 +1339,7 @@
 				}}
 				nearbyCount={$merchantList.totalCount}
 				isLoadingCount={$merchantList.isLoadingList}
+				zoomLevel={currentZoom}
 			/>
 		</div>
 	{/if}
