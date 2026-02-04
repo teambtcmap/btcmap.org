@@ -223,16 +223,24 @@
 			const currentClass = tooltip.options.className || '';
 			const needsClassUpdate = currentClass !== options.className;
 			const needsContentUpdate = tooltip.getContent() !== labelText;
+
+			// No changes needed
 			if (!needsClassUpdate && !needsContentUpdate) {
 				return;
 			}
+
+			// If class needs to change, recreate the tooltip using Leaflet's public API
+			// (Leaflet doesn't provide a way to update tooltip classes after creation)
 			if (needsClassUpdate) {
-				tooltip.options.className = options.className;
+				marker.unbindTooltip();
+				marker.bindTooltip(labelText, options);
+				return;
 			}
+
+			// Only content needs updating - setContent() automatically updates the DOM
 			if (needsContentUpdate) {
 				tooltip.setContent(labelText);
 			}
-			tooltip.update();
 			return;
 		}
 		marker.bindTooltip(labelText, getMarkerLabelTooltipOptions(boosted));
