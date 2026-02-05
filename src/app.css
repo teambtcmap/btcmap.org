@@ -193,10 +193,10 @@
 /* Dark mode for Leaflet controls - Tailwind gray palette */
 :root {
 	/* Marker label colors - Light mode (Tailwind palette references) */
-	--marker-label-color: #0d9488; /* teal-600 */
+	--marker-label-color: #0e7490; /* cyan-700 - better contrast on varied map backgrounds */
 	--marker-label-shadow: #ffffff; /* white */
-	--marker-label-boosted-color: #f59e0b; /* amber-500 */
-	--marker-label-boosted-shadow: #fff7ed; /* orange-50 */
+	--marker-label-boosted-color: #f97316; /* orange-500 - warmer, more prominent */
+	--marker-label-boosted-shadow: #ffffff; /* white */
 }
 
 .dark {
@@ -207,9 +207,10 @@
 	--leaflet-text: #f3f4f6; /* gray-100 */
 	--leaflet-text-muted: #9ca3af; /* gray-400 */
 	--leaflet-link: #60a5fa; /* blue-400 */
-	--marker-label-shadow: rgba(15, 23, 42, 0.9);
-	--marker-label-boosted-color: #fbbf24;
-	--marker-label-boosted-shadow: rgba(15, 23, 42, 0.9);
+	--marker-label-color: #22d3ee; /* cyan-400 - bright for dark backgrounds */
+	--marker-label-shadow: rgba(0, 0, 0, 0.95); /* near-black */
+	--marker-label-boosted-color: #fb923c; /* orange-400 - bright warm tone */
+	--marker-label-boosted-shadow: rgba(0, 0, 0, 0.95); /* near-black */
 }
 
 .dark .leaflet-bar,
@@ -299,7 +300,7 @@
 		1px -1px 0 var(--marker-label-boosted-shadow),
 		-1px 1px 0 var(--marker-label-boosted-shadow),
 		1px 1px 0 var(--marker-label-boosted-shadow);
-	filter: drop-shadow(0 1px 2px rgba(255, 193, 7, 0.35));
+	filter: drop-shadow(0 1px 2px rgba(249, 115, 22, 0.35));
 }
 
 /* Z-index layering for marker labels and tooltips
