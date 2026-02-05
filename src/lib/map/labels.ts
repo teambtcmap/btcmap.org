@@ -17,11 +17,11 @@ export function getMarkerLabelTooltipOptions(
 ): TooltipOptions {
 	return {
 		permanent: true,
-		direction: 'right',
+		direction: 'auto',
 		className: boosted ? 'marker-label marker-label-boosted' : 'marker-label',
-		// Position label to the right of marker (17px) and above center (-25px)
-		// to avoid overlapping with the marker icon tip
-		offset: leaflet.point(17, -25)
+		// Position label near marker - 'auto' direction will choose optimal placement
+		// to avoid going offscreen (does not prevent label-to-label overlap)
+		offset: leaflet.point(12, -15)
 	};
 }
 
