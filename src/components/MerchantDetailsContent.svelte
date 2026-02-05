@@ -160,7 +160,7 @@
 			{:else if isLoading}
 				<div class="mt-1 h-5 w-32 animate-pulse rounded bg-link/50"></div>
 			{:else}
-				<span class="block text-body dark:text-white" title="Not verified">---</span>
+				<span class="block text-body dark:text-white" title="Not recently verified">---</span>
 			{/if}
 			<!-- eslint-disable svelte/no-navigation-without-resolve -->
 			<a

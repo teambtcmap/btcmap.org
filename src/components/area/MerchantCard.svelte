@@ -220,7 +220,7 @@
 		{:else}
 			<div class="flex items-center space-x-1 text-gray-500 dark:text-gray-400">
 				<Icon w="16" h="16" icon="sentiment_dissatisfied" type="material" class="shrink-0" />
-				<p class="text-sm font-semibold">Not Verified</p>
+				<p class="text-sm font-semibold">Not recently verified</p>
 			</div>
 		{/if}
 

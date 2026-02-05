@@ -63,6 +63,11 @@ const CONFIG = {
 		labelId: GITEA_LABELS.DATA.COMMUNITY_SUBMISSION,
 		hasAreaLabels: false
 	},
+	'verify-community': {
+		repo: 'btcmap-data',
+		labelId: GITEA_LABELS.DATA.VERIFY_COMMUNITY,
+		hasAreaLabels: false
+	},
 	'tagger-onboarding': {
 		repo: 'btcmap-infra',
 		labelId: GITEA_LABELS.INFRA.TAGGER_ONBOARDING,
@@ -171,6 +176,14 @@ Lightning: ${data.lightning}
 Social links: ${data.socialLinks}
 Community leader contact: ${data.contact}
 Notes: ${data.notes}
+Created at: ${timestamp}`;
+
+		case 'verify-community':
+			return `Community name: ${data.name}
+Community page: ${data.communityUrl}
+Information is accurate: ${data.accurate}
+Updates needed: ${data.updates || 'None'}
+How did you verify this?: ${data.verified}
 Created at: ${timestamp}`;
 
 		case 'tagger-onboarding':
