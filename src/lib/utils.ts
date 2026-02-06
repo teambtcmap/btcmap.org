@@ -393,3 +393,11 @@ export async function fetchEnhancedPlace(placeId: string): Promise<Place | null>
 		return null;
 	}
 }
+
+// Escapes HTML special characters to prevent XSS in text content
+// Use this for plain text inserted into innerHTML contexts (e.g., Leaflet tooltips)
+export function escapeHtml(text: string): string {
+	const div = document.createElement('div');
+	div.textContent = text;
+	return div.innerHTML;
+}

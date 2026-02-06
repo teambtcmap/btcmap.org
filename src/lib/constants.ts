@@ -42,12 +42,15 @@ export const MAP_FIT_BOUNDS_PADDING = 50;
 // ┌─────────────────────────────────────────────────────────────────────────┐
 // │ Zoom < 11  │ No data shown - "zoom in" message                          │
 // │ Zoom 11-14 │ API search with 1.5x radius, max 99 results                │
-// │ Zoom 15+   │ Use loaded markers with 1.5x bounds, enrich when open      │
+// │ Zoom 15+   │ Use loaded markers with 1.5x bounds, names visible, enrich when open      │
 // └─────────────────────────────────────────────────────────────────────────┘
 // All zoom levels use 1.5x radius multiplier for consistent "nearby" count.
 
 // Zoom 17+: Leaflet clustering disabled, individual markers shown
 export const CLUSTERING_DISABLED_ZOOM = 17;
+
+// Zoom 15+: Show place name labels on markers
+export const LABEL_VISIBLE_ZOOM = 15;
 
 // Zoom 1-5: Boosted markers are clustered (too zoomed out, would be crowded)
 // Zoom 6-16: Boosted markers are NOT clustered (stand out from regular markers)

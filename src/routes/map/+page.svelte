@@ -29,7 +29,8 @@
 		MARKER_CLICK_THROTTLE,
 		DEFAULT_MAP_LAT,
 		DEFAULT_MAP_LNG,
-		DEFAULT_MAP_ZOOM
+		DEFAULT_MAP_ZOOM,
+		LABEL_VISIBLE_ZOOM
 	} from '$lib/constants';
 	import {
 		calculateRadiusKm,
@@ -43,6 +44,11 @@
 		cleanupOutOfBoundsMarkers,
 		type LoadedMarkers
 	} from '$lib/map/markers';
+	import {
+		attachMarkerLabelIfVisible,
+		updateMarkerLabels,
+		LabelUpdateTracker
+	} from '$lib/map/labels';
 	import {
 		processPlaces,
 		isSupported as isWorkerSupported,
@@ -487,6 +493,17 @@
 				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
 
+			attachMarkerLabelIfVisible(
+				marker,
+				place.id,
+				currentZoom,
+				$merchantList.placeDetailsCache,
+				$placesById,
+				boosted,
+				leaflet,
+				place
+			);
+
 			if (boosted && !shouldClusterBoostedMarkers()) {
 				boostedLayer.addLayer(marker);
 				boostedLayerMarkerIds.add(place.id.toString());
@@ -710,6 +727,18 @@
 				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
 
+			attachMarkerLabelIfVisible(
+				marker,
+				place.id,
+				currentZoom,
+				$merchantList.placeDetailsCache,
+				$placesById,
+				boosted,
+				leaflet,
+				place,
+				() => labelTracker.incrementVersion()
+			);
+
 			// Route to appropriate layer based on boost status and zoom level
 			if (boosted && !shouldClusterBoostedMarkers()) {
 				boostedLayer.addLayer(marker);
@@ -736,6 +765,14 @@
 		});
 	}, 1000); // 1 second debounce for IndexedDB writes
 
+	// Debounced enriched details fetch to prevent excessive API calls during zoom/pan
+	const debouncedFetchEnrichedDetails = debounce(
+		(args: { coords: { lat: number; lon: number }; radiusKm: number }) => {
+			merchantList.fetchEnrichedDetails(args.coords, args.radiusKm);
+		},
+		500
+	); // 500ms debounce for API calls
+
 	// Zoom 15+: Use locally loaded markers, optionally enrich with API data
 	const updateListLocalMarkers = (
 		center: LatLng,
@@ -750,9 +787,15 @@
 
 		merchantList.setMerchants(allVisiblePlaces, center.lat, center.lng);
 
-		if ($merchantList.isOpen && allowHeavyFetch) {
-			const radiusKm = calculateRadiusKm(bounds) * NEARBY_RADIUS_MULTIPLIER;
-			merchantList.fetchEnrichedDetails({ lat: center.lat, lon: center.lng }, radiusKm);
+		// Fetch names if panel is open OR zoom is 15+ (for labels)
+		if ($merchantList.isOpen || currentZoom >= LABEL_VISIBLE_ZOOM) {
+			if (allowHeavyFetch || currentZoom >= LABEL_VISIBLE_ZOOM) {
+				const radiusKm = calculateRadiusKm(bounds) * NEARBY_RADIUS_MULTIPLIER;
+				debouncedFetchEnrichedDetails({
+					coords: { lat: center.lat, lon: center.lng },
+					radiusKm
+				});
+			}
 		}
 	};
 
@@ -783,13 +826,11 @@
 		const bounds = map.getBounds();
 		const center = map.getCenter();
 		const behavior = getZoomBehavior(currentZoom);
-		const isDesktop = window.innerWidth >= BREAKPOINTS.md;
 
 		// Determine if we should fetch full data or just count
-		// - Desktop: always fetch full data (list panel visible alongside map)
 		// - Force flag: explicit user action (e.g., button click)
 		// - List open: user is actively viewing the list (mobile or desktop)
-		const allowHeavyFetch = isDesktop || opts?.force || $merchantList.isOpen;
+		const allowHeavyFetch = opts?.force || $merchantList.isOpen;
 
 		switch (behavior) {
 			case 'local-markers':
@@ -992,6 +1033,17 @@
 				onMarkerClick: (id) => openMerchantDrawer(Number(id))
 			});
 
+			attachMarkerLabelIfVisible(
+				marker,
+				element.id,
+				currentZoom,
+				$merchantList.placeDetailsCache,
+				$placesById,
+				Boolean(iconData.boosted),
+				leaflet,
+				$placesById.get(element.id)
+			);
+
 			// Route to appropriate layer based on boost status and zoom level
 			if (iconData.boosted && !shouldClusterBoostedMarkers()) {
 				boostedMarkersToAdd.push(marker);
@@ -1017,6 +1069,32 @@
 			highlightMarker(loadedMarkers, selectedMarkerId);
 		}
 	};
+
+	// Label update tracker - manages state changes and triggers updates
+	let labelTracker = new LabelUpdateTracker(
+		currentZoom,
+		$merchantList.placeDetailsCache.size,
+		$merchantList.isEnrichingDetails
+	);
+
+	// Derived reactive state for label visibility
+	$: labelsVisible = currentZoom >= LABEL_VISIBLE_ZOOM;
+	$: cacheSize = $merchantList.placeDetailsCache.size;
+	$: isEnriching = $merchantList.isEnrichingDetails;
+
+	// Update marker labels when relevant state changes
+	$: if (mapLoaded && elementsLoaded && leaflet) {
+		labelTracker.shouldUpdate(labelsVisible, cacheSize, isEnriching, () => {
+			updateMarkerLabels(
+				loadedMarkers,
+				currentZoom,
+				$merchantList.placeDetailsCache,
+				$placesById,
+				boostedLayerMarkerIds,
+				leaflet
+			);
+		});
+	}
 
 	// Initialize elements when places data is ready and map is loaded
 	// The guard inside initializeElements() prevents multiple calls
@@ -1278,6 +1356,7 @@
 		// Cancel pending debounced operations to prevent memory leaks
 		if (debouncedLoadMarkers?.cancel) debouncedLoadMarkers.cancel();
 		if (debouncedCacheCoords?.cancel) debouncedCacheCoords.cancel();
+		if (debouncedFetchEnrichedDetails?.cancel) debouncedFetchEnrichedDetails.cancel();
 		if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
 		if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
 		if (glMapPollingTimer) clearTimeout(glMapPollingTimer);
@@ -1314,8 +1393,7 @@
 </svelte:head>
 
 <main class="relative h-screen w-full">
-	<h1 class="hidden">Map</h1>
-
+	<h1 class="sr-only">Bitcoin Merchant Map</h1>
 	<MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
 
 	<!-- Map takes full space -->
