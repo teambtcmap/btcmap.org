@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import MapLoadingMain from '$components/MapLoadingMain.svelte';
 	import TileLoadingIndicator from './components/TileLoadingIndicator.svelte';
+	import MapControls from './components/MapControls.svelte';
 	import MerchantDrawerHash from './components/MerchantDrawerHash.svelte';
 	import MerchantListPanel from './components/MerchantListPanel.svelte';
 	import MapSearchBar from './components/MapSearchBar.svelte';
@@ -59,11 +60,9 @@
 	import {
 		attribution,
 		changeDefaultIcons,
-		dataRefresh,
 		generateIcon,
 		generateMarker,
 		geolocate,
-		homeMarkerButtons,
 		layers,
 		scaleBars,
 		support,
@@ -306,7 +305,6 @@
 	const urlLong = $page.url.searchParams.getAll('long');
 
 	// allow to view map with only boosted locations
-	const boosts = $page.url.searchParams.has('boosts');
 
 	// displays a button in controls if there is new data available
 	const showDataRefresh = () => {
@@ -1278,51 +1276,6 @@
 			// add locate button to map
 			geolocate(leaflet, map, LocateControl);
 
-			// add boost button control
-			const customControls = leaflet.Control.extend({
-				options: {
-					position: 'topright'
-				},
-				onAdd: () => {
-					const addControlDiv = leaflet.DomUtil.create('div');
-					addControlDiv.classList.add('leaflet-control-boost', 'leaflet-bar', 'leaflet-control');
-
-					// Boost layer button
-					const boostLayerButton = leaflet.DomUtil.create('a');
-					boostLayerButton.classList.add('leaflet-control-boost-layer');
-					boostLayerButton.title = 'Boosted locations';
-					boostLayerButton.role = 'button';
-					boostLayerButton.ariaLabel = 'Boosted locations';
-					boostLayerButton.ariaDisabled = 'false';
-					boostLayerButton.innerHTML = `<img src='${boosts ? '/icons/boost-solid.svg' : '/icons/boost.svg'}' alt='boost' id='boost-layer' style='width: 16px; height: 16px;'/>`;
-					boostLayerButton.onclick = function toggleLayer() {
-						trackEvent('boost_layer_toggle');
-						if (boosts) {
-							$page.url.searchParams.delete('boosts');
-							location.search = $page.url.search;
-						} else {
-							$page.url.searchParams.append('boosts', 'true');
-							location.search = $page.url.search;
-						}
-					};
-					addControlDiv.append(boostLayerButton);
-
-					return addControlDiv;
-				}
-			});
-
-			map.addControl(new customControls());
-			const boostLayer = document.querySelector('.leaflet-control-boost-layer');
-			if (boostLayer) {
-				DomEvent.disableClickPropagation(boostLayer as HTMLElement);
-			}
-
-			// add home and marker buttons to map
-			homeMarkerButtons(leaflet, map, DomEvent, true);
-
-			// add data refresh button to map
-			dataRefresh(leaflet, map, DomEvent);
-
 			controlLayers = leaflet.control
 				.layers(baseMaps, undefined, { position: 'topright' })
 				.addTo(map);
@@ -1440,6 +1393,10 @@
 	/>
 
 	<MerchantDrawerHash />
+
+	{#if map && leaflet && DomEvent}
+		<MapControls {map} {leaflet} {DomEvent} />
+	{/if}
 
 	<TileLoadingIndicator visible={tilesLoading} />
 </main>
