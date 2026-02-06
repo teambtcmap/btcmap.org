@@ -2,6 +2,7 @@ import type { Marker, TooltipOptions } from 'leaflet';
 import type { Leaflet, Place } from '$lib/types';
 import type { LoadedMarkers } from '$lib/map/markers';
 import { LABEL_VISIBLE_ZOOM } from '$lib/constants';
+import { escapeHtml } from '$lib/utils';
 
 /**
  * Marker label management for the map
@@ -90,8 +91,9 @@ export function getLabelText(
 		if (!source) continue;
 		// Handle empty string as intentional "no name" to prevent fallback
 		if (source.name === '') return null;
-		if (source.name) return source.name;
-		if (source['osm:amenity']) return source['osm:amenity'];
+		// Escape HTML to prevent XSS (Leaflet tooltips treat strings as HTML)
+		if (source.name) return escapeHtml(source.name);
+		if (source['osm:amenity']) return escapeHtml(source['osm:amenity']);
 	}
 
 	return null;
