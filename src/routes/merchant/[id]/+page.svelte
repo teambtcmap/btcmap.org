@@ -101,7 +101,7 @@
 		icon = data.icon;
 		address = data.address;
 		description = data.description;
-		note = data.note;
+
 		hours = data.hours;
 		payment = data.payment;
 		phone = data.phone;
@@ -206,7 +206,7 @@
 	let icon: string | undefined;
 	let address: string | undefined;
 	let description: string | undefined;
-	let note: string | undefined;
+
 	let hours: string | undefined;
 	let payment: PayMerchant;
 	let boosted: string | undefined;
@@ -668,10 +668,6 @@
 
 		{#if description}
 			<p class="mx-auto max-w-[600px] text-primary dark:text-white">{description}</p>
-		{/if}
-
-		{#if note}
-			<p class="mx-auto max-w-[600px] text-primary dark:text-white">{note}</p>
 		{/if}
 
 		<!-- Three cards: Last Surveyed, Boost, Comments (use server data, don't wait for store sync) -->
