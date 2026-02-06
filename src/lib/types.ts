@@ -118,7 +118,6 @@ export interface MerchantPageData {
 	icon?: string;
 	address?: string;
 	description?: string;
-	note?: string;
 	hours?: string;
 	payment?: PayMerchant;
 	boosted?: string;

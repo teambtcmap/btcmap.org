@@ -160,7 +160,6 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 			icon,
 			address,
 			description: placeData.description,
-			note: placeData['osm:note'],
 			hours,
 			payment,
 			boosted,
