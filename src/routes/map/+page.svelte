@@ -1443,7 +1443,3 @@
 
 	<TileLoadingIndicator visible={tilesLoading} />
 </main>
-
-<style>
-	/* Used for dynamic marker labels in Leaflet - styles defined in global CSS */
-</style>
