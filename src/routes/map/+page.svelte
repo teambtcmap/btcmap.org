@@ -81,7 +81,15 @@
 	} from '$lib/store';
 	import type { Leaflet, Place } from '$lib/types';
 	import { debounce, errToast, isBoosted } from '$lib/utils';
-	import type { Control, LatLng, LatLngBounds, Map, Marker, MarkerClusterGroup } from 'leaflet';
+	import type {
+		Control,
+		LatLng,
+		LatLngBounds,
+		Layer,
+		Map,
+		Marker,
+		MarkerClusterGroup
+	} from 'leaflet';
 	import localforage from 'localforage';
 	import { onDestroy, onMount } from 'svelte';
 	import type { FeatureGroup } from 'leaflet';
@@ -1112,198 +1120,226 @@
 			map = leaflet.map(mapElement, { maxZoom: 19, zoomControl: false });
 			leaflet.control.zoom({ position: 'topright' }).addTo(map);
 
-			// Helper function to set mapLoaded after view is set
-			const setMapViewAndMarkLoaded = () => {
-				mapCenter = map.getCenter();
-				mapLoaded = true;
-			};
-
-			// use url hash if present
-			if (location.hash) {
-				try {
-					// Extract only the map coordinates part (before any & parameters)
-					const hashPart = location.hash.split('&')[0];
-					const coords = hashPart.split('/');
-					map.setView([Number(coords[1]), Number(coords[2])], Number(coords[0].slice(1)));
-					setMapViewAndMarkLoaded();
-				} catch (error) {
-					map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
-					setMapViewAndMarkLoaded();
-					errToast(
-						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
-					);
-					console.error(error);
-				}
-			}
-
-			// set URL lat/long query view if it exists and is valid
-			else if (urlLat.length && urlLong.length) {
-				try {
-					if (urlLat.length > 1 && urlLong.length > 1) {
-						map.fitBounds([
-							[Number(urlLat[0]), Number(urlLong[0])],
-							[Number(urlLat[1]), Number(urlLong[1])]
-						]);
-						setMapViewAndMarkLoaded();
-					} else {
-						map.fitBounds([[Number(urlLat[0]), Number(urlLong[0])]]);
-						setMapViewAndMarkLoaded();
-					}
-				} catch (error) {
-					map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
-					setMapViewAndMarkLoaded();
-					errToast(
-						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
-					);
-					console.error(error);
-				}
-			}
-
-			// set view to last location if it is present in the cache
-			else {
-				localforage
-					.getItem<LatLngBounds>('coords')
-					.then(function (value) {
-						if (value) {
-							map.fitBounds([
-								// @ts-expect-error - LatLngBounds internal structure access
-								[value._northEast.lat, value._northEast.lng],
-								// @ts-expect-error - LatLngBounds internal structure access
-								[value._southWest.lat, value._southWest.lng]
-							]);
-						} else if (data.geo?.lat != null && data.geo?.lng != null) {
-							// Use IP-based geolocation for first-time visitors
-							map.setView([data.geo.lat, data.geo.lng], DEFAULT_MAP_ZOOM);
-						} else {
-							map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
-						}
-						setMapViewAndMarkLoaded();
-					})
-					.catch(function (err) {
-						if (data.geo?.lat != null && data.geo?.lng != null) {
-							map.setView([data.geo.lat, data.geo.lng], DEFAULT_MAP_ZOOM);
-						} else {
-							map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
-						}
-						setMapViewAndMarkLoaded();
-						errToast(
-							'Could not set map view to cached coords, please try again or contact BTC Map.'
-						);
-						console.error(err);
-					});
-			}
-
-			// add tiles and basemaps
-			const { baseMaps, activeLayer } = layers(leaflet, map);
-
-			// Initialize current layer name for deduplication tracking
-			currentLayerName = detectTheme() === 'dark' ? 'Carto Dark Matter' : 'OpenFreeMap Liberty';
-
-			// Hook into MapLibre GL tile loading events
-			if (activeLayer && activeLayer.getMaplibreMap) {
-				// MapLibre GL map might not be ready immediately, poll for it
-				const checkGlMap = () => {
-					const glMap = activeLayer.getMaplibreMap();
-					if (glMap) {
-						// Clear polling timer now that GL map is ready
-						if (glMapPollingTimer) {
-							clearTimeout(glMapPollingTimer);
-							glMapPollingTimer = null;
-						}
-						glMap.on('idle', () => {
-							if (tilesLoadingTimer) {
-								clearTimeout(tilesLoadingTimer);
-								tilesLoadingTimer = null;
-							}
-							if (tilesLoadingFallback) {
-								clearTimeout(tilesLoadingFallback);
-								tilesLoadingFallback = null;
-							}
-							mapTilesLoaded = true;
-							tilesLoading = false;
-						});
-					} else {
-						// GL map not ready yet, check again after a short delay
-						glMapPollingTimer = setTimeout(checkGlMap, 100);
-					}
-				};
-				checkGlMap();
-			} else {
-				// Fallback: if not using MapLibre GL layer, mark tiles as loaded immediately
-				mapTilesLoaded = true;
-				tilesLoading = false;
-			}
-
-			// Show tile loading indicator on pan/zoom (debounced to prevent flickering)
-			map.on('movestart', () => {
-				if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
-				if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
-
-				// Only show indicator if loading takes > 150ms
-				tilesLoadingTimer = setTimeout(() => {
-					tilesLoading = true;
-				}, 150);
-
-				// Fallback: hide indicator after 5s if idle never fires
-				tilesLoadingFallback = setTimeout(() => {
-					tilesLoading = false;
-				}, 5000);
-			});
-
-			// Close drawer when clicking on map (not on markers)
-			map.on('click', () => {
-				if ($merchantDrawer.isOpen) {
-					if (selectedMarkerId) {
-						clearMarkerSelection(loadedMarkers, selectedMarkerId);
-						selectedMarkerId = null;
-					}
-					merchantDrawer.close();
-				}
-			});
-
-			// change broken marker image path in prod
-			leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
-
-			// add support attribution
-			support();
-
-			// add OSM attribution
-			attribution(leaflet, map);
-
-			// add scale
-			scaleBars(leaflet, map);
-
-			// add locate button to map
-			geolocate(leaflet, map, LocateControl);
-
-			controlLayers = leaflet.control
-				.layers(baseMaps, undefined, { position: 'topright' })
-				.addTo(map);
-
-			// track layer changes (with deduplication to avoid tracking same layer selection)
-			map.on('baselayerchange', (e: { name: string }) => {
-				if (e.name !== currentLayerName) {
-					trackEvent('layer_change', { layer: e.name });
-					currentLayerName = e.name;
-				}
-			});
-
-			// change default icons
-			changeDefaultIcons(true, leaflet, mapElement, DomEvent);
-
-			// final map setup
-			map.on('load', () => {
-				mapCenter = map.getCenter();
-				mapLoaded = true;
-			});
-
-			// Watch for hash changes to clear marker selection when drawer closes
-			window.addEventListener('hashchange', handleHashChange);
-
-			// Sync drawer state from URL hash on initial page load
-			merchantDrawer.syncFromHash();
+			// Setup map in logical steps
+			const { baseMaps, activeLayer } = await setupMapInitialView();
+			setupTileLayers(activeLayer);
+			setupTileLoadingIndicators();
+			setupMapClickHandlers();
+			setupMapControls(LocateControl, baseMaps);
+			setupMapFinalization();
 		}
 	});
+
+	// Setup helper functions (defined after onMount for proximity to usage)
+
+	const setupMapInitialView = async (): Promise<{
+		baseMaps: Record<string, Layer>;
+		activeLayer: unknown;
+	}> => {
+		// Helper function to set mapLoaded after view is set
+		const setMapViewAndMarkLoaded = () => {
+			mapCenter = map.getCenter();
+			mapLoaded = true;
+		};
+
+		// use url hash if present
+		if (location.hash) {
+			try {
+				// Extract only the map coordinates part (before any & parameters)
+				const hashPart = location.hash.split('&')[0];
+				const coords = hashPart.split('/');
+				map.setView([Number(coords[1]), Number(coords[2])], Number(coords[0].slice(1)));
+				setMapViewAndMarkLoaded();
+			} catch (error) {
+				map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
+				setMapViewAndMarkLoaded();
+				errToast(
+					'Could not set map view to provided coordinates, please try again or contact BTC Map.'
+				);
+				console.error(error);
+			}
+		}
+
+		// set URL lat/long query view if it exists and is valid
+		else if (urlLat.length && urlLong.length) {
+			try {
+				if (urlLat.length > 1 && urlLong.length > 1) {
+					map.fitBounds([
+						[Number(urlLat[0]), Number(urlLong[0])],
+						[Number(urlLat[1]), Number(urlLong[1])]
+					]);
+					setMapViewAndMarkLoaded();
+				} else {
+					map.fitBounds([[Number(urlLat[0]), Number(urlLong[0])]]);
+					setMapViewAndMarkLoaded();
+				}
+			} catch (error) {
+				map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
+				setMapViewAndMarkLoaded();
+				errToast(
+					'Could not set map view to provided coordinates, please try again or contact BTC Map.'
+				);
+				console.error(error);
+			}
+		}
+
+		// set view to last location if it is present in the cache
+		else {
+			localforage
+				.getItem<LatLngBounds>('coords')
+				.then(function (value) {
+					if (value) {
+						map.fitBounds([
+							// @ts-expect-error - LatLngBounds internal structure access
+							[value._northEast.lat, value._northEast.lng],
+							// @ts-expect-error - LatLngBounds internal structure access
+							[value._southWest.lat, value._southWest.lng]
+						]);
+					} else if (data.geo?.lat != null && data.geo?.lng != null) {
+						// Use IP-based geolocation for first-time visitors
+						map.setView([data.geo.lat, data.geo.lng], DEFAULT_MAP_ZOOM);
+					} else {
+						map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
+					}
+					setMapViewAndMarkLoaded();
+				})
+				.catch(function (err) {
+					if (data.geo?.lat != null && data.geo?.lng != null) {
+						map.setView([data.geo.lat, data.geo.lng], DEFAULT_MAP_ZOOM);
+					} else {
+						map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
+					}
+					setMapViewAndMarkLoaded();
+					errToast('Could not set map view to cached coords, please try again or contact BTC Map.');
+					console.error(err);
+				});
+		}
+
+		// add tiles and basemaps
+		const { baseMaps, activeLayer } = layers(leaflet, map);
+
+		// Initialize current layer name for deduplication tracking
+		currentLayerName = detectTheme() === 'dark' ? 'Carto Dark Matter' : 'OpenFreeMap Liberty';
+
+		return { baseMaps, activeLayer };
+	};
+
+	const setupTileLayers = (activeLayer: unknown) => {
+		// Hook into MapLibre GL tile loading events
+		if (activeLayer && typeof activeLayer === 'object' && 'getMaplibreMap' in activeLayer) {
+			// MapLibre GL map might not be ready immediately, poll for it
+			const checkGlMap = () => {
+				const glMap = (activeLayer as { getMaplibreMap: () => unknown }).getMaplibreMap();
+				if (glMap && typeof glMap === 'object' && 'on' in glMap) {
+					// Clear polling timer now that GL map is ready
+					if (glMapPollingTimer) {
+						clearTimeout(glMapPollingTimer);
+						glMapPollingTimer = null;
+					}
+					(glMap as { on: (event: string, callback: () => void) => void }).on('idle', () => {
+						if (tilesLoadingTimer) {
+							clearTimeout(tilesLoadingTimer);
+							tilesLoadingTimer = null;
+						}
+						if (tilesLoadingFallback) {
+							clearTimeout(tilesLoadingFallback);
+							tilesLoadingFallback = null;
+						}
+						mapTilesLoaded = true;
+						tilesLoading = false;
+					});
+				} else {
+					// GL map not ready yet, check again after a short delay
+					glMapPollingTimer = setTimeout(checkGlMap, 100);
+				}
+			};
+			checkGlMap();
+		} else {
+			// Fallback: if not using MapLibre GL layer, mark tiles as loaded immediately
+			mapTilesLoaded = true;
+			tilesLoading = false;
+		}
+	};
+
+	const setupTileLoadingIndicators = () => {
+		// Show tile loading indicator on pan/zoom (debounced to prevent flickering)
+		map.on('movestart', () => {
+			if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
+			if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
+
+			// Only show indicator if loading takes > 150ms
+			tilesLoadingTimer = setTimeout(() => {
+				tilesLoading = true;
+			}, 150);
+
+			// Fallback: hide indicator after 5s if idle never fires
+			tilesLoadingFallback = setTimeout(() => {
+				tilesLoading = false;
+			}, 5000);
+		});
+	};
+
+	const setupMapClickHandlers = () => {
+		// Close drawer when clicking on map (not on markers)
+		map.on('click', () => {
+			if ($merchantDrawer.isOpen) {
+				if (selectedMarkerId) {
+					clearMarkerSelection(loadedMarkers, selectedMarkerId);
+					selectedMarkerId = null;
+				}
+				merchantDrawer.close();
+			}
+		});
+	};
+
+	const setupMapControls = (
+		LocateControl: typeof import('leaflet.locatecontrol').LocateControl,
+		baseMaps: Record<string, Layer>
+	) => {
+		// change broken marker image path in prod
+		leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
+
+		// add support attribution
+		support();
+
+		// add OSM attribution
+		attribution(leaflet, map);
+
+		// add scale
+		scaleBars(leaflet, map);
+
+		// add locate button to map
+		geolocate(leaflet, map, LocateControl);
+
+		controlLayers = leaflet.control
+			.layers(baseMaps, undefined, { position: 'topright' })
+			.addTo(map);
+
+		// track layer changes (with deduplication to avoid tracking same layer selection)
+		map.on('baselayerchange', (e: { name: string }) => {
+			if (e.name !== currentLayerName) {
+				trackEvent('layer_change', { layer: e.name });
+				currentLayerName = e.name;
+			}
+		});
+	};
+
+	const setupMapFinalization = () => {
+		// change default icons
+		changeDefaultIcons(true, leaflet, mapElement, DomEvent);
+
+		// final map setup
+		map.on('load', () => {
+			mapCenter = map.getCenter();
+			mapLoaded = true;
+		});
+
+		// Watch for hash changes to clear marker selection when drawer closes
+		window.addEventListener('hashchange', handleHashChange);
+
+		// Sync drawer state from URL hash on initial page load
+		merchantDrawer.syncFromHash();
+	};
 
 	onDestroy(async () => {
 		// Cancel pending debounced operations to prevent memory leaks
