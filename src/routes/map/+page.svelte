@@ -45,11 +45,9 @@
 		cleanupOutOfBoundsMarkers,
 		type LoadedMarkers
 	} from '$lib/map/markers';
-	import {
-		attachMarkerLabelIfVisible,
-		updateMarkerLabels,
-		LabelUpdateTracker
-	} from '$lib/map/labels';
+	import { updateMarkerLabels, LabelUpdateTracker } from '$lib/map/labels';
+	import { createMarkerWithLabel } from '$lib/map/marker-creation';
+	import { processBatchOnMainThread } from '$lib/map/batch-processor';
 	import {
 		processPlaces,
 		isSupported as isWorkerSupported,
@@ -61,7 +59,6 @@
 		attribution,
 		changeDefaultIcons,
 		generateIcon,
-		generateMarker,
 		geolocate,
 		layers,
 		scaleBars,
@@ -483,32 +480,14 @@
 		if (placesToLoad.length === 0) return;
 
 		placesToLoad.forEach((place: Place) => {
-			const commentsCount = place.comments || 0;
-			const icon = place.icon;
-			const boosted = place.boosted_until ? Date.parse(place.boosted_until) > Date.now() : false;
-
-			const divIcon = generateIcon(leaflet, icon, boosted, commentsCount);
-
-			const marker = generateMarker({
-				lat: place.lat,
-				long: place.lon,
-				icon: divIcon,
-				placeId: place.id,
+			const { marker, boosted } = createMarkerWithLabel({
+				place,
 				leaflet,
-				verify: true,
-				onMarkerClick: (id) => openMerchantDrawer(Number(id))
-			});
-
-			attachMarkerLabelIfVisible(
-				marker,
-				place.id,
 				currentZoom,
-				$merchantList.placeDetailsCache,
-				$placesById,
-				boosted,
-				leaflet,
-				place
-			);
+				placeDetailsCache: $merchantList.placeDetailsCache,
+				placesById: $placesById,
+				onMarkerClick: openMerchantDrawer
+			});
 
 			if (boosted && !shouldClusterBoostedMarkers()) {
 				boostedLayer.addLayer(marker);
@@ -685,7 +664,20 @@
 					(progress: number, batch?: ProcessedPlace[]) => {
 						// Process batch on main thread (DOM operations)
 						if (batch) {
-							processBatchOnMainThread(batch, upToDateLayer);
+							processBatchOnMainThread({
+								batch,
+								leaflet,
+								currentZoom,
+								placeDetailsCache: $merchantList.placeDetailsCache,
+								placesById: $placesById,
+								loadedMarkers,
+								boostedLayerMarkerIds,
+								shouldClusterBoostedMarkers,
+								markers,
+								boostedLayer,
+								selectedMarkerId,
+								onMarkerClick: openMerchantDrawer
+							});
 						}
 					}
 				);
@@ -717,33 +709,15 @@
 		const placesToLoad = searchFiltered.filter((place) => !loadedMarkers[place.id.toString()]);
 
 		placesToLoad.forEach((place: Place) => {
-			const commentsCount = place.comments || 0;
-			const icon = place.icon;
-			const boosted = place.boosted_until ? Date.parse(place.boosted_until) > Date.now() : false;
-
-			const divIcon = generateIcon(leaflet, icon, boosted, commentsCount);
-
-			const marker = generateMarker({
-				lat: place.lat,
-				long: place.lon,
-				icon: divIcon,
-				placeId: place.id,
-				leaflet,
-				verify: true,
-				onMarkerClick: (id) => openMerchantDrawer(Number(id))
-			});
-
-			attachMarkerLabelIfVisible(
-				marker,
-				place.id,
-				currentZoom,
-				$merchantList.placeDetailsCache,
-				$placesById,
-				boosted,
-				leaflet,
+			const { marker, boosted } = createMarkerWithLabel({
 				place,
-				() => labelTracker.incrementVersion()
-			);
+				leaflet,
+				currentZoom,
+				placeDetailsCache: $merchantList.placeDetailsCache,
+				placesById: $placesById,
+				onMarkerClick: openMerchantDrawer,
+				onLabelUpdate: () => labelTracker.incrementVersion()
+			});
 
 			// Route to appropriate layer based on boost status and zoom level
 			if (boosted && !shouldClusterBoostedMarkers()) {
@@ -1010,71 +984,6 @@
 	};
 
 	// Process a batch of places on the main thread (DOM operations only)
-	const processBatchOnMainThread = (batch: ProcessedPlace[], _layer: FeatureGroup.SubGroup) => {
-		const regularMarkersToAdd: Marker[] = [];
-		const boostedMarkersToAdd: Marker[] = [];
-
-		batch.forEach((element: ProcessedPlace) => {
-			const { iconData } = element;
-			const placeId = element.id.toString();
-
-			// Skip if marker already loaded (double-check)
-			if (loadedMarkers[placeId]) return;
-
-			// Generate icon using pre-calculated data from worker
-			const divIcon = generateIcon(
-				leaflet,
-				iconData.iconTmp,
-				iconData.boosted,
-				iconData.commentsCount
-			);
-
-			const marker = generateMarker({
-				lat: element.lat,
-				long: element.lon,
-				icon: divIcon,
-				placeId: element.id,
-				leaflet,
-				verify: true,
-				onMarkerClick: (id) => openMerchantDrawer(Number(id))
-			});
-
-			attachMarkerLabelIfVisible(
-				marker,
-				element.id,
-				currentZoom,
-				$merchantList.placeDetailsCache,
-				$placesById,
-				Boolean(iconData.boosted),
-				leaflet,
-				$placesById.get(element.id)
-			);
-
-			// Route to appropriate layer based on boost status and zoom level
-			if (iconData.boosted && !shouldClusterBoostedMarkers()) {
-				boostedMarkersToAdd.push(marker);
-				boostedLayerMarkerIds.add(placeId);
-			} else {
-				regularMarkersToAdd.push(marker);
-			}
-			loadedMarkers[placeId] = marker;
-		});
-
-		// Batch add regular markers to cluster group
-		if (regularMarkersToAdd.length > 0 && markers) {
-			markers.addLayers(regularMarkersToAdd);
-		}
-
-		// Add boosted markers to non-clustered layer (only at zoom > 5)
-		if (boostedMarkersToAdd.length > 0 && boostedLayer) {
-			boostedMarkersToAdd.forEach((m) => boostedLayer.addLayer(m));
-		}
-
-		// Highlight the selected marker if it was just loaded (may be pending from search result click)
-		if ((regularMarkersToAdd.length > 0 || boostedMarkersToAdd.length > 0) && selectedMarkerId) {
-			highlightMarker(loadedMarkers, selectedMarkerId);
-		}
-	};
 
 	// Label update tracker - manages state changes and triggers updates
 	let labelTracker = new LabelUpdateTracker(
