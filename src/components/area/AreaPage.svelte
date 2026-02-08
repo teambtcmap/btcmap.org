@@ -11,6 +11,7 @@
 	import AreaMerchantHighlights from '$components/area/AreaMerchantHighlights.svelte';
 	import AreaStats from '$components/area/AreaStats.svelte';
 	import AreaTickets from '$components/area/AreaTickets.svelte';
+	import VerifyCommunityForm from '$components/area/VerifyCommunityForm.svelte';
 	import Boost from '$components/Boost.svelte';
 	import Icon from '$components/Icon.svelte';
 	import IssuesTable from '$components/IssuesTable.svelte';
@@ -475,9 +476,28 @@
 							class="flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-red-700 dark:bg-red-900/30 dark:text-red-300"
 						>
 							<Icon type="fa" icon="circle-xmark" w="14" h="14" />
-							<span>Not Verified</span>
+							<span>Not recently verified</span>
 						</div>
 					</div>
+				{/if}
+				{#if type === 'community'}
+					<!-- eslint-disable svelte/no-navigation-without-resolve -->
+					<!-- eslint-disable svelte/no-reactive-reassign -->
+					<a
+						href={`/community/${alias}/maintain#verify-form`}
+						class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
+						on:click|preventDefault={() => {
+							activeSection = Sections.maintain;
+							setTimeout(() => {
+								const form = document.getElementById('verify-form');
+								if (form) {
+									form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+								}
+							}, 100);
+						}}>Verify community</a
+					>
+					<!-- eslint-enable svelte/no-reactive-reassign -->
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
 				{/if}
 			{/if}
 		</div>
@@ -583,5 +603,13 @@
 			loading={!(dataInitialized && !elementsLoading)}
 		/>
 		<AreaTickets tickets={data.tickets} title="{name || 'BTC Map Area'} Open Tickets" />
+		{#if type === 'community'}
+			<div
+				id="verify-form"
+				class="mx-auto w-full max-w-[1000px] rounded-3xl border border-link/25 p-8 xl:w-[1000px]"
+			>
+				<VerifyCommunityForm communityName={name} communityAlias={alias} />
+			</div>
+		{/if}
 	{/if}
 </main>
