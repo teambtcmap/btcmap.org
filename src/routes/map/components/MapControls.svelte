@@ -27,20 +27,24 @@
 
 				const boostLayerButton = leaflet.DomUtil.create('a');
 				boostLayerButton.classList.add('leaflet-control-boost-layer');
+				boostLayerButton.href = '#';
+				boostLayerButton.tabIndex = 0;
 				boostLayerButton.title = 'Boosted locations';
 				boostLayerButton.role = 'button';
 				boostLayerButton.ariaLabel = 'Boosted locations';
 				boostLayerButton.ariaDisabled = 'false';
 				boostLayerButton.innerHTML = `<img src='${$page.url.searchParams.has('boosts') ? '/icons/boost-solid.svg' : '/icons/boost.svg'}' alt='boost' id='boost-layer' style='width: 16px; height: 16px;'/>`;
-				boostLayerButton.onclick = () => {
+				boostLayerButton.onclick = (e) => {
+					e.preventDefault();
 					trackEvent('boost_layer_toggle');
-					const boosts = $page.url.searchParams.has('boosts');
+					const currentUrl = new URL($page.url);
+					const boosts = currentUrl.searchParams.has('boosts');
 					if (boosts) {
-						$page.url.searchParams.delete('boosts');
+						currentUrl.searchParams.delete('boosts');
 					} else {
-						$page.url.searchParams.append('boosts', 'true');
+						currentUrl.searchParams.set('boosts', 'true');
 					}
-					location.search = $page.url.search;
+					location.search = currentUrl.search;
 				};
 				addControlDiv.append(boostLayerButton);
 
