@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import MapLoadingMain from '$components/MapLoadingMain.svelte';
 	import TileLoadingIndicator from './components/TileLoadingIndicator.svelte';
+	import MapControls from './components/MapControls.svelte';
 	import MerchantDrawerHash from './components/MerchantDrawerHash.svelte';
 	import MerchantListPanel from './components/MerchantListPanel.svelte';
 	import MapSearchBar from './components/MapSearchBar.svelte';
@@ -44,11 +45,9 @@
 		cleanupOutOfBoundsMarkers,
 		type LoadedMarkers
 	} from '$lib/map/markers';
-	import {
-		attachMarkerLabelIfVisible,
-		updateMarkerLabels,
-		LabelUpdateTracker
-	} from '$lib/map/labels';
+	import { updateMarkerLabels, LabelUpdateTracker } from '$lib/map/labels';
+	import { createMarkerWithLabel } from '$lib/map/marker-creation';
+	import { processBatchOnMainThread } from '$lib/map/batch-processor';
 	import {
 		processPlaces,
 		isSupported as isWorkerSupported,
@@ -59,11 +58,8 @@
 	import {
 		attribution,
 		changeDefaultIcons,
-		dataRefresh,
 		generateIcon,
-		generateMarker,
 		geolocate,
-		homeMarkerButtons,
 		layers,
 		scaleBars,
 		support,
@@ -82,7 +78,15 @@
 	} from '$lib/store';
 	import type { Leaflet, Place } from '$lib/types';
 	import { debounce, errToast, isBoosted } from '$lib/utils';
-	import type { Control, LatLng, LatLngBounds, Map, Marker, MarkerClusterGroup } from 'leaflet';
+	import type {
+		Control,
+		LatLng,
+		LatLngBounds,
+		Layer,
+		Map,
+		Marker,
+		MarkerClusterGroup
+	} from 'leaflet';
 	import localforage from 'localforage';
 	import { onDestroy, onMount } from 'svelte';
 	import type { FeatureGroup } from 'leaflet';
@@ -306,7 +310,6 @@
 	const urlLong = $page.url.searchParams.getAll('long');
 
 	// allow to view map with only boosted locations
-	const boosts = $page.url.searchParams.has('boosts');
 
 	// displays a button in controls if there is new data available
 	const showDataRefresh = () => {
@@ -477,32 +480,14 @@
 		if (placesToLoad.length === 0) return;
 
 		placesToLoad.forEach((place: Place) => {
-			const commentsCount = place.comments || 0;
-			const icon = place.icon;
-			const boosted = place.boosted_until ? Date.parse(place.boosted_until) > Date.now() : false;
-
-			const divIcon = generateIcon(leaflet, icon, boosted, commentsCount);
-
-			const marker = generateMarker({
-				lat: place.lat,
-				long: place.lon,
-				icon: divIcon,
-				placeId: place.id,
+			const { marker, boosted } = createMarkerWithLabel({
+				place,
 				leaflet,
-				verify: true,
-				onMarkerClick: (id) => openMerchantDrawer(Number(id))
-			});
-
-			attachMarkerLabelIfVisible(
-				marker,
-				place.id,
 				currentZoom,
-				$merchantList.placeDetailsCache,
-				$placesById,
-				boosted,
-				leaflet,
-				place
-			);
+				placeDetailsCache: $merchantList.placeDetailsCache,
+				placesById: $placesById,
+				onMarkerClick: openMerchantDrawer
+			});
 
 			if (boosted && !shouldClusterBoostedMarkers()) {
 				boostedLayer.addLayer(marker);
@@ -679,7 +664,20 @@
 					(progress: number, batch?: ProcessedPlace[]) => {
 						// Process batch on main thread (DOM operations)
 						if (batch) {
-							processBatchOnMainThread(batch, upToDateLayer);
+							processBatchOnMainThread({
+								batch,
+								leaflet,
+								currentZoom,
+								placeDetailsCache: $merchantList.placeDetailsCache,
+								placesById: $placesById,
+								loadedMarkers,
+								boostedLayerMarkerIds,
+								shouldClusterBoostedMarkers,
+								markers,
+								boostedLayer,
+								selectedMarkerId,
+								onMarkerClick: openMerchantDrawer
+							});
 						}
 					}
 				);
@@ -711,33 +709,15 @@
 		const placesToLoad = searchFiltered.filter((place) => !loadedMarkers[place.id.toString()]);
 
 		placesToLoad.forEach((place: Place) => {
-			const commentsCount = place.comments || 0;
-			const icon = place.icon;
-			const boosted = place.boosted_until ? Date.parse(place.boosted_until) > Date.now() : false;
-
-			const divIcon = generateIcon(leaflet, icon, boosted, commentsCount);
-
-			const marker = generateMarker({
-				lat: place.lat,
-				long: place.lon,
-				icon: divIcon,
-				placeId: place.id,
-				leaflet,
-				verify: true,
-				onMarkerClick: (id) => openMerchantDrawer(Number(id))
-			});
-
-			attachMarkerLabelIfVisible(
-				marker,
-				place.id,
-				currentZoom,
-				$merchantList.placeDetailsCache,
-				$placesById,
-				boosted,
-				leaflet,
+			const { marker, boosted } = createMarkerWithLabel({
 				place,
-				() => labelTracker.incrementVersion()
-			);
+				leaflet,
+				currentZoom,
+				placeDetailsCache: $merchantList.placeDetailsCache,
+				placesById: $placesById,
+				onMarkerClick: openMerchantDrawer,
+				onLabelUpdate: () => labelTracker.incrementVersion()
+			});
 
 			// Route to appropriate layer based on boost status and zoom level
 			if (boosted && !shouldClusterBoostedMarkers()) {
@@ -1004,71 +984,6 @@
 	};
 
 	// Process a batch of places on the main thread (DOM operations only)
-	const processBatchOnMainThread = (batch: ProcessedPlace[], _layer: FeatureGroup.SubGroup) => {
-		const regularMarkersToAdd: Marker[] = [];
-		const boostedMarkersToAdd: Marker[] = [];
-
-		batch.forEach((element: ProcessedPlace) => {
-			const { iconData } = element;
-			const placeId = element.id.toString();
-
-			// Skip if marker already loaded (double-check)
-			if (loadedMarkers[placeId]) return;
-
-			// Generate icon using pre-calculated data from worker
-			const divIcon = generateIcon(
-				leaflet,
-				iconData.iconTmp,
-				iconData.boosted,
-				iconData.commentsCount
-			);
-
-			const marker = generateMarker({
-				lat: element.lat,
-				long: element.lon,
-				icon: divIcon,
-				placeId: element.id,
-				leaflet,
-				verify: true,
-				onMarkerClick: (id) => openMerchantDrawer(Number(id))
-			});
-
-			attachMarkerLabelIfVisible(
-				marker,
-				element.id,
-				currentZoom,
-				$merchantList.placeDetailsCache,
-				$placesById,
-				Boolean(iconData.boosted),
-				leaflet,
-				$placesById.get(element.id)
-			);
-
-			// Route to appropriate layer based on boost status and zoom level
-			if (iconData.boosted && !shouldClusterBoostedMarkers()) {
-				boostedMarkersToAdd.push(marker);
-				boostedLayerMarkerIds.add(placeId);
-			} else {
-				regularMarkersToAdd.push(marker);
-			}
-			loadedMarkers[placeId] = marker;
-		});
-
-		// Batch add regular markers to cluster group
-		if (regularMarkersToAdd.length > 0 && markers) {
-			markers.addLayers(regularMarkersToAdd);
-		}
-
-		// Add boosted markers to non-clustered layer (only at zoom > 5)
-		if (boostedMarkersToAdd.length > 0 && boostedLayer) {
-			boostedMarkersToAdd.forEach((m) => boostedLayer.addLayer(m));
-		}
-
-		// Highlight the selected marker if it was just loaded (may be pending from search result click)
-		if ((regularMarkersToAdd.length > 0 || boostedMarkersToAdd.length > 0) && selectedMarkerId) {
-			highlightMarker(loadedMarkers, selectedMarkerId);
-		}
-	};
 
 	// Label update tracker - manages state changes and triggers updates
 	let labelTracker = new LabelUpdateTracker(
@@ -1114,243 +1029,226 @@
 			map = leaflet.map(mapElement, { maxZoom: 19, zoomControl: false });
 			leaflet.control.zoom({ position: 'topright' }).addTo(map);
 
-			// Helper function to set mapLoaded after view is set
-			const setMapViewAndMarkLoaded = () => {
-				mapCenter = map.getCenter();
-				mapLoaded = true;
-			};
-
-			// use url hash if present
-			if (location.hash) {
-				try {
-					// Extract only the map coordinates part (before any & parameters)
-					const hashPart = location.hash.split('&')[0];
-					const coords = hashPart.split('/');
-					map.setView([Number(coords[1]), Number(coords[2])], Number(coords[0].slice(1)));
-					setMapViewAndMarkLoaded();
-				} catch (error) {
-					map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
-					setMapViewAndMarkLoaded();
-					errToast(
-						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
-					);
-					console.error(error);
-				}
-			}
-
-			// set URL lat/long query view if it exists and is valid
-			else if (urlLat.length && urlLong.length) {
-				try {
-					if (urlLat.length > 1 && urlLong.length > 1) {
-						map.fitBounds([
-							[Number(urlLat[0]), Number(urlLong[0])],
-							[Number(urlLat[1]), Number(urlLong[1])]
-						]);
-						setMapViewAndMarkLoaded();
-					} else {
-						map.fitBounds([[Number(urlLat[0]), Number(urlLong[0])]]);
-						setMapViewAndMarkLoaded();
-					}
-				} catch (error) {
-					map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
-					setMapViewAndMarkLoaded();
-					errToast(
-						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
-					);
-					console.error(error);
-				}
-			}
-
-			// set view to last location if it is present in the cache
-			else {
-				localforage
-					.getItem<LatLngBounds>('coords')
-					.then(function (value) {
-						if (value) {
-							map.fitBounds([
-								// @ts-expect-error - LatLngBounds internal structure access
-								[value._northEast.lat, value._northEast.lng],
-								// @ts-expect-error - LatLngBounds internal structure access
-								[value._southWest.lat, value._southWest.lng]
-							]);
-						} else if (data.geo?.lat != null && data.geo?.lng != null) {
-							// Use IP-based geolocation for first-time visitors
-							map.setView([data.geo.lat, data.geo.lng], DEFAULT_MAP_ZOOM);
-						} else {
-							map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
-						}
-						setMapViewAndMarkLoaded();
-					})
-					.catch(function (err) {
-						if (data.geo?.lat != null && data.geo?.lng != null) {
-							map.setView([data.geo.lat, data.geo.lng], DEFAULT_MAP_ZOOM);
-						} else {
-							map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
-						}
-						setMapViewAndMarkLoaded();
-						errToast(
-							'Could not set map view to cached coords, please try again or contact BTC Map.'
-						);
-						console.error(err);
-					});
-			}
-
-			// add tiles and basemaps
-			const { baseMaps, activeLayer } = layers(leaflet, map);
-
-			// Initialize current layer name for deduplication tracking
-			currentLayerName = detectTheme() === 'dark' ? 'Carto Dark Matter' : 'OpenFreeMap Liberty';
-
-			// Hook into MapLibre GL tile loading events
-			if (activeLayer && activeLayer.getMaplibreMap) {
-				// MapLibre GL map might not be ready immediately, poll for it
-				const checkGlMap = () => {
-					const glMap = activeLayer.getMaplibreMap();
-					if (glMap) {
-						// Clear polling timer now that GL map is ready
-						if (glMapPollingTimer) {
-							clearTimeout(glMapPollingTimer);
-							glMapPollingTimer = null;
-						}
-						glMap.on('idle', () => {
-							if (tilesLoadingTimer) {
-								clearTimeout(tilesLoadingTimer);
-								tilesLoadingTimer = null;
-							}
-							if (tilesLoadingFallback) {
-								clearTimeout(tilesLoadingFallback);
-								tilesLoadingFallback = null;
-							}
-							mapTilesLoaded = true;
-							tilesLoading = false;
-						});
-					} else {
-						// GL map not ready yet, check again after a short delay
-						glMapPollingTimer = setTimeout(checkGlMap, 100);
-					}
-				};
-				checkGlMap();
-			} else {
-				// Fallback: if not using MapLibre GL layer, mark tiles as loaded immediately
-				mapTilesLoaded = true;
-				tilesLoading = false;
-			}
-
-			// Show tile loading indicator on pan/zoom (debounced to prevent flickering)
-			map.on('movestart', () => {
-				if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
-				if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
-
-				// Only show indicator if loading takes > 150ms
-				tilesLoadingTimer = setTimeout(() => {
-					tilesLoading = true;
-				}, 150);
-
-				// Fallback: hide indicator after 5s if idle never fires
-				tilesLoadingFallback = setTimeout(() => {
-					tilesLoading = false;
-				}, 5000);
-			});
-
-			// Close drawer when clicking on map (not on markers)
-			map.on('click', () => {
-				if ($merchantDrawer.isOpen) {
-					if (selectedMarkerId) {
-						clearMarkerSelection(loadedMarkers, selectedMarkerId);
-						selectedMarkerId = null;
-					}
-					merchantDrawer.close();
-				}
-			});
-
-			// change broken marker image path in prod
-			leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
-
-			// add support attribution
-			support();
-
-			// add OSM attribution
-			attribution(leaflet, map);
-
-			// add scale
-			scaleBars(leaflet, map);
-
-			// add locate button to map
-			geolocate(leaflet, map, LocateControl);
-
-			// add boost button control
-			const customControls = leaflet.Control.extend({
-				options: {
-					position: 'topright'
-				},
-				onAdd: () => {
-					const addControlDiv = leaflet.DomUtil.create('div');
-					addControlDiv.classList.add('leaflet-control-boost', 'leaflet-bar', 'leaflet-control');
-
-					// Boost layer button
-					const boostLayerButton = leaflet.DomUtil.create('a');
-					boostLayerButton.classList.add('leaflet-control-boost-layer');
-					boostLayerButton.title = 'Boosted locations';
-					boostLayerButton.role = 'button';
-					boostLayerButton.ariaLabel = 'Boosted locations';
-					boostLayerButton.ariaDisabled = 'false';
-					boostLayerButton.innerHTML = `<img src='${boosts ? '/icons/boost-solid.svg' : '/icons/boost.svg'}' alt='boost' id='boost-layer' style='width: 16px; height: 16px;'/>`;
-					boostLayerButton.onclick = function toggleLayer() {
-						trackEvent('boost_layer_toggle');
-						if (boosts) {
-							$page.url.searchParams.delete('boosts');
-							location.search = $page.url.search;
-						} else {
-							$page.url.searchParams.append('boosts', 'true');
-							location.search = $page.url.search;
-						}
-					};
-					addControlDiv.append(boostLayerButton);
-
-					return addControlDiv;
-				}
-			});
-
-			map.addControl(new customControls());
-			const boostLayer = document.querySelector('.leaflet-control-boost-layer');
-			if (boostLayer) {
-				DomEvent.disableClickPropagation(boostLayer as HTMLElement);
-			}
-
-			// add home and marker buttons to map
-			homeMarkerButtons(leaflet, map, DomEvent, true);
-
-			// add data refresh button to map
-			dataRefresh(leaflet, map, DomEvent);
-
-			controlLayers = leaflet.control
-				.layers(baseMaps, undefined, { position: 'topright' })
-				.addTo(map);
-
-			// track layer changes (with deduplication to avoid tracking same layer selection)
-			map.on('baselayerchange', (e: { name: string }) => {
-				if (e.name !== currentLayerName) {
-					trackEvent('layer_change', { layer: e.name });
-					currentLayerName = e.name;
-				}
-			});
-
-			// change default icons
-			changeDefaultIcons(true, leaflet, mapElement, DomEvent);
-
-			// final map setup
-			map.on('load', () => {
-				mapCenter = map.getCenter();
-				mapLoaded = true;
-			});
-
-			// Watch for hash changes to clear marker selection when drawer closes
-			window.addEventListener('hashchange', handleHashChange);
-
-			// Sync drawer state from URL hash on initial page load
-			merchantDrawer.syncFromHash();
+			// Setup map in logical steps
+			const { baseMaps, activeLayer } = await setupMapInitialView();
+			setupTileLayers(activeLayer);
+			setupTileLoadingIndicators();
+			setupMapClickHandlers();
+			setupMapControls(LocateControl, baseMaps);
+			setupMapFinalization();
 		}
 	});
+
+	// Setup helper functions (defined after onMount for proximity to usage)
+
+	const setupMapInitialView = async (): Promise<{
+		baseMaps: Record<string, Layer>;
+		activeLayer: unknown;
+	}> => {
+		// Helper function to set mapLoaded after view is set
+		const setMapViewAndMarkLoaded = () => {
+			mapCenter = map.getCenter();
+			mapLoaded = true;
+		};
+
+		// use url hash if present
+		if (location.hash) {
+			try {
+				// Extract only the map coordinates part (before any & parameters)
+				const hashPart = location.hash.split('&')[0];
+				const coords = hashPart.split('/');
+				map.setView([Number(coords[1]), Number(coords[2])], Number(coords[0].slice(1)));
+				setMapViewAndMarkLoaded();
+			} catch (error) {
+				map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
+				setMapViewAndMarkLoaded();
+				errToast(
+					'Could not set map view to provided coordinates, please try again or contact BTC Map.'
+				);
+				console.error(error);
+			}
+		}
+
+		// set URL lat/long query view if it exists and is valid
+		else if (urlLat.length && urlLong.length) {
+			try {
+				if (urlLat.length > 1 && urlLong.length > 1) {
+					map.fitBounds([
+						[Number(urlLat[0]), Number(urlLong[0])],
+						[Number(urlLat[1]), Number(urlLong[1])]
+					]);
+					setMapViewAndMarkLoaded();
+				} else {
+					map.fitBounds([[Number(urlLat[0]), Number(urlLong[0])]]);
+					setMapViewAndMarkLoaded();
+				}
+			} catch (error) {
+				map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
+				setMapViewAndMarkLoaded();
+				errToast(
+					'Could not set map view to provided coordinates, please try again or contact BTC Map.'
+				);
+				console.error(error);
+			}
+		}
+
+		// set view to last location if it is present in the cache
+		else {
+			localforage
+				.getItem<LatLngBounds>('coords')
+				.then(function (value) {
+					if (value) {
+						map.fitBounds([
+							// @ts-expect-error - LatLngBounds internal structure access
+							[value._northEast.lat, value._northEast.lng],
+							// @ts-expect-error - LatLngBounds internal structure access
+							[value._southWest.lat, value._southWest.lng]
+						]);
+					} else if (data.geo?.lat != null && data.geo?.lng != null) {
+						// Use IP-based geolocation for first-time visitors
+						map.setView([data.geo.lat, data.geo.lng], DEFAULT_MAP_ZOOM);
+					} else {
+						map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
+					}
+					setMapViewAndMarkLoaded();
+				})
+				.catch(function (err) {
+					if (data.geo?.lat != null && data.geo?.lng != null) {
+						map.setView([data.geo.lat, data.geo.lng], DEFAULT_MAP_ZOOM);
+					} else {
+						map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
+					}
+					setMapViewAndMarkLoaded();
+					errToast('Could not set map view to cached coords, please try again or contact BTC Map.');
+					console.error(err);
+				});
+		}
+
+		// add tiles and basemaps
+		const { baseMaps, activeLayer } = layers(leaflet, map);
+
+		// Initialize current layer name for deduplication tracking
+		currentLayerName = detectTheme() === 'dark' ? 'Carto Dark Matter' : 'OpenFreeMap Liberty';
+
+		return { baseMaps, activeLayer };
+	};
+
+	const setupTileLayers = (activeLayer: unknown) => {
+		// Hook into MapLibre GL tile loading events
+		if (activeLayer && typeof activeLayer === 'object' && 'getMaplibreMap' in activeLayer) {
+			// MapLibre GL map might not be ready immediately, poll for it
+			const checkGlMap = () => {
+				const glMap = (activeLayer as { getMaplibreMap: () => unknown }).getMaplibreMap();
+				if (glMap && typeof glMap === 'object' && 'on' in glMap) {
+					// Clear polling timer now that GL map is ready
+					if (glMapPollingTimer) {
+						clearTimeout(glMapPollingTimer);
+						glMapPollingTimer = null;
+					}
+					(glMap as { on: (event: string, callback: () => void) => void }).on('idle', () => {
+						if (tilesLoadingTimer) {
+							clearTimeout(tilesLoadingTimer);
+							tilesLoadingTimer = null;
+						}
+						if (tilesLoadingFallback) {
+							clearTimeout(tilesLoadingFallback);
+							tilesLoadingFallback = null;
+						}
+						mapTilesLoaded = true;
+						tilesLoading = false;
+					});
+				} else {
+					// GL map not ready yet, check again after a short delay
+					glMapPollingTimer = setTimeout(checkGlMap, 100);
+				}
+			};
+			checkGlMap();
+		} else {
+			// Fallback: if not using MapLibre GL layer, mark tiles as loaded immediately
+			mapTilesLoaded = true;
+			tilesLoading = false;
+		}
+	};
+
+	const setupTileLoadingIndicators = () => {
+		// Show tile loading indicator on pan/zoom (debounced to prevent flickering)
+		map.on('movestart', () => {
+			if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
+			if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
+
+			// Only show indicator if loading takes > 150ms
+			tilesLoadingTimer = setTimeout(() => {
+				tilesLoading = true;
+			}, 150);
+
+			// Fallback: hide indicator after 5s if idle never fires
+			tilesLoadingFallback = setTimeout(() => {
+				tilesLoading = false;
+			}, 5000);
+		});
+	};
+
+	const setupMapClickHandlers = () => {
+		// Close drawer when clicking on map (not on markers)
+		map.on('click', () => {
+			if ($merchantDrawer.isOpen) {
+				if (selectedMarkerId) {
+					clearMarkerSelection(loadedMarkers, selectedMarkerId);
+					selectedMarkerId = null;
+				}
+				merchantDrawer.close();
+			}
+		});
+	};
+
+	const setupMapControls = (
+		LocateControl: typeof import('leaflet.locatecontrol').LocateControl,
+		baseMaps: Record<string, Layer>
+	) => {
+		// change broken marker image path in prod
+		leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
+
+		// add support attribution
+		support();
+
+		// add OSM attribution
+		attribution(leaflet, map);
+
+		// add scale
+		scaleBars(leaflet, map);
+
+		// add locate button to map
+		geolocate(leaflet, map, LocateControl);
+
+		controlLayers = leaflet.control
+			.layers(baseMaps, undefined, { position: 'topright' })
+			.addTo(map);
+
+		// track layer changes (with deduplication to avoid tracking same layer selection)
+		map.on('baselayerchange', (e: { name: string }) => {
+			if (e.name !== currentLayerName) {
+				trackEvent('layer_change', { layer: e.name });
+				currentLayerName = e.name;
+			}
+		});
+	};
+
+	const setupMapFinalization = () => {
+		// change default icons
+		changeDefaultIcons(true, leaflet, mapElement, DomEvent);
+
+		// final map setup
+		map.on('load', () => {
+			mapCenter = map.getCenter();
+			mapLoaded = true;
+		});
+
+		// Watch for hash changes to clear marker selection when drawer closes
+		window.addEventListener('hashchange', handleHashChange);
+
+		// Sync drawer state from URL hash on initial page load
+		merchantDrawer.syncFromHash();
+	};
 
 	onDestroy(async () => {
 		// Cancel pending debounced operations to prevent memory leaks
@@ -1440,6 +1338,10 @@
 	/>
 
 	<MerchantDrawerHash />
+
+	{#if map && leaflet && DomEvent}
+		<MapControls {map} {leaflet} {DomEvent} />
+	{/if}
 
 	<TileLoadingIndicator visible={tilesLoading} />
 </main>
