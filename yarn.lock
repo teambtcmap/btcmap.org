@@ -807,14 +807,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@iconify/svelte@npm:^4.2.0":
-  version: 4.2.0
-  resolution: "@iconify/svelte@npm:4.2.0"
+"@iconify/svelte@npm:^5.2.1":
+  version: 5.2.1
+  resolution: "@iconify/svelte@npm:5.2.1"
   dependencies:
     "@iconify/types": "npm:^2.0.0"
   peerDependencies:
-    svelte: ">4.0.0"
-  checksum: 10c0/bd2e84061c4304dac2990d9e09fba232b7d2239d8c3c2fd73b1356ead101a9afdebd58d7118f0b41cf435bb0fdefc4915d92bcff69bbd44e762d657eb2cf199f
+    svelte: ">5.0.0"
+  checksum: 10c0/0fb200a183dab46372faedb6972bfac1652540ca088883214fb5ea8247f8caf2faba7dd9d6021aa95b15b82f5c9074d4a1662039fb2a424ae05111a29c922760
   languageName: node
   linkType: hard
 
@@ -2242,7 +2242,7 @@ __metadata:
   resolution: "btcmap@workspace:."
   dependencies:
     "@eslint/js": "npm:^10.0.1"
-    "@iconify/svelte": "npm:^4.2.0"
+    "@iconify/svelte": "npm:^5.2.1"
     "@mapbox/geojson-rewind": "npm:^0.5.2"
     "@maplibre/maplibre-gl-leaflet": "npm:^0.1.3"
     "@playwright/test": "npm:^1.58.2"
