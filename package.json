@@ -62,7 +62,7 @@
 		"@playwright/test": "^1.58.2",
 		"@sveltejs/adapter-netlify": "^5.2.4",
 		"@sveltejs/kit": "^2.50.2",
-		"@sveltejs/vite-plugin-svelte": "^3.1.2",
+		"@sveltejs/vite-plugin-svelte": "^6.2.4",
 		"@tailwindcss/postcss": "^4.1.18",
 		"@tailwindcss/vite": "^4.1.18",
 		"@types/d3-geo": "^3.1.0",
