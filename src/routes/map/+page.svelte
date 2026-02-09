@@ -139,7 +139,6 @@
 		// Throttle rapid clicks
 		const now = Date.now();
 		if (now - lastMarkerClickTime < MARKER_CLICK_THROTTLE) return;
-		lastMarkerClickTime = now;
 
 		// Batch DOM operations with requestAnimationFrame
 		requestAnimationFrame(() => {
@@ -150,6 +149,7 @@
 			highlightMarker(loadedMarkers, id);
 		});
 
+		lastMarkerClickTime = now;
 		merchantDrawer.open(id, 'details');
 	}
 
@@ -163,7 +163,7 @@
 	let map: Map;
 	let mapLoaded = false;
 	let elementsLoaded = false;
-	let mapTilesLoaded = false;
+	let mapTilesLoaded: boolean;
 	let tilesLoading = true;
 	let tilesLoadingTimer: ReturnType<typeof setTimeout> | null = null;
 	let tilesLoadingFallback: ReturnType<typeof setTimeout> | null = null;
@@ -328,8 +328,10 @@
 
 	// Filter map markers when category filter changes
 	$: if (elementsLoaded && upToDateLayer && selectedCategory !== previousCategory) {
-		previousCategory = selectedCategory;
 		clearNonMatchingMarkers(selectedCategory);
+		// Track previous category to prevent re-filtering
+
+		previousCategory = selectedCategory;
 		debouncedLoadMarkers();
 	}
 
@@ -341,6 +343,8 @@
 		const resultsChanged = searchResultsRevision !== previousSearchResultsRevision;
 
 		if (modeChanged) {
+			// Track previous mode to prevent re-triggering
+
 			previousMode = currentMode;
 			if (currentMode === 'search' && searchResultCount > 0) {
 				// Entering search mode with results
@@ -355,6 +359,8 @@
 			clearNonSearchResultMarkers();
 			loadSearchResultMarkers();
 		}
+
+		// Track previous revision to prevent re-triggering
 
 		previousSearchResultsRevision = searchResultsRevision;
 	}
@@ -459,13 +465,9 @@
 	const clearNonSearchResultMarkers = () => {
 		if (searchResultIds.size === 0) return;
 
-		const removedCount = removeMarkersByPredicate(
-			(placeId) => !placeInSearchResults(Number(placeId))
-		);
+		removeMarkersByPredicate((placeId) => !placeInSearchResults(Number(placeId)));
 
-		console.debug(
-			`[SEARCH] Filtered to ${searchResultIds.size} search results, removed ${removedCount} markers`
-		);
+		console.debug(`[SEARCH] Filtered to ${searchResultIds.size} search results`);
 	};
 
 	// Load markers for search results matching the current category filter
@@ -476,8 +478,6 @@
 		const placesToLoad = $merchantList.searchResults.filter(
 			(place) => searchResultIds.has(place.id) && !loadedMarkers[place.id.toString()]
 		);
-
-		if (placesToLoad.length === 0) return;
 
 		placesToLoad.forEach((place: Place) => {
 			const { marker, boosted } = createMarkerWithLabel({
@@ -933,11 +933,12 @@
 		map.on('moveend', () => {
 			isZooming = false;
 			const coords = map.getBounds();
-			mapCenter = map.getCenter();
 			const newZoom = map.getZoom();
 
 			// Handle boosted marker layer transitions when crossing zoom threshold
 			handleBoostedLayerTransition(previousZoom, newZoom);
+
+			mapCenter = map.getCenter();
 			previousZoom = newZoom;
 			currentZoom = newZoom;
 
@@ -955,9 +956,10 @@
 		mapLoadingStatus = 'Loading places in view...';
 
 		// Initialize mapCenter and zoom for merchant list panel and marker layer decisions
+		const initialZoom = map.getZoom();
 		mapCenter = map.getCenter();
-		currentZoom = map.getZoom();
-		previousZoom = currentZoom;
+		currentZoom = initialZoom;
+		previousZoom = initialZoom;
 
 		// Load initial markers for current viewport
 		// NOTE: Don't set isLoadingMarkers=true here, let loadMarkersInViewport handle it
@@ -1047,8 +1049,8 @@
 	}> => {
 		// Helper function to set mapLoaded after view is set
 		const setMapViewAndMarkLoaded = () => {
-			mapCenter = map.getCenter();
 			mapLoaded = true;
+			mapCenter = map.getCenter();
 		};
 
 		// use url hash if present
@@ -1239,8 +1241,8 @@
 
 		// final map setup
 		map.on('load', () => {
-			mapCenter = map.getCenter();
 			mapLoaded = true;
+			mapCenter = map.getCenter();
 		});
 
 		// Watch for hash changes to clear marker selection when drawer closes

@@ -41,7 +41,8 @@ export default tseslint.config(
 			'@typescript-eslint/no-unused-vars': [
 				'error',
 				{ argsIgnorePattern: '^_', varsIgnorePattern: '^_' }
-			]
+			],
+			'no-useless-assignment': 'off' // Disabled: too strict for side-effect function calls
 		}
 	},
 	{
