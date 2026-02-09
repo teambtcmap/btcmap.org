@@ -44,7 +44,7 @@
 		"js-confetti": "^0.13.1",
 		"leaflet": "^1.9.4",
 		"leaflet.featuregroup.subgroup": "^1.0.2",
-		"leaflet.locatecontrol": "0.86.0",
+		"leaflet.locatecontrol": "0.87.0",
 		"leaflet.markercluster": "^1.5.3",
 		"localforage": "^1.10.0",
 		"maplibre-gl": "^4.7.1",
