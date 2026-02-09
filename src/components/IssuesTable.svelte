@@ -57,7 +57,7 @@
 		const data = issues.map((issue) => {
 			const icon = getIssueIcon(issue.issue_code);
 			const name = issue.element_name;
-			var type: string = 'TODO';
+			let type: string;
 			if (issue.issue_code == 'missing_icon') {
 				type = 'Icon is missing';
 			} else if (issue.issue_code == 'not_verified') {

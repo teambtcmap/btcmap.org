@@ -42,6 +42,8 @@
 	// Track previous state to reset drawer when merchant changes
 	let previousMerchantId: number | null = null;
 	$: if (isOpen && merchantId !== previousMerchantId) {
+		// Track previous merchant to prevent re-triggering
+
 		previousMerchantId = merchantId;
 		drawerGesture.resetToPeek();
 	}
@@ -49,15 +51,23 @@
 	// Focus management: save/restore focus when expanding/collapsing
 	let wasExpanded = false;
 	$: if ($expanded && !wasExpanded) {
+		// Track expanded state to prevent re-triggering
+
+		wasExpanded = true;
+
 		previouslyFocusedElement = document.activeElement as HTMLElement;
 		setTimeout(() => handleElement?.focus(), 0);
-		wasExpanded = true;
 	} else if (!$expanded && wasExpanded) {
+		// Track collapsed state to prevent re-triggering
+
+		wasExpanded = false;
 		if (previouslyFocusedElement && typeof previouslyFocusedElement.focus === 'function') {
 			previouslyFocusedElement.focus();
+
+			previouslyFocusedElement = null;
+		} else {
+			previouslyFocusedElement = null;
 		}
-		previouslyFocusedElement = null;
-		wasExpanded = false;
 	}
 
 	// Focus trap: keep focus inside drawer when expanded

@@ -92,7 +92,9 @@
 		$areas?.length &&
 		!dataInitalized
 	) {
+		// Initialize data and mark as complete
 		initializeData();
+
 		dataInitalized = true;
 	}
 

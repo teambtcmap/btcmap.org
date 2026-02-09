@@ -130,7 +130,7 @@
 
 		// filter communities containing element
 		filteredCommunities = communities.filter((community) => {
-			let rewoundPoly = rewind(community.tags.geo_json, true);
+			const rewoundPoly = rewind(community.tags.geo_json, true);
 
 			if (typeof lat === 'number' && typeof long === 'number') {
 				if (geoContains(rewoundPoly, [long, lat])) {
@@ -140,9 +140,9 @@
 			return false;
 		});
 
-		merchantEvents = $events.filter((event) => event.element_id === data.placeData.osm_id);
-
-		merchantEvents.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
+		const allMerchantEvents = $events.filter((event) => event.element_id === data.placeData.osm_id);
+		allMerchantEvents.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
+		merchantEvents = allMerchantEvents;
 
 		const setupMap = () => {
 			// add map
@@ -210,11 +210,11 @@
 	let hours: string | undefined;
 	let payment: PayMerchant;
 	let boosted: string | undefined;
-	let verified: string[] = [];
+	let verified: string[];
 	const verifiedDate = calcVerifiedDate();
 
 	// Make comments reactive to server data updates (from invalidateAll() after adding comment)
-	let comments = data.comments;
+	let comments: typeof data.comments;
 	$: comments = data.comments;
 
 	// Initialize verified and boosted immediately from server data (don't wait for store sync)

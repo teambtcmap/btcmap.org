@@ -51,26 +51,24 @@
 	let periodLoading = false;
 	let errorMessage: string | null = data?.error ?? null;
 	let leaderboardRows: TaggerRow[] = [];
-	let totalTaggers = 0;
+	let totalTaggers: number;
 
 	const validatePeriodOption = (value: unknown): value is PeriodOption => {
 		return typeof value === 'string' && DEFAULT_PERIOD_OPTIONS.includes(value as PeriodOption);
 	};
 
-	let periodOptions: PeriodOption[] = [...DEFAULT_PERIOD_OPTIONS];
-	let selectedPeriod: PeriodOption = DEFAULT_PERIOD;
+	let periodOptions: PeriodOption[];
+	let selectedPeriod: PeriodOption;
 	let lastResolvedPeriod: PeriodOption = DEFAULT_PERIOD;
 
 	$: {
 		const incoming = Array.isArray(data?.periodOptions)
 			? data?.periodOptions
 			: DEFAULT_PERIOD_OPTIONS;
-		periodOptions = Array.from(
+		const validOptions = Array.from(
 			new Set(incoming.filter((option) => validatePeriodOption(option)))
 		) as PeriodOption[];
-		if (!periodOptions.length) {
-			periodOptions = [...DEFAULT_PERIOD_OPTIONS];
-		}
+		periodOptions = validOptions.length > 0 ? validOptions : [...DEFAULT_PERIOD_OPTIONS];
 	}
 
 	$: {
@@ -79,6 +77,8 @@
 			: DEFAULT_PERIOD;
 		const validPeriod = periodOptions.includes(periodFromData) ? periodFromData : DEFAULT_PERIOD;
 		if (validPeriod !== lastResolvedPeriod) {
+			// Track resolved period to prevent loops
+
 			lastResolvedPeriod = validPeriod;
 			selectedPeriod = validPeriod;
 		}
@@ -127,17 +127,18 @@
 	$: {
 		if (data?.rpcResult?.users?.length) {
 			const excluded = new Set(get(excludeLeader));
-			leaderboardRows = normalizeUsers(data.rpcResult.users, excluded);
-			totalTaggers = leaderboardRows.length;
+			const normalizedUsers = normalizeUsers(data.rpcResult.users, excluded);
+			leaderboardRows = normalizedUsers;
+			totalTaggers = normalizedUsers.length;
 			loading = false;
 			periodLoading = false;
 			errorMessage = null;
 		} else if (data?.error) {
-			leaderboardRows = [];
-			totalTaggers = 0;
 			loading = false;
 			periodLoading = false;
 			errorMessage = data.error;
+			leaderboardRows = [];
+			totalTaggers = 0;
 		} else {
 			leaderboardRows = [];
 			totalTaggers = 0;
@@ -271,8 +272,8 @@
 		}
 		const nextSearch = search.toString();
 		const nextUrl = nextSearch ? `/leaderboard?${nextSearch}` : '/leaderboard';
-		selectedPeriod = nextValue;
 		periodLoading = true;
+		selectedPeriod = nextValue;
 
 		// eslint-disable-next-line svelte/no-navigation-without-resolve
 		await goto(nextUrl, {
