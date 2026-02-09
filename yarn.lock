@@ -2294,7 +2294,7 @@ __metadata:
     svelte: "npm:^4.2.20"
     svelte-check: "npm:^4.3.6"
     svelte-eslint-parser: "npm:^1.4.1"
-    svelte-outclick: "npm:^3.7.1"
+    svelte-outclick: "npm:^4.2.0"
     svelte-preprocess: "npm:^6.0.3"
     svelte-time: "npm:^1.1.0"
     svg-captcha: "npm:^1.4.0"
@@ -5393,12 +5393,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"svelte-outclick@npm:^3.7.1":
-  version: 3.7.1
-  resolution: "svelte-outclick@npm:3.7.1"
+"svelte-outclick@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "svelte-outclick@npm:4.2.0"
   peerDependencies:
-    svelte: ">= 4.2.12"
-  checksum: 10c0/62e8b9a980745838469f59e816a106468631e08abba03170707a8a7774af820d80fce5f08ac91fe31be2b8500166d84ee632761abb0b7ce50e6e694cdff484e9
+    svelte: ">= 5"
+  checksum: 10c0/6b244eab2deebae687e144a53720dc0b01478fc793f9eba37de4a4f53b4cb9feb379581ab97162ea3b6d61d9ec218cb5f031ce5ae30214f15a697af581452932
   languageName: node
   linkType: hard
 
