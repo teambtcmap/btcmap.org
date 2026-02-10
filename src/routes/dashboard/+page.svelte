@@ -26,12 +26,39 @@
 	let upToDateChartCanvas: HTMLCanvasElement;
 	let upToDateChart: Chart<'line', number[], string>;
 
+	let chartsInitialized = false;
+
 	const populateCharts = () => {
+		// Guard: ensure canvas elements are available (SSR or before mount)
+		if (!upToDateChartCanvas || !totalChartCanvas) {
+			return;
+		}
+
+		// Prevent multiple initializations
+		if (chartsInitialized) {
+			return;
+		}
+		chartsInitialized = true;
+
 		const currentTheme = theme.current;
 		const cutoffDate = getChartHistoryDate();
 
 		const filterData = (data: ChartDataItem[] = []) =>
 			data.filter((item) => new Date(item.date) >= cutoffDate);
+
+		// Destroy existing charts before recreating (prevents "canvas already in use" error)
+		if (upToDateChart) {
+			upToDateChart.destroy();
+		}
+		if (totalChart) {
+			totalChart.destroy();
+		}
+
+		// Clear canvas content completely (double protection)
+		const upToDateContext = upToDateChartCanvas.getContext('2d');
+		const totalContext = totalChartCanvas.getContext('2d');
+		upToDateContext?.clearRect(0, 0, upToDateChartCanvas.width, upToDateChartCanvas.height);
+		totalContext?.clearRect(0, 0, totalChartCanvas.width, totalChartCanvas.height);
 
 		upToDateChart = new Chart(upToDateChartCanvas, {
 			type: 'line',
