@@ -9,7 +9,7 @@
 	import { usersSync } from '$lib/sync/users';
 	import { batchSync } from '$lib/sync/batchSync';
 	import type { ActivityEvent, Event, User } from '$lib/types';
-	import { detectTheme, errToast, formatElementID } from '$lib/utils';
+	import { errToast, formatElementID } from '$lib/utils';
 	import { onMount } from 'svelte';
 
 	onMount(() => {
@@ -100,7 +100,7 @@
 <main class="mt-10 mb-20 space-y-10">
 	{#if typeof window !== 'undefined'}
 		<h1
-			class="{detectTheme() === 'dark' || $theme === 'dark'
+			class="{$theme === 'dark'
 				? 'text-white'
 				: 'gradient'} text-center text-4xl !leading-tight font-semibold text-primary md:text-5xl lg:text-left dark:text-white"
 		>

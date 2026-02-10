@@ -28,7 +28,7 @@
 	import { excludeLeader } from '$lib/store';
 	import { theme } from '$lib/theme';
 	import type { RpcGetMostActiveUsersItem, TaggerLeaderboard } from '$lib/types';
-	import { debounce, detectTheme } from '$lib/utils';
+	import { debounce } from '$lib/utils';
 
 	type TaggerRow = TaggerLeaderboard & {
 		position: number;
@@ -300,7 +300,7 @@
 
 	<div class="mx-auto w-12/12 space-y-10 xl:w-[1200px]">
 		<h1
-			class="{detectTheme() === 'dark' || $theme === 'dark'
+			class="{$theme === 'dark'
 				? 'text-white'
 				: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl"
 		>

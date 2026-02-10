@@ -10,7 +10,7 @@
 	import { loadMapDependencies } from '$lib/map/imports';
 	import { attribution, changeDefaultIcons, generateLocationIcon, geolocate } from '$lib/map/setup';
 	import { theme } from '$lib/theme';
-	import { detectTheme, errToast } from '$lib/utils';
+	import { errToast } from '$lib/utils';
 
 	import axios from 'axios';
 
@@ -100,7 +100,7 @@
 		});
 
 		// Apply appropriate theme
-		const currentTheme = $theme || detectTheme();
+		const currentTheme = theme.current;
 
 		if (currentTheme === 'dark') {
 			openFreeMapDark.addTo(map);
@@ -279,7 +279,7 @@
 {#if !submitted}
 	{#if typeof window !== 'undefined'}
 		<h1
-			class="{detectTheme() === 'dark' || $theme === 'dark'
+			class="{$theme === 'dark'
 				? 'text-white'
 				: 'gradient'} mt-10 text-center text-4xl font-semibold md:text-5xl"
 		>
@@ -421,7 +421,7 @@
 								<label for="onchain" class="ml-1 cursor-pointer">
 									{#if typeof window !== 'undefined'}
 										<img
-											src={detectTheme() === 'dark' || $theme === 'dark'
+											src={$theme === 'dark'
 												? '/icons/btc-highlight-dark.svg'
 												: '/icons/btc-primary.svg'}
 											alt="onchain"
@@ -444,7 +444,7 @@
 								<label for="lightning" class="ml-1 cursor-pointer">
 									{#if typeof window !== 'undefined'}
 										<img
-											src={detectTheme() === 'dark' || $theme === 'dark'
+											src={$theme === 'dark'
 												? '/icons/ln-highlight-dark.svg'
 												: '/icons/ln-primary.svg'}
 											alt="lightning"
@@ -467,7 +467,7 @@
 								<label for="nfc" class="ml-1 cursor-pointer">
 									{#if typeof window !== 'undefined'}
 										<img
-											src={detectTheme() === 'dark' || $theme === 'dark'
+											src={$theme === 'dark'
 												? '/icons/nfc-highlight-dark.svg'
 												: '/icons/nfc-primary.svg'}
 											alt="nfc"

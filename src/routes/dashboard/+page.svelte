@@ -4,7 +4,7 @@
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import { theme } from '$lib/theme';
 	import type { ChartHistory } from '$lib/types';
-	import { detectTheme, updateChartThemes } from '$lib/utils';
+	import { updateChartThemes } from '$lib/utils';
 	import Chart from 'chart.js/auto';
 	import { format } from 'date-fns/format';
 	import { startOfYear } from 'date-fns/startOfYear';
@@ -27,7 +27,7 @@
 	let upToDateChart: Chart<'line', number[], string>;
 
 	const populateCharts = () => {
-		const theme = detectTheme();
+		const currentTheme = theme.current;
 		const cutoffDate = getChartHistoryDate();
 
 		const filterData = (data: ChartDataItem[] = []) =>
@@ -76,7 +76,7 @@
 							}
 						},
 						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+							color: currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					},
 					y: {
@@ -86,7 +86,7 @@
 							}
 						},
 						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+							color: currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					}
 				},
@@ -137,7 +137,7 @@
 							}
 						},
 						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+							color: currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					},
 					y: {
@@ -147,7 +147,68 @@
 							}
 						},
 						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+							color: currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+						}
+					}
+				},
+				interaction: {
+					intersect: false
+				}
+			}
+		});
+
+		totalChart = new Chart(totalChartCanvas, {
+			type: 'line',
+			data: {
+				labels: filterData(areaDashboard?.total_merchants_chart || []).map((item) =>
+					format(new Date(item.date), 'yyyy-MM-dd')
+				),
+				datasets: [
+					{
+						label: 'Total Merchants',
+						data: filterData(areaDashboard?.total_merchants_chart || []).map((item) => item.value),
+						fill: {
+							target: 'origin',
+							above: 'rgba(0, 153, 175, 0.2)'
+						},
+						borderColor: 'rgb(0, 153, 175)',
+						tension: 0.1,
+						pointStyle: false
+					}
+				]
+			},
+			options: {
+				animation: false,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						labels: {
+							font: {
+								weight: 600
+							}
+						}
+					}
+				},
+				scales: {
+					x: {
+						ticks: {
+							maxTicksLimit: 5,
+							font: {
+								weight: 600
+							}
+						},
+						grid: {
+							color: currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+						}
+					},
+					y: {
+						ticks: {
+							font: {
+								weight: 600
+							}
+						},
+						grid: {
+							color: currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					}
 				},
@@ -227,7 +288,7 @@
 <main class="mt-10 mb-20 space-y-10">
 	{#if typeof window !== 'undefined'}
 		<h1
-			class="{detectTheme() === 'dark' || $theme === 'dark'
+			class="{$theme === 'dark'
 				? 'text-white'
 				: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-left md:text-5xl"
 		>

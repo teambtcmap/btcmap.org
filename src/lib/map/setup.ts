@@ -8,8 +8,9 @@ import Icon from '$components/Icon.svelte';
 import { trackEvent } from '$lib/analytics';
 import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
 import { selectedMerchant } from '$lib/store';
+import { theme } from '$lib/theme';
 import type { DomEventType, Leaflet, Place } from '$lib/types';
-import { detectTheme, errToast, humanizeIconName } from '$lib/utils';
+import { errToast, humanizeIconName } from '$lib/utils';
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
@@ -27,7 +28,7 @@ export const updateMapHash = (zoom: number, center: LatLng): void => {
 };
 
 export const layers = (leaflet: Leaflet, map: Map) => {
-	const theme = detectTheme();
+	const currentTheme = theme.current;
 
 	const osm = leaflet.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		noWrap: true,
@@ -51,7 +52,7 @@ export const layers = (leaflet: Leaflet, map: Map) => {
 	});
 
 	let activeLayer;
-	if (theme === 'dark') {
+	if (currentTheme === 'dark') {
 		cartoDarkMatter.addTo(map);
 		activeLayer = cartoDarkMatter;
 	} else {

@@ -17,7 +17,7 @@
 	import { areaError, areas, reportError, reports, syncStatus } from '$lib/store';
 	import { theme } from '$lib/theme';
 	import type { AreaType, LeaderboardArea, Report } from '$lib/types';
-	import { errToast, getGrade, validateContinents, detectTheme, debounce } from '$lib/utils';
+	import { errToast, getGrade, validateContinents, debounce } from '$lib/utils';
 
 	import AreaLeaderboardMobileCard from '$components/leaderboard/AreaLeaderboardMobileCard.svelte';
 	import AreaLeaderboardDesktopTable from '$components/leaderboard/AreaLeaderboardDesktopTable.svelte';
@@ -413,7 +413,7 @@
 </section>
 
 {#if typeof window !== 'undefined'}
-	{#if detectTheme() === 'dark' || $theme === 'dark'}
+	{#if $theme === 'dark'}
 		<style>
 			select option {
 				--tw-bg-opacity: 1;

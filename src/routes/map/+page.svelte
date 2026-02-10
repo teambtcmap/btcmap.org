@@ -65,7 +65,7 @@
 		support,
 		updateMapHash
 	} from '$lib/map/setup';
-	import { detectTheme } from '$lib/utils';
+	import { theme } from '$lib/theme';
 	import {
 		placesError,
 		places,
@@ -1130,7 +1130,7 @@
 		const { baseMaps, activeLayer } = layers(leaflet, map);
 
 		// Initialize current layer name for deduplication tracking
-		currentLayerName = detectTheme() === 'dark' ? 'Carto Dark Matter' : 'OpenFreeMap Liberty';
+		currentLayerName = theme.current === 'dark' ? 'Carto Dark Matter' : 'OpenFreeMap Liberty';
 
 		return { baseMaps, activeLayer };
 	};

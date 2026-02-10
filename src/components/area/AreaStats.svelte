@@ -5,7 +5,7 @@
 	import { calcVerifiedDate, verifiedArr } from '$lib/map/setup';
 	import { theme } from '$lib/theme';
 	import type { Place, Report, AreaTags } from '$lib/types.js';
-	import { detectTheme, updateChartThemes } from '$lib/utils';
+	import { updateChartThemes } from '$lib/utils';
 	import Chart from 'chart.js/auto';
 	import { onMount } from 'svelte';
 
@@ -104,7 +104,7 @@
 				});
 			}
 
-			const theme = detectTheme();
+			const chartTheme = theme.current;
 
 			updatedChart = new Chart(updatedChartCanvas, {
 				type: 'pie',
@@ -173,7 +173,7 @@
 								}
 							},
 							grid: {
-								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+								color: chartTheme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 							}
 						},
 						y: {
@@ -186,7 +186,7 @@
 								}
 							},
 							grid: {
-								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+								color: chartTheme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 							}
 						}
 					},
@@ -234,7 +234,7 @@
 								}
 							},
 							grid: {
-								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+								color: chartTheme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 							}
 						},
 						y: {
@@ -247,7 +247,7 @@
 								}
 							},
 							grid: {
-								color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+								color: chartTheme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 							}
 						}
 					},

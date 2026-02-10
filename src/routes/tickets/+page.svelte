@@ -5,7 +5,6 @@
 	import TopButton from '$components/TopButton.svelte';
 	import { GITEA_LABELS } from '$lib/constants';
 	import { theme } from '$lib/theme';
-	import { detectTheme } from '$lib/utils';
 	// Temporarily disabled during maintenance
 	// import { errToast } from '$lib/utils';
 
@@ -53,7 +52,7 @@
 <main class="mt-10 mb-20 space-y-10">
 	{#if typeof window !== 'undefined'}
 		<h1
-			class="{detectTheme() === 'dark' || $theme === 'dark'
+			class="{$theme === 'dark'
 				? 'text-white'
 				: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl lg:text-left"
 		>

@@ -6,7 +6,7 @@
 	import { BREAKPOINTS, QR_CODE_SIZE } from '$lib/constants';
 	import { theme } from '$lib/theme';
 	import type { DonationType } from '$lib/types';
-	import { detectTheme, warningToast } from '$lib/utils';
+	import { warningToast } from '$lib/utils';
 	import type { Action } from 'svelte/action';
 
 	const onchain = 'bc1qt4g28vq480ec4ncl4h67qu4q4k2zel7xu0c2wg';
@@ -61,7 +61,7 @@
 <main class="my-10 space-y-10 text-center md:my-20">
 	{#if typeof window !== 'undefined'}
 		<h1
-			class="{detectTheme() === 'dark' || $theme === 'dark'
+			class="{$theme === 'dark'
 				? 'text-white'
 				: 'gradient'} text-4xl !leading-tight font-semibold md:text-5xl"
 		>

@@ -4,7 +4,6 @@
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import { apps } from '$lib/store';
 	import { theme } from '$lib/theme';
-	import { detectTheme } from '$lib/utils';
 
 	const communityApps: { link: string; type: string; icon: AppIconName; desc: string }[] = [
 		{
@@ -26,7 +25,7 @@
 <main class="my-10 space-y-10 text-center md:my-20">
 	{#if typeof window !== 'undefined'}
 		<h1
-			class="{detectTheme() === 'dark' || $theme === 'dark'
+			class="{$theme === 'dark'
 				? 'text-white'
 				: 'gradient'} text-4xl !leading-tight font-semibold text-primary md:text-5xl dark:text-white"
 		>

@@ -3,7 +3,7 @@
 	import IssueCell from '$components/IssueCell.svelte';
 	import { theme } from '$lib/theme';
 	import type { RpcIssue } from '$lib/types';
-	import { debounce, detectTheme, getIssueHelpLink, getIssueIcon, isEven } from '$lib/utils';
+	import { debounce, getIssueHelpLink, getIssueIcon, isEven } from '$lib/utils';
 	import { rankItem } from '@tanstack/match-sorter-utils';
 	import type {
 		ColumnDef,
@@ -377,7 +377,7 @@
 </section>
 
 {#if typeof window !== 'undefined'}
-	{#if detectTheme() === 'dark' || $theme === 'dark'}
+	{#if $theme === 'dark'}
 		<style>
 			select option {
 				--tw-bg-opacity: 1;

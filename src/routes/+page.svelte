@@ -5,7 +5,6 @@
 	import IconApps from '$lib/icons/IconApps.svelte';
 	import { apps } from '$lib/store';
 	import { theme } from '$lib/theme';
-	import { detectTheme } from '$lib/utils';
 	import { resolve } from '$app/paths';
 </script>
 
@@ -28,7 +27,7 @@
 			<div class="mx-auto w-full xl:mx-0 xl:w-[500px]">
 				{#if typeof window !== 'undefined'}
 					<h1
-						class="{detectTheme() === 'dark' || $theme === 'dark'
+						class="{$theme === 'dark'
 							? 'text-white'
 							: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl xl:text-left"
 					>
@@ -94,7 +93,7 @@
 			{#if typeof window !== 'undefined'}
 				<a href={resolve('/map')}>
 					<img
-						src={detectTheme() === 'dark' || $theme === 'dark'
+						src={$theme === 'dark'
 							? '/images/hero-mobile-example-dark.webp'
 							: '/images/hero-mobile-example.webp'}
 						alt="mobile example"
@@ -109,7 +108,7 @@
 </div>
 
 {#if typeof window !== 'undefined'}
-	{#if detectTheme() === 'dark' || $theme === 'dark'}
+	{#if $theme === 'dark'}
 		<style>
 			@media (min-width: 1280px) {
 				.street-map {

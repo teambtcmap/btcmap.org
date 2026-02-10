@@ -87,16 +87,6 @@ function createThemeStore() {
 export const theme = createThemeStore();
 
 /**
- * Helper to detect theme on initial load (for charts/map initialization).
- * This is the non-reactive version - use $theme for reactive updates in components.
- * @deprecated Use theme.current instead for new code. Kept for backward compatibility.
- */
-export const detectTheme = (): Theme => {
-	if (typeof window === 'undefined') return 'light';
-	return theme.current;
-};
-
-/**
  * Utility to check if current theme is dark.
  * Reactive: Use $isDark in components.
  */

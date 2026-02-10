@@ -1,5 +1,5 @@
 import { areas } from '$lib/store';
-import { theme, detectTheme as detectThemeFromService } from '$lib/theme';
+import { theme } from '$lib/theme';
 import { areasSync } from '$lib/sync/areas';
 import { PLACE_FIELD_SETS } from '$lib/api-fields';
 import { MERCHANT_LIST_MAX_ITEMS } from '$lib/constants';
@@ -109,12 +109,6 @@ export function getRandomColor() {
 	}
 	return color;
 }
-
-/**
- * @deprecated Use theme.current or import detectTheme from '$lib/theme' instead.
- * Kept for backward compatibility with existing code.
- */
-export const detectTheme = detectThemeFromService;
 
 export const updateChartThemes = (
 	charts: Chart<'line' | 'bar', number[] | undefined, string>[]

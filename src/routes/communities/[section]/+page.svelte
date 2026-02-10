@@ -9,7 +9,7 @@
 	import { areaError, areas, reportError, syncStatus } from '$lib/store';
 	import { theme } from '$lib/theme';
 	import { areasSync } from '$lib/sync/areas';
-	import { detectTheme, errToast } from '$lib/utils';
+	import { errToast } from '$lib/utils';
 	import { getOrganizationDisplayName } from '$lib/organizationDisplayNames';
 	import type { Community } from '$lib/types';
 	import Chart from 'chart.js/auto';
@@ -273,7 +273,7 @@
 <main class="my-10 space-y-10 text-center md:my-20">
 	{#if typeof window !== 'undefined'}
 		<h1
-			class="{detectTheme() === 'dark' || $theme === 'dark'
+			class="{$theme === 'dark'
 				? 'text-white'
 				: 'gradient'} text-4xl !leading-tight font-semibold md:text-5xl"
 		>

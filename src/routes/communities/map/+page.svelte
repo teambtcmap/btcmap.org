@@ -18,8 +18,9 @@
 	import { areasSync } from '$lib/sync/areas';
 	import { reportsSync } from '$lib/sync/reports';
 	import { batchSync } from '$lib/sync/batchSync';
+	import { theme } from '$lib/theme';
 	import type { Leaflet, Theme } from '$lib/types';
-	import { detectTheme, errToast } from '$lib/utils';
+	import { errToast } from '$lib/utils';
 	import rewind from '@mapbox/geojson-rewind';
 	import { geoArea } from 'd3-geo';
 	import type { Map } from 'leaflet';
@@ -30,7 +31,7 @@
 
 	let leaflet: Leaflet;
 	let DomEvent: typeof import('leaflet/src/dom/DomEvent');
-	let theme: Theme;
+	let currentMapTheme: Theme;
 
 	let mapElement: HTMLDivElement;
 	let map: Map;
@@ -114,23 +115,23 @@
 					<a href="${resolve(`/community/${community.id}`)}" class='block bg-link hover:bg-hover !text-white text-center font-semibold py-3 rounded-xl transition-colors' title='Community page'>View Community</a>
 				</div>
 
-				${
-					theme === 'dark'
-						? `
-							<style>
-								.leaflet-popup-content-wrapper, .leaflet-popup-tip {
-									background-color: #06171C;
-									border: 1px solid #e5e7eb
-							}
+					${
+						currentMapTheme === 'dark'
+							? `
+								<style>
+									.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+										background-color: #06171C;
+										border: 1px solid #e5e7eb
+								}
 
-								.leaflet-popup-close-button {
-									font-size: 24px !important;
-									top: 4px !important;
-									right: 4px !important;
-							}
-							</style>`
-						: ''
-				}`;
+									.leaflet-popup-close-button {
+										font-size: 24px !important;
+										top: 4px !important;
+										right: 4px !important;
+								}
+								</style>`
+							: ''
+					}`;
 
 			const socials = popupContainer.querySelector('#socials');
 			if (socials) {
@@ -204,7 +205,7 @@
 		batchSync([areasSync, reportsSync]);
 
 		if (browser) {
-			theme = detectTheme();
+			currentMapTheme = theme.current;
 
 			const deps = await loadMapDependencies();
 			leaflet = deps.leaflet;

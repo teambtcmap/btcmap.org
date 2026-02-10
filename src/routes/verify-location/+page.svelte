@@ -8,7 +8,7 @@
 	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import { placesError } from '$lib/store';
 	import { theme } from '$lib/theme';
-	import { detectTheme, errToast } from '$lib/utils';
+	import { errToast } from '$lib/utils';
 	import axios from 'axios';
 	import { onMount } from 'svelte';
 	import DOMPurify from 'dompurify';
@@ -122,7 +122,7 @@
 {#if !submitted}
 	{#if typeof window !== 'undefined'}
 		<h1
-			class="{detectTheme() === 'dark' || $theme === 'dark'
+			class="{$theme === 'dark'
 				? 'text-white'
 				: 'gradient'} mt-10 text-center text-4xl font-semibold md:text-5xl"
 		>

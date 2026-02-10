@@ -3,7 +3,6 @@
 	export let placeholders: number;
 
 	import { theme } from '$lib/theme';
-	import { detectTheme } from '$lib/utils';
 </script>
 
 <div class="mt-4">
@@ -22,7 +21,7 @@
 				{#if typeof window !== 'undefined'}
 					<img
 						src="/images/supporters/{supporter.logoDark
-							? detectTheme() === 'dark' || $theme === 'dark'
+							? $theme === 'dark'
 								? supporter.logoDark
 								: supporter.logo
 							: supporter.logo}"
