@@ -2,7 +2,7 @@
 	export let supporters: { url: string; logoDark?: string; logo: string; title: string }[];
 	export let placeholders: number;
 
-	import { theme } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import { detectTheme } from '$lib/utils';
 </script>
 

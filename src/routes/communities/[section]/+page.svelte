@@ -6,7 +6,8 @@
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import FormSelect from '$components/form/FormSelect.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
-	import { areaError, areas, reportError, syncStatus, theme } from '$lib/store';
+	import { areaError, areas, reportError, syncStatus } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import { areasSync } from '$lib/sync/areas';
 	import { detectTheme, errToast } from '$lib/utils';
 	import { getOrganizationDisplayName } from '$lib/organizationDisplayNames';

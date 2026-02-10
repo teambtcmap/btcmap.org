@@ -3,7 +3,7 @@
 	import Icon from '$components/Icon.svelte';
 	import ProfileStat from '$components/ProfileStat.svelte';
 	import { calcVerifiedDate, verifiedArr } from '$lib/map/setup';
-	import { theme } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import type { Place, Report, AreaTags } from '$lib/types.js';
 	import { detectTheme, updateChartThemes } from '$lib/utils';
 	import Chart from 'chart.js/auto';

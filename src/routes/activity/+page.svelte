@@ -3,7 +3,8 @@
 	import LatestTagger from '$components/LatestTagger.svelte';
 	import TaggerSkeleton from '$components/TaggerSkeleton.svelte';
 	import TopButton from '$components/TopButton.svelte';
-	import { placesError, eventError, events, syncStatus, theme, userError, users } from '$lib/store';
+	import { placesError, eventError, events, syncStatus, userError, users } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import { eventsSync } from '$lib/sync/events';
 	import { usersSync } from '$lib/sync/users';
 	import { batchSync } from '$lib/sync/batchSync';

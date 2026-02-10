@@ -9,7 +9,7 @@
 	import PrimaryButton from '$components/PrimaryButton.svelte';
 	import { loadMapDependencies } from '$lib/map/imports';
 	import { attribution, changeDefaultIcons, generateLocationIcon, geolocate } from '$lib/map/setup';
-	import { theme } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import { detectTheme, errToast } from '$lib/utils';
 
 	import axios from 'axios';

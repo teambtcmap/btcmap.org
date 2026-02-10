@@ -14,7 +14,8 @@
 	} from '@tanstack/svelte-table';
 	import { writable, derived } from 'svelte/store';
 	import { onMount } from 'svelte';
-	import { areaError, areas, reportError, reports, syncStatus, theme } from '$lib/store';
+	import { areaError, areas, reportError, reports, syncStatus } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import type { AreaType, LeaderboardArea, Report } from '$lib/types';
 	import { errToast, getGrade, validateContinents, detectTheme, debounce } from '$lib/utils';
 

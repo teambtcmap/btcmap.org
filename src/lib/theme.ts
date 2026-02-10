@@ -1,0 +1,117 @@
+import type { Theme } from './types';
+import { writable } from 'svelte/store';
+
+/**
+ * Creates a unified theme store that syncs across:
+ * - localStorage (persistence)
+ * - document.documentElement.classList (Tailwind dark mode)
+ * - Custom events (for non-Svelte code like charts)
+ * - SSR compatibility (reads from window.__INITIAL_THEME__)
+ */
+function createThemeStore() {
+	const { subscribe, set } = writable<Theme>('light');
+
+	return {
+		subscribe,
+		set: (theme: Theme) => {
+			localStorage.theme = theme;
+			if (theme === 'dark') {
+				document.documentElement.classList.add('dark');
+			} else {
+				document.documentElement.classList.remove('dark');
+			}
+			set(theme);
+			// Dispatch for non-Svelte code (charts, maps, etc.)
+			window.dispatchEvent(new CustomEvent('themechange', { detail: theme }));
+		},
+		toggle: () => {
+			const current = localStorage.theme === 'dark' ? 'dark' : 'light';
+			const newTheme = current === 'dark' ? 'light' : 'dark';
+			localStorage.theme = newTheme;
+			if (newTheme === 'dark') {
+				document.documentElement.classList.add('dark');
+			} else {
+				document.documentElement.classList.remove('dark');
+			}
+			set(newTheme);
+			window.dispatchEvent(new CustomEvent('themechange', { detail: newTheme }));
+		},
+		/**
+		 * Initialize theme on app mount. Must be called in +layout.svelte onMount.
+		 * Reads from SSR inline script (window.__INITIAL_THEME__) or falls back to localStorage/system preference.
+		 */
+		init: () => {
+			// During SSR, window won't exist - return early
+			if (typeof window === 'undefined') return;
+
+			// Use value set by inline script in app.html (SSR-safe)
+			const serverTheme = (window as { __INITIAL_THEME__?: Theme }).__INITIAL_THEME__;
+
+			let theme: Theme;
+			if (serverTheme) {
+				theme = serverTheme;
+			} else if ('theme' in localStorage) {
+				theme = localStorage.theme === 'dark' ? 'dark' : 'light';
+			} else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+				theme = 'dark';
+			} else {
+				theme = 'light';
+			}
+
+			// Sync DOM and store without triggering side effects
+			localStorage.theme = theme;
+			if (theme === 'dark') {
+				document.documentElement.classList.add('dark');
+			} else {
+				document.documentElement.classList.remove('dark');
+			}
+			set(theme);
+		},
+		/**
+		 * Get current theme value (for use outside of Svelte components)
+		 */
+		get current() {
+			if (typeof window === 'undefined') return 'light';
+			return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+		}
+	};
+}
+
+/**
+ * Main theme store - single source of truth for theme state.
+ * Use $theme in Svelte components for reactive updates.
+ * Use theme.init() in +layout.svelte onMount.
+ * Use theme.toggle() for theme toggle button.
+ * Use theme.current for non-reactive reads (e.g., chart initialization).
+ */
+export const theme = createThemeStore();
+
+/**
+ * Helper to detect theme on initial load (for charts/map initialization).
+ * This is the non-reactive version - use $theme for reactive updates in components.
+ * @deprecated Use theme.current instead for new code. Kept for backward compatibility.
+ */
+export const detectTheme = (): Theme => {
+	if (typeof window === 'undefined') return 'light';
+	return theme.current;
+};
+
+/**
+ * Utility to check if current theme is dark.
+ * Reactive: Use $isDark in components.
+ */
+export const isDark = {
+	subscribe: (fn: (value: boolean) => void) => {
+		return theme.subscribe((t) => fn(t === 'dark'));
+	}
+};
+
+/**
+ * Utility to check if current theme is light.
+ * Reactive: Use $isLight in components.
+ */
+export const isLight = {
+	subscribe: (fn: (value: boolean) => void) => {
+		return theme.subscribe((t) => fn(t === 'light'));
+	}
+};

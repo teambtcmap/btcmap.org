@@ -25,7 +25,8 @@
 	import { rankItem } from '@tanstack/match-sorter-utils';
 	import { page } from '$app/stores';
 	import { writable, get } from 'svelte/store';
-	import { excludeLeader, theme } from '$lib/store';
+	import { excludeLeader } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import type { RpcGetMostActiveUsersItem, TaggerLeaderboard } from '$lib/types';
 	import { debounce, detectTheme } from '$lib/utils';
 

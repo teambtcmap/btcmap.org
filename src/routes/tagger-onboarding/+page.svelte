@@ -4,7 +4,7 @@
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import Icon from '$components/Icon.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
-	import { theme } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import { detectTheme, errToast } from '$lib/utils';
 	import axios from 'axios';
 	import { onMount } from 'svelte';

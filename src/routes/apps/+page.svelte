@@ -2,7 +2,8 @@
 	import type { AppIconName } from '$lib/icons/types';
 	import AppCard from './components/AppCard.svelte';
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-	import { apps, theme } from '$lib/store';
+	import { apps } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import { detectTheme } from '$lib/utils';
 
 	const communityApps: { link: string; type: string; icon: AppIconName; desc: string }[] = [

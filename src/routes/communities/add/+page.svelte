@@ -6,7 +6,7 @@
 	import Icon from '$components/Icon.svelte';
 	import InfoTooltip from '$components/InfoTooltip.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
-	import { theme } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import type { NominatimResponse } from '$lib/types';
 	import { detectTheme, errToast, successToast, warningToast } from '$lib/utils';
 	import axios from 'axios';

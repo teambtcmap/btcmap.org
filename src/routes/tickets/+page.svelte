@@ -4,7 +4,7 @@
 	import OpenTicketSkeleton from './components/OpenTicketSkeleton.svelte';
 	import TopButton from '$components/TopButton.svelte';
 	import { GITEA_LABELS } from '$lib/constants';
-	import { theme } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import { detectTheme } from '$lib/utils';
 	// Temporarily disabled during maintenance
 	// import { errToast } from '$lib/utils';

@@ -4,7 +4,7 @@
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import SupportSection from './components/SupportSection.svelte';
 	import { BREAKPOINTS, QR_CODE_SIZE } from '$lib/constants';
-	import { theme } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import type { DonationType } from '$lib/types';
 	import { detectTheme, warningToast } from '$lib/utils';
 	import type { Action } from 'svelte/action';

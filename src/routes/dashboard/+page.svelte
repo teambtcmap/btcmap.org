@@ -2,7 +2,7 @@
 	import { browser } from '$app/environment';
 	import DashboardStat from './components/DashboardStat.svelte';
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-	import { theme } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import type { ChartHistory } from '$lib/types';
 	import { detectTheme, updateChartThemes } from '$lib/utils';
 	import Chart from 'chart.js/auto';

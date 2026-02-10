@@ -7,7 +7,7 @@
 	import { areasSync } from '$lib/sync/areas';
 	import { reportsSync } from '$lib/sync/reports';
 	import { batchSync } from '$lib/sync/batchSync';
-	import { theme } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import { detectTheme } from '$lib/utils';
 
 	const routes = [

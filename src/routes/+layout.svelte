@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { dev } from '$app/environment';
 	import { syncStatus } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import { elementsSync } from '$lib/sync/places';
 	import Header from '$components/layout/Header.svelte';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
@@ -26,6 +27,9 @@
 	let dataSyncInterval: ReturnType<typeof setInterval>;
 
 	onMount(async () => {
+		// Initialize theme from SSR/data attribute or localStorage
+		theme.init();
+
 		localforage.config({
 			name: 'BTC Map',
 			description: 'The Times 03/Jan/2009 Chancellor on brink of second bailout for banks'

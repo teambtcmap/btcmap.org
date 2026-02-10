@@ -1,7 +1,7 @@
 <script lang="ts">
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import IssuesTable from '$components/IssuesTable.svelte';
-	import { theme } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import { detectTheme } from '$lib/utils';
 	import type { RpcIssue } from '$lib/types';
 

@@ -1,27 +1,20 @@
 <script lang="ts">
-	import { theme } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import type { Theme } from '$lib/types';
-	import { detectTheme } from '$lib/utils';
 	import { onMount } from 'svelte';
 
-	let currentTheme: undefined | Theme;
+	let currentTheme: Theme | undefined;
 
 	onMount(() => {
-		currentTheme = detectTheme();
+		// Subscribe to theme store to get current value
+		const unsubscribe = theme.subscribe((t) => {
+			currentTheme = t;
+		});
+		return unsubscribe;
 	});
 
 	const toggleTheme = () => {
-		if (detectTheme() === 'dark') {
-			localStorage.theme = 'light';
-			document.documentElement.classList.remove('dark');
-			currentTheme = 'light';
-			$theme = 'light';
-		} else {
-			localStorage.theme = 'dark';
-			document.documentElement.classList.add('dark');
-			currentTheme = 'dark';
-			$theme = 'dark';
-		}
+		theme.toggle();
 	};
 </script>
 

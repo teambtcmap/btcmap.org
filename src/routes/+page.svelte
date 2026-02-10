@@ -3,7 +3,8 @@
 	import Header from '$components/layout/Header.svelte';
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import IconApps from '$lib/icons/IconApps.svelte';
-	import { apps, theme } from '$lib/store';
+	import { apps } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import { detectTheme } from '$lib/utils';
 	import { resolve } from '$app/paths';
 </script>

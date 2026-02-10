@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Icon from '$components/Icon.svelte';
 	import IssueCell from '$components/IssueCell.svelte';
-	import { theme } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import type { RpcIssue } from '$lib/types';
 	import { debounce, detectTheme, getIssueHelpLink, getIssueIcon, isEven } from '$lib/utils';
 	import { rankItem } from '@tanstack/match-sorter-utils';

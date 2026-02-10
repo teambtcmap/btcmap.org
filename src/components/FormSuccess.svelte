@@ -8,7 +8,7 @@
 
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
-	import { theme } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import { detectTheme } from '$lib/utils';
 </script>
 
