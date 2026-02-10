@@ -132,6 +132,8 @@
 		"loadingMap": "Carregando mapa...",
 		"loadingPlaces": "Carregando locais...",
 		"initializing": "Inicializando...",
+		"initializingMarkers": "Inicializando marcadores...",
+		"loadingPlacesInView": "Carregando locais na visualização...",
 		"downloading": "Baixando dados de locais...",
 		"processing": "Processando dados de locais...",
 		"complete": "Completo!",
@@ -175,6 +177,7 @@
 		"filterByCategory": "Filtrar por categoria",
 		"switchMode": "Alternar modo de pesquisa",
 		"togglePanel": "Alternar painel de lista de comerciantes",
+		"merchantList": "Lista de comerciantes",
 		"merchantListItem": "Item da lista de comerciantes",
 		"selectCategory": "Selecionar categoria",
 		"searchInput": "Pesquisar comerciantes"

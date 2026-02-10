@@ -132,6 +132,8 @@
 		"loadingMap": "Loading map...",
 		"loadingPlaces": "Loading places...",
 		"initializing": "Initializing...",
+		"initializingMarkers": "Initializing markers...",
+		"loadingPlacesInView": "Loading places in view...",
 		"downloading": "Downloading places data...",
 		"processing": "Processing places data...",
 		"complete": "Complete!",
@@ -175,6 +177,7 @@
 		"filterByCategory": "Filter by category",
 		"switchMode": "Switch search mode",
 		"togglePanel": "Toggle merchant list panel",
+		"merchantList": "Merchant list",
 		"merchantListItem": "Merchant list item",
 		"selectCategory": "Select category",
 		"searchInput": "Search for merchants"
