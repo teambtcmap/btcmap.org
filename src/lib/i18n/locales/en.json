@@ -31,5 +31,8 @@
 		"taggingIssues": "Tagging Issues",
 		"communities": "Communities",
 		"countries": "Countries"
+	},
+	"footer": {
+		"language": "Language"
 	}
 }
