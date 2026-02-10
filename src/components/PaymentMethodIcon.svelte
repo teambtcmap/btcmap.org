@@ -67,4 +67,4 @@
 	$: sizeClass = size === 'md' ? 'h-8 w-8' : 'h-6 w-6';
 </script>
 
-<img bind:this={imgElement} src={iconSrc} alt={method} class={sizeClass} title={titleText} />
+<img bind:this={imgElement} src={iconSrc} alt={label} class={sizeClass} title={titleText} />
