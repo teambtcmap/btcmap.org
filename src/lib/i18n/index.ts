@@ -4,13 +4,30 @@ import { register, init, locale } from 'svelte-i18n';
 register('en', () => import('./locales/en.json'));
 register('pt-BR', () => import('./locales/pt-BR.json'));
 
-// Check localStorage for saved preference
-const savedLocale = typeof window !== 'undefined' ? localStorage.getItem('language') : null;
+// Smart locale detection (mirrors theme detection pattern)
+function getInitialLocale(): string {
+	if (typeof window !== 'undefined') {
+		// 1. Check localStorage for saved preference (highest priority)
+		const saved = localStorage.getItem('language');
+		if (saved === 'en' || saved === 'pt-BR') {
+			return saved;
+		}
 
-// Initialize with saved preference or default to English
+		// 2. Check browser language (like theme checks system preference)
+		const browserLang = navigator.language || navigator.languages?.[0];
+		if (browserLang?.startsWith('pt')) {
+			return 'pt-BR';
+		}
+	}
+
+	// 3. Default fallback
+	return 'en';
+}
+
+// Initialize with smart detection
 init({
 	fallbackLocale: 'en',
-	initialLocale: savedLocale === 'en' || savedLocale === 'pt-BR' ? savedLocale : 'en'
+	initialLocale: getInitialLocale()
 });
 
 // Export locale store for components
