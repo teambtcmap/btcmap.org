@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { theme } from '$lib/theme';
+	import { _ } from '$lib/i18n';
 
 	export let status: 'yes' | 'no' | undefined;
 	export let method: 'btc' | 'ln' | 'nfc';
@@ -37,18 +38,32 @@
 		}
 	};
 
+	// Translation key map for payment methods
+	const tooltipKeys = {
+		btc: {
+			yes: 'payment.onchainAccepted',
+			no: 'payment.onchainNotAccepted',
+			unknown: 'payment.onchainUnknown'
+		},
+		ln: {
+			yes: 'payment.lightningAccepted',
+			no: 'payment.lightningNotAccepted',
+			unknown: 'payment.lightningUnknown'
+		},
+		nfc: {
+			yes: 'payment.contactlessAccepted',
+			no: 'payment.contactlessNotAccepted',
+			unknown: 'payment.contactlessUnknown'
+		}
+	};
+
 	$: statusKey = (status === 'yes' ? 'yes' : status === 'no' ? 'no' : 'unknown') as
 		| 'yes'
 		| 'no'
 		| 'unknown';
 	$: iconSrc =
 		$theme === 'dark' ? iconPaths[method][statusKey].dark : iconPaths[method][statusKey].light;
-	$: titleText =
-		status === 'yes'
-			? `${label} accepted`
-			: status === 'no'
-				? `${label} not accepted`
-				: `${label} unknown`;
+	$: titleText = $_(tooltipKeys[method][statusKey]);
 	$: sizeClass = size === 'md' ? 'h-8 w-8' : 'h-6 w-6';
 </script>
 
