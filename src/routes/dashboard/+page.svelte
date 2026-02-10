@@ -11,7 +11,7 @@
 	import { subDays } from 'date-fns/subDays';
 	import { subMonths } from 'date-fns/subMonths';
 	import { subYears } from 'date-fns/subYears';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 
 	export let data;
 
@@ -46,19 +46,16 @@
 		const filterData = (data: ChartDataItem[] = []) =>
 			data.filter((item) => new Date(item.date) >= cutoffDate);
 
-		// Destroy existing charts before recreating (prevents "canvas already in use" error)
-		if (upToDateChart) {
-			upToDateChart.destroy();
-		}
-		if (totalChart) {
-			totalChart.destroy();
+		// Use Chart.getChart to find and destroy existing chart instances
+		const existingUpToDateChart = Chart.getChart(upToDateChartCanvas);
+		if (existingUpToDateChart) {
+			existingUpToDateChart.destroy();
 		}
 
-		// Clear canvas content completely (double protection)
-		const upToDateContext = upToDateChartCanvas.getContext('2d');
-		const totalContext = totalChartCanvas.getContext('2d');
-		upToDateContext?.clearRect(0, 0, upToDateChartCanvas.width, upToDateChartCanvas.height);
-		totalContext?.clearRect(0, 0, totalChartCanvas.width, totalChartCanvas.height);
+		const existingTotalChart = Chart.getChart(totalChartCanvas);
+		if (existingTotalChart) {
+			existingTotalChart.destroy();
+		}
 
 		upToDateChart = new Chart(upToDateChartCanvas, {
 			type: 'line',
@@ -183,76 +180,22 @@
 				}
 			}
 		});
-
-		totalChart = new Chart(totalChartCanvas, {
-			type: 'line',
-			data: {
-				labels: filterData(areaDashboard?.total_merchants_chart || []).map((item) =>
-					format(new Date(item.date), 'yyyy-MM-dd')
-				),
-				datasets: [
-					{
-						label: 'Total Merchants',
-						data: filterData(areaDashboard?.total_merchants_chart || []).map((item) => item.value),
-						fill: {
-							target: 'origin',
-							above: 'rgba(0, 153, 175, 0.2)'
-						},
-						borderColor: 'rgb(0, 153, 175)',
-						tension: 0.1,
-						pointStyle: false
-					}
-				]
-			},
-			options: {
-				animation: false,
-				maintainAspectRatio: false,
-				plugins: {
-					legend: {
-						labels: {
-							font: {
-								weight: 600
-							}
-						}
-					}
-				},
-				scales: {
-					x: {
-						ticks: {
-							maxTicksLimit: 5,
-							font: {
-								weight: 600
-							}
-						},
-						grid: {
-							color: currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
-						}
-					},
-					y: {
-						ticks: {
-							font: {
-								weight: 600
-							}
-						},
-						grid: {
-							color: currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
-						}
-					}
-				},
-				interaction: {
-					intersect: false
-				}
-			}
-		});
 	};
 
 	$: $theme !== undefined && updateChartThemes([upToDateChart, totalChart]);
 
 	onMount(async () => {
 		if (browser) {
-			upToDateChartCanvas.getContext('2d');
-			totalChartCanvas.getContext('2d');
 			populateCharts();
+		}
+	});
+
+	onDestroy(() => {
+		if (upToDateChart) {
+			upToDateChart.destroy();
+		}
+		if (totalChart) {
+			totalChart.destroy();
 		}
 	});
 

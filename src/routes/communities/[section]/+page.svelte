@@ -13,7 +13,7 @@
 	import { getOrganizationDisplayName } from '$lib/organizationDisplayNames';
 	import type { Community } from '$lib/types';
 	import Chart from 'chart.js/auto';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import type { PageData } from './$types';
 	import { resolve } from '$app/paths';
 
@@ -118,6 +118,12 @@
 			southAmerica &&
 			southAmerica.length
 		) {
+			// Use Chart.getChart to find and destroy existing chart instance
+			const existingChart = Chart.getChart(continentChartCanvas);
+			if (existingChart) {
+				existingChart.destroy();
+			}
+
 			continentChart = new Chart(continentChartCanvas, {
 				type: 'doughnut',
 				data: {
@@ -257,8 +263,13 @@
 		areasSync();
 
 		if (browser) {
-			continentChartCanvas.getContext('2d');
 			initialRenderComplete = true;
+		}
+	});
+
+	onDestroy(() => {
+		if (continentChart) {
+			continentChart.destroy();
 		}
 	});
 </script>
