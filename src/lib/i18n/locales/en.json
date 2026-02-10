@@ -195,5 +195,25 @@
 		"analytics": "Analytics",
 		"whitePaper": "White Paper",
 		"cypherpunks": "Cypherpunks"
+	},
+	"forms": {
+		"optional": "(optional)",
+		"submit": "Submit",
+		"loading": "Loading...",
+		"success": "Success!",
+		"merchantName": "Merchant Name",
+		"category": "Category",
+		"website": "Website",
+		"phone": "Phone",
+		"openingHours": "Opening Hours",
+		"notes": "Notes",
+		"contact": "Public Contact",
+		"captcha": "Bot protection",
+		"captchaCaseSensitive": "(case-sensitive)",
+		"submitLocation": "Submit Location",
+		"submitReport": "Submit Report",
+		"selectLocation": "Select Location",
+		"locationSelected": "Location selected!",
+		"searchButton": "Search 🔍"
 	}
 }

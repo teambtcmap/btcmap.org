@@ -195,5 +195,25 @@
 		"analytics": "Análises",
 		"whitePaper": "White Paper",
 		"cypherpunks": "Cypherpunks"
+	},
+	"forms": {
+		"optional": "(opcional)",
+		"submit": "Enviar",
+		"loading": "Carregando...",
+		"success": "Sucesso!",
+		"merchantName": "Nome do Comerciante",
+		"category": "Categoria",
+		"website": "Site",
+		"phone": "Telefone",
+		"openingHours": "Horário de Funcionamento",
+		"notes": "Notas",
+		"contact": "Contato Público",
+		"captcha": "Proteção contra robôs",
+		"captchaCaseSensitive": "(diferencia maiúsculas/minúsculas)",
+		"submitLocation": "Enviar Local",
+		"submitReport": "Enviar Relatório",
+		"selectLocation": "Selecionar Local",
+		"locationSelected": "Local selecionado!",
+		"searchButton": "Pesquisar 🔍"
 	}
 }
