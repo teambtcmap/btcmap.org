@@ -1,0 +1,35 @@
+{
+	"home": {
+		"hero": "Encontre lugares para gastar sats onde quer que você esteja.",
+		"openMap": "Abrir Mapa",
+		"addLocation": "Adicionar Local",
+		"description": "Usamos o {osmLink} para marcar lugares que aceitam bitcoin e exibimos esses comerciantes em nossos belos aplicativos.",
+		"openSource": "Nossos aplicativos e os dados subjacentes são gratuitos e de código aberto.",
+		"hashtag": "#SPEDN ✊"
+	},
+	"nav": {
+		"maps": "Mapas",
+		"apps": "Aplicativos",
+		"stats": "Estatísticas",
+		"areas": "Áreas",
+		"maintain": "Manter",
+		"wiki": "Wiki",
+		"blog": "Blog",
+		"supportUs": "Apoie-nos",
+		"menu": "Menu",
+		"merchantMap": "Mapa de Comerciantes",
+		"communityMap": "Mapa da Comunidade",
+		"dashboard": "Painel",
+		"taggerLeaderboard": "Classificação de Etiquetadores",
+		"communityLeaderboard": "Classificação da Comunidade",
+		"countryLeaderboard": "Classificação de Países",
+		"addLocation": "Adicionar Local",
+		"addCommunity": "Adicionar Comunidade",
+		"becomeTagger": "Tornar-se um Etiquetador",
+		"openTickets": "Tickets Abertos",
+		"taggingActivity": "Atividade de Etiquetagem",
+		"taggingIssues": "Problemas de Etiquetagem",
+		"communities": "Comunidades",
+		"countries": "Países"
+	}
+}

@@ -15,6 +15,7 @@
 	import 'tippy.js/dist/tippy.css';
 	import '../app.css';
 	import Footer from '$components/layout/Footer.svelte';
+	import '$lib/i18n';
 
 	axios.defaults.timeout = 600000;
 

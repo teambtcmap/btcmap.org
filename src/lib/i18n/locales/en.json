@@ -1,0 +1,35 @@
+{
+	"home": {
+		"hero": "Find places to spend sats wherever you are.",
+		"openMap": "Open Map",
+		"addLocation": "Add Location",
+		"description": "We use {osmLink} to tag places that accept bitcoin and we display those merchants in our beautiful apps.",
+		"openSource": "Our apps and the underlying data are free and open source.",
+		"hashtag": "#SPEDN ✊"
+	},
+	"nav": {
+		"maps": "Maps",
+		"apps": "Apps",
+		"stats": "Stats",
+		"areas": "Areas",
+		"maintain": "Maintain",
+		"wiki": "Wiki",
+		"blog": "Blog",
+		"supportUs": "Support Us",
+		"menu": "Menu",
+		"merchantMap": "Merchant Map",
+		"communityMap": "Community Map",
+		"dashboard": "Dashboard",
+		"taggerLeaderboard": "Tagger Leaderboard",
+		"communityLeaderboard": "Community Leaderboard",
+		"countryLeaderboard": "Country Leaderboard",
+		"addLocation": "Add Location",
+		"addCommunity": "Add Community",
+		"becomeTagger": "Become a Tagger",
+		"openTickets": "Open Tickets",
+		"taggingActivity": "Tagging Activity",
+		"taggingIssues": "Tagging Issues",
+		"communities": "Communities",
+		"countries": "Countries"
+	}
+}
