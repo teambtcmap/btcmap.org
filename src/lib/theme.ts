@@ -46,6 +46,9 @@ function createThemeStore() {
 		},
 		// Initialize theme on app mount. Must be called in +layout.svelte onMount.
 		// Reads from SSR inline script (window.__INITIAL_THEME__) or falls back to localStorage/system preference.
+		// Note: Does NOT dispatch themechange event - this is intentional as init runs during
+		// app startup before any listeners (charts, maps) are registered. The DOM class is already
+		// set by the SSR script in app.html to prevent flash of wrong theme.
 		init: () => {
 			// During SSR, window won't exist - return early
 			if (typeof window === 'undefined') return;

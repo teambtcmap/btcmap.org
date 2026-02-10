@@ -1,39 +1,14 @@
 <script lang="ts">
 	import { theme } from '$lib/theme';
-	import type { Theme } from '$lib/types';
-	import { onMount } from 'svelte';
-
-	let currentTheme: Theme | undefined;
-
-	onMount(() => {
-		// Subscribe to theme store to get current value
-		const unsubscribe = theme.subscribe((t) => {
-			currentTheme = t;
-		});
-		return unsubscribe;
-	});
-
-	const toggleTheme = () => {
-		theme.toggle();
-	};
 </script>
 
 <button
-	on:click={toggleTheme}
-	disabled={!currentTheme}
-	aria-label={!currentTheme
-		? 'Theme toggle loading'
-		: currentTheme === 'dark'
-			? 'Switch to light mode'
-			: 'Switch to dark mode'}
-	title={!currentTheme
-		? 'Theme toggle loading'
-		: currentTheme === 'dark'
-			? 'Switch to light mode'
-			: 'Switch to dark mode'}
+	on:click={() => theme.toggle()}
+	aria-label={$theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+	title={$theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
 	class="h-10 w-10 text-link transition-colors hover:text-hover dark:text-white dark:hover:text-link"
 >
-	{#if currentTheme === 'dark'}
+	{#if $theme === 'dark'}
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			viewBox="0 0 24 24"
@@ -53,7 +28,7 @@
 				clip-rule="evenodd"
 			/></svg
 		>
-	{:else if currentTheme === 'light'}
+	{:else if $theme === 'light'}
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			viewBox="0 0 24 24"
