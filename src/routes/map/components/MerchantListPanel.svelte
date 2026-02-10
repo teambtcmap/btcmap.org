@@ -309,7 +309,7 @@
 							type="button"
 							on:click={handleClose}
 							class="p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
-							aria-label={$_('aria.close')}
+							aria-label={$_('aria.closeMerchantList')}
 						>
 							<Icon w="20" h="20" icon="close" type="material" />
 						</button>

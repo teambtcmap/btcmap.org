@@ -168,6 +168,7 @@
 	},
 	"aria": {
 		"close": "Fechar",
+		"closeMerchantList": "Fechar lista de comerciantes",
 		"openMenu": "Abrir menu",
 		"clearSearch": "Limpar pesquisa",
 		"previousPage": "Página anterior",

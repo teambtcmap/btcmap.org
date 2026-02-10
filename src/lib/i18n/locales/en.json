@@ -183,6 +183,7 @@
 	},
 	"aria": {
 		"close": "Close",
+		"closeMerchantList": "Close merchant list",
 		"openMenu": "Open menu",
 		"clearSearch": "Clear search",
 		"previousPage": "Previous page",
