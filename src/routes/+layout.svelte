@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { dev } from '$app/environment';
 	import { syncStatus } from '$lib/store';
 	import { theme } from '$lib/theme';
@@ -16,7 +17,12 @@
 	import '../app.css';
 	import Footer from '$components/layout/Footer.svelte';
 	import '$lib/i18n';
-	import { isLoading } from 'svelte-i18n';
+	import { isLoading, locale } from 'svelte-i18n';
+
+	// Update HTML lang attribute dynamically when locale changes
+	$: if (browser && $locale) {
+		document.documentElement.lang = $locale;
+	}
 
 	axios.defaults.timeout = 600000;
 
