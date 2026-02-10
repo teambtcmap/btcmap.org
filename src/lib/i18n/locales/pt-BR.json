@@ -148,7 +148,8 @@
 		"noActivity": "Nenhuma atividade para exibir.",
 		"loadMore": "Carregar Mais",
 		"viewOnMainMap": "Ver no mapa principal",
-		"noCommunity": "Este local não faz parte de uma comunidade, mas uma pode ser criada para ajudar a manter esta área local.",
+		"noCommunity": "Este local não faz parte de uma comunidade, mas uma pode ser {createLink} para ajudar a manter esta área local.",
+		"created": "criada",
 		"loadingCommunities": "Carregando comunidades..."
 	},
 	"comments": {

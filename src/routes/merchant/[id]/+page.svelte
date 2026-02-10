@@ -919,7 +919,12 @@
 						<p class="p-5 text-body dark:text-white">{$_('info.loadingCommunities')}</p>
 					{:else}
 						<p class="p-5 text-body dark:text-white">
-							{$_('info.noCommunity')}
+							<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+							{@html $_('info.noCommunity', {
+								values: {
+									createLink: `<a href="${resolve('/communities')}" class="text-link transition-colors hover:text-hover">${$_('info.created')}</a>`
+								}
+							})}
 						</p>
 					{/if}
 				</div>

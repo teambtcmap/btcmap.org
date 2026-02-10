@@ -150,7 +150,8 @@
 		"noActivity": "No activity to display.",
 		"loadMore": "Load More",
 		"viewOnMainMap": "View on main map",
-		"noCommunity": "This location is not part of a community, but one can be created to help maintain this local area.",
+		"noCommunity": "This location is not part of a community, but one can be {createLink} to help maintain this local area.",
+		"created": "created",
 		"loadingCommunities": "Loading communities..."
 	},
 	"comments": {
