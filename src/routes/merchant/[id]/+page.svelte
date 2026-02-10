@@ -71,6 +71,7 @@
 	import Time from 'svelte-time';
 	import tippy from 'tippy.js';
 	import { resolve } from '$app/paths';
+	import { _ } from '$lib/i18n';
 
 	// alert for user errors
 	$: $userError && errToast($userError);
@@ -392,9 +393,9 @@
 	<div class="bg-red-600 py-4 text-center text-white">
 		<p class="text-lg font-semibold">
 			<Icon w="20" h="20" class="mr-2 inline-block text-white" icon="skull" type="material" />
-			This merchant has been removed from BTC Map and may no longer accept Bitcoin.
+			{$_('merchant.deletedNotice')}
 		</p>
-		<p class="mt-1 text-sm">The data shown below is outdated and for reference only.</p>
+		<p class="mt-1 text-sm">{$_('merchant.deletedDetail')}</p>
 	</div>
 {/if}
 <main class="my-10 space-y-16 text-center md:my-20">
@@ -445,7 +446,7 @@
 					class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
 				>
 					<!-- eslint-enable svelte/no-navigation-without-resolve -->
-					View on main map
+					{$_('info.viewOnMainMap')}
 					<svg
 						class="ml-1 w-3"
 						width="16"
@@ -479,7 +480,7 @@
 							icon="phone"
 							type="material"
 						/>
-						Contact
+						{$_('info.contact')}
 					</h4>
 
 					<div class="flex items-center justify-center">
@@ -493,7 +494,7 @@
 
 			{#if (paymentMethod || thirdParty) && data}
 				<div class="text-primary dark:text-white">
-					<h4 class="text-primary uppercase dark:text-white">Accepted Payments</h4>
+					<h4 class="text-primary uppercase dark:text-white">{$_('payment.accepted')}</h4>
 					<div class="mt-1 flex items-center justify-center space-x-2">
 						{#if !paymentMethod}
 							<!-- eslint-disable svelte/no-navigation-without-resolve -->
@@ -517,7 +518,7 @@
 								bind:element={onchainTooltip}
 								status={data.osmTags?.['payment:onchain']}
 								method="btc"
-								label="On-chain"
+								label={$_('payment.onchain')}
 								variant="teal"
 								size="md"
 							/>
@@ -526,7 +527,7 @@
 								bind:element={lnTooltip}
 								status={data.osmTags?.['payment:lightning']}
 								method="ln"
-								label="Lightning"
+								label={$_('payment.lightning')}
 								variant="teal"
 								size="md"
 							/>
@@ -535,7 +536,7 @@
 								bind:element={nfcTooltip}
 								status={data.osmTags?.['payment:lightning_contactless']}
 								method="nfc"
-								label="Lightning contactless"
+								label={$_('payment.lightningContactless')}
 								variant="teal"
 								size="md"
 							/>
@@ -554,7 +555,7 @@
 							icon="schedule"
 							type="material"
 						/>
-						Hours
+						{$_('info.hours')}
 					</h4>
 
 					<div class="flex items-start justify-center">
@@ -567,12 +568,12 @@
 
 		<div class="flex flex-wrap items-center justify-center gap-4">
 			{#if dataInitialized}
-				<MerchantAction link={`geo:${lat},${long}`} icon="compass" text="Navigate" />
+				<MerchantAction link={`geo:${lat},${long}`} icon="compass" text={$_('merchant.navigate')} />
 
 				<MerchantAction
 					link={`https://www.openstreetmap.org/edit?${data.osmType}=${data.osmId}`}
 					icon="pencil"
-					text="Edit"
+					text={$_('merchant.edit')}
 				/>
 
 				<MerchantAction
@@ -581,7 +582,7 @@
 						successToast('Link copied to clipboard!');
 					}}
 					icon="share"
-					text="Share"
+					text={$_('merchant.share')}
 				/>
 
 				{#if payment}
@@ -594,23 +595,23 @@
 									? `https://coinos.io/${payment.username}`
 									: '#'}
 						icon="bolt"
-						text="Pay Merchant"
+						text={$_('merchant.pay')}
 					/>
 				{/if}
 
 				{#if phone}
-					<MerchantAction link={`tel:${phone}`} icon="phone" text="Call" />
+					<MerchantAction link={`tel:${phone}`} icon="phone" text={$_('merchant.call')} />
 				{/if}
 
 				{#if email}
-					<MerchantAction link={`mailto:${email}`} icon="email" text="Email" />
+					<MerchantAction link={`mailto:${email}`} icon="email" text={$_('merchant.email')} />
 				{/if}
 
 				{#if website}
 					<MerchantAction
 						link={website.startsWith('http') ? website : `https://${website}`}
 						icon="globe"
-						text="Website"
+						text={$_('merchant.website')}
 					/>
 				{/if}
 
@@ -642,7 +643,7 @@
 					<MerchantAction
 						on:click={() => ($showTags = data.osmTags)}
 						icon="tags"
-						text="Show Tags"
+						text={$_('merchant.showTags')}
 					/>
 				</span>
 
@@ -650,14 +651,14 @@
 					<MerchantAction
 						on:click={() => ($taggingIssues = data.osmTags?.issues || [])}
 						icon="issues"
-						text="Tag Issues"
+						text={$_('merchant.tagIssues')}
 					/>
 				</span>
 
 				<MerchantAction
 					link={`https://www.openstreetmap.org/${data.osmType}/${data.osmId}`}
 					icon="external"
-					text="View OSM"
+					text={$_('merchant.viewOSM')}
 				/>
 			{:else}
 				{#each Array(5) as _, i (i)}
@@ -673,7 +674,7 @@
 		<!-- Three cards: Last Surveyed, Boost, Comments (use server data, don't wait for store sync) -->
 		<div class="grid-cols-3 gap-12 space-y-12 lg:grid lg:space-y-0">
 			<Card headerAlign="center">
-				<h3 slot="header" class="text-2xl font-semibold">Last Surveyed</h3>
+				<h3 slot="header" class="text-2xl font-semibold">{$_('verification.lastSurveyed')}</h3>
 
 				<div slot="body" class="p-4">
 					{#if verified.length}
@@ -702,7 +703,7 @@
 							<strong>{formatVerifiedHuman(verified?.[0])}</strong>
 						</div>
 					{:else}
-						<p class="font-semibold dark:text-white">This location needs to be surveyed!</p>
+						<p class="font-semibold dark:text-white">{$_('verification.notSurveyed')}</p>
 					{/if}
 				</div>
 
@@ -711,23 +712,21 @@
 					link={`/verify-location?id=${data.id}`}
 					style="rounded-xl p-3 w-40"
 				>
-					Verify Location
+					{$_('verification.verifyLocation')}
 				</PrimaryButton>
 			</Card>
 
 			<Card headerAlign="center">
-				<h3 slot="header" class="text-2xl font-semibold">Boost</h3>
+				<h3 slot="header" class="text-2xl font-semibold">{$_('boost.title')}</h3>
 
 				<div slot="body" class="p-4">
 					<p class="mx-auto font-semibold dark:text-white">
-						{boosted
-							? 'This location is boosted!'
-							: "Boost this location to improve it's visibility on the map."}
+						{boosted ? $_('boost.isBoosted') : $_('boost.improveVisibility')}
 					</p>
 
 					{#if boosted}
 						<p class="dark:text-white">
-							Boost Expires:
+							{$_('boost.expires')}:
 							<span class="underline decoration-bitcoin decoration-4 underline-offset-8">
 								<Time live={3000} relative={true} timestamp={boosted} />
 							</span>
@@ -740,15 +739,16 @@
 
 			<Card headerAlign="center">
 				<h3 slot="header" class="text-2xl font-semibold">
-					Comments {#if comments.length}({comments.length}){/if}
+					{$_('merchant.comments')}
+					{#if comments.length}({comments.length}){/if}
 				</h3>
 
 				<div slot="body" class="p-4">
 					<p class="mx-auto font-semibold dark:text-white">
 						{#if comments.length}
-							Let others know your thoughts about this merchant.
+							{$_('comments.shareThoughts')}
 						{:else}
-							No comments yet. Be the first to leave a comment!
+							{$_('comments.beFirst')}
 						{/if}
 					</p>
 				</div>
@@ -756,7 +756,7 @@
 				<div slot="footer">
 					{#if comments.length}
 						<PrimaryButton link="#comments" style="w-40 rounded-xl p-3">
-							View Comments
+							{$_('comments.view')}
 						</PrimaryButton>
 					{:else}
 						<CommentAddButton elementId={data.id} />
@@ -769,7 +769,7 @@
 	<section id="map-section">
 		<Card>
 			<h3 slot="header" class="text-lg font-semibold">
-				{name || 'Merchant'} Location
+				{$_('merchant.location', { values: { name: name || $_('merchant.unknown') } })}
 			</h3>
 
 			<div slot="body" class="w-full">
@@ -790,7 +790,7 @@
 		<Card>
 			<div slot="header" class="flex items-center justify-between">
 				<h3 class="text-lg font-semibold">
-					{name || 'Merchant'} Comments
+					{$_('merchant.comments')}
 				</h3>
 				<CommentAddButton elementId={data.id} />
 			</div>
@@ -834,7 +834,7 @@
 	<section id="activity">
 		<Card>
 			<h3 slot="header" class="text-lg font-semibold">
-				{name || 'Merchant'} Activity
+				{$_('merchant.activity', { values: { name: name || $_('merchant.unknown') } })}
 			</h3>
 
 			<div slot="body" class="w-full">
@@ -860,7 +860,7 @@
 						{#if eventsPaginated.length !== merchantEvents.length}
 							<button
 								class="mx-auto !mb-5 block text-xl font-semibold text-link transition-colors hover:text-hover"
-								on:click={() => (eventCount = eventCount + 50)}>Load More</button
+								on:click={() => (eventCount = eventCount + 50)}>{$_('info.loadMore')}</button
 							>
 						{:else if merchantEvents.length > TOP_BUTTON_MIN_ITEMS}
 							<TopButton scroll={activityDiv} style="!mb-5" />
@@ -880,7 +880,7 @@
 							<TaggerSkeleton />
 						{/each}
 					{:else}
-						<p class="p-5 text-body dark:text-white">No activity to display.</p>
+						<p class="p-5 text-body dark:text-white">{$_('info.noActivity')}</p>
 					{/if}
 				</div>
 			</div>
@@ -890,7 +890,7 @@
 	<section id="communities">
 		<Card>
 			<h3 slot="header" class="text-lg font-semibold">
-				{name || 'Merchant'} Communities
+				{$_('merchant.communities', { values: { name: name || $_('merchant.unknown') } })}
 			</h3>
 
 			<div slot="body" class="w-full">
@@ -916,13 +916,10 @@
 							</div>
 						{/each}
 					{:else if !dataInitialized}
-						<p class="p-5 text-body dark:text-white">Loading communities...</p>
+						<p class="p-5 text-body dark:text-white">{$_('info.loadingCommunities')}</p>
 					{:else}
 						<p class="p-5 text-body dark:text-white">
-							This location is not part of a communtiy, but one can be <a
-								href={resolve('/communities')}
-								class="text-link transition-colors hover:text-hover">created</a
-							> to help maintain this local area.
+							{$_('info.noCommunity')}
 						</p>
 					{/if}
 				</div>
