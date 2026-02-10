@@ -2,7 +2,7 @@
 	import SocialLink from '$components/SocialLink.svelte';
 	import { socials } from '$lib/store';
 	import { env } from '$env/dynamic/public';
-	import { locale } from '$lib/i18n';
+	import { locale, _ } from '$lib/i18n';
 	import Icon from '$components/Icon.svelte';
 
 	function switchLanguage(newLocale: string) {
@@ -12,16 +12,21 @@
 		}
 	}
 
+	// Links with translation keys (translations are applied in template using $_())
 	const links = [
-		{ link: '/about-us', name: 'About Us' },
-		{ link: '/media', name: 'Media' },
-		{ link: '/license', name: 'License' },
-		{ link: '/privacy-policy', name: 'Privacy' },
+		{ link: '/about-us', nameKey: 'footer.aboutUs' },
+		{ link: '/media', nameKey: 'footer.media' },
+		{ link: '/license', nameKey: 'footer.license' },
+		{ link: '/privacy-policy', nameKey: 'footer.privacy' },
 		{ link: 'https://stats.uptimerobot.com/7kgEVtzlV1', name: 'Status' },
 		...(env.PUBLIC_UMAMI_URL
 			? [{ link: env.PUBLIC_UMAMI_URL, name: 'Analytics', external: true }]
 			: []),
-		{ link: 'https://bitcoin.rocks/business/', name: 'Bitcoin for Business', external: true },
+		{
+			link: 'https://bitcoin.rocks/business/',
+			nameKey: 'footer.bitcoinForBusiness',
+			external: true
+		},
 		{ link: '/bitcoin.pdf', name: 'White Paper' },
 		{ link: '/cypherpunks-manifesto.pdf', name: 'Cypherpunks' }
 	];
@@ -73,7 +78,7 @@
 			</button>
 		</span>
 
-		{#each links as link (link.name)}
+		{#each links as link (link.link)}
 			<!-- eslint-disable svelte/no-navigation-without-resolve -->
 			<a
 				href={link.link}
@@ -83,7 +88,7 @@
 					? 'mb-2.5 xl:mb-0'
 					: ''} text-sm text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link"
 			>
-				{link.name}
+				{link.nameKey ? $_(link.nameKey) : link.name}
 			</a>
 			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		{/each}

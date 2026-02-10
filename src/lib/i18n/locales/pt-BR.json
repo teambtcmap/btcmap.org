@@ -186,6 +186,10 @@
 		"media": "Mídia",
 		"license": "Licença",
 		"privacy": "Privacidade",
-		"bitcoinForBusiness": "Bitcoin para Negócios"
+		"bitcoinForBusiness": "Bitcoin para Negócios",
+		"status": "Status",
+		"analytics": "Análises",
+		"whitePaper": "White Paper",
+		"cypherpunks": "Cypherpunks"
 	}
 }

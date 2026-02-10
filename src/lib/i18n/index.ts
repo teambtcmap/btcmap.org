@@ -1,4 +1,4 @@
-import { register, init, locale } from 'svelte-i18n';
+import { register, init, locale, _ } from 'svelte-i18n';
 
 // Register locales with lazy loading
 register('en', () => import('./locales/en.json'));
@@ -30,5 +30,5 @@ init({
 	initialLocale: getInitialLocale()
 });
 
-// Export locale store for components
-export { locale };
+// Export locale store and translation function for components
+export { locale, _ };
