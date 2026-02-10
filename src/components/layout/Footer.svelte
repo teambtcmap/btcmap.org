@@ -4,8 +4,10 @@
 	import { env } from '$env/dynamic/public';
 	import { locale, _ } from '$lib/i18n';
 	import Icon from '$components/Icon.svelte';
+	import { trackEvent } from '$lib/analytics';
 
 	function switchLanguage(newLocale: string) {
+		trackEvent('language_switch', { language: newLocale });
 		locale.set(newLocale);
 		if (typeof window !== 'undefined') {
 			localStorage.setItem('language', newLocale);

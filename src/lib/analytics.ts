@@ -28,7 +28,8 @@ type EventName =
 	| 'drawer_swipe_expand'
 	| 'drawer_swipe_collapse'
 	| 'drawer_swipe_dismiss'
-	| 'drawer_collapse_button_click';
+	| 'drawer_collapse_button_click'
+	| 'language_switch';
 
 declare global {
 	interface Window {
