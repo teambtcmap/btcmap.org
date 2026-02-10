@@ -9,18 +9,29 @@
 	import { _ } from 'svelte-i18n';
 
 	$: navLinks = [
-		{ title: $_('nav.maps'), url: '', icon: 'map' as MobileNavIconName },
-		{ title: $_('nav.apps'), url: '/apps', icon: 'apps' as MobileNavIconName },
-		{ title: $_('nav.stats'), url: '', icon: 'stats' as MobileNavIconName },
-		{ title: $_('nav.areas'), url: '', icon: 'areas' as MobileNavIconName },
-		{ title: $_('nav.maintain'), url: '', icon: 'contribute' as MobileNavIconName },
+		{ id: 'maps', title: $_('nav.maps'), url: '', icon: 'map' as MobileNavIconName },
+		{ id: 'apps', title: $_('nav.apps'), url: '/apps', icon: 'apps' as MobileNavIconName },
+		{ id: 'stats', title: $_('nav.stats'), url: '', icon: 'stats' as MobileNavIconName },
+		{ id: 'areas', title: $_('nav.areas'), url: '', icon: 'areas' as MobileNavIconName },
+		{ id: 'maintain', title: $_('nav.maintain'), url: '', icon: 'contribute' as MobileNavIconName },
 		{
+			id: 'wiki',
 			title: $_('nav.wiki'),
 			url: 'https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki',
 			icon: 'wiki' as MobileNavIconName
 		},
-		{ title: $_('nav.blog'), url: 'https://blog.btcmap.org', icon: 'dash' as MobileNavIconName },
-		{ title: $_('nav.supportUs'), url: '/support-us', icon: 'support' as MobileNavIconName }
+		{
+			id: 'blog',
+			title: $_('nav.blog'),
+			url: 'https://blog.btcmap.org',
+			icon: 'dash' as MobileNavIconName
+		},
+		{
+			id: 'supportUs',
+			title: $_('nav.supportUs'),
+			url: '/support-us',
+			icon: 'support' as MobileNavIconName
+		}
 	];
 
 	$: mapsDropdownLinks = [
@@ -89,21 +100,21 @@
 	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
 	<nav class="flex flex-wrap space-x-16">
-		{#each navLinks as link (link.title)}
+		{#each navLinks as link (link.id)}
 			<!-- dropdown menu -->
-			{#if link.title === 'Maps'}
+			{#if link.id === 'maps'}
 				<NavDropdownDesktop title={link.title} links={mapsDropdownLinks} />
 
 				<!-- dropdown menu -->
-			{:else if link.title === 'Stats'}
+			{:else if link.id === 'stats'}
 				<NavDropdownDesktop title={link.title} links={statsDropdownLinks} />
 
 				<!-- dropdown menu -->
-			{:else if link.title === 'Maintain'}
+			{:else if link.id === 'maintain'}
 				<NavDropdownDesktop title={link.title} links={maintainDropdownLinks} />
 
 				<!-- dropdown menu -->
-			{:else if link.title === 'Areas'}
+			{:else if link.id === 'areas'}
 				<NavDropdownDesktop title={link.title} links={areasDropdownLinks} />
 			{:else}
 				<!-- regular links -->
@@ -154,21 +165,21 @@
 			? 'left-0'
 			: 'left-[-100%]'} h-[calc(100dvh-122.45px)] w-full space-y-2 overflow-y-auto border-t border-[#BDD2D4] bg-teal p-8 transition-all ease-in-out dark:bg-dark"
 	>
-		{#each navLinks as link (link.title)}
+		{#each navLinks as link (link.id)}
 			<!-- dropdown menu -->
-			{#if link.title === 'Maps'}
+			{#if link.id === 'maps'}
 				<NavDropdownMobile title={link.title} icon={link.icon} links={mapsDropdownLinks} />
 
 				<!-- dropdown menu -->
-			{:else if link.title === 'Stats'}
+			{:else if link.id === 'stats'}
 				<NavDropdownMobile title={link.title} icon={link.icon} links={statsDropdownLinks} />
 
 				<!-- dropdown menu -->
-			{:else if link.title === 'Areas'}
+			{:else if link.id === 'areas'}
 				<NavDropdownMobile title={link.title} icon={link.icon} links={areasDropdownLinks} />
 
 				<!-- dropdown menu -->
-			{:else if link.title === 'Maintain'}
+			{:else if link.id === 'maintain'}
 				<NavDropdownMobile title={link.title} icon={link.icon} links={maintainDropdownLinks} />
 
 				<!-- regular links -->
