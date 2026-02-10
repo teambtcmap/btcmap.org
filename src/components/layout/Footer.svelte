@@ -86,9 +86,7 @@
 				href={link.link}
 				target={link.external ? '_blank' : null}
 				rel={link.external ? 'noopener noreferrer' : null}
-				class="mx-1.5 {link.link !== '/cypherpunks-manifesto.pdf'
-					? 'mb-2.5 xl:mb-0'
-					: ''} text-sm text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link"
+				class="mx-1.5 mb-2.5 text-sm text-link transition-colors last:mb-0 hover:text-hover xl:mb-0 dark:text-white/50 dark:hover:text-link"
 			>
 				{link.nameKey ? $_(link.nameKey) : link.name}
 			</a>
