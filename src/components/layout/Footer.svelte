@@ -3,7 +3,6 @@
 	import { socials } from '$lib/store';
 	import { env } from '$env/dynamic/public';
 	import { locale } from '$lib/i18n';
-	import { _ } from 'svelte-i18n';
 	import Icon from '$components/Icon.svelte';
 
 	function switchLanguage(newLocale: string) {
@@ -39,31 +38,34 @@
 
 	<div class="flex flex-wrap justify-center xl:block">
 		<!-- Language Selector -->
-		<span
-			class="mx-2.5 mb-2.5 inline-flex items-center gap-1 text-sm text-body xl:mb-0 dark:text-white/50"
-		>
-			<Icon type="material" icon="translate" w="16" h="16" />
-			{$_('footer.language')}:
+		<span class="mx-1.5 mb-2.5 text-sm xl:mb-0">
+			<Icon
+				type="material"
+				icon="translate"
+				w="16"
+				h="16"
+				class="inline-block align-text-bottom text-body dark:text-white/50"
+			/>
 			<button
 				on:click={() => switchLanguage('en')}
 				disabled={$locale === 'en'}
 				aria-label="Switch to English"
 				class="
 					{$locale === 'en'
-					? 'cursor-default font-bold underline'
+					? 'cursor-default font-bold text-body underline dark:text-white/50'
 					: 'text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link'}
 				"
 			>
 				EN
 			</button>
-			<span>·</span>
+			<span class="text-body dark:text-white/50"> / </span>
 			<button
 				on:click={() => switchLanguage('pt-BR')}
 				disabled={$locale === 'pt-BR'}
 				aria-label="Mudar para Português"
 				class="
 					{$locale === 'pt-BR'
-					? 'cursor-default font-bold underline'
+					? 'cursor-default font-bold text-body underline dark:text-white/50'
 					: 'text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link'}
 				"
 			>
@@ -77,7 +79,7 @@
 				href={link.link}
 				target={link.external ? '_blank' : null}
 				rel={link.external ? 'noopener noreferrer' : null}
-				class="mx-2.5 {link.name !== 'Cypherpunks'
+				class="mx-1.5 {link.name !== 'Cypherpunks'
 					? 'mb-2.5 xl:mb-0'
 					: ''} text-sm text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link"
 			>
