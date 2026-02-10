@@ -372,16 +372,5 @@
 		"northAmerica": "North America",
 		"oceania": "Oceania",
 		"southAmerica": "South America"
-	},
-	"verification": {
-		"lastSurveyed": "Last Surveyed",
-		"verified": "Verified",
-		"outdated": "Outdated",
-		"notSurveyed": "This location needs to be surveyed!",
-		"verifyLocation": "Verify Location",
-		"verifiedTooltip": "Verified within the last year",
-		"outdatedTooltip": "Outdated please re-verify",
-		"helpImprove": "Help improve the data for everyone",
-		"surveyedBy": "Completed by BTC Map community members"
 	}
 }
