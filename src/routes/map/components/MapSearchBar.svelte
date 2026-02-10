@@ -5,6 +5,7 @@
 	import SearchInput from '$components/SearchInput.svelte';
 	import { trackEvent } from '$lib/analytics';
 	import { formatNearbyCount } from '$lib/utils';
+	import { _ } from '$lib/i18n';
 
 	// Callback when search is used (opens panel)
 	export let onSearch: ((query: string) => void) | undefined = undefined;
@@ -24,7 +25,8 @@
 	$: isOpen = $merchantList.isOpen;
 
 	// Placeholder based on mode
-	$: placeholder = mode === 'search' ? 'Search worldwide...' : 'Search nearby...';
+	$: placeholder =
+		mode === 'search' ? $_('search.placeholderWorldwide') : $_('search.placeholderNearby');
 
 	function handleInput(e: Event) {
 		const value = (e.target as HTMLInputElement).value;
@@ -80,7 +82,7 @@
 				bind:this={searchInputComponent}
 				value={searchQuery}
 				{placeholder}
-				ariaLabel="Search for Bitcoin merchants"
+				ariaLabel={$_('aria.searchInput')}
 				rounded
 				on:input={handleInput}
 				on:focus={handleFocus}
@@ -92,12 +94,12 @@
 							type="button"
 							on:click={handleClear}
 							class="p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
-							aria-label="Clear search"
+							aria-label={$_('aria.clearSearch')}
 						>
 							<Icon w="20" h="20" icon="close" type="material" />
 						</button>
 					{:else if isSearching}
-						<div role="status" aria-label="Searching">
+						<div role="status" aria-label={$_('search.searching')}>
 							<div
 								class="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-link dark:border-white/30 dark:border-t-white"
 							></div>
@@ -108,7 +110,7 @@
 		</div>
 
 		<!-- Segmented tabs (order matches panel: Worldwide, Nearby) -->
-		<div class="flex gap-1.5 md:gap-1.5" role="radiogroup" aria-label="Search mode">
+		<div class="flex gap-1.5 md:gap-1.5" role="radiogroup" aria-label={$_('aria.switchMode')}>
 			<button
 				type="button"
 				role="radio"
@@ -119,7 +121,7 @@
 					? 'bg-link text-white'
 					: 'bg-white text-gray-600 hover:bg-gray-50 dark:bg-dark dark:text-white/70 dark:hover:bg-white/10'}"
 			>
-				Worldwide
+				{$_('search.worldwide')}
 			</button>
 			<button
 				type="button"
@@ -131,7 +133,9 @@
 					? 'bg-link text-white'
 					: 'bg-white text-gray-600 hover:bg-gray-50 dark:bg-dark dark:text-white/70 dark:hover:bg-white/10'}"
 			>
-				Nearby{#if isLoadingCount}<span class="opacity-60"> ...</span>{:else if formattedCount}
+				{$_('search.nearby')}{#if isLoadingCount}<span class="opacity-60">
+						...</span
+					>{:else if formattedCount}
 					{formattedCount}{/if}
 			</button>
 		</div>
