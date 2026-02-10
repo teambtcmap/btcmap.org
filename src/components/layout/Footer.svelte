@@ -44,7 +44,7 @@
 				icon="translate"
 				w="16"
 				h="16"
-				class="inline-block align-text-bottom text-body dark:text-white/50"
+				class="inline-block align-text-bottom text-link dark:text-white/50"
 			/>
 			<button
 				on:click={() => switchLanguage('en')}
