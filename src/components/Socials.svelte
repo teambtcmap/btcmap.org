@@ -127,7 +127,7 @@
 	{/if}
 	{#if safeReddit}
 		<a href={safeReddit} target="_blank" rel="noreferrer" class="m-1">
-			<img src="/icons/socials/reddit.svg" alt="reddit" />
+			<img src="/icons/socials/reddit.svg" alt="reddit" class="h-10 w-10 rounded-full" />
 		</a>
 	{/if}
 	{#if safeSimplex}
