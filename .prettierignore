@@ -21,4 +21,5 @@ spritesheet-*.ts
 
 # icons
 static/icons/font-awesome/
+static/icons/socials/*
 src/lib/icons/**/*.svg
