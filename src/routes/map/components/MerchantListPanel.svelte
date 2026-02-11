@@ -19,9 +19,25 @@
 	import { calcVerifiedDate } from '$lib/merchantDrawerLogic';
 	import { trackEvent } from '$lib/analytics';
 	import { formatNearbyCount } from '$lib/utils';
+	import { _ } from '$lib/i18n';
 
 	// Compute once for all list items
 	const verifiedDate = calcVerifiedDate();
+
+	// Get translated category label
+	function getCategoryLabel(key: CategoryKey): string {
+		const labelMap: Record<CategoryKey, string> = {
+			all: $_('categories.all'),
+			restaurants: $_('categories.restaurants'),
+			shopping: $_('categories.shopping'),
+			groceries: $_('categories.groceries'),
+			coffee: $_('categories.coffee'),
+			atms: $_('categories.atms'),
+			hotels: $_('categories.hotels'),
+			beauty: $_('categories.beauty')
+		};
+		return labelMap[key];
+	}
 
 	// Callback to pan to a nearby merchant (already zoomed in, just center it)
 	export let onPanToNearbyMerchant: ((place: Place) => void) | undefined = undefined;
@@ -264,17 +280,17 @@
 		bind:this={panelElement}
 		class="pb-safe absolute inset-0 z-[1001] flex flex-col overflow-hidden bg-white md:absolute md:inset-auto md:top-3 md:bottom-4 md:left-3 md:w-80 md:rounded-lg md:pb-0 md:shadow-lg dark:bg-dark dark:shadow-black/30"
 		role="complementary"
-		aria-label="Merchant list"
+		aria-label={$_('aria.merchantList')}
 	>
 		<!-- Search input - uses shared SearchInput component -->
 		<div class="shrink-0 border-b border-gray-100 dark:border-white/10">
 			<SearchInput
 				bind:this={searchInputComponent}
 				value={mode === 'search' ? searchQuery : nearbyFilter}
-				placeholder={mode === 'search' ? 'Search worldwide...' : 'Search nearby...'}
-				ariaLabel={mode === 'search'
-					? 'Search for Bitcoin merchants worldwide'
-					: 'Filter nearby merchants by name'}
+				placeholder={mode === 'search'
+					? $_('search.placeholderWorldwide')
+					: $_('search.placeholderNearby')}
+				ariaLabel={mode === 'search' ? $_('search.switchToWorldwide') : $_('search.filterResults')}
 				on:input={handleUnifiedInput}
 				on:keydown={handleUnifiedKeyDown}
 			>
@@ -284,7 +300,7 @@
 							type="button"
 							on:click={handleClearInput}
 							class="p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
-							aria-label="Clear search"
+							aria-label={$_('aria.clearSearch')}
 						>
 							<Icon w="20" h="20" icon="close" type="material" />
 						</button>
@@ -293,7 +309,7 @@
 							type="button"
 							on:click={handleClose}
 							class="p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
-							aria-label="Close merchant list"
+							aria-label={$_('aria.closeMerchantList')}
 						>
 							<Icon w="20" h="20" icon="close" type="material" />
 						</button>
@@ -308,7 +324,7 @@
 			<div
 				class="flex rounded-lg bg-gray-100 p-1 dark:bg-white/5"
 				role="radiogroup"
-				aria-label="Search mode"
+				aria-label={$_('aria.switchMode')}
 			>
 				<button
 					type="button"
@@ -320,7 +336,7 @@
 						? 'bg-white text-primary shadow-sm dark:bg-white/10 dark:text-white'
 						: 'text-body hover:text-primary dark:text-white/70 dark:hover:text-white'}"
 				>
-					Worldwide
+					{$_('search.worldwide')}
 				</button>
 				<button
 					type="button"
@@ -332,17 +348,17 @@
 						? 'bg-white text-primary shadow-sm dark:bg-white/10 dark:text-white'
 						: 'text-body hover:text-primary dark:text-white/70 dark:hover:text-white'}"
 				>
-					Nearby{#if isLoadingList}<span class="opacity-60"> ...</span>{:else}{formatNearbyCount(
-							totalCount
-						)}{/if}
+					{$_('search.nearby')}{#if isLoadingList}<span class="opacity-60">
+							...</span
+						>{:else}{formatNearbyCount(totalCount)}{/if}
 				</button>
 			</div>
 
 			<!-- Category filter (shown in both nearby and search modes) -->
-			<div class="mt-3" role="radiogroup" aria-label="Filter by category">
-				<h3 class="sr-only">Filter by category</h3>
+			<div class="mt-3" role="radiogroup" aria-label={$_('aria.filterByCategory')}>
+				<h3 class="sr-only">{$_('categories.filter')}</h3>
 				<div class="flex flex-wrap gap-2">
-					{#each CATEGORY_ENTRIES as [key, category] (key)}
+					{#each CATEGORY_ENTRIES as [key, _category] (key)}
 						<button
 							type="button"
 							role="radio"
@@ -356,7 +372,7 @@
 								categoryCounts
 							)}"
 						>
-							{category.label}
+							{getCategoryLabel(key)}
 						</button>
 					{/each}
 				</div>
@@ -367,11 +383,11 @@
 				<p class="text-xs text-body dark:text-white/70" aria-live="polite">
 					{#if mode === 'search'}
 						{#if isSearching}
-							Searching...
+							{$_('search.searching')}
 						{:else if searchResults.length === 0 && searchQuery.length >= 3}
-							No results found
+							{$_('search.noResults')}
 						{:else if searchResults.length === 0}
-							Search for merchants
+							{$_('search.prompt')}
 						{:else if selectedCategory !== 'all' && filteredSearchResults.length !== searchResults.length}
 							{filteredSearchResults.length} of {searchResults.length} result{searchResults.length !==
 							1
@@ -381,9 +397,9 @@
 							{searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
 						{/if}
 					{:else if showZoomInMessage}
-						Zoom in to see list
+						{$_('search.zoomIn')}
 					{:else if isTruncated}
-						Showing nearest {merchants.length}
+						{$_('search.showingNearest', { values: { count: merchants.length } })}
 					{/if}
 				</p>
 				{#if mode === 'search'}
@@ -403,7 +419,7 @@
 							: `all ${filteredSearchResults.length} results`}"
 					>
 						<Icon w="14" h="14" icon="zoom_out_map" type="material" />
-						<span>Show all</span>
+						<span>{$_('search.showAll')}</span>
 					</button>
 				{/if}
 			</div>
@@ -414,7 +430,11 @@
 			{#if mode === 'search'}
 				<!-- Search results -->
 				{#if isSearching}
-					<div class="flex items-center justify-center py-8" role="status" aria-label="Searching">
+					<div
+						class="flex items-center justify-center py-8"
+						role="status"
+						aria-label={$_('search.searching')}
+					>
 						<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
 					</div>
 				{:else if searchResults.length === 0}
@@ -429,16 +449,16 @@
 						/>
 						<p class="text-sm text-body dark:text-white/70">
 							{#if searchQuery.length >= 3}
-								No results found for "{searchQuery}"
+								{$_('search.noResultsFor', { values: { query: searchQuery } })}
 							{:else}
-								Search for merchants by name
+								{$_('search.prompt')}
 							{/if}
 						</p>
 					</div>
 				{:else if filteredSearchResults.length === 0}
 					<!-- Has results but none match category filter -->
 					<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
-						No results in this category
+						{$_('categories.noMatches')}
 					</div>
 				{:else}
 					<ul class="divide-y divide-gray-100 dark:divide-white/5">
@@ -467,10 +487,10 @@
 					/>
 					<div>
 						<p class="text-sm font-medium text-primary dark:text-white">
-							Zoom in to see nearby merchants
+							{$_('search.zoomIn')}
 						</p>
 						<p class="mt-1 text-xs text-body dark:text-white/70">
-							The merchant list shows locations when zoomed in closer
+							{$_('search.zoomInDetail')}
 						</p>
 					</div>
 				</div>
@@ -478,13 +498,13 @@
 				<div
 					class="flex items-center justify-center py-8"
 					role="status"
-					aria-label="Loading nearby merchants"
+					aria-label={$_('aria.loading')}
 				>
 					<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
 				</div>
 			{:else if merchants.length === 0}
 				<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
-					No merchants visible in current view
+					{$_('search.noVisible')}
 				</div>
 			{:else}
 				<!-- Nearby mode: merchant list -->
@@ -497,7 +517,7 @@
 					: merchants}
 				{#if filteredMerchants.length === 0 && nearbyFilter}
 					<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
-						No merchants match "{nearbyFilter}"
+						{$_('search.noResultsFor', { values: { query: nearbyFilter } })}
 					</div>
 				{:else}
 					<ul class="divide-y divide-gray-100 dark:divide-white/5">

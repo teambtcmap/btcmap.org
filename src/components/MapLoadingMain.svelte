@@ -3,6 +3,7 @@
 	export let status: string | undefined = undefined;
 
 	import { fade } from 'svelte/transition';
+	import { _ } from '$lib/i18n';
 
 	let shouldHide = false;
 
@@ -28,7 +29,7 @@
 		class="absolute top-1/2 left-1/2 z-[10000] -translate-x-1/2 -translate-y-1/2 space-y-2 rounded-lg border-2 border-primary bg-teal p-4 drop-shadow-2xl dark:border-white dark:bg-dark"
 	>
 		<p class="text-center text-primary dark:text-white">
-			{status || 'Loading map...'}
+			{status || $_('status.loadingMap')}
 		</p>
 
 		<div class="mx-auto w-[200px] rounded-full bg-link/25">

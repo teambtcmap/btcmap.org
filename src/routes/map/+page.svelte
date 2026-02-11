@@ -78,6 +78,7 @@
 	} from '$lib/store';
 	import type { Leaflet, Place } from '$lib/types';
 	import { debounce, errToast, isBoosted } from '$lib/utils';
+	import { _ } from '$lib/i18n';
 	import type {
 		Control,
 		LatLng,
@@ -95,7 +96,7 @@
 	export let data: PageData;
 
 	let mapLoading = 1;
-	let mapLoadingStatus = 'Loading map...';
+	let mapLoadingStatus = $_('status.loadingMap');
 
 	// Combine map loading progress with places loading progress
 	$: {
@@ -112,12 +113,12 @@
 		// Priority 3: Loading initial markers (only during first load, not viewport updates)
 		else if (isLoadingMarkers && !elementsLoaded) {
 			mapLoading = 100;
-			mapLoadingStatus = 'Loading places...';
+			mapLoadingStatus = $_('status.loadingPlaces');
 		}
 		// Priority 4: Waiting for map tiles to render
 		else if (elementsLoaded && !mapTilesLoaded) {
 			mapLoading = 100;
-			mapLoadingStatus = 'Preparing map...';
+			mapLoadingStatus = $_('status.preparing');
 		}
 		// Reset when everything is done
 		else if (elementsLoaded && mapTilesLoaded) {
@@ -903,7 +904,7 @@
 			return;
 		}
 
-		mapLoadingStatus = 'Initializing markers...';
+		mapLoadingStatus = $_('status.initializingMarkers');
 
 		// create marker cluster group and layers
 		/* eslint-disable no-undef */
@@ -953,7 +954,7 @@
 			debouncedUpdateMerchantList();
 		});
 
-		mapLoadingStatus = 'Loading places in view...';
+		mapLoadingStatus = $_('status.loadingPlacesInView');
 
 		// Initialize mapCenter and zoom for merchant list panel and marker layer decisions
 		const initialZoom = map.getZoom();

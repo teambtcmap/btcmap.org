@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { dev } from '$app/environment';
 	import { syncStatus } from '$lib/store';
 	import { theme } from '$lib/theme';
@@ -15,6 +16,13 @@
 	import 'tippy.js/dist/tippy.css';
 	import '../app.css';
 	import Footer from '$components/layout/Footer.svelte';
+	import '$lib/i18n';
+	import { isLoading, locale } from 'svelte-i18n';
+
+	// Update HTML lang attribute dynamically when locale changes
+	$: if (browser && $locale) {
+		document.documentElement.lang = $locale;
+	}
 
 	axios.defaults.timeout = 600000;
 
@@ -73,19 +81,28 @@
 	{/if}
 </svelte:head>
 
-{#if !['/', '/map', '/communities/map', '/communities', '/countries'].includes(data.pathname)}
-	<div class="bg-teal dark:bg-dark">
-		<Header />
-		<div class="mx-auto w-10/12 xl:w-[1200px]">
-			<slot />
-			<Footer />
+{#if $isLoading}
+	<!-- Loading state while i18n initializes -->
+	<div class="flex h-screen items-center justify-center bg-teal dark:bg-dark">
+		<div class="text-center">
+			<p class="text-lg font-semibold text-primary dark:text-white">Loading...</p>
 		</div>
 	</div>
 {:else}
-	<slot />
-{/if}
+	{#if !['/', '/map', '/communities/map', '/communities', '/countries'].includes(data.pathname)}
+		<div class="bg-teal dark:bg-dark">
+			<Header />
+			<div class="mx-auto w-10/12 xl:w-[1200px]">
+				<slot />
+				<Footer />
+			</div>
+		</div>
+	{:else}
+		<slot />
+	{/if}
 
-<SvelteToast {options} />
+	<SvelteToast {options} />
+{/if}
 
 <style>
 	:root {

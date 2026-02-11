@@ -6,6 +6,7 @@
 	import { apps } from '$lib/store';
 	import { theme } from '$lib/theme';
 	import { resolve } from '$app/paths';
+	import { _ } from 'svelte-i18n';
 </script>
 
 <svelte:head>
@@ -31,7 +32,7 @@
 							? 'text-white'
 							: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl xl:text-left"
 					>
-						Find places to spend sats wherever you are.
+						{$_('home.hero')}
 					</h1>
 				{:else}
 					<HeaderPlaceholder />
@@ -40,12 +41,12 @@
 					<a
 						href={resolve('/map')}
 						class="rounded-full bg-link px-7 py-3.5 text-lg font-semibold text-white transition-colors hover:bg-hover"
-						>Open Map</a
+						>{$_('home.openMap')}</a
 					>
 					<a
 						href={resolve('/add-location')}
 						class="rounded-full bg-link px-7 py-3.5 text-lg font-semibold text-white transition-colors hover:bg-hover"
-						>Add Location</a
+						>{$_('home.addLocation')}</a
 					>
 				</div>
 				<div
@@ -76,18 +77,16 @@
 					{/each}
 				</div>
 				<h2 class="text-center text-xl font-semibold text-primary xl:text-left dark:text-white">
-					We use
-					<a
-						href="https://www.openstreetmap.org/about"
-						target="_blank"
-						rel="noreferrer"
-						class="text-link transition-colors hover:text-hover">OpenStreetMap</a
-					>
-					to tag places that accept bitcoin and we display those merchants in our beautiful apps.
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+					{@html $_('home.description', {
+						values: {
+							osmLink: `<a href="https://www.openstreetmap.org/about" target="_blank" rel="noreferrer" class="text-link transition-colors hover:text-hover">OpenStreetMap</a>`
+						}
+					})}
 					<br /><br />
-					Our apps and the underlying data are free and open source.
+					{$_('home.openSource')}
 					<br /><br />
-					#SPEDN ✊
+					{$_('home.hashtag')}
 				</h2>
 			</div>
 			{#if typeof window !== 'undefined'}

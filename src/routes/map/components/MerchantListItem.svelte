@@ -4,6 +4,7 @@
 	import type { Place } from '$lib/types';
 	import { formatVerifiedHuman } from '$lib/utils';
 	import { isUpToDate as checkUpToDate, isBoosted as checkBoosted } from '$lib/merchantDrawerLogic';
+	import { _ } from '$lib/i18n';
 
 	export let merchant: Place;
 	export let enrichedData: Place | null = null;
@@ -74,7 +75,9 @@
 					{:else if showSkeleton}
 						<div class="h-4 w-32 animate-pulse rounded bg-link/50"></div>
 					{:else}
-						<span class="truncate text-sm font-medium text-primary dark:text-white">Unknown</span>
+						<span class="truncate text-sm font-medium text-primary dark:text-white"
+							>{$_('merchant.unknown')}</span
+						>
 					{/if}
 				</div>
 
@@ -93,19 +96,19 @@
 						<PaymentMethodIcon
 							status={enrichedData['osm:payment:onchain']}
 							method="btc"
-							label="On-chain"
+							label={$_('payment.onchain')}
 							size="sm"
 						/>
 						<PaymentMethodIcon
 							status={enrichedData['osm:payment:lightning']}
 							method="ln"
-							label="Lightning"
+							label={$_('payment.lightning')}
 							size="sm"
 						/>
 						<PaymentMethodIcon
 							status={enrichedData['osm:payment:lightning_contactless']}
 							method="nfc"
-							label="Lightning contactless"
+							label={$_('payment.lightningContactless')}
 							size="sm"
 						/>
 					</div>
@@ -124,12 +127,12 @@
 								class="flex items-center gap-1 rounded-full bg-bitcoin/10 px-2 py-0.5 text-bitcoin"
 							>
 								<Icon w="12" h="12" icon="arrow_circle_up" type="material" />
-								Boosted
+								{$_('boost.boosted')}
 							</span>
 						{/if}
 						<span class="flex items-center gap-1 text-gray-500 dark:text-white/60">
 							<Icon w="12" h="12" icon={isVerified ? 'verified' : 'warning'} type="material" />
-							{isVerified ? 'Verified' : 'Outdated'}
+							{isVerified ? $_('verification.verified') : $_('verification.outdated')}
 							{#if enrichedData.verified_at}
 								<span class="text-gray-400 dark:text-white/40"
 									>· {formatVerifiedHuman(enrichedData.verified_at)}</span

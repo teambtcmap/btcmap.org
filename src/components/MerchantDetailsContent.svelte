@@ -5,6 +5,7 @@
 	import Time from 'svelte-time';
 	import type { Place } from '$lib/types';
 	import PaymentMethodIcon from '$components/PaymentMethodIcon.svelte';
+	import { _ } from '$lib/i18n';
 
 	export let merchant: Place;
 	export let isUpToDate: boolean;
@@ -19,7 +20,7 @@
 		<div class="rounded-lg bg-red-600 p-3 text-center text-sm text-white">
 			<p class="font-semibold">
 				<Icon w="16" h="16" class="mr-1 inline-block text-white" icon="skull" type="material" />
-				This merchant has been removed.
+				{$_('merchant.deletedBanner')}
 			</p>
 		</div>
 	{/if}
@@ -28,7 +29,7 @@
 		<a
 			href={resolve(`/merchant/${merchant.id}`)}
 			class="inline-block text-xl leading-snug font-bold text-link transition-colors hover:text-hover"
-			title="Merchant name"
+			title={$_('merchant.merchantName')}
 		>
 			{merchant.name}
 		</a>
@@ -37,7 +38,7 @@
 	{/if}
 
 	{#if merchant.address}
-		<p class="text-body dark:text-white" title="Address">
+		<p class="text-body dark:text-white" title={$_('merchant.address')}>
 			{merchant.address}
 		</p>
 	{:else if isLoading}
@@ -45,7 +46,7 @@
 	{/if}
 
 	{#if merchant.opening_hours}
-		<div class="flex items-start space-x-2" title="Opening hours">
+		<div class="flex items-start space-x-2" title={$_('merchant.openingHours')}>
 			<Icon
 				w="16"
 				h="16"
@@ -63,7 +64,7 @@
 			class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
 		>
 			<Icon w="24" h="24" icon="explore" type="material" />
-			<span class="mt-1 text-xs">Navigate</span>
+			<span class="mt-1 text-xs">{$_('merchant.navigate')}</span>
 		</a>
 
 		<!-- eslint-disable svelte/no-navigation-without-resolve -->
@@ -75,7 +76,7 @@
 			class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
 		>
 			<Icon w="24" h="24" icon="edit" type="material" />
-			<span class="mt-1 text-xs">Edit</span>
+			<span class="mt-1 text-xs">{$_('merchant.edit')}</span>
 		</a>
 		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
@@ -84,7 +85,7 @@
 			class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
 		>
 			<Icon w="24" h="24" icon="share" type="material" />
-			<span class="mt-1 text-xs">Share</span>
+			<span class="mt-1 text-xs">{$_('merchant.share')}</span>
 		</a>
 
 		<a
@@ -94,29 +95,29 @@
 			<div class="text-lg font-bold">
 				{merchant.comments || 0}
 			</div>
-			<span class="mt-1 text-xs">Comments</span>
+			<span class="mt-1 text-xs">{$_('merchant.comments')}</span>
 		</a>
 	</div>
 
 	<div class="border-t border-gray-300 pt-4 dark:border-white/95">
 		{#if merchant['osm:payment:onchain'] || merchant['osm:payment:lightning'] || merchant['osm:payment:lightning_contactless'] || merchant['osm:payment:bitcoin']}
 			<div class="mb-4">
-				<span class="block text-xs text-mapLabel dark:text-white/70">Payment Methods</span>
+				<span class="block text-xs text-mapLabel dark:text-white/70">{$_('payment.methods')}</span>
 				<div class="mt-1 flex space-x-2">
 					<PaymentMethodIcon
 						status={merchant['osm:payment:onchain']}
 						method="btc"
-						label="On-chain"
+						label={$_('payment.onchain')}
 					/>
 					<PaymentMethodIcon
 						status={merchant['osm:payment:lightning']}
 						method="ln"
-						label="Lightning"
+						label={$_('payment.lightning')}
 					/>
 					<PaymentMethodIcon
 						status={merchant['osm:payment:lightning_contactless']}
 						method="nfc"
-						label="Lightning contactless"
+						label={$_('payment.lightningContactless')}
 					/>
 				</div>
 			</div>
@@ -134,7 +135,7 @@
 		<div class="mb-4">
 			<span
 				class="block text-xs text-mapLabel dark:text-white/70"
-				title="Completed by BTC Map community members">Last Surveyed</span
+				title={$_('verification.surveyedBy')}>{$_('verification.lastSurveyed')}</span
 			>
 			{#if merchant.verified_at}
 				<span class="block text-body dark:text-white">
@@ -160,24 +161,25 @@
 			{:else if isLoading}
 				<div class="mt-1 h-5 w-32 animate-pulse rounded bg-link/50"></div>
 			{:else}
-				<span class="block text-body dark:text-white" title="Not recently verified">---</span>
+				<span class="block text-body dark:text-white" title={$_('verification.outdatedTooltip')}
+					>---</span
+				>
 			{/if}
 			<!-- eslint-disable svelte/no-navigation-without-resolve -->
 			<a
 				href={`${resolve('/verify-location')}?id=${merchant.id}`}
 				class="text-xs text-link transition-colors hover:text-hover"
-				title="Help improve the data for everyone"
+				title={$_('verification.helpImprove')}
 			>
-				Verify Location
+				{$_('verification.verifyLocation')}
 			</a>
 			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		</div>
 
 		<div>
 			{#if isBoosted && merchant.boosted_until}
-				<span
-					class="block text-xs text-mapLabel dark:text-white/70"
-					title="This location is boosted!">Boost Expires</span
+				<span class="block text-xs text-mapLabel dark:text-white/70" title={$_('boost.isBoosted')}
+					>{$_('boost.expires')}</span
 				>
 				<span class="block text-body dark:text-white">
 					<Time live={3000} relative={true} timestamp={merchant.boosted_until} />
@@ -185,7 +187,7 @@
 			{/if}
 
 			<button
-				title={isBoosted ? 'Extend Boost' : 'Boost'}
+				title={isBoosted ? $_('boost.extend') : $_('boost.title')}
 				on:click={onBoostClick}
 				disabled={boostLoading}
 				class="mt-2 flex h-[32px] items-center justify-center space-x-2 rounded-lg border border-gray-300 px-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
@@ -193,7 +195,13 @@
 				{#if !boostLoading}
 					<Icon w="16" h="16" icon="arrow_circle_up" type="material" />
 				{/if}
-				<span class="text-xs">{boostLoading ? 'Boosting...' : isBoosted ? 'Extend' : 'Boost'}</span>
+				<span class="text-xs"
+					>{boostLoading
+						? $_('boost.boosting')
+						: isBoosted
+							? $_('boost.extend')
+							: $_('boost.boostAction')}</span
+				>
 			</button>
 		</div>
 	</div>
@@ -202,6 +210,6 @@
 		href={resolve(`/merchant/${merchant.id}`)}
 		class="mt-4 block rounded-lg bg-link py-3 text-center text-white transition-colors hover:bg-hover"
 	>
-		View Full Details
+		{$_('merchant.viewDetails')}
 	</a>
 </div>
