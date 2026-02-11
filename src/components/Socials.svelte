@@ -11,6 +11,9 @@
 	export let github: undefined | string = undefined;
 	export let matrix: undefined | string = undefined;
 	export let geyser: undefined | string = undefined;
+	export let eventbrite: undefined | string = undefined;
+	export let reddit: undefined | string = undefined;
+	export let simplex: undefined | string = undefined;
 	export let instagram: undefined | string = undefined;
 	export let whatsapp: undefined | string = undefined;
 	export let facebook: undefined | string = undefined;
@@ -34,6 +37,9 @@
 	$: safeGithub = sanitizeUrl(github);
 	$: safeMatrix = sanitizeUrl(matrix);
 	$: safeGeyser = sanitizeUrl(geyser);
+	$: safeEventbrite = sanitizeUrl(eventbrite);
+	$: safeReddit = sanitizeUrl(reddit);
+	$: safeSimplex = sanitizeUrl(simplex);
 	$: safeInstagram = sanitizeUrl(instagram);
 	$: safeWhatsapp = sanitizeUrl(whatsapp);
 	$: safeFacebook = sanitizeUrl(facebook);
@@ -111,7 +117,22 @@
 	{/if}
 	{#if safeGeyser}
 		<a href={safeGeyser} target="_blank" rel="noreferrer" class="m-1">
-			<img src="/icons/socials/geyser.svg" alt="geyser" class="h-10 w-10 rounded-full" />
+			<img src="/icons/socials/geyser.jpg" alt="geyser" class="h-10 w-10 rounded-full" />
+		</a>
+	{/if}
+	{#if safeEventbrite}
+		<a href={safeEventbrite} target="_blank" rel="noreferrer" class="m-1">
+			<img src="/icons/socials/eventbrite.png" alt="eventbrite" class="h-10 w-10 rounded-full" />
+		</a>
+	{/if}
+	{#if safeReddit}
+		<a href={safeReddit} target="_blank" rel="noreferrer" class="m-1">
+			<img src="/icons/socials/reddit.svg" alt="reddit" />
+		</a>
+	{/if}
+	{#if safeSimplex}
+		<a href={safeSimplex} target="_blank" rel="noreferrer" class="m-1">
+			<img src="/icons/socials/simplex.jpg" alt="simplex" class="h-10 w-10 rounded-full" />
 		</a>
 	{/if}
 	{#if safeInstagram}
