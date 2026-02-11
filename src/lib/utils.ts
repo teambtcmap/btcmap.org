@@ -28,8 +28,10 @@ const SAFE_URL_PROTOCOLS = ['https:', 'http:', 'mailto:', 'tel:'];
 export const sanitizeUrl = (url: string | undefined): string | undefined => {
 	if (!url) return undefined;
 	try {
-		// Normalize scheme-less URLs by prepending https://
-		const urlToParse = url.includes('://') ? url : `https://${url}`;
+		// Detect if URL has any scheme (mailto:, tel:, https:, etc.)
+		// Only prepend https:// when no scheme is present
+		const hasScheme = /^[A-Za-z][A-Za-z0-9+.-]*:/.test(url);
+		const urlToParse = hasScheme ? url : `https://${url}`;
 		const parsed = new URL(urlToParse);
 		if (SAFE_URL_PROTOCOLS.includes(parsed.protocol.toLowerCase())) {
 			return urlToParse;
