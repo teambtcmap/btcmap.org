@@ -150,6 +150,7 @@
 						github: community.tags['contact:github'],
 						matrix: community.tags['contact:matrix'],
 						geyser: community.tags['contact:geyser'],
+						satlantis: community.tags['contact:satlantis'],
 						eventbrite: community.tags['contact:eventbrite'],
 						reddit: community.tags['contact:reddit'],
 						simplex: community.tags['contact:simplex'],

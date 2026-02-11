@@ -242,6 +242,7 @@
 			github = area['contact:github'];
 			matrix = area['contact:matrix'];
 			geyser = area['contact:geyser'];
+			satlantis = area['contact:satlantis'];
 			eventbrite = area['contact:eventbrite'];
 			reddit = area['contact:reddit'];
 			simplex = area['contact:simplex'];
@@ -264,6 +265,7 @@
 				github ||
 				matrix ||
 				geyser ||
+				satlantis ||
 				eventbrite ||
 				reddit ||
 				simplex ||
@@ -382,6 +384,7 @@
 	let github: string | undefined;
 	let matrix: string | undefined;
 	let geyser: string | undefined;
+	let satlantis: string | undefined;
 	let eventbrite: string | undefined;
 	let reddit: string | undefined;
 	let simplex: string | undefined;
@@ -527,6 +530,7 @@
 					{github}
 					{matrix}
 					{geyser}
+					{satlantis}
 					{eventbrite}
 					{reddit}
 					{simplex}

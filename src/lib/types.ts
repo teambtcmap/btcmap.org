@@ -61,6 +61,7 @@ export type AreaTags = {
 	['contact:github']?: string;
 	['contact:matrix']?: string;
 	['contact:geyser']?: string;
+	['contact:satlantis']?: string;
 	['contact:eventbrite']?: string;
 	['contact:reddit']?: string;
 	['contact:simplex']?: string;
