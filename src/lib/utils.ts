@@ -24,15 +24,16 @@ export const isValidPlaceId = (id: string): boolean => /^(\d+|(?:node|way|relati
 const SAFE_URL_PROTOCOLS = ['https:', 'http:', 'mailto:', 'tel:'];
 
 // Sanitizes URLs to prevent XSS by allowing only safe protocols
+// Returns undefined for relative URLs or non-absolute strings
 export const sanitizeUrl = (url: string | undefined): string | undefined => {
 	if (!url) return undefined;
 	try {
-		const parsed = new URL(url, 'https://btcmap.org');
+		const parsed = new URL(url);
 		if (SAFE_URL_PROTOCOLS.includes(parsed.protocol.toLowerCase())) {
 			return url;
 		}
 	} catch {
-		// Invalid URL
+		// Invalid URL or relative URL (new URL() throws for relative URLs without base)
 	}
 	return undefined;
 };
