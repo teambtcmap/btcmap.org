@@ -57,14 +57,23 @@ function createThemeStore() {
 			const serverTheme = (window as { __INITIAL_THEME__?: Theme }).__INITIAL_THEME__;
 
 			let theme: Theme;
-			if (serverTheme) {
+			// Validate serverTheme is actually a valid Theme value
+			if (serverTheme && (serverTheme === 'dark' || serverTheme === 'light')) {
 				theme = serverTheme;
-			} else if ('theme' in localStorage) {
-				theme = localStorage.theme === 'dark' ? 'dark' : 'light';
-			} else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-				theme = 'dark';
 			} else {
-				theme = 'light';
+				// Try reading from localStorage with error handling
+				try {
+					if ('theme' in localStorage) {
+						theme = localStorage.theme === 'dark' ? 'dark' : 'light';
+					} else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+						theme = 'dark';
+					} else {
+						theme = 'light';
+					}
+				} catch {
+					// localStorage unavailable, fall back to system preference
+					theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+				}
 			}
 
 			// Sync DOM and store without triggering side effects
