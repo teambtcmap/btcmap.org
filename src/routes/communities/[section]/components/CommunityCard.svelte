@@ -24,6 +24,9 @@
 	$: github = tags['contact:github'] && tags['contact:github'];
 	$: matrix = tags['contact:matrix'] && tags['contact:matrix'];
 	$: geyser = tags['contact:geyser'] && tags['contact:geyser'];
+	$: eventbrite = tags['contact:eventbrite'] && tags['contact:eventbrite'];
+	$: reddit = tags['contact:reddit'] && tags['contact:reddit'];
+	$: simplex = tags['contact:simplex'] && tags['contact:simplex'];
 	$: instagram = tags['contact:instagram'] && tags['contact:instagram'];
 	$: whatsapp = tags['contact:whatsapp'] && tags['contact:whatsapp'];
 	$: facebook = tags['contact:facebook'] && tags['contact:facebook'];
@@ -43,6 +46,9 @@
 		github ||
 		matrix ||
 		geyser ||
+		eventbrite ||
+		reddit ||
+		simplex ||
 		instagram ||
 		whatsapp ||
 		facebook ||
@@ -104,6 +110,9 @@
 			{github}
 			{matrix}
 			{geyser}
+			{eventbrite}
+			{reddit}
+			{simplex}
 			{instagram}
 			{whatsapp}
 			{facebook}
