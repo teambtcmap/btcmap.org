@@ -2,16 +2,16 @@
 	import { browser } from '$app/environment';
 	import DashboardStat from './components/DashboardStat.svelte';
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-	import { theme } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import type { ChartHistory } from '$lib/types';
-	import { detectTheme, updateChartThemes } from '$lib/utils';
+	import { updateChartThemes } from '$lib/utils';
 	import Chart from 'chart.js/auto';
 	import { format } from 'date-fns/format';
 	import { startOfYear } from 'date-fns/startOfYear';
 	import { subDays } from 'date-fns/subDays';
 	import { subMonths } from 'date-fns/subMonths';
 	import { subYears } from 'date-fns/subYears';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 
 	export let data;
 
@@ -26,12 +26,36 @@
 	let upToDateChartCanvas: HTMLCanvasElement;
 	let upToDateChart: Chart<'line', number[], string>;
 
+	let chartsInitialized = false;
+
 	const populateCharts = () => {
-		const theme = detectTheme();
+		// Guard: ensure canvas elements are available (SSR or before mount)
+		if (!upToDateChartCanvas || !totalChartCanvas) {
+			return;
+		}
+
+		// Prevent multiple initializations
+		if (chartsInitialized) {
+			return;
+		}
+		chartsInitialized = true;
+
+		const currentTheme = theme.current;
 		const cutoffDate = getChartHistoryDate();
 
 		const filterData = (data: ChartDataItem[] = []) =>
 			data.filter((item) => new Date(item.date) >= cutoffDate);
+
+		// Use Chart.getChart to find and destroy existing chart instances
+		const existingUpToDateChart = Chart.getChart(upToDateChartCanvas);
+		if (existingUpToDateChart) {
+			existingUpToDateChart.destroy();
+		}
+
+		const existingTotalChart = Chart.getChart(totalChartCanvas);
+		if (existingTotalChart) {
+			existingTotalChart.destroy();
+		}
 
 		upToDateChart = new Chart(upToDateChartCanvas, {
 			type: 'line',
@@ -76,7 +100,7 @@
 							}
 						},
 						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+							color: currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					},
 					y: {
@@ -86,7 +110,7 @@
 							}
 						},
 						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+							color: currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					}
 				},
@@ -137,7 +161,7 @@
 							}
 						},
 						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+							color: currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					},
 					y: {
@@ -147,7 +171,7 @@
 							}
 						},
 						grid: {
-							color: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
+							color: currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
 						}
 					}
 				},
@@ -162,9 +186,16 @@
 
 	onMount(async () => {
 		if (browser) {
-			upToDateChartCanvas.getContext('2d');
-			totalChartCanvas.getContext('2d');
 			populateCharts();
+		}
+	});
+
+	onDestroy(() => {
+		if (upToDateChart) {
+			upToDateChart.destroy();
+		}
+		if (totalChart) {
+			totalChart.destroy();
 		}
 	});
 
@@ -227,7 +258,7 @@
 <main class="mt-10 mb-20 space-y-10">
 	{#if typeof window !== 'undefined'}
 		<h1
-			class="{detectTheme() === 'dark' || $theme === 'dark'
+			class="{$theme === 'dark'
 				? 'text-white'
 				: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-left md:text-5xl"
 		>

@@ -15,7 +15,7 @@
 		geolocate,
 		layers
 	} from '$lib/map/setup';
-	import { theme } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import type { BaseMaps, DomEventType, Grade, Leaflet, Place } from '$lib/types';
 	import { getGrade } from '$lib/utils';
 	import type { GeoJSON } from 'geojson';

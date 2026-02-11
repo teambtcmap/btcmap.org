@@ -4,9 +4,10 @@
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import FormSelect from '$components/form/FormSelect.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
-	import { areaError, areas, theme } from '$lib/store';
+	import { areaError, areas } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import { areasSync } from '$lib/sync/areas';
-	import { detectTheme, errToast, validateContinents } from '$lib/utils';
+	import { errToast, validateContinents } from '$lib/utils';
 	import type { PageData } from './$types';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
@@ -114,7 +115,7 @@
 <main class="my-10 space-y-10 text-center md:my-20">
 	{#if typeof window !== 'undefined'}
 		<h1
-			class="{detectTheme() === 'dark' || $theme === 'dark'
+			class="{$theme === 'dark'
 				? 'text-white'
 				: 'gradient'} text-4xl !leading-tight font-semibold md:text-5xl"
 		>

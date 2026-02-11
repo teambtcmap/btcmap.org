@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { detectTheme } from '$lib/utils';
+	import { theme } from '$lib/theme';
 
 	export let status: 'yes' | 'no' | undefined;
 	export let method: 'btc' | 'ln' | 'nfc';
@@ -38,17 +37,12 @@
 		}
 	};
 
-	let isDark = false;
-
-	onMount(() => {
-		isDark = detectTheme() === 'dark';
-	});
-
 	$: statusKey = (status === 'yes' ? 'yes' : status === 'no' ? 'no' : 'unknown') as
 		| 'yes'
 		| 'no'
 		| 'unknown';
-	$: iconSrc = isDark ? iconPaths[method][statusKey].dark : iconPaths[method][statusKey].light;
+	$: iconSrc =
+		$theme === 'dark' ? iconPaths[method][statusKey].dark : iconPaths[method][statusKey].light;
 	$: titleText =
 		status === 'yes'
 			? `${label} accepted`

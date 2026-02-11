@@ -1,8 +1,7 @@
 <script lang="ts">
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import IssuesTable from '$components/IssuesTable.svelte';
-	import { theme } from '$lib/store';
-	import { detectTheme } from '$lib/utils';
+	import { theme } from '$lib/theme';
 	import type { RpcIssue } from '$lib/types';
 
 	export let data;
@@ -19,7 +18,7 @@
 <main class="mt-10 mb-20 space-y-10">
 	{#if typeof window !== 'undefined'}
 		<h1
-			class="{detectTheme() === 'dark' || $theme === 'dark'
+			class="{$theme === 'dark'
 				? 'text-white'
 				: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl lg:text-left"
 		>

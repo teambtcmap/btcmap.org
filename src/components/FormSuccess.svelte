@@ -8,18 +8,13 @@
 
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
-	import { theme } from '$lib/store';
-	import { detectTheme } from '$lib/utils';
+	import { theme } from '$lib/theme';
 </script>
 
 <div class="mt-10 flex items-center justify-center pb-20 text-center md:pb-32">
 	<div>
 		{#if typeof window !== 'undefined'}
-			<h2
-				class="{detectTheme() === 'dark' || $theme === 'dark'
-					? 'text-white'
-					: 'gradient'} mb-5 text-4xl font-semibold"
-			>
+			<h2 class="{$theme === 'dark' ? 'text-white' : 'gradient'} mb-5 text-4xl font-semibold">
 				{type} Submitted!
 			</h2>
 		{:else}

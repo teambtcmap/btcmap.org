@@ -2,8 +2,7 @@
 	export let supporters: { url: string; logoDark?: string; logo: string; title: string }[];
 	export let placeholders: number;
 
-	import { theme } from '$lib/store';
-	import { detectTheme } from '$lib/utils';
+	import { theme } from '$lib/theme';
 </script>
 
 <div class="mt-4">
@@ -22,7 +21,7 @@
 				{#if typeof window !== 'undefined'}
 					<img
 						src="/images/supporters/{supporter.logoDark
-							? detectTheme() === 'dark' || $theme === 'dark'
+							? $theme === 'dark'
 								? supporter.logoDark
 								: supporter.logo
 							: supporter.logo}"

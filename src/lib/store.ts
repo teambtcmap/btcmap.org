@@ -1,5 +1,5 @@
 import type { AppIconName } from '$lib/icons/types';
-import type { Area, Boost, Event, Issue, OSMTags, Place, Report, Theme, User } from '$lib/types';
+import type { Area, Boost, Event, Issue, OSMTags, Place, Report, User } from '$lib/types';
 import type { Writable } from 'svelte/store';
 import { derived, readable, writable } from 'svelte/store';
 
@@ -84,5 +84,3 @@ export const lastUpdatedPlaceId: Writable<number | undefined> = writable();
 export const showTags: Writable<OSMTags | undefined> = writable();
 export const taggingIssues: Writable<Issue[] | undefined> = writable();
 export const showMore = writable(false);
-
-export const theme: Writable<Theme> = writable();

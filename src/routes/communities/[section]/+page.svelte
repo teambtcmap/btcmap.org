@@ -6,13 +6,14 @@
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
 	import FormSelect from '$components/form/FormSelect.svelte';
 	import PrimaryButton from '$components/PrimaryButton.svelte';
-	import { areaError, areas, reportError, syncStatus, theme } from '$lib/store';
+	import { areaError, areas, reportError, syncStatus } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import { areasSync } from '$lib/sync/areas';
-	import { detectTheme, errToast } from '$lib/utils';
+	import { errToast } from '$lib/utils';
 	import { getOrganizationDisplayName } from '$lib/organizationDisplayNames';
 	import type { Community } from '$lib/types';
 	import Chart from 'chart.js/auto';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import type { PageData } from './$types';
 	import { resolve } from '$app/paths';
 
@@ -117,6 +118,12 @@
 			southAmerica &&
 			southAmerica.length
 		) {
+			// Use Chart.getChart to find and destroy existing chart instance
+			const existingChart = Chart.getChart(continentChartCanvas);
+			if (existingChart) {
+				existingChart.destroy();
+			}
+
 			continentChart = new Chart(continentChartCanvas, {
 				type: 'doughnut',
 				data: {
@@ -256,8 +263,13 @@
 		areasSync();
 
 		if (browser) {
-			continentChartCanvas.getContext('2d');
 			initialRenderComplete = true;
+		}
+	});
+
+	onDestroy(() => {
+		if (continentChart) {
+			continentChart.destroy();
 		}
 	});
 </script>
@@ -272,7 +284,7 @@
 <main class="my-10 space-y-10 text-center md:my-20">
 	{#if typeof window !== 'undefined'}
 		<h1
-			class="{detectTheme() === 'dark' || $theme === 'dark'
+			class="{$theme === 'dark'
 				? 'text-white'
 				: 'gradient'} text-4xl !leading-tight font-semibold md:text-5xl"
 		>

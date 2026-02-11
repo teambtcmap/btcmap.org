@@ -38,10 +38,10 @@
 		reports,
 		showTags,
 		taggingIssues,
-		theme,
 		userError,
 		users
 	} from '$lib/store';
+	import { theme } from '$lib/theme';
 	import { areasSync } from '$lib/sync/areas';
 	import { eventsSync } from '$lib/sync/events';
 	import { reportsSync } from '$lib/sync/reports';

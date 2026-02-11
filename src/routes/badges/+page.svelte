@@ -1,9 +1,8 @@
 <script lang="ts">
 	import BadgeCard from './components/BadgeCard.svelte';
 	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-	import { theme } from '$lib/store';
+	import { theme } from '$lib/theme';
 	import { BadgeType } from '$lib/types';
-	import { detectTheme } from '$lib/utils';
 
 	let achievements = [
 		{
@@ -172,7 +171,7 @@
 <main class="my-10 text-center md:my-20">
 	{#if typeof window !== 'undefined'}
 		<h1
-			class="{detectTheme() === 'dark' || $theme === 'dark'
+			class="{$theme === 'dark'
 				? 'text-white'
 				: 'gradient'} mb-8 text-4xl !leading-tight font-semibold md:text-5xl"
 		>

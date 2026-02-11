@@ -7,8 +7,7 @@
 	import { areasSync } from '$lib/sync/areas';
 	import { reportsSync } from '$lib/sync/reports';
 	import { batchSync } from '$lib/sync/batchSync';
-	import { theme } from '$lib/store';
-	import { detectTheme } from '$lib/utils';
+	import { theme } from '$lib/theme';
 
 	const routes = [
 		{ name: 'Communities', url: '/communities' },
@@ -32,7 +31,7 @@
 <main class="my-10 space-y-10">
 	{#if typeof window !== 'undefined'}
 		<h1
-			class="{detectTheme() === 'dark' || $theme === 'dark'
+			class="{$theme === 'dark'
 				? 'text-white'
 				: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl"
 		>

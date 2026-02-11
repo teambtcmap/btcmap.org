@@ -1,4 +1,5 @@
-import { theme, areas } from '$lib/store';
+import { areas } from '$lib/store';
+import { theme } from '$lib/theme';
 import { areasSync } from '$lib/sync/areas';
 import { PLACE_FIELD_SETS } from '$lib/api-fields';
 import { MERCHANT_LIST_MAX_ITEMS } from '$lib/constants';
@@ -109,38 +110,22 @@ export function getRandomColor() {
 	return color;
 }
 
-export const detectTheme = () => {
-	if (typeof window === 'undefined') return 'light'; // SSR fallback
-	if (
-		localStorage.theme === 'dark' ||
-		(!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
-	) {
-		return 'dark';
-	} else {
-		return 'light';
-	}
-};
-
 export const updateChartThemes = (
-	charts: Chart<'line' | 'bar', number[] | undefined, string>[]
+	charts: (Chart<'line' | 'bar', number[] | undefined, string> | undefined)[]
 ) => {
-	if (get(theme) === 'dark') {
-		charts.forEach((chart) => {
-			if (chart.options.scales?.x?.grid && chart.options.scales?.y?.grid) {
-				chart.options.scales.x.grid.color = 'rgba(255, 255, 255, 0.15)';
-				chart.options.scales.y.grid.color = 'rgba(255, 255, 255, 0.15)';
-				chart.update();
-			}
-		});
-	} else {
-		charts.forEach((chart) => {
-			if (chart.options.scales?.x?.grid && chart.options.scales?.y?.grid) {
-				chart.options.scales.x.grid.color = 'rgba(0, 0, 0, 0.1)';
-				chart.options.scales.y.grid.color = 'rgba(0, 0, 0, 0.1)';
-				chart.update();
-			}
-		});
-	}
+	const isDark = get(theme) === 'dark';
+	const gridColor = isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)';
+
+	charts.forEach((chart) => {
+		// Skip undefined charts (SSR) or charts without scales
+		if (!chart?.options?.scales?.x?.grid || !chart?.options?.scales?.y?.grid) {
+			return;
+		}
+
+		chart.options.scales.x.grid.color = gridColor;
+		chart.options.scales.y.grid.color = gridColor;
+		chart.update();
+	});
 };
 
 export const formatElementID = (id: string) => {

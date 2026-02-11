@@ -31,7 +31,7 @@
 	import { format } from 'date-fns/format';
 	import DOMPurify from 'dompurify';
 	import { marked } from 'marked';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 
 	// alert for user errors
 	$: $userError && errToast($userError);
@@ -273,6 +273,12 @@
 		sanitizedMarkdown = DOMPurify.sanitize(markdown);
 
 		const setupChart = () => {
+			// Use Chart.getChart to find and destroy existing chart instance
+			const existingChart = Chart.getChart(tagTypeChartCanvas);
+			if (existingChart) {
+				existingChart.destroy();
+			}
+
 			tagTypeChart = new Chart(tagTypeChartCanvas, {
 				type: 'pie',
 				data: {
@@ -339,8 +345,7 @@
 	let deletedPercent: string | undefined;
 
 	let tagTypeChartCanvas: HTMLCanvasElement;
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	let tagTypeChart;
+	let tagTypeChart: Chart<'pie', (number | undefined)[], string>;
 
 	let eventElements: ActivityEvent[] = [];
 
@@ -393,10 +398,13 @@
 		batchSync([eventsSync, usersSync]);
 
 		if (browser) {
-			// setup chart
-			tagTypeChartCanvas.getContext('2d');
-
 			initialRenderComplete = true;
+		}
+	});
+
+	onDestroy(() => {
+		if (tagTypeChart) {
+			tagTypeChart.destroy();
 		}
 	});
 </script>

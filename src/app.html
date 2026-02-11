@@ -14,15 +14,16 @@
 		<link rel="preload" href="/icons/boosted-icon-pin.svg" as="image" type="image/svg+xml" />
 
 		<script>
-			// theme
-			if (
+			// Theme initialization - runs before Svelte hydrates to prevent flash
+			const theme =
 				localStorage.theme === 'dark' ||
 				(!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
-			) {
-				document.documentElement.classList.add('dark');
-			} else {
-				document.documentElement.classList.remove('dark');
-			}
+					? 'dark'
+					: 'light';
+
+			document.documentElement.classList.toggle('dark', theme === 'dark');
+			// Store for JS to read on init (SSR hydration consistency)
+			window.__INITIAL_THEME__ = theme;
 
 			// service worker
 			navigator.serviceWorker?.ready.then((registration) => {
