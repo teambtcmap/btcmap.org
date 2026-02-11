@@ -349,7 +349,7 @@
 	// Calculate areaReports reactively based on data initialization and reports store
 	// Returns undefined while loading, empty array if no reports for this area, or filtered reports
 	$: areaReports =
-		dataInitialized && data?.id
+		dataInitialized && data?.id && $reports.length > 0
 			? $reports
 					.filter((report) => report.area_id === data.id)
 					.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']))
