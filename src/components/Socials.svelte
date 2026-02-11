@@ -11,6 +11,7 @@
 	export let github: undefined | string = undefined;
 	export let matrix: undefined | string = undefined;
 	export let geyser: undefined | string = undefined;
+	export let satlantis: undefined | string = undefined;
 	export let eventbrite: undefined | string = undefined;
 	export let reddit: undefined | string = undefined;
 	export let simplex: undefined | string = undefined;
@@ -37,6 +38,7 @@
 	$: safeGithub = sanitizeUrl(github);
 	$: safeMatrix = sanitizeUrl(matrix);
 	$: safeGeyser = sanitizeUrl(geyser);
+	$: safeSatlantis = sanitizeUrl(satlantis);
 	$: safeEventbrite = sanitizeUrl(eventbrite);
 	$: safeReddit = sanitizeUrl(reddit);
 	$: safeSimplex = sanitizeUrl(simplex);
@@ -118,6 +120,11 @@
 	{#if safeGeyser}
 		<a href={safeGeyser} target="_blank" rel="noreferrer" class="m-1">
 			<img src="/icons/socials/geyser.jpg" alt="geyser" class="h-10 w-10 rounded-full" />
+		</a>
+	{/if}
+	{#if safeSatlantis}
+		<a href={safeSatlantis} target="_blank" rel="noreferrer" class="m-1">
+			<img src="/icons/socials/satlantis.png" alt="satlantis" class="h-10 w-10 rounded-full" />
 		</a>
 	{/if}
 	{#if safeEventbrite}
