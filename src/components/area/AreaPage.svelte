@@ -44,7 +44,6 @@
 		type AreaTags,
 		type Event,
 		type Place,
-		type Report,
 		type RpcIssue,
 		type User
 	} from '$lib/types.js';
@@ -220,14 +219,6 @@
 			return;
 		}
 
-		// Only set areaReports when reports store has loaded (has actual data)
-		// Keep undefined while loading to show proper loading state
-		if ($reports?.length) {
-			areaReports = $reports
-				.filter((report) => report.area_id === data.id)
-				.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
-		}
-
 		area = areaFound.tags;
 
 		avatar =
@@ -355,16 +346,17 @@
 
 	$: $areas && $areas.length && $places && $places.length && !dataInitialized && initializeData();
 
-	// Update areaReports when reports store loads/changes after initialization
-	$: if (dataInitialized && $reports?.length && areaReports === undefined) {
-		areaReports = $reports
-			.filter((report) => report.area_id === data.id)
-			.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
-	}
+	// Calculate areaReports reactively based on data initialization and reports store
+	// Returns undefined while loading, empty array if no reports for this area, or filtered reports
+	$: areaReports =
+		dataInitialized && data?.id
+			? $reports
+					.filter((report) => report.area_id === data.id)
+					.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']))
+			: undefined;
 
 	let area: AreaTags;
 	let filteredPlaces: Place[] = [];
-	let areaReports: Report[];
 
 	let avatar: string;
 	const alias = data.id;
