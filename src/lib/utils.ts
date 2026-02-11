@@ -24,12 +24,17 @@ export const isValidPlaceId = (id: string): boolean => /^(\d+|(?:node|way|relati
 const SAFE_URL_PROTOCOLS = ['https:', 'http:', 'mailto:', 'tel:'];
 
 // Sanitizes URLs to prevent XSS by allowing only safe protocols
+// Normalizes scheme-less URLs (e.g., 'example.com' → 'https://example.com')
 export const sanitizeUrl = (url: string | undefined): string | undefined => {
 	if (!url) return undefined;
 	try {
-		const parsed = new URL(url, 'https://btcmap.org');
+		// Detect if URL has any scheme (mailto:, tel:, https:, etc.)
+		// Only prepend https:// when no scheme is present
+		const hasScheme = /^[A-Za-z][A-Za-z0-9+.-]*:/.test(url);
+		const urlToParse = hasScheme ? url : `https://${url}`;
+		const parsed = new URL(urlToParse);
 		if (SAFE_URL_PROTOCOLS.includes(parsed.protocol.toLowerCase())) {
-			return url;
+			return urlToParse;
 		}
 	} catch {
 		// Invalid URL

@@ -242,6 +242,9 @@
 			github = area['contact:github'];
 			matrix = area['contact:matrix'];
 			geyser = area['contact:geyser'];
+			eventbrite = area['contact:eventbrite'];
+			reddit = area['contact:reddit'];
+			simplex = area['contact:simplex'];
 			instagram = area['contact:instagram'];
 			whatsapp = area['contact:whatsapp'];
 			facebook = area['contact:facebook'];
@@ -261,6 +264,9 @@
 				github ||
 				matrix ||
 				geyser ||
+				eventbrite ||
+				reddit ||
+				simplex ||
 				instagram ||
 				whatsapp ||
 				facebook ||
@@ -376,6 +382,9 @@
 	let github: string | undefined;
 	let matrix: string | undefined;
 	let geyser: string | undefined;
+	let eventbrite: string | undefined;
+	let reddit: string | undefined;
+	let simplex: string | undefined;
 	let instagram: string | undefined;
 	let whatsapp: string | undefined;
 	let facebook: string | undefined;
@@ -518,6 +527,9 @@
 					{github}
 					{matrix}
 					{geyser}
+					{eventbrite}
+					{reddit}
+					{simplex}
 					{instagram}
 					{whatsapp}
 					{facebook}
