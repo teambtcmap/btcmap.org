@@ -44,7 +44,6 @@
 		type AreaTags,
 		type Event,
 		type Place,
-		type Report,
 		type RpcIssue,
 		type User
 	} from '$lib/types.js';
@@ -220,12 +219,6 @@
 			return;
 		}
 
-		areaReports = $reports
-			? $reports
-					.filter((report) => report.area_id === data.id)
-					.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']))
-			: [];
-
 		area = areaFound.tags;
 
 		avatar =
@@ -353,9 +346,17 @@
 
 	$: $areas && $areas.length && $places && $places.length && !dataInitialized && initializeData();
 
+	// Calculate areaReports reactively based on data initialization and reports store
+	// Returns undefined while loading, empty array if no reports for this area, or filtered reports
+	$: areaReports =
+		dataInitialized && data?.id && $reports.length > 0
+			? $reports
+					.filter((report) => report.area_id === data.id)
+					.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']))
+			: undefined;
+
 	let area: AreaTags;
 	let filteredPlaces: Place[] = [];
-	let areaReports: Report[];
 
 	let avatar: string;
 	const alias = data.id;
@@ -577,11 +578,11 @@
 			<div class="text-center text-primary dark:text-white">
 				<p>Error loading data. Please try again later.</p>
 			</div>
-		{:else if areaReports === undefined && !dataInitialized}
+		{:else if areaReports === undefined}
 			<div class="text-center text-primary dark:text-white">
 				<p>Loading data...</p>
 			</div>
-		{:else if areaReports && areaReports.length > 0}
+		{:else if areaReports.length > 0}
 			<AreaStats {name} {filteredPlaces} {areaReports} areaTags={area} />
 		{:else}
 			<div class="text-center text-primary dark:text-white">
