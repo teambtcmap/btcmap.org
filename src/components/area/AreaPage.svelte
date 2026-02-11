@@ -220,11 +220,13 @@
 			return;
 		}
 
-		areaReports = $reports
-			? $reports
-					.filter((report) => report.area_id === data.id)
-					.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']))
-			: [];
+		// Only set areaReports when reports store has loaded (has actual data)
+		// Keep undefined while loading to show proper loading state
+		if ($reports?.length) {
+			areaReports = $reports
+				.filter((report) => report.area_id === data.id)
+				.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
+		}
 
 		area = areaFound.tags;
 
@@ -352,6 +354,13 @@
 	};
 
 	$: $areas && $areas.length && $places && $places.length && !dataInitialized && initializeData();
+
+	// Update areaReports when reports store loads/changes after initialization
+	$: if (dataInitialized && $reports?.length && areaReports === undefined) {
+		areaReports = $reports
+			.filter((report) => report.area_id === data.id)
+			.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
+	}
 
 	let area: AreaTags;
 	let filteredPlaces: Place[] = [];
@@ -577,11 +586,11 @@
 			<div class="text-center text-primary dark:text-white">
 				<p>Error loading data. Please try again later.</p>
 			</div>
-		{:else if areaReports === undefined && !dataInitialized}
+		{:else if areaReports === undefined}
 			<div class="text-center text-primary dark:text-white">
 				<p>Loading data...</p>
 			</div>
-		{:else if areaReports && areaReports.length > 0}
+		{:else if areaReports.length > 0}
 			<AreaStats {name} {filteredPlaces} {areaReports} areaTags={area} />
 		{:else}
 			<div class="text-center text-primary dark:text-white">
