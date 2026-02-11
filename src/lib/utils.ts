@@ -111,7 +111,7 @@ export function getRandomColor() {
 }
 
 export const updateChartThemes = (
-	charts: Chart<'line' | 'bar', number[] | undefined, string>[]
+	charts: (Chart<'line' | 'bar', number[] | undefined, string> | undefined)[]
 ) => {
 	const isDark = get(theme) === 'dark';
 	const gridColor = isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)';
