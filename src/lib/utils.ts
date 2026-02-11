@@ -24,16 +24,18 @@ export const isValidPlaceId = (id: string): boolean => /^(\d+|(?:node|way|relati
 const SAFE_URL_PROTOCOLS = ['https:', 'http:', 'mailto:', 'tel:'];
 
 // Sanitizes URLs to prevent XSS by allowing only safe protocols
-// Returns undefined for relative URLs or non-absolute strings
+// Normalizes scheme-less URLs (e.g., 'example.com' → 'https://example.com')
 export const sanitizeUrl = (url: string | undefined): string | undefined => {
 	if (!url) return undefined;
 	try {
-		const parsed = new URL(url);
+		// Normalize scheme-less URLs by prepending https://
+		const urlToParse = url.includes('://') ? url : `https://${url}`;
+		const parsed = new URL(urlToParse);
 		if (SAFE_URL_PROTOCOLS.includes(parsed.protocol.toLowerCase())) {
-			return url;
+			return urlToParse;
 		}
 	} catch {
-		// Invalid URL or relative URL (new URL() throws for relative URLs without base)
+		// Invalid URL
 	}
 	return undefined;
 };
