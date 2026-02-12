@@ -431,13 +431,13 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 							/>
 							<label for="onchain" class="ml-1 cursor-pointer">
 								{#if typeof window !== 'undefined'}
-									<img
-										src={$theme === 'dark'
-											? '/icons/btc-highlight-dark.svg'
-											: '/icons/btc-primary.svg'}
-										alt="onchain"
-										class="inline"
-									/>
+								<img
+									src={$theme === 'dark'
+										? '/icons/btc-highlight-dark.svg'
+										: '/icons/btc-primary.svg'}
+									alt=""
+									class="inline"
+								/>
 								{/if}
 								{$_('addLocation.onchainLabel')}
 							</label>
@@ -454,13 +454,13 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 							/>
 							<label for="lightning" class="ml-1 cursor-pointer">
 								{#if typeof window !== 'undefined'}
-									<img
-										src={$theme === 'dark'
-											? '/icons/ln-highlight-dark.svg'
-											: '/icons/ln-primary.svg'}
-										alt="lightning"
-										class="inline"
-									/>
+								<img
+									src={$theme === 'dark'
+										? '/icons/ln-highlight-dark.svg'
+										: '/icons/ln-primary.svg'}
+									alt=""
+									class="inline"
+								/>
 								{/if}
 								{$_('addLocation.lightningLabel')}
 							</label>
@@ -477,13 +477,13 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 							/>
 							<label for="nfc" class="ml-1 cursor-pointer">
 								{#if typeof window !== 'undefined'}
-									<img
-										src={$theme === 'dark'
-											? '/icons/nfc-highlight-dark.svg'
-											: '/icons/nfc-primary.svg'}
-										alt="nfc"
-										class="inline"
-									/>
+								<img
+									src={$theme === 'dark'
+										? '/icons/nfc-highlight-dark.svg'
+										: '/icons/nfc-primary.svg'}
+									alt=""
+									class="inline"
+								/>
 								{/if}
 								{$_('addLocation.nfcLabel')}
 							</label>
