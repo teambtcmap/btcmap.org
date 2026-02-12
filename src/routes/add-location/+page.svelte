@@ -11,6 +11,7 @@ import InfoTooltip from "$components/InfoTooltip.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import { _ } from "$lib/i18n";
 import { loadMapDependencies } from "$lib/map/imports";
 import {
 	attribution,
@@ -295,19 +296,19 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 				? 'text-white'
 				: 'gradient'} mt-10 text-center text-4xl font-semibold md:text-5xl"
 		>
-			Accept bitcoin? Get found.
+			{$_('addLocation.hero')}
 		</h1>
 	{:else}
 		<HeaderPlaceholder />
 	{/if}
 
 	<p class="mt-10 text-center text-lg font-semibold text-primary md:text-xl dark:text-white">
-		If you're a business owner, please read our <a
+		{$_('addLocation.businessOwner')} <a
 			href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Merchant-Best-Practices"
 			target="_blank"
 			rel="noreferrer"
-			class="text-link transition-colors hover:text-hover">Merchant Best Practices</a
-		> guide.
+			class="text-link transition-colors hover:text-hover">{$_('addLocation.bestPractices')}</a
+		>{$_('addLocation.guide')}
 	</p>
 
 	<div class="mt-16 pb-20 md:pb-32 lg:flex lg:justify-between lg:gap-10">
@@ -316,38 +317,37 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 				<h2
 					class="mb-5 text-center text-3xl font-semibold text-primary md:text-left dark:text-white"
 				>
-					Done-for-you
+					{$_('addLocation.heading')}
 				</h2>
 
 				<p class="mb-10 w-full text-justify text-primary dark:text-white">
-					Fill out the following form and one of our volunteer community members will add your
-					location to the map. <InfoTooltip
-						tooltip="All additions are completed on a volunteer basis and so we can't guarantee when your location will be added."
+					{$_('addLocation.description')} <InfoTooltip
+						tooltip={$_('addLocation.tooltip')}
 					/>
 				</p>
 
 				<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
-					<div>
-						<label for="name" class="mb-2 block font-semibold">Merchant Name</label>
-						<input
-							disabled={!captchaSecret || !mapLoaded}
-							type="text"
-							name="name"
-							id="name"
-							placeholder="Satoshi's Comics"
-							required
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={name}
-						/>
-					</div>
+				<div>
+					<label for="name" class="mb-2 block font-semibold">{$_('forms.merchantName')}</label>
+					<input
+						disabled={!captchaSecret || !mapLoaded}
+						type="text"
+						name="name"
+						id="name"
+						placeholder={$_('addLocation.merchantNamePlaceholder')}
+						required
+						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+						bind:this={name}
+					/>
+				</div>
 
-					<div>
-						<label for="location-picker" class="mb-2 block font-semibold">Select Location</label>
-						{#if selected}
-							<span class="font-semibold text-green-500">Location selected!</span>
-						{:else if noLocationSelected}
-							<span class="font-semibold text-error">Please select a location...</span>
-						{/if}
+				<div>
+					<label for="location-picker" class="mb-2 block font-semibold">{$_('forms.selectLocation')}</label>
+					{#if selected}
+						<span class="font-semibold text-green-500">{$_('forms.locationSelected')}</span>
+					{:else if noLocationSelected}
+						<span class="font-semibold text-error">{$_('addLocation.noLocationError')}</span>
+					{/if}
 						<div class="relative mb-2">
 							<div
 								bind:this={mapElement}
@@ -366,7 +366,7 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 								readonly
 								type="number"
 								name="lat"
-								placeholder="Latitude"
+								placeholder={$_('addLocation.latitude')}
 								class="w-full rounded-2xl border-2 border-input p-3 focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 							/>
 							<input
@@ -376,263 +376,260 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 								readonly
 								type="number"
 								name="long"
-								placeholder="Longitude"
+								placeholder={$_('addLocation.longitude')}
 								class="w-full rounded-2xl border-2 border-input p-3 focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 							/>
 							<!-- 	eslint-enable svelte/no-reactive-reassign -->
 						</div>
 					</div>
 
-					<div>
-						<label for="address" class="mb-2 block font-semibold"
-							>Address (Optional) <InfoTooltip
-								tooltip="All locations are required to have a physical
-										presence. Optionally enter an address here if that makes sense where the merchant is located. Services without locations are not map-able."
-							/></label
-						>
-						<input
-							disabled={!captchaSecret || !mapLoaded}
-							type="text"
-							name="address"
-							id="address"
-							placeholder="2100 Freedom Drive..."
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={address}
-						/>
-					</div>
+				<div>
+					<label for="address" class="mb-2 block font-semibold"
+						>{$_('addLocation.addressLabel')} <InfoTooltip
+							tooltip={$_('addLocation.addressTooltip')}
+						/></label
+					>
+					<input
+						disabled={!captchaSecret || !mapLoaded}
+						type="text"
+						name="address"
+						id="address"
+						placeholder={$_('addLocation.addressPlaceholder')}
+						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+						bind:this={address}
+					/>
+				</div>
 
-					<div>
-						<label for="category" class="mb-2 block font-semibold">Category</label>
-						<input
-							disabled={!captchaSecret || !mapLoaded}
-							type="text"
-							name="category"
-							id="category"
-							placeholder="Restaurant etc."
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={category}
-						/>
-					</div>
+				<div>
+					<label for="category" class="mb-2 block font-semibold">{$_('forms.category')}</label>
+					<input
+						disabled={!captchaSecret || !mapLoaded}
+						type="text"
+						name="category"
+						id="category"
+						placeholder={$_('addLocation.categoryPlaceholder')}
+						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+						bind:this={category}
+					/>
+				</div>
 
-					<fieldset>
-						<legend class="mb-2 block font-semibold">Select accepted payment methods</legend>
-						{#if noMethodSelected}
-							<span class="font-semibold text-error">Please fix this...</span>
-						{/if}
-						<div class="space-y-4">
-							<div>
-								<input
-									class="h-4 w-4 accent-link"
-									disabled={!captchaSecret || !mapLoaded}
-									type="checkbox"
-									name="onchain"
-									id="onchain"
-									bind:this={onchain}
-									on:click={handleCheckboxClick}
-								/>
-								<label for="onchain" class="ml-1 cursor-pointer">
-									{#if typeof window !== 'undefined'}
-										<img
-											src={$theme === 'dark'
-												? '/icons/btc-highlight-dark.svg'
-												: '/icons/btc-primary.svg'}
-											alt="onchain"
-											class="inline"
-										/>
-									{/if}
-									On-chain
-								</label>
-							</div>
-							<div>
-								<input
-									class="h-4 w-4 accent-link"
-									disabled={!captchaSecret || !mapLoaded}
-									type="checkbox"
-									name="lightning"
-									id="lightning"
-									bind:this={lightning}
-									on:click={handleCheckboxClick}
-								/>
-								<label for="lightning" class="ml-1 cursor-pointer">
-									{#if typeof window !== 'undefined'}
-										<img
-											src={$theme === 'dark'
-												? '/icons/ln-highlight-dark.svg'
-												: '/icons/ln-primary.svg'}
-											alt="lightning"
-											class="inline"
-										/>
-									{/if}
-									Lightning
-								</label>
-							</div>
-							<div>
-								<input
-									class="h-4 w-4 accent-link"
-									disabled={!captchaSecret || !mapLoaded}
-									type="checkbox"
-									name="nfc"
-									id="nfc"
-									bind:this={nfc}
-									on:click={handleCheckboxClick}
-								/>
-								<label for="nfc" class="ml-1 cursor-pointer">
-									{#if typeof window !== 'undefined'}
-										<img
-											src={$theme === 'dark'
-												? '/icons/nfc-highlight-dark.svg'
-												: '/icons/nfc-primary.svg'}
-											alt="nfc"
-											class="inline"
-										/>
-									{/if}
-									Lightning Contactless
-								</label>
-							</div>
+				<fieldset>
+					<legend class="mb-2 block font-semibold">{$_('addLocation.paymentMethodsLegend')}</legend>
+					{#if noMethodSelected}
+						<span class="font-semibold text-error">{$_('addLocation.paymentMethodError')}</span>
+					{/if}
+					<div class="space-y-4">
+						<div>
+							<input
+								class="h-4 w-4 accent-link"
+								disabled={!captchaSecret || !mapLoaded}
+								type="checkbox"
+								name="onchain"
+								id="onchain"
+								bind:this={onchain}
+								on:click={handleCheckboxClick}
+							/>
+							<label for="onchain" class="ml-1 cursor-pointer">
+								{#if typeof window !== 'undefined'}
+									<img
+										src={$theme === 'dark'
+											? '/icons/btc-highlight-dark.svg'
+											: '/icons/btc-primary.svg'}
+										alt="onchain"
+										class="inline"
+									/>
+								{/if}
+								{$_('addLocation.onchainLabel')}
+							</label>
 						</div>
-					</fieldset>
-
-					<div>
-						<label for="website" class="mb-2 block font-semibold"
-							>Website <span class="font-normal">(optional)</span></label
-						>
-						<input
-							disabled={!captchaSecret || !mapLoaded}
-							type="url"
-							name="website"
-							placeholder="https://bitcoin.org"
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={website}
-						/>
+						<div>
+							<input
+								class="h-4 w-4 accent-link"
+								disabled={!captchaSecret || !mapLoaded}
+								type="checkbox"
+								name="lightning"
+								id="lightning"
+								bind:this={lightning}
+								on:click={handleCheckboxClick}
+							/>
+							<label for="lightning" class="ml-1 cursor-pointer">
+								{#if typeof window !== 'undefined'}
+									<img
+										src={$theme === 'dark'
+											? '/icons/ln-highlight-dark.svg'
+											: '/icons/ln-primary.svg'}
+										alt="lightning"
+										class="inline"
+									/>
+								{/if}
+								{$_('addLocation.lightningLabel')}
+							</label>
+						</div>
+						<div>
+							<input
+								class="h-4 w-4 accent-link"
+								disabled={!captchaSecret || !mapLoaded}
+								type="checkbox"
+								name="nfc"
+								id="nfc"
+								bind:this={nfc}
+								on:click={handleCheckboxClick}
+							/>
+							<label for="nfc" class="ml-1 cursor-pointer">
+								{#if typeof window !== 'undefined'}
+									<img
+										src={$theme === 'dark'
+											? '/icons/nfc-highlight-dark.svg'
+											: '/icons/nfc-primary.svg'}
+										alt="nfc"
+										class="inline"
+									/>
+								{/if}
+								{$_('addLocation.nfcLabel')}
+							</label>
+						</div>
 					</div>
+				</fieldset>
 
-					<div>
-						<label for="phone" class="mb-2 block font-semibold"
-							>Phone <span class="font-normal">(optional)</span></label
-						>
-						<input
-							disabled={!captchaSecret || !mapLoaded}
-							type="tel"
-							name="phone"
-							placeholder="Number"
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={phone}
-						/>
-					</div>
+				<div>
+					<label for="website" class="mb-2 block font-semibold"
+						>{$_('forms.website')} <span class="font-normal">({$_('forms.optional')})</span></label
+					>
+					<input
+						disabled={!captchaSecret || !mapLoaded}
+						type="url"
+						name="website"
+						placeholder={$_('addLocation.websitePlaceholder')}
+						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+						bind:this={website}
+					/>
+				</div>
 
-					<div>
-						<label for="hours" class="mb-2 block font-semibold"
-							>Opening Hours <span class="font-normal">(optional)</span></label
-						>
-						<input
-							disabled={!captchaSecret || !mapLoaded}
-							type="text"
-							name="hours"
-							placeholder="Mo-Fr 08:30-20:00"
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={hours}
-						/>
-					</div>
+				<div>
+					<label for="phone" class="mb-2 block font-semibold"
+						>{$_('forms.phone')} <span class="font-normal">({$_('forms.optional')})</span></label
+					>
+					<input
+						disabled={!captchaSecret || !mapLoaded}
+						type="tel"
+						name="phone"
+						placeholder={$_('addLocation.phonePlaceholder')}
+						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+						bind:this={phone}
+					/>
+				</div>
 
-					<div>
-						<label for="notes" class="mb-2 block font-semibold"
-							>Notes <span class="font-normal">(optional)</span></label
-						>
+				<div>
+					<label for="hours" class="mb-2 block font-semibold"
+						>{$_('forms.openingHours')} <span class="font-normal">({$_('forms.optional')})</span></label
+					>
+					<input
+						disabled={!captchaSecret || !mapLoaded}
+						type="text"
+						name="hours"
+						placeholder={$_('addLocation.hoursPlaceholder')}
+						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+						bind:this={hours}
+					/>
+				</div>
+
+				<div>
+					<label for="notes" class="mb-2 block font-semibold"
+						>{$_('forms.notes')} <span class="font-normal">({$_('forms.optional')})</span></label
+					>
+					<textarea
+						disabled={!captchaSecret || !mapLoaded}
+						name="notes"
+						placeholder={$_('addLocation.notesPlaceholder')}
+						rows="3"
+						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+						bind:this={notes}
+					/>
+				</div>
+
+				<div>
+					<label for="source" class="mb-2 block font-semibold">{$_('addLocation.dataSourceLabel')}</label>
+					<FormSelect
+						id="source"
+						disabled={!captchaSecret || !mapLoaded}
+						name="source"
+						required
+						bind:value={source}
+						on:change={async () => {
+							if (source === 'Other') {
+								await tick();
+								sourceOtherElement.focus();
+							}
+						}}
+					>
+						<option value="">{$_('addLocation.dataSourcePlaceholder')}</option>
+						<option value="Business Owner">{$_('addLocation.dataSourceOwner')}</option>
+						<option value="Customer">{$_('addLocation.dataSourceCustomer')}</option>
+						<option value="Other">{$_('addLocation.dataSourceOther')}</option>
+					</FormSelect>
+					{#if source === 'Other'}
+						<p class="my-2 text-justify text-sm">
+							{$_('addLocation.dataSourceOtherPrompt')}
+						</p>
 						<textarea
 							disabled={!captchaSecret || !mapLoaded}
-							name="notes"
-							placeholder="Please add further details here like additional merchant details, contacts, socials, etc."
-							rows="3"
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={notes}
-						/>
-					</div>
-
-					<div>
-						<label for="source" class="mb-2 block font-semibold">Data Source</label>
-						<FormSelect
-							id="source"
-							disabled={!captchaSecret || !mapLoaded}
-							name="source"
 							required
-							bind:value={source}
-							on:change={async () => {
-								if (source === 'Other') {
-									await tick();
-									sourceOtherElement.focus();
-								}
-							}}
+							name="source-other"
+							placeholder={$_('addLocation.dataSourceOtherPlaceholder')}
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+							bind:value={sourceOther}
+							bind:this={sourceOtherElement}
+						/>
+					{/if}
+				</div>
+
+				<div>
+					<label for="contact" class="mb-2 block font-semibold">{$_('forms.contact')}</label>
+					<p class="mb-2 text-justify text-sm">
+						{$_('addLocation.contactDescription')}
+					</p>
+					<input
+						disabled={!captchaSecret || !mapLoaded}
+						required
+						type="email"
+						name="contact"
+						placeholder={$_('addLocation.contactPlaceholder')}
+						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+						bind:this={contact}
+					/>
+				</div>
+
+				<div>
+					<div class="mb-2 flex items-center space-x-2">
+						<label for="captcha" class="font-semibold"
+							>{$_('forms.captcha')} <span class="font-normal">({$_('forms.captchaCaseSensitive')})</span></label
 						>
-							<option value="">Please select an option</option>
-							<option value="Business Owner">I am the business owner</option>
-							<option value="Customer">I visited as a customer</option>
-							<option value="Other">Other method</option>
-						</FormSelect>
-						{#if source === 'Other'}
-							<p class="my-2 text-justify text-sm">
-								How did you verify this information? Please provide as much detail as possible.
-							</p>
-							<textarea
-								disabled={!captchaSecret || !mapLoaded}
-								required
-								name="source-other"
-								placeholder="Local knowledge, online etc."
-								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-								bind:value={sourceOther}
-								bind:this={sourceOtherElement}
-							/>
+						{#if captchaSecret}
+							<button type="button" on:click={fetchCaptcha}>
+								<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
+							</button>
 						{/if}
 					</div>
-
-					<div>
-						<label for="contact" class="mb-2 block font-semibold">Public Contact</label>
-						<p class="mb-2 text-justify text-sm">
-							If we have any follow-up questions we will contact you in order to add this location
-							successfully. To speed up the process please check your spam folder in case it ends up
-							there.
-						</p>
+					<div class="space-y-2">
+						<div class="flex items-center justify-center rounded-2xl border-2 border-input py-1">
+							{#if isCaptchaLoading}
+								<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
+							{:else}
+								<!-- eslint-disable-next-line svelte/no-at-html-tags - we even sanitize the captcha content above -->
+								{@html captchaContent}
+							{/if}
+						</div>
 						<input
 							disabled={!captchaSecret || !mapLoaded}
 							required
-							type="email"
-							name="contact"
-							placeholder="hello@btcmap.org"
+							type="text"
+							name="captcha"
+							placeholder={$_('addLocation.captchaPlaceholder')}
 							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={contact}
+							bind:this={captchaInput}
 						/>
 					</div>
-
-					<div>
-						<div class="mb-2 flex items-center space-x-2">
-							<label for="captcha" class="font-semibold"
-								>Bot protection <span class="font-normal">(case-sensitive)</span></label
-							>
-							{#if captchaSecret}
-								<button type="button" on:click={fetchCaptcha}>
-									<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
-								</button>
-							{/if}
-						</div>
-						<div class="space-y-2">
-							<div class="flex items-center justify-center rounded-2xl border-2 border-input py-1">
-								{#if isCaptchaLoading}
-									<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
-								{:else}
-									<!-- eslint-disable-next-line svelte/no-at-html-tags - we even sanitize the captcha content above -->
-									{@html captchaContent}
-								{/if}
-							</div>
-							<input
-								disabled={!captchaSecret || !mapLoaded}
-								required
-								type="text"
-								name="captcha"
-								placeholder="Please enter the captcha text."
-								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-								bind:this={captchaInput}
-							/>
-						</div>
-					</div>
+				</div>
 
 					<input
 						type="text"
@@ -642,13 +639,13 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 						bind:this={honeyInput}
 					/>
 
-					<PrimaryButton
-						loading={submitting}
-						disabled={submitting || !captchaSecret || !mapLoaded}
-						style="w-full py-3 rounded-xl"
-					>
-						Submit Location
-					</PrimaryButton>
+				<PrimaryButton
+					loading={submitting}
+					disabled={submitting || !captchaSecret || !mapLoaded}
+					style="w-full py-3 rounded-xl"
+				>
+					{$_('forms.submitLocation')}
+				</PrimaryButton>
 				</form>
 			</div>
 		</section>
@@ -659,13 +656,13 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 		>
 			<div class="lg:flex lg:justify-start">
 				<div class="mx-auto max-w-xl text-primary dark:text-white">
-					<h2 class="mb-5 text-center text-3xl font-semibold md:text-left">Shadowy Supertagger?</h2>
+					<h2 class="mb-5 text-center text-3xl font-semibold md:text-left">{$_('addLocation.supertaggerHeading')}</h2>
 					<p class="mb-10 w-full text-justify md:text-left">
-						Contribute changes directly to OSM - like a 😎 boss. Who needs forms anyway.
+						{$_('addLocation.supertaggerDescription')}
 					</p>
 					<img
 						src="/images/supertagger.svg"
-						alt="shadowy supertagger"
+						alt={$_('addLocation.supertaggerImageAlt')}
 						class="mx-auto mb-10 h-[220px] w-[220px]"
 					/>
 					<PrimaryButton
@@ -673,7 +670,7 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 						link="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers-"
 						external={true}
 					>
-						See Wiki for instructions
+						{$_('addLocation.supertaggerWikiButton')}
 					</PrimaryButton>
 				</div>
 			</div>
