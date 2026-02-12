@@ -493,7 +493,7 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 
 				<div>
 					<label for="website" class="mb-2 block font-semibold"
-						>{$_('forms.website')} <span class="font-normal">({$_('forms.optional')})</span></label
+						>{$_('forms.website')} <span class="font-normal">{$_('forms.optional')}</span></label
 					>
 					<input
 						disabled={!captchaSecret || !mapLoaded}
@@ -507,7 +507,7 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 
 				<div>
 					<label for="phone" class="mb-2 block font-semibold"
-						>{$_('forms.phone')} <span class="font-normal">({$_('forms.optional')})</span></label
+						>{$_('forms.phone')} <span class="font-normal">{$_('forms.optional')}</span></label
 					>
 					<input
 						disabled={!captchaSecret || !mapLoaded}
@@ -521,7 +521,7 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 
 				<div>
 					<label for="hours" class="mb-2 block font-semibold"
-						>{$_('forms.openingHours')} <span class="font-normal">({$_('forms.optional')})</span></label
+						>{$_('forms.openingHours')} <span class="font-normal">{$_('forms.optional')}</span></label
 					>
 					<input
 						disabled={!captchaSecret || !mapLoaded}
@@ -535,7 +535,7 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 
 				<div>
 					<label for="notes" class="mb-2 block font-semibold"
-						>{$_('forms.notes')} <span class="font-normal">({$_('forms.optional')})</span></label
+						>{$_('forms.notes')} <span class="font-normal">{$_('forms.optional')}</span></label
 					>
 					<textarea
 						disabled={!captchaSecret || !mapLoaded}
