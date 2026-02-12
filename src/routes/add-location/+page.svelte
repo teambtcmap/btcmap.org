@@ -307,8 +307,8 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 			href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Merchant-Best-Practices"
 			target="_blank"
 			rel="noreferrer"
-			class="text-link transition-colors hover:text-hover">{$_('addLocation.bestPractices')}</a
-		>{$_('addLocation.guide')}
+				class="text-link transition-colors hover:text-hover">{$_('addLocation.bestPractices')}</a
+		> {$_('addLocation.guide')}
 	</p>
 
 	<div class="mt-16 pb-20 md:pb-32 lg:flex lg:justify-between lg:gap-10">
