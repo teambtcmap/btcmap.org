@@ -2,9 +2,7 @@ import type { Page } from '@playwright/test';
 
 export const MARKER_LOAD_TIMEOUT = 60000;
 
-/**
- * Wait for places API response and markers to render in DOM
- */
+// Wait for places API response and markers to render in DOM
 export async function waitForMarkersToLoad(page: Page) {
 	// First wait for the places API to respond
 	try {
@@ -24,10 +22,7 @@ export async function waitForMarkersToLoad(page: Page) {
 	);
 }
 
-/**
- * Setup console error collection for a test
- * Call this in beforeEach hook
- */
+// Setup console error collection for a test. Call this in beforeEach hook.
 export function setupConsoleErrorCollection(page: Page) {
 	const errors: string[] = [];
 	page.on('console', (msg) => {
@@ -42,10 +37,7 @@ export function setupConsoleErrorCollection(page: Page) {
 	(page as unknown as { _consoleErrors: string[] })._consoleErrors = errors;
 }
 
-/**
- * Check for critical console errors and fail if found
- * Call this in afterEach hook
- */
+// Check for critical console errors and fail if found. Call this in afterEach hook.
 export function checkForConsoleErrors(page: Page) {
 	const errors = (page as unknown as { _consoleErrors: string[] })._consoleErrors || [];
 	// Filter out non-critical errors (resource loading failures, minified JS noise, WebGL initialization)
