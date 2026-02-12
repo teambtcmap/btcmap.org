@@ -1,277 +1,294 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { goto } from '$app/navigation';
+import Chart from "chart.js/auto";
+import { onDestroy, onMount } from "svelte";
 
-	import CommunitySection from './components/CommunitySection.svelte';
-	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-	import FormSelect from '$components/form/FormSelect.svelte';
-	import PrimaryButton from '$components/PrimaryButton.svelte';
-	import { areaError, areas, reportError, syncStatus } from '$lib/store';
-	import { theme } from '$lib/theme';
-	import { areasSync } from '$lib/sync/areas';
-	import { errToast } from '$lib/utils';
-	import { getOrganizationDisplayName } from '$lib/organizationDisplayNames';
-	import type { Community } from '$lib/types';
-	import Chart from 'chart.js/auto';
-	import { onDestroy, onMount } from 'svelte';
-	import type { PageData } from './$types';
-	import { resolve } from '$app/paths';
+import FormSelect from "$components/form/FormSelect.svelte";
+import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import PrimaryButton from "$components/PrimaryButton.svelte";
+import { getOrganizationDisplayName } from "$lib/organizationDisplayNames";
+import { areaError, areas, reportError, syncStatus } from "$lib/store";
+import { areasSync } from "$lib/sync/areas";
+import { theme } from "$lib/theme";
+import type { Community } from "$lib/types";
+import { errToast } from "$lib/utils";
 
-	export let data: PageData;
+import type { PageData } from "./$types";
+import CommunitySection from "./components/CommunitySection.svelte";
+import { browser } from "$app/environment";
+import { goto } from "$app/navigation";
+import { resolve } from "$app/paths";
 
-	// alert for area errors
-	$: $areaError && errToast($areaError);
+export let data: PageData;
 
-	// alert for report errors
-	$: $reportError && errToast($reportError);
+// alert for area errors
+$: $areaError && errToast($areaError);
 
-	let chartRendered = false;
-	let initialRenderComplete = false;
+// alert for report errors
+$: $reportError && errToast($reportError);
 
-	$: communities =
-		$areas && $areas.length
-			? ($areas
-					.filter(
-						(area): area is Community =>
-							area.tags.type === 'community' &&
-							!!area.tags.geo_json &&
-							!!area.tags.name &&
-							!!area.tags['icon:square'] &&
-							!!area.tags.continent
-					)
-					.sort((a, b) => {
-						const nameA = a.tags.name.toUpperCase(); // ignore upper and lowercase
-						const nameB = b.tags.name.toUpperCase(); // ignore upper and lowercase
-						if (nameA < nameB) {
-							return -1;
-						}
-						if (nameA > nameB) {
-							return 1;
-						}
-						// names must be equal
-						return 0;
-					}) as Community[])
-			: undefined;
+let chartRendered = false;
+let initialRenderComplete = false;
 
-	const hasOrganization = (community: Community, orgName: string) => {
-		if (!community.tags.organization) return false;
-		const orgs = community.tags.organization.split(',').map((o: string) => o.trim());
-		return orgs.includes(orgName);
-	};
+$: communities = $areas?.length
+	? ($areas
+			.filter(
+				(area): area is Community =>
+					area.tags.type === "community" &&
+					!!area.tags.geo_json &&
+					!!area.tags.name &&
+					!!area.tags["icon:square"] &&
+					!!area.tags.continent,
+			)
+			.sort((a, b) => {
+				const nameA = a.tags.name.toUpperCase(); // ignore upper and lowercase
+				const nameB = b.tags.name.toUpperCase(); // ignore upper and lowercase
+				if (nameA < nameB) {
+					return -1;
+				}
+				if (nameA > nameB) {
+					return 1;
+				}
+				// names must be equal
+				return 0;
+			}) as Community[])
+	: undefined;
 
-	$: africa =
-		communities && communities.filter((community) => community.tags.continent === 'africa');
-	$: asia = communities && communities.filter((community) => community.tags.continent === 'asia');
-	$: europe =
-		communities && communities.filter((community) => community.tags.continent === 'europe');
-	$: northAmerica =
-		communities && communities.filter((community) => community.tags.continent === 'north-america');
-	$: oceania =
-		communities && communities.filter((community) => community.tags.continent === 'oceania');
-	$: southAmerica =
-		communities && communities.filter((community) => community.tags.continent === 'south-america');
+const hasOrganization = (community: Community, orgName: string) => {
+	if (!community.tags.organization) return false;
+	const orgs = community.tags.organization
+		.split(",")
+		.map((o: string) => o.trim());
+	return orgs.includes(orgName);
+};
 
-	// Get unique organizations from community data
-	$: uniqueOrganizations = communities
-		? Array.from(
-				new Set(
-					communities
-						.filter((community) => community.tags.organization)
-						.flatMap((community) =>
-							community.tags.organization!.split(',').map((org) => org.trim())
-						)
-				)
-			).sort()
-		: [];
+$: africa = communities?.filter(
+	(community) => community.tags.continent === "africa",
+);
+$: asia = communities?.filter(
+	(community) => community.tags.continent === "asia",
+);
+$: europe = communities?.filter(
+	(community) => community.tags.continent === "europe",
+);
+$: northAmerica = communities?.filter(
+	(community) => community.tags.continent === "north-america",
+);
+$: oceania = communities?.filter(
+	(community) => community.tags.continent === "oceania",
+);
+$: southAmerica = communities?.filter(
+	(community) => community.tags.continent === "south-america",
+);
 
-	// Generate organization sections dynamically
-	$: organizationSections = uniqueOrganizations.map((orgId) => ({
-		id: orgId,
-		displayName: getOrganizationDisplayName(orgId),
-		communities: communities?.filter((community) => hasOrganization(community, orgId)) || []
-	}));
+// Get unique organizations from community data
+$: uniqueOrganizations = communities
+	? Array.from(
+			new Set(
+				communities
+					.filter((community) => community.tags.organization)
+					.flatMap((community) =>
+						community.tags.organization!.split(",").map((org) => org.trim()),
+					),
+			),
+		).sort()
+	: [];
 
-	// Validate organization sections and redirect if invalid
-	$: if (data.isOrganization && organizationSections.length > 0) {
-		const isValidOrganization = organizationSections.some((org) => org.id === data.section);
-		if (!isValidOrganization) {
-			// eslint-disable-next-line svelte/no-navigation-without-resolve
-			goto('/communities/africa', { replaceState: true });
+// Generate organization sections dynamically
+$: organizationSections = uniqueOrganizations.map((orgId) => ({
+	id: orgId,
+	displayName: getOrganizationDisplayName(orgId),
+	communities:
+		communities?.filter((community) => hasOrganization(community, orgId)) || [],
+}));
+
+// Validate organization sections and redirect if invalid
+$: if (data.isOrganization && organizationSections.length > 0) {
+	const isValidOrganization = organizationSections.some(
+		(org) => org.id === data.section,
+	);
+	if (!isValidOrganization) {
+		// eslint-disable-next-line svelte/no-navigation-without-resolve
+		goto("/communities/africa", { replaceState: true });
+	}
+}
+
+let continentChartCanvas: HTMLCanvasElement;
+let continentChart: Chart<"doughnut", number[], string>;
+
+const populateChart = () => {
+	if (
+		africa?.length &&
+		asia &&
+		asia.length &&
+		europe &&
+		europe.length &&
+		northAmerica &&
+		northAmerica.length &&
+		oceania &&
+		oceania.length &&
+		southAmerica &&
+		southAmerica.length
+	) {
+		// Use Chart.getChart to find and destroy existing chart instance
+		const existingChart = Chart.getChart(continentChartCanvas);
+		if (existingChart) {
+			existingChart.destroy();
+		}
+
+		continentChart = new Chart(continentChartCanvas, {
+			type: "doughnut",
+			data: {
+				labels: [
+					"Africa",
+					"Asia",
+					"Europe",
+					"North America",
+					"Oceania",
+					"South America",
+				],
+				datasets: [
+					{
+						label: "Communities by Continent",
+						data: [
+							africa.length,
+							asia.length,
+							europe.length,
+							northAmerica.length,
+							oceania.length,
+							southAmerica.length,
+						],
+						backgroundColor: [
+							"rgba(247, 147, 26, 1)",
+							"rgba(11, 144, 114, 1)",
+							"rgba(247, 147, 26, 0.7)",
+							"rgba(11, 144, 114, 0.7)",
+							"rgba(247, 147, 26, 0.35)",
+							"rgba(11, 144, 114, 0.35)",
+						],
+						hoverOffset: 4,
+					},
+				],
+			},
+			options: {
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						labels: {
+							font: {
+								weight: 600,
+							},
+						},
+					},
+					title: {
+						display: true,
+						text: `${communities?.length || 0} Total`,
+						font: { size: 18 },
+					},
+				},
+			},
+		});
+
+		chartRendered = true;
+	}
+};
+
+const chartSync = (status: boolean) => {
+	if (!status) {
+		if (chartRendered) {
+			continentChart.data.datasets[0].data = [
+				africa?.length || 0,
+				asia?.length || 0,
+				europe?.length || 0,
+				northAmerica?.length || 0,
+				oceania?.length || 0,
+				southAmerica?.length || 0,
+			];
+			continentChart.update();
+		} else {
+			populateChart();
 		}
 	}
+};
 
-	let continentChartCanvas: HTMLCanvasElement;
-	let continentChart: Chart<'doughnut', number[], string>;
+$: $areas?.length &&
+	communities &&
+	communities.length &&
+	initialRenderComplete &&
+	chartSync($syncStatus);
 
-	const populateChart = () => {
-		if (
-			africa &&
-			africa.length &&
-			asia &&
-			asia.length &&
-			europe &&
-			europe.length &&
-			northAmerica &&
-			northAmerica.length &&
-			oceania &&
-			oceania.length &&
-			southAmerica &&
-			southAmerica.length
-		) {
-			// Use Chart.getChart to find and destroy existing chart instance
-			const existingChart = Chart.getChart(continentChartCanvas);
-			if (existingChart) {
-				existingChart.destroy();
-			}
+// Generate sections dynamically
+$: sections = [
+	"--Continents--",
+	"africa",
+	"asia",
+	"europe",
+	"north-america",
+	"oceania",
+	"south-america",
+	"--Organizations--",
+	...organizationSections.map((org) => org.id),
+];
 
-			continentChart = new Chart(continentChartCanvas, {
-				type: 'doughnut',
-				data: {
-					labels: ['Africa', 'Asia', 'Europe', 'North America', 'Oceania', 'South America'],
-					datasets: [
-						{
-							label: 'Communities by Continent',
-							data: [
-								africa.length,
-								asia.length,
-								europe.length,
-								northAmerica.length,
-								oceania.length,
-								southAmerica.length
-							],
-							backgroundColor: [
-								'rgba(247, 147, 26, 1)',
-								'rgba(11, 144, 114, 1)',
-								'rgba(247, 147, 26, 0.7)',
-								'rgba(11, 144, 114, 0.7)',
-								'rgba(247, 147, 26, 0.35)',
-								'rgba(11, 144, 114, 0.35)'
-							],
-							hoverOffset: 4
-						}
-					]
-				},
-				options: {
-					maintainAspectRatio: false,
-					plugins: {
-						legend: {
-							labels: {
-								font: {
-									weight: 600
-								}
-							}
-						},
-						title: {
-							display: true,
-							text: `${communities?.length || 0} Total`,
-							font: { size: 18 }
-						}
-					}
-				}
-			});
+$: communitySections = [
+	{
+		section: "africa",
+		communities: africa,
+	},
+	{
+		section: "asia",
+		communities: asia,
+	},
+	{
+		section: "europe",
+		communities: europe,
+	},
+	{
+		section: "north-america",
+		communities: northAmerica,
+	},
+	{
+		section: "oceania",
+		communities: oceania,
+	},
+	{
+		section: "south-america",
+		communities: southAmerica,
+	},
+	...organizationSections.map((org) => ({
+		section: org.id,
+		communities: org.communities,
+	})),
+];
 
-			chartRendered = true;
-		}
-	};
+// Map continent tag values to display names
+const continentDisplayNames: Record<string, string> = {
+	africa: "Africa",
+	asia: "Asia",
+	europe: "Europe",
+	"north-america": "North America",
+	oceania: "Oceania",
+	"south-america": "South America",
+};
 
-	const chartSync = (status: boolean) => {
-		if (!status) {
-			if (chartRendered) {
-				continentChart.data.datasets[0].data = [
-					africa?.length || 0,
-					asia?.length || 0,
-					europe?.length || 0,
-					northAmerica?.length || 0,
-					oceania?.length || 0,
-					southAmerica?.length || 0
-				];
-				continentChart.update();
-			} else {
-				populateChart();
-			}
-		}
-	};
+// Handle section changes via dropdown
+const handleSectionChange = (newSection: string) => {
+	// eslint-disable-next-line svelte/no-navigation-without-resolve
+	goto(`/communities/${newSection}`, { replaceState: false });
+};
 
-	$: $areas &&
-		$areas.length &&
-		communities &&
-		communities.length &&
-		initialRenderComplete &&
-		chartSync($syncStatus);
+onMount(() => {
+	areasSync();
 
-	// Generate sections dynamically
-	$: sections = [
-		'--Continents--',
-		'africa',
-		'asia',
-		'europe',
-		'north-america',
-		'oceania',
-		'south-america',
-		'--Organizations--',
-		...organizationSections.map((org) => org.id)
-	];
+	if (browser) {
+		initialRenderComplete = true;
+	}
+});
 
-	$: communitySections = [
-		{
-			section: 'africa',
-			communities: africa
-		},
-		{
-			section: 'asia',
-			communities: asia
-		},
-		{
-			section: 'europe',
-			communities: europe
-		},
-		{
-			section: 'north-america',
-			communities: northAmerica
-		},
-		{
-			section: 'oceania',
-			communities: oceania
-		},
-		{
-			section: 'south-america',
-			communities: southAmerica
-		},
-		...organizationSections.map((org) => ({
-			section: org.id,
-			communities: org.communities
-		}))
-	];
-
-	// Map continent tag values to display names
-	const continentDisplayNames: Record<string, string> = {
-		africa: 'Africa',
-		asia: 'Asia',
-		europe: 'Europe',
-		'north-america': 'North America',
-		oceania: 'Oceania',
-		'south-america': 'South America'
-	};
-
-	// Handle section changes via dropdown
-	const handleSectionChange = (newSection: string) => {
-		// eslint-disable-next-line svelte/no-navigation-without-resolve
-		goto(`/communities/${newSection}`, { replaceState: false });
-	};
-
-	onMount(() => {
-		areasSync();
-
-		if (browser) {
-			initialRenderComplete = true;
-		}
-	});
-
-	onDestroy(() => {
-		if (continentChart) {
-			continentChart.destroy();
-		}
-	});
+onDestroy(() => {
+	if (continentChart) {
+		continentChart.destroy();
+	}
+});
 </script>
 
 <svelte:head>

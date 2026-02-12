@@ -1,13 +1,13 @@
 <script lang="ts">
-	import type { SocialIconName } from '$lib/icons/types';
-	import IconSocials from '$lib/icons/IconSocials.svelte';
+import IconSocials from "$lib/icons/IconSocials.svelte";
+import type { SocialIconName } from "$lib/icons/types";
 
-	export let member: {
-		avatar: string;
-		name: string;
-		title: string;
-		socials: { url: string; name: SocialIconName }[];
-	};
+export let member: {
+	avatar: string;
+	name: string;
+	title: string;
+	socials: { url: string; name: SocialIconName }[];
+};
 </script>
 
 <div class="space-y-2 text-center">

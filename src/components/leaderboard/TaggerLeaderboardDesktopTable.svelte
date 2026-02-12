@@ -1,17 +1,19 @@
 <script lang="ts">
-	import type { Table } from '@tanstack/svelte-table';
-	import { flexRender } from '@tanstack/svelte-table';
-	import { resolve } from '$app/paths';
-	import type { TaggerLeaderboard } from '$lib/types';
-	import { isEven } from '$lib/utils';
-	import Tip from '$components/Tip.svelte';
+import type { Table } from "@tanstack/svelte-table";
+import { flexRender } from "@tanstack/svelte-table";
 
-	type TaggerRow = TaggerLeaderboard & {
-		position: number;
-		tipDestination?: string;
-	};
+import Tip from "$components/Tip.svelte";
+import type { TaggerLeaderboard } from "$lib/types";
+import { isEven } from "$lib/utils";
 
-	export let table: Table<TaggerRow>;
+import { resolve } from "$app/paths";
+
+type TaggerRow = TaggerLeaderboard & {
+	position: number;
+	tipDestination?: string;
+};
+
+export let table: Table<TaggerRow>;
 </script>
 
 <div class="hidden lg:block" role="region" aria-label="Tagger leaderboard table">

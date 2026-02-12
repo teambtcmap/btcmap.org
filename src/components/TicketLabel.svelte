@@ -1,16 +1,16 @@
 <script lang="ts">
-	export let title: string;
-	export let tooltip: string | undefined;
-	import tippy from 'tippy.js';
+export let title: string;
+export let tooltip: string | undefined;
 
-	let labelTooltip: HTMLSpanElement;
+import tippy from "tippy.js";
 
-	$: tooltip &&
-		tooltip.length &&
-		labelTooltip &&
-		tippy([labelTooltip], {
-			content: tooltip
-		});
+let labelTooltip: HTMLSpanElement;
+
+$: tooltip?.length &&
+	labelTooltip &&
+	tippy([labelTooltip], {
+		content: tooltip,
+	});
 </script>
 
 <span

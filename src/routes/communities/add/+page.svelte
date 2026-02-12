@@ -1,165 +1,173 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import Breadcrumbs from '$components/Breadcrumbs.svelte';
-	import FormSuccess from '$components/FormSuccess.svelte';
-	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-	import Icon from '$components/Icon.svelte';
-	import InfoTooltip from '$components/InfoTooltip.svelte';
-	import PrimaryButton from '$components/PrimaryButton.svelte';
-	import { theme } from '$lib/theme';
-	import type { NominatimResponse } from '$lib/types';
-	import { errToast, successToast, warningToast } from '$lib/utils';
-	import axios from 'axios';
-	import { onMount } from 'svelte';
-	import DOMPurify from 'dompurify';
+import axios from "axios";
+import DOMPurify from "dompurify";
+import { onMount } from "svelte";
 
-	const routes = [
-		{ name: 'Communities', url: '/communities' },
-		{ name: 'Add', url: '/communities/add' }
-	];
+import Breadcrumbs from "$components/Breadcrumbs.svelte";
+import FormSuccess from "$components/FormSuccess.svelte";
+import Icon from "$components/Icon.svelte";
+import InfoTooltip from "$components/InfoTooltip.svelte";
+import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import PrimaryButton from "$components/PrimaryButton.svelte";
+import { theme } from "$lib/theme";
+import type { NominatimResponse } from "$lib/types";
+import { errToast, successToast, warningToast } from "$lib/utils";
 
-	let captchaContent = '';
-	let isCaptchaLoading = true;
-	let captchaSecret: string;
-	let captchaValue: string = '';
-	let honeyInput: HTMLInputElement;
+import { browser } from "$app/environment";
 
-	const fetchCaptcha = () => {
-		isCaptchaLoading = true;
+const routes = [
+	{ name: "Communities", url: "/communities" },
+	{ name: "Add", url: "/communities/add" },
+];
+
+let captchaContent = "";
+let isCaptchaLoading = true;
+let captchaSecret: string;
+let captchaValue: string = "";
+let honeyInput: HTMLInputElement;
+
+const fetchCaptcha = () => {
+	isCaptchaLoading = true;
+	axios
+		.get("/captcha")
+		.then((response) => {
+			captchaSecret = response.data.captchaSecret;
+			captchaContent = DOMPurify.sanitize(response.data.captcha);
+		})
+		.catch((error) => {
+			errToast("Could not fetch captcha, please try again or contact BTC Map.");
+			console.error(error);
+		})
+		.finally(() => {
+			isCaptchaLoading = false;
+		});
+};
+
+let location: string | undefined;
+let name: string;
+let icon: string;
+let lightning: string;
+let socialLinks: string;
+let contact: string;
+let notes: string;
+
+let selected = false;
+let noLocationSelected = false;
+let submitted = false;
+let submitting = false;
+let submissionIssueNumber: number;
+
+let searchQuery: string;
+let searchResults: NominatimResponse[] = [];
+let searchLoading = false;
+
+const searchLocation = () => {
+	searchLoading = true;
+	searchResults = [];
+	location = undefined;
+	selected = false;
+
+	axios
+		.get<NominatimResponse[]>(
+			`https://nominatim.openstreetmap.org/search?q=${searchQuery}&format=json&polygon_geojson=1&email=hello@btcmap.org`,
+		)
+		.then((response) => {
+			searchResults = response.data.filter(
+				(area) =>
+					area.geojson?.type === "Polygon" ||
+					area.geojson?.type === "MultiPolygon",
+			);
+			if (!searchResults.length) {
+				warningToast("No locations found, please adjust query.");
+			}
+			searchLoading = false;
+		})
+		.catch((error) => {
+			errToast(
+				"Could not search for locations, please try again or contact BTC Map.",
+			);
+			searchLoading = false;
+			console.error(error);
+		});
+};
+
+const setLocation = (area: { display_name: string }) => {
+	location = area.display_name;
+	selected = true;
+	successToast("Location selected!");
+};
+
+const submitForm = (event: SubmitEvent) => {
+	event.preventDefault();
+	if (!selected) {
+		noLocationSelected = true;
+		errToast("Please select a location...");
+	} else {
+		submitting = true;
+
 		axios
-			.get('/captcha')
-			.then(function (response) {
-				captchaSecret = response.data.captchaSecret;
-				captchaContent = DOMPurify.sanitize(response.data.captcha);
+			.post("/api/gitea/issue", {
+				type: "community",
+				captchaSecret,
+				captchaTest: captchaValue,
+				honey: honeyInput,
+				location,
+				name,
+				icon: icon ? icon : "",
+				lightning: lightning ? lightning : "",
+				socialLinks: socialLinks ? socialLinks : "",
+				contact,
+				notes: notes ? notes : "",
 			})
-			.catch(function (error) {
-				errToast('Could not fetch captcha, please try again or contact BTC Map.');
-				console.error(error);
+			.then((response) => {
+				submissionIssueNumber = response.data.number;
+				submitted = true;
 			})
-			.finally(() => {
-				isCaptchaLoading = false;
-			});
-	};
-
-	let location: string | undefined;
-	let name: string;
-	let icon: string;
-	let lightning: string;
-	let socialLinks: string;
-	let contact: string;
-	let notes: string;
-
-	let selected = false;
-	let noLocationSelected = false;
-	let submitted = false;
-	let submitting = false;
-	let submissionIssueNumber: number;
-
-	let searchQuery: string;
-	let searchResults: NominatimResponse[] = [];
-	let searchLoading = false;
-
-	const searchLocation = () => {
-		searchLoading = true;
-		searchResults = [];
-		location = undefined;
-		selected = false;
-
-		axios
-			.get<NominatimResponse[]>(
-				`https://nominatim.openstreetmap.org/search?q=${searchQuery}&format=json&polygon_geojson=1&email=hello@btcmap.org`
-			)
-			.then(function (response) {
-				searchResults = response.data.filter(
-					(area) => area.geojson?.type === 'Polygon' || area.geojson?.type === 'MultiPolygon'
-				);
-				if (!searchResults.length) {
-					warningToast('No locations found, please adjust query.');
+			.catch((error) => {
+				if (error.response.data.message.includes("Captcha")) {
+					errToast(error.response.data.message);
+				} else {
+					errToast(
+						"Form submission failed, please try again or contact BTC Map.",
+					);
 				}
-				searchLoading = false;
-			})
-			.catch(function (error) {
-				errToast('Could not search for locations, please try again or contact BTC Map.');
-				searchLoading = false;
+
 				console.error(error);
+				submitting = false;
 			});
-	};
+	}
+};
 
-	const setLocation = (area: { display_name: string }) => {
-		location = area.display_name;
-		selected = true;
-		successToast('Location selected!');
-	};
+const formReset = () => {
+	// Reset state variables
+	selected = false;
+	noLocationSelected = false;
+	submitted = false;
+	submitting = false;
+	searchQuery = "";
+	searchResults = [];
+	searchLoading = false;
 
-	const submitForm = (event: SubmitEvent) => {
-		event.preventDefault();
-		if (!selected) {
-			noLocationSelected = true;
-			errToast('Please select a location...');
-		} else {
-			submitting = true;
+	// Clear form fields
+	location = undefined;
+	name = "";
+	icon = "";
+	lightning = "";
+	socialLinks = "";
+	contact = "";
+	notes = "";
+	captchaValue = ""; // Reset the value directly
 
-			axios
-				.post('/api/gitea/issue', {
-					type: 'community',
-					captchaSecret,
-					captchaTest: captchaValue,
-					honey: honeyInput,
-					location,
-					name,
-					icon: icon ? icon : '',
-					lightning: lightning ? lightning : '',
-					socialLinks: socialLinks ? socialLinks : '',
-					contact,
-					notes: notes ? notes : ''
-				})
-				.then(function (response) {
-					submissionIssueNumber = response.data.number;
-					submitted = true;
-				})
-				.catch(function (error) {
-					if (error.response.data.message.includes('Captcha')) {
-						errToast(error.response.data.message);
-					} else {
-						errToast('Form submission failed, please try again or contact BTC Map.');
-					}
+	// Refresh captcha
+	fetchCaptcha();
+};
 
-					console.error(error);
-					submitting = false;
-				});
-		}
-	};
-
-	const formReset = () => {
-		// Reset state variables
-		selected = false;
-		noLocationSelected = false;
-		submitted = false;
-		submitting = false;
-		searchQuery = '';
-		searchResults = [];
-		searchLoading = false;
-
-		// Clear form fields
-		location = undefined;
-		name = '';
-		icon = '';
-		lightning = '';
-		socialLinks = '';
-		contact = '';
-		notes = '';
-		captchaValue = ''; // Reset the value directly
-
-		// Refresh captcha
+onMount(async () => {
+	if (browser) {
+		// fetch and add captcha
 		fetchCaptcha();
-	};
-
-	onMount(async () => {
-		if (browser) {
-			// fetch and add captcha
-			fetchCaptcha();
-		}
-	});
+	}
+});
 </script>
 
 <svelte:head>

@@ -1,86 +1,87 @@
 <script lang="ts">
-	import { fly } from 'svelte/transition';
-	import CloseButton from '$components/CloseButton.svelte';
-	import MerchantDetailsContent from '$components/MerchantDetailsContent.svelte';
-	import { boost } from '$lib/store';
-	import {
-		calcVerifiedDate,
-		isUpToDate as checkUpToDate,
-		isBoosted as checkBoosted,
-		handleBoost as boostMerchant,
-		clearBoostState,
-		fetchMerchantDetails
-	} from '$lib/merchantDrawerLogic';
-	import type { Place } from '$lib/types';
+import { fly } from "svelte/transition";
 
-	export let merchantId: number | null = null;
-	export let onClose: () => void;
+import CloseButton from "$components/CloseButton.svelte";
+import MerchantDetailsContent from "$components/MerchantDetailsContent.svelte";
+import {
+	handleBoost as boostMerchant,
+	calcVerifiedDate,
+	isBoosted as checkBoosted,
+	isUpToDate as checkUpToDate,
+	clearBoostState,
+	fetchMerchantDetails,
+} from "$lib/merchantDrawerLogic";
+import { boost } from "$lib/store";
+import type { Place } from "$lib/types";
 
-	let merchant: Place | null = null;
-	let isLoading = false;
-	let lastFetchedId: number | null = null;
-	let abortController: AbortController | null = null;
+export let merchantId: number | null = null;
+export let onClose: () => void;
 
-	const verifiedDate = calcVerifiedDate();
-	$: isUpToDate = checkUpToDate(merchant, verifiedDate);
-	$: isBoosted = checkBoosted(merchant);
+let merchant: Place | null = null;
+let isLoading = false;
+let lastFetchedId: number | null = null;
+let abortController: AbortController | null = null;
 
-	let boostLoading = false;
-	const setBoostLoading = (loading: boolean) => {
-		boostLoading = loading;
-	};
+const verifiedDate = calcVerifiedDate();
+$: isUpToDate = checkUpToDate(merchant, verifiedDate);
+$: isBoosted = checkBoosted(merchant);
 
-	// Fetch merchant data when merchantId changes
-	$: if (merchantId && merchantId !== lastFetchedId) {
-		// Cancel any pending request
-		if (abortController) {
-			abortController.abort();
-		}
-		abortController = new AbortController();
+let boostLoading = false;
+const setBoostLoading = (loading: boolean) => {
+	boostLoading = loading;
+};
 
+// Fetch merchant data when merchantId changes
+$: if (merchantId && merchantId !== lastFetchedId) {
+	// Cancel any pending request
+	if (abortController) {
+		abortController.abort();
+	}
+	abortController = new AbortController();
+
+	fetchMerchantDetails(
+		merchantId,
+		merchantId,
+		(m) => (merchant = m),
+		(f) => (isLoading = f),
+		(id) => (lastFetchedId = id),
+		abortController.signal,
+	);
+}
+
+const closeDrawer = () => {
+	clearBoostState();
+	boostLoading = false;
+	merchant = null;
+	lastFetchedId = null;
+	if (abortController) {
+		abortController.abort();
+		abortController = null;
+	}
+	onClose();
+};
+
+const handleBoost = () => boostMerchant(merchant, merchantId, setBoostLoading);
+
+$: if ($boost !== undefined && merchant) {
+	// Boost state changed - refresh merchant data
+	if (merchantId) {
 		fetchMerchantDetails(
 			merchantId,
 			merchantId,
 			(m) => (merchant = m),
 			(f) => (isLoading = f),
 			(id) => (lastFetchedId = id),
-			abortController.signal
 		);
 	}
+}
 
-	const closeDrawer = () => {
-		clearBoostState();
-		boostLoading = false;
-		merchant = null;
-		lastFetchedId = null;
-		if (abortController) {
-			abortController.abort();
-			abortController = null;
-		}
-		onClose();
-	};
-
-	const handleBoost = () => boostMerchant(merchant, merchantId, setBoostLoading);
-
-	$: if ($boost !== undefined && merchant) {
-		// Boost state changed - refresh merchant data
-		if (merchantId) {
-			fetchMerchantDetails(
-				merchantId,
-				merchantId,
-				(m) => (merchant = m),
-				(f) => (isLoading = f),
-				(id) => (lastFetchedId = id)
-			);
-		}
+function handleKeydown(event: KeyboardEvent) {
+	if (event.key === "Escape") {
+		event.preventDefault();
+		closeDrawer();
 	}
-
-	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === 'Escape') {
-			event.preventDefault();
-			closeDrawer();
-		}
-	}
+}
 </script>
 
 <svelte:window on:keydown={handleKeydown} />

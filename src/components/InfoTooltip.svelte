@@ -1,14 +1,16 @@
 <script lang="ts">
-	export let tooltip: string;
-	import tippy from 'tippy.js';
-	import Icon from '$components/Icon.svelte';
+export let tooltip: string;
 
-	let infoTooltip: HTMLButtonElement;
+import tippy from "tippy.js";
 
-	$: infoTooltip &&
-		tippy([infoTooltip], {
-			content: tooltip
-		});
+import Icon from "$components/Icon.svelte";
+
+let infoTooltip: HTMLButtonElement;
+
+$: infoTooltip &&
+	tippy([infoTooltip], {
+		content: tooltip,
+	});
 </script>
 
 <button bind:this={infoTooltip}>

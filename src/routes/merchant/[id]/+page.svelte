@@ -1,385 +1,392 @@
 <script lang="ts">
-	export let data: MerchantPageData;
+export let data: MerchantPageData;
 
-	import { browser } from '$app/environment';
-	import Boost from '$components/Boost.svelte';
-	import BoostButton from '$components/BoostButton.svelte';
-	import Card from '$components/Card.svelte';
-	import CommentAddButton from './components/CommentAddButton.svelte';
-	import Icon from '$components/Icon.svelte';
-	import MapLoadingEmbed from '$components/MapLoadingEmbed.svelte';
-	import MerchantAction from './components/MerchantAction.svelte';
-	import MerchantEvent from './components/MerchantEvent.svelte';
-	import MerchantComment from './components/MerchantComment.svelte';
-	import PaymentMethodIcon from '$components/PaymentMethodIcon.svelte';
-	import PrimaryButton from '$components/PrimaryButton.svelte';
-	import ShowTags from '$components/ShowTags.svelte';
-	import TaggerSkeleton from '$components/TaggerSkeleton.svelte';
-	import TaggingIssues from '$components/TaggingIssues.svelte';
-	import TopButton from '$components/TopButton.svelte';
-	import { updateSinglePlace } from '$lib/sync/places';
-	import { loadMapDependencies } from '$lib/map/imports';
-	import {
-		attribution,
-		calcVerifiedDate,
-		changeDefaultIcons,
-		generateIcon,
-		geolocate,
-		layers
-	} from '$lib/map/setup';
-	import {
-		areaError,
-		areas,
-		placesById,
-		placesError,
-		eventError,
-		events,
-		reportError,
-		reports,
-		showTags,
-		taggingIssues,
-		userError,
-		users
-	} from '$lib/store';
-	import { theme } from '$lib/theme';
-	import { areasSync } from '$lib/sync/areas';
-	import { eventsSync } from '$lib/sync/events';
-	import { reportsSync } from '$lib/sync/reports';
-	import { usersSync } from '$lib/sync/users';
-	import { batchSync } from '$lib/sync/batchSync';
-	import type {
-		Area,
-		BaseMaps,
-		DomEventType,
-		Event,
-		Leaflet,
-		PayMerchant,
-		MerchantPageData
-	} from '$lib/types.js';
-	import type { Marker } from 'leaflet';
-	import {
-		errToast,
-		successToast,
-		formatOpeningHours,
-		formatVerifiedHuman,
-		isBoosted
-	} from '$lib/utils';
-	import rewind from '@mapbox/geojson-rewind';
-	import { geoContains } from 'd3-geo';
-	import type { Map } from 'leaflet';
-	import { onDestroy, onMount } from 'svelte';
-	import Time from 'svelte-time';
-	import tippy from 'tippy.js';
-	import { resolve } from '$app/paths';
-	import { _ } from '$lib/i18n';
+import rewind from "@mapbox/geojson-rewind";
+import { geoContains } from "d3-geo";
+import type { Map, Marker } from "leaflet";
+import { onDestroy, onMount } from "svelte";
+import Time from "svelte-time";
+import tippy from "tippy.js";
 
-	// alert for user errors
-	$: $userError && errToast($userError);
-	// alert for event errors
-	$: $eventError && errToast($eventError);
-	// alert for element errors
-	$: $placesError && errToast($placesError);
-	// alert for area errors
-	$: $areaError && errToast($areaError);
-	// alert for report errors
-	$: $reportError && errToast($reportError);
+import Boost from "$components/Boost.svelte";
+import BoostButton from "$components/BoostButton.svelte";
+import Card from "$components/Card.svelte";
+import Icon from "$components/Icon.svelte";
+import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
+import PaymentMethodIcon from "$components/PaymentMethodIcon.svelte";
+import PrimaryButton from "$components/PrimaryButton.svelte";
+import ShowTags from "$components/ShowTags.svelte";
+import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
+import TaggingIssues from "$components/TaggingIssues.svelte";
+import TopButton from "$components/TopButton.svelte";
+import { _ } from "$lib/i18n";
+import { loadMapDependencies } from "$lib/map/imports";
+import {
+	attribution,
+	calcVerifiedDate,
+	changeDefaultIcons,
+	generateIcon,
+	geolocate,
+	layers,
+} from "$lib/map/setup";
+import {
+	areaError,
+	areas,
+	eventError,
+	events,
+	placesById,
+	placesError,
+	reportError,
+	reports,
+	showTags,
+	taggingIssues,
+	userError,
+	users,
+} from "$lib/store";
+import { areasSync } from "$lib/sync/areas";
+import { batchSync } from "$lib/sync/batchSync";
+import { eventsSync } from "$lib/sync/events";
+import { updateSinglePlace } from "$lib/sync/places";
+import { reportsSync } from "$lib/sync/reports";
+import { usersSync } from "$lib/sync/users";
+import { theme } from "$lib/theme";
+import type {
+	Area,
+	BaseMaps,
+	DomEventType,
+	Event,
+	Leaflet,
+	MerchantPageData,
+	PayMerchant,
+} from "$lib/types.js";
+import {
+	errToast,
+	formatOpeningHours,
+	formatVerifiedHuman,
+	isBoosted,
+	successToast,
+} from "$lib/utils";
 
-	// Scroll indicator thresholds
-	const SCROLL_INDICATOR_MIN_ITEMS = 5;
-	const TOP_BUTTON_MIN_ITEMS = 10;
+import CommentAddButton from "./components/CommentAddButton.svelte";
+import MerchantAction from "./components/MerchantAction.svelte";
+import MerchantComment from "./components/MerchantComment.svelte";
+import MerchantEvent from "./components/MerchantEvent.svelte";
+import { browser } from "$app/environment";
+import { resolve } from "$app/paths";
 
-	let dataInitialized = false;
-	let initialRenderComplete = false;
+// alert for user errors
+$: $userError && errToast($userError);
+// alert for event errors
+$: $eventError && errToast($eventError);
+// alert for element errors
+$: $placesError && errToast($placesError);
+// alert for area errors
+$: $areaError && errToast($areaError);
+// alert for report errors
+$: $reportError && errToast($reportError);
 
-	let leaflet: Leaflet;
-	let DomEvent: DomEventType;
-	let LocateControl: typeof import('leaflet.locatecontrol').LocateControl;
+// Scroll indicator thresholds
+const SCROLL_INDICATOR_MIN_ITEMS = 5;
+const TOP_BUTTON_MIN_ITEMS = 10;
 
-	const initializeData = () => {
-		if (dataInitialized) return;
+let dataInitialized = false;
+let initialRenderComplete = false;
 
-		// Use server data directly instead of store lookup
-		icon = data.icon;
-		address = data.address;
-		description = data.description;
+let leaflet: Leaflet;
+let DomEvent: DomEventType;
+let LocateControl: typeof import("leaflet.locatecontrol").LocateControl;
 
-		hours = data.hours;
-		payment = data.payment;
-		phone = data.phone;
-		website = data.website;
-		email = data.email;
-		twitter = data.twitter;
-		instagram = data.instagram;
-		facebook = data.facebook;
-		thirdParty = data.thirdParty;
-		paymentMethod = data.paymentMethod;
+const initializeData = () => {
+	if (dataInitialized) return;
 
-		lat = data.lat;
-		long = data.lon;
+	// Use server data directly instead of store lookup
+	icon = data.icon;
+	address = data.address;
+	description = data.description;
 
-		const commentsCount = comments.length;
+	hours = data.hours;
+	payment = data.payment;
+	phone = data.phone;
+	website = data.website;
+	email = data.email;
+	twitter = data.twitter;
+	instagram = data.instagram;
+	facebook = data.facebook;
+	thirdParty = data.thirdParty;
+	paymentMethod = data.paymentMethod;
 
-		const communities = $areas.filter(
-			(area) =>
-				area.tags.type === 'community' &&
-				area.tags.geo_json &&
-				area.tags.name &&
-				area.tags['icon:square'] &&
-				area.tags.continent &&
-				$reports.find((report) => report.area_id === area.id)
+	lat = data.lat;
+	long = data.lon;
+
+	const commentsCount = comments.length;
+
+	const communities = $areas.filter(
+		(area) =>
+			area.tags.type === "community" &&
+			area.tags.geo_json &&
+			area.tags.name &&
+			area.tags["icon:square"] &&
+			area.tags.continent &&
+			$reports.find((report) => report.area_id === area.id),
+	);
+
+	// filter communities containing element
+	filteredCommunities = communities.filter((community) => {
+		const rewoundPoly = rewind(community.tags.geo_json, true);
+
+		if (typeof lat === "number" && typeof long === "number") {
+			if (geoContains(rewoundPoly, [long, lat])) {
+				return true;
+			}
+		}
+		return false;
+	});
+
+	const allMerchantEvents = $events.filter(
+		(event) => event.element_id === data.placeData.osm_id,
+	);
+	allMerchantEvents.sort(
+		(a, b) => Date.parse(b.created_at) - Date.parse(a.created_at),
+	);
+	merchantEvents = allMerchantEvents;
+
+	const setupMap = () => {
+		// add map
+		map = leaflet.map(mapElement, { attributionControl: false, maxZoom: 19 });
+
+		// add tiles and basemaps
+		const layersResult = layers(leaflet, map);
+		baseMaps = layersResult.baseMaps;
+
+		// change broken marker image path in prod
+		leaflet.Icon.Default.prototype.options.imagePath = "/icons/";
+
+		// add OSM attribution
+		attribution(leaflet, map);
+
+		leaflet.control.layers(baseMaps).addTo(map);
+
+		// add locate button to map
+		geolocate(leaflet, map, LocateControl);
+
+		// change default icons
+		changeDefaultIcons(true, leaflet, mapElement, DomEvent);
+
+		// add element to map
+		const divIcon = generateIcon(
+			leaflet,
+			data.placeData.deleted_at ? "skull" : icon || "question_mark",
+			!!boosted,
+			commentsCount,
 		);
 
-		// filter communities containing element
-		filteredCommunities = communities.filter((community) => {
-			const rewoundPoly = rewind(community.tags.geo_json, true);
-
-			if (typeof lat === 'number' && typeof long === 'number') {
-				if (geoContains(rewoundPoly, [long, lat])) {
-					return true;
-				}
-			}
-			return false;
-		});
-
-		const allMerchantEvents = $events.filter((event) => event.element_id === data.placeData.osm_id);
-		allMerchantEvents.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
-		merchantEvents = allMerchantEvents;
-
-		const setupMap = () => {
-			// add map
-			map = leaflet.map(mapElement, { attributionControl: false, maxZoom: 19 });
-
-			// add tiles and basemaps
-			const layersResult = layers(leaflet, map);
-			baseMaps = layersResult.baseMaps;
-
-			// change broken marker image path in prod
-			leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
-
-			// add OSM attribution
-			attribution(leaflet, map);
-
-			leaflet.control.layers(baseMaps).addTo(map);
-
-			// add locate button to map
-			geolocate(leaflet, map, LocateControl);
-
-			// change default icons
-			changeDefaultIcons(true, leaflet, mapElement, DomEvent);
-
-			// add element to map
-			const divIcon = generateIcon(
-				leaflet,
-				data.placeData.deleted_at ? 'skull' : icon || 'question_mark',
-				boosted ? true : false,
-				commentsCount
-			);
-
-			if (typeof lat === 'number' && typeof long === 'number') {
-				merchantMarker = leaflet.marker([lat, long], { icon: divIcon });
-				map.addLayer(merchantMarker);
-				map.fitBounds([[lat, long]]);
-			}
-
-			mapLoaded = true;
-		};
-		setupMap();
-
-		dataInitialized = true;
-	};
-
-	// Initialize data when component mounts, only need areas/reports/events for communities/activity
-	$: $users &&
-		$users.length &&
-		$events &&
-		$events.length &&
-		$areas &&
-		$areas.length &&
-		$reports &&
-		$reports.length &&
-		initialRenderComplete &&
-		!dataInitialized &&
-		initializeData();
-
-	// merchant variable no longer needed - using server data directly
-
-	const name = data.name;
-	let icon: string | undefined;
-	let address: string | undefined;
-	let description: string | undefined;
-
-	let hours: string | undefined;
-	let payment: PayMerchant;
-	let boosted: string | undefined;
-	let verified: string[];
-	const verifiedDate = calcVerifiedDate();
-
-	// Make comments reactive to server data updates (from invalidateAll() after adding comment)
-	let comments: typeof data.comments;
-	$: comments = data.comments;
-
-	// Initialize verified and boosted immediately from server data (don't wait for store sync)
-	$: verified = data.verified || [];
-	// Make boosted reactive to both server data and store updates, but only if boost is still active
-	$: {
-		const placeInStore = $placesById.get(Number(data.id));
-		const mergedPlace = placeInStore || data.placeData;
-		// Only set boosted if the place is actually boosted (expiry in future)
-		boosted = mergedPlace && isBoosted(mergedPlace) ? mergedPlace.boosted_until : undefined;
-	}
-	let phone: string | undefined;
-	let website: string | undefined;
-	let email: string | undefined;
-	let twitter: string | undefined;
-	let instagram: string | undefined;
-	let facebook: string | undefined;
-
-	let thirdParty: boolean | undefined;
-	let paymentMethod: string | undefined;
-
-	let thirdPartyTooltip: HTMLAnchorElement;
-	let onchainTooltip: HTMLImageElement;
-	let lnTooltip: HTMLImageElement;
-	let nfcTooltip: HTMLImageElement;
-	let verifiedTooltip: HTMLSpanElement;
-	let outdatedTooltip: HTMLSpanElement;
-
-	$: thirdPartyTooltip &&
-		data &&
-		tippy([thirdPartyTooltip], {
-			content: 'Third party app required'
-		});
-
-	$: onchainTooltip &&
-		data &&
-		tippy([onchainTooltip], {
-			content:
-				data.osmTags?.['payment:onchain'] === 'yes'
-					? 'On-chain accepted'
-					: data.osmTags?.['payment:onchain'] === 'no'
-						? 'On-chain not accepted'
-						: 'On-chain unknown'
-		});
-
-	$: lnTooltip &&
-		data &&
-		tippy([lnTooltip], {
-			content:
-				data.osmTags?.['payment:lightning'] === 'yes'
-					? 'Lightning accepted'
-					: data.osmTags?.['payment:lightning'] === 'no'
-						? 'Lightning not accepted'
-						: 'Lightning unknown'
-		});
-
-	$: nfcTooltip &&
-		data &&
-		tippy([nfcTooltip], {
-			content:
-				data.osmTags?.['payment:lightning_contactless'] === 'yes'
-					? 'Lightning Contactless accepted'
-					: data.osmTags?.['payment:lightning_contactless'] === 'no'
-						? 'Lightning contactless not accepted'
-						: 'Lightning contactless unknown'
-		});
-
-	$: verifiedTooltip &&
-		tippy([verifiedTooltip], {
-			content: 'Verified within the last year'
-		});
-
-	$: outdatedTooltip &&
-		tippy([outdatedTooltip], {
-			content: 'Outdated please re-verify'
-		});
-
-	let lat: number | undefined;
-	let long: number | undefined;
-
-	let filteredCommunities: Area[] = [];
-
-	let hideArrow = false;
-	let activityDiv: HTMLElement;
-
-	let hideCommentsArrow = false;
-	let commentsDiv: HTMLElement;
-
-	let merchantEvents: Event[] = [];
-
-	let eventCount = 50;
-	$: eventsPaginated = merchantEvents.slice(0, eventCount);
-
-	const findUser = (tagger: Event) => {
-		let foundUser = $users.find((user) => user.id == tagger['user_id']);
-
-		if (foundUser) {
-			return foundUser;
-		} else {
-			return undefined;
+		if (typeof lat === "number" && typeof long === "number") {
+			merchantMarker = leaflet.marker([lat, long], { icon: divIcon });
+			map.addLayer(merchantMarker);
+			map.fitBounds([[lat, long]]);
 		}
+
+		mapLoaded = true;
 	};
+	setupMap();
 
-	let mapElement: HTMLDivElement;
-	let map: Map;
-	let mapLoaded = false;
-	let merchantMarker: Marker | undefined; // Store marker reference for reactive updates
+	dataInitialized = true;
+};
 
-	let baseMaps: BaseMaps;
+// Initialize data when component mounts, only need areas/reports/events for communities/activity
+$: $users?.length &&
+	$events &&
+	$events.length &&
+	$areas &&
+	$areas.length &&
+	$reports &&
+	$reports.length &&
+	initialRenderComplete &&
+	!dataInitialized &&
+	initializeData();
 
-	onMount(async () => {
-		batchSync([eventsSync, usersSync, areasSync, reportsSync]);
+// merchant variable no longer needed - using server data directly
 
-		if (browser) {
-			const deps = await loadMapDependencies();
-			leaflet = deps.leaflet;
-			DomEvent = deps.DomEvent;
-			LocateControl = deps.LocateControl;
+const name = data.name;
+let icon: string | undefined;
+let address: string | undefined;
+let description: string | undefined;
 
-			initialRenderComplete = true;
+let hours: string | undefined;
+let payment: PayMerchant;
+let boosted: string | undefined;
+let verified: string[];
+const verifiedDate = calcVerifiedDate();
 
-			// Update localforage with fresh place data to sync comment counts, boosts, etc.
-			// This ensures the map shows current data when navigating back
-			try {
-				await updateSinglePlace(data.id);
-			} catch (error) {
-				// Silent failure - page still works with server data even if cache update fails
-				console.error('Could not update place in localforage:', error);
-			}
-		}
+// Make comments reactive to server data updates (from invalidateAll() after adding comment)
+let comments: typeof data.comments;
+$: comments = data.comments;
+
+// Initialize verified and boosted immediately from server data (don't wait for store sync)
+$: verified = data.verified || [];
+// Make boosted reactive to both server data and store updates, but only if boost is still active
+$: {
+	const placeInStore = $placesById.get(Number(data.id));
+	const mergedPlace = placeInStore || data.placeData;
+	// Only set boosted if the place is actually boosted (expiry in future)
+	boosted =
+		mergedPlace && isBoosted(mergedPlace)
+			? mergedPlace.boosted_until
+			: undefined;
+}
+let phone: string | undefined;
+let website: string | undefined;
+let email: string | undefined;
+let twitter: string | undefined;
+let instagram: string | undefined;
+let facebook: string | undefined;
+
+let thirdParty: boolean | undefined;
+let paymentMethod: string | undefined;
+
+let thirdPartyTooltip: HTMLAnchorElement;
+let onchainTooltip: HTMLImageElement;
+let lnTooltip: HTMLImageElement;
+let nfcTooltip: HTMLImageElement;
+let verifiedTooltip: HTMLSpanElement;
+let outdatedTooltip: HTMLSpanElement;
+
+$: thirdPartyTooltip &&
+	data &&
+	tippy([thirdPartyTooltip], {
+		content: "Third party app required",
 	});
 
-	const toggleTheme = () => {
-		if ($theme === 'dark') {
-			baseMaps['OpenFreeMap Liberty'].remove();
-			baseMaps['OpenFreeMap Dark'].addTo(map);
-		} else {
-			baseMaps['OpenFreeMap Dark'].remove();
-			baseMaps['OpenFreeMap Liberty'].addTo(map);
-		}
-	};
-
-	$: $theme !== undefined && mapLoaded && toggleTheme();
-
-	// Update marker icon when boost or comment state changes
-	$: if (merchantMarker && leaflet && mapLoaded && icon) {
-		const commentsCount = comments.length;
-		const displayIcon = data.placeData.deleted_at
-			? 'skull'
-			: icon !== 'question_mark'
-				? icon
-				: 'currency_bitcoin';
-		const newIcon = generateIcon(leaflet, displayIcon, boosted ? true : false, commentsCount);
-		merchantMarker.setIcon(newIcon);
-	}
-
-	onDestroy(async () => {
-		if (map) {
-			console.info('Unloading Leaflet map.');
-			map.remove();
-		}
+$: onchainTooltip &&
+	data &&
+	tippy([onchainTooltip], {
+		content:
+			data.osmTags?.["payment:onchain"] === "yes"
+				? "On-chain accepted"
+				: data.osmTags?.["payment:onchain"] === "no"
+					? "On-chain not accepted"
+					: "On-chain unknown",
 	});
 
-	const ogImage = `https://api.btcmap.org/og/element/${data.osmType}:${data.osmId}`;
+$: lnTooltip &&
+	data &&
+	tippy([lnTooltip], {
+		content:
+			data.osmTags?.["payment:lightning"] === "yes"
+				? "Lightning accepted"
+				: data.osmTags?.["payment:lightning"] === "no"
+					? "Lightning not accepted"
+					: "Lightning unknown",
+	});
+
+$: nfcTooltip &&
+	data &&
+	tippy([nfcTooltip], {
+		content:
+			data.osmTags?.["payment:lightning_contactless"] === "yes"
+				? "Lightning Contactless accepted"
+				: data.osmTags?.["payment:lightning_contactless"] === "no"
+					? "Lightning contactless not accepted"
+					: "Lightning contactless unknown",
+	});
+
+$: verifiedTooltip &&
+	tippy([verifiedTooltip], {
+		content: "Verified within the last year",
+	});
+
+$: outdatedTooltip &&
+	tippy([outdatedTooltip], {
+		content: "Outdated please re-verify",
+	});
+
+let lat: number | undefined;
+let long: number | undefined;
+
+let filteredCommunities: Area[] = [];
+
+let hideArrow = false;
+let activityDiv: HTMLElement;
+
+let hideCommentsArrow = false;
+let commentsDiv: HTMLElement;
+
+let merchantEvents: Event[] = [];
+
+let eventCount = 50;
+$: eventsPaginated = merchantEvents.slice(0, eventCount);
+
+const findUser = (tagger: Event) => {
+	let foundUser = $users.find((user) => user.id === tagger.user_id);
+
+	if (foundUser) {
+		return foundUser;
+	} else {
+		return undefined;
+	}
+};
+
+let mapElement: HTMLDivElement;
+let map: Map;
+let mapLoaded = false;
+let merchantMarker: Marker | undefined; // Store marker reference for reactive updates
+
+let baseMaps: BaseMaps;
+
+onMount(async () => {
+	batchSync([eventsSync, usersSync, areasSync, reportsSync]);
+
+	if (browser) {
+		const deps = await loadMapDependencies();
+		leaflet = deps.leaflet;
+		DomEvent = deps.DomEvent;
+		LocateControl = deps.LocateControl;
+
+		initialRenderComplete = true;
+
+		// Update localforage with fresh place data to sync comment counts, boosts, etc.
+		// This ensures the map shows current data when navigating back
+		try {
+			await updateSinglePlace(data.id);
+		} catch (error) {
+			// Silent failure - page still works with server data even if cache update fails
+			console.error("Could not update place in localforage:", error);
+		}
+	}
+});
+
+const toggleTheme = () => {
+	if ($theme === "dark") {
+		baseMaps["OpenFreeMap Liberty"].remove();
+		baseMaps["OpenFreeMap Dark"].addTo(map);
+	} else {
+		baseMaps["OpenFreeMap Dark"].remove();
+		baseMaps["OpenFreeMap Liberty"].addTo(map);
+	}
+};
+
+$: $theme !== undefined && mapLoaded && toggleTheme();
+
+// Update marker icon when boost or comment state changes
+$: if (merchantMarker && leaflet && mapLoaded && icon) {
+	const commentsCount = comments.length;
+	const displayIcon = data.placeData.deleted_at
+		? "skull"
+		: icon !== "question_mark"
+			? icon
+			: "currency_bitcoin";
+	const newIcon = generateIcon(leaflet, displayIcon, !!boosted, commentsCount);
+	merchantMarker.setIcon(newIcon);
+}
+
+onDestroy(async () => {
+	if (map) {
+		console.info("Unloading Leaflet map.");
+		map.remove();
+	}
+});
+
+const ogImage = `https://api.btcmap.org/og/element/${data.osmType}:${data.osmId}`;
 </script>
 
 <svelte:head>

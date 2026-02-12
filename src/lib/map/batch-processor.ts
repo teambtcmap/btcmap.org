@@ -1,11 +1,11 @@
-import type { Leaflet, Place } from '$lib/types';
-import type { Marker, MarkerClusterGroup } from 'leaflet';
-import type { FeatureGroup } from 'leaflet';
-import type { ProcessedPlace } from '$lib/workers/map-worker';
-import type { LoadedMarkers } from '$lib/map/markers';
-import { generateIcon, generateMarker } from '$lib/map/setup';
-import { attachMarkerLabelIfVisible } from '$lib/map/labels';
-import { highlightMarker } from '$lib/map/markers';
+import type { FeatureGroup, Marker, MarkerClusterGroup } from "leaflet";
+
+import { attachMarkerLabelIfVisible } from "$lib/map/labels";
+import type { LoadedMarkers } from "$lib/map/markers";
+import { highlightMarker } from "$lib/map/markers";
+import { generateIcon, generateMarker } from "$lib/map/setup";
+import type { Leaflet, Place } from "$lib/types";
+import type { ProcessedPlace } from "$lib/workers/map-worker";
 
 type ProcessBatchOptions = {
 	batch: ProcessedPlace[];
@@ -38,7 +38,7 @@ export const processBatchOnMainThread = ({
 	markers,
 	boostedLayer,
 	selectedMarkerId,
-	onMarkerClick
+	onMarkerClick,
 }: ProcessBatchOptions): void => {
 	const regularMarkersToAdd: Marker[] = [];
 	const boostedMarkersToAdd: Marker[] = [];
@@ -53,7 +53,7 @@ export const processBatchOnMainThread = ({
 			leaflet,
 			iconData.iconTmp,
 			iconData.boosted,
-			iconData.commentsCount
+			iconData.commentsCount,
 		);
 
 		const marker = generateMarker({
@@ -63,7 +63,7 @@ export const processBatchOnMainThread = ({
 			placeId: element.id,
 			leaflet,
 			verify: true,
-			onMarkerClick: (id) => onMarkerClick(Number(id))
+			onMarkerClick: (id) => onMarkerClick(Number(id)),
 		});
 
 		attachMarkerLabelIfVisible(
@@ -74,7 +74,7 @@ export const processBatchOnMainThread = ({
 			placesById,
 			Boolean(iconData.boosted),
 			leaflet,
-			placesById.get(element.id)
+			placesById.get(element.id),
 		);
 
 		if (iconData.boosted && !shouldClusterBoostedMarkers()) {
@@ -94,7 +94,10 @@ export const processBatchOnMainThread = ({
 		boostedMarkersToAdd.forEach((m) => boostedLayer.addLayer(m));
 	}
 
-	if ((regularMarkersToAdd.length > 0 || boostedMarkersToAdd.length > 0) && selectedMarkerId) {
+	if (
+		(regularMarkersToAdd.length > 0 || boostedMarkersToAdd.length > 0) &&
+		selectedMarkerId
+	) {
 		highlightMarker(loadedMarkers, selectedMarkerId);
 	}
 };

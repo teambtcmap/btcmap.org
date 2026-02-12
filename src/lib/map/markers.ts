@@ -1,28 +1,35 @@
-import type { LatLngBounds, Marker } from 'leaflet';
-import type { FeatureGroup } from 'leaflet';
+import type { FeatureGroup, LatLngBounds, Marker } from "leaflet";
 
 export type LoadedMarkers = Record<string, Marker>;
 
 // Clear selection styling from a marker
-export const clearMarkerSelection = (loadedMarkers: LoadedMarkers, markerId: number): void => {
+export const clearMarkerSelection = (
+	loadedMarkers: LoadedMarkers,
+	markerId: number,
+): void => {
 	const marker = loadedMarkers[markerId.toString()];
 	if (!marker) return;
 
 	const markerIcon = marker.getElement();
 	if (markerIcon) {
-		markerIcon.classList.remove('selected-marker', 'selected-marker-boosted');
+		markerIcon.classList.remove("selected-marker", "selected-marker-boosted");
 	}
 };
 
 // Add selection styling to a marker
-export const highlightMarker = (loadedMarkers: LoadedMarkers, markerId: number): void => {
+export const highlightMarker = (
+	loadedMarkers: LoadedMarkers,
+	markerId: number,
+): void => {
 	const marker = loadedMarkers[markerId.toString()];
 	if (!marker) return;
 
 	const markerIcon = marker.getElement();
 	if (markerIcon) {
-		const isBoosted = markerIcon.classList.contains('boosted-icon');
-		markerIcon.classList.add(isBoosted ? 'selected-marker-boosted' : 'selected-marker');
+		const isBoosted = markerIcon.classList.contains("boosted-icon");
+		markerIcon.classList.add(
+			isBoosted ? "selected-marker-boosted" : "selected-marker",
+		);
 	}
 };
 
@@ -40,7 +47,7 @@ export const cleanupOutOfBoundsMarkers = ({
 	upToDateLayer,
 	boostedLayer,
 	boostedLayerMarkerIds,
-	bounds
+	bounds,
 }: CleanupMarkersOptions): string[] => {
 	const markersToRemove: string[] = [];
 

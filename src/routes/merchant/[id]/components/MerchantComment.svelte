@@ -1,9 +1,10 @@
 <script lang="ts">
-	import Time from 'svelte-time';
-	import type { MerchantPageData } from '$lib/types';
+import Time from "svelte-time";
 
-	export let text: MerchantPageData['comments'][number]['text'];
-	export let time: MerchantPageData['comments'][number]['created_at'];
+import type { MerchantPageData } from "$lib/types";
+
+export let text: MerchantPageData["comments"][number]["text"];
+export let time: MerchantPageData["comments"][number]["created_at"];
 </script>
 
 <div

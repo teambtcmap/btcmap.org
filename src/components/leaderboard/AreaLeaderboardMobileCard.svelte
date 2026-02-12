@@ -1,12 +1,13 @@
 <script lang="ts">
-	import type { AreaType } from '$lib/types';
-	import type { Table } from '@tanstack/svelte-table';
-	import { isEven } from '$lib/utils';
-	import GradeDisplay from '$components/leaderboard/GradeDisplay.svelte';
+import type { Table } from "@tanstack/svelte-table";
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	export let table: Table<any>;
-	export let type: AreaType;
+import GradeDisplay from "$components/leaderboard/GradeDisplay.svelte";
+import type { AreaType } from "$lib/types";
+import { isEven } from "$lib/utils";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export let table: Table<any>;
+export let type: AreaType;
 </script>
 
 <!-- Mobile cards -->

@@ -1,5 +1,12 @@
-import type { WorkerMessage, WorkerResponse } from './sync-worker';
-import type { Place, Area, User, Event, Report, ProgressUpdate } from '../types';
+import type { WorkerMessage, WorkerResponse } from "./sync-worker";
+import type {
+	Area,
+	Event,
+	Place,
+	ProgressUpdate,
+	Report,
+	User,
+} from "../types";
 
 let worker: Worker | null = null;
 let workerInitialized = false;
@@ -21,7 +28,9 @@ function isWorkerSupported(): boolean {
 	}
 
 	workerSupported =
-		typeof Worker !== 'undefined' && typeof window !== 'undefined' && 'Worker' in window;
+		typeof Worker !== "undefined" &&
+		typeof window !== "undefined" &&
+		"Worker" in window;
 
 	return workerSupported;
 }
@@ -31,21 +40,21 @@ function handleWorkerMessage(response: WorkerResponse) {
 	if (!request) return;
 
 	switch (response.type) {
-		case 'PROGRESS':
+		case "PROGRESS":
 			// Don't resolve/reject, just call progress callback
 			if (request.onProgress) {
 				request.onProgress(response.payload as ProgressUpdate);
 			}
 			break;
 
-		case 'PARSED':
-		case 'FILTERED':
-		case 'MERGED':
+		case "PARSED":
+		case "FILTERED":
+		case "MERGED":
 			request.resolve(response.payload);
 			pendingRequests.delete(response.id);
 			break;
 
-		case 'ERROR': {
+		case "ERROR": {
 			const errorPayload = response.payload as { error: string };
 			request.reject(new Error(errorPayload.error));
 			pendingRequests.delete(response.id);
@@ -62,13 +71,15 @@ async function initWorker(): Promise<boolean> {
 	workerInitialized = true;
 
 	if (!isWorkerSupported()) {
-		console.warn('Web Workers not supported, falling back to synchronous processing');
+		console.warn(
+			"Web Workers not supported, falling back to synchronous processing",
+		);
 		return false;
 	}
 
 	try {
-		worker = new Worker(new URL('./sync-worker.ts', import.meta.url), {
-			type: 'module'
+		worker = new Worker(new URL("./sync-worker.ts", import.meta.url), {
+			type: "module",
 		});
 
 		worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
@@ -76,17 +87,17 @@ async function initWorker(): Promise<boolean> {
 		};
 
 		worker.onerror = (error) => {
-			console.error('Sync worker error:', error);
+			console.error("Sync worker error:", error);
 			// Reject all pending requests to prevent memory leaks
 			pendingRequests.forEach(({ reject }) => {
-				reject(new Error('Worker encountered an error'));
+				reject(new Error("Worker encountered an error"));
 			});
 			pendingRequests.clear();
 		};
 
 		return true;
 	} catch (error) {
-		console.warn('Failed to initialize sync worker:', error);
+		console.warn("Failed to initialize sync worker:", error);
 		worker = null;
 		return false;
 	}
@@ -97,35 +108,35 @@ function generateMessageId(): string {
 }
 
 async function sendWorkerMessage<T>(
-	messageType: WorkerMessage['type'],
-	payload: WorkerMessage['payload'],
-	onProgress?: (progress: ProgressUpdate) => void
+	messageType: WorkerMessage["type"],
+	payload: WorkerMessage["payload"],
+	onProgress?: (progress: ProgressUpdate) => void,
 ): Promise<T> {
 	const workerReady = await initWorker();
 
 	if (!workerReady || !worker) {
 		// Fallback to synchronous processing
-		throw new Error('Web Worker not supported');
+		throw new Error("Web Worker not supported");
 	}
 
 	const id = generateMessageId();
 
 	return new Promise<T>((resolve, reject) => {
 		if (!worker) {
-			reject(new Error('Worker became unavailable'));
+			reject(new Error("Worker became unavailable"));
 			return;
 		}
 
 		pendingRequests.set(id, {
 			resolve: resolve as (value: unknown) => void,
 			reject,
-			onProgress
+			onProgress,
 		});
 
 		const message: WorkerMessage = {
 			type: messageType,
 			payload,
-			id
+			id,
 		};
 
 		worker.postMessage(message);
@@ -134,14 +145,14 @@ async function sendWorkerMessage<T>(
 
 export async function parseJSON<T>(
 	json: string,
-	type: 'places' | 'areas' | 'users' | 'events' | 'reports',
-	onProgress?: (progress: ProgressUpdate) => void
+	type: "places" | "areas" | "users" | "events" | "reports",
+	onProgress?: (progress: ProgressUpdate) => void,
 ): Promise<T> {
 	try {
-		return await sendWorkerMessage<T>('PARSE_JSON', { json, type }, onProgress);
+		return await sendWorkerMessage<T>("PARSE_JSON", { json, type }, onProgress);
 	} catch (error) {
 		// Fallback to synchronous parsing
-		console.warn('Worker parsing failed, using synchronous fallback:', error);
+		console.warn("Worker parsing failed, using synchronous fallback:", error);
 		return JSON.parse(json);
 	}
 }
@@ -149,17 +160,17 @@ export async function parseJSON<T>(
 export async function filterPlaces(
 	places: Place[],
 	updatedPlaceIds: number[],
-	recentUpdates: Place[]
+	recentUpdates: Place[],
 ): Promise<Place[]> {
 	try {
-		return await sendWorkerMessage<Place[]>('FILTER_PLACES', {
+		return await sendWorkerMessage<Place[]>("FILTER_PLACES", {
 			places,
 			updatedPlaceIds,
-			recentUpdates
+			recentUpdates,
 		});
 	} catch (error) {
 		// Fallback to synchronous filtering
-		console.warn('Worker filtering failed, using synchronous fallback:', error);
+		console.warn("Worker filtering failed, using synchronous fallback:", error);
 		const updatedIds = new Set(updatedPlaceIds);
 		const filtered = places.filter((place) => !updatedIds.has(place.id));
 		const merged = [...filtered];
@@ -172,15 +183,17 @@ export async function filterPlaces(
 	}
 }
 
-export async function filterDeleted<T extends Place | Area | User | Event | Report>(
+export async function filterDeleted<
+	T extends Place | Area | User | Event | Report,
+>(
 	items: T[],
-	type: 'places' | 'areas' | 'users' | 'events' | 'reports'
+	type: "places" | "areas" | "users" | "events" | "reports",
 ): Promise<T[]> {
 	try {
-		return await sendWorkerMessage<T[]>('FILTER_DELETED', { items, type });
+		return await sendWorkerMessage<T[]>("FILTER_DELETED", { items, type });
 	} catch (error) {
 		// Fallback to synchronous filtering
-		console.warn('Worker filtering failed, using synchronous fallback:', error);
+		console.warn("Worker filtering failed, using synchronous fallback:", error);
 		return items.filter((item) => !item.deleted_at);
 	}
 }
@@ -188,14 +201,18 @@ export async function filterDeleted<T extends Place | Area | User | Event | Repo
 export async function mergeUpdates<T extends Area | User | Event | Report>(
 	cached: T[],
 	updates: T[],
-	type: 'areas' | 'users' | 'events' | 'reports'
+	type: "areas" | "users" | "events" | "reports",
 ): Promise<T[]> {
 	try {
-		return await sendWorkerMessage<T[]>('MERGE_UPDATES', { cached, updates, type });
+		return await sendWorkerMessage<T[]>("MERGE_UPDATES", {
+			cached,
+			updates,
+			type,
+		});
 	} catch (error) {
 		// Fallback to synchronous merging
 		// Type-safe: T is constrained to Area | User | Event | Report, all have id and deleted_at
-		console.warn('Worker merging failed, using synchronous fallback:', error);
+		console.warn("Worker merging failed, using synchronous fallback:", error);
 		const updatesMap = new Map(updates.map((item) => [item.id, item]));
 		const filtered = cached.filter((item) => !updatesMap.has(item.id));
 		const merged = [...filtered];

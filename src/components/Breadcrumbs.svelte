@@ -1,7 +1,8 @@
 <script lang="ts">
-	import Icon from '$components/Icon.svelte';
-	type Routes = { name: string; url: string }[];
-	export let routes: Routes;
+import Icon from "$components/Icon.svelte";
+
+type Routes = { name: string; url: string }[];
+export let routes: Routes;
 </script>
 
 <div

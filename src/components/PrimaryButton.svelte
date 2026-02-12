@@ -1,17 +1,17 @@
 <script lang="ts">
-	import LoadingSpinner from '$components/LoadingSpinner.svelte';
+import LoadingSpinner from "$components/LoadingSpinner.svelte";
 
-	export let style: string;
-	export let link: undefined | string = undefined;
-	export let type: undefined | 'button' | 'submit' = undefined;
-	export let external: undefined | boolean = undefined;
-	export let disabled: undefined | boolean = undefined;
-	export let loading: undefined | boolean = undefined;
+export let style: string;
+export let link: undefined | string = undefined;
+export let type: undefined | "button" | "submit" = undefined;
+export let external: undefined | boolean = undefined;
+export let disabled: undefined | boolean = undefined;
+export let loading: undefined | boolean = undefined;
 
-	const baseStyles =
-		'block bg-link text-center font-semibold text-white hover:bg-hover transition-colors';
+const baseStyles =
+	"block bg-link text-center font-semibold text-white hover:bg-hover transition-colors";
 
-	$: combinedStyles = `${baseStyles} ${style}`;
+$: combinedStyles = `${baseStyles} ${style}`;
 </script>
 
 {#if link}

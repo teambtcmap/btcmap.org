@@ -1,75 +1,77 @@
 <script lang="ts">
-	import BoostButton from '$components/BoostButton.svelte';
-	import Icon from '$components/Icon.svelte';
-	import { calcVerifiedDate, verifiedArr } from '$lib/map/setup';
-	import type { Place } from '$lib/types';
-	import { isBoosted, formatOpeningHours, fetchEnhancedPlace } from '$lib/utils';
-	import Time from 'svelte-time';
-	import tippy from 'tippy.js';
-	import { resolve } from '$app/paths';
-	import { onMount } from 'svelte';
+import { onMount } from "svelte";
+import Time from "svelte-time";
+import tippy from "tippy.js";
 
-	export let merchant: Place;
+import BoostButton from "$components/BoostButton.svelte";
+import Icon from "$components/Icon.svelte";
+import { calcVerifiedDate, verifiedArr } from "$lib/map/setup";
+import type { Place } from "$lib/types";
+import { fetchEnhancedPlace, formatOpeningHours, isBoosted } from "$lib/utils";
 
-	// Enhanced merchant data (fetched on-demand if basic data is missing)
-	let enhancedMerchant: Place | null = null;
-	let isEnhancing = false;
+import { resolve } from "$app/paths";
 
-	// Check if we need to fetch enhanced data (only essential fields)
-	$: needsEnhancement = !merchant.name || !merchant.address;
+export let merchant: Place;
 
-	// Fetch enhanced data when needed
-	async function enhanceMerchantData() {
-		if (!needsEnhancement || isEnhancing) return;
+// Enhanced merchant data (fetched on-demand if basic data is missing)
+let enhancedMerchant: Place | null = null;
+let isEnhancing = false;
 
-		isEnhancing = true;
-		try {
-			const enhanced = await fetchEnhancedPlace(merchant.id.toString());
-			if (enhanced) {
-				enhancedMerchant = enhanced;
-			}
-		} catch (error) {
-			console.error('Failed to enhance merchant data:', error);
-		} finally {
-			isEnhancing = false;
+// Check if we need to fetch enhanced data (only essential fields)
+$: needsEnhancement = !merchant.name || !merchant.address;
+
+// Fetch enhanced data when needed
+async function enhanceMerchantData() {
+	if (!needsEnhancement || isEnhancing) return;
+
+	isEnhancing = true;
+	try {
+		const enhanced = await fetchEnhancedPlace(merchant.id.toString());
+		if (enhanced) {
+			enhancedMerchant = enhanced;
 		}
+	} catch (error) {
+		console.error("Failed to enhance merchant data:", error);
+	} finally {
+		isEnhancing = false;
 	}
+}
 
-	// Auto-enhance on mount if needed
-	onMount(() => {
-		if (needsEnhancement) {
-			enhanceMerchantData();
-		}
+// Auto-enhance on mount if needed
+onMount(() => {
+	if (needsEnhancement) {
+		enhanceMerchantData();
+	}
+});
+
+// Use enhanced data if available, otherwise fall back to original
+$: displayMerchant = enhancedMerchant || merchant;
+
+// Make boosted reactive and handle undefined displayMerchant
+$: boosted = displayMerchant ? isBoosted(displayMerchant) : false;
+
+// Use internal Place ID for merchant link, fallback to OSM ID
+$: merchantLinkId = merchant.id || displayMerchant?.osm_id;
+
+// Make all displayMerchant property accesses reactive with safe defaults
+$: icon = displayMerchant?.icon || "question_mark";
+$: address = displayMerchant?.address;
+$: website = displayMerchant?.website;
+$: openingHours = displayMerchant?.opening_hours;
+$: phone = displayMerchant?.phone;
+$: email = displayMerchant?.email;
+$: twitter = displayMerchant?.twitter;
+$: instagram = displayMerchant?.instagram;
+$: facebook = displayMerchant?.facebook;
+$: verified = displayMerchant ? verifiedArr(displayMerchant) : [];
+const verifiedDate = calcVerifiedDate();
+
+let outdatedTooltip: HTMLDivElement;
+
+$: outdatedTooltip &&
+	tippy([outdatedTooltip], {
+		content: "Outdated please re-verify",
 	});
-
-	// Use enhanced data if available, otherwise fall back to original
-	$: displayMerchant = enhancedMerchant || merchant;
-
-	// Make boosted reactive and handle undefined displayMerchant
-	$: boosted = displayMerchant ? isBoosted(displayMerchant) : false;
-
-	// Use internal Place ID for merchant link, fallback to OSM ID
-	$: merchantLinkId = merchant.id || displayMerchant?.osm_id;
-
-	// Make all displayMerchant property accesses reactive with safe defaults
-	$: icon = displayMerchant?.icon || 'question_mark';
-	$: address = displayMerchant?.address;
-	$: website = displayMerchant?.website;
-	$: openingHours = displayMerchant?.opening_hours;
-	$: phone = displayMerchant?.phone;
-	$: email = displayMerchant?.email;
-	$: twitter = displayMerchant?.twitter;
-	$: instagram = displayMerchant?.instagram;
-	$: facebook = displayMerchant?.facebook;
-	$: verified = displayMerchant ? verifiedArr(displayMerchant) : [];
-	const verifiedDate = calcVerifiedDate();
-
-	let outdatedTooltip: HTMLDivElement;
-
-	$: outdatedTooltip &&
-		tippy([outdatedTooltip], {
-			content: 'Outdated please re-verify'
-		});
 </script>
 
 <div

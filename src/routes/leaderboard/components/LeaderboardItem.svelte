@@ -1,24 +1,25 @@
 <script lang="ts">
-	export let position: number;
-	export let avatar: string;
-	export let tagger: string;
-	export let id: number;
-	export let created: number;
-	export let updated: number;
-	export let deleted: number;
-	export let tip: string;
+export let position: number;
+export let avatar: string;
+export let tagger: string;
+export let id: number;
+export let created: number;
+export let updated: number;
+export let deleted: number;
+export let tip: string;
 
-	import Tip from '$components/Tip.svelte';
-	import { resolve } from '$app/paths';
+import Tip from "$components/Tip.svelte";
 
-	$: stats = [
-		{ stat: created, title: 'C' },
-		{ stat: updated, title: 'U' },
-		{ stat: deleted, title: 'D' }
-	];
+import { resolve } from "$app/paths";
 
-	$: regexMatch = tip && tip.match('(lightning:[^)]+)');
-	$: lightning = regexMatch && regexMatch[0].slice(10);
+$: stats = [
+	{ stat: created, title: "C" },
+	{ stat: updated, title: "U" },
+	{ stat: deleted, title: "D" },
+];
+
+$: regexMatch = tip?.match("(lightning:[^)]+)");
+$: lightning = regexMatch?.[0].slice(10);
 </script>
 
 <div

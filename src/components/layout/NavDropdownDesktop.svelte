@@ -1,17 +1,19 @@
 <script lang="ts">
-	import type { DropdownLink } from '$lib/types';
-	import OutClick from 'svelte-outclick';
-	import Icon from '$components/Icon.svelte';
-	import { afterNavigate } from '$app/navigation';
+import OutClick from "svelte-outclick";
 
-	export let title: string;
-	export let links: DropdownLink[];
+import Icon from "$components/Icon.svelte";
+import type { DropdownLink } from "$lib/types";
 
-	let show = false;
+import { afterNavigate } from "$app/navigation";
 
-	afterNavigate(() => {
-		show = false;
-	});
+export let title: string;
+export let links: DropdownLink[];
+
+let show = false;
+
+afterNavigate(() => {
+	show = false;
+});
 </script>
 
 <!-- dropdown menu -->

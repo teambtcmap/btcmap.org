@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
-	export let id: string;
-	export let name: string;
+import { resolve } from "$app/paths";
+export let id: string;
+export let name: string;
 </script>
 
 <div

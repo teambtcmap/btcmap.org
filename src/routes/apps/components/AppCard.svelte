@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { AppIconName } from '$lib/icons/types';
-	import IconApps from '$lib/icons/IconApps.svelte';
+import IconApps from "$lib/icons/IconApps.svelte";
+import type { AppIconName } from "$lib/icons/types";
 
-	export let image: AppIconName;
-	export let text: string;
-	export let desc: string;
-	export let link: string;
+export let image: AppIconName;
+export let text: string;
+export let desc: string;
+export let link: string;
 </script>
 
 <div>

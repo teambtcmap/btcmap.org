@@ -1,17 +1,17 @@
 <script lang="ts">
-	import type { SocialIconName } from '$lib/icons/types';
-	import IconSocials from '$lib/icons/IconSocials.svelte';
+import IconSocials from "$lib/icons/IconSocials.svelte";
+import type { SocialIconName } from "$lib/icons/types";
 
-	export let url: string;
-	export let social: SocialIconName;
+export let url: string;
+export let social: SocialIconName;
 
-	const socialLabels: Record<string, string> = {
-		matrix: 'Matrix',
-		github: 'GitHub',
-		amboss: 'Amboss',
-		nostr: 'Nostr',
-		x: 'X (Twitter)'
-	};
+const socialLabels: Record<string, string> = {
+	matrix: "Matrix",
+	github: "GitHub",
+	amboss: "Amboss",
+	nostr: "Nostr",
+	x: "X (Twitter)",
+};
 </script>
 
 <!-- eslint-disable svelte/no-navigation-without-resolve -->

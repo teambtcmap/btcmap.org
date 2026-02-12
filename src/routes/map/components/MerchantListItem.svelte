@@ -1,32 +1,35 @@
 <script lang="ts">
-	import Icon from '$components/Icon.svelte';
-	import PaymentMethodIcon from '$components/PaymentMethodIcon.svelte';
-	import type { Place } from '$lib/types';
-	import { formatVerifiedHuman } from '$lib/utils';
-	import { isUpToDate as checkUpToDate, isBoosted as checkBoosted } from '$lib/merchantDrawerLogic';
-	import { _ } from '$lib/i18n';
+import Icon from "$components/Icon.svelte";
+import PaymentMethodIcon from "$components/PaymentMethodIcon.svelte";
+import { _ } from "$lib/i18n";
+import {
+	isBoosted as checkBoosted,
+	isUpToDate as checkUpToDate,
+} from "$lib/merchantDrawerLogic";
+import type { Place } from "$lib/types";
+import { formatVerifiedHuman } from "$lib/utils";
 
-	export let merchant: Place;
-	export let enrichedData: Place | null = null;
-	export let isSelected: boolean = false;
-	export let verifiedDate: number;
-	export let onclick: (merchant: Place) => void = () => {};
-	export let onmouseenter: (merchant: Place) => void = () => {};
-	export let onmouseleave: (merchant: Place) => void = () => {};
+export let merchant: Place;
+export let enrichedData: Place | null = null;
+export let isSelected: boolean = false;
+export let verifiedDate: number;
+export let onclick: (merchant: Place) => void = () => {};
+export let onmouseenter: (merchant: Place) => void = () => {};
+export let onmouseleave: (merchant: Place) => void = () => {};
 
-	$: showSkeleton = !enrichedData;
-	$: displayData = enrichedData || merchant;
-	$: hasPaymentMethods =
-		enrichedData?.['osm:payment:onchain'] !== undefined ||
-		enrichedData?.['osm:payment:lightning'] !== undefined ||
-		enrichedData?.['osm:payment:lightning_contactless'] !== undefined;
+$: showSkeleton = !enrichedData;
+$: displayData = enrichedData || merchant;
+$: hasPaymentMethods =
+	enrichedData?.["osm:payment:onchain"] !== undefined ||
+	enrichedData?.["osm:payment:lightning"] !== undefined ||
+	enrichedData?.["osm:payment:lightning_contactless"] !== undefined;
 
-	$: isVerified = checkUpToDate(displayData, verifiedDate);
-	$: isBoosted = checkBoosted(merchant);
+$: isVerified = checkUpToDate(displayData, verifiedDate);
+$: isBoosted = checkBoosted(merchant);
 
-	function handleClick() {
-		onclick(merchant);
-	}
+function handleClick() {
+	onclick(merchant);
+}
 </script>
 
 <li class="list-none">

@@ -1,7 +1,9 @@
 // Temporarily disabled during maintenance
 // import { getIssues } from '$lib/gitea';
-import type { PageServerLoad } from './$types';
-import type { GiteaIssue } from '$lib/types';
+
+import type { GiteaIssue } from "$lib/types";
+
+import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async () => {
 	// Temporarily disabled during maintenance
@@ -22,6 +24,6 @@ export const load: PageServerLoad = async () => {
 	return {
 		tickets: [] as GiteaIssue[],
 		totalTickets: 0,
-		maintenance: true
+		maintenance: true,
 	};
 };

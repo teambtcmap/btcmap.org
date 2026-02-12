@@ -1,17 +1,21 @@
-import type { PageServerLoad } from './$types';
-import type { GeoLocation } from '$lib/types';
+import type { GeoLocation } from "$lib/types";
+
+import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ request }) => {
-	const geoHeader = request.headers.get('x-nf-geo');
+	const geoHeader = request.headers.get("x-nf-geo");
 
 	const geo: GeoLocation = { lat: null, lng: null };
 
 	if (geoHeader) {
 		try {
 			// Netlify encodes the geo header as base64
-			const decoded = Buffer.from(geoHeader, 'base64').toString('utf-8');
+			const decoded = Buffer.from(geoHeader, "base64").toString("utf-8");
 			const geoData = JSON.parse(decoded);
-			if (typeof geoData.latitude === 'number' && typeof geoData.longitude === 'number') {
+			if (
+				typeof geoData.latitude === "number" &&
+				typeof geoData.longitude === "number"
+			) {
 				geo.lat = geoData.latitude;
 				geo.lng = geoData.longitude;
 			}

@@ -1,265 +1,298 @@
 <script lang="ts">
-	import AboutCommunity from './components/AboutCommunity.svelte';
-	import AboutContributor from './components/AboutContributor.svelte';
-	import AboutCore from './components/AboutCore.svelte';
-	import AboutIntegration from './components/AboutIntegration.svelte';
-	import AboutMerchant from './components/AboutMerchant.svelte';
-	import AboutPlus from './components/AboutPlus.svelte';
-	import AboutTagger from './components/AboutTagger.svelte';
-	import {
-		areaError,
-		areas,
-		placesError,
-		places,
-		eventError,
-		events,
-		excludeLeader,
-		userError,
-		users
-	} from '$lib/store';
-	import { areasSync } from '$lib/sync/areas';
-	import { eventsSync } from '$lib/sync/events';
-	import { reportsSync } from '$lib/sync/reports';
-	import { usersSync } from '$lib/sync/users';
-	import { batchSync } from '$lib/sync/batchSync';
-	import { resolve } from '$app/paths';
-	import type { SocialIconName } from '$lib/icons/types';
-	import type { Area, Place } from '$lib/types';
-	import { errToast, formatElementID } from '$lib/utils';
-	import { onMount } from 'svelte';
+import { onMount } from "svelte";
 
-	onMount(() => {
-		batchSync([eventsSync, usersSync, areasSync, reportsSync]);
+import type { SocialIconName } from "$lib/icons/types";
+import {
+	areaError,
+	areas,
+	eventError,
+	events,
+	excludeLeader,
+	places,
+	placesError,
+	userError,
+	users,
+} from "$lib/store";
+import { areasSync } from "$lib/sync/areas";
+import { batchSync } from "$lib/sync/batchSync";
+import { eventsSync } from "$lib/sync/events";
+import { reportsSync } from "$lib/sync/reports";
+import { usersSync } from "$lib/sync/users";
+import type { Area, Place } from "$lib/types";
+import { errToast, formatElementID } from "$lib/utils";
+
+import AboutCommunity from "./components/AboutCommunity.svelte";
+import AboutContributor from "./components/AboutContributor.svelte";
+import AboutCore from "./components/AboutCore.svelte";
+import AboutIntegration from "./components/AboutIntegration.svelte";
+import AboutMerchant from "./components/AboutMerchant.svelte";
+import AboutPlus from "./components/AboutPlus.svelte";
+import AboutTagger from "./components/AboutTagger.svelte";
+import { resolve } from "$app/paths";
+
+onMount(() => {
+	batchSync([eventsSync, usersSync, areasSync, reportsSync]);
+});
+
+// alert for all errors
+$: {
+	if ($placesError) errToast($placesError);
+	if ($userError) errToast($userError);
+	if ($eventError) errToast($eventError);
+	if ($areaError) errToast($areaError);
+}
+
+let dataInitalized = false;
+
+let merchants: Place[] = [];
+let communities: Area[] = [];
+
+const fetchMerchantName = async (placeId: number): Promise<string> => {
+	try {
+		const response = await fetch(
+			`https://api.btcmap.org/v4/places/${placeId}?fields=name`,
+		);
+		if (!response.ok) throw new Error("API call failed");
+		const data = await response.json();
+		return data.name || formatElementID(`node:${placeId}`);
+	} catch {
+		return formatElementID(`node:${placeId}`);
+	}
+};
+
+const initializeData = async () => {
+	const boostedMerchants = $places
+		.filter((place: Place) => place.boosted_until)
+		.sort(
+			(a: Place, b: Place) =>
+				Date.parse(b.boosted_until || "0") - Date.parse(a.boosted_until || "0"),
+		)
+		.slice(0, 6);
+
+	// Fetch names for merchants
+	const merchantPromises = boostedMerchants.map(async (merchant: Place) => {
+		const name = await fetchMerchantName(merchant.id);
+		return { ...merchant, name };
 	});
 
-	// alert for all errors
-	$: {
-		if ($placesError) errToast($placesError);
-		if ($userError) errToast($userError);
-		if ($eventError) errToast($eventError);
-		if ($areaError) errToast($areaError);
+	try {
+		merchants = await Promise.all(merchantPromises);
+	} catch (error) {
+		console.error("Error fetching merchant names:", error);
+		// Fallback: use merchants without names
+		merchants = boostedMerchants;
 	}
 
-	let dataInitalized = false;
+	populateLeaderboard();
 
-	let merchants: Place[] = [];
-	let communities: Area[] = [];
+	communities = $areas.filter((area) => featuredCommunities.includes(area.id));
+};
 
-	const fetchMerchantName = async (placeId: number): Promise<string> => {
-		try {
-			const response = await fetch(`https://api.btcmap.org/v4/places/${placeId}?fields=name`);
-			if (!response.ok) throw new Error('API call failed');
-			const data = await response.json();
-			return data.name || formatElementID(`node:${placeId}`);
-		} catch {
-			return formatElementID(`node:${placeId}`);
-		}
-	};
+// Initialize data when all stores are loaded
+$: if (
+	$places?.length &&
+	$users?.length &&
+	$events?.length &&
+	$areas?.length &&
+	!dataInitalized
+) {
+	// Initialize data and mark as complete
+	initializeData();
 
-	const initializeData = async () => {
-		const boostedMerchants = $places
-			.filter((place: Place) => place.boosted_until)
-			.sort(
-				(a: Place, b: Place) =>
-					Date.parse(b.boosted_until || '0') - Date.parse(a.boosted_until || '0')
-			)
-			.slice(0, 6);
+	dataInitalized = true;
+}
 
-		// Fetch names for merchants
-		const merchantPromises = boostedMerchants.map(async (merchant: Place) => {
-			const name = await fetchMerchantName(merchant.id);
-			return { ...merchant, name };
-		});
+let supertaggers: {
+	id: number;
+	username: string;
+	avatar: string;
+	total: number;
+}[] = [];
 
-		try {
-			merchants = await Promise.all(merchantPromises);
-		} catch (error) {
-			console.error('Error fetching merchant names:', error);
-			// Fallback: use merchants without names
-			merchants = boostedMerchants;
+const populateLeaderboard = () => {
+	$users.forEach((user) => {
+		if ($excludeLeader.includes(user.id)) {
+			return;
 		}
 
-		populateLeaderboard();
+		let userEvents = $events.filter((event) => event.user_id === user.id);
 
-		communities = $areas.filter((area) => featuredCommunities.includes(area.id));
-	};
+		if (userEvents.length) {
+			let id = user.id;
+			let username = user.osm_json.display_name;
+			let avatar = user.osm_json.img
+				? user.osm_json.img.href
+				: "/images/satoshi-nakamoto.png";
 
-	// Initialize data when all stores are loaded
-	$: if (
-		$places?.length &&
-		$users?.length &&
-		$events?.length &&
-		$areas?.length &&
-		!dataInitalized
-	) {
-		// Initialize data and mark as complete
-		initializeData();
-
-		dataInitalized = true;
-	}
-
-	let supertaggers: { id: number; username: string; avatar: string; total: number }[] = [];
-
-	const populateLeaderboard = () => {
-		$users.forEach((user) => {
-			if ($excludeLeader.includes(user.id)) {
-				return;
-			}
-
-			let userEvents = $events.filter((event) => event['user_id'] == user.id);
-
-			if (userEvents.length) {
-				let id = user.id;
-				let username = user['osm_json'].display_name;
-				let avatar = user['osm_json'].img
-					? user['osm_json'].img.href
-					: '/images/satoshi-nakamoto.png';
-
-				supertaggers.push({
-					id,
-					username,
-					avatar,
-					total: id === 17221642 ? userEvents.length + 120 : userEvents.length
-				});
-			}
-		});
-
-		supertaggers.sort((a, b) => b.total - a.total);
-		supertaggers = supertaggers.slice(0, 6);
-	};
-
-	const featuredCommunities = [
-		'bitcoin-island-philippines',
-		'btc-curacao',
-		'bitcoin-beach',
-		'bitcoin-ekasi',
-		'einundzwanzig-deutschland',
-		'free-madeira'
-	];
-
-	const communityIntegrations = [
-		{ name: 'Coinos', icon: 'coinos', url: 'https://coinos.io/' },
-		{ name: 'Wallet of Satoshi', icon: 'wos', url: 'https://www.walletofsatoshi.com/' },
-		{ name: 'Pouch', icon: 'pouch', url: 'https://pouch.ph/' },
-		{ name: 'Bolt Card', icon: 'bolt', url: 'https://www.boltcard.org/' },
-		{ name: 'Galoy', icon: 'galoy', url: 'https://galoy.io/' },
-		{ name: 'Satimoto', icon: 'satimoto', url: 'https://satimoto.com/' },
-		{
-			name: 'Bitcoin Dashboard',
-			icon: 'dashboard',
-			url: 'https://bitcoin-primodata.streamlit.app/'
-		},
-		{ name: 'BitLocal', icon: 'bitlocal', url: 'https://www.bitlocal.app/' },
-		{ name: 'Nostr Bot', icon: 'nostr-bot', url: 'https://github.com/BcnBitcoinOnly/btcmap-bot' },
-		{ name: 'Fedi', icon: 'fedi', url: 'https://www.fedi.xyz/' },
-		{ name: 'Osmo', icon: 'osmo', url: 'https://www.osmowallet.com/' },
-		{ name: 'Bitcoin Rocks!', icon: 'bitcoin-rocks', url: 'https://bitcoin.rocks/' },
-		{ name: 'lipa', icon: 'lipa', url: 'https://lipa.swiss/' },
-		{ name: 'Spirit of Satoshi', icon: 'spirit', url: 'https://www.spiritofsatoshi.ai/' },
-		{ name: 'Blockstream', icon: 'blockstream', url: 'https://blockstream.com/local/' },
-		{ name: 'Satlantis', icon: 'satlantis', url: 'https://www.satlantis.io/' },
-		{ name: 'Aqua Wallet', icon: 'aqua', url: 'https://aquawallet.io/' },
-		{ name: 'Adopting Bitcoin', icon: 'adopting', url: 'https://www.adoptingbitcoin.org/' }
-	];
-
-	const projectIntegrations = [
-		{ name: 'OpenStreetMap', icon: 'osm', url: 'https://www.openstreetmap.org/' },
-		{ name: 'LNbits', icon: 'lnbits', url: 'https://lnbits.com/' },
-		{ name: 'GitHub', icon: 'gh', url: 'https://github.com/' },
-		{ name: 'Voltage', icon: 'voltage', url: 'https://voltage.cloud/' },
-		{ name: 'Leaflet', icon: 'leaflet', url: 'https://leafletjs.com/' },
-		{ name: 'Chart.js', icon: 'chartjs', url: 'https://www.chartjs.org/' }
-	];
-
-	const contributors = [
-		{
-			name: 'salvanakamoto',
-			title: 'iOS Developer',
-			url: 'https://github.com/salvatoto',
-			file: 'jpg'
-		},
-		{
-			name: 'saunter',
-			title: 'Community Leader',
-			url: 'https://twitter.com/StackingSaunter',
-			file: 'jpg'
-		},
-		{
-			name: 'Rogzy',
-			title: 'Community Leader',
-			url: 'https://twitter.com/DecouvreBitcoin',
-			file: 'jpg'
-		},
-		{
-			name: 'HolgerHatGarKeineNode',
-			title: 'Community Coder',
-			url: 'https://github.com/HolgerHatGarKeineNode',
-			file: 'jpeg'
-		},
-		{
-			name: '3j2009',
-			title: 'Designer',
-			url: 'https://github.com/3j2009',
-			file: 'jpeg'
-		},
-		{
-			name: 'Liam',
-			title: 'Animator',
-			url: 'https://twitter.com/LiamCyDennis',
-			file: 'jpg'
-		},
-		{
-			name: 'Andrej',
-			title: 'Icon Designer',
-			url: 'https://nostr.com/npub1cak3t8wa5zaxe99mfrzqzt8h2hp0lvalk8agj3qmthkmrs3zvlaqyt964v',
-			file: 'png'
+			supertaggers.push({
+				id,
+				username,
+				avatar,
+				total: id === 17221642 ? userEvents.length + 120 : userEvents.length,
+			});
 		}
-	];
+	});
 
-	const coreTeam: {
-		name: string;
-		title: string;
-		avatar: string;
-		socials: { url: string; name: SocialIconName }[];
-	}[] = [
-		{
-			name: 'Igor',
-			title: 'Backend & Android',
-			avatar: 'igor',
-			socials: [
-				{ url: 'https://bubelov.com/', name: 'website' },
-				{ url: 'https://github.com/bubelov', name: 'github' }
-			]
-		},
-		{
-			name: 'Nathan Day',
-			title: 'Project Manager',
-			avatar: 'nathan',
-			socials: [
-				{ url: 'https://twitter.com/nathan_day', name: 'x' },
-				{ url: 'https://github.com/dadofsambonzuki', name: 'github' }
-			]
-		},
-		{
-			name: 'secondl1ght',
-			title: 'Web Developer',
-			avatar: 'secondl1ght',
-			socials: [
-				{ url: 'https://secondl1ght.site', name: 'website' },
-				{ url: 'https://twitter.com/secondl1ght', name: 'x' },
-				{ url: 'https://github.com/secondl1ght', name: 'github' }
-			]
-		},
-		{
-			name: 'Karnage',
-			title: 'Lead Designer',
-			avatar: 'karnage',
-			socials: [
-				{ url: 'https://twitter.com/KarnageBitcoin', name: 'x' },
-				{ url: 'https://github.com/cogentgene', name: 'github' }
-			]
-		}
-	];
+	supertaggers.sort((a, b) => b.total - a.total);
+	supertaggers = supertaggers.slice(0, 6);
+};
+
+const featuredCommunities = [
+	"bitcoin-island-philippines",
+	"btc-curacao",
+	"bitcoin-beach",
+	"bitcoin-ekasi",
+	"einundzwanzig-deutschland",
+	"free-madeira",
+];
+
+const communityIntegrations = [
+	{ name: "Coinos", icon: "coinos", url: "https://coinos.io/" },
+	{
+		name: "Wallet of Satoshi",
+		icon: "wos",
+		url: "https://www.walletofsatoshi.com/",
+	},
+	{ name: "Pouch", icon: "pouch", url: "https://pouch.ph/" },
+	{ name: "Bolt Card", icon: "bolt", url: "https://www.boltcard.org/" },
+	{ name: "Galoy", icon: "galoy", url: "https://galoy.io/" },
+	{ name: "Satimoto", icon: "satimoto", url: "https://satimoto.com/" },
+	{
+		name: "Bitcoin Dashboard",
+		icon: "dashboard",
+		url: "https://bitcoin-primodata.streamlit.app/",
+	},
+	{ name: "BitLocal", icon: "bitlocal", url: "https://www.bitlocal.app/" },
+	{
+		name: "Nostr Bot",
+		icon: "nostr-bot",
+		url: "https://github.com/BcnBitcoinOnly/btcmap-bot",
+	},
+	{ name: "Fedi", icon: "fedi", url: "https://www.fedi.xyz/" },
+	{ name: "Osmo", icon: "osmo", url: "https://www.osmowallet.com/" },
+	{
+		name: "Bitcoin Rocks!",
+		icon: "bitcoin-rocks",
+		url: "https://bitcoin.rocks/",
+	},
+	{ name: "lipa", icon: "lipa", url: "https://lipa.swiss/" },
+	{
+		name: "Spirit of Satoshi",
+		icon: "spirit",
+		url: "https://www.spiritofsatoshi.ai/",
+	},
+	{
+		name: "Blockstream",
+		icon: "blockstream",
+		url: "https://blockstream.com/local/",
+	},
+	{ name: "Satlantis", icon: "satlantis", url: "https://www.satlantis.io/" },
+	{ name: "Aqua Wallet", icon: "aqua", url: "https://aquawallet.io/" },
+	{
+		name: "Adopting Bitcoin",
+		icon: "adopting",
+		url: "https://www.adoptingbitcoin.org/",
+	},
+];
+
+const projectIntegrations = [
+	{ name: "OpenStreetMap", icon: "osm", url: "https://www.openstreetmap.org/" },
+	{ name: "LNbits", icon: "lnbits", url: "https://lnbits.com/" },
+	{ name: "GitHub", icon: "gh", url: "https://github.com/" },
+	{ name: "Voltage", icon: "voltage", url: "https://voltage.cloud/" },
+	{ name: "Leaflet", icon: "leaflet", url: "https://leafletjs.com/" },
+	{ name: "Chart.js", icon: "chartjs", url: "https://www.chartjs.org/" },
+];
+
+const contributors = [
+	{
+		name: "salvanakamoto",
+		title: "iOS Developer",
+		url: "https://github.com/salvatoto",
+		file: "jpg",
+	},
+	{
+		name: "saunter",
+		title: "Community Leader",
+		url: "https://twitter.com/StackingSaunter",
+		file: "jpg",
+	},
+	{
+		name: "Rogzy",
+		title: "Community Leader",
+		url: "https://twitter.com/DecouvreBitcoin",
+		file: "jpg",
+	},
+	{
+		name: "HolgerHatGarKeineNode",
+		title: "Community Coder",
+		url: "https://github.com/HolgerHatGarKeineNode",
+		file: "jpeg",
+	},
+	{
+		name: "3j2009",
+		title: "Designer",
+		url: "https://github.com/3j2009",
+		file: "jpeg",
+	},
+	{
+		name: "Liam",
+		title: "Animator",
+		url: "https://twitter.com/LiamCyDennis",
+		file: "jpg",
+	},
+	{
+		name: "Andrej",
+		title: "Icon Designer",
+		url: "https://nostr.com/npub1cak3t8wa5zaxe99mfrzqzt8h2hp0lvalk8agj3qmthkmrs3zvlaqyt964v",
+		file: "png",
+	},
+];
+
+const coreTeam: {
+	name: string;
+	title: string;
+	avatar: string;
+	socials: { url: string; name: SocialIconName }[];
+}[] = [
+	{
+		name: "Igor",
+		title: "Backend & Android",
+		avatar: "igor",
+		socials: [
+			{ url: "https://bubelov.com/", name: "website" },
+			{ url: "https://github.com/bubelov", name: "github" },
+		],
+	},
+	{
+		name: "Nathan Day",
+		title: "Project Manager",
+		avatar: "nathan",
+		socials: [
+			{ url: "https://twitter.com/nathan_day", name: "x" },
+			{ url: "https://github.com/dadofsambonzuki", name: "github" },
+		],
+	},
+	{
+		name: "secondl1ght",
+		title: "Web Developer",
+		avatar: "secondl1ght",
+		socials: [
+			{ url: "https://secondl1ght.site", name: "website" },
+			{ url: "https://twitter.com/secondl1ght", name: "x" },
+			{ url: "https://github.com/secondl1ght", name: "github" },
+		],
+	},
+	{
+		name: "Karnage",
+		title: "Lead Designer",
+		avatar: "karnage",
+		socials: [
+			{ url: "https://twitter.com/KarnageBitcoin", name: "x" },
+			{ url: "https://github.com/cogentgene", name: "github" },
+		],
+	},
+];
 </script>
 
 <svelte:head>

@@ -1,35 +1,36 @@
 <script lang="ts">
-	import Icon from '$components/Icon.svelte';
-	import { boost, resetBoost } from '$lib/store';
-	import type { Place } from '$lib/types';
-	import axios from 'axios';
-	import axiosRetry from 'axios-retry';
+import axios from "axios";
+import axiosRetry from "axios-retry";
 
-	export let merchant: Place | undefined;
-	export let boosted: string | undefined;
-	export let style: 'button' | 'link' = 'button';
+import Icon from "$components/Icon.svelte";
+import { boost, resetBoost } from "$lib/store";
+import type { Place } from "$lib/types";
 
-	axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
+export let merchant: Place | undefined;
+export let boosted: string | undefined;
+export let style: "button" | "link" = "button";
 
-	let boostLoading = false;
+axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
-	const resetBoostLoading = () => {
-		boostLoading = false;
+let boostLoading = false;
+
+const resetBoostLoading = () => {
+	boostLoading = false;
+};
+
+const startBoost = async () => {
+	if (!merchant) return;
+
+	boostLoading = true;
+
+	$boost = {
+		id: merchant.id,
+		name: merchant.name || "",
+		boost: boosted || "",
 	};
+};
 
-	const startBoost = async () => {
-		if (!merchant) return;
-
-		boostLoading = true;
-
-		$boost = {
-			id: merchant.id,
-			name: merchant.name || '',
-			boost: boosted || ''
-		};
-	};
-
-	$: $resetBoost && resetBoostLoading();
+$: $resetBoost && resetBoostLoading();
 </script>
 
 {#if style === 'button'}

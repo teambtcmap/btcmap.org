@@ -1,17 +1,17 @@
 <script lang="ts">
-	import CopyButton from '$components/CopyButton.svelte';
-	import InvoicePayment from '$components/InvoicePayment.svelte';
+import CopyButton from "$components/CopyButton.svelte";
+import InvoicePayment from "$components/InvoicePayment.svelte";
 
-	export let invoice: string;
-	export let invoiceId: string;
-	export let onSuccess: () => void | Promise<void>;
-	export let onError: (error: unknown) => void;
-	export let onStatusCheckError: (error: unknown) => void;
-	export let description: string = '';
+export let invoice: string;
+export let invoiceId: string;
+export let onSuccess: () => void | Promise<void>;
+export let onError: (error: unknown) => void;
+export let onStatusCheckError: (error: unknown) => void;
+export let description: string = "";
 
-	// HTML description is controlled by the parent components (BoostContent)
-	// Content is generated from trusted variables, not user input
-	$: descriptionHtml = description;
+// HTML description is controlled by the parent components (BoostContent)
+// Content is generated from trusted variables, not user input
+$: descriptionHtml = description;
 </script>
 
 <div class="space-y-4 text-center">

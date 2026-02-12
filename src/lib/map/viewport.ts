@@ -1,15 +1,16 @@
-import { MERCHANT_LIST_MIN_ZOOM, MERCHANT_LIST_LOW_ZOOM } from '$lib/constants';
-import type { Leaflet, Place } from '$lib/types';
-import type { LatLngBounds } from 'leaflet';
+import type { LatLngBounds } from "leaflet";
 
-export type ZoomBehavior = 'none' | 'api-with-limit' | 'local-markers';
+import { MERCHANT_LIST_LOW_ZOOM, MERCHANT_LIST_MIN_ZOOM } from "$lib/constants";
+import type { Leaflet, Place } from "$lib/types";
+
+export type ZoomBehavior = "none" | "api-with-limit" | "local-markers";
 
 // Determines which fetch strategy to use based on current zoom level
 // See constants.ts for zoom behavior documentation
 export function getZoomBehavior(zoom: number): ZoomBehavior {
-	if (zoom >= MERCHANT_LIST_MIN_ZOOM) return 'local-markers'; // Zoom 15+
-	if (zoom >= MERCHANT_LIST_LOW_ZOOM) return 'api-with-limit'; // Zoom 11-14
-	return 'none'; // Below zoom 11
+	if (zoom >= MERCHANT_LIST_MIN_ZOOM) return "local-markers"; // Zoom 15+
+	if (zoom >= MERCHANT_LIST_LOW_ZOOM) return "api-with-limit"; // Zoom 11-14
+	return "none"; // Below zoom 11
 }
 
 // Calculate radius from map center to corner (Haversine formula)
@@ -34,7 +35,7 @@ export const calculateRadiusKm = (bounds: LatLngBounds): number => {
 export const getBufferedBounds = (
 	leaflet: Leaflet,
 	bounds: LatLngBounds,
-	bufferPercent: number
+	bufferPercent: number,
 ): LatLngBounds => {
 	const latDiff = bounds.getNorth() - bounds.getSouth();
 	const lngDiff = bounds.getEast() - bounds.getWest();
@@ -43,7 +44,7 @@ export const getBufferedBounds = (
 
 	return leaflet.latLngBounds([
 		[bounds.getSouth() - latBuffer, bounds.getWest() - lngBuffer],
-		[bounds.getNorth() + latBuffer, bounds.getEast() + lngBuffer]
+		[bounds.getNorth() + latBuffer, bounds.getEast() + lngBuffer],
 	]);
 };
 
@@ -52,10 +53,12 @@ export const getVisiblePlaces = (
 	leaflet: Leaflet,
 	places: Place[],
 	bounds: LatLngBounds,
-	bufferPercent: number
+	bufferPercent: number,
 ): Place[] => {
 	if (!bounds) return [];
 
 	const bufferedBounds = getBufferedBounds(leaflet, bounds, bufferPercent);
-	return places.filter((place) => bufferedBounds.contains([place.lat, place.lon]));
+	return places.filter((place) =>
+		bufferedBounds.contains([place.lat, place.lon]),
+	);
 };

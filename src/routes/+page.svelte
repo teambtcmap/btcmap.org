@@ -1,12 +1,14 @@
 <script lang="ts">
-	import Footer from '$components/layout/Footer.svelte';
-	import Header from '$components/layout/Header.svelte';
-	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-	import IconApps from '$lib/icons/IconApps.svelte';
-	import { apps } from '$lib/store';
-	import { theme } from '$lib/theme';
-	import { resolve } from '$app/paths';
-	import { _ } from 'svelte-i18n';
+import { _ } from "svelte-i18n";
+
+import Footer from "$components/layout/Footer.svelte";
+import Header from "$components/layout/Header.svelte";
+import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import IconApps from "$lib/icons/IconApps.svelte";
+import { apps } from "$lib/store";
+import { theme } from "$lib/theme";
+
+import { resolve } from "$app/paths";
 </script>
 
 <svelte:head>

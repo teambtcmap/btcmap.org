@@ -1,416 +1,437 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
+import { browser } from "$app/environment";
+import { goto } from "$app/navigation";
+import { page } from "$app/stores";
 
-	export let type: 'country' | 'community';
-	export let data: AreaPageProps;
+export let type: "country" | "community";
+export let data: AreaPageProps;
 
-	import AreaActivity from '$components/area/AreaActivity.svelte';
-	import AreaMap from '$components/area/AreaMap.svelte';
-	import AreaMerchantHighlights from '$components/area/AreaMerchantHighlights.svelte';
-	import AreaStats from '$components/area/AreaStats.svelte';
-	import AreaTickets from '$components/area/AreaTickets.svelte';
-	import VerifyCommunityForm from '$components/area/VerifyCommunityForm.svelte';
-	import Boost from '$components/Boost.svelte';
-	import Icon from '$components/Icon.svelte';
-	import IssuesTable from '$components/IssuesTable.svelte';
-	import OrgBadge from '$components/OrgBadge.svelte';
-	import Socials from '$components/Socials.svelte';
-	import SponsorBadge from '$components/SponsorBadge.svelte';
-	import Tip from '$components/Tip.svelte';
+import rewind from "@mapbox/geojson-rewind";
+import axios from "axios";
+import axiosRetry from "axios-retry";
+import { geoContains } from "d3-geo";
+import { differenceInMonths } from "date-fns/differenceInMonths";
+import { onMount } from "svelte";
 
-	import {
-		areaError,
-		areas,
-		placesError,
-		places,
-		eventError,
-		events,
-		reportError,
-		reports,
-		userError,
-		users
-	} from '$lib/store';
-	import { areasSync } from '$lib/sync/areas';
-	import { eventsSync } from '$lib/sync/events';
-	import { reportsSync } from '$lib/sync/reports';
-	import { usersSync } from '$lib/sync/users';
-	import { batchSync } from '$lib/sync/batchSync';
-	import {
-		TipType,
-		type ActivityEvent,
-		type AreaPageProps,
-		type AreaTags,
-		type Event,
-		type Place,
-		type RpcIssue,
-		type User
-	} from '$lib/types.js';
-	import {
-		errToast,
-		formatElementID,
-		validateContinents,
-		formatVerifiedHuman,
-		parseDateSafely
-	} from '$lib/utils';
-	import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
-	import axios from 'axios';
-	import axiosRetry from 'axios-retry';
-	import rewind from '@mapbox/geojson-rewind';
-	import { geoContains } from 'd3-geo';
-	import { differenceInMonths } from 'date-fns/differenceInMonths';
-	import { onMount } from 'svelte';
+import AreaActivity from "$components/area/AreaActivity.svelte";
+import AreaMap from "$components/area/AreaMap.svelte";
+import AreaMerchantHighlights from "$components/area/AreaMerchantHighlights.svelte";
+import AreaStats from "$components/area/AreaStats.svelte";
+import AreaTickets from "$components/area/AreaTickets.svelte";
+import VerifyCommunityForm from "$components/area/VerifyCommunityForm.svelte";
+import Boost from "$components/Boost.svelte";
+import Icon from "$components/Icon.svelte";
+import IssuesTable from "$components/IssuesTable.svelte";
+import OrgBadge from "$components/OrgBadge.svelte";
+import Socials from "$components/Socials.svelte";
+import SponsorBadge from "$components/SponsorBadge.svelte";
+import Tip from "$components/Tip.svelte";
+import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
+import {
+	areaError,
+	areas,
+	eventError,
+	events,
+	places,
+	placesError,
+	reportError,
+	reports,
+	userError,
+	users,
+} from "$lib/store";
+import { areasSync } from "$lib/sync/areas";
+import { batchSync } from "$lib/sync/batchSync";
+import { eventsSync } from "$lib/sync/events";
+import { reportsSync } from "$lib/sync/reports";
+import { usersSync } from "$lib/sync/users";
+import {
+	type ActivityEvent,
+	type AreaPageProps,
+	type AreaTags,
+	type Event,
+	type Place,
+	type RpcIssue,
+	TipType,
+	type User,
+} from "$lib/types.js";
+import {
+	errToast,
+	formatElementID,
+	formatVerifiedHuman,
+	parseDateSafely,
+	validateContinents,
+} from "$lib/utils";
 
-	axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
+axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
-	onMount(() => {
-		batchSync([areasSync, reportsSync, eventsSync, usersSync]);
-	});
+onMount(() => {
+	batchSync([areasSync, reportsSync, eventsSync, usersSync]);
+});
 
-	// alert for user errors
-	$: $userError && errToast($userError);
-	// alert for event errors
-	$: $eventError && errToast($eventError);
-	// alert for element errors
-	$: $placesError && errToast($placesError);
-	// alert for area errors
-	$: $areaError && errToast($areaError);
-	// alert for report errors
-	$: $reportError && errToast($reportError);
+// alert for user errors
+$: $userError && errToast($userError);
+// alert for event errors
+$: $eventError && errToast($eventError);
+// alert for element errors
+$: $placesError && errToast($placesError);
+// alert for area errors
+$: $areaError && errToast($areaError);
+// alert for report errors
+$: $reportError && errToast($reportError);
 
-	enum Sections {
-		merchants = 'Merchants',
-		stats = 'Stats',
-		activity = 'Activity',
-		maintain = 'Maintain'
-	}
+enum Sections {
+	merchants = "Merchants",
+	stats = "Stats",
+	activity = "Activity",
+	maintain = "Maintain",
+}
 
-	const sections = Object.values(Sections);
-	let scrolled = false;
+const sections = Object.values(Sections);
+let scrolled = false;
 
-	// Map section names to URL-friendly slugs
-	const sectionSlugs: Record<Sections, string> = {
-		[Sections.merchants]: 'merchants',
-		[Sections.stats]: 'stats',
-		[Sections.activity]: 'activity',
-		[Sections.maintain]: 'maintain'
-	};
+// Map section names to URL-friendly slugs
+const sectionSlugs: Record<Sections, string> = {
+	[Sections.merchants]: "merchants",
+	[Sections.stats]: "stats",
+	[Sections.activity]: "activity",
+	[Sections.maintain]: "maintain",
+};
 
-	// Reverse mapping from slugs to sections
-	const slugToSection: Record<string, Sections> = {
-		merchants: Sections.merchants,
-		stats: Sections.stats,
-		activity: Sections.activity,
-		maintain: Sections.maintain
-	};
+// Reverse mapping from slugs to sections
+const slugToSection: Record<string, Sections> = {
+	merchants: Sections.merchants,
+	stats: Sections.stats,
+	activity: Sections.activity,
+	maintain: Sections.maintain,
+};
 
-	// Get the current section from the route parameter
-	$: currentSection = $page.params.section || 'merchants';
-	$: activeSection = slugToSection[currentSection] || Sections.merchants;
+// Get the current section from the route parameter
+$: currentSection = $page.params.section || "merchants";
+$: activeSection = slugToSection[currentSection] || Sections.merchants;
 
-	// Handle section change
-	const handleSectionChange = (section: Sections) => {
-		const slug = sectionSlugs[section];
-		const areaId = data.id;
-		// eslint-disable-next-line svelte/no-navigation-without-resolve
-		goto(`/${type}/${areaId}/${slug}`);
-	};
+// Handle section change
+const handleSectionChange = (section: Sections) => {
+	const slug = sectionSlugs[section];
+	const areaId = data.id;
+	// eslint-disable-next-line svelte/no-navigation-without-resolve
+	goto(`/${type}/${areaId}/${slug}`);
+};
 
-	// No need for hash handling anymore - sections are handled by route parameters
+// No need for hash handling anymore - sections are handled by route parameters
 
-	let dataInitialized = false;
-	let elementsLoading = false;
+let dataInitialized = false;
+let elementsLoading = false;
 
-	// Fetch places for area using geographic filtering + enrichment with verification data
-	const fetchPlacesForArea = async (areaId: string): Promise<Place[]> => {
-		try {
-			elementsLoading = true;
+// Fetch places for area using geographic filtering + enrichment with verification data
+const fetchPlacesForArea = async (areaId: string): Promise<Place[]> => {
+	try {
+		elementsLoading = true;
 
-			// Step 1: Geographic filtering (fast, uses existing store)
-			const area = $areas.find((a) => a.id === areaId);
-			if (!area || !area.tags.geo_json) {
-				console.error('Area not found or missing geo_json:', areaId);
-				return [];
-			}
+		// Step 1: Geographic filtering (fast, uses existing store)
+		const area = $areas.find((a) => a.id === areaId);
+		if (!area || !area.tags.geo_json) {
+			console.error("Area not found or missing geo_json:", areaId);
+			return [];
+		}
 
-			const allPlaces = $places;
-			const rewoundPoly = rewind(area.tags.geo_json, true);
-			const areaPlaces = allPlaces.filter((place: Place) => {
-				return place.lat && place.lon && geoContains(rewoundPoly, [place.lon, place.lat]);
-			});
+		const allPlaces = $places;
+		const rewoundPoly = rewind(area.tags.geo_json, true);
+		const areaPlaces = allPlaces.filter((place: Place) => {
+			return (
+				place.lat &&
+				place.lon &&
+				geoContains(rewoundPoly, [place.lon, place.lat])
+			);
+		});
 
-			console.info(`Geographic filtering found ${areaPlaces.length} places for ${areaId}`);
+		console.info(
+			`Geographic filtering found ${areaPlaces.length} places for ${areaId}`,
+		);
 
-			// Step 2: Enrich with verification data from API (batched requests)
-			const placeIds = areaPlaces.map((p) => p.id);
-			const batchSize = 20;
-			const enrichedPlaces: Place[] = [];
+		// Step 2: Enrich with verification data from API (batched requests)
+		const placeIds = areaPlaces.map((p) => p.id);
+		const batchSize = 20;
+		const enrichedPlaces: Place[] = [];
+
+		console.info(
+			`Enriching ${placeIds.length} places with verification data in ${Math.ceil(placeIds.length / batchSize)} batches`,
+		);
+
+		for (let i = 0; i < placeIds.length; i += batchSize) {
+			const batch = placeIds.slice(i, i + batchSize);
+			const batchPromises = batch.map((id) =>
+				axios
+					.get<Place>(
+						`https://api.btcmap.org/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`,
+					)
+					.then((response) => response.data)
+					.catch((error) => {
+						console.warn(
+							`Failed to fetch place ${id}:`,
+							error.response?.status,
+						);
+						return null;
+					}),
+			);
+
+			const batchResults = await Promise.all(batchPromises);
+			const validPlaces = batchResults
+				.filter((place): place is Place => place !== null)
+				.filter((place) => !place.deleted_at);
+			enrichedPlaces.push(...validPlaces);
 
 			console.info(
-				`Enriching ${placeIds.length} places with verification data in ${Math.ceil(placeIds.length / batchSize)} batches`
+				`Batch ${Math.floor(i / batchSize) + 1} completed: ${validPlaces.length}/${batch.length} successful`,
+			);
+		}
+
+		console.info(
+			`Successfully enriched ${enrichedPlaces.length} places for ${areaId}`,
+		);
+		return enrichedPlaces;
+	} catch (error) {
+		console.error("Failed to fetch places for area:", areaId, error);
+		return [];
+	} finally {
+		elementsLoading = false;
+	}
+};
+
+const initializeData = async () => {
+	if (dataInitialized) return;
+
+	const areaFound = $areas.find((area) => {
+		if (type === "community") {
+			return (
+				area.id === data.id &&
+				area.tags.type === "community" &&
+				area.tags.geo_json &&
+				area.tags.name &&
+				area.tags["icon:square"] &&
+				area.tags.continent
+			);
+		} else {
+			return (
+				area.id === data.id &&
+				area.tags.type === "country" &&
+				area.id.length === 2 &&
+				area.tags.geo_json &&
+				area.tags.name &&
+				area.tags.continent &&
+				validateContinents(area.tags.continent)
+			);
+		}
+	});
+
+	if (!areaFound) {
+		console.error(
+			`Could not find ${type}, please try again or contact BTC Map.`,
+		);
+		// eslint-disable-next-line svelte/no-navigation-without-resolve
+		goto("/404");
+		return;
+	}
+
+	area = areaFound.tags;
+
+	avatar =
+		type === "community"
+			? `https://btcmap.org/.netlify/images?url=${area["icon:square"]}&fit=cover&w=256&h=256`
+			: `https://static.btcmap.org/images/countries/${areaFound.id}.svg`;
+	description = area.description;
+
+	if (type === "community") {
+		org = area.organization;
+		sponsor = area.sponsor;
+		website = area["contact:website"];
+		email = area["contact:email"];
+		phone = area["contact:phone"];
+		nostr = area["contact:nostr"];
+		twitter = area["contact:twitter"];
+		meetup = area["contact:meetup"];
+		telegram = area["contact:telegram"];
+		discord = area["contact:discord"];
+		youtube = area["contact:youtube"];
+		github = area["contact:github"];
+		matrix = area["contact:matrix"];
+		geyser = area["contact:geyser"];
+		satlantis = area["contact:satlantis"];
+		eventbrite = area["contact:eventbrite"];
+		reddit = area["contact:reddit"];
+		simplex = area["contact:simplex"];
+		instagram = area["contact:instagram"];
+		whatsapp = area["contact:whatsapp"];
+		facebook = area["contact:facebook"];
+		linkedin = area["contact:linkedin"];
+		rss = area["contact:rss"];
+		signal = area["contact:signal"];
+		hasContact = !!(
+			website ||
+			email ||
+			phone ||
+			nostr ||
+			twitter ||
+			meetup ||
+			telegram ||
+			discord ||
+			youtube ||
+			github ||
+			matrix ||
+			geyser ||
+			satlantis ||
+			eventbrite ||
+			reddit ||
+			simplex ||
+			instagram ||
+			whatsapp ||
+			facebook ||
+			linkedin ||
+			rss ||
+			signal
+		);
+		verifiedDate = data.verifiedDate || area["verified:date"];
+		isVerifiedDateStale = calculateStaleness(verifiedDate);
+
+		if (area["tips:lightning_address"]) {
+			lightning = {
+				destination: area["tips:lightning_address"],
+				type: TipType.Address,
+			};
+		} else if (area["tips:url"]) {
+			lightning = { destination: area["tips:url"], type: TipType.Url };
+		}
+	}
+
+	const rewoundPoly = rewind(area.geo_json, true);
+
+	// For AreaMap, filter places from client store
+	filteredPlaces = $places.filter((place: Place) => {
+		if (geoContains(rewoundPoly, [place.lon, place.lat])) {
+			return true;
+		} else {
+			return false;
+		}
+	});
+
+	issues = data.issues;
+
+	dataInitialized = true;
+
+	// Fetch places in the background for rich components
+	if (browser) {
+		const places = await fetchPlacesForArea(areaFound.id);
+		filteredPlaces = places;
+
+		// Process events after places are loaded, only if events and users stores are populated
+		if ($events.length && $users.length) {
+			const areaEvents = $events.filter((event) =>
+				filteredPlaces.find((place) => place.osm_id === event.element_id),
 			);
 
-			for (let i = 0; i < placeIds.length; i += batchSize) {
-				const batch = placeIds.slice(i, i + batchSize);
-				const batchPromises = batch.map((id) =>
-					axios
-						.get<Place>(
-							`https://api.btcmap.org/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`
-						)
-						.then((response) => response.data)
-						.catch((error) => {
-							console.warn(`Failed to fetch place ${id}:`, error.response?.status);
-							return null;
-						})
-				);
-
-				const batchResults = await Promise.all(batchPromises);
-				const validPlaces = batchResults
-					.filter((place): place is Place => place !== null)
-					.filter((place) => !place.deleted_at);
-				enrichedPlaces.push(...validPlaces);
-
-				console.info(
-					`Batch ${Math.floor(i / batchSize) + 1} completed: ${validPlaces.length}/${batch.length} successful`
-				);
-			}
-
-			console.info(`Successfully enriched ${enrichedPlaces.length} places for ${areaId}`);
-			return enrichedPlaces;
-		} catch (error) {
-			console.error('Failed to fetch places for area:', areaId, error);
-			return [];
-		} finally {
-			elementsLoading = false;
-		}
-	};
-
-	const initializeData = async () => {
-		if (dataInitialized) return;
-
-		const areaFound = $areas.find((area) => {
-			if (type === 'community') {
-				return (
-					area.id == data.id &&
-					area.tags.type === 'community' &&
-					area.tags.geo_json &&
-					area.tags.name &&
-					area.tags['icon:square'] &&
-					area.tags.continent
-				);
-			} else {
-				return (
-					area.id == data.id &&
-					area.tags.type === 'country' &&
-					area.id.length === 2 &&
-					area.tags.geo_json &&
-					area.tags.name &&
-					area.tags.continent &&
-					validateContinents(area.tags.continent)
-				);
-			}
-		});
-
-		if (!areaFound) {
-			console.error(`Could not find ${type}, please try again or contact BTC Map.`);
-			// eslint-disable-next-line svelte/no-navigation-without-resolve
-			goto('/404');
-			return;
-		}
-
-		area = areaFound.tags;
-
-		avatar =
-			type === 'community'
-				? `https://btcmap.org/.netlify/images?url=${area['icon:square']}&fit=cover&w=256&h=256`
-				: `https://static.btcmap.org/images/countries/${areaFound.id}.svg`;
-		description = area.description;
-
-		if (type === 'community') {
-			org = area.organization;
-			sponsor = area.sponsor;
-			website = area['contact:website'];
-			email = area['contact:email'];
-			phone = area['contact:phone'];
-			nostr = area['contact:nostr'];
-			twitter = area['contact:twitter'];
-			meetup = area['contact:meetup'];
-			telegram = area['contact:telegram'];
-			discord = area['contact:discord'];
-			youtube = area['contact:youtube'];
-			github = area['contact:github'];
-			matrix = area['contact:matrix'];
-			geyser = area['contact:geyser'];
-			satlantis = area['contact:satlantis'];
-			eventbrite = area['contact:eventbrite'];
-			reddit = area['contact:reddit'];
-			simplex = area['contact:simplex'];
-			instagram = area['contact:instagram'];
-			whatsapp = area['contact:whatsapp'];
-			facebook = area['contact:facebook'];
-			linkedin = area['contact:linkedin'];
-			rss = area['contact:rss'];
-			signal = area['contact:signal'];
-			hasContact = !!(
-				website ||
-				email ||
-				phone ||
-				nostr ||
-				twitter ||
-				meetup ||
-				telegram ||
-				discord ||
-				youtube ||
-				github ||
-				matrix ||
-				geyser ||
-				satlantis ||
-				eventbrite ||
-				reddit ||
-				simplex ||
-				instagram ||
-				whatsapp ||
-				facebook ||
-				linkedin ||
-				rss ||
-				signal
+			areaEvents.sort(
+				(a, b) => Date.parse(b.created_at) - Date.parse(a.created_at),
 			);
-			verifiedDate = data.verifiedDate || area['verified:date'];
-			isVerifiedDateStale = calculateStaleness(verifiedDate);
 
-			if (area['tips:lightning_address']) {
-				lightning = {
-					destination: area['tips:lightning_address'],
-					type: TipType.Address
-				};
-			} else if (area['tips:url']) {
-				lightning = { destination: area['tips:url'], type: TipType.Url };
-			}
-		}
+			const findUser = (tagger: Event) => {
+				let foundUser = $users.find((user) => user.id === tagger.user_id);
 
-		const rewoundPoly = rewind(area.geo_json, true);
-
-		// For AreaMap, filter places from client store
-		filteredPlaces = $places.filter((place: Place) => {
-			if (geoContains(rewoundPoly, [place.lon, place.lat])) {
-				return true;
-			} else {
-				return false;
-			}
-		});
-
-		issues = data.issues;
-
-		dataInitialized = true;
-
-		// Fetch places in the background for rich components
-		if (browser) {
-			const places = await fetchPlacesForArea(areaFound.id);
-			filteredPlaces = places;
-
-			// Process events after places are loaded, only if events and users stores are populated
-			if ($events.length && $users.length) {
-				const areaEvents = $events.filter((event) =>
-					filteredPlaces.find((place) => place.osm_id === event.element_id)
-				);
-
-				areaEvents.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']));
-
-				const findUser = (tagger: Event) => {
-					let foundUser = $users.find((user) => user.id == tagger['user_id']);
-
-					if (foundUser) {
-						if (!taggers.find((tagger) => tagger.id === foundUser?.id)) {
-							taggers.push(foundUser);
-						}
-
-						return foundUser;
-					} else {
-						return undefined;
+				if (foundUser) {
+					if (!taggers.find((tagger) => tagger.id === foundUser?.id)) {
+						taggers.push(foundUser);
 					}
-				};
 
-				areaEvents.forEach((event) => {
-					let placeMatch = filteredPlaces.find((place) => place.osm_id === event['element_id']);
+					return foundUser;
+				} else {
+					return undefined;
+				}
+			};
 
-					let location = placeMatch?.name || undefined;
+			areaEvents.forEach((event) => {
+				let placeMatch = filteredPlaces.find(
+					(place) => place.osm_id === event.element_id,
+				);
 
-					let tagger = findUser(event);
+				let location = placeMatch?.name || undefined;
 
-					eventElements.push({
-						...event,
-						location: location || formatElementID(event['element_id']),
-						merchantId: event['element_id'],
-						tagger
-					});
+				let tagger = findUser(event);
+
+				eventElements.push({
+					...event,
+					location: location || formatElementID(event.element_id),
+					merchantId: event.element_id,
+					tagger,
 				});
+			});
 
-				eventElements = eventElements;
-				taggers = taggers;
-			}
+			eventElements = eventElements;
+			taggers = taggers;
 		}
-	};
+	}
+};
 
-	$: $areas && $areas.length && $places && $places.length && !dataInitialized && initializeData();
+$: $areas?.length &&
+	$places &&
+	$places.length &&
+	!dataInitialized &&
+	initializeData();
 
-	// Calculate areaReports reactively based on data initialization and reports store
-	// Returns undefined while loading, empty array if no reports for this area, or filtered reports
-	$: areaReports =
-		dataInitialized && data?.id && $reports.length > 0
-			? $reports
-					.filter((report) => report.area_id === data.id)
-					.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']))
-			: undefined;
+// Calculate areaReports reactively based on data initialization and reports store
+// Returns undefined while loading, empty array if no reports for this area, or filtered reports
+$: areaReports =
+	dataInitialized && data?.id && $reports.length > 0
+		? $reports
+				.filter((report) => report.area_id === data.id)
+				.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
+		: undefined;
 
-	let area: AreaTags;
-	let filteredPlaces: Place[] = [];
+let area: AreaTags;
+let filteredPlaces: Place[] = [];
 
-	let avatar: string;
-	const alias = data.id;
-	const name = data.name;
-	let description: string | undefined;
-	let org: string | undefined;
-	let sponsor: boolean | undefined;
-	let website: string | undefined;
-	let email: string | undefined;
-	let phone: string | undefined;
-	let nostr: string | undefined;
-	let twitter: string | undefined;
-	let meetup: string | undefined;
-	let telegram: string | undefined;
-	let discord: string | undefined;
-	let youtube: string | undefined;
-	let github: string | undefined;
-	let matrix: string | undefined;
-	let geyser: string | undefined;
-	let satlantis: string | undefined;
-	let eventbrite: string | undefined;
-	let reddit: string | undefined;
-	let simplex: string | undefined;
-	let instagram: string | undefined;
-	let whatsapp: string | undefined;
-	let facebook: string | undefined;
-	let linkedin: string | undefined;
-	let rss: string | undefined;
-	let signal: string | undefined;
-	let verifiedDate: string | undefined = data.verifiedDate;
-	let hasContact = false;
+let avatar: string;
+const alias = data.id;
+const name = data.name;
+let description: string | undefined;
+let org: string | undefined;
+let sponsor: boolean | undefined;
+let website: string | undefined;
+let email: string | undefined;
+let phone: string | undefined;
+let nostr: string | undefined;
+let twitter: string | undefined;
+let meetup: string | undefined;
+let telegram: string | undefined;
+let discord: string | undefined;
+let youtube: string | undefined;
+let github: string | undefined;
+let matrix: string | undefined;
+let geyser: string | undefined;
+let satlantis: string | undefined;
+let eventbrite: string | undefined;
+let reddit: string | undefined;
+let simplex: string | undefined;
+let instagram: string | undefined;
+let whatsapp: string | undefined;
+let facebook: string | undefined;
+let linkedin: string | undefined;
+let rss: string | undefined;
+let signal: string | undefined;
+let verifiedDate: string | undefined = data.verifiedDate;
+let hasContact = false;
 
-	const calculateStaleness = (dateStr: string | undefined): boolean => {
-		if (!dateStr) return false;
-		const date = parseDateSafely(dateStr);
-		if (!date) return false;
-		return differenceInMonths(new Date(), date) > 12;
-	};
+const calculateStaleness = (dateStr: string | undefined): boolean => {
+	if (!dateStr) return false;
+	const date = parseDateSafely(dateStr);
+	if (!date) return false;
+	return differenceInMonths(new Date(), date) > 12;
+};
 
-	let isVerifiedDateStale: boolean = calculateStaleness(data.verifiedDate);
-	let lightning: { destination: string; type: TipType } | undefined;
+let isVerifiedDateStale: boolean = calculateStaleness(data.verifiedDate);
+let lightning: { destination: string; type: TipType } | undefined;
 
-	let eventElements: ActivityEvent[] = [];
-	let taggers: User[] = [];
+let eventElements: ActivityEvent[] = [];
+let taggers: User[] = [];
 
-	let issues: RpcIssue[] = [];
+let issues: RpcIssue[] = [];
 </script>
 
 <main class="my-10 space-y-16 text-center md:my-20">

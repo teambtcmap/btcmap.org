@@ -1,89 +1,93 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import FormSuccess from '$components/FormSuccess.svelte';
-	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-	import Icon from '$components/Icon.svelte';
-	import PrimaryButton from '$components/PrimaryButton.svelte';
-	import { theme } from '$lib/theme';
-	import { errToast } from '$lib/utils';
-	import axios from 'axios';
-	import { onMount } from 'svelte';
-	import DOMPurify from 'dompurify';
+import axios from "axios";
+import DOMPurify from "dompurify";
+import { onMount } from "svelte";
 
-	let nameInput: HTMLInputElement;
-	let emailInput: HTMLInputElement;
+import FormSuccess from "$components/FormSuccess.svelte";
+import Icon from "$components/Icon.svelte";
+import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import PrimaryButton from "$components/PrimaryButton.svelte";
+import { theme } from "$lib/theme";
+import { errToast } from "$lib/utils";
 
-	let captcha: HTMLDivElement;
-	let captchaSecret: string;
-	let captchaInput: HTMLInputElement;
-	let honeyInput: HTMLInputElement;
+import { browser } from "$app/environment";
 
-	let captchaContent = '';
-	let isCaptchaLoading = true;
+let nameInput: HTMLInputElement;
+let emailInput: HTMLInputElement;
 
-	const fetchCaptcha = () => {
-		isCaptchaLoading = true;
-		axios
-			.get('/captcha')
-			.then(function (response) {
-				captchaSecret = response.data.captchaSecret;
-				captchaContent = DOMPurify.sanitize(response.data.captcha);
-			})
-			.catch(function (error) {
-				errToast('Could not fetch captcha, please try again or contact BTC Map.');
-				console.error(error);
-			})
-			.finally(() => {
-				isCaptchaLoading = false;
-			});
-	};
+let captcha: HTMLDivElement;
+let captchaSecret: string;
+let captchaInput: HTMLInputElement;
+let honeyInput: HTMLInputElement;
 
-	let submitted = false;
-	let submitting = false;
+let captchaContent = "";
+let isCaptchaLoading = true;
 
-	const submitForm = (event: SubmitEvent) => {
-		event.preventDefault();
-		submitting = true;
+const fetchCaptcha = () => {
+	isCaptchaLoading = true;
+	axios
+		.get("/captcha")
+		.then((response) => {
+			captchaSecret = response.data.captchaSecret;
+			captchaContent = DOMPurify.sanitize(response.data.captcha);
+		})
+		.catch((error) => {
+			errToast("Could not fetch captcha, please try again or contact BTC Map.");
+			console.error(error);
+		})
+		.finally(() => {
+			isCaptchaLoading = false;
+		});
+};
 
-		axios
-			.post('/api/gitea/issue', {
-				type: 'tagger-onboarding',
-				captchaSecret,
-				captchaTest: captchaInput.value,
-				honey: honeyInput.value,
-				name: nameInput.value,
-				email: emailInput.value
-			})
-			.then(function () {
-				submitted = true;
-			})
-			.catch(function (error) {
-				const message = error.response?.data?.message;
-				if (typeof message === 'string' && message.includes('Captcha')) {
-					errToast(message);
-				} else {
-					errToast('Form submission failed, please try again or contact BTC Map.');
-				}
+let submitted = false;
+let submitting = false;
 
-				console.error(error);
-				submitting = false;
-			});
-	};
+const submitForm = (event: SubmitEvent) => {
+	event.preventDefault();
+	submitting = true;
 
-	function resetForm() {
-		submitted = false;
-		submitting = false;
-		nameInput.value = '';
-		emailInput.value = '';
-		captchaInput.value = '';
+	axios
+		.post("/api/gitea/issue", {
+			type: "tagger-onboarding",
+			captchaSecret,
+			captchaTest: captchaInput.value,
+			honey: honeyInput.value,
+			name: nameInput.value,
+			email: emailInput.value,
+		})
+		.then(() => {
+			submitted = true;
+		})
+		.catch((error) => {
+			const message = error.response?.data?.message;
+			if (typeof message === "string" && message.includes("Captcha")) {
+				errToast(message);
+			} else {
+				errToast(
+					"Form submission failed, please try again or contact BTC Map.",
+				);
+			}
+
+			console.error(error);
+			submitting = false;
+		});
+};
+
+function resetForm() {
+	submitted = false;
+	submitting = false;
+	nameInput.value = "";
+	emailInput.value = "";
+	captchaInput.value = "";
+	fetchCaptcha();
+}
+
+onMount(async () => {
+	if (browser) {
 		fetchCaptcha();
 	}
-
-	onMount(async () => {
-		if (browser) {
-			fetchCaptcha();
-		}
-	});
+});
 </script>
 
 <svelte:head>

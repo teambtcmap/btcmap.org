@@ -1,15 +1,16 @@
 <script lang="ts">
-	import tippy from 'tippy.js';
-	import { resolve } from '$app/paths';
+import tippy from "tippy.js";
 
-	export let tagger: { id: number; avatar: string; username: string };
+import { resolve } from "$app/paths";
 
-	let taggerTooltip: HTMLAnchorElement;
+export let tagger: { id: number; avatar: string; username: string };
 
-	$: taggerTooltip &&
-		tippy([taggerTooltip], {
-			content: tagger.username
-		});
+let taggerTooltip: HTMLAnchorElement;
+
+$: taggerTooltip &&
+	tippy([taggerTooltip], {
+		content: tagger.username,
+	});
 </script>
 
 <a bind:this={taggerTooltip} href={resolve(`/tagger/${tagger.id}`)}>

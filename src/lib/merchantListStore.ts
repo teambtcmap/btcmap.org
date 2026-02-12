@@ -1,19 +1,20 @@
-import { writable, get } from 'svelte/store';
-import axios from 'axios';
-import type { Place } from '$lib/types';
-import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
-import { isBoosted } from '$lib/merchantDrawerLogic';
-import { MERCHANT_LIST_MAX_ITEMS } from '$lib/constants';
-import { errToast } from '$lib/utils';
+import axios from "axios";
+import { get, writable } from "svelte/store";
+
+import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
 import {
+	type CategoryCounts,
+	type CategoryKey,
 	countMerchantsByCategory,
 	createEmptyCategoryCounts,
 	filterMerchantsByCategory,
-	type CategoryCounts,
-	type CategoryKey
-} from '$lib/categoryMapping';
+} from "$lib/categoryMapping";
+import { MERCHANT_LIST_MAX_ITEMS } from "$lib/constants";
+import { isBoosted } from "$lib/merchantDrawerLogic";
+import type { Place } from "$lib/types";
+import { errToast } from "$lib/utils";
 
-export type MerchantListMode = 'nearby' | 'search';
+export type MerchantListMode = "nearby" | "search";
 
 export interface MerchantListState {
 	isOpen: boolean;
@@ -43,17 +44,17 @@ const initialState: MerchantListState = {
 	placeDetailsCache: new Map(),
 	isLoadingList: false,
 	isEnrichingDetails: false,
-	mode: 'nearby',
-	searchQuery: '',
+	mode: "nearby",
+	searchQuery: "",
 	searchResults: [],
 	isSearching: false,
-	selectedCategory: 'all',
-	categoryCounts: createEmptyCategoryCounts()
+	selectedCategory: "all",
+	categoryCounts: createEmptyCategoryCounts(),
 };
 
 // Helper function to reset category state
 function resetCategoryState<T extends MerchantListState>(state: T): T {
-	return { ...state, selectedCategory: 'all' };
+	return { ...state, selectedCategory: "all" };
 }
 
 // Helper to apply category filtering with auto-reset when selected category has no matches
@@ -61,16 +62,18 @@ function resetCategoryState<T extends MerchantListState>(state: T): T {
 function applyCategoryFilter(
 	merchants: Place[],
 	selectedCategory: CategoryKey,
-	categoryCounts: CategoryCounts
+	categoryCounts: CategoryCounts,
 ): { filtered: Place[]; effectiveCategory: CategoryKey } {
 	// Auto-reset if selected category has no matches but other merchants exist
 	const shouldReset =
-		selectedCategory !== 'all' && categoryCounts.all > 0 && categoryCounts[selectedCategory] === 0;
+		selectedCategory !== "all" &&
+		categoryCounts.all > 0 &&
+		categoryCounts[selectedCategory] === 0;
 
-	const effectiveCategory = shouldReset ? 'all' : selectedCategory;
+	const effectiveCategory = shouldReset ? "all" : selectedCategory;
 
 	const filtered =
-		effectiveCategory !== 'all'
+		effectiveCategory !== "all"
 			? filterMerchantsByCategory(merchants, effectiveCategory)
 			: merchants;
 
@@ -80,14 +83,23 @@ function applyCategoryFilter(
 // Equirectangular approximation for local distance sorting
 // Uses squared distance (avoids sqrt) since we only need relative ordering
 // Cosine adjustment accounts for longitude distortion at different latitudes
-function getDistanceSquared(lat1: number, lon1: number, lat2: number, lon2: number): number {
+function getDistanceSquared(
+	lat1: number,
+	lon1: number,
+	lat2: number,
+	lon2: number,
+): number {
 	const dx = (lon2 - lon1) * Math.cos(((lat1 + lat2) / 2) * (Math.PI / 180));
 	const dy = lat2 - lat1;
 	return dx * dx + dy * dy;
 }
 
 // Sort order: boosted merchants first (premium placement), then by distance, then alphabetically
-function sortMerchants(merchants: Place[], centerLat?: number, centerLon?: number): Place[] {
+function sortMerchants(
+	merchants: Place[],
+	centerLat?: number,
+	centerLon?: number,
+): Place[] {
 	return [...merchants].sort((a, b) => {
 		// Boosted first
 		if (isBoosted(a) && !isBoosted(b)) return -1;
@@ -101,13 +113,13 @@ function sortMerchants(merchants: Place[], centerLat?: number, centerLon?: numbe
 		}
 
 		// Fallback to alphabetical
-		return (a.name || '').localeCompare(b.name || '');
+		return (a.name || "").localeCompare(b.name || "");
 	});
 }
 
 // Filter out invalid API response items missing required id field
 function filterValidPlaces<T extends { id?: unknown }>(items: T[]): T[] {
-	return items.filter((item): item is T => typeof item?.id === 'number');
+	return items.filter((item): item is T => typeof item?.id === "number");
 }
 
 function createMerchantListStore() {
@@ -149,10 +161,10 @@ function createMerchantListStore() {
 			update((state) => ({
 				...resetCategoryState(state),
 				isOpen: false,
-				mode: 'nearby',
-				searchQuery: '',
+				mode: "nearby",
+				searchQuery: "",
 				searchResults: [],
-				isSearching: false
+				isSearching: false,
 			}));
 		},
 
@@ -161,14 +173,14 @@ function createMerchantListStore() {
 			merchants: Place[],
 			centerLat?: number,
 			centerLon?: number,
-			limit: number = MERCHANT_LIST_MAX_ITEMS
+			limit: number = MERCHANT_LIST_MAX_ITEMS,
 		) {
 			const categoryCounts = countMerchantsByCategory(merchants);
 			const { selectedCategory } = get(store);
 			const { filtered, effectiveCategory } = applyCategoryFilter(
 				merchants,
 				selectedCategory,
-				categoryCounts
+				categoryCounts,
 			);
 
 			const sorted = sortMerchants(filtered, centerLat, centerLon);
@@ -180,7 +192,7 @@ function createMerchantListStore() {
 				totalCount: filtered.length,
 				isLoadingList: false,
 				categoryCounts,
-				selectedCategory: effectiveCategory
+				selectedCategory: effectiveCategory,
 			}));
 		},
 
@@ -190,7 +202,7 @@ function createMerchantListStore() {
 		async fetchAndReplaceList(
 			center: { lat: number; lon: number },
 			radiusKm: number,
-			options?: { hideIfExceeds?: number }
+			options?: { hideIfExceeds?: number },
 		) {
 			cancelListRequest();
 			listAbortController = new AbortController();
@@ -202,12 +214,12 @@ function createMerchantListStore() {
 				const fields = buildFieldsParam(PLACE_FIELD_SETS.LIST_ITEM);
 				const response = await axios.get<Place[]>(
 					`https://api.btcmap.org/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=${fields}`,
-					{ timeout: 10000, signal: listAbortController.signal }
+					{ timeout: 10000, signal: listAbortController.signal },
 				);
 
 				// Validate response is an array (API may return HTML error page)
 				if (!Array.isArray(response.data)) {
-					throw new Error('API returned invalid data format');
+					throw new Error("API returned invalid data format");
 				}
 
 				// Filter out invalid items missing required id field
@@ -220,7 +232,10 @@ function createMerchantListStore() {
 				const categoryCounts = countMerchantsByCategory(validPlaces);
 
 				// Check if we should hide results (too many at low zoom)
-				if (options?.hideIfExceeds && validPlaces.length > options.hideIfExceeds) {
+				if (
+					options?.hideIfExceeds &&
+					validPlaces.length > options.hideIfExceeds
+				) {
 					// Too many results - store count but show empty list
 					// The panel will display "zoom in" message, button shows count
 					update((state) => ({
@@ -228,14 +243,14 @@ function createMerchantListStore() {
 						merchants: [],
 						totalCount: validPlaces.length,
 						isLoadingList: false,
-						categoryCounts
+						categoryCounts,
 					}));
 				} else {
 					const { selectedCategory } = get(store);
 					const { filtered, effectiveCategory } = applyCategoryFilter(
 						validPlaces,
 						selectedCategory,
-						categoryCounts
+						categoryCounts,
 					);
 
 					const sorted = sortMerchants(filtered, center.lat, center.lon);
@@ -247,13 +262,13 @@ function createMerchantListStore() {
 						placeDetailsCache,
 						isLoadingList: false,
 						categoryCounts,
-						selectedCategory: effectiveCategory
+						selectedCategory: effectiveCategory,
 					}));
 				}
 			} catch (error) {
-				if (error instanceof Error && error.name !== 'AbortError') {
-					console.warn('Failed to fetch merchant list:', error.message);
-					errToast('Failed to load nearby merchants');
+				if (error instanceof Error && error.name !== "AbortError") {
+					console.warn("Failed to fetch merchant list:", error.message);
+					errToast("Failed to load nearby merchants");
 				}
 				update((state) => ({ ...state, isLoadingList: false }));
 			}
@@ -261,7 +276,10 @@ function createMerchantListStore() {
 
 		// Fetch only IDs to get count (minimal payload for button badge)
 		// Used at zoom 11-14 when panel is closed - avoids fetching full data unnecessarily
-		async fetchCountOnly(center: { lat: number; lon: number }, radiusKm: number) {
+		async fetchCountOnly(
+			center: { lat: number; lon: number },
+			radiusKm: number,
+		) {
 			cancelListRequest();
 			listAbortController = new AbortController();
 
@@ -270,12 +288,12 @@ function createMerchantListStore() {
 			try {
 				const response = await axios.get<{ id: number }[]>(
 					`https://api.btcmap.org/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=id`,
-					{ timeout: 10000, signal: listAbortController.signal }
+					{ timeout: 10000, signal: listAbortController.signal },
 				);
 
 				// Validate response is an array (API may return HTML error page)
 				if (!Array.isArray(response.data)) {
-					throw new Error('API returned invalid data format');
+					throw new Error("API returned invalid data format");
 				}
 
 				// Filter out invalid items missing required id field
@@ -285,12 +303,12 @@ function createMerchantListStore() {
 					...state,
 					merchants: [],
 					totalCount: validItems.length,
-					isLoadingList: false
+					isLoadingList: false,
 					// Preserve existing categoryCounts since we don't have actual merchant data to recalculate them
 				}));
 			} catch (error) {
-				if (error instanceof Error && error.name !== 'AbortError') {
-					console.warn('Failed to fetch merchant count:', error.message);
+				if (error instanceof Error && error.name !== "AbortError") {
+					console.warn("Failed to fetch merchant count:", error.message);
 				}
 				update((state) => ({ ...state, isLoadingList: false }));
 			}
@@ -299,7 +317,10 @@ function createMerchantListStore() {
 		// Fetch full Place data to enrich existing list items (doesn't change the list)
 		// Used at zoom 15-16 when panel is open - adds icons/addresses to skeleton items
 		// Runs silently in background without showing spinner
-		async fetchEnrichedDetails(center: { lat: number; lon: number }, radiusKm: number) {
+		async fetchEnrichedDetails(
+			center: { lat: number; lon: number },
+			radiusKm: number,
+		) {
 			cancelDetailsRequest();
 			detailsAbortController = new AbortController();
 
@@ -309,7 +330,7 @@ function createMerchantListStore() {
 				const fields = buildFieldsParam(PLACE_FIELD_SETS.LIST_ITEM);
 				const response = await axios.get<Place[]>(
 					`https://api.btcmap.org/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=${fields}`,
-					{ timeout: 10000, signal: detailsAbortController.signal }
+					{ timeout: 10000, signal: detailsAbortController.signal },
 				);
 
 				// Filter out invalid items and merge into existing cache
@@ -317,11 +338,15 @@ function createMerchantListStore() {
 				update((state) => {
 					const mergedCache = new Map(state.placeDetailsCache);
 					validPlaces.forEach((place) => mergedCache.set(place.id, place));
-					return { ...state, placeDetailsCache: mergedCache, isEnrichingDetails: false };
+					return {
+						...state,
+						placeDetailsCache: mergedCache,
+						isEnrichingDetails: false,
+					};
 				});
 			} catch (error) {
-				if (error instanceof Error && error.name !== 'AbortError') {
-					console.warn('Failed to fetch enriched details:', error.message);
+				if (error instanceof Error && error.name !== "AbortError") {
+					console.warn("Failed to fetch enriched details:", error.message);
 				}
 				update((state) => ({ ...state, isEnrichingDetails: false }));
 			}
@@ -334,11 +359,11 @@ function createMerchantListStore() {
 			update((state) => ({
 				...resetCategoryState(state),
 				isOpen: true,
-				mode: 'search',
+				mode: "search",
 				searchQuery: query,
 				searchResults: sortedResults,
 				isSearching: false,
-				categoryCounts
+				categoryCounts,
 			}));
 		},
 
@@ -349,8 +374,8 @@ function createMerchantListStore() {
 			update((state) => ({
 				...state,
 				isSearching,
-				mode: 'search',
-				isOpen: true
+				mode: "search",
+				isOpen: true,
 			}));
 		},
 
@@ -365,9 +390,9 @@ function createMerchantListStore() {
 		clearSearchInput() {
 			update((state) => ({
 				...resetCategoryState(state),
-				searchQuery: '',
+				searchQuery: "",
 				searchResults: [],
-				isSearching: false
+				isSearching: false,
 			}));
 		},
 
@@ -376,10 +401,10 @@ function createMerchantListStore() {
 		exitSearchMode() {
 			update((state) => ({
 				...resetCategoryState(state),
-				mode: 'nearby',
-				searchQuery: '',
+				mode: "nearby",
+				searchQuery: "",
 				searchResults: [],
-				isSearching: false
+				isSearching: false,
 			}));
 		},
 
@@ -401,7 +426,7 @@ function createMerchantListStore() {
 		reset() {
 			cancelAllRequests();
 			set(initialState);
-		}
+		},
 	};
 }
 

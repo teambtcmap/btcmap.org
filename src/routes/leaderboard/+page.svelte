@@ -1,287 +1,300 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import Icon from '$components/Icon.svelte';
-	import LeaderboardPagination from '$components/leaderboard/LeaderboardPagination.svelte';
-	import LeaderboardSearch from '$components/leaderboard/LeaderboardSearch.svelte';
-	import SortHeaderButton from '$components/leaderboard/SortHeaderButton.svelte';
-	import TaggerLeaderboardDesktopTable from '$components/leaderboard/TaggerLeaderboardDesktopTable.svelte';
-	import TaggerLeaderboardMobileCard from '$components/leaderboard/TaggerLeaderboardMobileCard.svelte';
-	import FormSelect from '$components/form/FormSelect.svelte';
-	import PrimaryButton from '$components/PrimaryButton.svelte';
-	import LoadingSpinner from '$components/LoadingSpinner.svelte';
-	import {
-		createSvelteTable,
-		getCoreRowModel,
-		getFilteredRowModel,
-		getPaginationRowModel,
-		getSortedRowModel,
-		type ColumnDef,
-		type FilterFn,
-		type OnChangeFn,
-		type PaginationState,
-		type SortingState,
-		type TableOptions
-	} from '@tanstack/svelte-table';
-	import { rankItem } from '@tanstack/match-sorter-utils';
-	import { page } from '$app/stores';
-	import { writable, get } from 'svelte/store';
-	import { excludeLeader } from '$lib/store';
-	import { theme } from '$lib/theme';
-	import type { RpcGetMostActiveUsersItem, TaggerLeaderboard } from '$lib/types';
-	import { debounce } from '$lib/utils';
+import { rankItem } from "@tanstack/match-sorter-utils";
+import {
+	type ColumnDef,
+	createSvelteTable,
+	type FilterFn,
+	getCoreRowModel,
+	getFilteredRowModel,
+	getPaginationRowModel,
+	getSortedRowModel,
+	type OnChangeFn,
+	type PaginationState,
+	type SortingState,
+	type TableOptions,
+} from "@tanstack/svelte-table";
+import { get, writable } from "svelte/store";
 
-	type TaggerRow = TaggerLeaderboard & {
-		position: number;
-		tipDestination?: string;
-	};
+import FormSelect from "$components/form/FormSelect.svelte";
+import Icon from "$components/Icon.svelte";
+import LoadingSpinner from "$components/LoadingSpinner.svelte";
+import LeaderboardPagination from "$components/leaderboard/LeaderboardPagination.svelte";
+import LeaderboardSearch from "$components/leaderboard/LeaderboardSearch.svelte";
+import SortHeaderButton from "$components/leaderboard/SortHeaderButton.svelte";
+import TaggerLeaderboardDesktopTable from "$components/leaderboard/TaggerLeaderboardDesktopTable.svelte";
+import TaggerLeaderboardMobileCard from "$components/leaderboard/TaggerLeaderboardMobileCard.svelte";
+import PrimaryButton from "$components/PrimaryButton.svelte";
+import { excludeLeader } from "$lib/store";
+import { theme } from "$lib/theme";
+import type { RpcGetMostActiveUsersItem, TaggerLeaderboard } from "$lib/types";
+import { debounce } from "$lib/utils";
 
-	type PeriodOption = '3-months' | '6-months' | '12-months' | 'all-time';
-	const DEFAULT_PERIOD: PeriodOption = '12-months';
-	const DEFAULT_PERIOD_OPTIONS: PeriodOption[] = ['3-months', '6-months', '12-months', 'all-time'];
-	const periodLabels: Record<PeriodOption, string> = {
-		'3-months': 'Last 3 months',
-		'6-months': 'Last 6 months',
-		'12-months': 'Last 12 months',
-		'all-time': 'All Time'
-	};
+import { goto } from "$app/navigation";
+import { page } from "$app/stores";
 
-	export let data;
+type TaggerRow = TaggerLeaderboard & {
+	position: number;
+	tipDestination?: string;
+};
 
-	const pageSizes = [10, 20, 30, 40, 50];
-	let loading = true;
-	let periodLoading = false;
-	let errorMessage: string | null = data?.error ?? null;
-	let leaderboardRows: TaggerRow[] = [];
-	let totalTaggers: number;
+type PeriodOption = "3-months" | "6-months" | "12-months" | "all-time";
+const DEFAULT_PERIOD: PeriodOption = "12-months";
+const DEFAULT_PERIOD_OPTIONS: PeriodOption[] = [
+	"3-months",
+	"6-months",
+	"12-months",
+	"all-time",
+];
+const periodLabels: Record<PeriodOption, string> = {
+	"3-months": "Last 3 months",
+	"6-months": "Last 6 months",
+	"12-months": "Last 12 months",
+	"all-time": "All Time",
+};
 
-	const validatePeriodOption = (value: unknown): value is PeriodOption => {
-		return typeof value === 'string' && DEFAULT_PERIOD_OPTIONS.includes(value as PeriodOption);
-	};
+export let data;
 
-	let periodOptions: PeriodOption[];
-	let selectedPeriod: PeriodOption;
-	let lastResolvedPeriod: PeriodOption = DEFAULT_PERIOD;
+const pageSizes = [10, 20, 30, 40, 50];
+let loading = true;
+let periodLoading = false;
+let errorMessage: string | null = data?.error ?? null;
+let leaderboardRows: TaggerRow[] = [];
+let totalTaggers: number;
 
-	$: {
-		const incoming = Array.isArray(data?.periodOptions)
-			? data?.periodOptions
-			: DEFAULT_PERIOD_OPTIONS;
-		const validOptions = Array.from(
-			new Set(incoming.filter((option) => validatePeriodOption(option)))
-		) as PeriodOption[];
-		periodOptions = validOptions.length > 0 ? validOptions : [...DEFAULT_PERIOD_OPTIONS];
+const validatePeriodOption = (value: unknown): value is PeriodOption => {
+	return (
+		typeof value === "string" &&
+		DEFAULT_PERIOD_OPTIONS.includes(value as PeriodOption)
+	);
+};
+
+let periodOptions: PeriodOption[];
+let selectedPeriod: PeriodOption;
+let lastResolvedPeriod: PeriodOption = DEFAULT_PERIOD;
+
+$: {
+	const incoming = Array.isArray(data?.periodOptions)
+		? data?.periodOptions
+		: DEFAULT_PERIOD_OPTIONS;
+	const validOptions = Array.from(
+		new Set(incoming.filter((option) => validatePeriodOption(option))),
+	) as PeriodOption[];
+	periodOptions =
+		validOptions.length > 0 ? validOptions : [...DEFAULT_PERIOD_OPTIONS];
+}
+
+$: {
+	const periodFromData = validatePeriodOption(data?.period)
+		? (data.period as PeriodOption)
+		: DEFAULT_PERIOD;
+	const validPeriod = periodOptions.includes(periodFromData)
+		? periodFromData
+		: DEFAULT_PERIOD;
+	if (validPeriod !== lastResolvedPeriod) {
+		// Track resolved period to prevent loops
+
+		lastResolvedPeriod = validPeriod;
+		selectedPeriod = validPeriod;
 	}
+}
 
-	$: {
-		const periodFromData = validatePeriodOption(data?.period)
-			? (data.period as PeriodOption)
-			: DEFAULT_PERIOD;
-		const validPeriod = periodOptions.includes(periodFromData) ? periodFromData : DEFAULT_PERIOD;
-		if (validPeriod !== lastResolvedPeriod) {
-			// Track resolved period to prevent loops
-
-			lastResolvedPeriod = validPeriod;
-			selectedPeriod = validPeriod;
-		}
+const extractLightningDestination = (tip?: string): string | undefined => {
+	if (!tip) return undefined;
+	const trimmed = tip.trim();
+	if (!trimmed) return undefined;
+	const lightningMatch = trimmed.match(/lightning:[^\s)]+/i);
+	if (lightningMatch) {
+		return lightningMatch[0].replace(/^lightning:/i, "");
 	}
+	return trimmed.replace(/^lightning:/i, "");
+};
 
-	const extractLightningDestination = (tip?: string): string | undefined => {
-		if (!tip) return undefined;
-		const trimmed = tip.trim();
-		if (!trimmed) return undefined;
-		const lightningMatch = trimmed.match(/lightning:[^\s)]+/i);
-		if (lightningMatch) {
-			return lightningMatch[0].replace(/^lightning:/i, '');
-		}
-		return trimmed.replace(/^lightning:/i, '');
-	};
+const normalizeUsers = (
+	users: RpcGetMostActiveUsersItem[],
+	excluded: Set<number>,
+): TaggerRow[] => {
+	return users
+		.filter((user) => !excluded.has(user.id))
+		.map((user) => {
+			const avatar = user.image_url || "/images/satoshi-nakamoto.png";
+			const totalEdits = user.edits;
+			return {
+				avatar,
+				tagger: user.name,
+				id: user.id,
+				created: user.created,
+				updated: user.updated,
+				deleted: user.deleted,
+				total: totalEdits,
+				tip: user.tip_address,
+				tipDestination: extractLightningDestination(user.tip_address),
+			};
+		})
+		.sort((a, b) => {
+			if (b.total !== a.total) return b.total - a.total;
+			if (b.updated !== a.updated) return b.updated - a.updated;
+			return a.tagger.localeCompare(b.tagger);
+		})
+		.map((item, index) => ({ ...item, position: index + 1 }));
+};
 
-	const normalizeUsers = (
-		users: RpcGetMostActiveUsersItem[],
-		excluded: Set<number>
-	): TaggerRow[] => {
-		return users
-			.filter((user) => !excluded.has(user.id))
-			.map((user) => {
-				const avatar = user.image_url || '/images/satoshi-nakamoto.png';
-				const totalEdits = user.edits;
-				return {
-					avatar,
-					tagger: user.name,
-					id: user.id,
-					created: user.created,
-					updated: user.updated,
-					deleted: user.deleted,
-					total: totalEdits,
-					tip: user.tip_address,
-					tipDestination: extractLightningDestination(user.tip_address)
-				};
-			})
-			.sort((a, b) => {
-				if (b.total !== a.total) return b.total - a.total;
-				if (b.updated !== a.updated) return b.updated - a.updated;
-				return a.tagger.localeCompare(b.tagger);
-			})
-			.map((item, index) => ({ ...item, position: index + 1 }));
-	};
-
-	$: {
-		if (data?.rpcResult?.users?.length) {
-			const excluded = new Set(get(excludeLeader));
-			const normalizedUsers = normalizeUsers(data.rpcResult.users, excluded);
-			leaderboardRows = normalizedUsers;
-			totalTaggers = normalizedUsers.length;
-			loading = false;
-			periodLoading = false;
-			errorMessage = null;
-		} else if (data?.error) {
-			loading = false;
-			periodLoading = false;
-			errorMessage = data.error;
-			leaderboardRows = [];
-			totalTaggers = 0;
-		} else {
-			leaderboardRows = [];
-			totalTaggers = 0;
-		}
+$: {
+	if (data?.rpcResult?.users?.length) {
+		const excluded = new Set(get(excludeLeader));
+		const normalizedUsers = normalizeUsers(data.rpcResult.users, excluded);
+		leaderboardRows = normalizedUsers;
+		totalTaggers = normalizedUsers.length;
+		loading = false;
+		periodLoading = false;
+		errorMessage = null;
+	} else if (data?.error) {
+		loading = false;
+		periodLoading = false;
+		errorMessage = data.error;
+		leaderboardRows = [];
+		totalTaggers = 0;
+	} else {
+		leaderboardRows = [];
+		totalTaggers = 0;
 	}
+}
 
-	const fuzzyFilter: FilterFn<TaggerRow> = (row, columnId, value, addMeta) => {
-		const itemRank = rankItem(row.getValue(columnId), value);
-		addMeta?.({ itemRank });
-		return itemRank.passed;
-	};
+const fuzzyFilter: FilterFn<TaggerRow> = (row, columnId, value, addMeta) => {
+	const itemRank = rankItem(row.getValue(columnId), value);
+	addMeta?.({ itemRank });
+	return itemRank.passed;
+};
 
-	const columns: ColumnDef<TaggerRow>[] = [
-		{
-			id: 'position',
-			header: 'Position',
-			accessorFn: (row) => row.position,
-			enableSorting: true,
-			enableGlobalFilter: false,
-			sortingFn: (a, b) => a.original.position - b.original.position
-		},
-		{
-			id: 'name',
-			header: 'Name',
-			accessorFn: (row) => row.tagger,
-			enableSorting: true,
-			filterFn: fuzzyFilter,
-			enableGlobalFilter: true
-		},
-		{
-			id: 'total',
-			header: 'Total',
-			accessorFn: (row) => row.total,
-			enableSorting: true,
-			enableGlobalFilter: false
-		},
-		{
-			id: 'created',
-			header: 'Created',
-			accessorFn: (row) => row.created,
-			enableSorting: true,
-			enableGlobalFilter: false
-		},
-		{
-			id: 'updated',
-			header: 'Updated',
-			accessorFn: (row) => row.updated,
-			enableSorting: true,
-			enableGlobalFilter: false
-		},
-		{
-			id: 'deleted',
-			header: 'Deleted',
-			accessorFn: (row) => row.deleted,
-			enableSorting: true,
-			enableGlobalFilter: false
-		},
-		{
-			id: 'tip',
-			header: 'Tip',
-			accessorFn: (row) => row.tipDestination ?? '',
-			enableSorting: false,
-			enableGlobalFilter: false
-		}
-	];
+const columns: ColumnDef<TaggerRow>[] = [
+	{
+		id: "position",
+		header: "Position",
+		accessorFn: (row) => row.position,
+		enableSorting: true,
+		enableGlobalFilter: false,
+		sortingFn: (a, b) => a.original.position - b.original.position,
+	},
+	{
+		id: "name",
+		header: "Name",
+		accessorFn: (row) => row.tagger,
+		enableSorting: true,
+		filterFn: fuzzyFilter,
+		enableGlobalFilter: true,
+	},
+	{
+		id: "total",
+		header: "Total",
+		accessorFn: (row) => row.total,
+		enableSorting: true,
+		enableGlobalFilter: false,
+	},
+	{
+		id: "created",
+		header: "Created",
+		accessorFn: (row) => row.created,
+		enableSorting: true,
+		enableGlobalFilter: false,
+	},
+	{
+		id: "updated",
+		header: "Updated",
+		accessorFn: (row) => row.updated,
+		enableSorting: true,
+		enableGlobalFilter: false,
+	},
+	{
+		id: "deleted",
+		header: "Deleted",
+		accessorFn: (row) => row.deleted,
+		enableSorting: true,
+		enableGlobalFilter: false,
+	},
+	{
+		id: "tip",
+		header: "Tip",
+		accessorFn: (row) => row.tipDestination ?? "",
+		enableSorting: false,
+		enableGlobalFilter: false,
+	},
+];
 
-	let sorting: SortingState = [{ id: 'total', desc: true }];
-	let pagination: PaginationState = {
-		pageIndex: 0,
-		pageSize: pageSizes[0]
-	};
+let sorting: SortingState = [{ id: "total", desc: true }];
+let pagination: PaginationState = {
+	pageIndex: 0,
+	pageSize: pageSizes[0],
+};
 
-	const setSorting: OnChangeFn<SortingState> = (updater) => {
-		sorting = updater instanceof Function ? updater(sorting) : updater;
-		options.update((old) => ({
-			...old,
-			state: {
-				...old.state,
-				sorting
-			}
-		}));
-	};
-
-	const setPagination: OnChangeFn<PaginationState> = (updater) => {
-		pagination = updater instanceof Function ? updater(pagination) : updater;
-		options.update((old) => ({
-			...old,
-			state: {
-				...old.state,
-				pagination
-			}
-		}));
-	};
-
-	const options = writable<TableOptions<TaggerRow>>({
-		data: leaderboardRows,
-		columns,
+const setSorting: OnChangeFn<SortingState> = (updater) => {
+	sorting = updater instanceof Function ? updater(sorting) : updater;
+	options.update((old) => ({
+		...old,
 		state: {
+			...old.state,
 			sorting,
-			pagination
 		},
-		onSortingChange: setSorting,
-		onPaginationChange: setPagination,
-		globalFilterFn: fuzzyFilter,
-		getCoreRowModel: getCoreRowModel(),
-		getSortedRowModel: getSortedRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
-		getFilteredRowModel: getFilteredRowModel()
-	});
-
-	const table = createSvelteTable(options);
-
-	$: options.update((current) => ({
-		...current,
-		data: leaderboardRows
 	}));
+};
 
-	const handleKeyUp = (e: KeyboardEvent) => {
-		$table?.setGlobalFilter(String((e.target as HTMLInputElement)?.value));
-	};
+const setPagination: OnChangeFn<PaginationState> = (updater) => {
+	pagination = updater instanceof Function ? updater(pagination) : updater;
+	options.update((old) => ({
+		...old,
+		state: {
+			...old.state,
+			pagination,
+		},
+	}));
+};
 
-	const searchDebounce = debounce((e) => handleKeyUp(e));
+const options = writable<TableOptions<TaggerRow>>({
+	data: leaderboardRows,
+	columns,
+	state: {
+		sorting,
+		pagination,
+	},
+	onSortingChange: setSorting,
+	onPaginationChange: setPagination,
+	globalFilterFn: fuzzyFilter,
+	getCoreRowModel: getCoreRowModel(),
+	getSortedRowModel: getSortedRowModel(),
+	getPaginationRowModel: getPaginationRowModel(),
+	getFilteredRowModel: getFilteredRowModel(),
+});
 
-	const handlePeriodChange = async (event: Event) => {
-		const nextValue = (event.target as HTMLSelectElement).value as PeriodOption;
-		const search = new URLSearchParams($page.url.searchParams);
-		if (nextValue === DEFAULT_PERIOD) {
-			search.delete('period');
-		} else {
-			search.set('period', nextValue);
-		}
-		const nextSearch = search.toString();
-		const nextUrl = nextSearch ? `/leaderboard?${nextSearch}` : '/leaderboard';
-		periodLoading = true;
-		selectedPeriod = nextValue;
+const table = createSvelteTable(options);
 
-		// eslint-disable-next-line svelte/no-navigation-without-resolve
-		await goto(nextUrl, {
-			replaceState: true,
-			noScroll: true
-		});
-	};
+$: options.update((current) => ({
+	...current,
+	data: leaderboardRows,
+}));
+
+const handleKeyUp = (e: KeyboardEvent) => {
+	$table?.setGlobalFilter(String((e.target as HTMLInputElement)?.value));
+};
+
+const searchDebounce = debounce((e) => handleKeyUp(e));
+
+const handlePeriodChange = async (event: Event) => {
+	const nextValue = (event.target as HTMLSelectElement).value as PeriodOption;
+	const search = new URLSearchParams($page.url.searchParams);
+	if (nextValue === DEFAULT_PERIOD) {
+		search.delete("period");
+	} else {
+		search.set("period", nextValue);
+	}
+	const nextSearch = search.toString();
+	const nextUrl = nextSearch ? `/leaderboard?${nextSearch}` : "/leaderboard";
+	periodLoading = true;
+	selectedPeriod = nextValue;
+
+	// eslint-disable-next-line svelte/no-navigation-without-resolve
+	await goto(nextUrl, {
+		replaceState: true,
+		noScroll: true,
+	});
+};
 </script>
 
 <svelte:head>

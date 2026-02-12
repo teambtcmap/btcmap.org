@@ -1,20 +1,21 @@
 <script lang="ts">
-	import tippy from 'tippy.js';
-	import Icon from '$components/Icon.svelte';
+import tippy from "tippy.js";
 
-	export let title: string;
-	export let stat: number | undefined;
-	export let percent: string | undefined = undefined;
-	export let border: string | undefined = undefined;
-	export let tooltip: undefined | string = undefined;
+import Icon from "$components/Icon.svelte";
 
-	let tooltipElement: HTMLButtonElement;
+export let title: string;
+export let stat: number | undefined;
+export let percent: string | undefined = undefined;
+export let border: string | undefined = undefined;
+export let tooltip: undefined | string = undefined;
 
-	$: tooltipElement &&
-		tippy([tooltipElement], {
-			content: tooltip,
-			allowHTML: true
-		});
+let tooltipElement: HTMLButtonElement;
+
+$: tooltipElement &&
+	tippy([tooltipElement], {
+		content: tooltip,
+		allowHTML: true,
+	});
 </script>
 
 <div class="space-y-5 p-5 {border}">

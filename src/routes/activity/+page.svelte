@@ -1,93 +1,107 @@
 <script lang="ts">
-	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-	import LatestTagger from '$components/LatestTagger.svelte';
-	import TaggerSkeleton from '$components/TaggerSkeleton.svelte';
-	import TopButton from '$components/TopButton.svelte';
-	import { placesError, eventError, events, syncStatus, userError, users } from '$lib/store';
-	import { theme } from '$lib/theme';
-	import { eventsSync } from '$lib/sync/events';
-	import { usersSync } from '$lib/sync/users';
-	import { batchSync } from '$lib/sync/batchSync';
-	import type { ActivityEvent, Event, User } from '$lib/types';
-	import { errToast, formatElementID } from '$lib/utils';
-	import { onMount } from 'svelte';
+import { onMount } from "svelte";
 
-	onMount(() => {
-		batchSync([eventsSync, usersSync]);
-	});
+import LatestTagger from "$components/LatestTagger.svelte";
+import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
+import TopButton from "$components/TopButton.svelte";
+import {
+	eventError,
+	events,
+	placesError,
+	syncStatus,
+	userError,
+	users,
+} from "$lib/store";
+import { batchSync } from "$lib/sync/batchSync";
+import { eventsSync } from "$lib/sync/events";
+import { usersSync } from "$lib/sync/users";
+import { theme } from "$lib/theme";
+import type { ActivityEvent, Event, User } from "$lib/types";
+import { errToast, formatElementID } from "$lib/utils";
 
-	// alert for user errors
-	$: $userError && errToast($userError);
-	// alert for event errors
-	$: $eventError && errToast($eventError);
-	// alert for element errors
-	$: $placesError && errToast($placesError);
+onMount(() => {
+	batchSync([eventsSync, usersSync]);
+});
 
-	let elementsLoading: boolean;
-	let supertaggers: ActivityEvent[];
+// alert for user errors
+$: $userError && errToast($userError);
+// alert for event errors
+$: $eventError && errToast($eventError);
+// alert for element errors
+$: $placesError && errToast($placesError);
 
-	const findUser = (tagger: Event) => {
-		let foundUser = $users.find((user) => user.id == tagger['user_id']);
-		if (foundUser) {
-			return foundUser;
-		} else {
-			return undefined;
-		}
-	};
+let elementsLoading: boolean;
+let supertaggers: ActivityEvent[];
 
-	const fetchMerchantName = async (elementId: string): Promise<string> => {
+const findUser = (tagger: Event) => {
+	let foundUser = $users.find((user) => user.id === tagger.user_id);
+	if (foundUser) {
+		return foundUser;
+	} else {
+		return undefined;
+	}
+};
+
+const fetchMerchantName = async (elementId: string): Promise<string> => {
+	try {
+		const response = await fetch(
+			`https://api.btcmap.org/v2/elements/${elementId}`,
+		);
+		if (!response.ok) throw new Error("API call failed");
+		const data = await response.json();
+		return data.osm_json?.tags?.name || formatElementID(elementId);
+	} catch {
+		return formatElementID(elementId);
+	}
+};
+
+const supertaggerSync = async (
+	status: boolean,
+	users: User[],
+	events: Event[],
+) => {
+	if (events.length && users.length && !status) {
+		let recentEvents = events
+			.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
+			.slice(0, 50);
+
+		elementsLoading = true;
+		supertaggers = [];
+
+		// Fetch merchant names concurrently
+		const supertaggerPromises = recentEvents.map(async (event) => {
+			const location = await fetchMerchantName(event.element_id);
+			const tagger = findUser(event);
+
+			return {
+				...event,
+				location,
+				merchantId: event.element_id,
+				tagger,
+			};
+		});
+
 		try {
-			const response = await fetch(`https://api.btcmap.org/v2/elements/${elementId}`);
-			if (!response.ok) throw new Error('API call failed');
-			const data = await response.json();
-			return data.osm_json?.tags?.name || formatElementID(elementId);
-		} catch {
-			return formatElementID(elementId);
+			supertaggers = await Promise.all(supertaggerPromises);
+		} catch (error) {
+			console.error("Error fetching merchant names:", error);
+			// Fallback: create entries with element IDs only
+			supertaggers = recentEvents.map((event) => ({
+				...event,
+				location: formatElementID(event.element_id),
+				merchantId: event.element_id,
+				tagger: findUser(event),
+			}));
 		}
-	};
 
-	const supertaggerSync = async (status: boolean, users: User[], events: Event[]) => {
-		if (events.length && users.length && !status) {
-			let recentEvents = events
-				.sort((a, b) => Date.parse(b['created_at']) - Date.parse(a['created_at']))
-				.slice(0, 50);
+		elementsLoading = false;
+	}
+};
 
-			elementsLoading = true;
-			supertaggers = [];
+$: supertaggerSync($syncStatus, $users, $events);
 
-			// Fetch merchant names concurrently
-			const supertaggerPromises = recentEvents.map(async (event) => {
-				const location = await fetchMerchantName(event['element_id']);
-				const tagger = findUser(event);
-
-				return {
-					...event,
-					location,
-					merchantId: event['element_id'],
-					tagger
-				};
-			});
-
-			try {
-				supertaggers = await Promise.all(supertaggerPromises);
-			} catch (error) {
-				console.error('Error fetching merchant names:', error);
-				// Fallback: create entries with element IDs only
-				supertaggers = recentEvents.map((event) => ({
-					...event,
-					location: formatElementID(event['element_id']),
-					merchantId: event['element_id'],
-					tagger: findUser(event)
-				}));
-			}
-
-			elementsLoading = false;
-		}
-	};
-
-	$: supertaggerSync($syncStatus, $users, $events);
-
-	$: latestTaggers = supertaggers && supertaggers.length && !elementsLoading ? true : false;
+$: latestTaggers = !!(supertaggers?.length && !elementsLoading);
 </script>
 
 <svelte:head>

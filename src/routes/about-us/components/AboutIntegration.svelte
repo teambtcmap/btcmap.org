@@ -1,5 +1,5 @@
 <script lang="ts">
-	export let integration: { url: string; icon: string; name: string };
+export let integration: { url: string; icon: string; name: string };
 </script>
 
 <div class="space-y-2">

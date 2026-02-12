@@ -1,16 +1,18 @@
 <script lang="ts">
-	import type { Area } from '$lib/types';
-	import tippy from 'tippy.js';
-	import { resolve } from '$app/paths';
+import tippy from "tippy.js";
 
-	export let community: Area;
+import type { Area } from "$lib/types";
 
-	let communityTooltip: HTMLAnchorElement;
+import { resolve } from "$app/paths";
 
-	$: communityTooltip &&
-		tippy([communityTooltip], {
-			content: community.tags.name
-		});
+export let community: Area;
+
+let communityTooltip: HTMLAnchorElement;
+
+$: communityTooltip &&
+	tippy([communityTooltip], {
+		content: community.tags.name,
+	});
 </script>
 
 <a bind:this={communityTooltip} href={resolve(`/community/${community.id}`)}>

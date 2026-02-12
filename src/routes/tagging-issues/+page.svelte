@@ -1,11 +1,11 @@
 <script lang="ts">
-	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-	import IssuesTable from '$components/IssuesTable.svelte';
-	import { theme } from '$lib/theme';
-	import type { RpcIssue } from '$lib/types';
+import IssuesTable from "$components/IssuesTable.svelte";
+import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import { theme } from "$lib/theme";
+import type { RpcIssue } from "$lib/types";
 
-	export let data;
-	let issues: RpcIssue[] = data.rpcResult.requested_issues;
+export let data;
+let issues: RpcIssue[] = data.rpcResult.requested_issues;
 </script>
 
 <svelte:head>

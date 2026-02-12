@@ -1,18 +1,24 @@
 <script lang="ts">
-	import type { AppIconName } from '$lib/icons/types';
-	import AppCard from './components/AppCard.svelte';
-	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-	import { apps } from '$lib/store';
-	import { theme } from '$lib/theme';
+import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import type { AppIconName } from "$lib/icons/types";
+import { apps } from "$lib/store";
+import { theme } from "$lib/theme";
 
-	const communityApps: { link: string; type: string; icon: AppIconName; desc: string }[] = [
-		{
-			link: 'https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666',
-			type: 'BitLocal',
-			icon: 'ios',
-			desc: 'iOS'
-		}
-	];
+import AppCard from "./components/AppCard.svelte";
+
+const communityApps: {
+	link: string;
+	type: string;
+	icon: AppIconName;
+	desc: string;
+}[] = [
+	{
+		link: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
+		type: "BitLocal",
+		icon: "ios",
+		desc: "iOS",
+	},
+];
 </script>
 
 <svelte:head>

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import Icon from '$components/Icon.svelte';
-	export let scroll: undefined | HTMLElement = undefined;
-	export let style: undefined | string = undefined;
+import Icon from "$components/Icon.svelte";
+export let scroll: undefined | HTMLElement = undefined;
+export let style: undefined | string = undefined;
 </script>
 
 <button

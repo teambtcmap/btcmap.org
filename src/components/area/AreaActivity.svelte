@@ -1,26 +1,27 @@
 <script lang="ts">
-	import LatestTagger from '$components/LatestTagger.svelte';
-	import TaggerSkeleton from '$components/TaggerSkeleton.svelte';
-	import TopButton from '$components/TopButton.svelte';
-	import Icon from '$components/Icon.svelte';
-	import type { ActivityEvent, User } from '$lib/types.js';
-	import { resolve } from '$app/paths';
+import Icon from "$components/Icon.svelte";
+import LatestTagger from "$components/LatestTagger.svelte";
+import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
+import TopButton from "$components/TopButton.svelte";
+import type { ActivityEvent, User } from "$lib/types.js";
 
-	export let alias: string;
-	export let name: string;
-	export let dataInitialized: boolean;
-	export let eventElements: ActivityEvent[];
-	export let taggers: User[];
+import { resolve } from "$app/paths";
 
-	let hideArrow = false;
-	let activityDiv: HTMLDivElement;
+export let alias: string;
+export let name: string;
+export let dataInitialized: boolean;
+export let eventElements: ActivityEvent[];
+export let taggers: User[];
 
-	let eventCount = 25;
-	$: eventElementsPaginated = eventElements.slice(0, eventCount);
+let hideArrow = false;
+let activityDiv: HTMLDivElement;
 
-	let taggerCount = 25;
-	$: taggersPaginated = taggers.slice(0, taggerCount);
-	let taggerDiv: HTMLDivElement;
+let eventCount = 25;
+$: eventElementsPaginated = eventElements.slice(0, eventCount);
+
+let taggerCount = 25;
+$: taggersPaginated = taggers.slice(0, taggerCount);
+let taggerDiv: HTMLDivElement;
 </script>
 
 <section id="taggers">

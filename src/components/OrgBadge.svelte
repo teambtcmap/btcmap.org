@@ -1,12 +1,12 @@
 <script lang="ts">
-	export let org: string;
+export let org: string;
 
-	$: organizations = org
-		? org
-				.split(',')
-				.map((o) => o.trim())
-				.filter((o) => o.length > 0)
-		: [];
+$: organizations = org
+	? org
+			.split(",")
+			.map((o) => o.trim())
+			.filter((o) => o.length > 0)
+	: [];
 </script>
 
 {#if organizations.length > 0}

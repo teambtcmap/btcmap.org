@@ -1,12 +1,12 @@
 <script lang="ts">
-	import LoadingSpinner from '$components/LoadingSpinner.svelte';
+import LoadingSpinner from "$components/LoadingSpinner.svelte";
 
-	export let title: string;
-	export let stat: number | undefined;
-	export let percent: undefined | string = undefined;
-	export let change: undefined | string = undefined;
-	export let border: undefined | string = undefined;
-	export let loading: boolean;
+export let title: string;
+export let stat: number | undefined;
+export let percent: undefined | string = undefined;
+export let change: undefined | string = undefined;
+export let border: undefined | string = undefined;
+export let loading: boolean;
 </script>
 
 <div class="space-y-5 p-5 {border}">

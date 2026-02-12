@@ -1,67 +1,70 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { dev } from '$app/environment';
-	import { syncStatus } from '$lib/store';
-	import { theme } from '$lib/theme';
-	import { elementsSync } from '$lib/sync/places';
-	import Header from '$components/layout/Header.svelte';
-	import { SvelteToast } from '@zerodevx/svelte-toast';
-	import axios from 'axios';
-	import 'leaflet.locatecontrol/dist/L.Control.Locate.min.css';
-	import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
-	import 'leaflet.markercluster/dist/MarkerCluster.css';
-	import 'leaflet/dist/leaflet.css';
-	import localforage from 'localforage';
-	import { onDestroy, onMount } from 'svelte';
-	import 'tippy.js/dist/tippy.css';
-	import '../app.css';
-	import Footer from '$components/layout/Footer.svelte';
-	import '$lib/i18n';
-	import { isLoading, locale } from 'svelte-i18n';
+import { SvelteToast } from "@zerodevx/svelte-toast";
+import axios from "axios";
 
-	// Update HTML lang attribute dynamically when locale changes
-	$: if (browser && $locale) {
-		document.documentElement.lang = $locale;
-	}
+import Header from "$components/layout/Header.svelte";
+import { syncStatus } from "$lib/store";
+import { elementsSync } from "$lib/sync/places";
+import { theme } from "$lib/theme";
 
-	axios.defaults.timeout = 600000;
+import { browser, dev } from "$app/environment";
+import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet/dist/leaflet.css";
+import localforage from "localforage";
+import { onDestroy, onMount } from "svelte";
+import "tippy.js/dist/tippy.css";
+import "../app.css";
 
-	const options = {
-		reversed: true,
-		intro: { y: 192 },
-		pausable: true
+import Footer from "$components/layout/Footer.svelte";
+import "$lib/i18n";
+import { isLoading, locale } from "svelte-i18n";
+
+// Update HTML lang attribute dynamically when locale changes
+$: if (browser && $locale) {
+	document.documentElement.lang = $locale;
+}
+
+axios.defaults.timeout = 600000;
+
+const options = {
+	reversed: true,
+	intro: { y: 192 },
+	pausable: true,
+};
+
+let dataSyncInterval: ReturnType<typeof setInterval>;
+
+onMount(async () => {
+	// Initialize theme from SSR/data attribute or localStorage
+	theme.init();
+
+	localforage.config({
+		name: "BTC Map",
+		description:
+			"The Times 03/Jan/2009 Chancellor on brink of second bailout for banks",
+	});
+
+	const dataSync = async () => {
+		$syncStatus = true;
+
+		// Load places (map is primary use case)
+		// Other syncs (events, users, areas, reports) are lazy-loaded by pages that need them
+		await elementsSync();
+
+		$syncStatus = false;
 	};
 
-	let dataSyncInterval: ReturnType<typeof setInterval>;
+	dataSync();
+	dataSyncInterval = setInterval(dataSync, 600000);
+});
 
-	onMount(async () => {
-		// Initialize theme from SSR/data attribute or localStorage
-		theme.init();
+onDestroy(() => {
+	clearInterval(dataSyncInterval);
+});
 
-		localforage.config({
-			name: 'BTC Map',
-			description: 'The Times 03/Jan/2009 Chancellor on brink of second bailout for banks'
-		});
-
-		const dataSync = async () => {
-			$syncStatus = true;
-
-			// Load places (map is primary use case)
-			// Other syncs (events, users, areas, reports) are lazy-loaded by pages that need them
-			await elementsSync();
-
-			$syncStatus = false;
-		};
-
-		dataSync();
-		dataSyncInterval = setInterval(dataSync, 600000);
-	});
-
-	onDestroy(() => {
-		clearInterval(dataSyncInterval);
-	});
-
-	export let data;
+export let data;
 </script>
 
 <svelte:head>

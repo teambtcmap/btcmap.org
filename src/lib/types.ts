@@ -1,7 +1,14 @@
-import type { GeoJSON, Polygon, MultiPolygon } from 'geojson';
-import type leaflet from 'leaflet';
-import type { DomEvent, FeatureGroup, LayerGroup, TileLayer, MaplibreGL } from 'leaflet';
-import type { MobileNavIconName } from '$lib/icons/types';
+import type { GeoJSON, MultiPolygon, Polygon } from "geojson";
+import type leaflet from "leaflet";
+import type {
+	DomEvent,
+	FeatureGroup,
+	LayerGroup,
+	MaplibreGL,
+	TileLayer,
+} from "leaflet";
+
+import type { MobileNavIconName } from "$lib/icons/types";
 
 // nominatim.openstreetmap.org API
 // https://nominatim.org/release-docs/latest/api/Search
@@ -41,51 +48,51 @@ export type AreaTags = {
 	continent: Continents;
 	url_alias: string;
 	geo_json: GeoJSON;
-	['icon:square']: string; // countries don't have this tag yet
+	"icon:square": string; // countries don't have this tag yet
 	organization?: string;
 	language?: string;
 	population?: string;
 	area_km2?: number;
-	['verified:date']?: string;
-	['population:date']?: string;
-	['population:year']?: number;
-	['contact:website']?: string;
-	['contact:email']?: string;
-	['contact:phone']?: string;
-	['contact:nostr']?: string;
-	['contact:twitter']?: string;
-	['contact:meetup']?: string;
-	['contact:telegram']?: string;
-	['contact:discord']?: string;
-	['contact:youtube']?: string;
-	['contact:github']?: string;
-	['contact:matrix']?: string;
-	['contact:geyser']?: string;
-	['contact:satlantis']?: string;
-	['contact:eventbrite']?: string;
-	['contact:reddit']?: string;
-	['contact:simplex']?: string;
-	['contact:instagram']?: string;
-	['contact:whatsapp']?: string;
-	['contact:facebook']?: string;
-	['contact:linkedin']?: string;
-	['contact:rss']?: string;
-	['contact:signal']?: string;
-	['tips:lightning_address']?: string;
-	['tips:url']?: string;
+	"verified:date"?: string;
+	"population:date"?: string;
+	"population:year"?: number;
+	"contact:website"?: string;
+	"contact:email"?: string;
+	"contact:phone"?: string;
+	"contact:nostr"?: string;
+	"contact:twitter"?: string;
+	"contact:meetup"?: string;
+	"contact:telegram"?: string;
+	"contact:discord"?: string;
+	"contact:youtube"?: string;
+	"contact:github"?: string;
+	"contact:matrix"?: string;
+	"contact:geyser"?: string;
+	"contact:satlantis"?: string;
+	"contact:eventbrite"?: string;
+	"contact:reddit"?: string;
+	"contact:simplex"?: string;
+	"contact:instagram"?: string;
+	"contact:whatsapp"?: string;
+	"contact:facebook"?: string;
+	"contact:linkedin"?: string;
+	"contact:rss"?: string;
+	"contact:signal"?: string;
+	"tips:lightning_address"?: string;
+	"tips:url"?: string;
 	sponsor?: boolean;
-	['box:north']?: string;
-	['box:east']?: string;
-	['box:south']?: string;
-	['box:west']?: string;
+	"box:north"?: string;
+	"box:east"?: string;
+	"box:south"?: string;
+	"box:west"?: string;
 };
 
-export type AreaType = 'community' | 'country' | 'trash';
+export type AreaType = "community" | "country" | "trash";
 
 export type Community = {
 	id: string;
 	tags: AreaTags & {
-		type: 'community';
+		type: "community";
 	};
 	created_at: string;
 	updated_at: string;
@@ -93,18 +100,18 @@ export type Community = {
 };
 
 export type Continents =
-	| 'africa'
-	| 'asia'
-	| 'europe'
-	| 'north-america'
-	| 'oceania'
-	| 'south-america'
-	| 'Africa'
-	| 'Asia'
-	| 'Europe'
-	| 'North America'
-	| 'Oceania'
-	| 'South America';
+	| "africa"
+	| "asia"
+	| "europe"
+	| "north-america"
+	| "oceania"
+	| "south-america"
+	| "Africa"
+	| "Asia"
+	| "Europe"
+	| "North America"
+	| "Oceania"
+	| "South America";
 
 export interface MerchantComment {
 	id: number;
@@ -150,12 +157,12 @@ export type RpcIssue = {
 };
 
 export type IssueType =
-	| 'date_format'
-	| 'misspelled_tag'
-	| 'missing_icon'
-	| 'not_verified'
-	| 'out_of_date'
-	| 'out_of_date_soon';
+	| "date_format"
+	| "misspelled_tag"
+	| "missing_icon"
+	| "not_verified"
+	| "out_of_date"
+	| "out_of_date_soon";
 
 export type Issue = {
 	description: string;
@@ -164,13 +171,13 @@ export type Issue = {
 };
 
 export type IssueIcon =
-	| 'fa-calendar-days'
-	| 'fa-spell-check'
-	| 'fa-icons'
-	| 'fa-clipboard-question'
-	| 'fa-hourglass-end'
-	| 'fa-list-check'
-	| 'fa-hourglass-half';
+	| "fa-calendar-days"
+	| "fa-spell-check"
+	| "fa-icons"
+	| "fa-clipboard-question"
+	| "fa-hourglass-end"
+	| "fa-list-check"
+	| "fa-hourglass-half";
 
 export type RpcGetMostActiveUsersItem = {
 	id: number;
@@ -197,7 +204,7 @@ export type Event = {
 	deleted_at: string;
 };
 
-export type EventType = 'create' | 'update' | 'delete';
+export type EventType = "create" | "update" | "delete";
 
 export type Report = {
 	id: number;
@@ -233,7 +240,7 @@ export type User = {
 		img: { href: string } | null;
 		account_created: string;
 	};
-	tags: { ['supporter:expires']?: string };
+	tags: { "supporter:expires"?: string };
 	created_at: string;
 	updated_at: string;
 	deleted_at: string;
@@ -250,10 +257,10 @@ export type DomEventType = typeof DomEvent;
 export type MapGroups = { [key: string]: LayerGroup | FeatureGroup.SubGroup };
 
 export type BaseMaps = {
-	'OpenFreeMap Liberty': MaplibreGL;
-	'OpenFreeMap Dark': MaplibreGL;
-	'Carto Positron': MaplibreGL;
-	'Carto Dark Matter': MaplibreGL;
+	"OpenFreeMap Liberty": MaplibreGL;
+	"OpenFreeMap Dark": MaplibreGL;
+	"Carto Positron": MaplibreGL;
+	"Carto Dark Matter": MaplibreGL;
 	OpenStreetMap: TileLayer;
 };
 
@@ -263,14 +270,16 @@ export type Boost = { id: number; name: string; boost: string } | undefined;
 
 // Search types for places search API
 export interface SearchItem {
-	type: 'element' | 'user' | 'area';
+	type: "element" | "user" | "area";
 	id: number;
 	name: string | null;
 	address?: string;
 	icon?: string;
 }
 
-export type PayMerchant = { type: string; url?: string; username?: string } | undefined;
+export type PayMerchant =
+	| { type: string; url?: string; username?: string }
+	| undefined;
 
 // leaderboards
 
@@ -295,15 +304,15 @@ export interface LeaderboardArea extends Area {
 // tagger
 
 export enum BadgeType {
-	Contribution = 'contribution',
-	Achievement = 'achievement'
+	Contribution = "contribution",
+	Achievement = "achievement",
 }
 
 export type EarnedBadge = { title: string; icon: string; type: BadgeType };
 
 export enum TipType {
-	Address = 'address',
-	Url = 'url'
+	Address = "address",
+	Url = "url",
 }
 
 // events
@@ -343,11 +352,11 @@ export interface GiteaIssue {
 	}[];
 }
 
-export type Tickets = GiteaIssue[] | 'error' | 'maintenance';
+export type Tickets = GiteaIssue[] | "error" | "maintenance";
 
-export type Theme = 'light' | 'dark';
+export type Theme = "light" | "dark";
 
-export type DonationType = 'On-chain' | 'Lightning';
+export type DonationType = "On-chain" | "Lightning";
 
 export type DropdownLink = {
 	url: string;
@@ -357,7 +366,7 @@ export type DropdownLink = {
 	rel?: string;
 };
 
-export type ChartHistory = '7D' | '1M' | '3M' | '6M' | 'YTD' | '1Y' | 'ALL';
+export type ChartHistory = "7D" | "1M" | "3M" | "6M" | "YTD" | "1Y" | "ALL";
 
 export type AreaPageProps = {
 	id: string;
@@ -400,40 +409,40 @@ export type Place = {
 	line?: string;
 	email?: string;
 	// OSM contact fields
-	'osm:contact:instagram'?: string;
-	'osm:contact:twitter'?: string;
-	'osm:contact:facebook'?: string;
-	'osm:contact:phone'?: string;
-	'osm:contact:website'?: string;
-	'osm:contact:email'?: string;
+	"osm:contact:instagram"?: string;
+	"osm:contact:twitter"?: string;
+	"osm:contact:facebook"?: string;
+	"osm:contact:phone"?: string;
+	"osm:contact:website"?: string;
+	"osm:contact:email"?: string;
 	// Payment methods
-	'payment:uri'?: string;
-	'payment:pouch'?: string;
-	'payment:coinos'?: string;
+	"payment:uri"?: string;
+	"payment:pouch"?: string;
+	"payment:coinos"?: string;
 	// Payment capabilities
-	'payment:lightning'?: 'yes';
-	'payment:onchain'?: 'yes';
-	'payment:lightning_contactless'?: 'yes';
+	"payment:lightning"?: "yes";
+	"payment:onchain"?: "yes";
+	"payment:lightning_contactless"?: "yes";
 	// Third party app requirement
 	required_app_url?: string;
 	// OSM payment method fields
-	'osm:payment:onchain'?: 'yes';
-	'osm:payment:lightning'?: 'yes';
-	'osm:payment:lightning_contactless'?: 'yes';
-	'osm:payment:bitcoin'?: 'yes';
-	'osm:payment:uri'?: string;
-	'osm:payment:coinos'?: string;
-	'osm:payment:pouch'?: string;
-	'osm:payment:lightning:requires_companion_app'?: 'yes';
-	'osm:payment:lightning:companion_app_url'?: string;
+	"osm:payment:onchain"?: "yes";
+	"osm:payment:lightning"?: "yes";
+	"osm:payment:lightning_contactless"?: "yes";
+	"osm:payment:bitcoin"?: "yes";
+	"osm:payment:uri"?: string;
+	"osm:payment:coinos"?: string;
+	"osm:payment:pouch"?: string;
+	"osm:payment:lightning:requires_companion_app"?: "yes";
+	"osm:payment:lightning:companion_app_url"?: string;
 	// OSM category fields
-	'osm:amenity'?: string;
-	'osm:category'?: string;
+	"osm:amenity"?: string;
+	"osm:category"?: string;
 	// OSM tags that might be useful
-	'osm:survey:date'?: string;
-	'osm:check_date'?: string;
-	'osm:check_date:currency:XBT'?: string;
-	'osm:note'?: string;
+	"osm:survey:date"?: string;
+	"osm:check_date"?: string;
+	"osm:check_date:currency:XBT"?: string;
+	"osm:note"?: string;
 };
 
 // Worker progress tracking
@@ -441,5 +450,5 @@ export interface ProgressUpdate {
 	percent: number;
 	itemsParsed?: number;
 	totalItems?: number;
-	status: 'downloading' | 'parsing' | 'filtering' | 'complete';
+	status: "downloading" | "parsing" | "filtering" | "complete";
 }

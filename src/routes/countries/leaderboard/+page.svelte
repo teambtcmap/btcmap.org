@@ -1,22 +1,23 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import AreaLeaderboard from '$components/leaderboard/AreaLeaderboard.svelte';
-	import Breadcrumbs from '$components/Breadcrumbs.svelte';
-	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-	import PrimaryButton from '$components/PrimaryButton.svelte';
-	import { areasSync } from '$lib/sync/areas';
-	import { reportsSync } from '$lib/sync/reports';
-	import { batchSync } from '$lib/sync/batchSync';
-	import { theme } from '$lib/theme';
+import { onMount } from "svelte";
 
-	const routes = [
-		{ name: 'Countries', url: '/countries' },
-		{ name: 'Leaderboard', url: '/countries/leaderboard' }
-	];
+import Breadcrumbs from "$components/Breadcrumbs.svelte";
+import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import AreaLeaderboard from "$components/leaderboard/AreaLeaderboard.svelte";
+import PrimaryButton from "$components/PrimaryButton.svelte";
+import { areasSync } from "$lib/sync/areas";
+import { batchSync } from "$lib/sync/batchSync";
+import { reportsSync } from "$lib/sync/reports";
+import { theme } from "$lib/theme";
 
-	onMount(() => {
-		batchSync([areasSync, reportsSync]);
-	});
+const routes = [
+	{ name: "Countries", url: "/countries" },
+	{ name: "Leaderboard", url: "/countries/leaderboard" },
+];
+
+onMount(() => {
+	batchSync([areasSync, reportsSync]);
+});
 </script>
 
 <svelte:head>

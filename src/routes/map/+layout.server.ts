@@ -1,12 +1,13 @@
-import { redirect } from '@sveltejs/kit';
-import type { LayoutServerLoad } from './$types';
+import { redirect } from "@sveltejs/kit";
+
+import type { LayoutServerLoad } from "./$types";
 
 export const load: LayoutServerLoad = ({ url }) => {
 	// redirect to communities map if params match
-	const community = url.searchParams.get('community');
-	const organization = url.searchParams.get('organization');
-	const language = url.searchParams.get('language');
-	const communitiesOnly = url.searchParams.has('communitiesOnly');
+	const community = url.searchParams.get("community");
+	const organization = url.searchParams.get("organization");
+	const language = url.searchParams.get("language");
+	const communitiesOnly = url.searchParams.has("communitiesOnly");
 
 	switch (true) {
 		case Boolean(community):
@@ -22,8 +23,8 @@ export const load: LayoutServerLoad = ({ url }) => {
 			break;
 
 		case communitiesOnly:
-			url.searchParams.delete('communitiesOnly');
-			redirect(301, '/communities/map');
+			url.searchParams.delete("communitiesOnly");
+			redirect(301, "/communities/map");
 			break;
 	}
 };

@@ -1,17 +1,24 @@
 <script lang="ts">
-	import Time from 'svelte-time';
+import Time from "svelte-time";
 
-	import Icon from '$components/Icon.svelte';
-	import TicketLabel from '$components/TicketLabel.svelte';
+import Icon from "$components/Icon.svelte";
+import TicketLabel from "$components/TicketLabel.svelte";
 
-	export let assignees: { html_url: string; avatar_url: string; login: string }[] = [];
-	export let comments: number = 0;
-	export let created: string = new Date().toISOString();
-	export let url: string = '';
-	export let labels: { name: string; description?: string }[] = [];
-	export let id: number = 0;
-	export let name: string = '';
-	export let user: { html_url: string; login: string } = { html_url: '', login: '' };
+export let assignees: {
+	html_url: string;
+	avatar_url: string;
+	login: string;
+}[] = [];
+export let comments: number = 0;
+export let created: string = new Date().toISOString();
+export let url: string = "";
+export let labels: { name: string; description?: string }[] = [];
+export let id: number = 0;
+export let name: string = "";
+export let user: { html_url: string; login: string } = {
+	html_url: "",
+	login: "",
+};
 </script>
 
 <div

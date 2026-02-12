@@ -1,98 +1,102 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import FormSuccess from '$components/FormSuccess.svelte';
-	import Icon from '$components/Icon.svelte';
-	import PrimaryButton from '$components/PrimaryButton.svelte';
-	import { errToast } from '$lib/utils';
-	import axios from 'axios';
-	import { onMount } from 'svelte';
-	import DOMPurify from 'dompurify';
+import axios from "axios";
+import DOMPurify from "dompurify";
+import { onMount } from "svelte";
 
-	export let communityName: string;
-	export let communityAlias: string;
+import FormSuccess from "$components/FormSuccess.svelte";
+import Icon from "$components/Icon.svelte";
+import PrimaryButton from "$components/PrimaryButton.svelte";
+import { errToast } from "$lib/utils";
 
-	let captcha: HTMLDivElement;
-	let captchaSecret: string;
-	let captchaInput: HTMLInputElement;
-	let honeyInput: HTMLInputElement;
+import { browser } from "$app/environment";
 
-	let captchaContent = '';
-	let isCaptchaLoading = true;
+export let communityName: string;
+export let communityAlias: string;
 
-	const fetchCaptcha = () => {
-		isCaptchaLoading = true;
-		axios
-			.get('/captcha')
-			.then(function (response) {
-				captchaSecret = response.data.captchaSecret;
-				captchaContent = DOMPurify.sanitize(response.data.captcha);
-			})
-			.catch(function (error) {
-				errToast('Could not fetch captcha, please try again or contact BTC Map.');
-				console.error(error);
-			})
-			.finally(() => {
-				isCaptchaLoading = false;
-			});
-	};
+let captcha: HTMLDivElement;
+let captchaSecret: string;
+let captchaInput: HTMLInputElement;
+let honeyInput: HTMLInputElement;
 
-	let accurate: boolean = false;
-	let updates: string = '';
-	let verify: HTMLTextAreaElement;
+let captchaContent = "";
+let isCaptchaLoading = true;
 
-	let submitted = false;
-	let submitting = false;
-	let submissionIssueNumber: number;
+const fetchCaptcha = () => {
+	isCaptchaLoading = true;
+	axios
+		.get("/captcha")
+		.then((response) => {
+			captchaSecret = response.data.captchaSecret;
+			captchaContent = DOMPurify.sanitize(response.data.captcha);
+		})
+		.catch((error) => {
+			errToast("Could not fetch captcha, please try again or contact BTC Map.");
+			console.error(error);
+		})
+		.finally(() => {
+			isCaptchaLoading = false;
+		});
+};
 
-	const submitForm = (event: SubmitEvent) => {
-		event.preventDefault();
-		submitting = true;
+let accurate: boolean = false;
+let updates: string = "";
+let verify: HTMLTextAreaElement;
 
-		const communityUrl = `${window.location.origin}/community/${communityAlias}/merchants`;
+let submitted = false;
+let submitting = false;
+let submissionIssueNumber: number;
 
-		axios
-			.post('/api/gitea/issue', {
-				type: 'verify-community',
-				captchaSecret,
-				captchaTest: captchaInput.value,
-				honey: honeyInput.value,
-				name: communityName,
-				communityUrl: communityUrl,
-				accurate: accurate ? 'Yes' : 'No',
-				updates: updates ? updates : '',
-				verified: verify.value
-			})
-			.then(function (response) {
-				submissionIssueNumber = response.data.number;
-				submitted = true;
-			})
-			.catch(function (error) {
-				if (error.response?.data?.message?.includes('Captcha')) {
-					errToast(error.response.data.message);
-				} else {
-					errToast('Form submission failed, please try again or contact BTC Map.');
-				}
+const submitForm = (event: SubmitEvent) => {
+	event.preventDefault();
+	submitting = true;
 
-				console.error(error);
-				submitting = false;
-			});
-	};
+	const communityUrl = `${window.location.origin}/community/${communityAlias}/merchants`;
 
-	function resetForm() {
-		submitted = false;
-		submitting = false;
-		accurate = false;
-		updates = '';
-		if (verify) verify.value = '';
-		if (captchaInput) captchaInput.value = '';
+	axios
+		.post("/api/gitea/issue", {
+			type: "verify-community",
+			captchaSecret,
+			captchaTest: captchaInput.value,
+			honey: honeyInput.value,
+			name: communityName,
+			communityUrl: communityUrl,
+			accurate: accurate ? "Yes" : "No",
+			updates: updates ? updates : "",
+			verified: verify.value,
+		})
+		.then((response) => {
+			submissionIssueNumber = response.data.number;
+			submitted = true;
+		})
+		.catch((error) => {
+			if (error.response?.data?.message?.includes("Captcha")) {
+				errToast(error.response.data.message);
+			} else {
+				errToast(
+					"Form submission failed, please try again or contact BTC Map.",
+				);
+			}
+
+			console.error(error);
+			submitting = false;
+		});
+};
+
+function resetForm() {
+	submitted = false;
+	submitting = false;
+	accurate = false;
+	updates = "";
+	if (verify) verify.value = "";
+	if (captchaInput) captchaInput.value = "";
+	fetchCaptcha();
+}
+
+onMount(async () => {
+	if (browser) {
 		fetchCaptcha();
 	}
-
-	onMount(async () => {
-		if (browser) {
-			fetchCaptcha();
-		}
-	});
+});
 </script>
 
 {#if !submitted}

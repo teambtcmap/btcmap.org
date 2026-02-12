@@ -1,91 +1,93 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { page } from '$app/stores';
-	import MapLoadingMain from '$components/MapLoadingMain.svelte';
-	import Socials from '$components/Socials.svelte';
-	import { loadMapDependencies } from '$lib/map/imports';
-	import {
-		attribution,
-		changeDefaultIcons,
-		geolocate,
-		homeMarkerButtons,
-		layers,
-		scaleBars,
-		support,
-		updateMapHash
-	} from '$lib/map/setup';
-	import { areaError, areas, reportError, reports } from '$lib/store';
-	import { areasSync } from '$lib/sync/areas';
-	import { reportsSync } from '$lib/sync/reports';
-	import { batchSync } from '$lib/sync/batchSync';
-	import { theme } from '$lib/theme';
-	import type { Leaflet, Theme } from '$lib/types';
-	import { errToast } from '$lib/utils';
-	import rewind from '@mapbox/geojson-rewind';
-	import { geoArea } from 'd3-geo';
-	import type { Map } from 'leaflet';
-	import { onDestroy, onMount } from 'svelte';
-	import { resolve } from '$app/paths';
+import rewind from "@mapbox/geojson-rewind";
+import { geoArea } from "d3-geo";
+import type { Map } from "leaflet";
+import { onDestroy, onMount } from "svelte";
 
-	let mapLoading = 0;
+import MapLoadingMain from "$components/MapLoadingMain.svelte";
+import Socials from "$components/Socials.svelte";
+import { loadMapDependencies } from "$lib/map/imports";
+import {
+	attribution,
+	changeDefaultIcons,
+	geolocate,
+	homeMarkerButtons,
+	layers,
+	scaleBars,
+	support,
+	updateMapHash,
+} from "$lib/map/setup";
+import { areaError, areas, reportError, reports } from "$lib/store";
+import { areasSync } from "$lib/sync/areas";
+import { batchSync } from "$lib/sync/batchSync";
+import { reportsSync } from "$lib/sync/reports";
+import { theme } from "$lib/theme";
+import type { Leaflet, Theme } from "$lib/types";
+import { errToast } from "$lib/utils";
 
-	let leaflet: Leaflet;
-	let DomEvent: typeof import('leaflet/src/dom/DomEvent');
-	let currentMapTheme: Theme;
+import { browser } from "$app/environment";
+import { resolve } from "$app/paths";
+import { page } from "$app/stores";
 
-	let mapElement: HTMLDivElement;
-	let map: Map;
-	let mapLoaded = false;
-	let communitiesLoaded = false;
+let mapLoading = 0;
 
-	// allow to view map centered on a community
-	const communityQuery = $page.url.searchParams.get('community');
+let leaflet: Leaflet;
+let DomEvent: typeof import("leaflet/src/dom/DomEvent");
+let currentMapTheme: Theme;
 
-	// allow to view map with only certain language communities
-	const language = $page.url.searchParams.get('language');
+let mapElement: HTMLDivElement;
+let map: Map;
+let mapLoaded = false;
+let communitiesLoaded = false;
 
-	// allow to view map with only certain org communities
-	const organization = $page.url.searchParams.get('organization');
+// allow to view map centered on a community
+const communityQuery = $page.url.searchParams.get("community");
 
-	// alert for area errors
-	$: $areaError && errToast($areaError);
+// allow to view map with only certain language communities
+const language = $page.url.searchParams.get("language");
 
-	// alert for report errors
-	$: $reportError && errToast($reportError);
+// allow to view map with only certain org communities
+const organization = $page.url.searchParams.get("organization");
 
-	const initializeCommunities = () => {
-		if (communitiesLoaded) return;
+// alert for area errors
+$: $areaError && errToast($areaError);
 
-		const communitySelected = $areas.find((area) => area.id === communityQuery);
+// alert for report errors
+$: $reportError && errToast($reportError);
 
-		// filter communities
-		const communitiesFiltered = $areas.filter(
-			(area) =>
-				area.tags.type === 'community' &&
-				area.tags.geo_json &&
-				area.tags.name &&
-				area.tags['icon:square'] &&
-				area.tags.continent &&
-				$reports.find((report) => report.area_id === area.id) &&
-				(language ? area.tags.language === language : true) &&
-				(organization ? area.tags.organization === organization : true)
-		);
+const initializeCommunities = () => {
+	if (communitiesLoaded) return;
 
-		// sort communities by largest to smallest
-		const communities = communitiesFiltered
-			.map((community) => {
-				rewind(community.tags.geo_json, true);
-				return { ...community, area: geoArea(community.tags.geo_json) };
-			})
-			.sort((a, b) => b.area - a.area);
+	const communitySelected = $areas.find((area) => area.id === communityQuery);
 
-		// add communities to map
-		communities.forEach((community) => {
-			const popupContainer = leaflet.DomUtil.create('div');
+	// filter communities
+	const communitiesFiltered = $areas.filter(
+		(area) =>
+			area.tags.type === "community" &&
+			area.tags.geo_json &&
+			area.tags.name &&
+			area.tags["icon:square"] &&
+			area.tags.continent &&
+			$reports.find((report) => report.area_id === area.id) &&
+			(language ? area.tags.language === language : true) &&
+			(organization ? area.tags.organization === organization : true),
+	);
 
-			popupContainer.innerHTML = `
+	// sort communities by largest to smallest
+	const communities = communitiesFiltered
+		.map((community) => {
+			rewind(community.tags.geo_json, true);
+			return { ...community, area: geoArea(community.tags.geo_json) };
+		})
+		.sort((a, b) => b.area - a.area);
+
+	// add communities to map
+	communities.forEach((community) => {
+		const popupContainer = leaflet.DomUtil.create("div");
+
+		popupContainer.innerHTML = `
 				<div class='text-center space-y-2'>
-					<img loading='lazy' src=${`https://btcmap.org/.netlify/images?url=${community.tags['icon:square']}&fit=cover&w=256&h=256`} alt='avatar' class='w-24 h-24 rounded-full mx-auto' title='Community icon' onerror="this.src='/images/bitcoin.svg'" />
+					<img loading='lazy' src=${`https://btcmap.org/.netlify/images?url=${community.tags["icon:square"]}&fit=cover&w=256&h=256`} alt='avatar' class='w-24 h-24 rounded-full mx-auto' title='Community icon' onerror="this.src='/images/bitcoin.svg'" />
 
 					<span class='text-primary dark:text-white font-semibold text-xl' title='Community name'>${
 						community.tags.name
@@ -98,7 +100,7 @@
 					>
 					${community.tags.organization}
 					</span>`
-							: ''
+							: ""
 					}
 
 					${
@@ -106,7 +108,7 @@
 							? `<span class="block gradient-bg w-32 mx-auto py-1 text-xs text-white font-semibold rounded-full" title='Supporter'>
 						BTC Map Sponsor
 					</span>`
-							: ''
+							: ""
 					}
 
 					<div id='socials'>
@@ -116,7 +118,7 @@
 				</div>
 
 					${
-						currentMapTheme === 'dark'
+						currentMapTheme === "dark"
 							? `
 								<style>
 									.leaflet-popup-content-wrapper, .leaflet-popup-tip {
@@ -130,155 +132,159 @@
 										right: 4px !important;
 								}
 								</style>`
-							: ''
+							: ""
 					}`;
 
-			const socials = popupContainer.querySelector('#socials');
-			if (socials) {
-				new Socials({
-					target: socials,
-					props: {
-						website: community.tags['contact:website'],
-						email: community.tags['contact:email'],
-						phone: community.tags['contact:phone'],
-						nostr: community.tags['contact:nostr'],
-						twitter: community.tags['contact:twitter'],
-						meetup: community.tags['contact:meetup'],
-						telegram: community.tags['contact:telegram'],
-						discord: community.tags['contact:discord'],
-						youtube: community.tags['contact:youtube'],
-						github: community.tags['contact:github'],
-						matrix: community.tags['contact:matrix'],
-						geyser: community.tags['contact:geyser'],
-						satlantis: community.tags['contact:satlantis'],
-						eventbrite: community.tags['contact:eventbrite'],
-						reddit: community.tags['contact:reddit'],
-						simplex: community.tags['contact:simplex'],
-						instagram: community.tags['contact:instagram'],
-						whatsapp: community.tags['contact:whatsapp'],
-						facebook: community.tags['contact:facebook'],
-						linkedin: community.tags['contact:linkedin'],
-						rss: community.tags['contact:rss'],
-						signal: community.tags['contact:signal']
-					}
-				});
-			}
+		const socials = popupContainer.querySelector("#socials");
+		if (socials) {
+			new Socials({
+				target: socials,
+				props: {
+					website: community.tags["contact:website"],
+					email: community.tags["contact:email"],
+					phone: community.tags["contact:phone"],
+					nostr: community.tags["contact:nostr"],
+					twitter: community.tags["contact:twitter"],
+					meetup: community.tags["contact:meetup"],
+					telegram: community.tags["contact:telegram"],
+					discord: community.tags["contact:discord"],
+					youtube: community.tags["contact:youtube"],
+					github: community.tags["contact:github"],
+					matrix: community.tags["contact:matrix"],
+					geyser: community.tags["contact:geyser"],
+					satlantis: community.tags["contact:satlantis"],
+					eventbrite: community.tags["contact:eventbrite"],
+					reddit: community.tags["contact:reddit"],
+					simplex: community.tags["contact:simplex"],
+					instagram: community.tags["contact:instagram"],
+					whatsapp: community.tags["contact:whatsapp"],
+					facebook: community.tags["contact:facebook"],
+					linkedin: community.tags["contact:linkedin"],
+					rss: community.tags["contact:rss"],
+					signal: community.tags["contact:signal"],
+				},
+			});
+		}
 
+		try {
+			let communityLayer = leaflet
+				.geoJSON(community.tags.geo_json, {
+					style: { color: "#000000", fillColor: "#F7931A", fillOpacity: 0.5 },
+				})
+				.bindPopup(popupContainer, { minWidth: 300 });
+
+			communityLayer.on("click", () => communityLayer.bringToBack());
+
+			communityLayer.addTo(map);
+		} catch (error) {
+			console.error(error, community);
+		}
+	});
+
+	// set view to community if in url params
+	if (communityQuery && communitySelected) {
+		try {
+			map.fitBounds(
+				leaflet.geoJSON(communitySelected.tags.geo_json).getBounds(),
+			);
+		} catch (error) {
+			map.setView([0, 0], 3);
+			errToast(
+				"Could not set map view to provided coordinates, please try again or contact BTC Map.",
+			);
+			console.error(error);
+		}
+	}
+
+	mapLoading = 100;
+
+	communitiesLoaded = true;
+};
+
+$: $areas?.length &&
+	$reports &&
+	$reports.length &&
+	mapLoaded &&
+	!communitiesLoaded &&
+	initializeCommunities();
+
+onMount(async () => {
+	batchSync([areasSync, reportsSync]);
+
+	if (browser) {
+		currentMapTheme = theme.current;
+
+		const deps = await loadMapDependencies();
+		leaflet = deps.leaflet;
+		DomEvent = deps.DomEvent;
+		const LocateControl = deps.LocateControl;
+
+		// add map and tiles
+		map = leaflet.map(mapElement);
+
+		// use url hash if present
+		if (location.hash) {
 			try {
-				let communityLayer = leaflet
-					.geoJSON(community.tags.geo_json, {
-						style: { color: '#000000', fillColor: '#F7931A', fillOpacity: 0.5 }
-					})
-					.bindPopup(popupContainer, { minWidth: 300 });
-
-				communityLayer.on('click', () => communityLayer.bringToBack());
-
-				communityLayer.addTo(map);
-			} catch (error) {
-				console.error(error, community);
-			}
-		});
-
-		// set view to community if in url params
-		if (communityQuery && communitySelected) {
-			try {
-				map.fitBounds(leaflet.geoJSON(communitySelected.tags.geo_json).getBounds());
+				const coords = location.hash.split("/");
+				map.setView(
+					[Number(coords[1]), Number(coords[2])],
+					Number(coords[0].slice(1)),
+				);
 			} catch (error) {
 				map.setView([0, 0], 3);
 				errToast(
-					'Could not set map view to provided coordinates, please try again or contact BTC Map.'
+					"Could not set map view to provided coordinates, please try again or contact BTC Map.",
 				);
 				console.error(error);
 			}
+		} else {
+			map.setView([0, 0], 3);
 		}
 
-		mapLoading = 100;
+		// add tiles and basemaps
+		const { baseMaps } = layers(leaflet, map);
 
-		communitiesLoaded = true;
-	};
-
-	$: $areas &&
-		$areas.length &&
-		$reports &&
-		$reports.length &&
-		mapLoaded &&
-		!communitiesLoaded &&
-		initializeCommunities();
-
-	onMount(async () => {
-		batchSync([areasSync, reportsSync]);
-
-		if (browser) {
-			currentMapTheme = theme.current;
-
-			const deps = await loadMapDependencies();
-			leaflet = deps.leaflet;
-			DomEvent = deps.DomEvent;
-			const LocateControl = deps.LocateControl;
-
-			// add map and tiles
-			map = leaflet.map(mapElement);
-
-			// use url hash if present
-			if (location.hash) {
-				try {
-					const coords = location.hash.split('/');
-					map.setView([Number(coords[1]), Number(coords[2])], Number(coords[0].slice(1)));
-				} catch (error) {
-					map.setView([0, 0], 3);
-					errToast(
-						'Could not set map view to provided coordinates, please try again or contact BTC Map.'
-					);
-					console.error(error);
-				}
-			} else {
-				map.setView([0, 0], 3);
+		map.on("moveend", () => {
+			if (!communityQuery) {
+				const zoom = map.getZoom();
+				const mapCenter = map.getCenter();
+				updateMapHash(zoom, mapCenter);
 			}
+		});
 
-			// add tiles and basemaps
-			const { baseMaps } = layers(leaflet, map);
+		// add support attribution
+		support();
 
-			map.on('moveend', () => {
-				if (!communityQuery) {
-					const zoom = map.getZoom();
-					const mapCenter = map.getCenter();
-					updateMapHash(zoom, mapCenter);
-				}
-			});
+		// add OSM attribution
+		attribution(leaflet, map);
 
-			// add support attribution
-			support();
+		// add scale
+		scaleBars(leaflet, map);
 
-			// add OSM attribution
-			attribution(leaflet, map);
+		// add locate button to map
+		geolocate(leaflet, map, LocateControl);
 
-			// add scale
-			scaleBars(leaflet, map);
+		// add home and marker buttons to map
+		homeMarkerButtons(leaflet, map, DomEvent);
 
-			// add locate button to map
-			geolocate(leaflet, map, LocateControl);
+		leaflet.control.layers(baseMaps).addTo(map);
 
-			// add home and marker buttons to map
-			homeMarkerButtons(leaflet, map, DomEvent);
+		// change default icons
+		changeDefaultIcons(true, leaflet, mapElement, DomEvent);
 
-			leaflet.control.layers(baseMaps).addTo(map);
+		// final map setup
+		mapLoading = 40;
 
-			// change default icons
-			changeDefaultIcons(true, leaflet, mapElement, DomEvent);
+		mapLoaded = true;
+	}
+});
 
-			// final map setup
-			mapLoading = 40;
-
-			mapLoaded = true;
-		}
-	});
-
-	onDestroy(async () => {
-		if (map) {
-			console.info('Unloading Leaflet map.');
-			map.remove();
-		}
-	});
+onDestroy(async () => {
+	if (map) {
+		console.info("Unloading Leaflet map.");
+		map.remove();
+	}
+});
 </script>
 
 <svelte:head>

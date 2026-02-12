@@ -1,15 +1,15 @@
 <script lang="ts">
-	import Icon from '$components/Icon.svelte';
+import Icon from "$components/Icon.svelte";
 
-	export let value: string;
+export let value: string;
 
-	let copied = false;
+let copied = false;
 
-	const copy = (field: string) => {
-		navigator.clipboard.writeText(field);
-		copied = true;
-		setTimeout(() => (copied = false), 2100);
-	};
+const copy = (field: string) => {
+	navigator.clipboard.writeText(field);
+	copied = true;
+	setTimeout(() => (copied = false), 2100);
+};
 </script>
 
 <button class="text-link transition-colors hover:text-hover" on:click={() => copy(value)}>

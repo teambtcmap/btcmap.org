@@ -1,202 +1,210 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { boost, resetBoost } from '$lib/store';
-	import Icon from '$components/Icon.svelte';
-	import BoostContent from '$components/BoostContent.svelte';
-	import MerchantDetailsContent from '$components/MerchantDetailsContent.svelte';
-	import MerchantPeekContentMobile from './MerchantPeekContentMobile.svelte';
-	import { invalidateAll } from '$app/navigation';
-	import { onMount } from 'svelte';
-	import { merchantDrawer } from '$lib/merchantDrawerStore';
-	import {
-		calcVerifiedDate,
-		isUpToDate as checkUpToDate,
-		isBoosted as checkBoosted,
-		handleBoost as boostMerchant,
-		handleBoostComplete as completeBoost,
-		ensureBoostData,
-		clearBoostState
-	} from '$lib/merchantDrawerLogic';
-	import { drawerGesture } from '$lib/drawerGestureController';
-	import { trackEvent } from '$lib/analytics';
+import { onMount } from "svelte";
 
-	// Derive state from centralized store
-	$: isOpen = $merchantDrawer.isOpen;
-	$: merchantId = $merchantDrawer.merchantId;
-	$: drawerView = $merchantDrawer.drawerView;
-	$: merchant = $merchantDrawer.merchant;
-	$: fetchingMerchant = $merchantDrawer.isLoading;
+import BoostContent from "$components/BoostContent.svelte";
+import Icon from "$components/Icon.svelte";
+import MerchantDetailsContent from "$components/MerchantDetailsContent.svelte";
+import { trackEvent } from "$lib/analytics";
+import { drawerGesture } from "$lib/drawerGestureController";
+import {
+	handleBoost as boostMerchant,
+	calcVerifiedDate,
+	isBoosted as checkBoosted,
+	isUpToDate as checkUpToDate,
+	clearBoostState,
+	handleBoostComplete as completeBoost,
+	ensureBoostData,
+} from "$lib/merchantDrawerLogic";
+import { merchantDrawer } from "$lib/merchantDrawerStore";
+import { boost, resetBoost } from "$lib/store";
 
-	// Get gesture state from controller
-	const { expanded, drawerHeight } = drawerGesture;
+import MerchantPeekContentMobile from "./MerchantPeekContentMobile.svelte";
+import { browser } from "$app/environment";
+import { invalidateAll } from "$app/navigation";
 
-	// DOM references
-	let drawerElement: HTMLDivElement;
-	let handleElement: HTMLDivElement;
-	let capturedElement: HTMLElement | null = null;
-	let contentScrollElement: HTMLDivElement | null = null;
+// Derive state from centralized store
+$: isOpen = $merchantDrawer.isOpen;
+$: merchantId = $merchantDrawer.merchantId;
+$: drawerView = $merchantDrawer.drawerView;
+$: merchant = $merchantDrawer.merchant;
+$: fetchingMerchant = $merchantDrawer.isLoading;
 
-	// Focus management for accessibility
-	let previouslyFocusedElement: HTMLElement | null = null;
+// Get gesture state from controller
+const { expanded, drawerHeight } = drawerGesture;
 
-	// Track previous state to reset drawer when merchant changes
-	let previousMerchantId: number | null = null;
-	$: if (isOpen && merchantId !== previousMerchantId) {
-		// Track previous merchant to prevent re-triggering
+// DOM references
+let drawerElement: HTMLDivElement;
+let handleElement: HTMLDivElement;
+let capturedElement: HTMLElement | null = null;
+let contentScrollElement: HTMLDivElement | null = null;
 
-		previousMerchantId = merchantId;
-		drawerGesture.resetToPeek();
+// Focus management for accessibility
+let previouslyFocusedElement: HTMLElement | null = null;
+
+// Track previous state to reset drawer when merchant changes
+let previousMerchantId: number | null = null;
+$: if (isOpen && merchantId !== previousMerchantId) {
+	// Track previous merchant to prevent re-triggering
+
+	previousMerchantId = merchantId;
+	drawerGesture.resetToPeek();
+}
+
+// Focus management: save/restore focus when expanding/collapsing
+let wasExpanded = false;
+$: if ($expanded && !wasExpanded) {
+	// Track expanded state to prevent re-triggering
+
+	wasExpanded = true;
+
+	previouslyFocusedElement = document.activeElement as HTMLElement;
+	setTimeout(() => handleElement?.focus(), 0);
+} else if (!$expanded && wasExpanded) {
+	// Track collapsed state to prevent re-triggering
+
+	wasExpanded = false;
+	if (
+		previouslyFocusedElement &&
+		typeof previouslyFocusedElement.focus === "function"
+	) {
+		previouslyFocusedElement.focus();
+
+		previouslyFocusedElement = null;
+	} else {
+		previouslyFocusedElement = null;
 	}
+}
 
-	// Focus management: save/restore focus when expanding/collapsing
-	let wasExpanded = false;
-	$: if ($expanded && !wasExpanded) {
-		// Track expanded state to prevent re-triggering
-
-		wasExpanded = true;
-
-		previouslyFocusedElement = document.activeElement as HTMLElement;
-		setTimeout(() => handleElement?.focus(), 0);
-	} else if (!$expanded && wasExpanded) {
-		// Track collapsed state to prevent re-triggering
-
-		wasExpanded = false;
-		if (previouslyFocusedElement && typeof previouslyFocusedElement.focus === 'function') {
-			previouslyFocusedElement.focus();
-
-			previouslyFocusedElement = null;
-		} else {
-			previouslyFocusedElement = null;
+// Focus trap: keep focus inside drawer when expanded
+function handleFocusOut(event: FocusEvent) {
+	if ($expanded && drawerElement && event.relatedTarget) {
+		const focusMovingOutside = !drawerElement.contains(
+			event.relatedTarget as Node,
+		);
+		if (focusMovingOutside) {
+			handleElement?.focus();
 		}
 	}
+}
 
-	// Focus trap: keep focus inside drawer when expanded
-	function handleFocusOut(event: FocusEvent) {
-		if ($expanded && drawerElement && event.relatedTarget) {
-			const focusMovingOutside = !drawerElement.contains(event.relatedTarget as Node);
-			if (focusMovingOutside) {
-				handleElement?.focus();
+const verifiedDate = calcVerifiedDate();
+$: isUpToDate = checkUpToDate(merchant, verifiedDate);
+$: isBoosted = checkBoosted(merchant);
+
+let boostLoading = false;
+const setBoostLoading = (loading: boolean) => {
+	boostLoading = loading;
+};
+
+const closeDrawer = () => {
+	clearBoostState();
+	boostLoading = false;
+	drawerGesture.collapse();
+	merchantDrawer.close();
+};
+
+const goBack = () => {
+	clearBoostState();
+	boostLoading = false;
+	merchantDrawer.setView("details");
+};
+
+$: if (drawerView !== "boost" && $boost !== undefined) {
+	clearBoostState();
+	boostLoading = false;
+}
+
+const handleBoost = () => boostMerchant(merchant, merchantId, setBoostLoading);
+const handleBoostComplete = () =>
+	completeBoost(merchantId, invalidateAll, resetBoost);
+
+function handleKeydown(event: KeyboardEvent) {
+	if (!isOpen) return;
+
+	switch (event.key) {
+		case "Escape":
+			event.preventDefault();
+			if (drawerView !== "details") {
+				goBack();
+			} else if ($expanded) {
+				drawerGesture.collapse();
+			} else {
+				closeDrawer();
 			}
-		}
-	}
-
-	const verifiedDate = calcVerifiedDate();
-	$: isUpToDate = checkUpToDate(merchant, verifiedDate);
-	$: isBoosted = checkBoosted(merchant);
-
-	let boostLoading = false;
-	const setBoostLoading = (loading: boolean) => {
-		boostLoading = loading;
-	};
-
-	const closeDrawer = () => {
-		clearBoostState();
-		boostLoading = false;
-		drawerGesture.collapse();
-		merchantDrawer.close();
-	};
-
-	const goBack = () => {
-		clearBoostState();
-		boostLoading = false;
-		merchantDrawer.setView('details');
-	};
-
-	$: if (drawerView !== 'boost' && $boost !== undefined) {
-		clearBoostState();
-		boostLoading = false;
-	}
-
-	const handleBoost = () => boostMerchant(merchant, merchantId, setBoostLoading);
-	const handleBoostComplete = () => completeBoost(merchantId, invalidateAll, resetBoost);
-
-	function handleKeydown(event: KeyboardEvent) {
-		if (!isOpen) return;
-
-		switch (event.key) {
-			case 'Escape':
-				event.preventDefault();
-				if (drawerView !== 'details') {
-					goBack();
-				} else if ($expanded) {
-					drawerGesture.collapse();
-				} else {
-					closeDrawer();
-				}
-				break;
-			case 'ArrowUp':
-				event.preventDefault();
-				if (!$expanded) {
-					drawerGesture.expand();
-				}
-				break;
-			case 'ArrowDown':
-				event.preventDefault();
-				if ($expanded) {
-					drawerGesture.collapse();
-				}
-				break;
-			case 'Enter':
-			case ' ':
-				if (document.activeElement === handleElement) {
-					event.preventDefault();
-					drawerGesture.toggle();
-				}
-				break;
-		}
-	}
-
-	// Wire up pointer event handlers with capture target
-	function onPointerDown(event: PointerEvent) {
-		const target = event.currentTarget as HTMLElement;
-		capturedElement = target;
-		drawerGesture.handlePointerDown(event, target);
-	}
-
-	function onPointerUp(event: PointerEvent) {
-		drawerGesture.handlePointerUp(event, capturedElement);
-		capturedElement = null;
-	}
-
-	// Wire up touch handler with scroll position
-	function onContentTouchMove(event: TouchEvent) {
-		const scrollTop = contentScrollElement?.scrollTop ?? 0;
-		drawerGesture.handleContentTouchMove(event, scrollTop);
-	}
-
-	onMount(() => {
-		// Set dismiss callback
-		drawerGesture.setDismissCallback(closeDrawer);
-
-		// Keyboard listener
-		window.addEventListener('keydown', handleKeydown);
-
-		// Window resize handler
-		let updateHeight: (() => void) | null = null;
-		if (browser) {
-			updateHeight = () => {
-				drawerGesture.setExpandedHeight(window.innerHeight);
-			};
-			updateHeight();
-			window.addEventListener('resize', updateHeight);
-		}
-
-		return () => {
-			drawerGesture.setDismissCallback(null);
-			window.removeEventListener('keydown', handleKeydown);
-			if (updateHeight) {
-				window.removeEventListener('resize', updateHeight);
+			break;
+		case "ArrowUp":
+			event.preventDefault();
+			if (!$expanded) {
+				drawerGesture.expand();
 			}
+			break;
+		case "ArrowDown":
+			event.preventDefault();
+			if ($expanded) {
+				drawerGesture.collapse();
+			}
+			break;
+		case "Enter":
+		case " ":
+			if (document.activeElement === handleElement) {
+				event.preventDefault();
+				drawerGesture.toggle();
+			}
+			break;
+	}
+}
+
+// Wire up pointer event handlers with capture target
+function onPointerDown(event: PointerEvent) {
+	const target = event.currentTarget as HTMLElement;
+	capturedElement = target;
+	drawerGesture.handlePointerDown(event, target);
+}
+
+function onPointerUp(event: PointerEvent) {
+	drawerGesture.handlePointerUp(event, capturedElement);
+	capturedElement = null;
+}
+
+// Wire up touch handler with scroll position
+function onContentTouchMove(event: TouchEvent) {
+	const scrollTop = contentScrollElement?.scrollTop ?? 0;
+	drawerGesture.handleContentTouchMove(event, scrollTop);
+}
+
+onMount(() => {
+	// Set dismiss callback
+	drawerGesture.setDismissCallback(closeDrawer);
+
+	// Keyboard listener
+	window.addEventListener("keydown", handleKeydown);
+
+	// Window resize handler
+	let updateHeight: (() => void) | null = null;
+	if (browser) {
+		updateHeight = () => {
+			drawerGesture.setExpandedHeight(window.innerHeight);
 		};
-	});
-
-	$: if (drawerView === 'boost' && merchant) {
-		ensureBoostData(merchant, $boost);
+		updateHeight();
+		window.addEventListener("resize", updateHeight);
 	}
 
-	export function openDrawer(id: number) {
-		merchantDrawer.open(id, 'details');
-	}
+	return () => {
+		drawerGesture.setDismissCallback(null);
+		window.removeEventListener("keydown", handleKeydown);
+		if (updateHeight) {
+			window.removeEventListener("resize", updateHeight);
+		}
+	};
+});
+
+$: if (drawerView === "boost" && merchant) {
+	ensureBoostData(merchant, $boost);
+}
+
+export function openDrawer(id: number) {
+	merchantDrawer.open(id, "details");
+}
 </script>
 
 {#if isOpen}

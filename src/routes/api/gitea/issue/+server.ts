@@ -1,15 +1,17 @@
-import { env } from '$env/dynamic/private';
-import { error } from '@sveltejs/kit';
-import axios from 'axios';
-import axiosRetry from 'axios-retry';
-import crypto from 'crypto';
-import type { RequestHandler } from './$types';
-import type { CipherKey, BinaryLike } from 'crypto';
-import { createIssueWithLabels, type GiteaRepo } from '$lib/gitea';
-import { GITEA_LABELS } from '$lib/constants';
-import { getAreaIdsByCoordinates } from '$lib/utils';
-import { get } from 'svelte/store';
-import { areas } from '$lib/store';
+import type { BinaryLike, CipherKey } from "node:crypto";
+import crypto from "node:crypto";
+import { error } from "@sveltejs/kit";
+import axios from "axios";
+import axiosRetry from "axios-retry";
+import { get } from "svelte/store";
+
+import { GITEA_LABELS } from "$lib/constants";
+import { createIssueWithLabels, type GiteaRepo } from "$lib/gitea";
+import { areas } from "$lib/store";
+import { getAreaIdsByCoordinates } from "$lib/utils";
+
+import type { RequestHandler } from "./$types";
+import { env } from "$env/dynamic/private";
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
@@ -48,61 +50,61 @@ type IssueConfig = {
 };
 
 const CONFIG = {
-	'add-location': {
-		repo: 'btcmap-data',
+	"add-location": {
+		repo: "btcmap-data",
 		labelId: GITEA_LABELS.DATA.ADD_LOCATION,
-		hasAreaLabels: true
+		hasAreaLabels: true,
 	},
-	'verify-location': {
-		repo: 'btcmap-data',
+	"verify-location": {
+		repo: "btcmap-data",
 		labelId: GITEA_LABELS.DATA.VERIFY_LOCATION,
-		hasAreaLabels: true
+		hasAreaLabels: true,
 	},
 	community: {
-		repo: 'btcmap-data',
+		repo: "btcmap-data",
 		labelId: GITEA_LABELS.DATA.COMMUNITY_SUBMISSION,
-		hasAreaLabels: false
+		hasAreaLabels: false,
 	},
-	'verify-community': {
-		repo: 'btcmap-data',
+	"verify-community": {
+		repo: "btcmap-data",
 		labelId: GITEA_LABELS.DATA.VERIFY_COMMUNITY,
-		hasAreaLabels: false
+		hasAreaLabels: false,
 	},
-	'tagger-onboarding': {
-		repo: 'btcmap-infra',
+	"tagger-onboarding": {
+		repo: "btcmap-infra",
 		labelId: GITEA_LABELS.INFRA.TAGGER_ONBOARDING,
-		hasAreaLabels: false
-	}
+		hasAreaLabels: false,
+	},
 } satisfies Record<string, IssueConfig>;
 
 type IssueType = keyof typeof CONFIG;
 
 function isValidIssueType(type: unknown): type is IssueType {
-	return typeof type === 'string' && type in CONFIG;
+	return typeof type === "string" && type in CONFIG;
 }
 
 function validateCaptcha(captchaSecret: string, captchaTest: string): void {
 	if (!env.SERVER_CRYPTO_KEY || !env.SERVER_INIT_VECTOR) {
-		error(503, 'Service unavailable');
+		error(503, "Service unavailable");
 	}
 
-	const initVector = Buffer.from(env.SERVER_INIT_VECTOR, 'hex');
-	const serverKey = Buffer.from(env.SERVER_CRYPTO_KEY, 'hex');
+	const initVector = Buffer.from(env.SERVER_INIT_VECTOR, "hex");
+	const serverKey = Buffer.from(env.SERVER_CRYPTO_KEY, "hex");
 
-	const algorithm = 'aes-256-cbc' as string;
+	const algorithm = "aes-256-cbc" as string;
 	const key = serverKey as unknown as CipherKey;
 	const iv = initVector as unknown as BinaryLike;
 	const decrypt = crypto.createDecipheriv(algorithm, key, iv);
 
-	let secret = decrypt.update(captchaSecret, 'hex', 'utf8');
-	secret += decrypt.final('utf8');
+	let secret = decrypt.update(captchaSecret, "hex", "utf8");
+	secret += decrypt.final("utf8");
 
 	if (captchaTest !== secret) {
-		error(400, 'Captcha test failed, please try again or contact BTC Map.');
+		error(400, "Captcha test failed, please try again or contact BTC Map.");
 	}
 
 	if (isCaptchaUsed(captchaSecret)) {
-		error(400, 'Captcha has already been used, please try another.');
+		error(400, "Captcha has already been used, please try another.");
 	} else {
 		addUsedCaptcha(captchaSecret);
 	}
@@ -110,7 +112,7 @@ function validateCaptcha(captchaSecret: string, captchaTest: string): void {
 
 async function getAreaLabelsFromCoordinates(
 	lat: number,
-	long: number
+	long: number,
 ): Promise<{ labels: string[]; text: string }> {
 	const associatedAreaIds = await getAreaIdsByCoordinates(lat, long);
 	const areasData = get(areas);
@@ -124,17 +126,21 @@ async function getAreaLabelsFromCoordinates(
 
 	const text = filteredAreas
 		.map((area) => `${area?.tags?.name} (${area?.tags?.url_alias || area?.id})`)
-		.join(', ');
+		.join(", ");
 
 	return { labels, text };
 }
 
-function generateBody(type: IssueType, data: Record<string, unknown>, areasText: string): string {
+function generateBody(
+	type: IssueType,
+	data: Record<string, unknown>,
+	areasText: string,
+): string {
 	const timestamp = new Date(Date.now()).toISOString();
 	const taggingInstructions = `If you are a new contributor please read our Tagging Instructions [here](https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants).`;
 
 	switch (type) {
-		case 'add-location':
+		case "add-location":
 			return `Merchant name: ${data.name}
 Address: ${data.address}
 Lat: ${data.lat}
@@ -154,7 +160,7 @@ Created at: ${timestamp}
 
 ${taggingInstructions}`;
 
-		case 'verify-location':
+		case "verify-location":
 			return `Merchant name: ${data.name}
 Merchant location: ${data.location}
 Coordinates: ${data.lat}, ${data.long}
@@ -167,7 +173,7 @@ Created at: ${timestamp}
 
 ${taggingInstructions}`;
 
-		case 'community':
+		case "community":
 			return `Community name: ${data.name}
 Location: ${data.location}
 GeoJSON: https://geojson.codingarena.top/?search=${encodeURIComponent(String(data.location))}
@@ -178,15 +184,15 @@ Community leader contact: ${data.contact}
 Notes: ${data.notes}
 Created at: ${timestamp}`;
 
-		case 'verify-community':
+		case "verify-community":
 			return `Community name: ${data.name}
 Community page: ${data.communityUrl}
 Information is accurate: ${data.accurate}
-Updates needed: ${data.updates || 'None'}
+Updates needed: ${data.updates || "None"}
 How did you verify this?: ${data.verified}
 Created at: ${timestamp}`;
 
-		case 'tagger-onboarding':
+		case "tagger-onboarding":
 			return `Name: ${data.name}
 Email: ${data.email}
 Created at: ${timestamp}
@@ -194,23 +200,27 @@ Created at: ${timestamp}
 New tagger onboarding request.`;
 
 		default:
-			error(400, 'Invalid issue type');
+			error(400, "Invalid issue type");
 	}
 }
 
 export const POST: RequestHandler = async ({ request }) => {
-	const { type, captchaSecret, captchaTest, honey, ...data } = await request.json();
+	const { type, captchaSecret, captchaTest, honey, ...data } =
+		await request.json();
 
-	console.debug('[gitea/issue] Processing request', { type, hasData: !!data.name });
+	console.debug("[gitea/issue] Processing request", {
+		type,
+		hasData: !!data.name,
+	});
 
 	if (honey) {
-		console.debug('[gitea/issue] Honeypot triggered');
+		console.debug("[gitea/issue] Honeypot triggered");
 		error(418);
 	}
 
 	if (!isValidIssueType(type)) {
-		console.debug('[gitea/issue] Invalid issue type', { type });
-		error(400, 'Invalid issue type');
+		console.debug("[gitea/issue] Invalid issue type", { type });
+		error(400, "Invalid issue type");
 	}
 
 	validateCaptcha(captchaSecret, captchaTest);
@@ -218,30 +228,41 @@ export const POST: RequestHandler = async ({ request }) => {
 	// type is now narrowed to IssueType after validation
 	const config = CONFIG[type];
 	let areaLabels: string[] = [];
-	let areasText = '';
+	let areasText = "";
 
 	if (config.hasAreaLabels && data.lat && data.long) {
-		console.debug('[gitea/issue] Fetching area labels', { lat: data.lat, long: data.long });
+		console.debug("[gitea/issue] Fetching area labels", {
+			lat: data.lat,
+			long: data.long,
+		});
 		const areaData = await getAreaLabelsFromCoordinates(data.lat, data.long);
 		areaLabels = areaData.labels;
 		areasText = areaData.text;
-		console.debug('[gitea/issue] Area labels resolved', { count: areaLabels.length });
+		console.debug("[gitea/issue] Area labels resolved", {
+			count: areaLabels.length,
+		});
 	}
 
 	const body = generateBody(type, data, areasText);
 	const title = String(data.name);
 
-	console.debug('[gitea/issue] Creating issue', { type, repo: config.repo, title });
+	console.debug("[gitea/issue] Creating issue", {
+		type,
+		repo: config.repo,
+		title,
+	});
 
 	const response = await createIssueWithLabels(
 		title,
 		body,
 		[config.labelId],
 		config.repo,
-		areaLabels
+		areaLabels,
 	);
 
-	console.debug('[gitea/issue] Issue created', { issueNumber: response.data.number });
+	console.debug("[gitea/issue] Issue created", {
+		issueNumber: response.data.number,
+	});
 
 	return new Response(JSON.stringify(response.data));
 };

@@ -1,23 +1,23 @@
 <script lang="ts">
-	import type { AreaType } from '$lib/types';
+import type { AreaType } from "$lib/types";
 
-	export let type: AreaType;
-	export let avatar: string;
-	export let name: string;
-	export let id: string;
+export let type: AreaType;
+export let avatar: string;
+export let name: string;
+export let id: string;
 
-	$: avatarSrc =
-		type === 'community'
-			? `https://btcmap.org/.netlify/images?url=${avatar}&fit=cover&w=256&h=256`
-			: avatar;
+$: avatarSrc =
+	type === "community"
+		? `https://btcmap.org/.netlify/images?url=${avatar}&fit=cover&w=256&h=256`
+		: avatar;
 
-	$: hasLongName = name?.match(/[^ ]{21}/);
-	$: displayName = name || 'Unknown';
+$: hasLongName = name?.match(/[^ ]{21}/);
+$: displayName = name || "Unknown";
 
-	function handleImageError(event: Event) {
-		const img = event.target as HTMLImageElement;
-		img.src = '/images/bitcoin.svg';
-	}
+function handleImageError(event: Event) {
+	const img = event.target as HTMLImageElement;
+	img.src = "/images/bitcoin.svg";
+}
 </script>
 
 {#if name}

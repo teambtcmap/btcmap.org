@@ -1,18 +1,20 @@
 <script lang="ts">
-	import Icon from '$components/Icon.svelte';
-	import { formatVerifiedHuman } from '$lib/utils';
-	import { resolve } from '$app/paths';
-	import Time from 'svelte-time';
-	import type { Place } from '$lib/types';
-	import PaymentMethodIcon from '$components/PaymentMethodIcon.svelte';
-	import { _ } from '$lib/i18n';
+import Time from "svelte-time";
 
-	export let merchant: Place;
-	export let isUpToDate: boolean;
-	export let isBoosted: boolean;
-	export let boostLoading: boolean;
-	export let onBoostClick: () => void;
-	export let isLoading: boolean = false;
+import Icon from "$components/Icon.svelte";
+import PaymentMethodIcon from "$components/PaymentMethodIcon.svelte";
+import { _ } from "$lib/i18n";
+import type { Place } from "$lib/types";
+import { formatVerifiedHuman } from "$lib/utils";
+
+import { resolve } from "$app/paths";
+
+export let merchant: Place;
+export let isUpToDate: boolean;
+export let isBoosted: boolean;
+export let boostLoading: boolean;
+export let onBoostClick: () => void;
+export let isLoading: boolean = false;
 </script>
 
 <div class="space-y-4">

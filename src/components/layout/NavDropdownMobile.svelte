@@ -1,18 +1,19 @@
 <script lang="ts">
-	import Icon from '$components/Icon.svelte';
-	import type { MobileNavIconName } from '$lib/icons/types';
-	import IconMobileNav from '$lib/icons/IconMobileNav.svelte';
-	import type { DropdownLink } from '$lib/types';
-	import OutClick from 'svelte-outclick';
+import OutClick from "svelte-outclick";
 
-	export let title: string;
-	export let icon: MobileNavIconName;
-	export let links: DropdownLink[];
+import Icon from "$components/Icon.svelte";
+import IconMobileNav from "$lib/icons/IconMobileNav.svelte";
+import type { MobileNavIconName } from "$lib/icons/types";
+import type { DropdownLink } from "$lib/types";
 
-	let show = false;
+export let title: string;
+export let icon: MobileNavIconName;
+export let links: DropdownLink[];
 
-	// Type assertion needed because template literal creates union of all possible strings
-	$: displayIcon = (show ? `${icon}-highlight` : icon) as MobileNavIconName;
+let show = false;
+
+// Type assertion needed because template literal creates union of all possible strings
+$: displayIcon = (show ? `${icon}-highlight` : icon) as MobileNavIconName;
 </script>
 
 <!-- dropdown menu -->
