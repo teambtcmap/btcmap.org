@@ -1,4 +1,11 @@
-import type { Place, Area, User, Event, Report, ProgressUpdate } from '../types';
+import type {
+	Area,
+	Event,
+	Place,
+	ProgressUpdate,
+	Report,
+	User,
+} from "../types";
 
 // Type constraint to ensure items have required properties
 type ItemWithId = Area | User | Event | Report;
@@ -6,19 +13,20 @@ type ItemWithId = Area | User | Event | Report;
 // Type guard to validate runtime types
 function hasRequiredProperties(item: unknown): item is ItemWithId {
 	return (
-		typeof item === 'object' &&
+		typeof item === "object" &&
 		item !== null &&
-		'id' in item &&
-		'deleted_at' in item &&
-		(typeof (item as ItemWithId).id === 'string' || typeof (item as ItemWithId).id === 'number') &&
-		(typeof (item as ItemWithId).deleted_at === 'string' ||
+		"id" in item &&
+		"deleted_at" in item &&
+		(typeof (item as ItemWithId).id === "string" ||
+			typeof (item as ItemWithId).id === "number") &&
+		(typeof (item as ItemWithId).deleted_at === "string" ||
 			(item as ItemWithId).deleted_at === null)
 	);
 }
 
 export interface ParseJSONPayload {
 	json: string;
-	type: 'places' | 'areas' | 'users' | 'events' | 'reports';
+	type: "places" | "areas" | "users" | "events" | "reports";
 }
 
 export interface FilterPlacesPayload {
@@ -29,23 +37,27 @@ export interface FilterPlacesPayload {
 
 export interface FilterDeletedPayload {
 	items: (Place | Area | User | Event | Report)[];
-	type: 'places' | 'areas' | 'users' | 'events' | 'reports';
+	type: "places" | "areas" | "users" | "events" | "reports";
 }
 
 export interface MergeUpdatesPayload {
 	cached: ItemWithId[];
 	updates: ItemWithId[];
-	type: 'areas' | 'users' | 'events' | 'reports';
+	type: "areas" | "users" | "events" | "reports";
 }
 
 export interface WorkerMessage {
-	type: 'PARSE_JSON' | 'FILTER_PLACES' | 'FILTER_DELETED' | 'MERGE_UPDATES';
-	payload: ParseJSONPayload | FilterPlacesPayload | FilterDeletedPayload | MergeUpdatesPayload;
+	type: "PARSE_JSON" | "FILTER_PLACES" | "FILTER_DELETED" | "MERGE_UPDATES";
+	payload:
+		| ParseJSONPayload
+		| FilterPlacesPayload
+		| FilterDeletedPayload
+		| MergeUpdatesPayload;
 	id: string;
 }
 
 export interface WorkerResponse {
-	type: 'PARSED' | 'FILTERED' | 'MERGED' | 'ERROR' | 'PROGRESS';
+	type: "PARSED" | "FILTERED" | "MERGED" | "ERROR" | "PROGRESS";
 	payload: unknown;
 	id: string;
 }
@@ -54,10 +66,10 @@ function serializeError(error: unknown): string {
 	if (error instanceof Error) {
 		return error.message;
 	}
-	if (typeof error === 'string') {
+	if (typeof error === "string") {
 		return error;
 	}
-	if (typeof error === 'object' && error !== null) {
+	if (typeof error === "object" && error !== null) {
 		try {
 			return JSON.stringify(error);
 		} catch {
@@ -72,17 +84,17 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
 
 	try {
 		switch (type) {
-			case 'PARSE_JSON': {
+			case "PARSE_JSON": {
 				const parsePayload = payload as ParseJSONPayload;
 
 				// Send initial progress
 				self.postMessage({
-					type: 'PROGRESS',
+					type: "PROGRESS",
 					payload: {
 						percent: 0,
-						status: 'parsing'
+						status: "parsing",
 					} as ProgressUpdate,
-					id
+					id,
 				} as WorkerResponse);
 
 				// Parse JSON with progress tracking
@@ -93,43 +105,47 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
 				// Send progress update after parsing
 				const itemCount = Array.isArray(parsed) ? parsed.length : 0;
 				self.postMessage({
-					type: 'PROGRESS',
+					type: "PROGRESS",
 					payload: {
 						percent: 100,
 						itemsParsed: itemCount,
 						totalItems: itemCount,
-						status: 'complete'
+						status: "complete",
 					} as ProgressUpdate,
-					id
+					id,
 				} as WorkerResponse);
 
-				console.info(`Worker parsed ${itemCount} items in ${parseTime.toFixed(2)}ms`);
+				console.info(
+					`Worker parsed ${itemCount} items in ${parseTime.toFixed(2)}ms`,
+				);
 
 				self.postMessage({
-					type: 'PARSED',
+					type: "PARSED",
 					payload: parsed,
-					id
+					id,
 				} as WorkerResponse);
 				break;
 			}
 
-			case 'FILTER_PLACES': {
+			case "FILTER_PLACES": {
 				const filterPayload = payload as FilterPlacesPayload;
 
 				// Send progress update
 				self.postMessage({
-					type: 'PROGRESS',
+					type: "PROGRESS",
 					payload: {
 						percent: 50,
-						status: 'filtering'
+						status: "filtering",
 					} as ProgressUpdate,
-					id
+					id,
 				} as WorkerResponse);
 
 				const updatedIds = new Set(filterPayload.updatedPlaceIds);
 
 				// Filter out places that will be updated
-				const filtered = filterPayload.places.filter((place) => !updatedIds.has(place.id));
+				const filtered = filterPayload.places.filter(
+					(place) => !updatedIds.has(place.id),
+				);
 
 				// Add non-deleted updates
 				const merged = [...filtered];
@@ -152,59 +168,67 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
 				deduplicated.reverse();
 
 				self.postMessage({
-					type: 'PROGRESS',
+					type: "PROGRESS",
 					payload: {
 						percent: 100,
 						itemsParsed: deduplicated.length,
 						totalItems: deduplicated.length,
-						status: 'complete'
+						status: "complete",
 					} as ProgressUpdate,
-					id
+					id,
 				} as WorkerResponse);
 
 				self.postMessage({
-					type: 'FILTERED',
+					type: "FILTERED",
 					payload: deduplicated,
-					id
+					id,
 				} as WorkerResponse);
 				break;
 			}
 
-			case 'FILTER_DELETED': {
+			case "FILTER_DELETED": {
 				const filterPayload = payload as FilterDeletedPayload;
 				let filtered: unknown[];
 
 				switch (filterPayload.type) {
-					case 'areas':
+					case "areas":
 						filtered = (filterPayload.items as Area[]).filter(
-							(area) => !area.deleted_at && area.tags?.type !== 'trash'
+							(area) => !area.deleted_at && area.tags?.type !== "trash",
 						);
 						break;
-					case 'places':
-						filtered = (filterPayload.items as Place[]).filter((place) => !place.deleted_at);
+					case "places":
+						filtered = (filterPayload.items as Place[]).filter(
+							(place) => !place.deleted_at,
+						);
 						break;
-					case 'users':
-						filtered = (filterPayload.items as User[]).filter((user) => !user.deleted_at);
+					case "users":
+						filtered = (filterPayload.items as User[]).filter(
+							(user) => !user.deleted_at,
+						);
 						break;
-					case 'events':
-						filtered = (filterPayload.items as Event[]).filter((event) => !event.deleted_at);
+					case "events":
+						filtered = (filterPayload.items as Event[]).filter(
+							(event) => !event.deleted_at,
+						);
 						break;
-					case 'reports':
-						filtered = (filterPayload.items as Report[]).filter((report) => !report.deleted_at);
+					case "reports":
+						filtered = (filterPayload.items as Report[]).filter(
+							(report) => !report.deleted_at,
+						);
 						break;
 					default:
 						filtered = filterPayload.items;
 				}
 
 				self.postMessage({
-					type: 'FILTERED',
+					type: "FILTERED",
 					payload: filtered,
-					id
+					id,
 				} as WorkerResponse);
 				break;
 			}
 
-			case 'MERGE_UPDATES': {
+			case "MERGE_UPDATES": {
 				const mergePayload = payload as MergeUpdatesPayload;
 
 				// Type-safe mapping: handle both string and number IDs
@@ -230,9 +254,9 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
 				});
 
 				self.postMessage({
-					type: 'MERGED',
+					type: "MERGED",
 					payload: merged,
-					id
+					id,
 				} as WorkerResponse);
 				break;
 			}
@@ -242,9 +266,9 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
 		}
 	} catch (error) {
 		self.postMessage({
-			type: 'ERROR',
+			type: "ERROR",
 			payload: { error: serializeError(error) },
-			id
+			id,
 		} as WorkerResponse);
 	}
 };

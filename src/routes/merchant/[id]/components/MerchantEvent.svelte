@@ -1,19 +1,21 @@
 <script lang="ts">
-	import Tip from '$components/Tip.svelte';
-	import type { EventType, User } from '$lib/types';
-	import Time from 'svelte-time';
-	import { resolve } from '$app/paths';
+import Time from "svelte-time";
 
-	export let action: EventType;
-	export let user: User | undefined;
-	export let time: string;
-	export let latest: boolean;
+import Tip from "$components/Tip.svelte";
+import type { EventType, User } from "$lib/types";
 
-	$: profile = user && user['osm_json'];
-	$: regexMatch = profile && profile.description.match('(lightning:[^)]+)');
-	$: lightning = regexMatch && regexMatch[0].slice(10);
+import { resolve } from "$app/paths";
 
-	$: username = profile && profile['display_name'];
+export let action: EventType;
+export let user: User | undefined;
+export let time: string;
+export let latest: boolean;
+
+$: profile = user?.osm_json;
+$: regexMatch = profile?.description.match("(lightning:[^)]+)");
+$: lightning = regexMatch?.[0].slice(10);
+
+$: username = profile?.display_name;
 </script>
 
 <div

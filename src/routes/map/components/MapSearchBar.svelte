@@ -1,76 +1,81 @@
 <script lang="ts">
-	import type { MerchantListMode } from '$lib/merchantListStore';
-	import { merchantList } from '$lib/merchantListStore';
-	import Icon from '$components/Icon.svelte';
-	import SearchInput from '$components/SearchInput.svelte';
-	import { trackEvent } from '$lib/analytics';
-	import { formatNearbyCount } from '$lib/utils';
-	import { _ } from '$lib/i18n';
+import Icon from "$components/Icon.svelte";
+import SearchInput from "$components/SearchInput.svelte";
+import { trackEvent } from "$lib/analytics";
+import { _ } from "$lib/i18n";
+import type { MerchantListMode } from "$lib/merchantListStore";
+import { merchantList } from "$lib/merchantListStore";
+import { formatNearbyCount } from "$lib/utils";
 
-	// Callback when search is used (opens panel)
-	export let onSearch: ((query: string) => void) | undefined = undefined;
-	export let onFocus: (() => void) | undefined = undefined;
-	export let onNearbyClick: (() => void) | undefined = undefined;
-	export let nearbyCount = 0;
-	export let isLoadingCount = false;
+// Callback when search is used (opens panel)
+export let onSearch: ((query: string) => void) | undefined = undefined;
+export let onFocus: (() => void) | undefined = undefined;
+export let onNearbyClick: (() => void) | undefined = undefined;
+export let nearbyCount = 0;
+export let isLoadingCount = false;
 
-	$: formattedCount = formatNearbyCount(nearbyCount);
+$: formattedCount = formatNearbyCount(nearbyCount);
 
-	let searchInputComponent: SearchInput;
+let searchInputComponent: SearchInput;
 
-	// Store subscriptions
-	$: searchQuery = $merchantList.searchQuery;
-	$: mode = $merchantList.mode;
-	$: isSearching = $merchantList.isSearching;
-	$: isOpen = $merchantList.isOpen;
+// Store subscriptions
+$: searchQuery = $merchantList.searchQuery;
+$: mode = $merchantList.mode;
+$: isSearching = $merchantList.isSearching;
+$: isOpen = $merchantList.isOpen;
 
-	// Placeholder based on mode
-	$: placeholder =
-		mode === 'search' ? $_('search.placeholderWorldwide') : $_('search.placeholderNearby');
+// Placeholder based on mode
+$: placeholder =
+	mode === "search"
+		? $_("search.placeholderWorldwide")
+		: $_("search.placeholderNearby");
 
-	function handleInput(e: Event) {
-		const value = (e.target as HTMLInputElement).value;
-		merchantList.setSearchQuery(value);
-		// Stay in current mode - no auto-switch
-		onSearch?.(value);
+function handleInput(e: Event) {
+	const value = (e.target as HTMLInputElement).value;
+	merchantList.setSearchQuery(value);
+	// Stay in current mode - no auto-switch
+	onSearch?.(value);
+}
+
+function handleModeSwitch(newMode: MerchantListMode) {
+	const isSameMode = newMode === mode;
+	if (!isSameMode) {
+		trackEvent(
+			newMode === "nearby" ? "nearby_mode_click" : "worldwide_mode_click",
+			{
+				source: "floating_bar",
+			},
+		);
+		merchantList.setMode(newMode);
 	}
-
-	function handleModeSwitch(newMode: MerchantListMode) {
-		const isSameMode = newMode === mode;
-		if (!isSameMode) {
-			trackEvent(newMode === 'nearby' ? 'nearby_mode_click' : 'worldwide_mode_click', {
-				source: 'floating_bar'
-			});
-			merchantList.setMode(newMode);
-		}
-		// Always open panel when clicking Nearby tab (shows guidance if empty)
-		if (newMode === 'nearby') {
-			onNearbyClick?.();
-		}
+	// Always open panel when clicking Nearby tab (shows guidance if empty)
+	if (newMode === "nearby") {
+		onNearbyClick?.();
 	}
+}
 
-	function handleFocus() {
-		trackEvent('search_input_focus', { source: 'floating_bar' });
-		onFocus?.();
-	}
+function handleFocus() {
+	trackEvent("search_input_focus", { source: "floating_bar" });
+	onFocus?.();
+}
 
-	function handleKeyDown(e: KeyboardEvent) {
-		if (e.key === 'Escape') {
-			if (searchQuery) {
-				e.preventDefault();
-				handleClear();
-			}
-		} else if (e.key === 'Enter') {
+function handleKeyDown(e: KeyboardEvent) {
+	if (e.key === "Escape") {
+		if (searchQuery) {
 			e.preventDefault();
-			onSearch?.(searchQuery);
+			handleClear();
 		}
+	} else if (e.key === "Enter") {
+		e.preventDefault();
+		onSearch?.(searchQuery);
 	}
+}
 
-	function handleClear() {
-		merchantList.clearSearchInput();
-		onSearch?.('');
-		searchInputComponent?.focus();
-	}
+function handleClear() {
+	merchantList.clearSearchInput();
+	onSearch?.("");
+	searchInputComponent?.focus();
+}
 </script>
 
 <!-- Floating search bar - hidden when panel is open (panel has its own search in same position) -->

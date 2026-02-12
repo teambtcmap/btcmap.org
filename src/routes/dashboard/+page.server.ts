@@ -1,5 +1,6 @@
-import type { PageServerLoad } from './$types';
-import { error } from '@sveltejs/kit';
+import { error } from "@sveltejs/kit";
+
+import type { PageServerLoad } from "./$types";
 
 interface DashboardData {
 	total_merchants: number;
@@ -16,10 +17,10 @@ interface ChartEntry {
 }
 
 export const load: PageServerLoad = async ({ fetch }) => {
-	const response = await fetch('https://api.btcmap.org/v4/dashboard');
+	const response = await fetch("https://api.btcmap.org/v4/dashboard");
 
 	if (!response.ok) {
-		throw error(response.status, 'Failed to fetch dashboard data');
+		throw error(response.status, "Failed to fetch dashboard data");
 	}
 
 	const areaDashboard: DashboardData = await response.json();

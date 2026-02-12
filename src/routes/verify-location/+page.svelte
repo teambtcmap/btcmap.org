@@ -1,115 +1,120 @@
 <script lang="ts">
-	export let data: import('./+page.server').VerifyLocationPageData;
-	import { browser } from '$app/environment';
-	import FormSuccess from '$components/FormSuccess.svelte';
-	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-	import Icon from '$components/Icon.svelte';
-	import InfoTooltip from '$components/InfoTooltip.svelte';
-	import PrimaryButton from '$components/PrimaryButton.svelte';
-	import { placesError } from '$lib/store';
-	import { theme } from '$lib/theme';
-	import { errToast } from '$lib/utils';
-	import axios from 'axios';
-	import { onMount } from 'svelte';
-	import DOMPurify from 'dompurify';
+export let data: import("./+page.server").VerifyLocationPageData;
 
-	// Initialize from server data
-	let name = data?.name || '';
-	let lat = data?.lat;
-	let long = data?.long;
-	let location = data?.location || '';
-	let edit = data?.edit || '';
+import axios from "axios";
+import DOMPurify from "dompurify";
+import { onMount } from "svelte";
 
-	let captcha: HTMLDivElement;
-	let captchaSecret: string;
-	let captchaInput: HTMLInputElement;
-	let honeyInput: HTMLInputElement;
+import FormSuccess from "$components/FormSuccess.svelte";
+import Icon from "$components/Icon.svelte";
+import InfoTooltip from "$components/InfoTooltip.svelte";
+import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import PrimaryButton from "$components/PrimaryButton.svelte";
+import { placesError } from "$lib/store";
+import { theme } from "$lib/theme";
+import { errToast } from "$lib/utils";
 
-	let captchaContent = '';
-	let isCaptchaLoading = true;
+import { browser } from "$app/environment";
 
-	const fetchCaptcha = () => {
-		isCaptchaLoading = true;
+// Initialize from server data
+let name = data?.name || "";
+let lat = data?.lat;
+let long = data?.long;
+let location = data?.location || "";
+let edit = data?.edit || "";
+
+let captcha: HTMLDivElement;
+let captchaSecret: string;
+let captchaInput: HTMLInputElement;
+let honeyInput: HTMLInputElement;
+
+let captchaContent = "";
+let isCaptchaLoading = true;
+
+const fetchCaptcha = () => {
+	isCaptchaLoading = true;
+	axios
+		.get("/captcha")
+		.then((response) => {
+			// handle success
+			captchaSecret = response.data.captchaSecret;
+			captchaContent = DOMPurify.sanitize(response.data.captcha);
+		})
+		.catch((error) => {
+			// handle error
+			errToast("Could not fetch captcha, please try again or contact BTC Map.");
+			console.error(error);
+		})
+		.finally(() => {
+			isCaptchaLoading = false;
+		});
+};
+
+let current: boolean;
+let outdated: string;
+let verify: HTMLTextAreaElement;
+
+let selected = !!data; // Set to true if we have server data
+let submitted = false;
+let submitting = false;
+let submissionIssueNumber: number;
+let merchantId = data?.merchantId || "";
+
+const submitForm = (event: SubmitEvent) => {
+	event.preventDefault();
+	if (!selected) {
+		errToast("Please select a location...");
+	} else {
+		submitting = true;
+
 		axios
-			.get('/captcha')
-			.then(function (response) {
-				// handle success
-				captchaSecret = response.data.captchaSecret;
-				captchaContent = DOMPurify.sanitize(response.data.captcha);
+			.post("/api/gitea/issue", {
+				type: "verify-location",
+				captchaSecret,
+				captchaTest: captchaInput.value,
+				honey: honeyInput.value,
+				name: name,
+				location: location,
+				edit: edit,
+				current: current ? "Yes" : "No",
+				outdated: outdated ? outdated : "",
+				verified: verify.value,
+				merchantId: merchantId,
+				lat: lat,
+				long: long,
 			})
-			.catch(function (error) {
-				// handle error
-				errToast('Could not fetch captcha, please try again or contact BTC Map.');
+			.then((response) => {
+				submissionIssueNumber = response.data.number;
+				submitted = true;
+			})
+			.catch((error) => {
+				if (error.response.data.message.includes("Captcha")) {
+					errToast(error.response.data.message);
+				} else {
+					errToast(
+						"Form submission failed, please try again or contact BTC Map.",
+					);
+				}
+
 				console.error(error);
-			})
-			.finally(() => {
-				isCaptchaLoading = false;
+				submitting = false;
 			});
-	};
-
-	let current: boolean;
-	let outdated: string;
-	let verify: HTMLTextAreaElement;
-
-	let selected = !!data; // Set to true if we have server data
-	let submitted = false;
-	let submitting = false;
-	let submissionIssueNumber: number;
-	let merchantId = data?.merchantId || '';
-
-	const submitForm = (event: SubmitEvent) => {
-		event.preventDefault();
-		if (!selected) {
-			errToast('Please select a location...');
-		} else {
-			submitting = true;
-
-			axios
-				.post('/api/gitea/issue', {
-					type: 'verify-location',
-					captchaSecret,
-					captchaTest: captchaInput.value,
-					honey: honeyInput.value,
-					name: name,
-					location: location,
-					edit: edit,
-					current: current ? 'Yes' : 'No',
-					outdated: outdated ? outdated : '',
-					verified: verify.value,
-					merchantId: merchantId,
-					lat: lat,
-					long: long
-				})
-				.then(function (response) {
-					submissionIssueNumber = response.data.number;
-					submitted = true;
-				})
-				.catch(function (error) {
-					if (error.response.data.message.includes('Captcha')) {
-						errToast(error.response.data.message);
-					} else {
-						errToast('Form submission failed, please try again or contact BTC Map.');
-					}
-
-					console.error(error);
-					submitting = false;
-				});
-		}
-	};
-
-	function resetForm() {
-		window.history.back();
 	}
+};
 
-	// alert for map errors
-	$: $placesError && errToast($placesError);
+function resetForm() {
+	window.history.back();
+}
 
-	onMount(async () => {
-		if (browser) {
-			// fetch and add captcha
-			fetchCaptcha();
-		}
-	});
+// alert for map errors
+$: $placesError && errToast($placesError);
+
+onMount(async () => {
+	if (browser) {
+		// fetch and add captcha
+		fetchCaptcha();
+	}
+});
 </script>
 
 <svelte:head>

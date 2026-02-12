@@ -1,68 +1,69 @@
 <script lang="ts">
-	import Socials from '$components/Socials.svelte';
-	import SponsorBadge from '$components/SponsorBadge.svelte';
-	import Tip from '$components/Tip.svelte';
-	import OrgBadge from '$components/OrgBadge.svelte';
-	import type { AreaTags } from '$lib/types';
-	import { TipType } from '$lib/types';
-	import { getOrganizationDisplayName } from '$lib/organizationDisplayNames';
-	import { resolve } from '$app/paths';
+import OrgBadge from "$components/OrgBadge.svelte";
+import Socials from "$components/Socials.svelte";
+import SponsorBadge from "$components/SponsorBadge.svelte";
+import Tip from "$components/Tip.svelte";
+import { getOrganizationDisplayName } from "$lib/organizationDisplayNames";
+import type { AreaTags } from "$lib/types";
+import { TipType } from "$lib/types";
 
-	export let id: string;
-	export let tags: AreaTags;
+import { resolve } from "$app/paths";
 
-	$: image = tags['icon:square'] && tags['icon:square'];
-	$: website = tags['contact:website'] && tags['contact:website'];
-	$: email = tags['contact:email'] && tags['contact:email'];
-	$: phone = tags['contact:phone'] && tags['contact:phone'];
-	$: nostr = tags['contact:nostr'] && tags['contact:nostr'];
-	$: twitter = tags['contact:twitter'] && tags['contact:twitter'];
-	$: meetup = tags['contact:meetup'] && tags['contact:meetup'];
-	$: telegram = tags['contact:telegram'] && tags['contact:telegram'];
-	$: discord = tags['contact:discord'] && tags['contact:discord'];
-	$: youtube = tags['contact:youtube'] && tags['contact:youtube'];
-	$: github = tags['contact:github'] && tags['contact:github'];
-	$: matrix = tags['contact:matrix'] && tags['contact:matrix'];
-	$: geyser = tags['contact:geyser'] && tags['contact:geyser'];
-	$: satlantis = tags['contact:satlantis'] && tags['contact:satlantis'];
-	$: eventbrite = tags['contact:eventbrite'] && tags['contact:eventbrite'];
-	$: reddit = tags['contact:reddit'] && tags['contact:reddit'];
-	$: simplex = tags['contact:simplex'] && tags['contact:simplex'];
-	$: instagram = tags['contact:instagram'] && tags['contact:instagram'];
-	$: whatsapp = tags['contact:whatsapp'] && tags['contact:whatsapp'];
-	$: facebook = tags['contact:facebook'] && tags['contact:facebook'];
-	$: linkedin = tags['contact:linkedin'] && tags['contact:linkedin'];
-	$: rss = tags['contact:rss'] && tags['contact:rss'];
-	$: signal = tags['contact:signal'] && tags['contact:signal'];
-	$: hasContact =
-		website ||
-		email ||
-		phone ||
-		nostr ||
-		twitter ||
-		meetup ||
-		telegram ||
-		discord ||
-		youtube ||
-		github ||
-		matrix ||
-		geyser ||
-		satlantis ||
-		eventbrite ||
-		reddit ||
-		simplex ||
-		instagram ||
-		whatsapp ||
-		facebook ||
-		linkedin ||
-		rss ||
-		signal;
-	$: tip =
-		(tags['tips:lightning_address'] && {
-			destination: tags['tips:lightning_address'],
-			type: TipType.Address
-		}) ||
-		(tags['tips:url'] && { destination: tags['tips:url'], type: TipType.Url });
+export let id: string;
+export let tags: AreaTags;
+
+$: image = tags["icon:square"] && tags["icon:square"];
+$: website = tags["contact:website"] && tags["contact:website"];
+$: email = tags["contact:email"] && tags["contact:email"];
+$: phone = tags["contact:phone"] && tags["contact:phone"];
+$: nostr = tags["contact:nostr"] && tags["contact:nostr"];
+$: twitter = tags["contact:twitter"] && tags["contact:twitter"];
+$: meetup = tags["contact:meetup"] && tags["contact:meetup"];
+$: telegram = tags["contact:telegram"] && tags["contact:telegram"];
+$: discord = tags["contact:discord"] && tags["contact:discord"];
+$: youtube = tags["contact:youtube"] && tags["contact:youtube"];
+$: github = tags["contact:github"] && tags["contact:github"];
+$: matrix = tags["contact:matrix"] && tags["contact:matrix"];
+$: geyser = tags["contact:geyser"] && tags["contact:geyser"];
+$: satlantis = tags["contact:satlantis"] && tags["contact:satlantis"];
+$: eventbrite = tags["contact:eventbrite"] && tags["contact:eventbrite"];
+$: reddit = tags["contact:reddit"] && tags["contact:reddit"];
+$: simplex = tags["contact:simplex"] && tags["contact:simplex"];
+$: instagram = tags["contact:instagram"] && tags["contact:instagram"];
+$: whatsapp = tags["contact:whatsapp"] && tags["contact:whatsapp"];
+$: facebook = tags["contact:facebook"] && tags["contact:facebook"];
+$: linkedin = tags["contact:linkedin"] && tags["contact:linkedin"];
+$: rss = tags["contact:rss"] && tags["contact:rss"];
+$: signal = tags["contact:signal"] && tags["contact:signal"];
+$: hasContact =
+	website ||
+	email ||
+	phone ||
+	nostr ||
+	twitter ||
+	meetup ||
+	telegram ||
+	discord ||
+	youtube ||
+	github ||
+	matrix ||
+	geyser ||
+	satlantis ||
+	eventbrite ||
+	reddit ||
+	simplex ||
+	instagram ||
+	whatsapp ||
+	facebook ||
+	linkedin ||
+	rss ||
+	signal;
+$: tip =
+	(tags["tips:lightning_address"] && {
+		destination: tags["tips:lightning_address"],
+		type: TipType.Address,
+	}) ||
+	(tags["tips:url"] && { destination: tags["tips:url"], type: TipType.Url });
 </script>
 
 <div

@@ -1,8 +1,13 @@
 <script lang="ts">
-	export let supporters: { url: string; logoDark?: string; logo: string; title: string }[];
-	export let placeholders: number;
+export let supporters: {
+	url: string;
+	logoDark?: string;
+	logo: string;
+	title: string;
+}[];
+export let placeholders: number;
 
-	import { theme } from '$lib/theme';
+import { theme } from "$lib/theme";
 </script>
 
 <div class="mt-4">

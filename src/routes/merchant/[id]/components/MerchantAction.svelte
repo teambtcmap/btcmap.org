@@ -1,35 +1,37 @@
 <script lang="ts">
-	import Icon from '$components/Icon.svelte';
+import Icon from "$components/Icon.svelte";
 
-	export let link: string | undefined = undefined;
-	export let icon: string;
-	export let text: string;
+export let link: string | undefined = undefined;
+export let icon: string;
+export let text: string;
 
-	const faIcons = ['x', 'instagram', 'facebook'];
-	const materialIconMap: Record<string, string> = {
-		compass: 'explore',
-		pencil: 'edit',
-		share: 'share',
-		bolt: 'bolt',
-		phone: 'phone',
-		email: 'email',
-		globe: 'language',
-		external: 'open_in_new',
-		tags: 'sell',
-		issues: 'warning'
-	};
+const faIcons = ["x", "instagram", "facebook"];
+const materialIconMap: Record<string, string> = {
+	compass: "explore",
+	pencil: "edit",
+	share: "share",
+	bolt: "bolt",
+	phone: "phone",
+	email: "email",
+	globe: "language",
+	external: "open_in_new",
+	tags: "sell",
+	issues: "warning",
+};
 
-	const faIconMap: Record<string, string> = {
-		x: 'x-twitter',
-		instagram: 'instagram',
-		facebook: 'facebook'
-	};
+const faIconMap: Record<string, string> = {
+	x: "x-twitter",
+	instagram: "instagram",
+	facebook: "facebook",
+};
 
-	$: isFaIcon = faIcons.includes(icon);
-	$: resolvedIcon = isFaIcon ? faIconMap[icon] || icon : materialIconMap[icon] || icon;
+$: isFaIcon = faIcons.includes(icon);
+$: resolvedIcon = isFaIcon
+	? faIconMap[icon] || icon
+	: materialIconMap[icon] || icon;
 
-	const baseClass =
-		'flex h-20 w-24 items-center justify-center rounded-lg border border-primary py-1 !text-primary transition-colors hover:border-link hover:!text-link dark:border-white/95 dark:!text-white dark:hover:border-link dark:hover:!text-link';
+const baseClass =
+	"flex h-20 w-24 items-center justify-center rounded-lg border border-primary py-1 !text-primary transition-colors hover:border-link hover:!text-link dark:border-white/95 dark:!text-white dark:hover:border-link dark:hover:!text-link";
 </script>
 
 {#if link}

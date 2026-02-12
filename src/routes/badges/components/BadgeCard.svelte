@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { BadgeType } from '$lib/types';
+import type { BadgeType } from "$lib/types";
 
-	export let icon: string;
-	export let title: string;
-	export let desc: string;
-	export let type: BadgeType;
+export let icon: string;
+export let title: string;
+export let desc: string;
+export let type: BadgeType;
 </script>
 
 <div

@@ -1,37 +1,38 @@
 <script lang="ts">
-	import SocialLink from '$components/SocialLink.svelte';
-	import { socials } from '$lib/store';
-	import { env } from '$env/dynamic/public';
-	import { locale, _ } from '$lib/i18n';
-	import Icon from '$components/Icon.svelte';
-	import { trackEvent } from '$lib/analytics';
+import Icon from "$components/Icon.svelte";
+import SocialLink from "$components/SocialLink.svelte";
+import { trackEvent } from "$lib/analytics";
+import { _, locale } from "$lib/i18n";
+import { socials } from "$lib/store";
 
-	function switchLanguage(newLocale: string) {
-		trackEvent('language_switch', { language: newLocale });
-		locale.set(newLocale);
-		if (typeof window !== 'undefined') {
-			localStorage.setItem('language', newLocale);
-		}
+import { env } from "$env/dynamic/public";
+
+function switchLanguage(newLocale: string) {
+	trackEvent("language_switch", { language: newLocale });
+	locale.set(newLocale);
+	if (typeof window !== "undefined") {
+		localStorage.setItem("language", newLocale);
 	}
+}
 
-	// Links with translation keys (translations are applied in template using $_())
-	const links = [
-		{ link: '/about-us', nameKey: 'footer.aboutUs' },
-		{ link: '/media', nameKey: 'footer.media' },
-		{ link: '/license', nameKey: 'footer.license' },
-		{ link: '/privacy-policy', nameKey: 'footer.privacy' },
-		{ link: 'https://stats.uptimerobot.com/7kgEVtzlV1', name: 'Status' },
-		...(env.PUBLIC_UMAMI_URL
-			? [{ link: env.PUBLIC_UMAMI_URL, name: 'Analytics', external: true }]
-			: []),
-		{
-			link: 'https://bitcoin.rocks/business/',
-			nameKey: 'footer.bitcoinForBusiness',
-			external: true
-		},
-		{ link: '/bitcoin.pdf', name: 'White Paper' },
-		{ link: '/cypherpunks-manifesto.pdf', name: 'Cypherpunks' }
-	];
+// Links with translation keys (translations are applied in template using $_())
+const links = [
+	{ link: "/about-us", nameKey: "footer.aboutUs" },
+	{ link: "/media", nameKey: "footer.media" },
+	{ link: "/license", nameKey: "footer.license" },
+	{ link: "/privacy-policy", nameKey: "footer.privacy" },
+	{ link: "https://stats.uptimerobot.com/7kgEVtzlV1", name: "Status" },
+	...(env.PUBLIC_UMAMI_URL
+		? [{ link: env.PUBLIC_UMAMI_URL, name: "Analytics", external: true }]
+		: []),
+	{
+		link: "https://bitcoin.rocks/business/",
+		nameKey: "footer.bitcoinForBusiness",
+		external: true,
+	},
+	{ link: "/bitcoin.pdf", name: "White Paper" },
+	{ link: "/cypherpunks-manifesto.pdf", name: "Cypherpunks" },
+];
 </script>
 
 <footer class="w-full items-center justify-between space-y-5 pb-5 xl:flex xl:space-y-0">

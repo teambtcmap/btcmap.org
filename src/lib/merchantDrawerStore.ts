@@ -1,11 +1,13 @@
-import { writable, get } from 'svelte/store';
-import { browser } from '$app/environment';
-import axios from 'axios';
-import { places } from '$lib/store';
-import type { DrawerView } from '$lib/merchantDrawerHash';
-import { updateMerchantHash, parseMerchantHash } from '$lib/merchantDrawerHash';
-import { PLACE_FIELD_SETS, buildFieldsParam } from '$lib/api-fields';
-import type { Place } from '$lib/types';
+import axios from "axios";
+import { get, writable } from "svelte/store";
+
+import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
+import type { DrawerView } from "$lib/merchantDrawerHash";
+import { parseMerchantHash, updateMerchantHash } from "$lib/merchantDrawerHash";
+import { places } from "$lib/store";
+import type { Place } from "$lib/types";
+
+import { browser } from "$app/environment";
 
 export interface MerchantDrawerState {
 	isOpen: boolean;
@@ -19,21 +21,24 @@ export interface MerchantDrawerState {
 const initialState: MerchantDrawerState = {
 	isOpen: false,
 	merchantId: null,
-	drawerView: 'details',
+	drawerView: "details",
 	merchant: null,
 	isLoading: false,
-	error: null
+	error: null,
 };
 
 function createMerchantDrawerStore() {
-	const { subscribe, set, update } = writable<MerchantDrawerState>(initialState);
+	const { subscribe, set, update } =
+		writable<MerchantDrawerState>(initialState);
 
 	let abortController: AbortController | null = null;
 
 	function hasCompleteData(place: Place | undefined): place is Place {
 		if (!place) return false;
 		return (
-			place.name !== undefined && place.address !== undefined && place.verified_at !== undefined
+			place.name !== undefined &&
+			place.address !== undefined &&
+			place.verified_at !== undefined
 		);
 	}
 
@@ -49,24 +54,33 @@ function createMerchantDrawerStore() {
 				`https://api.btcmap.org/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`,
 				{
 					timeout: 10000,
-					signal: abortController.signal
-				}
+					signal: abortController.signal,
+				},
 			);
 
 			// Only update if this merchant is still selected
 			update((state) => {
 				if (state.merchantId === id) {
-					return { ...state, merchant: response.data, isLoading: false, error: null };
+					return {
+						...state,
+						merchant: response.data,
+						isLoading: false,
+						error: null,
+					};
 				}
 				return state;
 			});
 		} catch (error) {
 			if (axios.isCancel(error)) return;
 
-			console.error('Error fetching merchant details:', error);
+			console.error("Error fetching merchant details:", error);
 			update((state) => {
 				if (state.merchantId === id) {
-					return { ...state, isLoading: false, error: 'Failed to load merchant details' };
+					return {
+						...state,
+						isLoading: false,
+						error: "Failed to load merchant details",
+					};
 				}
 				return state;
 			});
@@ -77,7 +91,7 @@ function createMerchantDrawerStore() {
 		subscribe,
 
 		// Open drawer with optimistic UI - show cached data immediately
-		open(id: number, view: DrawerView = 'details') {
+		open(id: number, view: DrawerView = "details") {
 			// Get cached data from places store
 			const cachedPlace = get(places).find((p) => p.id === id);
 			const needsFetch = !hasCompleteData(cachedPlace);
@@ -89,7 +103,7 @@ function createMerchantDrawerStore() {
 				drawerView: view,
 				merchant: cachedPlace || null,
 				isLoading: needsFetch,
-				error: null
+				error: null,
 			}));
 
 			// Update URL hash
@@ -114,7 +128,7 @@ function createMerchantDrawerStore() {
 				merchantId: null,
 				merchant: null,
 				isLoading: false,
-				error: null
+				error: null,
 			}));
 
 			updateMerchantHash(null);
@@ -147,8 +161,13 @@ function createMerchantDrawerStore() {
 				}
 
 				// Drawer opening or merchant changing
-				if (hashState.isOpen && hashState.merchantId !== currentState.merchantId) {
-					const cachedPlace = get(places).find((p) => p.id === hashState.merchantId);
+				if (
+					hashState.isOpen &&
+					hashState.merchantId !== currentState.merchantId
+				) {
+					const cachedPlace = get(places).find(
+						(p) => p.id === hashState.merchantId,
+					);
 					const needsFetch = !hasCompleteData(cachedPlace);
 
 					if (needsFetch && hashState.merchantId) {
@@ -162,7 +181,7 @@ function createMerchantDrawerStore() {
 						drawerView: hashState.drawerView,
 						merchant: cachedPlace || null,
 						isLoading: needsFetch,
-						error: null
+						error: null,
 					};
 				}
 
@@ -187,7 +206,7 @@ function createMerchantDrawerStore() {
 				abortController = null;
 			}
 			set(initialState);
-		}
+		},
 	};
 }
 

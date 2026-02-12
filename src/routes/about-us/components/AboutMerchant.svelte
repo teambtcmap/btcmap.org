@@ -1,20 +1,22 @@
 <script lang="ts">
-	import Icon from '$components/Icon.svelte';
-	import tippy from 'tippy.js';
-	import { resolve } from '$app/paths';
+import tippy from "tippy.js";
 
-	export let id: string;
-	export let icon: string;
-	export let tooltip: string | undefined;
+import Icon from "$components/Icon.svelte";
 
-	let merchantTooltip: HTMLAnchorElement;
+import { resolve } from "$app/paths";
 
-	$: merchantTooltip &&
-		tooltip &&
-		tooltip.length &&
-		tippy([merchantTooltip], {
-			content: tooltip
-		});
+export let id: string;
+export let icon: string;
+export let tooltip: string | undefined;
+
+let merchantTooltip: HTMLAnchorElement;
+
+$: merchantTooltip &&
+	tooltip &&
+	tooltip.length &&
+	tippy([merchantTooltip], {
+		content: tooltip,
+	});
 </script>
 
 <a

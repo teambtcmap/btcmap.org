@@ -1,18 +1,19 @@
 <script lang="ts">
-	import type { AreaType } from '$lib/types';
-	import type { Table } from '@tanstack/svelte-table';
-	import { flexRender } from '@tanstack/svelte-table';
-	import { isEven } from '$lib/utils';
-	import AreaLeaderboardItemName from '$components/leaderboard/AreaLeaderboardItemName.svelte';
-	import GradeDisplay from '$components/leaderboard/GradeDisplay.svelte';
-	import Icon from '$components/Icon.svelte';
+import type { Table } from "@tanstack/svelte-table";
+import { flexRender } from "@tanstack/svelte-table";
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	export let table: Table<any>;
-	export let type: AreaType;
-	export let totalTooltip: HTMLButtonElement;
-	export let upToDateTooltip: HTMLButtonElement;
-	export let gradeTooltip: HTMLButtonElement;
+import Icon from "$components/Icon.svelte";
+import AreaLeaderboardItemName from "$components/leaderboard/AreaLeaderboardItemName.svelte";
+import GradeDisplay from "$components/leaderboard/GradeDisplay.svelte";
+import type { AreaType } from "$lib/types";
+import { isEven } from "$lib/utils";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export let table: Table<any>;
+export let type: AreaType;
+export let totalTooltip: HTMLButtonElement;
+export let upToDateTooltip: HTMLButtonElement;
+export let gradeTooltip: HTMLButtonElement;
 </script>
 
 <div class="hidden lg:block" role="region" aria-label="Leaderboard table">

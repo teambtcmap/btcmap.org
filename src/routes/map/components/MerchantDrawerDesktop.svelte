@@ -1,108 +1,111 @@
 <script lang="ts">
-	import { boost, resetBoost } from '$lib/store';
-	import CloseButton from '$components/CloseButton.svelte';
-	import Icon from '$components/Icon.svelte';
-	import { fly } from 'svelte/transition';
-	import BoostContent from '$components/BoostContent.svelte';
-	import MerchantDetailsContent from '$components/MerchantDetailsContent.svelte';
-	import { invalidateAll } from '$app/navigation';
-	import { onMount, tick } from 'svelte';
-	import { merchantDrawer } from '$lib/merchantDrawerStore';
-	import { merchantList } from '$lib/merchantListStore';
-	import {
-		MERCHANT_LIST_WIDTH,
-		MERCHANT_DRAWER_WIDTH,
-		MAP_PANEL_MARGIN,
-		PANEL_DRAWER_GAP
-	} from '$lib/constants';
-	import {
-		calcVerifiedDate,
-		isUpToDate as checkUpToDate,
-		isBoosted as checkBoosted,
-		handleBoost as boostMerchant,
-		handleBoostComplete as completeBoost,
-		ensureBoostData,
-		clearBoostState
-	} from '$lib/merchantDrawerLogic';
+import { onMount, tick } from "svelte";
+import { fly } from "svelte/transition";
 
-	// Derive state from centralized store
-	$: isOpen = $merchantDrawer.isOpen;
-	$: merchantId = $merchantDrawer.merchantId;
-	$: drawerView = $merchantDrawer.drawerView;
-	$: merchant = $merchantDrawer.merchant;
-	$: fetchingMerchant = $merchantDrawer.isLoading;
-	$: listIsOpen = $merchantList.isOpen;
+import BoostContent from "$components/BoostContent.svelte";
+import CloseButton from "$components/CloseButton.svelte";
+import Icon from "$components/Icon.svelte";
+import MerchantDetailsContent from "$components/MerchantDetailsContent.svelte";
+import {
+	MAP_PANEL_MARGIN,
+	MERCHANT_DRAWER_WIDTH,
+	MERCHANT_LIST_WIDTH,
+	PANEL_DRAWER_GAP,
+} from "$lib/constants";
+import {
+	handleBoost as boostMerchant,
+	calcVerifiedDate,
+	isBoosted as checkBoosted,
+	isUpToDate as checkUpToDate,
+	clearBoostState,
+	handleBoostComplete as completeBoost,
+	ensureBoostData,
+} from "$lib/merchantDrawerLogic";
+import { merchantDrawer } from "$lib/merchantDrawerStore";
+import { merchantList } from "$lib/merchantListStore";
+import { boost, resetBoost } from "$lib/store";
 
-	// Calculate drawer position based on list panel state
-	$: drawerLeft = listIsOpen
-		? MAP_PANEL_MARGIN + MERCHANT_LIST_WIDTH + PANEL_DRAWER_GAP
-		: MAP_PANEL_MARGIN;
+import { invalidateAll } from "$app/navigation";
 
-	// Focus management - move focus to drawer when it opens
-	let drawerElement: HTMLDivElement;
-	$: if (isOpen && drawerElement) {
-		tick().then(() => {
-			const closeBtn = drawerElement.querySelector('button');
-			closeBtn?.focus();
-		});
-	}
+// Derive state from centralized store
+$: isOpen = $merchantDrawer.isOpen;
+$: merchantId = $merchantDrawer.merchantId;
+$: drawerView = $merchantDrawer.drawerView;
+$: merchant = $merchantDrawer.merchant;
+$: fetchingMerchant = $merchantDrawer.isLoading;
+$: listIsOpen = $merchantList.isOpen;
 
-	const verifiedDate = calcVerifiedDate();
-	$: isUpToDate = checkUpToDate(merchant, verifiedDate);
-	$: isBoosted = checkBoosted(merchant);
+// Calculate drawer position based on list panel state
+$: drawerLeft = listIsOpen
+	? MAP_PANEL_MARGIN + MERCHANT_LIST_WIDTH + PANEL_DRAWER_GAP
+	: MAP_PANEL_MARGIN;
 
-	let boostLoading = false;
-	const setBoostLoading = (loading: boolean) => {
-		boostLoading = loading;
-	};
+// Focus management - move focus to drawer when it opens
+let drawerElement: HTMLDivElement;
+$: if (isOpen && drawerElement) {
+	tick().then(() => {
+		const closeBtn = drawerElement.querySelector("button");
+		closeBtn?.focus();
+	});
+}
 
-	const closeDrawer = () => {
-		clearBoostState();
-		boostLoading = false;
-		merchantDrawer.close();
-	};
+const verifiedDate = calcVerifiedDate();
+$: isUpToDate = checkUpToDate(merchant, verifiedDate);
+$: isBoosted = checkBoosted(merchant);
 
-	const goBack = () => {
-		clearBoostState();
-		boostLoading = false;
-		merchantDrawer.setView('details');
-	};
+let boostLoading = false;
+const setBoostLoading = (loading: boolean) => {
+	boostLoading = loading;
+};
 
-	$: if (drawerView !== 'boost' && $boost !== undefined) {
-		clearBoostState();
-		boostLoading = false;
-	}
+const closeDrawer = () => {
+	clearBoostState();
+	boostLoading = false;
+	merchantDrawer.close();
+};
 
-	const handleBoost = () => boostMerchant(merchant, merchantId, setBoostLoading);
-	const handleBoostComplete = () => completeBoost(merchantId, invalidateAll, resetBoost);
+const goBack = () => {
+	clearBoostState();
+	boostLoading = false;
+	merchantDrawer.setView("details");
+};
 
-	function handleKeydown(event: KeyboardEvent) {
-		if (!isOpen) return;
+$: if (drawerView !== "boost" && $boost !== undefined) {
+	clearBoostState();
+	boostLoading = false;
+}
 
-		if (event.key === 'Escape') {
-			event.preventDefault();
-			if (drawerView !== 'details') {
-				goBack();
-			} else {
-				closeDrawer();
-			}
+const handleBoost = () => boostMerchant(merchant, merchantId, setBoostLoading);
+const handleBoostComplete = () =>
+	completeBoost(merchantId, invalidateAll, resetBoost);
+
+function handleKeydown(event: KeyboardEvent) {
+	if (!isOpen) return;
+
+	if (event.key === "Escape") {
+		event.preventDefault();
+		if (drawerView !== "details") {
+			goBack();
+		} else {
+			closeDrawer();
 		}
 	}
+}
 
-	onMount(() => {
-		window.addEventListener('keydown', handleKeydown);
-		return () => {
-			window.removeEventListener('keydown', handleKeydown);
-		};
-	});
+onMount(() => {
+	window.addEventListener("keydown", handleKeydown);
+	return () => {
+		window.removeEventListener("keydown", handleKeydown);
+	};
+});
 
-	$: if (drawerView === 'boost' && merchant) {
-		ensureBoostData(merchant, $boost);
-	}
+$: if (drawerView === "boost" && merchant) {
+	ensureBoostData(merchant, $boost);
+}
 
-	export function openDrawer(id: number) {
-		merchantDrawer.open(id, 'details');
-	}
+export function openDrawer(id: number) {
+	merchantDrawer.open(id, "details");
+}
 </script>
 
 {#if isOpen}

@@ -1,105 +1,112 @@
 <script lang="ts">
-	import {
-		CONFETTI_CANVAS_Z_INDEX,
-		POLLING_INTERVAL,
-		QR_CODE_SIZE,
-		PAYMENT_ERROR_MESSAGE,
-		BREAKPOINTS
-	} from '$lib/constants';
-	import { pollInvoiceStatus, isInvoicePaid } from '$lib/payment';
-	import { errToast } from '$lib/utils';
-	import JSConfetti from 'js-confetti';
-	import { tick, onDestroy } from 'svelte';
-	import { invalidateAll } from '$app/navigation';
+import JSConfetti from "js-confetti";
+import { onDestroy, tick } from "svelte";
 
-	export let invoice = '';
-	export let invoiceId = '';
-	export let onSuccess: () => void = () => {};
-	export let onError: (error: unknown) => void = () => {};
-	export let onStatusCheckError: (error: unknown) => void = () => {};
+import {
+	BREAKPOINTS,
+	CONFETTI_CANVAS_Z_INDEX,
+	PAYMENT_ERROR_MESSAGE,
+	POLLING_INTERVAL,
+	QR_CODE_SIZE,
+} from "$lib/constants";
+import { isInvoicePaid, pollInvoiceStatus } from "$lib/payment";
+import { errToast } from "$lib/utils";
 
-	let qr: HTMLCanvasElement;
-	let polling = false;
-	let pollInterval: ReturnType<typeof setInterval>;
+import { invalidateAll } from "$app/navigation";
 
-	const jsConfetti = new JSConfetti();
+export let invoice = "";
+export let invoiceId = "";
+export let onSuccess: () => void = () => {};
+export let onError: (error: unknown) => void = () => {};
+export let onStatusCheckError: (error: unknown) => void = () => {};
 
-	const generateQR = async () => {
-		await tick();
+let qr: HTMLCanvasElement;
+let polling = false;
+let pollInterval: ReturnType<typeof setInterval>;
 
-		try {
-			const QRCode = await import('qrcode');
-			QRCode.default.toCanvas(
-				qr,
-				invoice,
-				{ width: window.innerWidth > BREAKPOINTS.md ? QR_CODE_SIZE.desktop : QR_CODE_SIZE.mobile },
-				function (error: Error | null | undefined) {
-					if (error) {
-						errToast(PAYMENT_ERROR_MESSAGE);
-						console.error(error);
-						onError(error);
-					}
+const jsConfetti = new JSConfetti();
+
+const generateQR = async () => {
+	await tick();
+
+	try {
+		const QRCode = await import("qrcode");
+		QRCode.default.toCanvas(
+			qr,
+			invoice,
+			{
+				width:
+					window.innerWidth > BREAKPOINTS.md
+						? QR_CODE_SIZE.desktop
+						: QR_CODE_SIZE.mobile,
+			},
+			(error: Error | null | undefined) => {
+				if (error) {
+					errToast(PAYMENT_ERROR_MESSAGE);
+					console.error(error);
+					onError(error);
 				}
-			);
-		} catch (error) {
-			errToast('Could not load QR generator. Please try again.');
-			console.error('Failed to load QRCode module:', error);
-			onError(error);
-		}
-	};
+			},
+		);
+	} catch (error) {
+		errToast("Could not load QR generator. Please try again.");
+		console.error("Failed to load QRCode module:", error);
+		onError(error);
+	}
+};
 
-	const checkInvoiceStatus = async () => {
-		if (!invoiceId) return;
+const checkInvoiceStatus = async () => {
+	if (!invoiceId) return;
 
-		try {
-			const response = await pollInvoiceStatus(invoiceId);
-			if (isInvoicePaid(response.data.status)) {
-				polling = false;
-				clearInterval(pollInterval);
-				invalidateAll(); // Refresh UI immediately
-				jsConfetti.addConfetti();
-				onSuccess();
-			}
-		} catch (error) {
-			console.error('Error checking invoice status:', error);
-			onStatusCheckError(error);
-		}
-	};
-
-	const startPolling = () => {
-		polling = true;
-		pollInterval = setInterval(checkInvoiceStatus, POLLING_INTERVAL);
-	};
-
-	const stopPolling = () => {
-		if (pollInterval) {
-			clearInterval(pollInterval);
+	try {
+		const response = await pollInvoiceStatus(invoiceId);
+		if (isInvoicePaid(response.data.status)) {
 			polling = false;
+			clearInterval(pollInterval);
+			invalidateAll(); // Refresh UI immediately
+			jsConfetti.addConfetti();
+			onSuccess();
 		}
-	};
-
-	// Generate QR when invoice changes
-	$: if (invoice && qr) {
-		generateQR();
+	} catch (error) {
+		console.error("Error checking invoice status:", error);
+		onStatusCheckError(error);
 	}
+};
 
-	// Start polling when invoiceId is set
-	$: if (invoiceId && !polling) {
-		startPolling();
+const startPolling = () => {
+	polling = true;
+	pollInterval = setInterval(checkInvoiceStatus, POLLING_INTERVAL);
+};
+
+const stopPolling = () => {
+	if (pollInterval) {
+		clearInterval(pollInterval);
+		polling = false;
 	}
+};
 
-	// Set up confetti canvas z-index when QR canvas is ready
-	$: if (qr) {
-		const confettiCanvas = document.querySelector('canvas');
-		if (confettiCanvas) {
-			confettiCanvas.style.zIndex = CONFETTI_CANVAS_Z_INDEX;
-		}
+// Generate QR when invoice changes
+$: if (invoice && qr) {
+	generateQR();
+}
+
+// Start polling when invoiceId is set
+$: if (invoiceId && !polling) {
+	startPolling();
+}
+
+// Set up confetti canvas z-index when QR canvas is ready
+$: if (qr) {
+	const confettiCanvas = document.querySelector("canvas");
+	if (confettiCanvas) {
+		confettiCanvas.style.zIndex = CONFETTI_CANVAS_Z_INDEX;
 	}
+}
 
-	// Cleanup polling on component destroy
-	onDestroy(() => {
-		stopPolling();
-	});
+// Cleanup polling on component destroy
+onDestroy(() => {
+	stopPolling();
+});
 </script>
 
 <canvas

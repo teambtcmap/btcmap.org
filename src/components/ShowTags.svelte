@@ -1,10 +1,11 @@
 <script lang="ts">
-	import CloseButton from '$components/CloseButton.svelte';
-	import { showTags } from '$lib/store';
-	import OutClick from 'svelte-outclick';
-	import { fly } from 'svelte/transition';
+import { fly } from "svelte/transition";
+import OutClick from "svelte-outclick";
 
-	const closeModal = () => ($showTags = undefined);
+import CloseButton from "$components/CloseButton.svelte";
+import { showTags } from "$lib/store";
+
+const closeModal = () => ($showTags = undefined);
 </script>
 
 {#if $showTags}

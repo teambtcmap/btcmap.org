@@ -1,118 +1,122 @@
 <script lang="ts">
-	import Icon from '$components/Icon.svelte';
-	import IconSocials from '$lib/icons/IconSocials.svelte';
-	import PrimaryButton from '$components/PrimaryButton.svelte';
-	import { PAYMENT_ERROR_MESSAGE, STATUS_CHECK_ERROR_MESSAGE } from '$lib/constants';
-	import { boost, boostHash, lastUpdatedPlaceId } from '$lib/store';
-	import { updateSinglePlace } from '$lib/sync/places';
-	import { errToast, warningToast } from '$lib/utils';
-	import axios from 'axios';
-	import { fade } from 'svelte/transition';
-	import { onDestroy } from 'svelte';
-	import InvoicePaymentStage from '$components/InvoicePaymentStage.svelte';
+import axios from "axios";
+import { onDestroy } from "svelte";
+import { fade } from "svelte/transition";
 
-	export let merchantId: number | string;
-	export let merchantName: string | undefined = undefined;
-	export let onComplete: (() => void) | undefined = undefined;
+import Icon from "$components/Icon.svelte";
+import InvoicePaymentStage from "$components/InvoicePaymentStage.svelte";
+import PrimaryButton from "$components/PrimaryButton.svelte";
+import {
+	PAYMENT_ERROR_MESSAGE,
+	STATUS_CHECK_ERROR_MESSAGE,
+} from "$lib/constants";
+import IconSocials from "$lib/icons/IconSocials.svelte";
+import { boost, boostHash, lastUpdatedPlaceId } from "$lib/store";
+import { updateSinglePlace } from "$lib/sync/places";
+import { errToast, warningToast } from "$lib/utils";
 
-	let stage = 0;
+export let merchantId: number | string;
+export let merchantName: string | undefined = undefined;
+export let onComplete: (() => void) | undefined = undefined;
 
-	const values = [
-		{ sats: 5000, time: 1 },
-		{ sats: 10000, time: 3 },
-		{ sats: 30000, time: 12 }
-	];
+let stage = 0;
 
-	let tooltip = false;
-	let selectedBoost: { sats: number; time: number; expires: Date } | undefined;
-	let invoice = '';
-	let invoiceId = '';
-	let loading = false;
+const values = [
+	{ sats: 5000, time: 1 },
+	{ sats: 10000, time: 3 },
+	{ sats: 30000, time: 12 },
+];
 
-	onDestroy(() => {
-		stage = 0;
-		invoice = '';
-		invoiceId = '';
-		loading = false;
-		selectedBoost = undefined;
-		tooltip = false;
-	});
+let tooltip = false;
+let selectedBoost: { sats: number; time: number; expires: Date } | undefined;
+let invoice = "";
+let invoiceId = "";
+let loading = false;
 
-	const handlePaymentSuccess = async () => {
-		if ($boostHash === invoiceId) {
-			return;
+onDestroy(() => {
+	stage = 0;
+	invoice = "";
+	invoiceId = "";
+	loading = false;
+	selectedBoost = undefined;
+	tooltip = false;
+});
+
+const handlePaymentSuccess = async () => {
+	if ($boostHash === invoiceId) {
+		return;
+	}
+	$boostHash = invoiceId;
+
+	try {
+		const response = await axios.post("/api/boost/post", {
+			invoice_id: invoiceId,
+		});
+
+		stage = 2;
+		console.info(response);
+
+		if (merchantId) {
+			await updateSinglePlace(merchantId);
+			lastUpdatedPlaceId.set(Number(merchantId));
 		}
-		$boostHash = invoiceId;
 
-		try {
-			const response = await axios.post('/api/boost/post', {
-				invoice_id: invoiceId
-			});
-
-			stage = 2;
-			console.info(response);
-
-			if (merchantId) {
-				await updateSinglePlace(merchantId);
-				lastUpdatedPlaceId.set(Number(merchantId));
-			}
-
-			if (onComplete) {
-				onComplete();
-			}
-		} catch (error) {
-			warningToast('Could not finalize boost, please contact BTC Map.');
-			console.error(error);
+		if (onComplete) {
+			onComplete();
 		}
-	};
-
-	const handlePaymentError = (error: unknown) => {
-		console.error('Payment error:', error);
-	};
-
-	const handleStatusCheckError = (error: unknown) => {
-		errToast(STATUS_CHECK_ERROR_MESSAGE);
+	} catch (error) {
+		warningToast("Could not finalize boost, please contact BTC Map.");
 		console.error(error);
-	};
+	}
+};
 
-	const generateInvoice = () => {
-		loading = true;
+const handlePaymentError = (error: unknown) => {
+	console.error("Payment error:", error);
+};
 
-		const timeToDays: Record<number, number> = { 1: 30, 3: 90, 12: 365 };
-		const days = selectedBoost?.time
-			? timeToDays[selectedBoost.time] || selectedBoost.time
-			: undefined;
+const handleStatusCheckError = (error: unknown) => {
+	errToast(STATUS_CHECK_ERROR_MESSAGE);
+	console.error(error);
+};
 
-		if (!days || days <= 0) {
-			errToast('Invalid boost duration');
+const generateInvoice = () => {
+	loading = true;
+
+	const timeToDays: Record<number, number> = { 1: 30, 3: 90, 12: 365 };
+	const days = selectedBoost?.time
+		? timeToDays[selectedBoost.time] || selectedBoost.time
+		: undefined;
+
+	if (!days || days <= 0) {
+		errToast("Invalid boost duration");
+		loading = false;
+		return;
+	}
+
+	const placeId = Number(merchantId);
+	if (!placeId || Number.isNaN(placeId)) {
+		errToast("Invalid merchant ID");
+		loading = false;
+		return;
+	}
+
+	axios
+		.post("/api/boost/invoice/generate", {
+			place_id: placeId,
+			days: days,
+		})
+		.then((response) => {
+			invoice = response.data.invoice;
+			invoiceId = response.data.invoice_id;
+			stage = 1;
 			loading = false;
-			return;
-		}
-
-		const placeId = Number(merchantId);
-		if (!placeId || isNaN(placeId)) {
-			errToast('Invalid merchant ID');
+		})
+		.catch((error) => {
+			errToast(PAYMENT_ERROR_MESSAGE);
+			console.error(error);
 			loading = false;
-			return;
-		}
-
-		axios
-			.post('/api/boost/invoice/generate', {
-				place_id: placeId,
-				days: days
-			})
-			.then(function (response) {
-				invoice = response.data.invoice;
-				invoiceId = response.data.invoice_id;
-				stage = 1;
-				loading = false;
-			})
-			.catch(function (error) {
-				errToast(PAYMENT_ERROR_MESSAGE);
-				console.error(error);
-				loading = false;
-			});
-	};
+		});
+};
 </script>
 
 {#if stage === 0}

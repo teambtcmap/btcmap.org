@@ -1,11 +1,11 @@
 <script lang="ts">
-	export let value: string | undefined = undefined;
-	export let id: string | undefined = undefined;
-	export let name: string | undefined = undefined;
-	export let disabled: boolean = false;
-	export let required: boolean = false;
-	export let ariaLabel: string | undefined = undefined;
-	export let style: string = '';
+export let value: string | undefined = undefined;
+export let id: string | undefined = undefined;
+export let name: string | undefined = undefined;
+export let disabled: boolean = false;
+export let required: boolean = false;
+export let ariaLabel: string | undefined = undefined;
+export let style: string = "";
 </script>
 
 <select

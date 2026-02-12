@@ -1,38 +1,44 @@
 <script lang="ts">
-	import InfoTooltip from '$components/InfoTooltip.svelte';
-	import OpenTicket from '$components/OpenTicket.svelte';
-	import { GITEA_LABELS } from '$lib/constants';
-	import type { Tickets } from '$lib/types.js';
-	import { errToast } from '$lib/utils';
+import InfoTooltip from "$components/InfoTooltip.svelte";
+import OpenTicket from "$components/OpenTicket.svelte";
+import { GITEA_LABELS } from "$lib/constants";
+import type { GiteaIssue, GiteaLabel } from "$lib/types";
+import type { Tickets } from "$lib/types.js";
+import { errToast } from "$lib/utils";
 
-	import type { GiteaLabel, GiteaIssue } from '$lib/types';
+export let title: string;
+export let tickets: Tickets;
 
-	export let title: string;
-	export let tickets: Tickets;
+$: filteredTickets =
+	tickets === "error" || tickets === "maintenance" ? [] : tickets;
 
-	$: filteredTickets = tickets === 'error' || tickets === 'maintenance' ? [] : tickets;
+$: add = filteredTickets.filter((issue: GiteaIssue) =>
+	issue.labels.some(
+		(label: GiteaLabel) => label.id === GITEA_LABELS.DATA.ADD_LOCATION,
+	),
+);
+$: verify = filteredTickets.filter((issue: GiteaIssue) =>
+	issue.labels.some(
+		(label: GiteaLabel) => label.id === GITEA_LABELS.DATA.VERIFY_LOCATION,
+	),
+);
+$: community = filteredTickets.filter((issue: GiteaIssue) =>
+	issue.labels.some(
+		(label: GiteaLabel) => label.id === GITEA_LABELS.DATA.COMMUNITY_SUBMISSION,
+	),
+);
 
-	$: add = filteredTickets.filter((issue: GiteaIssue) =>
-		issue.labels.some((label: GiteaLabel) => label.id === GITEA_LABELS.DATA.ADD_LOCATION)
-	);
-	$: verify = filteredTickets.filter((issue: GiteaIssue) =>
-		issue.labels.some((label: GiteaLabel) => label.id === GITEA_LABELS.DATA.VERIFY_LOCATION)
-	);
-	$: community = filteredTickets.filter((issue: GiteaIssue) =>
-		issue.labels.some((label: GiteaLabel) => label.id === GITEA_LABELS.DATA.COMMUNITY_SUBMISSION)
-	);
+const ticketTypes = ["Add", "Verify", "Community"];
+let showType = "Add";
 
-	const ticketTypes = ['Add', 'Verify', 'Community'];
-	let showType = 'Add';
+$: ticketError = tickets === "error";
+$: ticketMaintenance = tickets === "maintenance";
 
-	$: ticketError = tickets === 'error';
-	$: ticketMaintenance = tickets === 'maintenance';
+$: if (ticketError) {
+	errToast("Could not load open tickets, please try again or contact BTC Map.");
+}
 
-	$: if (ticketError) {
-		errToast('Could not load open tickets, please try again or contact BTC Map.');
-	}
-
-	$: totalTickets = add.length + verify.length + community.length;
+$: totalTickets = add.length + verify.length + community.length;
 </script>
 
 <section id="tickets">

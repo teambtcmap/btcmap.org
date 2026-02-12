@@ -1,135 +1,144 @@
 <script lang="ts">
-	import type { ActivityEvent } from '$lib/types';
-	import { format } from 'date-fns/format';
-	import { resolve } from '$app/paths';
-	import LeaderboardSearch from '$components/leaderboard/LeaderboardSearch.svelte';
-	import LeaderboardPagination from '$components/leaderboard/LeaderboardPagination.svelte';
-	import {
-		createSvelteTable,
-		getCoreRowModel,
-		getFilteredRowModel,
-		getPaginationRowModel,
-		getSortedRowModel,
-		type ColumnDef,
-		type FilterFn,
-		type OnChangeFn,
-		type PaginationState,
-		type SortingState,
-		type TableOptions
-	} from '@tanstack/svelte-table';
-	import { rankItem } from '@tanstack/match-sorter-utils';
-	import { writable } from 'svelte/store';
-	import { debounce } from '$lib/utils';
+import { rankItem } from "@tanstack/match-sorter-utils";
+import {
+	type ColumnDef,
+	createSvelteTable,
+	type FilterFn,
+	getCoreRowModel,
+	getFilteredRowModel,
+	getPaginationRowModel,
+	getSortedRowModel,
+	type OnChangeFn,
+	type PaginationState,
+	type SortingState,
+	type TableOptions,
+} from "@tanstack/svelte-table";
+import { format } from "date-fns/format";
+import { writable } from "svelte/store";
 
-	export let eventElements: ActivityEvent[] = [];
-	export let username: string;
-	export let dataInitialized: boolean = false;
-	export let loadingNames: boolean = false;
-	export let onfetchNames: (data: { events: ActivityEvent[] }) => void = () => {};
+import LeaderboardPagination from "$components/leaderboard/LeaderboardPagination.svelte";
+import LeaderboardSearch from "$components/leaderboard/LeaderboardSearch.svelte";
+import type { ActivityEvent } from "$lib/types";
+import { debounce } from "$lib/utils";
 
-	const pageSizes = [10, 20, 30, 40, 50];
-	let globalFilter = '';
+import { resolve } from "$app/paths";
 
-	const fuzzyFilter: FilterFn<ActivityEvent> = (row, columnId, value, addMeta) => {
-		const itemRank = rankItem(row.getValue(columnId), value);
-		addMeta?.({ itemRank });
-		return itemRank.passed;
-	};
+export let eventElements: ActivityEvent[] = [];
+export let username: string;
+export let dataInitialized: boolean = false;
+export let loadingNames: boolean = false;
+export let onfetchNames: (data: { events: ActivityEvent[] }) => void = () => {};
 
-	const columns: ColumnDef<ActivityEvent>[] = [
-		{
-			id: 'location',
-			header: 'Location',
-			accessorFn: (row) => row.location,
-			enableSorting: false,
-			filterFn: fuzzyFilter,
-			enableGlobalFilter: true
-		},
-		{
-			id: 'type',
-			header: 'Action',
-			accessorFn: (row) => row.type,
-			enableSorting: true,
-			filterFn: fuzzyFilter,
-			enableGlobalFilter: true
-		},
-		{
-			id: 'created_at',
-			header: 'Date',
-			accessorFn: (row) => row.created_at,
-			enableSorting: true,
-			filterFn: fuzzyFilter,
-			enableGlobalFilter: true
-		}
-	];
+const pageSizes = [10, 20, 30, 40, 50];
+let globalFilter = "";
 
-	let sorting: SortingState = [{ id: 'created_at', desc: true }];
-	let pagination: PaginationState = {
-		pageIndex: 0,
-		pageSize: pageSizes[0]
-	};
+const fuzzyFilter: FilterFn<ActivityEvent> = (
+	row,
+	columnId,
+	value,
+	addMeta,
+) => {
+	const itemRank = rankItem(row.getValue(columnId), value);
+	addMeta?.({ itemRank });
+	return itemRank.passed;
+};
 
-	const setSorting: OnChangeFn<SortingState> = (updater) => {
-		sorting = updater instanceof Function ? updater(sorting) : updater;
-		options.update((old) => ({
-			...old,
-			state: {
-				...old.state,
-				sorting
-			}
-		}));
-	};
+const columns: ColumnDef<ActivityEvent>[] = [
+	{
+		id: "location",
+		header: "Location",
+		accessorFn: (row) => row.location,
+		enableSorting: false,
+		filterFn: fuzzyFilter,
+		enableGlobalFilter: true,
+	},
+	{
+		id: "type",
+		header: "Action",
+		accessorFn: (row) => row.type,
+		enableSorting: true,
+		filterFn: fuzzyFilter,
+		enableGlobalFilter: true,
+	},
+	{
+		id: "created_at",
+		header: "Date",
+		accessorFn: (row) => row.created_at,
+		enableSorting: true,
+		filterFn: fuzzyFilter,
+		enableGlobalFilter: true,
+	},
+];
 
-	const setPagination: OnChangeFn<PaginationState> = (updater) => {
-		pagination = updater instanceof Function ? updater(pagination) : updater;
-		options.update((old) => ({
-			...old,
-			state: {
-				...old.state,
-				pagination
-			}
-		}));
-	};
+let sorting: SortingState = [{ id: "created_at", desc: true }];
+let pagination: PaginationState = {
+	pageIndex: 0,
+	pageSize: pageSizes[0],
+};
 
-	const options = writable<TableOptions<ActivityEvent>>({
-		data: eventElements,
-		columns,
+const setSorting: OnChangeFn<SortingState> = (updater) => {
+	sorting = updater instanceof Function ? updater(sorting) : updater;
+	options.update((old) => ({
+		...old,
 		state: {
+			...old.state,
 			sorting,
-			pagination
 		},
-		onSortingChange: setSorting,
-		onPaginationChange: setPagination,
-		globalFilterFn: fuzzyFilter,
-		getCoreRowModel: getCoreRowModel(),
-		getSortedRowModel: getSortedRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
-		getFilteredRowModel: getFilteredRowModel()
-	});
-
-	const table = createSvelteTable(options);
-
-	$: options.update((current) => ({
-		...current,
-		data: eventElements
 	}));
+};
 
-	const fetchPageNames = (events: ActivityEvent[]) => {
-		if (loadingNames) return;
+const setPagination: OnChangeFn<PaginationState> = (updater) => {
+	pagination = updater instanceof Function ? updater(pagination) : updater;
+	options.update((old) => ({
+		...old,
+		state: {
+			...old.state,
+			pagination,
+		},
+	}));
+};
 
-		onfetchNames({ events });
-	};
+const options = writable<TableOptions<ActivityEvent>>({
+	data: eventElements,
+	columns,
+	state: {
+		sorting,
+		pagination,
+	},
+	onSortingChange: setSorting,
+	onPaginationChange: setPagination,
+	globalFilterFn: fuzzyFilter,
+	getCoreRowModel: getCoreRowModel(),
+	getSortedRowModel: getSortedRowModel(),
+	getPaginationRowModel: getPaginationRowModel(),
+	getFilteredRowModel: getFilteredRowModel(),
+});
 
-	$: if ($table.getRowModel().rows.length > 0 && dataInitialized) {
-		const currentPageEvents = $table.getRowModel().rows.map((row) => row.original);
-		fetchPageNames(currentPageEvents);
-	}
+const table = createSvelteTable(options);
 
-	const handleKeyUp = (e: KeyboardEvent) => {
-		$table?.setGlobalFilter(String((e.target as HTMLInputElement)?.value));
-	};
+$: options.update((current) => ({
+	...current,
+	data: eventElements,
+}));
 
-	const searchDebounce = debounce((e) => handleKeyUp(e));
+const fetchPageNames = (events: ActivityEvent[]) => {
+	if (loadingNames) return;
+
+	onfetchNames({ events });
+};
+
+$: if ($table.getRowModel().rows.length > 0 && dataInitialized) {
+	const currentPageEvents = $table
+		.getRowModel()
+		.rows.map((row) => row.original);
+	fetchPageNames(currentPageEvents);
+}
+
+const handleKeyUp = (e: KeyboardEvent) => {
+	$table?.setGlobalFilter(String((e.target as HTMLInputElement)?.value));
+};
+
+const searchDebounce = debounce((e) => handleKeyUp(e));
 </script>
 
 <div class="w-full rounded-3xl border border-gray-300 dark:border-white/95 dark:bg-white/10">

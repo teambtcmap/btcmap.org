@@ -1,23 +1,25 @@
 <script lang="ts">
-	import MerchantCard from '$components/area/MerchantCard.svelte';
-	import type { Place } from '$lib/types';
-	import { isBoosted } from '$lib/utils';
-	import { resolve } from '$app/paths';
+import MerchantCard from "$components/area/MerchantCard.svelte";
+import type { Place } from "$lib/types";
+import { isBoosted } from "$lib/utils";
 
-	export let dataInitialized: boolean;
-	export let filteredPlaces: Place[];
+import { resolve } from "$app/paths";
 
-	$: boosts =
-		filteredPlaces &&
-		filteredPlaces
-			.filter((p) => isBoosted(p))
-			.toSorted((a, b) => Date.parse(b.boosted_until || '') - Date.parse(a.boosted_until || ''));
+export let dataInitialized: boolean;
+export let filteredPlaces: Place[];
 
-	$: latest =
-		filteredPlaces &&
-		filteredPlaces
-			.toSorted((a, b) => Date.parse(b.created_at || '') - Date.parse(a.created_at || ''))
-			.slice(0, 6);
+$: boosts = filteredPlaces
+	?.filter((p) => isBoosted(p))
+	.toSorted(
+		(a, b) =>
+			Date.parse(b.boosted_until || "") - Date.parse(a.boosted_until || ""),
+	);
+
+$: latest = filteredPlaces
+	?.toSorted(
+		(a, b) => Date.parse(b.created_at || "") - Date.parse(a.created_at || ""),
+	)
+	.slice(0, 6);
 </script>
 
 <section id="boosted">

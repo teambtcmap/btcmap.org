@@ -1,11 +1,11 @@
 <script lang="ts">
-	import CopyButton from '$components/CopyButton.svelte';
-	import Icon from '$components/Icon.svelte';
-	import type { DonationType } from '$lib/types';
+import CopyButton from "$components/CopyButton.svelte";
+import Icon from "$components/Icon.svelte";
+import type { DonationType } from "$lib/types";
 
-	export let value: string;
-	export let text: DonationType;
-	export let showQrToggle: (type: DonationType) => void;
+export let value: string;
+export let text: DonationType;
+export let showQrToggle: (type: DonationType) => void;
 </script>
 
 <div>

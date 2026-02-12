@@ -1,4 +1,4 @@
-import type { GeoLocation } from '$lib/types';
+import type { GeoLocation } from "$lib/types";
 
 // See https://kit.svelte.dev/docs/types#app
 // for information about these interfaces
@@ -15,7 +15,7 @@ declare global {
 	interface Window {
 		requestIdleCallback(
 			callback: (deadline: IdleDeadline) => void,
-			options?: { timeout: number }
+			options?: { timeout: number },
 		): number;
 		cancelIdleCallback(handle: number): void;
 	}
@@ -25,5 +25,3 @@ declare global {
 		timeRemaining(): number;
 	}
 }
-
-export {};

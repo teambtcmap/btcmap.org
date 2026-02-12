@@ -1,16 +1,18 @@
 <script lang="ts">
-	import type { Table } from '@tanstack/svelte-table';
-	import type { TaggerLeaderboard } from '$lib/types';
-	import { resolve } from '$app/paths';
-	import { isEven } from '$lib/utils';
-	import Icon from '$components/Icon.svelte';
+import type { Table } from "@tanstack/svelte-table";
 
-	type TaggerRow = TaggerLeaderboard & {
-		position: number;
-		tipDestination?: string;
-	};
+import Icon from "$components/Icon.svelte";
+import type { TaggerLeaderboard } from "$lib/types";
+import { isEven } from "$lib/utils";
 
-	export let table: Table<TaggerRow>;
+import { resolve } from "$app/paths";
+
+type TaggerRow = TaggerLeaderboard & {
+	position: number;
+	tipDestination?: string;
+};
+
+export let table: Table<TaggerRow>;
 </script>
 
 <!-- Mobile cards -->

@@ -1,7 +1,8 @@
-import type { Leaflet, Place } from '$lib/types';
-import type { Marker } from 'leaflet';
-import { generateIcon, generateMarker } from '$lib/map/setup';
-import { attachMarkerLabelIfVisible } from '$lib/map/labels';
+import type { Marker } from "leaflet";
+
+import { attachMarkerLabelIfVisible } from "$lib/map/labels";
+import { generateIcon, generateMarker } from "$lib/map/setup";
+import type { Leaflet, Place } from "$lib/types";
 
 type CreateMarkerOptions = {
 	place: Place;
@@ -24,11 +25,13 @@ export const createMarkerWithLabel = ({
 	placeDetailsCache,
 	placesById,
 	onMarkerClick,
-	onLabelUpdate
+	onLabelUpdate,
 }: CreateMarkerOptions): { marker: Marker; boosted: boolean } => {
 	const commentsCount = place.comments || 0;
 	const icon = place.icon;
-	const boosted = place.boosted_until ? Date.parse(place.boosted_until) > Date.now() : false;
+	const boosted = place.boosted_until
+		? Date.parse(place.boosted_until) > Date.now()
+		: false;
 
 	const divIcon = generateIcon(leaflet, icon, boosted, commentsCount);
 
@@ -39,7 +42,7 @@ export const createMarkerWithLabel = ({
 		placeId: place.id,
 		leaflet,
 		verify: true,
-		onMarkerClick: (id) => onMarkerClick(Number(id))
+		onMarkerClick: (id) => onMarkerClick(Number(id)),
 	});
 
 	attachMarkerLabelIfVisible(
@@ -51,7 +54,7 @@ export const createMarkerWithLabel = ({
 		boosted,
 		leaflet,
 		place,
-		onLabelUpdate
+		onLabelUpdate,
 	);
 
 	return { marker, boosted };

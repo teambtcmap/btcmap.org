@@ -1,13 +1,14 @@
 <script lang="ts">
-	import CloseButton from '$components/CloseButton.svelte';
-	import Icon from '$components/Icon.svelte';
-	import IssueIcon from '$components/IssueIcon.svelte';
-	import { taggingIssues } from '$lib/store';
-	import { getIssueHelpLink, getIssueIcon } from '$lib/utils';
-	import OutClick from 'svelte-outclick';
-	import { fly } from 'svelte/transition';
+import { fly } from "svelte/transition";
+import OutClick from "svelte-outclick";
 
-	const closeModal = () => ($taggingIssues = undefined);
+import CloseButton from "$components/CloseButton.svelte";
+import Icon from "$components/Icon.svelte";
+import IssueIcon from "$components/IssueIcon.svelte";
+import { taggingIssues } from "$lib/store";
+import { getIssueHelpLink, getIssueIcon } from "$lib/utils";
+
+const closeModal = () => ($taggingIssues = undefined);
 </script>
 
 {#if $taggingIssues}

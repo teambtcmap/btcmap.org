@@ -1,45 +1,56 @@
 <script lang="ts">
-	const brandColors = ['#10B981', '#53C5D5', '#051173', '#0891B2', '#E4EBEC', '#164E63', '#155E75'];
+const brandColors = [
+	"#10B981",
+	"#53C5D5",
+	"#051173",
+	"#0891B2",
+	"#E4EBEC",
+	"#164E63",
+	"#155E75",
+];
 
-	const brand = [
-		{ link: '/images/hero-mobile-example.webp', name: 'App Screenshot' },
-		{ link: '/images/logo.svg', name: 'BTC Map Logo' },
-		{ link: '/images/supertagger.svg', name: 'Shadowy Supertagger' },
-		{ link: '/images/supertagger-king.svg', name: 'Shadowy Supertagger - Leader' }
-	];
+const brand = [
+	{ link: "/images/hero-mobile-example.webp", name: "App Screenshot" },
+	{ link: "/images/logo.svg", name: "BTC Map Logo" },
+	{ link: "/images/supertagger.svg", name: "Shadowy Supertagger" },
+	{
+		link: "/images/supertagger-king.svg",
+		name: "Shadowy Supertagger - Leader",
+	},
+];
 
-	const promotional = [
-		{ link: '/images/og/activity.png', name: 'Activity Feed' },
-		{ link: '/images/og/add-community.png', name: 'Add Community' },
-		{ link: '/images/og/add.png', name: 'Add Location' },
-		{ link: '/images/og/communities.png', name: 'Communities' },
-		{ link: '/images/og/countries.png', name: 'Countries' },
-		{ link: '/images/og/apps.png', name: 'Download Apps' },
-		{ link: '/images/og/badges.png', name: 'Earn Badges' },
-		{ link: '/images/og/home.png', name: 'Main' },
-		{ link: '/images/og/map.png', name: 'Map' },
-		{ link: '/images/og/merchant.png', name: 'Merchant' },
-		{ link: '/images/og/dash.png', name: 'Stats Dashboard' },
-		{ link: '/images/og/leader.png', name: 'Supertagger Leaderboard' },
-		{ link: '/images/og/supertagger.png', name: 'Supertagger Profile' },
-		{ link: '/images/og/support.png', name: 'Support Us' },
-		{ link: '/images/og/top-communities.png', name: 'Top Communities' },
-		{ link: '/images/og/top-countries.png', name: 'Top Countries' },
-		{ link: '/images/og/verify.png', name: 'Verify Locations' }
-	];
+const promotional = [
+	{ link: "/images/og/activity.png", name: "Activity Feed" },
+	{ link: "/images/og/add-community.png", name: "Add Community" },
+	{ link: "/images/og/add.png", name: "Add Location" },
+	{ link: "/images/og/communities.png", name: "Communities" },
+	{ link: "/images/og/countries.png", name: "Countries" },
+	{ link: "/images/og/apps.png", name: "Download Apps" },
+	{ link: "/images/og/badges.png", name: "Earn Badges" },
+	{ link: "/images/og/home.png", name: "Main" },
+	{ link: "/images/og/map.png", name: "Map" },
+	{ link: "/images/og/merchant.png", name: "Merchant" },
+	{ link: "/images/og/dash.png", name: "Stats Dashboard" },
+	{ link: "/images/og/leader.png", name: "Supertagger Leaderboard" },
+	{ link: "/images/og/supertagger.png", name: "Supertagger Profile" },
+	{ link: "/images/og/support.png", name: "Support Us" },
+	{ link: "/images/og/top-communities.png", name: "Top Communities" },
+	{ link: "/images/og/top-countries.png", name: "Top Countries" },
+	{ link: "/images/og/verify.png", name: "Verify Locations" },
+];
 
-	const team = [
-		{ link: '/images/team/igor.jpg', name: 'Igor' },
-		{ link: '/images/team/karnage.jpg', name: 'Karnage' },
-		{ link: '/images/team/nathan.jpg', name: 'Nathan Day' },
-		{ link: '/images/team/secondl1ght.jpg', name: 'secondl1ght' }
-	];
+const team = [
+	{ link: "/images/team/igor.jpg", name: "Igor" },
+	{ link: "/images/team/karnage.jpg", name: "Karnage" },
+	{ link: "/images/team/nathan.jpg", name: "Nathan Day" },
+	{ link: "/images/team/secondl1ght.jpg", name: "secondl1ght" },
+];
 
-	const assetSections = [
-		{ title: 'Brand', data: brand },
-		{ title: 'Promotional', data: promotional },
-		{ title: 'Team', data: team }
-	];
+const assetSections = [
+	{ title: "Brand", data: brand },
+	{ title: "Promotional", data: promotional },
+	{ title: "Team", data: team },
+];
 </script>
 
 <svelte:head>

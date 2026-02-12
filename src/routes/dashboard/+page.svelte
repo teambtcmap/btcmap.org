@@ -1,251 +1,283 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import DashboardStat from './components/DashboardStat.svelte';
-	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-	import { theme } from '$lib/theme';
-	import type { ChartHistory } from '$lib/types';
-	import { updateChartThemes } from '$lib/utils';
-	import Chart from 'chart.js/auto';
-	import { format } from 'date-fns/format';
-	import { startOfYear } from 'date-fns/startOfYear';
-	import { subDays } from 'date-fns/subDays';
-	import { subMonths } from 'date-fns/subMonths';
-	import { subYears } from 'date-fns/subYears';
-	import { onDestroy, onMount } from 'svelte';
+import Chart from "chart.js/auto";
+import { format } from "date-fns/format";
+import { startOfYear } from "date-fns/startOfYear";
+import { subDays } from "date-fns/subDays";
+import { subMonths } from "date-fns/subMonths";
+import { subYears } from "date-fns/subYears";
+import { onDestroy, onMount } from "svelte";
 
-	export let data;
+import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import { theme } from "$lib/theme";
+import type { ChartHistory } from "$lib/types";
+import { updateChartThemes } from "$lib/utils";
 
-	let areaDashboard = data.areaDashboard;
+import DashboardStat from "./components/DashboardStat.svelte";
+import { browser } from "$app/environment";
 
-	const chartHistory: ChartHistory[] = ['7D', '1M', '3M', '6M', 'YTD', '1Y', 'ALL'];
-	let chartHistorySelected: ChartHistory = '3M';
+export let data;
 
-	let totalChartCanvas: HTMLCanvasElement;
-	let totalChart: Chart<'line', number[], string>;
+let areaDashboard = data.areaDashboard;
 
-	let upToDateChartCanvas: HTMLCanvasElement;
-	let upToDateChart: Chart<'line', number[], string>;
+const chartHistory: ChartHistory[] = [
+	"7D",
+	"1M",
+	"3M",
+	"6M",
+	"YTD",
+	"1Y",
+	"ALL",
+];
+let chartHistorySelected: ChartHistory = "3M";
 
-	let chartsInitialized = false;
+let totalChartCanvas: HTMLCanvasElement;
+let totalChart: Chart<"line", number[], string>;
 
-	const populateCharts = () => {
-		// Guard: ensure canvas elements are available (SSR or before mount)
-		if (!upToDateChartCanvas || !totalChartCanvas) {
-			return;
-		}
+let upToDateChartCanvas: HTMLCanvasElement;
+let upToDateChart: Chart<"line", number[], string>;
 
-		// Prevent multiple initializations
-		if (chartsInitialized) {
-			return;
-		}
-		chartsInitialized = true;
+let chartsInitialized = false;
 
-		const currentTheme = theme.current;
+const populateCharts = () => {
+	// Guard: ensure canvas elements are available (SSR or before mount)
+	if (!upToDateChartCanvas || !totalChartCanvas) {
+		return;
+	}
+
+	// Prevent multiple initializations
+	if (chartsInitialized) {
+		return;
+	}
+	chartsInitialized = true;
+
+	const currentTheme = theme.current;
+	const cutoffDate = getChartHistoryDate();
+
+	const filterData = (data: ChartDataItem[] = []) =>
+		data.filter((item) => new Date(item.date) >= cutoffDate);
+
+	// Use Chart.getChart to find and destroy existing chart instances
+	const existingUpToDateChart = Chart.getChart(upToDateChartCanvas);
+	if (existingUpToDateChart) {
+		existingUpToDateChart.destroy();
+	}
+
+	const existingTotalChart = Chart.getChart(totalChartCanvas);
+	if (existingTotalChart) {
+		existingTotalChart.destroy();
+	}
+
+	upToDateChart = new Chart(upToDateChartCanvas, {
+		type: "line",
+		data: {
+			labels: filterData(areaDashboard?.verified_merchants_1y_chart || []).map(
+				(item) => format(new Date(item.date), "yyyy-MM-dd"),
+			),
+			datasets: [
+				{
+					label: "Recently Verified Merchants",
+					data: filterData(
+						areaDashboard?.verified_merchants_1y_chart || [],
+					).map((item) => item.value),
+					fill: {
+						target: "origin",
+						above: "rgba(11, 144, 114, 0.2)",
+					},
+					borderColor: "rgb(11, 144, 114)",
+					tension: 0.1,
+					pointStyle: false,
+				},
+			],
+		},
+		options: {
+			animation: false,
+			maintainAspectRatio: false,
+			plugins: {
+				legend: {
+					labels: {
+						font: {
+							weight: 600,
+						},
+					},
+				},
+			},
+			scales: {
+				x: {
+					ticks: {
+						maxTicksLimit: 5,
+						font: {
+							weight: 600,
+						},
+					},
+					grid: {
+						color:
+							currentTheme === "dark"
+								? "rgba(255, 255, 255, 0.15)"
+								: "rgba(0, 0, 0, 0.1)",
+					},
+				},
+				y: {
+					ticks: {
+						font: {
+							weight: 600,
+						},
+					},
+					grid: {
+						color:
+							currentTheme === "dark"
+								? "rgba(255, 255, 255, 0.15)"
+								: "rgba(0, 0, 0, 0.1)",
+					},
+				},
+			},
+			interaction: {
+				intersect: false,
+			},
+		},
+	});
+
+	totalChart = new Chart(totalChartCanvas, {
+		type: "line",
+		data: {
+			labels: filterData(areaDashboard?.total_merchants_chart || []).map(
+				(item) => format(new Date(item.date), "yyyy-MM-dd"),
+			),
+			datasets: [
+				{
+					label: "Total Merchants",
+					data: filterData(areaDashboard?.total_merchants_chart || []).map(
+						(item) => item.value,
+					),
+					fill: {
+						target: "origin",
+						above: "rgba(0, 153, 175, 0.2)",
+					},
+					borderColor: "rgb(0, 153, 175)",
+					tension: 0.1,
+					pointStyle: false,
+				},
+			],
+		},
+		options: {
+			animation: false,
+			maintainAspectRatio: false,
+			plugins: {
+				legend: {
+					labels: {
+						font: {
+							weight: 600,
+						},
+					},
+				},
+			},
+			scales: {
+				x: {
+					ticks: {
+						maxTicksLimit: 5,
+						font: {
+							weight: 600,
+						},
+					},
+					grid: {
+						color:
+							currentTheme === "dark"
+								? "rgba(255, 255, 255, 0.15)"
+								: "rgba(0, 0, 0, 0.1)",
+					},
+				},
+				y: {
+					ticks: {
+						font: {
+							weight: 600,
+						},
+					},
+					grid: {
+						color:
+							currentTheme === "dark"
+								? "rgba(255, 255, 255, 0.15)"
+								: "rgba(0, 0, 0, 0.1)",
+					},
+				},
+			},
+			interaction: {
+				intersect: false,
+			},
+		},
+	});
+};
+
+$: $theme !== undefined && updateChartThemes([upToDateChart, totalChart]);
+
+onMount(async () => {
+	if (browser) {
+		populateCharts();
+	}
+});
+
+onDestroy(() => {
+	if (upToDateChart) {
+		upToDateChart.destroy();
+	}
+	if (totalChart) {
+		totalChart.destroy();
+	}
+});
+
+interface ChartDataItem {
+	date: string;
+	value: number;
+}
+
+const getChartHistoryDate = () => {
+	const today = new Date();
+	switch (chartHistorySelected) {
+		case "7D":
+			return subDays(today, 7);
+		case "1M":
+			return subMonths(today, 1);
+		case "3M":
+			return subMonths(today, 3);
+		case "6M":
+			return subMonths(today, 6);
+		case "YTD":
+			return startOfYear(today);
+		case "1Y":
+			return subYears(today, 1);
+		case "ALL":
+			return new Date(0);
+	}
+};
+
+$: {
+	if (chartHistorySelected && upToDateChart && totalChart) {
 		const cutoffDate = getChartHistoryDate();
 
 		const filterData = (data: ChartDataItem[] = []) =>
 			data.filter((item) => new Date(item.date) >= cutoffDate);
 
-		// Use Chart.getChart to find and destroy existing chart instances
-		const existingUpToDateChart = Chart.getChart(upToDateChartCanvas);
-		if (existingUpToDateChart) {
-			existingUpToDateChart.destroy();
-		}
+		const updateChart = (
+			chart: Chart<"line", number[], string>,
+			data: ChartDataItem[],
+		) => {
+			const filtered = filterData(data);
+			chart.data.labels = filtered.map((item) =>
+				format(new Date(item.date), "yyyy-MM-dd"),
+			);
+			chart.data.datasets[0].data = filtered.map((item) => item.value);
+			chart.update();
+		};
 
-		const existingTotalChart = Chart.getChart(totalChartCanvas);
-		if (existingTotalChart) {
-			existingTotalChart.destroy();
-		}
-
-		upToDateChart = new Chart(upToDateChartCanvas, {
-			type: 'line',
-			data: {
-				labels: filterData(areaDashboard?.verified_merchants_1y_chart || []).map((item) =>
-					format(new Date(item.date), 'yyyy-MM-dd')
-				),
-				datasets: [
-					{
-						label: 'Recently Verified Merchants',
-						data: filterData(areaDashboard?.verified_merchants_1y_chart || []).map(
-							(item) => item.value
-						),
-						fill: {
-							target: 'origin',
-							above: 'rgba(11, 144, 114, 0.2)'
-						},
-						borderColor: 'rgb(11, 144, 114)',
-						tension: 0.1,
-						pointStyle: false
-					}
-				]
-			},
-			options: {
-				animation: false,
-				maintainAspectRatio: false,
-				plugins: {
-					legend: {
-						labels: {
-							font: {
-								weight: 600
-							}
-						}
-					}
-				},
-				scales: {
-					x: {
-						ticks: {
-							maxTicksLimit: 5,
-							font: {
-								weight: 600
-							}
-						},
-						grid: {
-							color: currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
-						}
-					},
-					y: {
-						ticks: {
-							font: {
-								weight: 600
-							}
-						},
-						grid: {
-							color: currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
-						}
-					}
-				},
-				interaction: {
-					intersect: false
-				}
-			}
-		});
-
-		totalChart = new Chart(totalChartCanvas, {
-			type: 'line',
-			data: {
-				labels: filterData(areaDashboard?.total_merchants_chart || []).map((item) =>
-					format(new Date(item.date), 'yyyy-MM-dd')
-				),
-				datasets: [
-					{
-						label: 'Total Merchants',
-						data: filterData(areaDashboard?.total_merchants_chart || []).map((item) => item.value),
-						fill: {
-							target: 'origin',
-							above: 'rgba(0, 153, 175, 0.2)'
-						},
-						borderColor: 'rgb(0, 153, 175)',
-						tension: 0.1,
-						pointStyle: false
-					}
-				]
-			},
-			options: {
-				animation: false,
-				maintainAspectRatio: false,
-				plugins: {
-					legend: {
-						labels: {
-							font: {
-								weight: 600
-							}
-						}
-					}
-				},
-				scales: {
-					x: {
-						ticks: {
-							maxTicksLimit: 5,
-							font: {
-								weight: 600
-							}
-						},
-						grid: {
-							color: currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
-						}
-					},
-					y: {
-						ticks: {
-							font: {
-								weight: 600
-							}
-						},
-						grid: {
-							color: currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'
-						}
-					}
-				},
-				interaction: {
-					intersect: false
-				}
-			}
-		});
-	};
-
-	$: $theme !== undefined && updateChartThemes([upToDateChart, totalChart]);
-
-	onMount(async () => {
-		if (browser) {
-			populateCharts();
-		}
-	});
-
-	onDestroy(() => {
-		if (upToDateChart) {
-			upToDateChart.destroy();
-		}
-		if (totalChart) {
-			totalChart.destroy();
-		}
-	});
-
-	interface ChartDataItem {
-		date: string;
-		value: number;
+		updateChart(
+			upToDateChart,
+			areaDashboard?.verified_merchants_1y_chart || [],
+		);
+		updateChart(totalChart, areaDashboard?.total_merchants_chart || []);
 	}
+}
 
-	const getChartHistoryDate = () => {
-		const today = new Date();
-		switch (chartHistorySelected) {
-			case '7D':
-				return subDays(today, 7);
-			case '1M':
-				return subMonths(today, 1);
-			case '3M':
-				return subMonths(today, 3);
-			case '6M':
-				return subMonths(today, 6);
-			case 'YTD':
-				return startOfYear(today);
-			case '1Y':
-				return subYears(today, 1);
-			case 'ALL':
-				return new Date(0);
-		}
-	};
-
-	$: {
-		if (chartHistorySelected && upToDateChart && totalChart) {
-			const cutoffDate = getChartHistoryDate();
-
-			const filterData = (data: ChartDataItem[] = []) =>
-				data.filter((item) => new Date(item.date) >= cutoffDate);
-
-			const updateChart = (chart: Chart<'line', number[], string>, data: ChartDataItem[]) => {
-				const filtered = filterData(data);
-				chart.data.labels = filtered.map((item) => format(new Date(item.date), 'yyyy-MM-dd'));
-				chart.data.datasets[0].data = filtered.map((item) => item.value);
-				chart.update();
-			};
-
-			updateChart(upToDateChart, areaDashboard?.verified_merchants_1y_chart || []);
-			updateChart(totalChart, areaDashboard?.total_merchants_chart || []);
-		}
-	}
-
-	$: {
-		areaDashboard = data.areaDashboard;
-	}
+$: {
+	areaDashboard = data.areaDashboard;
+}
 </script>
 
 <svelte:head>

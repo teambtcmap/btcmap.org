@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { socials } from '$lib/store';
+import { socials } from "$lib/store";
 </script>
 
 <svelte:head>

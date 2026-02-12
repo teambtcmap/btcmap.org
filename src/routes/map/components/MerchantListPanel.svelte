@@ -1,276 +1,292 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { tick, onDestroy } from 'svelte';
-	import type { MerchantListMode } from '$lib/merchantListStore';
-	import { merchantList } from '$lib/merchantListStore';
-	import { merchantDrawer } from '$lib/merchantDrawerStore';
-	import MerchantListItem from './MerchantListItem.svelte';
-	import LoadingSpinner from '$components/LoadingSpinner.svelte';
-	import Icon from '$components/Icon.svelte';
-	import SearchInput from '$components/SearchInput.svelte';
-	import type { Place } from '$lib/types';
-	import {
-		CATEGORY_ENTRIES,
-		placeMatchesCategory,
-		type CategoryKey,
-		type CategoryCounts
-	} from '$lib/categoryMapping';
-	import { MERCHANT_LIST_MIN_ZOOM, MERCHANT_LIST_LOW_ZOOM, BREAKPOINTS } from '$lib/constants';
-	import { calcVerifiedDate } from '$lib/merchantDrawerLogic';
-	import { trackEvent } from '$lib/analytics';
-	import { formatNearbyCount } from '$lib/utils';
-	import { _ } from '$lib/i18n';
+import { onDestroy, tick } from "svelte";
 
-	// Compute once for all list items
-	const verifiedDate = calcVerifiedDate();
+import Icon from "$components/Icon.svelte";
+import LoadingSpinner from "$components/LoadingSpinner.svelte";
+import SearchInput from "$components/SearchInput.svelte";
+import { trackEvent } from "$lib/analytics";
+import {
+	CATEGORY_ENTRIES,
+	type CategoryCounts,
+	type CategoryKey,
+	placeMatchesCategory,
+} from "$lib/categoryMapping";
+import {
+	BREAKPOINTS,
+	MERCHANT_LIST_LOW_ZOOM,
+	MERCHANT_LIST_MIN_ZOOM,
+} from "$lib/constants";
+import { _ } from "$lib/i18n";
+import { calcVerifiedDate } from "$lib/merchantDrawerLogic";
+import { merchantDrawer } from "$lib/merchantDrawerStore";
+import type { MerchantListMode } from "$lib/merchantListStore";
+import { merchantList } from "$lib/merchantListStore";
+import type { Place } from "$lib/types";
+import { formatNearbyCount } from "$lib/utils";
 
-	// Get translated category label
-	function getCategoryLabel(key: CategoryKey): string {
-		const labelMap: Record<CategoryKey, string> = {
-			all: $_('categories.all'),
-			restaurants: $_('categories.restaurants'),
-			shopping: $_('categories.shopping'),
-			groceries: $_('categories.groceries'),
-			coffee: $_('categories.coffee'),
-			atms: $_('categories.atms'),
-			hotels: $_('categories.hotels'),
-			beauty: $_('categories.beauty')
-		};
-		return labelMap[key];
+import MerchantListItem from "./MerchantListItem.svelte";
+import { browser } from "$app/environment";
+
+// Compute once for all list items
+const verifiedDate = calcVerifiedDate();
+
+// Get translated category label
+function getCategoryLabel(key: CategoryKey): string {
+	const labelMap: Record<CategoryKey, string> = {
+		all: $_("categories.all"),
+		restaurants: $_("categories.restaurants"),
+		shopping: $_("categories.shopping"),
+		groceries: $_("categories.groceries"),
+		coffee: $_("categories.coffee"),
+		atms: $_("categories.atms"),
+		hotels: $_("categories.hotels"),
+		beauty: $_("categories.beauty"),
+	};
+	return labelMap[key];
+}
+
+// Callback to pan to a nearby merchant (already zoomed in, just center it)
+export let onPanToNearbyMerchant: ((place: Place) => void) | undefined =
+	undefined;
+// Callback to zoom to a search result (may be far away, need to fly there)
+export let onZoomToSearchResult: ((place: Place) => void) | undefined =
+	undefined;
+// Callbacks for hover highlighting
+export let onHoverStart: ((place: Place) => void) | undefined = undefined;
+export let onHoverEnd: ((place: Place) => void) | undefined = undefined;
+// Current zoom level to determine if we should show "zoom in" message
+export let currentZoom: number = 0;
+// Search callback - called when user types in search input
+export let onSearch: ((query: string) => void) | undefined = undefined;
+// Mode change callback (called for nearby mode switch)
+export let onModeChange: ((mode: MerchantListMode) => void) | undefined =
+	undefined;
+// Refresh callback for category filtering
+export let onRefresh: (() => void) | undefined = undefined;
+// Callback to fit map bounds to all search results
+export let onFitSearchResultBounds: (() => void) | undefined = undefined;
+
+// Reference for search input component
+let searchInputComponent: SearchInput;
+
+// Local filter for nearby mode (client-side filtering by name)
+let nearbyFilter = "";
+
+// Body scroll lock for mobile (prevents iOS background scroll)
+let scrollLockActive = false;
+
+// Reference for focus trap
+let panelElement: HTMLElement;
+
+// Unified input handler - behaves differently based on mode
+function handleUnifiedInput(e: Event) {
+	const value = (e.target as HTMLInputElement).value;
+	if (mode === "search") {
+		merchantList.setSearchQuery(value);
+		onSearch?.($merchantList.searchQuery);
+	} else {
+		nearbyFilter = value;
 	}
+}
 
-	// Callback to pan to a nearby merchant (already zoomed in, just center it)
-	export let onPanToNearbyMerchant: ((place: Place) => void) | undefined = undefined;
-	// Callback to zoom to a search result (may be far away, need to fly there)
-	export let onZoomToSearchResult: ((place: Place) => void) | undefined = undefined;
-	// Callbacks for hover highlighting
-	export let onHoverStart: ((place: Place) => void) | undefined = undefined;
-	export let onHoverEnd: ((place: Place) => void) | undefined = undefined;
-	// Current zoom level to determine if we should show "zoom in" message
-	export let currentZoom: number = 0;
-	// Search callback - called when user types in search input
-	export let onSearch: ((query: string) => void) | undefined = undefined;
-	// Mode change callback (called for nearby mode switch)
-	export let onModeChange: ((mode: MerchantListMode) => void) | undefined = undefined;
-	// Refresh callback for category filtering
-	export let onRefresh: (() => void) | undefined = undefined;
-	// Callback to fit map bounds to all search results
-	export let onFitSearchResultBounds: (() => void) | undefined = undefined;
-
-	// Reference for search input component
-	let searchInputComponent: SearchInput;
-
-	// Local filter for nearby mode (client-side filtering by name)
-	let nearbyFilter = '';
-
-	// Body scroll lock for mobile (prevents iOS background scroll)
-	let scrollLockActive = false;
-
-	// Reference for focus trap
-	let panelElement: HTMLElement;
-
-	// Unified input handler - behaves differently based on mode
-	function handleUnifiedInput(e: Event) {
-		const value = (e.target as HTMLInputElement).value;
-		if (mode === 'search') {
-			merchantList.setSearchQuery(value);
-			onSearch?.($merchantList.searchQuery);
+// Unified keydown handler
+function handleUnifiedKeyDown(event: KeyboardEvent) {
+	if (event.key === "Escape") {
+		event.preventDefault();
+		event.stopPropagation();
+		if (mode === "search" && searchQuery) {
+			handleClearInput();
+		} else if (mode === "nearby" && nearbyFilter) {
+			handleClearInput();
 		} else {
-			nearbyFilter = value;
-		}
-	}
-
-	// Unified keydown handler
-	function handleUnifiedKeyDown(event: KeyboardEvent) {
-		if (event.key === 'Escape') {
-			event.preventDefault();
-			event.stopPropagation();
-			if (mode === 'search' && searchQuery) {
-				handleClearInput();
-			} else if (mode === 'nearby' && nearbyFilter) {
-				handleClearInput();
-			} else {
-				handleClose();
-			}
-		} else if (event.key === 'Enter' && mode === 'nearby' && nearbyFilter.length >= 3) {
-			// Switch to worldwide search on Enter in nearby mode
-			trackEvent('search_query');
-			merchantList.setSearchQuery(nearbyFilter);
-			merchantList.setMode('search');
-			onSearch?.(nearbyFilter);
-			nearbyFilter = '';
-		}
-	}
-
-	// Clear the current input (works for both modes)
-	function handleClearInput() {
-		if (mode === 'search') {
-			merchantList.clearSearchInput();
-			onSearch?.('');
-		} else {
-			nearbyFilter = '';
-		}
-		searchInputComponent?.focus();
-	}
-
-	function handleModeSwitch(newMode: MerchantListMode) {
-		if (newMode === mode) return;
-		// Clear both filters when switching modes
-		nearbyFilter = '';
-		if (newMode === 'nearby') {
-			trackEvent('nearby_mode_click', { source: 'panel' });
-			merchantList.exitSearchMode();
-			onModeChange?.(newMode);
-		} else {
-			trackEvent('worldwide_mode_click', { source: 'panel' });
-			merchantList.setMode(newMode);
-			// Focus search input when switching to worldwide
-			tick().then(() => searchInputComponent?.focus());
-		}
-	}
-
-	function handleCategorySelect(category: CategoryKey) {
-		// Guard against clicks on disabled buttons (Svelte fires click even when disabled)
-		if (!hasMatchingMerchants(category, categoryCounts)) return;
-		trackEvent('category_filter', { category, mode });
-		merchantList.setSelectedCategory(category);
-		// Only refresh in nearby mode - search mode filters client-side
-		if (mode === 'nearby') {
-			onRefresh?.();
-		}
-	}
-
-	$: isOpen = $merchantList.isOpen;
-	$: merchants = $merchantList.merchants;
-	$: totalCount = $merchantList.totalCount;
-	$: placeDetailsCache = $merchantList.placeDetailsCache;
-	$: isLoadingList = $merchantList.isLoadingList;
-	$: selectedId = $merchantDrawer.merchantId;
-	$: mode = $merchantList.mode;
-	$: searchResults = $merchantList.searchResults;
-	$: isSearching = $merchantList.isSearching;
-	$: searchQuery = $merchantList.searchQuery;
-	$: selectedCategory = $merchantList.selectedCategory;
-	$: categoryCounts = $merchantList.categoryCounts;
-
-	// Filter search results by category
-	$: filteredSearchResults =
-		selectedCategory === 'all'
-			? searchResults
-			: searchResults.filter((p) => placeMatchesCategory(p, selectedCategory));
-
-	// Helper function to check if a category has matching merchants
-	// Note: counts param required for Svelte reactivity (indirect deps aren't tracked)
-	function hasMatchingMerchants(categoryKey: CategoryKey, counts: CategoryCounts): boolean {
-		if (categoryKey === 'all') return true;
-		return (counts?.[categoryKey] ?? 0) > 0;
-	}
-
-	// Helper function to get category button classes
-	// Note: categoryCounts param required for Svelte reactivity (indirect deps aren't tracked)
-	function getCategoryButtonClass(
-		key: CategoryKey,
-		selectedCategory: CategoryKey,
-		counts: CategoryCounts
-	): string {
-		if (selectedCategory === key) return 'bg-primary text-white';
-		const hasMatches = key === 'all' || (counts?.[key] ?? 0) > 0;
-		if (hasMatches) {
-			return 'bg-gray-100 text-body hover:bg-gray-200 dark:bg-white/5 dark:text-white/70 dark:hover:bg-white/10';
-		}
-		return 'cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-white/30';
-	}
-
-	// Show "zoom in" message when:
-	// 1. Below zoom 11 (always - no data fetched at this level)
-	// 2. Between zoom 11-14 with no merchants (too many results in dense area)
-	$: showZoomInMessage =
-		currentZoom < MERCHANT_LIST_LOW_ZOOM ||
-		(currentZoom < MERCHANT_LIST_MIN_ZOOM && merchants.length === 0);
-	$: isTruncated = totalCount > merchants.length;
-
-	// Body scroll lock on mobile when panel is open
-	$: if (browser && isOpen !== undefined) {
-		const isMobile = window.innerWidth < BREAKPOINTS.md;
-		const shouldLock = isOpen && isMobile;
-		if (shouldLock && !scrollLockActive) {
-			document.body.style.overflow = 'hidden';
-			scrollLockActive = true;
-		} else if (!shouldLock && scrollLockActive) {
-			document.body.style.overflow = '';
-			scrollLockActive = false;
-		}
-	}
-
-	// Focus search input when panel opens (always, since we now have unified search)
-	$: if (browser && isOpen && searchInputComponent) {
-		tick().then(() => searchInputComponent?.focus());
-	}
-
-	function handleItemClick(place: Place) {
-		trackEvent('merchant_list_item_click', { mode });
-		merchantDrawer.open(place.id, 'details');
-
-		if (mode === 'search') {
-			// Search result: zoom to location (may be far from current view)
-			onZoomToSearchResult?.(place);
-		} else {
-			// Nearby merchant: pan only (already zoomed in)
-			onPanToNearbyMerchant?.(place);
-		}
-
-		// On mobile, close panel so drawer is visible (panel is fullscreen)
-		// On desktop, keep panel open (list and drawer coexist side by side)
-		if (browser && window.innerWidth < BREAKPOINTS.md) {
-			merchantList.close();
-		}
-	}
-
-	function handleMouseEnter(place: Place) {
-		onHoverStart?.(place);
-	}
-
-	function handleMouseLeave(place: Place) {
-		onHoverEnd?.(place);
-	}
-
-	function handleClose() {
-		nearbyFilter = ''; // Clear filter when closing
-		merchantList.close();
-	}
-
-	function handleWindowKeydown(event: KeyboardEvent) {
-		if (!isOpen) return;
-
-		// Focus trap: cycle Tab within the panel to prevent focus escaping to background
-		if (event.key === 'Tab' && panelElement) {
-			const focusable = panelElement.querySelectorAll<HTMLElement>(
-				'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-			);
-			const first = focusable[0];
-			const last = focusable[focusable.length - 1];
-
-			if (event.shiftKey && document.activeElement === first) {
-				event.preventDefault();
-				last?.focus();
-			} else if (!event.shiftKey && document.activeElement === last) {
-				event.preventDefault();
-				first?.focus();
-			}
-		}
-
-		if (event.key === 'Escape') {
-			event.preventDefault();
 			handleClose();
 		}
+	} else if (
+		event.key === "Enter" &&
+		mode === "nearby" &&
+		nearbyFilter.length >= 3
+	) {
+		// Switch to worldwide search on Enter in nearby mode
+		trackEvent("search_query");
+		merchantList.setSearchQuery(nearbyFilter);
+		merchantList.setMode("search");
+		onSearch?.(nearbyFilter);
+		nearbyFilter = "";
+	}
+}
+
+// Clear the current input (works for both modes)
+function handleClearInput() {
+	if (mode === "search") {
+		merchantList.clearSearchInput();
+		onSearch?.("");
+	} else {
+		nearbyFilter = "";
+	}
+	searchInputComponent?.focus();
+}
+
+function handleModeSwitch(newMode: MerchantListMode) {
+	if (newMode === mode) return;
+	// Clear both filters when switching modes
+	nearbyFilter = "";
+	if (newMode === "nearby") {
+		trackEvent("nearby_mode_click", { source: "panel" });
+		merchantList.exitSearchMode();
+		onModeChange?.(newMode);
+	} else {
+		trackEvent("worldwide_mode_click", { source: "panel" });
+		merchantList.setMode(newMode);
+		// Focus search input when switching to worldwide
+		tick().then(() => searchInputComponent?.focus());
+	}
+}
+
+function handleCategorySelect(category: CategoryKey) {
+	// Guard against clicks on disabled buttons (Svelte fires click even when disabled)
+	if (!hasMatchingMerchants(category, categoryCounts)) return;
+	trackEvent("category_filter", { category, mode });
+	merchantList.setSelectedCategory(category);
+	// Only refresh in nearby mode - search mode filters client-side
+	if (mode === "nearby") {
+		onRefresh?.();
+	}
+}
+
+$: isOpen = $merchantList.isOpen;
+$: merchants = $merchantList.merchants;
+$: totalCount = $merchantList.totalCount;
+$: placeDetailsCache = $merchantList.placeDetailsCache;
+$: isLoadingList = $merchantList.isLoadingList;
+$: selectedId = $merchantDrawer.merchantId;
+$: mode = $merchantList.mode;
+$: searchResults = $merchantList.searchResults;
+$: isSearching = $merchantList.isSearching;
+$: searchQuery = $merchantList.searchQuery;
+$: selectedCategory = $merchantList.selectedCategory;
+$: categoryCounts = $merchantList.categoryCounts;
+
+// Filter search results by category
+$: filteredSearchResults =
+	selectedCategory === "all"
+		? searchResults
+		: searchResults.filter((p) => placeMatchesCategory(p, selectedCategory));
+
+// Helper function to check if a category has matching merchants
+// Note: counts param required for Svelte reactivity (indirect deps aren't tracked)
+function hasMatchingMerchants(
+	categoryKey: CategoryKey,
+	counts: CategoryCounts,
+): boolean {
+	if (categoryKey === "all") return true;
+	return (counts?.[categoryKey] ?? 0) > 0;
+}
+
+// Helper function to get category button classes
+// Note: categoryCounts param required for Svelte reactivity (indirect deps aren't tracked)
+function getCategoryButtonClass(
+	key: CategoryKey,
+	selectedCategory: CategoryKey,
+	counts: CategoryCounts,
+): string {
+	if (selectedCategory === key) return "bg-primary text-white";
+	const hasMatches = key === "all" || (counts?.[key] ?? 0) > 0;
+	if (hasMatches) {
+		return "bg-gray-100 text-body hover:bg-gray-200 dark:bg-white/5 dark:text-white/70 dark:hover:bg-white/10";
+	}
+	return "cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-white/30";
+}
+
+// Show "zoom in" message when:
+// 1. Below zoom 11 (always - no data fetched at this level)
+// 2. Between zoom 11-14 with no merchants (too many results in dense area)
+$: showZoomInMessage =
+	currentZoom < MERCHANT_LIST_LOW_ZOOM ||
+	(currentZoom < MERCHANT_LIST_MIN_ZOOM && merchants.length === 0);
+$: isTruncated = totalCount > merchants.length;
+
+// Body scroll lock on mobile when panel is open
+$: if (browser && isOpen !== undefined) {
+	const isMobile = window.innerWidth < BREAKPOINTS.md;
+	const shouldLock = isOpen && isMobile;
+	if (shouldLock && !scrollLockActive) {
+		document.body.style.overflow = "hidden";
+		scrollLockActive = true;
+	} else if (!shouldLock && scrollLockActive) {
+		document.body.style.overflow = "";
+		scrollLockActive = false;
+	}
+}
+
+// Focus search input when panel opens (always, since we now have unified search)
+$: if (browser && isOpen && searchInputComponent) {
+	tick().then(() => searchInputComponent?.focus());
+}
+
+function handleItemClick(place: Place) {
+	trackEvent("merchant_list_item_click", { mode });
+	merchantDrawer.open(place.id, "details");
+
+	if (mode === "search") {
+		// Search result: zoom to location (may be far from current view)
+		onZoomToSearchResult?.(place);
+	} else {
+		// Nearby merchant: pan only (already zoomed in)
+		onPanToNearbyMerchant?.(place);
 	}
 
-	// Cleanup scroll lock when component is destroyed
-	onDestroy(() => {
-		if (browser && scrollLockActive) {
-			document.body.style.overflow = '';
+	// On mobile, close panel so drawer is visible (panel is fullscreen)
+	// On desktop, keep panel open (list and drawer coexist side by side)
+	if (browser && window.innerWidth < BREAKPOINTS.md) {
+		merchantList.close();
+	}
+}
+
+function handleMouseEnter(place: Place) {
+	onHoverStart?.(place);
+}
+
+function handleMouseLeave(place: Place) {
+	onHoverEnd?.(place);
+}
+
+function handleClose() {
+	nearbyFilter = ""; // Clear filter when closing
+	merchantList.close();
+}
+
+function handleWindowKeydown(event: KeyboardEvent) {
+	if (!isOpen) return;
+
+	// Focus trap: cycle Tab within the panel to prevent focus escaping to background
+	if (event.key === "Tab" && panelElement) {
+		const focusable = panelElement.querySelectorAll<HTMLElement>(
+			'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+		);
+		const first = focusable[0];
+		const last = focusable[focusable.length - 1];
+
+		if (event.shiftKey && document.activeElement === first) {
+			event.preventDefault();
+			last?.focus();
+		} else if (!event.shiftKey && document.activeElement === last) {
+			event.preventDefault();
+			first?.focus();
 		}
-	});
+	}
+
+	if (event.key === "Escape") {
+		event.preventDefault();
+		handleClose();
+	}
+}
+
+// Cleanup scroll lock when component is destroyed
+onDestroy(() => {
+	if (browser && scrollLockActive) {
+		document.body.style.overflow = "";
+	}
+});
 </script>
 
 <svelte:window on:keydown={handleWindowKeydown} />

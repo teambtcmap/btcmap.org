@@ -1,8 +1,8 @@
 <script lang="ts">
-	import IssueIcon from '$components/IssueIcon.svelte';
+import IssueIcon from "$components/IssueIcon.svelte";
 
-	export let id: 'icon' | 'name' | 'type' | 'viewLink' | 'editLink' | 'helpLink';
-	export let value: string;
+export let id: "icon" | "name" | "type" | "viewLink" | "editLink" | "helpLink";
+export let value: string;
 </script>
 
 {#if id === 'icon'}

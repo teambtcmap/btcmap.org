@@ -1,8 +1,9 @@
-import type { Marker, TooltipOptions } from 'leaflet';
-import type { Leaflet, Place } from '$lib/types';
-import type { LoadedMarkers } from '$lib/map/markers';
-import { LABEL_VISIBLE_ZOOM } from '$lib/constants';
-import { escapeHtml } from '$lib/utils';
+import type { Marker, TooltipOptions } from "leaflet";
+
+import { LABEL_VISIBLE_ZOOM } from "$lib/constants";
+import type { LoadedMarkers } from "$lib/map/markers";
+import type { Leaflet, Place } from "$lib/types";
+import { escapeHtml } from "$lib/utils";
 
 /**
  * Marker label management for the map
@@ -14,15 +15,15 @@ import { escapeHtml } from '$lib/utils';
  */
 export function getMarkerLabelTooltipOptions(
 	leaflet: Leaflet,
-	boosted: boolean = false
+	boosted: boolean = false,
 ): TooltipOptions {
 	return {
 		permanent: true,
-		direction: 'right',
-		className: boosted ? 'marker-label marker-label-boosted' : 'marker-label',
+		direction: "right",
+		className: boosted ? "marker-label marker-label-boosted" : "marker-label",
 		// Position label to the right of marker (17px) and above center (-25px)
 		// to avoid overlapping with the marker icon tip
-		offset: leaflet.point(17, -25)
+		offset: leaflet.point(17, -25),
 	};
 }
 
@@ -30,7 +31,9 @@ export function getMarkerLabelTooltipOptions(
  * Check if a place is currently boosted
  */
 export function isPlaceBoosted(place?: Place | null): boolean {
-	return place?.boosted_until ? Date.parse(place.boosted_until) > Date.now() : false;
+	return place?.boosted_until
+		? Date.parse(place.boosted_until) > Date.now()
+		: false;
 }
 
 /**
@@ -41,12 +44,12 @@ export function bindMarkerLabelTooltip(
 	marker: Marker,
 	labelText: string,
 	boosted: boolean,
-	leaflet: Leaflet
+	leaflet: Leaflet,
 ): void {
 	const tooltip = marker.getTooltip();
 	if (tooltip) {
 		const options = getMarkerLabelTooltipOptions(leaflet, boosted);
-		const currentClass = tooltip.options.className || '';
+		const currentClass = tooltip.options.className || "";
 		const needsClassUpdate = currentClass !== options.className;
 		const needsContentUpdate = tooltip.getContent() !== labelText;
 
@@ -79,21 +82,21 @@ export function getLabelText(
 	placeId: number,
 	placeDetailsCache: Map<number, Place>,
 	placesById: Map<number, Place>,
-	fallbackPlace?: Place
+	fallbackPlace?: Place,
 ): string | null {
 	const sources: Array<Place | undefined> = [
 		placeDetailsCache.get(placeId),
 		fallbackPlace,
-		placesById.get(placeId)
+		placesById.get(placeId),
 	];
 
 	for (const source of sources) {
 		if (!source) continue;
 		// Handle empty string as intentional "no name" to prevent fallback
-		if (source.name === '') return null;
+		if (source.name === "") return null;
 		// Escape HTML to prevent XSS (Leaflet tooltips treat strings as HTML)
 		if (source.name) return escapeHtml(source.name);
-		if (source['osm:amenity']) return escapeHtml(source['osm:amenity']);
+		if (source["osm:amenity"]) return escapeHtml(source["osm:amenity"]);
 	}
 
 	return null;
@@ -111,11 +114,16 @@ export function attachMarkerLabelIfVisible(
 	boosted: boolean,
 	leaflet: Leaflet,
 	fallbackPlace?: Place,
-	signalUpdate?: () => void
+	signalUpdate?: () => void,
 ): boolean {
 	if (currentZoom < LABEL_VISIBLE_ZOOM) return false;
 
-	const labelText = getLabelText(placeId, placeDetailsCache, placesById, fallbackPlace);
+	const labelText = getLabelText(
+		placeId,
+		placeDetailsCache,
+		placesById,
+		fallbackPlace,
+	);
 	if (labelText) {
 		bindMarkerLabelTooltip(marker, labelText, boosted, leaflet);
 		if (signalUpdate) {
@@ -135,7 +143,7 @@ export function updateMarkerLabels(
 	placeDetailsCache: Map<number, Place>,
 	placesById: Map<number, Place>,
 	boostedLayerMarkerIds: Set<string>,
-	leaflet: Leaflet
+	leaflet: Leaflet,
 ): void {
 	if (currentZoom < LABEL_VISIBLE_ZOOM) {
 		// Remove all tooltips when zoomed out
@@ -151,7 +159,8 @@ export function updateMarkerLabels(
 	Object.entries(loadedMarkers).forEach(([placeId, marker]) => {
 		const placeIdNum = Number(placeId);
 		const sourcePlace = placesById.get(placeIdNum);
-		const boosted = isPlaceBoosted(sourcePlace) || boostedLayerMarkerIds.has(placeId);
+		const boosted =
+			isPlaceBoosted(sourcePlace) || boostedLayerMarkerIds.has(placeId);
 
 		const attached = attachMarkerLabelIfVisible(
 			marker,
@@ -161,7 +170,7 @@ export function updateMarkerLabels(
 			placesById,
 			boosted,
 			leaflet,
-			sourcePlace
+			sourcePlace,
 		);
 
 		// Clean up stale tooltips if label text is no longer available
@@ -182,7 +191,11 @@ export class LabelUpdateTracker {
 	private labelVersion: number = 0;
 	private lastLabelVersion: number = 0;
 
-	constructor(initialZoom: number, initialCacheSize: number, initialEnrichingState: boolean) {
+	constructor(
+		initialZoom: number,
+		initialCacheSize: number,
+		initialEnrichingState: boolean,
+	) {
 		this.lastLabelZoomState = initialZoom >= LABEL_VISIBLE_ZOOM;
 		this.lastCacheRevision = initialCacheSize;
 		this.lastEnrichingState = initialEnrichingState;
@@ -203,14 +216,15 @@ export class LabelUpdateTracker {
 		labelsVisible: boolean,
 		currentCacheSize: number,
 		isEnriching: boolean,
-		updateCallback: () => void
+		updateCallback: () => void,
 	): boolean {
 		const zoomStateChanged = labelsVisible !== this.lastLabelZoomState;
 		const cacheChanged = currentCacheSize !== this.lastCacheRevision;
 		const enrichmentCompleted = this.lastEnrichingState && !isEnriching;
 		const versionChanged = this.labelVersion !== this.lastLabelVersion;
 
-		const shouldUpdate = zoomStateChanged || cacheChanged || enrichmentCompleted || versionChanged;
+		const shouldUpdate =
+			zoomStateChanged || cacheChanged || enrichmentCompleted || versionChanged;
 
 		if (shouldUpdate) {
 			updateCallback();

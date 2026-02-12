@@ -1,63 +1,79 @@
-import type { AppIconName } from '$lib/icons/types';
-import type { Area, Boost, Event, Issue, OSMTags, Place, Report, User } from '$lib/types';
-import type { Writable } from 'svelte/store';
-import { derived, readable, writable } from 'svelte/store';
+import type { Writable } from "svelte/store";
+import { derived, readable, writable } from "svelte/store";
+
+import type { AppIconName } from "$lib/icons/types";
+import type {
+	Area,
+	Boost,
+	Event,
+	Issue,
+	OSMTags,
+	Place,
+	Report,
+	User,
+} from "$lib/types";
 
 export const socials = readable({
-	x: 'https://x.com/btcmap',
-	nostr: 'https://nosta.me/nprofile1qqsra2ey033mkdwl5w8q0jss9ak69zafh82xsuvhwsaauw3trkq2amgax6f75',
-	matrix: 'https://matrix.to/#/#btcmap:matrix.org',
-	github: 'https://github.com/teambtcmap',
-	amboss: 'https://amboss.space/community/edf8d227-9bc7-4cb2-af2a-66c1b455109a'
+	x: "https://x.com/btcmap",
+	nostr:
+		"https://nosta.me/nprofile1qqsra2ey033mkdwl5w8q0jss9ak69zafh82xsuvhwsaauw3trkq2amgax6f75",
+	matrix: "https://matrix.to/#/#btcmap:matrix.org",
+	github: "https://github.com/teambtcmap",
+	amboss: "https://amboss.space/community/edf8d227-9bc7-4cb2-af2a-66c1b455109a",
 });
 
-export const apps = readable<{ link: string; type: string; icon: AppIconName; desc: string }[]>([
+export const apps = readable<
+	{ link: string; type: string; icon: AppIconName; desc: string }[]
+>([
 	{
-		link: '/map',
-		type: 'Web',
-		icon: 'web',
-		desc: 'Progressive Web App'
+		link: "/map",
+		type: "Web",
+		icon: "web",
+		desc: "Progressive Web App",
 	},
 	{
-		link: 'https://f-droid.org/en/packages/org.btcmap/',
-		type: 'F-Droid',
-		icon: 'f-droid',
-		desc: 'FOSS App Store'
+		link: "https://f-droid.org/en/packages/org.btcmap/",
+		type: "F-Droid",
+		icon: "f-droid",
+		desc: "FOSS App Store",
 	},
 	{
-		link: 'https://github.com/teambtcmap/btcmap-android/releases/latest',
-		type: 'APK',
-		icon: 'android',
-		desc: 'Direct Download'
+		link: "https://github.com/teambtcmap/btcmap-android/releases/latest",
+		type: "APK",
+		icon: "android",
+		desc: "Direct Download",
 	},
 	{
-		link: 'https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666',
-		type: 'iOS',
-		icon: 'ios',
-		desc: 'Walled Garden Option'
-	}
+		link: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
+		type: "iOS",
+		icon: "ios",
+		desc: "Walled Garden Option",
+	},
 ]);
 
 export const places: Writable<Place[]> = writable([]);
-export const placesById = derived(places, ($places) => new Map($places.map((p) => [p.id, p])));
-export const placesError = writable('');
+export const placesById = derived(
+	places,
+	($places) => new Map($places.map((p) => [p.id, p])),
+);
+export const placesError = writable("");
 export const placesSyncCount = writable(0);
 
 // Progress tracking for places sync
-export const placesLoadingStatus = writable<string>(''); // e.g. "Downloading places...", "Processing data..."
+export const placesLoadingStatus = writable<string>(""); // e.g. "Downloading places...", "Processing data..."
 export const placesLoadingProgress = writable<number>(0); // 0-100 percentage
 
 export const users: Writable<User[]> = writable([]);
-export const userError = writable('');
+export const userError = writable("");
 
 export const events: Writable<Event[]> = writable([]);
-export const eventError = writable('');
+export const eventError = writable("");
 
 export const areas: Writable<Area[]> = writable([]);
-export const areaError = writable('');
+export const areaError = writable("");
 
 export const reports: Writable<Report[]> = writable([]);
-export const reportError = writable('');
+export const reportError = writable("");
 
 export const syncStatus: Writable<boolean> = writable();
 
@@ -66,13 +82,13 @@ export const mapUpdates = writable(false);
 export const selectedMerchant: Writable<Place | null> = writable(null);
 
 const excludedTaggers = [
-	{ id: 9451067, note: 'b-jaz bot' },
-	{ id: 18545877, note: 'BTC Map account' },
-	{ id: 232801, note: 'CENTSOARER' },
-	{ id: 19880430, note: 'Qerko bot' },
-	{ id: 1778799, note: 'SomeoneElse_Revert - DWG' },
-	{ id: 21749653, note: 'Kinso - Steak&Shake Revert' },
-	{ id: 242345, note: 'confusedbuffalo bot' }
+	{ id: 9451067, note: "b-jaz bot" },
+	{ id: 18545877, note: "BTC Map account" },
+	{ id: 232801, note: "CENTSOARER" },
+	{ id: 19880430, note: "Qerko bot" },
+	{ id: 1778799, note: "SomeoneElse_Revert - DWG" },
+	{ id: 21749653, note: "Kinso - Steak&Shake Revert" },
+	{ id: 242345, note: "confusedbuffalo bot" },
 ];
 
 export const excludeLeader = readable(excludedTaggers.map(({ id }) => id));

@@ -1,30 +1,32 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
-	import CloseButton from '$components/CloseButton.svelte';
-	import { boost, resetBoost, lastUpdatedPlaceId } from '$lib/store';
-	import OutClick from 'svelte-outclick';
-	import { fly } from 'svelte/transition';
-	import BoostContent from '$components/BoostContent.svelte';
+import { fly } from "svelte/transition";
+import OutClick from "svelte-outclick";
 
-	let boostComplete = false;
+import BoostContent from "$components/BoostContent.svelte";
+import CloseButton from "$components/CloseButton.svelte";
+import { boost, lastUpdatedPlaceId, resetBoost } from "$lib/store";
 
-	const closeModal = () => {
-		if (boostComplete) {
-			invalidateAll();
-		}
-		$boost = undefined;
-		$resetBoost = $resetBoost + 1;
-		$lastUpdatedPlaceId = undefined;
-		boostComplete = false;
-	};
+import { invalidateAll } from "$app/navigation";
 
-	const handleOutClick = () => {
-		// Never close the boost modal on outside clicks to prevent accidental loss of progress
-	};
+let boostComplete = false;
 
-	const handleBoostComplete = () => {
-		boostComplete = true;
-	};
+const closeModal = () => {
+	if (boostComplete) {
+		invalidateAll();
+	}
+	$boost = undefined;
+	$resetBoost = $resetBoost + 1;
+	$lastUpdatedPlaceId = undefined;
+	boostComplete = false;
+};
+
+const handleOutClick = () => {
+	// Never close the boost modal on outside clicks to prevent accidental loss of progress
+};
+
+const handleBoostComplete = () => {
+	boostComplete = true;
+};
 </script>
 
 {#if $boost}

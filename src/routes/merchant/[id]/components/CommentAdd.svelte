@@ -1,90 +1,92 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
-	import CloseButton from '$components/CloseButton.svelte';
-	import Icon from '$components/Icon.svelte';
-	import InvoicePaymentStage from '$components/InvoicePaymentStage.svelte';
-	import PrimaryButton from '$components/PrimaryButton.svelte';
-	import { PAYMENT_ERROR_MESSAGE } from '$lib/constants';
-	import { lastUpdatedPlaceId } from '$lib/store';
-	import { updateSinglePlace } from '$lib/sync/places';
-	import { errToast } from '$lib/utils';
-	import axios from 'axios';
-	import OutClick from 'svelte-outclick';
-	import { fly } from 'svelte/transition';
-	import type { MerchantPageData } from '$lib/types.js';
+import axios from "axios";
+import { fly } from "svelte/transition";
+import OutClick from "svelte-outclick";
 
-	export let open: boolean = false;
-	export let onOpenChange: (value: boolean) => void = () => {};
-	export let elementId: MerchantPageData['id'] | undefined;
+import CloseButton from "$components/CloseButton.svelte";
+import Icon from "$components/Icon.svelte";
+import InvoicePaymentStage from "$components/InvoicePaymentStage.svelte";
+import PrimaryButton from "$components/PrimaryButton.svelte";
+import { PAYMENT_ERROR_MESSAGE } from "$lib/constants";
+import { lastUpdatedPlaceId } from "$lib/store";
+import { updateSinglePlace } from "$lib/sync/places";
+import type { MerchantPageData } from "$lib/types.js";
+import { errToast } from "$lib/utils";
 
-	let stage = 0;
-	let commentValue: string = '';
-	let invoice = '';
-	let invoiceId = '';
-	let loading = false;
-	let commentComplete = false;
-	const closeModal = () => {
-		if (commentComplete) {
-			invalidateAll();
-		}
-		onOpenChange(false);
-		stage = 0;
-		invoice = '';
-		invoiceId = '';
-		loading = false;
-		commentComplete = false;
-		$lastUpdatedPlaceId = undefined;
-	};
+import { invalidateAll } from "$app/navigation";
 
-	const handleOutClick = () => {
-		// Never close the modal on outside clicks to prevent accidental loss of progress
-	};
-	const generateInvoice = (event: SubmitEvent) => {
-		event.preventDefault();
-		if (!elementId || !commentValue.trim()) {
-			errToast('Please enter a comment');
-			return;
-		}
+export let open: boolean = false;
+export let onOpenChange: (value: boolean) => void = () => {};
+export let elementId: MerchantPageData["id"] | undefined;
 
-		loading = true;
-		axios
-			.post('/comment/invoice/generate', {
-				place_id: elementId,
-				comment: commentValue.trim()
-			})
-			.then(function (response) {
-				invoice = response.data.invoice;
-				invoiceId = response.data.invoice_id;
-				stage = 1;
-				loading = false;
-			})
-			.catch(function (error) {
-				errToast(PAYMENT_ERROR_MESSAGE);
-				console.error(error);
-				loading = false;
-			});
-	};
+let stage = 0;
+let commentValue: string = "";
+let invoice = "";
+let invoiceId = "";
+let loading = false;
+let commentComplete = false;
+const closeModal = () => {
+	if (commentComplete) {
+		invalidateAll();
+	}
+	onOpenChange(false);
+	stage = 0;
+	invoice = "";
+	invoiceId = "";
+	loading = false;
+	commentComplete = false;
+	$lastUpdatedPlaceId = undefined;
+};
 
-	const handlePaymentSuccess = async () => {
-		// Comment will be published automatically by the backend
-		stage = 2;
-		commentComplete = true;
+const handleOutClick = () => {
+	// Never close the modal on outside clicks to prevent accidental loss of progress
+};
+const generateInvoice = (event: SubmitEvent) => {
+	event.preventDefault();
+	if (!elementId || !commentValue.trim()) {
+		errToast("Please enter a comment");
+		return;
+	}
 
-		// Update the place in localforage and store immediately
-		if (elementId) {
-			await updateSinglePlace(elementId);
-			// Signal map to update marker icon
-			lastUpdatedPlaceId.set(Number(elementId));
-		}
-	};
+	loading = true;
+	axios
+		.post("/comment/invoice/generate", {
+			place_id: elementId,
+			comment: commentValue.trim(),
+		})
+		.then((response) => {
+			invoice = response.data.invoice;
+			invoiceId = response.data.invoice_id;
+			stage = 1;
+			loading = false;
+		})
+		.catch((error) => {
+			errToast(PAYMENT_ERROR_MESSAGE);
+			console.error(error);
+			loading = false;
+		});
+};
 
-	const handlePaymentError = (error: unknown) => {
-		console.error('Payment error:', error);
-	};
+const handlePaymentSuccess = async () => {
+	// Comment will be published automatically by the backend
+	stage = 2;
+	commentComplete = true;
 
-	const handleStatusCheckError = (error: unknown) => {
-		console.error('Status check error:', error);
-	};
+	// Update the place in localforage and store immediately
+	if (elementId) {
+		await updateSinglePlace(elementId);
+		// Signal map to update marker icon
+		lastUpdatedPlaceId.set(Number(elementId));
+	}
+};
+
+const handlePaymentError = (error: unknown) => {
+	console.error("Payment error:", error);
+};
+
+const handleStatusCheckError = (error: unknown) => {
+	console.error("Status check error:", error);
+};
 </script>
 
 {#if open}

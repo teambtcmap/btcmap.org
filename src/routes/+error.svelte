@@ -1,14 +1,16 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import Icon from '$components/Icon.svelte';
-	import { onMount } from 'svelte';
-	import { resolve } from '$app/paths';
+import { onMount } from "svelte";
 
-	onMount(() => {
-		if ($page.status === 500 && !navigator.onLine) {
-			location.reload();
-		}
-	});
+import Icon from "$components/Icon.svelte";
+
+import { resolve } from "$app/paths";
+import { page } from "$app/stores";
+
+onMount(() => {
+	if ($page.status === 500 && !navigator.onLine) {
+		location.reload();
+	}
+});
 </script>
 
 <svelte:head>

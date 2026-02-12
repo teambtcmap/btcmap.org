@@ -1,26 +1,27 @@
 <script lang="ts">
-	export let progress: number | undefined;
-	export let status: string | undefined = undefined;
+export let progress: number | undefined;
+export let status: string | undefined = undefined;
 
-	import { fade } from 'svelte/transition';
-	import { _ } from '$lib/i18n';
+import { fade } from "svelte/transition";
 
-	let shouldHide = false;
+import { _ } from "$lib/i18n";
 
-	// Watch for 100% completion to hide
-	$: if (progress === 100) {
-		shouldHide = true;
-	}
+let shouldHide = false;
 
-	// Reset shouldHide when progress is actively loading (> 0 and < 100)
-	$: if (progress !== undefined && progress > 0 && progress < 100) {
-		shouldHide = false;
-	}
+// Watch for 100% completion to hide
+$: if (progress === 100) {
+	shouldHide = true;
+}
 
-	// Show loading indicator only when actively loading (progress > 0) and not hidden
-	// Also create a typed variable for use in template
-	$: shouldShow = progress !== undefined && progress > 0 && !shouldHide;
-	$: displayProgress = progress ?? 0; // Provide fallback for template usage
+// Reset shouldHide when progress is actively loading (> 0 and < 100)
+$: if (progress !== undefined && progress > 0 && progress < 100) {
+	shouldHide = false;
+}
+
+// Show loading indicator only when actively loading (progress > 0) and not hidden
+// Also create a typed variable for use in template
+$: shouldShow = progress !== undefined && progress > 0 && !shouldHide;
+$: displayProgress = progress ?? 0; // Provide fallback for template usage
 </script>
 
 {#if shouldShow}

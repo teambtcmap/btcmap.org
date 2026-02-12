@@ -1,205 +1,213 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { GradeTable } from '$lib/constants';
-	import AreaMerchantDrawer from '$components/area/AreaMerchantDrawer.svelte';
-	import Icon from '$components/Icon.svelte';
-	import MapLoadingEmbed from '$components/MapLoadingEmbed.svelte';
-	import ShowTags from '$components/ShowTags.svelte';
-	import TaggingIssues from '$components/TaggingIssues.svelte';
-	import { loadMapDependencies } from '$lib/map/imports';
-	import {
-		attribution,
-		changeDefaultIcons,
-		generateIcon,
-		generateMarker,
-		geolocate,
-		layers
-	} from '$lib/map/setup';
-	import { theme } from '$lib/theme';
-	import type { BaseMaps, DomEventType, Grade, Leaflet, Place } from '$lib/types';
-	import { getGrade } from '$lib/utils';
-	import type { GeoJSON } from 'geojson';
-	import type { Map } from 'leaflet';
-	import { onDestroy, onMount } from 'svelte';
-	import tippy from 'tippy.js';
+import type { GeoJSON } from "geojson";
+import type { Map } from "leaflet";
+import { onDestroy, onMount } from "svelte";
+import tippy from "tippy.js";
 
-	export let name: string;
-	export let geoJSON: GeoJSON;
-	export let filteredPlaces: Place[];
+import AreaMerchantDrawer from "$components/area/AreaMerchantDrawer.svelte";
+import Icon from "$components/Icon.svelte";
+import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
+import ShowTags from "$components/ShowTags.svelte";
+import TaggingIssues from "$components/TaggingIssues.svelte";
+import { GradeTable } from "$lib/constants";
+import { loadMapDependencies } from "$lib/map/imports";
+import {
+	attribution,
+	changeDefaultIcons,
+	generateIcon,
+	generateMarker,
+	geolocate,
+	layers,
+} from "$lib/map/setup";
+import { theme } from "$lib/theme";
+import type { BaseMaps, DomEventType, Grade, Leaflet, Place } from "$lib/types";
+import { getGrade } from "$lib/utils";
 
-	// Local drawer state
-	let selectedMerchantId: number | null = null;
+import { browser } from "$app/environment";
 
-	const openDrawer = (id: number) => {
-		selectedMerchantId = id;
-	};
+export let name: string;
+export let geoJSON: GeoJSON;
+export let filteredPlaces: Place[];
 
-	const closeDrawer = () => {
-		selectedMerchantId = null;
-	};
+// Local drawer state
+let selectedMerchantId: number | null = null;
 
-	let total: number | undefined;
-	let upToDate: number | undefined;
-	let upToDatePercent: string | undefined;
+const openDrawer = (id: number) => {
+	selectedMerchantId = id;
+};
 
-	let grade: Grade;
+const closeDrawer = () => {
+	selectedMerchantId = null;
+};
 
-	let gradeTooltip: HTMLButtonElement;
+let total: number | undefined;
+let upToDate: number | undefined;
+let upToDatePercent: string | undefined;
 
-	$: gradeTooltip &&
-		tippy([gradeTooltip], {
-			content: GradeTable,
-			allowHTML: true
+let grade: Grade;
+
+let gradeTooltip: HTMLButtonElement;
+
+$: gradeTooltip &&
+	tippy([gradeTooltip], {
+		content: GradeTable,
+		allowHTML: true,
+	});
+
+let mapElement: HTMLDivElement;
+let map: Map;
+let mapLoaded = false;
+
+let baseMaps: BaseMaps;
+
+let leaflet: Leaflet;
+let DomEvent: DomEventType;
+let LocateControl: typeof import("leaflet.locatecontrol").LocateControl;
+
+const closePopup = () => {
+	map.closePopup();
+};
+
+$: $theme !== undefined && mapLoaded && closePopup();
+
+const toggleTheme = () => {
+	if ($theme === "dark") {
+		baseMaps["OpenFreeMap Liberty"].remove();
+		baseMaps["OpenFreeMap Dark"].addTo(map);
+	} else {
+		baseMaps["OpenFreeMap Dark"].remove();
+		baseMaps["OpenFreeMap Liberty"].addTo(map);
+	}
+};
+
+$: $theme !== undefined && mapLoaded && toggleTheme();
+
+onMount(async () => {
+	if (browser) {
+		const deps = await loadMapDependencies();
+		leaflet = deps.leaflet;
+		DomEvent = deps.leaflet.DomEvent;
+		LocateControl = deps.LocateControl;
+
+		initialRenderComplete = true;
+	}
+});
+
+onDestroy(async () => {
+	if (map) {
+		console.info("Unloading Leaflet map.");
+		map.remove();
+	}
+});
+
+let initialRenderComplete = false;
+let dataInitialized = false;
+
+const initializeData = () => {
+	if (dataInitialized) return;
+
+	const populateMap = () => {
+		// add map
+		map = leaflet.map(mapElement, { attributionControl: false, maxZoom: 19 });
+
+		// add tiles and basemaps
+		const layersResult = layers(leaflet, map);
+		baseMaps = layersResult.baseMaps;
+
+		// change broken marker image path in prod
+		leaflet.Icon.Default.prototype.options.imagePath = "/icons/";
+
+		// add OSM attribution
+		attribution(leaflet, map);
+
+		// create marker cluster groups
+
+		/* eslint-disable no-undef */
+		// @ts-expect-error L is injected globally by leaflet.markercluster
+		let markers = L.markerClusterGroup();
+		/* eslint-enable no-undef */
+		let upToDateLayer = leaflet.featureGroup.subGroup(markers);
+
+		// add locate button to map
+		geolocate(leaflet, map, LocateControl);
+
+		// change default icons
+		changeDefaultIcons(true, leaflet, mapElement, DomEvent);
+
+		// add area poly to map
+		leaflet.geoJSON(geoJSON, { style: { fill: false } }).addTo(map);
+
+		// add places to map
+		filteredPlaces.forEach((place) => {
+			const commentsCount = place.comments || 0;
+			const boosted = place.boosted_until
+				? Date.parse(place.boosted_until) > Date.now()
+				: false;
+
+			let divIcon = generateIcon(leaflet, place.icon, boosted, commentsCount);
+
+			let marker = generateMarker({
+				lat: place.lat,
+				long: place.lon,
+				icon: divIcon,
+				placeId: place.id,
+				leaflet,
+				verify: true,
+				onMarkerClick: (id) => openDrawer(Number(id)),
+			});
+
+			upToDateLayer.addLayer(marker);
+
+			if (upToDate === undefined) {
+				upToDate = 1;
+			} else {
+				upToDate++;
+			}
+
+			if (total === undefined) {
+				total = 1;
+			} else {
+				total++;
+			}
 		});
 
-	let mapElement: HTMLDivElement;
-	let map: Map;
-	let mapLoaded = false;
+		map.addLayer(markers);
+		map.addLayer(upToDateLayer);
 
-	let baseMaps: BaseMaps;
+		map.fitBounds(leaflet.geoJSON(geoJSON).getBounds());
 
-	let leaflet: Leaflet;
-	let DomEvent: DomEventType;
-	let LocateControl: typeof import('leaflet.locatecontrol').LocateControl;
+		// Close drawer when clicking on map (not on markers)
+		map.on("click", () => {
+			if (selectedMerchantId) {
+				closeDrawer();
+			}
+		});
 
-	const closePopup = () => {
-		map.closePopup();
+		mapLoaded = true;
 	};
 
-	$: $theme !== undefined && mapLoaded && closePopup();
+	populateMap();
 
-	const toggleTheme = () => {
-		if ($theme === 'dark') {
-			baseMaps['OpenFreeMap Liberty'].remove();
-			baseMaps['OpenFreeMap Dark'].addTo(map);
-		} else {
-			baseMaps['OpenFreeMap Dark'].remove();
-			baseMaps['OpenFreeMap Liberty'].addTo(map);
-		}
-	};
+	if (!upToDate) {
+		upToDate = 0;
+	}
 
-	$: $theme !== undefined && mapLoaded && toggleTheme();
+	if (!total) {
+		total = 0;
+	}
 
-	onMount(async () => {
-		if (browser) {
-			const deps = await loadMapDependencies();
-			leaflet = deps.leaflet;
-			DomEvent = deps.leaflet.DomEvent;
-			LocateControl = deps.LocateControl;
+	upToDatePercent = upToDate ? (upToDate / (total / 100)).toFixed(0) : "0";
 
-			initialRenderComplete = true;
-		}
-	});
+	grade = getGrade(Number(upToDatePercent));
 
-	onDestroy(async () => {
-		if (map) {
-			console.info('Unloading Leaflet map.');
-			map.remove();
-		}
-	});
+	dataInitialized = true;
+};
 
-	let initialRenderComplete = false;
-	let dataInitialized = false;
-
-	const initializeData = () => {
-		if (dataInitialized) return;
-
-		const populateMap = () => {
-			// add map
-			map = leaflet.map(mapElement, { attributionControl: false, maxZoom: 19 });
-
-			// add tiles and basemaps
-			const layersResult = layers(leaflet, map);
-			baseMaps = layersResult.baseMaps;
-
-			// change broken marker image path in prod
-			leaflet.Icon.Default.prototype.options.imagePath = '/icons/';
-
-			// add OSM attribution
-			attribution(leaflet, map);
-
-			// create marker cluster groups
-
-			/* eslint-disable no-undef */
-			// @ts-expect-error L is injected globally by leaflet.markercluster
-			let markers = L.markerClusterGroup();
-			/* eslint-enable no-undef */
-			let upToDateLayer = leaflet.featureGroup.subGroup(markers);
-
-			// add locate button to map
-			geolocate(leaflet, map, LocateControl);
-
-			// change default icons
-			changeDefaultIcons(true, leaflet, mapElement, DomEvent);
-
-			// add area poly to map
-			leaflet.geoJSON(geoJSON, { style: { fill: false } }).addTo(map);
-
-			// add places to map
-			filteredPlaces.forEach((place) => {
-				const commentsCount = place.comments || 0;
-				const boosted = place.boosted_until ? Date.parse(place.boosted_until) > Date.now() : false;
-
-				let divIcon = generateIcon(leaflet, place.icon, boosted, commentsCount);
-
-				let marker = generateMarker({
-					lat: place.lat,
-					long: place.lon,
-					icon: divIcon,
-					placeId: place.id,
-					leaflet,
-					verify: true,
-					onMarkerClick: (id) => openDrawer(Number(id))
-				});
-
-				upToDateLayer.addLayer(marker);
-
-				if (upToDate === undefined) {
-					upToDate = 1;
-				} else {
-					upToDate++;
-				}
-
-				if (total === undefined) {
-					total = 1;
-				} else {
-					total++;
-				}
-			});
-
-			map.addLayer(markers);
-			map.addLayer(upToDateLayer);
-
-			map.fitBounds(leaflet.geoJSON(geoJSON).getBounds());
-
-			// Close drawer when clicking on map (not on markers)
-			map.on('click', () => {
-				if (selectedMerchantId) {
-					closeDrawer();
-				}
-			});
-
-			mapLoaded = true;
-		};
-
-		populateMap();
-
-		if (!upToDate) {
-			upToDate = 0;
-		}
-
-		if (!total) {
-			total = 0;
-		}
-
-		upToDatePercent = upToDate ? (upToDate / (total / 100)).toFixed(0) : '0';
-
-		grade = getGrade(Number(upToDatePercent));
-
-		dataInitialized = true;
-	};
-
-	$: geoJSON && filteredPlaces && initialRenderComplete && !dataInitialized && initializeData();
+$: geoJSON &&
+	filteredPlaces &&
+	initialRenderComplete &&
+	!dataInitialized &&
+	initializeData();
 </script>
 
 <section id="map-section">

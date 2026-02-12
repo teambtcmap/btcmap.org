@@ -1,0 +1,96 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.3.14/schema.json",
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+	"files": {
+		"includes": [
+			"src/**",
+			"!.svelte-kit",
+			"!build",
+			"!static",
+			"!.netlify",
+			"!spritesheet-*.ts",
+			"!playwright-report",
+			"!src/error.html"
+		]
+	},
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": {
+					"level": "on",
+					"options": {
+						"groups": [
+							":NODE:",
+							":PACKAGE:",
+							":BLANK_LINE:",
+							["$lib/**", "$components/**"],
+							":BLANK_LINE:",
+							["./**"]
+						]
+					}
+				}
+			}
+		}
+	},
+	"linter": {
+		"rules": {
+			"style": {
+				"noUnusedTemplateLiteral": "off",
+				"noNonNullAssertion": "off"
+			},
+			"suspicious": {
+				"noConsole": {
+					"level": "error",
+					"options": {
+						"allow": ["info", "warn", "error", "debug", "assert"]
+					}
+				},
+				"noExplicitAny": "off",
+				"noImplicitAnyLet": "off",
+				"noShadowRestrictedNames": "off",
+				"useIterableCallbackReturn": "off"
+			},
+			"correctness": {
+				"noUnusedVariables": "error",
+				"noUnusedImports": "error"
+			},
+			"complexity": {
+				"noImportantStyles": "off"
+			}
+		}
+	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
+		},
+		"formatter": {
+			"enabled": true
+		}
+	},
+	"overrides": [
+		{
+			"includes": ["**/*.svelte"],
+			"linter": {
+				"rules": {
+					"correctness": {
+						"noUnusedVariables": "off",
+						"noUnusedImports": "off",
+						"noSelfAssign": "off",
+						"noInvalidUseBeforeDeclaration": "off"
+					},
+					"style": {
+						"useConst": "off",
+						"useImportType": "off"
+					},
+					"suspicious": {
+						"noAssignInExpressions": "off"
+					}
+				}
+			}
+		}
+	]
+}

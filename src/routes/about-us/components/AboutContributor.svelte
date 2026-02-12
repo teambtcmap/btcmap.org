@@ -1,5 +1,10 @@
 <script lang="ts">
-	export let contributor: { url: string; name: string; file: string; title: string };
+export let contributor: {
+	url: string;
+	name: string;
+	file: string;
+	title: string;
+};
 </script>
 
 <!-- eslint-disable svelte/no-navigation-without-resolve -->

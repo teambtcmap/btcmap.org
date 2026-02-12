@@ -1,9 +1,9 @@
-@import 'tailwindcss';
-@config '../tailwind.config.js';
+@import "tailwindcss";
+@config "../tailwind.config.js";
 
 @font-face {
-	font-family: 'Manrope';
-	src: url('/fonts/Manrope-Regular.ttf') format('truetype');
+	font-family: "Manrope";
+	src: url("/fonts/Manrope-Regular.ttf") format("truetype");
 	font-display: swap;
 }
 
@@ -81,11 +81,11 @@
 
 @layer components {
 	.div-icon {
-		background-image: url('/icons/div-icon-pin.svg');
+		background-image: url("/icons/div-icon-pin.svg");
 	}
 
 	.boosted-icon {
-		background-image: url('/icons/boosted-icon-pin.svg');
+		background-image: url("/icons/boosted-icon-pin.svg");
 	}
 
 	/* Optimized marker styles for performance */

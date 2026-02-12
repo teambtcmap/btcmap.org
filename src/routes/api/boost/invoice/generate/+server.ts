@@ -1,7 +1,8 @@
-import { error } from '@sveltejs/kit';
-import axios from 'axios';
-import axiosRetry from 'axios-retry';
-import type { RequestHandler } from './$types';
+import { error } from "@sveltejs/kit";
+import axios from "axios";
+import axiosRetry from "axios-retry";
+
+import type { RequestHandler } from "./$types";
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
@@ -16,24 +17,28 @@ export const POST: RequestHandler = async ({ request }) => {
 	const { place_id, days } = data;
 
 	if (!place_id || !days) {
-		error(400, 'Missing required parameters: place_id, days');
+		error(400, "Missing required parameters: place_id, days");
 	}
 
 	if (days <= 0) {
-		error(400, 'Invalid days parameter: must be a positive integer (30, 90, or 365)');
+		error(
+			400,
+			"Invalid days parameter: must be a positive integer (30, 90, or 365)",
+		);
 	}
 
 	const invoice = await axios
-		.post('https://api.btcmap.org/v4/place-boosts', {
+		.post("https://api.btcmap.org/v4/place-boosts", {
 			place_id: place_id.toString(),
-			days: days
+			days: days,
 		})
-		.then(function (response) {
-			return response.data;
-		})
-		.catch(function (err) {
+		.then((response) => response.data)
+		.catch((err) => {
 			console.error(err);
-			error(400, 'Could not generate boost invoice, please try again or contact BTC Map.');
+			error(
+				400,
+				"Could not generate boost invoice, please try again or contact BTC Map.",
+			);
 		});
 
 	return new Response(JSON.stringify(invoice));

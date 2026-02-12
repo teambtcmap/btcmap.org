@@ -1,16 +1,16 @@
 <script lang="ts">
-	import Icon from '$components/Icon.svelte';
+import Icon from "$components/Icon.svelte";
 
-	export let value: string = '';
-	export let placeholder: string = '';
-	export let ariaLabel: string = 'Search';
-	export let rounded: boolean = false;
+export let value: string = "";
+export let placeholder: string = "";
+export let ariaLabel: string = "Search";
+export let rounded: boolean = false;
 
-	let inputElement: HTMLInputElement;
+let inputElement: HTMLInputElement;
 
-	export function focus() {
-		inputElement?.focus();
-	}
+export function focus() {
+	inputElement?.focus();
+}
 </script>
 
 <div class="relative">

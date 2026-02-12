@@ -1,45 +1,52 @@
 <script lang="ts">
-	import HeaderPlaceholder from '$components/layout/HeaderPlaceholder.svelte';
-	import OpenTicket from '$components/OpenTicket.svelte';
-	import OpenTicketSkeleton from './components/OpenTicketSkeleton.svelte';
-	import TopButton from '$components/TopButton.svelte';
-	import { GITEA_LABELS } from '$lib/constants';
-	import { theme } from '$lib/theme';
-	// Temporarily disabled during maintenance
-	// import { errToast } from '$lib/utils';
+import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import OpenTicket from "$components/OpenTicket.svelte";
+import TopButton from "$components/TopButton.svelte";
+import { GITEA_LABELS } from "$lib/constants";
+import { theme } from "$lib/theme";
 
-	import type { GiteaLabel, GiteaIssue } from '$lib/types';
+import OpenTicketSkeleton from "./components/OpenTicketSkeleton.svelte";
 
-	const ticketTypes = ['Add', 'Verify', 'Community'];
-	let showType = 'Add';
+// Temporarily disabled during maintenance
+// import { errToast } from '$lib/utils';
 
-	export let data;
+import type { GiteaIssue, GiteaLabel } from "$lib/types";
 
-	$: tickets = data.tickets as GiteaIssue[];
+const ticketTypes = ["Add", "Verify", "Community"];
+let showType = "Add";
 
-	$: add =
-		tickets?.filter((issue) =>
-			issue?.labels?.some((label: GiteaLabel) => label?.id === GITEA_LABELS.DATA.ADD_LOCATION)
-		) || [];
-	$: verify =
-		tickets?.filter((issue) =>
-			issue?.labels?.some((label: GiteaLabel) => label?.id === GITEA_LABELS.DATA.VERIFY_LOCATION)
-		) || [];
-	$: community =
-		tickets?.filter((issue) =>
-			issue?.labels?.some(
-				(label: GiteaLabel) => label?.id === GITEA_LABELS.DATA.COMMUNITY_SUBMISSION
-			)
-		) || [];
+export let data;
 
-	let totalTickets = data.totalTickets;
+$: tickets = data.tickets as GiteaIssue[];
 
-	// Temporarily disabled during maintenance
-	// if (data.error) {
-	// 	errToast(data.error);
-	// }
+$: add =
+	tickets?.filter((issue) =>
+		issue?.labels?.some(
+			(label: GiteaLabel) => label?.id === GITEA_LABELS.DATA.ADD_LOCATION,
+		),
+	) || [];
+$: verify =
+	tickets?.filter((issue) =>
+		issue?.labels?.some(
+			(label: GiteaLabel) => label?.id === GITEA_LABELS.DATA.VERIFY_LOCATION,
+		),
+	) || [];
+$: community =
+	tickets?.filter((issue) =>
+		issue?.labels?.some(
+			(label: GiteaLabel) =>
+				label?.id === GITEA_LABELS.DATA.COMMUNITY_SUBMISSION,
+		),
+	) || [];
 
-	const isMaintenance = data.maintenance ?? false;
+let totalTickets = data.totalTickets;
+
+// Temporarily disabled during maintenance
+// if (data.error) {
+// 	errToast(data.error);
+// }
+
+const isMaintenance = data.maintenance ?? false;
 </script>
 
 <svelte:head>
