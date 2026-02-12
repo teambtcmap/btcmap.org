@@ -7,14 +7,13 @@ test.describe('Country Area Pages', () => {
 
 		await page.goto('/country/za');
 		await expect(page).toHaveURL(/\/country\/za\/merchants$/);
-		await page.waitForLoadState('networkidle');
+		await page.waitForLoadState('domcontentloaded');
 
 		const pageTitle = await page.title();
 		expect(pageTitle).toContain('South Africa');
 
-		const bodyContent = await page.locator('body').textContent();
-		expect(bodyContent).toBeTruthy();
-		expect(bodyContent!.length).toBeGreaterThan(100);
+		// Verify page heading is visible
+		await expect(page.getByRole('heading', { name: 'South Africa', exact: true })).toBeVisible();
 	});
 
 	test('handles section navigation', async ({ page }) => {

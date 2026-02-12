@@ -29,10 +29,6 @@ test.describe('Boost Invoice Generation', () => {
 		await expect(boostButton).toBeVisible();
 		await expect(boostButton).toBeEnabled();
 
-		// Small delay for Svelte component hydration - the button can be enabled before the merchant
-		// prop is passed down from SSR data, which causes the click handler to return early
-		await page.waitForTimeout(800);
-
 		// Click boost button and wait for modal
 		await boostButton.click();
 		await expect(page.locator('text=Boost Location')).toBeVisible({ timeout: 10000 });

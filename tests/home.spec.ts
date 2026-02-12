@@ -9,11 +9,10 @@ test.describe('Home Page', () => {
 		const heading = page.getByRole('heading', {
 			name: 'Find places to spend sats wherever you are.'
 		});
-		await heading.waitFor({ state: 'visible' });
-		await expect(heading).toBeTruthy();
+		await expect(heading).toBeVisible();
 
 		await page.getByRole('link', { name: 'Add Location' }).click();
 
-		await expect(page.getByRole('heading', { name: 'Accept bitcoin? Get found.' })).toBeTruthy();
+		await expect(page.getByRole('heading', { name: 'Accept bitcoin? Get found.' })).toBeVisible();
 	});
 });
