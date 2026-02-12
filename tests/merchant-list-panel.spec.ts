@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test';
 import {
-	MARKER_LOAD_TIMEOUT,
 	waitForMarkersToLoad,
 	setupConsoleErrorCollection,
 	checkForConsoleErrors
