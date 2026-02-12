@@ -1,55 +1,19 @@
 import { test, expect } from '@playwright/test';
+import {
+	waitForMarkersToLoad,
+	setupConsoleErrorCollection,
+	checkForConsoleErrors
+} from './helpers';
 
 test.describe('Map Drawer', () => {
 	// Collect console errors during tests - map JS errors should fail the test
 	test.beforeEach(async ({ page }) => {
-		const errors: string[] = [];
-		page.on('console', (msg) => {
-			if (msg.type() === 'error') {
-				errors.push(msg.text());
-			}
-		});
-		page.on('pageerror', (error) => {
-			errors.push(error.message);
-		});
-		// Store errors on page object for access in afterEach
-		(page as unknown as { _consoleErrors: string[] })._consoleErrors = errors;
+		setupConsoleErrorCollection(page);
 	});
 
 	test.afterEach(async ({ page }) => {
-		const errors = (page as unknown as { _consoleErrors: string[] })._consoleErrors || [];
-		// Filter out non-critical errors (resource loading failures, minified JS noise)
-		const criticalErrors = errors.filter((error) => {
-			// Skip single-character errors (minified JS noise)
-			if (error.length <= 2) return false;
-			if (error.includes('Failed to load resource')) return false;
-			if (error.includes('net::ERR_')) return false;
-			return true;
-		});
-		if (criticalErrors.length > 0) {
-			throw new Error(`Console errors detected:\n${criticalErrors.join('\n')}`);
-		}
+		checkForConsoleErrors(page);
 	});
-
-	// Helper: wait for places API response, then for markers to render
-	async function waitForMarkersToLoad(page: import('@playwright/test').Page) {
-		// First wait for the places API to respond
-		try {
-			await page.waitForResponse(
-				(response) => response.url().includes('api.btcmap.org/v4/places') && response.ok(),
-				{ timeout: 30000 }
-			);
-		} catch {
-			// API may have already responded before we started waiting
-			// Continue and check if markers exist
-		}
-
-		// Then wait for markers to render in DOM
-		await page.waitForFunction(
-			() => document.querySelectorAll('.leaflet-marker-pane > div').length > 0,
-			{ timeout: 45000 }
-		);
-	}
 
 	test('drawer opens on marker click and navigates to merchant detail page', async ({ page }) => {
 		test.setTimeout(180000);
@@ -105,23 +69,51 @@ test.describe('Map Drawer', () => {
 						const viewportCluster = Array.from(clusters).find(isInViewport);
 						const clusterToClick = viewportCluster || clusters[0];
 						(clusterToClick as HTMLElement).click();
-
-						setTimeout(() => {
-							const expandedMarkers = document.querySelectorAll(
-								'.leaflet-marker-pane > div:not([class*="cluster"])'
-							);
-							if (expandedMarkers.length > 0) {
-								const expandedViewportMarker = Array.from(expandedMarkers).find(isInViewport);
-								const markerToClick = expandedViewportMarker || expandedMarkers[0];
-								(markerToClick as HTMLElement).click();
-							}
-						}, 1000);
-						return true;
+						return 'cluster-clicked';
 					}
 				}
 
 				return false;
 			});
+
+			if (markerClicked === 'cluster-clicked') {
+				// Wait for cluster to expand and individual markers to appear
+				await page.waitForFunction(
+					() => {
+						const expandedMarkers = document.querySelectorAll(
+							'.leaflet-marker-pane > div:not([class*="cluster"])'
+						);
+						return expandedMarkers.length > 0;
+					},
+					{ timeout: 5000 }
+				);
+
+				// Click the expanded marker
+				await page.evaluate(() => {
+					const isInViewport = (element: Element) => {
+						const rect = element.getBoundingClientRect();
+						const viewport = {
+							width: window.innerWidth,
+							height: window.innerHeight
+						};
+						return (
+							rect.left >= 0 &&
+							rect.right <= viewport.width &&
+							rect.top >= 0 &&
+							rect.bottom <= viewport.height
+						);
+					};
+
+					const expandedMarkers = document.querySelectorAll(
+						'.leaflet-marker-pane > div:not([class*="cluster"])'
+					);
+					if (expandedMarkers.length > 0) {
+						const expandedViewportMarker = Array.from(expandedMarkers).find(isInViewport);
+						const markerToClick = expandedViewportMarker || expandedMarkers[0];
+						(markerToClick as HTMLElement).click();
+					}
+				});
+			}
 
 			if (!markerClicked) {
 				const debugInfo = await page.evaluate(() => {
@@ -138,28 +130,14 @@ test.describe('Map Drawer', () => {
 				throw new Error(`No clickable markers found. Debug info: ${JSON.stringify(debugInfo)}`);
 			}
 
-			await page.waitForTimeout(2000);
 			return true;
 		};
 
 		await findAndClickMarker();
 
-		try {
-			await page.waitForResponse(
-				(response) =>
-					response.url().includes('api.btcmap.org/v4/places/') && response.status() === 200,
-				{ timeout: 8000 }
-			);
-		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : String(error);
-			console.error('API response wait failed, but continuing:', errorMessage);
-		}
-
 		// Wait for drawer to open
 		const drawer = page.locator('[role="dialog"]');
 		await expect(drawer).toBeVisible({ timeout: 15000 });
-
-		await page.waitForTimeout(2000);
 
 		// Look for "View Full Details" button in drawer
 		const viewDetailsButton = page.locator('a:has-text("View Full Details")');
@@ -206,7 +184,17 @@ test.describe('Map Drawer', () => {
 		});
 
 		if (markerClicked === 'cluster') {
-			await page.waitForTimeout(1000);
+			// Wait for cluster to expand
+			await page.waitForFunction(
+				() => {
+					const expandedMarkers = document.querySelectorAll(
+						'.leaflet-marker-pane > div:not([class*="cluster"])'
+					);
+					return expandedMarkers.length > 0;
+				},
+				{ timeout: 5000 }
+			);
+
 			const expandedMarkerClicked = await page.evaluate(() => {
 				const expandedMarkers = document.querySelectorAll(
 					'.leaflet-marker-pane > div:not([class*="cluster"])'
@@ -224,8 +212,6 @@ test.describe('Map Drawer', () => {
 		} else if (!markerClicked) {
 			throw new Error('No markers found to click');
 		}
-
-		await page.waitForTimeout(2000);
 
 		// Check drawer comments button
 		const commentsButton = page.locator('a[href*="#comments"]');
@@ -249,6 +235,9 @@ test.describe('Map Drawer', () => {
 		// Wait for map to load
 		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
 		await expect(zoomInButton).toBeVisible();
+
+		// Wait for markers to load before hash parameter can trigger drawer
+		await waitForMarkersToLoad(page);
 
 		// Wait for drawer to open automatically
 		const drawer = page.locator('[role="dialog"]');
@@ -286,6 +275,9 @@ test.describe('Map Drawer', () => {
 		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
 		await expect(zoomInButton).toBeVisible();
 
+		// Wait for markers to load before hash parameter can trigger drawer
+		await waitForMarkersToLoad(page);
+
 		// Wait for mobile drawer to open (appears at bottom)
 		const drawer = page.locator('[role="dialog"]');
 		await expect(drawer).toBeVisible({ timeout: 15000 });
@@ -315,6 +307,9 @@ test.describe('Map Drawer', () => {
 		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
 		await expect(zoomInButton).toBeVisible();
 
+		// Wait for markers to load before hash parameter can trigger drawer
+		await waitForMarkersToLoad(page);
+
 		// Wait for drawer to open
 		const drawer = page.locator('[role="dialog"]');
 		await expect(drawer).toBeVisible({ timeout: 15000 });
@@ -334,6 +329,13 @@ test.describe('Map Drawer', () => {
 
 		// Navigate with merchant hash to open drawer directly
 		await page.goto('/map#15/53.55573/10.00825&merchant=6556', { waitUntil: 'load' });
+
+		// Wait for map to load
+		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
+		await expect(zoomInButton).toBeVisible();
+
+		// Wait for markers to load before hash parameter can trigger drawer
+		await waitForMarkersToLoad(page);
 
 		// Wait for drawer to open
 		const drawer = page.locator('[role="dialog"]');

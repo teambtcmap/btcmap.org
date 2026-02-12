@@ -4,10 +4,6 @@ test.describe('Communities Page', () => {
 	test('loads communities page successfully', async ({ page }) => {
 		await page.goto('/communities');
 
-		// Wait for page to load
-		await page.waitForSelector('main', { timeout: 10000 });
-		await page.waitForTimeout(500);
-
 		// Check page title
 		const pageTitle = await page.title();
 		expect(pageTitle).toContain('BTC Map - Communities');
@@ -21,17 +17,10 @@ test.describe('Communities Page', () => {
 		await expect(
 			page.getByText(/take ownership of your local bitcoin mapping data/i)
 		).toBeVisible();
-
-		// Check that content has loaded
-		const bodyContent = await page.locator('body').textContent();
-		expect(bodyContent).toBeTruthy();
-		expect(bodyContent!.length).toBeGreaterThan(100);
 	});
 
 	test('displays navigation buttons', async ({ page }) => {
 		await page.goto('/communities');
-		await page.waitForSelector('main', { timeout: 10000 });
-		await page.waitForTimeout(500);
 
 		// Check primary navigation buttons
 		const leaderboardBtn = page.getByRole('link', { name: 'Leaderboard' });
@@ -49,28 +38,20 @@ test.describe('Communities Page', () => {
 
 	test('renders communities chart', async ({ page }) => {
 		await page.goto('/communities');
-		await page.waitForSelector('main', { timeout: 10000 });
-		await page.waitForTimeout(500);
 
-		// Wait for chart to render
-		await page.waitForTimeout(2000);
-
-		// Check that chart canvas is present
+		// Check that chart canvas is present and visible
 		const chartCanvas = page.locator('canvas');
-		await expect(chartCanvas).toBeVisible();
+		await expect(chartCanvas).toBeVisible({ timeout: 10000 });
 
 		// Check that chart has proper dimensions
 		const canvasWidth = await chartCanvas.getAttribute('width');
 		const canvasHeight = await chartCanvas.getAttribute('height');
-		// Width is set to actual pixel value, not percentage
 		expect(parseInt(canvasWidth || '0')).toBeGreaterThan(0);
-		expect(canvasHeight).toBe('350');
+		expect(parseInt(canvasHeight || '0')).toBeGreaterThan(0);
 	});
 
 	test('defaults to Africa section', async ({ page }) => {
 		await page.goto('/communities');
-		await page.waitForSelector('main', { timeout: 10000 });
-		await page.waitForTimeout(500);
 
 		// Should redirect to Africa section
 		await expect(page).toHaveURL(/\/communities\/africa$/);

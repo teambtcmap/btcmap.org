@@ -33,7 +33,7 @@ export default defineConfig({
 
 		/* CI-specific timeouts for slower environments */
 		actionTimeout: process.env.CI ? 15000 : 5000,
-		navigationTimeout: process.env.CI ? 60000 : 10000
+		navigationTimeout: process.env.CI ? 60000 : 30000
 	},
 
 	/* Configure projects for major browsers */

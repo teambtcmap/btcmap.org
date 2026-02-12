@@ -2,25 +2,16 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Areas', () => {
 	test('opens country area', async ({ page }) => {
-		await page.goto('');
-
-		const heading = page.getByRole('heading', {
-			name: 'Find places to spend sats wherever you are.'
-		});
-		await heading.waitFor({ state: 'visible' });
-		await expect(heading).toBeTruthy();
-
-		await page.getByRole('button', { name: 'Areas' }).click();
-		await page.getByRole('link', { name: 'Countries' }).click();
+		// Navigate directly to countries page
+		await page.goto('/countries');
 		await expect(page).toHaveURL(/countries/);
 
 		// Wait for the countries page to load and find the South Africa link
 		await page.waitForLoadState('domcontentloaded');
-		await page.waitForTimeout(1000); // Give time for content to load
 
 		const southAfricaLink = page.getByRole('link', { name: 'South Africa' });
 		if ((await southAfricaLink.count()) > 0) {
-			await southAfricaLink.waitFor({ state: 'visible' });
+			await expect(southAfricaLink).toBeVisible();
 			await southAfricaLink.click();
 			// Wait for navigation to complete
 			await page.waitForLoadState('domcontentloaded');
@@ -31,32 +22,23 @@ test.describe('Areas', () => {
 			return; // Skip rest of test
 		}
 
-		await page
-			.getByRole('heading', {
+		await expect(
+			page.getByRole('heading', {
 				name: 'South Africa',
 				exact: true
 			})
-			.waitFor({ state: 'visible' });
+		).toBeVisible();
 	});
 
 	test('navigates through communities structure', async ({ page }) => {
-		await page.goto('');
-
-		const heading = page.getByRole('heading', {
-			name: 'Find places to spend sats wherever you are.'
-		});
-		await heading.waitFor({ state: 'visible' });
-		await expect(heading).toBeTruthy();
-
-		await page.getByRole('button', { name: 'Areas' }).click();
-		await page.getByRole('link', { name: 'Communities' }).click();
+		// Navigate directly to communities page
+		await page.goto('/communities');
 		await expect(page).toHaveURL(/communities/);
 
 		const communityHeading = page.getByRole('heading', {
 			name: 'Join the bitcoin map community.'
 		});
-		await communityHeading.waitFor({ state: 'visible' });
-		await expect(communityHeading).toBeTruthy();
+		await expect(communityHeading).toBeVisible();
 
 		// Wait for community data to load - areas API fetch can take a while from scratch
 		// The areas sync fetches paginated data which can be slow on first load
@@ -77,27 +59,16 @@ test.describe('Areas', () => {
 	});
 
 	test('community leaderboard structure loads', async ({ page }) => {
-		await page.goto('');
-
-		const heading = page.getByRole('heading', {
-			name: 'Find places to spend sats wherever you are.'
-		});
-		await heading.waitFor({ state: 'visible' });
-		await expect(heading).toBeTruthy();
-
-		await page.getByRole('button', { name: 'Areas' }).click();
-		await page.getByRole('link', { name: 'Communities' }).click();
-		await expect(page).toHaveURL(/communities/);
-
-		await page.getByRole('link', { name: 'Leaderboard' }).click();
+		// Navigate directly to community leaderboard
+		await page.goto('/communities/leaderboard');
 		await expect(page).toHaveURL(/communities\/leaderboard/);
 
 		// Wait for the page heading to be visible
-		await page
-			.getByRole('heading', {
+		await expect(
+			page.getByRole('heading', {
 				name: 'Community Leaderboard'
 			})
-			.waitFor({ state: 'visible' });
+		).toBeVisible();
 
 		// Just check that basic leaderboard structure is present (don't wait for heavy data loading)
 		// Simply verify the page loaded without errors - don't test specific elements

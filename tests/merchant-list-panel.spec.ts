@@ -1,35 +1,18 @@
 import { test, expect } from '@playwright/test';
-
-const MARKER_LOAD_TIMEOUT = 60000;
+import {
+	waitForMarkersToLoad,
+	setupConsoleErrorCollection,
+	checkForConsoleErrors
+} from './helpers';
 
 test.describe('Merchant List Panel', () => {
 	// Collect console errors during tests
 	test.beforeEach(async ({ page }) => {
-		const errors: string[] = [];
-		page.on('console', (msg) => {
-			if (msg.type() === 'error') {
-				errors.push(msg.text());
-			}
-		});
-		page.on('pageerror', (error) => {
-			errors.push(error.message);
-		});
-		(page as unknown as { _consoleErrors: string[] })._consoleErrors = errors;
+		setupConsoleErrorCollection(page);
 	});
 
 	test.afterEach(async ({ page }) => {
-		const errors = (page as unknown as { _consoleErrors: string[] })._consoleErrors || [];
-		// Filter out non-critical errors (resource loading failures, minified JS noise)
-		const criticalErrors = errors.filter((error) => {
-			// Skip single-character errors (minified JS noise)
-			if (error.length <= 2) return false;
-			if (error.includes('Failed to load resource')) return false;
-			if (error.includes('net::ERR_')) return false;
-			return true;
-		});
-		if (criticalErrors.length > 0) {
-			throw new Error(`Console errors detected:\n${criticalErrors.join('\n')}`);
-		}
+		checkForConsoleErrors(page);
 	});
 
 	test('floating search bar is visible on map load', async ({ page }) => {
@@ -44,14 +27,8 @@ test.describe('Merchant List Panel', () => {
 		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
 		await expect(zoomInButton).toBeVisible();
 
-		// Wait for markers to load (ensures map is fully ready)
-		await page.waitForFunction(
-			() => {
-				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
-				return markers.length > 0;
-			},
-			{ timeout: MARKER_LOAD_TIMEOUT }
-		);
+		// Wait for markers to load
+		await waitForMarkersToLoad(page);
 
 		// Floating search bar should be visible
 		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
@@ -77,13 +54,7 @@ test.describe('Merchant List Panel', () => {
 		await expect(zoomInButton).toBeVisible();
 
 		// Wait for markers to load
-		await page.waitForFunction(
-			() => {
-				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
-				return markers.length > 0;
-			},
-			{ timeout: MARKER_LOAD_TIMEOUT }
-		);
+		await waitForMarkersToLoad(page);
 
 		// List panel should NOT be visible initially
 		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
@@ -114,13 +85,7 @@ test.describe('Merchant List Panel', () => {
 		await expect(zoomInButton).toBeVisible();
 
 		// Wait for markers to load
-		await page.waitForFunction(
-			() => {
-				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
-				return markers.length > 0;
-			},
-			{ timeout: MARKER_LOAD_TIMEOUT }
-		);
+		await waitForMarkersToLoad(page);
 
 		// Click on search input to open list panel
 		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
@@ -172,13 +137,7 @@ test.describe('Merchant List Panel', () => {
 		await expect(zoomInButton).toBeVisible();
 
 		// Wait for markers to load
-		await page.waitForFunction(
-			() => {
-				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
-				return markers.length > 0;
-			},
-			{ timeout: MARKER_LOAD_TIMEOUT }
-		);
+		await waitForMarkersToLoad(page);
 
 		// Floating search bar should be visible on mobile
 		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
@@ -212,13 +171,7 @@ test.describe('Merchant List Panel', () => {
 		await expect(zoomInButton).toBeVisible();
 
 		// Wait for markers to load
-		await page.waitForFunction(
-			() => {
-				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
-				return markers.length > 0;
-			},
-			{ timeout: MARKER_LOAD_TIMEOUT }
-		);
+		await waitForMarkersToLoad(page);
 
 		// Click search input to open mobile list
 		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
@@ -267,13 +220,7 @@ test.describe('Merchant List Panel', () => {
 		await expect(zoomInButton).toBeVisible();
 
 		// Wait for markers to load
-		await page.waitForFunction(
-			() => {
-				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
-				return markers.length > 0;
-			},
-			{ timeout: MARKER_LOAD_TIMEOUT }
-		);
+		await waitForMarkersToLoad(page);
 
 		// Floating search bar should be visible initially
 		const floatingSearchInput = page.getByRole('searchbox', {
@@ -325,13 +272,7 @@ test.describe('Merchant List Panel', () => {
 		await expect(zoomInButton).toBeVisible();
 
 		// Wait for markers to load
-		await page.waitForFunction(
-			() => {
-				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
-				return markers.length > 0;
-			},
-			{ timeout: MARKER_LOAD_TIMEOUT }
-		);
+		await waitForMarkersToLoad(page);
 
 		// Floating search bar buttons should be visible (they have role="radio" for accessibility)
 		const worldwideButton = page.getByRole('radio', { name: 'Worldwide' });
@@ -370,13 +311,7 @@ test.describe('Merchant List Panel', () => {
 		await expect(zoomInButton).toBeVisible();
 
 		// Wait for markers to load
-		await page.waitForFunction(
-			() => {
-				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
-				return markers.length > 0;
-			},
-			{ timeout: MARKER_LOAD_TIMEOUT }
-		);
+		await waitForMarkersToLoad(page);
 
 		// Open the list panel via search input
 		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
@@ -420,13 +355,7 @@ test.describe('Merchant List Panel', () => {
 		await expect(zoomInButton).toBeVisible();
 
 		// Wait for markers to load
-		await page.waitForFunction(
-			() => {
-				const markers = document.querySelectorAll('.leaflet-marker-pane > div');
-				return markers.length > 0;
-			},
-			{ timeout: MARKER_LOAD_TIMEOUT }
-		);
+		await waitForMarkersToLoad(page);
 
 		// Floating search bar should be visible
 		const floatingSearchInput = page.getByRole('searchbox', {
