@@ -6,7 +6,7 @@ const API_ENDPOINT = '/api/boost/invoice/generate';
 
 test.describe('Boost Invoice Generation', () => {
 	test('generates valid invoice through complete UI flow', async ({ page }) => {
-		// Mock boost invoice API to prevent real invoice creation in production
+		// Mock boost invoice API to prevent real invoice creation during test execution
 		await mockBoostInvoiceAPI(page);
 
 		// Mock exchange rate API to avoid external dependency
