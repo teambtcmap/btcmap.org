@@ -1,10 +1,14 @@
 import { test, expect } from '@playwright/test';
+import { mockBoostInvoiceAPI } from './helpers';
 
 const MERCHANT_ID = 23143;
 const API_ENDPOINT = '/api/boost/invoice/generate';
 
 test.describe('Boost Invoice Generation', () => {
 	test('generates valid invoice through complete UI flow', async ({ page }) => {
+		// Mock boost invoice API to prevent real invoice creation in production
+		await mockBoostInvoiceAPI(page);
+
 		// Mock exchange rate API to avoid external dependency
 		await page.route('**/blockchain.info/**', async (route) => {
 			await route.fulfill({
@@ -74,6 +78,9 @@ test.describe('Boost Invoice Generation', () => {
 	});
 
 	test('validates missing required parameters', async ({ page }) => {
+		// Mock boost invoice API to prevent real invoice creation in production
+		await mockBoostInvoiceAPI(page);
+
 		const response = await page.request.post(API_ENDPOINT, {
 			data: { place_id: MERCHANT_ID }
 		});
@@ -84,6 +91,9 @@ test.describe('Boost Invoice Generation', () => {
 	});
 
 	test('validates invalid days parameter', async ({ page }) => {
+		// Mock boost invoice API to prevent real invoice creation in production
+		await mockBoostInvoiceAPI(page);
+
 		const response = await page.request.post(API_ENDPOINT, {
 			data: {
 				place_id: MERCHANT_ID,

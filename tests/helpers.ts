@@ -59,3 +59,49 @@ export function checkForConsoleErrors(page: Page) {
 		throw new Error(`Console errors detected:\n${criticalErrors.join('\n')}`);
 	}
 }
+
+/**
+ * Mock the boost invoice API to prevent real invoice creation in production.
+ * Returns static mock data that matches the production API response structure.
+ * This should be called at the beginning of any test that triggers invoice generation.
+ */
+export async function mockBoostInvoiceAPI(page: Page) {
+	await page.route('**/api/boost/invoice/generate', async (route) => {
+		const request = route.request();
+		const postData = request.postDataJSON();
+
+		// Validate request - return error for missing parameters
+		if (!postData.place_id || !postData.days) {
+			await route.fulfill({
+				status: 400,
+				contentType: 'application/json',
+				body: JSON.stringify({
+					message: 'Missing required parameters: place_id, days'
+				})
+			});
+			return;
+		}
+
+		// Validate request - return error for invalid days
+		if (postData.days <= 0) {
+			await route.fulfill({
+				status: 400,
+				contentType: 'application/json',
+				body: JSON.stringify({
+					message: 'Invalid days parameter: must be a positive integer (30, 90, or 365)'
+				})
+			});
+			return;
+		}
+
+		// Return mock successful response with static invoice data
+		await route.fulfill({
+			status: 200,
+			contentType: 'application/json',
+			body: JSON.stringify({
+				invoice: 'lnbc50000n1pj9x7xzpp5mock1nv01c3t3stm0ck3xam3pl3test1nv01c3x',
+				invoice_id: '12345678-1234-1234-1234-123456789abc'
+			})
+		});
+	});
+}
