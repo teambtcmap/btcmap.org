@@ -33,7 +33,12 @@ export default defineConfig({
 
 		/* CI-specific timeouts for slower environments */
 		actionTimeout: process.env.CI ? 15000 : 5000,
-		navigationTimeout: process.env.CI ? 60000 : 30000
+		navigationTimeout: process.env.CI ? 60000 : 30000,
+
+		/* Identify E2E test requests to prevent API bans */
+		extraHTTPHeaders: {
+			'User-Agent': 'btcmap-e2e-tests/1.0 (https://github.com/btcmap/btcmap.org)'
+		}
 	},
 
 	/* Configure projects for major browsers */
