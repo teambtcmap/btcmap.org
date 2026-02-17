@@ -12,6 +12,7 @@ import {
 import { MERCHANT_LIST_MAX_ITEMS } from "$lib/constants";
 import { isBoosted } from "$lib/merchantDrawerLogic";
 import type { Place } from "$lib/types";
+import { userLocation } from "$lib/userLocationStore";
 import { errToast } from "$lib/utils";
 
 export type MerchantListMode = "nearby" | "search";
@@ -100,15 +101,21 @@ function sortMerchants(
 	centerLat?: number,
 	centerLon?: number,
 ): Place[] {
+	const userLoc = get(userLocation).location;
+
 	return [...merchants].sort((a, b) => {
 		// Boosted first
 		if (isBoosted(a) && !isBoosted(b)) return -1;
 		if (!isBoosted(a) && isBoosted(b)) return 1;
 
-		// Then by distance (if center provided)
-		if (centerLat !== undefined && centerLon !== undefined) {
-			const distA = getDistanceSquared(centerLat, centerLon, a.lat, a.lon);
-			const distB = getDistanceSquared(centerLat, centerLon, b.lat, b.lon);
+		// Use user location if available, otherwise fall back to map center
+		const sortLat = userLoc?.lat ?? centerLat;
+		const sortLon = userLoc?.lon ?? centerLon;
+
+		// Then by distance
+		if (sortLat !== undefined && sortLon !== undefined) {
+			const distA = getDistanceSquared(sortLat, sortLon, a.lat, a.lon);
+			const distB = getDistanceSquared(sortLat, sortLon, b.lat, b.lon);
 			return distA - distB;
 		}
 
@@ -421,6 +428,16 @@ function createMerchantListStore() {
 		// Reset the selected category to 'all'
 		resetCategory() {
 			update((state) => resetCategoryState(state));
+		},
+
+		// Re-sort merchants using current user location (if available)
+		// Call this when user location becomes available to re-sort the list
+		reSortByUserLocation() {
+			update((state) => {
+				if (state.merchants.length === 0) return state;
+				const sorted = sortMerchants(state.merchants);
+				return { ...state, merchants: sorted };
+			});
 		},
 
 		reset() {

@@ -170,8 +170,11 @@ $: categoryCounts = $merchantList.categoryCounts;
 // Location button state
 let locationRequestDismissed = false;
 
-function handleEnableLocation() {
-	userLocation.getLocationWithCache();
+async function handleEnableLocation() {
+	const location = await userLocation.getLocationWithCache();
+	if (location) {
+		merchantList.reSortByUserLocation();
+	}
 }
 
 function handleDismissLocation() {

@@ -21,6 +21,18 @@ vi.mock("$lib/merchantDrawerLogic", () => ({
 		place.boosted_until && new Date(place.boosted_until) > new Date(),
 }));
 
+// Mock userLocationStore - must return proper store value for get()
+vi.mock("$lib/userLocationStore", () => {
+	const { writable } = require("svelte/store");
+	const mockStore = writable({ location: null, lastUpdated: null });
+	return {
+		userLocation: mockStore,
+		getLocationWithCache: vi.fn().mockResolvedValue(null),
+		getLocation: vi.fn().mockResolvedValue(null),
+		reSortByUserLocation: vi.fn(),
+	};
+});
+
 import { errToast } from "$lib/utils";
 
 // Import after mocks are set up
