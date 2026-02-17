@@ -71,46 +71,48 @@ function handleClick() {
 			</div>
 
 			<div class="min-w-0 flex-1">
-				<!-- Name with badges -->
-				<div class="flex items-center gap-1">
-					{#if enrichedData?.name}
-						<span
-							class="truncate text-sm font-medium {isBoosted
-								? 'text-bitcoin'
-								: 'text-primary dark:text-white'}"
-						>
-							{enrichedData.name}
+				<!-- Name with badges and distance -->
+				<div class="flex items-center justify-between gap-1">
+					<div class="flex items-center gap-1 min-w-0">
+						{#if enrichedData?.name}
+							<span
+								class="truncate text-sm font-medium {isBoosted
+									? 'text-bitcoin'
+									: 'text-primary dark:text-white'}"
+							>
+								{enrichedData.name}
+							</span>
+							{#if isVerified}
+								<Icon w="12" h="12" icon="verified" type="material" class="shrink-0 text-link" />
+							{/if}
+							{#if isBoosted}
+								<Icon
+									w="12"
+									h="12"
+									icon="arrow_circle_up"
+									type="material"
+									class="shrink-0 text-bitcoin"
+								/>
+							{/if}
+						{:else if showSkeleton}
+							<div class="h-4 w-32 animate-pulse rounded bg-link/50"></div>
+						{:else}
+							<span class="truncate text-sm font-medium text-primary dark:text-white"
+								>{$_('merchant.unknown')}</span
+							>
+						{/if}
+					</div>
+					{#if distanceDisplay}
+						<span class="shrink-0 text-xs text-gray-400 dark:text-white/40">
+							{distanceDisplay}
 						</span>
-						{#if isVerified}
-							<Icon w="12" h="12" icon="verified" type="material" class="shrink-0 text-link" />
-						{/if}
-						{#if isBoosted}
-							<Icon
-								w="12"
-								h="12"
-								icon="arrow_circle_up"
-								type="material"
-								class="shrink-0 text-bitcoin"
-							/>
-						{/if}
-					{:else if showSkeleton}
-						<div class="h-4 w-32 animate-pulse rounded bg-link/50"></div>
-					{:else}
-						<span class="truncate text-sm font-medium text-primary dark:text-white"
-							>{$_('merchant.unknown')}</span
-						>
 					{/if}
 				</div>
 
 				<!-- Address -->
-				{#if enrichedData?.address || distanceDisplay}
-					<p class="mt-0.5 flex gap-1 truncate text-xs text-body dark:text-white/70">
-						{#if enrichedData?.address}
-							<span class="truncate">{enrichedData.address}</span>
-						{/if}
-						{#if distanceDisplay}
-							<span class="shrink-0 text-gray-400 dark:text-white/40">• {distanceDisplay}</span>
-						{/if}
+				{#if enrichedData?.address}
+					<p class="mt-0.5 truncate text-xs text-body dark:text-white/70">
+						{enrichedData.address}
 					</p>
 				{:else if showSkeleton}
 					<div class="mt-0.5 h-3 w-24 animate-pulse rounded bg-link/50"></div>
