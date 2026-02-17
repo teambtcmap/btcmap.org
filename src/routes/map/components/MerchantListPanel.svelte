@@ -459,16 +459,16 @@ onDestroy(() => {
 						type="button"
 						on:click={handleEnableLocation}
 						class="flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors hover:bg-gray-50 dark:hover:bg-white/5"
-						aria-label="Enable precise distances"
+						aria-label={$_('search.enablePreciseDistances')}
 					>
 						<img src="/icons/locate.svg" alt="" class="h-4 w-4 dark:invert" />
-						<span class="text-primary dark:text-white">Enable precise distances</span>
+						<span class="text-primary dark:text-white">{$_('search.enablePreciseDistances')}</span>
 					</button>
 					<button
 						type="button"
 						on:click={handleDismissLocation}
 						class="shrink-0 rounded-md p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5"
-						aria-label="Dismiss"
+						aria-label={$_('search.clear')}
 					>
 						<Icon w="16" h="16" icon="close" type="material" />
 					</button>

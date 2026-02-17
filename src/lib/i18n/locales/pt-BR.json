@@ -49,7 +49,10 @@
 		"worldwide": "Mundial",
 		"nearby": "Próximo",
 		"switchToWorldwide": "Mudar para pesquisa mundial",
-		"filterResults": "Filtrar resultados próximos"
+		"filterResults": "Filtrar resultados próximos",
+		"placeholder": "Pesquisar...",
+		"ariaLabel": "Pesquisar ranking",
+		"enablePreciseDistances": "Ativar distâncias precisas"
 	},
 	"categories": {
 		"all": "Todos",
