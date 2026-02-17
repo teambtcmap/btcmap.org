@@ -22,6 +22,7 @@ import { merchantDrawer } from "$lib/merchantDrawerStore";
 import type { MerchantListMode } from "$lib/merchantListStore";
 import { merchantList } from "$lib/merchantListStore";
 import type { Place } from "$lib/types";
+import { userLocation } from "$lib/userLocationStore";
 import { formatNearbyCount } from "$lib/utils";
 
 import MerchantListItem from "./MerchantListItem.svelte";
@@ -165,6 +166,17 @@ $: isSearching = $merchantList.isSearching;
 $: searchQuery = $merchantList.searchQuery;
 $: selectedCategory = $merchantList.selectedCategory;
 $: categoryCounts = $merchantList.categoryCounts;
+
+// Location button state
+let locationRequestDismissed = false;
+
+function handleEnableLocation() {
+	userLocation.getLocationWithCache();
+}
+
+function handleDismissLocation() {
+	locationRequestDismissed = true;
+}
 
 // Filter search results by category
 $: filteredSearchResults =
@@ -439,6 +451,28 @@ onDestroy(() => {
 					</button>
 				{/if}
 			</div>
+
+			<!-- Location enable button - nearby mode only -->
+			{#if mode === 'nearby' && !$userLocation.location && !locationRequestDismissed}
+				<div class="mt-3 flex items-center gap-2 rounded-lg border border-gray-200 p-2 dark:border-white/10">
+					<button
+						type="button"
+						on:click={handleEnableLocation}
+						class="flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors hover:bg-gray-50 dark:hover:bg-white/5"
+					>
+						<img src="/icons/locate.svg" alt="" class="h-4 w-4" />
+						<span class="text-primary dark:text-white">Enable precise distances</span>
+					</button>
+					<button
+						type="button"
+						on:click={handleDismissLocation}
+						class="shrink-0 rounded-md p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5"
+						aria-label="Dismiss"
+					>
+						<Icon w="16" h="16" icon="close" type="material" />
+					</button>
+				</div>
+			{/if}
 		</div>
 
 		<!-- List content -->

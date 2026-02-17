@@ -7,7 +7,12 @@ import {
 	isUpToDate as checkUpToDate,
 } from "$lib/merchantDrawerLogic";
 import type { Place } from "$lib/types";
-import { formatVerifiedHuman } from "$lib/utils";
+import { userLocation } from "$lib/userLocationStore";
+import {
+	calculateDistance,
+	formatDistance,
+	formatVerifiedHuman,
+} from "$lib/utils";
 
 export let merchant: Place;
 export let enrichedData: Place | null = null;
@@ -26,6 +31,19 @@ $: hasPaymentMethods =
 
 $: isVerified = checkUpToDate(displayData, verifiedDate);
 $: isBoosted = checkBoosted(merchant);
+
+$: userLoc = $userLocation.location;
+$: distanceMeters =
+	userLoc && displayData?.lat && displayData?.lon
+		? calculateDistance(
+				userLoc.lat,
+				userLoc.lon,
+				displayData.lat,
+				displayData.lon,
+			) * 1000
+		: null;
+$: distanceDisplay =
+	distanceMeters !== null ? formatDistance(distanceMeters) : null;
 
 function handleClick() {
 	onclick(merchant);
@@ -85,9 +103,14 @@ function handleClick() {
 				</div>
 
 				<!-- Address -->
-				{#if enrichedData?.address}
-					<p class="mt-0.5 truncate text-xs text-body dark:text-white/70">
-						{enrichedData.address}
+				{#if enrichedData?.address || distanceDisplay}
+					<p class="mt-0.5 flex gap-1 truncate text-xs text-body dark:text-white/70">
+						{#if enrichedData?.address}
+							<span class="truncate">{enrichedData.address}</span>
+						{/if}
+						{#if distanceDisplay}
+							<span class="shrink-0 text-gray-400 dark:text-white/40">• {distanceDisplay}</span>
+						{/if}
 					</p>
 				{:else if showSkeleton}
 					<div class="mt-0.5 h-3 w-24 animate-pulse rounded bg-link/50"></div>
