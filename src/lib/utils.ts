@@ -441,13 +441,30 @@ function toRad(deg: number): number {
 	return deg * (Math.PI / 180);
 }
 
+function useMetricSystem(): boolean {
+	const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+	return !tz.startsWith("America/");
+}
+
 export function formatDistance(meters: number): string {
-	if (meters < 1000) {
-		return `${Math.round(meters)}m`;
+	if (useMetricSystem()) {
+		if (meters < 1000) {
+			return `${Math.round(meters)}m`;
+		}
+		const km = meters / 1000;
+		if (km < 10) {
+			return `${km.toFixed(1)}km`;
+		}
+		return `${Math.round(km)}km`;
 	}
-	const km = meters / 1000;
-	if (km < 10) {
-		return `${km.toFixed(1)}km`;
+
+	const feet = meters * 3.28084;
+	if (feet < 528) {
+		return `${Math.round(feet)}ft`;
 	}
-	return `${Math.round(km)}km`;
+	const miles = feet / 5280;
+	if (miles < 10) {
+		return `${miles.toFixed(1)}mi`;
+	}
+	return `${Math.round(miles)}mi`;
 }
