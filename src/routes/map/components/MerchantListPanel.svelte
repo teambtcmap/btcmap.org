@@ -460,7 +460,7 @@ onDestroy(() => {
 						on:click={handleEnableLocation}
 						class="flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors hover:bg-gray-50 dark:hover:bg-white/5"
 					>
-						<img src="/icons/locate.svg" alt="" class="h-4 w-4" />
+						<img src="/icons/locate.svg" alt="" class="h-4 w-4 dark:invert" />
 						<span class="text-primary dark:text-white">Enable precise distances</span>
 					</button>
 					<button
