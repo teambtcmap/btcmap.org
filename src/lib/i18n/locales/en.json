@@ -52,7 +52,9 @@
 		"filterResults": "Filter nearby results",
 		"placeholder": "Search...",
 		"ariaLabel": "Search leaderboard",
-		"enablePreciseDistances": "Enable precise distances"
+		"enablePreciseDistances": "Enable precise distances",
+		"locationPermissionDenied": "Location permission denied. Enable it in your browser settings.",
+		"locationUnavailable": "Could not determine your location. Please try again."
 	},
 	"categories": {
 		"all": "All",

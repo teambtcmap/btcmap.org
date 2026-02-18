@@ -23,7 +23,7 @@ import type { MerchantListMode } from "$lib/merchantListStore";
 import { merchantList } from "$lib/merchantListStore";
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
-import { formatNearbyCount } from "$lib/utils";
+import { errToast, formatNearbyCount } from "$lib/utils";
 
 import MerchantListItem from "./MerchantListItem.svelte";
 import { browser } from "$app/environment";
@@ -169,11 +169,27 @@ $: categoryCounts = $merchantList.categoryCounts;
 
 // Location button state
 let locationRequestDismissed = false;
+let isLoadingLocation = false;
 
 async function handleEnableLocation() {
-	const location = await userLocation.getLocationWithCache();
-	if (location) {
-		merchantList.reSortByUserLocation();
+	isLoadingLocation = true;
+	try {
+		const location = await userLocation.getLocationWithCache();
+		if (location) {
+			merchantList.reSortByUserLocation();
+		}
+	} catch (error) {
+		if (error instanceof GeolocationPositionError) {
+			if (error.code === error.PERMISSION_DENIED) {
+				errToast($_("search.locationPermissionDenied"));
+			} else {
+				errToast($_("search.locationUnavailable"));
+			}
+		} else {
+			errToast($_("search.locationUnavailable"));
+		}
+	} finally {
+		isLoadingLocation = false;
 	}
 }
 
@@ -461,10 +477,15 @@ onDestroy(() => {
 					<button
 						type="button"
 						on:click={handleEnableLocation}
-						class="flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors hover:bg-gray-50 dark:hover:bg-white/5"
+						disabled={isLoadingLocation}
+						class="flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors hover:bg-gray-50 disabled:opacity-50 dark:hover:bg-white/5"
 						aria-label={$_('search.enablePreciseDistances')}
 					>
-						<img src="/icons/locate.svg" alt="" class="h-4 w-4 dark:invert" />
+						{#if isLoadingLocation}
+							<LoadingSpinner color="text-primary dark:text-white" size="h-4 w-4" />
+						{:else}
+							<img src="/icons/locate.svg" alt="" class="h-4 w-4 dark:invert" />
+						{/if}
 						<span class="text-primary dark:text-white">{$_('search.enablePreciseDistances')}</span>
 					</button>
 					<button

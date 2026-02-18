@@ -52,7 +52,9 @@
 		"filterResults": "Filtrar resultados próximos",
 		"placeholder": "Pesquisar...",
 		"ariaLabel": "Pesquisar ranking",
-		"enablePreciseDistances": "Ativar distâncias precisas"
+		"enablePreciseDistances": "Ativar distâncias precisas",
+		"locationPermissionDenied": "Permissão de localização negada. Ative-a nas configurações do navegador.",
+		"locationUnavailable": "Não foi possível determinar sua localização. Tente novamente."
 	},
 	"categories": {
 		"all": "Todos",
