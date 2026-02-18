@@ -101,16 +101,9 @@ function createUserLocationStore() {
 		return fetchAndUpdateStore();
 	}
 
-	async function getLocation(): Promise<UserLocation | null> {
-		if (!browser) return null;
-
-		return fetchAndUpdateStore();
-	}
-
 	return {
 		subscribe,
 		getLocationWithCache,
-		getLocation,
 	};
 }
 
