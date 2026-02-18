@@ -552,7 +552,7 @@ onDestroy(() => {
 						{$_('categories.noMatches')}
 					</div>
 				{:else}
-					<ul class="flex flex-col gap-2 bg-[#FAFAF8] p-2 dark:bg-white/5">
+					<ul class="flex flex-col gap-2 bg-[#FAFAF8] p-2 dark:bg-white/10">
 						{#each filteredSearchResults as merchant (merchant.id)}
 							<MerchantListItem
 								{merchant}
@@ -611,7 +611,7 @@ onDestroy(() => {
 						{$_('search.noResultsFor', { values: { query: nearbyFilter } })}
 					</div>
 				{:else}
-					<ul class="flex flex-col gap-2 bg-[#FAFAF8] p-2 dark:bg-white/5">
+					<ul class="flex flex-col gap-2 bg-[#FAFAF8] p-2 dark:bg-white/10">
 						{#each filteredMerchants as merchant (merchant.id)}
 							<MerchantListItem
 								{merchant}
