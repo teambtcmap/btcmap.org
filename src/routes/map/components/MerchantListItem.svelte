@@ -62,6 +62,7 @@ function handleClick() {
 			? 'bg-link/5 dark:bg-link/10'
 			: ''}"
 		aria-current={isSelected ? 'true' : undefined}
+		aria-describedby={distanceDisplay ? `distance-${merchant.id}` : undefined}
 	>
 		<div class="flex items-start gap-3">
 			<!-- Icon -->
@@ -107,8 +108,8 @@ function handleClick() {
 					</div>
 					{#if distanceDisplay}
 						<span
+							id="distance-{merchant.id}"
 							class="shrink-0 text-xs text-gray-400 dark:text-white/40"
-							aria-label="{distanceDisplay} {$_('merchant.distanceAway')}"
 						>
 							{distanceDisplay}
 						</span>
