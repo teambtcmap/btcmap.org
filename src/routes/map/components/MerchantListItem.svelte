@@ -35,7 +35,9 @@ $: isBoosted = checkBoosted(merchant);
 $: userLoc = $userLocation.location;
 $: usesMetric = $userLocation.usesMetricSystem;
 $: distanceKm =
-	userLoc && displayData?.lat && displayData?.lon
+	userLoc &&
+	Number.isFinite(displayData?.lat) &&
+	Number.isFinite(displayData?.lon)
 		? calculateDistance(
 				userLoc.lat,
 				userLoc.lon,
