@@ -484,7 +484,7 @@ onDestroy(() => {
 						{#if isLoadingLocation}
 							<LoadingSpinner color="text-primary dark:text-white" size="h-4 w-4" />
 						{:else}
-							<img src="/icons/locate.svg" alt="" class="h-4 w-4 dark:invert" />
+							<Icon w="16" h="16" icon="my_location" type="material" class="text-primary dark:text-white" />
 						{/if}
 						<span class="text-primary dark:text-white">{$_('search.enablePreciseDistances')}</span>
 					</button>
