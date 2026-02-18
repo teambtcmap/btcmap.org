@@ -89,6 +89,11 @@ $: distanceDisplay =
 		? formatDistance(distanceKm, usesMetric)
 		: null;
 
+$: borderColor =
+	enrichedData && isVerified
+		? "border-l-[3px] border-l-green-600 dark:border-l-green-500"
+		: "";
+
 function handleClick() {
 	onclick(merchant);
 }
@@ -99,7 +104,7 @@ function handleClick() {
 		on:click={handleClick}
 		on:mouseenter={() => onmouseenter(merchant)}
 		on:mouseleave={() => onmouseleave(merchant)}
-		class="w-full rounded-lg bg-white px-3 py-3 text-left transition-colors hover:bg-gray-50 dark:bg-dark dark:hover:bg-white/5 {isSelected
+		class="w-full rounded-lg rounded-l-none bg-white px-3 py-3 text-left transition-colors hover:bg-gray-50 dark:bg-dark dark:hover:bg-white/5 {borderColor} {isSelected
 			? 'bg-link/5 dark:bg-link/10'
 			: ''}"
 		aria-current={isSelected ? 'true' : undefined}
