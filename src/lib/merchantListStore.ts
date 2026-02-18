@@ -13,7 +13,7 @@ import { MERCHANT_LIST_MAX_ITEMS } from "$lib/constants";
 import { isBoosted } from "$lib/merchantDrawerLogic";
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
-import { errToast } from "$lib/utils";
+import { calculateDistance, errToast } from "$lib/utils";
 
 export type MerchantListMode = "nearby" | "search";
 
@@ -81,20 +81,6 @@ function applyCategoryFilter(
 	return { filtered, effectiveCategory };
 }
 
-// Equirectangular approximation for local distance sorting
-// Uses squared distance (avoids sqrt) since we only need relative ordering
-// Cosine adjustment accounts for longitude distortion at different latitudes
-function getDistanceSquared(
-	lat1: number,
-	lon1: number,
-	lat2: number,
-	lon2: number,
-): number {
-	const dx = (lon2 - lon1) * Math.cos(((lat1 + lat2) / 2) * (Math.PI / 180));
-	const dy = lat2 - lat1;
-	return dx * dx + dy * dy;
-}
-
 // Sort order: boosted merchants first (premium placement), then by distance, then alphabetically
 function sortMerchants(
 	merchants: Place[],
@@ -114,8 +100,8 @@ function sortMerchants(
 
 		// Then by distance
 		if (sortLat !== undefined && sortLon !== undefined) {
-			const distA = getDistanceSquared(sortLat, sortLon, a.lat, a.lon);
-			const distB = getDistanceSquared(sortLat, sortLon, b.lat, b.lon);
+			const distA = calculateDistance(sortLat, sortLon, a.lat, a.lon);
+			const distB = calculateDistance(sortLat, sortLon, b.lat, b.lon);
 			return distA - distB;
 		}
 

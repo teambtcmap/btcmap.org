@@ -8,12 +8,14 @@ import type { Place } from "$lib/types";
 // Mock axios
 vi.mock("axios");
 
-// Mock errToast
-vi.mock("$lib/utils", () => ({
-	errToast: vi.fn(),
-	isBoosted: (place: Place) =>
-		place.boosted_until && new Date(place.boosted_until) > new Date(),
-}));
+// Mock errToast and calculateDistance
+vi.mock("$lib/utils", async () => {
+	const actual = await vi.importActual("$lib/utils");
+	return {
+		...actual,
+		errToast: vi.fn(),
+	};
+});
 
 // Mock isBoosted from merchantDrawerLogic
 vi.mock("$lib/merchantDrawerLogic", () => ({
@@ -22,8 +24,9 @@ vi.mock("$lib/merchantDrawerLogic", () => ({
 }));
 
 // Mock userLocationStore - must return proper store value for get()
-vi.mock("$lib/userLocationStore", () => {
-	const { writable } = require("svelte/store");
+vi.mock("$lib/userLocationStore", async () => {
+	const { writable } =
+		await vi.importActual<typeof import("svelte/store")>("svelte/store");
 	const mockStore = writable({
 		location: null,
 		lastUpdated: null,
