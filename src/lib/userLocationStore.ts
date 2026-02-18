@@ -13,6 +13,9 @@ interface UserLocationState {
 	usesMetricSystem: boolean | null;
 }
 
+// Cache location for 5 minutes - balances freshness with battery life and
+// avoiding repeated permission prompts. User location typically doesn't change
+// rapidly unless traveling at high speed.
 const DEFAULT_CACHE_AGE_MS = 5 * 60 * 1000;
 
 const initialState: UserLocationState = {
