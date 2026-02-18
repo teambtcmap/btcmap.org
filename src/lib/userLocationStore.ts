@@ -68,24 +68,20 @@ function createUserLocationStore() {
 	const store = writable<UserLocationState>(initialState);
 	const { subscribe } = store;
 
-	async function fetchAndUpdateStore(): Promise<UserLocation | null> {
-		try {
-			const position = await getCurrentPosition();
-			const location: UserLocation = {
-				lat: position.latitude,
-				lon: position.longitude,
-			};
+	async function fetchAndUpdateStore(): Promise<UserLocation> {
+		const position = await getCurrentPosition();
+		const location: UserLocation = {
+			lat: position.latitude,
+			lon: position.longitude,
+		};
 
-			store.set({
-				location,
-				lastUpdated: Date.now(),
-				usesMetricSystem: !isInImperialCountry(location.lat, location.lon),
-			});
+		store.set({
+			location,
+			lastUpdated: Date.now(),
+			usesMetricSystem: !isInImperialCountry(location.lat, location.lon),
+		});
 
-			return location;
-		} catch {
-			return null;
-		}
+		return location;
 	}
 
 	async function getLocationWithCache(

@@ -177,13 +177,11 @@ let merchantListContainer: HTMLDivElement;
 async function handleEnableLocation() {
 	isLoadingLocation = true;
 	try {
-		const location = await userLocation.getLocationWithCache();
-		if (location) {
-			merchantList.reSortByUserLocation();
-			locationAnnouncement = $_("search.locationEnabled");
-			await tick();
-			merchantListContainer?.focus();
-		}
+		await userLocation.getLocationWithCache();
+		merchantList.reSortByUserLocation();
+		locationAnnouncement = $_("search.locationEnabled");
+		await tick();
+		merchantListContainer?.focus();
 	} catch (error) {
 		if (error instanceof GeolocationPositionError) {
 			if (error.code === error.PERMISSION_DENIED) {
