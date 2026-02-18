@@ -89,20 +89,29 @@ function sortMerchants(
 	centerLon?: number,
 	userLoc?: UserLocation | null,
 ): Place[] {
+	// Use user location if available, otherwise fall back to map center
+	const sortLat = userLoc?.lat ?? centerLat;
+	const sortLon = userLoc?.lon ?? centerLon;
+
+	// Precompute distances once per merchant to avoid redundant trig inside the comparator
+	const distanceMap =
+		sortLat !== undefined && sortLon !== undefined
+			? new Map(
+					merchants.map((m) => [
+						m.id,
+						calculateDistance(sortLat, sortLon, m.lat, m.lon),
+					]),
+				)
+			: null;
+
 	return [...merchants].sort((a, b) => {
 		// Boosted first
 		if (isBoosted(a) && !isBoosted(b)) return -1;
 		if (!isBoosted(a) && isBoosted(b)) return 1;
 
-		// Use user location if available, otherwise fall back to map center
-		const sortLat = userLoc?.lat ?? centerLat;
-		const sortLon = userLoc?.lon ?? centerLon;
-
 		// Then by distance
-		if (sortLat !== undefined && sortLon !== undefined) {
-			const distA = calculateDistance(sortLat, sortLon, a.lat, a.lon);
-			const distB = calculateDistance(sortLat, sortLon, b.lat, b.lon);
-			return distA - distB;
+		if (distanceMap) {
+			return (distanceMap.get(a.id) ?? 0) - (distanceMap.get(b.id) ?? 0);
 		}
 
 		// Fallback to alphabetical
