@@ -121,7 +121,7 @@ function handleClick() {
 			</div>
 
 			<div class="min-w-0 flex-1">
-				<!-- Name with badges -->
+				<!-- Name -->
 				<div class="flex items-center justify-between gap-1">
 					<div class="flex items-center gap-1 min-w-0">
 						{#if enrichedData?.name}
@@ -149,19 +149,6 @@ function handleClick() {
 						</span>
 					{/if}
 				</div>
-				{#if distanceDisplay}
-					<!-- Visible short distance label -->
-					<span
-						class="shrink-0 text-xs text-gray-400 dark:text-white/40"
-						aria-hidden="true"
-					>
-						{distanceDisplay}
-					</span>
-					<!-- Full phrase for screen readers via aria-describedby on the parent button -->
-					<span id="distance-{merchant.id}" class="sr-only">
-						{$_('merchant.distanceAway', { values: { distance: distanceDisplay } })}
-					</span>
-				{/if}
 
 				<!-- Address -->
 				{#if enrichedData?.address}
