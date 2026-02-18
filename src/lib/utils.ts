@@ -416,6 +416,10 @@ export function escapeHtml(text: string): string {
 
 const EARTH_RADIUS_KM = 6371;
 
+function toRad(deg: number): number {
+	return deg * (Math.PI / 180);
+}
+
 export function calculateDistance(
 	lat1: number,
 	lon1: number,
@@ -435,10 +439,6 @@ export function calculateDistance(
 			Math.cos(lat2Rad);
 	const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 	return EARTH_RADIUS_KM * c;
-}
-
-function toRad(deg: number): number {
-	return deg * (Math.PI / 180);
 }
 
 export function formatDistance(km: number, useMetric: boolean): string {
