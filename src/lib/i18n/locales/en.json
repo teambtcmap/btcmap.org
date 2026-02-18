@@ -84,6 +84,7 @@
 		"comments": "Comments",
 		"commentsCount": "Comments ({count})",
 		"unknown": "Unknown",
+		"distanceAway": "away",
 		"deletedBanner": "This merchant has been removed.",
 		"deletedNotice": "This merchant has been removed from BTC Map and may no longer accept Bitcoin.",
 		"deletedDetail": "The data shown below is outdated and for reference only.",

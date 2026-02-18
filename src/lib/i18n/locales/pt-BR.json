@@ -84,6 +84,7 @@
 		"comments": "Comentários",
 		"commentsCount": "Comentários ({count})",
 		"unknown": "Desconhecido",
+		"distanceAway": "de distância",
 		"deletedBanner": "Este comerciante foi removido.",
 		"deletedNotice": "Este comerciante foi removido do BTC Map e pode não aceitar mais Bitcoin.",
 		"deletedDetail": "Os dados mostrados abaixo estão desatualizados e são apenas para referência.",

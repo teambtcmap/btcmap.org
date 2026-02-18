@@ -106,7 +106,10 @@ function handleClick() {
 						{/if}
 					</div>
 					{#if distanceDisplay}
-						<span class="shrink-0 text-xs text-gray-400 dark:text-white/40">
+						<span
+							class="shrink-0 text-xs text-gray-400 dark:text-white/40"
+							aria-label="{distanceDisplay} {$_('merchant.distanceAway')}"
+						>
 							{distanceDisplay}
 						</span>
 					{/if}
