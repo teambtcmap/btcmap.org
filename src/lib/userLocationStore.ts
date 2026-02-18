@@ -10,6 +10,7 @@ export interface UserLocation {
 interface UserLocationState {
 	location: UserLocation | null;
 	lastUpdated: number | null;
+	usesMetricSystem: boolean | null;
 }
 
 const DEFAULT_CACHE_AGE_MS = 5 * 60 * 1000;
@@ -17,7 +18,15 @@ const DEFAULT_CACHE_AGE_MS = 5 * 60 * 1000;
 const initialState: UserLocationState = {
 	location: null,
 	lastUpdated: null,
+	usesMetricSystem: null,
 };
+
+function isInImperialCountry(lat: number, lon: number): boolean {
+	const inContiguousUS = lat >= 24 && lat <= 49 && lon >= -125 && lon <= -66;
+	const inAlaska = lat >= 54 && lat <= 71 && lon >= -179 && lon <= -129;
+	const inHawaii = lat >= 18 && lat <= 23 && lon >= -161 && lon <= -154;
+	return inContiguousUS || inAlaska || inHawaii;
+}
 
 function getCurrentPosition(): Promise<{
 	latitude: number;
@@ -76,6 +85,7 @@ function createUserLocationStore() {
 			store.set({
 				location,
 				lastUpdated: Date.now(),
+				usesMetricSystem: !isInImperialCountry(location.lat, location.lon),
 			});
 
 			return location;
@@ -97,6 +107,7 @@ function createUserLocationStore() {
 			store.set({
 				location,
 				lastUpdated: Date.now(),
+				usesMetricSystem: !isInImperialCountry(location.lat, location.lon),
 			});
 
 			return location;

@@ -33,6 +33,7 @@ $: isVerified = checkUpToDate(displayData, verifiedDate);
 $: isBoosted = checkBoosted(merchant);
 
 $: userLoc = $userLocation.location;
+$: usesMetric = $userLocation.usesMetricSystem;
 $: distanceMeters =
 	userLoc && displayData?.lat && displayData?.lon
 		? calculateDistance(
@@ -43,7 +44,9 @@ $: distanceMeters =
 			) * 1000
 		: null;
 $: distanceDisplay =
-	distanceMeters !== null ? formatDistance(distanceMeters) : null;
+	distanceMeters !== null && usesMetric !== null
+		? formatDistance(distanceMeters, usesMetric)
+		: null;
 
 function handleClick() {
 	onclick(merchant);

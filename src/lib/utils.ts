@@ -441,18 +441,8 @@ function toRad(deg: number): number {
 	return deg * (Math.PI / 180);
 }
 
-let metricSystemCache: boolean | null = null;
-
-function useMetricSystem(): boolean {
-	if (metricSystemCache === null) {
-		const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-		metricSystemCache = !tz.startsWith("America/");
-	}
-	return metricSystemCache;
-}
-
-export function formatDistance(meters: number): string {
-	if (useMetricSystem()) {
+export function formatDistance(meters: number, useMetric: boolean): string {
+	if (useMetric) {
 		if (meters < 1000) {
 			return `${Math.round(meters)}m`;
 		}
