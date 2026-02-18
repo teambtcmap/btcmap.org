@@ -219,11 +219,6 @@ function handleClick() {
 						<span class="flex items-center gap-1 text-gray-500 dark:text-white/60">
 							<Icon w="12" h="12" icon={isVerified ? 'verified' : 'warning'} type="material" />
 							{isVerified ? $_('verification.verified') : $_('verification.outdated')}
-							{#if enrichedData.verified_at}
-								<span class="text-gray-400 dark:text-white/40"
-									>· {formatVerifiedHuman(enrichedData.verified_at)}</span
-								>
-							{/if}
 						</span>
 					</div>
 				{:else if showSkeleton}
