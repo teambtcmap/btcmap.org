@@ -54,7 +54,8 @@
 		"ariaLabel": "Search leaderboard",
 		"enablePreciseDistances": "Enable precise distances",
 		"locationPermissionDenied": "Location permission denied. Enable it in your browser settings.",
-		"locationUnavailable": "Could not determine your location. Please try again."
+		"locationUnavailable": "Could not determine your location. Please try again.",
+		"locationEnabled": "Location enabled. List sorted by distance."
 	},
 	"categories": {
 		"all": "All",

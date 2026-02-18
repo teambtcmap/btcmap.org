@@ -54,7 +54,8 @@
 		"ariaLabel": "Pesquisar ranking",
 		"enablePreciseDistances": "Ativar distâncias precisas",
 		"locationPermissionDenied": "Permissão de localização negada. Ative-a nas configurações do navegador.",
-		"locationUnavailable": "Não foi possível determinar sua localização. Tente novamente."
+		"locationUnavailable": "Não foi possível determinar sua localização. Tente novamente.",
+		"locationEnabled": "Localização ativada. Lista ordenada por distância."
 	},
 	"categories": {
 		"all": "Todos",

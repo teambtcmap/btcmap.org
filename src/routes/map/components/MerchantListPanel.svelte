@@ -170,6 +170,7 @@ $: categoryCounts = $merchantList.categoryCounts;
 // Location button state
 let locationRequestDismissed = false;
 let isLoadingLocation = false;
+let locationAnnouncement = "";
 
 async function handleEnableLocation() {
 	isLoadingLocation = true;
@@ -177,6 +178,7 @@ async function handleEnableLocation() {
 		const location = await userLocation.getLocationWithCache();
 		if (location) {
 			merchantList.reSortByUserLocation();
+			locationAnnouncement = $_("search.locationEnabled");
 		}
 	} catch (error) {
 		if (error instanceof GeolocationPositionError) {
@@ -329,6 +331,10 @@ onDestroy(() => {
 		role="complementary"
 		aria-label={$_('aria.merchantList')}
 	>
+		<!-- Screen reader announcement for location changes -->
+		{#if locationAnnouncement}
+			<p class="sr-only" aria-live="polite">{locationAnnouncement}</p>
+		{/if}
 		<!-- Search input - uses shared SearchInput component -->
 		<div class="shrink-0 border-b border-gray-100 dark:border-white/10">
 			<SearchInput
