@@ -121,7 +121,7 @@ function handleClick() {
 			</div>
 
 			<div class="min-w-0 flex-1">
-				<!-- Name with badges and distance -->
+				<!-- Name with badges -->
 				<div class="flex items-center justify-between gap-1">
 					<div class="flex items-center gap-1 min-w-0">
 						{#if enrichedData?.name}
@@ -132,18 +132,6 @@ function handleClick() {
 							>
 								{enrichedData.name}
 							</span>
-							{#if isVerified}
-								<Icon w="12" h="12" icon="verified" type="material" class="shrink-0 text-link" />
-							{/if}
-							{#if isBoosted}
-								<Icon
-									w="12"
-									h="12"
-									icon="arrow_circle_up"
-									type="material"
-									class="shrink-0 text-bitcoin"
-								/>
-							{/if}
 						{:else if showSkeleton}
 							<div class="h-4 w-32 animate-pulse rounded bg-link/50"></div>
 						{:else}
@@ -152,6 +140,15 @@ function handleClick() {
 							>
 						{/if}
 					</div>
+					{#if distanceDisplay}
+						<span
+							class="shrink-0 text-xs text-gray-400 dark:text-white/40"
+							aria-hidden="true"
+						>
+							{distanceDisplay}
+						</span>
+					{/if}
+				</div>
 				{#if distanceDisplay}
 					<!-- Visible short distance label -->
 					<span
@@ -165,7 +162,6 @@ function handleClick() {
 						{$_('merchant.distanceAway', { values: { distance: distanceDisplay } })}
 					</span>
 				{/if}
-				</div>
 
 				<!-- Address -->
 				{#if enrichedData?.address}
@@ -216,7 +212,7 @@ function handleClick() {
 								{$_('boost.boosted')}
 							</span>
 						{/if}
-						<span class="flex items-center gap-1 text-gray-500 dark:text-white/60">
+						<span class="flex items-center gap-1 {isVerified ? 'text-green-600 dark:text-green-500' : 'text-gray-500 dark:text-white/60'}">
 							<Icon w="12" h="12" icon={isVerified ? 'verified' : 'warning'} type="material" />
 							{isVerified ? $_('verification.verified') : $_('verification.outdated')}
 						</span>
