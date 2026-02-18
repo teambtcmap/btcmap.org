@@ -2,16 +2,16 @@ import { get, writable } from "svelte/store";
 
 import { browser } from "$app/environment";
 
-export interface UserLocation {
+export type UserLocation = {
 	lat: number;
 	lon: number;
-}
+};
 
-interface UserLocationState {
+type UserLocationState = {
 	location: UserLocation | null;
 	lastUpdated: number | null;
 	usesMetricSystem: boolean | null;
-}
+};
 
 // Cache location for 5 minutes - balances freshness with battery life and
 // avoiding repeated permission prompts. User location typically doesn't change
