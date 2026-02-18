@@ -93,7 +93,7 @@ function createUserLocationStore() {
 
 			return location;
 		} catch {
-			return currentState?.location ?? null;
+			return null;
 		}
 	}
 
