@@ -24,7 +24,11 @@ vi.mock("$lib/merchantDrawerLogic", () => ({
 // Mock userLocationStore - must return proper store value for get()
 vi.mock("$lib/userLocationStore", () => {
 	const { writable } = require("svelte/store");
-	const mockStore = writable({ location: null, lastUpdated: null });
+	const mockStore = writable({
+		location: null,
+		lastUpdated: null,
+		usesMetricSystem: null,
+	});
 	return {
 		userLocation: mockStore,
 		getLocationWithCache: vi.fn().mockResolvedValue(null),
