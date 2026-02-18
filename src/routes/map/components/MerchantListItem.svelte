@@ -1,6 +1,7 @@
 <script lang="ts">
 import Icon from "$components/Icon.svelte";
 import PaymentMethodIcon from "$components/PaymentMethodIcon.svelte";
+import { CATEGORY_GROUPS } from "$lib/categoryMapping";
 import { _ } from "$lib/i18n";
 import {
 	isBoosted as checkBoosted,
@@ -14,26 +15,42 @@ import {
 	formatVerifiedHuman,
 } from "$lib/utils";
 
-const CATEGORY_COLORS: Record<string, string> = {
-	restaurant:
+const FALLBACK_COLORS = [
+	"orange",
+	"emerald",
+	"amber",
+	"blue",
+	"purple",
+	"pink",
+];
+
+function getIconColor(icon: string | undefined): string {
+	if (!icon) return "";
+
+	for (const [_key, group] of Object.entries(CATEGORY_GROUPS)) {
+		const icons = group.icons as string[];
+		const color = (group as { color?: string }).color;
+		if (icons.includes(icon) && color) {
+			return color;
+		}
+	}
+
+	const fallbackIndex = icon.charCodeAt(0) % FALLBACK_COLORS.length;
+	return FALLBACK_COLORS[fallbackIndex];
+}
+
+const COLOR_CLASSES: Record<string, string> = {
+	orange:
 		"bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
-	local_pizza:
-		"bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
-	lunch_dining:
-		"bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
-	storefront:
+	emerald:
 		"bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
-	local_mall:
-		"bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
-	local_grocery_store:
-		"bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
-	local_cafe:
-		"bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
-	local_atm:
-		"bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
-	hotel: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
-	content_cut:
+	amber: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+	blue: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+	purple:
 		"bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
+	pink: "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300",
+	yellow:
+		"bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
 };
 
 export let merchant: Place;
@@ -91,8 +108,8 @@ function handleClick() {
 		<div class="flex items-start gap-3">
 			<!-- Icon -->
 			<div
-				class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg {CATEGORY_COLORS[
-					merchant.icon
+				class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg {COLOR_CLASSES[
+					getIconColor(merchant.icon)
 				] || 'bg-primary/10 text-primary dark:bg-white/10 dark:text-white'}"
 			>
 				<Icon w="22" h="22" icon={merchant.icon || 'currency_bitcoin'} type="material" />

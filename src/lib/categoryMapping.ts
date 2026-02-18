@@ -4,34 +4,42 @@ export const CATEGORY_GROUPS = {
 	all: {
 		label: "All",
 		icons: [] as string[],
+		color: "",
 	},
 	restaurants: {
 		label: "Restaurants",
 		icons: ["restaurant", "local_pizza", "lunch_dining"],
+		color: "orange",
 	},
 	shopping: {
 		label: "Shopping",
 		icons: ["storefront", "local_mall"],
+		color: "emerald",
 	},
 	groceries: {
 		label: "Groceries",
 		icons: ["local_grocery_store"],
+		color: "emerald",
 	},
 	coffee: {
 		label: "Coffee",
 		icons: ["local_cafe"],
+		color: "amber",
 	},
 	atms: {
 		label: "ATMs",
 		icons: ["local_atm"],
+		color: "yellow",
 	},
 	hotels: {
 		label: "Hotels",
 		icons: ["hotel"],
+		color: "blue",
 	},
 	beauty: {
 		label: "Beauty Salons",
 		icons: ["content_cut"],
+		color: "purple",
 	},
 } as const;
 
