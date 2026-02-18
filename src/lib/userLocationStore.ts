@@ -24,11 +24,11 @@ const initialState: UserLocationState = {
 	usesMetricSystem: null,
 };
 
-// Detects if coordinates are in the United States (the only major country
-// still primarily using imperial units). Returns true for US locations,
-// false otherwise.
-// Note: This does not account for UK mixed usage or other edge cases.
-function isInImperialCountry(lat: number, lon: number): boolean {
+// Detects if coordinates are within United States bounding boxes (contiguous US,
+// Alaska, Hawaii). Used as a proxy for imperial unit preference.
+// Note: Other imperial-using countries (Liberia, Myanmar) and UK mixed usage
+// are not handled — they will resolve to metric.
+function isInUnitedStates(lat: number, lon: number): boolean {
 	const inContiguousUS = lat >= 24 && lat <= 49 && lon >= -125 && lon <= -66;
 	const inAlaska = lat >= 54 && lat <= 71 && lon >= -179 && lon <= -129;
 	const inHawaii = lat >= 18 && lat <= 23 && lon >= -161 && lon <= -154;
@@ -78,7 +78,7 @@ function createUserLocationStore() {
 		store.set({
 			location,
 			lastUpdated: Date.now(),
-			usesMetricSystem: !isInImperialCountry(location.lat, location.lon),
+			usesMetricSystem: !isInUnitedStates(location.lat, location.lon),
 		});
 
 		return location;
