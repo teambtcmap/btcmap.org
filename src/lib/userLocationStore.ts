@@ -24,6 +24,10 @@ const initialState: UserLocationState = {
 	usesMetricSystem: null,
 };
 
+// Detects if coordinates are in the United States (the only major country
+// still primarily using imperial units). Returns true for US locations,
+// false otherwise.
+// Note: This does not account for UK mixed usage or other edge cases.
 function isInImperialCountry(lat: number, lon: number): boolean {
 	const inContiguousUS = lat >= 24 && lat <= 49 && lon >= -125 && lon <= -66;
 	const inAlaska = lat >= 54 && lat <= 71 && lon >= -179 && lon <= -129;
