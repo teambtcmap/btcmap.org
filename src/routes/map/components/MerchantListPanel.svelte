@@ -483,7 +483,7 @@ onDestroy(() => {
 
 			<!-- Location enable button - nearby mode only -->
 			{#if mode === 'nearby' && !$userLocation.location && !locationRequestDismissed}
-				<div class="mt-3 flex items-center gap-2 rounded-lg border border-gray-200 p-2 dark:border-white/10">
+				<div role="status" class="mt-3 flex items-center gap-2 rounded-lg border border-gray-200 p-2 dark:border-white/10">
 					<button
 						bind:this={locationButton}
 						type="button"
