@@ -14,6 +14,28 @@ import {
 	formatVerifiedHuman,
 } from "$lib/utils";
 
+const CATEGORY_COLORS: Record<string, string> = {
+	restaurant:
+		"bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
+	local_pizza:
+		"bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
+	lunch_dining:
+		"bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
+	storefront:
+		"bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
+	local_mall:
+		"bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
+	local_grocery_store:
+		"bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
+	local_cafe:
+		"bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+	local_atm:
+		"bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
+	hotel: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+	content_cut:
+		"bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
+};
+
 export let merchant: Place;
 export let enrichedData: Place | null = null;
 export let isSelected: boolean = false;
@@ -55,12 +77,12 @@ function handleClick() {
 }
 </script>
 
-<li class="list-none">
+	<li class="list-none">
 	<button
 		on:click={handleClick}
 		on:mouseenter={() => onmouseenter(merchant)}
 		on:mouseleave={() => onmouseleave(merchant)}
-		class="w-full px-3 py-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-white/5 {isSelected
+		class="w-full rounded-lg bg-white px-3 py-3 text-left transition-colors hover:bg-gray-50 dark:bg-dark dark:hover:bg-white/5 {isSelected
 			? 'bg-link/5 dark:bg-link/10'
 			: ''}"
 		aria-current={isSelected ? 'true' : undefined}
@@ -69,9 +91,9 @@ function handleClick() {
 		<div class="flex items-start gap-3">
 			<!-- Icon -->
 			<div
-				class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg {isBoosted
-					? 'bg-bitcoin/10 text-bitcoin'
-					: 'bg-primary/10 text-primary dark:bg-white/10 dark:text-white'}"
+				class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg {CATEGORY_COLORS[
+					merchant.icon
+				] || 'bg-primary/10 text-primary dark:bg-white/10 dark:text-white'}"
 			>
 				<Icon w="22" h="22" icon={merchant.icon || 'currency_bitcoin'} type="material" />
 			</div>

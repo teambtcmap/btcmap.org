@@ -552,7 +552,7 @@ onDestroy(() => {
 						{$_('categories.noMatches')}
 					</div>
 				{:else}
-					<ul class="divide-y divide-gray-100 dark:divide-white/5">
+					<ul class="flex flex-col gap-2 bg-[#F7F6F4] p-2 dark:bg-white/5">
 						{#each filteredSearchResults as merchant (merchant.id)}
 							<MerchantListItem
 								{merchant}
@@ -597,21 +597,21 @@ onDestroy(() => {
 				<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
 					{$_('search.noVisible')}
 				</div>
-			{:else}
-				<!-- Nearby mode: merchant list -->
-				{@const filteredMerchants = nearbyFilter
-					? merchants.filter((m) => {
-							const enriched = placeDetailsCache.get(m.id);
-							const name = enriched?.name || m.name || '';
-							return name.toLowerCase().includes(nearbyFilter.toLowerCase());
-						})
-					: merchants}
+				{:else}
+					<!-- Nearby mode: merchant list -->
+					{@const filteredMerchants = nearbyFilter
+						? merchants.filter((m) => {
+								const enriched = placeDetailsCache.get(m.id);
+								const name = enriched?.name || m.name || '';
+								return name.toLowerCase().includes(nearbyFilter.toLowerCase());
+							})
+						: merchants}
 				{#if filteredMerchants.length === 0 && nearbyFilter}
 					<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
 						{$_('search.noResultsFor', { values: { query: nearbyFilter } })}
 					</div>
 				{:else}
-					<ul class="divide-y divide-gray-100 dark:divide-white/5">
+					<ul class="flex flex-col gap-2 bg-[#F7F6F4] p-2 dark:bg-white/5">
 						{#each filteredMerchants as merchant (merchant.id)}
 							<MerchantListItem
 								{merchant}
