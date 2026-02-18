@@ -171,6 +171,8 @@ $: categoryCounts = $merchantList.categoryCounts;
 let locationRequestDismissed = false;
 let isLoadingLocation = false;
 let locationAnnouncement = "";
+let locationButton: HTMLButtonElement;
+let merchantListContainer: HTMLDivElement;
 
 async function handleEnableLocation() {
 	isLoadingLocation = true;
@@ -179,6 +181,8 @@ async function handleEnableLocation() {
 		if (location) {
 			merchantList.reSortByUserLocation();
 			locationAnnouncement = $_("search.locationEnabled");
+			await tick();
+			merchantListContainer?.focus();
 		}
 	} catch (error) {
 		if (error instanceof GeolocationPositionError) {
@@ -190,6 +194,8 @@ async function handleEnableLocation() {
 		} else {
 			errToast($_("search.locationUnavailable"));
 		}
+		await tick();
+		locationButton?.focus();
 	} finally {
 		isLoadingLocation = false;
 	}
@@ -481,6 +487,7 @@ onDestroy(() => {
 			{#if mode === 'nearby' && !$userLocation.location && !locationRequestDismissed}
 				<div class="mt-3 flex items-center gap-2 rounded-lg border border-gray-200 p-2 dark:border-white/10">
 					<button
+						bind:this={locationButton}
 						type="button"
 						on:click={handleEnableLocation}
 						disabled={isLoadingLocation}
@@ -507,7 +514,11 @@ onDestroy(() => {
 		</div>
 
 		<!-- List content -->
-		<div class="flex-1 overflow-y-auto">
+		<div
+			bind:this={merchantListContainer}
+			class="flex-1 overflow-y-auto"
+			tabindex="-1"
+		>
 			{#if mode === 'search'}
 				<!-- Search results -->
 				{#if isSearching}
