@@ -23,7 +23,7 @@ vi.mock("$lib/merchantDrawerLogic", () => ({
 		place.boosted_until && new Date(place.boosted_until) > new Date(),
 }));
 
-// Mock userLocationStore - must return proper store value for get()
+// Mock userLocationStore - matches real module shape: { subscribe, getLocationWithCache }
 vi.mock("$lib/userLocationStore", async () => {
 	const { writable } =
 		await vi.importActual<typeof import("svelte/store")>("svelte/store");
@@ -33,10 +33,10 @@ vi.mock("$lib/userLocationStore", async () => {
 		usesMetricSystem: null,
 	});
 	return {
-		userLocation: mockStore,
-		getLocationWithCache: vi.fn().mockResolvedValue(null),
-		getLocation: vi.fn().mockResolvedValue(null),
-		reSortByUserLocation: vi.fn(),
+		userLocation: {
+			subscribe: mockStore.subscribe,
+			getLocationWithCache: vi.fn().mockResolvedValue(null),
+		},
 	};
 });
 
