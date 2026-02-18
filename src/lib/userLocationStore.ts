@@ -64,20 +64,7 @@ function createUserLocationStore() {
 	const store = writable<UserLocationState>(initialState);
 	const { subscribe } = store;
 
-	async function getLocationWithCache(
-		maxAgeMs: number = DEFAULT_CACHE_AGE_MS,
-	): Promise<UserLocation | null> {
-		if (!browser) return null;
-
-		const currentState = get(store);
-
-		if (currentState?.location && currentState?.lastUpdated) {
-			const age = Date.now() - currentState.lastUpdated;
-			if (age < maxAgeMs) {
-				return currentState.location;
-			}
-		}
-
+	async function fetchAndUpdateStore(): Promise<UserLocation | null> {
 		try {
 			const position = await getCurrentPosition();
 			const location: UserLocation = {
@@ -97,26 +84,27 @@ function createUserLocationStore() {
 		}
 	}
 
+	async function getLocationWithCache(
+		maxAgeMs: number = DEFAULT_CACHE_AGE_MS,
+	): Promise<UserLocation | null> {
+		if (!browser) return null;
+
+		const currentState = get(store);
+
+		if (currentState?.location && currentState?.lastUpdated) {
+			const age = Date.now() - currentState.lastUpdated;
+			if (age < maxAgeMs) {
+				return currentState.location;
+			}
+		}
+
+		return fetchAndUpdateStore();
+	}
+
 	async function getLocation(): Promise<UserLocation | null> {
 		if (!browser) return null;
 
-		try {
-			const position = await getCurrentPosition();
-			const location: UserLocation = {
-				lat: position.latitude,
-				lon: position.longitude,
-			};
-
-			store.set({
-				location,
-				lastUpdated: Date.now(),
-				usesMetricSystem: !isInImperialCountry(location.lat, location.lon),
-			});
-
-			return location;
-		} catch {
-			return null;
-		}
+		return fetchAndUpdateStore();
 	}
 
 	return {
