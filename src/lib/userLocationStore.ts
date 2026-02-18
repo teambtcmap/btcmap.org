@@ -1,4 +1,4 @@
-import { writable } from "svelte/store";
+import { get, writable } from "svelte/store";
 
 import { browser } from "$app/environment";
 
@@ -57,11 +57,7 @@ function createUserLocationStore() {
 	): Promise<UserLocation | null> {
 		if (!browser) return null;
 
-		let currentState: UserLocationState | undefined;
-		const unsubscribe = store.subscribe((s) => {
-			currentState = s;
-		});
-		unsubscribe();
+		const currentState = get(store);
 
 		if (currentState?.location && currentState?.lastUpdated) {
 			const age = Date.now() - currentState.lastUpdated;
