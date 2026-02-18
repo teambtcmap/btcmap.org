@@ -503,7 +503,7 @@ onDestroy(() => {
 						type="button"
 						on:click={handleDismissLocation}
 						class="shrink-0 rounded-md p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5"
-						aria-label={$_('search.clear')}
+						aria-label={$_('search.dismissLocationPrompt')}
 					>
 						<Icon w="16" h="16" icon="close" type="material" />
 					</button>
