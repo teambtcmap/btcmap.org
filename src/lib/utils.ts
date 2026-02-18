@@ -441,23 +441,21 @@ function toRad(deg: number): number {
 	return deg * (Math.PI / 180);
 }
 
-export function formatDistance(meters: number, useMetric: boolean): string {
+export function formatDistance(km: number, useMetric: boolean): string {
 	if (useMetric) {
-		if (meters < 1000) {
-			return `${Math.round(meters)}m`;
+		if (km < 1) {
+			return `${Math.round(km * 1000)}m`;
 		}
-		const km = meters / 1000;
 		if (km < 10) {
 			return `${km.toFixed(1)}km`;
 		}
 		return `${Math.round(km)}km`;
 	}
 
-	const feet = meters * 3.28084;
-	if (feet < 528) {
-		return `${Math.round(feet)}ft`;
+	const miles = km * 0.621371;
+	if (miles < 0.1) {
+		return `${Math.round(km * 3280.84)}ft`;
 	}
-	const miles = feet / 5280;
 	if (miles < 10) {
 		return `${miles.toFixed(1)}mi`;
 	}

@@ -34,18 +34,18 @@ $: isBoosted = checkBoosted(merchant);
 
 $: userLoc = $userLocation.location;
 $: usesMetric = $userLocation.usesMetricSystem;
-$: distanceMeters =
+$: distanceKm =
 	userLoc && displayData?.lat && displayData?.lon
 		? calculateDistance(
 				userLoc.lat,
 				userLoc.lon,
 				displayData.lat,
 				displayData.lon,
-			) * 1000
+			)
 		: null;
 $: distanceDisplay =
-	distanceMeters !== null && usesMetric !== null
-		? formatDistance(distanceMeters, usesMetric)
+	distanceKm !== null && usesMetric !== null
+		? formatDistance(distanceKm, usesMetric)
 		: null;
 
 function handleClick() {
