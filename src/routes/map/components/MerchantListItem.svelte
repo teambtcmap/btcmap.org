@@ -106,14 +106,19 @@ function handleClick() {
 							>
 						{/if}
 					</div>
-					{#if distanceDisplay}
-						<span
-							id="distance-{merchant.id}"
-							class="shrink-0 text-xs text-gray-400 dark:text-white/40"
-						>
-							{distanceDisplay}
-						</span>
-					{/if}
+				{#if distanceDisplay}
+					<!-- Visible short distance label -->
+					<span
+						class="shrink-0 text-xs text-gray-400 dark:text-white/40"
+						aria-hidden="true"
+					>
+						{distanceDisplay}
+					</span>
+					<!-- Full phrase for screen readers via aria-describedby on the parent button -->
+					<span id="distance-{merchant.id}" class="sr-only">
+						{$_('merchant.distanceAway', { values: { distance: distanceDisplay } })}
+					</span>
+				{/if}
 				</div>
 
 				<!-- Address -->
