@@ -12,6 +12,7 @@ import {
 import { MERCHANT_LIST_MAX_ITEMS } from "$lib/constants";
 import { isBoosted } from "$lib/merchantDrawerLogic";
 import type { Place } from "$lib/types";
+import type { UserLocation } from "$lib/userLocationStore";
 import { userLocation } from "$lib/userLocationStore";
 import { calculateDistance, errToast } from "$lib/utils";
 
@@ -86,9 +87,8 @@ function sortMerchants(
 	merchants: Place[],
 	centerLat?: number,
 	centerLon?: number,
+	userLoc?: UserLocation | null,
 ): Place[] {
-	const userLoc = get(userLocation).location;
-
 	return [...merchants].sort((a, b) => {
 		// Boosted first
 		if (isBoosted(a) && !isBoosted(b)) return -1;
@@ -176,7 +176,12 @@ function createMerchantListStore() {
 				categoryCounts,
 			);
 
-			const sorted = sortMerchants(filtered, centerLat, centerLon);
+			const sorted = sortMerchants(
+				filtered,
+				centerLat,
+				centerLon,
+				get(userLocation).location,
+			);
 			const limited = sorted.slice(0, limit);
 
 			update((state) => ({
@@ -246,7 +251,12 @@ function createMerchantListStore() {
 						categoryCounts,
 					);
 
-					const sorted = sortMerchants(filtered, center.lat, center.lon);
+					const sorted = sortMerchants(
+						filtered,
+						center.lat,
+						center.lon,
+						get(userLocation).location,
+					);
 					const limited = sorted.slice(0, MERCHANT_LIST_MAX_ITEMS);
 					update((state) => ({
 						...state,
@@ -347,7 +357,12 @@ function createMerchantListStore() {
 
 		// Open panel with search results (sorted with boosted first)
 		openWithSearchResults(query: string, results: Place[]) {
-			const sortedResults = sortMerchants(results);
+			const sortedResults = sortMerchants(
+				results,
+				undefined,
+				undefined,
+				get(userLocation).location,
+			);
 			const categoryCounts = countMerchantsByCategory(sortedResults);
 			update((state) => ({
 				...resetCategoryState(state),
@@ -421,7 +436,12 @@ function createMerchantListStore() {
 		reSortByUserLocation() {
 			update((state) => {
 				if (state.merchants.length === 0) return state;
-				const sorted = sortMerchants(state.merchants);
+				const sorted = sortMerchants(
+					state.merchants,
+					undefined,
+					undefined,
+					get(userLocation).location,
+				);
 				return { ...state, merchants: sorted };
 			});
 		},
