@@ -141,6 +141,9 @@ function handleClick() {
 						>
 							{distanceDisplay}
 						</span>
+						<span id="distance-{merchant.id}" class="sr-only">
+							{$_('merchant.distanceAway', { values: { distance: distanceDisplay } })}
+						</span>
 					{/if}
 				</div>
 
