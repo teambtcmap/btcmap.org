@@ -111,7 +111,10 @@ function sortMerchants(
 
 		// Then by distance
 		if (distanceMap) {
-			return (distanceMap.get(a.id) ?? 0) - (distanceMap.get(b.id) ?? 0);
+			return (
+				(distanceMap.get(a.id) ?? Infinity) -
+				(distanceMap.get(b.id) ?? Infinity)
+			);
 		}
 
 		// Fallback to alphabetical
