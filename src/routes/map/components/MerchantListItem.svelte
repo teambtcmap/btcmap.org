@@ -1,8 +1,10 @@
 <script lang="ts">
 import Icon from "$components/Icon.svelte";
 import PaymentMethodIcon from "$components/PaymentMethodIcon.svelte";
-import type { CategoryColor } from "$lib/categoryMapping";
-import { getIconColor } from "$lib/categoryMapping";
+import {
+	CATEGORY_COLOR_CLASSES,
+	getIconColorWithFallback,
+} from "$lib/categoryMapping";
 import { _ } from "$lib/i18n";
 import {
 	isBoosted as checkBoosted,
@@ -11,33 +13,6 @@ import {
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
 import { calculateDistance, formatDistance } from "$lib/utils";
-
-const FALLBACK_COLORS = ["emerald", "amber", "blue", "purple", "pink", "cyan"];
-
-function getIconColorWithFallback(icon: string | undefined): CategoryColor {
-	const mappedColor = getIconColor(icon);
-	if (mappedColor) return mappedColor;
-
-	if (!icon) return "";
-
-	const fallbackIndex = icon.charCodeAt(0) % FALLBACK_COLORS.length;
-	return FALLBACK_COLORS[fallbackIndex] as CategoryColor;
-}
-
-const COLOR_CLASSES: Record<string, string> = {
-	orange:
-		"bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
-	emerald:
-		"bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
-	amber: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
-	blue: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
-	purple:
-		"bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
-	pink: "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300",
-	cyan: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300",
-	yellow:
-		"bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
-};
 
 export let merchant: Place;
 export let enrichedData: Place | null = null;
@@ -99,7 +74,7 @@ function handleClick() {
 		<div class="flex items-start gap-3">
 			<!-- Icon -->
 			<div
-				class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg {COLOR_CLASSES[
+				class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg {CATEGORY_COLOR_CLASSES[
 					getIconColorWithFallback(merchant.icon)
 				] || 'bg-primary/10 text-primary dark:bg-white/10 dark:text-white'}"
 			>

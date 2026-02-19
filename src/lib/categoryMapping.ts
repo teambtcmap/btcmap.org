@@ -101,6 +101,40 @@ export function getIconColor(icon: string | undefined): CategoryColor {
 	return ICON_TO_COLOR.get(icon) || "";
 }
 
+const FALLBACK_COLORS: CategoryColor[] = [
+	"emerald",
+	"amber",
+	"blue",
+	"purple",
+	"pink",
+	"cyan",
+];
+
+export function getIconColorWithFallback(
+	icon: string | undefined,
+): CategoryColor {
+	const mappedColor = getIconColor(icon);
+	if (mappedColor) return mappedColor;
+	if (!icon) return "";
+	return FALLBACK_COLORS[icon.charCodeAt(0) % FALLBACK_COLORS.length];
+}
+
+export const CATEGORY_COLOR_CLASSES: Record<CategoryColor, string> = {
+	orange:
+		"bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
+	emerald:
+		"bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
+	amber: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+	blue: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+	purple:
+		"bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
+	pink: "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300",
+	cyan: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300",
+	yellow:
+		"bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
+	"": "",
+};
+
 export const createEmptyCategoryCounts = (): CategoryCounts => {
 	return CATEGORIES.reduce((acc, category) => {
 		acc[category] = 0;
