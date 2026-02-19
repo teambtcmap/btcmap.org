@@ -101,9 +101,18 @@ function createUserLocationStore() {
 		return fetchAndUpdateStore();
 	}
 
+	function setLocation(lat: number, lon: number): void {
+		store.set({
+			location: { lat, lon },
+			lastUpdated: Date.now(),
+			usesMetricSystem: !isInUnitedStates(lat, lon),
+		});
+	}
+
 	return {
 		subscribe,
 		getLocationWithCache,
+		setLocation,
 	};
 }
 

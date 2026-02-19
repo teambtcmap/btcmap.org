@@ -8,6 +8,7 @@ import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
 import { selectedMerchant } from "$lib/store";
 import { theme } from "$lib/theme";
 import type { DomEventType, Leaflet, Place } from "$lib/types";
+import { userLocation } from "$lib/userLocationStore";
 import { errToast, humanizeIconName } from "$lib/utils";
 
 import { replaceState } from "$app/navigation";
@@ -158,6 +159,12 @@ export const geolocate = (
 ) => {
 	// Use plugin defaults, just add analytics tracking
 	new LocateControl({ position: "topright" }).addTo(map);
+
+	// Sync location to userLocationStore so the nearby panel can show distances
+	// without requiring the user to click the separate "Enable precise distances" button
+	map.on("locationfound", (e) => {
+		userLocation.setLocation(e.latlng.lat, e.latlng.lng);
+	});
 
 	const locateButton: HTMLAnchorElement | null = document.querySelector(
 		".leaflet-bar-part.leaflet-bar-part-single",
