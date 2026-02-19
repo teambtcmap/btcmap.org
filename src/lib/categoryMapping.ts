@@ -9,11 +9,11 @@ export type CategoryColor =
 	| "yellow"
 	| "";
 
-export interface CategoryGroup {
+export type CategoryGroup = {
 	label: string;
 	icons: readonly string[];
 	color: CategoryColor;
-}
+};
 
 export const CATEGORY_GROUPS: Record<string, CategoryGroup> = {
 	all: {
