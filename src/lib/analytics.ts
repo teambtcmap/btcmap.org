@@ -29,7 +29,8 @@ type EventName =
 	| "drawer_swipe_collapse"
 	| "drawer_swipe_dismiss"
 	| "drawer_collapse_button_click"
-	| "language_switch";
+	| "language_switch"
+	| "enable_precise_distances_click";
 
 declare global {
 	interface Window {

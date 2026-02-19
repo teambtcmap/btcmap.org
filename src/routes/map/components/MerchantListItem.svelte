@@ -7,7 +7,12 @@ import {
 	isUpToDate as checkUpToDate,
 } from "$lib/merchantDrawerLogic";
 import type { Place } from "$lib/types";
-import { formatVerifiedHuman } from "$lib/utils";
+import { userLocation } from "$lib/userLocationStore";
+import {
+	calculateDistance,
+	formatDistance,
+	formatVerifiedHuman,
+} from "$lib/utils";
 
 export let merchant: Place;
 export let enrichedData: Place | null = null;
@@ -27,6 +32,24 @@ $: hasPaymentMethods =
 $: isVerified = checkUpToDate(displayData, verifiedDate);
 $: isBoosted = checkBoosted(merchant);
 
+$: userLoc = $userLocation.location;
+$: usesMetric = $userLocation.usesMetricSystem;
+$: distanceKm =
+	userLoc &&
+	Number.isFinite(displayData?.lat) &&
+	Number.isFinite(displayData?.lon)
+		? calculateDistance(
+				userLoc.lat,
+				userLoc.lon,
+				displayData.lat,
+				displayData.lon,
+			)
+		: null;
+$: distanceDisplay =
+	distanceKm !== null && usesMetric !== null
+		? formatDistance(distanceKm, usesMetric)
+		: null;
+
 function handleClick() {
 	onclick(merchant);
 }
@@ -41,6 +64,7 @@ function handleClick() {
 			? 'bg-link/5 dark:bg-link/10'
 			: ''}"
 		aria-current={isSelected ? 'true' : undefined}
+		aria-describedby={distanceDisplay ? `distance-${merchant.id}` : undefined}
 	>
 		<div class="flex items-start gap-3">
 			<!-- Icon -->
@@ -53,35 +77,50 @@ function handleClick() {
 			</div>
 
 			<div class="min-w-0 flex-1">
-				<!-- Name with badges -->
-				<div class="flex items-center gap-1">
-					{#if enrichedData?.name}
-						<span
-							class="truncate text-sm font-medium {isBoosted
-								? 'text-bitcoin'
-								: 'text-primary dark:text-white'}"
-						>
-							{enrichedData.name}
-						</span>
-						{#if isVerified}
-							<Icon w="12" h="12" icon="verified" type="material" class="shrink-0 text-link" />
+				<!-- Name with badges and distance -->
+				<div class="flex items-center justify-between gap-1">
+					<div class="flex items-center gap-1 min-w-0">
+						{#if enrichedData?.name}
+							<span
+								class="truncate text-sm font-medium {isBoosted
+									? 'text-bitcoin'
+									: 'text-primary dark:text-white'}"
+							>
+								{enrichedData.name}
+							</span>
+							{#if isVerified}
+								<Icon w="12" h="12" icon="verified" type="material" class="shrink-0 text-link" />
+							{/if}
+							{#if isBoosted}
+								<Icon
+									w="12"
+									h="12"
+									icon="arrow_circle_up"
+									type="material"
+									class="shrink-0 text-bitcoin"
+								/>
+							{/if}
+						{:else if showSkeleton}
+							<div class="h-4 w-32 animate-pulse rounded bg-link/50"></div>
+						{:else}
+							<span class="truncate text-sm font-medium text-primary dark:text-white"
+								>{$_('merchant.unknown')}</span
+							>
 						{/if}
-						{#if isBoosted}
-							<Icon
-								w="12"
-								h="12"
-								icon="arrow_circle_up"
-								type="material"
-								class="shrink-0 text-bitcoin"
-							/>
-						{/if}
-					{:else if showSkeleton}
-						<div class="h-4 w-32 animate-pulse rounded bg-link/50"></div>
-					{:else}
-						<span class="truncate text-sm font-medium text-primary dark:text-white"
-							>{$_('merchant.unknown')}</span
-						>
-					{/if}
+					</div>
+				{#if distanceDisplay}
+					<!-- Visible short distance label -->
+					<span
+						class="shrink-0 text-xs text-gray-400 dark:text-white/40"
+						aria-hidden="true"
+					>
+						{distanceDisplay}
+					</span>
+					<!-- Full phrase for screen readers via aria-describedby on the parent button -->
+					<span id="distance-{merchant.id}" class="sr-only">
+						{$_('merchant.distanceAway', { values: { distance: distanceDisplay } })}
+					</span>
+				{/if}
 				</div>
 
 				<!-- Address -->

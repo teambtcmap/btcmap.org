@@ -18,6 +18,7 @@ const materialExceptions: Record<string, string> = {
 	skull: "material-symbols:skull",
 	currency_bitcoin: "material-symbols:currency-bitcoin",
 	close_round: "ic:round-close",
+	my_location: "material-symbols:my-location-rounded",
 };
 
 const faBrandIcons = ["x-twitter", "instagram", "facebook", "twitter"];

@@ -12,7 +12,9 @@ import {
 import { MERCHANT_LIST_MAX_ITEMS } from "$lib/constants";
 import { isBoosted } from "$lib/merchantDrawerLogic";
 import type { Place } from "$lib/types";
-import { errToast } from "$lib/utils";
+import type { UserLocation } from "$lib/userLocationStore";
+import { userLocation } from "$lib/userLocationStore";
+import { calculateDistance, errToast } from "$lib/utils";
 
 export type MerchantListMode = "nearby" | "search";
 
@@ -80,36 +82,39 @@ function applyCategoryFilter(
 	return { filtered, effectiveCategory };
 }
 
-// Equirectangular approximation for local distance sorting
-// Uses squared distance (avoids sqrt) since we only need relative ordering
-// Cosine adjustment accounts for longitude distortion at different latitudes
-function getDistanceSquared(
-	lat1: number,
-	lon1: number,
-	lat2: number,
-	lon2: number,
-): number {
-	const dx = (lon2 - lon1) * Math.cos(((lat1 + lat2) / 2) * (Math.PI / 180));
-	const dy = lat2 - lat1;
-	return dx * dx + dy * dy;
-}
-
 // Sort order: boosted merchants first (premium placement), then by distance, then alphabetically
 function sortMerchants(
 	merchants: Place[],
 	centerLat?: number,
 	centerLon?: number,
+	userLoc?: UserLocation | null,
 ): Place[] {
+	// Use user location if available, otherwise fall back to map center
+	const sortLat = userLoc?.lat ?? centerLat;
+	const sortLon = userLoc?.lon ?? centerLon;
+
+	// Precompute distances once per merchant to avoid redundant trig inside the comparator
+	const distanceMap =
+		sortLat !== undefined && sortLon !== undefined
+			? new Map(
+					merchants.map((m) => [
+						m.id,
+						calculateDistance(sortLat, sortLon, m.lat, m.lon),
+					]),
+				)
+			: null;
+
 	return [...merchants].sort((a, b) => {
 		// Boosted first
 		if (isBoosted(a) && !isBoosted(b)) return -1;
 		if (!isBoosted(a) && isBoosted(b)) return 1;
 
-		// Then by distance (if center provided)
-		if (centerLat !== undefined && centerLon !== undefined) {
-			const distA = getDistanceSquared(centerLat, centerLon, a.lat, a.lon);
-			const distB = getDistanceSquared(centerLat, centerLon, b.lat, b.lon);
-			return distA - distB;
+		// Then by distance
+		if (distanceMap) {
+			return (
+				(distanceMap.get(a.id) ?? Infinity) -
+				(distanceMap.get(b.id) ?? Infinity)
+			);
 		}
 
 		// Fallback to alphabetical
@@ -183,7 +188,12 @@ function createMerchantListStore() {
 				categoryCounts,
 			);
 
-			const sorted = sortMerchants(filtered, centerLat, centerLon);
+			const sorted = sortMerchants(
+				filtered,
+				centerLat,
+				centerLon,
+				get(userLocation).location,
+			);
 			const limited = sorted.slice(0, limit);
 
 			update((state) => ({
@@ -253,7 +263,12 @@ function createMerchantListStore() {
 						categoryCounts,
 					);
 
-					const sorted = sortMerchants(filtered, center.lat, center.lon);
+					const sorted = sortMerchants(
+						filtered,
+						center.lat,
+						center.lon,
+						get(userLocation).location,
+					);
 					const limited = sorted.slice(0, MERCHANT_LIST_MAX_ITEMS);
 					update((state) => ({
 						...state,
@@ -354,7 +369,12 @@ function createMerchantListStore() {
 
 		// Open panel with search results (sorted with boosted first)
 		openWithSearchResults(query: string, results: Place[]) {
-			const sortedResults = sortMerchants(results);
+			const sortedResults = sortMerchants(
+				results,
+				undefined,
+				undefined,
+				get(userLocation).location,
+			);
 			const categoryCounts = countMerchantsByCategory(sortedResults);
 			update((state) => ({
 				...resetCategoryState(state),
@@ -421,6 +441,21 @@ function createMerchantListStore() {
 		// Reset the selected category to 'all'
 		resetCategory() {
 			update((state) => resetCategoryState(state));
+		},
+
+		// Re-sort merchants using current user location (if available)
+		// Call this when user location becomes available to re-sort the list
+		reSortByUserLocation() {
+			update((state) => {
+				if (state.merchants.length === 0) return state;
+				const sorted = sortMerchants(
+					state.merchants,
+					undefined,
+					undefined,
+					get(userLocation).location,
+				);
+				return { ...state, merchants: sorted };
+			});
 		},
 
 		reset() {

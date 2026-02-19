@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { sanitizeUrl } from "./utils";
+import { calculateDistance, formatDistance, sanitizeUrl } from "./utils";
 
 describe("sanitizeUrl", () => {
 	describe("undefined/empty input", () => {
@@ -376,6 +376,65 @@ describe("sanitizeUrl", () => {
 
 		it("should handle phone numbers", () => {
 			expect(sanitizeUrl("tel:+15551234567")).toBe("tel:+15551234567");
+		});
+	});
+});
+
+describe("calculateDistance", () => {
+	it("returns 0 for identical coordinates", () => {
+		expect(calculateDistance(51.5, -0.1, 51.5, -0.1)).toBe(0);
+	});
+
+	it("returns a positive value for different coordinates", () => {
+		expect(calculateDistance(51.5, -0.1, 48.8, 2.3)).toBeGreaterThan(0);
+	});
+
+	it("returns distance in km (London to Paris ≈ 340km)", () => {
+		const dist = calculateDistance(51.5074, -0.1278, 48.8566, 2.3522);
+		expect(dist).toBeGreaterThan(330);
+		expect(dist).toBeLessThan(350);
+	});
+
+	it("is symmetric", () => {
+		const ab = calculateDistance(51.5, -0.1, 48.8, 2.3);
+		const ba = calculateDistance(48.8, 2.3, 51.5, -0.1);
+		expect(ab).toBeCloseTo(ba, 5);
+	});
+});
+
+describe("formatDistance", () => {
+	describe("metric", () => {
+		it("formats sub-km distances in metres", () => {
+			expect(formatDistance(0.5, true)).toBe("500m");
+		});
+
+		it("rounds metres correctly", () => {
+			expect(formatDistance(0.1234, true)).toBe("123m");
+		});
+
+		it("formats distances under 10km with one decimal", () => {
+			expect(formatDistance(3.456, true)).toBe("3.5km");
+		});
+
+		it("formats distances 10km and over as whole km", () => {
+			expect(formatDistance(12.7, true)).toBe("13km");
+		});
+	});
+
+	describe("imperial", () => {
+		it("formats short distances in feet", () => {
+			// 0.05km ≈ 164ft, well under 0.1mi threshold
+			expect(formatDistance(0.05, false)).toBe("164ft");
+		});
+
+		it("formats distances under 10mi with one decimal", () => {
+			// 5km ≈ 3.1mi
+			expect(formatDistance(5, false)).toBe("3.1mi");
+		});
+
+		it("formats distances 10mi and over as whole miles", () => {
+			// 20km ≈ 12.4mi
+			expect(formatDistance(20, false)).toBe("12mi");
 		});
 	});
 });

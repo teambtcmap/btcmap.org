@@ -8,18 +8,43 @@ import type { Place } from "$lib/types";
 // Mock axios
 vi.mock("axios");
 
-// Mock errToast
-vi.mock("$lib/utils", () => ({
-	errToast: vi.fn(),
-	isBoosted: (place: Place) =>
-		place.boosted_until && new Date(place.boosted_until) > new Date(),
-}));
+// Mock errToast and calculateDistance
+vi.mock("$lib/utils", async () => {
+	const actual = await vi.importActual("$lib/utils");
+	return {
+		...actual,
+		errToast: vi.fn(),
+	};
+});
 
 // Mock isBoosted from merchantDrawerLogic
 vi.mock("$lib/merchantDrawerLogic", () => ({
 	isBoosted: (place: Place) =>
 		place.boosted_until && new Date(place.boosted_until) > new Date(),
 }));
+
+// Hoisted so the vi.mock factory below can reference it before module init
+const { mockUserLocationStore } = vi.hoisted(() => {
+	const { writable } = require("svelte/store");
+	return {
+		mockUserLocationStore: writable({
+			location: null as { lat: number; lon: number } | null,
+			lastUpdated: null as number | null,
+			usesMetricSystem: null as boolean | null,
+		}),
+	};
+});
+
+// Mock userLocationStore - matches real module shape: { subscribe, getLocationWithCache, setLocation }
+vi.mock("$lib/userLocationStore", () => {
+	return {
+		userLocation: {
+			subscribe: mockUserLocationStore.subscribe,
+			getLocationWithCache: vi.fn().mockResolvedValue(null),
+			setLocation: vi.fn(),
+		},
+	};
+});
 
 import { errToast } from "$lib/utils";
 
@@ -41,6 +66,11 @@ describe("merchantListStore", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		merchantList.reset();
+		mockUserLocationStore.set({
+			location: null,
+			lastUpdated: null,
+			usesMetricSystem: null,
+		});
 	});
 
 	describe("state toggles", () => {
@@ -176,6 +206,80 @@ describe("merchantListStore", () => {
 			merchantList.setMerchants([withName, withoutName, nullName]);
 			const state = get(merchantList);
 			expect(state.merchants.length).toBe(3);
+		});
+	});
+
+	describe("reSortByUserLocation", () => {
+		it("should re-sort merchants by user location when available", () => {
+			const near = createMockPlace({ id: 1, lat: 0.001, lon: 0.001 });
+			const far = createMockPlace({ id: 2, lat: 10, lon: 10 });
+
+			// Load merchants sorted by map center (0,0) — both near but far is slightly further
+			merchantList.setMerchants([far, near], 0, 0);
+
+			// Simulate user location becoming available close to near merchant
+			mockUserLocationStore.set({
+				location: { lat: 0.001, lon: 0.001 },
+				lastUpdated: Date.now(),
+				usesMetricSystem: true,
+			});
+			merchantList.reSortByUserLocation();
+
+			const state = get(merchantList);
+			expect(state.merchants[0].id).toBe(1); // near first
+			expect(state.merchants[1].id).toBe(2);
+		});
+
+		it("should keep boosted merchants first after re-sort", () => {
+			const futureDate = new Date(Date.now() + 86400000).toISOString();
+			const boosted = createMockPlace({
+				id: 1,
+				lat: 10,
+				lon: 10,
+				boosted_until: futureDate,
+			});
+			const nearRegular = createMockPlace({ id: 2, lat: 0.001, lon: 0.001 });
+
+			merchantList.setMerchants([nearRegular, boosted], 0, 0);
+
+			// User is close to nearRegular — boosted should still come first
+			mockUserLocationStore.set({
+				location: { lat: 0.001, lon: 0.001 },
+				lastUpdated: Date.now(),
+				usesMetricSystem: true,
+			});
+			merchantList.reSortByUserLocation();
+
+			const state = get(merchantList);
+			expect(state.merchants[0].id).toBe(1); // boosted first despite distance
+			expect(state.merchants[1].id).toBe(2);
+		});
+
+		it("should do nothing when merchant list is empty", () => {
+			mockUserLocationStore.set({
+				location: { lat: 1, lon: 1 },
+				lastUpdated: Date.now(),
+				usesMetricSystem: true,
+			});
+			merchantList.reSortByUserLocation();
+
+			const state = get(merchantList);
+			expect(state.merchants).toEqual([]);
+		});
+
+		it("should do nothing when user location is not set", () => {
+			const a = createMockPlace({ id: 1, name: "Alpha", lat: 5, lon: 5 });
+			const b = createMockPlace({ id: 2, name: "Beta", lat: 1, lon: 1 });
+
+			// No center provided — falls back to alphabetical
+			merchantList.setMerchants([b, a]);
+			const before = get(merchantList).merchants.map((m) => m.id);
+
+			// location stays null — re-sort should keep alphabetical order
+			merchantList.reSortByUserLocation();
+
+			const after = get(merchantList).merchants.map((m) => m.id);
+			expect(after).toEqual(before);
 		});
 	});
 

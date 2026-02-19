@@ -51,7 +51,12 @@
 		"switchToWorldwide": "Switch to worldwide search",
 		"filterResults": "Filter nearby results",
 		"placeholder": "Search...",
-		"ariaLabel": "Search leaderboard"
+		"ariaLabel": "Search leaderboard",
+		"enablePreciseDistances": "Enable precise distances",
+		"dismissLocationPrompt": "Dismiss location prompt",
+		"locationPermissionDenied": "Location permission denied. Enable it in your browser settings.",
+		"locationUnavailable": "Could not determine your location. Please try again.",
+		"locationEnabled": "Location enabled. List sorted by distance."
 	},
 	"categories": {
 		"all": "All",
@@ -80,6 +85,7 @@
 		"comments": "Comments",
 		"commentsCount": "Comments ({count})",
 		"unknown": "Unknown",
+		"distanceAway": "{distance} away",
 		"deletedBanner": "This merchant has been removed.",
 		"deletedNotice": "This merchant has been removed from BTC Map and may no longer accept Bitcoin.",
 		"deletedDetail": "The data shown below is outdated and for reference only.",

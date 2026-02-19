@@ -22,7 +22,8 @@ import { merchantDrawer } from "$lib/merchantDrawerStore";
 import type { MerchantListMode } from "$lib/merchantListStore";
 import { merchantList } from "$lib/merchantListStore";
 import type { Place } from "$lib/types";
-import { formatNearbyCount } from "$lib/utils";
+import { userLocation } from "$lib/userLocationStore";
+import { errToast, formatNearbyCount } from "$lib/utils";
 
 import MerchantListItem from "./MerchantListItem.svelte";
 import { browser } from "$app/environment";
@@ -166,6 +167,43 @@ $: searchQuery = $merchantList.searchQuery;
 $: selectedCategory = $merchantList.selectedCategory;
 $: categoryCounts = $merchantList.categoryCounts;
 
+// Location button state
+let locationRequestDismissed = false;
+let isLoadingLocation = false;
+let locationAnnouncement = "";
+let locationButton: HTMLButtonElement;
+let merchantListContainer: HTMLDivElement;
+
+async function handleEnableLocation() {
+	isLoadingLocation = true;
+	trackEvent("enable_precise_distances_click");
+	try {
+		await userLocation.getLocationWithCache();
+		merchantList.reSortByUserLocation();
+		locationAnnouncement = $_("search.locationEnabled");
+		await tick();
+		merchantListContainer?.focus();
+	} catch (error) {
+		if (error instanceof GeolocationPositionError) {
+			if (error.code === error.PERMISSION_DENIED) {
+				errToast($_("search.locationPermissionDenied"));
+			} else {
+				errToast($_("search.locationUnavailable"));
+			}
+		} else {
+			errToast($_("search.locationUnavailable"));
+		}
+		await tick();
+		locationButton?.focus();
+	} finally {
+		isLoadingLocation = false;
+	}
+}
+
+function handleDismissLocation() {
+	locationRequestDismissed = true;
+}
+
 // Filter search results by category
 $: filteredSearchResults =
 	selectedCategory === "all"
@@ -298,6 +336,10 @@ onDestroy(() => {
 		role="complementary"
 		aria-label={$_('aria.merchantList')}
 	>
+		<!-- Screen reader announcement for location changes -->
+		{#if locationAnnouncement}
+			<p class="sr-only" aria-live="polite">{locationAnnouncement}</p>
+		{/if}
 		<!-- Search input - uses shared SearchInput component -->
 		<div class="shrink-0 border-b border-gray-100 dark:border-white/10">
 			<SearchInput
@@ -439,10 +481,43 @@ onDestroy(() => {
 					</button>
 				{/if}
 			</div>
+
+			<!-- Location enable button - nearby mode only -->
+			{#if mode === 'nearby' && !$userLocation.location && !locationRequestDismissed}
+				<div class="mt-3 flex items-center gap-2 rounded-lg border border-gray-200 p-2 dark:border-white/10">
+					<button
+						bind:this={locationButton}
+						type="button"
+						on:click={handleEnableLocation}
+						disabled={isLoadingLocation}
+						class="flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors hover:bg-gray-50 disabled:opacity-50 dark:hover:bg-white/5"
+						aria-label={$_('search.enablePreciseDistances')}
+					>
+						{#if isLoadingLocation}
+							<LoadingSpinner color="text-primary dark:text-white" size="h-4 w-4" />
+						{:else}
+							<Icon w="16" h="16" icon="my_location" type="material" class="text-primary dark:text-white" />
+						{/if}
+						<span class="text-primary dark:text-white">{$_('search.enablePreciseDistances')}</span>
+					</button>
+					<button
+						type="button"
+						on:click={handleDismissLocation}
+						class="shrink-0 rounded-md p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5"
+						aria-label={$_('search.dismissLocationPrompt')}
+					>
+						<Icon w="16" h="16" icon="close" type="material" />
+					</button>
+				</div>
+			{/if}
 		</div>
 
 		<!-- List content -->
-		<div class="flex-1 overflow-y-auto">
+		<div
+			bind:this={merchantListContainer}
+			class="flex-1 overflow-y-auto"
+			tabindex="-1"
+		>
 			{#if mode === 'search'}
 				<!-- Search results -->
 				{#if isSearching}

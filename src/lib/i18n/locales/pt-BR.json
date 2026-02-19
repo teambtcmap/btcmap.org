@@ -49,7 +49,14 @@
 		"worldwide": "Mundial",
 		"nearby": "Próximo",
 		"switchToWorldwide": "Mudar para pesquisa mundial",
-		"filterResults": "Filtrar resultados próximos"
+		"filterResults": "Filtrar resultados próximos",
+		"placeholder": "Pesquisar...",
+		"ariaLabel": "Pesquisar ranking",
+		"enablePreciseDistances": "Ativar distâncias precisas",
+		"dismissLocationPrompt": "Dispensar aviso de localização",
+		"locationPermissionDenied": "Permissão de localização negada. Ative-a nas configurações do navegador.",
+		"locationUnavailable": "Não foi possível determinar sua localização. Tente novamente.",
+		"locationEnabled": "Localização ativada. Lista ordenada por distância."
 	},
 	"categories": {
 		"all": "Todos",
@@ -78,6 +85,7 @@
 		"comments": "Comentários",
 		"commentsCount": "Comentários ({count})",
 		"unknown": "Desconhecido",
+		"distanceAway": "{distance} de distância",
 		"deletedBanner": "Este comerciante foi removido.",
 		"deletedNotice": "Este comerciante foi removido do BTC Map e pode não aceitar mais Bitcoin.",
 		"deletedDetail": "Os dados mostrados abaixo estão desatualizados e são apenas para referência.",
