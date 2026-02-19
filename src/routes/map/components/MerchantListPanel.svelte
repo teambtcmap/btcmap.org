@@ -176,6 +176,7 @@ let merchantListContainer: HTMLDivElement;
 
 async function handleEnableLocation() {
 	isLoadingLocation = true;
+	trackEvent("enable_precise_distances_click");
 	try {
 		await userLocation.getLocationWithCache();
 		merchantList.reSortByUserLocation();
