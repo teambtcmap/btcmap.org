@@ -7,6 +7,8 @@ export type CategoryColor =
 	| "blue"
 	| "purple"
 	| "yellow"
+	| "pink"
+	| "cyan"
 	| "";
 
 export type CategoryGroup = {
@@ -15,7 +17,7 @@ export type CategoryGroup = {
 	color: CategoryColor;
 };
 
-export const CATEGORY_GROUPS: Record<string, CategoryGroup> = {
+export const CATEGORY_GROUPS = {
 	all: {
 		label: "All",
 		icons: [],
@@ -56,17 +58,9 @@ export const CATEGORY_GROUPS: Record<string, CategoryGroup> = {
 		icons: ["content_cut"],
 		color: "purple",
 	},
-};
+} satisfies Record<string, CategoryGroup>;
 
-export type CategoryKey =
-	| "all"
-	| "restaurants"
-	| "shopping"
-	| "groceries"
-	| "coffee"
-	| "atms"
-	| "hotels"
-	| "beauty";
+export type CategoryKey = keyof typeof CATEGORY_GROUPS;
 
 // Explicit array for guaranteed order and clarity (could derive from CATEGORY_GROUPS but kept explicit)
 export const CATEGORIES: readonly CategoryKey[] = [
