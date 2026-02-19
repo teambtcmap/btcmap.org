@@ -1,7 +1,11 @@
 <script lang="ts">
 import Icon from "$components/Icon.svelte";
 import PaymentMethodIcon from "$components/PaymentMethodIcon.svelte";
-import { CATEGORY_GROUPS, type CategoryColor } from "$lib/categoryMapping";
+import {
+	CATEGORY_GROUPS,
+	type CategoryColor,
+	getIconColor,
+} from "$lib/categoryMapping";
 import { _ } from "$lib/i18n";
 import {
 	isBoosted as checkBoosted,
@@ -17,15 +21,11 @@ import {
 
 const FALLBACK_COLORS = ["emerald", "amber", "blue", "purple", "pink", "cyan"];
 
-function getIconColor(icon: string | undefined): CategoryColor {
-	if (!icon) return "";
+function getIconColorWithFallback(icon: string | undefined): CategoryColor {
+	const mappedColor = getIconColor(icon);
+	if (mappedColor) return mappedColor;
 
-	for (const [_key, group] of Object.entries(CATEGORY_GROUPS)) {
-		const { icons, color } = group;
-		if (icons.includes(icon) && color) {
-			return color;
-		}
-	}
+	if (!icon) return "";
 
 	const fallbackIndex = icon.charCodeAt(0) % FALLBACK_COLORS.length;
 	return FALLBACK_COLORS[fallbackIndex] as CategoryColor;

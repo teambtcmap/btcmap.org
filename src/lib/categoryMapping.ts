@@ -90,11 +90,21 @@ export type CategoryCounts = Record<CategoryKey, number>;
 // Build icon -> category lookup map once at module initialization
 // (avoids rebuilding on every countMerchantsByCategory call during pan/zoom)
 const ICON_TO_CATEGORY = new Map<string, CategoryKey>();
+const ICON_TO_COLOR = new Map<string, CategoryColor>();
+
 for (const [key, group] of Object.entries(CATEGORY_GROUPS)) {
 	if (key === "all") continue;
 	for (const icon of group.icons) {
 		ICON_TO_CATEGORY.set(icon, key as CategoryKey);
+		if (group.color) {
+			ICON_TO_COLOR.set(icon, group.color);
+		}
 	}
+}
+
+export function getIconColor(icon: string | undefined): CategoryColor {
+	if (!icon) return "";
+	return ICON_TO_COLOR.get(icon) || "";
 }
 
 export const createEmptyCategoryCounts = (): CategoryCounts => {
