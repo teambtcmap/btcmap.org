@@ -36,6 +36,7 @@ vi.mock("$lib/userLocationStore", async () => {
 		userLocation: {
 			subscribe: mockStore.subscribe,
 			getLocationWithCache: vi.fn().mockResolvedValue(null),
+			setLocation: vi.fn(),
 		},
 	};
 });
