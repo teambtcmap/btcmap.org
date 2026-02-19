@@ -10,6 +10,8 @@ import {
 	countMerchantsByCategory,
 	createEmptyCategoryCounts,
 	filterMerchantsByCategory,
+	getIconColor,
+	getIconColorWithFallback,
 	placeMatchesCategory,
 } from "./categoryMapping";
 
@@ -365,6 +367,57 @@ describe("categoryMapping", () => {
 			expect(
 				placeMatchesCategory(createMockPlace({ icon: "random" }), "coffee"),
 			).toBe(false);
+		});
+	});
+
+	describe("getIconColor", () => {
+		it("should return the correct color for a known icon", () => {
+			expect(getIconColor("restaurant")).toBe("orange");
+			expect(getIconColor("local_pizza")).toBe("orange");
+			expect(getIconColor("local_cafe")).toBe("amber");
+			expect(getIconColor("local_atm")).toBe("yellow");
+			expect(getIconColor("hotel")).toBe("blue");
+			expect(getIconColor("content_cut")).toBe("purple");
+			expect(getIconColor("storefront")).toBe("emerald");
+			expect(getIconColor("local_grocery_store")).toBe("emerald");
+		});
+
+		it("should return empty string for an unknown icon", () => {
+			expect(getIconColor("unknown_icon")).toBe("");
+			expect(getIconColor("currency_bitcoin")).toBe("");
+		});
+
+		it("should return empty string for undefined", () => {
+			expect(getIconColor(undefined)).toBe("");
+		});
+	});
+
+	describe("getIconColorWithFallback", () => {
+		it("should return the mapped color for a known icon", () => {
+			expect(getIconColorWithFallback("restaurant")).toBe("orange");
+			expect(getIconColorWithFallback("local_cafe")).toBe("amber");
+			expect(getIconColorWithFallback("local_atm")).toBe("yellow");
+		});
+
+		it("should return empty string for undefined", () => {
+			expect(getIconColorWithFallback(undefined)).toBe("");
+		});
+
+		it("should return a deterministic fallback color for an unknown icon", () => {
+			// charCodeAt(0) of 'c' (99) => 99 % 6 = 3 => 'purple'
+			expect(getIconColorWithFallback("currency_bitcoin")).toBe("purple");
+			// charCodeAt(0) of 'u' (117) => 117 % 6 = 3 => 'purple'
+			expect(getIconColorWithFallback("unknown_icon")).toBe("purple");
+		});
+
+		it("should return a consistent value for the same icon across calls", () => {
+			const first = getIconColorWithFallback("some_icon");
+			const second = getIconColorWithFallback("some_icon");
+			expect(first).toBe(second);
+		});
+
+		it("should not return empty string for an unknown icon", () => {
+			expect(getIconColorWithFallback("some_unknown_icon")).not.toBe("");
 		});
 	});
 });

@@ -1,6 +1,10 @@
 <script lang="ts">
 import Icon from "$components/Icon.svelte";
 import PaymentMethodIcon from "$components/PaymentMethodIcon.svelte";
+import {
+	CATEGORY_COLOR_CLASSES,
+	getIconColorWithFallback,
+} from "$lib/categoryMapping";
 import { _ } from "$lib/i18n";
 import {
 	isBoosted as checkBoosted,
@@ -8,11 +12,7 @@ import {
 } from "$lib/merchantDrawerLogic";
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
-import {
-	calculateDistance,
-	formatDistance,
-	formatVerifiedHuman,
-} from "$lib/utils";
+import { calculateDistance, formatDistance } from "$lib/utils";
 
 export let merchant: Place;
 export let enrichedData: Place | null = null;
@@ -50,6 +50,14 @@ $: distanceDisplay =
 		? formatDistance(distanceKm, usesMetric)
 		: null;
 
+$: hasBorder = !!enrichedData && isVerified;
+$: borderColor = hasBorder
+	? "border-l-[3px] border-l-green-600 dark:border-l-green-500"
+	: "";
+$: verificationClass = isVerified
+	? "text-green-600 dark:text-green-500"
+	: "text-gray-500 dark:text-white/60";
+
 function handleClick() {
 	onclick(merchant);
 }
@@ -60,7 +68,9 @@ function handleClick() {
 		on:click={handleClick}
 		on:mouseenter={() => onmouseenter(merchant)}
 		on:mouseleave={() => onmouseleave(merchant)}
-		class="w-full px-3 py-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-white/5 {isSelected
+		class="w-full bg-white px-3 py-3 text-left transition-colors hover:bg-gray-50 dark:bg-dark dark:hover:bg-white/5 {hasBorder
+			? 'rounded-lg rounded-l-none'
+			: 'rounded-lg'} {borderColor} {isSelected
 			? 'bg-link/5 dark:bg-link/10'
 			: ''}"
 		aria-current={isSelected ? 'true' : undefined}
@@ -69,15 +79,15 @@ function handleClick() {
 		<div class="flex items-start gap-3">
 			<!-- Icon -->
 			<div
-				class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg {isBoosted
-					? 'bg-bitcoin/10 text-bitcoin'
-					: 'bg-primary/10 text-primary dark:bg-white/10 dark:text-white'}"
+				class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg {CATEGORY_COLOR_CLASSES[
+					getIconColorWithFallback(merchant.icon)
+				] || 'bg-primary/10 text-primary dark:bg-white/10 dark:text-white'}"
 			>
 				<Icon w="22" h="22" icon={merchant.icon || 'currency_bitcoin'} type="material" />
 			</div>
 
 			<div class="min-w-0 flex-1">
-				<!-- Name with badges and distance -->
+				<!-- Name -->
 				<div class="flex items-center justify-between gap-1">
 					<div class="flex items-center gap-1 min-w-0">
 						{#if enrichedData?.name}
@@ -88,18 +98,6 @@ function handleClick() {
 							>
 								{enrichedData.name}
 							</span>
-							{#if isVerified}
-								<Icon w="12" h="12" icon="verified" type="material" class="shrink-0 text-link" />
-							{/if}
-							{#if isBoosted}
-								<Icon
-									w="12"
-									h="12"
-									icon="arrow_circle_up"
-									type="material"
-									class="shrink-0 text-bitcoin"
-								/>
-							{/if}
 						{:else if showSkeleton}
 							<div class="h-4 w-32 animate-pulse rounded bg-link/50"></div>
 						{:else}
@@ -108,19 +106,17 @@ function handleClick() {
 							>
 						{/if}
 					</div>
-				{#if distanceDisplay}
-					<!-- Visible short distance label -->
-					<span
-						class="shrink-0 text-xs text-gray-400 dark:text-white/40"
-						aria-hidden="true"
-					>
-						{distanceDisplay}
-					</span>
-					<!-- Full phrase for screen readers via aria-describedby on the parent button -->
-					<span id="distance-{merchant.id}" class="sr-only">
-						{$_('merchant.distanceAway', { values: { distance: distanceDisplay } })}
-					</span>
-				{/if}
+					{#if distanceDisplay}
+						<span
+							class="shrink-0 text-xs text-gray-400 dark:text-white/40"
+							aria-hidden="true"
+						>
+							{distanceDisplay}
+						</span>
+						<span id="distance-{merchant.id}" class="sr-only">
+							{$_('merchant.distanceAway', { values: { distance: distanceDisplay } })}
+						</span>
+					{/if}
 				</div>
 
 				<!-- Address -->
@@ -172,14 +168,9 @@ function handleClick() {
 								{$_('boost.boosted')}
 							</span>
 						{/if}
-						<span class="flex items-center gap-1 text-gray-500 dark:text-white/60">
+						<span class="flex items-center gap-1 {verificationClass}">
 							<Icon w="12" h="12" icon={isVerified ? 'verified' : 'warning'} type="material" />
 							{isVerified ? $_('verification.verified') : $_('verification.outdated')}
-							{#if enrichedData.verified_at}
-								<span class="text-gray-400 dark:text-white/40"
-									>· {formatVerifiedHuman(enrichedData.verified_at)}</span
-								>
-							{/if}
 						</span>
 					</div>
 				{:else if showSkeleton}

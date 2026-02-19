@@ -552,7 +552,7 @@ onDestroy(() => {
 						{$_('categories.noMatches')}
 					</div>
 				{:else}
-					<ul class="divide-y divide-gray-100 dark:divide-white/5">
+					<ul class="flex flex-col gap-2 bg-neutral-50 p-2 dark:bg-white/10">
 						{#each filteredSearchResults as merchant (merchant.id)}
 							<MerchantListItem
 								{merchant}
@@ -593,10 +593,6 @@ onDestroy(() => {
 				>
 					<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
 				</div>
-			{:else if merchants.length === 0}
-				<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
-					{$_('search.noVisible')}
-				</div>
 			{:else}
 				<!-- Nearby mode: merchant list -->
 				{@const filteredMerchants = nearbyFilter
@@ -606,12 +602,16 @@ onDestroy(() => {
 							return name.toLowerCase().includes(nearbyFilter.toLowerCase());
 						})
 					: merchants}
-				{#if filteredMerchants.length === 0 && nearbyFilter}
+				{#if merchants.length === 0}
+					<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
+						{$_('search.noVisible')}
+					</div>
+				{:else if filteredMerchants.length === 0 && nearbyFilter}
 					<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
 						{$_('search.noResultsFor', { values: { query: nearbyFilter } })}
 					</div>
 				{:else}
-					<ul class="divide-y divide-gray-100 dark:divide-white/5">
+					<ul class="flex flex-col gap-2 bg-neutral-50 p-2 dark:bg-white/10">
 						{#each filteredMerchants as merchant (merchant.id)}
 							<MerchantListItem
 								{merchant}
