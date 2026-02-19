@@ -93,7 +93,7 @@ function handleClick() {
 }
 </script>
 
-	<li class="list-none">
+<li class="list-none">
 	<button
 		on:click={handleClick}
 		on:mouseenter={() => onmouseenter(merchant)}

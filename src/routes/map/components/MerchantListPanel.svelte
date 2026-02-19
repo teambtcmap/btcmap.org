@@ -593,19 +593,15 @@ onDestroy(() => {
 				>
 					<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
 				</div>
-			{:else if merchants.length === 0}
-				<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
-					{$_('search.noVisible')}
-				</div>
-				{:else}
-					<!-- Nearby mode: merchant list -->
-					{@const filteredMerchants = nearbyFilter
-						? merchants.filter((m) => {
-								const enriched = placeDetailsCache.get(m.id);
-								const name = enriched?.name || m.name || '';
-								return name.toLowerCase().includes(nearbyFilter.toLowerCase());
-							})
-						: merchants}
+			{:else}
+				<!-- Nearby mode: merchant list -->
+				{@const filteredMerchants = nearbyFilter
+					? merchants.filter((m) => {
+							const enriched = placeDetailsCache.get(m.id);
+							const name = enriched?.name || m.name || '';
+							return name.toLowerCase().includes(nearbyFilter.toLowerCase());
+						})
+					: merchants}
 				{#if filteredMerchants.length === 0 && nearbyFilter}
 					<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
 						{$_('search.noResultsFor', { values: { query: nearbyFilter } })}
