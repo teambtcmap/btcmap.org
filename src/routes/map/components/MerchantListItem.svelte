@@ -50,7 +50,7 @@ $: distanceDisplay =
 		? formatDistance(distanceKm, usesMetric)
 		: null;
 
-$: hasBorder = enrichedData && isVerified;
+$: hasBorder = !!enrichedData && isVerified;
 $: borderColor = hasBorder
 	? "border-l-[3px] border-l-green-600 dark:border-l-green-500"
 	: "";
