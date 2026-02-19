@@ -54,6 +54,9 @@ $: hasBorder = enrichedData && isVerified;
 $: borderColor = hasBorder
 	? "border-l-[3px] border-l-green-600 dark:border-l-green-500"
 	: "";
+$: verificationClass = isVerified
+	? "text-green-600 dark:text-green-500"
+	: "text-gray-500 dark:text-white/60";
 
 function handleClick() {
 	onclick(merchant);
@@ -165,7 +168,7 @@ function handleClick() {
 								{$_('boost.boosted')}
 							</span>
 						{/if}
-						<span class="flex items-center gap-1 {isVerified ? 'text-green-600 dark:text-green-500' : 'text-gray-500 dark:text-white/60'}">
+						<span class="flex items-center gap-1 {verificationClass}">
 							<Icon w="12" h="12" icon={isVerified ? 'verified' : 'warning'} type="material" />
 							{isVerified ? $_('verification.verified') : $_('verification.outdated')}
 						</span>
