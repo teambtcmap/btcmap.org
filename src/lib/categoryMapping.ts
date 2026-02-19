@@ -1,9 +1,24 @@
 import type { Place } from "$lib/types";
 
-export const CATEGORY_GROUPS = {
+export type CategoryColor =
+	| "orange"
+	| "emerald"
+	| "amber"
+	| "blue"
+	| "purple"
+	| "yellow"
+	| "";
+
+export interface CategoryGroup {
+	label: string;
+	icons: readonly string[];
+	color: CategoryColor;
+}
+
+export const CATEGORY_GROUPS: Record<string, CategoryGroup> = {
 	all: {
 		label: "All",
-		icons: [] as string[],
+		icons: [],
 		color: "",
 	},
 	restaurants: {
@@ -41,9 +56,17 @@ export const CATEGORY_GROUPS = {
 		icons: ["content_cut"],
 		color: "purple",
 	},
-} as const;
+};
 
-export type CategoryKey = keyof typeof CATEGORY_GROUPS;
+export type CategoryKey =
+	| "all"
+	| "restaurants"
+	| "shopping"
+	| "groceries"
+	| "coffee"
+	| "atms"
+	| "hotels"
+	| "beauty";
 
 // Explicit array for guaranteed order and clarity (could derive from CATEGORY_GROUPS but kept explicit)
 export const CATEGORIES: readonly CategoryKey[] = [
