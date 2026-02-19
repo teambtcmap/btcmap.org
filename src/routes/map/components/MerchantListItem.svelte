@@ -15,14 +15,7 @@ import {
 	formatVerifiedHuman,
 } from "$lib/utils";
 
-const FALLBACK_COLORS = [
-	"orange",
-	"emerald",
-	"amber",
-	"blue",
-	"purple",
-	"pink",
-];
+const FALLBACK_COLORS = ["emerald", "amber", "blue", "purple", "pink", "cyan"];
 
 function getIconColor(icon: string | undefined): string {
 	if (!icon) return "";
@@ -49,6 +42,7 @@ const COLOR_CLASSES: Record<string, string> = {
 	purple:
 		"bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
 	pink: "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300",
+	cyan: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300",
 	yellow:
 		"bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
 };
