@@ -1,11 +1,8 @@
 <script lang="ts">
 import Icon from "$components/Icon.svelte";
 import PaymentMethodIcon from "$components/PaymentMethodIcon.svelte";
-import {
-	CATEGORY_GROUPS,
-	type CategoryColor,
-	getIconColor,
-} from "$lib/categoryMapping";
+import type { CategoryColor } from "$lib/categoryMapping";
+import { getIconColor } from "$lib/categoryMapping";
 import { _ } from "$lib/i18n";
 import {
 	isBoosted as checkBoosted,
@@ -13,11 +10,7 @@ import {
 } from "$lib/merchantDrawerLogic";
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
-import {
-	calculateDistance,
-	formatDistance,
-	formatVerifiedHuman,
-} from "$lib/utils";
+import { calculateDistance, formatDistance } from "$lib/utils";
 
 const FALLBACK_COLORS = ["emerald", "amber", "blue", "purple", "pink", "cyan"];
 
@@ -107,7 +100,7 @@ function handleClick() {
 			<!-- Icon -->
 			<div
 				class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg {COLOR_CLASSES[
-					getIconColor(merchant.icon)
+					getIconColorWithFallback(merchant.icon)
 				] || 'bg-primary/10 text-primary dark:bg-white/10 dark:text-white'}"
 			>
 				<Icon w="22" h="22" icon={merchant.icon || 'currency_bitcoin'} type="material" />
