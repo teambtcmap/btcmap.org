@@ -2307,7 +2307,7 @@ __metadata:
     svelte-i18n: "npm:^4.0.1"
     svelte-outclick: "npm:^3.7.1"
     svelte-preprocess: "npm:^6.0.3"
-    svelte-time: "npm:^1.1.0"
+    svelte-time: "npm:^2.1.0"
     svg-captcha: "npm:^1.4.0"
     tailwindcss: "npm:^4.1.18"
     tippy.js: "npm:^6.3.7"
@@ -5113,12 +5113,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"svelte-time@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "svelte-time@npm:1.1.0"
+"svelte-time@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "svelte-time@npm:2.1.0"
   dependencies:
     dayjs: "npm:^1.11.13"
-  checksum: 10c0/d9b4d56233c0de75a7996ed63708597c44d99c9041a4ffe3f7da7d2c831824e82c6abff433227ebb4ba1f4916401181a56edea0929ac5473785de852dc5ffac4
+  checksum: 10c0/ff24d193eaa0dee0dbac7b3a5848fe315eb2f3a2300666bcfc2759c1c188f76a254cc66f1b838f08fe59d028076e12e3adc82eabce2894153161bc0d8ce86043
   languageName: node
   linkType: hard
 
