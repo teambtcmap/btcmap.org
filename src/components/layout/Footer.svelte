@@ -79,6 +79,19 @@ const links = [
 			>
 				PT
 			</button>
+			<span class="text-body dark:text-white/50"> / </span>
+			<button
+				on:click={() => switchLanguage('bg')}
+				disabled={$locale === 'bg'}
+				aria-label="Преминаване към български"
+				class="
+					{$locale === 'bg'
+					? 'cursor-default font-bold text-body underline dark:text-white/50'
+					: 'text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link'}
+				"
+			>
+				BG
+			</button>
 		</span>
 
 		{#each links as link (link.link)}
