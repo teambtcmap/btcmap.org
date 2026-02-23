@@ -35,8 +35,8 @@ const links = [
 ];
 </script>
 
-<footer class="w-full items-center justify-between space-y-5 pb-5 xl:flex xl:space-y-0">
-	<div class="flex flex-wrap justify-center gap-5 xl:block xl:space-x-5">
+<footer class="flex w-full flex-col items-center justify-between gap-4 pb-5 xl:flex-row xl:flex-nowrap xl:gap-0">
+	<div class="flex flex-nowrap justify-center gap-3 xl:gap-4">
 		<SocialLink url={$socials.matrix} social="matrix" />
 		<SocialLink url={$socials.github} social="github" />
 		<SocialLink url={$socials.amboss} social="amboss" />
@@ -44,9 +44,9 @@ const links = [
 		<SocialLink url={$socials.x} social="x" />
 	</div>
 
-	<div class="flex flex-wrap justify-center xl:block">
+	<div class="flex flex-wrap justify-center gap-x-2 gap-y-2 xl:flex-nowrap xl:items-center">
 		<!-- Language Selector -->
-		<span class="mx-1.5 mb-2.5 text-sm xl:mb-0">
+		<span class="shrink-0 text-sm">
 			<Icon
 				type="material"
 				icon="translate"
@@ -55,6 +55,7 @@ const links = [
 				class="inline-block align-text-bottom text-link dark:text-white/50"
 			/>
 			<button
+				type="button"
 				on:click={() => switchLanguage('en')}
 				disabled={$locale === 'en'}
 				aria-label="Switch to English"
@@ -66,8 +67,9 @@ const links = [
 			>
 				EN
 			</button>
-			<span class="text-body dark:text-white/50"> / </span>
+			<span class="text-body dark:text-white/50">/</span>
 			<button
+				type="button"
 				on:click={() => switchLanguage('pt-BR')}
 				disabled={$locale === 'pt-BR'}
 				aria-label="Mudar para Português"
@@ -79,8 +81,9 @@ const links = [
 			>
 				PT
 			</button>
-			<span class="text-body dark:text-white/50"> / </span>
+			<span class="text-body dark:text-white/50">/</span>
 			<button
+				type="button"
 				on:click={() => switchLanguage('bg')}
 				disabled={$locale === 'bg'}
 				aria-label="Преминаване към български"
@@ -100,7 +103,7 @@ const links = [
 				href={link.link}
 				target={link.external ? '_blank' : null}
 				rel={link.external ? 'noopener noreferrer' : null}
-				class="mx-1.5 mb-2.5 text-sm text-link transition-colors last:mb-0 hover:text-hover xl:mb-0 dark:text-white/50 dark:hover:text-link"
+				class="shrink-0 whitespace-nowrap text-sm text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link"
 			>
 				{link.nameKey ? $_(link.nameKey) : link.name}
 			</a>
