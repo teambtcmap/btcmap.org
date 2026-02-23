@@ -1567,9 +1567,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sveltejs/kit@npm:^2.52.2":
-  version: 2.52.2
-  resolution: "@sveltejs/kit@npm:2.52.2"
+"@sveltejs/kit@npm:^2.53.0":
+  version: 2.53.0
+  resolution: "@sveltejs/kit@npm:2.53.0"
   dependencies:
     "@standard-schema/spec": "npm:^1.0.0"
     "@sveltejs/acorn-typescript": "npm:^1.0.5"
@@ -1585,10 +1585,10 @@ __metadata:
     sirv: "npm:^3.0.0"
   peerDependencies:
     "@opentelemetry/api": ^1.0.0
-    "@sveltejs/vite-plugin-svelte": ^3.0.0 || ^4.0.0-next.1 || ^5.0.0 || ^6.0.0-next.0
+    "@sveltejs/vite-plugin-svelte": ^3.0.0 || ^4.0.0-next.1 || ^5.0.0 || ^6.0.0-next.0 || ^7.0.0
     svelte: ^4.0.0 || ^5.0.0-next.0
     typescript: ^5.3.3
-    vite: ^5.0.3 || ^6.0.0 || ^7.0.0-beta.0
+    vite: ^5.0.3 || ^6.0.0 || ^7.0.0-beta.0 || ^8.0.0
   peerDependenciesMeta:
     "@opentelemetry/api":
       optional: true
@@ -1596,7 +1596,7 @@ __metadata:
       optional: true
   bin:
     svelte-kit: svelte-kit.js
-  checksum: 10c0/8e7b9ba781b84f0104813386bf457ea6e27da6e2a08be1f41b907c7272a9ad6d097b89dcdfe5da9f35243e10623a8f84d88c24956e151a5f5f0401f6dd0fd65f
+  checksum: 10c0/ec5d937b4328c6c9dd06439c817468c2bcbad1ccfa1c5be2615f77c8e7a04a4258e9143a832932109f36f1d6a0a4e4d56a14ea6801df275b4acf49574628c87f
   languageName: node
   linkType: hard
 
@@ -2265,7 +2265,7 @@ __metadata:
     "@maplibre/maplibre-gl-leaflet": "npm:^0.1.3"
     "@playwright/test": "npm:^1.58.2"
     "@sveltejs/adapter-netlify": "npm:^6.0.0"
-    "@sveltejs/kit": "npm:^2.52.2"
+    "@sveltejs/kit": "npm:^2.53.0"
     "@sveltejs/vite-plugin-svelte": "npm:^3.1.2"
     "@tailwindcss/postcss": "npm:^4.1.18"
     "@tailwindcss/vite": "npm:^4.1.18"
