@@ -23,7 +23,13 @@ const links = [
 	{ link: "/privacy-policy", nameKey: "footer.privacy" },
 	{ link: "https://stats.uptimerobot.com/7kgEVtzlV1", name: "Status" },
 	...(env.PUBLIC_UMAMI_URL
-		? [{ link: env.PUBLIC_UMAMI_URL, name: "Analytics", external: true }]
+		? [
+				{
+					link: env.PUBLIC_UMAMI_URL,
+					nameKey: "footer.analytics",
+					external: true,
+				},
+			]
 		: []),
 	{
 		link: "https://bitcoin.rocks/business/",
@@ -35,8 +41,8 @@ const links = [
 ];
 </script>
 
-<footer class="flex w-full flex-col items-center justify-between gap-4 pb-5 xl:flex-row xl:flex-nowrap xl:gap-0">
-	<div class="flex flex-nowrap justify-center gap-3 xl:gap-4">
+<footer class="w-full items-center justify-between space-y-5 pb-5 xl:flex xl:space-y-0">
+	<div class="flex flex-wrap justify-center gap-5 xl:block xl:space-x-5">
 		<SocialLink url={$socials.matrix} social="matrix" />
 		<SocialLink url={$socials.github} social="github" />
 		<SocialLink url={$socials.amboss} social="amboss" />
@@ -44,9 +50,13 @@ const links = [
 		<SocialLink url={$socials.x} social="x" />
 	</div>
 
-	<div class="flex flex-wrap justify-center gap-x-2 gap-y-2 xl:flex-nowrap xl:items-center">
+	<div
+		class="flex flex-wrap justify-center {$locale === 'bg'
+			? 'xl:flex xl:flex-nowrap xl:items-center xl:gap-x-2'
+			: 'xl:block'}"
+	>
 		<!-- Language Selector -->
-		<span class="shrink-0 text-sm">
+		<span class="mx-1.5 mb-2.5 text-sm xl:mb-0 {$locale === 'bg' ? 'xl:mx-0' : ''}">
 			<Icon
 				type="material"
 				icon="translate"
@@ -67,7 +77,7 @@ const links = [
 			>
 				EN
 			</button>
-			<span class="text-body dark:text-white/50">/</span>
+			<span class="text-body dark:text-white/50"> / </span>
 			<button
 				type="button"
 				on:click={() => switchLanguage('pt-BR')}
@@ -81,7 +91,7 @@ const links = [
 			>
 				PT
 			</button>
-			<span class="text-body dark:text-white/50">/</span>
+			<span class="text-body dark:text-white/50"> / </span>
 			<button
 				type="button"
 				on:click={() => switchLanguage('bg')}
@@ -103,7 +113,9 @@ const links = [
 				href={link.link}
 				target={link.external ? '_blank' : null}
 				rel={link.external ? 'noopener noreferrer' : null}
-				class="shrink-0 whitespace-nowrap text-sm text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link"
+				class="mx-1.5 mb-2.5 text-sm text-link transition-colors last:mb-0 hover:text-hover xl:mb-0 dark:text-white/50 dark:hover:text-link {$locale === 'bg'
+					? 'xl:mx-0 xl:shrink-0 xl:whitespace-nowrap'
+					: ''}"
 			>
 				{link.nameKey ? $_(link.nameKey) : link.name}
 			</a>
