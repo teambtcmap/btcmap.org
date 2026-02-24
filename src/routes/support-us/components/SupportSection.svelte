@@ -7,7 +7,10 @@ export let supporters: {
 }[];
 export let placeholders: number;
 
+import { _ } from "$lib/i18n";
 import { theme } from "$lib/theme";
+
+$: t = $_;
 </script>
 
 <div class="mt-4">
@@ -40,7 +43,7 @@ import { theme } from "$lib/theme";
 			<div
 				class="mx-auto flex h-[90px] w-full items-center justify-center self-center rounded-xl bg-supporter/50 drop-shadow-xl md:w-[250px]"
 			>
-				<a href="mailto:hello@btcmap.org" class="text-white uppercase">Apply here</a>
+				<a href="mailto:hello@btcmap.org" class="text-white uppercase">{t("supportUs.applyHere")}</a>
 			</div>
 		{/each}
 	</div>

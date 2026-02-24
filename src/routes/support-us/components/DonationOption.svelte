@@ -1,19 +1,23 @@
 <script lang="ts">
 import CopyButton from "$components/CopyButton.svelte";
 import Icon from "$components/Icon.svelte";
+import { _ } from "$lib/i18n";
 import type { DonationType } from "$lib/types";
 
 export let value: string;
-export let text: DonationType;
+export let textKey: string;
+export let network: DonationType;
 export let showQrToggle: (type: DonationType) => void;
+
+$: t = $_;
 </script>
 
 <div>
 	<h3 class="hidden text-lg text-body uppercase md:block dark:text-white">
-		{text}
+		{t(textKey)}
 		<img
-			src={text === 'Lightning' ? '/icons/ln-highlight.svg' : '/icons/btc-highlight.svg'}
-			alt="protocol"
+			src={network === 'Lightning' ? '/icons/ln-highlight.svg' : '/icons/btc-highlight.svg'}
+			alt={t("supportUs.donate.protocolAlt")}
 			class="mb-1 inline dark:rounded-full dark:bg-white dark:p-0.5"
 		/>
 	</h3>
@@ -23,10 +27,10 @@ export let showQrToggle: (type: DonationType) => void;
 		<!-- value -->
 		<span class="hidden lowercase md:block">{value.slice(0, 39)}...</span>
 		<span class="block uppercase md:hidden"
-			>{text}
+			>{t(textKey)}
 			<img
-				src={text === 'Lightning' ? '/icons/ln-highlight.svg' : '/icons/btc-highlight.svg'}
-				alt="protocol"
+				src={network === 'Lightning' ? '/icons/ln-highlight.svg' : '/icons/btc-highlight.svg'}
+				alt={t("supportUs.donate.protocolAlt")}
 				class="mb-1 inline dark:rounded-full dark:bg-white dark:p-0.5"
 			/>
 		</span>
@@ -35,7 +39,7 @@ export let showQrToggle: (type: DonationType) => void;
 			<!-- qr button -->
 			<button
 				class="text-link transition-colors hover:text-hover"
-				on:click={() => showQrToggle(text)}
+				on:click={() => showQrToggle(network)}
 			>
 				<Icon type="fa" icon="qrcode" w="24" h="24" />
 			</button>

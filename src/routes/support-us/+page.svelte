@@ -4,6 +4,7 @@ import type { Action } from "svelte/action";
 import CloseButton from "$components/CloseButton.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import { BREAKPOINTS, QR_CODE_SIZE } from "$lib/constants";
+import { _ } from "$lib/i18n";
 import { theme } from "$lib/theme";
 import type { DonationType } from "$lib/types";
 import { warningToast } from "$lib/utils";
@@ -16,6 +17,7 @@ const lnurlp =
 	"LNURL1DP68GURN8GHJ7CM0WFJJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQPSYZ34";
 
 let showQr = false;
+$: t = $_;
 let network: DonationType;
 
 const showQrToggle = (type: DonationType) => {
@@ -37,16 +39,14 @@ const renderQr: Action<HTMLCanvasElement> = (node) => {
 				},
 				(error: Error | null | undefined) => {
 					if (error) {
-						warningToast(
-							"Could not generate QR, please try again or contact BTC Map.",
-						);
+						warningToast(t("supportUs.qrError"));
 						console.error(error);
 					}
 				},
 			);
 		})
 		.catch((error) => {
-			warningToast("Could not load QR generator. Please try again.");
+			warningToast(t("supportUs.qrLoadError"));
 			console.error("Failed to load QRCode module:", error);
 		});
 };
@@ -77,9 +77,9 @@ const supporters = [
 </script>
 
 <svelte:head>
-	<title>BTC Map - Support Us</title>
+	<title>BTC Map - {$_( "supportUs.title" )}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/support.png" />
-	<meta property="twitter:title" content="BTC Map - Support Us" />
+	<meta property="twitter:title" content="BTC Map - {$_( "supportUs.title" )}" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/support.png" />
 </svelte:head>
 
@@ -90,18 +90,17 @@ const supporters = [
 				? 'text-white'
 				: 'gradient'} text-4xl !leading-tight font-semibold md:text-5xl"
 		>
-			Help place bitcoin on the map.
+			{$_("supportUs.hero")}
 		</h1>
 	{:else}
 		<HeaderPlaceholder />
 	{/if}
 
 	<h2 class="mx-auto w-full text-xl font-semibold text-primary lg:w-[800px] dark:text-white">
-		BTCMap.org is a free and open source project (FOSS). We rely on donations and sponsorship to
-		continue.
+		{$_("supportUs.intro")}
 
 		<br /><br />
-		We greatly appreciate all support.
+		{$_("supportUs.appreciate")}
 	</h2>
 
 	<section id="donate">
@@ -127,12 +126,12 @@ const supporters = [
 
 					<!-- cta -->
 					<p class="text-center text-xl text-primary dark:text-white">
-						Scan or click to donate <br class="block md:hidden" /><strong class="lowercase"
-							>{network}</strong
+						{$_("supportUs.donate.scanOrClick")} <br class="block md:hidden" /><strong class="lowercase"
+							>{network === 'Lightning' ? $_("supportUs.donate.lightning") : $_("supportUs.donate.onchain")}</strong
 						>
 						<img
 							src={network === 'Lightning' ? '/icons/ln-highlight.svg' : '/icons/btc-highlight.svg'}
-							alt="protocol"
+							alt={$_("supportUs.donate.protocolAlt")}
 							class="mb-1 inline dark:rounded-full dark:bg-white dark:p-0.5"
 						/>
 					</p>
@@ -141,19 +140,19 @@ const supporters = [
 		{:else}
 			<div class="space-y-5">
 				<!-- onchain -->
-				<DonationOption value={onchain} text="On-chain" {showQrToggle} />
+				<DonationOption value={onchain} textKey="supportUs.donate.onchain" network="On-chain" {showQrToggle} />
 				<!-- lightning -->
-				<DonationOption value={lnurlp} text="Lightning" {showQrToggle} />
+				<DonationOption value={lnurlp} textKey="supportUs.donate.lightning" network="Lightning" {showQrToggle} />
 			</div>
 		{/if}
 	</section>
 
 	<section id="supporters">
 		<h2 class="text-xl font-semibold text-primary uppercase dark:text-white">
-			Our amazing supporters
+			{$_("supportUs.supporters.heading")}
 		</h2>
 		<a href="mailto:hello@btcmap.org" class="text-link transition-colors hover:text-hover"
-			>Become a Sponsor</a
+			>{$_("supportUs.supporters.becomeSponsor")}</a
 		>
 
 		<SupportSection {supporters} placeholders={2} />
@@ -163,7 +162,7 @@ const supporters = [
 		<!-- channel -->
 		<div>
 			<h3 class="text-lg font-semibold text-body uppercase dark:text-white">
-				Open a lightning channel to us
+				{$_("supportUs.node.heading")}
 			</h3>
 			<a
 				href="https://amboss.space/node/03ef01535d57cd3a3ddff8b4050650b278991b3eb7853f772a200079b9adb24988"

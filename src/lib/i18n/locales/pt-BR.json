@@ -411,5 +411,27 @@
 		"locationsNote": "Locais incluem caixas eletrônicos.",
 		"totalTooltip": "Todos os locais incl. caixas eletrônicos",
 		"verifiedTooltip": "Locais verificados no último ano"
+	},
+	"supportUs": {
+		"title": "Apoie-nos",
+		"hero": "Ajude a colocar bitcoin no mapa.",
+		"intro": "BTCMap.org é um projeto gratuito e de código aberto (FOSS). Dependemos de doações e patrocínios para continuar.",
+		"appreciate": "Agradecemos muito todo o apoio.",
+		"donate": {
+			"scanOrClick": "Escaneie ou clique para doar",
+			"onchain": "On-chain",
+			"lightning": "Lightning",
+			"protocolAlt": "protocolo"
+		},
+		"supporters": {
+			"heading": "Nossos incríveis apoiadores",
+			"becomeSponsor": "Torne-se um Patrocinador"
+		},
+		"node": {
+			"heading": "Abra um canal lightning para nós"
+		},
+		"applyHere": "Candidate-se aqui",
+		"qrError": "Não foi possível gerar o QR, tente novamente ou entre em contato com o BTC Map.",
+		"qrLoadError": "Não foi possível carregar o gerador de QR. Por favor, tente novamente."
 	}
 }

@@ -491,5 +491,27 @@
 		"northAmerica": "North America",
 		"oceania": "Oceania",
 		"southAmerica": "South America"
+	},
+	"supportUs": {
+		"title": "Support Us",
+		"hero": "Help place bitcoin on the map.",
+		"intro": "BTCMap.org is a free and open source project (FOSS). We rely on donations and sponsorship to continue.",
+		"appreciate": "We greatly appreciate all support.",
+		"donate": {
+			"scanOrClick": "Scan or click to donate",
+			"onchain": "On-chain",
+			"lightning": "Lightning",
+			"protocolAlt": "protocol"
+		},
+		"supporters": {
+			"heading": "Our amazing supporters",
+			"becomeSponsor": "Become a Sponsor"
+		},
+		"node": {
+			"heading": "Open a lightning channel to us"
+		},
+		"applyHere": "Apply here",
+		"qrError": "Could not generate QR, please try again or contact BTC Map.",
+		"qrLoadError": "Could not load QR generator. Please try again."
 	}
 }
