@@ -3,6 +3,7 @@ import type { Table } from "@tanstack/svelte-table";
 import { flexRender } from "@tanstack/svelte-table";
 
 import Tip from "$components/Tip.svelte";
+import { _ } from "$lib/i18n";
 import type { TaggerLeaderboard } from "$lib/types";
 import { isEven } from "$lib/utils";
 
@@ -16,7 +17,7 @@ type TaggerRow = TaggerLeaderboard & {
 export let table: Table<TaggerRow>;
 </script>
 
-<div class="hidden lg:block" role="region" aria-label="Tagger leaderboard table">
+<div class="hidden lg:block" role="region" aria-label={$_('leaderboard.tableAria')}>
 	<table class="w-full text-left text-xs text-primary lg:text-sm xl:text-lg dark:text-white">
 		<thead>
 			{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
@@ -33,6 +34,7 @@ export let table: Table<TaggerRow>;
 									: 'none'}
 						>
 							{#if !header.isPlaceholder}
+								{@const headerLabel = typeof header.column.columnDef.header === 'string' ? header.column.columnDef.header : header.column.id}
 								<button
 									type="button"
 									class="flex items-center gap-x-1 leading-tight select-none md:gap-x-2"
@@ -48,15 +50,18 @@ export let table: Table<TaggerRow>;
 									}}
 									tabindex={header.column.getCanSort() ? 0 : -1}
 									aria-label={header.column.getCanSort()
-										? 'Sort by ' +
-											header.column.columnDef.header +
-											', currently ' +
-											(header.column.getIsSorted() === 'asc'
-												? 'ascending'
-												: header.column.getIsSorted() === 'desc'
-													? 'descending'
-													: 'unsorted')
-										: String(header.column.columnDef.header)}
+										? header.column.getIsSorted() === 'asc'
+											? $_('leaderboard.sortByCurrentlyAscending', {
+													values: { column: headerLabel },
+												})
+											: header.column.getIsSorted() === 'desc'
+												? $_('leaderboard.sortByCurrentlyDescending', {
+														values: { column: headerLabel },
+													})
+												: $_('leaderboard.sortByCurrentlyUnsorted', {
+														values: { column: headerLabel },
+													})
+										: headerLabel}
 								>
 									<span class="break-words">
 										<svelte:component

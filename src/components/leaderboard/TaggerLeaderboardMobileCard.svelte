@@ -2,6 +2,7 @@
 import type { Table } from "@tanstack/svelte-table";
 
 import Icon from "$components/Icon.svelte";
+import { _ } from "$lib/i18n";
 import type { TaggerLeaderboard } from "$lib/types";
 import { isEven } from "$lib/utils";
 
@@ -82,13 +83,13 @@ export let table: Table<TaggerRow>;
 			<div class="grid grid-cols-3 gap-3 text-center text-sm">
 				<!-- Total Edits -->
 				<div>
-					<p class="text-body dark:text-white/70">Total</p>
+					<p class="text-body dark:text-white/70">{$_('leaderboard.total')}</p>
 					<p class="font-semibold text-primary dark:text-white">{tagger.total.toLocaleString()}</p>
 				</div>
 
 				<!-- Created -->
 				<div>
-					<p class="text-body dark:text-white/70">Created</p>
+					<p class="text-body dark:text-white/70">{$_('leaderboard.created')}</p>
 					<p class="font-semibold text-primary dark:text-white">
 						{tagger.created.toLocaleString()}
 					</p>
@@ -96,7 +97,7 @@ export let table: Table<TaggerRow>;
 
 				<!-- Updated -->
 				<div>
-					<p class="text-body dark:text-white/70">Updated</p>
+					<p class="text-body dark:text-white/70">{$_('leaderboard.updated')}</p>
 					<p class="font-semibold text-primary dark:text-white">
 						{tagger.updated.toLocaleString()}
 					</p>

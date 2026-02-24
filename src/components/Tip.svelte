@@ -1,4 +1,5 @@
 <script lang="ts">
+import { _ } from "$lib/i18n";
 import { TipType } from "$lib/types";
 
 export let user: undefined | string = undefined;
@@ -35,7 +36,7 @@ export let type: TipType = TipType.Address;
 					stroke-linejoin="round"
 				/>
 			</svg>
-			Tip {user}
+			{$_('tip.labelWithUser', { values: { user } })}
 		</a>
 	</div>
 {:else}
@@ -64,6 +65,6 @@ export let type: TipType = TipType.Address;
 				stroke-linejoin="round"
 			/>
 		</svg>
-		Tip
+		{$_('tip.label')}
 	</a>
 {/if}
