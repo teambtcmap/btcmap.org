@@ -1,6 +1,8 @@
 <script lang="ts">
 import type { Table } from "@tanstack/svelte-table";
 
+import { _ } from "$lib/i18n";
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export let table: Table<any>;
 export let pageSizes: number[] = [10, 20, 30, 40, 50];
@@ -17,11 +19,11 @@ export let pageSizes: number[] = [10, 20, 30, 40, 50];
 			table?.setPageSize(Number(e.target?.value));
 		}}
 		class="cursor-pointer bg-transparent focus:outline-primary dark:focus:outline-white"
-		aria-label="Items per page"
+		aria-label={$_('leaderboard.itemsPerPage')}
 	>
 		{#each pageSizes as pageSize (pageSize)}
 			<option value={pageSize}>
-				Show {pageSize}
+				{$_('leaderboard.show', { values: { pageSize } })}
 			</option>
 		{/each}
 	</select>
@@ -36,7 +38,7 @@ export let pageSizes: number[] = [10, 20, 30, 40, 50];
 						: ''}"
 					on:click={() => table?.firstPage()}
 					disabled={!table?.getCanPreviousPage()}
-					aria-label="Go to first page"
+					aria-label={$_('leaderboard.firstPage')}
 				>
 					&lt;&lt;
 				</button>
@@ -47,7 +49,7 @@ export let pageSizes: number[] = [10, 20, 30, 40, 50];
 						: ''}"
 					on:click={() => table?.previousPage()}
 					disabled={!table?.getCanPreviousPage()}
-					aria-label="Go to previous page"
+					aria-label={$_('leaderboard.previousPage')}
 				>
 					&lt;
 				</button>
@@ -60,7 +62,7 @@ export let pageSizes: number[] = [10, 20, 30, 40, 50];
 						: ''}"
 					on:click={() => table?.nextPage()}
 					disabled={!table?.getCanNextPage()}
-					aria-label="Go to next page"
+					aria-label={$_('leaderboard.nextPage')}
 				>
 					&gt;
 				</button>
@@ -71,7 +73,7 @@ export let pageSizes: number[] = [10, 20, 30, 40, 50];
 						: ''}"
 					on:click={() => table?.lastPage()}
 					disabled={!table?.getCanNextPage()}
-					aria-label="Go to last page"
+					aria-label={$_('leaderboard.lastPage')}
 				>
 					&gt;&gt;
 				</button>
@@ -79,9 +81,9 @@ export let pageSizes: number[] = [10, 20, 30, 40, 50];
 		</div>
 
 		<span class="flex items-center justify-center gap-1 md:justify-start" aria-live="polite">
-			<div>Page</div>
+			<div>{$_('leaderboard.page')}</div>
 			<strong>
-				{table?.getState().pagination.pageIndex + 1} of
+				{table?.getState().pagination.pageIndex + 1} {$_('leaderboard.of')}
 				{table?.getPageCount().toLocaleString()}
 			</strong>
 		</span>

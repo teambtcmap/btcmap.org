@@ -3,6 +3,7 @@ import type { Table } from "@tanstack/svelte-table";
 import { flexRender } from "@tanstack/svelte-table";
 
 import Tip from "$components/Tip.svelte";
+import { _ } from "$lib/i18n";
 import type { TaggerLeaderboard } from "$lib/types";
 import { isEven } from "$lib/utils";
 
@@ -16,7 +17,7 @@ type TaggerRow = TaggerLeaderboard & {
 export let table: Table<TaggerRow>;
 </script>
 
-<div class="hidden lg:block" role="region" aria-label="Tagger leaderboard table">
+<div class="hidden lg:block" role="region" aria-label={$_('leaderboard.tableAria')}>
 	<table class="w-full text-left text-xs text-primary lg:text-sm xl:text-lg dark:text-white">
 		<thead>
 			{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
@@ -48,14 +49,17 @@ export let table: Table<TaggerRow>;
 									}}
 									tabindex={header.column.getCanSort() ? 0 : -1}
 									aria-label={header.column.getCanSort()
-										? 'Sort by ' +
-											header.column.columnDef.header +
-											', currently ' +
-											(header.column.getIsSorted() === 'asc'
-												? 'ascending'
-												: header.column.getIsSorted() === 'desc'
-													? 'descending'
-													: 'unsorted')
+										? header.column.getIsSorted() === 'asc'
+											? $_('leaderboard.sortByCurrentlyAscending', {
+													values: { column: header.column.columnDef.header },
+												})
+											: header.column.getIsSorted() === 'desc'
+												? $_('leaderboard.sortByCurrentlyDescending', {
+														values: { column: header.column.columnDef.header },
+													})
+												: $_('leaderboard.sortByCurrentlyUnsorted', {
+														values: { column: header.column.columnDef.header },
+													})
 										: String(header.column.columnDef.header)}
 								>
 									<span class="break-words">

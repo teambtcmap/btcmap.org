@@ -24,6 +24,7 @@ import SortHeaderButton from "$components/leaderboard/SortHeaderButton.svelte";
 import TaggerLeaderboardDesktopTable from "$components/leaderboard/TaggerLeaderboardDesktopTable.svelte";
 import TaggerLeaderboardMobileCard from "$components/leaderboard/TaggerLeaderboardMobileCard.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import { _ } from "$lib/i18n";
 import { excludeLeader } from "$lib/store";
 import { theme } from "$lib/theme";
 import type { RpcGetMostActiveUsersItem, TaggerLeaderboard } from "$lib/types";
@@ -45,12 +46,6 @@ const DEFAULT_PERIOD_OPTIONS: PeriodOption[] = [
 	"12-months",
 	"all-time",
 ];
-const periodLabels: Record<PeriodOption, string> = {
-	"3-months": "Last 3 months",
-	"6-months": "Last 6 months",
-	"12-months": "Last 12 months",
-	"all-time": "All Time",
-};
 
 export let data;
 
@@ -165,10 +160,18 @@ const fuzzyFilter: FilterFn<TaggerRow> = (row, columnId, value, addMeta) => {
 	return itemRank.passed;
 };
 
-const columns: ColumnDef<TaggerRow>[] = [
+$: translate = get(_);
+$: periodLabels = {
+	"3-months": translate("leaderboard.period3Months"),
+	"6-months": translate("leaderboard.period6Months"),
+	"12-months": translate("leaderboard.period12Months"),
+	"all-time": translate("leaderboard.periodAllTime"),
+};
+let columns: ColumnDef<TaggerRow>[] = [];
+$: columns = [
 	{
 		id: "position",
-		header: "Position",
+		header: translate("leaderboard.position"),
 		accessorFn: (row) => row.position,
 		enableSorting: true,
 		enableGlobalFilter: false,
@@ -176,7 +179,7 @@ const columns: ColumnDef<TaggerRow>[] = [
 	},
 	{
 		id: "name",
-		header: "Name",
+		header: translate("leaderboard.name"),
 		accessorFn: (row) => row.tagger,
 		enableSorting: true,
 		filterFn: fuzzyFilter,
@@ -184,35 +187,35 @@ const columns: ColumnDef<TaggerRow>[] = [
 	},
 	{
 		id: "total",
-		header: "Total",
+		header: translate("leaderboard.total"),
 		accessorFn: (row) => row.total,
 		enableSorting: true,
 		enableGlobalFilter: false,
 	},
 	{
 		id: "created",
-		header: "Created",
+		header: translate("leaderboard.created"),
 		accessorFn: (row) => row.created,
 		enableSorting: true,
 		enableGlobalFilter: false,
 	},
 	{
 		id: "updated",
-		header: "Updated",
+		header: translate("leaderboard.updated"),
 		accessorFn: (row) => row.updated,
 		enableSorting: true,
 		enableGlobalFilter: false,
 	},
 	{
 		id: "deleted",
-		header: "Deleted",
+		header: translate("leaderboard.deleted"),
 		accessorFn: (row) => row.deleted,
 		enableSorting: true,
 		enableGlobalFilter: false,
 	},
 	{
 		id: "tip",
-		header: "Tip",
+		header: translate("leaderboard.tip"),
 		accessorFn: (row) => row.tipDestination ?? "",
 		enableSorting: false,
 		enableGlobalFilter: false,
@@ -249,7 +252,7 @@ const setPagination: OnChangeFn<PaginationState> = (updater) => {
 
 const options = writable<TableOptions<TaggerRow>>({
 	data: leaderboardRows,
-	columns,
+	columns: [],
 	state: {
 		sorting,
 		pagination,
@@ -267,6 +270,7 @@ const table = createSvelteTable(options);
 
 $: options.update((current) => ({
 	...current,
+	columns,
 	data: leaderboardRows,
 }));
 
@@ -298,9 +302,9 @@ const handlePeriodChange = async (event: Event) => {
 </script>
 
 <svelte:head>
-	<title>BTC Map - Tagger Leaderboard</title>
+	<title>BTC Map - {$_(`leaderboard.taggerHero`)}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/leader.png" />
-	<meta property="twitter:title" content="BTC Map - Tagger Leaderboard" />
+	<meta property="twitter:title" content="BTC Map - {$_(`leaderboard.taggerHero`)}" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/leader.png" />
 </svelte:head>
 
@@ -317,7 +321,7 @@ const handlePeriodChange = async (event: Event) => {
 				? 'text-white'
 				: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl"
 		>
-			Tagger Leaderboard
+			{$_('leaderboard.taggerHero')}
 		</h1>
 
 		<PrimaryButton
@@ -325,7 +329,7 @@ const handlePeriodChange = async (event: Event) => {
 			link="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers-"
 			external
 		>
-			Join Them
+			{$_('leaderboard.joinButton')}
 		</PrimaryButton>
 
 		<section id="leaderboard" aria-labelledby="leaderboard-title">
@@ -337,7 +341,7 @@ const handlePeriodChange = async (event: Event) => {
 						id="leaderboard-title"
 						class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
 					>
-						Tagger Leaderboard
+						{$_('leaderboard.taggerHero')}
 						{#if !loading && !errorMessage && totalTaggers}
 							({totalTaggers})
 						{/if}
@@ -351,7 +355,7 @@ const handlePeriodChange = async (event: Event) => {
 							role="status"
 							aria-live="polite"
 						>
-							<span class="sr-only">Loading leaderboard data</span>
+							<span class="sr-only">{$_('leaderboard.loadingData')}</span>
 							<Icon type="fa" icon="table" w="96" h="96" class="animate-pulse text-link/50" />
 						</div>
 					</div>
@@ -365,17 +369,19 @@ const handlePeriodChange = async (event: Event) => {
 							<div class="flex flex-col items-center gap-4">
 								<LoadingSpinner color="text-link" size="h-12 w-12" />
 								<p class="text-lg font-medium text-primary dark:text-white">
-									Loading {periodLabels[selectedPeriod].toLowerCase()} data...
+									{$_('leaderboard.loadingPeriod', {
+										values: { period: periodLabels[selectedPeriod].toLowerCase() },
+									})}
 								</p>
 							</div>
 						</div>
 					</div>
 				{:else if errorMessage}
 					<p class="w-full p-5 text-center text-primary dark:text-white">
-						Failed to load leaderboard: {errorMessage}
+						{$_('leaderboard.failedToLoad')} {errorMessage}
 					</p>
 				{:else if !leaderboardRows.length}
-					<p class="w-full p-5 text-center text-primary dark:text-white">No data available</p>
+					<p class="w-full p-5 text-center text-primary dark:text-white">{$_('leaderboard.noData')}</p>
 				{:else}
 					<div class="p-5">
 						<div
@@ -393,12 +399,12 @@ const handlePeriodChange = async (event: Event) => {
 								class="flex flex-col gap-2 text-sm font-medium text-primary md:flex-row md:items-center md:gap-3 dark:text-white"
 								for="period-select"
 							>
-								<span>Period</span>
+								<span>{$_('leaderboard.periodLabel')}</span>
 								<FormSelect
 									id="period-select"
 									value={selectedPeriod}
 									on:change={handlePeriodChange}
-									ariaLabel="Select leaderboard period"
+									ariaLabel={$_('leaderboard.periodAria')}
 									style="md:w-auto"
 								>
 									{#each periodOptions as option (option)}
@@ -409,7 +415,7 @@ const handlePeriodChange = async (event: Event) => {
 						</div>
 
 						{#if $table.getFilteredRowModel().rows.length === 0}
-							<p class="w-full p-5 text-center text-primary dark:text-white">No results found.</p>
+							<p class="w-full p-5 text-center text-primary dark:text-white">{$_('leaderboard.noResults')}</p>
 						{:else}
 							<div class="block lg:hidden">
 								<div
@@ -418,23 +424,23 @@ const handlePeriodChange = async (event: Event) => {
 									<div class="grid grid-cols-4 gap-3 px-4 py-3 text-center text-xs">
 										<SortHeaderButton
 											column={$table?.getColumn('position')}
-											label="Position"
-											ariaLabel="Sort by position"
+											label={$_('leaderboard.position')}
+											ariaLabel={$_('leaderboard.sortPosition')}
 										/>
 										<SortHeaderButton
 											column={$table?.getColumn('total')}
-											label="Total"
-											ariaLabel="Sort by total edits"
+											label={$_('leaderboard.total')}
+											ariaLabel={$_('leaderboard.sortTotal')}
 										/>
 										<SortHeaderButton
 											column={$table?.getColumn('created')}
-											label="Created"
-											ariaLabel="Sort by created edits"
+											label={$_('leaderboard.created')}
+											ariaLabel={$_('leaderboard.sortCreated')}
 										/>
 										<SortHeaderButton
 											column={$table?.getColumn('updated')}
-											label="Updated"
-											ariaLabel="Sort by updated edits"
+											label={$_('leaderboard.updated')}
+											ariaLabel={$_('leaderboard.sortUpdated')}
 										/>
 									</div>
 								</div>
