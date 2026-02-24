@@ -15,7 +15,7 @@ let issues: RpcIssue[] = data.rpcResult.requested_issues;
 	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
-<main class="mt-10 mb-20 space-y-10">
+<div class="mt-10 mb-20 space-y-10">
 	{#if typeof window !== 'undefined'}
 		<h1
 			class="{$theme === 'dark'
@@ -42,4 +42,4 @@ let issues: RpcIssue[] = data.rpcResult.requested_issues;
 		Wiki page.
 	</p>
 	<IssuesTable title="Global Issues" {issues} loading={false} initialPageSize={50} />
-</main>
+</div>

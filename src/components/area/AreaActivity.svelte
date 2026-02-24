@@ -1,4 +1,6 @@
 <script lang="ts">
+import { _ } from "svelte-i18n";
+
 import Icon from "$components/Icon.svelte";
 import LatestTagger from "$components/LatestTagger.svelte";
 import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
@@ -31,7 +33,7 @@ let taggerDiv: HTMLDivElement;
 		<h3
 			class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
 		>
-			{name || 'BTC Map Area'} Supertaggers
+			{name || $_(`areaStats.defaultAreaName`)} {$_(`areaActivity.supertaggers`)}
 		</h3>
 
 		<div bind:this={taggerDiv} class="hide-scroll max-h-[375px] overflow-scroll p-1">
@@ -63,7 +65,7 @@ let taggerDiv: HTMLDivElement;
 				{#if taggersPaginated.length !== taggers.length}
 					<button
 						class="mx-auto !mb-4 block text-xl font-semibold text-link transition-colors hover:text-hover"
-						on:click={() => (taggerCount = taggerCount + 25)}>Load More</button
+						on:click={() => (taggerCount = taggerCount + 25)}>{$_(`areaActivity.loadMore`)}</button
 					>
 				{/if}
 			{:else if !dataInitialized}
@@ -76,7 +78,7 @@ let taggerDiv: HTMLDivElement;
 					{/each}
 				</div>
 			{:else}
-				<p class="p-5 text-center text-body dark:text-white">No supertaggers to display.</p>
+				<p class="p-5 text-center text-body dark:text-white">{$_(`areaActivity.noSupertaggers`)}</p>
 			{/if}
 		</div>
 	</div>
@@ -89,7 +91,7 @@ let taggerDiv: HTMLDivElement;
 		<h3
 			class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
 		>
-			{name || 'BTC Map Area'} Activity
+			{name || $_(`areaStats.defaultAreaName`)} {$_(`areaActivity.activity`)}
 		</h3>
 
 		<div
@@ -116,7 +118,7 @@ let taggerDiv: HTMLDivElement;
 				{#if eventElementsPaginated.length !== eventElements.length}
 					<button
 						class="mx-auto !mb-5 block text-xl font-semibold text-link transition-colors hover:text-hover"
-						on:click={() => (eventCount = eventCount + 25)}>Load More</button
+						on:click={() => (eventCount = eventCount + 25)}>{$_(`areaActivity.loadMore`)}</button
 					>
 				{:else if eventElements.length > 10}
 					<TopButton scroll={activityDiv} style="!mb-5" />
@@ -136,7 +138,7 @@ let taggerDiv: HTMLDivElement;
 					<TaggerSkeleton />
 				{/each}
 			{:else}
-				<p class="p-5 text-body dark:text-white">No activity to display.</p>
+				<p class="p-5 text-body dark:text-white">{$_(`areaActivity.noActivity`)}</p>
 			{/if}
 		</div>
 	</div>
@@ -149,7 +151,7 @@ let taggerDiv: HTMLDivElement;
 		<h3
 			class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
 		>
-			{name || 'BTC Map Area'} Atom Feeds
+			{name || $_(`areaStats.defaultAreaName`)} {$_(`areaActivity.atomFeeds`)}
 		</h3>
 
 		<ul class="space-y-5 p-5 text-lg font-semibold text-primary dark:text-white">
@@ -160,7 +162,7 @@ let taggerDiv: HTMLDivElement;
 					target="_blank"
 					rel="noreferrer"
 				>
-					New Places
+					{$_(`areaActivity.newPlaces`)}
 				</a>
 				<Icon type="fa" icon="location-pin" w="18" h="18" class="ml-1 inline align-middle" />
 			</li>
@@ -171,7 +173,7 @@ let taggerDiv: HTMLDivElement;
 					target="_blank"
 					rel="noreferrer"
 				>
-					New Comments
+					{$_(`areaActivity.newComments`)}
 				</a>
 				<Icon type="fa" icon="comment" w="18" h="18" class="ml-1 inline align-middle" />
 			</li>

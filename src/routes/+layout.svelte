@@ -2,8 +2,13 @@
 import { SvelteToast } from "@zerodevx/svelte-toast";
 import axios from "axios";
 
+import LoadingIndicator from "$components/LoadingIndicator.svelte";
 import Header from "$components/layout/Header.svelte";
-import { syncStatus } from "$lib/store";
+import {
+	placesLoadingProgress,
+	placesLoadingStatus,
+	syncStatus,
+} from "$lib/store";
 import { elementsSync } from "$lib/sync/places";
 import { theme } from "$lib/theme";
 
@@ -33,6 +38,20 @@ const options = {
 	intro: { y: 192 },
 	pausable: true,
 };
+
+let layoutSyncVisible = false;
+let layoutLoadingStatus = "";
+
+$: {
+	// Show sync progress only while actively loading (1-99%), hide when complete (100%)
+	if ($placesLoadingProgress > 0 && $placesLoadingProgress < 100) {
+		layoutSyncVisible = true;
+		layoutLoadingStatus = $placesLoadingStatus;
+	} else {
+		layoutSyncVisible = false;
+		layoutLoadingStatus = "";
+	}
+}
 
 let dataSyncInterval: ReturnType<typeof setInterval>;
 
@@ -85,23 +104,21 @@ export let data;
 </svelte:head>
 
 {#if $isLoading}
-	<!-- Loading state while i18n initializes -->
-	<div class="flex h-screen items-center justify-center bg-teal dark:bg-dark">
-		<div class="text-center">
-			<p class="text-lg font-semibold text-primary dark:text-white">Loading...</p>
-		</div>
-	</div>
+	<LoadingIndicator visible={$isLoading} status="Loading..." />
 {:else}
 	{#if !['/', '/map', '/communities/map', '/communities', '/countries'].includes(data.pathname)}
 		<div class="bg-teal dark:bg-dark">
 			<Header />
-			<div class="mx-auto w-10/12 xl:w-[1200px]">
+			<main class="mx-auto w-10/12 xl:w-[1200px]">
+				<LoadingIndicator visible={layoutSyncVisible} status={layoutLoadingStatus} progress={$placesLoadingProgress} />
 				<slot />
 				<Footer />
-			</div>
+			</main>
 		</div>
 	{:else}
-		<slot />
+		<main>
+			<slot />
+		</main>
 	{/if}
 
 	<SvelteToast {options} />

@@ -496,7 +496,7 @@ onDestroy(() => {
 	<meta property="twitter:image" content="https://btcmap.org/images/og/supertagger.png" />
 </svelte:head>
 
-<main class="my-10 text-center md:my-20">
+<div class="my-10 text-center md:my-20">
 	<section id="profile" class="space-y-8">
 		{#if avatar}
 			<img
@@ -636,4 +636,4 @@ onDestroy(() => {
 			onfetchNames={handleFetchNames}
 		/>
 	</section>
-</main>
+</div>

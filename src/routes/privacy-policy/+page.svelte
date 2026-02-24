@@ -9,7 +9,7 @@ import { socials } from "$lib/store";
 	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
-<main class="mt-10 mb-20 space-y-10">
+<div class="mt-10 mb-20 space-y-10">
 	<div class="space-y-5 text-xl text-body dark:text-white">
 		<h1 class="text-4xl !leading-tight font-semibold text-primary md:text-5xl dark:text-white">
 			Privacy Policy
@@ -176,4 +176,4 @@ import { socials } from "$lib/store";
 			</a> or on any of our social platforms.
 		</p>
 	</div>
-</main>
+</div>

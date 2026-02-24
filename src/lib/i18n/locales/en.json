@@ -419,6 +419,36 @@
 		"issueInvalidTagValue": "Tag value is not formatted properly ({code})",
 		"issueMisspelledTagName": "Spelling issue in tag name ({code})"
 	},
+	"areaStats": {
+		"population": "Population",
+		"asOf": "as of",
+		"area": "Area",
+		"totalLocations": "Total Locations",
+		"recentlyVerified": "Recently Verified Locations",
+		"recentlyVerifiedTooltip": "Locations that have been verified within one year.",
+		"recentlyVerifiedLabel": "Recently Verified",
+		"outdated": "Outdated",
+		"locations": "Locations",
+		"recentlyVerifiedPercent": "Recently Verified Percent",
+		"totalLocationsLabel": "Total Locations",
+		"chartsTitle": "Charts",
+		"defaultAreaName": "BTC Map Area",
+		"locationsNote": "*Locations accepting any bitcoin payment method.",
+		"verifiedNote": "*Locations with a survey:date, check_date, or check_date:currency:XBT tag less than one year old.",
+		"tagsInfo": "*More information on bitcoin mapping tags can be found",
+		"here": "here",
+		"chartDataNote": "*Chart data updated once every 24 hours."
+	},
+	"areaActivity": {
+		"supertaggers": "Supertaggers",
+		"loadMore": "Load More",
+		"noSupertaggers": "No supertaggers to display.",
+		"activity": "Activity",
+		"noActivity": "No activity to display.",
+		"atomFeeds": "Atom Feeds",
+		"newPlaces": "New Places",
+		"newComments": "New Comments"
+	},
 	"area": {
 		"sections": {
 			"merchants": "Merchants",
