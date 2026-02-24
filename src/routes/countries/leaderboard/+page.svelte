@@ -29,7 +29,7 @@ onMount(() => {
 
 <Breadcrumbs {routes} />
 
-<main class="my-10 space-y-10">
+<div class="my-10 space-y-10">
 	{#if typeof window !== 'undefined'}
 		<h1
 			class="{$theme === 'dark'
@@ -53,4 +53,4 @@ onMount(() => {
 	</PrimaryButton>
 
 	<AreaLeaderboard type="country" />
-</main>
+</div>

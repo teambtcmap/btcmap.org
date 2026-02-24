@@ -28,7 +28,7 @@ const communityApps: {
 	<meta property="twitter:image" content="https://btcmap.org/images/og/apps.png" />
 </svelte:head>
 
-<main class="my-10 space-y-10 text-center md:my-20">
+<div class="my-10 space-y-10 text-center md:my-20">
 	{#if typeof window !== 'undefined'}
 		<h1
 			class="{$theme === 'dark'
@@ -61,4 +61,4 @@ const communityApps: {
 			<AppCard image={app.icon} text={app.type} desc={app.desc} link={app.link} />
 		{/each}
 	</section>
-</main>
+</div>

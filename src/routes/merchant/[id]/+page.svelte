@@ -405,7 +405,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 		<p class="mt-1 text-sm">{$_('merchant.deletedDetail')}</p>
 	</div>
 {/if}
-<main class="my-10 space-y-16 text-center md:my-20">
+<div class="my-10 space-y-16 text-center md:my-20">
 	<section id="profile" class="space-y-8">
 		<div class="space-y-2">
 			{#if icon}
@@ -947,7 +947,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 			class="text-link transition-colors hover:text-hover">here</a
 		>.
 	</p>
-</main>
+</div>
 
 {#if browser}
 	<Boost />

@@ -60,7 +60,7 @@ const assetSections = [
 	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
-<main class="mt-10 mb-20 space-y-10 text-center text-primary dark:text-white">
+<div class="mt-10 mb-20 space-y-10 text-center text-primary dark:text-white">
 	<div class="space-y-5 text-xl">
 		<h1 class="text-4xl !leading-tight font-semibold md:text-5xl">Media</h1>
 		<p>Media assets are available for free to use for promotional purposes.</p>
@@ -113,4 +113,4 @@ const assetSections = [
 			{/each}
 		</div>
 	</section>
-</main>
+</div>

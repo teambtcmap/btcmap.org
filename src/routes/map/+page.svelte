@@ -1412,7 +1412,7 @@ onDestroy(async () => {
 	<meta property="twitter:image" content="https://btcmap.org/images/og/map.png" />
 </svelte:head>
 
-<main class="relative h-screen w-full">
+<div class="relative h-screen w-full">
 	<h1 class="sr-only">Bitcoin Merchant Map</h1>
 	<MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
 
@@ -1466,4 +1466,4 @@ onDestroy(async () => {
 	{/if}
 
 	<TileLoadingIndicator visible={tilesLoading} />
-</main>
+</div>

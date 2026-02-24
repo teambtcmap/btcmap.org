@@ -308,7 +308,7 @@ const handlePeriodChange = async (event: Event) => {
 	<meta property="twitter:image" content="https://btcmap.org/images/og/leader.png" />
 </svelte:head>
 
-<main class="mt-10 mb-20">
+<div class="mt-10 mb-20">
 	<div class="mb-10 flex justify-center">
 		<div id="hero" class="flex h-[324px] w-full items-end justify-center">
 			<img src="/images/supertagger-king.svg" alt="ultimate supertagger" />
@@ -456,7 +456,7 @@ const handlePeriodChange = async (event: Event) => {
 			</div>
 		</section>
 	</div>
-</main>
+</div>
 
 <style>
 	#hero {
