@@ -3,21 +3,21 @@ import { _, init, locale, register } from "svelte-i18n";
 // Register locales with lazy loading
 register("en", () => import("./locales/en.json"));
 register("pt-BR", () => import("./locales/pt-BR.json"));
+register("bg", () => import("./locales/bg.json"));
 
 // Smart locale detection (mirrors theme detection pattern)
 function getInitialLocale(): string {
 	if (typeof window !== "undefined") {
 		// 1. Check localStorage for saved preference (highest priority)
 		const saved = localStorage.getItem("language");
-		if (saved === "en" || saved === "pt-BR") {
+		if (saved === "en" || saved === "pt-BR" || saved === "bg") {
 			return saved;
 		}
 
 		// 2. Check browser language (like theme checks system preference)
 		const browserLang = navigator.language || navigator.languages?.[0];
-		if (browserLang?.startsWith("pt")) {
-			return "pt-BR";
-		}
+		if (browserLang?.startsWith("bg")) return "bg";
+		if (browserLang?.startsWith("pt")) return "pt-BR";
 	}
 
 	// 3. Default fallback

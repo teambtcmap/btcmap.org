@@ -23,7 +23,13 @@ const links = [
 	{ link: "/privacy-policy", nameKey: "footer.privacy" },
 	{ link: "https://stats.uptimerobot.com/7kgEVtzlV1", name: "Status" },
 	...(env.PUBLIC_UMAMI_URL
-		? [{ link: env.PUBLIC_UMAMI_URL, name: "Analytics", external: true }]
+		? [
+				{
+					link: env.PUBLIC_UMAMI_URL,
+					nameKey: "footer.analytics",
+					external: true,
+				},
+			]
 		: []),
 	{
 		link: "https://bitcoin.rocks/business/",
@@ -55,6 +61,7 @@ const links = [
 				class="inline-block align-text-bottom text-link dark:text-white/50"
 			/>
 			<button
+				type="button"
 				on:click={() => switchLanguage('en')}
 				disabled={$locale === 'en'}
 				aria-label="Switch to English"
@@ -68,6 +75,7 @@ const links = [
 			</button>
 			<span class="text-body dark:text-white/50"> / </span>
 			<button
+				type="button"
 				on:click={() => switchLanguage('pt-BR')}
 				disabled={$locale === 'pt-BR'}
 				aria-label="Mudar para Português"
@@ -78,6 +86,20 @@ const links = [
 				"
 			>
 				PT
+			</button>
+			<span class="text-body dark:text-white/50"> / </span>
+			<button
+				type="button"
+				on:click={() => switchLanguage('bg')}
+				disabled={$locale === 'bg'}
+				aria-label="Преминаване към български"
+				class="
+					{$locale === 'bg'
+					? 'cursor-default font-bold text-body underline dark:text-white/50'
+					: 'text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link'}
+				"
+			>
+				BG
 			</button>
 		</span>
 
