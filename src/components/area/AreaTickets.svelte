@@ -59,19 +59,24 @@ $: totalTickets = add.length + verify.length + community.length;
 				/>
 			</h3>
 
-			{#each ticketTypes as type, i (i)}
-				<button
-					class="mx-auto block w-40 border border-link py-2 text-center md:inline {i === 0
-						? 'rounded-t md:rounded-l md:rounded-tr-none'
-						: i === 2
-							? 'rounded-b md:rounded-r md:rounded-bl-none'
-							: ''} {showType === i ? 'bg-link text-white' : ''} transition-colors"
-					on:click={() => (showType = i)}
-					disabled={!filteredTickets.length || ticketError || ticketMaintenance}
-				>
-					{type}
-				</button>
-			{/each}
+			<div role="tablist" class="flex flex-col md:flex-row md:inline">
+				{#each ticketTypes as type, i (i)}
+					<button
+						role="tab"
+						aria-selected={showType === i}
+						aria-disabled={!filteredTickets.length || ticketError || ticketMaintenance}
+						class="mx-auto block w-40 border border-link py-2 text-center md:inline {i === 0
+							? 'rounded-t md:rounded-l md:rounded-tr-none'
+							: i === 2
+								? 'rounded-b md:rounded-r md:rounded-bl-none'
+								: ''} {showType === i ? 'bg-link text-white' : ''} transition-colors"
+						on:click={() => (showType = i)}
+						disabled={!filteredTickets.length || ticketError || ticketMaintenance}
+					>
+						{type}
+					</button>
+				{/each}
+			</div>
 		</div>
 
 		{#if filteredTickets.length && !ticketError}
