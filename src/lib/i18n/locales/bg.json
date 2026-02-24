@@ -141,6 +141,25 @@
 		"verifiedLocations": "Проверени места",
 		"viewMap": "Преглед на картата на общностите"
 	},
+	"area": {
+		"sections": {
+			"merchants": "Търговци",
+			"stats": "Статистики",
+			"activity": "Активност",
+			"maintain": "Поддръжка"
+		},
+		"defaultName": "Област BTC Map",
+		"viewOnCommunityMap": "Преглед на картата на общността",
+		"verifiedOverYearAgo": "Проверено преди повече от година",
+		"verified": "Проверено",
+		"notRecentlyVerified": "Не е проверено наскоро",
+		"verifyCommunity": "Провери общността",
+		"errorLoadingData": "Грешка при зареждане на данни. Моля, опитайте отново по-късно.",
+		"loadingData": "Зареждане на данни...",
+		"dataWithin24Hours": "Данните ще се появят в рамките на 24 часа.",
+		"taggingIssues": "Проблеми с етикетите на {name}",
+		"openTickets": "Отворени заявки на {name}"
+	},
 	"countries": {
 		"africa": "Африка",
 		"asia": "Азия",

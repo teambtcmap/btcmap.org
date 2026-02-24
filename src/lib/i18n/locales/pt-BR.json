@@ -324,6 +324,25 @@
 		"page": "Página",
 		"of": "de"
 	},
+	"area": {
+		"sections": {
+			"merchants": "Comerciantes",
+			"stats": "Estatísticas",
+			"activity": "Atividade",
+			"maintain": "Manter"
+		},
+		"defaultName": "Área BTC Map",
+		"viewOnCommunityMap": "Ver no mapa da comunidade",
+		"verifiedOverYearAgo": "Verificado há mais de um ano",
+		"verified": "Verificado",
+		"notRecentlyVerified": "Não verificado recentemente",
+		"verifyCommunity": "Verificar comunidade",
+		"errorLoadingData": "Erro ao carregar dados. Tente novamente mais tarde.",
+		"loadingData": "Carregando dados...",
+		"dataWithin24Hours": "Os dados aparecerão em até 24 horas.",
+		"taggingIssues": "Problemas de etiquetagem de {name}",
+		"openTickets": "Tickets abertos de {name}"
+	},
 	"verifyCommunity": {
 		"title": "Verificar Informações da Comunidade",
 		"description": "Ajude-nos a manter os dados da comunidade precisos verificando as informações abaixo.",
