@@ -322,12 +322,34 @@
 	"areaActivity": {
 		"supertaggersTitle": "Супертагъри на {name}",
 		"activityTitle": "Активност на {name}",
-		"noSupertaggers": "Няма супертагъри за показване."
+		"noSupertaggers": "Няма супертагъри за показване.",
+		"supertaggers": "Супертагъри",
+		"loadMore": "Зареди още",
+		"activity": "Активност",
+		"noActivity": "Няма активност за показване.",
+		"atomFeeds": "Atom емисии",
+		"newPlaces": "Нови места",
+		"newComments": "Нови коментари"
 	},
 	"areaStats": {
 		"population": "Население",
+		"asOf": "към",
 		"area": "Област",
 		"totalLocations": "Общо места",
+		"recentlyVerified": "Наскоро проверени места",
+		"recentlyVerifiedTooltip": "Места, проверени в последната година.",
+		"recentlyVerifiedLabel": "Наскоро проверени",
+		"outdated": "Остарели",
+		"locations": "Места",
+		"recentlyVerifiedPercent": "Процент наскоро проверени",
+		"totalLocationsLabel": "Общо места",
+		"chartsTitle": "Графики",
+		"defaultAreaName": "Област BTC Map",
+		"locationsNote": "*Места, приемащи всеки метод на плащане с биткойн.",
+		"verifiedNote": "*Места с етикет survey:date, check_date или check_date:currency:XBT по-малко от една година.",
+		"tagsInfo": "*Повече информация за етикетите за биткойн картографиране",
+		"here": "тук",
+		"chartDataNote": "*Данните от графиките се актуализират веднъж на 24 часа.",
 		"verifiedLocations": "Наскоро проверени места"
 	},
 	"areaTickets": {
