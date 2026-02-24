@@ -1,5 +1,6 @@
 <script lang="ts">
 import IssueIcon from "$components/IssueIcon.svelte";
+import { _ } from "$lib/i18n";
 
 export let id: "icon" | "name" | "type" | "viewLink" | "editLink" | "helpLink";
 export let value: string;
@@ -18,7 +19,7 @@ export let value: string;
 		rel="noreferrer"
 		class="text-link transition-colors hover:text-hover"
 	>
-		View
+		{$_("issuesTable.view")}
 	</a>
 {:else if id === 'editLink'}
 	<a
@@ -27,7 +28,7 @@ export let value: string;
 		rel="noreferrer"
 		class="text-link transition-colors hover:text-hover"
 	>
-		Edit
+		{$_("issuesTable.edit")}
 	</a>
 {:else if id === 'helpLink' && value}
 	<!-- eslint-disable svelte/no-navigation-without-resolve -->
@@ -38,6 +39,6 @@ export let value: string;
 		class="text-link transition-colors hover:text-hover"
 	>
 		<!-- eslint-enable svelte/no-navigation-without-resolve -->
-		Help
+		{$_("issuesTable.help")}
 	</a>
 {/if}

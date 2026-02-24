@@ -22,6 +22,7 @@ import { writable } from "svelte/store";
 
 import Icon from "$components/Icon.svelte";
 import IssueCell from "$components/IssueCell.svelte";
+import { _ } from "$lib/i18n";
 import { theme } from "$lib/theme";
 import type { RpcIssue } from "$lib/types";
 import { debounce, getIssueHelpLink, getIssueIcon, isEven } from "$lib/utils";
@@ -60,17 +61,21 @@ const renderTable = () => {
 		const name = issue.element_name;
 		let type: string;
 		if (issue.issue_code === "missing_icon") {
-			type = "Icon is missing";
+			type = $_("issuesTable.issueTypeMissingIcon");
 		} else if (issue.issue_code === "not_verified") {
-			type = "Last verification date is missing";
+			type = $_("issuesTable.issueTypeNotVerified");
 		} else if (issue.issue_code === "outdated") {
-			type = "Outdated, needs re-verification";
+			type = $_("issuesTable.issueTypeOutdated");
 		} else if (issue.issue_code === "outdated_soon") {
-			type = "Soon to be outdated, needs re-verification";
+			type = $_("issuesTable.issueTypeOutdatedSoon");
 		} else if (issue.issue_code.startsWith("invalid_tag_value")) {
-			type = `Tag value is not formatted properly (${issue.issue_code})`;
+			type = $_("issuesTable.issueTypeInvalidTag", {
+				values: { code: issue.issue_code },
+			});
 		} else if (issue.issue_code.startsWith("misspelled_tag_name")) {
-			type = `Spelling issue in tag name (${issue.issue_code})`;
+			type = $_("issuesTable.issueTypeMisspelledTag", {
+				values: { code: issue.issue_code },
+			});
 		} else {
 			type = issue.issue_code;
 		}
@@ -91,7 +96,7 @@ const renderTable = () => {
 		},
 		{
 			accessorKey: "name",
-			header: "Merchant Name",
+			header: $_("issuesTable.merchantName"),
 			cell: (info) =>
 				flexRender(IssueCell, { id: "name", value: info.getValue() }),
 			// @ts-expect-error fuzzy filter is registered via filterFns option
@@ -100,7 +105,7 @@ const renderTable = () => {
 		},
 		{
 			accessorKey: "type",
-			header: "Description",
+			header: $_("issuesTable.description"),
 			cell: (info) =>
 				flexRender(IssueCell, { id: "type", value: info.getValue() }),
 			enableGlobalFilter: false,
@@ -229,12 +234,12 @@ $: !loading && !tableRendered && renderTable();
 				</div>
 			</div>
 		{:else if !issues.length}
-			<p class="w-full p-5 text-center text-primary dark:text-white">No tagging issues!</p>
+			<p class="w-full p-5 text-center text-primary dark:text-white">{$_("issuesTable.noTaggingIssues")}</p>
 		{:else if $table}
 			<div class="relative text-primary dark:text-white">
 				<input
 					type="text"
-					placeholder="Search..."
+					placeholder={$_("issuesTable.searchPlaceholder")}
 					class="w-full bg-primary/5 px-5 py-2.5 text-sm focus:outline-primary dark:bg-white/5 dark:focus:outline-white"
 					bind:value={globalFilter}
 					on:keyup={searchDebounce}
@@ -262,7 +267,7 @@ $: !loading && !tableRendered && renderTable();
 				{/if}
 			</div>
 			{#if $table.getFilteredRowModel().rows.length === 0}
-				<p class="w-full p-5 text-center text-primary dark:text-white">No results found.</p>
+				<p class="w-full p-5 text-center text-primary dark:text-white">{$_("issuesTable.noResults")}</p>
 			{:else}
 				<div class="overflow-x-auto">
 					<table class="w-full text-left whitespace-nowrap text-primary dark:text-white">
@@ -320,7 +325,7 @@ $: !loading && !tableRendered && renderTable();
 					>
 						{#each pageSizes as pageSize (pageSize)}
 							<option value={pageSize}>
-								Show {pageSize}
+								{$_("issuesTable.showCount", { values: { count: pageSize } })}
 							</option>
 						{/each}
 					</select>
@@ -370,9 +375,9 @@ $: !loading && !tableRendered && renderTable();
 						</div>
 
 						<span class="flex items-center justify-center gap-1 md:justify-start">
-							<div>Page</div>
+							<div>{$_("issuesTable.page")}</div>
 							<strong>
-								{$table?.getState().pagination.pageIndex + 1} of
+								{$table?.getState().pagination.pageIndex + 1} {$_("issuesTable.of")}{" "}
 								{$table?.getPageCount().toLocaleString()}
 							</strong>
 						</span>

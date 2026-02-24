@@ -411,5 +411,43 @@
 		"locationsNote": "Locais incluem caixas eletrônicos.",
 		"totalTooltip": "Todos os locais incl. caixas eletrônicos",
 		"verifiedTooltip": "Locais verificados no último ano"
+	},
+	"issuesTable": {
+		"searchPlaceholder": "Pesquisar...",
+		"merchantName": "Nome do Comerciante",
+		"description": "Descrição",
+		"view": "Ver",
+		"edit": "Editar",
+		"help": "Ajuda",
+		"noTaggingIssues": "Nenhum problema de etiquetagem!",
+		"noResults": "Nenhum resultado encontrado.",
+		"page": "Página",
+		"of": "de",
+		"showCount": "Mostrar {count}",
+		"issueTypeMissingIcon": "Ícone ausente",
+		"issueTypeNotVerified": "Data da última verificação ausente",
+		"issueTypeOutdated": "Desatualizado, precisa de re-verificação",
+		"issueTypeOutdatedSoon": "Em breve desatualizado, precisa de re-verificação",
+		"issueTypeInvalidTag": "Valor da tag não está formatado corretamente ({code})",
+		"issueTypeMisspelledTag": "Erro de ortografia no nome da tag ({code})"
+	},
+	"taggingIssues": {
+		"heading": "Problemas de Etiquetagem",
+		"subheading": "Contribua para O mapa resolvendo problemas de etiquetagem!",
+		"descriptionPart1": "Mais informações sobre como se envolver podem ser encontradas em nossa página ",
+		"linkText": "Instruções de Etiquetagem",
+		"descriptionPart2": " na Wiki.",
+		"tableTitle": "Problemas Globais"
+	},
+	"countries": {
+		"hero": "Adoção de Bitcoin por países.",
+		"description": "Seu país? Seu mapa!",
+		"viewLeaderboard": "Ver ranking",
+		"africa": "África",
+		"asia": "Ásia",
+		"europe": "Europa",
+		"northAmerica": "América do Norte",
+		"oceania": "Oceania",
+		"southAmerica": "América do Sul"
 	}
 }
