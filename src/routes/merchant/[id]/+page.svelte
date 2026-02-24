@@ -386,7 +386,7 @@ onDestroy(async () => {
 	}
 });
 
-const ogImage = `https://api.btcmap.org/og/element/${data.osmType}:${data.osmId}`;
+const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 </script>
 
 <svelte:head>
