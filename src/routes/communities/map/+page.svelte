@@ -3,11 +3,9 @@ import rewind from "@mapbox/geojson-rewind";
 import { geoArea } from "d3-geo";
 import type { Map } from "leaflet";
 import { onDestroy, onMount } from "svelte";
-import { get } from "svelte/store";
 
 import MapLoadingMain from "$components/MapLoadingMain.svelte";
 import Socials from "$components/Socials.svelte";
-import { _ } from "$lib/i18n";
 import { loadMapDependencies } from "$lib/map/imports";
 import {
 	attribution,
@@ -254,22 +252,8 @@ onMount(async () => {
 			}
 		});
 
-		const t = get(_);
-		const mapControlsT = {
-			support: t("mapControls.support"),
-			supportWithSats: t("mapControls.supportWithSats"),
-			locate: t("mapControls.locate"),
-			fullScreen: t("mapControls.fullScreen"),
-			zoomIn: t("mapControls.zoomIn"),
-			zoomOut: t("mapControls.zoomOut"),
-			goToHome: t("mapControls.goToHome"),
-			addLocation: t("mapControls.addLocation"),
-			communityMap: t("mapControls.communityMap"),
-			merchantMap: t("mapControls.merchantMap"),
-		};
-
 		// add support attribution
-		support(mapControlsT);
+		support();
 
 		// add OSM attribution
 		attribution(leaflet, map);
@@ -278,15 +262,15 @@ onMount(async () => {
 		scaleBars(leaflet, map);
 
 		// add locate button to map
-		geolocate(leaflet, map, LocateControl, mapControlsT);
+		geolocate(leaflet, map, LocateControl);
 
 		// add home and marker buttons to map
-		homeMarkerButtons(leaflet, map, DomEvent, false, mapControlsT);
+		homeMarkerButtons(leaflet, map, DomEvent);
 
 		leaflet.control.layers(baseMaps).addTo(map);
 
 		// change default icons
-		changeDefaultIcons(true, leaflet, mapElement, DomEvent, mapControlsT);
+		changeDefaultIcons(true, leaflet, mapElement, DomEvent);
 
 		// final map setup
 		mapLoading = 40;

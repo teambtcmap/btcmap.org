@@ -1118,7 +1118,7 @@ onMount(async () => {
 		setupTileLoadingIndicators();
 		setupMapClickHandlers();
 		setupMapControls(LocateControl, baseMaps, get(_));
-		setupMapFinalization();
+		setupMapFinalization(get(_));
 	}
 });
 
@@ -1302,15 +1302,15 @@ const setupMapClickHandlers = () => {
 const setupMapControls = (
 	LocateControl: typeof import("leaflet.locatecontrol").LocateControl,
 	baseMaps: Record<string, Layer>,
-	t: (key: string) => string,
+	translate: (key: string) => string,
 ) => {
 	const mapControlsT = {
-		support: t("mapControls.support"),
-		supportWithSats: t("mapControls.supportWithSats"),
-		locate: t("mapControls.locate"),
-		fullScreen: t("mapControls.fullScreen"),
-		zoomIn: t("mapControls.zoomIn"),
-		zoomOut: t("mapControls.zoomOut"),
+		support: translate("mapControls.support"),
+		supportWithSats: translate("mapControls.supportWithSats"),
+		locate: translate("mapControls.locate"),
+		fullScreen: translate("mapControls.fullScreen"),
+		zoomIn: translate("mapControls.zoomIn"),
+		zoomOut: translate("mapControls.zoomOut"),
 	};
 
 	// change broken marker image path in prod
@@ -1341,11 +1341,11 @@ const setupMapControls = (
 	});
 };
 
-const setupMapFinalization = () => {
+const setupMapFinalization = (translate: (key: string) => string) => {
 	const mapControlsT = {
-		fullScreen: get(_)("mapControls.fullScreen"),
-		zoomIn: get(_)("mapControls.zoomIn"),
-		zoomOut: get(_)("mapControls.zoomOut"),
+		fullScreen: translate("mapControls.fullScreen"),
+		zoomIn: translate("mapControls.zoomIn"),
+		zoomOut: translate("mapControls.zoomOut"),
 	};
 	// change default icons
 	changeDefaultIcons(true, leaflet, mapElement, DomEvent, mapControlsT);

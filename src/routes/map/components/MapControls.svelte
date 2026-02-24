@@ -72,13 +72,13 @@ const addBoostControl = () => {
 onMount(() => {
 	if (!browser || !map || !leaflet || !DomEvent) return;
 
-	const t = get(_);
+	const translate = get(_);
 	const mapControlsT = {
-		goToHome: t("mapControls.goToHome"),
-		addLocation: t("mapControls.addLocation"),
-		communityMap: t("mapControls.communityMap"),
-		merchantMap: t("mapControls.merchantMap"),
-		dataRefreshAvailable: t("mapControls.dataRefreshAvailable"),
+		goToHome: translate("mapControls.goToHome"),
+		addLocation: translate("mapControls.addLocation"),
+		communityMap: translate("mapControls.communityMap"),
+		merchantMap: translate("mapControls.merchantMap"),
+		dataRefreshAvailable: translate("mapControls.dataRefreshAvailable"),
 	};
 
 	addBoostControl();

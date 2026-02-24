@@ -94,6 +94,7 @@ export type MapControlsTranslations = {
 	locate?: string;
 };
 
+/** Fallbacks when callers omit translations (e.g. communities map, add-location). */
 const defaultMapControls: Required<MapControlsTranslations> = {
 	fullScreen: "Full screen",
 	goToHome: "Go to home page",
@@ -116,7 +117,12 @@ export const support = (t?: MapControlsTranslations) => {
 
 	if (!supportAttribution) return;
 
-	supportAttribution.innerHTML = `<a href="/support-us" title="${labels.supportWithSats}">${labels.support}</a> BTC Map`;
+	supportAttribution.textContent = "";
+	const link = document.createElement("a");
+	link.href = "/support-us";
+	link.title = labels.supportWithSats;
+	link.textContent = labels.support;
+	supportAttribution.append(link, document.createTextNode(" BTC Map"));
 };
 
 export const scaleBars = (L: Leaflet, map: Map) => {
