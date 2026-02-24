@@ -5,6 +5,7 @@ import rewind from "@mapbox/geojson-rewind";
 import { geoContains } from "d3-geo";
 import type { Map, Marker } from "leaflet";
 import { onDestroy, onMount } from "svelte";
+import { get } from "svelte/store";
 import Time from "svelte-time";
 import tippy from "tippy.js";
 
@@ -166,11 +167,19 @@ const initializeData = () => {
 
 		leaflet.control.layers(baseMaps).addTo(map);
 
+		const t = get(_);
+		const mapControlsT = {
+			locate: t("mapControls.locate"),
+			fullScreen: t("mapControls.fullScreen"),
+			zoomIn: t("mapControls.zoomIn"),
+			zoomOut: t("mapControls.zoomOut"),
+		};
+
 		// add locate button to map
-		geolocate(leaflet, map, LocateControl);
+		geolocate(leaflet, map, LocateControl, mapControlsT);
 
 		// change default icons
-		changeDefaultIcons(true, leaflet, mapElement, DomEvent);
+		changeDefaultIcons(true, leaflet, mapElement, DomEvent, mapControlsT);
 
 		// add element to map
 		const divIcon = generateIcon(

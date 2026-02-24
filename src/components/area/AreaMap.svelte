@@ -2,6 +2,7 @@
 import type { GeoJSON } from "geojson";
 import type { Map } from "leaflet";
 import { onDestroy, onMount } from "svelte";
+import { get } from "svelte/store";
 import tippy from "tippy.js";
 
 import AreaMerchantDrawer from "$components/area/AreaMerchantDrawer.svelte";
@@ -10,6 +11,7 @@ import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
 import ShowTags from "$components/ShowTags.svelte";
 import TaggingIssues from "$components/TaggingIssues.svelte";
 import { GradeTable } from "$lib/constants";
+import { _ } from "$lib/i18n";
 import { loadMapDependencies } from "$lib/map/imports";
 import {
 	attribution,
@@ -128,11 +130,19 @@ const initializeData = () => {
 		/* eslint-enable no-undef */
 		let upToDateLayer = leaflet.featureGroup.subGroup(markers);
 
+		const t = get(_);
+		const mapControlsT = {
+			locate: t("mapControls.locate"),
+			fullScreen: t("mapControls.fullScreen"),
+			zoomIn: t("mapControls.zoomIn"),
+			zoomOut: t("mapControls.zoomOut"),
+		};
+
 		// add locate button to map
-		geolocate(leaflet, map, LocateControl);
+		geolocate(leaflet, map, LocateControl, mapControlsT);
 
 		// change default icons
-		changeDefaultIcons(true, leaflet, mapElement, DomEvent);
+		changeDefaultIcons(true, leaflet, mapElement, DomEvent, mapControlsT);
 
 		// add area poly to map
 		leaflet.geoJSON(geoJSON, { style: { fill: false } }).addTo(map);

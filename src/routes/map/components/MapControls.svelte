@@ -1,8 +1,10 @@
 <script lang="ts">
 import type { Control, Map } from "leaflet";
 import { onDestroy, onMount } from "svelte";
+import { get } from "svelte/store";
 
 import { trackEvent } from "$lib/analytics";
+import { _ } from "$lib/i18n";
 import { dataRefresh, homeMarkerButtons } from "$lib/map/setup";
 import type { Leaflet } from "$lib/types";
 
@@ -69,9 +71,18 @@ const addBoostControl = () => {
 onMount(() => {
 	if (!browser || !map || !leaflet || !DomEvent) return;
 
+	const t = get(_);
+	const mapControlsT = {
+		goToHome: t("mapControls.goToHome"),
+		addLocation: t("mapControls.addLocation"),
+		communityMap: t("mapControls.communityMap"),
+		merchantMap: t("mapControls.merchantMap"),
+		dataRefreshAvailable: t("mapControls.dataRefreshAvailable"),
+	};
+
 	addBoostControl();
-	homeMarkerButtons(leaflet, map, DomEvent, true);
-	dataRefresh(leaflet, map, DomEvent);
+	homeMarkerButtons(leaflet, map, DomEvent, true, mapControlsT);
+	dataRefresh(leaflet, map, DomEvent, mapControlsT);
 });
 
 onDestroy(() => {

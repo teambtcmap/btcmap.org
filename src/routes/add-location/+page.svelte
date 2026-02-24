@@ -3,6 +3,7 @@ import axios from "axios";
 import DOMPurify from "dompurify";
 import type { Map, MaplibreGL, Marker } from "leaflet";
 import { onDestroy, onMount, tick } from "svelte";
+import { get } from "svelte/store";
 
 import FormSuccess from "$components/FormSuccess.svelte";
 import FormSelect from "$components/form/FormSelect.svelte";
@@ -133,14 +134,22 @@ async function initializeMap() {
 		}
 	});
 
+	const t = get(_);
+	const mapControlsT = {
+		locate: t("mapControls.locate"),
+		fullScreen: t("mapControls.fullScreen"),
+		zoomIn: t("mapControls.zoomIn"),
+		zoomOut: t("mapControls.zoomOut"),
+	};
+
 	// Add map controls and settings
 	try {
-		geolocate(leaflet, map, LocateControl);
+		geolocate(leaflet, map, LocateControl, mapControlsT);
 	} catch (e) {
 		console.error("Error adding locate control:", e);
 	}
 
-	changeDefaultIcons(false, leaflet, mapElement, DomEvent);
+	changeDefaultIcons(false, leaflet, mapElement, DomEvent, mapControlsT);
 	attribution(leaflet, map);
 
 	// Force a resize to ensure proper rendering

@@ -11,6 +11,7 @@ import type {
 } from "leaflet";
 import localforage from "localforage";
 import { onDestroy, onMount } from "svelte";
+import { get } from "svelte/store";
 
 import MapLoadingMain from "$components/MapLoadingMain.svelte";
 import { trackEvent } from "$lib/analytics";
@@ -1116,7 +1117,7 @@ onMount(async () => {
 		setupTileLayers(activeLayer);
 		setupTileLoadingIndicators();
 		setupMapClickHandlers();
-		setupMapControls(LocateControl, baseMaps);
+		setupMapControls(LocateControl, baseMaps, get(_));
 		setupMapFinalization();
 	}
 });
@@ -1301,12 +1302,22 @@ const setupMapClickHandlers = () => {
 const setupMapControls = (
 	LocateControl: typeof import("leaflet.locatecontrol").LocateControl,
 	baseMaps: Record<string, Layer>,
+	t: (key: string) => string,
 ) => {
+	const mapControlsT = {
+		support: t("mapControls.support"),
+		supportWithSats: t("mapControls.supportWithSats"),
+		locate: t("mapControls.locate"),
+		fullScreen: t("mapControls.fullScreen"),
+		zoomIn: t("mapControls.zoomIn"),
+		zoomOut: t("mapControls.zoomOut"),
+	};
+
 	// change broken marker image path in prod
 	leaflet.Icon.Default.prototype.options.imagePath = "/icons/";
 
 	// add support attribution
-	support();
+	support(mapControlsT);
 
 	// add OSM attribution
 	attribution(leaflet, map);
@@ -1315,7 +1326,7 @@ const setupMapControls = (
 	scaleBars(leaflet, map);
 
 	// add locate button to map
-	geolocate(leaflet, map, LocateControl);
+	geolocate(leaflet, map, LocateControl, mapControlsT);
 
 	controlLayers = leaflet.control
 		.layers(baseMaps, undefined, { position: "topright" })
@@ -1331,8 +1342,13 @@ const setupMapControls = (
 };
 
 const setupMapFinalization = () => {
+	const mapControlsT = {
+		fullScreen: get(_)("mapControls.fullScreen"),
+		zoomIn: get(_)("mapControls.zoomIn"),
+		zoomOut: get(_)("mapControls.zoomOut"),
+	};
 	// change default icons
-	changeDefaultIcons(true, leaflet, mapElement, DomEvent);
+	changeDefaultIcons(true, leaflet, mapElement, DomEvent, mapControlsT);
 
 	// final map setup
 	map.on("load", () => {
