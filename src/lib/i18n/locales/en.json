@@ -442,6 +442,19 @@
 		"taggingIssues": "{name} Tagging Issues",
 		"openTickets": "{name} Open Tickets"
 	},
+	"areaTickets": {
+		"typeAdd": "Add",
+		"typeVerify": "Verify",
+		"typeCommunity": "Community",
+		"tooltip": "Tickets up for grabs from our noob forms! Anybody can help add or verify submissions on OpenStreetMap.",
+		"noAddTickets": "No open add tickets.",
+		"noVerifyTickets": "No open verify tickets.",
+		"noCommunityTickets": "No open community tickets.",
+		"maintenanceMessage": "Issues are currently under maintenance. ",
+		"viewOnGitea": "View issues directly on Gitea",
+		"errorMessage": "Error fetching tickets. Please try again or contact BTC Map support.",
+		"loadError": "Could not load open tickets, please try again or contact BTC Map."
+	},
 	"verifyCommunity": {
 		"title": "Verify Community Information",
 		"description": "Help us keep community data accurate by verifying the information below.",

@@ -373,6 +373,19 @@
 		"taggingIssues": "Problemas de etiquetagem de {name}",
 		"openTickets": "Tickets abertos de {name}"
 	},
+	"areaTickets": {
+		"typeAdd": "Adicionar",
+		"typeVerify": "Verificar",
+		"typeCommunity": "Comunidade",
+		"tooltip": "Tickets disponíveis dos nossos formulários! Qualquer um pode ajudar a adicionar ou verificar envios no OpenStreetMap.",
+		"noAddTickets": "Nenhum ticket de adicionar aberto.",
+		"noVerifyTickets": "Nenhum ticket de verificar aberto.",
+		"noCommunityTickets": "Nenhum ticket de comunidade aberto.",
+		"maintenanceMessage": "Os issues estão em manutenção. ",
+		"viewOnGitea": "Ver issues diretamente no Gitea",
+		"errorMessage": "Erro ao buscar tickets. Tente novamente ou entre em contato com o suporte do BTC Map.",
+		"loadError": "Não foi possível carregar os tickets abertos. Tente novamente ou entre em contato com o BTC Map."
+	},
 	"verifyCommunity": {
 		"title": "Verificar Informações da Comunidade",
 		"description": "Ajude-nos a manter os dados da comunidade precisos verificando as informações abaixo.",
