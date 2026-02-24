@@ -19,7 +19,7 @@ import {
 } from "@tanstack/svelte-table";
 import type { Readable } from "svelte/store";
 import { writable } from "svelte/store";
-import { _ } from "svelte-i18n";
+import { _, locale } from "svelte-i18n";
 
 import Icon from "$components/Icon.svelte";
 import IssueCell from "$components/IssueCell.svelte";
@@ -210,6 +210,9 @@ const renderTable = () => {
 	tableRendered = true;
 };
 
+$: if ($locale) {
+	tableRendered = false;
+}
 $: !loading && !tableRendered && renderTable();
 </script>
 
