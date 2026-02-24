@@ -324,6 +324,17 @@
 		"page": "Página",
 		"of": "de"
 	},
+	"countries": {
+		"hero": "Adoção de Bitcoin por países.",
+		"description": "Seu país? Seu mapa!",
+		"viewLeaderboard": "Ver ranking",
+		"africa": "África",
+		"asia": "Ásia",
+		"europe": "Europa",
+		"northAmerica": "América do Norte",
+		"oceania": "Oceania",
+		"southAmerica": "América do Sul"
+	},
 	"areaStats": {
 		"population": "População",
 		"asOf": "em",
