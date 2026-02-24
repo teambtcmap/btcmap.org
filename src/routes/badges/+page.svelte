@@ -169,7 +169,7 @@ let contributions = [
 	<meta property="twitter:image" content="https://btcmap.org/images/og/badges.png" />
 </svelte:head>
 
-<main class="my-10 text-center md:my-20">
+<div class="my-10 text-center md:my-20">
 	{#if typeof window !== 'undefined'}
 		<h1
 			class="{$theme === 'dark'
@@ -216,4 +216,4 @@ let contributions = [
 			{/each}
 		</div>
 	</section>
-</main>
+</div>

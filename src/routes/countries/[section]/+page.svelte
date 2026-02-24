@@ -124,7 +124,7 @@ function handleSectionChange(event: Event) {
 	<meta property="twitter:image" content="https://btcmap.org/images/og/countries.png" />
 </svelte:head>
 
-<main class="my-10 space-y-10 text-center md:my-20">
+<div class="my-10 space-y-10 text-center md:my-20">
 	{#if typeof window !== 'undefined'}
 		<h1
 			class="{$theme === 'dark'
@@ -168,4 +168,4 @@ function handleSectionChange(event: Event) {
 			{/if}
 		{/each}
 	</div>
-</main>
+</div>

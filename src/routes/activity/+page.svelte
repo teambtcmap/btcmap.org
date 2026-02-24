@@ -111,7 +111,7 @@ $: latestTaggers = !!(supertaggers?.length && !elementsLoading);
 	<meta property="twitter:image" content="https://btcmap.org/images/og/activity.png" />
 </svelte:head>
 
-<main class="mt-10 mb-20 space-y-10">
+<div class="mt-10 mb-20 space-y-10">
 	{#if typeof window !== 'undefined'}
 		<h1
 			class="{$theme === 'dark'
@@ -172,4 +172,4 @@ $: latestTaggers = !!(supertaggers?.length && !elementsLoading);
 			<TopButton />
 		</div>
 	</section>
-</main>
+</div>

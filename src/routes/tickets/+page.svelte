@@ -56,7 +56,7 @@ const isMaintenance = data.maintenance ?? false;
 	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
-<main class="mt-10 mb-20 space-y-10">
+<div class="mt-10 mb-20 space-y-10">
 	{#if typeof window !== 'undefined'}
 		<h1
 			class="{$theme === 'dark'
@@ -203,4 +203,4 @@ const isMaintenance = data.maintenance ?? false;
 			<TopButton />
 		</div>
 	</section>
-</main>
+</div>

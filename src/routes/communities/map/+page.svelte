@@ -294,10 +294,10 @@ onDestroy(async () => {
 	<meta property="twitter:image" content="https://btcmap.org/images/og/communities.png" />
 </svelte:head>
 
-<main>
+<div>
 	<h1 class="hidden">Community Map</h1>
 
 	<MapLoadingMain progress={mapLoading} />
 
 	<div bind:this={mapElement} class="absolute h-[100%] w-full !bg-teal dark:!bg-dark" />
-</main>
+</div>
