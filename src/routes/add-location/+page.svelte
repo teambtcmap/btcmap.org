@@ -678,8 +678,8 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 	</div>
 {:else}
 	<FormSuccess
-		type="Location"
-		text="We'll review your information and add it ASAP."
+		type={$_("addLocation.formSuccessType")}
+		text={$_("addLocation.formSuccessText")}
 		issue={submissionIssueNumber}
 		on:click={resetForm}
 	/>

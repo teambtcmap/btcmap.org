@@ -37,7 +37,15 @@
 		"supertaggerImageAlt": "тъмен супертагър",
 		"supertaggerWikiButton": "Вижте Уики за инструкции",
 		"tooltip": "Всички добавяния се правят от доброволци и не можем да гарантираме кога мястото ви ще бъде добавено.",
-		"websitePlaceholder": "https://bitcoin.org"
+		"websitePlaceholder": "https://bitcoin.org",
+		"formSuccessType": "Място",
+		"formSuccessText": "Ще прегледаме информацията и ще я добавим възможно най-скоро."
+	},
+	"formSuccess": {
+		"submittedTitle": "{type} изпратено!",
+		"monitorProgress": "Можете също да следите напредъка на вашето подаване тук:",
+		"issueLink": "Заявка #{issue}",
+		"submitAnother": "Изпрати друго {type}"
 	},
 	"mapControls": {
 		"fullScreen": "Цял екран",

@@ -278,7 +278,15 @@
 		"supertaggerHeading": "Supertagger Misterioso?",
 		"supertaggerDescription": "Contribua com alterações diretamente no OSM - como um chefão. Quem precisa de formulários mesmo.",
 		"supertaggerImageAlt": "supertagger misterioso",
-		"supertaggerWikiButton": "Veja a Wiki para instruções"
+		"supertaggerWikiButton": "Veja a Wiki para instruções",
+		"formSuccessType": "Local",
+		"formSuccessText": "Analisaremos suas informações e adicionaremos o mais rápido possível."
+	},
+	"formSuccess": {
+		"submittedTitle": "{type} enviado!",
+		"monitorProgress": "Você também pode acompanhar o progresso do seu envio aqui:",
+		"issueLink": "Issue #{issue}",
+		"submitAnother": "Enviar outro {type}"
 	},
 	"tip": {
 		"label": "Doar",
