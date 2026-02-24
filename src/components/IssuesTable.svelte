@@ -22,7 +22,7 @@ import { writable } from "svelte/store";
 
 import Icon from "$components/Icon.svelte";
 import IssueCell from "$components/IssueCell.svelte";
-import { _ } from "$lib/i18n";
+import { _, locale } from "$lib/i18n";
 import { theme } from "$lib/theme";
 import type { RpcIssue } from "$lib/types";
 import { debounce, getIssueHelpLink, getIssueIcon, isEven } from "$lib/utils";
@@ -211,6 +211,17 @@ const renderTable = () => {
 };
 
 $: !loading && !tableRendered && renderTable();
+
+// Re-render the table when locale changes so column headers and
+// issue-type labels (computed as plain strings) get fresh translations.
+let localeInitialized = false;
+$: if ($locale) {
+	if (localeInitialized) {
+		tableRendered = false;
+	} else {
+		localeInitialized = true;
+	}
+}
 </script>
 
 <section id="issues">

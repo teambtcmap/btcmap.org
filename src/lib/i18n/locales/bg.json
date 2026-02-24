@@ -367,7 +367,6 @@
 		"edit": "Редактирай",
 		"help": "Помощ",
 		"showCount": "Покажи {count}",
-		"pageOf": "{current} от {total}",
 		"issueTypeMissingIcon": "Липсва икона",
 		"issueTypeNotVerified": "Липсва дата на последна проверка",
 		"issueTypeOutdated": "Остаряло, нужна е повторна проверка",
