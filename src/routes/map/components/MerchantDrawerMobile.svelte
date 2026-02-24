@@ -256,7 +256,7 @@ export function openDrawer(id: number) {
 						<span class="text-sm font-semibold">{$_("mapDrawer.back")}</span>
 					</button>
 					<span class="text-sm font-semibold text-primary capitalize dark:text-white"
-						>{drawerView}</span
+						>{drawerView === 'boost' ? $_("mapDrawer.viewBoost") : $_("mapDrawer.viewDetails")}</span
 					>
 				{/if}
 

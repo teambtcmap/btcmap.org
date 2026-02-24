@@ -173,7 +173,9 @@
 		"closeMerchantDetails": "Close merchant details",
 		"expandDrawer": "Expand drawer",
 		"collapseDrawer": "Collapse drawer",
-		"merchantDetails": "Merchant details"
+		"merchantDetails": "Merchant details",
+		"viewBoost": "Boost",
+		"viewDetails": "Details"
 	},
 	"info": {
 		"contact": "Contact",

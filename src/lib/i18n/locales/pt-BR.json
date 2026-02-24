@@ -169,7 +169,9 @@
 		"closeMerchantDetails": "Fechar detalhes do comerciante",
 		"expandDrawer": "Expandir painel",
 		"collapseDrawer": "Recolher painel",
-		"merchantDetails": "Detalhes do comerciante"
+		"merchantDetails": "Detalhes do comerciante",
+		"viewBoost": "Impulsionar",
+		"viewDetails": "Detalhes"
 	},
 	"info": {
 		"contact": "Contato",

@@ -555,7 +555,9 @@
 		"closeMerchantDetails": "Затвори детайлите на търговеца",
 		"expandDrawer": "Разгъни панела",
 		"collapseDrawer": "Свий панела",
-		"merchantDetails": "Детайли за търговеца"
+		"merchantDetails": "Детайли за търговеца",
+		"viewBoost": "Подсили",
+		"viewDetails": "Детайли"
 	},
 	"success": {
 		"linkCopied": "Връзката е копирана в клипборда!",
