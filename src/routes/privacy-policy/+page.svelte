@@ -6,9 +6,9 @@ const linkClass = "text-link transition-colors hover:text-hover";
 </script>
 
 <svelte:head>
-	<title>BTC Map - {$_( "privacyPolicy.title" )}</title>
+	<title>BTC Map - {$_("privacyPolicy.title")}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/home.png" />
-	<meta property="twitter:title" content="BTC Map - {$_( "privacyPolicy.title" )}" />
+	<meta property="twitter:title" content="BTC Map - {$_("privacyPolicy.title")}" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
