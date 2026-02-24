@@ -49,6 +49,7 @@ import {
 	type LoadedMarkers,
 } from "$lib/map/markers";
 import {
+	applyMapControlTranslations,
 	attribution,
 	changeDefaultIcons,
 	generateIcon,
@@ -257,6 +258,7 @@ const handleHashChange = () => {
 
 // Track current search request for cancellation
 let searchAbortController: AbortController | null = null;
+let unsubscribeLocale: (() => void) | null = null;
 
 // Core search function
 const executeSearch = async (query: string) => {
@@ -1119,6 +1121,10 @@ onMount(async () => {
 		setupMapClickHandlers();
 		setupMapControls(LocateControl, baseMaps, get(_));
 		setupMapFinalization(get(_));
+
+		unsubscribeLocale = _.subscribe(() => {
+			applyMapControlTranslations(get(_));
+		});
 	}
 });
 
@@ -1394,6 +1400,8 @@ onDestroy(async () => {
 	if (browser) {
 		window.removeEventListener("hashchange", handleHashChange);
 	}
+
+	unsubscribeLocale?.();
 });
 </script>
 

@@ -17,7 +17,7 @@ export let DomEvent: typeof import("leaflet/src/dom/DomEvent") | undefined;
 
 let boostControl: Control | null = null;
 
-const addBoostControl = () => {
+const addBoostControl = (translate: (key: string) => string) => {
 	if (!leaflet || !map) return;
 
 	const BoostControl = leaflet.Control.extend({
@@ -32,7 +32,7 @@ const addBoostControl = () => {
 				"leaflet-control",
 			);
 
-			const boostLabel = get(_)("boost.locations");
+			const boostLabel = translate("boost.locations");
 			const boostLayerButton = leaflet.DomUtil.create("a");
 			boostLayerButton.classList.add("leaflet-control-boost-layer");
 			boostLayerButton.href = "#";
@@ -81,7 +81,7 @@ onMount(() => {
 		dataRefreshAvailable: translate("mapControls.dataRefreshAvailable"),
 	};
 
-	addBoostControl();
+	addBoostControl(translate);
 	homeMarkerButtons(leaflet, map, DomEvent, true, mapControlsT);
 	dataRefresh(leaflet, map, DomEvent, mapControlsT);
 });

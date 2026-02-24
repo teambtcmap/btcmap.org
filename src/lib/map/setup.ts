@@ -96,8 +96,105 @@ export type MapControlsTranslations = {
 };
 
 // Fallbacks when callers omit translations (e.g. communities map, add-location). Sourced from en.json.
-const defaultMapControls: Required<MapControlsTranslations> =
-	en.mapControls as Required<MapControlsTranslations>;
+const defaultMapControls: Required<MapControlsTranslations> = {
+	fullScreen: en.mapControls.fullScreen,
+	goToHome: en.mapControls.goToHome,
+	addLocation: en.mapControls.addLocation,
+	communityMap: en.mapControls.communityMap,
+	merchantMap: en.mapControls.merchantMap,
+	dataRefreshAvailable: en.mapControls.dataRefreshAvailable,
+	support: en.mapControls.support,
+	supportWithSats: en.mapControls.supportWithSats,
+	zoomIn: en.mapControls.zoomIn,
+	zoomOut: en.mapControls.zoomOut,
+	locate: en.mapControls.locate,
+};
+
+// Updates map control labels in the DOM when locale changes. Call from a locale subscription.
+export const applyMapControlTranslations = (t: (key: string) => string) => {
+	const labels = {
+		support: t("mapControls.support"),
+		supportWithSats: t("mapControls.supportWithSats"),
+		zoomIn: t("mapControls.zoomIn"),
+		zoomOut: t("mapControls.zoomOut"),
+		fullScreen: t("mapControls.fullScreen"),
+		locate: t("mapControls.locate"),
+		goToHome: t("mapControls.goToHome"),
+		addLocation: t("mapControls.addLocation"),
+		communityMap: t("mapControls.communityMap"),
+		merchantMap: t("mapControls.merchantMap"),
+		dataRefreshAvailable: t("mapControls.dataRefreshAvailable"),
+		boostLocations: t("boost.locations"),
+	};
+
+	const supportLink = document.querySelector(
+		".leaflet-control-attribution a[href='/support-us']",
+	) as HTMLAnchorElement | null;
+	if (supportLink) {
+		supportLink.title = labels.supportWithSats;
+		supportLink.textContent = labels.support;
+	}
+
+	const zoomIn = document.querySelector(".leaflet-control-zoom-in");
+	if (zoomIn) {
+		zoomIn.setAttribute("title", labels.zoomIn);
+		zoomIn.setAttribute("aria-label", labels.zoomIn);
+	}
+	const zoomOut = document.querySelector(".leaflet-control-zoom-out");
+	if (zoomOut) {
+		zoomOut.setAttribute("title", labels.zoomOut);
+		zoomOut.setAttribute("aria-label", labels.zoomOut);
+	}
+
+	const fullscreen = document.querySelector(".leaflet-control-full-screen");
+	if (fullscreen) {
+		fullscreen.setAttribute("title", labels.fullScreen);
+		fullscreen.setAttribute("aria-label", labels.fullScreen);
+	}
+
+	const locateBtn = document.querySelector(
+		".leaflet-bar-part.leaflet-bar-part-single",
+	);
+	if (locateBtn) {
+		locateBtn.setAttribute("title", labels.locate);
+		locateBtn.setAttribute("aria-label", labels.locate);
+	}
+
+	const homeBtn = document.querySelector(".leaflet-control-home");
+	if (homeBtn) {
+		homeBtn.setAttribute("title", labels.goToHome);
+		homeBtn.setAttribute("aria-label", labels.goToHome);
+	}
+	const addLocBtn = document.querySelector(".leaflet-control-add-location");
+	if (addLocBtn) {
+		addLocBtn.setAttribute("title", labels.addLocation);
+		addLocBtn.setAttribute("aria-label", labels.addLocation);
+	}
+	const communityBtn = document.querySelector(".leaflet-control-community-map");
+	if (communityBtn) {
+		communityBtn.setAttribute("title", labels.communityMap);
+		communityBtn.setAttribute("aria-label", labels.communityMap);
+	}
+	const merchantBtn = document.querySelector(".leaflet-control-merchant-map");
+	if (merchantBtn) {
+		merchantBtn.setAttribute("title", labels.merchantMap);
+		merchantBtn.setAttribute("aria-label", labels.merchantMap);
+	}
+
+	const dataRefreshBtn = document.querySelector(
+		".leaflet-control-data-refresh",
+	);
+	if (dataRefreshBtn) {
+		dataRefreshBtn.setAttribute("title", labels.dataRefreshAvailable);
+		dataRefreshBtn.setAttribute("aria-label", labels.dataRefreshAvailable);
+	}
+
+	const boostBtn = document.querySelector(".leaflet-control-boost-layer");
+	if (boostBtn) {
+		boostBtn.setAttribute("title", labels.boostLocations);
+		boostBtn.setAttribute("aria-label", labels.boostLocations);
+	}
+};
 
 export const support = (t?: MapControlsTranslations) => {
 	const labels = { ...defaultMapControls, ...t };
@@ -240,6 +337,7 @@ export const homeMarkerButtons = (
 
 			// Home button
 			const addHomeButton = L.DomUtil.create("a");
+			addHomeButton.classList.add("leaflet-control-home");
 			addHomeButton.href = "/";
 			addHomeButton.title = labels.goToHome;
 			addHomeButton.role = "button";
@@ -253,6 +351,7 @@ export const homeMarkerButtons = (
 			if (mainMap) {
 				// Add location button
 				const addLocationButton = L.DomUtil.create("a");
+				addLocationButton.classList.add("leaflet-control-add-location");
 				addLocationButton.href = "/add-location";
 				addLocationButton.title = labels.addLocation;
 				addLocationButton.role = "button";
@@ -265,6 +364,7 @@ export const homeMarkerButtons = (
 
 				// Community map button
 				const communityMapButton = L.DomUtil.create("a");
+				communityMapButton.classList.add("leaflet-control-community-map");
 				communityMapButton.href = "/communities/map";
 				communityMapButton.title = labels.communityMap;
 				communityMapButton.role = "button";
@@ -277,6 +377,7 @@ export const homeMarkerButtons = (
 			} else {
 				// Merchant map button (for community map page)
 				const merchantMapButton = L.DomUtil.create("a");
+				merchantMapButton.classList.add("leaflet-control-merchant-map");
 				merchantMapButton.href = "/map";
 				merchantMapButton.title = labels.merchantMap;
 				merchantMapButton.role = "button";
