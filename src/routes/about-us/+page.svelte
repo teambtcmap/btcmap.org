@@ -1,6 +1,7 @@
 <script lang="ts">
 import { onMount } from "svelte";
 
+import { _ } from "$lib/i18n";
 import type { SocialIconName } from "$lib/icons/types";
 import {
 	areaError,
@@ -296,37 +297,34 @@ const coreTeam: {
 </script>
 
 <svelte:head>
-	<title>BTC Map - About</title>
+	<title>BTC Map - {$_( "aboutUs.title" )}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/home.png" />
-	<meta property="twitter:title" content="BTC Map - About" />
+	<meta property="twitter:title" content="BTC Map - {$_( "aboutUs.title" )}" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
 <div class="mt-10 mb-20 space-y-20 text-primary md:space-y-40 dark:text-white">
 	<div class="space-y-5 text-center text-xl">
-		<h1 class="text-4xl !leading-tight font-semibold md:text-5xl">About Us</h1>
+		<h1 class="text-4xl !leading-tight font-semibold md:text-5xl">{$_("aboutUs.title")}</h1>
 		<p class="mx-auto md:w-[600px]">
-			BTC Map is a free and open source project powered by volunteer bitcoiners and bitcoin-friendly
-			merchants around the world.
+			{$_("aboutUs.description")}
 		</p>
 	</div>
 
 	<section class="w-full justify-center space-y-10 lg:flex lg:space-y-0 lg:space-x-10">
 		<div class="lg:w-[475px]">
-			<h2 class="mb-5 text-3xl font-semibold">Merchants</h2>
+			<h2 class="mb-5 text-3xl font-semibold">{$_("aboutUs.merchants.heading")}</h2>
 
 			<div class="space-y-5">
 				<p>
-					Merchants are at the heart of BTC Map. These businesses are front-running the paradigm
-					change and positioning themselves for continued success. Any merchant who accepts bitcoin
-					can be listed on BTC Map.
+					{$_("aboutUs.merchants.intro")}
 				</p>
 				<p>
-					<strong>Accept bitcoin?</strong>
+					<strong>{$_("aboutUs.merchants.acceptBitcoin")}</strong>
 					<a
 						href={resolve('/add-location')}
 						class="font-semibold text-link transition-colors hover:text-hover"
-						>Get listed on BTC Map</a
+						>{$_("aboutUs.merchants.getListed")}</a
 					>!
 				</p>
 			</div>
@@ -346,16 +344,14 @@ const coreTeam: {
 	</section>
 
 	<section class="w-full space-y-10 rounded-xl bg-[#164E63] p-5 text-center text-white md:p-10">
-		<h2 class="text-3xl font-semibold">Shadowy Supertaggers</h2>
+		<h2 class="text-3xl font-semibold">{$_("aboutUs.supertaggers.heading")}</h2>
 
 		<p class="mx-auto lg:w-[650px]">
-			Shadowy Supertaggers are people who power this project. They are volunteers who selflessly
-			take the time to update business locations with new information. Without them, BTC Map would
-			not be sustainable!
+			{$_("aboutUs.supertaggers.intro")}
 		</p>
 
 		<div class="space-y-5">
-			<p class="font-semibold uppercase">Our top supertaggers</p>
+			<p class="font-semibold uppercase">{$_("aboutUs.supertaggers.topLabel")}</p>
 
 			<div class="flex flex-wrap justify-center gap-5">
 				{#if supertaggers.length}
@@ -372,22 +368,22 @@ const coreTeam: {
 			<a
 				href={resolve('/leaderboard')}
 				class="inline-block font-semibold underline underline-offset-4 hover:no-underline"
-				>View leaderboard</a
+				>{$_("aboutUs.supertaggers.viewLeaderboard")}</a
 			>
 		</div>
 	</section>
 
 	<section class="w-full justify-center space-y-10 lg:flex lg:space-y-0 lg:space-x-10">
 		<div class="lg:w-[475px]">
-			<h2 class="mb-5 text-3xl font-semibold">Communities</h2>
+			<h2 class="mb-5 text-3xl font-semibold">{$_("aboutUs.communities.heading")}</h2>
 
 			<div class="space-y-5">
-				<p>Bitcoin communities help drive global adoption by onboarding new users locally!</p>
+				<p>{$_("aboutUs.communities.intro")}</p>
 				<p>
-					<strong>Don’t see your community?</strong>
+					<strong>{$_("aboutUs.communities.addPrompt")}</strong>
 					<a
 						href={resolve('/communities/add')}
-						class="font-semibold text-link transition-colors hover:text-hover">Add it to BTC Map</a
+						class="font-semibold text-link transition-colors hover:text-hover">{$_("aboutUs.communities.addLink")}</a
 					>.
 				</p>
 			</div>
@@ -409,7 +405,7 @@ const coreTeam: {
 			<div class="mt-5 flex justify-center">
 				<a
 					href={resolve('/communities')}
-					class="font-semibold text-link transition-colors hover:text-hover">See all communities</a
+					class="font-semibold text-link transition-colors hover:text-hover">{$_("aboutUs.communities.seeAll")}</a
 				>
 			</div>
 		</div>
@@ -418,11 +414,11 @@ const coreTeam: {
 	<section
 		class="w-full space-y-10 rounded-xl bg-[#F1F7FC] p-5 text-center md:p-10 dark:bg-white/[0.15]"
 	>
-		<h2 class="text-3xl font-semibold">Integrations</h2>
+		<h2 class="text-3xl font-semibold">{$_("aboutUs.integrations.heading")}</h2>
 
 		<p class="font-semibold uppercase">
-			Community integrations <span class="block text-sm font-normal normal-case"
-				>Projects using BTC Map</span
+			{$_("aboutUs.integrations.communityLabel")} <span class="block text-sm font-normal normal-case"
+				>{$_("aboutUs.integrations.communitySub")}</span
 			>
 		</p>
 
@@ -434,8 +430,8 @@ const coreTeam: {
 		</div>
 
 		<p class="font-semibold uppercase">
-			Project integrations <span class="block text-sm font-normal normal-case"
-				>BTC Map uses these projects</span
+			{$_("aboutUs.integrations.projectLabel")} <span class="block text-sm font-normal normal-case"
+				>{$_("aboutUs.integrations.projectSub")}</span
 			>
 		</p>
 
@@ -447,20 +443,19 @@ const coreTeam: {
 		</div>
 
 		<p>
-			If you are interested in integrating with us please <a
+			{$_("aboutUs.integrations.reachOut")} <a
 				href="mailto:hello@btcmap.org"
-				class="font-semibold text-link transition-colors hover:text-hover">reach out</a
+				class="font-semibold text-link transition-colors hover:text-hover">{$_("aboutUs.integrations.reachOutLink")}</a
 			>!
 		</p>
 	</section>
 
 	<section class="w-full justify-center space-y-10 lg:flex lg:space-y-0 lg:space-x-10">
 		<div class="lg:w-[475px]">
-			<h2 class="mb-5 text-3xl font-semibold">Contributors</h2>
+			<h2 class="mb-5 text-3xl font-semibold">{$_("aboutUs.contributors.heading")}</h2>
 
 			<p>
-				Anybody can contribute to BTC Map in many different ways. If you would like to get involved
-				please don't hesitate and come join the fun!
+				{$_("aboutUs.contributors.intro")}
 			</p>
 		</div>
 
@@ -475,31 +470,20 @@ const coreTeam: {
 		class="w-full justify-center space-y-10 rounded-xl bg-[#EBEFF2] p-5 md:p-10 lg:flex lg:space-y-0 lg:space-x-10 dark:bg-white/[0.15]"
 	>
 		<div class="lg:w-[475px]">
-			<h2 class="mb-10 text-3xl font-semibold">Core Team</h2>
+			<h2 class="mb-10 text-3xl font-semibold">{$_("aboutUs.coreTeam.heading")}</h2>
 
 			<div class="space-y-10">
 				<p>
-					<strong>Igor</strong> is a long time bitcoiner, mapper, and digital nomad living abroad. He
-					created BTC Map as an Android application and the project has since gained worldwide momentum
-					from there. He now also maintains all of the backend infrastructure for the project.
+					{$_("aboutUs.coreTeam.igorBio")}
 				</p>
 				<p>
-					<strong>Nathan</strong> is a tech entrepreneur turned pleb-at-large. He brought the core team
-					together to accelerate app development. Having built, sold, invested in and advised tech businesses
-					over the years he is now focused on bitcoin, building BTCMap.org, gamertron.net and delivering
-					bitcoin education for kids.
+					{$_("aboutUs.coreTeam.nathanBio")}
 				</p>
 				<p>
-					A self-taught Web Developer, <strong>secondl1ght</strong> dove head first down the bitcoin rabbit
-					hole and left his fiat career to focus on bitcoin development full-time. He created and maintains
-					the BTC Map web application, as well as an encrypted messaging app called Cipherchat, and works
-					on lightning network tools at Amboss Technologies.
+					{$_("aboutUs.coreTeam.secondl1ghtBio")}
 				</p>
 				<p>
-					<strong>Karnage</strong> is the lead designer on the web app and created the BTC Map brand.
-					He has contributed to many high profile bitcoin open source projects. His mission is to help
-					startup founders succeed and creates products to achieve this goal. Pixel-perfect product design
-					every time. Get it shipped.
+					{$_("aboutUs.coreTeam.karnageBio")}
 				</p>
 			</div>
 		</div>
