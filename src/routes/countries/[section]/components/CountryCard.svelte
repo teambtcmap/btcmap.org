@@ -19,7 +19,7 @@ export let name: string;
 		>
 			<img
 				src={`https://static.btcmap.org/images/countries/${id}.svg`}
-				alt={getCountryName(id, $locale, name)}
+				alt={getCountryName(id ?? '', $locale ?? 'en', name ?? '')}
 				class="mx-auto h-20 w-20 rounded-full object-cover"
 				on:error={function () {
 					this.src = '/images/bitcoin.svg';
@@ -27,7 +27,7 @@ export let name: string;
 			/>
 
 			<span class="block text-center text-lg font-semibold"
-				>{getCountryName(id, $locale, name)}</span
+				>{getCountryName(id ?? '', $locale ?? 'en', name ?? '')}</span
 			>
 		</a>
 	</div>

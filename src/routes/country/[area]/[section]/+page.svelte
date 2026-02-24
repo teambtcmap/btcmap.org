@@ -14,7 +14,10 @@ const { name, id } = data;
 
 $: routes = [
 	{ name: $_(`nav.countries`), url: "/countries" },
-	{ name: getCountryName(id, $locale, name || ""), url: `/country/${id}` },
+	{
+		name: getCountryName(id ?? "", $locale ?? "en", name || ""),
+		url: `/country/${id}`,
+	},
 ];
 </script>
 

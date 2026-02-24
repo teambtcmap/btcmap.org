@@ -161,13 +161,13 @@ function handleSectionChange(event: Event) {
 			{#if data.section}
 				<h2 class="mb-2 text-3xl font-semibold text-primary md:mb-0 md:text-left dark:text-white">
 					<a href={resolve(`/countries/${data.section}`)}
-						>{$_(continentKeys[data.section] || 'countries.europe')}</a
+						>{$_(continentKeys[data.section])}</a
 					>
 				</h2>
 
 				<FormSelect value={data.section} on:change={handleSectionChange} style="md:w-auto">
 					{#each sections as option (option)}
-						<option value={option}>{$_(continentKeys[option] || option)}</option>
+						<option value={option}>{$_(continentKeys[option])}</option>
 					{/each}
 				</FormSelect>
 			{/if}
