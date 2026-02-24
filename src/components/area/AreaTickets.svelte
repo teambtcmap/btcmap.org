@@ -64,7 +64,7 @@ $: totalTickets = add.length + verify.length + community.length;
 				<button
 					class="mx-auto block w-40 border border-link py-2 text-center md:inline {i === 0
 							? 'rounded-t md:rounded-l md:rounded-tr-none'
-						: i === 1
+						: i === ticketTypes.length - 1
 							? 'rounded-b md:rounded-r md:rounded-bl-none'
 							: ''} {showTypeIndex === i ? 'bg-link text-white' : ''} transition-colors"
 					on:click={() => (showTypeIndex = i)}
