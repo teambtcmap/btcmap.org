@@ -423,6 +423,25 @@
 		"newPlaces": "New Places",
 		"newComments": "New Comments"
 	},
+	"area": {
+		"sections": {
+			"merchants": "Merchants",
+			"stats": "Stats",
+			"activity": "Activity",
+			"maintain": "Maintain"
+		},
+		"defaultName": "BTC Map Area",
+		"viewOnCommunityMap": "View on community map",
+		"verifiedOverYearAgo": "Verified over a year ago",
+		"verified": "Verified",
+		"notRecentlyVerified": "Not recently verified",
+		"verifyCommunity": "Verify community",
+		"errorLoadingData": "Error loading data. Please try again later.",
+		"loadingData": "Loading data...",
+		"dataWithin24Hours": "Data will appear within 24 hours.",
+		"taggingIssues": "{name} Tagging Issues",
+		"openTickets": "{name} Open Tickets"
+	},
 	"verifyCommunity": {
 		"title": "Verify Community Information",
 		"description": "Help us keep community data accurate by verifying the information below.",
