@@ -6,6 +6,7 @@ import Icon from "$components/Icon.svelte";
 import MerchantDetailsContent from "$components/MerchantDetailsContent.svelte";
 import { trackEvent } from "$lib/analytics";
 import { drawerGesture } from "$lib/drawerGestureController";
+import { _ } from "$lib/i18n";
 import {
 	handleBoost as boostMerchant,
 	calcVerifiedDate,
@@ -232,7 +233,7 @@ export function openDrawer(id: number) {
 			on:pointercancel={drawerGesture.handlePointerCancel}
 			tabindex="0"
 			role="button"
-			aria-label={$expanded ? 'Collapse drawer' : 'Expand drawer'}
+			aria-label={$expanded ? $_("mapDrawer.collapseDrawer") : $_("mapDrawer.expandDrawer")}
 			aria-expanded={$expanded}
 			aria-controls="drawer-content"
 		>
@@ -252,7 +253,7 @@ export function openDrawer(id: number) {
 						class="flex touch-auto items-center space-x-2 text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
 					>
 						<Icon w="20" h="20" icon="arrow_back" type="material" />
-						<span class="text-sm font-semibold">Back</span>
+						<span class="text-sm font-semibold">{$_("mapDrawer.back")}</span>
 					</button>
 					<span class="text-sm font-semibold text-primary capitalize dark:text-white"
 						>{drawerView}</span
@@ -267,7 +268,7 @@ export function openDrawer(id: number) {
 							drawerGesture.collapse();
 						}}
 						class="touch-auto rounded-full p-2 text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
-						aria-label="Collapse drawer"
+						aria-label={$_("mapDrawer.collapseDrawer")}
 					>
 						<Icon w="20" h="20" icon="keyboard_arrow_down" type="material" />
 					</button>

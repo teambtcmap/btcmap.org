@@ -12,6 +12,7 @@ import {
 	MERCHANT_LIST_WIDTH,
 	PANEL_DRAWER_GAP,
 } from "$lib/constants";
+import { _ } from "$lib/i18n";
 import {
 	handleBoost as boostMerchant,
 	calcVerifiedDate,
@@ -117,7 +118,7 @@ export function openDrawer(id: number) {
 		class="absolute top-3 z-[1002] max-h-[calc(100%-1.5rem)] w-full overflow-y-auto rounded-lg bg-white shadow-lg transition-[left] duration-200 dark:bg-dark"
 		style="left: {drawerLeft}px; max-width: {MERCHANT_DRAWER_WIDTH}px"
 		role="dialog"
-		aria-label="Merchant details"
+		aria-label={$_("mapDrawer.merchantDetails")}
 	>
 		<div
 			class="sticky top-0 z-10 flex items-center justify-between rounded-t-lg bg-white p-2 dark:bg-dark {drawerView !==
@@ -132,7 +133,7 @@ export function openDrawer(id: number) {
 					class="flex items-center space-x-2 text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
 				>
 					<Icon w="20" h="20" icon="arrow_back" type="material" />
-					<span class="text-sm font-semibold">Back</span>
+					<span class="text-sm font-semibold">{$_("mapDrawer.back")}</span>
 				</button>
 				<span class="text-sm font-semibold text-primary capitalize dark:text-white"
 					>{drawerView}</span
@@ -141,7 +142,7 @@ export function openDrawer(id: number) {
 				<!-- Spacer to keep close button aligned -->
 				<div></div>
 			{/if}
-			<CloseButton on:click={closeDrawer} ariaLabel="Close merchant details" />
+			<CloseButton on:click={closeDrawer} ariaLabel={$_("mapDrawer.closeMerchantDetails")} />
 		</div>
 
 		{#if !merchant && fetchingMerchant}
