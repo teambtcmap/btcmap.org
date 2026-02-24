@@ -50,13 +50,9 @@ const links = [
 		<SocialLink url={$socials.x} social="x" />
 	</div>
 
-	<div
-		class="flex flex-wrap justify-center {$locale === 'bg'
-			? 'xl:flex xl:flex-nowrap xl:items-center xl:gap-x-2'
-			: 'xl:block'}"
-	>
+	<div class="flex flex-wrap justify-center xl:block">
 		<!-- Language Selector -->
-		<span class="mx-1.5 mb-2.5 text-sm xl:mb-0 {$locale === 'bg' ? 'xl:mx-0' : ''}">
+		<span class="mx-1.5 mb-2.5 text-sm xl:mb-0">
 			<Icon
 				type="material"
 				icon="translate"
@@ -113,9 +109,7 @@ const links = [
 				href={link.link}
 				target={link.external ? '_blank' : null}
 				rel={link.external ? 'noopener noreferrer' : null}
-				class="mx-1.5 mb-2.5 text-sm text-link transition-colors last:mb-0 hover:text-hover xl:mb-0 dark:text-white/50 dark:hover:text-link {$locale === 'bg'
-					? 'xl:mx-0 xl:shrink-0 xl:whitespace-nowrap'
-					: ''}"
+				class="mx-1.5 mb-2.5 text-sm text-link transition-colors last:mb-0 hover:text-hover xl:mb-0 dark:text-white/50 dark:hover:text-link"
 			>
 				{link.nameKey ? $_(link.nameKey) : link.name}
 			</a>

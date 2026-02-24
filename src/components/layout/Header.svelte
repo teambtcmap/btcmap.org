@@ -2,7 +2,7 @@
 import NavDropdownDesktop from "$components/layout/NavDropdownDesktop.svelte";
 import NavDropdownMobile from "$components/layout/NavDropdownMobile.svelte";
 import ThemeToggle from "$components/ThemeToggle.svelte";
-import { _, locale } from "$lib/i18n";
+import { _ } from "$lib/i18n";
 import IconMobileNav from "$lib/icons/IconMobileNav.svelte";
 import type { MobileNavIconName } from "$lib/icons/types";
 import type { DropdownLink } from "$lib/types";
@@ -157,9 +157,7 @@ afterNavigate(() => {
 	</a>
 	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
-	<nav
-		class="flex {$locale === 'bg' ? 'flex-nowrap space-x-6' : 'flex-wrap space-x-16'}"
-	>
+	<nav class="flex flex-wrap space-x-16">
 		{#each navLinks as link (link.id)}
 			<!-- dropdown menu -->
 			{#if link.id === 'maps'}
