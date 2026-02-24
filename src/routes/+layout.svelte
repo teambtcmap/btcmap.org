@@ -116,7 +116,6 @@ export let data;
 			</div>
 		</div>
 	{:else}
-		<LoadingIndicator visible={layoutSyncVisible} status={layoutLoadingStatus} progress={$placesLoadingProgress} />
 		<slot />
 	{/if}
 
