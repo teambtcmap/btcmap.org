@@ -5,6 +5,7 @@ import type { DivIcon, LatLng, Map } from "leaflet";
 import Icon from "$components/Icon.svelte";
 import { trackEvent } from "$lib/analytics";
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
+import en from "$lib/i18n/locales/en.json";
 import { selectedMerchant } from "$lib/store";
 import { theme } from "$lib/theme";
 import type { DomEventType, Leaflet, Place } from "$lib/types";
@@ -80,16 +81,135 @@ export const attribution = (L: Leaflet, map: Map) => {
 	L.control.attribution({ position: "bottomleft", prefix: false }).addTo(map);
 };
 
-export const support = () => {
-	// Add "Support BTC Map" link to right attribution
+export type MapControlsTranslations = {
+	fullScreen?: string;
+	goToHome?: string;
+	addLocation?: string;
+	communityMap?: string;
+	merchantMap?: string;
+	dataRefreshAvailable?: string;
+	support?: string;
+	supportWithSats?: string;
+	zoomIn?: string;
+	zoomOut?: string;
+	locate?: string;
+};
+
+// Fallbacks when callers omit translations (e.g. communities map, add-location). Sourced from en.json.
+const defaultMapControls: Required<MapControlsTranslations> = {
+	fullScreen: en.mapControls.fullScreen,
+	goToHome: en.mapControls.goToHome,
+	addLocation: en.mapControls.addLocation,
+	communityMap: en.mapControls.communityMap,
+	merchantMap: en.mapControls.merchantMap,
+	dataRefreshAvailable: en.mapControls.dataRefreshAvailable,
+	support: en.mapControls.support,
+	supportWithSats: en.mapControls.supportWithSats,
+	zoomIn: en.mapControls.zoomIn,
+	zoomOut: en.mapControls.zoomOut,
+	locate: en.mapControls.locate,
+};
+
+// Updates map control labels in the DOM when locale changes. Call from a locale subscription.
+export const applyMapControlTranslations = (t: (key: string) => string) => {
+	const labels = {
+		support: t("mapControls.support"),
+		supportWithSats: t("mapControls.supportWithSats"),
+		zoomIn: t("mapControls.zoomIn"),
+		zoomOut: t("mapControls.zoomOut"),
+		fullScreen: t("mapControls.fullScreen"),
+		locate: t("mapControls.locate"),
+		goToHome: t("mapControls.goToHome"),
+		addLocation: t("mapControls.addLocation"),
+		communityMap: t("mapControls.communityMap"),
+		merchantMap: t("mapControls.merchantMap"),
+		dataRefreshAvailable: t("mapControls.dataRefreshAvailable"),
+		boostLocations: t("boost.locations"),
+	};
+
+	const supportLink = document.querySelector(
+		".leaflet-control-attribution a[href='/support-us']",
+	) as HTMLAnchorElement | null;
+	if (supportLink) {
+		supportLink.title = labels.supportWithSats;
+		supportLink.textContent = labels.support;
+	}
+
+	const zoomIn = document.querySelector(".leaflet-control-zoom-in");
+	if (zoomIn) {
+		zoomIn.setAttribute("title", labels.zoomIn);
+		zoomIn.setAttribute("aria-label", labels.zoomIn);
+	}
+	const zoomOut = document.querySelector(".leaflet-control-zoom-out");
+	if (zoomOut) {
+		zoomOut.setAttribute("title", labels.zoomOut);
+		zoomOut.setAttribute("aria-label", labels.zoomOut);
+	}
+
+	const fullscreen = document.querySelector(".leaflet-control-full-screen");
+	if (fullscreen) {
+		fullscreen.setAttribute("title", labels.fullScreen);
+		fullscreen.setAttribute("aria-label", labels.fullScreen);
+	}
+
+	const locateBtn = document.querySelector(
+		".leaflet-bar-part.leaflet-bar-part-single",
+	);
+	if (locateBtn) {
+		locateBtn.setAttribute("title", labels.locate);
+		locateBtn.setAttribute("aria-label", labels.locate);
+	}
+
+	const homeBtn = document.querySelector(".leaflet-control-home");
+	if (homeBtn) {
+		homeBtn.setAttribute("title", labels.goToHome);
+		homeBtn.setAttribute("aria-label", labels.goToHome);
+	}
+	const addLocBtn = document.querySelector(".leaflet-control-add-location");
+	if (addLocBtn) {
+		addLocBtn.setAttribute("title", labels.addLocation);
+		addLocBtn.setAttribute("aria-label", labels.addLocation);
+	}
+	const communityBtn = document.querySelector(".leaflet-control-community-map");
+	if (communityBtn) {
+		communityBtn.setAttribute("title", labels.communityMap);
+		communityBtn.setAttribute("aria-label", labels.communityMap);
+	}
+	const merchantBtn = document.querySelector(".leaflet-control-merchant-map");
+	if (merchantBtn) {
+		merchantBtn.setAttribute("title", labels.merchantMap);
+		merchantBtn.setAttribute("aria-label", labels.merchantMap);
+	}
+
+	const dataRefreshBtn = document.querySelector(
+		".leaflet-control-data-refresh",
+	);
+	if (dataRefreshBtn) {
+		dataRefreshBtn.setAttribute("title", labels.dataRefreshAvailable);
+		dataRefreshBtn.setAttribute("aria-label", labels.dataRefreshAvailable);
+	}
+
+	const boostBtn = document.querySelector(".leaflet-control-boost-layer");
+	if (boostBtn) {
+		boostBtn.setAttribute("title", labels.boostLocations);
+		boostBtn.setAttribute("aria-label", labels.boostLocations);
+	}
+};
+
+export const support = (t?: MapControlsTranslations) => {
+	const labels = { ...defaultMapControls, ...t };
 	const supportAttribution: HTMLDivElement | null = document.querySelector(
 		".leaflet-bottom.leaflet-right > .leaflet-control-attribution",
 	);
 
 	if (!supportAttribution) return;
 
-	supportAttribution.innerHTML =
-		'<a href="/support-us" title="Support with sats">Support</a> BTC Map';
+	supportAttribution.textContent = "";
+	const link = document.createElement("a");
+	link.href = "/support-us";
+	link.title = labels.supportWithSats;
+	link.textContent = labels.support;
+	supportAttribution.append(link, document.createTextNode(" BTC Map"));
 };
 
 export const scaleBars = (L: Leaflet, map: Map) => {
@@ -102,12 +222,17 @@ export const changeDefaultIcons = (
 	L: Leaflet,
 	mapElement: HTMLDivElement,
 	DomEvent: DomEventType,
+	t?: MapControlsTranslations,
 ) => {
+	const labels = { ...defaultMapControls, ...t };
+
 	// Add analytics tracking to zoom controls (keep Leaflet's default +/- text)
 	const zoomIn: HTMLAnchorElement | null = document.querySelector(
 		".leaflet-control-zoom-in",
 	);
 	if (zoomIn) {
+		zoomIn.title = labels.zoomIn;
+		zoomIn.setAttribute("aria-label", labels.zoomIn);
 		zoomIn.addEventListener("click", () => {
 			trackEvent("zoom_in_click");
 		});
@@ -117,6 +242,8 @@ export const changeDefaultIcons = (
 		".leaflet-control-zoom-out",
 	);
 	if (zoomOut) {
+		zoomOut.title = labels.zoomOut;
+		zoomOut.setAttribute("aria-label", labels.zoomOut);
 		zoomOut.addEventListener("click", () => {
 			trackEvent("zoom_out_click");
 		});
@@ -127,9 +254,9 @@ export const changeDefaultIcons = (
 		document.querySelector(".leaflet-bar");
 	const fullscreenButton = L.DomUtil.create("a");
 	fullscreenButton.classList.add("leaflet-control-full-screen");
-	fullscreenButton.title = "Full screen";
+	fullscreenButton.title = labels.fullScreen;
 	fullscreenButton.role = "button";
-	fullscreenButton.ariaLabel = "Full screen";
+	fullscreenButton.ariaLabel = labels.fullScreen;
 	fullscreenButton.ariaDisabled = "false";
 	fullscreenButton.innerHTML = `<img src='/icons/expand.svg' alt='fullscreen' class='inline' style='width: 16px; height: 16px;'/>`;
 	fullscreenButton.onclick = function toggleFullscreen() {
@@ -156,9 +283,15 @@ export const geolocate = (
 	_L: Leaflet,
 	map: Map,
 	LocateControl: typeof import("leaflet.locatecontrol").LocateControl,
+	t?: MapControlsTranslations,
 ) => {
-	// Use plugin defaults, just add analytics tracking
-	new LocateControl({ position: "topright" }).addTo(map);
+	const labels = { ...defaultMapControls, ...t };
+	const locateTitle = labels.locate;
+
+	new LocateControl({
+		position: "topright",
+		strings: { title: locateTitle },
+	}).addTo(map);
 
 	// Sync location to userLocationStore so the nearby panel can show distances
 	// without requiring the user to click the separate "Enable precise distances" button
@@ -172,6 +305,8 @@ export const geolocate = (
 	if (locateButton) {
 		// Replace default arrow icon with custom crosshairs icon
 		locateButton.innerHTML = `<img src='/icons/locate.svg' alt='locate' style='width: 16px; height: 16px;'/>`;
+		locateButton.title = locateTitle;
+		locateButton.setAttribute("aria-label", locateTitle);
 
 		locateButton.addEventListener("click", () => {
 			trackEvent("locate_click");
@@ -184,7 +319,9 @@ export const homeMarkerButtons = (
 	map: Map,
 	DomEvent: DomEventType,
 	mainMap?: boolean,
+	t?: MapControlsTranslations,
 ) => {
+	const labels = { ...defaultMapControls, ...t };
 	const addControlDiv = L.DomUtil.create("div");
 
 	const customControls = L.Control.extend({
@@ -200,10 +337,11 @@ export const homeMarkerButtons = (
 
 			// Home button
 			const addHomeButton = L.DomUtil.create("a");
+			addHomeButton.classList.add("leaflet-control-home");
 			addHomeButton.href = "/";
-			addHomeButton.title = "Go to home page";
+			addHomeButton.title = labels.goToHome;
 			addHomeButton.role = "button";
-			addHomeButton.ariaLabel = "Go to home page";
+			addHomeButton.ariaLabel = labels.goToHome;
 			addHomeButton.innerHTML = `<img src='/icons/home.svg' alt='home' style='width: 16px; height: 16px;'/>`;
 			addHomeButton.onclick = () => {
 				trackEvent("home_button_click");
@@ -213,10 +351,11 @@ export const homeMarkerButtons = (
 			if (mainMap) {
 				// Add location button
 				const addLocationButton = L.DomUtil.create("a");
+				addLocationButton.classList.add("leaflet-control-add-location");
 				addLocationButton.href = "/add-location";
-				addLocationButton.title = "Add location";
+				addLocationButton.title = labels.addLocation;
 				addLocationButton.role = "button";
-				addLocationButton.ariaLabel = "Add location";
+				addLocationButton.ariaLabel = labels.addLocation;
 				addLocationButton.innerHTML = `<img src='/icons/marker.svg' alt='marker' style='width: 16px; height: 16px;'/>`;
 				addLocationButton.onclick = () => {
 					trackEvent("add_location_click");
@@ -225,10 +364,11 @@ export const homeMarkerButtons = (
 
 				// Community map button
 				const communityMapButton = L.DomUtil.create("a");
+				communityMapButton.classList.add("leaflet-control-community-map");
 				communityMapButton.href = "/communities/map";
-				communityMapButton.title = "Community map";
+				communityMapButton.title = labels.communityMap;
 				communityMapButton.role = "button";
-				communityMapButton.ariaLabel = "Community map";
+				communityMapButton.ariaLabel = labels.communityMap;
 				communityMapButton.innerHTML = `<img src='/icons/group.svg' alt='group' style='width: 16px; height: 16px;'/>`;
 				communityMapButton.onclick = () => {
 					trackEvent("community_map_click");
@@ -237,10 +377,11 @@ export const homeMarkerButtons = (
 			} else {
 				// Merchant map button (for community map page)
 				const merchantMapButton = L.DomUtil.create("a");
+				merchantMapButton.classList.add("leaflet-control-merchant-map");
 				merchantMapButton.href = "/map";
-				merchantMapButton.title = "Merchant map";
+				merchantMapButton.title = labels.merchantMap;
 				merchantMapButton.role = "button";
-				merchantMapButton.ariaLabel = "Merchant map";
+				merchantMapButton.ariaLabel = labels.merchantMap;
 				merchantMapButton.innerHTML = `<img src='/icons/shopping.svg' alt='shopping' style='width: 16px; height: 16px;'/>`;
 				addControlDiv.append(merchantMapButton);
 			}
@@ -253,7 +394,13 @@ export const homeMarkerButtons = (
 	DomEvent.disableClickPropagation(addControlDiv);
 };
 
-export const dataRefresh = (L: Leaflet, map: Map, DomEvent: DomEventType) => {
+export const dataRefresh = (
+	L: Leaflet,
+	map: Map,
+	DomEvent: DomEventType,
+	t?: MapControlsTranslations,
+) => {
+	const labels = { ...defaultMapControls, ...t };
 	const dataRefreshButton = L.DomUtil.create("a");
 
 	const customDataRefreshButton = L.Control.extend({
@@ -270,9 +417,9 @@ export const dataRefresh = (L: Leaflet, map: Map, DomEvent: DomEventType) => {
 			dataRefreshDiv.style.display = "none";
 
 			dataRefreshButton.classList.add("leaflet-control-data-refresh");
-			dataRefreshButton.title = "Data refresh available";
+			dataRefreshButton.title = labels.dataRefreshAvailable;
 			dataRefreshButton.role = "button";
-			dataRefreshButton.ariaLabel = "Data refresh available";
+			dataRefreshButton.ariaLabel = labels.dataRefreshAvailable;
 			dataRefreshButton.ariaDisabled = "false";
 			dataRefreshButton.innerHTML = `<img src='/icons/refresh.svg' alt='refresh' style='width: 16px; height: 16px;'/>`;
 			dataRefreshButton.onclick = () => {

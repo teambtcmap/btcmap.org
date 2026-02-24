@@ -70,6 +70,19 @@
 		"filter": "Filter by category",
 		"noMatches": "No results in this category"
 	},
+	"mapControls": {
+		"fullScreen": "Full screen",
+		"goToHome": "Go to home page",
+		"addLocation": "Add location",
+		"communityMap": "Community map",
+		"merchantMap": "Merchant map",
+		"dataRefreshAvailable": "Data refresh available",
+		"support": "Support",
+		"supportWithSats": "Support with sats",
+		"zoomIn": "Zoom in",
+		"zoomOut": "Zoom out",
+		"locate": "Show me where I am"
+	},
 	"merchant": {
 		"navigate": "Navigate",
 		"edit": "Edit",

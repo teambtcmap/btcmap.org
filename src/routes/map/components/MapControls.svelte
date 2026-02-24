@@ -1,8 +1,10 @@
 <script lang="ts">
 import type { Control, Map } from "leaflet";
 import { onDestroy, onMount } from "svelte";
+import { get } from "svelte/store";
 
 import { trackEvent } from "$lib/analytics";
+import { _ } from "$lib/i18n";
 import { dataRefresh, homeMarkerButtons } from "$lib/map/setup";
 import type { Leaflet } from "$lib/types";
 
@@ -15,7 +17,7 @@ export let DomEvent: typeof import("leaflet/src/dom/DomEvent") | undefined;
 
 let boostControl: Control | null = null;
 
-const addBoostControl = () => {
+const addBoostControl = (translate: (key: string) => string) => {
 	if (!leaflet || !map) return;
 
 	const BoostControl = leaflet.Control.extend({
@@ -30,13 +32,14 @@ const addBoostControl = () => {
 				"leaflet-control",
 			);
 
+			const boostLabel = translate("boost.locations");
 			const boostLayerButton = leaflet.DomUtil.create("a");
 			boostLayerButton.classList.add("leaflet-control-boost-layer");
 			boostLayerButton.href = "#";
 			boostLayerButton.tabIndex = 0;
-			boostLayerButton.title = "Boosted locations";
+			boostLayerButton.title = boostLabel;
 			boostLayerButton.role = "button";
-			boostLayerButton.ariaLabel = "Boosted locations";
+			boostLayerButton.ariaLabel = boostLabel;
 			boostLayerButton.ariaDisabled = "false";
 			boostLayerButton.innerHTML = `<img src='${$page.url.searchParams.has("boosts") ? "/icons/boost-solid.svg" : "/icons/boost.svg"}' alt='boost' id='boost-layer' style='width: 16px; height: 16px;'/>`;
 			boostLayerButton.onclick = (e) => {
@@ -69,9 +72,18 @@ const addBoostControl = () => {
 onMount(() => {
 	if (!browser || !map || !leaflet || !DomEvent) return;
 
-	addBoostControl();
-	homeMarkerButtons(leaflet, map, DomEvent, true);
-	dataRefresh(leaflet, map, DomEvent);
+	const translate = get(_);
+	const mapControlsT = {
+		goToHome: translate("mapControls.goToHome"),
+		addLocation: translate("mapControls.addLocation"),
+		communityMap: translate("mapControls.communityMap"),
+		merchantMap: translate("mapControls.merchantMap"),
+		dataRefreshAvailable: translate("mapControls.dataRefreshAvailable"),
+	};
+
+	addBoostControl(translate);
+	homeMarkerButtons(leaflet, map, DomEvent, true, mapControlsT);
+	dataRefresh(leaflet, map, DomEvent, mapControlsT);
 });
 
 onDestroy(() => {

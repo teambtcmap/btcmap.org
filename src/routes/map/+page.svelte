@@ -11,6 +11,7 @@ import type {
 } from "leaflet";
 import localforage from "localforage";
 import { onDestroy, onMount } from "svelte";
+import { get } from "svelte/store";
 
 import MapLoadingMain from "$components/MapLoadingMain.svelte";
 import { trackEvent } from "$lib/analytics";
@@ -48,6 +49,7 @@ import {
 	type LoadedMarkers,
 } from "$lib/map/markers";
 import {
+	applyMapControlTranslations,
 	attribution,
 	changeDefaultIcons,
 	generateIcon,
@@ -256,6 +258,7 @@ const handleHashChange = () => {
 
 // Track current search request for cancellation
 let searchAbortController: AbortController | null = null;
+let unsubscribeLocale: (() => void) | null = null;
 
 // Core search function
 const executeSearch = async (query: string) => {
@@ -1116,8 +1119,12 @@ onMount(async () => {
 		setupTileLayers(activeLayer);
 		setupTileLoadingIndicators();
 		setupMapClickHandlers();
-		setupMapControls(LocateControl, baseMaps);
-		setupMapFinalization();
+		setupMapControls(LocateControl, baseMaps, get(_));
+		setupMapFinalization(get(_));
+
+		unsubscribeLocale = _.subscribe(() => {
+			applyMapControlTranslations(get(_));
+		});
 	}
 });
 
@@ -1301,12 +1308,22 @@ const setupMapClickHandlers = () => {
 const setupMapControls = (
 	LocateControl: typeof import("leaflet.locatecontrol").LocateControl,
 	baseMaps: Record<string, Layer>,
+	translate: (key: string) => string,
 ) => {
+	const mapControlsT = {
+		support: translate("mapControls.support"),
+		supportWithSats: translate("mapControls.supportWithSats"),
+		locate: translate("mapControls.locate"),
+		fullScreen: translate("mapControls.fullScreen"),
+		zoomIn: translate("mapControls.zoomIn"),
+		zoomOut: translate("mapControls.zoomOut"),
+	};
+
 	// change broken marker image path in prod
 	leaflet.Icon.Default.prototype.options.imagePath = "/icons/";
 
 	// add support attribution
-	support();
+	support(mapControlsT);
 
 	// add OSM attribution
 	attribution(leaflet, map);
@@ -1315,7 +1332,7 @@ const setupMapControls = (
 	scaleBars(leaflet, map);
 
 	// add locate button to map
-	geolocate(leaflet, map, LocateControl);
+	geolocate(leaflet, map, LocateControl, mapControlsT);
 
 	controlLayers = leaflet.control
 		.layers(baseMaps, undefined, { position: "topright" })
@@ -1330,9 +1347,14 @@ const setupMapControls = (
 	});
 };
 
-const setupMapFinalization = () => {
+const setupMapFinalization = (translate: (key: string) => string) => {
+	const mapControlsT = {
+		fullScreen: translate("mapControls.fullScreen"),
+		zoomIn: translate("mapControls.zoomIn"),
+		zoomOut: translate("mapControls.zoomOut"),
+	};
 	// change default icons
-	changeDefaultIcons(true, leaflet, mapElement, DomEvent);
+	changeDefaultIcons(true, leaflet, mapElement, DomEvent, mapControlsT);
 
 	// final map setup
 	map.on("load", () => {
@@ -1378,6 +1400,8 @@ onDestroy(async () => {
 	if (browser) {
 		window.removeEventListener("hashchange", handleHashChange);
 	}
+
+	unsubscribeLocale?.();
 });
 </script>
 
