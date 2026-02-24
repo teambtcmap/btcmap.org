@@ -15,6 +15,7 @@ import {
 } from "@tanstack/svelte-table";
 import { onMount } from "svelte";
 import { derived, writable } from "svelte/store";
+import { _ } from "svelte-i18n";
 import tippy from "tippy.js";
 
 import Icon from "$components/Icon.svelte";
@@ -303,14 +304,14 @@ onMount(() => {
 const setHeaderTooltips = () => {
 	if (totalTooltip) {
 		tippy(totalTooltip, {
-			content: "All locations inc. ATMS",
+			content: $_(`areaLeaderboard.totalTooltip`),
 			allowHTML: true,
 		});
 	}
 
 	if (upToDateTooltip) {
 		tippy(upToDateTooltip, {
-			content: "Locations verified within the past year",
+			content: $_(`areaLeaderboard.verifiedTooltip`),
 			allowHTML: true,
 		});
 	}
@@ -336,7 +337,7 @@ $: upToDateTooltip && totalTooltip && gradeTooltip && setHeaderTooltips();
 				id="leaderboard-title"
 				class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
 			>
-				{type === 'community' ? 'Community' : 'Country'} Leaderboard
+				{type === 'community' ? $_(`areaLeaderboard.communityLeaderboard`) : $_(`areaLeaderboard.countryLeaderboard`)}
 				{#if !loading && $leaderboardWithPositions.length > 0}
 					({$leaderboardWithPositions.length})
 				{/if}
@@ -354,12 +355,12 @@ $: upToDateTooltip && totalTooltip && gradeTooltip && setHeaderTooltips();
 				</div>
 			</div>
 		{:else if $leaderboardWithPositions.length === 0}
-			<p class="w-full p-5 text-center text-primary dark:text-white">No data available</p>
+			<p class="w-full p-5 text-center text-primary dark:text-white">{$_(`areaLeaderboard.noData`)}</p>
 		{:else}
 			<LeaderboardSearch table={$table} bind:globalFilter {searchDebounce} />
 
 			{#if $table.getFilteredRowModel().rows.length === 0}
-				<p class="w-full p-5 text-center text-primary dark:text-white">No results found.</p>
+				<p class="w-full p-5 text-center text-primary dark:text-white">{$_(`areaLeaderboard.noResults`)}</p>
 			{:else}
 				<!-- Mobile: Three-row card layout with sorting headers -->
 				<div class="block lg:hidden">
@@ -409,14 +410,14 @@ $: upToDateTooltip && totalTooltip && gradeTooltip && setHeaderTooltips();
 			<footer
 				class="border-t border-gray-300 px-5 pt-2.5 pb-5 text-sm text-body dark:border-white/95 dark:text-white"
 			>
-				<p>Position is calculated as follows:</p>
+				<p>{$_(`areaLeaderboard.positionCalc`)}</p>
 
 				<ul class="list-inside list-disc">
-					<li>Primary: Total locations minus 5x outdated elements.</li>
-					<li>Secondary: Total number of locations.</li>
+					<li>{$_(`areaLeaderboard.primaryCalc`)}</li>
+					<li>{$_(`areaLeaderboard.secondaryCalc`)}</li>
 				</ul>
 
-				<p>Locations include ATMs.</p>
+				<p>{$_(`areaLeaderboard.locationsNote`)}</p>
 			</footer>
 		{/if}
 	</div>

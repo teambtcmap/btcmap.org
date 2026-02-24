@@ -2,6 +2,7 @@
 import axios from "axios";
 import DOMPurify from "dompurify";
 import { onMount } from "svelte";
+import { _ } from "svelte-i18n";
 
 import FormSuccess from "$components/FormSuccess.svelte";
 import Icon from "$components/Icon.svelte";
@@ -30,7 +31,7 @@ const fetchCaptcha = () => {
 			captchaContent = DOMPurify.sanitize(response.data.captcha);
 		})
 		.catch((error) => {
-			errToast("Could not fetch captcha, please try again or contact BTC Map.");
+			errToast($_(`errors.captchaFetch`));
 			console.error(error);
 		})
 		.finally(() => {
@@ -72,9 +73,7 @@ const submitForm = (event: SubmitEvent) => {
 			if (error.response?.data?.message?.includes("Captcha")) {
 				errToast(error.response.data.message);
 			} else {
-				errToast(
-					"Form submission failed, please try again or contact BTC Map.",
-				);
+				errToast($_(`errors.formSubmission`));
 			}
 
 			console.error(error);
@@ -103,10 +102,10 @@ onMount(async () => {
 	<section class="mx-auto w-full max-w-2xl space-y-5 text-left">
 		<div class="space-y-2 text-center">
 			<h3 class="text-2xl font-semibold text-primary dark:text-white">
-				Verify Community Information
+				{$_(`verifyCommunity.title`)}
 			</h3>
 			<p class="text-sm text-primary dark:text-white">
-				Help us keep community data accurate by verifying the information below.
+				{$_(`verifyCommunity.description`)}
 			</p>
 		</div>
 
@@ -118,7 +117,7 @@ onMount(async () => {
 					readonly
 					type="text"
 					name="name"
-					placeholder="Community Name"
+					placeholder={$_(`verifyCommunity.communityName`)}
 					class="w-full rounded-2xl border-2 border-input p-3 text-center font-semibold focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 				/>
 			</div>
@@ -126,7 +125,7 @@ onMount(async () => {
 			<div>
 				<div class="flex items-center space-x-2">
 					<label for="accurate" class="{!updates ? 'cursor-pointer' : ''} font-semibold"
-						>Current information is accurate</label
+						>{$_(`verifyCommunity.accurateLabel`)}</label
 					>
 					<input
 						class="h-4 w-4 accent-link"
@@ -139,19 +138,19 @@ onMount(async () => {
 					/>
 				</div>
 				<p class="text-sm dark:text-white/70">
-					Check this box if you have verified the existing data is up-to-date.
+					{$_(`verifyCommunity.accurateHint`)}
 				</p>
 			</div>
 
 			<div>
 				<label for="updates" class="mb-2 block font-semibold"
-					>Updates needed <span class="font-normal">(If applicable)</span></label
+					>{$_(`verifyCommunity.updatesLabel`)} <span class="font-normal">{$_(`verifyCommunity.ifApplicable`)}</span></label
 				>
 				<textarea
 					disabled={accurate}
 					required={!accurate}
 					name="updates"
-					placeholder="Describe what information needs to be updated (contact links, description, etc.)"
+					placeholder={$_(`verifyCommunity.updatesPlaceholder`)}
 					rows="3"
 					class="w-full rounded-2xl border-2 border-input bg-white p-3 placeholder-gray-500 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:text-white dark:placeholder-gray-400 dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 					bind:value={updates}
@@ -159,11 +158,11 @@ onMount(async () => {
 			</div>
 
 			<div>
-				<label for="verify" class="mb-2 block font-semibold">How did you verify this?</label>
+				<label for="verify" class="mb-2 block font-semibold">{$_(`verifyCommunity.verifyLabel`)}</label>
 				<textarea
 					required
 					name="verify"
-					placeholder="I visited their website, attended a meetup, contacted them directly, etc."
+					placeholder={$_(`verifyCommunity.verifyPlaceholder`)}
 					rows="3"
 					class="w-full rounded-2xl border-2 border-input bg-white p-3 placeholder-gray-500 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:text-white dark:placeholder-gray-400 dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 					bind:this={verify}
@@ -173,7 +172,7 @@ onMount(async () => {
 			<div>
 				<div class="mb-2 flex items-center space-x-2">
 					<label for="captcha" class="font-semibold"
-						>Bot protection <span class="font-normal">(case-sensitive)</span></label
+						>{$_(`verifyCommunity.botProtection`)} <span class="font-normal">{$_(`verifyCommunity.caseSensitive`)}</span></label
 					>
 					{#if captchaSecret}
 						<button type="button" on:click={fetchCaptcha}>
@@ -198,7 +197,7 @@ onMount(async () => {
 						required
 						type="text"
 						name="captcha"
-						placeholder="Please enter the captcha text."
+						placeholder={$_(`verifyCommunity.captchaPlaceholder`)}
 						class="w-full rounded-2xl border-2 border-input bg-white p-3 placeholder-gray-500 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:text-white dark:placeholder-gray-400 dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 						bind:this={captchaInput}
 					/>
@@ -208,7 +207,7 @@ onMount(async () => {
 			<input
 				type="text"
 				name="honey"
-				placeholder="A nice pot of honey."
+				placeholder={$_(`verifyCommunity.honeyPlaceholder`)}
 				class="hidden"
 				bind:this={honeyInput}
 			/>
@@ -218,14 +217,14 @@ onMount(async () => {
 				disabled={submitting || !captchaSecret}
 				style="w-full py-3 rounded-xl"
 			>
-				Submit Report
+				{$_(`verifyCommunity.submitReport`)}
 			</PrimaryButton>
 		</form>
 	</section>
 {:else}
 	<FormSuccess
-		type="Report"
-		text="Thanks for verifying this community's information. We'll review your report and update it ASAP."
+		type={$_(`verifyCommunity.successType`)}
+		text={$_(`verifyCommunity.successMessage`)}
 		issue={submissionIssueNumber}
 		on:click={resetForm}
 	/>
