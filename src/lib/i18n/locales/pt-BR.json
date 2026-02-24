@@ -152,13 +152,21 @@
 		"seeHowItLooks": "Veja como fica",
 		"boostedPinAlt": "Pin impulsionado",
 		"feeNote": "A taxa é usada para apoiar o projeto open source BTC Map e continuar seu desenvolvimento.",
-		"boostForMonths": "Impulsionar por {time} mês{plural}",
+		"boostFor1Month": "Impulsionar por 1 mês",
+		"boostForNMonths": "Impulsionar por {time} meses",
+		"duration1Month": "1 mês",
+		"durationNMonths": "{time} meses",
 		"thankYou": "Obrigado por apoiar {name} e o BTC Map!",
 		"thisLocation": "este local",
 		"boostedUntil": "Este local será impulsionado até",
 		"shareOnTwitter": "Compartilhar no Twitter",
 		"shareEncourage": "Compartilhar seu apoio pode incentivar outros a mostrar o deles 🥰",
-		"invoiceDescription": "Impulsione este local por <strong>{time} mês{plural} <br /> {sats} sats</strong>"
+		"invoiceDescription1": "Impulsione este local por <strong>1 mês <br /> {sats} sats</strong>",
+		"invoiceDescriptionN": "Impulsione este local por <strong>{time} meses <br /> {sats} sats</strong>",
+		"finalizeError": "Não foi possível finalizar o impulso, entre em contato com o BTC Map.",
+		"invalidDuration": "Duração de impulso inválida",
+		"invalidMerchantId": "ID do comerciante inválido",
+		"twitterShareText": "Acabei de impulsionar {name} no @btcmap. Confira!"
 	},
 	"invoicePayment": {
 		"scanOrClick": "Escaneie ou clique para pagar com lightning"

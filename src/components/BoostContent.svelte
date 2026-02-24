@@ -66,7 +66,7 @@ const handlePaymentSuccess = async () => {
 			onComplete();
 		}
 	} catch (error) {
-		warningToast("Could not finalize boost, please contact BTC Map.");
+		warningToast($_("boost.finalizeError"));
 		console.error(error);
 	}
 };
@@ -89,14 +89,14 @@ const generateInvoice = () => {
 		: undefined;
 
 	if (!days || days <= 0) {
-		errToast("Invalid boost duration");
+		errToast($_("boost.invalidDuration"));
 		loading = false;
 		return;
 	}
 
 	const placeId = Number(merchantId);
 	if (!placeId || Number.isNaN(placeId)) {
-		errToast("Invalid merchant ID");
+		errToast($_("boost.invalidMerchantId"));
 		loading = false;
 		return;
 	}
@@ -184,7 +184,11 @@ const generateInvoice = () => {
 						<img src="/icons/star.svg" alt="star" class="absolute top-1 right-1" />
 					{/if}
 
-					<p class="text-xs">{value.time} month{value.time > 1 ? 's' : ''}</p>
+					<p class="text-xs">
+						{value.time === 1
+							? $_("boost.duration1Month")
+							: $_("boost.durationNMonths", { values: { time: value.time } })}
+					</p>
 					<p class="font-bold">{value.sats.toLocaleString()} sats</p>
 				</button>
 			{/each}
@@ -201,12 +205,11 @@ const generateInvoice = () => {
 			on:click={generateInvoice}
 		>
 			{selectedBoost
-				? $_("boost.boostForMonths", {
-						values: {
-							time: selectedBoost.time,
-							plural: selectedBoost.time > 1 ? "s" : "",
-						},
-					})
+				? selectedBoost.time === 1
+					? $_("boost.boostFor1Month")
+					: $_("boost.boostForNMonths", {
+							values: { time: selectedBoost.time },
+						})
 				: $_("boost.boostAction")}
 		</PrimaryButton>
 	</div>
@@ -218,13 +221,16 @@ const generateInvoice = () => {
 		onError={handlePaymentError}
 		onStatusCheckError={handleStatusCheckError}
 		description={selectedBoost
-			? $_("boost.invoiceDescription", {
-					values: {
-						time: selectedBoost.time,
-						plural: selectedBoost.time > 1 ? "s" : "",
-						sats: selectedBoost.sats.toLocaleString(),
-					},
-				})
+			? selectedBoost.time === 1
+				? $_("boost.invoiceDescription1", {
+						values: { sats: selectedBoost.sats.toLocaleString() },
+					})
+				: $_("boost.invoiceDescriptionN", {
+						values: {
+							time: selectedBoost.time,
+							sats: selectedBoost.sats.toLocaleString(),
+						},
+					})
 			: ""}
 	/>
 {:else}
@@ -251,9 +257,7 @@ const generateInvoice = () => {
 		</p>
 
 		<a
-			href="https://twitter.com/share?text=I just boosted {merchantName
-				? encodeURIComponent(merchantName)
-				: 'this location'} on @btcmap. Check them out!&url=https://btcmap.org/merchant/{merchantId}&hashtags=bitcoin"
+			href="https://twitter.com/share?text={encodeURIComponent($_('boost.twitterShareText', { values: { name: merchantName || $_('boost.thisLocation') } }))}&url=https://btcmap.org/merchant/{merchantId}&hashtags=bitcoin"
 			target="_blank"
 			rel="noreferrer"
 			class="mx-auto flex w-[200px] items-center justify-center rounded-xl bg-twitter py-3 text-white"
