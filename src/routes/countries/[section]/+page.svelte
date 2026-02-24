@@ -1,5 +1,6 @@
 <script lang="ts">
 import { onMount } from "svelte";
+import { _ } from "svelte-i18n";
 
 import FormSelect from "$components/form/FormSelect.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
@@ -96,8 +97,18 @@ $: countrySections = [
 	},
 ];
 
-// Map continent tag values to display names
-const continentDisplayNames: Record<string, string> = {
+// Map continent slugs to i18n keys (for display)
+const continentKeys: Record<string, string> = {
+	africa: "countries.africa",
+	asia: "countries.asia",
+	europe: "countries.europe",
+	"north-america": "countries.northAmerica",
+	oceania: "countries.oceania",
+	"south-america": "countries.southAmerica",
+};
+
+// Map slugs to OSM continent values (for filtering)
+const slugToOsm: Record<string, string> = {
 	africa: "Africa",
 	asia: "Asia",
 	europe: "Europe",
@@ -131,18 +142,18 @@ function handleSectionChange(event: Event) {
 				? 'text-white'
 				: 'gradient'} text-4xl !leading-tight font-semibold md:text-5xl"
 		>
-			Bitcoin adoption by countries.
+			{$_('countries.hero')}
 		</h1>
 	{:else}
 		<HeaderPlaceholder />
 	{/if}
 
 	<h2 class="mx-auto w-full text-xl font-semibold text-primary lg:w-[800px] dark:text-white">
-		Your country? Your map!
+		{$_('countries.description')}
 	</h2>
 
 	<PrimaryButton style="md:w-[200px] mx-auto py-3 rounded-xl" link="/countries/leaderboard">
-		View leaderboard
+		{$_('countries.viewLeaderboard')}
 	</PrimaryButton>
 
 	<div>
@@ -150,20 +161,20 @@ function handleSectionChange(event: Event) {
 			{#if data.section}
 				<h2 class="mb-2 text-3xl font-semibold text-primary md:mb-0 md:text-left dark:text-white">
 					<a href={resolve(`/countries/${data.section}`)}
-						>{continentDisplayNames[data.section] || data.section}</a
+						>{$_(continentKeys[data.section] || 'countries.europe')}</a
 					>
 				</h2>
 
 				<FormSelect value={data.section} on:change={handleSectionChange} style="md:w-auto">
 					{#each sections as option (option)}
-						<option value={option}>{continentDisplayNames[option] || option}</option>
+						<option value={option}>{$_(continentKeys[option] || option)}</option>
 					{/each}
 				</FormSelect>
 			{/if}
 		</div>
 
 		{#each countrySections as item (item.section)}
-			{#if continentDisplayNames[data.section] === item.section}
+			{#if data.section && slugToOsm[data.section] === item.section}
 				<CountrySection countries={item.countries} />
 			{/if}
 		{/each}

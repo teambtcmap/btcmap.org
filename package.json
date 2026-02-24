@@ -43,6 +43,7 @@
 		"dompurify": "^3.3.1",
 		"globals": "^17.3.0",
 		"husky": "^9.1.7",
+		"i18n-iso-countries": "^7.14.0",
 		"js-confetti": "^0.13.1",
 		"leaflet": "^1.9.4",
 		"leaflet.featuregroup.subgroup": "^1.0.2",

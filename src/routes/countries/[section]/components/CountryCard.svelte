@@ -1,5 +1,10 @@
 <script lang="ts">
+import { locale } from "svelte-i18n";
+
+import { getCountryName } from "$lib/countryNames";
+
 import { resolve } from "$app/paths";
+
 export let id: string;
 export let name: string;
 </script>
@@ -14,14 +19,16 @@ export let name: string;
 		>
 			<img
 				src={`https://static.btcmap.org/images/countries/${id}.svg`}
-				alt={name}
+				alt={getCountryName(id, $locale, name)}
 				class="mx-auto h-20 w-20 rounded-full object-cover"
 				on:error={function () {
 					this.src = '/images/bitcoin.svg';
 				}}
 			/>
 
-			<span class="block text-center text-lg font-semibold">{name}</span>
+			<span class="block text-center text-lg font-semibold"
+				>{getCountryName(id, $locale, name)}</span
+			>
 		</a>
 	</div>
 </div>
