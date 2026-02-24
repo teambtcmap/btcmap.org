@@ -8,7 +8,7 @@
 	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
-<main class="mt-10 mb-20 space-y-5 text-body dark:text-white">
+<div class="mt-10 mb-20 space-y-5 text-body dark:text-white">
 	<p class="text-center font-semibold text-primary dark:text-white">
 		BTC Map - Easily find places to spend sats anywhere on the planet.
 		<br />
@@ -676,4 +676,4 @@
 	<h2 class="text-center text-3xl font-semibold text-primary dark:text-white">
 		END OF TERMS AND CONDITIONS
 	</h2>
-</main>
+</div>

@@ -1,6 +1,7 @@
 <script lang="ts">
 import Chart from "chart.js/auto";
 import { onMount } from "svelte";
+import { _ } from "svelte-i18n";
 
 import Icon from "$components/Icon.svelte";
 import ProfileStat from "$components/ProfileStat.svelte";
@@ -111,10 +112,13 @@ const initializeData = () => {
 		updatedChart = new Chart(updatedChartCanvas, {
 			type: "pie",
 			data: {
-				labels: ["Recently Verified", "Outdated"],
+				labels: [
+					$_(`areaStats.recentlyVerifiedLabel`),
+					$_(`areaStats.outdated`),
+				],
 				datasets: [
 					{
-						label: "Locations",
+						label: $_(`areaStats.locations`),
 						data: [upToDate, outdated],
 						backgroundColor: ["rgb(16, 183, 145)", "rgb(235, 87, 87)"],
 						hoverOffset: 4,
@@ -145,7 +149,7 @@ const initializeData = () => {
 				labels: percents.map(({ date }) => date),
 				datasets: [
 					{
-						label: "Recently Verified Percent",
+						label: $_(`areaStats.recentlyVerifiedPercent`),
 						data: percents.map(
 							({ tags: { up_to_date_percent } }) => up_to_date_percent,
 						),
@@ -214,7 +218,7 @@ const initializeData = () => {
 				labels: chartsReports.map(({ date }) => date),
 				datasets: [
 					{
-						label: "Total Locations",
+						label: $_(`areaStats.totalLocationsLabel`),
 						data: chartsReports.map(
 							({ tags: { total_elements } }) => total_elements,
 						),
@@ -344,21 +348,21 @@ onMount(async () => {
 			{#if areaTags.population}
 				<div class="flex flex-col">
 					<span class="text-sm tracking-wide text-gray-600 uppercase dark:text-gray-300"
-						>Population</span
+						>{$_(`areaStats.population`)}</span
 					>
 					<span class="text-2xl font-bold text-primary dark:text-white">
 						{parseInt(areaTags.population).toLocaleString()}
 					</span>
 					{#if getPopulationDate(areaTags)}
 						<span class="text-xs text-gray-500 dark:text-gray-400">
-							as of {getPopulationDate(areaTags)}
+							{$_(`areaStats.asOf`)} {getPopulationDate(areaTags)}
 						</span>
 					{/if}
 				</div>
 			{/if}
 			{#if areaTags.area_km2}
 				<div class="flex flex-col">
-					<span class="text-sm tracking-wide text-gray-600 uppercase dark:text-gray-300">Area</span>
+					<span class="text-sm tracking-wide text-gray-600 uppercase dark:text-gray-300">{$_(`areaStats.area`)}</span>
 					<span class="text-2xl font-bold text-primary dark:text-white">
 						{areaTags.area_km2.toLocaleString()} km²
 					</span>
@@ -373,16 +377,16 @@ onMount(async () => {
 			: 'rounded-t-3xl'} grid md:grid-cols-2 xl:grid-cols-2"
 	>
 		<ProfileStat
-			title="Total Locations"
+			title={$_(`areaStats.totalLocations`)}
 			stat={total}
 			border="border-b xl:border-b-0 md:border-r border-gray-300 dark:border-white/95"
 		/>
 		<ProfileStat
-			title="Recently Verified Locations"
+			title={$_(`areaStats.recentlyVerified`)}
 			stat={upToDate}
 			percent={total && total > 0 ? upToDatePercent : undefined}
 			border="border-b xl:border-b-0 xl:border-r border-gray-300 dark:border-white/95"
-			tooltip="Locations that have been verified within one year."
+			tooltip={$_(`areaStats.recentlyVerifiedTooltip`)}
 		/>
 	</div>
 
@@ -412,7 +416,7 @@ onMount(async () => {
 		<h3
 			class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
 		>
-			{name || 'BTC Map Area'} Charts
+			{name || $_(`areaStats.defaultAreaName`)} {$_(`areaStats.chartsTitle`)}
 		</h3>
 
 		<div class="border-b border-gray-300 p-5 dark:border-white/95">
@@ -427,7 +431,7 @@ onMount(async () => {
 				<canvas bind:this={totalChartCanvas} width="100%" height="400" />
 			</div>
 			<p class="mt-1 text-center text-sm text-body dark:text-white">
-				*Locations accepting any bitcoin payment method.
+				{$_(`areaStats.locationsNote`)}
 			</p>
 		</div>
 
@@ -443,20 +447,19 @@ onMount(async () => {
 				<canvas bind:this={upToDateChartCanvas} width="100%" height="400" />
 			</div>
 			<p class="mt-1 text-center text-sm text-body dark:text-white">
-				*Locations with a <em>survey:date</em>, <em>check_date</em>, or
-				<em>check_date:currency:XBT</em> tag less than one year old.
+				{$_(`areaStats.verifiedNote`)}
 			</p>
 		</div>
 	</div>
 </section>
 
 <p class="text-center text-sm text-body md:text-left dark:text-white">
-	*More information on bitcoin mapping tags can be found <a
+	{$_(`areaStats.tagsInfo`)} <a
 		href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#tagging-guidance"
 		target="_blank"
 		rel="noreferrer"
-		class="text-link transition-colors hover:text-hover">here</a
+		class="text-link transition-colors hover:text-hover">{$_(`areaStats.here`)}</a
 	>.
 	<br />
-	*Chart data updated once every 24 hours.
+	{$_(`areaStats.chartDataNote`)}
 </p>

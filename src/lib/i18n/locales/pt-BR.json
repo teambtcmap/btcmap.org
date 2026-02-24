@@ -335,6 +335,36 @@
 		"oceania": "Oceania",
 		"southAmerica": "América do Sul"
 	},
+	"areaStats": {
+		"population": "População",
+		"asOf": "em",
+		"area": "Área",
+		"totalLocations": "Total de Locais",
+		"recentlyVerified": "Locais Verificados Recentemente",
+		"recentlyVerifiedTooltip": "Locais que foram verificados no último ano.",
+		"recentlyVerifiedLabel": "Verificado Recentemente",
+		"outdated": "Desatualizado",
+		"locations": "Locais",
+		"recentlyVerifiedPercent": "Percentual Verificado Recentemente",
+		"totalLocationsLabel": "Total de Locais",
+		"chartsTitle": "Gráficos",
+		"defaultAreaName": "Área BTC Map",
+		"locationsNote": "*Locais que aceitam qualquer método de pagamento em bitcoin.",
+		"verifiedNote": "*Locais com tag survey:date, check_date ou check_date:currency:XBT com menos de um ano.",
+		"tagsInfo": "*Mais informações sobre tags de mapeamento bitcoin podem ser encontradas",
+		"here": "aqui",
+		"chartDataNote": "*Dados dos gráficos atualizados a cada 24 horas."
+	},
+	"areaActivity": {
+		"supertaggers": "Supertaggers",
+		"loadMore": "Carregar Mais",
+		"noSupertaggers": "Nenhum supertagger para exibir.",
+		"activity": "Atividade",
+		"noActivity": "Nenhuma atividade para exibir.",
+		"atomFeeds": "Feeds Atom",
+		"newPlaces": "Novos Locais",
+		"newComments": "Novos Comentários"
+	},
 	"area": {
 		"sections": {
 			"merchants": "Comerciantes",

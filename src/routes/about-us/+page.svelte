@@ -302,7 +302,7 @@ const coreTeam: {
 	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
-<main class="mt-10 mb-20 space-y-20 text-primary md:space-y-40 dark:text-white">
+<div class="mt-10 mb-20 space-y-20 text-primary md:space-y-40 dark:text-white">
 	<div class="space-y-5 text-center text-xl">
 		<h1 class="text-4xl !leading-tight font-semibold md:text-5xl">About Us</h1>
 		<p class="mx-auto md:w-[600px]">
@@ -510,4 +510,4 @@ const coreTeam: {
 			{/each}
 		</div>
 	</section>
-</main>
+</div>

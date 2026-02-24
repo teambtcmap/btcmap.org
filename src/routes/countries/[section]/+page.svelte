@@ -1,10 +1,11 @@
 <script lang="ts">
 import { onMount } from "svelte";
-import { _ } from "svelte-i18n";
+import { _, locale } from "svelte-i18n";
 
 import FormSelect from "$components/form/FormSelect.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import { loadCountryLocale } from "$lib/countryNames";
 import { areaError, areas } from "$lib/store";
 import { areasSync } from "$lib/sync/areas";
 import { theme } from "$lib/theme";
@@ -20,6 +21,8 @@ export let data: PageData;
 onMount(() => {
 	areasSync();
 });
+
+$: $locale && loadCountryLocale($locale);
 
 // alert for area errors
 $: $areaError && errToast($areaError);
@@ -135,7 +138,7 @@ function handleSectionChange(event: Event) {
 	<meta property="twitter:image" content="https://btcmap.org/images/og/countries.png" />
 </svelte:head>
 
-<main class="my-10 space-y-10 text-center md:my-20">
+<div class="my-10 space-y-10 text-center md:my-20">
 	{#if typeof window !== 'undefined'}
 		<h1
 			class="{$theme === 'dark'
@@ -179,4 +182,4 @@ function handleSectionChange(event: Event) {
 			{/if}
 		{/each}
 	</div>
-</main>
+</div>
