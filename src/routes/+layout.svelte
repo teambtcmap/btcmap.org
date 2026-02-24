@@ -3,7 +3,12 @@ import { SvelteToast } from "@zerodevx/svelte-toast";
 import axios from "axios";
 
 import Header from "$components/layout/Header.svelte";
-import { syncStatus } from "$lib/store";
+import SyncProgressIndicator from "$components/SyncProgressIndicator.svelte";
+import {
+	placesLoadingProgress,
+	placesLoadingStatus,
+	syncStatus,
+} from "$lib/store";
 import { elementsSync } from "$lib/sync/places";
 import { theme } from "$lib/theme";
 
@@ -33,6 +38,20 @@ const options = {
 	intro: { y: 192 },
 	pausable: true,
 };
+
+let layoutSyncVisible = false;
+let layoutLoadingStatus = "";
+
+$: {
+	// Show sync progress only while actively loading (1-99%), hide when complete (100%)
+	if ($placesLoadingProgress > 0 && $placesLoadingProgress < 100) {
+		layoutSyncVisible = true;
+		layoutLoadingStatus = $placesLoadingStatus;
+	} else {
+		layoutSyncVisible = false;
+		layoutLoadingStatus = "";
+	}
+}
 
 let dataSyncInterval: ReturnType<typeof setInterval>;
 
@@ -96,12 +115,16 @@ export let data;
 		<div class="bg-teal dark:bg-dark">
 			<Header />
 			<div class="mx-auto w-10/12 xl:w-[1200px]">
+				<SyncProgressIndicator visible={layoutSyncVisible} status={layoutLoadingStatus} progress={$placesLoadingProgress} />
 				<slot />
 				<Footer />
 			</div>
 		</div>
 	{:else}
-		<slot />
+		<div>
+			<SyncProgressIndicator visible={layoutSyncVisible} status={layoutLoadingStatus} progress={$placesLoadingProgress} />
+			<slot />
+		</div>
 	{/if}
 
 	<SvelteToast {options} />
