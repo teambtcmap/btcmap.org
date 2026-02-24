@@ -411,5 +411,42 @@
 		"locationsNote": "Locais incluem caixas eletrônicos.",
 		"totalTooltip": "Todos os locais incl. caixas eletrônicos",
 		"verifiedTooltip": "Locais verificados no último ano"
+	},
+	"media": {
+		"title": "Mídia",
+		"intro": "Recursos de mídia estão disponíveis gratuitamente para uso promocional.",
+		"brandColors": "Cores da Marca",
+		"assets": "Recursos",
+		"downloadAll": "Baixar Tudo",
+		"brand": "Marca",
+		"promotional": "Promocional",
+		"team": "Equipe",
+		"assetNames": {
+			"appScreenshot": "Captura de Tela do App",
+			"btcmapLogo": "Logo BTC Map",
+			"shadowySupertagger": "Shadowy Supertagger",
+			"shadowySupertaggerLeader": "Shadowy Supertagger - Líder",
+			"activityFeed": "Feed de Atividade",
+			"addCommunity": "Adicionar Comunidade",
+			"addLocation": "Adicionar Local",
+			"communities": "Comunidades",
+			"countries": "Países",
+			"downloadApps": "Baixar Apps",
+			"earnBadges": "Ganhar Emblemas",
+			"main": "Principal",
+			"map": "Mapa",
+			"merchant": "Comerciante",
+			"statsDashboard": "Painel de Estatísticas",
+			"supertaggerLeaderboard": "Ranking de Supertaggers",
+			"supertaggerProfile": "Perfil de Supertagger",
+			"supportUs": "Apoiar",
+			"topCommunities": "Principais Comunidades",
+			"topCountries": "Principais Países",
+			"verifyLocations": "Verificar Locais",
+			"igor": "Igor",
+			"karnage": "Karnage",
+			"nathanDay": "Nathan Day",
+			"secondl1ght": "secondl1ght"
+		}
 	}
 }

@@ -491,5 +491,42 @@
 		"northAmerica": "North America",
 		"oceania": "Oceania",
 		"southAmerica": "South America"
+	},
+	"media": {
+		"title": "Media",
+		"intro": "Media assets are available for free to use for promotional purposes.",
+		"brandColors": "Brand Colors",
+		"assets": "Assets",
+		"downloadAll": "Download All",
+		"brand": "Brand",
+		"promotional": "Promotional",
+		"team": "Team",
+		"assetNames": {
+			"appScreenshot": "App Screenshot",
+			"btcmapLogo": "BTC Map Logo",
+			"shadowySupertagger": "Shadowy Supertagger",
+			"shadowySupertaggerLeader": "Shadowy Supertagger - Leader",
+			"activityFeed": "Activity Feed",
+			"addCommunity": "Add Community",
+			"addLocation": "Add Location",
+			"communities": "Communities",
+			"countries": "Countries",
+			"downloadApps": "Download Apps",
+			"earnBadges": "Earn Badges",
+			"main": "Main",
+			"map": "Map",
+			"merchant": "Merchant",
+			"statsDashboard": "Stats Dashboard",
+			"supertaggerLeaderboard": "Supertagger Leaderboard",
+			"supertaggerProfile": "Supertagger Profile",
+			"supportUs": "Support Us",
+			"topCommunities": "Top Communities",
+			"topCountries": "Top Countries",
+			"verifyLocations": "Verify Locations",
+			"igor": "Igor",
+			"karnage": "Karnage",
+			"nathanDay": "Nathan Day",
+			"secondl1ght": "secondl1ght"
+		}
 	}
 }
