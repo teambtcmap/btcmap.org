@@ -77,9 +77,9 @@ const supporters = [
 </script>
 
 <svelte:head>
-	<title>BTC Map - {$_( "supportUs.title" )}</title>
+	<title>BTC Map - {$_("supportUs.title")}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/support.png" />
-	<meta property="twitter:title" content="BTC Map - {$_( "supportUs.title" )}" />
+	<meta property="twitter:title" content="BTC Map - {$_("supportUs.title")}" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/support.png" />
 </svelte:head>
 
@@ -90,17 +90,17 @@ const supporters = [
 				? 'text-white'
 				: 'gradient'} text-4xl !leading-tight font-semibold md:text-5xl"
 		>
-			{$_("supportUs.hero")}
+			{t("supportUs.hero")}
 		</h1>
 	{:else}
 		<HeaderPlaceholder />
 	{/if}
 
 	<h2 class="mx-auto w-full text-xl font-semibold text-primary lg:w-[800px] dark:text-white">
-		{$_("supportUs.intro")}
+		{t("supportUs.intro")}
 
 		<br /><br />
-		{$_("supportUs.appreciate")}
+		{t("supportUs.appreciate")}
 	</h2>
 
 	<section id="donate">
@@ -126,12 +126,12 @@ const supporters = [
 
 					<!-- cta -->
 					<p class="text-center text-xl text-primary dark:text-white">
-						{$_("supportUs.donate.scanOrClick")} <br class="block md:hidden" /><strong class="lowercase"
-							>{network === 'Lightning' ? $_("supportUs.donate.lightning") : $_("supportUs.donate.onchain")}</strong
+						{t("supportUs.donate.scanOrClick")} <br class="block md:hidden" /><strong class="lowercase"
+							>{network === 'Lightning' ? t("supportUs.donate.lightning") : t("supportUs.donate.onchain")}</strong
 						>
 						<img
 							src={network === 'Lightning' ? '/icons/ln-highlight.svg' : '/icons/btc-highlight.svg'}
-							alt={$_("supportUs.donate.protocolAlt")}
+							alt={`${t(network === 'Lightning' ? "supportUs.donate.lightning" : "supportUs.donate.onchain")} ${t("supportUs.donate.protocolAlt")}`}
 							class="mb-1 inline dark:rounded-full dark:bg-white dark:p-0.5"
 						/>
 					</p>
@@ -149,10 +149,10 @@ const supporters = [
 
 	<section id="supporters">
 		<h2 class="text-xl font-semibold text-primary uppercase dark:text-white">
-			{$_("supportUs.supporters.heading")}
+			{t("supportUs.supporters.heading")}
 		</h2>
 		<a href="mailto:hello@btcmap.org" class="text-link transition-colors hover:text-hover"
-			>{$_("supportUs.supporters.becomeSponsor")}</a
+			>{t("supportUs.supporters.becomeSponsor")}</a
 		>
 
 		<SupportSection {supporters} placeholders={2} />
@@ -162,7 +162,7 @@ const supporters = [
 		<!-- channel -->
 		<div>
 			<h3 class="text-lg font-semibold text-body uppercase dark:text-white">
-				{$_("supportUs.node.heading")}
+				{t("supportUs.node.heading")}
 			</h3>
 			<a
 				href="https://amboss.space/node/03ef01535d57cd3a3ddff8b4050650b278991b3eb7853f772a200079b9adb24988"

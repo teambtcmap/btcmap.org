@@ -1,4 +1,7 @@
 <script lang="ts">
+import { _ } from "$lib/i18n";
+import { theme } from "$lib/theme";
+
 export let supporters: {
 	url: string;
 	logoDark?: string;
@@ -6,9 +9,6 @@ export let supporters: {
 	title: string;
 }[];
 export let placeholders: number;
-
-import { _ } from "$lib/i18n";
-import { theme } from "$lib/theme";
 
 $: t = $_;
 </script>
