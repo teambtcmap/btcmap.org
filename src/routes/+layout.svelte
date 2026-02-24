@@ -2,8 +2,8 @@
 import { SvelteToast } from "@zerodevx/svelte-toast";
 import axios from "axios";
 
+import LoadingIndicator from "$components/LoadingIndicator.svelte";
 import Header from "$components/layout/Header.svelte";
-import SyncProgressIndicator from "$components/SyncProgressIndicator.svelte";
 import {
 	placesLoadingProgress,
 	placesLoadingStatus,
@@ -115,14 +115,14 @@ export let data;
 		<div class="bg-teal dark:bg-dark">
 			<Header />
 			<div class="mx-auto w-10/12 xl:w-[1200px]">
-				<SyncProgressIndicator visible={layoutSyncVisible} status={layoutLoadingStatus} progress={$placesLoadingProgress} />
+				<LoadingIndicator visible={layoutSyncVisible} status={layoutLoadingStatus} progress={$placesLoadingProgress} />
 				<slot />
 				<Footer />
 			</div>
 		</div>
 	{:else}
 		<div>
-			<SyncProgressIndicator visible={layoutSyncVisible} status={layoutLoadingStatus} progress={$placesLoadingProgress} />
+			<LoadingIndicator visible={layoutSyncVisible} status={layoutLoadingStatus} progress={$placesLoadingProgress} />
 			<slot />
 		</div>
 	{/if}

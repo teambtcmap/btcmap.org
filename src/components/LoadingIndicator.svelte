@@ -5,7 +5,7 @@ import LoadingSpinner from "$components/LoadingSpinner.svelte";
 
 export let visible = false;
 export let status = "";
-export let progress = 0;
+export let progress: number | undefined = undefined;
 </script>
 
 {#if visible}
@@ -18,7 +18,7 @@ export let progress = 0;
 		<LoadingSpinner size="h-3 w-3 md:h-4 md:w-4" color="text-link" />
 		<span class="text-xs text-primary md:text-sm dark:text-white">
 			{status}
-			{#if progress > 0 && progress < 100}
+			{#if progress !== undefined && progress > 0 && progress < 100}
 				({Math.round(progress)}%)
 			{/if}
 		</span>
