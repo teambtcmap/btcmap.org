@@ -146,7 +146,34 @@
 		"expires": "Impulso Expira",
 		"isBoosted": "Este local está impulsionado!",
 		"improveVisibility": "Impulsione este local para melhorar sua visibilidade no mapa.",
-		"locations": "Locais impulsionados"
+		"locations": "Locais impulsionados",
+		"boostLocation": "Impulsionar Local",
+		"description": "Destaque este comerciante em laranja bitcoin no mapa, brilhe nos resultados de pesquisa e seja descoberto no mapa exclusivo de locais impulsionados!",
+		"seeHowItLooks": "Veja como fica",
+		"boostedPinAlt": "Pin impulsionado",
+		"feeNote": "A taxa é usada para apoiar o projeto open source BTC Map e continuar seu desenvolvimento.",
+		"boostForMonths": "Impulsionar por {time} mês{plural}",
+		"thankYou": "Obrigado por apoiar {name} e o BTC Map!",
+		"thisLocation": "este local",
+		"boostedUntil": "Este local será impulsionado até",
+		"shareOnTwitter": "Compartilhar no Twitter",
+		"shareEncourage": "Compartilhar seu apoio pode incentivar outros a mostrar o deles 🥰",
+		"invoiceDescription": "Impulsione este local por <strong>{time} mês{plural} <br /> {sats} sats</strong>"
+	},
+	"invoicePayment": {
+		"scanOrClick": "Escaneie ou clique para pagar com lightning"
+	},
+	"commentAdd": {
+		"title": "Adicionar Comentário",
+		"pleaseEnterComment": "Por favor, digite um comentário",
+		"anonymousNote": "Todos os comentários são atualmente anônimos. Cobramos uma pequena taxa em sats como medida de proteção contra spam.",
+		"currentFee": "Taxa atual: 500 sats",
+		"yourComment": "Seu comentário",
+		"submitButton": "Comentário",
+		"publishNote": "Seu comentário será publicado quando nossos bots confirmarem o pagamento.",
+		"close": "Fechar",
+		"thankYou": "Obrigado pelo seu comentário!",
+		"published": "Seu comentário foi publicado!"
 	},
 	"status": {
 		"loading": "Carregando...",

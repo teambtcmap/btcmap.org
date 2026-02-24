@@ -146,7 +146,34 @@
 		"expires": "Boost Expires",
 		"isBoosted": "This location is boosted!",
 		"improveVisibility": "Boost this location to improve it's visibility on the map.",
-		"locations": "Boosted locations"
+		"locations": "Boosted locations",
+		"boostLocation": "Boost Location",
+		"description": "Make this merchant stand out in bitcoin orange on the map, shine in the search results, and be discovered in the exclusive boosted locations map!",
+		"seeHowItLooks": "See how it looks",
+		"boostedPinAlt": "Boosted pin",
+		"feeNote": "The fee is used to support the BTC Map open source project and continue it's development.",
+		"boostForMonths": "Boost for {time} month{plural}",
+		"thankYou": "Thank you for supporting {name} & BTC Map!",
+		"thisLocation": "this location",
+		"boostedUntil": "This location will be boosted until",
+		"shareOnTwitter": "Share on Twitter",
+		"shareEncourage": "Sharing your support may encourage others to show theirs 🥰",
+		"invoiceDescription": "Boost this location for <strong>{time} month{plural} <br /> {sats} sats</strong>"
+	},
+	"invoicePayment": {
+		"scanOrClick": "Scan or click to pay with lightning"
+	},
+	"commentAdd": {
+		"title": "Add Comment",
+		"pleaseEnterComment": "Please enter a comment",
+		"anonymousNote": "All comments are currently anonymous. We collect a small fee in sats as a spam protection measure.",
+		"currentFee": "Current fee: 500 sats",
+		"yourComment": "Your comment",
+		"submitButton": "Comment",
+		"publishNote": "Your comment will be published when our bots have confirmed the payment.",
+		"close": "Close",
+		"thankYou": "Thank you for your comment!",
+		"published": "Your comment has been published!"
 	},
 	"tip": {
 		"label": "Tip",

@@ -1,6 +1,7 @@
 <script lang="ts">
 import CopyButton from "$components/CopyButton.svelte";
 import InvoicePayment from "$components/InvoicePayment.svelte";
+import { _ } from "$lib/i18n";
 
 export let invoice: string;
 export let invoiceId: string;
@@ -15,7 +16,7 @@ $: descriptionHtml = description;
 </script>
 
 <div class="space-y-4 text-center">
-	<p class="text-xl font-bold text-primary dark:text-white">Scan or click to pay with lightning</p>
+	<p class="text-xl font-bold text-primary dark:text-white">{$_("invoicePayment.scanOrClick")}</p>
 
 	<a href="lightning:{invoice}" class="inline-block">
 		<InvoicePayment {invoice} {invoiceId} {onSuccess} {onError} {onStatusCheckError} />
