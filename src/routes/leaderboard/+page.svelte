@@ -160,7 +160,7 @@ const fuzzyFilter: FilterFn<TaggerRow> = (row, columnId, value, addMeta) => {
 	return itemRank.passed;
 };
 
-$: translate = get(_);
+$: translate = $_;
 $: periodLabels = {
 	"3-months": translate("leaderboard.period3Months"),
 	"6-months": translate("leaderboard.period6Months"),
@@ -370,7 +370,7 @@ const handlePeriodChange = async (event: Event) => {
 								<LoadingSpinner color="text-link" size="h-12 w-12" />
 								<p class="text-lg font-medium text-primary dark:text-white">
 									{$_('leaderboard.loadingPeriod', {
-										values: { period: periodLabels[selectedPeriod].toLowerCase() },
+										values: { period: periodLabels[selectedPeriod] },
 									})}
 								</p>
 							</div>
@@ -378,7 +378,7 @@ const handlePeriodChange = async (event: Event) => {
 					</div>
 				{:else if errorMessage}
 					<p class="w-full p-5 text-center text-primary dark:text-white">
-						{$_('leaderboard.failedToLoad')} {errorMessage}
+						{$_('leaderboard.failedToLoad')}
 					</p>
 				{:else if !leaderboardRows.length}
 					<p class="w-full p-5 text-center text-primary dark:text-white">{$_('leaderboard.noData')}</p>

@@ -34,6 +34,7 @@ export let table: Table<TaggerRow>;
 									: 'none'}
 						>
 							{#if !header.isPlaceholder}
+								{@const headerLabel = typeof header.column.columnDef.header === 'string' ? header.column.columnDef.header : header.column.id}
 								<button
 									type="button"
 									class="flex items-center gap-x-1 leading-tight select-none md:gap-x-2"
@@ -51,16 +52,16 @@ export let table: Table<TaggerRow>;
 									aria-label={header.column.getCanSort()
 										? header.column.getIsSorted() === 'asc'
 											? $_('leaderboard.sortByCurrentlyAscending', {
-													values: { column: header.column.columnDef.header },
+													values: { column: headerLabel },
 												})
 											: header.column.getIsSorted() === 'desc'
 												? $_('leaderboard.sortByCurrentlyDescending', {
-														values: { column: header.column.columnDef.header },
+														values: { column: headerLabel },
 													})
 												: $_('leaderboard.sortByCurrentlyUnsorted', {
-														values: { column: header.column.columnDef.header },
+														values: { column: headerLabel },
 													})
-										: String(header.column.columnDef.header)}
+										: headerLabel}
 								>
 									<span class="break-words">
 										<svelte:component
