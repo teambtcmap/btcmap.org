@@ -104,12 +104,7 @@ export let data;
 </svelte:head>
 
 {#if $isLoading}
-	<!-- Loading state while i18n initializes -->
-	<div class="flex h-screen items-center justify-center bg-teal dark:bg-dark">
-		<div class="text-center">
-			<p class="text-lg font-semibold text-primary dark:text-white">Loading...</p>
-		</div>
-	</div>
+	<LoadingIndicator visible={$isLoading} status="Loading..." />
 {:else}
 	{#if !['/', '/map', '/communities/map', '/communities', '/countries'].includes(data.pathname)}
 		<div class="bg-teal dark:bg-dark">
