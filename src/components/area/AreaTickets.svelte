@@ -1,4 +1,6 @@
 <script lang="ts">
+import { _ } from "svelte-i18n";
+
 import InfoTooltip from "$components/InfoTooltip.svelte";
 import OpenTicket from "$components/OpenTicket.svelte";
 import { GITEA_LABELS } from "$lib/constants";
@@ -28,14 +30,18 @@ $: community = filteredTickets.filter((issue: GiteaIssue) =>
 	),
 );
 
-const ticketTypes = ["Add", "Verify", "Community"];
-let showType = "Add";
+$: ticketTypes = [
+	$_(`maintain.add`),
+	$_(`maintain.verify`),
+	$_(`maintain.community`),
+];
+let showTypeIndex = 0;
 
 $: ticketError = tickets === "error";
 $: ticketMaintenance = tickets === "maintenance";
 
 $: if (ticketError) {
-	errToast("Could not load open tickets, please try again or contact BTC Map.");
+	errToast($_(`maintain.couldNotLoadTickets`));
 }
 
 $: totalTickets = add.length + verify.length + community.length;
@@ -50,18 +56,18 @@ $: totalTickets = add.length + verify.length + community.length;
 					<span class="text-base">({totalTickets})</span>
 				{/if}
 				<InfoTooltip
-					tooltip="Tickets up for grabs from our noob forms! Anybody can help add or verify submissions on OpenStreetMap."
+					tooltip={$_(`maintain.ticketsTooltip`)}
 				/>
 			</h3>
 
-			{#each ticketTypes as type (type)}
+			{#each ticketTypes as type, i (i)}
 				<button
-					class="mx-auto block w-40 border border-link py-2 text-center md:inline {type === 'Add'
-						? 'rounded-t md:rounded-l md:rounded-tr-none'
-						: type === 'Verify'
+					class="mx-auto block w-40 border border-link py-2 text-center md:inline {i === 0
+							? 'rounded-t md:rounded-l md:rounded-tr-none'
+						: i === 1
 							? 'rounded-b md:rounded-r md:rounded-bl-none'
-							: ''} {showType === type ? 'bg-link text-white' : ''} transition-colors"
-					on:click={() => (showType = type)}
+							: ''} {showTypeIndex === i ? 'bg-link text-white' : ''} transition-colors"
+					on:click={() => (showTypeIndex = i)}
 					disabled={!filteredTickets.length || ticketError || ticketMaintenance}
 				>
 					{type}
@@ -70,7 +76,7 @@ $: totalTickets = add.length + verify.length + community.length;
 		</div>
 
 		{#if filteredTickets.length && !ticketError}
-			{#if showType === 'Add'}
+			{#if showTypeIndex === 0}
 				{#if add.length}
 					{#each add as ticket (ticket.number)}
 						<OpenTicket
@@ -88,10 +94,10 @@ $: totalTickets = add.length + verify.length + community.length;
 					<p
 						class="border-t border-gray-300 p-5 text-center text-body dark:border-white/95 dark:text-white"
 					>
-						No open <strong>add</strong> tickets.
+						{$_(`maintain.noAddTickets`)}
 					</p>
 				{/if}
-			{:else if showType === 'Verify'}
+			{:else if showTypeIndex === 1}
 				{#if verify.length}
 					{#each verify as ticket (ticket.number)}
 						<OpenTicket
@@ -109,10 +115,10 @@ $: totalTickets = add.length + verify.length + community.length;
 					<p
 						class="border-t border-gray-300 p-5 text-center text-body dark:border-white/95 dark:text-white"
 					>
-						No open <strong>verify</strong> tickets.
+						{$_(`maintain.noVerifyTickets`)}
 					</p>
 				{/if}
-			{:else if showType === 'Community'}
+			{:else if showTypeIndex === 2}
 				{#if community.length}
 					{#each community as ticket (ticket.number)}
 						<OpenTicket
@@ -130,7 +136,7 @@ $: totalTickets = add.length + verify.length + community.length;
 					<p
 						class="border-t border-gray-300 p-5 text-center text-body dark:border-white/95 dark:text-white"
 					>
-						No open <strong>community</strong> tickets.
+						{$_(`maintain.noCommunityTickets`)}
 					</p>
 				{/if}
 			{/if}
@@ -138,18 +144,18 @@ $: totalTickets = add.length + verify.length + community.length;
 			<p
 				class="border-t border-gray-300 p-5 text-center text-body dark:border-white/95 dark:text-white"
 			>
-				Issues are currently under maintenance. <a
+				{$_(`maintain.underMaintenance`)} <a
 					href="https://gitea.btcmap.org/teambtcmap/btcmap-data/issues"
 					target="_blank"
 					rel="noreferrer"
-					class="text-link transition-colors hover:text-hover">View issues directly on Gitea</a
+					class="text-link transition-colors hover:text-hover">{$_(`maintain.viewOnGitea`)}</a
 				>.
 			</p>
 		{:else if ticketError}
 			<p
 				class="border-t border-gray-300 p-5 text-center text-body dark:border-white/95 dark:text-white"
 			>
-				Error fetching tickets. Please try again or contact BTC Map support.
+				{$_(`maintain.errorFetching`)}
 			</p>
 		{/if}
 	</div>
