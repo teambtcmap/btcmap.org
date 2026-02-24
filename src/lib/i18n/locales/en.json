@@ -429,7 +429,7 @@
 		"primaryCalc": "Primary: Total locations minus 5x outdated elements.",
 		"secondaryCalc": "Secondary: Total number of locations.",
 		"locationsNote": "Locations include ATMs.",
-		"totalTooltip": "All locations inc. ATMS",
+		"totalTooltip": "All locations inc. ATMs",
 		"verifiedTooltip": "Locations verified within the past year"
 	},
 	"countries": {
