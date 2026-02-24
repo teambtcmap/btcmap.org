@@ -40,8 +40,14 @@ let showTypeIndex = 0;
 $: ticketError = tickets === "error";
 $: ticketMaintenance = tickets === "maintenance";
 
+let prevTicketError = false;
 $: if (ticketError) {
-	errToast($_(`maintain.couldNotLoadTickets`));
+	if (!prevTicketError) {
+		errToast($_(`maintain.couldNotLoadTickets`));
+	}
+	prevTicketError = true;
+} else {
+	prevTicketError = false;
 }
 
 $: totalTickets = add.length + verify.length + community.length;
