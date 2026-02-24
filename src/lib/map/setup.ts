@@ -5,6 +5,7 @@ import type { DivIcon, LatLng, Map } from "leaflet";
 import Icon from "$components/Icon.svelte";
 import { trackEvent } from "$lib/analytics";
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
+import en from "$lib/i18n/locales/en.json";
 import { selectedMerchant } from "$lib/store";
 import { theme } from "$lib/theme";
 import type { DomEventType, Leaflet, Place } from "$lib/types";
@@ -94,20 +95,9 @@ export type MapControlsTranslations = {
 	locate?: string;
 };
 
-/** Fallbacks when callers omit translations (e.g. communities map, add-location). */
-const defaultMapControls: Required<MapControlsTranslations> = {
-	fullScreen: "Full screen",
-	goToHome: "Go to home page",
-	addLocation: "Add location",
-	communityMap: "Community map",
-	merchantMap: "Merchant map",
-	dataRefreshAvailable: "Data refresh available",
-	support: "Support",
-	supportWithSats: "Support with sats",
-	zoomIn: "Zoom in",
-	zoomOut: "Zoom out",
-	locate: "Show me where I am",
-};
+// Fallbacks when callers omit translations (e.g. communities map, add-location). Sourced from en.json.
+const defaultMapControls: Required<MapControlsTranslations> =
+	en.mapControls as Required<MapControlsTranslations>;
 
 export const support = (t?: MapControlsTranslations) => {
 	const labels = { ...defaultMapControls, ...t };
