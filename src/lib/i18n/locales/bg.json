@@ -167,6 +167,25 @@
 		"issueInvalidTagValue": "Стойността на етикета не е форматирана правилно ({code})",
 		"issueMisspelledTagName": "Правописна грешка в името на етикета ({code})"
 	},
+	"area": {
+		"sections": {
+			"merchants": "Търговци",
+			"stats": "Статистики",
+			"activity": "Активност",
+			"maintain": "Поддръжка"
+		},
+		"defaultName": "Област BTC Map",
+		"viewOnCommunityMap": "Преглед на картата на общността",
+		"verifiedOverYearAgo": "Проверено преди повече от година",
+		"verified": "Проверено",
+		"notRecentlyVerified": "Не е проверено наскоро",
+		"verifyCommunity": "Провери общността",
+		"errorLoadingData": "Грешка при зареждане на данни. Моля, опитайте отново по-късно.",
+		"loadingData": "Зареждане на данни...",
+		"dataWithin24Hours": "Данните ще се появят в рамките на 24 часа.",
+		"taggingIssues": "Проблеми с етикетите на {name}",
+		"openTickets": "Отворени заявки на {name}"
+	},
 	"countries": {
 		"africa": "Африка",
 		"asia": "Азия",
@@ -371,6 +390,45 @@
 	},
 	"errorPage": {
 		"home": "Начало"
+	},
+	"verifyCommunity": {
+		"title": "Провери информацията за общността",
+		"description": "Помогнете ни да поддържаме данните за общностите актуални чрез проверка на информацията по-долу.",
+		"communityName": "Име на общността",
+		"accurateLabel": "Текущата информация е точна",
+		"accurateHint": "Отметнете, ако сте проверили, че данните са актуални.",
+		"updatesLabel": "Нужни са актуализации",
+		"ifApplicable": "(Ако е приложимо)",
+		"updatesPlaceholder": "Опишете каква информация трябва да се актуализира (контакти, описание и т.н.)",
+		"verifyLabel": "Как проверихте?",
+		"verifyPlaceholder": "Посетих уебсайта им, присъствах на среща, свързах се директно и т.н.",
+		"botProtection": "Защита от ботове",
+		"caseSensitive": "(различава главни/малки букви)",
+		"captchaPlaceholder": "Моля въведете текста от captcha.",
+		"honeyPlaceholder": "Горница с мед.",
+		"submitReport": "Изпрати доклад",
+		"successType": "Доклад",
+		"successMessage": "Благодарим ви за проверката на информацията за общността. Ще прегледаме доклада и ще актуализираме възможно най-скоро."
+	},
+	"areaLeaderboard": {
+		"communityLeaderboard": "Класация на общностите",
+		"countryLeaderboard": "Класация по държави",
+		"noData": "Няма налични данни",
+		"noResults": "Няма намерени резултати.",
+		"position": "Позиция",
+		"sortByPosition": "Сортиране по позиция",
+		"total": "Общо",
+		"sortByTotal": "Сортиране по общо места",
+		"verified": "Проверени",
+		"sortByVerified": "Сортиране по проверени места",
+		"grade": "Оценка",
+		"sortByGrade": "Сортиране по оценка",
+		"positionCalc": "Позицията се изчислява по следния начин:",
+		"primaryCalc": "Първично: Общо места минус 5x остарели елементи.",
+		"secondaryCalc": "Вторично: Общ брой места.",
+		"locationsNote": "Местата включват банкомати.",
+		"totalTooltip": "Всички места включ. банкомати",
+		"verifiedTooltip": "Места, проверени през последната година"
 	},
 	"verifyCommunityForm": {
 		"heading": "Провери информацията за общността",

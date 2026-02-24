@@ -1,4 +1,6 @@
 <script lang="ts">
+import { _ } from "svelte-i18n";
+
 import { browser } from "$app/environment";
 import { goto } from "$app/navigation";
 import { page } from "$app/stores";
@@ -80,11 +82,18 @@ $: $areaError && errToast($areaError);
 $: $reportError && errToast($reportError);
 
 enum Sections {
-	merchants = "Merchants",
-	stats = "Stats",
-	activity = "Activity",
-	maintain = "Maintain",
+	merchants = "merchants",
+	stats = "stats",
+	activity = "activity",
+	maintain = "maintain",
 }
+
+const sectionKeys: Record<Sections, string> = {
+	[Sections.merchants]: "area.sections.merchants",
+	[Sections.stats]: "area.sections.stats",
+	[Sections.activity]: "area.sections.activity",
+	[Sections.maintain]: "area.sections.maintain",
+};
 
 const sections = Object.values(Sections);
 let scrolled = false;
@@ -450,7 +459,7 @@ let issues: RpcIssue[] = [];
 				<div class="mx-auto h-32 w-32 animate-pulse rounded-full bg-link/50" />
 			{/if}
 			<h1 class="text-4xl !leading-tight font-semibold text-primary dark:text-white">
-				{name || 'BTC Map Area'}
+				{name || $_('area.defaultName')}
 			</h1>
 			{#if org}
 				<OrgBadge {org} />
@@ -466,7 +475,7 @@ let issues: RpcIssue[] = [];
 				<a
 					href={`/communities/map?community=${alias}`}
 					class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
-					>View on community map <svg
+					>{$_('area.viewOnCommunityMap')} <svg
 						class="ml-1 w-3"
 						width="16"
 						height="16"
@@ -493,14 +502,14 @@ let issues: RpcIssue[] = [];
 								class="flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300"
 							>
 								<Icon type="fa" icon="circle-exclamation" w="14" h="14" />
-								<span>Verified over a year ago</span>
+								<span>{$_('area.verifiedOverYearAgo')}</span>
 							</div>
 						{:else}
 							<div
 								class="flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-green-700 dark:bg-green-900/30 dark:text-green-300"
 							>
 								<Icon type="material" icon="verified" w="14" h="14" />
-								<span>Verified: {formatVerifiedHuman(verifiedDate)}</span>
+								<span>{$_('area.verified')}: {formatVerifiedHuman(verifiedDate)}</span>
 							</div>
 						{/if}
 					</div>
@@ -510,7 +519,7 @@ let issues: RpcIssue[] = [];
 							class="flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-red-700 dark:bg-red-900/30 dark:text-red-300"
 						>
 							<Icon type="fa" icon="circle-xmark" w="14" h="14" />
-							<span>Not recently verified</span>
+							<span>{$_('area.notRecentlyVerified')}</span>
 						</div>
 					</div>
 				{/if}
@@ -528,7 +537,7 @@ let issues: RpcIssue[] = [];
 									form.scrollIntoView({ behavior: 'smooth', block: 'center' });
 								}
 							}, 100);
-						}}>Verify community</a
+						}}>{$_('area.verifyCommunity')}</a
 					>
 					<!-- eslint-enable svelte/no-reactive-reassign -->
 					<!-- eslint-enable svelte/no-navigation-without-resolve -->
@@ -588,7 +597,7 @@ let issues: RpcIssue[] = [];
 					? 'border-link font-bold'
 					: 'border-link/25'}"
 			>
-				{section}
+				{$_(sectionKeys[section])}
 			</button>
 		{/each}
 
@@ -613,17 +622,17 @@ let issues: RpcIssue[] = [];
 	{:else if activeSection === Sections.stats}
 		{#if $reportError}
 			<div class="text-center text-primary dark:text-white">
-				<p>Error loading data. Please try again later.</p>
+				<p>{$_('area.errorLoadingData')}</p>
 			</div>
 		{:else if areaReports === undefined}
 			<div class="text-center text-primary dark:text-white">
-				<p>Loading data...</p>
+				<p>{$_('area.loadingData')}</p>
 			</div>
 		{:else if areaReports.length > 0}
 			<AreaStats {name} {filteredPlaces} {areaReports} areaTags={area} />
 		{:else}
 			<div class="text-center text-primary dark:text-white">
-				<p class="text-xl">Data will appear within 24 hours.</p>
+				<p class="text-xl">{$_('area.dataWithin24Hours')}</p>
 			</div>
 		{/if}
 	{:else if activeSection === Sections.activity}
@@ -636,11 +645,11 @@ let issues: RpcIssue[] = [];
 		/>
 	{:else if activeSection === Sections.maintain}
 		<IssuesTable
-			title="{name || 'BTC Map Area'} Tagging Issues"
+			title={$_('area.taggingIssues', { values: { name: name || $_('area.defaultName') } })}
 			{issues}
 			loading={!(dataInitialized && !elementsLoading)}
 		/>
-		<AreaTickets tickets={data.tickets} title="{name || 'BTC Map Area'} Open Tickets" />
+		<AreaTickets tickets={data.tickets} title={$_('area.openTickets', { values: { name: name || $_('area.defaultName') } })} />
 		{#if type === 'community'}
 			<div
 				id="verify-form"

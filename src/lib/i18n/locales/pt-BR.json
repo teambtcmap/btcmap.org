@@ -349,5 +349,63 @@
 		"issueOutdatedSoon": "Em breve desatualizado, precisa de re-verificação",
 		"issueInvalidTagValue": "Valor da tag não está formatado corretamente ({code})",
 		"issueMisspelledTagName": "Erro de ortografia no nome da tag ({code})"
+	},
+	"area": {
+		"sections": {
+			"merchants": "Comerciantes",
+			"stats": "Estatísticas",
+			"activity": "Atividade",
+			"maintain": "Manter"
+		},
+		"defaultName": "Área BTC Map",
+		"viewOnCommunityMap": "Ver no mapa da comunidade",
+		"verifiedOverYearAgo": "Verificado há mais de um ano",
+		"verified": "Verificado",
+		"notRecentlyVerified": "Não verificado recentemente",
+		"verifyCommunity": "Verificar comunidade",
+		"errorLoadingData": "Erro ao carregar dados. Tente novamente mais tarde.",
+		"loadingData": "Carregando dados...",
+		"dataWithin24Hours": "Os dados aparecerão em até 24 horas.",
+		"taggingIssues": "Problemas de etiquetagem de {name}",
+		"openTickets": "Tickets abertos de {name}"
+	},
+	"verifyCommunity": {
+		"title": "Verificar Informações da Comunidade",
+		"description": "Ajude-nos a manter os dados da comunidade precisos verificando as informações abaixo.",
+		"communityName": "Nome da Comunidade",
+		"accurateLabel": "As informações atuais estão corretas",
+		"accurateHint": "Marque esta caixa se você verificou que os dados existentes estão atualizados.",
+		"updatesLabel": "Atualizações necessárias",
+		"ifApplicable": "(Se aplicável)",
+		"updatesPlaceholder": "Descreva quais informações precisam ser atualizadas (links de contato, descrição, etc.)",
+		"verifyLabel": "Como você verificou isso?",
+		"verifyPlaceholder": "Visitei o site deles, participei de um meetup, entrei em contato diretamente, etc.",
+		"botProtection": "Proteção contra bots",
+		"caseSensitive": "(diferencia maiúsculas)",
+		"captchaPlaceholder": "Por favor digite o texto do captcha.",
+		"honeyPlaceholder": "Um pote de mel.",
+		"submitReport": "Enviar Relatório",
+		"successType": "Relatório",
+		"successMessage": "Obrigado por verificar as informações desta comunidade. Analisaremos seu relatório e atualizaremos o mais rápido possível."
+	},
+	"areaLeaderboard": {
+		"communityLeaderboard": "Ranking da Comunidade",
+		"countryLeaderboard": "Ranking de Países",
+		"noData": "Nenhum dado disponível",
+		"noResults": "Nenhum resultado encontrado.",
+		"position": "Posição",
+		"sortByPosition": "Ordenar por posição",
+		"total": "Total",
+		"sortByTotal": "Ordenar por total de locais",
+		"verified": "Verificado",
+		"sortByVerified": "Ordenar por locais verificados",
+		"grade": "Nota",
+		"sortByGrade": "Ordenar por nota",
+		"positionCalc": "A posição é calculada da seguinte forma:",
+		"primaryCalc": "Primário: Total de locais menos 5x elementos desatualizados.",
+		"secondaryCalc": "Secundário: Número total de locais.",
+		"locationsNote": "Locais incluem caixas eletrônicos.",
+		"totalTooltip": "Todos os locais incl. caixas eletrônicos",
+		"verifiedTooltip": "Locais verificados no último ano"
 	}
 }

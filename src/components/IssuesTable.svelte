@@ -69,9 +69,13 @@ const renderTable = () => {
 		} else if (issue.issue_code === "outdated_soon") {
 			type = $_(`maintain.issueOutdatedSoon`);
 		} else if (issue.issue_code.startsWith("invalid_tag_value")) {
-			type = $_(`maintain.issueInvalidTagValue`, { code: issue.issue_code });
+			type = $_(`maintain.issueInvalidTagValue`, {
+				values: { code: issue.issue_code },
+			});
 		} else if (issue.issue_code.startsWith("misspelled_tag_name")) {
-			type = $_(`maintain.issueMisspelledTagName`, { code: issue.issue_code });
+			type = $_(`maintain.issueMisspelledTagName`, {
+				values: { code: issue.issue_code },
+			});
 		} else {
 			type = issue.issue_code;
 		}
@@ -321,7 +325,7 @@ $: !loading && !tableRendered && renderTable();
 					>
 						{#each pageSizes as pageSize (pageSize)}
 							<option value={pageSize}>
-								{$_(`leaderboard.show`, { pageSize })}
+								{$_(`leaderboard.show`, { values: { pageSize } })}
 							</option>
 						{/each}
 					</select>
@@ -373,8 +377,7 @@ $: !loading && !tableRendered && renderTable();
 						<span class="flex items-center justify-center gap-1 md:justify-start">
 							<div>{$_(`leaderboard.page`)}</div>
 							<strong>
-								{$table?.getState().pagination.pageIndex + 1} of
-								{$table?.getPageCount().toLocaleString()}
+								{$table?.getState().pagination.pageIndex + 1} {$_(`leaderboard.of`)} {$table?.getPageCount().toLocaleString()}
 							</strong>
 						</span>
 					</div>
