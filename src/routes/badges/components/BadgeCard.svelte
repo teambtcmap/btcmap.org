@@ -6,6 +6,9 @@ export let icon: string;
 export let titleKey: string;
 export let descKey: string;
 export let type: BadgeType;
+
+$: title = $_(titleKey);
+$: desc = $_(descKey);
 </script>
 
 <div
@@ -16,15 +19,15 @@ export let type: BadgeType;
 		<div
 			class="absolute top-5 -right-2 w-20 rounded-full bg-white py-2 font-semibold text-link shadow-lg dark:bg-white/[0.15]"
 		>
-			+{$_(descKey)}
+			+{desc}
 		</div>
 	{/if}
 
-	<img src="/icons/badges/{icon}.svg" alt={$_(titleKey)} class="mx-auto h-28 w-28" />
+	<img src="/icons/badges/{icon}.svg" alt={title} class="mx-auto h-28 w-28" />
 
-	<p class="text-xl font-semibold text-primary dark:text-white">{$_(titleKey)}</p>
+	<p class="text-xl font-semibold text-primary dark:text-white">{title}</p>
 
 	{#if type === 'achievement'}
-		<p class="text-body dark:text-white">{$_(descKey)}</p>
+		<p class="text-body dark:text-white">{desc}</p>
 	{/if}
 </div>
