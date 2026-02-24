@@ -409,7 +409,7 @@
 		"noCommunityTickets": "No open community tickets.",
 		"ticketsTooltip": "Tickets up for grabs from our noob forms! Anybody can help add or verify submissions on OpenStreetMap.",
 		"underMaintenance": "Issues are currently under maintenance.",
-		"viewOnGitea": "View issues directly on Gitea",
+		"viewOnGitea": "View issues directly on Gitea.",
 		"errorFetching": "Error fetching tickets. Please try again or contact BTC Map support.",
 		"couldNotLoadTickets": "Could not load open tickets, please try again or contact BTC Map.",
 		"issueMissingIcon": "Icon is missing",

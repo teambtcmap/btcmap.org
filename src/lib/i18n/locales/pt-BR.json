@@ -340,7 +340,7 @@
 		"noCommunityTickets": "Nenhum ticket de comunidade aberto.",
 		"ticketsTooltip": "Tickets disponíveis nos nossos formulários! Qualquer um pode ajudar a adicionar ou verificar submissões no OpenStreetMap.",
 		"underMaintenance": "Os problemas estão em manutenção.",
-		"viewOnGitea": "Ver problemas diretamente no Gitea",
+		"viewOnGitea": "Ver problemas diretamente no Gitea.",
 		"errorFetching": "Erro ao buscar tickets. Tente novamente ou entre em contato com o suporte do BTC Map.",
 		"couldNotLoadTickets": "Não foi possível carregar os tickets abertos, tente novamente ou entre em contato com o BTC Map.",
 		"issueMissingIcon": "Ícone está faltando",

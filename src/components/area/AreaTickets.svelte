@@ -155,7 +155,7 @@ $: totalTickets = add.length + verify.length + community.length;
 					target="_blank"
 					rel="noreferrer"
 					class="text-link transition-colors hover:text-hover">{$_(`maintain.viewOnGitea`)}</a
-				>.
+				>
 			</p>
 		{:else if ticketError}
 			<p
