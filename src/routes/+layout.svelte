@@ -116,10 +116,8 @@ export let data;
 			</div>
 		</div>
 	{:else}
-		<div>
-			<LoadingIndicator visible={layoutSyncVisible} status={layoutLoadingStatus} progress={$placesLoadingProgress} />
-			<slot />
-		</div>
+		<LoadingIndicator visible={layoutSyncVisible} status={layoutLoadingStatus} progress={$placesLoadingProgress} />
+		<slot />
 	{/if}
 
 	<SvelteToast {options} />
