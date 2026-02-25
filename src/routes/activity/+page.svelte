@@ -5,6 +5,7 @@ import LatestTagger from "$components/LatestTagger.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
 import TopButton from "$components/TopButton.svelte";
+import { _ } from "$lib/i18n";
 import {
 	eventError,
 	events,
@@ -105,9 +106,10 @@ $: latestTaggers = !!(supertaggers?.length && !elementsLoading);
 </script>
 
 <svelte:head>
-	<title>BTC Map - Activity</title>
+	<title>BTC Map - {$_('areaActivity.activity')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/activity.png" />
-	<meta property="twitter:title" content="BTC Map - Activity" />
+	<meta property="og:title" content="BTC Map - {$_('areaActivity.activity')}" />
+	<meta property="twitter:title" content="BTC Map - {$_('areaActivity.activity')}" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/activity.png" />
 </svelte:head>
 
