@@ -8,6 +8,7 @@ import Icon from "$components/Icon.svelte";
 import InvoicePaymentStage from "$components/InvoicePaymentStage.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import { PAYMENT_ERROR_MESSAGE } from "$lib/constants";
+import { _ } from "$lib/i18n";
 import { lastUpdatedPlaceId } from "$lib/store";
 import { updateSinglePlace } from "$lib/sync/places";
 import type { MerchantPageData } from "$lib/types.js";
@@ -44,7 +45,7 @@ const handleOutClick = () => {
 const generateInvoice = (event: SubmitEvent) => {
 	event.preventDefault();
 	if (!elementId || !commentValue.trim()) {
-		errToast("Please enter a comment");
+		errToast($_("commentAdd.pleaseEnterComment"));
 		return;
 	}
 
@@ -104,18 +105,17 @@ const handleStatusCheckError = (error: unknown) => {
 			{#if stage === 0}
 				<form class="space-y-4" on:submit={generateInvoice}>
 					<legend>
-						<p class="mb-2 text-xl font-bold text-primary dark:text-white">Add Comment</p>
+						<p class="mb-2 text-xl font-bold text-primary dark:text-white">{$_("commentAdd.title")}</p>
 
 						<p class="text-sm text-body dark:text-white">
-							All comments are currently anonymous. We collect a small fee in sats as a spam
-							protection measure.
+							{$_("commentAdd.anonymousNote")}
 						</p>
-						<p class="text-sm text-body dark:text-white">Current fee: 500 sats</p>
+						<p class="text-sm text-body dark:text-white">{$_("commentAdd.currentFee")}</p>
 					</legend>
 
 					<div>
 						<label for="comment" class="mb-2 block font-semibold text-primary dark:text-white"
-							>Your comment</label
+							>{$_("commentAdd.yourComment")}</label
 						>
 						<textarea
 							name="comment"
@@ -126,7 +126,7 @@ const handleStatusCheckError = (error: unknown) => {
 					</div>
 
 					<PrimaryButton style="w-full rounded-xl p-3" disabled={loading} type="submit" {loading}>
-						Comment
+						{$_("commentAdd.submitButton")}
 					</PrimaryButton>
 				</form>
 			{:else if stage === 1}
@@ -139,18 +139,18 @@ const handleStatusCheckError = (error: unknown) => {
 				>
 					<p class="rounded-md border p-1 text-sm text-body dark:text-white">
 						<Icon w="16" h="16" icon="info" class="inline-block" />
-						Your comment will be published when our bots have confirmed the payment.
+						{$_("commentAdd.publishNote")}
 					</p>
 
-					<PrimaryButton style="w-full rounded-xl p-3" on:click={closeModal}>Close</PrimaryButton>
+					<PrimaryButton style="w-full rounded-xl p-3" on:click={closeModal}>{$_("commentAdd.close")}</PrimaryButton>
 				</InvoicePaymentStage>
 			{:else}
 				<div class="space-y-4 text-center">
-					<p class="text-xl font-bold text-primary dark:text-white">Thank you for your comment!</p>
+					<p class="text-xl font-bold text-primary dark:text-white">{$_("commentAdd.thankYou")}</p>
 
-					<p class="text-body dark:text-white">Your comment has been published!</p>
+					<p class="text-body dark:text-white">{$_("commentAdd.published")}</p>
 
-					<PrimaryButton style="w-full rounded-xl p-3" on:click={closeModal}>Close</PrimaryButton>
+					<PrimaryButton style="w-full rounded-xl p-3" on:click={closeModal}>{$_("commentAdd.close")}</PrimaryButton>
 				</div>
 			{/if}
 		</div>
