@@ -61,21 +61,18 @@ test.describe('Countries', () => {
 		await page.goto('/countries/africa');
 
 		// Wait for country cards to load (areas sync is async)
-		const countryCards = page.locator('.rounded-3xl .text-lg.font-semibold');
+		const countryCards = page.locator('[data-testid="country-name"]');
 		await countryCards.first().waitFor({ state: 'visible', timeout: 30000 });
-		const englishName = await countryCards.first().textContent();
+		const englishName = (await countryCards.first().textContent()) ?? '';
 
 		// Click PT language button
 		const ptButton = page.getByRole('button', { name: /Switch to Portuguese|Mudar para Português/i });
 		await ptButton.click();
 
-		// Wait for locale to apply - country names should update
-		await page.waitForTimeout(1500);
+		// Wait until the first country card text changes from its English name
+		await expect(countryCards.first()).not.toHaveText(englishName, { timeout: 10000 });
 
 		const portugueseName = await countryCards.first().textContent();
-
-		// South Africa in PT is "África do Sul", Algeria is "Argélia" - should differ from English
-		expect(portugueseName).not.toBe(englishName);
 		expect(portugueseName?.length).toBeGreaterThan(0);
 	});
 });

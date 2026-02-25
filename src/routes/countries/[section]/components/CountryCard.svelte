@@ -39,7 +39,9 @@ $: {
 				}}
 			/>
 
-			<span class="block text-center text-lg font-semibold"
+			<span
+				data-testid="country-name"
+				class="block text-center text-lg font-semibold"
 				>{localizedName}</span
 			>
 		</a>

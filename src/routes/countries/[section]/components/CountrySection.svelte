@@ -1,12 +1,12 @@
 <script lang="ts">
 import { locale } from "svelte-i18n";
 
-export let countries: Area[] | undefined;
-
 import type { Area } from "$lib/types";
 
 import CountryCard from "./CountryCard.svelte";
 import CountrySkeleton from "./CountrySkeleton.svelte";
+
+export let countries: Area[] | undefined;
 </script>
 
 <section>
