@@ -56,6 +56,7 @@ import type {
 	DomEventType,
 	Event,
 	Leaflet,
+	MerchantArea,
 	MerchantPageData,
 	PayMerchant,
 } from "$lib/types.js";
@@ -120,27 +121,7 @@ const initializeData = () => {
 
 	const commentsCount = comments.length;
 
-	const communities = $areas.filter(
-		(area) =>
-			area.tags.type === "community" &&
-			area.tags.geo_json &&
-			area.tags.name &&
-			area.tags["icon:square"] &&
-			area.tags.continent &&
-			$reports.find((report) => report.area_id === area.id),
-	);
-
-	// filter communities containing element
-	filteredCommunities = communities.filter((community) => {
-		const rewoundPoly = rewind(community.tags.geo_json, true);
-
-		if (typeof lat === "number" && typeof long === "number") {
-			if (geoContains(rewoundPoly, [long, lat])) {
-				return true;
-			}
-		}
-		return false;
-	});
+	filteredCommunities = data.areas;
 
 	const allMerchantEvents = $events.filter(
 		(event) => event.element_id === data.placeData.osm_id,
@@ -303,7 +284,7 @@ $: outdatedTooltip &&
 let lat: number | undefined;
 let long: number | undefined;
 
-let filteredCommunities: Area[] = [];
+let filteredCommunities: MerchantArea[] = [];
 
 let hideArrow = false;
 let activityDiv: HTMLElement;

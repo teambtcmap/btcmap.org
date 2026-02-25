@@ -6,6 +6,7 @@ import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
 import { verifiedArr } from "$lib/map/setup";
 import type {
 	MerchantComment,
+	MerchantArea,
 	MerchantPageData,
 	PayMerchant,
 	Place,
@@ -49,6 +50,19 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 		} catch {
 			// Comments endpoint failed - use empty array
 			comments = [];
+		}
+
+		let areas: MerchantArea[] = [];
+
+		try {
+			// Fetch areas directly from the dedicated areas endpoint
+			const areasResponse = await axios.get(
+				`https://api.btcmap.org/v4/places/${encodeURIComponent(id)}/areas?type=community`,
+			);
+			areas = areasResponse.data;
+		} catch {
+			// Areas endpoint failed - use empty array
+			areas = [];
 		}
 
 		// Process all merchant data server-side
@@ -152,6 +166,7 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 			lat,
 			lon,
 			comments,
+			areas,
 			// Additional processed fields
 			icon,
 			address,
