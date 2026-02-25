@@ -373,13 +373,13 @@ $: upToDateTooltip && totalTooltip && gradeTooltip && setHeaderTooltips();
 
 							<SortHeaderButton
 								column={$table?.getColumn('total')}
-								label={$_(`areaLeaderboard.total`)}
+								label={$_(`areaLeaderboard.totalLocations`)}
 								ariaLabel={$_(`areaLeaderboard.sortByTotal`)}
 							/>
 
 							<SortHeaderButton
 								column={$table?.getColumn('upToDateElements')}
-								label={$_(`areaLeaderboard.verified`)}
+								label={$_(`areaLeaderboard.verifiedLocations`)}
 								ariaLabel={$_(`areaLeaderboard.sortByVerified`)}
 							/>
 
