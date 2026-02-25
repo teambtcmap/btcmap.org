@@ -17,6 +17,9 @@ import type { PageServerLoad } from "./$types";
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
+// Non-retrying instance for secondary fetches that should fail fast
+const fastAxios = axios.create({ timeout: 8000 });
+
 export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 	const { id } = params;
 
@@ -41,13 +44,11 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 
 		// Fetch comments and areas in parallel since they're independent
 		const [commentsResult, areasResult] = await Promise.allSettled([
-			axios.get<MerchantComment[]>(
+			fastAxios.get<MerchantComment[]>(
 				`https://api.btcmap.org/v4/places/${encodeURIComponent(id)}/comments`,
-				{ timeout: 8000 },
 			),
-			axios.get<MerchantArea[]>(
+			fastAxios.get<MerchantArea[]>(
 				`https://api.btcmap.org/v4/places/${encodeURIComponent(id)}/areas?type=community`,
-				{ timeout: 8000 },
 			),
 		]);
 
