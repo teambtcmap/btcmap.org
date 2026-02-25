@@ -1,5 +1,6 @@
 <script lang="ts">
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import { _ } from "$lib/i18n";
 import type { AppIconName } from "$lib/icons/types";
 import { apps } from "$lib/store";
 import { theme } from "$lib/theme";
@@ -22,9 +23,10 @@ const communityApps: {
 </script>
 
 <svelte:head>
-	<title>BTC Map - Apps</title>
+	<title>BTC Map - {$_('nav.apps')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/apps.png" />
-	<meta property="twitter:title" content="BTC Map - Apps" />
+	<meta property="og:title" content="BTC Map - {$_('nav.apps')}" />
+	<meta property="twitter:title" content="BTC Map - {$_('nav.apps')}" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/apps.png" />
 </svelte:head>
 
