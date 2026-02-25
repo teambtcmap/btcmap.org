@@ -17,6 +17,9 @@ import type { PageServerLoad } from "./$types";
 
 axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
+// Non-retrying instance for secondary fetches that should fail fast
+const fastAxios = axios.create({ timeout: 8000 });
+
 export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 	const { id } = params;
 
@@ -39,31 +42,20 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 		const lat = placeData.lat;
 		const lon = placeData.lon;
 
-		let comments: MerchantComment[] = [];
-
-		try {
-			// Fetch comments directly from the dedicated comments endpoint
-			const commentsResponse = await axios.get(
+		// Fetch comments and areas in parallel since they're independent
+		const [commentsResult, areasResult] = await Promise.allSettled([
+			fastAxios.get<MerchantComment[]>(
 				`https://api.btcmap.org/v4/places/${encodeURIComponent(id)}/comments`,
-			);
-			comments = commentsResponse.data;
-		} catch {
-			// Comments endpoint failed - use empty array
-			comments = [];
-		}
-
-		let areas: MerchantArea[] = [];
-
-		try {
-			// Fetch areas directly from the dedicated areas endpoint
-			const areasResponse = await axios.get(
+			),
+			fastAxios.get<MerchantArea[]>(
 				`https://api.btcmap.org/v4/places/${encodeURIComponent(id)}/areas?type=community`,
-			);
-			areas = areasResponse.data;
-		} catch {
-			// Areas endpoint failed - use empty array
-			areas = [];
-		}
+			),
+		]);
+
+		const comments =
+			commentsResult.status === "fulfilled" ? commentsResult.value.data : [];
+		const areas =
+			areasResult.status === "fulfilled" ? areasResult.value.data : [];
 
 		// Process all merchant data server-side
 		const icon = placeData.icon || "question_mark";

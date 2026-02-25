@@ -113,21 +113,20 @@ export type Continents =
 	| "Oceania"
 	| "South America";
 
-export interface MerchantComment {
+export type MerchantComment = {
 	id: number;
 	text: string;
 	created_at: string;
-}
+};
 
-export interface MerchantArea {
+// Derived from Area — the /v4/places/{id}/areas endpoint returns a slightly
+// different shape: numeric id, extra alias field, no deleted_at.
+export type MerchantArea = Omit<Area, "id" | "deleted_at"> & {
 	id: number;
 	alias: string;
-	tags: AreaTags;
-	created_at: string;
-	updated_at: string;
-}
+};
 
-export interface MerchantPageData {
+export type MerchantPageData = {
 	id: string;
 	name?: string;
 	lat: number;
@@ -156,7 +155,7 @@ export interface MerchantPageData {
 	placeData: Place;
 	osmViewUrl: string;
 	osmEditUrl: string;
-}
+};
 
 export type RpcIssue = {
 	element_osm_type: string;
