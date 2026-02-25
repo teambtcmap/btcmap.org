@@ -1,10 +1,12 @@
 <script lang="ts">
+import { _ } from "$lib/i18n";
 </script>
 
 <svelte:head>
-	<title>BTC Map - License</title>
+	<title>BTC Map - {$_('footer.license')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/home.png" />
-	<meta property="twitter:title" content="BTC Map - License" />
+	<meta property="og:title" content="BTC Map - {$_('footer.license')}" />
+	<meta property="twitter:title" content="BTC Map - {$_('footer.license')}" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
