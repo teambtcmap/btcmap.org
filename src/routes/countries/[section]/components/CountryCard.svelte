@@ -8,7 +8,13 @@ import { resolve } from "$app/paths";
 export let id: string;
 export let name: string;
 
-$: localizedName = getCountryName(id, $locale ?? "en", name);
+let localizedName = "";
+$: {
+	localizedName = name;
+	getCountryName(id, $locale ?? "en", name).then((n) => {
+		localizedName = n;
+	});
+}
 </script>
 
 <div

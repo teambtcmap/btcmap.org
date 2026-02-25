@@ -10,10 +10,19 @@ import type { PageData } from "./$types";
 
 export let data: PageData & AreaPageProps;
 
+let countryDisplayName = "";
+$: {
+	const fallback = data.name ?? "";
+	countryDisplayName = fallback;
+	getCountryName(data.id ?? "", $locale ?? "en", fallback).then((n) => {
+		countryDisplayName = n;
+	});
+}
+
 $: routes = [
 	{ name: $_(`nav.countries`), url: "/countries" },
 	{
-		name: getCountryName(data.id ?? "", $locale ?? "en", data.name ?? ""),
+		name: countryDisplayName,
 		url: `/country/${data.id}`,
 	},
 ];
