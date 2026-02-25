@@ -504,6 +504,25 @@
 		"totalTooltip": "Todos os locais incl. caixas eletrônicos",
 		"verifiedTooltip": "Locais verificados no último ano"
 	},
+	"taggingIssues": {
+		"heading": "Problemas de Etiquetagem",
+		"subheading": "Contribua para O mapa resolvendo problemas de etiquetagem!",
+		"descriptionPart1": "Mais informações sobre como se envolver podem ser encontradas em nossa página ",
+		"linkText": "Instruções de Etiquetagem",
+		"descriptionPart2": " na Wiki.",
+		"tableTitle": "Problemas Globais"
+	},
+	"countries": {
+		"hero": "Adoção de Bitcoin por países.",
+		"description": "Seu país? Seu mapa!",
+		"viewLeaderboard": "Ver ranking",
+		"africa": "África",
+		"asia": "Ásia",
+		"europe": "Europa",
+		"northAmerica": "América do Norte",
+		"oceania": "Oceania",
+		"southAmerica": "América do Sul"
+	},
 	"supportUs": {
 		"title": "Apoie-nos",
 		"hero": "Ajude a colocar bitcoin no mapa.",
