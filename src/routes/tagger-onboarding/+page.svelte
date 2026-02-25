@@ -7,6 +7,7 @@ import FormSuccess from "$components/FormSuccess.svelte";
 import Icon from "$components/Icon.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import { _ } from "$lib/i18n";
 import { theme } from "$lib/theme";
 import { errToast } from "$lib/utils";
 
@@ -91,9 +92,10 @@ onMount(async () => {
 </script>
 
 <svelte:head>
-	<title>BTC Map - Become a Tagger</title>
+	<title>BTC Map - {$_('nav.becomeTagger')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/home.png" />
-	<meta property="twitter:title" content="BTC Map - Become a Tagger" />
+	<meta property="og:title" content="BTC Map - {$_('nav.becomeTagger')}" />
+	<meta property="twitter:title" content="BTC Map - {$_('nav.becomeTagger')}" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
