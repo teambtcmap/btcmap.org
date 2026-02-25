@@ -573,6 +573,33 @@
 		"totalTooltip": "All locations inc. ATMs",
 		"verifiedTooltip": "Locations verified within the past year"
 	},
+	"issuesTable": {
+		"searchPlaceholder": "Search...",
+		"merchantName": "Merchant Name",
+		"description": "Description",
+		"view": "View",
+		"edit": "Edit",
+		"help": "Help",
+		"noTaggingIssues": "No tagging issues!",
+		"noResults": "No results found.",
+		"page": "Page",
+		"of": "of",
+		"showCount": "Show {count}",
+		"issueTypeMissingIcon": "Icon is missing",
+		"issueTypeNotVerified": "Last verification date is missing",
+		"issueTypeOutdated": "Outdated, needs re-verification",
+		"issueTypeOutdatedSoon": "Soon to be outdated, needs re-verification",
+		"issueTypeInvalidTag": "Tag value is not formatted properly ({code})",
+		"issueTypeMisspelledTag": "Spelling issue in tag name ({code})"
+	},
+	"taggingIssues": {
+		"heading": "Tagging Issues",
+		"subheading": "Contribute to THE map by resolving tagging issues!",
+		"descriptionPart1": "More information about how to get involved can be found on our ",
+		"linkText": "Tagging Instructions",
+		"descriptionPart2": " Wiki page.",
+		"tableTitle": "Global Issues"
+	},
 	"countries": {
 		"hero": "Bitcoin adoption by countries.",
 		"description": "Your country? Your map!",
