@@ -29,47 +29,79 @@ export let type: AreaType;
 				: 'bg-white dark:bg-transparent'}"
 			role="row"
 		>
-			<!-- Row 1: Larger Avatar -->
-			<div class="flex justify-center">
-				<img
-					src={type === 'community'
-						? `https://btcmap.org/.netlify/images?url=${area.tags?.['icon:square'] || ''}&fit=cover&w=256&h=256`
-						: `https://static.btcmap.org/images/countries/${area.id}.svg`}
-					alt="{area.tags?.name || 'Unknown'} avatar"
-					class="h-16 w-16 rounded-full object-cover"
-					on:error={(e) => {
-						const target = e.target;
-						if (target instanceof HTMLImageElement) {
-							target.src = '/images/bitcoin.svg';
-						}
-					}}
-					loading="lazy"
-				/>
-			</div>
-
-			<!-- Row 2: Name (centered and prominent) -->
-			<div class="text-center">
-				<!-- eslint-disable svelte/no-navigation-without-resolve -->
-				<a
-					href={`/${type}/${area.tags?.url_alias || area.id || ''}`}
-					class="text-lg font-semibold text-link transition-colors hover:text-hover {area.tags?.name?.match(
-						/[^ ]{21}/
-					)
-						? 'break-all'
-						: ''}"
-					aria-label="View {area.tags?.name || 'Unknown'} details"
+			{#if type === 'country'}
+				<LeaderboardCountryName
+					countryCode={area.id}
+					name={area.tags?.name || 'Unknown'}
+					let:localizedName
 				>
-					<!-- eslint-enable svelte/no-navigation-without-resolve -->
-					{#if type === 'country'}
-						<LeaderboardCountryName
-							countryCode={area.id}
-							name={area.tags?.name || 'Unknown'}
+					<!-- Row 1: Larger Avatar -->
+					<div class="flex justify-center">
+						<img
+							src={`https://static.btcmap.org/images/countries/${area.id}.svg`}
+							alt="{localizedName} avatar"
+							class="h-16 w-16 rounded-full object-cover"
+							on:error={(e) => {
+								const target = e.target;
+								if (target instanceof HTMLImageElement) {
+									target.src = '/images/bitcoin.svg';
+								}
+							}}
+							loading="lazy"
 						/>
-					{:else}
+					</div>
+
+					<!-- Row 2: Name (centered and prominent) -->
+					<div class="text-center">
+						<!-- eslint-disable svelte/no-navigation-without-resolve -->
+						<a
+							href={`/${type}/${area.tags?.url_alias || area.id || ''}`}
+							class="text-lg font-semibold text-link transition-colors hover:text-hover {area.tags?.name?.match(
+								/[^ ]{21}/
+							)
+								? 'break-all'
+								: ''}"
+							aria-label="View {localizedName} details"
+						>
+							{localizedName}
+						</a>
+						<!-- eslint-enable svelte/no-navigation-without-resolve -->
+					</div>
+				</LeaderboardCountryName>
+			{:else}
+				<!-- Row 1: Larger Avatar -->
+				<div class="flex justify-center">
+					<img
+						src={`https://btcmap.org/.netlify/images?url=${area.tags?.['icon:square'] || ''}&fit=cover&w=256&h=256`}
+						alt="{area.tags?.name || 'Unknown'} avatar"
+						class="h-16 w-16 rounded-full object-cover"
+						on:error={(e) => {
+							const target = e.target;
+							if (target instanceof HTMLImageElement) {
+								target.src = '/images/bitcoin.svg';
+							}
+						}}
+						loading="lazy"
+					/>
+				</div>
+
+				<!-- Row 2: Name (centered and prominent) -->
+				<div class="text-center">
+					<!-- eslint-disable svelte/no-navigation-without-resolve -->
+					<a
+						href={`/${type}/${area.tags?.url_alias || area.id || ''}`}
+						class="text-lg font-semibold text-link transition-colors hover:text-hover {area.tags?.name?.match(
+							/[^ ]{21}/
+						)
+							? 'break-all'
+							: ''}"
+						aria-label="View {area.tags?.name || 'Unknown'} details"
+					>
 						{area.tags?.name || 'Unknown'}
-					{/if}
-				</a>
-			</div>
+					</a>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
+				</div>
+			{/if}
 
 			<!-- Row 3: Stats in a 4-column grid (no headers, just data) -->
 			<div class="grid grid-cols-4 gap-3 text-center text-sm">

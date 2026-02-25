@@ -12,12 +12,14 @@ $: {
 	const gen = ++_nameGen;
 	const fallback = name || "Unknown";
 	localizedName = fallback;
-	getCountryName(countryCode, $locale ?? "en", fallback)
-		.then((n) => {
-			if (gen === _nameGen) localizedName = n;
-		})
-		.catch(() => {});
+	if (countryCode) {
+		getCountryName(countryCode, $locale ?? "en", fallback)
+			.then((n) => {
+				if (gen === _nameGen) localizedName = n;
+			})
+			.catch(() => {});
+	}
 }
 </script>
 
-{localizedName}
+<slot {localizedName}></slot>

@@ -12,8 +12,8 @@ import { reportsSync } from "$lib/sync/reports";
 import { theme } from "$lib/theme";
 
 $: routes = [
-	{ name: $_(`nav.countries`), url: "/countries" },
-	{ name: $_(`countries.leaderboard`), url: "/countries/leaderboard" },
+	{ name: $_("nav.countries"), url: "/countries" },
+	{ name: $_("countries.leaderboard"), url: "/countries/leaderboard" },
 ];
 
 onMount(() => {
@@ -37,7 +37,7 @@ onMount(() => {
 				? 'text-white'
 				: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl"
 		>
-			{$_(`countries.leaderboardHero`)}
+			{$_('countries.leaderboardHero')}
 		</h1>
 	{:else}
 		<HeaderPlaceholder />
@@ -46,11 +46,11 @@ onMount(() => {
 	<h2
 		class="mx-auto w-full text-center text-xl font-semibold text-primary lg:w-[800px] dark:text-white"
 	>
-		{$_(`countries.leaderboardDescription`)}
+		{$_('countries.leaderboardDescription')}
 	</h2>
 
 	<PrimaryButton style="md:w-[200px] mx-auto py-3 rounded-xl" link="/countries">
-		{$_(`countries.viewDirectory`)}
+		{$_('countries.viewDirectory')}
 	</PrimaryButton>
 
 	<AreaLeaderboard type="country" />

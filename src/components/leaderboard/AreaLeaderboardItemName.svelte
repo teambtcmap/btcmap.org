@@ -8,7 +8,7 @@ export let type: AreaType;
 export let avatar: string;
 export let name: string;
 export let id: string;
-/** Country ISO code (e.g. "za") - required for type "country" to translate name */
+// Country ISO code (e.g. "za") - required for type "country" to translate name
 export let countryCode: string | undefined = undefined;
 
 $: avatarSrc =
