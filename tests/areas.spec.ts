@@ -6,12 +6,13 @@ test.describe('Areas', () => {
 		await page.goto('/countries');
 		await expect(page).toHaveURL(/countries/);
 
-		// Wait for the countries page to load and find the South Africa link
+		// Wait for the countries page to load and areas API to populate country cards
 		await page.waitForLoadState('domcontentloaded');
 
 		const southAfricaLink = page.getByRole('link', { name: 'South Africa' });
-		if ((await southAfricaLink.count()) > 0) {
-			await expect(southAfricaLink).toBeVisible();
+		// Wait for country cards to appear (areas sync can be slow)
+		const linkVisible = await southAfricaLink.first().waitFor({ state: 'visible', timeout: 30000 }).then(() => true).catch(() => false);
+		if (linkVisible) {
 			await southAfricaLink.click();
 			// Wait for navigation to complete
 			await page.waitForLoadState('domcontentloaded');

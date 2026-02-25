@@ -10,7 +10,7 @@ import type { PageData } from "./$types";
 
 export let data: PageData & AreaPageProps;
 
-let countryDisplayName = "";
+let countryDisplayName = data.name ?? "";
 $: {
 	const fallback = data.name ?? "";
 	countryDisplayName = fallback;

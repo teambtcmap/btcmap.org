@@ -8,7 +8,7 @@ import { resolve } from "$app/paths";
 export let id: string;
 export let name: string;
 
-let localizedName = "";
+let localizedName = name;
 $: {
 	localizedName = name;
 	getCountryName(id, $locale ?? "en", name).then((n) => {
