@@ -141,12 +141,12 @@ export interface MerchantPageData {
 	facebook?: string;
 	thirdParty?: boolean;
 	paymentMethod?: string;
-	// OSM data for edit links and tag functionality
-	osmType: string;
-	osmId: number;
+	// OSM data for tag functionality
 	osmTags: OSMTags;
 	// Place data for BoostButton and other components
 	placeData: Place;
+	osmViewUrl: string;
+	osmEditUrl: string;
 }
 
 export type RpcIssue = {
@@ -401,6 +401,7 @@ export type Place = {
 	verified_at?: string;
 	osm_id?: string;
 	osm_url?: string;
+	osm_edit_url?: string;
 	phone?: string;
 	website?: string;
 	twitter?: string;

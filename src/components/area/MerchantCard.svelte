@@ -5,6 +5,7 @@ import tippy from "tippy.js";
 
 import BoostButton from "$components/BoostButton.svelte";
 import Icon from "$components/Icon.svelte";
+import { _ } from "$lib/i18n";
 import { calcVerifiedDate, verifiedArr } from "$lib/map/setup";
 import type { Place } from "$lib/types";
 import { fetchEnhancedPlace, formatOpeningHours, isBoosted } from "$lib/utils";
@@ -222,7 +223,7 @@ $: outdatedTooltip &&
 		{:else}
 			<div class="flex items-center space-x-1 text-gray-500 dark:text-gray-400">
 				<Icon w="16" h="16" icon="sentiment_dissatisfied" type="material" class="shrink-0" />
-				<p class="text-sm font-semibold">Not recently verified</p>
+				<p class="text-sm font-semibold">{$_("area.notRecentlyVerified")}</p>
 			</div>
 		{/if}
 
@@ -240,10 +241,10 @@ $: outdatedTooltip &&
 			<a
 				href={resolve(`/merchant/${merchantLinkId}`)}
 				class="inline-flex items-center space-x-1 font-semibold text-link transition-colors hover:text-hover"
-				title="Help improve the data for everyone"
+				title={$_("verification.helpImprove")}
 			>
 				<Icon w="16" h="16" icon="verified" type="material" class="shrink-0" />
-				<p class="text-sm">Verify</p>
+				<p class="text-sm">{$_("verification.verifyLocation")}</p>
 			</a>
 
 			<BoostButton {merchant} boosted={boosted ? merchant.boosted_until : undefined} style="link" />
