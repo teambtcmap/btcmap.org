@@ -21,7 +21,10 @@ const links = [
 	{ link: "/media", nameKey: "footer.media" },
 	{ link: "/license", nameKey: "footer.license" },
 	{ link: "/privacy-policy", nameKey: "footer.privacy" },
-	{ link: "https://stats.uptimerobot.com/7kgEVtzlV1", name: "Status" },
+	{
+		link: "https://stats.uptimerobot.com/7kgEVtzlV1",
+		nameKey: "footer.status",
+	},
 	...(env.PUBLIC_UMAMI_URL
 		? [
 				{
@@ -36,8 +39,8 @@ const links = [
 		nameKey: "footer.bitcoinForBusiness",
 		external: true,
 	},
-	{ link: "/bitcoin.pdf", name: "White Paper" },
-	{ link: "/cypherpunks-manifesto.pdf", name: "Cypherpunks" },
+	{ link: "/bitcoin.pdf", nameKey: "footer.whitePaper" },
+	{ link: "/cypherpunks-manifesto.pdf", nameKey: "footer.cypherpunks" },
 ];
 </script>
 
