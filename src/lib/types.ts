@@ -119,12 +119,21 @@ export interface MerchantComment {
 	created_at: string;
 }
 
+export interface MerchantArea {
+	id: number;
+	alias: string;
+	tags: AreaTags;
+	created_at: string;
+	updated_at: string;
+}
+
 export interface MerchantPageData {
 	id: string;
 	name?: string;
 	lat: number;
 	lon: number;
 	comments: MerchantComment[];
+	areas: MerchantArea[];
 	// Additional fields from Element data
 	icon?: string;
 	address?: string;

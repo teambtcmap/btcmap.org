@@ -1,8 +1,6 @@
 <script lang="ts">
 export let data: MerchantPageData;
 
-import rewind from "@mapbox/geojson-rewind";
-import { geoContains } from "d3-geo";
 import type { Map, Marker } from "leaflet";
 import { onDestroy, onMount } from "svelte";
 import Time from "svelte-time";
@@ -30,8 +28,6 @@ import {
 	layers,
 } from "$lib/map/setup";
 import {
-	areaError,
-	areas,
 	eventError,
 	events,
 	placesById,
@@ -43,7 +39,6 @@ import {
 	userError,
 	users,
 } from "$lib/store";
-import { areasSync } from "$lib/sync/areas";
 import { batchSync } from "$lib/sync/batchSync";
 import { eventsSync } from "$lib/sync/events";
 import { updateSinglePlace } from "$lib/sync/places";
@@ -56,6 +51,7 @@ import type {
 	DomEventType,
 	Event,
 	Leaflet,
+	MerchantArea,
 	MerchantPageData,
 	PayMerchant,
 } from "$lib/types.js";
@@ -80,8 +76,6 @@ $: $userError && errToast($userError);
 $: $eventError && errToast($eventError);
 // alert for element errors
 $: $placesError && errToast($placesError);
-// alert for area errors
-$: $areaError && errToast($areaError);
 // alert for report errors
 $: $reportError && errToast($reportError);
 
@@ -120,27 +114,7 @@ const initializeData = () => {
 
 	const commentsCount = comments.length;
 
-	const communities = $areas.filter(
-		(area) =>
-			area.tags.type === "community" &&
-			area.tags.geo_json &&
-			area.tags.name &&
-			area.tags["icon:square"] &&
-			area.tags.continent &&
-			$reports.find((report) => report.area_id === area.id),
-	);
-
-	// filter communities containing element
-	filteredCommunities = communities.filter((community) => {
-		const rewoundPoly = rewind(community.tags.geo_json, true);
-
-		if (typeof lat === "number" && typeof long === "number") {
-			if (geoContains(rewoundPoly, [long, lat])) {
-				return true;
-			}
-		}
-		return false;
-	});
+	filteredCommunities = data.areas;
 
 	const allMerchantEvents = $events.filter(
 		(event) => event.element_id === data.placeData.osm_id,
@@ -197,8 +171,6 @@ const initializeData = () => {
 $: $users?.length &&
 	$events &&
 	$events.length &&
-	$areas &&
-	$areas.length &&
 	$reports &&
 	$reports.length &&
 	initialRenderComplete &&
@@ -303,7 +275,7 @@ $: outdatedTooltip &&
 let lat: number | undefined;
 let long: number | undefined;
 
-let filteredCommunities: Area[] = [];
+let filteredCommunities: MerchantArea[] = [];
 
 let hideArrow = false;
 let activityDiv: HTMLElement;
@@ -334,7 +306,7 @@ let merchantMarker: Marker | undefined; // Store marker reference for reactive u
 let baseMaps: BaseMaps;
 
 onMount(async () => {
-	batchSync([eventsSync, usersSync, areasSync, reportsSync]);
+	batchSync([eventsSync, usersSync, reportsSync]);
 
 	if (browser) {
 		const deps = await loadMapDependencies();
