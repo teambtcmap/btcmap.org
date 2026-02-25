@@ -87,7 +87,7 @@
 					},
 					"style": {
 						"useConst": "warn",
-						"useImportType": "warn"
+						"useImportType": "off"
 					},
 					"suspicious": {
 						"noAssignInExpressions": "warn"

@@ -1,6 +1,6 @@
 <script lang="ts">
 import Icon from "$components/Icon.svelte";
-import type SearchInput from "$components/SearchInput.svelte";
+import SearchInput from "$components/SearchInput.svelte";
 import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import type { MerchantListMode } from "$lib/merchantListStore";

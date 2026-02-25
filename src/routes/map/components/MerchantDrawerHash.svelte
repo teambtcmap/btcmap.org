@@ -1,8 +1,8 @@
 <script lang="ts">
 import { BREAKPOINTS } from "$lib/constants";
 
-import type MerchantDrawerDesktop from "./MerchantDrawerDesktop.svelte";
-import type MerchantDrawerMobile from "./MerchantDrawerMobile.svelte";
+import MerchantDrawerDesktop from "./MerchantDrawerDesktop.svelte";
+import MerchantDrawerMobile from "./MerchantDrawerMobile.svelte";
 import { browser } from "$app/environment";
 
 // Initialize immediately to prevent component flash on mount
