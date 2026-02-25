@@ -1,4 +1,6 @@
 <script lang="ts">
+import { _ } from "$lib/i18n";
+
 const brandColors = [
 	"#10B981",
 	"#53C5D5",
@@ -10,64 +12,94 @@ const brandColors = [
 ];
 
 const brand = [
-	{ link: "/images/hero-mobile-example.webp", name: "App Screenshot" },
-	{ link: "/images/logo.svg", name: "BTC Map Logo" },
-	{ link: "/images/supertagger.svg", name: "Shadowy Supertagger" },
+	{
+		link: "/images/hero-mobile-example.webp",
+		nameKey: "media.assetNames.appScreenshot",
+	},
+	{ link: "/images/logo.svg", nameKey: "media.assetNames.btcmapLogo" },
+	{
+		link: "/images/supertagger.svg",
+		nameKey: "media.assetNames.shadowySupertagger",
+	},
 	{
 		link: "/images/supertagger-king.svg",
-		name: "Shadowy Supertagger - Leader",
+		nameKey: "media.assetNames.shadowySupertaggerLeader",
 	},
 ];
 
 const promotional = [
-	{ link: "/images/og/activity.png", name: "Activity Feed" },
-	{ link: "/images/og/add-community.png", name: "Add Community" },
-	{ link: "/images/og/add.png", name: "Add Location" },
-	{ link: "/images/og/communities.png", name: "Communities" },
-	{ link: "/images/og/countries.png", name: "Countries" },
-	{ link: "/images/og/apps.png", name: "Download Apps" },
-	{ link: "/images/og/badges.png", name: "Earn Badges" },
-	{ link: "/images/og/home.png", name: "Main" },
-	{ link: "/images/og/map.png", name: "Map" },
-	{ link: "/images/og/merchant.png", name: "Merchant" },
-	{ link: "/images/og/dash.png", name: "Stats Dashboard" },
-	{ link: "/images/og/leader.png", name: "Supertagger Leaderboard" },
-	{ link: "/images/og/supertagger.png", name: "Supertagger Profile" },
-	{ link: "/images/og/support.png", name: "Support Us" },
-	{ link: "/images/og/top-communities.png", name: "Top Communities" },
-	{ link: "/images/og/top-countries.png", name: "Top Countries" },
-	{ link: "/images/og/verify.png", name: "Verify Locations" },
+	{ link: "/images/og/activity.png", nameKey: "media.assetNames.activityFeed" },
+	{
+		link: "/images/og/add-community.png",
+		nameKey: "media.assetNames.addCommunity",
+	},
+	{ link: "/images/og/add.png", nameKey: "media.assetNames.addLocation" },
+	{
+		link: "/images/og/communities.png",
+		nameKey: "media.assetNames.communities",
+	},
+	{ link: "/images/og/countries.png", nameKey: "media.assetNames.countries" },
+	{ link: "/images/og/apps.png", nameKey: "media.assetNames.downloadApps" },
+	{ link: "/images/og/badges.png", nameKey: "media.assetNames.earnBadges" },
+	{ link: "/images/og/home.png", nameKey: "media.assetNames.main" },
+	{ link: "/images/og/map.png", nameKey: "media.assetNames.map" },
+	{ link: "/images/og/merchant.png", nameKey: "media.assetNames.merchant" },
+	{ link: "/images/og/dash.png", nameKey: "media.assetNames.statsDashboard" },
+	{
+		link: "/images/og/leader.png",
+		nameKey: "media.assetNames.supertaggerLeaderboard",
+	},
+	{
+		link: "/images/og/supertagger.png",
+		nameKey: "media.assetNames.supertaggerProfile",
+	},
+	{ link: "/images/og/support.png", nameKey: "media.assetNames.supportUs" },
+	{
+		link: "/images/og/top-communities.png",
+		nameKey: "media.assetNames.topCommunities",
+	},
+	{
+		link: "/images/og/top-countries.png",
+		nameKey: "media.assetNames.topCountries",
+	},
+	{
+		link: "/images/og/verify.png",
+		nameKey: "media.assetNames.verifyLocations",
+	},
 ];
 
 const team = [
-	{ link: "/images/team/igor.jpg", name: "Igor" },
-	{ link: "/images/team/karnage.jpg", name: "Karnage" },
-	{ link: "/images/team/nathan.jpg", name: "Nathan Day" },
-	{ link: "/images/team/secondl1ght.jpg", name: "secondl1ght" },
+	{ link: "/images/team/igor.jpg", nameKey: "media.assetNames.igor" },
+	{ link: "/images/team/karnage.jpg", nameKey: "media.assetNames.karnage" },
+	{ link: "/images/team/nathan.jpg", nameKey: "media.assetNames.nathanDay" },
+	{
+		link: "/images/team/secondl1ght.jpg",
+		nameKey: "media.assetNames.secondl1ght",
+	},
 ];
 
 const assetSections = [
-	{ title: "Brand", data: brand },
-	{ title: "Promotional", data: promotional },
-	{ title: "Team", data: team },
+	{ titleKey: "media.brand", data: brand },
+	{ titleKey: "media.promotional", data: promotional },
+	{ titleKey: "media.team", data: team },
 ];
 </script>
 
 <svelte:head>
-	<title>BTC Map - Media</title>
+	<title>BTC Map - {$_("media.title")}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/home.png" />
-	<meta property="twitter:title" content="BTC Map - Media" />
+	<meta property="twitter:title" content="BTC Map - {$_("media.title")}" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
 <div class="mt-10 mb-20 space-y-10 text-center text-primary dark:text-white">
 	<div class="space-y-5 text-xl">
-		<h1 class="text-4xl !leading-tight font-semibold md:text-5xl">Media</h1>
-		<p>Media assets are available for free to use for promotional purposes.</p>
+		<h1 class="text-4xl !leading-tight font-semibold md:text-5xl">{$_("media.title")}</h1>
+		<p>{$_("media.intro")}</p>
 	</div>
 
 	<section>
-		<h2 class="mb-5 text-3xl font-semibold">Brand Colors</h2>
+		<h2 class="mb-5 text-3xl font-semibold">{$_("media.brandColors")}</h2>
 
 		<div class="flex flex-wrap justify-center gap-5">
 			{#each brandColors as color (color)}
@@ -83,7 +115,7 @@ const assetSections = [
 
 	<section class="flex justify-center">
 		<div class="space-y-5">
-			<h2 class="text-3xl font-semibold">Assets</h2>
+			<h2 class="text-3xl font-semibold">{$_("media.assets")}</h2>
 
 			<!-- eslint-disable svelte/no-navigation-without-resolve -->
 			<a
@@ -92,19 +124,19 @@ const assetSections = [
 				class="mx-auto block w-36 rounded-lg bg-link py-3 font-semibold text-white transition-colors hover:bg-hover"
 			>
 				<!-- eslint-enable svelte/no-navigation-without-resolve -->
-				Download All
+				{$_("media.downloadAll")}
 			</a>
 
-			{#each assetSections as section (section.title)}
+			{#each assetSections as section (section.titleKey)}
 				<div class="space-y-2 text-left">
-					<h3 class="text-xl font-semibold">{section.title}</h3>
+					<h3 class="text-xl font-semibold">{$_(section.titleKey)}</h3>
 
 					<ul class="ml-5 list-disc space-y-1">
-						{#each section.data as asset (asset.name)}
+						{#each section.data as asset (asset.link)}
 							<li>
 								<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 								<a href={asset.link} class="text-link transition-colors hover:text-hover">
-									{asset.name}
+									{$_(asset.nameKey)}
 								</a>
 							</li>
 						{/each}
