@@ -19,8 +19,8 @@ jobs:
           needs-env: 'false'
           needs-sync: 'true'
 
-      - name: Run Prettier
+      - name: Run Biome format check
         run: yarn run format
 
-      - name: Run ESLint
+      - name: Run Biome lint
         run: yarn run lint
