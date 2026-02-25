@@ -1,14 +1,11 @@
 <script lang="ts">
-import { locale } from "svelte-i18n";
-
-import { getCountryName } from "$lib/countryNames";
+import LeaderboardCountryName from "$components/leaderboard/LeaderboardCountryName.svelte";
 import type { AreaType } from "$lib/types";
 
 export let type: AreaType;
 export let avatar: string;
 export let name: string;
 export let id: string;
-// Country ISO code (e.g. "za") - required for type "country" to translate name
 export let countryCode: string | undefined = undefined;
 
 $: avatarSrc =
@@ -16,22 +13,8 @@ $: avatarSrc =
 		? `https://btcmap.org/.netlify/images?url=${avatar}&fit=cover&w=256&h=256`
 		: avatar;
 
-let _nameGen = 0;
-let localizedName = name || "Unknown";
-$: {
-	const gen = ++_nameGen;
-	const fallback = name || "Unknown";
-	localizedName = fallback;
-	if (type === "country" && countryCode) {
-		getCountryName(countryCode, $locale ?? "en", fallback)
-			.then((n) => {
-				if (gen === _nameGen) localizedName = n;
-			})
-			.catch(() => {});
-	}
-}
-
-$: hasLongName = localizedName?.match(/[^ ]{21}/);
+$: displayName = name || "Unknown";
+$: hasLongName = displayName?.match(/[^ ]{21}/);
 
 function handleImageError(event: Event) {
 	const img = event.target as HTMLImageElement;
@@ -40,26 +23,51 @@ function handleImageError(event: Event) {
 </script>
 
 {#if name}
-	<div class="flex items-center gap-3">
-		<img
-			src={avatarSrc}
-			alt="{localizedName} avatar"
-			class="h-10 w-10 shrink-0 rounded-full object-cover"
-			on:error={handleImageError}
-			loading="lazy"
-		/>
-		<!-- eslint-disable svelte/no-navigation-without-resolve -->
-		<a
-			href={`/${type}/${id}`}
-			class="font-medium text-link transition-colors hover:text-hover {hasLongName
-				? 'break-all'
-				: ''}"
-			aria-label="View {localizedName} details"
-		>
-			<!-- eslint-enable svelte/no-navigation-without-resolve -->
-			{localizedName}
-		</a>
-	</div>
+	{#if type === "country" && countryCode}
+		<LeaderboardCountryName {countryCode} {name} let:localizedName>
+			<div class="flex items-center gap-3">
+				<img
+					src={avatarSrc}
+					alt="{localizedName} avatar"
+					class="h-10 w-10 shrink-0 rounded-full object-cover"
+					on:error={handleImageError}
+					loading="lazy"
+				/>
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
+				<a
+					href={`/${type}/${id}`}
+					class="font-medium text-link transition-colors hover:text-hover {localizedName?.match(
+						/[^ ]{21}/
+					)
+						? 'break-all'
+						: ''}"
+					aria-label="View {localizedName} details"
+				>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
+					{localizedName}
+				</a>
+			</div>
+		</LeaderboardCountryName>
+	{:else}
+		<div class="flex items-center gap-3">
+			<img
+				src={avatarSrc}
+				alt="{displayName} avatar"
+				class="h-10 w-10 shrink-0 rounded-full object-cover"
+				on:error={handleImageError}
+				loading="lazy"
+			/>
+			<!-- eslint-disable svelte/no-navigation-without-resolve -->
+			<a
+				href={`/${type}/${id}`}
+				class="font-medium text-link transition-colors hover:text-hover {hasLongName ? 'break-all' : ''}"
+				aria-label="View {displayName} details"
+			>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
+				{displayName}
+			</a>
+		</div>
+	{/if}
 {:else}
 	<!-- Skeleton loading state -->
 	<div class="flex items-center gap-3" role="status" aria-label="Loading area information">
