@@ -3,6 +3,7 @@ import rewind from "@mapbox/geojson-rewind";
 import { geoArea } from "d3-geo";
 import type { Map } from "leaflet";
 import { onDestroy, onMount } from "svelte";
+import { _ } from "svelte-i18n";
 
 import MapLoadingMain from "$components/MapLoadingMain.svelte";
 import Socials from "$components/Socials.svelte";
@@ -288,10 +289,11 @@ onDestroy(async () => {
 </script>
 
 <svelte:head>
-	<title>BTC Map - Community Map</title>
+	<title>BTC Map - {$_('meta.communityMap')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/communities.png" />
-	<meta property="twitter:title" content="BTC Map - Community Map" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/communities.png" />
+	<meta property="og:title" content="BTC Map - {$_('meta.communityMap')}" />
+	<meta name="twitter:title" content="BTC Map - {$_('meta.communityMap')}" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/communities.png" />
 </svelte:head>
 
 <div>

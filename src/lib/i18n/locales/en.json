@@ -279,6 +279,19 @@
 		"whitePaper": "White Paper",
 		"cypherpunks": "Cypherpunks"
 	},
+	"meta": {
+		"countries": "Countries",
+		"countriesLeaderboard": "Countries Leaderboard",
+		"addLocation": "Add Location",
+		"addCommunity": "Add Community",
+		"communityMap": "Community Map",
+		"communities": "Communities",
+		"communitiesLeaderboard": "Communities Leaderboard",
+		"merchant": "Merchant",
+		"country": "Country",
+		"community": "Community",
+		"supertagger": "Supertagger"
+	},
 	"forms": {
 		"optional": "(optional)",
 		"submit": "Submit",
@@ -556,10 +569,13 @@
 		"noData": "No data available",
 		"noResults": "No results found.",
 		"position": "Position",
+		"name": "Name",
 		"sortByPosition": "Sort by position",
 		"total": "Total",
+		"totalLocations": "Total Locations",
 		"sortByTotal": "Sort by total locations",
 		"verified": "Verified",
+		"verifiedLocations": "Verified Locations",
 		"sortByVerified": "Sort by verified locations",
 		"grade": "Grade",
 		"sortByGrade": "Sort by grade",

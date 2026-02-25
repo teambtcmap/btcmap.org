@@ -283,10 +283,11 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 </script>
 
 <svelte:head>
-	<title>BTC Map - Add Location</title>
+	<title>BTC Map - {$_('meta.addLocation')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/add.png" />
-	<meta property="twitter:title" content="BTC Map - Add Location" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/add.png" />
+	<meta property="og:title" content="BTC Map - {$_('meta.addLocation')}" />
+	<meta name="twitter:title" content="BTC Map - {$_('meta.addLocation')}" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/add.png" />
 </svelte:head>
 
 {#if !submitted}

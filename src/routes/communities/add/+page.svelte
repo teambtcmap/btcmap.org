@@ -2,6 +2,7 @@
 import axios from "axios";
 import DOMPurify from "dompurify";
 import { onMount } from "svelte";
+import { _ } from "svelte-i18n";
 
 import Breadcrumbs from "$components/Breadcrumbs.svelte";
 import FormSuccess from "$components/FormSuccess.svelte";
@@ -171,10 +172,11 @@ onMount(async () => {
 </script>
 
 <svelte:head>
-	<title>BTC Map - Add Community</title>
+	<title>BTC Map - {$_('meta.addCommunity')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/add-community.png" />
-	<meta property="twitter:title" content="BTC Map - Add Community" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/add-community.png" />
+	<meta property="og:title" content="BTC Map - {$_('meta.addCommunity')}" />
+	<meta name="twitter:title" content="BTC Map - {$_('meta.addCommunity')}" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/add-community.png" />
 </svelte:head>
 
 <Breadcrumbs {routes} />

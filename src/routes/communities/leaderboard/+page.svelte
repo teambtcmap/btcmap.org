@@ -1,5 +1,6 @@
 <script lang="ts">
 import { onMount } from "svelte";
+import { _ } from "svelte-i18n";
 
 import Breadcrumbs from "$components/Breadcrumbs.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
@@ -21,10 +22,11 @@ onMount(() => {
 </script>
 
 <svelte:head>
-	<title>BTC Map - Communities Leaderboard</title>
+	<title>BTC Map - {$_('meta.communitiesLeaderboard')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/top-communities.png" />
-	<meta property="twitter:title" content="BTC Map - Communities Leaderboard" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/top-communities.png" />
+	<meta property="og:title" content="BTC Map - {$_('meta.communitiesLeaderboard')}" />
+	<meta name="twitter:title" content="BTC Map - {$_('meta.communitiesLeaderboard')}" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/top-communities.png" />
 </svelte:head>
 
 <Breadcrumbs {routes} />

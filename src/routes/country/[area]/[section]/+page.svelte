@@ -35,10 +35,11 @@ $: routes = [
 </script>
 
 <svelte:head>
-	<title>{data.name ? data.name + ' - ' : ''}BTC Map Country</title>
+	<title>{data.name ? data.name + ' - ' : ''}BTC Map {$_('meta.country')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/countries.png" />
-	<meta property="twitter:title" content="{data.name ? data.name + ' - ' : ''}BTC Map Country" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/countries.png" />
+	<meta property="og:title" content="{data.name ? data.name + ' - ' : ''}BTC Map {$_('meta.country')}" />
+	<meta name="twitter:title" content="{data.name ? data.name + ' - ' : ''}BTC Map {$_('meta.country')}" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/countries.png" />
 </svelte:head>
 
 <Breadcrumbs {routes} />
