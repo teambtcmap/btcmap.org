@@ -119,13 +119,12 @@ export interface MerchantComment {
 	created_at: string;
 }
 
-export interface MerchantArea {
+// Derived from Area — the /v4/places/{id}/areas endpoint returns a slightly
+// different shape: numeric id, extra alias field, no deleted_at.
+export type MerchantArea = Omit<Area, "id" | "deleted_at"> & {
 	id: number;
 	alias: string;
-	tags: AreaTags;
-	created_at: string;
-	updated_at: string;
-}
+};
 
 export interface MerchantPageData {
 	id: string;
