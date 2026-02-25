@@ -161,7 +161,17 @@
 		"preparing": "Preparando mapa...",
 		"finalizing": "Finalizando...",
 		"merging": "Mesclando atualizações...",
-		"checkingUpdates": "Verificando atualizações..."
+		"checkingUpdates": "Verificando atualizações...",
+		"loadingTiles": "Carregando blocos..."
+	},
+	"mapDrawer": {
+		"back": "Voltar",
+		"closeMerchantDetails": "Fechar detalhes do comerciante",
+		"expandDrawer": "Expandir painel",
+		"collapseDrawer": "Recolher painel",
+		"merchantDetails": "Detalhes do comerciante",
+		"viewBoost": "Impulsionar",
+		"viewDetails": "Detalhes"
 	},
 	"info": {
 		"contact": "Contato",

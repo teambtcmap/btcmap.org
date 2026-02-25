@@ -165,7 +165,17 @@
 		"preparing": "Preparing map...",
 		"finalizing": "Finalizing...",
 		"merging": "Merging updates...",
-		"checkingUpdates": "Checking for updates..."
+		"checkingUpdates": "Checking for updates...",
+		"loadingTiles": "Loading tiles..."
+	},
+	"mapDrawer": {
+		"back": "Back",
+		"closeMerchantDetails": "Close merchant details",
+		"expandDrawer": "Expand drawer",
+		"collapseDrawer": "Collapse drawer",
+		"merchantDetails": "Merchant details",
+		"viewBoost": "Boost",
+		"viewDetails": "Details"
 	},
 	"info": {
 		"contact": "Contact",

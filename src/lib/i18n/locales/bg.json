@@ -559,6 +559,15 @@
 		"preparing": "Подготовка...",
 		"processing": "Обработка на данните..."
 	},
+	"mapDrawer": {
+		"back": "Назад",
+		"closeMerchantDetails": "Затвори детайлите на търговеца",
+		"expandDrawer": "Разгъни панела",
+		"collapseDrawer": "Свий панела",
+		"merchantDetails": "Детайли за търговеца",
+		"viewBoost": "Подсили",
+		"viewDetails": "Детайли"
+	},
 	"success": {
 		"linkCopied": "Връзката е копирана в клипборда!",
 		"locationSelected": "Мястото е избрано!"
