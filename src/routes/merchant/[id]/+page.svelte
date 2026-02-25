@@ -1,8 +1,6 @@
 <script lang="ts">
 export let data: MerchantPageData;
 
-import rewind from "@mapbox/geojson-rewind";
-import { geoContains } from "d3-geo";
 import type { Map, Marker } from "leaflet";
 import { onDestroy, onMount } from "svelte";
 import Time from "svelte-time";
@@ -30,8 +28,6 @@ import {
 	layers,
 } from "$lib/map/setup";
 import {
-	areaError,
-	areas,
 	eventError,
 	events,
 	placesById,
@@ -81,8 +77,6 @@ $: $userError && errToast($userError);
 $: $eventError && errToast($eventError);
 // alert for element errors
 $: $placesError && errToast($placesError);
-// alert for area errors
-$: $areaError && errToast($areaError);
 // alert for report errors
 $: $reportError && errToast($reportError);
 
@@ -178,8 +172,6 @@ const initializeData = () => {
 $: $users?.length &&
 	$events &&
 	$events.length &&
-	$areas &&
-	$areas.length &&
 	$reports &&
 	$reports.length &&
 	initialRenderComplete &&
@@ -315,7 +307,7 @@ let merchantMarker: Marker | undefined; // Store marker reference for reactive u
 let baseMaps: BaseMaps;
 
 onMount(async () => {
-	batchSync([eventsSync, usersSync, areasSync, reportsSync]);
+	batchSync([eventsSync, usersSync, reportsSync]);
 
 	if (browser) {
 		const deps = await loadMapDependencies();

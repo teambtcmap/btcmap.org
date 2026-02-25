@@ -5,8 +5,8 @@ import axiosRetry from "axios-retry";
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
 import { verifiedArr } from "$lib/map/setup";
 import type {
-	MerchantComment,
 	MerchantArea,
+	MerchantComment,
 	MerchantPageData,
 	PayMerchant,
 	Place,
