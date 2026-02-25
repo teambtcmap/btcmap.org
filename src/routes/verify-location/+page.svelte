@@ -10,6 +10,7 @@ import Icon from "$components/Icon.svelte";
 import InfoTooltip from "$components/InfoTooltip.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import { _ } from "$lib/i18n";
 import { placesError } from "$lib/store";
 import { theme } from "$lib/theme";
 import { errToast } from "$lib/utils";
@@ -118,9 +119,9 @@ onMount(async () => {
 </script>
 
 <svelte:head>
-	<title>BTC Map - Verify Location</title>
+	<title>BTC Map - {$_('verifyLocation.heading')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/verify.png" />
-	<meta property="twitter:title" content="BTC Map - Verify Location" />
+	<meta property="twitter:title" content="BTC Map - {$_('verifyLocation.heading')}" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/verify.png" />
 </svelte:head>
 
