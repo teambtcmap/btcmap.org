@@ -122,6 +122,7 @@ export let gradeTooltip: HTMLButtonElement;
 										: `https://static.btcmap.org/images/countries/${cell.row.original.id}.svg`}
 									name={cell.row.original.tags?.name || 'Unknown'}
 									id={cell.row.original.tags?.url_alias || cell.row.original.id || ''}
+									countryCode={type === 'country' ? cell.row.original.id : undefined}
 								/>
 							{:else if cell.column.id === 'grade'}
 								{@const grade = cell.row.original.grade || 0}

@@ -2,6 +2,7 @@
 import type { Table } from "@tanstack/svelte-table";
 
 import GradeDisplay from "$components/leaderboard/GradeDisplay.svelte";
+import LeaderboardCountryName from "$components/leaderboard/LeaderboardCountryName.svelte";
 import type { AreaType } from "$lib/types";
 import { isEven } from "$lib/utils";
 
@@ -59,7 +60,14 @@ export let type: AreaType;
 					aria-label="View {area.tags?.name || 'Unknown'} details"
 				>
 					<!-- eslint-enable svelte/no-navigation-without-resolve -->
-					{area.tags?.name || 'Unknown'}
+					{#if type === 'country'}
+						<LeaderboardCountryName
+							countryCode={area.id}
+							name={area.tags?.name || 'Unknown'}
+						/>
+					{:else}
+						{area.tags?.name || 'Unknown'}
+					{/if}
 				</a>
 			</div>
 

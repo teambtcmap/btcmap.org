@@ -1,5 +1,6 @@
 <script lang="ts">
 import { onMount } from "svelte";
+import { _ } from "svelte-i18n";
 
 import Breadcrumbs from "$components/Breadcrumbs.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
@@ -10,9 +11,9 @@ import { batchSync } from "$lib/sync/batchSync";
 import { reportsSync } from "$lib/sync/reports";
 import { theme } from "$lib/theme";
 
-const routes = [
-	{ name: "Countries", url: "/countries" },
-	{ name: "Leaderboard", url: "/countries/leaderboard" },
+$: routes = [
+	{ name: $_(`nav.countries`), url: "/countries" },
+	{ name: $_(`countries.leaderboard`), url: "/countries/leaderboard" },
 ];
 
 onMount(() => {
@@ -36,7 +37,7 @@ onMount(() => {
 				? 'text-white'
 				: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl"
 		>
-			Top Countries
+			{$_(`countries.leaderboardHero`)}
 		</h1>
 	{:else}
 		<HeaderPlaceholder />
@@ -45,11 +46,11 @@ onMount(() => {
 	<h2
 		class="mx-auto w-full text-center text-xl font-semibold text-primary lg:w-[800px] dark:text-white"
 	>
-		Insights into bitcoin adoption worldwide!
+		{$_(`countries.leaderboardDescription`)}
 	</h2>
 
 	<PrimaryButton style="md:w-[200px] mx-auto py-3 rounded-xl" link="/countries">
-		View directory
+		{$_(`countries.viewDirectory`)}
 	</PrimaryButton>
 
 	<AreaLeaderboard type="country" />
