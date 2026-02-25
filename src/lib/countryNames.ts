@@ -8,6 +8,15 @@ const localeMap = {
 	bg: "bg",
 } as const;
 
+/** Explicit imports so Vite can bundle; dynamic template imports fail with bare specifiers */
+const localeLoaders: Record<
+	string,
+	() => Promise<{ default: Record<string, string> }>
+> = {
+	pt: () => import("i18n-iso-countries/langs/pt.json"),
+	bg: () => import("i18n-iso-countries/langs/bg.json"),
+};
+
 /**
  * Returns the localized country name for a given ISO 3166-1 alpha-2 code.
  * Uses OSM/fallback name for English (avoids long ISO forms like "Bolivia, Plurinational State of").
@@ -30,9 +39,9 @@ export async function getCountryName(
 		if (countryLocale === "en") return fallback;
 
 		if (!loadedLocales.has(countryLocale)) {
-			const localeModule = await import(
-				`i18n-iso-countries/langs/${countryLocale}.json`
-			);
+			const loader = localeLoaders[countryLocale];
+			if (!loader) return fallback;
+			const localeModule = await loader();
 			countries.registerLocale(localeModule.default);
 			loadedLocales.add(countryLocale);
 		}

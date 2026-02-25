@@ -56,4 +56,26 @@ test.describe('Countries', () => {
 		// Check that URL updated to South America
 		await expect(page).toHaveURL(/countries\/south-america/);
 	});
+
+	test('country names translate when switching to PT', async ({ page }) => {
+		await page.goto('/countries/africa');
+
+		// Wait for country cards to load (areas sync is async)
+		const countryCards = page.locator('.rounded-3xl .text-lg.font-semibold');
+		await countryCards.first().waitFor({ state: 'visible', timeout: 30000 });
+		const englishName = await countryCards.first().textContent();
+
+		// Click PT language button
+		const ptButton = page.getByRole('button', { name: /Switch to Portuguese|Mudar para Português/i });
+		await ptButton.click();
+
+		// Wait for locale to apply - country names should update
+		await page.waitForTimeout(1500);
+
+		const portugueseName = await countryCards.first().textContent();
+
+		// South Africa in PT is "África do Sul", Algeria is "Argélia" - should differ from English
+		expect(portugueseName).not.toBe(englishName);
+		expect(portugueseName?.length).toBeGreaterThan(0);
+	});
 });
