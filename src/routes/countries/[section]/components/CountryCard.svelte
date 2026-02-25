@@ -8,12 +8,18 @@ import { resolve } from "$app/paths";
 export let id: string;
 export let name: string;
 
+let _nameGen = 0;
 let localizedName = name;
 $: {
+	const gen = ++_nameGen;
 	localizedName = name;
-	getCountryName(id, $locale ?? "en", name).then((n) => {
-		localizedName = n;
-	});
+	getCountryName(id, $locale ?? "en", name)
+		.then((n) => {
+			if (gen === _nameGen) localizedName = n;
+		})
+		.catch(() => {
+			// Keep fallback on error
+		});
 }
 </script>
 

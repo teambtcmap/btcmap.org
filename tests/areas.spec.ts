@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Areas', () => {
 	test('opens country area', async ({ page }) => {
+		test.setTimeout(60000); // Areas API can be slow
 		// Navigate directly to countries page
 		await page.goto('/countries');
 		await expect(page).toHaveURL(/countries/);
@@ -10,18 +11,12 @@ test.describe('Areas', () => {
 		await page.waitForLoadState('domcontentloaded');
 
 		const southAfricaLink = page.getByRole('link', { name: 'South Africa' });
-		// Wait for country cards to appear (areas sync can be slow)
-		const linkVisible = await southAfricaLink.first().waitFor({ state: 'visible', timeout: 30000 }).then(() => true).catch(() => false);
-		if (linkVisible) {
-			await southAfricaLink.click();
-			// Wait for navigation to complete
-			await page.waitForLoadState('domcontentloaded');
-			await expect(page).toHaveURL(/country\/za\/merchants/); // App redirects to merchants section
-		} else {
-			// If South Africa link not found, just verify we're on countries page
-			await expect(page).toHaveURL(/countries/);
-			return; // Skip rest of test
-		}
+		// Fail clearly if country cards don't appear - don't silently skip
+		await southAfricaLink.first().waitFor({ state: 'visible', timeout: 30000 });
+		await southAfricaLink.click();
+		// Wait for navigation to complete
+		await page.waitForLoadState('domcontentloaded');
+		await expect(page).toHaveURL(/country\/za\/merchants/); // App redirects to merchants section
 
 		await expect(
 			page.getByRole('heading', {
