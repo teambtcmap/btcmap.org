@@ -8,6 +8,16 @@ const localeMap = {
 	bg: "bg",
 } as const;
 
+/**
+ * Returns the localized country name for a given ISO 3166-1 alpha-2 code.
+ * Uses OSM/fallback name for English (avoids long ISO forms like "Bolivia, Plurinational State of").
+ * Lazy-loads locale JSON from i18n-iso-countries for non-English locales.
+ *
+ * @param code - ISO 3166-1 alpha-2 country code (e.g. "ZA", "US")
+ * @param locale - App locale ("en", "pt-BR", "bg"); unknown locales fall back to "en"
+ * @param fallback - Name to return when translation is unavailable or locale is "en"
+ * @returns Promise resolving to the localized country name or fallback
+ */
 export async function getCountryName(
 	code: string,
 	locale: string,

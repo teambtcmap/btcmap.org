@@ -11,7 +11,7 @@ import type { PageData } from "./$types";
 export let data: PageData & AreaPageProps;
 
 let _nameGen = 0;
-let countryDisplayName = data.name ?? "";
+let countryDisplayName: string; // set by reactive block below
 $: {
 	const gen = ++_nameGen;
 	const fallback = data.name ?? "";
