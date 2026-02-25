@@ -364,8 +364,8 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 <svelte:head>
 	<title>{name ? name + ' - ' : ''}BTC Map Merchant</title>
 	<meta property="og:image" content={ogImage} />
-	<meta property="twitter:title" content="{name ? name + ' - ' : ''}BTC Map Merchant" />
-	<meta property="twitter:image" content={ogImage} />
+	<meta name="twitter:title" content="{name ? name + ' - ' : ''}BTC Map Merchant" />
+	<meta name="twitter:image" content={ogImage} />
 </svelte:head>
 
 {#if data.placeData.deleted_at}

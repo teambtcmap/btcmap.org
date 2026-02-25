@@ -304,8 +304,8 @@ const handlePeriodChange = async (event: Event) => {
 <svelte:head>
 	<title>BTC Map - {$_(`leaderboard.taggerHero`)}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/leader.png" />
-	<meta property="twitter:title" content="BTC Map - {$_(`leaderboard.taggerHero`)}" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/leader.png" />
+	<meta name="twitter:title" content="BTC Map - {$_(`leaderboard.taggerHero`)}" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/leader.png" />
 </svelte:head>
 
 <div class="mt-10 mb-20">

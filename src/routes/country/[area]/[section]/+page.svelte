@@ -37,8 +37,8 @@ $: routes = [
 <svelte:head>
 	<title>{data.name ? data.name + ' - ' : ''}BTC Map Country</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/countries.png" />
-	<meta property="twitter:title" content="{data.name ? data.name + ' - ' : ''}BTC Map Country" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/countries.png" />
+	<meta name="twitter:title" content="{data.name ? data.name + ' - ' : ''}BTC Map Country" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/countries.png" />
 </svelte:head>
 
 <Breadcrumbs {routes} />

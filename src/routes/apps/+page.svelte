@@ -26,8 +26,8 @@ const communityApps: {
 	<title>BTC Map - {$_('nav.apps')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/apps.png" />
 	<meta property="og:title" content="BTC Map - {$_('nav.apps')}" />
-	<meta property="twitter:title" content="BTC Map - {$_('nav.apps')}" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/apps.png" />
+	<meta name="twitter:title" content="BTC Map - {$_('nav.apps')}" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/apps.png" />
 </svelte:head>
 
 <div class="my-10 space-y-10 text-center md:my-20">

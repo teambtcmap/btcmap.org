@@ -18,8 +18,8 @@ const routes = [
 <svelte:head>
 	<title>{name ? name + ' - ' : ''}BTC Map Community</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/communities.png" />
-	<meta property="twitter:title" content="{name ? name + ' - ' : ''}BTC Map Community" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/communities.png" />
+	<meta name="twitter:title" content="{name ? name + ' - ' : ''}BTC Map Community" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/communities.png" />
 </svelte:head>
 
 <Breadcrumbs {routes} />

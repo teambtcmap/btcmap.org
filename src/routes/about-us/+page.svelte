@@ -299,8 +299,8 @@ const coreTeam: {
 <svelte:head>
 	<title>BTC Map - {$_( "aboutUs.title" )}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/home.png" />
-	<meta property="twitter:title" content="BTC Map - {$_( "aboutUs.title" )}" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
+	<meta name="twitter:title" content="BTC Map - {$_( "aboutUs.title" )}" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
 <div class="mt-10 mb-20 space-y-20 text-primary md:space-y-40 dark:text-white">
