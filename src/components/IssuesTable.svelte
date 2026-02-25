@@ -214,6 +214,17 @@ $: if ($locale) {
 	tableRendered = false;
 }
 $: !loading && !tableRendered && renderTable();
+
+// Re-render the table when locale changes so column headers and
+// issue-type labels (computed as plain strings) get fresh translations.
+let localeInitialized = false;
+$: if ($locale) {
+	if (localeInitialized) {
+		tableRendered = false;
+	} else {
+		localeInitialized = true;
+	}
+}
 </script>
 
 <section id="issues">
