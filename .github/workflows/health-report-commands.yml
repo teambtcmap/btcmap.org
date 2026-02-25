@@ -1,0 +1,232 @@
+name: Health Report Commands
+
+on:
+  issue_comment:
+    types: [created]
+
+concurrency:
+  group: health-report-commands-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+permissions:
+  issues: write
+  contents: read
+  actions: write
+
+jobs:
+  handle-command:
+    # Only run on health-report labeled issues, for slash commands from trusted actors
+    if: >-
+      contains(github.event.issue.labels.*.name, 'health-report') &&
+      startsWith(github.event.comment.body, '/') &&
+      (github.event.comment.author_association == 'OWNER' ||
+       github.event.comment.author_association == 'MEMBER' ||
+       github.event.comment.author_association == 'COLLABORATOR')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse command
+        id: parse
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.comment.body.trim();
+            const firstLine = body.split('\n')[0].trim();
+
+            if (firstLine.startsWith('/config')) {
+              core.setOutput('command', 'config');
+            } else if (firstLine.startsWith('/create-issue')) {
+              const title = firstLine.replace('/create-issue', '').trim();
+              core.setOutput('command', 'create-issue');
+              core.setOutput('arg', title);
+            } else if (firstLine === '/run-now') {
+              core.setOutput('command', 'run-now');
+            } else if (firstLine === '/skip-next') {
+              core.setOutput('command', 'skip-next');
+            } else {
+              core.setOutput('command', 'unknown');
+            }
+
+      # --- /config ---
+      # Acknowledge the config comment so the user knows it was received.
+      # The actual config parsing happens at report generation time via parse-config.sh.
+      - name: Handle /config
+        if: steps.parse.outputs.command == 'config'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.comment.body;
+
+            // Validate that the config comment has at least one [x] checkbox
+            const hasChecked = /\[x\]/i.test(body);
+            const hasUnchecked = /\[ \]/.test(body);
+
+            if (!hasChecked && !hasUnchecked) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: [
+                  '⚠️ **Invalid `/config` format.** Expected a checkbox list like:',
+                  '',
+                  '```',
+                  '/config',
+                  '- [x] Codebase hygiene',
+                  '- [x] Consistency',
+                  '- [x] CI/CD improvements',
+                  '- [x] Accessibility',
+                  '- [x] Svelte v5 migration readiness',
+                  '- [x] API/data handling',
+                  '- [x] Commit changelog analysis',
+                  '- [ ] Type safety audit',
+                  '```',
+                  '',
+                  'Check the boxes for scans you want enabled, uncheck for disabled.'
+                ].join('\n')
+              });
+              return;
+            }
+
+            // Count checked/unchecked
+            const checked = (body.match(/\[x\]/gi) || []).length;
+            const unchecked = (body.match(/\[ \]/g) || []).length;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `✅ **Config saved.** ${checked} check(s) enabled, ${unchecked} disabled. This configuration will be used for the next health report run.`
+            });
+
+      # --- /create-issue ---
+      # Creates a standalone GitHub issue from a report finding.
+      - name: Handle /create-issue
+        if: steps.parse.outputs.command == 'create-issue'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Extract title from the comment body directly to avoid injection via ${{ }}
+            const body = context.payload.comment.body.trim();
+            const title = body.split('\n')[0].replace('/create-issue', '').trim();
+
+            if (!title) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: '⚠️ **Usage:** `/create-issue <title>` — please provide a title for the new issue.'
+              });
+              return;
+            }
+
+            // Ensure the follow-up label exists
+            try {
+              await github.rest.issues.getLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: 'health-report-followup'
+              });
+            } catch (e) {
+              await github.rest.issues.createLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: 'health-report-followup',
+                color: 'c2e0c6',
+                description: 'Follow-up issue created from a health report finding'
+              });
+            }
+
+            const reportIssue = context.issue.number;
+            const newIssue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: [
+                `Identified in health report #${reportIssue}.`,
+                '',
+                '---',
+                `_Created via \`/create-issue\` command on #${reportIssue}_`
+              ].join('\n'),
+              labels: ['health-report-followup']
+            });
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `✅ Created issue #${newIssue.data.number}: [${title}](${newIssue.data.html_url})`
+            });
+
+      # --- /run-now ---
+      # Triggers the health report workflow immediately.
+      - name: Handle /run-now
+        if: steps.parse.outputs.command == 'run-now'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'codebase-health-report.yml',
+                ref: 'main'
+              });
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: '🚀 **Health report triggered.** A new report will be generated shortly. Check the [Actions tab](../../actions/workflows/codebase-health-report.yml) for progress.'
+              });
+            } catch (e) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `⚠️ **Failed to trigger workflow.** ${e.message}\n\nYou can trigger it manually from the [Actions tab](../../actions/workflows/codebase-health-report.yml).`
+              });
+            }
+
+      # --- /skip-next ---
+      # The comment itself serves as the marker. parse-config.sh in the main
+      # workflow checks for its presence and skips the run if found.
+      - name: Handle /skip-next
+        if: steps.parse.outputs.command == 'skip-next'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '⏭️ **Next scheduled run will be skipped.** The `/skip-next` marker has been noted. The following run after that will proceed normally.'
+            });
+
+      # --- Unknown command ---
+      - name: Handle unknown command
+        if: steps.parse.outputs.command == 'unknown'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.comment.body.trim();
+            const command = body.split('\n')[0].split(' ')[0];
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: [
+                `⚠️ **Unknown command \`${command}\`.** Available commands:`,
+                '',
+                '| Command | Description |',
+                '|---------|-------------|',
+                '| `/config` | Adjust which scans run (use checkbox list) |',
+                '| `/create-issue <title>` | Create a follow-up issue from a finding |',
+                '| `/run-now` | Trigger an immediate health report |',
+                '| `/skip-next` | Skip the next scheduled run |'
+              ].join('\n')
+            });

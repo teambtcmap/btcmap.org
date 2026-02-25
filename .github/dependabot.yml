@@ -6,10 +6,30 @@ updates:
       interval: 'weekly'
     open-pull-requests-limit: 10
     groups:
-      typescript-eslint:
+      biome:
         patterns:
-          - '@typescript-eslint/*'
-          - 'typescript-eslint'
-      prettier:
+          - '@biomejs/*'
+      svelte:
         patterns:
-          - '*prettier*'
+          - 'svelte'
+          - '@sveltejs/*'
+          - 'svelte-*'
+      tailwind:
+        patterns:
+          - 'tailwindcss'
+          - '@tailwindcss/*'
+      playwright:
+        patterns:
+          - '@playwright/*'
+      leaflet:
+        patterns:
+          - 'leaflet'
+          - 'leaflet-*'
+          - '@maplibre/*'
+          - 'maplibre-gl'
+
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 5

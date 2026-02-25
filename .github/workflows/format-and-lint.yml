@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: ['**']
 
+concurrency:
+  group: format-and-lint-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   format-and-lint:
     runs-on: ubuntu-latest
@@ -19,8 +23,8 @@ jobs:
           needs-env: 'false'
           needs-sync: 'true'
 
-      - name: Run Prettier
+      - name: Run Biome format check
         run: yarn run format
 
-      - name: Run ESLint
+      - name: Run Biome lint
         run: yarn run lint
