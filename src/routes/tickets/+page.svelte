@@ -3,6 +3,7 @@ import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import OpenTicket from "$components/OpenTicket.svelte";
 import TopButton from "$components/TopButton.svelte";
 import { GITEA_LABELS } from "$lib/constants";
+import { _ } from "$lib/i18n";
 import { theme } from "$lib/theme";
 
 import OpenTicketSkeleton from "./components/OpenTicketSkeleton.svelte";
@@ -50,9 +51,9 @@ const isMaintenance = data.maintenance ?? false;
 </script>
 
 <svelte:head>
-	<title>BTC Map - Open Tickets</title>
+	<title>BTC Map - {$_('nav.openTickets')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/home.png" />
-	<meta property="twitter:title" content="BTC Map - Open Tickets" />
+	<meta property="twitter:title" content="BTC Map - {$_('nav.openTickets')}" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
