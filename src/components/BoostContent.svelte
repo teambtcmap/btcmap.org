@@ -10,6 +10,7 @@ import {
 	PAYMENT_ERROR_MESSAGE,
 	STATUS_CHECK_ERROR_MESSAGE,
 } from "$lib/constants";
+import { _ } from "$lib/i18n";
 import IconSocials from "$lib/icons/IconSocials.svelte";
 import { boost, boostHash, lastUpdatedPlaceId } from "$lib/store";
 import { updateSinglePlace } from "$lib/sync/places";
@@ -65,7 +66,7 @@ const handlePaymentSuccess = async () => {
 			onComplete();
 		}
 	} catch (error) {
-		warningToast("Could not finalize boost, please contact BTC Map.");
+		warningToast($_("boost.finalizeError"));
 		console.error(error);
 	}
 };
@@ -88,14 +89,14 @@ const generateInvoice = () => {
 		: undefined;
 
 	if (!days || days <= 0) {
-		errToast("Invalid boost duration");
+		errToast($_("boost.invalidDuration"));
 		loading = false;
 		return;
 	}
 
 	const placeId = Number(merchantId);
 	if (!placeId || Number.isNaN(placeId)) {
-		errToast("Invalid merchant ID");
+		errToast($_("boost.invalidMerchantId"));
 		loading = false;
 		return;
 	}
@@ -122,18 +123,17 @@ const generateInvoice = () => {
 {#if stage === 0}
 	<div class="space-y-4">
 		<div>
-			<p class="mb-2 text-xl font-bold text-primary dark:text-white">Boost Location</p>
+			<p class="mb-2 text-xl font-bold text-primary dark:text-white">{$_("boost.boostLocation")}</p>
 
 			<p class="text-sm text-body dark:text-white">
-				Make this merchant stand out in bitcoin orange on the map, shine in the search results, and
-				be discovered in the exclusive boosted locations map!
+				{$_("boost.description")}
 			</p>
 
 			<button
 				on:mouseenter={() => (tooltip = true)}
 				on:mouseleave={() => (tooltip = false)}
 				class="relative text-sm text-link transition-colors hover:text-hover"
-				>See how it looks
+				>{$_("boost.seeHowItLooks")}
 				{#if tooltip}
 					<div
 						transition:fade={{ delay: 0, duration: 100 }}
@@ -141,7 +141,7 @@ const generateInvoice = () => {
 					>
 						<img
 							src="/icons/boosted-icon-pin.svg"
-							alt="Boosted pin"
+							alt={$_("boost.boostedPinAlt")}
 							class="mx-auto"
 							width="32"
 							height="43"
@@ -184,14 +184,18 @@ const generateInvoice = () => {
 						<img src="/icons/star.svg" alt="star" class="absolute top-1 right-1" />
 					{/if}
 
-					<p class="text-xs">{value.time} month{value.time > 1 ? 's' : ''}</p>
+					<p class="text-xs">
+						{value.time === 1
+							? $_("boost.duration1Month")
+							: $_("boost.durationNMonths", { values: { time: value.time } })}
+					</p>
 					<p class="font-bold">{value.sats.toLocaleString()} sats</p>
 				</button>
 			{/each}
 		</div>
 
 		<p class="text-xs text-body dark:text-white">
-			The fee is used to support the BTC Map open source project and continue it's development.
+			{$_("boost.feeNote")}
 		</p>
 
 		<PrimaryButton
@@ -201,8 +205,12 @@ const generateInvoice = () => {
 			on:click={generateInvoice}
 		>
 			{selectedBoost
-				? `Boost for ${selectedBoost.time} month${selectedBoost.time > 1 ? 's' : ''}`
-				: 'Boost'}
+				? selectedBoost.time === 1
+					? $_("boost.boostFor1Month")
+					: $_("boost.boostForNMonths", {
+							values: { time: selectedBoost.time },
+						})
+				: $_("boost.boostAction")}
 		</PrimaryButton>
 	</div>
 {:else if stage === 1}
@@ -213,8 +221,17 @@ const generateInvoice = () => {
 		onError={handlePaymentError}
 		onStatusCheckError={handleStatusCheckError}
 		description={selectedBoost
-			? `Boost this location for <strong>${selectedBoost.time} month${selectedBoost.time > 1 ? 's' : ''} <br /> ${selectedBoost.sats.toLocaleString()} sats</strong>`
-			: ''}
+			? selectedBoost.time === 1
+				? $_("boost.invoiceDescription1", {
+						values: { sats: selectedBoost.sats.toLocaleString() },
+					})
+				: $_("boost.invoiceDescriptionN", {
+						values: {
+							time: selectedBoost.time,
+							sats: selectedBoost.sats.toLocaleString(),
+						},
+					})
+			: ""}
 	/>
 {:else}
 	<div class="space-y-4 text-center">
@@ -223,11 +240,13 @@ const generateInvoice = () => {
 				? 'break-all'
 				: ''}"
 		>
-			Thank you for supporting {merchantName || 'this location'} & BTC Map!
+			{$_("boost.thankYou", {
+				values: { name: merchantName || $_("boost.thisLocation") },
+			})}
 		</p>
 
 		<p class="text-body dark:text-white">
-			This location will be boosted until <br />
+			{$_("boost.boostedUntil")} <br />
 			<strong
 				>{selectedBoost?.expires.toLocaleDateString(undefined, {
 					year: 'numeric',
@@ -238,17 +257,15 @@ const generateInvoice = () => {
 		</p>
 
 		<a
-			href="https://twitter.com/share?text=I just boosted {merchantName
-				? encodeURIComponent(merchantName)
-				: 'this location'} on @btcmap. Check them out!&url=https://btcmap.org/merchant/{merchantId}&hashtags=bitcoin"
+			href="https://twitter.com/share?text={encodeURIComponent($_('boost.twitterShareText', { values: { name: merchantName || $_('boost.thisLocation') } }))}&url=https://btcmap.org/merchant/{merchantId}&hashtags=bitcoin"
 			target="_blank"
 			rel="noreferrer"
 			class="mx-auto flex w-[200px] items-center justify-center rounded-xl bg-twitter py-3 text-white"
-			>Share on Twitter <IconSocials w="24" h="24" class="ml-2" icon="x" /></a
+			>{$_("boost.shareOnTwitter")} <IconSocials w="24" h="24" class="ml-2" icon="x" /></a
 		>
 
 		<p class="text-sm text-body dark:text-white">
-			Sharing your support may encourage <br /> others to show theirs 🥰
+			{$_("boost.shareEncourage")}
 		</p>
 	</div>
 {/if}

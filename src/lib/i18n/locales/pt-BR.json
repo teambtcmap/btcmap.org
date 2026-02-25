@@ -146,7 +146,42 @@
 		"expires": "Impulso Expira",
 		"isBoosted": "Este local está impulsionado!",
 		"improveVisibility": "Impulsione este local para melhorar sua visibilidade no mapa.",
-		"locations": "Locais impulsionados"
+		"locations": "Locais impulsionados",
+		"boostLocation": "Impulsionar Local",
+		"description": "Destaque este comerciante em laranja bitcoin no mapa, brilhe nos resultados de pesquisa e seja descoberto no mapa exclusivo de locais impulsionados!",
+		"seeHowItLooks": "Veja como fica",
+		"boostedPinAlt": "Pin impulsionado",
+		"feeNote": "A taxa é usada para apoiar o projeto open source BTC Map e continuar seu desenvolvimento.",
+		"boostFor1Month": "Impulsionar por 1 mês",
+		"boostForNMonths": "Impulsionar por {time} meses",
+		"duration1Month": "1 mês",
+		"durationNMonths": "{time} meses",
+		"thankYou": "Obrigado por apoiar {name} e o BTC Map!",
+		"thisLocation": "este local",
+		"boostedUntil": "Este local será impulsionado até",
+		"shareOnTwitter": "Compartilhar no Twitter",
+		"shareEncourage": "Compartilhar seu apoio pode incentivar outros a mostrar o deles 🥰",
+		"invoiceDescription1": "Impulsione este local por <strong>1 mês <br /> {sats} sats</strong>",
+		"invoiceDescriptionN": "Impulsione este local por <strong>{time} meses <br /> {sats} sats</strong>",
+		"finalizeError": "Não foi possível finalizar o impulso, entre em contato com o BTC Map.",
+		"invalidDuration": "Duração de impulso inválida",
+		"invalidMerchantId": "ID do comerciante inválido",
+		"twitterShareText": "Acabei de impulsionar {name} no @btcmap. Confira!"
+	},
+	"invoicePayment": {
+		"scanOrClick": "Escaneie ou clique para pagar com lightning"
+	},
+	"commentAdd": {
+		"title": "Adicionar Comentário",
+		"pleaseEnterComment": "Por favor, digite um comentário",
+		"anonymousNote": "Todos os comentários são atualmente anônimos. Cobramos uma pequena taxa em sats como medida de proteção contra spam.",
+		"currentFee": "Taxa atual: 500 sats",
+		"yourComment": "Seu comentário",
+		"submitButton": "Comentário",
+		"publishNote": "Seu comentário será publicado quando nossos bots confirmarem o pagamento.",
+		"close": "Fechar",
+		"thankYou": "Obrigado pelo seu comentário!",
+		"published": "Seu comentário foi publicado!"
 	},
 	"status": {
 		"loading": "Carregando...",
@@ -161,7 +196,17 @@
 		"preparing": "Preparando mapa...",
 		"finalizing": "Finalizando...",
 		"merging": "Mesclando atualizações...",
-		"checkingUpdates": "Verificando atualizações..."
+		"checkingUpdates": "Verificando atualizações...",
+		"loadingTiles": "Carregando blocos..."
+	},
+	"mapDrawer": {
+		"back": "Voltar",
+		"closeMerchantDetails": "Fechar detalhes do comerciante",
+		"expandDrawer": "Expandir painel",
+		"collapseDrawer": "Recolher painel",
+		"merchantDetails": "Detalhes do comerciante",
+		"viewBoost": "Impulsionar",
+		"viewDetails": "Detalhes"
 	},
 	"info": {
 		"contact": "Contato",
@@ -278,7 +323,15 @@
 		"supertaggerHeading": "Supertagger Misterioso?",
 		"supertaggerDescription": "Contribua com alterações diretamente no OSM - como um chefão. Quem precisa de formulários mesmo.",
 		"supertaggerImageAlt": "supertagger misterioso",
-		"supertaggerWikiButton": "Veja a Wiki para instruções"
+		"supertaggerWikiButton": "Veja a Wiki para instruções",
+		"formSuccessType": "Local",
+		"formSuccessText": "Analisaremos suas informações e adicionaremos o mais rápido possível."
+	},
+	"formSuccess": {
+		"submittedTitle": "{type} enviado!",
+		"monitorProgress": "Você também pode acompanhar o progresso do seu envio aqui:",
+		"issueLink": "Issue #{issue}",
+		"submitAnother": "Enviar outro {type}"
 	},
 	"tip": {
 		"label": "Doar",
@@ -323,6 +376,32 @@
 		"lastPage": "Ir para última página",
 		"page": "Página",
 		"of": "de"
+	},
+	"maintain": {
+		"merchantName": "Nome do comerciante",
+		"description": "Descrição",
+		"view": "Ver",
+		"edit": "Editar",
+		"help": "Ajuda",
+		"noTaggingIssues": "Nenhum problema de etiquetagem!",
+		"noTaggingIssuesModal": "Nenhum problema de etiquetagem!",
+		"add": "Adicionar",
+		"verify": "Verificar",
+		"community": "Comunidade",
+		"noAddTickets": "Nenhum ticket de adicionar aberto.",
+		"noVerifyTickets": "Nenhum ticket de verificar aberto.",
+		"noCommunityTickets": "Nenhum ticket de comunidade aberto.",
+		"ticketsTooltip": "Tickets disponíveis nos nossos formulários! Qualquer um pode ajudar a adicionar ou verificar submissões no OpenStreetMap.",
+		"underMaintenance": "Os problemas estão em manutenção.",
+		"viewOnGitea": "Ver problemas diretamente no Gitea.",
+		"errorFetching": "Erro ao buscar tickets. Tente novamente ou entre em contato com o suporte do BTC Map.",
+		"couldNotLoadTickets": "Não foi possível carregar os tickets abertos, tente novamente ou entre em contato com o BTC Map.",
+		"issueMissingIcon": "Ícone está faltando",
+		"issueNotVerified": "Data da última verificação está faltando",
+		"issueOutdated": "Desatualizado, precisa de re-verificação",
+		"issueOutdatedSoon": "Em breve desatualizado, precisa de re-verificação",
+		"issueInvalidTagValue": "Valor da tag não está formatado corretamente ({code})",
+		"issueMisspelledTagName": "Erro de ortografia no nome da tag ({code})"
 	},
 	"areaStats": {
 		"population": "População",
@@ -372,6 +451,19 @@
 		"dataWithin24Hours": "Os dados aparecerão em até 24 horas.",
 		"taggingIssues": "Problemas de etiquetagem de {name}",
 		"openTickets": "Tickets abertos de {name}"
+	},
+	"areaTickets": {
+		"typeAdd": "Adicionar",
+		"typeVerify": "Verificar",
+		"typeCommunity": "Comunidade",
+		"tooltip": "Tickets disponíveis dos nossos formulários! Qualquer um pode ajudar a adicionar ou verificar envios no OpenStreetMap.",
+		"noAddTickets": "Nenhum ticket de adicionar aberto.",
+		"noVerifyTickets": "Nenhum ticket de verificar aberto.",
+		"noCommunityTickets": "Nenhum ticket de comunidade aberto.",
+		"maintenanceMessage": "Os issues estão em manutenção. ",
+		"viewOnGitea": "Ver issues diretamente no Gitea",
+		"errorMessage": "Erro ao buscar tickets. Tente novamente ou entre em contato com o suporte do BTC Map.",
+		"loadError": "Não foi possível carregar os tickets abertos. Tente novamente ou entre em contato com o BTC Map."
 	},
 	"verifyCommunity": {
 		"title": "Verificar Informações da Comunidade",
@@ -433,5 +525,51 @@
 		"applyHere": "Candidate-se aqui",
 		"qrError": "Não foi possível gerar o QR, tente novamente ou entre em contato com o BTC Map.",
 		"qrLoadError": "Não foi possível carregar o gerador de QR. Por favor, tente novamente."
+	},
+	"aboutUs": {
+		"title": "Sobre Nós",
+		"description": "BTC Map é um projeto gratuito e de código aberto mantido por voluntários bitcoiners e comerciantes amigáveis ao bitcoin em todo o mundo.",
+		"merchants": {
+			"heading": "Comerciantes",
+			"intro": "Os comerciantes estão no coração do BTC Map. Esses negócios estão à frente da mudança de paradigma e se posicionando para o sucesso contínuo. Qualquer comerciante que aceite bitcoin pode ser listado no BTC Map.",
+			"acceptBitcoin": "Aceita bitcoin?",
+			"getListed": "Cadastre-se no BTC Map"
+		},
+		"supertaggers": {
+			"heading": "Shadowy Supertaggers",
+			"intro": "Shadowy Supertaggers são pessoas que impulsionam este projeto. São voluntários que dedicam tempo para atualizar locais de negócios com novas informações. Sem eles, o BTC Map não seria sustentável!",
+			"topLabel": "Nossos principais supertaggers",
+			"viewLeaderboard": "Ver ranking"
+		},
+		"communities": {
+			"heading": "Comunidades",
+			"intro": "Comunidades bitcoin ajudam a impulsionar a adoção global ao integrar novos usuários localmente!",
+			"addPrompt": "Não vê sua comunidade?",
+			"addLink": "Adicione ao BTC Map",
+			"seeAll": "Ver todas as comunidades"
+		},
+		"integrations": {
+			"heading": "Integrações",
+			"communityLabel": "Integrações da comunidade",
+			"communitySub": "Projetos que usam BTC Map",
+			"projectLabel": "Integrações do projeto",
+			"projectSub": "BTC Map usa estes projetos",
+			"reachOut": "Se você está interessado em integrar conosco, por favor",
+			"reachOutLink": "entre em contato",
+			"supporter": "Apoiador",
+			"more": "Mais!"
+		},
+		"contributors": {
+			"heading": "Contribuidores",
+			"intro": "Qualquer um pode contribuir com o BTC Map de muitas formas diferentes. Se você gostaria de se envolver, não hesite e venha participar!"
+		},
+		"coreTeam": {
+			"heading": "Equipe Principal",
+			"igorBio": "Igor é um bitcoiner de longa data, mapeador e nômade digital vivendo no exterior. Ele criou o BTC Map como um aplicativo Android e o projeto ganhou impulso mundial a partir daí. Agora ele também mantém toda a infraestrutura de backend do projeto.",
+			"nathanBio": "Nathan é um empreendedor de tecnologia que se tornou plebeu. Ele reuniu a equipe principal para acelerar o desenvolvimento de aplicativos. Tendo construído, vendido, investido e assessorado negócios de tecnologia ao longo dos anos, agora está focado em bitcoin, construindo BTCMap.org, gamertron.net e oferecendo educação em bitcoin para crianças.",
+			"secondl1ghtBio": "Um desenvolvedor web autodidata, secondl1ght mergulhou de cabeça na toca do coelho do bitcoin e deixou sua carreira em fiat para se concentrar no desenvolvimento de bitcoin em tempo integral. Ele criou e mantém o aplicativo web BTC Map, além de um aplicativo de mensagens criptografadas chamado Cipherchat, e trabalha em ferramentas da rede Lightning na Amboss Technologies.",
+			"karnageBio": "Karnage é o designer principal do aplicativo web e criou a marca BTC Map. Ele contribuiu para muitos projetos bitcoin de código aberto de alto perfil. Sua missão é ajudar fundadores de startups a ter sucesso e criar produtos para alcançar esse objetivo. Design de produto pixel-perfeito sempre. Faça acontecer."
+		},
+		"avatarAlt": "avatar"
 	}
 }
