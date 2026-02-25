@@ -86,9 +86,9 @@ const assetSections = [
 </script>
 
 <svelte:head>
-	<title>BTC Map - Media</title>
+	<title>BTC Map - {$_("media.title")}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/home.png" />
-	<meta property="twitter:title" content="BTC Map - Media" />
+	<meta property="twitter:title" content="BTC Map - {$_("media.title")}" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
