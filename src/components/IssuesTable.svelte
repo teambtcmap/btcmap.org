@@ -19,10 +19,10 @@ import {
 } from "@tanstack/svelte-table";
 import type { Readable } from "svelte/store";
 import { writable } from "svelte/store";
+import { _, locale } from "svelte-i18n";
 
 import Icon from "$components/Icon.svelte";
 import IssueCell from "$components/IssueCell.svelte";
-import { _, locale } from "$lib/i18n";
 import { theme } from "$lib/theme";
 import type { RpcIssue } from "$lib/types";
 import { debounce, getIssueHelpLink, getIssueIcon, isEven } from "$lib/utils";
@@ -61,19 +61,19 @@ const renderTable = () => {
 		const name = issue.element_name;
 		let type: string;
 		if (issue.issue_code === "missing_icon") {
-			type = $_("issuesTable.issueTypeMissingIcon");
+			type = $_(`maintain.issueMissingIcon`);
 		} else if (issue.issue_code === "not_verified") {
-			type = $_("issuesTable.issueTypeNotVerified");
+			type = $_(`maintain.issueNotVerified`);
 		} else if (issue.issue_code === "outdated") {
-			type = $_("issuesTable.issueTypeOutdated");
+			type = $_(`maintain.issueOutdated`);
 		} else if (issue.issue_code === "outdated_soon") {
-			type = $_("issuesTable.issueTypeOutdatedSoon");
+			type = $_(`maintain.issueOutdatedSoon`);
 		} else if (issue.issue_code.startsWith("invalid_tag_value")) {
-			type = $_("issuesTable.issueTypeInvalidTag", {
+			type = $_(`maintain.issueInvalidTagValue`, {
 				values: { code: issue.issue_code },
 			});
 		} else if (issue.issue_code.startsWith("misspelled_tag_name")) {
-			type = $_("issuesTable.issueTypeMisspelledTag", {
+			type = $_(`maintain.issueMisspelledTagName`, {
 				values: { code: issue.issue_code },
 			});
 		} else {
@@ -96,7 +96,7 @@ const renderTable = () => {
 		},
 		{
 			accessorKey: "name",
-			header: $_("issuesTable.merchantName"),
+			header: $_(`maintain.merchantName`),
 			cell: (info) =>
 				flexRender(IssueCell, { id: "name", value: info.getValue() }),
 			// @ts-expect-error fuzzy filter is registered via filterFns option
@@ -105,7 +105,7 @@ const renderTable = () => {
 		},
 		{
 			accessorKey: "type",
-			header: $_("issuesTable.description"),
+			header: $_(`maintain.description`),
 			cell: (info) =>
 				flexRender(IssueCell, { id: "type", value: info.getValue() }),
 			enableGlobalFilter: false,
@@ -210,6 +210,9 @@ const renderTable = () => {
 	tableRendered = true;
 };
 
+$: if ($locale) {
+	tableRendered = false;
+}
 $: !loading && !tableRendered && renderTable();
 
 // Re-render the table when locale changes so column headers and
@@ -245,12 +248,12 @@ $: if ($locale) {
 				</div>
 			</div>
 		{:else if !issues.length}
-			<p class="w-full p-5 text-center text-primary dark:text-white">{$_("issuesTable.noTaggingIssues")}</p>
+			<p class="w-full p-5 text-center text-primary dark:text-white">{$_(`maintain.noTaggingIssues`)}</p>
 		{:else if $table}
 			<div class="relative text-primary dark:text-white">
 				<input
 					type="text"
-					placeholder={$_("issuesTable.searchPlaceholder")}
+					placeholder={$_(`search.placeholder`)}
 					class="w-full bg-primary/5 px-5 py-2.5 text-sm focus:outline-primary dark:bg-white/5 dark:focus:outline-white"
 					bind:value={globalFilter}
 					on:keyup={searchDebounce}
@@ -278,7 +281,7 @@ $: if ($locale) {
 				{/if}
 			</div>
 			{#if $table.getFilteredRowModel().rows.length === 0}
-				<p class="w-full p-5 text-center text-primary dark:text-white">{$_("issuesTable.noResults")}</p>
+				<p class="w-full p-5 text-center text-primary dark:text-white">{$_(`leaderboard.noResults`)}</p>
 			{:else}
 				<div class="overflow-x-auto">
 					<table class="w-full text-left whitespace-nowrap text-primary dark:text-white">
@@ -336,7 +339,7 @@ $: if ($locale) {
 					>
 						{#each pageSizes as pageSize (pageSize)}
 							<option value={pageSize}>
-								{$_("issuesTable.showCount", { values: { count: pageSize } })}
+								{$_(`leaderboard.show`, { values: { pageSize } })}
 							</option>
 						{/each}
 					</select>
@@ -386,10 +389,9 @@ $: if ($locale) {
 						</div>
 
 						<span class="flex items-center justify-center gap-1 md:justify-start">
-							<div>{$_("issuesTable.page")}</div>
+							<div>{$_(`leaderboard.page`)}</div>
 							<strong>
-								{$table?.getState().pagination.pageIndex + 1} {$_("issuesTable.of")}{" "}
-								{$table?.getPageCount().toLocaleString()}
+								{$table?.getState().pagination.pageIndex + 1} {$_(`leaderboard.of`)} {$table?.getPageCount().toLocaleString()}
 							</strong>
 						</span>
 					</div>
