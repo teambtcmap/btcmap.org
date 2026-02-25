@@ -7,7 +7,7 @@ on:
     branches: ['**']
 
 concurrency:
-  group: build-${{ github.head_ref || github.ref }}
+  group: build-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:

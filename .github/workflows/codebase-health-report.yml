@@ -110,7 +110,8 @@ jobs:
             //
             // For now, we use the structured raw report as-is.
 
-            core.setOutput('report', rawReport);
+            // Write (possibly synthesized) report back to the file
+            fs.writeFileSync('/tmp/health-results/report.md', rawReport, 'utf8');
             core.info(`Report length: ${rawReport.length} characters`);
 
       # Phase 4: Create GitHub Issue
@@ -120,17 +121,12 @@ jobs:
           script: |
             const fs = require('fs');
 
-            // Use AI-synthesized report if available, otherwise raw report
-            const aiReport = `${{ steps.ai-summary.outputs.report }}`;
+            // Always read report from file (safe from template literal injection)
             let reportBody;
-            if (aiReport && aiReport.length > 0) {
-              reportBody = aiReport;
-            } else {
-              try {
-                reportBody = fs.readFileSync('/tmp/health-results/report.md', 'utf8');
-              } catch (e) {
-                reportBody = '# Codebase Health Report\n\nError: Could not read report file.';
-              }
+            try {
+              reportBody = fs.readFileSync('/tmp/health-results/report.md', 'utf8');
+            } catch (e) {
+              reportBody = '# Codebase Health Report\n\nError: Could not read report file.';
             }
 
             // Check if skip-next marker exists on the latest health-report issue

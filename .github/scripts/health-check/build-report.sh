@@ -346,7 +346,7 @@ render_findings() {
   echo ""
   echo "## Enabled Checks"
   for check in "Codebase hygiene" "Consistency" "Type safety audit" "CI/CD improvements" "Accessibility" "Svelte v5 migration readiness" "API/data handling" "Commit changelog analysis"; do
-    local label="$check"
+    label="$check"
     if [[ "$check" == "Type safety audit" ]]; then
       label="$check (not yet implemented)"
     fi
