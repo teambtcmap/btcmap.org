@@ -262,6 +262,13 @@
 		"whitePaper": "White Paper",
 		"cypherpunks": "Cypherpunks"
 	},
+	"taggerOnboarding": {
+		"nameLabel": "Nome",
+		"emailLabel": "E-mail",
+		"namePlaceholder": "Seu nome",
+		"emailPlaceholder": "seu@email.com",
+		"loadingForm": "Carregando formulário..."
+	},
 	"forms": {
 		"optional": "(opcional)",
 		"submit": "Enviar",

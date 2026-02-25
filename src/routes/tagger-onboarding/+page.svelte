@@ -125,19 +125,19 @@ onMount(async () => {
 		<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
 			{#if !captchaSecret}
 				<p class="text-center text-sm text-gray-500" role="status" aria-live="polite">
-					Loading form...
+					{$_('taggerOnboarding.loadingForm')}
 				</p>
 			{/if}
 
 			<div>
-				<label for="name" class="mb-2 block font-semibold">Name</label>
+				<label for="name" class="mb-2 block font-semibold">{$_('taggerOnboarding.nameLabel')}</label>
 				<input
 					disabled={!captchaSecret}
 					required
 					type="text"
 					id="name"
 					name="name"
-					placeholder="Your name"
+					placeholder={$_('taggerOnboarding.namePlaceholder')}
 					aria-describedby={!captchaSecret ? 'form-loading-status' : undefined}
 					class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 					bind:this={nameInput}
@@ -145,14 +145,14 @@ onMount(async () => {
 			</div>
 
 			<div>
-				<label for="email" class="mb-2 block font-semibold">Email</label>
+				<label for="email" class="mb-2 block font-semibold">{$_('taggerOnboarding.emailLabel')}</label>
 				<input
 					disabled={!captchaSecret}
 					required
 					type="email"
 					id="email"
 					name="email"
-					placeholder="your@email.com"
+					placeholder={$_('taggerOnboarding.emailPlaceholder')}
 					class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 					bind:this={emailInput}
 				/>
@@ -161,7 +161,7 @@ onMount(async () => {
 			<div>
 				<div class="mb-2 flex items-center space-x-2">
 					<label for="captcha" class="font-semibold"
-						>Bot protection <span class="font-normal">(case-sensitive)</span></label
+						>{$_('forms.captcha')} <span class="font-normal">({$_('forms.captchaCaseSensitive')})</span></label
 					>
 					{#if captchaSecret}
 						<button type="button" on:click={fetchCaptcha} aria-label="Refresh captcha">
