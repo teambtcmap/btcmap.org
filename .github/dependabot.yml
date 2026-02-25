@@ -24,7 +24,7 @@ updates:
       leaflet:
         patterns:
           - 'leaflet'
-          - 'leaflet.*'
+          - 'leaflet-*'
           - '@maplibre/*'
           - 'maplibre-gl'
 

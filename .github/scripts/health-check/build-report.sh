@@ -19,7 +19,7 @@ ENABLED_FILE="$OUTPUT_DIR/enabled_checks.txt"
 
 # Helper: check if a scan is enabled
 is_enabled() {
-  grep -qi "$1" "$ENABLED_FILE" 2>/dev/null
+  grep -Fxiq "$1" "$ENABLED_FILE" 2>/dev/null
 }
 
 # Helper: count findings by severity from a JSON findings array
@@ -97,7 +97,7 @@ render_findings() {
   echo ""
 
   # Commit changelog analysis
-  if is_enabled "Commit changelog"; then
+  if is_enabled "Commit changelog analysis"; then
     echo "## Changes Since Last Report"
     echo ""
     if [[ -f "$COMMITS_FILE" ]]; then
@@ -274,7 +274,7 @@ render_findings() {
   fi
 
   # Svelte v5 migration
-  if is_enabled "Svelte v5" && [[ -f "$SVELTE_FILE" ]]; then
+  if is_enabled "Svelte v5 migration readiness" && [[ -f "$SVELTE_FILE" ]]; then
     echo "## Svelte v5 Migration Readiness"
     echo ""
     REACTIVE=$(jq '.reactive_declarations' "$SVELTE_FILE")
@@ -319,7 +319,7 @@ render_findings() {
   fi
 
   # API/Data handling
-  if is_enabled "API" && [[ -f "$API_FILE" ]]; then
+  if is_enabled "API/data handling" && [[ -f "$API_FILE" ]]; then
     echo "## API & Data Handling"
     echo ""
     render_findings "$API_FILE"
@@ -328,7 +328,7 @@ render_findings() {
   fi
 
   # CI/CD
-  if is_enabled "CI" && [[ -f "$CI_FILE" ]]; then
+  if is_enabled "CI/CD improvements" && [[ -f "$CI_FILE" ]]; then
     echo "## CI/CD"
     echo ""
     render_findings "$CI_FILE"

@@ -7,12 +7,8 @@ OUTPUT_FILE="$OUTPUT_DIR/api.json"
 
 FINDINGS="[]"
 
-add_finding() {
-  local severity="$1" title="$2" details="$3" files="$4"
-  FINDINGS=$(echo "$FINDINGS" | jq \
-    --arg sev "$severity" --arg title "$title" --arg details "$details" --arg files "$files" \
-    '. + [{"severity": $sev, "title": $title, "details": $details, "files": $files}]')
-}
+# shellcheck source=common.sh
+source "$(dirname "$0")/common.sh"
 
 # 1. Axios calls without error handling (no .catch or try/catch)
 # Find axios.get/post/put/delete calls

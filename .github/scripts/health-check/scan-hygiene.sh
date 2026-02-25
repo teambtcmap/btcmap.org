@@ -7,12 +7,8 @@ OUTPUT_FILE="$OUTPUT_DIR/hygiene.json"
 
 FINDINGS="[]"
 
-add_finding() {
-  local severity="$1" title="$2" details="$3" files="$4"
-  FINDINGS=$(echo "$FINDINGS" | jq \
-    --arg sev "$severity" --arg title "$title" --arg details "$details" --arg files "$files" \
-    '. + [{"severity": $sev, "title": $title, "details": $details, "files": $files}]')
-}
+# shellcheck source=common.sh
+source "$(dirname "$0")/common.sh"
 
 # 1. Stale tool references in CI workflows
 PRETTIER_REFS=$(grep -rn -i 'prettier' .github/workflows/ 2>/dev/null || true)
@@ -55,7 +51,7 @@ fi
 
 # 4. Unused exports — find exported functions/consts not imported elsewhere
 # (lightweight heuristic: exported names in lib/ that appear only once in the codebase)
-UNUSED_EXPORTS=""
+UNUSED_EXPORTS=()
 while IFS= read -r line; do
   # Extract the exported name
   NAME=$(echo "$line" | grep -oP 'export\s+(const|function|let|class)\s+\K\w+' || true)
@@ -65,15 +61,15 @@ while IFS= read -r line; do
   COUNT=$(grep -rl "$NAME" src/ --include='*.ts' --include='*.svelte' --include='*.js' 2>/dev/null \
     | grep -v "$FILE" | wc -l | tr -d ' ')
   if [[ "$COUNT" -eq 0 ]]; then
-    UNUSED_EXPORTS="${UNUSED_EXPORTS}${line}\n"
+    UNUSED_EXPORTS+=("$line")
   fi
 done < <(grep -rn 'export \(const\|function\|let\|class\) ' src/lib/ --include='*.ts' 2>/dev/null | head -100)
 
-if [[ -n "$UNUSED_EXPORTS" ]]; then
-  UNUSED_COUNT=$(echo -e "$UNUSED_EXPORTS" | grep -c '.' || echo 0)
+if [[ "${#UNUSED_EXPORTS[@]}" -gt 0 ]]; then
+  UNUSED_COUNT="${#UNUSED_EXPORTS[@]}"
   add_finding "low" "Potentially unused exports ($UNUSED_COUNT found)" \
     "Exported symbols in src/lib/ that don't appear to be imported elsewhere. Review and consider removing." \
-    "$(echo -e "$UNUSED_EXPORTS" | head -10)"
+    "$(printf '%s\n' "${UNUSED_EXPORTS[@]}" | head -10)"
 fi
 
 # 5. Console.log statements (excluding allowed console methods)

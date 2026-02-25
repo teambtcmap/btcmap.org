@@ -41,15 +41,15 @@ jobs:
           bash .github/scripts/health-check/parse-config.sh /tmp/health-results
           enabled="/tmp/health-results/enabled_checks.txt"
           check_enabled() {
-            if grep -qi "$1" "$enabled"; then echo "true"; else echo "false"; fi
+            if grep -Fxiq "$1" "$enabled"; then echo "true"; else echo "false"; fi
           }
-          echo "commit_changelog=$(check_enabled 'Commit changelog')" >> "$GITHUB_OUTPUT"
+          echo "commit_changelog=$(check_enabled 'Commit changelog analysis')" >> "$GITHUB_OUTPUT"
           echo "codebase_hygiene=$(check_enabled 'Codebase hygiene')" >> "$GITHUB_OUTPUT"
           echo "consistency=$(check_enabled 'Consistency')" >> "$GITHUB_OUTPUT"
-          echo "svelte_v5=$(check_enabled 'Svelte v5')" >> "$GITHUB_OUTPUT"
+          echo "svelte_v5=$(check_enabled 'Svelte v5 migration readiness')" >> "$GITHUB_OUTPUT"
           echo "accessibility=$(check_enabled 'Accessibility')" >> "$GITHUB_OUTPUT"
-          echo "api=$(check_enabled 'API')" >> "$GITHUB_OUTPUT"
-          echo "ci=$(check_enabled 'CI')" >> "$GITHUB_OUTPUT"
+          echo "api=$(check_enabled 'API/data handling')" >> "$GITHUB_OUTPUT"
+          echo "ci=$(check_enabled 'CI/CD improvements')" >> "$GITHUB_OUTPUT"
 
       # Phase 1a: Commit analysis
       - name: Analyze commits since last report
@@ -134,16 +134,16 @@ jobs:
             }
 
             // Check if skip-next marker exists on the latest health-report issue
-            const existingIssues = await github.rest.issues.listForRepo({
+            const latestIssues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
               labels: 'health-report',
               state: 'all',
-              per_page: 10
+              per_page: 1
             });
 
-            if (existingIssues.data.length > 0) {
-              const latestIssue = existingIssues.data[0];
+            if (latestIssues.data.length > 0) {
+              const latestIssue = latestIssues.data[0];
               const comments = await github.rest.issues.listComments({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -192,18 +192,24 @@ jobs:
 
             core.info(`Created health report issue #${issue.data.number}`);
 
-            // Close previous open health-report issues
-            if (existingIssues.data.length > 0) {
-              for (const prev of existingIssues.data) {
-                if (prev.state === 'open' && prev.number !== issue.data.number) {
-                  await github.rest.issues.update({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    issue_number: prev.number,
-                    state: 'closed',
-                    state_reason: 'completed'
-                  });
-                  core.info(`Closed previous report issue #${prev.number}`);
-                }
+            // Close all previous open health-report issues
+            const openIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'health-report',
+              state: 'open',
+              per_page: 30
+            });
+
+            for (const prev of openIssues.data) {
+              if (prev.number !== issue.data.number) {
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prev.number,
+                  state: 'closed',
+                  state_reason: 'completed'
+                });
+                core.info(`Closed previous report issue #${prev.number}`);
               }
             }

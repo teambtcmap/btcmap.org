@@ -7,12 +7,8 @@ OUTPUT_FILE="$OUTPUT_DIR/a11y.json"
 
 FINDINGS="[]"
 
-add_finding() {
-  local severity="$1" title="$2" details="$3" files="$4"
-  FINDINGS=$(echo "$FINDINGS" | jq \
-    --arg sev "$severity" --arg title "$title" --arg details "$details" --arg files "$files" \
-    '. + [{"severity": $sev, "title": $title, "details": $details, "files": $files}]')
-}
+# shellcheck source=common.sh
+source "$(dirname "$0")/common.sh"
 
 # 1. Images without alt attribute
 NO_ALT=$(grep -rn '<img' src/ --include='*.svelte' 2>/dev/null \
@@ -50,16 +46,17 @@ if [[ -n "$ICON_BUTTONS" ]]; then
 fi
 
 # 4. Form inputs without associated labels
-INPUTS_NO_LABEL=$(grep -rnP '<input[^>]*(?!.*aria-label)(?!.*id=)' src/ --include='*.svelte' 2>/dev/null || true)
+# Use simple grep + exclusion pipeline instead of fragile PCRE lookaheads
+INPUTS_NO_LABEL=$(grep -rn '<input' src/ --include='*.svelte' 2>/dev/null \
+  | grep -v 'aria-label' \
+  | grep -v 'aria-labelledby' \
+  | grep -v 'id=' \
+  | grep -v 'type="hidden"' || true)
 if [[ -n "$INPUTS_NO_LABEL" ]]; then
-  # More targeted: inputs without aria-label, aria-labelledby, or nearby <label>
-  NO_LABEL=$(echo "$INPUTS_NO_LABEL" | grep -v 'aria-label' | grep -v 'type="hidden"' || true)
-  if [[ -n "$NO_LABEL" ]]; then
-    COUNT=$(echo "$NO_LABEL" | wc -l | tr -d ' ')
-    add_finding "low" "Form inputs potentially missing labels ($COUNT)" \
-      "Input elements should have associated labels via aria-label, aria-labelledby, or <label> elements. Manual verification recommended." \
-      "$(echo "$NO_LABEL" | head -10)"
-  fi
+  COUNT=$(echo "$INPUTS_NO_LABEL" | wc -l | tr -d ' ')
+  add_finding "low" "Form inputs potentially missing labels ($COUNT)" \
+    "Input elements should have associated labels via aria-label, aria-labelledby, or id with a <label> element. Manual verification recommended." \
+    "$(echo "$INPUTS_NO_LABEL" | head -10)"
 fi
 
 # 5. Missing lang attribute check
