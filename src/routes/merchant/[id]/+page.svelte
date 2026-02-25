@@ -578,7 +578,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 				<MerchantAction link={`geo:${lat},${long}`} icon="compass" text={$_('merchant.navigate')} />
 
 				<MerchantAction
-					link={`https://www.openstreetmap.org/edit?${data.osmType}=${data.osmId}`}
+					link={`${data.osmEditUrl}`}
 					icon="pencil"
 					text={$_('merchant.edit')}
 				/>
@@ -663,7 +663,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 				</span>
 
 				<MerchantAction
-					link={`https://www.openstreetmap.org/${data.osmType}/${data.osmId}`}
+					link={`${data.osmViewUrl}`}
 					icon="external"
 					text={$_('merchant.viewOSM')}
 				/>
