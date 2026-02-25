@@ -452,6 +452,19 @@
 		"taggingIssues": "Problemas de etiquetagem de {name}",
 		"openTickets": "Tickets abertos de {name}"
 	},
+	"areaTickets": {
+		"typeAdd": "Adicionar",
+		"typeVerify": "Verificar",
+		"typeCommunity": "Comunidade",
+		"tooltip": "Tickets disponíveis dos nossos formulários! Qualquer um pode ajudar a adicionar ou verificar envios no OpenStreetMap.",
+		"noAddTickets": "Nenhum ticket de adicionar aberto.",
+		"noVerifyTickets": "Nenhum ticket de verificar aberto.",
+		"noCommunityTickets": "Nenhum ticket de comunidade aberto.",
+		"maintenanceMessage": "Os issues estão em manutenção. ",
+		"viewOnGitea": "Ver issues diretamente no Gitea",
+		"errorMessage": "Erro ao buscar tickets. Tente novamente ou entre em contato com o suporte do BTC Map.",
+		"loadError": "Não foi possível carregar os tickets abertos. Tente novamente ou entre em contato com o BTC Map."
+	},
 	"verifyCommunity": {
 		"title": "Verificar Informações da Comunidade",
 		"description": "Ajude-nos a manter os dados da comunidade precisos verificando as informações abaixo.",
@@ -491,6 +504,118 @@
 		"totalTooltip": "Todos os locais incl. caixas eletrônicos",
 		"verifiedTooltip": "Locais verificados no último ano"
 	},
+	"badges": {
+		"title": "Emblemas",
+		"intro": "Você pode ganhar emblemas por suas contribuições ao BTC Map que serão exibidos no seu perfil. Tem uma ideia de emblema? Avise-nos!",
+		"achievements": "Conquistas",
+		"contributions": "Contribuições",
+		"achievement": {
+			"geyserTournament": {
+				"title": "Torneio Geyser",
+				"desc": "Participe do Evento Supertagger 2023"
+			},
+			"topTagger": { "title": "Top Tagger", "desc": "#1 no ranking" },
+			"podium": { "title": "Pódio", "desc": "Entre os 3 primeiros no ranking" },
+			"highRank": {
+				"title": "Alta Posição",
+				"desc": "Entre os 10 primeiros no ranking"
+			},
+			"ogSupertagger": {
+				"title": "OG Supertagger",
+				"desc": "Contribua com o BTC Map nos primeiros 3 meses"
+			},
+			"lightningJunkie": {
+				"title": "Lightning Junkie",
+				"desc": "Adicione um botão de gorjeta ao seu perfil"
+			},
+			"helloWorld": {
+				"title": "Hello World",
+				"desc": "Adicione um avatar ao seu perfil"
+			},
+			"demolitionSpecialist": {
+				"title": "Especialista em Demolição",
+				"desc": "A maioria das suas contribuições são exclusões"
+			},
+			"updateMaxi": {
+				"title": "Update Maxi",
+				"desc": "A maioria das suas contribuições são atualizações"
+			},
+			"creator": {
+				"title": "Criador",
+				"desc": "A maioria das suas contribuições são criações"
+			},
+			"supporter": {
+				"title": "Apoiador",
+				"desc": "Faça uma doação anual ao BTC Map"
+			}
+		},
+		"contribution": {
+			"hyperbitcoinisation": { "title": "Hiperbitcoinização", "desc": "21M" },
+			"pizzaTime": { "title": "Hora da Pizza", "desc": "10K" },
+			"godly": { "title": "Divino", "desc": "7777" },
+			"shadow": { "title": "Sombra", "desc": "5000" },
+			"whitepaper": { "title": "Whitepaper", "desc": "3110" },
+			"winston": { "title": "Winston", "desc": "1984" },
+			"whale": { "title": "Baleia", "desc": "1000" },
+			"infinity": { "title": "Infinito", "desc": "821" },
+			"legend": { "title": "Lenda", "desc": "500" },
+			"chancellor": { "title": "Chanceler", "desc": "301" },
+			"sha": { "title": "SHA", "desc": "256" },
+			"noBailouts": { "title": "Sem Resgates", "desc": "210" },
+			"supertagger": { "title": "Supertagger", "desc": "100" },
+			"ath": { "title": "ATH", "desc": "69" },
+			"longestChain": { "title": "Cadeia Mais Longa", "desc": "51" },
+			"satoshi": { "title": "Satoshi", "desc": "21" },
+			"heartbeat": { "title": "Batimento", "desc": "10" },
+			"segwit": { "title": "Segwit", "desc": "4" },
+			"wholeTagger": { "title": "Whole Tagger", "desc": "1" }
+		}
+	},
+	"media": {
+		"title": "Mídia",
+		"intro": "Recursos de mídia estão disponíveis gratuitamente para uso promocional.",
+		"brandColors": "Cores da Marca",
+		"assets": "Recursos",
+		"downloadAll": "Baixar Tudo",
+		"brand": "Marca",
+		"promotional": "Promocional",
+		"team": "Equipe",
+		"assetNames": {
+			"appScreenshot": "Captura de Tela do App",
+			"btcmapLogo": "Logo BTC Map",
+			"shadowySupertagger": "Shadowy Supertagger",
+			"shadowySupertaggerLeader": "Shadowy Supertagger - Líder",
+			"activityFeed": "Feed de Atividade",
+			"addCommunity": "Adicionar Comunidade",
+			"addLocation": "Adicionar Local",
+			"communities": "Comunidades",
+			"countries": "Países",
+			"downloadApps": "Baixar Apps",
+			"earnBadges": "Ganhar Emblemas",
+			"main": "Principal",
+			"map": "Mapa",
+			"merchant": "Comerciante",
+			"statsDashboard": "Painel de Estatísticas",
+			"supertaggerLeaderboard": "Ranking de Supertaggers",
+			"supertaggerProfile": "Perfil de Supertagger",
+			"supportUs": "Apoiar",
+			"topCommunities": "Principais Comunidades",
+			"topCountries": "Principais Países",
+			"verifyLocations": "Verificar Locais",
+			"igor": "Igor",
+			"karnage": "Karnage",
+			"nathanDay": "Nathan Day",
+			"secondl1ght": "secondl1ght"
+		}
+	},
+	"taggingIssues": {
+		"heading": "Problemas de Etiquetagem",
+		"subheading": "Contribua para O mapa resolvendo problemas de etiquetagem!",
+		"descriptionPart1": "Mais informações sobre como se envolver podem ser encontradas em nossa página ",
+		"linkText": "Instruções de Etiquetagem",
+		"descriptionPart2": " na Wiki.",
+		"tableTitle": "Problemas Globais"
+	},
 	"countries": {
 		"hero": "Adoção de Bitcoin por países.",
 		"description": "Seu país? Seu mapa!",
@@ -501,6 +626,70 @@
 		"northAmerica": "América do Norte",
 		"oceania": "Oceania",
 		"southAmerica": "América do Sul"
+	},
+	"supportUs": {
+		"title": "Apoie-nos",
+		"hero": "Ajude a colocar bitcoin no mapa.",
+		"intro": "BTCMap.org é um projeto gratuito e de código aberto (FOSS). Dependemos de doações e patrocínios para continuar.",
+		"appreciate": "Agradecemos muito todo o apoio.",
+		"donate": {
+			"scanOrClick": "Escaneie ou clique para doar",
+			"onchain": "On-chain",
+			"lightning": "Lightning",
+			"protocolAlt": "protocolo"
+		},
+		"supporters": {
+			"heading": "Nossos incríveis apoiadores",
+			"becomeSponsor": "Torne-se um Patrocinador"
+		},
+		"node": {
+			"heading": "Abra um canal lightning para nós"
+		},
+		"applyHere": "Candidate-se aqui",
+		"qrError": "Não foi possível gerar o QR, tente novamente ou entre em contato com o BTC Map.",
+		"qrLoadError": "Não foi possível carregar o gerador de QR. Por favor, tente novamente."
+	},
+	"privacyPolicy": {
+		"title": "Política de Privacidade",
+		"intro": "Não coletamos suas informações pessoais.",
+		"readMore": "Por favor, leia mais para mais detalhes.",
+		"forms": {
+			"heading": "Formulários",
+			"intro": "O que acontece quando você envia um formulário em nosso site:",
+			"item1": "Uma issue é criada automaticamente em nosso repositório {btcmapDataLink} auto-hospedado contendo as informações do formulário.",
+			"item2": "Uma mensagem é enviada automaticamente para nosso {matrixLink}.",
+			"item3": "Se a submissão for válida, ela é adicionada ao {osmLink} por um contribuidor do BTC Map e aparecerá em nossos aplicativos.",
+			"item4": "Algumas informações, incluindo comunidades, não são armazenadas no OpenStreetMap, mas no banco de dados do BTC Map.",
+			"referPolicies": "Por favor, consulte as políticas de privacidade de cada uma dessas terceiras partes para entender como suas informações são usadas lá.",
+			"agreePublic": "Ao enviar informações através de um de nossos formulários, você concorda que essas informações serão usadas publicamente.",
+			"doNotSubmit": "Não envie nenhuma informação pessoal ou privada.",
+			"xHandleBefore": "Se você incluir um handle do X, podemos postar sobre sua submissão na conta",
+			"xHandleAfter": "do X."
+		},
+		"analytics": {
+			"heading": "Analytics",
+			"intro": "Usamos analytics que respeitam a privacidade fornecidos pela {netlifyLink} e uma instância auto-hospedada da {umamiLink} para rastrear estatísticas de uso ao longo do tempo e melhorar a experiência do usuário.",
+			"noCookies": "Esses analytics não usam cookies ou rastreadores. Não há informações pessoalmente identificáveis incluídas. Todos os dados são anônimos e estão em conformidade com o {gdprLink}.",
+			"readMore": "Abaixo estão alguns links para saber mais sobre o Netlify Analytics:"
+		},
+		"cookies": {
+			"heading": "Cookies",
+			"intro": "Não usamos cookies."
+		},
+		"ipProtection": {
+			"heading": "Como Proteger Seu IP Online",
+			"intro": "É uma boa prática proteger seu endereço IP público ao navegar na web. Os dois métodos mais comuns para fazer isso são:",
+			"item1": "Use um serviço VPN como {mullvadLink}.",
+			"item2": "Use o navegador {torLink}."
+		},
+		"changes": {
+			"heading": "Alterações nesta Política de Privacidade",
+			"lastUpdated": "Esta política de privacidade foi atualizada pela última vez em: 10 de julho de 2023."
+		},
+		"contact": {
+			"heading": "Entre em Contato",
+			"intro": "Se você tiver alguma dúvida ou feedback sobre nossa política de privacidade, entre em contato conosco em {contactLink} ou em qualquer uma de nossas plataformas sociais."
+		}
 	},
 	"aboutUs": {
 		"title": "Sobre Nós",
