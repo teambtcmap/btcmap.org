@@ -1,179 +1,176 @@
 <script lang="ts">
+import { _ } from "$lib/i18n";
 import { socials } from "$lib/store";
+
+const linkClass = "text-link transition-colors hover:text-hover";
 </script>
 
 <svelte:head>
-	<title>BTC Map - Privacy Policy</title>
+	<title>BTC Map - {$_("privacyPolicy.title")}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/home.png" />
-	<meta property="twitter:title" content="BTC Map - Privacy Policy" />
+	<meta property="twitter:title" content="BTC Map - {$_("privacyPolicy.title")}" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
 <div class="mt-10 mb-20 space-y-10">
 	<div class="space-y-5 text-xl text-body dark:text-white">
 		<h1 class="text-4xl !leading-tight font-semibold text-primary md:text-5xl dark:text-white">
-			Privacy Policy
+			{$_("privacyPolicy.title")}
 		</h1>
 		<p>
-			We <strong>do not</strong> collect your personal information.
+			<strong>{$_("privacyPolicy.intro")}</strong>
 		</p>
-		<p>Please read further for more details.</p>
+		<p>{$_("privacyPolicy.readMore")}</p>
 	</div>
 
 	<div class="space-y-5 text-xl text-body dark:text-white">
-		<h2 class="text-3xl font-semibold text-primary dark:text-white">Forms</h2>
-		<p>What happens when you submit a form on our website:</p>
+		<h2 class="text-3xl font-semibold text-primary dark:text-white">{$_("privacyPolicy.forms.heading")}</h2>
+		<p>{$_("privacyPolicy.forms.intro")}</p>
 		<ol class="ml-5 list-decimal space-y-2">
 			<li>
-				An issue is automatically created in our self-hosted <a
-					href="https://gitea.btcmap.org/teambtcmap/btcmap-data/issues/"
-					class="text-link transition-colors hover:text-hover">btcmap-data</a
-				> repo containing the form information.
+				{@html $_("privacyPolicy.forms.item1", {
+					values: {
+						btcmapDataLink: `<a href="https://gitea.btcmap.org/teambtcmap/btcmap-data/issues/" class="${linkClass}">btcmap-data</a>`
+					}
+				})}
 			</li>
 			<li>
-				A message is automatically sent to our <a
-					href="https://matrix.to/#/#btcmap:matrix.org"
-					class="text-link transition-colors hover:text-hover">Matrix Space</a
-				> .
+				{@html $_("privacyPolicy.forms.item2", {
+					values: {
+						matrixLink: `<a href="https://matrix.to/#/#btcmap:matrix.org" class="${linkClass}">Matrix Space</a>`
+					}
+				})}
 			</li>
 			<li>
-				If the submission is valid, it is added to <a
-					href="https://www.openstreetmap.org"
-					class="text-link transition-colors hover:text-hover">OpenStreetMap</a
-				> by a BTC Map contributor and will appear in our apps.
+				{@html $_("privacyPolicy.forms.item3", {
+					values: {
+						osmLink: `<a href="https://www.openstreetmap.org" class="${linkClass}">OpenStreetMap</a>`
+					}
+				})}
 			</li>
 			<li>
-				Some information including communities is not stored on OpenStreetMap but in the BTC Map
-				database instead.
+				{$_("privacyPolicy.forms.item4")}
 			</li>
 		</ol>
 		<p>
-			Please refer to the privacy policies of each of these third parties to understand how your
-			information is used there.
+			{$_("privacyPolicy.forms.referPolicies")}
 		</p>
 		<ul class="ml-5 list-disc space-y-2">
 			<li>
 				<a
 					href="https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement"
-					class="text-link transition-colors hover:text-hover">GitHub Privacy Policy</a
+					class={linkClass}>GitHub Privacy Policy</a
 				>
 			</li>
 			<li>
-				<a href="https://discord.com/privacy" class="text-link transition-colors hover:text-hover"
+				<a href="https://discord.com/privacy" class={linkClass}
 					>Discord Privacy Policy</a
 				>
 			</li>
 			<li>
 				<a
 					href="https://wiki.osmfoundation.org/wiki/Privacy_Policy"
-					class="text-link transition-colors hover:text-hover">OpenStreetMap Privacy Policy</a
+					class={linkClass}>OpenStreetMap Privacy Policy</a
 				>
 			</li>
 		</ul>
 		<p>
-			By submitting information through one of our forms you are agreeing that this information will
-			be used publicly.
+			{$_("privacyPolicy.forms.agreePublic")}
 		</p>
-		<p><strong>Do not</strong> submit any personal or private information.</p>
+		<p><strong>{$_("privacyPolicy.forms.doNotSubmit")}</strong></p>
 		<p>
-			If you include an X handle, we may post about your submission from the
+			{$_("privacyPolicy.forms.xHandleBefore")}
 			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-			<a href={$socials.x} class="text-link transition-colors hover:text-hover">@btcmap</a>
-			X account.
+			<a href={$socials.x} class={linkClass}>@btcmap</a>
+			{$_("privacyPolicy.forms.xHandleAfter")}
 		</p>
 	</div>
 
 	<div class="space-y-5 text-xl text-body dark:text-white">
-		<h2 class="text-3xl font-semibold text-primary dark:text-white">Analytics</h2>
+		<h2 class="text-3xl font-semibold text-primary dark:text-white">{$_("privacyPolicy.analytics.heading")}</h2>
 		<p>
-			We use privacy respecting analytics provided by <a
-				href="https://www.netlify.com/"
-				class="text-link transition-colors hover:text-hover"
-			>
-				Netlify
-			</a>
-
-			and a self-hosted instance of
-			<a href="https://umami.is/" class="text-link transition-colors hover:text-hover"> Umami </a>
-			in order to track usage statistics over time and improve the user experience.
+			{@html $_("privacyPolicy.analytics.intro", {
+				values: {
+					netlifyLink: `<a href="https://www.netlify.com/" class="${linkClass}">Netlify</a>`,
+					umamiLink: `<a href="https://umami.is/" class="${linkClass}">Umami</a>`
+				}
+			})}
 		</p>
 		<p>
-			These analytics do not use any cookies or trackers. There is no personally identifiable
-			information included. All of the data is anonymous and complies with the <a
-				href="https://www.netlify.com/gdpr-ccpa/"
-				class="text-link transition-colors hover:text-hover"
-			>
-				GDPR
-			</a>.
+			{@html $_("privacyPolicy.analytics.noCookies", {
+				values: {
+					gdprLink: `<a href="https://www.netlify.com/gdpr-ccpa/" class="${linkClass}">GDPR</a>`
+				}
+			})}
 		</p>
-		<p>Below are some links to read more about Netlify Analytics:</p>
+		<p>{$_("privacyPolicy.analytics.readMore")}</p>
 		<ul class="ml-5 list-disc space-y-2">
 			<li>
 				<a
 					href="https://www.netlify.com/products/analytics/"
-					class="text-link transition-colors hover:text-hover">Netlify Analytics</a
+					class={linkClass}>Netlify Analytics</a
 				>
 			</li>
 			<li>
 				<a
 					href="https://docs.netlify.com/monitor-sites/analytics/"
-					class="text-link transition-colors hover:text-hover">Netlify Docs - Analytics</a
+					class={linkClass}>Netlify Docs - Analytics</a
 				>
 			</li>
 			<li>
 				<a
 					href="https://docs.netlify.com/monitor-sites/analytics/how-analytics-works/"
-					class="text-link transition-colors hover:text-hover">Netlify Docs - How Analytics Works</a
+					class={linkClass}>Netlify Docs - How Analytics Works</a
 				>
 			</li>
 		</ul>
 	</div>
 
 	<div class="space-y-5 text-xl text-body dark:text-white">
-		<h2 class="text-3xl font-semibold text-primary dark:text-white">Cookies</h2>
-		<p>We <strong>do not</strong> use cookies.</p>
+		<h2 class="text-3xl font-semibold text-primary dark:text-white">{$_("privacyPolicy.cookies.heading")}</h2>
+		<p><strong>{$_("privacyPolicy.cookies.intro")}</strong></p>
 	</div>
 
 	<div class="space-y-5 text-xl text-body dark:text-white">
 		<h2 class="text-3xl font-semibold text-primary dark:text-white">
-			How to Protect Your IP Online
+			{$_("privacyPolicy.ipProtection.heading")}
 		</h2>
 		<p>
-			It is good practice to protect your public IP address when surfing the web. The two most
-			common methods to do this are:
+			{$_("privacyPolicy.ipProtection.intro")}
 		</p>
 		<ol class="ml-5 list-decimal space-y-2">
 			<li>
-				Use a VPN service like <a
-					href="https://mullvad.net/en/"
-					class="text-link transition-colors hover:text-hover">Mullvad</a
-				>.
+				{@html $_("privacyPolicy.ipProtection.item1", {
+					values: {
+						mullvadLink: `<a href="https://mullvad.net/en/" class="${linkClass}">Mullvad</a>`
+					}
+				})}
 			</li>
 			<li>
-				Use <a
-					href="https://www.torproject.org/"
-					class="text-link transition-colors hover:text-hover">Tor</a
-				> browser.
+				{@html $_("privacyPolicy.ipProtection.item2", {
+					values: {
+						torLink: `<a href="https://www.torproject.org/" class="${linkClass}">Tor</a>`
+					}
+				})}
 			</li>
 		</ol>
 	</div>
 
 	<div class="space-y-5 text-xl text-body dark:text-white">
 		<h2 class="text-3xl font-semibold text-primary dark:text-white">
-			Changes to this Privacy Policy
+			{$_("privacyPolicy.changes.heading")}
 		</h2>
-		<p>This privacy policy was last updated: July 10, 2023.</p>
+		<p>{$_("privacyPolicy.changes.lastUpdated")}</p>
 	</div>
 
 	<div class="space-y-5 text-xl text-body dark:text-white">
-		<h2 class="text-3xl font-semibold text-primary dark:text-white">Contact Us</h2>
+		<h2 class="text-3xl font-semibold text-primary dark:text-white">{$_("privacyPolicy.contact.heading")}</h2>
 		<p>
-			If you have any questions or feedback about our privacy policy, please contact us at <a
-				href="mailto:hello@btcmap.org"
-				class="text-link transition-colors hover:text-hover"
-			>
-				hello@btcmap.org
-			</a> or on any of our social platforms.
+			{@html $_("privacyPolicy.contact.intro", {
+				values: {
+					contactLink: `<a href="mailto:hello@btcmap.org" class="${linkClass}">hello@btcmap.org</a>`
+				}
+			})}
 		</p>
 	</div>
 </div>

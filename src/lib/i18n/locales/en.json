@@ -681,6 +681,107 @@
 			"wholeTagger": { "title": "Whole Tagger", "desc": "1" }
 		}
 	},
+	"media": {
+		"title": "Media",
+		"intro": "Media assets are available for free to use for promotional purposes.",
+		"brandColors": "Brand Colors",
+		"assets": "Assets",
+		"downloadAll": "Download All",
+		"brand": "Brand",
+		"promotional": "Promotional",
+		"team": "Team",
+		"assetNames": {
+			"appScreenshot": "App Screenshot",
+			"btcmapLogo": "BTC Map Logo",
+			"shadowySupertagger": "Shadowy Supertagger",
+			"shadowySupertaggerLeader": "Shadowy Supertagger - Leader",
+			"activityFeed": "Activity Feed",
+			"addCommunity": "Add Community",
+			"addLocation": "Add Location",
+			"communities": "Communities",
+			"countries": "Countries",
+			"downloadApps": "Download Apps",
+			"earnBadges": "Earn Badges",
+			"main": "Main",
+			"map": "Map",
+			"merchant": "Merchant",
+			"statsDashboard": "Stats Dashboard",
+			"supertaggerLeaderboard": "Supertagger Leaderboard",
+			"supertaggerProfile": "Supertagger Profile",
+			"supportUs": "Support Us",
+			"topCommunities": "Top Communities",
+			"topCountries": "Top Countries",
+			"verifyLocations": "Verify Locations",
+			"igor": "Igor",
+			"karnage": "Karnage",
+			"nathanDay": "Nathan Day",
+			"secondl1ght": "secondl1ght"
+		}
+	},
+	"supportUs": {
+		"title": "Support Us",
+		"hero": "Help place bitcoin on the map.",
+		"intro": "BTCMap.org is a free and open source project (FOSS). We rely on donations and sponsorship to continue.",
+		"appreciate": "We greatly appreciate all support.",
+		"donate": {
+			"scanOrClick": "Scan or click to donate",
+			"onchain": "On-chain",
+			"lightning": "Lightning",
+			"protocolAlt": "protocol"
+		},
+		"supporters": {
+			"heading": "Our amazing supporters",
+			"becomeSponsor": "Become a Sponsor"
+		},
+		"node": {
+			"heading": "Open a lightning channel to us"
+		},
+		"applyHere": "Apply here",
+		"qrError": "Could not generate QR, please try again or contact BTC Map.",
+		"qrLoadError": "Could not load QR generator. Please try again."
+	},
+	"privacyPolicy": {
+		"title": "Privacy Policy",
+		"intro": "We do not collect your personal information.",
+		"readMore": "Please read further for more details.",
+		"forms": {
+			"heading": "Forms",
+			"intro": "What happens when you submit a form on our website:",
+			"item1": "An issue is automatically created in our self-hosted {btcmapDataLink} repo containing the form information.",
+			"item2": "A message is automatically sent to our {matrixLink}.",
+			"item3": "If the submission is valid, it is added to {osmLink} by a BTC Map contributor and will appear in our apps.",
+			"item4": "Some information including communities is not stored on OpenStreetMap but in the BTC Map database instead.",
+			"referPolicies": "Please refer to the privacy policies of each of these third parties to understand how your information is used there.",
+			"agreePublic": "By submitting information through one of our forms you are agreeing that this information will be used publicly.",
+			"doNotSubmit": "Do not submit any personal or private information.",
+			"xHandleBefore": "If you include an X handle, we may post about your submission from the",
+			"xHandleAfter": "X account."
+		},
+		"analytics": {
+			"heading": "Analytics",
+			"intro": "We use privacy respecting analytics provided by {netlifyLink} and a self-hosted instance of {umamiLink} in order to track usage statistics over time and improve the user experience.",
+			"noCookies": "These analytics do not use any cookies or trackers. There is no personally identifiable information included. All of the data is anonymous and complies with the {gdprLink}.",
+			"readMore": "Below are some links to read more about Netlify Analytics:"
+		},
+		"cookies": {
+			"heading": "Cookies",
+			"intro": "We do not use cookies."
+		},
+		"ipProtection": {
+			"heading": "How to Protect Your IP Online",
+			"intro": "It is good practice to protect your public IP address when surfing the web. The two most common methods to do this are:",
+			"item1": "Use a VPN service like {mullvadLink}.",
+			"item2": "Use {torLink} browser."
+		},
+		"changes": {
+			"heading": "Changes to this Privacy Policy",
+			"lastUpdated": "This privacy policy was last updated: July 10, 2023."
+		},
+		"contact": {
+			"heading": "Contact Us",
+			"intro": "If you have any questions or feedback about our privacy policy, please contact us at {contactLink} or on any of our social platforms."
+		}
+	},
 	"aboutUs": {
 		"title": "About Us",
 		"description": "BTC Map is a free and open source project powered by volunteer bitcoiners and bitcoin-friendly merchants around the world.",
