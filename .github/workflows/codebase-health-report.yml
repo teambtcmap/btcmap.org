@@ -51,44 +51,81 @@ jobs:
           echo "api=$(check_enabled 'API/data handling')" >> "$GITHUB_OUTPUT"
           echo "ci=$(check_enabled 'CI/CD improvements')" >> "$GITHUB_OUTPUT"
 
+      # Phase 0b: Check for /skip-next marker on the latest health-report issue
+      - name: Check for skip-next marker
+        id: skip-check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const latestIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'health-report',
+              state: 'all',
+              per_page: 1
+            });
+
+            if (latestIssues.data.length > 0) {
+              const comments = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: latestIssues.data[0].number
+              });
+
+              const skipComment = comments.data.find(c => c.body.trim().startsWith('/skip-next'));
+              if (skipComment) {
+                core.info('Found /skip-next command on previous report. Skipping this run.');
+                // Remove the skip marker so the next run proceeds
+                await github.rest.issues.deleteComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: skipComment.id
+                });
+                core.setOutput('skip', 'true');
+                return;
+              }
+            }
+            core.setOutput('skip', 'false');
+
       # Phase 1a: Commit analysis
       - name: Analyze commits since last report
-        if: ${{ steps.config.outputs.commit_changelog == 'true' }}
+        if: steps.skip-check.outputs.skip != 'true' && steps.config.outputs.commit_changelog == 'true'
         run: bash .github/scripts/health-check/scan-commits.sh /tmp/health-results
 
       # Phase 1b: Static scans
       - name: Run codebase hygiene scan
-        if: ${{ steps.config.outputs.codebase_hygiene == 'true' }}
+        if: steps.skip-check.outputs.skip != 'true' && steps.config.outputs.codebase_hygiene == 'true'
         run: bash .github/scripts/health-check/scan-hygiene.sh /tmp/health-results
 
       - name: Run consistency scan
-        if: ${{ steps.config.outputs.consistency == 'true' }}
+        if: steps.skip-check.outputs.skip != 'true' && steps.config.outputs.consistency == 'true'
         run: bash .github/scripts/health-check/scan-consistency.sh /tmp/health-results
 
       - name: Run Svelte v5 migration scan
-        if: ${{ steps.config.outputs.svelte_v5 == 'true' }}
+        if: steps.skip-check.outputs.skip != 'true' && steps.config.outputs.svelte_v5 == 'true'
         run: bash .github/scripts/health-check/scan-svelte-v5.sh /tmp/health-results
 
       - name: Run accessibility scan
-        if: ${{ steps.config.outputs.accessibility == 'true' }}
+        if: steps.skip-check.outputs.skip != 'true' && steps.config.outputs.accessibility == 'true'
         run: bash .github/scripts/health-check/scan-a11y.sh /tmp/health-results
 
       - name: Run API/data handling scan
-        if: ${{ steps.config.outputs.api == 'true' }}
+        if: steps.skip-check.outputs.skip != 'true' && steps.config.outputs.api == 'true'
         run: bash .github/scripts/health-check/scan-api.sh /tmp/health-results
 
       - name: Run CI/CD scan
-        if: ${{ steps.config.outputs.ci == 'true' }}
+        if: steps.skip-check.outputs.skip != 'true' && steps.config.outputs.ci == 'true'
         run: bash .github/scripts/health-check/scan-ci.sh /tmp/health-results
 
       # Phase 2: Build structured report
       - name: Assemble raw report
+        if: steps.skip-check.outputs.skip != 'true'
         run: bash .github/scripts/health-check/build-report.sh /tmp/health-results
 
       # Phase 3: AI synthesis (optional)
       - name: AI summary synthesis
         id: ai-summary
-        if: ${{ !inputs.skip_ai_summary }}
+        if: steps.skip-check.outputs.skip != 'true' && !inputs.skip_ai_summary
         uses: actions/github-script@v7
         with:
           script: |
@@ -116,6 +153,7 @@ jobs:
 
       # Phase 4: Create GitHub Issue
       - name: Create health report issue
+        if: steps.skip-check.outputs.skip != 'true'
         uses: actions/github-script@v7
         with:
           script: |
@@ -127,36 +165,6 @@ jobs:
               reportBody = fs.readFileSync('/tmp/health-results/report.md', 'utf8');
             } catch (e) {
               reportBody = '# Codebase Health Report\n\nError: Could not read report file.';
-            }
-
-            // Check if skip-next marker exists on the latest health-report issue
-            const latestIssues = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: 'health-report',
-              state: 'all',
-              per_page: 1
-            });
-
-            if (latestIssues.data.length > 0) {
-              const latestIssue = latestIssues.data[0];
-              const comments = await github.rest.issues.listComments({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: latestIssue.number
-              });
-
-              const skipComment = comments.data.find(c => c.body.trim().startsWith('/skip-next'));
-              if (skipComment) {
-                core.info('Found /skip-next command on previous report. Skipping this run.');
-                // Remove the skip marker so the next run proceeds
-                await github.rest.issues.deleteComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  comment_id: skipComment.id
-                });
-                return;
-              }
             }
 
             // Ensure the health-report label exists

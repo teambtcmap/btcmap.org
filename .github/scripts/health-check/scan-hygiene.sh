@@ -58,7 +58,7 @@ while IFS= read -r line; do
   [[ -z "$NAME" ]] && continue
   # Count occurrences across the codebase (excluding the definition file itself)
   FILE=$(echo "$line" | cut -d: -f1)
-  COUNT=$(grep -rl "$NAME" src/ --include='*.ts' --include='*.svelte' --include='*.js' 2>/dev/null \
+  COUNT=$(grep -Frl "$NAME" src/ --include='*.ts' --include='*.svelte' --include='*.js' 2>/dev/null \
     | grep -v "$FILE" | wc -l | tr -d ' ')
   if [[ "$COUNT" -eq 0 ]]; then
     UNUSED_EXPORTS+=("$line")
@@ -82,7 +82,7 @@ if [[ -n "$CONSOLE_LOGS" ]]; then
 fi
 
 # 6. TODO/FIXME/HACK comments
-TODOS=$(grep -rn 'TODO\|FIXME\|HACK\|XXX' src/ --include='*.ts' --include='*.svelte' --include='*.js' 2>/dev/null || true)
+TODOS=$(grep -rnE 'TODO|FIXME|HACK|XXX' src/ --include='*.ts' --include='*.svelte' --include='*.js' 2>/dev/null || true)
 if [[ -n "$TODOS" ]]; then
   TODO_COUNT=$(echo "$TODOS" | wc -l | tr -d ' ')
   add_finding "info" "TODO/FIXME/HACK comments ($TODO_COUNT found)" \

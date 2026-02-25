@@ -277,13 +277,13 @@ render_findings() {
   if is_enabled "Svelte v5 migration readiness" && [[ -f "$SVELTE_FILE" ]]; then
     echo "## Svelte v5 Migration Readiness"
     echo ""
-    REACTIVE=$(jq '.reactive_declarations' "$SVELTE_FILE")
-    DISPATCH=$(jq '.create_event_dispatcher' "$SVELTE_FILE")
-    SLOTS=$(jq '.slot_usage' "$SVELTE_FILE")
-    BEFORE_UPD=$(jq '.before_update' "$SVELTE_FILE")
-    AFTER_UPD=$(jq '.after_update' "$SVELTE_FILE")
-    DOLLAR_P=$(jq '.dollar_props' "$SVELTE_FILE")
-    SVELTE_COMP=$(jq '.svelte_component' "$SVELTE_FILE")
+    REACTIVE=$(jq '.reactive_declarations // 0' "$SVELTE_FILE")
+    DISPATCH=$(jq '.create_event_dispatcher // 0' "$SVELTE_FILE")
+    SLOTS=$(jq '.slot_usage // 0' "$SVELTE_FILE")
+    BEFORE_UPD=$(jq '.before_update // 0' "$SVELTE_FILE")
+    AFTER_UPD=$(jq '.after_update // 0' "$SVELTE_FILE")
+    DOLLAR_P=$(jq '.dollar_props // 0' "$SVELTE_FILE")
+    SVELTE_COMP=$(jq '.svelte_component // 0' "$SVELTE_FILE")
 
     PREV_REACTIVE=$(jq '.previous.reactive_declarations // empty' "$SVELTE_FILE" 2>/dev/null || true)
     PREV_DISPATCH=$(jq '.previous.create_event_dispatcher // empty' "$SVELTE_FILE" 2>/dev/null || true)

@@ -6,7 +6,7 @@ on:
 
 concurrency:
   group: health-report-commands-${{ github.event.issue.number }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   issues: write

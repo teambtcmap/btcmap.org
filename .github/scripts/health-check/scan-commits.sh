@@ -27,8 +27,6 @@ if [[ -z "$OLDEST_HASH" ]]; then
   exit 0
 fi
 
-RANGE="${OLDEST_HASH}^..HEAD"
-
 # Total commit count
 TOTAL=$(git log --since="$SINCE_DATE" --oneline | wc -l | tr -d ' ')
 
@@ -84,11 +82,9 @@ COSMETIC_COMMITS=""
 while IFS= read -r hash; do
   [[ -z "$hash" ]] && continue
   # Check if the diff only contains whitespace changes
-  DIFF_CONTENT=$(git diff "$hash^".."$hash" -- '*.ts' '*.svelte' '*.js' 2>/dev/null \
-    | grep '^[+-]' | grep -v '^[+-][+-][+-]' | sed 's/^[+-]//' | sed 's/[[:space:]]//g' || true)
-  ADDED=$(git diff "$hash^".."$hash" -- '*.ts' '*.svelte' '*.js' 2>/dev/null \
+  ADDED=$(git diff "${hash}^".."${hash}" -- '*.ts' '*.svelte' '*.js' 2>/dev/null \
     | grep '^+' | grep -v '^\+\+\+' | sed 's/^+//' | sed 's/[[:space:]]//g' || true)
-  REMOVED=$(git diff "$hash^".."$hash" -- '*.ts' '*.svelte' '*.js' 2>/dev/null \
+  REMOVED=$(git diff "${hash}^".."${hash}" -- '*.ts' '*.svelte' '*.js' 2>/dev/null \
     | grep '^-' | grep -v '^\-\-\-' | sed 's/^-//' | sed 's/[[:space:]]//g' || true)
   if [[ "$ADDED" == "$REMOVED" && -n "$ADDED" ]]; then
     SUBJECT=$(git log -1 --format='%s' "$hash")
@@ -147,35 +143,61 @@ while IFS= read -r line; do
   fi
 done < <(git log --since="$SINCE_DATE" --format='%H %s')
 
-# Build JSON output
-cat > "$OUTPUT_FILE" << JSONEOF
-{
-  "since": "$SINCE_DATE",
-  "total_commits": $TOTAL,
-  "contributors": $CONTRIBUTORS,
-  "files_changed": $FILES_CHANGED,
-  "by_type": {
-    "feat": $FEAT_COUNT,
-    "fix": $FIX_COUNT,
-    "refactor": $REFACTOR_COUNT,
-    "chore": $CHORE_COUNT,
-    "perf": $PERF_COUNT,
-    "style": $STYLE_COUNT,
-    "docs": $DOCS_COUNT,
-    "test": $TEST_COUNT
-  },
-  "non_conventional_count": $NON_CONVENTIONAL,
-  "missing_issue_ref_count": $MISSING_ISSUE_REF,
-  "non_conventional_list": $(echo -e "$NON_CONVENTIONAL_LIST" | jq -Rs 'split("\n") | map(select(. != ""))'),
-  "missing_issue_list": $(echo -e "$MISSING_ISSUE_LIST" | jq -Rs 'split("\n") | map(select(. != ""))'),
-  "contributor_list": $(echo "$CONTRIBUTOR_LIST" | jq -Rs 'split("\n") | map(select(. != ""))'),
-  "hotspots": $(echo "$HOTSPOTS" | jq -Rs 'split("\n") | map(select(. != ""))'),
-  "new_dependencies": $(echo -e "$NEW_DEPS" | jq -Rs 'split("\n") | map(select(. != ""))'),
-  "cosmetic_commits": $(echo -e "$COSMETIC_COMMITS" | jq -Rs 'split("\n") | map(select(. != ""))'),
-  "code_without_tests": $(echo -e "$CODE_NO_TESTS" | jq -Rs 'split("\n") | map(select(. != ""))'),
-  "quick_fixes": $(echo -e "$QUICK_FIXES" | jq -Rs 'split("\n") | map(select(. != ""))'),
-  "ai_signatures": $(echo -e "$AI_SIGNATURES" | jq -Rs 'split("\n") | map(select(. != ""))')
+# Build JSON output using jq for safe encoding
+json_array_from() {
+  echo -e "$1" | jq -Rs 'split("\n") | map(select(. != ""))'
 }
-JSONEOF
+
+jq -n \
+  --arg since "$SINCE_DATE" \
+  --argjson total "$TOTAL" \
+  --argjson contributors "$CONTRIBUTORS" \
+  --argjson files_changed "$FILES_CHANGED" \
+  --argjson feat "$FEAT_COUNT" \
+  --argjson fix "$FIX_COUNT" \
+  --argjson refactor "$REFACTOR_COUNT" \
+  --argjson chore "$CHORE_COUNT" \
+  --argjson perf "$PERF_COUNT" \
+  --argjson style "$STYLE_COUNT" \
+  --argjson docs "$DOCS_COUNT" \
+  --argjson test "$TEST_COUNT" \
+  --argjson non_conventional "$NON_CONVENTIONAL" \
+  --argjson missing_issue_ref "$MISSING_ISSUE_REF" \
+  --argjson non_conventional_list "$(json_array_from "$NON_CONVENTIONAL_LIST")" \
+  --argjson missing_issue_list "$(json_array_from "$MISSING_ISSUE_LIST")" \
+  --argjson contributor_list "$(echo "$CONTRIBUTOR_LIST" | jq -Rs 'split("\n") | map(select(. != ""))')" \
+  --argjson hotspots "$(echo "$HOTSPOTS" | jq -Rs 'split("\n") | map(select(. != ""))')" \
+  --argjson new_dependencies "$(json_array_from "$NEW_DEPS")" \
+  --argjson cosmetic_commits "$(json_array_from "$COSMETIC_COMMITS")" \
+  --argjson code_without_tests "$(json_array_from "$CODE_NO_TESTS")" \
+  --argjson quick_fixes "$(json_array_from "$QUICK_FIXES")" \
+  --argjson ai_signatures "$(json_array_from "$AI_SIGNATURES")" \
+  '{
+    since: $since,
+    total_commits: $total,
+    contributors: $contributors,
+    files_changed: $files_changed,
+    by_type: {
+      feat: $feat,
+      fix: $fix,
+      refactor: $refactor,
+      chore: $chore,
+      perf: $perf,
+      style: $style,
+      docs: $docs,
+      test: $test
+    },
+    non_conventional_count: $non_conventional,
+    missing_issue_ref_count: $missing_issue_ref,
+    non_conventional_list: $non_conventional_list,
+    missing_issue_list: $missing_issue_list,
+    contributor_list: $contributor_list,
+    hotspots: $hotspots,
+    new_dependencies: $new_dependencies,
+    cosmetic_commits: $cosmetic_commits,
+    code_without_tests: $code_without_tests,
+    quick_fixes: $quick_fixes,
+    ai_signatures: $ai_signatures
+  }' > "$OUTPUT_FILE"
 
 echo "Commit analysis complete: $OUTPUT_FILE"
