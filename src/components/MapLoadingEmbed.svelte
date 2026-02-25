@@ -2,6 +2,7 @@
 export let style: undefined | string = undefined;
 
 import LoadingSpinner from "$components/LoadingSpinner.svelte";
+import { _ } from "$lib/i18n";
 </script>
 
 <div
@@ -9,6 +10,6 @@ import LoadingSpinner from "$components/LoadingSpinner.svelte";
 >
 	<div class="space-y-6">
 		<LoadingSpinner color="text-link" />
-		<p class="text-center font-semibold text-primary dark:text-white">Loading map...</p>
+		<p class="text-center font-semibold text-primary dark:text-white">{$_("status.loadingMap")}</p>
 	</div>
 </div>

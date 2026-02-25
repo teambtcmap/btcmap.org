@@ -1,4 +1,6 @@
 <script lang="ts">
+import { _ } from "svelte-i18n";
+
 import IssueIcon from "$components/IssueIcon.svelte";
 
 export let id: "icon" | "name" | "type" | "viewLink" | "editLink" | "helpLink";
@@ -18,7 +20,7 @@ export let value: string;
 		rel="noreferrer"
 		class="text-link transition-colors hover:text-hover"
 	>
-		View
+		{$_(`maintain.view`)}
 	</a>
 {:else if id === 'editLink'}
 	<a
@@ -27,7 +29,7 @@ export let value: string;
 		rel="noreferrer"
 		class="text-link transition-colors hover:text-hover"
 	>
-		Edit
+		{$_(`maintain.edit`)}
 	</a>
 {:else if id === 'helpLink' && value}
 	<!-- eslint-disable svelte/no-navigation-without-resolve -->
@@ -38,6 +40,6 @@ export let value: string;
 		class="text-link transition-colors hover:text-hover"
 	>
 		<!-- eslint-enable svelte/no-navigation-without-resolve -->
-		Help
+		{$_(`maintain.help`)}
 	</a>
 {/if}

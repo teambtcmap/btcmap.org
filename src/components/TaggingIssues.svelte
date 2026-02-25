@@ -1,5 +1,6 @@
 <script lang="ts">
 import { fly } from "svelte/transition";
+import { _ } from "svelte-i18n";
 import OutClick from "svelte-outclick";
 
 import CloseButton from "$components/CloseButton.svelte";
@@ -34,7 +35,7 @@ const closeModal = () => ($taggingIssues = undefined);
 									class="text-link transition-colors hover:text-hover"
 								>
 									<!-- eslint-enable svelte/no-navigation-without-resolve -->
-									Help
+									{$_(`maintain.help`)}
 								</a>
 							{/if}
 						</div>
@@ -42,7 +43,7 @@ const closeModal = () => ($taggingIssues = undefined);
 				{:else}
 					<div class="flex items-center space-x-2">
 						<Icon type="fa" icon="thumbs-up" w="12" h="12" />
-						<p>No tagging issues!</p>
+						<p>{$_(`maintain.noTaggingIssuesModal`)}</p>
 					</div>
 				{/if}
 			</div>

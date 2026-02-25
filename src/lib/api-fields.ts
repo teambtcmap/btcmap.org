@@ -25,6 +25,7 @@ export const PLACE_FIELDS = {
 		"verified_at",
 		"osm_id",
 		"osm_url",
+		"osm_edit_url",
 		"osm:contact:instagram",
 		"osm:contact:twitter",
 		"osm:contact:facebook",

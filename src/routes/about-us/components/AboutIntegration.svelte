@@ -1,4 +1,6 @@
 <script lang="ts">
+import { _ } from "$lib/i18n";
+
 export let integration: { url: string; icon: string; name: string };
 </script>
 
@@ -32,7 +34,7 @@ export let integration: { url: string; icon: string; name: string };
 			rel="noreferrer"
 			class="mx-auto block w-32 rounded-full bg-link py-1 text-xs font-semibold text-white transition-colors hover:bg-hover"
 		>
-			Supporter
+			{$_("aboutUs.integrations.supporter")}
 		</a>
 	{/if}
 </div>
