@@ -3,7 +3,7 @@ import { onDestroy, tick } from "svelte";
 
 import Icon from "$components/Icon.svelte";
 import LoadingSpinner from "$components/LoadingSpinner.svelte";
-import SearchInput from "$components/SearchInput.svelte";
+import type SearchInput from "$components/SearchInput.svelte";
 import { trackEvent } from "$lib/analytics";
 import {
 	CATEGORY_ENTRIES,
