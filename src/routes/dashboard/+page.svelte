@@ -8,6 +8,7 @@ import { subYears } from "date-fns/subYears";
 import { onDestroy, onMount } from "svelte";
 
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import { _ } from "$lib/i18n";
 import { theme } from "$lib/theme";
 import type { ChartHistory } from "$lib/types";
 import { updateChartThemes } from "$lib/utils";
@@ -281,9 +282,9 @@ $: {
 </script>
 
 <svelte:head>
-	<title>BTC Map - Dashboard</title>
+	<title>BTC Map - {$_('dashboard.hero')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/dash.png" />
-	<meta property="twitter:title" content="BTC Map - Dashboard" />
+	<meta property="twitter:title" content="BTC Map - {$_('dashboard.hero')}" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/dash.png" />
 </svelte:head>
 
