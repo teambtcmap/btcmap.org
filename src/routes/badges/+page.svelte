@@ -71,7 +71,7 @@ const contributions = [
 		<h2 class="text-center text-3xl font-semibold text-primary dark:text-white">{$_("badges.achievements")}</h2>
 
 		<div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-			{#each [...achievements].reverse() as achievement (achievement.icon)}
+			{#each [...achievements].reverse() as achievement (achievement.key)}
 				<BadgeCard
 					icon={achievement.icon}
 					titleKey={`badges.achievement.${achievement.key}.title`}
@@ -86,7 +86,7 @@ const contributions = [
 		<h2 class="text-center text-3xl font-semibold text-primary dark:text-white">{$_("badges.contributions")}</h2>
 
 		<div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-			{#each [...contributions].reverse() as contribution (contribution.icon)}
+			{#each [...contributions].reverse() as contribution (contribution.key)}
 				<BadgeCard
 					icon={contribution.icon}
 					titleKey={`badges.contribution.${contribution.key}.title`}
