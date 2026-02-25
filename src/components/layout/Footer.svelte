@@ -21,7 +21,11 @@ const links = [
 	{ link: "/media", nameKey: "footer.media" },
 	{ link: "/license", nameKey: "footer.license" },
 	{ link: "/privacy-policy", nameKey: "footer.privacy" },
-	{ link: "https://stats.uptimerobot.com/7kgEVtzlV1", name: "Status" },
+	{
+		link: "https://stats.uptimerobot.com/7kgEVtzlV1",
+		nameKey: "footer.status",
+		external: true,
+	},
 	...(env.PUBLIC_UMAMI_URL
 		? [
 				{
@@ -36,8 +40,8 @@ const links = [
 		nameKey: "footer.bitcoinForBusiness",
 		external: true,
 	},
-	{ link: "/bitcoin.pdf", name: "White Paper" },
-	{ link: "/cypherpunks-manifesto.pdf", name: "Cypherpunks" },
+	{ link: "/bitcoin.pdf", nameKey: "footer.whitePaper" },
+	{ link: "/cypherpunks-manifesto.pdf", nameKey: "footer.cypherpunks" },
 ];
 </script>
 
@@ -111,7 +115,7 @@ const links = [
 				rel={link.external ? 'noopener noreferrer' : null}
 				class="mx-1.5 mb-2.5 text-sm text-link transition-colors last:mb-0 hover:text-hover xl:mb-0 dark:text-white/50 dark:hover:text-link"
 			>
-				{link.nameKey ? $_(link.nameKey) : link.name}
+				{$_(link.nameKey)}
 			</a>
 			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		{/each}
