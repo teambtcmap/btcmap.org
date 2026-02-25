@@ -296,7 +296,15 @@
 		"supertaggerHeading": "Shadowy Supertagger?",
 		"supertaggerDescription": "Contribute changes directly to OSM - like a 😎 boss. Who needs forms anyway.",
 		"supertaggerImageAlt": "shadowy supertagger",
-		"supertaggerWikiButton": "See Wiki for instructions"
+		"supertaggerWikiButton": "See Wiki for instructions",
+		"formSuccessType": "Location",
+		"formSuccessText": "We'll review your information and add it ASAP."
+	},
+	"formSuccess": {
+		"submittedTitle": "{type} Submitted!",
+		"monitorProgress": "You may also monitor the progress of your submission here:",
+		"issueLink": "Issue #{issue}",
+		"submitAnother": "Submit another {type}"
 	},
 	"verifyLocation": {
 		"hero": "Help improve the data for everyone.",
