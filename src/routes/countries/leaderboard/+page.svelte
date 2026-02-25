@@ -37,7 +37,7 @@ onMount(() => {
 				? 'text-white'
 				: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl"
 		>
-			Country Leaderboard
+			{$_('countries.leaderboardHero')}
 		</h1>
 	{:else}
 		<HeaderPlaceholder />

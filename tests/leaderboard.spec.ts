@@ -21,7 +21,7 @@ test.describe('Leaderboard pages', () => {
 		// This confirms the data sync completed and table rendered
 		await expect(page.getByRole('cell', { name: '🥇' })).toBeVisible({ timeout: 30000 });
 
-		// Verify the header is present
-		await expect(page.getByRole('heading', { name: /Country Leaderboard/ })).toBeVisible();
+		// Verify the header is present (i18n: countries.leaderboardHero = "Top Countries")
+		await expect(page.getByRole('heading', { name: /Top Countries/ })).toBeVisible();
 	});
 });
