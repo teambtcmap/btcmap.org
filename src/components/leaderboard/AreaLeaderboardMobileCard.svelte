@@ -56,7 +56,7 @@ export let type: AreaType;
 						<!-- eslint-disable svelte/no-navigation-without-resolve -->
 						<a
 							href={`/${type}/${area.tags?.url_alias || area.id || ''}`}
-							class="text-lg font-semibold text-link transition-colors hover:text-hover {area.tags?.name?.match(
+							class="text-lg font-semibold text-link transition-colors hover:text-hover {localizedName?.match(
 								/[^ ]{21}/
 							)
 								? 'break-all'
