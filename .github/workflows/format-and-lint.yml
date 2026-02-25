@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: ['**']
 
+concurrency:
+  group: format-and-lint-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   format-and-lint:
     runs-on: ubuntu-latest
