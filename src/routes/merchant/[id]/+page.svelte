@@ -39,7 +39,6 @@ import {
 	userError,
 	users,
 } from "$lib/store";
-import { areasSync } from "$lib/sync/areas";
 import { batchSync } from "$lib/sync/batchSync";
 import { eventsSync } from "$lib/sync/events";
 import { updateSinglePlace } from "$lib/sync/places";
