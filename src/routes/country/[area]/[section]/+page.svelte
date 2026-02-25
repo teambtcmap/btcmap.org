@@ -10,21 +10,19 @@ import type { PageData } from "./$types";
 
 export let data: PageData & AreaPageProps;
 
-const { name, id } = data;
-
 $: routes = [
 	{ name: $_(`nav.countries`), url: "/countries" },
 	{
-		name: getCountryName(id, $locale ?? "en", name),
-		url: `/country/${id}`,
+		name: getCountryName(data.id ?? "", $locale ?? "en", data.name ?? ""),
+		url: `/country/${data.id}`,
 	},
 ];
 </script>
 
 <svelte:head>
-	<title>{name ? name + ' - ' : ''}BTC Map Country</title>
+	<title>{data.name ? data.name + ' - ' : ''}BTC Map Country</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/countries.png" />
-	<meta property="twitter:title" content="{name ? name + ' - ' : ''}BTC Map Country" />
+	<meta property="twitter:title" content="{data.name ? data.name + ' - ' : ''}BTC Map Country" />
 	<meta property="twitter:image" content="https://btcmap.org/images/og/countries.png" />
 </svelte:head>
 

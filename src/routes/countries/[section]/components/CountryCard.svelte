@@ -7,6 +7,8 @@ import { resolve } from "$app/paths";
 
 export let id: string;
 export let name: string;
+
+$: localizedName = getCountryName(id, $locale ?? "en", name);
 </script>
 
 <div
@@ -19,7 +21,7 @@ export let name: string;
 		>
 			<img
 				src={`https://static.btcmap.org/images/countries/${id}.svg`}
-				alt={getCountryName(id ?? "", $locale ?? "en", name ?? "")}
+				alt={localizedName}
 				class="mx-auto h-20 w-20 rounded-full object-cover"
 				on:error={function () {
 					this.src = '/images/bitcoin.svg';
@@ -27,7 +29,7 @@ export let name: string;
 			/>
 
 			<span class="block text-center text-lg font-semibold"
-				>{getCountryName(id ?? "", $locale ?? "en", name ?? "")}</span
+				>{localizedName}</span
 			>
 		</a>
 	</div>

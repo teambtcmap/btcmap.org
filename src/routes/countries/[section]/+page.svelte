@@ -97,24 +97,14 @@ $: countrySections = [
 	},
 ];
 
-// Map continent slugs to i18n keys (for display)
-const continentKeys: Record<string, string> = {
-	africa: "countries.africa",
-	asia: "countries.asia",
-	europe: "countries.europe",
-	"north-america": "countries.northAmerica",
-	oceania: "countries.oceania",
-	"south-america": "countries.southAmerica",
-};
-
-// Map slugs to OSM continent values (for filtering)
-const slugToOsm: Record<string, string> = {
-	africa: "Africa",
-	asia: "Asia",
-	europe: "Europe",
-	"north-america": "North America",
-	oceania: "Oceania",
-	"south-america": "South America",
+// Map continent slugs to i18n keys and OSM values (single source of truth)
+const continentConfig: Record<string, { i18nKey: string; osm: string }> = {
+	africa: { i18nKey: "countries.africa", osm: "Africa" },
+	asia: { i18nKey: "countries.asia", osm: "Asia" },
+	europe: { i18nKey: "countries.europe", osm: "Europe" },
+	"north-america": { i18nKey: "countries.northAmerica", osm: "North America" },
+	oceania: { i18nKey: "countries.oceania", osm: "Oceania" },
+	"south-america": { i18nKey: "countries.southAmerica", osm: "South America" },
 };
 
 // Handle dropdown change
@@ -161,20 +151,20 @@ function handleSectionChange(event: Event) {
 			{#if data.section}
 				<h2 class="mb-2 text-3xl font-semibold text-primary md:mb-0 md:text-left dark:text-white">
 					<a href={resolve(`/countries/${data.section}`)}
-						>{$_(continentKeys[data.section])}</a
+						>{$_(continentConfig[data.section]?.i18nKey ?? "")}</a
 					>
 				</h2>
 
 				<FormSelect value={data.section} on:change={handleSectionChange} style="md:w-auto">
 					{#each sections as option (option)}
-						<option value={option}>{$_(continentKeys[option])}</option>
+						<option value={option}>{$_(continentConfig[option].i18nKey)}</option>
 					{/each}
 				</FormSelect>
 			{/if}
 		</div>
 
 		{#each countrySections as item (item.section)}
-			{#if data.section && slugToOsm[data.section] === item.section}
+			{#if data.section && continentConfig[data.section]?.osm === item.section}
 				<CountrySection countries={item.countries} />
 			{/if}
 		{/each}
