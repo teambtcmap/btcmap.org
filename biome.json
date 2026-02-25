@@ -86,11 +86,11 @@
 						"noInvalidUseBeforeDeclaration": "off"
 					},
 					"style": {
-						"useConst": "off",
-						"useImportType": "off"
+						"useConst": "warn",
+						"useImportType": "warn"
 					},
 					"suspicious": {
-						"noAssignInExpressions": "off"
+						"noAssignInExpressions": "warn"
 					}
 				}
 			}
