@@ -568,6 +568,10 @@
 			"wholeTagger": { "title": "Whole Tagger", "desc": "1" }
 		}
 	},
+	"apps": {
+		"official": "Oficial",
+		"community": "Comunidade"
+	},
 	"media": {
 		"title": "Mídia",
 		"intro": "Recursos de mídia estão disponíveis gratuitamente para uso promocional.",
