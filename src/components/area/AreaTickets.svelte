@@ -1,8 +1,9 @@
 <script lang="ts">
+import { _ } from "svelte-i18n";
+
 import InfoTooltip from "$components/InfoTooltip.svelte";
 import OpenTicket from "$components/OpenTicket.svelte";
 import { GITEA_LABELS } from "$lib/constants";
-import { _ } from "$lib/i18n";
 import type { GiteaIssue, GiteaLabel } from "$lib/types";
 import type { Tickets } from "$lib/types.js";
 import { errToast } from "$lib/utils";
@@ -30,17 +31,23 @@ $: community = filteredTickets.filter((issue: GiteaIssue) =>
 );
 
 $: ticketTypes = [
-	$_("areaTickets.typeAdd"),
-	$_("areaTickets.typeVerify"),
-	$_("areaTickets.typeCommunity"),
+	$_(`maintain.add`),
+	$_(`maintain.verify`),
+	$_(`maintain.community`),
 ];
-let showType = 0;
+let showTypeIndex = 0;
 
 $: ticketError = tickets === "error";
 $: ticketMaintenance = tickets === "maintenance";
 
+let prevTicketError = false;
 $: if (ticketError) {
-	errToast($_("areaTickets.loadError"));
+	if (!prevTicketError) {
+		errToast($_(`maintain.couldNotLoadTickets`));
+	}
+	prevTicketError = true;
+} else {
+	prevTicketError = false;
 }
 
 $: totalTickets = add.length + verify.length + community.length;
@@ -55,7 +62,7 @@ $: totalTickets = add.length + verify.length + community.length;
 					<span class="text-base">({totalTickets})</span>
 				{/if}
 				<InfoTooltip
-					tooltip={$_("areaTickets.tooltip")}
+					tooltip={$_(`maintain.ticketsTooltip`)}
 				/>
 			</h3>
 
@@ -63,14 +70,14 @@ $: totalTickets = add.length + verify.length + community.length;
 				{#each ticketTypes as type, i (i)}
 					<button
 						role="tab"
-						aria-selected={showType === i}
+						aria-selected={showTypeIndex === i}
 						aria-disabled={!filteredTickets.length || ticketError || ticketMaintenance}
 						class="mx-auto block w-40 border border-link py-2 text-center md:inline {i === 0
 							? 'rounded-t md:rounded-l md:rounded-tr-none'
-							: i === 2
+							: i === ticketTypes.length - 1
 								? 'rounded-b md:rounded-r md:rounded-bl-none'
-								: ''} {showType === i ? 'bg-link text-white' : ''} transition-colors"
-						on:click={() => (showType = i)}
+								: ''} {showTypeIndex === i ? 'bg-link text-white' : ''} transition-colors"
+						on:click={() => (showTypeIndex = i)}
 						disabled={!filteredTickets.length || ticketError || ticketMaintenance}
 					>
 						{type}
@@ -80,7 +87,7 @@ $: totalTickets = add.length + verify.length + community.length;
 		</div>
 
 		{#if filteredTickets.length && !ticketError}
-			{#if showType === 0}
+			{#if showTypeIndex === 0}
 				{#if add.length}
 					{#each add as ticket (ticket.number)}
 						<OpenTicket
@@ -98,10 +105,10 @@ $: totalTickets = add.length + verify.length + community.length;
 					<p
 						class="border-t border-gray-300 p-5 text-center text-body dark:border-white/95 dark:text-white"
 					>
-						{$_("areaTickets.noAddTickets")}
+						{$_(`maintain.noAddTickets`)}
 					</p>
 				{/if}
-			{:else if showType === 1}
+			{:else if showTypeIndex === 1}
 				{#if verify.length}
 					{#each verify as ticket (ticket.number)}
 						<OpenTicket
@@ -119,10 +126,10 @@ $: totalTickets = add.length + verify.length + community.length;
 					<p
 						class="border-t border-gray-300 p-5 text-center text-body dark:border-white/95 dark:text-white"
 					>
-						{$_("areaTickets.noVerifyTickets")}
+						{$_(`maintain.noVerifyTickets`)}
 					</p>
 				{/if}
-			{:else if showType === 2}
+			{:else if showTypeIndex === 2}
 				{#if community.length}
 					{#each community as ticket (ticket.number)}
 						<OpenTicket
@@ -140,7 +147,7 @@ $: totalTickets = add.length + verify.length + community.length;
 					<p
 						class="border-t border-gray-300 p-5 text-center text-body dark:border-white/95 dark:text-white"
 					>
-						{$_("areaTickets.noCommunityTickets")}
+						{$_(`maintain.noCommunityTickets`)}
 					</p>
 				{/if}
 			{/if}
@@ -148,18 +155,18 @@ $: totalTickets = add.length + verify.length + community.length;
 			<p
 				class="border-t border-gray-300 p-5 text-center text-body dark:border-white/95 dark:text-white"
 			>
-				{$_("areaTickets.maintenanceMessage")}<a
+				{$_(`maintain.underMaintenance`)} <a
 					href="https://gitea.btcmap.org/teambtcmap/btcmap-data/issues"
 					target="_blank"
 					rel="noreferrer"
-					class="text-link transition-colors hover:text-hover">{$_("areaTickets.viewOnGitea")}</a
-				>.
+					class="text-link transition-colors hover:text-hover">{$_(`maintain.viewOnGitea`)}</a
+				>
 			</p>
 		{:else if ticketError}
 			<p
 				class="border-t border-gray-300 p-5 text-center text-body dark:border-white/95 dark:text-white"
 			>
-				{$_("areaTickets.errorMessage")}
+				{$_(`maintain.errorFetching`)}
 			</p>
 		{/if}
 	</div>

@@ -161,7 +161,17 @@
 		"preparing": "Preparando mapa...",
 		"finalizing": "Finalizando...",
 		"merging": "Mesclando atualizações...",
-		"checkingUpdates": "Verificando atualizações..."
+		"checkingUpdates": "Verificando atualizações...",
+		"loadingTiles": "Carregando blocos..."
+	},
+	"mapDrawer": {
+		"back": "Voltar",
+		"closeMerchantDetails": "Fechar detalhes do comerciante",
+		"expandDrawer": "Expandir painel",
+		"collapseDrawer": "Recolher painel",
+		"merchantDetails": "Detalhes do comerciante",
+		"viewBoost": "Impulsionar",
+		"viewDetails": "Detalhes"
 	},
 	"info": {
 		"contact": "Contato",
@@ -278,7 +288,15 @@
 		"supertaggerHeading": "Supertagger Misterioso?",
 		"supertaggerDescription": "Contribua com alterações diretamente no OSM - como um chefão. Quem precisa de formulários mesmo.",
 		"supertaggerImageAlt": "supertagger misterioso",
-		"supertaggerWikiButton": "Veja a Wiki para instruções"
+		"supertaggerWikiButton": "Veja a Wiki para instruções",
+		"formSuccessType": "Local",
+		"formSuccessText": "Analisaremos suas informações e adicionaremos o mais rápido possível."
+	},
+	"formSuccess": {
+		"submittedTitle": "{type} enviado!",
+		"monitorProgress": "Você também pode acompanhar o progresso do seu envio aqui:",
+		"issueLink": "Issue #{issue}",
+		"submitAnother": "Enviar outro {type}"
 	},
 	"tip": {
 		"label": "Doar",
@@ -323,6 +341,32 @@
 		"lastPage": "Ir para última página",
 		"page": "Página",
 		"of": "de"
+	},
+	"maintain": {
+		"merchantName": "Nome do comerciante",
+		"description": "Descrição",
+		"view": "Ver",
+		"edit": "Editar",
+		"help": "Ajuda",
+		"noTaggingIssues": "Nenhum problema de etiquetagem!",
+		"noTaggingIssuesModal": "Nenhum problema de etiquetagem!",
+		"add": "Adicionar",
+		"verify": "Verificar",
+		"community": "Comunidade",
+		"noAddTickets": "Nenhum ticket de adicionar aberto.",
+		"noVerifyTickets": "Nenhum ticket de verificar aberto.",
+		"noCommunityTickets": "Nenhum ticket de comunidade aberto.",
+		"ticketsTooltip": "Tickets disponíveis nos nossos formulários! Qualquer um pode ajudar a adicionar ou verificar submissões no OpenStreetMap.",
+		"underMaintenance": "Os problemas estão em manutenção.",
+		"viewOnGitea": "Ver problemas diretamente no Gitea.",
+		"errorFetching": "Erro ao buscar tickets. Tente novamente ou entre em contato com o suporte do BTC Map.",
+		"couldNotLoadTickets": "Não foi possível carregar os tickets abertos, tente novamente ou entre em contato com o BTC Map.",
+		"issueMissingIcon": "Ícone está faltando",
+		"issueNotVerified": "Data da última verificação está faltando",
+		"issueOutdated": "Desatualizado, precisa de re-verificação",
+		"issueOutdatedSoon": "Em breve desatualizado, precisa de re-verificação",
+		"issueInvalidTagValue": "Valor da tag não está formatado corretamente ({code})",
+		"issueMisspelledTagName": "Erro de ortografia no nome da tag ({code})"
 	},
 	"areaStats": {
 		"population": "População",
@@ -424,5 +468,51 @@
 		"locationsNote": "Locais incluem caixas eletrônicos.",
 		"totalTooltip": "Todos os locais incl. caixas eletrônicos",
 		"verifiedTooltip": "Locais verificados no último ano"
+	},
+	"aboutUs": {
+		"title": "Sobre Nós",
+		"description": "BTC Map é um projeto gratuito e de código aberto mantido por voluntários bitcoiners e comerciantes amigáveis ao bitcoin em todo o mundo.",
+		"merchants": {
+			"heading": "Comerciantes",
+			"intro": "Os comerciantes estão no coração do BTC Map. Esses negócios estão à frente da mudança de paradigma e se posicionando para o sucesso contínuo. Qualquer comerciante que aceite bitcoin pode ser listado no BTC Map.",
+			"acceptBitcoin": "Aceita bitcoin?",
+			"getListed": "Cadastre-se no BTC Map"
+		},
+		"supertaggers": {
+			"heading": "Shadowy Supertaggers",
+			"intro": "Shadowy Supertaggers são pessoas que impulsionam este projeto. São voluntários que dedicam tempo para atualizar locais de negócios com novas informações. Sem eles, o BTC Map não seria sustentável!",
+			"topLabel": "Nossos principais supertaggers",
+			"viewLeaderboard": "Ver ranking"
+		},
+		"communities": {
+			"heading": "Comunidades",
+			"intro": "Comunidades bitcoin ajudam a impulsionar a adoção global ao integrar novos usuários localmente!",
+			"addPrompt": "Não vê sua comunidade?",
+			"addLink": "Adicione ao BTC Map",
+			"seeAll": "Ver todas as comunidades"
+		},
+		"integrations": {
+			"heading": "Integrações",
+			"communityLabel": "Integrações da comunidade",
+			"communitySub": "Projetos que usam BTC Map",
+			"projectLabel": "Integrações do projeto",
+			"projectSub": "BTC Map usa estes projetos",
+			"reachOut": "Se você está interessado em integrar conosco, por favor",
+			"reachOutLink": "entre em contato",
+			"supporter": "Apoiador",
+			"more": "Mais!"
+		},
+		"contributors": {
+			"heading": "Contribuidores",
+			"intro": "Qualquer um pode contribuir com o BTC Map de muitas formas diferentes. Se você gostaria de se envolver, não hesite e venha participar!"
+		},
+		"coreTeam": {
+			"heading": "Equipe Principal",
+			"igorBio": "Igor é um bitcoiner de longa data, mapeador e nômade digital vivendo no exterior. Ele criou o BTC Map como um aplicativo Android e o projeto ganhou impulso mundial a partir daí. Agora ele também mantém toda a infraestrutura de backend do projeto.",
+			"nathanBio": "Nathan é um empreendedor de tecnologia que se tornou plebeu. Ele reuniu a equipe principal para acelerar o desenvolvimento de aplicativos. Tendo construído, vendido, investido e assessorado negócios de tecnologia ao longo dos anos, agora está focado em bitcoin, construindo BTCMap.org, gamertron.net e oferecendo educação em bitcoin para crianças.",
+			"secondl1ghtBio": "Um desenvolvedor web autodidata, secondl1ght mergulhou de cabeça na toca do coelho do bitcoin e deixou sua carreira em fiat para se concentrar no desenvolvimento de bitcoin em tempo integral. Ele criou e mantém o aplicativo web BTC Map, além de um aplicativo de mensagens criptografadas chamado Cipherchat, e trabalha em ferramentas da rede Lightning na Amboss Technologies.",
+			"karnageBio": "Karnage é o designer principal do aplicativo web e criou a marca BTC Map. Ele contribuiu para muitos projetos bitcoin de código aberto de alto perfil. Sua missão é ajudar fundadores de startups a ter sucesso e criar produtos para alcançar esse objetivo. Design de produto pixel-perfeito sempre. Faça acontecer."
+		},
+		"avatarAlt": "avatar"
 	}
 }

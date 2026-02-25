@@ -35,26 +35,6 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 			throw error(404, "Merchant Not Found");
 		}
 
-		// Extract OSM type and ID from osm_url or osm_id for edit links
-		let osmType: "node" | "way" | "relation" = "node"; // default
-		let osmIdNum = Number(placeData.id); // fallback
-
-		if (placeData.osm_url) {
-			const osmMatch = placeData.osm_url.match(
-				/openstreetmap\.org\/([^/]+)\/(\d+)/,
-			);
-			if (osmMatch) {
-				osmType = osmMatch[1] as "node" | "way" | "relation";
-				osmIdNum = Number(osmMatch[2]);
-			}
-		} else if (placeData.osm_id) {
-			const parts = placeData.osm_id.split(":");
-			if (parts.length === 2) {
-				osmType = parts[0] as "node" | "way" | "relation";
-				osmIdNum = Number(parts[1]);
-			}
-		}
-
 		const lat = placeData.lat;
 		const lon = placeData.lon;
 
@@ -189,11 +169,11 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 			thirdParty,
 			paymentMethod,
 			// OSM data for edit links and tag functionality
-			osmType,
-			osmId: osmIdNum,
 			osmTags,
 			// Place data for BoostButton and other components
 			placeData,
+			osmViewUrl: placeData.osm_url ?? "",
+			osmEditUrl: placeData.osm_edit_url ?? "",
 		};
 	} catch (err) {
 		console.error(err);

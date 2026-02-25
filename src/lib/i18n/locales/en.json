@@ -165,7 +165,17 @@
 		"preparing": "Preparing map...",
 		"finalizing": "Finalizing...",
 		"merging": "Merging updates...",
-		"checkingUpdates": "Checking for updates..."
+		"checkingUpdates": "Checking for updates...",
+		"loadingTiles": "Loading tiles..."
+	},
+	"mapDrawer": {
+		"back": "Back",
+		"closeMerchantDetails": "Close merchant details",
+		"expandDrawer": "Expand drawer",
+		"collapseDrawer": "Collapse drawer",
+		"merchantDetails": "Merchant details",
+		"viewBoost": "Boost",
+		"viewDetails": "Details"
 	},
 	"info": {
 		"contact": "Contact",
@@ -296,7 +306,15 @@
 		"supertaggerHeading": "Shadowy Supertagger?",
 		"supertaggerDescription": "Contribute changes directly to OSM - like a 😎 boss. Who needs forms anyway.",
 		"supertaggerImageAlt": "shadowy supertagger",
-		"supertaggerWikiButton": "See Wiki for instructions"
+		"supertaggerWikiButton": "See Wiki for instructions",
+		"formSuccessType": "Location",
+		"formSuccessText": "We'll review your information and add it ASAP."
+	},
+	"formSuccess": {
+		"submittedTitle": "{type} Submitted!",
+		"monitorProgress": "You may also monitor the progress of your submission here:",
+		"issueLink": "Issue #{issue}",
+		"submitAnother": "Submit another {type}"
 	},
 	"verifyLocation": {
 		"hero": "Help improve the data for everyone.",
@@ -392,6 +410,32 @@
 		"byContinent": "Communities by Continent",
 		"totalLocations": "Total Locations",
 		"verifiedLocations": "Verified Locations"
+	},
+	"maintain": {
+		"merchantName": "Merchant Name",
+		"description": "Description",
+		"view": "View",
+		"edit": "Edit",
+		"help": "Help",
+		"noTaggingIssues": "No tagging issues!",
+		"noTaggingIssuesModal": "No tagging issues!",
+		"add": "Add",
+		"verify": "Verify",
+		"community": "Community",
+		"noAddTickets": "No open add tickets.",
+		"noVerifyTickets": "No open verify tickets.",
+		"noCommunityTickets": "No open community tickets.",
+		"ticketsTooltip": "Tickets up for grabs from our noob forms! Anybody can help add or verify submissions on OpenStreetMap.",
+		"underMaintenance": "Issues are currently under maintenance.",
+		"viewOnGitea": "View issues directly on Gitea.",
+		"errorFetching": "Error fetching tickets. Please try again or contact BTC Map support.",
+		"couldNotLoadTickets": "Could not load open tickets, please try again or contact BTC Map.",
+		"issueMissingIcon": "Icon is missing",
+		"issueNotVerified": "Last verification date is missing",
+		"issueOutdated": "Outdated, needs re-verification",
+		"issueOutdatedSoon": "Soon to be outdated, needs re-verification",
+		"issueInvalidTagValue": "Tag value is not formatted properly ({code})",
+		"issueMisspelledTagName": "Spelling issue in tag name ({code})"
 	},
 	"areaStats": {
 		"population": "Population",
@@ -504,5 +548,51 @@
 		"northAmerica": "North America",
 		"oceania": "Oceania",
 		"southAmerica": "South America"
+	},
+	"aboutUs": {
+		"title": "About Us",
+		"description": "BTC Map is a free and open source project powered by volunteer bitcoiners and bitcoin-friendly merchants around the world.",
+		"merchants": {
+			"heading": "Merchants",
+			"intro": "Merchants are at the heart of BTC Map. These businesses are front-running the paradigm change and positioning themselves for continued success. Any merchant who accepts bitcoin can be listed on BTC Map.",
+			"acceptBitcoin": "Accept bitcoin?",
+			"getListed": "Get listed on BTC Map"
+		},
+		"supertaggers": {
+			"heading": "Shadowy Supertaggers",
+			"intro": "Shadowy Supertaggers are people who power this project. They are volunteers who selflessly take the time to update business locations with new information. Without them, BTC Map would not be sustainable!",
+			"topLabel": "Our top supertaggers",
+			"viewLeaderboard": "View leaderboard"
+		},
+		"communities": {
+			"heading": "Communities",
+			"intro": "Bitcoin communities help drive global adoption by onboarding new users locally!",
+			"addPrompt": "Don't see your community?",
+			"addLink": "Add it to BTC Map",
+			"seeAll": "See all communities"
+		},
+		"integrations": {
+			"heading": "Integrations",
+			"communityLabel": "Community integrations",
+			"communitySub": "Projects using BTC Map",
+			"projectLabel": "Project integrations",
+			"projectSub": "BTC Map uses these projects",
+			"reachOut": "If you are interested in integrating with us please",
+			"reachOutLink": "reach out",
+			"supporter": "Supporter",
+			"more": "More!"
+		},
+		"contributors": {
+			"heading": "Contributors",
+			"intro": "Anybody can contribute to BTC Map in many different ways. If you would like to get involved please don't hesitate and come join the fun!"
+		},
+		"coreTeam": {
+			"heading": "Core Team",
+			"igorBio": "Igor is a long time bitcoiner, mapper, and digital nomad living abroad. He created BTC Map as an Android application and the project has since gained worldwide momentum from there. He now also maintains all of the backend infrastructure for the project.",
+			"nathanBio": "Nathan is a tech entrepreneur turned pleb-at-large. He brought the core team together to accelerate app development. Having built, sold, invested in and advised tech businesses over the years he is now focused on bitcoin, building BTCMap.org, gamertron.net and delivering bitcoin education for kids.",
+			"secondl1ghtBio": "A self-taught Web Developer, secondl1ght dove head first down the bitcoin rabbit hole and left his fiat career to focus on bitcoin development full-time. He created and maintains the BTC Map web application, as well as an encrypted messaging app called Cipherchat, and works on lightning network tools at Amboss Technologies.",
+			"karnageBio": "Karnage is the lead designer on the web app and created the BTC Map brand. He has contributed to many high profile bitcoin open source projects. His mission is to help startup founders succeed and creates products to achieve this goal. Pixel-perfect product design every time. Get it shipped."
+		},
+		"avatarAlt": "avatar"
 	}
 }
