@@ -1,0 +1,191 @@
+name: Codebase Health Report
+
+on:
+  schedule:
+    # 1st and 15th of each month at 9:00 UTC (biweekly)
+    - cron: '0 9 1,15 * *'
+  workflow_dispatch:
+    inputs:
+      skip_ai_summary:
+        description: 'Skip AI synthesis (post raw structured report only)'
+        type: boolean
+        default: false
+
+concurrency:
+  group: health-report
+  cancel-in-progress: true
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  health-report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NODE_OPTIONS: --max-old-space-size=4096
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history for commit analysis
+
+      - name: Create results directory
+        run: mkdir -p /tmp/health-results
+
+      # Phase 0: Load configuration from previous report issue
+      - name: Load configuration
+        run: bash .github/scripts/health-check/parse-config.sh /tmp/health-results
+
+      # Phase 1a: Commit analysis
+      - name: Analyze commits since last report
+        if: grep -qi 'Commit changelog' /tmp/health-results/enabled_checks.txt
+        run: bash .github/scripts/health-check/scan-commits.sh /tmp/health-results
+
+      # Phase 1b: Static scans (run enabled checks in parallel via background jobs)
+      - name: Run codebase hygiene scan
+        if: grep -qi 'Codebase hygiene' /tmp/health-results/enabled_checks.txt
+        run: bash .github/scripts/health-check/scan-hygiene.sh /tmp/health-results
+
+      - name: Run consistency scan
+        if: grep -qi 'Consistency' /tmp/health-results/enabled_checks.txt
+        run: bash .github/scripts/health-check/scan-consistency.sh /tmp/health-results
+
+      - name: Run Svelte v5 migration scan
+        if: grep -qi 'Svelte v5' /tmp/health-results/enabled_checks.txt
+        run: bash .github/scripts/health-check/scan-svelte-v5.sh /tmp/health-results
+
+      - name: Run accessibility scan
+        if: grep -qi 'Accessibility' /tmp/health-results/enabled_checks.txt
+        run: bash .github/scripts/health-check/scan-a11y.sh /tmp/health-results
+
+      - name: Run API/data handling scan
+        if: grep -qi 'API' /tmp/health-results/enabled_checks.txt
+        run: bash .github/scripts/health-check/scan-api.sh /tmp/health-results
+
+      - name: Run CI/CD scan
+        if: grep -qi 'CI' /tmp/health-results/enabled_checks.txt
+        run: bash .github/scripts/health-check/scan-ci.sh /tmp/health-results
+
+      # Phase 2: Build structured report
+      - name: Assemble raw report
+        run: bash .github/scripts/health-check/build-report.sh /tmp/health-results
+
+      # Phase 3: AI synthesis (optional)
+      - name: AI summary synthesis
+        id: ai-summary
+        if: ${{ !inputs.skip_ai_summary }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const rawReport = fs.readFileSync('/tmp/health-results/report.md', 'utf8');
+
+            // Use the raw report directly — the AI synthesis step is a placeholder
+            // that can be replaced with an actual AI API call when ready.
+            //
+            // To enable AI synthesis, replace this block with a call to your preferred
+            // AI provider (OpenAI, Anthropic, GitHub Copilot API, etc.) passing
+            // rawReport as context with a prompt like:
+            //
+            //   "You are a senior developer reviewing a biweekly codebase health report.
+            //    Synthesize the following raw findings into a prioritized, actionable summary.
+            //    Group related findings. Highlight the most impactful items first.
+            //    Keep the same markdown structure but make it more readable and add
+            //    brief recommendations for each finding."
+            //
+            // For now, we use the structured raw report as-is.
+
+            core.setOutput('report', rawReport);
+            core.info(`Report length: ${rawReport.length} characters`);
+
+      # Phase 4: Create GitHub Issue
+      - name: Create health report issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            // Use AI-synthesized report if available, otherwise raw report
+            let reportBody;
+            try {
+              reportBody = fs.readFileSync('/tmp/health-results/report.md', 'utf8');
+            } catch (e) {
+              reportBody = '# Codebase Health Report\n\nError: Could not read report file.';
+            }
+
+            // Check if skip-next marker exists on the latest health-report issue
+            const existingIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'health-report',
+              state: 'all',
+              per_page: 1
+            });
+
+            if (existingIssues.data.length > 0) {
+              const latestIssue = existingIssues.data[0];
+              const comments = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: latestIssue.number
+              });
+
+              const skipComment = comments.data.find(c => c.body.trim().startsWith('/skip-next'));
+              if (skipComment) {
+                core.info('Found /skip-next command on previous report. Skipping this run.');
+                // Remove the skip marker so the next run proceeds
+                await github.rest.issues.deleteComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: skipComment.id
+                });
+                return;
+              }
+            }
+
+            // Ensure the health-report label exists
+            try {
+              await github.rest.issues.getLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: 'health-report'
+              });
+            } catch (e) {
+              await github.rest.issues.createLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: 'health-report',
+                color: '0075ca',
+                description: 'Automated biweekly codebase health report'
+              });
+            }
+
+            // Create the issue
+            const today = new Date().toISOString().split('T')[0];
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Biweekly Codebase Health Report — ${today}`,
+              body: reportBody,
+              labels: ['health-report']
+            });
+
+            core.info(`Created health report issue #${issue.data.number}`);
+
+            // Close previous open health-report issues
+            if (existingIssues.data.length > 0) {
+              for (const prev of existingIssues.data) {
+                if (prev.state === 'open' && prev.number !== issue.data.number) {
+                  await github.rest.issues.update({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: prev.number,
+                    state: 'closed',
+                    state_reason: 'completed'
+                  });
+                  core.info(`Closed previous report issue #${prev.number}`);
+                }
+              }
+            }
