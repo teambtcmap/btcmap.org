@@ -1,7 +1,26 @@
 <script lang="ts">
+import { locale } from "svelte-i18n";
+
+import { getCountryName } from "$lib/countryNames";
+
 import { resolve } from "$app/paths";
+
 export let id: string;
 export let name: string;
+
+let _nameGen = 0;
+let localizedName = name;
+$: {
+	const gen = ++_nameGen;
+	localizedName = name;
+	getCountryName(id, $locale ?? "en", name)
+		.then((n) => {
+			if (gen === _nameGen) localizedName = n;
+		})
+		.catch(() => {
+			// Keep fallback on error
+		});
+}
 </script>
 
 <div
@@ -14,14 +33,16 @@ export let name: string;
 		>
 			<img
 				src={`https://static.btcmap.org/images/countries/${id}.svg`}
-				alt={name}
+				alt={localizedName}
 				class="mx-auto h-20 w-20 rounded-full object-cover"
 				on:error={function () {
 					this.src = '/images/bitcoin.svg';
 				}}
 			/>
 
-			<span class="block text-center text-lg font-semibold">{name}</span>
+			<span class="block text-center text-lg font-semibold"
+				>{localizedName}</span
+			>
 		</a>
 	</div>
 </div>
