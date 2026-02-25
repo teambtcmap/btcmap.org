@@ -504,6 +504,73 @@
 		"totalTooltip": "Todos os locais incl. caixas eletrônicos",
 		"verifiedTooltip": "Locais verificados no último ano"
 	},
+	"badges": {
+		"title": "Emblemas",
+		"intro": "Você pode ganhar emblemas por suas contribuições ao BTC Map que serão exibidos no seu perfil. Tem uma ideia de emblema? Avise-nos!",
+		"achievements": "Conquistas",
+		"contributions": "Contribuições",
+		"achievement": {
+			"geyserTournament": {
+				"title": "Torneio Geyser",
+				"desc": "Participe do Evento Supertagger 2023"
+			},
+			"topTagger": { "title": "Top Tagger", "desc": "#1 no ranking" },
+			"podium": { "title": "Pódio", "desc": "Entre os 3 primeiros no ranking" },
+			"highRank": {
+				"title": "Alta Posição",
+				"desc": "Entre os 10 primeiros no ranking"
+			},
+			"ogSupertagger": {
+				"title": "OG Supertagger",
+				"desc": "Contribua com o BTC Map nos primeiros 3 meses"
+			},
+			"lightningJunkie": {
+				"title": "Lightning Junkie",
+				"desc": "Adicione um botão de gorjeta ao seu perfil"
+			},
+			"helloWorld": {
+				"title": "Hello World",
+				"desc": "Adicione um avatar ao seu perfil"
+			},
+			"demolitionSpecialist": {
+				"title": "Especialista em Demolição",
+				"desc": "A maioria das suas contribuições são exclusões"
+			},
+			"updateMaxi": {
+				"title": "Update Maxi",
+				"desc": "A maioria das suas contribuições são atualizações"
+			},
+			"creator": {
+				"title": "Criador",
+				"desc": "A maioria das suas contribuições são criações"
+			},
+			"supporter": {
+				"title": "Apoiador",
+				"desc": "Faça uma doação anual ao BTC Map"
+			}
+		},
+		"contribution": {
+			"hyperbitcoinisation": { "title": "Hiperbitcoinização", "desc": "21M" },
+			"pizzaTime": { "title": "Hora da Pizza", "desc": "10K" },
+			"godly": { "title": "Divino", "desc": "7777" },
+			"shadow": { "title": "Sombra", "desc": "5000" },
+			"whitepaper": { "title": "Whitepaper", "desc": "3110" },
+			"winston": { "title": "Winston", "desc": "1984" },
+			"whale": { "title": "Baleia", "desc": "1000" },
+			"infinity": { "title": "Infinito", "desc": "821" },
+			"legend": { "title": "Lenda", "desc": "500" },
+			"chancellor": { "title": "Chanceler", "desc": "301" },
+			"sha": { "title": "SHA", "desc": "256" },
+			"noBailouts": { "title": "Sem Resgates", "desc": "210" },
+			"supertagger": { "title": "Supertagger", "desc": "100" },
+			"ath": { "title": "ATH", "desc": "69" },
+			"longestChain": { "title": "Cadeia Mais Longa", "desc": "51" },
+			"satoshi": { "title": "Satoshi", "desc": "21" },
+			"heartbeat": { "title": "Batimento", "desc": "10" },
+			"segwit": { "title": "Segwit", "desc": "4" },
+			"wholeTagger": { "title": "Whole Tagger", "desc": "1" }
+		}
+	},
 	"media": {
 		"title": "Mídia",
 		"intro": "Recursos de mídia estão disponíveis gratuitamente para uso promocional.",

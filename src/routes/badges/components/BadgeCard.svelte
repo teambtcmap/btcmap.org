@@ -1,10 +1,14 @@
 <script lang="ts">
+import { _ } from "$lib/i18n";
 import type { BadgeType } from "$lib/types";
 
 export let icon: string;
-export let title: string;
-export let desc: string;
+export let titleKey: string;
+export let descKey: string;
 export let type: BadgeType;
+
+$: title = $_(titleKey);
+$: desc = $_(descKey);
 </script>
 
 <div

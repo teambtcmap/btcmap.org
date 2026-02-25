@@ -611,6 +611,76 @@
 		"oceania": "Oceania",
 		"southAmerica": "South America"
 	},
+	"badges": {
+		"title": "Badges",
+		"intro": "You can earn badges for your BTC Map contributions that will be displayed on your profile. Have a badge idea? Let us know!",
+		"achievements": "Achievements",
+		"contributions": "Contributions",
+		"achievement": {
+			"geyserTournament": {
+				"title": "Geyser Tournament",
+				"desc": "Participate in the 2023 Supertagger Event"
+			},
+			"topTagger": { "title": "Top Tagger", "desc": "#1 on the leaderboard" },
+			"podium": {
+				"title": "Podium",
+				"desc": "In the top 3 on the leaderboard"
+			},
+			"highRank": {
+				"title": "High Rank",
+				"desc": "In the top 10 on the leaderboard"
+			},
+			"ogSupertagger": {
+				"title": "OG Supertagger",
+				"desc": "Contribute to BTC Map within the first 3 months"
+			},
+			"lightningJunkie": {
+				"title": "Lightning Junkie",
+				"desc": "Add a tip button to your profile"
+			},
+			"helloWorld": {
+				"title": "Hello World",
+				"desc": "Add an avatar to your profile"
+			},
+			"demolitionSpecialist": {
+				"title": "Demolition Specialist",
+				"desc": "The majority of your contributions are deletions"
+			},
+			"updateMaxi": {
+				"title": "Update Maxi",
+				"desc": "The majority of your contributions are updates"
+			},
+			"creator": {
+				"title": "Creator",
+				"desc": "The majority of your contributions are creations"
+			},
+			"supporter": {
+				"title": "Supporter",
+				"desc": "Make an annual donation to BTC Map"
+			}
+		},
+		"contribution": {
+			"hyperbitcoinisation": { "title": "Hyperbitcoinisation", "desc": "21M" },
+			"pizzaTime": { "title": "Pizza Time", "desc": "10K" },
+			"godly": { "title": "Godly", "desc": "7777" },
+			"shadow": { "title": "Shadow", "desc": "5000" },
+			"whitepaper": { "title": "Whitepaper", "desc": "3110" },
+			"winston": { "title": "Winston", "desc": "1984" },
+			"whale": { "title": "Whale", "desc": "1000" },
+			"infinity": { "title": "Infinity", "desc": "821" },
+			"legend": { "title": "Legend", "desc": "500" },
+			"chancellor": { "title": "Chancellor", "desc": "301" },
+			"sha": { "title": "SHA", "desc": "256" },
+			"noBailouts": { "title": "No Bailouts", "desc": "210" },
+			"supertagger": { "title": "Supertagger", "desc": "100" },
+			"ath": { "title": "ATH", "desc": "69" },
+			"longestChain": { "title": "Longest Chain", "desc": "51" },
+			"satoshi": { "title": "Satoshi", "desc": "21" },
+			"heartbeat": { "title": "Heartbeat", "desc": "10" },
+			"segwit": { "title": "Segwit", "desc": "4" },
+			"wholeTagger": { "title": "Whole Tagger", "desc": "1" }
+		}
+	},
 	"media": {
 		"title": "Media",
 		"intro": "Media assets are available for free to use for promotional purposes.",

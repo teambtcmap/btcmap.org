@@ -671,44 +671,38 @@
 		"googlePlayNote": "Забележка: Няма опция за Google Play поради прекомерните изисквания за KYC за разработчици."
 	},
 	"badges": {
-		"heading": "Значки",
-		"description": "Можете да спечелите значки за приносите си в BTC Map, които ще се показват в профила ви. Имате идея за значка? Кажете ни!",
-		"achievementsHeading": "Постижения",
-		"contributionsHeading": "Приноси",
+		"title": "Значки",
+		"intro": "Можете да печелите значки за приносите си в BTC Map, които ще се показват в профила ви. Имате идея за значка? Кажете ни!",
+		"achievements": "Постижения",
+		"contributions": "Приноси",
 		"achievement": {
-			"geyser": {
+			"geyserTournament": {
 				"title": "Турнир Geyser",
 				"desc": "Участвайте в събитието Supertagger 2023"
 			},
-			"top-tagger": {
-				"title": "Топ тагър",
-				"desc": "#1 в класацията"
-			},
-			"podium": {
-				"title": "Подиум",
-				"desc": "В топ 3 в класацията"
-			},
-			"high-rank": {
+			"topTagger": { "title": "Топ тагър", "desc": "#1 в класацията" },
+			"podium": { "title": "Подиум", "desc": "В топ 3 в класацията" },
+			"highRank": {
 				"title": "Висока позиция",
 				"desc": "В топ 10 в класацията"
 			},
-			"og-supertagger": {
+			"ogSupertagger": {
 				"title": "OG Supertagger",
-				"desc": "Допринесете към BTC Map през първите 3 месеца"
+				"desc": "Допринесете към BTC Map в първите 3 месеца"
 			},
-			"lightning-junkie": {
-				"title": "Lightning зависим",
+			"lightningJunkie": {
+				"title": "Lightning Junkie",
 				"desc": "Добавете бутон за бакшиш в профила си"
 			},
-			"hello-world": {
+			"helloWorld": {
 				"title": "Hello World",
 				"desc": "Добавете аватар в профила си"
 			},
-			"demolition-specialist": {
+			"demolitionSpecialist": {
 				"title": "Специалист по разрушаване",
 				"desc": "Повечето от приносите ви са изтривания"
 			},
-			"update-maxi": {
+			"updateMaxi": {
 				"title": "Update Maxi",
 				"desc": "Повечето от приносите ви са актуализации"
 			},
@@ -718,86 +712,29 @@
 			},
 			"supporter": {
 				"title": "Поддръжник",
-				"desc": "Направете годишно дарение към BTC Map"
+				"desc": "Направете годишно дарение на BTC Map"
 			}
 		},
 		"contribution": {
-			"hyperbitcoinisation": {
-				"title": "Хипербиткойнизация",
-				"desc": "21M"
-			},
-			"pizza-time": {
-				"title": "Време за пица",
-				"desc": "10K"
-			},
-			"godly": {
-				"title": "Божествено",
-				"desc": "7777"
-			},
-			"shadow": {
-				"title": "Сянка",
-				"desc": "5000"
-			},
-			"whitepaper": {
-				"title": "White Paper",
-				"desc": "3110"
-			},
-			"winston": {
-				"title": "Winston",
-				"desc": "1984"
-			},
-			"whale": {
-				"title": "Кит",
-				"desc": "1000"
-			},
-			"infinity": {
-				"title": "Безкрайност",
-				"desc": "821"
-			},
-			"legend": {
-				"title": "Легенда",
-				"desc": "500"
-			},
-			"chancellor": {
-				"title": "Канцлер",
-				"desc": "301"
-			},
-			"sha": {
-				"title": "SHA",
-				"desc": "256"
-			},
-			"no-bailouts": {
-				"title": "Без спасявания",
-				"desc": "210"
-			},
-			"supertagger": {
-				"title": "Supertagger",
-				"desc": "100"
-			},
-			"ath": {
-				"title": "ATH",
-				"desc": "69"
-			},
-			"longest-chain": {
-				"title": "Най-дълга верига",
-				"desc": "51"
-			},
-			"satoshi": {
-				"title": "Сатоши",
-				"desc": "21"
-			},
-			"heartbeat": {
-				"title": "Сърцебиене",
-				"desc": "10"
-			},
-			"segwit": {
-				"title": "SegWit",
-				"desc": "4"
-			},
-			"whole-tagger": {
-				"title": "Цял тагър",
-				"desc": "1"
-			}
+			"hyperbitcoinisation": { "title": "Хипербиткойнизация", "desc": "21M" },
+			"pizzaTime": { "title": "Време за пица", "desc": "10K" },
+			"godly": { "title": "Божествен", "desc": "7777" },
+			"shadow": { "title": "Сянка", "desc": "5000" },
+			"whitepaper": { "title": "Whitepaper", "desc": "3110" },
+			"winston": { "title": "Winston", "desc": "1984" },
+			"whale": { "title": "Кит", "desc": "1000" },
+			"infinity": { "title": "Безкрайност", "desc": "821" },
+			"legend": { "title": "Легенда", "desc": "500" },
+			"chancellor": { "title": "Канцлер", "desc": "301" },
+			"sha": { "title": "SHA", "desc": "256" },
+			"noBailouts": { "title": "Без спасявания", "desc": "210" },
+			"supertagger": { "title": "Supertagger", "desc": "100" },
+			"ath": { "title": "ATH", "desc": "69" },
+			"longestChain": { "title": "Най-дълга верига", "desc": "51" },
+			"satoshi": { "title": "Satoshi", "desc": "21" },
+			"heartbeat": { "title": "Сърцебиене", "desc": "10" },
+			"segwit": { "title": "Segwit", "desc": "4" },
+			"wholeTagger": { "title": "Whole Tagger", "desc": "1" }
 		}
 	},
 	"taggerOnboarding": {
