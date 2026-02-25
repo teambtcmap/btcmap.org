@@ -141,6 +141,32 @@
 		"verifiedLocations": "Проверени места",
 		"viewMap": "Преглед на картата на общностите"
 	},
+	"maintain": {
+		"merchantName": "Име на търговеца",
+		"description": "Описание",
+		"view": "Преглед",
+		"edit": "Редактирай",
+		"help": "Помощ",
+		"noTaggingIssues": "Няма проблеми с тагването!",
+		"noTaggingIssuesModal": "Няма проблеми с тагването!",
+		"add": "Добави",
+		"verify": "Провери",
+		"community": "Общност",
+		"noAddTickets": "Няма отворени заявки за добавяне.",
+		"noVerifyTickets": "Няма отворени заявки за проверка.",
+		"noCommunityTickets": "Няма отворени заявки за общности.",
+		"ticketsTooltip": "Билети от нашите формуляри! Всеки може да помогне с добавяне или проверка в OpenStreetMap.",
+		"underMaintenance": "Заявките са в режим на поддръжка.",
+		"viewOnGitea": "Преглед на заявките директно в Gitea.",
+		"errorFetching": "Грешка при зареждане на билетите. Опитайте отново или се свържете с поддръжката на BTC Map.",
+		"couldNotLoadTickets": "Неуспешно зареждане на отворените билети, опитайте отново или се свържете с BTC Map.",
+		"issueMissingIcon": "Липсва икона",
+		"issueNotVerified": "Липсва дата на последна проверка",
+		"issueOutdated": "Остаряло, нужна е повторна проверка",
+		"issueOutdatedSoon": "Скоро ще остарее, нужна е повторна проверка",
+		"issueInvalidTagValue": "Стойността на тага не е правилно форматирана ({code})",
+		"issueMisspelledTagName": "Правописна грешка в името на тага ({code})"
+	},
 	"area": {
 		"sections": {
 			"merchants": "Търговци",
@@ -352,34 +378,9 @@
 		"chartDataNote": "*Данните от графиките се актуализират веднъж на 24 часа.",
 		"verifiedLocations": "Наскоро проверени места"
 	},
-	"areaTickets": {
-		"viewOnGitea": "Преглед на заявките директно в Gitea"
-	},
-	"issuesTable": {
-		"noTaggingIssues": "Няма проблеми с тагването!",
-		"noResults": "Няма намерени резултати.",
-		"page": "Страница",
-		"searchPlaceholder": "Търсене...",
-		"merchantName": "Име на търговеца",
-		"description": "Описание",
-		"view": "Преглед",
-		"edit": "Редактирай",
-		"help": "Помощ",
-		"showCount": "Покажи {count}",
-		"pageOf": "{current} от {total}",
-		"issueTypeMissingIcon": "Липсва икона",
-		"issueTypeNotVerified": "Липсва дата на последна проверка",
-		"issueTypeOutdated": "Остаряло, нужна е повторна проверка",
-		"issueTypeOutdatedSoon": "Скоро ще остарее, нужна е повторна проверка",
-		"issueTypeInvalidTag": "Стойността на тага не е правилно форматирана ({code})",
-		"issueTypeMisspelledTag": "Правописна грешка в името на тага ({code})"
-	},
 	"tip": {
 		"label": "Бакшиш",
 		"labelWithUser": "Бакшиш за {user}"
-	},
-	"taggingIssuesComponent": {
-		"noTaggingIssues": "Няма проблеми с тагването!"
 	},
 	"invoicePayment": {
 		"scanOrClick": "Сканирайте или кликнете за плащане с Lightning"
