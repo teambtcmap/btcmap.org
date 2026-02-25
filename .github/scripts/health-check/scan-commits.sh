@@ -115,19 +115,24 @@ QUICK_FIXES=""
 PREV_HASH=""
 PREV_DATE=""
 PREV_FILES=""
-while IFS='|' read -r hash date files subject; do
+while IFS='|' read -r hash date subject files; do
   [[ -z "$hash" ]] && continue
   if [[ -n "$PREV_HASH" && -n "$files" && -n "$PREV_FILES" ]]; then
     # Check for overlapping files
     OVERLAP=$(comm -12 <(echo "$files" | tr ' ' '\n' | sort) <(echo "$PREV_FILES" | tr ' ' '\n' | sort) | head -1 || true)
-    if [[ -n "$OVERLAP" ]] && echo "$subject" | grep -qiP '(fix|patch|hotfix|oops|typo|revert)'; then
-      QUICK_FIXES="${QUICK_FIXES}${hash:0:7} ${subject} (fixes ${PREV_HASH:0:7})\n"
+    if [[ -n "$OVERLAP" ]]; then
+      # Only flag quick fixes within 24h (86400 seconds)
+      TIME_DIFF=$(( PREV_DATE - date ))
+      if (( TIME_DIFF < 0 )); then TIME_DIFF=$(( -TIME_DIFF )); fi
+      if (( TIME_DIFF <= 86400 )) && echo "$subject" | grep -qiP '(fix|patch|hotfix|oops|typo|revert)'; then
+        QUICK_FIXES="${QUICK_FIXES}${hash:0:7} ${subject} (fixes ${PREV_HASH:0:7})\n"
+      fi
     fi
   fi
   PREV_HASH="$hash"
   PREV_DATE="$date"
   PREV_FILES="$files"
-done < <(git log --since="$SINCE_DATE" --pretty=format:'%H|%ad|' --date=unix --name-only \
+done < <(git log --since="$SINCE_DATE" --pretty=format:'%H|%ad|%s|' --date=unix --name-only \
   | awk 'BEGIN{RS=""} {gsub(/\n/, " "); print}' | head -100)
 
 # Detect AI-generated commit signatures

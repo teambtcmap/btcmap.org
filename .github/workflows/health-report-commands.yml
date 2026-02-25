@@ -15,10 +15,13 @@ permissions:
 
 jobs:
   handle-command:
-    # Only run on health-report labeled issues, for comments starting with /
+    # Only run on health-report labeled issues, for slash commands from trusted actors
     if: >-
       contains(github.event.issue.labels.*.name, 'health-report') &&
-      startsWith(github.event.comment.body, '/')
+      startsWith(github.event.comment.body, '/') &&
+      (github.event.comment.author_association == 'OWNER' ||
+       github.event.comment.author_association == 'MEMBER' ||
+       github.event.comment.author_association == 'COLLABORATOR')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:

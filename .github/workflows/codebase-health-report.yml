@@ -34,38 +34,51 @@ jobs:
       - name: Create results directory
         run: mkdir -p /tmp/health-results
 
-      # Phase 0: Load configuration from previous report issue
+      # Phase 0: Load configuration and set step outputs for conditional checks
       - name: Load configuration
-        run: bash .github/scripts/health-check/parse-config.sh /tmp/health-results
+        id: config
+        run: |
+          bash .github/scripts/health-check/parse-config.sh /tmp/health-results
+          enabled="/tmp/health-results/enabled_checks.txt"
+          check_enabled() {
+            if grep -qi "$1" "$enabled"; then echo "true"; else echo "false"; fi
+          }
+          echo "commit_changelog=$(check_enabled 'Commit changelog')" >> "$GITHUB_OUTPUT"
+          echo "codebase_hygiene=$(check_enabled 'Codebase hygiene')" >> "$GITHUB_OUTPUT"
+          echo "consistency=$(check_enabled 'Consistency')" >> "$GITHUB_OUTPUT"
+          echo "svelte_v5=$(check_enabled 'Svelte v5')" >> "$GITHUB_OUTPUT"
+          echo "accessibility=$(check_enabled 'Accessibility')" >> "$GITHUB_OUTPUT"
+          echo "api=$(check_enabled 'API')" >> "$GITHUB_OUTPUT"
+          echo "ci=$(check_enabled 'CI')" >> "$GITHUB_OUTPUT"
 
       # Phase 1a: Commit analysis
       - name: Analyze commits since last report
-        if: grep -qi 'Commit changelog' /tmp/health-results/enabled_checks.txt
+        if: ${{ steps.config.outputs.commit_changelog == 'true' }}
         run: bash .github/scripts/health-check/scan-commits.sh /tmp/health-results
 
-      # Phase 1b: Static scans (run enabled checks in parallel via background jobs)
+      # Phase 1b: Static scans
       - name: Run codebase hygiene scan
-        if: grep -qi 'Codebase hygiene' /tmp/health-results/enabled_checks.txt
+        if: ${{ steps.config.outputs.codebase_hygiene == 'true' }}
         run: bash .github/scripts/health-check/scan-hygiene.sh /tmp/health-results
 
       - name: Run consistency scan
-        if: grep -qi 'Consistency' /tmp/health-results/enabled_checks.txt
+        if: ${{ steps.config.outputs.consistency == 'true' }}
         run: bash .github/scripts/health-check/scan-consistency.sh /tmp/health-results
 
       - name: Run Svelte v5 migration scan
-        if: grep -qi 'Svelte v5' /tmp/health-results/enabled_checks.txt
+        if: ${{ steps.config.outputs.svelte_v5 == 'true' }}
         run: bash .github/scripts/health-check/scan-svelte-v5.sh /tmp/health-results
 
       - name: Run accessibility scan
-        if: grep -qi 'Accessibility' /tmp/health-results/enabled_checks.txt
+        if: ${{ steps.config.outputs.accessibility == 'true' }}
         run: bash .github/scripts/health-check/scan-a11y.sh /tmp/health-results
 
       - name: Run API/data handling scan
-        if: grep -qi 'API' /tmp/health-results/enabled_checks.txt
+        if: ${{ steps.config.outputs.api == 'true' }}
         run: bash .github/scripts/health-check/scan-api.sh /tmp/health-results
 
       - name: Run CI/CD scan
-        if: grep -qi 'CI' /tmp/health-results/enabled_checks.txt
+        if: ${{ steps.config.outputs.ci == 'true' }}
         run: bash .github/scripts/health-check/scan-ci.sh /tmp/health-results
 
       # Phase 2: Build structured report
@@ -108,11 +121,16 @@ jobs:
             const fs = require('fs');
 
             // Use AI-synthesized report if available, otherwise raw report
+            const aiReport = `${{ steps.ai-summary.outputs.report }}`;
             let reportBody;
-            try {
-              reportBody = fs.readFileSync('/tmp/health-results/report.md', 'utf8');
-            } catch (e) {
-              reportBody = '# Codebase Health Report\n\nError: Could not read report file.';
+            if (aiReport && aiReport.length > 0) {
+              reportBody = aiReport;
+            } else {
+              try {
+                reportBody = fs.readFileSync('/tmp/health-results/report.md', 'utf8');
+              } catch (e) {
+                reportBody = '# Codebase Health Report\n\nError: Could not read report file.';
+              }
             }
 
             // Check if skip-next marker exists on the latest health-report issue
@@ -121,7 +139,7 @@ jobs:
               repo: context.repo.repo,
               labels: 'health-report',
               state: 'all',
-              per_page: 1
+              per_page: 10
             });
 
             if (existingIssues.data.length > 0) {

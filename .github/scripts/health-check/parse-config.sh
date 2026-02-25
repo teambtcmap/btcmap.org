@@ -40,8 +40,8 @@ fi
 
 echo "Found /config comment on issue #$ISSUE_NUMBER, parsing..."
 
-# Parse checked items: [x] Some Check Name → "Some Check Name"
-echo "$CONFIG_BODY" | grep -oP '\[x\]\s+\K.*' | sed 's/[[:space:]]*$//' > "$ENABLED_FILE"
+# Parse checked items: [x] or [X] Some Check Name → "Some Check Name"
+echo "$CONFIG_BODY" | grep -ioP '\[x\]\s+\K.*' | sed 's/[[:space:]]*$//' > "$ENABLED_FILE"
 
 if [[ ! -s "$ENABLED_FILE" ]]; then
   echo "Config comment had no enabled checks, using defaults."

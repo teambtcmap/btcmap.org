@@ -83,7 +83,7 @@ if [[ -f ".github/dependabot.yml" ]]; then
     if ! grep -qP "$REGEX" package.json 2>/dev/null; then
       STALE_GROUPS="${STALE_GROUPS}Pattern: $pattern\n"
     fi
-  done < <(grep "- '" .github/dependabot.yml 2>/dev/null | grep -v 'package-ecosystem\|interval\|directory')
+  done < <(grep -F -- "- '" .github/dependabot.yml 2>/dev/null | grep -v 'package-ecosystem\|interval\|directory')
 
   if [[ -n "$STALE_GROUPS" ]]; then
     add_finding "low" "Potentially stale dependabot group patterns" \

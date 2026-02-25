@@ -346,10 +346,14 @@ render_findings() {
   echo ""
   echo "## Enabled Checks"
   for check in "Codebase hygiene" "Consistency" "Type safety audit" "CI/CD improvements" "Accessibility" "Svelte v5 migration readiness" "API/data handling" "Commit changelog analysis"; do
+    local label="$check"
+    if [[ "$check" == "Type safety audit" ]]; then
+      label="$check (not yet implemented)"
+    fi
     if is_enabled "$check"; then
-      echo "- [x] $check"
+      echo "- [x] $label"
     else
-      echo "- [ ] $check"
+      echo "- [ ] $label"
     fi
   done
   echo '```'

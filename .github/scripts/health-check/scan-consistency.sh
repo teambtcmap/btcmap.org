@@ -15,13 +15,13 @@ add_finding() {
 }
 
 # 1. interface vs type — project prefers `type` over `interface`
-INTERFACE_COUNT=$(grep -rn '^\s*export\s\+interface\b\|^\s*interface\b' src/ \
+INTERFACE_COUNT=$(grep -rnP '^\s*export\s+interface\b|^\s*interface\b' src/ \
   --include='*.ts' --include='*.svelte' 2>/dev/null | wc -l | tr -d ' ')
-TYPE_COUNT=$(grep -rn '^\s*export\s\+type\b\|^\s*type\b' src/ \
+TYPE_COUNT=$(grep -rnP '^\s*export\s+type\b|^\s*type\b' src/ \
   --include='*.ts' --include='*.svelte' 2>/dev/null | grep -v 'import type' | wc -l | tr -d ' ')
 
 if [[ "$INTERFACE_COUNT" -gt 0 ]]; then
-  INTERFACE_FILES=$(grep -rn '^\s*export\s\+interface\b\|^\s*interface\b' src/ \
+  INTERFACE_FILES=$(grep -rnP '^\s*export\s+interface\b|^\s*interface\b' src/ \
     --include='*.ts' --include='*.svelte' 2>/dev/null | head -10)
   add_finding "medium" "interface usage ($INTERFACE_COUNT) — project prefers type" \
     "Project convention is to use 'type' over 'interface'. Found $INTERFACE_COUNT interface declarations vs $TYPE_COUNT type declarations." \

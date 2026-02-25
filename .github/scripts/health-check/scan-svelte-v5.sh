@@ -52,10 +52,10 @@ PREV_REACTIVE=""
 PREV_DISPATCH=""
 PREV_SLOTS=""
 if [[ -n "$PREV_ISSUE" ]]; then
-  # Try to extract previous values from the report table
-  PREV_REACTIVE=$(echo "$PREV_ISSUE" | grep -oP 'reactive declarations\s*\|\s*\d+\s*\|\s*\K\d+' || true)
-  PREV_DISPATCH=$(echo "$PREV_ISSUE" | grep -oP 'createEventDispatcher\s*\|\s*\d+\s*\|\s*\K\d+' || true)
-  PREV_SLOTS=$(echo "$PREV_ISSUE" | grep -oP 'slot usage\s*\|\s*\d+\s*\|\s*\K\d+' || true)
+  # Extract previous values (the count column) from the report table
+  PREV_REACTIVE=$(echo "$PREV_ISSUE" | grep -oP 'reactive declarations\s*\|\s*\K\d+' || true)
+  PREV_DISPATCH=$(echo "$PREV_ISSUE" | grep -oP 'createEventDispatcher\s*\|\s*\K\d+' || true)
+  PREV_SLOTS=$(echo "$PREV_ISSUE" | grep -oP 'slot usage\s*\|\s*\K\d+' || true)
 fi
 
 cat > "$OUTPUT_FILE" << JSONEOF
