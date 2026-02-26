@@ -1413,7 +1413,7 @@ onDestroy(async () => {
 </svelte:head>
 
 <div class="relative h-screen w-full">
-	<h1 class="sr-only">Bitcoin Merchant Map</h1>
+	<h1 class="sr-only">{$_('map.bitcoinMerchantMapTitle')}</h1>
 	<MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
 
 	<!-- Map takes full space -->

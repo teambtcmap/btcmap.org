@@ -609,7 +609,12 @@
 		"collapseDrawer": "Свий панела",
 		"merchantDetails": "Детайли за търговеца",
 		"viewBoost": "Подсили",
-		"viewDetails": "Детайли"
+		"viewDetails": "Детайли",
+		"swipeUpForDetails": "Плъзнете нагоре за детайли",
+		"swipeDownToClose": "Плъзнете надолу за затваряне"
+	},
+	"map": {
+		"bitcoinMerchantMapTitle": "Карта на биткойн търговци"
 	},
 	"success": {
 		"linkCopied": "Връзката е копирана в клипборда!",

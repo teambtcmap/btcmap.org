@@ -206,7 +206,12 @@
 		"collapseDrawer": "Recolher painel",
 		"merchantDetails": "Detalhes do comerciante",
 		"viewBoost": "Impulsionar",
-		"viewDetails": "Detalhes"
+		"viewDetails": "Detalhes",
+		"swipeUpForDetails": "Deslize para cima para ver detalhes",
+		"swipeDownToClose": "Deslize para baixo para fechar"
+	},
+	"map": {
+		"bitcoinMerchantMapTitle": "Mapa de Comerciantes Bitcoin"
 	},
 	"info": {
 		"contact": "Contato",
@@ -274,6 +279,10 @@
 		"country": "País",
 		"community": "Comunidade",
 		"supertagger": "Supertagger"
+	},
+	"communityMap": {
+		"viewCommunity": "Ver Comunidade",
+		"pageTitle": "Mapa da Comunidade"
 	},
 	"taggerOnboarding": {
 		"nameLabel": "Nome",

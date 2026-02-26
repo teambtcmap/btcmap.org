@@ -210,7 +210,12 @@
 		"collapseDrawer": "Collapse drawer",
 		"merchantDetails": "Merchant details",
 		"viewBoost": "Boost",
-		"viewDetails": "Details"
+		"viewDetails": "Details",
+		"swipeUpForDetails": "Swipe up for details",
+		"swipeDownToClose": "Swipe down to close"
+	},
+	"map": {
+		"bitcoinMerchantMapTitle": "Bitcoin Merchant Map"
 	},
 	"info": {
 		"contact": "Contact",
@@ -291,6 +296,10 @@
 		"country": "Country",
 		"community": "Community",
 		"supertagger": "Supertagger"
+	},
+	"communityMap": {
+		"viewCommunity": "View Community",
+		"pageTitle": "Community Map"
 	},
 	"taggerOnboarding": {
 		"nameLabel": "Name",
