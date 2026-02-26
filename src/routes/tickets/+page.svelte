@@ -64,7 +64,7 @@ const isMaintenance = data.maintenance ?? false;
 				? 'text-white'
 				: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl lg:text-left"
 		>
-			Open Tickets
+			{$_('nav.openTickets')}
 			{#if totalTickets}
 				<span class="text-3xl">({totalTickets})</span>
 			{/if}
@@ -76,14 +76,13 @@ const isMaintenance = data.maintenance ?? false;
 	<h2
 		class="w-full text-center text-xl font-semibold text-primary lg:w-[675px] lg:text-left dark:text-white"
 	>
-		Tickets up for grabs from our noob forms! Anyone can help add or verify location submissions and
-		help vet communities.
+		{$_('maintain.ticketsSubheading')}
 	</h2>
 
 	<p class="text-center text-xl text-primary lg:text-left dark:text-white">
-		More information on how to get involved can be found in our <a
+		{$_('maintain.taggingInstructionsIntro')} <a
 			href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers"
-			class="text-link transition-colors hover:text-hover">Tagging Merchant Instructions</a
+			class="text-link transition-colors hover:text-hover">{$_('maintain.taggingInstructionsLink')}</a
 		>.
 	</p>
 
@@ -91,12 +90,12 @@ const isMaintenance = data.maintenance ?? false;
 		<div class="w-full rounded-3xl border border-gray-300 dark:border-white/95 dark:bg-white/10">
 			{#if isMaintenance}
 				<p class="p-5 text-center text-body dark:text-white">
-					Issues are currently under maintenance. <a
+					{$_('maintain.underMaintenance')} <a
 						href="https://gitea.btcmap.org/teambtcmap/btcmap-data/issues"
 						target="_blank"
 						rel="noreferrer"
-						class="text-link transition-colors hover:text-hover">View issues directly on Gitea</a
-					>.
+						class="text-link transition-colors hover:text-hover">{$_('maintain.viewOnGitea')}</a
+					>
 				</p>
 			{:else}
 				<div class="p-5 text-center text-2xl font-semibold text-primary dark:text-white">
@@ -107,7 +106,7 @@ const isMaintenance = data.maintenance ?? false;
 								: type === 'Community'
 									? 'rounded-b md:rounded-r md:rounded-bl-none'
 									: ''} {showType === type ? 'bg-link text-white' : ''} transition-colors"
-							on:click={() => (showType = type)}>{type}</button
+							on:click={() => (showType = type)}>{$_(`maintain.${type.toLowerCase()}`)}</button
 						>
 					{/each}
 				</div>
@@ -152,7 +151,7 @@ const isMaintenance = data.maintenance ?? false;
 							<p
 								class="border-t border-gray-300 p-5 text-center text-body dark:border-white/95 dark:text-white"
 							>
-								No open <strong>verify</strong> tickets.
+								{$_('maintain.noVerifyTickets')}
 							</p>
 						{/if}
 					{:else if showType === 'Community'}
@@ -182,7 +181,7 @@ const isMaintenance = data.maintenance ?? false;
 						<p
 							class="border-t border-gray-300 p-5 text-center font-semibold text-primary dark:border-white/95 dark:text-white"
 						>
-							View all open tickets directly on <a
+							{$_('maintain.viewAllOnGitea')} <a
 								href="https://gitea.btcmap.org/teambtcmap/btcmap-data/issues"
 								target="_blank"
 								rel="noreferrer"
@@ -198,7 +197,7 @@ const isMaintenance = data.maintenance ?? false;
 			{/if}
 		</div>
 		<p class="text-center text-sm text-body lg:text-left dark:text-white">
-			*Data updated every 10 minutes.
+			{$_('maintain.dataUpdatedNote')}
 		</p>
 		<div class="mt-10 flex justify-center">
 			<TopButton />
