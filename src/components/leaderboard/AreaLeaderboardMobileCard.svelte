@@ -3,6 +3,7 @@ import type { Table } from "@tanstack/svelte-table";
 
 import GradeDisplay from "$components/leaderboard/GradeDisplay.svelte";
 import LeaderboardCountryName from "$components/leaderboard/LeaderboardCountryName.svelte";
+import { _ } from "$lib/i18n";
 import type { AreaType } from "$lib/types";
 import { isEven } from "$lib/utils";
 
@@ -61,7 +62,7 @@ export let type: AreaType;
 							)
 								? 'break-all'
 								: ''}"
-							aria-label="View {localizedName} details"
+							aria-label={$_('areaLeaderboard.viewDetails', { values: { name: localizedName } })}
 						>
 							{localizedName}
 						</a>
@@ -95,7 +96,7 @@ export let type: AreaType;
 						)
 							? 'break-all'
 							: ''}"
-						aria-label="View {area.tags?.name || 'Unknown'} details"
+						aria-label={$_('areaLeaderboard.viewDetails', { values: { name: area.tags?.name || 'Unknown' } })}
 					>
 						{area.tags?.name || 'Unknown'}
 					</a>

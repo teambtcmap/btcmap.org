@@ -1,4 +1,8 @@
 <script lang="ts">
+import { get } from "svelte/store";
+
+import { _ } from "$lib/i18n";
+
 export let grade: number = 0;
 export let percentage: number | undefined = undefined;
 export let avgDate: string | undefined = undefined;
@@ -69,7 +73,9 @@ function gradeTooltipAction(
 		class:flex={size === 'large'}
 		class:justify-center={size === 'large'}
 		role="img"
-		aria-label="{grade} out of 5 stars{percentage ? `, ${percentage.toFixed(1)}% up-to-date` : ''}"
+		aria-label={percentage !== undefined
+			? get(_)("gradeDisplay.ariaLabelWithPercentage", { values: { grade, percentage: percentage.toFixed(1) } })
+			: get(_)("gradeDisplay.ariaLabel", { values: { grade } })}
 		use:gradeTooltipAction={{ percentage, avgDate }}
 	>
 		{'★'.repeat(grade)}{'☆'.repeat(5 - grade)}

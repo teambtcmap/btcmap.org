@@ -1,5 +1,6 @@
 <script lang="ts">
 import LeaderboardCountryName from "$components/leaderboard/LeaderboardCountryName.svelte";
+import { _ } from "$lib/i18n";
 import type { AreaType } from "$lib/types";
 
 export let type: AreaType;
@@ -41,7 +42,7 @@ function handleImageError(event: Event) {
 					)
 						? 'break-all'
 						: ''}"
-					aria-label="View {localizedName} details"
+					aria-label={$_('areaLeaderboard.viewDetails', { values: { name: localizedName } })}
 				>
 					<!-- eslint-enable svelte/no-navigation-without-resolve -->
 					{localizedName}
@@ -61,7 +62,7 @@ function handleImageError(event: Event) {
 			<a
 				href={`/${type}/${id}`}
 				class="font-medium text-link transition-colors hover:text-hover {hasLongName ? 'break-all' : ''}"
-				aria-label="View {displayName} details"
+				aria-label={$_('areaLeaderboard.viewDetails', { values: { name: displayName } })}
 			>
 				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 				{displayName}
@@ -70,7 +71,7 @@ function handleImageError(event: Event) {
 	{/if}
 {:else}
 	<!-- Skeleton loading state -->
-	<div class="flex items-center gap-3" role="status" aria-label="Loading area information">
+	<div class="flex items-center gap-3" role="status" aria-label={$_('areaLeaderboard.loadingAreaInfo')}>
 		<div class="h-10 w-10 shrink-0 animate-pulse rounded-full bg-link/50" aria-hidden="true"></div>
 		<div class="h-5 w-24 animate-pulse rounded bg-link/50" aria-hidden="true"></div>
 		<span class="sr-only">Loading...</span>

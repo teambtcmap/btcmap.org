@@ -151,6 +151,7 @@
 		"description": "Make this merchant stand out in bitcoin orange on the map, shine in the search results, and be discovered in the exclusive boosted locations map!",
 		"seeHowItLooks": "See how it looks",
 		"boostedPinAlt": "Boosted pin",
+		"boostedMerchant": "Boosted merchant",
 		"feeNote": "The fee is used to support the BTC Map open-source project and continue its development.",
 		"boostFor1Month": "Boost for 1 month",
 		"boostForNMonths": "Boost for {time} months",
@@ -278,6 +279,9 @@
 		"searchInput": "Search for Bitcoin merchants"
 	},
 	"footer": {
+		"switchToEnglish": "Switch to English",
+		"switchToPortuguese": "Switch to Portuguese",
+		"switchToBulgarian": "Switch to Bulgarian",
 		"aboutUs": "About Us",
 		"media": "Media",
 		"license": "License",
@@ -303,7 +307,8 @@
 	},
 	"communityMap": {
 		"viewCommunity": "View Community",
-		"pageTitle": "Community Map"
+		"pageTitle": "Community Map",
+		"organization": "Organization"
 	},
 	"taggerOnboarding": {
 		"nameLabel": "Name",
@@ -320,7 +325,16 @@
 		"successMessage": "Thanks for your interest in becoming a tagger! We'll review your application and one of the team will be in contact via the email you provided. Contact hello@btcmap.org if you need to follow up."
 	},
 	"taggerProfile": {
-		"osmProfile": "OSM Profile"
+		"osmProfile": "OSM Profile",
+		"totalTags": "Total Tags",
+		"created": "Created",
+		"updated": "Updated",
+		"deleted": "Deleted",
+		"chartCreated": "Created",
+		"chartUpdated": "Updated",
+		"chartDeleted": "Deleted",
+		"chartLabel": "Tag Types",
+		"mappingSince": "Mapping Since"
 	},
 	"forms": {
 		"optional": "(optional)",
@@ -671,7 +685,13 @@
 		"secondaryCalc": "Secondary: Total number of locations.",
 		"locationsNote": "Locations include ATMs.",
 		"totalTooltip": "All locations inc. ATMs",
-		"verifiedTooltip": "Locations verified within the past year"
+		"verifiedTooltip": "Locations verified within the past year",
+		"tableAria": "Leaderboard table",
+		"totalTooltipInfo": "Information about total locations",
+		"verifiedTooltipInfo": "Information about verified locations",
+		"gradeTooltipInfo": "Information about Grade metric",
+		"viewDetails": "View {name} details",
+		"loadingAreaInfo": "Loading area information"
 	},
 	"issuesTable": {
 		"searchPlaceholder": "Search...",
@@ -714,6 +734,10 @@
 		"northAmerica": "North America",
 		"oceania": "Oceania",
 		"southAmerica": "South America"
+	},
+	"gradeDisplay": {
+		"ariaLabel": "{grade} out of 5 stars",
+		"ariaLabelWithPercentage": "{grade} out of 5 stars, {percentage}% up-to-date"
 	},
 	"badges": {
 		"title": "Badges",

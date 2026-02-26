@@ -35,7 +35,7 @@ $: hasVerification = merchant.verified_at !== undefined;
 		{#if isBoosted}
 			<div
 				class="flex-shrink-0 rounded-full bg-link px-2.5 py-1 text-xs font-semibold text-white"
-				title="Boosted merchant"
+				title={$_('boost.boostedMerchant')}
 			>
 				<Icon w="14" h="14" icon="bolt" type="material" class="mr-1 inline" />
 				Boosted

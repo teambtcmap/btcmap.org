@@ -151,6 +151,7 @@
 		"description": "Destaque este comerciante em laranja bitcoin no mapa, brilhe nos resultados de pesquisa e seja descoberto no mapa exclusivo de locais impulsionados!",
 		"seeHowItLooks": "Veja como fica",
 		"boostedPinAlt": "Pin impulsionado",
+		"boostedMerchant": "Comerciante impulsionado",
 		"feeNote": "A taxa é usada para apoiar o projeto open source BTC Map e continuar seu desenvolvimento.",
 		"boostFor1Month": "Impulsionar por 1 mês",
 		"boostForNMonths": "Impulsionar por {time} meses",
@@ -262,6 +263,9 @@
 		"searchInput": "Pesquisar comerciantes Bitcoin"
 	},
 	"footer": {
+		"switchToEnglish": "Mudar para inglês",
+		"switchToPortuguese": "Mudar para português",
+		"switchToBulgarian": "Mudar para búlgaro",
 		"aboutUs": "Sobre Nós",
 		"media": "Mídia",
 		"license": "Licença",
@@ -287,7 +291,8 @@
 	},
 	"communityMap": {
 		"viewCommunity": "Ver Comunidade",
-		"pageTitle": "Mapa da Comunidade"
+		"pageTitle": "Mapa da Comunidade",
+		"organization": "Organização"
 	},
 	"taggerOnboarding": {
 		"nameLabel": "Nome",
@@ -304,7 +309,16 @@
 		"successMessage": "Obrigado pelo seu interesse em se tornar um etiquetador! Revisaremos sua candidatura e alguém da equipe entrará em contato pelo e-mail fornecido. Entre em contato em hello@btcmap.org se precisar de acompanhamento."
 	},
 	"taggerProfile": {
-		"osmProfile": "Perfil OSM"
+		"osmProfile": "Perfil OSM",
+		"totalTags": "Total de Tags",
+		"created": "Criados",
+		"updated": "Atualizados",
+		"deleted": "Excluídos",
+		"chartCreated": "Criados",
+		"chartUpdated": "Atualizados",
+		"chartDeleted": "Excluídos",
+		"chartLabel": "Tipos de Tags",
+		"mappingSince": "Mapeando desde"
 	},
 	"forms": {
 		"optional": "(opcional)",
@@ -603,7 +617,17 @@
 		"secondaryCalc": "Secundário: Número total de locais.",
 		"locationsNote": "Locais incluem caixas eletrônicos.",
 		"totalTooltip": "Todos os locais incl. caixas eletrônicos",
-		"verifiedTooltip": "Locais verificados no último ano"
+		"verifiedTooltip": "Locais verificados no último ano",
+		"tableAria": "Tabela do ranking",
+		"totalTooltipInfo": "Informações sobre total de locais",
+		"verifiedTooltipInfo": "Informações sobre locais verificados",
+		"gradeTooltipInfo": "Informações sobre métrica de nota",
+		"viewDetails": "Ver detalhes de {name}",
+		"loadingAreaInfo": "Carregando informações da área"
+	},
+	"gradeDisplay": {
+		"ariaLabel": "{grade} de 5 estrelas",
+		"ariaLabelWithPercentage": "{grade} de 5 estrelas, {percentage}% atualizado"
 	},
 	"badges": {
 		"title": "Emblemas",
