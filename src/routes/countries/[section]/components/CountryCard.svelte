@@ -9,15 +9,17 @@ export let id: string;
 export let name: string;
 
 let localizedName = name;
+let nameRequestId = 0;
 $: currentLocale = $locale ?? "en";
 $: {
+	const requestId = ++nameRequestId;
 	localizedName = name;
 	getCountryName(id, currentLocale, name)
 		.then((n) => {
-			localizedName = n;
+			if (requestId === nameRequestId) localizedName = n;
 		})
 		.catch(() => {
-			localizedName = name;
+			if (requestId === nameRequestId) localizedName = name;
 		});
 }
 </script>

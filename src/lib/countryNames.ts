@@ -8,8 +8,14 @@ const localeMap = {
 	bg: "bg",
 } as const;
 
+type CountryLocale = (typeof localeMap)[keyof typeof localeMap];
+type NonEnglishCountryLocale = Exclude<CountryLocale, "en">;
+
 // Explicit imports so Vite can bundle; dynamic template imports fail with bare specifiers
-const localeLoaders: Record<string, () => Promise<{ default: LocaleData }>> = {
+const localeLoaders: Record<
+	NonEnglishCountryLocale,
+	() => Promise<{ default: LocaleData }>
+> = {
 	pt: () => import("i18n-iso-countries/langs/pt.json"),
 	bg: () => import("i18n-iso-countries/langs/bg.json"),
 };
@@ -29,9 +35,8 @@ export async function getCountryName(
 		if (countryLocale === "en") return fallback;
 
 		if (!loadedLocales.has(countryLocale)) {
-			const loader = localeLoaders[countryLocale];
-			if (!loader) return fallback;
-			const localeModule = await loader();
+			const localeModule =
+				await localeLoaders[countryLocale as NonEnglishCountryLocale]();
 			countries.registerLocale(localeModule.default);
 			loadedLocales.add(countryLocale);
 		}
