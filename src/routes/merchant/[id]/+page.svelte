@@ -753,7 +753,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 							/>
 						{/if}
 					{:else}
-						<p class="p-5 text-body dark:text-white">No comments yet.</p>
+						<p class="p-5 text-body dark:text-white">{$_('comments.none')}</p>
 					{/if}
 				</div>
 			</div>

@@ -530,7 +530,7 @@ onDestroy(() => {
 					target="_blank"
 					rel="noreferrer"
 					class="mx-auto flex w-24 items-center justify-center text-xs text-link transition-colors hover:text-hover"
-					>OSM Profile <svg
+					>{$_('taggerProfile.osmProfile')} <svg
 						class="ml-1 w-3"
 						width="16"
 						height="16"

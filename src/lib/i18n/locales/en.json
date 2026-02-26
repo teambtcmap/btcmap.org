@@ -297,7 +297,17 @@
 		"emailLabel": "Email",
 		"namePlaceholder": "Your name",
 		"emailPlaceholder": "your@email.com",
-		"loadingForm": "Loading form..."
+		"loadingForm": "Loading form...",
+		"refreshCaptcha": "Refresh captcha",
+		"submittingApplication": "Submitting your application...",
+		"submitButton": "Submit Application",
+		"captchaPlaceholder": "Please enter the captcha text.",
+		"honeyPlaceholder": "A nice pot of honey.",
+		"successType": "Application",
+		"successMessage": "Thanks for your interest in becoming a tagger! We'll review your application and one of the team will be in contact via the email you provided. Contact hello@btcmap.org if you need to follow up."
+	},
+	"taggerProfile": {
+		"osmProfile": "OSM Profile"
 	},
 	"forms": {
 		"optional": "(optional)",
