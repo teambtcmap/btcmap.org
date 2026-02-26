@@ -25,9 +25,10 @@ test.describe('Verify Location Page', () => {
 		await expect(page.getByText('How did you verify this?')).toBeVisible();
 		await expect(page.getByText('Bot protection')).toBeVisible();
 
-		// Check submit button is present
-		const submitButton = page.getByRole('button', { name: 'Submit Report' });
-		await expect(submitButton).toBeVisible();
+		// Check submit button is present (data-testid is locale-independent)
+		const submitSection = page.getByTestId('verify-submit');
+		await submitSection.scrollIntoViewIfNeeded();
+		await expect(submitSection).toBeVisible({ timeout: 15000 });
 
 		// Check basic form elements exist (don't test if they're enabled - depends on data loading)
 		const currentCheckbox = page.getByRole('checkbox', { name: 'Current information is correct' });

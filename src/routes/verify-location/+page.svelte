@@ -265,13 +265,15 @@ onMount(async () => {
 				bind:this={honeyInput}
 			/>
 
-			<PrimaryButton
-				loading={submitting}
-				disabled={submitting || !captchaSecret || !data}
-				style="w-full py-3 rounded-xl"
-			>
-				{$_('verifyLocation.submitReport')}
-			</PrimaryButton>
+			<div data-testid="verify-submit">
+				<PrimaryButton
+					loading={submitting}
+					disabled={submitting || !captchaSecret || !data}
+					style="w-full py-3 rounded-xl"
+				>
+					{$_('verifyLocation.submitReport')}
+				</PrimaryButton>
+			</div>
 		</form>
 	</section>
 {:else}
