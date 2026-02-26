@@ -5,6 +5,7 @@ import { flexRender } from "@tanstack/svelte-table";
 import Icon from "$components/Icon.svelte";
 import AreaLeaderboardItemName from "$components/leaderboard/AreaLeaderboardItemName.svelte";
 import GradeDisplay from "$components/leaderboard/GradeDisplay.svelte";
+import { _ } from "$lib/i18n";
 import type { AreaType } from "$lib/types";
 import { isEven } from "$lib/utils";
 
@@ -16,7 +17,7 @@ export let upToDateTooltip: HTMLButtonElement;
 export let gradeTooltip: HTMLButtonElement;
 </script>
 
-<div class="hidden lg:block" role="region" aria-label="Leaderboard table">
+<div class="hidden lg:block" role="region" aria-label={$_('areaLeaderboard.tableAria')}>
 	<table class="w-full text-left text-xs text-primary lg:text-sm xl:text-lg dark:text-white">
 		<thead>
 			{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
@@ -67,7 +68,7 @@ export let gradeTooltip: HTMLButtonElement;
 											bind:this={totalTooltip}
 											type="button"
 											class="ml-1 cursor-default"
-											aria-label="Information about total locations"
+											aria-label={$_('areaLeaderboard.totalTooltipInfo')}
 										>
 											<Icon type="fa" icon="circle-info" w="14" h="14" class="text-sm" />
 										</button>
@@ -76,7 +77,7 @@ export let gradeTooltip: HTMLButtonElement;
 											bind:this={upToDateTooltip}
 											type="button"
 											class="ml-1 cursor-default"
-											aria-label="Information about verified locations"
+											aria-label={$_('areaLeaderboard.verifiedTooltipInfo')}
 										>
 											<Icon type="fa" icon="circle-info" w="14" h="14" class="text-sm" />
 										</button>
@@ -85,7 +86,7 @@ export let gradeTooltip: HTMLButtonElement;
 											bind:this={gradeTooltip}
 											type="button"
 											class="ml-1 cursor-default"
-											aria-label="Information about Grade metric"
+											aria-label={$_('areaLeaderboard.gradeTooltipInfo')}
 										>
 											<Icon type="fa" icon="circle-info" w="14" h="14" class="text-sm" />
 										</button>

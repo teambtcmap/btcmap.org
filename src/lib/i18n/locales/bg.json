@@ -277,6 +277,9 @@
 		"updateError": "Не може да се актуализират местата, използват се кеширани данни."
 	},
 	"footer": {
+		"switchToEnglish": "Преминаване към английски",
+		"switchToPortuguese": "Преминаване към португалски",
+		"switchToBulgarian": "Преминаване към български",
 		"aboutUs": "За нас",
 		"analytics": "Анализи",
 		"bitcoinForBusiness": "₿ за бизнеса",
@@ -481,7 +484,13 @@
 		"secondaryCalc": "Вторично: Общ брой места.",
 		"locationsNote": "Местата включват банкомати.",
 		"totalTooltip": "Всички места включ. банкомати",
-		"verifiedTooltip": "Места, проверени през последната година"
+		"verifiedTooltip": "Места, проверени през последната година",
+		"tableAria": "Таблица с класация",
+		"totalTooltipInfo": "Информация за общо места",
+		"verifiedTooltipInfo": "Информация за проверени места",
+		"gradeTooltipInfo": "Информация за метриката Оценка",
+		"viewDetails": "Преглед на детайли за {name}",
+		"loadingAreaInfo": "Зареждане на информация за областта"
 	},
 	"verifyCommunityForm": {
 		"heading": "Провери информацията за общността",
@@ -693,6 +702,10 @@
 		"official": "Официални",
 		"community": "Общност",
 		"googlePlayNote": "Забележка: Няма опция за Google Play поради прекомерните изисквания за KYC за разработчици."
+	},
+	"gradeDisplay": {
+		"ariaLabel": "{grade} от 5 звезди",
+		"ariaLabelWithPercentage": "{grade} от 5 звезди, {percentage}% актуално"
 	},
 	"badges": {
 		"title": "Значки",

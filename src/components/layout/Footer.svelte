@@ -68,7 +68,7 @@ const links = [
 				type="button"
 				on:click={() => switchLanguage('en')}
 				disabled={$locale === 'en'}
-				aria-label="Switch to English"
+				aria-label={$_('footer.switchToEnglish')}
 				class="
 					{$locale === 'en'
 					? 'cursor-default font-bold text-body underline dark:text-white/50'
@@ -96,7 +96,7 @@ const links = [
 				type="button"
 				on:click={() => switchLanguage('bg')}
 				disabled={$locale === 'bg'}
-				aria-label="Преминаване към български"
+				aria-label={$_('footer.switchToBulgarian')}
 				class="
 					{$locale === 'bg'
 					? 'cursor-default font-bold text-body underline dark:text-white/50'

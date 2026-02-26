@@ -324,7 +324,7 @@ $: {
 			class="grid rounded-3xl border border-gray-300 md:grid-cols-2 xl:grid-cols-2 dark:border-white/95 dark:bg-white/10"
 		>
 			<DashboardStat
-				title="Total Exchanges"
+				title={$_('dashboard.totalExchanges')}
 				stat={areaDashboard?.total_exchanges}
 				border="border-b md:border-b-0 border-gray-300"
 				loading={false}

@@ -221,7 +221,7 @@ export function openDrawer(id: number) {
 		on:focusout={handleFocusOut}
 		role="dialog"
 		aria-modal="true"
-		aria-label="Merchant details"
+		aria-label={$_("mapDrawer.merchantDetails")}
 	>
 		<!-- Drag handle and header area -->
 		<div

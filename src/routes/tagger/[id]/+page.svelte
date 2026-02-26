@@ -1,5 +1,7 @@
 <script lang="ts">
-import { _ } from "svelte-i18n";
+import { get } from "svelte/store";
+
+import { _ } from "$lib/i18n";
 
 import type { PageData } from "./$types";
 export let data: PageData;
@@ -356,10 +358,15 @@ const initializeData = async () => {
 			existingChart.destroy();
 		}
 
+		const t = get(_);
 		tagTypeChart = new Chart(tagTypeChartCanvas, {
 			type: "pie",
 			data: {
-				labels: ["Created", "Updated", "Deleted"],
+				labels: [
+					t("taggerProfile.chartCreated"),
+					t("taggerProfile.chartUpdated"),
+					t("taggerProfile.chartDeleted"),
+				],
 				datasets: [
 					{
 						label: "Tag Types",
@@ -521,7 +528,7 @@ onDestroy(() => {
 			<p class="flex items-center justify-center space-x-1 text-sm text-primary dark:text-white">
 				<Icon type="fa" icon="map-pin" w="16" h="16" />
 				<span class="block">
-					Mapping Since: {mappingSince ? format(new Date(mappingSince), 'yyyy-MM-dd') : '-'}
+					{$_('taggerProfile.mappingSince')}: {mappingSince ? format(new Date(mappingSince), 'yyyy-MM-dd') : '-'}
 				</span>
 			</p>
 			{#if username}
@@ -592,23 +599,23 @@ onDestroy(() => {
 			class="grid rounded-t-3xl border border-gray-300 md:grid-cols-2 xl:grid-cols-4 dark:border-white/95 dark:bg-white/10"
 		>
 			<ProfileStat
-				title="Total Tags"
+				title={$_('taggerProfile.totalTags')}
 				stat={total}
 				border="border-b xl:border-b-0 md:border-r border-gray-300 dark:border-white/95"
 			/>
 			<ProfileStat
-				title="Created"
+				title={$_('taggerProfile.created')}
 				stat={created}
 				percent={createdPercent}
 				border="border-b xl:border-b-0 xl:border-r border-gray-300 dark:border-white/95"
 			/>
 			<ProfileStat
-				title="Updated"
+				title={$_('taggerProfile.updated')}
 				stat={updated}
 				percent={updatedPercent}
 				border="border-b md:border-b-0 md:border-r border-gray-300 dark:border-white/95"
 			/>
-			<ProfileStat title="Deleted" stat={deleted} percent={deletedPercent} />
+			<ProfileStat title={$_('taggerProfile.deleted')} stat={deleted} percent={deletedPercent} />
 		</div>
 
 		<div
