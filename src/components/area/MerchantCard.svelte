@@ -71,7 +71,7 @@ let outdatedTooltip: HTMLDivElement;
 
 $: outdatedTooltip &&
 	tippy([outdatedTooltip], {
-		content: "Outdated please re-verify",
+		content: $_(`verification.outdatedTooltip`),
 	});
 </script>
 

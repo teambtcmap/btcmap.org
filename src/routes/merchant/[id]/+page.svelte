@@ -548,7 +548,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 					<MerchantAction
 						link={twitter.startsWith('http') ? twitter : `https://twitter.com/${twitter}`}
 						icon="x"
-						text="X"
+						text={$_('merchant.socialX')}
 					/>
 				{/if}
 
@@ -556,7 +556,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 					<MerchantAction
 						link={instagram.startsWith('http') ? instagram : `https://instagram.com/${instagram}`}
 						icon="instagram"
-						text="Instagram"
+						text={$_('merchant.socialInstagram')}
 					/>
 				{/if}
 
@@ -564,7 +564,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 					<MerchantAction
 						link={facebook.startsWith('http') ? facebook : `https://facebook.com/${facebook}`}
 						icon="facebook"
-						text="Facebook"
+						text={$_('merchant.socialFacebook')}
 					/>
 				{/if}
 

@@ -38,7 +38,7 @@ $: hasVerification = merchant.verified_at !== undefined;
 				title={$_('boost.boostedMerchant')}
 			>
 				<Icon w="14" h="14" icon="bolt" type="material" class="mr-1 inline" />
-				Boosted
+				{$_('boost.boosted')}
 			</div>
 		{/if}
 	</div>
@@ -52,21 +52,21 @@ $: hasVerification = merchant.verified_at !== undefined;
 					<PaymentMethodIcon
 						status={merchant['osm:payment:onchain']}
 						method="btc"
-						label="On-chain"
+						label={$_('payment.onchain')}
 					/>
 				{/if}
 				{#if merchant['osm:payment:lightning']}
 					<PaymentMethodIcon
 						status={merchant['osm:payment:lightning']}
 						method="ln"
-						label="Lightning"
+						label={$_('payment.lightning')}
 					/>
 				{/if}
 				{#if merchant['osm:payment:lightning_contactless']}
 					<PaymentMethodIcon
 						status={merchant['osm:payment:lightning_contactless']}
 						method="nfc"
-						label="Lightning contactless"
+						label={$_('payment.lightningContactless')}
 					/>
 				{/if}
 			{:else if isLoading}
@@ -83,12 +83,12 @@ $: hasVerification = merchant.verified_at !== undefined;
 				{#if isUpToDate}
 					<div class="flex items-center gap-1 text-green-600 dark:text-green-400">
 						<Icon w="14" h="14" icon="verified" type="material" />
-						<span>Verified</span>
+						<span>{$_('verification.verified')}</span>
 					</div>
 				{:else}
 					<div class="flex items-center gap-1 text-orange-600 dark:text-orange-400">
 						<Icon w="14" h="14" icon="warning" type="material" />
-						<span>Outdated</span>
+						<span>{$_('verification.outdated')}</span>
 					</div>
 				{/if}
 			{:else if isLoading}
