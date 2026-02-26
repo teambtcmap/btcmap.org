@@ -121,8 +121,8 @@ function handleSectionChange(event: Event) {
 <svelte:head>
 	<title>BTC Map - Countries</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/countries.png" />
-	<meta property="twitter:title" content="BTC Map - Countries" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/countries.png" />
+	<meta name="twitter:title" content="BTC Map - Countries" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/countries.png" />
 </svelte:head>
 
 <div class="my-10 space-y-10 text-center md:my-20">

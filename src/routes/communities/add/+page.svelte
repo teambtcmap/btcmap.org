@@ -173,8 +173,8 @@ onMount(async () => {
 <svelte:head>
 	<title>BTC Map - Add Community</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/add-community.png" />
-	<meta property="twitter:title" content="BTC Map - Add Community" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/add-community.png" />
+	<meta name="twitter:title" content="BTC Map - Add Community" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/add-community.png" />
 </svelte:head>
 
 <Breadcrumbs {routes} />

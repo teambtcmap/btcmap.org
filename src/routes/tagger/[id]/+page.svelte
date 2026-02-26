@@ -492,8 +492,8 @@ onDestroy(() => {
 <svelte:head>
 	<title>{username ? username + ' - ' : ''}BTC Map Supertagger</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/supertagger.png" />
-	<meta property="twitter:title" content="{username ? username + ' - ' : ''}BTC Map Supertagger" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/supertagger.png" />
+	<meta name="twitter:title" content="{username ? username + ' - ' : ''}BTC Map Supertagger" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/supertagger.png" />
 </svelte:head>
 
 <div class="my-10 text-center md:my-20">

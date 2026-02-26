@@ -53,8 +53,8 @@ const isMaintenance = data.maintenance ?? false;
 <svelte:head>
 	<title>BTC Map - {$_('nav.openTickets')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/home.png" />
-	<meta property="twitter:title" content="BTC Map - {$_('nav.openTickets')}" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/home.png" />
+	<meta name="twitter:title" content="BTC Map - {$_('nav.openTickets')}" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
 <div class="mt-10 mb-20 space-y-10">

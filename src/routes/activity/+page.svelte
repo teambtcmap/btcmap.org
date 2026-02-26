@@ -107,8 +107,8 @@ $: latestTaggers = !!(supertaggers?.length && !elementsLoading);
 <svelte:head>
 	<title>BTC Map - Activity</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/activity.png" />
-	<meta property="twitter:title" content="BTC Map - Activity" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/activity.png" />
+	<meta name="twitter:title" content="BTC Map - Activity" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/activity.png" />
 </svelte:head>
 
 <div class="mt-10 mb-20 space-y-10">

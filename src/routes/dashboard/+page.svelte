@@ -284,8 +284,8 @@ $: {
 <svelte:head>
 	<title>BTC Map - {$_('dashboard.hero')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/dash.png" />
-	<meta property="twitter:title" content="BTC Map - {$_('dashboard.hero')}" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/dash.png" />
+	<meta name="twitter:title" content="BTC Map - {$_('dashboard.hero')}" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/dash.png" />
 </svelte:head>
 
 <div class="mt-10 mb-20 space-y-10">

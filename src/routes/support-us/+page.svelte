@@ -79,8 +79,8 @@ const supporters = [
 <svelte:head>
 	<title>BTC Map - {t("supportUs.title")}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/support.png" />
-	<meta property="twitter:title" content="BTC Map - {t("supportUs.title")}" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/support.png" />
+	<meta name="twitter:title" content="BTC Map - {t("supportUs.title")}" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/support.png" />
 </svelte:head>
 
 <div class="my-10 space-y-10 text-center md:my-20">

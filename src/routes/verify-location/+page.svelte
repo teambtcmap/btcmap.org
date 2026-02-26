@@ -121,8 +121,8 @@ onMount(async () => {
 <svelte:head>
 	<title>BTC Map - {$_('verifyLocation.heading')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/verify.png" />
-	<meta property="twitter:title" content="BTC Map - {$_('verifyLocation.heading')}" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/verify.png" />
+	<meta name="twitter:title" content="BTC Map - {$_('verifyLocation.heading')}" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/verify.png" />
 </svelte:head>
 
 {#if !submitted}

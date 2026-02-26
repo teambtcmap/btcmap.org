@@ -290,8 +290,8 @@ onDestroy(async () => {
 <svelte:head>
 	<title>BTC Map - Community Map</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/communities.png" />
-	<meta property="twitter:title" content="BTC Map - Community Map" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/communities.png" />
+	<meta name="twitter:title" content="BTC Map - Community Map" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/communities.png" />
 </svelte:head>
 
 <div>

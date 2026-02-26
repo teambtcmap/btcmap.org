@@ -23,8 +23,8 @@ onMount(() => {
 <svelte:head>
 	<title>BTC Map - Communities Leaderboard</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/top-communities.png" />
-	<meta property="twitter:title" content="BTC Map - Communities Leaderboard" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/top-communities.png" />
+	<meta name="twitter:title" content="BTC Map - Communities Leaderboard" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/top-communities.png" />
 </svelte:head>
 
 <Breadcrumbs {routes} />
