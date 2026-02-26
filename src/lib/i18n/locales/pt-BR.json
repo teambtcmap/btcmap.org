@@ -338,7 +338,10 @@
 		"submitReport": "Enviar Relatório",
 		"selectLocation": "Selecionar Local",
 		"locationSelected": "Local selecionado!",
-		"searchButton": "Pesquisar 🔍"
+		"searchButton": "Pesquisar 🔍",
+		"address": "Endereço",
+		"honeyPlaceholder": "Um pote de mel.",
+		"captchaPlaceholder": "Por favor insira o texto do captcha."
 	},
 	"addLocation": {
 		"hero": "Aceita bitcoin? Seja encontrado.",

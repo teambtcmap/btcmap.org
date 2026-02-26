@@ -3,6 +3,7 @@ import axios from "axios";
 import DOMPurify from "dompurify";
 import type { Map, MaplibreGL, Marker } from "leaflet";
 import { onDestroy, onMount, tick } from "svelte";
+import { get } from "svelte/store";
 
 import FormSuccess from "$components/FormSuccess.svelte";
 import FormSelect from "$components/form/FormSelect.svelte";
@@ -39,7 +40,7 @@ const fetchCaptcha = () => {
 			captchaContent = DOMPurify.sanitize(response.data.captcha);
 		})
 		.catch((error) => {
-			errToast("Could not fetch captcha, please try again or contact BTC Map.");
+			errToast(get(_)("errors.captchaFetch"));
 			console.error(error);
 		})
 		.finally(() => {
@@ -185,10 +186,10 @@ const submitForm = (event: SubmitEvent) => {
 	event.preventDefault();
 	if (!selected) {
 		noLocationSelected = true;
-		errToast("Please select a location...");
+		errToast(get(_)("errors.noLocationSelected"));
 	} else if (!onchain.checked && !lightning.checked && !nfc.checked) {
 		noMethodSelected = true;
-		errToast("Please select at least one payment method...");
+		errToast(get(_)("errors.noPaymentMethod"));
 	} else {
 		submitting = true;
 		if (onchain.checked) {
@@ -234,9 +235,7 @@ const submitForm = (event: SubmitEvent) => {
 				if (error.response.data.message.includes("Captcha")) {
 					errToast(error.response.data.message);
 				} else {
-					errToast(
-						"Form submission failed, please try again or contact BTC Map.",
-					);
+					errToast(get(_)("errors.formSubmission"));
 				}
 				console.error(error);
 				submitting = false;
@@ -635,7 +634,7 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 					<input
 						type="text"
 						name="honey"
-						placeholder="A nice pot of honey."
+						placeholder={$_('forms.honeyPlaceholder')}
 						class="hidden"
 						bind:this={honeyInput}
 					/>

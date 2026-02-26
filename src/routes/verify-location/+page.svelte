@@ -4,6 +4,7 @@ export let data: import("./+page.server").VerifyLocationPageData;
 import axios from "axios";
 import DOMPurify from "dompurify";
 import { onMount } from "svelte";
+import { get } from "svelte/store";
 
 import FormSuccess from "$components/FormSuccess.svelte";
 import Icon from "$components/Icon.svelte";
@@ -42,8 +43,7 @@ const fetchCaptcha = () => {
 			captchaContent = DOMPurify.sanitize(response.data.captcha);
 		})
 		.catch((error) => {
-			// handle error
-			errToast("Could not fetch captcha, please try again or contact BTC Map.");
+			errToast(get(_)("errors.captchaFetch"));
 			console.error(error);
 		})
 		.finally(() => {
@@ -64,7 +64,7 @@ let merchantId = data?.merchantId || "";
 const submitForm = (event: SubmitEvent) => {
 	event.preventDefault();
 	if (!selected) {
-		errToast("Please select a location...");
+		errToast(get(_)("errors.noLocationSelected"));
 	} else {
 		submitting = true;
 
@@ -92,9 +92,7 @@ const submitForm = (event: SubmitEvent) => {
 				if (error.response.data.message.includes("Captcha")) {
 					errToast(error.response.data.message);
 				} else {
-					errToast(
-						"Form submission failed, please try again or contact BTC Map.",
-					);
+					errToast(get(_)("errors.formSubmission"));
 				}
 
 				console.error(error);
@@ -252,7 +250,7 @@ onMount(async () => {
 						required
 						type="text"
 						name="captcha"
-						placeholder="Please enter the captcha text."
+						placeholder={$_('forms.captchaPlaceholder')}
 						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 						bind:this={captchaInput}
 					/>
@@ -262,7 +260,7 @@ onMount(async () => {
 			<input
 				type="text"
 				name="honey"
-				placeholder="A nice pot of honey."
+				placeholder={$_('forms.honeyPlaceholder')}
 				class="hidden"
 				bind:this={honeyInput}
 			/>
@@ -272,15 +270,14 @@ onMount(async () => {
 				disabled={submitting || !captchaSecret || !data}
 				style="w-full py-3 rounded-xl"
 			>
-				Submit Report
+				{$_('verifyLocation.submitReport')}
 			</PrimaryButton>
 		</form>
 	</section>
 {:else}
 	<FormSuccess
-		type="Report"
-		text="Thanks for taking the time to fill out this report. We’ll review your information and
-update it ASAP."
+		type={$_('verifyLocation.successType')}
+		text={$_('verifyLocation.successMessage')}
 		issue={submissionIssueNumber}
 		on:click={resetForm}
 	/>

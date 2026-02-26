@@ -22,9 +22,10 @@ import { onDestroy, onMount } from "svelte";
 import "tippy.js/dist/tippy.css";
 import "../app.css";
 
-import Footer from "$components/layout/Footer.svelte";
-import "$lib/i18n";
 import { isLoading, locale } from "svelte-i18n";
+
+import Footer from "$components/layout/Footer.svelte";
+import { _ } from "$lib/i18n";
 
 // Update HTML lang attribute dynamically when locale changes
 $: if (browser && $locale) {
@@ -104,7 +105,7 @@ export let data;
 </svelte:head>
 
 {#if $isLoading}
-	<LoadingIndicator visible={$isLoading} status="Loading..." />
+	<LoadingIndicator visible={$isLoading} status={$_("status.loading")} />
 {:else}
 	{#if !['/', '/map', '/communities/map', '/communities', '/countries'].includes(data.pathname)}
 		<div class="bg-teal dark:bg-dark">

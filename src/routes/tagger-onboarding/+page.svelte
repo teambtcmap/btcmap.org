@@ -2,6 +2,7 @@
 import axios from "axios";
 import DOMPurify from "dompurify";
 import { onMount } from "svelte";
+import { get } from "svelte/store";
 
 import FormSuccess from "$components/FormSuccess.svelte";
 import Icon from "$components/Icon.svelte";
@@ -33,7 +34,7 @@ const fetchCaptcha = () => {
 			captchaContent = DOMPurify.sanitize(response.data.captcha);
 		})
 		.catch((error) => {
-			errToast("Could not fetch captcha, please try again or contact BTC Map.");
+			errToast(get(_)("errors.captchaFetch"));
 			console.error(error);
 		})
 		.finally(() => {
@@ -65,9 +66,7 @@ const submitForm = (event: SubmitEvent) => {
 			if (typeof message === "string" && message.includes("Captcha")) {
 				errToast(message);
 			} else {
-				errToast(
-					"Form submission failed, please try again or contact BTC Map.",
-				);
+				errToast(get(_)("errors.formSubmission"));
 			}
 
 			console.error(error);

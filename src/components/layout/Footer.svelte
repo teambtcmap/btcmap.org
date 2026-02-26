@@ -82,7 +82,7 @@ const links = [
 				type="button"
 				on:click={() => switchLanguage('pt-BR')}
 				disabled={$locale === 'pt-BR'}
-				aria-label="Mudar para Português"
+				aria-label={$_('footer.switchToPortuguese')}
 				class="
 					{$locale === 'pt-BR'
 					? 'cursor-default font-bold text-body underline dark:text-white/50'
