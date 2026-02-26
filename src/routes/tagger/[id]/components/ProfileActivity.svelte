@@ -4,6 +4,7 @@ import {
 	type ColumnDef,
 	createSvelteTable,
 	type FilterFn,
+	flexRender,
 	getCoreRowModel,
 	getFilteredRowModel,
 	getPaginationRowModel,
@@ -190,17 +191,30 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 												tabindex={header.column.getCanSort() ? 0 : -1}
 												aria-label={header.column.getCanSort()
 													? 'Sort by ' +
-														String(header.column.columnDef.header) +
+														String(
+															typeof header.column.columnDef.header === 'function'
+																? header.column.columnDef.header(header.getContext())
+																: header.column.columnDef.header,
+														) +
 														', currently ' +
 														(header.column.getIsSorted() === 'asc'
 															? 'ascending'
 															: header.column.getIsSorted() === 'desc'
 																? 'descending'
 																: 'unsorted')
-													: String(header.column.columnDef.header)}
+													: String(
+															typeof header.column.columnDef.header === 'function'
+																? header.column.columnDef.header(header.getContext())
+																: header.column.columnDef.header,
+														)}
 											>
 												<span class="break-words">
-													{String(header.column.columnDef.header)}
+													<svelte:component
+														this={flexRender(
+															header.column.columnDef.header,
+															header.getContext(),
+														)}
+													/>
 												</span>
 												{#if header.column.getIsSorted().toString() === 'asc'}
 													<span aria-hidden="true">▲</span>
