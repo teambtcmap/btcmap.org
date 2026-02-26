@@ -8,6 +8,14 @@ import type { Place } from "$lib/types";
 // Mock axios
 vi.mock("axios");
 
+// Mock i18n to avoid intl-messageformat module resolution in tests
+vi.mock("$lib/i18n", () => {
+	const { writable } = require("svelte/store");
+	const mockT = (key: string) =>
+		key === "errors.loadFailed" ? "Failed to load nearby merchants" : key;
+	return { _: writable(mockT) };
+});
+
 // Mock errToast and calculateDistance
 vi.mock("$lib/utils", async () => {
 	const actual = await vi.importActual("$lib/utils");

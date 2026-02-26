@@ -1,10 +1,12 @@
 import axios from "axios";
 import axiosRetry from "axios-retry";
 import type { DivIcon, LatLng, Map } from "leaflet";
+import { get } from "svelte/store";
 
 import Icon from "$components/Icon.svelte";
 import { trackEvent } from "$lib/analytics";
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
+import { _ } from "$lib/i18n";
 import en from "$lib/i18n/locales/en.json";
 import { selectedMerchant } from "$lib/store";
 import { theme } from "$lib/theme";
@@ -264,7 +266,9 @@ export const changeDefaultIcons = (
 		if (!document.fullscreenElement) {
 			mapElement.requestFullscreen().catch((err) => {
 				errToast(
-					`Error attempting to enable fullscreen mode: ${err.message} (${err.name})`,
+					get(_)("errors.fullscreenError", {
+						values: { message: err.message, name: err.name },
+					}),
 				);
 			});
 		} else {
@@ -568,7 +572,7 @@ export const generateMarker = ({
 				selectedMerchant.set(placeDetails);
 			} catch (error) {
 				console.error("Error fetching place details:", error);
-				errToast("Error loading merchant details. Please try again.");
+				errToast(get(_)("errors.merchantDetailsLoadError"));
 			}
 		}
 	});

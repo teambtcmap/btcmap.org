@@ -3,6 +3,7 @@ import type { Writable } from "svelte/store";
 import { get } from "svelte/store";
 
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
+import { _ } from "$lib/i18n";
 import { updateMerchantHash } from "$lib/merchantDrawerHash";
 import { boost } from "$lib/store";
 import type { Boost, Place } from "$lib/types";
@@ -82,7 +83,7 @@ export async function fetchMerchantDetails(
 			return;
 		}
 		console.error("Error fetching merchant details:", error);
-		errToast("Error loading merchant details. Please try again.");
+		errToast(get(_)("errors.merchantDetailsLoadError"));
 	} finally {
 		setFetching(false);
 	}
@@ -112,7 +113,7 @@ export async function handleBoost(
 		setBoostLoading(false);
 	} catch (error) {
 		console.error("Error fetching exchange rate for boost:", error);
-		errToast("Failed to load boost information. Please try again.");
+		errToast(get(_)("errors.boostLoadError"));
 		boost.set(undefined);
 		setBoostLoading(false);
 	}

@@ -246,7 +246,11 @@
 		"noPaymentMethod": "Please select at least one payment method...",
 		"formSubmission": "Form submission failed, please try again or contact BTC Map.",
 		"locationSearch": "Could not search for locations, please try again or contact BTC Map.",
-		"mapView": "Could not set map view to provided coordinates, please try again or contact BTC Map."
+		"mapView": "Could not set map view to provided coordinates, please try again or contact BTC Map.",
+		"mapViewCachedCoords": "Could not set map view to cached coords, please try again or contact BTC Map.",
+		"merchantDetailsLoadError": "Error loading merchant details. Please try again.",
+		"boostLoadError": "Failed to load boost information. Please try again.",
+		"fullscreenError": "Error attempting to enable fullscreen mode: {message} ({name})"
 	},
 	"success": {
 		"locationSelected": "Location selected!",

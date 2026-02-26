@@ -1,6 +1,7 @@
 <script lang="ts">
 import JSConfetti from "js-confetti";
 import { onDestroy, tick } from "svelte";
+import { get } from "svelte/store";
 
 import {
 	BREAKPOINTS,
@@ -9,6 +10,7 @@ import {
 	POLLING_INTERVAL,
 	QR_CODE_SIZE,
 } from "$lib/constants";
+import { _ } from "$lib/i18n";
 import { isInvoicePaid, pollInvoiceStatus } from "$lib/payment";
 import { errToast } from "$lib/utils";
 
@@ -49,7 +51,7 @@ const generateQR = async () => {
 			},
 		);
 	} catch (error) {
-		errToast("Could not load QR generator. Please try again.");
+		errToast(get(_)("supportUs.qrLoadError"));
 		console.error("Failed to load QRCode module:", error);
 		onError(error);
 	}

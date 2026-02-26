@@ -296,7 +296,7 @@ const executeSearch = async (query: string) => {
 			return;
 		}
 		console.error("Search error:", error);
-		errToast("Search temporarily unavailable");
+		errToast(get(_)("errors.searchUnavailable"));
 		merchantList.exitSearchMode();
 	}
 };
@@ -1154,9 +1154,7 @@ const setupMapInitialView = async (): Promise<{
 		} catch (error) {
 			map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
 			setMapViewAndMarkLoaded();
-			errToast(
-				"Could not set map view to provided coordinates, please try again or contact BTC Map.",
-			);
+			errToast(get(_)("errors.mapView"));
 			console.error(error);
 		}
 	}
@@ -1177,9 +1175,7 @@ const setupMapInitialView = async (): Promise<{
 		} catch (error) {
 			map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
 			setMapViewAndMarkLoaded();
-			errToast(
-				"Could not set map view to provided coordinates, please try again or contact BTC Map.",
-			);
+			errToast(get(_)("errors.mapView"));
 			console.error(error);
 		}
 	}
@@ -1211,9 +1207,7 @@ const setupMapInitialView = async (): Promise<{
 					map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
 				}
 				setMapViewAndMarkLoaded();
-				errToast(
-					"Could not set map view to cached coords, please try again or contact BTC Map.",
-				);
+				errToast(get(_)("errors.mapViewCachedCoords"));
 				console.error(err);
 			});
 	}

@@ -4,10 +4,10 @@ import { geoArea } from "d3-geo";
 import type { Map } from "leaflet";
 import { onDestroy, onMount } from "svelte";
 import { get } from "svelte/store";
-import { _ } from "svelte-i18n";
 
 import MapLoadingMain from "$components/MapLoadingMain.svelte";
 import Socials from "$components/Socials.svelte";
+import { _ } from "$lib/i18n";
 import { loadMapDependencies } from "$lib/map/imports";
 import {
 	attribution,
@@ -191,9 +191,7 @@ const initializeCommunities = () => {
 			);
 		} catch (error) {
 			map.setView([0, 0], 3);
-			errToast(
-				"Could not set map view to provided coordinates, please try again or contact BTC Map.",
-			);
+			errToast(get(_)("errors.mapView"));
 			console.error(error);
 		}
 	}
@@ -234,9 +232,7 @@ onMount(async () => {
 				);
 			} catch (error) {
 				map.setView([0, 0], 3);
-				errToast(
-					"Could not set map view to provided coordinates, please try again or contact BTC Map.",
-				);
+				errToast(get(_)("errors.mapView"));
 				console.error(error);
 			}
 		} else {
