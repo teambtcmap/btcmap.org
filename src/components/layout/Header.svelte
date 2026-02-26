@@ -152,7 +152,7 @@ afterNavigate(() => {
 </script>
 
 <!-- desktop header -->
-<header class="relative z-30 mx-auto hidden w-[1200px] items-center justify-between gap-x-4 py-5 md:flex">
+<header class="relative z-30 mx-auto hidden w-[1200px] items-center justify-between gap-x-4 py-5 xl:flex">
 	<!-- eslint-disable svelte/no-navigation-without-resolve -->
 	<a href="/">
 		<img src="/images/logo.svg" alt="logo" class="w-16" />
@@ -199,7 +199,7 @@ afterNavigate(() => {
 
 <!-- mobile header -->
 <header
-	class="sticky top-0 z-30 flex w-full items-center justify-between px-4 py-5 md:hidden {showMobileMenu
+	class="sticky top-0 z-30 flex w-full items-center justify-between px-4 py-5 xl:hidden {showMobileMenu
 		? 'bg-teal dark:bg-dark'
 		: 'bg-teal/90 dark:bg-dark/90'}"
 >
