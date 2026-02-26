@@ -282,6 +282,19 @@
 		"status": "Статус",
 		"whitePaper": "Бяла книга"
 	},
+	"meta": {
+		"countries": "Държави",
+		"countriesLeaderboard": "Класация по държави",
+		"addLocation": "Добави място",
+		"addCommunity": "Добави общност",
+		"communityMap": "Карта на общността",
+		"communities": "Общности",
+		"communitiesLeaderboard": "Класация на общностите",
+		"merchant": "Търговец",
+		"country": "Държава",
+		"community": "Общност",
+		"supertagger": "Supertagger"
+	},
 	"forms": {
 		"address": "Адрес",
 		"captcha": "Защита от ботове",
@@ -448,10 +461,13 @@
 		"noData": "Няма налични данни",
 		"noResults": "Няма намерени резултати.",
 		"position": "Позиция",
+		"name": "Име",
 		"sortByPosition": "Сортиране по позиция",
 		"total": "Общо",
+		"totalLocations": "Общо места",
 		"sortByTotal": "Сортиране по общо места",
 		"verified": "Проверени",
+		"verifiedLocations": "Проверени места",
 		"sortByVerified": "Сортиране по проверени места",
 		"grade": "Оценка",
 		"sortByGrade": "Сортиране по оценка",

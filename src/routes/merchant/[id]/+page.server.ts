@@ -5,6 +5,7 @@ import axiosRetry from "axios-retry";
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
 import { verifiedArr } from "$lib/map/setup";
 import type {
+	MerchantActivityEvent,
 	MerchantArea,
 	MerchantComment,
 	MerchantPageData,
@@ -43,19 +44,25 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 		const lon = placeData.lon;
 
 		// Fetch comments and areas in parallel since they're independent
-		const [commentsResult, areasResult] = await Promise.allSettled([
-			fastAxios.get<MerchantComment[]>(
-				`https://api.btcmap.org/v4/places/${encodeURIComponent(id)}/comments`,
-			),
-			fastAxios.get<MerchantArea[]>(
-				`https://api.btcmap.org/v4/places/${encodeURIComponent(id)}/areas?type=community`,
-			),
-		]);
+		const [commentsResult, areasResult, activityResult] =
+			await Promise.allSettled([
+				fastAxios.get<MerchantComment[]>(
+					`https://api.btcmap.org/v4/places/${encodeURIComponent(id)}/comments`,
+				),
+				fastAxios.get<MerchantArea[]>(
+					`https://api.btcmap.org/v4/places/${encodeURIComponent(id)}/areas?type=community`,
+				),
+				fastAxios.get<MerchantActivityEvent[]>(
+					`https://api.btcmap.org/v4/places/${encodeURIComponent(id)}/activity`,
+				),
+			]);
 
 		const comments =
 			commentsResult.status === "fulfilled" ? commentsResult.value.data : [];
 		const areas =
 			areasResult.status === "fulfilled" ? areasResult.value.data : [];
+		const activity =
+			activityResult.status === "fulfilled" ? activityResult.value.data : [];
 
 		// Process all merchant data server-side
 		const icon = placeData.icon || "question_mark";
@@ -159,6 +166,7 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 			lon,
 			comments,
 			areas,
+			activity,
 			// Additional processed fields
 			icon,
 			address,

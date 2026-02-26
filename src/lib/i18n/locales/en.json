@@ -4,7 +4,7 @@
 		"openMap": "Open Map",
 		"addLocation": "Add Location",
 		"description": "We use {osmLink} to tag places that accept bitcoin and we display those merchants in our beautiful apps.",
-		"openSource": "Our apps and the underlying data are free and open source.",
+		"openSource": "Our apps and the underlying data are free and open-source.",
 		"hashtag": "#SPEDN ✊"
 	},
 	"nav": {
@@ -151,7 +151,7 @@
 		"description": "Make this merchant stand out in bitcoin orange on the map, shine in the search results, and be discovered in the exclusive boosted locations map!",
 		"seeHowItLooks": "See how it looks",
 		"boostedPinAlt": "Boosted pin",
-		"feeNote": "The fee is used to support the BTC Map open source project and continue its development.",
+		"feeNote": "The fee is used to support the BTC Map open-source project and continue its development.",
 		"boostFor1Month": "Boost for 1 month",
 		"boostForNMonths": "Boost for {time} months",
 		"duration1Month": "1 month",
@@ -278,6 +278,26 @@
 		"analytics": "Analytics",
 		"whitePaper": "White Paper",
 		"cypherpunks": "Cypherpunks"
+	},
+	"meta": {
+		"countries": "Countries",
+		"countriesLeaderboard": "Countries Leaderboard",
+		"addLocation": "Add Location",
+		"addCommunity": "Add Community",
+		"communityMap": "Community Map",
+		"communities": "Communities",
+		"communitiesLeaderboard": "Communities Leaderboard",
+		"merchant": "Merchant",
+		"country": "Country",
+		"community": "Community",
+		"supertagger": "Supertagger"
+	},
+	"taggerOnboarding": {
+		"nameLabel": "Name",
+		"emailLabel": "Email",
+		"namePlaceholder": "Your name",
+		"emailPlaceholder": "your@email.com",
+		"loadingForm": "Loading form..."
 	},
 	"forms": {
 		"optional": "(optional)",
@@ -556,10 +576,13 @@
 		"noData": "No data available",
 		"noResults": "No results found.",
 		"position": "Position",
+		"name": "Name",
 		"sortByPosition": "Sort by position",
 		"total": "Total",
+		"totalLocations": "Total Locations",
 		"sortByTotal": "Sort by total locations",
 		"verified": "Verified",
+		"verifiedLocations": "Verified Locations",
 		"sortByVerified": "Sort by verified locations",
 		"grade": "Grade",
 		"sortByGrade": "Sort by grade",
@@ -682,6 +705,10 @@
 			"wholeTagger": { "title": "Whole Tagger", "desc": "1" }
 		}
 	},
+	"apps": {
+		"official": "Official",
+		"community": "Community"
+	},
 	"media": {
 		"title": "Media",
 		"intro": "Media assets are available for free to use for promotional purposes.",
@@ -722,7 +749,7 @@
 	"supportUs": {
 		"title": "Support Us",
 		"hero": "Help place bitcoin on the map.",
-		"intro": "BTCMap.org is a free and open source project (FOSS). We rely on donations and sponsorship to continue.",
+		"intro": "BTCMap.org is a free and open-source project (FOSS). We rely on donations and sponsorship to continue.",
 		"appreciate": "We greatly appreciate all support.",
 		"donate": {
 			"scanOrClick": "Scan or click to donate",
@@ -785,7 +812,7 @@
 	},
 	"aboutUs": {
 		"title": "About Us",
-		"description": "BTC Map is a free and open source project powered by volunteer bitcoiners and bitcoin-friendly merchants around the world.",
+		"description": "BTC Map is a free and open-source project powered by volunteer bitcoiners and bitcoin-friendly merchants around the world.",
 		"merchants": {
 			"heading": "Merchants",
 			"intro": "Merchants are at the heart of BTC Map. These businesses are front-running the paradigm change and positioning themselves for continued success. Any merchant who accepts bitcoin can be listed on BTC Map.",
@@ -823,9 +850,9 @@
 		"coreTeam": {
 			"heading": "Core Team",
 			"igorBio": "Igor is a long time bitcoiner, mapper, and digital nomad living abroad. He created BTC Map as an Android application and the project has since gained worldwide momentum from there. He now also maintains all of the backend infrastructure for the project.",
-			"nathanBio": "Nathan is a tech entrepreneur turned pleb-at-large. He brought the core team together to accelerate app development. Having built, sold, invested in and advised tech businesses over the years he is now focused on bitcoin, building BTCMap.org, gamertron.net and delivering bitcoin education for kids.",
+			"nathanBio": "Nathan is a tech entrepreneur turned pleb-at-large. He brought the core team together to accelerate app development. Having built, sold, invested in and advised tech businesses over the years, he is now focused on bitcoin, building BTCMap.org, gamertron.net, and delivering bitcoin education for kids.",
 			"secondl1ghtBio": "A self-taught Web Developer, secondl1ght dove head first down the bitcoin rabbit hole and left his fiat career to focus on bitcoin development full-time. He created and maintains the BTC Map web application, as well as an encrypted messaging app called Cipherchat, and works on lightning network tools at Amboss Technologies.",
-			"karnageBio": "Karnage is the lead designer on the web app and created the BTC Map brand. He has contributed to many high profile bitcoin open source projects. His mission is to help startup founders succeed and creates products to achieve this goal. Pixel-perfect product design every time. Get it shipped."
+			"karnageBio": "Karnage is the lead designer on the web app and created the BTC Map brand. He has contributed to many high profile bitcoin open-source projects. His mission is to help startup founders succeed and creates products to achieve this goal. Pixel-perfect product design every time. Get it shipped."
 		},
 		"avatarAlt": "avatar"
 	}

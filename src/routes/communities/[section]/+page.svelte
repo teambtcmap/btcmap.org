@@ -1,6 +1,7 @@
 <script lang="ts">
 import Chart from "chart.js/auto";
 import { onDestroy, onMount } from "svelte";
+import { _ } from "svelte-i18n";
 
 import FormSelect from "$components/form/FormSelect.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
@@ -292,10 +293,11 @@ onDestroy(() => {
 </script>
 
 <svelte:head>
-	<title>BTC Map - Communities</title>
+	<title>BTC Map - {$_('meta.communities')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/communities.png" />
-	<meta property="twitter:title" content="BTC Map - Communities" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/communities.png" />
+	<meta property="og:title" content="BTC Map - {$_('meta.communities')}" />
+	<meta name="twitter:title" content="BTC Map - {$_('meta.communities')}" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/communities.png" />
 </svelte:head>
 
 <div class="my-10 space-y-10 text-center md:my-20">

@@ -22,10 +22,11 @@ onMount(() => {
 </script>
 
 <svelte:head>
-	<title>BTC Map - Countries Leaderboard</title>
+	<title>BTC Map - {$_('meta.countriesLeaderboard')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/top-countries.png" />
-	<meta property="twitter:title" content="BTC Map - Countries Leaderboard" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/top-countries.png" />
+	<meta property="og:title" content="BTC Map - {$_('meta.countriesLeaderboard')}" />
+	<meta name="twitter:title" content="BTC Map - {$_('meta.countriesLeaderboard')}" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/top-countries.png" />
 </svelte:head>
 
 <Breadcrumbs {routes} />

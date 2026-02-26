@@ -1,4 +1,6 @@
 <script lang="ts">
+import { _ } from "svelte-i18n";
+
 import type { PageData } from "./$types";
 export let data: PageData;
 
@@ -490,10 +492,11 @@ onDestroy(() => {
 </script>
 
 <svelte:head>
-	<title>{username ? username + ' - ' : ''}BTC Map Supertagger</title>
+	<title>{username ? username + ' - ' : ''}BTC Map - {$_('meta.supertagger')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/supertagger.png" />
-	<meta property="twitter:title" content="{username ? username + ' - ' : ''}BTC Map Supertagger" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/supertagger.png" />
+	<meta property="og:title" content="{username ? username + ' - ' : ''}BTC Map - {$_('meta.supertagger')}" />
+	<meta name="twitter:title" content="{username ? username + ' - ' : ''}BTC Map - {$_('meta.supertagger')}" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/supertagger.png" />
 </svelte:head>
 
 <div class="my-10 text-center md:my-20">

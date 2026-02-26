@@ -144,20 +144,26 @@ $: areasDropdownLinks = [
 
 let showMobileMenu = false;
 
+$: hasLongNavLabels = navLinks.some((link) => link.title.length > 12);
+
 afterNavigate(() => {
 	showMobileMenu = false;
 });
 </script>
 
 <!-- desktop header -->
-<header class="relative z-30 mx-auto hidden w-[1200px] items-center justify-between py-5 xl:flex">
+<header class="relative z-30 mx-auto hidden w-[1200px] items-center justify-between gap-x-4 py-5 xl:flex">
 	<!-- eslint-disable svelte/no-navigation-without-resolve -->
 	<a href="/">
 		<img src="/images/logo.svg" alt="logo" class="w-16" />
 	</a>
 	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
-	<nav class="flex flex-wrap space-x-16">
+	<nav
+		class="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-y-2 {hasLongNavLabels
+			? 'gap-x-2'
+			: 'gap-x-6'}"
+	>
 		{#each navLinks as link (link.id)}
 			<!-- dropdown menu -->
 			{#if link.id === 'maps'}

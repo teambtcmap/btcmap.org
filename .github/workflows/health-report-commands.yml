@@ -27,11 +27,11 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Parse command
         id: parse
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const body = context.payload.comment.body.trim();
@@ -56,7 +56,7 @@ jobs:
       # The actual config parsing happens at report generation time via parse-config.sh.
       - name: Handle /config
         if: steps.parse.outputs.command == 'config'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const body = context.payload.comment.body;
@@ -106,7 +106,7 @@ jobs:
       # Creates a standalone GitHub issue from a report finding.
       - name: Handle /create-issue
         if: steps.parse.outputs.command == 'create-issue'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             // Extract title from the comment body directly to avoid injection via ${{ }}
@@ -165,7 +165,7 @@ jobs:
       # Triggers the health report workflow immediately.
       - name: Handle /run-now
         if: steps.parse.outputs.command == 'run-now'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             try {
@@ -196,7 +196,7 @@ jobs:
       # workflow checks for its presence and skips the run if found.
       - name: Handle /skip-next
         if: steps.parse.outputs.command == 'skip-next'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             await github.rest.issues.createComment({
@@ -209,7 +209,7 @@ jobs:
       # --- Unknown command ---
       - name: Handle unknown command
         if: steps.parse.outputs.command == 'unknown'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const body = context.payload.comment.body.trim();

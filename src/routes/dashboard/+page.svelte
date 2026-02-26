@@ -8,6 +8,7 @@ import { subYears } from "date-fns/subYears";
 import { onDestroy, onMount } from "svelte";
 
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import { _ } from "$lib/i18n";
 import { theme } from "$lib/theme";
 import type { ChartHistory } from "$lib/types";
 import { updateChartThemes } from "$lib/utils";
@@ -281,10 +282,10 @@ $: {
 </script>
 
 <svelte:head>
-	<title>BTC Map - Dashboard</title>
+	<title>BTC Map - {$_('dashboard.hero')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/dash.png" />
-	<meta property="twitter:title" content="BTC Map - Dashboard" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/dash.png" />
+	<meta name="twitter:title" content="BTC Map - {$_('dashboard.hero')}" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/dash.png" />
 </svelte:head>
 
 <div class="mt-10 mb-20 space-y-10">
@@ -305,13 +306,13 @@ $: {
 			class="grid rounded-3xl border border-gray-300 md:grid-cols-2 xl:grid-cols-2 dark:border-white/95 dark:bg-white/10"
 		>
 			<DashboardStat
-				title="Total Merchants"
+				title={$_('dashboard.totalMerchants')}
 				stat={areaDashboard?.total_merchants}
 				border="border-b md:border-b-0 border-gray-300"
 				loading={false}
 			/>
 			<DashboardStat
-				title="Recently Verified"
+				title={$_('dashboard.recentlyVerified')}
 				stat={areaDashboard?.verified_merchants_1y}
 				loading={false}
 			/>
@@ -329,7 +330,7 @@ $: {
 				loading={false}
 			/>
 			<DashboardStat
-				title="Recently Verified"
+				title={$_('dashboard.recentlyVerified')}
 				stat={areaDashboard?.verified_exchanges_1y}
 				loading={false}
 			/>
