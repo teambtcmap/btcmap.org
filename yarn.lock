@@ -1455,21 +1455,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sveltejs/adapter-netlify@npm:^6.0.3":
-  version: 6.0.3
-  resolution: "@sveltejs/adapter-netlify@npm:6.0.3"
+"@sveltejs/adapter-netlify@npm:^6.0.4":
+  version: 6.0.4
+  resolution: "@sveltejs/adapter-netlify@npm:6.0.4"
   dependencies:
     "@iarna/toml": "npm:^2.2.5"
     esbuild: "npm:^0.25.4"
   peerDependencies:
     "@sveltejs/kit": ^2.31.0
-  checksum: 10c0/095b0ce34c7f3d6e38f22570bc5eb4b6d27cf14943afc7552e8e0e0fe29a9434faafa748858aa681219604e35f4239bdd5636d40cdca79e5fb3b0e92e3adc112
+  checksum: 10c0/e1b5002bdc0a0037c29b6cd8b1e0b209fc1db4ca916618ff5ea3f9f12cb0a6fde74f00023dbb0d20a18c28ee71f68ab6b12ab859e79f8cd47b8f6e0eb24ead8b
   languageName: node
   linkType: hard
 
-"@sveltejs/kit@npm:^2.53.0":
-  version: 2.53.0
-  resolution: "@sveltejs/kit@npm:2.53.0"
+"@sveltejs/kit@npm:^2.53.2":
+  version: 2.53.2
+  resolution: "@sveltejs/kit@npm:2.53.2"
   dependencies:
     "@standard-schema/spec": "npm:^1.0.0"
     "@sveltejs/acorn-typescript": "npm:^1.0.5"
@@ -1496,7 +1496,7 @@ __metadata:
       optional: true
   bin:
     svelte-kit: svelte-kit.js
-  checksum: 10c0/ec5d937b4328c6c9dd06439c817468c2bcbad1ccfa1c5be2615f77c8e7a04a4258e9143a832932109f36f1d6a0a4e4d56a14ea6801df275b4acf49574628c87f
+  checksum: 10c0/5890ada21540e6656c3dbc406023e53a0fa8a62dfcbc422498c03fa07698b454045980b4f3946ca4abfdd7bd2ac1bcb5ff25bbd93fef3a649c3366c02d03a2b2
   languageName: node
   linkType: hard
 
@@ -1872,12 +1872,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^25.3.0":
-  version: 25.3.0
-  resolution: "@types/node@npm:25.3.0"
+"@types/node@npm:^25.3.1":
+  version: 25.3.1
+  resolution: "@types/node@npm:25.3.1"
   dependencies:
     undici-types: "npm:~7.18.0"
-  checksum: 10c0/7b2b18c9d68047157367fc2f786d4f166d22dc0ad9f82331ca02fb16f2f391854123dbe604dcb938cda119c87051e4bb71dcb9ece44a579f483a6f96d4bd41de
+  checksum: 10c0/f4714e3f2c393434cdefbf207f3fe470bcf4d6c5717298c3fc9239e362a57cd25e59603c60e9c956e7d5d0dfb97cf2e037b37cf6dc2f3876f6a963146f7adc6d
   languageName: node
   linkType: hard
 
@@ -2157,8 +2157,8 @@ __metadata:
     "@mapbox/geojson-rewind": "npm:^0.5.2"
     "@maplibre/maplibre-gl-leaflet": "npm:^0.1.3"
     "@playwright/test": "npm:^1.58.2"
-    "@sveltejs/adapter-netlify": "npm:^6.0.3"
-    "@sveltejs/kit": "npm:^2.53.0"
+    "@sveltejs/adapter-netlify": "npm:^6.0.4"
+    "@sveltejs/kit": "npm:^2.53.2"
     "@sveltejs/vite-plugin-svelte": "npm:^3.1.2"
     "@tailwindcss/postcss": "npm:^4.2.1"
     "@tailwindcss/vite": "npm:^4.2.1"
@@ -2171,7 +2171,7 @@ __metadata:
     "@types/leaflet.featuregroup.subgroup": "npm:^1.0.4"
     "@types/leaflet.locatecontrol": "npm:^0.85.1"
     "@types/leaflet.markercluster": "npm:^1.5.6"
-    "@types/node": "npm:^25.3.0"
+    "@types/node": "npm:^25.3.1"
     "@types/qrcode": "npm:^1.5.6"
     "@zerodevx/svelte-toast": "npm:^0.9.6"
     axios: "npm:^1.13.5"
