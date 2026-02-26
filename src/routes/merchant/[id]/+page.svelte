@@ -187,7 +187,7 @@ let outdatedTooltip: HTMLSpanElement;
 $: thirdPartyTooltip &&
 	data &&
 	tippy([thirdPartyTooltip], {
-		content: "Third party app required",
+		content: $_("payment.thirdPartyRequired"),
 	});
 
 $: onchainTooltip &&
@@ -195,10 +195,10 @@ $: onchainTooltip &&
 	tippy([onchainTooltip], {
 		content:
 			data.osmTags?.["payment:onchain"] === "yes"
-				? "On-chain accepted"
+				? $_("payment.onchainAccepted")
 				: data.osmTags?.["payment:onchain"] === "no"
-					? "On-chain not accepted"
-					: "On-chain unknown",
+					? $_("payment.onchainNotAccepted")
+					: $_("payment.onchainUnknown"),
 	});
 
 $: lnTooltip &&
@@ -206,10 +206,10 @@ $: lnTooltip &&
 	tippy([lnTooltip], {
 		content:
 			data.osmTags?.["payment:lightning"] === "yes"
-				? "Lightning accepted"
+				? $_("payment.lightningAccepted")
 				: data.osmTags?.["payment:lightning"] === "no"
-					? "Lightning not accepted"
-					: "Lightning unknown",
+					? $_("payment.lightningNotAccepted")
+					: $_("payment.lightningUnknown"),
 	});
 
 $: nfcTooltip &&
@@ -217,20 +217,20 @@ $: nfcTooltip &&
 	tippy([nfcTooltip], {
 		content:
 			data.osmTags?.["payment:lightning_contactless"] === "yes"
-				? "Lightning Contactless accepted"
+				? $_("payment.contactlessAccepted")
 				: data.osmTags?.["payment:lightning_contactless"] === "no"
-					? "Lightning contactless not accepted"
-					: "Lightning contactless unknown",
+					? $_("payment.contactlessNotAccepted")
+					: $_("payment.contactlessUnknown"),
 	});
 
 $: verifiedTooltip &&
 	tippy([verifiedTooltip], {
-		content: "Verified within the last year",
+		content: $_("verification.verifiedTooltip"),
 	});
 
 $: outdatedTooltip &&
 	tippy([outdatedTooltip], {
-		content: "Outdated please re-verify",
+		content: $_("verification.outdatedTooltip"),
 	});
 
 let lat: number | undefined;
@@ -508,7 +508,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 				<MerchantAction
 					on:click={() => {
 						navigator.clipboard.writeText(`https://btcmap.org/merchant/${data.id}`);
-						successToast('Link copied to clipboard!');
+						successToast($_("success.linkCopied"));
 					}}
 					icon="share"
 					text={$_('merchant.share')}
