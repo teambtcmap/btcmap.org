@@ -306,13 +306,13 @@ $: {
 			class="grid rounded-3xl border border-gray-300 md:grid-cols-2 xl:grid-cols-2 dark:border-white/95 dark:bg-white/10"
 		>
 			<DashboardStat
-				title="Total Merchants"
+				title={$_('dashboard.totalMerchants')}
 				stat={areaDashboard?.total_merchants}
 				border="border-b md:border-b-0 border-gray-300"
 				loading={false}
 			/>
 			<DashboardStat
-				title="Recently Verified"
+				title={$_('dashboard.recentlyVerified')}
 				stat={areaDashboard?.verified_merchants_1y}
 				loading={false}
 			/>
@@ -330,7 +330,7 @@ $: {
 				loading={false}
 			/>
 			<DashboardStat
-				title="Recently Verified"
+				title={$_('dashboard.recentlyVerified')}
 				stat={areaDashboard?.verified_exchanges_1y}
 				loading={false}
 			/>

@@ -131,7 +131,7 @@ const isMaintenance = data.maintenance ?? false;
 							<p
 								class="border-t border-gray-300 p-5 text-center text-body dark:border-white/95 dark:text-white"
 							>
-								No open <strong>add</strong> tickets.
+								{$_('maintain.noAddTickets')}
 							</p>
 						{/if}
 					{:else if showType === 'Verify'}
@@ -173,7 +173,7 @@ const isMaintenance = data.maintenance ?? false;
 							<p
 								class="border-t border-gray-300 p-5 text-center text-body dark:border-white/95 dark:text-white"
 							>
-								No open <strong>community</strong> tickets.
+								{$_('maintain.noCommunityTickets')}
 							</p>
 						{/if}
 					{/if}

@@ -689,6 +689,10 @@
 			"wholeTagger": { "title": "Whole Tagger", "desc": "1" }
 		}
 	},
+	"apps": {
+		"official": "Official",
+		"community": "Community"
+	},
 	"media": {
 		"title": "Media",
 		"intro": "Media assets are available for free to use for promotional purposes.",
