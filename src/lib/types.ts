@@ -133,6 +133,7 @@ export type MerchantPageData = {
 	lon: number;
 	comments: MerchantComment[];
 	areas: MerchantArea[];
+	activity: MerchantActivityEvent[];
 	// Additional fields from Element data
 	icon?: string;
 	address?: string;
@@ -210,6 +211,16 @@ export type Event = {
 	created_at: string;
 	updated_at: string;
 	deleted_at: string;
+};
+
+export type MerchantActivityEvent = {
+	id: number;
+	type: EventType;
+	user_id: number | undefined;
+	user_name: string | undefined;
+	user_tip: string | undefined;
+	created_at: string;
+	updated_at: string;
 };
 
 export type EventType = "create" | "update" | "delete";

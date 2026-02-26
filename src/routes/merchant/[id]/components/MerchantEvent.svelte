@@ -7,15 +7,11 @@ import type { EventType, User } from "$lib/types";
 import { resolve } from "$app/paths";
 
 export let action: EventType;
-export let user: User | undefined;
+export let user_id: number | undefined;
+export let user_name: string | undefined;
+export let user_tip: string | undefined;
 export let time: string;
 export let latest: boolean;
-
-$: profile = user?.osm_json;
-$: regexMatch = profile?.description.match("(lightning:[^)]+)");
-$: lightning = regexMatch?.[0].slice(10);
-
-$: username = profile?.display_name;
 </script>
 
 <div
@@ -49,18 +45,18 @@ $: username = profile?.display_name;
 				<strong>{action.charAt(0).toUpperCase() + action.slice(1, action.length)}d</strong>
 
 				<!-- user -->
-				{#if user && username}
+				{#if user_id && user_name}
 					by <a
-						href={resolve(`/tagger/${user.id}`)}
+						href={resolve(`/tagger/${user_id}`)}
 						class="block break-all text-link transition-colors hover:text-hover lg:inline"
-						>{username}
+						>{user_name}
 					</a>
 				{/if}
 			</span>
 
 			<!-- time ago -->
 			<span
-				class="block text-center font-semibold text-taggerTime lg:inline dark:text-white/70 {lightning
+				class="block text-center font-semibold text-taggerTime lg:inline dark:text-white/70 {user_tip
 					? 'lg:mr-5'
 					: ''}"
 			>
@@ -69,8 +65,8 @@ $: username = profile?.display_name;
 		</div>
 
 		<!-- lightning tip button -->
-		{#if lightning}
-			<Tip destination={lightning} class="mx-auto block lg:mx-0 lg:inline" />
+		{#if user_tip}
+			<Tip destination={user_tip} class="mx-auto block lg:mx-0 lg:inline" />
 		{/if}
 	</div>
 </div>
