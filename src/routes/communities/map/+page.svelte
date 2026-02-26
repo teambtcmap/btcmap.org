@@ -6,6 +6,8 @@ import { onDestroy, onMount } from "svelte";
 import { get } from "svelte/store";
 import { _ } from "svelte-i18n";
 
+const t = () => get(_);
+
 import MapLoadingMain from "$components/MapLoadingMain.svelte";
 import Socials from "$components/Socials.svelte";
 import { loadMapDependencies } from "$lib/map/imports";
@@ -191,9 +193,7 @@ const initializeCommunities = () => {
 			);
 		} catch (error) {
 			map.setView([0, 0], 3);
-			errToast(
-				"Could not set map view to provided coordinates, please try again or contact BTC Map.",
-			);
+			errToast(t()("errors.mapView"));
 			console.error(error);
 		}
 	}
@@ -234,9 +234,7 @@ onMount(async () => {
 				);
 			} catch (error) {
 				map.setView([0, 0], 3);
-				errToast(
-					"Could not set map view to provided coordinates, please try again or contact BTC Map.",
-				);
+				errToast(t()("errors.mapView"));
 				console.error(error);
 			}
 		} else {

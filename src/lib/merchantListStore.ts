@@ -10,6 +10,7 @@ import {
 	filterMerchantsByCategory,
 } from "$lib/categoryMapping";
 import { MERCHANT_LIST_MAX_ITEMS } from "$lib/constants";
+import { _ } from "$lib/i18n";
 import { isBoosted } from "$lib/merchantDrawerLogic";
 import type { Place } from "$lib/types";
 import type { UserLocation } from "$lib/userLocationStore";
@@ -283,7 +284,7 @@ function createMerchantListStore() {
 			} catch (error) {
 				if (error instanceof Error && error.name !== "AbortError") {
 					console.warn("Failed to fetch merchant list:", error.message);
-					errToast("Failed to load nearby merchants");
+					errToast(get(_)("errors.loadFailed"));
 				}
 				update((state) => ({ ...state, isLoadingList: false }));
 			}
