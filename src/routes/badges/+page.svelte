@@ -46,8 +46,8 @@ const contributions = [
 <svelte:head>
 	<title>BTC Map - {$_("badges.title")}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/badges.png" />
-	<meta property="twitter:title" content="BTC Map - {$_("badges.title")}" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/badges.png" />
+	<meta name="twitter:title" content="BTC Map - {$_("badges.title")}" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/badges.png" />
 </svelte:head>
 
 <div class="my-10 text-center md:my-20">

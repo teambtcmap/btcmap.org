@@ -275,6 +275,13 @@
 		"community": "Comunidade",
 		"supertagger": "Supertagger"
 	},
+	"taggerOnboarding": {
+		"nameLabel": "Nome",
+		"emailLabel": "E-mail",
+		"namePlaceholder": "Seu nome",
+		"emailPlaceholder": "seu@email.com",
+		"loadingForm": "Carregando formulário..."
+	},
 	"forms": {
 		"optional": "(opcional)",
 		"submit": "Enviar",
@@ -583,6 +590,10 @@
 			"segwit": { "title": "Segwit", "desc": "4" },
 			"wholeTagger": { "title": "Whole Tagger", "desc": "1" }
 		}
+	},
+	"apps": {
+		"official": "Oficial",
+		"community": "Comunidade"
 	},
 	"media": {
 		"title": "Mídia",

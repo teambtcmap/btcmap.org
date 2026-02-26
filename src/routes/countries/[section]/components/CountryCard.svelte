@@ -8,17 +8,18 @@ import { resolve } from "$app/paths";
 export let id: string;
 export let name: string;
 
-let _nameGen = 0;
 let localizedName = name;
+let nameRequestId = 0;
+$: currentLocale = $locale ?? "en";
 $: {
-	const gen = ++_nameGen;
+	const requestId = ++nameRequestId;
 	localizedName = name;
-	getCountryName(id, $locale ?? "en", name)
+	getCountryName(id, currentLocale, name)
 		.then((n) => {
-			if (gen === _nameGen) localizedName = n;
+			if (requestId === nameRequestId) localizedName = n;
 		})
 		.catch(() => {
-			// Keep fallback on error
+			if (requestId === nameRequestId) localizedName = name;
 		});
 }
 </script>
@@ -40,7 +41,9 @@ $: {
 				}}
 			/>
 
-			<span class="block text-center text-lg font-semibold"
+			<span
+				data-testid="country-name"
+				class="block text-center text-lg font-semibold"
 				>{localizedName}</span
 			>
 		</a>

@@ -292,6 +292,13 @@
 		"community": "Community",
 		"supertagger": "Supertagger"
 	},
+	"taggerOnboarding": {
+		"nameLabel": "Name",
+		"emailLabel": "Email",
+		"namePlaceholder": "Your name",
+		"emailPlaceholder": "your@email.com",
+		"loadingForm": "Loading form..."
+	},
 	"forms": {
 		"optional": "(optional)",
 		"submit": "Submit",
@@ -697,6 +704,10 @@
 			"segwit": { "title": "Segwit", "desc": "4" },
 			"wholeTagger": { "title": "Whole Tagger", "desc": "1" }
 		}
+	},
+	"apps": {
+		"official": "Official",
+		"community": "Community"
 	},
 	"media": {
 		"title": "Media",

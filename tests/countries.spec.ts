@@ -56,4 +56,24 @@ test.describe('Countries', () => {
 		// Check that URL updated to South America
 		await expect(page).toHaveURL(/countries\/south-america/);
 	});
+
+	test('country names translate when switching to PT', async ({ page }) => {
+		await page.goto('/countries/africa');
+
+		// Target South Africa (ZA) - known to differ: "South Africa" (en) vs "África do Sul" (pt)
+		const southAfricaCard = page.locator('a[href*="/country/za"] [data-testid="country-name"]');
+		await southAfricaCard.waitFor({ state: 'visible', timeout: 30000 });
+		const englishName = (await southAfricaCard.textContent()) ?? '';
+		expect(englishName.length).toBeGreaterThan(0);
+
+		// Click PT language button
+		const ptButton = page.getByRole('button', { name: /Switch to Portuguese|Mudar para Português/i });
+		await ptButton.click();
+
+		// Wait until South Africa card text changes from English to Portuguese
+		await expect(southAfricaCard).not.toHaveText(englishName, { timeout: 10000 });
+
+		const portugueseName = await southAfricaCard.textContent();
+		expect(portugueseName?.length).toBeGreaterThan(0);
+	});
 });

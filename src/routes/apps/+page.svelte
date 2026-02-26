@@ -26,8 +26,8 @@ const communityApps: {
 	<title>BTC Map - {$_('nav.apps')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/apps.png" />
 	<meta property="og:title" content="BTC Map - {$_('nav.apps')}" />
-	<meta property="twitter:title" content="BTC Map - {$_('nav.apps')}" />
-	<meta property="twitter:image" content="https://btcmap.org/images/og/apps.png" />
+	<meta name="twitter:title" content="BTC Map - {$_('nav.apps')}" />
+	<meta name="twitter:image" content="https://btcmap.org/images/og/apps.png" />
 </svelte:head>
 
 <div class="my-10 space-y-10 text-center md:my-20">
@@ -47,7 +47,7 @@ const communityApps: {
 		We have you covered on whatever device and OS you choose.
 	</h2>
 
-	<h3 class="text-2xl font-semibold text-primary md:text-left dark:text-white">Official</h3>
+	<h3 class="text-2xl font-semibold text-primary md:text-left dark:text-white">{$_('apps.official')}</h3>
 	<section id="official-apps" class="grid gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 		{#each $apps as app (app.link)}
 			<AppCard image={app.icon} text={app.type} desc={app.desc} link={app.link} />
@@ -57,7 +57,7 @@ const communityApps: {
 		Note: There is no Google Play option due to their excessive KYC requirements for developers.
 	</p>
 
-	<h3 class="text-2xl font-semibold text-primary md:text-left dark:text-white">Community</h3>
+	<h3 class="text-2xl font-semibold text-primary md:text-left dark:text-white">{$_('apps.community')}</h3>
 	<section id="community-apps" class="grid gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 		{#each communityApps as app (app.link)}
 			<AppCard image={app.icon} text={app.type} desc={app.desc} link={app.link} />
