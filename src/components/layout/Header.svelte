@@ -157,7 +157,7 @@ afterNavigate(() => {
 	</a>
 	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
-	<nav class="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-y-2">
+	<nav class="flex min-w-0 flex-1 flex-wrap items-center gap-x-4 gap-y-2">
 		{#each navLinks as link (link.id)}
 			<!-- dropdown menu -->
 			{#if link.id === 'maps'}
