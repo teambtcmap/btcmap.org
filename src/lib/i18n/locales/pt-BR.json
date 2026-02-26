@@ -289,7 +289,17 @@
 		"emailLabel": "E-mail",
 		"namePlaceholder": "Seu nome",
 		"emailPlaceholder": "seu@email.com",
-		"loadingForm": "Carregando formulário..."
+		"loadingForm": "Carregando formulário...",
+		"refreshCaptcha": "Atualizar captcha",
+		"submittingApplication": "Enviando sua candidatura...",
+		"submitButton": "Enviar Candidatura",
+		"captchaPlaceholder": "Por favor, digite o texto do captcha.",
+		"honeyPlaceholder": "Um pote de mel.",
+		"successType": "Candidatura",
+		"successMessage": "Obrigado pelo seu interesse em se tornar um etiquetador! Revisaremos sua candidatura e alguém da equipe entrará em contato pelo e-mail fornecido. Entre em contato em hello@btcmap.org se precisar de acompanhamento."
+	},
+	"taggerProfile": {
+		"osmProfile": "Perfil OSM"
 	},
 	"forms": {
 		"optional": "(opcional)",

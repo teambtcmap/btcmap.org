@@ -164,7 +164,7 @@ onMount(async () => {
 						>{$_('forms.captcha')} <span class="font-normal">({$_('forms.captchaCaseSensitive')})</span></label
 					>
 					{#if captchaSecret}
-						<button type="button" on:click={fetchCaptcha} aria-label="Refresh captcha">
+						<button type="button" on:click={fetchCaptcha} aria-label={$_('taggerOnboarding.refreshCaptcha')}>
 							<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
 						</button>
 					{/if}
@@ -187,7 +187,7 @@ onMount(async () => {
 						type="text"
 						id="captcha"
 						name="captcha"
-						placeholder="Please enter the captcha text."
+						placeholder={$_('taggerOnboarding.captchaPlaceholder')}
 						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 						bind:this={captchaInput}
 					/>
@@ -197,7 +197,7 @@ onMount(async () => {
 			<input
 				type="text"
 				name="honey"
-				placeholder="A nice pot of honey."
+				placeholder={$_('taggerOnboarding.honeyPlaceholder')}
 				class="hidden"
 				bind:this={honeyInput}
 			/>
@@ -207,18 +207,18 @@ onMount(async () => {
 				disabled={submitting || !captchaSecret}
 				style="w-full py-3 rounded-xl"
 			>
-				Submit Application
+				{$_('taggerOnboarding.submitButton')}
 			</PrimaryButton>
 
 			{#if submitting}
-				<p class="sr-only" role="status" aria-live="polite">Submitting your application...</p>
+				<p class="sr-only" role="status" aria-live="polite">{$_('taggerOnboarding.submittingApplication')}</p>
 			{/if}
 		</form>
 	</section>
 {:else}
 	<FormSuccess
-		type="Application"
-		text="Thanks for your interest in becoming a tagger! We'll review your application and one of the team will be in contact via the email you provided. Contact hello@btcmap.org if you need to follow up."
+		type={$_('taggerOnboarding.successType')}
+		text={$_('taggerOnboarding.successMessage')}
 		showIssueLink={false}
 		on:click={resetForm}
 	/>
