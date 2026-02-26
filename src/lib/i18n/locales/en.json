@@ -279,6 +279,13 @@
 		"whitePaper": "White Paper",
 		"cypherpunks": "Cypherpunks"
 	},
+	"taggerOnboarding": {
+		"nameLabel": "Name",
+		"emailLabel": "Email",
+		"namePlaceholder": "Your name",
+		"emailPlaceholder": "your@email.com",
+		"loadingForm": "Loading form..."
+	},
 	"forms": {
 		"optional": "(optional)",
 		"submit": "Submit",

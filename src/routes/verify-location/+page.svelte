@@ -173,7 +173,7 @@ onMount(async () => {
 					readonly
 					type="text"
 					name="name"
-					placeholder={!data ? 'Loading Merchant...' : 'Merchant Name'}
+					placeholder={!data ? $_('verifyLocation.loadingPlaceholder') : $_('verifyLocation.merchantNamePlaceholder')}
 					class="w-full rounded-2xl border-2 border-input p-3 text-center font-semibold focus:outline-link"
 				/>
 			</div>
@@ -181,7 +181,7 @@ onMount(async () => {
 			<div>
 				<div class="flex items-center space-x-2">
 					<label for="current" class="{!outdated ? 'cursor-pointer' : ''} font-semibold"
-						>Current information is correct</label
+						>{$_('verifyLocation.currentInfoLabel')}</label
 					>
 					<input
 						class="h-4 w-4 accent-link"
@@ -193,18 +193,18 @@ onMount(async () => {
 						bind:checked={current}
 					/>
 				</div>
-				<p class="text-sm">Check this box if you have verified the existing data is up-to-date.</p>
+				<p class="text-sm">{$_('verifyLocation.currentInfoDescription')}</p>
 			</div>
 
 			<div>
 				<label for="outdated" class="mb-2 block font-semibold"
-					>Outdated information <span class="font-normal">(If applicable)</span></label
+					>{$_('verifyLocation.outdatedLabel')} <span class="font-normal">({$_('verifyLocation.ifApplicable')})</span></label
 				>
 				<textarea
 					disabled={!captchaSecret || !data || current}
 					required={!current}
 					name="outdated"
-					placeholder="Provide what info is incorrect and the updated info on this location"
+					placeholder={$_('verifyLocation.outdatedPlaceholder')}
 					rows="3"
 					class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 					bind:value={outdated}
@@ -212,12 +212,12 @@ onMount(async () => {
 			</div>
 
 			<div>
-				<label for="verify" class="mb-2 block font-semibold">How did you verify this?</label>
+				<label for="verify" class="mb-2 block font-semibold">{$_('verifyLocation.verifyLabel')}</label>
 				<textarea
 					disabled={!captchaSecret || !data}
 					required
 					name="verify"
-					placeholder="Please provide additional info here"
+					placeholder={$_('verifyLocation.verifyPlaceholder')}
 					rows="3"
 					class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 					bind:this={verify}
@@ -227,7 +227,7 @@ onMount(async () => {
 			<div>
 				<div class="mb-2 flex items-center space-x-2">
 					<label for="captcha" class="font-semibold"
-						>Bot protection <span class="font-normal">(case-sensitive)</span></label
+						>{$_('forms.captcha')} <span class="font-normal">({$_('forms.captchaCaseSensitive')})</span></label
 					>
 					{#if captchaSecret}
 						<button type="button" on:click={fetchCaptcha}>
