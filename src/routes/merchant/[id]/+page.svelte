@@ -27,36 +27,19 @@ import {
 	geolocate,
 	layers,
 } from "$lib/map/setup";
-import {
-	eventError,
-	events,
-	placesById,
-	placesError,
-	reportError,
-	reports,
-	showTags,
-	taggingIssues,
-	userError,
-	users,
-} from "$lib/store";
-import { batchSync } from "$lib/sync/batchSync";
-import { eventsSync } from "$lib/sync/events";
+import { placesById, showTags, taggingIssues } from "$lib/store";
 import { updateSinglePlace } from "$lib/sync/places";
-import { reportsSync } from "$lib/sync/reports";
-import { usersSync } from "$lib/sync/users";
 import { theme } from "$lib/theme";
 import type {
-	Area,
 	BaseMaps,
 	DomEventType,
-	Event,
 	Leaflet,
+	MerchantActivityEvent,
 	MerchantArea,
 	MerchantPageData,
 	PayMerchant,
 } from "$lib/types.js";
 import {
-	errToast,
 	formatOpeningHours,
 	formatVerifiedHuman,
 	isBoosted,
@@ -69,15 +52,6 @@ import MerchantComment from "./components/MerchantComment.svelte";
 import MerchantEvent from "./components/MerchantEvent.svelte";
 import { browser } from "$app/environment";
 import { resolve } from "$app/paths";
-
-// alert for user errors
-$: $userError && errToast($userError);
-// alert for event errors
-$: $eventError && errToast($eventError);
-// alert for element errors
-$: $placesError && errToast($placesError);
-// alert for report errors
-$: $reportError && errToast($reportError);
 
 // Scroll indicator thresholds
 const SCROLL_INDICATOR_MIN_ITEMS = 5;
@@ -116,13 +90,7 @@ const initializeData = () => {
 
 	filteredCommunities = data.areas;
 
-	const allMerchantEvents = $events.filter(
-		(event) => event.element_id === data.placeData.osm_id,
-	);
-	allMerchantEvents.sort(
-		(a, b) => Date.parse(b.created_at) - Date.parse(a.created_at),
-	);
-	merchantEvents = allMerchantEvents;
+	merchantEvents = data.activity;
 
 	const setupMap = () => {
 		// add map
@@ -167,15 +135,8 @@ const initializeData = () => {
 	dataInitialized = true;
 };
 
-// Initialize data when component mounts, only need areas/reports/events for communities/activity
-$: $users?.length &&
-	$events &&
-	$events.length &&
-	$reports &&
-	$reports.length &&
-	initialRenderComplete &&
-	!dataInitialized &&
-	initializeData();
+// Initialize data when component mounts
+$: initialRenderComplete && !dataInitialized && initializeData();
 
 // merchant variable no longer needed - using server data directly
 
@@ -283,20 +244,10 @@ let activityDiv: HTMLElement;
 let hideCommentsArrow = false;
 let commentsDiv: HTMLElement;
 
-let merchantEvents: Event[] = [];
+let merchantEvents: MerchantActivityEvent[] = [];
 
 let eventCount = 50;
 $: eventsPaginated = merchantEvents.slice(0, eventCount);
-
-const findUser = (tagger: Event) => {
-	let foundUser = $users.find((user) => user.id === tagger.user_id);
-
-	if (foundUser) {
-		return foundUser;
-	} else {
-		return undefined;
-	}
-};
 
 let mapElement: HTMLDivElement;
 let map: Map;
@@ -306,8 +257,6 @@ let merchantMarker: Marker | undefined; // Store marker reference for reactive u
 let baseMaps: BaseMaps;
 
 onMount(async () => {
-	batchSync([eventsSync, usersSync, reportsSync]);
-
 	if (browser) {
 		const deps = await loadMapDependencies();
 		leaflet = deps.leaflet;
@@ -830,7 +779,9 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 						{#each eventsPaginated as event (event['created_at'])}
 							<MerchantEvent
 								action={event.type}
-								user={findUser(event)}
+								user_id={event.user_id}
+								user_name={event.user_name}
+								user_tip={event.user_tip}
 								time={event['created_at']}
 								latest={event === merchantEvents[0] ? true : false}
 							/>
