@@ -311,9 +311,10 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 </script>
 
 <svelte:head>
-	<title>{name ? name + ' - ' : ''}BTC Map Merchant</title>
+	<title>{name ? name + ' - ' : ''}BTC Map - {$_('meta.merchant')}</title>
 	<meta property="og:image" content={ogImage} />
-	<meta name="twitter:title" content="{name ? name + ' - ' : ''}BTC Map Merchant" />
+	<meta property="og:title" content="{name ? name + ' - ' : ''}BTC Map - {$_('meta.merchant')}" />
+	<meta name="twitter:title" content="{name ? name + ' - ' : ''}BTC Map - {$_('meta.merchant')}" />
 	<meta name="twitter:image" content={ogImage} />
 </svelte:head>
 

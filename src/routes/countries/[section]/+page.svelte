@@ -119,9 +119,10 @@ function handleSectionChange(event: Event) {
 </script>
 
 <svelte:head>
-	<title>BTC Map - Countries</title>
+	<title>BTC Map - {$_('meta.countries')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/countries.png" />
-	<meta name="twitter:title" content="BTC Map - Countries" />
+	<meta property="og:title" content="BTC Map - {$_('meta.countries')}" />
+	<meta name="twitter:title" content="BTC Map - {$_('meta.countries')}" />
 	<meta name="twitter:image" content="https://btcmap.org/images/og/countries.png" />
 </svelte:head>
 

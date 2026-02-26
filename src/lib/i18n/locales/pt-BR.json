@@ -262,6 +262,19 @@
 		"whitePaper": "White Paper",
 		"cypherpunks": "Cypherpunks"
 	},
+	"meta": {
+		"countries": "Países",
+		"countriesLeaderboard": "Ranking de Países",
+		"addLocation": "Adicionar Local",
+		"addCommunity": "Adicionar Comunidade",
+		"communityMap": "Mapa da Comunidade",
+		"communities": "Comunidades",
+		"communitiesLeaderboard": "Ranking de Comunidades",
+		"merchant": "Comerciante",
+		"country": "País",
+		"community": "Comunidade",
+		"supertagger": "Supertagger"
+	},
 	"taggerOnboarding": {
 		"nameLabel": "Nome",
 		"emailLabel": "E-mail",
@@ -494,10 +507,13 @@
 		"noData": "Nenhum dado disponível",
 		"noResults": "Nenhum resultado encontrado.",
 		"position": "Posição",
+		"name": "Nome",
 		"sortByPosition": "Ordenar por posição",
 		"total": "Total",
+		"totalLocations": "Total de Locais",
 		"sortByTotal": "Ordenar por total de locais",
 		"verified": "Verificado",
+		"verifiedLocations": "Locais Verificados",
 		"sortByVerified": "Ordenar por locais verificados",
 		"grade": "Nota",
 		"sortByGrade": "Ordenar por nota",

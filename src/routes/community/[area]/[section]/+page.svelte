@@ -1,4 +1,6 @@
 <script lang="ts">
+import { _ } from "svelte-i18n";
+
 import AreaPage from "$components/area/AreaPage.svelte";
 import Breadcrumbs from "$components/Breadcrumbs.svelte";
 import type { AreaPageProps } from "$lib/types";
@@ -16,9 +18,10 @@ const routes = [
 </script>
 
 <svelte:head>
-	<title>{name ? name + ' - ' : ''}BTC Map Community</title>
+	<title>{name ? name + ' - ' : ''}BTC Map - {$_('meta.community')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/communities.png" />
-	<meta name="twitter:title" content="{name ? name + ' - ' : ''}BTC Map Community" />
+	<meta property="og:title" content="{name ? name + ' - ' : ''}BTC Map - {$_('meta.community')}" />
+	<meta name="twitter:title" content="{name ? name + ' - ' : ''}BTC Map - {$_('meta.community')}" />
 	<meta name="twitter:image" content="https://btcmap.org/images/og/communities.png" />
 </svelte:head>
 

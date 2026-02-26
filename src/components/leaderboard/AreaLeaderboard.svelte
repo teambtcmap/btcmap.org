@@ -146,11 +146,11 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
 	return itemRank.passed;
 };
 
-// Column definitions - static, defined once
+// Column definitions - headers use i18n for locale reactivity
 const columns: ColumnDef<LeaderboardArea & { position: number }>[] = [
 	{
 		id: "position",
-		header: "Position",
+		header: () => $_(`areaLeaderboard.position`),
 		accessorFn: (row) => row.position,
 		cell: (info) => {
 			const position = info.getValue() as number;
@@ -167,7 +167,7 @@ const columns: ColumnDef<LeaderboardArea & { position: number }>[] = [
 	},
 	{
 		id: "name",
-		header: "Name",
+		header: () => $_(`areaLeaderboard.name`),
 		accessorFn: (row) => row.tags?.name || "Unknown",
 		cell: (info) => info.row.original,
 		enableSorting: true,
@@ -177,23 +177,21 @@ const columns: ColumnDef<LeaderboardArea & { position: number }>[] = [
 	},
 	{
 		id: "total",
-		header: "Total Locations",
+		header: () => $_(`areaLeaderboard.totalLocations`),
 		accessorFn: (row) => row.report?.tags?.total_elements || 0,
 		enableSorting: true,
 		enableGlobalFilter: false,
 	},
 	{
 		id: "upToDateElements",
-		header: "Verified Locations",
+		header: () => $_(`areaLeaderboard.verifiedLocations`),
 		accessorFn: (row) => row.report?.tags?.up_to_date_elements || 0,
 		enableSorting: true,
 		enableGlobalFilter: false,
 	},
 	{
 		id: "grade",
-		header: () => {
-			return `Grade`;
-		},
+		header: () => $_(`areaLeaderboard.grade`),
 		accessorFn: (row) => row.grade || 0,
 		cell: (info) => info.getValue(),
 		sortingFn: (a, b) => {
@@ -369,26 +367,26 @@ $: upToDateTooltip && totalTooltip && gradeTooltip && setHeaderTooltips();
 						<div class="grid grid-cols-4 gap-3 px-4 py-3 text-center text-xs">
 							<SortHeaderButton
 								column={$table?.getColumn('position')}
-								label="Position"
-								ariaLabel="Sort by position"
+								label={$_(`areaLeaderboard.position`)}
+								ariaLabel={$_(`areaLeaderboard.sortByPosition`)}
 							/>
 
 							<SortHeaderButton
 								column={$table?.getColumn('total')}
-								label="Total"
-								ariaLabel="Sort by total locations"
+								label={$_(`areaLeaderboard.totalLocations`)}
+								ariaLabel={$_(`areaLeaderboard.sortByTotal`)}
 							/>
 
 							<SortHeaderButton
 								column={$table?.getColumn('upToDateElements')}
-								label="Verified"
-								ariaLabel="Sort by verified locations"
+								label={$_(`areaLeaderboard.verifiedLocations`)}
+								ariaLabel={$_(`areaLeaderboard.sortByVerified`)}
 							/>
 
 							<SortHeaderButton
 								column={$table?.getColumn('grade')}
-								label="Grade"
-								ariaLabel="Sort by grade"
+								label={$_(`areaLeaderboard.grade`)}
+								ariaLabel={$_(`areaLeaderboard.sortByGrade`)}
 							/>
 						</div>
 					</div>
