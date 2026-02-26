@@ -3,6 +3,7 @@ import rewind from "@mapbox/geojson-rewind";
 import { geoArea } from "d3-geo";
 import type { Map } from "leaflet";
 import { onDestroy, onMount } from "svelte";
+import { get } from "svelte/store";
 import { _ } from "svelte-i18n";
 
 import MapLoadingMain from "$components/MapLoadingMain.svelte";
@@ -115,7 +116,7 @@ const initializeCommunities = () => {
 					<div id='socials'>
 					</div>
 
-					<a href="${resolve(`/community/${community.id}`)}" class='block bg-link hover:bg-hover !text-white text-center font-semibold py-3 rounded-xl transition-colors' title='Community page'>View Community</a>
+					<a href="${resolve(`/community/${community.id}`)}" class='block bg-link hover:bg-hover !text-white text-center font-semibold py-3 rounded-xl transition-colors' title='Community page'>${get(_)("communityMap.viewCommunity")}</a>
 				</div>
 
 					${
@@ -297,7 +298,7 @@ onDestroy(async () => {
 </svelte:head>
 
 <div>
-	<h1 class="hidden">Community Map</h1>
+	<h1 class="hidden">{$_('communityMap.pageTitle')}</h1>
 
 	<MapLoadingMain progress={mapLoading} />
 

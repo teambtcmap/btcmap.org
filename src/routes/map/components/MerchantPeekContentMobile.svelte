@@ -1,6 +1,7 @@
 <script lang="ts">
 import Icon from "$components/Icon.svelte";
 import PaymentMethodIcon from "$components/PaymentMethodIcon.svelte";
+import { _ } from "$lib/i18n";
 import type { Place } from "$lib/types";
 
 export let merchant: Place;
@@ -100,10 +101,10 @@ $: hasVerification = merchant.verified_at !== undefined;
 	<div class="flex items-center justify-end border-t border-gray-200 pt-3 dark:border-white/10">
 		<div class="flex items-center gap-1 text-xs text-body dark:text-white/50">
 			<Icon w="14" h="14" icon="arrow_upward" type="material" />
-			<span>Swipe up for details</span>
+			<span>{$_('mapDrawer.swipeUpForDetails')}</span>
 			<span class="mx-1">·</span>
 			<Icon w="14" h="14" icon="arrow_downward" type="material" />
-			<span>Swipe down to close</span>
+			<span>{$_('mapDrawer.swipeDownToClose')}</span>
 		</div>
 	</div>
 </div>
