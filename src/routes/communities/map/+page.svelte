@@ -98,7 +98,7 @@ const initializeCommunities = () => {
 					${
 						community.tags.organization
 							? `<span
-						class="mx-auto whitespace-nowrap w-fit block rounded-full bg-[#10B981] px-3.5 py-1 text-xs font-semibold uppercase text-white" title='Organization'
+						class="mx-auto whitespace-nowrap w-fit block rounded-full bg-[#10B981] px-3.5 py-1 text-xs font-semibold uppercase text-white" title="${get(_)("communityMap.organization")}"
 					>
 					${community.tags.organization}
 					</span>`
@@ -107,8 +107,8 @@ const initializeCommunities = () => {
 
 					${
 						community.tags.sponsor
-							? `<span class="block gradient-bg w-32 mx-auto py-1 text-xs text-white font-semibold rounded-full" title='Supporter'>
-						BTC Map Sponsor
+							? `<span class="block gradient-bg w-32 mx-auto py-1 text-xs text-white font-semibold rounded-full" title="${get(_)("communityMap.supporter")}">
+						${get(_)("communityMap.sponsor")}
 					</span>`
 							: ""
 					}

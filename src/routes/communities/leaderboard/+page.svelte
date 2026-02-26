@@ -1,19 +1,19 @@
 <script lang="ts">
 import { onMount } from "svelte";
-import { _ } from "svelte-i18n";
 
 import Breadcrumbs from "$components/Breadcrumbs.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import AreaLeaderboard from "$components/leaderboard/AreaLeaderboard.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import { _ } from "$lib/i18n";
 import { areasSync } from "$lib/sync/areas";
 import { batchSync } from "$lib/sync/batchSync";
 import { reportsSync } from "$lib/sync/reports";
 import { theme } from "$lib/theme";
 
-const routes = [
-	{ name: "Communities", url: "/communities" },
-	{ name: "Leaderboard", url: "/communities/leaderboard" },
+$: routes = [
+	{ name: $_("nav.communities"), url: "/communities" },
+	{ name: $_("communities.leaderboard"), url: "/communities/leaderboard" },
 ];
 
 onMount(() => {
@@ -38,7 +38,7 @@ onMount(() => {
 				? 'text-white'
 				: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl"
 		>
-			Top Communities
+			{$_('communities.leaderboardHero')}
 		</h1>
 	{:else}
 		<HeaderPlaceholder />
@@ -47,21 +47,20 @@ onMount(() => {
 	<h2
 		class="mx-auto w-full text-center text-xl font-semibold text-primary lg:w-[800px] dark:text-white"
 	>
-		Bitcoin mapping communities maintain their local datasets and strive to have the most accurate
-		information. They also help onboard new merchants in their area!
+		{$_('communities.leaderboardDescription')}
 	</h2>
 
 	<div>
 		<PrimaryButton style="w-full md:w-[200px] mx-auto py-3 rounded-xl mb-5" link="/communities">
-			Directory
+			{$_('communities.directory')}
 		</PrimaryButton>
 
 		<div class="flex flex-col items-center justify-center gap-5 md:flex-row">
 			<PrimaryButton style="w-full md:w-[200px] py-3 rounded-xl" link="/communities/add">
-				Add community
+				{$_('communities.addCommunity')}
 			</PrimaryButton>
 			<PrimaryButton style="w-full md:w-[200px] py-3 rounded-xl" link="/communities/map">
-				View community map
+				{$_('communities.viewMap')}
 			</PrimaryButton>
 		</div>
 	</div>

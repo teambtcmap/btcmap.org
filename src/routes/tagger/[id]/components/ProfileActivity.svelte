@@ -18,6 +18,7 @@ import { writable } from "svelte/store";
 
 import LeaderboardPagination from "$components/leaderboard/LeaderboardPagination.svelte";
 import LeaderboardSearch from "$components/leaderboard/LeaderboardSearch.svelte";
+import { _ } from "$lib/i18n";
 import type { ActivityEvent } from "$lib/types";
 import { debounce } from "$lib/utils";
 
@@ -46,7 +47,7 @@ const fuzzyFilter: FilterFn<ActivityEvent> = (
 const columns: ColumnDef<ActivityEvent>[] = [
 	{
 		id: "location",
-		header: "Location",
+		header: () => $_(`profileActivity.location`),
 		accessorFn: (row) => row.location,
 		enableSorting: false,
 		filterFn: fuzzyFilter,
@@ -54,7 +55,7 @@ const columns: ColumnDef<ActivityEvent>[] = [
 	},
 	{
 		id: "type",
-		header: "Action",
+		header: () => $_(`profileActivity.action`),
 		accessorFn: (row) => row.type,
 		enableSorting: true,
 		filterFn: fuzzyFilter,
@@ -62,7 +63,7 @@ const columns: ColumnDef<ActivityEvent>[] = [
 	},
 	{
 		id: "created_at",
-		header: "Date",
+		header: () => $_(`profileActivity.date`),
 		accessorFn: (row) => row.created_at,
 		enableSorting: true,
 		filterFn: fuzzyFilter,
@@ -145,7 +146,7 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 	<h3
 		class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
 	>
-		{username || 'BTC Map Supertagger'}'s Activity
+		{$_('profileActivity.activityTitle', { values: { name: username || $_('taggerProfile.defaultName') } })}
 	</h3>
 
 	{#if eventElements && eventElements.length && dataInitialized}
@@ -154,7 +155,7 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 		</div>
 
 		{#if $table.getFilteredRowModel().rows.length === 0}
-			<p class="w-full p-5 text-center text-primary dark:text-white">No results found.</p>
+			<p class="w-full p-5 text-center text-primary dark:text-white">{$_('profileActivity.noResults')}</p>
 		{:else}
 			<div class="overflow-x-auto">
 				<table class="w-full">

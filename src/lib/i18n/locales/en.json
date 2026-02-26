@@ -308,7 +308,9 @@
 	"communityMap": {
 		"viewCommunity": "View Community",
 		"pageTitle": "Community Map",
-		"organization": "Organization"
+		"organization": "Organization",
+		"sponsor": "BTC Map Sponsor",
+		"supporter": "Supporter"
 	},
 	"taggerOnboarding": {
 		"nameLabel": "Name",
@@ -324,6 +326,13 @@
 		"successType": "Application",
 		"successMessage": "Thanks for your interest in becoming a tagger! We'll review your application and one of the team will be in contact via the email you provided. Contact hello@btcmap.org if you need to follow up."
 	},
+	"profileActivity": {
+		"location": "Location",
+		"action": "Action",
+		"date": "Date",
+		"noResults": "No results found.",
+		"activityTitle": "{name} Activity"
+	},
 	"taggerProfile": {
 		"osmProfile": "OSM Profile",
 		"totalTags": "Total Tags",
@@ -334,7 +343,8 @@
 		"chartUpdated": "Updated",
 		"chartDeleted": "Deleted",
 		"chartLabel": "Tag Types",
-		"mappingSince": "Mapping Since"
+		"mappingSince": "Mapping Since",
+		"defaultName": "BTC Map Supertagger"
 	},
 	"forms": {
 		"optional": "(optional)",

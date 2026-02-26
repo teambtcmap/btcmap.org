@@ -292,7 +292,9 @@
 	"communityMap": {
 		"viewCommunity": "Ver Comunidade",
 		"pageTitle": "Mapa da Comunidade",
-		"organization": "Organização"
+		"organization": "Organização",
+		"sponsor": "Patrocinador BTC Map",
+		"supporter": "Apoiador"
 	},
 	"taggerOnboarding": {
 		"nameLabel": "Nome",
@@ -308,6 +310,13 @@
 		"successType": "Candidatura",
 		"successMessage": "Obrigado pelo seu interesse em se tornar um etiquetador! Revisaremos sua candidatura e alguém da equipe entrará em contato pelo e-mail fornecido. Entre em contato em hello@btcmap.org se precisar de acompanhamento."
 	},
+	"profileActivity": {
+		"location": "Local",
+		"action": "Ação",
+		"date": "Data",
+		"noResults": "Nenhum resultado encontrado.",
+		"activityTitle": "Atividade de {name}"
+	},
 	"taggerProfile": {
 		"osmProfile": "Perfil OSM",
 		"totalTags": "Total de Tags",
@@ -318,7 +327,8 @@
 		"chartUpdated": "Atualizados",
 		"chartDeleted": "Excluídos",
 		"chartLabel": "Tipos de Tags",
-		"mappingSince": "Mapeando desde"
+		"mappingSince": "Mapeando desde",
+		"defaultName": "Supertagger do BTC Map"
 	},
 	"forms": {
 		"optional": "(opcional)",
