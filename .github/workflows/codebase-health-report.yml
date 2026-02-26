@@ -27,7 +27,7 @@ jobs:
       NODE_OPTIONS: --max-old-space-size=4096
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0 # full history for commit analysis
 
