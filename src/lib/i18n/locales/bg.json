@@ -835,7 +835,9 @@
 		"formSubmitError": "Изпращането на формуляра е неуспешно, моля опитайте отново или се свържете с BTC Map.",
 		"searchError": "Не може да се търсят местоположения, моля опитайте отново или се свържете с BTC Map.",
 		"noLocationsWarning": "Няма намерени местоположения, моля променете заявката.",
-		"locationSelectedToast": "Местоположението е избрано!"
+		"locationSelectedToast": "Местоположението е избрано!",
+		"breadcrumbCommunities": "Общности",
+		"breadcrumbAdd": "Добави"
 	},
 	"taggerProfile": {
 		"mappingSince": "Картографира от",

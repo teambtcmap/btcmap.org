@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
 import axios from "axios";
 import DOMPurify from "dompurify";
 import { onMount } from "svelte";
@@ -16,9 +16,10 @@ import { errToast, successToast, warningToast } from "$lib/utils";
 
 import { browser } from "$app/environment";
 
-const routes = [
-	{ name: "Communities", url: "/communities" },
-	{ name: "Add", url: "/communities/add" },
+$: t = $_;
+$: routes = [
+	{ name: t("addCommunityForm.breadcrumbCommunities"), url: "/communities" },
+	{ name: t("addCommunityForm.breadcrumbAdd"), url: "/communities/add" },
 ];
 
 let captchaContent = "";
@@ -36,7 +37,7 @@ const fetchCaptcha = () => {
 			captchaContent = DOMPurify.sanitize(response.data.captcha);
 		})
 		.catch((error) => {
-			errToast("Could not fetch captcha, please try again or contact BTC Map.");
+			errToast(t("addCommunityForm.captchaFetchError"));
 			console.error(error);
 		})
 		.finally(() => {
@@ -79,14 +80,12 @@ const searchLocation = () => {
 					area.geojson?.type === "MultiPolygon",
 			);
 			if (!searchResults.length) {
-				warningToast("No locations found, please adjust query.");
+				warningToast(t("addCommunityForm.noLocationsWarning"));
 			}
 			searchLoading = false;
 		})
 		.catch((error) => {
-			errToast(
-				"Could not search for locations, please try again or contact BTC Map.",
-			);
+			errToast(t("addCommunityForm.searchError"));
 			searchLoading = false;
 			console.error(error);
 		});
@@ -95,14 +94,14 @@ const searchLocation = () => {
 const setLocation = (area: { display_name: string }) => {
 	location = area.display_name;
 	selected = true;
-	successToast("Location selected!");
+	successToast(t("addCommunityForm.locationSelectedToast"));
 };
 
 const submitForm = (event: SubmitEvent) => {
 	event.preventDefault();
 	if (!selected) {
 		noLocationSelected = true;
-		errToast("Please select a location...");
+		errToast(t("addCommunityForm.locationError"));
 	} else {
 		submitting = true;
 
@@ -128,9 +127,7 @@ const submitForm = (event: SubmitEvent) => {
 				if (error.response.data.message.includes("Captcha")) {
 					errToast(error.response.data.message);
 				} else {
-					errToast(
-						"Form submission failed, please try again or contact BTC Map.",
-					);
+					errToast(t("addCommunityForm.formSubmitError"));
 				}
 
 				console.error(error);
@@ -187,7 +184,7 @@ onMount(async () => {
 				? 'text-white'
 				: 'gradient'} mt-10 text-center text-4xl font-semibold md:text-5xl"
 		>
-			Make an impact locally!
+			{$_('addCommunityForm.hero')}
 		</h1>
 	{:else}
 		<HeaderPlaceholder />
@@ -195,35 +192,34 @@ onMount(async () => {
 
 	<section id="add-community" class="mx-auto mt-16 w-full pb-20 md:w-[600px] md:pb-32">
 		<h2 class="mb-5 text-center text-3xl font-semibold text-primary dark:text-white">
-			Add Community
+			{$_('addCommunityForm.heading')}
 		</h2>
 
 		<p class="mb-5 w-full text-center text-primary dark:text-white">
-			Please fill out this form to submit a community application. This is a great way to grow
-			bitcoin adoption in your area, have some fun, and maybe even make some friends along the way. <InfoTooltip
-				tooltip="NOTE: BTC Map is a free and open source project run by volunteers. Each community application is manually reviewed to ensure quality. It may take a few weeks to have your community added."
+			{$_('addCommunityForm.description')} <InfoTooltip
+				tooltip={$_('addCommunityForm.tooltip')}
 			/>
 		</p>
 
 		<div class="mb-10 w-full text-primary dark:text-white">
-			<p class="font-semibold">Criteria</p>
+			<p class="font-semibold">{$_('addCommunityForm.criteriaHeading')}</p>
 			<ul class="ml-5 list-disc">
-				<li>bitcoin-only</li>
-				<li>must be a geographical area not a single point</li>
-				<li>be willing to take ownership of your local mapping data</li>
-				<li>try to onboard new businesses in your area</li>
+				<li>{$_('addCommunityForm.criteria1')}</li>
+				<li>{$_('addCommunityForm.criteria2')}</li>
+				<li>{$_('addCommunityForm.criteria3')}</li>
+				<li>{$_('addCommunityForm.criteria4')}</li>
 			</ul>
 		</div>
 
 		<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
 			<div class="space-y-2">
-				<label for="location-picker" class="block font-semibold">Select Location</label>
-				<p class="text-sm">Search for an area and select an option from the results.</p>
+				<label for="location-picker" class="block font-semibold">{$_('addCommunityForm.locationLabel')}</label>
+				<p class="text-sm">{$_('addCommunityForm.locationHint')}</p>
 
 				{#if selected}
-					<span class="font-semibold text-green-500">Location selected!</span>
+					<span class="font-semibold text-green-500">{$_('addCommunityForm.locationSelected')}</span>
 				{:else if noLocationSelected}
-					<span class="font-semibold text-error">Please select a location...</span>
+					<span class="font-semibold text-error">{$_('addCommunityForm.locationError')}</span>
 				{/if}
 
 				<div class="space-y-2 md:flex md:space-y-0 md:space-x-2">
@@ -236,7 +232,7 @@ onMount(async () => {
 						disabled={!captchaSecret}
 						type="text"
 						name="location"
-						placeholder="El Zonte, El Salvador"
+						placeholder={$_('addCommunityForm.locationPlaceholder')}
 						required
 						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 						bind:value={searchQuery}
@@ -250,7 +246,7 @@ onMount(async () => {
 							? 'opacity-50 hover:bg-link'
 							: ''} w-full md:w-[210px] py-3 rounded-xl"
 					>
-						Search 🔍
+						{$_('forms.searchButton')}
 					</PrimaryButton>
 				</div>
 
@@ -277,12 +273,12 @@ onMount(async () => {
 			</div>
 
 			<div>
-				<label for="name" class="mb-2 block font-semibold">Community Name</label>
+				<label for="name" class="mb-2 block font-semibold">{$_('addCommunityForm.nameLabel')}</label>
 				<input
 					disabled={!captchaSecret}
 					type="text"
 					name="name"
-					placeholder="Bitcoin Island Philippines"
+					placeholder={$_('addCommunityForm.namePlaceholder')}
 					required
 					class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 					bind:value={name}
@@ -291,17 +287,16 @@ onMount(async () => {
 
 			<div>
 				<label for="icon" class="mb-2 block font-semibold"
-					>Icon URL <span class="font-normal">(optional)</span></label
+					>{$_('addCommunityForm.iconLabel')} <span class="font-normal">({$_('addCommunityForm.iconOptional')})</span></label
 				>
 				<p class="mb-2 text-sm">
-					We will use the avatar from your social link or the country's flag your community is
-					located in if an icon is not provided.
+					{$_('addCommunityForm.iconHint')}
 				</p>
 				<input
 					disabled={!captchaSecret}
 					type="url"
 					name="icon"
-					placeholder="https://static.btcmap.org/images/communities/iom.svg"
+					placeholder={$_('addCommunityForm.iconPlaceholder')}
 					class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 					bind:value={icon}
 				/>
@@ -309,44 +304,44 @@ onMount(async () => {
 
 			<div>
 				<label for="lightning" class="mb-2 block font-semibold"
-					>Lightning Tips <span class="font-normal">(optional)</span></label
+					>{$_('addCommunityForm.lightningLabel')} <span class="font-normal">({$_('addCommunityForm.iconOptional')})</span></label
 				>
 				<p class="mb-2 text-sm">
-					If you want the ability to receive sats you can add either a <a
+					{$_('addCommunityForm.lightningHint')} <a
 						href="https://lightningaddress.com/"
 						target="_blank"
 						rel="noreferrer"
-						class="text-link transition-colors hover:text-hover">Lightning Address</a
+						class="text-link transition-colors hover:text-hover">{$_('addCommunityForm.lightningAddress')}</a
 					>
-					or
+					{$_('addCommunityForm.lightningOr')}
 					<a
 						href="https://github.com/fiatjaf/lnurl-rfc#lnurl-documents"
 						target="_blank"
 						rel="noreferrer"
-						class="text-link transition-colors hover:text-hover">LNURL-pay</a
-					> string.
+						class="text-link transition-colors hover:text-hover">{$_('addCommunityForm.lightningLnurl')}</a
+					> {$_('addCommunityForm.lightningSuffix')}
 				</p>
 				<input
 					disabled={!captchaSecret}
 					type="text"
 					name="lightning"
-					placeholder="btcmap@zbd.gg"
+					placeholder={$_('addCommunityForm.lightningPlaceholder')}
 					class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 					bind:value={lightning}
 				/>
 			</div>
 
 			<div>
-				<label for="socials" class="mb-2 block font-semibold">Social Links</label>
+				<label for="socials" class="mb-2 block font-semibold">{$_('addCommunityForm.socialsLabel')}</label>
 				<p class="mb-2 text-sm">
-					You need to provide at least one method for people to join your community.
+					{$_('addCommunityForm.socialsHint')}
 				</p>
 
 				<textarea
 					required
 					disabled={!captchaSecret}
 					name="socials"
-					placeholder="Website, Nostr, Telegram, Meetup etc."
+					placeholder={$_('addCommunityForm.socialsPlaceholder')}
 					rows="3"
 					class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 					bind:value={socialLinks}
@@ -354,16 +349,16 @@ onMount(async () => {
 			</div>
 
 			<div>
-				<label for="icon" class="mb-2 block font-semibold">Public Contact</label>
+				<label for="icon" class="mb-2 block font-semibold">{$_('addCommunityForm.contactLabel')}</label>
 				<p class="mb-2 text-sm">
-					A way to get in touch with the community leader if we have any questions.
+					{$_('addCommunityForm.contactHint')}
 				</p>
 				<input
 					required
 					disabled={!captchaSecret}
 					type="text"
 					name="contact"
-					placeholder="e.g. hello@btcmap.org"
+					placeholder={$_('addCommunityForm.contactPlaceholder')}
 					class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 					bind:value={contact}
 				/>
@@ -371,17 +366,16 @@ onMount(async () => {
 
 			<div>
 				<label for="notes" class="mb-2 block font-semibold"
-					>Notes <span class="font-normal">(optional)</span></label
+					>{$_('addCommunityForm.notesLabel')} <span class="font-normal">({$_('addCommunityForm.iconOptional')})</span></label
 				>
 				<p class="mb-2 text-sm">
-					Is this community part of an organization? Would you like to be associated with a specific
-					language? Etc.
+					{$_('addCommunityForm.notesHint')}
 				</p>
 
 				<textarea
 					disabled={!captchaSecret}
 					name="notes"
-					placeholder="German speaking - part of Einundzwanzig."
+					placeholder={$_('addCommunityForm.notesPlaceholder')}
 					rows="2"
 					class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 					bind:value={notes}
@@ -391,7 +385,7 @@ onMount(async () => {
 			<div>
 				<div class="mb-2 flex items-center space-x-2">
 					<label for="captcha" class="font-semibold"
-						>Bot protection <span class="font-normal">(case-sensitive)</span></label
+						>{$_('addCommunityForm.captchaLabel')} <span class="font-normal">({$_('addCommunityForm.captchaCaseSensitive')})</span></label
 					>
 					{#if captchaSecret}
 						<button type="button" on:click={fetchCaptcha}>
@@ -413,7 +407,7 @@ onMount(async () => {
 						required
 						type="text"
 						name="captcha"
-						placeholder="Please enter the captcha text."
+						placeholder={$_('addCommunityForm.captchaPlaceholder')}
 						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 						bind:value={captchaValue}
 					/>
@@ -423,7 +417,7 @@ onMount(async () => {
 			<input
 				type="text"
 				name="honey"
-				placeholder="A nice pot of honey."
+				placeholder={$_('addCommunityForm.honeyPlaceholder')}
 				class="hidden"
 				bind:value={honeyInput}
 			/>
@@ -433,15 +427,14 @@ onMount(async () => {
 				disabled={submitting || !captchaSecret}
 				style="w-full py-3 rounded-xl"
 			>
-				Submit Community
+				{$_('addCommunityForm.submitButton')}
 			</PrimaryButton>
 		</form>
 	</section>
 {:else}
 	<FormSuccess
-		type="Community"
-		text="Thanks for your initiative to create a bitcoin community. We’ll review your information
-	and reach out if we need any more details."
+		type={$_('addCommunityForm.successType')}
+		text={$_('addCommunityForm.successMessage')}
 		issue={submissionIssueNumber}
 		buttonWidth="w-60"
 		on:click={formReset}
