@@ -25,11 +25,8 @@ test.describe('Verify Location Page', () => {
 		await expect(page.getByText('How did you verify this?')).toBeVisible();
 		await expect(page.getByText('Bot protection')).toBeVisible();
 
-		// Check submit button is present. getByRole('button', { name: /.../ }) and getByText
-		// fail: the button is disabled until captcha/data load, and the accessible name
-		// may not be available. Using getByRole('button') scoped to the form + .last()
-		// is semantic (role) with structural disambiguation (form's last button = submit).
-		const submitButton = page.locator('#verify form').getByRole('button').last();
+		// Check submit button is present (tests use English; name matches "Submit Report")
+		const submitButton = page.locator('#verify form').getByRole('button', { name: /Submit/ });
 		await submitButton.scrollIntoViewIfNeeded();
 		await expect(submitButton).toBeVisible({ timeout: 15000 });
 
