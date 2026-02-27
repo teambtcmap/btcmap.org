@@ -274,6 +274,7 @@
 	},
 	"aria": {
 		"logoAlt": "Logo do BTC Map",
+		"avatarAlt": "Avatar",
 		"close": "Fechar",
 		"closeMerchantList": "Fechar lista de comerciantes",
 		"openMenu": "Abrir menu",

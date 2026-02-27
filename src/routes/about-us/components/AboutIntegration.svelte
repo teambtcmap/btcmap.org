@@ -18,7 +18,7 @@ export let integration: { url: string; icon: string; name: string };
 			integration.icon === 'adopting'
 				? '.png'
 				: '.jpg'}"
-			alt="logo"
+			alt={$_('aria.logoAlt')}
 			class="mx-auto h-24 w-24 rounded-full object-cover"
 			on:error={function () {
 				this.src = '/images/bitcoin.svg';

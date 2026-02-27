@@ -9,6 +9,7 @@ export let deleted: number;
 export let tip: string;
 
 import Tip from "$components/Tip.svelte";
+import { _ } from "$lib/i18n";
 
 import { resolve } from "$app/paths";
 
@@ -44,7 +45,7 @@ $: lightning = regexMatch?.[0].slice(10);
 	<div class="flex flex-col items-center gap-2 lg:flex-row">
 		<img
 			src={avatar}
-			alt="avatar"
+			alt={$_('aria.avatarAlt')}
 			class="h-20 w-20 rounded-full object-cover lg:h-14 lg:w-14"
 			on:error={function () {
 				this.src = '/images/satoshi-nakamoto.png';

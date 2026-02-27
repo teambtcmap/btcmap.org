@@ -511,7 +511,7 @@ onDestroy(() => {
 		{#if avatar}
 			<img
 				src={avatar}
-				alt="avatar"
+				alt={$_('aria.avatarAlt')}
 				class="mx-auto h-32 w-32 rounded-full object-cover"
 				on:error={function () {
 					this.src = '/images/satoshi-nakamoto.png';

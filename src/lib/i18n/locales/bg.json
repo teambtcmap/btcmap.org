@@ -70,6 +70,7 @@
 	},
 	"aria": {
 		"logoAlt": "Лого на BTC Map",
+		"avatarAlt": "Аватар",
 		"clearSearch": "Изчисти търсенето",
 		"clearSearchAria": "Изчисти търсенето",
 		"close": "Затвори",
