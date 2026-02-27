@@ -58,7 +58,15 @@
 		"supportWithSats": "Подкрепи с сатошита",
 		"zoomIn": "Увеличете",
 		"zoomOut": "Намалете",
-		"locate": "Покажи къде съм"
+		"locate": "Покажи къде съм",
+		"boostAlt": "Подсили",
+		"fullScreenAlt": "Цял екран",
+		"locateAlt": "Покажи къде съм",
+		"goToHomeAlt": "Към началната страница",
+		"addLocationAlt": "Добави място",
+		"communityMapAlt": "Карта на общностите",
+		"merchantMapAlt": "Карта на търговците",
+		"dataRefreshAlt": "Налични нови данни"
 	},
 	"aria": {
 		"logoAlt": "Лого на BTC Map",
@@ -201,6 +209,10 @@
 		"underMaintenance": "Заявките са в режим на поддръжка.",
 		"viewOnGitea": "Преглед на заявките директно в Gitea.",
 		"viewAllOnGitea": "Преглед на всички отворени заявки директно в",
+		"giteaLinkText": "Gitea",
+		"opened": "отворена",
+		"by": "от",
+		"avatarAlt": "аватар",
 		"dataUpdatedNote": "*Данните се актуализират на всеки 10 минути.",
 		"errorFetching": "Грешка при зареждане на билетите. Опитайте отново или се свържете с поддръжката на BTC Map.",
 		"couldNotLoadTickets": "Неуспешно зареждане на отворените билети, опитайте отново или се свържете с BTC Map.",

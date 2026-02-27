@@ -185,7 +185,7 @@ const isMaintenance = data.maintenance ?? false;
 								href="https://gitea.btcmap.org/teambtcmap/btcmap-data/issues"
 								target="_blank"
 								rel="noreferrer"
-								class="text-link transition-colors hover:text-hover">Gitea</a
+								class="text-link transition-colors hover:text-hover">{$_('maintain.giteaLinkText')}</a
 							>.
 						</p>
 					{/if}
