@@ -1,7 +1,7 @@
 <script lang="ts">
+import { _ } from "$lib/i18n";
 import IconSocials from "$lib/icons/IconSocials.svelte";
 import type { SocialIconName } from "$lib/icons/types";
-import { _ } from "$lib/i18n";
 
 export let member: {
 	avatar: string;

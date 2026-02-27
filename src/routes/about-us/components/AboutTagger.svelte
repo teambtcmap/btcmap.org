@@ -2,6 +2,7 @@
 import tippy from "tippy.js";
 
 import { _ } from "$lib/i18n";
+
 import { resolve } from "$app/paths";
 
 export let tagger: { id: number; avatar: string; username: string };
