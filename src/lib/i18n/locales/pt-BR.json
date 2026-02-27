@@ -157,6 +157,7 @@
 		"boostLocation": "Impulsionar Local",
 		"description": "Destaque este comerciante em laranja bitcoin no mapa, brilhe nos resultados de pesquisa e seja descoberto no mapa exclusivo de locais impulsionados!",
 		"seeHowItLooks": "Veja como fica",
+		"starAlt": "Estrela",
 		"boostedPinAlt": "Pin impulsionado",
 		"boostedMerchant": "Comerciante impulsionado",
 		"feeNote": "A taxa é usada para apoiar o projeto open source BTC Map e continuar seu desenvolvimento.",
@@ -177,7 +178,9 @@
 		"twitterShareText": "Acabei de impulsionar {name} no @btcmap. Confira!"
 	},
 	"invoicePayment": {
-		"scanOrClick": "Escaneie ou clique para pagar com lightning"
+		"scanOrClick": "Escaneie ou clique para pagar com lightning",
+		"invoiceLabel": "Fatura",
+		"protocolAlt": "Protocolo Lightning"
 	},
 	"commentAdd": {
 		"title": "Adicionar Comentário",
@@ -736,6 +739,9 @@
 		}
 	},
 	"apps": {
+		"hero": "Encontre comerciantes em qualquer plataforma.",
+		"subheading": "Temos você coberto em qualquer dispositivo e sistema operacional que escolher.",
+		"googlePlayNote": "Nota: Não há opção do Google Play devido aos requisitos excessivos de KYC para desenvolvedores.",
 		"official": "Oficial",
 		"community": "Comunidade"
 	},

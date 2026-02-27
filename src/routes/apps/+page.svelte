@@ -37,7 +37,7 @@ const communityApps: {
 				? 'text-white'
 				: 'gradient'} text-4xl !leading-tight font-semibold text-primary md:text-5xl dark:text-white"
 		>
-			Find merchants on any platform.
+			{$_('apps.hero')}
 		</h1>
 	{:else}
 		<HeaderPlaceholder />
@@ -54,7 +54,7 @@ const communityApps: {
 		{/each}
 	</section>
 	<p class="text-center font-normal dark:text-white">
-		Note: There is no Google Play option due to their excessive KYC requirements for developers.
+		{$_('apps.googlePlayNote')}
 	</p>
 
 	<h3 class="text-2xl font-semibold text-primary md:text-left dark:text-white">{$_('apps.community')}</h3>
