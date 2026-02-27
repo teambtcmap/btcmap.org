@@ -25,8 +25,10 @@ test.describe('Verify Location Page', () => {
 		await expect(page.getByText('How did you verify this?')).toBeVisible();
 		await expect(page.getByText('Bot protection')).toBeVisible();
 
-		// Check submit button is present (tests use English; name matches "Submit Report")
-		const submitButton = page.locator('#verify form').getByRole('button', { name: /Submit/ });
+		// Check submit button is present. getByRole('button', { name }) fails when the button
+		// shows a loading spinner (replaces text) or i18n isn't ready. Use form-scoped .last()
+		// since the submit button is the form's last button.
+		const submitButton = page.locator('#verify form').getByRole('button').last();
 		await submitButton.scrollIntoViewIfNeeded();
 		await expect(submitButton).toBeVisible({ timeout: 15000 });
 
