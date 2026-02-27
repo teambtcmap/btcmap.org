@@ -11,33 +11,33 @@ source "$(dirname "$0")/common.sh"
 
 # Count reactive declarations ($:)
 REACTIVE_DECLS=$({ grep -rn '^\s*\$:' src/ --include='*.svelte' 2>/dev/null || true; } | count_lines)
-REACTIVE_FILES=$(grep -rn '^\s*\$:' src/ --include='*.svelte' 2>/dev/null \
+REACTIVE_FILES=$({ grep -rn '^\s*\$:' src/ --include='*.svelte' 2>/dev/null || true; } \
   | cut -d: -f1 | sort -u | head -20)
 
 # Count createEventDispatcher usage
 EVENT_DISPATCH=$({ grep -rn 'createEventDispatcher' src/ --include='*.svelte' --include='*.ts' 2>/dev/null || true; } | count_lines)
-EVENT_DISPATCH_FILES=$(grep -rn 'createEventDispatcher' src/ --include='*.svelte' --include='*.ts' 2>/dev/null \
+EVENT_DISPATCH_FILES=$({ grep -rn 'createEventDispatcher' src/ --include='*.svelte' --include='*.ts' 2>/dev/null || true; } \
   | cut -d: -f1 | sort -u | head -20)
 
 # Count <slot> usage (will become {@render} / snippets)
 SLOT_USAGE=$({ grep -rn '<slot' src/ --include='*.svelte' 2>/dev/null || true; } | count_lines)
-SLOT_FILES=$(grep -rn '<slot' src/ --include='*.svelte' 2>/dev/null \
+SLOT_FILES=$({ grep -rn '<slot' src/ --include='*.svelte' 2>/dev/null || true; } \
   | cut -d: -f1 | sort -u | head -20)
 
 # Count beforeUpdate/afterUpdate lifecycle hooks
 BEFORE_UPDATE=$({ grep -rn 'beforeUpdate' src/ --include='*.svelte' --include='*.ts' 2>/dev/null || true; } | count_lines)
 AFTER_UPDATE=$({ grep -rn 'afterUpdate' src/ --include='*.svelte' --include='*.ts' 2>/dev/null || true; } | count_lines)
-LIFECYCLE_FILES=$(grep -rn 'beforeUpdate\|afterUpdate' src/ --include='*.svelte' --include='*.ts' 2>/dev/null \
+LIFECYCLE_FILES=$({ grep -rn 'beforeUpdate\|afterUpdate' src/ --include='*.svelte' --include='*.ts' 2>/dev/null || true; } \
   | cut -d: -f1 | sort -u | head -20)
 
 # Count $$props / $$restProps usage
 DOLLAR_PROPS=$({ grep -rn '\$\$props\|\$\$restProps' src/ --include='*.svelte' 2>/dev/null || true; } | count_lines)
-DOLLAR_PROPS_FILES=$(grep -rn '\$\$props\|\$\$restProps' src/ --include='*.svelte' 2>/dev/null \
+DOLLAR_PROPS_FILES=$({ grep -rn '\$\$props\|\$\$restProps' src/ --include='*.svelte' 2>/dev/null || true; } \
   | cut -d: -f1 | sort -u | head -20)
 
 # Count <svelte:component> usage (simplified in v5)
 SVELTE_COMPONENT=$({ grep -rn '<svelte:component' src/ --include='*.svelte' 2>/dev/null || true; } | count_lines)
-SVELTE_COMPONENT_FILES=$(grep -rn '<svelte:component' src/ --include='*.svelte' 2>/dev/null \
+SVELTE_COMPONENT_FILES=$({ grep -rn '<svelte:component' src/ --include='*.svelte' 2>/dev/null || true; } \
   | cut -d: -f1 | sort -u | head -20)
 
 # Count onMount/onDestroy (still supported in v5 but worth tracking)
