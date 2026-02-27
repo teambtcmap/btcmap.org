@@ -17,7 +17,7 @@ onMount(() => {
 <svelte:head>
 	<title>{$_('errorPage.title')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/home.png" />
-	<meta name="twitter:title" content="BTC Map" />
+	<meta name="twitter:title" content={$_('errorPage.title')} />
 	<meta name="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
