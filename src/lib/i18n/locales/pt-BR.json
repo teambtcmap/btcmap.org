@@ -296,6 +296,19 @@
 		"sponsor": "Patrocinador BTC Map",
 		"supporter": "Apoiador"
 	},
+	"communities": {
+		"hero": "Junte-se à comunidade do mapa bitcoin.",
+		"description": "Assuma a responsabilidade pelos dados locais do mapa bitcoin e ajude a impulsionar a adoção. As comunidades bitcoin são a faísca que acende o movimento. Junte-se aos seus amigos, cadastre negócios e divirta-se!",
+		"leaderboardHero": "Principais Comunidades",
+		"leaderboardDescription": "As comunidades de mapeamento bitcoin mantêm seus conjuntos de dados locais e buscam ter as informações mais precisas. Elas também ajudam a cadastrar novos comerciantes em sua região!",
+		"directory": "Diretório",
+		"addCommunity": "Adicionar comunidade",
+		"viewMap": "Ver mapa da comunidade",
+		"leaderboard": "Ranking",
+		"byContinent": "Comunidades por continente",
+		"totalLocations": "Total de locais",
+		"verifiedLocations": "Locais verificados"
+	},
 	"taggerOnboarding": {
 		"nameLabel": "Nome",
 		"emailLabel": "E-mail",
