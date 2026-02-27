@@ -433,6 +433,26 @@
 		"issueLink": "Issue #{issue}",
 		"submitAnother": "Enviar outro {type}"
 	},
+	"dashboard": {
+		"hero": "Dashboard",
+		"totalMerchants": "Total de Comerciantes",
+		"recentlyVerified": "Recentemente Verificados",
+		"totalExchanges": "Total de Exchanges",
+		"period7d": "7D",
+		"period1m": "1M",
+		"period3m": "3M",
+		"period6m": "6M",
+		"periodYtd": "YTD",
+		"period1y": "1A",
+		"periodAll": "TODOS",
+		"verifiedLabel": "Comerciantes Recentemente Verificados",
+		"totalLabel": "Total de Comerciantes",
+		"merchantsNote": "*Comerciantes que aceitam qualquer método de bitcoin.",
+		"verifiedNote": "*Comerciantes com survey:date, check_date ou check_date:currency:XBT com menos de um ano.",
+		"tagsNotePart1": "*Mais informações sobre tags de mapeamento bitcoin podem ser encontradas",
+		"tagsNoteLink": "aqui",
+		"tagsNotePart2": "."
+	},
 	"tip": {
 		"label": "Doar",
 		"labelWithUser": "Doar para {user}"
@@ -580,6 +600,21 @@
 		"tagsInfo": "*Mais informações sobre tags de mapeamento bitcoin podem ser encontradas",
 		"here": "aqui",
 		"chartDataNote": "*Dados dos gráficos atualizados a cada 24 horas."
+	},
+	"activityPage": {
+		"heading": "Atividade",
+		"hero": "Os Supertaggers Sombrios não dormem. Eles ficam acordados a noite toda, etiquetando. O mundo que queremos está a uma etiqueta de distância.",
+		"cta": "Você também pode ser uma lenda supertagging! O que está esperando?",
+		"getTaggin": "Comece a etiquetar!",
+		"latestSupertaggers": "Últimos Supertaggers"
+	},
+	"areaHighlights": {
+		"boostedMerchants": "Comerciantes Impulsionados",
+		"noBoosted": "Nenhum comerciante impulsionado nesta área.",
+		"latestAdded": "Últimos Adicionados",
+		"noLatest": "Nenhum adicionado recentemente nesta área. Você pode",
+		"addNewMerchant": "adicionar um novo comerciante",
+		"now": "agora!"
 	},
 	"areaActivity": {
 		"supertaggers": "Supertaggers",

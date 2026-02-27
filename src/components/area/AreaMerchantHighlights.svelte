@@ -1,5 +1,6 @@
 <script lang="ts">
 import MerchantCard from "$components/area/MerchantCard.svelte";
+import { _ } from "$lib/i18n";
 import type { Place } from "$lib/types";
 import { isBoosted } from "$lib/utils";
 
@@ -29,7 +30,7 @@ $: latest = filteredPlaces
 		<h3
 			class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
 		>
-			Boosted Merchants
+			{$_('areaHighlights.boostedMerchants')}
 		</h3>
 
 		<div class="w-full px-2 py-6 sm:px-5">
@@ -47,7 +48,7 @@ $: latest = filteredPlaces
 				</div>
 			{:else}
 				<p class="text-center text-primary sm:text-left dark:text-white">
-					No boosted merchants in this area.
+					{$_('areaHighlights.noBoosted')}
 				</p>
 			{/if}
 		</div>
@@ -61,7 +62,7 @@ $: latest = filteredPlaces
 		<h3
 			class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
 		>
-			Latest Added
+			{$_('areaHighlights.latestAdded')}
 		</h3>
 
 		<div class="w-full px-2 py-6 sm:px-5">
@@ -79,10 +80,10 @@ $: latest = filteredPlaces
 				</div>
 			{:else}
 				<p class="text-center text-primary sm:text-left dark:text-white">
-					No latest added in this area. You can <a
+					{$_('areaHighlights.noLatest')} <a
 						href={resolve('/add-location')}
-						class="text-link transition-colors hover:text-hover">add a new merchant</a
-					> now!
+						class="text-link transition-colors hover:text-hover">{$_('areaHighlights.addNewMerchant')}</a
+					> {$_('areaHighlights.now')}
 				</p>
 			{/if}
 		</div>
