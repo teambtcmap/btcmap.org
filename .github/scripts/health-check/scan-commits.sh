@@ -6,6 +6,9 @@ set -euo pipefail
 OUTPUT_DIR="${1:-.}"
 OUTPUT_FILE="$OUTPUT_DIR/commits.json"
 
+# shellcheck source=common.sh
+source "$(dirname "$0")/common.sh"
+
 # Determine anchor date: last health-report issue creation date, or 14 days ago
 LAST_REPORT_DATE=$(gh issue list --label "health-report" --state all --limit 1 \
   --json createdAt --jq '.[0].createdAt // empty' 2>/dev/null || true)
@@ -28,10 +31,7 @@ if [[ -z "$OLDEST_HASH" ]]; then
 fi
 
 # Total commit count
-TOTAL=$(git log --since="$SINCE_DATE" --oneline | wc -l | tr -d ' ')
-
-# Helper: sanitize a grep -c result to a plain integer, defaulting to 0 on no-match
-sanitize_count() { local n="${1//[^0-9]/}"; echo "${n:-0}"; }
+TOTAL=$(git log --since="$SINCE_DATE" --oneline | count_lines)
 
 # Commits by type (conventional commit prefix)
 FEAT_COUNT=$(sanitize_count "$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ feat' || true)")
@@ -61,7 +61,7 @@ NON_CONVENTIONAL_LIST=$(git log --since="$SINCE_DATE" --pretty=format:'%h %s' \
   | head -20 || true)
 
 # Unique contributors
-CONTRIBUTORS=$(git log --since="$SINCE_DATE" --format='%an' | sort -u | wc -l | tr -d ' ')
+CONTRIBUTORS=$(git log --since="$SINCE_DATE" --format='%an' | sort -u | count_lines)
 CONTRIBUTOR_LIST=$(git log --since="$SINCE_DATE" --format='%an' | sort | uniq -c | sort -rn | head -10)
 
 # File change frequency (hotspots) — top 15 most changed files
@@ -70,14 +70,21 @@ HOTSPOTS=$(git log --since="$SINCE_DATE" --name-only --pretty=format: \
 
 # Files changed count
 FILES_CHANGED=$(git log --since="$SINCE_DATE" --name-only --pretty=format: \
-  | grep -v '^$' | sort -u | wc -l | tr -d ' ')
+  | grep -v '^$' | sort -u | count_lines)
 
 # Detect new dependencies added in package.json
 NEW_DEPS=""
 if git log --since="$SINCE_DATE" --name-only --pretty=format: | grep -q 'package.json'; then
-  # Get package.json diff for added dependency lines
-  NEW_DEPS=$(git diff "$OLDEST_HASH^"..HEAD -- package.json \
-    | grep '^+' | grep -vP '^\+\+\+' | grep -oP '"\K[^"]+(?="\s*:\s*")' || true)
+  # Guard against OLDEST_HASH being the very first commit (no parent)
+  if git rev-parse "$OLDEST_HASH^" >/dev/null 2>&1; then
+    NEW_DEPS=$(git diff "$OLDEST_HASH^"..HEAD -- package.json \
+      | grep '^+' | grep -vP '^\+\+\+' | grep -oP '"\K[^"]+(?="\s*:\s*")' || true)
+  else
+    # First commit in the repo — diff the entire file against empty tree
+    EMPTY_TREE=$(git hash-object -t tree /dev/null)
+    NEW_DEPS=$(git diff "$EMPTY_TREE"..HEAD -- package.json \
+      | grep '^+' | grep -vP '^\+\+\+' | grep -oP '"\K[^"]+(?="\s*:\s*")' || true)
+  fi
 fi
 
 # Detect cosmetic-only commits (only whitespace, comments, or formatting changes)
@@ -114,8 +121,11 @@ QUICK_FIXES=""
 PREV_HASH=""
 PREV_DATE=""
 PREV_FILES=""
-while IFS='|' read -r hash date subject files; do
+while IFS= read -r hash; do
   [[ -z "$hash" ]] && continue
+  date=$(git log -1 --format='%ad' --date=unix "$hash" 2>/dev/null || true)
+  subject=$(git log -1 --format='%s' "$hash" 2>/dev/null || true)
+  files=$(git diff-tree --no-commit-id --name-only -r "$hash" 2>/dev/null | tr '\n' ' ' || true)
   if [[ -n "$PREV_HASH" && -n "$files" && -n "$PREV_FILES" ]]; then
     # Check for overlapping files
     OVERLAP=$(comm -12 <(echo "$files" | tr ' ' '\n' | sort) <(echo "$PREV_FILES" | tr ' ' '\n' | sort) | head -1 || true)
@@ -131,8 +141,7 @@ while IFS='|' read -r hash date subject files; do
   PREV_HASH="$hash"
   PREV_DATE="$date"
   PREV_FILES="$files"
-done < <(git log --since="$SINCE_DATE" --pretty=format:'%H|%ad|%s|' --date=unix --name-only \
-  | awk 'BEGIN{RS=""} {gsub(/\n/, " "); print}' | head -100)
+done < <(git log --since="$SINCE_DATE" --format='%H' | head -100)
 
 # Detect AI-generated commit signatures
 AI_SIGNATURES=""

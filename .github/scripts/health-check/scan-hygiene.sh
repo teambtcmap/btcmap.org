@@ -59,7 +59,7 @@ while IFS= read -r line; do
   # Count occurrences across the codebase (excluding the definition file itself)
   FILE=$(echo "$line" | cut -d: -f1)
   COUNT=$(grep -Frl "$NAME" src/ --include='*.ts' --include='*.svelte' --include='*.js' 2>/dev/null \
-    | grep -v "$FILE" | wc -l | tr -d ' ')
+    | grep -v "$FILE" | count_lines)
   if [[ "$COUNT" -eq 0 ]]; then
     UNUSED_EXPORTS+=("$line")
   fi
@@ -75,7 +75,7 @@ fi
 # 5. Console.log statements (excluding allowed console methods)
 CONSOLE_LOGS=$(grep -rn 'console\.log\b' src/ --include='*.ts' --include='*.svelte' --include='*.js' 2>/dev/null || true)
 if [[ -n "$CONSOLE_LOGS" ]]; then
-  LOG_COUNT=$(echo "$CONSOLE_LOGS" | wc -l | tr -d ' ')
+  LOG_COUNT=$(echo "$CONSOLE_LOGS" | count_lines)
   add_finding "low" "console.log statements found ($LOG_COUNT)" \
     "Biome config allows console.info/warn/error/debug but console.log should be removed." \
     "$(echo "$CONSOLE_LOGS" | head -10)"
@@ -84,7 +84,7 @@ fi
 # 6. TODO/FIXME/HACK comments
 TODOS=$(grep -rnE 'TODO|FIXME|HACK|XXX' src/ --include='*.ts' --include='*.svelte' --include='*.js' 2>/dev/null || true)
 if [[ -n "$TODOS" ]]; then
-  TODO_COUNT=$(echo "$TODOS" | wc -l | tr -d ' ')
+  TODO_COUNT=$(echo "$TODOS" | count_lines)
   add_finding "info" "TODO/FIXME/HACK comments ($TODO_COUNT found)" \
     "Tracked code annotations that may need attention." \
     "$(echo "$TODOS" | head -15)"

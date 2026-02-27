@@ -15,7 +15,7 @@ source "$(dirname "$0")/common.sh"
 AXIOS_CALLS=$(grep -rn 'axios\.\(get\|post\|put\|delete\|patch\)' src/ \
   --include='*.ts' --include='*.svelte' 2>/dev/null || true)
 if [[ -n "$AXIOS_CALLS" ]]; then
-  TOTAL_CALLS=$(echo "$AXIOS_CALLS" | wc -l | tr -d ' ')
+  TOTAL_CALLS=$(echo "$AXIOS_CALLS" | count_lines)
   # Check for calls not inside try blocks or without .catch
   # Heuristic: lines with axios calls that don't have 'catch' within 5 lines
   UNHANDLED=""
@@ -29,8 +29,7 @@ if [[ -n "$AXIOS_CALLS" ]]; then
   done <<< "$AXIOS_CALLS"
 
   if [[ -n "$UNHANDLED" ]]; then
-    UNHANDLED_COUNT=$(echo -e "$UNHANDLED" | grep -c '.' 2>/dev/null || true)
-    UNHANDLED_COUNT="${UNHANDLED_COUNT//[^0-9]/}"; UNHANDLED_COUNT="${UNHANDLED_COUNT:-0}"
+    UNHANDLED_COUNT=$(sanitize_count "$(echo -e "$UNHANDLED" | grep -c '.' 2>/dev/null || true)")
     add_finding "medium" "Axios calls potentially missing error handling ($UNHANDLED_COUNT)" \
       "Found $TOTAL_CALLS total axios calls, $UNHANDLED_COUNT appear to lack try/catch or .catch() error handling." \
       "$(echo -e "$UNHANDLED" | head -10)"
@@ -51,8 +50,7 @@ if [[ -n "$LF_CALLS" ]]; then
   done <<< "$LF_CALLS"
 
   if [[ -n "$UNHANDLED_LF" ]]; then
-    COUNT=$(echo -e "$UNHANDLED_LF" | grep -c '.' 2>/dev/null || true)
-    COUNT="${COUNT//[^0-9]/}"; COUNT="${COUNT:-0}"
+    COUNT=$(sanitize_count "$(echo -e "$UNHANDLED_LF" | grep -c '.' 2>/dev/null || true)")
     add_finding "medium" "LocalForage calls potentially missing error handling ($COUNT)" \
       "IndexedDB operations can fail (storage full, private browsing). Consider adding error handling." \
       "$(echo -e "$UNHANDLED_LF" | head -10)"
@@ -71,9 +69,9 @@ PLACE_USAGE=$(grep -rn '\bPlace\b' src/ --include='*.ts' --include='*.svelte' 2>
   | grep -v 'import.*Place' | grep -v '// ' || true)
 
 if [[ -n "$ELEMENT_USAGE" ]]; then
-  ELEM_COUNT=$(echo "$ELEMENT_USAGE" | wc -l | tr -d ' ')
+  ELEM_COUNT=$(echo "$ELEMENT_USAGE" | count_lines)
   PLACE_COUNT=0
-  [[ -n "$PLACE_USAGE" ]] && PLACE_COUNT=$(echo "$PLACE_USAGE" | wc -l | tr -d ' ')
+  [[ -n "$PLACE_USAGE" ]] && PLACE_COUNT=$(echo "$PLACE_USAGE" | count_lines)
   add_finding "info" "API type usage: Element ($ELEM_COUNT refs) vs Place ($PLACE_COUNT refs)" \
     "Project prefers Place type (v4 API). Element type (v2 API) should be migrated where possible." \
     "$(echo "$ELEMENT_USAGE" | head -5)"
@@ -84,7 +82,7 @@ HARDCODED_URLS=$(grep -rnP "https?://api\.btcmap\.org" src/ \
   --include='*.ts' --include='*.svelte' 2>/dev/null \
   | grep -v 'constants\|config\|\.env' || true)
 if [[ -n "$HARDCODED_URLS" ]]; then
-  COUNT=$(echo "$HARDCODED_URLS" | wc -l | tr -d ' ')
+  COUNT=$(echo "$HARDCODED_URLS" | count_lines)
   add_finding "low" "Hardcoded API URLs ($COUNT)" \
     "API base URLs should use constants or environment variables for maintainability." \
     "$(echo "$HARDCODED_URLS" | head -10)"
@@ -101,8 +99,7 @@ if [[ -n "$ASYNC_COMPONENTS" ]]; then
     fi
   done
   if [[ -n "$NO_LOADING" ]]; then
-    COUNT=$(echo -e "$NO_LOADING" | grep -c '.' 2>/dev/null || true)
-    COUNT="${COUNT//[^0-9]/}"; COUNT="${COUNT:-0}"
+    COUNT=$(sanitize_count "$(echo -e "$NO_LOADING" | grep -c '.' 2>/dev/null || true)")
     add_finding "low" "Async components potentially missing loading states ($COUNT)" \
       "Components with async data fetching should show loading indicators." \
       "$(echo -e "$NO_LOADING" | head -10)"
@@ -119,8 +116,7 @@ if [[ -n "$SYNC_FILES" ]]; then
     fi
   done
   if [[ -n "$NO_UPDATED_SINCE" ]]; then
-    COUNT=$(echo -e "$NO_UPDATED_SINCE" | grep -c '.' 2>/dev/null || true)
-    COUNT="${COUNT//[^0-9]/}"; COUNT="${COUNT:-0}"
+    COUNT=$(sanitize_count "$(echo -e "$NO_UPDATED_SINCE" | grep -c '.' 2>/dev/null || true)")
     add_finding "info" "Sync modules without updated_since optimization ($COUNT)" \
       "Some sync modules may be fetching full datasets instead of incremental updates." \
       "$(echo -e "$NO_UPDATED_SINCE" | head -10)"
