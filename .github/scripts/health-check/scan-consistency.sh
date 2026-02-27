@@ -11,10 +11,10 @@ FINDINGS="[]"
 source "$(dirname "$0")/common.sh"
 
 # 1. interface vs type — project prefers `type` over `interface`
-INTERFACE_COUNT=$(grep -rnP '^\s*export\s+interface\b|^\s*interface\b' src/ \
-  --include='*.ts' --include='*.svelte' 2>/dev/null | count_lines)
-TYPE_COUNT=$(grep -rnP '^\s*export\s+type\b|^\s*type\b' src/ \
-  --include='*.ts' --include='*.svelte' 2>/dev/null | grep -v 'import type' | count_lines)
+INTERFACE_COUNT=$({ grep -rnP '^\s*export\s+interface\b|^\s*interface\b' src/ \
+  --include='*.ts' --include='*.svelte' 2>/dev/null || true; } | count_lines)
+TYPE_COUNT=$({ grep -rnP '^\s*export\s+type\b|^\s*type\b' src/ \
+  --include='*.ts' --include='*.svelte' 2>/dev/null | grep -v 'import type' || true; } | count_lines)
 
 if [[ "$INTERFACE_COUNT" -gt 0 ]]; then
   INTERFACE_FILES=$(grep -rnP '^\s*export\s+interface\b|^\s*interface\b' src/ \
@@ -35,8 +35,8 @@ if [[ -n "$MIXED_IMPORTS" ]]; then
 fi
 
 # 3. JSDoc comments (project prefers inline // comments)
-JSDOC_COUNT=$(grep -rn '/\*\*' src/ --include='*.ts' --include='*.svelte' 2>/dev/null \
-  | grep -v 'node_modules' | count_lines)
+JSDOC_COUNT=$({ grep -rn '/\*\*' src/ --include='*.ts' --include='*.svelte' 2>/dev/null \
+  | grep -v 'node_modules' || true; } | count_lines)
 if [[ "$JSDOC_COUNT" -gt 0 ]]; then
   JSDOC_FILES=$(grep -rn '/\*\*' src/ --include='*.ts' --include='*.svelte' 2>/dev/null \
     | grep -v 'node_modules' | head -10)

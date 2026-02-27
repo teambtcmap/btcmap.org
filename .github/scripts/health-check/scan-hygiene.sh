@@ -58,8 +58,8 @@ while IFS= read -r line; do
   [[ -z "$NAME" ]] && continue
   # Count occurrences across the codebase (excluding the definition file itself)
   FILE=$(echo "$line" | cut -d: -f1)
-  COUNT=$(grep -Frl "$NAME" src/ --include='*.ts' --include='*.svelte' --include='*.js' 2>/dev/null \
-    | grep -v "$FILE" | count_lines)
+  COUNT=$({ grep -Frl "$NAME" src/ --include='*.ts' --include='*.svelte' --include='*.js' 2>/dev/null \
+    | grep -Fv -- "$FILE" || true; } | count_lines)
   if [[ "$COUNT" -eq 0 ]]; then
     UNUSED_EXPORTS+=("$line")
   fi

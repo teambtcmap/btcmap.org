@@ -10,44 +10,44 @@ OUTPUT_FILE="$OUTPUT_DIR/svelte-v5.json"
 source "$(dirname "$0")/common.sh"
 
 # Count reactive declarations ($:)
-REACTIVE_DECLS=$(grep -rn '^\s*\$:' src/ --include='*.svelte' 2>/dev/null | count_lines)
+REACTIVE_DECLS=$({ grep -rn '^\s*\$:' src/ --include='*.svelte' 2>/dev/null || true; } | count_lines)
 REACTIVE_FILES=$(grep -rn '^\s*\$:' src/ --include='*.svelte' 2>/dev/null \
   | cut -d: -f1 | sort -u | head -20)
 
 # Count createEventDispatcher usage
-EVENT_DISPATCH=$(grep -rn 'createEventDispatcher' src/ --include='*.svelte' --include='*.ts' 2>/dev/null | count_lines)
+EVENT_DISPATCH=$({ grep -rn 'createEventDispatcher' src/ --include='*.svelte' --include='*.ts' 2>/dev/null || true; } | count_lines)
 EVENT_DISPATCH_FILES=$(grep -rn 'createEventDispatcher' src/ --include='*.svelte' --include='*.ts' 2>/dev/null \
   | cut -d: -f1 | sort -u | head -20)
 
 # Count <slot> usage (will become {@render} / snippets)
-SLOT_USAGE=$(grep -rn '<slot' src/ --include='*.svelte' 2>/dev/null | count_lines)
+SLOT_USAGE=$({ grep -rn '<slot' src/ --include='*.svelte' 2>/dev/null || true; } | count_lines)
 SLOT_FILES=$(grep -rn '<slot' src/ --include='*.svelte' 2>/dev/null \
   | cut -d: -f1 | sort -u | head -20)
 
 # Count beforeUpdate/afterUpdate lifecycle hooks
-BEFORE_UPDATE=$(grep -rn 'beforeUpdate' src/ --include='*.svelte' --include='*.ts' 2>/dev/null | count_lines)
-AFTER_UPDATE=$(grep -rn 'afterUpdate' src/ --include='*.svelte' --include='*.ts' 2>/dev/null | count_lines)
+BEFORE_UPDATE=$({ grep -rn 'beforeUpdate' src/ --include='*.svelte' --include='*.ts' 2>/dev/null || true; } | count_lines)
+AFTER_UPDATE=$({ grep -rn 'afterUpdate' src/ --include='*.svelte' --include='*.ts' 2>/dev/null || true; } | count_lines)
 LIFECYCLE_FILES=$(grep -rn 'beforeUpdate\|afterUpdate' src/ --include='*.svelte' --include='*.ts' 2>/dev/null \
   | cut -d: -f1 | sort -u | head -20)
 
 # Count $$props / $$restProps usage
-DOLLAR_PROPS=$(grep -rn '\$\$props\|\$\$restProps' src/ --include='*.svelte' 2>/dev/null | count_lines)
+DOLLAR_PROPS=$({ grep -rn '\$\$props\|\$\$restProps' src/ --include='*.svelte' 2>/dev/null || true; } | count_lines)
 DOLLAR_PROPS_FILES=$(grep -rn '\$\$props\|\$\$restProps' src/ --include='*.svelte' 2>/dev/null \
   | cut -d: -f1 | sort -u | head -20)
 
 # Count <svelte:component> usage (simplified in v5)
-SVELTE_COMPONENT=$(grep -rn '<svelte:component' src/ --include='*.svelte' 2>/dev/null | count_lines)
+SVELTE_COMPONENT=$({ grep -rn '<svelte:component' src/ --include='*.svelte' 2>/dev/null || true; } | count_lines)
 SVELTE_COMPONENT_FILES=$(grep -rn '<svelte:component' src/ --include='*.svelte' 2>/dev/null \
   | cut -d: -f1 | sort -u | head -20)
 
 # Count onMount/onDestroy (still supported in v5 but worth tracking)
-ON_MOUNT=$(grep -rn 'onMount' src/ --include='*.svelte' --include='*.ts' 2>/dev/null | count_lines)
-ON_DESTROY=$(grep -rn 'onDestroy' src/ --include='*.svelte' --include='*.ts' 2>/dev/null | count_lines)
+ON_MOUNT=$({ grep -rn 'onMount' src/ --include='*.svelte' --include='*.ts' 2>/dev/null || true; } | count_lines)
+ON_DESTROY=$({ grep -rn 'onDestroy' src/ --include='*.svelte' --include='*.ts' 2>/dev/null || true; } | count_lines)
 
 # Count store subscriptions with $ prefix (still works in v5 but runes preferred)
-STORE_SUBS=$(grep -rnP '\$\w+' src/ --include='*.svelte' 2>/dev/null \
+STORE_SUBS=$({ grep -rnP '\$\w+' src/ --include='*.svelte' 2>/dev/null \
   | grep -v '^\s*//' | grep -v '\$:' | grep -v '\$\$' \
-  | grep -v 'node_modules' | count_lines)
+  | grep -v 'node_modules' || true; } | count_lines)
 
 # Load previous report's metrics for delta comparison
 PREV_ISSUE=$(gh issue list --label "health-report" --state all --limit 1 --json body --jq '.[0].body // empty' 2>/dev/null || true)
