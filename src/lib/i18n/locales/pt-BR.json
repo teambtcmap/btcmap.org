@@ -309,7 +309,11 @@
 		"pageTitle": "Mapa da Comunidade",
 		"organization": "Organização",
 		"sponsor": "Patrocinador BTC Map",
-		"supporter": "Apoiador"
+		"supporter": "Apoiador",
+		"avatarAlt": "Ícone da comunidade",
+		"communityIconTitle": "Ícone da comunidade",
+		"communityNameTitle": "Nome da comunidade",
+		"communityPageTitle": "Página da comunidade"
 	},
 	"communities": {
 		"hero": "Junte-se à comunidade do mapa bitcoin.",
@@ -867,6 +871,14 @@
 		"contact": {
 			"heading": "Entre em Contato",
 			"intro": "Se você tiver alguma dúvida ou feedback sobre nossa política de privacidade, entre em contato conosco em {contactLink} ou em qualquer uma de nossas plataformas sociais."
+		},
+		"links": {
+			"githubPrivacy": "Política de Privacidade do GitHub",
+			"discordPrivacy": "Política de Privacidade do Discord",
+			"osmPrivacy": "Política de Privacidade do OpenStreetMap",
+			"netlifyAnalytics": "Netlify Analytics",
+			"netlifyDocsAnalytics": "Netlify Docs - Analytics",
+			"netlifyDocsHowAnalytics": "Netlify Docs - How Analytics Works"
 		}
 	},
 	"aboutUs": {

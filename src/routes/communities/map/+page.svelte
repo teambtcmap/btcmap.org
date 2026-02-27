@@ -89,9 +89,9 @@ const initializeCommunities = () => {
 
 		popupContainer.innerHTML = `
 				<div class='text-center space-y-2'>
-					<img loading='lazy' src=${`https://btcmap.org/.netlify/images?url=${community.tags["icon:square"]}&fit=cover&w=256&h=256`} alt='avatar' class='w-24 h-24 rounded-full mx-auto' title='Community icon' onerror="this.src='/images/bitcoin.svg'" />
+					<img loading='lazy' src=${`https://btcmap.org/.netlify/images?url=${community.tags["icon:square"]}&fit=cover&w=256&h=256`} alt='${get(_)("communityMap.avatarAlt")}' class='w-24 h-24 rounded-full mx-auto' title='${get(_)("communityMap.communityIconTitle")}' onerror="this.src='/images/bitcoin.svg'" />
 
-					<span class='text-primary dark:text-white font-semibold text-xl' title='Community name'>${
+					<span class='text-primary dark:text-white font-semibold text-xl' title='${get(_)("communityMap.communityNameTitle")}'>${
 						community.tags.name
 					}</span>
 
@@ -116,7 +116,7 @@ const initializeCommunities = () => {
 					<div id='socials'>
 					</div>
 
-					<a href="${resolve(`/community/${community.id}`)}" class='block bg-link hover:bg-hover !text-white text-center font-semibold py-3 rounded-xl transition-colors' title='Community page'>${get(_)("communityMap.viewCommunity")}</a>
+					<a href="${resolve(`/community/${community.id}`)}" class='block bg-link hover:bg-hover !text-white text-center font-semibold py-3 rounded-xl transition-colors' title='${get(_)("communityMap.communityPageTitle")}'>${get(_)("communityMap.viewCommunity")}</a>
 				</div>
 
 					${

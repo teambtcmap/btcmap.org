@@ -321,7 +321,11 @@
 		"pageTitle": "Community Map",
 		"organization": "Organization",
 		"sponsor": "BTC Map Sponsor",
-		"supporter": "Supporter"
+		"supporter": "Supporter",
+		"avatarAlt": "Community icon",
+		"communityIconTitle": "Community icon",
+		"communityNameTitle": "Community name",
+		"communityPageTitle": "Community page"
 	},
 	"taggerOnboarding": {
 		"nameLabel": "Name",
@@ -939,6 +943,14 @@
 		"contact": {
 			"heading": "Contact Us",
 			"intro": "If you have any questions or feedback about our privacy policy, please contact us at {contactLink} or on any of our social platforms."
+		},
+		"links": {
+			"githubPrivacy": "GitHub Privacy Policy",
+			"discordPrivacy": "Discord Privacy Policy",
+			"osmPrivacy": "OpenStreetMap Privacy Policy",
+			"netlifyAnalytics": "Netlify Analytics",
+			"netlifyDocsAnalytics": "Netlify Docs - Analytics",
+			"netlifyDocsHowAnalytics": "Netlify Docs - How Analytics Works"
 		}
 	},
 	"aboutUs": {

@@ -59,18 +59,18 @@ const linkClass = "text-link transition-colors hover:text-hover";
 			<li>
 				<a
 					href="https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement"
-					class={linkClass}>GitHub Privacy Policy</a
+					class={linkClass}>{$_("privacyPolicy.links.githubPrivacy")}</a
 				>
 			</li>
 			<li>
 				<a href="https://discord.com/privacy" class={linkClass}
-					>Discord Privacy Policy</a
+					>{$_("privacyPolicy.links.discordPrivacy")}</a
 				>
 			</li>
 			<li>
 				<a
 					href="https://wiki.osmfoundation.org/wiki/Privacy_Policy"
-					class={linkClass}>OpenStreetMap Privacy Policy</a
+					class={linkClass}>{$_("privacyPolicy.links.osmPrivacy")}</a
 				>
 			</li>
 		</ul>
@@ -108,19 +108,19 @@ const linkClass = "text-link transition-colors hover:text-hover";
 			<li>
 				<a
 					href="https://www.netlify.com/products/analytics/"
-					class={linkClass}>Netlify Analytics</a
+					class={linkClass}>{$_("privacyPolicy.links.netlifyAnalytics")}</a
 				>
 			</li>
 			<li>
 				<a
 					href="https://docs.netlify.com/monitor-sites/analytics/"
-					class={linkClass}>Netlify Docs - Analytics</a
+					class={linkClass}>{$_("privacyPolicy.links.netlifyDocsAnalytics")}</a
 				>
 			</li>
 			<li>
 				<a
 					href="https://docs.netlify.com/monitor-sites/analytics/how-analytics-works/"
-					class={linkClass}>Netlify Docs - How Analytics Works</a
+					class={linkClass}>{$_("privacyPolicy.links.netlifyDocsHowAnalytics")}</a
 				>
 			</li>
 		</ul>

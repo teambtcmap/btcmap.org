@@ -895,7 +895,11 @@
 		"sponsor": "BTC Map спонсор",
 		"organization": "Организация",
 		"supporter": "Поддръжник",
-		"pageTitle": "Карта на общностите"
+		"pageTitle": "Карта на общностите",
+		"avatarAlt": "Икона на общността",
+		"communityIconTitle": "Икона на общността",
+		"communityNameTitle": "Име на общността",
+		"communityPageTitle": "Страница на общността"
 	},
 	"communitiesDirectory": {
 		"continents": "Континенти",
@@ -1026,6 +1030,14 @@
 		"contact": {
 			"heading": "Свържете се с нас",
 			"intro": "Ако имате въпроси или обратна връзка относно нашата политика за поверителност, моля свържете се с нас на {contactLink} или на някоя от нашите социални платформи."
+		},
+		"links": {
+			"githubPrivacy": "Политика за поверителност на GitHub",
+			"discordPrivacy": "Политика за поверителност на Discord",
+			"osmPrivacy": "Политика за поверителност на OpenStreetMap",
+			"netlifyAnalytics": "Netlify Analytics",
+			"netlifyDocsAnalytics": "Netlify Docs - Analytics",
+			"netlifyDocsHowAnalytics": "Netlify Docs - How Analytics Works"
 		}
 	},
 	"aboutUs": {
