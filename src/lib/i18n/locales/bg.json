@@ -61,6 +61,7 @@
 		"locate": "Покажи къде съм"
 	},
 	"aria": {
+		"logoAlt": "Лого на BTC Map",
 		"clearSearch": "Изчисти търсенето",
 		"clearSearchAria": "Изчисти търсенето",
 		"close": "Затвори",
@@ -336,7 +337,11 @@
 		"hashtag": "#SPEDN ✊",
 		"hero": "Намерете места за харчене на сатошита където и да сте.",
 		"openMap": "Отвори карта",
-		"openSource": "Нашите приложения и данните са безплатни и с отворен код."
+		"openSource": "Нашите приложения и данните са безплатни и с отворен код.",
+		"roadsAlt": "Карта с пътища",
+		"openWebAppAria": "Отвори уеб приложението",
+		"downloadForAria": "Изтегли за {type}",
+		"mobileExampleAlt": "Пример за мобилно приложение"
 	},
 	"info": {
 		"contact": "Контакт",
@@ -378,6 +383,7 @@
 		"sortPosition": "Сортирай по позиция",
 		"sortTotal": "Сортирай по общо редакции",
 		"sortUpdated": "Сортирай по актуализирани",
+		"ultimateSupertaggerAlt": "Краен супертагър",
 		"tableAria": "Таблица на класацията на тагърите",
 		"sortByCurrentlyAscending": "Сортирай по {column}, в момента възходящо",
 		"sortByCurrentlyDescending": "Сортирай по {column}, в момента низходящо",
