@@ -46,7 +46,7 @@ let taggerDiv: HTMLDivElement;
 									src={tagger.osm_json.img
 										? tagger.osm_json.img.href
 										: '/images/satoshi-nakamoto.png'}
-									alt="avatar"
+									alt={$_('aria.avatarAlt')}
 									class="mx-auto h-20 w-20 rounded-full object-cover"
 									on:error={function () {
 										this.src = '/images/satoshi-nakamoto.png';

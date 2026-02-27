@@ -1,4 +1,5 @@
 <script lang="ts">
+import { _ } from "$lib/i18n";
 import IconSocials from "$lib/icons/IconSocials.svelte";
 import type { SocialIconName } from "$lib/icons/types";
 
@@ -13,7 +14,7 @@ export let member: {
 <div class="space-y-2 text-center">
 	<img
 		src="/images/team/{member.avatar}.jpg"
-		alt="avatar"
+		alt={$_('aria.avatarAlt')}
 		class="mx-auto h-28 w-28 rounded-full object-cover"
 		on:error={function () {
 			this.src = '/images/satoshi-nakamoto.png';

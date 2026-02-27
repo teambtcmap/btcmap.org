@@ -1,4 +1,6 @@
 <script lang="ts">
+import { _ } from "$lib/i18n";
+
 export let contributor: {
 	url: string;
 	name: string;
@@ -17,7 +19,7 @@ export let contributor: {
 	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 	<img
 		src="/images/contributors/{contributor.name}.{contributor.file}"
-		alt="avatar"
+		alt={$_('aria.avatarAlt')}
 		class="mx-auto h-24 w-24 rounded-full object-cover"
 		on:error={function () {
 			this.src = '/images/satoshi-nakamoto.png';

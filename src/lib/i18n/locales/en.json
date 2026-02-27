@@ -286,6 +286,7 @@
 	},
 	"aria": {
 		"logoAlt": "BTC Map logo",
+		"avatarAlt": "Avatar",
 		"close": "Close",
 		"closeMerchantList": "Close merchant list",
 		"openMenu": "Open menu",

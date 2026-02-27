@@ -834,7 +834,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 								<a href={resolve(`/community/${community.id}`)}>
 									<img
 										src={`https://btcmap.org/.netlify/images?url=${community.tags['icon:square']}&fit=cover&w=256&h=256`}
-										alt="logo"
+										alt={$_('aria.logoAlt')}
 										class="mx-auto h-20 w-20 rounded-full object-cover"
 										on:error={function () {
 											this.src = '/images/bitcoin.svg';
