@@ -177,6 +177,10 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 												: 'none'}
 									>
 										{#if !header.isPlaceholder}
+											{@const headerLabel =
+												typeof header.column.columnDef.header === 'function'
+													? header.column.columnDef.header(header.getContext())
+													: header.column.columnDef.header}
 											<button
 												type="button"
 												class="flex items-center gap-x-1 leading-tight select-none"
@@ -190,23 +194,18 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 												}}
 												tabindex={header.column.getCanSort() ? 0 : -1}
 												aria-label={header.column.getCanSort()
-													? 'Sort by ' +
-														String(
-															typeof header.column.columnDef.header === 'function'
-																? header.column.columnDef.header(header.getContext())
-																: header.column.columnDef.header,
-														) +
-														', currently ' +
-														(header.column.getIsSorted() === 'asc'
-															? 'ascending'
-															: header.column.getIsSorted() === 'desc'
-																? 'descending'
-																: 'unsorted')
-													: String(
-															typeof header.column.columnDef.header === 'function'
-																? header.column.columnDef.header(header.getContext())
-																: header.column.columnDef.header,
-														)}
+													? header.column.getIsSorted() === 'asc'
+														? $_('leaderboard.sortByCurrentlyAscending', {
+																values: { column: headerLabel },
+															})
+														: header.column.getIsSorted() === 'desc'
+															? $_('leaderboard.sortByCurrentlyDescending', {
+																	values: { column: headerLabel },
+																})
+															: $_('leaderboard.sortByCurrentlyUnsorted', {
+																	values: { column: headerLabel },
+																})
+													: headerLabel}
 											>
 												<span class="break-words">
 													<svelte:component
