@@ -15,6 +15,7 @@ SVELTE_FILE="$OUTPUT_DIR/svelte-v5.json"
 A11Y_FILE="$OUTPUT_DIR/a11y.json"
 API_FILE="$OUTPUT_DIR/api.json"
 CI_FILE="$OUTPUT_DIR/ci.json"
+TYPE_SAFETY_FILE="$OUTPUT_DIR/type-safety.json"
 ENABLED_FILE="$OUTPUT_DIR/enabled_checks.txt"
 
 # Helper: check if a scan is enabled
@@ -75,7 +76,7 @@ render_findings() {
 
   # Summary counts
   HIGH=0; MEDIUM=0; LOW=0; INFO=0
-  for f in "$HYGIENE_FILE" "$CONSISTENCY_FILE" "$A11Y_FILE" "$API_FILE" "$CI_FILE"; do
+  for f in "$HYGIENE_FILE" "$CONSISTENCY_FILE" "$A11Y_FILE" "$API_FILE" "$CI_FILE" "$TYPE_SAFETY_FILE"; do
     [[ ! -f "$f" ]] && continue
     HIGH=$((HIGH + $(count_severity "$f" "high")))
     MEDIUM=$((MEDIUM + $(count_severity "$f" "medium")))
@@ -314,6 +315,15 @@ render_findings() {
     echo ""
   fi
 
+  # Type safety audit
+  if is_enabled "Type safety audit" && [[ -f "$TYPE_SAFETY_FILE" ]]; then
+    echo "## Type Safety Audit"
+    echo ""
+    render_findings "$TYPE_SAFETY_FILE"
+    echo "---"
+    echo ""
+  fi
+
   # Config footer
   echo "## Current Configuration"
   echo ""
@@ -324,14 +334,10 @@ render_findings() {
   echo ""
   echo "## Enabled Checks"
   for check in "Codebase hygiene" "Consistency" "Type safety audit" "CI/CD improvements" "Accessibility" "Svelte v5 migration readiness" "API/data handling" "Commit changelog analysis"; do
-    label="$check"
-    if [[ "$check" == "Type safety audit" ]]; then
-      label="$check (not yet implemented)"
-    fi
     if is_enabled "$check"; then
-      echo "- [x] $label"
+      echo "- [x] $check"
     else
-      echo "- [ ] $label"
+      echo "- [ ] $check"
     fi
   done
   echo '```'
