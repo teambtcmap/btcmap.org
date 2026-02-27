@@ -22,9 +22,9 @@ import { onDestroy, onMount } from "svelte";
 import "tippy.js/dist/tippy.css";
 import "../app.css";
 
-import Footer from "$components/layout/Footer.svelte";
-import "$lib/i18n";
 import { isLoading, locale } from "svelte-i18n";
+
+import Footer from "$components/layout/Footer.svelte";
 
 // Update HTML lang attribute dynamically when locale changes
 $: if (browser && $locale) {

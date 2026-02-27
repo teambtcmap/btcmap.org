@@ -326,7 +326,9 @@
 		"submitLocation": "Изпрати място",
 		"submitReport": "Изпрати доклад",
 		"success": "Успех!",
-		"website": "Уебсайт"
+		"website": "Уебсайт",
+		"honeyPlaceholder": "Хубав съд с мед.",
+		"captchaPlaceholder": "Моля, въведете текста от captcha."
 	},
 	"home": {
 		"addLocation": "Добави място",

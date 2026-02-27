@@ -365,7 +365,9 @@
 		"selectLocation": "Select Location",
 		"locationSelected": "Location selected!",
 		"searchButton": "Search 🔍",
-		"address": "Address"
+		"address": "Address",
+		"honeyPlaceholder": "A nice pot of honey.",
+		"captchaPlaceholder": "Please enter the captcha text."
 	},
 	"addLocation": {
 		"hero": "Accept bitcoin? Get found.",
