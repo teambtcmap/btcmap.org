@@ -1,7 +1,7 @@
 <script lang="ts">
-import { onMount } from "svelte";
+import { onDestroy, onMount } from "svelte";
 import Time from "svelte-time";
-import tippy from "tippy.js";
+import tippy, { type Instance } from "tippy.js";
 
 import BoostButton from "$components/BoostButton.svelte";
 import Icon from "$components/Icon.svelte";
@@ -68,11 +68,33 @@ $: verified = displayMerchant ? verifiedArr(displayMerchant) : [];
 const verifiedDate = calcVerifiedDate();
 
 let outdatedTooltip: HTMLDivElement;
+let outdatedTooltipInstance: Instance | null = null;
 
-$: outdatedTooltip &&
-	tippy([outdatedTooltip], {
-		content: "Outdated please re-verify",
-	});
+$: if (outdatedTooltip) {
+	if (
+		outdatedTooltipInstance &&
+		outdatedTooltipInstance.reference !== outdatedTooltip
+	) {
+		outdatedTooltipInstance.destroy();
+		outdatedTooltipInstance = null;
+	}
+	if (!outdatedTooltipInstance) {
+		outdatedTooltipInstance = tippy(outdatedTooltip, {
+			content: $_("verification.outdatedTooltip"),
+		});
+	} else {
+		outdatedTooltipInstance.setContent($_("verification.outdatedTooltip"));
+	}
+}
+$: if (!outdatedTooltip && outdatedTooltipInstance) {
+	outdatedTooltipInstance.destroy();
+	outdatedTooltipInstance = null;
+}
+
+onDestroy(() => {
+	outdatedTooltipInstance?.destroy();
+	outdatedTooltipInstance = null;
+});
 </script>
 
 <div

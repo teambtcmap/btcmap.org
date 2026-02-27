@@ -536,6 +536,9 @@
 		"unknown": "Неизвестно",
 		"viewDetails": "Пълен преглед",
 		"viewOSM": "Преглед в OSM",
+		"socialX": "X",
+		"socialInstagram": "Instagram",
+		"socialFacebook": "Facebook",
 		"website": "Уебсайт"
 	},
 	"nav": {
