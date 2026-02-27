@@ -85,7 +85,15 @@
 		"supportWithSats": "Apoiar com sats",
 		"zoomIn": "Aumentar zoom",
 		"zoomOut": "Diminuir zoom",
-		"locate": "Mostrar onde estou"
+		"locate": "Mostrar onde estou",
+		"boostAlt": "Impulsionar",
+		"fullScreenAlt": "Tela cheia",
+		"locateAlt": "Mostrar onde estou",
+		"goToHomeAlt": "Ir para a página inicial",
+		"addLocationAlt": "Adicionar local",
+		"communityMapAlt": "Mapa da comunidade",
+		"merchantMapAlt": "Mapa de comerciantes",
+		"dataRefreshAlt": "Atualização de dados disponível"
 	},
 	"merchant": {
 		"navigate": "Navegar",
@@ -551,6 +559,10 @@
 		"underMaintenance": "Os problemas estão em manutenção.",
 		"viewOnGitea": "Ver problemas diretamente no Gitea.",
 		"viewAllOnGitea": "Ver todos os tickets abertos diretamente no",
+		"giteaLinkText": "Gitea",
+		"opened": "aberto",
+		"by": "por",
+		"avatarAlt": "avatar",
 		"dataUpdatedNote": "*Dados atualizados a cada 10 minutos.",
 		"errorFetching": "Erro ao buscar tickets. Tente novamente ou entre em contato com o suporte do BTC Map.",
 		"couldNotLoadTickets": "Não foi possível carregar os tickets abertos, tente novamente ou entre em contato com o BTC Map.",

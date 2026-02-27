@@ -3,6 +3,7 @@ import Time from "svelte-time";
 
 import Icon from "$components/Icon.svelte";
 import TicketLabel from "$components/TicketLabel.svelte";
+import { _ } from "$lib/i18n";
 
 export let assignees: {
 	html_url: string;
@@ -48,9 +49,9 @@ export let user: { html_url: string; login: string } = {
 			</p>
 
 			<p class="text-body dark:text-white">
-				#{id} opened <Time live={3000} relative timestamp={created} />
+				#{id} {$_('maintain.opened')} <Time live={3000} relative timestamp={created} />
 				<br class="block md:hidden" />
-				by
+				{$_('maintain.by')}
 				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href={user.html_url}
@@ -72,7 +73,7 @@ export let user: { html_url: string; login: string } = {
 				<a href={assignee?.html_url} target="_blank" rel="noreferrer" class="mr-1 mb-1">
 					<img
 						src={assignee?.avatar_url}
-						alt="avatar"
+						alt={$_('maintain.avatarAlt')}
 						title={assignee?.login}
 						class="h-8 w-8 rounded-full object-cover"
 					/>

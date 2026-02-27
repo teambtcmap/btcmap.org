@@ -120,13 +120,21 @@ export const applyMapControlTranslations = (t: (key: string) => string) => {
 		zoomIn: t("mapControls.zoomIn"),
 		zoomOut: t("mapControls.zoomOut"),
 		fullScreen: t("mapControls.fullScreen"),
+		fullScreenAlt: t("mapControls.fullScreenAlt"),
 		locate: t("mapControls.locate"),
+		locateAlt: t("mapControls.locateAlt"),
 		goToHome: t("mapControls.goToHome"),
+		goToHomeAlt: t("mapControls.goToHomeAlt"),
 		addLocation: t("mapControls.addLocation"),
+		addLocationAlt: t("mapControls.addLocationAlt"),
 		communityMap: t("mapControls.communityMap"),
+		communityMapAlt: t("mapControls.communityMapAlt"),
 		merchantMap: t("mapControls.merchantMap"),
+		merchantMapAlt: t("mapControls.merchantMapAlt"),
 		dataRefreshAvailable: t("mapControls.dataRefreshAvailable"),
+		dataRefreshAlt: t("mapControls.dataRefreshAlt"),
 		boostLocations: t("boost.locations"),
+		boostAlt: t("mapControls.boostAlt"),
 	};
 
 	const supportLink = document.querySelector(
@@ -152,6 +160,8 @@ export const applyMapControlTranslations = (t: (key: string) => string) => {
 	if (fullscreen) {
 		fullscreen.setAttribute("title", labels.fullScreen);
 		fullscreen.setAttribute("aria-label", labels.fullScreen);
+		const fullscreenImg = fullscreen.querySelector("img");
+		if (fullscreenImg) fullscreenImg.setAttribute("alt", labels.fullScreenAlt);
 	}
 
 	const locateBtn = document.querySelector(
@@ -160,27 +170,37 @@ export const applyMapControlTranslations = (t: (key: string) => string) => {
 	if (locateBtn) {
 		locateBtn.setAttribute("title", labels.locate);
 		locateBtn.setAttribute("aria-label", labels.locate);
+		const locateImg = locateBtn.querySelector("img");
+		if (locateImg) locateImg.setAttribute("alt", labels.locateAlt);
 	}
 
 	const homeBtn = document.querySelector(".leaflet-control-home");
 	if (homeBtn) {
 		homeBtn.setAttribute("title", labels.goToHome);
 		homeBtn.setAttribute("aria-label", labels.goToHome);
+		const homeImg = homeBtn.querySelector("img");
+		if (homeImg) homeImg.setAttribute("alt", labels.goToHomeAlt);
 	}
 	const addLocBtn = document.querySelector(".leaflet-control-add-location");
 	if (addLocBtn) {
 		addLocBtn.setAttribute("title", labels.addLocation);
 		addLocBtn.setAttribute("aria-label", labels.addLocation);
+		const addLocImg = addLocBtn.querySelector("img");
+		if (addLocImg) addLocImg.setAttribute("alt", labels.addLocationAlt);
 	}
 	const communityBtn = document.querySelector(".leaflet-control-community-map");
 	if (communityBtn) {
 		communityBtn.setAttribute("title", labels.communityMap);
 		communityBtn.setAttribute("aria-label", labels.communityMap);
+		const communityImg = communityBtn.querySelector("img");
+		if (communityImg) communityImg.setAttribute("alt", labels.communityMapAlt);
 	}
 	const merchantBtn = document.querySelector(".leaflet-control-merchant-map");
 	if (merchantBtn) {
 		merchantBtn.setAttribute("title", labels.merchantMap);
 		merchantBtn.setAttribute("aria-label", labels.merchantMap);
+		const merchantImg = merchantBtn.querySelector("img");
+		if (merchantImg) merchantImg.setAttribute("alt", labels.merchantMapAlt);
 	}
 
 	const dataRefreshBtn = document.querySelector(
@@ -189,12 +209,16 @@ export const applyMapControlTranslations = (t: (key: string) => string) => {
 	if (dataRefreshBtn) {
 		dataRefreshBtn.setAttribute("title", labels.dataRefreshAvailable);
 		dataRefreshBtn.setAttribute("aria-label", labels.dataRefreshAvailable);
+		const refreshImg = dataRefreshBtn.querySelector("img");
+		if (refreshImg) refreshImg.setAttribute("alt", labels.dataRefreshAlt);
 	}
 
 	const boostBtn = document.querySelector(".leaflet-control-boost-layer");
 	if (boostBtn) {
 		boostBtn.setAttribute("title", labels.boostLocations);
 		boostBtn.setAttribute("aria-label", labels.boostLocations);
+		const boostImg = boostBtn.querySelector("img");
+		if (boostImg) boostImg.setAttribute("alt", labels.boostAlt);
 	}
 };
 
@@ -260,7 +284,7 @@ export const changeDefaultIcons = (
 	fullscreenButton.role = "button";
 	fullscreenButton.ariaLabel = labels.fullScreen;
 	fullscreenButton.ariaDisabled = "false";
-	fullscreenButton.innerHTML = `<img src='/icons/expand.svg' alt='fullscreen' class='inline' style='width: 16px; height: 16px;'/>`;
+	fullscreenButton.innerHTML = `<img src='/icons/expand.svg' alt='${get(_)("mapControls.fullScreenAlt")}' class='inline' style='width: 16px; height: 16px;'/>`;
 	fullscreenButton.onclick = function toggleFullscreen() {
 		trackEvent("fullscreen_click");
 		if (!document.fullscreenElement) {
@@ -308,7 +332,7 @@ export const geolocate = (
 	);
 	if (locateButton) {
 		// Replace default arrow icon with custom crosshairs icon
-		locateButton.innerHTML = `<img src='/icons/locate.svg' alt='locate' style='width: 16px; height: 16px;'/>`;
+		locateButton.innerHTML = `<img src='/icons/locate.svg' alt='${get(_)("mapControls.locateAlt")}' style='width: 16px; height: 16px;'/>`;
 		locateButton.title = locateTitle;
 		locateButton.setAttribute("aria-label", locateTitle);
 
@@ -346,7 +370,7 @@ export const homeMarkerButtons = (
 			addHomeButton.title = labels.goToHome;
 			addHomeButton.role = "button";
 			addHomeButton.ariaLabel = labels.goToHome;
-			addHomeButton.innerHTML = `<img src='/icons/home.svg' alt='home' style='width: 16px; height: 16px;'/>`;
+			addHomeButton.innerHTML = `<img src='/icons/home.svg' alt='${get(_)("mapControls.goToHomeAlt")}' style='width: 16px; height: 16px;'/>`;
 			addHomeButton.onclick = () => {
 				trackEvent("home_button_click");
 			};
@@ -360,7 +384,7 @@ export const homeMarkerButtons = (
 				addLocationButton.title = labels.addLocation;
 				addLocationButton.role = "button";
 				addLocationButton.ariaLabel = labels.addLocation;
-				addLocationButton.innerHTML = `<img src='/icons/marker.svg' alt='marker' style='width: 16px; height: 16px;'/>`;
+				addLocationButton.innerHTML = `<img src='/icons/marker.svg' alt='${get(_)("mapControls.addLocationAlt")}' style='width: 16px; height: 16px;'/>`;
 				addLocationButton.onclick = () => {
 					trackEvent("add_location_click");
 				};
@@ -373,7 +397,7 @@ export const homeMarkerButtons = (
 				communityMapButton.title = labels.communityMap;
 				communityMapButton.role = "button";
 				communityMapButton.ariaLabel = labels.communityMap;
-				communityMapButton.innerHTML = `<img src='/icons/group.svg' alt='group' style='width: 16px; height: 16px;'/>`;
+				communityMapButton.innerHTML = `<img src='/icons/group.svg' alt='${get(_)("mapControls.communityMapAlt")}' style='width: 16px; height: 16px;'/>`;
 				communityMapButton.onclick = () => {
 					trackEvent("community_map_click");
 				};
@@ -386,7 +410,7 @@ export const homeMarkerButtons = (
 				merchantMapButton.title = labels.merchantMap;
 				merchantMapButton.role = "button";
 				merchantMapButton.ariaLabel = labels.merchantMap;
-				merchantMapButton.innerHTML = `<img src='/icons/shopping.svg' alt='shopping' style='width: 16px; height: 16px;'/>`;
+				merchantMapButton.innerHTML = `<img src='/icons/shopping.svg' alt='${get(_)("mapControls.merchantMapAlt")}' style='width: 16px; height: 16px;'/>`;
 				addControlDiv.append(merchantMapButton);
 			}
 
@@ -425,7 +449,7 @@ export const dataRefresh = (
 			dataRefreshButton.role = "button";
 			dataRefreshButton.ariaLabel = labels.dataRefreshAvailable;
 			dataRefreshButton.ariaDisabled = "false";
-			dataRefreshButton.innerHTML = `<img src='/icons/refresh.svg' alt='refresh' style='width: 16px; height: 16px;'/>`;
+			dataRefreshButton.innerHTML = `<img src='/icons/refresh.svg' alt='${get(_)("mapControls.dataRefreshAlt")}' style='width: 16px; height: 16px;'/>`;
 			dataRefreshButton.onclick = () => {
 				trackEvent("data_refresh_click");
 				location.reload();

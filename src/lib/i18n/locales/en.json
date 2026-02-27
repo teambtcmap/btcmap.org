@@ -85,7 +85,15 @@
 		"supportWithSats": "Support with sats",
 		"zoomIn": "Zoom in",
 		"zoomOut": "Zoom out",
-		"locate": "Show me where I am"
+		"locate": "Show me where I am",
+		"boostAlt": "Boost",
+		"fullScreenAlt": "Full screen",
+		"locateAlt": "Show me where I am",
+		"goToHomeAlt": "Go to home page",
+		"addLocationAlt": "Add location",
+		"communityMapAlt": "Community map",
+		"merchantMapAlt": "Merchant map",
+		"dataRefreshAlt": "Data refresh available"
 	},
 	"merchant": {
 		"navigate": "Navigate",
@@ -601,6 +609,10 @@
 		"underMaintenance": "Issues are currently under maintenance.",
 		"viewOnGitea": "View issues directly on Gitea.",
 		"viewAllOnGitea": "View all open tickets directly on",
+		"giteaLinkText": "Gitea",
+		"opened": "opened",
+		"by": "by",
+		"avatarAlt": "avatar",
 		"dataUpdatedNote": "*Data updated every 10 minutes.",
 		"errorFetching": "Error fetching tickets. Please try again or contact BTC Map support.",
 		"couldNotLoadTickets": "Could not load open tickets, please try again or contact BTC Map.",
