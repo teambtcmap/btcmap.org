@@ -130,7 +130,7 @@ onMount(async () => {
 				? 'text-white'
 				: 'gradient'} mt-10 text-center text-4xl font-semibold md:text-5xl"
 		>
-			Help improve the data for everyone.
+			{$_('verifyLocation.hero')}
 		</h1>
 	{:else}
 		<HeaderPlaceholder />
@@ -138,28 +138,27 @@ onMount(async () => {
 
 	<section id="verify" class="mx-auto mt-16 w-full pb-20 md:w-[600px] md:pb-32">
 		<h2 class="mb-5 text-center text-3xl font-semibold text-primary dark:text-white">
-			Verify Location<br />
+			{$_('verifyLocation.heading')}<br />
 			<span class="text-base font-normal"
-				>(Ensure the information is still accurate and update it otherwise.)</span
+				>{$_('verifyLocation.subheading')}</span
 			>
 		</h2>
 
 		<p class="mb-10 w-full text-center text-primary dark:text-white">
-			Please fill out the following form and one of our volunteer community members will update your
-			location on the map. Did you know you can update this data yourself on <a
+			{$_('verifyLocation.descriptionPart1')} <a
 				href="https://www.openstreetmap.org"
 				target="_blank"
 				rel="noreferrer"
-				class="text-link transition-colors hover:text-hover">OpenStreetMap</a
-			>? You can check out our
+				class="text-link transition-colors hover:text-hover">{$_('verifyLocation.osmLinkText')}</a
+			>{$_('verifyLocation.descriptionPart2')}
 			<a
 				href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers"
 				target="_blank"
 				rel="noreferrer"
-				class="text-link transition-colors hover:text-hover">Wiki</a
+				class="text-link transition-colors hover:text-hover">{$_('verifyLocation.wikiLinkText')}</a
 			>
-			for more instructions. <InfoTooltip
-				tooltip="NOTE: Due to the backlog of requests and the updates being completed on a volunteer effort, it may take several weeks to update this location. It is encouraged to update the location on OpenStreetMap directly if you want to see the changes appear on the map right away."
+			{$_('verifyLocation.descriptionPart3')} <InfoTooltip
+				tooltip={$_('verifyLocation.tooltip')}
 			/>
 		</p>
 

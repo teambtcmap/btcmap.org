@@ -254,6 +254,12 @@
 		"view": "View Comments",
 		"shareThoughts": "Let others know your thoughts about this merchant."
 	},
+	"errorPage": {
+		"title": "BTC Map - Error",
+		"home": "Home",
+		"tryAgain": "Please try again or contact BTC Map.",
+		"logoAlt": "Logo"
+	},
 	"errors": {
 		"searchUnavailable": "Search temporarily unavailable",
 		"loadFailed": "Failed to load nearby merchants",
