@@ -18,7 +18,7 @@ function getInitialLocale(): string {
 	if (typeof window !== "undefined") {
 		// 1. Check localStorage for saved preference (highest priority)
 		const saved = localStorage.getItem("language");
-		if (isSupportedLocale(saved ?? "")) {
+		if (saved && isSupportedLocale(saved)) {
 			return saved;
 		}
 
