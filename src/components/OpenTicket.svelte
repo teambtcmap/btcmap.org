@@ -70,10 +70,16 @@ export let user: { html_url: string; login: string } = {
 		<div class="flex flex-wrap justify-center md:justify-start">
 			{#each assignees || [] as assignee, index (index)}
 				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-				<a href={assignee?.html_url} target="_blank" rel="noreferrer" class="mr-1 mb-1">
+				<a
+					href={assignee?.html_url}
+					target="_blank"
+					rel="noreferrer"
+					class="mr-1 mb-1"
+					aria-label={assignee?.login}
+				>
 					<img
 						src={assignee?.avatar_url}
-						alt={$_('maintain.avatarAlt')}
+						alt={`${assignee?.login} ${$_('maintain.avatarAlt')}`}
 						title={assignee?.login}
 						class="h-8 w-8 rounded-full object-cover"
 					/>

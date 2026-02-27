@@ -284,7 +284,15 @@ export const changeDefaultIcons = (
 	fullscreenButton.role = "button";
 	fullscreenButton.ariaLabel = labels.fullScreen;
 	fullscreenButton.ariaDisabled = "false";
-	fullscreenButton.innerHTML = `<img src='/icons/expand.svg' alt='${get(_)("mapControls.fullScreenAlt")}' class='inline' style='width: 16px; height: 16px;'/>`;
+	const fullscreenImg = L.DomUtil.create(
+		"img",
+		"inline",
+		fullscreenButton,
+	) as HTMLImageElement;
+	fullscreenImg.src = "/icons/expand.svg";
+	fullscreenImg.alt = get(_)("mapControls.fullScreenAlt");
+	fullscreenImg.style.width = "16px";
+	fullscreenImg.style.height = "16px";
 	fullscreenButton.onclick = function toggleFullscreen() {
 		trackEvent("fullscreen_click");
 		if (!document.fullscreenElement) {
@@ -332,7 +340,13 @@ export const geolocate = (
 	);
 	if (locateButton) {
 		// Replace default arrow icon with custom crosshairs icon
-		locateButton.innerHTML = `<img src='/icons/locate.svg' alt='${get(_)("mapControls.locateAlt")}' style='width: 16px; height: 16px;'/>`;
+		locateButton.textContent = "";
+		const locateImg = document.createElement("img") as HTMLImageElement;
+		locateImg.src = "/icons/locate.svg";
+		locateImg.alt = get(_)("mapControls.locateAlt");
+		locateImg.style.width = "16px";
+		locateImg.style.height = "16px";
+		locateButton.appendChild(locateImg);
 		locateButton.title = locateTitle;
 		locateButton.setAttribute("aria-label", locateTitle);
 
@@ -370,7 +384,15 @@ export const homeMarkerButtons = (
 			addHomeButton.title = labels.goToHome;
 			addHomeButton.role = "button";
 			addHomeButton.ariaLabel = labels.goToHome;
-			addHomeButton.innerHTML = `<img src='/icons/home.svg' alt='${get(_)("mapControls.goToHomeAlt")}' style='width: 16px; height: 16px;'/>`;
+			const homeImg = L.DomUtil.create(
+				"img",
+				"",
+				addHomeButton,
+			) as HTMLImageElement;
+			homeImg.src = "/icons/home.svg";
+			homeImg.alt = get(_)("mapControls.goToHomeAlt");
+			homeImg.style.width = "16px";
+			homeImg.style.height = "16px";
 			addHomeButton.onclick = () => {
 				trackEvent("home_button_click");
 			};
@@ -384,7 +406,15 @@ export const homeMarkerButtons = (
 				addLocationButton.title = labels.addLocation;
 				addLocationButton.role = "button";
 				addLocationButton.ariaLabel = labels.addLocation;
-				addLocationButton.innerHTML = `<img src='/icons/marker.svg' alt='${get(_)("mapControls.addLocationAlt")}' style='width: 16px; height: 16px;'/>`;
+				const addLocImg = L.DomUtil.create(
+					"img",
+					"",
+					addLocationButton,
+				) as HTMLImageElement;
+				addLocImg.src = "/icons/marker.svg";
+				addLocImg.alt = get(_)("mapControls.addLocationAlt");
+				addLocImg.style.width = "16px";
+				addLocImg.style.height = "16px";
 				addLocationButton.onclick = () => {
 					trackEvent("add_location_click");
 				};
@@ -397,7 +427,15 @@ export const homeMarkerButtons = (
 				communityMapButton.title = labels.communityMap;
 				communityMapButton.role = "button";
 				communityMapButton.ariaLabel = labels.communityMap;
-				communityMapButton.innerHTML = `<img src='/icons/group.svg' alt='${get(_)("mapControls.communityMapAlt")}' style='width: 16px; height: 16px;'/>`;
+				const communityImg = L.DomUtil.create(
+					"img",
+					"",
+					communityMapButton,
+				) as HTMLImageElement;
+				communityImg.src = "/icons/group.svg";
+				communityImg.alt = get(_)("mapControls.communityMapAlt");
+				communityImg.style.width = "16px";
+				communityImg.style.height = "16px";
 				communityMapButton.onclick = () => {
 					trackEvent("community_map_click");
 				};
@@ -410,7 +448,15 @@ export const homeMarkerButtons = (
 				merchantMapButton.title = labels.merchantMap;
 				merchantMapButton.role = "button";
 				merchantMapButton.ariaLabel = labels.merchantMap;
-				merchantMapButton.innerHTML = `<img src='/icons/shopping.svg' alt='${get(_)("mapControls.merchantMapAlt")}' style='width: 16px; height: 16px;'/>`;
+				const merchantImg = L.DomUtil.create(
+					"img",
+					"",
+					merchantMapButton,
+				) as HTMLImageElement;
+				merchantImg.src = "/icons/shopping.svg";
+				merchantImg.alt = get(_)("mapControls.merchantMapAlt");
+				merchantImg.style.width = "16px";
+				merchantImg.style.height = "16px";
 				addControlDiv.append(merchantMapButton);
 			}
 
@@ -449,7 +495,15 @@ export const dataRefresh = (
 			dataRefreshButton.role = "button";
 			dataRefreshButton.ariaLabel = labels.dataRefreshAvailable;
 			dataRefreshButton.ariaDisabled = "false";
-			dataRefreshButton.innerHTML = `<img src='/icons/refresh.svg' alt='${get(_)("mapControls.dataRefreshAlt")}' style='width: 16px; height: 16px;'/>`;
+			const refreshImg = L.DomUtil.create(
+				"img",
+				"",
+				dataRefreshButton,
+			) as HTMLImageElement;
+			refreshImg.src = "/icons/refresh.svg";
+			refreshImg.alt = get(_)("mapControls.dataRefreshAlt");
+			refreshImg.style.width = "16px";
+			refreshImg.style.height = "16px";
 			dataRefreshButton.onclick = () => {
 				trackEvent("data_refresh_click");
 				location.reload();

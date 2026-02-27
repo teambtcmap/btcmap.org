@@ -41,7 +41,18 @@ const addBoostControl = (translate: (key: string) => string) => {
 			boostLayerButton.role = "button";
 			boostLayerButton.ariaLabel = boostLabel;
 			boostLayerButton.ariaDisabled = "false";
-			boostLayerButton.innerHTML = `<img src='${$page.url.searchParams.has("boosts") ? "/icons/boost-solid.svg" : "/icons/boost.svg"}' alt='${translate("mapControls.boostAlt")}' id='boost-layer' style='width: 16px; height: 16px;'/>`;
+			const boostImg = leaflet.DomUtil.create(
+				"img",
+				"",
+				boostLayerButton,
+			) as HTMLImageElement;
+			boostImg.src = $page.url.searchParams.has("boosts")
+				? "/icons/boost-solid.svg"
+				: "/icons/boost.svg";
+			boostImg.alt = translate("mapControls.boostAlt");
+			boostImg.id = "boost-layer";
+			boostImg.style.width = "16px";
+			boostImg.style.height = "16px";
 			boostLayerButton.onclick = (e) => {
 				e.preventDefault();
 				trackEvent("boost_layer_toggle");
