@@ -97,8 +97,12 @@ CODE_NO_TESTS=""
 while IFS= read -r hash; do
   [[ -z "$hash" ]] && continue
   FILES=$(git diff-tree --no-commit-id --name-only -r "$hash" 2>/dev/null || true)
-  HAS_SRC=$(echo "$FILES" | grep -c '^src/' || echo 0)
-  HAS_TEST=$(echo "$FILES" | grep -cE '\.(test|spec)\.(ts|js)$' || echo 0)
+  HAS_SRC=$(echo "$FILES" | grep -c '^src/' 2>/dev/null || true)
+  HAS_SRC="${HAS_SRC//[^0-9]/}"
+  HAS_SRC="${HAS_SRC:-0}"
+  HAS_TEST=$(echo "$FILES" | grep -cE '\.(test|spec)\.(ts|js)$' 2>/dev/null || true)
+  HAS_TEST="${HAS_TEST//[^0-9]/}"
+  HAS_TEST="${HAS_TEST:-0}"
   SUBJECT=$(git log -1 --format='%s' "$hash")
   # Only flag feat/fix commits that change src/ without tests
   if [[ "$HAS_SRC" -gt 0 && "$HAS_TEST" -eq 0 ]] && echo "$SUBJECT" | grep -qP '^(feat|fix)'; then
