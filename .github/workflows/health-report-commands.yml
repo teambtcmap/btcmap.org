@@ -213,7 +213,9 @@ jobs:
         with:
           script: |
             const body = context.payload.comment.body.trim();
-            const command = body.split('\n')[0].split(' ')[0];
+            // Sanitize: extract first word, strip non-alphanumeric chars except / and -
+            const rawCommand = body.split('\n')[0].split(' ')[0];
+            const command = rawCommand.replace(/[^a-zA-Z0-9\/_-]/g, '').slice(0, 50);
 
             await github.rest.issues.createComment({
               owner: context.repo.owner,

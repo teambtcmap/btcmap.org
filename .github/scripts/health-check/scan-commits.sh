@@ -6,6 +6,9 @@ set -euo pipefail
 OUTPUT_DIR="${1:-.}"
 OUTPUT_FILE="$OUTPUT_DIR/commits.json"
 
+# shellcheck source=common.sh
+source "$(dirname "$0")/common.sh"
+
 # Determine anchor date: last health-report issue creation date, or 14 days ago
 LAST_REPORT_DATE=$(gh issue list --label "health-report" --state all --limit 1 \
   --json createdAt --jq '.[0].createdAt // empty' 2>/dev/null || true)
@@ -28,25 +31,25 @@ if [[ -z "$OLDEST_HASH" ]]; then
 fi
 
 # Total commit count
-TOTAL=$(git log --since="$SINCE_DATE" --oneline | wc -l | tr -d ' ')
+TOTAL=$(git log --since="$SINCE_DATE" --oneline | count_lines)
 
 # Commits by type (conventional commit prefix)
-FEAT_COUNT=$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ feat' || echo 0)
-FIX_COUNT=$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ fix' || echo 0)
-REFACTOR_COUNT=$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ refactor' || echo 0)
-CHORE_COUNT=$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ chore' || echo 0)
-PERF_COUNT=$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ perf' || echo 0)
-STYLE_COUNT=$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ style' || echo 0)
-DOCS_COUNT=$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ docs' || echo 0)
-TEST_COUNT=$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ test' || echo 0)
+FEAT_COUNT=$(sanitize_count "$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ feat' || true)")
+FIX_COUNT=$(sanitize_count "$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ fix' || true)")
+REFACTOR_COUNT=$(sanitize_count "$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ refactor' || true)")
+CHORE_COUNT=$(sanitize_count "$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ chore' || true)")
+PERF_COUNT=$(sanitize_count "$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ perf' || true)")
+STYLE_COUNT=$(sanitize_count "$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ style' || true)")
+DOCS_COUNT=$(sanitize_count "$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ docs' || true)")
+TEST_COUNT=$(sanitize_count "$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ test' || true)")
 
 # Non-conventional commits (don't match type(scope): or type: pattern)
-NON_CONVENTIONAL=$(git log --since="$SINCE_DATE" --pretty=format:'%s' \
-  | grep -cvP '^\s*(feat|fix|refactor|chore|perf|style|docs|test|build|ci|revert)(\(.+\))?(!)?:\s' || echo 0)
+NON_CONVENTIONAL=$(sanitize_count "$(git log --since="$SINCE_DATE" --pretty=format:'%s' \
+  | grep -cvP '^\s*(feat|fix|refactor|chore|perf|style|docs|test|build|ci|revert)(\(.+\))?(!)?:\s' || true)")
 
 # Commits missing issue references (#123)
-MISSING_ISSUE_REF=$(git log --since="$SINCE_DATE" --pretty=format:'%h %s' \
-  | grep -cv '#[0-9]' || echo 0)
+MISSING_ISSUE_REF=$(sanitize_count "$(git log --since="$SINCE_DATE" --pretty=format:'%h %s' \
+  | grep -cv '#[0-9]' || true)")
 
 # List commits missing issue refs (for the report)
 MISSING_ISSUE_LIST=$(git log --since="$SINCE_DATE" --pretty=format:'%h %s' \
@@ -58,7 +61,7 @@ NON_CONVENTIONAL_LIST=$(git log --since="$SINCE_DATE" --pretty=format:'%h %s' \
   | head -20 || true)
 
 # Unique contributors
-CONTRIBUTORS=$(git log --since="$SINCE_DATE" --format='%an' | sort -u | wc -l | tr -d ' ')
+CONTRIBUTORS=$(git log --since="$SINCE_DATE" --format='%an' | sort -u | count_lines)
 CONTRIBUTOR_LIST=$(git log --since="$SINCE_DATE" --format='%an' | sort | uniq -c | sort -rn | head -10)
 
 # File change frequency (hotspots) — top 15 most changed files
@@ -67,14 +70,21 @@ HOTSPOTS=$(git log --since="$SINCE_DATE" --name-only --pretty=format: \
 
 # Files changed count
 FILES_CHANGED=$(git log --since="$SINCE_DATE" --name-only --pretty=format: \
-  | grep -v '^$' | sort -u | wc -l | tr -d ' ')
+  | grep -v '^$' | sort -u | count_lines)
 
 # Detect new dependencies added in package.json
 NEW_DEPS=""
 if git log --since="$SINCE_DATE" --name-only --pretty=format: | grep -q 'package.json'; then
-  # Get package.json diff for added dependency lines
-  NEW_DEPS=$(git diff "$OLDEST_HASH^"..HEAD -- package.json \
-    | grep '^+' | grep -vP '^\+\+\+' | grep -oP '"\K[^"]+(?="\s*:\s*")' || true)
+  # Guard against OLDEST_HASH being the very first commit (no parent)
+  if git rev-parse "$OLDEST_HASH^" >/dev/null 2>&1; then
+    NEW_DEPS=$(git diff "$OLDEST_HASH^"..HEAD -- package.json \
+      | grep '^+' | grep -vP '^\+\+\+' | grep -oP '"\K[^"]+(?="\s*:\s*")' || true)
+  else
+    # First commit in the repo — diff the entire file against empty tree
+    EMPTY_TREE=$(git hash-object -t tree /dev/null)
+    NEW_DEPS=$(git diff "$EMPTY_TREE"..HEAD -- package.json \
+      | grep '^+' | grep -vP '^\+\+\+' | grep -oP '"\K[^"]+(?="\s*:\s*")' || true)
+  fi
 fi
 
 # Detect cosmetic-only commits (only whitespace, comments, or formatting changes)
@@ -97,8 +107,8 @@ CODE_NO_TESTS=""
 while IFS= read -r hash; do
   [[ -z "$hash" ]] && continue
   FILES=$(git diff-tree --no-commit-id --name-only -r "$hash" 2>/dev/null || true)
-  HAS_SRC=$(echo "$FILES" | grep -c '^src/' || echo 0)
-  HAS_TEST=$(echo "$FILES" | grep -cE '\.(test|spec)\.(ts|js)$' || echo 0)
+  HAS_SRC=$(sanitize_count "$(echo "$FILES" | grep -c '^src/' || true)")
+  HAS_TEST=$(sanitize_count "$(echo "$FILES" | grep -cE '\.(test|spec)\.(ts|js)$' || true)")
   SUBJECT=$(git log -1 --format='%s' "$hash")
   # Only flag feat/fix commits that change src/ without tests
   if [[ "$HAS_SRC" -gt 0 && "$HAS_TEST" -eq 0 ]] && echo "$SUBJECT" | grep -qP '^(feat|fix)'; then
@@ -111,8 +121,11 @@ QUICK_FIXES=""
 PREV_HASH=""
 PREV_DATE=""
 PREV_FILES=""
-while IFS='|' read -r hash date subject files; do
+while IFS= read -r hash; do
   [[ -z "$hash" ]] && continue
+  date=$(git log -1 --format='%ad' --date=unix "$hash" 2>/dev/null || true)
+  subject=$(git log -1 --format='%s' "$hash" 2>/dev/null || true)
+  files=$(git diff-tree --no-commit-id --name-only -r "$hash" 2>/dev/null | tr '\n' ' ' || true)
   if [[ -n "$PREV_HASH" && -n "$files" && -n "$PREV_FILES" ]]; then
     # Check for overlapping files
     OVERLAP=$(comm -12 <(echo "$files" | tr ' ' '\n' | sort) <(echo "$PREV_FILES" | tr ' ' '\n' | sort) | head -1 || true)
@@ -128,8 +141,7 @@ while IFS='|' read -r hash date subject files; do
   PREV_HASH="$hash"
   PREV_DATE="$date"
   PREV_FILES="$files"
-done < <(git log --since="$SINCE_DATE" --pretty=format:'%H|%ad|%s|' --date=unix --name-only \
-  | awk 'BEGIN{RS=""} {gsub(/\n/, " "); print}' | head -100)
+done < <(git log --since="$SINCE_DATE" --format='%H' | head -100)
 
 # Detect AI-generated commit signatures
 AI_SIGNATURES=""
