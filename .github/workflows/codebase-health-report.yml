@@ -51,6 +51,7 @@ jobs:
           echo "api=$(check_enabled 'API/data handling')" >> "$GITHUB_OUTPUT"
           echo "ci=$(check_enabled 'CI/CD improvements')" >> "$GITHUB_OUTPUT"
           echo "type_safety=$(check_enabled 'Type safety audit')" >> "$GITHUB_OUTPUT"
+          echo "doc_drift=$(check_enabled 'Documentation drift')" >> "$GITHUB_OUTPUT"
 
       # Phase 0b: Check for /skip-next marker on the latest health-report issue
       #           Also saves the previous report body for deduplication in build-report.sh
@@ -140,6 +141,10 @@ jobs:
       - name: Run type safety audit
         if: steps.skip-check.outputs.skip != 'true' && steps.config.outputs.type_safety == 'true'
         run: bash .github/scripts/health-check/scan-type-safety.sh /tmp/health-results
+
+      - name: Run documentation drift scan
+        if: steps.skip-check.outputs.skip != 'true' && steps.config.outputs.doc_drift == 'true'
+        run: bash .github/scripts/health-check/scan-doc-drift.sh /tmp/health-results
 
       # Phase 2: Build structured report
       - name: Assemble raw report

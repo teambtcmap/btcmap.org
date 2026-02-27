@@ -17,6 +17,7 @@ A11Y_FILE="$OUTPUT_DIR/a11y.json"
 API_FILE="$OUTPUT_DIR/api.json"
 CI_FILE="$OUTPUT_DIR/ci.json"
 TYPE_SAFETY_FILE="$OUTPUT_DIR/type-safety.json"
+DOC_DRIFT_FILE="$OUTPUT_DIR/doc-drift.json"
 ENABLED_FILE="$OUTPUT_DIR/enabled_checks.txt"
 
 # Helper: check if a scan is enabled
@@ -131,7 +132,7 @@ render_findings() {
 
   # Summary counts
   HIGH=0; MEDIUM=0; LOW=0; INFO=0
-  for f in "$HYGIENE_FILE" "$CONSISTENCY_FILE" "$A11Y_FILE" "$API_FILE" "$CI_FILE" "$TYPE_SAFETY_FILE"; do
+  for f in "$HYGIENE_FILE" "$CONSISTENCY_FILE" "$A11Y_FILE" "$API_FILE" "$CI_FILE" "$TYPE_SAFETY_FILE" "$DOC_DRIFT_FILE"; do
     [[ ! -f "$f" ]] && continue
     HIGH=$((HIGH + $(count_severity "$f" "high")))
     MEDIUM=$((MEDIUM + $(count_severity "$f" "medium")))
@@ -379,6 +380,15 @@ render_findings() {
     echo ""
   fi
 
+  # Documentation drift
+  if is_enabled "Documentation drift" && [[ -f "$DOC_DRIFT_FILE" ]]; then
+    echo "## Documentation Drift"
+    echo ""
+    render_findings "$DOC_DRIFT_FILE"
+    echo "---"
+    echo ""
+  fi
+
   # Config footer
   echo "## Current Configuration"
   echo ""
@@ -388,7 +398,7 @@ render_findings() {
   echo "/config"
   echo ""
   echo "## Enabled Checks"
-  for check in "Codebase hygiene" "Consistency" "Type safety audit" "CI/CD improvements" "Accessibility" "Svelte v5 migration readiness" "API/data handling" "Commit changelog analysis"; do
+  for check in "Codebase hygiene" "Consistency" "Type safety audit" "CI/CD improvements" "Accessibility" "Svelte v5 migration readiness" "API/data handling" "Commit changelog analysis" "Documentation drift"; do
     if is_enabled "$check"; then
       echo "- [x] $check"
     else

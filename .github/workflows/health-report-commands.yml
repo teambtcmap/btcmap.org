@@ -83,6 +83,7 @@ jobs:
                   '- [x] API/data handling',
                   '- [x] Commit changelog analysis',
                   '- [ ] Type safety audit',
+                  '- [x] Documentation drift',
                   '```',
                   '',
                   'Check the boxes for scans you want enabled, uncheck for disabled.'

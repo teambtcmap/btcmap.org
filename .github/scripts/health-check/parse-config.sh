@@ -15,6 +15,7 @@ DEFAULTS=(
   "Svelte v5 migration readiness"
   "API/data handling"
   "Commit changelog analysis"
+  "Documentation drift"
 )
 
 # Find the latest health-report issue number
