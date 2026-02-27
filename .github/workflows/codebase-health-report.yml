@@ -50,6 +50,7 @@ jobs:
           echo "accessibility=$(check_enabled 'Accessibility')" >> "$GITHUB_OUTPUT"
           echo "api=$(check_enabled 'API/data handling')" >> "$GITHUB_OUTPUT"
           echo "ci=$(check_enabled 'CI/CD improvements')" >> "$GITHUB_OUTPUT"
+          echo "type_safety=$(check_enabled 'Type safety audit')" >> "$GITHUB_OUTPUT"
 
       # Phase 0b: Check for /skip-next marker on the latest health-report issue
       - name: Check for skip-next marker
@@ -116,6 +117,18 @@ jobs:
       - name: Run CI/CD scan
         if: steps.skip-check.outputs.skip != 'true' && steps.config.outputs.ci == 'true'
         run: bash .github/scripts/health-check/scan-ci.sh /tmp/health-results
+
+      # Phase 1c: Type safety audit (requires Node.js + dependencies)
+      - name: Setup Node.js and dependencies
+        if: steps.skip-check.outputs.skip != 'true' && steps.config.outputs.type_safety == 'true'
+        uses: ./.github/actions/setup
+        with:
+          needs-env: 'true'
+          needs-sync: 'false'
+
+      - name: Run type safety audit
+        if: steps.skip-check.outputs.skip != 'true' && steps.config.outputs.type_safety == 'true'
+        run: bash .github/scripts/health-check/scan-type-safety.sh /tmp/health-results
 
       # Phase 2: Build structured report
       - name: Assemble raw report
