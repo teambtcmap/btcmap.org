@@ -4,6 +4,7 @@
 set -euo pipefail
 
 OUTPUT_DIR="${1:-.}"
+PREV_REPORT="${2:-}"
 REPORT_FILE="$OUTPUT_DIR/report.md"
 TODAY=$(date -u '+%b %d, %Y')
 
@@ -30,9 +31,37 @@ count_severity() {
   jq --arg s "$severity" '[.[] | select(.severity == $s)] | length' "$file" 2>/dev/null || echo 0
 }
 
-# Helper: render findings from a JSON array
+# Build a lookup of finding titles seen in the previous report.
+# Titles are extracted from "### HIGH:", "### MEDIUM:", "### LOW:", "### INFO:" headings.
+# The title is everything after the severity prefix, e.g. "### LOW: JSDoc comments (42)" → "JSDoc comments"
+# We strip trailing counts in parentheses so e.g. "(42)" vs "(38)" still match.
+PREV_TITLES=""
+if [[ -n "$PREV_REPORT" && -f "$PREV_REPORT" ]]; then
+  PREV_TITLES=$(grep -oP '###\s+(HIGH|MEDIUM|LOW|INFO):\s+\K[^\n]+' "$PREV_REPORT" 2>/dev/null \
+    | sed 's/\s*([0-9][0-9]* [^)]*)//' \
+    | sed 's/\s*([0-9][0-9]*)//' \
+    || true)
+fi
+
+# Check if a finding title appeared in the previous report (fuzzy: strip trailing counts).
+is_recurring() {
+  local title="$1"
+  [[ -z "$PREV_TITLES" ]] && return 1
+  # Strip trailing parenthetical count from current title for comparison
+  local base
+  base=$(echo "$title" | sed 's/\s*([0-9][0-9]* [^)]*)//' | sed 's/\s*([0-9][0-9]*)//')
+  echo "$PREV_TITLES" | grep -qF "$base"
+}
+
+# Recurring findings accumulator — populated by render_findings, printed at end of each section
+RECURRING_LIST=()
+
+# Helper: render findings from a JSON array.
+# High/medium findings are always shown in full.
+# Low/info findings that appeared in the previous report are skipped (added to RECURRING_LIST instead).
 render_findings() {
   local file="$1"
+  RECURRING_LIST=()
   [[ ! -f "$file" ]] && return
   local len
   len=$(jq 'length' "$file" 2>/dev/null || echo 0)
@@ -41,12 +70,19 @@ render_findings() {
     echo ""
     return
   fi
+  local printed=0
   for i in $(seq 0 $((len - 1))); do
     local sev title details files
     sev=$(jq -r ".[$i].severity" "$file")
     title=$(jq -r ".[$i].title" "$file")
     details=$(jq -r ".[$i].details" "$file")
     files=$(jq -r ".[$i].files" "$file")
+
+    # Suppress recurring low/info findings — just track them for the summary
+    if [[ "$sev" == "low" || "$sev" == "info" ]] && is_recurring "$title"; then
+      RECURRING_LIST+=("$title")
+      continue
+    fi
 
     local icon=""
     case "$sev" in
@@ -66,7 +102,26 @@ render_findings() {
       echo '```'
       echo ""
     fi
+    printed=$((printed + 1))
   done
+
+  if [[ "$printed" -eq 0 && "${#RECURRING_LIST[@]}" -eq 0 ]]; then
+    echo "No issues found."
+    echo ""
+  fi
+
+  # Print recurring summary if any were suppressed — compact keyword list
+  if [[ "${#RECURRING_LIST[@]}" -gt 0 ]]; then
+    local keywords=""
+    for t in "${RECURRING_LIST[@]}"; do
+      # Keep only the short label before any " —", " (", or " —" suffix
+      local kw
+      kw=$(echo "$t" | sed 's/\s*(.*//; s/\s*—.*//' | xargs)
+      keywords="${keywords:+$keywords, }$kw"
+    done
+    echo "_Recurring (${#RECURRING_LIST[@]}): $keywords_"
+    echo ""
+  fi
 }
 
 # Start building the report
