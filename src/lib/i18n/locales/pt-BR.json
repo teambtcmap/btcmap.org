@@ -301,7 +301,11 @@
 		"pageTitle": "Mapa da Comunidade",
 		"organization": "Organização",
 		"sponsor": "Patrocinador BTC Map",
-		"supporter": "Apoiador"
+		"supporter": "Apoiador",
+		"avatarAlt": "Ícone da comunidade",
+		"communityIconTitle": "Ícone da comunidade",
+		"communityNameTitle": "Nome da comunidade",
+		"communityPageTitle": "Página da comunidade"
 	},
 	"communities": {
 		"hero": "Junte-se à comunidade do mapa bitcoin.",
