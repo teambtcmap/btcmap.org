@@ -250,6 +250,12 @@
 		"view": "Ver Comentários",
 		"shareThoughts": "Deixe os outros saberem o que você pensa sobre este comerciante."
 	},
+	"errorPage": {
+		"title": "BTC Map - Erro",
+		"home": "Início",
+		"tryAgain": "Por favor, tente novamente ou entre em contato com o BTC Map.",
+		"logoAlt": "Logo"
+	},
 	"errors": {
 		"searchUnavailable": "Pesquisa temporariamente indisponível",
 		"loadFailed": "Falha ao carregar comerciantes próximos",
@@ -460,6 +466,29 @@
 		"tagsNotePart1": "*Mais informações sobre tags de mapeamento bitcoin podem ser encontradas",
 		"tagsNoteLink": "aqui",
 		"tagsNotePart2": "."
+	},
+	"verifyLocation": {
+		"hero": "Ajude a melhorar os dados para todos.",
+		"heading": "Verificar Local",
+		"subheading": "(Certifique-se de que as informações ainda estão corretas e atualize-as, se necessário.)",
+		"descriptionPart1": "Preencha o formulário abaixo e um dos membros voluntários da nossa comunidade atualizará seu local no mapa. Sabia que você pode atualizar esses dados no",
+		"osmLinkText": "OpenStreetMap",
+		"descriptionPart2": "? Confira nossa",
+		"wikiLinkText": "Wiki",
+		"descriptionPart3": "para mais instruções.",
+		"tooltip": "NOTA: Devido ao acúmulo de solicitações e às atualizações feitas por voluntários, pode levar várias semanas para atualizar este local. Recomendamos atualizar o local diretamente no OpenStreetMap para ver as alterações no mapa imediatamente.",
+		"loadingPlaceholder": "Carregando comerciante...",
+		"merchantNamePlaceholder": "Nome do Comerciante",
+		"currentInfoLabel": "As informações atuais estão corretas",
+		"currentInfoDescription": "Marque esta caixa se você verificou que os dados existentes estão atualizados.",
+		"outdatedLabel": "Informações desatualizadas",
+		"ifApplicable": "(Se aplicável)",
+		"outdatedPlaceholder": "Forneça quais informações estão incorretas e as informações atualizadas",
+		"verifyLabel": "Como você verificou isso?",
+		"verifyPlaceholder": "Por favor, forneça informações adicionais aqui",
+		"successType": "Relatório",
+		"successMessage": "Obrigado por preencher este relatório. Revisaremos suas informações e as atualizaremos o mais rápido possível.",
+		"submitReport": "Enviar Relatório"
 	},
 	"tip": {
 		"label": "Doar",
