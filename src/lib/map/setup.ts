@@ -25,8 +25,9 @@ export const updateMapHash = (zoom: number, center: LatLng): void => {
 	const existingParams = ampIndex !== -1 ? currentHash.substring(ampIndex) : "";
 
 	const newHash = `#${zoom}/${center.lat.toFixed(5)}/${center.lng.toFixed(5)}${existingParams}`;
-	// Use SvelteKit's replaceState to preserve current pathname while updating hash
-	const url = window.location.pathname + newHash;
+	// Use SvelteKit's replaceState to preserve pathname, search params (e.g. language=bg), and hash
+	const search = window.location.search || "";
+	const url = window.location.pathname + search + newHash;
 	// eslint-disable-next-line svelte/no-navigation-without-resolve
 	replaceState(url, {});
 };

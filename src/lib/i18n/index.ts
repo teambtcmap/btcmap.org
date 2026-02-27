@@ -5,12 +5,20 @@ register("en", () => import("./locales/en.json"));
 register("pt-BR", () => import("./locales/pt-BR.json"));
 register("bg", () => import("./locales/bg.json"));
 
+export const SUPPORTED_LOCALES = ["en", "pt-BR", "bg"] as const;
+
+export function isSupportedLocale(
+	lang: string,
+): lang is (typeof SUPPORTED_LOCALES)[number] {
+	return (SUPPORTED_LOCALES as readonly string[]).includes(lang);
+}
+
 // Smart locale detection (mirrors theme detection pattern)
 function getInitialLocale(): string {
 	if (typeof window !== "undefined") {
 		// 1. Check localStorage for saved preference (highest priority)
 		const saved = localStorage.getItem("language");
-		if (saved === "en" || saved === "pt-BR" || saved === "bg") {
+		if (isSupportedLocale(saved ?? "")) {
 			return saved;
 		}
 

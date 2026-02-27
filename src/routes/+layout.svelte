@@ -25,6 +25,19 @@ import "../app.css";
 import { isLoading, locale } from "svelte-i18n";
 
 import Footer from "$components/layout/Footer.svelte";
+import { isSupportedLocale } from "$lib/i18n";
+
+import { page } from "$app/stores";
+
+// Apply language from URL param site-wide (e.g. /map?language=bg for embedded maps).
+// Exclude /communities/map where language filters communities by area.tags.language.
+$: if (browser && $page.url.pathname !== "/communities/map") {
+	const langParam = $page.url.searchParams.get("language");
+	if (langParam && isSupportedLocale(langParam)) {
+		locale.set(langParam);
+		localStorage.setItem("language", langParam);
+	}
+}
 
 // Update HTML lang attribute dynamically when locale changes
 $: if (browser && $locale) {
