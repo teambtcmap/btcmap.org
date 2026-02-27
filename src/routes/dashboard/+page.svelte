@@ -5,8 +5,8 @@ import { startOfYear } from "date-fns/startOfYear";
 import { subDays } from "date-fns/subDays";
 import { subMonths } from "date-fns/subMonths";
 import { subYears } from "date-fns/subYears";
-import { get } from "svelte/store";
 import { onDestroy, onMount } from "svelte";
+import { get } from "svelte/store";
 
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import { _ } from "$lib/i18n";
