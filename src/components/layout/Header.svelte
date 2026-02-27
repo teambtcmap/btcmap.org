@@ -155,7 +155,7 @@ afterNavigate(() => {
 <header class="relative z-30 mx-auto hidden w-[1200px] items-center justify-between gap-x-4 py-5 xl:flex">
 	<!-- eslint-disable svelte/no-navigation-without-resolve -->
 	<a href="/">
-		<img src="/images/logo.svg" alt="logo" class="w-16" />
+		<img src="/images/logo.svg" alt={$_('aria.logoAlt')} class="w-16" />
 	</a>
 	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
@@ -205,7 +205,7 @@ afterNavigate(() => {
 >
 	<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 	<a href="/">
-		<img src="/images/logo.svg" alt="logo" class="w-16" />
+		<img src="/images/logo.svg" alt={$_('aria.logoAlt')} class="w-16" />
 	</a>
 
 	<div class="space-x-4">

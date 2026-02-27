@@ -311,7 +311,7 @@ const handlePeriodChange = async (event: Event) => {
 <div class="mt-10 mb-20">
 	<div class="mb-10 flex justify-center">
 		<div id="hero" class="flex h-[324px] w-full items-end justify-center">
-			<img src="/images/supertagger-king.svg" alt="ultimate supertagger" />
+			<img src="/images/supertagger-king.svg" alt={$_('leaderboard.ultimateSupertaggerAlt')} />
 		</div>
 	</div>
 

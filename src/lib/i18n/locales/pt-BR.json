@@ -5,7 +5,11 @@
 		"addLocation": "Adicionar Local",
 		"description": "Usamos o {osmLink} para marcar lugares que aceitam bitcoin e exibimos esses comerciantes em nossos belos aplicativos.",
 		"openSource": "Nossos aplicativos e os dados subjacentes são gratuitos e de código aberto.",
-		"hashtag": "#SPEDN ✊"
+		"hashtag": "#SPEDN ✊",
+		"roadsAlt": "Mapa de ruas",
+		"openWebAppAria": "Abrir aplicativo web",
+		"downloadForAria": "Baixar para {type}",
+		"mobileExampleAlt": "Exemplo de aplicativo móvel"
 	},
 	"nav": {
 		"maps": "Mapas",
@@ -252,6 +256,7 @@
 		"fullscreenError": "Erro ao tentar ativar o modo tela cheia: {message} ({name})"
 	},
 	"aria": {
+		"logoAlt": "Logo do BTC Map",
 		"close": "Fechar",
 		"closeMerchantList": "Fechar lista de comerciantes",
 		"openMenu": "Abrir menu",
@@ -452,6 +457,7 @@
 		"sortTotal": "Ordenar por total de edições",
 		"sortCreated": "Ordenar por edições criadas",
 		"sortUpdated": "Ordenar por edições atualizadas",
+		"ultimateSupertaggerAlt": "Supertagger definitivo",
 		"tableAria": "Tabela do ranking de etiquetadores",
 		"sortByCurrentlyAscending": "Ordenar por {column}, atualmente ascendente",
 		"sortByCurrentlyDescending": "Ordenar por {column}, atualmente descendente",

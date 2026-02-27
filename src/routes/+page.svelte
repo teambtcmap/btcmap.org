@@ -21,7 +21,7 @@ import { resolve } from "$app/paths";
 <div class="street-map bg-teal dark:bg-dark">
 	<img
 		src="/images/street-map.svg"
-		alt="roads"
+		alt={$_('home.roadsAlt')}
 		class="absolute top-0 right-0 xl:hidden dark:opacity-10"
 	/>
 	<Header />
@@ -64,7 +64,7 @@ import { resolve } from "$app/paths";
 								href={app.link}
 								target={app.type === 'Web' ? null : '_blank'}
 								rel={app.type === 'Web' ? null : 'noreferrer'}
-								aria-label={app.type === 'Web' ? 'Open web app' : `Download for ${app.type}`}
+								aria-label={app.type === 'Web' ? $_('home.openWebAppAria') : $_('home.downloadForAria', { values: { type: app.type } })}
 								class="block rounded-full bg-link p-3 text-white transition-colors hover:bg-hover"
 							>
 								<!-- eslint-enable svelte/no-navigation-without-resolve -->
@@ -97,7 +97,7 @@ import { resolve } from "$app/paths";
 						src={$theme === 'dark'
 							? '/images/hero-mobile-example-dark.webp'
 							: '/images/hero-mobile-example.webp'}
-						alt="mobile example"
+						alt={$_('home.mobileExampleAlt')}
 						class="mx-auto mt-10 w-80 drop-shadow-2xl xl:mx-0 xl:mt-0"
 					/>
 				</a>
