@@ -97,6 +97,7 @@
 		"boosting": "Подсилване...",
 		"boostLocation": "Подсили място",
 		"seeHowItLooks": "Виж как изглежда",
+		"starAlt": "Звезда",
 		"shareOnTwitter": "Сподели в Twitter",
 		"expires": "Подсилването изтича",
 		"extend": "Удължи",
@@ -445,7 +446,9 @@
 		"labelWithUser": "Бакшиш за {user}"
 	},
 	"invoicePayment": {
-		"scanOrClick": "Сканирайте или кликнете за плащане с Lightning"
+		"scanOrClick": "Сканирайте или кликнете за плащане с Lightning",
+		"invoiceLabel": "Фактура",
+		"protocolAlt": "Lightning протокол"
 	},
 	"errorPage": {
 		"home": "Начало"
@@ -706,8 +709,9 @@
 		"dataUpdatedNote": "*Данните се актуализират на всеки 10 минути."
 	},
 	"apps": {
-		"heading": "Намерете търговци на всяка платформа.",
+		"hero": "Намерете търговци на всяка платформа.",
 		"subheading": "Покрити сте на всяко устройство и ОС.",
+		"googlePlayNote": "Забележка: Няма опция за Google Play поради изискванията им за KYC за разработчици.",
 		"official": "Официални",
 		"community": "Общност",
 		"googlePlayNote": "Забележка: Няма опция за Google Play поради прекомерните изисквания за KYC за разработчици."

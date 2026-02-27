@@ -181,7 +181,7 @@ const generateInvoice = () => {
 						: 'border-gray-300 text-primary dark:border-white/95 dark:text-white'} text-center transition-colors hover:border-link hover:text-link dark:hover:text-link"
 				>
 					{#if value.time === 3}
-						<img src="/icons/star.svg" alt="star" class="absolute top-1 right-1" />
+						<img src="/icons/star.svg" alt={$_("boost.starAlt")} class="absolute top-1 right-1" />
 					{/if}
 
 					<p class="text-xs">

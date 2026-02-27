@@ -153,6 +153,7 @@
 		"boostLocation": "Boost Location",
 		"description": "Make this merchant stand out in bitcoin orange on the map, shine in the search results, and be discovered in the exclusive boosted locations map!",
 		"seeHowItLooks": "See how it looks",
+		"starAlt": "Star",
 		"boostedPinAlt": "Boosted pin",
 		"boostedMerchant": "Boosted merchant",
 		"feeNote": "The fee is used to support the BTC Map open-source project and continue its development.",
@@ -173,7 +174,9 @@
 		"twitterShareText": "I just boosted {name} on @btcmap. Check them out!"
 	},
 	"invoicePayment": {
-		"scanOrClick": "Scan or click to pay with lightning"
+		"scanOrClick": "Scan or click to pay with lightning",
+		"invoiceLabel": "Invoice",
+		"protocolAlt": "Lightning protocol"
 	},
 	"commentAdd": {
 		"title": "Add Comment",
@@ -825,6 +828,9 @@
 		}
 	},
 	"apps": {
+		"hero": "Find merchants on any platform.",
+		"subheading": "We have you covered on whatever device and OS you choose.",
+		"googlePlayNote": "Note: There is no Google Play option due to their excessive KYC requirements for developers.",
 		"official": "Official",
 		"community": "Community"
 	},

@@ -36,9 +36,9 @@ $: descriptionHtml = description;
 			{invoice.slice(0, 39)}...
 		</p>
 		<p class="block text-sm text-body uppercase md:hidden dark:text-white">
-			Invoice <img
+			{$_("invoicePayment.invoiceLabel")} <img
 				src="/icons/ln-highlight.svg"
-				alt="protocol"
+				alt={$_("invoicePayment.protocolAlt")}
 				class="mb-1 inline dark:rounded-full dark:bg-white dark:p-0.5"
 			/>
 		</p>
