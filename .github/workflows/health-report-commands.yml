@@ -82,7 +82,8 @@ jobs:
                   '- [x] Svelte v5 migration readiness',
                   '- [x] API/data handling',
                   '- [x] Commit changelog analysis',
-                  '- [ ] Type safety audit',
+                  '- [x] Type safety audit',
+                  '- [x] Documentation drift',
                   '```',
                   '',
                   'Check the boxes for scans you want enabled, uncheck for disabled.'

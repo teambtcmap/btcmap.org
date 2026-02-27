@@ -4,6 +4,7 @@
 set -euo pipefail
 
 OUTPUT_DIR="${1:-.}"
+PREV_REPORT="${2:-}"
 REPORT_FILE="$OUTPUT_DIR/report.md"
 TODAY=$(date -u '+%b %d, %Y')
 
@@ -15,6 +16,8 @@ SVELTE_FILE="$OUTPUT_DIR/svelte-v5.json"
 A11Y_FILE="$OUTPUT_DIR/a11y.json"
 API_FILE="$OUTPUT_DIR/api.json"
 CI_FILE="$OUTPUT_DIR/ci.json"
+TYPE_SAFETY_FILE="$OUTPUT_DIR/type-safety.json"
+DOC_DRIFT_FILE="$OUTPUT_DIR/doc-drift.json"
 ENABLED_FILE="$OUTPUT_DIR/enabled_checks.txt"
 
 # Helper: check if a scan is enabled
@@ -29,9 +32,37 @@ count_severity() {
   jq --arg s "$severity" '[.[] | select(.severity == $s)] | length' "$file" 2>/dev/null || echo 0
 }
 
-# Helper: render findings from a JSON array
+# Build a lookup of finding titles seen in the previous report.
+# Titles are extracted from "### HIGH:", "### MEDIUM:", "### LOW:", "### INFO:" headings.
+# The title is everything after the severity prefix, e.g. "### LOW: JSDoc comments (42)" → "JSDoc comments"
+# We strip trailing counts in parentheses so e.g. "(42)" vs "(38)" still match.
+PREV_TITLES=""
+if [[ -n "$PREV_REPORT" && -f "$PREV_REPORT" ]]; then
+  PREV_TITLES=$(grep -oP '###\s+(HIGH|MEDIUM|LOW|INFO):\s+\K[^\n]+' "$PREV_REPORT" 2>/dev/null \
+    | sed 's/\s*([0-9][0-9]* [^)]*)//' \
+    | sed 's/\s*([0-9][0-9]*)//' \
+    || true)
+fi
+
+# Check if a finding title appeared in the previous report (fuzzy: strip trailing counts).
+is_recurring() {
+  local title="$1"
+  [[ -z "$PREV_TITLES" ]] && return 1
+  # Strip trailing parenthetical count from current title for comparison
+  local base
+  base=$(echo "$title" | sed 's/\s*([0-9][0-9]* [^)]*)//' | sed 's/\s*([0-9][0-9]*)//')
+  echo "$PREV_TITLES" | grep -qF "$base"
+}
+
+# Recurring findings accumulator — populated by render_findings, printed at end of each section
+RECURRING_LIST=()
+
+# Helper: render findings from a JSON array.
+# High/medium findings are always shown in full.
+# Low/info findings that appeared in the previous report are skipped (added to RECURRING_LIST instead).
 render_findings() {
   local file="$1"
+  RECURRING_LIST=()
   [[ ! -f "$file" ]] && return
   local len
   len=$(jq 'length' "$file" 2>/dev/null || echo 0)
@@ -40,12 +71,19 @@ render_findings() {
     echo ""
     return
   fi
+  local printed=0
   for i in $(seq 0 $((len - 1))); do
     local sev title details files
     sev=$(jq -r ".[$i].severity" "$file")
     title=$(jq -r ".[$i].title" "$file")
     details=$(jq -r ".[$i].details" "$file")
     files=$(jq -r ".[$i].files" "$file")
+
+    # Suppress recurring low/info findings — just track them for the summary
+    if [[ "$sev" == "low" || "$sev" == "info" ]] && is_recurring "$title"; then
+      RECURRING_LIST+=("$title")
+      continue
+    fi
 
     local icon=""
     case "$sev" in
@@ -60,16 +98,31 @@ render_findings() {
     echo "$details"
     echo ""
     if [[ -n "$files" && "$files" != "null" ]]; then
-      echo "<details><summary>Files</summary>"
-      echo ""
       echo '```'
       echo "$files"
       echo '```'
       echo ""
-      echo "</details>"
-      echo ""
     fi
+    printed=$((printed + 1))
   done
+
+  if [[ "$printed" -eq 0 && "${#RECURRING_LIST[@]}" -eq 0 ]]; then
+    echo "No issues found."
+    echo ""
+  fi
+
+  # Print recurring summary if any were suppressed — compact keyword list
+  if [[ "${#RECURRING_LIST[@]}" -gt 0 ]]; then
+    local keywords=""
+    for t in "${RECURRING_LIST[@]}"; do
+      # Keep only the short label before any " —", " (", or " —" suffix
+      local kw
+      kw=$(echo "$t" | sed 's/\s*(.*//; s/\s*—.*//' | xargs)
+      keywords="${keywords:+$keywords, }$kw"
+    done
+    echo "_Recurring (${#RECURRING_LIST[@]}): $keywords_"
+    echo ""
+  fi
 }
 
 # Start building the report
@@ -79,7 +132,7 @@ render_findings() {
 
   # Summary counts
   HIGH=0; MEDIUM=0; LOW=0; INFO=0
-  for f in "$HYGIENE_FILE" "$CONSISTENCY_FILE" "$A11Y_FILE" "$API_FILE" "$CI_FILE"; do
+  for f in "$HYGIENE_FILE" "$CONSISTENCY_FILE" "$A11Y_FILE" "$API_FILE" "$CI_FILE" "$TYPE_SAFETY_FILE" "$DOC_DRIFT_FILE"; do
     [[ ! -f "$f" ]] && continue
     HIGH=$((HIGH + $(count_severity "$f" "high")))
     MEDIUM=$((MEDIUM + $(count_severity "$f" "medium")))
@@ -141,12 +194,9 @@ render_findings() {
           echo "- **$NON_CONV commits** don't follow conventional commit format"
           NON_CONV_LIST=$(jq -r '.non_conventional_list[]' "$COMMITS_FILE" 2>/dev/null | head -5 || true)
           if [[ -n "$NON_CONV_LIST" ]]; then
-            echo "  <details><summary>Show commits</summary>"
-            echo ""
-            echo '  ```'
-            echo "  $NON_CONV_LIST"
-            echo '  ```'
-            echo "  </details>"
+            echo '```'
+            echo "$NON_CONV_LIST"
+            echo '```'
           fi
           echo ""
         fi
@@ -156,12 +206,9 @@ render_findings() {
           echo "- **$MISSING_REF commits** missing issue references (\`#123\`)"
           MISSING_LIST=$(jq -r '.missing_issue_list[]' "$COMMITS_FILE" 2>/dev/null | head -5 || true)
           if [[ -n "$MISSING_LIST" ]]; then
-            echo "  <details><summary>Show commits</summary>"
-            echo ""
-            echo '  ```'
-            echo "  $MISSING_LIST"
-            echo '  ```'
-            echo "  </details>"
+            echo '```'
+            echo "$MISSING_LIST"
+            echo '```'
           fi
           echo ""
         fi
@@ -172,12 +219,9 @@ render_findings() {
           echo "- **$COSMETIC cosmetic-only commits** (whitespace/formatting only)"
           COSMETIC_LIST=$(jq -r '.cosmetic_commits[]' "$COMMITS_FILE" 2>/dev/null | head -5 || true)
           if [[ -n "$COSMETIC_LIST" ]]; then
-            echo "  <details><summary>Show commits</summary>"
-            echo ""
-            echo '  ```'
-            echo "  $COSMETIC_LIST"
-            echo '  ```'
-            echo "  </details>"
+            echo '```'
+            echo "$COSMETIC_LIST"
+            echo '```'
           fi
           echo ""
         fi
@@ -188,12 +232,9 @@ render_findings() {
           echo "- **$CODE_NO_TESTS feat/fix commits** with no accompanying test changes"
           CNT_LIST=$(jq -r '.code_without_tests[]' "$COMMITS_FILE" 2>/dev/null | head -5 || true)
           if [[ -n "$CNT_LIST" ]]; then
-            echo "  <details><summary>Show commits</summary>"
-            echo ""
-            echo '  ```'
-            echo "  $CNT_LIST"
-            echo '  ```'
-            echo "  </details>"
+            echo '```'
+            echo "$CNT_LIST"
+            echo '```'
           fi
           echo ""
         fi
@@ -204,12 +245,9 @@ render_findings() {
           echo "- **$QUICK_FIXES quick-fix patterns** detected (fix immediately following another commit to the same file)"
           QF_LIST=$(jq -r '.quick_fixes[]' "$COMMITS_FILE" 2>/dev/null | head -5 || true)
           if [[ -n "$QF_LIST" ]]; then
-            echo "  <details><summary>Show commits</summary>"
-            echo ""
-            echo '  ```'
-            echo "  $QF_LIST"
-            echo '  ```'
-            echo "  </details>"
+            echo '```'
+            echo "$QF_LIST"
+            echo '```'
           fi
           echo ""
         fi
@@ -220,12 +258,9 @@ render_findings() {
           echo "- **$AI_SIGS commits** with AI-generated signatures detected"
           AI_LIST=$(jq -r '.ai_signatures[]' "$COMMITS_FILE" 2>/dev/null | head -5 || true)
           if [[ -n "$AI_LIST" ]]; then
-            echo "  <details><summary>Show commits</summary>"
-            echo ""
-            echo '  ```'
-            echo "  $AI_LIST"
-            echo '  ```'
-            echo "  </details>"
+            echo '```'
+            echo "$AI_LIST"
+            echo '```'
           fi
           echo ""
         fi
@@ -336,8 +371,26 @@ render_findings() {
     echo ""
   fi
 
+  # Type safety audit
+  if is_enabled "Type safety audit" && [[ -f "$TYPE_SAFETY_FILE" ]]; then
+    echo "## Type Safety Audit"
+    echo ""
+    render_findings "$TYPE_SAFETY_FILE"
+    echo "---"
+    echo ""
+  fi
+
+  # Documentation drift
+  if is_enabled "Documentation drift" && [[ -f "$DOC_DRIFT_FILE" ]]; then
+    echo "## Documentation Drift"
+    echo ""
+    render_findings "$DOC_DRIFT_FILE"
+    echo "---"
+    echo ""
+  fi
+
   # Config footer
-  echo "<details><summary>Current Configuration</summary>"
+  echo "## Current Configuration"
   echo ""
   echo "Reply with \`/config\` followed by an updated checklist to adjust what future reports analyze."
   echo ""
@@ -345,22 +398,16 @@ render_findings() {
   echo "/config"
   echo ""
   echo "## Enabled Checks"
-  for check in "Codebase hygiene" "Consistency" "Type safety audit" "CI/CD improvements" "Accessibility" "Svelte v5 migration readiness" "API/data handling" "Commit changelog analysis"; do
-    label="$check"
-    if [[ "$check" == "Type safety audit" ]]; then
-      label="$check (not yet implemented)"
-    fi
+  for check in "Codebase hygiene" "Consistency" "Type safety audit" "CI/CD improvements" "Accessibility" "Svelte v5 migration readiness" "API/data handling" "Commit changelog analysis" "Documentation drift"; do
     if is_enabled "$check"; then
-      echo "- [x] $label"
+      echo "- [x] $check"
     else
-      echo "- [ ] $label"
+      echo "- [ ] $check"
     fi
   done
   echo '```'
   echo ""
-  echo "</details>"
-  echo ""
-  echo "<details><summary>Available Commands</summary>"
+  echo "## Available Commands"
   echo ""
   echo "Reply to this issue with any of the following:"
   echo ""
@@ -370,8 +417,6 @@ render_findings() {
   echo "| \`/run-now\` | Trigger a new health report immediately |"
   echo "| \`/skip-next\` | Skip the next scheduled report |"
   echo "| \`/create-issue <title>\` | Create a new issue from a specific finding |"
-  echo ""
-  echo "</details>"
   echo ""
   echo "---"
   echo "_Report generated by [codebase-health-report](https://github.com/$GITHUB_REPOSITORY/actions/workflows/codebase-health-report.yml) workflow._"

@@ -50,13 +50,18 @@ jobs:
           echo "accessibility=$(check_enabled 'Accessibility')" >> "$GITHUB_OUTPUT"
           echo "api=$(check_enabled 'API/data handling')" >> "$GITHUB_OUTPUT"
           echo "ci=$(check_enabled 'CI/CD improvements')" >> "$GITHUB_OUTPUT"
+          echo "type_safety=$(check_enabled 'Type safety audit')" >> "$GITHUB_OUTPUT"
+          echo "doc_drift=$(check_enabled 'Documentation drift')" >> "$GITHUB_OUTPUT"
 
       # Phase 0b: Check for /skip-next marker on the latest health-report issue
-      - name: Check for skip-next marker
+      #           Also saves the previous report body for deduplication in build-report.sh
+      - name: Check for skip-next marker and fetch previous report
         id: skip-check
         uses: actions/github-script@v8
         with:
           script: |
+            const fs = require('fs');
+
             const latestIssues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -66,10 +71,18 @@ jobs:
             });
 
             if (latestIssues.data.length > 0) {
+              const prevIssue = latestIssues.data[0];
+
+              // Save previous report body for deduplication
+              if (prevIssue.body) {
+                fs.writeFileSync('/tmp/health-results/previous-report.md', prevIssue.body, 'utf8');
+                core.info(`Saved previous report from issue #${prevIssue.number} for deduplication`);
+              }
+
               const comments = await github.rest.issues.listComments({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                issue_number: latestIssues.data[0].number
+                issue_number: prevIssue.number
               });
 
               const skipComment = comments.data.find(c => c.body.trim().startsWith('/skip-next'));
@@ -117,10 +130,26 @@ jobs:
         if: steps.skip-check.outputs.skip != 'true' && steps.config.outputs.ci == 'true'
         run: bash .github/scripts/health-check/scan-ci.sh /tmp/health-results
 
+      # Phase 1c: Type safety audit (requires Node.js + dependencies)
+      - name: Setup Node.js and dependencies
+        if: steps.skip-check.outputs.skip != 'true' && steps.config.outputs.type_safety == 'true'
+        uses: ./.github/actions/setup
+        with:
+          needs-env: 'true'
+          needs-sync: 'false'
+
+      - name: Run type safety audit
+        if: steps.skip-check.outputs.skip != 'true' && steps.config.outputs.type_safety == 'true'
+        run: bash .github/scripts/health-check/scan-type-safety.sh /tmp/health-results
+
+      - name: Run documentation drift scan
+        if: steps.skip-check.outputs.skip != 'true' && steps.config.outputs.doc_drift == 'true'
+        run: bash .github/scripts/health-check/scan-doc-drift.sh /tmp/health-results
+
       # Phase 2: Build structured report
       - name: Assemble raw report
         if: steps.skip-check.outputs.skip != 'true'
-        run: bash .github/scripts/health-check/build-report.sh /tmp/health-results
+        run: bash .github/scripts/health-check/build-report.sh /tmp/health-results /tmp/health-results/previous-report.md
 
       # Phase 3: AI synthesis (optional)
       - name: AI summary synthesis

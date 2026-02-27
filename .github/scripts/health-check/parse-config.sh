@@ -10,11 +10,13 @@ ENABLED_FILE="$OUTPUT_DIR/enabled_checks.txt"
 DEFAULTS=(
   "Codebase hygiene"
   "Consistency"
+  "Type safety audit"
   "CI/CD improvements"
   "Accessibility"
   "Svelte v5 migration readiness"
   "API/data handling"
   "Commit changelog analysis"
+  "Documentation drift"
 )
 
 # Find the latest health-report issue number
