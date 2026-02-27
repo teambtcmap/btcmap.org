@@ -62,7 +62,7 @@ if [[ -n "$PREV_ISSUE" ]]; then
 fi
 
 json_array_from_lines() {
-  echo "$1" | jq -Rs 'split("\n") | map(select(. != ""))'
+  printf '%s' "$1" | jq -Rs 'split("\n") | map(select(. != ""))'
 }
 
 jq -n \

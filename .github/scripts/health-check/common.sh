@@ -14,4 +14,4 @@ add_finding() {
 sanitize_count() { local n="${1//[^0-9]/}"; echo "${n:-0}"; }
 
 # Count non-empty lines in piped input and return a clean integer.
-count_lines() { wc -l | tr -d ' '; }
+count_lines() { awk 'NF' | wc -l | tr -d ' '; }
