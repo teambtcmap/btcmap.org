@@ -120,7 +120,7 @@ $: latestTaggers = !!(supertaggers?.length && !elementsLoading);
 				? 'text-white'
 				: 'gradient'} text-center text-4xl !leading-tight font-semibold text-primary md:text-5xl lg:text-left dark:text-white"
 		>
-			Activity
+			{$_('activityPage.heading')}
 		</h1>
 	{:else}
 		<HeaderPlaceholder />
@@ -129,14 +129,13 @@ $: latestTaggers = !!(supertaggers?.length && !elementsLoading);
 	<h2
 		class="w-full text-center text-xl font-semibold text-primary lg:w-[675px] lg:text-left dark:text-white"
 	>
-		Shadowy Supertaggers don’t sleep. They are up all night, tagging away. The world we want is a
-		tag away.
+		{$_('activityPage.hero')}
 	</h2>
 
 	<p class="text-center text-xl text-primary lg:text-left dark:text-white">
-		You too can be a shadowy supertagging legend! What are you waiting for? <a
+		{$_('activityPage.cta')} <a
 			href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers-"
-			class="text-link transition-colors hover:text-hover">Get taggin’!</a
+			class="text-link transition-colors hover:text-hover">{$_('activityPage.getTaggin')}</a
 		>
 	</p>
 
@@ -145,7 +144,7 @@ $: latestTaggers = !!(supertaggers?.length && !elementsLoading);
 			<h3
 				class="border-b border-gray-300 p-5 text-center text-2xl font-semibold text-primary lg:text-left dark:border-white/95 dark:text-white"
 			>
-				Latest Supertaggers
+				{$_('activityPage.latestSupertaggers')}
 			</h3>
 
 			<div class="space-y-5">

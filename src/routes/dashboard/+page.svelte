@@ -6,6 +6,7 @@ import { subDays } from "date-fns/subDays";
 import { subMonths } from "date-fns/subMonths";
 import { subYears } from "date-fns/subYears";
 import { onDestroy, onMount } from "svelte";
+import { get } from "svelte/store";
 
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import { _ } from "$lib/i18n";
@@ -76,7 +77,7 @@ const populateCharts = () => {
 			),
 			datasets: [
 				{
-					label: "Recently Verified Merchants",
+					label: get(_)("dashboard.verifiedLabel"),
 					data: filterData(
 						areaDashboard?.verified_merchants_1y_chart || [],
 					).map((item) => item.value),
@@ -145,7 +146,7 @@ const populateCharts = () => {
 			),
 			datasets: [
 				{
-					label: "Total Merchants",
+					label: get(_)("dashboard.totalLabel"),
 					data: filterData(areaDashboard?.total_merchants_chart || []).map(
 						(item) => item.value,
 					),
@@ -295,7 +296,7 @@ $: {
 				? 'text-white'
 				: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-left md:text-5xl"
 		>
-			Dashboard
+			{$_('dashboard.hero')}
 		</h1>
 	{:else}
 		<HeaderPlaceholder />
@@ -358,7 +359,7 @@ $: {
 				<canvas bind:this={totalChartCanvas} width="100%" height="400" />
 			</div>
 			<p class="mt-1 text-center text-sm text-body dark:text-white">
-				*Merchants accepting any bitcoin method.
+				{$_('dashboard.merchantsNote')}
 			</p>
 		</div>
 
@@ -367,18 +368,17 @@ $: {
 				<canvas bind:this={upToDateChartCanvas} width="100%" height="400" />
 			</div>
 			<p class="mt-1 text-center text-sm text-body dark:text-white">
-				*Merchants with a <em>survey:date</em>, <em>check_date</em>, or
-				<em>check_date:currency:XBT</em> tag less than one year old.
+				{$_('dashboard.verifiedNote')}
 			</p>
 		</div>
 	</section>
 
 	<p class="text-center text-sm text-body md:text-left dark:text-white">
-		*More information on bitcoin mapping tags can be found <a
+		{$_('dashboard.tagsNotePart1')} <a
 			href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#tagging-guidance"
 			target="_blank"
 			rel="noreferrer"
-			class="text-link transition-colors hover:text-hover">here</a
-		>.
+			class="text-link transition-colors hover:text-hover">{$_('dashboard.tagsNoteLink')}</a
+		>{$_('dashboard.tagsNotePart2')}
 	</p>
 </div>
