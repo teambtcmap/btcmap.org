@@ -30,23 +30,26 @@ fi
 # Total commit count
 TOTAL=$(git log --since="$SINCE_DATE" --oneline | wc -l | tr -d ' ')
 
+# Helper: run a grep -c pipeline safely, stripping whitespace and defaulting to 0
+grep_count() { local n; n=$(eval "$@" 2>/dev/null || true); n="${n//[^0-9]/}"; echo "${n:-0}"; }
+
 # Commits by type (conventional commit prefix)
-FEAT_COUNT=$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ feat' || echo 0)
-FIX_COUNT=$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ fix' || echo 0)
-REFACTOR_COUNT=$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ refactor' || echo 0)
-CHORE_COUNT=$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ chore' || echo 0)
-PERF_COUNT=$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ perf' || echo 0)
-STYLE_COUNT=$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ style' || echo 0)
-DOCS_COUNT=$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ docs' || echo 0)
-TEST_COUNT=$(git log --since="$SINCE_DATE" --oneline | grep -ciP '^[a-f0-9]+ test' || echo 0)
+FEAT_COUNT=$(grep_count "git log --since=\"$SINCE_DATE\" --oneline | grep -ciP '^[a-f0-9]+ feat'")
+FIX_COUNT=$(grep_count "git log --since=\"$SINCE_DATE\" --oneline | grep -ciP '^[a-f0-9]+ fix'")
+REFACTOR_COUNT=$(grep_count "git log --since=\"$SINCE_DATE\" --oneline | grep -ciP '^[a-f0-9]+ refactor'")
+CHORE_COUNT=$(grep_count "git log --since=\"$SINCE_DATE\" --oneline | grep -ciP '^[a-f0-9]+ chore'")
+PERF_COUNT=$(grep_count "git log --since=\"$SINCE_DATE\" --oneline | grep -ciP '^[a-f0-9]+ perf'")
+STYLE_COUNT=$(grep_count "git log --since=\"$SINCE_DATE\" --oneline | grep -ciP '^[a-f0-9]+ style'")
+DOCS_COUNT=$(grep_count "git log --since=\"$SINCE_DATE\" --oneline | grep -ciP '^[a-f0-9]+ docs'")
+TEST_COUNT=$(grep_count "git log --since=\"$SINCE_DATE\" --oneline | grep -ciP '^[a-f0-9]+ test'")
 
 # Non-conventional commits (don't match type(scope): or type: pattern)
-NON_CONVENTIONAL=$(git log --since="$SINCE_DATE" --pretty=format:'%s' \
-  | grep -cvP '^\s*(feat|fix|refactor|chore|perf|style|docs|test|build|ci|revert)(\(.+\))?(!)?:\s' || echo 0)
+NON_CONVENTIONAL=$(grep_count "git log --since=\"$SINCE_DATE\" --pretty=format:'%s' \
+  | grep -cvP '^\s*(feat|fix|refactor|chore|perf|style|docs|test|build|ci|revert)(\(.+\))?(!)?:\s'")
 
 # Commits missing issue references (#123)
-MISSING_ISSUE_REF=$(git log --since="$SINCE_DATE" --pretty=format:'%h %s' \
-  | grep -cv '#[0-9]' || echo 0)
+MISSING_ISSUE_REF=$(grep_count "git log --since=\"$SINCE_DATE\" --pretty=format:'%h %s' \
+  | grep -cv '#[0-9]'")
 
 # List commits missing issue refs (for the report)
 MISSING_ISSUE_LIST=$(git log --since="$SINCE_DATE" --pretty=format:'%h %s' \
@@ -97,12 +100,8 @@ CODE_NO_TESTS=""
 while IFS= read -r hash; do
   [[ -z "$hash" ]] && continue
   FILES=$(git diff-tree --no-commit-id --name-only -r "$hash" 2>/dev/null || true)
-  HAS_SRC=$(echo "$FILES" | grep -c '^src/' 2>/dev/null || true)
-  HAS_SRC="${HAS_SRC//[^0-9]/}"
-  HAS_SRC="${HAS_SRC:-0}"
-  HAS_TEST=$(echo "$FILES" | grep -cE '\.(test|spec)\.(ts|js)$' 2>/dev/null || true)
-  HAS_TEST="${HAS_TEST//[^0-9]/}"
-  HAS_TEST="${HAS_TEST:-0}"
+  HAS_SRC=$(grep_count "echo \"\$FILES\" | grep -c '^src/'")
+  HAS_TEST=$(grep_count "echo \"\$FILES\" | grep -cE '\.(test|spec)\.(ts|js)\$'")
   SUBJECT=$(git log -1 --format='%s' "$hash")
   # Only flag feat/fix commits that change src/ without tests
   if [[ "$HAS_SRC" -gt 0 && "$HAS_TEST" -eq 0 ]] && echo "$SUBJECT" | grep -qP '^(feat|fix)'; then

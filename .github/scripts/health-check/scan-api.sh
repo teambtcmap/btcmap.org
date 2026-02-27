@@ -29,7 +29,8 @@ if [[ -n "$AXIOS_CALLS" ]]; then
   done <<< "$AXIOS_CALLS"
 
   if [[ -n "$UNHANDLED" ]]; then
-    UNHANDLED_COUNT=$(echo -e "$UNHANDLED" | grep -c '.' || echo 0)
+    UNHANDLED_COUNT=$(echo -e "$UNHANDLED" | grep -c '.' 2>/dev/null || true)
+    UNHANDLED_COUNT="${UNHANDLED_COUNT//[^0-9]/}"; UNHANDLED_COUNT="${UNHANDLED_COUNT:-0}"
     add_finding "medium" "Axios calls potentially missing error handling ($UNHANDLED_COUNT)" \
       "Found $TOTAL_CALLS total axios calls, $UNHANDLED_COUNT appear to lack try/catch or .catch() error handling." \
       "$(echo -e "$UNHANDLED" | head -10)"
@@ -50,7 +51,8 @@ if [[ -n "$LF_CALLS" ]]; then
   done <<< "$LF_CALLS"
 
   if [[ -n "$UNHANDLED_LF" ]]; then
-    COUNT=$(echo -e "$UNHANDLED_LF" | grep -c '.' || echo 0)
+    COUNT=$(echo -e "$UNHANDLED_LF" | grep -c '.' 2>/dev/null || true)
+    COUNT="${COUNT//[^0-9]/}"; COUNT="${COUNT:-0}"
     add_finding "medium" "LocalForage calls potentially missing error handling ($COUNT)" \
       "IndexedDB operations can fail (storage full, private browsing). Consider adding error handling." \
       "$(echo -e "$UNHANDLED_LF" | head -10)"
@@ -99,7 +101,8 @@ if [[ -n "$ASYNC_COMPONENTS" ]]; then
     fi
   done
   if [[ -n "$NO_LOADING" ]]; then
-    COUNT=$(echo -e "$NO_LOADING" | grep -c '.' || echo 0)
+    COUNT=$(echo -e "$NO_LOADING" | grep -c '.' 2>/dev/null || true)
+    COUNT="${COUNT//[^0-9]/}"; COUNT="${COUNT:-0}"
     add_finding "low" "Async components potentially missing loading states ($COUNT)" \
       "Components with async data fetching should show loading indicators." \
       "$(echo -e "$NO_LOADING" | head -10)"
@@ -116,7 +119,8 @@ if [[ -n "$SYNC_FILES" ]]; then
     fi
   done
   if [[ -n "$NO_UPDATED_SINCE" ]]; then
-    COUNT=$(echo -e "$NO_UPDATED_SINCE" | grep -c '.' || echo 0)
+    COUNT=$(echo -e "$NO_UPDATED_SINCE" | grep -c '.' 2>/dev/null || true)
+    COUNT="${COUNT//[^0-9]/}"; COUNT="${COUNT:-0}"
     add_finding "info" "Sync modules without updated_since optimization ($COUNT)" \
       "Some sync modules may be fetching full datasets instead of incremental updates." \
       "$(echo -e "$NO_UPDATED_SINCE" | head -10)"
