@@ -713,8 +713,7 @@
 		"subheading": "Покрити сте на всяко устройство и ОС.",
 		"googlePlayNote": "Забележка: Няма опция за Google Play поради изискванията им за KYC за разработчици.",
 		"official": "Официални",
-		"community": "Общност",
-		"googlePlayNote": "Забележка: Няма опция за Google Play поради прекомерните изисквания за KYC за разработчици."
+		"community": "Общност"
 	},
 	"gradeDisplay": {
 		"ariaLabel": "{grade} от 5 звезди",
