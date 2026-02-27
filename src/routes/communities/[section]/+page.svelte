@@ -307,15 +307,14 @@ onDestroy(() => {
 				? 'text-white'
 				: 'gradient'} text-4xl !leading-tight font-semibold md:text-5xl"
 		>
-			Join the bitcoin map community.
+			{$_('communities.hero')}
 		</h1>
 	{:else}
 		<HeaderPlaceholder />
 	{/if}
 
 	<h2 class="mx-auto w-full text-xl font-semibold text-primary lg:w-[800px] dark:text-white">
-		Take ownership of your local bitcoin mapping data and help drive adoption. Bitcoin communities
-		are the spark that ignites the movement. Join your friends, onboard businesses and have fun!
+		{$_('communities.description')}
 	</h2>
 
 	<div>
@@ -323,15 +322,15 @@ onDestroy(() => {
 			style="md:w-[200px] mx-auto py-3 rounded-xl mb-5"
 			link="/communities/leaderboard"
 		>
-			Leaderboard
+			{$_('communities.leaderboard')}
 		</PrimaryButton>
 
 		<div class="flex flex-col items-center justify-center gap-5 md:flex-row">
 			<PrimaryButton style="md:w-[200px] py-3 rounded-xl w-full" link="/communities/add">
-				Add community
+				{$_('communities.addCommunity')}
 			</PrimaryButton>
 			<PrimaryButton style="md:w-[200px] py-3 rounded-xl w-full" link="/communities/map">
-				View community map
+				{$_('communities.viewMap')}
 			</PrimaryButton>
 		</div>
 	</div>

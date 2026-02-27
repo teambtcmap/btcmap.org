@@ -1,8 +1,7 @@
 <script lang="ts">
-import { _ } from "svelte-i18n";
-
 import AreaPage from "$components/area/AreaPage.svelte";
 import Breadcrumbs from "$components/Breadcrumbs.svelte";
+import { _ } from "$lib/i18n";
 import type { AreaPageProps } from "$lib/types";
 
 import type { PageData } from "./$types";
@@ -11,8 +10,8 @@ export let data: PageData & AreaPageProps;
 
 const { name, id } = data;
 
-const routes = [
-	{ name: "Communities", url: "/communities" },
+$: routes = [
+	{ name: $_("nav.communities"), url: "/communities" },
 	{ name, url: `/community/${id}` },
 ];
 </script>

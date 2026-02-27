@@ -4,6 +4,7 @@ import {
 	type ColumnDef,
 	createSvelteTable,
 	type FilterFn,
+	flexRender,
 	getCoreRowModel,
 	getFilteredRowModel,
 	getPaginationRowModel,
@@ -18,6 +19,7 @@ import { writable } from "svelte/store";
 
 import LeaderboardPagination from "$components/leaderboard/LeaderboardPagination.svelte";
 import LeaderboardSearch from "$components/leaderboard/LeaderboardSearch.svelte";
+import { _ } from "$lib/i18n";
 import type { ActivityEvent } from "$lib/types";
 import { debounce } from "$lib/utils";
 
@@ -46,7 +48,7 @@ const fuzzyFilter: FilterFn<ActivityEvent> = (
 const columns: ColumnDef<ActivityEvent>[] = [
 	{
 		id: "location",
-		header: "Location",
+		header: () => $_(`profileActivity.location`),
 		accessorFn: (row) => row.location,
 		enableSorting: false,
 		filterFn: fuzzyFilter,
@@ -54,7 +56,7 @@ const columns: ColumnDef<ActivityEvent>[] = [
 	},
 	{
 		id: "type",
-		header: "Action",
+		header: () => $_(`profileActivity.action`),
 		accessorFn: (row) => row.type,
 		enableSorting: true,
 		filterFn: fuzzyFilter,
@@ -62,7 +64,7 @@ const columns: ColumnDef<ActivityEvent>[] = [
 	},
 	{
 		id: "created_at",
-		header: "Date",
+		header: () => $_(`profileActivity.date`),
 		accessorFn: (row) => row.created_at,
 		enableSorting: true,
 		filterFn: fuzzyFilter,
@@ -145,7 +147,7 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 	<h3
 		class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
 	>
-		{username || 'BTC Map Supertagger'}'s Activity
+		{$_('profileActivity.activityTitle', { values: { name: username || $_('taggerProfile.defaultName') } })}
 	</h3>
 
 	{#if eventElements && eventElements.length && dataInitialized}
@@ -154,7 +156,7 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 		</div>
 
 		{#if $table.getFilteredRowModel().rows.length === 0}
-			<p class="w-full p-5 text-center text-primary dark:text-white">No results found.</p>
+			<p class="w-full p-5 text-center text-primary dark:text-white">{$_('profileActivity.noResults')}</p>
 		{:else}
 			<div class="overflow-x-auto">
 				<table class="w-full">
@@ -175,6 +177,10 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 												: 'none'}
 									>
 										{#if !header.isPlaceholder}
+											{@const headerLabel =
+												typeof header.column.columnDef.header === 'function'
+													? header.column.columnDef.header(header.getContext())
+													: header.column.columnDef.header}
 											<button
 												type="button"
 												class="flex items-center gap-x-1 leading-tight select-none"
@@ -188,18 +194,26 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 												}}
 												tabindex={header.column.getCanSort() ? 0 : -1}
 												aria-label={header.column.getCanSort()
-													? 'Sort by ' +
-														String(header.column.columnDef.header) +
-														', currently ' +
-														(header.column.getIsSorted() === 'asc'
-															? 'ascending'
-															: header.column.getIsSorted() === 'desc'
-																? 'descending'
-																: 'unsorted')
-													: String(header.column.columnDef.header)}
+													? header.column.getIsSorted() === 'asc'
+														? $_('leaderboard.sortByCurrentlyAscending', {
+																values: { column: headerLabel },
+															})
+														: header.column.getIsSorted() === 'desc'
+															? $_('leaderboard.sortByCurrentlyDescending', {
+																	values: { column: headerLabel },
+																})
+															: $_('leaderboard.sortByCurrentlyUnsorted', {
+																	values: { column: headerLabel },
+																})
+													: headerLabel}
 											>
 												<span class="break-words">
-													{String(header.column.columnDef.header)}
+													<svelte:component
+														this={flexRender(
+															header.column.columnDef.header,
+															header.getContext(),
+														)}
+													/>
 												</span>
 												{#if header.column.getIsSorted().toString() === 'asc'}
 													<span aria-hidden="true">▲</span>

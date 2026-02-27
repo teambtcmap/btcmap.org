@@ -292,7 +292,22 @@
 	"communityMap": {
 		"viewCommunity": "Ver Comunidade",
 		"pageTitle": "Mapa da Comunidade",
-		"organization": "Organização"
+		"organization": "Organização",
+		"sponsor": "Patrocinador BTC Map",
+		"supporter": "Apoiador"
+	},
+	"communities": {
+		"hero": "Junte-se à comunidade do mapa bitcoin.",
+		"description": "Assuma a responsabilidade pelos dados locais do mapa bitcoin e ajude a impulsionar a adoção. As comunidades bitcoin são a faísca que acende o movimento. Junte-se aos seus amigos, cadastre negócios e divirta-se!",
+		"leaderboardHero": "Principais Comunidades",
+		"leaderboardDescription": "As comunidades de mapeamento bitcoin mantêm seus conjuntos de dados locais e buscam ter as informações mais precisas. Elas também ajudam a cadastrar novos comerciantes em sua região!",
+		"directory": "Diretório",
+		"addCommunity": "Adicionar comunidade",
+		"viewMap": "Ver mapa da comunidade",
+		"leaderboard": "Ranking",
+		"byContinent": "Comunidades por continente",
+		"totalLocations": "Total de locais",
+		"verifiedLocations": "Locais verificados"
 	},
 	"taggerOnboarding": {
 		"nameLabel": "Nome",
@@ -308,6 +323,13 @@
 		"successType": "Candidatura",
 		"successMessage": "Obrigado pelo seu interesse em se tornar um etiquetador! Revisaremos sua candidatura e alguém da equipe entrará em contato pelo e-mail fornecido. Entre em contato em hello@btcmap.org se precisar de acompanhamento."
 	},
+	"profileActivity": {
+		"location": "Local",
+		"action": "Ação",
+		"date": "Data",
+		"noResults": "Nenhum resultado encontrado.",
+		"activityTitle": "Atividade de {name}"
+	},
 	"taggerProfile": {
 		"osmProfile": "Perfil OSM",
 		"totalTags": "Total de Tags",
@@ -318,7 +340,8 @@
 		"chartUpdated": "Atualizados",
 		"chartDeleted": "Excluídos",
 		"chartLabel": "Tipos de Tags",
-		"mappingSince": "Mapeando desde"
+		"mappingSince": "Mapeando desde",
+		"defaultName": "Supertagger do BTC Map"
 	},
 	"forms": {
 		"optional": "(opcional)",
