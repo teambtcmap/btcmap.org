@@ -30,8 +30,8 @@ import { isSupportedLocale } from "$lib/i18n";
 import { page } from "$app/stores";
 
 // Apply language from URL param site-wide (e.g. /map?language=bg for embedded maps).
-// Exclude /communities/map where language filters communities by area.tags.language.
-$: if (browser && $page.url.pathname !== "/communities/map") {
+// On /communities/map, ?communityLang= filters communities; ?language= sets UI locale.
+$: if (browser) {
 	const langParam = $page.url.searchParams.get("language");
 	if (langParam && isSupportedLocale(langParam)) {
 		locale.set(langParam);

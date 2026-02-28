@@ -46,7 +46,7 @@ let communitiesLoaded = false;
 const communityQuery = $page.url.searchParams.get("community");
 
 // allow to view map with only certain language communities
-const language = $page.url.searchParams.get("language");
+const communityLang = $page.url.searchParams.get("communityLang");
 
 // allow to view map with only certain org communities
 const organization = $page.url.searchParams.get("organization");
@@ -71,7 +71,7 @@ const initializeCommunities = () => {
 			area.tags["icon:square"] &&
 			area.tags.continent &&
 			$reports.find((report) => report.area_id === area.id) &&
-			(language ? area.tags.language === language : true) &&
+			(communityLang ? area.tags.language === communityLang : true) &&
 			(organization ? area.tags.organization === organization : true),
 	);
 
