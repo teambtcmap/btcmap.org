@@ -448,3 +448,46 @@ export const updateSinglePlace = async (
 		return null;
 	}
 };
+
+export const updatePlaceInCache = async (
+	place: Place,
+): Promise<Place | null> => {
+	try {
+		const cachedPlaces = await localforage.getItem<Place[]>("places_v4");
+
+		if (!cachedPlaces) {
+			console.warn("No cached places found, cannot update place");
+			return null;
+		}
+
+		if (place.deleted_at) {
+			const updatedPlaces = cachedPlaces.filter((p) => p.id !== place.id);
+			if (updatedPlaces.length !== cachedPlaces.length) {
+				await localforage.setItem("places_v4", updatedPlaces);
+				await yieldToMain();
+				places.set(updatedPlaces);
+				console.info(`Removed deleted place ${place.id} from cache`);
+			}
+			return null;
+		}
+
+		const placeIndex = cachedPlaces.findIndex((p) => p.id === place.id);
+
+		let updatedPlaces: Place[];
+		if (placeIndex !== -1) {
+			updatedPlaces = [...cachedPlaces];
+			updatedPlaces[placeIndex] = place;
+		} else {
+			updatedPlaces = [...cachedPlaces, place];
+		}
+
+		await localforage.setItem("places_v4", updatedPlaces);
+		await yieldToMain();
+		places.set(updatedPlaces);
+
+		return place;
+	} catch (error) {
+		console.error(`Failed to update place ${place.id} in cache:`, error);
+		return null;
+	}
+};
