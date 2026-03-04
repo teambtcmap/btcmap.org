@@ -28,7 +28,7 @@ import {
 	layers,
 } from "$lib/map/setup";
 import { placesById, showTags, taggingIssues } from "$lib/store";
-import { updateSinglePlace } from "$lib/sync/places";
+import { updatePlaceInCache } from "$lib/sync/places";
 import { theme } from "$lib/theme";
 import type {
 	BaseMaps,
@@ -67,30 +67,7 @@ let LocateControl: typeof import("leaflet.locatecontrol").LocateControl;
 const initializeData = () => {
 	if (dataInitialized) return;
 
-	// Use server data directly instead of store lookup
-	icon = data.icon;
-	address = data.address;
-	description = data.description;
-
-	hours = data.hours;
-	payment = data.payment;
-	phone = data.phone;
-	website = data.website;
-	email = data.email;
-	twitter = data.twitter;
-	instagram = data.instagram;
-	facebook = data.facebook;
-	thirdParty = data.thirdParty;
-	paymentMethod = data.paymentMethod;
-
-	lat = data.lat;
-	long = data.lon;
-
 	const commentsCount = comments.length;
-
-	filteredCommunities = data.areas;
-
-	merchantEvents = data.activity;
 
 	const setupMap = () => {
 		// add map
@@ -140,13 +117,30 @@ $: initialRenderComplete && !dataInitialized && initializeData();
 
 // merchant variable no longer needed - using server data directly
 
-const name = data.name;
-let icon: string | undefined;
-let address: string | undefined;
-let description: string | undefined;
+// Use server data directly via reactive declarations
+$: icon = data.icon;
+$: address = data.address;
+$: description = data.description;
 
-let hours: string | undefined;
-let payment: PayMerchant;
+$: hours = data.hours;
+$: payment = data.payment;
+$: phone = data.phone;
+$: website = data.website;
+$: email = data.email;
+$: twitter = data.twitter;
+$: instagram = data.instagram;
+$: facebook = data.facebook;
+
+$: thirdParty = data.thirdParty;
+$: paymentMethod = data.paymentMethod;
+
+$: lat = data.lat;
+$: long = data.lon;
+
+$: filteredCommunities = data.areas;
+$: merchantEvents = data.activity;
+
+const name = data.name;
 let boosted: string | undefined;
 let verified: string[];
 const verifiedDate = calcVerifiedDate();
@@ -167,16 +161,6 @@ $: {
 			? mergedPlace.boosted_until
 			: undefined;
 }
-let phone: string | undefined;
-let website: string | undefined;
-let email: string | undefined;
-let twitter: string | undefined;
-let instagram: string | undefined;
-let facebook: string | undefined;
-
-let thirdParty: boolean | undefined;
-let paymentMethod: string | undefined;
-
 let thirdPartyTooltip: HTMLAnchorElement;
 let onchainTooltip: HTMLImageElement;
 let lnTooltip: HTMLImageElement;
@@ -233,18 +217,11 @@ $: outdatedTooltip &&
 		content: $_("verification.outdatedTooltip"),
 	});
 
-let lat: number | undefined;
-let long: number | undefined;
-
-let filteredCommunities: MerchantArea[] = [];
-
 let hideArrow = false;
 let activityDiv: HTMLElement;
 
 let hideCommentsArrow = false;
 let commentsDiv: HTMLElement;
-
-let merchantEvents: MerchantActivityEvent[] = [];
 
 let eventCount = 50;
 $: eventsPaginated = merchantEvents.slice(0, eventCount);
@@ -268,7 +245,7 @@ onMount(async () => {
 		// Update localforage with fresh place data to sync comment counts, boosts, etc.
 		// This ensures the map shows current data when navigating back
 		try {
-			await updateSinglePlace(data.id);
+			await updatePlaceInCache(data.placeData);
 		} catch (error) {
 			// Silent failure - page still works with server data even if cache update fails
 			console.error("Could not update place in localforage:", error);
