@@ -338,6 +338,24 @@ $: {
 		</div>
 	</section>
 
+	<section id="area-stats">
+		<div
+			class="grid rounded-3xl border border-gray-300 md:grid-cols-2 xl:grid-cols-2 dark:border-white/95 dark:bg-white/10"
+		>
+			<DashboardStat
+				title={$_('dashboard.totalAreas')}
+				stat={areaDashboard?.total_areas}
+				border="border-b md:border-b-0 border-gray-300"
+				loading={false}
+			/>
+			<DashboardStat
+				title={$_('dashboard.recentlyVerified')}
+				stat={areaDashboard?.verified_areas_1y}
+				loading={false}
+			/>
+		</div>
+	</section>
+
 	<section id="charts" class="space-y-10">
 		<div
 			class="flex flex-wrap justify-end gap-3 font-semibold text-primary md:gap-5 dark:text-white"

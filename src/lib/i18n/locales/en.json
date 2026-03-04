@@ -472,8 +472,9 @@
 	"dashboard": {
 		"hero": "Dashboard",
 		"totalMerchants": "Total Merchants",
-		"recentlyVerified": "Recently Verified",
+		"recentlyVerified": "Recently Verified (1y)",
 		"totalExchanges": "Total Exchanges",
+		"totalAreas": "Total Areas",
 		"period7d": "7D",
 		"period1m": "1M",
 		"period3m": "3M",
