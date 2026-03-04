@@ -1,13 +1,13 @@
 import type { OSMTags, PayMerchant, Place } from "$lib/types";
 
-export interface ContactFields {
+export type ContactFields = {
 	phone?: string;
 	website?: string;
 	email?: string;
 	twitter?: string;
 	instagram?: string;
 	facebook?: string;
-}
+};
 
 export function getContactFields(place: Place): ContactFields {
 	return {

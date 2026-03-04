@@ -1,6 +1,6 @@
 import axios from "axios";
 import axiosRetry from "axios-retry";
-import type { DivIcon, LatLng, Map } from "leaflet";
+import type { DivIcon, LatLng, Map as LeafletMap } from "leaflet";
 import { get } from "svelte/store";
 
 import Icon from "$components/Icon.svelte";
@@ -32,7 +32,7 @@ export const updateMapHash = (zoom: number, center: LatLng): void => {
 	replaceState(url, {});
 };
 
-export const layers = (leaflet: Leaflet, map: Map) => {
+export const layers = (leaflet: Leaflet, map: LeafletMap) => {
 	const currentTheme = theme.current;
 
 	const osm = leaflet.tileLayer(
@@ -79,7 +79,7 @@ export const layers = (leaflet: Leaflet, map: Map) => {
 	return { baseMaps, activeLayer };
 };
 
-export const attribution = (L: Leaflet, map: Map) => {
+export const attribution = (L: Leaflet, map: LeafletMap) => {
 	// Use Leaflet's default attribution control
 	L.control.attribution({ position: "bottomleft", prefix: false }).addTo(map);
 };
@@ -239,7 +239,7 @@ export const support = (t?: MapControlsTranslations) => {
 	supportAttribution.append(link, document.createTextNode(" BTC Map"));
 };
 
-export const scaleBars = (L: Leaflet, map: Map) => {
+export const scaleBars = (L: Leaflet, map: LeafletMap) => {
 	// Use Leaflet's default scale control
 	L.control.scale({ position: "bottomleft" }).addTo(map);
 };
@@ -318,7 +318,7 @@ export const changeDefaultIcons = (
 
 export const geolocate = (
 	_L: Leaflet,
-	map: Map,
+	map: LeafletMap,
 	LocateControl: typeof import("leaflet.locatecontrol").LocateControl,
 	t?: MapControlsTranslations,
 ) => {
@@ -359,7 +359,7 @@ export const geolocate = (
 
 export const homeMarkerButtons = (
 	L: Leaflet,
-	map: Map,
+	map: LeafletMap,
 	DomEvent: DomEventType,
 	mainMap?: boolean,
 	t?: MapControlsTranslations,
@@ -471,7 +471,7 @@ export const homeMarkerButtons = (
 
 export const dataRefresh = (
 	L: Leaflet,
-	map: Map,
+	map: LeafletMap,
 	DomEvent: DomEventType,
 	t?: MapControlsTranslations,
 ) => {
@@ -586,11 +586,13 @@ export const generateIcon = (
 	});
 };
 
-const verifiedCache = new WeakMap<Place, string[]>();
+// Cache verification arrays per place id; entries are overwritten whenever fresh Place data arrives via stores
+const verifiedCache = new Map<number, string[]>();
 
 export const verifiedArr = (place: Place): string[] => {
-	if (verifiedCache.has(place)) {
-		return verifiedCache.get(place)!;
+	const cacheKey = place.id;
+	if (verifiedCache.has(cacheKey)) {
+		return verifiedCache.get(cacheKey)!;
 	}
 
 	const verified: string[] = [];
@@ -614,7 +616,7 @@ export const verifiedArr = (place: Place): string[] => {
 		verified.sort((a, b) => Date.parse(b) - Date.parse(a));
 	}
 
-	verifiedCache.set(place, verified);
+	verifiedCache.set(cacheKey, verified);
 
 	return verified;
 };
