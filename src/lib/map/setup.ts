@@ -586,8 +586,14 @@ export const generateIcon = (
 	});
 };
 
-export const verifiedArr = (place: Place) => {
-	const verified = [];
+const verifiedCache = new WeakMap<Place, string[]>();
+
+export const verifiedArr = (place: Place): string[] => {
+	if (verifiedCache.has(place)) {
+		return verifiedCache.get(place)!;
+	}
+
+	const verified: string[] = [];
 
 	if (place["osm:survey:date"] && Date.parse(place["osm:survey:date"])) {
 		verified.push(place["osm:survey:date"]);
@@ -607,6 +613,8 @@ export const verifiedArr = (place: Place) => {
 	if (verified.length > 1) {
 		verified.sort((a, b) => Date.parse(b) - Date.parse(a));
 	}
+
+	verifiedCache.set(place, verified);
 
 	return verified;
 };
