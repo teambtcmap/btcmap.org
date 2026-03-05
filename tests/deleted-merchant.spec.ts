@@ -2,6 +2,10 @@ import { test, expect } from '@playwright/test';
 import { setupConsoleErrorCollection, checkForConsoleErrors } from './helpers';
 
 // Known deleted merchant — "Tabaccheria Il Quadrifoglio" (deleted 2023-04-20)
+// WARNING: These tests depend on merchant ID 7361 remaining in the API with
+// deleted_at set. If this merchant gets fully purged from the API in the
+// future, these tests will fail and will need to be updated to use a
+// different deleted merchant ID.
 const DELETED_MERCHANT_ID = 7361;
 
 test.describe('Deleted Merchant Page', () => {
