@@ -587,12 +587,18 @@ export const generateIcon = (
 };
 
 // Cache verification arrays per place id; entries are overwritten whenever fresh Place data arrives via stores
+const MAX_CACHE_SIZE = 100;
 const verifiedCache = new Map<number, string[]>();
 
 export const verifiedArr = (place: Place): string[] => {
 	const cacheKey = place.id;
+
 	if (verifiedCache.has(cacheKey)) {
-		return verifiedCache.get(cacheKey)!;
+		// Move to end (most recently used)
+		const cached = verifiedCache.get(cacheKey)!;
+		verifiedCache.delete(cacheKey);
+		verifiedCache.set(cacheKey, cached);
+		return cached;
 	}
 
 	const verified: string[] = [];
@@ -614,6 +620,15 @@ export const verifiedArr = (place: Place): string[] => {
 
 	if (verified.length > 1) {
 		verified.sort((a, b) => Date.parse(b) - Date.parse(a));
+	}
+
+	// Add to cache with eviction if needed
+	if (verifiedCache.size >= MAX_CACHE_SIZE) {
+		// Remove first entry (least recently used)
+		const firstKey = verifiedCache.keys().next().value;
+		if (firstKey !== undefined) {
+			verifiedCache.delete(firstKey);
+		}
 	}
 
 	verifiedCache.set(cacheKey, verified);

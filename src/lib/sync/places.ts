@@ -452,6 +452,12 @@ export const updateSinglePlace = async (
 export const updatePlaceInCache = async (
 	place: Place,
 ): Promise<Place | null> => {
+	// Runtime guard for SSR safety
+	if (typeof window === "undefined") {
+		console.warn("updatePlaceInCache called in SSR context");
+		return null;
+	}
+
 	try {
 		const cachedPlaces = await localforage.getItem<Place[]>("places_v4");
 

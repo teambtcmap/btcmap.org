@@ -20,7 +20,7 @@ export function getContactFields(place: Place): ContactFields {
 	};
 }
 
-export function mapPayment(place: Place): PayMerchant {
+export function mapPayment(place: Place): PayMerchant | undefined {
 	if (place["osm:payment:uri"]) {
 		return { type: "uri", url: place["osm:payment:uri"] };
 	}

@@ -28,7 +28,6 @@ import {
 	layers,
 } from "$lib/map/setup";
 import { placesById, showTags, taggingIssues } from "$lib/store";
-import { updatePlaceInCache } from "$lib/sync/places";
 import { theme } from "$lib/theme";
 import type {
 	BaseMaps,
@@ -38,7 +37,7 @@ import type {
 	MerchantArea,
 	MerchantPageData,
 	PayMerchant,
-} from "$lib/types.js";
+} from "$lib/types";
 import {
 	formatOpeningHours,
 	formatVerifiedHuman,
@@ -245,6 +244,7 @@ onMount(async () => {
 		// Update localforage with fresh place data to sync comment counts, boosts, etc.
 		// This ensures the map shows current data when navigating back
 		try {
+			const { updatePlaceInCache } = await import("$lib/sync/places");
 			await updatePlaceInCache(data.placeData);
 		} catch (error) {
 			// Silent failure - page still works with server data even if cache update fails
