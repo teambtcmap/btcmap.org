@@ -9,7 +9,6 @@ import { isThisYear } from "date-fns/isThisYear";
 import { isToday } from "date-fns/isToday";
 import { parseISO } from "date-fns/parseISO";
 import { subDays } from "date-fns/subDays";
-import DOMPurify from "dompurify";
 import { get } from "svelte/store";
 
 import { PLACE_FIELD_SETS } from "$lib/api-fields";
@@ -289,17 +288,22 @@ export async function getAreaIdsByCoordinates(
 }
 
 export const formatOpeningHours = (str: string): string => {
-	const html = str
+	return str
 		.split(/;\s*/)
-		.map((part) => `<span>${part.trim()}</span>`)
+		.map((part) => `<span>${escapeHtml(part.trim())}</span>`)
 		.join("");
-
-	// DOMPurify requires a DOM environment — skip sanitization during SSR.
-	// Safe because the input is opening_hours from OSM, not arbitrary user HTML.
-	if (typeof window === "undefined") return html;
-
-	return DOMPurify.sanitize(html, { ALLOWED_TAGS: ["span"] });
 };
+
+// Escapes HTML special characters to prevent XSS in text content
+// Use this for plain text inserted into innerHTML contexts (e.g., Leaflet tooltips)
+export function escapeHtml(text: string): string {
+	return text
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#039;");
+}
 
 const RECENT_DATE_THRESHOLD_DAYS = 30;
 
@@ -408,14 +412,6 @@ export async function fetchEnhancedPlace(
 		console.error(`Error fetching enhanced place data for ${placeId}:`, error);
 		return null;
 	}
-}
-
-// Escapes HTML special characters to prevent XSS in text content
-// Use this for plain text inserted into innerHTML contexts (e.g., Leaflet tooltips)
-export function escapeHtml(text: string): string {
-	const div = document.createElement("div");
-	div.textContent = text;
-	return div.innerHTML;
 }
 
 const EARTH_RADIUS_KM = 6371;
