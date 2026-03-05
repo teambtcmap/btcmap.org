@@ -294,6 +294,10 @@ export const formatOpeningHours = (str: string): string => {
 		.map((part) => `<span>${part.trim()}</span>`)
 		.join("");
 
+	// DOMPurify requires a DOM environment — skip sanitization during SSR.
+	// Safe because the input is opening_hours from OSM, not arbitrary user HTML.
+	if (typeof window === "undefined") return html;
+
 	return DOMPurify.sanitize(html, { ALLOWED_TAGS: ["span"] });
 };
 
