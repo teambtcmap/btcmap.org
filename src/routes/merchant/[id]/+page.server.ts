@@ -37,8 +37,9 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 
 	try {
 		// Fetch complete data from v4 Places API (supports both numeric Place IDs and OSM-style IDs)
+		// include_deleted=true is required so deleted places return full field data instead of id-only
 		const placeResponse = await axios.get(
-			`https://api.btcmap.org/v4/places/${encodeURIComponent(id)}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`,
+			`https://api.btcmap.org/v4/places/${encodeURIComponent(id)}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}&include_deleted=true`,
 		);
 		const placeData: Place = placeResponse.data;
 
