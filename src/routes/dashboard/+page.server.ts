@@ -9,6 +9,8 @@ interface DashboardData {
 	verified_merchants_1y_chart: Array<ChartEntry>;
 	total_exchanges: number;
 	verified_exchanges_1y: number;
+	total_areas: number;
+	verified_areas_1y: number;
 }
 
 interface ChartEntry {
