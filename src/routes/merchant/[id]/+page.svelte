@@ -117,10 +117,28 @@ $: initialRenderComplete && !dataInitialized && initializeData();
 // merchant variable no longer needed - using server data directly
 
 // Use server data directly via reactive declarations
+let icon: string | undefined;
+let address: string | undefined;
+let description: string | undefined;
+let hours: string | undefined;
+let payment: PayMerchant | undefined;
+let phone: string | undefined;
+let website: string | undefined;
+let email: string | undefined;
+let twitter: string | undefined;
+let instagram: string | undefined;
+let facebook: string | undefined;
+let thirdParty: boolean | undefined;
+let paymentMethod: string | undefined;
+let lat: number;
+let long: number;
+let filteredCommunities: MerchantArea[] = [];
+let merchantEvents: MerchantActivityEvent[] = [];
+let name: string | undefined;
+
 $: icon = data.icon;
 $: address = data.address;
 $: description = data.description;
-
 $: hours = data.hours;
 $: payment = data.payment;
 $: phone = data.phone;
@@ -129,17 +147,13 @@ $: email = data.email;
 $: twitter = data.twitter;
 $: instagram = data.instagram;
 $: facebook = data.facebook;
-
 $: thirdParty = data.thirdParty;
 $: paymentMethod = data.paymentMethod;
-
 $: lat = data.lat;
 $: long = data.lon;
-
 $: filteredCommunities = data.areas;
 $: merchantEvents = data.activity;
-
-const name = data.name;
+$: name = data.name;
 let boosted: string | undefined;
 let verified: string[];
 const verifiedDate = calcVerifiedDate();
