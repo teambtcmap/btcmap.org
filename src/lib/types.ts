@@ -426,7 +426,6 @@ export type Place = {
 	twitter?: string;
 	facebook?: string;
 	instagram?: string;
-	line?: string;
 	email?: string;
 	// OSM contact fields
 	"osm:contact:instagram"?: string;
@@ -435,14 +434,6 @@ export type Place = {
 	"osm:contact:phone"?: string;
 	"osm:contact:website"?: string;
 	"osm:contact:email"?: string;
-	// Payment methods
-	"payment:uri"?: string;
-	"payment:pouch"?: string;
-	"payment:coinos"?: string;
-	// Payment capabilities
-	"payment:lightning"?: "yes";
-	"payment:onchain"?: "yes";
-	"payment:lightning_contactless"?: "yes";
 	// Third party app requirement
 	required_app_url?: string;
 	// OSM payment method fields
@@ -453,7 +444,6 @@ export type Place = {
 	"osm:payment:uri"?: string;
 	"osm:payment:coinos"?: string;
 	"osm:payment:pouch"?: string;
-	"osm:payment:lightning:requires_companion_app"?: "yes";
 	"osm:payment:lightning:companion_app_url"?: string;
 	// OSM category fields
 	"osm:amenity"?: string;
