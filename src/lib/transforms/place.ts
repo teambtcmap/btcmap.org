@@ -49,7 +49,7 @@ export function getPaymentMethod(place: Place): string | undefined {
 }
 
 export function buildOsmTags(place: Place, contact?: ContactFields): OSMTags {
-	const tags: Record<string, any> = {};
+	const tags: OSMTags = {};
 
 	const contacts = contact || getContactFields(place);
 
