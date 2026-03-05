@@ -1,6 +1,6 @@
 import axios from "axios";
 import axiosRetry from "axios-retry";
-import type { DivIcon, LatLng, Map } from "leaflet";
+import type { DivIcon, LatLng, Map as LeafletMap } from "leaflet";
 import { get } from "svelte/store";
 
 import Icon from "$components/Icon.svelte";
@@ -32,7 +32,7 @@ export const updateMapHash = (zoom: number, center: LatLng): void => {
 	replaceState(url, {});
 };
 
-export const layers = (leaflet: Leaflet, map: Map) => {
+export const layers = (leaflet: Leaflet, map: LeafletMap) => {
 	const currentTheme = theme.current;
 
 	const osm = leaflet.tileLayer(
@@ -79,7 +79,7 @@ export const layers = (leaflet: Leaflet, map: Map) => {
 	return { baseMaps, activeLayer };
 };
 
-export const attribution = (L: Leaflet, map: Map) => {
+export const attribution = (L: Leaflet, map: LeafletMap) => {
 	// Use Leaflet's default attribution control
 	L.control.attribution({ position: "bottomleft", prefix: false }).addTo(map);
 };
@@ -239,7 +239,7 @@ export const support = (t?: MapControlsTranslations) => {
 	supportAttribution.append(link, document.createTextNode(" BTC Map"));
 };
 
-export const scaleBars = (L: Leaflet, map: Map) => {
+export const scaleBars = (L: Leaflet, map: LeafletMap) => {
 	// Use Leaflet's default scale control
 	L.control.scale({ position: "bottomleft" }).addTo(map);
 };
@@ -318,7 +318,7 @@ export const changeDefaultIcons = (
 
 export const geolocate = (
 	_L: Leaflet,
-	map: Map,
+	map: LeafletMap,
 	LocateControl: typeof import("leaflet.locatecontrol").LocateControl,
 	t?: MapControlsTranslations,
 ) => {
@@ -359,7 +359,7 @@ export const geolocate = (
 
 export const homeMarkerButtons = (
 	L: Leaflet,
-	map: Map,
+	map: LeafletMap,
 	DomEvent: DomEventType,
 	mainMap?: boolean,
 	t?: MapControlsTranslations,
@@ -471,7 +471,7 @@ export const homeMarkerButtons = (
 
 export const dataRefresh = (
 	L: Leaflet,
-	map: Map,
+	map: LeafletMap,
 	DomEvent: DomEventType,
 	t?: MapControlsTranslations,
 ) => {
@@ -586,8 +586,24 @@ export const generateIcon = (
 	});
 };
 
-export const verifiedArr = (place: Place) => {
-	const verified = [];
+// Cache verification arrays keyed by id + updated_at so stale entries are
+// naturally displaced when a Place object is updated. Falls back to id-only
+// when updated_at is absent. MAX_CACHE_SIZE caps memory in long sessions.
+const MAX_CACHE_SIZE = 100;
+const verifiedCache = new Map<string, string[]>();
+
+export const verifiedArr = (place: Place): string[] => {
+	const cacheKey = `${place.id}:${place.updated_at ?? ""}`;
+
+	if (verifiedCache.has(cacheKey)) {
+		// Move to end (most recently used)
+		const cached = verifiedCache.get(cacheKey)!;
+		verifiedCache.delete(cacheKey);
+		verifiedCache.set(cacheKey, cached);
+		return cached;
+	}
+
+	const verified: string[] = [];
 
 	if (place["osm:survey:date"] && Date.parse(place["osm:survey:date"])) {
 		verified.push(place["osm:survey:date"]);
@@ -607,6 +623,17 @@ export const verifiedArr = (place: Place) => {
 	if (verified.length > 1) {
 		verified.sort((a, b) => Date.parse(b) - Date.parse(a));
 	}
+
+	// Add to cache with eviction if needed
+	if (verifiedCache.size >= MAX_CACHE_SIZE) {
+		// Remove first entry (least recently used)
+		const firstKey = verifiedCache.keys().next().value;
+		if (firstKey !== undefined) {
+			verifiedCache.delete(firstKey);
+		}
+	}
+
+	verifiedCache.set(cacheKey, verified);
 
 	return verified;
 };
