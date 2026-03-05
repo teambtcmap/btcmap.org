@@ -586,12 +586,14 @@ export const generateIcon = (
 	});
 };
 
-// Cache verification arrays per place id; entries are overwritten whenever fresh Place data arrives via stores
+// Cache verification arrays keyed by id + updated_at so stale entries are
+// naturally displaced when a Place object is updated. Falls back to id-only
+// when updated_at is absent. MAX_CACHE_SIZE caps memory in long sessions.
 const MAX_CACHE_SIZE = 100;
-const verifiedCache = new Map<number, string[]>();
+const verifiedCache = new Map<string, string[]>();
 
 export const verifiedArr = (place: Place): string[] => {
-	const cacheKey = place.id;
+	const cacheKey = `${place.id}:${place.updated_at ?? ""}`;
 
 	if (verifiedCache.has(cacheKey)) {
 		// Move to end (most recently used)
