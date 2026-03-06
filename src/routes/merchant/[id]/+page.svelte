@@ -17,7 +17,7 @@ import ShowTags from "$components/ShowTags.svelte";
 import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
 import TaggingIssues from "$components/TaggingIssues.svelte";
 import TopButton from "$components/TopButton.svelte";
-import { _ } from "$lib/i18n";
+import { _, locale } from "$lib/i18n";
 import { loadMapDependencies } from "$lib/map/imports";
 import {
 	attribution,
@@ -135,6 +135,56 @@ let long: number;
 let filteredCommunities: MerchantArea[] = [];
 let merchantEvents: MerchantActivityEvent[] = [];
 let name: string | undefined;
+
+let localizedName: string | undefined;
+let nameRequestId = 0;
+
+// Returns the best language code to use for the API request.
+// Uses the app locale when non-English (e.g. pt-BR, bg).
+// When the app locale is English (whether by default or explicit choice),
+// falls back to navigator.language so users with non-English browsers can
+// still see localized merchant names even when the UI has no translation for
+// their language. Returns null when both resolve to English.
+function getApiLang(appLocale: string): string | null {
+	if (!appLocale.startsWith("en")) return appLocale;
+	if (typeof navigator === "undefined") return null;
+	const browserLang = navigator.language;
+	if (!browserLang.startsWith("en")) return browserLang;
+	return null;
+}
+
+$: if (browser) {
+	const requestId = ++nameRequestId;
+	localizedName = undefined;
+	const lang = getApiLang($locale ?? "en");
+	if (lang && data.id) {
+		fetchLocalizedName(data.id, data.name, lang, requestId);
+	}
+}
+
+async function fetchLocalizedName(
+	placeId: string,
+	defaultName: string | undefined,
+	lang: string,
+	requestId: number,
+) {
+	try {
+		const response = await fetch(
+			`https://api.btcmap.org/v4/places/${placeId}?fields=name&lang=${encodeURIComponent(lang)}`,
+		);
+		if (!response.ok) return;
+		const result = (await response.json()) as { name?: string };
+		if (
+			requestId === nameRequestId &&
+			result.name &&
+			result.name !== defaultName
+		) {
+			localizedName = result.name;
+		}
+	} catch {
+		// Silent fallback to default name
+	}
+}
 
 $: icon = data.icon;
 $: address = data.address;
@@ -302,10 +352,10 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 </script>
 
 <svelte:head>
-	<title>{name ? name + ' - ' : ''}BTC Map - {$_('meta.merchant')}</title>
+	<title>{localizedName || name ? (localizedName || name) + ' - ' : ''}BTC Map - {$_('meta.merchant')}</title>
 	<meta property="og:image" content={ogImage} />
-	<meta property="og:title" content="{name ? name + ' - ' : ''}BTC Map - {$_('meta.merchant')}" />
-	<meta name="twitter:title" content="{name ? name + ' - ' : ''}BTC Map - {$_('meta.merchant')}" />
+	<meta property="og:title" content="{localizedName || name ? (localizedName || name) + ' - ' : ''}BTC Map - {$_('meta.merchant')}" />
+	<meta name="twitter:title" content="{localizedName || name ? (localizedName || name) + ' - ' : ''}BTC Map - {$_('meta.merchant')}" />
 	<meta name="twitter:image" content={ogImage} />
 </svelte:head>
 
@@ -347,7 +397,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 			{/if}
 
 			<h1 class="text-4xl !leading-tight font-semibold text-primary dark:text-white">
-				{name || 'BTC Map Merchant'}
+				{localizedName || name || 'BTC Map Merchant'}
 				{#if data.placeData.deleted_at}
 					<span class="text-2xl text-red-600 dark:text-red-400">(Deleted)</span>
 				{/if}
@@ -689,7 +739,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 	<section id="map-section">
 		<Card>
 			<h3 slot="header" class="text-lg font-semibold">
-				{$_('merchant.location', { values: { name: name || $_('merchant.unknown') } })}
+				{$_('merchant.location', { values: { name: localizedName || name || $_('merchant.unknown') } })}
 			</h3>
 
 			<div slot="body" class="w-full">
@@ -754,7 +804,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 	<section id="activity">
 		<Card>
 			<h3 slot="header" class="text-lg font-semibold">
-				{$_('merchant.activity', { values: { name: name || $_('merchant.unknown') } })}
+				{$_('merchant.activity', { values: { name: localizedName || name || $_('merchant.unknown') } })}
 			</h3>
 
 			<div slot="body" class="w-full">
@@ -812,7 +862,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 	<section id="communities">
 		<Card>
 			<h3 slot="header" class="text-lg font-semibold">
-				{$_('merchant.communities', { values: { name: name || $_('merchant.unknown') } })}
+				{$_('merchant.communities', { values: { name: localizedName || name || $_('merchant.unknown') } })}
 			</h3>
 
 			<div slot="body" class="w-full">
