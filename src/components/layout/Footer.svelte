@@ -105,6 +105,20 @@ const links = [
 			>
 				BG
 			</button>
+			<span class="text-body dark:text-white/50"> / </span>
+			<button
+				type="button"
+				on:click={() => switchLanguage('ru')}
+				disabled={$locale === 'ru'}
+				aria-label={$_('footer.switchToRussian')}
+				class="
+					{$locale === 'ru'
+					? 'cursor-default font-bold text-body underline dark:text-white/50'
+					: 'text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link'}
+				"
+			>
+				RU
+			</button>
 		</span>
 
 		{#each links as link (link.link)}

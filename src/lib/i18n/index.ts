@@ -4,8 +4,9 @@ import { _, init, locale, register } from "svelte-i18n";
 register("en", () => import("./locales/en.json"));
 register("pt-BR", () => import("./locales/pt-BR.json"));
 register("bg", () => import("./locales/bg.json"));
+register("ru", () => import("./locales/ru.json"));
 
-export const SUPPORTED_LOCALES = ["en", "pt-BR", "bg"] as const;
+export const SUPPORTED_LOCALES = ["en", "pt-BR", "bg", "ru"] as const;
 
 export function isSupportedLocale(
 	lang: string,
@@ -26,6 +27,7 @@ function getInitialLocale(): string {
 		const browserLang = navigator.language || navigator.languages?.[0];
 		if (browserLang?.startsWith("bg")) return "bg";
 		if (browserLang?.startsWith("pt")) return "pt-BR";
+		if (browserLang?.startsWith("ru")) return "ru";
 	}
 
 	// 3. Default fallback
