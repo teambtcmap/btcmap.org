@@ -140,10 +140,11 @@ let localizedName: string | undefined;
 let nameRequestId = 0;
 
 // Returns the best language code to use for the API request.
-// Prefers the user's explicit app locale (e.g. pt-BR set via language switcher),
-// but falls back to the browser language for unsupported locales (e.g. ja, de)
-// so users can see localized merchant names even when the UI isn't translated.
-// Returns null when both the app locale and browser language are English.
+// Uses the app locale when non-English (e.g. pt-BR, bg).
+// When the app locale is English (whether by default or explicit choice),
+// falls back to navigator.language so users with non-English browsers can
+// still see localized merchant names even when the UI has no translation for
+// their language. Returns null when both resolve to English.
 function getApiLang(appLocale: string): string | null {
 	if (!appLocale.startsWith("en")) return appLocale;
 	if (typeof navigator === "undefined") return null;
@@ -169,10 +170,10 @@ async function fetchLocalizedName(
 ) {
 	try {
 		const response = await fetch(
-			`https://api.btcmap.org/v4/places/${placeId}?fields=name&lang=${lang}`,
+			`https://api.btcmap.org/v4/places/${placeId}?fields=name&lang=${encodeURIComponent(lang)}`,
 		);
 		if (!response.ok) return;
-		const result = await response.json();
+		const result = (await response.json()) as { name?: string };
 		if (
 			requestId === nameRequestId &&
 			result.name &&
