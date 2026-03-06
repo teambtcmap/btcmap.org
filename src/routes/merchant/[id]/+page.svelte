@@ -136,6 +136,36 @@ let filteredCommunities: MerchantArea[] = [];
 let merchantEvents: MerchantActivityEvent[] = [];
 let name: string | undefined;
 
+let localizedName: string | undefined;
+let localizedNameFetched = false;
+
+$: {
+	const lang = navigator.language;
+	if (lang !== "en") {
+		fetchLocalizedName(data.id, data.name, lang);
+	}
+	localizedNameFetched = true;
+}
+
+async function fetchLocalizedName(
+	placeId: string,
+	defaultName: string | undefined,
+	lang: string,
+) {
+	try {
+		const response = await fetch(
+			`https://api.btcmap.org/v4/places/${placeId}?fields=name&lang=${lang}`,
+		);
+		if (!response.ok) return;
+		const data = await response.json();
+		if (data.name && data.name !== defaultName) {
+			localizedName = data.name;
+		}
+	} catch {
+		// Silent failure - page continues with original name
+	}
+}
+
 $: icon = data.icon;
 $: address = data.address;
 $: description = data.description;
@@ -302,10 +332,9 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 </script>
 
 <svelte:head>
-	<title>{name ? name + ' - ' : ''}BTC Map - {$_('meta.merchant')}</title>
-	<meta property="og:image" content={ogImage} />
-	<meta property="og:title" content="{name ? name + ' - ' : ''}BTC Map - {$_('meta.merchant')}" />
-	<meta name="twitter:title" content="{name ? name + ' - ' : ''}BTC Map - {$_('meta.merchant')}" />
+<title>{localizedName || name ? (localizedName || name) + ' - ' : ''}BTC Map - {$_('meta.merchant')}</title>
+	<meta property="og:title" content="{localizedName || name ? (localizedName || name) + ' - ' : ''}BTC Map - {$_('meta.merchant')}" />
+	<meta name="twitter:title" content="{localizedName || name ? (localizedName || name) + ' - ' : ''}BTC Map - {$_('meta.merchant')}" />
 	<meta name="twitter:image" content={ogImage} />
 </svelte:head>
 
@@ -347,7 +376,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 			{/if}
 
 			<h1 class="text-4xl !leading-tight font-semibold text-primary dark:text-white">
-				{name || 'BTC Map Merchant'}
+				{localizedName || name || 'BTC Map Merchant'}
 				{#if data.placeData.deleted_at}
 					<span class="text-2xl text-red-600 dark:text-red-400">(Deleted)</span>
 				{/if}
@@ -689,7 +718,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 	<section id="map-section">
 		<Card>
 			<h3 slot="header" class="text-lg font-semibold">
-				{$_('merchant.location', { values: { name: name || $_('merchant.unknown') } })}
+				{$_('merchant.location', { values: { name: localizedName || name || $_('merchant.unknown') } })}
 			</h3>
 
 			<div slot="body" class="w-full">
@@ -754,7 +783,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 	<section id="activity">
 		<Card>
 			<h3 slot="header" class="text-lg font-semibold">
-				{$_('merchant.activity', { values: { name: name || $_('merchant.unknown') } })}
+				{$_('merchant.activity', { values: { name: localizedName || name || $_('merchant.unknown') } })}
 			</h3>
 
 			<div slot="body" class="w-full">
@@ -812,7 +841,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 	<section id="communities">
 		<Card>
 			<h3 slot="header" class="text-lg font-semibold">
-				{$_('merchant.communities', { values: { name: name || $_('merchant.unknown') } })}
+				{$_('merchant.communities', { values: { name: localizedName || name || $_('merchant.unknown') } })}
 			</h3>
 
 			<div slot="body" class="w-full">
