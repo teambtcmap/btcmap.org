@@ -1818,15 +1818,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/leaflet.locatecontrol@npm:^0.85.1":
-  version: 0.85.1
-  resolution: "@types/leaflet.locatecontrol@npm:0.85.1"
-  dependencies:
-    leaflet.locatecontrol: "npm:*"
-  checksum: 10c0/d3407ee9ab279116a64a4143a9bdf5fbb4fe7ce89b7fc6d1defab85a99cfa39ae7867e4beb8897b8bc44ae5e94766500218d76086ef800ca34289649d7eb7a04
-  languageName: node
-  linkType: hard
-
 "@types/leaflet.markercluster@npm:^1.5.6":
   version: 1.5.6
   resolution: "@types/leaflet.markercluster@npm:1.5.6"
@@ -2169,7 +2160,6 @@ __metadata:
     "@types/geojson": "npm:^7946.0.16"
     "@types/leaflet": "npm:1.9.21"
     "@types/leaflet.featuregroup.subgroup": "npm:^1.0.4"
-    "@types/leaflet.locatecontrol": "npm:^0.85.1"
     "@types/leaflet.markercluster": "npm:^1.5.6"
     "@types/node": "npm:^25.3.3"
     "@types/qrcode": "npm:^1.5.6"
@@ -2187,7 +2177,7 @@ __metadata:
     jsdom: "npm:^28.1.0"
     leaflet: "npm:^1.9.4"
     leaflet.featuregroup.subgroup: "npm:^1.0.2"
-    leaflet.locatecontrol: "npm:0.88.0"
+    leaflet.locatecontrol: "npm:^0.88.0"
     leaflet.markercluster: "npm:^1.5.3"
     lint-staged: "npm:^16.3.2"
     localforage: "npm:^1.10.0"
@@ -3650,14 +3640,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"leaflet.locatecontrol@npm:*":
-  version: 0.86.0
-  resolution: "leaflet.locatecontrol@npm:0.86.0"
-  checksum: 10c0/4e1fabeaf3ffd656c4d2e17a0e1de9dcc2bc97d3bbae4d512ee565317374dc34fe942b9755ceadc0038f0a8f1a1f052007893c11b83db8b529262f2680aa6fe8
-  languageName: node
-  linkType: hard
-
-"leaflet.locatecontrol@npm:0.88.0":
+"leaflet.locatecontrol@npm:^0.88.0":
   version: 0.88.0
   resolution: "leaflet.locatecontrol@npm:0.88.0"
   checksum: 10c0/c490084990ad28267ca7cb860de9a993face74474da44d8e6ac04fb0d80f06b78237e0835be43473694fe7d8683d7ae72fce68e4da1be3de712eaffdd04d6052
