@@ -62,18 +62,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@biomejs/biome@npm:^2.4.5":
-  version: 2.4.5
-  resolution: "@biomejs/biome@npm:2.4.5"
+"@biomejs/biome@npm:^2.4.6":
+  version: 2.4.6
+  resolution: "@biomejs/biome@npm:2.4.6"
   dependencies:
-    "@biomejs/cli-darwin-arm64": "npm:2.4.5"
-    "@biomejs/cli-darwin-x64": "npm:2.4.5"
-    "@biomejs/cli-linux-arm64": "npm:2.4.5"
-    "@biomejs/cli-linux-arm64-musl": "npm:2.4.5"
-    "@biomejs/cli-linux-x64": "npm:2.4.5"
-    "@biomejs/cli-linux-x64-musl": "npm:2.4.5"
-    "@biomejs/cli-win32-arm64": "npm:2.4.5"
-    "@biomejs/cli-win32-x64": "npm:2.4.5"
+    "@biomejs/cli-darwin-arm64": "npm:2.4.6"
+    "@biomejs/cli-darwin-x64": "npm:2.4.6"
+    "@biomejs/cli-linux-arm64": "npm:2.4.6"
+    "@biomejs/cli-linux-arm64-musl": "npm:2.4.6"
+    "@biomejs/cli-linux-x64": "npm:2.4.6"
+    "@biomejs/cli-linux-x64-musl": "npm:2.4.6"
+    "@biomejs/cli-win32-arm64": "npm:2.4.6"
+    "@biomejs/cli-win32-x64": "npm:2.4.6"
   dependenciesMeta:
     "@biomejs/cli-darwin-arm64":
       optional: true
@@ -93,62 +93,62 @@ __metadata:
       optional: true
   bin:
     biome: bin/biome
-  checksum: 10c0/5466d0f69c30bbe1912f3f5f307dd31293e054c8b307c21f1df22edad415de34cf46842b0bd57e150cfc6dc6d698e848f6cd26fc7155d685aa8323e4ead7538e
+  checksum: 10c0/3c0aea8069fa4bebde97ff4ef394f0383d2a3a1393a99e0cdea6c1769805cc18c5ea2c02e88779a63327d432c5858522dceae32f6a359d690f5f71f60ea4ca02
   languageName: node
   linkType: hard
 
-"@biomejs/cli-darwin-arm64@npm:2.4.5":
-  version: 2.4.5
-  resolution: "@biomejs/cli-darwin-arm64@npm:2.4.5"
+"@biomejs/cli-darwin-arm64@npm:2.4.6":
+  version: 2.4.6
+  resolution: "@biomejs/cli-darwin-arm64@npm:2.4.6"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@biomejs/cli-darwin-x64@npm:2.4.5":
-  version: 2.4.5
-  resolution: "@biomejs/cli-darwin-x64@npm:2.4.5"
+"@biomejs/cli-darwin-x64@npm:2.4.6":
+  version: 2.4.6
+  resolution: "@biomejs/cli-darwin-x64@npm:2.4.6"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@biomejs/cli-linux-arm64-musl@npm:2.4.5":
-  version: 2.4.5
-  resolution: "@biomejs/cli-linux-arm64-musl@npm:2.4.5"
+"@biomejs/cli-linux-arm64-musl@npm:2.4.6":
+  version: 2.4.6
+  resolution: "@biomejs/cli-linux-arm64-musl@npm:2.4.6"
   conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
-"@biomejs/cli-linux-arm64@npm:2.4.5":
-  version: 2.4.5
-  resolution: "@biomejs/cli-linux-arm64@npm:2.4.5"
+"@biomejs/cli-linux-arm64@npm:2.4.6":
+  version: 2.4.6
+  resolution: "@biomejs/cli-linux-arm64@npm:2.4.6"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@biomejs/cli-linux-x64-musl@npm:2.4.5":
-  version: 2.4.5
-  resolution: "@biomejs/cli-linux-x64-musl@npm:2.4.5"
+"@biomejs/cli-linux-x64-musl@npm:2.4.6":
+  version: 2.4.6
+  resolution: "@biomejs/cli-linux-x64-musl@npm:2.4.6"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@biomejs/cli-linux-x64@npm:2.4.5":
-  version: 2.4.5
-  resolution: "@biomejs/cli-linux-x64@npm:2.4.5"
+"@biomejs/cli-linux-x64@npm:2.4.6":
+  version: 2.4.6
+  resolution: "@biomejs/cli-linux-x64@npm:2.4.6"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@biomejs/cli-win32-arm64@npm:2.4.5":
-  version: 2.4.5
-  resolution: "@biomejs/cli-win32-arm64@npm:2.4.5"
+"@biomejs/cli-win32-arm64@npm:2.4.6":
+  version: 2.4.6
+  resolution: "@biomejs/cli-win32-arm64@npm:2.4.6"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@biomejs/cli-win32-x64@npm:2.4.5":
-  version: 2.4.5
-  resolution: "@biomejs/cli-win32-x64@npm:2.4.5"
+"@biomejs/cli-win32-x64@npm:2.4.6":
+  version: 2.4.6
+  resolution: "@biomejs/cli-win32-x64@npm:2.4.6"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
@@ -1818,15 +1818,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/leaflet.locatecontrol@npm:^0.85.1":
-  version: 0.85.1
-  resolution: "@types/leaflet.locatecontrol@npm:0.85.1"
-  dependencies:
-    leaflet.locatecontrol: "npm:*"
-  checksum: 10c0/d3407ee9ab279116a64a4143a9bdf5fbb4fe7ce89b7fc6d1defab85a99cfa39ae7867e4beb8897b8bc44ae5e94766500218d76086ef800ca34289649d7eb7a04
-  languageName: node
-  linkType: hard
-
 "@types/leaflet.markercluster@npm:^1.5.6":
   version: 1.5.6
   resolution: "@types/leaflet.markercluster@npm:1.5.6"
@@ -1872,12 +1863,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^25.3.3":
-  version: 25.3.3
-  resolution: "@types/node@npm:25.3.3"
+"@types/node@npm:^25.3.5":
+  version: 25.3.5
+  resolution: "@types/node@npm:25.3.5"
   dependencies:
     undici-types: "npm:~7.18.0"
-  checksum: 10c0/63e1d3816a9f4a706ab5d588d18cb98aa824b97748ff585537d327528e9438f58f69f45c7762e7cd3a1ab32c1619f551aabe8075d13172f9273cf10f6d83ab91
+  checksum: 10c0/4cf0834a6f6933bf0aca6afead117ae3db3b8f02a5f7187a24f871db0fb9344e5e46573ba387bc53b7505e1e219c4c535cbe67221ced95bb5ad98573223b19d0
   languageName: node
   linkType: hard
 
@@ -2152,7 +2143,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "btcmap@workspace:."
   dependencies:
-    "@biomejs/biome": "npm:^2.4.5"
+    "@biomejs/biome": "npm:^2.4.6"
     "@iconify/svelte": "npm:^4.2.0"
     "@mapbox/geojson-rewind": "npm:^0.5.2"
     "@maplibre/maplibre-gl-leaflet": "npm:^0.1.3"
@@ -2169,9 +2160,8 @@ __metadata:
     "@types/geojson": "npm:^7946.0.16"
     "@types/leaflet": "npm:1.9.21"
     "@types/leaflet.featuregroup.subgroup": "npm:^1.0.4"
-    "@types/leaflet.locatecontrol": "npm:^0.85.1"
     "@types/leaflet.markercluster": "npm:^1.5.6"
-    "@types/node": "npm:^25.3.3"
+    "@types/node": "npm:^25.3.5"
     "@types/qrcode": "npm:^1.5.6"
     "@zerodevx/svelte-toast": "npm:^0.9.6"
     axios: "npm:^1.13.6"
@@ -2179,7 +2169,7 @@ __metadata:
     chart.js: "npm:^4.5.1"
     d3-geo: "npm:^3.1.1"
     date-fns: "npm:^4.1.0"
-    dompurify: "npm:^3.3.1"
+    dompurify: "npm:^3.3.2"
     globals: "npm:^17.4.0"
     husky: "npm:^9.1.7"
     i18n-iso-countries: "npm:^7.14.0"
@@ -2187,12 +2177,12 @@ __metadata:
     jsdom: "npm:^28.1.0"
     leaflet: "npm:^1.9.4"
     leaflet.featuregroup.subgroup: "npm:^1.0.2"
-    leaflet.locatecontrol: "npm:0.88.0"
+    leaflet.locatecontrol: "npm:^0.88.0"
     leaflet.markercluster: "npm:^1.5.3"
     lint-staged: "npm:^16.3.2"
     localforage: "npm:^1.10.0"
     maplibre-gl: "npm:^4.7.1"
-    marked: "npm:^17.0.3"
+    marked: "npm:^17.0.4"
     postcss: "npm:^8.5.8"
     qrcode: "npm:^1.5.4"
     svelte: "npm:^4.2.20"
@@ -2544,15 +2534,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dompurify@npm:^3.3.1":
-  version: 3.3.1
-  resolution: "dompurify@npm:3.3.1"
+"dompurify@npm:^3.3.2":
+  version: 3.3.2
+  resolution: "dompurify@npm:3.3.2"
   dependencies:
     "@types/trusted-types": "npm:^2.0.7"
   dependenciesMeta:
     "@types/trusted-types":
       optional: true
-  checksum: 10c0/fa0a8c55a436ba0d54389195e3d2337e311f56de709a2fc9efc98dbbc7746fa53bb4b74b6ac043b77a279a8f2ebd8685f0ebaa6e58c9e32e92051d529bc0baf8
+  checksum: 10c0/8989525f003dd062e829137982b5412143421342991b2732bd621a1efd98b2c3cdc4f37547601d0727d3bc20f1d0eb2a0ecca287d3688f168cdb54ced867ca8f
   languageName: node
   linkType: hard
 
@@ -3650,14 +3640,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"leaflet.locatecontrol@npm:*":
-  version: 0.86.0
-  resolution: "leaflet.locatecontrol@npm:0.86.0"
-  checksum: 10c0/4e1fabeaf3ffd656c4d2e17a0e1de9dcc2bc97d3bbae4d512ee565317374dc34fe942b9755ceadc0038f0a8f1a1f052007893c11b83db8b529262f2680aa6fe8
-  languageName: node
-  linkType: hard
-
-"leaflet.locatecontrol@npm:0.88.0":
+"leaflet.locatecontrol@npm:^0.88.0":
   version: 0.88.0
   resolution: "leaflet.locatecontrol@npm:0.88.0"
   checksum: 10c0/c490084990ad28267ca7cb860de9a993face74474da44d8e6ac04fb0d80f06b78237e0835be43473694fe7d8683d7ae72fce68e4da1be3de712eaffdd04d6052
@@ -3969,12 +3952,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"marked@npm:^17.0.3":
-  version: 17.0.3
-  resolution: "marked@npm:17.0.3"
+"marked@npm:^17.0.4":
+  version: 17.0.4
+  resolution: "marked@npm:17.0.4"
   bin:
     marked: bin/marked.js
-  checksum: 10c0/3970f96ce3b1a7fd5bba82a6c7e4dffec9f7e0f238633e57139e8aa8fe637bccb1c1b61f2b3ed21b1afdbd4e076326f29e449d147203a0bdb9394e21e9a6a722
+  checksum: 10c0/a6f6a2df8157835bc23b2bede31f1cae7af75af7a2cd2e070d640c5a490e6cfe5eb63309cf353d7b373f7aef04ead4f2de51a59905bb829c462d802484468cd9
   languageName: node
   linkType: hard
 
