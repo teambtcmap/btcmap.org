@@ -10,6 +10,7 @@ import { _, locale } from "$lib/i18n";
 
 const languages = [
 	{ code: "en", name: "English", short: "EN" },
+	{ code: "de", name: "Deutsch", short: "DE" },
 	{ code: "pt-BR", name: "Português (Brasil)", short: "PT" },
 	{ code: "bg", name: "Български", short: "BG" },
 	{ code: "ru", name: "Русский", short: "RU" },
