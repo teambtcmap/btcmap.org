@@ -305,6 +305,8 @@
 		"searchInput": "Поиск биткоин мест"
 	},
 	"footer": {
+		"language": "Язык",
+		"selectLanguage": "Выберите язык",
 		"switchToEnglish": "Переключиться на английский",
 		"switchToPortuguese": "Переключиться на португальский",
 		"switchToBulgarian": "Переключиться на болгарский",

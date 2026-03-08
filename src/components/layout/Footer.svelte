@@ -1,19 +1,11 @@
 <script lang="ts">
 import Icon from "$components/Icon.svelte";
+import LanguageModal from "$components/LanguageModal.svelte";
 import SocialLink from "$components/SocialLink.svelte";
-import { trackEvent } from "$lib/analytics";
-import { _, locale } from "$lib/i18n";
+import { _ } from "$lib/i18n";
 import { socials } from "$lib/store";
 
 import { env } from "$env/dynamic/public";
-
-function switchLanguage(newLocale: string) {
-	trackEvent("language_switch", { language: newLocale });
-	locale.set(newLocale);
-	if (typeof window !== "undefined") {
-		localStorage.setItem("language", newLocale);
-	}
-}
 
 // Links with translation keys (translations are applied in template using $_())
 const links = [
@@ -55,71 +47,7 @@ const links = [
 	</div>
 
 	<div class="flex flex-wrap justify-center xl:block">
-		<!-- Language Selector -->
-		<span class="mx-1.5 mb-2.5 text-sm xl:mb-0">
-			<Icon
-				type="material"
-				icon="translate"
-				w="16"
-				h="16"
-				class="inline-block align-text-bottom text-link dark:text-white/50"
-			/>
-			<button
-				type="button"
-				on:click={() => switchLanguage('en')}
-				disabled={$locale === 'en'}
-				aria-label={$_('footer.switchToEnglish')}
-				class="
-					{$locale === 'en'
-					? 'cursor-default font-bold text-body underline dark:text-white/50'
-					: 'text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link'}
-				"
-			>
-				EN
-			</button>
-			<span class="text-body dark:text-white/50"> / </span>
-			<button
-				type="button"
-				on:click={() => switchLanguage('pt-BR')}
-				disabled={$locale === 'pt-BR'}
-				aria-label={$_('footer.switchToPortuguese')}
-				class="
-					{$locale === 'pt-BR'
-					? 'cursor-default font-bold text-body underline dark:text-white/50'
-					: 'text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link'}
-				"
-			>
-				PT
-			</button>
-			<span class="text-body dark:text-white/50"> / </span>
-			<button
-				type="button"
-				on:click={() => switchLanguage('bg')}
-				disabled={$locale === 'bg'}
-				aria-label={$_('footer.switchToBulgarian')}
-				class="
-					{$locale === 'bg'
-					? 'cursor-default font-bold text-body underline dark:text-white/50'
-					: 'text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link'}
-				"
-			>
-				BG
-			</button>
-			<span class="text-body dark:text-white/50"> / </span>
-			<button
-				type="button"
-				on:click={() => switchLanguage('ru')}
-				disabled={$locale === 'ru'}
-				aria-label={$_('footer.switchToRussian')}
-				class="
-					{$locale === 'ru'
-					? 'cursor-default font-bold text-body underline dark:text-white/50'
-					: 'text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link'}
-				"
-			>
-				RU
-			</button>
-		</span>
+		<LanguageModal />
 
 		{#each links as link (link.link)}
 			<!-- eslint-disable svelte/no-navigation-without-resolve -->

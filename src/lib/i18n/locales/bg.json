@@ -303,6 +303,8 @@
 		"updateError": "Не може да се актуализират местата, използват се кеширани данни."
 	},
 	"footer": {
+		"language": "Език",
+		"selectLanguage": "Изберете език",
 		"switchToEnglish": "Преминаване към английски",
 		"switchToPortuguese": "Преминаване към португалски",
 		"switchToBulgarian": "Преминаване към български",

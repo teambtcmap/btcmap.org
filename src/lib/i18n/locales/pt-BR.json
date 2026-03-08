@@ -293,6 +293,8 @@
 		"searchInput": "Pesquisar comerciantes Bitcoin"
 	},
 	"footer": {
+		"language": "Idioma",
+		"selectLanguage": "Selecionar idioma",
 		"switchToEnglish": "Mudar para inglês",
 		"switchToPortuguese": "Mudar para português",
 		"switchToBulgarian": "Mudar para búlgaro",
