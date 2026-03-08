@@ -40,7 +40,7 @@ const rightLinks = [
 ];
 </script>
 
-<footer class="mx-auto w-full max-w-6xl items-center justify-between space-y-5 pb-5 xl:flex xl:space-y-0">
+<footer class="mx-auto w-full max-w-6xl items-center justify-between space-y-5 pb-5 xl:flex xl:items-start xl:space-y-0">
 	<div class="flex flex-wrap justify-center gap-5 xl:block xl:space-x-5">
 		<SocialLink url={$socials.matrix} social="matrix" />
 		<SocialLink url={$socials.github} social="github" />
