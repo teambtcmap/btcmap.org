@@ -7,7 +7,7 @@ import { socials } from "$lib/store";
 import { env } from "$env/dynamic/public";
 
 // Left column: user-facing resources
-const linksLeft = [
+const leftLinks = [
 	{ link: "/bitcoin.pdf", nameKey: "footer.whitePaper" },
 	{
 		link: "https://bitcoin.rocks/business/",
@@ -27,7 +27,7 @@ const linksLeft = [
 ];
 
 // Right column: company & legal
-const linksRight = [
+const rightLinks = [
 	{ link: "/about-us", nameKey: "footer.aboutUs" },
 	{ link: "/media", nameKey: "footer.media" },
 	{ link: "/license", nameKey: "footer.license" },
@@ -49,10 +49,10 @@ const linksRight = [
 		<SocialLink url={$socials.x} social="x" />
 	</div>
 
-	<div class="mx-auto flex flex-col items-center gap-x-10 sm:flex-row sm:items-start xl:mx-0">
-		<div class="flex flex-col items-center gap-y-2.5 sm:items-start">
+	<nav class="mx-auto flex flex-col items-center gap-8 xl:mx-0 xl:flex-row xl:items-start xl:gap-x-40">
+		<div class="flex flex-col items-center gap-y-2 xl:items-start">
 			<LanguageModal />
-			{#each linksLeft as link (link.link)}
+			{#each leftLinks as link (link.link)}
 				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href={link.link}
@@ -65,8 +65,8 @@ const linksRight = [
 				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			{/each}
 		</div>
-		<div class="mt-2.5 flex flex-col items-center gap-y-2.5 sm:mt-0 sm:items-start">
-			{#each linksRight as link (link.link)}
+		<div class="flex flex-col items-center gap-y-2 xl:items-start">
+			{#each rightLinks as link (link.link)}
 				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href={link.link}
@@ -79,5 +79,5 @@ const linksRight = [
 				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			{/each}
 		</div>
-	</div>
+	</nav>
 </footer>

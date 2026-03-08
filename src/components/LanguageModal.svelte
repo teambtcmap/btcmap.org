@@ -59,7 +59,7 @@ function handleKeydown(event: KeyboardEvent) {
 	aria-haspopup="dialog"
 	class="flex items-center text-sm text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link"
 >
-	<span class="font-bold">{$_("footer.language")}</span>
+	<span>{$_("footer.language")}</span>
 	<Icon
 		type="material"
 		icon="translate"
