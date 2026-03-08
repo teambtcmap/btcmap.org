@@ -960,7 +960,7 @@
 		},
 		"analytics": {
 			"heading": "Analytik",
-			"intro": "Wir verwenden datenschutzfreundliche Analytik von {netlifyLink} und eine selbst gehostete Instanz von {umamiLink], um Nutzungsstatistiken zu verfolgen und das Nutzererlebnis zu verbessern.",
+			"intro": "Wir verwenden datenschutzfreundliche Analytik von {netlifyLink} und eine selbst gehostete Instanz von {umamiLink}, um Nutzungsstatistiken zu verfolgen und das Nutzererlebnis zu verbessern.",
 			"noCookies": "Diese Analytik verwendet keine Cookies oder Tracker. Es werden keine personenbezogenen Daten erhoben. Alle Daten sind anonym und entsprechen der {gdprLink}.",
 			"readMore": "Unten sind einige Links, um mehr über Netlify Analytics zu lesen:"
 		},
