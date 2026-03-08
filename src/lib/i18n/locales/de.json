@@ -244,7 +244,7 @@
 		"viewOnMainMap": "Auf Hauptkarte anzeigen",
 		"noCommunity": "Dieser Ort ist nicht Teil einer Community, aber eine kann erstellt werden, um dieses lokale Gebiet zu pflegen.",
 		"created": "erstellt",
-		"loadingCommunities": "Communityen laden..."
+		"loadingCommunities": "Communities laden..."
 	},
 	"comments": {
 		"title": "Kommentare",
@@ -532,14 +532,14 @@
 	},
 	"communities": {
 		"hero": "Tritt der Bitcoin Map Community bei.",
-		"description": "Übernehme die Verantwortung für deine lokalen Bitcoin-Mapping-Daten und hilf, die Akzeptanz voranzutreiben. Bitcoin-Communityen sind der Funke, der die Bewegung entzündet. Treffe Freunde, onboarde Geschäfte und hab Spaß!",
-		"leaderboardHero": "Top Communityen",
-		"leaderboardDescription": "Bitcoin-Mapping-Communityen pflegen ihre lokalen Datensätze und streben nach den genauesten Informationen. Sie helfen auch, neue Händler in ihrer Region zu onboarden!",
+		"description": "Übernehme die Verantwortung für deine lokalen Bitcoin-Mapping-Daten und hilf, die Akzeptanz voranzutreiben. Bitcoin-Communities sind der Funke, der die Bewegung entzündet. Treffe Freunde, onboarde Geschäfte und hab Spaß!",
+		"leaderboardHero": "Top Communities",
+		"leaderboardDescription": "Bitcoin-Mapping-Communities pflegen ihre lokalen Datensätze und streben nach den genauesten Informationen. Sie helfen auch, neue Händler in ihrer Region zu onboarden!",
 		"directory": "Verzeichnis",
 		"addCommunity": "Community hinzufügen",
 		"viewMap": "Communityskarte anzeigen",
 		"leaderboard": "Rangliste",
-		"byContinent": "Communityen nach Kontinent",
+		"byContinent": "Communities nach Kontinent",
 		"totalLocations": "Gesamte Standorte",
 		"verifiedLocations": "Verifizierte Standorte"
 	},
@@ -592,7 +592,7 @@
 		"searchError": "Ortssuche fehlgeschlagen, bitte versuche es erneut oder kontaktiere BTC Map.",
 		"noLocationsWarning": "Keine Orte gefunden, bitte passe die Suche an.",
 		"locationSelectedToast": "Standort ausgewählt!",
-		"breadcrumbCommunities": "Communityen",
+		"breadcrumbCommunities": "Communities",
 		"breadcrumbAdd": "Hinzufügen"
 	},
 	"maintain": {
@@ -610,7 +610,7 @@
 		"noVerifyTickets": "Keine offenen Verifizieren-Tickets.",
 		"noCommunityTickets": "Keine offenen Communitys-Tickets.",
 		"ticketsTooltip": "Tickets von unseren Einsteiger-Formularen! Jeder kann helfen, Einreichungen auf OpenStreetMap hinzuzufügen oder zu verifizieren.",
-		"ticketsSubheading": "Tickets von unseren Einsteiger-Formularen! Jeder kann helfen, Standorteinreichungen zu verifizieren und Communityen zu prüfen.",
+		"ticketsSubheading": "Tickets von unseren Einsteiger-Formularen! Jeder kann helfen, Standorteinreichungen zu verifizieren und Communities zu prüfen.",
 		"taggingInstructionsIntro": "Weitere Informationen, wie du dich einbringen kannst, findest du in unserem",
 		"taggingInstructionsLink": "Tagging-Anleitung für Händler",
 		"underMaintenance": "Probleme werden derzeit gewartet.",
@@ -895,7 +895,7 @@
 			"activityFeed": "Aktivitäts-Feed",
 			"addCommunity": "Community hinzufügen",
 			"addLocation": "Ort hinzufügen",
-			"communities": "Communityen",
+			"communities": "Communities",
 			"countries": "Länder",
 			"downloadApps": "Apps herunterladen",
 			"earnBadges": "Abzeichen verdienen",
@@ -906,7 +906,7 @@
 			"supertaggerLeaderboard": "Supertagger-Rangliste",
 			"supertaggerProfile": "Supertagger-Profil",
 			"supportUs": "Unterstütze uns",
-			"topCommunities": "Top Communityen",
+			"topCommunities": "Top Communities",
 			"topCountries": "Top Länder",
 			"verifyLocations": "Standorte verifizieren",
 			"Igor": "Igor",
@@ -947,7 +947,7 @@
 			"item1": "Ein Issue wird automatisch in unserem selbst gehosteten {btcmapDataLink} Repo erstellt, das die Formularinformationen enthält.",
 			"item2": "Eine Nachricht wird automatisch an unser {matrixLink} gesendet.",
 			"item3": "Wenn die Einreichung gültig ist, wird sie von einem BTC Map Mitwirkenden zu {osmLink} hinzugefügt und erscheint in unseren Apps.",
-			"item4": "Einige Informationen, einschließlich Communityen, werden nicht auf OpenStreetMap gespeichert, sondern stattdessen in der BTC Map-Datenbank.",
+			"item4": "Einige Informationen, einschließlich Communities, werden nicht auf OpenStreetMap gespeichert, sondern stattdessen in der BTC Map-Datenbank.",
 			"referPolicies": "Bitte beachte die Datenschutzrichtlinien dieser Drittparteien, um zu verstehen, wie deine Informationen dort verwendet werden.",
 			"agreePublic": "Durch das Einreichen von Informationen über eines unserer Formulare erklärst du dich damit einverstanden, dass diese Informationen öffentlich verwendet werden.",
 			"doNotSubmit": "Reiche keine persönlichen oder privaten Informationen ein.",
@@ -1003,11 +1003,11 @@
 			"viewLeaderboard": "Rangliste anzeigen"
 		},
 		"communities": {
-			"heading": "Communityen",
-			"intro": "Bitcoin-Communityen helfen, die globale Akzeptanz voranzutreiben, indem sie neue Benutzer lokal onboarden!",
+			"heading": "Communities",
+			"intro": "Bitcoin-Communities helfen, die globale Akzeptanz voranzutreiben, indem sie neue Benutzer lokal onboarden!",
 			"addPrompt": "Siehst du deine Community nicht?",
 			"addLink": "Füge sie zu BTC Map hinzu",
-			"seeAll": "Alle Communityen anzeigen"
+			"seeAll": "Alle Communities anzeigen"
 		},
 		"integrations": {
 			"heading": "Integrationen",
