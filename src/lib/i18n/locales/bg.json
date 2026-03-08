@@ -305,9 +305,6 @@
 	"footer": {
 		"language": "Език",
 		"selectLanguage": "Изберете език",
-		"switchToEnglish": "Преминаване към английски",
-		"switchToPortuguese": "Преминаване към португалски",
-		"switchToBulgarian": "Преминаване към български",
 		"aboutUs": "За нас",
 		"analytics": "Анализи",
 		"bitcoinForBusiness": "₿ за бизнеса",

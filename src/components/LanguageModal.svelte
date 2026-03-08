@@ -42,6 +42,8 @@ function handleKeydown(event: KeyboardEvent) {
 	type="button"
 	on:click={() => (show = true)}
 	aria-label={$_("footer.language")}
+	aria-expanded={show}
+	aria-haspopup="dialog"
 	class="flex items-center text-sm text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link"
 >
 	<span class="font-bold">{$_("footer.language")}</span>
@@ -58,10 +60,13 @@ function handleKeydown(event: KeyboardEvent) {
 	<OutClick on:outclick={handleOutClick}>
 		<div
 			transition:fly={{ y: 200, duration: 300 }}
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="language-modal-title"
 			class="z-[2000] flex flex-col overflow-auto border border-gray-300 bg-white p-6 shadow-2xl fixed inset-0 w-full h-full dark:border-white/95 dark:bg-dark md:inset-auto md:top-1/2 md:left-1/2 md:w-80 md:max-h-[90vh] md:h-auto md:rounded-xl md:translate-x-[-50%] md:translate-y-[-50%]"
 		>
 			<div class="mb-4 flex items-center justify-between">
-				<h2 class="text-lg font-semibold text-primary dark:text-white">
+				<h2 id="language-modal-title" class="text-lg font-semibold text-primary dark:text-white">
 					{$_("footer.selectLanguage")}
 				</h2>
 				<CloseButton on:click={() => (show = false)} />

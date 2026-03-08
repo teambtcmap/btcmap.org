@@ -55,7 +55,7 @@ const links = [
 				href={link.link}
 				target={link.external ? '_blank' : null}
 				rel={link.external ? 'noopener noreferrer' : null}
-				class="mx-1.5 mb-2.5 text-sm text-link transition-colors hover:text-hover xl:mb-0 dark:text-white/50 dark:hover:text-link"
+				class="mx-1.5 mb-2.5 text-sm text-link transition-colors last:mb-0 hover:text-hover xl:mb-0 dark:text-white/50 dark:hover:text-link"
 			>
 				{$_(link.nameKey)}
 			</a>

@@ -307,9 +307,6 @@
 	"footer": {
 		"language": "Language",
 		"selectLanguage": "Select language",
-		"switchToEnglish": "Switch to English",
-		"switchToPortuguese": "Switch to Portuguese",
-		"switchToBulgarian": "Switch to Bulgarian",
 		"aboutUs": "About Us",
 		"media": "Media",
 		"license": "License",
