@@ -45,23 +45,19 @@ const links = [
 		<SocialLink url={$socials.x} social="x" />
 	</div>
 
-	<div class="flex flex-col items-center xl:items-end">
-		<div class="mb-4">
-			<LanguageModal />
-		</div>
-		<div class="grid grid-cols-2 gap-x-10 gap-y-2.5">
-			{#each links as link (link.link)}
-				<!-- eslint-disable svelte/no-navigation-without-resolve -->
-				<a
-					href={link.link}
-					target={link.external ? '_blank' : null}
-					rel={link.external ? 'noopener noreferrer' : null}
-					class="text-sm text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link"
-				>
-					{$_(link.nameKey)}
-				</a>
-				<!-- eslint-enable svelte/no-navigation-without-resolve -->
-			{/each}
-		</div>
+	<div class="mx-auto grid grid-cols-2 gap-x-10 gap-y-2.5 xl:mx-0">
+		<LanguageModal />
+		{#each links as link (link.link)}
+			<!-- eslint-disable svelte/no-navigation-without-resolve -->
+			<a
+				href={link.link}
+				target={link.external ? '_blank' : null}
+				rel={link.external ? 'noopener noreferrer' : null}
+				class="text-sm text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link"
+			>
+				{$_(link.nameKey)}
+			</a>
+			<!-- eslint-enable svelte/no-navigation-without-resolve -->
+		{/each}
 	</div>
 </footer>
