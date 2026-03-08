@@ -41,7 +41,6 @@ function handleKeydown(event: KeyboardEvent) {
 <button
 	type="button"
 	on:click={() => (show = true)}
-	aria-label={$_("footer.language")}
 	aria-expanded={show}
 	aria-haspopup="dialog"
 	class="flex items-center text-sm text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link"
