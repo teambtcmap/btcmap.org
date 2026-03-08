@@ -1016,7 +1016,7 @@
 		"integrations": {
 			"heading": "Integrationen",
 			"communityLabel": "Communitys-Integrationen",
-			"communitieSub": "Projekte, die BTC Map verwenden",
+			"communitySub": "Projekte, die BTC Map verwenden",
 			"projectLabel": "Projekt-Integrationen",
 			"projectSub": "BTC Map verwendet diese Projekte",
 			"reachOut": "Wenn du daran interessiert bist, mit uns zu integrieren, bitte",
