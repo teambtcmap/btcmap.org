@@ -46,10 +46,10 @@ const links = [
 	</div>
 
 	<div class="flex flex-col items-center xl:items-end">
-		<div class="mb-2">
+		<div class="mb-4">
 			<LanguageModal />
 		</div>
-		<div class="grid grid-cols-2 gap-x-6 gap-y-1.5">
+		<div class="grid grid-cols-2 gap-x-10 gap-y-2.5">
 			{#each links as link (link.link)}
 				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
