@@ -309,6 +309,7 @@
 	"footer": {
 		"language": "Език",
 		"selectLanguage": "Изберете език",
+		"nav": "Навигация в долния колонтитул",
 		"aboutUs": "За нас",
 		"analytics": "Анализи",
 		"bitcoinForBusiness": "₿ за бизнеса",

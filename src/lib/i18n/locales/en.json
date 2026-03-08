@@ -311,6 +311,7 @@
 	"footer": {
 		"language": "Language",
 		"selectLanguage": "Select language",
+		"nav": "Footer navigation",
 		"aboutUs": "About Us",
 		"media": "Media",
 		"license": "License",

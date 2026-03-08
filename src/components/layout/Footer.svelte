@@ -49,7 +49,7 @@ const rightLinks = [
 		<SocialLink url={$socials.x} social="x" />
 	</div>
 
-	<nav class="mx-auto flex flex-col items-center gap-8 xl:mx-0 xl:flex-row xl:items-start xl:gap-x-40">
+	<nav aria-label={$_("footer.nav")} class="mx-auto flex flex-col items-center gap-8 xl:mx-0 xl:flex-row xl:items-start xl:gap-x-40">
 		<div class="flex flex-col items-center gap-y-2 xl:items-start">
 			<LanguageModal />
 			{#each leftLinks as link (link.link)}
