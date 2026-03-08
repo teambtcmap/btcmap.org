@@ -1,5 +1,4 @@
 <script lang="ts">
-import Icon from "$components/Icon.svelte";
 import LanguageModal from "$components/LanguageModal.svelte";
 import SocialLink from "$components/SocialLink.svelte";
 import { _ } from "$lib/i18n";

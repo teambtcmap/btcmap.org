@@ -16,15 +16,17 @@ const languages = [
 ];
 
 let show = false;
+let hasBeenOpened = false;
 let triggerEl: HTMLButtonElement;
 let modalEl: HTMLDivElement;
 
-// Focus first button in modal when opened, restore to trigger when closed
+// Focus first language button in modal when opened, restore to trigger when closed
 $: if (show) {
+	hasBeenOpened = true;
 	tick().then(() => {
-		modalEl?.querySelector<HTMLElement>("button")?.focus();
+		modalEl?.querySelector<HTMLElement>(".space-y-2 button")?.focus();
 	});
-} else {
+} else if (hasBeenOpened) {
 	tick().then(() => {
 		triggerEl?.focus();
 	});
