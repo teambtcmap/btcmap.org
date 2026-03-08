@@ -6,15 +6,12 @@ import { socials } from "$lib/store";
 
 import { env } from "$env/dynamic/public";
 
-// Links with translation keys (translations are applied in template using $_())
-const links = [
-	{ link: "/about-us", nameKey: "footer.aboutUs" },
-	{ link: "/media", nameKey: "footer.media" },
-	{ link: "/license", nameKey: "footer.license" },
-	{ link: "/privacy-policy", nameKey: "footer.privacy" },
+// Left column: user-facing resources
+const linksLeft = [
+	{ link: "/bitcoin.pdf", nameKey: "footer.whitePaper" },
 	{
-		link: "https://stats.uptimerobot.com/7kgEVtzlV1",
-		nameKey: "footer.status",
+		link: "https://bitcoin.rocks/business/",
+		nameKey: "footer.bitcoinForBusiness",
 		external: true,
 	},
 	...(env.PUBLIC_UMAMI_URL
@@ -26,17 +23,24 @@ const links = [
 				},
 			]
 		: []),
+	{ link: "/cypherpunks-manifesto.pdf", nameKey: "footer.cypherpunks" },
+];
+
+// Right column: company & legal
+const linksRight = [
+	{ link: "/about-us", nameKey: "footer.aboutUs" },
+	{ link: "/media", nameKey: "footer.media" },
+	{ link: "/license", nameKey: "footer.license" },
+	{ link: "/privacy-policy", nameKey: "footer.privacy" },
 	{
-		link: "https://bitcoin.rocks/business/",
-		nameKey: "footer.bitcoinForBusiness",
+		link: "https://stats.uptimerobot.com/7kgEVtzlV1",
+		nameKey: "footer.status",
 		external: true,
 	},
-	{ link: "/bitcoin.pdf", nameKey: "footer.whitePaper" },
-	{ link: "/cypherpunks-manifesto.pdf", nameKey: "footer.cypherpunks" },
 ];
 </script>
 
-<footer class="w-full items-center justify-between space-y-5 pb-5 xl:flex xl:space-y-0">
+<footer class="mx-auto w-full max-w-6xl items-center justify-between space-y-5 pb-5 xl:flex xl:space-y-0">
 	<div class="flex flex-wrap justify-center gap-5 xl:block xl:space-x-5">
 		<SocialLink url={$socials.matrix} social="matrix" />
 		<SocialLink url={$socials.github} social="github" />
@@ -45,19 +49,35 @@ const links = [
 		<SocialLink url={$socials.x} social="x" />
 	</div>
 
-	<div class="mx-auto grid grid-cols-2 gap-x-10 gap-y-2.5 xl:mx-0">
-		<LanguageModal />
-		{#each links as link (link.link)}
-			<!-- eslint-disable svelte/no-navigation-without-resolve -->
-			<a
-				href={link.link}
-				target={link.external ? '_blank' : null}
-				rel={link.external ? 'noopener noreferrer' : null}
-				class="text-sm text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link"
-			>
-				{$_(link.nameKey)}
-			</a>
-			<!-- eslint-enable svelte/no-navigation-without-resolve -->
-		{/each}
+	<div class="mx-auto flex flex-col items-center gap-x-10 sm:flex-row sm:items-start xl:mx-0">
+		<div class="flex flex-col items-center gap-y-2.5 sm:items-start">
+			<LanguageModal />
+			{#each linksLeft as link (link.link)}
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
+				<a
+					href={link.link}
+					target={link.external ? '_blank' : null}
+					rel={link.external ? 'noopener noreferrer' : null}
+					class="text-sm text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link"
+				>
+					{$_(link.nameKey)}
+				</a>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
+			{/each}
+		</div>
+		<div class="mt-2.5 flex flex-col items-center gap-y-2.5 sm:mt-0 sm:items-start">
+			{#each linksRight as link (link.link)}
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
+				<a
+					href={link.link}
+					target={link.external ? '_blank' : null}
+					rel={link.external ? 'noopener noreferrer' : null}
+					class="text-sm text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link"
+				>
+					{$_(link.nameKey)}
+				</a>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
+			{/each}
+		</div>
 	</div>
 </footer>
