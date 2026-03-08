@@ -28,13 +28,6 @@ function switchLanguage(newLocale: string) {
 function handleOutClick() {
 	show = false;
 }
-
-function getCurrentLanguageShort(
-	currentLocale: string | null | undefined,
-): string {
-	const lang = languages.find((l) => l.code === currentLocale);
-	return lang?.short ?? "EN";
-}
 </script>
 
 <button
@@ -43,14 +36,14 @@ function getCurrentLanguageShort(
 	aria-label={$_("footer.language")}
 	class="flex items-center text-sm text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link"
 >
+	<span class="font-bold">{$_("footer.language")}</span>
 	<Icon
 		type="material"
 		icon="translate"
 		w="16"
 		h="16"
-		class="mr-1 inline-block align-text-bottom text-link dark:text-white/50"
+		class="ml-1 inline-block align-text-bottom text-link dark:text-white/50"
 	/>
-	<span class="font-bold">{getCurrentLanguageShort($locale)}</span>
 </button>
 
 {#if show}
