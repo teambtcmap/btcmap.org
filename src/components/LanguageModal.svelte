@@ -1,4 +1,5 @@
 <script lang="ts">
+import { tick } from "svelte";
 import { fly } from "svelte/transition";
 import OutClick from "svelte-outclick";
 
@@ -15,6 +16,19 @@ const languages = [
 ];
 
 let show = false;
+let triggerEl: HTMLButtonElement;
+let modalEl: HTMLDivElement;
+
+// Focus first button in modal when opened, restore to trigger when closed
+$: if (show) {
+	tick().then(() => {
+		modalEl?.querySelector<HTMLElement>("button")?.focus();
+	});
+} else {
+	tick().then(() => {
+		triggerEl?.focus();
+	});
+}
 
 function switchLanguage(newLocale: string) {
 	trackEvent("language_switch", { language: newLocale });
@@ -22,10 +36,6 @@ function switchLanguage(newLocale: string) {
 	if (typeof window !== "undefined") {
 		localStorage.setItem("language", newLocale);
 	}
-	show = false;
-}
-
-function handleOutClick() {
 	show = false;
 }
 
@@ -39,8 +49,9 @@ function handleKeydown(event: KeyboardEvent) {
 <svelte:window on:keydown={handleKeydown} />
 
 <button
+	bind:this={triggerEl}
 	type="button"
-	on:click={() => (show = true)}
+	on:click={() => (show = !show)}
 	aria-expanded={show}
 	aria-haspopup="dialog"
 	class="flex items-center text-sm text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link"
@@ -56,8 +67,9 @@ function handleKeydown(event: KeyboardEvent) {
 </button>
 
 {#if show}
-	<OutClick on:outclick={handleOutClick}>
+	<OutClick excludeElements={[triggerEl]} on:outclick={() => (show = false)}>
 		<div
+			bind:this={modalEl}
 			transition:fly={{ y: 200, duration: 300 }}
 			role="dialog"
 			aria-modal="true"
