@@ -28,7 +28,15 @@ function switchLanguage(newLocale: string) {
 function handleOutClick() {
 	show = false;
 }
+
+function handleKeydown(event: KeyboardEvent) {
+	if (event.key === "Escape" && show) {
+		show = false;
+	}
+}
 </script>
+
+<svelte:window on:keydown={handleKeydown} />
 
 <button
 	type="button"
