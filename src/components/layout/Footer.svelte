@@ -45,20 +45,23 @@ const links = [
 		<SocialLink url={$socials.x} social="x" />
 	</div>
 
-	<div class="flex flex-wrap justify-center gap-x-3 xl:flex xl:space-x-5">
-		<span class="mx-1.5"><LanguageModal /></span>
-
-		{#each links as link (link.link)}
-			<!-- eslint-disable svelte/no-navigation-without-resolve -->
-			<a
-				href={link.link}
-				target={link.external ? '_blank' : null}
-				rel={link.external ? 'noopener noreferrer' : null}
-				class="mx-1.5 mb-2.5 text-sm text-link transition-colors last:mb-0 hover:text-hover xl:mb-0 dark:text-white/50 dark:hover:text-link"
-			>
-				{$_(link.nameKey)}
-			</a>
-			<!-- eslint-enable svelte/no-navigation-without-resolve -->
-		{/each}
+	<div class="flex flex-col items-center xl:items-end">
+		<div class="mb-2">
+			<LanguageModal />
+		</div>
+		<div class="grid grid-cols-2 gap-x-6 gap-y-1.5">
+			{#each links as link (link.link)}
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
+				<a
+					href={link.link}
+					target={link.external ? '_blank' : null}
+					rel={link.external ? 'noopener noreferrer' : null}
+					class="text-sm text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link"
+				>
+					{$_(link.nameKey)}
+				</a>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
+			{/each}
+		</div>
 	</div>
 </footer>
