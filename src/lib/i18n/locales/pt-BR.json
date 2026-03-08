@@ -292,6 +292,10 @@
 		"selectCategory": "Selecionar categoria",
 		"searchInput": "Pesquisar comerciantes Bitcoin"
 	},
+	"theme": {
+		"switchToLightMode": "Mudar para modo claro",
+		"switchToDarkMode": "Mudar para modo escuro"
+	},
 	"footer": {
 		"language": "Idioma",
 		"selectLanguage": "Selecionar idioma",

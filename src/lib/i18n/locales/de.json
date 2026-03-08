@@ -304,6 +304,10 @@
 		"selectCategory": "Kategorie auswählen",
 		"searchInput": "Suche nach Bitcoin-Händlern"
 	},
+	"theme": {
+		"switchToLightMode": "Zum hellen Modus wechseln",
+		"switchToDarkMode": "Zum dunklen Modus wechseln"
+	},
 	"footer": {
 		"language": "Sprache",
 		"selectLanguage": "Sprache auswählen",
