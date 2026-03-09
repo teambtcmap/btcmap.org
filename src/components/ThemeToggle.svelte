@@ -1,11 +1,12 @@
 <script lang="ts">
+import { _ } from "$lib/i18n";
 import { theme } from "$lib/theme";
 </script>
 
 <button
 	on:click={() => theme.toggle()}
-	aria-label={$theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-	title={$theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+	aria-label={$theme === 'dark' ? $_('theme.switchToLightMode') : $_('theme.switchToDarkMode')}
+	title={$theme === 'dark' ? $_('theme.switchToLightMode') : $_('theme.switchToDarkMode')}
 	class="h-10 w-10 text-link transition-colors hover:text-hover dark:text-white dark:hover:text-link"
 >
 	{#if $theme === 'dark'}

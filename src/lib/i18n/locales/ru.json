@@ -304,9 +304,14 @@
 		"selectCategory": "Выберите категорию",
 		"searchInput": "Поиск биткоин мест"
 	},
+	"theme": {
+		"switchToLightMode": "Переключиться на светлую тему",
+		"switchToDarkMode": "Переключиться на темную тему"
+	},
 	"footer": {
 		"language": "Язык",
 		"selectLanguage": "Выберите язык",
+		"nav": "Навигация в нижнем колонтитуле",
 		"aboutUs": "О нас",
 		"media": "Медиа",
 		"license": "Лицензия",

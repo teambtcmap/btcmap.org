@@ -100,6 +100,10 @@
 		"switchMode": "Превключи режим на търсене",
 		"togglePanel": "Превключи панела със списъка"
 	},
+	"theme": {
+		"switchToLightMode": "Превключи към светла тема",
+		"switchToDarkMode": "Превключи към тъмна тема"
+	},
 	"boost": {
 		"boostAction": "Подсили",
 		"boosted": "Подсилено",
@@ -305,6 +309,7 @@
 	"footer": {
 		"language": "Език",
 		"selectLanguage": "Изберете език",
+		"nav": "Навигация в долния колонтитул",
 		"aboutUs": "За нас",
 		"analytics": "Анализи",
 		"bitcoinForBusiness": "₿ за бизнеса",

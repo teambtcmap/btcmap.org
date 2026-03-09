@@ -304,9 +304,14 @@
 		"selectCategory": "Select category",
 		"searchInput": "Search for Bitcoin merchants"
 	},
+	"theme": {
+		"switchToLightMode": "Switch to light mode",
+		"switchToDarkMode": "Switch to dark mode"
+	},
 	"footer": {
 		"language": "Language",
 		"selectLanguage": "Select language",
+		"nav": "Footer navigation",
 		"aboutUs": "About Us",
 		"media": "Media",
 		"license": "License",

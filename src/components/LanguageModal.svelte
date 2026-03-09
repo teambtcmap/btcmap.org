@@ -10,6 +10,7 @@ import { _, locale } from "$lib/i18n";
 
 const languages = [
 	{ code: "en", name: "English", short: "EN" },
+	{ code: "de", name: "Deutsch", short: "DE" },
 	{ code: "pt-BR", name: "Português (Brasil)", short: "PT" },
 	{ code: "bg", name: "Български", short: "BG" },
 	{ code: "ru", name: "Русский", short: "RU" },
@@ -58,7 +59,7 @@ function handleKeydown(event: KeyboardEvent) {
 	aria-haspopup="dialog"
 	class="flex items-center text-sm text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link"
 >
-	<span class="font-bold">{$_("footer.language")}</span>
+	<span>{$_("footer.language")}</span>
 	<Icon
 		type="material"
 		icon="translate"
