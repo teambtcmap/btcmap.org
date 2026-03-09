@@ -1,29 +1,17 @@
 <script lang="ts">
-import Icon from "$components/Icon.svelte";
+import LanguageModal from "$components/LanguageModal.svelte";
 import SocialLink from "$components/SocialLink.svelte";
-import { trackEvent } from "$lib/analytics";
-import { _, locale } from "$lib/i18n";
+import { _ } from "$lib/i18n";
 import { socials } from "$lib/store";
 
 import { env } from "$env/dynamic/public";
 
-function switchLanguage(newLocale: string) {
-	trackEvent("language_switch", { language: newLocale });
-	locale.set(newLocale);
-	if (typeof window !== "undefined") {
-		localStorage.setItem("language", newLocale);
-	}
-}
-
-// Links with translation keys (translations are applied in template using $_())
-const links = [
-	{ link: "/about-us", nameKey: "footer.aboutUs" },
-	{ link: "/media", nameKey: "footer.media" },
-	{ link: "/license", nameKey: "footer.license" },
-	{ link: "/privacy-policy", nameKey: "footer.privacy" },
+// Left column: user-facing resources
+const leftLinks = [
+	{ link: "/bitcoin.pdf", nameKey: "footer.whitePaper" },
 	{
-		link: "https://stats.uptimerobot.com/7kgEVtzlV1",
-		nameKey: "footer.status",
+		link: "https://bitcoin.rocks/business/",
+		nameKey: "footer.bitcoinForBusiness",
 		external: true,
 	},
 	...(env.PUBLIC_UMAMI_URL
@@ -35,17 +23,24 @@ const links = [
 				},
 			]
 		: []),
+	{ link: "/cypherpunks-manifesto.pdf", nameKey: "footer.cypherpunks" },
+];
+
+// Right column: company & legal
+const rightLinks = [
+	{ link: "/about-us", nameKey: "footer.aboutUs" },
+	{ link: "/media", nameKey: "footer.media" },
+	{ link: "/license", nameKey: "footer.license" },
+	{ link: "/privacy-policy", nameKey: "footer.privacy" },
 	{
-		link: "https://bitcoin.rocks/business/",
-		nameKey: "footer.bitcoinForBusiness",
+		link: "https://stats.uptimerobot.com/7kgEVtzlV1",
+		nameKey: "footer.status",
 		external: true,
 	},
-	{ link: "/bitcoin.pdf", nameKey: "footer.whitePaper" },
-	{ link: "/cypherpunks-manifesto.pdf", nameKey: "footer.cypherpunks" },
 ];
 </script>
 
-<footer class="w-full items-center justify-between space-y-5 pb-5 xl:flex xl:space-y-0">
+<footer class="mx-auto w-full max-w-6xl items-center justify-between space-y-5 pb-5 xl:flex xl:items-start xl:space-y-0">
 	<div class="flex flex-wrap justify-center gap-5 xl:block xl:space-x-5">
 		<SocialLink url={$socials.matrix} social="matrix" />
 		<SocialLink url={$socials.github} social="github" />
@@ -54,84 +49,35 @@ const links = [
 		<SocialLink url={$socials.x} social="x" />
 	</div>
 
-	<div class="flex flex-wrap justify-center xl:block">
-		<!-- Language Selector -->
-		<span class="mx-1.5 mb-2.5 text-sm xl:mb-0">
-			<Icon
-				type="material"
-				icon="translate"
-				w="16"
-				h="16"
-				class="inline-block align-text-bottom text-link dark:text-white/50"
-			/>
-			<button
-				type="button"
-				on:click={() => switchLanguage('en')}
-				disabled={$locale === 'en'}
-				aria-label={$_('footer.switchToEnglish')}
-				class="
-					{$locale === 'en'
-					? 'cursor-default font-bold text-body underline dark:text-white/50'
-					: 'text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link'}
-				"
-			>
-				EN
-			</button>
-			<span class="text-body dark:text-white/50"> / </span>
-			<button
-				type="button"
-				on:click={() => switchLanguage('pt-BR')}
-				disabled={$locale === 'pt-BR'}
-				aria-label={$_('footer.switchToPortuguese')}
-				class="
-					{$locale === 'pt-BR'
-					? 'cursor-default font-bold text-body underline dark:text-white/50'
-					: 'text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link'}
-				"
-			>
-				PT
-			</button>
-			<span class="text-body dark:text-white/50"> / </span>
-			<button
-				type="button"
-				on:click={() => switchLanguage('bg')}
-				disabled={$locale === 'bg'}
-				aria-label={$_('footer.switchToBulgarian')}
-				class="
-					{$locale === 'bg'
-					? 'cursor-default font-bold text-body underline dark:text-white/50'
-					: 'text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link'}
-				"
-			>
-				BG
-			</button>
-			<span class="text-body dark:text-white/50"> / </span>
-			<button
-				type="button"
-				on:click={() => switchLanguage('ru')}
-				disabled={$locale === 'ru'}
-				aria-label={$_('footer.switchToRussian')}
-				class="
-					{$locale === 'ru'
-					? 'cursor-default font-bold text-body underline dark:text-white/50'
-					: 'text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link'}
-				"
-			>
-				RU
-			</button>
-		</span>
-
-		{#each links as link (link.link)}
-			<!-- eslint-disable svelte/no-navigation-without-resolve -->
-			<a
-				href={link.link}
-				target={link.external ? '_blank' : null}
-				rel={link.external ? 'noopener noreferrer' : null}
-				class="mx-1.5 mb-2.5 text-sm text-link transition-colors last:mb-0 hover:text-hover xl:mb-0 dark:text-white/50 dark:hover:text-link"
-			>
-				{$_(link.nameKey)}
-			</a>
-			<!-- eslint-enable svelte/no-navigation-without-resolve -->
-		{/each}
-	</div>
+	<nav aria-label={$_("footer.nav")} class="mx-auto flex flex-col items-center gap-8 xl:mx-0 xl:flex-row xl:items-start xl:gap-x-40">
+		<div class="flex flex-col items-center gap-y-2 xl:items-start">
+			<LanguageModal />
+			{#each leftLinks as link (link.link)}
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
+				<a
+					href={link.link}
+					target={link.external ? '_blank' : null}
+					rel={link.external ? 'noopener noreferrer' : null}
+					class="text-sm text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link"
+				>
+					{$_(link.nameKey)}
+				</a>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
+			{/each}
+		</div>
+		<div class="flex flex-col items-center gap-y-2 xl:items-start">
+			{#each rightLinks as link (link.link)}
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
+				<a
+					href={link.link}
+					target={link.external ? '_blank' : null}
+					rel={link.external ? 'noopener noreferrer' : null}
+					class="text-sm text-link transition-colors hover:text-hover dark:text-white/50 dark:hover:text-link"
+				>
+					{$_(link.nameKey)}
+				</a>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
+			{/each}
+		</div>
+	</nav>
 </footer>

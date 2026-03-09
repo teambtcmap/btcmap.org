@@ -66,8 +66,9 @@ test.describe('Countries', () => {
 		const englishName = (await southAfricaCard.textContent()) ?? '';
 		expect(englishName.length).toBeGreaterThan(0);
 
-		// Click PT language button
-		const ptButton = page.getByRole('button', { name: /Switch to Portuguese|Mudar para Português/i });
+		// Open language modal then click PT
+		await page.getByRole('button', { name: /^Language$/i }).click();
+		const ptButton = page.getByRole('button', { name: /Português/i });
 		await ptButton.click();
 
 		// Wait until South Africa card text changes from English to Portuguese

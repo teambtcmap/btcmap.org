@@ -2,17 +2,25 @@ import { _, init, locale, register } from "svelte-i18n";
 
 // Register locales with lazy loading
 register("en", () => import("./locales/en.json"));
+register("de", () => import("./locales/de.json"));
 register("pt-BR", () => import("./locales/pt-BR.json"));
 register("bg", () => import("./locales/bg.json"));
 register("ru", () => import("./locales/ru.json"));
 
-export const SUPPORTED_LOCALES = ["en", "pt-BR", "bg", "ru"] as const;
+export const SUPPORTED_LOCALES = ["en", "de", "pt-BR", "bg", "ru"] as const;
 
 export function isSupportedLocale(
 	lang: string,
 ): lang is (typeof SUPPORTED_LOCALES)[number] {
 	return (SUPPORTED_LOCALES as readonly string[]).includes(lang);
 }
+
+const BROWSER_LOCALE_MAP: Record<string, string> = {
+	de: "de",
+	bg: "bg",
+	pt: "pt-BR",
+	ru: "ru",
+};
 
 // Smart locale detection (mirrors theme detection pattern)
 function getInitialLocale(): string {
@@ -25,9 +33,10 @@ function getInitialLocale(): string {
 
 		// 2. Check browser language (like theme checks system preference)
 		const browserLang = navigator.language || navigator.languages?.[0];
-		if (browserLang?.startsWith("bg")) return "bg";
-		if (browserLang?.startsWith("pt")) return "pt-BR";
-		if (browserLang?.startsWith("ru")) return "ru";
+		const prefix = browserLang?.split("-")[0];
+		if (prefix && prefix in BROWSER_LOCALE_MAP) {
+			return BROWSER_LOCALE_MAP[prefix];
+		}
 	}
 
 	// 3. Default fallback
