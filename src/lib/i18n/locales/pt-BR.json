@@ -829,7 +829,11 @@
 		"subheading": "Temos você coberto em qualquer dispositivo e sistema operacional que escolher.",
 		"googlePlayNote": "Nota: Não há opção do Google Play devido aos requisitos excessivos de KYC para desenvolvedores.",
 		"official": "Oficial",
-		"community": "Comunidade"
+		"community": "Comunidade",
+		"pwa": "Progressive Web App",
+		"fdroid": "FOSS App Store",
+		"directandroid": "Direct Download",
+		"ios": "Walled Garden Option"
 	},
 	"media": {
 		"title": "Mídia",

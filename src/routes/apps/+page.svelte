@@ -44,7 +44,7 @@ const communityApps: {
 	{/if}
 
 	<h2 class="mx-auto w-full text-xl font-semibold text-primary lg:w-[800px] dark:text-white">
-		We have you covered on whatever device and OS you choose.
+		{$_('apps.subheading')}
 	</h2>
 
 	<h3 class="text-2xl font-semibold text-primary md:text-left dark:text-white">{$_('apps.official')}</h3>
