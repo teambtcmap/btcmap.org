@@ -1025,17 +1025,6 @@
 			"supporter": "Supporter",
 			"more": "More!"
 		},
-		"contributors": {
-			"heading": "Contributors",
-			"intro": "Anybody can contribute to BTC Map in many different ways. If you would like to get involved please don't hesitate and come join the fun!"
-		},
-		"coreTeam": {
-			"heading": "Core Team",
-			"igorBio": "Igor is a long time bitcoiner, mapper, and digital nomad living abroad. He created BTC Map as an Android application and the project has since gained worldwide momentum from there. He now also maintains all of the backend infrastructure for the project.",
-			"nathanBio": "Nathan is a tech entrepreneur turned pleb-at-large. He brought the core team together to accelerate app development. Having built, sold, invested in and advised tech businesses over the years, he is now focused on bitcoin, building BTCMap.org, gamertron.net, and delivering bitcoin education for kids.",
-			"secondl1ghtBio": "A self-taught Web Developer, secondl1ght dove head first down the bitcoin rabbit hole and left his fiat career to focus on bitcoin development full-time. He created and maintains the BTC Map web application, as well as an encrypted messaging app called Cipherchat, and works on lightning network tools at Amboss Technologies.",
-			"karnageBio": "Karnage is the lead designer on the web app and created the BTC Map brand. He has contributed to many high profile bitcoin open-source projects. His mission is to help startup founders succeed and creates products to achieve this goal. Pixel-perfect product design every time. Get it shipped."
-		},
 		"avatarAlt": "avatar"
 	}
 }
