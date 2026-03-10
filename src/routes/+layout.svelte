@@ -45,6 +45,7 @@ $: if (browser && $locale) {
 }
 
 axios.defaults.timeout = 600000;
+axios.defaults.headers.common["User-Agent"] = "btcmap.org";
 
 const options = {
 	reversed: true,
