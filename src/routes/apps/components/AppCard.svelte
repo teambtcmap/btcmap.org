@@ -1,4 +1,5 @@
 <script lang="ts">
+import { _ } from "$lib/i18n";
 import IconApps from "$lib/icons/IconApps.svelte";
 import type { AppIconName } from "$lib/icons/types";
 
@@ -24,7 +25,7 @@ export let link: string;
 				<IconApps w="112" h="112" icon={image} />
 			</div>
 			<p>{text}</p>
-			<p class="text-xl font-normal">{desc}</p>
+			<p class="text-xl font-normal">{$_(desc)}</p>
 		</a>
 	{:else}
 		<div

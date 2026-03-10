@@ -881,7 +881,11 @@
 		"subheading": "We have you covered on whatever device and OS you choose.",
 		"googlePlayNote": "Note: There is no Google Play option due to their excessive KYC requirements for developers.",
 		"official": "Official",
-		"community": "Community"
+		"community": "Community",
+		"pwa": "Progressive Web App",
+		"fdroid": "FOSS App Store",
+		"directandroid": "Direct Download",
+		"ios": "Walled Garden Option"
 	},
 	"media": {
 		"title": "Media",

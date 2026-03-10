@@ -755,7 +755,11 @@
 		"subheading": "Покрити сте на всяко устройство и ОС.",
 		"googlePlayNote": "Забележка: Няма опция за Google Play поради изискванията им за KYC за разработчици.",
 		"official": "Официални",
-		"community": "Общност"
+		"community": "Общност",
+		"pwa": "Progressive Web App",
+		"fdroid": "FOSS App Store",
+		"directandroid": "Direct Download",
+		"ios": "Walled Garden Option"
 	},
 	"gradeDisplay": {
 		"ariaLabel": "{grade} от 5 звезди",

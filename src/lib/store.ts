@@ -29,25 +29,25 @@ export const apps = readable<
 		link: "/map",
 		type: "Web",
 		icon: "web",
-		desc: "Progressive Web App",
+		desc: "apps.pwa",
 	},
 	{
 		link: "https://f-droid.org/en/packages/org.btcmap/",
 		type: "F-Droid",
 		icon: "f-droid",
-		desc: "FOSS App Store",
+		desc: "apps.fdroid",
 	},
 	{
 		link: "https://github.com/teambtcmap/btcmap-android/releases/latest",
 		type: "APK",
 		icon: "android",
-		desc: "Direct Download",
+		desc: "apps.directandroid",
 	},
 	{
 		link: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
 		type: "iOS",
 		icon: "ios",
-		desc: "Walled Garden Option",
+		desc: "apps.ios",
 	},
 ]);
 
