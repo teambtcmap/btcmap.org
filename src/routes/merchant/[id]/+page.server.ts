@@ -92,6 +92,7 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 		return {
 			id: placeData.id.toString(),
 			name: placeData.name,
+			localizedName: placeData.localized_name,
 			lat,
 			lon,
 			comments,

@@ -12,6 +12,7 @@ export const PLACE_FIELDS = {
 	SYNC: ["deleted_at", "updated_at"] as const satisfies (keyof Place)[],
 	POPUP: [
 		"name",
+		"localized_name",
 		"address",
 		"description",
 		"phone",

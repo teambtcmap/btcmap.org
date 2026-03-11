@@ -137,7 +137,6 @@ let merchantEvents: MerchantActivityEvent[] = [];
 let name: string | undefined;
 
 let localizedName: string | undefined;
-let nameRequestId = 0;
 
 // Returns the best language code to use for the API request.
 // Uses the app locale when non-English (e.g. pt-BR, bg).
@@ -154,36 +153,8 @@ function getApiLang(appLocale: string): string | null {
 }
 
 $: if (browser) {
-	const requestId = ++nameRequestId;
-	localizedName = undefined;
-	const lang = getApiLang($locale ?? "en");
-	if (lang && data.id) {
-		fetchLocalizedName(data.id, data.name, lang, requestId);
-	}
-}
-
-async function fetchLocalizedName(
-	placeId: string,
-	defaultName: string | undefined,
-	lang: string,
-	requestId: number,
-) {
-	try {
-		const response = await fetch(
-			`https://api.btcmap.org/v4/places/${placeId}?fields=name&lang=${encodeURIComponent(lang)}`,
-		);
-		if (!response.ok) return;
-		const result = (await response.json()) as { name?: string };
-		if (
-			requestId === nameRequestId &&
-			result.name &&
-			result.name !== defaultName
-		) {
-			localizedName = result.name;
-		}
-	} catch {
-		// Silent fallback to default name
-	}
+	const lang = (getApiLang($locale ?? "en") ?? "en")?.substring?.(0, 2) || "en";
+	localizedName = data.localizedName?.[lang];
 }
 
 $: icon = data.icon;
