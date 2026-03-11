@@ -250,6 +250,25 @@ const getChartHistoryDate = () => {
 	}
 };
 
+function localizedName(entry: ChartHistory): string {
+	switch (entry) {
+		case "7D":
+			return $_("dashboard.period7d");
+		case "1M":
+			return $_("dashboard.period1m");
+		case "3M":
+			return $_("dashboard.period3m");
+		case "6M":
+			return $_("dashboard.period6m");
+		case "YTD":
+			return $_("dashboard.periodYtd");
+		case "1Y":
+			return $_("dashboard.period1y");
+		case "ALL":
+			return $_("dashboard.periodAll");
+	}
+}
+
 $: {
 	if (chartHistorySelected && upToDateChart && totalChart) {
 		const cutoffDate = getChartHistoryDate();
@@ -367,7 +386,7 @@ $: {
 						: ''}
 					on:click={() => (chartHistorySelected = history)}
 				>
-					{history}
+					{localizedName(history)}
 				</button>
 			{/each}
 		</div>
