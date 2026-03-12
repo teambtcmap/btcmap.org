@@ -1,6 +1,6 @@
-import axios from "axios";
 import { get } from "svelte/store";
 
+import api from "$lib/axios";
 import { areas } from "$lib/store";
 import type { GiteaIssue, GiteaLabel } from "$lib/types";
 import { getRandomColor } from "$lib/utils";
@@ -37,13 +37,13 @@ async function syncIssuesFromGitea(): Promise<IssuesCache> {
 	};
 
 	const [issuesResponse, repoResponse] = await Promise.all([
-		axios.get(
+		api.get(
 			`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data/issues?state=open`,
 			{
 				headers,
 			},
 		),
-		axios.get(`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data`, {
+		api.get(`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/btcmap-data`, {
 			headers,
 		}),
 	]);
@@ -114,7 +114,7 @@ async function getLabels(
 	};
 
 	try {
-		const response = await axios.get(
+		const response = await api.get(
 			`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/${repo}/labels`,
 			{ headers },
 		);
@@ -153,7 +153,7 @@ async function createLabel(
 			color = getRandomColor().substring(1);
 		}
 
-		const response = await axios.post(
+		const response = await api.post(
 			`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/${repo}/labels`,
 			{
 				name,
@@ -191,7 +191,7 @@ export async function createIssueWithLabels(
 
 		const allLabelIds = [...labelIds, ...validAreaLabelIds];
 
-		const response = await axios.post(
+		const response = await api.post(
 			`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/${repo}/issues`,
 			{ title, body, labels: allLabelIds },
 			{ headers },

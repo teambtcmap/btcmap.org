@@ -1,11 +1,10 @@
-import axios from "axios";
-import axiosRetry from "axios-retry";
 import type { DivIcon, LatLng, Map as LeafletMap } from "leaflet";
 import { get } from "svelte/store";
 
 import Icon from "$components/Icon.svelte";
 import { trackEvent } from "$lib/analytics";
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
+import api from "$lib/axios";
 import { _ } from "$lib/i18n";
 import en from "$lib/i18n/locales/en.json";
 import { selectedMerchant } from "$lib/store";
@@ -15,8 +14,6 @@ import { userLocation } from "$lib/userLocationStore";
 import { errToast, humanizeIconName } from "$lib/utils";
 
 import { replaceState } from "$app/navigation";
-
-axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 export const updateMapHash = (zoom: number, center: LatLng): void => {
 	// Preserve any existing query parameters (like &merchant=123)
@@ -671,7 +668,7 @@ export const generateMarker = ({
 		} else {
 			// Fallback to old store-based behavior
 			try {
-				const response = await axios.get(
+				const response = await api.get(
 					`https://api.btcmap.org/v4/places/${placeId}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`,
 				);
 				const placeDetails = response.data;

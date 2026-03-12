@@ -1,11 +1,8 @@
-import axios from "axios";
-import axiosRetry from "axios-retry";
 import localforage from "localforage";
 import type { Writable } from "svelte/store";
 
+import api from "$lib/axios";
 import { clearTables } from "$lib/sync/clearTables";
-
-axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 // Base interface for syncable entities
 interface SyncableEntity {
@@ -168,7 +165,7 @@ async function initialSync<T extends SyncableEntity>(
 
 	do {
 		try {
-			const response = await axios.get<T[]>(
+			const response = await api.get<T[]>(
 				`https://api.btcmap.org/v2/${apiEndpoint}?updated_since=${updatedSince}&limit=${limit}`,
 			);
 
@@ -224,7 +221,7 @@ async function incrementalSync<T extends SyncableEntity>(
 	const dataMap = new Map(cachedData.map((item) => [item.id, item]));
 
 	do {
-		const response = await axios.get<T[]>(
+		const response = await api.get<T[]>(
 			`https://api.btcmap.org/v2/${apiEndpoint}?updated_since=${updatedSince}&limit=${limit}`,
 		);
 

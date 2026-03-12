@@ -1,5 +1,6 @@
 import { error } from "@sveltejs/kit";
-import axios from "axios";
+
+import api from "$lib/axios";
 
 import type { RequestHandler } from "./$types";
 
@@ -11,7 +12,7 @@ export const GET: RequestHandler = async ({ url }) => {
 		error(400, "Missing required parameter: invoice_id");
 	}
 
-	const status = await axios
+	const status = await api
 		.get(`https://api.btcmap.org/v4/invoices/${invoiceId}`)
 		.then((response) => response.data)
 		.catch((err) => {

@@ -1,10 +1,8 @@
 import { error } from "@sveltejs/kit";
-import axios from "axios";
-import axiosRetry from "axios-retry";
+
+import api from "$lib/axios";
 
 import type { RequestHandler } from "./$types";
-
-axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 export const GET: RequestHandler = async ({ url }) => {
 	const query = url.searchParams.get("name");
@@ -14,7 +12,7 @@ export const GET: RequestHandler = async ({ url }) => {
 	}
 
 	try {
-		const response = await axios.get(
+		const response = await api.get(
 			`https://api.btcmap.org/v4/places/search/?name=${encodeURIComponent(query)}`,
 		);
 

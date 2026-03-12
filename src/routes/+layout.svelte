@@ -1,6 +1,5 @@
 <script lang="ts">
 import { SvelteToast } from "@zerodevx/svelte-toast";
-import axios from "axios";
 
 import LoadingIndicator from "$components/LoadingIndicator.svelte";
 import Header from "$components/layout/Header.svelte";
@@ -42,12 +41,6 @@ $: if (browser) {
 // Update HTML lang attribute dynamically when locale changes
 $: if (browser && $locale) {
 	document.documentElement.lang = $locale;
-}
-
-axios.defaults.timeout = 600000;
-
-if (!browser) {
-	axios.defaults.headers.common["User-Agent"] = "btcmap.org";
 }
 
 const options = {

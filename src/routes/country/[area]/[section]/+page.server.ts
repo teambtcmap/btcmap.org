@@ -1,13 +1,11 @@
 import { error, redirect } from "@sveltejs/kit";
-import axios from "axios";
-import axiosRetry from "axios-retry";
+
+import api from "$lib/axios";
 
 import type { PageServerLoad } from "./$types";
 
 // Temporarily disabled during maintenance
 // import { getIssues } from '$lib/gitea';
-
-axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 export const load: PageServerLoad = async ({ params }) => {
 	const { area, section } = params;
@@ -25,7 +23,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		throw redirect(302, `/country/${encodeURIComponent(area)}/merchants`);
 	}
 	try {
-		const areaResponse = await axios.get(
+		const areaResponse = await api.get(
 			`https://api.btcmap.org/v3/areas/${encodeURIComponent(area)}`,
 		);
 		const fetchedArea = areaResponse.data;

@@ -1,8 +1,8 @@
 import { error } from "@sveltejs/kit";
 import axios from "axios";
-import axiosRetry from "axios-retry";
 
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
+import api from "$lib/axios";
 import { verifiedArr } from "$lib/map/setup";
 import {
 	buildOsmTags,
@@ -22,10 +22,11 @@ import { isValidPlaceId } from "$lib/utils";
 
 import type { PageServerLoad } from "./$types";
 
-axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
-
 // Non-retrying instance for secondary fetches that should fail fast
-const fastAxios = axios.create({ timeout: 8000 });
+const fastAxios = axios.create({
+	timeout: 8000,
+	headers: { "User-Agent": "btcmap.org" },
+});
 
 export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 	const { id } = params;
@@ -38,7 +39,7 @@ export const load: PageServerLoad<MerchantPageData> = async ({ params }) => {
 	try {
 		// Fetch complete data from v4 Places API (supports both numeric Place IDs and OSM-style IDs)
 		// include_deleted=true is required so deleted places return full field data instead of id-only
-		const placeResponse = await axios.get(
+		const placeResponse = await api.get(
 			`https://api.btcmap.org/v4/places/${encodeURIComponent(id)}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}&include_deleted=true`,
 		);
 		const placeData: Place = placeResponse.data;

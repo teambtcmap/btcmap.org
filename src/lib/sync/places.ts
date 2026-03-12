@@ -1,9 +1,9 @@
-import axios, { type AxiosProgressEvent } from "axios";
-import axiosRetry from "axios-retry";
+import type { AxiosProgressEvent } from "axios";
 import localforage from "localforage";
 import { get } from "svelte/store";
 
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
+import api from "$lib/axios";
 import {
 	mapUpdates,
 	places,
@@ -16,8 +16,6 @@ import { clearTables } from "$lib/sync/clearTables";
 import type { Place } from "$lib/types";
 import { yieldToMain } from "$lib/utils";
 import { filterPlaces, parseJSON } from "$lib/workers/sync-worker-manager";
-
-axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 // Concurrency protection to prevent multiple simultaneous syncs
 let syncInProgress = false;
@@ -60,7 +58,7 @@ const isValidSyncDate = (dateStr: string): boolean => {
 const getStaticFileDate = async (): Promise<string> => {
 	try {
 		// Use HEAD request to get headers without downloading the full file
-		const headResponse = await axios.head(
+		const headResponse = await api.head(
 			"https://cdn.static.btcmap.org/api/v4/places.json",
 		);
 		const lastModified = headResponse.headers["last-modified"];
@@ -123,7 +121,7 @@ export const elementsSync = async () => {
 						placesLoadingProgress.set(PROGRESS_RANGES.DOWNLOAD_START);
 
 						// Fetch as text to parse in worker
-						const staticResponse = await axios.get(
+						const staticResponse = await api.get(
 							"https://cdn.static.btcmap.org/api/v4/places.json",
 							{
 								responseType: "text",
@@ -245,7 +243,7 @@ export const elementsSync = async () => {
 				let apiSucceeded = false;
 
 				try {
-					const apiResponse = await axios.get<Place[]>(
+					const apiResponse = await api.get<Place[]>(
 						`https://api.btcmap.org/v4/places?fields=${buildFieldsParam(PLACE_FIELD_SETS.MAP_SYNC)}&updated_since=${updatesSince}&include_deleted=true`,
 					);
 
@@ -350,7 +348,7 @@ export const elementsSync = async () => {
 
 				try {
 					// Fetch as text to parse in worker
-					const staticResponse = await axios.get(
+					const staticResponse = await api.get(
 						"https://cdn.static.btcmap.org/api/v4/places.json",
 						{
 							responseType: "text",
@@ -390,7 +388,7 @@ export const updateSinglePlace = async (
 ): Promise<Place | null> => {
 	try {
 		// Fetch the updated place from the API
-		const response = await axios.get<Place>(
+		const response = await api.get<Place>(
 			`https://api.btcmap.org/v4/places/${placeId}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`,
 		);
 		const updatedPlace = response.data;

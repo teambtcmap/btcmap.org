@@ -3,6 +3,7 @@ import type { Writable } from "svelte/store";
 import { get } from "svelte/store";
 
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
+import api from "$lib/axios";
 import { _ } from "$lib/i18n";
 import { updateMerchantHash } from "$lib/merchantDrawerHash";
 import { boost } from "$lib/store";
@@ -67,7 +68,7 @@ export async function fetchMerchantDetails(
 	setMerchant(null);
 
 	try {
-		const response = await axios.get(
+		const response = await api.get(
 			`https://api.btcmap.org/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`,
 			{
 				timeout: 10000, // 10 second timeout

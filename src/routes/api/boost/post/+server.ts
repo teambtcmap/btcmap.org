@@ -1,10 +1,8 @@
 import { error, json } from "@sveltejs/kit";
-import axios from "axios";
-import axiosRetry from "axios-retry";
+
+import api from "$lib/axios";
 
 import type { RequestHandler } from "./$types";
-
-axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 const used: string[] = [];
 
@@ -21,7 +19,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		error(418, "Invoice already processed");
 	}
 
-	const invoiceStatus = await axios
+	const invoiceStatus = await api
 		.get(`https://api.btcmap.org/v4/invoices/${invoice_id}`)
 		.then((response) => response.data)
 		.catch((err) => {

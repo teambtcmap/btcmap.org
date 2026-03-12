@@ -1,10 +1,8 @@
 import { error } from "@sveltejs/kit";
-import axios from "axios";
-import axiosRetry from "axios-retry";
+
+import api from "$lib/axios";
 
 import type { RequestHandler } from "./$types";
-
-axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 interface BoostInvoiceRequest {
 	place_id: number;
@@ -27,7 +25,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		);
 	}
 
-	const invoice = await axios
+	const invoice = await api
 		.post("https://api.btcmap.org/v4/place-boosts", {
 			place_id: place_id.toString(),
 			days: days,
