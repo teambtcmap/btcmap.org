@@ -152,8 +152,8 @@ function getApiLang(appLocale: string): string | null {
 	return null;
 }
 
-$: if (browser) {
-	const lang = (getApiLang($locale ?? "en") ?? "en")?.substring?.(0, 2) || "en";
+$: {
+	const lang = (getApiLang($locale ?? "en") ?? "en").split(/[-_]/)[0] || "en";
 	localizedName = data.localizedName?.[lang];
 }
 
