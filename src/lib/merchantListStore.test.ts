@@ -9,7 +9,6 @@ vi.mock("$lib/axios", () => ({
 	default: {
 		get: vi.fn(),
 		post: vi.fn(),
-		isCancel: vi.fn().mockReturnValue(false),
 	},
 }));
 
