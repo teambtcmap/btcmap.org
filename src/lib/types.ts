@@ -129,6 +129,7 @@ export type MerchantArea = Omit<Area, "id" | "deleted_at"> & {
 export type MerchantPageData = {
 	id: string;
 	name?: string;
+	localizedName?: Record<string, string>;
 	lat: number;
 	lon: number;
 	comments: MerchantComment[];
@@ -413,6 +414,7 @@ export type Place = {
 	boosted_until?: string; // Only present when location is boosted
 	// Standard documented fields
 	name?: string;
+	localized_name?: Record<string, string>;
 	address?: string;
 	description?: string;
 	opening_hours?: string;
