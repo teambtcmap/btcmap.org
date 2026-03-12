@@ -2,6 +2,7 @@ import axios from "axios";
 import { get, writable } from "svelte/store";
 
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
+import api from "$lib/axios";
 import type { DrawerView } from "$lib/merchantDrawerHash";
 import { parseMerchantHash, updateMerchantHash } from "$lib/merchantDrawerHash";
 import { places } from "$lib/store";
@@ -50,7 +51,7 @@ function createMerchantDrawerStore() {
 		abortController = new AbortController();
 
 		try {
-			const response = await axios.get(
+			const response = await api.get(
 				`https://api.btcmap.org/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`,
 				{
 					timeout: 10000,

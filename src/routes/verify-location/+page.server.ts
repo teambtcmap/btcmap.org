@@ -1,6 +1,6 @@
 import { error } from "@sveltejs/kit";
-import axios from "axios";
 
+import api from "$lib/axios";
 import { isValidPlaceId } from "$lib/utils";
 
 import type { PageServerLoad } from "./$types";
@@ -29,7 +29,7 @@ export const load: PageServerLoad<VerifyLocationPageData> = async ({ url }) => {
 
 	try {
 		// Fetch from v4 Places API (supports both numeric Place IDs and OSM-style IDs)
-		const response = await axios.get(
+		const response = await api.get(
 			`https://api.btcmap.org/v4/places/${encodeURIComponent(id)}?fields=id,osm_id,osm_url,name,address,lat,lon`,
 		);
 		const placeData = response.data;

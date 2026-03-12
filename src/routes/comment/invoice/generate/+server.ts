@@ -1,10 +1,8 @@
 import { error } from "@sveltejs/kit";
-import axios from "axios";
-import axiosRetry from "axios-retry";
+
+import api from "$lib/axios";
 
 import type { RequestHandler } from "./$types";
-
-axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 export const POST: RequestHandler = async ({ request }) => {
 	const data = await request.json();
@@ -14,7 +12,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		error(400, "Missing required parameters: place_id and comment");
 	}
 
-	const response = await axios
+	const response = await api
 		.post("https://api.btcmap.org/v4/place-comments", {
 			place_id,
 			comment,

@@ -1,12 +1,18 @@
-import axios from "axios";
 import { get } from "svelte/store";
 import type { Mock } from "vitest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Place } from "$lib/types";
 
-// Mock axios
-vi.mock("axios");
+// Mock the centralized axios instance
+vi.mock("$lib/axios", () => ({
+	default: {
+		get: vi.fn(),
+		post: vi.fn(),
+	},
+}));
+
+import api from "$lib/axios";
 
 // Mock i18n to avoid intl-messageformat module resolution in tests
 vi.mock("$lib/i18n", () => {
@@ -294,7 +300,7 @@ describe("merchantListStore", () => {
 	describe("fetchAndReplaceList", () => {
 		it("should set isLoadingList while fetching", async () => {
 			const mockResponse = { data: [] };
-			(axios.get as Mock).mockResolvedValueOnce(mockResponse);
+			(api.get as Mock).mockResolvedValueOnce(mockResponse);
 
 			const fetchPromise = merchantList.fetchAndReplaceList(
 				{ lat: 0, lon: 0 },
@@ -316,7 +322,7 @@ describe("merchantListStore", () => {
 				createMockPlace({ id: 1 }),
 				createMockPlace({ id: 2 }),
 			];
-			(axios.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
+			(api.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
 
 			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
 			const state = get(merchantList);
@@ -330,7 +336,7 @@ describe("merchantListStore", () => {
 				createMockPlace({ id: 123 }),
 				createMockPlace({ id: 456 }),
 			];
-			(axios.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
+			(api.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
 
 			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
 			const state = get(merchantList);
@@ -343,7 +349,7 @@ describe("merchantListStore", () => {
 			const mockPlaces = Array.from({ length: 60 }, (_, i) =>
 				createMockPlace({ id: i }),
 			);
-			(axios.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
+			(api.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
 
 			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10, {
 				hideIfExceeds: 50,
@@ -358,7 +364,7 @@ describe("merchantListStore", () => {
 			const mockPlaces = Array.from({ length: 100 }, (_, i) =>
 				createMockPlace({ id: i }),
 			);
-			(axios.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
+			(api.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
 
 			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10, {
 				hideIfExceeds: 50,
@@ -370,7 +376,7 @@ describe("merchantListStore", () => {
 
 		it("should show error toast on failure", async () => {
 			const error = new Error("Network error");
-			(axios.get as Mock).mockRejectedValueOnce(error);
+			(api.get as Mock).mockRejectedValueOnce(error);
 
 			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
 
@@ -380,7 +386,7 @@ describe("merchantListStore", () => {
 		it("should ignore AbortError (no toast)", async () => {
 			const abortError = new Error("Aborted");
 			abortError.name = "AbortError";
-			(axios.get as Mock).mockRejectedValueOnce(abortError);
+			(api.get as Mock).mockRejectedValueOnce(abortError);
 
 			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
 
@@ -390,11 +396,11 @@ describe("merchantListStore", () => {
 
 	describe("fetchCountOnly", () => {
 		it("should request only id field", async () => {
-			(axios.get as Mock).mockResolvedValueOnce({ data: [] });
+			(api.get as Mock).mockResolvedValueOnce({ data: [] });
 
 			await merchantList.fetchCountOnly({ lat: 10, lon: 20 }, 5);
 
-			expect(axios.get).toHaveBeenCalledWith(
+			expect(api.get).toHaveBeenCalledWith(
 				expect.stringContaining("fields=id"),
 				expect.any(Object),
 			);
@@ -402,7 +408,7 @@ describe("merchantListStore", () => {
 
 		it("should set totalCount from response length", async () => {
 			const mockIds = [{ id: 1 }, { id: 2 }, { id: 3 }];
-			(axios.get as Mock).mockResolvedValueOnce({ data: mockIds });
+			(api.get as Mock).mockResolvedValueOnce({ data: mockIds });
 
 			await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
 			const state = get(merchantList);
@@ -412,7 +418,7 @@ describe("merchantListStore", () => {
 
 		it("should leave merchants empty", async () => {
 			const mockIds = [{ id: 1 }, { id: 2 }];
-			(axios.get as Mock).mockResolvedValueOnce({ data: mockIds });
+			(api.get as Mock).mockResolvedValueOnce({ data: mockIds });
 
 			await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
 			const state = get(merchantList);
@@ -422,7 +428,7 @@ describe("merchantListStore", () => {
 
 		it("should not show error toast on failure", async () => {
 			const error = new Error("Network error");
-			(axios.get as Mock).mockRejectedValueOnce(error);
+			(api.get as Mock).mockRejectedValueOnce(error);
 
 			await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
 
@@ -434,12 +440,12 @@ describe("merchantListStore", () => {
 		it("should merge into existing cache (not replace)", async () => {
 			// Set up initial cache
 			const initialPlace = createMockPlace({ id: 1 });
-			(axios.get as Mock).mockResolvedValueOnce({ data: [initialPlace] });
+			(api.get as Mock).mockResolvedValueOnce({ data: [initialPlace] });
 			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
 
 			// Fetch enriched details with new place
 			const newPlace = createMockPlace({ id: 2 });
-			(axios.get as Mock).mockResolvedValueOnce({ data: [newPlace] });
+			(api.get as Mock).mockResolvedValueOnce({ data: [newPlace] });
 			await merchantList.fetchEnrichedDetails({ lat: 0, lon: 0 }, 10);
 
 			const state = get(merchantList);
@@ -448,7 +454,7 @@ describe("merchantListStore", () => {
 		});
 
 		it("should set isEnrichingDetails during fetch", async () => {
-			(axios.get as Mock).mockResolvedValueOnce({ data: [] });
+			(api.get as Mock).mockResolvedValueOnce({ data: [] });
 
 			const fetchPromise = merchantList.fetchEnrichedDetails(
 				{ lat: 0, lon: 0 },
@@ -465,7 +471,7 @@ describe("merchantListStore", () => {
 		});
 
 		it("should not affect isLoadingList", async () => {
-			(axios.get as Mock).mockResolvedValueOnce({ data: [] });
+			(api.get as Mock).mockResolvedValueOnce({ data: [] });
 
 			const fetchPromise = merchantList.fetchEnrichedDetails(
 				{ lat: 0, lon: 0 },
@@ -482,7 +488,7 @@ describe("merchantListStore", () => {
 	describe("request cancellation", () => {
 		it("should cancel previous list request when new one starts", async () => {
 			let firstAborted = false;
-			(axios.get as Mock)
+			(api.get as Mock)
 				.mockImplementationOnce(
 					(_url: string, config: { signal: AbortSignal }) =>
 						new Promise((_, reject) => {
@@ -509,7 +515,7 @@ describe("merchantListStore", () => {
 
 		it("should NOT cancel details request when list request starts", async () => {
 			let detailsAborted = false;
-			(axios.get as Mock)
+			(api.get as Mock)
 				.mockImplementationOnce(
 					(_url: string, config: { signal: AbortSignal }) =>
 						new Promise((resolve) => {
@@ -537,7 +543,7 @@ describe("merchantListStore", () => {
 			let listAborted = false;
 			let detailsAborted = false;
 
-			(axios.get as Mock)
+			(api.get as Mock)
 				.mockImplementationOnce(
 					(_url: string, config: { signal: AbortSignal }) =>
 						new Promise((_, reject) => {
@@ -577,7 +583,7 @@ describe("merchantListStore", () => {
 		it("close() should NOT cancel requests (just hide panel)", async () => {
 			let requestAborted = false;
 
-			(axios.get as Mock).mockImplementationOnce(
+			(api.get as Mock).mockImplementationOnce(
 				(_url: string, config: { signal: AbortSignal }) =>
 					new Promise((resolve) => {
 						config.signal.addEventListener("abort", () => {
@@ -968,7 +974,7 @@ describe("merchantListStore", () => {
 					createPlaceWithIcon("restaurant", { id: 2 }),
 					createPlaceWithIcon("local_cafe", { id: 3 }),
 				];
-				(axios.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
+				(api.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
 
 				await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
 				const state = get(merchantList);
@@ -986,7 +992,7 @@ describe("merchantListStore", () => {
 					createPlaceWithIcon("local_cafe", { id: 2 }),
 					createPlaceWithIcon("restaurant", { id: 3 }),
 				];
-				(axios.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
+				(api.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
 
 				await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
 				const state = get(merchantList);
@@ -1003,7 +1009,7 @@ describe("merchantListStore", () => {
 					createPlaceWithIcon("local_cafe", { id: 1 }),
 					createPlaceWithIcon("local_atm", { id: 2 }),
 				];
-				(axios.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
+				(api.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
 
 				await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
 				const state = get(merchantList);
@@ -1018,7 +1024,7 @@ describe("merchantListStore", () => {
 						id: i,
 					}),
 				);
-				(axios.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
+				(api.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
 
 				await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10, {
 					hideIfExceeds: 50,

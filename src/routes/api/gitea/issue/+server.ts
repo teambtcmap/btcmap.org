@@ -1,8 +1,6 @@
 import type { BinaryLike, CipherKey } from "node:crypto";
 import crypto from "node:crypto";
 import { error } from "@sveltejs/kit";
-import axios from "axios";
-import axiosRetry from "axios-retry";
 import { get } from "svelte/store";
 
 import { GITEA_LABELS } from "$lib/constants";
@@ -12,8 +10,6 @@ import { getAreaIdsByCoordinates } from "$lib/utils";
 
 import type { RequestHandler } from "./$types";
 import { env } from "$env/dynamic/private";
-
-axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 // TTL-based cache for used captcha secrets to prevent memory leaks
 const CAPTCHA_TTL_MS = 10 * 60 * 1000; // 10 minutes

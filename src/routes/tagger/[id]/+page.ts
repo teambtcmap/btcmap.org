@@ -1,10 +1,8 @@
 import { error } from "@sveltejs/kit";
-import axios from "axios";
-import axiosRetry from "axios-retry";
+
+import api from "$lib/axios";
 
 import type { PageLoad } from "./$types";
-
-axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 export const load: PageLoad = async ({ params }) => {
 	const { id } = params;
@@ -15,7 +13,7 @@ export const load: PageLoad = async ({ params }) => {
 	}
 
 	try {
-		const response = await axios.get(
+		const response = await api.get(
 			`https://api.btcmap.org/v2/users/${encodeURIComponent(id)}`,
 		);
 
