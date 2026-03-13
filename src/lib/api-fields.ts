@@ -60,6 +60,7 @@ export const PLACE_FIELD_SETS = {
 	],
 	LIST_ITEM: [
 		"name",
+		"localized_name",
 		"address",
 		"icon",
 		"boosted_until",

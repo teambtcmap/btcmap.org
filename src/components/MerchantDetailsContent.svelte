@@ -3,7 +3,7 @@ import Time from "svelte-time";
 
 import Icon from "$components/Icon.svelte";
 import PaymentMethodIcon from "$components/PaymentMethodIcon.svelte";
-import { _ } from "$lib/i18n";
+import { _, locale } from "$lib/i18n";
 import type { Place } from "$lib/types";
 import { formatVerifiedHuman } from "$lib/utils";
 
@@ -15,6 +15,9 @@ export let isBoosted: boolean;
 export let boostLoading: boolean;
 export let onBoostClick: () => void;
 export let isLoading: boolean = false;
+
+$: lang = ($locale ?? "en").split(/[-_]/)[0] || "en";
+$: displayName = merchant.localized_name?.[lang] || merchant.name;
 </script>
 
 <div class="space-y-4">
@@ -27,13 +30,13 @@ export let isLoading: boolean = false;
 		</div>
 	{/if}
 
-	{#if merchant.name}
+	{#if displayName}
 		<a
 			href={resolve(`/merchant/${merchant.id}`)}
 			class="inline-block text-xl leading-snug font-bold text-link transition-colors hover:text-hover"
 			title={$_('merchant.merchantName')}
 		>
-			{merchant.name}
+			{displayName}
 		</a>
 	{:else if isLoading}
 		<div class="h-7 w-3/4 animate-pulse rounded-lg bg-link/50"></div>

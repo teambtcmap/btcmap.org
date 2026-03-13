@@ -5,7 +5,7 @@ import {
 	CATEGORY_COLOR_CLASSES,
 	getIconColorWithFallback,
 } from "$lib/categoryMapping";
-import { _ } from "$lib/i18n";
+import { _, locale } from "$lib/i18n";
 import {
 	isBoosted as checkBoosted,
 	isUpToDate as checkUpToDate,
@@ -31,6 +31,9 @@ $: hasPaymentMethods =
 
 $: isVerified = checkUpToDate(displayData, verifiedDate);
 $: isBoosted = checkBoosted(merchant);
+
+$: lang = ($locale ?? "en").split(/[-_]/)[0] || "en";
+$: displayName = displayData?.localized_name?.[lang] || displayData?.name;
 
 $: userLoc = $userLocation.location;
 $: usesMetric = $userLocation.usesMetricSystem;
@@ -90,13 +93,13 @@ function handleClick() {
 				<!-- Name -->
 				<div class="flex items-center justify-between gap-1">
 					<div class="flex items-center gap-1 min-w-0">
-						{#if enrichedData?.name}
+						{#if displayName}
 							<span
 								class="truncate text-sm font-medium {isBoosted
 									? 'text-bitcoin'
 									: 'text-primary dark:text-white'}"
 							>
-								{enrichedData.name}
+								{displayName}
 							</span>
 						{:else if showSkeleton}
 							<div class="h-4 w-32 animate-pulse rounded bg-link/50"></div>

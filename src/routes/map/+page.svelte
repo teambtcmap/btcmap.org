@@ -37,7 +37,7 @@ import {
 	VIEWPORT_BATCH_SIZE,
 	VIEWPORT_BUFFER_PERCENT,
 } from "$lib/constants";
-import { _ } from "$lib/i18n";
+import { _, locale } from "$lib/i18n";
 import { processBatchOnMainThread } from "$lib/map/batch-processor";
 import { loadMapDependencies } from "$lib/map/imports";
 import { LabelUpdateTracker, updateMarkerLabels } from "$lib/map/labels";
@@ -1092,6 +1092,7 @@ $: if (mapLoaded && elementsLoaded && leaflet) {
 			$placesById,
 			boostedLayerMarkerIds,
 			leaflet,
+			$locale ?? undefined,
 		);
 	});
 }

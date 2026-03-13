@@ -83,7 +83,9 @@ export function getLabelText(
 	placeDetailsCache: Map<number, Place>,
 	placesById: Map<number, Place>,
 	fallbackPlace?: Place,
+	locale?: string,
 ): string | null {
+	const lang = locale?.split(/[-_]/)[0];
 	const sources: Array<Place | undefined> = [
 		placeDetailsCache.get(placeId),
 		fallbackPlace,
@@ -94,7 +96,10 @@ export function getLabelText(
 		if (!source) continue;
 		// Handle empty string as intentional "no name" to prevent fallback
 		if (source.name === "") return null;
-		// Escape HTML to prevent XSS (Leaflet tooltips treat strings as HTML)
+		// Check for localized name first, then fall back to default name
+		if (lang && source.localized_name?.[lang]) {
+			return escapeHtml(source.localized_name[lang]);
+		}
 		if (source.name) return escapeHtml(source.name);
 		if (source["osm:amenity"]) return escapeHtml(source["osm:amenity"]);
 	}
@@ -115,6 +120,7 @@ export function attachMarkerLabelIfVisible(
 	leaflet: Leaflet,
 	fallbackPlace?: Place,
 	signalUpdate?: () => void,
+	locale?: string,
 ): boolean {
 	if (currentZoom < LABEL_VISIBLE_ZOOM) return false;
 
@@ -123,6 +129,7 @@ export function attachMarkerLabelIfVisible(
 		placeDetailsCache,
 		placesById,
 		fallbackPlace,
+		locale,
 	);
 	if (labelText) {
 		bindMarkerLabelTooltip(marker, labelText, boosted, leaflet);
@@ -144,6 +151,7 @@ export function updateMarkerLabels(
 	placesById: Map<number, Place>,
 	boostedLayerMarkerIds: Set<string>,
 	leaflet: Leaflet,
+	locale?: string,
 ): void {
 	if (currentZoom < LABEL_VISIBLE_ZOOM) {
 		// Remove all tooltips when zoomed out
@@ -171,6 +179,8 @@ export function updateMarkerLabels(
 			boosted,
 			leaflet,
 			sourcePlace,
+			undefined,
+			locale,
 		);
 
 		// Clean up stale tooltips if label text is no longer available
