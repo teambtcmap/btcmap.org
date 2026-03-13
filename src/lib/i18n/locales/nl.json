@@ -18,7 +18,7 @@
 		"areas": "Gebieden",
 		"maintain": "Behouden",
 		"wiki": "Wiki",
-		"blog": "Bloggen",
+		"blog": "Blog",
 		"supportUs": "Steun ons",
 		"menu": "Menu",
 		"merchantMap": "Koopmanskaart",
@@ -97,7 +97,7 @@
 	},
 	"merchant": {
 		"navigate": "Navigeren",
-		"edit": "Bewerking",
+		"edit": "Bewerk",
 		"share": "Deel",
 		"call": "Telefoongesprek",
 		"email": "E-mail",
@@ -142,14 +142,14 @@
 		"onchainAccepted": "On-chain geaccepteerd",
 		"onchainNotAccepted": "On-chain niet geaccepteerd",
 		"onchainUnknown": "On-chain onbekend",
-		"lightning": "Bliksem",
-		"lightningAccepted": "Bliksem geaccepteerd",
-		"lightningNotAccepted": "Bliksem niet geaccepteerd",
-		"lightningUnknown": "Bliksem onbekend",
-		"lightningContactless": "Bliksem contactloos",
-		"contactlessAccepted": "Bliksem Contactloos geaccepteerd",
-		"contactlessNotAccepted": "Bliksem contactloos niet geaccepteerd",
-		"contactlessUnknown": "Bliksem contactloos onbekend",
+		"lightning": "Lightning",
+		"lightningAccepted": "Lightning geaccepteerd",
+		"lightningNotAccepted": "Lightning niet geaccepteerd",
+		"lightningUnknown": "Lightning onbekend",
+		"lightningContactless": "Lightning contactloos",
+		"contactlessAccepted": "Lightning Contactloos geaccepteerd",
+		"contactlessNotAccepted": "Lightning contactloos niet geaccepteerd",
+		"contactlessUnknown": "Lightning contactloos onbekend",
 		"thirdPartyRequired": "App van derden vereist"
 	},
 	"boost": {
@@ -186,7 +186,7 @@
 		"twitterShareText": "Ik heb zojuist {name} een boost gegeven op @btcmap. Bekijk ze!"
 	},
 	"invoicePayment": {
-		"scanOrClick": "Scan of klik om met bliksem te betalen",
+		"scanOrClick": "Scan of klik om met Lightning te betalen",
 		"invoiceLabel": "Factuur",
 		"protocolAlt": "Lightning-protocol"
 	},
@@ -198,7 +198,7 @@
 		"yourComment": "Jouw opmerking",
 		"submitButton": "Opmerking",
 		"publishNote": "Uw reactie wordt gepubliceerd wanneer onze bots de betaling hebben bevestigd.",
-		"close": "Dichtbij",
+		"close": "Sluiten",
 		"thankYou": "Bedankt voor je reactie!",
 		"published": "Je reactie is gepubliceerd!"
 	},
@@ -223,7 +223,7 @@
 		"loadingTiles": "Tegels laden..."
 	},
 	"mapDrawer": {
-		"back": "Rug",
+		"back": "Terug",
 		"closeMerchantDetails": "Sluit de details van de verkoper",
 		"expandDrawer": "Vouw lade uit",
 		"collapseDrawer": "Lade inklappen",
@@ -287,7 +287,7 @@
 	"aria": {
 		"logoAlt": "BTC Map-logo",
 		"avatarAlt": "Avatar",
-		"close": "Dichtbij",
+		"close": "Sluiten",
 		"closeMerchantList": "Sluit de verkoperslijst",
 		"openMenu": "Menu openen",
 		"clearSearch": "Duidelijke zoekopdracht",
@@ -422,8 +422,8 @@
 		"paymentMethodsLegend": "Selecteer geaccepteerde betaalmethoden",
 		"paymentMethodError": "Los dit alstublieft op...",
 		"onchainLabel": "Aan de ketting",
-		"lightningLabel": "Bliksem",
-		"nfcLabel": "Bliksem contactloos",
+		"lightningLabel": "Lightning",
+		"nfcLabel": "Lightning contactloos",
 		"websitePlaceholder": "https://bitcoin.org",
 		"phonePlaceholder": "Nummer",
 		"hoursPlaceholder": "Ma-Vr 08:30-20:00 uur",
@@ -492,7 +492,7 @@
 		"verifiedNote": "*Verkopers met een survey:date, check_date of check_date:currency:XBT-tag die minder dan één jaar oud is.",
 		"tagsNotePart1": "*Meer informatie over bitcoin mapping-tags kunt u vinden",
 		"tagsNoteLink": "hier",
-		"tagsNotePart2": null
+		"tagsNotePart2": "."
 	},
 	"leaderboard": {
 		"taggerHero": "Tagger-klassement",
@@ -518,9 +518,9 @@
 		"grade": "Cijfer",
 		"verified": "Geverifieerd",
 		"sortPosition": "Sorteer op positie",
-		"sortTotal": "Sorteer op totaal aantal bewerkingen",
-		"sortCreated": "Sorteer op gemaakte bewerkingen",
-		"sortUpdated": "Sorteer op bijgewerkte bewerkingen",
+		"sortTotal": "Sorteer op totaal aantal Bewerken",
+		"sortCreated": "Sorteer op gemaakte Bewerken",
+		"sortUpdated": "Sorteer op bijgewerkte Bewerken",
 		"ultimateSupertaggerAlt": "Ultieme supertagger",
 		"tableAria": "Tagger-klassementtabel",
 		"sortByCurrentlyAscending": "Sorteer op {column}, momenteel oplopend",
@@ -569,7 +569,7 @@
 		"iconOptional": "(optioneel)",
 		"iconHint": "We gebruiken de avatar van uw sociale link of de vlag van het land waarin uw community zich bevindt als er geen pictogram is opgegeven.",
 		"iconPlaceholder": "https://static.btcmap.org/images/communities/iom.svg",
-		"lightningLabel": "Bliksemtips",
+		"lightningLabel": "Lightningtips",
 		"lightningHint": "Als je de mogelijkheid wilt hebben om sats te ontvangen, kun je een",
 		"lightningAddress": "Lightning-adres",
 		"lightningOr": "of",
@@ -604,7 +604,7 @@
 		"merchantName": "Naam handelaar",
 		"description": "Beschrijving",
 		"view": "Weergave",
-		"edit": "Bewerking",
+		"edit": "Bewerk",
 		"help": "Hulp",
 		"noTaggingIssues": "Geen tagproblemen!",
 		"noTaggingIssuesModal": "Geen tagproblemen!",
@@ -765,7 +765,7 @@
 		"merchantName": "Naam handelaar",
 		"description": "Beschrijving",
 		"view": "Weergave",
-		"edit": "Bewerking",
+		"edit": "Bewerk",
 		"help": "Hulp",
 		"noTaggingIssues": "Geen tagproblemen!",
 		"noResults": "Geen resultaten gevonden.",
@@ -833,7 +833,7 @@
 				"desc": "Draag binnen de eerste 3 maanden bij aan BTC Map"
 			},
 			"lightningJunkie": {
-				"title": "Bliksemjunkie",
+				"title": "Lightningjunkie",
 				"desc": "Voeg een tipknop toe aan uw profiel"
 			},
 			"helloWorld": {
@@ -991,8 +991,8 @@
 		"appreciate": "Wij waarderen alle steun enorm.",
 		"donate": {
 			"scanOrClick": "Scan of klik om te doneren",
-			"onchain": "Aan de ketting",
-			"lightning": "Bliksem",
+			"onchain": "On-chain",
+			"lightning": "Lighting",
 			"protocolAlt": "protocol"
 		},
 		"supporters": {
@@ -1000,7 +1000,7 @@
 			"becomeSponsor": "Word sponsor"
 		},
 		"node": {
-			"heading": "Open een bliksemkanaal voor ons"
+			"heading": "Open een Lightningkanaal voor ons"
 		},
 		"applyHere": "Solliciteer hier",
 		"qrError": "Kon geen QR genereren. Probeer het opnieuw of neem contact op met BTC Map.",
