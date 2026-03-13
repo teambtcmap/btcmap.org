@@ -68,18 +68,17 @@ export const processBatchOnMainThread = ({
 			onMarkerClick: (id) => onMarkerClick(Number(id)),
 		});
 
-		attachMarkerLabelIfVisible(
+		attachMarkerLabelIfVisible({
 			marker,
-			element.id,
+			placeId: element.id,
 			currentZoom,
 			placeDetailsCache,
 			placesById,
-			Boolean(iconData.boosted),
+			boosted: Boolean(iconData.boosted),
 			leaflet,
-			placesById.get(element.id),
-			undefined,
+			fallbackPlace: placesById.get(element.id),
 			locale,
-		);
+		});
 
 		if (iconData.boosted && !shouldClusterBoostedMarkers()) {
 			boostedMarkersToAdd.push(marker);

@@ -108,21 +108,34 @@ export function getLabelText(
 	return null;
 }
 
+type AttachMarkerLabelOptions = {
+	marker: Marker;
+	placeId: number;
+	currentZoom: number;
+	placeDetailsCache: Map<number, Place>;
+	placesById: Map<number, Place>;
+	boosted: boolean;
+	leaflet: Leaflet;
+	fallbackPlace?: Place;
+	signalUpdate?: () => void;
+	locale?: string | null;
+};
+
 /**
  * Attach label tooltip to marker if zoom level allows visibility
  */
-export function attachMarkerLabelIfVisible(
-	marker: Marker,
-	placeId: number,
-	currentZoom: number,
-	placeDetailsCache: Map<number, Place>,
-	placesById: Map<number, Place>,
-	boosted: boolean,
-	leaflet: Leaflet,
-	fallbackPlace?: Place,
-	signalUpdate?: () => void,
-	locale?: string | null,
-): boolean {
+export function attachMarkerLabelIfVisible({
+	marker,
+	placeId,
+	currentZoom,
+	placeDetailsCache,
+	placesById,
+	boosted,
+	leaflet,
+	fallbackPlace,
+	signalUpdate,
+	locale,
+}: AttachMarkerLabelOptions): boolean {
 	if (currentZoom < LABEL_VISIBLE_ZOOM) return false;
 
 	const labelText = getLabelText(
@@ -171,18 +184,17 @@ export function updateMarkerLabels(
 		const boosted =
 			isPlaceBoosted(sourcePlace) || boostedLayerMarkerIds.has(placeId);
 
-		const attached = attachMarkerLabelIfVisible(
+		const attached = attachMarkerLabelIfVisible({
 			marker,
-			placeIdNum,
+			placeId: placeIdNum,
 			currentZoom,
 			placeDetailsCache,
 			placesById,
 			boosted,
 			leaflet,
-			sourcePlace,
-			undefined,
+			fallbackPlace: sourcePlace,
 			locale,
-		);
+		});
 
 		// Clean up stale tooltips if label text is no longer available
 		if (!attached && marker.getTooltip()) {

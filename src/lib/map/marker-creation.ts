@@ -47,18 +47,18 @@ export const createMarkerWithLabel = ({
 		onMarkerClick: (id) => onMarkerClick(Number(id)),
 	});
 
-	attachMarkerLabelIfVisible(
+	attachMarkerLabelIfVisible({
 		marker,
-		place.id,
+		placeId: place.id,
 		currentZoom,
 		placeDetailsCache,
 		placesById,
 		boosted,
 		leaflet,
-		place,
-		onLabelUpdate,
+		fallbackPlace: place,
+		signalUpdate: onLabelUpdate,
 		locale,
-	);
+	});
 
 	return { marker, boosted };
 };
