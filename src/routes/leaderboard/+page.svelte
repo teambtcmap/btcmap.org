@@ -13,7 +13,7 @@ import {
 	type SortingState,
 	type TableOptions,
 } from "@tanstack/svelte-table";
-import { get, writable } from "svelte/store";
+import { writable } from "svelte/store";
 
 import FormSelect from "$components/form/FormSelect.svelte";
 import Icon from "$components/Icon.svelte";
