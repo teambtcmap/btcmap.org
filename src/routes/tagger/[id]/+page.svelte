@@ -18,7 +18,6 @@ import Tip from "$components/Tip.svelte";
 import {
 	eventError,
 	events,
-	excludeLeader,
 	places,
 	placesError,
 	userError,
@@ -95,10 +94,6 @@ const initializeData = async () => {
 
 	const populateLeaderboard = () => {
 		$users.forEach((user) => {
-			if ($excludeLeader.includes(user.id)) {
-				return;
-			}
-
 			let userEvents = $events.filter((event) => event.user_id === user.id);
 
 			if (userEvents.length) {

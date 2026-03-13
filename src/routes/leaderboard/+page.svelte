@@ -13,7 +13,7 @@ import {
 	type SortingState,
 	type TableOptions,
 } from "@tanstack/svelte-table";
-import { get, writable } from "svelte/store";
+import { writable } from "svelte/store";
 
 import FormSelect from "$components/form/FormSelect.svelte";
 import Icon from "$components/Icon.svelte";
@@ -25,13 +25,23 @@ import TaggerLeaderboardDesktopTable from "$components/leaderboard/TaggerLeaderb
 import TaggerLeaderboardMobileCard from "$components/leaderboard/TaggerLeaderboardMobileCard.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import { _ } from "$lib/i18n";
-import { excludeLeader } from "$lib/store";
 import { theme } from "$lib/theme";
-import type { RpcGetMostActiveUsersItem, TaggerLeaderboard } from "$lib/types";
+import type { TaggerLeaderboard } from "$lib/types";
 import { debounce } from "$lib/utils";
 
 import { goto } from "$app/navigation";
 import { page } from "$app/stores";
+
+type TopEditorItem = {
+	id: number;
+	name: string;
+	avatar_url: string;
+	total_edits: number;
+	places_created: number;
+	places_updated: number;
+	places_deleted: number;
+	tip_url: string | null;
+};
 
 type TaggerRow = TaggerLeaderboard & {
 	position: number;
@@ -39,7 +49,7 @@ type TaggerRow = TaggerLeaderboard & {
 };
 
 type PeriodOption = "3-months" | "6-months" | "12-months" | "all-time";
-const DEFAULT_PERIOD: PeriodOption = "12-months";
+const DEFAULT_PERIOD: PeriodOption = "3-months";
 const DEFAULT_PERIOD_OPTIONS: PeriodOption[] = [
 	"3-months",
 	"6-months",
@@ -104,25 +114,22 @@ const extractLightningDestination = (tip?: string): string | undefined => {
 	return trimmed.replace(/^lightning:/i, "");
 };
 
-const normalizeUsers = (
-	users: RpcGetMostActiveUsersItem[],
-	excluded: Set<number>,
-): TaggerRow[] => {
+const normalizeUsers = (users: TopEditorItem[]): TaggerRow[] => {
 	return users
-		.filter((user) => !excluded.has(user.id))
 		.map((user) => {
-			const avatar = user.image_url || "/images/satoshi-nakamoto.png";
-			const totalEdits = user.edits;
+			const avatar = user.avatar_url || "/images/satoshi-nakamoto.png";
+			const totalEdits = user.total_edits;
+			const tip = user.tip_url ?? "";
 			return {
 				avatar,
 				tagger: user.name,
 				id: user.id,
-				created: user.created,
-				updated: user.updated,
-				deleted: user.deleted,
+				created: user.places_created,
+				updated: user.places_updated,
+				deleted: user.places_deleted,
 				total: totalEdits,
-				tip: user.tip_address,
-				tipDestination: extractLightningDestination(user.tip_address),
+				tip,
+				tipDestination: extractLightningDestination(tip || undefined),
 			};
 		})
 		.sort((a, b) => {
@@ -134,9 +141,8 @@ const normalizeUsers = (
 };
 
 $: {
-	if (data?.rpcResult?.users?.length) {
-		const excluded = new Set(get(excludeLeader));
-		const normalizedUsers = normalizeUsers(data.rpcResult.users, excluded);
+	if (Array.isArray(data?.rpcResult?.users)) {
+		const normalizedUsers = normalizeUsers(data.rpcResult.users);
 		leaderboardRows = normalizedUsers;
 		totalTaggers = normalizedUsers.length;
 		loading = false;

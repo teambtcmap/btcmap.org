@@ -40,7 +40,7 @@ const buildPeriodRange = (period: PeriodKey) => {
 	return { period_start: startDate.toISOString().split("T")[0], period_end };
 };
 
-const DEFAULT_PERIOD: PeriodKey = "12-months";
+const DEFAULT_PERIOD: PeriodKey = "3-months";
 
 const resolvePeriod = (maybePeriod: string | null): PeriodKey => {
 	return PERIOD_OPTIONS.includes(maybePeriod as PeriodKey)
@@ -53,38 +53,23 @@ export const load: PageServerLoad = async ({ url }) => {
 	const range = buildPeriodRange(resolvedPeriod);
 
 	try {
-		const response = await fetch("https://api.btcmap.org/rpc", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				jsonrpc: "2.0",
-				id: 1,
-				method: "get_most_active_users",
-				params: {
-					...range,
-					limit: 100,
-				},
-			}),
-		});
+		const response = await fetch(
+			`https://api.btcmap.org/v4/top-editors?period_start=${range.period_start}&period_end=${range.period_end}`,
+		);
 
-		const data = await response.json();
-
-		if (data.error) {
-			const errorMessage = data.error.message || "RPC Error";
-			const errorDetails = data.error.data
-				? `: ${JSON.stringify(data.error.data)}`
-				: "";
+		if (!response.ok) {
 			return {
-				error: errorMessage + errorDetails,
+				error: `API Error: ${response.status}`,
 				rpcResult: null,
 				period: resolvedPeriod,
 				periodOptions: PERIOD_OPTIONS,
 			};
 		}
+
+		const data = await response.json();
+
 		return {
-			rpcResult: data.result,
+			rpcResult: { users: data },
 			period: resolvedPeriod,
 			periodOptions: PERIOD_OPTIONS,
 		};
