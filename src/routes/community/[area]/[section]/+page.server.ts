@@ -12,8 +12,8 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 export const load: PageServerLoad = async ({ params }) => {
 	const { area, section } = params;
 
-	// Validate area parameter format (alphanumeric, underscores, hyphens only)
-	if (!/^[\w-]+$/.test(area)) {
+	// Allow non-Latin aliases while still rejecting malformed path-like values.
+	if (area.includes("/")) {
 		throw error(404, "Community Not Found");
 	}
 
