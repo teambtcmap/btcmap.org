@@ -33,3 +33,6 @@ package-lock.json
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# OpenCode local config
+opencode.json
