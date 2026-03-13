@@ -199,6 +199,7 @@ export class LabelUpdateTracker {
 	private lastLabelZoomState: boolean;
 	private lastCacheRevision: number;
 	private lastEnrichingState: boolean;
+	private lastLocale: string;
 	private labelVersion: number = 0;
 	private lastLabelVersion: number = 0;
 
@@ -206,10 +207,12 @@ export class LabelUpdateTracker {
 		initialZoom: number,
 		initialCacheSize: number,
 		initialEnrichingState: boolean,
+		initialLocale: string = "en",
 	) {
 		this.lastLabelZoomState = initialZoom >= LABEL_VISIBLE_ZOOM;
 		this.lastCacheRevision = initialCacheSize;
 		this.lastEnrichingState = initialEnrichingState;
+		this.lastLocale = initialLocale;
 	}
 
 	/**
@@ -227,21 +230,28 @@ export class LabelUpdateTracker {
 		labelsVisible: boolean,
 		currentCacheSize: number,
 		isEnriching: boolean,
+		currentLocale: string,
 		updateCallback: () => void,
 	): boolean {
 		const zoomStateChanged = labelsVisible !== this.lastLabelZoomState;
 		const cacheChanged = currentCacheSize !== this.lastCacheRevision;
 		const enrichmentCompleted = this.lastEnrichingState && !isEnriching;
 		const versionChanged = this.labelVersion !== this.lastLabelVersion;
+		const localeChanged = currentLocale !== this.lastLocale;
 
 		const shouldUpdate =
-			zoomStateChanged || cacheChanged || enrichmentCompleted || versionChanged;
+			zoomStateChanged ||
+			cacheChanged ||
+			enrichmentCompleted ||
+			versionChanged ||
+			localeChanged;
 
 		if (shouldUpdate) {
 			updateCallback();
 			this.lastLabelZoomState = labelsVisible;
 			this.lastCacheRevision = currentCacheSize;
 			this.lastLabelVersion = this.labelVersion;
+			this.lastLocale = currentLocale;
 		}
 
 		this.lastEnrichingState = isEnriching;
