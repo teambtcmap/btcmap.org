@@ -23,6 +23,11 @@ describe("getCountryName", () => {
 			expect(result).toBe("Южна Африка");
 		});
 
+		it("maps nl and returns translated name", async () => {
+			const result = await getCountryName("ZA", "nl", "South Africa");
+			expect(result).toBe("Republiek Zuid-Afrika");
+		});
+
 		it("falls back to en for unknown locale", async () => {
 			expect(await getCountryName("ZA", "invalid-locale", "South Africa")).toBe(
 				"South Africa",

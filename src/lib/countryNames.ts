@@ -6,6 +6,7 @@ const localeMap = {
 	en: "en",
 	"pt-BR": "pt",
 	bg: "bg",
+	nl: "nl",
 } as const;
 
 type CountryLocale = (typeof localeMap)[keyof typeof localeMap];
@@ -18,6 +19,7 @@ const localeLoaders: Record<
 > = {
 	pt: () => import("i18n-iso-countries/langs/pt.json"),
 	bg: () => import("i18n-iso-countries/langs/bg.json"),
+	nl: () => import("i18n-iso-countries/langs/nl.json"),
 };
 
 // Returns localized country name for an ISO alpha-2 code.
