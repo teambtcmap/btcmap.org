@@ -141,7 +141,7 @@ const normalizeUsers = (users: TopEditorItem[]): TaggerRow[] => {
 };
 
 $: {
-	if (data?.rpcResult?.users?.length) {
+	if (Array.isArray(data?.rpcResult?.users)) {
 		const normalizedUsers = normalizeUsers(data.rpcResult.users);
 		leaderboardRows = normalizedUsers;
 		totalTaggers = normalizedUsers.length;
