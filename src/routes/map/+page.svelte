@@ -1075,7 +1075,7 @@ let labelTracker = new LabelUpdateTracker(
 	currentZoom,
 	$merchantList.placeDetailsCache.size,
 	$merchantList.isEnrichingDetails,
-	$locale ?? undefined,
+	$locale,
 );
 
 // Derived reactive state for label visibility
@@ -1089,7 +1089,7 @@ $: if (mapLoaded && elementsLoaded && leaflet) {
 		labelsVisible,
 		cacheSize,
 		isEnriching,
-		$locale ?? "en",
+		$locale,
 		() => {
 			updateMarkerLabels(
 				loadedMarkers,
@@ -1098,7 +1098,7 @@ $: if (mapLoaded && elementsLoaded && leaflet) {
 				$placesById,
 				boostedLayerMarkerIds,
 				leaflet,
-				$locale ?? undefined,
+				$locale,
 			);
 		},
 	);

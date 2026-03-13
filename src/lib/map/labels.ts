@@ -84,7 +84,7 @@ export function getLabelText(
 	placeDetailsCache: Map<number, Place>,
 	placesById: Map<number, Place>,
 	fallbackPlace?: Place,
-	locale?: string,
+	locale?: string | null,
 ): string | null {
 	const lang = getDisplayLang(locale);
 	const sources: Array<Place | undefined> = [
@@ -121,7 +121,7 @@ export function attachMarkerLabelIfVisible(
 	leaflet: Leaflet,
 	fallbackPlace?: Place,
 	signalUpdate?: () => void,
-	locale?: string,
+	locale?: string | null,
 ): boolean {
 	if (currentZoom < LABEL_VISIBLE_ZOOM) return false;
 
@@ -152,7 +152,7 @@ export function updateMarkerLabels(
 	placesById: Map<number, Place>,
 	boostedLayerMarkerIds: Set<string>,
 	leaflet: Leaflet,
-	locale?: string,
+	locale?: string | null,
 ): void {
 	if (currentZoom < LABEL_VISIBLE_ZOOM) {
 		// Remove all tooltips when zoomed out
@@ -207,12 +207,12 @@ export class LabelUpdateTracker {
 		initialZoom: number,
 		initialCacheSize: number,
 		initialEnrichingState: boolean,
-		initialLocale: string = "en",
+		initialLocale?: string | null,
 	) {
 		this.lastLabelZoomState = initialZoom >= LABEL_VISIBLE_ZOOM;
 		this.lastCacheRevision = initialCacheSize;
 		this.lastEnrichingState = initialEnrichingState;
-		this.lastLocale = initialLocale;
+		this.lastLocale = getDisplayLang(initialLocale);
 	}
 
 	/**
@@ -230,14 +230,15 @@ export class LabelUpdateTracker {
 		labelsVisible: boolean,
 		currentCacheSize: number,
 		isEnriching: boolean,
-		currentLocale: string,
+		currentLocale: string | null | undefined,
 		updateCallback: () => void,
 	): boolean {
+		const normalizedLocale = getDisplayLang(currentLocale);
 		const zoomStateChanged = labelsVisible !== this.lastLabelZoomState;
 		const cacheChanged = currentCacheSize !== this.lastCacheRevision;
 		const enrichmentCompleted = this.lastEnrichingState && !isEnriching;
 		const versionChanged = this.labelVersion !== this.lastLabelVersion;
-		const localeChanged = currentLocale !== this.lastLocale;
+		const localeChanged = normalizedLocale !== this.lastLocale;
 
 		const shouldUpdate =
 			zoomStateChanged ||
@@ -251,7 +252,7 @@ export class LabelUpdateTracker {
 			this.lastLabelZoomState = labelsVisible;
 			this.lastCacheRevision = currentCacheSize;
 			this.lastLabelVersion = this.labelVersion;
-			this.lastLocale = currentLocale;
+			this.lastLocale = normalizedLocale;
 		}
 
 		this.lastEnrichingState = isEnriching;
