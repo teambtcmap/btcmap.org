@@ -843,7 +843,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 					{#if filteredCommunities && filteredCommunities.length}
 						{#each filteredCommunities as community (community.id)}
 							<div class="m-4 space-y-1 transition-transform hover:scale-110">
-								<a href={resolve(`/community/${community.id}`)}>
+								<a href={resolve(`/community/${encodeURIComponent(community.id)}`)}>
 									<img
 										src={`https://btcmap.org/.netlify/images?url=${community.tags['icon:square']}&fit=cover&w=256&h=256`}
 										alt={$_('aria.logoAlt')}

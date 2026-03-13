@@ -12,7 +12,7 @@ const { name, id } = data;
 
 $: routes = [
 	{ name: $_("nav.communities"), url: "/communities" },
-	{ name, url: `/community/${id}` },
+	{ name, url: `/community/${encodeURIComponent(id)}` },
 ];
 </script>
 

@@ -51,7 +51,7 @@ const submitForm = (event: SubmitEvent) => {
 	event.preventDefault();
 	submitting = true;
 
-	const communityUrl = `${window.location.origin}/community/${communityAlias}/merchants`;
+	const communityUrl = `${window.location.origin}/community/${encodeURIComponent(communityAlias)}/merchants`;
 
 	axios
 		.post("/api/gitea/issue", {

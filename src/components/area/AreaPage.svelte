@@ -121,7 +121,7 @@ $: activeSection = slugToSection[currentSection] || Sections.merchants;
 // Handle section change
 const handleSectionChange = (section: Sections) => {
 	const slug = sectionSlugs[section];
-	const areaId = data.id;
+	const areaId = encodeURIComponent(data.id);
 	// eslint-disable-next-line svelte/no-navigation-without-resolve
 	goto(`/${type}/${areaId}/${slug}`);
 };
@@ -473,7 +473,7 @@ let issues: RpcIssue[] = [];
 			{#if alias && type === 'community'}
 				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
-					href={`/communities/map?community=${alias}`}
+					href={`/communities/map?community=${encodeURIComponent(alias)}`}
 					class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
 					>{$_('area.viewOnCommunityMap')} <svg
 						class="ml-1 w-3"
@@ -527,7 +527,7 @@ let issues: RpcIssue[] = [];
 					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<!-- eslint-disable svelte/no-reactive-reassign -->
 					<a
-						href={`/community/${alias}/maintain#verify-form`}
+						href={`/community/${encodeURIComponent(alias)}/maintain#verify-form`}
 						class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
 						on:click|preventDefault={() => {
 							activeSection = Sections.maintain;
