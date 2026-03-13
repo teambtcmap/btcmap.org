@@ -64,7 +64,7 @@ export function getDisplayLang(appLocale: string | null | undefined): string {
 		return locale.split(/[-_]/)[0] || "en";
 	}
 	if (typeof navigator !== "undefined") {
-		const browserLang = navigator.language;
+		const browserLang = navigator.language || navigator.languages?.[0];
 		if (browserLang && !browserLang.startsWith("en")) {
 			return browserLang.split(/[-_]/)[0] || "en";
 		}
