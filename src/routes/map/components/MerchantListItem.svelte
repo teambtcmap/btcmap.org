@@ -5,7 +5,7 @@ import {
 	CATEGORY_COLOR_CLASSES,
 	getIconColorWithFallback,
 } from "$lib/categoryMapping";
-import { _, locale } from "$lib/i18n";
+import { _, getDisplayLang, locale } from "$lib/i18n";
 import {
 	isBoosted as checkBoosted,
 	isUpToDate as checkUpToDate,
@@ -32,7 +32,7 @@ $: hasPaymentMethods =
 $: isVerified = checkUpToDate(displayData, verifiedDate);
 $: isBoosted = checkBoosted(merchant);
 
-$: lang = ($locale ?? "en").split(/[-_]/)[0] || "en";
+$: lang = getDisplayLang($locale);
 $: displayName = displayData?.localized_name?.[lang] || displayData?.name;
 
 $: userLoc = $userLocation.location;

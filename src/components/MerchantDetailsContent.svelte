@@ -3,7 +3,7 @@ import Time from "svelte-time";
 
 import Icon from "$components/Icon.svelte";
 import PaymentMethodIcon from "$components/PaymentMethodIcon.svelte";
-import { _, locale } from "$lib/i18n";
+import { _, getDisplayLang, locale } from "$lib/i18n";
 import type { Place } from "$lib/types";
 import { formatVerifiedHuman } from "$lib/utils";
 
@@ -16,7 +16,7 @@ export let boostLoading: boolean;
 export let onBoostClick: () => void;
 export let isLoading: boolean = false;
 
-$: lang = ($locale ?? "en").split(/[-_]/)[0] || "en";
+$: lang = getDisplayLang($locale);
 $: displayName = merchant.localized_name?.[lang] || merchant.name;
 </script>
 

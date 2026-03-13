@@ -1,6 +1,7 @@
 import type { Marker, TooltipOptions } from "leaflet";
 
 import { LABEL_VISIBLE_ZOOM } from "$lib/constants";
+import { getDisplayLang } from "$lib/i18n";
 import type { LoadedMarkers } from "$lib/map/markers";
 import type { Leaflet, Place } from "$lib/types";
 import { escapeHtml } from "$lib/utils";
@@ -85,7 +86,7 @@ export function getLabelText(
 	fallbackPlace?: Place,
 	locale?: string,
 ): string | null {
-	const lang = locale?.split(/[-_]/)[0];
+	const lang = getDisplayLang(locale);
 	const sources: Array<Place | undefined> = [
 		placeDetailsCache.get(placeId),
 		fallbackPlace,
@@ -97,7 +98,7 @@ export function getLabelText(
 		// Handle empty string as intentional "no name" to prevent fallback
 		if (source.name === "") return null;
 		// Check for localized name first, then fall back to default name
-		if (lang && source.localized_name?.[lang]) {
+		if (source.localized_name?.[lang]) {
 			return escapeHtml(source.localized_name[lang]);
 		}
 		if (source.name) return escapeHtml(source.name);
