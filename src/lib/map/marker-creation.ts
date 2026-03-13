@@ -12,6 +12,7 @@ type CreateMarkerOptions = {
 	placesById: Map<number, Place>;
 	onMarkerClick: (id: number) => void;
 	onLabelUpdate?: () => void;
+	locale?: string | null;
 };
 
 /**
@@ -26,6 +27,7 @@ export const createMarkerWithLabel = ({
 	placesById,
 	onMarkerClick,
 	onLabelUpdate,
+	locale,
 }: CreateMarkerOptions): { marker: Marker; boosted: boolean } => {
 	const commentsCount = place.comments || 0;
 	const icon = place.icon;
@@ -55,6 +57,7 @@ export const createMarkerWithLabel = ({
 		leaflet,
 		place,
 		onLabelUpdate,
+		locale,
 	);
 
 	return { marker, boosted };

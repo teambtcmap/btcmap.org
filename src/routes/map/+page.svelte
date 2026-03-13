@@ -524,6 +524,7 @@ const loadSearchResultMarkers = () => {
 			placeDetailsCache: $merchantList.placeDetailsCache,
 			placesById: $placesById,
 			onMarkerClick: openMerchantDrawer,
+			locale: $locale,
 		});
 
 		if (boosted && !shouldClusterBoostedMarkers()) {
@@ -738,6 +739,7 @@ const loadMarkersInViewport = async () => {
 							boostedLayer,
 							selectedMarkerId,
 							onMarkerClick: openMerchantDrawer,
+							locale: $locale,
 						});
 					}
 				},
@@ -789,6 +791,7 @@ const loadMarkersInViewportFallback = (bounds: LatLngBounds) => {
 			placesById: $placesById,
 			onMarkerClick: openMerchantDrawer,
 			onLabelUpdate: () => labelTracker.incrementVersion(),
+			locale: $locale,
 		});
 
 		// Route to appropriate layer based on boost status and zoom level
