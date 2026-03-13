@@ -59,9 +59,9 @@ export { locale, _ };
 // still see localized place names even when the UI has no translation for
 // their language. Returns "en" when both resolve to English.
 export function getDisplayLang(appLocale: string | null | undefined): string {
-	const locale = appLocale ?? "en";
-	if (!locale.startsWith("en")) {
-		return locale.split(/[-_]/)[0] || "en";
+	const effectiveLocale = appLocale ?? "en";
+	if (!effectiveLocale.startsWith("en")) {
+		return effectiveLocale.split(/[-_]/)[0] || "en";
 	}
 	if (typeof navigator !== "undefined") {
 		const browserLang = navigator.language || navigator.languages?.[0];
