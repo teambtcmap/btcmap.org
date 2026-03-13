@@ -138,14 +138,7 @@ let name: string | undefined;
 
 let localizedName: string | undefined;
 
-// Returns the best language code to use for localized name lookups.
-// Uses the app locale when non-English; falls back to navigator.language
-// so users with non-English browsers see localized names even when the UI
-// has no translation for their language.
-
-$: {
-	localizedName = data.localizedName?.[getDisplayLang($locale)];
-}
+$: localizedName = data.localizedName?.[getDisplayLang($locale)];
 
 $: icon = data.icon;
 $: address = data.address;

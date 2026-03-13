@@ -16,8 +16,8 @@ export let boostLoading: boolean;
 export let onBoostClick: () => void;
 export let isLoading: boolean = false;
 
-$: lang = getDisplayLang($locale);
-$: displayName = merchant.localized_name?.[lang] || merchant.name;
+$: displayName =
+	merchant.localized_name?.[getDisplayLang($locale)] || merchant.name;
 </script>
 
 <div class="space-y-4">

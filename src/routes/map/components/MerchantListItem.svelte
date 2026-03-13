@@ -32,8 +32,8 @@ $: hasPaymentMethods =
 $: isVerified = checkUpToDate(displayData, verifiedDate);
 $: isBoosted = checkBoosted(merchant);
 
-$: lang = getDisplayLang($locale);
-$: displayName = displayData?.localized_name?.[lang] || displayData?.name;
+$: displayName =
+	displayData?.localized_name?.[getDisplayLang($locale)] || displayData?.name;
 
 $: userLoc = $userLocation.location;
 $: usesMetric = $userLocation.usesMetricSystem;
