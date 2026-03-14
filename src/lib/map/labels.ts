@@ -84,9 +84,8 @@ export function getLabelText(
 	placeDetailsCache: Map<number, Place>,
 	placesById: Map<number, Place>,
 	fallbackPlace?: Place,
-	locale?: string | null,
+	lang: string = "en",
 ): string | null {
-	const lang = getDisplayLang(locale);
 	const sources: Array<Place | undefined> = [
 		placeDetailsCache.get(placeId),
 		fallbackPlace,
@@ -119,6 +118,7 @@ type AttachMarkerLabelOptions = {
 	fallbackPlace?: Place;
 	signalUpdate?: () => void;
 	locale?: string | null;
+	lang?: string;
 };
 
 /**
@@ -135,6 +135,7 @@ export function attachMarkerLabelIfVisible({
 	fallbackPlace,
 	signalUpdate,
 	locale,
+	lang,
 }: AttachMarkerLabelOptions): boolean {
 	if (currentZoom < LABEL_VISIBLE_ZOOM) return false;
 
@@ -143,7 +144,7 @@ export function attachMarkerLabelIfVisible({
 		placeDetailsCache,
 		placesById,
 		fallbackPlace,
-		locale,
+		lang ?? getDisplayLang(locale),
 	);
 	if (labelText) {
 		bindMarkerLabelTooltip(marker, labelText, boosted, leaflet);
@@ -177,6 +178,9 @@ export function updateMarkerLabels(
 		return;
 	}
 
+	// Normalize locale once for the entire batch instead of per-marker
+	const lang = getDisplayLang(locale);
+
 	// Update or create tooltips for all visible markers
 	Object.entries(loadedMarkers).forEach(([placeId, marker]) => {
 		const placeIdNum = Number(placeId);
@@ -193,7 +197,7 @@ export function updateMarkerLabels(
 			boosted,
 			leaflet,
 			fallbackPlace: sourcePlace,
-			locale,
+			lang,
 		});
 
 		// Clean up stale tooltips if label text is no longer available
