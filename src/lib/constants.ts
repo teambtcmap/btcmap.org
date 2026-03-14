@@ -85,6 +85,9 @@ export const DEFAULT_MAP_LAT = 12.11209;
 export const DEFAULT_MAP_LNG = -68.91119;
 export const DEFAULT_MAP_ZOOM = 15;
 
+// Zoom level used when deep-linking to a merchant with no coordinates in the URL
+export const MERCHANT_DEEP_LINK_ZOOM = 15;
+
 export const GradeTable = `<table>
 <thead>
     <tr>

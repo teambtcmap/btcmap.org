@@ -29,6 +29,7 @@ import {
 	MAP_FIT_BOUNDS_PADDING,
 	MARKER_CLICK_THROTTLE,
 	MAX_LOADED_MARKERS,
+	MERCHANT_DEEP_LINK_ZOOM,
 	MERCHANT_DRAWER_WIDTH,
 	MERCHANT_LIST_LOW_ZOOM,
 	MERCHANT_LIST_MAX_ITEMS,
@@ -65,6 +66,7 @@ import {
 	getVisiblePlaces,
 	getZoomBehavior,
 } from "$lib/map/viewport";
+import { parseMerchantHash } from "$lib/merchantDrawerHash";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import type { MerchantListMode } from "$lib/merchantListStore";
 import { merchantList } from "$lib/merchantListStore";
@@ -1126,12 +1128,13 @@ onMount(async () => {
 		leaflet.control.zoom({ position: "topright" }).addTo(map);
 
 		// Setup map in logical steps
-		const { baseMaps, activeLayer } = await setupMapInitialView();
+		const { baseMaps, activeLayer, hashHadCoords } =
+			await setupMapInitialView();
 		setupTileLayers(activeLayer);
 		setupTileLoadingIndicators();
 		setupMapClickHandlers();
 		setupMapControls(LocateControl, baseMaps, get(_));
-		setupMapFinalization(get(_));
+		setupMapFinalization(get(_), hashHadCoords);
 
 		unsubscribeLocale = _.subscribe(() => {
 			applyMapControlTranslations(get(_));
@@ -1144,6 +1147,7 @@ onMount(async () => {
 const setupMapInitialView = async (): Promise<{
 	baseMaps: Record<string, Layer>;
 	activeLayer: unknown;
+	hashHadCoords: boolean;
 }> => {
 	// Helper function to set mapLoaded after view is set
 	const setMapViewAndMarkLoaded = () => {
@@ -1153,21 +1157,37 @@ const setupMapInitialView = async (): Promise<{
 
 	// use url hash if present
 	if (location.hash) {
-		try {
-			// Extract only the map coordinates part (before any & parameters)
-			const hashPart = location.hash.split("&")[0];
-			const coords = hashPart.split("/");
-			map.setView(
-				[Number(coords[1]), Number(coords[2])],
-				Number(coords[0].slice(1)),
-			);
-			setMapViewAndMarkLoaded();
-		} catch (error) {
-			map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
-			setMapViewAndMarkLoaded();
-			errToast(get(_)("errors.mapView"));
-			console.error(error);
+		// Extract only the map coordinates part (before any & parameters)
+		const hashPart = location.hash.split("&")[0];
+		const coords = hashPart.split("/");
+		// Valid map coords hash has format #zoom/lat/lon (3 parts, numeric)
+		const hasCoords =
+			coords.length === 3 &&
+			!Number.isNaN(Number(coords[0].slice(1))) &&
+			!Number.isNaN(Number(coords[1])) &&
+			!Number.isNaN(Number(coords[2]));
+
+		if (hasCoords) {
+			try {
+				map.setView(
+					[Number(coords[1]), Number(coords[2])],
+					Number(coords[0].slice(1)),
+				);
+				setMapViewAndMarkLoaded();
+			} catch (error) {
+				map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
+				setMapViewAndMarkLoaded();
+				errToast(get(_)("errors.mapView"));
+				console.error(error);
+			}
+			// add tiles and basemaps
+			const { baseMaps, activeLayer } = layers(leaflet, map);
+			currentLayerName =
+				theme.current === "dark" ? "Carto Dark Matter" : "OpenFreeMap Liberty";
+			return { baseMaps, activeLayer, hashHadCoords: true };
 		}
+		// Hash present but no coords (e.g. #merchant=123) — fall through to
+		// geolocation/default, and pan to merchant later in setupMapFinalization
 	}
 
 	// set URL lat/long query view if it exists and is valid
@@ -1230,7 +1250,7 @@ const setupMapInitialView = async (): Promise<{
 	currentLayerName =
 		theme.current === "dark" ? "Carto Dark Matter" : "OpenFreeMap Liberty";
 
-	return { baseMaps, activeLayer };
+	return { baseMaps, activeLayer, hashHadCoords: false };
 };
 
 const setupTileLayers = (activeLayer: unknown) => {
@@ -1352,7 +1372,10 @@ const setupMapControls = (
 	});
 };
 
-const setupMapFinalization = (translate: (key: string) => string) => {
+const setupMapFinalization = (
+	translate: (key: string) => string,
+	hashHadCoords: boolean,
+) => {
 	const mapControlsT = {
 		fullScreen: translate("mapControls.fullScreen"),
 		zoomIn: translate("mapControls.zoomIn"),
@@ -1372,6 +1395,26 @@ const setupMapFinalization = (translate: (key: string) => string) => {
 
 	// Sync drawer state from URL hash on initial page load
 	merchantDrawer.syncFromHash();
+
+	// If the URL had a merchant ID but no map coordinates, pan to the merchant
+	if (!hashHadCoords) {
+		const { merchantId, isOpen } = parseMerchantHash();
+		if (isOpen && merchantId) {
+			const place = get(placesById).get(merchantId);
+			if (place) {
+				map.setView([place.lat, place.lon], MERCHANT_DEEP_LINK_ZOOM);
+			} else {
+				// Places may still be loading — subscribe and pan once merchant appears
+				const unsub = placesById.subscribe(($placesById) => {
+					const p = $placesById.get(merchantId);
+					if (p) {
+						map.setView([p.lat, p.lon], MERCHANT_DEEP_LINK_ZOOM);
+						unsub();
+					}
+				});
+			}
+		}
+	}
 };
 
 onDestroy(async () => {
