@@ -261,6 +261,8 @@ const handleHashChange = () => {
 // Track current search request for cancellation
 let searchAbortController: AbortController | null = null;
 let unsubscribeLocale: (() => void) | null = null;
+let deepLinkPanUnsub: (() => void) | null = null;
+let deepLinkPanTimer: ReturnType<typeof setTimeout> | null = null;
 
 // Core search function
 const executeSearch = async (query: string) => {
@@ -1402,16 +1404,30 @@ const setupMapFinalization = (
 		if (isOpen && merchantId) {
 			const place = get(placesById).get(merchantId);
 			if (place) {
-				map.setView([place.lat, place.lon], MERCHANT_DEEP_LINK_ZOOM);
+				navigateToPlace(place, {
+					targetZoom: MERCHANT_DEEP_LINK_ZOOM,
+					spiderfyCluster: true,
+				});
 			} else {
 				// Places may still be loading — subscribe and pan once merchant appears
-				const unsub = placesById.subscribe(($placesById) => {
+				deepLinkPanUnsub = placesById.subscribe(($placesById) => {
 					const p = $placesById.get(merchantId);
 					if (p) {
-						map.setView([p.lat, p.lon], MERCHANT_DEEP_LINK_ZOOM);
-						unsub();
+						navigateToPlace(p, {
+							targetZoom: MERCHANT_DEEP_LINK_ZOOM,
+							spiderfyCluster: true,
+						});
+						if (deepLinkPanTimer) clearTimeout(deepLinkPanTimer);
+						deepLinkPanUnsub?.();
+						deepLinkPanUnsub = null;
 					}
 				});
+				// Safety fallback: unsubscribe after 10s if merchant never appears
+				deepLinkPanTimer = setTimeout(() => {
+					deepLinkPanUnsub?.();
+					deepLinkPanUnsub = null;
+					deepLinkPanTimer = null;
+				}, 10_000);
 			}
 		}
 	}
@@ -1450,6 +1466,11 @@ onDestroy(async () => {
 	}
 
 	unsubscribeLocale?.();
+
+	// Clean up deep-link pan subscription and timeout if still pending
+	if (deepLinkPanTimer) clearTimeout(deepLinkPanTimer);
+	deepLinkPanUnsub?.();
+	deepLinkPanUnsub = null;
 });
 </script>
 

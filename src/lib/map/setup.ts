@@ -16,10 +16,22 @@ import { errToast, humanizeIconName } from "$lib/utils";
 import { replaceState } from "$app/navigation";
 
 export const updateMapHash = (zoom: number, center: LatLng): void => {
-	// Preserve any existing query parameters (like &merchant=123)
+	// Preserve any existing merchant/view parameters
+	// Hash formats:
+	//   #zoom/lat/lon                     → coords only, no params
+	//   #zoom/lat/lon&merchant=123        → coords + params (separated by &)
+	//   #merchant=123                     → params only (no coords yet)
 	const currentHash = window.location.hash.substring(1);
 	const ampIndex = currentHash.indexOf("&");
-	const existingParams = ampIndex !== -1 ? currentHash.substring(ampIndex) : "";
+
+	let existingParams = "";
+	if (ampIndex !== -1) {
+		// Has ampersand — params are after it
+		existingParams = currentHash.substring(ampIndex);
+	} else if (!currentHash.includes("/")) {
+		// No slash means no map coords — entire hash is params (e.g. merchant=123)
+		existingParams = currentHash ? `&${currentHash}` : "";
+	}
 
 	const newHash = `#${zoom}/${center.lat.toFixed(5)}/${center.lng.toFixed(5)}${existingParams}`;
 	// Use SvelteKit's replaceState to preserve pathname, search params (e.g. language=bg), and hash
