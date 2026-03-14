@@ -1,5 +1,6 @@
 import { error } from "@sveltejs/kit";
 
+import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
 import api from "$lib/axios";
 
 import type { RequestHandler } from "./$types";
@@ -11,9 +12,11 @@ export const GET: RequestHandler = async ({ url }) => {
 		error(400, "Missing required parameter: name");
 	}
 
+	const fields = buildFieldsParam(PLACE_FIELD_SETS.LIST_ITEM);
+
 	try {
 		const response = await api.get(
-			`https://api.btcmap.org/v4/places/search/?name=${encodeURIComponent(query)}`,
+			`https://api.btcmap.org/v4/places/search/?name=${encodeURIComponent(query)}&fields=${fields}`,
 		);
 
 		return new Response(JSON.stringify(response.data), {

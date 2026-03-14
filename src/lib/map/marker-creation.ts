@@ -12,6 +12,7 @@ type CreateMarkerOptions = {
 	placesById: Map<number, Place>;
 	onMarkerClick: (id: number) => void;
 	onLabelUpdate?: () => void;
+	locale?: string | null;
 };
 
 /**
@@ -26,6 +27,7 @@ export const createMarkerWithLabel = ({
 	placesById,
 	onMarkerClick,
 	onLabelUpdate,
+	locale,
 }: CreateMarkerOptions): { marker: Marker; boosted: boolean } => {
 	const commentsCount = place.comments || 0;
 	const icon = place.icon;
@@ -45,17 +47,18 @@ export const createMarkerWithLabel = ({
 		onMarkerClick: (id) => onMarkerClick(Number(id)),
 	});
 
-	attachMarkerLabelIfVisible(
+	attachMarkerLabelIfVisible({
 		marker,
-		place.id,
+		placeId: place.id,
 		currentZoom,
 		placeDetailsCache,
 		placesById,
 		boosted,
 		leaflet,
-		place,
-		onLabelUpdate,
-	);
+		fallbackPlace: place,
+		signalUpdate: onLabelUpdate,
+		locale,
+	});
 
 	return { marker, boosted };
 };

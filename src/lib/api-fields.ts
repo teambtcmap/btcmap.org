@@ -59,10 +59,10 @@ export const PLACE_FIELD_SETS = {
 		...PLACE_FIELDS.POPUP,
 	],
 	LIST_ITEM: [
+		...PLACE_FIELDS.CORE,
 		"name",
+		"localized_name",
 		"address",
-		"icon",
-		"boosted_until",
 		"verified_at",
 		"osm:payment:onchain",
 		"osm:payment:lightning",

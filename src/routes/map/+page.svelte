@@ -37,7 +37,7 @@ import {
 	VIEWPORT_BATCH_SIZE,
 	VIEWPORT_BUFFER_PERCENT,
 } from "$lib/constants";
-import { _ } from "$lib/i18n";
+import { _, locale } from "$lib/i18n";
 import { processBatchOnMainThread } from "$lib/map/batch-processor";
 import { loadMapDependencies } from "$lib/map/imports";
 import { LabelUpdateTracker, updateMarkerLabels } from "$lib/map/labels";
@@ -524,6 +524,7 @@ const loadSearchResultMarkers = () => {
 			placeDetailsCache: $merchantList.placeDetailsCache,
 			placesById: $placesById,
 			onMarkerClick: openMerchantDrawer,
+			locale: $locale,
 		});
 
 		if (boosted && !shouldClusterBoostedMarkers()) {
@@ -738,6 +739,7 @@ const loadMarkersInViewport = async () => {
 							boostedLayer,
 							selectedMarkerId,
 							onMarkerClick: openMerchantDrawer,
+							locale: $locale,
 						});
 					}
 				},
@@ -789,6 +791,7 @@ const loadMarkersInViewportFallback = (bounds: LatLngBounds) => {
 			placesById: $placesById,
 			onMarkerClick: openMerchantDrawer,
 			onLabelUpdate: () => labelTracker.incrementVersion(),
+			locale: $locale,
 		});
 
 		// Route to appropriate layer based on boost status and zoom level
@@ -1075,6 +1078,7 @@ let labelTracker = new LabelUpdateTracker(
 	currentZoom,
 	$merchantList.placeDetailsCache.size,
 	$merchantList.isEnrichingDetails,
+	$locale,
 );
 
 // Derived reactive state for label visibility
@@ -1084,16 +1088,23 @@ $: isEnriching = $merchantList.isEnrichingDetails;
 
 // Update marker labels when relevant state changes
 $: if (mapLoaded && elementsLoaded && leaflet) {
-	labelTracker.shouldUpdate(labelsVisible, cacheSize, isEnriching, () => {
-		updateMarkerLabels(
-			loadedMarkers,
-			currentZoom,
-			$merchantList.placeDetailsCache,
-			$placesById,
-			boostedLayerMarkerIds,
-			leaflet,
-		);
-	});
+	labelTracker.shouldUpdate(
+		labelsVisible,
+		cacheSize,
+		isEnriching,
+		$locale,
+		() => {
+			updateMarkerLabels(
+				loadedMarkers,
+				currentZoom,
+				$merchantList.placeDetailsCache,
+				$placesById,
+				boostedLayerMarkerIds,
+				leaflet,
+				$locale,
+			);
+		},
+	);
 }
 
 // Initialize elements when places data is ready and map is loaded

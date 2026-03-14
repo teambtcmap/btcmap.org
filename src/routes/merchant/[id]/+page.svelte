@@ -17,7 +17,7 @@ import ShowTags from "$components/ShowTags.svelte";
 import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
 import TaggingIssues from "$components/TaggingIssues.svelte";
 import TopButton from "$components/TopButton.svelte";
-import { _, locale } from "$lib/i18n";
+import { _, getDisplayLang, locale } from "$lib/i18n";
 import { loadMapDependencies } from "$lib/map/imports";
 import {
 	attribution,
@@ -138,24 +138,7 @@ let name: string | undefined;
 
 let localizedName: string | undefined;
 
-// Returns the best language code to use for the API request.
-// Uses the app locale when non-English (e.g. pt-BR, bg).
-// When the app locale is English (whether by default or explicit choice),
-// falls back to navigator.language so users with non-English browsers can
-// still see localized merchant names even when the UI has no translation for
-// their language. Returns null when both resolve to English.
-function getApiLang(appLocale: string): string | null {
-	if (!appLocale.startsWith("en")) return appLocale;
-	if (typeof navigator === "undefined") return null;
-	const browserLang = navigator.language;
-	if (!browserLang.startsWith("en")) return browserLang;
-	return null;
-}
-
-$: {
-	const lang = (getApiLang($locale ?? "en") ?? "en").split(/[-_]/)[0] || "en";
-	localizedName = data.localizedName?.[lang];
-}
+$: localizedName = data.localizedName?.[getDisplayLang($locale)];
 
 $: icon = data.icon;
 $: address = data.address;

@@ -20,6 +20,7 @@ type ProcessBatchOptions = {
 	boostedLayer: FeatureGroup;
 	selectedMarkerId: number | null;
 	onMarkerClick: (id: number) => void;
+	locale?: string | null;
 };
 
 /**
@@ -39,6 +40,7 @@ export const processBatchOnMainThread = ({
 	boostedLayer,
 	selectedMarkerId,
 	onMarkerClick,
+	locale,
 }: ProcessBatchOptions): void => {
 	const regularMarkersToAdd: Marker[] = [];
 	const boostedMarkersToAdd: Marker[] = [];
@@ -66,16 +68,17 @@ export const processBatchOnMainThread = ({
 			onMarkerClick: (id) => onMarkerClick(Number(id)),
 		});
 
-		attachMarkerLabelIfVisible(
+		attachMarkerLabelIfVisible({
 			marker,
-			element.id,
+			placeId: element.id,
 			currentZoom,
 			placeDetailsCache,
 			placesById,
-			Boolean(iconData.boosted),
+			boosted: Boolean(iconData.boosted),
 			leaflet,
-			placesById.get(element.id),
-		);
+			fallbackPlace: placesById.get(element.id),
+			locale,
+		});
 
 		if (iconData.boosted && !shouldClusterBoostedMarkers()) {
 			boostedMarkersToAdd.push(marker);

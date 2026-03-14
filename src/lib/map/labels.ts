@@ -1,6 +1,7 @@
 import type { Marker, TooltipOptions } from "leaflet";
 
 import { LABEL_VISIBLE_ZOOM } from "$lib/constants";
+import { getDisplayLang } from "$lib/i18n";
 import type { LoadedMarkers } from "$lib/map/markers";
 import type { Leaflet, Place } from "$lib/types";
 import { escapeHtml } from "$lib/utils";
@@ -83,6 +84,7 @@ export function getLabelText(
 	placeDetailsCache: Map<number, Place>,
 	placesById: Map<number, Place>,
 	fallbackPlace?: Place,
+	lang: string = "en",
 ): string | null {
 	const sources: Array<Place | undefined> = [
 		placeDetailsCache.get(placeId),
@@ -94,7 +96,10 @@ export function getLabelText(
 		if (!source) continue;
 		// Handle empty string as intentional "no name" to prevent fallback
 		if (source.name === "") return null;
-		// Escape HTML to prevent XSS (Leaflet tooltips treat strings as HTML)
+		// Check for localized name first, then fall back to default name
+		if (source.localized_name?.[lang]) {
+			return escapeHtml(source.localized_name[lang]);
+		}
 		if (source.name) return escapeHtml(source.name);
 		if (source["osm:amenity"]) return escapeHtml(source["osm:amenity"]);
 	}
@@ -102,20 +107,36 @@ export function getLabelText(
 	return null;
 }
 
+type AttachMarkerLabelOptions = {
+	marker: Marker;
+	placeId: number;
+	currentZoom: number;
+	placeDetailsCache: Map<number, Place>;
+	placesById: Map<number, Place>;
+	boosted: boolean;
+	leaflet: Leaflet;
+	fallbackPlace?: Place;
+	signalUpdate?: () => void;
+	locale?: string | null;
+	lang?: string;
+};
+
 /**
  * Attach label tooltip to marker if zoom level allows visibility
  */
-export function attachMarkerLabelIfVisible(
-	marker: Marker,
-	placeId: number,
-	currentZoom: number,
-	placeDetailsCache: Map<number, Place>,
-	placesById: Map<number, Place>,
-	boosted: boolean,
-	leaflet: Leaflet,
-	fallbackPlace?: Place,
-	signalUpdate?: () => void,
-): boolean {
+export function attachMarkerLabelIfVisible({
+	marker,
+	placeId,
+	currentZoom,
+	placeDetailsCache,
+	placesById,
+	boosted,
+	leaflet,
+	fallbackPlace,
+	signalUpdate,
+	locale,
+	lang,
+}: AttachMarkerLabelOptions): boolean {
 	if (currentZoom < LABEL_VISIBLE_ZOOM) return false;
 
 	const labelText = getLabelText(
@@ -123,6 +144,7 @@ export function attachMarkerLabelIfVisible(
 		placeDetailsCache,
 		placesById,
 		fallbackPlace,
+		lang ?? getDisplayLang(locale),
 	);
 	if (labelText) {
 		bindMarkerLabelTooltip(marker, labelText, boosted, leaflet);
@@ -144,6 +166,7 @@ export function updateMarkerLabels(
 	placesById: Map<number, Place>,
 	boostedLayerMarkerIds: Set<string>,
 	leaflet: Leaflet,
+	locale?: string | null,
 ): void {
 	if (currentZoom < LABEL_VISIBLE_ZOOM) {
 		// Remove all tooltips when zoomed out
@@ -155,6 +178,9 @@ export function updateMarkerLabels(
 		return;
 	}
 
+	// Normalize locale once for the entire batch instead of per-marker
+	const lang = getDisplayLang(locale);
+
 	// Update or create tooltips for all visible markers
 	Object.entries(loadedMarkers).forEach(([placeId, marker]) => {
 		const placeIdNum = Number(placeId);
@@ -162,16 +188,17 @@ export function updateMarkerLabels(
 		const boosted =
 			isPlaceBoosted(sourcePlace) || boostedLayerMarkerIds.has(placeId);
 
-		const attached = attachMarkerLabelIfVisible(
+		const attached = attachMarkerLabelIfVisible({
 			marker,
-			placeIdNum,
+			placeId: placeIdNum,
 			currentZoom,
 			placeDetailsCache,
 			placesById,
 			boosted,
 			leaflet,
-			sourcePlace,
-		);
+			fallbackPlace: sourcePlace,
+			lang,
+		});
 
 		// Clean up stale tooltips if label text is no longer available
 		if (!attached && marker.getTooltip()) {
@@ -188,6 +215,7 @@ export class LabelUpdateTracker {
 	private lastLabelZoomState: boolean;
 	private lastCacheRevision: number;
 	private lastEnrichingState: boolean;
+	private lastLocale: string;
 	private labelVersion: number = 0;
 	private lastLabelVersion: number = 0;
 
@@ -195,10 +223,12 @@ export class LabelUpdateTracker {
 		initialZoom: number,
 		initialCacheSize: number,
 		initialEnrichingState: boolean,
+		initialLocale?: string | null,
 	) {
 		this.lastLabelZoomState = initialZoom >= LABEL_VISIBLE_ZOOM;
 		this.lastCacheRevision = initialCacheSize;
 		this.lastEnrichingState = initialEnrichingState;
+		this.lastLocale = getDisplayLang(initialLocale);
 	}
 
 	/**
@@ -216,21 +246,29 @@ export class LabelUpdateTracker {
 		labelsVisible: boolean,
 		currentCacheSize: number,
 		isEnriching: boolean,
+		currentLocale: string | null | undefined,
 		updateCallback: () => void,
 	): boolean {
+		const normalizedLocale = getDisplayLang(currentLocale);
 		const zoomStateChanged = labelsVisible !== this.lastLabelZoomState;
 		const cacheChanged = currentCacheSize !== this.lastCacheRevision;
 		const enrichmentCompleted = this.lastEnrichingState && !isEnriching;
 		const versionChanged = this.labelVersion !== this.lastLabelVersion;
+		const localeChanged = normalizedLocale !== this.lastLocale;
 
 		const shouldUpdate =
-			zoomStateChanged || cacheChanged || enrichmentCompleted || versionChanged;
+			zoomStateChanged ||
+			cacheChanged ||
+			enrichmentCompleted ||
+			versionChanged ||
+			localeChanged;
 
 		if (shouldUpdate) {
 			updateCallback();
 			this.lastLabelZoomState = labelsVisible;
 			this.lastCacheRevision = currentCacheSize;
 			this.lastLabelVersion = this.labelVersion;
+			this.lastLocale = normalizedLocale;
 		}
 
 		this.lastEnrichingState = isEnriching;
