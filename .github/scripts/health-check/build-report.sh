@@ -117,7 +117,7 @@ render_findings() {
     for t in "${RECURRING_LIST[@]}"; do
       # Keep only the short label before any " —", " (", or " —" suffix
       local kw
-      kw=$(echo "$t" | sed 's/\s*(.*//; s/\s*—.*//' | xargs)
+      kw=$(echo "$t" | sed 's/\s*(.*//; s/\s*—.*//' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
       keywords="${keywords:+$keywords, }$kw"
     done
     echo "_Recurring (${#RECURRING_LIST[@]}): $keywords"
