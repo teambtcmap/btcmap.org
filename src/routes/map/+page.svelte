@@ -235,24 +235,18 @@ const handleHashChange = () => {
 	// Sync store from hash - single source of truth
 	merchantDrawer.syncFromHash();
 
-	const hash = window.location.hash.substring(1);
-	const hasDrawer = hash.includes("merchant=");
+	const { merchantId, isOpen } = parseMerchantHash();
 
-	if (!hasDrawer && selectedMarkerId) {
+	if (!isOpen && selectedMarkerId) {
 		clearMarkerSelection(loadedMarkers, selectedMarkerId);
 		selectedMarkerId = null;
-	} else if (hasDrawer) {
-		const params = new URLSearchParams(hash.substring(hash.indexOf("&") + 1));
-		const merchantParam = params.get("merchant");
-		if (merchantParam) {
-			const merchantId = Number(merchantParam);
-			if (merchantId !== selectedMarkerId) {
-				if (selectedMarkerId) {
-					clearMarkerSelection(loadedMarkers, selectedMarkerId);
-				}
-				selectedMarkerId = merchantId;
-				highlightMarker(loadedMarkers, merchantId);
+	} else if (isOpen && merchantId) {
+		if (merchantId !== selectedMarkerId) {
+			if (selectedMarkerId) {
+				clearMarkerSelection(loadedMarkers, selectedMarkerId);
 			}
+			selectedMarkerId = merchantId;
+			highlightMarker(loadedMarkers, merchantId);
 		}
 	}
 };
@@ -1055,15 +1049,10 @@ const initializeElements = async () => {
 	elementsLoaded = true;
 
 	if (browser) {
-		const hash = window.location.hash.substring(1);
-		if (hash.includes("merchant=")) {
-			const params = new URLSearchParams(hash.substring(hash.indexOf("&") + 1));
-			const merchantParam = params.get("merchant");
-			if (merchantParam) {
-				const merchantId = Number(merchantParam);
-				selectedMarkerId = merchantId;
-				highlightMarker(loadedMarkers, merchantId);
-			}
+		const { merchantId, isOpen } = parseMerchantHash();
+		if (isOpen && merchantId) {
+			selectedMarkerId = merchantId;
+			highlightMarker(loadedMarkers, merchantId);
 		}
 
 		// Initialize merchant list if already zoomed in

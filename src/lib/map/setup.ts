@@ -25,11 +25,11 @@ export const updateMapHash = (zoom: number, center: LatLng): void => {
 	const ampIndex = currentHash.indexOf("&");
 
 	let existingParams = "";
-	if (ampIndex !== -1) {
-		// Has ampersand — params are after it
+	if (ampIndex !== -1 && currentHash.substring(0, ampIndex).includes("/")) {
+		// Has coords before & — params are after it (e.g. 15/10.2/-67.5&merchant=123)
 		existingParams = currentHash.substring(ampIndex);
 	} else if (!currentHash.includes("/")) {
-		// No slash means no map coords — entire hash is params (e.g. merchant=123)
+		// No coords at all — entire hash is params (e.g. merchant=123 or merchant=123&view=boost)
 		existingParams = currentHash ? `&${currentHash}` : "";
 	}
 
