@@ -396,10 +396,8 @@ const initializeData = async () => {
 };
 
 $: $users?.length &&
-	$events &&
-	$events.length &&
-	$places &&
-	$places.length &&
+	$events?.length &&
+	$places?.length &&
 	initialRenderComplete &&
 	!dataInitialized &&
 	// eslint-disable-next-line svelte/infinite-reactive-loop

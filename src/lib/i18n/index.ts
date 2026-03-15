@@ -50,7 +50,7 @@ init({
 });
 
 // Export locale store and translation function for components
-export { locale, _ };
+export { _, locale };
 
 // Returns the best language code to use for localized name lookups.
 // Uses the app locale when non-English (e.g. pt-BR, bg, ru).

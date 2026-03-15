@@ -119,16 +119,11 @@ let continentChart: Chart<"doughnut", number[], string>;
 const populateChart = () => {
 	if (
 		africa?.length &&
-		asia &&
-		asia.length &&
-		europe &&
-		europe.length &&
-		northAmerica &&
-		northAmerica.length &&
-		oceania &&
-		oceania.length &&
-		southAmerica &&
-		southAmerica.length
+		asia?.length &&
+		europe?.length &&
+		northAmerica?.length &&
+		oceania?.length &&
+		southAmerica?.length
 	) {
 		// Use Chart.getChart to find and destroy existing chart instance
 		const existingChart = Chart.getChart(continentChartCanvas);
@@ -212,8 +207,7 @@ const chartSync = (status: boolean) => {
 };
 
 $: $areas?.length &&
-	communities &&
-	communities.length &&
+	communities?.length &&
 	initialRenderComplete &&
 	chartSync($syncStatus);
 

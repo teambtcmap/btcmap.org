@@ -202,8 +202,7 @@ const initializeCommunities = () => {
 };
 
 $: $areas?.length &&
-	$reports &&
-	$reports.length &&
+	$reports?.length &&
 	mapLoaded &&
 	!communitiesLoaded &&
 	initializeCommunities();

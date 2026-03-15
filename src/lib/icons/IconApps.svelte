@@ -18,6 +18,7 @@ export let icon: AppIconName;
 export let w = "24";
 export let h = "24";
 let className: string | undefined = undefined;
+
 export { className as class };
 </script>
 

@@ -4,6 +4,7 @@ import IconIconify from "@iconify/svelte";
 export let w: string;
 export let h: string;
 let className: string | undefined = undefined;
+
 export { className as class };
 export let icon: string;
 export let type: "material" | "fa" = "material";

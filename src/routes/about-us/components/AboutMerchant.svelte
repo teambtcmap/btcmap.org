@@ -12,8 +12,7 @@ export let tooltip: string | undefined;
 let merchantTooltip: HTMLAnchorElement;
 
 $: merchantTooltip &&
-	tooltip &&
-	tooltip.length &&
+	tooltip?.length &&
 	tippy([merchantTooltip], {
 		content: tooltip,
 	});
