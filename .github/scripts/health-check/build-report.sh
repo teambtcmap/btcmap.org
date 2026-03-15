@@ -120,7 +120,7 @@ render_findings() {
       kw=$(echo "$t" | sed 's/\s*(.*//; s/\s*—.*//' | xargs)
       keywords="${keywords:+$keywords, }$kw"
     done
-    echo "_Recurring (${#RECURRING_LIST[@]}): $keywords_"
+    echo "_Recurring (${#RECURRING_LIST[@]}): $keywords"
     echo ""
   fi
 }
