@@ -29,7 +29,6 @@ import {
 	MAP_FIT_BOUNDS_PADDING,
 	MARKER_CLICK_THROTTLE,
 	MAX_LOADED_MARKERS,
-	MERCHANT_DEEP_LINK_ZOOM,
 	MERCHANT_DRAWER_WIDTH,
 	MERCHANT_LIST_LOW_ZOOM,
 	MERCHANT_LIST_MAX_ITEMS,
@@ -1405,7 +1404,7 @@ const setupMapFinalization = (
 			const place = get(placesById).get(merchantId);
 			if (place) {
 				navigateToPlace(place, {
-					targetZoom: MERCHANT_DEEP_LINK_ZOOM,
+					targetZoom: DEFAULT_MAP_ZOOM,
 					spiderfyCluster: true,
 				});
 			} else {
@@ -1414,7 +1413,7 @@ const setupMapFinalization = (
 					const p = $placesById.get(merchantId);
 					if (p) {
 						navigateToPlace(p, {
-							targetZoom: MERCHANT_DEEP_LINK_ZOOM,
+							targetZoom: DEFAULT_MAP_ZOOM,
 							spiderfyCluster: true,
 						});
 						if (deepLinkPanTimer) clearTimeout(deepLinkPanTimer);
