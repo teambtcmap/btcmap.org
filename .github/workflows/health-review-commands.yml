@@ -1,0 +1,109 @@
+name: Health Review Commands
+
+on:
+  issue_comment:
+    types: [created]
+
+concurrency:
+  group: health-review-commands-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+permissions:
+  issues: write
+  contents: read
+  actions: write
+
+jobs:
+  handle-command:
+    if: >-
+      contains(github.event.issue.labels.*.name, 'health-report') &&
+      startsWith(github.event.comment.body, '/') &&
+      (github.event.comment.author_association == 'OWNER' ||
+       github.event.comment.author_association == 'MEMBER' ||
+       github.event.comment.author_association == 'COLLABORATOR')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Handle command
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const body = context.payload.comment.body.trim();
+            const firstLine = body.split('\n')[0].trim();
+
+            if (firstLine === '/run-now') {
+              try {
+                await github.rest.actions.createWorkflowDispatch({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  workflow_id: 'ai-health-review.yml',
+                  ref: 'main'
+                });
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: '🚀 **Health review triggered.** Check the [Actions tab](../../actions/workflows/ai-health-review.yml) for progress.'
+                });
+              } catch (e) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: `⚠️ **Failed to trigger workflow.** ${e.message}`
+                });
+              }
+
+            } else if (firstLine.startsWith('/create-issue')) {
+              const title = firstLine.replace('/create-issue', '').trim();
+              if (!title) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: '⚠️ **Usage:** `/create-issue <title>`'
+                });
+                return;
+              }
+
+              try {
+                await github.rest.issues.getLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: 'health-report-followup'
+                });
+              } catch (e) {
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: 'health-report-followup',
+                  color: 'c2e0c6',
+                  description: 'Follow-up from health review finding'
+                });
+              }
+
+              const newIssue = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: `Identified in health review #${context.issue.number}.\n\n---\n_Created via \`/create-issue\` on #${context.issue.number}_`,
+                labels: ['health-report-followup']
+              });
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `✅ Created #${newIssue.data.number}: [${title}](${newIssue.data.html_url})`
+              });
+
+            } else {
+              const rawCommand = firstLine.split(' ')[0];
+              const command = rawCommand.replace(/[^a-zA-Z0-9/_-]/g, '').slice(0, 50);
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `⚠️ Unknown command \`${command}\`. Available: \`/run-now\`, \`/create-issue <title>\``
+              });
+            }

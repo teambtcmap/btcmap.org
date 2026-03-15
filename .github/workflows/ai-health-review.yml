@@ -1,0 +1,299 @@
+name: AI Codebase Health Review
+
+on:
+  schedule:
+    - cron: '0 9 1,15 * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: health-review
+  cancel-in-progress: true
+
+permissions:
+  issues: write
+  contents: read
+  models: read
+
+jobs:
+  ai-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Collect commits
+        id: commits
+        run: |
+          set -euo pipefail
+
+          # Anchor to last health-report issue date, fall back to 14 days
+          LAST_DATE=$(gh issue list --label "health-report" --state all --limit 1 \
+            --json createdAt --jq '.[0].createdAt // empty' 2>/dev/null || true)
+
+          if [[ -z "$LAST_DATE" ]]; then
+            SINCE_DATE=$(date -u -d '14 days ago' '+%Y-%m-%dT%H:%M:%SZ')
+          else
+            SINCE_DATE="$LAST_DATE"
+          fi
+
+          echo "since_date=$SINCE_DATE" >> "$GITHUB_OUTPUT"
+
+          COMMIT_LOG=$(git log --since="$SINCE_DATE" --no-merges --format='%h %s (%an)' | head -200)
+          COMMIT_COUNT=$(echo "$COMMIT_LOG" | grep -c . || echo 0)
+
+          if [[ "$COMMIT_COUNT" -eq 0 ]]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "No commits since $SINCE_DATE"
+            exit 0
+          fi
+
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "commit_count=$COMMIT_COUNT" >> "$GITHUB_OUTPUT"
+          echo "$COMMIT_LOG" > /tmp/commit-log.txt
+
+          OLDEST_HASH=$(git log --since="$SINCE_DATE" --no-merges --format='%H' --reverse | head -1)
+          echo "oldest_hash=$OLDEST_HASH" >> "$GITHUB_OUTPUT"
+
+          # Hotspot files
+          git log --since="$SINCE_DATE" --no-merges --name-only --pretty=format: \
+            | grep -v '^$' | sort | uniq -c | sort -rn | head -15 > /tmp/hotspots.txt
+
+      - name: Generate diff
+        if: steps.commits.outputs.skip != 'true'
+        run: |
+          set -euo pipefail
+          OLDEST_HASH="${{ steps.commits.outputs.oldest_hash }}"
+
+          if git rev-parse "${OLDEST_HASH}^" >/dev/null 2>&1; then
+            DIFF_BASE="${OLDEST_HASH}^"
+          else
+            DIFF_BASE=$(git hash-object -t tree /dev/null)
+          fi
+
+          git diff "$DIFF_BASE"..HEAD -- . \
+            ':!yarn.lock' ':!package-lock.json' ':!src/lib/i18n/locales/' \
+            ':!*.snap' ':!*.lock' ':!static/images/' ':!static/icons/' \
+            > /tmp/raw-diff.txt
+
+          DIFF_SIZE=$(wc -c < /tmp/raw-diff.txt)
+          echo "Diff size: ${DIFF_SIZE} bytes"
+
+          MAX_SIZE=150000
+          if [[ "$DIFF_SIZE" -gt "$MAX_SIZE" ]]; then
+            echo "Truncating diff from ${DIFF_SIZE} to ${MAX_SIZE} bytes"
+            head -c "$MAX_SIZE" /tmp/raw-diff.txt > /tmp/diff.txt
+            printf '\n\n... [TRUNCATED: diff was %s bytes, showing first %s]\n' "$DIFF_SIZE" "$MAX_SIZE" >> /tmp/diff.txt
+          else
+            cp /tmp/raw-diff.txt /tmp/diff.txt
+          fi
+
+      - name: AI review
+        if: steps.commits.outputs.skip != 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          COMMIT_LOG=$(cat /tmp/commit-log.txt)
+          DIFF=$(cat /tmp/diff.txt)
+          HOTSPOTS=$(cat /tmp/hotspots.txt)
+          PROJECT_CONTEXT=$(cat CLAUDE.md)
+
+          SYSTEM_PROMPT='You are a senior software engineer performing a biweekly code review for a SvelteKit web application (btcmap.org). Your job is to review recently merged code and provide actionable feedback.
+
+          Your review focuses on two questions:
+          1. "Did we miss something?" — bugs, security issues, logic errors, race conditions, missing error handling, accessibility problems, or quality issues in the merged code.
+          2. "Can we refactor?" — patterns, duplication, or related changes across multiple commits that could be consolidated or improved now that they have all landed.
+
+          Project stack: SvelteKit v4 (NOT v5 — do not suggest runes/$state/$derived/$effect), Tailwind CSS v4, TypeScript, Biome (linter/formatter), Vitest, Playwright, Leaflet maps, axios, localforage.
+
+          Review guidelines:
+          - Focus on the DIFF, not hypotheticals. Every finding must reference specific code from the diff.
+          - Prioritize: security > bugs > error handling > performance > code quality > style.
+          - Be specific: include file paths and describe the issue clearly.
+          - Be concise: no filler, no praise, no "the code looks good overall" padding.
+          - Group related findings.
+          - If the changes are mostly dependency bumps or locale file updates, say so briefly and focus on substantive code changes.
+          - Rate each finding: CRITICAL, HIGH, MEDIUM, or LOW.
+          - Maximum 10 findings. If you find more, keep the 10 most important.
+          - Do NOT suggest migrating to Svelte v5 runes — the project intentionally stays on v4.
+          - Do NOT suggest formatting or import ordering changes — Biome handles that.
+          - If nothing significant was missed and there are no refactoring opportunities, say so briefly. Do not invent findings.
+
+          Output format (strict markdown):
+          # Biweekly Codebase Health Review
+
+          ## Summary
+          [2-3 sentences: what changed, overall assessment]
+
+          ## Findings
+
+          ### [SEVERITY]: [Short title]
+          **Files:** `path/to/file`
+          [Description of the issue and what to do about it. Include a brief code snippet from the diff if helpful.]
+
+          ---
+
+          (repeat for each finding, separated by ---)
+
+          ## Refactoring Opportunities
+          [Cross-cutting patterns or consolidation opportunities. Otherwise "None identified in this period."]
+
+          ## Stats
+          - **Commits reviewed:** N
+          - **Period:** DATE to DATE'
+
+          USER_PROMPT="Here are the project conventions:
+
+          <project-conventions>
+          ${PROJECT_CONTEXT}
+          </project-conventions>
+
+          Commit log (${{ steps.commits.outputs.commit_count }} commits since ${{ steps.commits.outputs.since_date }}):
+
+          <commit-log>
+          ${COMMIT_LOG}
+          </commit-log>
+
+          Most frequently changed files:
+
+          <hotspots>
+          ${HOTSPOTS}
+          </hotspots>
+
+          Unified diff (noise files excluded):
+
+          <diff>
+          ${DIFF}
+          </diff>
+
+          Please review and produce your health review report."
+
+          # Build JSON safely with jq
+          jq -n \
+            --arg model "anthropic/claude-sonnet-4-6" \
+            --arg system "$SYSTEM_PROMPT" \
+            --arg user "$USER_PROMPT" \
+            '{
+              model: $model,
+              messages: [
+                { role: "system", content: $system },
+                { role: "user", content: $user }
+              ],
+              max_tokens: 4096
+            }' > /tmp/api-request.json
+
+          HTTP_STATUS=$(curl -s -w '%{http_code}' -o /tmp/api-response.json \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -H "Content-Type: application/json" \
+            https://models.github.ai/inference/chat/completions \
+            -d @/tmp/api-request.json)
+
+          if [[ "$HTTP_STATUS" != "200" ]]; then
+            echo "::error::GitHub Models API returned HTTP $HTTP_STATUS"
+            ERROR_MSG=$(jq -r '.error.message // .message // "Unknown error"' /tmp/api-response.json 2>/dev/null || echo "Unknown error")
+            echo "Error: $ERROR_MSG"
+
+            # Fallback: raw commit summary
+            {
+              echo "# Biweekly Codebase Health Review"
+              echo ""
+              echo "> **AI analysis failed** (HTTP $HTTP_STATUS: $ERROR_MSG)."
+              echo "> Showing raw commit summary instead."
+              echo ""
+              echo "## Commits (${{ steps.commits.outputs.commit_count }} since ${{ steps.commits.outputs.since_date }})"
+              echo '```'
+              head -50 /tmp/commit-log.txt
+              echo '```'
+              echo ""
+              echo "## Hotspot files"
+              echo '```'
+              cat /tmp/hotspots.txt
+              echo '```'
+            } > /tmp/review.md
+            exit 0
+          fi
+
+          # Extract AI response
+          jq -r '.choices[0].message.content' /tmp/api-response.json > /tmp/review.md
+
+          # Append footer
+          cat >> /tmp/review.md << 'EOF'
+
+          ---
+          _Generated by [AI Health Review](../../actions/workflows/ai-health-review.yml) using GitHub Models._
+          _Reply with `/run-now` to trigger a new review or `/create-issue <title>` to create a follow-up issue._
+          EOF
+
+          echo "Review generated ($(wc -c < /tmp/review.md) bytes)"
+
+      - name: Create issue
+        if: steps.commits.outputs.skip != 'true'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+
+            let reviewBody;
+            try {
+              reviewBody = fs.readFileSync('/tmp/review.md', 'utf8');
+            } catch (e) {
+              reviewBody = '# Biweekly Codebase Health Review\n\nError: Could not read review file.';
+            }
+
+            // Ensure label exists
+            try {
+              await github.rest.issues.getLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: 'health-report'
+              });
+            } catch (e) {
+              await github.rest.issues.createLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: 'health-report',
+                color: '0075ca',
+                description: 'AI-powered biweekly codebase health review'
+              });
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Biweekly Codebase Health Review — ${today}`,
+              body: reviewBody,
+              labels: ['health-report']
+            });
+
+            core.info(`Created review issue #${issue.data.number}`);
+
+            // Close previous open health-report issues
+            const openIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'health-report',
+              state: 'open',
+              per_page: 30
+            });
+
+            for (const prev of openIssues.data) {
+              if (prev.number !== issue.data.number) {
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prev.number,
+                  state: 'closed',
+                  state_reason: 'completed'
+                });
+                core.info(`Closed previous report issue #${prev.number}`);
+              }
+            }
