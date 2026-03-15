@@ -124,10 +124,14 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/) format for a
 
 [optional body]
 
-🤖 Generated with [opencode](https://opencode.ai)
+🤖 Generated with [<tool>](<tool-url>)
 ```
 
-**Note:** When using opencode, we do not set a co-author attribution
+Use the appropriate tool attribution based on which tool generated the commit:
+- When using opencode: `🤖 Generated with [opencode](https://opencode.ai)`
+- When using pi: `🤖 Generated with [pi](https://github.com/mariozechner/pi-coding-agent)`
+
+**Note:** We do not set a co-author attribution
 
 ### Examples:
 
