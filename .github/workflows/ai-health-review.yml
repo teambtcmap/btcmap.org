@@ -102,12 +102,14 @@ jobs:
           DIFF=$(cat /tmp/diff.txt)
           HOTSPOTS=$(cat /tmp/hotspots.txt)
           PROJECT_CONTEXT=$(cat CLAUDE.md)
+          AGENTS_MD=$(cat AGENTS.md 2>/dev/null || echo "")
 
           SYSTEM_PROMPT='You are a senior software engineer performing a biweekly code review for a SvelteKit web application (btcmap.org). Your job is to review recently merged code and provide actionable feedback.
 
-          Your review focuses on two questions:
+          Your review focuses on three questions:
           1. "Did we miss something?" — bugs, security issues, logic errors, race conditions, missing error handling, accessibility problems, or quality issues in the merged code.
           2. "Can we refactor?" — patterns, duplication, or related changes across multiple commits that could be consolidated or improved now that they have all landed.
+          3. "Is AGENTS.md outdated?" — compare the AGENTS.md documentation against the actual codebase patterns visible in the diff. Flag any conventions, tooling references, file paths, or project structure notes in AGENTS.md that contradict what the code actually does.
 
           Project stack: SvelteKit v4 (NOT v5 — do not suggest runes/$state/$derived/$effect), Tailwind CSS v4, TypeScript, Biome (linter/formatter), Vitest, Playwright, Leaflet maps, axios, localforage.
 
@@ -143,15 +145,24 @@ jobs:
           ## Refactoring Opportunities
           [Cross-cutting patterns or consolidation opportunities. Otherwise "None identified in this period."]
 
+          ## AGENTS.md Drift
+          [Any conventions, tooling references, or project structure notes in AGENTS.md that are outdated or contradict what the code actually does. Otherwise "AGENTS.md is up to date."]
+
           ## Stats
           - **Commits reviewed:** N
           - **Period:** DATE to DATE'
 
-          USER_PROMPT="Here are the project conventions:
+          USER_PROMPT="Here are the project conventions (CLAUDE.md):
 
           <project-conventions>
           ${PROJECT_CONTEXT}
           </project-conventions>
+
+          Here is AGENTS.md (check if it is outdated relative to the codebase):
+
+          <agents-md>
+          ${AGENTS_MD}
+          </agents-md>
 
           Commit log (${{ steps.commits.outputs.commit_count }} commits since ${{ steps.commits.outputs.since_date }}):
 
