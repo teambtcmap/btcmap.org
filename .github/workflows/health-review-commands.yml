@@ -82,20 +82,29 @@ jobs:
                 });
               }
 
-              const newIssue = await github.rest.issues.create({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                title: title,
-                body: `Identified in health review #${context.issue.number}.\n\n---\n_Created via \`/create-issue\` on #${context.issue.number}_`,
-                labels: ['health-report-followup']
-              });
+              try {
+                const newIssue = await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: title,
+                  body: `Identified in health review #${context.issue.number}.\n\n---\n_Created via \`/create-issue\` on #${context.issue.number}_`,
+                  labels: ['health-report-followup']
+                });
 
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body: `✅ Created #${newIssue.data.number}: [${title}](${newIssue.data.html_url})`
-              });
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: `✅ Created #${newIssue.data.number}: [${title}](${newIssue.data.html_url})`
+                });
+              } catch (e) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: `⚠️ **Failed to create issue:** ${e.message}`
+                });
+              }
 
             } else {
               const rawCommand = firstLine.split(' ')[0];
