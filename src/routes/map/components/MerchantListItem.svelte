@@ -5,7 +5,7 @@ import {
 	CATEGORY_COLOR_CLASSES,
 	getIconColorWithFallback,
 } from "$lib/categoryMapping";
-import { _, getDisplayLang, locale } from "$lib/i18n";
+import { _ } from "$lib/i18n";
 import {
 	isBoosted as checkBoosted,
 	isUpToDate as checkUpToDate,
@@ -31,9 +31,6 @@ $: hasPaymentMethods =
 
 $: isVerified = checkUpToDate(displayData, verifiedDate);
 $: isBoosted = checkBoosted(merchant);
-
-$: displayName =
-	displayData?.localized_name?.[getDisplayLang($locale)] || displayData?.name;
 
 $: userLoc = $userLocation.location;
 $: usesMetric = $userLocation.usesMetricSystem;
@@ -90,19 +87,19 @@ function handleClick() {
 			</div>
 
 			<div class="min-w-0 flex-1">
-				<!-- Name -->
+				<!-- Name: show skeleton while loading, resolved name once enriched, or "unknown" -->
 				<div class="flex items-center justify-between gap-1">
 					<div class="flex items-center gap-1 min-w-0">
-						{#if displayName}
+						{#if showSkeleton}
+							<div class="h-4 w-32 animate-pulse rounded bg-link/50"></div>
+						{:else if displayData.name}
 							<span
 								class="truncate text-sm font-medium {isBoosted
 									? 'text-bitcoin'
 									: 'text-primary dark:text-white'}"
 							>
-								{displayName}
+								{displayData.name}
 							</span>
-						{:else if showSkeleton}
-							<div class="h-4 w-32 animate-pulse rounded bg-link/50"></div>
 						{:else}
 							<span class="truncate text-sm font-medium text-primary dark:text-white"
 								>{$_('merchant.unknown')}</span

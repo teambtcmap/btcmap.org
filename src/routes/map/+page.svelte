@@ -37,7 +37,7 @@ import {
 	VIEWPORT_BATCH_SIZE,
 	VIEWPORT_BUFFER_PERCENT,
 } from "$lib/constants";
-import { _, locale } from "$lib/i18n";
+import { _ } from "$lib/i18n";
 import { processBatchOnMainThread } from "$lib/map/batch-processor";
 import { loadMapDependencies } from "$lib/map/imports";
 import { LabelUpdateTracker, updateMarkerLabels } from "$lib/map/labels";
@@ -65,6 +65,7 @@ import {
 	getVisiblePlaces,
 	getZoomBehavior,
 } from "$lib/map/viewport";
+import { parseMerchantHash } from "$lib/merchantDrawerHash";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import type { MerchantListMode } from "$lib/merchantListStore";
 import { merchantList } from "$lib/merchantListStore";
@@ -234,24 +235,18 @@ const handleHashChange = () => {
 	// Sync store from hash - single source of truth
 	merchantDrawer.syncFromHash();
 
-	const hash = window.location.hash.substring(1);
-	const hasDrawer = hash.includes("merchant=");
+	const { merchantId, isOpen } = parseMerchantHash();
 
-	if (!hasDrawer && selectedMarkerId) {
+	if (!isOpen && selectedMarkerId) {
 		clearMarkerSelection(loadedMarkers, selectedMarkerId);
 		selectedMarkerId = null;
-	} else if (hasDrawer) {
-		const params = new URLSearchParams(hash.substring(hash.indexOf("&") + 1));
-		const merchantParam = params.get("merchant");
-		if (merchantParam) {
-			const merchantId = Number(merchantParam);
-			if (merchantId !== selectedMarkerId) {
-				if (selectedMarkerId) {
-					clearMarkerSelection(loadedMarkers, selectedMarkerId);
-				}
-				selectedMarkerId = merchantId;
-				highlightMarker(loadedMarkers, merchantId);
+	} else if (isOpen && merchantId) {
+		if (merchantId !== selectedMarkerId) {
+			if (selectedMarkerId) {
+				clearMarkerSelection(loadedMarkers, selectedMarkerId);
 			}
+			selectedMarkerId = merchantId;
+			highlightMarker(loadedMarkers, merchantId);
 		}
 	}
 };
@@ -259,6 +254,8 @@ const handleHashChange = () => {
 // Track current search request for cancellation
 let searchAbortController: AbortController | null = null;
 let unsubscribeLocale: (() => void) | null = null;
+let deepLinkPanUnsub: (() => void) | null = null;
+let deepLinkPanTimer: ReturnType<typeof setTimeout> | null = null;
 
 // Core search function
 const executeSearch = async (query: string) => {
@@ -524,7 +521,6 @@ const loadSearchResultMarkers = () => {
 			placeDetailsCache: $merchantList.placeDetailsCache,
 			placesById: $placesById,
 			onMarkerClick: openMerchantDrawer,
-			locale: $locale,
 		});
 
 		if (boosted && !shouldClusterBoostedMarkers()) {
@@ -739,7 +735,6 @@ const loadMarkersInViewport = async () => {
 							boostedLayer,
 							selectedMarkerId,
 							onMarkerClick: openMerchantDrawer,
-							locale: $locale,
 						});
 					}
 				},
@@ -791,7 +786,6 @@ const loadMarkersInViewportFallback = (bounds: LatLngBounds) => {
 			placesById: $placesById,
 			onMarkerClick: openMerchantDrawer,
 			onLabelUpdate: () => labelTracker.incrementVersion(),
-			locale: $locale,
 		});
 
 		// Route to appropriate layer based on boost status and zoom level
@@ -1055,15 +1049,10 @@ const initializeElements = async () => {
 	elementsLoaded = true;
 
 	if (browser) {
-		const hash = window.location.hash.substring(1);
-		if (hash.includes("merchant=")) {
-			const params = new URLSearchParams(hash.substring(hash.indexOf("&") + 1));
-			const merchantParam = params.get("merchant");
-			if (merchantParam) {
-				const merchantId = Number(merchantParam);
-				selectedMarkerId = merchantId;
-				highlightMarker(loadedMarkers, merchantId);
-			}
+		const { merchantId, isOpen } = parseMerchantHash();
+		if (isOpen && merchantId) {
+			selectedMarkerId = merchantId;
+			highlightMarker(loadedMarkers, merchantId);
 		}
 
 		// Initialize merchant list if already zoomed in
@@ -1078,7 +1067,6 @@ let labelTracker = new LabelUpdateTracker(
 	currentZoom,
 	$merchantList.placeDetailsCache.size,
 	$merchantList.isEnrichingDetails,
-	$locale,
 );
 
 // Derived reactive state for label visibility
@@ -1088,23 +1076,16 @@ $: isEnriching = $merchantList.isEnrichingDetails;
 
 // Update marker labels when relevant state changes
 $: if (mapLoaded && elementsLoaded && leaflet) {
-	labelTracker.shouldUpdate(
-		labelsVisible,
-		cacheSize,
-		isEnriching,
-		$locale,
-		() => {
-			updateMarkerLabels(
-				loadedMarkers,
-				currentZoom,
-				$merchantList.placeDetailsCache,
-				$placesById,
-				boostedLayerMarkerIds,
-				leaflet,
-				$locale,
-			);
-		},
-	);
+	labelTracker.shouldUpdate(labelsVisible, cacheSize, isEnriching, () => {
+		updateMarkerLabels(
+			loadedMarkers,
+			currentZoom,
+			$merchantList.placeDetailsCache,
+			$placesById,
+			boostedLayerMarkerIds,
+			leaflet,
+		);
+	});
 }
 
 // Initialize elements when places data is ready and map is loaded
@@ -1126,12 +1107,13 @@ onMount(async () => {
 		leaflet.control.zoom({ position: "topright" }).addTo(map);
 
 		// Setup map in logical steps
-		const { baseMaps, activeLayer } = await setupMapInitialView();
+		const { baseMaps, activeLayer, hashHadCoords } =
+			await setupMapInitialView();
 		setupTileLayers(activeLayer);
 		setupTileLoadingIndicators();
 		setupMapClickHandlers();
 		setupMapControls(LocateControl, baseMaps, get(_));
-		setupMapFinalization(get(_));
+		setupMapFinalization(get(_), hashHadCoords);
 
 		unsubscribeLocale = _.subscribe(() => {
 			applyMapControlTranslations(get(_));
@@ -1144,6 +1126,7 @@ onMount(async () => {
 const setupMapInitialView = async (): Promise<{
 	baseMaps: Record<string, Layer>;
 	activeLayer: unknown;
+	hashHadCoords: boolean;
 }> => {
 	// Helper function to set mapLoaded after view is set
 	const setMapViewAndMarkLoaded = () => {
@@ -1153,21 +1136,37 @@ const setupMapInitialView = async (): Promise<{
 
 	// use url hash if present
 	if (location.hash) {
-		try {
-			// Extract only the map coordinates part (before any & parameters)
-			const hashPart = location.hash.split("&")[0];
-			const coords = hashPart.split("/");
-			map.setView(
-				[Number(coords[1]), Number(coords[2])],
-				Number(coords[0].slice(1)),
-			);
-			setMapViewAndMarkLoaded();
-		} catch (error) {
-			map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
-			setMapViewAndMarkLoaded();
-			errToast(get(_)("errors.mapView"));
-			console.error(error);
+		// Extract only the map coordinates part (before any & parameters)
+		const hashPart = location.hash.split("&")[0];
+		const coords = hashPart.split("/");
+		// Valid map coords hash has format #zoom/lat/lon (3 parts, numeric)
+		const hasCoords =
+			coords.length === 3 &&
+			!Number.isNaN(Number(coords[0].slice(1))) &&
+			!Number.isNaN(Number(coords[1])) &&
+			!Number.isNaN(Number(coords[2]));
+
+		if (hasCoords) {
+			try {
+				map.setView(
+					[Number(coords[1]), Number(coords[2])],
+					Number(coords[0].slice(1)),
+				);
+				setMapViewAndMarkLoaded();
+			} catch (error) {
+				map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
+				setMapViewAndMarkLoaded();
+				errToast(get(_)("errors.mapView"));
+				console.error(error);
+			}
+			// add tiles and basemaps
+			const { baseMaps, activeLayer } = layers(leaflet, map);
+			currentLayerName =
+				theme.current === "dark" ? "Carto Dark Matter" : "OpenFreeMap Liberty";
+			return { baseMaps, activeLayer, hashHadCoords: true };
 		}
+		// Hash present but no coords (e.g. #merchant=123) — fall through to
+		// geolocation/default, and pan to merchant later in setupMapFinalization
 	}
 
 	// set URL lat/long query view if it exists and is valid
@@ -1230,7 +1229,7 @@ const setupMapInitialView = async (): Promise<{
 	currentLayerName =
 		theme.current === "dark" ? "Carto Dark Matter" : "OpenFreeMap Liberty";
 
-	return { baseMaps, activeLayer };
+	return { baseMaps, activeLayer, hashHadCoords: false };
 };
 
 const setupTileLayers = (activeLayer: unknown) => {
@@ -1352,7 +1351,10 @@ const setupMapControls = (
 	});
 };
 
-const setupMapFinalization = (translate: (key: string) => string) => {
+const setupMapFinalization = (
+	translate: (key: string) => string,
+	hashHadCoords: boolean,
+) => {
 	const mapControlsT = {
 		fullScreen: translate("mapControls.fullScreen"),
 		zoomIn: translate("mapControls.zoomIn"),
@@ -1372,6 +1374,40 @@ const setupMapFinalization = (translate: (key: string) => string) => {
 
 	// Sync drawer state from URL hash on initial page load
 	merchantDrawer.syncFromHash();
+
+	// If the URL had a merchant ID but no map coordinates, pan to the merchant
+	if (!hashHadCoords) {
+		const { merchantId, isOpen } = parseMerchantHash();
+		if (isOpen && merchantId) {
+			const place = get(placesById).get(merchantId);
+			if (place) {
+				navigateToPlace(place, {
+					targetZoom: DEFAULT_MAP_ZOOM,
+					spiderfyCluster: true,
+				});
+			} else {
+				// Places may still be loading — subscribe and pan once merchant appears
+				deepLinkPanUnsub = placesById.subscribe(($placesById) => {
+					const p = $placesById.get(merchantId);
+					if (p) {
+						navigateToPlace(p, {
+							targetZoom: DEFAULT_MAP_ZOOM,
+							spiderfyCluster: true,
+						});
+						if (deepLinkPanTimer) clearTimeout(deepLinkPanTimer);
+						deepLinkPanUnsub?.();
+						deepLinkPanUnsub = null;
+					}
+				});
+				// Safety fallback: unsubscribe after 10s if merchant never appears
+				deepLinkPanTimer = setTimeout(() => {
+					deepLinkPanUnsub?.();
+					deepLinkPanUnsub = null;
+					deepLinkPanTimer = null;
+				}, 10_000);
+			}
+		}
+	}
 };
 
 onDestroy(async () => {
@@ -1407,6 +1443,11 @@ onDestroy(async () => {
 	}
 
 	unsubscribeLocale?.();
+
+	// Clean up deep-link pan subscription and timeout if still pending
+	if (deepLinkPanTimer) clearTimeout(deepLinkPanTimer);
+	deepLinkPanUnsub?.();
+	deepLinkPanUnsub = null;
 });
 </script>
 
