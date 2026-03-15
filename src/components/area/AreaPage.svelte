@@ -378,11 +378,7 @@ const initializeData = async () => {
 	}
 };
 
-$: $areas?.length &&
-	$places &&
-	$places.length &&
-	!dataInitialized &&
-	initializeData();
+$: $areas?.length && $places?.length && !dataInitialized && initializeData();
 
 // Calculate areaReports reactively based on data initialization and reports store
 // Returns undefined while loading, empty array if no reports for this area, or filtered reports

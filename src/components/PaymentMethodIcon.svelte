@@ -9,6 +9,7 @@ export let variant: "default" | "teal" = "default";
 export let size: "sm" | "md" = "sm";
 
 let imgElement: HTMLImageElement | undefined = undefined;
+
 export { imgElement as element };
 
 const iconPaths = {
