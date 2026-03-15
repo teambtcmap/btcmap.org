@@ -42,8 +42,8 @@ jobs:
 
           echo "since_date=$SINCE_DATE" >> "$GITHUB_OUTPUT"
 
+          COMMIT_COUNT=$(git rev-list --count --since="$SINCE_DATE" --no-merges HEAD)
           COMMIT_LOG=$(git log --since="$SINCE_DATE" --no-merges --format='%h %s (%an)' | head -200)
-          COMMIT_COUNT=$(echo "$COMMIT_LOG" | grep -c . || echo 0)
 
           if [[ "$COMMIT_COUNT" -eq 0 ]]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
@@ -277,34 +277,44 @@ jobs:
             }
 
             const today = new Date().toISOString().split('T')[0];
-            const issue = await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: `Biweekly Codebase Health Review — ${today}`,
-              body: reviewBody,
-              labels: ['health-report']
-            });
+            let issue;
+            try {
+              issue = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `Biweekly Codebase Health Review — ${today}`,
+                body: reviewBody,
+                labels: ['health-report']
+              });
+            } catch (e) {
+              core.setFailed(`Failed to create health review issue: ${e.message}`);
+              return;
+            }
 
             core.info(`Created review issue #${issue.data.number}`);
 
             // Close previous open health-report issues
-            const openIssues = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: 'health-report',
-              state: 'open',
-              per_page: 30
-            });
+            try {
+              const openIssues = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: 'health-report',
+                state: 'open',
+                per_page: 30
+              });
 
-            for (const prev of openIssues.data) {
-              if (prev.number !== issue.data.number) {
-                await github.rest.issues.update({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: prev.number,
-                  state: 'closed',
-                  state_reason: 'completed'
-                });
-                core.info(`Closed previous report issue #${prev.number}`);
+              for (const prev of openIssues.data) {
+                if (prev.number !== issue.data.number) {
+                  await github.rest.issues.update({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: prev.number,
+                    state: 'closed',
+                    state_reason: 'completed'
+                  });
+                  core.info(`Closed previous report issue #${prev.number}`);
+                }
               }
+            } catch (e) {
+              core.warning(`Failed to close previous issues: ${e.message}`);
             }
