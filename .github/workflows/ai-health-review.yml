@@ -101,7 +101,7 @@ jobs:
           COMMIT_LOG=$(cat /tmp/commit-log.txt)
           DIFF=$(cat /tmp/diff.txt)
           HOTSPOTS=$(cat /tmp/hotspots.txt)
-          PROJECT_CONTEXT=$(cat CLAUDE.md)
+          PROJECT_CONTEXT=$(cat CLAUDE.md 2>/dev/null || echo "")
           AGENTS_MD=$(cat AGENTS.md 2>/dev/null || echo "")
 
           SYSTEM_PROMPT='You are a senior software engineer performing a biweekly code review for a SvelteKit web application (btcmap.org). Your job is to review recently merged code and provide actionable feedback.
@@ -111,7 +111,7 @@ jobs:
           2. "Can we refactor?" — patterns, duplication, or related changes across multiple commits that could be consolidated or improved now that they have all landed.
           3. "Is AGENTS.md outdated?" — compare the AGENTS.md documentation against the actual codebase patterns visible in the diff. Flag any conventions, tooling references, file paths, or project structure notes in AGENTS.md that contradict what the code actually does.
 
-          Project stack: SvelteKit v4 (NOT v5 — do not suggest runes/$state/$derived/$effect), Tailwind CSS v4, TypeScript, Biome (linter/formatter), Vitest, Playwright, Leaflet maps, axios, localforage.
+          Project stack: Svelte 4 / SvelteKit 2 (NOT Svelte v5 — do not suggest runes/$state/$derived/$effect), Tailwind CSS v4, TypeScript, Biome (linter/formatter), Vitest, Playwright, Leaflet maps, axios, localforage.
 
           Review guidelines:
           - Focus on the DIFF, not hypotheticals. Every finding must reference specific code from the diff.
@@ -205,7 +205,7 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             -H "Content-Type: application/json" \
             https://models.github.ai/inference/chat/completions \
-            -d @/tmp/api-request.json)
+            -d @/tmp/api-request.json) || HTTP_STATUS="000"
 
           if [[ "$HTTP_STATUS" != "200" ]]; then
             echo "::error::GitHub Models API returned HTTP $HTTP_STATUS"
