@@ -80,7 +80,7 @@ jobs:
 
           # Hotspot files
           git log --since="$SINCE_DATE" --no-merges --name-only --pretty=format: \
-            | grep -v '^$' | sort | uniq -c | sort -rn | head -15 > /tmp/hotspots.txt
+            | grep -v '^$' | sort | uniq -c | sort -rn | head -15 > /tmp/hotspots.txt || true
 
       - name: Generate diff
         if: steps.commits.outputs.skip != 'true'
