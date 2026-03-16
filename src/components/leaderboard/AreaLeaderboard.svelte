@@ -13,7 +13,7 @@ import {
 	type SortingState,
 	type TableOptions,
 } from "@tanstack/svelte-table";
-import { onDestroy, onMount } from "svelte";
+import { onDestroy } from "svelte";
 import { derived, writable } from "svelte/store";
 import { _ } from "svelte-i18n";
 import tippy from "tippy.js";
@@ -295,11 +295,6 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 $: loading =
 	$syncStatus ||
 	($leaderboardWithPositions.length === 0 && !$areaError && !$reportError);
-
-// Better lifecycle management
-onMount(() => {
-	setHeaderTooltips();
-});
 
 // Simplified tooltip setup function for header tooltips only
 const setHeaderTooltips = () => {
