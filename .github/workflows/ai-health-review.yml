@@ -195,11 +195,14 @@ jobs:
 
           Please review and produce your health review report."
 
-          # Build JSON safely with jq
+          # Write prompts to files to avoid "Argument list too long" with jq --arg
+          printf '%s' "$SYSTEM_PROMPT" > /tmp/system-prompt.txt
+          printf '%s' "$USER_PROMPT" > /tmp/user-prompt.txt
+
           jq -n \
             --arg model "anthropic/claude-sonnet-4-6" \
-            --arg system "$SYSTEM_PROMPT" \
-            --arg user "$USER_PROMPT" \
+            --rawfile system /tmp/system-prompt.txt \
+            --rawfile user /tmp/user-prompt.txt \
             '{
               model: $model,
               messages: [
