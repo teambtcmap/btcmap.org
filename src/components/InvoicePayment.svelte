@@ -1,7 +1,6 @@
 <script lang="ts">
 import JSConfetti from "js-confetti";
 import { onDestroy, tick } from "svelte";
-import { get } from "svelte/store";
 
 import {
 	BREAKPOINTS,
@@ -51,7 +50,7 @@ const generateQR = async () => {
 			},
 		);
 	} catch (error) {
-		errToast(get(_)("supportUs.qrLoadError"));
+		errToast($_("supportUs.qrLoadError"));
 		console.error("Failed to load QRCode module:", error);
 		onError(error);
 	}
