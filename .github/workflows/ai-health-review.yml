@@ -199,7 +199,7 @@ jobs:
           printf '%s' "$USER_PROMPT" > /tmp/user-prompt.txt
 
           jq -n \
-            --arg model "claude-sonnet-4-5" \
+            --arg model "anthropic/claude-sonnet-4.6" \
             --rawfile system /tmp/system-prompt.txt \
             --rawfile user /tmp/user-prompt.txt \
             '{
@@ -220,7 +220,7 @@ jobs:
 
           if [[ "$HTTP_STATUS" != "200" ]]; then
             ERROR_MSG=$(jq -r '.error.message // .message // "Unknown error"' /tmp/api-response.json 2>/dev/null || echo "Unknown error")
-            echo "::error::GitHub Models API returned HTTP $HTTP_STATUS: $ERROR_MSG"
+            echo "::error::PPQ API returned HTTP $HTTP_STATUS: $ERROR_MSG"
             exit 1
           fi
 
