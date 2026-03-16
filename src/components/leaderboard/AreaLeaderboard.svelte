@@ -13,7 +13,7 @@ import {
 	type SortingState,
 	type TableOptions,
 } from "@tanstack/svelte-table";
-import { onMount } from "svelte";
+import { onDestroy, onMount } from "svelte";
 import { derived, writable } from "svelte/store";
 import { _ } from "svelte-i18n";
 import tippy from "tippy.js";
@@ -40,6 +40,9 @@ let globalFilter = "";
 let totalTooltip: HTMLButtonElement;
 let upToDateTooltip: HTMLButtonElement;
 let gradeTooltip: HTMLButtonElement;
+
+// Track instances so they can be destroyed on component teardown
+let tippyInstances: { destroy(): void }[] = [];
 
 // Alert for errors - more idiomatic Svelte
 $: if ($areaError) errToast($areaError);
@@ -300,27 +303,42 @@ onMount(() => {
 
 // Simplified tooltip setup function for header tooltips only
 const setHeaderTooltips = () => {
+	// Destroy any previously created instances before re-creating them
+	tippyInstances.forEach((instance) => instance.destroy());
+	tippyInstances = [];
+
 	if (totalTooltip) {
-		tippy(totalTooltip, {
-			content: $_(`areaLeaderboard.totalTooltip`),
-			allowHTML: true,
-		});
+		tippyInstances.push(
+			tippy(totalTooltip, {
+				content: $_(`areaLeaderboard.totalTooltip`),
+				allowHTML: true,
+			}),
+		);
 	}
 
 	if (upToDateTooltip) {
-		tippy(upToDateTooltip, {
-			content: $_(`areaLeaderboard.verifiedTooltip`),
-			allowHTML: true,
-		});
+		tippyInstances.push(
+			tippy(upToDateTooltip, {
+				content: $_(`areaLeaderboard.verifiedTooltip`),
+				allowHTML: true,
+			}),
+		);
 	}
 
 	if (gradeTooltip) {
-		tippy(gradeTooltip, {
-			content: GradeTable,
-			allowHTML: true,
-		});
+		tippyInstances.push(
+			tippy(gradeTooltip, {
+				content: GradeTable,
+				allowHTML: true,
+			}),
+		);
 	}
 };
+
+onDestroy(() => {
+	tippyInstances.forEach((instance) => instance.destroy());
+	tippyInstances = [];
+});
 
 // Set header tooltips when elements are available
 $: upToDateTooltip && totalTooltip && gradeTooltip && setHeaderTooltips();
