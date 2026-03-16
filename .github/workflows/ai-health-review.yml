@@ -63,7 +63,7 @@ jobs:
           echo "cutoff_date=$CUTOFF" >> "$GITHUB_OUTPUT"
 
           COMMIT_COUNT=$(git rev-list --count --since="$SINCE_DATE" --no-merges HEAD)
-          COMMIT_LOG=$(git log --since="$SINCE_DATE" --no-merges --format='%h %s (%an)' | head -200)
+          COMMIT_LOG=$(set +o pipefail; git log --since="$SINCE_DATE" --no-merges --format='%h %s (%an)' | head -200)
 
           if [[ "$COMMIT_COUNT" -eq 0 ]]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
@@ -75,12 +75,12 @@ jobs:
           echo "commit_count=$COMMIT_COUNT" >> "$GITHUB_OUTPUT"
           echo "$COMMIT_LOG" > /tmp/commit-log.txt
 
-          OLDEST_HASH=$(git log --since="$SINCE_DATE" --no-merges --format='%H' --reverse | head -1)
+          OLDEST_HASH=$(set +o pipefail; git log --since="$SINCE_DATE" --no-merges --format='%H' --reverse | head -1)
           echo "oldest_hash=$OLDEST_HASH" >> "$GITHUB_OUTPUT"
 
           # Hotspot files
           git log --since="$SINCE_DATE" --no-merges --name-only --pretty=format: \
-            | grep -v '^$' | sort | uniq -c | sort -rn | head -15 > /tmp/hotspots.txt || true
+            | { grep -v '^$' || true; } | sort | uniq -c | sort -rn | head -15 > /tmp/hotspots.txt || true
 
       - name: Generate diff
         if: steps.commits.outputs.skip != 'true'
