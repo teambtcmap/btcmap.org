@@ -23,7 +23,7 @@
    Copy `.env.example` and save as `.env`
 1. `yarn build`
 
-_NOTE:_ BTC Map uses the latest LTS version of [node](https://nodejs.org/). If you have [NVM](https://github.com/nvm-sh/nvm), you can simply run `nvm use` in the root directory of the repo to switch to the supported node version.
+_NOTE:_ BTC Map uses Node 22 LTS. If you have [mise](https://mise.jdx.dev/), run `mise install` in the repo root to switch to the correct version.
 
 #### Icons
 
