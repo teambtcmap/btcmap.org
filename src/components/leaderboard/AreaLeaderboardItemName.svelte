@@ -36,7 +36,7 @@ function handleImageError(event: Event) {
 				/>
 				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
-					href={`/${type}/${id}`}
+					href={`/${type}/${encodeURIComponent(id)}`}
 					class="font-medium text-link transition-colors hover:text-hover {localizedName?.match(
 						/[^ ]{21}/
 					)
@@ -60,7 +60,7 @@ function handleImageError(event: Event) {
 			/>
 			<!-- eslint-disable svelte/no-navigation-without-resolve -->
 			<a
-				href={`/${type}/${id}`}
+				href={`/${type}/${encodeURIComponent(id)}`}
 				class="font-medium text-link transition-colors hover:text-hover {hasLongName ? 'break-all' : ''}"
 				aria-label={$_('areaLeaderboard.viewDetails', { values: { name: displayName } })}
 			>
