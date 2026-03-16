@@ -15,7 +15,7 @@ import {
 } from "@tanstack/svelte-table";
 import { onDestroy } from "svelte";
 import { derived, writable } from "svelte/store";
-import { _ } from "svelte-i18n";
+import { _, locale } from "svelte-i18n";
 import tippy from "tippy.js";
 
 import Icon from "$components/Icon.svelte";
@@ -335,8 +335,12 @@ onDestroy(() => {
 	tippyInstances = [];
 });
 
-// Set header tooltips when elements are available
-$: upToDateTooltip && totalTooltip && gradeTooltip && setHeaderTooltips();
+// Set header tooltips when elements are available or locale changes
+$: upToDateTooltip &&
+	totalTooltip &&
+	gradeTooltip &&
+	$locale &&
+	setHeaderTooltips();
 </script>
 
 <section id="leaderboard" aria-labelledby="leaderboard-title">
