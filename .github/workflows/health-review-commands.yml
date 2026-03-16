@@ -31,19 +31,24 @@ jobs:
             const body = context.payload.comment.body.trim();
             const firstLine = body.split('\n')[0].trim();
 
-            if (firstLine === '/run-now') {
+            if (firstLine.startsWith('/run-now')) {
+              const sinceCommit = firstLine.replace('/run-now', '').trim();
               try {
                 await github.rest.actions.createWorkflowDispatch({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   workflow_id: 'ai-health-review.yml',
-                  ref: 'main'
+                  ref: 'main',
+                  inputs: sinceCommit ? { since_commit: sinceCommit } : {}
                 });
+                const msg = sinceCommit
+                  ? `🚀 **Health review triggered** from commit \`${sinceCommit}\`.`
+                  : '🚀 **Health review triggered.**';
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: context.issue.number,
-                  body: '🚀 **Health review triggered.** Check the [Actions tab](../../actions/workflows/ai-health-review.yml) for progress.'
+                  body: `${msg} Check the [Actions tab](../../actions/workflows/ai-health-review.yml) for progress.`
                 });
               } catch (e) {
                 await github.rest.issues.createComment({
@@ -113,6 +118,6 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
-                body: `⚠️ Unknown command \`${command}\`. Available: \`/run-now\`, \`/create-issue <title>\``
+                body: `⚠️ Unknown command \`${command}\`. Available: \`/run-now [commit]\`, \`/create-issue <title>\``
               });
             }

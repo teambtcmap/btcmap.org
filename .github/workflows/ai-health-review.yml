@@ -3,7 +3,11 @@ name: AI Codebase Health Review
 on:
   schedule:
     - cron: '0 9 1,15 * *'
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      since_commit:
+        description: 'Review commits starting from this commit hash (exclusive)'
+        required: false
 
 concurrency:
   group: health-review
@@ -29,20 +33,26 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Anchor to cutoff timestamp embedded in previous report, fall back to createdAt, then 14 days
-          PREV_BODY=$(gh issue list --label "health-report" --state all --limit 1 \
-            --json body --jq '.[0].body // empty' 2>/dev/null || true)
-          LAST_CUTOFF=$(echo "$PREV_BODY" | grep -oP '<!-- cutoff: \K[^ ]+(?= -->)' || true)
-
-          if [[ -n "$LAST_CUTOFF" ]]; then
-            SINCE_DATE="$LAST_CUTOFF"
+          SINCE_COMMIT="${{ inputs.since_commit }}"
+          if [[ -n "$SINCE_COMMIT" ]]; then
+            # Use the provided commit's date as anchor
+            SINCE_DATE=$(git log -1 --format='%aI' "$SINCE_COMMIT")
           else
-            LAST_DATE=$(gh issue list --label "health-report" --state all --limit 1 \
-              --json createdAt --jq '.[0].createdAt // empty' 2>/dev/null || true)
-            if [[ -n "$LAST_DATE" ]]; then
-              SINCE_DATE="$LAST_DATE"
+            # Anchor to cutoff timestamp embedded in previous report, fall back to createdAt, then 14 days
+            PREV_BODY=$(gh issue list --label "health-report" --state all --limit 1 \
+              --json body --jq '.[0].body // empty' 2>/dev/null || true)
+            LAST_CUTOFF=$(echo "$PREV_BODY" | grep -oP '<!-- cutoff: \K[^ ]+(?= -->)' || true)
+
+            if [[ -n "$LAST_CUTOFF" ]]; then
+              SINCE_DATE="$LAST_CUTOFF"
             else
-              SINCE_DATE=$(date -u -d '14 days ago' '+%Y-%m-%dT%H:%M:%SZ')
+              LAST_DATE=$(gh issue list --label "health-report" --state all --limit 1 \
+                --json createdAt --jq '.[0].createdAt // empty' 2>/dev/null || true)
+              if [[ -n "$LAST_DATE" ]]; then
+                SINCE_DATE="$LAST_DATE"
+              else
+                SINCE_DATE=$(date -u -d '14 days ago' '+%Y-%m-%dT%H:%M:%SZ')
+              fi
             fi
           fi
 
