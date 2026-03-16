@@ -210,9 +210,6 @@ const renderTable = () => {
 	tableRendered = true;
 };
 
-$: if ($locale) {
-	tableRendered = false;
-}
 $: !loading && !tableRendered && renderTable();
 
 // Re-render the table when locale changes so column headers and
