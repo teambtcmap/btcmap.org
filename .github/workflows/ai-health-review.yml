@@ -200,7 +200,7 @@ jobs:
           printf '%s' "$USER_PROMPT" > /tmp/user-prompt.txt
 
           jq -n \
-            --arg model "anthropic/claude-sonnet-4-6" \
+            --arg model "openai/gpt-4.1" \
             --rawfile system /tmp/system-prompt.txt \
             --rawfile user /tmp/user-prompt.txt \
             '{
