@@ -145,6 +145,7 @@ Use the appropriate tool attribution based on which tool generated the commit:
 - `style`: Code style changes (formatting, etc.)
 - `docs`: Documentation changes
 - `test`: Test-related changes
+- `ci`: CI/CD configuration changes
 - `chore`: Maintenance tasks
 
 ### Workflow:
@@ -153,8 +154,9 @@ Use the appropriate tool attribution based on which tool generated the commit:
 2. **🎨 MANDATORY:** Run `yarn run format:fix` ⚠️ **THIS IS REQUIRED BEFORE EVERY COMMIT** ⚠️
 3. Run `yarn run check` to perform type checking
 4. Run `yarn run lint` to verify no errors
-5. Stage and commit with conventional format
-6. Include issue number if applicable (e.g., `#276`)
+5. Verify the commit type matches the change (e.g., `ci` for CI changes, `feat` only for new features, not config/tooling)
+6. Stage and commit with conventional format
+7. Include issue number if applicable (e.g., `#276`)
 
 **🚨 CRITICAL REMINDER:** You MUST run `yarn run format:fix` before staging any commit. This is non-negotiable and ensures consistent code formatting across the entire project.
 
