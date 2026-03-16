@@ -123,13 +123,15 @@ jobs:
           HOTSPOTS=$(cat /tmp/hotspots.txt)
           PROJECT_CONTEXT=$(cat CLAUDE.md 2>/dev/null || echo "")
           AGENTS_MD=$(cat AGENTS.md 2>/dev/null || echo "")
+          README_MD=$(cat README.md 2>/dev/null || echo "")
 
           SYSTEM_PROMPT='You are a senior software engineer performing a biweekly code review for a SvelteKit web application (btcmap.org). Your job is to review recently merged code and provide actionable feedback.
 
-          Your review focuses on three questions:
+          Your review focuses on four questions:
           1. "Did we miss something?" — bugs, security issues, logic errors, race conditions, missing error handling, accessibility problems, or quality issues in the merged code.
           2. "Can we refactor?" — patterns, duplication, or related changes across multiple commits that could be consolidated or improved now that they have all landed.
           3. "Is AGENTS.md outdated?" — compare the AGENTS.md documentation against the actual codebase patterns visible in the diff. Flag any conventions, tooling references, file paths, or project structure notes in AGENTS.md that contradict what the code actually does.
+          4. "Is README.md outdated?" — compare the README.md against the actual codebase (commands, setup steps, project structure, dependencies). Flag any instructions, commands, or descriptions that no longer match reality.
 
           Project stack: Svelte 4 / SvelteKit 2 (NOT Svelte v5 — do not suggest runes/$state/$derived/$effect), Tailwind CSS v4, TypeScript, Biome (linter/formatter), Vitest, Playwright, Leaflet maps, axios, localforage.
 
@@ -168,6 +170,9 @@ jobs:
           ## AGENTS.md Drift
           [Any conventions, tooling references, or project structure notes in AGENTS.md that are outdated or contradict what the code actually does. Otherwise "AGENTS.md is up to date."]
 
+          ## README.md Drift
+          [Any setup instructions, commands, descriptions, or references in README.md that are outdated or incorrect. Otherwise "README.md is up to date."]
+
           ## Stats
           - **Commits reviewed:** N
           - **Period:** DATE to DATE'
@@ -183,6 +188,12 @@ jobs:
           <agents-md>
           ${AGENTS_MD}
           </agents-md>
+
+          Here is README.md (check if it is outdated relative to the codebase):
+
+          <readme-md>
+          ${README_MD}
+          </readme-md>
 
           Commit log (${{ steps.commits.outputs.commit_count }} commits since ${{ steps.commits.outputs.since_date }}):
 
