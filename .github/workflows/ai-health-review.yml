@@ -222,30 +222,9 @@ jobs:
             -d @/tmp/api-request.json) || HTTP_STATUS="000"
 
           if [[ "$HTTP_STATUS" != "200" ]]; then
-            echo "::error::GitHub Models API returned HTTP $HTTP_STATUS"
             ERROR_MSG=$(jq -r '.error.message // .message // "Unknown error"' /tmp/api-response.json 2>/dev/null || echo "Unknown error")
-            echo "Error: $ERROR_MSG"
-
-            # Fallback: raw commit summary
-            {
-              echo "# Biweekly Codebase Health Review"
-              echo ""
-              echo "> **AI analysis failed** (HTTP $HTTP_STATUS: $ERROR_MSG)."
-              echo "> Showing raw commit summary instead."
-              echo ""
-              echo "## Commits (${{ steps.commits.outputs.commit_count }} since ${{ steps.commits.outputs.since_date }})"
-              echo '```'
-              head -50 /tmp/commit-log.txt
-              echo '```'
-              echo ""
-              echo "## Hotspot files"
-              echo '```'
-              cat /tmp/hotspots.txt
-              echo '```'
-              echo ""
-              echo "<!-- cutoff: ${{ steps.commits.outputs.cutoff_date }} -->"
-            } > /tmp/review.md
-            exit 0
+            echo "::error::GitHub Models API returned HTTP $HTTP_STATUS: $ERROR_MSG"
+            exit 1
           fi
 
           # Extract AI response
