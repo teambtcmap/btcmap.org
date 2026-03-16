@@ -14,12 +14,6 @@ This file contains project-specific guidelines and commands for Claude Code to f
 
 **Failure to run `yarn run format:fix` before committing will result in inconsistent code formatting.**
 
-## Additional Documentation
-
-For comprehensive project architecture, patterns, and development workflows, see:
-
-- [GitHub Copilot Instructions](.github/copilot-instructions.md) - Detailed project overview, framework stack, data architecture, and coding conventions
-
 ## Code Quality Commands
 
 ### Linting
