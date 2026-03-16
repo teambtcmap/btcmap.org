@@ -73,14 +73,34 @@ describe("getDisplayLang", () => {
 
 	describe("SSR safety (window undefined)", () => {
 		it("returns en when window is not available and app locale is English", () => {
-			// Temporarily hide window to simulate SSR
-			const originalWindow = globalThis.window;
-			// @ts-expect-error simulate SSR
-			delete globalThis.window;
+			// Simulate non-English browser language
+			const originalLanguage = navigator.language;
+			const originalLanguages = navigator.languages;
+			Object.defineProperty(navigator, "language", {
+				value: "de-DE",
+				configurable: true,
+			});
+			Object.defineProperty(navigator, "languages", {
+				value: ["de-DE"],
+				configurable: true,
+			});
+
+			// Simulate SSR: make window unavailable
+			vi.stubGlobal("window", undefined);
+
 			try {
 				expect(getDisplayLang("en")).toBe("en");
 			} finally {
-				globalThis.window = originalWindow;
+				// Restore globals
+				vi.unstubAllGlobals();
+				Object.defineProperty(navigator, "language", {
+					value: originalLanguage,
+					configurable: true,
+				});
+				Object.defineProperty(navigator, "languages", {
+					value: originalLanguages,
+					configurable: true,
+				});
 			}
 		});
 
