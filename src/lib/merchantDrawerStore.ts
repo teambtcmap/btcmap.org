@@ -5,7 +5,7 @@ import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
 import api from "$lib/axios";
 import type { DrawerView } from "$lib/merchantDrawerHash";
 import { parseMerchantHash, updateMerchantHash } from "$lib/merchantDrawerHash";
-import { places } from "$lib/store";
+import { placesById } from "$lib/store";
 import type { Place } from "$lib/types";
 
 import { browser } from "$app/environment";
@@ -93,8 +93,8 @@ function createMerchantDrawerStore() {
 
 		// Open drawer with optimistic UI - show cached data immediately
 		open(id: number, view: DrawerView = "details") {
-			// Get cached data from places store
-			const cachedPlace = get(places).find((p) => p.id === id);
+			// Get cached data from places store using O(1) Map lookup
+			const cachedPlace = get(placesById).get(id);
 			const needsFetch = !hasCompleteData(cachedPlace);
 
 			update((state) => ({
@@ -166,9 +166,8 @@ function createMerchantDrawerStore() {
 					hashState.isOpen &&
 					hashState.merchantId !== currentState.merchantId
 				) {
-					const cachedPlace = get(places).find(
-						(p) => p.id === hashState.merchantId,
-					);
+					// hashState.isOpen guarantees merchantId is non-null here
+					const cachedPlace = get(placesById).get(hashState.merchantId!);
 					const needsFetch = !hasCompleteData(cachedPlace);
 
 					if (needsFetch && hashState.merchantId) {
