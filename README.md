@@ -6,9 +6,11 @@
 
 1. `git clone`\
    to clone the repo and `cd` into the directory
-2. `yarn`\
+2. Enable Corepack (if needed)\
+   If `yarn` command is not found, run: `corepack enable`
+3. `yarn`\
    to install the packages
-3. `yarn dev`\
+4. `yarn dev`\
    will open the app on: http://localhost:5000
 
 ### Check your changes before commit/pushing
@@ -23,7 +25,7 @@
    Copy `.env.example` and save as `.env`
 1. `yarn build`
 
-_NOTE:_ BTC Map uses Node 22 LTS. If you have [mise](https://mise.jdx.dev/), run `mise install` in the repo root to switch to the correct version.
+_NOTE:_ BTC Map uses Node 22 LTS. If you have [mise](https://mise.jdx.dev/), run `mise install` in the repo root to switch to the correct version. This project uses Corepack (bundled with Node 22) to manage yarn 4.12.0 automatically.
 
 #### Icons
 
