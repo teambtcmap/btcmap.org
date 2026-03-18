@@ -18,10 +18,11 @@ export let type: AreaType;
 		{@const area = row.original}
 		{@const position = area.position}
 		{@const grade = area.grade || 0}
-		{@const percentage = area.report?.tags?.up_to_date_percent}
-		{@const avgDate = area.report?.tags?.avg_verification_date}
-		{@const totalElements = area.report?.tags?.total_elements || 0}
-		{@const upToDateElements = area.report?.tags?.up_to_date_elements || 0}
+		{@const percentage = area.places_total > 0
+			? Math.round((area.places_verified_1y / area.places_total) * 100)
+			: 0}
+		{@const totalElements = area.places_total || 0}
+		{@const upToDateElements = area.places_verified_1y || 0}
 
 		<!-- Card with three-row layout -->
 		<div
@@ -32,14 +33,14 @@ export let type: AreaType;
 		>
 			{#if type === 'country'}
 				<LeaderboardCountryName
-					countryCode={area.id}
-					name={area.tags?.name || 'Unknown'}
+					countryCode={area.alias}
+					name={area.name || 'Unknown'}
 					let:localizedName
 				>
 					<!-- Row 1: Larger Avatar -->
 					<div class="flex justify-center">
 						<img
-							src={`https://static.btcmap.org/images/countries/${area.id}.svg`}
+							src={area.icon || `https://static.btcmap.org/images/countries/${area.alias}.svg`}
 							alt="{localizedName} avatar"
 							class="h-16 w-16 rounded-full object-cover"
 							on:error={(e) => {
@@ -56,7 +57,7 @@ export let type: AreaType;
 					<div class="text-center">
 						<!-- eslint-disable svelte/no-navigation-without-resolve -->
 						<a
-							href={`/${type}/${encodeURIComponent(area.tags?.url_alias || area.id || '')}`}
+							href={`/${type}/${encodeURIComponent(area.alias || String(area.id) || '')}`}
 							class="text-lg font-semibold text-link transition-colors hover:text-hover {localizedName?.match(
 								/[^ ]{21}/
 							)
@@ -73,8 +74,8 @@ export let type: AreaType;
 				<!-- Row 1: Larger Avatar -->
 				<div class="flex justify-center">
 					<img
-						src={`https://btcmap.org/.netlify/images?url=${area.tags?.['icon:square'] || ''}&fit=cover&w=256&h=256`}
-						alt="{area.tags?.name || 'Unknown'} avatar"
+						src={`https://btcmap.org/.netlify/images?url=${area.icon || ''}&fit=cover&w=256&h=256`}
+						alt="{area.name || 'Unknown'} avatar"
 						class="h-16 w-16 rounded-full object-cover"
 						on:error={(e) => {
 							const target = e.target;
@@ -90,15 +91,15 @@ export let type: AreaType;
 				<div class="text-center">
 					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
-						href={`/${type}/${encodeURIComponent(area.tags?.url_alias || area.id || '')}`}
-						class="text-lg font-semibold text-link transition-colors hover:text-hover {area.tags?.name?.match(
+						href={`/${type}/${encodeURIComponent(area.alias || String(area.id) || '')}`}
+						class="text-lg font-semibold text-link transition-colors hover:text-hover {area.name?.match(
 							/[^ ]{21}/
 						)
 							? 'break-all'
 							: ''}"
-						aria-label={$_('areaLeaderboard.viewDetails', { values: { name: area.tags?.name || 'Unknown' } })}
+						aria-label={$_('areaLeaderboard.viewDetails', { values: { name: area.name || 'Unknown' } })}
 					>
-						{area.tags?.name || 'Unknown'}
+						{area.name || 'Unknown'}
 					</a>
 					<!-- eslint-enable svelte/no-navigation-without-resolve -->
 				</div>
@@ -128,7 +129,7 @@ export let type: AreaType;
 
 				<!-- Grade -->
 				<div class="text-sm">
-					<GradeDisplay {grade} {percentage} {avgDate} size="small" />
+					<GradeDisplay {grade} {percentage} size="small" />
 				</div>
 			</div>
 		</div>

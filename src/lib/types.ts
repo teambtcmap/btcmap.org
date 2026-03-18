@@ -316,6 +316,16 @@ export type TaggerLeaderboard = {
 
 export type ProfileLeaderboard = { id: number; total: number };
 
+export type ApiLeaderboardArea = {
+	id: number;
+	alias: string;
+	name: string;
+	icon: string;
+	places_total: number;
+	places_verified_1y: number;
+	grade: number;
+};
+
 export interface LeaderboardArea extends Area {
 	report: Report;
 	grade: Grade;
