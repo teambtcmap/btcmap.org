@@ -145,9 +145,13 @@ const columns: ColumnDef<ApiLeaderboardArea & { position: number }>[] = [
 				return bGrade - aGrade;
 			}
 
-			// Secondary sort: by places_verified_1y (descending - higher percentages first)
-			const aPercent = a.original.places_verified_1y || 0;
-			const bPercent = b.original.places_verified_1y || 0;
+			// Secondary sort: by places_verified_1y / places_total ratio (descending - higher percentages first)
+			const aTotal = a.original.places_total || 0;
+			const bTotal = b.original.places_total || 0;
+			const aPercent =
+				aTotal > 0 ? (a.original.places_verified_1y || 0) / aTotal : 0;
+			const bPercent =
+				bTotal > 0 ? (b.original.places_verified_1y || 0) / bTotal : 0;
 			return bPercent - aPercent;
 		},
 		enableSorting: true,
