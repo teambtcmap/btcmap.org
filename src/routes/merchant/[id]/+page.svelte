@@ -153,7 +153,9 @@ $: twitter = data.twitter;
 $: instagram = data.instagram;
 $: facebook = data.facebook;
 $: thirdParty = data.thirdParty;
-$: companionAppUrl = data.osmTags?.["payment:lightning:companion_app_url"];
+$: companionAppUrl =
+	data.osmTags?.["payment:lightning:companion_app_url"] ||
+	data.placeData.required_app_url;
 $: paymentMethod = data.paymentMethod;
 $: lat = data.lat;
 $: long = data.lon;
