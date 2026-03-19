@@ -100,7 +100,10 @@ async function fetchComments(placeId: number) {
 		</div>
 	{/if}
 
-	<div class="flex items-start gap-3">
+	<a
+		href={resolve(`/merchant/${merchant.id}`)}
+		class="flex items-start gap-3 rounded-xl p-2 -m-2 transition-colors hover:bg-gray-50 dark:hover:bg-white/5"
+	>
 		<!-- Category icon -->
 		<div
 			class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl {CATEGORY_COLOR_CLASSES[
@@ -112,19 +115,15 @@ async function fetchComments(placeId: number) {
 
 		<div class="min-w-0 flex-1">
 			{#if displayName}
-				<a
-					href={resolve(`/merchant/${merchant.id}`)}
-					class="inline-block text-[22px] leading-snug font-semibold text-link underline decoration-link/30 underline-offset-2 transition-colors hover:text-hover hover:decoration-hover/60"
-					title={$_('merchant.merchantName')}
-				>
+				<span class="inline-block text-[22px] leading-snug font-semibold text-link transition-colors hover:text-hover">
 					{displayName}
-				</a>
+				</span>
 			{:else if isLoading}
 				<div class="h-7 w-3/4 animate-pulse rounded-lg bg-link/50"></div>
 			{/if}
 
 			{#if merchant.address}
-				<p class="mt-0.5 text-sm text-body dark:text-white" title={$_('merchant.address')}>
+				<p class="mt-0.5 text-sm text-body dark:text-white">
 					{merchant.address}
 				</p>
 			{:else if isLoading}
@@ -144,7 +143,7 @@ async function fetchComments(placeId: number) {
 				</span>
 			{/if}
 		</div>
-	</div>
+	</a>
 
 	{#if merchant.opening_hours}
 		<div class="flex items-start gap-2" title={$_('merchant.openingHours')}>
