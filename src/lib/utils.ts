@@ -241,6 +241,10 @@ export const validateContinents = (continent: Continents) =>
 		"South America",
 	].includes(continent);
 
+export const shareMerchant = (merchantId: number | string) => {
+	navigator.clipboard.writeText(`https://btcmap.org/merchant/${merchantId}`);
+};
+
 export const isBoosted = (item: Place | undefined | null) => {
 	if (!item) return false;
 	return item.boosted_until && Date.parse(item.boosted_until) > Date.now();
