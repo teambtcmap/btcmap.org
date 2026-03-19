@@ -30,6 +30,16 @@ $: displayName =
 $: merchantCoords = { lat: merchant.lat, lon: merchant.lon };
 $: openStatus = getOpenStatus(merchant.opening_hours, merchantCoords);
 
+$: companionAppUrl = merchant["osm:payment:lightning:companion_app_url"];
+$: companionAppName = (() => {
+	if (!companionAppUrl) return null;
+	try {
+		return new URL(companionAppUrl).hostname.replace(/^www\./, "");
+	} catch {
+		return null;
+	}
+})();
+
 // Refresh open/closed status every 60s so the badge stays accurate
 let openStatusInterval: ReturnType<typeof setInterval>;
 onMount(() => {
@@ -227,13 +237,26 @@ async function fetchComments(placeId: number) {
 	</div>
 
 	<div class="border-t border-gray-300 pt-4 dark:border-white/95">
-		{#if merchant['osm:payment:lightning'] === 'yes' || merchant['osm:payment:onchain'] === 'yes' || merchant['osm:payment:lightning_contactless'] === 'yes'}
+		{#if merchant['osm:payment:lightning'] === 'yes' || merchant['osm:payment:onchain'] === 'yes' || merchant['osm:payment:lightning_contactless'] === 'yes' || companionAppUrl}
 			<div class="mb-4">
 				<PaymentMethodPills
 					onchain={merchant['osm:payment:onchain']}
 					lightning={merchant['osm:payment:lightning']}
 					contactless={merchant['osm:payment:lightning_contactless']}
 				/>
+				{#if companionAppUrl}
+					<!-- eslint-disable svelte/no-navigation-without-resolve -->
+					<a
+						href={companionAppUrl}
+						target="_blank"
+						rel="noreferrer"
+						class="mt-2 inline-flex items-center gap-1.5 rounded-full bg-purple-100 px-2.5 py-1 text-xs font-medium text-purple-800 transition-colors hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:hover:bg-purple-900/50"
+					>
+						<Icon w="14" h="14" icon="smartphone" type="material" />
+						{companionAppName || $_('payment.thirdPartyRequired')}
+					</a>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
+				{/if}
 			</div>
 		{:else if isLoading}
 			<div class="mb-4">
