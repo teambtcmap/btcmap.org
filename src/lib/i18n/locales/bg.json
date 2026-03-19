@@ -626,6 +626,7 @@
 		"lightningNotAccepted": "Lightning не се приема",
 		"lightningUnknown": "Lightning неизвестно",
 		"methods": "Методи на плащане",
+		"accepts": "Приема",
 		"onchain": "On-chain",
 		"onchainAccepted": "On-chain приема се",
 		"onchainNotAccepted": "On-chain не се приема",

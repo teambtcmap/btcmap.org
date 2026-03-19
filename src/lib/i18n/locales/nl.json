@@ -137,6 +137,7 @@
 	},
 	"payment": {
 		"methods": "Betaalmethoden",
+		"accepts": "Accepteert",
 		"accepted": "Geaccepteerde betalingen",
 		"onchain": "Aan de ketting",
 		"onchainAccepted": "On-chain geaccepteerd",

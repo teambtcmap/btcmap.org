@@ -141,6 +141,7 @@
 	},
 	"payment": {
 		"methods": "Métodos de Pagamento",
+		"accepts": "Aceita",
 		"accepted": "Pagamentos Aceitos",
 		"onchain": "On-chain",
 		"onchainAccepted": "On-chain aceito",
