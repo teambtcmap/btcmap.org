@@ -16,7 +16,13 @@ export type SocialIconName =
 	| "x"
 	| "youtube";
 
-export type AppIconName = "android" | "f-droid" | "ios" | "play" | "web";
+export type AppIconName =
+	| "android"
+	| "bolt"
+	| "f-droid"
+	| "ios"
+	| "play"
+	| "web";
 
 export type MobileNavIconName =
 	| "activity"

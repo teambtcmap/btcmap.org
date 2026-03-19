@@ -65,8 +65,8 @@ import { resolve } from "$app/paths";
 								target={app.type === 'Web' ? null : '_blank'}
 								rel={app.type === 'Web' ? null : 'noreferrer'}
 								aria-label={app.type === 'Web' ? $_('home.openWebAppAria') : $_('home.downloadForAria', { values: { type: app.type } })}
-								class="block rounded-full bg-link p-3 text-white transition-colors hover:bg-hover"
-							>
+							class="mx-auto inline-flex rounded-full bg-link p-3 text-white transition-colors hover:bg-hover"
+						>
 								<!-- eslint-enable svelte/no-navigation-without-resolve -->
 								<IconApps
 									w="32"
