@@ -45,7 +45,7 @@ $: hasVerification = merchant.verified_at !== undefined;
 	<!-- Payment methods and verification -->
 	<div class="flex items-center justify-between gap-4">
 		<!-- Payment methods -->
-		<div class="flex items-center gap-1.5">
+		<div class="flex flex-wrap items-center gap-1.5">
 			{#if hasAcceptedPayment}
 				{#if merchant['osm:payment:lightning'] === 'yes'}
 					<PaymentMethodPill method="ln" label={$_('payment.lightning')} />

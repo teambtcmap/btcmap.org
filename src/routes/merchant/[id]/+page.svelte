@@ -377,7 +377,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 				<!-- Placeholder for alignment -->
 			{/if}
 
-			{#if (paymentMethod || thirdParty) && data}
+			{#if (paymentMethod || companionAppUrl) && data}
 				<div class="text-primary dark:text-white">
 					<div class="flex flex-wrap items-center justify-center gap-2">
 						{#if paymentMethod}
@@ -387,7 +387,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 								contactless={data.osmTags?.['payment:lightning_contactless']}
 							/>
 						{/if}
-						{#if thirdParty && companionAppUrl}
+						{#if companionAppUrl}
 							<CompanionAppPill url={companionAppUrl} />
 						{/if}
 					</div>
