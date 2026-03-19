@@ -5,7 +5,7 @@ import Time from "svelte-time";
 
 import Icon from "$components/Icon.svelte";
 import MerchantComment from "$components/MerchantComment.svelte";
-import PaymentMethodIcon from "$components/PaymentMethodIcon.svelte";
+import PaymentMethodPill from "$components/PaymentMethodPill.svelte";
 import {
 	CATEGORY_COLOR_CLASSES,
 	getIconColorWithFallback,
@@ -227,34 +227,27 @@ async function fetchComments(placeId: number) {
 	</div>
 
 	<div class="border-t border-gray-300 pt-4 dark:border-white/95">
-		{#if merchant['osm:payment:onchain'] || merchant['osm:payment:lightning'] || merchant['osm:payment:lightning_contactless'] || merchant['osm:payment:bitcoin']}
+		{#if merchant['osm:payment:lightning'] === 'yes' || merchant['osm:payment:onchain'] === 'yes' || merchant['osm:payment:lightning_contactless'] === 'yes'}
 			<div class="mb-4">
-				<span class="block text-xs text-mapLabel dark:text-white/70">{$_('payment.methods')}</span>
-				<div class="mt-1 flex space-x-2">
-					<PaymentMethodIcon
-						status={merchant['osm:payment:onchain']}
-						method="btc"
-						label={$_('payment.onchain')}
-					/>
-					<PaymentMethodIcon
-						status={merchant['osm:payment:lightning']}
-						method="ln"
-						label={$_('payment.lightning')}
-					/>
-					<PaymentMethodIcon
-						status={merchant['osm:payment:lightning_contactless']}
-						method="nfc"
-						label={$_('payment.lightningContactless')}
-					/>
+				<span class="block text-xs text-mapLabel dark:text-white/70">{$_('payment.accepts')}</span>
+				<div class="mt-1 flex flex-wrap gap-2">
+					{#if merchant['osm:payment:lightning'] === 'yes'}
+						<PaymentMethodPill method="ln" label={$_('payment.lightning')} />
+					{/if}
+					{#if merchant['osm:payment:onchain'] === 'yes'}
+						<PaymentMethodPill method="btc" label={$_('payment.onchain')} />
+					{/if}
+					{#if merchant['osm:payment:lightning_contactless'] === 'yes'}
+						<PaymentMethodPill method="nfc" label={$_('payment.lightningContactless')} />
+					{/if}
 				</div>
 			</div>
 		{:else if isLoading}
 			<div class="mb-4">
-				<div class="h-3 w-24 animate-pulse rounded bg-link/50"></div>
-				<div class="mt-1 flex space-x-2">
-					<div class="h-8 w-16 animate-pulse rounded bg-link/50"></div>
-					<div class="h-8 w-16 animate-pulse rounded bg-link/50"></div>
-					<div class="h-8 w-16 animate-pulse rounded bg-link/50"></div>
+				<div class="h-3 w-16 animate-pulse rounded bg-link/50"></div>
+				<div class="mt-1 flex gap-2">
+					<div class="h-7 w-20 animate-pulse rounded-full bg-link/50"></div>
+					<div class="h-7 w-20 animate-pulse rounded-full bg-link/50"></div>
 				</div>
 			</div>
 		{/if}
