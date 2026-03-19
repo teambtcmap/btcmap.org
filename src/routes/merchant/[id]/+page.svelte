@@ -259,6 +259,7 @@ $: if (merchantMarker && leaflet && mapLoaded && icon) {
 }
 
 onDestroy(async () => {
+	clearTimeout(shareTimeout);
 	if (map) {
 		console.info("Unloading Leaflet map.");
 		map.remove();

@@ -42,7 +42,10 @@ onMount(() => {
 		openStatus = getOpenStatus(merchant.opening_hours, merchantCoords);
 	}, 60_000);
 });
-onDestroy(() => clearInterval(openStatusInterval));
+onDestroy(() => {
+	clearInterval(openStatusInterval);
+	clearTimeout(shareTimeout);
+});
 
 let shareConfirm = false;
 let shareTimeout: ReturnType<typeof setTimeout>;
