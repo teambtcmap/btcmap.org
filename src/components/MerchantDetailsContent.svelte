@@ -224,13 +224,7 @@ async function fetchComments(placeId: number) {
 			}}
 			class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
 		>
-			<Icon
-				w="24"
-				h="24"
-				icon={shareConfirm ? 'check_circle' : 'share'}
-				type="material"
-				class={shareConfirm ? 'text-green-600 dark:text-green-400' : ''}
-			/>
+			<Icon w="24" h="24" icon={shareConfirm ? 'check_circle' : 'share'} type="material" />
 			<span class="mt-1 text-xs">{$_('merchant.share')}</span>
 		</button>
 
