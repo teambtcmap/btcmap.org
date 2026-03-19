@@ -1,5 +1,6 @@
 <script lang="ts">
 import axios from "axios";
+import { onDestroy } from "svelte";
 import Time from "svelte-time";
 
 import Icon from "$components/Icon.svelte";
@@ -26,10 +27,14 @@ export let isLoading: boolean = false;
 $: displayName =
 	merchant.localized_name?.[getDisplayLang($locale)] || merchant.name;
 
-$: openStatus = getOpenStatus(merchant.opening_hours, {
-	lat: merchant.lat,
-	lon: merchant.lon,
-});
+$: merchantCoords = { lat: merchant.lat, lon: merchant.lon };
+$: openStatus = getOpenStatus(merchant.opening_hours, merchantCoords);
+
+// Refresh open/closed status every 60s so the badge stays accurate
+const openStatusInterval = setInterval(() => {
+	openStatus = getOpenStatus(merchant.opening_hours, merchantCoords);
+}, 60_000);
+onDestroy(() => clearInterval(openStatusInterval));
 
 // Comments state
 let comments: { id: number; text: string; created_at: string }[] = [];
