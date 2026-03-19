@@ -114,7 +114,7 @@ async function fetchComments(placeId: number) {
 			{#if displayName}
 				<a
 					href={resolve(`/merchant/${merchant.id}`)}
-					class="inline-block text-[22px] leading-snug font-semibold text-link transition-colors hover:text-hover"
+					class="inline-block text-[22px] leading-snug font-semibold text-link underline decoration-link/30 underline-offset-2 transition-colors hover:text-hover hover:decoration-hover/60"
 					title={$_('merchant.merchantName')}
 				>
 					{displayName}
