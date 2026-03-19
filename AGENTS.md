@@ -122,10 +122,11 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/) format for a
 ```
 
 Use the appropriate tool attribution based on which tool generated the commit:
+- When using Claude Code: use `Co-Authored-By:` (Claude Code sets this automatically)
 - When using opencode: `🤖 Generated with [opencode](https://opencode.ai)`
 - When using pi: `🤖 Generated with [pi](https://github.com/mariozechner/pi-coding-agent)`
 
-**Note:** We do not set a co-author attribution
+**Note:** Only Claude Code uses co-author attribution. Other tools use the `🤖 Generated with` line instead.
 
 ### Examples:
 
