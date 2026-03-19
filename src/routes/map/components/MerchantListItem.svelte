@@ -1,6 +1,5 @@
 <script lang="ts">
 import Icon from "$components/Icon.svelte";
-import PaymentMethodIcon from "$components/PaymentMethodIcon.svelte";
 import {
 	CATEGORY_COLOR_CLASSES,
 	getIconColorWithFallback,
@@ -24,10 +23,6 @@ export let onmouseleave: (merchant: Place) => void = () => {};
 
 $: showSkeleton = !enrichedData;
 $: displayData = enrichedData || merchant;
-$: hasPaymentMethods =
-	enrichedData?.["osm:payment:onchain"] !== undefined ||
-	enrichedData?.["osm:payment:lightning"] !== undefined ||
-	enrichedData?.["osm:payment:lightning_contactless"] !== undefined;
 
 $: isVerified = checkUpToDate(displayData, verifiedDate);
 $: isBoosted = checkBoosted(merchant);
@@ -126,35 +121,6 @@ function handleClick() {
 					</p>
 				{:else if showSkeleton}
 					<div class="mt-0.5 h-3 w-24 animate-pulse rounded bg-link/50"></div>
-				{/if}
-
-				<!-- Payment methods -->
-				{#if enrichedData && hasPaymentMethods}
-					<div class="mt-1.5 flex gap-1">
-						<PaymentMethodIcon
-							status={enrichedData['osm:payment:onchain']}
-							method="btc"
-							label={$_('payment.onchain')}
-							size="sm"
-						/>
-						<PaymentMethodIcon
-							status={enrichedData['osm:payment:lightning']}
-							method="ln"
-							label={$_('payment.lightning')}
-							size="sm"
-						/>
-						<PaymentMethodIcon
-							status={enrichedData['osm:payment:lightning_contactless']}
-							method="nfc"
-							label={$_('payment.lightningContactless')}
-							size="sm"
-						/>
-					</div>
-				{:else if showSkeleton}
-					<div class="mt-1.5 flex gap-1">
-						<div class="h-5 w-5 animate-pulse rounded bg-link/50"></div>
-						<div class="h-5 w-5 animate-pulse rounded bg-link/50"></div>
-					</div>
 				{/if}
 
 				<!-- Status badges -->

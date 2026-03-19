@@ -141,6 +141,7 @@
 	},
 	"payment": {
 		"methods": "Способы оплаты",
+		"accepts": "Принимает",
 		"accepted": "Принимаемые платежи",
 		"onchain": "Ончейн",
 		"onchainAccepted": "Ончейн принимается",

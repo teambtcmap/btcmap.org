@@ -9,9 +9,10 @@ import tippy from "tippy.js";
 import Boost from "$components/Boost.svelte";
 import BoostButton from "$components/BoostButton.svelte";
 import Card from "$components/Card.svelte";
+import CompanionAppPill from "$components/CompanionAppPill.svelte";
 import Icon from "$components/Icon.svelte";
 import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
-import PaymentMethodIcon from "$components/PaymentMethodIcon.svelte";
+import PaymentMethodPills from "$components/PaymentMethodPills.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import ShowTags from "$components/ShowTags.svelte";
 import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
@@ -152,6 +153,9 @@ $: twitter = data.twitter;
 $: instagram = data.instagram;
 $: facebook = data.facebook;
 $: thirdParty = data.thirdParty;
+$: companionAppUrl =
+	data.osmTags?.["payment:lightning:companion_app_url"] ||
+	data.placeData.required_app_url;
 $: paymentMethod = data.paymentMethod;
 $: lat = data.lat;
 $: long = data.lon;
@@ -178,51 +182,8 @@ $: {
 			? mergedPlace.boosted_until
 			: undefined;
 }
-let thirdPartyTooltip: HTMLAnchorElement;
-let onchainTooltip: HTMLImageElement;
-let lnTooltip: HTMLImageElement;
-let nfcTooltip: HTMLImageElement;
 let verifiedTooltip: HTMLSpanElement;
 let outdatedTooltip: HTMLSpanElement;
-
-$: thirdPartyTooltip &&
-	data &&
-	tippy([thirdPartyTooltip], {
-		content: $_("payment.thirdPartyRequired"),
-	});
-
-$: onchainTooltip &&
-	data &&
-	tippy([onchainTooltip], {
-		content:
-			data.osmTags?.["payment:onchain"] === "yes"
-				? $_("payment.onchainAccepted")
-				: data.osmTags?.["payment:onchain"] === "no"
-					? $_("payment.onchainNotAccepted")
-					: $_("payment.onchainUnknown"),
-	});
-
-$: lnTooltip &&
-	data &&
-	tippy([lnTooltip], {
-		content:
-			data.osmTags?.["payment:lightning"] === "yes"
-				? $_("payment.lightningAccepted")
-				: data.osmTags?.["payment:lightning"] === "no"
-					? $_("payment.lightningNotAccepted")
-					: $_("payment.lightningUnknown"),
-	});
-
-$: nfcTooltip &&
-	data &&
-	tippy([nfcTooltip], {
-		content:
-			data.osmTags?.["payment:lightning_contactless"] === "yes"
-				? $_("payment.contactlessAccepted")
-				: data.osmTags?.["payment:lightning_contactless"] === "no"
-					? $_("payment.contactlessNotAccepted")
-					: $_("payment.contactlessUnknown"),
-	});
 
 $: verifiedTooltip &&
 	tippy([verifiedTooltip], {
@@ -416,54 +377,18 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 				<!-- Placeholder for alignment -->
 			{/if}
 
-			{#if (paymentMethod || thirdParty) && data}
+			{#if (paymentMethod || companionAppUrl) && data}
 				<div class="text-primary dark:text-white">
-					<h4 class="text-primary uppercase dark:text-white">{$_('payment.accepted')}</h4>
-					<div class="mt-1 flex items-center justify-center space-x-2">
-						{#if !paymentMethod}
-							<!-- eslint-disable svelte/no-navigation-without-resolve -->
-							<a
-								bind:this={thirdPartyTooltip}
-								href={data.osmTags?.['payment:lightning:companion_app_url']}
-								target="_blank"
-								rel="noreferrer"
-							>
-								<!-- eslint-enable svelte/no-navigation-without-resolve -->
-								<Icon
-									type="fa"
-									icon="mobile-screen-button"
-									w="32"
-									h="32"
-									class="text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
-								/>
-							</a>
-						{:else if typeof window !== 'undefined'}
-							<PaymentMethodIcon
-								bind:element={onchainTooltip}
-								status={data.osmTags?.['payment:onchain']}
-								method="btc"
-								label={$_('payment.onchain')}
-								variant="teal"
-								size="md"
+					<div class="flex flex-wrap items-center justify-center gap-2">
+						{#if paymentMethod}
+							<PaymentMethodPills
+								onchain={data.osmTags?.['payment:onchain']}
+								lightning={data.osmTags?.['payment:lightning']}
+								contactless={data.osmTags?.['payment:lightning_contactless']}
 							/>
-
-							<PaymentMethodIcon
-								bind:element={lnTooltip}
-								status={data.osmTags?.['payment:lightning']}
-								method="ln"
-								label={$_('payment.lightning')}
-								variant="teal"
-								size="md"
-							/>
-
-							<PaymentMethodIcon
-								bind:element={nfcTooltip}
-								status={data.osmTags?.['payment:lightning_contactless']}
-								method="nfc"
-								label={$_('payment.lightningContactless')}
-								variant="teal"
-								size="md"
-							/>
+						{/if}
+						{#if companionAppUrl}
+							<CompanionAppPill url={companionAppUrl} />
 						{/if}
 					</div>
 				</div>

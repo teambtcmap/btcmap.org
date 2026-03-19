@@ -141,6 +141,7 @@
 	},
 	"payment": {
 		"methods": "Zahlungsmethoden",
+		"accepts": "Akzeptiert",
 		"accepted": "Akzeptierte Zahlungen",
 		"onchain": "On-Chain",
 		"onchainAccepted": "On-Chain akzeptiert",

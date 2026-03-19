@@ -1,6 +1,6 @@
 <script lang="ts">
 import Icon from "$components/Icon.svelte";
-import PaymentMethodIcon from "$components/PaymentMethodIcon.svelte";
+import PaymentMethodPill from "$components/PaymentMethodPill.svelte";
 import { _ } from "$lib/i18n";
 import type { Place } from "$lib/types";
 
@@ -9,12 +9,11 @@ export let isUpToDate: boolean;
 export let isBoosted: boolean;
 export let isLoading: boolean = false;
 
-// Check if we have the detailed data needed for display
 $: hasName = merchant.name !== undefined;
-$: hasPaymentMethods =
-	merchant["osm:payment:onchain"] !== undefined ||
-	merchant["osm:payment:lightning"] !== undefined ||
-	merchant["osm:payment:lightning_contactless"] !== undefined;
+$: hasAcceptedPayment =
+	merchant["osm:payment:lightning"] === "yes" ||
+	merchant["osm:payment:onchain"] === "yes" ||
+	merchant["osm:payment:lightning_contactless"] === "yes";
 $: hasVerification = merchant.verified_at !== undefined;
 </script>
 
@@ -46,33 +45,21 @@ $: hasVerification = merchant.verified_at !== undefined;
 	<!-- Payment methods and verification -->
 	<div class="flex items-center justify-between gap-4">
 		<!-- Payment methods -->
-		<div class="flex items-center space-x-2">
-			{#if hasPaymentMethods}
-				{#if merchant['osm:payment:onchain']}
-					<PaymentMethodIcon
-						status={merchant['osm:payment:onchain']}
-						method="btc"
-						label={$_('payment.onchain')}
-					/>
+		<div class="flex flex-wrap items-center gap-1.5">
+			{#if hasAcceptedPayment}
+				{#if merchant['osm:payment:lightning'] === 'yes'}
+					<PaymentMethodPill method="ln" label={$_('payment.lightning')} />
 				{/if}
-				{#if merchant['osm:payment:lightning']}
-					<PaymentMethodIcon
-						status={merchant['osm:payment:lightning']}
-						method="ln"
-						label={$_('payment.lightning')}
-					/>
+				{#if merchant['osm:payment:onchain'] === 'yes'}
+					<PaymentMethodPill method="btc" label={$_('payment.onchain')} />
 				{/if}
-				{#if merchant['osm:payment:lightning_contactless']}
-					<PaymentMethodIcon
-						status={merchant['osm:payment:lightning_contactless']}
-						method="nfc"
-						label={$_('payment.lightningContactless')}
-					/>
+				{#if merchant['osm:payment:lightning_contactless'] === 'yes'}
+					<PaymentMethodPill method="nfc" label={$_('payment.lightningContactless')} />
 				{/if}
 			{:else if isLoading}
-				<div class="flex space-x-2">
-					<div class="h-6 w-6 animate-pulse rounded bg-link/50"></div>
-					<div class="h-6 w-6 animate-pulse rounded bg-link/50"></div>
+				<div class="flex gap-1.5">
+					<div class="h-6 w-16 animate-pulse rounded-full bg-link/50"></div>
+					<div class="h-6 w-16 animate-pulse rounded-full bg-link/50"></div>
 				</div>
 			{/if}
 		</div>
