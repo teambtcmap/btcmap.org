@@ -1,6 +1,6 @@
 {
 	"home": {
-		"hero": "Vind plaatsen om sats door te brengen, waar je ook bent.",
+		"hero": "Vind plaatsen om je sats te spenden, waar je ook bent!",
 		"openMap": "Kaart openen",
 		"addLocation": "Locatie toevoegen",
 		"description": "We gebruiken {osmLink} om plaatsen te taggen die bitcoin accepteren en we tonen die verkopers in onze prachtige apps.",
@@ -16,7 +16,7 @@
 		"apps": "Apps",
 		"stats": "Statistieken",
 		"areas": "Gebieden",
-		"maintain": "Behouden",
+		"maintain": "Onderhoud",
 		"wiki": "Wiki",
 		"blog": "Blog",
 		"supportUs": "Steun ons",
@@ -319,7 +319,7 @@
 		"bitcoinForBusiness": "Bitcoin voor bedrijven",
 		"status": "Status",
 		"analytics": "Analyses",
-		"whitePaper": "Witboek",
+		"whitePaper": "White Paper",
 		"cypherpunks": "Cypherpunks"
 	},
 	"meta": {
@@ -685,7 +685,7 @@
 			"merchants": "Kooplieden",
 			"stats": "Statistieken",
 			"activity": "Activiteit",
-			"maintain": "Behouden"
+			"maintain": "Onderhoud"
 		},
 		"defaultName": "BTC-kaartgebied",
 		"viewOnCommunityMap": "Bekijk op de gemeenschapskaart",
@@ -875,7 +875,7 @@
 				"desc": "5000"
 			},
 			"whitepaper": {
-				"title": "Witboek",
+				"title": "White Paper",
 				"desc": "3110"
 			},
 			"winston": {
