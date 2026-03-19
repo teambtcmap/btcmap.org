@@ -9,6 +9,7 @@ import tippy from "tippy.js";
 import Boost from "$components/Boost.svelte";
 import BoostButton from "$components/BoostButton.svelte";
 import Card from "$components/Card.svelte";
+import CompanionAppPill from "$components/CompanionAppPill.svelte";
 import Icon from "$components/Icon.svelte";
 import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
 import PaymentMethodPills from "$components/PaymentMethodPills.svelte";
@@ -153,14 +154,6 @@ $: instagram = data.instagram;
 $: facebook = data.facebook;
 $: thirdParty = data.thirdParty;
 $: companionAppUrl = data.osmTags?.["payment:lightning:companion_app_url"];
-$: companionAppName = (() => {
-	if (!companionAppUrl) return null;
-	try {
-		return new URL(companionAppUrl).hostname.replace(/^www\./, "");
-	} catch {
-		return null;
-	}
-})();
 $: paymentMethod = data.paymentMethod;
 $: lat = data.lat;
 $: long = data.lon;
@@ -393,17 +386,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 							/>
 						{/if}
 						{#if thirdParty && companionAppUrl}
-							<!-- eslint-disable svelte/no-navigation-without-resolve -->
-							<a
-								href={companionAppUrl}
-								target="_blank"
-								rel="noreferrer"
-								class="inline-flex items-center gap-1.5 rounded-full bg-purple-100 px-2.5 py-1 text-xs font-medium text-purple-800 transition-colors hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:hover:bg-purple-900/50"
-							>
-								<Icon type="fa" icon="mobile-screen-button" w="14" h="14" />
-								{companionAppName || $_('payment.thirdPartyRequired')}
-							</a>
-							<!-- eslint-enable svelte/no-navigation-without-resolve -->
+							<CompanionAppPill url={companionAppUrl} />
 						{/if}
 					</div>
 				</div>

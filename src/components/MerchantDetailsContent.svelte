@@ -3,6 +3,7 @@ import axios from "axios";
 import { onDestroy, onMount } from "svelte";
 import Time from "svelte-time";
 
+import CompanionAppPill from "$components/CompanionAppPill.svelte";
 import Icon from "$components/Icon.svelte";
 import MerchantComment from "$components/MerchantComment.svelte";
 import PaymentMethodPills from "$components/PaymentMethodPills.svelte";
@@ -31,14 +32,6 @@ $: merchantCoords = { lat: merchant.lat, lon: merchant.lon };
 $: openStatus = getOpenStatus(merchant.opening_hours, merchantCoords);
 
 $: companionAppUrl = merchant["osm:payment:lightning:companion_app_url"];
-$: companionAppName = (() => {
-	if (!companionAppUrl) return null;
-	try {
-		return new URL(companionAppUrl).hostname.replace(/^www\./, "");
-	} catch {
-		return null;
-	}
-})();
 
 // Refresh open/closed status every 60s so the badge stays accurate
 let openStatusInterval: ReturnType<typeof setInterval>;
@@ -245,17 +238,9 @@ async function fetchComments(placeId: number) {
 					contactless={merchant['osm:payment:lightning_contactless']}
 				/>
 				{#if companionAppUrl}
-					<!-- eslint-disable svelte/no-navigation-without-resolve -->
-					<a
-						href={companionAppUrl}
-						target="_blank"
-						rel="noreferrer"
-						class="mt-2 inline-flex items-center gap-1.5 rounded-full bg-purple-100 px-2.5 py-1 text-xs font-medium text-purple-800 transition-colors hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:hover:bg-purple-900/50"
-					>
-						<Icon w="14" h="14" icon="smartphone" type="material" />
-						{companionAppName || $_('payment.thirdPartyRequired')}
-					</a>
-					<!-- eslint-enable svelte/no-navigation-without-resolve -->
+					<div class="mt-2">
+						<CompanionAppPill url={companionAppUrl} />
+					</div>
 				{/if}
 			</div>
 		{:else if isLoading}
