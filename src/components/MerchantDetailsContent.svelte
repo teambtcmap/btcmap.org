@@ -31,7 +31,9 @@ $: displayName =
 $: merchantCoords = { lat: merchant.lat, lon: merchant.lon };
 $: openStatus = getOpenStatus(merchant.opening_hours, merchantCoords);
 
-$: companionAppUrl = merchant["osm:payment:lightning:companion_app_url"];
+$: companionAppUrl =
+	merchant["osm:payment:lightning:companion_app_url"] ||
+	merchant.required_app_url;
 
 // Refresh open/closed status every 60s so the badge stays accurate
 let openStatusInterval: ReturnType<typeof setInterval>;
