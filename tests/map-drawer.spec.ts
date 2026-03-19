@@ -323,6 +323,78 @@ test.describe('Map Drawer', () => {
 		await expect(boostText.first()).toBeVisible({ timeout: 10000 });
 	});
 
+	test('comments re-appear after switching to merchant without comments and back', async ({
+		page
+	}) => {
+		let commentsFetchCount = 0;
+
+		// Mock the comments API: merchant 6556 has comments, others return empty
+		await page.route('**/v4/places/*/comments', async (route) => {
+			commentsFetchCount++;
+			const url = route.request().url();
+			if (url.includes('/places/6556/')) {
+				await route.fulfill({
+					status: 200,
+					contentType: 'application/json',
+					body: JSON.stringify([
+						{ id: 1, text: 'Great place!', created_at: '2025-01-15T12:00:00Z' }
+					])
+				});
+			} else {
+				await route.fulfill({
+					status: 200,
+					contentType: 'application/json',
+					body: JSON.stringify([])
+				});
+			}
+		});
+
+		// Mock the single-place API so both merchants resolve with appropriate comment counts
+		await page.route('**/v4/places/6556', async (route) => {
+			const response = await route.fetch();
+			const json = await response.json();
+			json.comments = 1;
+			await route.fulfill({ response, json });
+		});
+		await page.route('**/v4/places/1', async (route) => {
+			const response = await route.fetch();
+			const json = await response.json();
+			json.comments = 0;
+			await route.fulfill({ response, json });
+		});
+
+		// Open merchant 6556 (has comments)
+		await page.goto('/map#15/53.55573/10.00825&merchant=6556', { waitUntil: 'load' });
+		await waitForMarkersToLoad(page);
+
+		const drawer = page.locator('[role="dialog"]');
+		await expect(drawer).toBeVisible({ timeout: 15000 });
+
+		// Verify comments appear
+		await expect(drawer.getByText('Great place!')).toBeVisible({ timeout: 10000 });
+		const firstFetchCount = commentsFetchCount;
+		expect(firstFetchCount).toBeGreaterThanOrEqual(1);
+
+		// Switch to merchant 1 (no comments)
+		await page.evaluate(() => {
+			window.location.hash = '#15/53.55573/10.00825&merchant=1';
+		});
+
+		// Wait for drawer to update — comments should be gone
+		await expect(drawer.getByText('Great place!')).not.toBeVisible({ timeout: 10000 });
+
+		// Switch back to merchant 6556
+		await page.evaluate(() => {
+			window.location.hash = '#15/53.55573/10.00825&merchant=6556';
+		});
+
+		// Comments must re-appear (this is the bug scenario)
+		await expect(drawer.getByText('Great place!')).toBeVisible({ timeout: 10000 });
+
+		// Verify a new fetch was triggered
+		expect(commentsFetchCount).toBeGreaterThan(firstFetchCount);
+	});
+
 	test('drawer dismisses on swipe down from peek state (mobile)', async ({ page }) => {
 		// Set mobile viewport
 		await page.setViewportSize({ width: 375, height: 667 });
