@@ -14,15 +14,11 @@ const leftLinks = [
 		nameKey: "footer.bitcoinForBusiness",
 		external: true,
 	},
-	...(env.PUBLIC_UMAMI_URL
-		? [
-				{
-					link: env.PUBLIC_UMAMI_URL,
-					nameKey: "footer.analytics",
-					external: true,
-				},
-			]
-		: []),
+	{
+		link: env.PUBLIC_UMAMI_URL || "https://umami.btcmap.org",
+		nameKey: "footer.analytics",
+		external: true,
+	},
 	{ link: "/cypherpunks-manifesto.pdf", nameKey: "footer.cypherpunks" },
 ];
 
