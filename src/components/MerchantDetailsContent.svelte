@@ -43,6 +43,7 @@ $: if (
 	comments = [];
 	commentsLoading = false;
 	commentsError = false;
+	lastFetchedId = null;
 }
 
 async function fetchComments(placeId: number) {
