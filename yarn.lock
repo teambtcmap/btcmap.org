@@ -55,6 +55,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7.28.6":
+  version: 7.29.2
+  resolution: "@babel/runtime@npm:7.29.2"
+  checksum: 10c0/30b80a0140d16467792e1bbeb06f655b0dab70407da38dfac7fedae9c859f9ae9d846ef14ad77bd3814c064295fe9b1bc551f1541ea14646ae9f22b71a8bc17a
+  languageName: node
+  linkType: hard
+
 "@biomejs/biome@npm:^2.4.7":
   version: 2.4.7
   resolution: "@biomejs/biome@npm:2.4.7"
@@ -2187,6 +2194,7 @@ __metadata:
     localforage: "npm:^1.10.0"
     maplibre-gl: "npm:^4.7.1"
     marked: "npm:^17.0.4"
+    opening_hours: "npm:^3.11.0"
     postcss: "npm:^8.5.8"
     qrcode: "npm:^1.5.4"
     svelte: "npm:^4.2.20"
@@ -3452,6 +3460,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"i18next@npm:^25.3.2":
+  version: 25.8.19
+  resolution: "i18next@npm:25.8.19"
+  dependencies:
+    "@babel/runtime": "npm:^7.28.6"
+  peerDependencies:
+    typescript: ^5
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 10c0/bf8e1b091d7cc8ac16339db5e7153bc6972a7111dd2b99635d46b875783d1f5ed31d4530360dd7c6209def4d38a00141bf594b1e891a989f93dd86ba3e9b05f4
+  languageName: node
+  linkType: hard
+
 "iconv-lite@npm:^0.6.2":
   version: 0.6.3
   resolution: "iconv-lite@npm:0.6.3"
@@ -4247,6 +4269,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"opening_hours@npm:^3.11.0":
+  version: 3.11.0
+  resolution: "opening_hours@npm:3.11.0"
+  dependencies:
+    i18next: "npm:^25.3.2"
+    suncalc: "npm:^1.9.0"
+  checksum: 10c0/3ece07f2ac2039d54d728a06bfb82c5f5597deb7453b9508d5f1d234d16e782103b8d2d5a4d37eff4e1e38a63c7e3419c77c2ece079d6f0f4fcf5f4006893a8f
+  languageName: node
+  linkType: hard
+
 "opentype.js@npm:^0.7.3":
   version: 0.7.3
   resolution: "opentype.js@npm:0.7.3"
@@ -4861,6 +4893,13 @@ __metadata:
   dependencies:
     js-tokens: "npm:^9.0.1"
   checksum: 10c0/50918f669915d9ad0fe4b7599902b735f853f2201c97791ead00104a654259c0c61bc2bc8fa3db05109339b61f4cf09e47b94ecc874ffbd0e013965223893af8
+  languageName: node
+  linkType: hard
+
+"suncalc@npm:^1.9.0":
+  version: 1.9.0
+  resolution: "suncalc@npm:1.9.0"
+  checksum: 10c0/3c76c600ec8e60b7a6efab72f48cce3fc9b4ce95f8fa404fcd13d22f618fee2b83d7ad486544aee76bc20129c9f4eae4a76b09640c54167edd1de6099ca6cd3d
   languageName: node
   linkType: hard
 
