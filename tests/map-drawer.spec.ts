@@ -139,8 +139,8 @@ test.describe('Map Drawer', () => {
 		const drawer = page.locator('[role="dialog"]');
 		await expect(drawer).toBeVisible({ timeout: 15000 });
 
-		// Look for "View Full Details" button in drawer
-		const viewDetailsButton = page.locator('a:has-text("View Full Details")');
+		// Look for "See full profile" button in drawer
+		const viewDetailsButton = page.locator('a:has-text("See full profile")');
 		await expect(viewDetailsButton).toBeVisible({ timeout: 10000 });
 
 		const merchantHref = await viewDetailsButton.getAttribute('href');
@@ -254,8 +254,8 @@ test.describe('Map Drawer', () => {
 			console.error('API response wait failed:', error);
 		}
 
-		// Verify "View Full Details" button appears (confirms drawer has content)
-		const viewDetailsButton = page.locator('a:has-text("View Full Details")');
+		// Verify "See full profile" button appears (confirms drawer has content)
+		const viewDetailsButton = page.locator('a:has-text("See full profile")');
 		await expect(viewDetailsButton).toBeVisible({ timeout: 10000 });
 
 		// Verify the correct merchant is displayed
