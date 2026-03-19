@@ -992,7 +992,7 @@
 		"donate": {
 			"scanOrClick": "Scan of klik om te doneren",
 			"onchain": "On-chain",
-			"lightning": "Lighting",
+			"lightning": "Lightning",
 			"protocolAlt": "protocol"
 		},
 		"supporters": {
