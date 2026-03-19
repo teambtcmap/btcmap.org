@@ -242,6 +242,7 @@ export const validateContinents = (continent: Continents) =>
 	].includes(continent);
 
 export const shareMerchant = (merchantId: number | string) => {
+	if (typeof navigator === "undefined") return;
 	navigator.clipboard.writeText(`https://btcmap.org/merchant/${merchantId}`);
 };
 
