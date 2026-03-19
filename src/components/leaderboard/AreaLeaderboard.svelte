@@ -13,8 +13,8 @@ import {
 	type SortingState,
 	type TableOptions,
 } from "@tanstack/svelte-table";
-import { onDestroy } from "svelte";
-import { derived, writable } from "svelte/store";
+import { onDestroy, onMount } from "svelte";
+import { writable } from "svelte/store";
 import { _, locale } from "svelte-i18n";
 import tippy from "tippy.js";
 
@@ -25,10 +25,9 @@ import LeaderboardPagination from "$components/leaderboard/LeaderboardPagination
 import LeaderboardSearch from "$components/leaderboard/LeaderboardSearch.svelte";
 import SortHeaderButton from "$components/leaderboard/SortHeaderButton.svelte";
 import { GradeTable } from "$lib/constants";
-import { areaError, areas, reportError, reports, syncStatus } from "$lib/store";
 import { theme } from "$lib/theme";
-import type { AreaType, LeaderboardArea, Report } from "$lib/types";
-import { debounce, errToast, getGrade, validateContinents } from "$lib/utils";
+import type { ApiLeaderboardArea, AreaType } from "$lib/types";
+import { debounce, errToast } from "$lib/utils";
 
 export let type: AreaType;
 export let initialPageSize = 10;
@@ -44,101 +43,41 @@ let gradeTooltip: HTMLButtonElement;
 // Track instances so they can be destroyed on component teardown
 let tippyInstances: { destroy(): void }[] = [];
 
-// Alert for errors - more idiomatic Svelte
-$: if ($areaError) errToast($areaError);
-$: if ($reportError) errToast($reportError);
+// API data store
+const leaderboardData = writable<ApiLeaderboardArea[]>([]);
+const loading = writable(true);
+const error = writable<string | null>(null);
 
-// More idiomatic Svelte using derived stores
-const areasFiltered = derived([areas, reports], ([$areas, $reports]) => {
-	if (!$reports?.length) return [];
+const fetchLeaderboardData = async () => {
+	loading.set(true);
+	error.set(null);
 
-	return $areas.filter((area) => {
-		if (type === "community") {
-			return (
-				area.tags.type === "community" &&
-				area.tags.geo_json &&
-				area.tags.name &&
-				area.tags["icon:square"] &&
-				area.tags.continent &&
-				$reports.find((report) => report.area_id === area.id)
-			);
-		} else {
-			return (
-				area.tags.type === "country" &&
-				area.id.length === 2 &&
-				area.tags.geo_json &&
-				area.tags.name &&
-				area.tags.continent &&
-				validateContinents(area.tags.continent)
-			);
+	try {
+		const endpoint =
+			type === "community"
+				? "https://api.btcmap.org/v4/communities/top"
+				: "https://api.btcmap.org/v4/countries/top";
+
+		const response = await fetch(endpoint);
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
 		}
-	});
-});
 
-const areaReports = derived(
-	[areasFiltered, reports],
-	([$areasFiltered, $reports]) => {
-		if (!$areasFiltered?.length || !$reports?.length) return [];
-
-		return $reports
-			.filter((report) =>
-				$areasFiltered.find((area) => area.id === report.area_id),
-			)
-			.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
-	},
-);
-
-// Scoring function for leaderboard
-const score = (report: Report): number => {
-	return Math.max(
-		report.tags.total_elements - report.tags.outdated_elements * 5,
-		0,
-	);
+		const data: ApiLeaderboardArea[] = await response.json();
+		leaderboardData.set(data);
+	} catch (e) {
+		const message =
+			e instanceof Error ? e.message : "Failed to fetch leaderboard data";
+		error.set(message);
+		errToast(message);
+	} finally {
+		loading.set(false);
+	}
 };
 
-// Derived store for leaderboard data
-const leaderboard = derived(
-	[areasFiltered, areaReports, syncStatus],
-	([$areasFiltered, $areaReports, $syncStatus]) => {
-		if (!$areasFiltered.length || !$areaReports.length || $syncStatus) {
-			return [];
-		}
-
-		const result: LeaderboardArea[] = [];
-
-		$areasFiltered.forEach((area) => {
-			const areaReport = $areaReports.find(
-				(report) => report.area_id === area.id,
-			);
-
-			if (areaReport) {
-				const grade = getGrade(areaReport.tags.up_to_date_percent);
-				result.push({ ...area, report: areaReport, grade });
-			}
-		});
-
-		// Apply the same sorting logic as the original component
-		return result.sort((a, b) => {
-			const aScore = score(a.report);
-			const bScore = score(b.report);
-
-			// Primary sort: by score (descending - higher scores first)
-			if (bScore !== aScore) {
-				return bScore - aScore;
-			}
-
-			// Secondary sort: by total elements (descending - more locations first)
-			return b.report.tags.total_elements - a.report.tags.total_elements;
-		});
-	},
-);
-
-// Create a derived store for leaderboard with positions
-const leaderboardWithPositions = derived(leaderboard, ($leaderboard) => {
-	return $leaderboard.map((item, index) => ({
-		...item,
-		position: index + 1, // Position based on sorted order
-	}));
+onMount(() => {
+	fetchLeaderboardData();
 });
 
 // Fuzzy filter for global search
@@ -150,7 +89,7 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
 };
 
 // Column definitions - headers use i18n for locale reactivity
-const columns: ColumnDef<LeaderboardArea & { position: number }>[] = [
+const columns: ColumnDef<ApiLeaderboardArea & { position: number }>[] = [
 	{
 		id: "position",
 		header: () => $_(`areaLeaderboard.position`),
@@ -171,7 +110,7 @@ const columns: ColumnDef<LeaderboardArea & { position: number }>[] = [
 	{
 		id: "name",
 		header: () => $_(`areaLeaderboard.name`),
-		accessorFn: (row) => row.tags?.name || "Unknown",
+		accessorFn: (row) => row.name || "Unknown",
 		cell: (info) => info.row.original,
 		enableSorting: true,
 		// @ts-expect-error TanStack table expects string literal for filterFn but we're using custom fuzzy filter
@@ -181,14 +120,14 @@ const columns: ColumnDef<LeaderboardArea & { position: number }>[] = [
 	{
 		id: "total",
 		header: () => $_(`areaLeaderboard.totalLocations`),
-		accessorFn: (row) => row.report?.tags?.total_elements || 0,
+		accessorFn: (row) => row.places_total || 0,
 		enableSorting: true,
 		enableGlobalFilter: false,
 	},
 	{
 		id: "upToDateElements",
 		header: () => $_(`areaLeaderboard.verifiedLocations`),
-		accessorFn: (row) => row.report?.tags?.up_to_date_elements || 0,
+		accessorFn: (row) => row.places_verified_1y || 0,
 		enableSorting: true,
 		enableGlobalFilter: false,
 	},
@@ -206,9 +145,13 @@ const columns: ColumnDef<LeaderboardArea & { position: number }>[] = [
 				return bGrade - aGrade;
 			}
 
-			// Secondary sort: by up_to_date_percent (descending - higher percentages first)
-			const aPercent = a.original.report?.tags?.up_to_date_percent || 0;
-			const bPercent = b.original.report?.tags?.up_to_date_percent || 0;
+			// Secondary sort: by places_verified_1y / places_total ratio (descending - higher percentages first)
+			const aTotal = a.original.places_total || 0;
+			const bTotal = b.original.places_total || 0;
+			const aPercent =
+				aTotal > 0 ? (a.original.places_verified_1y || 0) / aTotal : 0;
+			const bPercent =
+				bTotal > 0 ? (b.original.places_verified_1y || 0) / bTotal : 0;
 			return bPercent - aPercent;
 		},
 		enableSorting: true,
@@ -254,7 +197,9 @@ const setPagination: OnChangeFn<PaginationState> = (updater) => {
 };
 
 // Table options store - created once
-const options = writable<TableOptions<LeaderboardArea & { position: number }>>({
+const options = writable<
+	TableOptions<ApiLeaderboardArea & { position: number }>
+>({
 	data: [], // Start with empty data
 	columns,
 	state: {
@@ -276,11 +221,15 @@ const options = writable<TableOptions<LeaderboardArea & { position: number }>>({
 // Create table instance once
 const table = createSvelteTable(options);
 
-// Update only data reactively, not entire table
-$: if ($leaderboardWithPositions) {
+// Update only data reactively with positions, not entire table
+$: if ($leaderboardData) {
+	const dataWithPosition = $leaderboardData.map((item, index) => ({
+		...item,
+		position: index + 1,
+	}));
 	options.update((current) => ({
 		...current,
-		data: $leaderboardWithPositions,
+		data: dataWithPosition,
 	}));
 }
 
@@ -290,11 +239,6 @@ const handleKeyUp = (e: KeyboardEvent) => {
 };
 
 const searchDebounce = debounce((e) => handleKeyUp(e));
-
-// Loading state
-$: loading =
-	$syncStatus ||
-	($leaderboardWithPositions.length === 0 && !$areaError && !$reportError);
 
 // Simplified tooltip setup function for header tooltips only
 const setHeaderTooltips = () => {
@@ -353,13 +297,13 @@ $: upToDateTooltip &&
 				class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
 			>
 				{type === 'community' ? $_(`areaLeaderboard.communityLeaderboard`) : $_(`areaLeaderboard.countryLeaderboard`)}
-				{#if !loading && $leaderboardWithPositions.length > 0}
-					({$leaderboardWithPositions.length})
+				{#if !$loading && $leaderboardData.length > 0}
+					({$leaderboardData.length})
 				{/if}
 			</h2>
 		</header>
 
-		{#if loading}
+		{#if $loading}
 			<div class="p-5">
 				<div
 					class="flex h-[572px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
@@ -369,7 +313,7 @@ $: upToDateTooltip &&
 					<Icon type="fa" icon="table" w="96" h="96" class="animate-pulse text-link/50" />
 				</div>
 			</div>
-		{:else if $leaderboardWithPositions.length === 0}
+		{:else if $leaderboardData.length === 0}
 			<p class="w-full p-5 text-center text-primary dark:text-white">{$_(`areaLeaderboard.noData`)}</p>
 		{:else}
 			<LeaderboardSearch table={$table} bind:globalFilter {searchDebounce} />

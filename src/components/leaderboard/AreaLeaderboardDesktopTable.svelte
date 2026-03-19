@@ -118,18 +118,17 @@ export let gradeTooltip: HTMLButtonElement;
 							{#if cell.column.id === 'name'}
 								<AreaLeaderboardItemName
 									{type}
-									avatar={type === 'community'
-										? cell.row.original.tags?.['icon:square'] || ''
-										: `https://static.btcmap.org/images/countries/${cell.row.original.id}.svg`}
-									name={cell.row.original.tags?.name || 'Unknown'}
-									id={cell.row.original.tags?.url_alias || cell.row.original.id || ''}
-									countryCode={type === 'country' ? cell.row.original.id : undefined}
+									avatar={cell.row.original.icon || ''}
+									name={cell.row.original.name || 'Unknown'}
+									id={cell.row.original.alias || String(cell.row.original.id) || ''}
+									countryCode={type === 'country' ? cell.row.original.alias : undefined}
 								/>
 							{:else if cell.column.id === 'grade'}
 								{@const grade = cell.row.original.grade || 0}
-								{@const percentage = cell.row.original.report?.tags?.up_to_date_percent}
-								{@const avgDate = cell.row.original.report?.tags?.avg_verification_date}
-								<GradeDisplay {grade} {percentage} {avgDate} size="large" />
+								{@const percentage = cell.row.original.places_total > 0
+									? Math.round((cell.row.original.places_verified_1y / cell.row.original.places_total) * 100)
+									: 0}
+								<GradeDisplay {grade} {percentage} size="large" />
 							{:else}
 								<svelte:component
 									this={flexRender(cell.column.columnDef.cell, cell.getContext())}
