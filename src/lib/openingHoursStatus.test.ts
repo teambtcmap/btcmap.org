@@ -44,8 +44,8 @@ describe("getOpenStatus", () => {
 		});
 
 		it("returns open with a nextChange Date on a weekday during business hours", () => {
-			// Wednesday 2026-03-18 10:00 UTC
-			vi.setSystemTime(new Date("2026-03-18T10:00:00Z"));
+			// Wednesday 2026-03-18 10:00 local time
+			vi.setSystemTime(new Date(2026, 2, 18, 10, 0, 0));
 
 			const result = getOpenStatus("Mo-Fr 09:00-17:00");
 			expect(result).not.toBeNull();
@@ -54,8 +54,8 @@ describe("getOpenStatus", () => {
 		});
 
 		it("returns closed on a Saturday for weekday-only hours", () => {
-			// Saturday 2026-03-21 10:00 UTC
-			vi.setSystemTime(new Date("2026-03-21T10:00:00Z"));
+			// Saturday 2026-03-21 10:00 local time
+			vi.setSystemTime(new Date(2026, 2, 21, 10, 0, 0));
 
 			const result = getOpenStatus("Mo-Fr 09:00-17:00");
 			expect(result).not.toBeNull();
@@ -64,8 +64,8 @@ describe("getOpenStatus", () => {
 		});
 
 		it("returns closed before opening time", () => {
-			// Wednesday 2026-03-18 06:00 UTC
-			vi.setSystemTime(new Date("2026-03-18T06:00:00Z"));
+			// Wednesday 2026-03-18 06:00 local time
+			vi.setSystemTime(new Date(2026, 2, 18, 6, 0, 0));
 
 			const result = getOpenStatus("Mo-Fr 09:00-17:00");
 			expect(result).not.toBeNull();
