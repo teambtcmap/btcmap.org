@@ -1,5 +1,6 @@
 <script lang="ts">
 import android from "./apps/android.svg?raw";
+import bolt from "./apps/bolt.svg?raw";
 import fdroid from "./apps/f-droid.svg?raw";
 import ios from "./apps/ios.svg?raw";
 import play from "./apps/play.svg?raw";
@@ -8,6 +9,7 @@ import type { AppIconName } from "./types";
 
 const icons: Record<AppIconName, string> = {
 	android,
+	bolt,
 	"f-droid": fdroid,
 	ios,
 	play,

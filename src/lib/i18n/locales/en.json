@@ -885,6 +885,7 @@
 		"pwa": "Progressive Web App",
 		"fdroid": "FOSS App Store",
 		"directandroid": "Direct Download",
+		"zapstore": "Nostr App Store",
 		"ios": "Walled Garden Option"
 	},
 	"media": {

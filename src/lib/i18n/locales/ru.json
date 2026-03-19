@@ -945,6 +945,7 @@
 		"pwa": "Открыть в браузере",
 		"fdroid": "Android магазин",
 		"directandroid": "Прямая загрузка для Android",
+		"zapstore": "Nostr магазин",
 		"ios": "iPhone, iPad и Mac"
 	},
 	"media": {

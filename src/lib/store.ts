@@ -44,6 +44,12 @@ export const apps = readable<
 		desc: "apps.directandroid",
 	},
 	{
+		link: "https://zapstore.dev/apps/org.btcmap",
+		type: "Zapstore",
+		icon: "bolt",
+		desc: "apps.zapstore",
+	},
+	{
 		link: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
 		type: "iOS",
 		icon: "ios",
