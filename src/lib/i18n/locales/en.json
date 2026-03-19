@@ -120,6 +120,8 @@
 		"merchantName": "Merchant name",
 		"address": "Address",
 		"openingHours": "Opening hours",
+		"openNow": "Open now",
+		"closed": "Closed",
 		"location": "{name} Location",
 		"activity": "{name} Activity",
 		"communities": "{name} Communities"

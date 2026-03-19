@@ -5,7 +5,12 @@ import Time from "svelte-time";
 import Icon from "$components/Icon.svelte";
 import MerchantComment from "$components/MerchantComment.svelte";
 import PaymentMethodIcon from "$components/PaymentMethodIcon.svelte";
+import {
+	CATEGORY_COLOR_CLASSES,
+	getIconColorWithFallback,
+} from "$lib/categoryMapping";
 import { _, getDisplayLang, locale } from "$lib/i18n";
+import { getOpenStatus } from "$lib/openingHoursStatus";
 import type { Place } from "$lib/types";
 import { formatVerifiedHuman } from "$lib/utils";
 
@@ -20,6 +25,8 @@ export let isLoading: boolean = false;
 
 $: displayName =
 	merchant.localized_name?.[getDisplayLang($locale)] || merchant.name;
+
+$: openStatus = getOpenStatus(merchant.opening_hours);
 
 // Comments state
 let comments: { id: number; text: string; created_at: string }[] = [];
@@ -90,36 +97,62 @@ async function fetchComments(placeId: number) {
 		</div>
 	{/if}
 
-	{#if displayName}
-		<a
-			href={resolve(`/merchant/${merchant.id}`)}
-			class="inline-block text-xl leading-snug font-bold text-link transition-colors hover:text-hover"
-			title={$_('merchant.merchantName')}
+	<div class="flex items-start gap-3">
+		<!-- Category icon -->
+		<div
+			class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl {CATEGORY_COLOR_CLASSES[
+				getIconColorWithFallback(merchant.icon)
+			] || 'bg-primary/10 text-primary dark:bg-white/10 dark:text-white'}"
 		>
-			{displayName}
-		</a>
-	{:else if isLoading}
-		<div class="h-7 w-3/4 animate-pulse rounded-lg bg-link/50"></div>
-	{/if}
+			<Icon w="26" h="26" icon={merchant.icon || 'currency_bitcoin'} type="material" />
+		</div>
 
-	{#if merchant.address}
-		<p class="text-body dark:text-white" title={$_('merchant.address')}>
-			{merchant.address}
-		</p>
-	{:else if isLoading}
-		<div class="h-5 w-1/2 animate-pulse rounded bg-link/50"></div>
-	{/if}
+		<div class="min-w-0 flex-1">
+			{#if displayName}
+				<a
+					href={resolve(`/merchant/${merchant.id}`)}
+					class="inline-block text-[22px] leading-snug font-semibold text-link transition-colors hover:text-hover"
+					title={$_('merchant.merchantName')}
+				>
+					{displayName}
+				</a>
+			{:else if isLoading}
+				<div class="h-7 w-3/4 animate-pulse rounded-lg bg-link/50"></div>
+			{/if}
+
+			{#if merchant.address}
+				<p class="mt-0.5 text-sm text-body dark:text-white" title={$_('merchant.address')}>
+					{merchant.address}
+				</p>
+			{:else if isLoading}
+				<div class="mt-1 h-5 w-1/2 animate-pulse rounded bg-link/50"></div>
+			{/if}
+
+			{#if openStatus}
+				<span
+					class="mt-1 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {openStatus.isOpen
+						? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+						: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'}"
+				>
+					{openStatus.isOpen ? $_('merchant.openNow') : $_('merchant.closed')}
+					{#if openStatus.nextChange}
+						<span class="ml-1">· {openStatus.nextChange}</span>
+					{/if}
+				</span>
+			{/if}
+		</div>
+	</div>
 
 	{#if merchant.opening_hours}
-		<div class="flex items-start space-x-2" title={$_('merchant.openingHours')}>
+		<div class="flex items-start gap-2" title={$_('merchant.openingHours')}>
 			<Icon
 				w="16"
 				h="16"
-				class="mt-1 shrink-0 text-primary dark:text-white"
+				class="mt-0.5 shrink-0 text-body dark:text-white/70"
 				icon="schedule"
 				type="material"
 			/>
-			<span class="text-body dark:text-white">{merchant.opening_hours}</span>
+			<span class="text-sm text-body dark:text-white">{merchant.opening_hours}</span>
 		</div>
 	{/if}
 
