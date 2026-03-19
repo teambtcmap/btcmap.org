@@ -5,7 +5,7 @@ import Time from "svelte-time";
 
 import Icon from "$components/Icon.svelte";
 import MerchantComment from "$components/MerchantComment.svelte";
-import PaymentMethodPill from "$components/PaymentMethodPill.svelte";
+import PaymentMethodPills from "$components/PaymentMethodPills.svelte";
 import {
 	CATEGORY_COLOR_CLASSES,
 	getIconColorWithFallback,
@@ -229,18 +229,11 @@ async function fetchComments(placeId: number) {
 	<div class="border-t border-gray-300 pt-4 dark:border-white/95">
 		{#if merchant['osm:payment:lightning'] === 'yes' || merchant['osm:payment:onchain'] === 'yes' || merchant['osm:payment:lightning_contactless'] === 'yes'}
 			<div class="mb-4">
-				<span class="block text-xs text-mapLabel dark:text-white/70">{$_('payment.accepts')}</span>
-				<div class="mt-1 flex flex-wrap gap-2">
-					{#if merchant['osm:payment:lightning'] === 'yes'}
-						<PaymentMethodPill method="ln" label={$_('payment.lightning')} />
-					{/if}
-					{#if merchant['osm:payment:onchain'] === 'yes'}
-						<PaymentMethodPill method="btc" label={$_('payment.onchain')} />
-					{/if}
-					{#if merchant['osm:payment:lightning_contactless'] === 'yes'}
-						<PaymentMethodPill method="nfc" label={$_('payment.lightningContactless')} />
-					{/if}
-				</div>
+				<PaymentMethodPills
+					onchain={merchant['osm:payment:onchain']}
+					lightning={merchant['osm:payment:lightning']}
+					contactless={merchant['osm:payment:lightning_contactless']}
+				/>
 			</div>
 		{:else if isLoading}
 			<div class="mb-4">
