@@ -1,10 +1,8 @@
 <script lang="ts">
 import Time from "svelte-time";
 
-import type { MerchantPageData } from "$lib/types";
-
-export let text: MerchantPageData["comments"][number]["text"];
-export let time: MerchantPageData["comments"][number]["created_at"];
+export let text: string;
+export let time: string;
 export let compact = false;
 </script>
 
@@ -34,10 +32,7 @@ export let compact = false;
 		class:lg:space-y-0={!compact}
 	>
 		<div class:space-y-2={!compact} class:space-y-1={compact} class:lg:space-y-0={!compact}>
-			<span
-				class="text-primary dark:text-white"
-				class:lg:mr-5={!compact}
-			>
+			<span class="text-primary dark:text-white" class:lg:mr-5={!compact}>
 				{text}
 			</span>
 

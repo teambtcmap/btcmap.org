@@ -1,7 +1,9 @@
 <script lang="ts">
+import axios from "axios";
 import Time from "svelte-time";
 
 import Icon from "$components/Icon.svelte";
+import MerchantComment from "$components/MerchantComment.svelte";
 import PaymentMethodIcon from "$components/PaymentMethodIcon.svelte";
 import { _, getDisplayLang, locale } from "$lib/i18n";
 import type { Place } from "$lib/types";
@@ -18,6 +20,64 @@ export let isLoading: boolean = false;
 
 $: displayName =
 	merchant.localized_name?.[getDisplayLang($locale)] || merchant.name;
+
+// Comments state
+let comments: { id: number; text: string; created_at: string }[] = [];
+let commentsLoading = false;
+let commentsError = false;
+let lastFetchedId: number | null = null;
+let abortController: AbortController | null = null;
+
+// Non-retrying axios instance for fast fail
+const fastApi = axios.create({ timeout: 5000 });
+
+// Fetch comments when merchant changes (with proper guards)
+$: if (
+	merchant?.id &&
+	merchant.id !== lastFetchedId &&
+	(merchant.comments || 0) > 0
+) {
+	fetchComments(merchant.id);
+} else if (merchant?.id && (merchant.comments || 0) === 0) {
+	// Skip fetch if no comments exist
+	comments = [];
+	commentsLoading = false;
+	commentsError = false;
+	lastFetchedId = null;
+}
+
+async function fetchComments(placeId: number) {
+	// Cancel any pending request
+	if (abortController) {
+		abortController.abort();
+	}
+	abortController = new AbortController();
+
+	commentsLoading = true;
+	commentsError = false;
+	lastFetchedId = placeId;
+
+	try {
+		const response = await fastApi.get(
+			`https://api.btcmap.org/v4/places/${placeId}/comments`,
+			{ signal: abortController.signal },
+		);
+		// Validate response is an array
+		if (Array.isArray(response.data)) {
+			comments = response.data;
+		} else {
+			comments = [];
+			commentsError = true;
+		}
+	} catch (err) {
+		if (axios.isCancel(err)) return;
+		console.error("Error fetching comments:", err);
+		commentsError = true;
+	} finally {
+		commentsLoading = false;
+		abortController = null;
+	}
+}
 </script>
 
 <div class="space-y-4">
@@ -213,8 +273,32 @@ $: displayName =
 
 	<a
 		href={resolve(`/merchant/${merchant.id}`)}
-		class="mt-4 block rounded-lg bg-link py-3 text-center text-white transition-colors hover:bg-hover"
+		class="block rounded-lg bg-link py-3 text-center text-white transition-colors hover:bg-hover"
 	>
 		{$_('merchant.viewDetails')}
 	</a>
+
+	<!-- Comments Section -->
+	{#if commentsLoading}
+		<div class="space-y-2">
+			<div class="h-4 w-24 animate-pulse rounded bg-link/50"></div>
+			<div class="space-y-2">
+				<div class="h-12 w-full animate-pulse rounded bg-link/50"></div>
+				<div class="h-12 w-full animate-pulse rounded bg-link/50"></div>
+			</div>
+		</div>
+	{:else if commentsError}
+		<div class="rounded-lg bg-red-100 p-3 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-300">
+			{$_('errors.loadFailed')}
+		</div>
+	{:else if comments.length > 0}
+		<div class="border-t border-gray-300 pt-4 dark:border-white/95">
+			<span class="block text-xs text-mapLabel dark:text-white/70">{$_('merchant.comments')}</span>
+			<div class="mt-2 space-y-2">
+				{#each comments as comment (comment.id)}
+					<MerchantComment text={comment.text} time={comment.created_at} compact={true} />
+				{/each}
+			</div>
+		</div>
+	{/if}
 </div>
