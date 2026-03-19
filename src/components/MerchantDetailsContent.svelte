@@ -139,7 +139,25 @@ async function fetchComments(placeId: number) {
 				>
 					{openStatus.isOpen ? $_('merchant.openNow') : $_('merchant.closed')}
 					{#if openStatus.nextChange}
-						<span class="ml-1">· {openStatus.nextChange}</span>
+						<span class="ml-1"
+							>· {openStatus.isOpen
+								? $_('merchant.closesAt', {
+										values: {
+											time: openStatus.nextChange.toLocaleTimeString($locale || undefined, {
+												hour: 'numeric',
+												minute: '2-digit',
+											}),
+										},
+									})
+								: $_('merchant.opensAt', {
+										values: {
+											time: openStatus.nextChange.toLocaleTimeString($locale || undefined, {
+												hour: 'numeric',
+												minute: '2-digit',
+											}),
+										},
+									})}</span
+						>
 					{/if}
 				</span>
 			{/if}

@@ -122,6 +122,8 @@
 		"openingHours": "Opening hours",
 		"openNow": "Open now",
 		"closed": "Closed",
+		"closesAt": "Closes {time}",
+		"opensAt": "Opens {time}",
 		"location": "{name} Location",
 		"activity": "{name} Activity",
 		"communities": "{name} Communities"

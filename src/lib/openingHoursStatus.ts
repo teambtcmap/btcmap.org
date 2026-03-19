@@ -2,7 +2,7 @@ import OpeningHours from "opening_hours";
 
 export type OpenStatus = {
 	isOpen: boolean;
-	nextChange: string | null;
+	nextChange: Date | null;
 };
 
 type Coords = { lat: number; lon: number };
@@ -14,8 +14,9 @@ export function getOpenStatus(
 	if (!hoursString) return null;
 
 	try {
-		// Pass merchant coordinates so the library evaluates in the merchant's timezone
-		// Coordinates enable timezone-aware evaluation for the merchant's location
+		// Coordinates enable timezone-aware evaluation for the merchant's location.
+		// Empty country_code/state means no public-holiday awareness — the library
+		// needs a full nominatim response for that, which we don't have.
 		const nominatim = coords
 			? {
 					lat: coords.lat,
@@ -27,21 +28,7 @@ export function getOpenStatus(
 		const isOpen = oh.getState();
 		const nextChange = oh.getNextChange();
 
-		let nextChangeText: string | null = null;
-		if (nextChange) {
-			const hours = nextChange.getHours();
-			const minutes = nextChange.getMinutes();
-			const ampm = hours >= 12 ? "PM" : "AM";
-			const displayHours = hours % 12 || 12;
-			const minutePart = minutes
-				? `:${minutes.toString().padStart(2, "0")}`
-				: "";
-			nextChangeText = isOpen
-				? `Closes ${displayHours}${minutePart} ${ampm}`
-				: `Opens ${displayHours}${minutePart} ${ampm}`;
-		}
-
-		return { isOpen, nextChange: nextChangeText };
+		return { isOpen, nextChange: nextChange ?? null };
 	} catch {
 		return null;
 	}
