@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getOpenStatus } from "./openingHoursStatus";
 
@@ -15,7 +15,6 @@ describe("getOpenStatus", () => {
 		const result = getOpenStatus("24/7");
 		expect(result).not.toBeNull();
 		expect(result!.isOpen).toBe(true);
-		// 24/7 has no next change
 		expect(result!.nextChange).toBeNull();
 	});
 
@@ -23,16 +22,7 @@ describe("getOpenStatus", () => {
 		expect(getOpenStatus("garbage text")).toBeNull();
 	});
 
-	it("returns a nextChange string for time-bounded hours", () => {
-		const result = getOpenStatus("Mo-Su 00:00-23:59");
-		expect(result).not.toBeNull();
-		if (result?.nextChange) {
-			expect(result.nextChange).toMatch(/^(Closes|Opens) \d{1,2}/);
-		}
-	});
-
 	it("accepts merchant coordinates for timezone-aware evaluation", () => {
-		// Prague coordinates
 		const result = getOpenStatus("24/7", { lat: 50.08, lon: 14.42 });
 		expect(result).not.toBeNull();
 		expect(result!.isOpen).toBe(true);
@@ -42,5 +32,44 @@ describe("getOpenStatus", () => {
 		const result = getOpenStatus("24/7");
 		expect(result).not.toBeNull();
 		expect(result!.isOpen).toBe(true);
+	});
+
+	describe("with frozen time", () => {
+		beforeEach(() => {
+			vi.useFakeTimers();
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it("returns open with a nextChange Date on a weekday during business hours", () => {
+			// Wednesday 2026-03-18 10:00 UTC
+			vi.setSystemTime(new Date("2026-03-18T10:00:00Z"));
+
+			const result = getOpenStatus("Mo-Fr 09:00-17:00");
+			expect(result).not.toBeNull();
+			expect(result!.isOpen).toBe(true);
+			expect(result!.nextChange).toBeInstanceOf(Date);
+		});
+
+		it("returns closed on a Saturday for weekday-only hours", () => {
+			// Saturday 2026-03-21 10:00 UTC
+			vi.setSystemTime(new Date("2026-03-21T10:00:00Z"));
+
+			const result = getOpenStatus("Mo-Fr 09:00-17:00");
+			expect(result).not.toBeNull();
+			expect(result!.isOpen).toBe(false);
+			expect(result!.nextChange).toBeInstanceOf(Date);
+		});
+
+		it("returns closed before opening time", () => {
+			// Wednesday 2026-03-18 06:00 UTC
+			vi.setSystemTime(new Date("2026-03-18T06:00:00Z"));
+
+			const result = getOpenStatus("Mo-Fr 09:00-17:00");
+			expect(result).not.toBeNull();
+			expect(result!.isOpen).toBe(false);
+		});
 	});
 });
