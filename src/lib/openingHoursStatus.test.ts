@@ -30,4 +30,17 @@ describe("getOpenStatus", () => {
 			expect(result.nextChange).toMatch(/^(Closes|Opens) \d{1,2}/);
 		}
 	});
+
+	it("accepts merchant coordinates for timezone-aware evaluation", () => {
+		// Prague coordinates
+		const result = getOpenStatus("24/7", { lat: 50.08, lon: 14.42 });
+		expect(result).not.toBeNull();
+		expect(result!.isOpen).toBe(true);
+	});
+
+	it("works without coordinates (fallback to local timezone)", () => {
+		const result = getOpenStatus("24/7");
+		expect(result).not.toBeNull();
+		expect(result!.isOpen).toBe(true);
+	});
 });

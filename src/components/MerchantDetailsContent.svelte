@@ -26,7 +26,10 @@ export let isLoading: boolean = false;
 $: displayName =
 	merchant.localized_name?.[getDisplayLang($locale)] || merchant.name;
 
-$: openStatus = getOpenStatus(merchant.opening_hours);
+$: openStatus = getOpenStatus(merchant.opening_hours, {
+	lat: merchant.lat,
+	lon: merchant.lon,
+});
 
 // Comments state
 let comments: { id: number; text: string; created_at: string }[] = [];
