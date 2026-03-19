@@ -120,6 +120,10 @@
 		"merchantName": "Название торговца",
 		"address": "Адрес",
 		"openingHours": "Часы работы",
+		"openNow": "Открыто",
+		"closed": "Закрыто",
+		"closesAt": "Закроется в {time}",
+		"opensAt": "Откроется в {time}",
 		"location": "Местоположение {name}",
 		"activity": "Активность {name}",
 		"communities": "Сообщества {name}"
