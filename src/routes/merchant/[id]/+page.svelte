@@ -178,15 +178,8 @@ $: {
 			? mergedPlace.boosted_until
 			: undefined;
 }
-let thirdPartyTooltip: HTMLAnchorElement;
 let verifiedTooltip: HTMLSpanElement;
 let outdatedTooltip: HTMLSpanElement;
-
-$: thirdPartyTooltip &&
-	data &&
-	tippy([thirdPartyTooltip], {
-		content: $_("payment.thirdPartyRequired"),
-	});
 
 $: verifiedTooltip &&
 	tippy([verifiedTooltip], {
@@ -382,35 +375,28 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 
 			{#if (paymentMethod || thirdParty) && data}
 				<div class="text-primary dark:text-white">
-					{#if !paymentMethod}
-						<h4 class="text-primary uppercase dark:text-white">{$_('payment.accepted')}</h4>
-						<div class="mt-1 flex items-center justify-center space-x-2">
-							<!-- eslint-disable svelte/no-navigation-without-resolve -->
-							<a
-								bind:this={thirdPartyTooltip}
-								href={data.osmTags?.['payment:lightning:companion_app_url']}
-								target="_blank"
-								rel="noreferrer"
-							>
-								<!-- eslint-enable svelte/no-navigation-without-resolve -->
-								<Icon
-									type="fa"
-									icon="mobile-screen-button"
-									w="32"
-									h="32"
-									class="text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
-								/>
-							</a>
-						</div>
-					{:else}
-						<div class="flex justify-center">
+					<div class="flex flex-wrap items-center justify-center gap-2">
+						{#if paymentMethod}
 							<PaymentMethodPills
 								onchain={data.osmTags?.['payment:onchain']}
 								lightning={data.osmTags?.['payment:lightning']}
 								contactless={data.osmTags?.['payment:lightning_contactless']}
 							/>
-						</div>
-					{/if}
+						{/if}
+						{#if thirdParty && data.osmTags?.['payment:lightning:companion_app_url']}
+							<!-- eslint-disable svelte/no-navigation-without-resolve -->
+							<a
+								href={data.osmTags?.['payment:lightning:companion_app_url']}
+								target="_blank"
+								rel="noreferrer"
+								class="inline-flex items-center gap-1.5 rounded-full bg-purple-100 px-2.5 py-1 text-xs font-medium text-purple-800 transition-colors hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:hover:bg-purple-900/50"
+							>
+								<Icon type="fa" icon="mobile-screen-button" w="14" h="14" />
+								{$_('payment.thirdPartyRequired')}
+							</a>
+							<!-- eslint-enable svelte/no-navigation-without-resolve -->
+						{/if}
+					</div>
 				</div>
 			{/if}
 
