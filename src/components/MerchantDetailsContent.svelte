@@ -38,9 +38,14 @@ $: companionAppUrl =
 $: phone = merchant.phone || merchant["osm:contact:phone"];
 $: websiteRaw = merchant.website || merchant["osm:contact:website"];
 $: websiteUrl = sanitizeUrl(websiteRaw);
-$: websiteDisplay = websiteRaw
-	? websiteRaw.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")
-	: null;
+$: websiteDisplay = (() => {
+	if (!websiteUrl) return null;
+	try {
+		return new URL(websiteUrl).hostname.replace(/^www\./, "");
+	} catch {
+		return null;
+	}
+})();
 
 // Refresh open/closed status every 60s so the badge stays accurate
 let openStatusInterval: ReturnType<typeof setInterval>;
