@@ -340,13 +340,6 @@ async function fetchComments(placeId: number) {
 		</div>
 	</div>
 
-	<a
-		href={resolve(`/merchant/${merchant.id}`)}
-		class="block rounded-lg bg-link py-3 text-center text-white transition-colors hover:bg-hover"
-	>
-		{$_('merchant.viewDetails')}
-	</a>
-
 	<!-- Comments Section -->
 	{#if commentsLoading}
 		<div class="space-y-2">
@@ -370,4 +363,14 @@ async function fetchComments(placeId: number) {
 			</div>
 		</div>
 	{/if}
+
+	<div class="pt-2 text-center">
+		<a
+			href={resolve(`/merchant/${merchant.id}`)}
+			class="inline-flex items-center gap-1 text-sm text-link transition-colors hover:text-hover"
+		>
+			{$_('merchant.seeFullProfile')}
+			<Icon w="14" h="14" icon="arrow_forward" type="material" />
+		</a>
+	</div>
 </div>

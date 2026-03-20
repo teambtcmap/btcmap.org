@@ -116,11 +116,11 @@ test.describe('Merchant List Panel', () => {
 		}
 
 		// Drawer should open (use specific selector to exclude mobile list dialog)
-		const drawer = page.locator('[role="dialog"]:has(a:has-text("View Full Details"))');
+		const drawer = page.locator('[role="dialog"]:has(a:has-text("See full profile"))');
 		await expect(drawer).toBeVisible({ timeout: 10000 });
 
-		// Drawer should have View Full Details button
-		const viewDetailsButton = drawer.locator('a:has-text("View Full Details")');
+		// Drawer should have See full profile button
+		const viewDetailsButton = drawer.locator('a:has-text("See full profile")');
 		await expect(viewDetailsButton).toBeVisible({ timeout: 10000 });
 	});
 
