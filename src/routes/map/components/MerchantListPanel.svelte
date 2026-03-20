@@ -295,6 +295,14 @@ function handleClose() {
 	merchantList.close();
 }
 
+function handleZoomToNearbyLevel() {
+	onZoomToNearbyLevel?.();
+	// Close panel on mobile so the user can see the map zoom in
+	if (browser && window.innerWidth < BREAKPOINTS.md) {
+		handleClose();
+	}
+}
+
 function handleWindowKeydown(event: KeyboardEvent) {
 	if (!isOpen) return;
 
@@ -458,7 +466,7 @@ onDestroy(() => {
 						{/if}
 					{:else if showZoomInMessage}
 						<button
-							on:click={onZoomToNearbyLevel}
+							on:click={handleZoomToNearbyLevel}
 							class="text-link underline-offset-2 hover:underline dark:text-white"
 							>{$_('search.zoomIn')}</button
 						>
@@ -575,9 +583,9 @@ onDestroy(() => {
 			{:else if showZoomInMessage}
 				<!-- Nearby mode: clickable zoom in prompt -->
 				<button
-					on:click={onZoomToNearbyLevel}
+					type="button"
+					on:click={handleZoomToNearbyLevel}
 					class="group flex w-full cursor-pointer flex-col items-center justify-center gap-3 px-4 py-12 text-center transition-colors hover:bg-gray-50 dark:hover:bg-white/5"
-					aria-label={$_('search.zoomIn')}
 				>
 					<div
 						class="rounded-full bg-link/10 p-3 transition-colors group-hover:bg-link/20 dark:bg-white/10 dark:group-hover:bg-white/20"
