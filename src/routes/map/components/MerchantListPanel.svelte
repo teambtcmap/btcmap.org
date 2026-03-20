@@ -52,6 +52,8 @@ export let onPanToNearbyMerchant: ((place: Place) => void) | undefined =
 // Callback to zoom to a search result (may be far away, need to fly there)
 export let onZoomToSearchResult: ((place: Place) => void) | undefined =
 	undefined;
+// Callback to zoom to nearby level (when user clicks "zoom in" message)
+export let onZoomToNearbyLevel: (() => void) | undefined = undefined;
 // Callbacks for hover highlighting
 export let onHoverStart: ((place: Place) => void) | undefined = undefined;
 export let onHoverEnd: ((place: Place) => void) | undefined = undefined;
@@ -293,6 +295,14 @@ function handleClose() {
 	merchantList.close();
 }
 
+function handleZoomToNearbyLevel() {
+	onZoomToNearbyLevel?.();
+	// Close panel on mobile so the user can see the map zoom in
+	if (browser && window.innerWidth < BREAKPOINTS.md) {
+		handleClose();
+	}
+}
+
 function handleWindowKeydown(event: KeyboardEvent) {
 	if (!isOpen) return;
 
@@ -455,7 +465,11 @@ onDestroy(() => {
 							{searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
 						{/if}
 					{:else if showZoomInMessage}
-						{$_('search.zoomIn')}
+						<button
+							on:click={handleZoomToNearbyLevel}
+							class="text-link underline-offset-2 hover:underline dark:text-white"
+							>{$_('search.zoomIn')}</button
+						>
 					{:else if isTruncated}
 						{$_('search.showingNearest', { values: { count: merchants.length } })}
 					{/if}
@@ -567,24 +581,26 @@ onDestroy(() => {
 					</ul>
 				{/if}
 			{:else if showZoomInMessage}
-				<!-- Nearby mode: zoom in message -->
-				<div class="flex flex-col items-center justify-center gap-3 px-4 py-12 text-center">
-					<Icon
-						w="48"
-						h="48"
-						icon="zoom_in"
-						type="material"
-						class="text-gray-300 dark:text-white/30"
-					/>
+				<!-- Nearby mode: clickable zoom in prompt -->
+				<button
+					type="button"
+					on:click={handleZoomToNearbyLevel}
+					class="group mx-2 mt-2 flex w-[calc(100%-1rem)] cursor-pointer flex-col items-center justify-center gap-3 rounded-lg px-4 py-12 text-center transition-colors hover:bg-gray-50 dark:hover:bg-white/5"
+				>
+					<div
+						class="rounded-full bg-link/10 p-3 transition-colors group-hover:bg-link/20 dark:bg-white/10 dark:group-hover:bg-white/20"
+					>
+						<Icon w="32" h="32" icon="zoom_in" type="material" class="text-link dark:text-white" />
+					</div>
 					<div>
-						<p class="text-sm font-medium text-primary dark:text-white">
+						<p class="text-sm font-medium text-primary group-hover:text-link dark:text-white">
 							{$_('search.zoomIn')}
 						</p>
 						<p class="mt-1 text-xs text-body dark:text-white/70">
 							{$_('search.zoomInDetail')}
 						</p>
 					</div>
-				</div>
+				</button>
 			{:else if isLoadingList}
 				<div
 					class="flex items-center justify-center py-8"
