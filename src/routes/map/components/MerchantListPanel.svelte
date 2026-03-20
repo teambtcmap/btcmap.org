@@ -585,7 +585,7 @@ onDestroy(() => {
 				<button
 					type="button"
 					on:click={handleZoomToNearbyLevel}
-					class="group flex w-full cursor-pointer flex-col items-center justify-center gap-3 px-4 py-12 text-center transition-colors hover:bg-gray-50 dark:hover:bg-white/5"
+					class="group mx-2 mt-2 flex w-[calc(100%-1rem)] cursor-pointer flex-col items-center justify-center gap-3 rounded-lg px-4 py-12 text-center transition-colors hover:bg-gray-50 dark:hover:bg-white/5"
 				>
 					<div
 						class="rounded-full bg-link/10 p-3 transition-colors group-hover:bg-link/20 dark:bg-white/10 dark:group-hover:bg-white/20"
