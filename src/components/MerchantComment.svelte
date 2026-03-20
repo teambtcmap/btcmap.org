@@ -6,43 +6,31 @@ export let time: string;
 export let compact = false;
 </script>
 
-<div
-	class:items-center={!compact}
-	class:items-start={compact}
-	class:space-y-2={!compact}
-	class:space-y-1={compact}
-	class:p-5={!compact}
-	class:p-3={compact}
-	class:text-center={!compact}
-	class:text-left={compact}
-	class:text-xl={!compact}
-	class:text-base={compact}
-	class:lg:flex={!compact}
-	class:lg:space-y-0={!compact}
-	class:lg:space-x-5={!compact}
-	class:lg:text-left={!compact}
->
+{#if compact}
+	<div class="rounded-lg bg-gray-50 p-3 dark:bg-white/5">
+		<p class="text-sm text-primary dark:text-white">{text}</p>
+		<span class="mt-1 block text-xs text-body dark:text-white/50">
+			<Time timestamp={time} relative live={60000} />
+		</span>
+	</div>
+{:else}
 	<div
-		class="w-full flex-wrap"
-		class:items-center={!compact}
-		class:items-start={compact}
-		class:justify-between={!compact}
-		class:space-y-2={!compact}
-		class:lg:flex={!compact}
-		class:lg:space-y-0={!compact}
+		class="items-center space-y-2 p-5 text-center text-xl lg:flex lg:space-y-0 lg:space-x-5 lg:text-left"
 	>
-		<div class:space-y-2={!compact} class:space-y-1={compact} class:lg:space-y-0={!compact}>
-			<span class="text-primary dark:text-white" class:lg:mr-5={!compact}>
-				{text}
-			</span>
+		<div
+			class="w-full flex-wrap items-center justify-between space-y-2 lg:flex lg:space-y-0"
+		>
+			<div class="space-y-2 lg:space-y-0">
+				<span class="text-primary dark:text-white lg:mr-5">
+					{text}
+				</span>
 
-			<span
-				class="block font-semibold text-taggerTime dark:text-white/70"
-				class:text-center={!compact}
-				class:lg:inline={!compact}
-			>
-				<Time timestamp={time} />
-			</span>
+				<span
+					class="block text-center font-semibold text-taggerTime dark:text-white/70 lg:inline"
+				>
+					<Time timestamp={time} />
+				</span>
+			</div>
 		</div>
 	</div>
-</div>
+{/if}
