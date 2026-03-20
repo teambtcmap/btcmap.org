@@ -14,7 +14,7 @@ import {
 import { _, getDisplayLang, locale } from "$lib/i18n";
 import { getOpenStatus } from "$lib/openingHoursStatus";
 import type { Place } from "$lib/types";
-import { formatVerifiedHuman, shareMerchant } from "$lib/utils";
+import { formatVerifiedHuman, sanitizeUrl, shareMerchant } from "$lib/utils";
 
 import { resolve } from "$app/paths";
 
@@ -34,6 +34,13 @@ $: openStatus = getOpenStatus(merchant.opening_hours, merchantCoords);
 $: companionAppUrl =
 	merchant["osm:payment:lightning:companion_app_url"] ||
 	merchant.required_app_url;
+
+$: phone = merchant.phone || merchant["osm:contact:phone"];
+$: websiteRaw = merchant.website || merchant["osm:contact:website"];
+$: websiteUrl = sanitizeUrl(websiteRaw);
+$: websiteDisplay = websiteRaw
+	? websiteRaw.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")
+	: null;
 
 // Refresh open/closed status every 60s so the badge stays accurate
 let openStatusInterval: ReturnType<typeof setInterval>;
@@ -193,6 +200,41 @@ async function fetchComments(placeId: number) {
 				type="material"
 			/>
 			<span class="text-sm text-body dark:text-white">{merchant.opening_hours}</span>
+		</div>
+	{/if}
+
+	{#if phone}
+		<div class="flex items-center gap-2">
+			<Icon
+				w="16"
+				h="16"
+				class="shrink-0 text-body dark:text-white/70"
+				icon="phone"
+				type="material"
+			/>
+			<a href="tel:{phone}" class="text-sm text-link transition-colors hover:text-hover">
+				{phone}
+			</a>
+		</div>
+	{/if}
+
+	{#if websiteUrl}
+		<div class="flex items-center gap-2">
+			<Icon
+				w="16"
+				h="16"
+				class="shrink-0 text-body dark:text-white/70"
+				icon="language"
+				type="material"
+			/>
+			<a
+				href={websiteUrl}
+				target="_blank"
+				rel="noopener noreferrer"
+				class="truncate text-sm text-link transition-colors hover:text-hover"
+			>
+				{websiteDisplay}
+			</a>
 		</div>
 	{/if}
 
