@@ -41,7 +41,8 @@ $: websiteUrl = sanitizeUrl(websiteRaw);
 $: websiteDisplay = (() => {
 	if (!websiteUrl) return null;
 	try {
-		return new URL(websiteUrl).hostname.replace(/^www\./, "");
+		const hostname = new URL(websiteUrl).hostname.replace(/^www\./, "");
+		return hostname || null;
 	} catch {
 		return null;
 	}
@@ -223,7 +224,7 @@ async function fetchComments(placeId: number) {
 		</div>
 	{/if}
 
-	{#if websiteUrl}
+	{#if websiteUrl && websiteDisplay}
 		<div class="flex items-center gap-2">
 			<Icon
 				w="16"
