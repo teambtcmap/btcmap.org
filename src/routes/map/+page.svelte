@@ -32,6 +32,7 @@ import {
 	MERCHANT_DRAWER_WIDTH,
 	MERCHANT_LIST_LOW_ZOOM,
 	MERCHANT_LIST_MAX_ITEMS,
+	MERCHANT_LIST_MIN_ZOOM,
 	MERCHANT_LIST_WIDTH,
 	NEARBY_RADIUS_MULTIPLIER,
 	VIEWPORT_BATCH_SIZE,
@@ -978,6 +979,30 @@ const zoomToSearchResult = (place: Place) => {
 	navigateToPlace(place, { targetZoom: 19 });
 };
 
+// Zoom to nearby level (when user clicks "zoom in" message)
+const zoomToNearbyLevel = () => {
+	if (!map || !browser) return;
+
+	trackEvent("zoom_in_click");
+
+	const currentCenter = map.getCenter();
+	const { visibleCenterX, mapSize } = getPanelOffset();
+
+	// Calculate offset at target zoom level
+	const offsetX = mapSize.x / 2 - visibleCenterX;
+	const targetPoint = map.project(
+		[currentCenter.lat, currentCenter.lng],
+		MERCHANT_LIST_MIN_ZOOM,
+	);
+	const offsetPoint = leaflet.point(targetPoint.x + offsetX, targetPoint.y);
+	const offsetLatLng = map.unproject(offsetPoint, MERCHANT_LIST_MIN_ZOOM);
+
+	map.setView(offsetLatLng, MERCHANT_LIST_MIN_ZOOM, {
+		animate: true,
+		duration: 0.3,
+	});
+};
+
 const initializeElements = async () => {
 	if (elementsLoaded) {
 		return;
@@ -1491,6 +1516,7 @@ onDestroy(async () => {
 	<MerchantListPanel
 		onPanToNearbyMerchant={panToNearbyMerchant}
 		onZoomToSearchResult={zoomToSearchResult}
+		onZoomToNearbyLevel={zoomToNearbyLevel}
 		onFitSearchResultBounds={fitBoundsToSearchResults}
 		onHoverStart={(place) => highlightMarker(loadedMarkers, place.id)}
 		onHoverEnd={(place) => {
