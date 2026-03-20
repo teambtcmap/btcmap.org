@@ -357,7 +357,7 @@ async function fetchComments(placeId: number) {
 		<div class="border-t border-gray-300 pt-4 dark:border-white/95">
 			<span class="block text-xs text-mapLabel dark:text-white/70">{$_('merchant.comments')}</span>
 			<div class="mt-2 space-y-2">
-				{#each comments as comment (comment.id)}
+				{#each [...comments].reverse() as comment (comment.id)}
 					<MerchantComment text={comment.text} time={comment.created_at} compact={true} />
 				{/each}
 			</div>
