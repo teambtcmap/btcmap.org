@@ -43,7 +43,7 @@ import {
 	formatOpeningHours,
 	formatVerifiedHuman,
 	isBoosted,
-	successToast,
+	shareMerchant,
 } from "$lib/utils";
 
 import CommentAddButton from "./components/CommentAddButton.svelte";
@@ -164,6 +164,8 @@ $: merchantEvents = data.activity;
 $: name = data.name;
 let boosted: string | undefined;
 let verified: string[];
+let shareConfirm = false;
+let shareTimeout: ReturnType<typeof setTimeout>;
 const verifiedDate = calcVerifiedDate();
 
 // Make comments reactive to server data updates (from invalidateAll() after adding comment)
@@ -257,6 +259,7 @@ $: if (merchantMarker && leaflet && mapLoaded && icon) {
 }
 
 onDestroy(async () => {
+	clearTimeout(shareTimeout);
 	if (map) {
 		console.info("Unloading Leaflet map.");
 		map.remove();
@@ -427,10 +430,12 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 
 				<MerchantAction
 					on:click={() => {
-						navigator.clipboard.writeText(`https://btcmap.org/merchant/${data.id}`);
-						successToast($_("success.linkCopied"));
+						shareMerchant(data.id);
+						clearTimeout(shareTimeout);
+						shareConfirm = true;
+						shareTimeout = setTimeout(() => (shareConfirm = false), 2000);
 					}}
-					icon="share"
+					icon={shareConfirm ? 'check_circle' : 'share'}
 					text={$_('merchant.share')}
 				/>
 

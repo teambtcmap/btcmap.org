@@ -14,7 +14,7 @@ import {
 import { _, getDisplayLang, locale } from "$lib/i18n";
 import { getOpenStatus } from "$lib/openingHoursStatus";
 import type { Place } from "$lib/types";
-import { formatVerifiedHuman } from "$lib/utils";
+import { formatVerifiedHuman, shareMerchant } from "$lib/utils";
 
 import { resolve } from "$app/paths";
 
@@ -42,7 +42,13 @@ onMount(() => {
 		openStatus = getOpenStatus(merchant.opening_hours, merchantCoords);
 	}, 60_000);
 });
-onDestroy(() => clearInterval(openStatusInterval));
+onDestroy(() => {
+	clearInterval(openStatusInterval);
+	clearTimeout(shareTimeout);
+});
+
+let shareConfirm = false;
+let shareTimeout: ReturnType<typeof setTimeout>;
 
 // Comments state
 let comments: { id: number; text: string; created_at: string }[] = [];
@@ -212,13 +218,18 @@ async function fetchComments(placeId: number) {
 		</a>
 		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
-		<a
-			href={resolve(`/merchant/${merchant.id}`)}
+		<button
+			on:click={() => {
+				shareMerchant(merchant.id);
+				clearTimeout(shareTimeout);
+				shareConfirm = true;
+				shareTimeout = setTimeout(() => (shareConfirm = false), 2000);
+			}}
 			class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
 		>
-			<Icon w="24" h="24" icon="share" type="material" />
+			<Icon w="24" h="24" icon={shareConfirm ? 'check_circle' : 'share'} type="material" />
 			<span class="mt-1 text-xs">{$_('merchant.share')}</span>
-		</a>
+		</button>
 
 		<a
 			href={resolve(`/merchant/${merchant.id}#comments`)}
