@@ -49,43 +49,10 @@ $: websiteDisplay = (() => {
 	}
 })();
 
-// Sanitize and resolve OSM edit URL with fallback chain:
-// 1. osm_edit_url (preferred — actual edit link)
-// 2. osm_url (view link)
-// 3. Constructed from osm_id (type:id)
-// 4. Fallback to /node/{id}
-$: osmEditUrl = (() => {
-	const isValidOsmUrl = (url: string | undefined): string | undefined => {
-		if (!url) return undefined;
-		try {
-			const parsed = new URL(url);
-			const host = parsed.hostname.toLowerCase();
-			if (
-				["https:", "http:"].includes(parsed.protocol) &&
-				(host === "openstreetmap.org" || host.endsWith(".openstreetmap.org"))
-			)
-				return url;
-		} catch {}
-		return undefined;
-	};
-
-	const editUrl = isValidOsmUrl(merchant.osm_edit_url);
-	if (editUrl) return editUrl;
-
-	const viewUrl = isValidOsmUrl(merchant.osm_url);
-	if (viewUrl) return viewUrl;
-
-	if (merchant.osm_id) {
-		const [osmType, osmId] = merchant.osm_id.split(":");
-		if (
-			["node", "way", "relation"].includes(osmType) &&
-			/^\d+$/.test(osmId ?? "")
-		) {
-			return `https://www.openstreetmap.org/${osmType}/${osmId}`;
-		}
-	}
-	return `https://www.openstreetmap.org/node/${merchant.id}`;
-})();
+$: osmEditUrl =
+	merchant.osm_edit_url ||
+	merchant.osm_url ||
+	`https://www.openstreetmap.org/node/${merchant.id}`;
 
 // Refresh open/closed status every 60s so the badge stays accurate
 let openStatusInterval: ReturnType<typeof setInterval>;
