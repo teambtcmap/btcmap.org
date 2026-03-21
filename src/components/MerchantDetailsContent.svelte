@@ -54,9 +54,20 @@ $: osmEditUrl = (() => {
 	if (merchant.osm_url) {
 		try {
 			const parsed = new URL(merchant.osm_url);
-			if (parsed.hostname.endsWith("openstreetmap.org"))
+			const host = parsed.hostname.toLowerCase();
+			if (host === "openstreetmap.org" || host.endsWith(".openstreetmap.org"))
 				return merchant.osm_url;
 		} catch {}
+	}
+	// Parse osm_id (format: "type:id") for correct entity type
+	if (merchant.osm_id) {
+		const [osmType, osmId] = merchant.osm_id.split(":");
+		if (
+			["node", "way", "relation"].includes(osmType) &&
+			/^\d+$/.test(osmId ?? "")
+		) {
+			return `https://www.openstreetmap.org/${osmType}/${osmId}`;
+		}
 	}
 	return `https://www.openstreetmap.org/node/${merchant.id}`;
 })();
