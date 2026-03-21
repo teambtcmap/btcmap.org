@@ -7,6 +7,7 @@ import CompanionAppPill from "$components/CompanionAppPill.svelte";
 import Icon from "$components/Icon.svelte";
 import MerchantComment from "$components/MerchantComment.svelte";
 import PaymentMethodPills from "$components/PaymentMethodPills.svelte";
+import { trackEvent } from "$lib/analytics";
 import {
 	CATEGORY_COLOR_CLASSES,
 	getIconColorWithFallback,
@@ -46,6 +47,18 @@ $: websiteDisplay = (() => {
 	} catch {
 		return null;
 	}
+})();
+
+// Sanitize OSM URL: only allow openstreetmap.org domains
+$: osmEditUrl = (() => {
+	if (merchant.osm_url) {
+		try {
+			const parsed = new URL(merchant.osm_url);
+			if (parsed.hostname.endsWith("openstreetmap.org"))
+				return merchant.osm_url;
+		} catch {}
+	}
+	return `https://www.openstreetmap.org/node/${merchant.id}`;
 })();
 
 // Refresh open/closed status every 60s so the badge stays accurate
@@ -146,6 +159,7 @@ async function fetchComments(placeId: number) {
 			{#if displayName}
 				<a
 					href={resolve(`/merchant/${merchant.id}`)}
+					on:click={() => trackEvent('merchant_name_click')}
 					class="inline-block text-[22px] leading-snug font-semibold text-link transition-colors hover:text-hover"
 					title={$_('merchant.merchantName')}
 				>
@@ -257,9 +271,8 @@ async function fetchComments(placeId: number) {
 			<span class="text-[11px]">{$_('merchant.navigate')}</span>
 		</a>
 
-		<!-- eslint-disable svelte/no-navigation-without-resolve -->
 		<a
-			href={merchant.osm_url || `https://www.openstreetmap.org/node/${merchant.id}`}
+			href={osmEditUrl}
 			target="_blank"
 			rel="noreferrer"
 			class="flex flex-col items-center gap-1 text-primary dark:text-white"
@@ -271,7 +284,6 @@ async function fetchComments(placeId: number) {
 			</span>
 			<span class="text-[11px]">{$_('merchant.edit')}</span>
 		</a>
-		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
 		<button
 			on:click={() => {
@@ -324,36 +336,16 @@ async function fetchComments(placeId: number) {
 
 		<div class="flex items-center gap-2 py-2.5">
 			{#if merchant.verified_at}
-				{#if isUpToDate}
-					<Icon
-						w="16"
-						h="16"
-						class="shrink-0 text-primary dark:text-white"
-						icon="verified"
-						type="material"
-					/>
-				{:else}
-					<Icon
-						w="16"
-						h="16"
-						class="shrink-0 text-primary dark:text-white"
-						icon="error_outline"
-						type="material"
-					/>
-				{/if}
+				<Icon
+					w="16"
+					h="16"
+					class="shrink-0 text-primary dark:text-white"
+					icon={isUpToDate ? 'verified' : 'error_outline'}
+					type="material"
+				/>
 				<span class="text-sm text-body dark:text-white">
 					{formatVerifiedHuman(merchant.verified_at)}
 				</span>
-				<!-- eslint-disable svelte/no-navigation-without-resolve -->
-				<span class="text-body dark:text-white/50">·</span>
-				<a
-					href={`${resolve('/verify-location')}?id=${merchant.id}`}
-					class="text-xs text-link transition-colors hover:text-hover"
-					title={$_('verification.helpImprove')}
-				>
-					{$_('verification.verifyLocation')}
-				</a>
-				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			{:else if isLoading}
 				<div class="h-5 w-32 animate-pulse rounded bg-link/50"></div>
 			{:else}
@@ -367,6 +359,9 @@ async function fetchComments(placeId: number) {
 				<span class="text-sm text-body dark:text-white" title={$_('verification.outdatedTooltip')}
 					>---</span
 				>
+			{/if}
+
+			{#if !isLoading}
 				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<span class="text-body dark:text-white/50">·</span>
 				<a
@@ -444,6 +439,7 @@ async function fetchComments(placeId: number) {
 	<div class="pt-2 text-center">
 		<a
 			href={resolve(`/merchant/${merchant.id}`)}
+			on:click={() => trackEvent('merchant_profile_click')}
 			class="inline-flex items-center gap-1 text-sm text-link transition-colors hover:text-hover"
 		>
 			{$_('merchant.seeFullProfile')}

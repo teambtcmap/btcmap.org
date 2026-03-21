@@ -219,10 +219,10 @@ test.describe('Map Drawer', () => {
 
 		await expect(commentsButton).toContainText('Comments');
 
-		const commentCountDiv = commentsButton.locator('div').first();
-		await expect(commentCountDiv).toBeVisible();
+		const commentCountSpan = commentsButton.locator('span.text-sm').first();
+		await expect(commentCountSpan).toBeVisible();
 
-		const countText = await commentCountDiv.textContent();
+		const countText = await commentCountSpan.textContent();
 		const trimmedCount = countText?.trim() || '';
 		expect(trimmedCount).toMatch(/^\d+$/);
 	});

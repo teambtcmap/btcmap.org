@@ -30,7 +30,9 @@ type EventName =
 	| "drawer_swipe_dismiss"
 	| "drawer_collapse_button_click"
 	| "language_switch"
-	| "enable_precise_distances_click";
+	| "enable_precise_distances_click"
+	| "merchant_name_click"
+	| "merchant_profile_click";
 
 declare global {
 	interface Window {
