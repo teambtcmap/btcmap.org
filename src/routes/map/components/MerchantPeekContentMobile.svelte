@@ -1,4 +1,5 @@
 <script lang="ts">
+import BoostBadge from "$components/BoostBadge.svelte";
 import Icon from "$components/Icon.svelte";
 import PaymentMethodPill from "$components/PaymentMethodPill.svelte";
 import { _ } from "$lib/i18n";
@@ -30,15 +31,8 @@ $: hasVerification = merchant.verified_at !== undefined;
 			{/if}
 		</div>
 
-		<!-- Boost badge if boosted -->
 		{#if isBoosted}
-			<div
-				class="flex-shrink-0 rounded-full bg-bitcoin/10 px-2.5 py-1 text-xs font-semibold text-bitcoin"
-				title={$_('boost.boostedMerchant')}
-			>
-				<Icon w="12" h="12" icon="arrow_circle_up" type="material" class="mr-1 inline" />
-				{$_('boost.boosted')}
-			</div>
+			<BoostBadge />
 		{/if}
 	</div>
 

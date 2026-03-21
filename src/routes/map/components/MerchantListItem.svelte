@@ -1,4 +1,5 @@
 <script lang="ts">
+import BoostBadge from "$components/BoostBadge.svelte";
 import Icon from "$components/Icon.svelte";
 import {
 	CATEGORY_COLOR_CLASSES,
@@ -127,12 +128,7 @@ function handleClick() {
 				{#if enrichedData}
 					<div class="mt-1.5 flex flex-wrap items-center gap-2 text-xs">
 						{#if isBoosted}
-							<span
-								class="flex items-center gap-1 rounded-full bg-bitcoin/10 px-2 py-0.5 text-bitcoin"
-							>
-								<Icon w="12" h="12" icon="arrow_circle_up" type="material" />
-								{$_('boost.boosted')}
-							</span>
+							<BoostBadge />
 						{/if}
 						<span class="flex items-center gap-1 {verificationClass}">
 							<Icon w="12" h="12" icon={isVerified ? 'verified' : 'warning'} type="material" />

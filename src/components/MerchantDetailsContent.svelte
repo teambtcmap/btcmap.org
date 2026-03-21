@@ -3,6 +3,7 @@ import axios from "axios";
 import { onDestroy, onMount } from "svelte";
 import Time from "svelte-time";
 
+import BoostBadge from "$components/BoostBadge.svelte";
 import CompanionAppPill from "$components/CompanionAppPill.svelte";
 import Icon from "$components/Icon.svelte";
 import MerchantComment from "$components/MerchantComment.svelte";
@@ -370,14 +371,9 @@ async function fetchComments(placeId: number) {
 
 		{#if isBoosted && merchant.boosted_until}
 			<div class="flex items-center gap-2 py-2.5">
-				<span
-					class="flex items-center gap-1 rounded-full bg-bitcoin/10 px-2 py-0.5 text-xs text-bitcoin"
-				>
-					<Icon w="12" h="12" icon="arrow_circle_up" type="material" />
-					{$_('boost.boosted')}
-				</span>
+				<BoostBadge />
 				<span class="text-sm text-body dark:text-white">
-					{$_('boost.expires')}
+					{$_('boost.expires')}:
 					<Time live={3000} relative={true} timestamp={merchant.boosted_until} />
 				</span>
 				<span class="text-body dark:text-white/50">·</span>
