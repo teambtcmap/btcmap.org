@@ -303,102 +303,118 @@ async function fetchComments(placeId: number) {
 		</a>
 	</div>
 
-	<div class="border-t border-gray-300 pt-4 dark:border-white/95">
+	<div class="divide-y divide-gray-200 dark:divide-white/10">
 		{#if merchant['osm:payment:lightning'] === 'yes' || merchant['osm:payment:onchain'] === 'yes' || merchant['osm:payment:lightning_contactless'] === 'yes' || companionAppUrl}
-			<div class="mb-4">
+			<div class="flex items-center gap-2 py-2.5">
 				<PaymentMethodPills
 					onchain={merchant['osm:payment:onchain']}
 					lightning={merchant['osm:payment:lightning']}
 					contactless={merchant['osm:payment:lightning_contactless']}
 				/>
 				{#if companionAppUrl}
-					<div class="mt-2">
-						<CompanionAppPill url={companionAppUrl} />
-					</div>
+					<CompanionAppPill url={companionAppUrl} />
 				{/if}
 			</div>
 		{:else if isLoading}
-			<div class="mb-4">
-				<div class="h-3 w-16 animate-pulse rounded bg-link/50"></div>
-				<div class="mt-1 flex gap-2">
-					<div class="h-7 w-20 animate-pulse rounded-full bg-link/50"></div>
-					<div class="h-7 w-20 animate-pulse rounded-full bg-link/50"></div>
-				</div>
+			<div class="flex gap-2 py-2.5">
+				<div class="h-7 w-20 animate-pulse rounded-full bg-link/50"></div>
+				<div class="h-7 w-20 animate-pulse rounded-full bg-link/50"></div>
 			</div>
 		{/if}
 
-		<div class="mb-4">
-			<span
-				class="block text-xs text-mapLabel dark:text-white/70"
-				title={$_('verification.surveyedBy')}>{$_('verification.lastSurveyed')}</span
-			>
+		<div class="flex items-center gap-2 py-2.5">
 			{#if merchant.verified_at}
-				<span class="block text-body dark:text-white">
-					{#if isUpToDate}
-						<Icon
-							w="16"
-							h="16"
-							class="mr-1 inline text-primary dark:text-white"
-							icon="verified"
-							type="material"
-						/>
-					{:else}
-						<Icon
-							w="16"
-							h="16"
-							class="mr-1 inline text-primary dark:text-white"
-							icon="error_outline"
-							type="material"
-						/>
-					{/if}
+				{#if isUpToDate}
+					<Icon
+						w="16"
+						h="16"
+						class="shrink-0 text-primary dark:text-white"
+						icon="verified"
+						type="material"
+					/>
+				{:else}
+					<Icon
+						w="16"
+						h="16"
+						class="shrink-0 text-primary dark:text-white"
+						icon="error_outline"
+						type="material"
+					/>
+				{/if}
+				<span class="text-sm text-body dark:text-white">
 					{formatVerifiedHuman(merchant.verified_at)}
 				</span>
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
+				<span class="text-body dark:text-white/50">·</span>
+				<a
+					href={`${resolve('/verify-location')}?id=${merchant.id}`}
+					class="text-xs text-link transition-colors hover:text-hover"
+					title={$_('verification.helpImprove')}
+				>
+					{$_('verification.verifyLocation')}
+				</a>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			{:else if isLoading}
-				<div class="mt-1 h-5 w-32 animate-pulse rounded bg-link/50"></div>
+				<div class="h-5 w-32 animate-pulse rounded bg-link/50"></div>
 			{:else}
-				<span class="block text-body dark:text-white" title={$_('verification.outdatedTooltip')}
+				<Icon
+					w="16"
+					h="16"
+					class="shrink-0 text-body dark:text-white/70"
+					icon="error_outline"
+					type="material"
+				/>
+				<span class="text-sm text-body dark:text-white" title={$_('verification.outdatedTooltip')}
 					>---</span
 				>
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
+				<span class="text-body dark:text-white/50">·</span>
+				<a
+					href={`${resolve('/verify-location')}?id=${merchant.id}`}
+					class="text-xs text-link transition-colors hover:text-hover"
+					title={$_('verification.helpImprove')}
+				>
+					{$_('verification.verifyLocation')}
+				</a>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			{/if}
-			<!-- eslint-disable svelte/no-navigation-without-resolve -->
-			<a
-				href={`${resolve('/verify-location')}?id=${merchant.id}`}
-				class="text-xs text-link transition-colors hover:text-hover"
-				title={$_('verification.helpImprove')}
-			>
-				{$_('verification.verifyLocation')}
-			</a>
-			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		</div>
 
-		<div>
-			{#if isBoosted && merchant.boosted_until}
-				<span class="block text-xs text-mapLabel dark:text-white/70" title={$_('boost.isBoosted')}
-					>{$_('boost.expires')}</span
-				>
-				<span class="block text-body dark:text-white">
+		{#if isBoosted && merchant.boosted_until}
+			<div class="flex items-center gap-2 py-2.5">
+				<Icon
+					w="16"
+					h="16"
+					class="shrink-0 text-primary dark:text-white"
+					icon="arrow_circle_up"
+					type="material"
+				/>
+				<span class="text-sm text-body dark:text-white">
 					<Time live={3000} relative={true} timestamp={merchant.boosted_until} />
 				</span>
-			{/if}
-
-			<button
-				title={isBoosted ? $_('boost.extend') : $_('boost.title')}
-				on:click={onBoostClick}
-				disabled={boostLoading}
-				class="mt-2 flex h-[32px] items-center justify-center space-x-2 rounded-lg border border-gray-300 px-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
-			>
-				{#if !boostLoading}
-					<Icon w="16" h="16" icon="arrow_circle_up" type="material" />
-				{/if}
-				<span class="text-xs"
-					>{boostLoading
-						? $_('boost.boosting')
-						: isBoosted
-							? $_('boost.extend')
-							: $_('boost.boostAction')}</span
+				<span class="text-body dark:text-white/50">·</span>
+				<button
+					title={$_('boost.extend')}
+					on:click={onBoostClick}
+					disabled={boostLoading}
+					class="text-xs text-link transition-colors hover:text-hover disabled:opacity-50"
 				>
-			</button>
-		</div>
+					{boostLoading ? $_('boost.boosting') : $_('boost.extend')}
+				</button>
+			</div>
+		{:else}
+			<div class="flex items-center gap-2 py-2.5">
+				<button
+					title={$_('boost.title')}
+					on:click={onBoostClick}
+					disabled={boostLoading}
+					class="flex items-center gap-1.5 text-xs text-link transition-colors hover:text-hover disabled:opacity-50"
+				>
+					<Icon w="16" h="16" icon="arrow_circle_up" type="material" />
+					<span>{boostLoading ? $_('boost.boosting') : $_('boost.boostAction')}</span>
+				</button>
+			</div>
+		{/if}
 	</div>
 
 	<!-- Comments Section -->
