@@ -244,25 +244,32 @@ async function fetchComments(placeId: number) {
 		</div>
 	{/if}
 
-	<div class="grid grid-cols-2 gap-2">
+	<div class="flex justify-around border-t border-b border-gray-200 py-3 dark:border-white/10">
 		<a
 			href="geo:{merchant.lat},{merchant.lon}"
-			class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
+			class="flex flex-col items-center gap-1 text-primary dark:text-white"
 		>
-			<Icon w="24" h="24" icon="explore" type="material" />
-			<span class="mt-1 text-xs">{$_('merchant.navigate')}</span>
+			<span
+				class="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-white dark:bg-primary"
+			>
+				<Icon w="18" h="18" icon="explore" type="material" />
+			</span>
+			<span class="text-[11px]">{$_('merchant.navigate')}</span>
 		</a>
 
 		<!-- eslint-disable svelte/no-navigation-without-resolve -->
-		<!-- External link to OpenStreetMap -->
 		<a
 			href={merchant.osm_url || `https://www.openstreetmap.org/node/${merchant.id}`}
 			target="_blank"
 			rel="noreferrer"
-			class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
+			class="flex flex-col items-center gap-1 text-primary dark:text-white"
 		>
-			<Icon w="24" h="24" icon="edit" type="material" />
-			<span class="mt-1 text-xs">{$_('merchant.edit')}</span>
+			<span
+				class="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 transition-colors hover:bg-gray-50 dark:border-white/20 dark:hover:bg-white/10"
+			>
+				<Icon w="18" h="18" icon="edit" type="material" />
+			</span>
+			<span class="text-[11px]">{$_('merchant.edit')}</span>
 		</a>
 		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
@@ -273,20 +280,26 @@ async function fetchComments(placeId: number) {
 				shareConfirm = true;
 				shareTimeout = setTimeout(() => (shareConfirm = false), 2000);
 			}}
-			class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
+			class="flex flex-col items-center gap-1 text-primary dark:text-white"
 		>
-			<Icon w="24" h="24" icon={shareConfirm ? 'check_circle' : 'share'} type="material" />
-			<span class="mt-1 text-xs">{$_('merchant.share')}</span>
+			<span
+				class="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 transition-colors hover:bg-gray-50 dark:border-white/20 dark:hover:bg-white/10"
+			>
+				<Icon w="18" h="18" icon={shareConfirm ? 'check_circle' : 'share'} type="material" />
+			</span>
+			<span class="text-[11px]">{$_('merchant.share')}</span>
 		</button>
 
 		<a
 			href={resolve(`/merchant/${merchant.id}#comments`)}
-			class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
+			class="flex flex-col items-center gap-1 text-primary dark:text-white"
 		>
-			<div class="text-lg font-bold">
-				{merchant.comments || 0}
-			</div>
-			<span class="mt-1 text-xs">{$_('merchant.comments')}</span>
+			<span
+				class="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 transition-colors hover:bg-gray-50 dark:border-white/20 dark:hover:bg-white/10"
+			>
+				<span class="text-sm font-bold">{merchant.comments || 0}</span>
+			</span>
+			<span class="text-[11px]">{$_('merchant.comments')}</span>
 		</a>
 	</div>
 
