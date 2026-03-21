@@ -49,17 +49,32 @@ $: websiteDisplay = (() => {
 	}
 })();
 
-// Sanitize OSM URL: only allow openstreetmap.org domains
+// Sanitize and resolve OSM edit URL with fallback chain:
+// 1. osm_edit_url (preferred — actual edit link)
+// 2. osm_url (view link)
+// 3. Constructed from osm_id (type:id)
+// 4. Fallback to /node/{id}
 $: osmEditUrl = (() => {
-	if (merchant.osm_url) {
+	const isValidOsmUrl = (url: string | undefined): string | undefined => {
+		if (!url) return undefined;
 		try {
-			const parsed = new URL(merchant.osm_url);
+			const parsed = new URL(url);
 			const host = parsed.hostname.toLowerCase();
-			if (host === "openstreetmap.org" || host.endsWith(".openstreetmap.org"))
-				return merchant.osm_url;
+			if (
+				["https:", "http:"].includes(parsed.protocol) &&
+				(host === "openstreetmap.org" || host.endsWith(".openstreetmap.org"))
+			)
+				return url;
 		} catch {}
-	}
-	// Parse osm_id (format: "type:id") for correct entity type
+		return undefined;
+	};
+
+	const editUrl = isValidOsmUrl(merchant.osm_edit_url);
+	if (editUrl) return editUrl;
+
+	const viewUrl = isValidOsmUrl(merchant.osm_url);
+	if (viewUrl) return viewUrl;
+
 	if (merchant.osm_id) {
 		const [osmType, osmId] = merchant.osm_id.split(":");
 		if (
@@ -285,7 +300,7 @@ async function fetchComments(placeId: number) {
 		<a
 			href={osmEditUrl}
 			target="_blank"
-			rel="noreferrer"
+			rel="noopener noreferrer"
 			class="flex flex-col items-center gap-1 text-primary dark:text-white"
 		>
 			<span
