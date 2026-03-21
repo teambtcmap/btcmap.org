@@ -33,10 +33,10 @@ $: hasVerification = merchant.verified_at !== undefined;
 		<!-- Boost badge if boosted -->
 		{#if isBoosted}
 			<div
-				class="flex-shrink-0 rounded-full bg-link px-2.5 py-1 text-xs font-semibold text-white"
+				class="flex-shrink-0 rounded-full bg-bitcoin/10 px-2.5 py-1 text-xs font-semibold text-bitcoin"
 				title={$_('boost.boostedMerchant')}
 			>
-				<Icon w="14" h="14" icon="bolt" type="material" class="mr-1 inline" />
+				<Icon w="12" h="12" icon="arrow_circle_up" type="material" class="mr-1 inline" />
 				{$_('boost.boosted')}
 			</div>
 		{/if}
