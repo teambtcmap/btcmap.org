@@ -7,6 +7,7 @@ import CompanionAppPill from "$components/CompanionAppPill.svelte";
 import Icon from "$components/Icon.svelte";
 import MerchantComment from "$components/MerchantComment.svelte";
 import PaymentMethodPills from "$components/PaymentMethodPills.svelte";
+import { trackEvent } from "$lib/analytics";
 import {
 	CATEGORY_COLOR_CLASSES,
 	getIconColorWithFallback,
@@ -47,6 +48,11 @@ $: websiteDisplay = (() => {
 		return null;
 	}
 })();
+
+$: osmEditUrl =
+	merchant.osm_edit_url ||
+	merchant.osm_url ||
+	`https://www.openstreetmap.org/node/${merchant.id}`;
 
 // Refresh open/closed status every 60s so the badge stays accurate
 let openStatusInterval: ReturnType<typeof setInterval>;
@@ -146,6 +152,7 @@ async function fetchComments(placeId: number) {
 			{#if displayName}
 				<a
 					href={resolve(`/merchant/${merchant.id}`)}
+					on:click={() => trackEvent('merchant_name_click')}
 					class="inline-block text-[22px] leading-snug font-semibold text-link transition-colors hover:text-hover"
 					title={$_('merchant.merchantName')}
 				>
@@ -244,27 +251,32 @@ async function fetchComments(placeId: number) {
 		</div>
 	{/if}
 
-	<div class="grid grid-cols-2 gap-2">
+	<div class="flex justify-around border-t border-b border-gray-200 py-3 dark:border-white/10">
 		<a
 			href="geo:{merchant.lat},{merchant.lon}"
-			class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
+			class="flex flex-col items-center gap-1 text-primary dark:text-white"
 		>
-			<Icon w="24" h="24" icon="explore" type="material" />
-			<span class="mt-1 text-xs">{$_('merchant.navigate')}</span>
+			<span
+				class="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-white dark:bg-primary"
+			>
+				<Icon w="18" h="18" icon="explore" type="material" />
+			</span>
+			<span class="text-[11px]">{$_('merchant.navigate')}</span>
 		</a>
 
-		<!-- eslint-disable svelte/no-navigation-without-resolve -->
-		<!-- External link to OpenStreetMap -->
 		<a
-			href={merchant.osm_url || `https://www.openstreetmap.org/node/${merchant.id}`}
+			href={osmEditUrl}
 			target="_blank"
-			rel="noreferrer"
-			class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
+			rel="noopener noreferrer"
+			class="flex flex-col items-center gap-1 text-primary dark:text-white"
 		>
-			<Icon w="24" h="24" icon="edit" type="material" />
-			<span class="mt-1 text-xs">{$_('merchant.edit')}</span>
+			<span
+				class="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 transition-colors hover:bg-gray-50 dark:border-white/20 dark:hover:bg-white/10"
+			>
+				<Icon w="18" h="18" icon="edit" type="material" />
+			</span>
+			<span class="text-[11px]">{$_('merchant.edit')}</span>
 		</a>
-		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
 		<button
 			on:click={() => {
@@ -273,119 +285,124 @@ async function fetchComments(placeId: number) {
 				shareConfirm = true;
 				shareTimeout = setTimeout(() => (shareConfirm = false), 2000);
 			}}
-			class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
+			class="flex flex-col items-center gap-1 text-primary dark:text-white"
 		>
-			<Icon w="24" h="24" icon={shareConfirm ? 'check_circle' : 'share'} type="material" />
-			<span class="mt-1 text-xs">{$_('merchant.share')}</span>
+			<span
+				class="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 transition-colors hover:bg-gray-50 dark:border-white/20 dark:hover:bg-white/10"
+			>
+				<Icon w="18" h="18" icon={shareConfirm ? 'check_circle' : 'share'} type="material" />
+			</span>
+			<span class="text-[11px]">{$_('merchant.share')}</span>
 		</button>
 
 		<a
 			href={resolve(`/merchant/${merchant.id}#comments`)}
-			class="flex flex-col items-center rounded-lg border border-gray-300 py-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
+			class="flex flex-col items-center gap-1 text-primary dark:text-white"
 		>
-			<div class="text-lg font-bold">
-				{merchant.comments || 0}
-			</div>
-			<span class="mt-1 text-xs">{$_('merchant.comments')}</span>
+			<span
+				class="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 transition-colors hover:bg-gray-50 dark:border-white/20 dark:hover:bg-white/10"
+			>
+				<span class="text-sm font-bold">{merchant.comments || 0}</span>
+			</span>
+			<span class="text-[11px]">{$_('merchant.comments')}</span>
 		</a>
 	</div>
 
-	<div class="border-t border-gray-300 pt-4 dark:border-white/95">
+	<div class="divide-y divide-gray-200 dark:divide-white/10">
 		{#if merchant['osm:payment:lightning'] === 'yes' || merchant['osm:payment:onchain'] === 'yes' || merchant['osm:payment:lightning_contactless'] === 'yes' || companionAppUrl}
-			<div class="mb-4">
+			<div class="flex items-center gap-2 py-2.5">
 				<PaymentMethodPills
 					onchain={merchant['osm:payment:onchain']}
 					lightning={merchant['osm:payment:lightning']}
 					contactless={merchant['osm:payment:lightning_contactless']}
 				/>
 				{#if companionAppUrl}
-					<div class="mt-2">
-						<CompanionAppPill url={companionAppUrl} />
-					</div>
+					<CompanionAppPill url={companionAppUrl} />
 				{/if}
 			</div>
 		{:else if isLoading}
-			<div class="mb-4">
-				<div class="h-3 w-16 animate-pulse rounded bg-link/50"></div>
-				<div class="mt-1 flex gap-2">
-					<div class="h-7 w-20 animate-pulse rounded-full bg-link/50"></div>
-					<div class="h-7 w-20 animate-pulse rounded-full bg-link/50"></div>
-				</div>
+			<div class="flex gap-2 py-2.5">
+				<div class="h-7 w-20 animate-pulse rounded-full bg-link/50"></div>
+				<div class="h-7 w-20 animate-pulse rounded-full bg-link/50"></div>
 			</div>
 		{/if}
 
-		<div class="mb-4">
-			<span
-				class="block text-xs text-mapLabel dark:text-white/70"
-				title={$_('verification.surveyedBy')}>{$_('verification.lastSurveyed')}</span
-			>
+		<div class="flex items-center gap-2 py-2.5">
 			{#if merchant.verified_at}
-				<span class="block text-body dark:text-white">
-					{#if isUpToDate}
-						<Icon
-							w="16"
-							h="16"
-							class="mr-1 inline text-primary dark:text-white"
-							icon="verified"
-							type="material"
-						/>
-					{:else}
-						<Icon
-							w="16"
-							h="16"
-							class="mr-1 inline text-primary dark:text-white"
-							icon="error_outline"
-							type="material"
-						/>
-					{/if}
+				<Icon
+					w="16"
+					h="16"
+					class="shrink-0 text-primary dark:text-white"
+					icon={isUpToDate ? 'verified' : 'error_outline'}
+					type="material"
+				/>
+				<span class="text-sm text-body dark:text-white">
 					{formatVerifiedHuman(merchant.verified_at)}
 				</span>
 			{:else if isLoading}
-				<div class="mt-1 h-5 w-32 animate-pulse rounded bg-link/50"></div>
+				<div class="h-5 w-32 animate-pulse rounded bg-link/50"></div>
 			{:else}
-				<span class="block text-body dark:text-white" title={$_('verification.outdatedTooltip')}
+				<Icon
+					w="16"
+					h="16"
+					class="shrink-0 text-body dark:text-white/70"
+					icon="error_outline"
+					type="material"
+				/>
+				<span class="text-sm text-body dark:text-white" title={$_('verification.outdatedTooltip')}
 					>---</span
 				>
 			{/if}
-			<!-- eslint-disable svelte/no-navigation-without-resolve -->
-			<a
-				href={`${resolve('/verify-location')}?id=${merchant.id}`}
-				class="text-xs text-link transition-colors hover:text-hover"
-				title={$_('verification.helpImprove')}
-			>
-				{$_('verification.verifyLocation')}
-			</a>
-			<!-- eslint-enable svelte/no-navigation-without-resolve -->
+
+			{#if !isLoading}
+				<!-- eslint-disable svelte/no-navigation-without-resolve -->
+				<span class="text-body dark:text-white/50">·</span>
+				<a
+					href={`${resolve('/verify-location')}?id=${merchant.id}`}
+					class="text-xs text-link transition-colors hover:text-hover"
+					title={$_('verification.helpImprove')}
+				>
+					{$_('verification.verifyLocation')}
+				</a>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
+			{/if}
 		</div>
 
-		<div>
-			{#if isBoosted && merchant.boosted_until}
-				<span class="block text-xs text-mapLabel dark:text-white/70" title={$_('boost.isBoosted')}
-					>{$_('boost.expires')}</span
-				>
-				<span class="block text-body dark:text-white">
+		{#if isBoosted && merchant.boosted_until}
+			<div class="flex items-center gap-2 py-2.5">
+				<Icon
+					w="16"
+					h="16"
+					class="shrink-0 text-primary dark:text-white"
+					icon="arrow_circle_up"
+					type="material"
+				/>
+				<span class="text-sm text-body dark:text-white">
 					<Time live={3000} relative={true} timestamp={merchant.boosted_until} />
 				</span>
-			{/if}
-
-			<button
-				title={isBoosted ? $_('boost.extend') : $_('boost.title')}
-				on:click={onBoostClick}
-				disabled={boostLoading}
-				class="mt-2 flex h-[32px] items-center justify-center space-x-2 rounded-lg border border-gray-300 px-3 text-primary transition-colors hover:border-link hover:text-link dark:border-white/95 dark:text-white dark:hover:text-link"
-			>
-				{#if !boostLoading}
-					<Icon w="16" h="16" icon="arrow_circle_up" type="material" />
-				{/if}
-				<span class="text-xs"
-					>{boostLoading
-						? $_('boost.boosting')
-						: isBoosted
-							? $_('boost.extend')
-							: $_('boost.boostAction')}</span
+				<span class="text-body dark:text-white/50">·</span>
+				<button
+					title={$_('boost.extend')}
+					on:click={onBoostClick}
+					disabled={boostLoading}
+					class="text-xs text-link transition-colors hover:text-hover disabled:opacity-50"
 				>
-			</button>
-		</div>
+					{boostLoading ? $_('boost.boosting') : $_('boost.extend')}
+				</button>
+			</div>
+		{:else}
+			<div class="flex items-center gap-2 py-2.5">
+				<button
+					title={$_('boost.title')}
+					on:click={onBoostClick}
+					disabled={boostLoading}
+					class="flex items-center gap-1.5 text-xs text-link transition-colors hover:text-hover disabled:opacity-50"
+				>
+					<Icon w="16" h="16" icon="arrow_circle_up" type="material" />
+					<span>{boostLoading ? $_('boost.boosting') : $_('boost.boostAction')}</span>
+				</button>
+			</div>
+		{/if}
 	</div>
 
 	<!-- Comments Section -->
@@ -415,6 +432,7 @@ async function fetchComments(placeId: number) {
 	<div class="pt-2 text-center">
 		<a
 			href={resolve(`/merchant/${merchant.id}`)}
+			on:click={() => trackEvent('merchant_profile_click')}
 			class="inline-flex items-center gap-1 text-sm text-link transition-colors hover:text-hover"
 		>
 			{$_('merchant.seeFullProfile')}
