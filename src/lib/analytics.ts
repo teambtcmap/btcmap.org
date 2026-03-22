@@ -32,7 +32,8 @@ type EventName =
 	| "language_switch"
 	| "enable_precise_distances_click"
 	| "merchant_name_click"
-	| "merchant_profile_click";
+	| "merchant_profile_click"
+	| "browser_language";
 
 declare global {
 	interface Window {
@@ -52,4 +53,9 @@ export const trackEvent = (
 	if (!window.umami) return;
 
 	window.umami.track(eventName, eventData);
+};
+
+export const trackBrowserLanguage = (): void => {
+	const language = navigator.language || "unknown";
+	trackEvent("browser_language", { language });
 };
