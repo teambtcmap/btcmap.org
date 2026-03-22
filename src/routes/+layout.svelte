@@ -3,6 +3,7 @@ import { SvelteToast } from "@zerodevx/svelte-toast";
 
 import LoadingIndicator from "$components/LoadingIndicator.svelte";
 import Header from "$components/layout/Header.svelte";
+import { trackBrowserLanguage } from "$lib/analytics";
 import {
 	placesLoadingProgress,
 	placesLoadingStatus,
@@ -68,6 +69,9 @@ let dataSyncInterval: ReturnType<typeof setInterval>;
 onMount(async () => {
 	// Initialize theme from SSR/data attribute or localStorage
 	theme.init();
+
+	// Track browser language for translation insights
+	trackBrowserLanguage();
 
 	localforage.config({
 		name: "BTC Map",
