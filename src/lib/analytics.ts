@@ -57,5 +57,10 @@ export const trackEvent = (
 
 export const trackBrowserLanguage = (): void => {
 	const language = navigator.language || "unknown";
-	trackEvent("browser_language", { language });
+	const [languageCode, languageRegion] = language.split("-");
+	trackEvent("browser_language", {
+		language,
+		language_code: languageCode,
+		...(languageRegion && { language_region: languageRegion }),
+	});
 };
