@@ -16,6 +16,7 @@ const languages = [
 	{ code: "ru", name: "Русский", short: "RU" },
 	{ code: "nl", name: "Nederlands", short: "NL" },
 	{ code: "fr", name: "Français", short: "FR" },
+	{ code: "es", name: "Español", short: "ES" },
 ];
 
 let show = false;
