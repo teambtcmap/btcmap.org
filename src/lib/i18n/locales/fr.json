@@ -24,15 +24,15 @@
 		"merchantMap": "Carte des commerces",
 		"communityMap": "Carte des communautés",
 		"dashboard": "Tableau de bord",
-		"taggerLeaderboard": "Classement des taggers",
+		"taggerLeaderboard": "Classement des contributeurs",
 		"communityLeaderboard": "Classement des communautés",
 		"countryLeaderboard": "Classement des pays",
 		"addLocation": "Ajouter un lieu",
 		"addCommunity": "Ajouter une communauté",
-		"becomeTagger": "Devenir tagger",
+		"becomeTagger": "Devenir contributeur",
 		"openTickets": "Tickets ouverts",
-		"taggingActivity": "Activité de tagging",
-		"taggingIssues": "Problèmes de tagging",
+		"taggingActivity": "Activité de marquage",
+		"taggingIssues": "Problèmes de marquage",
 		"communities": "Communautés",
 		"countries": "Pays"
 	},
@@ -325,7 +325,7 @@
 		"bitcoinForBusiness": "Bitcoin pour les entreprises",
 		"status": "Statut",
 		"analytics": "Analytique",
-		"whitePaper": "Livre blanc",
+		"whitePaper": "White Paper",
 		"cypherpunks": "Cypherpunks"
 	},
 	"meta": {
@@ -364,7 +364,7 @@
 		"captchaPlaceholder": "Veuillez saisir le texte du captcha.",
 		"honeyPlaceholder": "A nice pot of honey.",
 		"successType": "Candidature",
-		"successMessage": "Merci pour votre intérêt à devenir tagger ! Nous examinerons votre candidature et un membre de l'équipe vous contactera par e-mail. Écrivez à hello@btcmap.org si vous souhaitez un suivi."
+		"successMessage": "Merci pour votre intérêt à devenir contributeur ! Nous examinerons votre candidature et un membre de l'équipe vous contactera par e-mail. Écrivez à hello@btcmap.org si vous souhaitez un suivi."
 	},
 	"profileActivity": {
 		"location": "Lieu",
@@ -445,7 +445,7 @@
 		"contactPlaceholder": "hello@btcmap.org",
 		"captchaPlaceholder": "Veuillez saisir le texte du captcha.",
 		"supertaggerHeading": "Shadowy Supertagger ?",
-		"supertaggerDescription": "Contribuez directement sur OSM - comme un 😎 pro. Qui a besoin de formulaires.",
+		"supertaggerDescription": "Contribuez directement sur OSM - comme un 😎 pro. Qui a besoin de formulaires ?",
 		"supertaggerImageAlt": "shadowy supertagger",
 		"supertaggerWikiButton": "Voir le Wiki pour les instructions",
 		"formSuccessType": "Lieu",
@@ -489,7 +489,7 @@
 		"period1m": "1M",
 		"period3m": "3M",
 		"period6m": "6M",
-		"periodYtd": "CDA",
+		"periodYtd": "Depuis janv.",
 		"period1y": "1A",
 		"periodAll": "TOUT",
 		"verifiedLabel": "Commerces récemment vérifiés",
@@ -501,7 +501,7 @@
 		"tagsNotePart2": "."
 	},
 	"leaderboard": {
-		"taggerHero": "Classement des taggers",
+		"taggerHero": "Classement des contributeurs",
 		"joinButton": "Rejoignez-les",
 		"loadingData": "Chargement des données du classement",
 		"loadingPeriod": "Chargement des données {period}...",
@@ -528,7 +528,7 @@
 		"sortCreated": "Trier par modifications créées",
 		"sortUpdated": "Trier par modifications mises à jour",
 		"ultimateSupertaggerAlt": "Supertagger ultime",
-		"tableAria": "Tableau du classement des taggers",
+		"tableAria": "Tableau du classement des contributeurs",
 		"sortByCurrentlyAscending": "Trier par {column}, actuellement croissant",
 		"sortByCurrentlyDescending": "Trier par {column}, actuellement décroissant",
 		"sortByCurrentlyUnsorted": "Trier par {column}, actuellement non trié",
@@ -612,8 +612,8 @@
 		"view": "Voir",
 		"edit": "Modifier",
 		"help": "Aide",
-		"noTaggingIssues": "Aucun problème de tagging !",
-		"noTaggingIssuesModal": "Aucun problème de tagging !",
+		"noTaggingIssues": "Aucun problème de marquage !",
+		"noTaggingIssuesModal": "Aucun problème de marquage !",
 		"add": "Ajouter",
 		"verify": "Vérifier",
 		"community": "Communauté",
@@ -623,7 +623,7 @@
 		"ticketsTooltip": "Tickets disponibles provenant de nos formulaires pour débutants ! Tout le monde peut aider à ajouter ou vérifier des soumissions sur OpenStreetMap.",
 		"ticketsSubheading": "Tickets disponibles provenant de nos formulaires pour débutants ! Tout le monde peut aider à ajouter ou vérifier des soumissions de lieux et à évaluer les communautés.",
 		"taggingInstructionsIntro": "Plus d'informations sur comment s'impliquer dans notre",
-		"taggingInstructionsLink": "Instructions de tagging des commerces",
+		"taggingInstructionsLink": "Instructions de marquage des commerces",
 		"underMaintenance": "Les tickets sont actuellement en maintenance.",
 		"viewOnGitea": "Voir les tickets directement sur Gitea.",
 		"viewAllOnGitea": "Voir tous les tickets ouverts directement sur",
@@ -663,8 +663,8 @@
 	},
 	"activityPage": {
 		"heading": "Activité",
-		"hero": "Les Shadowy Supertaggers ne dorment pas. Ils taguent toute la nuit. Le monde que nous voulons est à un tag près.",
-		"cta": "Vous aussi pouvez devenir une légende du supertagging ! Qu'attendez-vous ?",
+		"hero": "Les Shadowy Supertaggers ne dorment pas. Ils identifient des commerces toute la nuit. Le monde que nous voulons est à un marquage près.",
+		"cta": "Vous aussi pouvez devenir une légende du marquage ! Qu'attendez-vous ?",
 		"getTaggin": "À vos tags !",
 		"latestSupertaggers": "Derniers Supertaggers"
 	},
@@ -702,7 +702,7 @@
 		"errorLoadingData": "Erreur lors du chargement des données. Veuillez réessayer plus tard.",
 		"loadingData": "Chargement des données...",
 		"dataWithin24Hours": "Les données apparaîtront dans les 24 heures.",
-		"taggingIssues": "Problèmes de tagging de {name}",
+		"taggingIssues": "Problèmes de marquage de {name}",
 		"openTickets": "Tickets ouverts de {name}"
 	},
 	"areaTickets": {
@@ -773,7 +773,7 @@
 		"view": "Voir",
 		"edit": "Modifier",
 		"help": "Aide",
-		"noTaggingIssues": "Aucun problème de tagging !",
+		"noTaggingIssues": "Aucun problème de marquage !",
 		"noResults": "Aucun résultat trouvé.",
 		"page": "Page",
 		"of": "sur",
@@ -786,10 +786,10 @@
 		"issueTypeMisspelledTag": "Erreur d'orthographe dans le nom du tag ({code})"
 	},
 	"taggingIssues": {
-		"heading": "Problèmes de tagging",
-		"subheading": "Contribuez à LA carte en résolvant les problèmes de tagging !",
+		"heading": "Problèmes de marquage",
+		"subheading": "Contribuez à LA carte en résolvant les problèmes de marquage !",
 		"descriptionPart1": "Plus d'informations sur comment s'impliquer sur notre ",
-		"linkText": "Instructions de tagging",
+		"linkText": "Instructions de marquage",
 		"descriptionPart2": " page Wiki.",
 		"tableTitle": "Problèmes globaux"
 	},
@@ -822,7 +822,10 @@
 				"title": "Tournoi Geyser",
 				"desc": "Participer à l'événement Supertagger 2023"
 			},
-			"topTagger": { "title": "Meilleur tagger", "desc": "N°1 au classement" },
+			"topTagger": {
+				"title": "Meilleur contributeur",
+				"desc": "N°1 au classement"
+			},
 			"podium": {
 				"title": "Podium",
 				"desc": "Dans le top 3 du classement"
@@ -892,7 +895,7 @@
 		"fdroid": "Magasin d'applications FOSS",
 		"directandroid": "Téléchargement direct",
 		"zapstore": "Magasin d'applications Nostr",
-		"ios": "Option jardin clos"
+		"ios": "Écosystème fermé iOS"
 	},
 	"media": {
 		"title": "Médias",
