@@ -15,6 +15,7 @@ const languages = [
 	{ code: "bg", name: "Български", short: "BG" },
 	{ code: "ru", name: "Русский", short: "RU" },
 	{ code: "nl", name: "Nederlands", short: "NL" },
+	{ code: "fr", name: "Français", short: "FR" },
 ];
 
 let show = false;
