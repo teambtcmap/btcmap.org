@@ -446,7 +446,7 @@ async function fetchComments(placeId: number) {
 			{$_('errors.loadFailed')}
 		</div>
 	{:else if comments.length > 0}
-		<div class="border-t border-gray-300 pt-4 dark:border-white/95">
+		<div class="border-t border-gray-200 pt-4 dark:border-white/10">
 			<span class="block text-xs text-mapLabel dark:text-white/70">{$_('merchant.comments')}</span>
 			<div class="mt-2 space-y-2">
 				{#each [...comments].reverse() as comment (comment.id)}
