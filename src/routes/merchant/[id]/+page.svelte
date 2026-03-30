@@ -570,26 +570,38 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 				</PrimaryButton>
 			</Card>
 
-			<Card headerAlign="center">
-				<h3 slot="header" class="text-2xl font-semibold">{$_('boost.title')}</h3>
+			<div
+				class="flex w-full flex-col rounded-3xl border border-amber-200 bg-amber-50/50 dark:border-amber-700/30 dark:bg-amber-900/10"
+			>
+				<div
+					class="flex items-center justify-center gap-2 border-b border-amber-200 p-5 dark:border-amber-700/30"
+				>
+					<Icon w="20" h="20" icon={boosted ? 'auto_awesome' : 'rocket_launch'} type="material" />
+					<h3 class="text-2xl font-semibold text-amber-800 dark:text-amber-300">
+						{$_('boost.title')}
+					</h3>
+				</div>
 
-				<div slot="body" class="p-4">
-					<p class="mx-auto font-semibold dark:text-white">
-						{boosted ? $_('boost.isBoosted') : $_('boost.improveVisibility')}
+				<div class="flex flex-1 flex-col items-center justify-between gap-4 p-4">
+					<p class="font-semibold text-amber-800 dark:text-amber-300">
+						{boosted ? $_('boost.isBoosted') : $_('boost.getVisibility')}
+					</p>
+					<p class="text-sm text-amber-700 dark:text-amber-400/80">
+						{boosted ? '' : $_('boost.boostPromo')}
 					</p>
 
 					{#if boosted}
-						<p class="dark:text-white">
+						<p class="text-amber-700 dark:text-amber-400/80">
 							{$_('boost.expires')}:
-							<span class="underline decoration-bitcoin decoration-4 underline-offset-8">
+							<span class="font-semibold">
 								<Time live={3000} relative={true} timestamp={boosted} />
 							</span>
 						</p>
 					{/if}
-				</div>
 
-				<BoostButton slot="footer" merchant={data.placeData} {boosted} />
-			</Card>
+					<BoostButton merchant={data.placeData} {boosted} />
+				</div>
+			</div>
 
 			<Card headerAlign="center">
 				<h3 slot="header" class="text-2xl font-semibold">

@@ -3,6 +3,7 @@ import axios from "axios";
 import axiosRetry from "axios-retry";
 
 import Icon from "$components/Icon.svelte";
+import { _ } from "$lib/i18n";
 import { boost, resetBoost } from "$lib/store";
 import type { Place } from "$lib/types";
 
@@ -39,11 +40,21 @@ $: $resetBoost && resetBoostLoading();
 		on:click={startBoost}
 		disabled={boostLoading}
 		class="{boosted
-			? 'bg-bitcoin hover:bg-bitcoinHover'
-			: 'bg-link hover:bg-hover'} mx-auto flex w-40 items-center justify-center rounded-xl p-3 text-center font-semibold text-white transition-colors"
+			? 'border border-amber-300 text-amber-800 hover:bg-amber-100 dark:border-amber-600/40 dark:text-amber-300 dark:hover:bg-amber-900/30'
+			: 'bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-500'} mx-auto flex w-40 items-center justify-center rounded-xl p-3 text-center font-semibold transition-colors disabled:opacity-50"
 	>
-		<Icon w="20" h="20" class="mr-1 text-white" icon="arrow_circle_up" type="material" />
-		{boostLoading ? 'Boosting...' : boosted ? 'Extend Boost' : 'Boost'}
+		<Icon
+			w="20"
+			h="20"
+			class="mr-1"
+			icon={boosted ? 'arrow_circle_up' : 'rocket_launch'}
+			type="material"
+		/>
+		{boostLoading
+			? $_('boost.boosting')
+			: boosted
+				? $_('boost.extendBoost')
+				: $_('boost.boostThisPlace')}
 	</button>
 {:else}
 	<button
@@ -53,6 +64,12 @@ $: $resetBoost && resetBoostLoading();
 		class="inline-flex items-center space-x-1 font-semibold text-link transition-colors hover:text-hover"
 	>
 		<Icon w="16" h="16" icon="arrow_circle_up" class="shrink-0" type="material" />
-		<p class="text-sm">{boostLoading ? 'Boosting...' : boosted ? 'Extend Boost' : 'Boost'}</p>
+		<p class="text-sm">
+			{boostLoading
+				? $_('boost.boosting')
+				: boosted
+					? $_('boost.extendBoost')
+					: $_('boost.boostThisPlace')}
+		</p>
 	</button>
 {/if}
