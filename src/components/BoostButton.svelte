@@ -63,7 +63,13 @@ $: $resetBoost && resetBoostLoading();
 		disabled={boostLoading || Boolean($boost)}
 		class="inline-flex items-center space-x-1 font-semibold text-link transition-colors hover:text-hover"
 	>
-		<Icon w="16" h="16" icon="arrow_circle_up" class="shrink-0" type="material" />
+		<Icon
+			w="16"
+			h="16"
+			icon={boosted ? 'arrow_circle_up' : 'rocket_launch'}
+			class="shrink-0"
+			type="material"
+		/>
 		<p class="text-sm">
 			{boostLoading
 				? $_('boost.boosting')
