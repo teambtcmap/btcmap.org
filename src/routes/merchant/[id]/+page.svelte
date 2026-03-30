@@ -588,26 +588,30 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 					</h3>
 				</div>
 
-				<div class="flex flex-1 flex-col items-center justify-between gap-4 p-4">
-					<p class="font-semibold text-amber-800 dark:text-amber-300">
-						{boosted ? $_('boost.isBoosted') : $_('boost.getVisibility')}
-					</p>
-					{#if !boosted}
-						<p class="text-sm text-amber-700 dark:text-amber-400/80">
-							{$_('boost.boostPromo')}
+				<div class="flex flex-1 flex-col justify-between gap-4">
+					<div class="flex flex-col items-center gap-4 p-4">
+						<p class="font-semibold text-amber-800 dark:text-amber-300">
+							{boosted ? $_('boost.isBoosted') : $_('boost.getVisibility')}
 						</p>
-					{/if}
+						{#if !boosted}
+							<p class="text-sm text-amber-700 dark:text-amber-400/80">
+								{$_('boost.boostPromo')}
+							</p>
+						{/if}
 
-					{#if boosted}
-						<p class="text-amber-700 dark:text-amber-400/80">
-							{$_('boost.expires')}:
-							<span class="font-semibold">
-								<Time live={3000} relative={true} timestamp={boosted} />
-							</span>
-						</p>
-					{/if}
+						{#if boosted}
+							<p class="text-amber-700 dark:text-amber-400/80">
+								{$_('boost.expires')}:
+								<span class="font-semibold">
+									<Time live={3000} relative={true} timestamp={boosted} />
+								</span>
+							</p>
+						{/if}
+					</div>
 
-					<BoostButton merchant={data.placeData} {boosted} />
+					<div class="flex justify-center pb-4">
+						<BoostButton merchant={data.placeData} {boosted} />
+					</div>
 				</div>
 			</div>
 
