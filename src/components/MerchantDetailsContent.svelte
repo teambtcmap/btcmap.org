@@ -376,7 +376,13 @@ async function fetchComments(placeId: number) {
 					<div
 						class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30"
 					>
-						<Icon w="20" h="20" icon="auto_awesome" type="material" />
+						<Icon
+							w="20"
+							h="20"
+							class="text-amber-600 dark:text-amber-400"
+							icon="auto_awesome"
+							type="material"
+						/>
 					</div>
 					<div class="min-w-0 flex-1">
 						<p class="text-sm font-semibold text-amber-800 dark:text-amber-300">
@@ -405,7 +411,13 @@ async function fetchComments(placeId: number) {
 					<div
 						class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30"
 					>
-						<Icon w="20" h="20" icon="rocket_launch" type="material" />
+						<Icon
+							w="20"
+							h="20"
+							class="text-amber-600 dark:text-amber-400"
+							icon="rocket_launch"
+							type="material"
+						/>
 					</div>
 					<div class="min-w-0 flex-1">
 						<p class="text-sm font-semibold text-amber-800 dark:text-amber-300">
