@@ -576,7 +576,13 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 				<div
 					class="flex items-center justify-center gap-2 border-b border-amber-200 p-5 dark:border-amber-700/30"
 				>
-					<Icon w="20" h="20" icon={boosted ? 'auto_awesome' : 'rocket_launch'} type="material" />
+					<Icon
+						w="20"
+						h="20"
+						class="text-amber-800 dark:text-amber-300"
+						icon={boosted ? 'auto_awesome' : 'rocket_launch'}
+						type="material"
+					/>
 					<h3 class="text-2xl font-semibold text-amber-800 dark:text-amber-300">
 						{$_('boost.title')}
 					</h3>
