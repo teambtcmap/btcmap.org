@@ -369,7 +369,7 @@ async function fetchComments(placeId: number) {
 		</div>
 
 		<div
-			class="rounded-xl border border-amber-200 bg-amber-50/50 p-4 dark:border-amber-700/30 dark:bg-amber-900/10"
+			class="mt-2.5 rounded-xl border border-amber-200 bg-amber-50/50 p-4 dark:border-amber-700/30 dark:bg-amber-900/10"
 		>
 			{#if isBoosted && merchant.boosted_until}
 				<div class="flex items-start gap-3">
