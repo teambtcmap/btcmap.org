@@ -3,7 +3,6 @@ import axios from "axios";
 import { onDestroy, onMount } from "svelte";
 import Time from "svelte-time";
 
-import BoostBadge from "$components/BoostBadge.svelte";
 import CompanionAppPill from "$components/CompanionAppPill.svelte";
 import Icon from "$components/Icon.svelte";
 import MerchantComment from "$components/MerchantComment.svelte";
@@ -369,36 +368,68 @@ async function fetchComments(placeId: number) {
 			{/if}
 		</div>
 
-		{#if isBoosted && merchant.boosted_until}
-			<div class="flex items-center gap-2 py-2.5">
-				<BoostBadge />
-				<span class="text-sm text-body dark:text-white">
-					{$_('boost.expires')}:
-					<Time live={3000} relative={true} timestamp={merchant.boosted_until} />
-				</span>
-				<span class="text-body dark:text-white/50">·</span>
+		<div
+			class="rounded-xl border border-amber-200 bg-amber-50/50 p-4 dark:border-amber-700/30 dark:bg-amber-900/10"
+		>
+			{#if isBoosted && merchant.boosted_until}
+				<div class="flex items-start gap-3">
+					<div
+						class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30"
+					>
+						<Icon w="20" h="20" icon="auto_awesome" type="material" />
+					</div>
+					<div class="min-w-0 flex-1">
+						<p class="text-sm font-semibold text-amber-800 dark:text-amber-300">
+							{$_('boost.boosted')}
+						</p>
+						<p class="mt-0.5 text-xs text-amber-700 dark:text-amber-400/80">
+							{$_('boost.expires')}:
+							<Time live={3000} relative={true} timestamp={merchant.boosted_until} />
+						</p>
+					</div>
+				</div>
 				<button
-					title={$_('boost.extend')}
 					on:click={onBoostClick}
 					disabled={boostLoading}
-					class="text-xs text-link transition-colors hover:text-hover disabled:opacity-50"
+					class="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-amber-300 px-3 py-2 text-sm font-medium text-amber-800 transition-colors hover:bg-amber-100 disabled:opacity-50 dark:border-amber-600/40 dark:text-amber-300 dark:hover:bg-amber-900/30"
 				>
-					{boostLoading ? $_('boost.boosting') : $_('boost.extend')}
+					{#if boostLoading}
+						{$_('boost.boosting')}
+					{:else}
+						<Icon w="16" h="16" icon="arrow_circle_up" type="material" />
+						{$_('boost.extendBoost')}
+					{/if}
 				</button>
-			</div>
-		{:else}
-			<div class="flex items-center gap-2 py-2.5">
+			{:else}
+				<div class="flex items-start gap-3">
+					<div
+						class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30"
+					>
+						<Icon w="20" h="20" icon="rocket_launch" type="material" />
+					</div>
+					<div class="min-w-0 flex-1">
+						<p class="text-sm font-semibold text-amber-800 dark:text-amber-300">
+							{$_('boost.getVisibility')}
+						</p>
+						<p class="mt-0.5 text-xs text-amber-700 dark:text-amber-400/80">
+							{$_('boost.boostPromo')}
+						</p>
+					</div>
+				</div>
 				<button
-					title={$_('boost.title')}
 					on:click={onBoostClick}
 					disabled={boostLoading}
-					class="flex items-center gap-1.5 text-xs text-link transition-colors hover:text-hover disabled:opacity-50"
+					class="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-amber-500 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-600 disabled:opacity-50 dark:bg-amber-600 dark:hover:bg-amber-500"
 				>
-					<Icon w="16" h="16" icon="arrow_circle_up" type="material" />
-					<span>{boostLoading ? $_('boost.boosting') : $_('boost.boostAction')}</span>
+					{#if boostLoading}
+						{$_('boost.boosting')}
+					{:else}
+						<Icon w="16" h="16" icon="rocket_launch" type="material" />
+						{$_('boost.boostThisPlace')}
+					{/if}
 				</button>
-			</div>
-		{/if}
+			{/if}
+		</div>
 	</div>
 
 	<!-- Comments Section -->
