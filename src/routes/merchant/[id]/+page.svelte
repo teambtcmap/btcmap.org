@@ -592,9 +592,11 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 					<p class="font-semibold text-amber-800 dark:text-amber-300">
 						{boosted ? $_('boost.isBoosted') : $_('boost.getVisibility')}
 					</p>
-					<p class="text-sm text-amber-700 dark:text-amber-400/80">
-						{boosted ? '' : $_('boost.boostPromo')}
-					</p>
+					{#if !boosted}
+						<p class="text-sm text-amber-700 dark:text-amber-400/80">
+							{$_('boost.boostPromo')}
+						</p>
+					{/if}
 
 					{#if boosted}
 						<p class="text-amber-700 dark:text-amber-400/80">
