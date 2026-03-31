@@ -24,4 +24,4 @@ jobs:
           needs-sync: 'true'
 
       - name: Run Vitest tests
-        run: yarn run test
+        run: pnpm run test

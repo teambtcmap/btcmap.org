@@ -7,25 +7,25 @@
 1. `git clone`\
    to clone the repo and `cd` into the directory
 2. Enable Corepack (if needed)\
-   If `yarn` command is not found, run: `corepack enable`
-3. `yarn`\
+   If `pnpm` command is not found, run: `corepack enable`
+3. `pnpm install`\
    to install the packages
-4. `yarn dev`\
+4. `pnpm dev`\
    will open the app on: http://localhost:5000
 
 ### Check your changes before commit/pushing
 
-- `yarn run format`
-- `yarn run lint`
-- `yarn run typecheck`
+- `pnpm run format`
+- `pnpm run lint`
+- `pnpm run typecheck`
 
 ### Build project
 
 1. Create `.env`  
    Copy `.env.example` and save as `.env`
-1. `yarn build`
+1. `pnpm build`
 
-_NOTE:_ BTC Map uses Node 22 LTS. If you have [mise](https://mise.jdx.dev/), run `mise install` in the repo root to switch to the correct version. This project uses Corepack (bundled with Node 22) to manage yarn 4.12.0 automatically.
+_NOTE:_ BTC Map uses Node 22 LTS. If you have [mise](https://mise.jdx.dev/), run `mise install` in the repo root to switch to the correct version. This project uses Corepack (bundled with Node 22) to manage pnpm automatically.
 
 #### Icons
 
@@ -37,25 +37,25 @@ _NOTE:_ BTC Map uses Node 22 LTS. If you have [mise](https://mise.jdx.dev/), run
 #### Install
 
 ```sh
-  yarn playwright install
+  pnpm playwright install
 ```
 
 #### Run tests
 
 ```sh
-  yarn playwright test
+  pnpm playwright test
     Runs the end-to-end tests.
 
-  yarn playwright test --ui
+  pnpm playwright test --ui
     Starts the interactive UI mode.
 
-  yarn playwright test --project=chromium
+  pnpm playwright test --project=chromium
     Runs the tests only on Desktop Chrome.
 
-  yarn playwright test example
+  pnpm playwright test example
     Runs the tests in a specific file.
 
-  yarn playwright test --debug
+  pnpm playwright test --debug
     Runs the tests in debug mode.
 ```
 

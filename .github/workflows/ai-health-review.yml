@@ -95,7 +95,7 @@ jobs:
           fi
 
           git diff "$DIFF_BASE"..HEAD -- . \
-            ':!yarn.lock' ':!package-lock.json' ':!src/lib/i18n/locales/' \
+            ':!pnpm-lock.yaml' ':!package-lock.json' ':!src/lib/i18n/locales/' \
             ':!*.snap' ':!*.lock' ':!static/images/' ':!static/icons/' \
             > /tmp/raw-diff.txt
 

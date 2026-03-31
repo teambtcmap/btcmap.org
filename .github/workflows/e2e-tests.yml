@@ -29,20 +29,20 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             playwright-chromium-${{ runner.os }}-
 
       - name: Install Playwright Browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: yarn playwright install --with-deps chromium
+        run: pnpm playwright install --with-deps chromium
 
       - name: Install Playwright Dependencies
         if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: yarn playwright install-deps
+        run: pnpm playwright install-deps
 
       - name: Run Playwright tests
-        run: yarn playwright test
+        run: pnpm playwright test
 
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}

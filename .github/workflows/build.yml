@@ -24,4 +24,4 @@ jobs:
           needs-sync: 'false'
 
       - name: Build app
-        run: yarn run build
+        run: pnpm run build

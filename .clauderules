@@ -1,9 +1,9 @@
 # Critical Rules - Read First
 
 ## Before Every Commit
-1. Run `yarn run format:fix` (MANDATORY)
-2. Run `yarn run check`
-3. Run `yarn run lint`
+1. Run `pnpm run format:fix` (MANDATORY)
+2. Run `pnpm run check`
+3. Run `pnpm run lint`
 4. Use conventional commits: `type(scope): description #issue`
 
 ## Conventional Commit Types
