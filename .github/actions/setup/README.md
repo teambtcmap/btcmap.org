@@ -9,10 +9,11 @@ Shared setup steps used across all CI workflows (after checkout).
 
 ## What it does
 
-1. Sets up Node.js with yarn caching
-2. Optionally creates .env file (if `needs-env: 'true'`)
-3. Installs dependencies with `yarn`
-4. Optionally runs `yarn svelte-kit sync` (if `needs-sync: 'true'`)
+1. Sets up pnpm via `pnpm/action-setup`
+2. Sets up Node.js with pnpm caching
+3. Optionally creates .env file (if `needs-env: 'true'`)
+4. Installs dependencies with `pnpm install --frozen-lockfile`
+5. Optionally runs `pnpm svelte-kit sync` (if `needs-sync: 'true'`)
 
 ## Usage
 

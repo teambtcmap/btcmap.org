@@ -27,13 +27,8 @@ package-lock.json
 # Replit
 /attached_assets
 
-# Yarn v4 (Berry)
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
+# ignore unintended yarn lock file
+yarn.lock
 
 # OpenCode local config
 opencode.json

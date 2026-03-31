@@ -13,10 +13,12 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - uses: pnpm/action-setup@v4
+
     - uses: actions/setup-node@v4
       with:
         node-version: '22'
-        cache: 'yarn'
+        cache: 'pnpm'
 
     - name: Create .env
       if: ${{ inputs.needs-env == 'true' }}
@@ -25,9 +27,9 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      run: yarn
+      run: pnpm install --frozen-lockfile
 
     - name: Sync SvelteKit
       if: ${{ inputs.needs-sync == 'true' }}
       shell: bash
-      run: yarn svelte-kit sync
+      run: pnpm svelte-kit sync

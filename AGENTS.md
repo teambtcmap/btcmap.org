@@ -6,20 +6,20 @@ This file contains project-specific guidelines and commands for Claude Code to f
 
 **BEFORE EVERY COMMIT, YOU MUST:**
 
-1. **🎨 Format code:** Run `yarn run format:fix` (REQUIRED - NO EXCEPTIONS)
-2. **🔍 Type check:** Run `yarn run check`
-3. **🧹 Lint:** Run `yarn run lint`
-4. **🧪 Unit tests:** Run `yarn run test --run`
+1. **🎨 Format code:** Run `pnpm run format:fix` (REQUIRED - NO EXCEPTIONS)
+2. **🔍 Type check:** Run `pnpm run check`
+3. **🧹 Lint:** Run `pnpm run lint`
+4. **🧪 Unit tests:** Run `pnpm run test --run`
 5. **📝 Commit format:** Use [Conventional Commits](https://www.conventionalcommits.org/) format with issue number
 
-**Failure to run `yarn run format:fix` before committing will result in inconsistent code formatting.**
+**Failure to run `pnpm run format:fix` before committing will result in inconsistent code formatting.**
 
 ## Code Quality Commands
 
 ### Linting
 
 ```bash
-yarn run lint
+pnpm run lint
 ```
 
 Run this command to check for Biome lint errors. Always run this before committing changes to ensure code quality.
@@ -27,7 +27,7 @@ Run this command to check for Biome lint errors. Always run this before committi
 ### Formatting
 
 ```bash
-yarn run format:fix
+pnpm run format:fix
 ```
 
 Run this command to automatically format code according to project standards. Always run this before committing changes.
@@ -35,7 +35,7 @@ Run this command to automatically format code according to project standards. Al
 ### Type Checking
 
 ```bash
-yarn run check
+pnpm run check
 ```
 
 Run this command to perform comprehensive TypeScript type checking and Svelte validation. Always run this before committing changes.
@@ -109,7 +109,7 @@ export const updateSinglePlace = async (placeId: string | number): Promise<Place
 
 ## Git Commit Guidelines
 
-**⚠️ CRITICAL: Always run `yarn run format:fix` before committing!**
+**⚠️ CRITICAL: Always run `pnpm run format:fix` before committing!**
 
 Follow [Conventional Commits](https://www.conventionalcommits.org/) format for all commits:
 
@@ -152,14 +152,14 @@ Use the appropriate tool attribution based on which tool generated the commit:
 ### Workflow:
 
 1. Make your changes
-2. **🎨 MANDATORY:** Run `yarn run format:fix` ⚠️ **THIS IS REQUIRED BEFORE EVERY COMMIT** ⚠️
-3. Run `yarn run check` to perform type checking
-4. Run `yarn run lint` to verify no errors
+2. **🎨 MANDATORY:** Run `pnpm run format:fix` ⚠️ **THIS IS REQUIRED BEFORE EVERY COMMIT** ⚠️
+3. Run `pnpm run check` to perform type checking
+4. Run `pnpm run lint` to verify no errors
 5. Verify the commit type matches the change (e.g., `ci` for CI changes, `feat` only for new features, not config/tooling)
 6. Stage and commit with conventional format
 7. Include issue number if applicable (e.g., `#276`)
 
-**🚨 CRITICAL REMINDER:** You MUST run `yarn run format:fix` before staging any commit. This is non-negotiable and ensures consistent code formatting across the entire project.
+**🚨 CRITICAL REMINDER:** You MUST run `pnpm run format:fix` before staging any commit. This is non-negotiable and ensures consistent code formatting across the entire project.
 
 ## Project Structure Notes
 
