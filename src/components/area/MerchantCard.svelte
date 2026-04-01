@@ -153,7 +153,6 @@ onDestroy(() => {
 					<Icon w="16" h="16" icon="schedule" type="material" class="shrink-0" />
 					<div class="text-sm">
 						<time class="flex flex-col items-start">
-							<!-- eslint-disable-next-line svelte/no-at-html-tags - we sanitize the content in formatOpeningHours -->
 							{@html formatOpeningHours(openingHours)}
 						</time>
 					</div>

@@ -409,7 +409,6 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 					</h4>
 
 					<div class="flex items-start justify-center">
-						<!-- eslint-disable-next-line svelte/no-at-html-tags - we even sanitize the captcha content above -->
 						<time class="flex flex-col items-start">{@html formatOpeningHours(hours)}</time>
 					</div>
 				</div>
@@ -797,7 +796,6 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 						<p class="p-5 text-body dark:text-white">{$_('info.loadingCommunities')}</p>
 					{:else}
 						<p class="p-5 text-body dark:text-white">
-							<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 							{@html $_('info.noCommunity', {
 								values: {
 									createLink: `<a href="${resolve('/communities')}" class="text-link transition-colors hover:text-hover">${$_('info.created')}</a>`

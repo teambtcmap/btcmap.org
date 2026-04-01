@@ -550,7 +550,6 @@ onDestroy(() => {
 		</div>
 
 		<h2 class="mx-auto w-full text-xl break-all text-body lg:w-[800px] dark:text-white">
-			<!-- eslint-disable-next-line svelte/no-at-html-tags - we even sanitize the captcha content above -->
 			{@html sanitizedMarkdown}
 		</h2>
 

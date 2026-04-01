@@ -77,7 +77,6 @@ import { resolve } from "$app/paths";
 					{/each}
 				</div>
 				<h2 class="text-center text-xl font-semibold text-primary xl:text-left dark:text-white">
-					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 					{@html $_('home.description', {
 						values: {
 							osmLink: `<a href="https://www.openstreetmap.org/about" target="_blank" rel="noreferrer" class="text-link transition-colors hover:text-hover">OpenStreetMap</a>`
