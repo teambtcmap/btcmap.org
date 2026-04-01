@@ -153,11 +153,9 @@ afterNavigate(() => {
 
 <!-- desktop header -->
 <header class="relative z-30 mx-auto hidden w-[1200px] items-center justify-between gap-x-4 py-5 xl:flex">
-	<!-- eslint-disable svelte/no-navigation-without-resolve -->
 	<a href="/">
 		<img src="/images/logo.svg" alt={$_('aria.logoAlt')} class="w-16" />
 	</a>
-	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
 	<nav
 		class="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-y-2 {hasLongNavLabels
@@ -182,14 +180,12 @@ afterNavigate(() => {
 				<NavDropdownDesktop title={link.title} links={areasDropdownLinks} />
 			{:else}
 				<!-- regular links -->
-				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href={link.url}
 					class="text-xl font-semibold text-link transition-colors hover:text-hover dark:text-white dark:hover:text-link"
 				>
 					{link.title}
 				</a>
-				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			{/if}
 		{/each}
 	</nav>
@@ -203,7 +199,6 @@ afterNavigate(() => {
 		? 'bg-teal dark:bg-dark'
 		: 'bg-teal/90 dark:bg-dark/90'}"
 >
-	<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 	<a href="/">
 		<img src="/images/logo.svg" alt={$_('aria.logoAlt')} class="w-16" />
 	</a>
@@ -248,7 +243,6 @@ afterNavigate(() => {
 
 				<!-- regular links -->
 			{:else}
-				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 				<a href={link.url} class="flex w-full items-center text-xl text-link dark:text-white">
 					<span
 						class="mr-4 rounded-full bg-mobileButtons p-3 transition-colors active:bg-mobileButtonsActive"

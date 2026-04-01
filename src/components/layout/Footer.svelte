@@ -49,7 +49,6 @@ const rightLinks = [
 		<div class="flex flex-col items-center gap-y-2 xl:items-start">
 			<LanguageModal />
 			{#each leftLinks as link (link.link)}
-				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href={link.link}
 					target={link.external ? '_blank' : null}
@@ -58,12 +57,10 @@ const rightLinks = [
 				>
 					{$_(link.nameKey)}
 				</a>
-				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			{/each}
 		</div>
 		<div class="flex flex-col items-center gap-y-2 xl:items-start">
 			{#each rightLinks as link (link.link)}
-				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href={link.link}
 					target={link.external ? '_blank' : null}
@@ -72,7 +69,6 @@ const rightLinks = [
 				>
 					{$_(link.nameKey)}
 				</a>
-				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			{/each}
 		</div>
 	</nav>

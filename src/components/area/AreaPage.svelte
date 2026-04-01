@@ -122,7 +122,6 @@ $: activeSection = slugToSection[currentSection] || Sections.merchants;
 const handleSectionChange = (section: Sections) => {
 	const slug = sectionSlugs[section];
 	const areaId = encodeURIComponent(data.id);
-	// eslint-disable-next-line svelte/no-navigation-without-resolve
 	goto(`/${type}/${areaId}/${slug}`);
 };
 
@@ -236,7 +235,6 @@ const initializeData = async () => {
 		console.error(
 			`Could not find ${type}, please try again or contact BTC Map.`,
 		);
-		// eslint-disable-next-line svelte/no-navigation-without-resolve
 		goto("/404");
 		return;
 	}
@@ -467,7 +465,6 @@ let issues: RpcIssue[] = [];
 				<p class="text-xl text-primary dark:text-white">{description}</p>
 			{/if}
 			{#if alias && type === 'community'}
-				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href={`/communities/map?community=${encodeURIComponent(alias)}`}
 					class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
@@ -488,7 +485,6 @@ let issues: RpcIssue[] = [];
 						/>
 					</svg></a
 				>
-				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			{/if}
 			{#if type === 'community'}
 				{#if verifiedDate}
@@ -520,7 +516,6 @@ let issues: RpcIssue[] = [];
 					</div>
 				{/if}
 				{#if type === 'community'}
-					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<!-- eslint-disable svelte/no-reactive-reassign -->
 					<a
 						href={`/community/${encodeURIComponent(alias)}/maintain#verify-form`}
@@ -536,7 +531,6 @@ let issues: RpcIssue[] = [];
 						}}>{$_('area.verifyCommunity')}</a
 					>
 					<!-- eslint-enable svelte/no-reactive-reassign -->
-					<!-- eslint-enable svelte/no-navigation-without-resolve -->
 				{/if}
 			{/if}
 		</div>

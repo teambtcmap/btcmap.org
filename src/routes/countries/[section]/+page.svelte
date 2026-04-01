@@ -111,7 +111,6 @@ const continentConfig: Record<string, { i18nKey: string; osm: string }> = {
 function handleSectionChange(event: Event) {
 	const target = event.target as HTMLSelectElement;
 	const newSection = target.value;
-	// eslint-disable-next-line svelte/no-navigation-without-resolve
 	goto(`/countries/${newSection}`);
 }
 

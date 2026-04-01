@@ -34,7 +34,6 @@ function handleImageError(event: Event) {
 					on:error={handleImageError}
 					loading="lazy"
 				/>
-				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href={`/${type}/${encodeURIComponent(id)}`}
 					class="font-medium text-link transition-colors hover:text-hover {localizedName?.match(
@@ -44,7 +43,6 @@ function handleImageError(event: Event) {
 						: ''}"
 					aria-label={$_('areaLeaderboard.viewDetails', { values: { name: localizedName } })}
 				>
-					<!-- eslint-enable svelte/no-navigation-without-resolve -->
 					{localizedName}
 				</a>
 			</div>
@@ -58,13 +56,11 @@ function handleImageError(event: Event) {
 				on:error={handleImageError}
 				loading="lazy"
 			/>
-			<!-- eslint-disable svelte/no-navigation-without-resolve -->
 			<a
 				href={`/${type}/${encodeURIComponent(id)}`}
 				class="font-medium text-link transition-colors hover:text-hover {hasLongName ? 'break-all' : ''}"
 				aria-label={$_('areaLeaderboard.viewDetails', { values: { name: displayName } })}
 			>
-				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 				{displayName}
 			</a>
 		</div>

@@ -1,0 +1,76 @@
+<h2>Map UI Improvement Opportunities</h2>
+<p class="subtitle">Issues spotted in the current screenshot — click the areas you'd like to focus on</p>
+
+<div class="options" data-multiselect>
+
+  <div class="option" data-choice="i18n" onclick="toggleSelect(this)">
+    <div class="letter">1</div>
+    <div class="content">
+      <h3>Mixed-Language Text</h3>
+      <p><strong>"Boost verloopt in 15 days"</strong> — Dutch label, English duration. The opening hours also show English day abbreviations (Mo-Th, Fr-Sa, Su) instead of Dutch (Ma-Do, Vr-Za, Zo). These break the immersion for non-English users.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="category-pills" onclick="toggleSelect(this)">
+    <div class="letter">2</div>
+    <div class="content">
+      <h3>Category Filter Pills Wrap to 3 Rows</h3>
+      <p>8 category pills (Alle, Restaurants, Winkelen, Boodschappen, Koffie, Geldautomaten, Hotels, Schoonheidssalons) wrap to 3 lines, consuming ~80px of vertical space. A horizontally scrollable single row or compact icon-only pills would reclaim space for the merchant list.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="drawer-scroll" onclick="toggleSelect(this)">
+    <div class="letter">3</div>
+    <div class="content">
+      <h3>Drawer Content Length & Scrolling</h3>
+      <p>The merchant detail drawer is very tall — action buttons + payment methods + verification + boost + 4 comments pushes content well below the fold. The merchant name scrolls off-screen. A sticky header and collapsible comments section would help.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="action-buttons" onclick="toggleSelect(this)">
+    <div class="letter">4</div>
+    <div class="content">
+      <h3>Action Buttons Take Too Much Space</h3>
+      <p>The 2×2 grid of large action buttons (Navigeren, Bewerk, Deel, Opmerkingen) dominates the top of the drawer. These could be an inline icon row or a compact toolbar to free up space for the actual merchant info.</p>
+    </div>
+  </div>
+
+</div>
+
+<h3 style="margin-top: 2rem;">Additional Observations</h3>
+
+<div class="options" data-multiselect>
+
+  <div class="option" data-choice="location-banner" onclick="toggleSelect(this)">
+    <div class="letter">5</div>
+    <div class="content">
+      <h3>Location Permission Banner</h3>
+      <p>"Maak nauwkeurige afstanden mogelijk" takes up a full row in the sidebar. Once dismissed, it doesn't return, but for first-time visitors it pushes the merchant list down. Could be integrated into the search bar or shown as a subtle icon.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="map-coverage" onclick="toggleSelect(this)">
+    <div class="letter">6</div>
+    <div class="content">
+      <h3>Map Visible Area When Drawer Open</h3>
+      <p>With sidebar (320px) + drawer (400px) both open, ~720px of horizontal space is consumed on the left. On a 1366px laptop screen, more than half the map is hidden. Consider overlaying the drawer on the sidebar or using a slide-over pattern.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="comments-ux" onclick="toggleSelect(this)">
+    <div class="letter">7</div>
+    <div class="content">
+      <h3>Comments Section UX</h3>
+      <p>All 4 comments are shown inline, taking ~200px of vertical space. The oldest are 2+ years old. Consider: collapsed by default with "Show 4 comments" expand, or showing only the most recent 1-2 with a "show more" link.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="marker-legend" onclick="toggleSelect(this)">
+    <div class="letter">8</div>
+    <div class="content">
+      <h3>No Marker Legend on Map</h3>
+      <p>The map uses different colored icons (teal squares, orange markers, green diamonds) for different merchant types, but there's no legend explaining what each color/shape means. New users may not understand the visual encoding.</p>
+    </div>
+  </div>
+
+</div>

@@ -52,7 +52,6 @@ $: safeSignal = sanitizeUrl(signal);
 
 <div class="flex flex-wrap items-center justify-center {style || ''}">
 	{#if safeWebsite}
-		<!-- eslint-disable svelte/no-navigation-without-resolve -->
 		<a href={safeWebsite} target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-bitcoin">
 				<Icon type="fa" icon="globe" w="28" h="28" class="text-white" />
@@ -171,7 +170,6 @@ $: safeSignal = sanitizeUrl(signal);
 	{/if}
 	{#if safeSignal}
 		<a href={safeSignal} target="_blank" rel="noreferrer" class="m-1">
-			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			<img src="/icons/socials/signal.svg" alt="signal" class="h-10 w-10 rounded-full" />
 		</a>
 	{/if}

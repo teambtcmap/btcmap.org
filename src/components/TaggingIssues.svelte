@@ -27,14 +27,12 @@ const closeModal = () => ($taggingIssues = undefined);
 							<IssueIcon icon={getIssueIcon(issue.type)} />
 							<p>{issue.description}</p>
 							{#if getIssueHelpLink(issue.type)}
-								<!-- eslint-disable svelte/no-navigation-without-resolve -->
 								<a
 									href={getIssueHelpLink(issue.type)}
 									target="_blank"
 									rel="noreferrer"
 									class="text-link transition-colors hover:text-hover"
 								>
-									<!-- eslint-enable svelte/no-navigation-without-resolve -->
 									{$_(`maintain.help`)}
 								</a>
 							{/if}

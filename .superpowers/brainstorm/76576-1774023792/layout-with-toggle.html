@@ -1,0 +1,112 @@
+<h2>Layout with Panel Collapse Toggle</h2>
+<p class="subtitle">Google Maps pattern: single panel with collapse/expand arrow at the boundary</p>
+
+<!-- Expanded state -->
+<div class="mockup" style="margin-bottom: 1.5rem;">
+  <div class="mockup-header">Panel Expanded (default)</div>
+  <div class="mockup-body" style="font-size: 11px; font-family: system-ui;">
+    <div style="display: flex; height: 280px; gap: 0; position: relative;">
+      <!-- Single unified panel -->
+      <div style="width: 32%; background: white; display: flex; flex-direction: column; border-right: none;">
+        <div style="padding: 6px; border-bottom: 1px solid #eee;">
+          <div style="background: #f1f3f4; border-radius: 16px; padding: 5px 10px; font-size: 9px; color: #666;">🔍 Zoek in de buurt...</div>
+        </div>
+        <div style="padding: 4px 8px; font-size: 9px; color: #F7931A; border-bottom: 1px solid #eee; cursor: pointer;">← Terug naar lijst</div>
+        <div style="flex: 1; overflow: hidden;">
+          <div style="padding: 8px; display: flex; gap: 6px; align-items: flex-start;">
+            <div style="width: 32px; height: 32px; background: #e8f5e9; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px;">🏪</div>
+            <div>
+              <div style="font-weight: bold; font-size: 13px;">Kiosk 87</div>
+              <div style="font-size: 9px; color: #666;">87 Lange Reihe Hamburg 20099</div>
+              <span style="color: #16a34a; font-size: 9px; font-weight: 500;">Open</span> <span style="font-size: 9px; color: #666;">· Sluit om 22:00</span>
+            </div>
+          </div>
+          <!-- Compact actions -->
+          <div style="display: flex; justify-content: space-around; padding: 8px 4px; border-top: 1px solid #eee; border-bottom: 1px solid #eee;">
+            <div style="text-align: center; font-size: 8px;">
+              <div style="width: 30px; height: 30px; background: #F7931A; border-radius: 50%; margin: 0 auto 2px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">▶</div>
+              Navigate
+            </div>
+            <div style="text-align: center; font-size: 8px;">
+              <div style="width: 30px; height: 30px; background: #f8f8f8; border: 1px solid #ddd; border-radius: 50%; margin: 0 auto 2px; display: flex; align-items: center; justify-content: center; font-size: 12px;">✏</div>
+              Edit
+            </div>
+            <div style="text-align: center; font-size: 8px;">
+              <div style="width: 30px; height: 30px; background: #f8f8f8; border: 1px solid #ddd; border-radius: 50%; margin: 0 auto 2px; display: flex; align-items: center; justify-content: center; font-size: 12px;">↗</div>
+              Share
+            </div>
+            <div style="text-align: center; font-size: 8px;">
+              <div style="width: 30px; height: 30px; background: #f8f8f8; border: 1px solid #ddd; border-radius: 50%; margin: 0 auto 2px; display: flex; align-items: center; justify-content: center; font-size: 12px;">✓</div>
+              Verify
+            </div>
+          </div>
+          <!-- Info rows -->
+          <div style="padding: 4px 8px; font-size: 10px;">
+            <div style="padding: 5px 0; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 4px;">
+              <span style="background: #F7931A; color: white; padding: 1px 8px; border-radius: 10px; font-size: 9px;">⚡ Lightning</span>
+            </div>
+            <div style="padding: 5px 0; border-bottom: 1px solid #f0f0f0;">🕐 Ma-Do 09:00-22:00 · Vr-Za 09:00-00:00</div>
+            <div style="padding: 5px 0; border-bottom: 1px solid #f0f0f0;">✅ Geverifieerd · 23 nov 2025</div>
+            <div style="padding: 5px 0; border-bottom: 1px solid #f0f0f0;">🚀 Boost verloopt over 15 dagen</div>
+            <div style="padding: 5px 0; color: #F7931A; cursor: pointer;">💬 4 opmerkingen ›</div>
+          </div>
+        </div>
+      </div>
+      <!-- COLLAPSE TOGGLE BUTTON -->
+      <div style="width: 20px; background: transparent; display: flex; align-items: center; justify-content: center; z-index: 10; position: relative;">
+        <div style="width: 24px; height: 48px; background: white; border-radius: 0 8px 8px 0; box-shadow: 2px 0 4px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; color: #555;">
+          ◀
+        </div>
+      </div>
+      <!-- Map -->
+      <div style="flex: 1; background: linear-gradient(135deg, #e8f0e8 0%, #d4e6d4 50%, #e0ead0 100%); display: flex; align-items: center; justify-content: center; color: #666; border-radius: 0;">
+        <div style="text-align: center;">
+          🗺️ Map<br>
+          <span style="font-size: 10px; color: #888;">~68% of screen</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Collapsed state -->
+<div class="mockup" style="margin-bottom: 1.5rem;">
+  <div class="mockup-header">Panel Collapsed (full map view)</div>
+  <div class="mockup-body" style="font-size: 11px; font-family: system-ui;">
+    <div style="display: flex; height: 200px; gap: 0; position: relative;">
+      <!-- EXPAND TOGGLE BUTTON (panel hidden) -->
+      <div style="width: 20px; background: transparent; display: flex; align-items: center; justify-content: center; z-index: 10;">
+        <div style="width: 24px; height: 48px; background: white; border-radius: 0 8px 8px 0; box-shadow: 2px 0 4px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; color: #555;">
+          ▶
+        </div>
+      </div>
+      <!-- Full map -->
+      <div style="flex: 1; background: linear-gradient(135deg, #e8f0e8 0%, #d4e6d4 50%, #e0ead0 100%); display: flex; align-items: center; justify-content: center; color: #666;">
+        <div style="text-align: center;">
+          🗺️ Full Map View<br>
+          <span style="font-size: 10px; color: #888;">~100% of screen</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- How it works -->
+<h3>Panel States</h3>
+<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 0.75rem;">
+  <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px;">
+    <strong style="color: #166534;">List View</strong>
+    <p style="font-size: 0.85rem; margin-top: 4px;">Search + category filters + merchant list. Click a merchant → transitions to detail view.</p>
+  </div>
+  <div style="background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; padding: 12px;">
+    <strong style="color: #9a3412;">Detail View</strong>
+    <p style="font-size: 0.85rem; margin-top: 4px;">Replaces list in same panel. "← Back" returns to list. Same ◀ toggle to collapse.</p>
+  </div>
+  <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px;">
+    <strong style="color: #1e40af;">Collapsed</strong>
+    <p style="font-size: 0.85rem; margin-top: 4px;">Panel hidden. Small ▶ button at left edge. Click to restore previous view (list or detail).</p>
+  </div>
+</div>
+
+<h3 style="margin-top: 1.5rem;">Wide screen (≥ 1536px) exception</h3>
+<p style="font-size: 0.9rem; color: #666;">On ultrawide monitors, list + detail show side-by-side (current behavior but with compact design). The ◀ toggle still collapses both panels.</p>

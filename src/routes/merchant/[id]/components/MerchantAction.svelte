@@ -35,9 +35,7 @@ const baseClass =
 </script>
 
 {#if link}
-	<!-- eslint-disable svelte/no-navigation-without-resolve -->
 	<a href={link} target="_blank" rel="noopener noreferrer" class={baseClass}>
-		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		<div>
 			<Icon w="30" h="30" icon={resolvedIcon} type={isFaIcon ? 'fa' : 'material'} class="mx-auto" />
 			<span class="mt-1 block text-center text-xs font-semibold">{text}</span>

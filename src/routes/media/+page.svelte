@@ -117,13 +117,11 @@ const assetSections = [
 		<div class="space-y-5">
 			<h2 class="text-3xl font-semibold">{$_("media.assets")}</h2>
 
-			<!-- eslint-disable svelte/no-navigation-without-resolve -->
 			<a
 				href="/assets/btcmap-media-assets.zip"
 				download
 				class="mx-auto block w-36 rounded-lg bg-link py-3 font-semibold text-white transition-colors hover:bg-hover"
 			>
-				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 				{$_("media.downloadAll")}
 			</a>
 
@@ -134,7 +132,6 @@ const assetSections = [
 					<ul class="ml-5 list-disc space-y-1">
 						{#each section.data as asset (asset.link)}
 							<li>
-								<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 								<a href={asset.link} class="text-link transition-colors hover:text-hover">
 									{$_(asset.nameKey)}
 								</a>

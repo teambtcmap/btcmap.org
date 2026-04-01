@@ -1,0 +1,134 @@
+<h2>Map Layout Redesign — Spec Summary</h2>
+<p class="subtitle">Review these mockups, then approve or request changes in the terminal</p>
+
+<!-- Current vs Proposed -->
+<div class="split" style="margin-bottom: 2rem;">
+  <div class="mockup">
+    <div class="mockup-header" style="background: #dc2626; color: white;">Current Layout (problem)</div>
+    <div class="mockup-body" style="font-size: 11px; font-family: system-ui;">
+      <div style="display: flex; height: 200px; gap: 0;">
+        <div style="width: 24%; background: white; border-right: 1px solid #ddd; padding: 6px; display: flex; flex-direction: column;">
+          <div style="font-weight: bold; font-size: 10px; margin-bottom: 4px;">🔍 Search</div>
+          <div style="font-size: 9px; color: #666;">320px list</div>
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 2px; margin-top: 4px;">
+            <div style="background: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-size: 8px;">Kiosk 87</div>
+            <div style="background: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-size: 8px;">Open Vision</div>
+            <div style="background: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-size: 8px;">uhrzeit.org</div>
+          </div>
+        </div>
+        <div style="width: 30%; background: white; border-right: 1px solid #ddd; padding: 6px; display: flex; flex-direction: column;">
+          <div style="font-weight: bold; font-size: 10px;">Kiosk 87</div>
+          <div style="font-size: 9px; color: #666; margin-bottom: 4px;">400px drawer</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3px;">
+            <div style="background: #f5f5f5; padding: 4px; border-radius: 3px; text-align: center; font-size: 8px;">Navigate</div>
+            <div style="background: #f5f5f5; padding: 4px; border-radius: 3px; text-align: center; font-size: 8px;">Edit</div>
+            <div style="background: #f5f5f5; padding: 4px; border-radius: 3px; text-align: center; font-size: 8px;">Share</div>
+            <div style="background: #f5f5f5; padding: 4px; border-radius: 3px; text-align: center; font-size: 8px;">Comments</div>
+          </div>
+          <div style="font-size: 8px; margin-top: 4px; color: #666;">⚡ Lightning<br>🕐 Hours...<br>✅ Verified<br>💬 Comment 1...<br>💬 Comment 2...<br>💬 Comment 3...</div>
+        </div>
+        <div style="flex: 1; background: #fce4e4; display: flex; align-items: center; justify-content: center; color: #dc2626; font-size: 11px; text-align: center;">
+          🗺️ Map<br><strong>Only ~46%</strong><br>of 1366px
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header" style="background: #16a34a; color: white;">Proposed Layout (laptop)</div>
+    <div class="mockup-body" style="font-size: 11px; font-family: system-ui;">
+      <div style="display: flex; height: 200px; gap: 0;">
+        <div style="width: 26%; background: white; display: flex; flex-direction: column; border-right: none;">
+          <div style="padding: 4px 6px; border-bottom: 1px solid #eee;">
+            <div style="background: #f1f3f4; border-radius: 12px; padding: 3px 8px; font-size: 9px; color: #666;">🔍 Search</div>
+          </div>
+          <div style="padding: 3px 6px; font-size: 9px; color: #F7931A; border-bottom: 1px solid #eee;">← Back to list</div>
+          <div style="padding: 6px; flex: 1;">
+            <div style="font-weight: bold; font-size: 11px;">🏪 Kiosk 87</div>
+            <div style="font-size: 8px; color: #666;">87 Lange Reihe Hamburg</div>
+            <div style="font-size: 8px; color: #16a34a;">Open · Closes 22:00</div>
+            <div style="display: flex; gap: 8px; margin: 6px 0; justify-content: space-around;">
+              <div style="text-align: center; font-size: 7px;">
+                <div style="width: 22px; height: 22px; background: #F7931A; border-radius: 50%; margin: 0 auto 1px; display: flex; align-items: center; justify-content: center; color: white; font-size: 9px;">▶</div>Nav
+              </div>
+              <div style="text-align: center; font-size: 7px;">
+                <div style="width: 22px; height: 22px; border: 1px solid #ddd; border-radius: 50%; margin: 0 auto 1px; display: flex; align-items: center; justify-content: center; font-size: 9px;">✏</div>Edit
+              </div>
+              <div style="text-align: center; font-size: 7px;">
+                <div style="width: 22px; height: 22px; border: 1px solid #ddd; border-radius: 50%; margin: 0 auto 1px; display: flex; align-items: center; justify-content: center; font-size: 9px;">↗</div>Share
+              </div>
+              <div style="text-align: center; font-size: 7px;">
+                <div style="width: 22px; height: 22px; border: 1px solid #ddd; border-radius: 50%; margin: 0 auto 1px; display: flex; align-items: center; justify-content: center; font-size: 9px;">✓</div>Verify
+              </div>
+            </div>
+            <div style="font-size: 8px; border-top: 1px solid #eee; padding-top: 4px;">
+              <div style="padding: 2px 0;"><span style="background: #F7931A; color: white; padding: 0 4px; border-radius: 6px; font-size: 7px;">⚡ Lightning</span></div>
+              <div style="padding: 2px 0; border-top: 1px solid #f5f5f5;">🕐 Ma-Do 09-22</div>
+              <div style="padding: 2px 0; border-top: 1px solid #f5f5f5;">✅ Verified · 23 Nov</div>
+              <div style="padding: 2px 0; border-top: 1px solid #f5f5f5;">🚀 Boost: 15d · <span style="color: #F7931A;">Extend</span></div>
+              <div style="padding: 2px 0; border-top: 1px solid #f5f5f5; color: #F7931A;">💬 4 comments ›</div>
+            </div>
+          </div>
+        </div>
+        <!-- Toggle -->
+        <div style="width: 16px; display: flex; align-items: center; justify-content: center;">
+          <div style="width: 18px; height: 36px; background: white; border-radius: 0 6px 6px 0; box-shadow: 2px 0 4px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; font-size: 10px; color: #555;">◀</div>
+        </div>
+        <div style="flex: 1; background: #e8f5e9; display: flex; align-items: center; justify-content: center; color: #16a34a; font-size: 11px; text-align: center;">
+          🗺️ Map<br><strong>~74%</strong><br>of 1366px
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Wide screen dual panel -->
+<div class="mockup" style="margin-bottom: 1.5rem;">
+  <div class="mockup-header">Wide Screen (≥ 1536px) — Dual Panel Preserved</div>
+  <div class="mockup-body" style="font-size: 11px; font-family: system-ui;">
+    <div style="display: flex; height: 160px; gap: 0;">
+      <div style="width: 20%; background: white; border-right: 1px solid #eee; padding: 4px;">
+        <div style="font-size: 9px; font-weight: bold;">🔍 Search + List</div>
+        <div style="font-size: 8px; color: #666; margin-top: 2px;">320px (unchanged)</div>
+      </div>
+      <div style="width: 26%; background: white; border-right: 1px solid #ddd; padding: 4px; box-shadow: 2px 0 4px rgba(0,0,0,0.05);">
+        <div style="font-size: 9px; font-weight: bold;">Merchant Detail</div>
+        <div style="font-size: 8px; color: #666; margin-top: 2px;">400px (unchanged)</div>
+        <div style="font-size: 8px; color: #666; margin-top: 2px;">But with compact layout</div>
+      </div>
+      <div style="width: 14px; display: flex; align-items: center; justify-content: center;">
+        <div style="width: 14px; height: 30px; background: white; border-radius: 0 5px 5px 0; box-shadow: 2px 0 3px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; font-size: 8px; color: #555;">◀</div>
+      </div>
+      <div style="flex: 1; background: #e8f0e8; display: flex; align-items: center; justify-content: center; color: #666; font-size: 10px;">
+        🗺️ Map (~54% of 1536px)
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Key changes summary -->
+<h3>Key Changes</h3>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.5rem;">
+  <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; font-size: 0.85rem;">
+    <strong style="color: #166534;">What changes</strong>
+    <ul style="margin: 6px 0 0 16px; line-height: 1.6;">
+      <li>Detail replaces list on &lt;1536px screens</li>
+      <li>◀/▶ collapse toggle at panel edge</li>
+      <li>Circular action buttons (horizontal row)</li>
+      <li>Compact info rows</li>
+      <li>Comments collapsed to link</li>
+      <li>Boost action inline in info row</li>
+    </ul>
+  </div>
+  <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px; font-size: 0.85rem;">
+    <strong style="color: #1e40af;">What stays the same</strong>
+    <ul style="margin: 6px 0 0 16px; line-height: 1.6;">
+      <li>Mobile bottom sheet (no changes)</li>
+      <li>URL hash deep linking</li>
+      <li>Dual panel on ≥1536px screens</li>
+      <li>Search/filter behavior</li>
+      <li>Keyboard navigation (Esc)</li>
+      <li>Dark mode support</li>
+    </ul>
+  </div>
+</div>

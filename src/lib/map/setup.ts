@@ -37,7 +37,6 @@ export const updateMapHash = (zoom: number, center: LatLng): void => {
 	// Use SvelteKit's replaceState to preserve pathname, search params (e.g. language=bg), and hash
 	const search = window.location.search || "";
 	const url = window.location.pathname + search + newHash;
-	// eslint-disable-next-line svelte/no-navigation-without-resolve
 	replaceState(url, {});
 };
 

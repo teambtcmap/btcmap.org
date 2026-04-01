@@ -80,7 +80,6 @@ const linkClass = "text-link transition-colors hover:text-hover";
 		<p><strong>{$_("privacyPolicy.forms.doNotSubmit")}</strong></p>
 		<p>
 			{$_("privacyPolicy.forms.xHandleBefore")}
-			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 			<a href={$socials.x} class={linkClass}>@btcmap</a>
 			{$_("privacyPolicy.forms.xHandleAfter")}
 		</p>

@@ -39,7 +39,6 @@ afterNavigate(() => {
 		>
 			<div class="absolute top-8 right-0 z-50 w-[185px] rounded-2xl shadow-lg">
 				{#each links as link, i (link.url)}
-					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href={link.url}
 						target={link.external ? '_blank' : null}
@@ -51,7 +50,6 @@ afterNavigate(() => {
 								? 'rounded-b-2xl'
 								: ''}"
 					>
-						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 						{link.title}
 						{#if link.external}
 							<Icon

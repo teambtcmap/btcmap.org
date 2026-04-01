@@ -40,14 +40,12 @@ $: displayIcon = (show ? `${icon}-highlight` : icon) as MobileNavIconName;
 	>
 		<div class="ml-7 space-y-2">
 			{#each links as link (link.url)}
-				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href={link.url}
 					target={link.external ? '_blank' : null}
 					rel={link.rel || (link.external ? 'noopener noreferrer' : null)}
 					class="flex w-full items-center text-xl text-link dark:text-white"
 				>
-					<!-- eslint-enable svelte/no-navigation-without-resolve -->
 					<span
 						class="mr-4 rounded-full bg-mobileButtons p-3 transition-colors active:bg-mobileButtonsActive"
 					>
