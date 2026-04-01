@@ -122,10 +122,8 @@ const initializeData = () => {
 
 		// create marker cluster groups
 
-		/* eslint-disable no-undef */
 		// @ts-expect-error L is injected globally by leaflet.markercluster
 		let markers = L.markerClusterGroup();
-		/* eslint-enable no-undef */
 		let upToDateLayer = leaflet.featureGroup.subGroup(markers);
 
 		// add locate button to map

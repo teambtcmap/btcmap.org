@@ -162,7 +162,6 @@ function openMerchantDrawer(id: number) {
 
 let leaflet: Leaflet;
 let DomEvent: typeof import("leaflet/src/dom/DomEvent");
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let controlLayers: Control.Layers;
 let currentLayerName: string | null = null;
 
@@ -1011,7 +1010,6 @@ const initializeElements = async () => {
 	mapLoadingStatus = $_("status.initializingMarkers");
 
 	// create marker cluster group and layers
-	/* eslint-disable no-undef */
 	// @ts-expect-error - L is global from Leaflet
 	markers = L.markerClusterGroup({
 		maxClusterRadius: 80,
@@ -1020,7 +1018,6 @@ const initializeElements = async () => {
 		chunkInterval: 50,
 		chunkDelay: 50,
 	});
-	/* eslint-enable no-undef */
 	upToDateLayer = leaflet.featureGroup.subGroup(markers);
 	boostedLayer = leaflet.featureGroup();
 
