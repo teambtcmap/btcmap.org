@@ -137,14 +137,12 @@ onDestroy(() => {
 			{#if website}
 				<div class="flex items-center space-x-2">
 					<Icon w="16" h="16" icon="language" type="material" class="shrink-0" />
-					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href={website.startsWith('http') ? website : `https://${website}`}
 						target="_blank"
 						rel="noreferrer"
 						class="text-sm underline decoration-primary decoration-1 underline-offset-4 dark:decoration-white"
 					>
-						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 						{website}
 					</a>
 				</div>
@@ -155,7 +153,6 @@ onDestroy(() => {
 					<Icon w="16" h="16" icon="schedule" type="material" class="shrink-0" />
 					<div class="text-sm">
 						<time class="flex flex-col items-start">
-							<!-- eslint-disable-next-line svelte/no-at-html-tags - we sanitize the content in formatOpeningHours -->
 							{@html formatOpeningHours(openingHours)}
 						</time>
 					</div>
@@ -188,39 +185,33 @@ onDestroy(() => {
 
 			<div class="flex items-center space-x-2">
 				{#if twitter}
-					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href={twitter.startsWith('http') ? twitter : `https://twitter.com/${twitter}`}
 						target="_blank"
 						rel="noreferrer"
 					>
-						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
 						<Icon w="16" h="16" icon="x-twitter" type="fa" />
 					</a>
 				{/if}
 
 				{#if instagram}
-					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href={instagram.startsWith('http') ? instagram : `https://instagram.com/${instagram}`}
 						target="_blank"
 						rel="noreferrer"
 					>
-						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
 						<Icon w="16" h="16" icon="instagram" type="fa" />
 					</a>
 				{/if}
 
 				{#if facebook}
-					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href={facebook.startsWith('http') ? facebook : `https://facebook.com/${facebook}`}
 						target="_blank"
 						rel="noreferrer"
 					>
-						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
 						<Icon w="16" h="16" icon="facebook" type="fa" />
 					</a>

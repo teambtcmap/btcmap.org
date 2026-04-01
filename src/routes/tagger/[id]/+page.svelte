@@ -57,7 +57,6 @@ const initializeData = async () => {
 	const userFound = $users.find((user) => user.id === data.user);
 	if (!userFound) {
 		console.error("Could not find user, please try again or contact BTC Map.");
-		// eslint-disable-next-line svelte/no-navigation-without-resolve
 		goto("/404");
 		return;
 	}
@@ -391,7 +390,6 @@ const initializeData = async () => {
 	};
 	setupChart();
 
-	// eslint-disable-next-line svelte/infinite-reactive-loop
 	dataInitialized = true;
 };
 
@@ -400,7 +398,6 @@ $: $users?.length &&
 	$places?.length &&
 	initialRenderComplete &&
 	!dataInitialized &&
-	// eslint-disable-next-line svelte/infinite-reactive-loop
 	initializeData();
 
 let userCreated: string | undefined;
@@ -551,7 +548,6 @@ onDestroy(() => {
 		</div>
 
 		<h2 class="mx-auto w-full text-xl break-all text-body lg:w-[800px] dark:text-white">
-			<!-- eslint-disable-next-line svelte/no-at-html-tags - we even sanitize the captcha content above -->
 			{@html sanitizedMarkdown}
 		</h2>
 
@@ -564,7 +560,6 @@ onDestroy(() => {
 		<div class="flex flex-wrap items-center justify-center">
 			{#if dataInitialized}
 				{#each earnedBadges as badge (badge.title)}
-					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 					<a href="/badges#{badge.icon}" class="transition-transform hover:scale-110">
 						<div class="mx-3 mb-6">
 							<img

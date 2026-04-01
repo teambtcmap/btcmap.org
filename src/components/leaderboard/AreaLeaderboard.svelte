@@ -81,7 +81,6 @@ onMount(() => {
 });
 
 // Fuzzy filter for global search
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
 	const itemRank = rankItem(row.getValue(columnId), value);
 	addMeta({ itemRank });

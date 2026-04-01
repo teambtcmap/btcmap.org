@@ -70,7 +70,6 @@ export { className as class };
 	role="img"
 	aria-hidden="true"
 >
-	<!-- eslint-disable-next-line svelte/no-at-html-tags - SVG from trusted local files -->
 	{@html icons[icon]}
 </span>
 

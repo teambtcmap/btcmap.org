@@ -59,7 +59,6 @@ import { resolve } from "$app/paths";
 							class="mx-2 my-2 space-y-1 text-center font-semibold text-body md:my-0 dark:text-white"
 						>
 							<p>{app.type}</p>
-							<!-- eslint-disable svelte/no-navigation-without-resolve -->
 							<a
 								href={app.link}
 								target={app.type === 'Web' ? null : '_blank'}
@@ -67,7 +66,6 @@ import { resolve } from "$app/paths";
 								aria-label={app.type === 'Web' ? $_('home.openWebAppAria') : $_('home.downloadForAria', { values: { type: app.type } })}
 							class="mx-auto inline-flex rounded-full bg-link p-3 text-white transition-colors hover:bg-hover"
 						>
-								<!-- eslint-enable svelte/no-navigation-without-resolve -->
 								<IconApps
 									w="32"
 									h="32"
@@ -79,7 +77,6 @@ import { resolve } from "$app/paths";
 					{/each}
 				</div>
 				<h2 class="text-center text-xl font-semibold text-primary xl:text-left dark:text-white">
-					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 					{@html $_('home.description', {
 						values: {
 							osmLink: `<a href="https://www.openstreetmap.org/about" target="_blank" rel="noreferrer" class="text-link transition-colors hover:text-hover">OpenStreetMap</a>`

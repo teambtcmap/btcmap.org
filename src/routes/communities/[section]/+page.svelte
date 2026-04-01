@@ -108,7 +108,6 @@ $: if (data.isOrganization && organizationSections.length > 0) {
 		(org) => org.id === data.section,
 	);
 	if (!isValidOrganization) {
-		// eslint-disable-next-line svelte/no-navigation-without-resolve
 		goto("/communities/africa", { replaceState: true });
 	}
 }
@@ -267,7 +266,6 @@ const continentDisplayNames: Record<string, string> = {
 
 // Handle section changes via dropdown
 const handleSectionChange = (newSection: string) => {
-	// eslint-disable-next-line svelte/no-navigation-without-resolve
 	goto(`/communities/${newSection}`, { replaceState: false });
 };
 

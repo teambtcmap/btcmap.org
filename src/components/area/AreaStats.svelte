@@ -315,7 +315,6 @@ let legacy: number | undefined;
 let upToDatePercent: string | undefined;
 
 let updatedChartCanvas: HTMLCanvasElement;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let updatedChart;
 
 let chartsLoading = true;

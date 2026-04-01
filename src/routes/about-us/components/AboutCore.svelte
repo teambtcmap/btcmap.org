@@ -28,14 +28,12 @@ export let member: {
 
 	<div class="flex justify-center space-x-2">
 		{#each member.socials as social (social.url)}
-			<!-- eslint-disable svelte/no-navigation-without-resolve -->
 			<a
 				href={social.url}
 				target="_blank"
 				rel="noreferrer"
 				class="inline-block rounded-full bg-[#AFBBC9] p-2 text-white transition-opacity hover:opacity-80"
 			>
-				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 				<IconSocials w="16" h="16" icon={social.name} />
 			</a>
 		{/each}

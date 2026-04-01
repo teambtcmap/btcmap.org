@@ -299,7 +299,6 @@ const handlePeriodChange = async (event: Event) => {
 	periodLoading = true;
 	selectedPeriod = nextValue;
 
-	// eslint-disable-next-line svelte/no-navigation-without-resolve
 	await goto(nextUrl, {
 		replaceState: true,
 		noScroll: true,

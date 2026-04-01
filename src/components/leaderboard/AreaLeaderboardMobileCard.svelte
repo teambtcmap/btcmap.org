@@ -7,7 +7,6 @@ import { _ } from "$lib/i18n";
 import type { AreaType } from "$lib/types";
 import { isEven } from "$lib/utils";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export let table: Table<any>;
 export let type: AreaType;
 </script>
@@ -55,7 +54,6 @@ export let type: AreaType;
 
 					<!-- Row 2: Name (centered and prominent) -->
 					<div class="text-center">
-						<!-- eslint-disable svelte/no-navigation-without-resolve -->
 						<a
 							href={`/${type}/${encodeURIComponent(area.alias || String(area.id) || '')}`}
 							class="text-lg font-semibold text-link transition-colors hover:text-hover {localizedName?.match(
@@ -67,7 +65,6 @@ export let type: AreaType;
 						>
 							{localizedName}
 						</a>
-						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 					</div>
 				</LeaderboardCountryName>
 			{:else}
@@ -89,7 +86,6 @@ export let type: AreaType;
 
 				<!-- Row 2: Name (centered and prominent) -->
 				<div class="text-center">
-					<!-- eslint-disable svelte/no-navigation-without-resolve -->
 					<a
 						href={`/${type}/${encodeURIComponent(area.alias || String(area.id) || '')}`}
 						class="text-lg font-semibold text-link transition-colors hover:text-hover {area.name?.match(
@@ -101,7 +97,6 @@ export let type: AreaType;
 					>
 						{area.name || 'Unknown'}
 					</a>
-					<!-- eslint-enable svelte/no-navigation-without-resolve -->
 				</div>
 			{/if}
 

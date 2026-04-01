@@ -176,7 +176,6 @@ onMount(async () => {
 						{#if isCaptchaLoading}
 							<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
 						{:else}
-							<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 							{@html captchaContent}
 						{/if}
 					</div>

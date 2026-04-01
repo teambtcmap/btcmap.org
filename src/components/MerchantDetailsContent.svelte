@@ -355,7 +355,6 @@ async function fetchComments(placeId: number) {
 			{/if}
 
 			{#if !isLoading}
-				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<span class="text-body dark:text-white/50">·</span>
 				<a
 					href={`${resolve('/verify-location')}?id=${merchant.id}`}
@@ -364,7 +363,6 @@ async function fetchComments(placeId: number) {
 				>
 					{$_('verification.verifyLocation')}
 				</a>
-				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			{/if}
 		</div>
 	</div>

@@ -50,7 +50,6 @@ $: username = profile?.display_name;
 		<div class="space-y-2 lg:space-y-0">
 			<span class="text-primary lg:mr-5 dark:text-white">
 				<!-- location -->
-				<!-- eslint-disable svelte/no-navigation-without-resolve -->
 				<a
 					href={action === 'delete'
 						? `https://www.openstreetmap.org/${deleteLink[0]}/${deleteLink[1]}`
@@ -59,7 +58,6 @@ $: username = profile?.display_name;
 					rel={action === 'delete' ? 'noreferrer' : null}
 					class="break-all text-link transition-colors hover:text-hover"
 				>
-					<!-- eslint-enable svelte/no-navigation-without-resolve -->
 					{location}
 					{#if action === 'delete'}
 						<svg

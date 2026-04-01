@@ -32,14 +32,12 @@ export let value: string;
 		{$_(`maintain.edit`)}
 	</a>
 {:else if id === 'helpLink' && value}
-	<!-- eslint-disable svelte/no-navigation-without-resolve -->
 	<a
 		href={value}
 		target="_blank"
 		rel="noreferrer"
 		class="text-link transition-colors hover:text-hover"
 	>
-		<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		{$_(`maintain.help`)}
 	</a>
 {/if}

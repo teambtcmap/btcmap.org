@@ -358,7 +358,6 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 							{/if}
 						</div>
 						<div class="flex space-x-2">
-							<!-- 	eslint-disable svelte/no-reactive-reassign -->
 							<input
 								required
 								disabled
@@ -379,7 +378,6 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 								placeholder={$_('addLocation.longitude')}
 								class="w-full rounded-2xl border-2 border-input p-3 focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 							/>
-							<!-- 	eslint-enable svelte/no-reactive-reassign -->
 						</div>
 					</div>
 
@@ -615,7 +613,6 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 							{#if isCaptchaLoading}
 								<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
 							{:else}
-								<!-- eslint-disable-next-line svelte/no-at-html-tags - we even sanitize the captcha content above -->
 								{@html captchaContent}
 							{/if}
 						</div>

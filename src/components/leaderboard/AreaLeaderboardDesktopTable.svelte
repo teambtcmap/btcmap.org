@@ -9,7 +9,6 @@ import { _ } from "$lib/i18n";
 import type { AreaType } from "$lib/types";
 import { isEven } from "$lib/utils";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export let table: Table<any>;
 export let type: AreaType;
 export let totalTooltip: HTMLButtonElement;

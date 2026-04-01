@@ -16,7 +16,6 @@ $: t = $_;
 <div class="mt-4">
 	<div class="mx-auto w-full grid-cols-3 gap-10 space-y-10 lg:grid lg:w-[830px] lg:space-y-0">
 		{#each supporters as supporter (supporter.url)}
-			<!-- eslint-disable svelte/no-navigation-without-resolve -->
 
 			<a
 				href={supporter.url}
@@ -24,7 +23,6 @@ $: t = $_;
 				rel="noreferrer"
 				class="mx-auto block w-full self-center md:w-[250px]"
 			>
-				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
 				{#if typeof window !== 'undefined'}
 					<img
