@@ -31,17 +31,12 @@ export type AppConfig = {
 
 export const appConfigs: AppConfig[] = [
 	{
-		id: "btcmap",
+		id: "btcmap-android",
 		name: "BTC Map",
 		logo: "/images/apps/btcmap.png",
 		tag: "btcmap",
 		sponsor: false,
 		stores: [
-			{
-				store: "web",
-				platform: "web",
-				url: "/map",
-			},
 			{
 				store: "f-droid",
 				platform: "android",
@@ -57,6 +52,29 @@ export const appConfigs: AppConfig[] = [
 				platform: "android",
 				url: "https://zapstore.dev/apps/org.btcmap",
 			},
+		],
+	},
+	{
+		id: "btcmap-web",
+		name: "BTC Map",
+		logo: "/images/apps/btcmap.png",
+		tag: "btcmap",
+		sponsor: false,
+		stores: [
+			{
+				store: "web",
+				platform: "web",
+				url: "/map",
+			},
+		],
+	},
+	{
+		id: "btcmap-ios",
+		name: "BTC Map",
+		logo: "/images/apps/btcmap.png",
+		tag: "btcmap",
+		sponsor: false,
+		stores: [
 			{
 				store: "app-store",
 				platform: "ios",
@@ -64,6 +82,7 @@ export const appConfigs: AppConfig[] = [
 			},
 		],
 	},
+
 	{
 		id: "bitlocal",
 		name: "BitLocal",
