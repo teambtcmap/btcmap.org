@@ -1,14 +1,38 @@
 <script lang="ts">
 import { _ } from "svelte-i18n";
 
+import AppDownloadModal from "$components/AppDownloadModal.svelte";
 import Footer from "$components/layout/Footer.svelte";
 import Header from "$components/layout/Header.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
-import IconApps from "$lib/icons/IconApps.svelte";
-import { apps } from "$lib/store";
+import type { AppConfig } from "$lib/apps";
+import { appConfigs } from "$lib/apps";
 import { theme } from "$lib/theme";
 
 import { resolve } from "$app/paths";
+
+const btcmapApps = appConfigs.filter((a) => a.tag === "btcmap");
+
+let activeApp: AppConfig | null = null;
+let modalOpen = false;
+
+function hideLogoOnError(e: Event) {
+	(e.currentTarget as HTMLImageElement).style.display = "none";
+}
+
+function openAppModal(app: AppConfig) {
+	if (app.stores.length === 1) {
+		const store = app.stores[0];
+		if (store.store === "web") {
+			window.location.href = store.url;
+		} else {
+			window.open(store.url, "_blank", "noreferrer");
+		}
+	} else {
+		activeApp = app;
+		modalOpen = true;
+	}
+}
 </script>
 
 <svelte:head>
@@ -25,6 +49,10 @@ import { resolve } from "$app/paths";
 		class="absolute top-0 right-0 xl:hidden dark:opacity-10"
 	/>
 	<Header />
+	{#if activeApp}
+		<AppDownloadModal app={activeApp} bind:open={modalOpen} />
+	{/if}
+
 	<div class="relative mx-auto w-10/12 xl:w-[1200px]">
 		<section id="hero" class="items-center justify-between pt-10 pb-20 xl:flex xl:pt-0">
 			<div class="mx-auto w-full xl:mx-0 xl:w-[500px]">
@@ -51,31 +79,30 @@ import { resolve } from "$app/paths";
 						>{$_('home.addLocation')}</a
 					>
 				</div>
-				<div
-					class="my-8 flex flex-wrap justify-center rounded-2xl bg-white/30 py-6 dark:bg-white/[0.15]"
-				>
-					{#each $apps as app (app.link)}
-						<div
-							class="mx-2 my-2 space-y-1 text-center font-semibold text-body md:my-0 dark:text-white"
+			<div
+				class="my-8 flex flex-wrap justify-center rounded-2xl bg-white/30 py-6 dark:bg-white/[0.15]"
+			>
+				{#each btcmapApps as app (app.id)}
+					<div
+						class="mx-2 my-2 space-y-1 text-center font-semibold text-body md:my-0 dark:text-white"
+					>
+						<p>{app.name}</p>
+						<button
+							type="button"
+							aria-label={$_('home.downloadForAria', { values: { type: app.name } })}
+							class="mx-auto flex cursor-pointer rounded-full bg-link p-2 text-white transition-colors hover:bg-hover"
+							on:click={() => openAppModal(app)}
 						>
-							<p>{app.type}</p>
-							<a
-								href={app.link}
-								target={app.type === 'Web' ? null : '_blank'}
-								rel={app.type === 'Web' ? null : 'noreferrer'}
-								aria-label={app.type === 'Web' ? $_('home.openWebAppAria') : $_('home.downloadForAria', { values: { type: app.type } })}
-							class="mx-auto inline-flex rounded-full bg-link p-3 text-white transition-colors hover:bg-hover"
-						>
-								<IconApps
-									w="32"
-									h="32"
-									class={app.icon === 'play' ? 'pl-0.5' : ''}
-									icon={app.icon}
-								/>
-							</a>
-						</div>
-					{/each}
-				</div>
+							<img
+								src={app.logo}
+								alt={app.name}
+								class="h-8 w-8 rounded-lg object-cover"
+								on:error={hideLogoOnError}
+							/>
+						</button>
+					</div>
+				{/each}
+			</div>
 				<h2 class="text-center text-xl font-semibold text-primary xl:text-left dark:text-white">
 					{@html $_('home.description', {
 						values: {

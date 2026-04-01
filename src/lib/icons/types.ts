@@ -18,11 +18,16 @@ export type SocialIconName =
 
 export type AppIconName =
 	| "android"
-	| "bolt"
+	| "apk"
+	| "app-store"
 	| "f-droid"
+	| "google-play"
 	| "ios"
+	| "linux-package"
+	| "obtainium"
 	| "play"
-	| "web";
+	| "web"
+	| "zapstore";
 
 export type MobileNavIconName =
 	| "activity"

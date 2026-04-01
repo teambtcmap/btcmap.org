@@ -1,19 +1,29 @@
 <script lang="ts">
 import android from "./apps/android.svg?raw";
-import bolt from "./apps/bolt.svg?raw";
+import apk from "./apps/apk.svg?raw";
+import appStore from "./apps/app-store.svg?raw";
 import fdroid from "./apps/f-droid.svg?raw";
+import googlePlay from "./apps/google-play.svg?raw";
 import ios from "./apps/ios.svg?raw";
+import linuxPackage from "./apps/linux-package.svg?raw";
+import obtainium from "./apps/obtainium.svg?raw";
 import play from "./apps/play.svg?raw";
 import web from "./apps/web.svg?raw";
+import zapstore from "./apps/zapstore.svg?raw";
 import type { AppIconName } from "./types";
 
 const icons: Record<AppIconName, string> = {
 	android,
-	bolt,
+	apk,
+	"app-store": appStore,
 	"f-droid": fdroid,
+	"google-play": googlePlay,
 	ios,
+	"linux-package": linuxPackage,
+	obtainium,
 	play,
 	web,
+	zapstore,
 };
 
 export let icon: AppIconName;

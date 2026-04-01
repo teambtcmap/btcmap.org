@@ -1,37 +1,96 @@
 <script lang="ts">
-import { _ } from "$lib/i18n";
-import IconApps from "$lib/icons/IconApps.svelte";
-import type { AppIconName } from "$lib/icons/types";
+import AppDownloadModal from "$components/AppDownloadModal.svelte";
+import type { AppConfig } from "$lib/apps";
 
-export let image: AppIconName;
-export let text: string;
-export let desc: string;
-export let link: string;
+export let app: AppConfig;
+
+let modalOpen = false;
+
+const fallbackSrc =
+	"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='112' height='112' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='1.5'%3E%3Crect x='3' y='3' width='18' height='18' rx='3'/%3E%3Cpath d='M9 12h6M12 9v6'/%3E%3C/svg%3E";
+
+function handleImgError(e: Event) {
+	(e.currentTarget as HTMLImageElement).src = fallbackSrc;
+}
+
+const platformLabels: Record<string, string> = {
+	android: "Android",
+	ios: "iOS",
+	web: "Web",
+	linux: "Linux",
+	windows: "Windows",
+	mac: "macOS",
+};
+
+$: platformsLabel = [...new Set(app.stores.map((s) => s.platform))]
+	.map((p) => platformLabels[p] ?? p)
+	.join(" | ");
+
+function handleClick() {
+	if (app.stores.length === 1) {
+		const store = app.stores[0];
+		if (store.store === "web") {
+			window.location.href = store.url;
+		} else {
+			window.open(store.url, "_blank", "noreferrer");
+		}
+	} else {
+		modalOpen = true;
+	}
+}
 </script>
 
 <div>
-	{#if link}
-		<a
-			href={link}
-			target={text === 'Web' ? null : '_blank'}
-			rel={text === 'Web' ? null : 'noreferrer'}
-			class="text-2xl font-semibold text-link transition-colors hover:text-hover"
+	{#if app.tag === 'coming-soon'}
+		<div class="opacity-50">
+			<div
+				class="relative mb-5 flex h-60 items-center justify-center rounded-2xl bg-offwhite dark:bg-white/[0.15]"
+			>
+				{#if app.sponsor}
+					<span
+						class="absolute top-3 right-3 rounded-full bg-link px-2 py-0.5 text-xs font-semibold text-white"
+					>
+						Sponsor
+					</span>
+				{/if}
+				<img
+					src={app.logo}
+					alt={app.name}
+					class="h-28 w-28 rounded-2xl object-cover"
+					on:error={handleImgError}
+				/>
+			</div>
+			<p class="text-2xl font-semibold text-link">{app.name}</p>
+			<p class="text-xl font-normal text-link">{platformsLabel}</p>
+		</div>
+	{:else}
+		<button
+			type="button"
+			class="group w-full cursor-pointer text-left"
+			on:click={handleClick}
+			aria-label="Download {app.name}"
 		>
 			<div
-				class="mb-5 flex h-60 items-center justify-center rounded-2xl bg-offwhite dark:bg-white/[0.15]"
+				class="relative mb-5 flex h-60 items-center justify-center rounded-2xl bg-offwhite transition-colors group-hover:bg-link/10 dark:bg-white/[0.15] dark:group-hover:bg-link/20"
 			>
-				<IconApps w="112" h="112" icon={image} />
+				{#if app.sponsor}
+					<span
+						class="absolute top-3 right-3 rounded-full bg-link px-2 py-0.5 text-xs font-semibold text-white"
+					>
+						Sponsor
+					</span>
+				{/if}
+				<img
+					src={app.logo}
+					alt={app.name}
+					class="h-28 w-28 rounded-2xl object-cover"
+					on:error={handleImgError}
+				/>
 			</div>
-			<p>{text}</p>
-			<p class="text-xl font-normal">{$_(desc)}</p>
-		</a>
-	{:else}
-		<div
-			class="mb-5 flex h-60 items-center justify-center rounded-2xl bg-offwhite text-link opacity-50 dark:bg-white/[0.15]"
-		>
-			<i class="{image} h-28 w-28" />
-		</div>
-		<p class="text-2xl font-semibold text-link opacity-50">{text}</p>
-		<p class="text-xl text-link opacity-50">Soon!</p>
+			<p class="text-2xl font-semibold text-link transition-colors group-hover:text-hover">{app.name}</p>
+			<p class="text-xl font-normal text-link transition-colors group-hover:text-hover">{platformsLabel}</p>
+		</button>
+
+		<AppDownloadModal bind:open={modalOpen} {app} />
 	{/if}
 </div>
