@@ -68,7 +68,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.8",
 		"@iconify/svelte": "^4.2.0",
-		"@playwright/test": "^1.58.2",
+		"@playwright/test": "^1.59.0",
 		"@sveltejs/adapter-netlify": "^6.0.4",
 		"@sveltejs/kit": "^2.55.0",
 		"@sveltejs/vite-plugin-svelte": "^3.1.2",
