@@ -516,7 +516,6 @@ let issues: RpcIssue[] = [];
 					</div>
 				{/if}
 				{#if type === 'community'}
-					<!-- eslint-disable svelte/no-reactive-reassign -->
 					<a
 						href={`/community/${encodeURIComponent(alias)}/maintain#verify-form`}
 						class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
@@ -530,7 +529,6 @@ let issues: RpcIssue[] = [];
 							}, 100);
 						}}>{$_('area.verifyCommunity')}</a
 					>
-					<!-- eslint-enable svelte/no-reactive-reassign -->
 				{/if}
 			{/if}
 		</div>
