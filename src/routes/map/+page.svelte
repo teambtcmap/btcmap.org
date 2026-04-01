@@ -1070,7 +1070,6 @@ const initializeElements = async () => {
 	// NOTE: Don't set isLoadingMarkers=true here, let loadMarkersInViewport handle it
 	await loadMarkersInViewport();
 
-	// eslint-disable-next-line svelte/infinite-reactive-loop -- this breaks the loop, not causes it
 	elementsLoaded = true;
 
 	if (browser) {
@@ -1116,7 +1115,6 @@ $: if (mapLoaded && elementsLoaded && leaflet) {
 // Initialize elements when places data is ready and map is loaded
 // The guard inside initializeElements() prevents multiple calls
 $: if ($places?.length && mapLoaded && !elementsLoaded) {
-	// eslint-disable-next-line svelte/infinite-reactive-loop -- elementsLoaded=true stops the loop
 	initializeElements();
 }
 

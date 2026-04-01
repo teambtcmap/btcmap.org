@@ -390,7 +390,6 @@ const initializeData = async () => {
 	};
 	setupChart();
 
-	// eslint-disable-next-line svelte/infinite-reactive-loop
 	dataInitialized = true;
 };
 
@@ -399,7 +398,6 @@ $: $users?.length &&
 	$places?.length &&
 	initialRenderComplete &&
 	!dataInitialized &&
-	// eslint-disable-next-line svelte/infinite-reactive-loop
 	initializeData();
 
 let userCreated: string | undefined;
