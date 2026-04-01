@@ -200,7 +200,6 @@ export type RpcGetMostActiveUsersItem = {
 	deleted: number;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type OSMTags = { [key: string]: any };
 
 export type Event = {

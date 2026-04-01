@@ -206,7 +206,6 @@ export const isEven = (number: number) => {
 	return number % 2 === 0;
 };
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export function debounce(func: (e?: any) => void, timeout = 500) {
 	let timer: ReturnType<typeof setTimeout>;
 	// @ts-expect-error: introducing typecheck, this was failing, so ingoring for now
@@ -223,7 +222,6 @@ export function debounce(func: (e?: any) => void, timeout = 500) {
 	};
 	return debouncedFn;
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 export const validateContinents = (continent: Continents) =>
 	[

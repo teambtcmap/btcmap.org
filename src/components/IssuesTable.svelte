@@ -174,7 +174,6 @@ const renderTable = () => {
 	};
 
 	// https://tanstack.com/table/v8/docs/framework/svelte/examples/filtering
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
 		// Rank the item
 		const itemRank = rankItem(row.getValue(columnId), value);

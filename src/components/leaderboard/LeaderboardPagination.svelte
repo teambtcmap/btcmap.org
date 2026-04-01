@@ -3,7 +3,6 @@ import type { Table } from "@tanstack/svelte-table";
 
 import { _ } from "$lib/i18n";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export let table: Table<any>;
 export let pageSizes: number[] = [10, 20, 30, 40, 50];
 </script>
