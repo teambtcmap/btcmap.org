@@ -193,12 +193,12 @@ export const appConfigs: AppConfig[] = [
 		name: "Coinos",
 		logo: "/images/apps/coinos.webp",
 		tag: "powered-by-btcmap",
-		sponsor: false,
+		sponsor: true,
 		stores: [
 			{
 				store: "zapstore",
 				platform: "android",
-				url: "https://zapstore.dev/apps/coinos",
+				url: "https://zapstore.dev/apps/io.coinos",
 			},
 			{
 				store: "apk",
