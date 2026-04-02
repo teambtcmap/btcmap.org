@@ -864,38 +864,90 @@
 			}
 		},
 		"contribution": {
-			"hyperbitcoinisation": { "title": "Hiperbitcoinización", "desc": "21M" },
-			"pizzaTime": { "title": "Hora de Pizza", "desc": "10K" },
-			"godly": { "title": "Divino", "desc": "7777" },
-			"shadow": { "title": "Sombra", "desc": "5000" },
-			"whitepaper": { "title": "Whitepaper", "desc": "3110" },
-			"winston": { "title": "Winston", "desc": "1984" },
-			"whale": { "title": "Ballena", "desc": "1000" },
-			"infinity": { "title": "Infinito", "desc": "821" },
-			"legend": { "title": "Leyenda", "desc": "500" },
-			"chancellor": { "title": "Canciller", "desc": "301" },
-			"sha": { "title": "SHA", "desc": "256" },
-			"noBailouts": { "title": "Sin Rescates", "desc": "210" },
-			"supertagger": { "title": "Supertagger", "desc": "100" },
-			"ath": { "title": "ATH", "desc": "69" },
-			"longestChain": { "title": "Cadena Más Larga", "desc": "51" },
-			"satoshi": { "title": "Satoshi", "desc": "21" },
-			"heartbeat": { "title": "Latido", "desc": "10" },
-			"segwit": { "title": "Segwit", "desc": "4" },
-			"wholeTagger": { "title": "Tagger Completo", "desc": "1" }
+			"hyperbitcoinisation": {
+				"title": "Hiperbitcoinización",
+				"desc": "21M"
+			},
+			"pizzaTime": {
+				"title": "Hora de Pizza",
+				"desc": "10K"
+			},
+			"godly": {
+				"title": "Divino",
+				"desc": "7777"
+			},
+			"shadow": {
+				"title": "Sombra",
+				"desc": "5000"
+			},
+			"whitepaper": {
+				"title": "Whitepaper",
+				"desc": "3110"
+			},
+			"winston": {
+				"title": "Winston",
+				"desc": "1984"
+			},
+			"whale": {
+				"title": "Ballena",
+				"desc": "1000"
+			},
+			"infinity": {
+				"title": "Infinito",
+				"desc": "821"
+			},
+			"legend": {
+				"title": "Leyenda",
+				"desc": "500"
+			},
+			"chancellor": {
+				"title": "Canciller",
+				"desc": "301"
+			},
+			"sha": {
+				"title": "SHA",
+				"desc": "256"
+			},
+			"noBailouts": {
+				"title": "Sin Rescates",
+				"desc": "210"
+			},
+			"supertagger": {
+				"title": "Supertagger",
+				"desc": "100"
+			},
+			"ath": {
+				"title": "ATH",
+				"desc": "69"
+			},
+			"longestChain": {
+				"title": "Cadena Más Larga",
+				"desc": "51"
+			},
+			"satoshi": {
+				"title": "Satoshi",
+				"desc": "21"
+			},
+			"heartbeat": {
+				"title": "Latido",
+				"desc": "10"
+			},
+			"segwit": {
+				"title": "Segwit",
+				"desc": "4"
+			},
+			"wholeTagger": {
+				"title": "Tagger Completo",
+				"desc": "1"
+			}
 		}
 	},
 	"apps": {
 		"hero": "Encuentra comercios en cualquier plataforma.",
 		"subheading": "Te tenemos cubierto en cualquier dispositivo y sistema operativo que elijas.",
-		"googlePlayNote": "Nota: No hay opción en Google Play debido a sus excesivos requisitos de KYC para desarrolladores.",
-		"official": "Oficial",
-		"community": "Comunidad",
-		"pwa": "Aplicación Web Progresiva",
-		"fdroid": "Tienda de Apps FOSS",
-		"directandroid": "Descarga Directa",
-		"zapstore": "Tienda de Apps Nostr",
-		"ios": "Opción de Jardín Cerrado"
+		"btcmap": "BTC Map Apps",
+		"poweredBy": "Powered by BTC Map",
+		"comingSoon": "Coming Soon"
 	},
 	"media": {
 		"title": "Medios",

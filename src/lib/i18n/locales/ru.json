@@ -945,14 +945,9 @@
 	"apps": {
 		"hero": "С вами на любой платформе",
 		"subheading": "Наши приложения и проекты сторонних разработчиков на основе наших данных",
-		"googlePlayNote": "Примечание: нас нет в Google Play из-за их чрезмерных требований KYC для разработчиков",
-		"official": "Официальные приложения",
-		"community": "Сообщество",
-		"pwa": "Открыть в браузере",
-		"fdroid": "Android магазин",
-		"directandroid": "Прямая загрузка для Android",
-		"zapstore": "Nostr магазин",
-		"ios": "iPhone, iPad и Mac"
+		"btcmap": "BTC Map Apps",
+		"poweredBy": "Powered by BTC Map",
+		"comingSoon": "Coming Soon"
 	},
 	"media": {
 		"title": "Медиа",
