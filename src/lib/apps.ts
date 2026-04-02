@@ -86,7 +86,7 @@ export const appConfigs: AppConfig[] = [
 	{
 		id: "bitlocal",
 		name: "BitLocal",
-		logo: "",
+		logo: "/images/apps/bitlocal.webp",
 		tag: "powered-by-btcmap",
 		sponsor: false,
 		stores: [
