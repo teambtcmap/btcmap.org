@@ -124,6 +124,16 @@ export const appConfigs: AppConfig[] = [
 		sponsor: false,
 		stores: [
 			{
+				store: "zapstore",
+				platform: "android",
+				url: "https://zapstore.dev/apps/com.getalby.albygo",
+			},
+			{
+				store: "apk",
+				platform: "android",
+				url: "https://github.com/getAlby/go/releases/latest",
+			},
+			{
 				store: "app-store",
 				platform: "ios",
 				url: "https://apps.apple.com/app/alby-go-bitcoin-lightning/id6475508537",
@@ -185,6 +195,16 @@ export const appConfigs: AppConfig[] = [
 		tag: "coming-soon",
 		sponsor: false,
 		stores: [
+			{
+				store: "zapstore",
+				platform: "android",
+				url: "https://zapstore.dev/apps/io.blink.wallet",
+			},
+			{
+				store: "apk",
+				platform: "android",
+				url: "https://github.com/blinkbitcoin/blink-mobile/releases/latest",
+			},
 			{
 				store: "google-play",
 				platform: "android",
