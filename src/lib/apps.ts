@@ -33,7 +33,7 @@ export const appConfigs: AppConfig[] = [
 	{
 		id: "btcmap-android",
 		name: "BTC Map",
-		logo: "/images/apps/btcmap.png",
+		logo: "/images/logo.svg",
 		tag: "btcmap",
 		sponsor: false,
 		stores: [
@@ -57,7 +57,7 @@ export const appConfigs: AppConfig[] = [
 	{
 		id: "btcmap-web",
 		name: "BTC Map",
-		logo: "/images/apps/btcmap.png",
+		logo: "/images/logo.svg",
 		tag: "btcmap",
 		sponsor: false,
 		stores: [
@@ -71,7 +71,7 @@ export const appConfigs: AppConfig[] = [
 	{
 		id: "btcmap-ios",
 		name: "BTC Map",
-		logo: "/images/apps/btcmap.png",
+		logo: "/images/logo.svg",
 		tag: "btcmap",
 		sponsor: false,
 		stores: [
@@ -86,7 +86,7 @@ export const appConfigs: AppConfig[] = [
 	{
 		id: "bitlocal",
 		name: "BitLocal",
-		logo: "/images/apps/bitlocal.png",
+		logo: "",
 		tag: "powered-by-btcmap",
 		sponsor: false,
 		stores: [
@@ -148,7 +148,7 @@ export const appConfigs: AppConfig[] = [
 	{
 		id: "aqua",
 		name: "Aqua",
-		logo: "/images/apps/aqua.png",
+		logo: "",
 		tag: "powered-by-btcmap",
 		sponsor: false,
 		stores: [
@@ -172,7 +172,7 @@ export const appConfigs: AppConfig[] = [
 	{
 		id: "cash-app",
 		name: "Cash App",
-		logo: "/images/apps/cash-app.png",
+		logo: "",
 		tag: "powered-by-btcmap",
 		sponsor: true,
 		stores: [
