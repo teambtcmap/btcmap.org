@@ -6,6 +6,20 @@ import type { AppIconName } from "$lib/icons/types";
 export let app: AppConfig;
 export let open = false;
 
+const platformLabels: Record<string, string> = {
+	android: "Android",
+	ios: "iOS",
+	web: "Web",
+	linux: "Linux",
+	windows: "Windows",
+	mac: "macOS",
+};
+
+$: modalTitle =
+	app.tag === "btcmap"
+		? (platformLabels[app.stores[0]?.platform] ?? app.name)
+		: app.name;
+
 const storeLabels: Record<StoreKey, string> = {
 	"app-store": "App Store",
 	apk: "APK",
@@ -59,7 +73,7 @@ function hideLogoOnError(e: Event) {
 			class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-zinc-900"
 			role="dialog"
 			aria-modal="true"
-			aria-label="Download {app.name}"
+			aria-label="Download {modalTitle}"
 		>
 			<div class="mb-5 flex items-center justify-between">
 				<div class="flex items-center gap-3">
@@ -69,7 +83,7 @@ function hideLogoOnError(e: Event) {
 						class="h-10 w-10 rounded-xl object-cover"
 						on:error={hideLogoOnError}
 					/>
-					<h2 class="text-lg font-semibold text-body dark:text-white">{app.name}</h2>
+					<h2 class="text-lg font-semibold text-body dark:text-white">{modalTitle}</h2>
 				</div>
 				<button
 					type="button"
