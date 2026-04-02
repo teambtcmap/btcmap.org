@@ -172,7 +172,7 @@ export const appConfigs: AppConfig[] = [
 	{
 		id: "cash-app",
 		name: "Cash App",
-		logo: "",
+		logo: "/images/apps/cash-app.webp",
 		tag: "powered-by-btcmap",
 		sponsor: true,
 		stores: [
