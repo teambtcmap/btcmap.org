@@ -11,6 +11,7 @@ import IconApps from "$lib/icons/IconApps.svelte";
 import type { AppIconName } from "$lib/icons/types";
 import { theme } from "$lib/theme";
 
+import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
 
 const btcmapApps = appConfigs.filter((a) => a.tag === "btcmap");
@@ -30,17 +31,15 @@ const platformLabels: Record<string, string> = {
 	web: "Web",
 };
 
-function hideLogoOnError(e: Event) {
-	(e.currentTarget as HTMLImageElement).style.display = "none";
-}
+$: if (!modalOpen) activeApp = null;
 
 function openAppModal(app: AppConfig) {
 	if (app.stores.length === 1) {
 		const store = app.stores[0];
 		if (store.store === "web") {
-			window.location.href = store.url;
+			goto(store.url);
 		} else {
-			window.open(store.url, "_blank", "noreferrer");
+			window.open(store.url, "_blank", "noopener,noreferrer");
 		}
 	} else {
 		activeApp = app;

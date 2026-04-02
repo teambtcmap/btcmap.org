@@ -4,6 +4,8 @@ import type { AppConfig } from "$lib/apps";
 import IconApps from "$lib/icons/IconApps.svelte";
 import type { AppIconName } from "$lib/icons/types";
 
+import { goto } from "$app/navigation";
+
 export let app: AppConfig;
 
 let modalOpen = false;
@@ -38,9 +40,9 @@ function handleClick() {
 	if (app.stores.length === 1) {
 		const store = app.stores[0];
 		if (store.store === "web") {
-			window.location.href = store.url;
+			goto(store.url);
 		} else {
-			window.open(store.url, "_blank", "noreferrer");
+			window.open(store.url, "_blank", "noopener,noreferrer");
 		}
 	} else {
 		modalOpen = true;

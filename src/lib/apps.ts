@@ -197,7 +197,7 @@ export const appConfigs: AppConfig[] = [
 		name: "Bull Bitcoin Wallet",
 		logo: "/images/apps/bull-bitcoin.png",
 		tag: "coming-soon",
-		sponsor: true,
+		sponsor: false,
 		stores: [
 			{
 				store: "google-play",
