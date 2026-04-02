@@ -15,9 +15,11 @@
 
 ### Check your changes before commit/pushing
 
-- `pnpm run format`
+- `pnpm run format:fix`
 - `pnpm run lint`
+- `pnpm run check`
 - `pnpm run typecheck`
+- `pnpm run test --run`
 
 ### Build project
 
