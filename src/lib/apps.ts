@@ -117,6 +117,25 @@ export const appConfigs: AppConfig[] = [
 		],
 	},
 	{
+		id: "alby",
+		name: "Alby Go",
+		logo: "/images/apps/alby.png",
+		tag: "powered-by-btcmap",
+		sponsor: false,
+		stores: [
+			{
+				store: "app-store",
+				platform: "ios",
+				url: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
+			},
+			{
+				store: "google-play",
+				platform: "android",
+				url: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
+			},
+		],
+	},
+	{
 		id: "aqua",
 		name: "Aqua",
 		logo: "/images/apps/aqua.png",
@@ -162,6 +181,11 @@ export const appConfigs: AppConfig[] = [
 		sponsor: false,
 		stores: [
 			{
+				store: "google-play",
+				platform: "android",
+				url: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
+			},
+			{
 				store: "app-store",
 				platform: "ios",
 				url: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
@@ -175,6 +199,11 @@ export const appConfigs: AppConfig[] = [
 		tag: "coming-soon",
 		sponsor: true,
 		stores: [
+			{
+				store: "google-play",
+				platform: "android",
+				url: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
+			},
 			{
 				store: "app-store",
 				platform: "ios",
