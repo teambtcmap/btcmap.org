@@ -101,8 +101,12 @@ function handleClick() {
 					/>
 				{/if}
 			</div>
-			<p class="text-2xl font-semibold text-link transition-colors group-hover:text-hover">{app.name}</p>
-			<p class="text-xl font-normal text-link transition-colors group-hover:text-hover">{platformsLabel}</p>
+			<p class="text-2xl font-semibold text-link transition-colors group-hover:text-hover">
+				{app.tag === 'btcmap' ? platformsLabel : app.name}
+			</p>
+			{#if app.tag !== 'btcmap'}
+				<p class="text-xl font-normal text-link transition-colors group-hover:text-hover">{platformsLabel}</p>
+			{/if}
 		</button>
 
 		<AppDownloadModal bind:open={modalOpen} {app} />
