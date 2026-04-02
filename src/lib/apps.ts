@@ -148,7 +148,7 @@ export const appConfigs: AppConfig[] = [
 	{
 		id: "aqua",
 		name: "Aqua",
-		logo: "",
+		logo: "/images/apps/aqua.png",
 		tag: "powered-by-btcmap",
 		sponsor: false,
 		stores: [
