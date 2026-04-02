@@ -34,7 +34,7 @@ const platformLabels: Record<string, string> = {
 
 $: platformsLabel = [...new Set(app.stores.map((s) => s.platform))]
 	.map((p) => platformLabels[p] ?? p)
-	.join(" | ");
+	.join(" + ");
 
 function handleClick() {
 	if (app.stores.length === 1) {
