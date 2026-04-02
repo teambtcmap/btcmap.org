@@ -143,6 +143,11 @@ export const appConfigs: AppConfig[] = [
 		sponsor: false,
 		stores: [
 			{
+				store: "zapstore",
+				platform: "android",
+				url: "https://zapstore.dev/apps/io.aquawallet.android",
+			},
+			{
 				store: "app-store",
 				platform: "ios",
 				url: "https://apps.apple.com/app/aqua-bitcoin-wallet/id1543531557",
