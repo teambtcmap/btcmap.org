@@ -78,7 +78,7 @@ export const appConfigs: AppConfig[] = [
 			{
 				store: "app-store",
 				platform: "ios",
-				url: "https://apps.apple.com/us/app/btc-map/id6502495265",
+				url: "https://apps.apple.com/us/app/btc-map/id6443604345",
 			},
 		],
 	},
