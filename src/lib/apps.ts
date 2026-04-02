@@ -189,6 +189,30 @@ export const appConfigs: AppConfig[] = [
 		],
 	},
 	{
+		id: "coinos",
+		name: "Coinos",
+		logo: "/images/apps/coinos.webp",
+		tag: "powered-by-btcmap",
+		sponsor: false,
+		stores: [
+			{
+				store: "zapstore",
+				platform: "android",
+				url: "https://zapstore.dev/apps/coinos",
+			},
+			{
+				store: "apk",
+				platform: "android",
+				url: "https://github.com/coinos/coinos-ui/releases/latest",
+			},
+			{
+				store: "web",
+				platform: "web",
+				url: "https://coinos.io",
+			},
+		],
+	},
+	{
 		id: "blink",
 		name: "Blink",
 		logo: "/images/apps/blink.png",
