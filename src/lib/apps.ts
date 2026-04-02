@@ -112,7 +112,7 @@ export const appConfigs: AppConfig[] = [
 			{
 				store: "google-play",
 				platform: "android",
-				url: "https://play.google.com/store/apps/details?id=com.walletofsatoshi.wallet",
+				url: "https://play.google.com/store/apps/details?id=com.livingroomofsatoshi.wallet",
 			},
 		],
 	},
@@ -136,12 +136,12 @@ export const appConfigs: AppConfig[] = [
 			{
 				store: "app-store",
 				platform: "ios",
-				url: "https://apps.apple.com/app/alby-go-bitcoin-lightning/id6475508537",
+				url: "https://apps.apple.com/us/app/alby-go/id6471335774",
 			},
 			{
 				store: "google-play",
 				platform: "android",
-				url: "https://play.google.com/store/apps/details?id=com.getalby.albygo",
+				url: "https://play.google.com/store/apps/details?id=com.getalby.mobile",
 			},
 		],
 	},
@@ -160,12 +160,12 @@ export const appConfigs: AppConfig[] = [
 			{
 				store: "app-store",
 				platform: "ios",
-				url: "https://apps.apple.com/app/aqua-bitcoin-wallet/id1543531557",
+				url: "https://apps.apple.com/us/app/aqua-wallet/id6468594241",
 			},
 			{
 				store: "google-play",
 				platform: "android",
-				url: "https://play.google.com/store/apps/details?id=bitcoin.aqua.wallet",
+				url: "https://play.google.com/store/apps/details?id=io.aquawallet.android",
 			},
 		],
 	},
@@ -184,7 +184,7 @@ export const appConfigs: AppConfig[] = [
 			{
 				store: "google-play",
 				platform: "android",
-				url: "https://play.google.com/store/apps/details?id=com.square.cash",
+				url: "https://play.google.com/store/apps/details?id=com.squareup.cash",
 			},
 		],
 	},
