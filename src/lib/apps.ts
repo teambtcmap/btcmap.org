@@ -107,12 +107,12 @@ export const appConfigs: AppConfig[] = [
 			{
 				store: "app-store",
 				platform: "ios",
-				url: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
+				url: "https://apps.apple.com/us/app/wallet-of-satoshi/id1438599608",
 			},
 			{
 				store: "google-play",
 				platform: "android",
-				url: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
+				url: "https://play.google.com/store/apps/details?id=com.walletofsatoshi.wallet",
 			},
 		],
 	},
@@ -126,12 +126,12 @@ export const appConfigs: AppConfig[] = [
 			{
 				store: "app-store",
 				platform: "ios",
-				url: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
+				url: "https://apps.apple.com/app/alby-go-bitcoin-lightning/id6475508537",
 			},
 			{
 				store: "google-play",
 				platform: "android",
-				url: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
+				url: "https://play.google.com/store/apps/details?id=com.getalby.albygo",
 			},
 		],
 	},
@@ -145,12 +145,12 @@ export const appConfigs: AppConfig[] = [
 			{
 				store: "app-store",
 				platform: "ios",
-				url: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
+				url: "https://apps.apple.com/app/aqua-bitcoin-wallet/id1543531557",
 			},
 			{
 				store: "google-play",
 				platform: "android",
-				url: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
+				url: "https://play.google.com/store/apps/details?id=bitcoin.aqua.wallet",
 			},
 		],
 	},
@@ -164,12 +164,12 @@ export const appConfigs: AppConfig[] = [
 			{
 				store: "app-store",
 				platform: "ios",
-				url: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
+				url: "https://apps.apple.com/us/app/cash-app/id711923939",
 			},
 			{
 				store: "google-play",
 				platform: "android",
-				url: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
+				url: "https://play.google.com/store/apps/details?id=com.square.cash",
 			},
 		],
 	},
@@ -183,12 +183,12 @@ export const appConfigs: AppConfig[] = [
 			{
 				store: "google-play",
 				platform: "android",
-				url: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
+				url: "https://play.google.com/store/apps/details?id=io.blink.wallet",
 			},
 			{
 				store: "app-store",
 				platform: "ios",
-				url: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
+				url: "https://apps.apple.com/us/app/blink-bitcoin-wallet/id1559600189",
 			},
 		],
 	},
@@ -202,12 +202,12 @@ export const appConfigs: AppConfig[] = [
 			{
 				store: "google-play",
 				platform: "android",
-				url: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
+				url: "https://play.google.com/store/apps/details?id=com.bullbitcoin.mobile",
 			},
 			{
 				store: "app-store",
 				platform: "ios",
-				url: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
+				url: "https://apps.apple.com/ca/app/bull-bitcoin-wallet/id6474683604",
 			},
 		],
 	},
