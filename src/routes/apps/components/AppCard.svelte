@@ -1,6 +1,8 @@
 <script lang="ts">
 import AppDownloadModal from "$components/AppDownloadModal.svelte";
 import type { AppConfig } from "$lib/apps";
+import IconApps from "$lib/icons/IconApps.svelte";
+import type { AppIconName } from "$lib/icons/types";
 
 export let app: AppConfig;
 
@@ -8,6 +10,12 @@ let modalOpen = false;
 
 const fallbackSrc =
 	"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='112' height='112' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='1.5'%3E%3Crect x='3' y='3' width='18' height='18' rx='3'/%3E%3Cpath d='M9 12h6M12 9v6'/%3E%3C/svg%3E";
+
+const platformIcons: Record<string, AppIconName> = {
+	android: "android",
+	ios: "ios",
+	web: "web",
+};
 
 function handleImgError(e: Event) {
 	(e.currentTarget as HTMLImageElement).src = fallbackSrc;
@@ -80,12 +88,18 @@ function handleClick() {
 						Sponsor
 					</span>
 				{/if}
-				<img
-					src={app.logo}
-					alt={app.name}
-					class="h-28 w-28 rounded-2xl object-cover"
-					on:error={handleImgError}
-				/>
+				{#if app.tag === 'btcmap' && platformIcons[app.stores[0]?.platform]}
+					<span class="inline-flex rounded-full bg-link p-6 text-white">
+						<IconApps w="56" h="56" icon={platformIcons[app.stores[0].platform]} />
+					</span>
+				{:else}
+					<img
+						src={app.logo}
+						alt={app.name}
+						class="h-28 w-28 rounded-2xl object-cover"
+						on:error={handleImgError}
+					/>
+				{/if}
 			</div>
 			<p class="text-2xl font-semibold text-link transition-colors group-hover:text-hover">{app.name}</p>
 			<p class="text-xl font-normal text-link transition-colors group-hover:text-hover">{platformsLabel}</p>

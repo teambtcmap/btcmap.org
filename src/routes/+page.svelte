@@ -7,6 +7,8 @@ import Header from "$components/layout/Header.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import type { AppConfig } from "$lib/apps";
 import { appConfigs } from "$lib/apps";
+import IconApps from "$lib/icons/IconApps.svelte";
+import type { AppIconName } from "$lib/icons/types";
 import { theme } from "$lib/theme";
 
 import { resolve } from "$app/paths";
@@ -15,6 +17,18 @@ const btcmapApps = appConfigs.filter((a) => a.tag === "btcmap");
 
 let activeApp: AppConfig | null = null;
 let modalOpen = false;
+
+const platformIcons: Record<string, AppIconName> = {
+	android: "android",
+	ios: "ios",
+	web: "web",
+};
+
+const platformLabels: Record<string, string> = {
+	android: "Android",
+	ios: "iOS",
+	web: "Web",
+};
 
 function hideLogoOnError(e: Event) {
 	(e.currentTarget as HTMLImageElement).style.display = "none";
@@ -83,24 +97,24 @@ function openAppModal(app: AppConfig) {
 				class="my-8 flex flex-wrap justify-center rounded-2xl bg-white/30 py-6 dark:bg-white/[0.15]"
 			>
 				{#each btcmapApps as app (app.id)}
-					<div
-						class="mx-2 my-2 space-y-1 text-center font-semibold text-body md:my-0 dark:text-white"
-					>
-						<p>{app.name}</p>
-						<button
-							type="button"
-							aria-label={$_('home.downloadForAria', { values: { type: app.name } })}
-							class="mx-auto flex cursor-pointer rounded-full bg-link p-2 text-white transition-colors hover:bg-hover"
-							on:click={() => openAppModal(app)}
+					{@const platform = app.stores[0]?.platform}
+					{@const icon = platformIcons[platform]}
+					{@const label = platformLabels[platform] ?? platform}
+					{#if icon}
+						<div
+							class="mx-2 my-2 space-y-1 text-center font-semibold text-body md:my-0 dark:text-white"
 						>
-							<img
-								src={app.logo}
-								alt={app.name}
-								class="h-8 w-8 rounded-lg object-cover"
-								on:error={hideLogoOnError}
-							/>
-						</button>
-					</div>
+							<p>{label}</p>
+							<button
+								type="button"
+								aria-label={$_('home.downloadForAria', { values: { type: label } })}
+								class="mx-auto inline-flex cursor-pointer rounded-full bg-link p-3 text-white transition-colors hover:bg-hover"
+								on:click={() => openAppModal(app)}
+							>
+								<IconApps w="32" h="32" {icon} />
+							</button>
+						</div>
+					{/if}
 				{/each}
 			</div>
 				<h2 class="text-center text-xl font-semibold text-primary xl:text-left dark:text-white">
