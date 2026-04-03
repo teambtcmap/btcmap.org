@@ -28,7 +28,6 @@ const storeLabels: Record<StoreKey, string> = {
 	"google-play": "Google Play",
 	"linux-package": "Linux Package",
 	obtainium: "Obtainium",
-	play: "Google Play",
 	web: "Web App",
 	zapstore: "Zapstore",
 };
@@ -40,7 +39,6 @@ const storeIcons: Record<StoreKey, AppIconName> = {
 	"google-play": "google-play",
 	"linux-package": "linux-package",
 	obtainium: "obtainium",
-	play: "play",
 	web: "web",
 	zapstore: "zapstore",
 };

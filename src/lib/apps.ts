@@ -7,7 +7,6 @@ export type StoreKey =
 	| "google-play"
 	| "linux-package"
 	| "obtainium"
-	| "play"
 	| "web"
 	| "zapstore";
 

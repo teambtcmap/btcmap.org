@@ -15,12 +15,16 @@ let hasBeenOpened = false;
 
 $: if (open) {
 	hasBeenOpened = true;
+	if (!triggerEl && typeof document !== "undefined") {
+		triggerEl = document.activeElement as HTMLElement | null;
+	}
 	tick().then(() => {
 		modalEl?.querySelector<HTMLElement>("button, a, [tabindex]")?.focus();
 	});
 } else if (hasBeenOpened) {
 	tick().then(() => {
 		triggerEl?.focus();
+		triggerEl = null;
 	});
 }
 
