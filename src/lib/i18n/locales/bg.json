@@ -759,14 +759,12 @@
 	"apps": {
 		"hero": "Намерете търговци на всяка платформа.",
 		"subheading": "Покрити сте на всяко устройство и ОС.",
-		"googlePlayNote": "Забележка: Няма опция за Google Play поради изискванията им за KYC за разработчици.",
-		"official": "Официални",
-		"community": "Общност",
-		"pwa": "Progressive Web App",
-		"fdroid": "FOSS App Store",
-		"directandroid": "Direct Download",
-		"zapstore": "Nostr App Store",
-		"ios": "Walled Garden Option"
+		"btcmap": "BTC Map Apps",
+		"poweredBy": "Powered by BTC Map",
+		"comingSoon": "Очаквайте скоро",
+		"sponsor": "Спонсор",
+		"downloadAria": "Изтегли {name}",
+		"openAria": "Отвори {name}"
 	},
 	"gradeDisplay": {
 		"ariaLabel": "{grade} от 5 звезди",
@@ -782,8 +780,14 @@
 				"title": "Турнир Geyser",
 				"desc": "Участвайте в събитието Supertagger 2023"
 			},
-			"topTagger": { "title": "Топ тагър", "desc": "#1 в класацията" },
-			"podium": { "title": "Подиум", "desc": "В топ 3 в класацията" },
+			"topTagger": {
+				"title": "Топ тагър",
+				"desc": "#1 в класацията"
+			},
+			"podium": {
+				"title": "Подиум",
+				"desc": "В топ 3 в класацията"
+			},
 			"highRank": {
 				"title": "Висока позиция",
 				"desc": "В топ 10 в класацията"
@@ -818,25 +822,82 @@
 			}
 		},
 		"contribution": {
-			"hyperbitcoinisation": { "title": "Хипербиткойнизация", "desc": "21M" },
-			"pizzaTime": { "title": "Време за пица", "desc": "10K" },
-			"godly": { "title": "Божествен", "desc": "7777" },
-			"shadow": { "title": "Сянка", "desc": "5000" },
-			"whitepaper": { "title": "Whitepaper", "desc": "3110" },
-			"winston": { "title": "Winston", "desc": "1984" },
-			"whale": { "title": "Кит", "desc": "1000" },
-			"infinity": { "title": "Безкрайност", "desc": "821" },
-			"legend": { "title": "Легенда", "desc": "500" },
-			"chancellor": { "title": "Канцлер", "desc": "301" },
-			"sha": { "title": "SHA", "desc": "256" },
-			"noBailouts": { "title": "Без спасявания", "desc": "210" },
-			"supertagger": { "title": "Supertagger", "desc": "100" },
-			"ath": { "title": "ATH", "desc": "69" },
-			"longestChain": { "title": "Най-дълга верига", "desc": "51" },
-			"satoshi": { "title": "Satoshi", "desc": "21" },
-			"heartbeat": { "title": "Сърцебиене", "desc": "10" },
-			"segwit": { "title": "Segwit", "desc": "4" },
-			"wholeTagger": { "title": "Whole Tagger", "desc": "1" }
+			"hyperbitcoinisation": {
+				"title": "Хипербиткойнизация",
+				"desc": "21M"
+			},
+			"pizzaTime": {
+				"title": "Време за пица",
+				"desc": "10K"
+			},
+			"godly": {
+				"title": "Божествен",
+				"desc": "7777"
+			},
+			"shadow": {
+				"title": "Сянка",
+				"desc": "5000"
+			},
+			"whitepaper": {
+				"title": "Whitepaper",
+				"desc": "3110"
+			},
+			"winston": {
+				"title": "Winston",
+				"desc": "1984"
+			},
+			"whale": {
+				"title": "Кит",
+				"desc": "1000"
+			},
+			"infinity": {
+				"title": "Безкрайност",
+				"desc": "821"
+			},
+			"legend": {
+				"title": "Легенда",
+				"desc": "500"
+			},
+			"chancellor": {
+				"title": "Канцлер",
+				"desc": "301"
+			},
+			"sha": {
+				"title": "SHA",
+				"desc": "256"
+			},
+			"noBailouts": {
+				"title": "Без спасявания",
+				"desc": "210"
+			},
+			"supertagger": {
+				"title": "Supertagger",
+				"desc": "100"
+			},
+			"ath": {
+				"title": "ATH",
+				"desc": "69"
+			},
+			"longestChain": {
+				"title": "Най-дълга верига",
+				"desc": "51"
+			},
+			"satoshi": {
+				"title": "Satoshi",
+				"desc": "21"
+			},
+			"heartbeat": {
+				"title": "Сърцебиене",
+				"desc": "10"
+			},
+			"segwit": {
+				"title": "Segwit",
+				"desc": "4"
+			},
+			"wholeTagger": {
+				"title": "Whole Tagger",
+				"desc": "1"
+			}
 		}
 	},
 	"taggerOnboarding": {

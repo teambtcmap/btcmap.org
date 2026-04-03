@@ -1,25 +1,16 @@
 <script lang="ts">
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import { appConfigs } from "$lib/apps";
 import { _ } from "$lib/i18n";
-import type { AppIconName } from "$lib/icons/types";
-import { apps } from "$lib/store";
 import { theme } from "$lib/theme";
 
 import AppCard from "./components/AppCard.svelte";
 
-const communityApps: {
-	link: string;
-	type: string;
-	icon: AppIconName;
-	desc: string;
-}[] = [
-	{
-		link: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
-		type: "BitLocal",
-		icon: "ios",
-		desc: "iOS",
-	},
-];
+const btcmapApps = appConfigs.filter((a) => a.tag === "btcmap");
+const poweredByApps = appConfigs
+	.filter((a) => a.tag === "powered-by-btcmap")
+	.sort((a, b) => Number(b.sponsor) - Number(a.sponsor));
+const comingSoonApps = appConfigs.filter((a) => a.tag === "coming-soon");
 </script>
 
 <svelte:head>
@@ -47,20 +38,28 @@ const communityApps: {
 		{$_('apps.subheading')}
 	</h2>
 
-	<h3 class="text-2xl font-semibold text-primary md:text-left dark:text-white">{$_('apps.official')}</h3>
-	<section id="official-apps" class="grid gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-		{#each $apps as app (app.link)}
-			<AppCard image={app.icon} text={app.type} desc={app.desc} link={app.link} />
+	<h3 class="text-2xl font-semibold text-primary md:text-left dark:text-white">{$_('apps.btcmap')}</h3>
+	<section id="btcmap-apps" class="grid gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+		{#each btcmapApps as app (app.id)}
+			<AppCard {app} />
 		{/each}
 	</section>
-	<p class="text-center font-normal dark:text-white">
-		{$_('apps.googlePlayNote')}
-	</p>
 
-	<h3 class="text-2xl font-semibold text-primary md:text-left dark:text-white">{$_('apps.community')}</h3>
-	<section id="community-apps" class="grid gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-		{#each communityApps as app (app.link)}
-			<AppCard image={app.icon} text={app.type} desc={app.desc} link={app.link} />
-		{/each}
-	</section>
+	{#if poweredByApps.length > 0}
+		<h3 class="text-2xl font-semibold text-primary md:text-left dark:text-white">{$_('apps.poweredBy')}</h3>
+		<section id="powered-by-apps" class="grid gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+			{#each poweredByApps as app (app.id)}
+				<AppCard {app} />
+			{/each}
+		</section>
+	{/if}
+
+	{#if comingSoonApps.length > 0}
+		<h3 class="text-2xl font-semibold text-primary md:text-left dark:text-white">{$_('apps.comingSoon')}</h3>
+		<section id="coming-soon-apps" class="grid gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+			{#each comingSoonApps as app (app.id)}
+				<AppCard {app} />
+			{/each}
+		</section>
+	{/if}
 </div>

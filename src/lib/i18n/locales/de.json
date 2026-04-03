@@ -822,7 +822,10 @@
 				"title": "Geyser Turnier",
 				"desc": "Nimm am 2023 Supertagger Event teil"
 			},
-			"topTagger": { "title": "Top Tagger", "desc": "#1 auf der Rangliste" },
+			"topTagger": {
+				"title": "Top Tagger",
+				"desc": "#1 auf der Rangliste"
+			},
 			"podium": {
 				"title": "Podium",
 				"desc": "Unter den Top 3 auf der Rangliste"
@@ -861,38 +864,93 @@
 			}
 		},
 		"contribution": {
-			"hyperbitcoinisation": { "title": "Hyperbitcoinisation", "desc": "21M" },
-			"pizzaTime": { "title": "Pizza Time", "desc": "10K" },
-			"godly": { "title": "Godly", "desc": "7777" },
-			"shadow": { "title": "Schatten", "desc": "5000" },
-			"whitepaper": { "title": "Whitepaper", "desc": "3110" },
-			"winston": { "title": "Winston", "desc": "1984" },
-			"whale": { "title": "Wal", "desc": "1000" },
-			"infinity": { "title": "Unendlichkeit", "desc": "821" },
-			"legend": { "title": "Legende", "desc": "500" },
-			"chancellor": { "title": "Kanzler", "desc": "301" },
-			"sha": { "title": "SHA", "desc": "256" },
-			"noBailouts": { "title": "Keine Bailouts", "desc": "210" },
-			"supertagger": { "title": "Supertagger", "desc": "100" },
-			"ath": { "title": "ATH", "desc": "69" },
-			"longestChain": { "title": "Längste Kette", "desc": "51" },
-			"satoshi": { "title": "Satoshi", "desc": "21" },
-			"heartbeat": { "title": "Herzschlag", "desc": "10" },
-			"segwit": { "title": "Segwit", "desc": "4" },
-			"wholeTagger": { "title": "Ganzer Tagger", "desc": "1" }
+			"hyperbitcoinisation": {
+				"title": "Hyperbitcoinisation",
+				"desc": "21M"
+			},
+			"pizzaTime": {
+				"title": "Pizza Time",
+				"desc": "10K"
+			},
+			"godly": {
+				"title": "Godly",
+				"desc": "7777"
+			},
+			"shadow": {
+				"title": "Schatten",
+				"desc": "5000"
+			},
+			"whitepaper": {
+				"title": "Whitepaper",
+				"desc": "3110"
+			},
+			"winston": {
+				"title": "Winston",
+				"desc": "1984"
+			},
+			"whale": {
+				"title": "Wal",
+				"desc": "1000"
+			},
+			"infinity": {
+				"title": "Unendlichkeit",
+				"desc": "821"
+			},
+			"legend": {
+				"title": "Legende",
+				"desc": "500"
+			},
+			"chancellor": {
+				"title": "Kanzler",
+				"desc": "301"
+			},
+			"sha": {
+				"title": "SHA",
+				"desc": "256"
+			},
+			"noBailouts": {
+				"title": "Keine Bailouts",
+				"desc": "210"
+			},
+			"supertagger": {
+				"title": "Supertagger",
+				"desc": "100"
+			},
+			"ath": {
+				"title": "ATH",
+				"desc": "69"
+			},
+			"longestChain": {
+				"title": "Längste Kette",
+				"desc": "51"
+			},
+			"satoshi": {
+				"title": "Satoshi",
+				"desc": "21"
+			},
+			"heartbeat": {
+				"title": "Herzschlag",
+				"desc": "10"
+			},
+			"segwit": {
+				"title": "Segwit",
+				"desc": "4"
+			},
+			"wholeTagger": {
+				"title": "Ganzer Tagger",
+				"desc": "1"
+			}
 		}
 	},
 	"apps": {
 		"hero": "Finde Händler auf jeder Plattform.",
 		"subheading": "Wir haben dich auf jedem Gerät und Betriebssystem abgedeckt.",
-		"googlePlayNote": "Hinweis: Es gibt keine Google Play-Option aufgrund ihrer übermäßigen KYC-Anforderungen für Entwickler.",
-		"official": "Offiziell",
-		"community": "Community",
-		"pwa": "Progressive Web App",
-		"fdroid": "FOSS App Store",
-		"directandroid": "Direct Download",
-		"zapstore": "Nostr App Store",
-		"ios": "Walled Garden Option"
+		"btcmap": "BTC Map Apps",
+		"poweredBy": "Powered by BTC Map",
+		"comingSoon": "Demnächst",
+		"sponsor": "Sponsor",
+		"downloadAria": "{name} herunterladen",
+		"openAria": "{name} öffnen"
 	},
 	"media": {
 		"title": "Medien",

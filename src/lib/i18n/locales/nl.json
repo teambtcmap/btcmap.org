@@ -941,13 +941,12 @@
 	"apps": {
 		"hero": "Vind verkopers op elk platform.",
 		"subheading": "Wij staan ​​voor u klaar, op welk apparaat en besturingssysteem u ook kiest.",
-		"googlePlayNote": "Opmerking: er is geen Google Play-optie vanwege de buitensporige KYC-vereisten voor ontwikkelaars.",
-		"official": "Officieel",
-		"community": "Gemeenschap",
-		"pwa": "Progressieve webapp",
-		"fdroid": "FOSS App Store",
-		"directandroid": "Direct downloaden",
-		"ios": "Ommuurde tuinoptie"
+		"btcmap": "BTC Map Apps",
+		"poweredBy": "Powered by BTC Map",
+		"comingSoon": "Binnenkort",
+		"sponsor": "Sponsor",
+		"downloadAria": "{name} downloaden",
+		"openAria": "{name} openen"
 	},
 	"media": {
 		"title": "Media",

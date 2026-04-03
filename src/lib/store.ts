@@ -1,7 +1,6 @@
 import type { Writable } from "svelte/store";
 import { derived, readable, writable } from "svelte/store";
 
-import type { AppIconName } from "$lib/icons/types";
 import type {
 	Area,
 	Boost,
@@ -21,41 +20,6 @@ export const socials = readable({
 	github: "https://github.com/teambtcmap",
 	amboss: "https://amboss.space/community/edf8d227-9bc7-4cb2-af2a-66c1b455109a",
 });
-
-export const apps = readable<
-	{ link: string; type: string; icon: AppIconName; desc: string }[]
->([
-	{
-		link: "/map",
-		type: "Web",
-		icon: "web",
-		desc: "apps.pwa",
-	},
-	{
-		link: "https://f-droid.org/en/packages/org.btcmap/",
-		type: "F-Droid",
-		icon: "f-droid",
-		desc: "apps.fdroid",
-	},
-	{
-		link: "https://github.com/teambtcmap/btcmap-android/releases/latest",
-		type: "APK",
-		icon: "android",
-		desc: "apps.directandroid",
-	},
-	{
-		link: "https://zapstore.dev/apps/org.btcmap",
-		type: "Zapstore",
-		icon: "bolt",
-		desc: "apps.zapstore",
-	},
-	{
-		link: "https://apps.apple.com/us/app/bitlocal-btc-friendly-shops/id6447485666",
-		type: "iOS",
-		icon: "ios",
-		desc: "apps.ios",
-	},
-]);
 
 export const places: Writable<Place[]> = writable([]);
 export const placesById = derived(
