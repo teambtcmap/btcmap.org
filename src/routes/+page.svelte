@@ -106,7 +106,9 @@ function openAppModal(app: AppConfig) {
 							<p>{label}</p>
 							<button
 								type="button"
-								aria-label={$_('home.downloadForAria', { values: { type: label } })}
+								aria-label={platform === 'web'
+									? $_('home.openWebAppAria', { values: { type: label } })
+									: $_('home.downloadForAria', { values: { type: label } })}
 								class="mx-auto inline-flex cursor-pointer rounded-full bg-link p-3 text-white transition-colors hover:bg-hover"
 								on:click={() => openAppModal(app)}
 							>
