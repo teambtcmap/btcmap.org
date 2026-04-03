@@ -76,7 +76,7 @@ function handleClick() {
 	{:else}
 		<button
 			type="button"
-			class="group w-full cursor-pointer text-left"
+			class="group w-full cursor-pointer"
 			on:click={handleClick}
 			aria-label="Download {app.name}"
 		>
