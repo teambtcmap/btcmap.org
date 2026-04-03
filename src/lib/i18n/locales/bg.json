@@ -763,7 +763,8 @@
 		"poweredBy": "Powered by BTC Map",
 		"comingSoon": "Очаквайте скоро",
 		"sponsor": "Спонсор",
-		"downloadAria": "Изтегли {name}"
+		"downloadAria": "Изтегли {name}",
+		"openAria": "Отвори {name}"
 	},
 	"gradeDisplay": {
 		"ariaLabel": "{grade} от 5 звезди",

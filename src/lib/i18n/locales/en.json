@@ -893,7 +893,8 @@
 		"poweredBy": "Powered by BTC Map",
 		"comingSoon": "Coming Soon",
 		"sponsor": "Sponsor",
-		"downloadAria": "Download {name}"
+		"downloadAria": "Download {name}",
+		"openAria": "Open {name}"
 	},
 	"media": {
 		"title": "Media",

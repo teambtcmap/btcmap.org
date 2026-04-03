@@ -37,6 +37,8 @@ $: platformsLabel = [...new Set(app.stores.map((s) => s.platform))]
 	.map((p) => platformLabels[p] ?? p)
 	.join(" + ");
 
+$: isWebOnly = app.stores.length === 1 && app.stores[0].store === "web";
+
 function handleClick() {
 	if (app.stores.length === 1) {
 		const store = app.stores[0];
@@ -79,7 +81,7 @@ function handleClick() {
 			type="button"
 			class="group w-full cursor-pointer"
 			on:click={handleClick}
-			aria-label={$_('apps.downloadAria', { values: { name: app.name } })}
+			aria-label={isWebOnly ? $_('apps.openAria', { values: { name: app.name } }) : $_('apps.downloadAria', { values: { name: app.name } })}
 		>
 			<div
 				class="relative mb-5 flex h-60 items-center justify-center rounded-2xl bg-offwhite transition-colors group-hover:bg-link/10 dark:bg-white/[0.15] dark:group-hover:bg-link/20"

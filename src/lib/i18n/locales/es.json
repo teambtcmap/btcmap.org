@@ -949,7 +949,8 @@
 		"poweredBy": "Powered by BTC Map",
 		"comingSoon": "Próximamente",
 		"sponsor": "Patrocinador",
-		"downloadAria": "Descargar {name}"
+		"downloadAria": "Descargar {name}",
+		"openAria": "Abrir {name}"
 	},
 	"media": {
 		"title": "Medios",
