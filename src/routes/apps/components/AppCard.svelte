@@ -1,6 +1,7 @@
 <script lang="ts">
 import AppDownloadModal from "$components/AppDownloadModal.svelte";
 import type { AppConfig } from "$lib/apps";
+import { _ } from "$lib/i18n";
 import IconApps from "$lib/icons/IconApps.svelte";
 import type { AppIconName } from "$lib/icons/types";
 
@@ -60,7 +61,7 @@ function handleClick() {
 					<span
 						class="absolute top-3 right-3 rounded-full bg-link px-2 py-0.5 text-xs font-semibold text-white"
 					>
-						Sponsor
+						{$_('apps.sponsor')}
 					</span>
 				{/if}
 				<img
@@ -78,7 +79,7 @@ function handleClick() {
 			type="button"
 			class="group w-full cursor-pointer"
 			on:click={handleClick}
-			aria-label="Download {app.name}"
+			aria-label={$_('apps.downloadAria', { values: { name: app.name } })}
 		>
 			<div
 				class="relative mb-5 flex h-60 items-center justify-center rounded-2xl bg-offwhite transition-colors group-hover:bg-link/10 dark:bg-white/[0.15] dark:group-hover:bg-link/20"
@@ -87,7 +88,7 @@ function handleClick() {
 					<span
 						class="absolute top-3 right-3 rounded-full bg-link px-2 py-0.5 text-xs font-semibold text-white"
 					>
-						Sponsor
+						{$_('apps.sponsor')}
 					</span>
 				{/if}
 				{#if app.tag === 'btcmap' && platformIcons[app.stores[0]?.platform]}

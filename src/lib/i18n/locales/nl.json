@@ -943,7 +943,9 @@
 		"subheading": "Wij staan ​​voor u klaar, op welk apparaat en besturingssysteem u ook kiest.",
 		"btcmap": "BTC Map Apps",
 		"poweredBy": "Powered by BTC Map",
-		"comingSoon": "Binnenkort"
+		"comingSoon": "Binnenkort",
+		"sponsor": "Sponsor",
+		"downloadAria": "{name} downloaden"
 	},
 	"media": {
 		"title": "Media",

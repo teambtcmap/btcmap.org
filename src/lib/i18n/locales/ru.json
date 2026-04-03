@@ -947,7 +947,9 @@
 		"subheading": "Наши приложения и проекты сторонних разработчиков на основе наших данных",
 		"btcmap": "BTC Map Apps",
 		"poweredBy": "Powered by BTC Map",
-		"comingSoon": "Скоро"
+		"comingSoon": "Скоро",
+		"sponsor": "Спонсор",
+		"downloadAria": "Скачать {name}"
 	},
 	"media": {
 		"title": "Медиа",

@@ -898,7 +898,9 @@
 		"subheading": "Temos você coberto em qualquer dispositivo e sistema operacional que escolher.",
 		"btcmap": "BTC Map Apps",
 		"poweredBy": "Powered by BTC Map",
-		"comingSoon": "Em breve"
+		"comingSoon": "Em breve",
+		"sponsor": "Patrocinador",
+		"downloadAria": "Baixar {name}"
 	},
 	"media": {
 		"title": "Mídia",

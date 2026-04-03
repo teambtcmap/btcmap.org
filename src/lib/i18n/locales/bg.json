@@ -761,7 +761,9 @@
 		"subheading": "Покрити сте на всяко устройство и ОС.",
 		"btcmap": "BTC Map Apps",
 		"poweredBy": "Powered by BTC Map",
-		"comingSoon": "Очаквайте скоро"
+		"comingSoon": "Очаквайте скоро",
+		"sponsor": "Спонсор",
+		"downloadAria": "Изтегли {name}"
 	},
 	"gradeDisplay": {
 		"ariaLabel": "{grade} от 5 звезди",
