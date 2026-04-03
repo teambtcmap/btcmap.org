@@ -42,7 +42,11 @@ $: isWebOnly = app.stores.length === 1 && app.stores[0].store === "web";
 function handleClick() {
 	if (app.stores.length === 1) {
 		const store = app.stores[0];
-		if (store.store === "web") {
+		if (
+			store.store === "web" &&
+			!store.url.startsWith("http://") &&
+			!store.url.startsWith("https://")
+		) {
 			goto(store.url);
 		} else {
 			window.open(store.url, "_blank", "noopener,noreferrer");
