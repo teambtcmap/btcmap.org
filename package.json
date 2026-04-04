@@ -6,6 +6,9 @@
 	"repository": "https://github.com/teambtcmap/btcmap.org",
 	"author": "secondl1ght <secondl1ght@protonmail.com>",
 	"license": "AGPL-3.0",
+	"engines": {
+		"node": ">=22"
+	},
 	"type": "module",
 	"scripts": {
 		"build": "vite build",
@@ -68,9 +71,9 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.10",
 		"@iconify/svelte": "^4.2.0",
-		"@playwright/test": "^1.58.2",
+		"@playwright/test": "^1.59.1",
 		"@sveltejs/adapter-netlify": "^6.0.4",
-		"@sveltejs/kit": "^2.55.0",
+		"@sveltejs/kit": "^2.56.1",
 		"@sveltejs/vite-plugin-svelte": "^3.1.2",
 		"@tailwindcss/postcss": "^4.2.2",
 		"@tailwindcss/vite": "^4.2.2",
@@ -80,7 +83,7 @@
 		"@types/leaflet": "1.9.21",
 		"@types/leaflet.featuregroup.subgroup": "^1.0.4",
 		"@types/leaflet.markercluster": "^1.5.6",
-		"@types/node": "^25.5.0",
+		"@types/node": "^22",
 		"@types/qrcode": "^1.5.6",
 		"jsdom": "^29.0.1",
 		"lint-staged": "^16.4.0",

@@ -34,3 +34,6 @@ yarn.lock
 
 # OpenCode local config
 opencode.json
+
+# Claude Code
+.claude/
