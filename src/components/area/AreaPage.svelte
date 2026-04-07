@@ -628,7 +628,6 @@ let issues: RpcIssue[] = [];
 			{alias}
 			{name}
 			dataInitialized={dataInitialized && !elementsLoading}
-			{eventElements}
 			{taggers}
 		/>
 	{:else if activeSection === Sections.maintain}
