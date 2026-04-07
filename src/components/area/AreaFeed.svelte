@@ -4,7 +4,6 @@ import Time from "svelte-time";
 
 import Icon from "$components/Icon.svelte";
 import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
-import TopButton from "$components/TopButton.svelte";
 import api from "$lib/axios";
 
 import { dev } from "$app/environment";
@@ -20,41 +19,56 @@ type ActivityItem = {
 	place_name?: string;
 	osm_user_id?: number;
 	osm_user_name?: string;
-	osm_user_tip?: string;
 	comment?: string;
 	duration_days?: number;
-	image: string;
 	date: string;
 };
 
 let feedItems: ActivityItem[] = [];
 let loading = false;
+let error = false;
 let feedDiv: HTMLDivElement;
 let hideArrow = false;
 let days = 30;
+let fetchGeneration = 0;
 
-const fetchFeed = async () => {
+const fetchFeed = async (append: boolean) => {
 	loading = true;
+	error = false;
+	const gen = ++fetchGeneration;
 	try {
 		const base = dev ? "/local-api" : "https://api.btcmap.org";
 		const url = `${base}/v4/activity?area=${encodeURIComponent(alias)}&days=${days}`;
 		const res = await api.get<ActivityItem[]>(url);
+		// Discard stale response if user navigated to a different area
+		if (gen !== fetchGeneration) return;
 		feedItems = res.data;
 	} catch {
-		feedItems = [];
+		if (gen !== fetchGeneration) return;
+		if (!append) feedItems = [];
+		error = true;
 	}
 	loading = false;
 };
 
 const loadMore = () => {
+	const scrollTop = feedDiv?.scrollTop;
 	days = days + 30;
-	fetchFeed();
+	fetchFeed(true).then(() => {
+		// Restore scroll position after re-render
+		if (feedDiv && scrollTop) {
+			requestAnimationFrame(() => {
+				feedDiv.scrollTop = scrollTop;
+			});
+		}
+	});
 };
 
 $: if (dataInitialized && alias) {
 	days = 30;
 	feedItems = [];
-	fetchFeed();
+	error = false;
+	fetchFeed(false);
 }
 </script>
 
@@ -76,7 +90,7 @@ $: if (dataInitialized && alias) {
 			}}
 		>
 			{#if feedItems.length}
-				{#each feedItems as item, i (item.type + '-' + item.place_id + '-' + item.date)}
+				{#each feedItems as item, i (item.type + '-' + item.place_id + '-' + item.date + '-' + i)}
 					<div
 						class="flex flex-col items-center gap-2 p-5 text-center text-xl lg:flex-row lg:gap-5 lg:text-left"
 					>
@@ -205,6 +219,16 @@ $: if (dataInitialized && alias) {
 				{#each Array(5) as _, index (index)}
 					<TaggerSkeleton />
 				{/each}
+			{:else if error}
+				<p class="p-5 text-center text-body dark:text-white">
+					{$_(`areaActivity.noActivity`)}
+					<button
+						class="ml-2 text-link transition-colors hover:text-hover"
+						on:click={() => fetchFeed(false)}
+					>
+						Retry
+					</button>
+				</p>
 			{:else if dataInitialized}
 				<p class="p-5 text-body dark:text-white">{$_(`areaActivity.noActivity`)}</p>
 			{/if}

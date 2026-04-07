@@ -47,7 +47,6 @@ import { eventsSync } from "$lib/sync/events";
 import { reportsSync } from "$lib/sync/reports";
 import { usersSync } from "$lib/sync/users";
 import {
-	type ActivityEvent,
 	type AreaPageProps,
 	type AreaTags,
 	type Event,
@@ -58,7 +57,6 @@ import {
 } from "$lib/types.js";
 import {
 	errToast,
-	formatElementID,
 	formatVerifiedHuman,
 	parseDateSafely,
 	validateContinents,
@@ -339,38 +337,13 @@ const initializeData = async () => {
 				(a, b) => Date.parse(b.created_at) - Date.parse(a.created_at),
 			);
 
-			const findUser = (tagger: Event) => {
-				let foundUser = $users.find((user) => user.id === tagger.user_id);
-
-				if (foundUser) {
-					if (!taggers.find((tagger) => tagger.id === foundUser?.id)) {
-						taggers.push(foundUser);
-					}
-
-					return foundUser;
-				} else {
-					return undefined;
-				}
-			};
-
 			areaEvents.forEach((event) => {
-				let placeMatch = filteredPlaces.find(
-					(place) => place.osm_id === event.element_id,
-				);
-
-				let location = placeMatch?.name || undefined;
-
-				let tagger = findUser(event);
-
-				eventElements.push({
-					...event,
-					location: location || formatElementID(event.element_id),
-					merchantId: event.element_id,
-					tagger,
-				});
+				let foundUser = $users.find((user) => user.id === event.user_id);
+				if (foundUser && !taggers.find((t) => t.id === foundUser?.id)) {
+					taggers.push(foundUser);
+				}
 			});
 
-			eventElements = eventElements;
 			taggers = taggers;
 		}
 	}
@@ -431,7 +404,6 @@ const calculateStaleness = (dateStr: string | undefined): boolean => {
 let isVerifiedDateStale: boolean = calculateStaleness(data.verifiedDate);
 let lightning: { destination: string; type: TipType } | undefined;
 
-let eventElements: ActivityEvent[] = [];
 let taggers: User[] = [];
 
 let issues: RpcIssue[] = [];
