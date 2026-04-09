@@ -53,8 +53,13 @@ const fetchFeed = async (append: boolean) => {
 
 const loadMore = () => {
 	const scrollTop = feedDiv?.scrollTop;
+	const prevDays = days;
 	days = days + 30;
 	fetchFeed(true).then(() => {
+		if (error) {
+			days = prevDays;
+			return;
+		}
 		// Restore scroll position after re-render
 		if (feedDiv && scrollTop) {
 			requestAnimationFrame(() => {
