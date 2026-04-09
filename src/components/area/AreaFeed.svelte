@@ -25,6 +25,16 @@ type ActivityItem = {
 
 const DAYS_PER_PAGE = 30;
 
+const DOT_COLORS: Record<string, string> = {
+	place_commented: "bg-amber-500",
+	place_boosted: "bg-orange-500",
+	place_added: "bg-created",
+	place_deleted: "bg-deleted",
+	place_updated: "bg-link",
+};
+
+const dotColor = (type: string) => DOT_COLORS[type] ?? "bg-link";
+
 let feedItems: ActivityItem[] = [];
 let loading = false;
 let error = false;
@@ -102,32 +112,10 @@ $: if (dataInitialized && alias) {
 					>
 						<!-- dot -->
 						<span class="relative mx-auto mb-2 flex h-3 w-3 lg:mx-0 lg:mb-0">
-							{#if item.type === 'place_commented'}
-								<span
-									class="{i === 0 ? 'animate-ping' : ''} absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75"
-								/>
-								<span class="relative inline-flex h-3 w-3 rounded-full bg-amber-500" />
-							{:else if item.type === 'place_boosted'}
-								<span
-									class="{i === 0 ? 'animate-ping' : ''} absolute inline-flex h-full w-full rounded-full bg-orange-500 opacity-75"
-								/>
-								<span class="relative inline-flex h-3 w-3 rounded-full bg-orange-500" />
-							{:else if item.type === 'place_added'}
-								<span
-									class="{i === 0 ? 'animate-ping' : ''} absolute inline-flex h-full w-full rounded-full bg-created opacity-75"
-								/>
-								<span class="relative inline-flex h-3 w-3 rounded-full bg-created" />
-							{:else if item.type === 'place_deleted'}
-								<span
-									class="{i === 0 ? 'animate-ping' : ''} absolute inline-flex h-full w-full rounded-full bg-deleted opacity-75"
-								/>
-								<span class="relative inline-flex h-3 w-3 rounded-full bg-deleted" />
-							{:else}
-								<span
-									class="{i === 0 ? 'animate-ping' : ''} absolute inline-flex h-full w-full rounded-full bg-link opacity-75"
-								/>
-								<span class="relative inline-flex h-3 w-3 rounded-full bg-link" />
-							{/if}
+							<span
+								class="{i === 0 ? 'animate-ping' : ''} absolute inline-flex h-full w-full rounded-full {dotColor(item.type)} opacity-75"
+							/>
+							<span class="relative inline-flex h-3 w-3 rounded-full {dotColor(item.type)}" />
 						</span>
 
 						<div
