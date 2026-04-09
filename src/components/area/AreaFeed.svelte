@@ -43,10 +43,11 @@ let hideArrow = false;
 let days = DAYS_PER_PAGE;
 let fetchGeneration = 0;
 
-const fetchFeed = async (append: boolean) => {
+const fetchFeed = async () => {
 	loading = true;
 	error = false;
 	const gen = ++fetchGeneration;
+	const hadItems = feedItems.length > 0;
 	try {
 		const url = `https://api.btcmap.org/v4/activity?area=${encodeURIComponent(alias)}&days=${days}`;
 		const res = await api.get<ActivityItem[]>(url);
@@ -55,7 +56,9 @@ const fetchFeed = async (append: boolean) => {
 		feedItems = res.data;
 	} catch {
 		if (gen !== fetchGeneration) return;
-		if (!append) feedItems = [];
+		// On initial fetch failure clear items so the empty error state shows;
+		// on load-more failure keep existing items so the inline error renders.
+		if (!hadItems) feedItems = [];
 		error = true;
 	}
 	loading = false;
@@ -65,7 +68,7 @@ const loadMore = () => {
 	const scrollTop = feedDiv?.scrollTop;
 	const prevDays = days;
 	days = days + DAYS_PER_PAGE;
-	fetchFeed(true).then(() => {
+	fetchFeed().then(() => {
 		if (error) {
 			days = prevDays;
 			return;
@@ -84,7 +87,7 @@ $: if (dataInitialized && alias) {
 	feedItems = [];
 	error = false;
 	hideArrow = false;
-	fetchFeed(false);
+	fetchFeed();
 }
 </script>
 
@@ -230,7 +233,7 @@ $: if (dataInitialized && alias) {
 					{$_(`areaActivity.loadError`)}
 					<button
 						class="ml-2 text-link transition-colors hover:text-hover"
-						on:click={() => fetchFeed(false)}
+						on:click={() => fetchFeed()}
 					>
 						{$_(`areaActivity.retry`)}
 					</button>
