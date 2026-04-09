@@ -142,15 +142,15 @@ $: if (dataInitialized && alias) {
 										>
 											{item.place_name || item.place_id}
 										</a>
-										was <strong
+										{$_('areaActivity.was')} <strong
 											>{item.type === 'place_added'
-												? 'created'
+												? $_('areaActivity.created')
 												: item.type === 'place_deleted'
-													? 'deleted'
-													: 'updated'}</strong
+													? $_('areaActivity.deleted')
+													: $_('areaActivity.updated')}</strong
 										>
 										{#if item.osm_user_id && item.osm_user_name}
-											by <a
+											{$_('areaActivity.by')} <a
 												href={resolve(`/tagger/${item.osm_user_id}`)}
 												class="break-all text-link transition-colors hover:text-hover"
 											>
@@ -171,7 +171,7 @@ $: if (dataInitialized && alias) {
 										>
 											{item.place_name || item.place_id}
 										</a>
-										— <span class="italic"
+										{$_('areaActivity.commented')} <span class="italic"
 											>"{item.comment && item.comment.length > 80
 												? item.comment.slice(0, 77) + '...'
 												: item.comment}"</span
@@ -190,7 +190,7 @@ $: if (dataInitialized && alias) {
 										>
 											{item.place_name || item.place_id}
 										</a>
-										was <strong>boosted</strong> for {item.duration_days} days
+										{@html $_('areaActivity.boosted', { values: { days: item.duration_days } })}
 									{/if}
 								</span>
 

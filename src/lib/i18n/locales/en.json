@@ -688,6 +688,13 @@
 		"noActivity": "No activity to display.",
 		"loadError": "Failed to load activity.",
 		"retry": "Retry",
+		"was": "was",
+		"created": "created",
+		"updated": "updated",
+		"deleted": "deleted",
+		"by": "by",
+		"boosted": "was <strong>boosted</strong> for {days} days",
+		"commented": "—",
 		"atomFeeds": "Atom Feeds",
 		"newPlaces": "New Places",
 		"newComments": "New Comments"
