@@ -143,7 +143,7 @@ $: if (dataInitialized && alias) {
 													? 'deleted'
 													: 'updated'}</strong
 										>
-										{#if item.osm_user_name}
+										{#if item.osm_user_id && item.osm_user_name}
 											by <a
 												href={resolve(`/tagger/${item.osm_user_id}`)}
 												class="break-all text-link transition-colors hover:text-hover"
