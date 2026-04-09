@@ -178,7 +178,7 @@ $: if (dataInitialized && alias) {
 										>
 											{item.place_name || item.place_id}
 										</a>
-										{@html $_('areaActivity.boosted', { values: { days: item.duration_days } })}
+										{$_('areaActivity.was')} <strong>{$_('areaActivity.boosted')}</strong> {$_('areaActivity.forDays', { values: { days: item.duration_days } })}
 									{/if}
 								</span>
 
