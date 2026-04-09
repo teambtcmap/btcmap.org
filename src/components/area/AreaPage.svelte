@@ -46,15 +46,15 @@ import { batchSync } from "$lib/sync/batchSync";
 import { eventsSync } from "$lib/sync/events";
 import { reportsSync } from "$lib/sync/reports";
 import { usersSync } from "$lib/sync/users";
-import {
-	type AreaPageProps,
-	type AreaTags,
-	type Event,
-	type Place,
-	type RpcIssue,
-	TipType,
-	type User,
+import type {
+	AreaPageProps,
+	AreaTags,
+	Event,
+	Place,
+	RpcIssue,
+	User,
 } from "$lib/types.js";
+import { TipType } from "$lib/types.js";
 import {
 	errToast,
 	formatVerifiedHuman,
