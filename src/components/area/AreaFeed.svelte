@@ -227,12 +227,12 @@ $: if (dataInitialized && alias) {
 				{/each}
 			{:else if error}
 				<p class="p-5 text-center text-body dark:text-white">
-					{$_(`areaActivity.noActivity`)}
+					{$_(`areaActivity.loadError`)}
 					<button
 						class="ml-2 text-link transition-colors hover:text-hover"
 						on:click={() => fetchFeed(false)}
 					>
-						Retry
+						{$_(`areaActivity.retry`)}
 					</button>
 				</p>
 			{:else if dataInitialized}

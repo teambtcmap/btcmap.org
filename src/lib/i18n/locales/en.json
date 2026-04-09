@@ -686,6 +686,8 @@
 		"noSupertaggers": "No supertaggers to display.",
 		"activity": "Activity",
 		"noActivity": "No activity to display.",
+		"loadError": "Failed to load activity.",
+		"retry": "Retry",
 		"atomFeeds": "Atom Feeds",
 		"newPlaces": "New Places",
 		"newComments": "New Comments"
