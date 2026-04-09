@@ -6,7 +6,6 @@ import Icon from "$components/Icon.svelte";
 import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
 import api from "$lib/axios";
 
-import { dev } from "$app/environment";
 import { resolve } from "$app/paths";
 
 export let alias: string;
@@ -39,8 +38,7 @@ const fetchFeed = async (append: boolean) => {
 	error = false;
 	const gen = ++fetchGeneration;
 	try {
-		const base = dev ? "/local-api" : "https://api.btcmap.org";
-		const url = `${base}/v4/activity?area=${encodeURIComponent(alias)}&days=${days}`;
+		const url = `https://api.btcmap.org/v4/activity?area=${encodeURIComponent(alias)}&days=${days}`;
 		const res = await api.get<ActivityItem[]>(url);
 		// Discard stale response if user navigated to a different area
 		if (gen !== fetchGeneration) return;
