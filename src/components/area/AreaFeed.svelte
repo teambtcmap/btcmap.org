@@ -24,12 +24,14 @@ type ActivityItem = {
 	date: string;
 };
 
+const DAYS_PER_PAGE = 30;
+
 let feedItems: ActivityItem[] = [];
 let loading = false;
 let error = false;
 let feedDiv: HTMLDivElement;
 let hideArrow = false;
-let days = 30;
+let days = DAYS_PER_PAGE;
 let fetchGeneration = 0;
 
 const fetchFeed = async (append: boolean) => {
@@ -54,7 +56,7 @@ const fetchFeed = async (append: boolean) => {
 const loadMore = () => {
 	const scrollTop = feedDiv?.scrollTop;
 	const prevDays = days;
-	days = days + 30;
+	days = days + DAYS_PER_PAGE;
 	fetchFeed(true).then(() => {
 		if (error) {
 			days = prevDays;
@@ -70,7 +72,7 @@ const loadMore = () => {
 };
 
 $: if (dataInitialized && alias) {
-	days = 30;
+	days = DAYS_PER_PAGE;
 	feedItems = [];
 	error = false;
 	hideArrow = false;
