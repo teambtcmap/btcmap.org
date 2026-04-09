@@ -73,6 +73,7 @@ $: if (dataInitialized && alias) {
 	days = 30;
 	feedItems = [];
 	error = false;
+	hideArrow = false;
 	fetchFeed(false);
 }
 </script>
