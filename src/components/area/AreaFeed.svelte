@@ -192,6 +192,18 @@ $: if (dataInitialized && alias) {
 					</div>
 				{/each}
 
+				{#if error}
+					<p class="mx-auto !mb-2 text-center text-body dark:text-white">
+						{$_(`areaActivity.loadError`)}
+						<button
+							class="ml-2 text-link transition-colors hover:text-hover"
+							on:click={loadMore}
+						>
+							{$_(`areaActivity.retry`)}
+						</button>
+					</p>
+				{/if}
+
 				<button
 					class="mx-auto !mb-5 block text-xl font-semibold text-link transition-colors hover:text-hover"
 					on:click={loadMore}
