@@ -84,5 +84,20 @@ async function toggle() {
 		w="18"
 		h="18"
 	/>
-	<span>{saved ? $_(`merchant.saved`) : $_(`merchant.save`)}</span>
+	<!-- Render both labels stacked and toggle visibility so the button width
+	     stays constant across the save/saved transition. -->
+	<span class="grid">
+		<span
+			class="col-start-1 row-start-1 transition-opacity {saved
+				? 'opacity-0'
+				: 'opacity-100'}"
+			aria-hidden={saved}>{$_(`merchant.save`)}</span
+		>
+		<span
+			class="col-start-1 row-start-1 transition-opacity {saved
+				? 'opacity-100'
+				: 'opacity-0'}"
+			aria-hidden={!saved}>{$_(`merchant.saved`)}</span
+		>
+	</span>
 </button>
