@@ -18,12 +18,11 @@ type SavedPlace = {
 
 type SavedArea = {
 	id: number;
-	alias: string;
-	tags: {
-		name?: string;
-		type?: string;
-		"icon:square"?: string;
-	};
+	name: string;
+	type: string;
+	url_alias: string;
+	icon?: string;
+	website_url?: string;
 };
 
 let places: SavedPlace[] = [];
@@ -100,12 +99,12 @@ onMount(async () => {
 				<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 					{#each areas as area (area.id)}
 						<a
-							href={resolve(`/${area.tags?.type === "community" ? "community" : "country"}/${area.alias}/merchants`)}
+							href={resolve(`/${area.type === "community" ? "community" : "country"}/${area.url_alias}/merchants`)}
 							class="flex items-center gap-3 rounded-xl border border-gray-300 p-4 transition-colors hover:border-link dark:border-white/20 dark:hover:border-link"
 						>
-							{#if area.tags?.["icon:square"]}
+							{#if area.icon}
 								<img
-									src={area.tags["icon:square"]}
+									src={area.icon}
 									alt=""
 									class="h-8 w-8 shrink-0 rounded-full object-cover"
 								/>
@@ -113,7 +112,7 @@ onMount(async () => {
 								<Icon type="material" icon="bookmark_filled" w="20" h="20" class="shrink-0 text-link" />
 							{/if}
 							<span class="truncate font-semibold text-primary dark:text-white">
-								{area.tags?.name || area.alias}
+								{area.name || area.url_alias}
 							</span>
 						</a>
 					{/each}
