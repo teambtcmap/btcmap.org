@@ -30,6 +30,11 @@ let areas: SavedArea[] = [];
 let loading = true;
 
 onMount(async () => {
+	// Ensure session is hydrated from localStorage before checking.
+	// Child onMount runs before layout onMount in Svelte, so we can't
+	// rely on the layout's session.init() having run yet.
+	session.init();
+
 	if (!$session) {
 		goto("/map");
 		return;
