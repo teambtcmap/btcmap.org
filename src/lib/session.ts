@@ -1,5 +1,7 @@
 import { writable } from "svelte/store";
 
+import api from "$lib/axios";
+
 // Session represents an anonymous/throwaway BTC Map account created on first
 // "save" action. The token is persisted in localStorage and used as a Bearer
 // token on authenticated API calls.
@@ -68,23 +70,16 @@ function createSessionStore() {
 	let signUpInFlight: Promise<Session> | null = null;
 
 	const doSignUp = async (): Promise<Session> => {
-		// TODO: replace with POST /v4/users when the REST endpoint lands.
-		//
-		// This is a local-only mock. The existing RPC endpoints (add_user +
-		// create_api_key) would work server-side but the browser can't reach
-		// them: api.btcmap.org returns HTTP 502 on OPTIONS preflight to /rpc,
-		// failing CORS. Rather than build a server-side proxy for a temporary
-		// dependency, we mock the future endpoint here. The shape is identical
-		// to what the real POST /v4/users call will return, so swapping it in
-		// later is a single-function change.
-		//
-		// Note: the mock token is fake. Real PUT /v4/places/saved calls will
-		// fail with 401 until this is replaced.
-		console.warn(
-			"session: using mock signUp — PUT calls will fail with 401 until POST /v4/users is available",
-		);
-		const username = generateUsername();
-		const token = `mock-${generatePassword()}`;
+		// Calls the SvelteKit server route which proxies to the btcmap API.
+		// This avoids CORS preflight issues (the API returns 404 on OPTIONS).
+		// The server route creates a user + token in two API calls.
+		const password = generatePassword();
+		const res = await api.post("/api/session/signup", { password });
+
+		const { username, token } = res.data;
+		if (typeof username !== "string" || typeof token !== "string") {
+			throw new Error("signup did not return username and token");
+		}
 
 		const session: Session = {
 			username,
@@ -204,15 +199,6 @@ function createSessionStore() {
 			set(null);
 		},
 	};
-}
-
-// Generates a URL-safe random username like "btcmap-a7k3n9p2yz".
-// Prefixed so admins can identify throwaway accounts if needed.
-function generateUsername(): string {
-	const suffix = Array.from(crypto.getRandomValues(new Uint8Array(5)))
-		.map((b) => b.toString(36).padStart(2, "0"))
-		.join("");
-	return `btcmap-${suffix}`;
 }
 
 // Generates a cryptographically random password. Not shown to the user in

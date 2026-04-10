@@ -24,18 +24,19 @@ $: savedList =
 		: ($session?.savedAreas ?? []);
 $: saved = savedList.includes(id);
 
-const API_ENDPOINTS = {
-	place: "https://api.btcmap.org/v4/places/saved",
-	area: "https://api.btcmap.org/v4/areas/saved",
+// SvelteKit server routes that proxy to the btcmap API (avoids CORS preflight).
+const PROXY_ENDPOINTS = {
+	place: "/api/session/saved-places",
+	area: "/api/session/saved-areas",
 } as const;
 
 async function putSaved(token: string, ids: number[]): Promise<number[]> {
-	const res = await api.put<number[]>(API_ENDPOINTS[type], ids, {
+	const res = await api.put<number[]>(PROXY_ENDPOINTS[type], ids, {
 		headers: { Authorization: `Bearer ${token}` },
 	});
 	if (!Array.isArray(res.data)) {
 		throw new Error(
-			`PUT ${API_ENDPOINTS[type]} returned an unexpected response`,
+			`PUT ${PROXY_ENDPOINTS[type]} returned an unexpected response`,
 		);
 	}
 	return res.data;
