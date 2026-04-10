@@ -138,13 +138,12 @@ function createSessionStore() {
 	};
 }
 
-// Generates a URL-safe random username like "btcmap-a7k3n9p2".
+// Generates a URL-safe random username like "btcmap-a7k3n9p2yz".
 // Prefixed so admins can identify throwaway accounts if needed.
 function generateUsername(): string {
-	const suffix = Array.from(crypto.getRandomValues(new Uint8Array(6)))
+	const suffix = Array.from(crypto.getRandomValues(new Uint8Array(5)))
 		.map((b) => b.toString(36).padStart(2, "0"))
-		.join("")
-		.slice(0, 10);
+		.join("");
 	return `btcmap-${suffix}`;
 }
 
