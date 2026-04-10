@@ -52,6 +52,51 @@ function saveToStorage(session: Session | null) {
 function createSessionStore() {
 	const { subscribe, set, update } = writable<Session | null>(null);
 
+	// Tracks the in-flight signUp() promise. Prevents double-click from
+	// creating two server-side accounts when called in rapid succession.
+	let signUpInFlight: Promise<Session> | null = null;
+
+	const doSignUp = async (): Promise<Session> => {
+		const username = generateUsername();
+		const password = generatePassword();
+
+		const addUserRes = await api.post("https://api.btcmap.org/rpc", {
+			jsonrpc: "2.0",
+			method: "add_user",
+			params: { name: username, password },
+			id: 1,
+		});
+
+		if (addUserRes.data?.error) {
+			throw new Error(
+				`add_user failed: ${addUserRes.data.error.message ?? "unknown"}`,
+			);
+		}
+
+		const keyRes = await api.post("https://api.btcmap.org/rpc", {
+			jsonrpc: "2.0",
+			method: "create_api_key",
+			params: { username, password, label: "btcmap.org" },
+			id: 1,
+		});
+
+		if (keyRes.data?.error) {
+			throw new Error(
+				`create_api_key failed: ${keyRes.data.error.message ?? "unknown"}`,
+			);
+		}
+
+		const token = keyRes.data?.result?.token;
+		if (typeof token !== "string") {
+			throw new Error("create_api_key did not return a token");
+		}
+
+		const session: Session = { username, token, savedPlaces: [] };
+		saveToStorage(session);
+		set(session);
+		return session;
+	};
+
 	return {
 		subscribe,
 
@@ -64,45 +109,15 @@ function createSessionStore() {
 		// Create a throwaway account via the existing RPC endpoints. Returns
 		// the new session on success. Stores everything in localStorage so the
 		// user stays "logged in" across reloads.
-		signUp: async (): Promise<Session> => {
-			const username = generateUsername();
-			const password = generatePassword();
-
-			const addUserRes = await api.post("https://api.btcmap.org/rpc", {
-				jsonrpc: "2.0",
-				method: "add_user",
-				params: { name: username, password },
-				id: 1,
+		//
+		// Concurrent calls share the same in-flight promise, so double-clicks
+		// on the SaveButton won't create two server-side accounts.
+		signUp: (): Promise<Session> => {
+			if (signUpInFlight) return signUpInFlight;
+			signUpInFlight = doSignUp().finally(() => {
+				signUpInFlight = null;
 			});
-
-			if (addUserRes.data?.error) {
-				throw new Error(
-					`add_user failed: ${addUserRes.data.error.message ?? "unknown"}`,
-				);
-			}
-
-			const keyRes = await api.post("https://api.btcmap.org/rpc", {
-				jsonrpc: "2.0",
-				method: "create_api_key",
-				params: { username, password, label: "btcmap.org" },
-				id: 1,
-			});
-
-			if (keyRes.data?.error) {
-				throw new Error(
-					`create_api_key failed: ${keyRes.data.error.message ?? "unknown"}`,
-				);
-			}
-
-			const token = keyRes.data?.result?.token;
-			if (typeof token !== "string") {
-				throw new Error("create_api_key did not return a token");
-			}
-
-			const session: Session = { username, token, savedPlaces: [] };
-			saveToStorage(session);
-			set(session);
-			return session;
+			return signUpInFlight;
 		},
 
 		// Replace the savedPlaces array. Call after a successful PUT.
