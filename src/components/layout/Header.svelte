@@ -193,6 +193,7 @@ afterNavigate(() => {
 	</nav>
 
 	<div class="flex items-center gap-3">
+		<ThemeToggle />
 		{#if $session}
 			<a
 				href="/saved"
@@ -203,7 +204,6 @@ afterNavigate(() => {
 				<Icon type="material" icon="bookmark_filled" w="22" h="22" />
 			</a>
 		{/if}
-		<ThemeToggle />
 	</div>
 </header>
 
@@ -218,6 +218,7 @@ afterNavigate(() => {
 	</a>
 
 	<div class="flex items-center space-x-4">
+		<ThemeToggle />
 		{#if $session}
 			<a
 				href="/saved"
@@ -228,7 +229,6 @@ afterNavigate(() => {
 				<Icon type="material" icon="bookmark_filled" w="22" h="22" />
 			</a>
 		{/if}
-		<ThemeToggle />
 
 		<!-- menu toggle -->
 		<button on:click={() => (showMobileMenu = !showMobileMenu)}>
