@@ -29,7 +29,7 @@ const API_ENDPOINTS = {
 	area: "https://api.btcmap.org/v4/areas/saved",
 } as const;
 
-async function putSaved(token: string, ids: number[]): Promise<void> {
+async function putSaved(token: string, ids: number[]): Promise<number[]> {
 	const res = await api.put<number[]>(API_ENDPOINTS[type], ids, {
 		headers: { Authorization: `Bearer ${token}` },
 	});
@@ -38,6 +38,7 @@ async function putSaved(token: string, ids: number[]): Promise<void> {
 			`PUT ${API_ENDPOINTS[type]} returned an unexpected response`,
 		);
 	}
+	return res.data;
 }
 
 async function toggle() {
@@ -62,7 +63,14 @@ async function toggle() {
 				: session.toggleSavedArea(id);
 		if (!nextSaved) throw new Error("toggle returned null (no session)");
 
-		await putSaved(current.token, nextSaved);
+		// Write the server's canonical list back to the store so the client
+		// stays in sync even if the server deduplicates or rejects IDs.
+		const serverList = await putSaved(current.token, nextSaved);
+		if (type === "place") {
+			session.setSavedPlaces(serverList);
+		} else {
+			session.setSavedAreas(serverList);
+		}
 	} catch (err) {
 		if (previousSession) {
 			if (type === "place") {
