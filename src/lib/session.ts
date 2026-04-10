@@ -50,8 +50,8 @@ function saveToStorage(session: Session | null) {
 		} else {
 			localStorage.removeItem(STORAGE_KEY);
 		}
-	} catch {
-		// Storage unavailable or quota exceeded
+	} catch (err) {
+		console.warn("session: failed to persist to localStorage", err);
 	}
 }
 
