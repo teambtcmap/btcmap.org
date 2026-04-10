@@ -458,9 +458,7 @@ let issues: RpcIssue[] = [];
 			<h1 class="text-4xl !leading-tight font-semibold text-primary dark:text-white">
 				{name || $_('area.defaultName')}
 			</h1>
-			{#if areaNumericId}
-				<SaveButton id={areaNumericId} type="area" />
-			{/if}
+			<SaveButton id={areaNumericId ?? 0} type="area" />
 			{#if org}
 				<OrgBadge {org} />
 			{/if}
