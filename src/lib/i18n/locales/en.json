@@ -43,7 +43,8 @@
 		"areas": "Areas",
 		"empty": "Save places and areas to see them here.",
 		"noPlaces": "No saved places yet.",
-		"noAreas": "No saved areas yet."
+		"noAreas": "No saved areas yet.",
+		"loadError": "Failed to load some saved items."
 	},
 	"search": {
 		"placeholderWorldwide": "Search worldwide...",

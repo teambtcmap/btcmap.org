@@ -28,6 +28,8 @@ type SavedArea = {
 let places: SavedPlace[] = [];
 let areas: SavedArea[] = [];
 let loading = true;
+let placesError = false;
+let areasError = false;
 
 onMount(async () => {
 	// Ensure session is hydrated from localStorage before checking.
@@ -40,17 +42,26 @@ onMount(async () => {
 		return;
 	}
 
-	try {
-		const headers = { Authorization: `Bearer ${$session.token}` };
-		const [placesRes, areasRes] = await Promise.all([
-			api.get<SavedPlace[]>("/api/session/saved-places", { headers }),
-			api.get<SavedArea[]>("/api/session/saved-areas", { headers }),
-		]);
-		places = placesRes.data;
-		areas = areasRes.data;
-	} catch (err) {
-		console.error("Failed to load saved items", err);
+	const headers = { Authorization: `Bearer ${$session.token}` };
+	const [placesRes, areasRes] = await Promise.allSettled([
+		api.get<SavedPlace[]>("/api/session/saved-places", { headers }),
+		api.get<SavedArea[]>("/api/session/saved-areas", { headers }),
+	]);
+
+	if (placesRes.status === "fulfilled") {
+		places = placesRes.value.data;
+	} else {
+		placesError = true;
+		console.error("Failed to load saved places", placesRes.reason);
 	}
+
+	if (areasRes.status === "fulfilled") {
+		areas = areasRes.value.data;
+	} else {
+		areasError = true;
+		console.error("Failed to load saved areas", areasRes.reason);
+	}
+
 	loading = false;
 });
 </script>
@@ -68,11 +79,17 @@ onMount(async () => {
 		<div class="flex justify-center">
 			<div class="h-8 w-8 animate-spin rounded-full border-4 border-link border-t-transparent" />
 		</div>
-	{:else if !places.length && !areas.length}
+	{:else if !places.length && !areas.length && !placesError && !areasError}
 		<p class="text-center text-lg text-body dark:text-white/70">
 			{$_("saved.empty")}
 		</p>
 	{:else}
+		{#if placesError}
+			<p class="text-center text-body dark:text-white/70">{$_("saved.loadError")}</p>
+		{/if}
+		{#if areasError}
+			<p class="text-center text-body dark:text-white/70">{$_("saved.loadError")}</p>
+		{/if}
 		{#if places.length}
 			<section class="space-y-4">
 				<h2 class="text-2xl font-semibold text-primary dark:text-white">
