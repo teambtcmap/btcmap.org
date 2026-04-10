@@ -80,6 +80,9 @@ function createSessionStore() {
 		//
 		// Note: the mock token is fake. Real PUT /v4/places/saved calls will
 		// fail with 401 until this is replaced.
+		console.warn(
+			"session: using mock signUp — PUT calls will fail with 401 until POST /v4/users is available",
+		);
 		const username = generateUsername();
 		const token = `mock-${generatePassword()}`;
 
