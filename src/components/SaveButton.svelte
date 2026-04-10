@@ -70,9 +70,10 @@ async function toggle() {
 
 <button
 	type="button"
-	class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-colors {saved
-		? 'text-link'
-		: 'text-body hover:text-link dark:text-white'} {className ?? ''}"
+	class="{saved
+		? 'border border-link text-link hover:bg-link/10 dark:border-link dark:text-link'
+		: 'bg-link text-white hover:bg-hover'} mx-auto flex w-40 items-center justify-center rounded-xl p-3 text-center font-semibold transition-colors disabled:opacity-50 {className ??
+		''}"
 	on:click={toggle}
 	disabled={pending}
 	aria-pressed={saved}
@@ -81,8 +82,9 @@ async function toggle() {
 	<Icon
 		type="material"
 		icon={saved ? 'bookmark_filled' : 'bookmark'}
-		w="18"
-		h="18"
+		w="20"
+		h="20"
+		class="mr-1"
 	/>
 	<!-- Render both labels stacked and toggle visibility so the button width
 	     stays constant across the save/saved transition. -->

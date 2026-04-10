@@ -323,7 +323,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 					{/if}
 				</h1>
 				{#if !data.placeData.deleted_at}
-					<SaveButton placeId={Number(data.id)} class="mt-2" />
+					<SaveButton placeId={Number(data.id)} />
 				{/if}
 			</div>
 
