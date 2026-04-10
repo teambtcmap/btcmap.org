@@ -123,7 +123,12 @@ function createSessionStore() {
 		// Replace the savedPlaces array. Call after a successful PUT.
 		setSavedPlaces: (ids: number[]) => {
 			update((current) => {
-				if (!current) return current;
+				if (!current) {
+					console.warn(
+						"session.setSavedPlaces called with no active session — call signUp() first",
+					);
+					return current;
+				}
 				const next = { ...current, savedPlaces: ids };
 				saveToStorage(next);
 				return next;
