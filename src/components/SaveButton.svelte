@@ -1,8 +1,7 @@
 <script lang="ts">
-import { _ } from "svelte-i18n";
-
 import Icon from "$components/Icon.svelte";
 import api from "$lib/axios";
+import { _ } from "$lib/i18n";
 import { session } from "$lib/session";
 import { errToast } from "$lib/utils";
 
