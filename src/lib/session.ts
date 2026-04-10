@@ -19,6 +19,7 @@ export type Session = {
 	username: string;
 	token: string;
 	savedPlaces: number[];
+	savedAreas: number[];
 };
 
 const STORAGE_KEY = "btcmap_session";
@@ -35,6 +36,10 @@ function loadFromStorage(): Session | null {
 			!Array.isArray(parsed?.savedPlaces)
 		) {
 			return null;
+		}
+		// Backfill savedAreas for sessions created before this field existed
+		if (!Array.isArray(parsed.savedAreas)) {
+			parsed.savedAreas = [];
 		}
 		return parsed as Session;
 	} catch {
@@ -78,7 +83,12 @@ function createSessionStore() {
 		const username = generateUsername();
 		const token = `mock-${generatePassword()}`;
 
-		const session: Session = { username, token, savedPlaces: [] };
+		const session: Session = {
+			username,
+			token,
+			savedPlaces: [],
+			savedAreas: [],
+		};
 		saveToStorage(session);
 		set(session);
 		return session;
@@ -122,6 +132,21 @@ function createSessionStore() {
 			});
 		},
 
+		// Replace the savedAreas array. Call after a successful PUT.
+		setSavedAreas: (ids: number[]) => {
+			update((current) => {
+				if (!current) {
+					console.warn(
+						"session.setSavedAreas called with no active session — call signUp() first",
+					);
+					return current;
+				}
+				const next = { ...current, savedAreas: ids };
+				saveToStorage(next);
+				return next;
+			});
+		},
+
 		// Toggle a place in saved_places atomically. Computing the next list
 		// inside the update() callback avoids a race when multiple buttons
 		// read-modify-write concurrently (e.g. on a future "My Saved" list
@@ -142,6 +167,28 @@ function createSessionStore() {
 					: [...current.savedPlaces, id];
 				result = nextSaved;
 				const next = { ...current, savedPlaces: nextSaved };
+				saveToStorage(next);
+				return next;
+			});
+			return result;
+		},
+
+		// Toggle an area in saved_areas atomically. Same pattern as toggleSavedPlace.
+		toggleSavedArea: (id: number): number[] | null => {
+			let result: number[] | null = null;
+			update((current) => {
+				if (!current) {
+					console.warn(
+						"session.toggleSavedArea called with no active session — call signUp() first",
+					);
+					return current;
+				}
+				const alreadySaved = current.savedAreas.includes(id);
+				const nextSaved = alreadySaved
+					? current.savedAreas.filter((x) => x !== id)
+					: [...current.savedAreas, id];
+				result = nextSaved;
+				const next = { ...current, savedAreas: nextSaved };
 				saveToStorage(next);
 				return next;
 			});

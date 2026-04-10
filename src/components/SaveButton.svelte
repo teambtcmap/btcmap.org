@@ -5,8 +5,11 @@ import { _ } from "$lib/i18n";
 import { session } from "$lib/session";
 import { errToast } from "$lib/utils";
 
-// The numeric place (element) ID to save/unsave.
-export let placeId: number;
+// The numeric ID of the item to save/unsave.
+export let id: number;
+
+// Whether this saves a place or an area.
+export let type: "place" | "area" = "place";
 
 // Optional className passthrough for layout-specific styling.
 let className: string | undefined = undefined;
@@ -15,17 +18,25 @@ export { className as class };
 
 let pending = false;
 
-// Whether this place is currently in the user's saved_places list.
-$: saved = $session?.savedPlaces.includes(placeId) ?? false;
+$: savedList =
+	type === "place"
+		? ($session?.savedPlaces ?? [])
+		: ($session?.savedAreas ?? []);
+$: saved = savedList.includes(id);
 
-async function putSavedPlaces(token: string, ids: number[]): Promise<void> {
-	const res = await api.put<number[]>(
-		"https://api.btcmap.org/v4/places/saved",
-		ids,
-		{ headers: { Authorization: `Bearer ${token}` } },
-	);
+const API_ENDPOINTS = {
+	place: "https://api.btcmap.org/v4/places/saved",
+	area: "https://api.btcmap.org/v4/areas/saved",
+} as const;
+
+async function putSaved(token: string, ids: number[]): Promise<void> {
+	const res = await api.put<number[]>(API_ENDPOINTS[type], ids, {
+		headers: { Authorization: `Bearer ${token}` },
+	});
 	if (!Array.isArray(res.data)) {
-		throw new Error("PUT /v4/places/saved returned an unexpected response");
+		throw new Error(
+			`PUT ${API_ENDPOINTS[type]} returned an unexpected response`,
+		);
 	}
 }
 
@@ -33,33 +44,32 @@ async function toggle() {
 	if (pending) return;
 	pending = true;
 
-	// Snapshot the current state so we can roll back on error.
 	const previousSession = $session;
-	const previousSaved = previousSession?.savedPlaces ?? [];
+	const previousSaved =
+		type === "place"
+			? (previousSession?.savedPlaces ?? [])
+			: (previousSession?.savedAreas ?? []);
 
 	try {
-		// Ensure we have a session. signUp() is memoized so double-clicks are safe.
 		let current = previousSession;
 		if (!current) {
 			current = await session.signUp();
 		}
 
-		// Toggle atomically inside the store's update() callback to avoid
-		// races when multiple SaveButtons are on the same page.
-		const nextSaved = session.toggleSavedPlace(placeId);
-		if (!nextSaved)
-			throw new Error("toggleSavedPlace returned null (no session)");
+		const nextSaved =
+			type === "place"
+				? session.toggleSavedPlace(id)
+				: session.toggleSavedArea(id);
+		if (!nextSaved) throw new Error("toggle returned null (no session)");
 
-		// Persist to the server. On failure we roll back below.
-		await putSavedPlaces(current.token, nextSaved);
+		await putSaved(current.token, nextSaved);
 	} catch (err) {
-		// Rollback: restore the previous saved list if we had a session.
-		// If we did NOT have a previous session, it means signUp() succeeded
-		// this turn but the first PUT failed — drop the whole throwaway
-		// account so localStorage doesn't keep a session the server never
-		// saw. Matches the "throwaway, no recovery" model.
 		if (previousSession) {
-			session.setSavedPlaces(previousSaved);
+			if (type === "place") {
+				session.setSavedPlaces(previousSaved);
+			} else {
+				session.setSavedAreas(previousSaved);
+			}
 		} else {
 			session.clear();
 		}
@@ -89,8 +99,6 @@ async function toggle() {
 		h="16"
 		class="mr-1"
 	/>
-	<!-- Render both labels stacked and toggle visibility so the button width
-	     stays constant across the save/saved transition. -->
 	<span class="grid">
 		<span
 			class="col-start-1 row-start-1 transition-opacity {saved

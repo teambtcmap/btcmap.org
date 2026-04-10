@@ -25,6 +25,7 @@ import Boost from "$components/Boost.svelte";
 import Icon from "$components/Icon.svelte";
 import IssuesTable from "$components/IssuesTable.svelte";
 import OrgBadge from "$components/OrgBadge.svelte";
+import SaveButton from "$components/SaveButton.svelte";
 import Socials from "$components/Socials.svelte";
 import SponsorBadge from "$components/SponsorBadge.svelte";
 import Tip from "$components/Tip.svelte";
@@ -240,6 +241,7 @@ const initializeData = async () => {
 	}
 
 	area = areaFound.tags;
+	areaNumericId = Number(areaFound.id);
 
 	avatar =
 		type === "community"
@@ -391,6 +393,7 @@ let area: AreaTags;
 let filteredPlaces: Place[] = [];
 
 let avatar: string;
+let areaNumericId: number | null = null;
 const alias = data.id;
 const name = data.name;
 let description: string | undefined;
@@ -455,6 +458,9 @@ let issues: RpcIssue[] = [];
 			<h1 class="text-4xl !leading-tight font-semibold text-primary dark:text-white">
 				{name || $_('area.defaultName')}
 			</h1>
+			{#if areaNumericId}
+				<SaveButton id={areaNumericId} type="area" />
+			{/if}
 			{#if org}
 				<OrgBadge {org} />
 			{/if}
