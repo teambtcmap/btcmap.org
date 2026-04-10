@@ -241,7 +241,6 @@ const initializeData = async () => {
 	}
 
 	area = areaFound.tags;
-	areaNumericId = Number(areaFound.id);
 
 	avatar =
 		type === "community"
@@ -393,7 +392,6 @@ let area: AreaTags;
 let filteredPlaces: Place[] = [];
 
 let avatar: string;
-let areaNumericId: number | null = null;
 const alias = data.id;
 const name = data.name;
 let description: string | undefined;
@@ -458,7 +456,7 @@ let issues: RpcIssue[] = [];
 			<h1 class="text-4xl !leading-tight font-semibold text-primary dark:text-white">
 				{name || $_('area.defaultName')}
 			</h1>
-			<SaveButton id={areaNumericId ?? 0} type="area" />
+			<SaveButton id={data.numericId} type="area" />
 			{#if org}
 				<OrgBadge {org} />
 			{/if}
