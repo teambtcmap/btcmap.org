@@ -9,6 +9,14 @@ import api from "$lib/axios";
 // NOTE: there is no recovery flow in the MVP. If the user clears localStorage
 // they lose access to their saved items. A backup flow (set password, link
 // Nostr) will be added later.
+//
+// SECURITY — localStorage token blast radius:
+// Storing the Bearer token in localStorage is acceptable here ONLY because
+// the account is a throwaway with no recoverable data or PII. The token
+// grants access to its own saved_places/saved_areas and nothing else.
+// DO NOT reuse this pattern for real user accounts with durable data,
+// payment info, or elevated roles — an XSS would exfiltrate the token.
+// For real accounts, migrate to httpOnly cookies or similar.
 export type Session = {
 	username: string;
 	token: string;
