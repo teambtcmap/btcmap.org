@@ -1,7 +1,5 @@
 import { writable } from "svelte/store";
 
-import api from "$lib/axios";
-
 // Session represents an anonymous/throwaway BTC Map account created on first
 // "save" action. The token is persisted in localStorage and used as a Bearer
 // token on authenticated API calls.
@@ -65,39 +63,20 @@ function createSessionStore() {
 	let signUpInFlight: Promise<Session> | null = null;
 
 	const doSignUp = async (): Promise<Session> => {
+		// TODO: replace with POST /v4/users when the REST endpoint lands.
+		//
+		// This is a local-only mock. The existing RPC endpoints (add_user +
+		// create_api_key) would work server-side but the browser can't reach
+		// them: api.btcmap.org returns HTTP 502 on OPTIONS preflight to /rpc,
+		// failing CORS. Rather than build a server-side proxy for a temporary
+		// dependency, we mock the future endpoint here. The shape is identical
+		// to what the real POST /v4/users call will return, so swapping it in
+		// later is a single-function change.
+		//
+		// Note: the mock token is fake. Real PUT /v4/places/saved calls will
+		// fail with 401 until this is replaced.
 		const username = generateUsername();
-		const password = generatePassword();
-
-		const addUserRes = await api.post("https://api.btcmap.org/rpc", {
-			jsonrpc: "2.0",
-			method: "add_user",
-			params: { name: username, password },
-			id: 1,
-		});
-
-		if (addUserRes.data?.error) {
-			throw new Error(
-				`add_user failed: ${addUserRes.data.error.message ?? "unknown"}`,
-			);
-		}
-
-		const keyRes = await api.post("https://api.btcmap.org/rpc", {
-			jsonrpc: "2.0",
-			method: "create_api_key",
-			params: { username, password, label: "btcmap.org" },
-			id: 1,
-		});
-
-		if (keyRes.data?.error) {
-			throw new Error(
-				`create_api_key failed: ${keyRes.data.error.message ?? "unknown"}`,
-			);
-		}
-
-		const token = keyRes.data?.result?.token;
-		if (typeof token !== "string") {
-			throw new Error("create_api_key did not return a token");
-		}
+		const token = `mock-${generatePassword()}`;
 
 		const session: Session = { username, token, savedPlaces: [] };
 		saveToStorage(session);
