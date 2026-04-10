@@ -80,7 +80,15 @@ async function toggle() {
 				session.setSavedAreas(previousSaved);
 			}
 		} else {
-			session.clear();
+			// signUp() succeeded but the PUT failed. Don't clear the session —
+			// the account and token are valid. Just rollback the saved list to
+			// empty so the next click retries with the same account instead of
+			// creating another orphan.
+			if (type === "place") {
+				session.setSavedPlaces([]);
+			} else {
+				session.setSavedAreas([]);
+			}
 		}
 		errToast($_(`merchant.saveFailed`));
 		console.error("SaveButton.toggle failed", err);
