@@ -1,10 +1,12 @@
 <script lang="ts">
+import Icon from "$components/Icon.svelte";
 import NavDropdownDesktop from "$components/layout/NavDropdownDesktop.svelte";
 import NavDropdownMobile from "$components/layout/NavDropdownMobile.svelte";
 import ThemeToggle from "$components/ThemeToggle.svelte";
 import { _ } from "$lib/i18n";
 import IconMobileNav from "$lib/icons/IconMobileNav.svelte";
 import type { MobileNavIconName } from "$lib/icons/types";
+import { session } from "$lib/session";
 import type { DropdownLink } from "$lib/types";
 
 import { afterNavigate } from "$app/navigation";
@@ -190,7 +192,19 @@ afterNavigate(() => {
 		{/each}
 	</nav>
 
-	<ThemeToggle />
+	<div class="flex items-center gap-3">
+		{#if $session}
+			<a
+				href="/saved"
+				class="text-white transition-opacity hover:opacity-80"
+				aria-label={$_("nav.saved")}
+				title={$_("nav.saved")}
+			>
+				<Icon type="material" icon="bookmark_filled" w="22" h="22" />
+			</a>
+		{/if}
+		<ThemeToggle />
+	</div>
 </header>
 
 <!-- mobile header -->
@@ -203,7 +217,17 @@ afterNavigate(() => {
 		<img src="/images/logo.svg" alt={$_('aria.logoAlt')} class="w-16" />
 	</a>
 
-	<div class="space-x-4">
+	<div class="flex items-center space-x-4">
+		{#if $session}
+			<a
+				href="/saved"
+				class="text-white transition-opacity hover:opacity-80"
+				aria-label={$_("nav.saved")}
+				title={$_("nav.saved")}
+			>
+				<Icon type="material" icon="bookmark_filled" w="22" h="22" />
+			</a>
+		{/if}
 		<ThemeToggle />
 
 		<!-- menu toggle -->

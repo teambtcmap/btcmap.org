@@ -34,7 +34,16 @@
 		"taggingActivity": "Tagging Activity",
 		"taggingIssues": "Tagging Issues",
 		"communities": "Communities",
-		"countries": "Countries"
+		"countries": "Countries",
+		"saved": "Saved"
+	},
+	"saved": {
+		"title": "My Saved",
+		"places": "Places",
+		"areas": "Areas",
+		"empty": "Save places and areas to see them here.",
+		"noPlaces": "No saved places yet.",
+		"noAreas": "No saved areas yet."
 	},
 	"search": {
 		"placeholderWorldwide": "Search worldwide...",
