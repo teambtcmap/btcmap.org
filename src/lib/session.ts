@@ -68,12 +68,18 @@ function createSessionStore() {
 			const username = generateUsername();
 			const password = generatePassword();
 
-			await api.post("https://api.btcmap.org/rpc", {
+			const addUserRes = await api.post("https://api.btcmap.org/rpc", {
 				jsonrpc: "2.0",
 				method: "add_user",
 				params: { name: username, password },
 				id: 1,
 			});
+
+			if (addUserRes.data?.error) {
+				throw new Error(
+					`add_user failed: ${addUserRes.data.error.message ?? "unknown"}`,
+				);
+			}
 
 			const keyRes = await api.post("https://api.btcmap.org/rpc", {
 				jsonrpc: "2.0",
@@ -81,6 +87,12 @@ function createSessionStore() {
 				params: { username, password, label: "btcmap.org" },
 				id: 1,
 			});
+
+			if (keyRes.data?.error) {
+				throw new Error(
+					`create_api_key failed: ${keyRes.data.error.message ?? "unknown"}`,
+				);
+			}
 
 			const token = keyRes.data?.result?.token;
 			if (typeof token !== "string") {
