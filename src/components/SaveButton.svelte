@@ -54,11 +54,15 @@ async function toggle() {
 		// Persist to the server. On failure we roll back below.
 		await putSavedPlaces(current.token, nextSaved);
 	} catch (err) {
-		// Rollback: restore the previous saved list if we had a session, or
-		// clear any partial state we wrote. Don't touch the token itself —
-		// if signUp() failed there's no session to restore.
+		// Rollback: restore the previous saved list if we had a session.
+		// If we did NOT have a previous session, it means signUp() succeeded
+		// this turn but the first PUT failed — drop the whole throwaway
+		// account so localStorage doesn't keep a session the server never
+		// saw. Matches the "throwaway, no recovery" model.
 		if (previousSession) {
 			session.setSavedPlaces(previousSaved);
+		} else {
+			session.clear();
 		}
 		errToast($_(`merchant.saveFailed`));
 		console.error("SaveButton.toggle failed", err);
