@@ -315,17 +315,15 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 				<div class="mx-auto h-32 w-32 animate-pulse rounded-full bg-link/50" />
 			{/if}
 
-			<div class="flex flex-wrap items-start justify-center gap-3">
-				<h1 class="text-4xl !leading-tight font-semibold text-primary dark:text-white">
-					{localizedName || name || 'BTC Map Merchant'}
-					{#if data.placeData.deleted_at}
-						<span class="text-2xl text-red-600 dark:text-red-400">(Deleted)</span>
-					{/if}
-				</h1>
-				{#if !data.placeData.deleted_at}
-					<SaveButton placeId={Number(data.id)} />
+			<h1 class="text-4xl !leading-tight font-semibold text-primary dark:text-white">
+				{localizedName || name || 'BTC Map Merchant'}
+				{#if data.placeData.deleted_at}
+					<span class="text-2xl text-red-600 dark:text-red-400">(Deleted)</span>
 				{/if}
-			</div>
+			</h1>
+			{#if !data.placeData.deleted_at}
+				<SaveButton placeId={Number(data.id)} />
+			{/if}
 
 			{#if address}
 				<h2 class="text-xl text-primary dark:text-white">
