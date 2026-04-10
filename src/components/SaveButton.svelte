@@ -94,10 +94,9 @@ async function toggle() {
 	type="button"
 	class="{saved
 		? 'border border-link text-link hover:bg-link/10 dark:border-link dark:text-link'
-		: 'bg-link text-white hover:bg-hover'} mx-auto flex w-28 items-center justify-center rounded-lg px-3 py-1.5 text-center text-sm font-semibold transition-colors disabled:opacity-50 {className ??
+		: 'bg-link text-white hover:bg-hover'} mx-auto flex w-28 items-center justify-center rounded-lg px-3 py-1.5 text-center text-sm font-semibold transition-colors {pending ? 'opacity-50' : ''} {className ??
 		''}"
 	on:click={toggle}
-	disabled={pending}
 	aria-pressed={saved}
 	aria-label={saved ? $_(`merchant.saved`) : $_(`merchant.save`)}
 >
