@@ -44,11 +44,11 @@ async function toggle() {
 			current = await session.signUp();
 		}
 
-		// Compute the next list and optimistically update the UI.
-		const nextSaved = saved
-			? current.savedPlaces.filter((id) => id !== placeId)
-			: [...current.savedPlaces, placeId];
-		session.setSavedPlaces(nextSaved);
+		// Toggle atomically inside the store's update() callback to avoid
+		// races when multiple SaveButtons are on the same page.
+		const nextSaved = session.toggleSavedPlace(placeId);
+		if (!nextSaved)
+			throw new Error("toggleSavedPlace returned null (no session)");
 
 		// Persist to the server. On failure we roll back below.
 		await putSavedPlaces(current.token, nextSaved);

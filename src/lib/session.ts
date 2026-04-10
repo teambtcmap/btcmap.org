@@ -122,6 +122,32 @@ function createSessionStore() {
 			});
 		},
 
+		// Toggle a place in saved_places atomically. Computing the next list
+		// inside the update() callback avoids a race when multiple buttons
+		// read-modify-write concurrently (e.g. on a future "My Saved" list
+		// view). Returns the resulting list so the caller can send it to the
+		// server via PUT.
+		toggleSavedPlace: (id: number): number[] | null => {
+			let result: number[] | null = null;
+			update((current) => {
+				if (!current) {
+					console.warn(
+						"session.toggleSavedPlace called with no active session — call signUp() first",
+					);
+					return current;
+				}
+				const alreadySaved = current.savedPlaces.includes(id);
+				const nextSaved = alreadySaved
+					? current.savedPlaces.filter((x) => x !== id)
+					: [...current.savedPlaces, id];
+				result = nextSaved;
+				const next = { ...current, savedPlaces: nextSaved };
+				saveToStorage(next);
+				return next;
+			});
+			return result;
+		},
+
 		// Clear the session (logout / forget account). No recovery.
 		clear: () => {
 			saveToStorage(null);
