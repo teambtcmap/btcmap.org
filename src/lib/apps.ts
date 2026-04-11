@@ -97,6 +97,25 @@ export const appConfigs: AppConfig[] = [
 		],
 	},
 	{
+		id: "bitkit",
+		name: "Bitkit",
+		logo: "/images/apps/bitkit.png",
+		tag: "powered-by-btcmap",
+		sponsor: false,
+		stores: [
+			{
+				store: "app-store",
+				platform: "ios",
+				url: "https://apps.apple.com/us/app/bitkit-bitcoin-wallet/id6502440655",
+			},
+			{
+				store: "google-play",
+				platform: "android",
+				url: "https://play.google.com/store/apps/details?id=to.bitkit",
+			},
+		],
+	},
+	{
 		id: "wos",
 		name: "Wallet of Satoshi",
 		logo: "/images/apps/wos.png",
@@ -265,6 +284,20 @@ export const appConfigs: AppConfig[] = [
 				store: "google-play",
 				platform: "android",
 				url: "https://play.google.com/store/apps/details?id=nz.lightningpay.wallet",
+			},
+		],
+	},
+	{
+		id: "sovran",
+		name: "Sovran",
+		logo: "/images/apps/sovran.png",
+		tag: "powered-by-btcmap",
+		sponsor: false,
+		stores: [
+			{
+				store: "app-store",
+				platform: "ios",
+				url: "https://apps.apple.com/in/app/sovran/id6499554529",
 			},
 		],
 	},
