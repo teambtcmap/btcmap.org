@@ -5,7 +5,7 @@ import Icon from "$components/Icon.svelte";
 import { _ } from "$lib/i18n";
 import { session } from "$lib/session";
 
-import { afterNavigate } from "$app/navigation";
+import { afterNavigate, goto } from "$app/navigation";
 
 let open = false;
 
@@ -49,13 +49,18 @@ afterNavigate(() => {
 						{$_("nav.mySaved")}
 					</a>
 
-					<a
-						href="/login"
-						class="flex items-center gap-2 px-4 py-2 text-sm text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
+					<button
+						on:click={() => {
+							if (confirm($_("nav.switchAccountConfirm"))) {
+								open = false;
+								goto("/login");
+							}
+						}}
+						class="flex w-full items-center gap-2 px-4 py-2 text-sm text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
 					>
 						<Icon type="material" icon="swap_horiz" w="16" h="16" />
 						{$_("nav.switchAccount")}
-					</a>
+					</button>
 				{:else}
 					<a
 						href="/login"

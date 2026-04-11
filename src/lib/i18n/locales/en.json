@@ -40,7 +40,7 @@
 		"account": "Account",
 		"login": "Log in",
 		"switchAccount": "Switch account",
-		"logout": "Log out"
+		"switchAccountConfirm": "Switching accounts will replace your current saved places. Make sure you've backed up your credentials. Continue?"
 	},
 	"saved": {
 		"title": "My Saved",

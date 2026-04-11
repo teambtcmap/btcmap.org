@@ -10,13 +10,15 @@ import api from "$lib/axios";
 // they lose access to their saved items. A backup flow (set password, link
 // Nostr) will be added later.
 //
-// SECURITY — localStorage token blast radius:
-// Storing the Bearer token in localStorage is acceptable here ONLY because
-// the account is a throwaway with no recoverable data or PII. The token
-// grants access to its own saved_places/saved_areas and nothing else.
-// DO NOT reuse this pattern for real user accounts with durable data,
-// payment info, or elevated roles — an XSS would exfiltrate the token.
-// For real accounts, migrate to httpOnly cookies or similar.
+// SECURITY — localStorage blast radius:
+// Both the Bearer token AND the password are stored in localStorage.
+// The password is kept so the backup modal can show it to the user.
+// An XSS could exfiltrate both — the token grants API access, and
+// the password can create new tokens (effectively the same access).
+// This is acceptable for throwaway accounts with only saved_places/
+// saved_areas data. DO NOT reuse this pattern for real user accounts
+// with durable data, payment info, or elevated roles. For real
+// accounts, migrate to httpOnly cookies or similar.
 export type Session = {
 	username: string;
 	password: string;
