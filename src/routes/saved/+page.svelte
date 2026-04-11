@@ -38,7 +38,7 @@ onMount(async () => {
 	session.init();
 
 	if (!$session) {
-		loading = false;
+		goto("/login");
 		return;
 	}
 
