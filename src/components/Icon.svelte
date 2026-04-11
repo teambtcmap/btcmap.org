@@ -21,6 +21,7 @@ const materialExceptions: Record<string, string> = {
 	close_round: "ic:round-close",
 	my_location: "material-symbols:my-location-rounded",
 	bookmark_filled: "ic:baseline-bookmark",
+	account_circle_filled: "ic:baseline-account-circle",
 };
 
 const faBrandIcons = ["x-twitter", "instagram", "facebook", "twitter"];

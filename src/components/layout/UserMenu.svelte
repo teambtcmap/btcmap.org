@@ -19,27 +19,32 @@ function handleLogout() {
 }
 </script>
 
-{#if $session}
-	<div class="relative">
-		<button
-			id="user-menu-trigger"
-			on:click={() => (open = !open)}
-			class="text-white transition-opacity hover:opacity-80"
-			aria-label={$_("nav.account")}
-			aria-haspopup="true"
-			aria-expanded={open}
-		>
-			<Icon type="material" icon="account_circle" w="24" h="24" />
-		</button>
+<div class="relative">
+	<button
+		id="user-menu-trigger"
+		on:click={() => (open = !open)}
+		class="text-white transition-opacity hover:opacity-80"
+		aria-label={$_("nav.account")}
+		aria-haspopup="true"
+		aria-expanded={open}
+	>
+		<Icon
+			type="material"
+			icon={$session ? 'account_circle_filled' : 'account_circle'}
+			w="24"
+			h="24"
+		/>
+	</button>
 
-		{#if open}
-			<OutClick
-				excludeQuerySelectorAll="#user-menu-trigger"
-				on:outclick={() => (open = false)}
+	{#if open}
+		<OutClick
+			excludeQuerySelectorAll="#user-menu-trigger"
+			on:outclick={() => (open = false)}
+		>
+			<div
+				class="absolute right-0 top-full z-50 mt-2 w-48 rounded-lg border border-gray-300 bg-white py-1 shadow-lg dark:border-white/20 dark:bg-dark"
 			>
-				<div
-					class="absolute right-0 top-full z-50 mt-2 w-48 rounded-lg border border-gray-300 bg-white py-1 shadow-lg dark:border-white/20 dark:bg-dark"
-				>
+				{#if $session}
 					<a
 						href="/saved"
 						class="flex items-center gap-2 px-4 py-2 text-sm text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
@@ -57,8 +62,16 @@ function handleLogout() {
 						<Icon type="material" icon="logout" w="16" h="16" />
 						{$_("nav.logout")}
 					</button>
-				</div>
-			</OutClick>
-		{/if}
-	</div>
-{/if}
+				{:else}
+					<a
+						href="/login"
+						class="flex items-center gap-2 px-4 py-2 text-sm text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
+					>
+						<Icon type="material" icon="login" w="16" h="16" />
+						{$_("nav.login")}
+					</a>
+				{/if}
+			</div>
+		</OutClick>
+	{/if}
+</div>
