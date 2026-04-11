@@ -35,7 +35,10 @@
 		"taggingIssues": "Tagging Issues",
 		"communities": "Communities",
 		"countries": "Countries",
-		"saved": "Saved"
+		"saved": "Saved",
+		"mySaved": "My Saved",
+		"account": "Account",
+		"logout": "Log out"
 	},
 	"saved": {
 		"title": "My Saved",
