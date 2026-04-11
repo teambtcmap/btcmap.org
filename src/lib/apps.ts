@@ -212,6 +212,25 @@ export const appConfigs: AppConfig[] = [
 		],
 	},
 	{
+		id: "manna",
+		name: "Manna",
+		logo: "/images/apps/manna.png",
+		tag: "powered-by-btcmap",
+		sponsor: false,
+		stores: [
+			{
+				store: "google-play",
+				platform: "android",
+				url: "https://play.google.com/store/apps/details?id=com.lightning.manna",
+			},
+			{
+				store: "app-store",
+				platform: "ios",
+				url: "https://apps.apple.com/us/app/manna-bitcoin-wallet/id6745337602",
+			},
+		],
+	},
+	{
 		id: "blink",
 		name: "Blink",
 		logo: "/images/apps/blink.png",
