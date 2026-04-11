@@ -14,10 +14,6 @@ import { elementsSync } from "$lib/sync/places";
 import { theme } from "$lib/theme";
 
 import { browser, dev } from "$app/environment";
-
-// Hydrate session immediately (synchronous localStorage read) so the
-// UserMenu icon renders in the correct state without waiting for onMount.
-if (browser) session.init();
 import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
@@ -74,6 +70,9 @@ let dataSyncInterval: ReturnType<typeof setInterval>;
 onMount(async () => {
 	// Initialize theme from SSR/data attribute or localStorage
 	theme.init();
+
+	// Restore saved session (throwaway account + saved places) from localStorage
+	session.init();
 
 	// Track browser language for translation insights
 	trackBrowserLanguage();
