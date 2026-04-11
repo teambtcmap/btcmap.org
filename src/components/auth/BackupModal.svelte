@@ -11,21 +11,12 @@ const dispatch = createEventDispatcher();
 let showPassword = false;
 
 async function copyToClipboard(text: string, label: string) {
-	try {
-		await navigator.clipboard.writeText(text);
-		successToast(`${label} copied`);
-	} catch {
-		// Fallback for older browsers
-		const input = document.createElement("input");
-		input.value = text;
-		document.body.appendChild(input);
-		input.select();
-		document.execCommand("copy");
-		document.body.removeChild(input);
-		successToast(`${label} copied`);
-	}
+	await navigator.clipboard.writeText(text);
+	successToast(`${label} copied`);
 }
 </script>
+
+<svelte:window on:keydown={(e) => e.key === "Escape" && dispatch("close")} />
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
