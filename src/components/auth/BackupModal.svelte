@@ -10,9 +10,13 @@ const dispatch = createEventDispatcher();
 
 let showPassword = false;
 
-async function copyToClipboard(text: string, label: string) {
-	await navigator.clipboard.writeText(text);
-	successToast(`${label} copied`);
+async function copyToClipboard(text: string) {
+	try {
+		await navigator.clipboard.writeText(text);
+		successToast($_("backup.copied"));
+	} catch (err) {
+		console.error("Clipboard write failed", err);
+	}
 }
 </script>
 
@@ -56,7 +60,7 @@ async function copyToClipboard(text: string, label: string) {
 							class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-primary dark:border-white/20 dark:bg-white/5 dark:text-white"
 						/>
 						<button
-							on:click={() => copyToClipboard($session?.username ?? "", $_("backup.username"))}
+							on:click={() => copyToClipboard($session?.username ?? "")}
 							class="shrink-0 rounded-lg border border-gray-300 p-2 transition-colors hover:bg-gray-100 dark:border-white/20 dark:hover:bg-white/10"
 							title={$_("backup.copy")}
 						>
@@ -92,7 +96,7 @@ async function copyToClipboard(text: string, label: string) {
 						</button>
 						{#if $session.password}
 							<button
-								on:click={() => copyToClipboard($session?.password ?? "", $_("backup.password"))}
+								on:click={() => copyToClipboard($session?.password ?? "")}
 								class="shrink-0 rounded-lg border border-gray-300 p-2 transition-colors hover:bg-gray-100 dark:border-white/20 dark:hover:bg-white/10"
 								title={$_("backup.copy")}
 							>

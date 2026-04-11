@@ -71,7 +71,8 @@
 		"show": "Show password",
 		"hide": "Hide password",
 		"unavailable": "Not available (old account)",
-		"warning": "These credentials are the only way to recover your saved places."
+		"warning": "These credentials are the only way to recover your saved places.",
+		"copied": "Copied to clipboard"
 	},
 	"save": {
 		"accountCreated": "Account created — your saved places are stored on this device."
