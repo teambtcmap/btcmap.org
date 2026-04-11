@@ -40,7 +40,7 @@
 		"account": "Account",
 		"login": "Log in",
 		"switchAccount": "Switch account",
-		"switchAccountConfirm": "Switching accounts will replace your current saved places. Make sure you've backed up your credentials. Continue?"
+		"backupAccount": "Back up account"
 	},
 	"saved": {
 		"title": "My Saved",
@@ -59,6 +59,17 @@
 		"loggingIn": "Logging in...",
 		"failed": "Invalid username or password.",
 		"error": "Something went wrong. Please try again."
+	},
+	"backup": {
+		"title": "Back up account",
+		"description": "Save these credentials to log in on another device.",
+		"username": "Username",
+		"password": "Password",
+		"copy": "Copy",
+		"show": "Show password",
+		"hide": "Hide password",
+		"unavailable": "Not available (old account)",
+		"warning": "These credentials are the only way to recover your saved places."
 	},
 	"save": {
 		"accountCreated": "Account created — your saved places are stored on this device."

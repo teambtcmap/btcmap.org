@@ -1,13 +1,15 @@
 <script lang="ts">
 import OutClick from "svelte-outclick";
 
+import BackupModal from "$components/auth/BackupModal.svelte";
 import Icon from "$components/Icon.svelte";
 import { _ } from "$lib/i18n";
 import { session } from "$lib/session";
 
-import { afterNavigate, goto } from "$app/navigation";
+import { afterNavigate } from "$app/navigation";
 
 let open = false;
+let showBackup = false;
 
 afterNavigate(() => {
 	open = false;
@@ -51,16 +53,24 @@ afterNavigate(() => {
 
 					<button
 						on:click={() => {
-							if (confirm($_("nav.switchAccountConfirm"))) {
-								open = false;
-								goto("/login");
-							}
+							open = false;
+							showBackup = true;
 						}}
 						class="flex w-full items-center gap-2 px-4 py-2 text-sm text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
 					>
+						<Icon type="material" icon="key" w="16" h="16" />
+						{$_("nav.backupAccount")}
+					</button>
+
+					<hr class="my-1 border-gray-200 dark:border-white/10" />
+
+					<a
+						href="/login"
+						class="flex items-center gap-2 px-4 py-2 text-sm text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
+					>
 						<Icon type="material" icon="swap_horiz" w="16" h="16" />
 						{$_("nav.switchAccount")}
-					</button>
+					</a>
 				{:else}
 					<a
 						href="/login"
@@ -74,3 +84,7 @@ afterNavigate(() => {
 		</OutClick>
 	{/if}
 </div>
+
+{#if showBackup}
+	<BackupModal on:close={() => (showBackup = false)} />
+{/if}
