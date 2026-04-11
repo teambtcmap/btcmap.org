@@ -212,6 +212,30 @@ export const appConfigs: AppConfig[] = [
 		],
 	},
 	{
+		id: "fedi",
+		name: "Fedi",
+		logo: "/images/apps/fedi.png",
+		tag: "powered-by-btcmap",
+		sponsor: false,
+		stores: [
+			{
+				store: "google-play",
+				platform: "android",
+				url: "https://play.google.com/store/apps/details?id=com.fedi",
+			},
+			{
+				store: "app-store",
+				platform: "ios",
+				url: "https://apps.apple.com/us/app/fedi-alpha/id6448916281",
+			},
+			{
+				store: "apk",
+				platform: "android",
+				url: "https://apk.fedi.xyz",
+			},
+		],
+	},
+	{
 		id: "manna",
 		name: "Manna",
 		logo: "/images/apps/manna.png",
