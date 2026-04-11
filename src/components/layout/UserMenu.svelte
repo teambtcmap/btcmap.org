@@ -66,13 +66,16 @@ afterNavigate(() => {
 
 					<hr class="my-1 border-gray-200 dark:border-white/10" />
 
-					<a
-						href="/login"
-						class="flex items-center gap-2 px-4 py-2 text-sm text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
+					<button
+						on:click={() => {
+							session.clear();
+							open = false;
+						}}
+						class="flex w-full items-center gap-2 px-4 py-2 text-sm text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
 					>
-						<Icon type="material" icon="swap_horiz" w="16" h="16" />
-						{$_("nav.switchAccount")}
-					</a>
+						<Icon type="material" icon="logout" w="16" h="16" />
+						{$_("nav.logout")}
+					</button>
 				{:else}
 					<a
 						href="/login"
