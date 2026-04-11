@@ -106,7 +106,7 @@ export const appConfigs: AppConfig[] = [
 			{
 				store: "app-store",
 				platform: "ios",
-				url: "https://apps.apple.com/us/app/bitkit-wallet/id1637040489",
+				url: "https://apps.apple.com/us/app/bitkit-bitcoin-wallet/id6502440655",
 			},
 			{
 				store: "google-play",
