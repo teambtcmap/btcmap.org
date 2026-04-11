@@ -193,7 +193,7 @@ afterNavigate(() => {
 
 	<div class="flex items-center gap-3">
 		<ThemeToggle />
-		<UserMenu />
+		<UserMenu id="user-menu-desktop" />
 	</div>
 </header>
 
@@ -209,7 +209,7 @@ afterNavigate(() => {
 
 	<div class="flex items-center space-x-4">
 		<ThemeToggle />
-		<UserMenu />
+		<UserMenu id="user-menu-mobile" />
 
 		<!-- menu toggle -->
 		<button on:click={() => (showMobileMenu = !showMobileMenu)}>

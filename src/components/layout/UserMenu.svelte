@@ -8,9 +8,11 @@ import { session } from "$lib/session";
 
 import { afterNavigate } from "$app/navigation";
 
+export let id = "user-menu";
+
 let open = false;
 let showBackup = false;
-const triggerId = `user-menu-trigger-${Math.random().toString(36).slice(2, 8)}`;
+$: triggerId = `${id}-trigger`;
 
 afterNavigate(() => {
 	open = false;
