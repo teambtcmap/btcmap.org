@@ -295,11 +295,6 @@ export const appConfigs: AppConfig[] = [
 		sponsor: false,
 		stores: [
 			{
-				store: "google-play",
-				platform: "android",
-				url: "https://play.google.com/store/apps/details?id=com.sovranapp",
-			},
-			{
 				store: "app-store",
 				platform: "ios",
 				url: "https://apps.apple.com/in/app/sovran/id6499554529",
