@@ -1,25 +1,16 @@
 <script lang="ts">
 import { _ } from "svelte-i18n";
 
+import AreaFeed from "$components/area/AreaFeed.svelte";
 import Icon from "$components/Icon.svelte";
-import LatestTagger from "$components/LatestTagger.svelte";
-import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
-import TopButton from "$components/TopButton.svelte";
-import type { ActivityEvent, User } from "$lib/types.js";
+import type { User } from "$lib/types.js";
 
 import { resolve } from "$app/paths";
 
 export let alias: string;
 export let name: string;
 export let dataInitialized: boolean;
-export let eventElements: ActivityEvent[];
 export let taggers: User[];
-
-let hideArrow = false;
-let activityDiv: HTMLDivElement;
-
-let eventCount = 25;
-$: eventElementsPaginated = eventElements.slice(0, eventCount);
 
 let taggerCount = 25;
 $: taggersPaginated = taggers.slice(0, taggerCount);
@@ -84,65 +75,7 @@ let taggerDiv: HTMLDivElement;
 	</div>
 </section>
 
-<section id="activity">
-	<!-- prettier-ignore -->
-	<div class="w-full rounded-3xl border border-gray-300 dark:border-white/95 dark:bg-white/10">
-		<!-- prettier-ignore -->
-		<h3
-			class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
-		>
-			{name || $_(`areaStats.defaultAreaName`)} {$_(`areaActivity.activity`)}
-		</h3>
-
-		<div
-			bind:this={activityDiv}
-			class="hide-scroll relative max-h-[375px] space-y-2 overflow-y-scroll"
-			on:scroll={() => {
-				if (dataInitialized && !hideArrow) {
-					hideArrow = true;
-				}
-			}}
-		>
-			{#if eventElements && eventElements.length}
-				{#each eventElementsPaginated as event (event['created_at'])}
-					<LatestTagger
-						location={event.location}
-						action={event.type}
-						user={event.tagger}
-						time={event['created_at']}
-						latest={event === eventElements[0] ? true : false}
-						merchantId={event.merchantId}
-					/>
-				{/each}
-
-				{#if eventElementsPaginated.length !== eventElements.length}
-					<button
-						class="mx-auto !mb-5 block text-xl font-semibold text-link transition-colors hover:text-hover"
-						on:click={() => (eventCount = eventCount + 25)}>{$_(`areaActivity.loadMore`)}</button
-					>
-				{:else if eventElements.length > 10}
-					<TopButton scroll={activityDiv} style="!mb-5" />
-				{/if}
-
-				{#if !hideArrow && eventElements.length > 5}
-					<Icon
-						type="fa"
-						icon="chevron-down"
-						w="16"
-						h="16"
-						class="absolute bottom-4 left-[calc(50%-8px)] z-20 animate-bounce text-primary dark:text-white"
-					/>
-				{/if}
-			{:else if !dataInitialized}
-				{#each Array(5) as _, index (index)}
-					<TaggerSkeleton />
-				{/each}
-			{:else}
-				<p class="p-5 text-body dark:text-white">{$_(`areaActivity.noActivity`)}</p>
-			{/if}
-		</div>
-	</div>
-</section>
+<AreaFeed {alias} {name} {dataInitialized} />
 
 <section id="atom">
 	<!-- prettier-ignore -->
