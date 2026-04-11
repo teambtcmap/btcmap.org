@@ -48,7 +48,7 @@ afterNavigate(() => {
 			>
 				{#if $session}
 					<a
-						href="/saved"
+						href="/user/saved"
 						class="flex items-center gap-2 px-4 py-2 text-sm text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
 					>
 						<Icon type="material" icon="bookmark" w="16" h="16" />

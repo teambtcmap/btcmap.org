@@ -54,7 +54,7 @@ async function handleSubmit() {
 			session.setSavedAreas(ids);
 		}
 
-		goto("/saved");
+		goto("/user/saved");
 	} catch (err) {
 		const message =
 			(err as { response?: { status?: number } })?.response?.status === 401
