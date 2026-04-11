@@ -93,7 +93,7 @@
 		"svelte-preprocess": "^6.0.3",
 		"tailwindcss": "^4.2.2",
 		"typescript": "^5.9.3",
-		"vite": "^5.4.21",
+		"vite": "^6.4.2",
 		"vitest": "^3.2.4"
 	},
 	"packageManager": "pnpm@10.11.0"
