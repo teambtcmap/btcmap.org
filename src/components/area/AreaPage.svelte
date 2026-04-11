@@ -25,6 +25,7 @@ import Boost from "$components/Boost.svelte";
 import Icon from "$components/Icon.svelte";
 import IssuesTable from "$components/IssuesTable.svelte";
 import OrgBadge from "$components/OrgBadge.svelte";
+import SaveButton from "$components/SaveButton.svelte";
 import Socials from "$components/Socials.svelte";
 import SponsorBadge from "$components/SponsorBadge.svelte";
 import Tip from "$components/Tip.svelte";
@@ -427,6 +428,7 @@ let issues: RpcIssue[] = [];
 			<h1 class="text-4xl !leading-tight font-semibold text-primary dark:text-white">
 				{name || $_('area.defaultName')}
 			</h1>
+			<SaveButton id={data.numericId} type="area" />
 			{#if org}
 				<OrgBadge {org} />
 			{/if}

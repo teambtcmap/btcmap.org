@@ -34,7 +34,17 @@
 		"taggingActivity": "Tagging Activity",
 		"taggingIssues": "Tagging Issues",
 		"communities": "Communities",
-		"countries": "Countries"
+		"countries": "Countries",
+		"saved": "Saved"
+	},
+	"saved": {
+		"title": "My Saved",
+		"places": "Places",
+		"areas": "Areas",
+		"empty": "Save places and areas to see them here.",
+		"noPlaces": "No saved places yet.",
+		"noAreas": "No saved areas yet.",
+		"loadError": "Failed to load some saved items."
 	},
 	"search": {
 		"placeholderWorldwide": "Search worldwide...",
@@ -99,6 +109,9 @@
 		"navigate": "Navigate",
 		"edit": "Edit",
 		"share": "Share",
+		"save": "Save",
+		"saved": "Saved",
+		"saveFailed": "Failed to save",
 		"call": "Call",
 		"email": "Email",
 		"website": "Website",

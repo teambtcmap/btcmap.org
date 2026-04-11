@@ -399,6 +399,7 @@ export type ChartHistory = "7D" | "1M" | "3M" | "6M" | "YTD" | "1Y" | "ALL";
 
 export type AreaPageProps = {
 	id: string;
+	numericId: number;
 	name: string;
 	tickets: Tickets;
 	issues: RpcIssue[];

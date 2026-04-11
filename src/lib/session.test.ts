@@ -1,0 +1,202 @@
+import { get } from "svelte/store";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+// Mock axios to prevent real API calls
+vi.mock("$lib/axios", () => ({
+	default: {
+		get: vi.fn(),
+		post: vi.fn(),
+	},
+}));
+
+// Fresh session store for each test
+async function createTestSession() {
+	vi.resetModules();
+	const { session } = await import("$lib/session");
+	return session;
+}
+
+// Helper: seed a session into the store by calling init() with
+// pre-populated localStorage
+function seedStorage(data: {
+	username: string;
+	token: string;
+	savedPlaces: number[];
+	savedAreas?: number[];
+}) {
+	localStorage.setItem("btcmap_session", JSON.stringify(data));
+}
+
+describe("session store", () => {
+	beforeEach(() => {
+		localStorage.clear();
+		vi.restoreAllMocks();
+	});
+
+	describe("toggleSavedPlace", () => {
+		it("adds a place when not already saved", async () => {
+			seedStorage({
+				username: "test",
+				token: "tok",
+				savedPlaces: [1, 2],
+				savedAreas: [],
+			});
+			const session = await createTestSession();
+			session.init();
+
+			const result = session.toggleSavedPlace(3);
+			expect(result).toEqual([1, 2, 3]);
+			expect(get(session)?.savedPlaces).toEqual([1, 2, 3]);
+		});
+
+		it("removes a place when already saved", async () => {
+			seedStorage({
+				username: "test",
+				token: "tok",
+				savedPlaces: [1, 2, 3],
+				savedAreas: [],
+			});
+			const session = await createTestSession();
+			session.init();
+
+			const result = session.toggleSavedPlace(2);
+			expect(result).toEqual([1, 3]);
+			expect(get(session)?.savedPlaces).toEqual([1, 3]);
+		});
+
+		it("returns null when no session exists", async () => {
+			const session = await createTestSession();
+			const result = session.toggleSavedPlace(1);
+			expect(result).toBeNull();
+		});
+
+		it("persists to localStorage", async () => {
+			seedStorage({
+				username: "test",
+				token: "tok",
+				savedPlaces: [],
+				savedAreas: [],
+			});
+			const session = await createTestSession();
+			session.init();
+
+			session.toggleSavedPlace(42);
+
+			const stored = JSON.parse(localStorage.getItem("btcmap_session") ?? "{}");
+			expect(stored.savedPlaces).toEqual([42]);
+		});
+	});
+
+	describe("toggleSavedArea", () => {
+		it("adds an area when not already saved", async () => {
+			seedStorage({
+				username: "test",
+				token: "tok",
+				savedPlaces: [],
+				savedAreas: [10],
+			});
+			const session = await createTestSession();
+			session.init();
+
+			const result = session.toggleSavedArea(20);
+			expect(result).toEqual([10, 20]);
+		});
+
+		it("removes an area when already saved", async () => {
+			seedStorage({
+				username: "test",
+				token: "tok",
+				savedPlaces: [],
+				savedAreas: [10, 20],
+			});
+			const session = await createTestSession();
+			session.init();
+
+			const result = session.toggleSavedArea(10);
+			expect(result).toEqual([20]);
+		});
+	});
+
+	describe("loadFromStorage backfill", () => {
+		it("backfills savedAreas when missing from old session", async () => {
+			// Simulate an old session without savedAreas
+			localStorage.setItem(
+				"btcmap_session",
+				JSON.stringify({
+					username: "old-user",
+					token: "old-tok",
+					savedPlaces: [1, 2],
+				}),
+			);
+			const session = await createTestSession();
+			session.init();
+
+			const current = get(session);
+			expect(current?.savedAreas).toEqual([]);
+			expect(current?.savedPlaces).toEqual([1, 2]);
+		});
+
+		it("returns null for invalid data", async () => {
+			localStorage.setItem("btcmap_session", "not-json");
+			const session = await createTestSession();
+			session.init();
+			expect(get(session)).toBeNull();
+		});
+
+		it("returns null when username is missing", async () => {
+			localStorage.setItem(
+				"btcmap_session",
+				JSON.stringify({ token: "tok", savedPlaces: [] }),
+			);
+			const session = await createTestSession();
+			session.init();
+			expect(get(session)).toBeNull();
+		});
+	});
+
+	describe("signUp memoization", () => {
+		it("concurrent calls return the same promise", async () => {
+			const { default: api } = await import("$lib/axios");
+			(api.post as ReturnType<typeof vi.fn>).mockResolvedValue({
+				data: { username: "new-user", token: "new-tok" },
+			});
+
+			const session = await createTestSession();
+
+			const p1 = session.signUp();
+			const p2 = session.signUp();
+
+			expect(p1).toBe(p2);
+
+			const [r1, r2] = await Promise.all([p1, p2]);
+			expect(r1).toBe(r2);
+			expect(r1.username).toBe("new-user");
+		});
+	});
+
+	describe("setSavedPlaces / setSavedAreas with null session", () => {
+		it("setSavedPlaces warns and no-ops when session is null", async () => {
+			const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+			const session = await createTestSession();
+
+			session.setSavedPlaces([1, 2]);
+
+			expect(get(session)).toBeNull();
+			expect(warnSpy).toHaveBeenCalledWith(
+				expect.stringContaining("setSavedPlaces"),
+			);
+		});
+
+		it("setSavedAreas warns and no-ops when session is null", async () => {
+			const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+			const session = await createTestSession();
+
+			session.setSavedAreas([1, 2]);
+
+			expect(get(session)).toBeNull();
+			expect(warnSpy).toHaveBeenCalledWith(
+				expect.stringContaining("setSavedAreas"),
+			);
+		});
+	});
+});

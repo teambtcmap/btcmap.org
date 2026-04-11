@@ -14,6 +14,7 @@ import Icon from "$components/Icon.svelte";
 import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
 import PaymentMethodPills from "$components/PaymentMethodPills.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import SaveButton from "$components/SaveButton.svelte";
 import ShowTags from "$components/ShowTags.svelte";
 import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
 import TaggingIssues from "$components/TaggingIssues.svelte";
@@ -320,6 +321,9 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 					<span class="text-2xl text-red-600 dark:text-red-400">(Deleted)</span>
 				{/if}
 			</h1>
+			{#if !data.placeData.deleted_at}
+				<SaveButton id={Number(data.id)} type="place" />
+			{/if}
 
 			{#if address}
 				<h2 class="text-xl text-primary dark:text-white">

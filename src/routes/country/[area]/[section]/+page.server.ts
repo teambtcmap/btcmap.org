@@ -60,6 +60,7 @@ export const load: PageServerLoad = async ({ params }) => {
 
 		return {
 			id: fetchedArea.tags.url_alias,
+			numericId: fetchedArea.id,
 			name: fetchedArea.tags.name,
 			tickets: tickets,
 			issues: issues.result.requested_issues,
