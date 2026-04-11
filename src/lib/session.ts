@@ -11,12 +11,13 @@ import api from "$lib/axios";
 // Nostr) will be added later.
 //
 // SECURITY — localStorage blast radius:
-// Both the Bearer token AND the password are stored in localStorage.
-// The password is kept so the backup modal can show it to the user.
-// An XSS could exfiltrate both — the token grants API access, and
-// the password can create new tokens (effectively the same access).
-// This is acceptable for throwaway accounts with only saved_places/
-// saved_areas data. DO NOT reuse this pattern for real user accounts
+// The Bearer token is always stored in localStorage. The password is
+// stored only for auto-generated accounts (so the backup modal can
+// show it). Manual logins store an empty password — the user already
+// knows their credentials. An XSS could exfiltrate the token (and
+// the password for auto-generated accounts). This is acceptable for
+// throwaway accounts with only saved_places/saved_areas data.
+// DO NOT reuse this pattern for real user accounts
 // with durable data, payment info, or elevated roles. For real
 // accounts, migrate to httpOnly cookies or similar.
 export type Session = {
