@@ -29,7 +29,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			if (status === 401 || status === 403) {
 				error(401, "Invalid username or password");
 			}
-			console.error("Failed to create token:", err?.response?.data ?? err);
+			console.error("Failed to create token:", err?.response?.status);
 			error(502, "Failed to log in");
 		});
 

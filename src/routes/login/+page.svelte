@@ -17,13 +17,13 @@ onMount(() => {
 });
 
 async function handleSubmit() {
-	if (!username.trim() || !password.trim()) return;
+	if (!username.trim() || !password) return;
 	loading = true;
 
 	try {
 		const res = await api.post("/api/session/login", {
 			username: username.trim(),
-			password: password.trim(),
+			password,
 		});
 
 		const token = res.data?.token;
@@ -61,7 +61,11 @@ async function handleSubmit() {
 				? $_("login.failed")
 				: $_("login.error");
 		errToast(message);
-		console.error("Login failed", err);
+		console.error(
+			"Login failed:",
+			(err as { response?: { status?: number } })?.response?.status ??
+				"unknown",
+		);
 	} finally {
 		loading = false;
 	}
@@ -113,7 +117,7 @@ async function handleSubmit() {
 
 			<button
 				type="submit"
-				disabled={loading || !username.trim() || !password.trim()}
+				disabled={loading || !username.trim() || !password}
 				class="w-full rounded-lg bg-link px-4 py-2 font-semibold text-white transition-colors hover:bg-hover disabled:opacity-50"
 			>
 				{loading ? $_("login.loggingIn") : $_("login.submit")}
