@@ -19,7 +19,8 @@ afterNavigate(() => {
 		id="user-menu-trigger"
 		on:click={() => (open = !open)}
 		class="text-white transition-opacity hover:opacity-80"
-		aria-label={$_("nav.account")}
+		aria-label={$session?.username ?? $_("nav.account")}
+		title={$session?.username ?? $_("nav.account")}
 		aria-haspopup="true"
 		aria-expanded={open}
 	>
