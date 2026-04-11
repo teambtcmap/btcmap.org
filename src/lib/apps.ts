@@ -231,6 +231,20 @@ export const appConfigs: AppConfig[] = [
 		],
 	},
 	{
+		id: "stacked",
+		name: "Stacked Wallet",
+		logo: "/images/apps/stacked.png",
+		tag: "powered-by-btcmap",
+		sponsor: false,
+		stores: [
+			{
+				store: "google-play",
+				platform: "android",
+				url: "https://play.google.com/store/apps/details?id=nz.lightningpay.wallet",
+			},
+		],
+	},
+	{
 		id: "blink",
 		name: "Blink",
 		logo: "/images/apps/blink.png",
