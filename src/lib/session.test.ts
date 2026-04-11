@@ -20,11 +20,15 @@ async function createTestSession() {
 // pre-populated localStorage
 function seedStorage(data: {
 	username: string;
+	password?: string;
 	token: string;
 	savedPlaces: number[];
 	savedAreas?: number[];
 }) {
-	localStorage.setItem("btcmap_session", JSON.stringify(data));
+	localStorage.setItem(
+		"btcmap_session",
+		JSON.stringify({ password: "pw", ...data }),
+	);
 }
 
 describe("session store", () => {

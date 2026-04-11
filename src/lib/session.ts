@@ -19,6 +19,7 @@ import api from "$lib/axios";
 // For real accounts, migrate to httpOnly cookies or similar.
 export type Session = {
 	username: string;
+	password: string;
 	token: string;
 	savedPlaces: number[];
 	savedAreas: number[];
@@ -42,6 +43,12 @@ function loadFromStorage(): Session | null {
 		// Backfill savedAreas for sessions created before this field existed
 		if (!Array.isArray(parsed.savedAreas)) {
 			parsed.savedAreas = [];
+		}
+		// Backfill password for sessions created before backup was available.
+		// Empty string means the password is lost — the user can still use
+		// their current token but can't back up or log in on another device.
+		if (typeof parsed.password !== "string") {
+			parsed.password = "";
 		}
 		return parsed as Session;
 	} catch {
@@ -83,6 +90,7 @@ function createSessionStore() {
 
 		const session: Session = {
 			username,
+			password,
 			token,
 			savedPlaces: [],
 			savedAreas: [],
