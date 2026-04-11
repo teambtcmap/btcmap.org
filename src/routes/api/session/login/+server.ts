@@ -11,11 +11,11 @@ export const POST: RequestHandler = async ({ request }) => {
 	const body = await request.json();
 	const { username, password } = body;
 
-	if (!username || typeof username !== "string") {
-		error(400, "Missing required parameter: username");
+	if (!username || typeof username !== "string" || username.length > 100) {
+		error(400, "Missing or invalid username");
 	}
-	if (!password || typeof password !== "string") {
-		error(400, "Missing required parameter: password");
+	if (!password || typeof password !== "string" || password.length > 200) {
+		error(400, "Missing or invalid password");
 	}
 
 	const tokenRes = await api
