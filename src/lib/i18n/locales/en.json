@@ -50,6 +50,15 @@
 		"noAreas": "No saved areas yet.",
 		"loadError": "Failed to load some saved items."
 	},
+	"login": {
+		"title": "Log in",
+		"username": "Username",
+		"password": "Password",
+		"submit": "Log in",
+		"loggingIn": "Logging in...",
+		"failed": "Invalid username or password.",
+		"error": "Something went wrong. Please try again."
+	},
 	"search": {
 		"placeholderWorldwide": "Search worldwide...",
 		"placeholderNearby": "Search nearby...",

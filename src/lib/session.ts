@@ -201,6 +201,20 @@ function createSessionStore() {
 			return result;
 		},
 
+		// Replace the current session with a different account (login flow).
+		// Saved items are populated separately after login.
+		login: (username: string, password: string, token: string) => {
+			const session: Session = {
+				username,
+				password,
+				token,
+				savedPlaces: [],
+				savedAreas: [],
+			};
+			saveToStorage(session);
+			set(session);
+		},
+
 		// Clear the session (logout / forget account). No recovery.
 		clear: () => {
 			saveToStorage(null);
