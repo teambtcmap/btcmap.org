@@ -10,6 +10,7 @@ import { afterNavigate } from "$app/navigation";
 
 let open = false;
 let showBackup = false;
+const triggerId = `user-menu-trigger-${Math.random().toString(36).slice(2, 8)}`;
 
 afterNavigate(() => {
 	open = false;
@@ -18,7 +19,7 @@ afterNavigate(() => {
 
 <div class="relative">
 	<button
-		id="user-menu-trigger"
+		id={triggerId}
 		on:click={() => (open = !open)}
 		class="flex h-10 w-10 items-center justify-center text-white transition-opacity hover:opacity-80"
 		aria-label={$session?.username ?? $_("nav.account")}
@@ -36,7 +37,7 @@ afterNavigate(() => {
 
 	{#if open}
 		<OutClick
-			excludeQuerySelectorAll="#user-menu-trigger"
+			excludeQuerySelectorAll={`#${triggerId}`}
 			on:outclick={() => (open = false)}
 		>
 			<div
