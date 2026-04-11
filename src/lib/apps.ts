@@ -104,14 +104,14 @@ export const appConfigs: AppConfig[] = [
 		sponsor: true,
 		stores: [
 			{
-				store: "app-store",
-				platform: "ios",
-				url: "https://apps.apple.com/us/app/wallet-of-satoshi/id1438599608",
-			},
-			{
 				store: "google-play",
 				platform: "android",
 				url: "https://play.google.com/store/apps/details?id=com.livingroomofsatoshi.wallet",
+			},
+			{
+				store: "app-store",
+				platform: "ios",
+				url: "https://apps.apple.com/us/app/wallet-of-satoshi/id1438599608",
 			},
 		],
 	},
@@ -122,6 +122,11 @@ export const appConfigs: AppConfig[] = [
 		tag: "powered-by-btcmap",
 		sponsor: false,
 		stores: [
+			{
+				store: "google-play",
+				platform: "android",
+				url: "https://play.google.com/store/apps/details?id=com.getalby.mobile",
+			},
 			{
 				store: "zapstore",
 				platform: "android",
@@ -137,11 +142,6 @@ export const appConfigs: AppConfig[] = [
 				platform: "ios",
 				url: "https://apps.apple.com/us/app/alby-go/id6471335774",
 			},
-			{
-				store: "google-play",
-				platform: "android",
-				url: "https://play.google.com/store/apps/details?id=com.getalby.mobile",
-			},
 		],
 	},
 	{
@@ -152,6 +152,11 @@ export const appConfigs: AppConfig[] = [
 		sponsor: false,
 		stores: [
 			{
+				store: "google-play",
+				platform: "android",
+				url: "https://play.google.com/store/apps/details?id=io.aquawallet.android",
+			},
+			{
 				store: "zapstore",
 				platform: "android",
 				url: "https://zapstore.dev/apps/io.aquawallet.android",
@@ -160,11 +165,6 @@ export const appConfigs: AppConfig[] = [
 				store: "app-store",
 				platform: "ios",
 				url: "https://apps.apple.com/us/app/aqua-wallet/id6468594241",
-			},
-			{
-				store: "google-play",
-				platform: "android",
-				url: "https://play.google.com/store/apps/details?id=io.aquawallet.android",
 			},
 		],
 	},
@@ -176,14 +176,14 @@ export const appConfigs: AppConfig[] = [
 		sponsor: true,
 		stores: [
 			{
-				store: "app-store",
-				platform: "ios",
-				url: "https://apps.apple.com/us/app/cash-app/id711923939",
-			},
-			{
 				store: "google-play",
 				platform: "android",
 				url: "https://play.google.com/store/apps/details?id=com.squareup.cash",
+			},
+			{
+				store: "app-store",
+				platform: "ios",
+				url: "https://apps.apple.com/us/app/cash-app/id711923939",
 			},
 		],
 	},
@@ -224,14 +224,14 @@ export const appConfigs: AppConfig[] = [
 				url: "https://play.google.com/store/apps/details?id=com.fedi",
 			},
 			{
-				store: "app-store",
-				platform: "ios",
-				url: "https://apps.apple.com/us/app/fedi-alpha/id6448916281",
-			},
-			{
 				store: "apk",
 				platform: "android",
 				url: "https://apk.fedi.xyz",
+			},
+			{
+				store: "app-store",
+				platform: "ios",
+				url: "https://apps.apple.com/us/app/fedi-alpha/id6448916281",
 			},
 		],
 	},
@@ -276,6 +276,11 @@ export const appConfigs: AppConfig[] = [
 		sponsor: false,
 		stores: [
 			{
+				store: "google-play",
+				platform: "android",
+				url: "https://play.google.com/store/apps/details?id=io.blink.wallet",
+			},
+			{
 				store: "zapstore",
 				platform: "android",
 				url: "https://zapstore.dev/apps/io.blink.wallet",
@@ -284,11 +289,6 @@ export const appConfigs: AppConfig[] = [
 				store: "apk",
 				platform: "android",
 				url: "https://github.com/blinkbitcoin/blink-mobile/releases/latest",
-			},
-			{
-				store: "google-play",
-				platform: "android",
-				url: "https://play.google.com/store/apps/details?id=io.blink.wallet",
 			},
 			{
 				store: "app-store",
