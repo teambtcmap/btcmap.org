@@ -119,5 +119,17 @@ async function handleSubmit() {
 				{loading ? $_("login.loggingIn") : $_("login.submit")}
 			</button>
 		</form>
+
+		<p class="text-center text-sm text-body dark:text-white/70">
+			{$_("login.noAccount")}
+			<a
+				href="https://developer.btcmap.org"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="text-link transition-colors hover:text-hover"
+			>
+				{$_("login.createAccount")}
+			</a>
+		</p>
 	</div>
 </div>

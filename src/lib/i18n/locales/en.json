@@ -58,7 +58,9 @@
 		"submit": "Log in",
 		"loggingIn": "Logging in...",
 		"failed": "Invalid username or password.",
-		"error": "Something went wrong. Please try again."
+		"error": "Something went wrong. Please try again.",
+		"noAccount": "Don't have an account?",
+		"createAccount": "Create one here"
 	},
 	"backup": {
 		"title": "Back up account",
