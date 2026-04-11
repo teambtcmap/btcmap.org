@@ -43,7 +43,7 @@
 		"@tanstack/match-sorter-utils": "^8.19.4",
 		"@tanstack/svelte-table": "^8.21.3",
 		"@zerodevx/svelte-toast": "^0.9.6",
-		"axios": "^1.13.6",
+		"axios": "^1.15.0",
 		"axios-retry": "^4.5.0",
 		"chart.js": "^4.5.1",
 		"d3-geo": "^3.1.1",
@@ -69,11 +69,11 @@
 		"tippy.js": "^6.3.7"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.10",
+		"@biomejs/biome": "^2.4.11",
 		"@iconify/svelte": "^4.2.0",
 		"@playwright/test": "^1.59.1",
 		"@sveltejs/adapter-netlify": "^6.0.4",
-		"@sveltejs/kit": "^2.56.1",
+		"@sveltejs/kit": "^2.57.1",
 		"@sveltejs/vite-plugin-svelte": "^3.1.2",
 		"@tailwindcss/postcss": "^4.2.2",
 		"@tailwindcss/vite": "^4.2.2",
