@@ -12,11 +12,6 @@ let open = false;
 afterNavigate(() => {
 	open = false;
 });
-
-function handleLogout() {
-	session.clear();
-	open = false;
-}
 </script>
 
 <div class="relative">
@@ -52,16 +47,6 @@ function handleLogout() {
 						<Icon type="material" icon="bookmark" w="16" h="16" />
 						{$_("nav.mySaved")}
 					</a>
-
-					<hr class="my-1 border-gray-200 dark:border-white/10" />
-
-					<button
-						on:click={handleLogout}
-						class="flex w-full items-center gap-2 px-4 py-2 text-sm text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
-					>
-						<Icon type="material" icon="logout" w="16" h="16" />
-						{$_("nav.logout")}
-					</button>
 				{:else}
 					<a
 						href="/login"
