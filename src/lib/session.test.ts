@@ -123,7 +123,6 @@ describe("session store", () => {
 
 	describe("loadFromStorage backfill", () => {
 		it("backfills savedAreas when missing from old session", async () => {
-			// Simulate an old session without savedAreas
 			localStorage.setItem(
 				"btcmap_session",
 				JSON.stringify({
@@ -138,6 +137,23 @@ describe("session store", () => {
 			const current = get(session);
 			expect(current?.savedAreas).toEqual([]);
 			expect(current?.savedPlaces).toEqual([1, 2]);
+		});
+
+		it("backfills password when missing from old session", async () => {
+			localStorage.setItem(
+				"btcmap_session",
+				JSON.stringify({
+					username: "old-user",
+					token: "old-tok",
+					savedPlaces: [1],
+					savedAreas: [],
+				}),
+			);
+			const session = await createTestSession();
+			session.init();
+
+			const current = get(session);
+			expect(current?.password).toBe("");
 		});
 
 		it("returns null for invalid data", async () => {

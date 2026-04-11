@@ -26,6 +26,7 @@ function handleLogout() {
 			on:click={() => (open = !open)}
 			class="text-white transition-opacity hover:opacity-80"
 			aria-label={$_("nav.account")}
+			aria-haspopup="true"
 			aria-expanded={open}
 		>
 			<Icon type="material" icon="account_circle" w="24" h="24" />
