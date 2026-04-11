@@ -22,9 +22,8 @@ async function copyToClipboard(text: string) {
 
 <svelte:window on:keydown={(e) => e.key === "Escape" && dispatch("close")} />
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div
+	role="presentation"
 	class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50"
 	on:click|self={() => dispatch("close")}
 >
@@ -34,6 +33,7 @@ async function copyToClipboard(text: string) {
 				{$_("backup.title")}
 			</h2>
 			<button
+				type="button"
 				on:click={() => dispatch("close")}
 				class="text-body transition-colors hover:text-primary dark:text-white/50 dark:hover:text-white"
 			>
