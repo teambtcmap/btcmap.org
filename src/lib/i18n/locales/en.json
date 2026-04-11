@@ -39,6 +39,7 @@
 		"mySaved": "My Saved",
 		"account": "Account",
 		"login": "Log in",
+		"switchAccount": "Switch account",
 		"logout": "Log out"
 	},
 	"saved": {

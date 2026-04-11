@@ -47,6 +47,14 @@ afterNavigate(() => {
 						<Icon type="material" icon="bookmark" w="16" h="16" />
 						{$_("nav.mySaved")}
 					</a>
+
+					<a
+						href="/login"
+						class="flex items-center gap-2 px-4 py-2 text-sm text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
+					>
+						<Icon type="material" icon="swap_horiz" w="16" h="16" />
+						{$_("nav.switchAccount")}
+					</a>
 				{:else}
 					<a
 						href="/login"
