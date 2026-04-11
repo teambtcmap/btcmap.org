@@ -3,7 +3,7 @@ import Icon from "$components/Icon.svelte";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
 import { session } from "$lib/session";
-import { errToast } from "$lib/utils";
+import { errToast, successToast } from "$lib/utils";
 
 // The numeric ID of the item to save/unsave.
 export let id: number;
@@ -56,6 +56,7 @@ async function toggle() {
 		let current = previousSession;
 		if (!current) {
 			current = await session.signUp();
+			successToast($_("save.accountCreated"));
 		}
 
 		const nextSaved =

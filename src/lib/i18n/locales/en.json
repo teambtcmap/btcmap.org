@@ -60,6 +60,9 @@
 		"failed": "Invalid username or password.",
 		"error": "Something went wrong. Please try again."
 	},
+	"save": {
+		"accountCreated": "Account created — your saved places are stored on this device."
+	},
 	"search": {
 		"placeholderWorldwide": "Search worldwide...",
 		"placeholderNearby": "Search nearby...",
