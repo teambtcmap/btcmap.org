@@ -32,8 +32,8 @@ async function handleSubmit() {
 		}
 
 		// Replace current session with the logged-in account.
-		// Fetch saved items from the server to populate the store.
-		session.login(username.trim(), password.trim(), token);
+		// Don't store the password — the user already knows it.
+		session.login(username.trim(), "", token);
 
 		// Load saved items from server
 		const headers = { Authorization: `Bearer ${token}` };
