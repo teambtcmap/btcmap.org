@@ -288,6 +288,25 @@ export const appConfigs: AppConfig[] = [
 		],
 	},
 	{
+		id: "speed",
+		name: "Speed Wallet",
+		logo: "/images/apps/speed.png",
+		tag: "powered-by-btcmap",
+		sponsor: false,
+		stores: [
+			{
+				store: "google-play",
+				platform: "android",
+				url: "https://play.google.com/store/apps/details?id=com.app.speedwallet",
+			},
+			{
+				store: "app-store",
+				platform: "ios",
+				url: "https://apps.apple.com/us/app/speed-wallet-buy-bitcoin/id6462426281",
+			},
+		],
+	},
+	{
 		id: "sovran",
 		name: "Sovran",
 		logo: "/images/apps/sovran.png",
