@@ -96,6 +96,4 @@ afterNavigate(() => {
 	{/if}
 </div>
 
-{#if showBackup}
-	<BackupModal on:close={() => (showBackup = false)} />
-{/if}
+<BackupModal bind:open={showBackup} />
