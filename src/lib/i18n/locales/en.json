@@ -60,7 +60,17 @@
 		"failed": "Invalid username or password.",
 		"error": "Something went wrong. Please try again.",
 		"noAccount": "Don't have an account?",
-		"createAccount": "Create one here"
+		"createAccount": "Create one here",
+		"or": "or",
+		"nostrExtension": "Sign in with Nostr extension",
+		"nostrSigning": "Waiting for signature...",
+		"nostrFailed": "Nostr signature was rejected.",
+		"nostrError": "Something went wrong signing in with Nostr.",
+		"nsecToggle": "Sign in with a private key",
+		"nsecLabel": "Private key (nsec)",
+		"nsecSubmit": "Sign in with private key",
+		"nsecWarning": "Your key is used locally to sign a login event and is never stored or sent to any server. Prefer a Nostr extension if you have one.",
+		"nsecInvalid": "That doesn't look like a valid nsec key."
 	},
 	"backup": {
 		"title": "Back up account",

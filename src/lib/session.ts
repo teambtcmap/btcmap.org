@@ -226,6 +226,45 @@ function createSessionStore() {
 			set(session);
 		},
 
+		// Fetch saved places + areas from the server and hydrate the store.
+		// Best-effort: partial failures are logged, not thrown. Call after
+		// login() so there's an active session to populate.
+		loadSavedItemsFromServer: async (token: string): Promise<void> => {
+			const headers = { Authorization: `Bearer ${token}` };
+			const [placesRes, areasRes] = await Promise.allSettled([
+				api.get("/api/session/saved-places", { headers }),
+				api.get("/api/session/saved-areas", { headers }),
+			]);
+
+			const applyIds = (ids: number[], key: "savedPlaces" | "savedAreas") => {
+				update((current) => {
+					if (!current) return current;
+					const next = { ...current, [key]: ids };
+					saveToStorage(next);
+					return next;
+				});
+			};
+
+			if (
+				placesRes.status === "fulfilled" &&
+				Array.isArray(placesRes.value.data)
+			) {
+				applyIds(
+					placesRes.value.data.map((p: { id: number }) => p.id),
+					"savedPlaces",
+				);
+			}
+			if (
+				areasRes.status === "fulfilled" &&
+				Array.isArray(areasRes.value.data)
+			) {
+				applyIds(
+					areasRes.value.data.map((a: { id: number }) => a.id),
+					"savedAreas",
+				);
+			}
+		},
+
 		// Clear the session (logout / forget account). No recovery.
 		clear: () => {
 			saveToStorage(null);
