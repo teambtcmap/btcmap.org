@@ -64,7 +64,7 @@ async function copyToClipboard(text: string) {
 				id="{idPrefix}-password"
 				type={showPassword ? "text" : "password"}
 				readonly
-				value={password ?? $_("backup.unavailable")}
+				value={password || $_("backup.unavailable")}
 				class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-primary dark:border-white/20 dark:bg-white/5 dark:text-white"
 			/>
 			<button
