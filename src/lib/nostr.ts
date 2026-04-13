@@ -1,3 +1,4 @@
+import { decode } from "nostr-tools/nip19";
 import type { EventTemplate, VerifiedEvent } from "nostr-tools/pure";
 import { finalizeEvent } from "nostr-tools/pure";
 
@@ -50,4 +51,16 @@ export async function signAuthWithExtension(): Promise<VerifiedEvent> {
 // key is used once and discarded — never stored.
 export function signAuthWithSecretKey(secretKey: Uint8Array): VerifiedEvent {
 	return finalizeEvent(buildAuthTemplate(), secretKey);
+}
+
+// Decode a bech32 nsec... string into its 32-byte secret key. Throws on any
+// non-nsec input (npub, invalid bech32, wrong length) — callers surface a
+// generic "invalid key" message rather than leaking details.
+export function decodeNsec(nsec: string): Uint8Array {
+	const trimmed = nsec.trim();
+	const decoded = decode(trimmed);
+	if (decoded.type !== "nsec") {
+		throw new Error("Not an nsec");
+	}
+	return decoded.data;
 }
