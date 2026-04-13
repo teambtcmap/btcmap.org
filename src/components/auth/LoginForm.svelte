@@ -45,16 +45,10 @@ async function handleSubmit() {
 
 		await onSuccess(current);
 	} catch (err) {
-		const message =
-			(err as { response?: { status?: number } })?.response?.status === 401
-				? $_("login.failed")
-				: $_("login.error");
-		errToast(message);
-		console.error(
-			"Login failed:",
-			(err as { response?: { status?: number } })?.response?.status ??
-				"unknown",
-		);
+		const status = (err as { response?: { status?: number } })?.response
+			?.status;
+		errToast(status === 401 ? $_("login.failed") : $_("login.error"));
+		console.error("Login failed:", status ?? "unknown");
 	} finally {
 		loading = false;
 	}
