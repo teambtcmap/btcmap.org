@@ -30,11 +30,13 @@ onMount(() => {
 	// case of slow injection. Re-check once to avoid a hidden button on first
 	// paint when the extension is present.
 	hasNostrExtension = getNostrExtension() !== null;
-	if (!hasNostrExtension) {
-		setTimeout(() => {
-			hasNostrExtension = getNostrExtension() !== null;
-		}, 300);
-	}
+	if (hasNostrExtension) return;
+	const t = setTimeout(() => {
+		hasNostrExtension = getNostrExtension() !== null;
+	}, 300);
+	// Svelte runs the returned function on component destroy — prevents a
+	// set-after-unmount if the user navigates away within 300ms.
+	return () => clearTimeout(t);
 });
 
 async function exchangeSignedEvent(signedEvent: VerifiedEvent) {
