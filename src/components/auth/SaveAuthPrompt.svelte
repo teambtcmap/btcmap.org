@@ -30,13 +30,14 @@ type View = "choice" | "login" | "backup";
 let view: View = "choice";
 let creating = false;
 
-function titleFor(v: View): string {
-	if (v === "backup") return $_("backup.title");
-	if (v === "login") return $_("login.title");
-	return $_("save.prompt.title");
-}
-
-$: title = titleFor(view);
+// Inline so Svelte's reactive dependency tracker picks up $_ lexically —
+// otherwise locale changes don't retitle the modal until `view` changes.
+$: title =
+	view === "backup"
+		? $_("backup.title")
+		: view === "login"
+			? $_("login.title")
+			: $_("save.prompt.title");
 
 // Reset view state whenever the modal is (re)opened/closed.
 $: if (!open) {
