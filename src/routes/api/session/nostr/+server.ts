@@ -1,6 +1,7 @@
 import { error, json } from "@sveltejs/kit";
 
 import api from "$lib/axios";
+import { NOSTR_AUTH_URL } from "$lib/nostr";
 
 import type { RequestHandler } from "./$types";
 
@@ -16,16 +17,14 @@ export const POST: RequestHandler = async ({ request }) => {
 		error(400, "Missing or invalid signed_event");
 	}
 
-	const res = await api
-		.post("https://api.btcmap.org/v4/auth/nostr", { signed_event })
-		.catch((err) => {
-			const status = err?.response?.status;
-			if (status === 401 || status === 403) {
-				error(401, "Invalid Nostr signature");
-			}
-			console.error("Failed to exchange Nostr event:", status);
-			error(502, "Failed to authenticate with Nostr");
-		});
+	const res = await api.post(NOSTR_AUTH_URL, { signed_event }).catch((err) => {
+		const status = err?.response?.status;
+		if (status === 401 || status === 403) {
+			error(401, "Invalid Nostr signature");
+		}
+		console.error("Failed to exchange Nostr event:", status);
+		error(502, "Failed to authenticate with Nostr");
+	});
 
 	const token = res.data?.token;
 	const username = res.data?.username;
