@@ -72,7 +72,8 @@
 		"hide": "Hide password",
 		"unavailable": "Not available (old account)",
 		"warning": "These credentials are the only way to recover your saved places.",
-		"copied": "Copied to clipboard"
+		"copied": "Copied to clipboard",
+		"copyFailed": "Copy failed — please copy manually"
 	},
 	"save": {
 		"accountCreated": "Account created — your saved places are stored on this device.",

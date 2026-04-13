@@ -1,7 +1,7 @@
 <script lang="ts">
 import Icon from "$components/Icon.svelte";
 import { _ } from "$lib/i18n";
-import { successToast } from "$lib/utils";
+import { errToast, successToast } from "$lib/utils";
 
 export let username: string;
 export let password: string | null;
@@ -15,6 +15,7 @@ async function copyToClipboard(text: string) {
 		await navigator.clipboard.writeText(text);
 		successToast($_("backup.copied"));
 	} catch (err) {
+		errToast($_("backup.copyFailed"));
 		console.error("Clipboard write failed", err);
 	}
 }
