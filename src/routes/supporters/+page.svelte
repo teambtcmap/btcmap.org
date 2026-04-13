@@ -10,7 +10,12 @@ import type { DonationType } from "$lib/types";
 import { warningToast } from "$lib/utils";
 
 import DonationOption from "./components/DonationOption.svelte";
+import PlebSection from "./components/PlebSection.svelte";
 import SupportSection from "./components/SupportSection.svelte";
+import type { SponsorshipLevel } from "./sponsors";
+import { plebs, sponsors, sponsorshipTiers } from "./sponsors";
+
+const PLEB_TIER_CTA = "https://geyser.fund/project/btcmap/rewards";
 
 const onchain = "bc1qt4g28vq480ec4ncl4h67qu4q4k2zel7xu0c2wg";
 const lnurlp =
@@ -39,47 +44,48 @@ const renderQr: Action<HTMLCanvasElement> = (node) => {
 				},
 				(error: Error | null | undefined) => {
 					if (error) {
-						warningToast(t("supportUs.qrError"));
+						warningToast(t("supporters.qrError"));
 						console.error(error);
 					}
 				},
 			);
 		})
 		.catch((error) => {
-			warningToast(t("supportUs.qrLoadError"));
+			warningToast(t("supporters.qrLoadError"));
 			console.error("Failed to load QRCode module:", error);
 		});
 };
 
-const supporters = [
-	{
-		url: "https://coinos.io/",
-		title: "coinos",
-		logo: "coinos.svg",
-		logoDark: "coinos-dark.svg",
+type SponsorsByLevel = Record<SponsorshipLevel, typeof sponsors>;
+
+const sponsorsByLevel = sponsorshipTiers.reduce<SponsorsByLevel>(
+	(acc, tier) => {
+		acc[tier.level] = sponsors.filter(
+			(sponsor) => sponsor.level === tier.level,
+		);
+		return acc;
 	},
 	{
-		url: "https://www.walletofsatoshi.com/",
-		title: "Wallet of Satoshi",
-		logo: "wos.png",
+		Explorer: [],
+		Wayfinder: [],
+		Cartographer: [],
+		Navigator: [],
+		Pioneer: [],
+		Pleb: [],
 	},
-	{
-		url: "https://btccuracao.com/",
-		title: "BTC Curacao",
-		logo: "btccuracao.png",
-	},
-	{
-		url: "https://geyser.fund/project/satsnfacts",
-		title: "Sats n Facts",
-		logo: "satsnfacts.png",
-	},
-];
+);
+
+const orgTiers = [...sponsorshipTiers]
+	.filter((t) => t.level !== "Pleb")
+	.reverse();
+
+const plebTier = sponsorshipTiers.find((t) => t.level === "Pleb")!;
 </script>
 
 <svelte:head>
-	<title>BTC Map - {t("supportUs.title")}</title>
+	<title>BTC Map - {t("supporters.title")}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/support.png" />
-	<meta name="twitter:title" content="BTC Map - {t("supportUs.title")}" />
+	<meta name="twitter:title" content="BTC Map - {t("supporters.title")}" />
 	<meta name="twitter:image" content="https://btcmap.org/images/og/support.png" />
 </svelte:head>
 
@@ -90,18 +96,57 @@ const supporters = [
 				? 'text-white'
 				: 'gradient'} text-4xl !leading-tight font-semibold md:text-5xl"
 		>
-			{t("supportUs.hero")}
+			{t("supporters.hero")}
 		</h1>
 	{:else}
 		<HeaderPlaceholder />
 	{/if}
 
-	<h2 class="mx-auto w-full text-xl font-semibold text-primary lg:w-[800px] dark:text-white">
-		{t("supportUs.intro")}
+	<!-- Pleb tier -->
+	<section id="pleb-supporters" class="space-y-6">
+		<div class="mx-auto max-w-2xl space-y-4">
+			<h2 class="text-3xl font-bold text-primary dark:text-white">Individual Supporters</h2>
+			<p class="text-base text-body dark:text-slate-300">
+				BTC Map is community-powered. Individual supporters are the foundation of everything we build —
+				keeping the project independent, open, and in the hands of the people who use it.
+			</p>
+			<a
+				href={PLEB_TIER_CTA}
+				target="_blank"
+				rel="noreferrer"
+				class="inline-block rounded-xl bg-link px-6 py-3 font-semibold text-white transition-colors hover:bg-hover"
+			>
+				Become a Supporter
+			</a>
+		</div>
 
-		<br /><br />
-		{t("supportUs.appreciate")}
-	</h2>
+		<PlebSection tier={plebTier} {plebs} ctaHref={PLEB_TIER_CTA} />
+	</section>
+
+	<!-- Industry sponsors -->
+	<section id="sponsors" class="space-y-6">
+		<div class="mx-auto max-w-2xl space-y-4">
+			<h2 class="text-3xl font-bold text-primary dark:text-white">
+				{t("supporters.supporters.heading")}
+			</h2>
+			<p class="text-base text-body dark:text-slate-300">
+				BTC Map is built in the open and sustained by the organisations that believe in it.
+				Each sponsorship tier reflects a deeper level of commitment to open bitcoin infrastructure.
+			</p>
+			<a
+				href="mailto:hello@btcmap.org"
+				class="inline-block rounded-xl bg-link px-6 py-3 font-semibold text-white transition-colors hover:bg-hover"
+			>
+				{t("supporters.supporters.becomeSponsor")}
+			</a>
+		</div>
+
+		<div class="space-y-6">
+			{#each orgTiers as tier (tier.level)}
+				<SupportSection {tier} sponsors={sponsorsByLevel[tier.level]} />
+			{/each}
+		</div>
+	</section>
 
 	<section id="donate">
 		{#if showQr}
@@ -125,12 +170,12 @@ const supporters = [
 
 					<!-- cta -->
 					<p class="text-center text-xl text-primary dark:text-white">
-						{t("supportUs.donate.scanOrClick")} <br class="block md:hidden" /><strong class="lowercase"
-							>{network === 'Lightning' ? t("supportUs.donate.lightning") : t("supportUs.donate.onchain")}</strong
+						{t("supporters.donate.scanOrClick")} <br class="block md:hidden" /><strong class="lowercase"
+							>{network === 'Lightning' ? t("supporters.donate.lightning") : t("supporters.donate.onchain")}</strong
 						>
 						<img
 							src={network === 'Lightning' ? '/icons/ln-highlight.svg' : '/icons/btc-highlight.svg'}
-							alt={`${t(network === 'Lightning' ? "supportUs.donate.lightning" : "supportUs.donate.onchain")} ${t("supportUs.donate.protocolAlt")}`}
+							alt={`${t(network === 'Lightning' ? "supporters.donate.lightning" : "supporters.donate.onchain")} ${t("supporters.donate.protocolAlt")}`}
 							class="mb-1 inline dark:rounded-full dark:bg-white dark:p-0.5"
 						/>
 					</p>
@@ -139,29 +184,18 @@ const supporters = [
 		{:else}
 			<div class="space-y-5">
 				<!-- onchain -->
-				<DonationOption value={onchain} textKey="supportUs.donate.onchain" network="On-chain" {showQrToggle} />
+				<DonationOption value={onchain} textKey="supporters.donate.onchain" network="On-chain" {showQrToggle} />
 				<!-- lightning -->
-				<DonationOption value={lnurlp} textKey="supportUs.donate.lightning" network="Lightning" {showQrToggle} />
+				<DonationOption value={lnurlp} textKey="supporters.donate.lightning" network="Lightning" {showQrToggle} />
 			</div>
 		{/if}
-	</section>
-
-	<section id="supporters">
-		<h2 class="text-xl font-semibold text-primary uppercase dark:text-white">
-			{t("supportUs.supporters.heading")}
-		</h2>
-		<a href="mailto:hello@btcmap.org" class="text-link transition-colors hover:text-hover"
-			>{t("supportUs.supporters.becomeSponsor")}</a
-		>
-
-		<SupportSection {supporters} placeholders={2} />
 	</section>
 
 	<section id="node">
 		<!-- channel -->
 		<div>
 			<h3 class="text-lg font-semibold text-body uppercase dark:text-white">
-				{t("supportUs.node.heading")}
+				{t("supporters.node.heading")}
 			</h3>
 			<a
 				href="https://amboss.space/node/03ef01535d57cd3a3ddff8b4050650b278991b3eb7853f772a200079b9adb24988"

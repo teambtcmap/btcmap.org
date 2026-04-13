@@ -19,7 +19,7 @@
 		"maintain": "Contribuer",
 		"wiki": "Wiki",
 		"blog": "Blog",
-		"supportUs": "Nous soutenir",
+		"supporters": "Nous soutenir",
 		"menu": "Menu",
 		"merchantMap": "Carte des commerces",
 		"communityMap": "Carte des communautés",
@@ -979,7 +979,7 @@
 			"statsDashboard": "Tableau de bord des statistiques",
 			"supertaggerLeaderboard": "Classement des Supertaggers",
 			"supertaggerProfile": "Profil Supertagger",
-			"supportUs": "Nous soutenir",
+			"supporters": "Nous soutenir",
 			"topCommunities": "Meilleures communautés",
 			"topCountries": "Meilleurs pays",
 			"verifyLocations": "Vérifier les lieux",
@@ -989,11 +989,9 @@
 			"secondl1ght": "secondl1ght"
 		}
 	},
-	"supportUs": {
+	"supporters": {
 		"title": "Nous soutenir",
 		"hero": "Aidez à placer le bitcoin sur la carte.",
-		"intro": "BTCMap.org est un projet libre et open-source (FOSS). Nous dépendons des dons et du parrainage pour continuer.",
-		"appreciate": "Nous apprécions grandement tout soutien.",
 		"donate": {
 			"scanOrClick": "Scannez ou cliquez pour faire un don",
 			"onchain": "On-chain",
