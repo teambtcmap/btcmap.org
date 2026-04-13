@@ -183,7 +183,7 @@ async function handleSubmit() {
 						type="password"
 						bind:value={nsec}
 						placeholder="nsec1..."
-						autocomplete="off"
+						autocomplete="new-password"
 						autocorrect="off"
 						autocapitalize="off"
 						spellcheck="false"
