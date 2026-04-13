@@ -1,5 +1,6 @@
 import api from "$lib/axios";
-import { type Session, session } from "$lib/session";
+import type { Session } from "$lib/session";
+import { session } from "$lib/session";
 
 export type SavedItemType = "place" | "area";
 
