@@ -72,10 +72,22 @@
 		"hide": "Hide password",
 		"unavailable": "Not available (old account)",
 		"warning": "These credentials are the only way to recover your saved places.",
-		"copied": "Copied to clipboard"
+		"copied": "Copied to clipboard",
+		"copyFailed": "Copy failed — please copy manually"
 	},
 	"save": {
-		"accountCreated": "Account created — your saved places are stored on this device."
+		"accountCreatedPlace": "Account created — your saved places are stored on this device.",
+		"accountCreatedArea": "Account created — your saved areas are stored on this device.",
+		"prompt": {
+			"titlePlace": "Save this place",
+			"titleArea": "Save this area",
+			"descriptionPlace": "Log in to your existing account, or create a new one to keep your saved places.",
+			"descriptionArea": "Log in to your existing account, or create a new one to keep your saved areas.",
+			"createAccount": "Create account",
+			"login": "Log in",
+			"back": "Back",
+			"done": "Done"
+		}
 	},
 	"search": {
 		"placeholderWorldwide": "Search worldwide...",
