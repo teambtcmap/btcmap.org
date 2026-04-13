@@ -76,6 +76,7 @@ async function handleSubmit() {
 			type="text"
 			bind:value={username}
 			autocomplete="username"
+			maxlength="100"
 			class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-primary dark:border-white/20 dark:bg-dark dark:text-white"
 		/>
 	</div>
@@ -92,6 +93,7 @@ async function handleSubmit() {
 			type="password"
 			bind:value={password}
 			autocomplete="current-password"
+			maxlength="200"
 			class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-primary dark:border-white/20 dark:bg-dark dark:text-white"
 		/>
 	</div>
