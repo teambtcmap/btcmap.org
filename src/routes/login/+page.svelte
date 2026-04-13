@@ -49,22 +49,7 @@ async function exchangeSignedEvent(signedEvent: VerifiedEvent) {
 	}
 
 	session.login(apiUsername, "", token);
-
-	const headers = { Authorization: `Bearer ${token}` };
-	const [placesRes, areasRes] = await Promise.allSettled([
-		api.get("/api/session/saved-places", { headers }),
-		api.get("/api/session/saved-areas", { headers }),
-	]);
-
-	if (placesRes.status === "fulfilled" && Array.isArray(placesRes.value.data)) {
-		const ids = placesRes.value.data.map((p: { id: number }) => p.id);
-		session.setSavedPlaces(ids);
-	}
-	if (areasRes.status === "fulfilled" && Array.isArray(areasRes.value.data)) {
-		const ids = areasRes.value.data.map((a: { id: number }) => a.id);
-		session.setSavedAreas(ids);
-	}
-
+	await session.loadSavedItemsFromServer(token);
 	goto("/user/saved");
 }
 
@@ -132,26 +117,7 @@ async function handleSubmit() {
 		// Replace current session with the logged-in account.
 		// Don't store the password — the user already knows it.
 		session.login(username.trim(), "", token);
-
-		// Load saved items from server
-		const headers = { Authorization: `Bearer ${token}` };
-		const [placesRes, areasRes] = await Promise.allSettled([
-			api.get("/api/session/saved-places", { headers }),
-			api.get("/api/session/saved-areas", { headers }),
-		]);
-
-		if (
-			placesRes.status === "fulfilled" &&
-			Array.isArray(placesRes.value.data)
-		) {
-			const ids = placesRes.value.data.map((p: { id: number }) => p.id);
-			session.setSavedPlaces(ids);
-		}
-		if (areasRes.status === "fulfilled" && Array.isArray(areasRes.value.data)) {
-			const ids = areasRes.value.data.map((a: { id: number }) => a.id);
-			session.setSavedAreas(ids);
-		}
-
+		await session.loadSavedItemsFromServer(token);
 		goto("/user/saved");
 	} catch (err) {
 		const message =
