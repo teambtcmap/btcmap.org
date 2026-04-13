@@ -74,23 +74,33 @@ async function loginWithNsec() {
 	if (!nsec.trim()) return;
 	nsecLoading = true;
 	let secretKey: Uint8Array | null = null;
+
+	// Phase 1: decode + sign (sync, only fails on malformed key). A failure
+	// here is unambiguous, so the error message can be specific.
+	let signedEvent: VerifiedEvent;
 	try {
 		secretKey = decodeNsec(nsec);
-		const signedEvent = signAuthWithSecretKey(secretKey);
-		// Clear the textarea now — the signed event is already built.
+		signedEvent = signAuthWithSecretKey(secretKey);
 		nsec = "";
+	} catch {
+		errToast($_("login.nsecInvalid"));
+		console.error("Nsec decode failed");
+		if (secretKey) secretKey.fill(0);
+		nsecLoading = false;
+		return;
+	}
+
+	// Phase 2: network exchange. Reuses the same 401-vs-generic classifier as
+	// loginWithNostr so transport errors don't get misreported as "invalid nsec".
+	try {
 		await exchangeSignedEvent(signedEvent);
 	} catch (err) {
 		const status = (err as { response?: { status?: number } })?.response
 			?.status;
-		const isDecodeError = !status && !(err as { response?: unknown })?.response;
-		const message = isDecodeError
-			? $_("login.nsecInvalid")
-			: status === 401
-				? $_("login.nostrFailed")
-				: $_("login.nostrError");
+		const message =
+			status === 401 ? $_("login.nostrFailed") : $_("login.nostrError");
 		errToast(message);
-		console.error("Nsec login failed:", status ?? "decode");
+		console.error("Nsec login failed:", status ?? "unknown");
 	} finally {
 		// Best-effort zeroing. V8 may have copies elsewhere, but this covers the
 		// primary reference.
