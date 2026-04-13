@@ -60,7 +60,12 @@
 		"failed": "Invalid username or password.",
 		"error": "Something went wrong. Please try again.",
 		"noAccount": "Don't have an account?",
-		"createAccount": "Create one here"
+		"createAccount": "Create one here",
+		"or": "or",
+		"nostrExtension": "Sign in with Nostr extension",
+		"nostrSigning": "Waiting for signature...",
+		"nostrFailed": "Nostr signature was rejected.",
+		"nostrError": "Something went wrong signing in with Nostr."
 	},
 	"backup": {
 		"title": "Back up account",
