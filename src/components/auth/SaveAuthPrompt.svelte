@@ -92,7 +92,15 @@ async function handleCreateAccount() {
 
 async function handleLoginSuccess(current: Session) {
 	try {
-		await hydrateSavedFromServer(current.token);
+		const hydrated = await hydrateSavedFromServer(current.token);
+
+		// Don't save on top of a failed hydrate for this type — the local list
+		// is stale and putSavedList would wipe the user's real server-side
+		// saved list, leaving only the pending id.
+		if (!hydrated[type]) {
+			errToast($_("merchant.saveFailed"));
+			return;
+		}
 
 		// Re-read the freshly populated session so performInitialSave sees the
 		// server-side saved lists and merges (not overwrites) the new id.
