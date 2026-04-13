@@ -63,9 +63,12 @@ async function handleCreateAccount() {
 	creating = true;
 	try {
 		const current = await session.signUp();
-		successToast($_("save.accountCreated"));
-		await performInitialSave(current);
+		// Commit the backup view before the save attempt so a failing save
+		// can't strand a new account without the user ever seeing their
+		// credentials. performInitialSave toasts on its own errors.
 		view = "backup";
+		successToast($_("save.accountCreated"));
+		await performInitialSave(current).catch(() => {});
 	} catch (err) {
 		console.error("SaveAuthPrompt.handleCreateAccount failed", err);
 		open = false;
