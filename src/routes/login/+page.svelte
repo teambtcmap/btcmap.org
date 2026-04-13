@@ -2,8 +2,8 @@
 import { onMount } from "svelte";
 
 import LoginForm from "$components/auth/LoginForm.svelte";
-import api from "$lib/axios";
 import { _ } from "$lib/i18n";
+import { hydrateSavedFromServer } from "$lib/savedItems";
 import type { Session } from "$lib/session";
 import { session } from "$lib/session";
 
@@ -14,21 +14,7 @@ onMount(() => {
 });
 
 async function handleSuccess(current: Session) {
-	const headers = { Authorization: `Bearer ${current.token}` };
-	const [placesRes, areasRes] = await Promise.allSettled([
-		api.get("/api/session/saved-places", { headers }),
-		api.get("/api/session/saved-areas", { headers }),
-	]);
-
-	if (placesRes.status === "fulfilled" && Array.isArray(placesRes.value.data)) {
-		const ids = placesRes.value.data.map((p: { id: number }) => p.id);
-		session.setSavedPlaces(ids);
-	}
-	if (areasRes.status === "fulfilled" && Array.isArray(areasRes.value.data)) {
-		const ids = areasRes.value.data.map((a: { id: number }) => a.id);
-		session.setSavedAreas(ids);
-	}
-
+	await hydrateSavedFromServer(current.token);
 	goto("/user/saved");
 }
 </script>

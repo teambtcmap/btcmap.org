@@ -46,3 +46,22 @@ export function toggleSavedLocal(
 		? session.toggleSavedPlace(id)
 		: session.toggleSavedArea(id);
 }
+
+// Fetches the server-side saved-places and saved-areas lists and populates
+// the session store. Uses allSettled so one failing endpoint doesn't block
+// the other.
+export async function hydrateSavedFromServer(token: string): Promise<void> {
+	const headers = { Authorization: `Bearer ${token}` };
+	const [placesRes, areasRes] = await Promise.allSettled([
+		api.get(PROXY_ENDPOINTS.place, { headers }),
+		api.get(PROXY_ENDPOINTS.area, { headers }),
+	]);
+	if (placesRes.status === "fulfilled" && Array.isArray(placesRes.value.data)) {
+		const ids = placesRes.value.data.map((p: { id: number }) => p.id);
+		session.setSavedPlaces(ids);
+	}
+	if (areasRes.status === "fulfilled" && Array.isArray(areasRes.value.data)) {
+		const ids = areasRes.value.data.map((a: { id: number }) => a.id);
+		session.setSavedAreas(ids);
+	}
+}

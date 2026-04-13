@@ -4,10 +4,14 @@ import { createEventDispatcher } from "svelte";
 import BackupCredentials from "$components/auth/BackupCredentials.svelte";
 import LoginForm from "$components/auth/LoginForm.svelte";
 import Modal from "$components/Modal.svelte";
-import api from "$lib/axios";
 import { _ } from "$lib/i18n";
 import type { SavedItemType } from "$lib/savedItems";
-import { getSavedList, putSavedList, setSavedList } from "$lib/savedItems";
+import {
+	getSavedList,
+	hydrateSavedFromServer,
+	putSavedList,
+	setSavedList,
+} from "$lib/savedItems";
 import type { Session } from "$lib/session";
 import { session } from "$lib/session";
 import { errToast, successToast } from "$lib/utils";
@@ -75,22 +79,7 @@ async function handleCreateAccount() {
 
 async function handleLoginSuccess(current: Session) {
 	try {
-		const headers = { Authorization: `Bearer ${current.token}` };
-		const [placesRes, areasRes] = await Promise.allSettled([
-			api.get("/api/session/saved-places", { headers }),
-			api.get("/api/session/saved-areas", { headers }),
-		]);
-		if (
-			placesRes.status === "fulfilled" &&
-			Array.isArray(placesRes.value.data)
-		) {
-			const ids = placesRes.value.data.map((p: { id: number }) => p.id);
-			session.setSavedPlaces(ids);
-		}
-		if (areasRes.status === "fulfilled" && Array.isArray(areasRes.value.data)) {
-			const ids = areasRes.value.data.map((a: { id: number }) => a.id);
-			session.setSavedAreas(ids);
-		}
+		await hydrateSavedFromServer(current.token);
 
 		// Re-read the freshly populated session so performInitialSave sees the
 		// server-side saved lists and merges (not overwrites) the new id.
