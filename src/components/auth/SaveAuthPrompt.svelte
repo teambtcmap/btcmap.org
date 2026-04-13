@@ -1,8 +1,8 @@
 <script lang="ts">
 import { createEventDispatcher } from "svelte";
 
+import BackupCredentials from "$components/auth/BackupCredentials.svelte";
 import LoginForm from "$components/auth/LoginForm.svelte";
-import Icon from "$components/Icon.svelte";
 import Modal from "$components/Modal.svelte";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
@@ -24,7 +24,6 @@ const dispatch = createEventDispatcher<{
 type View = "choice" | "login" | "backup";
 let view: View = "choice";
 let creating = false;
-let showPassword = false;
 
 $: title =
 	view === "backup"
@@ -36,7 +35,6 @@ $: title =
 // Reset view state whenever the modal is (re)opened/closed.
 $: if (!open) {
 	view = "choice";
-	showPassword = false;
 }
 
 async function performInitialSave(current: Session) {
@@ -111,15 +109,6 @@ async function handleLoginSuccess(current: Session) {
 	}
 }
 
-async function copyToClipboard(text: string) {
-	try {
-		await navigator.clipboard.writeText(text);
-		successToast($_("backup.copied"));
-	} catch (err) {
-		console.error("Clipboard write failed", err);
-	}
-}
-
 function handleDone() {
 	open = false;
 	dispatch("close");
@@ -161,87 +150,11 @@ function handleDone() {
 		<p class="mb-4 text-sm text-body dark:text-white/70">
 			{$_("backup.description")}
 		</p>
-		<div class="space-y-3">
-			<div>
-				<label
-					for="save-prompt-username"
-					class="mb-1 block text-xs font-semibold text-body dark:text-white/70"
-				>
-					{$_("backup.username")}
-				</label>
-				<div class="flex items-center gap-2">
-					<input
-						id="save-prompt-username"
-						type="text"
-						readonly
-						value={$session.username}
-						class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-primary dark:border-white/20 dark:bg-white/5 dark:text-white"
-					/>
-					<button
-						type="button"
-						on:click={() => copyToClipboard($session?.username ?? "")}
-						class="shrink-0 rounded-lg border border-gray-300 p-2 transition-colors hover:bg-gray-100 dark:border-white/20 dark:hover:bg-white/10"
-						title={$_("backup.copy")}
-					>
-						<Icon
-							type="material"
-							icon="content_copy"
-							w="16"
-							h="16"
-							class="text-primary dark:text-white"
-						/>
-					</button>
-				</div>
-			</div>
-			<div>
-				<label
-					for="save-prompt-password"
-					class="mb-1 block text-xs font-semibold text-body dark:text-white/70"
-				>
-					{$_("backup.password")}
-				</label>
-				<div class="flex items-center gap-2">
-					<input
-						id="save-prompt-password"
-						type={showPassword ? "text" : "password"}
-						readonly
-						value={$session.password}
-						class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-primary dark:border-white/20 dark:bg-white/5 dark:text-white"
-					/>
-					<button
-						type="button"
-						on:click={() => (showPassword = !showPassword)}
-						class="shrink-0 rounded-lg border border-gray-300 p-2 transition-colors hover:bg-gray-100 dark:border-white/20 dark:hover:bg-white/10"
-						title={showPassword ? $_("backup.hide") : $_("backup.show")}
-					>
-						<Icon
-							type="material"
-							icon={showPassword ? "visibility_off" : "visibility"}
-							w="16"
-							h="16"
-							class="text-primary dark:text-white"
-						/>
-					</button>
-					<button
-						type="button"
-						on:click={() => copyToClipboard($session?.password ?? "")}
-						class="shrink-0 rounded-lg border border-gray-300 p-2 transition-colors hover:bg-gray-100 dark:border-white/20 dark:hover:bg-white/10"
-						title={$_("backup.copy")}
-					>
-						<Icon
-							type="material"
-							icon="content_copy"
-							w="16"
-							h="16"
-							class="text-primary dark:text-white"
-						/>
-					</button>
-				</div>
-			</div>
-		</div>
-		<p class="mt-4 text-xs text-body dark:text-white/50">
-			{$_("backup.warning")}
-		</p>
+		<BackupCredentials
+			idPrefix="save-prompt"
+			username={$session.username}
+			password={$session.password}
+		/>
 		<button
 			type="button"
 			on:click={handleDone}
