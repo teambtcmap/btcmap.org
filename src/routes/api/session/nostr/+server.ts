@@ -5,11 +5,20 @@ import { NOSTR_AUTH_URL } from "$lib/nostr";
 
 import type { RequestHandler } from "./$types";
 
+// A signed NIP-98 event is ~400 bytes. 4 KB leaves generous headroom for
+// unusual tag sets while rejecting obvious junk bodies before we try to parse.
+const MAX_BODY_BYTES = 4096;
+
 // POST /api/session/nostr
 // Exchanges a signed NIP-98 event (kind 27235) for a BTC Map Bearer token.
 // Proxies POST /v4/auth/nostr to avoid browser CORS preflight issues.
 // If the npub is unknown, the API creates a new account linked to that pubkey.
 export const POST: RequestHandler = async ({ request }) => {
+	const contentLength = Number(request.headers.get("content-length"));
+	if (!Number.isFinite(contentLength) || contentLength > MAX_BODY_BYTES) {
+		error(413, "Request body too large");
+	}
+
 	const body = await request.json();
 	const { signed_event } = body;
 
