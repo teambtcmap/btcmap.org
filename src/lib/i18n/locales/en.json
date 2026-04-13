@@ -75,7 +75,15 @@
 		"copied": "Copied to clipboard"
 	},
 	"save": {
-		"accountCreated": "Account created — your saved places are stored on this device."
+		"accountCreated": "Account created — your saved places are stored on this device.",
+		"prompt": {
+			"title": "Save this place",
+			"description": "Log in to your existing account, or create a new one to keep your saved places.",
+			"createAccount": "Create account",
+			"login": "Log in",
+			"back": "Back",
+			"done": "Done"
+		}
 	},
 	"search": {
 		"placeholderWorldwide": "Search worldwide...",
