@@ -76,10 +76,13 @@
 		"copyFailed": "Copy failed — please copy manually"
 	},
 	"save": {
-		"accountCreated": "Account created — your saved places are stored on this device.",
+		"accountCreatedPlace": "Account created — your saved places are stored on this device.",
+		"accountCreatedArea": "Account created — your saved areas are stored on this device.",
 		"prompt": {
-			"title": "Save this place",
-			"description": "Log in to your existing account, or create a new one to keep your saved places.",
+			"titlePlace": "Save this place",
+			"titleArea": "Save this area",
+			"descriptionPlace": "Log in to your existing account, or create a new one to keep your saved places.",
+			"descriptionArea": "Log in to your existing account, or create a new one to keep your saved areas.",
 			"createAccount": "Create account",
 			"login": "Log in",
 			"back": "Back",

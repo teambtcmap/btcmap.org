@@ -30,6 +30,15 @@ type View = "choice" | "login" | "backup";
 let view: View = "choice";
 let creating = false;
 
+$: promptTitleKey =
+	type === "area" ? "save.prompt.titleArea" : "save.prompt.titlePlace";
+$: promptDescriptionKey =
+	type === "area"
+		? "save.prompt.descriptionArea"
+		: "save.prompt.descriptionPlace";
+$: accountCreatedKey =
+	type === "area" ? "save.accountCreatedArea" : "save.accountCreatedPlace";
+
 // Inline so Svelte's reactive dependency tracker picks up $_ lexically —
 // otherwise locale changes don't retitle the modal until `view` changes.
 $: title =
@@ -37,7 +46,7 @@ $: title =
 		? $_("backup.title")
 		: view === "login"
 			? $_("login.title")
-			: $_("save.prompt.title");
+			: $_(promptTitleKey);
 
 // Reset view state whenever the modal is (re)opened/closed.
 $: if (!open) {
@@ -70,7 +79,7 @@ async function handleCreateAccount() {
 		// can't strand a new account without the user ever seeing their
 		// credentials. performInitialSave toasts on its own errors.
 		view = "backup";
-		successToast($_("save.accountCreated"));
+		successToast($_(accountCreatedKey));
 		await performInitialSave(current).catch(() => {});
 	} catch (err) {
 		console.error("SaveAuthPrompt.handleCreateAccount failed", err);
@@ -107,7 +116,7 @@ function handleDone() {
 <Modal bind:open {title} titleId="save-auth-prompt-title">
 	{#if view === "choice"}
 		<p class="mb-6 text-sm text-body dark:text-white/70">
-			{$_("save.prompt.description")}
+			{$_(promptDescriptionKey)}
 		</p>
 		<div class="space-y-3">
 			<button
