@@ -1,7 +1,8 @@
 <script lang="ts">
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
-import { type Session, session } from "$lib/session";
+import type { Session } from "$lib/session";
+import { session } from "$lib/session";
 import { errToast } from "$lib/utils";
 
 // Caller receives the new session after a successful login. This keeps the

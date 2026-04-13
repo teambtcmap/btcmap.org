@@ -2,10 +2,10 @@
 import SaveAuthPrompt from "$components/auth/SaveAuthPrompt.svelte";
 import Icon from "$components/Icon.svelte";
 import { _ } from "$lib/i18n";
+import type { SavedItemType } from "$lib/savedItems";
 import {
 	getSavedList,
 	putSavedList,
-	type SavedItemType,
 	setSavedList,
 	toggleSavedLocal,
 } from "$lib/savedItems";

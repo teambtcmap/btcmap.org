@@ -4,7 +4,8 @@ import { onMount } from "svelte";
 import LoginForm from "$components/auth/LoginForm.svelte";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
-import { type Session, session } from "$lib/session";
+import type { Session } from "$lib/session";
+import { session } from "$lib/session";
 
 import { goto } from "$app/navigation";
 

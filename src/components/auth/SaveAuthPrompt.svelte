@@ -6,13 +6,10 @@ import Icon from "$components/Icon.svelte";
 import Modal from "$components/Modal.svelte";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
-import {
-	getSavedList,
-	putSavedList,
-	type SavedItemType,
-	setSavedList,
-} from "$lib/savedItems";
-import { type Session, session } from "$lib/session";
+import type { SavedItemType } from "$lib/savedItems";
+import { getSavedList, putSavedList, setSavedList } from "$lib/savedItems";
+import type { Session } from "$lib/session";
+import { session } from "$lib/session";
 import { errToast, successToast } from "$lib/utils";
 
 export let id: number;
