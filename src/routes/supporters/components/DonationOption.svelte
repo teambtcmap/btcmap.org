@@ -17,7 +17,7 @@ $: t = $_;
 		{t(textKey)}
 		<img
 			src={network === 'Lightning' ? '/icons/ln-highlight.svg' : '/icons/btc-highlight.svg'}
-			alt={`${t(textKey)} ${t("supportUs.donate.protocolAlt")}`}
+			alt={`${t(textKey)} ${t("supporters.donate.protocolAlt")}`}
 			class="mb-1 inline dark:rounded-full dark:bg-white dark:p-0.5"
 		/>
 	</h3>
@@ -30,7 +30,7 @@ $: t = $_;
 			>{t(textKey)}
 			<img
 				src={network === 'Lightning' ? '/icons/ln-highlight.svg' : '/icons/btc-highlight.svg'}
-				alt={`${t(textKey)} ${t("supportUs.donate.protocolAlt")}`}
+				alt={`${t(textKey)} ${t("supporters.donate.protocolAlt")}`}
 				class="mb-1 inline dark:rounded-full dark:bg-white dark:p-0.5"
 			/>
 		</span>

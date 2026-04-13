@@ -50,7 +50,7 @@ const generateQR = async () => {
 			},
 		);
 	} catch (error) {
-		errToast($_("supportUs.qrLoadError"));
+		errToast($_("supporters.qrLoadError"));
 		console.error("Failed to load QRCode module:", error);
 		onError(error);
 	}
