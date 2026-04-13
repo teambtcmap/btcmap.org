@@ -75,6 +75,11 @@ async function handleCreateAccount() {
 	creating = true;
 	try {
 		const current = await session.signUp();
+		// If the user dismissed the modal while signUp was pending, don't
+		// mutate view/show toasts — that would leak "backup" view into the
+		// next open. The account still exists locally and can be backed up
+		// via the UserMenu.
+		if (!open) return;
 		// Commit the backup view before the save attempt so a failing save
 		// can't strand a new account without the user ever seeing their
 		// credentials. performInitialSave toasts on its own errors.
