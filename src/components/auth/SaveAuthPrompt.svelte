@@ -1,5 +1,6 @@
 <script lang="ts">
 import { createEventDispatcher } from "svelte";
+import { get } from "svelte/store";
 
 import BackupCredentials from "$components/auth/BackupCredentials.svelte";
 import LoginForm from "$components/auth/LoginForm.svelte";
@@ -29,16 +30,18 @@ type View = "choice" | "login" | "backup";
 let view: View = "choice";
 let creating = false;
 
-$: title =
-	view === "backup"
-		? $_("backup.title")
-		: view === "login"
-			? $_("login.title")
-			: $_("save.prompt.title");
+function titleFor(v: View): string {
+	if (v === "backup") return $_("backup.title");
+	if (v === "login") return $_("login.title");
+	return $_("save.prompt.title");
+}
+
+$: title = titleFor(view);
 
 // Reset view state whenever the modal is (re)opened/closed.
 $: if (!open) {
 	view = "choice";
+	creating = false;
 }
 
 async function performInitialSave(current: Session) {
@@ -83,11 +86,7 @@ async function handleLoginSuccess(current: Session) {
 
 		// Re-read the freshly populated session so performInitialSave sees the
 		// server-side saved lists and merges (not overwrites) the new id.
-		let refreshed: Session | null = null;
-		const unsub = session.subscribe((s) => {
-			refreshed = s;
-		});
-		unsub();
+		const refreshed = get(session);
 		if (!refreshed) throw new Error("session missing after login");
 
 		await performInitialSave(refreshed);

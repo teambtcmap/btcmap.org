@@ -1,4 +1,6 @@
 <script lang="ts">
+import { get } from "svelte/store";
+
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
 import type { Session } from "$lib/session";
@@ -38,11 +40,7 @@ async function handleSubmit() {
 
 		// Pull the new session value so callers get a concrete Session object
 		// instead of having to subscribe.
-		let current: Session | null = null;
-		const unsub = session.subscribe((s) => {
-			current = s;
-		});
-		unsub();
+		const current = get(session);
 		if (!current) throw new Error("session.login did not populate the store");
 
 		await onSuccess(current);
