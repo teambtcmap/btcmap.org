@@ -88,9 +88,9 @@ const orgTiers = [...sponsorshipTiers]
 	.filter((t) => !individualLevels.includes(t.level))
 	.reverse();
 
-const individualTiers = [...sponsorshipTiers]
-	.filter((t) => individualLevels.includes(t.level))
-	.reverse();
+const individualTiers = sponsorshipTiers.filter((t) =>
+	individualLevels.includes(t.level),
+);
 
 const plebsByTier: Record<string, typeof plebs> = {
 	Baller: ballers,
