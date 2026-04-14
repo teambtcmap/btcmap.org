@@ -29,17 +29,17 @@ export type SponsorshipTier = {
 	headline: string;
 };
 
-export const plebs: Pleb[] = [
+export const plebs: Pleb[] = [];
+
+export const chads: Pleb[] = [];
+
+export const ballers: Pleb[] = [
 	{
 		name: "Nathan Day",
 		url: "https://nathan.day.ag",
 		avatar: "/images/supporters/plebs/nathan-day.jpg",
 	},
 ];
-
-export const chads: Pleb[] = [];
-
-export const ballers: Pleb[] = [];
 
 export const sponsorshipTiers: SponsorshipTier[] = [
 	{ level: "Explorer", headline: "First step in backing open maps" },
