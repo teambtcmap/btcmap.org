@@ -6,7 +6,7 @@ import type { Sponsor, SponsorshipTier } from "../sponsors";
 export let tier: SponsorshipTier;
 export let sponsors: Sponsor[];
 
-const levelStyles: Record<Exclude<SponsorshipTier["level"], "Pleb">, string> = {
+const levelStyles: Partial<Record<SponsorshipTier["level"], string>> = {
 	Explorer:
 		"border-emerald-300/70 bg-emerald-50/70 dark:border-emerald-400/40 dark:bg-emerald-500/10",
 	Wayfinder:
@@ -18,9 +18,11 @@ const levelStyles: Record<Exclude<SponsorshipTier["level"], "Pleb">, string> = {
 	Pioneer:
 		"border-rose-300/70 bg-rose-50/70 dark:border-rose-400/40 dark:bg-rose-500/10",
 };
+
+$: cardStyle = levelStyles[tier.level] ?? "";
 </script>
 
-<article class="rounded-2xl border p-6 text-left shadow-sm {tier.level !== 'Pleb' ? levelStyles[tier.level] : ''}">
+<article class="rounded-2xl border p-6 text-left shadow-sm {cardStyle}">
 	<div class="mb-6 space-y-1">
 		<h3 class="text-2xl font-bold text-primary dark:text-white">{tier.level} tier</h3>
 		<p class="text-base text-body/70 dark:text-slate-400">{tier.headline}</p>
