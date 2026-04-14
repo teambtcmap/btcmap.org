@@ -42,13 +42,13 @@ export const ballers: Pleb[] = [
 ];
 
 export const sponsorshipTiers: SponsorshipTier[] = [
-	{ level: "Explorer", headline: "First step in backing open maps" },
+	{ level: "Explorer", headline: "A first step in backing us" },
 	{ level: "Wayfinder", headline: "Growing product alignment" },
 	{ level: "Cartographer", headline: "Core ecosystem partner" },
-	{ level: "Navigator", headline: "Operational collaboration" },
-	{ level: "Pioneer", headline: "Strategic long-term builder" },
-	{ level: "Baller", headline: "High-conviction individual backer" },
-	{ level: "Chad", headline: "Committed community supporter" },
+	{ level: "Navigator", headline: "High-conviction industry supporters" },
+	{ level: "Pioneer", headline: "Our most committed supporters" },
+	{ level: "Baller", headline: "High-conviction individual backers" },
+	{ level: "Chad", headline: "Committed community supporters" },
 	{ level: "Pleb", headline: "Every sat counts" },
 ];
 
