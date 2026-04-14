@@ -30,7 +30,7 @@ export type SponsorshipTier = {
 export const plebs: Pleb[] = [
 	{
 		name: "Nathan Day",
-		url: "https://btcmap.org",
+		url: "https://nathan.day.ag",
 		avatar: "/images/supporters/plebs/nathan-day.jpg",
 	},
 ];
