@@ -4,10 +4,24 @@ import type { Pleb, SponsorshipTier } from "../sponsors";
 export let tier: SponsorshipTier;
 export let plebs: Pleb[];
 export let ctaHref: string;
+
+const tierStyles: Partial<Record<SponsorshipTier["level"], string>> = {
+	Baller:
+		"border-yellow-300/70 bg-yellow-50/70 dark:border-yellow-400/40 dark:bg-yellow-500/10",
+	Chad: "border-purple-300/70 bg-purple-50/70 dark:border-purple-400/40 dark:bg-purple-500/10",
+	Pleb: "border-orange-300/70 bg-orange-50/70 dark:border-orange-400/40 dark:bg-orange-500/10",
+};
+
+const initBg: Partial<Record<SponsorshipTier["level"], string>> = {
+	Baller:
+		"bg-yellow-200 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300",
+	Chad: "bg-purple-200 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300",
+	Pleb: "bg-orange-200 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300",
+};
 </script>
 
 <div
-	class="rounded-2xl border border-orange-300/70 bg-orange-50/70 p-6 text-left shadow-sm dark:border-orange-400/40 dark:bg-orange-500/10"
+	class="rounded-2xl border p-6 text-left shadow-sm {tierStyles[tier.level] ?? ''}"
 >
 	<div class="mb-6 space-y-1">
 		<h3 class="text-2xl font-bold text-primary dark:text-white">{tier.level} tier</h3>
@@ -30,7 +44,7 @@ export let ctaHref: string;
 					/>
 				{:else}
 					<div
-						class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/60 bg-orange-200 text-xl font-bold text-orange-700 shadow-md dark:border-white/20 dark:bg-orange-900/40 dark:text-orange-300"
+						class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/60 text-xl font-bold shadow-md dark:border-white/20 {initBg[tier.level] ?? ''}"
 					>
 						{pleb.name[0]}
 					</div>

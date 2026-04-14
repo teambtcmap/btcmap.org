@@ -13,7 +13,14 @@ import DonationOption from "./components/DonationOption.svelte";
 import PlebSection from "./components/PlebSection.svelte";
 import SupportSection from "./components/SupportSection.svelte";
 import type { SponsorshipLevel } from "./sponsors";
-import { plebs, sponsors, sponsorshipTiers } from "./sponsors";
+import {
+	ballers,
+	chads,
+	individualLevels,
+	plebs,
+	sponsors,
+	sponsorshipTiers,
+} from "./sponsors";
 
 const PLEB_TIER_CTA = "https://geyser.fund/project/btcmap/rewards";
 
@@ -71,15 +78,25 @@ const sponsorsByLevel = sponsorshipTiers.reduce<SponsorsByLevel>(
 		Cartographer: [],
 		Navigator: [],
 		Pioneer: [],
+		Baller: [],
+		Chad: [],
 		Pleb: [],
 	},
 );
 
 const orgTiers = [...sponsorshipTiers]
-	.filter((t) => t.level !== "Pleb")
+	.filter((t) => !individualLevels.includes(t.level))
 	.reverse();
 
-const plebTier = sponsorshipTiers.find((t) => t.level === "Pleb")!;
+const individualTiers = [...sponsorshipTiers]
+	.filter((t) => individualLevels.includes(t.level))
+	.reverse();
+
+const plebsByTier: Record<string, typeof plebs> = {
+	Baller: ballers,
+	Chad: chads,
+	Pleb: plebs,
+};
 </script>
 
 <svelte:head>
@@ -119,7 +136,11 @@ const plebTier = sponsorshipTiers.find((t) => t.level === "Pleb")!;
 			</a>
 		</div>
 
-		<PlebSection tier={plebTier} {plebs} ctaHref={PLEB_TIER_CTA} />
+		<div class="space-y-6">
+			{#each individualTiers as tier (tier.level)}
+				<PlebSection {tier} plebs={plebsByTier[tier.level] ?? []} ctaHref={PLEB_TIER_CTA} />
+			{/each}
+		</div>
 	</section>
 
 	<!-- Industry sponsors -->
