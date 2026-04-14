@@ -107,8 +107,7 @@ const plebTier = sponsorshipTiers.find((t) => t.level === "Pleb")!;
 		<div class="mx-auto max-w-2xl space-y-4">
 			<h2 class="text-3xl font-bold text-primary dark:text-white">Individual Supporters</h2>
 			<p class="text-base text-body dark:text-slate-300">
-				BTC Map is community-powered. Individual supporters are the foundation of everything we build —
-				keeping the project independent, open, and in the hands of the people who use it.
+				BTC Map is community-powered. Individual supporters help keep the project independent, open, and in the hands of the people who use it.
 			</p>
 			<a
 				href={PLEB_TIER_CTA}
