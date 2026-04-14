@@ -24,7 +24,7 @@ $: cardStyle = levelStyles[tier.level] ?? "";
 
 <article class="rounded-2xl border p-6 text-left shadow-sm {cardStyle}">
 	<div class="mb-6 space-y-1">
-		<h3 class="text-2xl font-bold text-primary dark:text-white">{tier.level} tier</h3>
+		<h3 class="text-2xl font-bold text-primary dark:text-white">{tier.level}s</h3>
 		<p class="text-base text-body/70 dark:text-slate-400">{tier.headline}</p>
 	</div>
 
@@ -66,8 +66,8 @@ $: cardStyle = levelStyles[tier.level] ?? "";
 				<a
 					href="mailto:hello@btcmap.org"
 					class="text-sm font-semibold uppercase tracking-wide text-link"
-					>Apply to become a {tier.level} partner</a
-				>
+					>Apply to become a {tier.level}</a
+					>
 			</div>
 		{/if}
 	</div>
