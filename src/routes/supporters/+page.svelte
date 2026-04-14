@@ -129,8 +129,7 @@ const plebTier = sponsorshipTiers.find((t) => t.level === "Pleb")!;
 				{t("supporters.supporters.heading")}
 			</h2>
 			<p class="text-base text-body dark:text-slate-300">
-				BTC Map is built in the open and sustained by the organisations that believe in it.
-				Each sponsorship tier reflects a deeper level of commitment to open bitcoin infrastructure.
+				BTC Map is recognized as an important part of Bitcoin's wider infrastructure. Each sponsor below represents is supporting us in our mission to make Bitcoin everyday money.
 			</p>
 			<a
 				href="mailto:hello@btcmap.org"
