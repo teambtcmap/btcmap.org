@@ -206,15 +206,18 @@ const plebsByTier: Record<string, typeof plebs> = {
 				<DonationOption value={onchain} textKey="supporters.donate.onchain" network="On-chain" {showQrToggle} />
 				<!-- lightning -->
 				<DonationOption value={lnurlp} textKey="supporters.donate.lightning" network="Lightning" {showQrToggle} />
+				<!-- lightning address -->
+				<DonationOption value="donations@btcmap.org" textKey="supporters.donate.lightningAddress" network="Lightning" />
 			</div>
 		{/if}
 	</section>
 
 	<section id="node">
 		<DonationOption
-			value="donations@btcmap.org"
+			value={lnurlp}
 			textKey="supporters.node.heading"
 			network="Lightning"
+			{showQrToggle}
 		/>
 	</section>
 </div>
