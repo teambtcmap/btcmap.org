@@ -150,7 +150,7 @@ const plebsByTier: Record<string, typeof plebs> = {
 				{t("supporters.supporters.heading")}
 			</h2>
 			<p class="text-base text-body dark:text-slate-300">
-				BTC Map is recognized as an important part of Bitcoin's wider infrastructure. Each sponsor below represents is supporting us in our mission to make Bitcoin everyday money.
+				BTC Map is recognized as an important part of Bitcoin's wider infrastructure. Each sponsor below is supporting us in our mission to make Bitcoin everyday money.
 			</p>
 			<a
 				href="mailto:hello@btcmap.org"
@@ -211,18 +211,10 @@ const plebsByTier: Record<string, typeof plebs> = {
 	</section>
 
 	<section id="node">
-		<!-- channel -->
-		<div>
-			<h3 class="text-lg font-semibold text-body uppercase dark:text-white">
-				{t("supporters.node.heading")}
-			</h3>
-			<a
-				href="https://amboss.space/node/03ef01535d57cd3a3ddff8b4050650b278991b3eb7853f772a200079b9adb24988"
-				target="_blank"
-				rel="noreferrer"
-				class="break-all text-link transition-colors hover:text-hover"
-				>03ef01535d57cd3a3ddff8b4050650b278991b3eb7853f772a200079b9adb24988</a
-			>
-		</div>
+		<DonationOption
+			value="donations@btcmap.org"
+			textKey="supporters.node.heading"
+			network="Lightning"
+		/>
 	</section>
 </div>
