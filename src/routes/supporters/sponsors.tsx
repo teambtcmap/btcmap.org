@@ -42,8 +42,8 @@ export const ballers: Pleb[] = [
 ];
 
 export const sponsorshipTiers: SponsorshipTier[] = [
-	{ level: "Explorer", headline: "A first step in backing us" },
-	{ level: "Wayfinder", headline: "Growing product alignment" },
+	{ level: "Explorer", headline: "Loving what we do" },
+	{ level: "Wayfinder", headline: "Supporting the mission" },
 	{ level: "Cartographer", headline: "Core ecosystem partner" },
 	{ level: "Navigator", headline: "High-conviction industry supporters" },
 	{ level: "Pioneer", headline: "Our most committed supporters" },

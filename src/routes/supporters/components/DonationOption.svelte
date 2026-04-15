@@ -7,7 +7,7 @@ import type { DonationType } from "$lib/types";
 export let value: string;
 export let textKey: string;
 export let network: DonationType;
-export let showQrToggle: (type: DonationType) => void;
+export let showQrToggle: ((type: DonationType) => void) | undefined = undefined;
 
 $: t = $_;
 </script>
@@ -37,12 +37,14 @@ $: t = $_;
 
 		<div class="space-x-4">
 			<!-- qr button -->
-			<button
-				class="text-link transition-colors hover:text-hover"
-				on:click={() => showQrToggle(network)}
-			>
-				<Icon type="fa" icon="qrcode" w="24" h="24" />
-			</button>
+			{#if showQrToggle}
+				<button
+					class="text-link transition-colors hover:text-hover"
+					on:click={() => showQrToggle(network)}
+				>
+					<Icon type="fa" icon="qrcode" w="24" h="24" />
+				</button>
+			{/if}
 
 			<!-- copy button -->
 			<CopyButton {value} />
