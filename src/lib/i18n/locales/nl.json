@@ -992,6 +992,7 @@
 			"scanOrClick": "Scan of klik om te doneren",
 			"onchain": "On-chain",
 			"lightning": "Lightning",
+			"lightningAddress": "Lightning-adres",
 			"protocolAlt": "protocol"
 		},
 		"supporters": {
@@ -999,7 +1000,7 @@
 			"becomeSponsor": "Word supporter"
 		},
 		"node": {
-			"heading": "Open een Lightningkanaal voor ons"
+			"heading": "Open een Lightningkanaal"
 		},
 		"applyHere": "Solliciteer hier",
 		"qrError": "Kon geen QR genereren. Probeer het opnieuw of neem contact op met BTC Map.",

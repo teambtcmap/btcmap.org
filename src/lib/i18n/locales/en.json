@@ -963,6 +963,7 @@
 			"scanOrClick": "Scan or click to donate",
 			"onchain": "On-chain",
 			"lightning": "Lightning",
+			"lightningAddress": "Lightning Address",
 			"protocolAlt": "protocol"
 		},
 		"supporters": {

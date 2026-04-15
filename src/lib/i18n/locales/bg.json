@@ -1083,6 +1083,7 @@
 			"scanOrClick": "Сканирайте или кликнете за дарение",
 			"onchain": "On-chain",
 			"lightning": "Lightning",
+			"lightningAddress": "Lightning адрес",
 			"protocolAlt": "протокол"
 		},
 		"supporters": {
@@ -1090,7 +1091,7 @@
 			"becomeSponsor": "Станете поддръжник"
 		},
 		"node": {
-			"heading": "Отворете Lightning канал към нас"
+			"heading": "Отворете Lightning канал"
 		},
 		"applyHere": "Кандидатствайте тук",
 		"qrError": "Не може да се генерира QR код, моля опитайте отново или се свържете с BTC Map.",

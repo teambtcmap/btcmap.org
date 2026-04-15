@@ -970,6 +970,7 @@
 			"scanOrClick": "Escaneie ou clique para doar",
 			"onchain": "On-chain",
 			"lightning": "Lightning",
+			"lightningAddress": "Endereço Lightning",
 			"protocolAlt": "protocolo"
 		},
 		"supporters": {
@@ -977,7 +978,7 @@
 			"becomeSponsor": "Torne-se um apoiador"
 		},
 		"node": {
-			"heading": "Abra um canal lightning para nós"
+			"heading": "Abra um canal lightning"
 		},
 		"applyHere": "Candidate-se aqui",
 		"qrError": "Não foi possível gerar o QR, tente novamente ou entre em contato com o BTC Map.",
