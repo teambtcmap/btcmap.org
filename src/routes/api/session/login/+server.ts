@@ -21,7 +21,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	const tokenRes = await api
 		.post(
 			`https://api.btcmap.org/v4/users/${encodeURIComponent(username)}/tokens`,
-			{},
+			{ label: "BTC Map Web" },
 			{ headers: { Authorization: `Bearer ${password}` } },
 		)
 		.catch((err) => {

@@ -50,7 +50,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 					"Content-Type": "application/json",
 					Authorization: `Bearer ${password}`,
 				},
-				body: JSON.stringify({}),
+				body: JSON.stringify({ label: "BTC Map Web" }),
 			},
 		);
 	} catch (err) {
