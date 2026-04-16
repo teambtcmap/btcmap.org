@@ -128,80 +128,79 @@ const handleSectionChange = (section: Sections) => {
 
 let dataInitialized = false;
 let elementsLoading = false;
+let activityEnriched = false;
 
-// Fetch places for area using geographic filtering + enrichment with verification data
-const fetchPlacesForArea = async (areaId: string): Promise<Place[]> => {
+// Fetch minimal per-place data (id + osm_id + deleted_at) for the area so the /activity
+// tab's Supertaggers list can match $events.element_id to place.osm_id. osm_id isn't in
+// the static places.json the global $places store is seeded from, so it has to come from
+// the API. This is an interim shim: once the area-scoped top-editors REST endpoint ships,
+// the whole function + its call site go away.
+const fetchActivityPlaceIds = async (placeIds: number[]): Promise<Place[]> => {
 	try {
 		elementsLoading = true;
-
-		// Step 1: Geographic filtering (fast, uses existing store)
-		const area = $areas.find((a) => a.id === areaId);
-		if (!area || !area.tags.geo_json) {
-			console.error("Area not found or missing geo_json:", areaId);
-			return [];
-		}
-
-		const allPlaces = $places;
-		const rewoundPoly = rewind(area.tags.geo_json, true);
-		const areaPlaces = allPlaces.filter((place: Place) => {
-			return (
-				place.lat &&
-				place.lon &&
-				geoContains(rewoundPoly, [place.lon, place.lat])
-			);
-		});
-
-		console.info(
-			`Geographic filtering found ${areaPlaces.length} places for ${areaId}`,
-		);
-
-		// Step 2: Enrich with verification data from API (batched requests)
-		const placeIds = areaPlaces.map((p) => p.id);
 		const batchSize = 20;
-		const enrichedPlaces: Place[] = [];
-
-		console.info(
-			`Enriching ${placeIds.length} places with verification data in ${Math.ceil(placeIds.length / batchSize)} batches`,
-		);
+		const enriched: Place[] = [];
+		const fieldsParam = buildFieldsParam(PLACE_FIELD_SETS.ACTIVITY_AGGREGATE);
 
 		for (let i = 0; i < placeIds.length; i += batchSize) {
 			const batch = placeIds.slice(i, i + batchSize);
-			const batchPromises = batch.map((id) =>
-				axios
-					.get<Place>(
-						`https://api.btcmap.org/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`,
-					)
-					.then((response) => response.data)
-					.catch((error) => {
-						console.warn(
-							`Failed to fetch place ${id}:`,
-							error.response?.status,
-						);
-						return null;
-					}),
+			const batchResults = await Promise.all(
+				batch.map((id) =>
+					axios
+						.get<Place>(
+							`https://api.btcmap.org/v4/places/${id}?fields=${fieldsParam}`,
+						)
+						.then((response) => response.data)
+						.catch((error) => {
+							console.warn(
+								`Failed to fetch place ${id}:`,
+								error.response?.status,
+							);
+							return null;
+						}),
+				),
 			);
-
-			const batchResults = await Promise.all(batchPromises);
-			const validPlaces = batchResults
-				.filter((place): place is Place => place !== null)
-				.filter((place) => !place.deleted_at);
-			enrichedPlaces.push(...validPlaces);
-
-			console.info(
-				`Batch ${Math.floor(i / batchSize) + 1} completed: ${validPlaces.length}/${batch.length} successful`,
-			);
+			for (const place of batchResults) {
+				if (place && !place.deleted_at) enriched.push(place);
+			}
 		}
-
-		console.info(
-			`Successfully enriched ${enrichedPlaces.length} places for ${areaId}`,
-		);
-		return enrichedPlaces;
+		return enriched;
 	} catch (error) {
-		console.error("Failed to fetch places for area:", areaId, error);
+		console.error("Failed to fetch activity place ids:", error);
 		return [];
 	} finally {
 		elementsLoading = false;
 	}
+};
+
+const populateTaggersFromEvents = (placesForTaggers: Place[]) => {
+	if (!$events.length || !$users.length) return;
+
+	const areaEvents = $events.filter((event) =>
+		placesForTaggers.find((place) => place.osm_id === event.element_id),
+	);
+	areaEvents.sort(
+		(a, b) => Date.parse(b.created_at) - Date.parse(a.created_at),
+	);
+
+	const newTaggers: User[] = [];
+	areaEvents.forEach((event) => {
+		const foundUser = $users.find((user) => user.id === event.user_id);
+		if (foundUser && !newTaggers.find((t) => t.id === foundUser.id)) {
+			newTaggers.push(foundUser);
+		}
+	});
+	taggers = newTaggers;
+};
+
+const enrichForActivity = async () => {
+	if (activityEnriched || !filteredPlaces.length) return;
+	activityEnriched = true;
+
+	const placesForTaggers = await fetchActivityPlaceIds(
+		filteredPlaces.map((p) => p.id),
+	);
+	populateTaggersFromEvents(placesForTaggers);
 };
 
 const initializeData = async () => {
@@ -322,35 +321,21 @@ const initializeData = async () => {
 	issues = data.issues;
 
 	dataInitialized = true;
-
-	// Fetch places in the background for rich components
-	if (browser) {
-		const places = await fetchPlacesForArea(areaFound.id);
-		filteredPlaces = places;
-
-		// Process events after places are loaded, only if events and users stores are populated
-		if ($events.length && $users.length) {
-			const areaEvents = $events.filter((event) =>
-				filteredPlaces.find((place) => place.osm_id === event.element_id),
-			);
-
-			areaEvents.sort(
-				(a, b) => Date.parse(b.created_at) - Date.parse(a.created_at),
-			);
-
-			areaEvents.forEach((event) => {
-				let foundUser = $users.find((user) => user.id === event.user_id);
-				if (foundUser && !taggers.find((t) => t.id === foundUser?.id)) {
-					taggers.push(foundUser);
-				}
-			});
-
-			taggers = taggers;
-		}
-	}
 };
 
 $: $areas?.length && $places?.length && !dataInitialized && initializeData();
+
+// Activity tab is the only section that needs per-place data beyond the static
+// places.json (it needs osm_id to match events to places). Fire enrichment only
+// when the user actually lands on /activity — merchants/stats/maintain don't need it.
+$: if (
+	browser &&
+	dataInitialized &&
+	activeSection === Sections.activity &&
+	!activityEnriched
+) {
+	enrichForActivity();
+}
 
 // Calculate areaReports reactively based on data initialization and reports store
 // Returns undefined while loading, empty array if no reports for this area, or filtered reports
@@ -591,7 +576,7 @@ let issues: RpcIssue[] = [];
 				<p>{$_('area.loadingData')}</p>
 			</div>
 		{:else if areaReports.length > 0}
-			<AreaStats {name} {filteredPlaces} {areaReports} areaTags={area} />
+			<AreaStats {name} {areaReports} areaTags={area} />
 		{:else}
 			<div class="text-center text-primary dark:text-white">
 				<p class="text-xl">{$_('area.dataWithin24Hours')}</p>
