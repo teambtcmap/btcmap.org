@@ -127,8 +127,11 @@ const handleSectionChange = (section: Sections) => {
 // No need for hash handling anymore - sections are handled by route parameters
 
 let dataInitialized = false;
-let elementsLoading = false;
-let activityEnriched = false;
+// Two flags because the UI needs to know "has the enrichment actually finished",
+// while the reactive trigger needs to know "is it already running" — using a single
+// flag causes a flash of the empty-state message for the duration of fetch.
+let activityEnrichmentInFlight = false;
+let activityEnrichmentDone = false;
 
 // Fetch minimal per-place data (id + osm_id + deleted_at) for the area so the /activity
 // tab's Supertaggers list can match $events.element_id to place.osm_id. osm_id isn't in
@@ -137,7 +140,6 @@ let activityEnriched = false;
 // the whole function + its call site go away.
 const fetchActivityPlaceIds = async (placeIds: number[]): Promise<Place[]> => {
 	try {
-		elementsLoading = true;
 		const batchSize = 20;
 		const enriched: Place[] = [];
 		const fieldsParam = buildFieldsParam(PLACE_FIELD_SETS.ACTIVITY_AGGREGATE);
@@ -168,8 +170,6 @@ const fetchActivityPlaceIds = async (placeIds: number[]): Promise<Place[]> => {
 	} catch (error) {
 		console.error("Failed to fetch activity place ids:", error);
 		return [];
-	} finally {
-		elementsLoading = false;
 	}
 };
 
@@ -194,13 +194,22 @@ const populateTaggersFromEvents = (placesForTaggers: Place[]) => {
 };
 
 const enrichForActivity = async () => {
-	if (activityEnriched || !filteredPlaces.length) return;
-	activityEnriched = true;
-
-	const placesForTaggers = await fetchActivityPlaceIds(
-		filteredPlaces.map((p) => p.id),
-	);
-	populateTaggersFromEvents(placesForTaggers);
+	if (
+		activityEnrichmentInFlight ||
+		activityEnrichmentDone ||
+		!filteredPlaces.length
+	)
+		return;
+	activityEnrichmentInFlight = true;
+	try {
+		const placesForTaggers = await fetchActivityPlaceIds(
+			filteredPlaces.map((p) => p.id),
+		);
+		populateTaggersFromEvents(placesForTaggers);
+		activityEnrichmentDone = true;
+	} finally {
+		activityEnrichmentInFlight = false;
+	}
 };
 
 const initializeData = async () => {
@@ -328,11 +337,17 @@ $: $areas?.length && $places?.length && !dataInitialized && initializeData();
 // Activity tab is the only section that needs per-place data beyond the static
 // places.json (it needs osm_id to match events to places). Fire enrichment only
 // when the user actually lands on /activity — merchants/stats/maintain don't need it.
+// Also wait for $events/$users to populate: batchSync runs them independently of
+// $areas/$places, so dataInitialized can flip true before events/users are ready,
+// and populateTaggersFromEvents would silently produce an empty list in that window.
 $: if (
 	browser &&
 	dataInitialized &&
 	activeSection === Sections.activity &&
-	!activityEnriched
+	$events.length &&
+	$users.length &&
+	!activityEnrichmentInFlight &&
+	!activityEnrichmentDone
 ) {
 	enrichForActivity();
 }
@@ -559,10 +574,7 @@ let issues: RpcIssue[] = [];
 
 	{#if activeSection === Sections.merchants}
 		<AreaMap {name} geoJSON={area?.geo_json} {filteredPlaces} />
-		<AreaMerchantHighlights
-			dataInitialized={dataInitialized && !elementsLoading}
-			{filteredPlaces}
-		/>
+		<AreaMerchantHighlights {dataInitialized} {filteredPlaces} />
 		{#if browser}
 			<Boost />
 		{/if}
@@ -586,14 +598,14 @@ let issues: RpcIssue[] = [];
 		<AreaActivity
 			{alias}
 			{name}
-			dataInitialized={dataInitialized && !elementsLoading}
+			dataInitialized={dataInitialized && activityEnrichmentDone}
 			{taggers}
 		/>
 	{:else if activeSection === Sections.maintain}
 		<IssuesTable
 			title={$_('area.taggingIssues', { values: { name: name || $_('area.defaultName') } })}
 			{issues}
-			loading={!(dataInitialized && !elementsLoading)}
+			loading={!dataInitialized}
 		/>
 		<AreaTickets tickets={data.tickets} title={$_('area.openTickets', { values: { name: name || $_('area.defaultName') } })} />
 		{#if type === 'community'}
