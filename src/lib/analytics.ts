@@ -37,7 +37,9 @@ type EventName =
 	| "save_item_toggle"
 	| "save_prompt_shown"
 	| "save_prompt_create_account_click"
-	| "save_prompt_login_click";
+	| "save_prompt_login_click"
+	| "backup_modal_shown"
+	| "backup_credentials_copied";
 
 declare global {
 	interface Window {

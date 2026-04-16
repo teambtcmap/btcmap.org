@@ -91,6 +91,7 @@ async function handleCreateAccount() {
 		// can't strand a new account without the user ever seeing their
 		// credentials. performInitialSave toasts on its own errors.
 		view = "backup";
+		trackEvent("backup_modal_shown", { source: "save_prompt" });
 		successToast($_(accountCreatedKey));
 		await performInitialSave(current).catch(() => {});
 	} catch (err) {
