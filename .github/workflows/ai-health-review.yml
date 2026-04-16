@@ -123,9 +123,9 @@ jobs:
             | sed 's|.* b/||' \
             | sort -u > /tmp/diff-files.txt
 
-          # $lib/ imports referenced in the diff but not themselves changed
-          grep -ohP 'from ["\x27]\$lib/[^"\x27]+["\x27]' /tmp/raw-diff.txt \
-            | sed 's/from ["'"'"']$lib\//src\/lib\//; s/["'"'"']$//' \
+          # $lib/ and $components/ imports referenced in the diff but not themselves changed
+          grep -ohP 'from ["\x27]\$(lib|components)/[^"\x27]+["\x27]' /tmp/raw-diff.txt \
+            | sed 's/from ["'"'"']\$lib\//src\/lib\//; s/from ["'"'"']\$components\//src\/components\//; s/["'"'"']$//' \
             | sort -u > /tmp/imports-raw.txt || true
 
           > /tmp/imports-resolved.txt
@@ -142,7 +142,7 @@ jobs:
           cat /tmp/diff-files.txt /tmp/imports-resolved.txt \
             | sort -u \
             | grep -E '\.(ts|svelte|js)$' \
-            | grep -v 'node_modules\|src/lib/i18n/locales/' > /tmp/context-files-unsorted.txt || true
+            | grep -vE 'node_modules|src/lib/i18n/locales/' > /tmp/context-files-unsorted.txt || true
 
           # Prioritize: server .ts first, then other .ts, then .svelte
           > /tmp/context-files.txt
