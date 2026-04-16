@@ -130,13 +130,10 @@ let dataInitialized = false;
 // Two flags because the UI needs to know "has the enrichment actually finished",
 // while the reactive trigger needs to know "is it already running" — using a single
 // flag causes a flash of the empty-state message for the duration of fetch.
+// Per-request transient failures are handled by axiosRetry (configured at module
+// scope above), so a single attempt is sufficient — no outer retry counter needed.
 let activityEnrichmentInFlight = false;
 let activityEnrichmentDone = false;
-// Bounded retry: fetchActivityPlaceIds swallows per-request errors and returns []
-// on a full network outage. Without a counter, the reactive trigger would retry in
-// a tight loop. Reset on area change.
-let activityEnrichmentAttempts = 0;
-const MAX_ACTIVITY_ATTEMPTS = 3;
 
 // The activity shim requests only id/osm_id/deleted_at; the returned objects don't
 // satisfy Place's required lat/lon/icon contract. Use a narrower type so the axios
@@ -214,28 +211,28 @@ const populateTaggersFromEvents = (placesForTaggers: ActivityPlace[]) => {
 };
 
 const enrichForActivity = async () => {
-	if (
-		activityEnrichmentInFlight ||
-		activityEnrichmentDone ||
-		activityEnrichmentAttempts >= MAX_ACTIVITY_ATTEMPTS ||
-		!filteredPlaces.length
-	)
+	if (activityEnrichmentInFlight || activityEnrichmentDone) return;
+
+	// Empty area: nothing to fetch; mark done so the UI falls through to
+	// the "No supertaggers" empty state instead of stalling on the skeleton.
+	if (!filteredPlaces.length) {
+		activityEnrichmentDone = true;
 		return;
+	}
+
 	activityEnrichmentInFlight = true;
-	activityEnrichmentAttempts++;
 	try {
 		const placesForTaggers = await fetchActivityPlaceIds(
 			filteredPlaces.map((p) => p.id),
 		);
 		populateTaggersFromEvents(placesForTaggers);
-		// Only lock as "done" when we actually got data. All-empty result with a
-		// non-empty filteredPlaces is the signature of a network failure (inner
-		// .catch swallows per-request errors and returns null); leave Done=false
-		// so the reactive trigger can retry up to MAX_ACTIVITY_ATTEMPTS times.
-		if (placesForTaggers.length > 0) {
-			activityEnrichmentDone = true;
-		}
 	} finally {
+		// Always mark done after a completed attempt. axiosRetry handles transient
+		// per-request failures internally; if everything still came back empty, that's
+		// a persistent failure and showing the empty state beats spinning forever.
+		// User can retry by navigating to a different area (the lastAreaId reactive
+		// resets activityEnrichmentDone).
+		activityEnrichmentDone = true;
 		activityEnrichmentInFlight = false;
 	}
 };
@@ -372,7 +369,6 @@ $: if (data?.id !== lastAreaId) {
 	dataInitialized = false;
 	activityEnrichmentInFlight = false;
 	activityEnrichmentDone = false;
-	activityEnrichmentAttempts = 0;
 	taggers = [];
 	filteredPlaces = [];
 }
@@ -392,8 +388,7 @@ $: if (
 	$events.length &&
 	$users.length &&
 	!activityEnrichmentInFlight &&
-	!activityEnrichmentDone &&
-	activityEnrichmentAttempts < MAX_ACTIVITY_ATTEMPTS
+	!activityEnrichmentDone
 ) {
 	enrichForActivity();
 }

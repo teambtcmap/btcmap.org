@@ -37,7 +37,7 @@ const initializeData = () => {
 	total = latestReport?.tags.total_elements ?? 0;
 	upToDate = latestReport?.tags.up_to_date_elements ?? 0;
 	legacy = latestReport?.tags.legacy_elements ?? 0;
-	outdated = Math.max(0, total - upToDate);
+	outdated = latestReport?.tags.outdated_elements ?? 0;
 	upToDatePercent = latestReport?.tags.up_to_date_percent
 		? latestReport.tags.up_to_date_percent.toFixed(0)
 		: "0";
