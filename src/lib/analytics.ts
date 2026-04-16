@@ -33,7 +33,8 @@ type EventName =
 	| "enable_precise_distances_click"
 	| "merchant_name_click"
 	| "merchant_profile_click"
-	| "browser_language";
+	| "browser_language"
+	| "save_item_toggle";
 
 declare global {
 	interface Window {

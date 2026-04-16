@@ -1,6 +1,7 @@
 <script lang="ts">
 import SaveAuthPrompt from "$components/auth/SaveAuthPrompt.svelte";
 import Icon from "$components/Icon.svelte";
+import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import type { SavedItemType } from "$lib/savedItems";
 import {
@@ -49,6 +50,11 @@ async function toggle() {
 		// stays in sync even if the server deduplicates or rejects IDs.
 		const serverList = await putSavedList(type, $session.token, nextSaved);
 		setSavedList(type, serverList);
+		trackEvent("save_item_toggle", {
+			saved: serverList.includes(id),
+			type,
+			source: "save_button",
+		});
 	} catch (err) {
 		setSavedList(type, previousSaved);
 		errToast($_(`merchant.saveFailed`));
