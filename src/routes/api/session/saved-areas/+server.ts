@@ -1,33 +1,30 @@
 import { error, json } from "@sveltejs/kit";
 
-import api from "$lib/axios";
-
 import type { RequestHandler } from "./$types";
 
 // GET /api/session/saved-areas
 // Proxies GET /v4/areas/saved to avoid browser CORS preflight issues.
-export const GET: RequestHandler = async ({ request }) => {
+export const GET: RequestHandler = async ({ request, fetch }) => {
 	const token = request.headers.get("authorization");
 	if (!token) {
 		error(401, "Missing Authorization header");
 	}
 
-	const res = await api
-		.get("https://api.btcmap.org/v4/areas/saved", {
-			headers: { Authorization: token },
-		})
-		.catch((err) => {
-			const status = err?.response?.status ?? 502;
-			console.error("Failed to fetch saved areas:", err?.response?.data ?? err);
-			error(status, "Failed to fetch saved areas");
-		});
+	const res = await fetch("https://api.btcmap.org/v4/areas/saved", {
+		headers: { Authorization: token },
+	});
 
-	return json(res.data);
+	if (!res.ok) {
+		console.error("Failed to fetch saved areas:", await res.text());
+		error(res.status, "Failed to fetch saved areas");
+	}
+
+	return json(await res.json());
 };
 
 // PUT /api/session/saved-areas
 // Proxies PUT /v4/areas/saved to avoid browser CORS preflight issues.
-export const PUT: RequestHandler = async ({ request }) => {
+export const PUT: RequestHandler = async ({ request, fetch }) => {
 	const token = request.headers.get("authorization");
 	if (!token) {
 		error(401, "Missing Authorization header");
@@ -38,15 +35,19 @@ export const PUT: RequestHandler = async ({ request }) => {
 		error(400, "Body must be a JSON array of area IDs");
 	}
 
-	const res = await api
-		.put("https://api.btcmap.org/v4/areas/saved", ids, {
-			headers: { Authorization: token },
-		})
-		.catch((err) => {
-			const status = err?.response?.status ?? 502;
-			console.error("Failed to save areas:", err?.response?.data ?? err);
-			error(status, "Failed to save areas");
-		});
+	const res = await fetch("https://api.btcmap.org/v4/areas/saved", {
+		method: "PUT",
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: token,
+		},
+		body: JSON.stringify(ids),
+	});
 
-	return json(res.data);
+	if (!res.ok) {
+		console.error("Failed to save areas:", await res.text());
+		error(res.status, "Failed to save areas");
+	}
+
+	return json(await res.json());
 };

@@ -1,7 +1,5 @@
 import { error, json } from "@sveltejs/kit";
 
-import api from "$lib/axios";
-
 import type { RequestHandler } from "./$types";
 
 // POST /api/session/signup
@@ -9,7 +7,7 @@ import type { RequestHandler } from "./$types";
 // Calls two API endpoints server-side to avoid browser CORS issues:
 //   1. POST /v4/users          → create account
 //   2. POST /v4/users/{name}/tokens → get Bearer token
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, fetch }) => {
 	const body = await request.json();
 	const password = body?.password;
 
@@ -18,31 +16,43 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	// Step 1: Create user
-	const userRes = await api
-		.post("https://api.btcmap.org/v4/users", { password })
-		.catch((err) => {
-			console.error("Failed to create user:", err?.response?.data ?? err);
-			error(502, "Failed to create account");
-		});
+	const userRes = await fetch("https://api.btcmap.org/v4/users", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ password }),
+	});
 
-	const username = userRes.data?.name;
+	if (!userRes.ok) {
+		console.error("Failed to create user:", await userRes.text());
+		error(502, "Failed to create account");
+	}
+
+	const userData = await userRes.json();
+	const username = userData?.name;
 	if (!username) {
 		error(502, "User creation returned no username");
 	}
 
 	// Step 2: Create token (password is sent as Bearer for this endpoint)
-	const tokenRes = await api
-		.post(
-			`https://api.btcmap.org/v4/users/${encodeURIComponent(username)}/tokens`,
-			{},
-			{ headers: { Authorization: `Bearer ${password}` } },
-		)
-		.catch((err) => {
-			console.error("Failed to create token:", err?.response?.data ?? err);
-			error(502, "Failed to create authentication token");
-		});
+	const tokenRes = await fetch(
+		`https://api.btcmap.org/v4/users/${encodeURIComponent(username)}/tokens`,
+		{
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${password}`,
+			},
+			body: JSON.stringify({}),
+		},
+	);
 
-	const token = tokenRes.data?.token;
+	if (!tokenRes.ok) {
+		console.error("Failed to create token:", await tokenRes.text());
+		error(502, "Failed to create authentication token");
+	}
+
+	const tokenData = await tokenRes.json();
+	const token = tokenData?.token;
 	if (!token) {
 		error(502, "Token creation returned no token");
 	}
