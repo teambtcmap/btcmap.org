@@ -30,7 +30,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 
 	if (!userRes.ok) {
 		console.error("Failed to create user:", await userRes.text());
-		error(502, "Failed to create account");
+		error(userRes.status, "Failed to create account");
 	}
 
 	const userData = await userRes.json();
@@ -60,7 +60,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 
 	if (!tokenRes.ok) {
 		console.error("Failed to create token:", await tokenRes.text());
-		error(502, "Failed to create authentication token");
+		error(tokenRes.status, "Failed to create authentication token");
 	}
 
 	const tokenData = await tokenRes.json();
