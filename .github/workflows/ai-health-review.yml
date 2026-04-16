@@ -118,19 +118,19 @@ jobs:
           MAX_CONTEXT=120000
           MAX_FILE=20000
 
-          # Files changed in the diff
+          # Files changed in the diff (extract b/ path so renames resolve to the new name)
           grep '^diff --git' /tmp/raw-diff.txt \
-            | sed 's|diff --git a/||; s| b/.*||' \
+            | sed 's|.* b/||' \
             | sort -u > /tmp/diff-files.txt
 
           # $lib/ imports referenced in the diff but not themselves changed
           grep -ohP 'from ["\x27]\$lib/[^"\x27]+["\x27]' /tmp/raw-diff.txt \
-            | sed "s/from [\"']\\$lib\\//src\\/lib\\//; s/[\"']$//" \
+            | sed 's/from ["'"'"']$lib\//src\/lib\//; s/["'"'"']$//' \
             | sort -u > /tmp/imports-raw.txt || true
 
           > /tmp/imports-resolved.txt
           while IFS= read -r mod; do
-            for candidate in "${mod}.ts" "${mod}/index.ts" "${mod}"; do
+            for candidate in "${mod}.ts" "${mod%.js}.ts" "${mod}/index.ts" "${mod}"; do
               if [[ -f "$candidate" ]]; then
                 echo "$candidate" >> /tmp/imports-resolved.txt
                 break
