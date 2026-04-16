@@ -1,12 +1,10 @@
 import { error, json } from "@sveltejs/kit";
 
-import api from "$lib/axios";
-
 import type { RequestHandler } from "./$types";
 
 const used: string[] = [];
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, fetch }) => {
 	const { invoice_id } = await request.json();
 
 	// check that invoice_id is provided
@@ -19,16 +17,28 @@ export const POST: RequestHandler = async ({ request }) => {
 		error(418, "Invoice already processed");
 	}
 
-	const invoiceStatus = await api
-		.get(`https://api.btcmap.org/v4/invoices/${invoice_id}`)
-		.then((response) => response.data)
-		.catch((err) => {
-			console.error(err);
-			error(
-				400,
-				"Could not verify invoice status, please try again or contact BTC Map.",
-			);
-		});
+	let res: Response;
+	try {
+		res = await fetch(
+			`https://api.btcmap.org/v4/invoices/${encodeURIComponent(invoice_id)}`,
+		);
+	} catch (err) {
+		console.error("Failed to verify invoice status:", err);
+		error(
+			502,
+			"Could not verify invoice status, please try again or contact BTC Map.",
+		);
+	}
+
+	if (!res.ok) {
+		console.error("Failed to verify invoice status:", await res.text());
+		error(
+			res.status,
+			"Could not verify invoice status, please try again or contact BTC Map.",
+		);
+	}
+
+	const invoiceStatus = await res.json();
 
 	if (invoiceStatus.status !== "paid") {
 		error(400, "Invoice not paid");
