@@ -132,16 +132,28 @@ let dataInitialized = false;
 // flag causes a flash of the empty-state message for the duration of fetch.
 let activityEnrichmentInFlight = false;
 let activityEnrichmentDone = false;
+// Bounded retry: fetchActivityPlaceIds swallows per-request errors and returns []
+// on a full network outage. Without a counter, the reactive trigger would retry in
+// a tight loop. Reset on area change.
+let activityEnrichmentAttempts = 0;
+const MAX_ACTIVITY_ATTEMPTS = 3;
 
-// Fetch minimal per-place data (id + osm_id + deleted_at) for the area so the /activity
-// tab's Supertaggers list can match $events.element_id to place.osm_id. osm_id isn't in
-// the static places.json the global $places store is seeded from, so it has to come from
-// the API. This is an interim shim: once the area-scoped top-editors REST endpoint ships,
-// the whole function + its call site go away.
-const fetchActivityPlaceIds = async (placeIds: number[]): Promise<Place[]> => {
+// The activity shim requests only id/osm_id/deleted_at; the returned objects don't
+// satisfy Place's required lat/lon/icon contract. Use a narrower type so the axios
+// generic and downstream signatures are honest.
+type ActivityPlace = Pick<Place, "id" | "osm_id" | "deleted_at">;
+
+// Fetch minimal per-place data for the area so the /activity tab's Supertaggers list
+// can match $events.element_id to place.osm_id. osm_id isn't in the static places.json
+// the global $places store is seeded from, so it has to come from the API. Interim
+// shim: once the area-scoped top-editors REST endpoint ships, this function + its
+// call site go away.
+const fetchActivityPlaceIds = async (
+	placeIds: number[],
+): Promise<ActivityPlace[]> => {
 	try {
 		const batchSize = 20;
-		const enriched: Place[] = [];
+		const enriched: ActivityPlace[] = [];
 		const fieldsParam = buildFieldsParam(PLACE_FIELD_SETS.ACTIVITY_AGGREGATE);
 
 		for (let i = 0; i < placeIds.length; i += batchSize) {
@@ -149,7 +161,7 @@ const fetchActivityPlaceIds = async (placeIds: number[]): Promise<Place[]> => {
 			const batchResults = await Promise.all(
 				batch.map((id) =>
 					axios
-						.get<Place>(
+						.get<ActivityPlace>(
 							`https://api.btcmap.org/v4/places/${id}?fields=${fieldsParam}`,
 						)
 						.then((response) => response.data)
@@ -173,23 +185,31 @@ const fetchActivityPlaceIds = async (placeIds: number[]): Promise<Place[]> => {
 	}
 };
 
-const populateTaggersFromEvents = (placesForTaggers: Place[]) => {
+const populateTaggersFromEvents = (placesForTaggers: ActivityPlace[]) => {
 	if (!$events.length || !$users.length) return;
 
-	const areaEvents = $events.filter((event) =>
-		placesForTaggers.find((place) => place.osm_id === event.element_id),
-	);
-	areaEvents.sort(
-		(a, b) => Date.parse(b.created_at) - Date.parse(a.created_at),
-	);
+	const placeOsmIds = new Set<string>();
+	for (const place of placesForTaggers) {
+		if (place.osm_id) placeOsmIds.add(place.osm_id);
+	}
+	const usersById = new Map<number, User>();
+	for (const user of $users) {
+		usersById.set(user.id, user);
+	}
 
+	const areaEvents = $events
+		.filter((event) => placeOsmIds.has(event.element_id))
+		.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+
+	const seenUserIds = new Set<number>();
 	const newTaggers: User[] = [];
-	areaEvents.forEach((event) => {
-		const foundUser = $users.find((user) => user.id === event.user_id);
-		if (foundUser && !newTaggers.find((t) => t.id === foundUser.id)) {
-			newTaggers.push(foundUser);
-		}
-	});
+	for (const event of areaEvents) {
+		if (seenUserIds.has(event.user_id)) continue;
+		const user = usersById.get(event.user_id);
+		if (!user) continue;
+		seenUserIds.add(event.user_id);
+		newTaggers.push(user);
+	}
 	taggers = newTaggers;
 };
 
@@ -197,16 +217,24 @@ const enrichForActivity = async () => {
 	if (
 		activityEnrichmentInFlight ||
 		activityEnrichmentDone ||
+		activityEnrichmentAttempts >= MAX_ACTIVITY_ATTEMPTS ||
 		!filteredPlaces.length
 	)
 		return;
 	activityEnrichmentInFlight = true;
+	activityEnrichmentAttempts++;
 	try {
 		const placesForTaggers = await fetchActivityPlaceIds(
 			filteredPlaces.map((p) => p.id),
 		);
 		populateTaggersFromEvents(placesForTaggers);
-		activityEnrichmentDone = true;
+		// Only lock as "done" when we actually got data. All-empty result with a
+		// non-empty filteredPlaces is the signature of a network failure (inner
+		// .catch swallows per-request errors and returns null); leave Done=false
+		// so the reactive trigger can retry up to MAX_ACTIVITY_ATTEMPTS times.
+		if (placesForTaggers.length > 0) {
+			activityEnrichmentDone = true;
+		}
 	} finally {
 		activityEnrichmentInFlight = false;
 	}
@@ -332,6 +360,23 @@ const initializeData = async () => {
 	dataInitialized = true;
 };
 
+// Reset area-scoped state when the user navigates client-side to a different area.
+// SvelteKit reuses the +page.svelte instance (and this AreaPage) across
+// /country/X/* → /country/Y/* transitions, and initializeData has an early
+// `if (dataInitialized) return` guard — so without this reset the previous area's
+// state would leak into the next one. Must run before the initializeData reactive
+// below so dataInitialized=false is observed on the same tick.
+let lastAreaId: string | undefined;
+$: if (data?.id !== lastAreaId) {
+	lastAreaId = data.id;
+	dataInitialized = false;
+	activityEnrichmentInFlight = false;
+	activityEnrichmentDone = false;
+	activityEnrichmentAttempts = 0;
+	taggers = [];
+	filteredPlaces = [];
+}
+
 $: $areas?.length && $places?.length && !dataInitialized && initializeData();
 
 // Activity tab is the only section that needs per-place data beyond the static
@@ -347,7 +392,8 @@ $: if (
 	$events.length &&
 	$users.length &&
 	!activityEnrichmentInFlight &&
-	!activityEnrichmentDone
+	!activityEnrichmentDone &&
+	activityEnrichmentAttempts < MAX_ACTIVITY_ATTEMPTS
 ) {
 	enrichForActivity();
 }
