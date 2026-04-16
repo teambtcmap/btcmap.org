@@ -34,7 +34,10 @@ type EventName =
 	| "merchant_name_click"
 	| "merchant_profile_click"
 	| "browser_language"
-	| "save_item_toggle";
+	| "save_item_toggle"
+	| "save_prompt_shown"
+	| "save_prompt_create_account_click"
+	| "save_prompt_login_click";
 
 declare global {
 	interface Window {

@@ -37,6 +37,7 @@ async function toggle() {
 	// The modal handles signup/login and performs the save itself.
 	if (!$session) {
 		showPrompt = true;
+		trackEvent("save_prompt_shown", { type });
 		return;
 	}
 
