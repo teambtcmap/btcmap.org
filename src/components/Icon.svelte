@@ -20,7 +20,8 @@ const materialExceptions: Record<string, string> = {
 	currency_bitcoin: "material-symbols:currency-bitcoin",
 	close_round: "ic:round-close",
 	my_location: "material-symbols:my-location-rounded",
-	bookmark_filled: "ic:baseline-bookmark",
+	bookmark_filled: "ic:baseline-bookmark-added",
+	account_circle_filled: "ic:baseline-account-circle",
 };
 
 const faBrandIcons = ["x-twitter", "instagram", "facebook", "twitter"];

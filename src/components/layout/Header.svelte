@@ -1,12 +1,11 @@
 <script lang="ts">
-import Icon from "$components/Icon.svelte";
 import NavDropdownDesktop from "$components/layout/NavDropdownDesktop.svelte";
 import NavDropdownMobile from "$components/layout/NavDropdownMobile.svelte";
+import UserMenu from "$components/layout/UserMenu.svelte";
 import ThemeToggle from "$components/ThemeToggle.svelte";
 import { _ } from "$lib/i18n";
 import IconMobileNav from "$lib/icons/IconMobileNav.svelte";
 import type { MobileNavIconName } from "$lib/icons/types";
-import { session } from "$lib/session";
 import type { DropdownLink } from "$lib/types";
 
 import { afterNavigate } from "$app/navigation";
@@ -194,16 +193,7 @@ afterNavigate(() => {
 
 	<div class="flex items-center gap-3">
 		<ThemeToggle />
-		{#if $session}
-			<a
-				href="/saved"
-				class="text-white transition-opacity hover:opacity-80"
-				aria-label={$_("nav.saved")}
-				title={$_("nav.saved")}
-			>
-				<Icon type="material" icon="bookmark_filled" w="22" h="22" />
-			</a>
-		{/if}
+		<UserMenu id="user-menu-desktop" />
 	</div>
 </header>
 
@@ -219,16 +209,7 @@ afterNavigate(() => {
 
 	<div class="flex items-center space-x-4">
 		<ThemeToggle />
-		{#if $session}
-			<a
-				href="/saved"
-				class="text-white transition-opacity hover:opacity-80"
-				aria-label={$_("nav.saved")}
-				title={$_("nav.saved")}
-			>
-				<Icon type="material" icon="bookmark_filled" w="22" h="22" />
-			</a>
-		{/if}
+		<UserMenu id="user-menu-mobile" />
 
 		<!-- menu toggle -->
 		<button on:click={() => (showMobileMenu = !showMobileMenu)}>

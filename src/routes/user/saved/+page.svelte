@@ -38,7 +38,7 @@ onMount(async () => {
 	session.init();
 
 	if (!$session) {
-		goto("/map");
+		goto("/login");
 		return;
 	}
 

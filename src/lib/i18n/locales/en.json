@@ -35,7 +35,12 @@
 		"taggingIssues": "Tagging Issues",
 		"communities": "Communities",
 		"countries": "Countries",
-		"saved": "Saved"
+		"saved": "Saved",
+		"mySaved": "My Saved",
+		"account": "Account",
+		"login": "Log in",
+		"logout": "Log out",
+		"backupAccount": "Back up account"
 	},
 	"saved": {
 		"title": "My Saved",
@@ -45,6 +50,44 @@
 		"noPlaces": "No saved places yet.",
 		"noAreas": "No saved areas yet.",
 		"loadError": "Failed to load some saved items."
+	},
+	"login": {
+		"title": "Log in",
+		"username": "Username",
+		"password": "Password",
+		"submit": "Log in",
+		"loggingIn": "Logging in...",
+		"failed": "Invalid username or password.",
+		"error": "Something went wrong. Please try again.",
+		"noAccount": "Don't have an account?",
+		"createAccount": "Create one here"
+	},
+	"backup": {
+		"title": "Back up account",
+		"description": "Save these credentials to log in on another device.",
+		"username": "Username",
+		"password": "Password",
+		"copy": "Copy",
+		"show": "Show password",
+		"hide": "Hide password",
+		"unavailable": "Not available (old account)",
+		"warning": "These credentials are the only way to recover your saved places.",
+		"copied": "Copied to clipboard",
+		"copyFailed": "Copy failed — please copy manually"
+	},
+	"save": {
+		"accountCreatedPlace": "Account created — your saved places are stored on this device.",
+		"accountCreatedArea": "Account created — your saved areas are stored on this device.",
+		"prompt": {
+			"titlePlace": "Save this place",
+			"titleArea": "Save this area",
+			"descriptionPlace": "Log in to your existing account, or create a new one to keep your saved places.",
+			"descriptionArea": "Log in to your existing account, or create a new one to keep your saved areas.",
+			"createAccount": "Create account",
+			"login": "Log in",
+			"back": "Back",
+			"done": "Done"
+		}
 	},
 	"search": {
 		"placeholderWorldwide": "Search worldwide...",

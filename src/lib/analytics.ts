@@ -33,7 +33,14 @@ type EventName =
 	| "enable_precise_distances_click"
 	| "merchant_name_click"
 	| "merchant_profile_click"
-	| "browser_language";
+	| "browser_language"
+	| "save_item_toggle"
+	| "save_prompt_shown"
+	| "save_prompt_create_account_click"
+	| "save_prompt_login_click"
+	| "login_create_account_click"
+	| "backup_modal_shown"
+	| "backup_credentials_copied";
 
 declare global {
 	interface Window {
