@@ -220,20 +220,29 @@ const enrichForActivity = async () => {
 		return;
 	}
 
+	// Capture the area id at start. If the user navigates to a different area
+	// mid-fetch, the lastAreaId reactive resets our flags but cannot cancel an
+	// in-flight promise; without this guard the stale completion would overwrite
+	// the new area's taggers and stomp its inFlight flag.
+	const startAreaId = data.id;
 	activityEnrichmentInFlight = true;
 	try {
 		const placesForTaggers = await fetchActivityPlaceIds(
 			filteredPlaces.map((p) => p.id),
 		);
+		if (data.id !== startAreaId) return;
 		populateTaggersFromEvents(placesForTaggers);
 	} finally {
-		// Always mark done after a completed attempt. axiosRetry handles transient
-		// per-request failures internally; if everything still came back empty, that's
-		// a persistent failure and showing the empty state beats spinning forever.
-		// User can retry by navigating to a different area (the lastAreaId reactive
-		// resets activityEnrichmentDone).
-		activityEnrichmentDone = true;
-		activityEnrichmentInFlight = false;
+		// Only flip flags if we're still the current area. Stale completions return
+		// silently above; the new area's enrichForActivity owns its own inFlight.
+		// On the success path, marking Done lets the UI fall through to the empty
+		// state when the fetch produced nothing (axiosRetry already handles
+		// transient per-request failures). User can retry by navigating to a
+		// different area (the lastAreaId reactive resets activityEnrichmentDone).
+		if (data.id === startAreaId) {
+			activityEnrichmentDone = true;
+			activityEnrichmentInFlight = false;
+		}
 	}
 };
 
