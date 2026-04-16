@@ -38,6 +38,7 @@ type EventName =
 	| "save_prompt_shown"
 	| "save_prompt_create_account_click"
 	| "save_prompt_login_click"
+	| "login_create_account_click"
 	| "backup_modal_shown"
 	| "backup_credentials_copied";
 

@@ -1,6 +1,7 @@
 <script lang="ts">
 import { get } from "svelte/store";
 
+import { trackEvent } from "$lib/analytics";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
 import type { Session } from "$lib/session";
@@ -106,6 +107,7 @@ async function handleSubmit() {
 			href="https://developer.btcmap.org"
 			target="_blank"
 			rel="noopener noreferrer"
+			on:click={() => trackEvent("login_create_account_click")}
 			class="text-link transition-colors hover:text-hover"
 		>
 			{$_("login.createAccount")}
