@@ -5,6 +5,7 @@ import { get } from "svelte/store";
 import BackupCredentials from "$components/auth/BackupCredentials.svelte";
 import LoginForm from "$components/auth/LoginForm.svelte";
 import Modal from "$components/Modal.svelte";
+import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import type { SavedItemType } from "$lib/savedItems";
 import {
@@ -61,6 +62,11 @@ async function performInitialSave(current: Session) {
 	try {
 		const serverList = await putSavedList(type, current.token, nextList);
 		setSavedList(type, serverList);
+		trackEvent("save_item_toggle", {
+			saved: serverList.includes(id),
+			type,
+			source: "save_prompt",
+		});
 		dispatch("saved");
 	} catch (err) {
 		setSavedList(type, existing);
@@ -73,6 +79,7 @@ async function performInitialSave(current: Session) {
 async function handleCreateAccount() {
 	if (creating) return;
 	creating = true;
+	trackEvent("save_prompt_create_account_click", { type });
 	try {
 		const current = await session.signUp();
 		// If the user dismissed the modal while signUp was pending, don't
@@ -84,6 +91,7 @@ async function handleCreateAccount() {
 		// can't strand a new account without the user ever seeing their
 		// credentials. performInitialSave toasts on its own errors.
 		view = "backup";
+		trackEvent("backup_modal_shown", { source: "save_prompt" });
 		successToast($_(accountCreatedKey));
 		await performInitialSave(current).catch(() => {});
 	} catch (err) {
@@ -142,7 +150,10 @@ function handleDone() {
 			</button>
 			<button
 				type="button"
-				on:click={() => (view = "login")}
+				on:click={() => {
+					trackEvent("save_prompt_login_click", { type });
+					view = "login";
+				}}
 				class="w-full rounded-lg border border-link px-4 py-2 font-semibold text-link transition-colors hover:bg-link/10"
 			>
 				{$_("save.prompt.login")}

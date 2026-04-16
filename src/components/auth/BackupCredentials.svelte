@@ -1,5 +1,6 @@
 <script lang="ts">
 import Icon from "$components/Icon.svelte";
+import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import { errToast, successToast } from "$lib/utils";
 
@@ -10,9 +11,10 @@ export let idPrefix = "backup";
 
 let showPassword = false;
 
-async function copyToClipboard(text: string) {
+async function copyToClipboard(text: string, field: "username" | "password") {
 	try {
 		await navigator.clipboard.writeText(text);
+		trackEvent("backup_credentials_copied", { field });
 		successToast($_("backup.copied"));
 	} catch (err) {
 		errToast($_("backup.copyFailed"));
@@ -39,7 +41,7 @@ async function copyToClipboard(text: string) {
 			/>
 			<button
 				type="button"
-				on:click={() => copyToClipboard(username)}
+				on:click={() => copyToClipboard(username, "username")}
 				class="shrink-0 rounded-lg border border-gray-300 p-2 transition-colors hover:bg-gray-100 dark:border-white/20 dark:hover:bg-white/10"
 				title={$_("backup.copy")}
 			>
@@ -85,7 +87,7 @@ async function copyToClipboard(text: string) {
 			{#if password}
 				<button
 					type="button"
-					on:click={() => copyToClipboard(password ?? "")}
+					on:click={() => copyToClipboard(password ?? "", "password")}
 					class="shrink-0 rounded-lg border border-gray-300 p-2 transition-colors hover:bg-gray-100 dark:border-white/20 dark:hover:bg-white/10"
 					title={$_("backup.copy")}
 				>
