@@ -1,4 +1,4 @@
-import { error } from "@sveltejs/kit";
+import { error, isHttpError } from "@sveltejs/kit";
 
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
 import { verifiedArr } from "$lib/map/setup";
@@ -52,7 +52,10 @@ export const load: PageServerLoad<MerchantPageData> = async ({
 		);
 
 		if (!placeResponse.ok) {
-			throw error(404, "Merchant Not Found");
+			if (placeResponse.status === 404 || placeResponse.status === 410) {
+				throw error(404, "Merchant Not Found");
+			}
+			throw error(502, "Upstream API error");
 		}
 
 		const placeData: Place = await placeResponse.json();
@@ -134,6 +137,7 @@ export const load: PageServerLoad<MerchantPageData> = async ({
 		};
 	} catch (err) {
 		console.error(err);
-		error(404, "Merchant Not Found");
+		if (isHttpError(err)) throw err;
+		error(502, "Upstream API error");
 	}
 };

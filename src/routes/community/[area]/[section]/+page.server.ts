@@ -1,4 +1,4 @@
-import { error, redirect } from "@sveltejs/kit";
+import { error, isHttpError, redirect } from "@sveltejs/kit";
 
 import type { PageServerLoad } from "./$types";
 
@@ -24,7 +24,10 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		);
 
 		if (!areaResponse.ok) {
-			throw error(404, "Community Not Found");
+			if (areaResponse.status === 404 || areaResponse.status === 410) {
+				throw error(404, "Community Not Found");
+			}
+			throw error(502, "Upstream API error");
 		}
 
 		const fetchedArea = await areaResponse.json();
@@ -69,6 +72,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		};
 	} catch (err) {
 		console.error(err);
-		throw error(404, "Community Not Found");
+		if (isHttpError(err)) throw err;
+		throw error(502, "Upstream API error");
 	}
 };

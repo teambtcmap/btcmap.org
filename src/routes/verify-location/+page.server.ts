@@ -1,4 +1,4 @@
-import { error } from "@sveltejs/kit";
+import { error, isHttpError } from "@sveltejs/kit";
 
 import { isValidPlaceId } from "$lib/utils";
 
@@ -36,7 +36,10 @@ export const load: PageServerLoad<VerifyLocationPageData> = async ({
 		);
 
 		if (!response.ok) {
-			error(404, "Merchant Not Found");
+			if (response.status === 404 || response.status === 410) {
+				error(404, "Merchant Not Found");
+			}
+			error(502, "Upstream API error");
 		}
 
 		const placeData = await response.json();
@@ -81,6 +84,7 @@ export const load: PageServerLoad<VerifyLocationPageData> = async ({
 		};
 	} catch (err) {
 		console.error(err);
-		error(404, "Merchant Not Found");
+		if (isHttpError(err)) throw err;
+		error(502, "Upstream API error");
 	}
 };
