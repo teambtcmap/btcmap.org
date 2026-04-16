@@ -868,7 +868,7 @@
                         }
                 },
                 "contribution": {
-                        hyperbitcoinisation": { "title": "Hyperbitcoinisatie", "desc": "21M" },
+                        "hyperbitcoinisation": { "title": "Hyperbitcoinisatie", "desc": "21M" },
                         "pizzaTime": { "title": "Pizza-tijd", "desc": "10K" },
                         "godly": { "title": "Goddelijk", "desc": "7777" },
                         "shadow": { "title": "Schaduw", "desc": "5000" },
