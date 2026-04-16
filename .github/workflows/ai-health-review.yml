@@ -111,6 +111,68 @@ jobs:
             cp /tmp/raw-diff.txt /tmp/diff.txt
           fi
 
+      - name: Collect full file contents
+        if: steps.commits.outputs.skip != 'true'
+        run: |
+          set -euo pipefail
+          MAX_CONTEXT=120000
+          MAX_FILE=20000
+
+          # Files changed in the diff (extract b/ path so renames resolve to the new name)
+          grep '^diff --git' /tmp/raw-diff.txt \
+            | sed 's|.* b/||' \
+            | sort -u > /tmp/diff-files.txt
+
+          # $lib/ and $components/ imports referenced in the diff but not themselves changed
+          grep -ohP 'from ["\x27]\$(lib|components)/[^"\x27]+["\x27]' /tmp/raw-diff.txt \
+            | sed 's/from ["'"'"']\$lib\//src\/lib\//; s/from ["'"'"']\$components\//src\/components\//; s/["'"'"']$//' \
+            | sort -u > /tmp/imports-raw.txt || true
+
+          > /tmp/imports-resolved.txt
+          while IFS= read -r mod; do
+            for candidate in "${mod}.ts" "${mod%.js}.ts" "${mod}/index.ts" "${mod}"; do
+              if [[ -f "$candidate" ]]; then
+                echo "$candidate" >> /tmp/imports-resolved.txt
+                break
+              fi
+            done
+          done < /tmp/imports-raw.txt
+
+          # Merge, deduplicate, filter to source files
+          cat /tmp/diff-files.txt /tmp/imports-resolved.txt \
+            | sort -u \
+            | grep -E '\.(ts|svelte|js)$' \
+            | grep -vE 'node_modules|src/lib/i18n/locales/' > /tmp/context-files-unsorted.txt || true
+
+          # Prioritize: server .ts first, then other .ts, then .svelte
+          > /tmp/context-files.txt
+          grep -E '\+server\.ts|\+page\.server\.ts' /tmp/context-files-unsorted.txt >> /tmp/context-files.txt || true
+          grep -v -E '\+server\.ts|\+page\.server\.ts' /tmp/context-files-unsorted.txt \
+            | grep '\.ts$' >> /tmp/context-files.txt || true
+          grep '\.svelte$' /tmp/context-files-unsorted.txt >> /tmp/context-files.txt || true
+
+          TOTAL=0
+          > /tmp/file-contents.txt
+          while IFS= read -r filepath; do
+            if [[ -f "$filepath" ]]; then
+              SIZE=$(wc -c < "$filepath")
+              if (( SIZE > MAX_FILE )); then
+                echo "[SKIPPED: $filepath ($SIZE bytes, over per-file limit)]" >> /tmp/file-contents.txt
+                continue
+              fi
+              if (( TOTAL + SIZE > MAX_CONTEXT )); then
+                echo "[SKIPPED: $filepath ($SIZE bytes, context budget exhausted)]" >> /tmp/file-contents.txt
+                continue
+              fi
+              printf '=== %s ===\n' "$filepath" >> /tmp/file-contents.txt
+              cat "$filepath" >> /tmp/file-contents.txt
+              printf '\n\n' >> /tmp/file-contents.txt
+              TOTAL=$((TOTAL + SIZE))
+            fi
+          done < /tmp/context-files.txt
+
+          echo "Full context: ${TOTAL} bytes across $(wc -l < /tmp/context-files.txt) files"
+
       - name: AI review
         if: steps.commits.outputs.skip != 'true'
         env:
@@ -121,6 +183,7 @@ jobs:
           COMMIT_LOG=$(cat /tmp/commit-log.txt)
           DIFF=$(cat /tmp/diff.txt)
           HOTSPOTS=$(cat /tmp/hotspots.txt)
+          FILE_CONTENTS=$(cat /tmp/file-contents.txt 2>/dev/null || echo "")
           PROJECT_CONTEXT=$(cat CLAUDE.md 2>/dev/null || echo "")
           AGENTS_MD=$(cat AGENTS.md 2>/dev/null || echo "")
           README_MD=$(cat README.md 2>/dev/null || echo "")
@@ -147,6 +210,14 @@ jobs:
           - Do NOT suggest migrating to Svelte v5 runes — the project intentionally stays on v4.
           - Do NOT suggest formatting or import ordering changes — Biome handles that.
           - If nothing significant was missed and there are no refactoring opportunities, say so briefly. Do not invent findings.
+
+          Verification rules (mandatory):
+          - ONLY report issues you can directly verify from the provided diff AND full file contents. If you need a file that is not provided, do NOT report the finding.
+          - For each finding, you must be able to point to specific lines in the diff or file contents that prove the issue exists. If you cannot, drop it.
+          - NEVER assume what a module contains based on its name. Read the provided file contents. If a module is not included, do not make claims about its internals.
+          - Before flagging a pattern in new code, check whether existing files in the full file contents use the same pattern. If they do, it is an established project convention — do not flag it.
+          - Distinguish CONFIRMED (you can see the bug in provided code) from SUSPECTED (inferring from incomplete info). Only CONFIRMED issues may be rated HIGH or CRITICAL. SUSPECTED issues must be rated LOW and prefixed with "[UNVERIFIED]".
+          - Maximum 3 unverified findings. If you have more, keep only the 3 most plausible.
 
           Output format (strict markdown):
           # Biweekly Codebase Health Review
@@ -207,11 +278,26 @@ jobs:
           ${HOTSPOTS}
           </hotspots>
 
+          Full file contents for diff-touched source files and their key imports.
+          Use these to VERIFY findings — they show the complete current state, not just changed lines:
+
+          <file-contents>
+          ${FILE_CONTENTS}
+          </file-contents>
+
           Unified diff (noise files excluded):
 
           <diff>
           ${DIFF}
           </diff>
+
+          IMPORTANT — These paths are EXCLUDED from the diff and you have NO visibility into their contents:
+          - src/lib/i18n/locales/* (all translation JSON files)
+          - pnpm-lock.yaml, package-lock.json, *.lock
+          - *.snap (test snapshots)
+          - static/images/*, static/icons/*
+          Do NOT claim translation keys are missing — you cannot see the locale files.
+          Do NOT flag lock file or snapshot changes.
 
           Please review and produce your health review report."
 
