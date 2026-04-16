@@ -15,12 +15,18 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 		error(400, "Missing required parameter: password");
 	}
 
-	// Step 1: Create user
-	const userRes = await fetch("https://api.btcmap.org/v4/users", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ password }),
-	});
+	let userRes: Response;
+	try {
+		// Step 1: Create user
+		userRes = await fetch("https://api.btcmap.org/v4/users", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ password }),
+		});
+	} catch (err) {
+		console.error("Failed to create user:", err);
+		error(502, "Failed to create account");
+	}
 
 	if (!userRes.ok) {
 		console.error("Failed to create user:", await userRes.text());
@@ -33,18 +39,24 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 		error(502, "User creation returned no username");
 	}
 
-	// Step 2: Create token (password is sent as Bearer for this endpoint)
-	const tokenRes = await fetch(
-		`https://api.btcmap.org/v4/users/${encodeURIComponent(username)}/tokens`,
-		{
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer ${password}`,
+	let tokenRes: Response;
+	try {
+		// Step 2: Create token (password is sent as Bearer for this endpoint)
+		tokenRes = await fetch(
+			`https://api.btcmap.org/v4/users/${encodeURIComponent(username)}/tokens`,
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${password}`,
+				},
+				body: JSON.stringify({}),
 			},
-			body: JSON.stringify({}),
-		},
-	);
+		);
+	} catch (err) {
+		console.error("Failed to create token:", err);
+		error(502, "Failed to create authentication token");
+	}
 
 	if (!tokenRes.ok) {
 		console.error("Failed to create token:", await tokenRes.text());

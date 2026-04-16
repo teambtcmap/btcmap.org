@@ -10,9 +10,15 @@ export const GET: RequestHandler = async ({ request, fetch }) => {
 		error(401, "Missing Authorization header");
 	}
 
-	const res = await fetch("https://api.btcmap.org/v4/places/saved", {
-		headers: { Authorization: token },
-	});
+	let res: Response;
+	try {
+		res = await fetch("https://api.btcmap.org/v4/places/saved", {
+			headers: { Authorization: token },
+		});
+	} catch (err) {
+		console.error("Failed to fetch saved places:", err);
+		error(502, "Failed to fetch saved places");
+	}
 
 	if (!res.ok) {
 		console.error("Failed to fetch saved places:", await res.text());
@@ -35,14 +41,20 @@ export const PUT: RequestHandler = async ({ request, fetch }) => {
 		error(400, "Body must be a JSON array of place IDs");
 	}
 
-	const res = await fetch("https://api.btcmap.org/v4/places/saved", {
-		method: "PUT",
-		headers: {
-			"Content-Type": "application/json",
-			Authorization: token,
-		},
-		body: JSON.stringify(ids),
-	});
+	let res: Response;
+	try {
+		res = await fetch("https://api.btcmap.org/v4/places/saved", {
+			method: "PUT",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: token,
+			},
+			body: JSON.stringify(ids),
+		});
+	} catch (err) {
+		console.error("Failed to save places:", err);
+		error(502, "Failed to save places");
+	}
 
 	if (!res.ok) {
 		console.error("Failed to save places:", await res.text());
