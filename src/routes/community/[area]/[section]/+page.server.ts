@@ -1,13 +1,11 @@
 import { error, redirect } from "@sveltejs/kit";
 
-import api from "$lib/axios";
-
 import type { PageServerLoad } from "./$types";
 
 // Temporarily disabled during maintenance
 // import { getIssues } from '$lib/gitea';
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, fetch }) => {
 	const { area, section } = params;
 
 	// Allow non-Latin aliases while still rejecting malformed path-like values.
@@ -21,10 +19,15 @@ export const load: PageServerLoad = async ({ params }) => {
 		throw redirect(302, `/community/${encodeURIComponent(area)}/merchants`);
 	}
 	try {
-		const areaResponse = await api.get(
+		const areaResponse = await fetch(
 			`https://api.btcmap.org/v3/areas/${encodeURIComponent(area)}`,
 		);
-		const fetchedArea = areaResponse.data;
+
+		if (!areaResponse.ok) {
+			throw error(404, "Community Not Found");
+		}
+
+		const fetchedArea = await areaResponse.json();
 
 		// Check if area is deleted (v3 returns no tags for deleted areas)
 		if (fetchedArea.deleted_at || !fetchedArea.tags) {
