@@ -25,8 +25,8 @@ import {
 const PLEB_TIER_CTA = "https://geyser.fund/project/btcmap/rewards";
 
 const onchain = "bc1qt4g28vq480ec4ncl4h67qu4q4k2zel7xu0c2wg";
-const lnurlp =
-	"LNURL1DP68GURN8GHJ7CM0WFJJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQPSYZ34";
+const lnurlp = "donations@btcmap.org";
+const lightningnode = "lkjasddlkasdjlkaslkasdlkdasjlk";
 
 let showQr = false;
 $: t = $_;
@@ -206,15 +206,13 @@ const plebsByTier: Record<string, typeof plebs> = {
 				<DonationOption value={onchain} textKey="supporters.donate.onchain" network="On-chain" {showQrToggle} />
 				<!-- lightning -->
 				<DonationOption value={lnurlp} textKey="supporters.donate.lightning" network="Lightning" {showQrToggle} />
-				<!-- lightning address -->
-				<DonationOption value="donations@btcmap.org" textKey="supporters.donate.lightningAddress" network="Lightning" />
 			</div>
 		{/if}
 	</section>
 
 	<section id="node">
 		<DonationOption
-			value={lnurlp}
+			value={lightningnode}
 			textKey="supporters.node.heading"
 			network="Lightning"
 			{showQrToggle}
