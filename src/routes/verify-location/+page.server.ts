@@ -1,11 +1,10 @@
-import { error } from "@sveltejs/kit";
+import { error, isHttpError } from "@sveltejs/kit";
 
-import api from "$lib/axios";
 import { isValidPlaceId } from "$lib/utils";
 
 import type { PageServerLoad } from "./$types";
 
-export interface VerifyLocationPageData {
+export type VerifyLocationPageData = {
 	id: string;
 	name: string | undefined;
 	lat: number;
@@ -13,9 +12,12 @@ export interface VerifyLocationPageData {
 	location: string;
 	edit: string;
 	merchantId: string;
-}
+};
 
-export const load: PageServerLoad<VerifyLocationPageData> = async ({ url }) => {
+export const load: PageServerLoad<VerifyLocationPageData> = async ({
+	url,
+	fetch,
+}) => {
 	const id = url.searchParams.get("id");
 
 	if (!id) {
@@ -29,10 +31,18 @@ export const load: PageServerLoad<VerifyLocationPageData> = async ({ url }) => {
 
 	try {
 		// Fetch from v4 Places API (supports both numeric Place IDs and OSM-style IDs)
-		const response = await api.get(
+		const response = await fetch(
 			`https://api.btcmap.org/v4/places/${encodeURIComponent(id)}?fields=id,osm_id,osm_url,name,address,lat,lon`,
 		);
-		const placeData = response.data;
+
+		if (!response.ok) {
+			if (response.status === 404 || response.status === 410) {
+				error(404, "Merchant Not Found");
+			}
+			error(502, "Upstream API error");
+		}
+
+		const placeData = await response.json();
 
 		if (!placeData) {
 			error(404, "Merchant Not Found");
@@ -74,6 +84,7 @@ export const load: PageServerLoad<VerifyLocationPageData> = async ({ url }) => {
 		};
 	} catch (err) {
 		console.error(err);
-		error(404, "Merchant Not Found");
+		if (isHttpError(err)) throw err;
+		error(502, "Upstream API error");
 	}
 };

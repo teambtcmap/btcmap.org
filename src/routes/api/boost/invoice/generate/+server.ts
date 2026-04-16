@@ -1,16 +1,14 @@
 import { error } from "@sveltejs/kit";
 
-import api from "$lib/axios";
-
 import type { RequestHandler } from "./$types";
 
-interface BoostInvoiceRequest {
+type BoostInvoiceRequest = {
 	place_id: number;
 	days: number;
-}
+};
 
 // generate and return invoice
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, fetch }) => {
 	const data: BoostInvoiceRequest = await request.json();
 	const { place_id, days } = data;
 
@@ -25,19 +23,28 @@ export const POST: RequestHandler = async ({ request }) => {
 		);
 	}
 
-	const invoice = await api
-		.post("https://api.btcmap.org/v4/place-boosts", {
-			place_id: place_id.toString(),
-			days: days,
-		})
-		.then((response) => response.data)
-		.catch((err) => {
-			console.error(err);
-			error(
-				400,
-				"Could not generate boost invoice, please try again or contact BTC Map.",
-			);
+	let res: Response;
+	try {
+		res = await fetch("https://api.btcmap.org/v4/place-boosts", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ place_id: place_id.toString(), days }),
 		});
+	} catch (err) {
+		console.error("Failed to generate boost invoice:", err);
+		error(
+			502,
+			"Could not generate boost invoice, please try again or contact BTC Map.",
+		);
+	}
 
-	return new Response(JSON.stringify(invoice));
+	if (!res.ok) {
+		console.error("Failed to generate boost invoice:", await res.text());
+		error(
+			res.status,
+			"Could not generate boost invoice, please try again or contact BTC Map.",
+		);
+	}
+
+	return new Response(JSON.stringify(await res.json()));
 };
