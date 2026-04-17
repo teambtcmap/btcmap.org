@@ -9,8 +9,6 @@ export let type: "country" | "community";
 export let data: AreaPageProps;
 
 import rewind from "@mapbox/geojson-rewind";
-import axios from "axios";
-import axiosRetry from "axios-retry";
 import { geoContains } from "d3-geo";
 import { differenceInMonths } from "date-fns/differenceInMonths";
 import { onMount } from "svelte";
@@ -30,18 +28,16 @@ import Socials from "$components/Socials.svelte";
 import SponsorBadge from "$components/SponsorBadge.svelte";
 import Tip from "$components/Tip.svelte";
 import { API_BASE } from "$lib/api-base";
-import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
+import api from "$lib/axios";
 import {
 	areaError,
 	areas,
 	eventError,
-	events,
 	places,
 	placesError,
 	reportError,
 	reports,
 	userError,
-	users,
 } from "$lib/store";
 import { areasSync } from "$lib/sync/areas";
 import { batchSync } from "$lib/sync/batchSync";
@@ -51,10 +47,9 @@ import { usersSync } from "$lib/sync/users";
 import type {
 	AreaPageProps,
 	AreaTags,
-	Event,
 	Place,
 	RpcIssue,
-	User,
+	Tagger,
 } from "$lib/types.js";
 import { TipType } from "$lib/types.js";
 import {
@@ -63,8 +58,6 @@ import {
 	parseDateSafely,
 	validateContinents,
 } from "$lib/utils";
-
-axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 onMount(() => {
 	batchSync([areasSync, reportsSync, eventsSync, usersSync]);
@@ -128,121 +121,41 @@ const handleSectionChange = (section: Sections) => {
 // No need for hash handling anymore - sections are handled by route parameters
 
 let dataInitialized = false;
-// Two flags because the UI needs to know "has the enrichment actually finished",
-// while the reactive trigger needs to know "is it already running" — using a single
-// flag causes a flash of the empty-state message for the duration of fetch.
-// Per-request transient failures are handled by axiosRetry (configured at module
-// scope above), so a single attempt is sufficient — no outer retry counter needed.
-let activityEnrichmentInFlight = false;
-let activityEnrichmentDone = false;
+// Two flags: taggersInFlight prevents re-fire during the async fetch,
+// taggersLoaded gates the UI so the skeleton stays up until the fetch
+// completes. Per-request transient failures are handled by axiosRetry
+// on the shared $lib/axios instance, so a single attempt is sufficient.
+let taggersInFlight = false;
+let taggersLoaded = false;
 
-// The activity shim requests only id/osm_id/deleted_at; the returned objects don't
-// satisfy Place's required lat/lon/icon contract. Use a narrower type so the axios
-// generic and downstream signatures are honest.
-type ActivityPlace = Pick<Place, "id" | "osm_id" | "deleted_at">;
-
-// Fetch minimal per-place data for the area so the /activity tab's Supertaggers list
-// can match $events.element_id to place.osm_id. osm_id isn't in the static places.json
-// the global $places store is seeded from, so it has to come from the API. Interim
-// shim: once the area-scoped top-editors REST endpoint ships, this function + its
-// call site go away.
-const fetchActivityPlaceIds = async (
-	placeIds: number[],
-): Promise<ActivityPlace[]> => {
-	try {
-		const batchSize = 20;
-		const enriched: ActivityPlace[] = [];
-		const fieldsParam = buildFieldsParam(PLACE_FIELD_SETS.ACTIVITY_AGGREGATE);
-
-		for (let i = 0; i < placeIds.length; i += batchSize) {
-			const batch = placeIds.slice(i, i + batchSize);
-			const batchResults = await Promise.all(
-				batch.map((id) =>
-					axios
-						.get<ActivityPlace>(
-							`${API_BASE}/v4/places/${id}?fields=${fieldsParam}`,
-						)
-						.then((response) => response.data)
-						.catch((error) => {
-							console.warn(
-								`Failed to fetch place ${id}:`,
-								error.response?.status,
-							);
-							return null;
-						}),
-				),
-			);
-			for (const place of batchResults) {
-				if (place && !place.deleted_at) enriched.push(place);
-			}
-		}
-		return enriched;
-	} catch (error) {
-		console.error("Failed to fetch activity place ids:", error);
-		return [];
-	}
-};
-
-const populateTaggersFromEvents = (placesForTaggers: ActivityPlace[]) => {
-	if (!$events.length || !$users.length) return;
-
-	const placeOsmIds = new Set<string>();
-	for (const place of placesForTaggers) {
-		if (place.osm_id) placeOsmIds.add(place.osm_id);
-	}
-	const usersById = new Map<number, User>();
-	for (const user of $users) {
-		usersById.set(user.id, user);
-	}
-
-	const areaEvents = $events
-		.filter((event) => placeOsmIds.has(event.element_id))
-		.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
-
-	const seenUserIds = new Set<number>();
-	const newTaggers: User[] = [];
-	for (const event of areaEvents) {
-		if (seenUserIds.has(event.user_id)) continue;
-		const user = usersById.get(event.user_id);
-		if (!user) continue;
-		seenUserIds.add(event.user_id);
-		newTaggers.push(user);
-	}
-	taggers = newTaggers;
-};
-
-const enrichForActivity = async () => {
-	if (activityEnrichmentInFlight || activityEnrichmentDone) return;
-
-	// Empty area: nothing to fetch; mark done so the UI falls through to
-	// the "No supertaggers" empty state instead of stalling on the skeleton.
-	if (!filteredPlaces.length) {
-		activityEnrichmentDone = true;
-		return;
-	}
+const fetchAreaTopEditors = async () => {
+	if (taggersInFlight || taggersLoaded || !data?.id) return;
 
 	// Capture the area id at start. If the user navigates to a different area
 	// mid-fetch, the lastAreaId reactive resets our flags but cannot cancel an
-	// in-flight promise; without this guard the stale completion would overwrite
-	// the new area's taggers and stomp its inFlight flag.
+	// in-flight promise; without this guard the stale completion would
+	// overwrite the new area's taggers and stomp its loading state.
 	const startAreaId = data.id;
-	activityEnrichmentInFlight = true;
+	taggersInFlight = true;
 	try {
-		const placesForTaggers = await fetchActivityPlaceIds(
-			filteredPlaces.map((p) => p.id),
-		);
+		const url = `${API_BASE}/v4/areas/${encodeURIComponent(data.id)}/top-editors?limit=100`;
+		const response = await api.get<Tagger[]>(url);
 		if (data.id !== startAreaId) return;
-		populateTaggersFromEvents(placesForTaggers);
+		taggers = response.data;
+	} catch (error) {
+		if (data.id !== startAreaId) return;
+		console.warn("Failed to fetch area top editors:", error);
 	} finally {
-		// Only flip flags if we're still the current area. Stale completions return
-		// silently above; the new area's enrichForActivity owns its own inFlight.
-		// On the success path, marking Done lets the UI fall through to the empty
-		// state when the fetch produced nothing (axiosRetry already handles
-		// transient per-request failures). User can retry by navigating to a
-		// different area (the lastAreaId reactive resets activityEnrichmentDone).
+		// Only flip flags if we're still the current area. Stale completions
+		// return silently above; the new area's fetch owns its own state.
+		// Mark loaded after any completed attempt (success OR final failure
+		// after axiosRetry exhausts its retries) so the UI falls through to
+		// the empty state instead of hanging on the skeleton. User can retry
+		// by navigating to a different area (lastAreaId reactive resets
+		// taggersLoaded).
 		if (data.id === startAreaId) {
-			activityEnrichmentDone = true;
-			activityEnrichmentInFlight = false;
+			taggersLoaded = true;
+			taggersInFlight = false;
 		}
 	}
 };
@@ -377,30 +290,23 @@ let lastAreaId: string | undefined;
 $: if (data?.id !== lastAreaId) {
 	lastAreaId = data.id;
 	dataInitialized = false;
-	activityEnrichmentInFlight = false;
-	activityEnrichmentDone = false;
+	taggersInFlight = false;
+	taggersLoaded = false;
 	taggers = [];
 	filteredPlaces = [];
 }
 
 $: $areas?.length && $places?.length && !dataInitialized && initializeData();
 
-// Activity tab is the only section that needs per-place data beyond the static
-// places.json (it needs osm_id to match events to places). Fire enrichment only
-// when the user actually lands on /activity — merchants/stats/maintain don't need it.
-// Also wait for $events/$users to populate: batchSync runs them independently of
-// $areas/$places, so dataInitialized can flip true before events/users are ready,
-// and populateTaggersFromEvents would silently produce an empty list in that window.
+// Fire the area top-editors fetch only when the user actually lands on /activity.
+// One REST call replaces the previous per-place enrichment shim.
 $: if (
 	browser &&
-	dataInitialized &&
 	activeSection === Sections.activity &&
-	$events.length &&
-	$users.length &&
-	!activityEnrichmentInFlight &&
-	!activityEnrichmentDone
+	!taggersInFlight &&
+	!taggersLoaded
 ) {
-	enrichForActivity();
+	fetchAreaTopEditors();
 }
 
 // Calculate areaReports reactively based on data initialization and reports store
@@ -456,7 +362,7 @@ const calculateStaleness = (dateStr: string | undefined): boolean => {
 let isVerifiedDateStale: boolean = calculateStaleness(data.verifiedDate);
 let lightning: { destination: string; type: TipType } | undefined;
 
-let taggers: User[] = [];
+let taggers: Tagger[] = [];
 
 let issues: RpcIssue[] = [];
 </script>
@@ -649,7 +555,7 @@ let issues: RpcIssue[] = [];
 		<AreaActivity
 			{alias}
 			{name}
-			dataInitialized={dataInitialized && activityEnrichmentDone}
+			dataInitialized={dataInitialized && taggersLoaded}
 			{taggers}
 		/>
 	{:else if activeSection === Sections.maintain}

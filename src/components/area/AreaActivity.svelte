@@ -3,14 +3,14 @@ import { _ } from "svelte-i18n";
 
 import AreaFeed from "$components/area/AreaFeed.svelte";
 import Icon from "$components/Icon.svelte";
-import type { User } from "$lib/types.js";
+import type { Tagger } from "$lib/types.js";
 
 import { resolve } from "$app/paths";
 
 export let alias: string;
 export let name: string;
 export let dataInitialized: boolean;
-export let taggers: User[];
+export let taggers: Tagger[];
 
 let taggerCount = 25;
 $: taggersPaginated = taggers.slice(0, taggerCount);
@@ -34,9 +34,7 @@ let taggerDiv: HTMLDivElement;
 						<div class="m-4 space-y-1 transition-transform hover:scale-110">
 							<a href={resolve(`/tagger/${tagger.id}`)}>
 								<img
-									src={tagger.osm_json.img
-										? tagger.osm_json.img.href
-										: '/images/satoshi-nakamoto.png'}
+									src={tagger.avatar_url ?? '/images/satoshi-nakamoto.png'}
 									alt={$_('aria.avatarAlt')}
 									class="mx-auto h-20 w-20 rounded-full object-cover"
 									on:error={function () {
@@ -44,9 +42,7 @@ let taggerDiv: HTMLDivElement;
 									}}
 								/>
 								<p class="text-center font-semibold text-body dark:text-white">
-									{tagger.osm_json.display_name.length > 21
-										? tagger.osm_json.display_name.slice(0, 18) + '...'
-										: tagger.osm_json.display_name}
+									{tagger.name.length > 21 ? tagger.name.slice(0, 18) + '...' : tagger.name}
 								</p>
 							</a>
 						</div>

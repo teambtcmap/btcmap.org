@@ -265,6 +265,19 @@ export type User = {
 	deleted_at: string;
 };
 
+// Response shape of GET /v4/areas/{id}/top-editors and /v4/top-editors.
+// Used by the Supertaggers list on /country|community/*/activity pages.
+export type Tagger = {
+	id: number;
+	name: string;
+	avatar_url: string | null;
+	total_edits: number;
+	places_created: number;
+	places_updated: number;
+	places_deleted: number;
+	tip_url: string | null;
+};
+
 // FRONTEND
 
 // leaflet
