@@ -168,7 +168,7 @@ All API fetch calls use `API_BASE` from `$lib/api-base.ts` instead of hardcoding
 - **Production / default (no env var set):** `https://api.btcmap.org`
 - **Local API development:** Set `VITE_API_BASE_URL=/btcmap-api-proxy` in `.env` to route requests through the Vite dev proxy to a local `btcmap-api` on `127.0.0.1:8000`
 
-When adding new API calls, always use `${API_BASE}/v4/...` (imported from `$lib/api-base`) — never hardcode `https://api.btcmap.org` directly.
+When adding new API calls, always use `${API_BASE}/...` (imported from `$lib/api-base`) with the correct version/endpoint (e.g. `/v2/`, `/v3/`, `/v4/`, `/rpc`) — never hardcode `https://api.btcmap.org` directly.
 
 User-facing URLs (Atom feed `href` attributes, OpenGraph image URLs) should remain hardcoded to the production API since they're rendered in HTML and must resolve publicly.
 
