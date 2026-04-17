@@ -4,6 +4,7 @@ import Time from "svelte-time";
 
 import Icon from "$components/Icon.svelte";
 import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
+import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
 
 import { resolve } from "$app/paths";
@@ -49,7 +50,7 @@ const fetchFeed = async () => {
 	const gen = ++fetchGeneration;
 	const hadItems = feedItems.length > 0;
 	try {
-		const url = `https://api.btcmap.org/v4/activity?area=${encodeURIComponent(alias)}&days=${days}`;
+		const url = `${API_BASE}/v4/activity?area=${encodeURIComponent(alias)}&days=${days}`;
 		const res = await api.get<ActivityItem[]>(url);
 		// Discard stale response if user navigated to a different area
 		if (gen !== fetchGeneration) return;

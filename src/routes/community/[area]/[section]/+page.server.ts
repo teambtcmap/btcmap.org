@@ -1,5 +1,7 @@
 import { error, isHttpError, redirect } from "@sveltejs/kit";
 
+import { API_BASE } from "$lib/api-base";
+
 import type { PageServerLoad } from "./$types";
 
 // Temporarily disabled during maintenance
@@ -20,7 +22,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	}
 	try {
 		const areaResponse = await fetch(
-			`https://api.btcmap.org/v3/areas/${encodeURIComponent(area)}`,
+			`${API_BASE}/v3/areas/${encodeURIComponent(area)}`,
 		);
 
 		if (!areaResponse.ok) {
@@ -43,7 +45,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		// }));
 		const tickets = "maintenance";
 
-		const issuesResponse = await fetch("https://api.btcmap.org/rpc", {
+		const issuesResponse = await fetch(`${API_BASE}/rpc`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

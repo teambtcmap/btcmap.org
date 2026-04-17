@@ -24,6 +24,7 @@ import AreaLeaderboardMobileCard from "$components/leaderboard/AreaLeaderboardMo
 import LeaderboardPagination from "$components/leaderboard/LeaderboardPagination.svelte";
 import LeaderboardSearch from "$components/leaderboard/LeaderboardSearch.svelte";
 import SortHeaderButton from "$components/leaderboard/SortHeaderButton.svelte";
+import { API_BASE } from "$lib/api-base";
 import { GradeTable } from "$lib/constants";
 import { theme } from "$lib/theme";
 import type { ApiLeaderboardArea, AreaType } from "$lib/types";
@@ -55,8 +56,8 @@ const fetchLeaderboardData = async () => {
 	try {
 		const endpoint =
 			type === "community"
-				? "https://api.btcmap.org/v4/communities/top"
-				: "https://api.btcmap.org/v4/countries/top";
+				? `${API_BASE}/v4/communities/top`
+				: `${API_BASE}/v4/countries/top`;
 
 		const response = await fetch(endpoint);
 

@@ -1,8 +1,10 @@
+import { API_BASE } from "$lib/api-base";
+
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async () => {
 	try {
-		const response = await fetch("https://api.btcmap.org/rpc", {
+		const response = await fetch(`${API_BASE}/rpc`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

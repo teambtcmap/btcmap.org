@@ -8,6 +8,7 @@ import Icon from "$components/Icon.svelte";
 import MerchantComment from "$components/MerchantComment.svelte";
 import PaymentMethodPills from "$components/PaymentMethodPills.svelte";
 import { trackEvent } from "$lib/analytics";
+import { API_BASE } from "$lib/api-base";
 import {
 	CATEGORY_COLOR_CLASSES,
 	getIconColorWithFallback,
@@ -107,7 +108,7 @@ async function fetchComments(placeId: number) {
 
 	try {
 		const response = await fastApi.get(
-			`https://api.btcmap.org/v4/places/${placeId}/comments`,
+			`${API_BASE}/v4/places/${placeId}/comments`,
 			{ signal: abortController.signal },
 		);
 		// Validate response is an array

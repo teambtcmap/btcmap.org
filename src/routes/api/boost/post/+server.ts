@@ -1,5 +1,7 @@
 import { error, json } from "@sveltejs/kit";
 
+import { API_BASE } from "$lib/api-base";
+
 import type { RequestHandler } from "./$types";
 
 const used: string[] = [];
@@ -20,7 +22,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 	let res: Response;
 	try {
 		res = await fetch(
-			`https://api.btcmap.org/v4/invoices/${encodeURIComponent(invoice_id)}`,
+			`${API_BASE}/v4/invoices/${encodeURIComponent(invoice_id)}`,
 		);
 	} catch (err) {
 		console.error("Failed to verify invoice status:", err);

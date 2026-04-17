@@ -1,5 +1,7 @@
 import { error } from "@sveltejs/kit";
 
+import { API_BASE } from "$lib/api-base";
+
 import type { RequestHandler } from "./$types";
 
 export const POST: RequestHandler = async ({ request, fetch }) => {
@@ -12,7 +14,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 
 	let res: Response;
 	try {
-		res = await fetch("https://api.btcmap.org/v4/place-comments", {
+		res = await fetch(`${API_BASE}/v4/place-comments`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ place_id, comment }),

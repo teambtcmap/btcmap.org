@@ -21,6 +21,16 @@
 - `pnpm run typecheck`
 - `pnpm run test --run`
 
+### Local API development
+
+To test the frontend against a local [btcmap-api](https://github.com/teambtcmap/btcmap-api) instance:
+
+1. Start the API: `cd btcmap-api && cargo run` (binds to `127.0.0.1:8000`)
+2. Add to your `.env`: `VITE_API_BASE_URL=/btcmap-api-proxy`
+3. Start the frontend: `pnpm dev`
+
+The Vite dev server proxies `/btcmap-api-proxy/*` requests to the local API, avoiding CORS issues. Remove or comment out the env var to switch back to the production API.
+
 ### Build project
 
 1. Create `.env`  

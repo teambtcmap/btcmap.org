@@ -2,6 +2,7 @@ import type { AxiosProgressEvent } from "axios";
 import localforage from "localforage";
 import { get } from "svelte/store";
 
+import { API_BASE } from "$lib/api-base";
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
 import api from "$lib/axios";
 import {
@@ -244,7 +245,7 @@ export const elementsSync = async () => {
 
 				try {
 					const apiResponse = await api.get<Place[]>(
-						`https://api.btcmap.org/v4/places?fields=${buildFieldsParam(PLACE_FIELD_SETS.MAP_SYNC)}&updated_since=${updatesSince}&include_deleted=true`,
+						`${API_BASE}/v4/places?fields=${buildFieldsParam(PLACE_FIELD_SETS.MAP_SYNC)}&updated_since=${updatesSince}&include_deleted=true`,
 					);
 
 					const recentUpdates = apiResponse.data;
@@ -389,7 +390,7 @@ export const updateSinglePlace = async (
 	try {
 		// Fetch the updated place from the API
 		const response = await api.get<Place>(
-			`https://api.btcmap.org/v4/places/${placeId}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`,
+			`${API_BASE}/v4/places/${placeId}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`,
 		);
 		const updatedPlace = response.data;
 

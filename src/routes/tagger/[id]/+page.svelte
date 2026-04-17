@@ -15,6 +15,7 @@ import { onDestroy, onMount } from "svelte";
 import Icon from "$components/Icon.svelte";
 import ProfileStat from "$components/ProfileStat.svelte";
 import Tip from "$components/Tip.svelte";
+import { API_BASE } from "$lib/api-base";
 import {
 	eventError,
 	events,
@@ -440,9 +441,7 @@ const fetchPageNames = async (events: ActivityEvent[]) => {
 	if (idsToFetch.length > 0) {
 		const promises = idsToFetch.map(async (id) => {
 			try {
-				const response = await fetch(
-					`https://api.btcmap.org/v4/places/${id}?fields=name`,
-				);
+				const response = await fetch(`${API_BASE}/v4/places/${id}?fields=name`);
 				if (response.ok) {
 					const data = await response.json();
 					return { id, name: data.name || formatElementID(id) };

@@ -3,6 +3,7 @@ import { get } from "svelte/store";
 
 import Icon from "$components/Icon.svelte";
 import { trackEvent } from "$lib/analytics";
+import { API_BASE } from "$lib/api-base";
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
@@ -680,7 +681,7 @@ export const generateMarker = ({
 			// Fallback to old store-based behavior
 			try {
 				const response = await api.get(
-					`https://api.btcmap.org/v4/places/${placeId}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`,
+					`${API_BASE}/v4/places/${placeId}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`,
 				);
 				const placeDetails = response.data;
 				selectedMerchant.set(placeDetails);

@@ -1,5 +1,7 @@
 import { error } from "@sveltejs/kit";
 
+import { API_BASE } from "$lib/api-base";
+
 import type { PageServerLoad } from "./$types";
 
 interface DashboardData {
@@ -19,7 +21,7 @@ interface ChartEntry {
 }
 
 export const load: PageServerLoad = async ({ fetch }) => {
-	const response = await fetch("https://api.btcmap.org/v4/dashboard");
+	const response = await fetch(`${API_BASE}/v4/dashboard`);
 
 	if (!response.ok) {
 		throw error(response.status, "Failed to fetch dashboard data");
