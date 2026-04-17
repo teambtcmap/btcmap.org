@@ -1,5 +1,6 @@
 import { error, isHttpError } from "@sveltejs/kit";
 
+import { API_BASE } from "$lib/api-base";
 import { isValidPlaceId } from "$lib/utils";
 
 import type { PageServerLoad } from "./$types";
@@ -32,7 +33,7 @@ export const load: PageServerLoad<VerifyLocationPageData> = async ({
 	try {
 		// Fetch from v4 Places API (supports both numeric Place IDs and OSM-style IDs)
 		const response = await fetch(
-			`https://api.btcmap.org/v4/places/${encodeURIComponent(id)}?fields=id,osm_id,osm_url,name,address,lat,lon`,
+			`${API_BASE}/v4/places/${encodeURIComponent(id)}?fields=id,osm_id,osm_url,name,address,lat,lon`,
 		);
 
 		if (!response.ok) {

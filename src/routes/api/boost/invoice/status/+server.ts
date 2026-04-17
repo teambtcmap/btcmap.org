@@ -1,5 +1,7 @@
 import { error } from "@sveltejs/kit";
 
+import { API_BASE } from "$lib/api-base";
+
 import type { RequestHandler } from "./$types";
 
 // check the status of an invoice
@@ -13,7 +15,7 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 	let res: Response;
 	try {
 		res = await fetch(
-			`https://api.btcmap.org/v4/invoices/${encodeURIComponent(invoiceId)}`,
+			`${API_BASE}/v4/invoices/${encodeURIComponent(invoiceId)}`,
 		);
 	} catch (err) {
 		console.error("Failed to check invoice status:", err);

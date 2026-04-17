@@ -1,5 +1,6 @@
 import { get, writable } from "svelte/store";
 
+import { API_BASE } from "$lib/api-base";
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
 import api from "$lib/axios";
 import {
@@ -224,7 +225,7 @@ function createMerchantListStore() {
 			try {
 				const fields = buildFieldsParam(PLACE_FIELD_SETS.LIST_ITEM);
 				const response = await api.get<Place[]>(
-					`https://api.btcmap.org/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=${fields}`,
+					`${API_BASE}/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=${fields}`,
 					{ timeout: 10000, signal: listAbortController.signal },
 				);
 
@@ -303,7 +304,7 @@ function createMerchantListStore() {
 
 			try {
 				const response = await api.get<{ id: number }[]>(
-					`https://api.btcmap.org/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=id`,
+					`${API_BASE}/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=id`,
 					{ timeout: 10000, signal: listAbortController.signal },
 				);
 
@@ -345,7 +346,7 @@ function createMerchantListStore() {
 			try {
 				const fields = buildFieldsParam(PLACE_FIELD_SETS.LIST_ITEM);
 				const response = await api.get<Place[]>(
-					`https://api.btcmap.org/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=${fields}`,
+					`${API_BASE}/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=${fields}`,
 					{ timeout: 10000, signal: detailsAbortController.signal },
 				);
 

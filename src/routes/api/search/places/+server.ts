@@ -1,5 +1,6 @@
 import { error } from "@sveltejs/kit";
 
+import { API_BASE } from "$lib/api-base";
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
 
 import type { RequestHandler } from "./$types";
@@ -16,7 +17,7 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 	let res: Response;
 	try {
 		res = await fetch(
-			`https://api.btcmap.org/v4/places/search/?name=${encodeURIComponent(query)}&fields=${fields}`,
+			`${API_BASE}/v4/places/search/?name=${encodeURIComponent(query)}&fields=${fields}`,
 		);
 	} catch (err) {
 		console.error("Search API error:", err);

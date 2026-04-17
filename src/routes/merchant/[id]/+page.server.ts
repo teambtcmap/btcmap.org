@@ -1,5 +1,6 @@
 import { error, isHttpError } from "@sveltejs/kit";
 
+import { API_BASE } from "$lib/api-base";
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
 import { verifiedArr } from "$lib/map/setup";
 import {
@@ -48,7 +49,7 @@ export const load: PageServerLoad<MerchantPageData> = async ({
 		// Fetch complete data from v4 Places API (supports both numeric Place IDs and OSM-style IDs)
 		// include_deleted=true is required so deleted places return full field data instead of id-only
 		const placeResponse = await fetch(
-			`https://api.btcmap.org/v4/places/${encodeURIComponent(id)}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}&include_deleted=true`,
+			`${API_BASE}/v4/places/${encodeURIComponent(id)}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}&include_deleted=true`,
 		);
 
 		if (!placeResponse.ok) {
@@ -73,15 +74,15 @@ export const load: PageServerLoad<MerchantPageData> = async ({
 		const [comments, areas, activity] = await Promise.all([
 			fetchJson<MerchantComment[]>(
 				fetch,
-				`https://api.btcmap.org/v4/places/${encodedId}/comments`,
+				`${API_BASE}/v4/places/${encodedId}/comments`,
 			).then((data) => data ?? []),
 			fetchJson<MerchantArea[]>(
 				fetch,
-				`https://api.btcmap.org/v4/places/${encodedId}/areas?type=community`,
+				`${API_BASE}/v4/places/${encodedId}/areas?type=community`,
 			).then((data) => data ?? []),
 			fetchJson<MerchantActivityEvent[]>(
 				fetch,
-				`https://api.btcmap.org/v4/places/${encodedId}/activity`,
+				`${API_BASE}/v4/places/${encodedId}/activity`,
 			).then((data) => data ?? []),
 		]);
 

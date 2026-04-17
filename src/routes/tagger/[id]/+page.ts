@@ -1,5 +1,6 @@
 import { error } from "@sveltejs/kit";
 
+import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
 
 import type { PageLoad } from "./$types";
@@ -14,7 +15,7 @@ export const load: PageLoad = async ({ params }) => {
 
 	try {
 		const response = await api.get(
-			`https://api.btcmap.org/v2/users/${encodeURIComponent(id)}`,
+			`${API_BASE}/v2/users/${encodeURIComponent(id)}`,
 		);
 
 		const data = response.data;

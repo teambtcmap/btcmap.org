@@ -161,6 +161,17 @@ Use the appropriate tool attribution based on which tool generated the commit:
 
 **🚨 CRITICAL REMINDER:** You MUST run `pnpm run format:fix` before staging any commit. This is non-negotiable and ensures consistent code formatting across the entire project.
 
+## API Base URL
+
+All API fetch calls use `API_BASE` from `$lib/api-base.ts` instead of hardcoding `https://api.btcmap.org`. The base URL is controlled by the `VITE_API_BASE_URL` environment variable:
+
+- **Production / default (no env var set):** `https://api.btcmap.org`
+- **Local API development:** Set `VITE_API_BASE_URL=/btcmap-api-proxy` in `.env` to route requests through the Vite dev proxy to a local `btcmap-api` on `127.0.0.1:8000`
+
+When adding new API calls, always use `${API_BASE}/...` (imported from `$lib/api-base`) with the correct version/endpoint (e.g. `/v2/`, `/v3/`, `/v4/`, `/rpc`) — never hardcode `https://api.btcmap.org` directly.
+
+User-facing URLs (Atom feed `href` attributes, OpenGraph image URLs) should remain hardcoded to the production API since they're rendered in HTML and must resolve publicly.
+
 ## Project Structure Notes
 
 - `src/lib/sync/places.ts` always runs first and populates the `$places` store with `Place[]` data

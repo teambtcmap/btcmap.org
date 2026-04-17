@@ -5,6 +5,7 @@ import LatestTagger from "$components/LatestTagger.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
 import TopButton from "$components/TopButton.svelte";
+import { API_BASE } from "$lib/api-base";
 import { _ } from "$lib/i18n";
 import {
 	eventError,
@@ -46,9 +47,7 @@ const findUser = (tagger: Event) => {
 
 const fetchMerchantName = async (elementId: string): Promise<string> => {
 	try {
-		const response = await fetch(
-			`https://api.btcmap.org/v2/elements/${elementId}`,
-		);
+		const response = await fetch(`${API_BASE}/v2/elements/${elementId}`);
 		if (!response.ok) throw new Error("API call failed");
 		const data = await response.json();
 		return data.osm_json?.tags?.name || formatElementID(elementId);

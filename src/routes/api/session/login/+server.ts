@@ -1,5 +1,6 @@
 import { error, json } from "@sveltejs/kit";
 
+import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
 
 import type { RequestHandler } from "./$types";
@@ -20,7 +21,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	const tokenRes = await api
 		.post(
-			`https://api.btcmap.org/v4/users/${encodeURIComponent(username)}/tokens`,
+			`${API_BASE}/v4/users/${encodeURIComponent(username)}/tokens`,
 			{ label: "BTC Map Web" },
 			{ headers: { Authorization: `Bearer ${password}` } },
 		)

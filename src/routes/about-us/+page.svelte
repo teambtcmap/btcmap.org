@@ -1,6 +1,7 @@
 <script lang="ts">
 import { onMount } from "svelte";
 
+import { API_BASE } from "$lib/api-base";
 import { _ } from "$lib/i18n";
 import type { SocialIconName } from "$lib/icons/types";
 import {
@@ -50,7 +51,7 @@ let communities: Area[] = [];
 const fetchMerchantName = async (placeId: number): Promise<string> => {
 	try {
 		const response = await fetch(
-			`https://api.btcmap.org/v4/places/${placeId}?fields=name`,
+			`${API_BASE}/v4/places/${placeId}?fields=name`,
 		);
 		if (!response.ok) throw new Error("API call failed");
 		const data = await response.json();

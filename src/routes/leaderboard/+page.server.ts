@@ -1,3 +1,5 @@
+import { API_BASE } from "$lib/api-base";
+
 import type { PageServerLoad } from "./$types";
 
 const ALL_TIME_START = "2021-09-01";
@@ -48,13 +50,13 @@ const resolvePeriod = (maybePeriod: string | null): PeriodKey => {
 		: DEFAULT_PERIOD;
 };
 
-export const load: PageServerLoad = async ({ url }) => {
+export const load: PageServerLoad = async ({ url, fetch }) => {
 	const resolvedPeriod = resolvePeriod(url.searchParams.get("period"));
 	const range = buildPeriodRange(resolvedPeriod);
 
 	try {
 		const response = await fetch(
-			`https://api.btcmap.org/v4/top-editors?period_start=${range.period_start}&period_end=${range.period_end}`,
+			`${API_BASE}/v4/top-editors?period_start=${range.period_start}&period_end=${range.period_end}`,
 		);
 
 		if (!response.ok) {

@@ -1,5 +1,7 @@
 import { error, json } from "@sveltejs/kit";
 
+import { API_BASE } from "$lib/api-base";
+
 import type { RequestHandler } from "./$types";
 
 // POST /api/session/signup
@@ -18,7 +20,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 	let userRes: Response;
 	try {
 		// Step 1: Create user
-		userRes = await fetch("https://api.btcmap.org/v4/users", {
+		userRes = await fetch(`${API_BASE}/v4/users`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ password }),
@@ -43,7 +45,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 	try {
 		// Step 2: Create token (password is sent as Bearer for this endpoint)
 		tokenRes = await fetch(
-			`https://api.btcmap.org/v4/users/${encodeURIComponent(username)}/tokens`,
+			`${API_BASE}/v4/users/${encodeURIComponent(username)}/tokens`,
 			{
 				method: "POST",
 				headers: {

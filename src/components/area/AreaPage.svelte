@@ -29,6 +29,7 @@ import SaveButton from "$components/SaveButton.svelte";
 import Socials from "$components/Socials.svelte";
 import SponsorBadge from "$components/SponsorBadge.svelte";
 import Tip from "$components/Tip.svelte";
+import { API_BASE } from "$lib/api-base";
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
 import {
 	areaError,
@@ -159,7 +160,7 @@ const fetchActivityPlaceIds = async (
 				batch.map((id) =>
 					axios
 						.get<ActivityPlace>(
-							`https://api.btcmap.org/v4/places/${id}?fields=${fieldsParam}`,
+							`${API_BASE}/v4/places/${id}?fields=${fieldsParam}`,
 						)
 						.then((response) => response.data)
 						.catch((error) => {

@@ -11,6 +11,7 @@ import { parseISO } from "date-fns/parseISO";
 import { subDays } from "date-fns/subDays";
 import { get } from "svelte/store";
 
+import { API_BASE } from "$lib/api-base";
 import { PLACE_FIELD_SETS } from "$lib/api-fields";
 import { MERCHANT_LIST_MAX_ITEMS } from "$lib/constants";
 import { areas } from "$lib/store";
@@ -370,7 +371,7 @@ export async function fetchEnhancedPlace(
 
 	try {
 		const response = await fetch(
-			`https://api.btcmap.org/v4/places/${placeId}?fields=${PLACE_FIELD_SETS.COMPLETE_PLACE.join(",")}`,
+			`${API_BASE}/v4/places/${placeId}?fields=${PLACE_FIELD_SETS.COMPLETE_PLACE.join(",")}`,
 		);
 
 		if (!response.ok) {

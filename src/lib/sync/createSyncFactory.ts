@@ -1,6 +1,7 @@
 import localforage from "localforage";
 import type { Writable } from "svelte/store";
 
+import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
 import { clearTables } from "$lib/sync/clearTables";
 
@@ -166,7 +167,7 @@ async function initialSync<T extends SyncableEntity>(
 	do {
 		try {
 			const response = await api.get<T[]>(
-				`https://api.btcmap.org/v2/${apiEndpoint}?updated_since=${updatedSince}&limit=${limit}`,
+				`${API_BASE}/v2/${apiEndpoint}?updated_since=${updatedSince}&limit=${limit}`,
 			);
 
 			const newItems = response.data;
@@ -222,7 +223,7 @@ async function incrementalSync<T extends SyncableEntity>(
 
 	do {
 		const response = await api.get<T[]>(
-			`https://api.btcmap.org/v2/${apiEndpoint}?updated_since=${updatedSince}&limit=${limit}`,
+			`${API_BASE}/v2/${apiEndpoint}?updated_since=${updatedSince}&limit=${limit}`,
 		);
 
 		const newItems = response.data;
