@@ -9,7 +9,9 @@
 // need an absolute URL. We resolve relative paths against the dev server
 // origin so the Vite proxy still works during SSR.
 function resolveApiBase(): string {
-	const raw = import.meta.env.VITE_API_BASE_URL || "https://api.btcmap.org";
+	const raw = (
+		import.meta.env.VITE_API_BASE_URL || "https://api.btcmap.org"
+	).replace(/\/+$/, "");
 	if (typeof window === "undefined" && raw.startsWith("/")) {
 		const port = import.meta.env.VITE_PORT || 5000;
 		return `http://localhost:${port}${raw}`;
