@@ -127,80 +127,122 @@ const handleSectionChange = (section: Sections) => {
 // No need for hash handling anymore - sections are handled by route parameters
 
 let dataInitialized = false;
-let elementsLoading = false;
+// Two flags because the UI needs to know "has the enrichment actually finished",
+// while the reactive trigger needs to know "is it already running" — using a single
+// flag causes a flash of the empty-state message for the duration of fetch.
+// Per-request transient failures are handled by axiosRetry (configured at module
+// scope above), so a single attempt is sufficient — no outer retry counter needed.
+let activityEnrichmentInFlight = false;
+let activityEnrichmentDone = false;
 
-// Fetch places for area using geographic filtering + enrichment with verification data
-const fetchPlacesForArea = async (areaId: string): Promise<Place[]> => {
+// The activity shim requests only id/osm_id/deleted_at; the returned objects don't
+// satisfy Place's required lat/lon/icon contract. Use a narrower type so the axios
+// generic and downstream signatures are honest.
+type ActivityPlace = Pick<Place, "id" | "osm_id" | "deleted_at">;
+
+// Fetch minimal per-place data for the area so the /activity tab's Supertaggers list
+// can match $events.element_id to place.osm_id. osm_id isn't in the static places.json
+// the global $places store is seeded from, so it has to come from the API. Interim
+// shim: once the area-scoped top-editors REST endpoint ships, this function + its
+// call site go away.
+const fetchActivityPlaceIds = async (
+	placeIds: number[],
+): Promise<ActivityPlace[]> => {
 	try {
-		elementsLoading = true;
-
-		// Step 1: Geographic filtering (fast, uses existing store)
-		const area = $areas.find((a) => a.id === areaId);
-		if (!area || !area.tags.geo_json) {
-			console.error("Area not found or missing geo_json:", areaId);
-			return [];
-		}
-
-		const allPlaces = $places;
-		const rewoundPoly = rewind(area.tags.geo_json, true);
-		const areaPlaces = allPlaces.filter((place: Place) => {
-			return (
-				place.lat &&
-				place.lon &&
-				geoContains(rewoundPoly, [place.lon, place.lat])
-			);
-		});
-
-		console.info(
-			`Geographic filtering found ${areaPlaces.length} places for ${areaId}`,
-		);
-
-		// Step 2: Enrich with verification data from API (batched requests)
-		const placeIds = areaPlaces.map((p) => p.id);
 		const batchSize = 20;
-		const enrichedPlaces: Place[] = [];
-
-		console.info(
-			`Enriching ${placeIds.length} places with verification data in ${Math.ceil(placeIds.length / batchSize)} batches`,
-		);
+		const enriched: ActivityPlace[] = [];
+		const fieldsParam = buildFieldsParam(PLACE_FIELD_SETS.ACTIVITY_AGGREGATE);
 
 		for (let i = 0; i < placeIds.length; i += batchSize) {
 			const batch = placeIds.slice(i, i + batchSize);
-			const batchPromises = batch.map((id) =>
-				axios
-					.get<Place>(
-						`https://api.btcmap.org/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`,
-					)
-					.then((response) => response.data)
-					.catch((error) => {
-						console.warn(
-							`Failed to fetch place ${id}:`,
-							error.response?.status,
-						);
-						return null;
-					}),
+			const batchResults = await Promise.all(
+				batch.map((id) =>
+					axios
+						.get<ActivityPlace>(
+							`https://api.btcmap.org/v4/places/${id}?fields=${fieldsParam}`,
+						)
+						.then((response) => response.data)
+						.catch((error) => {
+							console.warn(
+								`Failed to fetch place ${id}:`,
+								error.response?.status,
+							);
+							return null;
+						}),
+				),
 			);
-
-			const batchResults = await Promise.all(batchPromises);
-			const validPlaces = batchResults
-				.filter((place): place is Place => place !== null)
-				.filter((place) => !place.deleted_at);
-			enrichedPlaces.push(...validPlaces);
-
-			console.info(
-				`Batch ${Math.floor(i / batchSize) + 1} completed: ${validPlaces.length}/${batch.length} successful`,
-			);
+			for (const place of batchResults) {
+				if (place && !place.deleted_at) enriched.push(place);
+			}
 		}
-
-		console.info(
-			`Successfully enriched ${enrichedPlaces.length} places for ${areaId}`,
-		);
-		return enrichedPlaces;
+		return enriched;
 	} catch (error) {
-		console.error("Failed to fetch places for area:", areaId, error);
+		console.error("Failed to fetch activity place ids:", error);
 		return [];
+	}
+};
+
+const populateTaggersFromEvents = (placesForTaggers: ActivityPlace[]) => {
+	if (!$events.length || !$users.length) return;
+
+	const placeOsmIds = new Set<string>();
+	for (const place of placesForTaggers) {
+		if (place.osm_id) placeOsmIds.add(place.osm_id);
+	}
+	const usersById = new Map<number, User>();
+	for (const user of $users) {
+		usersById.set(user.id, user);
+	}
+
+	const areaEvents = $events
+		.filter((event) => placeOsmIds.has(event.element_id))
+		.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+
+	const seenUserIds = new Set<number>();
+	const newTaggers: User[] = [];
+	for (const event of areaEvents) {
+		if (seenUserIds.has(event.user_id)) continue;
+		const user = usersById.get(event.user_id);
+		if (!user) continue;
+		seenUserIds.add(event.user_id);
+		newTaggers.push(user);
+	}
+	taggers = newTaggers;
+};
+
+const enrichForActivity = async () => {
+	if (activityEnrichmentInFlight || activityEnrichmentDone) return;
+
+	// Empty area: nothing to fetch; mark done so the UI falls through to
+	// the "No supertaggers" empty state instead of stalling on the skeleton.
+	if (!filteredPlaces.length) {
+		activityEnrichmentDone = true;
+		return;
+	}
+
+	// Capture the area id at start. If the user navigates to a different area
+	// mid-fetch, the lastAreaId reactive resets our flags but cannot cancel an
+	// in-flight promise; without this guard the stale completion would overwrite
+	// the new area's taggers and stomp its inFlight flag.
+	const startAreaId = data.id;
+	activityEnrichmentInFlight = true;
+	try {
+		const placesForTaggers = await fetchActivityPlaceIds(
+			filteredPlaces.map((p) => p.id),
+		);
+		if (data.id !== startAreaId) return;
+		populateTaggersFromEvents(placesForTaggers);
 	} finally {
-		elementsLoading = false;
+		// Only flip flags if we're still the current area. Stale completions return
+		// silently above; the new area's enrichForActivity owns its own inFlight.
+		// On the success path, marking Done lets the UI fall through to the empty
+		// state when the fetch produced nothing (axiosRetry already handles
+		// transient per-request failures). User can retry by navigating to a
+		// different area (the lastAreaId reactive resets activityEnrichmentDone).
+		if (data.id === startAreaId) {
+			activityEnrichmentDone = true;
+			activityEnrichmentInFlight = false;
+		}
 	}
 };
 
@@ -322,35 +364,43 @@ const initializeData = async () => {
 	issues = data.issues;
 
 	dataInitialized = true;
-
-	// Fetch places in the background for rich components
-	if (browser) {
-		const places = await fetchPlacesForArea(areaFound.id);
-		filteredPlaces = places;
-
-		// Process events after places are loaded, only if events and users stores are populated
-		if ($events.length && $users.length) {
-			const areaEvents = $events.filter((event) =>
-				filteredPlaces.find((place) => place.osm_id === event.element_id),
-			);
-
-			areaEvents.sort(
-				(a, b) => Date.parse(b.created_at) - Date.parse(a.created_at),
-			);
-
-			areaEvents.forEach((event) => {
-				let foundUser = $users.find((user) => user.id === event.user_id);
-				if (foundUser && !taggers.find((t) => t.id === foundUser?.id)) {
-					taggers.push(foundUser);
-				}
-			});
-
-			taggers = taggers;
-		}
-	}
 };
 
+// Reset area-scoped state when the user navigates client-side to a different area.
+// SvelteKit reuses the +page.svelte instance (and this AreaPage) across
+// /country/X/* → /country/Y/* transitions, and initializeData has an early
+// `if (dataInitialized) return` guard — so without this reset the previous area's
+// state would leak into the next one. Must run before the initializeData reactive
+// below so dataInitialized=false is observed on the same tick.
+let lastAreaId: string | undefined;
+$: if (data?.id !== lastAreaId) {
+	lastAreaId = data.id;
+	dataInitialized = false;
+	activityEnrichmentInFlight = false;
+	activityEnrichmentDone = false;
+	taggers = [];
+	filteredPlaces = [];
+}
+
 $: $areas?.length && $places?.length && !dataInitialized && initializeData();
+
+// Activity tab is the only section that needs per-place data beyond the static
+// places.json (it needs osm_id to match events to places). Fire enrichment only
+// when the user actually lands on /activity — merchants/stats/maintain don't need it.
+// Also wait for $events/$users to populate: batchSync runs them independently of
+// $areas/$places, so dataInitialized can flip true before events/users are ready,
+// and populateTaggersFromEvents would silently produce an empty list in that window.
+$: if (
+	browser &&
+	dataInitialized &&
+	activeSection === Sections.activity &&
+	$events.length &&
+	$users.length &&
+	!activityEnrichmentInFlight &&
+	!activityEnrichmentDone
+) {
+	enrichForActivity();
+}
 
 // Calculate areaReports reactively based on data initialization and reports store
 // Returns undefined while loading, empty array if no reports for this area, or filtered reports
@@ -574,10 +624,7 @@ let issues: RpcIssue[] = [];
 
 	{#if activeSection === Sections.merchants}
 		<AreaMap {name} geoJSON={area?.geo_json} {filteredPlaces} />
-		<AreaMerchantHighlights
-			dataInitialized={dataInitialized && !elementsLoading}
-			{filteredPlaces}
-		/>
+		<AreaMerchantHighlights {dataInitialized} {filteredPlaces} />
 		{#if browser}
 			<Boost />
 		{/if}
@@ -591,7 +638,7 @@ let issues: RpcIssue[] = [];
 				<p>{$_('area.loadingData')}</p>
 			</div>
 		{:else if areaReports.length > 0}
-			<AreaStats {name} {filteredPlaces} {areaReports} areaTags={area} />
+			<AreaStats {name} {areaReports} areaTags={area} />
 		{:else}
 			<div class="text-center text-primary dark:text-white">
 				<p class="text-xl">{$_('area.dataWithin24Hours')}</p>
@@ -601,14 +648,14 @@ let issues: RpcIssue[] = [];
 		<AreaActivity
 			{alias}
 			{name}
-			dataInitialized={dataInitialized && !elementsLoading}
+			dataInitialized={dataInitialized && activityEnrichmentDone}
 			{taggers}
 		/>
 	{:else if activeSection === Sections.maintain}
 		<IssuesTable
 			title={$_('area.taggingIssues', { values: { name: name || $_('area.defaultName') } })}
 			{issues}
-			loading={!(dataInitialized && !elementsLoading)}
+			loading={!dataInitialized}
 		/>
 		<AreaTickets tickets={data.tickets} title={$_('area.openTickets', { values: { name: name || $_('area.defaultName') } })} />
 		{#if type === 'community'}

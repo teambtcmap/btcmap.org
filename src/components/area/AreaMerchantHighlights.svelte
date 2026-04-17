@@ -16,11 +16,10 @@ $: boosts = filteredPlaces
 			Date.parse(b.boosted_until || "") - Date.parse(a.boosted_until || ""),
 	);
 
-$: latest = filteredPlaces
-	?.toSorted(
-		(a, b) => Date.parse(b.created_at || "") - Date.parse(a.created_at || ""),
-	)
-	.slice(0, 6);
+// element.id is a SQLite rowid auto-assigned on insert, so sorting by id desc is
+// a close approximation of "latest added" and works without per-place enrichment
+// (created_at isn't in the static places.json the global $places store is seeded from).
+$: latest = filteredPlaces?.toSorted((a, b) => b.id - a.id).slice(0, 6);
 </script>
 
 <section id="boosted">

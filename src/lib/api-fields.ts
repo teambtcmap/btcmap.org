@@ -68,6 +68,13 @@ export const PLACE_FIELD_SETS = {
 		"osm:payment:lightning",
 		"osm:payment:lightning_contactless",
 	] as const satisfies (keyof Place)[],
+	// Minimal fields for /activity tab's Supertaggers list — matches $events.element_id to
+	// place.osm_id. Interim shim: remove once the area-scoped top-editors REST endpoint ships.
+	ACTIVITY_AGGREGATE: [
+		"id",
+		"osm_id",
+		"deleted_at",
+	] as const satisfies (keyof Place)[],
 } as const;
 
 export const buildFieldsParam = (fields: readonly string[]) => fields.join(",");

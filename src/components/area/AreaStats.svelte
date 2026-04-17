@@ -5,15 +5,13 @@ import { _ } from "svelte-i18n";
 
 import Icon from "$components/Icon.svelte";
 import ProfileStat from "$components/ProfileStat.svelte";
-import { calcVerifiedDate, verifiedArr } from "$lib/map/setup";
 import { theme } from "$lib/theme";
-import type { AreaTags, Place, Report } from "$lib/types.js";
+import type { AreaTags, Report } from "$lib/types.js";
 import { updateChartThemes } from "$lib/utils";
 
 import { browser } from "$app/environment";
 
 export let name: string;
-export let filteredPlaces: Place[];
 export let areaReports: Report[];
 export let areaTags: AreaTags | undefined = undefined;
 
@@ -32,57 +30,17 @@ let dataInitialized = false;
 const initializeData = () => {
 	if (dataInitialized) return;
 
-	filteredPlaces.forEach((place) => {
-		// get date from 1 year ago to add verified check if survey is current
-		let verifiedDate = calcVerifiedDate();
-		let verified = verifiedArr(place);
-
-		if (verified.length && Date.parse(verified[0]) > verifiedDate) {
-			if (upToDate === undefined) {
-				upToDate = 1;
-			} else {
-				upToDate++;
-			}
-		} else {
-			if (outdated === undefined) {
-				outdated = 1;
-			} else {
-				outdated++;
-			}
-		}
-
-		if (place["osm:payment:bitcoin"]) {
-			if (legacy === undefined) {
-				legacy = 1;
-			} else {
-				legacy++;
-			}
-		}
-
-		if (total === undefined) {
-			total = 1;
-		} else {
-			total++;
-		}
-	});
-
-	if (!upToDate) {
-		upToDate = 0;
-	}
-
-	if (!outdated) {
-		outdated = 0;
-	}
-
-	if (!legacy) {
-		legacy = 0;
-	}
-
-	if (!total) {
-		total = 0;
-	}
-
-	upToDatePercent = upToDate ? (upToDate / (total / 100)).toFixed(0) : "0";
+	// Headline counts come straight from the latest report — the backend already
+	// aggregates total_elements / up_to_date_elements / legacy_elements /
+	// up_to_date_percent per area per day. No need to re-count client-side.
+	const latestReport = areaReports[0];
+	total = latestReport?.tags.total_elements ?? 0;
+	upToDate = latestReport?.tags.up_to_date_elements ?? 0;
+	legacy = latestReport?.tags.legacy_elements ?? 0;
+	outdated = latestReport?.tags.outdated_elements ?? 0;
+	upToDatePercent = latestReport?.tags.up_to_date_percent
+		? latestReport.tags.up_to_date_percent.toFixed(0)
+		: "0";
 
 	const populateCharts = () => {
 		const chartsReports = [...areaReports].sort(
@@ -289,20 +247,8 @@ const initializeData = () => {
 	dataInitialized = true;
 };
 
-// Check if places have verification data (indicator that enrichment is complete)
-$: hasVerificationData =
-	filteredPlaces &&
-	filteredPlaces.length > 0 &&
-	filteredPlaces.some(
-		(p) =>
-			p["osm:survey:date"] ||
-			p["osm:check_date"] ||
-			p["osm:check_date:currency:XBT"],
-	);
-
-// Only initialize when we have verification data
-$: hasVerificationData &&
-	areaReports &&
+// Initialize once the report data is available and the canvases are mounted.
+$: areaReports?.length &&
 	initialRenderComplete &&
 	!dataInitialized &&
 	initializeData();
