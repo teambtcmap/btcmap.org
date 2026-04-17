@@ -24,7 +24,7 @@ afterNavigate(() => {
 		type="button"
 		id={triggerId}
 		on:click={() => (open = !open)}
-		class="flex h-10 w-10 items-center justify-center text-white transition-opacity hover:opacity-80"
+		class="flex h-10 w-10 items-center justify-center text-link transition-colors hover:text-hover dark:text-white dark:hover:text-link"
 		aria-label={$session?.username ?? $_("nav.account")}
 		title={$session?.username ?? $_("nav.account")}
 		aria-haspopup="true"
