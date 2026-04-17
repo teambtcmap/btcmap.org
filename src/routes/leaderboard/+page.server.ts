@@ -50,7 +50,7 @@ const resolvePeriod = (maybePeriod: string | null): PeriodKey => {
 		: DEFAULT_PERIOD;
 };
 
-export const load: PageServerLoad = async ({ url }) => {
+export const load: PageServerLoad = async ({ url, fetch }) => {
 	const resolvedPeriod = resolvePeriod(url.searchParams.get("period"));
 	const range = buildPeriodRange(resolvedPeriod);
 

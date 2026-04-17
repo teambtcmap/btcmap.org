@@ -2,7 +2,7 @@ import { API_BASE } from "$lib/api-base";
 
 import type { PageServerLoad } from "./$types";
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ fetch }) => {
 	try {
 		const response = await fetch(`${API_BASE}/rpc`, {
 			method: "POST",
