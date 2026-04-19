@@ -127,6 +127,7 @@ let dataInitialized = false;
 // on the shared $lib/axios instance, so a single attempt is sufficient.
 let taggersInFlight = false;
 let taggersLoaded = false;
+let taggersLoadError = false;
 
 const fetchAreaTopEditors = async () => {
 	if (taggersInFlight || taggersLoaded || !data?.id) return;
@@ -145,6 +146,7 @@ const fetchAreaTopEditors = async () => {
 	} catch (error) {
 		if (data.id !== startAreaId) return;
 		console.warn("Failed to fetch area top editors:", error);
+		taggersLoadError = true;
 	} finally {
 		// Only flip flags if we're still the current area. Stale completions
 		// return silently above; the new area's fetch owns its own state.
@@ -292,6 +294,7 @@ $: if (data?.id !== lastAreaId) {
 	dataInitialized = false;
 	taggersInFlight = false;
 	taggersLoaded = false;
+	taggersLoadError = false;
 	taggers = [];
 	filteredPlaces = [];
 }
@@ -557,6 +560,7 @@ let issues: RpcIssue[] = [];
 			{name}
 			dataInitialized={dataInitialized && taggersLoaded}
 			{taggers}
+			{taggersLoadError}
 		/>
 	{:else if activeSection === Sections.maintain}
 		<IssuesTable

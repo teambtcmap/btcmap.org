@@ -11,6 +11,7 @@ export let alias: string;
 export let name: string;
 export let dataInitialized: boolean;
 export let taggers: Tagger[];
+export let taggersLoadError: boolean;
 
 let taggerCount = 25;
 $: taggersPaginated = taggers.slice(0, taggerCount);
@@ -64,6 +65,8 @@ let taggerDiv: HTMLDivElement;
 						</div>
 					{/each}
 				</div>
+			{:else if taggersLoadError}
+				<p class="p-5 text-center text-body dark:text-white">{$_(`areaActivity.supertaggersError`)}</p>
 			{:else}
 				<p class="p-5 text-center text-body dark:text-white">{$_(`areaActivity.noSupertaggers`)}</p>
 			{/if}
