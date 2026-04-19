@@ -457,6 +457,7 @@
 		"supertaggersTitle": "Супертагъри на {name}",
 		"activityTitle": "Активност на {name}",
 		"noSupertaggers": "Няма супертагъри за показване.",
+		"supertaggersError": "Couldn't load top editors. Please try again later.",
 		"supertaggers": "Супертагъри",
 		"loadMore": "Зареди още",
 		"activity": "Активност",
