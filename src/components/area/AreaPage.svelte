@@ -121,41 +121,44 @@ const handleSectionChange = (section: Sections) => {
 // No need for hash handling anymore - sections are handled by route parameters
 
 let dataInitialized = false;
-// Two flags: taggersInFlight prevents re-fire during the async fetch,
-// taggersLoaded gates the UI so the skeleton stays up until the fetch
-// completes. Per-request transient failures are handled by axiosRetry
-// on the shared $lib/axios instance, so a single attempt is sufficient.
+// taggersInFlight prevents re-fire during the async fetch; taggersLoaded
+// gates the UI so the skeleton stays up until the fetch completes. Per-
+// request transient failures are handled by axiosRetry on the shared
+// $lib/axios instance, so a single attempt is sufficient.
+// taggersFetchGeneration is a monotonic request token: each fetch
+// captures the current value and later compares it to discard its result
+// if a newer fetch has since started (including same-area re-entry,
+// which an area-id guard cannot distinguish).
 let taggersInFlight = false;
 let taggersLoaded = false;
 let taggersLoadError = false;
+let taggersFetchGeneration = 0;
 
 const fetchAreaTopEditors = async () => {
 	if (taggersInFlight || taggersLoaded || !data?.id) return;
 
-	// Capture the area id at start. If the user navigates to a different area
-	// mid-fetch, the lastAreaId reactive resets our flags but cannot cancel an
-	// in-flight promise; without this guard the stale completion would
-	// overwrite the new area's taggers and stomp its loading state.
-	const startAreaId = data.id;
+	// Capture a monotonic token at start. The lastAreaId reactive cannot
+	// cancel an in-flight promise, and an area-id guard alone would miss
+	// same-area re-entry (A→B→A leaves two A fetches pending with matching
+	// ids). The token distinguishes them so stale completions return silently.
+	const gen = ++taggersFetchGeneration;
 	taggersInFlight = true;
 	try {
 		const url = `${API_BASE}/v4/areas/${encodeURIComponent(data.id)}/top-editors?limit=100`;
 		const response = await api.get<Tagger[]>(url);
-		if (data.id !== startAreaId) return;
+		if (gen !== taggersFetchGeneration) return;
 		taggers = response.data;
 	} catch (error) {
-		if (data.id !== startAreaId) return;
+		if (gen !== taggersFetchGeneration) return;
 		console.warn("Failed to fetch area top editors:", error);
 		taggersLoadError = true;
 	} finally {
-		// Only flip flags if we're still the current area. Stale completions
-		// return silently above; the new area's fetch owns its own state.
-		// Mark loaded after any completed attempt (success OR final failure
-		// after axiosRetry exhausts its retries) so the UI falls through to
-		// the empty state instead of hanging on the skeleton. User can retry
-		// by navigating to a different area (lastAreaId reactive resets
-		// taggersLoaded).
-		if (data.id === startAreaId) {
+		// Only flip flags if this is still the most recent fetch. Stale
+		// completions return silently above; the newer fetch owns its own
+		// state. Mark loaded after any completed attempt (success OR final
+		// failure after axiosRetry exhausts its retries) so the UI falls
+		// through to the empty state instead of hanging on the skeleton.
+		if (gen === taggersFetchGeneration) {
 			taggersLoaded = true;
 			taggersInFlight = false;
 		}
@@ -295,6 +298,10 @@ $: if (data?.id !== lastAreaId) {
 	taggersInFlight = false;
 	taggersLoaded = false;
 	taggersLoadError = false;
+	// Invalidate any in-flight fetch so its completion can't stomp the new
+	// area's state even if we cross sections and the fetch reactive doesn't
+	// re-fire to bump the token on its own.
+	taggersFetchGeneration++;
 	taggers = [];
 	filteredPlaces = [];
 }
