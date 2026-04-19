@@ -10,6 +10,7 @@ import { resolve } from "$app/paths";
 export let alias: string;
 export let name: string;
 export let dataInitialized: boolean;
+export let taggersLoaded: boolean;
 export let taggers: Tagger[];
 export let taggersLoadError: boolean;
 
@@ -56,7 +57,7 @@ let taggerDiv: HTMLDivElement;
 						on:click={() => (taggerCount = taggerCount + 25)}>{$_(`areaActivity.loadMore`)}</button
 					>
 				{/if}
-			{:else if !dataInitialized}
+			{:else if !taggersLoaded}
 				<div class="flex flex-wrap items-center justify-center">
 					{#each Array(5) as _, index (index)}
 						<div class="m-4 space-y-1 transition-transform hover:scale-110">

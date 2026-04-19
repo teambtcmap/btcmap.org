@@ -558,7 +558,8 @@ let issues: RpcIssue[] = [];
 		<AreaActivity
 			{alias}
 			{name}
-			dataInitialized={dataInitialized && taggersLoaded}
+			{dataInitialized}
+			{taggersLoaded}
 			{taggers}
 			{taggersLoadError}
 		/>
