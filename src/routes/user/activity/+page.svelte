@@ -178,7 +178,9 @@ onMount(async () => {
 	{:else}
 		<div class="mb-2 flex justify-center">
 			<select
-				class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-body dark:border-white/20 dark:bg-white/10 dark:text-white"
+				aria-label="Filter activity by saved item"
+				class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-body enabled:cursor-pointer disabled:opacity-60 dark:border-white/20 dark:bg-white/10 dark:text-white"
+				disabled={feedLoading}
 				on:change={handleFilterChange}
 			>
 				<option value="all">All saved items</option>
