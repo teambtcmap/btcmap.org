@@ -160,11 +160,13 @@ onMount(async () => {
 </script>
 
 <svelte:head>
-	<title>My activity | BTC Map</title>
+	<title>{$_("userActivity.title")} | BTC Map</title>
 </svelte:head>
 
 <div class="mx-auto my-10 max-w-3xl px-4 md:my-20">
-	<h1 class="mb-8 text-center text-4xl font-semibold text-primary dark:text-white">My activity</h1>
+	<h1 class="mb-8 text-center text-4xl font-semibold text-primary dark:text-white">
+		{$_("userActivity.title")}
+	</h1>
 
 	{#if initialLoading}
 		<div class="flex justify-center">
@@ -172,32 +174,33 @@ onMount(async () => {
 		</div>
 	{:else if !hasSavedItems}
 		<p class="text-center text-lg text-body dark:text-white/70">
-			You haven't saved any places or areas yet. Save some from the map and come back here to see
-			activity on them.
+			{$_("userActivity.empty")}
 		</p>
 	{:else}
 		<div class="mb-2 flex justify-center">
 			<select
-				aria-label="Filter activity by saved item"
+				aria-label={$_("userActivity.filterLabel")}
 				class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-body enabled:cursor-pointer disabled:opacity-60 dark:border-white/20 dark:bg-white/10 dark:text-white"
 				disabled={feedLoading}
 				on:change={handleFilterChange}
 			>
-				<option value="all">All saved items</option>
+				<option value="all">{$_("userActivity.filterAll")}</option>
 				{#if savedPlaceIds.length}
-					<optgroup label="Places">
+					<optgroup label={$_("userActivity.filterPlaces")}>
 						{#each savedPlaceIds as placeId (placeId)}
 							<option value={`place:${placeId}`}>
-								{placeNames.get(placeId) || `Place ${placeId}`}
+								{placeNames.get(placeId) ||
+									$_("userActivity.placeFallback", { values: { id: placeId } })}
 							</option>
 						{/each}
 					</optgroup>
 				{/if}
 				{#if savedAreaIds.length}
-					<optgroup label="Areas">
+					<optgroup label={$_("userActivity.filterAreas")}>
 						{#each savedAreaIds as areaId (areaId)}
 							<option value={`area:${areaId}`}>
-								{areaNames.get(areaId) || `Area ${areaId}`}
+								{areaNames.get(areaId) ||
+									$_("userActivity.areaFallback", { values: { id: areaId } })}
 							</option>
 						{/each}
 					</optgroup>
@@ -206,7 +209,7 @@ onMount(async () => {
 		</div>
 
 		<p class="mb-6 text-center text-sm text-body/70 dark:text-white/50">
-			Showing activity from the last {DAYS} days
+			{$_("userActivity.timeWindow", { values: { days: DAYS } })}
 		</p>
 
 		{#if feedLoading && !feedItems.length}
