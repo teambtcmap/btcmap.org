@@ -11,8 +11,15 @@ import { session } from "$lib/session";
 import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
 
+type ActivityType =
+	| "place_added"
+	| "place_updated"
+	| "place_deleted"
+	| "place_commented"
+	| "place_boosted";
+
 type ActivityItem = {
-	type: string;
+	type: ActivityType;
 	place_id: number;
 	place_name?: string;
 	osm_user_id?: number;
@@ -33,7 +40,7 @@ type Filter =
 const DAYS = 30;
 const PAGE_SIZE = 20;
 
-const DOT_COLORS: Record<string, string> = {
+const DOT_COLORS: Record<ActivityType, string> = {
 	place_commented: "bg-amber-500",
 	place_boosted: "bg-orange-500",
 	place_added: "bg-created",
@@ -41,7 +48,7 @@ const DOT_COLORS: Record<string, string> = {
 	place_updated: "bg-link",
 };
 
-const dotColor = (type: string) => DOT_COLORS[type] ?? "bg-link";
+const dotColor = (type: ActivityType) => DOT_COLORS[type];
 
 let savedPlaces: SavedPlace[] = [];
 let savedAreas: SavedArea[] = [];
