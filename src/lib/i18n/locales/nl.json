@@ -681,6 +681,7 @@
 		"supertaggers": "Supertaggers",
 		"loadMore": "Laad meer",
 		"noSupertaggers": "Er zijn geen supertaggers om weer te geven.",
+		"supertaggersError": "Couldn't load top editors. Please try again later.",
 		"activity": "Activiteit",
 		"noActivity": "Geen activiteit om weer te geven.",
 		"atomFeeds": "Atoomvoedingen",

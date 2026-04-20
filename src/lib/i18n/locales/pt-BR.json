@@ -670,6 +670,7 @@
 		"supertaggers": "Supertaggers",
 		"loadMore": "Carregar Mais",
 		"noSupertaggers": "Nenhum supertagger para exibir.",
+		"supertaggersError": "Couldn't load top editors. Please try again later.",
 		"activity": "Atividade",
 		"noActivity": "Nenhuma atividade para exibir.",
 		"atomFeeds": "Feeds Atom",

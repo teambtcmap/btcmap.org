@@ -677,6 +677,7 @@
 		"supertaggers": "Supertagger",
 		"loadMore": "Mehr laden",
 		"noSupertaggers": "Keine Supertagger anzuzeigen.",
+		"supertaggersError": "Couldn't load top editors. Please try again later.",
 		"activity": "Aktivität",
 		"noActivity": "Keine Aktivität anzuzeigen.",
 		"atomFeeds": "Atom Feeds",

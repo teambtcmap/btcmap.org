@@ -3,14 +3,16 @@ import { _ } from "svelte-i18n";
 
 import AreaFeed from "$components/area/AreaFeed.svelte";
 import Icon from "$components/Icon.svelte";
-import type { User } from "$lib/types.js";
+import type { Tagger } from "$lib/types.js";
 
 import { resolve } from "$app/paths";
 
 export let alias: string;
 export let name: string;
 export let dataInitialized: boolean;
-export let taggers: User[];
+export let taggersLoaded: boolean;
+export let taggers: Tagger[];
+export let taggersLoadError: boolean;
 
 let taggerCount = 25;
 $: taggersPaginated = taggers.slice(0, taggerCount);
@@ -34,9 +36,7 @@ let taggerDiv: HTMLDivElement;
 						<div class="m-4 space-y-1 transition-transform hover:scale-110">
 							<a href={resolve(`/tagger/${tagger.id}`)}>
 								<img
-									src={tagger.osm_json.img
-										? tagger.osm_json.img.href
-										: '/images/satoshi-nakamoto.png'}
+									src={tagger.avatar_url ?? '/images/satoshi-nakamoto.png'}
 									alt={$_('aria.avatarAlt')}
 									class="mx-auto h-20 w-20 rounded-full object-cover"
 									on:error={function () {
@@ -44,9 +44,7 @@ let taggerDiv: HTMLDivElement;
 									}}
 								/>
 								<p class="text-center font-semibold text-body dark:text-white">
-									{tagger.osm_json.display_name.length > 21
-										? tagger.osm_json.display_name.slice(0, 18) + '...'
-										: tagger.osm_json.display_name}
+									{tagger.name.length > 21 ? tagger.name.slice(0, 18) + '...' : tagger.name}
 								</p>
 							</a>
 						</div>
@@ -59,7 +57,7 @@ let taggerDiv: HTMLDivElement;
 						on:click={() => (taggerCount = taggerCount + 25)}>{$_(`areaActivity.loadMore`)}</button
 					>
 				{/if}
-			{:else if !dataInitialized}
+			{:else if !taggersLoaded}
 				<div class="flex flex-wrap items-center justify-center">
 					{#each Array(5) as _, index (index)}
 						<div class="m-4 space-y-1 transition-transform hover:scale-110">
@@ -68,6 +66,8 @@ let taggerDiv: HTMLDivElement;
 						</div>
 					{/each}
 				</div>
+			{:else if taggersLoadError}
+				<p class="p-5 text-center text-body dark:text-white">{$_(`areaActivity.supertaggersError`)}</p>
 			{:else}
 				<p class="p-5 text-center text-body dark:text-white">{$_(`areaActivity.noSupertaggers`)}</p>
 			{/if}

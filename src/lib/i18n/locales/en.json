@@ -737,6 +737,7 @@
 		"supertaggers": "Supertaggers",
 		"loadMore": "Load More",
 		"noSupertaggers": "No supertaggers to display.",
+		"supertaggersError": "Couldn't load top editors. Please try again later.",
 		"activity": "Activity",
 		"noActivity": "No activity to display.",
 		"loadError": "Failed to load activity.",

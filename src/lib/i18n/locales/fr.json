@@ -677,6 +677,7 @@
 		"supertaggers": "Supertaggers",
 		"loadMore": "Charger plus",
 		"noSupertaggers": "Aucun supertagger à afficher.",
+		"supertaggersError": "Couldn't load top editors. Please try again later.",
 		"activity": "Activité",
 		"noActivity": "Aucune activité à afficher.",
 		"atomFeeds": "Flux Atom",

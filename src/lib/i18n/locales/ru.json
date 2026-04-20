@@ -677,6 +677,7 @@
 		"supertaggers": "Редакторы",
 		"loadMore": "Загрузить ещё",
 		"noSupertaggers": "Нет редакторов для отображения.",
+		"supertaggersError": "Couldn't load top editors. Please try again later.",
 		"activity": "Активность",
 		"noActivity": "Нет активности для отображения.",
 		"atomFeeds": "Atom ленты",
