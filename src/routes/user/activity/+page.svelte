@@ -149,7 +149,7 @@ onMount(async () => {
 			activity on them.
 		</p>
 	{:else}
-		<div class="mb-6 flex justify-center">
+		<div class="mb-2 flex justify-center">
 			<select
 				class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-body dark:border-white/20 dark:bg-white/10 dark:text-white"
 				on:change={handleFilterChange}
@@ -171,6 +171,10 @@ onMount(async () => {
 				{/if}
 			</select>
 		</div>
+
+		<p class="mb-6 text-center text-sm text-body/70 dark:text-white/50">
+			Showing activity from the last {DAYS} days
+		</p>
 
 		{#if feedLoading && !feedItems.length}
 			<div class="flex justify-center">
