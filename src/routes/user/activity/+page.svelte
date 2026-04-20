@@ -39,6 +39,9 @@ type Filter =
 
 const DAYS = 30;
 const PAGE_SIZE = 20;
+// Mirrors the server-side cap in /v4/activity — slice here so a user
+// with 500+ saved places still gets a usable response instead of a 400.
+const MAX_PLACES = 500;
 
 const DOT_COLORS: Record<ActivityType, string> = {
 	place_commented: "bg-amber-500",
@@ -50,8 +53,13 @@ const DOT_COLORS: Record<ActivityType, string> = {
 
 const dotColor = (type: ActivityType) => DOT_COLORS[type];
 
-let savedPlaces: SavedPlace[] = [];
-let savedAreas: SavedArea[] = [];
+// IDs come from the session (always available once logged in).
+// Names are fetched from the API best-effort for the filter select —
+// if that fetch fails the feed still works.
+let savedPlaceIds: number[] = [];
+let savedAreaIds: number[] = [];
+let placeNames: Map<number, string> = new Map();
+let areaNames: Map<number, string> = new Map();
 let hasSavedItems = false;
 let filter: Filter = { kind: "all" };
 let feedItems: ActivityItem[] = [];
@@ -67,10 +75,9 @@ $: totalPages = Math.max(1, Math.ceil(feedItems.length / PAGE_SIZE));
 const buildFeedUrl = (f: Filter): string => {
 	const params = new URLSearchParams({ days: String(DAYS) });
 	if (f.kind === "all") {
-		if (savedAreas.length)
-			params.set("areas", savedAreas.map((a) => a.id).join(","));
-		if (savedPlaces.length)
-			params.set("places", savedPlaces.map((p) => p.id).join(","));
+		const places = savedPlaceIds.slice(0, MAX_PLACES);
+		if (savedAreaIds.length) params.set("areas", savedAreaIds.join(","));
+		if (places.length) params.set("places", places.join(","));
 	} else if (f.kind === "place") {
 		params.set("places", String(f.id));
 	} else {
@@ -122,20 +129,33 @@ onMount(async () => {
 		return;
 	}
 
+	savedPlaceIds = $session.savedPlaces ?? [];
+	savedAreaIds = $session.savedAreas ?? [];
+	hasSavedItems = savedPlaceIds.length > 0 || savedAreaIds.length > 0;
+	initialLoading = false;
+
+	if (!hasSavedItems) return;
+
+	// Kick off the feed fetch immediately using the session IDs so the
+	// user doesn't wait on the saved-lists round-trip.
+	const feedPromise = fetchFeed();
+
+	// Hydrate names for the filter select in parallel. Best-effort:
+	// if either call fails, the select falls back to "Place <id>" /
+	// "Area <id>" labels and the feed is unaffected.
 	const headers = { Authorization: `Bearer ${$session.token}` };
 	const [placesRes, areasRes] = await Promise.allSettled([
 		api.get<SavedPlace[]>("/api/session/saved-places", { headers }),
 		api.get<SavedArea[]>("/api/session/saved-areas", { headers }),
 	]);
-	if (placesRes.status === "fulfilled") savedPlaces = placesRes.value.data;
-	if (areasRes.status === "fulfilled") savedAreas = areasRes.value.data;
-
-	hasSavedItems = savedPlaces.length > 0 || savedAreas.length > 0;
-	initialLoading = false;
-
-	if (hasSavedItems) {
-		await fetchFeed();
+	if (placesRes.status === "fulfilled") {
+		placeNames = new Map(placesRes.value.data.map((p) => [p.id, p.name]));
 	}
+	if (areasRes.status === "fulfilled") {
+		areaNames = new Map(areasRes.value.data.map((a) => [a.id, a.name]));
+	}
+
+	await feedPromise;
 });
 </script>
 
@@ -162,17 +182,21 @@ onMount(async () => {
 				on:change={handleFilterChange}
 			>
 				<option value="all">All saved items</option>
-				{#if savedPlaces.length}
+				{#if savedPlaceIds.length}
 					<optgroup label="Places">
-						{#each savedPlaces as place (place.id)}
-							<option value={`place:${place.id}`}>{place.name || `Place ${place.id}`}</option>
+						{#each savedPlaceIds as placeId (placeId)}
+							<option value={`place:${placeId}`}>
+								{placeNames.get(placeId) || `Place ${placeId}`}
+							</option>
 						{/each}
 					</optgroup>
 				{/if}
-				{#if savedAreas.length}
+				{#if savedAreaIds.length}
 					<optgroup label="Areas">
-						{#each savedAreas as area (area.id)}
-							<option value={`area:${area.id}`}>{area.name || `Area ${area.id}`}</option>
+						{#each savedAreaIds as areaId (areaId)}
+							<option value={`area:${areaId}`}>
+								{areaNames.get(areaId) || `Area ${areaId}`}
+							</option>
 						{/each}
 					</optgroup>
 				{/if}
