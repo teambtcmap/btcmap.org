@@ -152,10 +152,7 @@
 		"lightningAccepted": "Lightning geaccepteerd",
 		"lightningNotAccepted": "Lightning niet geaccepteerd",
 		"lightningUnknown": "Lightning onbekend",
-		"lightningContactless": "Lightning contactloos",
-		"contactlessAccepted": "Lightning contactloos geaccepteerd",
-		"contactlessNotAccepted": "Lightning contactloos niet geaccepteerd",
-		"contactlessUnknown": "Lightning contactloos onbekend",
+		"contactless": "Contactloos",
 		"thirdPartyRequired": "App van derden vereist"
 	},
 	"boost": {
@@ -433,7 +430,7 @@
 		"paymentMethodError": "Los dit alstublieft op...",
 		"onchainLabel": "On-chain",
 		"lightningLabel": "Lightning",
-		"nfcLabel": "Lightning NFC (contactloos)",
+		"nfcLabel": "Contactloos",
 		"websitePlaceholder": "https://bitcoin.org",
 		"phonePlaceholder": "Nummer",
 		"hoursPlaceholder": "Ma-Vr 08:30-20:00 uur",

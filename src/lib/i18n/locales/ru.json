@@ -152,10 +152,7 @@
 		"lightningAccepted": "Lightning принимается",
 		"lightningNotAccepted": "Lightning не принимается",
 		"lightningUnknown": "Lightning неизвестно",
-		"lightningContactless": "Lightning бесконтактный",
-		"contactlessAccepted": "Бесконтактный Lightning принимается",
-		"contactlessNotAccepted": "Бесконтактный Lightning не принимается",
-		"contactlessUnknown": "Бесконтактный Lightning неизвестно",
+		"contactless": "Бесконтактный",
 		"thirdPartyRequired": "Требуется стороннее приложение"
 	},
 	"boost": {
@@ -429,7 +426,7 @@
 		"paymentMethodError": "Пожалуйста, исправьте...",
 		"onchainLabel": "Ончейн",
 		"lightningLabel": "Lightning",
-		"nfcLabel": "Lightning (бесконтактный)",
+		"nfcLabel": "Бесконтактный",
 		"websitePlaceholder": "https://bitcoin.org",
 		"phonePlaceholder": "Номер",
 		"hoursPlaceholder": "Пн-Пт 08:30-20:00",

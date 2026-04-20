@@ -208,10 +208,7 @@
 		"lightningAccepted": "Lightning accepted",
 		"lightningNotAccepted": "Lightning not accepted",
 		"lightningUnknown": "Lightning unknown",
-		"lightningContactless": "Lightning contactless",
-		"contactlessAccepted": "Lightning Contactless accepted",
-		"contactlessNotAccepted": "Lightning contactless not accepted",
-		"contactlessUnknown": "Lightning contactless unknown",
+		"contactless": "Contactless",
 		"thirdPartyRequired": "Third party app required"
 	},
 	"boost": {
@@ -489,7 +486,7 @@
 		"paymentMethodError": "Please fix this...",
 		"onchainLabel": "On-chain",
 		"lightningLabel": "Lightning",
-		"nfcLabel": "Lightning Contactless",
+		"nfcLabel": "Contactless",
 		"websitePlaceholder": "https://bitcoin.org",
 		"phonePlaceholder": "Number",
 		"hoursPlaceholder": "Mo-Fr 08:30-20:00",

@@ -48,7 +48,7 @@ $: hasVerification = merchant.verified_at !== undefined;
 					<PaymentMethodPill method="btc" label={$_('payment.onchain')} />
 				{/if}
 				{#if merchant['osm:payment:lightning_contactless'] === 'yes'}
-					<PaymentMethodPill method="nfc" label={$_('payment.lightningContactless')} />
+					<PaymentMethodPill method="nfc" label={$_('payment.contactless')} />
 				{/if}
 			{:else if isLoading}
 				<div class="flex gap-1.5">

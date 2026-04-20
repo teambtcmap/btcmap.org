@@ -24,7 +24,7 @@ $: hasAny = onchain === "yes" || lightning === "yes" || contactless === "yes";
 			{#if contactless === "yes"}
 				<PaymentMethodPill
 					method="nfc"
-					label={$_("payment.lightningContactless")}
+					label={$_("payment.contactless")}
 				/>
 			{/if}
 		</div>
