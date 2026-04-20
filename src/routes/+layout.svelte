@@ -124,7 +124,7 @@ export let data;
 {#if $isLoading}
 	<LoadingIndicator visible={$isLoading} status="Loading..." />
 {:else}
-	{#if !['/', '/map', '/communities/map', '/communities', '/countries'].includes(data.pathname)}
+	{#if !['/', '/map', '/communities/map', '/events/map', '/communities', '/countries'].includes(data.pathname)}
 		<div class="bg-teal dark:bg-dark">
 			<Header />
 			<main class="mx-auto w-10/12 xl:w-[1200px]">

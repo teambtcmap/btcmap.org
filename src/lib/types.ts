@@ -480,6 +480,16 @@ export type Place = {
 	"osm:note"?: string;
 };
 
+export type EventMapEvent = {
+	id: number;
+	lat: number;
+	lon: number;
+	name: string;
+	website: string;
+	starts_at: string;
+	ends_at: string | null;
+};
+
 // Worker progress tracking
 export interface ProgressUpdate {
 	percent: number;
