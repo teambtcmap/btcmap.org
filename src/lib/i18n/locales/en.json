@@ -49,7 +49,9 @@
 		"empty": "Save places and areas to see them here.",
 		"noPlaces": "No saved places yet.",
 		"noAreas": "No saved areas yet.",
-		"loadError": "Failed to load some saved items."
+		"loadError": "Failed to load some saved items.",
+		"removeNamed": "Remove {name}",
+		"removeFailed": "Failed to remove"
 	},
 	"login": {
 		"title": "Log in",

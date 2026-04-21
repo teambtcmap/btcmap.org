@@ -9,9 +9,9 @@ import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import type { SavedItemType } from "$lib/savedItems";
 import {
+	addSavedItem,
 	getSavedList,
 	hydrateSavedFromServer,
-	putSavedList,
 	setSavedList,
 } from "$lib/savedItems";
 import type { Session } from "$lib/session";
@@ -57,10 +57,15 @@ $: if (!open) {
 
 async function performInitialSave(current: Session) {
 	const existing = getSavedList(current, type);
-	const nextList = existing.includes(id) ? existing : [...existing, id];
-	setSavedList(type, nextList);
+	// No-op if already saved — the atomic POST would still succeed (API
+	// dedupes) but we avoid the round-trip and the misleading toast.
+	if (existing.includes(id)) {
+		dispatch("saved");
+		return;
+	}
+	setSavedList(type, [...existing, id]);
 	try {
-		const serverList = await putSavedList(type, current.token, nextList);
+		const serverList = await addSavedItem(type, current.token, id);
 		setSavedList(type, serverList);
 		trackEvent("save_item_toggle", {
 			saved: serverList.includes(id),
@@ -105,18 +110,14 @@ async function handleCreateAccount() {
 
 async function handleLoginSuccess(current: Session) {
 	try {
-		const hydrated = await hydrateSavedFromServer(current.token);
+		// Best-effort hydrate so the local saved lists reflect the server
+		// before we attempt the save. The atomic POST in performInitialSave
+		// doesn't rely on a complete local list, so a partial hydrate
+		// failure won't clobber the server's saved items — it just means
+		// the short-circuit "already saved" check might miss and we pay for
+		// an extra (idempotent) POST.
+		await hydrateSavedFromServer(current.token);
 
-		// Don't save on top of a failed hydrate for this type — the local list
-		// is stale and putSavedList would wipe the user's real server-side
-		// saved list, leaving only the pending id.
-		if (!hydrated[type]) {
-			errToast($_("merchant.saveFailed"));
-			return;
-		}
-
-		// Re-read the freshly populated session so performInitialSave sees the
-		// server-side saved lists and merges (not overwrites) the new id.
 		const refreshed = get(session);
 		if (!refreshed) throw new Error("session missing after login");
 

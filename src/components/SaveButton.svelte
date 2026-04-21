@@ -5,8 +5,9 @@ import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import type { SavedItemType } from "$lib/savedItems";
 import {
+	addSavedItem,
 	getSavedList,
-	putSavedList,
+	removeSavedItem,
 	setSavedList,
 	toggleSavedLocal,
 } from "$lib/savedItems";
@@ -42,14 +43,17 @@ async function toggle() {
 	}
 
 	pending = true;
+	const wasSaved = saved;
 	const previousSaved = [...savedList];
 	try {
 		const nextSaved = toggleSavedLocal(type, id);
 		if (!nextSaved) throw new Error("toggle returned null (no session)");
 
-		// Write the server's canonical list back to the store so the client
-		// stays in sync even if the server deduplicates or rejects IDs.
-		const serverList = await putSavedList(type, $session.token, nextSaved);
+		// Atomic single-item POST / DELETE — avoids the PUT-whole-array race
+		// where two tabs' concurrent writes can overwrite each other.
+		const serverList = wasSaved
+			? await removeSavedItem(type, $session.token, id)
+			: await addSavedItem(type, $session.token, id);
 		setSavedList(type, serverList);
 		trackEvent("save_item_toggle", {
 			saved: serverList.includes(id),
