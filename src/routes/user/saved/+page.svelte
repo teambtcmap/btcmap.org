@@ -50,10 +50,12 @@ async function removePlace(id: number) {
 		setSavedList("place", serverList);
 	} catch (err) {
 		console.error("Failed to remove saved place", err);
-		errToast($_("merchant.saveFailed"));
+		errToast($_("saved.removeFailed"));
 		places = [...places.slice(0, index), previous, ...places.slice(index)];
 	} finally {
-		removingPlaces = new Set([...removingPlaces].filter((x) => x !== id));
+		const next = new Set(removingPlaces);
+		next.delete(id);
+		removingPlaces = next;
 	}
 }
 
@@ -72,10 +74,12 @@ async function removeArea(id: number) {
 		setSavedList("area", serverList);
 	} catch (err) {
 		console.error("Failed to remove saved area", err);
-		errToast($_("merchant.saveFailed"));
+		errToast($_("saved.removeFailed"));
 		areas = [...areas.slice(0, index), previous, ...areas.slice(index)];
 	} finally {
-		removingAreas = new Set([...removingAreas].filter((x) => x !== id));
+		const next = new Set(removingAreas);
+		next.delete(id);
+		removingAreas = next;
 	}
 }
 
