@@ -92,14 +92,20 @@ let fetchGeneration = 0;
 
 $: filter = parseFilterValue(filterValue);
 // Counts are over the unfiltered window so chip counts don't collapse
-// when the user toggles a type off.
-$: typeCounts = feedItems.reduce(
-	(acc, item) => {
-		acc[item.type] = (acc[item.type] ?? 0) + 1;
-		return acc;
-	},
-	{} as Record<ActivityType, number>,
-);
+// when the user toggles a type off. Prefill every key with 0 so the
+// record is fully populated and the chip template can read
+// `typeCounts[type]` without a fallback.
+$: typeCounts = ((): Record<ActivityType, number> => {
+	const counts: Record<ActivityType, number> = {
+		place_added: 0,
+		place_updated: 0,
+		place_deleted: 0,
+		place_commented: 0,
+		place_boosted: 0,
+	};
+	for (const item of feedItems) counts[item.type]++;
+	return counts;
+})();
 $: visibleItems = feedItems.filter((i) => activeTypes.has(i.type));
 $: pagedItems = visibleItems.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 $: totalPages = Math.max(1, Math.ceil(visibleItems.length / PAGE_SIZE));
@@ -266,7 +272,6 @@ onMount(async () => {
 		<div class="mb-6 flex flex-wrap items-center justify-center gap-2">
 			{#each ACTIVITY_TYPES as type (type)}
 				{@const active = activeTypes.has(type)}
-				{@const count = typeCounts[type] ?? 0}
 				<button
 					type="button"
 					aria-pressed={active}
@@ -277,7 +282,7 @@ onMount(async () => {
 				>
 					<span class="h-2 w-2 rounded-full {dotColor(type)}" />
 					<span>{$_(TYPE_LABEL_KEYS[type])}</span>
-					<span class="text-xs opacity-70">({count})</span>
+					<span class="text-xs opacity-70">({typeCounts[type]})</span>
 				</button>
 			{/each}
 		</div>
