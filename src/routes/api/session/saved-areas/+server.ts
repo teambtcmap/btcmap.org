@@ -40,7 +40,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 	}
 
 	const id = await request.json();
-	if (typeof id !== "number" || !Number.isInteger(id)) {
+	if (!Number.isInteger(id)) {
 		error(400, "Body must be an integer area ID");
 	}
 
