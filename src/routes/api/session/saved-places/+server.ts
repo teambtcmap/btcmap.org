@@ -39,7 +39,12 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 		error(401, "Missing Authorization header");
 	}
 
-	const id = await request.json();
+	let id: unknown;
+	try {
+		id = await request.json();
+	} catch {
+		error(400, "Body must be a JSON integer place ID");
+	}
 	if (!Number.isInteger(id)) {
 		error(400, "Body must be an integer place ID");
 	}
