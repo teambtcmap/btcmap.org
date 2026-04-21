@@ -10,17 +10,33 @@ const PROXY_ENDPOINTS = {
 	area: "/api/session/saved-areas",
 } as const;
 
-export async function putSavedList(
+export async function addSavedItem(
 	type: SavedItemType,
 	token: string,
-	ids: number[],
+	id: number,
 ): Promise<number[]> {
-	const res = await api.put<number[]>(PROXY_ENDPOINTS[type], ids, {
+	const res = await api.post<number[]>(PROXY_ENDPOINTS[type], id, {
 		headers: { Authorization: `Bearer ${token}` },
 	});
 	if (!Array.isArray(res.data)) {
 		throw new Error(
-			`PUT ${PROXY_ENDPOINTS[type]} returned an unexpected response`,
+			`POST ${PROXY_ENDPOINTS[type]} returned an unexpected response`,
+		);
+	}
+	return res.data;
+}
+
+export async function removeSavedItem(
+	type: SavedItemType,
+	token: string,
+	id: number,
+): Promise<number[]> {
+	const res = await api.delete<number[]>(`${PROXY_ENDPOINTS[type]}/${id}`, {
+		headers: { Authorization: `Bearer ${token}` },
+	});
+	if (!Array.isArray(res.data)) {
+		throw new Error(
+			`DELETE ${PROXY_ENDPOINTS[type]}/{id} returned an unexpected response`,
 		);
 	}
 	return res.data;

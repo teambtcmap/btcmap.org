@@ -30,37 +30,38 @@ export const GET: RequestHandler = async ({ request, fetch }) => {
 	return json(await res.json());
 };
 
-// PUT /api/session/saved-areas
-// Proxies PUT /v4/areas/saved to avoid browser CORS preflight issues.
-export const PUT: RequestHandler = async ({ request, fetch }) => {
+// POST /api/session/saved-areas
+// Proxies POST /v4/areas/saved (body: single integer) to avoid browser
+// CORS preflight issues. Returns the updated saved-area IDs.
+export const POST: RequestHandler = async ({ request, fetch }) => {
 	const token = request.headers.get("authorization");
 	if (!token) {
 		error(401, "Missing Authorization header");
 	}
 
-	const ids = await request.json();
-	if (!Array.isArray(ids)) {
-		error(400, "Body must be a JSON array of area IDs");
+	const id = await request.json();
+	if (typeof id !== "number" || !Number.isInteger(id)) {
+		error(400, "Body must be an integer area ID");
 	}
 
 	let res: Response;
 	try {
 		res = await fetch(`${API_BASE}/v4/areas/saved`, {
-			method: "PUT",
+			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 				Authorization: token,
 			},
-			body: JSON.stringify(ids),
+			body: JSON.stringify(id),
 		});
 	} catch (err) {
-		console.error("Failed to save areas:", err);
-		error(502, "Failed to save areas");
+		console.error("Failed to add saved area:", err);
+		error(502, "Failed to add saved area");
 	}
 
 	if (!res.ok) {
-		console.error("Failed to save areas:", await res.text());
-		error(res.status, "Failed to save areas");
+		console.error("Failed to add saved area:", await res.text());
+		error(res.status, "Failed to add saved area");
 	}
 
 	return json(await res.json());

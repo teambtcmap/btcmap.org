@@ -9,9 +9,9 @@ import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import type { SavedItemType } from "$lib/savedItems";
 import {
+	addSavedItem,
 	getSavedList,
 	hydrateSavedFromServer,
-	putSavedList,
 	setSavedList,
 } from "$lib/savedItems";
 import type { Session } from "$lib/session";
@@ -57,10 +57,15 @@ $: if (!open) {
 
 async function performInitialSave(current: Session) {
 	const existing = getSavedList(current, type);
-	const nextList = existing.includes(id) ? existing : [...existing, id];
-	setSavedList(type, nextList);
+	// No-op if already saved — the atomic POST would still succeed (API
+	// dedupes) but we avoid the round-trip and the misleading toast.
+	if (existing.includes(id)) {
+		dispatch("saved");
+		return;
+	}
+	setSavedList(type, [...existing, id]);
 	try {
-		const serverList = await putSavedList(type, current.token, nextList);
+		const serverList = await addSavedItem(type, current.token, id);
 		setSavedList(type, serverList);
 		trackEvent("save_item_toggle", {
 			saved: serverList.includes(id),
