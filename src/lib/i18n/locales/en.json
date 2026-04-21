@@ -50,7 +50,7 @@
 		"noPlaces": "No saved places yet.",
 		"noAreas": "No saved areas yet.",
 		"loadError": "Failed to load some saved items.",
-		"remove": "Remove",
+		"removeNamed": "Remove {name}",
 		"removeFailed": "Failed to remove"
 	},
 	"login": {

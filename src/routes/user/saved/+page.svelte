@@ -150,6 +150,7 @@ onMount(async () => {
 				</h2>
 				<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 					{#each places as place (place.id)}
+						{@const placeLabel = place.name || `Place ${place.id}`}
 						<div
 							class="flex items-center gap-2 rounded-xl border border-gray-300 pr-2 transition-colors hover:border-link dark:border-white/20 dark:hover:border-link {removingPlaces.has(
 								place.id,
@@ -169,13 +170,13 @@ onMount(async () => {
 									class="shrink-0 text-link"
 								/>
 								<span class="truncate font-semibold text-primary dark:text-white">
-									{place.name || `Place ${place.id}`}
+									{placeLabel}
 								</span>
 							</a>
 							<button
 								type="button"
-								aria-label={$_("saved.remove")}
-								title={$_("saved.remove")}
+								aria-label={$_("saved.removeNamed", { values: { name: placeLabel } })}
+								title={$_("saved.removeNamed", { values: { name: placeLabel } })}
 								class="shrink-0 rounded-full p-2 text-body/60 transition-colors hover:bg-gray-100 hover:text-body disabled:opacity-40 dark:text-white/60 dark:hover:bg-white/10 dark:hover:text-white"
 								disabled={removingPlaces.has(place.id)}
 								on:click={() => removePlace(place.id)}
@@ -196,6 +197,7 @@ onMount(async () => {
 				</h2>
 				<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 					{#each areas as area (area.id)}
+						{@const areaLabel = area.name || area.url_alias}
 						<div
 							class="flex items-center gap-2 rounded-xl border border-gray-300 pr-2 transition-colors hover:border-link dark:border-white/20 dark:hover:border-link {removingAreas.has(
 								area.id,
@@ -225,13 +227,13 @@ onMount(async () => {
 									/>
 								{/if}
 								<span class="truncate font-semibold text-primary dark:text-white">
-									{area.name || area.url_alias}
+									{areaLabel}
 								</span>
 							</a>
 							<button
 								type="button"
-								aria-label={$_("saved.remove")}
-								title={$_("saved.remove")}
+								aria-label={$_("saved.removeNamed", { values: { name: areaLabel } })}
+								title={$_("saved.removeNamed", { values: { name: areaLabel } })}
 								class="shrink-0 rounded-full p-2 text-body/60 transition-colors hover:bg-gray-100 hover:text-body disabled:opacity-40 dark:text-white/60 dark:hover:bg-white/10 dark:hover:text-white"
 								disabled={removingAreas.has(area.id)}
 								on:click={() => removeArea(area.id)}
