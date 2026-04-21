@@ -5,6 +5,11 @@ export type FormSelectOption = {
 	// Optional group label — options sharing the same group are rendered
 	// under a disabled separator row (── {group} ──). Keeps the visual
 	// hierarchy of <optgroup> without its Chromium/Linux dark-mode quirk.
+	//
+	// Contract: pass at least one ungrouped option (or a placeholder)
+	// before any grouped options. Group separator rows are rendered as
+	// `<option disabled>` and must not be the first item — otherwise the
+	// select could default-select the disabled row on mount.
 	group?: string;
 };
 </script>
@@ -75,8 +80,12 @@ function partition(opts: FormSelectOption[]) {
 	 * label rows) with OS-native light colours even when the page is
 	 * dark. Applied globally so every <select> on any page that imports
 	 * FormSelect inherits the fix — matches the inline workaround in
-	 * IssuesTable.svelte / AreaLeaderboard.svelte. */
-	:global(.dark select option),
+	 * IssuesTable.svelte / AreaLeaderboard.svelte.
+	 *
+	 * Scoped to :not(:disabled) so the browser's default dim styling
+	 * for disabled options (separators / placeholders) is preserved —
+	 * otherwise they'd look selectable in dark mode. */
+	:global(.dark select option:not(:disabled)),
 	:global(.dark select optgroup) {
 		background-color: rgb(55 65 81); /* gray-700 */
 		color: white;
