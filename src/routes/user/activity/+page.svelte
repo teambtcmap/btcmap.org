@@ -2,6 +2,8 @@
 import { onMount } from "svelte";
 import Time from "svelte-time";
 
+import type { FormSelectOption } from "$components/form/FormSelect.svelte";
+import FormSelect from "$components/form/FormSelect.svelte";
 import Icon from "$components/Icon.svelte";
 import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
@@ -61,7 +63,9 @@ let savedAreaIds: number[] = [];
 let placeNames: Map<number, string> = new Map();
 let areaNames: Map<number, string> = new Map();
 let hasSavedItems = false;
-let filter: Filter = { kind: "all" };
+// filterValue is the select's string value ("all" | "place:<id>" |
+// "area:<id>"); `filter` is the parsed typed view used by buildFeedUrl.
+let filterValue = "all";
 let feedItems: ActivityItem[] = [];
 let page = 0;
 let initialLoading = true;
@@ -69,8 +73,43 @@ let feedLoading = false;
 let feedError = false;
 let fetchGeneration = 0;
 
+$: filter = parseFilterValue(filterValue);
 $: pagedItems = feedItems.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 $: totalPages = Math.max(1, Math.ceil(feedItems.length / PAGE_SIZE));
+
+// Rebuild options when saved-id lists, hydrated names, or locale change.
+$: filterOptions = ((): FormSelectOption[] => {
+	const opts: FormSelectOption[] = [
+		{ value: "all", label: $_("userActivity.filterAll") },
+	];
+	const placesLabel = $_("userActivity.filterPlaces");
+	const areasLabel = $_("userActivity.filterAreas");
+	for (const id of savedPlaceIds) {
+		opts.push({
+			value: `place:${id}`,
+			label:
+				placeNames.get(id) ||
+				$_("userActivity.placeFallback", { values: { id } }),
+			group: placesLabel,
+		});
+	}
+	for (const id of savedAreaIds) {
+		opts.push({
+			value: `area:${id}`,
+			label:
+				areaNames.get(id) ||
+				$_("userActivity.areaFallback", { values: { id } }),
+			group: areasLabel,
+		});
+	}
+	return opts;
+})();
+
+function parseFilterValue(v: string): Filter {
+	if (v.startsWith("place:")) return { kind: "place", id: Number(v.slice(6)) };
+	if (v.startsWith("area:")) return { kind: "area", id: Number(v.slice(5)) };
+	return { kind: "all" };
+}
 
 const buildFeedUrl = (f: Filter): string => {
 	const params = new URLSearchParams({ days: String(DAYS) });
@@ -107,15 +146,7 @@ const goToPage = (next: number) => {
 	page = Math.max(0, Math.min(totalPages - 1, next));
 };
 
-const handleFilterChange = (e: Event) => {
-	const value = (e.target as HTMLSelectElement).value;
-	if (value === "all") {
-		filter = { kind: "all" };
-	} else if (value.startsWith("place:")) {
-		filter = { kind: "place", id: Number(value.slice(6)) };
-	} else if (value.startsWith("area:")) {
-		filter = { kind: "area", id: Number(value.slice(5)) };
-	}
+const handleFilterChange = () => {
 	feedItems = [];
 	page = 0;
 	feedError = false;
@@ -177,35 +208,14 @@ onMount(async () => {
 			{$_("userActivity.empty")}
 		</p>
 	{:else}
-		<div class="mb-2 flex justify-center">
-			<select
-				aria-label={$_("userActivity.filterLabel")}
-				class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-body enabled:cursor-pointer disabled:opacity-60 dark:border-white/20 dark:bg-white/10 dark:text-white"
+		<div class="mb-2">
+			<FormSelect
+				ariaLabel={$_("userActivity.filterLabel")}
+				bind:value={filterValue}
 				disabled={feedLoading}
+				options={filterOptions}
 				on:change={handleFilterChange}
-			>
-				<option value="all">{$_("userActivity.filterAll")}</option>
-				{#if savedPlaceIds.length}
-					<optgroup label={$_("userActivity.filterPlaces")}>
-						{#each savedPlaceIds as placeId (placeId)}
-							<option value={`place:${placeId}`}>
-								{placeNames.get(placeId) ||
-									$_("userActivity.placeFallback", { values: { id: placeId } })}
-							</option>
-						{/each}
-					</optgroup>
-				{/if}
-				{#if savedAreaIds.length}
-					<optgroup label={$_("userActivity.filterAreas")}>
-						{#each savedAreaIds as areaId (areaId)}
-							<option value={`area:${areaId}`}>
-								{areaNames.get(areaId) ||
-									$_("userActivity.areaFallback", { values: { id: areaId } })}
-							</option>
-						{/each}
-					</optgroup>
-				{/if}
-			</select>
+			/>
 		</div>
 
 		<p class="mb-6 text-center text-sm text-body/70 dark:text-white/50">
