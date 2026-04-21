@@ -45,12 +45,28 @@ const PAGE_SIZE = 20;
 // with 500+ saved places still gets a usable response instead of a 400.
 const MAX_PLACES = 500;
 
+const ACTIVITY_TYPES: ActivityType[] = [
+	"place_added",
+	"place_updated",
+	"place_deleted",
+	"place_commented",
+	"place_boosted",
+];
+
 const DOT_COLORS: Record<ActivityType, string> = {
 	place_commented: "bg-amber-500",
 	place_boosted: "bg-orange-500",
 	place_added: "bg-created",
 	place_deleted: "bg-deleted",
 	place_updated: "bg-link",
+};
+
+const TYPE_LABEL_KEYS: Record<ActivityType, string> = {
+	place_added: "userActivity.typeAdded",
+	place_updated: "userActivity.typeUpdated",
+	place_deleted: "userActivity.typeDeleted",
+	place_commented: "userActivity.typeCommented",
+	place_boosted: "userActivity.typeBoosted",
 };
 
 const dotColor = (type: ActivityType) => DOT_COLORS[type];
@@ -66,6 +82,7 @@ let hasSavedItems = false;
 // filterValue is the select's string value ("all" | "place:<id>" |
 // "area:<id>"); `filter` is the parsed typed view used by buildFeedUrl.
 let filterValue = "all";
+let activeTypes: Set<ActivityType> = new Set(ACTIVITY_TYPES);
 let feedItems: ActivityItem[] = [];
 let page = 0;
 let initialLoading = true;
@@ -74,8 +91,26 @@ let feedError = false;
 let fetchGeneration = 0;
 
 $: filter = parseFilterValue(filterValue);
-$: pagedItems = feedItems.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-$: totalPages = Math.max(1, Math.ceil(feedItems.length / PAGE_SIZE));
+// Counts are over the unfiltered window so chip counts don't collapse
+// when the user toggles a type off.
+$: typeCounts = feedItems.reduce(
+	(acc, item) => {
+		acc[item.type] = (acc[item.type] ?? 0) + 1;
+		return acc;
+	},
+	{} as Record<ActivityType, number>,
+);
+$: visibleItems = feedItems.filter((i) => activeTypes.has(i.type));
+$: pagedItems = visibleItems.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+$: totalPages = Math.max(1, Math.ceil(visibleItems.length / PAGE_SIZE));
+
+function toggleType(type: ActivityType) {
+	const next = new Set(activeTypes);
+	if (next.has(type)) next.delete(type);
+	else next.add(type);
+	activeTypes = next;
+	page = 0;
+}
 
 // Rebuild options when saved-id lists, hydrated names, or locale change.
 $: filterOptions = ((): FormSelectOption[] => {
@@ -224,9 +259,28 @@ onMount(async () => {
 			/>
 		</div>
 
-		<p class="mb-6 text-center text-sm text-body/70 dark:text-white/50">
+		<p class="mb-4 text-center text-sm text-body/70 dark:text-white/50">
 			{$_("userActivity.timeWindow", { values: { days: DAYS } })}
 		</p>
+
+		<div class="mb-6 flex flex-wrap items-center justify-center gap-2">
+			{#each ACTIVITY_TYPES as type (type)}
+				{@const active = activeTypes.has(type)}
+				{@const count = typeCounts[type] ?? 0}
+				<button
+					type="button"
+					aria-pressed={active}
+					on:click={() => toggleType(type)}
+					class="flex items-center gap-2 rounded-full border px-3 py-1 text-sm transition-colors {active
+						? 'border-link bg-link/10 text-primary dark:border-link dark:text-white'
+						: 'border-gray-300 text-body/60 hover:border-link hover:text-body dark:border-white/20 dark:text-white/50 dark:hover:text-white'}"
+				>
+					<span class="h-2 w-2 rounded-full {dotColor(type)}" />
+					<span>{$_(TYPE_LABEL_KEYS[type])}</span>
+					<span class="text-xs opacity-70">({count})</span>
+				</button>
+			{/each}
+		</div>
 
 		{#if feedLoading && !feedItems.length}
 			<div class="flex justify-center">
@@ -243,6 +297,12 @@ onMount(async () => {
 				</button>
 			</p>
 		{:else if !feedItems.length}
+			<p class="text-center text-body dark:text-white/70">{$_("areaActivity.noActivity")}</p>
+		{:else if !activeTypes.size}
+			<p class="text-center text-body dark:text-white/70">
+				{$_("userActivity.noTypesSelected")}
+			</p>
+		{:else if !visibleItems.length}
 			<p class="text-center text-body dark:text-white/70">{$_("areaActivity.noActivity")}</p>
 		{:else}
 			{#if totalPages > 1}
