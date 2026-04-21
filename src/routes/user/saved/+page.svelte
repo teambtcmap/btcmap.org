@@ -48,6 +48,10 @@ async function removePlace(id: number) {
 	try {
 		const serverList = await removeSavedItem("place", token, id);
 		setSavedList("place", serverList);
+		// Drop any cards for IDs the server no longer lists (e.g. removed
+		// from another tab/device since we loaded this page).
+		const serverIds = new Set(serverList);
+		places = places.filter((p) => serverIds.has(p.id));
 	} catch (err) {
 		console.error("Failed to remove saved place", err);
 		errToast($_("saved.removeFailed"));
@@ -72,6 +76,10 @@ async function removeArea(id: number) {
 	try {
 		const serverList = await removeSavedItem("area", token, id);
 		setSavedList("area", serverList);
+		// Drop any cards for IDs the server no longer lists (e.g. removed
+		// from another tab/device since we loaded this page).
+		const serverIds = new Set(serverList);
+		areas = areas.filter((a) => serverIds.has(a.id));
 	} catch (err) {
 		console.error("Failed to remove saved area", err);
 		errToast($_("saved.removeFailed"));
