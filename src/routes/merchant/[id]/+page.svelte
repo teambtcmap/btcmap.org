@@ -333,7 +333,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 
 			{#if lat && long}
 				<a
-					href={`/map#18/${lat}/${long}`}
+					href={`/map#18/${lat}/${long}&merchant=${data.id}`}
 					class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
 				>
 					{$_('info.viewOnMainMap')}
