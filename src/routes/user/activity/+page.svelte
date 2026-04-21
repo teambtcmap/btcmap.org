@@ -106,8 +106,14 @@ $: filterOptions = ((): FormSelectOption[] => {
 })();
 
 function parseFilterValue(v: string): Filter {
-	if (v.startsWith("place:")) return { kind: "place", id: Number(v.slice(6)) };
-	if (v.startsWith("area:")) return { kind: "area", id: Number(v.slice(5)) };
+	if (v.startsWith("place:")) {
+		const id = Number(v.slice(6));
+		return Number.isFinite(id) ? { kind: "place", id } : { kind: "all" };
+	}
+	if (v.startsWith("area:")) {
+		const id = Number(v.slice(5));
+		return Number.isFinite(id) ? { kind: "area", id } : { kind: "all" };
+	}
 	return { kind: "all" };
 }
 
