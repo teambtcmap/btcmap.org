@@ -69,7 +69,8 @@
 		"typeDeleted": "Deleted",
 		"typeCommented": "Commented",
 		"typeBoosted": "Boosted",
-		"noTypesSelected": "Select at least one activity type above"
+		"noTypesSelected": "Select at least one activity type above",
+		"noMatchingTypes": "No activity matches your selected types."
 	},
 	"login": {
 		"title": "Log in",

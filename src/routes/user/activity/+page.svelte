@@ -315,7 +315,9 @@ onMount(async () => {
 				{$_("userActivity.noTypesSelected")}
 			</p>
 		{:else if !visibleItems.length}
-			<p class="text-center text-body dark:text-white/70">{$_("areaActivity.noActivity")}</p>
+			<p class="text-center text-body dark:text-white/70">
+				{$_("userActivity.noMatchingTypes")}
+			</p>
 		{:else}
 			{#if totalPages > 1}
 				<div class="mb-4 flex items-center justify-center gap-4">
