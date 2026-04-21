@@ -36,7 +36,7 @@ export async function removeSavedItem(
 	});
 	if (!Array.isArray(res.data)) {
 		throw new Error(
-			`DELETE ${PROXY_ENDPOINTS[type]}/{id} returned an unexpected response`,
+			`DELETE ${PROXY_ENDPOINTS[type]}/${id} returned an unexpected response`,
 		);
 	}
 	return res.data;
