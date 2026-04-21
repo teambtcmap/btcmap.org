@@ -4,7 +4,9 @@ import { onMount } from "svelte";
 import Icon from "$components/Icon.svelte";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
+import { removeSavedItem, setSavedList } from "$lib/savedItems";
 import { session } from "$lib/session";
+import { errToast } from "$lib/utils";
 
 import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
@@ -30,6 +32,52 @@ let areas: SavedArea[] = [];
 let loading = true;
 let placesError = false;
 let areasError = false;
+let removingPlaces = new Set<number>();
+let removingAreas = new Set<number>();
+
+async function removePlace(id: number) {
+	if (!$session || removingPlaces.has(id)) return;
+	const token = $session.token;
+	const index = places.findIndex((p) => p.id === id);
+	if (index === -1) return;
+	const previous = places[index];
+
+	removingPlaces = new Set(removingPlaces).add(id);
+	places = places.filter((p) => p.id !== id);
+
+	try {
+		const serverList = await removeSavedItem("place", token, id);
+		setSavedList("place", serverList);
+	} catch (err) {
+		console.error("Failed to remove saved place", err);
+		errToast($_("merchant.saveFailed"));
+		places = [...places.slice(0, index), previous, ...places.slice(index)];
+	} finally {
+		removingPlaces = new Set([...removingPlaces].filter((x) => x !== id));
+	}
+}
+
+async function removeArea(id: number) {
+	if (!$session || removingAreas.has(id)) return;
+	const token = $session.token;
+	const index = areas.findIndex((a) => a.id === id);
+	if (index === -1) return;
+	const previous = areas[index];
+
+	removingAreas = new Set(removingAreas).add(id);
+	areas = areas.filter((a) => a.id !== id);
+
+	try {
+		const serverList = await removeSavedItem("area", token, id);
+		setSavedList("area", serverList);
+	} catch (err) {
+		console.error("Failed to remove saved area", err);
+		errToast($_("merchant.saveFailed"));
+		areas = [...areas.slice(0, index), previous, ...areas.slice(index)];
+	} finally {
+		removingAreas = new Set([...removingAreas].filter((x) => x !== id));
+	}
+}
 
 onMount(async () => {
 	// Ensure session is hydrated from localStorage before checking.
@@ -98,15 +146,39 @@ onMount(async () => {
 				</h2>
 				<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 					{#each places as place (place.id)}
-						<a
-							href={resolve(`/merchant/${place.id}`)}
-							class="flex items-center gap-3 rounded-xl border border-gray-300 p-4 transition-colors hover:border-link dark:border-white/20 dark:hover:border-link"
+						<div
+							class="flex items-center gap-2 rounded-xl border border-gray-300 pr-2 transition-colors hover:border-link dark:border-white/20 dark:hover:border-link {removingPlaces.has(
+								place.id,
+							)
+								? 'opacity-50'
+								: ''}"
 						>
-							<Icon type="material" icon="bookmark_filled" w="20" h="20" class="shrink-0 text-link" />
-							<span class="truncate font-semibold text-primary dark:text-white">
-								{place.name || `Place ${place.id}`}
-							</span>
-						</a>
+							<a
+								href={resolve(`/merchant/${place.id}`)}
+								class="flex min-w-0 flex-1 items-center gap-3 p-4"
+							>
+								<Icon
+									type="material"
+									icon="bookmark_filled"
+									w="20"
+									h="20"
+									class="shrink-0 text-link"
+								/>
+								<span class="truncate font-semibold text-primary dark:text-white">
+									{place.name || `Place ${place.id}`}
+								</span>
+							</a>
+							<button
+								type="button"
+								aria-label={$_("saved.remove")}
+								title={$_("saved.remove")}
+								class="shrink-0 rounded-full p-2 text-body/60 transition-colors hover:bg-gray-100 hover:text-body disabled:opacity-40 dark:text-white/60 dark:hover:bg-white/10 dark:hover:text-white"
+								disabled={removingPlaces.has(place.id)}
+								on:click={() => removePlace(place.id)}
+							>
+								<Icon type="material" icon="close" w="18" h="18" />
+							</button>
+						</div>
 					{/each}
 				</div>
 			</section>
@@ -120,23 +192,49 @@ onMount(async () => {
 				</h2>
 				<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 					{#each areas as area (area.id)}
-						<a
-							href={resolve(`/${area.type === "community" ? "community" : "country"}/${area.url_alias}/merchants`)}
-							class="flex items-center gap-3 rounded-xl border border-gray-300 p-4 transition-colors hover:border-link dark:border-white/20 dark:hover:border-link"
+						<div
+							class="flex items-center gap-2 rounded-xl border border-gray-300 pr-2 transition-colors hover:border-link dark:border-white/20 dark:hover:border-link {removingAreas.has(
+								area.id,
+							)
+								? 'opacity-50'
+								: ''}"
 						>
-							{#if area.icon}
-								<img
-									src={area.icon}
-									alt=""
-									class="h-8 w-8 shrink-0 rounded-full object-cover"
-								/>
-							{:else}
-								<Icon type="material" icon="bookmark_filled" w="20" h="20" class="shrink-0 text-link" />
-							{/if}
-							<span class="truncate font-semibold text-primary dark:text-white">
-								{area.name || area.url_alias}
-							</span>
-						</a>
+							<a
+								href={resolve(
+									`/${area.type === "community" ? "community" : "country"}/${area.url_alias}/merchants`,
+								)}
+								class="flex min-w-0 flex-1 items-center gap-3 p-4"
+							>
+								{#if area.icon}
+									<img
+										src={area.icon}
+										alt=""
+										class="h-8 w-8 shrink-0 rounded-full object-cover"
+									/>
+								{:else}
+									<Icon
+										type="material"
+										icon="bookmark_filled"
+										w="20"
+										h="20"
+										class="shrink-0 text-link"
+									/>
+								{/if}
+								<span class="truncate font-semibold text-primary dark:text-white">
+									{area.name || area.url_alias}
+								</span>
+							</a>
+							<button
+								type="button"
+								aria-label={$_("saved.remove")}
+								title={$_("saved.remove")}
+								class="shrink-0 rounded-full p-2 text-body/60 transition-colors hover:bg-gray-100 hover:text-body disabled:opacity-40 dark:text-white/60 dark:hover:bg-white/10 dark:hover:text-white"
+								disabled={removingAreas.has(area.id)}
+								on:click={() => removeArea(area.id)}
+							>
+								<Icon type="material" icon="close" w="18" h="18" />
+							</button>
+						</div>
 					{/each}
 				</div>
 			</section>
