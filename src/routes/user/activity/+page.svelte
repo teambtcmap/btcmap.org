@@ -109,6 +109,11 @@ $: typeCounts = ((): Record<ActivityType, number> => {
 $: visibleItems = feedItems.filter((i) => activeTypes.has(i.type));
 $: pagedItems = visibleItems.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 $: totalPages = Math.max(1, Math.ceil(visibleItems.length / PAGE_SIZE));
+// Suppress the "(0)" suffix on every chip during the very first load,
+// where typeCounts is uniformly zero and a chipful of zeros looks like
+// "there's nothing to filter". After the initial fetch resolves we
+// always show counts, even if some are legitimately 0.
+$: showChipCounts = !(feedLoading && !feedItems.length);
 
 function toggleType(type: ActivityType) {
 	const next = new Set(activeTypes);
@@ -282,7 +287,9 @@ onMount(async () => {
 				>
 					<span class="h-2 w-2 rounded-full {dotColor(type)}" />
 					<span>{$_(TYPE_LABEL_KEYS[type])}</span>
-					<span class="text-xs opacity-70">({typeCounts[type]})</span>
+					{#if showChipCounts}
+						<span class="text-xs opacity-70">({typeCounts[type]})</span>
+					{/if}
 				</button>
 			{/each}
 		</div>
