@@ -337,7 +337,9 @@ onMount(async () => {
 											</a>
 											{$_("areaActivity.was")}
 											<strong>{$_("areaActivity.boosted")}</strong>
-											{$_("areaActivity.forDays", { values: { days: item.duration_days } })}
+											{#if item.duration_days != null}
+												{$_("areaActivity.forDays", { values: { days: item.duration_days } })}
+											{/if}
 										{/if}
 									</span>
 
