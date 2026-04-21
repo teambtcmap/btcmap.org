@@ -37,6 +37,7 @@
 		"countries": "Countries",
 		"saved": "Saved",
 		"mySaved": "My Saved",
+		"myActivity": "My Activity",
 		"account": "Account",
 		"login": "Log in",
 		"logout": "Log out",
@@ -52,6 +53,17 @@
 		"loadError": "Failed to load some saved items.",
 		"removeNamed": "Remove {name}",
 		"removeFailed": "Failed to remove"
+	},
+	"userActivity": {
+		"title": "My Activity",
+		"empty": "You haven't saved any places or areas yet. Save some from the map and come back here to see activity on them.",
+		"filterLabel": "Filter activity by saved item",
+		"filterAll": "All saved items",
+		"filterPlaces": "Places",
+		"filterAreas": "Areas",
+		"placeFallback": "Place {id}",
+		"areaFallback": "Area {id}",
+		"timeWindow": "Showing activity from the last {days} days"
 	},
 	"login": {
 		"title": "Log in",

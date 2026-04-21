@@ -15,7 +15,7 @@ onMount(() => {
 
 async function handleSuccess(current: Session) {
 	await hydrateSavedFromServer(current.token);
-	goto("/user/saved");
+	goto("/user/activity");
 }
 </script>
 
