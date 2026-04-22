@@ -34,6 +34,7 @@ const closeDrawer = () => {
 let mapElement: HTMLDivElement;
 let map: Map;
 let mapLoaded = false;
+let destroyed = false;
 
 let baseMaps: BaseMaps;
 
@@ -54,6 +55,9 @@ $: $theme !== undefined &&
 onMount(async () => {
 	if (browser) {
 		const deps = await loadMapDependencies();
+		// User may have navigated away while the dynamic imports were in
+		// flight; bail out before touching component state.
+		if (destroyed) return;
 		leaflet = deps.leaflet;
 		DomEvent = deps.leaflet.DomEvent;
 		LocateControl = deps.LocateControl;
@@ -63,6 +67,7 @@ onMount(async () => {
 });
 
 onDestroy(() => {
+	destroyed = true;
 	if (map) {
 		console.info("Unloading Leaflet map.");
 		map.remove();
@@ -143,7 +148,7 @@ const initializeData = () => {
 	changeDefaultIcons(true, leaflet, mapElement, DomEvent);
 
 	map.on("click", () => {
-		if (selectedMerchantId) {
+		if (selectedMerchantId !== null) {
 			closeDrawer();
 		}
 	});
