@@ -246,11 +246,11 @@ $: geoJSON &&
 			<!-- prettier-ignore -->
 			<div
 				bind:this={mapElement}
-				class="z-10 h-[300px] border border-gray-300 !bg-teal text-left md:h-[600px] dark:border-white/95 dark:!bg-[#202f33]"
+				class="z-10 h-[300px] rounded-b-3xl border border-gray-300 !bg-teal text-left md:h-[600px] dark:border-white/95 dark:!bg-[#202f33]"
 			/>
 			{#if !mapLoaded}
 				<MapLoadingEmbed
-					style="h-[300px] md:h-[600px] border border-gray-300 dark:border-white/95"
+					style="h-[300px] md:h-[600px] rounded-b-3xl border border-gray-300 dark:border-white/95"
 				/>
 			{/if}
 		</div>
