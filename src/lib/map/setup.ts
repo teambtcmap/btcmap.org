@@ -221,20 +221,6 @@ export const applyMapControlTranslations = (t: (key: string) => string) => {
 		const merchantImg = merchantBtn.querySelector("img");
 		if (merchantImg) merchantImg.setAttribute("alt", labels.merchantMapAlt);
 	}
-	const accountBtn = document.querySelector(".leaflet-control-account");
-	if (accountBtn) {
-		const accountLoggedIn = !!get(session);
-		const title = accountLoggedIn ? labels.account : labels.login;
-		accountBtn.setAttribute("title", title);
-		accountBtn.setAttribute("aria-label", title);
-		const accountImg = accountBtn.querySelector("img");
-		if (accountImg) {
-			accountImg.setAttribute(
-				"alt",
-				accountLoggedIn ? labels.accountAlt : labels.loginAlt,
-			);
-		}
-	}
 
 	const dataRefreshBtn = document.querySelector(
 		".leaflet-control-data-refresh",
@@ -399,6 +385,11 @@ export const homeMarkerButtons = (
 	const labels = { ...defaultMapControls, ...t };
 	const addControlDiv = L.DomUtil.create("div");
 
+	// Account button stays in sync with session (SaveAuthPrompt can update it without a reload)
+	// and locale (language switcher) — kept in closure so onRemove can unsubscribe.
+	let accountSessionUnsubscribe: (() => void) | null = null;
+	let accountLocaleUnsubscribe: (() => void) | null = null;
+
 	const customControls = L.Control.extend({
 		options: {
 			position: "topright",
@@ -493,31 +484,50 @@ export const homeMarkerButtons = (
 				addControlDiv.append(merchantMapButton);
 			}
 
-			// Account / Log in button — session state is read at control creation; see spec for non-reactive caveat.
-			const loggedIn = !!get(session);
+			// Account / Log in button — href + labels are driven by a session/locale subscription
+			// so the button stays correct after in-place auth flows (SaveAuthPrompt, logout, etc.).
 			const accountButton = L.DomUtil.create("a");
 			accountButton.classList.add("leaflet-control-account");
-			accountButton.href = loggedIn ? "/user/activity" : "/login";
-			accountButton.title = loggedIn ? labels.account : labels.login;
 			accountButton.role = "button";
-			accountButton.ariaLabel = loggedIn ? labels.account : labels.login;
 			const accountImg = L.DomUtil.create(
 				"img",
 				"",
 				accountButton,
 			) as HTMLImageElement;
 			accountImg.src = "/icons/account.svg";
-			accountImg.alt = loggedIn
-				? get(_)("mapControls.accountAlt")
-				: get(_)("mapControls.loginAlt");
 			accountImg.style.width = "16px";
 			accountImg.style.height = "16px";
 			accountButton.onclick = () => {
-				trackEvent("account_button_click", { logged_in: loggedIn });
+				trackEvent("account_button_click", { logged_in: !!get(session) });
 			};
 			addControlDiv.append(accountButton);
 
+			const updateAccount = () => {
+				const loggedIn = !!get(session);
+				const t = get(_);
+				const title = loggedIn
+					? t("mapControls.account")
+					: t("mapControls.login");
+				accountButton.href = loggedIn ? "/user/activity" : "/login";
+				accountButton.title = title;
+				accountButton.ariaLabel = title;
+				accountImg.alt = loggedIn
+					? t("mapControls.accountAlt")
+					: t("mapControls.loginAlt");
+			};
+
+			// Both subscribe() calls fire synchronously with the current value, so
+			// this also handles initial render — no separate init path needed.
+			accountSessionUnsubscribe = session.subscribe(updateAccount);
+			accountLocaleUnsubscribe = _.subscribe(updateAccount);
+
 			return addControlDiv;
+		},
+		onRemove: () => {
+			accountSessionUnsubscribe?.();
+			accountLocaleUnsubscribe?.();
+			accountSessionUnsubscribe = null;
+			accountLocaleUnsubscribe = null;
 		},
 	});
 
