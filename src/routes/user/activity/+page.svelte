@@ -1,5 +1,5 @@
 <script lang="ts">
-import { onMount } from "svelte";
+import { onDestroy, onMount } from "svelte";
 import Time from "svelte-time";
 
 import type { FormSelectOption } from "$components/form/FormSelect.svelte";
@@ -44,6 +44,10 @@ const PAGE_SIZE = 20;
 // Mirrors the server-side cap in /v4/activity — slice here so a user
 // with 500+ saved places still gets a usable response instead of a 400.
 const MAX_PLACES = 500;
+// localStorage key holding the ISO date of the newest activity item
+// the user has seen on this page. Used to render a "N new since your
+// last visit" pill on return visits.
+const LAST_VISIT_KEY = "userActivityLastVisit";
 
 const DOT_COLORS: Record<ActivityType, string> = {
 	place_commented: "bg-amber-500",
@@ -72,10 +76,17 @@ let initialLoading = true;
 let feedLoading = false;
 let feedError = false;
 let fetchGeneration = 0;
+// ISO date captured from localStorage at mount; anything in feedItems
+// with a later `date` counts as "new since your last visit".
+let lastVisit: string | null = null;
+let dismissedNewPill = false;
 
 $: filter = parseFilterValue(filterValue);
 $: pagedItems = feedItems.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 $: totalPages = Math.max(1, Math.ceil(feedItems.length / PAGE_SIZE));
+$: newCount = lastVisit
+	? feedItems.filter((i) => i.date > (lastVisit as string)).length
+	: 0;
 
 // Rebuild options when saved-id lists, hydrated names, or locale change.
 $: filterOptions = ((): FormSelectOption[] => {
@@ -159,12 +170,32 @@ const handleFilterChange = () => {
 	fetchFeed();
 };
 
+// Advance the "last visit" watermark to the newest item the user has
+// seen. Called on dismiss and on unmount so the pill doesn't linger.
+function updateLastVisit() {
+	if (typeof window === "undefined" || feedItems.length === 0) return;
+	localStorage.setItem(LAST_VISIT_KEY, feedItems[0].date);
+}
+
+function dismissNewPill() {
+	dismissedNewPill = true;
+	updateLastVisit();
+}
+
+onDestroy(() => {
+	updateLastVisit();
+});
+
 onMount(async () => {
 	session.init();
 	if (!$session) {
 		goto("/login");
 		return;
 	}
+
+	// Snapshot the previous visit's watermark *before* fetching; the
+	// pill's newCount compares feedItems against this value.
+	lastVisit = localStorage.getItem(LAST_VISIT_KEY);
 
 	savedPlaceIds = $session.savedPlaces ?? [];
 	savedAreaIds = $session.savedAreas ?? [];
@@ -248,6 +279,23 @@ onMount(async () => {
 				<Time relative timestamp={feedItems[0].date} />
 			{/if}
 		</p>
+
+		{#if newCount > 0 && !dismissedNewPill}
+			<div
+				class="mb-4 flex items-center justify-between gap-3 rounded-lg border border-link/40 bg-link/10 px-4 py-2"
+			>
+				<span class="text-sm text-primary dark:text-white">
+					{$_("userActivity.newSinceLastVisit", { values: { count: newCount } })}
+				</span>
+				<button
+					type="button"
+					class="shrink-0 text-sm text-link transition-colors hover:text-hover"
+					on:click={dismissNewPill}
+				>
+					{$_("userActivity.dismiss")}
+				</button>
+			</div>
+		{/if}
 
 		{#if feedLoading && !feedItems.length}
 			<div class="flex justify-center">
