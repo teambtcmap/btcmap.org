@@ -75,6 +75,10 @@ const loadMore = () => {
 	});
 };
 
+// Fresh-slate whenever the user navigates between areas: reset the
+// window size, drop buffered items, re-enable every activity type (so
+// a previous area's toggle state doesn't silently hide cards on the
+// new one), clear error/arrow indicators, and kick off the first fetch.
 $: if (dataInitialized && alias) {
 	days = DAYS_PER_PAGE;
 	feedItems = [];

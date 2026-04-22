@@ -9,6 +9,16 @@ import {
 } from "$lib/activity";
 import { _ } from "$lib/i18n";
 
+// activeTypes is intended for two-way binding: `bind:activeTypes` in
+// the parent. The component reassigns the Set on each toggle, so the
+// parent's binding always sees the new value.
+//
+// A `change` event is dispatched on every toggle as a *separate*
+// channel — consumers that only care about "user changed the filter,
+// run a side effect" (e.g. resetting pagination) can `on:change`
+// without adding a reactive dependency on activeTypes. Svelte 4 has
+// no clean single-channel way to express "run a side effect when a
+// bound prop is written", hence the two-channel API.
 export let activeTypes: Set<ActivityType>;
 export let counts: Record<ActivityType, number>;
 // When false, the trailing "(N)" suffix on each chip is hidden. Used
