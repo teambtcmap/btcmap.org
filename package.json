@@ -59,7 +59,7 @@
 		"leaflet.markercluster": "^1.5.3",
 		"localforage": "^1.10.0",
 		"maplibre-gl": "^4.7.1",
-		"marked": "^18.0.0",
+		"marked": "^18.0.2",
 		"opening_hours": "^3.12.0",
 		"qrcode": "^1.5.4",
 		"svelte-i18n": "^4.0.1",
