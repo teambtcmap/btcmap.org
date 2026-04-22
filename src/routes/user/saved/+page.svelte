@@ -2,6 +2,7 @@
 import { onMount } from "svelte";
 
 import Icon from "$components/Icon.svelte";
+import MultiPlaceMap from "$components/MultiPlaceMap.svelte";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
 import { removeSavedItem, setSavedList } from "$lib/savedItems";
@@ -156,6 +157,7 @@ onMount(async () => {
 					<Icon type="material" icon="location_on" w="24" h="24" class="mr-1 inline align-middle" />
 					{$_("saved.places")}
 				</h2>
+				<MultiPlaceMap {places} />
 				<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 					{#each places as place (place.id)}
 						{@const placeLabel = place.name || `Place ${place.id}`}
