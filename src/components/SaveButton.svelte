@@ -20,6 +20,10 @@ export let id: number;
 // Whether this saves a place or an area.
 export let type: SavedItemType = "place";
 
+// "pill" — default labeled pill button.
+// "icon-stack" — vertical icon-circle + label, matches the merchant drawer action row (Navigate / Edit / Share / Comments).
+export let variant: "pill" | "icon-stack" = "pill";
+
 // Optional className passthrough for layout-specific styling.
 let className: string | undefined = undefined;
 
@@ -70,37 +74,65 @@ async function toggle() {
 }
 </script>
 
-<button
-	type="button"
-	class="{saved
-		? 'border border-link text-link hover:bg-link/10 dark:border-link dark:text-link'
-		: 'bg-link text-white hover:bg-hover'} mx-auto flex w-28 items-center justify-center rounded-lg px-3 py-1.5 text-center text-sm font-semibold transition-colors {pending ? 'opacity-50' : ''} {className ??
-		''}"
-	on:click={toggle}
-	aria-pressed={saved}
-	aria-label={saved ? $_(`merchant.saved`) : $_(`merchant.save`)}
->
-	<Icon
-		type="material"
-		icon={saved ? 'bookmark_filled' : 'bookmark'}
-		w="16"
-		h="16"
-		class="mr-1"
-	/>
-	<span class="grid">
+{#if variant === "icon-stack"}
+	<button
+		type="button"
+		class="flex flex-col items-center gap-1 text-primary transition-opacity dark:text-white {pending
+			? 'opacity-50'
+			: ''} {className ?? ''}"
+		on:click={toggle}
+		aria-pressed={saved}
+		aria-label={saved ? $_(`merchant.saved`) : $_(`merchant.save`)}
+	>
 		<span
-			class="col-start-1 row-start-1 transition-opacity {saved
-				? 'opacity-0'
-				: 'opacity-100'}"
-			aria-hidden={saved}>{$_(`merchant.save`)}</span
+			class="flex h-9 w-9 items-center justify-center rounded-full transition-colors {saved
+				? 'bg-primary text-white dark:bg-primary'
+				: 'border border-gray-300 hover:bg-gray-50 dark:border-white/20 dark:hover:bg-white/10'}"
 		>
-		<span
-			class="col-start-1 row-start-1 transition-opacity {saved
-				? 'opacity-100'
-				: 'opacity-0'}"
-			aria-hidden={!saved}>{$_(`merchant.saved`)}</span
-		>
-	</span>
-</button>
+			<Icon
+				type="material"
+				icon={saved ? 'bookmark_filled' : 'bookmark'}
+				w="18"
+				h="18"
+			/>
+		</span>
+		<span class="text-[11px]">
+			{saved ? $_(`merchant.saved`) : $_(`merchant.save`)}
+		</span>
+	</button>
+{:else}
+	<button
+		type="button"
+		class="{saved
+			? 'border border-link text-link hover:bg-link/10 dark:border-link dark:text-link'
+			: 'bg-link text-white hover:bg-hover'} mx-auto flex w-28 items-center justify-center rounded-lg px-3 py-1.5 text-center text-sm font-semibold transition-colors {pending ? 'opacity-50' : ''} {className ??
+			''}"
+		on:click={toggle}
+		aria-pressed={saved}
+		aria-label={saved ? $_(`merchant.saved`) : $_(`merchant.save`)}
+	>
+		<Icon
+			type="material"
+			icon={saved ? 'bookmark_filled' : 'bookmark'}
+			w="16"
+			h="16"
+			class="mr-1"
+		/>
+		<span class="grid">
+			<span
+				class="col-start-1 row-start-1 transition-opacity {saved
+					? 'opacity-0'
+					: 'opacity-100'}"
+				aria-hidden={saved}>{$_(`merchant.save`)}</span
+			>
+			<span
+				class="col-start-1 row-start-1 transition-opacity {saved
+					? 'opacity-100'
+					: 'opacity-0'}"
+				aria-hidden={!saved}>{$_(`merchant.saved`)}</span
+			>
+		</span>
+	</button>
+{/if}
 
 <SaveAuthPrompt bind:open={showPrompt} {id} {type} />

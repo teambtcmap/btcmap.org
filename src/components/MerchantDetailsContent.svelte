@@ -254,6 +254,8 @@ async function fetchComments(placeId: number) {
 	{/if}
 
 	<div class="flex justify-around border-t border-b border-gray-200 py-3 dark:border-white/10">
+		<SaveButton id={merchant.id} type="place" variant="icon-stack" />
+
 		<a
 			href="geo:{merchant.lat},{merchant.lon}"
 			class="flex flex-col items-center gap-1 text-primary dark:text-white"
@@ -308,10 +310,6 @@ async function fetchComments(placeId: number) {
 			</span>
 			<span class="text-[11px]">{$_('merchant.comments')}</span>
 		</a>
-	</div>
-
-	<div class="flex justify-center pt-3">
-		<SaveButton id={merchant.id} type="place" />
 	</div>
 
 	<div class="divide-y divide-gray-200 dark:divide-white/10">
