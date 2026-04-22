@@ -47,8 +47,7 @@ export const TYPE_LABEL_KEYS: Record<ActivityType, string> = {
 	place_boosted: "userActivity.typeBoosted",
 };
 
-export const dotColor = (type: ActivityType): string =>
-	DOT_COLORS[type] ?? "bg-link";
+export const dotColor = (type: ActivityType): string => DOT_COLORS[type];
 
 export function emptyTypeCounts(): Record<ActivityType, number> {
 	return {
