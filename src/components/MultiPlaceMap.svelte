@@ -6,6 +6,7 @@ import AreaMerchantDrawer from "$components/area/AreaMerchantDrawer.svelte";
 import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
 import { loadMapDependencies } from "$lib/map/imports";
 import {
+	applyThemeToBaseMaps,
 	attribution,
 	changeDefaultIcons,
 	generateIcon,
@@ -46,17 +47,9 @@ const closePopup = () => {
 
 $: $theme !== undefined && mapLoaded && closePopup();
 
-const toggleTheme = () => {
-	if ($theme === "dark") {
-		baseMaps["OpenFreeMap Liberty"].remove();
-		baseMaps["OpenFreeMap Dark"].addTo(map);
-	} else {
-		baseMaps["OpenFreeMap Dark"].remove();
-		baseMaps["OpenFreeMap Liberty"].addTo(map);
-	}
-};
-
-$: $theme !== undefined && mapLoaded && toggleTheme();
+$: $theme !== undefined &&
+	mapLoaded &&
+	applyThemeToBaseMaps($theme, baseMaps, map);
 
 onMount(async () => {
 	if (browser) {
