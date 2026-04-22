@@ -398,6 +398,14 @@ export type Tickets = GiteaIssue[] | "error" | "maintenance";
 
 export type Theme = "light" | "dark";
 
+// Shape returned by /api/session/saved-places (proxy of /v4/places/saved)
+export type SavedPlace = {
+	id: number;
+	name: string;
+	lat: number;
+	lon: number;
+};
+
 export type DonationType = "On-chain" | "Lightning";
 
 export type DropdownLink = {

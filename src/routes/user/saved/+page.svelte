@@ -7,17 +7,11 @@ import api from "$lib/axios";
 import { _ } from "$lib/i18n";
 import { removeSavedItem, setSavedList } from "$lib/savedItems";
 import { session } from "$lib/session";
+import type { SavedPlace } from "$lib/types";
 import { errToast } from "$lib/utils";
 
 import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
-
-type SavedPlace = {
-	id: number;
-	name: string;
-	lat: number;
-	lon: number;
-};
 
 type SavedArea = {
 	id: number;

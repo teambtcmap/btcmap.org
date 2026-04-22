@@ -14,18 +14,11 @@ import {
 	layers,
 } from "$lib/map/setup";
 import { theme } from "$lib/theme";
-import type { BaseMaps, DomEventType, Leaflet } from "$lib/types";
+import type { BaseMaps, DomEventType, Leaflet, SavedPlace } from "$lib/types";
 
 import { browser } from "$app/environment";
 
-type PlaceMarker = {
-	id: number;
-	name: string;
-	lat: number;
-	lon: number;
-};
-
-export let places: PlaceMarker[];
+export let places: SavedPlace[];
 
 let selectedMerchantId: number | null = null;
 
