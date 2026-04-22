@@ -2,6 +2,7 @@
 import Time from "svelte-time";
 
 import Icon from "$components/Icon.svelte";
+import SaveButton from "$components/SaveButton.svelte";
 import { type ActivityItem, dotColor } from "$lib/activity";
 import { _ } from "$lib/i18n";
 
@@ -11,6 +12,11 @@ export let item: ActivityItem;
 // When true, the outer ping-dot animates. Intended for the newest
 // (top-of-list) card so the feed has a single pulse of visual motion.
 export let highlight = false;
+
+// The feed is a discovery surface: most cards reference places the
+// viewer hasn't individually saved. Offer a save action on every
+// non-deleted event so users can capture places straight from the feed.
+$: showSaveButton = item.type !== "place_deleted";
 </script>
 
 <div
@@ -94,5 +100,17 @@ export let highlight = false;
 				<Time live={3000} relative timestamp={item.date} />
 			</span>
 		</div>
+
+		<!-- TODO(perf): SaveButton subscribes to $session and mounts a
+			SaveAuthPrompt per card, which is wasteful in long feeds
+			(especially AreaFeed after several load-more clicks). If a
+			real user reports lag at big sizes, switch to a lighter
+			list-context pattern: parent precomputes a
+			`Set<number>` of saved-place ids, passes `saved` + an
+			`onToggle(id)` handler to each card, and hoists a single
+			shared <SaveAuthPrompt> to the feed level. -->
+		{#if showSaveButton}
+			<SaveButton id={item.place_id} type="place" class="!mx-0 shrink-0" />
+		{/if}
 	</div>
 </div>
