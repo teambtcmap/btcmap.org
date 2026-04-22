@@ -2,9 +2,15 @@
 import { _ } from "svelte-i18n";
 
 import ActivityCard from "$components/activity/ActivityCard.svelte";
+import ActivityTypeFilter from "$components/activity/ActivityTypeFilter.svelte";
 import Icon from "$components/Icon.svelte";
 import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
-import type { ActivityItem } from "$lib/activity";
+import {
+	ACTIVITY_TYPES,
+	type ActivityItem,
+	type ActivityType,
+	countByType,
+} from "$lib/activity";
 import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
 
@@ -15,12 +21,20 @@ export let dataInitialized: boolean;
 const DAYS_PER_PAGE = 30;
 
 let feedItems: ActivityItem[] = [];
+let activeTypes: Set<ActivityType> = new Set(ACTIVITY_TYPES);
 let loading = false;
 let error = false;
 let feedDiv: HTMLDivElement;
 let hideArrow = false;
 let days = DAYS_PER_PAGE;
 let fetchGeneration = 0;
+
+$: typeCounts = countByType(feedItems);
+$: visibleItems = feedItems.filter((i) => activeTypes.has(i.type));
+// Hide the "(0)" chip suffix during the first fetch while typeCounts
+// is uniformly zero — otherwise every chip reads "(0)" as if there
+// were nothing to filter.
+$: showChipCounts = !(loading && !feedItems.length);
 
 const fetchFeed = async () => {
 	loading = true;
@@ -64,6 +78,7 @@ const loadMore = () => {
 $: if (dataInitialized && alias) {
 	days = DAYS_PER_PAGE;
 	feedItems = [];
+	activeTypes = new Set(ACTIVITY_TYPES);
 	error = false;
 	hideArrow = false;
 	fetchFeed();
@@ -78,6 +93,16 @@ $: if (dataInitialized && alias) {
 			{name || $_(`areaStats.defaultAreaName`)} {$_(`areaActivity.activity`)}
 		</h3>
 
+		{#if feedItems.length}
+			<div class="border-b border-gray-300 p-3 dark:border-white/95">
+				<ActivityTypeFilter
+					bind:activeTypes
+					counts={typeCounts}
+					showCounts={showChipCounts}
+				/>
+			</div>
+		{/if}
+
 		<div
 			bind:this={feedDiv}
 			class="hide-scroll relative max-h-[375px] space-y-2 overflow-y-scroll"
@@ -88,9 +113,19 @@ $: if (dataInitialized && alias) {
 			}}
 		>
 			{#if feedItems.length}
-				{#each feedItems as item, i (item.type + '-' + item.place_id + '-' + item.date + '-' + i)}
-					<ActivityCard {item} highlight={i === 0} />
-				{/each}
+				{#if !activeTypes.size}
+					<p class="p-5 text-center text-body dark:text-white">
+						{$_("userActivity.noTypesSelected")}
+					</p>
+				{:else if !visibleItems.length}
+					<p class="p-5 text-center text-body dark:text-white">
+						{$_("userActivity.noMatchingTypes")}
+					</p>
+				{:else}
+					{#each visibleItems as item, i (item.type + '-' + item.place_id + '-' + item.date + '-' + i)}
+						<ActivityCard {item} highlight={i === 0} />
+					{/each}
+				{/if}
 
 				{#if error}
 					<p class="mx-auto !mb-2 text-center text-body dark:text-white">
@@ -112,7 +147,7 @@ $: if (dataInitialized && alias) {
 					{loading ? $_(`areaActivity.loadMore`) + '...' : $_(`areaActivity.loadMore`)}
 				</button>
 
-				{#if !hideArrow && feedItems.length > 5}
+				{#if !hideArrow && visibleItems.length > 5}
 					<Icon
 						type="fa"
 						icon="chevron-down"
