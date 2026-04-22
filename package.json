@@ -75,7 +75,7 @@
 		"@sveltejs/adapter-netlify": "^6.0.4",
 		"@sveltejs/kit": "^2.57.1",
 		"@sveltejs/vite-plugin-svelte": "^3.1.2",
-		"@tailwindcss/postcss": "^4.2.2",
+		"@tailwindcss/postcss": "^4.2.4",
 		"@tailwindcss/vite": "^4.2.2",
 		"@types/d3-geo": "^3.1.0",
 		"@types/dompurify": "^3.2.0",
