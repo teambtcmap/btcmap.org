@@ -188,7 +188,7 @@ onMount(async () => {
 	<title>{$_("userActivity.title")} | BTC Map</title>
 </svelte:head>
 
-<div class="mx-auto my-10 max-w-3xl px-4 md:my-20">
+<div class="my-10 md:my-20">
 	<h1 class="mb-8 text-center text-4xl font-semibold text-primary dark:text-white">
 		{$_("userActivity.title")}
 	</h1>
