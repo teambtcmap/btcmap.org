@@ -34,7 +34,7 @@ function toggle(type: ActivityType) {
 			type="button"
 			aria-pressed={active}
 			on:click={() => toggle(type)}
-			class="flex items-center gap-2 rounded-full border px-3 py-1 text-sm transition-colors {active
+			class="flex items-center gap-2 rounded-full border px-3 py-1 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-link focus-visible:ring-offset-1 dark:focus-visible:ring-offset-dark {active
 				? 'border-link bg-link/10 text-primary dark:border-link dark:text-white'
 				: 'border-gray-300 text-body/60 hover:border-link hover:text-body dark:border-white/20 dark:text-white/50 dark:hover:text-white'}"
 		>
