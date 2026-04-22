@@ -101,6 +101,14 @@ $: showSaveButton = item.type !== "place_deleted";
 			</span>
 		</div>
 
+		<!-- TODO(perf): SaveButton subscribes to $session and mounts a
+			SaveAuthPrompt per card, which is wasteful in long feeds
+			(especially AreaFeed after several load-more clicks). If a
+			real user reports lag at big sizes, switch to a lighter
+			list-context pattern: parent precomputes a
+			`Set<number>` of saved-place ids, passes `saved` + an
+			`onToggle(id)` handler to each card, and hoists a single
+			shared <SaveAuthPrompt> to the feed level. -->
 		{#if showSaveButton}
 			<SaveButton id={item.place_id} type="place" class="!mx-0 shrink-0" />
 		{/if}
