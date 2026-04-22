@@ -49,7 +49,8 @@ export const layers = (leaflet: Leaflet, map: LeafletMap) => {
 		"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
 		{
 			noWrap: true,
-			maxZoom: 19,
+			maxZoom: 21,
+			maxNativeZoom: 19,
 		},
 	);
 
