@@ -87,7 +87,7 @@
 		"@types/qrcode": "^1.5.6",
 		"jsdom": "^29.0.2",
 		"lint-staged": "^16.4.0",
-		"postcss": "^8.5.8",
+		"postcss": "^8.5.10",
 		"svelte": "^4.2.20",
 		"svelte-check": "^4.4.5",
 		"svelte-preprocess": "^6.0.3",
