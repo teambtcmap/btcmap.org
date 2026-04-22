@@ -5,6 +5,14 @@ import Time from "svelte-time";
 import type { FormSelectOption } from "$components/form/FormSelect.svelte";
 import FormSelect from "$components/form/FormSelect.svelte";
 import Icon from "$components/Icon.svelte";
+import {
+	ACTIVITY_TYPES,
+	type ActivityItem,
+	type ActivityType,
+	countByType,
+	dotColor,
+	TYPE_LABEL_KEYS,
+} from "$lib/activity";
 import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
@@ -12,24 +20,6 @@ import { session } from "$lib/session";
 
 import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
-
-type ActivityType =
-	| "place_added"
-	| "place_updated"
-	| "place_deleted"
-	| "place_commented"
-	| "place_boosted";
-
-type ActivityItem = {
-	type: ActivityType;
-	place_id: number;
-	place_name?: string;
-	osm_user_id?: number;
-	osm_user_name?: string;
-	comment?: string;
-	duration_days?: number;
-	date: string;
-};
 
 type SavedPlace = { id: number; name: string };
 type SavedArea = { id: number; name: string };
@@ -44,32 +34,6 @@ const PAGE_SIZE = 20;
 // Mirrors the server-side cap in /v4/activity — slice here so a user
 // with 500+ saved places still gets a usable response instead of a 400.
 const MAX_PLACES = 500;
-
-const ACTIVITY_TYPES: ActivityType[] = [
-	"place_added",
-	"place_updated",
-	"place_deleted",
-	"place_commented",
-	"place_boosted",
-];
-
-const DOT_COLORS: Record<ActivityType, string> = {
-	place_commented: "bg-amber-500",
-	place_boosted: "bg-orange-500",
-	place_added: "bg-created",
-	place_deleted: "bg-deleted",
-	place_updated: "bg-link",
-};
-
-const TYPE_LABEL_KEYS: Record<ActivityType, string> = {
-	place_added: "userActivity.typeAdded",
-	place_updated: "userActivity.typeUpdated",
-	place_deleted: "userActivity.typeDeleted",
-	place_commented: "userActivity.typeCommented",
-	place_boosted: "userActivity.typeBoosted",
-};
-
-const dotColor = (type: ActivityType) => DOT_COLORS[type];
 
 // IDs come from the session (always available once logged in).
 // Names are fetched from the API best-effort for the filter select —
@@ -92,20 +56,8 @@ let fetchGeneration = 0;
 
 $: filter = parseFilterValue(filterValue);
 // Counts are over the unfiltered window so chip counts don't collapse
-// when the user toggles a type off. Prefill every key with 0 so the
-// record is fully populated and the chip template can read
-// `typeCounts[type]` without a fallback.
-$: typeCounts = ((): Record<ActivityType, number> => {
-	const counts: Record<ActivityType, number> = {
-		place_added: 0,
-		place_updated: 0,
-		place_deleted: 0,
-		place_commented: 0,
-		place_boosted: 0,
-	};
-	for (const item of feedItems) counts[item.type]++;
-	return counts;
-})();
+// when the user toggles a type off.
+$: typeCounts = countByType(feedItems);
 $: visibleItems = feedItems.filter((i) => activeTypes.has(i.type));
 $: pagedItems = visibleItems.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 $: totalPages = Math.max(1, Math.ceil(visibleItems.length / PAGE_SIZE));

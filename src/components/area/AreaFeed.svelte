@@ -4,6 +4,7 @@ import Time from "svelte-time";
 
 import Icon from "$components/Icon.svelte";
 import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
+import { type ActivityItem, dotColor } from "$lib/activity";
 import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
 
@@ -13,28 +14,7 @@ export let alias: string;
 export let name: string;
 export let dataInitialized: boolean;
 
-type ActivityItem = {
-	type: string;
-	place_id: number;
-	place_name?: string;
-	osm_user_id?: number;
-	osm_user_name?: string;
-	comment?: string;
-	duration_days?: number;
-	date: string;
-};
-
 const DAYS_PER_PAGE = 30;
-
-const DOT_COLORS: Record<string, string> = {
-	place_commented: "bg-amber-500",
-	place_boosted: "bg-orange-500",
-	place_added: "bg-created",
-	place_deleted: "bg-deleted",
-	place_updated: "bg-link",
-};
-
-const dotColor = (type: string) => DOT_COLORS[type] ?? "bg-link";
 
 let feedItems: ActivityItem[] = [];
 let loading = false;
