@@ -242,6 +242,11 @@ onMount(async () => {
 
 		<p class="mb-6 text-center text-sm text-body/70 dark:text-white/50">
 			{$_("userActivity.timeWindow", { values: { days: DAYS } })}
+			{#if feedItems.length}
+				· {$_("userActivity.statsCount", { values: { count: feedItems.length } })}
+				· {$_("userActivity.statsLatest")}
+				<Time relative timestamp={feedItems[0].date} />
+			{/if}
 		</p>
 
 		{#if feedLoading && !feedItems.length}
