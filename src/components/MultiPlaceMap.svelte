@@ -71,10 +71,16 @@ onDestroy(() => {
 
 let initialRenderComplete = false;
 let dataInitialized = false;
+let hasFitBoundsOnce = false;
 // markerClusterGroup extends FeatureGroup; its own type isn't bundled
 let markers: FeatureGroup;
 
-const renderPlaces = () => {
+// Re-render markers for the current places. Only fit bounds on the first
+// render (or when the caller explicitly asks) so that removing a saved
+// place doesn't yank the user out of the view they just panned/zoomed to.
+const renderPlaces = ({ fit }: { fit?: boolean } = {}) => {
+	const shouldFit = fit ?? !hasFitBoundsOnce;
+
 	markers.clearLayers();
 
 	places.forEach((place) => {
@@ -93,14 +99,17 @@ const renderPlaces = () => {
 		markers.addLayer(marker);
 	});
 
-	if (places.length > 0) {
-		const coords = places.map((p) => [p.lat, p.lon] as [number, number]);
-		map.fitBounds(leaflet.latLngBounds(coords), {
-			maxZoom: 14,
-			padding: [20, 20],
-		});
-	} else {
-		map.setView([20, 0], 2);
+	if (shouldFit) {
+		if (places.length > 0) {
+			const coords = places.map((p) => [p.lat, p.lon] as [number, number]);
+			map.fitBounds(leaflet.latLngBounds(coords), {
+				maxZoom: 14,
+				padding: [20, 20],
+			});
+			hasFitBoundsOnce = true;
+		} else {
+			map.setView([20, 0], 2);
+		}
 	}
 
 	// If the currently-open drawer's place was removed from the list,
