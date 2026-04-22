@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { Map } from "leaflet";
+import type { FeatureGroup, Map } from "leaflet";
 import { onDestroy, onMount } from "svelte";
 
 import AreaMerchantDrawer from "$components/area/AreaMerchantDrawer.svelte";
@@ -85,25 +85,11 @@ onDestroy(() => {
 
 let initialRenderComplete = false;
 let dataInitialized = false;
+// markerClusterGroup extends FeatureGroup; its own type isn't bundled
+let markers: FeatureGroup;
 
-const initializeData = () => {
-	if (dataInitialized) return;
-
-	map = leaflet.map(mapElement, { attributionControl: false, maxZoom: 19 });
-
-	const layersResult = layers(leaflet, map);
-	baseMaps = layersResult.baseMaps;
-
-	leaflet.Icon.Default.prototype.options.imagePath = "/icons/";
-
-	attribution(leaflet, map);
-
-	// @ts-expect-error L is injected globally by leaflet.markercluster
-	const markers = L.markerClusterGroup();
-
-	geolocate(leaflet, map, LocateControl);
-
-	changeDefaultIcons(true, leaflet, mapElement, DomEvent);
+const renderPlaces = () => {
+	markers.clearLayers();
 
 	places.forEach((place) => {
 		const divIcon = generateIcon(leaflet, "currency_bitcoin", false, 0);
@@ -121,8 +107,6 @@ const initializeData = () => {
 		markers.addLayer(marker);
 	});
 
-	map.addLayer(markers);
-
 	if (places.length > 0) {
 		const coords = places.map((p) => [p.lat, p.lon] as [number, number]);
 		map.fitBounds(leaflet.latLngBounds(coords), {
@@ -133,17 +117,53 @@ const initializeData = () => {
 		map.setView([20, 0], 2);
 	}
 
+	// If the currently-open drawer's place was removed from the list,
+	// close it — the user's context is gone.
+	if (
+		selectedMerchantId !== null &&
+		!places.some((p) => p.id === selectedMerchantId)
+	) {
+		closeDrawer();
+	}
+};
+
+const initializeData = () => {
+	if (dataInitialized) return;
+
+	map = leaflet.map(mapElement, { attributionControl: false, maxZoom: 19 });
+
+	const layersResult = layers(leaflet, map);
+	baseMaps = layersResult.baseMaps;
+
+	leaflet.Icon.Default.prototype.options.imagePath = "/icons/";
+
+	attribution(leaflet, map);
+
+	// @ts-expect-error L is injected globally by leaflet.markercluster
+	markers = L.markerClusterGroup();
+	map.addLayer(markers);
+
+	geolocate(leaflet, map, LocateControl);
+
+	changeDefaultIcons(true, leaflet, mapElement, DomEvent);
+
 	map.on("click", () => {
 		if (selectedMerchantId) {
 			closeDrawer();
 		}
 	});
 
+	renderPlaces();
+
 	mapLoaded = true;
 	dataInitialized = true;
 };
 
-$: places && initialRenderComplete && !dataInitialized && initializeData();
+$: if (places && initialRenderComplete && !dataInitialized) {
+	initializeData();
+} else if (places && dataInitialized) {
+	renderPlaces();
+}
 </script>
 
 <section>
