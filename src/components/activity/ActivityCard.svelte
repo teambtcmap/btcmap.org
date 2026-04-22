@@ -60,12 +60,14 @@ export let highlight = false;
 					>
 						{item.place_name || item.place_id}
 					</a>
-					{$_("areaActivity.commented")}
-					<span class="italic"
-						>"{item.comment && item.comment.length > 80
-							? item.comment.slice(0, 77) + "..."
-							: item.comment}"</span
-					>
+					{#if item.comment}
+						{$_("areaActivity.commented")}
+						<span class="italic"
+							>"{item.comment.length > 80
+								? item.comment.slice(0, 77) + "..."
+								: item.comment}"</span
+						>
+					{/if}
 				{:else if item.type === "place_boosted"}
 					<Icon
 						type="fa"
