@@ -2,6 +2,7 @@
 import { onMount } from "svelte";
 
 import ActivityCard from "$components/activity/ActivityCard.svelte";
+import ActivityTypeFilter from "$components/activity/ActivityTypeFilter.svelte";
 import type { FormSelectOption } from "$components/form/FormSelect.svelte";
 import FormSelect from "$components/form/FormSelect.svelte";
 import Icon from "$components/Icon.svelte";
@@ -10,8 +11,6 @@ import {
 	type ActivityItem,
 	type ActivityType,
 	countByType,
-	dotColor,
-	TYPE_LABEL_KEYS,
 } from "$lib/activity";
 import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
@@ -65,14 +64,6 @@ $: totalPages = Math.max(1, Math.ceil(visibleItems.length / PAGE_SIZE));
 // "there's nothing to filter". After the initial fetch resolves we
 // always show counts, even if some are legitimately 0.
 $: showChipCounts = !(feedLoading && !feedItems.length);
-
-function toggleType(type: ActivityType) {
-	const next = new Set(activeTypes);
-	if (next.has(type)) next.delete(type);
-	else next.add(type);
-	activeTypes = next;
-	page = 0;
-}
 
 // Rebuild options when saved-id lists, hydrated names, or locale change.
 $: filterOptions = ((): FormSelectOption[] => {
@@ -225,24 +216,13 @@ onMount(async () => {
 			{$_("userActivity.timeWindow", { values: { days: DAYS } })}
 		</p>
 
-		<div class="mb-6 flex flex-wrap items-center justify-center gap-2">
-			{#each ACTIVITY_TYPES as type (type)}
-				{@const active = activeTypes.has(type)}
-				<button
-					type="button"
-					aria-pressed={active}
-					on:click={() => toggleType(type)}
-					class="flex items-center gap-2 rounded-full border px-3 py-1 text-sm transition-colors {active
-						? 'border-link bg-link/10 text-primary dark:border-link dark:text-white'
-						: 'border-gray-300 text-body/60 hover:border-link hover:text-body dark:border-white/20 dark:text-white/50 dark:hover:text-white'}"
-				>
-					<span class="h-2 w-2 rounded-full {dotColor(type)}" />
-					<span>{$_(TYPE_LABEL_KEYS[type])}</span>
-					{#if showChipCounts}
-						<span class="text-xs opacity-70">({typeCounts[type]})</span>
-					{/if}
-				</button>
-			{/each}
+		<div class="mb-6">
+			<ActivityTypeFilter
+				bind:activeTypes
+				counts={typeCounts}
+				showCounts={showChipCounts}
+				on:change={() => (page = 0)}
+			/>
 		</div>
 
 		{#if feedLoading && !feedItems.length}
