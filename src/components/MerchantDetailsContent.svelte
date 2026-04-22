@@ -7,6 +7,7 @@ import CompanionAppPill from "$components/CompanionAppPill.svelte";
 import Icon from "$components/Icon.svelte";
 import MerchantComment from "$components/MerchantComment.svelte";
 import PaymentMethodPills from "$components/PaymentMethodPills.svelte";
+import SaveButton from "$components/SaveButton.svelte";
 import { trackEvent } from "$lib/analytics";
 import { API_BASE } from "$lib/api-base";
 import {
@@ -253,6 +254,8 @@ async function fetchComments(placeId: number) {
 	{/if}
 
 	<div class="flex justify-around border-t border-b border-gray-200 py-3 dark:border-white/10">
+		<SaveButton id={merchant.id} type="place" variant="icon-stack" />
+
 		<a
 			href="geo:{merchant.lat},{merchant.lon}"
 			class="flex flex-col items-center gap-1 text-primary dark:text-white"

@@ -154,6 +154,8 @@
 		"addLocation": "Add location",
 		"communityMap": "Community map",
 		"merchantMap": "Merchant map",
+		"account": "Account",
+		"login": "Log in",
 		"dataRefreshAvailable": "Data refresh available",
 		"support": "Support",
 		"supportWithSats": "Support with sats",
@@ -167,6 +169,8 @@
 		"addLocationAlt": "Add location",
 		"communityMapAlt": "Community map",
 		"merchantMapAlt": "Merchant map",
+		"accountAlt": "Account",
+		"loginAlt": "Log in",
 		"dataRefreshAlt": "Data refresh available"
 	},
 	"merchant": {

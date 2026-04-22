@@ -8,6 +8,7 @@ import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
 import en from "$lib/i18n/locales/en.json";
+import { session } from "$lib/session";
 import { selectedMerchant } from "$lib/store";
 import { theme } from "$lib/theme";
 import type { DomEventType, Leaflet, Place } from "$lib/types";
@@ -99,6 +100,8 @@ export type MapControlsTranslations = {
 	addLocation?: string;
 	communityMap?: string;
 	merchantMap?: string;
+	account?: string;
+	login?: string;
 	dataRefreshAvailable?: string;
 	support?: string;
 	supportWithSats?: string;
@@ -114,6 +117,8 @@ const defaultMapControls: Required<MapControlsTranslations> = {
 	addLocation: en.mapControls.addLocation,
 	communityMap: en.mapControls.communityMap,
 	merchantMap: en.mapControls.merchantMap,
+	account: en.mapControls.account,
+	login: en.mapControls.login,
 	dataRefreshAvailable: en.mapControls.dataRefreshAvailable,
 	support: en.mapControls.support,
 	supportWithSats: en.mapControls.supportWithSats,
@@ -141,6 +146,10 @@ export const applyMapControlTranslations = (t: (key: string) => string) => {
 		communityMapAlt: t("mapControls.communityMapAlt"),
 		merchantMap: t("mapControls.merchantMap"),
 		merchantMapAlt: t("mapControls.merchantMapAlt"),
+		account: t("mapControls.account"),
+		accountAlt: t("mapControls.accountAlt"),
+		login: t("mapControls.login"),
+		loginAlt: t("mapControls.loginAlt"),
 		dataRefreshAvailable: t("mapControls.dataRefreshAvailable"),
 		dataRefreshAlt: t("mapControls.dataRefreshAlt"),
 		boostLocations: t("boost.locations"),
@@ -376,6 +385,11 @@ export const homeMarkerButtons = (
 	const labels = { ...defaultMapControls, ...t };
 	const addControlDiv = L.DomUtil.create("div");
 
+	// Account button stays in sync with session (SaveAuthPrompt can update it without a reload)
+	// and locale (language switcher) — kept in closure so onRemove can unsubscribe.
+	let accountSessionUnsubscribe: (() => void) | null = null;
+	let accountLocaleUnsubscribe: (() => void) | null = null;
+
 	const customControls = L.Control.extend({
 		options: {
 			position: "topright",
@@ -470,7 +484,50 @@ export const homeMarkerButtons = (
 				addControlDiv.append(merchantMapButton);
 			}
 
+			// Account / Log in button — href + labels are driven by a session/locale subscription
+			// so the button stays correct after in-place auth flows (SaveAuthPrompt, logout, etc.).
+			const accountButton = L.DomUtil.create("a");
+			accountButton.classList.add("leaflet-control-account");
+			accountButton.role = "button";
+			const accountImg = L.DomUtil.create(
+				"img",
+				"",
+				accountButton,
+			) as HTMLImageElement;
+			accountImg.src = "/icons/account.svg";
+			accountImg.style.width = "16px";
+			accountImg.style.height = "16px";
+			accountButton.onclick = () => {
+				trackEvent("account_button_click", { logged_in: !!get(session) });
+			};
+			addControlDiv.append(accountButton);
+
+			const updateAccount = () => {
+				const loggedIn = !!get(session);
+				const t = get(_);
+				const title = loggedIn
+					? t("mapControls.account")
+					: t("mapControls.login");
+				accountButton.href = loggedIn ? "/user/activity" : "/login";
+				accountButton.title = title;
+				accountButton.ariaLabel = title;
+				accountImg.alt = loggedIn
+					? t("mapControls.accountAlt")
+					: t("mapControls.loginAlt");
+			};
+
+			// Both subscribe() calls fire synchronously with the current value, so
+			// this also handles initial render — no separate init path needed.
+			accountSessionUnsubscribe = session.subscribe(updateAccount);
+			accountLocaleUnsubscribe = _.subscribe(updateAccount);
+
 			return addControlDiv;
+		},
+		onRemove: () => {
+			accountSessionUnsubscribe?.();
+			accountLocaleUnsubscribe?.();
+			accountSessionUnsubscribe = null;
+			accountLocaleUnsubscribe = null;
 		},
 	});
 
