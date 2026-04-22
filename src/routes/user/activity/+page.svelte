@@ -210,9 +210,25 @@ onMount(async () => {
 			<div class="h-8 w-8 animate-spin rounded-full border-4 border-link border-t-transparent" />
 		</div>
 	{:else if !hasSavedItems}
-		<p class="text-center text-lg text-body dark:text-white/70">
-			{$_("userActivity.empty")}
-		</p>
+		<div class="space-y-6 text-center">
+			<p class="text-lg text-body dark:text-white/70">
+				{$_("userActivity.empty")}
+			</p>
+			<div class="flex flex-wrap items-center justify-center gap-3">
+				<a
+					href={resolve("/map")}
+					class="rounded-lg bg-link px-4 py-2 font-semibold text-white transition-colors hover:bg-hover"
+				>
+					{$_("userActivity.ctaBrowseMap")}
+				</a>
+				<a
+					href={resolve("/countries")}
+					class="rounded-lg border border-link px-4 py-2 font-semibold text-link transition-colors hover:bg-link/10"
+				>
+					{$_("userActivity.ctaBrowseCountries")}
+				</a>
+			</div>
+		</div>
 	{:else}
 		<div class="mb-2">
 			<FormSelect

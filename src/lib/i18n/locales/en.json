@@ -63,7 +63,13 @@
 		"filterAreas": "Areas",
 		"placeFallback": "Place {id}",
 		"areaFallback": "Area {id}",
-		"timeWindow": "Showing activity from the last {days} days"
+		"timeWindow": "Showing activity from the last {days} days",
+		"ctaBrowseMap": "Open the map",
+		"ctaBrowseCountries": "Browse countries",
+		"statsCount": "{count} events",
+		"statsLatest": "latest",
+		"newSinceLastVisit": "{count} new since your last visit",
+		"dismiss": "Dismiss"
 	},
 	"login": {
 		"title": "Log in",
