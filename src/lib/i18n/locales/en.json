@@ -63,7 +63,14 @@
 		"filterAreas": "Areas",
 		"placeFallback": "Place {id}",
 		"areaFallback": "Area {id}",
-		"timeWindow": "Showing activity from the last {days} days"
+		"timeWindow": "Showing activity from the last {days} days",
+		"typeAdded": "Added",
+		"typeUpdated": "Updated",
+		"typeDeleted": "Deleted",
+		"typeCommented": "Commented",
+		"typeBoosted": "Boosted",
+		"noTypesSelected": "Select at least one activity type above",
+		"noMatchingTypes": "No activity matches your selected types."
 	},
 	"login": {
 		"title": "Log in",

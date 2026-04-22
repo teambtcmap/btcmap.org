@@ -1,35 +1,23 @@
 <script lang="ts">
 import { onMount } from "svelte";
-import Time from "svelte-time";
 
+import ActivityCard from "$components/activity/ActivityCard.svelte";
+import ActivityTypeFilter from "$components/activity/ActivityTypeFilter.svelte";
 import type { FormSelectOption } from "$components/form/FormSelect.svelte";
 import FormSelect from "$components/form/FormSelect.svelte";
 import Icon from "$components/Icon.svelte";
+import {
+	ACTIVITY_TYPES,
+	type ActivityItem,
+	type ActivityType,
+	countByType,
+} from "$lib/activity";
 import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
 import { session } from "$lib/session";
 
 import { goto } from "$app/navigation";
-import { resolve } from "$app/paths";
-
-type ActivityType =
-	| "place_added"
-	| "place_updated"
-	| "place_deleted"
-	| "place_commented"
-	| "place_boosted";
-
-type ActivityItem = {
-	type: ActivityType;
-	place_id: number;
-	place_name?: string;
-	osm_user_id?: number;
-	osm_user_name?: string;
-	comment?: string;
-	duration_days?: number;
-	date: string;
-};
 
 type SavedPlace = { id: number; name: string };
 type SavedArea = { id: number; name: string };
@@ -45,16 +33,6 @@ const PAGE_SIZE = 20;
 // with 500+ saved places still gets a usable response instead of a 400.
 const MAX_PLACES = 500;
 
-const DOT_COLORS: Record<ActivityType, string> = {
-	place_commented: "bg-amber-500",
-	place_boosted: "bg-orange-500",
-	place_added: "bg-created",
-	place_deleted: "bg-deleted",
-	place_updated: "bg-link",
-};
-
-const dotColor = (type: ActivityType) => DOT_COLORS[type];
-
 // IDs come from the session (always available once logged in).
 // Names are fetched from the API best-effort for the filter select —
 // if that fetch fails the feed still works.
@@ -66,6 +44,7 @@ let hasSavedItems = false;
 // filterValue is the select's string value ("all" | "place:<id>" |
 // "area:<id>"); `filter` is the parsed typed view used by buildFeedUrl.
 let filterValue = "all";
+let activeTypes: Set<ActivityType> = new Set(ACTIVITY_TYPES);
 let feedItems: ActivityItem[] = [];
 let page = 0;
 let initialLoading = true;
@@ -74,8 +53,17 @@ let feedError = false;
 let fetchGeneration = 0;
 
 $: filter = parseFilterValue(filterValue);
-$: pagedItems = feedItems.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-$: totalPages = Math.max(1, Math.ceil(feedItems.length / PAGE_SIZE));
+// Counts are over the unfiltered window so chip counts don't collapse
+// when the user toggles a type off.
+$: typeCounts = countByType(feedItems);
+$: visibleItems = feedItems.filter((i) => activeTypes.has(i.type));
+$: pagedItems = visibleItems.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+$: totalPages = Math.max(1, Math.ceil(visibleItems.length / PAGE_SIZE));
+// Suppress the "(0)" suffix on every chip during the very first load,
+// where typeCounts is uniformly zero and a chipful of zeros looks like
+// "there's nothing to filter". After the initial fetch resolves we
+// always show counts, even if some are legitimately 0.
+$: showChipCounts = !(feedLoading && !feedItems.length);
 
 // Rebuild options when saved-id lists, hydrated names, or locale change.
 $: filterOptions = ((): FormSelectOption[] => {
@@ -200,7 +188,7 @@ onMount(async () => {
 	<title>{$_("userActivity.title")} | BTC Map</title>
 </svelte:head>
 
-<div class="mx-auto my-10 max-w-3xl px-4 md:my-20">
+<div class="my-10 md:my-20">
 	<h1 class="mb-8 text-center text-4xl font-semibold text-primary dark:text-white">
 		{$_("userActivity.title")}
 	</h1>
@@ -224,9 +212,18 @@ onMount(async () => {
 			/>
 		</div>
 
-		<p class="mb-6 text-center text-sm text-body/70 dark:text-white/50">
+		<p class="mb-4 text-center text-sm text-body/70 dark:text-white/50">
 			{$_("userActivity.timeWindow", { values: { days: DAYS } })}
 		</p>
+
+		<div class="mb-6">
+			<ActivityTypeFilter
+				bind:activeTypes
+				counts={typeCounts}
+				showCounts={showChipCounts}
+				on:change={() => (page = 0)}
+			/>
+		</div>
 
 		{#if feedLoading && !feedItems.length}
 			<div class="flex justify-center">
@@ -244,6 +241,14 @@ onMount(async () => {
 			</p>
 		{:else if !feedItems.length}
 			<p class="text-center text-body dark:text-white/70">{$_("areaActivity.noActivity")}</p>
+		{:else if !activeTypes.size}
+			<p class="text-center text-body dark:text-white/70">
+				{$_("userActivity.noTypesSelected")}
+			</p>
+		{:else if !visibleItems.length}
+			<p class="text-center text-body dark:text-white/70">
+				{$_("userActivity.noMatchingTypes")}
+			</p>
 		{:else}
 			{#if totalPages > 1}
 				<div class="mb-4 flex items-center justify-center gap-4">
@@ -274,101 +279,8 @@ onMount(async () => {
 			<div class="rounded-3xl border border-gray-300 dark:border-white/95 dark:bg-white/10">
 				<div class="space-y-2 p-2">
 					{#each pagedItems as item, i (item.type + "-" + item.place_id + "-" + item.date + "-" + i)}
-						<div
-							class="flex flex-col items-center gap-2 p-5 text-center text-xl lg:flex-row lg:gap-5 lg:text-left"
-						>
-							<span class="relative mx-auto mb-2 flex h-3 w-3 lg:mx-0 lg:mb-0">
-								<span
-									class="{i === 0 ? 'animate-ping' : ''} absolute inline-flex h-full w-full rounded-full {dotColor(
-										item.type,
-									)} opacity-75"
-								/>
-								<span
-									class="relative inline-flex h-3 w-3 rounded-full {dotColor(item.type)}"
-								/>
-							</span>
-
-							<div
-								class="w-full flex-wrap items-center justify-between space-y-2 lg:flex lg:space-y-0"
-							>
-								<div class="space-y-2 lg:space-y-0">
-									<span class="text-primary lg:mr-5 dark:text-white">
-										{#if item.type === "place_added" || item.type === "place_updated" || item.type === "place_deleted"}
-											<a
-												href={resolve(`/merchant/${item.place_id}`)}
-												class="break-all text-link transition-colors hover:text-hover"
-											>
-												{item.place_name || item.place_id}
-											</a>
-											{$_("areaActivity.was")}
-											<strong
-												>{item.type === "place_added"
-													? $_("areaActivity.created")
-													: item.type === "place_deleted"
-														? $_("areaActivity.deleted")
-														: $_("areaActivity.updated")}</strong
-											>
-											{#if item.osm_user_id && item.osm_user_name}
-												{$_("areaActivity.by")}
-												<a
-													href={resolve(`/tagger/${item.osm_user_id}`)}
-													class="break-all text-link transition-colors hover:text-hover"
-												>
-													{item.osm_user_name}
-												</a>
-											{/if}
-										{:else if item.type === "place_commented"}
-											<Icon
-												type="fa"
-												icon="comment"
-												w="16"
-												h="16"
-												class="mr-1 inline align-middle"
-											/>
-											<a
-												href={resolve(`/merchant/${item.place_id}`)}
-												class="break-all text-link transition-colors hover:text-hover"
-											>
-												{item.place_name || item.place_id}
-											</a>
-											{$_("areaActivity.commented")}
-											<span class="italic"
-												>"{item.comment && item.comment.length > 80
-													? item.comment.slice(0, 77) + "..."
-													: item.comment}"</span
-											>
-										{:else if item.type === "place_boosted"}
-											<Icon
-												type="fa"
-												icon="bolt"
-												w="16"
-												h="16"
-												class="mr-1 inline align-middle text-orange-500"
-											/>
-											<a
-												href={resolve(`/merchant/${item.place_id}`)}
-												class="break-all text-link transition-colors hover:text-hover"
-											>
-												{item.place_name || item.place_id}
-											</a>
-											{$_("areaActivity.was")}
-											<strong>{$_("areaActivity.boosted")}</strong>
-											{#if item.duration_days != null}
-												{$_("areaActivity.forDays", { values: { days: item.duration_days } })}
-											{/if}
-										{/if}
-									</span>
-
-									<span
-										class="block text-center font-semibold text-taggerTime lg:inline dark:text-white/70"
-									>
-										<Time live={3000} relative timestamp={item.date} />
-									</span>
-								</div>
-							</div>
-						</div>
+						<ActivityCard {item} highlight={i === 0} />
 					{/each}
-
 				</div>
 			</div>
 
