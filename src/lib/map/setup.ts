@@ -8,6 +8,7 @@ import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
 import en from "$lib/i18n/locales/en.json";
+import { session } from "$lib/session";
 import { selectedMerchant } from "$lib/store";
 import { theme } from "$lib/theme";
 import type { DomEventType, Leaflet, Place } from "$lib/types";
@@ -99,6 +100,8 @@ export type MapControlsTranslations = {
 	addLocation?: string;
 	communityMap?: string;
 	merchantMap?: string;
+	account?: string;
+	login?: string;
 	dataRefreshAvailable?: string;
 	support?: string;
 	supportWithSats?: string;
@@ -114,6 +117,8 @@ const defaultMapControls: Required<MapControlsTranslations> = {
 	addLocation: en.mapControls.addLocation,
 	communityMap: en.mapControls.communityMap,
 	merchantMap: en.mapControls.merchantMap,
+	account: en.mapControls.account,
+	login: en.mapControls.login,
 	dataRefreshAvailable: en.mapControls.dataRefreshAvailable,
 	support: en.mapControls.support,
 	supportWithSats: en.mapControls.supportWithSats,
@@ -141,6 +146,10 @@ export const applyMapControlTranslations = (t: (key: string) => string) => {
 		communityMapAlt: t("mapControls.communityMapAlt"),
 		merchantMap: t("mapControls.merchantMap"),
 		merchantMapAlt: t("mapControls.merchantMapAlt"),
+		account: t("mapControls.account"),
+		accountAlt: t("mapControls.accountAlt"),
+		login: t("mapControls.login"),
+		loginAlt: t("mapControls.loginAlt"),
 		dataRefreshAvailable: t("mapControls.dataRefreshAvailable"),
 		dataRefreshAlt: t("mapControls.dataRefreshAlt"),
 		boostLocations: t("boost.locations"),
@@ -211,6 +220,20 @@ export const applyMapControlTranslations = (t: (key: string) => string) => {
 		merchantBtn.setAttribute("aria-label", labels.merchantMap);
 		const merchantImg = merchantBtn.querySelector("img");
 		if (merchantImg) merchantImg.setAttribute("alt", labels.merchantMapAlt);
+	}
+	const accountBtn = document.querySelector(".leaflet-control-account");
+	if (accountBtn) {
+		const accountLoggedIn = !!get(session);
+		const title = accountLoggedIn ? labels.account : labels.login;
+		accountBtn.setAttribute("title", title);
+		accountBtn.setAttribute("aria-label", title);
+		const accountImg = accountBtn.querySelector("img");
+		if (accountImg) {
+			accountImg.setAttribute(
+				"alt",
+				accountLoggedIn ? labels.accountAlt : labels.loginAlt,
+			);
+		}
 	}
 
 	const dataRefreshBtn = document.querySelector(
@@ -469,6 +492,30 @@ export const homeMarkerButtons = (
 				merchantImg.style.height = "16px";
 				addControlDiv.append(merchantMapButton);
 			}
+
+			// Account / Log in button — session state is read at control creation; see spec for non-reactive caveat.
+			const loggedIn = !!get(session);
+			const accountButton = L.DomUtil.create("a");
+			accountButton.classList.add("leaflet-control-account");
+			accountButton.href = loggedIn ? "/user/activity" : "/login";
+			accountButton.title = loggedIn ? labels.account : labels.login;
+			accountButton.role = "button";
+			accountButton.ariaLabel = loggedIn ? labels.account : labels.login;
+			const accountImg = L.DomUtil.create(
+				"img",
+				"",
+				accountButton,
+			) as HTMLImageElement;
+			accountImg.src = "/icons/account.svg";
+			accountImg.alt = loggedIn
+				? get(_)("mapControls.accountAlt")
+				: get(_)("mapControls.loginAlt");
+			accountImg.style.width = "16px";
+			accountImg.style.height = "16px";
+			accountButton.onclick = () => {
+				trackEvent("account_button_click", { logged_in: loggedIn });
+			};
+			addControlDiv.append(accountButton);
 
 			return addControlDiv;
 		},
