@@ -1,22 +1,17 @@
 <script lang="ts">
-import { onMount } from "svelte";
+import { onDestroy, onMount } from "svelte";
 
 import Icon from "$components/Icon.svelte";
+import MultiPlaceMap from "$components/MultiPlaceMap.svelte";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
 import { removeSavedItem, setSavedList } from "$lib/savedItems";
 import { session } from "$lib/session";
+import type { SavedPlace } from "$lib/types";
 import { errToast } from "$lib/utils";
 
 import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
-
-type SavedPlace = {
-	id: number;
-	name: string;
-	lat: number;
-	lon: number;
-};
 
 type SavedArea = {
 	id: number;
@@ -34,6 +29,15 @@ let placesError = false;
 let areasError = false;
 let removingPlaces = new Set<number>();
 let removingAreas = new Set<number>();
+
+// Gate the heavy MultiPlaceMap on desktop viewports so mobile users
+// don't download Leaflet + MapLibre + plugins for a view they can't see.
+// Matches Tailwind's default `md` breakpoint (768px).
+let isDesktop = false;
+let desktopMql: MediaQueryList | undefined;
+const handleDesktopChange = (e: MediaQueryListEvent) => {
+	isDesktop = e.matches;
+};
 
 async function removePlace(id: number) {
 	if (!$session || removingPlaces.has(id)) return;
@@ -92,6 +96,10 @@ async function removeArea(id: number) {
 }
 
 onMount(async () => {
+	desktopMql = window.matchMedia("(min-width: 768px)");
+	isDesktop = desktopMql.matches;
+	desktopMql.addEventListener("change", handleDesktopChange);
+
 	// Ensure session is hydrated from localStorage before checking.
 	// Child onMount runs before layout onMount in Svelte, so we can't
 	// rely on the layout's session.init() having run yet.
@@ -123,6 +131,10 @@ onMount(async () => {
 	}
 
 	loading = false;
+});
+
+onDestroy(() => {
+	desktopMql?.removeEventListener("change", handleDesktopChange);
 });
 </script>
 
@@ -156,6 +168,9 @@ onMount(async () => {
 					<Icon type="material" icon="location_on" w="24" h="24" class="mr-1 inline align-middle" />
 					{$_("saved.places")}
 				</h2>
+				{#if isDesktop}
+					<MultiPlaceMap {places} />
+				{/if}
 				<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 					{#each places as place (place.id)}
 						{@const placeLabel = place.name || `Place ${place.id}`}

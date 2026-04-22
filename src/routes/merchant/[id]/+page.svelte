@@ -22,6 +22,7 @@ import TopButton from "$components/TopButton.svelte";
 import { _, getDisplayLang, locale } from "$lib/i18n";
 import { loadMapDependencies } from "$lib/map/imports";
 import {
+	applyThemeToBaseMaps,
 	attribution,
 	calcVerifiedDate,
 	changeDefaultIcons,
@@ -235,17 +236,9 @@ onMount(async () => {
 	}
 });
 
-const toggleTheme = () => {
-	if ($theme === "dark") {
-		baseMaps["OpenFreeMap Liberty"].remove();
-		baseMaps["OpenFreeMap Dark"].addTo(map);
-	} else {
-		baseMaps["OpenFreeMap Dark"].remove();
-		baseMaps["OpenFreeMap Liberty"].addTo(map);
-	}
-};
-
-$: $theme !== undefined && mapLoaded && toggleTheme();
+$: $theme !== undefined &&
+	mapLoaded &&
+	applyThemeToBaseMaps($theme, baseMaps, map);
 
 // Update marker icon when boost or comment state changes
 $: if (merchantMarker && leaflet && mapLoaded && icon) {

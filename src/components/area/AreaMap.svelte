@@ -12,6 +12,7 @@ import TaggingIssues from "$components/TaggingIssues.svelte";
 import { GradeTable } from "$lib/constants";
 import { loadMapDependencies } from "$lib/map/imports";
 import {
+	applyThemeToBaseMaps,
 	attribution,
 	changeDefaultIcons,
 	generateIcon,
@@ -70,17 +71,9 @@ const closePopup = () => {
 
 $: $theme !== undefined && mapLoaded && closePopup();
 
-const toggleTheme = () => {
-	if ($theme === "dark") {
-		baseMaps["OpenFreeMap Liberty"].remove();
-		baseMaps["OpenFreeMap Dark"].addTo(map);
-	} else {
-		baseMaps["OpenFreeMap Dark"].remove();
-		baseMaps["OpenFreeMap Liberty"].addTo(map);
-	}
-};
-
-$: $theme !== undefined && mapLoaded && toggleTheme();
+$: $theme !== undefined &&
+	mapLoaded &&
+	applyThemeToBaseMaps($theme, baseMaps, map);
 
 onMount(async () => {
 	if (browser) {
@@ -246,11 +239,11 @@ $: geoJSON &&
 			<!-- prettier-ignore -->
 			<div
 				bind:this={mapElement}
-				class="z-10 h-[300px] border border-gray-300 !bg-teal text-left md:h-[600px] dark:border-white/95 dark:!bg-[#202f33]"
+				class="z-10 h-[300px] rounded-b-3xl border border-gray-300 !bg-teal text-left md:h-[600px] dark:border-white/95 dark:!bg-[#202f33]"
 			/>
 			{#if !mapLoaded}
 				<MapLoadingEmbed
-					style="h-[300px] md:h-[600px] border border-gray-300 dark:border-white/95"
+					style="h-[300px] md:h-[600px] rounded-b-3xl border border-gray-300 dark:border-white/95"
 				/>
 			{/if}
 		</div>

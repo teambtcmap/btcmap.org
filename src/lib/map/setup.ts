@@ -11,7 +11,7 @@ import en from "$lib/i18n/locales/en.json";
 import { session } from "$lib/session";
 import { selectedMerchant } from "$lib/store";
 import { theme } from "$lib/theme";
-import type { DomEventType, Leaflet, Place } from "$lib/types";
+import type { BaseMaps, DomEventType, Leaflet, Place, Theme } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
 import { errToast, humanizeIconName } from "$lib/utils";
 
@@ -92,6 +92,22 @@ export const layers = (leaflet: Leaflet, map: LeafletMap) => {
 export const attribution = (L: Leaflet, map: LeafletMap) => {
 	// Use Leaflet's default attribution control
 	L.control.attribution({ position: "bottomleft", prefix: false }).addTo(map);
+};
+
+// Swap the OpenFreeMap Liberty/Dark layers when the theme changes.
+// Callers invoke this from a reactive block once the map is initialized.
+export const applyThemeToBaseMaps = (
+	currentTheme: Theme | undefined,
+	baseMaps: BaseMaps,
+	map: LeafletMap,
+) => {
+	if (currentTheme === "dark") {
+		baseMaps["OpenFreeMap Liberty"].remove();
+		baseMaps["OpenFreeMap Dark"].addTo(map);
+	} else {
+		baseMaps["OpenFreeMap Dark"].remove();
+		baseMaps["OpenFreeMap Liberty"].addTo(map);
+	}
 };
 
 export type MapControlsTranslations = {

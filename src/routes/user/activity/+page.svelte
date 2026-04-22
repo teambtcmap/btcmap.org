@@ -16,10 +16,10 @@ import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
 import { session } from "$lib/session";
+import type { SavedPlace } from "$lib/types";
 
 import { goto } from "$app/navigation";
 
-type SavedPlace = { id: number; name: string };
 type SavedArea = { id: number; name: string };
 
 type Filter =
