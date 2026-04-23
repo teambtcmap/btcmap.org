@@ -91,6 +91,7 @@ import {
 } from "$lib/workers/worker-manager";
 
 import type { PageData } from "./$types";
+import CommunityRail from "./components/CommunityRail.svelte";
 import MapControls from "./components/MapControls.svelte";
 import MapSearchBar from "./components/MapSearchBar.svelte";
 import MerchantDrawerHash from "./components/MerchantDrawerHash.svelte";
@@ -1527,6 +1528,14 @@ onDestroy(async () => {
 	/>
 
 	<MerchantDrawerHash />
+
+	{#if mapLoaded}
+		<CommunityRail
+			lat={mapCenter?.lat ?? null}
+			lon={mapCenter?.lng ?? null}
+			zoom={currentZoom}
+		/>
+	{/if}
 
 	{#if map && leaflet && DomEvent}
 		<MapControls {map} {leaflet} {DomEvent} />
