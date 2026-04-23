@@ -1,7 +1,7 @@
 import rewind from "@mapbox/geojson-rewind";
 import { toast } from "@zerodevx/svelte-toast";
 import type { Chart } from "chart.js";
-import { geoContains } from "d3-geo";
+import { geoBounds, geoContains } from "d3-geo";
 import { format } from "date-fns/format";
 import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
 import { isAfter } from "date-fns/isAfter";
@@ -266,6 +266,33 @@ const normalizeSocialUrl = (url: string, platform: string): string => {
 	return platformUrls[platform] + url;
 };
 
+// Cached [west, south, east, north] bboxes keyed by the geo_json object so the
+// hot path below can skip the expensive rewind + geoContains when the point is
+// clearly outside. Mirrors the ±0.1° bbox prefilter in btcmap-api
+// (src/service/area.rs), adapted to exact bounds.
+const geoJsonBboxCache = new WeakMap<
+	object,
+	[number, number, number, number]
+>();
+
+function getBbox(
+	geoJson: object,
+): [number, number, number, number] | undefined {
+	const cached = geoJsonBboxCache.get(geoJson);
+	if (cached) return cached;
+	try {
+		// d3-geo's geoBounds returns [[west, south], [east, north]].
+		const [[w, s], [e, n]] = geoBounds(
+			geoJson as Parameters<typeof geoBounds>[0],
+		);
+		const bbox: [number, number, number, number] = [w, s, e, n];
+		geoJsonBboxCache.set(geoJson, bbox);
+		return bbox;
+	} catch {
+		return undefined;
+	}
+}
+
 // Filters areas to communities whose polygon contains the given coordinate.
 // Pure/synchronous — caller passes in already-synced $areas. Does NOT call areasSync().
 export function getCommunitiesAtCoordinates(
@@ -276,6 +303,11 @@ export function getCommunitiesAtCoordinates(
 	return allAreas.filter((area) => {
 		if (area.tags.type !== "community") return false;
 		if (!area.tags.geo_json) return false;
+		const bbox = getBbox(area.tags.geo_json);
+		if (bbox) {
+			const [w, s, e, n] = bbox;
+			if (lon < w || lon > e || lat < s || lat > n) return false;
+		}
 		try {
 			const rewoundPoly = rewind(area.tags.geo_json, true);
 			return geoContains(rewoundPoly, [lon, lat]);

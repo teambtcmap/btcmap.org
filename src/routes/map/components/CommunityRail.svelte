@@ -4,12 +4,6 @@ import type { GeoJSON as LeafletGeoJSON, Map as LeafletMap } from "leaflet";
 import { onDestroy, onMount } from "svelte";
 import { fly } from "svelte/transition";
 
-// Enter from 10px below (slides up), exit reverses. Y motion avoids the
-// horizontal scrollbar that X motion caused when the rail sat at the viewport edge.
-const DESKTOP_FLY = { duration: 280, y: 10 };
-// Mobile rail is anchored top-left, so enter from above sliding down.
-const MOBILE_FLY = { duration: 280, y: -10 };
-
 import {
 	MAP_PANEL_MARGIN,
 	MERCHANT_DRAWER_WIDTH,
@@ -22,6 +16,12 @@ import type { Area, Leaflet } from "$lib/types";
 import { getCommunitiesAtCoordinates } from "$lib/utils";
 
 import { resolve } from "$app/paths";
+
+// Enter from 10px below (slides up), exit reverses. Y motion avoids the
+// horizontal scrollbar that X motion caused when the rail sat at the viewport edge.
+const DESKTOP_FLY = { duration: 280, y: 10 };
+// Mobile rail is anchored top-left, so enter from above sliding down.
+const MOBILE_FLY = { duration: 280, y: -10 };
 
 export let lat: number | null = null;
 export let lon: number | null = null;
