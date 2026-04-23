@@ -1123,7 +1123,7 @@ onMount(async () => {
 		const LocateControl = deps.LocateControl;
 
 		// add map and tiles
-		map = leaflet.map(mapElement, { maxZoom: 19, zoomControl: false });
+		map = leaflet.map(mapElement, { maxZoom: 21, zoomControl: false });
 		leaflet.control.zoom({ position: "topright" }).addTo(map);
 
 		// Setup map in logical steps
