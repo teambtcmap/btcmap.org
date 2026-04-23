@@ -17,7 +17,7 @@ import { MERCHANT_LIST_MAX_ITEMS } from "$lib/constants";
 import { areas } from "$lib/store";
 import { areasSync } from "$lib/sync/areas";
 import { theme } from "$lib/theme";
-import type { Continents, Grade, IssueIcon, Place } from "$lib/types";
+import type { Area, Continents, Grade, IssueIcon, Place } from "$lib/types";
 
 // Validates place ID format (numeric or OSM-style type:id like "node:123456")
 export const isValidPlaceId = (id: string): boolean =>
@@ -265,6 +265,25 @@ const normalizeSocialUrl = (url: string, platform: string): string => {
 	};
 	return platformUrls[platform] + url;
 };
+
+// Filters areas to communities whose polygon contains the given coordinate.
+// Pure/synchronous — caller passes in already-synced $areas. Does NOT call areasSync().
+export function getCommunitiesAtCoordinates(
+	lat: number,
+	lon: number,
+	allAreas: Area[],
+): Area[] {
+	return allAreas.filter((area) => {
+		if (area.tags.type !== "community") return false;
+		if (!area.tags.geo_json) return false;
+		try {
+			const rewoundPoly = rewind(area.tags.geo_json, true);
+			return geoContains(rewoundPoly, [lon, lat]);
+		} catch {
+			return false;
+		}
+	});
+}
 
 export async function getAreaIdsByCoordinates(
 	lat: number,
