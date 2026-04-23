@@ -44,8 +44,18 @@ $: rightOffset = $merchantDrawer.isOpen
 	? MAP_PANEL_MARGIN + MERCHANT_DRAWER_WIDTH + PANEL_DRAWER_GAP
 	: MAP_PANEL_MARGIN;
 
+// Clear hover preview if the previewed community is no longer visible.
+// This handles the case where the rail DOM is removed (pan / zoom-out)
+// before mouseleave or blur fires on the hovered anchor.
+$: if (
+	previewCommunityId &&
+	!allCommunities.some((c) => c.id === previewCommunityId)
+) {
+	clearPreview();
+}
+
 const avatarUrl = (community: Area): string =>
-	`https://btcmap.org/.netlify/images?url=${community.tags["icon:square"]}&fit=cover&w=64&h=64`;
+	`https://btcmap.org/.netlify/images?url=${encodeURIComponent(community.tags["icon:square"])}&fit=cover&w=64&h=64`;
 
 const communityHref = (community: Area): string =>
 	resolve(`/community/${encodeURIComponent(community.id)}`);
@@ -56,12 +66,14 @@ const handleImgError = (e: Event) => {
 };
 
 let previewLayer: LeafletGeoJSON | null = null;
+let previewCommunityId: string | null = null;
 
 function clearPreview() {
 	if (previewLayer && map) {
 		map.removeLayer(previewLayer);
 	}
 	previewLayer = null;
+	previewCommunityId = null;
 }
 
 function showPreview(community: Area) {
@@ -80,6 +92,7 @@ function showPreview(community: Area) {
 				interactive: false,
 			})
 			.addTo(map);
+		previewCommunityId = community.id;
 	} catch (e) {
 		console.error("CommunityRail: failed to draw preview", e);
 	}

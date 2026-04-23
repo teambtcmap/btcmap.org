@@ -528,4 +528,27 @@ describe("getCommunitiesAtCoordinates", () => {
 		const result = getCommunitiesAtCoordinates(52.23, 21.01, [a, b]);
 		expect(result.map((c) => c.id).sort()).toEqual(["a", "b"]);
 	});
+
+	it("handles antimeridian-wrapping polygons (e.g. Fiji)", () => {
+		// Polygon that straddles ±180°: covers lon 175°E → 180° → -175°W, lat 15°S → 20°S
+		const fijiBox = {
+			type: "Polygon" as const,
+			coordinates: [
+				[
+					[175, -20],
+					[185, -20], // 185 longitude normalized to -175
+					[185, -15],
+					[175, -15],
+					[175, -20],
+				],
+			],
+		};
+		const fiji = makeArea({ id: "fiji", geo_json: fijiBox });
+		// Point at lon 178 (clearly inside the wrapped range)
+		const inside = getCommunitiesAtCoordinates(-17, 178, [fiji]);
+		expect(inside.map((c) => c.id)).toEqual(["fiji"]);
+		// Point at lon 0 (clearly outside) should still be rejected
+		const outside = getCommunitiesAtCoordinates(-17, 0, [fiji]);
+		expect(outside).toEqual([]);
+	});
 });

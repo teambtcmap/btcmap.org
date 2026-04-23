@@ -306,7 +306,10 @@ export function getCommunitiesAtCoordinates(
 		const bbox = getBbox(area.tags.geo_json);
 		if (bbox) {
 			const [w, s, e, n] = bbox;
-			if (lon < w || lon > e || lat < s || lat > n) return false;
+			// Handle antimeridian-wrapping bboxes (e.g. Fiji, far-east Russia):
+			// when w > e the valid longitude range is [w, 180] ∪ [-180, e].
+			const outsideLon = w <= e ? lon < w || lon > e : lon < w && lon > e;
+			if (outsideLon || lat < s || lat > n) return false;
 		}
 		try {
 			const rewoundPoly = rewind(area.tags.geo_json, true);
