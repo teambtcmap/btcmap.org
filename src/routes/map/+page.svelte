@@ -1534,6 +1534,8 @@ onDestroy(async () => {
 			lat={mapCenter?.lat ?? null}
 			lon={mapCenter?.lng ?? null}
 			zoom={currentZoom}
+			{map}
+			{leaflet}
 		/>
 	{/if}
 

@@ -1,5 +1,7 @@
 <script lang="ts">
-import { onMount } from "svelte";
+import rewind from "@mapbox/geojson-rewind";
+import type { GeoJSON as LeafletGeoJSON, Map as LeafletMap } from "leaflet";
+import { onDestroy, onMount } from "svelte";
 
 import {
 	MAP_PANEL_MARGIN,
@@ -9,7 +11,7 @@ import {
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { areas } from "$lib/store";
 import { areasSync } from "$lib/sync/areas";
-import type { Area } from "$lib/types";
+import type { Area, Leaflet } from "$lib/types";
 import { getCommunitiesAtCoordinates } from "$lib/utils";
 
 import { resolve } from "$app/paths";
@@ -17,6 +19,8 @@ import { resolve } from "$app/paths";
 export let lat: number | null = null;
 export let lon: number | null = null;
 export let zoom: number | null = null;
+export let map: LeafletMap | undefined = undefined;
+export let leaflet: Leaflet | undefined = undefined;
 
 const MIN_ZOOM = 6;
 const MOBILE_VISIBLE_LIMIT = 4;
@@ -44,11 +48,43 @@ const handleImgError = (e: Event) => {
 	img.src = "/images/bitcoin.svg";
 };
 
+let previewLayer: LeafletGeoJSON | null = null;
+
+function clearPreview() {
+	if (previewLayer && map) {
+		map.removeLayer(previewLayer);
+	}
+	previewLayer = null;
+}
+
+function showPreview(community: Area) {
+	if (!map || !leaflet || !community.tags.geo_json) return;
+	clearPreview();
+	try {
+		const gj = rewind(community.tags.geo_json, true);
+		previewLayer = leaflet
+			.geoJSON(gj, {
+				style: {
+					color: "#000000",
+					weight: 1,
+					fillColor: "#F7931A",
+					fillOpacity: 0.3,
+				},
+				interactive: false,
+			})
+			.addTo(map);
+	} catch (e) {
+		console.error("CommunityRail: failed to draw preview", e);
+	}
+}
+
 onMount(() => {
 	// /map does not otherwise sync the areas store; trigger it here so the
 	// rail has data. areasSync has its own 5-min cache so repeat calls are cheap.
 	areasSync();
 });
+
+onDestroy(clearPreview);
 </script>
 
 {#if allCommunities.length > 0}
@@ -62,6 +98,10 @@ onMount(() => {
 				href={communityHref(community)}
 				title={community.tags.name}
 				aria-label={community.tags.name}
+				on:mouseenter={() => showPreview(community)}
+				on:mouseleave={clearPreview}
+				on:focus={() => showPreview(community)}
+				on:blur={clearPreview}
 				class="pointer-events-auto block h-10 w-10 overflow-hidden rounded-full border border-white bg-white shadow-md hover:ring-2 hover:ring-link dark:border-dark dark:bg-dark"
 			>
 				<img
