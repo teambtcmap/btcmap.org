@@ -2,6 +2,9 @@
 import rewind from "@mapbox/geojson-rewind";
 import type { GeoJSON as LeafletGeoJSON, Map as LeafletMap } from "leaflet";
 import { onDestroy, onMount } from "svelte";
+import { fade } from "svelte/transition";
+
+const FADE = { duration: 180 };
 
 import {
 	MAP_PANEL_MARGIN,
@@ -102,6 +105,7 @@ onDestroy(clearPreview);
 				on:mouseleave={clearPreview}
 				on:focus={() => showPreview(community)}
 				on:blur={clearPreview}
+				transition:fade={FADE}
 				class="pointer-events-auto block h-10 w-10 overflow-hidden rounded-full border border-white bg-white shadow-md hover:ring-2 hover:ring-link dark:border-dark dark:bg-dark"
 			>
 				<img
@@ -124,6 +128,7 @@ onDestroy(clearPreview);
 				href={communityHref(community)}
 				title={community.tags.name}
 				aria-label={community.tags.name}
+				transition:fade={FADE}
 				class="pointer-events-auto block h-8 w-8 overflow-hidden rounded-full border border-white bg-white shadow-md dark:border-dark dark:bg-dark"
 			>
 				<img
@@ -140,6 +145,7 @@ onDestroy(clearPreview);
 				href={resolve('/communities/map')}
 				title="+{mobileOverflow} more"
 				aria-label="View all communities on the community map"
+				transition:fade={FADE}
 				class="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full border border-white bg-white text-xs font-semibold text-primary shadow-md dark:border-dark dark:bg-dark dark:text-white"
 			>
 				+{mobileOverflow}
