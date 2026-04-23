@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { calculateDistance, formatDistance, sanitizeUrl } from "./utils";
+import type { Area } from "$lib/types";
+
+import {
+	calculateDistance,
+	formatDistance,
+	getCommunitiesAtCoordinates,
+	sanitizeUrl,
+} from "./utils";
 
 describe("sanitizeUrl", () => {
 	describe("undefined/empty input", () => {
@@ -436,5 +443,112 @@ describe("formatDistance", () => {
 			// 20km ≈ 12.4mi
 			expect(formatDistance(20, false)).toBe("12mi");
 		});
+	});
+});
+
+describe("getCommunitiesAtCoordinates", () => {
+	// Box polygon around Warsaw (lat 52.0-53.0, lon 20.0-22.0)
+	const warsawBox = {
+		type: "Polygon" as const,
+		coordinates: [
+			[
+				[20, 52],
+				[22, 52],
+				[22, 53],
+				[20, 53],
+				[20, 52],
+			],
+		],
+	};
+
+	// Box polygon far away (Atlantic ocean)
+	const atlanticBox = {
+		type: "Polygon" as const,
+		coordinates: [
+			[
+				[-40, 30],
+				[-20, 30],
+				[-20, 40],
+				[-40, 40],
+				[-40, 30],
+			],
+		],
+	};
+
+	const makeArea = (
+		overrides: Partial<Area["tags"]> & { id?: string },
+	): Area => ({
+		id: overrides.id ?? "test-area",
+		tags: {
+			type: "community",
+			name: "Test",
+			continent: "europe",
+			url_alias: "test",
+			geo_json: warsawBox,
+			"icon:square": "https://example.com/icon.png",
+			...overrides,
+		} as Area["tags"],
+		created_at: "",
+		updated_at: "",
+		deleted_at: "",
+	});
+
+	it("returns empty array when no areas provided", () => {
+		expect(getCommunitiesAtCoordinates(52.23, 21.01, [])).toEqual([]);
+	});
+
+	it("returns community whose polygon contains the point", () => {
+		const warsaw = makeArea({ id: "warsaw", name: "Warsaw" });
+		const result = getCommunitiesAtCoordinates(52.23, 21.01, [warsaw]);
+		expect(result).toHaveLength(1);
+		expect(result[0].id).toBe("warsaw");
+	});
+
+	it("excludes communities whose polygon does not contain the point", () => {
+		const atlantic = makeArea({ id: "atl", geo_json: atlanticBox });
+		expect(getCommunitiesAtCoordinates(52.23, 21.01, [atlantic])).toEqual([]);
+	});
+
+	it("excludes countries even if their polygon contains the point", () => {
+		const poland = makeArea({ id: "poland", type: "country" });
+		expect(getCommunitiesAtCoordinates(52.23, 21.01, [poland])).toEqual([]);
+	});
+
+	it("skips areas without geo_json without throwing", () => {
+		const noGeo = makeArea({
+			id: "no-geo",
+			geo_json: undefined as unknown as Area["tags"]["geo_json"],
+		});
+		expect(getCommunitiesAtCoordinates(52.23, 21.01, [noGeo])).toEqual([]);
+	});
+
+	it("returns multiple matching communities when both contain the point", () => {
+		const a = makeArea({ id: "a" });
+		const b = makeArea({ id: "b" });
+		const result = getCommunitiesAtCoordinates(52.23, 21.01, [a, b]);
+		expect(result.map((c) => c.id).sort()).toEqual(["a", "b"]);
+	});
+
+	it("handles antimeridian-wrapping polygons (e.g. Fiji)", () => {
+		// Polygon that straddles ±180°: covers lon 175°E → 180° → -175°W, lat 15°S → 20°S
+		const fijiBox = {
+			type: "Polygon" as const,
+			coordinates: [
+				[
+					[175, -20],
+					[185, -20], // 185 longitude normalized to -175
+					[185, -15],
+					[175, -15],
+					[175, -20],
+				],
+			],
+		};
+		const fiji = makeArea({ id: "fiji", geo_json: fijiBox });
+		// Point at lon 178 (clearly inside the wrapped range)
+		const inside = getCommunitiesAtCoordinates(-17, 178, [fiji]);
+		expect(inside.map((c) => c.id)).toEqual(["fiji"]);
+		// Point at lon 0 (clearly outside) should still be rejected
+		const outside = getCommunitiesAtCoordinates(-17, 0, [fiji]);
+		expect(outside).toEqual([]);
 	});
 });
