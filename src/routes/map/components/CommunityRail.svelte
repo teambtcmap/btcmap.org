@@ -10,6 +10,7 @@ import {
 	PANEL_DRAWER_GAP,
 } from "$lib/constants";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
+import { merchantList } from "$lib/merchantListStore";
 import { areas } from "$lib/store";
 import { areasSync } from "$lib/sync/areas";
 import type { Area, Leaflet } from "$lib/types";
@@ -136,9 +137,10 @@ onDestroy(clearPreview);
 		{/each}
 	</div>
 
-	<!-- Mobile: top-left (desktop search bar moves to bottom on mobile, leaving space here). Capped with +N overflow link. -->
+	<!-- Mobile: top-left. Hidden when the merchant drawer or the nearby/worldwide list is open so the active merchant context owns the screen. -->
 	<div
 		class="pointer-events-none absolute top-3 left-3 z-[1001] flex flex-col gap-1.5 md:hidden"
+		class:hidden={$merchantDrawer.isOpen || $merchantList.isOpen}
 	>
 		{#each mobileVisible as community (community.id)}
 			<a
