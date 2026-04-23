@@ -1,4 +1,6 @@
 <script lang="ts">
+import { onMount } from "svelte";
+
 import {
 	MAP_PANEL_MARGIN,
 	MERCHANT_DRAWER_WIDTH,
@@ -6,6 +8,7 @@ import {
 } from "$lib/constants";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { areas } from "$lib/store";
+import { areasSync } from "$lib/sync/areas";
 import type { Area } from "$lib/types";
 import { getCommunitiesAtCoordinates } from "$lib/utils";
 
@@ -36,6 +39,12 @@ const handleImgError = (e: Event) => {
 	const img = e.currentTarget as HTMLImageElement;
 	img.src = "/images/bitcoin.svg";
 };
+
+onMount(() => {
+	// /map does not otherwise sync the areas store; trigger it here so the
+	// rail has data. areasSync has its own 5-min cache so repeat calls are cheap.
+	areasSync();
+});
 </script>
 
 {#if communities.length > 0}
