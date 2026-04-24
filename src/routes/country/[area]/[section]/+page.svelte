@@ -42,8 +42,9 @@ $: metaDescription = truncateAtWord(
 );
 
 function truncateAtWord(s: string, max: number): string {
-	if (s.length <= max) return s;
-	const cut = s.slice(0, max - 1);
+	const codePoints = Array.from(s);
+	if (codePoints.length <= max) return s;
+	const cut = codePoints.slice(0, max - 1).join("");
 	const lastSpace = cut.lastIndexOf(" ");
 	return `${lastSpace > max * 0.7 ? cut.slice(0, lastSpace) : cut.trimEnd()}…`;
 }
