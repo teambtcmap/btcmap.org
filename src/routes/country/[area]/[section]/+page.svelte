@@ -33,12 +33,20 @@ $: routes = [
 	},
 ];
 
-$: metaDescription = (
+$: metaDescription = truncateAtWord(
 	data.description?.replace(/\s+/g, " ").trim() ||
-	$_("meta.countryFallbackDescription", {
-		values: { name: countryDisplayName },
-	})
-).slice(0, 200);
+		$_("meta.countryFallbackDescription", {
+			values: { name: countryDisplayName },
+		}),
+	200,
+);
+
+function truncateAtWord(s: string, max: number): string {
+	if (s.length <= max) return s;
+	const cut = s.slice(0, max - 1);
+	const lastSpace = cut.lastIndexOf(" ");
+	return `${lastSpace > max * 0.7 ? cut.slice(0, lastSpace) : cut.trimEnd()}…`;
+}
 </script>
 
 <svelte:head>
