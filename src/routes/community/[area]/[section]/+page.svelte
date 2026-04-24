@@ -20,9 +20,7 @@ $: metaDescription = buildMetaDescription(
 	200,
 );
 
-$: faviconUrl = data.iconSquare
-	? `https://btcmap.org/.netlify/images?url=${encodeURIComponent(data.iconSquare)}&fit=cover&w=64&h=64`
-	: null;
+$: faviconUrl = data.iconSquare || null;
 
 $: canonicalUrl = `https://btcmap.org/community/${encodeURIComponent(data.id)}/merchants`;
 </script>
