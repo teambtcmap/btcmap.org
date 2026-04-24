@@ -659,7 +659,7 @@ export const generateIcon = (
 		const savedBadge = document.createElement("span");
 		savedBadge.className =
 			"saved-badge absolute top-1 left-1 transform -translate-x-1/2 -translate-y-1/2 " +
-			"bg-link text-white " +
+			"bg-white text-link ring-1 ring-link " +
 			"rounded-full w-4 h-4 flex items-center justify-center " +
 			"pointer-events-none";
 		const savedIcon = document.createElement("div");
@@ -668,7 +668,7 @@ export const generateIcon = (
 			props: {
 				w: "10",
 				h: "10",
-				class: "text-white",
+				class: "text-link",
 				icon: "bookmark_filled",
 				type: "material",
 			},
