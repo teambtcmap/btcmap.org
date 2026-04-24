@@ -421,7 +421,9 @@
 		"merchant": "Merchant",
 		"country": "Country",
 		"community": "Community",
-		"supertagger": "Supertagger"
+		"supertagger": "Supertagger",
+		"communityFallbackDescription": "Find places to spend bitcoin in {name}. Browse merchants, see community stats, and connect with local contacts.",
+		"countryFallbackDescription": "Find places to spend bitcoin in {name}. Browse merchants, see country stats, and explore local communities."
 	},
 	"communityMap": {
 		"viewCommunity": "View Community",

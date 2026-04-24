@@ -72,6 +72,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 			name: fetchedArea.tags.name,
 			tickets: tickets,
 			issues: issues.result.requested_issues,
+			description: fetchedArea.tags.description,
 		};
 	} catch (err) {
 		console.error(err);

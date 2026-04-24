@@ -32,13 +32,23 @@ $: routes = [
 		url: `/country/${data.id}`,
 	},
 ];
+
+$: metaDescription = (
+	data.description?.replace(/\s+/g, " ").trim() ||
+	$_("meta.countryFallbackDescription", {
+		values: { name: countryDisplayName },
+	})
+).slice(0, 200);
 </script>
 
 <svelte:head>
 	<title>{countryDisplayName || $_('meta.country')}</title>
+	<meta name="description" content={metaDescription} />
 	<meta property="og:image" content="https://btcmap.org/images/og/countries.png" />
 	<meta property="og:title" content={countryDisplayName || $_('meta.country')} />
+	<meta property="og:description" content={metaDescription} />
 	<meta name="twitter:title" content={countryDisplayName || $_('meta.country')} />
+	<meta name="twitter:description" content={metaDescription} />
 	<meta name="twitter:image" content="https://btcmap.org/images/og/countries.png" />
 </svelte:head>
 

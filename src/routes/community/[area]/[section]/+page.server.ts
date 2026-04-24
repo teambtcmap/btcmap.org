@@ -71,6 +71,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 			tickets: tickets,
 			issues: issues.result.requested_issues,
 			verifiedDate: fetchedArea.tags["verified:date"],
+			description: fetchedArea.tags.description,
 		};
 	} catch (err) {
 		console.error(err);
