@@ -10,20 +10,18 @@ type CreateMarkerOptions = {
 	currentZoom: number;
 	placeDetailsCache: Map<number, Place>;
 	placesById: Map<number, Place>;
+	savedPlaceIds?: Set<number>;
 	onMarkerClick: (id: number) => void;
 	onLabelUpdate?: () => void;
 };
 
-/**
- * Creates a Leaflet marker with icon and optional label
- * Encapsulates the common pattern used in worker and fallback paths
- */
 export const createMarkerWithLabel = ({
 	place,
 	leaflet,
 	currentZoom,
 	placeDetailsCache,
 	placesById,
+	savedPlaceIds,
 	onMarkerClick,
 	onLabelUpdate,
 }: CreateMarkerOptions): { marker: Marker; boosted: boolean } => {
@@ -32,8 +30,9 @@ export const createMarkerWithLabel = ({
 	const boosted = place.boosted_until
 		? Date.parse(place.boosted_until) > Date.now()
 		: false;
+	const isSaved = savedPlaceIds?.has(place.id) ?? false;
 
-	const divIcon = generateIcon(leaflet, icon, boosted, commentsCount);
+	const divIcon = generateIcon(leaflet, icon, boosted, commentsCount, isSaved);
 
 	const marker = generateMarker({
 		lat: place.lat,
