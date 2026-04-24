@@ -396,9 +396,12 @@ $: if (elementsLoaded && upToDateLayer) {
 // alert for map errors
 $: $placesError && errToast($placesError);
 
-// Track the previous saved set so the reactive block below can diff
-// add/remove rather than rebuilding every loaded marker on every change.
-let previousSavedPlaceIds = new Set<number>();
+// Snapshot of the previous saved-place set, held in a ref object so mutating
+// .value does not invalidate the reactive block below. Svelte 4 tracks
+// top-level `let` reassignments but not property writes on a stable object
+// binding — a plain `let previousSavedPlaceIds` would retrigger this block
+// every time we updated it, costing a redundant no-op run per save toggle.
+const prevSavedSnapshot: { value: Set<number> } = { value: new Set() };
 
 // When the user saves/unsaves a place (typically from the drawer), update
 // the badge on any currently-loaded marker whose saved state flipped.
@@ -406,16 +409,15 @@ let previousSavedPlaceIds = new Set<number>();
 // via $savedPlaceIds in processBatchOnMainThread / createMarkerWithLabel.
 $: if (leaflet && loadedMarkers) {
 	const nextSaved = $savedPlaceIds;
+	const prevSaved = prevSavedSnapshot.value;
 	const changed: number[] = [];
 	for (const id of nextSaved) {
-		if (!previousSavedPlaceIds.has(id)) changed.push(id);
+		if (!prevSaved.has(id)) changed.push(id);
 	}
-	for (const id of previousSavedPlaceIds) {
+	for (const id of prevSaved) {
 		if (!nextSaved.has(id)) changed.push(id);
 	}
-	// Safe to mutate after the diff loops: nothing else depends on
-	// previousSavedPlaceIds, so the assignment doesn't retrigger this block.
-	previousSavedPlaceIds = nextSaved;
+	prevSavedSnapshot.value = nextSaved;
 
 	for (const id of changed) {
 		const marker = loadedMarkers[id.toString()];
