@@ -131,16 +131,22 @@ function handleClearInput() {
 
 function handleModeSwitch(newMode: MerchantListMode) {
 	if (newMode === mode) return;
-	// Clear both filters when switching modes
-	nearbyFilter = "";
 	if (newMode === "nearby") {
 		trackEvent("nearby_mode_click", { source: "panel" });
+		const carryOver = $merchantList.searchQuery;
 		merchantList.exitSearchMode();
+		nearbyFilter = carryOver;
 		onModeChange?.(newMode);
+		tick().then(() => searchInputComponent?.focus());
 	} else {
 		trackEvent("worldwide_mode_click", { source: "panel" });
-		merchantList.setMode(newMode);
-		// Focus search input when switching to worldwide
+		const carryOver = nearbyFilter;
+		nearbyFilter = "";
+		merchantList.setSearchQuery(carryOver);
+		merchantList.setMode("search");
+		if (carryOver.length >= 3) {
+			onSearch?.(carryOver);
+		}
 		tick().then(() => searchInputComponent?.focus());
 	}
 }
