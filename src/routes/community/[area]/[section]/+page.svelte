@@ -8,7 +8,7 @@ import type { PageData } from "./$types";
 
 export let data: PageData & AreaPageProps;
 
-const { name, id, description } = data;
+const { name, id, description, iconSquare } = data;
 
 $: routes = [
 	{ name: $_("nav.communities"), url: "/communities" },
@@ -19,6 +19,10 @@ $: metaDescription = (
 	description?.replace(/\s+/g, " ").trim() ||
 	$_("meta.communityFallbackDescription", { values: { name } })
 ).slice(0, 200);
+
+$: faviconUrl = iconSquare
+	? `https://btcmap.org/.netlify/images?url=${encodeURIComponent(iconSquare)}&fit=cover&w=64&h=64`
+	: null;
 </script>
 
 <svelte:head>
@@ -30,6 +34,10 @@ $: metaDescription = (
 	<meta name="twitter:title" content={name || $_('meta.community')} />
 	<meta name="twitter:description" content={metaDescription} />
 	<meta name="twitter:image" content="https://btcmap.org/images/og/communities.png" />
+	{#if faviconUrl}
+		<link rel="icon" href={faviconUrl} />
+		<link rel="apple-touch-icon" href={faviconUrl} />
+	{/if}
 </svelte:head>
 
 <Breadcrumbs {routes} />

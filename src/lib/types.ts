@@ -426,6 +426,7 @@ export type AreaPageProps = {
 	issues: RpcIssue[];
 	verifiedDate?: string;
 	description?: string;
+	iconSquare?: string;
 };
 
 // Nullable geographic coordinates (for optional geo data like IP-based location)

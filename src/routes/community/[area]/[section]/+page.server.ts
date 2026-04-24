@@ -72,6 +72,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 			issues: issues.result.requested_issues,
 			verifiedDate: fetchedArea.tags["verified:date"],
 			description: fetchedArea.tags.description,
+			iconSquare: fetchedArea.tags["icon:square"],
 		};
 	} catch (err) {
 		console.error(err);
