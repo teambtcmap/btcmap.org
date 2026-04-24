@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { Area } from "$lib/types";
 
 import {
+	buildMetaDescription,
 	calculateDistance,
 	formatDistance,
 	getCommunitiesAtCoordinates,
@@ -550,5 +551,51 @@ describe("getCommunitiesAtCoordinates", () => {
 		// Point at lon 0 (clearly outside) should still be rejected
 		const outside = getCommunitiesAtCoordinates(-17, 0, [fiji]);
 		expect(outside).toEqual([]);
+	});
+});
+
+describe("buildMetaDescription", () => {
+	const fallback = "Fallback description for {name}.";
+
+	it("uses description when present and short enough", () => {
+		expect(buildMetaDescription("A short bio.", fallback, 200)).toBe(
+			"A short bio.",
+		);
+	});
+
+	it("falls back when description is nullish or empty", () => {
+		expect(buildMetaDescription(null, fallback, 200)).toBe(fallback);
+		expect(buildMetaDescription(undefined, fallback, 200)).toBe(fallback);
+		expect(buildMetaDescription("", fallback, 200)).toBe(fallback);
+		expect(buildMetaDescription("   ", fallback, 200)).toBe(fallback);
+	});
+
+	it("collapses internal whitespace and trims", () => {
+		expect(buildMetaDescription("  foo\n\tbar   baz  ", fallback, 200)).toBe(
+			"foo bar baz",
+		);
+	});
+
+	it("truncates long descriptions at a word boundary with an ellipsis", () => {
+		const long = "alpha beta gamma delta epsilon zeta eta theta iota kappa";
+		// max=20 → cut at 19 codepoints ("alpha beta gamma de"),
+		// then back off to the last word boundary inside that slice.
+		expect(buildMetaDescription(long, fallback, 20)).toBe("alpha beta gamma…");
+	});
+
+	it("does not split surrogate pairs when truncating near an emoji", () => {
+		// Each 🍊 is two UTF-16 code units but one code point.
+		const emojiHeavy = `${"ab ".repeat(6)}🍊🍊🍊🍊🍊🍊🍊🍊🍊🍊`;
+		const out = buildMetaDescription(emojiHeavy, fallback, 20);
+		// If a surrogate pair was split, the resulting string would
+		// contain an unpaired surrogate (U+D800-U+DFFF).
+		expect(out).not.toMatch(/[\uD800-\uDFFF](?![\uDC00-\uDFFF])/);
+		expect(out).not.toMatch(/(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/);
+	});
+
+	it("falls back to a hard cut when no word boundary is in the last 30%", () => {
+		// Single very long token with no spaces.
+		const out = buildMetaDescription("a".repeat(500), fallback, 20);
+		expect(out).toBe(`${"a".repeat(19)}…`);
 	});
 });

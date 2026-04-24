@@ -3,6 +3,7 @@ import AreaPage from "$components/area/AreaPage.svelte";
 import Breadcrumbs from "$components/Breadcrumbs.svelte";
 import { _ } from "$lib/i18n";
 import type { AreaPageProps } from "$lib/types";
+import { buildMetaDescription } from "$lib/utils";
 
 import type { PageData } from "./$types";
 
@@ -13,19 +14,11 @@ $: routes = [
 	{ name: data.name, url: `/community/${encodeURIComponent(data.id)}` },
 ];
 
-$: metaDescription = truncateAtWord(
-	data.description?.replace(/\s+/g, " ").trim() ||
-		$_("meta.communityFallbackDescription", { values: { name: data.name } }),
+$: metaDescription = buildMetaDescription(
+	data.description,
+	$_("meta.communityFallbackDescription", { values: { name: data.name } }),
 	200,
 );
-
-function truncateAtWord(s: string, max: number): string {
-	const codePoints = Array.from(s);
-	if (codePoints.length <= max) return s;
-	const cut = codePoints.slice(0, max - 1).join("");
-	const lastSpace = cut.lastIndexOf(" ");
-	return `${lastSpace > max * 0.7 ? cut.slice(0, lastSpace) : cut.trimEnd()}…`;
-}
 
 $: faviconUrl = data.iconSquare
 	? `https://btcmap.org/.netlify/images?url=${encodeURIComponent(data.iconSquare)}&fit=cover&w=64&h=64`
