@@ -623,6 +623,7 @@ export const generateIcon = (
 	icon: string,
 	boosted: boolean,
 	commentsCount: number,
+	isSaved = false,
 ) => {
 	const className = boosted ? "animate-wiggle" : "";
 	const iconTmp = icon !== "question_mark" ? icon : "currency_bitcoin";
@@ -652,6 +653,28 @@ export const generateIcon = (
 			"bg-green-600 text-white text-[10px] font-bold " +
 			"rounded-full w-4 h-4 flex items-center justify-center";
 		iconContainer.appendChild(commentsCountSpan);
+	}
+
+	if (isSaved) {
+		const savedBadge = document.createElement("span");
+		savedBadge.className =
+			"saved-badge absolute top-1 left-1 transform -translate-x-1/2 -translate-y-1/2 " +
+			"bg-pink-600 text-white " +
+			"rounded-full w-4 h-4 flex items-center justify-center " +
+			"pointer-events-none";
+		const savedIcon = document.createElement("div");
+		new Icon({
+			target: savedIcon,
+			props: {
+				w: "10",
+				h: "10",
+				class: "text-white",
+				icon: "bookmark_filled",
+				type: "material",
+			},
+		});
+		savedBadge.appendChild(savedIcon);
+		iconContainer.appendChild(savedBadge);
 	}
 
 	// Accessible label for screen readers
