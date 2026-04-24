@@ -31,10 +31,13 @@ function truncateAtWord(s: string, max: number): string {
 $: faviconUrl = iconSquare
 	? `https://btcmap.org/.netlify/images?url=${encodeURIComponent(iconSquare)}&fit=cover&w=64&h=64`
 	: null;
+
+$: canonicalUrl = `https://btcmap.org/community/${encodeURIComponent(id)}/merchants`;
 </script>
 
 <svelte:head>
 	<title>{name || $_('meta.community')}</title>
+	<link rel="canonical" href={canonicalUrl} />
 	<meta name="description" content={metaDescription} />
 	<meta property="og:image" content="https://btcmap.org/images/og/communities.png" />
 	<meta property="og:title" content={name || $_('meta.community')} />

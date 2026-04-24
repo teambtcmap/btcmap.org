@@ -47,10 +47,13 @@ function truncateAtWord(s: string, max: number): string {
 	const lastSpace = cut.lastIndexOf(" ");
 	return `${lastSpace > max * 0.7 ? cut.slice(0, lastSpace) : cut.trimEnd()}…`;
 }
+
+$: canonicalUrl = `https://btcmap.org/country/${encodeURIComponent(data.id)}/merchants`;
 </script>
 
 <svelte:head>
 	<title>{countryDisplayName || $_('meta.country')}</title>
+	<link rel="canonical" href={canonicalUrl} />
 	<meta name="description" content={metaDescription} />
 	<meta property="og:image" content="https://btcmap.org/images/og/countries.png" />
 	<meta property="og:title" content={countryDisplayName || $_('meta.country')} />
