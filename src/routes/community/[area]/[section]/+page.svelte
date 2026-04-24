@@ -22,6 +22,8 @@ $: metaDescription = buildMetaDescription(
 
 $: faviconUrl = data.iconSquare || null;
 
+$: ogImage = data.iconSquare || "https://btcmap.org/images/og/communities.png";
+
 $: canonicalUrl = `https://btcmap.org/community/${encodeURIComponent(data.id)}/merchants`;
 </script>
 
@@ -29,12 +31,12 @@ $: canonicalUrl = `https://btcmap.org/community/${encodeURIComponent(data.id)}/m
 	<title>{data.name || $_('meta.community')}</title>
 	<link rel="canonical" href={canonicalUrl} />
 	<meta name="description" content={metaDescription} />
-	<meta property="og:image" content="https://btcmap.org/images/og/communities.png" />
+	<meta property="og:image" content={ogImage} />
 	<meta property="og:title" content={data.name || $_('meta.community')} />
 	<meta property="og:description" content={metaDescription} />
 	<meta name="twitter:title" content={data.name || $_('meta.community')} />
 	<meta name="twitter:description" content={metaDescription} />
-	<meta name="twitter:image" content="https://btcmap.org/images/og/communities.png" />
+	<meta name="twitter:image" content={ogImage} />
 	{#if faviconUrl}
 		<link rel="icon" href={faviconUrl} />
 		<link rel="apple-touch-icon" href={faviconUrl} />
