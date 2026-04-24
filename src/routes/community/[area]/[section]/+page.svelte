@@ -6,6 +6,7 @@ import type { AreaPageProps } from "$lib/types";
 import { buildMetaDescription } from "$lib/utils";
 
 import type { PageData } from "./$types";
+import { browser } from "$app/environment";
 
 export let data: PageData & AreaPageProps;
 
@@ -21,6 +22,18 @@ $: metaDescription = buildMetaDescription(
 );
 
 $: faviconUrl = data.iconSquare || null;
+
+// Chrome prefers the site-wide SVG favicon from app.html over any PNG
+// we add in svelte:head, regardless of declaration order. Remove the
+// app.html icon links (keeping only our community one) so the community
+// icon actually shows in the tab.
+$: if (browser && faviconUrl) {
+	for (const link of document.querySelectorAll<HTMLLinkElement>(
+		'link[rel="icon"]',
+	)) {
+		if (link.href !== faviconUrl) link.remove();
+	}
+}
 
 $: ogImage = data.iconSquare || "https://btcmap.org/images/og/communities.png";
 
