@@ -82,7 +82,7 @@ async function toggle() {
 			: ''} {className ?? ''}"
 		on:click={toggle}
 		aria-pressed={saved}
-		aria-label={saved ? $_(`merchant.saved`) : $_(`merchant.save`)}
+		aria-label={saved ? $_(`merchant.unsave`) : $_(`merchant.save`)}
 	>
 		<span
 			class="flex h-9 w-9 items-center justify-center rounded-full transition-colors {saved
@@ -97,7 +97,7 @@ async function toggle() {
 			/>
 		</span>
 		<span class="text-[11px]">
-			{saved ? $_(`merchant.saved`) : $_(`merchant.save`)}
+			{saved ? $_(`merchant.unsave`) : $_(`merchant.save`)}
 		</span>
 	</button>
 {:else}
@@ -109,7 +109,7 @@ async function toggle() {
 			''}"
 		on:click={toggle}
 		aria-pressed={saved}
-		aria-label={saved ? $_(`merchant.saved`) : $_(`merchant.save`)}
+		aria-label={saved ? $_(`merchant.unsave`) : $_(`merchant.save`)}
 	>
 		<Icon
 			type="material"
@@ -129,7 +129,7 @@ async function toggle() {
 				class="col-start-1 row-start-1 transition-opacity {saved
 					? 'opacity-100'
 					: 'opacity-0'}"
-				aria-hidden={!saved}>{$_(`merchant.saved`)}</span
+				aria-hidden={!saved}>{$_(`merchant.unsave`)}</span
 			>
 		</span>
 	</button>
