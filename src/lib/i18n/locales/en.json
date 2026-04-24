@@ -179,6 +179,7 @@
 		"share": "Share",
 		"save": "Save",
 		"unsave": "Unsave",
+		"savedStatus": "saved",
 		"saveFailed": "Failed to save",
 		"call": "Call",
 		"email": "Email",

@@ -663,12 +663,12 @@ export const generateIcon = (
 			"rounded-full w-4 h-4 flex items-center justify-center " +
 			"pointer-events-none";
 		const savedIcon = document.createElement("div");
+		// Wrapper's text-link colors the glyph via currentColor — no class needed here.
 		new Icon({
 			target: savedIcon,
 			props: {
 				w: "10",
 				h: "10",
-				class: "text-link",
 				icon: "bookmark_filled",
 				type: "material",
 			},
@@ -680,7 +680,9 @@ export const generateIcon = (
 	// Accessible label for screen readers
 	const accessibleLabel = document.createElement("span");
 	accessibleLabel.className = "sr-only";
-	accessibleLabel.textContent = humanizeIconName(icon);
+	accessibleLabel.textContent = isSaved
+		? `${humanizeIconName(icon)} (${get(_)("merchant.savedStatus")})`
+		: humanizeIconName(icon);
 	iconContainer.appendChild(accessibleLabel);
 
 	return L.divIcon({

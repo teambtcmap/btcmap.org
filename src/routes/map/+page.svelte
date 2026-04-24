@@ -413,6 +413,8 @@ $: if (leaflet && loadedMarkers) {
 	for (const id of previousSavedPlaceIds) {
 		if (!nextSaved.has(id)) changed.push(id);
 	}
+	// Safe to mutate after the diff loops: nothing else depends on
+	// previousSavedPlaceIds, so the assignment doesn't retrigger this block.
 	previousSavedPlaceIds = nextSaved;
 
 	for (const id of changed) {
