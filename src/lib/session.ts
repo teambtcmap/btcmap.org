@@ -1,4 +1,4 @@
-import { writable } from "svelte/store";
+import { derived, writable } from "svelte/store";
 
 import api from "$lib/axios";
 
@@ -244,3 +244,11 @@ function generatePassword(): string {
 }
 
 export const session = createSessionStore();
+
+// Set of saved place IDs, kept in sync with the session store. Exposed as a
+// Set so callers (e.g. the main map's marker factory) can O(1) lookup a
+// place's saved state without scanning the savedPlaces array per marker.
+export const savedPlaceIds = derived(
+	session,
+	($s) => new Set<number>($s?.savedPlaces ?? []),
+);
