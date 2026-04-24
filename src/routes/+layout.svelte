@@ -105,6 +105,16 @@ export let data;
 </script>
 
 <svelte:head>
+	{#if !data.pathname.startsWith('/community/') && !data.pathname.startsWith('/country/')}
+		<meta
+			name="description"
+			content="Easily find places to spend sats anywhere on the planet."
+		/>
+		<meta
+			name="twitter:description"
+			content="Easily find places to spend sats anywhere on the planet."
+		/>
+	{/if}
 	<meta
 		name="lightning"
 		content="lnurlp:LNURL1DP68GURN8GHJ7CM0WFJJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQPSYZ34"

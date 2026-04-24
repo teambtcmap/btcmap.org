@@ -5,6 +5,7 @@ import AreaPage from "$components/area/AreaPage.svelte";
 import Breadcrumbs from "$components/Breadcrumbs.svelte";
 import { getCountryName } from "$lib/countryNames";
 import type { AreaPageProps } from "$lib/types";
+import { buildMetaDescription } from "$lib/utils";
 
 import type { PageData } from "./$types";
 
@@ -29,16 +30,30 @@ $: routes = [
 	{ name: $_(`nav.countries`), url: "/countries" },
 	{
 		name: countryDisplayName,
-		url: `/country/${data.id}`,
+		url: `/country/${encodeURIComponent(data.id)}`,
 	},
 ];
+
+$: metaDescription = buildMetaDescription(
+	data.description,
+	$_("meta.countryFallbackDescription", {
+		values: { name: countryDisplayName },
+	}),
+	200,
+);
+
+$: canonicalUrl = `https://btcmap.org/country/${encodeURIComponent(data.id)}/merchants`;
 </script>
 
 <svelte:head>
-	<title>{countryDisplayName ? countryDisplayName + ' - ' : ''}BTC Map - {$_('meta.country')}</title>
+	<title>{countryDisplayName || $_('meta.country')}</title>
+	<link rel="canonical" href={canonicalUrl} />
+	<meta name="description" content={metaDescription} />
 	<meta property="og:image" content="https://btcmap.org/images/og/countries.png" />
-	<meta property="og:title" content="{countryDisplayName ? countryDisplayName + ' - ' : ''}BTC Map - {$_('meta.country')}" />
-	<meta name="twitter:title" content="{countryDisplayName ? countryDisplayName + ' - ' : ''}BTC Map - {$_('meta.country')}" />
+	<meta property="og:title" content={countryDisplayName || $_('meta.country')} />
+	<meta property="og:description" content={metaDescription} />
+	<meta name="twitter:title" content={countryDisplayName || $_('meta.country')} />
+	<meta name="twitter:description" content={metaDescription} />
 	<meta name="twitter:image" content="https://btcmap.org/images/og/countries.png" />
 </svelte:head>
 

@@ -519,3 +519,32 @@ export function formatDistance(km: number, useMetric: boolean): string {
 	}
 	return `${Math.round(miles)}mi`;
 }
+
+// Builds a meta description string: prefers `description` when present,
+// otherwise uses `fallback`. Normalizes whitespace and truncates at a
+// word boundary with an ellipsis. Uses Intl.Segmenter so it also works
+// for non-space-separated scripts (CJK, Thai), and operates on code
+// points so surrogate pairs (emoji etc.) are never split.
+export const buildMetaDescription = (
+	description: string | null | undefined,
+	fallback: string,
+	max: number,
+): string => {
+	const source = description?.replace(/\s+/g, " ").trim() || fallback.trim();
+	const codePoints = Array.from(source);
+	if (codePoints.length <= max) return source;
+
+	const cut = codePoints.slice(0, max - 1).join("");
+	const segmenter = new Intl.Segmenter(undefined, { granularity: "word" });
+	let lastBoundary = -1;
+	for (const { index } of segmenter.segment(cut)) {
+		if (index > 0) lastBoundary = index;
+	}
+
+	const threshold = (max - 1) * 0.7;
+	const truncated =
+		lastBoundary > threshold
+			? cut.slice(0, lastBoundary).trimEnd()
+			: cut.trimEnd();
+	return `${truncated}…`;
+};
