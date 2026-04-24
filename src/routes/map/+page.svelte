@@ -70,6 +70,7 @@ import { parseMerchantHash } from "$lib/merchantDrawerHash";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import type { MerchantListMode } from "$lib/merchantListStore";
 import { merchantList } from "$lib/merchantListStore";
+import { savedPlaceIds } from "$lib/session";
 import {
 	lastUpdatedPlaceId,
 	mapUpdates,
@@ -395,6 +396,48 @@ $: if (elementsLoaded && upToDateLayer) {
 // alert for map errors
 $: $placesError && errToast($placesError);
 
+// Snapshot of the previous saved-place set, held in a ref object so mutating
+// .value does not invalidate the reactive block below. Svelte 4 tracks
+// top-level `let` reassignments but not property writes on a stable object
+// binding — a plain `let previousSavedPlaceIds` would retrigger this block
+// every time we updated it, costing a redundant no-op run per save toggle.
+const prevSavedSnapshot: { value: Set<number> } = { value: new Set() };
+
+// When the user saves/unsaves a place (typically from the drawer), update
+// the badge on any currently-loaded marker whose saved state flipped.
+// Markers not yet loaded will pick up the correct badge at creation time
+// via $savedPlaceIds in processBatchOnMainThread / createMarkerWithLabel.
+$: if (leaflet && loadedMarkers) {
+	const nextSaved = $savedPlaceIds;
+	const prevSaved = prevSavedSnapshot.value;
+	const changed: number[] = [];
+	for (const id of nextSaved) {
+		if (!prevSaved.has(id)) changed.push(id);
+	}
+	for (const id of prevSaved) {
+		if (!nextSaved.has(id)) changed.push(id);
+	}
+	prevSavedSnapshot.value = nextSaved;
+
+	for (const id of changed) {
+		const marker = loadedMarkers[id.toString()];
+		if (!marker) continue;
+		const place = $placesById.get(id);
+		if (!place) continue;
+		const commentsCount =
+			typeof place.comments === "number" ? place.comments : 0;
+		const placeIsBoosted = !!isBoosted(place);
+		const newIcon = generateIcon(
+			leaflet,
+			place.icon || "question_mark",
+			placeIsBoosted,
+			commentsCount,
+			nextSaved.has(id),
+		);
+		marker.setIcon(newIcon);
+	}
+}
+
 // Update marker icon when place is updated (boost or comment)
 $: if ($lastUpdatedPlaceId && leaflet && loadedMarkers) {
 	const placeIdStr = $lastUpdatedPlaceId.toString();
@@ -416,6 +459,7 @@ $: if ($lastUpdatedPlaceId && leaflet && loadedMarkers) {
 				updatedPlace.icon || "question_mark",
 				placeIsBoosted,
 				commentsCount,
+				$savedPlaceIds.has($lastUpdatedPlaceId),
 			);
 
 			// Update the marker icon
@@ -521,6 +565,7 @@ const loadSearchResultMarkers = () => {
 			currentZoom,
 			placeDetailsCache: $merchantList.placeDetailsCache,
 			placesById: $placesById,
+			savedPlaceIds: $savedPlaceIds,
 			onMarkerClick: openMerchantDrawer,
 		});
 
@@ -729,6 +774,7 @@ const loadMarkersInViewport = async () => {
 							currentZoom,
 							placeDetailsCache: $merchantList.placeDetailsCache,
 							placesById: $placesById,
+							savedPlaceIds: $savedPlaceIds,
 							loadedMarkers,
 							boostedLayerMarkerIds,
 							shouldClusterBoostedMarkers,
@@ -785,6 +831,7 @@ const loadMarkersInViewportFallback = (bounds: LatLngBounds) => {
 			currentZoom,
 			placeDetailsCache: $merchantList.placeDetailsCache,
 			placesById: $placesById,
+			savedPlaceIds: $savedPlaceIds,
 			onMarkerClick: openMerchantDrawer,
 			onLabelUpdate: () => labelTracker.incrementVersion(),
 		});

@@ -13,6 +13,7 @@ type ProcessBatchOptions = {
 	currentZoom: number;
 	placeDetailsCache: Map<number, Place>;
 	placesById: Map<number, Place>;
+	savedPlaceIds?: Set<number>;
 	loadedMarkers: LoadedMarkers;
 	boostedLayerMarkerIds: Set<string>;
 	shouldClusterBoostedMarkers: () => boolean;
@@ -22,16 +23,13 @@ type ProcessBatchOptions = {
 	onMarkerClick: (id: number) => void;
 };
 
-/**
- * Process a batch of places from the worker and add markers to appropriate layers
- * Performs batch DOM operations for better performance
- */
 export const processBatchOnMainThread = ({
 	batch,
 	leaflet,
 	currentZoom,
 	placeDetailsCache,
 	placesById,
+	savedPlaceIds,
 	loadedMarkers,
 	boostedLayerMarkerIds,
 	shouldClusterBoostedMarkers,
@@ -49,11 +47,13 @@ export const processBatchOnMainThread = ({
 
 		if (loadedMarkers[placeId]) return;
 
+		const isSaved = savedPlaceIds?.has(element.id) ?? false;
 		const divIcon = generateIcon(
 			leaflet,
 			iconData.iconTmp,
 			iconData.boosted,
 			iconData.commentsCount,
+			isSaved,
 		);
 
 		const marker = generateMarker({
