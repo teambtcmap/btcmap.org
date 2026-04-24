@@ -17,10 +17,10 @@ $: routes = [
 </script>
 
 <svelte:head>
-	<title>{name ? name + ' - ' : ''}BTC Map - {$_('meta.community')}</title>
+	<title>{name || $_('meta.community')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/communities.png" />
-	<meta property="og:title" content="{name ? name + ' - ' : ''}BTC Map - {$_('meta.community')}" />
-	<meta name="twitter:title" content="{name ? name + ' - ' : ''}BTC Map - {$_('meta.community')}" />
+	<meta property="og:title" content={name || $_('meta.community')} />
+	<meta name="twitter:title" content={name || $_('meta.community')} />
 	<meta name="twitter:image" content="https://btcmap.org/images/og/communities.png" />
 </svelte:head>
 
