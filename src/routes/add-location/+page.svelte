@@ -1,7 +1,6 @@
 <script lang="ts">
 import axios from "axios";
 import DOMPurify from "dompurify";
-import type * as L from "leaflet";
 import type { Map, MaplibreGL, Marker } from "leaflet";
 import { onDestroy, onMount, tick } from "svelte";
 import { get } from "svelte/store";
@@ -22,6 +21,7 @@ import {
 	geolocate,
 } from "$lib/map/setup";
 import { theme } from "$lib/theme";
+import type { Leaflet } from "$lib/types";
 import { errToast, isValidLatitude, isValidLongitude } from "$lib/utils";
 
 import { browser } from "$app/environment";
@@ -160,7 +160,7 @@ let manualLong = "";
 let manualLatError = "";
 let manualLongError = "";
 let marker: Marker | undefined;
-let leafletRef: typeof L | undefined;
+let leafletRef: Leaflet | undefined;
 
 function placeMarker(
 	newLat: number,
@@ -191,10 +191,15 @@ function placeMarker(
 function toggleAdvanced() {
 	showAdvanced = !showAdvanced;
 	// When opening the section after a map click, prefill the inputs
-	// so the user sees the coordinates they already selected.
+	// so the user sees the coordinates they already selected. Snap
+	// lat/long to the displayed precision so the reactive parser's
+	// equality check (parsedLat !== lat) holds and we don't re-emit
+	// a placeMarker / flyTo just from opening the panel.
 	if (showAdvanced && lat !== undefined && long !== undefined) {
 		manualLat = lat.toFixed(5);
 		manualLong = long.toFixed(5);
+		lat = Number(manualLat);
+		long = Number(manualLong);
 	}
 }
 let category: HTMLInputElement;
