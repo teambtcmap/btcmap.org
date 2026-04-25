@@ -464,11 +464,12 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 										{$_('addLocation.advancedHint')}
 									</p>
 									<div class="flex space-x-2">
-										<label class="block w-full">
-											<span class="mb-1 block text-sm font-semibold">
+										<div class="w-full">
+											<label for="manual-lat" class="mb-2 block font-semibold">
 												{$_('addLocation.latitude')}
-											</span>
+											</label>
 											<input
+												id="manual-lat"
 												bind:value={manualLat}
 												type="text"
 												inputmode="decimal"
@@ -478,16 +479,17 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 												class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 											/>
 											{#if manualLatError}
-												<span id="manual-lat-error" class="mt-1 block text-sm font-semibold text-error">
+												<span id="manual-lat-error" class="block font-semibold text-error">
 													{manualLatError}
 												</span>
 											{/if}
-										</label>
-										<label class="block w-full">
-											<span class="mb-1 block text-sm font-semibold">
+										</div>
+										<div class="w-full">
+											<label for="manual-long" class="mb-2 block font-semibold">
 												{$_('addLocation.longitude')}
-											</span>
+											</label>
 											<input
+												id="manual-long"
 												bind:value={manualLong}
 												type="text"
 												inputmode="decimal"
@@ -497,11 +499,11 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 												class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 											/>
 											{#if manualLongError}
-												<span id="manual-long-error" class="mt-1 block text-sm font-semibold text-error">
+												<span id="manual-long-error" class="block font-semibold text-error">
 													{manualLongError}
 												</span>
 											{/if}
-										</label>
+										</div>
 									</div>
 								</div>
 							{/if}
