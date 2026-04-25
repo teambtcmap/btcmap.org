@@ -4,6 +4,10 @@ test.describe('Add Location — manual coordinate entry', () => {
 	test.beforeEach(async ({ page }) => {
 		await page.goto('/add-location');
 		await page.waitForLoadState('domcontentloaded');
+		// The Leaflet/MapLibre deps load async on mount. Wait for the
+		// map container to render so placeMarker() doesn't no-op.
+		await expect(page.locator('.leaflet-container')).toBeVisible();
+		await expect(page.locator('.leaflet-control-zoom')).toBeVisible();
 	});
 
 	test('advanced section is collapsed by default', async ({ page }) => {

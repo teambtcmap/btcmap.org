@@ -173,6 +173,8 @@ function placeMarker(
 		manualLat = newLat.toFixed(5);
 		manualLong = newLong.toFixed(5);
 	}
+	selected = true;
+	noLocationSelected = false;
 	if (!leafletRef || !map) return;
 	if (marker) {
 		map.removeLayer(marker);
@@ -184,8 +186,6 @@ function placeMarker(
 	if (fly) {
 		map.flyTo([newLat, newLong], 17);
 	}
-	selected = true;
-	noLocationSelected = false;
 }
 
 function toggleAdvanced() {
@@ -223,7 +223,12 @@ const handleCheckboxClick = () => {
 $: latFixed = lat?.toFixed(5);
 $: longFixed = long?.toFixed(5);
 
-$: {
+$: if (!showAdvanced) {
+	manualLatError = "";
+	manualLongError = "";
+}
+
+$: if (showAdvanced) {
 	const trimmedLat = manualLat.trim();
 	const trimmedLong = manualLong.trim();
 	const parsedLat = trimmedLat === "" ? Number.NaN : Number(trimmedLat);
@@ -237,6 +242,13 @@ $: {
 	if (latOk && longOk && (parsedLat !== lat || parsedLong !== long)) {
 		placeMarker(parsedLat, parsedLong, { fly: true, syncManual: false });
 	}
+}
+
+// If the user typed valid coords before the map finished loading,
+// placeMarker() returned early (no leafletRef/map). Once the map is
+// ready, drop the marker that's owed.
+$: if (mapLoaded && lat !== undefined && long !== undefined && !marker) {
+	placeMarker(lat, long, { fly: true, syncManual: false });
 }
 
 const submitForm = (event: SubmitEvent) => {
