@@ -57,6 +57,8 @@ function resetForm() {
 	noMethodSelected = false;
 	lat = undefined;
 	long = undefined;
+	manualLat = "";
+	manualLong = "";
 	source = undefined;
 	sourceOther = undefined;
 
@@ -156,6 +158,9 @@ let address: HTMLInputElement;
 let lat: number | undefined;
 let long: number | undefined;
 let selected = false;
+let showAdvanced = false;
+let manualLat = "";
+let manualLong = "";
 let category: HTMLInputElement;
 let methods: ("onchain" | "lightning" | "nfc")[] = [];
 let onchain: HTMLInputElement;
@@ -378,6 +383,48 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 								placeholder={$_('addLocation.longitude')}
 								class="w-full rounded-2xl border-2 border-input p-3 focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 							/>
+						</div>
+						<div class="mt-2">
+							<button
+								type="button"
+								class="text-sm font-semibold text-link hover:text-hover focus:outline-link"
+								aria-expanded={showAdvanced}
+								aria-controls="manual-coords"
+								on:click={() => (showAdvanced = !showAdvanced)}
+							>
+								{showAdvanced ? '▾' : '▸'} {$_('addLocation.advancedToggle')}
+							</button>
+							{#if showAdvanced}
+								<div id="manual-coords" class="mt-2 space-y-2">
+									<p class="text-sm text-primary/80 dark:text-white/70">
+										{$_('addLocation.advancedHint')}
+									</p>
+									<div class="flex space-x-2">
+										<input
+											bind:value={manualLat}
+											type="number"
+											step="any"
+											min="-90"
+											max="90"
+											inputmode="decimal"
+											aria-label={$_('addLocation.latitude')}
+											placeholder={$_('addLocation.manualLatitudePlaceholder')}
+											class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+										/>
+										<input
+											bind:value={manualLong}
+											type="number"
+											step="any"
+											min="-180"
+											max="180"
+											inputmode="decimal"
+											aria-label={$_('addLocation.longitude')}
+											placeholder={$_('addLocation.manualLongitudePlaceholder')}
+											class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+										/>
+									</div>
+								</div>
+							{/if}
 						</div>
 					</div>
 
