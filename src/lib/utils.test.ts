@@ -7,6 +7,8 @@ import {
 	calculateDistance,
 	formatDistance,
 	getCommunitiesAtCoordinates,
+	isValidLatitude,
+	isValidLongitude,
 	sanitizeUrl,
 } from "./utils";
 
@@ -597,5 +599,49 @@ describe("buildMetaDescription", () => {
 		// Single very long token with no spaces.
 		const out = buildMetaDescription("a".repeat(500), fallback, 20);
 		expect(out).toBe(`${"a".repeat(19)}…`);
+	});
+});
+
+describe("isValidLatitude", () => {
+	it("accepts values within [-90, 90]", () => {
+		expect(isValidLatitude(0)).toBe(true);
+		expect(isValidLatitude(52.52)).toBe(true);
+		expect(isValidLatitude(-33.8688)).toBe(true);
+		expect(isValidLatitude(90)).toBe(true);
+		expect(isValidLatitude(-90)).toBe(true);
+	});
+
+	it("rejects values outside [-90, 90]", () => {
+		expect(isValidLatitude(90.0001)).toBe(false);
+		expect(isValidLatitude(-90.0001)).toBe(false);
+		expect(isValidLatitude(180)).toBe(false);
+	});
+
+	it("rejects non-finite values", () => {
+		expect(isValidLatitude(Number.NaN)).toBe(false);
+		expect(isValidLatitude(Number.POSITIVE_INFINITY)).toBe(false);
+		expect(isValidLatitude(Number.NEGATIVE_INFINITY)).toBe(false);
+	});
+});
+
+describe("isValidLongitude", () => {
+	it("accepts values within [-180, 180]", () => {
+		expect(isValidLongitude(0)).toBe(true);
+		expect(isValidLongitude(13.405)).toBe(true);
+		expect(isValidLongitude(-122.4194)).toBe(true);
+		expect(isValidLongitude(180)).toBe(true);
+		expect(isValidLongitude(-180)).toBe(true);
+	});
+
+	it("rejects values outside [-180, 180]", () => {
+		expect(isValidLongitude(180.0001)).toBe(false);
+		expect(isValidLongitude(-180.0001)).toBe(false);
+		expect(isValidLongitude(200)).toBe(false);
+	});
+
+	it("rejects non-finite values", () => {
+		expect(isValidLongitude(Number.NaN)).toBe(false);
+		expect(isValidLongitude(Number.POSITIVE_INFINITY)).toBe(false);
+		expect(isValidLongitude(Number.NEGATIVE_INFINITY)).toBe(false);
 	});
 });

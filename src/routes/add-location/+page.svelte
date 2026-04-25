@@ -21,7 +21,8 @@ import {
 	geolocate,
 } from "$lib/map/setup";
 import { theme } from "$lib/theme";
-import { errToast } from "$lib/utils";
+import type { Leaflet } from "$lib/types";
+import { errToast, isValidLatitude, isValidLongitude } from "$lib/utils";
 
 import { browser } from "$app/environment";
 
@@ -57,6 +58,11 @@ function resetForm() {
 	noMethodSelected = false;
 	lat = undefined;
 	long = undefined;
+	latInput = "";
+	longInput = "";
+	latError = "";
+	longError = "";
+	showAdvanced = false;
 	source = undefined;
 	sourceOther = undefined;
 
@@ -90,11 +96,13 @@ function resetForm() {
 async function initializeMap() {
 	const deps = await loadMapDependencies();
 	const leaflet = deps.leaflet;
+	leafletRef = leaflet;
 	const DomEvent = deps.DomEvent;
 	const LocateControl = deps.LocateControl;
 
 	// Create map instance
 	if (map) map.remove(); // Clean up any existing map
+	marker = undefined;
 	map = leaflet
 		.map(mapElement, { attributionControl: false, maxZoom: 19 })
 		.setView([0, 0], 2);
@@ -117,20 +125,12 @@ async function initializeMap() {
 		openFreeMapLiberty.addTo(map);
 	}
 
-	// Add marker on click
-	let marker: Marker;
 	map.on("click", (e) => {
 		if (captchaSecret) {
-			lat = e.latlng.lat;
-			long = e.latlng.lng;
-
-			if (marker) {
-				map.removeLayer(marker);
-			}
-
-			const locationIcon = generateLocationIcon(leaflet);
-			marker = leaflet.marker([lat, long], { icon: locationIcon }).addTo(map);
-			selected = true;
+			placeMarker(e.latlng.lat, e.latlng.lng, {
+				fly: false,
+				syncInputs: true,
+			});
 		}
 	});
 
@@ -156,6 +156,58 @@ let address: HTMLInputElement;
 let lat: number | undefined;
 let long: number | undefined;
 let selected = false;
+let showAdvanced = false;
+let latInput = "";
+let longInput = "";
+let latError = "";
+let longError = "";
+let marker: Marker | undefined;
+let leafletRef: Leaflet | undefined;
+
+function placeMarker(
+	newLat: number,
+	newLong: number,
+	{ fly, syncInputs }: { fly: boolean; syncInputs: boolean },
+) {
+	// When syncing from a map click, snap to displayed precision so the
+	// reactive parser's equality check (parsedLat !== lat) holds and we
+	// don't re-emit a flyTo on the next tick.
+	let finalLat = newLat;
+	let finalLong = newLong;
+	if (syncInputs) {
+		latInput = newLat.toFixed(5);
+		longInput = newLong.toFixed(5);
+		finalLat = Number(latInput);
+		finalLong = Number(longInput);
+	}
+	lat = finalLat;
+	long = finalLong;
+	selected = true;
+	noLocationSelected = false;
+	if (!leafletRef || !map) return;
+	if (marker) {
+		map.removeLayer(marker);
+	}
+	const locationIcon = generateLocationIcon(leafletRef);
+	marker = leafletRef
+		.marker([finalLat, finalLong], { icon: locationIcon })
+		.addTo(map);
+	if (fly) {
+		map.flyTo([finalLat, finalLong], 17);
+	}
+}
+
+function toggleAdvanced() {
+	showAdvanced = !showAdvanced;
+	if (!showAdvanced) {
+		// Leaving advanced mode: clear any error state and snap displayed
+		// values to the same 5-dp precision used for read-only display.
+		latError = "";
+		longError = "";
+		if (lat !== undefined) latInput = lat.toFixed(5);
+		if (long !== undefined) longInput = long.toFixed(5);
+	}
+}
 let category: HTMLInputElement;
 let methods: ("onchain" | "lightning" | "nfc")[] = [];
 let onchain: HTMLInputElement;
@@ -179,8 +231,28 @@ const handleCheckboxClick = () => {
 	noMethodSelected = false;
 };
 
-$: latFixed = lat?.toFixed(5);
-$: longFixed = long?.toFixed(5);
+$: if (showAdvanced) {
+	const trimmedLat = latInput.trim();
+	const trimmedLong = longInput.trim();
+	const parsedLat = trimmedLat === "" ? Number.NaN : Number(trimmedLat);
+	const parsedLong = trimmedLong === "" ? Number.NaN : Number(trimmedLong);
+	const latOk = isValidLatitude(parsedLat);
+	const longOk = isValidLongitude(parsedLong);
+	latError =
+		trimmedLat !== "" && !latOk ? $_("addLocation.latitudeInvalid") : "";
+	longError =
+		trimmedLong !== "" && !longOk ? $_("addLocation.longitudeInvalid") : "";
+	if (latOk && longOk && (parsedLat !== lat || parsedLong !== long)) {
+		placeMarker(parsedLat, parsedLong, { fly: true, syncInputs: false });
+	}
+}
+
+// If the user typed valid coords before the map finished loading,
+// placeMarker() returned early (no leafletRef/map). Once the map is
+// ready, drop the marker that's owed.
+$: if (mapLoaded && lat !== undefined && long !== undefined && !marker) {
+	placeMarker(lat, long, { fly: true, syncInputs: false });
+}
 
 const submitForm = (event: SubmitEvent) => {
 	event.preventDefault();
@@ -358,26 +430,61 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 							{/if}
 						</div>
 						<div class="flex space-x-2">
-							<input
-								required
-								disabled
-								bind:value={latFixed}
-								readonly
-								type="number"
-								name="lat"
-								placeholder={$_('addLocation.latitude')}
-								class="w-full rounded-2xl border-2 border-input p-3 focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							/>
-							<input
-								required
-								disabled
-								bind:value={longFixed}
-								readonly
-								type="number"
-								name="long"
-								placeholder={$_('addLocation.longitude')}
-								class="w-full rounded-2xl border-2 border-input p-3 focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							/>
+							<div class="w-full">
+								<input
+									id="lat"
+									aria-label={$_('addLocation.latitude')}
+									aria-invalid={!!latError}
+									aria-describedby={latError ? 'lat-error' : undefined}
+									readonly={!showAdvanced}
+									bind:value={latInput}
+									type="text"
+									inputmode="decimal"
+									name="lat"
+									placeholder={$_('addLocation.latitude')}
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link read-only:cursor-default read-only:bg-gray-100 read-only:text-gray-500 dark:bg-white/[0.15] dark:read-only:bg-gray-700 dark:read-only:text-gray-400"
+								/>
+								{#if latError}
+									<span id="lat-error" class="block font-semibold text-error">
+										{latError}
+									</span>
+								{/if}
+							</div>
+							<div class="w-full">
+								<input
+									id="long"
+									aria-label={$_('addLocation.longitude')}
+									aria-invalid={!!longError}
+									aria-describedby={longError ? 'long-error' : undefined}
+									readonly={!showAdvanced}
+									bind:value={longInput}
+									type="text"
+									inputmode="decimal"
+									name="long"
+									placeholder={$_('addLocation.longitude')}
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link read-only:cursor-default read-only:bg-gray-100 read-only:text-gray-500 dark:bg-white/[0.15] dark:read-only:bg-gray-700 dark:read-only:text-gray-400"
+								/>
+								{#if longError}
+									<span id="long-error" class="block font-semibold text-error">
+										{longError}
+									</span>
+								{/if}
+							</div>
+						</div>
+						<div class="mt-2">
+							<button
+								type="button"
+								class="text-sm font-semibold text-link hover:text-hover focus:outline-link"
+								aria-expanded={showAdvanced}
+								on:click={toggleAdvanced}
+							>
+								{showAdvanced ? '▾' : '▸'} {$_('addLocation.advancedToggle')}
+							</button>
+							{#if showAdvanced}
+								<p class="mt-2 text-sm text-primary/80 dark:text-white/70">
+									{$_('addLocation.advancedHint')}
+								</p>
+							{/if}
 						</div>
 					</div>
 
