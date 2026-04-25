@@ -125,7 +125,10 @@ async function initializeMap() {
 
 	map.on("click", (e) => {
 		if (captchaSecret) {
-			placeMarker(e.latlng.lat, e.latlng.lng, { fly: false });
+			placeMarker(e.latlng.lat, e.latlng.lng, {
+				fly: false,
+				syncManual: true,
+			});
 		}
 	});
 
@@ -162,10 +165,14 @@ let leafletRef: typeof L | undefined;
 function placeMarker(
 	newLat: number,
 	newLong: number,
-	{ fly }: { fly: boolean },
+	{ fly, syncManual }: { fly: boolean; syncManual: boolean },
 ) {
 	lat = newLat;
 	long = newLong;
+	if (syncManual && showAdvanced) {
+		manualLat = newLat.toFixed(5);
+		manualLong = newLong.toFixed(5);
+	}
 	if (!leafletRef || !map) return;
 	if (marker) {
 		map.removeLayer(marker);
@@ -179,6 +186,16 @@ function placeMarker(
 	}
 	selected = true;
 	noLocationSelected = false;
+}
+
+function toggleAdvanced() {
+	showAdvanced = !showAdvanced;
+	// When opening the section after a map click, prefill the inputs
+	// so the user sees the coordinates they already selected.
+	if (showAdvanced && lat !== undefined && long !== undefined) {
+		manualLat = lat.toFixed(5);
+		manualLong = long.toFixed(5);
+	}
 }
 let category: HTMLInputElement;
 let methods: ("onchain" | "lightning" | "nfc")[] = [];
@@ -218,7 +235,7 @@ $: {
 	manualLongError =
 		trimmedLong !== "" && !longOk ? $_("addLocation.longitudeInvalid") : "";
 	if (latOk && longOk && (parsedLat !== lat || parsedLong !== long)) {
-		placeMarker(parsedLat, parsedLong, { fly: true });
+		placeMarker(parsedLat, parsedLong, { fly: true, syncManual: false });
 	}
 }
 
@@ -425,7 +442,7 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 								class="text-sm font-semibold text-link hover:text-hover focus:outline-link"
 								aria-expanded={showAdvanced}
 								aria-controls="manual-coords"
-								on:click={() => (showAdvanced = !showAdvanced)}
+								on:click={toggleAdvanced}
 							>
 								{showAdvanced ? '▾' : '▸'} {$_('addLocation.advancedToggle')}
 							</button>
