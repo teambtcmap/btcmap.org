@@ -550,13 +550,14 @@ export const buildMetaDescription = (
 };
 
 // Wraps an area icon URL with Netlify's image optimization service. Skips
-// the wrapper for icons already hosted on static.btcmap.org/images/areas/
-// since those are already 256×256 PNGs (re-optimizing is wasted work, and
-// the host allowlist also rejects most other origins). Falsy input
-// short-circuits to the bitcoin fallback to avoid a wasted 400 from
-// Netlify. Note: `size` is ignored for the static.btcmap.org passthrough —
-// callers requesting smaller sizes will receive the native 256 PNG and
-// rely on the browser to downscale. Issue #622.
+// the wrapper for icons under static.btcmap.org/images/areas/ — the new
+// standardized format there is 256×256 PNG. Migration to that format is
+// incremental, so legacy entries under the same path also bypass and are
+// served at their native size; we accept that trade-off to get the win on
+// already-migrated icons today. Falsy input short-circuits to the bitcoin
+// fallback to avoid a wasted 400 from Netlify. `size` is intentionally
+// ignored for the bypass path — callers asking for smaller sizes get the
+// native asset and rely on the browser to downscale. Issue #622.
 export const areaIconSrc = (
 	icon: string | null | undefined,
 	size = 256,
