@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { Area } from "$lib/types";
 
 import {
+	areaIconSrc,
 	buildMetaDescription,
 	calculateDistance,
 	formatDistance,
@@ -597,5 +598,46 @@ describe("buildMetaDescription", () => {
 		// Single very long token with no spaces.
 		const out = buildMetaDescription("a".repeat(500), fallback, 20);
 		expect(out).toBe(`${"a".repeat(19)}…`);
+	});
+});
+
+describe("areaIconSrc", () => {
+	it("returns the raw URL for static.btcmap.org/images/areas paths", () => {
+		const url = "https://static.btcmap.org/images/areas/abc.png";
+		expect(areaIconSrc(url)).toBe(url);
+		expect(areaIconSrc(url, 64)).toBe(url);
+	});
+
+	it("wraps non-static.btcmap.org URLs with the Netlify image service", () => {
+		const url = "https://ugc.production.linktr.ee/foo.webp";
+		expect(areaIconSrc(url)).toBe(
+			`https://btcmap.org/.netlify/images?url=${encodeURIComponent(url)}&fit=cover&w=256&h=256`,
+		);
+	});
+
+	it("respects a custom size", () => {
+		const url = "https://example.com/icon.png";
+		expect(areaIconSrc(url, 64)).toBe(
+			`https://btcmap.org/.netlify/images?url=${encodeURIComponent(url)}&fit=cover&w=64&h=64`,
+		);
+	});
+
+	it("does not bypass for paths outside /images/areas/", () => {
+		const url = "https://static.btcmap.org/images/countries/us.svg";
+		expect(areaIconSrc(url)).toBe(
+			`https://btcmap.org/.netlify/images?url=${encodeURIComponent(url)}&fit=cover&w=256&h=256`,
+		);
+	});
+
+	it("handles null/undefined/empty inputs without throwing", () => {
+		expect(areaIconSrc(null)).toBe(
+			"https://btcmap.org/.netlify/images?url=&fit=cover&w=256&h=256",
+		);
+		expect(areaIconSrc(undefined)).toBe(
+			"https://btcmap.org/.netlify/images?url=&fit=cover&w=256&h=256",
+		);
+		expect(areaIconSrc("")).toBe(
+			"https://btcmap.org/.netlify/images?url=&fit=cover&w=256&h=256",
+		);
 	});
 });

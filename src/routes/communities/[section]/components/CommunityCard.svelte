@@ -6,6 +6,7 @@ import Tip from "$components/Tip.svelte";
 import { getOrganizationDisplayName } from "$lib/organizationDisplayNames";
 import type { AreaTags } from "$lib/types";
 import { TipType } from "$lib/types";
+import { areaIconSrc } from "$lib/utils";
 
 import { resolve } from "$app/paths";
 
@@ -76,9 +77,7 @@ $: tip =
 		>
 			<img
 				loading="lazy"
-				src={image
-					? `https://btcmap.org/.netlify/images?url=${image}&fit=cover&w=256&h=256`
-					: '/images/bitcoin.svg'}
+				src={image ? areaIconSrc(image) : '/images/bitcoin.svg'}
 				alt={tags.name}
 				class="mx-auto h-20 w-20 rounded-full object-cover"
 				on:error={function () {
