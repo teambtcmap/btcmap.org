@@ -436,14 +436,13 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 									aria-label={$_('addLocation.latitude')}
 									aria-invalid={!!latError}
 									aria-describedby={latError ? 'lat-error' : undefined}
-									disabled={!captchaSecret || !mapLoaded}
 									readonly={!showAdvanced}
 									bind:value={latInput}
 									type="text"
 									inputmode="decimal"
 									name="lat"
 									placeholder={$_('addLocation.latitude')}
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 read-only:cursor-default read-only:bg-gray-100 read-only:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400 dark:read-only:bg-gray-700 dark:read-only:text-gray-400"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link read-only:cursor-default read-only:bg-gray-100 read-only:text-gray-500 dark:bg-white/[0.15] dark:read-only:bg-gray-700 dark:read-only:text-gray-400"
 								/>
 								{#if latError}
 									<span id="lat-error" class="block font-semibold text-error">
@@ -457,14 +456,13 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 									aria-label={$_('addLocation.longitude')}
 									aria-invalid={!!longError}
 									aria-describedby={longError ? 'long-error' : undefined}
-									disabled={!captchaSecret || !mapLoaded}
 									readonly={!showAdvanced}
 									bind:value={longInput}
 									type="text"
 									inputmode="decimal"
 									name="long"
 									placeholder={$_('addLocation.longitude')}
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 read-only:cursor-default read-only:bg-gray-100 read-only:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400 dark:read-only:bg-gray-700 dark:read-only:text-gray-400"
+									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link read-only:cursor-default read-only:bg-gray-100 read-only:text-gray-500 dark:bg-white/[0.15] dark:read-only:bg-gray-700 dark:read-only:text-gray-400"
 								/>
 								{#if longError}
 									<span id="long-error" class="block font-semibold text-error">
