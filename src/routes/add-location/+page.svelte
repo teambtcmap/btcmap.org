@@ -400,28 +400,36 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 										{$_('addLocation.advancedHint')}
 									</p>
 									<div class="flex space-x-2">
-										<input
-											bind:value={manualLat}
-											type="number"
-											step="any"
-											min="-90"
-											max="90"
-											inputmode="decimal"
-											aria-label={$_('addLocation.latitude')}
-											placeholder={$_('addLocation.manualLatitudePlaceholder')}
-											class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-										/>
-										<input
-											bind:value={manualLong}
-											type="number"
-											step="any"
-											min="-180"
-											max="180"
-											inputmode="decimal"
-											aria-label={$_('addLocation.longitude')}
-											placeholder={$_('addLocation.manualLongitudePlaceholder')}
-											class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-										/>
+										<label class="block w-full">
+											<span class="mb-1 block text-sm font-semibold">
+												{$_('addLocation.latitude')}
+											</span>
+											<input
+												bind:value={manualLat}
+												type="number"
+												step="any"
+												min="-90"
+												max="90"
+												inputmode="decimal"
+												placeholder={$_('addLocation.manualLatitudePlaceholder')}
+												class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+											/>
+										</label>
+										<label class="block w-full">
+											<span class="mb-1 block text-sm font-semibold">
+												{$_('addLocation.longitude')}
+											</span>
+											<input
+												bind:value={manualLong}
+												type="number"
+												step="any"
+												min="-180"
+												max="180"
+												inputmode="decimal"
+												placeholder={$_('addLocation.manualLongitudePlaceholder')}
+												class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+											/>
+										</label>
 									</div>
 								</div>
 							{/if}
