@@ -53,6 +53,7 @@ import type {
 } from "$lib/types.js";
 import { TipType } from "$lib/types.js";
 import {
+	areaIconSrc,
 	errToast,
 	formatVerifiedHuman,
 	parseDateSafely,
@@ -203,7 +204,7 @@ const initializeData = async () => {
 
 	avatar =
 		type === "community"
-			? `https://btcmap.org/.netlify/images?url=${area["icon:square"]}&fit=cover&w=256&h=256`
+			? areaIconSrc(area["icon:square"])
 			: `https://static.btcmap.org/images/countries/${areaFound.id}.svg`;
 	description = area.description;
 

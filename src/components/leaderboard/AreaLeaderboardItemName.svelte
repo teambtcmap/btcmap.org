@@ -2,6 +2,7 @@
 import LeaderboardCountryName from "$components/leaderboard/LeaderboardCountryName.svelte";
 import { _ } from "$lib/i18n";
 import type { AreaType } from "$lib/types";
+import { areaIconSrc } from "$lib/utils";
 
 export let type: AreaType;
 export let avatar: string;
@@ -9,10 +10,7 @@ export let name: string;
 export let id: string;
 export let countryCode: string | undefined = undefined;
 
-$: avatarSrc =
-	type === "community"
-		? `https://btcmap.org/.netlify/images?url=${avatar}&fit=cover&w=256&h=256`
-		: avatar;
+$: avatarSrc = type === "community" ? areaIconSrc(avatar) : avatar;
 
 $: displayName = name || "Unknown";
 $: hasLongName = displayName?.match(/[^ ]{21}/);

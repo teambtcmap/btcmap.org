@@ -554,3 +554,18 @@ export const buildMetaDescription = (
 			: cut.trimEnd();
 	return `${truncated}…`;
 };
+
+// Wraps an area icon URL with Netlify's image optimization service. Skips
+// the wrapper for icons already hosted on static.btcmap.org/images/areas/
+// since those are already 256×256 PNGs (re-optimizing is wasted work, and
+// the host allowlist also rejects most other origins). Issue #622.
+export const areaIconSrc = (
+	icon: string | null | undefined,
+	size = 256,
+): string => {
+	const src = icon ?? "";
+	if (src.startsWith("https://static.btcmap.org/images/areas/")) {
+		return src;
+	}
+	return `https://btcmap.org/.netlify/images?url=${encodeURIComponent(src)}&fit=cover&w=${size}&h=${size}`;
+};

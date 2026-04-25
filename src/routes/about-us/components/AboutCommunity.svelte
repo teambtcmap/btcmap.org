@@ -3,6 +3,7 @@ import tippy from "tippy.js";
 
 import { _ } from "$lib/i18n";
 import type { Area } from "$lib/types";
+import { areaIconSrc } from "$lib/utils";
 
 import { resolve } from "$app/paths";
 
@@ -18,7 +19,7 @@ $: communityTooltip &&
 
 <a bind:this={communityTooltip} href={resolve(`/community/${encodeURIComponent(community.id)}`)}>
 	<img
-		src={`https://btcmap.org/.netlify/images?url=${community.tags['icon:square']}&fit=cover&w=256&h=256`}
+		src={areaIconSrc(community.tags['icon:square'])}
 		alt={$_('aria.avatarAlt')}
 		class="h-24 w-24 rounded-full object-cover"
 		on:error={function () {

@@ -5,7 +5,7 @@ import GradeDisplay from "$components/leaderboard/GradeDisplay.svelte";
 import LeaderboardCountryName from "$components/leaderboard/LeaderboardCountryName.svelte";
 import { _ } from "$lib/i18n";
 import type { AreaType } from "$lib/types";
-import { isEven } from "$lib/utils";
+import { areaIconSrc, isEven } from "$lib/utils";
 
 export let table: Table<any>;
 export let type: AreaType;
@@ -71,7 +71,7 @@ export let type: AreaType;
 				<!-- Row 1: Larger Avatar -->
 				<div class="flex justify-center">
 					<img
-						src={`https://btcmap.org/.netlify/images?url=${area.icon || ''}&fit=cover&w=256&h=256`}
+						src={areaIconSrc(area.icon)}
 						alt="{area.name || 'Unknown'} avatar"
 						class="h-16 w-16 rounded-full object-cover"
 						on:error={(e) => {

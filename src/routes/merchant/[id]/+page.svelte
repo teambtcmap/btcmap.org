@@ -42,6 +42,7 @@ import type {
 	PayMerchant,
 } from "$lib/types";
 import {
+	areaIconSrc,
 	formatOpeningHours,
 	formatVerifiedHuman,
 	isBoosted,
@@ -776,7 +777,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 							<div class="m-4 space-y-1 transition-transform hover:scale-110">
 								<a href={resolve(`/community/${encodeURIComponent(community.id)}`)}>
 									<img
-										src={`https://btcmap.org/.netlify/images?url=${community.tags['icon:square']}&fit=cover&w=256&h=256`}
+										src={areaIconSrc(community.tags['icon:square'])}
 										alt={$_('aria.logoAlt')}
 										class="mx-auto h-20 w-20 rounded-full object-cover"
 										on:error={function () {
