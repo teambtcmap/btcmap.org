@@ -10,29 +10,42 @@ test.describe('Add Location — manual coordinate entry', () => {
 		await expect(page.locator('.leaflet-control-zoom')).toBeVisible();
 	});
 
-	test('advanced section is collapsed by default', async ({ page }) => {
+	test('lat/long inputs are read-only by default', async ({ page }) => {
+		await expect(page.getByLabel('Latitude')).toHaveAttribute('readonly', '');
+		await expect(page.getByLabel('Longitude')).toHaveAttribute('readonly', '');
 		const toggle = page.getByRole('button', {
 			name: /Advanced — enter coordinates manually/
 		});
-		await expect(toggle).toBeVisible();
 		await expect(toggle).toHaveAttribute('aria-expanded', 'false');
-		await expect(page.locator('#manual-coords')).toHaveCount(0);
+	});
+
+	test('toggling advanced mode makes the existing fields editable', async ({
+		page
+	}) => {
+		await page
+			.getByRole('button', { name: /Advanced — enter coordinates manually/ })
+			.click();
+
+		await expect(page.getByLabel('Latitude')).not.toHaveAttribute(
+			'readonly',
+			''
+		);
+		await expect(page.getByLabel('Longitude')).not.toHaveAttribute(
+			'readonly',
+			''
+		);
 	});
 
 	test('typing valid coords drops a marker and shows "Location selected"', async ({
 		page
 	}) => {
-		const toggle = page.getByRole('button', {
-			name: /Advanced — enter coordinates manually/
-		});
-		await toggle.click();
-
-		const section = page.locator('#manual-coords');
-		await expect(section).toBeVisible();
+		await page
+			.getByRole('button', { name: /Advanced — enter coordinates manually/ })
+			.click();
 
 		// Berlin
-		await section.getByLabel('Latitude').fill('52.5200');
-		await section.getByLabel('Longitude').fill('13.4050');
+		await page.getByLabel('Latitude').fill('52.5200');
+		await page.getByLabel('Longitude').fill('13.4050');
 
 		await expect(page.getByText('Location selected!')).toBeVisible();
 		await expect(page.locator('.leaflet-marker-icon')).toHaveCount(1);
@@ -43,13 +56,12 @@ test.describe('Add Location — manual coordinate entry', () => {
 			.getByRole('button', { name: /Advanced — enter coordinates manually/ })
 			.click();
 
-		const section = page.locator('#manual-coords');
-		await section.getByLabel('Latitude').fill('95');
+		await page.getByLabel('Latitude').fill('95');
 
 		await expect(
-			section.getByText('Latitude must be a number between -90 and 90.')
+			page.getByText('Latitude must be a number between -90 and 90.')
 		).toBeVisible();
-		await expect(section.getByLabel('Latitude')).toHaveAttribute(
+		await expect(page.getByLabel('Latitude')).toHaveAttribute(
 			'aria-invalid',
 			'true'
 		);
@@ -61,12 +73,11 @@ test.describe('Add Location — manual coordinate entry', () => {
 			.getByRole('button', { name: /Advanced — enter coordinates manually/ })
 			.click();
 
-		const section = page.locator('#manual-coords');
-		await section.getByLabel('Latitude').fill('52.52');
-		await section.getByLabel('Longitude').fill('-200');
+		await page.getByLabel('Latitude').fill('52.52');
+		await page.getByLabel('Longitude').fill('-200');
 
 		await expect(
-			section.getByText('Longitude must be a number between -180 and 180.')
+			page.getByText('Longitude must be a number between -180 and 180.')
 		).toBeVisible();
 		await expect(page.locator('.leaflet-marker-icon')).toHaveCount(0);
 	});
@@ -76,15 +87,14 @@ test.describe('Add Location — manual coordinate entry', () => {
 			.getByRole('button', { name: /Advanced — enter coordinates manually/ })
 			.click();
 
-		const section = page.locator('#manual-coords');
-		await section.getByLabel('Latitude').fill('not a number');
+		await page.getByLabel('Latitude').fill('not a number');
 
 		await expect(
-			section.getByText('Latitude must be a number between -90 and 90.')
+			page.getByText('Latitude must be a number between -90 and 90.')
 		).toBeVisible();
 	});
 
-	test('reopening section after entering coords prefills the inputs', async ({
+	test('exiting advanced mode keeps the entered coords visible', async ({
 		page
 	}) => {
 		const toggle = page.getByRole('button', {
@@ -92,18 +102,16 @@ test.describe('Add Location — manual coordinate entry', () => {
 		});
 		await toggle.click();
 
-		const section = page.locator('#manual-coords');
-		await section.getByLabel('Latitude').fill('52.5200');
-		await section.getByLabel('Longitude').fill('13.4050');
+		await page.getByLabel('Latitude').fill('52.5200');
+		await page.getByLabel('Longitude').fill('13.4050');
 		await expect(page.locator('.leaflet-marker-icon')).toHaveCount(1);
 
-		// close
+		// Close advanced — fields go back to read-only but keep the values.
 		await toggle.click();
-		await expect(section).toHaveCount(0);
-
-		// reopen — values should be prefilled from lat/long state
-		await toggle.click();
-		await expect(section.getByLabel('Latitude')).toHaveValue('52.52000');
-		await expect(section.getByLabel('Longitude')).toHaveValue('13.40500');
+		await expect(page.getByLabel('Latitude')).toHaveAttribute('readonly', '');
+		await expect(page.getByLabel('Latitude')).toHaveValue('52.52000');
+		await expect(page.getByLabel('Longitude')).toHaveValue('13.40500');
+		// Marker still on the map.
+		await expect(page.locator('.leaflet-marker-icon')).toHaveCount(1);
 	});
 });
