@@ -675,15 +675,9 @@ describe("areaIconSrc", () => {
 		);
 	});
 
-	it("handles null/undefined/empty inputs without throwing", () => {
-		expect(areaIconSrc(null)).toBe(
-			"https://btcmap.org/.netlify/images?url=&fit=cover&w=256&h=256",
-		);
-		expect(areaIconSrc(undefined)).toBe(
-			"https://btcmap.org/.netlify/images?url=&fit=cover&w=256&h=256",
-		);
-		expect(areaIconSrc("")).toBe(
-			"https://btcmap.org/.netlify/images?url=&fit=cover&w=256&h=256",
-		);
+	it("returns the bitcoin fallback for null/undefined/empty inputs", () => {
+		expect(areaIconSrc(null)).toBe("/images/bitcoin.svg");
+		expect(areaIconSrc(undefined)).toBe("/images/bitcoin.svg");
+		expect(areaIconSrc("")).toBe("/images/bitcoin.svg");
 	});
 });
