@@ -320,6 +320,12 @@ export function getCommunitiesAtCoordinates(
 	});
 }
 
+export const isValidLatitude = (n: number): boolean =>
+	Number.isFinite(n) && n >= -90 && n <= 90;
+
+export const isValidLongitude = (n: number): boolean =>
+	Number.isFinite(n) && n >= -180 && n <= 180;
+
 export async function getAreaIdsByCoordinates(
 	lat: number,
 	long: number,
