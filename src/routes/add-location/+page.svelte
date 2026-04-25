@@ -1,6 +1,7 @@
 <script lang="ts">
 import axios from "axios";
 import DOMPurify from "dompurify";
+import type * as L from "leaflet";
 import type { Map, MaplibreGL, Marker } from "leaflet";
 import { onDestroy, onMount, tick } from "svelte";
 import { get } from "svelte/store";
@@ -21,7 +22,7 @@ import {
 	geolocate,
 } from "$lib/map/setup";
 import { theme } from "$lib/theme";
-import { errToast } from "$lib/utils";
+import { errToast, isValidLatitude, isValidLongitude } from "$lib/utils";
 
 import { browser } from "$app/environment";
 
@@ -93,11 +94,13 @@ function resetForm() {
 async function initializeMap() {
 	const deps = await loadMapDependencies();
 	const leaflet = deps.leaflet;
+	leafletRef = leaflet;
 	const DomEvent = deps.DomEvent;
 	const LocateControl = deps.LocateControl;
 
 	// Create map instance
 	if (map) map.remove(); // Clean up any existing map
+	marker = undefined;
 	map = leaflet
 		.map(mapElement, { attributionControl: false, maxZoom: 19 })
 		.setView([0, 0], 2);
@@ -120,20 +123,9 @@ async function initializeMap() {
 		openFreeMapLiberty.addTo(map);
 	}
 
-	// Add marker on click
-	let marker: Marker;
 	map.on("click", (e) => {
 		if (captchaSecret) {
-			lat = e.latlng.lat;
-			long = e.latlng.lng;
-
-			if (marker) {
-				map.removeLayer(marker);
-			}
-
-			const locationIcon = generateLocationIcon(leaflet);
-			marker = leaflet.marker([lat, long], { icon: locationIcon }).addTo(map);
-			selected = true;
+			placeMarker(e.latlng.lat, e.latlng.lng, { fly: false });
 		}
 	});
 
@@ -162,6 +154,32 @@ let selected = false;
 let showAdvanced = false;
 let manualLat = "";
 let manualLong = "";
+let manualLatError = "";
+let manualLongError = "";
+let marker: Marker | undefined;
+let leafletRef: typeof L | undefined;
+
+function placeMarker(
+	newLat: number,
+	newLong: number,
+	{ fly }: { fly: boolean },
+) {
+	lat = newLat;
+	long = newLong;
+	if (!leafletRef || !map) return;
+	if (marker) {
+		map.removeLayer(marker);
+	}
+	const locationIcon = generateLocationIcon(leafletRef);
+	marker = leafletRef
+		.marker([newLat, newLong], { icon: locationIcon })
+		.addTo(map);
+	if (fly) {
+		map.flyTo([newLat, newLong], 17);
+	}
+	selected = true;
+	noLocationSelected = false;
+}
 let category: HTMLInputElement;
 let methods: ("onchain" | "lightning" | "nfc")[] = [];
 let onchain: HTMLInputElement;
@@ -187,6 +205,22 @@ const handleCheckboxClick = () => {
 
 $: latFixed = lat?.toFixed(5);
 $: longFixed = long?.toFixed(5);
+
+$: {
+	const trimmedLat = manualLat.trim();
+	const trimmedLong = manualLong.trim();
+	const parsedLat = trimmedLat === "" ? Number.NaN : Number(trimmedLat);
+	const parsedLong = trimmedLong === "" ? Number.NaN : Number(trimmedLong);
+	const latOk = isValidLatitude(parsedLat);
+	const longOk = isValidLongitude(parsedLong);
+	manualLatError =
+		trimmedLat !== "" && !latOk ? $_("addLocation.latitudeInvalid") : "";
+	manualLongError =
+		trimmedLong !== "" && !longOk ? $_("addLocation.longitudeInvalid") : "";
+	if (latOk && longOk && (parsedLat !== lat || parsedLong !== long)) {
+		placeMarker(parsedLat, parsedLong, { fly: true });
+	}
+}
 
 const submitForm = (event: SubmitEvent) => {
 	event.preventDefault();
@@ -407,14 +441,18 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 											</span>
 											<input
 												bind:value={manualLat}
-												type="number"
-												step="any"
-												min="-90"
-												max="90"
+												type="text"
 												inputmode="decimal"
+												aria-invalid={!!manualLatError}
+												aria-describedby={manualLatError ? 'manual-lat-error' : undefined}
 												placeholder={$_('addLocation.manualLatitudePlaceholder')}
 												class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 											/>
+											{#if manualLatError}
+												<span id="manual-lat-error" class="mt-1 block text-sm font-semibold text-error">
+													{manualLatError}
+												</span>
+											{/if}
 										</label>
 										<label class="block w-full">
 											<span class="mb-1 block text-sm font-semibold">
@@ -422,14 +460,18 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 											</span>
 											<input
 												bind:value={manualLong}
-												type="number"
-												step="any"
-												min="-180"
-												max="180"
+												type="text"
 												inputmode="decimal"
+												aria-invalid={!!manualLongError}
+												aria-describedby={manualLongError ? 'manual-long-error' : undefined}
 												placeholder={$_('addLocation.manualLongitudePlaceholder')}
 												class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 											/>
+											{#if manualLongError}
+												<span id="manual-long-error" class="mt-1 block text-sm font-semibold text-error">
+													{manualLongError}
+												</span>
+											{/if}
 										</label>
 									</div>
 								</div>
