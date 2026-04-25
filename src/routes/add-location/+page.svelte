@@ -59,6 +59,7 @@ function resetForm() {
 	long = undefined;
 	manualLat = "";
 	manualLong = "";
+	showAdvanced = false;
 	source = undefined;
 	sourceOther = undefined;
 
