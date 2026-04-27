@@ -176,7 +176,6 @@ const initializeData = async () => {
 				area.tags.type === "community" &&
 				area.tags.geo_json &&
 				area.tags.name &&
-				area.tags["icon:square"] &&
 				area.tags.continent
 			);
 		} else {
