@@ -77,7 +77,7 @@ $: tip =
 		>
 			<img
 				loading="lazy"
-				src={image ? areaIconSrc(image) : '/images/bitcoin.svg'}
+				src={areaIconSrc(image)}
 				alt={tags.name}
 				class="mx-auto h-20 w-20 rounded-full object-cover"
 				on:error={function () {
