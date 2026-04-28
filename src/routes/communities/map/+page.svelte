@@ -25,7 +25,7 @@ import { batchSync } from "$lib/sync/batchSync";
 import { reportsSync } from "$lib/sync/reports";
 import { theme } from "$lib/theme";
 import type { Leaflet, Theme } from "$lib/types";
-import { errToast } from "$lib/utils";
+import { areaIconSrc, errToast } from "$lib/utils";
 
 import { browser } from "$app/environment";
 import { resolve } from "$app/paths";
@@ -89,7 +89,7 @@ const initializeCommunities = () => {
 
 		popupContainer.innerHTML = `
 				<div class='text-center space-y-2'>
-					<img loading='lazy' src=${`https://btcmap.org/.netlify/images?url=${community.tags["icon:square"]}&fit=cover&w=256&h=256`} alt='${get(_)("communityMap.avatarAlt")}' class='w-24 h-24 rounded-full mx-auto' title='${get(_)("communityMap.communityIconTitle")}' onerror="this.src='/images/bitcoin.svg'" />
+					<img loading='lazy' src='${areaIconSrc(community.tags["icon:square"])}' alt='${get(_)("communityMap.avatarAlt")}' class='w-24 h-24 rounded-full mx-auto' title='${get(_)("communityMap.communityIconTitle")}' onerror="this.src='/images/bitcoin.svg'" />
 
 					<span class='text-primary dark:text-white font-semibold text-xl' title='${get(_)("communityMap.communityNameTitle")}'>${
 						community.tags.name

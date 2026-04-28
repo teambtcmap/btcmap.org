@@ -14,7 +14,7 @@ import { merchantList } from "$lib/merchantListStore";
 import { areas } from "$lib/store";
 import { areasSync } from "$lib/sync/areas";
 import type { Area, Leaflet } from "$lib/types";
-import { getCommunitiesAtCoordinates } from "$lib/utils";
+import { areaIconSrc, getCommunitiesAtCoordinates } from "$lib/utils";
 
 import { resolve } from "$app/paths";
 
@@ -56,7 +56,7 @@ $: if (
 }
 
 const avatarUrl = (community: Area): string =>
-	`https://btcmap.org/.netlify/images?url=${encodeURIComponent(community.tags["icon:square"])}&fit=cover&w=64&h=64`;
+	areaIconSrc(community.tags["icon:square"], 64);
 
 const communityHref = (community: Area): string =>
 	resolve(`/community/${encodeURIComponent(community.id)}`);
