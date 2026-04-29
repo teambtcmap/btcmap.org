@@ -19,7 +19,7 @@
 		"maintain": "Maintain",
 		"wiki": "Wiki",
 		"blog": "Blog",
-		"supportUs": "Support Us",
+		"supporters": "Supporters",
 		"menu": "Menu",
 		"merchantMap": "Merchant Map",
 		"communityMap": "Community Map",
@@ -1019,7 +1019,7 @@
 			"statsDashboard": "Stats Dashboard",
 			"supertaggerLeaderboard": "Supertagger Leaderboard",
 			"supertaggerProfile": "Supertagger Profile",
-			"supportUs": "Support Us",
+			"supporters": "Supporters",
 			"topCommunities": "Top Communities",
 			"topCountries": "Top Countries",
 			"verifyLocations": "Verify Locations",
@@ -1029,23 +1029,22 @@
 			"secondl1ght": "secondl1ght"
 		}
 	},
-	"supportUs": {
-		"title": "Support Us",
+	"supporters": {
+		"title": "Supporters",
 		"hero": "Help place bitcoin on the map.",
-		"intro": "BTCMap.org is a free and open-source project (FOSS). We rely on donations and sponsorship to continue.",
-		"appreciate": "We greatly appreciate all support.",
 		"donate": {
 			"scanOrClick": "Scan or click to donate",
 			"onchain": "On-chain",
 			"lightning": "Lightning",
+			"lightningAddress": "Lightning Address",
 			"protocolAlt": "protocol"
 		},
 		"supporters": {
-			"heading": "Our amazing supporters",
-			"becomeSponsor": "Become a Sponsor"
+			"heading": "Industry Supporters",
+			"becomeSponsor": "Become a Supporter"
 		},
 		"node": {
-			"heading": "Open a lightning channel to us"
+			"heading": "Open a lightning channel"
 		},
 		"applyHere": "Apply here",
 		"qrError": "Could not generate QR, please try again or contact BTC Map.",

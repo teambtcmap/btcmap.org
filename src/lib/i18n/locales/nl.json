@@ -19,7 +19,7 @@
 		"maintain": "Onderhoud",
 		"wiki": "Wiki",
 		"blog": "Blog",
-		"supportUs": "Steun ons",
+		"supporters": "Steun ons",
 		"menu": "Menu",
 		"merchantMap": "Ondernemerskaart",
 		"communityMap": "Communitykaart",
@@ -924,7 +924,7 @@
 			"statsDashboard": "Statistiekdashboard",
 			"supertaggerLeaderboard": "Supertagger-klassement",
 			"supertaggerProfile": "Supertagger-profiel",
-			"supportUs": "Steun ons",
+			"supporters": "Steun ons",
 			"topCommunities": "Topgemeenschappen",
 			"topCountries": "Toplanden",
 			"verifyLocations": "Locaties verifiëren",
@@ -934,23 +934,22 @@
 			"secondl1ght": "tweedelig"
 		}
 	},
-	"supportUs": {
+	"supporters": {
 		"title": "Steun ons",
 		"hero": "Help bitcoin op de kaart te zetten.",
-		"intro": "BTCMap.org is een gratis en open-sourceproject (FOSS). Om door te kunnen gaan zijn wij afhankelijk van donaties en sponsoring.",
-		"appreciate": "Wij waarderen alle steun enorm.",
 		"donate": {
 			"scanOrClick": "Scan of klik om te doneren",
 			"onchain": "On-chain",
 			"lightning": "Lightning",
+			"lightningAddress": "Lightning-adres",
 			"protocolAlt": "protocol"
 		},
 		"supporters": {
 			"heading": "Onze geweldige supporters",
-			"becomeSponsor": "Word sponsor"
+			"becomeSponsor": "Word supporter"
 		},
 		"node": {
-			"heading": "Open een Lightningkanaal voor ons"
+			"heading": "Open een Lightningkanaal"
 		},
 		"applyHere": "Solliciteer hier",
 		"qrError": "Kon geen QR genereren. Probeer het opnieuw of neem contact op met BTC Map.",

@@ -19,7 +19,7 @@
 		"maintain": "Волонтерам",
 		"wiki": "Вики",
 		"blog": "Блог",
-		"supportUs": "Поддержать нас",
+		"supporters": "Поддержать нас",
 		"menu": "Меню",
 		"merchantMap": "Карта мест",
 		"communityMap": "Карта сообществ",
@@ -977,7 +977,7 @@
 			"statsDashboard": "Панель статистики",
 			"supertaggerLeaderboard": "Рейтинг супертеггеров",
 			"supertaggerProfile": "Профиль супертеггера",
-			"supportUs": "Поддержите нас",
+			"supporters": "Поддержите нас",
 			"topCommunities": "Лучшие сообщества",
 			"topCountries": "Лучшие страны",
 			"verifyLocations": "Подтвердить местоположения",
@@ -987,23 +987,22 @@
 			"secondl1ght": "secondl1ght"
 		}
 	},
-	"supportUs": {
+	"supporters": {
 		"title": "Поддержите нас",
 		"hero": "Помогите разместить биткоин на карте.",
-		"intro": "BTCMap.org - волонтерский проект с открытым исходным кодом (FOSS). Мы полагаемся на пожертвования и спонсорство для продолжения работы.",
-		"appreciate": "Мы очень ценим любую поддержку.",
 		"donate": {
 			"scanOrClick": "Сканируйте или нажмите для пожертвования",
 			"onchain": "Ончейн",
 			"lightning": "Lightning",
+			"lightningAddress": "Lightning-адрес",
 			"protocolAlt": "протокол"
 		},
 		"supporters": {
 			"heading": "Наши удивительные сторонники",
-			"becomeSponsor": "Стать спонсором"
+			"becomeSponsor": "Стать сторонником"
 		},
 		"node": {
-			"heading": "Откройте канал Lightning для нас"
+			"heading": "Откройте канал Lightning"
 		},
 		"applyHere": "Подать заявку здесь",
 		"qrError": "Не удалось сгенерировать QR, пожалуйста, попробуйте снова или свяжитесь с BTC Map.",

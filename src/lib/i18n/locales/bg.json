@@ -611,7 +611,7 @@
 		"merchantMap": "Карта на търговците",
 		"openTickets": "Отворени заявки",
 		"stats": "Статистики",
-		"supportUs": "Подкрепи ни",
+		"supporters": "Подкрепи ни",
 		"taggerLeaderboard": "Класация на тагърите",
 		"taggingActivity": "Активност по тагване",
 		"taggingIssues": "Проблеми с тагването",
@@ -1064,7 +1064,7 @@
 			"statsDashboard": "Табло със статистики",
 			"supertaggerLeaderboard": "Класация на супертагъри",
 			"supertaggerProfile": "Профил на супертагър",
-			"supportUs": "Подкрепи",
+			"supporters": "Подкрепи",
 			"topCommunities": "Топ общности",
 			"topCountries": "Топ държави",
 			"verifyLocations": "Провери места",
@@ -1074,23 +1074,22 @@
 			"secondl1ght": "secondl1ght"
 		}
 	},
-	"supportUs": {
+	"supporters": {
 		"title": "Подкрепете ни",
 		"hero": "Помогнете да поставите биткойн на картата.",
-		"intro": "BTCMap.org е безплатен проект с отворен код (FOSS). Разчитаме на дарения и спонсорства, за да продължим.",
-		"appreciate": "Много ценим всяка подкрепа.",
 		"donate": {
 			"scanOrClick": "Сканирайте или кликнете за дарение",
 			"onchain": "On-chain",
 			"lightning": "Lightning",
+			"lightningAddress": "Lightning адрес",
 			"protocolAlt": "протокол"
 		},
 		"supporters": {
 			"heading": "Нашите невероятни поддръжници",
-			"becomeSponsor": "Станете спонсор"
+			"becomeSponsor": "Станете поддръжник"
 		},
 		"node": {
-			"heading": "Отворете Lightning канал към нас"
+			"heading": "Отворете Lightning канал"
 		},
 		"applyHere": "Кандидатствайте тук",
 		"qrError": "Не може да се генерира QR код, моля опитайте отново или се свържете с BTC Map.",

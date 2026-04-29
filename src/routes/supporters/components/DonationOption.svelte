@@ -7,7 +7,7 @@ import type { DonationType } from "$lib/types";
 export let value: string;
 export let textKey: string;
 export let network: DonationType;
-export let showQrToggle: (type: DonationType) => void;
+export let showQrToggle: ((type: DonationType) => void) | undefined = undefined;
 
 $: t = $_;
 </script>
@@ -17,7 +17,7 @@ $: t = $_;
 		{t(textKey)}
 		<img
 			src={network === 'Lightning' ? '/icons/ln-highlight.svg' : '/icons/btc-highlight.svg'}
-			alt={`${t(textKey)} ${t("supportUs.donate.protocolAlt")}`}
+			alt={`${t(textKey)} ${t("supporters.donate.protocolAlt")}`}
 			class="mb-1 inline dark:rounded-full dark:bg-white dark:p-0.5"
 		/>
 	</h3>
@@ -30,19 +30,21 @@ $: t = $_;
 			>{t(textKey)}
 			<img
 				src={network === 'Lightning' ? '/icons/ln-highlight.svg' : '/icons/btc-highlight.svg'}
-				alt={`${t(textKey)} ${t("supportUs.donate.protocolAlt")}`}
+				alt={`${t(textKey)} ${t("supporters.donate.protocolAlt")}`}
 				class="mb-1 inline dark:rounded-full dark:bg-white dark:p-0.5"
 			/>
 		</span>
 
 		<div class="space-x-4">
 			<!-- qr button -->
-			<button
-				class="text-link transition-colors hover:text-hover"
-				on:click={() => showQrToggle(network)}
-			>
-				<Icon type="fa" icon="qrcode" w="24" h="24" />
-			</button>
+			{#if showQrToggle}
+				<button
+					class="text-link transition-colors hover:text-hover"
+					on:click={() => showQrToggle(network)}
+				>
+					<Icon type="fa" icon="qrcode" w="24" h="24" />
+				</button>
+			{/if}
 
 			<!-- copy button -->
 			<CopyButton {value} />
