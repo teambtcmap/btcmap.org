@@ -32,7 +32,7 @@ const platformLabels: Record<string, string> = {
 	web: "Web",
 };
 
-$: if (!modalOpen) activeApp = null;
+$: if (!modalOpen) setTimeout(() => (activeApp = null), 300);
 
 function openAppModal(app: AppConfig) {
 	if (app.stores.length === 1) {
