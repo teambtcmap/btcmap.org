@@ -5,6 +5,7 @@ import Icon from "$components/Icon.svelte";
 import LoadingSpinner from "$components/LoadingSpinner.svelte";
 import SearchInput from "$components/SearchInput.svelte";
 import { trackEvent } from "$lib/analytics";
+import { lockBodyScroll, unlockBodyScroll } from "$lib/bodyScrollLock";
 import {
 	CATEGORY_ENTRIES,
 	type CategoryCounts,
@@ -75,7 +76,7 @@ let searchInputComponent: SearchInput;
 // Local filter for nearby mode (client-side filtering by name)
 let nearbyFilter = "";
 
-// Body scroll lock for mobile (prevents iOS background scroll)
+// Body scroll lock state for mobile (prevents iOS background scroll)
 let scrollLockActive = false;
 
 // Reference for focus trap
@@ -250,10 +251,10 @@ $: if (browser && isOpen !== undefined) {
 	const isMobile = window.innerWidth < BREAKPOINTS.md;
 	const shouldLock = isOpen && isMobile;
 	if (shouldLock && !scrollLockActive) {
-		document.body.style.overflow = "hidden";
+		lockBodyScroll();
 		scrollLockActive = true;
 	} else if (!shouldLock && scrollLockActive) {
-		document.body.style.overflow = "";
+		unlockBodyScroll();
 		scrollLockActive = false;
 	}
 }
@@ -332,7 +333,8 @@ function handleWindowKeydown(event: KeyboardEvent) {
 // Cleanup scroll lock when component is destroyed
 onDestroy(() => {
 	if (browser && scrollLockActive) {
-		document.body.style.overflow = "";
+		unlockBodyScroll();
+		scrollLockActive = false;
 	}
 });
 </script>

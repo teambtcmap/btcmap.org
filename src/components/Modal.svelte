@@ -1,8 +1,9 @@
 <script lang="ts">
-import { tick } from "svelte";
+import { onDestroy, tick } from "svelte";
 import { fade, fly } from "svelte/transition";
 
 import CloseButton from "$components/CloseButton.svelte";
+import { lockBodyScroll, unlockBodyScroll } from "$lib/bodyScrollLock";
 
 export let open = false;
 export let title: string;
@@ -11,17 +12,13 @@ export let titleId: string = "modal-title";
 let triggerEl: HTMLElement | null = null;
 let modalEl: HTMLDivElement;
 let hasBeenOpened = false;
-let originalOverflow = "";
 
 $: if (open) {
 	hasBeenOpened = true;
 	if (!triggerEl && typeof document !== "undefined") {
 		triggerEl = document.activeElement as HTMLElement | null;
 	}
-	if (typeof document !== "undefined") {
-		originalOverflow = document.body.style.overflow;
-		document.body.style.overflow = "hidden";
-	}
+	lockBodyScroll();
 	tick().then(() => {
 		modalEl?.querySelector<HTMLElement>("button, a, [tabindex]")?.focus();
 	});
@@ -30,10 +27,12 @@ $: if (open) {
 		triggerEl?.focus();
 		triggerEl = null;
 	});
-	if (typeof document !== "undefined") {
-		document.body.style.overflow = originalOverflow || "";
-	}
+	unlockBodyScroll();
 }
+
+onDestroy(() => {
+	if (open) unlockBodyScroll();
+});
 
 function handleKeydown(e: KeyboardEvent) {
 	if (e.key === "Escape" && open) open = false;
