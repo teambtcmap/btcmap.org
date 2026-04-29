@@ -1,9 +1,9 @@
 <script lang="ts">
-import { tick } from "svelte";
-import { fly } from "svelte/transition";
-import OutClick from "svelte-outclick";
+import { onDestroy, tick } from "svelte";
+import { fade, fly } from "svelte/transition";
 
 import CloseButton from "$components/CloseButton.svelte";
+import { lockBodyScroll, unlockBodyScroll } from "$lib/bodyScrollLock";
 
 export let open = false;
 export let title: string;
@@ -18,6 +18,7 @@ $: if (open) {
 	if (!triggerEl && typeof document !== "undefined") {
 		triggerEl = document.activeElement as HTMLElement | null;
 	}
+	lockBodyScroll();
 	tick().then(() => {
 		modalEl?.querySelector<HTMLElement>("button, a, [tabindex]")?.focus();
 	});
@@ -26,7 +27,12 @@ $: if (open) {
 		triggerEl?.focus();
 		triggerEl = null;
 	});
+	unlockBodyScroll();
 }
+
+onDestroy(() => {
+	if (open) unlockBodyScroll();
+});
 
 function handleKeydown(e: KeyboardEvent) {
 	if (e.key === "Escape" && open) open = false;
@@ -40,23 +46,32 @@ export function setTrigger(el: HTMLElement) {
 <svelte:window on:keydown={handleKeydown} />
 
 {#if open}
-	<OutClick on:outclick={() => (open = false)}>
-		<div
-			bind:this={modalEl}
-			transition:fly={{ y: 200, duration: 300 }}
-			role="dialog"
-			aria-modal="true"
-			aria-labelledby={titleId}
-			class="z-[2000] flex flex-col overflow-auto border border-gray-300 bg-white p-6 shadow-2xl fixed inset-0 w-full h-full dark:border-white/95 dark:bg-dark md:inset-auto md:top-1/2 md:left-1/2 md:w-80 md:max-h-[90vh] md:h-auto md:rounded-xl md:translate-x-[-50%] md:translate-y-[-50%]"
-		>
-			<div class="mb-4 flex items-center justify-between">
-				<h2 id={titleId} class="text-lg font-semibold text-primary dark:text-white">
-					{title}
-				</h2>
-				<CloseButton on:click={() => (open = false)} />
-			</div>
+	<!-- svelte-ignore a11y-no-static-element-interactions - Backdrop click closes modal, keyboard handled by dialog -->
+	<!-- svelte-ignore a11y-click-events-have-key-events - Keyboard close handled by global Escape listener and dialog focus -->
+	<div
+		transition:fade={{ duration: 200 }}
+		class="fixed inset-0 z-[1000] bg-black/40 dark:bg-black/60"
+		on:click={() => (open = false)}
+		aria-hidden="true"
+	/>
 
+	<div
+		bind:this={modalEl}
+		transition:fly={{ y: 200, duration: 300 }}
+		role="dialog"
+		aria-modal="true"
+		aria-labelledby={titleId}
+		class="fixed inset-x-4 bottom-4 z-[2000] flex max-h-[85dvh] flex-col overflow-hidden rounded-2xl border border-gray-300 bg-white px-5 py-5 shadow-2xl dark:border-white/95 dark:bg-dark sm:inset-auto sm:top-1/2 sm:left-1/2 sm:h-auto sm:w-80 sm:max-h-[90vh] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-xl sm:px-6 sm:py-6"
+	>
+		<div class="mb-4 flex items-center justify-between">
+			<h2 id={titleId} class="text-lg font-semibold text-primary dark:text-white">
+				{title}
+			</h2>
+			<CloseButton on:click={() => (open = false)} />
+		</div>
+
+		<div class="min-h-0 flex-1 overflow-y-auto -mx-5 px-5 sm:-mx-6 sm:px-6">
 			<slot />
 		</div>
-	</OutClick>
+	</div>
 {/if}

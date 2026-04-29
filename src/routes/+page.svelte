@@ -1,4 +1,5 @@
 <script lang="ts">
+import { tick } from "svelte";
 import { _ } from "svelte-i18n";
 
 import AppDownloadModal from "$components/AppDownloadModal.svelte";
@@ -31,7 +32,7 @@ const platformLabels: Record<string, string> = {
 	web: "Web",
 };
 
-$: if (!modalOpen) activeApp = null;
+$: if (!modalOpen) setTimeout(() => (activeApp = null), 300);
 
 function openAppModal(app: AppConfig) {
 	if (app.stores.length === 1) {
@@ -43,7 +44,9 @@ function openAppModal(app: AppConfig) {
 		}
 	} else {
 		activeApp = app;
-		modalOpen = true;
+		tick().then(() => {
+			modalOpen = true;
+		});
 	}
 }
 </script>
