@@ -58,7 +58,7 @@
 		"leaflet.locatecontrol": "^0.89.0",
 		"leaflet.markercluster": "^1.5.3",
 		"localforage": "^1.10.0",
-		"maplibre-gl": "^4.7.1",
+		"maplibre-gl": "^5.24.0",
 		"marked": "^18.0.0",
 		"opening_hours": "^3.12.0",
 		"qrcode": "^1.5.4",
