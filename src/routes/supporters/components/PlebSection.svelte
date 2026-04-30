@@ -28,8 +28,7 @@ const initBg: Partial<Record<SponsorshipTier["level"], string>> = {
 				href={pleb.url ?? '#'}
 				target={pleb.url ? '_blank' : undefined}
 				rel="noreferrer"
-				title={pleb.name}
-				class="group transition-transform duration-150 hover:-translate-y-0.5"
+				class="group relative transition-transform duration-150 hover:-translate-y-0.5"
 			>
 				{#if pleb.avatar}
 					<img
@@ -44,6 +43,11 @@ const initBg: Partial<Record<SponsorshipTier["level"], string>> = {
 						{pleb.name[0]}
 					</div>
 				{/if}
+				<span
+					class="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-gray-700"
+				>
+					{pleb.name}
+				</span>
 			</a>
 		{/each}
 
@@ -52,14 +56,18 @@ const initBg: Partial<Record<SponsorshipTier["level"], string>> = {
 			href={ctaHref}
 			target="_blank"
 			rel="noreferrer"
-			title="Become a Supporter"
-			class="group transition-transform duration-150 hover:-translate-y-0.5"
+			class="group relative transition-transform duration-150 hover:-translate-y-0.5"
 		>
 			<div
 				class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-dashed border-link/50 bg-white/60 text-2xl font-light text-link shadow-md transition-colors group-hover:border-link group-hover:bg-white dark:bg-slate-900/40 dark:group-hover:bg-slate-900/70"
 			>
 				+
 			</div>
+			<span
+				class="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-gray-700"
+			>
+				Become a Supporter
+			</span>
 		</a>
 	</div>
 
