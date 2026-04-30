@@ -89,7 +89,7 @@ export const sponsors: Sponsor[] = [
 		url: "https://coinos.io/",
 		icon: "/images/supporters/coinos.svg",
 		iconDark: "/images/supporters/coinos-dark.svg",
-		level: "Navigator",
+		level: "Wayfinder",
 	},
 	{
 		name: "Square",
