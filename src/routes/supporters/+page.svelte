@@ -88,6 +88,8 @@ const orgTiers = [...sponsorshipTiers]
 	.filter((t) => !individualLevels.includes(t.level))
 	.reverse();
 
+const wayfinderTier = orgTiers.find((t) => t.level === "Wayfinder");
+
 const individualTiers = sponsorshipTiers.filter((t) =>
 	individualLevels.includes(t.level),
 );
@@ -162,11 +164,17 @@ const plebsByTier: Record<string, typeof plebs> = {
 
 		<div class="space-y-6">
 			{#each orgTiers as tier (tier.level)}
-				<SupportSection
-					{tier}
-					sponsors={sponsorsByLevel[tier.level]}
-					compact={tier.level === 'Explorer' || tier.level === 'Wayfinder'}
-				/>
+				{#if tier.level === 'Explorer'}
+					<!-- Explorer and Wayfinder rendered side-by-side -->
+					<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+						<SupportSection {tier} sponsors={sponsorsByLevel[tier.level]} />
+						{#if wayfinderTier}
+							<SupportSection tier={wayfinderTier} sponsors={sponsorsByLevel['Wayfinder']} />
+						{/if}
+					</div>
+				{:else if tier.level !== 'Wayfinder'}
+					<SupportSection {tier} sponsors={sponsorsByLevel[tier.level]} />
+				{/if}
 			{/each}
 		</div>
 	</section>
