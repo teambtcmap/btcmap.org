@@ -16,8 +16,13 @@ const initBg: Partial<Record<SponsorshipTier["level"], string>> = {
 let activeTooltip: string | null = null;
 
 function toggleTooltip(name: string, e: MouseEvent | TouchEvent) {
+	if (activeTooltip === name) {
+		// second tap — let the link navigate
+		activeTooltip = null;
+		return;
+	}
 	e.preventDefault();
-	activeTooltip = activeTooltip === name ? null : name;
+	activeTooltip = name;
 }
 
 function handleClickOutside(e: MouseEvent) {
@@ -53,7 +58,7 @@ function handleClickOutside(e: MouseEvent) {
 					rel="noreferrer"
 					class="block transition-transform duration-150 hover:-translate-y-0.5"
 					on:click={(e) => {
-						if (activeTooltip !== pleb.name) e.preventDefault();
+						if (activeTooltip !== null && activeTooltip !== pleb.name) e.preventDefault();
 					}}
 				>
 					{#if pleb.avatar}
