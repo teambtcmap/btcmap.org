@@ -167,9 +167,9 @@ const plebsByTier: Record<string, typeof plebs> = {
 				{#if tier.level === 'Explorer'}
 					<!-- Explorer and Wayfinder rendered side-by-side -->
 					<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-						<SupportSection {tier} sponsors={sponsorsByLevel[tier.level]} />
+						<SupportSection {tier} sponsors={sponsorsByLevel[tier.level]} compact />
 						{#if wayfinderTier}
-							<SupportSection tier={wayfinderTier} sponsors={sponsorsByLevel['Wayfinder']} />
+							<SupportSection tier={wayfinderTier} sponsors={sponsorsByLevel['Wayfinder']} compact />
 						{/if}
 					</div>
 				{:else if tier.level !== 'Wayfinder'}

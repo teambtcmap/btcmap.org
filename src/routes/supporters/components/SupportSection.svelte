@@ -5,6 +5,7 @@ import type { Sponsor, SponsorshipTier } from "../sponsors";
 
 export let tier: SponsorshipTier;
 export let sponsors: Sponsor[];
+export let compact = false;
 
 const levelStyles: Partial<Record<SponsorshipTier["level"], string>> = {
 	Explorer:
@@ -28,13 +29,13 @@ $: cardStyle = levelStyles[tier.level] ?? "";
 		<p class="text-base text-body/70 dark:text-slate-400">{tier.headline}</p>
 	</div>
 
-	<div class="mx-auto w-full grid-cols-3 gap-8 space-y-8 lg:grid lg:space-y-0">
+	<div class="grid w-full gap-4 {compact ? 'grid-cols-2' : 'grid-cols-1 lg:grid-cols-3'} {compact ? '' : 'gap-8'}">
 		{#each sponsors as sponsor (sponsor.url)}
 			<a
 				href={sponsor.url}
 				target="_blank"
 				rel="noreferrer"
-				class="mx-auto block w-full self-center rounded-xl border border-white/40 bg-white/60 p-4 transition-transform duration-150 hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-slate-900/40 md:w-[250px]"
+				class="block w-full self-center rounded-xl border border-white/40 bg-white/60 p-3 transition-transform duration-150 hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-slate-900/40"
 			>
 				{#if sponsor.icon && typeof window !== 'undefined'}
 					<img
@@ -44,22 +45,22 @@ $: cardStyle = levelStyles[tier.level] ?? "";
 								: sponsor.icon
 							: sponsor.icon}"
 						alt={sponsor.name}
-						class="mx-auto h-[90px] w-auto object-contain"
+						class="mx-auto w-auto object-contain {compact ? 'h-[56px]' : 'h-[90px]'}"
 					/>
 				{:else}
 					<div
-						class="mx-auto flex h-[90px] w-full items-center justify-center rounded-lg border border-dashed border-link/35 px-3 text-center text-2xl font-semibold text-primary dark:text-white"
+						class="mx-auto flex w-full items-center justify-center rounded-lg border border-dashed border-link/35 px-3 text-center font-semibold text-primary dark:text-white {compact ? 'h-[56px] text-lg' : 'h-[90px] text-2xl'}"
 					>
 						{sponsor.name}
 					</div>
 				{/if}
-				<p class="mt-3 text-center text-sm font-medium text-primary dark:text-white">
+				<p class="text-center font-medium text-primary dark:text-white {compact ? 'mt-2 text-xs' : 'mt-3 text-sm'}">
 					{sponsor.name}
 				</p>
 			</a>
 		{/each}
 		<div
-			class="mx-auto flex min-h-[120px] w-full items-center justify-center self-center rounded-xl border border-dashed border-link/40 bg-white/50 p-6 text-center dark:bg-slate-900/40 md:w-[250px]"
+			class="flex w-full items-center justify-center self-center rounded-xl border border-dashed border-link/40 bg-white/50 p-4 text-center dark:bg-slate-900/40 {compact ? 'min-h-[80px]' : 'min-h-[120px]'}"
 		>
 			<a
 				href="mailto:hello@btcmap.org"
