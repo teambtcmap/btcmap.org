@@ -162,7 +162,11 @@ const plebsByTier: Record<string, typeof plebs> = {
 
 		<div class="space-y-6">
 			{#each orgTiers as tier (tier.level)}
-				<SupportSection {tier} sponsors={sponsorsByLevel[tier.level]} />
+				<SupportSection
+					{tier}
+					sponsors={sponsorsByLevel[tier.level]}
+					compact={tier.level === 'Explorer' || tier.level === 'Wayfinder'}
+				/>
 			{/each}
 		</div>
 	</section>
