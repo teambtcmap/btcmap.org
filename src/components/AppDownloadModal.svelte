@@ -3,7 +3,7 @@ import Modal from "$components/Modal.svelte";
 import type { AppConfig, StoreKey } from "$lib/apps";
 import IconApps from "$lib/icons/IconApps.svelte";
 
-export let app: AppConfig;
+export let app: AppConfig | null;
 export let open = false;
 
 const platformLabels: Record<string, string> = {
@@ -15,10 +15,11 @@ const platformLabels: Record<string, string> = {
 	mac: "macOS",
 };
 
-$: modalTitle =
-	app.tag === "btcmap"
+$: modalTitle = app
+	? app.tag === "btcmap"
 		? (platformLabels[app.stores[0]?.platform] ?? app.name)
-		: app.name;
+		: app.name
+	: "";
 
 const storeLabels: Record<StoreKey, string> = {
 	"app-store": "App Store",
@@ -33,19 +34,21 @@ const storeLabels: Record<StoreKey, string> = {
 </script>
 
 <Modal bind:open title={modalTitle} titleId="app-download-modal-title">
-	<ul class="space-y-2">
-		{#each app.stores as entry (entry.store + entry.platform)}
-			<li>
-				<a
-					href={entry.url}
-					target={entry.store === 'web' ? null : '_blank'}
-					rel={entry.store === 'web' ? null : 'noopener noreferrer'}
-					class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors hover:bg-gray-100 text-body dark:hover:bg-white/5 dark:text-white"
-				>
-					<IconApps icon={entry.store} w="20" h="20" />
-					<span class="text-sm font-medium">{storeLabels[entry.store]}</span>
-				</a>
-			</li>
-		{/each}
-	</ul>
+	{#if app}
+		<ul class="space-y-2">
+			{#each app.stores as entry (entry.store + entry.platform)}
+				<li>
+					<a
+						href={entry.url}
+						target={entry.store === 'web' ? null : '_blank'}
+						rel={entry.store === 'web' ? null : 'noopener noreferrer'}
+						class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors hover:bg-gray-100 text-body dark:hover:bg-white/5 dark:text-white"
+					>
+						<IconApps icon={entry.store} w="20" h="20" />
+						<span class="text-sm font-medium">{storeLabels[entry.store]}</span>
+					</a>
+				</li>
+			{/each}
+		</ul>
+	{/if}
 </Modal>

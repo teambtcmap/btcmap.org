@@ -1,5 +1,4 @@
 <script lang="ts">
-import { tick } from "svelte";
 import { _ } from "svelte-i18n";
 
 import AppDownloadModal from "$components/AppDownloadModal.svelte";
@@ -57,9 +56,7 @@ function openAppModal(app: AppConfig) {
 		}
 	} else {
 		activeApp = app;
-		tick().then(() => {
-			modalOpen = true;
-		});
+		modalOpen = true;
 	}
 }
 </script>
@@ -78,9 +75,7 @@ function openAppModal(app: AppConfig) {
 		class="absolute top-0 right-0 xl:hidden dark:opacity-10"
 	/>
 	<Header />
-	{#if activeApp}
-		<AppDownloadModal app={activeApp} bind:open={modalOpen} />
-	{/if}
+	<AppDownloadModal app={activeApp} bind:open={modalOpen} />
 
 	<div class="relative mx-auto w-10/12 xl:w-[1200px]">
 		<section id="hero" class="items-center justify-between pt-10 pb-20 xl:flex xl:pt-0">
