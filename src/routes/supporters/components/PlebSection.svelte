@@ -64,7 +64,7 @@ const initBg: Partial<Record<SponsorshipTier["level"], string>> = {
 		</a>
 	</div>
 
-	<div class="mt-6 flex items-center gap-2 border-t border-black/10 pt-4 dark:border-white/10">
+	<div class="mt-6 flex items-center justify-center gap-2 border-t border-black/10 pt-4 dark:border-white/10">
 		<span class="text-xs text-body/50 dark:text-slate-500">Powered by</span>
 		<a
 			href="https://geyser.fund/project/btcmap"
