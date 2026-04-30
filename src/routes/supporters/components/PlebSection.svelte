@@ -63,4 +63,16 @@ const initBg: Partial<Record<SponsorshipTier["level"], string>> = {
 			<span class="text-xs font-medium text-link">Join us</span>
 		</a>
 	</div>
+
+	<div class="mt-6 flex items-center gap-2 border-t border-black/10 pt-4 dark:border-white/10">
+		<span class="text-xs text-body/50 dark:text-slate-500">Powered by</span>
+		<a
+			href="https://geyser.fund/project/btcmap"
+			target="_blank"
+			rel="noreferrer"
+			class="flex items-center gap-1.5 opacity-50 transition-opacity hover:opacity-80"
+		>
+			<img src="https://geyser.fund/logo-brand.svg" alt="Geyser" class="h-4 w-auto" />
+		</a>
+	</div>
 </div>
