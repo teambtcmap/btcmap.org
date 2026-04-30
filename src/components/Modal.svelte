@@ -53,8 +53,6 @@ export function setTrigger(el: HTMLElement) {
 <svelte:window on:keydown={handleKeydown} />
 
 {#if open}
-	<!-- svelte-ignore a11y-no-static-element-interactions - Backdrop click closes modal, keyboard handled by dialog -->
-	<!-- svelte-ignore a11y-click-events-have-key-events - Keyboard close handled by global Escape listener and dialog focus -->
 	<div
 		transition:fade={{ duration: 200 }}
 		class="fixed inset-0 z-[1000] bg-black/40 dark:bg-black/60"
