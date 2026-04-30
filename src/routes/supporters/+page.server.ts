@@ -33,6 +33,19 @@ type GeyserResponse = {
 	};
 };
 
+async function isImageUrl(
+	url: string,
+	fetch: typeof globalThis.fetch,
+): Promise<boolean> {
+	try {
+		const res = await fetch(url, { method: "HEAD" });
+		const contentType = res.headers.get("content-type") ?? "";
+		return res.ok && contentType.startsWith("image/");
+	} catch {
+		return false;
+	}
+}
+
 export const load: PageServerLoad = async ({ fetch }) => {
 	try {
 		const res = await fetch(GEYSER_API, {
@@ -48,17 +61,27 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		const json: GeyserResponse = await res.json();
 		const funders = json.data?.projectGet?.funders ?? [];
 
-		const plebs: Pleb[] = funders
+		const namedFunders = funders
 			.filter(
 				(f): f is GeyserFunder & { user: NonNullable<GeyserFunder["user"]> } =>
 					f.user !== null,
 			)
-			.sort((a, b) => b.amountFunded - a.amountFunded)
-			.map((f) => ({
-				name: f.user.username,
-				url: `https://geyser.fund/user/${f.user.id}`,
-				avatar: f.user.imageUrl ?? undefined,
-			}));
+			.sort((a, b) => b.amountFunded - a.amountFunded);
+
+		// Validate all avatar URLs in parallel
+		const avatars = await Promise.all(
+			namedFunders.map((f) =>
+				f.user.imageUrl
+					? isImageUrl(f.user.imageUrl, fetch)
+					: Promise.resolve(false),
+			),
+		);
+
+		const plebs: Pleb[] = namedFunders.map((f, i) => ({
+			name: f.user.username,
+			url: `https://geyser.fund/user/${f.user.id}`,
+			avatar: avatars[i] ? (f.user.imageUrl ?? undefined) : undefined,
+		}));
 
 		return { plebs };
 	} catch {
