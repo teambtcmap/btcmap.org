@@ -12,13 +12,17 @@ export let titleId: string = "modal-title";
 let triggerEl: HTMLElement | null = null;
 let modalEl: HTMLDivElement;
 let hasBeenOpened = false;
+let scrollLocked = false;
 
 $: if (open) {
 	hasBeenOpened = true;
 	if (!triggerEl && typeof document !== "undefined") {
 		triggerEl = document.activeElement as HTMLElement | null;
 	}
-	lockBodyScroll();
+	if (!scrollLocked) {
+		lockBodyScroll();
+		scrollLocked = true;
+	}
 	tick().then(() => {
 		modalEl?.querySelector<HTMLElement>("button, a, [tabindex]")?.focus();
 	});
@@ -27,11 +31,14 @@ $: if (open) {
 		triggerEl?.focus();
 		triggerEl = null;
 	});
-	unlockBodyScroll();
+	if (scrollLocked) {
+		unlockBodyScroll();
+		scrollLocked = false;
+	}
 }
 
 onDestroy(() => {
-	if (open) unlockBodyScroll();
+	if (scrollLocked) unlockBodyScroll();
 });
 
 function handleKeydown(e: KeyboardEvent) {
