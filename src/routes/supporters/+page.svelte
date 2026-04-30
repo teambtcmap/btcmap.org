@@ -9,16 +9,14 @@ import { theme } from "$lib/theme";
 import type { DonationType } from "$lib/types";
 import { warningToast } from "$lib/utils";
 
+import type { PageData } from "./$types";
 import DonationOption from "./components/DonationOption.svelte";
 import PlebSection from "./components/PlebSection.svelte";
 import SupportSection from "./components/SupportSection.svelte";
 import type { SponsorshipLevel } from "./sponsors";
-import {
-	individualLevels,
-	plebs,
-	sponsors,
-	sponsorshipTiers,
-} from "./sponsors";
+import { individualLevels, sponsors, sponsorshipTiers } from "./sponsors";
+
+export let data: PageData;
 
 const PLEB_TIER_CTA = "https://geyser.fund/project/btcmap/rewards";
 
@@ -127,7 +125,7 @@ const plebTier = sponsorshipTiers.find((t) => t.level === "Pleb")!;
 		</div>
 
 		<div class="space-y-6">
-			<PlebSection tier={plebTier} {plebs} ctaHref={PLEB_TIER_CTA} />
+			<PlebSection tier={plebTier} plebs={data.plebs} ctaHref={PLEB_TIER_CTA} />
 		</div>
 	</section>
 
