@@ -28,7 +28,8 @@ const initBg: Partial<Record<SponsorshipTier["level"], string>> = {
 				href={pleb.url ?? '#'}
 				target={pleb.url ? '_blank' : undefined}
 				rel="noreferrer"
-				class="group flex flex-col items-center gap-2 transition-transform duration-150 hover:-translate-y-0.5"
+				title={pleb.name}
+				class="group transition-transform duration-150 hover:-translate-y-0.5"
 			>
 				{#if pleb.avatar}
 					<img
@@ -43,7 +44,6 @@ const initBg: Partial<Record<SponsorshipTier["level"], string>> = {
 						{pleb.name[0]}
 					</div>
 				{/if}
-				<span class="text-xs font-medium text-body dark:text-slate-300">{pleb.name}</span>
 			</a>
 		{/each}
 
@@ -52,15 +52,14 @@ const initBg: Partial<Record<SponsorshipTier["level"], string>> = {
 			href={ctaHref}
 			target="_blank"
 			rel="noreferrer"
-			class="group flex flex-col items-center gap-2 transition-transform duration-150 hover:-translate-y-0.5"
 			title="Become a Supporter"
+			class="group transition-transform duration-150 hover:-translate-y-0.5"
 		>
 			<div
 				class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-dashed border-link/50 bg-white/60 text-2xl font-light text-link shadow-md transition-colors group-hover:border-link group-hover:bg-white dark:bg-slate-900/40 dark:group-hover:bg-slate-900/70"
 			>
 				+
 			</div>
-			<span class="text-xs font-medium text-link">Join us</span>
 		</a>
 	</div>
 
