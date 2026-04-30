@@ -18,7 +18,7 @@ import { individualLevels, sponsors, sponsorshipTiers } from "./sponsors";
 
 export let data: PageData;
 
-const PLEB_TIER_CTA = "https://geyser.fund/project/btcmap";
+const PLEB_TIER_CTA = "https://geyser.fund/project/btcmap/leaderboard";
 
 const onchain = "bc1qt4g28vq480ec4ncl4h67qu4q4k2zel7xu0c2wg";
 const lnurlp = "donations@btcmap.org";

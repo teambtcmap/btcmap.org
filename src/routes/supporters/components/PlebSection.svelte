@@ -94,7 +94,7 @@ function onTouchEnd(pleb: Pleb, e: TouchEvent) {
 	>
 		<span class="text-xs text-body/50 dark:text-slate-500">Powered by</span>
 		<a
-			href="https://geyser.fund/project/btcmap"
+			href="https://geyser.fund/project/btcmap/leaderboard"
 			target="_blank"
 			rel="noreferrer"
 			class="flex items-center gap-1.5 opacity-50 transition-opacity hover:opacity-80"
