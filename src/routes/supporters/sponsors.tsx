@@ -82,7 +82,7 @@ export const sponsors: Sponsor[] = [
 		name: "Wallet of Satoshi",
 		url: "https://www.walletofsatoshi.com/",
 		icon: "/images/supporters/wos.png",
-		level: "Cartographer",
+		level: "Navigator",
 	},
 	{
 		name: "Coinos",
