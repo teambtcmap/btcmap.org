@@ -4,11 +4,9 @@ export type SponsorshipLevel =
 	| "Cartographer"
 	| "Navigator"
 	| "Pioneer"
-	| "Baller"
-	| "Chad"
 	| "Pleb";
 
-export const individualLevels: SponsorshipLevel[] = ["Pleb", "Chad", "Baller"];
+export const individualLevels: SponsorshipLevel[] = ["Pleb"];
 
 export type Sponsor = {
 	name: string;
@@ -31,24 +29,12 @@ export type SponsorshipTier = {
 
 export const plebs: Pleb[] = [];
 
-export const chads: Pleb[] = [];
-
-export const ballers: Pleb[] = [
-	{
-		name: "Nathan Day",
-		url: "https://nathan.day.ag",
-		avatar: "/images/supporters/plebs/nathan-day.jpg",
-	},
-];
-
 export const sponsorshipTiers: SponsorshipTier[] = [
 	{ level: "Explorer", headline: "Loving what we do" },
 	{ level: "Wayfinder", headline: "Supporting the mission" },
 	{ level: "Cartographer", headline: "Core ecosystem partner" },
 	{ level: "Navigator", headline: "High-conviction industry supporters" },
 	{ level: "Pioneer", headline: "Our most committed supporters" },
-	{ level: "Baller", headline: "High-conviction individual backers" },
-	{ level: "Chad", headline: "Committed community supporters" },
 	{ level: "Pleb", headline: "Every sat counts" },
 ];
 

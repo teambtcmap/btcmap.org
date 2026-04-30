@@ -14,8 +14,6 @@ import PlebSection from "./components/PlebSection.svelte";
 import SupportSection from "./components/SupportSection.svelte";
 import type { SponsorshipLevel } from "./sponsors";
 import {
-	ballers,
-	chads,
 	individualLevels,
 	plebs,
 	sponsors,
@@ -78,8 +76,6 @@ const sponsorsByLevel = sponsorshipTiers.reduce<SponsorsByLevel>(
 		Cartographer: [],
 		Navigator: [],
 		Pioneer: [],
-		Baller: [],
-		Chad: [],
 		Pleb: [],
 	},
 );
@@ -90,15 +86,7 @@ const orgTiers = [...sponsorshipTiers]
 
 const explorerTier = orgTiers.find((t) => t.level === "Explorer");
 
-const individualTiers = sponsorshipTiers.filter((t) =>
-	individualLevels.includes(t.level),
-);
-
-const plebsByTier: Record<string, typeof plebs> = {
-	Baller: ballers,
-	Chad: chads,
-	Pleb: plebs,
-};
+const plebTier = sponsorshipTiers.find((t) => t.level === "Pleb")!;
 </script>
 
 <svelte:head>
@@ -139,9 +127,7 @@ const plebsByTier: Record<string, typeof plebs> = {
 		</div>
 
 		<div class="space-y-6">
-			{#each individualTiers as tier (tier.level)}
-				<PlebSection {tier} plebs={plebsByTier[tier.level] ?? []} ctaHref={PLEB_TIER_CTA} />
-			{/each}
+			<PlebSection tier={plebTier} {plebs} ctaHref={PLEB_TIER_CTA} />
 		</div>
 	</section>
 

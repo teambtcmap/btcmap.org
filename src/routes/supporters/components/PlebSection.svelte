@@ -6,16 +6,10 @@ export let plebs: Pleb[];
 export let ctaHref: string;
 
 const tierStyles: Partial<Record<SponsorshipTier["level"], string>> = {
-	Baller:
-		"border-yellow-300/70 bg-yellow-50/70 dark:border-yellow-400/40 dark:bg-yellow-500/10",
-	Chad: "border-purple-300/70 bg-purple-50/70 dark:border-purple-400/40 dark:bg-purple-500/10",
 	Pleb: "border-orange-300/70 bg-orange-50/70 dark:border-orange-400/40 dark:bg-orange-500/10",
 };
 
 const initBg: Partial<Record<SponsorshipTier["level"], string>> = {
-	Baller:
-		"bg-yellow-200 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300",
-	Chad: "bg-purple-200 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300",
 	Pleb: "bg-orange-200 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300",
 };
 </script>
