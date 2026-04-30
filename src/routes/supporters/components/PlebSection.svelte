@@ -44,9 +44,12 @@ const initBg: Partial<Record<SponsorshipTier["level"], string>> = {
 					</div>
 				{/if}
 				<span
-					class="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-gray-700"
+					class="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-center text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-gray-700"
 				>
-					{pleb.name}
+					<span class="block font-medium">{pleb.name}</span>
+					{#if pleb.sats}
+						<span class="block opacity-75">{pleb.sats.toLocaleString()} sats</span>
+					{/if}
 				</span>
 			</a>
 		{/each}

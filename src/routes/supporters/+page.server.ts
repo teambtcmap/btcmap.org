@@ -81,6 +81,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 			name: f.user.username,
 			url: `https://geyser.fund/user/${f.user.id}`,
 			avatar: avatars[i] ? (f.user.imageUrl ?? undefined) : undefined,
+			sats: f.amountFunded,
 		}));
 
 		return { plebs };

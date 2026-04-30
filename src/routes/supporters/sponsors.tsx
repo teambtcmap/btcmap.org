@@ -23,6 +23,7 @@ export type Pleb = {
 	name: string;
 	url?: string;
 	avatar?: string;
+	sats?: number;
 };
 
 export type SponsorshipTier = {
