@@ -22,7 +22,7 @@ const initBg: Partial<Record<SponsorshipTier["level"], string>> = {
 		<p class="text-base text-body/70 dark:text-slate-400">{tier.headline}</p>
 	</div>
 
-	<div class="flex flex-wrap items-end gap-4">
+	<div class="flex flex-wrap justify-center gap-4">
 		{#each plebs as pleb (pleb.name)}
 			<a
 				href={pleb.url ?? '#'}
