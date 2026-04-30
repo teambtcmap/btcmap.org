@@ -15,27 +15,23 @@ const initBg: Partial<Record<SponsorshipTier["level"], string>> = {
 
 let activeTooltip: string | null = null;
 
-function toggleTooltip(name: string, e: MouseEvent | TouchEvent) {
-	if (activeTooltip === name) {
-		// second tap — let the link navigate
+function onTouchEnd(pleb: Pleb, e: TouchEvent) {
+	if (activeTooltip === pleb.name) {
+		// Already showing — let the tap through to follow the link
 		activeTooltip = null;
-		return;
-	}
-	e.preventDefault();
-	activeTooltip = name;
-}
-
-function handleClickOutside(e: MouseEvent) {
-	if (
-		activeTooltip &&
-		!(e.target as Element).closest("[data-tooltip-anchor]")
-	) {
-		activeTooltip = null;
+	} else {
+		// First tap — show tooltip, block navigation
+		e.preventDefault();
+		activeTooltip = pleb.name;
 	}
 }
 </script>
 
-<svelte:window on:click={handleClickOutside} />
+<svelte:window
+	on:touchend={() => {
+		activeTooltip = null;
+	}}
+/>
 
 <div class="rounded-2xl border p-6 text-left shadow-sm {tierStyles[tier.level] ?? ''}">
 	<div class="mb-6 space-y-1">
@@ -45,47 +41,37 @@ function handleClickOutside(e: MouseEvent) {
 
 	<div class="flex flex-wrap justify-center gap-4">
 		{#each plebs as pleb (pleb.name)}
-			<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-			<div
-				data-tooltip-anchor
-				class="relative"
-				on:click={(e) => toggleTooltip(pleb.name, e)}
-				on:touchend={(e) => toggleTooltip(pleb.name, e)}
+			<a
+				href={pleb.url ?? "#"}
+				target={pleb.url ? "_blank" : undefined}
+				rel="noreferrer"
+				class="group relative transition-transform duration-150 hover:-translate-y-0.5"
+				on:touchend|stopPropagation={(e) => onTouchEnd(pleb, e)}
 			>
-				<a
-					href={pleb.url ?? "#"}
-					target={pleb.url ? "_blank" : undefined}
-					rel="noreferrer"
-					class="block transition-transform duration-150 hover:-translate-y-0.5"
-					on:click={(e) => {
-						if (activeTooltip !== null && activeTooltip !== pleb.name) e.preventDefault();
-					}}
-				>
-					{#if pleb.avatar}
-						<img
-							src={pleb.avatar}
-							alt={pleb.name}
-							class="h-16 w-16 rounded-full border-2 border-white/60 object-cover shadow-md dark:border-white/20 {activeTooltip === pleb.name ? 'border-link' : ''}"
-						/>
-					{:else}
-						<div
-							class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/60 text-xl font-bold shadow-md dark:border-white/20 {initBg[tier.level] ?? ''}"
-						>
-							{pleb.name[0]}
-						</div>
-					{/if}
-				</a>
-				{#if activeTooltip === pleb.name}
-					<span
-						class="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-center text-xs text-white dark:bg-gray-700"
+				{#if pleb.avatar}
+					<img
+						src={pleb.avatar}
+						alt={pleb.name}
+						class="h-16 w-16 rounded-full border-2 border-white/60 object-cover shadow-md group-hover:border-link dark:border-white/20"
+					/>
+				{:else}
+					<div
+						class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/60 text-xl font-bold shadow-md dark:border-white/20 {initBg[tier.level] ?? ''}"
 					>
-						<span class="block font-medium">{pleb.name}</span>
-						{#if pleb.sats}
-							<span class="block opacity-75">{pleb.sats.toLocaleString()} sats</span>
-						{/if}
-					</span>
+						{pleb.name[0]}
+					</div>
 				{/if}
-			</div>
+				<!-- Desktop: CSS hover. Mobile: controlled by activeTooltip -->
+				<span
+					class="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-center text-xs text-white transition-opacity dark:bg-gray-700
+						{activeTooltip === pleb.name ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}"
+				>
+					<span class="block font-medium">{pleb.name}</span>
+					{#if pleb.sats}
+						<span class="block opacity-75">{pleb.sats.toLocaleString()} sats</span>
+					{/if}
+				</span>
+			</a>
 		{/each}
 
 		<!-- CTA -->
