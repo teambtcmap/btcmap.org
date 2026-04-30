@@ -70,7 +70,7 @@ export const sponsors: Sponsor[] = [
 		name: "BTC Curacao",
 		url: "https://btccuracao.com/",
 		icon: "/images/supporters/btccuracao.png",
-		level: "Wayfinder",
+		level: "Cartographer",
 	},
 	{
 		name: "OpenSats",
