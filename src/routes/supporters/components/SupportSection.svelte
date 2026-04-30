@@ -66,8 +66,8 @@ $: cardStyle = levelStyles[tier.level] ?? "";
 				<a
 					href="mailto:hello@btcmap.org"
 					class="text-sm font-semibold uppercase tracking-wide text-link"
-					>Apply to become a {tier.level}</a
-					>
+					>Become a {tier.level}</a
+				>
 			</div>
 		{/if}
 	</div>
