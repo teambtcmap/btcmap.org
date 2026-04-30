@@ -18,6 +18,7 @@ const btcmapApps = appConfigs.filter((a) => a.tag === "btcmap");
 
 let activeApp: AppConfig | null = null;
 let modalOpen = false;
+let clearActiveAppTimer: ReturnType<typeof setTimeout> | null = null;
 
 const platformIcons: Record<string, AppIconName> = {
 	android: "android",
@@ -31,7 +32,19 @@ const platformLabels: Record<string, string> = {
 	web: "Web",
 };
 
-$: if (!modalOpen) activeApp = null;
+$: handleModalOpenChange(modalOpen);
+
+function handleModalOpenChange(open: boolean) {
+	if (!open && clearActiveAppTimer === null) {
+		clearActiveAppTimer = setTimeout(() => {
+			activeApp = null;
+			clearActiveAppTimer = null;
+		}, 300);
+	} else if (open && clearActiveAppTimer !== null) {
+		clearTimeout(clearActiveAppTimer);
+		clearActiveAppTimer = null;
+	}
+}
 
 function openAppModal(app: AppConfig) {
 	if (app.stores.length === 1) {
@@ -62,9 +75,7 @@ function openAppModal(app: AppConfig) {
 		class="absolute top-0 right-0 xl:hidden dark:opacity-10"
 	/>
 	<Header />
-	{#if activeApp}
-		<AppDownloadModal app={activeApp} bind:open={modalOpen} />
-	{/if}
+	<AppDownloadModal app={activeApp} bind:open={modalOpen} />
 
 	<div class="relative mx-auto w-10/12 xl:w-[1200px]">
 		<section id="hero" class="items-center justify-between pt-10 pb-20 xl:flex xl:pt-0">
