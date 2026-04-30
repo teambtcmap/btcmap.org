@@ -35,7 +35,10 @@ export const sponsorshipTiers: SponsorshipTier[] = [
 	{ level: "Cartographer", headline: "Core ecosystem partner" },
 	{ level: "Navigator", headline: "High-conviction industry supporters" },
 	{ level: "Pioneer", headline: "Our most committed supporters" },
-	{ level: "Pleb", headline: "Every sat counts" },
+	{
+		level: "Pleb",
+		headline: "Every sat counts — ordered by cumulative contributions",
+	},
 ];
 
 export const sponsors: Sponsor[] = [
