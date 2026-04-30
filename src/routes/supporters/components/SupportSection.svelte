@@ -29,46 +29,43 @@ $: cardStyle = levelStyles[tier.level] ?? "";
 	</div>
 
 	<div class="mx-auto w-full grid-cols-3 gap-8 space-y-8 lg:grid lg:space-y-0">
-		{#if sponsors.length > 0}
-			{#each sponsors as sponsor (sponsor.url)}
-				<a
-					href={sponsor.url}
-					target="_blank"
-					rel="noreferrer"
-					class="mx-auto block w-full self-center rounded-xl border border-white/40 bg-white/60 p-4 transition-transform duration-150 hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-slate-900/40 md:w-[250px]"
-				>
-					{#if sponsor.icon && typeof window !== 'undefined'}
-						<img
-							src="{sponsor.iconDark
-								? $theme === 'dark'
-									? sponsor.iconDark
-									: sponsor.icon
-								: sponsor.icon}"
-							alt={sponsor.name}
-							class="mx-auto h-[90px] w-auto object-contain"
-						/>
-					{:else}
-						<div
-							class="mx-auto flex h-[90px] w-full items-center justify-center rounded-lg border border-dashed border-link/35 px-3 text-center text-2xl font-semibold text-primary dark:text-white"
-						>
-							{sponsor.name}
-						</div>
-					{/if}
-					<p class="mt-3 text-center text-sm font-medium text-primary dark:text-white">
-						{sponsor.name}
-					</p>
-				</a>
-			{/each}
-		{:else}
-			<div
-				class="mx-auto flex min-h-[120px] w-full items-center justify-center self-center rounded-xl border border-dashed border-link/40 bg-white/50 p-6 text-center dark:bg-slate-900/40 md:w-[250px]"
+		{#each sponsors as sponsor (sponsor.url)}
+			<a
+				href={sponsor.url}
+				target="_blank"
+				rel="noreferrer"
+				class="mx-auto block w-full self-center rounded-xl border border-white/40 bg-white/60 p-4 transition-transform duration-150 hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-slate-900/40 md:w-[250px]"
 			>
-				<a
-					href="mailto:hello@btcmap.org"
-					class="text-sm font-semibold uppercase tracking-wide text-link"
-					>Become a {tier.level}</a
-				>
-			</div>
-		{/if}
+				{#if sponsor.icon && typeof window !== 'undefined'}
+					<img
+						src="{sponsor.iconDark
+							? $theme === 'dark'
+								? sponsor.iconDark
+								: sponsor.icon
+							: sponsor.icon}"
+						alt={sponsor.name}
+						class="mx-auto h-[90px] w-auto object-contain"
+					/>
+				{:else}
+					<div
+						class="mx-auto flex h-[90px] w-full items-center justify-center rounded-lg border border-dashed border-link/35 px-3 text-center text-2xl font-semibold text-primary dark:text-white"
+					>
+						{sponsor.name}
+					</div>
+				{/if}
+				<p class="mt-3 text-center text-sm font-medium text-primary dark:text-white">
+					{sponsor.name}
+				</p>
+			</a>
+		{/each}
+		<div
+			class="mx-auto flex min-h-[120px] w-full items-center justify-center self-center rounded-xl border border-dashed border-link/40 bg-white/50 p-6 text-center dark:bg-slate-900/40 md:w-[250px]"
+		>
+			<a
+				href="mailto:hello@btcmap.org"
+				class="text-sm font-semibold uppercase tracking-wide text-link"
+				>Become a {tier.level}</a
+			>
+		</div>
 	</div>
 </article>
