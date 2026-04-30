@@ -54,6 +54,13 @@ export const sponsorshipTiers: SponsorshipTier[] = [
 
 export const sponsors: Sponsor[] = [
 	{
+		name: "JAN3",
+		url: "https://jan3.com",
+		icon: "/images/supporters/jan3.svg",
+		iconDark: "/images/supporters/jan3-dark.svg",
+		level: "Explorer",
+	},
+	{
 		name: "Sats n Facts",
 		url: "https://geyser.fund/project/satsnfacts",
 		icon: "/images/supporters/satsnfacts.png",
