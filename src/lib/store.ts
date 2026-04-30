@@ -18,7 +18,8 @@ export const socials = readable({
 		"https://nosta.me/nprofile1qqsra2ey033mkdwl5w8q0jss9ak69zafh82xsuvhwsaauw3trkq2amgax6f75",
 	matrix: "https://matrix.to/#/#btcmap:matrix.org",
 	github: "https://github.com/teambtcmap",
-	amboss: "https://amboss.space/community/edf8d227-9bc7-4cb2-af2a-66c1b455109a",
+	amboss:
+		"https://amboss.space/node/038f4d8a3fdeeb92bbcd97f510c28c2ad814f1736792f5df97a476d38ef4280cb5",
 });
 
 export const places: Writable<Place[]> = writable([]);

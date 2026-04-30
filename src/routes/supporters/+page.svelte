@@ -22,7 +22,8 @@ const PLEB_TIER_CTA = "https://geyser.fund/project/btcmap/leaderboard";
 
 const onchain = "bc1qt4g28vq480ec4ncl4h67qu4q4k2zel7xu0c2wg";
 const lnurlp = "donations@btcmap.org";
-const lightningnode = "lkjasddlkasdjlkaslkasdlkdasjlk";
+const lightningnode =
+	"038f4d8a3fdeeb92bbcd97f510c28c2ad814f1736792f5df97a476d38ef4280cb5";
 
 let showQr = false;
 $: t = $_;
