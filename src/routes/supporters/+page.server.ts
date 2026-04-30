@@ -8,6 +8,7 @@ const QUERY = `{
     funders {
       amountFunded
       user {
+        id
         username
         imageUrl
       }
@@ -18,6 +19,7 @@ const QUERY = `{
 type GeyserFunder = {
 	amountFunded: number;
 	user: {
+		id: string;
 		username: string;
 		imageUrl: string | null;
 	} | null;
@@ -54,7 +56,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 			.sort((a, b) => b.amountFunded - a.amountFunded)
 			.map((f) => ({
 				name: f.user.username,
-				url: `https://geyser.fund/profile/${f.user.username}`,
+				url: `https://geyser.fund/user/${f.user.id}`,
 				avatar: f.user.imageUrl ?? undefined,
 			}));
 
