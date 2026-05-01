@@ -25,7 +25,7 @@ $: t = $_;
 		class="mx-auto flex w-full items-center justify-between rounded-xl bg-slate-100 px-4 py-4 text-body md:w-[475px] md:justify-center md:space-x-4 md:px-0 md:py-3 dark:bg-white/[0.15] dark:text-white"
 	>
 		<!-- value -->
-		<span class="hidden lowercase md:block">{value.slice(0, 39)}...</span>
+		<span class="hidden truncate lowercase md:block">{value}</span>
 		<span class="block uppercase md:hidden"
 			>{t(textKey)}
 			<img
