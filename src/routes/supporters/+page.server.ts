@@ -6,7 +6,7 @@ const GEYSER_API = "https://api.geyser.fund/graphql";
 // Users excluded from the leaderboard (platform/project accounts)
 const EXCLUDED_USER_IDS = new Set(["995", "641"]); // BTC Map, Geyser
 
-const QUERY = `{
+const FUNDERS_QUERY = `{
   projectGet(where: { name: "btcmap" }) {
     funders {
       amountFunded
@@ -14,6 +14,20 @@ const QUERY = `{
         id
         username
         imageUrl
+      }
+    }
+  }
+}`;
+
+const CONTRIBUTIONS_QUERY = `{
+  projectGet(where: { name: "btcmap" }) {
+    contributions {
+      createdAt
+      amount
+      funder {
+        user {
+          id
+        }
       }
     }
   }
@@ -28,10 +42,26 @@ type GeyserFunder = {
 	} | null;
 };
 
-type GeyserResponse = {
+type GeyserContribution = {
+	createdAt: number;
+	amount: number;
+	funder: {
+		user: { id: string } | null;
+	};
+};
+
+type FundersResponse = {
 	data: {
 		projectGet: {
 			funders: GeyserFunder[];
+		};
+	};
+};
+
+type ContributionsResponse = {
+	data: {
+		projectGet: {
+			contributions: GeyserContribution[];
 		};
 	};
 };
@@ -49,24 +79,35 @@ async function isImageUrl(
 	}
 }
 
+async function gql<T>(
+	query: string,
+	fetch: typeof globalThis.fetch,
+): Promise<T | null> {
+	const res = await fetch(GEYSER_API, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ query }),
+	});
+	if (!res.ok) return null;
+	return res.json();
+}
+
 export const load: PageServerLoad = async ({ fetch }) => {
 	try {
-		const res = await fetch(GEYSER_API, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ query: QUERY }),
-		});
+		const [fundersJson, contributionsJson] = await Promise.all([
+			gql<FundersResponse>(FUNDERS_QUERY, fetch),
+			gql<ContributionsResponse>(CONTRIBUTIONS_QUERY, fetch),
+		]);
 
-		if (!res.ok) {
+		if (!fundersJson || !contributionsJson) {
 			return { plebs: [] };
 		}
 
-		const json: GeyserResponse = await res.json();
-		const funders = json.data?.projectGet?.funders ?? [];
+		const funders = fundersJson.data?.projectGet?.funders ?? [];
+		const contributions =
+			contributionsJson.data?.projectGet?.contributions ?? [];
 
-		// Separate anon and named funders, excluding platform accounts
-		const anonFunders = funders.filter((f) => f.user === null);
-
+		// Named funders (pre-aggregated), excluding platform accounts
 		const namedFunders = funders
 			.filter(
 				(f): f is GeyserFunder & { user: NonNullable<GeyserFunder["user"]> } =>
@@ -92,11 +133,14 @@ export const load: PageServerLoad = async ({ fetch }) => {
 			sats: f.amountFunded,
 		}));
 
-		const anonPlebs: Pleb[] = anonFunders.map((f) => ({
-			name: "Anon",
-			avatar: "/images/satoshi-nakamoto.png",
-			sats: f.amountFunded,
-		}));
+		// Anon contributions — each gets a unique robohash seeded by createdAt
+		const anonPlebs: Pleb[] = contributions
+			.filter((c) => c.funder.user === null)
+			.map((c) => ({
+				name: "Anon",
+				avatar: `https://robohash.org/anon-${c.createdAt}?set=set1&size=64x64`,
+				sats: c.amount,
+			}));
 
 		const allPlebs = [...namedPlebs, ...anonPlebs].sort(
 			(a, b) => (b.sats ?? 0) - (a.sats ?? 0),
