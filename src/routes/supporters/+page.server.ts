@@ -129,6 +129,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 			.sort((a, b) => b.amountFunded - a.amountFunded);
 
 		const namedPlebs: Pleb[] = namedFunders.map((f) => ({
+			id: f.user.id,
 			name: f.user.username,
 			url: `https://geyser.fund/user/${f.user.id}`,
 			avatar: isAllowlistedImageUrl(f.user.imageUrl)
@@ -141,6 +142,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		const anonPlebs: Pleb[] = contributions
 			.filter((c) => c.funder.user === null)
 			.map((c) => ({
+				id: `anon-${c.createdAt}`,
 				name: "Anon",
 				avatar: `https://robohash.org/anon-${c.createdAt}?set=set1&size=64x64`,
 				sats: c.amount,

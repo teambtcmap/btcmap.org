@@ -20,6 +20,7 @@ export type Sponsor = {
 };
 
 export type Pleb = {
+	id: string;
 	name: string;
 	url?: string;
 	avatar?: string;

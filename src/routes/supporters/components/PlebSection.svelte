@@ -16,13 +16,13 @@ const initBg: Partial<Record<SponsorshipTier["level"], string>> = {
 let activeTooltip: string | null = null;
 
 function onTouchEnd(pleb: Pleb, e: TouchEvent) {
-	if (activeTooltip === pleb.name) {
+	if (activeTooltip === pleb.id) {
 		// Already showing — let the tap through to follow the link
 		activeTooltip = null;
 	} else {
 		// First tap — show tooltip, block navigation
 		e.preventDefault();
-		activeTooltip = pleb.name;
+		activeTooltip = pleb.id;
 	}
 }
 </script>
@@ -40,7 +40,7 @@ function onTouchEnd(pleb: Pleb, e: TouchEvent) {
 	</div>
 
 	<div class="flex flex-wrap justify-center gap-4">
-		{#each plebs as pleb, i (i)}
+		{#each plebs as pleb (pleb.id)}
 			{#if pleb.url}
 				<a
 					href={pleb.url}
@@ -65,36 +65,36 @@ function onTouchEnd(pleb: Pleb, e: TouchEvent) {
 					<!-- Desktop: CSS hover. Mobile: controlled by activeTooltip -->
 					<span
 						class="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-center text-xs text-white transition-opacity dark:bg-gray-700
-							{activeTooltip === pleb.name ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}"
-					>
-						<span class="block font-medium">{pleb.name}</span>
-						{#if pleb.sats}
-							<span class="block opacity-75">{pleb.sats.toLocaleString()} sats</span>
-						{/if}
-					</span>
-				</a>
-			{:else}
-				<!-- svelte-ignore a11y-no-static-element-interactions -->
-				<div
-					class="group relative"
-					on:touchend|stopPropagation={(e) => onTouchEnd(pleb, e)}
+					{activeTooltip === pleb.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}"
 				>
-					{#if pleb.avatar}
-						<img
-							src={pleb.avatar}
-							alt={pleb.name}
-							class="h-16 w-16 rounded-full border-2 border-white/60 object-cover shadow-md dark:border-white/20"
-						/>
-					{:else}
-						<div
-							class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/60 text-xl font-bold shadow-md dark:border-white/20 {initBg[tier.level] ?? ''}"
-						>
-							{pleb.name[0]}
-						</div>
+					<span class="block font-medium">{pleb.name}</span>
+					{#if pleb.sats}
+						<span class="block opacity-75">{pleb.sats.toLocaleString()} sats</span>
 					{/if}
-					<span
-						class="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-center text-xs text-white transition-opacity dark:bg-gray-700
-							{activeTooltip === pleb.name ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}"
+				</span>
+			</a>
+		{:else}
+			<!-- svelte-ignore a11y-no-static-element-interactions -->
+			<div
+				class="group relative"
+				on:touchend|stopPropagation={(e) => onTouchEnd(pleb, e)}
+			>
+				{#if pleb.avatar}
+					<img
+						src={pleb.avatar}
+						alt={pleb.name}
+						class="h-16 w-16 rounded-full border-2 border-white/60 object-cover shadow-md dark:border-white/20"
+					/>
+				{:else}
+					<div
+						class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/60 text-xl font-bold shadow-md dark:border-white/20 {initBg[tier.level] ?? ''}"
+					>
+						{pleb.name[0]}
+					</div>
+				{/if}
+				<span
+					class="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-center text-xs text-white transition-opacity dark:bg-gray-700
+						{activeTooltip === pleb.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}"
 					>
 						<span class="block font-medium">{pleb.name}</span>
 						{#if pleb.sats}
