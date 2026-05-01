@@ -90,7 +90,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 			url: `https://geyser.fund/user/${f.user.id}`,
 			avatar: avatars[i]
 				? (f.user.imageUrl ?? undefined)
-				: `https://robohash.org/${f.user.id}?set=set4&size=64x64`,
+				: `https://robohash.org/${f.user.id}?set=set1&size=64x64`,
 			sats: f.amountFunded,
 		}));
 
