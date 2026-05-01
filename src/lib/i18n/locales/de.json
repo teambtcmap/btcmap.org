@@ -1006,7 +1006,15 @@
 		},
 		"applyHere": "Bewirb dich hier",
 		"qrError": "QR konnte nicht generiert werden, bitte versuche es erneut oder kontaktiere BTC Map.",
-		"qrLoadError": "QR-Generator konnte nicht geladen werden. Bitte versuche es erneut."
+		"qrLoadError": "QR-Generator konnte nicht geladen werden. Bitte versuche es erneut.",
+		"individual": {
+			"heading": "Individuelle Unterstützer",
+			"description": "BTC Map wird von der Community getragen. Individuelle Unterstützer helfen dabei, das Projekt unabhängig, offen und in den Händen der Menschen zu halten, die es nutzen.",
+			"cta": "Unterstützer werden"
+		},
+		"sponsors": {
+			"description": "BTC Map ist ein wichtiger Teil der Bitcoin-Infrastruktur. Jeder Sponsor unterstützt uns bei unserer Mission, Bitcoin zu alltäglichem Zahlungsmittel zu machen."
+		}
 	},
 	"privacyPolicy": {
 		"title": "Datenschutzrichtlinie",

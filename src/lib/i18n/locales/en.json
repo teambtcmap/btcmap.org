@@ -1032,6 +1032,14 @@
 	"supporters": {
 		"title": "Supporters",
 		"hero": "Help place bitcoin on the map.",
+		"individual": {
+			"heading": "Individual Supporters",
+			"description": "BTC Map is community-powered. Individual supporters help keep the project independent, open, and in the hands of the people who use it.",
+			"cta": "Become a Supporter"
+		},
+		"sponsors": {
+			"description": "BTC Map is recognized as an important part of Bitcoin's wider infrastructure. Each sponsor below is supporting us in our mission to make Bitcoin everyday money."
+		},
 		"donate": {
 			"scanOrClick": "Scan or click to donate",
 			"onchain": "On-chain",

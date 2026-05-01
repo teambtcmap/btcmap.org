@@ -953,7 +953,15 @@
 		},
 		"applyHere": "Solliciteer hier",
 		"qrError": "Kon geen QR genereren. Probeer het opnieuw of neem contact op met BTC Map.",
-		"qrLoadError": "Kan QR-generator niet laden. Probeer het opnieuw."
+		"qrLoadError": "Kan QR-generator niet laden. Probeer het opnieuw.",
+		"individual": {
+			"heading": "Individuele supporters",
+			"description": "BTC Map wordt aangedreven door de community. Individuele supporters helpen het project onafhankelijk, open en in handen van de gebruikers te houden.",
+			"cta": "Word supporter"
+		},
+		"sponsors": {
+			"description": "BTC Map wordt erkend als een belangrijk onderdeel van de Bitcoin-infrastructuur. Elke sponsor ondersteunt ons in onze missie om van Bitcoin alledaags geld te maken."
+		}
 	},
 	"privacyPolicy": {
 		"title": "Privacybeleid",

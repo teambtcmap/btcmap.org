@@ -111,17 +111,17 @@ const plebTier = sponsorshipTiers.find((t) => t.level === "Pleb")!;
 	<!-- Pleb tier -->
 	<section id="pleb-supporters" class="space-y-6">
 		<div class="mx-auto max-w-2xl space-y-4">
-			<h2 class="text-3xl font-bold text-primary dark:text-white">Individual Supporters</h2>
+			<h2 class="text-3xl font-bold text-primary dark:text-white">{t("supporters.individual.heading")}</h2>
 			<p class="text-base text-body dark:text-slate-300">
-				BTC Map is community-powered. Individual supporters help keep the project independent, open, and in the hands of the people who use it.
+				{t("supporters.individual.description")}
 			</p>
 			<a
 				href={PLEB_TIER_CTA}
 				target="_blank"
-				rel="noreferrer"
+				rel="noopener noreferrer"
 				class="inline-block rounded-xl bg-link px-6 py-3 font-semibold text-white transition-colors hover:bg-hover"
 			>
-				Become a Supporter
+				{t("supporters.individual.cta")}
 			</a>
 		</div>
 
@@ -137,7 +137,7 @@ const plebTier = sponsorshipTiers.find((t) => t.level === "Pleb")!;
 				{t("supporters.supporters.heading")}
 			</h2>
 			<p class="text-base text-body dark:text-slate-300">
-				BTC Map is recognized as an important part of Bitcoin's wider infrastructure. Each sponsor below is supporting us in our mission to make Bitcoin everyday money.
+				{t("supporters.sponsors.description")}
 			</p>
 			<a
 				href="mailto:hello@btcmap.org"
