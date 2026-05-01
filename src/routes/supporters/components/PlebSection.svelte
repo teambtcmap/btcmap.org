@@ -1,5 +1,9 @@
 <script lang="ts">
+import { _ } from "$lib/i18n";
+
 import type { Pleb, SponsorshipTier } from "../sponsors";
+
+$: t = $_;
 
 export let tier: SponsorshipTier;
 export let plebs: Pleb[];
@@ -36,7 +40,7 @@ function onTouchEnd(pleb: Pleb, e: TouchEvent) {
 <div class="rounded-2xl border p-6 text-left shadow-sm {tierStyles[tier.level] ?? ''}">
 	<div class="mb-6 space-y-1">
 		<h3 class="text-2xl font-bold text-primary dark:text-white">{tier.level}s</h3>
-		<p class="text-base text-body/70 dark:text-slate-400">{tier.headline}</p>
+		<p class="text-base text-body/70 dark:text-slate-400">{t(tier.headlineKey)}</p>
 	</div>
 
 	<div class="flex flex-wrap justify-center gap-4">

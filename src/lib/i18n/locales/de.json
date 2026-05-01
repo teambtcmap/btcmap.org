@@ -1015,6 +1015,26 @@
 		},
 		"sponsors": {
 			"description": "BTC Map ist ein wichtiger Teil der Bitcoin-Infrastruktur. Jeder Sponsor unterstützt uns bei unserer Mission, Bitcoin zu alltäglichem Zahlungsmittel zu machen."
+		},
+		"tiers": {
+			"explorer": {
+				"headline": "Unterstützt unsere Arbeit"
+			},
+			"wayfinder": {
+				"headline": "Unterstützt die Mission"
+			},
+			"cartographer": {
+				"headline": "Kern-Ökosystempartner"
+			},
+			"navigator": {
+				"headline": "Branchenunterstützer mit hoher Überzeugung"
+			},
+			"pioneer": {
+				"headline": "Unsere engagiertesten Unterstützer"
+			},
+			"pleb": {
+				"headline": "Jeder Sat zählt – geordnet nach kumulierten Beiträgen"
+			}
 		}
 	},
 	"privacyPolicy": {

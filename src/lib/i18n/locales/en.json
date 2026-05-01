@@ -1032,6 +1032,16 @@
 	"supporters": {
 		"title": "Supporters",
 		"hero": "Help place bitcoin on the map.",
+		"tiers": {
+			"explorer": { "headline": "Loving what we do" },
+			"wayfinder": { "headline": "Supporting the mission" },
+			"cartographer": { "headline": "Core ecosystem partner" },
+			"navigator": { "headline": "High-conviction industry supporters" },
+			"pioneer": { "headline": "Our most committed supporters" },
+			"pleb": {
+				"headline": "Every sat counts — ordered by cumulative contributions"
+			}
+		},
 		"individual": {
 			"heading": "Individual Supporters",
 			"description": "BTC Map is community-powered. Individual supporters help keep the project independent, open, and in the hands of the people who use it.",

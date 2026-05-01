@@ -1,4 +1,5 @@
 <script lang="ts">
+import { _ } from "$lib/i18n";
 import { theme } from "$lib/theme";
 
 import type { Sponsor, SponsorshipTier } from "../sponsors";
@@ -21,12 +22,13 @@ const levelStyles: Partial<Record<SponsorshipTier["level"], string>> = {
 };
 
 $: cardStyle = levelStyles[tier.level] ?? "";
+$: t = $_;
 </script>
 
 <article class="rounded-2xl border p-6 text-left shadow-sm {cardStyle}">
 	<div class="mb-6 space-y-1">
 		<h3 class="text-2xl font-bold text-primary dark:text-white">{tier.level}s</h3>
-		<p class="text-base text-body/70 dark:text-slate-400">{tier.headline}</p>
+		<p class="text-base text-body/70 dark:text-slate-400">{t(tier.headlineKey)}</p>
 	</div>
 
 	<div class="grid w-full gap-4 {compact ? 'grid-cols-2' : 'grid-cols-1 lg:grid-cols-3'} {compact ? '' : 'gap-8'}">

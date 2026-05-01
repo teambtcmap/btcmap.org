@@ -29,19 +29,19 @@ export type Pleb = {
 
 export type SponsorshipTier = {
 	level: SponsorshipLevel;
-	headline: string;
+	headlineKey: string;
 };
 
 export const sponsorshipTiers: SponsorshipTier[] = [
-	{ level: "Explorer", headline: "Loving what we do" },
-	{ level: "Wayfinder", headline: "Supporting the mission" },
-	{ level: "Cartographer", headline: "Core ecosystem partner" },
-	{ level: "Navigator", headline: "High-conviction industry supporters" },
-	{ level: "Pioneer", headline: "Our most committed supporters" },
+	{ level: "Explorer", headlineKey: "supporters.tiers.explorer.headline" },
+	{ level: "Wayfinder", headlineKey: "supporters.tiers.wayfinder.headline" },
 	{
-		level: "Pleb",
-		headline: "Every sat counts — ordered by cumulative contributions",
+		level: "Cartographer",
+		headlineKey: "supporters.tiers.cartographer.headline",
 	},
+	{ level: "Navigator", headlineKey: "supporters.tiers.navigator.headline" },
+	{ level: "Pioneer", headlineKey: "supporters.tiers.pioneer.headline" },
+	{ level: "Pleb", headlineKey: "supporters.tiers.pleb.headline" },
 ];
 
 export const sponsors: Sponsor[] = [
