@@ -65,9 +65,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		const funders = json.data?.projectGet?.funders ?? [];
 
 		// Separate anon and named funders, excluding platform accounts
-		const anonTotal = funders
-			.filter((f) => f.user === null)
-			.reduce((sum, f) => sum + f.amountFunded, 0);
+		const anonFunders = funders.filter((f) => f.user === null);
 
 		const namedFunders = funders
 			.filter(
@@ -94,14 +92,13 @@ export const load: PageServerLoad = async ({ fetch }) => {
 			sats: f.amountFunded,
 		}));
 
-		// Add anon aggregate entry at the correct position by sats
-		const anonPleb: Pleb = {
+		const anonPlebs: Pleb[] = anonFunders.map((f) => ({
 			name: "Anon",
 			avatar: "/images/satoshi-nakamoto.png",
-			sats: anonTotal,
-		};
+			sats: f.amountFunded,
+		}));
 
-		const allPlebs = [...namedPlebs, anonPleb].sort(
+		const allPlebs = [...namedPlebs, ...anonPlebs].sort(
 			(a, b) => (b.sats ?? 0) - (a.sats ?? 0),
 		);
 

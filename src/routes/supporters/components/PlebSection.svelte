@@ -40,7 +40,7 @@ function onTouchEnd(pleb: Pleb, e: TouchEvent) {
 	</div>
 
 	<div class="flex flex-wrap justify-center gap-4">
-		{#each plebs as pleb (pleb.name)}
+		{#each plebs as pleb, i (i)}
 			<a
 				href={pleb.url ?? "#"}
 				target={pleb.url ? "_blank" : undefined}
