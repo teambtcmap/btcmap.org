@@ -92,17 +92,26 @@ type ContributionsResponse = {
 	};
 };
 
+const REQUEST_TIMEOUT_MS = 6000;
+
 async function gql<T>(
 	query: string,
 	fetch: typeof globalThis.fetch,
 ): Promise<T | null> {
-	const res = await fetch(GEYSER_API, {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ query }),
-	});
-	if (!res.ok) return null;
-	return res.json();
+	const controller = new AbortController();
+	const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+	try {
+		const res = await fetch(GEYSER_API, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ query }),
+			signal: controller.signal,
+		});
+		if (!res.ok) return null;
+		return res.json();
+	} finally {
+		clearTimeout(timeout);
+	}
 }
 
 export const load: PageServerLoad = async ({ fetch }) => {
