@@ -3,18 +3,24 @@ import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 
 const UPSTREAM = "https://rizful.com/.well-known/lnurlp/btcmap";
+const TIMEOUT_MS = 5000;
 
 const CORS_HEADERS = { "Access-Control-Allow-Origin": "*" };
 
 export const GET: RequestHandler = async ({ fetch }) => {
+	const controller = new AbortController();
+	const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
 	let res: Response;
 	try {
-		res = await fetch(UPSTREAM);
+		res = await fetch(UPSTREAM, { signal: controller.signal });
 	} catch {
 		return json(
 			{ status: "ERROR", reason: "Upstream unavailable" },
 			{ status: 502, headers: CORS_HEADERS },
 		);
+	} finally {
+		clearTimeout(timeout);
 	}
 
 	if (!res.ok) {
