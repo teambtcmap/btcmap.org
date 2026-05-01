@@ -24,6 +24,8 @@ const onchain = "bc1qt4g28vq480ec4ncl4h67qu4q4k2zel7xu0c2wg";
 const lnurlp = "donations@btcmap.org";
 const lightningnode =
 	"038f4d8a3fdeeb92bbcd97f510c28c2ad814f1736792f5df97a476d38ef4280cb5";
+const lightningnodeUrl =
+	"https://amboss.space/node/038f4d8a3fdeeb92bbcd97f510c28c2ad814f1736792f5df97a476d38ef4280cb5";
 
 let showQr = false;
 $: t = $_;
@@ -198,7 +200,7 @@ const plebTier = sponsorshipTiers.find((t) => t.level === "Pleb")!;
 >
 	<div class="flex flex-col items-center gap-5 py-4">
 		<!-- qr -->
-		<a href={network === 'Node' ? lightningnode : network === 'Lightning' ? `lightning:${lnurlp}` : `bitcoin:${onchain}`}>
+		<a href={network === 'Node' ? lightningnodeUrl : network === 'Lightning' ? `lightning:${lnurlp}` : `bitcoin:${onchain}`}>
 			<canvas
 				use:renderQr
 				class="mx-auto h-[200px] w-[200px] rounded-xl border-4 border-link transition-colors hover:border-hover sm:h-[256px] sm:w-[256px]"
