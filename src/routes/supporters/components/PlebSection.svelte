@@ -41,44 +41,75 @@ function onTouchEnd(pleb: Pleb, e: TouchEvent) {
 
 	<div class="flex flex-wrap justify-center gap-4">
 		{#each plebs as pleb, i (i)}
-			<a
-				href={pleb.url ?? "#"}
-				target={pleb.url ? "_blank" : undefined}
-				rel="noreferrer"
-				class="group relative transition-transform duration-150 hover:-translate-y-0.5"
-				on:touchend|stopPropagation={(e) => onTouchEnd(pleb, e)}
-			>
-				{#if pleb.avatar}
-					<img
-						src={pleb.avatar}
-						alt={pleb.name}
-						class="h-16 w-16 rounded-full border-2 border-white/60 object-cover shadow-md group-hover:border-link dark:border-white/20"
-					/>
-				{:else}
-					<div
-						class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/60 text-xl font-bold shadow-md dark:border-white/20 {initBg[tier.level] ?? ''}"
-					>
-						{pleb.name[0]}
-					</div>
-				{/if}
-				<!-- Desktop: CSS hover. Mobile: controlled by activeTooltip -->
-				<span
-					class="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-center text-xs text-white transition-opacity dark:bg-gray-700
-						{activeTooltip === pleb.name ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}"
+			{#if pleb.url}
+				<a
+					href={pleb.url}
+					target="_blank"
+					rel="noopener noreferrer"
+					class="group relative transition-transform duration-150 hover:-translate-y-0.5"
+					on:touchend|stopPropagation={(e) => onTouchEnd(pleb, e)}
 				>
-					<span class="block font-medium">{pleb.name}</span>
-					{#if pleb.sats}
-						<span class="block opacity-75">{pleb.sats.toLocaleString()} sats</span>
+					{#if pleb.avatar}
+						<img
+							src={pleb.avatar}
+							alt={pleb.name}
+							class="h-16 w-16 rounded-full border-2 border-white/60 object-cover shadow-md group-hover:border-link dark:border-white/20"
+						/>
+					{:else}
+						<div
+							class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/60 text-xl font-bold shadow-md dark:border-white/20 {initBg[tier.level] ?? ''}"
+						>
+							{pleb.name[0]}
+						</div>
 					{/if}
-				</span>
-			</a>
+					<!-- Desktop: CSS hover. Mobile: controlled by activeTooltip -->
+					<span
+						class="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-center text-xs text-white transition-opacity dark:bg-gray-700
+							{activeTooltip === pleb.name ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}"
+					>
+						<span class="block font-medium">{pleb.name}</span>
+						{#if pleb.sats}
+							<span class="block opacity-75">{pleb.sats.toLocaleString()} sats</span>
+						{/if}
+					</span>
+				</a>
+			{:else}
+				<!-- svelte-ignore a11y-no-static-element-interactions -->
+				<div
+					class="group relative"
+					on:touchend|stopPropagation={(e) => onTouchEnd(pleb, e)}
+				>
+					{#if pleb.avatar}
+						<img
+							src={pleb.avatar}
+							alt={pleb.name}
+							class="h-16 w-16 rounded-full border-2 border-white/60 object-cover shadow-md dark:border-white/20"
+						/>
+					{:else}
+						<div
+							class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/60 text-xl font-bold shadow-md dark:border-white/20 {initBg[tier.level] ?? ''}"
+						>
+							{pleb.name[0]}
+						</div>
+					{/if}
+					<span
+						class="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-center text-xs text-white transition-opacity dark:bg-gray-700
+							{activeTooltip === pleb.name ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}"
+					>
+						<span class="block font-medium">{pleb.name}</span>
+						{#if pleb.sats}
+							<span class="block opacity-75">{pleb.sats.toLocaleString()} sats</span>
+						{/if}
+					</span>
+				</div>
+			{/if}
 		{/each}
 
 		<!-- CTA -->
 		<a
 			href={ctaHref}
 			target="_blank"
-			rel="noreferrer"
+			rel="noopener noreferrer"
 			class="group relative transition-transform duration-150 hover:-translate-y-0.5"
 		>
 			<div
@@ -96,7 +127,7 @@ function onTouchEnd(pleb: Pleb, e: TouchEvent) {
 		<a
 			href="https://geyser.fund/project/btcmap/leaderboard"
 			target="_blank"
-			rel="noreferrer"
+			rel="noopener noreferrer"
 			class="flex items-center gap-1.5 opacity-50 transition-opacity hover:opacity-80"
 		>
 			<img src="https://geyser.fund/logo-brand.svg" alt="Geyser" class="h-4 w-auto" />
