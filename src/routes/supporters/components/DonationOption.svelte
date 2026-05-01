@@ -47,6 +47,10 @@ $: t = $_;
 			<!-- qr button -->
 			{#if showQrToggle}
 				<button
+					type="button"
+					aria-label={network === 'Node'
+						? t("supporters.node.scanOrClick")
+						: t("supporters.donate.scanOrClick")}
 					class="text-link transition-colors hover:text-hover"
 					on:click={() => showQrToggle(network)}
 				>
