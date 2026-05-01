@@ -58,6 +58,11 @@ export const sponsors: Sponsor[] = [
 		level: "Explorer",
 	},
 	{
+		name: "Bittylicious",
+		url: "https://bittylicious.com/",
+		level: "Explorer",
+	},
+	{
 		name: "BTC Curacao",
 		url: "https://btccuracao.com/",
 		icon: "/images/supporters/btccuracao.png",
