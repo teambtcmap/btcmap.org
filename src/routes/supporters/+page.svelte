@@ -190,14 +190,18 @@ const plebTier = sponsorshipTiers.find((t) => t.level === "Pleb")!;
 
 				<!-- cta -->
 				<p class="text-center text-xl text-primary dark:text-white">
-					{t("supporters.donate.scanOrClick")} <br class="block md:hidden" /><strong class="lowercase"
-						>{network === 'Node' ? t("supporters.node.heading") : network === 'Lightning' ? t("supporters.donate.lightning") : t("supporters.donate.onchain")}</strong
-					>
-					<img
-						src="/icons/ln-highlight.svg"
-						alt={`${t("supporters.donate.lightning")} ${t("supporters.donate.protocolAlt")}`}
-						class="mb-1 inline dark:rounded-full dark:bg-white dark:p-0.5"
-					/>
+					{network === 'Node' ? t("supporters.node.scanOrClick") : t("supporters.donate.scanOrClick")}
+					<br class="block md:hidden" />
+					{#if network !== 'Node'}
+						<strong class="lowercase"
+							>{network === 'Lightning' ? t("supporters.donate.lightning") : t("supporters.donate.onchain")}</strong
+						>
+						<img
+							src={network === 'Lightning' ? '/icons/ln-highlight.svg' : '/icons/btc-highlight.svg'}
+							alt={`${network === 'Lightning' ? t("supporters.donate.lightning") : t("supporters.donate.onchain")} ${t("supporters.donate.protocolAlt")}`}
+							class="mb-1 inline dark:rounded-full dark:bg-white dark:p-0.5"
+						/>
+					{/if}
 				</p>
 				</div>
 			</div>

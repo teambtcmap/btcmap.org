@@ -949,7 +949,8 @@
 			"becomeSponsor": "Word supporter"
 		},
 		"node": {
-			"heading": "Open een Lightningkanaal"
+			"heading": "Open een Lightningkanaal",
+			"scanOrClick": "Scan of klik om te verbinden"
 		},
 		"applyHere": "Solliciteer hier",
 		"qrError": "Kon geen QR genereren. Probeer het opnieuw of neem contact op met BTC Map.",

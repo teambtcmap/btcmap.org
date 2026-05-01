@@ -1052,7 +1052,8 @@
 			"becomeSponsor": "Become a Supporter"
 		},
 		"node": {
-			"heading": "Open a lightning channel"
+			"heading": "Open a lightning channel",
+			"scanOrClick": "Scan or click to connect"
 		},
 		"applyHere": "Apply here",
 		"qrError": "Could not generate QR, please try again or contact BTC Map.",
