@@ -34,7 +34,7 @@ $: cardStyle = levelStyles[tier.level] ?? "";
 			<a
 				href={sponsor.url}
 				target="_blank"
-				rel="noreferrer"
+				rel="noopener noreferrer"
 				class="block w-full self-center rounded-xl border border-white/40 bg-white/60 p-3 transition-transform duration-150 hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-slate-900/40"
 			>
 				{#if sponsor.icon && typeof window !== 'undefined'}
