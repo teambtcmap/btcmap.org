@@ -19,6 +19,11 @@ const initBg: Partial<Record<SponsorshipTier["level"], string>> = {
 
 let activeTooltip: string | null = null;
 
+function onAvatarError(e: Event, pleb: Pleb) {
+	const img = e.currentTarget as HTMLImageElement;
+	img.src = `https://robohash.org/${pleb.id}?set=set1&size=64x64`;
+}
+
 function onTouchEnd(pleb: Pleb, e: TouchEvent) {
 	if (activeTooltip === pleb.id) {
 		// Already showing — let the tap through to follow the link
@@ -53,13 +58,14 @@ function onTouchEnd(pleb: Pleb, e: TouchEvent) {
 					class="group relative transition-transform duration-150 hover:-translate-y-0.5"
 					on:touchend|stopPropagation={(e) => onTouchEnd(pleb, e)}
 				>
-					{#if pleb.avatar}
-						<img
-							src={pleb.avatar}
-							alt={pleb.name}
-							class="h-16 w-16 rounded-full border-2 border-white/60 object-cover shadow-md group-hover:border-link dark:border-white/20"
-						/>
-					{:else}
+				{#if pleb.avatar}
+					<img
+						src={pleb.avatar}
+						alt={pleb.name}
+						class="h-16 w-16 rounded-full border-2 border-white/60 object-cover shadow-md group-hover:border-link dark:border-white/20"
+						on:error={(e) => onAvatarError(e, pleb)}
+					/>
+				{:else}
 						<div
 							class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/60 text-xl font-bold shadow-md dark:border-white/20 {initBg[tier.level] ?? ''}"
 						>
@@ -83,13 +89,14 @@ function onTouchEnd(pleb: Pleb, e: TouchEvent) {
 				class="group relative"
 				on:touchend|stopPropagation={(e) => onTouchEnd(pleb, e)}
 			>
-				{#if pleb.avatar}
-					<img
-						src={pleb.avatar}
-						alt={pleb.name}
-						class="h-16 w-16 rounded-full border-2 border-white/60 object-cover shadow-md dark:border-white/20"
-					/>
-				{:else}
+			{#if pleb.avatar}
+				<img
+					src={pleb.avatar}
+					alt={pleb.name}
+					class="h-16 w-16 rounded-full border-2 border-white/60 object-cover shadow-md dark:border-white/20"
+					on:error={(e) => onAvatarError(e, pleb)}
+				/>
+			{:else}
 					<div
 						class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/60 text-xl font-bold shadow-md dark:border-white/20 {initBg[tier.level] ?? ''}"
 					>
