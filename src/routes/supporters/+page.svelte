@@ -1,4 +1,5 @@
 <script lang="ts">
+import { onMount } from "svelte";
 import type { Action } from "svelte/action";
 
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
@@ -26,6 +27,11 @@ const lightningnode =
 	"038f4d8a3fdeeb92bbcd97f510c28c2ad814f1736792f5df97a476d38ef4280cb5";
 const lightningnodeUrl =
 	"https://amboss.space/node/038f4d8a3fdeeb92bbcd97f510c28c2ad814f1736792f5df97a476d38ef4280cb5";
+
+let mounted = false;
+onMount(() => {
+	mounted = true;
+});
 
 let showQr = false;
 $: t = $_;
@@ -102,11 +108,11 @@ const plebTier = sponsorshipTiers.find((t) => t.level === "Pleb")!;
 </svelte:head>
 
 <div class="my-10 space-y-10 text-center md:my-20">
-	{#if typeof window !== 'undefined'}
+	{#if mounted}
 		<h1
 			class="{$theme === 'dark'
 				? 'text-white'
-				: 'gradient'} text-4xl !leading-tight font-semibold md:text-5xl"
+				: 'gradient'} text-4xl leading-tight! font-semibold md:text-5xl"
 		>
 			{t("supporters.hero")}
 		</h1>
