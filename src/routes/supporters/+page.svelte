@@ -1,8 +1,8 @@
 <script lang="ts">
 import type { Action } from "svelte/action";
 
-import CloseButton from "$components/CloseButton.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import Modal from "$components/Modal.svelte";
 import { BREAKPOINTS, QR_CODE_SIZE } from "$lib/constants";
 import { _ } from "$lib/i18n";
 import { theme } from "$lib/theme";
@@ -169,58 +169,55 @@ const plebTier = sponsorshipTiers.find((t) => t.level === "Pleb")!;
 	</section>
 
 	<section id="donate">
-		{#if showQr}
-			<div
-				class="relative mx-auto flex h-[450px] w-full items-center justify-center rounded-xl bg-slate-100 drop-shadow-xl md:h-[380px] md:w-[475px] dark:bg-white/[0.15]"
-			>
-				<div class="space-y-5">
-					<CloseButton
-						position="absolute top-4 right-6"
-						colors="text-link hover:text-hover"
-						on:click={() => (showQr = false)}
-					/>
-
-				<!-- qr -->
-				<a href={network === 'Node' ? lightningnode : network === 'Lightning' ? `lightning:${lnurlp}` : `bitcoin:${onchain}`}>
-					<canvas
-						use:renderQr
-						class="mx-auto h-[200px] w-[200px] rounded-xl border-4 border-link transition-colors hover:border-hover sm:h-[256px] sm:w-[256px]"
-					/>
-				</a>
-
-				<!-- cta -->
-				<p class="text-center text-xl text-primary dark:text-white">
-					{network === 'Node' ? t("supporters.node.scanOrClick") : t("supporters.donate.scanOrClick")}
-					<br class="block md:hidden" />
-					{#if network !== 'Node'}
-						<strong class="lowercase"
-							>{network === 'Lightning' ? t("supporters.donate.lightning") : t("supporters.donate.onchain")}</strong
-						>
-						<img
-							src={network === 'Lightning' ? '/icons/ln-highlight.svg' : '/icons/btc-highlight.svg'}
-							alt={`${network === 'Lightning' ? t("supporters.donate.lightning") : t("supporters.donate.onchain")} ${t("supporters.donate.protocolAlt")}`}
-							class="mb-1 inline dark:rounded-full dark:bg-white dark:p-0.5"
-						/>
-					{/if}
-				</p>
-				</div>
-			</div>
-		{:else}
-			<div class="space-y-5">
-				<!-- onchain -->
-				<DonationOption value={onchain} textKey="supporters.donate.onchain" network="On-chain" {showQrToggle} />
-				<!-- lightning -->
-				<DonationOption value={lnurlp} textKey="supporters.donate.lightning" network="Lightning" {showQrToggle} />
-			</div>
-		{/if}
+		<div class="space-y-5">
+			<!-- onchain -->
+			<DonationOption value={onchain} textKey="supporters.donate.onchain" network="On-chain" {showQrToggle} />
+			<!-- lightning -->
+			<DonationOption value={lnurlp} textKey="supporters.donate.lightning" network="Lightning" {showQrToggle} />
+		</div>
 	</section>
 
 	<section id="node">
 		<DonationOption
 			value={lightningnode}
 			textKey="supporters.node.heading"
-		network="Node"
-		{showQrToggle}
-	/>
+			network="Node"
+			{showQrToggle}
+		/>
 	</section>
 </div>
+
+<Modal
+	bind:open={showQr}
+	title={network === 'Node'
+		? t("supporters.node.scanOrClick")
+		: network === 'Lightning'
+			? t("supporters.donate.lightning")
+			: t("supporters.donate.onchain")}
+	titleId="qr-modal-title"
+>
+	<div class="flex flex-col items-center gap-5 py-4">
+		<!-- qr -->
+		<a href={network === 'Node' ? lightningnode : network === 'Lightning' ? `lightning:${lnurlp}` : `bitcoin:${onchain}`}>
+			<canvas
+				use:renderQr
+				class="mx-auto h-[200px] w-[200px] rounded-xl border-4 border-link transition-colors hover:border-hover sm:h-[256px] sm:w-[256px]"
+			/>
+		</a>
+
+		<!-- cta -->
+		<p class="text-center text-base text-primary dark:text-white">
+			{network === 'Node' ? t("supporters.node.scanOrClick") : t("supporters.donate.scanOrClick")}
+			{#if network !== 'Node'}
+				<strong class="lowercase"
+					>{network === 'Lightning' ? t("supporters.donate.lightning") : t("supporters.donate.onchain")}</strong
+				>
+				<img
+					src={network === 'Lightning' ? '/icons/ln-highlight.svg' : '/icons/btc-highlight.svg'}
+					alt={`${network === 'Lightning' ? t("supporters.donate.lightning") : t("supporters.donate.onchain")} ${t("supporters.donate.protocolAlt")}`}
+					class="mb-1 inline dark:rounded-full dark:bg-white dark:p-0.5"
+				/>
+			{/if}
+		</p>
+	</div>
+</Modal>
