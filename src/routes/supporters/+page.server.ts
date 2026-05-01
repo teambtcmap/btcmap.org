@@ -6,6 +6,32 @@ const GEYSER_API = "https://api.geyser.fund/graphql";
 // Users excluded from the leaderboard (platform/project accounts)
 const EXCLUDED_USER_IDS = new Set(["995", "641"]); // BTC Map, Geyser
 
+// Allowlisted hostnames for avatar images — only URLs from these hosts are
+// passed to the client. This avoids server-side fetching of arbitrary
+// user-controlled URLs (SSRF).
+const AVATAR_ALLOWLIST = new Set([
+	"storage.googleapis.com",
+	"pbs.twimg.com",
+	"abs.twimg.com",
+	"avatars.githubusercontent.com",
+	"cdn.nostr.build",
+	"nostr.build",
+	"image.nostr.build",
+	"primal.b-cdn.net",
+	"media.tenor.com",
+]);
+
+function isAllowlistedImageUrl(url: string | null): boolean {
+	if (!url) return false;
+	try {
+		const { protocol, hostname } = new URL(url);
+		if (protocol !== "https:") return false;
+		return AVATAR_ALLOWLIST.has(hostname);
+	} catch {
+		return false;
+	}
+}
+
 const FUNDERS_QUERY = `{
   projectGet(where: { name: "btcmap" }) {
     funders {
@@ -66,19 +92,6 @@ type ContributionsResponse = {
 	};
 };
 
-async function isImageUrl(
-	url: string,
-	fetch: typeof globalThis.fetch,
-): Promise<boolean> {
-	try {
-		const res = await fetch(url, { method: "HEAD" });
-		const contentType = res.headers.get("content-type") ?? "";
-		return res.ok && contentType.startsWith("image/");
-	} catch {
-		return false;
-	}
-}
-
 async function gql<T>(
 	query: string,
 	fetch: typeof globalThis.fetch,
@@ -115,19 +128,10 @@ export const load: PageServerLoad = async ({ fetch }) => {
 			)
 			.sort((a, b) => b.amountFunded - a.amountFunded);
 
-		// Validate avatar URLs in parallel; fall back to robohash for missing ones
-		const avatars = await Promise.all(
-			namedFunders.map((f) =>
-				f.user.imageUrl
-					? isImageUrl(f.user.imageUrl, fetch)
-					: Promise.resolve(false),
-			),
-		);
-
-		const namedPlebs: Pleb[] = namedFunders.map((f, i) => ({
+		const namedPlebs: Pleb[] = namedFunders.map((f) => ({
 			name: f.user.username,
 			url: `https://geyser.fund/user/${f.user.id}`,
-			avatar: avatars[i]
+			avatar: isAllowlistedImageUrl(f.user.imageUrl)
 				? (f.user.imageUrl ?? undefined)
 				: `https://robohash.org/${f.user.id}?set=set1&size=64x64`,
 			sats: f.amountFunded,
