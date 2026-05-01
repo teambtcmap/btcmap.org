@@ -47,7 +47,7 @@ $: t = $_;
 								: sponsor.icon
 							: sponsor.icon}"
 						alt={sponsor.name}
-						class="mx-auto w-auto object-contain {compact ? 'h-[56px]' : sponsor.iconSmall ? 'h-[56px]' : 'h-[90px]'}"
+						class="mx-auto w-auto object-contain {compact ? 'h-[56px]' : 'h-[90px]'}"
 					/>
 				{:else}
 					<div

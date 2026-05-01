@@ -16,7 +16,6 @@ export type Sponsor = {
 	url: string;
 	icon?: string;
 	iconDark?: string;
-	iconSmall?: boolean;
 	level: SponsorshipLevel;
 };
 
@@ -101,7 +100,6 @@ export const sponsors: Sponsor[] = [
 		url: "https://squareup.com/",
 		icon: "/images/supporters/square.svg",
 		iconDark: "/images/supporters/square-dark.svg",
-		iconSmall: true,
 		level: "Pioneer",
 	},
 ];
