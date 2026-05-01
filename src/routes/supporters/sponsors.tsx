@@ -60,6 +60,7 @@ export const sponsors: Sponsor[] = [
 	{
 		name: "Bittylicious",
 		url: "https://bittylicious.com/",
+		icon: "/images/supporters/bittylicious.png",
 		level: "Explorer",
 	},
 	{
