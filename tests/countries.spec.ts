@@ -9,7 +9,7 @@ test.describe('Countries', () => {
 
 		// Wait for the page to load
 		const heading = page.getByRole('heading', {
-			name: 'Bitcoin adoption by countries.'
+			name: 'Bitcoin adoption by countries'
 		});
 		await heading.waitFor({ state: 'visible' });
 		await expect(heading).toBeVisible();
@@ -29,7 +29,7 @@ test.describe('Countries', () => {
 
 		// Wait for the page to load
 		const heading = page.getByRole('heading', {
-			name: 'Bitcoin adoption by countries.'
+			name: 'Bitcoin adoption by countries'
 		});
 		await heading.waitFor({ state: 'visible' });
 
