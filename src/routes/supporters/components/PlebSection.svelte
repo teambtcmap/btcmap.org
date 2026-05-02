@@ -10,11 +10,8 @@ export let plebs: Pleb[];
 export let ctaHref: string;
 
 const tierStyles: Partial<Record<SponsorshipTier["level"], string>> = {
-	Pleb: "border-orange-300/70 bg-orange-50/70 dark:border-orange-400/40 dark:bg-orange-500/10",
-};
-
-const initBg: Partial<Record<SponsorshipTier["level"], string>> = {
-	Pleb: "bg-orange-200 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300",
+	// Bitcoin orange is an official brand color (#F7931A)
+	Pleb: "border-[#F7931A]/40 bg-[#F7931A]/5 dark:border-[#F7931A]/30 dark:bg-[#F7931A]/5",
 };
 
 let activeTooltip: string | null = null;
@@ -58,20 +55,12 @@ function onTouchEnd(pleb: Pleb, e: TouchEvent) {
 					class="group relative transition-transform duration-150 hover:-translate-y-0.5"
 					on:touchend|stopPropagation={(e) => onTouchEnd(pleb, e)}
 				>
-				{#if pleb.avatar}
-					<img
-						src={pleb.avatar}
-						alt={pleb.name}
-						class="h-16 w-16 rounded-full border-2 border-white/60 object-cover shadow-md group-hover:border-link dark:border-white/20"
-						on:error={(e) => onAvatarError(e, pleb)}
-					/>
-				{:else}
-						<div
-							class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/60 text-xl font-bold shadow-md dark:border-white/20 {initBg[tier.level] ?? ''}"
-						>
-							{pleb.name[0]}
-						</div>
-					{/if}
+			<img
+					src={pleb.avatar ?? `https://robohash.org/${pleb.id}?set=set1&size=64x64`}
+					alt={pleb.name}
+					class="h-16 w-16 rounded-full border-2 border-white/60 object-cover shadow-md group-hover:border-link dark:border-white/20"
+					on:error={(e) => onAvatarError(e, pleb)}
+				/>
 					<!-- Desktop: CSS hover. Mobile: controlled by activeTooltip -->
 					<span
 						class="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-center text-xs text-white transition-opacity dark:bg-gray-700
@@ -89,20 +78,12 @@ function onTouchEnd(pleb: Pleb, e: TouchEvent) {
 				class="group relative"
 				on:touchend|stopPropagation={(e) => onTouchEnd(pleb, e)}
 			>
-			{#if pleb.avatar}
-				<img
-					src={pleb.avatar}
-					alt={pleb.name}
-					class="h-16 w-16 rounded-full border-2 border-white/60 object-cover shadow-md dark:border-white/20"
-					on:error={(e) => onAvatarError(e, pleb)}
-				/>
-			{:else}
-					<div
-						class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/60 text-xl font-bold shadow-md dark:border-white/20 {initBg[tier.level] ?? ''}"
-					>
-						{pleb.name[0]}
-					</div>
-				{/if}
+		<img
+			src={pleb.avatar ?? `https://robohash.org/${pleb.id}?set=set1&size=64x64`}
+			alt={pleb.name}
+			class="h-16 w-16 rounded-full border-2 border-white/60 object-cover shadow-md dark:border-white/20"
+			on:error={(e) => onAvatarError(e, pleb)}
+		/>
 				<span
 					class="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-center text-xs text-white transition-opacity dark:bg-gray-700
 						{activeTooltip === pleb.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}"

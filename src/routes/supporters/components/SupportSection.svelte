@@ -9,16 +9,18 @@ export let sponsors: Sponsor[];
 export let compact = false;
 
 const levelStyles: Partial<Record<SponsorshipTier["level"], string>> = {
+	// Tiers use the brand teal/cyan palette at pastel intensities, differentiated by shade step.
+	// highlight (#051173 navy) and bitcoin orange are used as accent tones for upper tiers.
 	Explorer:
-		"border-emerald-300/70 bg-emerald-50/70 dark:border-emerald-400/40 dark:bg-emerald-500/10",
+		"border-cyan-300/60 bg-cyan-50/60 dark:border-cyan-400/30 dark:bg-cyan-500/10",
 	Wayfinder:
-		"border-sky-300/70 bg-sky-50/70 dark:border-sky-400/40 dark:bg-sky-500/10",
+		"border-[#BDD2D4]/80 bg-[#E4EBEC]/60 dark:border-[#BDD2D4]/25 dark:bg-[#E4EBEC]/5",
 	Cartographer:
-		"border-amber-300/70 bg-amber-50/70 dark:border-amber-400/40 dark:bg-amber-500/10",
+		"border-[#0099AF]/40 bg-[#F0F6F6]/80 dark:border-[#0099AF]/30 dark:bg-[#0099AF]/10",
 	Navigator:
-		"border-indigo-300/70 bg-indigo-50/70 dark:border-indigo-400/40 dark:bg-indigo-500/10",
+		"border-[#095D73]/40 bg-[#D4E1E2]/50 dark:border-[#095D73]/40 dark:bg-[#095D73]/10",
 	Pioneer:
-		"border-rose-300/70 bg-rose-50/70 dark:border-rose-400/40 dark:bg-rose-500/10",
+		"border-[#051173]/30 bg-[#E4EBEC]/70 dark:border-[#051173]/40 dark:bg-[#051173]/10",
 };
 
 $: cardStyle = levelStyles[tier.level] ?? "";
