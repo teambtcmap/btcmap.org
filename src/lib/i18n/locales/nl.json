@@ -19,7 +19,7 @@
 		"maintain": "Onderhoud",
 		"wiki": "Wiki",
 		"blog": "Blog",
-		"supportUs": "Steun ons",
+		"supporters": "Steun ons",
 		"menu": "Menu",
 		"merchantMap": "Ondernemerskaart",
 		"communityMap": "Communitykaart",
@@ -866,25 +866,82 @@
 			}
 		},
 		"contribution": {
-			"hyperbitcoinisation": { "title": "Hyperbitcoinisatie", "desc": "21M" },
-			"pizzaTime": { "title": "Pizza-tijd", "desc": "10K" },
-			"godly": { "title": "Goddelijk", "desc": "7777" },
-			"shadow": { "title": "Schaduw", "desc": "5000" },
-			"whitepaper": { "title": "White Paper", "desc": "3110" },
-			"winston": { "title": "Winston", "desc": "1984" },
-			"whale": { "title": "Walvis", "desc": "1000" },
-			"infinity": { "title": "Oneindigheid", "desc": "821" },
-			"legend": { "title": "Legende", "desc": "500" },
-			"chancellor": { "title": "Kanselier", "desc": "301" },
-			"sha": { "title": "SHA", "desc": "256" },
-			"noBailouts": { "title": "Geen reddingsoperaties", "desc": "210" },
-			"supertagger": { "title": "Supertagger", "desc": "100" },
-			"ath": { "title": "ATH", "desc": "69" },
-			"longestChain": { "title": "Langste keten", "desc": "51" },
-			"satoshi": { "title": "Satoshi", "desc": "21" },
-			"heartbeat": { "title": "Hartslag", "desc": "10" },
-			"segwit": { "title": "Segwit", "desc": "4" },
-			"wholeTagger": { "title": "Hele Tagger", "desc": "1" }
+			"hyperbitcoinisation": {
+				"title": "Hyperbitcoinisatie",
+				"desc": "21M"
+			},
+			"pizzaTime": {
+				"title": "Pizza-tijd",
+				"desc": "10K"
+			},
+			"godly": {
+				"title": "Goddelijk",
+				"desc": "7777"
+			},
+			"shadow": {
+				"title": "Schaduw",
+				"desc": "5000"
+			},
+			"whitepaper": {
+				"title": "White Paper",
+				"desc": "3110"
+			},
+			"winston": {
+				"title": "Winston",
+				"desc": "1984"
+			},
+			"whale": {
+				"title": "Walvis",
+				"desc": "1000"
+			},
+			"infinity": {
+				"title": "Oneindigheid",
+				"desc": "821"
+			},
+			"legend": {
+				"title": "Legende",
+				"desc": "500"
+			},
+			"chancellor": {
+				"title": "Kanselier",
+				"desc": "301"
+			},
+			"sha": {
+				"title": "SHA",
+				"desc": "256"
+			},
+			"noBailouts": {
+				"title": "Geen reddingsoperaties",
+				"desc": "210"
+			},
+			"supertagger": {
+				"title": "Supertagger",
+				"desc": "100"
+			},
+			"ath": {
+				"title": "ATH",
+				"desc": "69"
+			},
+			"longestChain": {
+				"title": "Langste keten",
+				"desc": "51"
+			},
+			"satoshi": {
+				"title": "Satoshi",
+				"desc": "21"
+			},
+			"heartbeat": {
+				"title": "Hartslag",
+				"desc": "10"
+			},
+			"segwit": {
+				"title": "Segwit",
+				"desc": "4"
+			},
+			"wholeTagger": {
+				"title": "Hele Tagger",
+				"desc": "1"
+			}
 		}
 	},
 	"apps": {
@@ -924,7 +981,7 @@
 			"statsDashboard": "Statistiekdashboard",
 			"supertaggerLeaderboard": "Supertagger-klassement",
 			"supertaggerProfile": "Supertagger-profiel",
-			"supportUs": "Steun ons",
+			"supporters": "Steun ons",
 			"topCommunities": "Topgemeenschappen",
 			"topCountries": "Toplanden",
 			"verifyLocations": "Locaties verifiëren",
@@ -934,27 +991,55 @@
 			"secondl1ght": "tweedelig"
 		}
 	},
-	"supportUs": {
+	"supporters": {
 		"title": "Steun ons",
 		"hero": "Help bitcoin op de kaart te zetten.",
-		"intro": "BTCMap.org is een gratis en open-sourceproject (FOSS). Om door te kunnen gaan zijn wij afhankelijk van donaties en sponsoring.",
-		"appreciate": "Wij waarderen alle steun enorm.",
 		"donate": {
 			"scanOrClick": "Scan of klik om te doneren",
 			"onchain": "On-chain",
 			"lightning": "Lightning",
+			"lightningAddress": "Lightning-adres",
 			"protocolAlt": "protocol"
 		},
 		"supporters": {
 			"heading": "Onze geweldige supporters",
-			"becomeSponsor": "Word sponsor"
+			"becomeSponsor": "Word supporter"
 		},
 		"node": {
-			"heading": "Open een Lightningkanaal voor ons"
+			"heading": "Open een Lightningkanaal",
+			"scanOrClick": "Scan of klik om te verbinden"
 		},
 		"applyHere": "Solliciteer hier",
 		"qrError": "Kon geen QR genereren. Probeer het opnieuw of neem contact op met BTC Map.",
-		"qrLoadError": "Kan QR-generator niet laden. Probeer het opnieuw."
+		"qrLoadError": "Kan QR-generator niet laden. Probeer het opnieuw.",
+		"individual": {
+			"heading": "Individuele supporters",
+			"description": "BTC Map wordt aangedreven door de community. Individuele supporters helpen het project onafhankelijk, open en in handen van de gebruikers te houden.",
+			"cta": "Word supporter"
+		},
+		"sponsors": {
+			"description": "BTC Map wordt erkend als een belangrijk onderdeel van de Bitcoin-infrastructuur. Elke sponsor ondersteunt ons in onze missie om van Bitcoin alledaags geld te maken."
+		},
+		"tiers": {
+			"explorer": {
+				"headline": "Houdt van wat we doen"
+			},
+			"wayfinder": {
+				"headline": "Ondersteunt de missie"
+			},
+			"cartographer": {
+				"headline": "Kernpartner in het ecosysteem"
+			},
+			"navigator": {
+				"headline": "Overtuigde sectorondersteuners"
+			},
+			"pioneer": {
+				"headline": "Onze meest toegewijde supporters"
+			},
+			"pleb": {
+				"headline": "Elke sat telt — geordend op cumulatieve bijdragen"
+			}
+		}
 	},
 	"privacyPolicy": {
 		"title": "Privacybeleid",

@@ -54,9 +54,9 @@ $: navLinks = [
 		icon: "dash" as MobileNavIconName,
 	},
 	{
-		id: "supportUs",
-		title: $_("nav.supportUs"),
-		url: "/support-us",
+		id: "supporters",
+		title: $_("nav.supporters"),
+		url: "/supporters",
 		icon: "support" as MobileNavIconName,
 	},
 ];

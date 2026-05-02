@@ -19,7 +19,7 @@
 		"maintain": "Pflegen",
 		"wiki": "Wiki",
 		"blog": "Blog",
-		"supportUs": "Unterstütze uns",
+		"supporters": "Unterstütze uns",
 		"menu": "Menü",
 		"merchantMap": "Händlerkarte",
 		"communityMap": "Communitykarte",
@@ -977,7 +977,7 @@
 			"statsDashboard": "Statistik-Übersicht",
 			"supertaggerLeaderboard": "Supertagger-Rangliste",
 			"supertaggerProfile": "Supertagger-Profil",
-			"supportUs": "Unterstütze uns",
+			"supporters": "Unterstütze uns",
 			"topCommunities": "Top Communities",
 			"topCountries": "Top Länder",
 			"verifyLocations": "Standorte verifizieren",
@@ -987,27 +987,55 @@
 			"secondl1ght": "secondl1ght"
 		}
 	},
-	"supportUs": {
+	"supporters": {
 		"title": "Unterstütze uns",
 		"hero": "Hilf, Bitcoin auf die Karte zu bringen.",
-		"intro": "BTCMap.org ist ein kostenloses Open-Source-Projekt (FOSS). Wir sind auf Spenden und Sponsoring angewiesen.",
-		"appreciate": "Wir schätzen jede Unterstützung sehr.",
 		"donate": {
 			"scanOrClick": "Scannen oder klicken, um zu spenden",
 			"onchain": "On-Chain",
 			"lightning": "Lightning",
+			"lightningAddress": "Lightning-Adresse",
 			"protocolAlt": "Protokoll"
 		},
 		"supporters": {
 			"heading": "Unsere großartigen Unterstützer",
-			"becomeSponsor": "Werde Sponsor"
+			"becomeSponsor": "Werde Unterstützer"
 		},
 		"node": {
-			"heading": "Öffne einen Lightning-Kanal zu uns"
+			"heading": "Öffne einen Lightning-Kanal",
+			"scanOrClick": "Scannen oder klicken, um zu verbinden"
 		},
 		"applyHere": "Bewirb dich hier",
 		"qrError": "QR konnte nicht generiert werden, bitte versuche es erneut oder kontaktiere BTC Map.",
-		"qrLoadError": "QR-Generator konnte nicht geladen werden. Bitte versuche es erneut."
+		"qrLoadError": "QR-Generator konnte nicht geladen werden. Bitte versuche es erneut.",
+		"individual": {
+			"heading": "Individuelle Unterstützer",
+			"description": "BTC Map wird von der Community getragen. Individuelle Unterstützer helfen dabei, das Projekt unabhängig, offen und in den Händen der Menschen zu halten, die es nutzen.",
+			"cta": "Unterstützer werden"
+		},
+		"sponsors": {
+			"description": "BTC Map ist ein wichtiger Teil der Bitcoin-Infrastruktur. Jeder Sponsor unterstützt uns bei unserer Mission, Bitcoin zu alltäglichem Zahlungsmittel zu machen."
+		},
+		"tiers": {
+			"explorer": {
+				"headline": "Unterstützt unsere Arbeit"
+			},
+			"wayfinder": {
+				"headline": "Unterstützt die Mission"
+			},
+			"cartographer": {
+				"headline": "Kern-Ökosystempartner"
+			},
+			"navigator": {
+				"headline": "Branchenunterstützer mit hoher Überzeugung"
+			},
+			"pioneer": {
+				"headline": "Unsere engagiertesten Unterstützer"
+			},
+			"pleb": {
+				"headline": "Jeder Sat zählt – geordnet nach kumulierten Beiträgen"
+			}
+		}
 	},
 	"privacyPolicy": {
 		"title": "Datenschutzrichtlinie",

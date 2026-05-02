@@ -174,7 +174,7 @@ export const applyMapControlTranslations = (t: (key: string) => string) => {
 	};
 
 	const supportLink = document.querySelector(
-		".leaflet-control-attribution a[href='/support-us']",
+		".leaflet-control-attribution a[href='/supporters']",
 	) as HTMLAnchorElement | null;
 	if (supportLink) {
 		supportLink.title = labels.supportWithSats;
@@ -268,7 +268,7 @@ export const support = (t?: MapControlsTranslations) => {
 
 	supportAttribution.textContent = "";
 	const link = document.createElement("a");
-	link.href = "/support-us";
+	link.href = "/supporters";
 	link.title = labels.supportWithSats;
 	link.textContent = labels.support;
 	supportAttribution.append(link, document.createTextNode(" BTC Map"));
