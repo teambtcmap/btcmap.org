@@ -1,6 +1,6 @@
 {
 	"home": {
-		"hero": "Find places to spend sats wherever you are.",
+		"hero": "Find places to spend sats wherever you are",
 		"openMap": "Open Map",
 		"addLocation": "Add Location",
 		"description": "We use {osmLink} to tag places that accept bitcoin and we display those merchants in our beautiful apps.",
@@ -495,7 +495,7 @@
 		"captchaPlaceholder": "Please enter the captcha text."
 	},
 	"addLocation": {
-		"hero": "Accept bitcoin? Get found.",
+		"hero": "Accept bitcoin? Get found",
 		"businessOwner": "If you're a business owner, please read our",
 		"bestPractices": "Merchant Best Practices",
 		"guide": "guide.",
@@ -547,7 +547,7 @@
 		"submitAnother": "Submit another {type}"
 	},
 	"verifyLocation": {
-		"hero": "Help improve the data for everyone.",
+		"hero": "Help improve the data for everyone",
 		"heading": "Verify Location",
 		"subheading": "(Ensure the information is still accurate and update it otherwise.)",
 		"descriptionPart1": "Please fill out the following form and one of our volunteer community members will update your location on the map. Did you know you can update this data yourself on",
@@ -631,7 +631,7 @@
 		"of": "of"
 	},
 	"communities": {
-		"hero": "Join the bitcoin map community.",
+		"hero": "Join the bitcoin map community",
 		"description": "Take ownership of your local bitcoin mapping data and help drive adoption. Bitcoin communities are the spark that ignites the movement. Join your friends, onboard businesses and have fun!",
 		"leaderboardHero": "Top Communities",
 		"leaderboardDescription": "Bitcoin mapping communities maintain their local datasets and strive to have the most accurate information. They also help onboard new merchants in their area!",
@@ -894,7 +894,7 @@
 		"tableTitle": "Global Issues"
 	},
 	"countries": {
-		"hero": "Bitcoin adoption by countries.",
+		"hero": "Bitcoin adoption by countries",
 		"description": "Your country? Your map!",
 		"viewLeaderboard": "View leaderboard",
 		"viewDirectory": "View directory",
@@ -983,7 +983,7 @@
 		}
 	},
 	"apps": {
-		"hero": "Find merchants on any platform.",
+		"hero": "Find merchants on any platform",
 		"subheading": "We have you covered on whatever device and OS you choose.",
 		"btcmap": "BTC Map Apps",
 		"poweredBy": "Powered by BTC Map",
@@ -1031,7 +1031,7 @@
 	},
 	"supporters": {
 		"title": "Supporters",
-		"hero": "Help place bitcoin on the map.",
+		"hero": "Help place bitcoin on the map",
 		"tiers": {
 			"explorer": { "headline": "Loving what we do" },
 			"wayfinder": { "headline": "Supporting the mission" },
