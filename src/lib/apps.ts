@@ -18,15 +18,18 @@ export type AppStoreEntry = {
 	url: string;
 };
 
-export type AppConfig = {
+type AppConfigBase = {
 	id: string;
 	name: string;
 	// path in /static, e.g. '/images/apps/btcmap.png'
 	logo: string;
 	tag: AppTag;
-	sponsor: boolean;
 	stores: AppStoreEntry[];
 };
+
+export type AppConfig =
+	| (AppConfigBase & { sponsor: true; sponsorOrder: number })
+	| (AppConfigBase & { sponsor: false; sponsorOrder?: never });
 
 export const appConfigs: AppConfig[] = [
 	{
@@ -121,6 +124,7 @@ export const appConfigs: AppConfig[] = [
 		logo: "/images/apps/wos.png",
 		tag: "powered-by-btcmap",
 		sponsor: true,
+		sponsorOrder: 2,
 		stores: [
 			{
 				store: "google-play",
@@ -168,7 +172,8 @@ export const appConfigs: AppConfig[] = [
 		name: "Aqua",
 		logo: "/images/apps/aqua.png",
 		tag: "powered-by-btcmap",
-		sponsor: false,
+		sponsor: true,
+		sponsorOrder: 4,
 		stores: [
 			{
 				store: "google-play",
@@ -193,6 +198,7 @@ export const appConfigs: AppConfig[] = [
 		logo: "/images/apps/cash-app.webp",
 		tag: "powered-by-btcmap",
 		sponsor: true,
+		sponsorOrder: 1,
 		stores: [
 			{
 				store: "google-play",
@@ -212,6 +218,7 @@ export const appConfigs: AppConfig[] = [
 		logo: "/images/apps/coinos.webp",
 		tag: "powered-by-btcmap",
 		sponsor: true,
+		sponsorOrder: 3,
 		stores: [
 			{
 				store: "zapstore",

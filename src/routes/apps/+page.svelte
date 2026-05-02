@@ -9,7 +9,13 @@ import AppCard from "./components/AppCard.svelte";
 const btcmapApps = appConfigs.filter((a) => a.tag === "btcmap");
 const poweredByApps = appConfigs
 	.filter((a) => a.tag === "powered-by-btcmap")
-	.sort((a, b) => Number(b.sponsor) - Number(a.sponsor));
+	.sort((a, b) => {
+		const aOrder = a.sponsorOrder ?? Infinity;
+		const bOrder = b.sponsorOrder ?? Infinity;
+		if (aOrder !== bOrder) return aOrder - bOrder;
+		// non-sponsors (both Infinity) fall through to alphabetical
+		return a.name.localeCompare(b.name);
+	});
 const comingSoonApps = appConfigs.filter((a) => a.tag === "coming-soon");
 </script>
 
