@@ -25,6 +25,8 @@ export type AppConfig = {
 	logo: string;
 	tag: AppTag;
 	sponsor: boolean;
+	// explicit display order for sponsor cards; non-sponsors are sorted alphabetically after
+	sponsorOrder?: number;
 	stores: AppStoreEntry[];
 };
 
@@ -121,6 +123,7 @@ export const appConfigs: AppConfig[] = [
 		logo: "/images/apps/wos.png",
 		tag: "powered-by-btcmap",
 		sponsor: true,
+		sponsorOrder: 2,
 		stores: [
 			{
 				store: "google-play",
@@ -168,7 +171,8 @@ export const appConfigs: AppConfig[] = [
 		name: "Aqua",
 		logo: "/images/apps/aqua.png",
 		tag: "powered-by-btcmap",
-		sponsor: false,
+		sponsor: true,
+		sponsorOrder: 4,
 		stores: [
 			{
 				store: "google-play",
@@ -193,6 +197,7 @@ export const appConfigs: AppConfig[] = [
 		logo: "/images/apps/cash-app.webp",
 		tag: "powered-by-btcmap",
 		sponsor: true,
+		sponsorOrder: 1,
 		stores: [
 			{
 				store: "google-play",
@@ -212,6 +217,7 @@ export const appConfigs: AppConfig[] = [
 		logo: "/images/apps/coinos.webp",
 		tag: "powered-by-btcmap",
 		sponsor: true,
+		sponsorOrder: 3,
 		stores: [
 			{
 				store: "zapstore",
