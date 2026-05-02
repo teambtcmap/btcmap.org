@@ -217,6 +217,7 @@ jobs:
           - NEVER assume what a module contains based on its name. Read the provided file contents. If a module is not included, do not make claims about its internals.
           - Before flagging a pattern in new code, check whether existing files in the full file contents use the same pattern. If they do, it is an established project convention — do not flag it.
           - Do NOT include unverified or speculative findings. If you cannot directly point to specific lines in the provided diff or file contents that prove the issue exists, drop the finding entirely. There is no quota for "[UNVERIFIED]" or low-confidence items — omit them.
+          - Every finding MUST include a **Quote:** block containing 1-3 lines copied verbatim (character-for-character) from the provided diff or file contents. Post-processing greps these quotes against the actual inputs; findings whose quote cannot be located will be dropped automatically. Do not paraphrase, summarize, or reconstruct from memory — copy exactly.
 
           Output format (strict markdown):
           # Biweekly Codebase Health Review
@@ -228,7 +229,11 @@ jobs:
 
           ### [SEVERITY]: [Short title]
           **Files:** `path/to/file`
-          [Description of the issue and what to do about it. Include a brief code snippet from the diff if helpful.]
+          **Quote:**
+          ```
+          <exact 1-3 lines copied verbatim from the provided diff or file contents — used to verify the finding is grounded in real code>
+          ```
+          [Description of the issue and what to do about it.]
 
           ---
 
@@ -345,14 +350,20 @@ jobs:
 
           echo "Review generated ($(wc -c < /tmp/review.md) bytes)"
 
-      - name: Drop findings whose files do not exist
+      - name: Validate findings (drop hallucinated files and unverifiable quotes)
         if: steps.commits.outputs.skip != 'true'
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          # Drop findings (### blocks under ## Findings) whose **Files:** path
-          # does not exist in the working tree. Catches the most common AI
-          # hallucination: inventing a file from an import or naming guess.
+          # Two-stage finding validation, applied to each ### block under
+          # ## Findings:
+          #   1. **Files:** `path` must exist in the working tree
+          #      (catches invented filenames from import-name guessing)
+          #   2. **Quote:** ```...``` must appear verbatim in the diff or
+          #      file contents the model was given
+          #      (catches misattribution and paraphrased "from memory" claims)
+          # Findings that fail either check are dropped, with a log line
+          # explaining why so the failure mode is visible in CI history.
           import os
           import re
           import sys
@@ -361,8 +372,21 @@ jobs:
           with open(path, "r", encoding="utf-8") as f:
               text = f.read()
 
-          # Split off the Findings section so we only process findings; leave
-          # everything before and after untouched.
+          # Load the model's input corpus once. Normalize whitespace so quote
+          # matching is robust to indentation drift between source and what
+          # the model copied (it sometimes trims leading tabs).
+          def norm(s: str) -> str:
+              return re.sub(r"\s+", " ", s).strip()
+
+          corpus_parts = []
+          for src in ("/tmp/diff.txt", "/tmp/file-contents.txt"):
+              try:
+                  with open(src, "r", encoding="utf-8", errors="replace") as f:
+                      corpus_parts.append(f.read())
+              except FileNotFoundError:
+                  pass
+          corpus = norm("\n".join(corpus_parts))
+
           findings_re = re.compile(
               r"(## Findings\s*\n)(.*?)(\n##\s+\S)", re.DOTALL
           )
@@ -373,57 +397,71 @@ jobs:
 
           head, body, tail = m.group(1), m.group(2), m.group(3)
 
-          # Findings are ### blocks separated by '---' on its own line.
-          # Split conservatively on '\n---\n' (or '\n---\s*\n').
           blocks = re.split(r"\n---\s*\n", body.strip())
 
           file_re = re.compile(r"\*\*Files?:\*\*\s*(.+)")
           path_re = re.compile(r"`([^`]+)`")
+          # Match a fenced code block that follows the **Quote:** label.
+          # Tolerate optional language tag and either ``` or ~~~ fences.
+          quote_re = re.compile(
+              r"\*\*Quote:\*\*\s*\n+(?:```|~~~)[^\n]*\n(.*?)\n(?:```|~~~)",
+              re.DOTALL,
+          )
 
           kept = []
           dropped = []
           for block in blocks:
               if not block.strip().startswith("###"):
-                  # Preamble or unstructured content — keep as-is.
                   kept.append(block)
                   continue
+              title = block.splitlines()[0].strip()
+
+              # 1. File existence
               fm = file_re.search(block)
               if not fm:
-                  # No **Files:** line — can't verify, keep (rare).
-                  kept.append(block)
+                  dropped.append((title, "no **Files:** line"))
                   continue
               raw = fm.group(1).strip()
-              # Pull each `path` from the line; fall back to whitespace/comma
-              # split if no backticks were used.
               paths = path_re.findall(raw)
               if not paths:
                   paths = [p.strip().rstrip(",") for p in re.split(r"[,\s]+", raw) if p.strip()]
               missing = [p for p in paths if not os.path.isfile(p)]
               if missing:
-                  title = block.splitlines()[0].strip()
-                  dropped.append((title, missing))
+                  dropped.append((title, f"missing file(s): {', '.join(missing)}"))
                   continue
+
+              # 2. Quote present and verifiable
+              qm = quote_re.search(block)
+              if not qm:
+                  dropped.append((title, "no **Quote:** code block"))
+                  continue
+              quote_norm = norm(qm.group(1))
+              if not quote_norm:
+                  dropped.append((title, "empty **Quote:** block"))
+                  continue
+              if quote_norm not in corpus:
+                  preview = quote_norm[:80] + ("…" if len(quote_norm) > 80 else "")
+                  dropped.append((title, f"quote not found in diff or file-contents: '{preview}'"))
+                  continue
+
               kept.append(block)
 
           new_body = "\n\n---\n\n".join(kept).strip() + "\n\n"
 
-          # If everything was dropped, leave a placeholder so the section is
-          # still present and downstream consumers don't break.
           if not any(b.strip().startswith("###") for b in kept):
-              new_body += "_All findings were dropped by post-processing (file paths did not exist in the repo)._\n\n"
+              new_body += "_All findings were dropped by post-processing (failed file or quote verification)._\n\n"
 
           new_text = text[:m.start()] + head + new_body + tail + text[m.end():]
           with open(path, "w", encoding="utf-8") as f:
               f.write(new_text)
 
           if dropped:
-              print(f"Dropped {len(dropped)} finding(s) whose file paths do not exist:")
-              for title, missing in dropped:
+              print(f"Dropped {len(dropped)} finding(s):")
+              for title, reason in dropped:
                   print(f"  - {title}")
-                  for p in missing:
-                      print(f"      missing: {p}")
+                  print(f"      reason: {reason}")
           else:
-              print("No findings dropped — all referenced file paths exist.")
+              print("No findings dropped — all passed file and quote verification.")
           PY
 
       - name: Create issue
