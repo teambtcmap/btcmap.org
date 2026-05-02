@@ -5,10 +5,27 @@ export let value: string;
 
 let copied = false;
 
-const copy = (field: string) => {
-	navigator.clipboard.writeText(field);
-	copied = true;
-	setTimeout(() => (copied = false), 2100);
+const copy = async (field: string) => {
+	let success = false;
+	try {
+		await navigator.clipboard.writeText(field);
+		success = true;
+	} catch {
+		// fallback for browsers/contexts where clipboard API is unavailable
+		const el = document.createElement("textarea");
+		el.value = field;
+		el.style.position = "fixed";
+		el.style.opacity = "0";
+		document.body.appendChild(el);
+		el.focus();
+		el.select();
+		success = document.execCommand("copy");
+		document.body.removeChild(el);
+	}
+	if (success) {
+		copied = true;
+		setTimeout(() => (copied = false), 2100);
+	}
 };
 </script>
 
