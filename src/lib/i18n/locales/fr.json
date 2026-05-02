@@ -1,6 +1,6 @@
 {
 	"home": {
-		"hero": "Trouvez des endroits où dépenser vos sats, où que vous soyez.",
+		"hero": "Trouvez des endroits où dépenser vos sats, où que vous soyez",
 		"openMap": "Ouvrir la carte",
 		"addLocation": "Ajouter un lieu",
 		"description": "Nous utilisons {osmLink} pour identifier les lieux qui acceptent le bitcoin et nous affichons ces commerces dans nos magnifiques applications.",
@@ -407,7 +407,7 @@
 		"captchaPlaceholder": "Veuillez saisir le texte du captcha."
 	},
 	"addLocation": {
-		"hero": "Vous acceptez le bitcoin ? Faites-vous trouver.",
+		"hero": "Vous acceptez le bitcoin ? Faites-vous trouver",
 		"businessOwner": "Si vous êtes propriétaire d'un commerce, veuillez lire nos",
 		"bestPractices": "Bonnes pratiques pour les commerces",
 		"guide": ".",
@@ -455,7 +455,7 @@
 		"submitAnother": "Soumettre un(e) autre {type}"
 	},
 	"verifyLocation": {
-		"hero": "Aidez à améliorer les données pour tous.",
+		"hero": "Aidez à améliorer les données pour tous",
 		"heading": "Vérifier le lieu",
 		"subheading": "(Assurez-vous que les informations sont toujours exactes et mettez-les à jour si nécessaire.)",
 		"descriptionPart1": "Veuillez remplir le formulaire suivant et l'un de nos bénévoles mettra à jour votre lieu sur la carte. Saviez-vous que vous pouvez mettre à jour ces données vous-même sur",
@@ -539,7 +539,7 @@
 		"of": "sur"
 	},
 	"communities": {
-		"hero": "Rejoignez la communauté de cartographie bitcoin.",
+		"hero": "Rejoignez la communauté de cartographie bitcoin",
 		"description": "Prenez en main les données de cartographie bitcoin de votre zone et contribuez à l'adoption. Les communautés bitcoin sont l'étincelle qui allume le mouvement. Rejoignez vos amis, intégrez des commerces et amusez-vous !",
 		"leaderboardHero": "Meilleures communautés",
 		"leaderboardDescription": "Les communautés de cartographie bitcoin maintiennent leurs données locales et s'efforcent d'avoir les informations les plus précises. Elles aident également à intégrer de nouveaux commerces dans leur zone !",
@@ -792,7 +792,7 @@
 		"tableTitle": "Problèmes globaux"
 	},
 	"countries": {
-		"hero": "Adoption du bitcoin par pays.",
+		"hero": "Adoption du bitcoin par pays",
 		"description": "Votre pays ? Votre carte !",
 		"viewLeaderboard": "Voir le classement",
 		"viewDirectory": "Voir le répertoire",
@@ -941,7 +941,7 @@
 		}
 	},
 	"apps": {
-		"hero": "Trouvez des commerces sur toutes les plateformes.",
+		"hero": "Trouvez des commerces sur toutes les plateformes",
 		"subheading": "Nous vous accompagnons quel que soit votre appareil et votre système d'exploitation.",
 		"btcmap": "BTC Map Apps",
 		"poweredBy": "Powered by BTC Map",
@@ -989,7 +989,7 @@
 	},
 	"supporters": {
 		"title": "Nous soutenir",
-		"hero": "Aidez à placer le bitcoin sur la carte.",
+		"hero": "Aidez à placer le bitcoin sur la carte",
 		"donate": {
 			"scanOrClick": "Scannez ou cliquez pour faire un don",
 			"onchain": "On-chain",
