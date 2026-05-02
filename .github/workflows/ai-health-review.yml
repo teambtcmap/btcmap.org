@@ -392,7 +392,17 @@ jobs:
           )
           m = findings_re.search(text)
           if not m:
-              print("No '## Findings' section found — leaving review unchanged.")
+              # Surface the silent-pass as a workflow annotation so a
+              # malformed AI response doesn't quietly publish unvalidated.
+              # Don't hard-fail: a genuinely empty period with no findings
+              # is also a valid outcome and shouldn't break the schedule.
+              print(
+                  "::warning title=Health review validator::"
+                  "Could not locate a '## Findings' section in the AI "
+                  "response — review was published without file/quote "
+                  "verification. If the report contains findings, the "
+                  "output format may have drifted from the prompt schema."
+              )
               sys.exit(0)
 
           head, body, tail = m.group(1), m.group(2), m.group(3)
