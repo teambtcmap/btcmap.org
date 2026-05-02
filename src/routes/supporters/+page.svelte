@@ -23,10 +23,6 @@ const PLEB_TIER_CTA = "https://geyser.fund/project/btcmap/leaderboard";
 
 const onchain = "bc1qt4g28vq480ec4ncl4h67qu4q4k2zel7xu0c2wg";
 const lnurlp = "donations@btcmap.org";
-const lightningnode =
-	"038f4d8a3fdeeb92bbcd97f510c28c2ad814f1736792f5df97a476d38ef4280cb5";
-const lightningnodeUrl =
-	"https://amboss.space/node/038f4d8a3fdeeb92bbcd97f510c28c2ad814f1736792f5df97a476d38ef4280cb5";
 
 let mounted = false;
 onMount(() => {
@@ -47,11 +43,7 @@ const renderQr: Action<HTMLCanvasElement> = (node) => {
 		.then((QRCode) => {
 			QRCode.default.toCanvas(
 				node,
-				network === "Node"
-					? lightningnode
-					: network === "Lightning"
-						? `lightning:${lnurlp}`
-						: `bitcoin:${onchain}`,
+				network === "Lightning" ? `lightning:${lnurlp}` : `bitcoin:${onchain}`,
 				{
 					width:
 						window.innerWidth > BREAKPOINTS.md
@@ -185,28 +177,18 @@ const plebTier = sponsorshipTiers.find((t) => t.level === "Pleb")!;
 		</div>
 	</section>
 
-	<section id="node">
-		<DonationOption
-			value={lightningnode}
-			textKey="supporters.node.heading"
-			network="Node"
-			{showQrToggle}
-		/>
-	</section>
 </div>
 
 <Modal
 	bind:open={showQr}
-	title={network === 'Node'
-		? t("supporters.node.scanOrClick")
-		: network === 'Lightning'
-			? t("supporters.donate.lightning")
-			: t("supporters.donate.onchain")}
+	title={network === 'Lightning'
+		? t("supporters.donate.lightning")
+		: t("supporters.donate.onchain")}
 	titleId="qr-modal-title"
 >
 	<div class="flex flex-col items-center gap-5 py-4">
 		<!-- qr -->
-		<a href={network === 'Node' ? lightningnodeUrl : network === 'Lightning' ? `lightning:${lnurlp}` : `bitcoin:${onchain}`}>
+		<a href={network === 'Lightning' ? `lightning:${lnurlp}` : `bitcoin:${onchain}`}>
 			<canvas
 				use:renderQr
 				class="mx-auto h-[200px] w-[200px] rounded-xl border-4 border-link transition-colors hover:border-hover sm:h-[256px] sm:w-[256px]"
@@ -215,17 +197,15 @@ const plebTier = sponsorshipTiers.find((t) => t.level === "Pleb")!;
 
 		<!-- cta -->
 		<p class="text-center text-base text-primary dark:text-white">
-			{network === 'Node' ? t("supporters.node.scanOrClick") : t("supporters.donate.scanOrClick")}
-			{#if network !== 'Node'}
-				<strong class="lowercase"
-					>{network === 'Lightning' ? t("supporters.donate.lightning") : t("supporters.donate.onchain")}</strong
-				>
-				<img
-					src={network === 'Lightning' ? '/icons/ln-highlight.svg' : '/icons/btc-highlight.svg'}
-					alt={`${network === 'Lightning' ? t("supporters.donate.lightning") : t("supporters.donate.onchain")} ${t("supporters.donate.protocolAlt")}`}
-					class="mb-1 inline dark:rounded-full dark:bg-white dark:p-0.5"
-				/>
-			{/if}
+			{t("supporters.donate.scanOrClick")}
+			<strong class="lowercase"
+				>{network === 'Lightning' ? t("supporters.donate.lightning") : t("supporters.donate.onchain")}</strong
+			>
+			<img
+				src={network === 'Lightning' ? '/icons/ln-highlight.svg' : '/icons/btc-highlight.svg'}
+				alt={`${network === 'Lightning' ? t("supporters.donate.lightning") : t("supporters.donate.onchain")} ${t("supporters.donate.protocolAlt")}`}
+				class="mb-1 inline dark:rounded-full dark:bg-white dark:p-0.5"
+			/>
 		</p>
 	</div>
 </Modal>

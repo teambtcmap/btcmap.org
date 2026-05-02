@@ -406,7 +406,7 @@ export type SavedPlace = {
 	lon: number;
 };
 
-export type DonationType = "On-chain" | "Lightning" | "Node";
+export type DonationType = "On-chain" | "Lightning";
 
 export type DropdownLink = {
 	url: string;
