@@ -618,13 +618,18 @@ export const generateLocationIcon = (L: Leaflet) => {
 	});
 };
 
+// DivIcon augmented with the Svelte component instances it owns, so the
+// marker that uses the icon can $destroy() them when removed from the map.
+// Without this, every cluster re-render leaks the icon components.
+type DivIconWithInstances = DivIcon & { _iconInstances?: Icon[] };
+
 export const generateIcon = (
 	L: Leaflet,
 	icon: string,
 	boosted: boolean,
 	commentsCount: number,
 	isSaved = false,
-) => {
+): DivIconWithInstances => {
 	const className = boosted ? "animate-wiggle" : "";
 	const iconTmp = icon !== "question_mark" ? icon : "currency_bitcoin";
 
@@ -632,17 +637,21 @@ export const generateIcon = (
 	iconContainer.className =
 		"icon-container relative flex items-center justify-center";
 
+	const instances: Icon[] = [];
+
 	const iconElement = document.createElement("div");
-	new Icon({
-		target: iconElement,
-		props: {
-			w: "20",
-			h: "20",
-			class: `${className} mt-[5.75px] text-white`,
-			icon: iconTmp,
-			type: "material",
-		},
-	});
+	instances.push(
+		new Icon({
+			target: iconElement,
+			props: {
+				w: "20",
+				h: "20",
+				class: `${className} mt-[5.75px] text-white`,
+				icon: iconTmp,
+				type: "material",
+			},
+		}),
+	);
 	iconContainer.appendChild(iconElement);
 
 	if (commentsCount > 0) {
@@ -664,15 +673,17 @@ export const generateIcon = (
 			"pointer-events-none";
 		const savedIcon = document.createElement("div");
 		// Wrapper's text-link colors the glyph via currentColor — no class needed here.
-		new Icon({
-			target: savedIcon,
-			props: {
-				w: "10",
-				h: "10",
-				icon: "bookmark_filled",
-				type: "material",
-			},
-		});
+		instances.push(
+			new Icon({
+				target: savedIcon,
+				props: {
+					w: "10",
+					h: "10",
+					icon: "bookmark_filled",
+					type: "material",
+				},
+			}),
+		);
 		savedBadge.appendChild(savedIcon);
 		iconContainer.appendChild(savedBadge);
 	}
@@ -685,13 +696,15 @@ export const generateIcon = (
 		: humanizeIconName(icon);
 	iconContainer.appendChild(accessibleLabel);
 
-	return L.divIcon({
+	const divIcon = L.divIcon({
 		className: boosted ? "boosted-icon" : "div-icon",
 		iconSize: [32, 43],
 		iconAnchor: [16, 43],
 		popupAnchor: [0, -43],
 		html: iconContainer,
-	});
+	}) as DivIconWithInstances;
+	divIcon._iconInstances = instances;
+	return divIcon;
 };
 
 // Cache verification arrays keyed by id + updated_at so stale entries are
@@ -772,6 +785,15 @@ export const generateMarker = ({
 	// issues?: Issue[];
 }) => {
 	const marker = L.marker([lat, long], { icon });
+
+	const ownedInstances = (icon as DivIconWithInstances)._iconInstances;
+	if (ownedInstances && ownedInstances.length > 0) {
+		marker.on("remove", () => {
+			for (const instance of ownedInstances) {
+				instance.$destroy();
+			}
+		});
+	}
 
 	marker.on("click", async () => {
 		if (onMarkerClick) {
