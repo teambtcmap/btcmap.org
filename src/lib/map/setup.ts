@@ -623,6 +623,35 @@ export const generateLocationIcon = (L: Leaflet) => {
 // Without this, every cluster re-render leaks the icon components.
 type DivIconWithInstances = DivIcon & { _iconInstances?: Icon[] };
 
+// Wire up Icon-component cleanup for a marker built from a generateIcon()
+// divIcon. Wraps setIcon so swaps (boost / comment / saved-status updates)
+// destroy the previous icon's components, and registers an on('remove')
+// hook so cluster-clear / map-unmount paths also clean up.
+//
+// Without wrapping setIcon, a single marker.setIcon(newIcon) call leaks
+// every Icon component the previous icon owned — a marker that flips
+// between saved/unsaved many times accumulates instances forever.
+export const attachIconCleanup = (
+	marker: import("leaflet").Marker,
+	initialIcon: DivIcon,
+): void => {
+	const readInstances = (i: DivIcon): Icon[] =>
+		(i as DivIconWithInstances)._iconInstances ?? [];
+	let trackedInstances = readInstances(initialIcon);
+
+	const origSetIcon = marker.setIcon.bind(marker);
+	marker.setIcon = (nextIcon: DivIcon) => {
+		for (const instance of trackedInstances) instance.$destroy();
+		trackedInstances = readInstances(nextIcon);
+		return origSetIcon(nextIcon);
+	};
+
+	marker.on("remove", () => {
+		for (const instance of trackedInstances) instance.$destroy();
+		trackedInstances = [];
+	});
+};
+
 export const generateIcon = (
 	L: Leaflet,
 	icon: string,
@@ -785,15 +814,7 @@ export const generateMarker = ({
 	// issues?: Issue[];
 }) => {
 	const marker = L.marker([lat, long], { icon });
-
-	const ownedInstances = (icon as DivIconWithInstances)._iconInstances;
-	if (ownedInstances && ownedInstances.length > 0) {
-		marker.on("remove", () => {
-			for (const instance of ownedInstances) {
-				instance.$destroy();
-			}
-		});
-	}
+	attachIconCleanup(marker, icon);
 
 	marker.on("click", async () => {
 		if (onMarkerClick) {
