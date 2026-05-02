@@ -32,7 +32,7 @@ test.describe('Areas', () => {
 		await expect(page).toHaveURL(/communities/);
 
 		const communityHeading = page.getByRole('heading', {
-			name: 'Join the bitcoin map community.'
+			name: 'Join the bitcoin map community'
 		});
 		await expect(communityHeading).toBeVisible();
 
