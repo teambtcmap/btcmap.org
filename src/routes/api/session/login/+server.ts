@@ -1,14 +1,13 @@
 import { error, json } from "@sveltejs/kit";
 
 import { API_BASE } from "$lib/api-base";
-import api from "$lib/axios";
 
 import type { RequestHandler } from "./$types";
 
 // POST /api/session/login
 // Authenticates with username + password and returns a Bearer token.
 // Proxies POST /v4/users/{username}/tokens to avoid CORS preflight issues.
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, fetch }) => {
 	const body = await request.json();
 	const { username, password } = body;
 
@@ -19,22 +18,34 @@ export const POST: RequestHandler = async ({ request }) => {
 		error(400, "Missing or invalid password");
 	}
 
-	const tokenRes = await api
-		.post(
+	let tokenRes: Response;
+	try {
+		tokenRes = await fetch(
 			`${API_BASE}/v4/users/${encodeURIComponent(username)}/tokens`,
-			{ label: "BTC Map Web" },
-			{ headers: { Authorization: `Bearer ${password}` } },
-		)
-		.catch((err) => {
-			const status = err?.response?.status;
-			if (status === 401 || status === 403) {
-				error(401, "Invalid username or password");
-			}
-			console.error("Failed to create token:", err?.response?.status);
-			error(502, "Failed to log in");
-		});
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${password}`,
+				},
+				body: JSON.stringify({ label: "BTC Map Web" }),
+			},
+		);
+	} catch (err) {
+		console.error("Failed to create token:", err);
+		error(502, "Failed to log in");
+	}
 
-	const token = tokenRes.data?.token;
+	if (!tokenRes.ok) {
+		if (tokenRes.status === 401 || tokenRes.status === 403) {
+			error(401, "Invalid username or password");
+		}
+		console.error("Failed to create token:", tokenRes.status);
+		error(502, "Failed to log in");
+	}
+
+	const tokenData = await tokenRes.json();
+	const token = tokenData?.token;
 	if (typeof token !== "string") {
 		error(502, "Token creation returned no token");
 	}
