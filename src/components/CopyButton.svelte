@@ -6,8 +6,10 @@ export let value: string;
 let copied = false;
 
 const copy = async (field: string) => {
+	let success = false;
 	try {
 		await navigator.clipboard.writeText(field);
+		success = true;
 	} catch {
 		// fallback for browsers/contexts where clipboard API is unavailable
 		const el = document.createElement("textarea");
@@ -17,11 +19,13 @@ const copy = async (field: string) => {
 		document.body.appendChild(el);
 		el.focus();
 		el.select();
-		document.execCommand("copy");
+		success = document.execCommand("copy");
 		document.body.removeChild(el);
 	}
-	copied = true;
-	setTimeout(() => (copied = false), 2100);
+	if (success) {
+		copied = true;
+		setTimeout(() => (copied = false), 2100);
+	}
 };
 </script>
 
