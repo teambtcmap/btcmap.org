@@ -15,10 +15,18 @@ const tierStyles: Partial<Record<SponsorshipTier["level"], string>> = {
 };
 
 let activeTooltip: string | null = null;
+// tracks plebs whose avatar and robohash both failed
+let brokenAvatars = new Set<string>();
 
 function onAvatarError(e: Event, pleb: Pleb) {
 	const img = e.currentTarget as HTMLImageElement;
-	img.src = `https://robohash.org/${pleb.id}?set=set1&size=64x64`;
+	const robohash = `https://robohash.org/${pleb.id}?set=set1&size=64x64`;
+	if (img.src !== robohash) {
+		img.src = robohash;
+	} else {
+		// robohash also failed — fall back to initials
+		brokenAvatars = new Set(brokenAvatars).add(pleb.id);
+	}
 }
 
 function onTouchEnd(pleb: Pleb, e: TouchEvent) {
@@ -55,38 +63,54 @@ function onTouchEnd(pleb: Pleb, e: TouchEvent) {
 					class="group relative transition-transform duration-150 hover:-translate-y-0.5"
 					on:touchend|stopPropagation={(e) => onTouchEnd(pleb, e)}
 				>
-			<img
-					src={pleb.avatar ?? `https://robohash.org/${pleb.id}?set=set1&size=64x64`}
-					alt={pleb.name}
-					class="h-16 w-16 rounded-full border-2 border-white/60 object-cover shadow-md group-hover:border-link dark:border-white/20"
-					on:error={(e) => onAvatarError(e, pleb)}
-				/>
+					{#if brokenAvatars.has(pleb.id)}
+						<div
+							class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/60 bg-[#F7931A]/20 text-xl font-bold text-[#F7931A] shadow-md dark:border-white/20 dark:bg-[#F7931A]/15 dark:text-[#F9A136]"
+						>
+							{pleb.name[0]}
+						</div>
+					{:else}
+						<img
+							src={pleb.avatar ?? `https://robohash.org/${pleb.id}?set=set1&size=64x64`}
+							alt={pleb.name}
+							class="h-16 w-16 rounded-full border-2 border-white/60 object-cover shadow-md group-hover:border-link dark:border-white/20"
+							on:error={(e) => onAvatarError(e, pleb)}
+						/>
+					{/if}
 					<!-- Desktop: CSS hover. Mobile: controlled by activeTooltip -->
 					<span
 						class="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-center text-xs text-white transition-opacity dark:bg-gray-700
 					{activeTooltip === pleb.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}"
+					>
+						<span class="block font-medium">{pleb.name}</span>
+						{#if pleb.sats}
+							<span class="block opacity-75">{pleb.sats.toLocaleString()} sats</span>
+						{/if}
+					</span>
+				</a>
+			{:else}
+				<!-- svelte-ignore a11y-no-static-element-interactions -->
+				<div
+					class="group relative"
+					on:touchend|stopPropagation={(e) => onTouchEnd(pleb, e)}
 				>
-					<span class="block font-medium">{pleb.name}</span>
-					{#if pleb.sats}
-						<span class="block opacity-75">{pleb.sats.toLocaleString()} sats</span>
+					{#if brokenAvatars.has(pleb.id)}
+						<div
+							class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/60 bg-[#F7931A]/20 text-xl font-bold text-[#F7931A] shadow-md dark:border-white/20 dark:bg-[#F7931A]/15 dark:text-[#F9A136]"
+						>
+							{pleb.name[0]}
+						</div>
+					{:else}
+						<img
+							src={pleb.avatar ?? `https://robohash.org/${pleb.id}?set=set1&size=64x64`}
+							alt={pleb.name}
+							class="h-16 w-16 rounded-full border-2 border-white/60 object-cover shadow-md dark:border-white/20"
+							on:error={(e) => onAvatarError(e, pleb)}
+						/>
 					{/if}
-				</span>
-			</a>
-		{:else}
-			<!-- svelte-ignore a11y-no-static-element-interactions -->
-			<div
-				class="group relative"
-				on:touchend|stopPropagation={(e) => onTouchEnd(pleb, e)}
-			>
-		<img
-			src={pleb.avatar ?? `https://robohash.org/${pleb.id}?set=set1&size=64x64`}
-			alt={pleb.name}
-			class="h-16 w-16 rounded-full border-2 border-white/60 object-cover shadow-md dark:border-white/20"
-			on:error={(e) => onAvatarError(e, pleb)}
-		/>
-				<span
-					class="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-center text-xs text-white transition-opacity dark:bg-gray-700
-						{activeTooltip === pleb.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}"
+					<span
+						class="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-center text-xs text-white transition-opacity dark:bg-gray-700
+							{activeTooltip === pleb.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}"
 					>
 						<span class="block font-medium">{pleb.name}</span>
 						{#if pleb.sats}
