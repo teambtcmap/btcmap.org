@@ -1,6 +1,6 @@
 {
 	"home": {
-		"hero": "Vind locaties om sats uit te geven, waar je ook bent.",
+		"hero": "Vind locaties om sats uit te geven, waar je ook bent",
 		"openMap": "Kaart openen",
 		"addLocation": "Locatie toevoegen",
 		"description": "Wij gebruiken {osmLink} om locaties te markeren die bitcoin accepteren, en we tonen deze ondernemers in onze prachtige apps.",
@@ -411,7 +411,7 @@
 		"captchaPlaceholder": "Voer de captcha-tekst in."
 	},
 	"addLocation": {
-		"hero": "Accepteer je bitcoin? Zorg dat je gevonden wordt.",
+		"hero": "Accepteer je bitcoin? Zorg dat je gevonden wordt",
 		"businessOwner": "Als je ondernemer bent, lees dan onze",
 		"bestPractices": "Best practices voor ondernemers",
 		"guide": "gids.",
@@ -459,7 +459,7 @@
 		"submitAnother": "Nog   n indienen {type}"
 	},
 	"verifyLocation": {
-		"hero": "Help mee om de gegevens voor iedereen beter te maken.",
+		"hero": "Help mee om de gegevens voor iedereen beter te maken",
 		"heading": "Controleer locatie",
 		"subheading": "(Controleer of de informatie nog klopt en werk deze zo nodig bij.)",
 		"descriptionPart1": "Vul het onderstaande formulier in, dan werkt een van onze vrijwilligers je locatie bij op de kaart. Wist je al dat je deze informatie zelf kunt wijzigen via",
@@ -543,7 +543,7 @@
 		"of": "van"
 	},
 	"communities": {
-		"hero": "Sluit u aan bij de bitcoin-kaartgemeenschap.",
+		"hero": "Sluit u aan bij de bitcoin-kaartgemeenschap",
 		"description": "Neem de verantwoordelijkheid voor uw lokale bitcoin-kaartgegevens en stimuleer de adoptie. Bitcoin-gemeenschappen zijn de vonk die de beweging doet ontbranden. Sluit je aan bij je vrienden, meld je aan bij bedrijven en veel plezier!",
 		"leaderboardHero": "Topgemeenschappen",
 		"leaderboardDescription": "Bitcoin-kaartgemeenschappen onderhouden hun lokale datasets en streven ernaar om over de meest nauwkeurige informatie te beschikken. Ze helpen ook nieuwe verkopers in hun regio aan boord te krijgen!",
@@ -796,7 +796,7 @@
 		"tableTitle": "Mondiale problemen"
 	},
 	"countries": {
-		"hero": "Bitcoin-adoptie door landen.",
+		"hero": "Bitcoin-adoptie door landen",
 		"description": "Jouw land? Jouw kaart!",
 		"viewLeaderboard": "Bekijk klassement",
 		"viewDirectory": "Directory bekijken",
@@ -945,7 +945,7 @@
 		}
 	},
 	"apps": {
-		"hero": "Vind verkopers op elk platform.",
+		"hero": "Vind verkopers op elk platform",
 		"subheading": "Wij staan ​​voor u klaar, op welk apparaat en besturingssysteem u ook kiest.",
 		"btcmap": "BTC Map Apps",
 		"poweredBy": "Powered by BTC Map",
@@ -993,7 +993,7 @@
 	},
 	"supporters": {
 		"title": "Steun ons",
-		"hero": "Help bitcoin op de kaart te zetten.",
+		"hero": "Help bitcoin op de kaart te zetten",
 		"donate": {
 			"scanOrClick": "Scan of klik om te doneren",
 			"onchain": "On-chain",

@@ -1,6 +1,6 @@
 {
 	"home": {
-		"hero": "Finde Orte, um Sats auszugeben, wo auch immer du bist.",
+		"hero": "Finde Orte, um Sats auszugeben, wo auch immer du bist",
 		"openMap": "Karte öffnen",
 		"addLocation": "Ort hinzufügen",
 		"description": "Wir nutzen {osmLink}, um Orte zu markieren, die Bitcoin akzeptieren, und zeigen diese Händler in unseren schönen Apps.",
@@ -455,7 +455,7 @@
 		"submitAnother": "Noch ein {type} einreichen"
 	},
 	"verifyLocation": {
-		"hero": "Hilf, die Daten für alle zu verbessern.",
+		"hero": "Hilf, die Daten für alle zu verbessern",
 		"heading": "Standort verifizieren",
 		"subheading": "(Stelle sicher, dass die Informationen noch korrekt sind und aktualisiere sie gegebenenfalls.)",
 		"descriptionPart1": "Bitte fülle das folgende Formular aus und einer unserer freiwilligen Communitysmitglieder wird deinen Standort auf der Karte aktualisieren. Wusstest du, dass du diese Daten selbst auf",
@@ -539,7 +539,7 @@
 		"of": "von"
 	},
 	"communities": {
-		"hero": "Tritt der Bitcoin Map Community bei.",
+		"hero": "Tritt der Bitcoin Map Community bei",
 		"description": "Übernehme die Verantwortung für deine lokalen Bitcoin-Mapping-Daten und hilf, die Akzeptanz voranzutreiben. Bitcoin-Communities sind der Funke, der die Bewegung entzündet. Treffe Freunde, onboarde Geschäfte und hab Spaß!",
 		"leaderboardHero": "Top Communities",
 		"leaderboardDescription": "Bitcoin-Mapping-Communities pflegen ihre lokalen Datensätze und streben nach den genauesten Informationen. Sie helfen auch, neue Händler in ihrer Region zu onboarden!",
@@ -792,7 +792,7 @@
 		"tableTitle": "Globale Probleme"
 	},
 	"countries": {
-		"hero": "Bitcoin-Akzeptanz nach Ländern.",
+		"hero": "Bitcoin-Akzeptanz nach Ländern",
 		"description": "Dein Land? Deine Karte!",
 		"viewLeaderboard": "Rangliste anzeigen",
 		"viewDirectory": "Verzeichnis anzeigen",
@@ -941,7 +941,7 @@
 		}
 	},
 	"apps": {
-		"hero": "Finde Händler auf jeder Plattform.",
+		"hero": "Finde Händler auf jeder Plattform",
 		"subheading": "Wir haben dich auf jedem Gerät und Betriebssystem abgedeckt.",
 		"btcmap": "BTC Map Apps",
 		"poweredBy": "Powered by BTC Map",
@@ -989,7 +989,7 @@
 	},
 	"supporters": {
 		"title": "Unterstütze uns",
-		"hero": "Hilf, Bitcoin auf die Karte zu bringen.",
+		"hero": "Hilf, Bitcoin auf die Karte zu bringen",
 		"donate": {
 			"scanOrClick": "Scannen oder klicken, um zu spenden",
 			"onchain": "On-Chain",
