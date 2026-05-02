@@ -18,17 +18,18 @@ export type AppStoreEntry = {
 	url: string;
 };
 
-export type AppConfig = {
+type AppConfigBase = {
 	id: string;
 	name: string;
 	// path in /static, e.g. '/images/apps/btcmap.png'
 	logo: string;
 	tag: AppTag;
-	sponsor: boolean;
-	// explicit display order for sponsor cards; non-sponsors are sorted alphabetically after
-	sponsorOrder?: number;
 	stores: AppStoreEntry[];
 };
+
+export type AppConfig =
+	| (AppConfigBase & { sponsor: true; sponsorOrder: number })
+	| (AppConfigBase & { sponsor: false; sponsorOrder?: never });
 
 export const appConfigs: AppConfig[] = [
 	{
