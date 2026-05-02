@@ -11,7 +11,7 @@ export let ctaHref: string;
 
 const tierStyles: Partial<Record<SponsorshipTier["level"], string>> = {
 	// Bitcoin orange is an official brand color (#F7931A)
-	Pleb: "border-[#F7931A]/40 bg-[#F7931A]/5 dark:border-[#F7931A]/30 dark:bg-[#F7931A]/5",
+	Pleb: "border-[#F7931A]/40 bg-[#F7931A]/5 dark:border-[#F7931A]/40 dark:bg-[#F7931A]/[0.08]",
 };
 
 let activeTooltip: string | null = null;
