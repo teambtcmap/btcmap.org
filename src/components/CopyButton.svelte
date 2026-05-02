@@ -5,8 +5,21 @@ export let value: string;
 
 let copied = false;
 
-const copy = (field: string) => {
-	navigator.clipboard.writeText(field);
+const copy = async (field: string) => {
+	try {
+		await navigator.clipboard.writeText(field);
+	} catch {
+		// fallback for browsers/contexts where clipboard API is unavailable
+		const el = document.createElement("textarea");
+		el.value = field;
+		el.style.position = "fixed";
+		el.style.opacity = "0";
+		document.body.appendChild(el);
+		el.focus();
+		el.select();
+		document.execCommand("copy");
+		document.body.removeChild(el);
+	}
 	copied = true;
 	setTimeout(() => (copied = false), 2100);
 };
