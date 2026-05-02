@@ -32,7 +32,18 @@ export const GET: RequestHandler = async ({ fetch }) => {
 
 	let data: Record<string, unknown>;
 	try {
-		data = await res.json();
+		const parsed: unknown = await res.json();
+		if (
+			parsed === null ||
+			typeof parsed !== "object" ||
+			Array.isArray(parsed)
+		) {
+			return json(
+				{ status: "ERROR", reason: "Invalid upstream response" },
+				{ status: 502, headers: CORS_HEADERS },
+			);
+		}
+		data = parsed as Record<string, unknown>;
 	} catch {
 		return json(
 			{ status: "ERROR", reason: "Invalid upstream response" },

@@ -147,13 +147,13 @@ export const load: PageServerLoad = async ({ fetch }) => {
 			sats: f.amountFunded,
 		}));
 
-		// Anon contributions — each gets a unique robohash seeded by createdAt
+		// Anon contributions — index is appended to createdAt to guarantee unique IDs
 		const anonPlebs: Pleb[] = contributions
 			.filter((c) => c.funder.user === null)
-			.map((c) => ({
-				id: `anon-${c.createdAt}`,
+			.map((c, i) => ({
+				id: `anon-${c.createdAt}-${i}`,
 				name: "Anon",
-				avatar: `https://robohash.org/anon-${c.createdAt}?set=set1&size=64x64`,
+				avatar: `https://robohash.org/anon-${c.createdAt}-${i}?set=set1&size=64x64`,
 				sats: c.amount,
 			}));
 
