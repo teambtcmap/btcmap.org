@@ -129,6 +129,7 @@ const renderPlaces = ({ fit }: { fit?: boolean } = {}) => {
 
 const initializeData = () => {
 	if (dataInitialized) return;
+	if (destroyed) return;
 
 	map = leaflet.map(mapElement, { attributionControl: false, maxZoom: 19 });
 
