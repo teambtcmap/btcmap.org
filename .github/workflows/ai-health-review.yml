@@ -206,7 +206,7 @@ jobs:
           - Group related findings.
           - If the changes are mostly dependency bumps or locale file updates, say so briefly and focus on substantive code changes.
           - Rate each finding: CRITICAL, HIGH, MEDIUM, or LOW.
-          - Maximum 10 findings. If you find more, keep the 10 most important.
+          - Aim for 0-5 findings. Empty or short reports are good outcomes — only add more findings if the period genuinely warrants them, never to "look thorough".
           - Do NOT suggest migrating to Svelte v5 runes — the project intentionally stays on v4.
           - Do NOT suggest formatting or import ordering changes — Biome handles that.
           - If nothing significant was missed and there are no refactoring opportunities, say so briefly. Do not invent findings.
@@ -216,8 +216,7 @@ jobs:
           - For each finding, you must be able to point to specific lines in the diff or file contents that prove the issue exists. If you cannot, drop it.
           - NEVER assume what a module contains based on its name. Read the provided file contents. If a module is not included, do not make claims about its internals.
           - Before flagging a pattern in new code, check whether existing files in the full file contents use the same pattern. If they do, it is an established project convention — do not flag it.
-          - Distinguish CONFIRMED (you can see the bug in provided code) from SUSPECTED (inferring from incomplete info). Only CONFIRMED issues may be rated HIGH or CRITICAL. SUSPECTED issues must be rated LOW and prefixed with "[UNVERIFIED]".
-          - Maximum 3 unverified findings. If you have more, keep only the 3 most plausible.
+          - Do NOT include unverified or speculative findings. If you cannot directly point to specific lines in the provided diff or file contents that prove the issue exists, drop the finding entirely. There is no quota for "[UNVERIFIED]" or low-confidence items — omit them.
 
           Output format (strict markdown):
           # Biweekly Codebase Health Review
@@ -345,6 +344,87 @@ jobs:
           FOOTER
 
           echo "Review generated ($(wc -c < /tmp/review.md) bytes)"
+
+      - name: Drop findings whose files do not exist
+        if: steps.commits.outputs.skip != 'true'
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          # Drop findings (### blocks under ## Findings) whose **Files:** path
+          # does not exist in the working tree. Catches the most common AI
+          # hallucination: inventing a file from an import or naming guess.
+          import os
+          import re
+          import sys
+
+          path = "/tmp/review.md"
+          with open(path, "r", encoding="utf-8") as f:
+              text = f.read()
+
+          # Split off the Findings section so we only process findings; leave
+          # everything before and after untouched.
+          findings_re = re.compile(
+              r"(## Findings\s*\n)(.*?)(\n##\s+\S)", re.DOTALL
+          )
+          m = findings_re.search(text)
+          if not m:
+              print("No '## Findings' section found — leaving review unchanged.")
+              sys.exit(0)
+
+          head, body, tail = m.group(1), m.group(2), m.group(3)
+
+          # Findings are ### blocks separated by '---' on its own line.
+          # Split conservatively on '\n---\n' (or '\n---\s*\n').
+          blocks = re.split(r"\n---\s*\n", body.strip())
+
+          file_re = re.compile(r"\*\*Files?:\*\*\s*(.+)")
+          path_re = re.compile(r"`([^`]+)`")
+
+          kept = []
+          dropped = []
+          for block in blocks:
+              if not block.strip().startswith("###"):
+                  # Preamble or unstructured content — keep as-is.
+                  kept.append(block)
+                  continue
+              fm = file_re.search(block)
+              if not fm:
+                  # No **Files:** line — can't verify, keep (rare).
+                  kept.append(block)
+                  continue
+              raw = fm.group(1).strip()
+              # Pull each `path` from the line; fall back to whitespace/comma
+              # split if no backticks were used.
+              paths = path_re.findall(raw)
+              if not paths:
+                  paths = [p.strip().rstrip(",") for p in re.split(r"[,\s]+", raw) if p.strip()]
+              missing = [p for p in paths if not os.path.isfile(p)]
+              if missing:
+                  title = block.splitlines()[0].strip()
+                  dropped.append((title, missing))
+                  continue
+              kept.append(block)
+
+          new_body = "\n\n---\n\n".join(kept).strip() + "\n\n"
+
+          # If everything was dropped, leave a placeholder so the section is
+          # still present and downstream consumers don't break.
+          if not any(b.strip().startswith("###") for b in kept):
+              new_body += "_All findings were dropped by post-processing (file paths did not exist in the repo)._\n\n"
+
+          new_text = text[:m.start()] + head + new_body + tail + text[m.end():]
+          with open(path, "w", encoding="utf-8") as f:
+              f.write(new_text)
+
+          if dropped:
+              print(f"Dropped {len(dropped)} finding(s) whose file paths do not exist:")
+              for title, missing in dropped:
+                  print(f"  - {title}")
+                  for p in missing:
+                      print(f"      missing: {p}")
+          else:
+              print("No findings dropped — all referenced file paths exist.")
+          PY
 
       - name: Create issue
         if: steps.commits.outputs.skip != 'true'
