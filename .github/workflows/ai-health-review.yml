@@ -387,6 +387,24 @@ jobs:
                   pass
           corpus = norm("\n".join(corpus_parts))
 
+          # Paths that appear as either side of a `diff --git a/x b/y` header.
+          # A finding may legitimately reference a deleted or renamed file
+          # whose path no longer exists on disk; we accept it if the path
+          # was part of this period's diff. Use the untruncated raw-diff
+          # when present so this works even on large diffs.
+          diff_paths: set[str] = set()
+          diff_header_re = re.compile(r"^diff --git a/(.+?) b/(.+)$", re.MULTILINE)
+          for src in ("/tmp/raw-diff.txt", "/tmp/diff.txt"):
+              try:
+                  with open(src, "r", encoding="utf-8", errors="replace") as f:
+                      diff_text = f.read()
+                  for ma, mb in diff_header_re.findall(diff_text):
+                      diff_paths.add(ma)
+                      diff_paths.add(mb)
+                  break
+              except FileNotFoundError:
+                  continue
+
           findings_re = re.compile(
               r"(## Findings\s*\n)(.*?)(\n##\s+\S)", re.DOTALL
           )
@@ -435,7 +453,13 @@ jobs:
               paths = path_re.findall(raw)
               if not paths:
                   paths = [p.strip().rstrip(",") for p in re.split(r"[,\s]+", raw) if p.strip()]
-              missing = [p for p in paths if not os.path.isfile(p)]
+              # A path is OK if it's on disk OR was touched by the period's
+              # diff (covers deletes and renames where the cited path is the
+              # old name). Anything else is a hallucinated path.
+              missing = [
+                  p for p in paths
+                  if not os.path.isfile(p) and p not in diff_paths
+              ]
               if missing:
                   dropped.append((title, f"missing file(s): {', '.join(missing)}"))
                   continue
