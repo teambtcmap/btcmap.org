@@ -27,6 +27,7 @@ import {
 	attribution,
 	calcVerifiedDate,
 	changeDefaultIcons,
+	disposeMarker,
 	generateIcon,
 	geolocate,
 	layers,
@@ -258,6 +259,9 @@ $: if (merchantMarker && leaflet && mapLoaded && icon) {
 onDestroy(async () => {
 	clearTimeout(shareTimeout);
 	if (map) {
+		if (merchantMarker) {
+			disposeMarker(merchantMarker);
+		}
 		console.info("Unloading Leaflet map.");
 		map.remove();
 	}

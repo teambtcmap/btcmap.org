@@ -9,6 +9,7 @@ import {
 	applyThemeToBaseMaps,
 	attribution,
 	changeDefaultIcons,
+	disposeMarker,
 	generateIcon,
 	generateMarker,
 	geolocate,
@@ -69,6 +70,13 @@ onMount(async () => {
 onDestroy(() => {
 	destroyed = true;
 	if (map) {
+		// Dispose all marker Icon components before tearing down the map;
+		// map.remove() drops the DOM but leaves Svelte components alive.
+		if (markers) {
+			markers.eachLayer((layer) =>
+				disposeMarker(layer as import("leaflet").Marker),
+			);
+		}
 		console.info("Unloading Leaflet map.");
 		map.remove();
 	}
@@ -86,6 +94,11 @@ let markers: FeatureGroup;
 const renderPlaces = ({ fit }: { fit?: boolean } = {}) => {
 	const shouldFit = fit ?? !hasFitBoundsOnce;
 
+	// Dispose Icon component instances of the markers we are about to drop;
+	// clearLayers alone removes the DOM but leaks the Svelte components.
+	markers.eachLayer((layer) =>
+		disposeMarker(layer as import("leaflet").Marker),
+	);
 	markers.clearLayers();
 
 	places.forEach((place) => {

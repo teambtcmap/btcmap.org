@@ -623,14 +623,25 @@ export const generateLocationIcon = (L: Leaflet) => {
 // Without this, every cluster re-render leaks the icon components.
 type DivIconWithInstances = DivIcon & { _iconInstances?: Icon[] };
 
+// Marker augmented with a disposer for the icon's Svelte components.
+// Disposal is explicit — see attachIconCleanup for why we don't hook
+// 'remove'.
+type MarkerWithDisposer = import("leaflet").Marker & {
+	_disposeIconInstances?: () => void;
+};
+
 // Wire up Icon-component cleanup for a marker built from a generateIcon()
-// divIcon. Wraps setIcon so swaps (boost / comment / saved-status updates)
-// destroy the previous icon's components, and registers an on('remove')
-// hook so cluster-clear / map-unmount paths also clean up.
-//
-// Without wrapping setIcon, a single marker.setIcon(newIcon) call leaks
-// every Icon component the previous icon owned — a marker that flips
-// between saved/unsaved many times accumulates instances forever.
+// divIcon. Two cleanup paths:
+//   1. setIcon is wrapped so swaps (boost/comment/saved-status updates)
+//      destroy the previous icon's components and start tracking the new
+//      one's. Covers the most common in-place state change.
+//   2. An explicit disposeMarker(marker) call destroys the currently-
+//      tracked instances. Callers must invoke this when they are
+//      *permanently* done with the marker (e.g. before clearLayers, in
+//      the parent component's onDestroy). DON'T hook on('remove') for
+//      this — Leaflet fires 'remove' during temporary layer transitions
+//      (removeLayer + addLayer), and destroying components mid-transition
+//      leaves the re-added marker with a broken icon.
 export const attachIconCleanup = (
 	marker: import("leaflet").Marker,
 	initialIcon: DivIcon,
@@ -646,10 +657,17 @@ export const attachIconCleanup = (
 		return origSetIcon(nextIcon);
 	};
 
-	marker.on("remove", () => {
+	(marker as MarkerWithDisposer)._disposeIconInstances = () => {
 		for (const instance of trackedInstances) instance.$destroy();
 		trackedInstances = [];
-	});
+	};
+};
+
+// Destroy the Svelte Icon components owned by a marker's icon. Safe to
+// call on markers without attached cleanup (no-op). Idempotent within a
+// single marker (a second call after the first finds an empty list).
+export const disposeMarker = (marker: import("leaflet").Marker): void => {
+	(marker as MarkerWithDisposer)._disposeIconInstances?.();
 };
 
 export const generateIcon = (
