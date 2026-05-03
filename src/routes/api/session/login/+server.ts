@@ -8,7 +8,15 @@ import type { RequestHandler } from "./$types";
 // Authenticates with username + password and returns a Bearer token.
 // Proxies POST /v4/users/{username}/tokens to avoid CORS preflight issues.
 export const POST: RequestHandler = async ({ request, fetch }) => {
-	const body = await request.json();
+	let body: { username?: unknown; password?: unknown };
+	try {
+		body = await request.json();
+	} catch {
+		error(400, "Invalid JSON body");
+	}
+	if (!body || typeof body !== "object") {
+		error(400, "Invalid request body");
+	}
 	const { username, password } = body;
 
 	if (!username || typeof username !== "string" || username.length > 100) {
@@ -44,7 +52,13 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 		error(502, "Failed to log in");
 	}
 
-	const tokenData = await tokenRes.json();
+	let tokenData: { token?: unknown };
+	try {
+		tokenData = (await tokenRes.json()) as { token?: unknown };
+	} catch (err) {
+		console.error("Failed to parse token response:", err);
+		error(502, "Failed to log in");
+	}
 	const token = tokenData?.token;
 	if (typeof token !== "string") {
 		error(502, "Token creation returned no token");
