@@ -142,7 +142,6 @@ export type MerchantPageData = {
 	hours?: string;
 	payment?: PayMerchant;
 	boosted?: string;
-	verified: string[];
 	phone?: string;
 	website?: string;
 	email?: string;

@@ -6,9 +6,14 @@ import tippy, { type Instance } from "tippy.js";
 import BoostButton from "$components/BoostButton.svelte";
 import Icon from "$components/Icon.svelte";
 import { _ } from "$lib/i18n";
-import { calcVerifiedDate, verifiedArr } from "$lib/map/setup";
 import type { Place } from "$lib/types";
-import { fetchEnhancedPlace, formatOpeningHours, isBoosted } from "$lib/utils";
+import {
+	fetchEnhancedPlace,
+	formatOpeningHours,
+	formatVerifiedHuman,
+	isBoosted,
+} from "$lib/utils";
+import { isRecentlyVerified } from "$lib/verification";
 
 import { resolve } from "$app/paths";
 
@@ -64,8 +69,7 @@ $: email = displayMerchant?.email;
 $: twitter = displayMerchant?.twitter;
 $: instagram = displayMerchant?.instagram;
 $: facebook = displayMerchant?.facebook;
-$: verified = displayMerchant ? verifiedArr(displayMerchant) : [];
-const verifiedDate = calcVerifiedDate();
+$: verifiedAt = displayMerchant?.verified_at;
 
 let outdatedTooltip: HTMLDivElement;
 let outdatedTooltipInstance: Instance | null = null;
@@ -221,13 +225,15 @@ onDestroy(() => {
 	</div>
 
 	<div class="w-full space-y-2 border-t border-gray-300 pt-3 dark:border-gray-300/25">
-		{#if verified.length}
+		{#if verifiedAt}
 			<div class="flex items-center space-x-1">
 				<p class="text-sm font-semibold text-gray-500 dark:text-gray-400">
-					Last Surveyed: <span class="text-primary dark:text-white">{verified[0]}</span>
+					Last Surveyed: <span class="text-primary dark:text-white"
+						>{formatVerifiedHuman(verifiedAt)}</span
+					>
 				</p>
 
-				{#if !(Date.parse(verified[0]) > verifiedDate)}
+				{#if !isRecentlyVerified(verifiedAt)}
 					<div bind:this={outdatedTooltip} class="text-primary dark:text-white">
 						<Icon w="16" h="16" icon="error_outline" type="material" class="shrink-0" />
 					</div>

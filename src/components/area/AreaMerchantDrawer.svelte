@@ -5,14 +5,13 @@ import CloseButton from "$components/CloseButton.svelte";
 import MerchantDetailsContent from "$components/MerchantDetailsContent.svelte";
 import {
 	handleBoost as boostMerchant,
-	calcVerifiedDate,
 	isBoosted as checkBoosted,
-	isUpToDate as checkUpToDate,
 	clearBoostState,
 	fetchMerchantDetails,
 } from "$lib/merchantDrawerLogic";
 import { boost } from "$lib/store";
 import type { Place } from "$lib/types";
+import { isUpToDate as checkUpToDate } from "$lib/verification";
 
 export let merchantId: number | null = null;
 export let onClose: () => void;
@@ -22,8 +21,7 @@ let isLoading = false;
 let lastFetchedId: number | null = null;
 let abortController: AbortController | null = null;
 
-const verifiedDate = calcVerifiedDate();
-$: isUpToDate = checkUpToDate(merchant, verifiedDate);
+$: isUpToDate = checkUpToDate(merchant);
 $: isBoosted = checkBoosted(merchant);
 
 let boostLoading = false;

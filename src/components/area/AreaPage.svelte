@@ -10,7 +10,6 @@ export let data: AreaPageProps;
 
 import rewind from "@mapbox/geojson-rewind";
 import { geoContains } from "d3-geo";
-import { differenceInMonths } from "date-fns/differenceInMonths";
 import { onMount } from "svelte";
 
 import AreaActivity from "$components/area/AreaActivity.svelte";
@@ -56,9 +55,9 @@ import {
 	areaIconSrc,
 	errToast,
 	formatVerifiedHuman,
-	parseDateSafely,
 	validateContinents,
 } from "$lib/utils";
+import { isRecentlyVerified } from "$lib/verification";
 
 onMount(() => {
 	batchSync([areasSync, reportsSync, eventsSync, usersSync]);
@@ -258,7 +257,7 @@ const initializeData = async () => {
 			signal
 		);
 		verifiedDate = data.verifiedDate || area["verified:date"];
-		isVerifiedDateStale = calculateStaleness(verifiedDate);
+		isVerifiedDateStale = !isRecentlyVerified(verifiedDate);
 
 		if (area["tips:lightning_address"]) {
 			lightning = {
@@ -363,14 +362,7 @@ let signal: string | undefined;
 let verifiedDate: string | undefined = data.verifiedDate;
 let hasContact = false;
 
-const calculateStaleness = (dateStr: string | undefined): boolean => {
-	if (!dateStr) return false;
-	const date = parseDateSafely(dateStr);
-	if (!date) return false;
-	return differenceInMonths(new Date(), date) > 12;
-};
-
-let isVerifiedDateStale: boolean = calculateStaleness(data.verifiedDate);
+let isVerifiedDateStale: boolean = !isRecentlyVerified(data.verifiedDate);
 let lightning: { destination: string; type: TipType } | undefined;
 
 let taggers: Tagger[] = [];

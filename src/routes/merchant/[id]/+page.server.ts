@@ -2,7 +2,6 @@ import { error, isHttpError } from "@sveltejs/kit";
 
 import { API_BASE } from "$lib/api-base";
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
-import { verifiedArr } from "$lib/map/setup";
 import {
 	buildOsmTags,
 	getBoosted,
@@ -93,7 +92,6 @@ export const load: PageServerLoad<MerchantPageData> = async ({
 
 		const payment = mapPayment(placeData);
 		const boosted = getBoosted(placeData);
-		const verified = verifiedArr(placeData);
 		const contact = getContactFields(placeData);
 		const { phone, website, email, twitter, instagram, facebook } = contact;
 
@@ -120,7 +118,6 @@ export const load: PageServerLoad<MerchantPageData> = async ({
 			hours,
 			payment,
 			boosted,
-			verified,
 			phone,
 			website,
 			email,

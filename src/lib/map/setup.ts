@@ -11,7 +11,7 @@ import en from "$lib/i18n/locales/en.json";
 import { session } from "$lib/session";
 import { selectedMerchant } from "$lib/store";
 import { theme } from "$lib/theme";
-import type { BaseMaps, DomEventType, Leaflet, Place, Theme } from "$lib/types";
+import type { BaseMaps, DomEventType, Leaflet, Theme } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
 import { errToast, humanizeIconName } from "$lib/utils";
 
@@ -603,12 +603,6 @@ export const dataRefresh = (
 	DomEvent.disableClickPropagation(dataRefreshButton);
 };
 
-export const calcVerifiedDate = () => {
-	const verifiedDate = new Date();
-	const previousYear = verifiedDate.getFullYear() - 1;
-	return verifiedDate.setFullYear(previousYear);
-};
-
 export const generateLocationIcon = (L: Leaflet) => {
 	return L.divIcon({
 		className: "div-icon",
@@ -752,58 +746,6 @@ export const generateIcon = (
 	}) as DivIconWithInstances;
 	divIcon._iconInstances = instances;
 	return divIcon;
-};
-
-// Cache verification arrays keyed by id + updated_at so stale entries are
-// naturally displaced when a Place object is updated. Falls back to id-only
-// when updated_at is absent. MAX_CACHE_SIZE caps memory in long sessions.
-const MAX_CACHE_SIZE = 100;
-const verifiedCache = new Map<string, string[]>();
-
-export const verifiedArr = (place: Place): string[] => {
-	const cacheKey = `${place.id}:${place.updated_at ?? ""}`;
-
-	if (verifiedCache.has(cacheKey)) {
-		// Move to end (most recently used)
-		const cached = verifiedCache.get(cacheKey)!;
-		verifiedCache.delete(cacheKey);
-		verifiedCache.set(cacheKey, cached);
-		return cached;
-	}
-
-	const verified: string[] = [];
-
-	if (place["osm:survey:date"] && Date.parse(place["osm:survey:date"])) {
-		verified.push(place["osm:survey:date"]);
-	}
-
-	if (place["osm:check_date"] && Date.parse(place["osm:check_date"])) {
-		verified.push(place["osm:check_date"]);
-	}
-
-	if (
-		place["osm:check_date:currency:XBT"] &&
-		Date.parse(place["osm:check_date:currency:XBT"])
-	) {
-		verified.push(place["osm:check_date:currency:XBT"]);
-	}
-
-	if (verified.length > 1) {
-		verified.sort((a, b) => Date.parse(b) - Date.parse(a));
-	}
-
-	// Add to cache with eviction if needed
-	if (verifiedCache.size >= MAX_CACHE_SIZE) {
-		// Remove first entry (least recently used)
-		const firstKey = verifiedCache.keys().next().value;
-		if (firstKey !== undefined) {
-			verifiedCache.delete(firstKey);
-		}
-	}
-
-	verifiedCache.set(cacheKey, verified);
-
-	return verified;
 };
 
 export const generateMarker = ({

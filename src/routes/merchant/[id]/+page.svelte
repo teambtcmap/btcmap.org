@@ -25,7 +25,6 @@ import {
 	applyThemeToBaseMaps,
 	attachIconCleanup,
 	attribution,
-	calcVerifiedDate,
 	changeDefaultIcons,
 	disposeMarker,
 	generateIcon,
@@ -50,6 +49,7 @@ import {
 	isBoosted,
 	shareMerchant,
 } from "$lib/utils";
+import { isRecentlyVerified } from "$lib/verification";
 
 import CommentAddButton from "./components/CommentAddButton.svelte";
 import MerchantAction from "./components/MerchantAction.svelte";
@@ -169,17 +169,14 @@ $: filteredCommunities = data.areas;
 $: merchantEvents = data.activity;
 $: name = data.name;
 let boosted: string | undefined;
-let verified: string[];
 let shareConfirm = false;
 let shareTimeout: ReturnType<typeof setTimeout>;
-const verifiedDate = calcVerifiedDate();
 
 // Make comments reactive to server data updates (from invalidateAll() after adding comment)
 let comments: typeof data.comments;
 $: comments = data.comments;
 
-// Initialize verified and boosted immediately from server data (don't wait for store sync)
-$: verified = data.verified || [];
+$: verifiedAt = data.placeData?.verified_at;
 // Make boosted reactive to both server data and store updates, but only if boost is still active
 $: {
 	const placeInStore = $placesById.get(Number(data.id));
@@ -532,9 +529,9 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 				<h3 slot="header" class="text-2xl font-semibold">{$_('verification.lastSurveyed')}</h3>
 
 				<div slot="body" class="p-4">
-					{#if verified.length}
+					{#if verifiedAt}
 						<div class="flex items-center justify-center dark:text-white">
-							{#if Date.parse(verified[0]) > verifiedDate}
+							{#if isRecentlyVerified(verifiedAt)}
 								<span bind:this={verifiedTooltip}>
 									<Icon
 										w="30"
@@ -555,7 +552,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 									/>
 								</span>
 							{/if}
-							<strong>{formatVerifiedHuman(verified?.[0])}</strong>
+							<strong>{formatVerifiedHuman(verifiedAt)}</strong>
 						</div>
 					{:else}
 						<p class="font-semibold dark:text-white">{$_('verification.notSurveyed')}</p>

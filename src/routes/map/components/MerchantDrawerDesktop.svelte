@@ -15,9 +15,7 @@ import {
 import { _ } from "$lib/i18n";
 import {
 	handleBoost as boostMerchant,
-	calcVerifiedDate,
 	isBoosted as checkBoosted,
-	isUpToDate as checkUpToDate,
 	clearBoostState,
 	handleBoostComplete as completeBoost,
 	ensureBoostData,
@@ -25,6 +23,7 @@ import {
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { merchantList } from "$lib/merchantListStore";
 import { boost, resetBoost } from "$lib/store";
+import { isUpToDate as checkUpToDate } from "$lib/verification";
 
 import { invalidateAll } from "$app/navigation";
 
@@ -50,8 +49,7 @@ $: if (isOpen && drawerElement) {
 	});
 }
 
-const verifiedDate = calcVerifiedDate();
-$: isUpToDate = checkUpToDate(merchant, verifiedDate);
+$: isUpToDate = checkUpToDate(merchant);
 $: isBoosted = checkBoosted(merchant);
 
 let boostLoading = false;
