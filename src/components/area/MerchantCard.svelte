@@ -9,7 +9,7 @@ import { _ } from "$lib/i18n";
 import { verifiedArr } from "$lib/map/setup";
 import type { Place } from "$lib/types";
 import { fetchEnhancedPlace, formatOpeningHours, isBoosted } from "$lib/utils";
-import { calcVerifiedDate } from "$lib/verification";
+import { isRecentlyVerified } from "$lib/verification";
 
 import { resolve } from "$app/paths";
 
@@ -66,7 +66,6 @@ $: twitter = displayMerchant?.twitter;
 $: instagram = displayMerchant?.instagram;
 $: facebook = displayMerchant?.facebook;
 $: verified = displayMerchant ? verifiedArr(displayMerchant) : [];
-const verifiedDate = calcVerifiedDate();
 
 let outdatedTooltip: HTMLDivElement;
 let outdatedTooltipInstance: Instance | null = null;
@@ -228,7 +227,7 @@ onDestroy(() => {
 					Last Surveyed: <span class="text-primary dark:text-white">{verified[0]}</span>
 				</p>
 
-				{#if !(Date.parse(verified[0]) > verifiedDate)}
+				{#if !isRecentlyVerified(verified[0])}
 					<div bind:this={outdatedTooltip} class="text-primary dark:text-white">
 						<Icon w="16" h="16" icon="error_outline" type="material" class="shrink-0" />
 					</div>

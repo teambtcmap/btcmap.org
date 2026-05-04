@@ -49,7 +49,7 @@ import {
 	isBoosted,
 	shareMerchant,
 } from "$lib/utils";
-import { calcVerifiedDate } from "$lib/verification";
+import { isRecentlyVerified } from "$lib/verification";
 
 import CommentAddButton from "./components/CommentAddButton.svelte";
 import MerchantAction from "./components/MerchantAction.svelte";
@@ -172,7 +172,6 @@ let boosted: string | undefined;
 let verified: string[];
 let shareConfirm = false;
 let shareTimeout: ReturnType<typeof setTimeout>;
-const verifiedDate = calcVerifiedDate();
 
 // Make comments reactive to server data updates (from invalidateAll() after adding comment)
 let comments: typeof data.comments;
@@ -534,7 +533,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 				<div slot="body" class="p-4">
 					{#if verified.length}
 						<div class="flex items-center justify-center dark:text-white">
-							{#if Date.parse(verified[0]) > verifiedDate}
+							{#if isRecentlyVerified(verified[0])}
 								<span bind:this={verifiedTooltip}>
 									<Icon
 										w="30"
