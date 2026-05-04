@@ -161,6 +161,14 @@ Use the appropriate tool attribution based on which tool generated the commit:
 
 **🚨 CRITICAL REMINDER:** You MUST run `pnpm run format:fix` before staging any commit. This is non-negotiable and ensures consistent code formatting across the entire project.
 
+## i18n / Translations
+
+When editing locale files in `src/lib/i18n/locales/*.json`:
+
+- **Never translate proper names or usernames.** Personal names (e.g. `Nathan Day`), brand names, and online handles (e.g. `secondl1ght`, `karnage`) must be kept verbatim across all locales. Translating them produces incorrect, sometimes nonsensical output (e.g. "Nathan Dag", "tweedelig").
+- **Keep keys aligned with `en.json`.** When adding or renaming keys, update every locale file so the key sets match. Missing keys silently fall back to English at runtime.
+- **Use the file's existing HTML-entity style for diacritics** (`&euml;`, `&ouml;`, `&uuml;`, `&eacute;`, `&mdash;`) rather than mixing literal Unicode and entity forms within the same locale.
+
 ## API Base URL
 
 All API fetch calls use `API_BASE` from `$lib/api-base.ts` instead of hardcoding `https://api.btcmap.org`. The base URL is controlled by the `VITE_API_BASE_URL` environment variable:
