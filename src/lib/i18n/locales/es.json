@@ -659,8 +659,8 @@
 		"chartDataNote": "*Datos del gráfico actualizados una vez cada 24 horas."
 	},
 	"activityPage": {
-		"heading": "Actividad",
-		"hero": "Los Supertaggers Misteriosos no duermen. Están despiertos toda la noche etiquetando. El mundo que queremos está a una etiqueta de distancia.",
+		"title": "Actividad",
+		"subheading": "Los Supertaggers Misteriosos no duermen. Están despiertos toda la noche etiquetando. El mundo que queremos está a una etiqueta de distancia.",
 		"cta": "¡Tú también puedes ser una leyenda del superetiquetado misterioso! ¿Qué estás esperando?",
 		"getTaggin": "¡A etiquetar!",
 		"latestSupertaggers": "Últimos Supertaggers"

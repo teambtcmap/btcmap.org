@@ -659,8 +659,8 @@
 		"chartDataNote": "*Diagrammdaten werden einmal alle 24 Stunden aktualisiert."
 	},
 	"activityPage": {
-		"heading": "Aktivität",
-		"hero": "Schattenhafte Supertagger schlafen nicht. Sie sind die ganze Nacht auf und taggen. Die Welt, die wir wollen, ist nur ein Tag entfernt.",
+		"title": "Aktivität",
+		"subheading": "Schattenhafte Supertagger schlafen nicht. Sie sind die ganze Nacht auf und taggen. Die Welt, die wir wollen, ist nur ein Tag entfernt.",
 		"cta": "Du kannst auch eine schattenhafte Supertagger-Legende werden! Worauf wartest du noch?",
 		"getTaggin": "Leg los!",
 		"latestSupertaggers": "Neueste Supertagger"

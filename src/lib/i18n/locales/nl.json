@@ -751,8 +751,8 @@
 		"chartDataNote": "*Grafiekgegevens worden &eacute;&eacute;n keer per 24 uur bijgewerkt."
 	},
 	"activityPage": {
-		"heading": "Activiteit",
-		"hero": "Geheimzinnige Supertaggers slapen niet. Ze zijn de hele nacht in de weer met taggen. De wereld die we willen, is slechts &eacute;&eacute;n tag verwijderd.",
+		"title": "Activiteit",
+		"subheading": "Geheimzinnige Supertaggers slapen niet. Ze zijn de hele nacht in de weer met taggen. De wereld die we willen, is slechts &eacute;&eacute;n tag verwijderd.",
 		"cta": "Ook jij kunt een geheimzinnige supertagging-legende worden! Waar wacht je nog op?",
 		"getTaggin": "Begin met taggen!",
 		"latestSupertaggers": "Nieuwste Supertaggers"

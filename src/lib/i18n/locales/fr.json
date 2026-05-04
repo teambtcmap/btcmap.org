@@ -659,8 +659,8 @@
 		"chartDataNote": "*Données des graphiques mises à jour toutes les 24 heures."
 	},
 	"activityPage": {
-		"heading": "Activité",
-		"hero": "Les Shadowy Supertaggers ne dorment pas. Ils identifient des commerces toute la nuit. Le monde que nous voulons est à un marquage près.",
+		"title": "Activité",
+		"subheading": "Les Shadowy Supertaggers ne dorment pas. Ils identifient des commerces toute la nuit. Le monde que nous voulons est à un marquage près.",
 		"cta": "Vous aussi pouvez devenir une légende du marquage ! Qu'attendez-vous ?",
 		"getTaggin": "À vos tags !",
 		"latestSupertaggers": "Derniers Supertaggers"

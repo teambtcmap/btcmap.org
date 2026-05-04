@@ -652,8 +652,8 @@
 		"chartDataNote": "*Dados dos gráficos atualizados a cada 24 horas."
 	},
 	"activityPage": {
-		"heading": "Atividade",
-		"hero": "Os Supertaggers Sombrios não dormem. Eles ficam acordados a noite toda, etiquetando. O mundo que queremos está a uma etiqueta de distância.",
+		"title": "Atividade",
+		"subheading": "Os Supertaggers Sombrios não dormem. Eles ficam acordados a noite toda, etiquetando. O mundo que queremos está a uma etiqueta de distância.",
 		"cta": "Você também pode ser uma lenda supertagging! O que está esperando?",
 		"getTaggin": "Comece a etiquetar!",
 		"latestSupertaggers": "Últimos Supertaggers"
