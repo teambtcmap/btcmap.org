@@ -414,7 +414,6 @@
 	"meta": {
 		"countries": "Countries",
 		"countriesLeaderboard": "Countries Leaderboard",
-		"addLocation": "Add Location",
 		"addCommunity": "Add Community",
 		"communityMap": "Community Map",
 		"communities": "Communities",
@@ -495,7 +494,8 @@
 		"captchaPlaceholder": "Please enter the captcha text."
 	},
 	"addLocation": {
-		"hero": "Accept bitcoin? Get found",
+		"title": "Add Location",
+		"subheading": "Accept bitcoin? Get found",
 		"businessOwner": "If you're a business owner, please read our",
 		"bestPractices": "Merchant Best Practices",
 		"guide": "guide.",

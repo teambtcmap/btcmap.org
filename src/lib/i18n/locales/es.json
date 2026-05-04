@@ -328,7 +328,6 @@
 	"meta": {
 		"countries": "Países",
 		"countriesLeaderboard": "Tabla de Países",
-		"addLocation": "Agregar Ubicación",
 		"addCommunity": "Agregar Comunidad",
 		"communityMap": "Mapa de Comunidades",
 		"communities": "Comunidades",
@@ -407,7 +406,8 @@
 		"captchaPlaceholder": "Por favor ingresa el texto del captcha."
 	},
 	"addLocation": {
-		"hero": "¿Aceptas bitcoin? Que te encuentren",
+		"title": "Agregar Ubicación",
+		"subheading": "¿Aceptas bitcoin? Que te encuentren",
 		"businessOwner": "Si eres dueño de un negocio, por favor lee nuestras",
 		"bestPractices": "Mejores Prácticas para Comercios",
 		"guide": "guía.",

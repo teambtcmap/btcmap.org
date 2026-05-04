@@ -316,7 +316,6 @@
 	"meta": {
 		"countries": "Países",
 		"countriesLeaderboard": "Ranking de Países",
-		"addLocation": "Adicionar Local",
 		"addCommunity": "Adicionar Comunidade",
 		"communityMap": "Mapa da Comunidade",
 		"communities": "Comunidades",
@@ -408,7 +407,8 @@
 		"captchaPlaceholder": "Por favor insira o texto do captcha."
 	},
 	"addLocation": {
-		"hero": "Aceita bitcoin? Seja encontrado",
+		"title": "Adicionar Local",
+		"subheading": "Aceita bitcoin? Seja encontrado",
 		"businessOwner": "Se você é um proprietário de negócios, por favor leia nosso guia de",
 		"bestPractices": "Melhores Práticas para Comerciantes",
 		"guide": ".",

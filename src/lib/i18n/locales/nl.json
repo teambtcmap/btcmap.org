@@ -414,7 +414,6 @@
 	"meta": {
 		"countries": "Landen",
 		"countriesLeaderboard": "Landenranglijst",
-		"addLocation": "Locatie toevoegen",
 		"addCommunity": "Community toevoegen",
 		"communityMap": "Communitykaart",
 		"communities": "Community's",
@@ -495,7 +494,8 @@
 		"captchaPlaceholder": "Voer de captcha-tekst in."
 	},
 	"addLocation": {
-		"hero": "Accepteer je Bitcoin? Zorg dat je gevonden wordt",
+		"title": "Locatie toevoegen",
+		"subheading": "Accepteer je Bitcoin? Zorg dat je gevonden wordt",
 		"businessOwner": "Als je ondernemer bent, lees dan onze",
 		"bestPractices": "Best practices voor ondernemers",
 		"guide": "gids.",

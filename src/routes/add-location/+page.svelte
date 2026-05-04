@@ -354,10 +354,10 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 </script>
 
 <svelte:head>
-	<title>BTC Map - {$_('meta.addLocation')}</title>
+	<title>BTC Map - {$_('addLocation.title')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/add.png" />
-	<meta property="og:title" content="BTC Map - {$_('meta.addLocation')}" />
-	<meta name="twitter:title" content="BTC Map - {$_('meta.addLocation')}" />
+	<meta property="og:title" content="BTC Map - {$_('addLocation.title')}" />
+	<meta name="twitter:title" content="BTC Map - {$_('addLocation.title')}" />
 	<meta name="twitter:image" content="https://btcmap.org/images/og/add.png" />
 </svelte:head>
 
@@ -368,11 +368,15 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 				? 'text-white'
 				: 'gradient'} mt-10 text-center text-4xl font-semibold md:text-5xl"
 		>
-			{$_('addLocation.hero')}
+			{$_('addLocation.title')}
 		</h1>
 	{:else}
 		<HeaderPlaceholder />
 	{/if}
+
+	<p class="mt-10 text-center text-2xl font-semibold text-primary md:text-3xl dark:text-white">
+		{$_('addLocation.subheading')}
+	</p>
 
 	<p class="mt-10 text-center text-lg font-semibold text-primary md:text-xl dark:text-white">
 		{$_('addLocation.businessOwner')} <a
