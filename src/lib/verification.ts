@@ -1,20 +1,15 @@
 import type { Place } from "$lib/types";
 
-// Memoize verified date calculation - recompute only once per day
-let cachedVerifiedDate: number | null = null;
-let cachedDay: number | null = null;
-
+// Returns the timestamp exactly 12 months before "now". Intentionally
+// uncached: the previous module-scope cache keyed on Date.getDate()
+// (day-of-month, 1-31) would return a stale value when a process
+// crossed a month boundary on the same day number (e.g. May 15 → Jun
+// 15). This bites both long-lived browser sessions and SSR workers.
+// The computation is trivial, so just recompute.
 export function calcVerifiedDate(): number {
-	const today = new Date().getDate();
-	if (cachedVerifiedDate !== null && cachedDay === today) {
-		return cachedVerifiedDate;
-	}
-
-	const verifiedDate = new Date();
-	const previousYear = verifiedDate.getFullYear() - 1;
-	cachedVerifiedDate = verifiedDate.setFullYear(previousYear);
-	cachedDay = today;
-	return cachedVerifiedDate;
+	const d = new Date();
+	d.setFullYear(d.getFullYear() - 1);
+	return d.getTime();
 }
 
 // True if the given verification date is within the "recently verified"
