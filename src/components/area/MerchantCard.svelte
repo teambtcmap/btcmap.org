@@ -13,7 +13,7 @@ import {
 	formatVerifiedHuman,
 	isBoosted,
 } from "$lib/utils";
-import { isRecentlyVerified, verifiedArr } from "$lib/verification";
+import { isRecentlyVerified } from "$lib/verification";
 
 import { resolve } from "$app/paths";
 
@@ -69,7 +69,7 @@ $: email = displayMerchant?.email;
 $: twitter = displayMerchant?.twitter;
 $: instagram = displayMerchant?.instagram;
 $: facebook = displayMerchant?.facebook;
-$: verified = displayMerchant ? verifiedArr(displayMerchant) : [];
+$: verifiedAt = displayMerchant?.verified_at;
 
 let outdatedTooltip: HTMLDivElement;
 let outdatedTooltipInstance: Instance | null = null;
@@ -225,15 +225,15 @@ onDestroy(() => {
 	</div>
 
 	<div class="w-full space-y-2 border-t border-gray-300 pt-3 dark:border-gray-300/25">
-		{#if verified.length}
+		{#if verifiedAt}
 			<div class="flex items-center space-x-1">
 				<p class="text-sm font-semibold text-gray-500 dark:text-gray-400">
 					Last Surveyed: <span class="text-primary dark:text-white"
-						>{formatVerifiedHuman(verified[0])}</span
+						>{formatVerifiedHuman(verifiedAt)}</span
 					>
 				</p>
 
-				{#if !isRecentlyVerified(verified[0])}
+				{#if !isRecentlyVerified(verifiedAt)}
 					<div bind:this={outdatedTooltip} class="text-primary dark:text-white">
 						<Icon w="16" h="16" icon="error_outline" type="material" class="shrink-0" />
 					</div>

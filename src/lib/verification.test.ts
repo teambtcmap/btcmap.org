@@ -6,7 +6,6 @@ import {
 	calcVerifiedDate,
 	isRecentlyVerified,
 	isUpToDate,
-	verifiedArr,
 } from "./verification";
 
 const FIXED_NOW = new Date("2026-05-04T12:00:00Z").getTime();
@@ -75,70 +74,6 @@ describe("isRecentlyVerified", () => {
 		expect(isRecentlyVerified(null)).toBe(false);
 		expect(isRecentlyVerified("")).toBe(false);
 		expect(isRecentlyVerified("not-a-date")).toBe(false);
-	});
-});
-
-describe("verifiedArr", () => {
-	const place = (overrides: Partial<Place> = {}): Place =>
-		({ id: 1, ...overrides }) as unknown as Place;
-
-	it("returns an empty array when no OSM date tags are present", () => {
-		expect(verifiedArr(place())).toEqual([]);
-	});
-
-	it("returns the OSM date tags that are present", () => {
-		expect(
-			verifiedArr(
-				place({
-					"osm:survey:date": "2025-07-18",
-					"osm:check_date": "2025-03-01",
-				}),
-			),
-		).toEqual(["2025-07-18", "2025-03-01"]);
-	});
-
-	it("sorts multiple dates with the most recent first", () => {
-		expect(
-			verifiedArr(
-				place({
-					"osm:check_date": "2025-03-01",
-					"osm:survey:date": "2025-07-18",
-					"osm:check_date:currency:XBT": "2024-12-15",
-				}),
-			),
-		).toEqual(["2025-07-18", "2025-03-01", "2024-12-15"]);
-	});
-
-	it("ignores invalid date strings", () => {
-		expect(
-			verifiedArr(
-				place({
-					"osm:survey:date": "not-a-date",
-					"osm:check_date": "2025-07-18",
-				}),
-			),
-		).toEqual(["2025-07-18"]);
-	});
-
-	// Regression for issue #964: MerchantCard renders the same place twice -
-	// first with the stripped MAP_SYNC shape (no OSM date tags), then again
-	// after fetchEnhancedPlace populates COMPLETE_PLACE fields. A previous
-	// module-scope cache keyed on `${id}:${updated_at}` returned the empty
-	// first result for the enhanced second call, leaving cards stuck on
-	// "Not recently verified" even when the place had a fresh date.
-	it("does not return a stale empty result when the same record is later enriched", () => {
-		const id = 42;
-		const updated_at = "2025-07-19T00:00:00Z";
-
-		const stripped = place({ id, updated_at });
-		expect(verifiedArr(stripped)).toEqual([]);
-
-		const enriched = place({
-			id,
-			updated_at,
-			"osm:survey:date": "2025-07-18",
-		});
-		expect(verifiedArr(enriched)).toEqual(["2025-07-18"]);
 	});
 });
 

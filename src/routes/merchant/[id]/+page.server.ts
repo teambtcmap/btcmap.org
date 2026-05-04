@@ -17,7 +17,6 @@ import type {
 	Place,
 } from "$lib/types";
 import { isValidPlaceId } from "$lib/utils";
-import { verifiedArr } from "$lib/verification";
 
 import type { PageServerLoad } from "./$types";
 
@@ -93,7 +92,6 @@ export const load: PageServerLoad<MerchantPageData> = async ({
 
 		const payment = mapPayment(placeData);
 		const boosted = getBoosted(placeData);
-		const verified = verifiedArr(placeData);
 		const contact = getContactFields(placeData);
 		const { phone, website, email, twitter, instagram, facebook } = contact;
 
@@ -120,7 +118,6 @@ export const load: PageServerLoad<MerchantPageData> = async ({
 			hours,
 			payment,
 			boosted,
-			verified,
 			phone,
 			website,
 			email,
