@@ -7,7 +7,12 @@ import BoostButton from "$components/BoostButton.svelte";
 import Icon from "$components/Icon.svelte";
 import { _ } from "$lib/i18n";
 import type { Place } from "$lib/types";
-import { fetchEnhancedPlace, formatOpeningHours, isBoosted } from "$lib/utils";
+import {
+	fetchEnhancedPlace,
+	formatOpeningHours,
+	formatVerifiedHuman,
+	isBoosted,
+} from "$lib/utils";
 import { isRecentlyVerified, verifiedArr } from "$lib/verification";
 
 import { resolve } from "$app/paths";
@@ -223,7 +228,9 @@ onDestroy(() => {
 		{#if verified.length}
 			<div class="flex items-center space-x-1">
 				<p class="text-sm font-semibold text-gray-500 dark:text-gray-400">
-					Last Surveyed: <span class="text-primary dark:text-white">{verified[0]}</span>
+					Last Surveyed: <span class="text-primary dark:text-white"
+						>{formatVerifiedHuman(verified[0])}</span
+					>
 				</p>
 
 				{#if !isRecentlyVerified(verified[0])}
