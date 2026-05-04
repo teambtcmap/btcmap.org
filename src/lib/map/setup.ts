@@ -618,13 +618,65 @@ export const generateLocationIcon = (L: Leaflet) => {
 	});
 };
 
+// DivIcon augmented with the Svelte component instances it owns, so the
+// marker that uses the icon can $destroy() them when removed from the map.
+// Without this, every cluster re-render leaks the icon components.
+type DivIconWithInstances = DivIcon & { _iconInstances?: Icon[] };
+
+// Marker augmented with a disposer for the icon's Svelte components.
+// Disposal is explicit — see attachIconCleanup for why we don't hook
+// 'remove'.
+type MarkerWithDisposer = import("leaflet").Marker & {
+	_disposeIconInstances?: () => void;
+};
+
+// Wire up Icon-component cleanup for a marker built from a generateIcon()
+// divIcon. Two cleanup paths:
+//   1. setIcon is wrapped so swaps (boost/comment/saved-status updates)
+//      destroy the previous icon's components and start tracking the new
+//      one's. Covers the most common in-place state change.
+//   2. An explicit disposeMarker(marker) call destroys the currently-
+//      tracked instances. Callers must invoke this when they are
+//      *permanently* done with the marker (e.g. before clearLayers, in
+//      the parent component's onDestroy). DON'T hook on('remove') for
+//      this — Leaflet fires 'remove' during temporary layer transitions
+//      (removeLayer + addLayer), and destroying components mid-transition
+//      leaves the re-added marker with a broken icon.
+export const attachIconCleanup = (
+	marker: import("leaflet").Marker,
+	initialIcon: DivIcon,
+): void => {
+	const readInstances = (i: DivIcon): Icon[] =>
+		(i as DivIconWithInstances)._iconInstances ?? [];
+	let trackedInstances = readInstances(initialIcon);
+
+	const origSetIcon = marker.setIcon.bind(marker);
+	marker.setIcon = (nextIcon: DivIcon) => {
+		for (const instance of trackedInstances) instance.$destroy();
+		trackedInstances = readInstances(nextIcon);
+		return origSetIcon(nextIcon);
+	};
+
+	(marker as MarkerWithDisposer)._disposeIconInstances = () => {
+		for (const instance of trackedInstances) instance.$destroy();
+		trackedInstances = [];
+	};
+};
+
+// Destroy the Svelte Icon components owned by a marker's icon. Safe to
+// call on markers without attached cleanup (no-op). Idempotent within a
+// single marker (a second call after the first finds an empty list).
+export const disposeMarker = (marker: import("leaflet").Marker): void => {
+	(marker as MarkerWithDisposer)._disposeIconInstances?.();
+};
+
 export const generateIcon = (
 	L: Leaflet,
 	icon: string,
 	boosted: boolean,
 	commentsCount: number,
 	isSaved = false,
-) => {
+): DivIconWithInstances => {
 	const className = boosted ? "animate-wiggle" : "";
 	const iconTmp = icon !== "question_mark" ? icon : "currency_bitcoin";
 
@@ -632,17 +684,21 @@ export const generateIcon = (
 	iconContainer.className =
 		"icon-container relative flex items-center justify-center";
 
+	const instances: Icon[] = [];
+
 	const iconElement = document.createElement("div");
-	new Icon({
-		target: iconElement,
-		props: {
-			w: "20",
-			h: "20",
-			class: `${className} mt-[5.75px] text-white`,
-			icon: iconTmp,
-			type: "material",
-		},
-	});
+	instances.push(
+		new Icon({
+			target: iconElement,
+			props: {
+				w: "20",
+				h: "20",
+				class: `${className} mt-[5.75px] text-white`,
+				icon: iconTmp,
+				type: "material",
+			},
+		}),
+	);
 	iconContainer.appendChild(iconElement);
 
 	if (commentsCount > 0) {
@@ -664,15 +720,17 @@ export const generateIcon = (
 			"pointer-events-none";
 		const savedIcon = document.createElement("div");
 		// Wrapper's text-link colors the glyph via currentColor — no class needed here.
-		new Icon({
-			target: savedIcon,
-			props: {
-				w: "10",
-				h: "10",
-				icon: "bookmark_filled",
-				type: "material",
-			},
-		});
+		instances.push(
+			new Icon({
+				target: savedIcon,
+				props: {
+					w: "10",
+					h: "10",
+					icon: "bookmark_filled",
+					type: "material",
+				},
+			}),
+		);
 		savedBadge.appendChild(savedIcon);
 		iconContainer.appendChild(savedBadge);
 	}
@@ -685,13 +743,15 @@ export const generateIcon = (
 		: humanizeIconName(icon);
 	iconContainer.appendChild(accessibleLabel);
 
-	return L.divIcon({
+	const divIcon = L.divIcon({
 		className: boosted ? "boosted-icon" : "div-icon",
 		iconSize: [32, 43],
 		iconAnchor: [16, 43],
 		popupAnchor: [0, -43],
 		html: iconContainer,
-	});
+	}) as DivIconWithInstances;
+	divIcon._iconInstances = instances;
+	return divIcon;
 };
 
 // Cache verification arrays keyed by id + updated_at so stale entries are
@@ -772,6 +832,7 @@ export const generateMarker = ({
 	// issues?: Issue[];
 }) => {
 	const marker = L.marker([lat, long], { icon });
+	attachIconCleanup(marker, icon);
 
 	marker.on("click", async () => {
 		if (onMarkerClick) {

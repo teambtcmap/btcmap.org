@@ -23,9 +23,11 @@ import { _, getDisplayLang, locale } from "$lib/i18n";
 import { loadMapDependencies } from "$lib/map/imports";
 import {
 	applyThemeToBaseMaps,
+	attachIconCleanup,
 	attribution,
 	calcVerifiedDate,
 	changeDefaultIcons,
+	disposeMarker,
 	generateIcon,
 	geolocate,
 	layers,
@@ -104,6 +106,7 @@ const initializeData = () => {
 
 		if (typeof lat === "number" && typeof long === "number") {
 			merchantMarker = leaflet.marker([lat, long], { icon: divIcon });
+			attachIconCleanup(merchantMarker, divIcon);
 			map.addLayer(merchantMarker);
 			map.fitBounds([[lat, long]]);
 		}
@@ -256,6 +259,9 @@ $: if (merchantMarker && leaflet && mapLoaded && icon) {
 onDestroy(async () => {
 	clearTimeout(shareTimeout);
 	if (map) {
+		if (merchantMarker) {
+			disposeMarker(merchantMarker);
+		}
 		console.info("Unloading Leaflet map.");
 		map.remove();
 	}

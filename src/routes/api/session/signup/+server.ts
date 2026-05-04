@@ -10,8 +10,16 @@ import type { RequestHandler } from "./$types";
 //   1. POST /v4/users          → create account
 //   2. POST /v4/users/{name}/tokens → get Bearer token
 export const POST: RequestHandler = async ({ request, fetch }) => {
-	const body = await request.json();
-	const password = body?.password;
+	let body: { password?: unknown };
+	try {
+		body = await request.json();
+	} catch {
+		error(400, "Invalid JSON body");
+	}
+	if (!body || typeof body !== "object") {
+		error(400, "Invalid request body");
+	}
+	const password = body.password;
 
 	if (!password || typeof password !== "string") {
 		error(400, "Missing required parameter: password");
@@ -35,9 +43,15 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 		error(userRes.status, "Failed to create account");
 	}
 
-	const userData = await userRes.json();
+	let userData: { name?: unknown };
+	try {
+		userData = (await userRes.json()) as { name?: unknown };
+	} catch (err) {
+		console.error("Failed to parse user response:", err);
+		error(502, "Failed to create account");
+	}
 	const username = userData?.name;
-	if (!username) {
+	if (!username || typeof username !== "string") {
 		error(502, "User creation returned no username");
 	}
 
@@ -65,9 +79,15 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 		error(tokenRes.status, "Failed to create authentication token");
 	}
 
-	const tokenData = await tokenRes.json();
+	let tokenData: { token?: unknown };
+	try {
+		tokenData = (await tokenRes.json()) as { token?: unknown };
+	} catch (err) {
+		console.error("Failed to parse token response:", err);
+		error(502, "Failed to create authentication token");
+	}
 	const token = tokenData?.token;
-	if (!token) {
+	if (!token || typeof token !== "string") {
 		error(502, "Token creation returned no token");
 	}
 

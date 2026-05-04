@@ -206,7 +206,7 @@ jobs:
           - Group related findings.
           - If the changes are mostly dependency bumps or locale file updates, say so briefly and focus on substantive code changes.
           - Rate each finding: CRITICAL, HIGH, MEDIUM, or LOW.
-          - Maximum 10 findings. If you find more, keep the 10 most important.
+          - Aim for 0-5 findings. Empty or short reports are good outcomes — only add more findings if the period genuinely warrants them, never to "look thorough".
           - Do NOT suggest migrating to Svelte v5 runes — the project intentionally stays on v4.
           - Do NOT suggest formatting or import ordering changes — Biome handles that.
           - If nothing significant was missed and there are no refactoring opportunities, say so briefly. Do not invent findings.
@@ -216,8 +216,8 @@ jobs:
           - For each finding, you must be able to point to specific lines in the diff or file contents that prove the issue exists. If you cannot, drop it.
           - NEVER assume what a module contains based on its name. Read the provided file contents. If a module is not included, do not make claims about its internals.
           - Before flagging a pattern in new code, check whether existing files in the full file contents use the same pattern. If they do, it is an established project convention — do not flag it.
-          - Distinguish CONFIRMED (you can see the bug in provided code) from SUSPECTED (inferring from incomplete info). Only CONFIRMED issues may be rated HIGH or CRITICAL. SUSPECTED issues must be rated LOW and prefixed with "[UNVERIFIED]".
-          - Maximum 3 unverified findings. If you have more, keep only the 3 most plausible.
+          - Do NOT include unverified or speculative findings. If you cannot directly point to specific lines in the provided diff or file contents that prove the issue exists, drop the finding entirely. There is no quota for "[UNVERIFIED]" or low-confidence items — omit them.
+          - Every finding MUST include a **Quote:** block containing 1-3 lines copied from the provided diff or file contents. Post-processing greps these quotes against the actual inputs after collapsing whitespace, so leading-tab depth and line-wrap differences are tolerated — but the tokens (identifiers, operators, punctuation, string contents) must match exactly. Do not paraphrase, summarize, or reconstruct from memory; findings whose quote cannot be located will be dropped automatically.
 
           Output format (strict markdown):
           # Biweekly Codebase Health Review
@@ -229,7 +229,11 @@ jobs:
 
           ### [SEVERITY]: [Short title]
           **Files:** `path/to/file`
-          [Description of the issue and what to do about it. Include a brief code snippet from the diff if helpful.]
+          **Quote:**
+          ```
+          <exact 1-3 lines copied verbatim from the provided diff or file contents — used to verify the finding is grounded in real code>
+          ```
+          [Description of the issue and what to do about it.]
 
           ---
 
@@ -345,6 +349,154 @@ jobs:
           FOOTER
 
           echo "Review generated ($(wc -c < /tmp/review.md) bytes)"
+
+      - name: Validate findings (drop hallucinated files and unverifiable quotes)
+        if: steps.commits.outputs.skip != 'true'
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          # Two-stage finding validation, applied to each ### block under
+          # ## Findings:
+          #   1. **Files:** `path` must exist in the working tree
+          #      (catches invented filenames from import-name guessing)
+          #   2. **Quote:** ```...``` must appear verbatim in the diff or
+          #      file contents the model was given
+          #      (catches misattribution and paraphrased "from memory" claims)
+          # Findings that fail either check are dropped, with a log line
+          # explaining why so the failure mode is visible in CI history.
+          import os
+          import re
+          import sys
+
+          path = "/tmp/review.md"
+          with open(path, "r", encoding="utf-8") as f:
+              text = f.read()
+
+          # Load the model's input corpus once. Normalize whitespace so quote
+          # matching is robust to indentation drift between source and what
+          # the model copied (it sometimes trims leading tabs).
+          def norm(s: str) -> str:
+              return re.sub(r"\s+", " ", s).strip()
+
+          corpus_parts = []
+          for src in ("/tmp/diff.txt", "/tmp/file-contents.txt"):
+              try:
+                  with open(src, "r", encoding="utf-8", errors="replace") as f:
+                      corpus_parts.append(f.read())
+              except FileNotFoundError:
+                  pass
+          corpus = norm("\n".join(corpus_parts))
+
+          # Paths that appear as either side of a `diff --git a/x b/y` header.
+          # A finding may legitimately reference a deleted or renamed file
+          # whose path no longer exists on disk; we accept it if the path
+          # was part of this period's diff. Use the untruncated raw-diff
+          # when present so this works even on large diffs.
+          diff_paths: set[str] = set()
+          diff_header_re = re.compile(r"^diff --git a/(.+?) b/(.+)$", re.MULTILINE)
+          for src in ("/tmp/raw-diff.txt", "/tmp/diff.txt"):
+              try:
+                  with open(src, "r", encoding="utf-8", errors="replace") as f:
+                      diff_text = f.read()
+                  for ma, mb in diff_header_re.findall(diff_text):
+                      diff_paths.add(ma)
+                      diff_paths.add(mb)
+                  break
+              except FileNotFoundError:
+                  continue
+
+          findings_re = re.compile(
+              r"(## Findings\s*\n)(.*?)(\n##\s+\S)", re.DOTALL
+          )
+          m = findings_re.search(text)
+          if not m:
+              # Surface the silent-pass as a workflow annotation so a
+              # malformed AI response doesn't quietly publish unvalidated.
+              # Don't hard-fail: a genuinely empty period with no findings
+              # is also a valid outcome and shouldn't break the schedule.
+              print(
+                  "::warning title=Health review validator::"
+                  "Could not locate a '## Findings' section in the AI "
+                  "response — review was published without file/quote "
+                  "verification. If the report contains findings, the "
+                  "output format may have drifted from the prompt schema."
+              )
+              sys.exit(0)
+
+          head, body, tail = m.group(1), m.group(2), m.group(3)
+
+          blocks = re.split(r"\n---\s*\n", body.strip())
+
+          file_re = re.compile(r"\*\*Files?:\*\*\s*(.+)")
+          path_re = re.compile(r"`([^`]+)`")
+          # Match a fenced code block that follows the **Quote:** label.
+          # Tolerate optional language tag and either ``` or ~~~ fences.
+          quote_re = re.compile(
+              r"\*\*Quote:\*\*\s*\n+(?:```|~~~)[^\n]*\n(.*?)\n(?:```|~~~)",
+              re.DOTALL,
+          )
+
+          kept = []
+          dropped = []
+          for block in blocks:
+              if not block.strip().startswith("###"):
+                  kept.append(block)
+                  continue
+              title = block.splitlines()[0].strip()
+
+              # 1. File existence
+              fm = file_re.search(block)
+              if not fm:
+                  dropped.append((title, "no **Files:** line"))
+                  continue
+              raw = fm.group(1).strip()
+              paths = path_re.findall(raw)
+              if not paths:
+                  paths = [p.strip().rstrip(",") for p in re.split(r"[,\s]+", raw) if p.strip()]
+              # A path is OK if it's on disk OR was touched by the period's
+              # diff (covers deletes and renames where the cited path is the
+              # old name). Anything else is a hallucinated path.
+              missing = [
+                  p for p in paths
+                  if not os.path.isfile(p) and p not in diff_paths
+              ]
+              if missing:
+                  dropped.append((title, f"missing file(s): {', '.join(missing)}"))
+                  continue
+
+              # 2. Quote present and verifiable
+              qm = quote_re.search(block)
+              if not qm:
+                  dropped.append((title, "no **Quote:** code block"))
+                  continue
+              quote_norm = norm(qm.group(1))
+              if not quote_norm:
+                  dropped.append((title, "empty **Quote:** block"))
+                  continue
+              if quote_norm not in corpus:
+                  preview = quote_norm[:80] + ("…" if len(quote_norm) > 80 else "")
+                  dropped.append((title, f"quote not found in diff or file-contents: '{preview}'"))
+                  continue
+
+              kept.append(block)
+
+          new_body = "\n\n---\n\n".join(kept).strip() + "\n\n"
+
+          if not any(b.strip().startswith("###") for b in kept):
+              new_body += "_All findings were dropped by post-processing (failed file or quote verification)._\n\n"
+
+          new_text = text[:m.start()] + head + new_body + tail + text[m.end():]
+          with open(path, "w", encoding="utf-8") as f:
+              f.write(new_text)
+
+          if dropped:
+              print(f"Dropped {len(dropped)} finding(s):")
+              for title, reason in dropped:
+                  print(f"  - {title}")
+                  print(f"      reason: {reason}")
+          else:
+              print("No findings dropped — all passed file and quote verification.")
+          PY
 
       - name: Create issue
         if: steps.commits.outputs.skip != 'true'

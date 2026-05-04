@@ -53,6 +53,7 @@ import {
 	applyMapControlTranslations,
 	attribution,
 	changeDefaultIcons,
+	disposeMarker,
 	generateIcon,
 	geolocate,
 	layers,
@@ -506,6 +507,7 @@ const removeMarkersByPredicate = (
 			markers.removeLayer(marker);
 			boostedLayer.removeLayer(marker);
 			boostedLayerMarkerIds.delete(placeId);
+			disposeMarker(marker);
 			markersToRemove.push(placeId);
 		}
 	});
@@ -1495,6 +1497,12 @@ onDestroy(async () => {
 	merchantList.reset();
 
 	if (map) {
+		// Dispose Icon component instances on every still-live marker before
+		// tearing down the map; map.remove() drops the DOM but leaves the
+		// Svelte components alive.
+		for (const marker of Object.values(loadedMarkers)) {
+			disposeMarker(marker);
+		}
 		console.info("Unloading Leaflet map.");
 		map.remove();
 	}
