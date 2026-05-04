@@ -119,7 +119,7 @@ $: latestTaggers = !!(supertaggers?.length && !elementsLoading);
 				? 'text-white'
 				: 'gradient'} text-center text-4xl !leading-tight font-semibold text-primary md:text-5xl lg:text-left dark:text-white"
 		>
-			{$_('activityPage.heading')}
+			{$_('activityPage.title')}
 		</h1>
 	{:else}
 		<HeaderPlaceholder />
@@ -128,7 +128,7 @@ $: latestTaggers = !!(supertaggers?.length && !elementsLoading);
 	<h2
 		class="w-full text-center text-xl font-semibold text-primary lg:w-[675px] lg:text-left dark:text-white"
 	>
-		{$_('activityPage.hero')}
+		{$_('activityPage.subheading')}
 	</h2>
 
 	<p class="text-center text-xl text-primary lg:text-left dark:text-white">

@@ -117,9 +117,9 @@ onMount(async () => {
 </script>
 
 <svelte:head>
-	<title>BTC Map - {$_('verifyLocation.heading')}</title>
+	<title>BTC Map - {$_('verifyLocation.title')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/verify.png" />
-	<meta name="twitter:title" content="BTC Map - {$_('verifyLocation.heading')}" />
+	<meta name="twitter:title" content="BTC Map - {$_('verifyLocation.title')}" />
 	<meta name="twitter:image" content="https://btcmap.org/images/og/verify.png" />
 </svelte:head>
 
@@ -130,7 +130,7 @@ onMount(async () => {
 				? 'text-white'
 				: 'gradient'} mt-10 text-center text-4xl font-semibold md:text-5xl"
 		>
-			{$_('verifyLocation.hero')}
+			{$_('verifyLocation.title')}
 		</h1>
 	{:else}
 		<HeaderPlaceholder />
@@ -138,9 +138,9 @@ onMount(async () => {
 
 	<section id="verify" class="mx-auto mt-16 w-full pb-20 md:w-[600px] md:pb-32">
 		<h2 class="mb-5 text-center text-3xl font-semibold text-primary dark:text-white">
-			{$_('verifyLocation.heading')}<br />
+			{$_('verifyLocation.subheading')}<br />
 			<span class="text-base font-normal"
-				>{$_('verifyLocation.subheading')}</span
+				>{$_('verifyLocation.note')}</span
 			>
 		</h2>
 

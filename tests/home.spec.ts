@@ -13,6 +13,6 @@ test.describe('Home Page', () => {
 
 		await page.getByRole('link', { name: 'Add Location' }).click();
 
-		await expect(page.getByRole('heading', { name: 'Accept bitcoin? Get found' })).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Add Location' })).toBeVisible();
 	});
 });

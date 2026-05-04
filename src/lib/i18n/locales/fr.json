@@ -328,7 +328,6 @@
 	"meta": {
 		"countries": "Pays",
 		"countriesLeaderboard": "Classement des pays",
-		"addLocation": "Ajouter un lieu",
 		"addCommunity": "Ajouter une communauté",
 		"communityMap": "Carte des communautés",
 		"communities": "Communautés",
@@ -407,7 +406,8 @@
 		"captchaPlaceholder": "Veuillez saisir le texte du captcha."
 	},
 	"addLocation": {
-		"hero": "Vous acceptez le bitcoin ? Faites-vous trouver",
+		"title": "Ajouter un lieu",
+		"subheading": "Vous acceptez le bitcoin ? Faites-vous trouver",
 		"businessOwner": "Si vous êtes propriétaire d'un commerce, veuillez lire nos",
 		"bestPractices": "Bonnes pratiques pour les commerces",
 		"guide": ".",
@@ -455,9 +455,9 @@
 		"submitAnother": "Soumettre un(e) autre {type}"
 	},
 	"verifyLocation": {
-		"hero": "Aidez à améliorer les données pour tous",
-		"heading": "Vérifier le lieu",
-		"subheading": "(Assurez-vous que les informations sont toujours exactes et mettez-les à jour si nécessaire.)",
+		"subheading": "Aidez à améliorer les données pour tous",
+		"title": "Vérifier le lieu",
+		"note": "(Assurez-vous que les informations sont toujours exactes et mettez-les à jour si nécessaire.)",
 		"descriptionPart1": "Veuillez remplir le formulaire suivant et l'un de nos bénévoles mettra à jour votre lieu sur la carte. Saviez-vous que vous pouvez mettre à jour ces données vous-même sur",
 		"osmLinkText": "OpenStreetMap",
 		"descriptionPart2": "? Consultez notre",
@@ -659,8 +659,8 @@
 		"chartDataNote": "*Données des graphiques mises à jour toutes les 24 heures."
 	},
 	"activityPage": {
-		"heading": "Activité",
-		"hero": "Les Shadowy Supertaggers ne dorment pas. Ils identifient des commerces toute la nuit. Le monde que nous voulons est à un marquage près.",
+		"title": "Activité",
+		"subheading": "Les Shadowy Supertaggers ne dorment pas. Ils identifient des commerces toute la nuit. Le monde que nous voulons est à un marquage près.",
 		"cta": "Vous aussi pouvez devenir une légende du marquage ! Qu'attendez-vous ?",
 		"getTaggin": "À vos tags !",
 		"latestSupertaggers": "Derniers Supertaggers"
@@ -784,7 +784,7 @@
 		"issueTypeMisspelledTag": "Erreur d'orthographe dans le nom du tag ({code})"
 	},
 	"taggingIssues": {
-		"heading": "Problèmes de marquage",
+		"title": "Problèmes de marquage",
 		"subheading": "Contribuez à LA carte en résolvant les problèmes de marquage !",
 		"descriptionPart1": "Plus d'informations sur comment s'impliquer sur notre ",
 		"linkText": "Instructions de marquage",

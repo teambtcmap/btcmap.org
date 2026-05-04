@@ -328,7 +328,6 @@
 	"meta": {
 		"countries": "Países",
 		"countriesLeaderboard": "Tabla de Países",
-		"addLocation": "Agregar Ubicación",
 		"addCommunity": "Agregar Comunidad",
 		"communityMap": "Mapa de Comunidades",
 		"communities": "Comunidades",
@@ -407,7 +406,8 @@
 		"captchaPlaceholder": "Por favor ingresa el texto del captcha."
 	},
 	"addLocation": {
-		"hero": "¿Aceptas bitcoin? Que te encuentren",
+		"title": "Agregar Ubicación",
+		"subheading": "¿Aceptas bitcoin? Que te encuentren",
 		"businessOwner": "Si eres dueño de un negocio, por favor lee nuestras",
 		"bestPractices": "Mejores Prácticas para Comercios",
 		"guide": "guía.",
@@ -455,9 +455,9 @@
 		"submitAnother": "Enviar otro {type}"
 	},
 	"verifyLocation": {
-		"hero": "Ayuda a mejorar los datos para todos",
-		"heading": "Verificar Ubicación",
-		"subheading": "(Asegúrate de que la información siga siendo precisa y actualízala si es necesario.)",
+		"subheading": "Ayuda a mejorar los datos para todos",
+		"title": "Verificar Ubicación",
+		"note": "(Asegúrate de que la información siga siendo precisa y actualízala si es necesario.)",
 		"descriptionPart1": "Por favor completa el siguiente formulario y uno de nuestros miembros voluntarios de la comunidad actualizará tu ubicación en el mapa. ¿Sabías que puedes actualizar estos datos tú mismo en",
 		"osmLinkText": "OpenStreetMap",
 		"descriptionPart2": "? Puedes consultar nuestro",
@@ -659,8 +659,8 @@
 		"chartDataNote": "*Datos del gráfico actualizados una vez cada 24 horas."
 	},
 	"activityPage": {
-		"heading": "Actividad",
-		"hero": "Los Supertaggers Misteriosos no duermen. Están despiertos toda la noche etiquetando. El mundo que queremos está a una etiqueta de distancia.",
+		"title": "Actividad",
+		"subheading": "Los Supertaggers Misteriosos no duermen. Están despiertos toda la noche etiquetando. El mundo que queremos está a una etiqueta de distancia.",
 		"cta": "¡Tú también puedes ser una leyenda del superetiquetado misterioso! ¿Qué estás esperando?",
 		"getTaggin": "¡A etiquetar!",
 		"latestSupertaggers": "Últimos Supertaggers"
@@ -784,7 +784,7 @@
 		"issueTypeMisspelledTag": "Error de ortografía en el nombre de la etiqueta ({code})"
 	},
 	"taggingIssues": {
-		"heading": "Problemas de Etiquetado",
+		"title": "Problemas de Etiquetado",
 		"subheading": "¡Contribuye al mapa resolviendo problemas de etiquetado!",
 		"descriptionPart1": "Más información sobre cómo participar se puede encontrar en nuestra página ",
 		"linkText": "Instrucciones de Etiquetado",

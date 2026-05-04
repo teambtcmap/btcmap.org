@@ -328,7 +328,6 @@
 	"meta": {
 		"countries": "Länder",
 		"countriesLeaderboard": "Länder-Rangliste",
-		"addLocation": "Ort hinzufügen",
 		"addCommunity": "Community hinzufügen",
 		"communityMap": "Communitykarte",
 		"communities": "Communities",
@@ -407,7 +406,8 @@
 		"captchaPlaceholder": "Bitte gib den Captcha-Text ein."
 	},
 	"addLocation": {
-		"hero": "Akzeptierst Du Bitcoin? Lass Dich finden!",
+		"title": "Ort hinzufügen",
+		"subheading": "Akzeptierst Du Bitcoin? Lass Dich finden!",
 		"businessOwner": "Wenn du Geschäftsinhaber bist, lies bitte unseren",
 		"bestPractices": "Leitfaden für Händler",
 		"guide": ".",
@@ -455,9 +455,9 @@
 		"submitAnother": "Noch ein {type} einreichen"
 	},
 	"verifyLocation": {
-		"hero": "Hilf, die Daten für alle zu verbessern",
-		"heading": "Standort verifizieren",
-		"subheading": "(Stelle sicher, dass die Informationen noch korrekt sind und aktualisiere sie gegebenenfalls.)",
+		"subheading": "Hilf, die Daten für alle zu verbessern",
+		"title": "Standort verifizieren",
+		"note": "(Stelle sicher, dass die Informationen noch korrekt sind und aktualisiere sie gegebenenfalls.)",
 		"descriptionPart1": "Bitte fülle das folgende Formular aus und einer unserer freiwilligen Communitysmitglieder wird deinen Standort auf der Karte aktualisieren. Wusstest du, dass du diese Daten selbst auf",
 		"osmLinkText": "OpenStreetMap",
 		"descriptionPart2": " aktualisieren kannst? Du kannst unser",
@@ -659,8 +659,8 @@
 		"chartDataNote": "*Diagrammdaten werden einmal alle 24 Stunden aktualisiert."
 	},
 	"activityPage": {
-		"heading": "Aktivität",
-		"hero": "Schattenhafte Supertagger schlafen nicht. Sie sind die ganze Nacht auf und taggen. Die Welt, die wir wollen, ist nur ein Tag entfernt.",
+		"title": "Aktivität",
+		"subheading": "Schattenhafte Supertagger schlafen nicht. Sie sind die ganze Nacht auf und taggen. Die Welt, die wir wollen, ist nur ein Tag entfernt.",
 		"cta": "Du kannst auch eine schattenhafte Supertagger-Legende werden! Worauf wartest du noch?",
 		"getTaggin": "Leg los!",
 		"latestSupertaggers": "Neueste Supertagger"
@@ -784,7 +784,7 @@
 		"issueTypeMisspelledTag": "Rechtschreibfehler im Tag-Namen ({code})"
 	},
 	"taggingIssues": {
-		"heading": "Tagging-Probleme",
+		"title": "Tagging-Probleme",
 		"subheading": "Trage zur Karte bei, indem du Tagging-Probleme löst!",
 		"descriptionPart1": "Weitere Informationen, wie du dich einbringen kannst, findest du auf unserer ",
 		"linkText": "Tagging-Anleitung",

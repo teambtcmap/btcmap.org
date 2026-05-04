@@ -414,7 +414,6 @@
 	"meta": {
 		"countries": "Countries",
 		"countriesLeaderboard": "Countries Leaderboard",
-		"addLocation": "Add Location",
 		"addCommunity": "Add Community",
 		"communityMap": "Community Map",
 		"communities": "Communities",
@@ -495,7 +494,8 @@
 		"captchaPlaceholder": "Please enter the captcha text."
 	},
 	"addLocation": {
-		"hero": "Accept bitcoin? Get found",
+		"title": "Add Location",
+		"subheading": "Accept bitcoin? Get found",
 		"businessOwner": "If you're a business owner, please read our",
 		"bestPractices": "Merchant Best Practices",
 		"guide": "guide.",
@@ -547,9 +547,9 @@
 		"submitAnother": "Submit another {type}"
 	},
 	"verifyLocation": {
-		"hero": "Help improve the data for everyone",
-		"heading": "Verify Location",
-		"subheading": "(Ensure the information is still accurate and update it otherwise.)",
+		"subheading": "Help improve the data for everyone",
+		"title": "Verify Location",
+		"note": "(Ensure the information is still accurate and update it otherwise.)",
 		"descriptionPart1": "Please fill out the following form and one of our volunteer community members will update your location on the map. Did you know you can update this data yourself on",
 		"osmLinkText": "OpenStreetMap",
 		"descriptionPart2": "? You can check out our",
@@ -751,8 +751,8 @@
 		"chartDataNote": "*Chart data updated once every 24 hours."
 	},
 	"activityPage": {
-		"heading": "Activity",
-		"hero": "Shadowy Supertaggers don't sleep. They are up all night, tagging away. The world we want is a tag away.",
+		"title": "Activity",
+		"subheading": "Shadowy Supertaggers don't sleep. They are up all night, tagging away. The world we want is a tag away.",
 		"cta": "You too can be a shadowy supertagging legend! What are you waiting for?",
 		"getTaggin": "Get taggin'!",
 		"latestSupertaggers": "Latest Supertaggers"
@@ -886,7 +886,7 @@
 		"issueTypeMisspelledTag": "Spelling issue in tag name ({code})"
 	},
 	"taggingIssues": {
-		"heading": "Tagging Issues",
+		"title": "Tagging Issues",
 		"subheading": "Contribute to THE map by resolving tagging issues!",
 		"descriptionPart1": "More information about how to get involved can be found on our ",
 		"linkText": "Tagging Instructions",

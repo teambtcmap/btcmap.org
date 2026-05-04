@@ -414,7 +414,6 @@
 	"meta": {
 		"countries": "Landen",
 		"countriesLeaderboard": "Landenranglijst",
-		"addLocation": "Locatie toevoegen",
 		"addCommunity": "Community toevoegen",
 		"communityMap": "Communitykaart",
 		"communities": "Community's",
@@ -495,7 +494,8 @@
 		"captchaPlaceholder": "Voer de captcha-tekst in."
 	},
 	"addLocation": {
-		"hero": "Accepteer je Bitcoin? Zorg dat je gevonden wordt",
+		"title": "Locatie toevoegen",
+		"subheading": "Accepteer je Bitcoin? Zorg dat je gevonden wordt",
 		"businessOwner": "Als je ondernemer bent, lees dan onze",
 		"bestPractices": "Best practices voor ondernemers",
 		"guide": "gids.",
@@ -547,9 +547,9 @@
 		"submitAnother": "Nog &eacute;&eacute;n indienen {type}"
 	},
 	"verifyLocation": {
-		"hero": "Help mee om de gegevens voor iedereen beter te maken",
-		"heading": "Verifieer locatie",
-		"subheading": "(Controleer of de informatie nog klopt en werk deze zo nodig bij.)",
+		"subheading": "Help mee om de gegevens voor iedereen beter te maken",
+		"title": "Verifieer locatie",
+		"note": "(Controleer of de informatie nog klopt en werk deze zo nodig bij.)",
 		"descriptionPart1": "Vul het onderstaande formulier in, dan werkt een van onze vrijwilligers je locatie bij op de kaart. Wist je al dat je deze informatie zelf kunt wijzigen via",
 		"osmLinkText": "OpenStreetMap",
 		"descriptionPart2": "? Lees onze",
@@ -751,8 +751,8 @@
 		"chartDataNote": "*Grafiekgegevens worden &eacute;&eacute;n keer per 24 uur bijgewerkt."
 	},
 	"activityPage": {
-		"heading": "Activiteit",
-		"hero": "Geheimzinnige Supertaggers slapen niet. Ze zijn de hele nacht in de weer met taggen. De wereld die we willen, is slechts &eacute;&eacute;n tag verwijderd.",
+		"title": "Activiteit",
+		"subheading": "Geheimzinnige Supertaggers slapen niet. Ze zijn de hele nacht in de weer met taggen. De wereld die we willen, is slechts &eacute;&eacute;n tag verwijderd.",
 		"cta": "Ook jij kunt een geheimzinnige supertagging-legende worden! Waar wacht je nog op?",
 		"getTaggin": "Begin met taggen!",
 		"latestSupertaggers": "Nieuwste Supertaggers"
@@ -886,7 +886,7 @@
 		"issueTypeMisspelledTag": "Spellingsprobleem in tagnaam ({code})"
 	},
 	"taggingIssues": {
-		"heading": "Problemen met taggen",
+		"title": "Problemen met taggen",
 		"subheading": "Draag bij aan DE kaart door tagproblemen op te lossen!",
 		"descriptionPart1": "Meer informatie over hoe u mee kunt doen vindt u op onze",
 		"linkText": "Instructies voor het taggen",
