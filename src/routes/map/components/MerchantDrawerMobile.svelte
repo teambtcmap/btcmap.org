@@ -9,15 +9,14 @@ import { drawerGesture } from "$lib/drawerGestureController";
 import { _ } from "$lib/i18n";
 import {
 	handleBoost as boostMerchant,
-	calcVerifiedDate,
 	isBoosted as checkBoosted,
-	isUpToDate as checkUpToDate,
 	clearBoostState,
 	handleBoostComplete as completeBoost,
 	ensureBoostData,
 } from "$lib/merchantDrawerLogic";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { boost, resetBoost } from "$lib/store";
+import { isUpToDate as checkUpToDate } from "$lib/verification";
 
 import MerchantPeekContentMobile from "./MerchantPeekContentMobile.svelte";
 import { browser } from "$app/environment";
@@ -88,8 +87,7 @@ function handleFocusOut(event: FocusEvent) {
 	}
 }
 
-const verifiedDate = calcVerifiedDate();
-$: isUpToDate = checkUpToDate(merchant, verifiedDate);
+$: isUpToDate = checkUpToDate(merchant);
 $: isBoosted = checkBoosted(merchant);
 
 let boostLoading = false;

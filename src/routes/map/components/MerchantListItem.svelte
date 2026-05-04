@@ -6,18 +6,15 @@ import {
 	getIconColorWithFallback,
 } from "$lib/categoryMapping";
 import { _ } from "$lib/i18n";
-import {
-	isBoosted as checkBoosted,
-	isUpToDate as checkUpToDate,
-} from "$lib/merchantDrawerLogic";
+import { isBoosted as checkBoosted } from "$lib/merchantDrawerLogic";
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
 import { calculateDistance, formatDistance } from "$lib/utils";
+import { isUpToDate as checkUpToDate } from "$lib/verification";
 
 export let merchant: Place;
 export let enrichedData: Place | null = null;
 export let isSelected: boolean = false;
-export let verifiedDate: number;
 export let onclick: (merchant: Place) => void = () => {};
 export let onmouseenter: (merchant: Place) => void = () => {};
 export let onmouseleave: (merchant: Place) => void = () => {};
@@ -25,7 +22,7 @@ export let onmouseleave: (merchant: Place) => void = () => {};
 $: showSkeleton = !enrichedData;
 $: displayData = enrichedData || merchant;
 
-$: isVerified = checkUpToDate(displayData, verifiedDate);
+$: isVerified = checkUpToDate(displayData);
 $: isBoosted = checkBoosted(merchant);
 
 $: userLoc = $userLocation.location;

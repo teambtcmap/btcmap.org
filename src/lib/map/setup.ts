@@ -603,12 +603,6 @@ export const dataRefresh = (
 	DomEvent.disableClickPropagation(dataRefreshButton);
 };
 
-export const calcVerifiedDate = () => {
-	const verifiedDate = new Date();
-	const previousYear = verifiedDate.getFullYear() - 1;
-	return verifiedDate.setFullYear(previousYear);
-};
-
 export const generateLocationIcon = (L: Leaflet) => {
 	return L.divIcon({
 		className: "div-icon",

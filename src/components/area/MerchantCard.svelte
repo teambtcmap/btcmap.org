@@ -6,9 +6,10 @@ import tippy, { type Instance } from "tippy.js";
 import BoostButton from "$components/BoostButton.svelte";
 import Icon from "$components/Icon.svelte";
 import { _ } from "$lib/i18n";
-import { calcVerifiedDate, verifiedArr } from "$lib/map/setup";
+import { verifiedArr } from "$lib/map/setup";
 import type { Place } from "$lib/types";
 import { fetchEnhancedPlace, formatOpeningHours, isBoosted } from "$lib/utils";
+import { calcVerifiedDate } from "$lib/verification";
 
 import { resolve } from "$app/paths";
 

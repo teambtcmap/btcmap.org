@@ -11,32 +11,6 @@ import { boost } from "$lib/store";
 import type { Boost, Place } from "$lib/types";
 import { errToast } from "$lib/utils";
 
-// Memoize verified date calculation - recompute only once per day
-let cachedVerifiedDate: number | null = null;
-let cachedDay: number | null = null;
-
-export function calcVerifiedDate(): number {
-	const today = new Date().getDate();
-	if (cachedVerifiedDate !== null && cachedDay === today) {
-		return cachedVerifiedDate;
-	}
-
-	const verifiedDate = new Date();
-	const previousYear = verifiedDate.getFullYear() - 1;
-	cachedVerifiedDate = verifiedDate.setFullYear(previousYear);
-	cachedDay = today;
-	return cachedVerifiedDate;
-}
-
-export function isUpToDate(
-	merchant: Place | null,
-	verifiedDate: number,
-): boolean {
-	return !!(
-		merchant?.verified_at && Date.parse(merchant.verified_at) > verifiedDate
-	);
-}
-
 export function isBoosted(merchant: Place | null): boolean {
 	return !!(
 		merchant?.boosted_until && Date.parse(merchant.boosted_until) > Date.now()

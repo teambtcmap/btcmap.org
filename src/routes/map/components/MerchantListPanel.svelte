@@ -18,7 +18,6 @@ import {
 	MERCHANT_LIST_MIN_ZOOM,
 } from "$lib/constants";
 import { _ } from "$lib/i18n";
-import { calcVerifiedDate } from "$lib/merchantDrawerLogic";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import type { MerchantListMode } from "$lib/merchantListStore";
 import { merchantList } from "$lib/merchantListStore";
@@ -28,9 +27,6 @@ import { errToast, formatNearbyCount } from "$lib/utils";
 
 import MerchantListItem from "./MerchantListItem.svelte";
 import { browser } from "$app/environment";
-
-// Compute once for all list items
-const verifiedDate = calcVerifiedDate();
 
 // Get translated category label
 function getCategoryLabel(key: CategoryKey): string {
@@ -580,7 +576,6 @@ onDestroy(() => {
 								{merchant}
 								enrichedData={merchant}
 								isSelected={selectedId === merchant.id}
-								{verifiedDate}
 								onclick={handleItemClick}
 								onmouseenter={handleMouseEnter}
 								onmouseleave={handleMouseLeave}
@@ -641,7 +636,6 @@ onDestroy(() => {
 								{merchant}
 								enrichedData={placeDetailsCache.get(merchant.id) || null}
 								isSelected={selectedId === merchant.id}
-								{verifiedDate}
 								onclick={handleItemClick}
 								onmouseenter={handleMouseEnter}
 								onmouseleave={handleMouseLeave}

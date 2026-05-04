@@ -25,7 +25,6 @@ import {
 	applyThemeToBaseMaps,
 	attachIconCleanup,
 	attribution,
-	calcVerifiedDate,
 	changeDefaultIcons,
 	disposeMarker,
 	generateIcon,
@@ -50,6 +49,7 @@ import {
 	isBoosted,
 	shareMerchant,
 } from "$lib/utils";
+import { calcVerifiedDate } from "$lib/verification";
 
 import CommentAddButton from "./components/CommentAddButton.svelte";
 import MerchantAction from "./components/MerchantAction.svelte";
