@@ -19,7 +19,7 @@
 		"maintain": "Onderhoud",
 		"wiki": "Wiki",
 		"blog": "Blog",
-		"supportUs": "Steun ons",
+		"supporters": "Steun ons",
 		"menu": "Menu",
 		"merchantMap": "Ondernemerskaart",
 		"communityMap": "Communitykaart",
@@ -1022,7 +1022,7 @@
 			"statsDashboard": "Statistiekdashboard",
 			"supertaggerLeaderboard": "Supertagger-klassement",
 			"supertaggerProfile": "Supertagger-profiel",
-			"supportUs": "Steun ons",
+			"supporters": "Steun ons",
 			"topCommunities": "Topgemeenschappen",
 			"topCountries": "Toplanden",
 			"verifyLocations": "Locaties verifi&euml;ren",
@@ -1032,15 +1032,32 @@
 			"secondl1ght": "tweedelig"
 		}
 	},
-	"supportUs": {
+	"supporters": {
 		"title": "Steun ons",
 		"hero": "Help Bitcoin op de kaart te zetten",
-		"intro": "BTCMap.org is een gratis en open-sourceproject (FOSS). Om door te kunnen gaan zijn wij afhankelijk van donaties en sponsoring.",
-		"appreciate": "Wij waarderen alle steun enorm.",
+		"tiers": {
+			"explorer": { "headline": "Houden van wat we doen" },
+			"wayfinder": { "headline": "Steunt de missie" },
+			"cartographer": { "headline": "Kernpartner van het ecosysteem" },
+			"navigator": { "headline": "Standvastige steunpilaren uit de sector" },
+			"pioneer": { "headline": "Onze meest toegewijde supporters" },
+			"pleb": {
+				"headline": "Elke sat telt &mdash; gerangschikt op cumulatieve bijdragen"
+			}
+		},
+		"individual": {
+			"heading": "Individuele supporters",
+			"description": "BTC Map wordt gedragen door de community. Individuele supporters helpen het project onafhankelijk en open te houden, in handen van de mensen die het gebruiken.",
+			"cta": "Word supporter"
+		},
+		"sponsors": {
+			"description": "BTC Map wordt erkend als een belangrijk onderdeel van de bredere Bitcoin-infrastructuur. Elke sponsor hieronder ondersteunt ons in onze missie om bitcoin tot dagelijks geld te maken."
+		},
 		"donate": {
 			"scanOrClick": "Scan of klik om te doneren",
 			"onchain": "On-chain",
 			"lightning": "Lightning",
+			"lightningAddress": "Lightning-adres",
 			"protocolAlt": "protocol"
 		},
 		"supporters": {
@@ -1048,7 +1065,8 @@
 			"becomeSponsor": "Word sponsor"
 		},
 		"node": {
-			"heading": "Open een lightning-kanaal naar ons"
+			"heading": "Open een lightning-kanaal naar ons",
+			"scanOrClick": "Scan of klik om verbinding te maken"
 		},
 		"applyHere": "Solliciteer hier",
 		"qrError": "Kon geen QR genereren. Probeer het opnieuw of neem contact op met BTC Map.",
