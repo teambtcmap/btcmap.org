@@ -116,7 +116,7 @@ async function toggle() {
 			icon={saved ? 'bookmark_filled' : 'bookmark'}
 			w="16"
 			h="16"
-			class="mr-1"
+			class="mr-1 shrink-0"
 		/>
 		<span class="grid">
 			<span
