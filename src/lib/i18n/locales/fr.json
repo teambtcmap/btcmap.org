@@ -784,7 +784,7 @@
 		"issueTypeMisspelledTag": "Erreur d'orthographe dans le nom du tag ({code})"
 	},
 	"taggingIssues": {
-		"heading": "Problèmes de marquage",
+		"title": "Problèmes de marquage",
 		"subheading": "Contribuez à LA carte en résolvant les problèmes de marquage !",
 		"descriptionPart1": "Plus d'informations sur comment s'impliquer sur notre ",
 		"linkText": "Instructions de marquage",

@@ -784,7 +784,7 @@
 		"issueTypeMisspelledTag": "Error de ortografía en el nombre de la etiqueta ({code})"
 	},
 	"taggingIssues": {
-		"heading": "Problemas de Etiquetado",
+		"title": "Problemas de Etiquetado",
 		"subheading": "¡Contribuye al mapa resolviendo problemas de etiquetado!",
 		"descriptionPart1": "Más información sobre cómo participar se puede encontrar en nuestra página ",
 		"linkText": "Instrucciones de Etiquetado",

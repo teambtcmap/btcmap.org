@@ -886,7 +886,7 @@
 		"issueTypeMisspelledTag": "Spellingsprobleem in tagnaam ({code})"
 	},
 	"taggingIssues": {
-		"heading": "Problemen met taggen",
+		"title": "Problemen met taggen",
 		"subheading": "Draag bij aan DE kaart door tagproblemen op te lossen!",
 		"descriptionPart1": "Meer informatie over hoe u mee kunt doen vindt u op onze",
 		"linkText": "Instructies voor het taggen",

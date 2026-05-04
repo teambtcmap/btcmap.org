@@ -10,9 +10,9 @@ let issues: RpcIssue[] = data.rpcResult.requested_issues;
 </script>
 
 <svelte:head>
-	<title>BTC Map - {$_("taggingIssues.heading")}</title>
+	<title>BTC Map - {$_("taggingIssues.title")}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/home.png" />
-	<meta name="twitter:title" content="BTC Map - {$_("taggingIssues.heading")}" />
+	<meta name="twitter:title" content="BTC Map - {$_("taggingIssues.title")}" />
 	<meta name="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
@@ -23,7 +23,7 @@ let issues: RpcIssue[] = data.rpcResult.requested_issues;
 				? 'text-white'
 				: 'gradient'} text-center text-4xl !leading-tight font-semibold md:text-5xl lg:text-left"
 		>
-			{$_("taggingIssues.heading")}
+			{$_("taggingIssues.title")}
 		</h1>
 	{:else}
 		<HeaderPlaceholder />

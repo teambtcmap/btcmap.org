@@ -886,7 +886,7 @@
 		"issueTypeMisspelledTag": "Spelling issue in tag name ({code})"
 	},
 	"taggingIssues": {
-		"heading": "Tagging Issues",
+		"title": "Tagging Issues",
 		"subheading": "Contribute to THE map by resolving tagging issues!",
 		"descriptionPart1": "More information about how to get involved can be found on our ",
 		"linkText": "Tagging Instructions",

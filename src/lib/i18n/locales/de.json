@@ -784,7 +784,7 @@
 		"issueTypeMisspelledTag": "Rechtschreibfehler im Tag-Namen ({code})"
 	},
 	"taggingIssues": {
-		"heading": "Tagging-Probleme",
+		"title": "Tagging-Probleme",
 		"subheading": "Trage zur Karte bei, indem du Tagging-Probleme löst!",
 		"descriptionPart1": "Weitere Informationen, wie du dich einbringen kannst, findest du auf unserer ",
 		"linkText": "Tagging-Anleitung",
