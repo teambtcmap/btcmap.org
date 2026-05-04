@@ -27,3 +27,36 @@ export function isRecentlyVerified(
 export function isUpToDate(merchant: Place | null): boolean {
 	return isRecentlyVerified(merchant?.verified_at);
 }
+
+// Returns the place's OSM verification dates (most recent first).
+// Intentionally uncached: an earlier version keyed a module-scope
+// cache on `${id}:${updated_at}`, which collided when MerchantCard
+// rendered the same record twice — first with the stripped MAP_SYNC
+// shape (no OSM date tags), then with the enhanced COMPLETE_PLACE
+// shape (tags present). The first call cached `[]` and the enhanced
+// call hit that stale entry, leaving every area card stuck on
+// "Not recently verified" even when the place had a fresh date.
+export function verifiedArr(place: Place): string[] {
+	const verified: string[] = [];
+
+	if (place["osm:survey:date"] && Date.parse(place["osm:survey:date"])) {
+		verified.push(place["osm:survey:date"]);
+	}
+
+	if (place["osm:check_date"] && Date.parse(place["osm:check_date"])) {
+		verified.push(place["osm:check_date"]);
+	}
+
+	if (
+		place["osm:check_date:currency:XBT"] &&
+		Date.parse(place["osm:check_date:currency:XBT"])
+	) {
+		verified.push(place["osm:check_date:currency:XBT"]);
+	}
+
+	if (verified.length > 1) {
+		verified.sort((a, b) => Date.parse(b) - Date.parse(a));
+	}
+
+	return verified;
+}

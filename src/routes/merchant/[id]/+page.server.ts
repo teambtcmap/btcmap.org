@@ -2,7 +2,6 @@ import { error, isHttpError } from "@sveltejs/kit";
 
 import { API_BASE } from "$lib/api-base";
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
-import { verifiedArr } from "$lib/map/setup";
 import {
 	buildOsmTags,
 	getBoosted,
@@ -18,6 +17,7 @@ import type {
 	Place,
 } from "$lib/types";
 import { isValidPlaceId } from "$lib/utils";
+import { verifiedArr } from "$lib/verification";
 
 import type { PageServerLoad } from "./$types";
 
