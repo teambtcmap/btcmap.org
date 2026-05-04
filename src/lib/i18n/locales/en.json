@@ -338,6 +338,7 @@
 	"comments": {
 		"title": "Comments",
 		"add": "Add Comment",
+		"adding": "Commenting...",
 		"none": "No comments yet.",
 		"beFirst": "No comments yet. Be the first to leave a comment!",
 		"view": "View Comments",

@@ -338,6 +338,7 @@
 	"comments": {
 		"title": "Reacties",
 		"add": "Reactie toevoegen",
+		"adding": "Bezig...",
 		"none": "Er zijn nog geen reacties.",
 		"beFirst": "Er zijn nog geen reacties. Laat als eerste een reactie achter!",
 		"view": "Reacties bekijken",

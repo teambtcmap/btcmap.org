@@ -1,5 +1,6 @@
 <script lang="ts">
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import { _ } from "$lib/i18n";
 import type { MerchantPageData } from "$lib/types.js";
 
 import CommentAdd from "./CommentAdd.svelte";
@@ -15,9 +16,9 @@ let open = false;
 	style="flex w-40 items-center justify-center rounded-xl p-3"
 >
 	{#if open}
-		Commenting...
+		{$_('comments.adding')}
 	{:else}
-		Add comment
+		{$_('comments.add')}
 	{/if}
 </PrimaryButton>
 
