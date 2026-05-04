@@ -455,9 +455,9 @@
 		"submitAnother": "Noch ein {type} einreichen"
 	},
 	"verifyLocation": {
-		"hero": "Hilf, die Daten für alle zu verbessern",
-		"heading": "Standort verifizieren",
-		"subheading": "(Stelle sicher, dass die Informationen noch korrekt sind und aktualisiere sie gegebenenfalls.)",
+		"subheading": "Hilf, die Daten für alle zu verbessern",
+		"title": "Standort verifizieren",
+		"note": "(Stelle sicher, dass die Informationen noch korrekt sind und aktualisiere sie gegebenenfalls.)",
 		"descriptionPart1": "Bitte fülle das folgende Formular aus und einer unserer freiwilligen Communitysmitglieder wird deinen Standort auf der Karte aktualisieren. Wusstest du, dass du diese Daten selbst auf",
 		"osmLinkText": "OpenStreetMap",
 		"descriptionPart2": " aktualisieren kannst? Du kannst unser",

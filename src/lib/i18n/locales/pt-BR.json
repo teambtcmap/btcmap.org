@@ -477,9 +477,9 @@
 		"tagsNotePart2": "."
 	},
 	"verifyLocation": {
-		"hero": "Ajude a melhorar os dados para todos",
-		"heading": "Verificar Local",
-		"subheading": "(Certifique-se de que as informações ainda estão corretas e atualize-as, se necessário.)",
+		"subheading": "Ajude a melhorar os dados para todos",
+		"title": "Verificar Local",
+		"note": "(Certifique-se de que as informações ainda estão corretas e atualize-as, se necessário.)",
 		"descriptionPart1": "Preencha o formulário abaixo e um dos membros voluntários da nossa comunidade atualizará seu local no mapa. Sabia que você pode atualizar esses dados no",
 		"osmLinkText": "OpenStreetMap",
 		"descriptionPart2": "? Confira nossa",

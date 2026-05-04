@@ -455,9 +455,9 @@
 		"submitAnother": "Soumettre un(e) autre {type}"
 	},
 	"verifyLocation": {
-		"hero": "Aidez à améliorer les données pour tous",
-		"heading": "Vérifier le lieu",
-		"subheading": "(Assurez-vous que les informations sont toujours exactes et mettez-les à jour si nécessaire.)",
+		"subheading": "Aidez à améliorer les données pour tous",
+		"title": "Vérifier le lieu",
+		"note": "(Assurez-vous que les informations sont toujours exactes et mettez-les à jour si nécessaire.)",
 		"descriptionPart1": "Veuillez remplir le formulaire suivant et l'un de nos bénévoles mettra à jour votre lieu sur la carte. Saviez-vous que vous pouvez mettre à jour ces données vous-même sur",
 		"osmLinkText": "OpenStreetMap",
 		"descriptionPart2": "? Consultez notre",

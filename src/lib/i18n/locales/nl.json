@@ -547,9 +547,9 @@
 		"submitAnother": "Nog &eacute;&eacute;n indienen {type}"
 	},
 	"verifyLocation": {
-		"hero": "Help mee om de gegevens voor iedereen beter te maken",
-		"heading": "Verifieer locatie",
-		"subheading": "(Controleer of de informatie nog klopt en werk deze zo nodig bij.)",
+		"subheading": "Help mee om de gegevens voor iedereen beter te maken",
+		"title": "Verifieer locatie",
+		"note": "(Controleer of de informatie nog klopt en werk deze zo nodig bij.)",
 		"descriptionPart1": "Vul het onderstaande formulier in, dan werkt een van onze vrijwilligers je locatie bij op de kaart. Wist je al dat je deze informatie zelf kunt wijzigen via",
 		"osmLinkText": "OpenStreetMap",
 		"descriptionPart2": "? Lees onze",
