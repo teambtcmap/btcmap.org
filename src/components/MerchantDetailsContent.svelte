@@ -405,7 +405,7 @@ async function fetchComments(placeId: number) {
 					{#if boostLoading}
 						{$_('boost.boosting')}
 					{:else}
-						<Icon w="16" h="16" icon="arrow_circle_up" type="material" />
+						<Icon w="16" h="16" class="shrink-0" icon="arrow_circle_up" type="material" />
 						{$_('boost.extendBoost')}
 					{/if}
 				</button>
@@ -439,7 +439,7 @@ async function fetchComments(placeId: number) {
 					{#if boostLoading}
 						{$_('boost.boosting')}
 					{:else}
-						<Icon w="16" h="16" icon="rocket_launch" type="material" />
+						<Icon w="16" h="16" class="shrink-0" icon="rocket_launch" type="material" />
 						{$_('boost.boostThisPlace')}
 					{/if}
 				</button>

@@ -46,7 +46,7 @@ $: $resetBoost && resetBoostLoading();
 		<Icon
 			w="20"
 			h="20"
-			class="mr-1"
+			class="mr-1 shrink-0"
 			icon={boosted ? 'arrow_circle_up' : 'rocket_launch'}
 			type="material"
 		/>
