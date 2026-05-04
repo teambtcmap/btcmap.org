@@ -94,7 +94,7 @@
 		"unavailable": "Niet beschikbaar (verouderd account)",
 		"warning": "Deze inloggegevens zijn de enige manier om je opgeslagen locaties te herstellen.",
 		"copied": "Gekopieerd naar klembord",
-		"copyFailed": "Kopi ren mislukt, kopieer alsjeblieft handmatig"
+		"copyFailed": "Kopi&euml;ren mislukt, kopieer alsjeblieft handmatig"
 	},
 	"save": {
 		"accountCreatedPlace": "Account aangemaakt, je opgeslagen locaties worden op dit apparaat bewaard.",
@@ -360,8 +360,8 @@
 		"noPaymentMethod": "Selecteer minimaal &eacute;&eacute;n betaalmethode...",
 		"formSubmission": "Het verzenden van het formulier is mislukt. Probeer het nog eens of neem contact op met BTC Map.",
 		"locationSearch": "Het zoeken naar locaties is mislukt. Probeer het opnieuw of neem contact op met BTC Map.",
-		"mapView": "Kan de kaartweergave niet instellen op de opgegeven co rdinaten, probeer het opnieuw of neem contact op met BTC Map.",
-		"mapViewCachedCoords": "Kan de kaartweergave niet instellen op gecachte co rdinaten, probeer het opnieuw of neem contact op met BTC Map.",
+		"mapView": "Kan de kaartweergave niet instellen op de opgegeven co&ouml;rdinaten, probeer het opnieuw of neem contact op met BTC Map.",
+		"mapViewCachedCoords": "Kan de kaartweergave niet instellen op gecachte co&ouml;rdinaten, probeer het opnieuw of neem contact op met BTC Map.",
 		"merchantDetailsLoadError": "Fout bij het laden van de ondernemergegevens. Probeer het opnieuw.",
 		"boostLoadError": "Laden van boostinformatie mislukt. Probeer het opnieuw.",
 		"fullscreenError": "Fout bij het activeren van de schermvullende weergave: {message} ({name})"
@@ -507,7 +507,7 @@
 		"latitude": "Breedtegraad",
 		"longitude": "Lengtegraad",
 		"advancedToggle": "Geavanceerd: co&ouml;rdinaten handmatig invoeren",
-		"advancedHint": "Handig als je de exacte co rdinaten al weet (bijvoorbeeld via Google Maps). Je kan ook op de kaart klikken om ze aan te passen.",
+		"advancedHint": "Handig als je de exacte co&ouml;rdinaten al weet (bijvoorbeeld via Google Maps). Je kan ook op de kaart klikken om ze aan te passen.",
 		"latitudeInvalid": "Breedtegraad moet een getal tussen -90 en 90 zijn.",
 		"longitudeInvalid": "Lengtegraad moet een getal tussen -180 en 180 zijn.",
 		"addressLabel": "Adres (optioneel)",
@@ -534,7 +534,7 @@
 		"contactPlaceholder": "hallo@btcmap.org",
 		"captchaPlaceholder": "Voer de captcha-tekst in",
 		"supertaggerHeading": "Geheimzinnige Supertagger?",
-		"supertaggerDescription": "Draag direct bij aan OSM - like a 😎 boss. Wie heeft er  berhaupt formulieren nodig?",
+		"supertaggerDescription": "Draag direct bij aan OSM - like a 😎 boss. Wie heeft er &uuml;berhaupt formulieren nodig?",
 		"supertaggerImageAlt": "geheimzinnige supertagger?",
 		"supertaggerWikiButton": "Raadpleeg de wiki voor instructies.",
 		"formSuccessType": "Locatie",
