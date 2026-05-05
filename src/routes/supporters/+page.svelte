@@ -144,7 +144,7 @@ const plebTier = sponsorshipTiers.find((t) => t.level === "Pleb")!;
 				{t("supporters.sponsors.description")}
 			</p>
 			<a
-				href="mailto:hello@btcmap.org"
+				href="mailto:hello@btcmap.org?subject=Sponsorship%20enquiry"
 				class="inline-block rounded-xl bg-link px-6 py-3 font-semibold text-white transition-colors hover:bg-hover"
 			>
 				{t("supporters.supporters.becomeSponsor")}
