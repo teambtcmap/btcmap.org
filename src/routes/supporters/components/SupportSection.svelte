@@ -67,7 +67,7 @@ $: t = $_;
 			class="flex w-full items-center justify-center self-center rounded-xl border border-dashed border-link/40 bg-white/50 p-4 text-center dark:bg-slate-900/40 {compact ? 'min-h-[80px]' : 'min-h-[120px]'}"
 		>
 			<a
-				href="mailto:hello@btcmap.org"
+				href="mailto:hello@btcmap.org?subject=Sponsorship%20enquiry%3A%20{encodeURIComponent(tier.level)}"
 				class="text-sm font-semibold uppercase tracking-wide text-link"
 				>Become a {tier.level}</a
 			>
