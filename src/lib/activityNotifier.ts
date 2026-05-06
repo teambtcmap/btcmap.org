@@ -32,7 +32,7 @@ export const hasNewActivity = derived(
 // user never sees the dot. Treat anything unparseable as missing.
 const ISO_8601_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
 
-function isValidLastSeen(raw: string | null): raw is string {
+export function isValidLastSeen(raw: string | null): raw is string {
 	return raw !== null && ISO_8601_RE.test(raw);
 }
 

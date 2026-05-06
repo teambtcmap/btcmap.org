@@ -13,6 +13,7 @@ import {
 	countByType,
 } from "$lib/activity";
 import {
+	isValidLastSeen,
 	MAX_PLACES,
 	markActivitySeen,
 	storageKeyFor,
@@ -164,7 +165,11 @@ onMount(async () => {
 		return;
 	}
 
-	priorLastSeen = localStorage.getItem(storageKeyFor($session.username));
+	// Validate the same way the notifier does — junk in localStorage
+	// would break the lexicographic date comparisons used for the pill
+	// count and per-card "new" tinting.
+	const rawLastSeen = localStorage.getItem(storageKeyFor($session.username));
+	priorLastSeen = isValidLastSeen(rawLastSeen) ? rawLastSeen : null;
 	savedPlaceIds = $session.savedPlaces ?? [];
 	savedAreaIds = $session.savedAreas ?? [];
 	hasSavedItems = savedPlaceIds.length > 0 || savedAreaIds.length > 0;
