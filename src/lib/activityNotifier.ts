@@ -6,7 +6,7 @@ import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
 import type { Session } from "$lib/session";
 
-export const POLL_INTERVAL_MS = 30 * 60 * 1000;
+export const POLL_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
 export const POLL_DAYS = 1;
 export const STORAGE_KEY_PREFIX = "btcmap_activity_lastseen:";
 
