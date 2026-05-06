@@ -392,7 +392,8 @@
 		"merchantList": "Ondernemerslijst",
 		"merchantListItem": "Ondernemerslijst item",
 		"selectCategory": "Selecteer categorie",
-		"searchInput": "Zoek naar Bitcoin ondernemers"
+		"searchInput": "Zoek naar Bitcoin ondernemers",
+		"newActivity": "Nieuwe activiteit in je opgeslagen plaatsen"
 	},
 	"theme": {
 		"switchToLightMode": "Schakel over naar lichte modus",

@@ -3,6 +3,7 @@ import OutClick from "svelte-outclick";
 
 import BackupModal from "$components/auth/BackupModal.svelte";
 import Icon from "$components/Icon.svelte";
+import { hasNewActivity } from "$lib/activityNotifier";
 import { _ } from "$lib/i18n";
 import { session } from "$lib/session";
 
@@ -24,7 +25,7 @@ afterNavigate(() => {
 		type="button"
 		id={triggerId}
 		on:click={() => (open = !open)}
-		class="flex h-10 w-10 items-center justify-center text-link transition-colors hover:text-hover dark:text-white dark:hover:text-link"
+		class="relative flex h-10 w-10 items-center justify-center text-link transition-colors hover:text-hover dark:text-white dark:hover:text-link"
 		aria-label={$session?.username ?? $_("nav.account")}
 		title={$session?.username ?? $_("nav.account")}
 		aria-haspopup="true"
@@ -36,6 +37,13 @@ afterNavigate(() => {
 			w="24"
 			h="24"
 		/>
+		{#if $session && $hasNewActivity}
+			<span
+				class="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-dark"
+				aria-label={$_("aria.newActivity")}
+				role="status"
+			></span>
+		{/if}
 	</button>
 
 	{#if open}

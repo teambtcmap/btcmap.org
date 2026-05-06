@@ -392,7 +392,8 @@
 		"merchantList": "Merchant list",
 		"merchantListItem": "Merchant list item",
 		"selectCategory": "Select category",
-		"searchInput": "Search for Bitcoin merchants"
+		"searchInput": "Search for Bitcoin merchants",
+		"newActivity": "New activity in your saved places"
 	},
 	"theme": {
 		"switchToLightMode": "Switch to light mode",
