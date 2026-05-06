@@ -49,7 +49,7 @@ export function markActivitySeen(username: string, date: string): void {
 }
 
 // Mirrors the server-side cap in /v4/activity.
-const MAX_PLACES = 500;
+export const MAX_PLACES = 500;
 
 function buildPollUrl(s: Session): string {
 	const params = new URLSearchParams({ days: String(POLL_DAYS) });

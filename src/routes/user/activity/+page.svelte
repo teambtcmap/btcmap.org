@@ -12,7 +12,11 @@ import {
 	type ActivityType,
 	countByType,
 } from "$lib/activity";
-import { markActivitySeen, storageKeyFor } from "$lib/activityNotifier";
+import {
+	MAX_PLACES,
+	markActivitySeen,
+	storageKeyFor,
+} from "$lib/activityNotifier";
 import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
@@ -30,9 +34,6 @@ type Filter =
 
 const DAYS = 30;
 const PAGE_SIZE = 20;
-// Mirrors the server-side cap in /v4/activity — slice here so a user
-// with 500+ saved places still gets a usable response instead of a 400.
-const MAX_PLACES = 500;
 
 // IDs come from the session (always available once logged in).
 // Names are fetched from the API best-effort for the filter select —
