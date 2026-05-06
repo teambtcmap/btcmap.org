@@ -271,6 +271,82 @@ describe("activityNotifier — polling", () => {
 		stop();
 	});
 
+	it("ignores a fetch that resolves after logout", async () => {
+		// Defer the fetch resolution so we can log out while it's still
+		// in flight, then complete it and assert nothing leaked through.
+		let resolveFetch!: (value: { data: unknown }) => void;
+		(api as unknown as ApiMock).get.mockReturnValue(
+			new Promise((r) => {
+				resolveFetch = r;
+			}),
+		);
+
+		const m = await freshModule();
+		const sessionStore = writable<Session | null>(makeSession());
+		const stop = m.startActivityPolling(sessionStore);
+		await flushMicrotasks();
+		expect((api as unknown as ApiMock).get).toHaveBeenCalledTimes(1);
+
+		// User logs out before the in-flight fetch resolves.
+		sessionStore.set(null);
+		await flushMicrotasks();
+		expect(get(m.latestActivityDate)).toBeNull();
+
+		// Now resolve the stale fetch with what would otherwise be a
+		// "newest item" payload.
+		resolveFetch({
+			data: [
+				{ type: "place_added", place_id: 1, date: "2026-05-06T10:00:00Z" },
+			],
+		});
+		await flushMicrotasks();
+
+		// Stores must remain cleared and no localStorage write should have
+		// happened for the logged-out user.
+		expect(get(m.latestActivityDate)).toBeNull();
+		expect(get(m.lastSeenActivityDate)).toBeNull();
+		expect(localStorage.getItem("btcmap_activity_lastseen:alice")).toBeNull();
+		stop();
+	});
+
+	it("ignores a fetch that resolves after an account switch", async () => {
+		// Bob's fetch resolves *after* the user switches to a new account
+		// "carol" — Bob's response must not write into carol's state.
+		let resolveFetch!: (value: { data: unknown }) => void;
+		(api as unknown as ApiMock).get.mockImplementationOnce(
+			() =>
+				new Promise((r) => {
+					resolveFetch = r;
+				}),
+		);
+		(api as unknown as ApiMock).get.mockResolvedValue({ data: [] });
+
+		const m = await freshModule();
+		const sessionStore = writable<Session | null>(
+			makeSession({ username: "bob" }),
+		);
+		const stop = m.startActivityPolling(sessionStore);
+		await flushMicrotasks();
+
+		// Switch to carol while bob's fetch is still in flight.
+		sessionStore.set(makeSession({ username: "carol", savedPlaces: [9] }));
+		await flushMicrotasks();
+
+		// Resolve bob's fetch with a "newest item".
+		resolveFetch({
+			data: [
+				{ type: "place_added", place_id: 1, date: "2026-05-06T10:00:00Z" },
+			],
+		});
+		await flushMicrotasks();
+
+		// carol's state must not contain bob's date and bob's lastSeen
+		// must not have been bootstrapped from a stale response.
+		expect(get(m.latestActivityDate)).not.toBe("2026-05-06T10:00:00Z");
+		expect(localStorage.getItem("btcmap_activity_lastseen:bob")).toBeNull();
+		stop();
+	});
+
 	it("logout (session → null) clears stores and stops polling", async () => {
 		(api as unknown as ApiMock).get.mockResolvedValue({
 			data: [

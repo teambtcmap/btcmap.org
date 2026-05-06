@@ -69,6 +69,12 @@ export function startActivityPolling(
 		inFlight = (async () => {
 			try {
 				const res = await api.get<ActivityItem[]>(buildPollUrl(s));
+				// If the session changed during the await (logout, account
+				// switch) the response belongs to a no-longer-active user.
+				// Drop it so we don't overwrite the new session's state or
+				// write a stale lastSeen into localStorage for an account
+				// the user has left.
+				if (currentSession?.username !== s.username) return;
 				const newest = res.data[0]?.date ?? null;
 				lastFetchAt = Date.now();
 				if (newest) {
