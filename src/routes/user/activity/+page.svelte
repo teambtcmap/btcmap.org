@@ -177,18 +177,14 @@ onMount(async () => {
 
 	// Hydrate names for the filter select in parallel. Best-effort:
 	// if either call fails, the select falls back to "Place <id>" /
-	// "Area <id>" labels and the feed is unaffected.
+	// "Area <id>" labels and the feed is unaffected. Don't await this
+	// before markActivitySeen — a slow names call would leave the nav
+	// dot showing while the user is already reading the feed.
 	const headers = { Authorization: `Bearer ${$session.token}` };
-	const [placesRes, areasRes] = await Promise.allSettled([
+	const namesPromise = Promise.allSettled([
 		api.get<SavedPlace[]>("/api/session/saved-places", { headers }),
 		api.get<SavedArea[]>("/api/session/saved-areas", { headers }),
 	]);
-	if (placesRes.status === "fulfilled") {
-		placeNames = new Map(placesRes.value.data.map((p) => [p.id, p.name]));
-	}
-	if (areasRes.status === "fulfilled") {
-		areaNames = new Map(areasRes.value.data.map((a) => [a.id, a.name]));
-	}
 
 	await feedPromise;
 
@@ -197,6 +193,14 @@ onMount(async () => {
 	// changed during awaits (e.g. logout).
 	if (feedItems.length > 0 && $session) {
 		markActivitySeen($session.username, feedItems[0].date);
+	}
+
+	const [placesRes, areasRes] = await namesPromise;
+	if (placesRes.status === "fulfilled") {
+		placeNames = new Map(placesRes.value.data.map((p) => [p.id, p.name]));
+	}
+	if (areasRes.status === "fulfilled") {
+		areaNames = new Map(areasRes.value.data.map((a) => [a.id, a.name]));
 	}
 });
 </script>
