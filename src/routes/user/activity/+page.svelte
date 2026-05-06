@@ -306,7 +306,10 @@ onMount(async () => {
 			<div class="rounded-3xl border border-gray-300 dark:border-white/95 dark:bg-white/10">
 				<div class="space-y-2 p-2">
 					{#each pagedItems as item, i (item.type + "-" + item.place_id + "-" + item.date + "-" + i)}
-						<ActivityCard {item} highlight={i === 0} />
+						{@const isNew = !!priorLastSeen && item.date > priorLastSeen}
+						<div class={isNew ? "rounded-2xl bg-link/5 dark:bg-link/10" : ""}>
+							<ActivityCard {item} highlight={isNew} />
+						</div>
 					{/each}
 				</div>
 			</div>
