@@ -12,6 +12,7 @@ import {
 	type ActivityType,
 	countByType,
 } from "$lib/activity";
+import { markActivitySeen, storageKeyFor } from "$lib/activityNotifier";
 import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
@@ -51,8 +52,16 @@ let initialLoading = true;
 let feedLoading = false;
 let feedError = false;
 let fetchGeneration = 0;
+// Captured once at mount before markActivitySeen() runs, so the
+// "X new" pill is computed against the user's *previous* visit.
+let priorLastSeen: string | null = null;
+let pillDismissed = false;
 
 $: filter = parseFilterValue(filterValue);
+$: newCount = priorLastSeen
+	? feedItems.filter((i) => i.date > (priorLastSeen as string)).length
+	: 0;
+$: showNewPill = !pillDismissed && newCount > 0;
 // Counts are over the unfiltered window so chip counts don't collapse
 // when the user toggles a type off.
 $: typeCounts = countByType(feedItems);
@@ -154,6 +163,7 @@ onMount(async () => {
 		return;
 	}
 
+	priorLastSeen = localStorage.getItem(storageKeyFor($session.username));
 	savedPlaceIds = $session.savedPlaces ?? [];
 	savedAreaIds = $session.savedAreas ?? [];
 	hasSavedItems = savedPlaceIds.length > 0 || savedAreaIds.length > 0;
@@ -181,6 +191,13 @@ onMount(async () => {
 	}
 
 	await feedPromise;
+
+	// Mark the newest item as seen so the nav dot clears the moment the
+	// user lands on this page. Guarded on $session because it may have
+	// changed during awaits (e.g. logout).
+	if (feedItems.length > 0 && $session) {
+		markActivitySeen($session.username, feedItems[0].date);
+	}
 });
 </script>
 
@@ -274,6 +291,16 @@ onMount(async () => {
 						<Icon type="material" icon="chevron_right" w="24" h="24" />
 					</button>
 				</div>
+			{/if}
+
+			{#if showNewPill}
+				<button
+					type="button"
+					on:click={() => (pillDismissed = true)}
+					class="mx-auto mb-3 block rounded-full bg-link px-4 py-1 text-sm font-medium text-white transition-colors hover:bg-hover"
+				>
+					{$_("userActivity.newSinceLastVisit", { values: { count: newCount } })}
+				</button>
 			{/if}
 
 			<div class="rounded-3xl border border-gray-300 dark:border-white/95 dark:bg-white/10">

@@ -70,7 +70,8 @@
 		"typeCommented": "Gereageerd",
 		"typeBoosted": "Geboost",
 		"noTypesSelected": "Kies hierboven ten minste &eacute;&eacute;n type activiteit",
-		"noMatchingTypes": "Geen enkele activiteit past bij je gekozen types."
+		"noMatchingTypes": "Geen enkele activiteit past bij je gekozen types.",
+		"newSinceLastVisit": "{count} nieuw sinds je laatste bezoek"
 	},
 	"login": {
 		"title": "Aanmelden",
