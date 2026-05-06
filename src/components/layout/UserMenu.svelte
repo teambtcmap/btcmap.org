@@ -14,6 +14,13 @@ export let id = "user-menu";
 let open = false;
 let showBackup = false;
 $: triggerId = `${id}-trigger`;
+$: accountLabel = $session?.username ?? $_("nav.account");
+// Fold the new-activity state into the button's accessible name —
+// otherwise the inner dot's aria-label is shadowed by the button's
+// own aria-label and never reaches assistive tech.
+$: triggerLabel = $hasNewActivity
+	? `${accountLabel}. ${$_("aria.newActivity")}`
+	: accountLabel;
 
 afterNavigate(() => {
 	open = false;
@@ -26,8 +33,8 @@ afterNavigate(() => {
 		id={triggerId}
 		on:click={() => (open = !open)}
 		class="relative flex h-10 w-10 items-center justify-center text-link transition-colors hover:text-hover dark:text-white dark:hover:text-link"
-		aria-label={$session?.username ?? $_("nav.account")}
-		title={$session?.username ?? $_("nav.account")}
+		aria-label={triggerLabel}
+		title={triggerLabel}
 		aria-haspopup="true"
 		aria-expanded={open}
 	>
@@ -40,8 +47,7 @@ afterNavigate(() => {
 		{#if $session && $hasNewActivity}
 			<span
 				class="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-dark"
-				aria-label={$_("aria.newActivity")}
-				role="status"
+				aria-hidden="true"
 			></span>
 		{/if}
 	</button>
