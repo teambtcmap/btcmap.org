@@ -96,29 +96,43 @@ export function startActivityPolling(
 		void fetchNow(s);
 	};
 
+	const stopInterval = (): void => {
+		if (intervalId !== null) {
+			clearInterval(intervalId);
+			intervalId = null;
+		}
+	};
+
 	const unsubSession = sessionStore.subscribe((s) => {
 		currentSession = s;
-		if (s) {
-			if (s.username !== currentUsername) {
-				currentUsername = s.username;
-				loadLastSeen(s.username);
-				latestActivityDate.set(null);
-				lastFetchAt = 0;
-				if (hasSavedItems(s)) {
-					if (intervalId === null) {
-						intervalId = setInterval(tick, POLL_INTERVAL_MS);
-					}
-					tick();
-				}
-			}
-		} else {
+		if (!s) {
 			currentUsername = null;
 			latestActivityDate.set(null);
 			lastSeenActivityDate.set(null);
-			if (intervalId !== null) {
-				clearInterval(intervalId);
-				intervalId = null;
+			stopInterval();
+			return;
+		}
+
+		// Per-username bootstrap (load lastSeen, reset latest) — only on
+		// the transition into this username.
+		const usernameChanged = s.username !== currentUsername;
+		if (usernameChanged) {
+			currentUsername = s.username;
+			loadLastSeen(s.username);
+			latestActivityDate.set(null);
+			lastFetchAt = 0;
+		}
+
+		// Reconcile the polling interval on every session update so a user
+		// who saves their first place mid-session starts being polled, and
+		// a user who unsaves their last item stops.
+		if (hasSavedItems(s)) {
+			if (intervalId === null) {
+				intervalId = setInterval(tick, POLL_INTERVAL_MS);
 			}
+			if (usernameChanged || lastFetchAt === 0) tick();
+		} else {
+			stopInterval();
 		}
 	});
 
@@ -132,7 +146,7 @@ export function startActivityPolling(
 
 	return () => {
 		unsubSession();
-		if (intervalId !== null) clearInterval(intervalId);
+		stopInterval();
 		if (typeof document !== "undefined") {
 			document.removeEventListener("visibilitychange", onVisibility);
 		}

@@ -232,6 +232,45 @@ describe("activityNotifier — polling", () => {
 		expect((api as unknown as ApiMock).get).toHaveBeenCalledTimes(1);
 	});
 
+	it("starts polling when saved items appear mid-session (same username)", async () => {
+		(api as unknown as ApiMock).get.mockResolvedValue({
+			data: [
+				{ type: "place_added", place_id: 1, date: "2026-05-06T10:00:00Z" },
+			],
+		});
+		const m = await freshModule();
+		// User signs in with zero saved items — no polling yet.
+		const sessionStore = writable<Session | null>(
+			makeSession({ savedPlaces: [], savedAreas: [] }),
+		);
+		const stop = m.startActivityPolling(sessionStore);
+		await flushMicrotasks();
+		expect((api as unknown as ApiMock).get).not.toHaveBeenCalled();
+
+		// User saves their first place — same username, savedPlaces grows.
+		sessionStore.set(makeSession({ savedPlaces: [1] }));
+		await flushMicrotasks();
+		expect((api as unknown as ApiMock).get).toHaveBeenCalledTimes(1);
+		stop();
+	});
+
+	it("stops polling when the user unsaves their last item", async () => {
+		(api as unknown as ApiMock).get.mockResolvedValue({ data: [] });
+		const m = await freshModule();
+		const sessionStore = writable<Session | null>(makeSession());
+		const stop = m.startActivityPolling(sessionStore);
+		await flushMicrotasks();
+		expect((api as unknown as ApiMock).get).toHaveBeenCalledTimes(1);
+
+		// User unsaves their last item — interval should clear so we don't
+		// keep polling for nothing.
+		sessionStore.set(makeSession({ savedPlaces: [], savedAreas: [] }));
+		await flushMicrotasks();
+		await vi.advanceTimersByTimeAsync(m.POLL_INTERVAL_MS * 2);
+		expect((api as unknown as ApiMock).get).toHaveBeenCalledTimes(1);
+		stop();
+	});
+
 	it("logout (session → null) clears stores and stops polling", async () => {
 		(api as unknown as ApiMock).get.mockResolvedValue({
 			data: [
