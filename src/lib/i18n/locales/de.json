@@ -315,7 +315,6 @@
 		"language": "Sprache",
 		"selectLanguage": "Sprache auswählen",
 		"nav": "Fußzeilen-Navigation",
-		"aboutUs": "Über uns",
 		"media": "Medien",
 		"license": "Lizenz",
 		"privacy": "Datenschutz",
@@ -1086,40 +1085,5 @@
 			"netlifyDocsAnalytics": "Netlify Docs - Analytik",
 			"netlifyDocsHowAnalytics": "Netlify Docs - Wie Analytik funktioniert"
 		}
-	},
-	"aboutUs": {
-		"title": "Über uns",
-		"description": "BTC Map ist ein kostenloses Open-Source-Projekt, das von freiwilligen Bitcoinern und bitcoinfreundlichen Händlern weltweit betrieben wird.",
-		"merchants": {
-			"heading": "Händler",
-			"intro": "Händler sind das Herz von BTC Map. Diese Unternehmen treiben den Paradigmenwechsel voran und positionieren sich für weiteren Erfolg. Jeder Händler, der Bitcoin akzeptiert, kann auf BTC Map gelistet werden.",
-			"acceptBitcoin": "Akzeptierst du Bitcoin?",
-			"getListed": "Auf BTC Map listen lassen"
-		},
-		"supertaggers": {
-			"heading": "Schattenhafte Supertagger",
-			"intro": "Schattenhafte Supertagger sind die Menschen, die dieses Projekt antreiben. Sie sind Freiwillige, die sich die Zeit nehmen, Geschäftsstandorte mit neuen Informationen zu aktualisieren. Ohne sie wäre BTC Map nicht nachhaltig!",
-			"topLabel": "Unsere Top-Supertagger",
-			"viewLeaderboard": "Rangliste anzeigen"
-		},
-		"communities": {
-			"heading": "Communities",
-			"intro": "Bitcoin-Communities helfen, die globale Akzeptanz voranzutreiben, indem sie neue Benutzer lokal onboarden!",
-			"addPrompt": "Siehst du deine Community nicht?",
-			"addLink": "Füge sie zu BTC Map hinzu",
-			"seeAll": "Alle Communities anzeigen"
-		},
-		"integrations": {
-			"heading": "Integrationen",
-			"communityLabel": "Communitys-Integrationen",
-			"communitySub": "Projekte, die BTC Map verwenden",
-			"projectLabel": "Projekt-Integrationen",
-			"projectSub": "BTC Map verwendet diese Projekte",
-			"reachOut": "Wenn du daran interessiert bist, mit uns zu integrieren, bitte",
-			"reachOutLink": "melde dich",
-			"supporter": "Unterstützer",
-			"more": "Mehr!"
-		},
-		"avatarAlt": "Avatar"
 	}
 }

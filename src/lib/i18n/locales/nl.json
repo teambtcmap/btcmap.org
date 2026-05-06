@@ -402,7 +402,6 @@
 		"language": "Taal",
 		"selectLanguage": "Selecteer taal",
 		"nav": "Voettekstnavigatie",
-		"aboutUs": "Over ons",
 		"media": "Media",
 		"license": "Licentie",
 		"privacy": "Privacy",
@@ -1122,40 +1121,5 @@
 			"netlifyDocsAnalytics": "Netlify Documenten - Analytics",
 			"netlifyDocsHowAnalytics": "Netlify Documenten - Hoe Analytics werkt"
 		}
-	},
-	"aboutUs": {
-		"title": "Over ons",
-		"description": "BTC Map is een gratis en open-sourceproject, mogelijk gemaakt door vrijwillige Bitcoiners en Bitcoinvriendelijke handelaars over de hele wereld.",
-		"merchants": {
-			"heading": "Ondernemers",
-			"intro": "Ondernemers vormen de kern van BTC Map. Deze bedrijven lopen voorop in de paradigmaverandering en positioneren zichzelf voor blijvend succes. Elke handelaar die Bitcoin accepteert, kan op de BTC-kaart worden vermeld.",
-			"acceptBitcoin": "Bitcoin accepteren?",
-			"getListed": "Zorg dat je vermeld wordt op de BTC Map"
-		},
-		"supertaggers": {
-			"heading": "Geheimzinnige Supertaggers",
-			"intro": "Geheimzinnige Supertaggers zijn mensen die dit project aandrijven. Het zijn vrijwilligers die belangeloos de tijd nemen om bedrijfslocaties te voorzien van nieuwe informatie. Zonder hen zou BTC Map niet duurzaam zijn!",
-			"topLabel": "Onze top-supertaggers",
-			"viewLeaderboard": "Bekijk klassement"
-		},
-		"communities": {
-			"heading": "Community's",
-			"intro": "Bitcoin-gemeenschappen helpen de wereldwijde adoptie te stimuleren door nieuwe gebruikers lokaal te introduceren!",
-			"addPrompt": "Staat je community er niet bij?",
-			"addLink": "Voeg het toe aan de BTC Map",
-			"seeAll": "Bekijk alle community's"
-		},
-		"integrations": {
-			"heading": "Integraties",
-			"communityLabel": "Gemeenschapsintegraties",
-			"communitySub": "Projecten die gebruik maken van BTC Map",
-			"projectLabel": "Projectintegraties",
-			"projectSub": "BTC Map maakt gebruik van deze projecten",
-			"reachOut": "Als u geïnteresseerd bent om met ons te integreren, neem dan contact met ons op",
-			"reachOutLink": "reiken",
-			"supporter": "Supporter",
-			"more": "Meer!"
-		},
-		"avatarAlt": "avatar"
 	}
 }

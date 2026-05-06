@@ -315,7 +315,6 @@
 		"language": "Langue",
 		"selectLanguage": "Sélectionner la langue",
 		"nav": "Navigation du pied de page",
-		"aboutUs": "À propos",
 		"media": "Médias",
 		"license": "Licence",
 		"privacy": "Confidentialité",
@@ -1086,40 +1085,5 @@
 			"netlifyDocsAnalytics": "Documentation Netlify - Analytics",
 			"netlifyDocsHowAnalytics": "Documentation Netlify - Fonctionnement de l'analytique"
 		}
-	},
-	"aboutUs": {
-		"title": "À propos",
-		"description": "BTC Map est un projet libre et open-source alimenté par des bitcoiners bénévoles et des commerces acceptant le bitcoin dans le monde entier.",
-		"merchants": {
-			"heading": "Commerces",
-			"intro": "Les commerces sont au coeur de BTC Map. Ces entreprises anticipent le changement de paradigme et se positionnent pour un succès durable. Tout commerce qui accepte le bitcoin peut être répertorié sur BTC Map.",
-			"acceptBitcoin": "Vous acceptez le bitcoin ?",
-			"getListed": "Faites-vous référencer sur BTC Map"
-		},
-		"supertaggers": {
-			"heading": "Shadowy Supertaggers",
-			"intro": "Les Shadowy Supertaggers sont les personnes qui font vivre ce projet. Ce sont des bénévoles qui prennent le temps de mettre à jour les informations des commerces. Sans eux, BTC Map ne serait pas viable !",
-			"topLabel": "Nos meilleurs supertaggers",
-			"viewLeaderboard": "Voir le classement"
-		},
-		"communities": {
-			"heading": "Communautés",
-			"intro": "Les communautés bitcoin contribuent à l'adoption mondiale en intégrant de nouveaux utilisateurs localement !",
-			"addPrompt": "Vous ne voyez pas votre communauté ?",
-			"addLink": "Ajoutez-la sur BTC Map",
-			"seeAll": "Voir toutes les communautés"
-		},
-		"integrations": {
-			"heading": "Intégrations",
-			"communityLabel": "Intégrations communautaires",
-			"communitySub": "Projets utilisant BTC Map",
-			"projectLabel": "Intégrations de projets",
-			"projectSub": "BTC Map utilise ces projets",
-			"reachOut": "Si vous êtes intéressé par une intégration avec nous, veuillez",
-			"reachOutLink": "nous contacter",
-			"supporter": "Supporter",
-			"more": "Et plus !"
-		},
-		"avatarAlt": "avatar"
 	}
 }

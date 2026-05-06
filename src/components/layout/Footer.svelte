@@ -24,7 +24,6 @@ const leftLinks = [
 
 // Right column: company & legal
 const rightLinks = [
-	{ link: "/about-us", nameKey: "footer.aboutUs" },
 	{ link: "/media", nameKey: "footer.media" },
 	{ link: "/license", nameKey: "footer.license" },
 	{ link: "/privacy-policy", nameKey: "footer.privacy" },

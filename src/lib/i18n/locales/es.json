@@ -315,7 +315,6 @@
 		"language": "Idioma",
 		"selectLanguage": "Seleccionar idioma",
 		"nav": "Navegación del pie de página",
-		"aboutUs": "Sobre Nosotros",
 		"media": "Medios",
 		"license": "Licencia",
 		"privacy": "Privacidad",
@@ -1086,40 +1085,5 @@
 			"netlifyDocsAnalytics": "Documentación de Netlify - Analytics",
 			"netlifyDocsHowAnalytics": "Documentación de Netlify - Cómo Funcionan las Analíticas"
 		}
-	},
-	"aboutUs": {
-		"title": "Sobre Nosotros",
-		"description": "BTC Map es un proyecto gratuito y de código abierto impulsado por bitcoiners voluntarios y comercios que aceptan bitcoin en todo el mundo.",
-		"merchants": {
-			"heading": "Comercios",
-			"intro": "Los comercios son el corazón de BTC Map. Estos negocios están a la vanguardia del cambio de paradigma y posicionándose para el éxito continuo. Cualquier comercio que acepte bitcoin puede ser listado en BTC Map.",
-			"acceptBitcoin": "¿Aceptas bitcoin?",
-			"getListed": "Aparece en BTC Map"
-		},
-		"supertaggers": {
-			"heading": "Supertaggers Misteriosos",
-			"intro": "Los Supertaggers Misteriosos son las personas que impulsan este proyecto. Son voluntarios que desinteresadamente dedican su tiempo a actualizar ubicaciones de negocios con nueva información. ¡Sin ellos, BTC Map no sería sostenible!",
-			"topLabel": "Nuestros mejores supertaggers",
-			"viewLeaderboard": "Ver tabla de clasificación"
-		},
-		"communities": {
-			"heading": "Comunidades",
-			"intro": "¡Las comunidades bitcoin ayudan a impulsar la adopción global incorporando nuevos usuarios localmente!",
-			"addPrompt": "¿No ves tu comunidad?",
-			"addLink": "Agrégala a BTC Map",
-			"seeAll": "Ver todas las comunidades"
-		},
-		"integrations": {
-			"heading": "Integraciones",
-			"communityLabel": "Integraciones de comunidad",
-			"communitySub": "Proyectos usando BTC Map",
-			"projectLabel": "Integraciones de proyecto",
-			"projectSub": "BTC Map usa estos proyectos",
-			"reachOut": "Si estás interesado en integrarte con nosotros, por favor",
-			"reachOutLink": "contáctanos",
-			"supporter": "Colaborador",
-			"more": "¡Más!"
-		},
-		"avatarAlt": "avatar"
 	}
 }

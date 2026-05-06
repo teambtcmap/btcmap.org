@@ -303,7 +303,6 @@
 		"language": "Idioma",
 		"selectLanguage": "Selecionar idioma",
 		"nav": "Navegação do rodapé",
-		"aboutUs": "Sobre Nós",
 		"media": "Mídia",
 		"license": "Licença",
 		"privacy": "Privacidade",
@@ -1060,40 +1059,5 @@
 			"netlifyDocsAnalytics": "Netlify Docs - Analytics",
 			"netlifyDocsHowAnalytics": "Netlify Docs - How Analytics Works"
 		}
-	},
-	"aboutUs": {
-		"title": "Sobre Nós",
-		"description": "BTC Map é um projeto gratuito e de código aberto mantido por voluntários bitcoiners e comerciantes amigáveis ao bitcoin em todo o mundo.",
-		"merchants": {
-			"heading": "Comerciantes",
-			"intro": "Os comerciantes estão no coração do BTC Map. Esses negócios estão à frente da mudança de paradigma e se posicionando para o sucesso contínuo. Qualquer comerciante que aceite bitcoin pode ser listado no BTC Map.",
-			"acceptBitcoin": "Aceita bitcoin?",
-			"getListed": "Cadastre-se no BTC Map"
-		},
-		"supertaggers": {
-			"heading": "Shadowy Supertaggers",
-			"intro": "Shadowy Supertaggers são pessoas que impulsionam este projeto. São voluntários que dedicam tempo para atualizar locais de negócios com novas informações. Sem eles, o BTC Map não seria sustentável!",
-			"topLabel": "Nossos principais supertaggers",
-			"viewLeaderboard": "Ver ranking"
-		},
-		"communities": {
-			"heading": "Comunidades",
-			"intro": "Comunidades bitcoin ajudam a impulsionar a adoção global ao integrar novos usuários localmente!",
-			"addPrompt": "Não vê sua comunidade?",
-			"addLink": "Adicione ao BTC Map",
-			"seeAll": "Ver todas as comunidades"
-		},
-		"integrations": {
-			"heading": "Integrações",
-			"communityLabel": "Integrações da comunidade",
-			"communitySub": "Projetos que usam BTC Map",
-			"projectLabel": "Integrações do projeto",
-			"projectSub": "BTC Map usa estes projetos",
-			"reachOut": "Se você está interessado em integrar conosco, por favor",
-			"reachOutLink": "entre em contato",
-			"supporter": "Apoiador",
-			"more": "Mais!"
-		},
-		"avatarAlt": "avatar"
 	}
 }
