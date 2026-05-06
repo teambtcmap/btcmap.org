@@ -1,3 +1,5 @@
+import { isValid } from "date-fns/isValid";
+import { parseISO } from "date-fns/parseISO";
 import type { Readable } from "svelte/store";
 import { derived, writable } from "svelte/store";
 
@@ -25,15 +27,13 @@ export const hasNewActivity = derived(
 	},
 );
 
-// Cheap shape check — accept anything that looks like an ISO-8601
-// timestamp. The hasNewActivity store compares dates as raw strings
-// (lexicographic == chronological for ISO-8601), so junk values like
-// "abc" silently force the comparison into "always false" and the
-// user never sees the dot. Treat anything unparseable as missing.
-const ISO_8601_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
-
+// hasNewActivity compares dates as raw strings (lexicographic ==
+// chronological for ISO-8601), so junk values like "abc" silently
+// force the comparison into "always false" and the user never sees
+// the dot. parseISO + isValid rejects unparseable and impossible
+// dates so we can treat them as missing.
 export function isValidLastSeen(raw: string | null): raw is string {
-	return raw !== null && ISO_8601_RE.test(raw);
+	return raw !== null && isValid(parseISO(raw));
 }
 
 export function loadLastSeen(username: string): void {
