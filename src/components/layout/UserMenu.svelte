@@ -77,9 +77,8 @@ afterNavigate(() => {
 						{$_("nav.myActivity")}
 						{#if $hasNewActivity}
 							<span
-								class="ml-auto h-2 w-2 rounded-full bg-red-500"
-								aria-label={$_("aria.newActivity")}
-								role="status"
+								class="ml-auto h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-dark"
+								aria-hidden="true"
 							></span>
 						{/if}
 					</a>
