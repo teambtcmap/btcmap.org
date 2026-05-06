@@ -347,6 +347,89 @@ describe("activityNotifier — polling", () => {
 		stop();
 	});
 
+	it("starts a fresh fetch for the new user on account switch even while the old fetch is in flight", async () => {
+		// Hold bob's fetch open. Then switch to carol and verify carol
+		// gets her own fetch immediately, rather than receiving bob's
+		// stale promise.
+		let resolveBob!: (value: { data: unknown }) => void;
+		const apiMock = (api as unknown as ApiMock).get;
+		apiMock.mockImplementationOnce(
+			() =>
+				new Promise((r) => {
+					resolveBob = r;
+				}),
+		);
+		apiMock.mockResolvedValueOnce({
+			data: [
+				{ type: "place_added", place_id: 9, date: "2026-05-06T12:00:00Z" },
+			],
+		});
+
+		const m = await freshModule();
+		const sessionStore = writable<Session | null>(
+			makeSession({ username: "bob" }),
+		);
+		const stop = m.startActivityPolling(sessionStore);
+		await flushMicrotasks();
+		expect(apiMock).toHaveBeenCalledTimes(1);
+
+		sessionStore.set(makeSession({ username: "carol", savedPlaces: [9] }));
+		await flushMicrotasks();
+		expect(apiMock).toHaveBeenCalledTimes(2);
+		expect(apiMock.mock.calls[1][0]).toContain("places=9");
+
+		// Resolve bob's stale fetch — must not write into carol's state.
+		resolveBob({
+			data: [
+				{ type: "place_added", place_id: 1, date: "2026-05-06T10:00:00Z" },
+			],
+		});
+		await flushMicrotasks();
+		expect(get(m.latestActivityDate)).toBe("2026-05-06T12:00:00Z");
+		expect(localStorage.getItem("btcmap_activity_lastseen:bob")).toBeNull();
+		stop();
+	});
+
+	it("ignores a fetch that resolves after a same-username re-login", async () => {
+		// alice logs in, fetch is in flight, alice logs out and back in;
+		// the original fetch resolves and must not leak into the new
+		// session even though the username is identical.
+		let resolveFirst!: (value: { data: unknown }) => void;
+		const apiMock = (api as unknown as ApiMock).get;
+		apiMock.mockImplementationOnce(
+			() =>
+				new Promise((r) => {
+					resolveFirst = r;
+				}),
+		);
+		apiMock.mockResolvedValueOnce({ data: [] });
+
+		const m = await freshModule();
+		const sessionStore = writable<Session | null>(makeSession());
+		const stop = m.startActivityPolling(sessionStore);
+		await flushMicrotasks();
+		expect(apiMock).toHaveBeenCalledTimes(1);
+
+		// Logout, then log back in as the same username.
+		sessionStore.set(null);
+		await flushMicrotasks();
+		sessionStore.set(makeSession());
+		await flushMicrotasks();
+
+		// The new login starts its own fetch (gen bumped twice).
+		expect(apiMock).toHaveBeenCalledTimes(2);
+
+		resolveFirst({
+			data: [
+				{ type: "place_added", place_id: 1, date: "2026-05-06T10:00:00Z" },
+			],
+		});
+		await flushMicrotasks();
+		// The stale resolution must not have bootstrapped lastSeen.
+		expect(localStorage.getItem("btcmap_activity_lastseen:alice")).toBeNull();
+		stop();
+	});
+
 	it("logout (session → null) clears stores and stops polling", async () => {
 		(api as unknown as ApiMock).get.mockResolvedValue({
 			data: [

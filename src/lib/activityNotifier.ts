@@ -60,21 +60,24 @@ export function startActivityPolling(
 	let currentUsername: string | null = null;
 	let currentSession: Session | null = null;
 	let inFlight: Promise<void> | null = null;
+	// Bumped every time the session identity changes (login / logout /
+	// account switch / same-user re-login). fetchNow captures the value
+	// at call time and discards its response — and refuses to release
+	// the inFlight slot — when the generation has moved on, so a stale
+	// network request can't overwrite the active session's state and
+	// can't block a fresh tick from starting its own fetch.
+	let fetchGeneration = 0;
 
 	const isVisible = (): boolean =>
 		typeof document === "undefined" || document.visibilityState === "visible";
 
 	const fetchNow = async (s: Session): Promise<void> => {
 		if (inFlight) return inFlight;
+		const gen = fetchGeneration;
 		inFlight = (async () => {
 			try {
 				const res = await api.get<ActivityItem[]>(buildPollUrl(s));
-				// If the session changed during the await (logout, account
-				// switch) the response belongs to a no-longer-active user.
-				// Drop it so we don't overwrite the new session's state or
-				// write a stale lastSeen into localStorage for an account
-				// the user has left.
-				if (currentSession?.username !== s.username) return;
+				if (gen !== fetchGeneration) return;
 				const newest = res.data[0]?.date ?? null;
 				lastFetchAt = Date.now();
 				if (newest) {
@@ -89,7 +92,10 @@ export function startActivityPolling(
 			} catch {
 				// Silent failure — try again next interval.
 			} finally {
-				inFlight = null;
+				// Only release the slot if we are still the active generation;
+				// otherwise the subscribe handler has already nulled inFlight
+				// and possibly assigned a fresh fetch we must not stomp on.
+				if (gen === fetchGeneration) inFlight = null;
 			}
 		})();
 		return inFlight;
@@ -111,8 +117,19 @@ export function startActivityPolling(
 
 	const unsubSession = sessionStore.subscribe((s) => {
 		currentSession = s;
+		const newUsername = s?.username ?? null;
+		const identityChanged = newUsername !== currentUsername;
+
+		if (identityChanged) {
+			fetchGeneration += 1;
+			// Drop the in-flight slot so the next tick can spawn a fresh
+			// fetch immediately. The previous in-flight (if any) will
+			// discard its own response via the gen check.
+			inFlight = null;
+			currentUsername = newUsername;
+		}
+
 		if (!s) {
-			currentUsername = null;
 			latestActivityDate.set(null);
 			lastSeenActivityDate.set(null);
 			stopInterval();
@@ -121,9 +138,7 @@ export function startActivityPolling(
 
 		// Per-username bootstrap (load lastSeen, reset latest) — only on
 		// the transition into this username.
-		const usernameChanged = s.username !== currentUsername;
-		if (usernameChanged) {
-			currentUsername = s.username;
+		if (identityChanged) {
 			loadLastSeen(s.username);
 			latestActivityDate.set(null);
 			lastFetchAt = 0;
@@ -136,7 +151,7 @@ export function startActivityPolling(
 			if (intervalId === null) {
 				intervalId = setInterval(tick, POLL_INTERVAL_MS);
 			}
-			if (usernameChanged || lastFetchAt === 0) tick();
+			if (identityChanged || lastFetchAt === 0) tick();
 		} else {
 			stopInterval();
 		}
