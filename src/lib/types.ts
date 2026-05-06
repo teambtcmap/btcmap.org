@@ -153,6 +153,8 @@ export type MerchantPageData = {
 	paymentMethod?: string;
 	// OSM data for tag functionality
 	osmTags: OSMTags;
+	// Per-element issues fetched from /v2/elements (v4 doesn't expose them yet)
+	issues: Issue[];
 	// Place data for BoostButton and other components
 	placeData: Place;
 	osmViewUrl: string;
@@ -177,7 +179,7 @@ export type IssueType =
 export type Issue = {
 	description: string;
 	severity: number;
-	type: IssueType;
+	type: string;
 };
 
 export type IssueIcon =

@@ -502,10 +502,10 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 					/>
 				</span>
 
-				{#if data.osmTags?.issues?.length}
+				{#if data.issues.length}
 					<span id="tagging-issues">
 						<MerchantAction
-							on:click={() => ($taggingIssues = data.osmTags.issues)}
+							on:click={() => ($taggingIssues = data.issues)}
 							icon="issues"
 							text={$_('merchant.tagIssues')}
 						/>

@@ -112,11 +112,10 @@ export const load: PageServerLoad<MerchantPageData> = async ({
 		const osmTags = buildOsmTags(placeData, contact);
 
 		// v4 /v4/places doesn't expose per-place issues yet; pull them from the
-		// v2 element response so the merchant page's tag-issues icon and modal work.
-		const issues = elementV2?.tags?.issues;
-		if (issues?.length) {
-			osmTags.issues = issues;
-		}
+		// v2 element response. Returned as a separate field (not inside osmTags)
+		// because osmTags is also passed to the Show Tags modal, which iterates
+		// it as string key/value pairs.
+		const issues = elementV2?.tags?.issues ?? [];
 
 		return {
 			id: placeData.id.toString(),
@@ -145,6 +144,7 @@ export const load: PageServerLoad<MerchantPageData> = async ({
 			paymentMethod,
 			// OSM data for edit links and tag functionality
 			osmTags,
+			issues,
 			// Place data for BoostButton and other components
 			placeData,
 			osmViewUrl: placeData.osm_url ?? "",
