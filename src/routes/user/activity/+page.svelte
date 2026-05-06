@@ -318,7 +318,11 @@ onMount(async () => {
 					{#each pagedItems as item, i (item.type + "-" + item.place_id + "-" + item.date + "-" + i)}
 						{@const isNew = !!priorLastSeen && item.date > priorLastSeen}
 						<div class={isNew ? "rounded-2xl bg-link/5 dark:bg-link/10" : ""}>
-							<ActivityCard {item} highlight={isNew} />
+							<!-- ActivityCard.highlight drives an animate-ping on the
+								status dot — keep it singular so a feed full of new
+								items doesn't pulse at the user; the bg tint already
+								marks each new card. -->
+							<ActivityCard {item} highlight={isNew && i === 0} />
 						</div>
 					{/each}
 				</div>
