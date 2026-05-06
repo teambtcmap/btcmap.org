@@ -312,7 +312,6 @@
 		"language": "Език",
 		"selectLanguage": "Изберете език",
 		"nav": "Навигация в долния колонтитул",
-		"aboutUs": "За нас",
 		"analytics": "Анализи",
 		"bitcoinForBusiness": "₿ за бизнеса",
 		"cypherpunks": "Шифърпънк",
@@ -1174,40 +1173,5 @@
 			"netlifyDocsAnalytics": "Netlify Docs - Analytics",
 			"netlifyDocsHowAnalytics": "Netlify Docs - How Analytics Works"
 		}
-	},
-	"aboutUs": {
-		"title": "За нас",
-		"description": "BTC Map е безплатен проект с отворен код, поддържан от доброволци биткойнери и търговци, приятелски настроени към биткойн по целия свят.",
-		"merchants": {
-			"heading": "Търговци",
-			"intro": "Търговците са в сърцето на BTC Map. Тези бизнеси водят промяната в парадигмата и се позиционират за продължаващ успех. Всеки търговец, който приема биткойн, може да бъде добавен в BTC Map.",
-			"acceptBitcoin": "Приемате биткойн?",
-			"getListed": "Добавете се в BTC Map"
-		},
-		"supertaggers": {
-			"heading": "Shadowy Supertaggers",
-			"intro": "Shadowy Supertaggers са хората, които задвижват този проект. Те са доброволци, които безкористно отделят време за актуализиране на бизнес локации с нова информация. Без тях BTC Map не би бил устойчив!",
-			"topLabel": "Нашите топ супертагъри",
-			"viewLeaderboard": "Преглед на класацията"
-		},
-		"communities": {
-			"heading": "Общности",
-			"intro": "Биткойн общностите помагат за глобалното разпространение, като привличат нови потребители локално!",
-			"addPrompt": "Не виждате вашата общност?",
-			"addLink": "Добавете я в BTC Map",
-			"seeAll": "Вижте всички общности"
-		},
-		"integrations": {
-			"heading": "Интеграции",
-			"communityLabel": "Интеграции на общността",
-			"communitySub": "Проекти, използващи BTC Map",
-			"projectLabel": "Интеграции на проекта",
-			"projectSub": "BTC Map използва тези проекти",
-			"reachOut": "Ако се интересувате от интеграция с нас, моля",
-			"reachOutLink": "свържете се",
-			"supporter": "Поддръжник",
-			"more": "Още!"
-		},
-		"avatarAlt": "аватар"
 	}
 }
