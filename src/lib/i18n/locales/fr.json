@@ -305,7 +305,8 @@
 		"merchantList": "Liste des commerces",
 		"merchantListItem": "Élément de la liste des commerces",
 		"selectCategory": "Sélectionner une catégorie",
-		"searchInput": "Rechercher des commerces Bitcoin"
+		"searchInput": "Rechercher des commerces Bitcoin",
+		"newActivity": "Nouvelle activité dans vos lieux enregistrés"
 	},
 	"theme": {
 		"switchToLightMode": "Passer en mode clair",

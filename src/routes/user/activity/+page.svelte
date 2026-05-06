@@ -12,6 +12,12 @@ import {
 	type ActivityType,
 	countByType,
 } from "$lib/activity";
+import {
+	isValidLastSeen,
+	MAX_PLACES,
+	markActivitySeen,
+	storageKeyFor,
+} from "$lib/activityNotifier";
 import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
@@ -29,9 +35,6 @@ type Filter =
 
 const DAYS = 30;
 const PAGE_SIZE = 20;
-// Mirrors the server-side cap in /v4/activity — slice here so a user
-// with 500+ saved places still gets a usable response instead of a 400.
-const MAX_PLACES = 500;
 
 // IDs come from the session (always available once logged in).
 // Names are fetched from the API best-effort for the filter select —
@@ -51,8 +54,16 @@ let initialLoading = true;
 let feedLoading = false;
 let feedError = false;
 let fetchGeneration = 0;
+// Captured once at mount before markActivitySeen() runs, so the
+// "X new" pill is computed against the user's *previous* visit.
+let priorLastSeen: string | null = null;
+let pillDismissed = false;
 
 $: filter = parseFilterValue(filterValue);
+$: newCount = priorLastSeen
+	? feedItems.filter((i) => i.date > (priorLastSeen as string)).length
+	: 0;
+$: showNewPill = !pillDismissed && newCount > 0;
 // Counts are over the unfiltered window so chip counts don't collapse
 // when the user toggles a type off.
 $: typeCounts = countByType(feedItems);
@@ -154,6 +165,11 @@ onMount(async () => {
 		return;
 	}
 
+	// Validate the same way the notifier does — junk in localStorage
+	// would break the lexicographic date comparisons used for the pill
+	// count and per-card "new" tinting.
+	const rawLastSeen = localStorage.getItem(storageKeyFor($session.username));
+	priorLastSeen = isValidLastSeen(rawLastSeen) ? rawLastSeen : null;
 	savedPlaceIds = $session.savedPlaces ?? [];
 	savedAreaIds = $session.savedAreas ?? [];
 	hasSavedItems = savedPlaceIds.length > 0 || savedAreaIds.length > 0;
@@ -167,20 +183,31 @@ onMount(async () => {
 
 	// Hydrate names for the filter select in parallel. Best-effort:
 	// if either call fails, the select falls back to "Place <id>" /
-	// "Area <id>" labels and the feed is unaffected.
+	// "Area <id>" labels and the feed is unaffected. Don't await this
+	// before markActivitySeen — a slow names call would leave the nav
+	// dot showing while the user is already reading the feed.
 	const headers = { Authorization: `Bearer ${$session.token}` };
-	const [placesRes, areasRes] = await Promise.allSettled([
+	const namesPromise = Promise.allSettled([
 		api.get<SavedPlace[]>("/api/session/saved-places", { headers }),
 		api.get<SavedArea[]>("/api/session/saved-areas", { headers }),
 	]);
+
+	await feedPromise;
+
+	// Mark the newest item as seen so the nav dot clears the moment the
+	// user lands on this page. Guarded on $session because it may have
+	// changed during awaits (e.g. logout).
+	if (feedItems.length > 0 && $session) {
+		markActivitySeen($session.username, feedItems[0].date);
+	}
+
+	const [placesRes, areasRes] = await namesPromise;
 	if (placesRes.status === "fulfilled") {
 		placeNames = new Map(placesRes.value.data.map((p) => [p.id, p.name]));
 	}
 	if (areasRes.status === "fulfilled") {
 		areaNames = new Map(areasRes.value.data.map((a) => [a.id, a.name]));
 	}
-
-	await feedPromise;
 });
 </script>
 
@@ -276,10 +303,27 @@ onMount(async () => {
 				</div>
 			{/if}
 
+			{#if showNewPill}
+				<button
+					type="button"
+					on:click={() => (pillDismissed = true)}
+					class="mx-auto mb-3 block rounded-full bg-link px-4 py-1 text-sm font-medium text-white transition-colors hover:bg-hover"
+				>
+					{$_("userActivity.newSinceLastVisit", { values: { count: newCount } })}
+				</button>
+			{/if}
+
 			<div class="rounded-3xl border border-gray-300 dark:border-white/95 dark:bg-white/10">
 				<div class="space-y-2 p-2">
 					{#each pagedItems as item, i (item.type + "-" + item.place_id + "-" + item.date + "-" + i)}
-						<ActivityCard {item} highlight={i === 0} />
+						{@const isNew = !!priorLastSeen && item.date > priorLastSeen}
+						<div class={isNew ? "rounded-2xl bg-link/5 dark:bg-link/10" : ""}>
+							<!-- ActivityCard.highlight drives an animate-ping on the
+								status dot — keep it singular so a feed full of new
+								items doesn't pulse at the user; the bg tint already
+								marks each new card. -->
+							<ActivityCard {item} highlight={isNew && i === 0} />
+						</div>
 					{/each}
 				</div>
 			</div>

@@ -293,7 +293,8 @@
 		"merchantList": "Lista de comerciantes",
 		"merchantListItem": "Item da lista de comerciantes",
 		"selectCategory": "Selecionar categoria",
-		"searchInput": "Pesquisar comerciantes Bitcoin"
+		"searchInput": "Pesquisar comerciantes Bitcoin",
+		"newActivity": "Nova atividade em seus locais salvos"
 	},
 	"theme": {
 		"switchToLightMode": "Mudar para modo claro",

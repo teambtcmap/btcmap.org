@@ -305,7 +305,8 @@
 		"merchantList": "Händlerliste",
 		"merchantListItem": "Händlerlisten-Eintrag",
 		"selectCategory": "Kategorie auswählen",
-		"searchInput": "Suche nach Bitcoin-Händlern"
+		"searchInput": "Suche nach Bitcoin-Händlern",
+		"newActivity": "Neue Aktivität in deinen gespeicherten Orten"
 	},
 	"theme": {
 		"switchToLightMode": "Zum hellen Modus wechseln",

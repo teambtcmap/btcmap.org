@@ -305,7 +305,8 @@
 		"merchantList": "Список торговцев",
 		"merchantListItem": "Элемент списка торговцев",
 		"selectCategory": "Выберите категорию",
-		"searchInput": "Поиск биткоин мест"
+		"searchInput": "Поиск биткоин мест",
+		"newActivity": "Новая активность в ваших сохранённых местах"
 	},
 	"theme": {
 		"switchToLightMode": "Переключиться на светлую тему",
