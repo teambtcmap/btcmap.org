@@ -3,6 +3,7 @@ import { SvelteToast } from "@zerodevx/svelte-toast";
 
 import LoadingIndicator from "$components/LoadingIndicator.svelte";
 import Header from "$components/layout/Header.svelte";
+import { startActivityPolling } from "$lib/activityNotifier";
 import { trackBrowserLanguage } from "$lib/analytics";
 import { session } from "$lib/session";
 import {
@@ -66,6 +67,7 @@ $: {
 }
 
 let dataSyncInterval: ReturnType<typeof setInterval>;
+let stopActivityPolling: (() => void) | null = null;
 
 onMount(async () => {
 	// Initialize theme from SSR/data attribute or localStorage
@@ -73,6 +75,10 @@ onMount(async () => {
 
 	// Restore saved session (throwaway account + saved places) from localStorage
 	session.init();
+
+	// Start the saved-activity background poller. Internally subscribes to
+	// the session store; no-ops while logged out or while no items are saved.
+	stopActivityPolling = startActivityPolling(session);
 
 	// Track browser language for translation insights
 	trackBrowserLanguage();
@@ -99,6 +105,7 @@ onMount(async () => {
 
 onDestroy(() => {
 	clearInterval(dataSyncInterval);
+	stopActivityPolling?.();
 });
 
 export let data;
