@@ -25,10 +25,21 @@ export const hasNewActivity = derived(
 	},
 );
 
+// Cheap shape check — accept anything that looks like an ISO-8601
+// timestamp. The hasNewActivity store compares dates as raw strings
+// (lexicographic == chronological for ISO-8601), so junk values like
+// "abc" silently force the comparison into "always false" and the
+// user never sees the dot. Treat anything unparseable as missing.
+const ISO_8601_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
+
+function isValidLastSeen(raw: string | null): raw is string {
+	return raw !== null && ISO_8601_RE.test(raw);
+}
+
 export function loadLastSeen(username: string): void {
 	if (typeof window === "undefined") return;
 	const raw = localStorage.getItem(storageKeyFor(username));
-	lastSeenActivityDate.set(raw ?? null);
+	lastSeenActivityDate.set(isValidLastSeen(raw) ? raw : null);
 }
 
 export function markActivitySeen(username: string, date: string): void {
@@ -84,8 +95,12 @@ export function startActivityPolling(
 					latestActivityDate.set(newest);
 					// Bootstrap lastSeen on the first poll so a logged-in user
 					// doesn't see a red dot from activity that happened before
-					// they ever opened the page.
-					if (localStorage.getItem(storageKeyFor(s.username)) === null) {
+					// they ever opened the page. Also bootstrap when the
+					// stored value is malformed — leaving junk there would
+					// keep hasNewActivity stuck against a value the user
+					// could never "match".
+					const stored = localStorage.getItem(storageKeyFor(s.username));
+					if (!isValidLastSeen(stored)) {
 						markActivitySeen(s.username, newest);
 					}
 				}

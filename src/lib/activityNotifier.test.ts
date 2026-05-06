@@ -104,6 +104,30 @@ describe("activityNotifier — pure helpers and stores", () => {
 		m.loadLastSeen("alice");
 		expect(get(m.lastSeenActivityDate)).toBeNull();
 	});
+
+	it("loadLastSeen treats malformed values as null", async () => {
+		localStorage.setItem("btcmap_activity_lastseen:alice", "abc");
+		const m = await freshModule();
+		m.loadLastSeen("alice");
+		expect(get(m.lastSeenActivityDate)).toBeNull();
+	});
+
+	it("loadLastSeen treats an empty string as null", async () => {
+		localStorage.setItem("btcmap_activity_lastseen:alice", "");
+		const m = await freshModule();
+		m.loadLastSeen("alice");
+		expect(get(m.lastSeenActivityDate)).toBeNull();
+	});
+
+	it("loadLastSeen accepts a well-formed ISO-8601 value", async () => {
+		localStorage.setItem(
+			"btcmap_activity_lastseen:alice",
+			"2026-05-06T08:00:00Z",
+		);
+		const m = await freshModule();
+		m.loadLastSeen("alice");
+		expect(get(m.lastSeenActivityDate)).toBe("2026-05-06T08:00:00Z");
+	});
 });
 
 describe("activityNotifier — polling", () => {
@@ -427,6 +451,27 @@ describe("activityNotifier — polling", () => {
 		await flushMicrotasks();
 		// The stale resolution must not have bootstrapped lastSeen.
 		expect(localStorage.getItem("btcmap_activity_lastseen:alice")).toBeNull();
+		stop();
+	});
+
+	it("first poll repairs a malformed lastSeen by bootstrapping", async () => {
+		// User has corrupted localStorage somehow (browser ext, manual
+		// edit). On first poll the bootstrap path should run as if the
+		// key was missing, so the dot doesn't get stuck on.
+		localStorage.setItem("btcmap_activity_lastseen:alice", "abc");
+		(api as unknown as ApiMock).get.mockResolvedValue({
+			data: [
+				{ type: "place_added", place_id: 1, date: "2026-05-06T10:00:00Z" },
+			],
+		});
+		const m = await freshModule();
+		const sessionStore = writable<Session | null>(makeSession());
+		const stop = m.startActivityPolling(sessionStore);
+		await flushMicrotasks();
+		expect(localStorage.getItem("btcmap_activity_lastseen:alice")).toBe(
+			"2026-05-06T10:00:00Z",
+		);
+		expect(get(m.hasNewActivity)).toBe(false);
 		stop();
 	});
 
