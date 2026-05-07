@@ -499,13 +499,15 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 					/>
 				</span>
 
-				<span id="tagging-issues">
-					<MerchantAction
-						on:click={() => ($taggingIssues = data.osmTags?.issues || [])}
-						icon="issues"
-						text={$_('merchant.tagIssues')}
-					/>
-				</span>
+				{#if data.issues.length}
+					<span id="tagging-issues">
+						<MerchantAction
+							on:click={() => ($taggingIssues = data.issues)}
+							icon="issues"
+							text={$_('merchant.tagIssues')}
+						/>
+					</span>
+				{/if}
 
 				<MerchantAction
 					link={`${data.osmViewUrl}`}

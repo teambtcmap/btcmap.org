@@ -152,6 +152,8 @@ export type MerchantPageData = {
 	paymentMethod?: string;
 	// OSM data for tag functionality
 	osmTags: OSMTags;
+	// Per-element issues fetched from /v2/elements (v4 doesn't expose them yet)
+	issues: Issue[];
 	// Place data for BoostButton and other components
 	placeData: Place;
 	osmViewUrl: string;
@@ -168,6 +170,7 @@ export type RpcIssue = {
 export type IssueType =
 	| "date_format"
 	| "misspelled_tag"
+	| "missing_currency_xbt"
 	| "missing_icon"
 	| "not_verified"
 	| "out_of_date"
