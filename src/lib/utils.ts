@@ -177,10 +177,10 @@ export const getIssueIcon = (issue_code: string): IssueIcon => {
 	if (issue_code === "not_verified") {
 		return "fa-clipboard-question";
 	}
-	if (issue_code === "outdated") {
+	if (issue_code === "outdated" || issue_code === "out_of_date") {
 		return "fa-hourglass-end";
 	}
-	if (issue_code === "outdated_soon") {
+	if (issue_code === "outdated_soon" || issue_code === "out_of_date_soon") {
 		return "fa-hourglass-half";
 	}
 	return "fa-list-check";
@@ -189,7 +189,9 @@ export const getIssueIcon = (issue_code: string): IssueIcon => {
 export const getIssueHelpLink = (issue_code: string) => {
 	if (
 		issue_code === "outdated" ||
+		issue_code === "out_of_date" ||
 		issue_code === "outdated_soon" ||
+		issue_code === "out_of_date_soon" ||
 		issue_code === "not_verified"
 	) {
 		return "https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Verifying-Existing-Merchants";

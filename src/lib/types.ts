@@ -171,6 +171,7 @@ export type RpcIssue = {
 export type IssueType =
 	| "date_format"
 	| "misspelled_tag"
+	| "missing_currency_xbt"
 	| "missing_icon"
 	| "not_verified"
 	| "out_of_date"
@@ -179,7 +180,7 @@ export type IssueType =
 export type Issue = {
 	description: string;
 	severity: number;
-	type: string;
+	type: IssueType;
 };
 
 export type IssueIcon =
