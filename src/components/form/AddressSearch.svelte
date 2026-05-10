@@ -80,15 +80,20 @@ function handleKeydown(e: KeyboardEvent) {
 		return;
 	}
 	if (results.length === 0) return;
+	if (e.key === "Enter") {
+		// Always swallow Enter while the dropdown is open. Otherwise, when
+		// no result is highlighted yet, default form submission would fire
+		// on the parent <form>.
+		e.preventDefault();
+		if (activeIndex >= 0) selectResult(activeIndex);
+		return;
+	}
 	if (e.key === "ArrowDown") {
 		e.preventDefault();
 		activeIndex = (activeIndex + 1) % results.length;
 	} else if (e.key === "ArrowUp") {
 		e.preventDefault();
 		activeIndex = activeIndex <= 0 ? results.length - 1 : activeIndex - 1;
-	} else if (e.key === "Enter" && activeIndex >= 0) {
-		e.preventDefault();
-		selectResult(activeIndex);
 	} else if (e.key === "Escape") {
 		closeResults();
 	}
