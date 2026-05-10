@@ -416,7 +416,7 @@ onMount(async () => {
 			<input
 				type="text"
 				name="honey"
-				placeholder={$_('addCommunityForm.honeyPlaceholder')}
+				placeholder="A nice pot of honey."
 				class="hidden"
 				bind:value={honeyInput}
 			/>

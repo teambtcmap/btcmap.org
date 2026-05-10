@@ -353,7 +353,6 @@
 		"submitReport": "Изпрати доклад",
 		"success": "Успех!",
 		"website": "Уебсайт",
-		"honeyPlaceholder": "Хубав съд с мед.",
 		"captchaPlaceholder": "Моля, въведете текста от captcha."
 	},
 	"home": {
@@ -510,7 +509,6 @@
 		"botProtection": "Защита от ботове",
 		"caseSensitive": "(различава главни/малки букви)",
 		"captchaPlaceholder": "Моля въведете текста от captcha.",
-		"honeyPlaceholder": "Горница с мед.",
 		"submitReport": "Изпрати доклад",
 		"successType": "Доклад",
 		"successMessage": "Благодарим ви за проверката на информацията за общността. Ще прегледаме доклада и ще актуализираме възможно най-скоро."
@@ -910,7 +908,6 @@
 		"captchaLabel": "Защита от ботове",
 		"captchaCaseSensitive": "(малките и големите букви имат значение)",
 		"captchaPlaceholder": "Моля, въведете текста от captcha.",
-		"honeyPlaceholder": "Хубав съд с мед.",
 		"submitButton": "Изпрати кандидатура",
 		"refreshCaptcha": "Обнови captcha",
 		"submitting": "Изпращане на кандидатурата...",
@@ -971,7 +968,6 @@
 		"captchaLabel": "Защита от ботове",
 		"captchaCaseSensitive": "(малките и големите букви имат значение)",
 		"captchaPlaceholder": "Моля, въведете текста от captcha.",
-		"honeyPlaceholder": "Хубав съд с мед.",
 		"submitButton": "Изпрати общност",
 		"successType": "Общност",
 		"successMessage": "Благодарим за инициативата да създадете биткойн общност. Ще прегледаме информацията и ще се свържем, ако ни трябват допълнителни детайли.",

@@ -358,7 +358,6 @@
 		"submittingApplication": "Envoi de votre candidature...",
 		"submitButton": "Envoyer la candidature",
 		"captchaPlaceholder": "Veuillez saisir le texte du captcha.",
-		"honeyPlaceholder": "A nice pot of honey.",
 		"successType": "Candidature",
 		"successMessage": "Merci pour votre intérêt à devenir contributeur ! Nous examinerons votre candidature et un membre de l'équipe vous contactera par e-mail. Écrivez à hello@btcmap.org si vous souhaitez un suivi."
 	},
@@ -402,7 +401,6 @@
 		"locationSelected": "Lieu sélectionné !",
 		"searchButton": "Rechercher 🔍",
 		"address": "Adresse",
-		"honeyPlaceholder": "A nice pot of honey.",
 		"captchaPlaceholder": "Veuillez saisir le texte du captcha."
 	},
 	"addLocation": {
@@ -591,7 +589,6 @@
 		"captchaLabel": "Protection anti-bot",
 		"captchaCaseSensitive": "(sensible à la casse)",
 		"captchaPlaceholder": "Veuillez saisir le texte du captcha.",
-		"honeyPlaceholder": "A nice pot of honey.",
 		"submitButton": "Soumettre la communauté",
 		"successType": "Communauté",
 		"successMessage": "Merci pour votre initiative de créer une communauté bitcoin. Nous examinerons vos informations et vous contacterons si nous avons besoin de plus de détails.",
@@ -730,7 +727,6 @@
 		"botProtection": "Protection anti-bot",
 		"caseSensitive": "(sensible à la casse)",
 		"captchaPlaceholder": "Veuillez saisir le texte du captcha.",
-		"honeyPlaceholder": "A nice pot of honey.",
 		"submitReport": "Soumettre le rapport",
 		"successType": "Rapport",
 		"successMessage": "Merci d'avoir vérifié les informations de cette communauté. Nous examinerons votre rapport et le mettrons à jour dès que possible."

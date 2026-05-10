@@ -359,7 +359,6 @@
 		"submittingApplication": "Enviando sua candidatura...",
 		"submitButton": "Enviar Candidatura",
 		"captchaPlaceholder": "Por favor, digite o texto do captcha.",
-		"honeyPlaceholder": "Um pote de mel.",
 		"successType": "Candidatura",
 		"successMessage": "Obrigado pelo seu interesse em se tornar um etiquetador! Revisaremos sua candidatura e alguém da equipe entrará em contato pelo e-mail fornecido. Entre em contato em hello@btcmap.org se precisar de acompanhamento."
 	},
@@ -403,7 +402,6 @@
 		"locationSelected": "Local selecionado!",
 		"searchButton": "Pesquisar 🔍",
 		"address": "Endereço",
-		"honeyPlaceholder": "Um pote de mel.",
 		"captchaPlaceholder": "Por favor insira o texto do captcha."
 	},
 	"addLocation": {
@@ -584,7 +582,6 @@
 		"captchaLabel": "Proteção contra bots",
 		"captchaCaseSensitive": "(diferencia maiúsculas)",
 		"captchaPlaceholder": "Por favor, digite o texto do captcha.",
-		"honeyPlaceholder": "Um pote de mel.",
 		"submitButton": "Enviar Comunidade",
 		"successType": "Comunidade",
 		"successMessage": "Obrigado pela sua iniciativa em criar uma comunidade bitcoin. Revisaremos suas informações e entraremos em contato se precisarmos de mais detalhes.",
@@ -723,7 +720,6 @@
 		"botProtection": "Proteção contra bots",
 		"caseSensitive": "(diferencia maiúsculas)",
 		"captchaPlaceholder": "Por favor digite o texto do captcha.",
-		"honeyPlaceholder": "Um pote de mel.",
 		"submitReport": "Enviar Relatório",
 		"successType": "Relatório",
 		"successMessage": "Obrigado por verificar as informações desta comunidade. Analisaremos seu relatório e atualizaremos o mais rápido possível."

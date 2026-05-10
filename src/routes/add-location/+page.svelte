@@ -760,7 +760,7 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 					<input
 						type="text"
 						name="honey"
-						placeholder={$_('forms.honeyPlaceholder')}
+						placeholder="A nice pot of honey."
 						class="hidden"
 						bind:this={honeyInput}
 					/>

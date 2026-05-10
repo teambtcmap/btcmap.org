@@ -448,7 +448,6 @@
 		"submittingApplication": "Submitting your application...",
 		"submitButton": "Submit Application",
 		"captchaPlaceholder": "Please enter the captcha text.",
-		"honeyPlaceholder": "A nice pot of honey.",
 		"successType": "Application",
 		"successMessage": "Thanks for your interest in becoming a tagger! We'll review your application and one of the team will be in contact via the email you provided. Contact hello@btcmap.org if you need to follow up."
 	},
@@ -492,7 +491,6 @@
 		"locationSelected": "Location selected!",
 		"searchButton": "Search 🔍",
 		"address": "Address",
-		"honeyPlaceholder": "A nice pot of honey.",
 		"captchaPlaceholder": "Please enter the captcha text."
 	},
 	"addLocation": {
@@ -693,7 +691,6 @@
 		"captchaLabel": "Bot protection",
 		"captchaCaseSensitive": "(case-sensitive)",
 		"captchaPlaceholder": "Please enter the captcha text.",
-		"honeyPlaceholder": "A nice pot of honey.",
 		"submitButton": "Submit Community",
 		"successType": "Community",
 		"successMessage": "Thanks for your initiative to create a bitcoin community. We'll review your information and reach out if we need any more details.",
@@ -842,7 +839,6 @@
 		"botProtection": "Bot protection",
 		"caseSensitive": "(case-sensitive)",
 		"captchaPlaceholder": "Please enter the captcha text.",
-		"honeyPlaceholder": "A nice pot of honey.",
 		"submitReport": "Submit Report",
 		"successType": "Report",
 		"successMessage": "Thanks for verifying this community's information. We'll review your report and update it ASAP."
@@ -932,7 +928,10 @@
 				"title": "Geyser Tournament",
 				"desc": "Participate in the 2023 Supertagger Event"
 			},
-			"topTagger": { "title": "Top Tagger", "desc": "#1 on the leaderboard" },
+			"topTagger": {
+				"title": "Top Tagger",
+				"desc": "#1 on the leaderboard"
+			},
 			"podium": {
 				"title": "Podium",
 				"desc": "In the top 3 on the leaderboard"
@@ -971,25 +970,82 @@
 			}
 		},
 		"contribution": {
-			"hyperbitcoinisation": { "title": "Hyperbitcoinisation", "desc": "21M" },
-			"pizzaTime": { "title": "Pizza Time", "desc": "10K" },
-			"godly": { "title": "Godly", "desc": "7777" },
-			"shadow": { "title": "Shadow", "desc": "5000" },
-			"whitepaper": { "title": "Whitepaper", "desc": "3110" },
-			"winston": { "title": "Winston", "desc": "1984" },
-			"whale": { "title": "Whale", "desc": "1000" },
-			"infinity": { "title": "Infinity", "desc": "821" },
-			"legend": { "title": "Legend", "desc": "500" },
-			"chancellor": { "title": "Chancellor", "desc": "301" },
-			"sha": { "title": "SHA", "desc": "256" },
-			"noBailouts": { "title": "No Bailouts", "desc": "210" },
-			"supertagger": { "title": "Supertagger", "desc": "100" },
-			"ath": { "title": "ATH", "desc": "69" },
-			"longestChain": { "title": "Longest Chain", "desc": "51" },
-			"satoshi": { "title": "Satoshi", "desc": "21" },
-			"heartbeat": { "title": "Heartbeat", "desc": "10" },
-			"segwit": { "title": "Segwit", "desc": "4" },
-			"wholeTagger": { "title": "Whole Tagger", "desc": "1" }
+			"hyperbitcoinisation": {
+				"title": "Hyperbitcoinisation",
+				"desc": "21M"
+			},
+			"pizzaTime": {
+				"title": "Pizza Time",
+				"desc": "10K"
+			},
+			"godly": {
+				"title": "Godly",
+				"desc": "7777"
+			},
+			"shadow": {
+				"title": "Shadow",
+				"desc": "5000"
+			},
+			"whitepaper": {
+				"title": "Whitepaper",
+				"desc": "3110"
+			},
+			"winston": {
+				"title": "Winston",
+				"desc": "1984"
+			},
+			"whale": {
+				"title": "Whale",
+				"desc": "1000"
+			},
+			"infinity": {
+				"title": "Infinity",
+				"desc": "821"
+			},
+			"legend": {
+				"title": "Legend",
+				"desc": "500"
+			},
+			"chancellor": {
+				"title": "Chancellor",
+				"desc": "301"
+			},
+			"sha": {
+				"title": "SHA",
+				"desc": "256"
+			},
+			"noBailouts": {
+				"title": "No Bailouts",
+				"desc": "210"
+			},
+			"supertagger": {
+				"title": "Supertagger",
+				"desc": "100"
+			},
+			"ath": {
+				"title": "ATH",
+				"desc": "69"
+			},
+			"longestChain": {
+				"title": "Longest Chain",
+				"desc": "51"
+			},
+			"satoshi": {
+				"title": "Satoshi",
+				"desc": "21"
+			},
+			"heartbeat": {
+				"title": "Heartbeat",
+				"desc": "10"
+			},
+			"segwit": {
+				"title": "Segwit",
+				"desc": "4"
+			},
+			"wholeTagger": {
+				"title": "Whole Tagger",
+				"desc": "1"
+			}
 		}
 	},
 	"apps": {
@@ -1043,11 +1099,21 @@
 		"title": "Supporters",
 		"hero": "Help place bitcoin on the map",
 		"tiers": {
-			"explorer": { "headline": "Loving what we do" },
-			"wayfinder": { "headline": "Supporting the mission" },
-			"cartographer": { "headline": "Core ecosystem partner" },
-			"navigator": { "headline": "High-conviction industry supporters" },
-			"pioneer": { "headline": "Our most committed supporters" },
+			"explorer": {
+				"headline": "Loving what we do"
+			},
+			"wayfinder": {
+				"headline": "Supporting the mission"
+			},
+			"cartographer": {
+				"headline": "Core ecosystem partner"
+			},
+			"navigator": {
+				"headline": "High-conviction industry supporters"
+			},
+			"pioneer": {
+				"headline": "Our most committed supporters"
+			},
 			"pleb": {
 				"headline": "Every sat counts — ordered by cumulative contributions"
 			}
