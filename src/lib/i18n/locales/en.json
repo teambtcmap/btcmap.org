@@ -91,7 +91,8 @@
 		"nsecLabel": "Nostr secret key",
 		"nsecWarning": "Your nsec is sent only to your browser to sign in once — it is never stored or transmitted.",
 		"nsecSubmit": "Sign in with nsec",
-		"nsecInvalid": "That does not look like a valid nsec"
+		"nsecInvalid": "That does not look like a valid nsec",
+		"or": "or"
 	},
 	"backup": {
 		"title": "Back up account",
