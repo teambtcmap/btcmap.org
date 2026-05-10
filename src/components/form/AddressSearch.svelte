@@ -21,9 +21,22 @@ let cooldownTimer: ReturnType<typeof setInterval> | undefined;
 let results: GeocodeResult[] = [];
 let errorState: "none" | "no-results" | "network" = "none";
 let activeIndex = -1;
+let lastSearchedQuery = "";
 
 $: canSubmit =
 	!disabled && !loading && cooldownRemaining === 0 && query.trim().length > 0;
+
+// If the user edits the input after a search, the previously rendered
+// results / error message no longer match what's typed. Clear them so a
+// stray Enter can't pick a result that doesn't correspond to the visible query.
+$: if (
+	query.trim() !== lastSearchedQuery &&
+	(results.length > 0 || errorState !== "none")
+) {
+	results = [];
+	errorState = "none";
+	activeIndex = -1;
+}
 
 function startCooldown() {
 	cooldownRemaining = COOLDOWN_SECONDS;
@@ -39,12 +52,16 @@ function startCooldown() {
 
 async function runSearch() {
 	if (!canSubmit) return;
+	const submitted = query.trim();
+	lastSearchedQuery = submitted;
 	loading = true;
 	errorState = "none";
 	results = [];
 	activeIndex = -1;
 	try {
-		const found = await searchAddress(query.trim(), locale);
+		const found = await searchAddress(submitted, locale);
+		// If the user edited the query while we were waiting, drop the result.
+		if (query.trim() !== submitted) return;
 		if (found.length === 0) {
 			errorState = "no-results";
 		} else if (found.length === 1) {
