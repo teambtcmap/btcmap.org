@@ -38,6 +38,10 @@ $: if (
 	activeIndex = -1;
 }
 
+function emitSelect(r: GeocodeResult) {
+	dispatch("select", { lat: r.lat, lng: r.lon, displayName: r.displayName });
+}
+
 function startCooldown() {
 	cooldownRemaining = COOLDOWN_SECONDS;
 	cooldownTimer = setInterval(() => {
@@ -65,12 +69,7 @@ async function runSearch() {
 		if (found.length === 0) {
 			errorState = "no-results";
 		} else if (found.length === 1) {
-			const r = found[0];
-			dispatch("select", {
-				lat: r.lat,
-				lng: r.lon,
-				displayName: r.displayName,
-			});
+			emitSelect(found[0]);
 		} else {
 			results = found;
 		}
@@ -86,7 +85,7 @@ async function runSearch() {
 function selectResult(index: number) {
 	const r = results[index];
 	if (!r) return;
-	dispatch("select", { lat: r.lat, lng: r.lon, displayName: r.displayName });
+	emitSelect(r);
 	results = [];
 	activeIndex = -1;
 }
