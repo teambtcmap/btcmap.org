@@ -439,6 +439,9 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 					{:else if noLocationSelected}
 						<span class="font-semibold text-error">{$_('addLocation.noLocationError')}</span>
 					{/if}
+						<p class="mt-2 mb-1 text-sm font-semibold text-primary/80 dark:text-white/80">
+							{$_('addLocation.searchByAddressLabel')}
+						</p>
 						<div class="mb-3">
 							<AddressSearch
 								disabled={!captchaSecret || !mapLoaded}
@@ -446,6 +449,9 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 								on:select={handleAddressSelect}
 							/>
 						</div>
+						<p class="mt-2 mb-1 text-sm font-semibold text-primary/80 dark:text-white/80">
+							{$_('addLocation.orSelectOnMapLabel')}
+						</p>
 						<div class="relative mb-2">
 							<div
 								bind:this={mapElement}

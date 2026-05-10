@@ -504,6 +504,8 @@
 		"tooltip": "All additions are completed on a volunteer basis and so we can't guarantee when your location will be added.",
 		"merchantNamePlaceholder": "Satoshi's Comics",
 		"noLocationError": "Please select a location...",
+		"searchByAddressLabel": "Search for an address",
+		"orSelectOnMapLabel": "…or click on the map",
 		"latitude": "Latitude",
 		"longitude": "Longitude",
 		"advancedToggle": "Advanced — enter coordinates manually",
