@@ -1,5 +1,6 @@
 import { error, json } from "@sveltejs/kit";
 
+import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
 
 import type { RequestHandler } from "./$types";
@@ -13,7 +14,7 @@ export const GET: RequestHandler = async ({ request }) => {
 	}
 
 	const res = await api
-		.get("https://api.btcmap.org/v4/places/saved", {
+		.get(`${API_BASE}/v4/places/saved`, {
 			headers: { Authorization: token },
 		})
 		.catch((err) => {
@@ -42,7 +43,7 @@ export const PUT: RequestHandler = async ({ request }) => {
 	}
 
 	const res = await api
-		.put("https://api.btcmap.org/v4/places/saved", ids, {
+		.put(`${API_BASE}/v4/places/saved`, ids, {
 			headers: { Authorization: token },
 		})
 		.catch((err) => {

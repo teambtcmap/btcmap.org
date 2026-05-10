@@ -2,14 +2,11 @@ import { decode } from "nostr-tools/nip19";
 import type { EventTemplate, VerifiedEvent } from "nostr-tools/pure";
 import { finalizeEvent } from "nostr-tools/pure";
 
+import { API_BASE } from "$lib/api-base";
+
 // URL the API verifies in the NIP-98 event's "u" tag. Must match what the
-// server sees, including scheme and no trailing slash. Defaults to the
-// production API; override with VITE_API_BASE_URL in .env for local dev
-// against a checked-out btcmap-api (typically http://127.0.0.1:8000).
-const API_BASE_URL = (
-	import.meta.env.VITE_API_BASE_URL || "https://api.btcmap.org"
-).replace(/\/+$/, "");
-export const NOSTR_AUTH_URL = `${API_BASE_URL}/v4/auth/nostr`;
+// server sees, including scheme and no trailing slash.
+export const NOSTR_AUTH_URL = `${API_BASE}/v4/auth/nostr`;
 
 // NIP-07 extension interface (window.nostr) — minimal subset we use.
 // Extensions like Alby, nos2x inject this on page load.

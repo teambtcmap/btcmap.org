@@ -1,5 +1,6 @@
 import { error, json } from "@sveltejs/kit";
 
+import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
 
 import type { RequestHandler } from "./$types";
@@ -19,7 +20,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	// Step 1: Create user
 	const userRes = await api
-		.post("https://api.btcmap.org/v4/users", { password })
+		.post(`${API_BASE}/v4/users`, { password })
 		.catch((err) => {
 			console.error("Failed to create user:", err?.response?.data ?? err);
 			error(502, "Failed to create account");
@@ -33,7 +34,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	// Step 2: Create token (password is sent as Bearer for this endpoint)
 	const tokenRes = await api
 		.post(
-			`https://api.btcmap.org/v4/users/${encodeURIComponent(username)}/tokens`,
+			`${API_BASE}/v4/users/${encodeURIComponent(username)}/tokens`,
 			{},
 			{ headers: { Authorization: `Bearer ${password}` } },
 		)
