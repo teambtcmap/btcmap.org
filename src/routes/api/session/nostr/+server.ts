@@ -18,7 +18,15 @@ const MAX_BODY_BYTES = 4096;
 // On success the API auto-creates a fresh user when the npub is unknown,
 // otherwise mints a Bearer token bound to the existing user.
 export const POST: RequestHandler = async ({ request, fetch }) => {
-	const contentLength = Number(request.headers.get("content-length"));
+	// Require content-length and that it's within the cap. A missing header
+	// (e.g. chunked transfer encoding) would otherwise let Number(null) ⇒ 0
+	// satisfy the upper-bound check and bypass the guard, so we reject it
+	// outright and let SvelteKit's own body-limit catch the fallback case.
+	const contentLengthHeader = request.headers.get("content-length");
+	if (!contentLengthHeader) {
+		error(411, "Content-Length header required");
+	}
+	const contentLength = Number(contentLengthHeader);
 	if (!Number.isFinite(contentLength) || contentLength > MAX_BODY_BYTES) {
 		error(413, "Request body too large");
 	}
