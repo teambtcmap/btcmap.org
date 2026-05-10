@@ -1,5 +1,5 @@
 import { decode } from "nostr-tools/nip19";
-import type { EventTemplate, VerifiedEvent } from "nostr-tools/pure";
+import type { Event, EventTemplate } from "nostr-tools/pure";
 import { finalizeEvent } from "nostr-tools/pure";
 
 import { API_BASE } from "$lib/api-base";
@@ -10,11 +10,19 @@ import { API_BASE } from "$lib/api-base";
 // absolute http://127.0.0.1:8000) signs for the right origin.
 export const NOSTR_AUTH_URL = `${API_BASE}/v4/auth/nostr`;
 
+// Both signing paths return something the server can verify. The local
+// path (finalizeEvent) yields nostr-tools' branded VerifiedEvent; NIP-07
+// extensions only return a plain signed Event (no verifiedSymbol). Our
+// callers JSON-serialize and let btcmap-api re-verify the Schnorr sig,
+// so the brand is irrelevant — typing both paths as plain Event avoids
+// misleading any future code that might inspect the brand.
+export type SignedAuthEvent = Event;
+
 // NIP-07 extension interface (window.nostr) — minimal subset we use.
 // Extensions like Alby, nos2x inject this on page load.
 type NostrExtension = {
 	getPublicKey: () => Promise<string>;
-	signEvent: (event: EventTemplate) => Promise<VerifiedEvent>;
+	signEvent: (event: EventTemplate) => Promise<Event>;
 };
 
 declare global {
@@ -44,8 +52,9 @@ function buildAuthTemplate(): EventTemplate {
 }
 
 // Sign via a NIP-07 browser extension. Throws if no extension is present or
-// the user rejects the signature request.
-export async function signAuthWithExtension(): Promise<VerifiedEvent> {
+// the user rejects the signature request. Returns a plain signed Event —
+// extensions don't set the nostr-tools "verified" brand.
+export async function signAuthWithExtension(): Promise<SignedAuthEvent> {
 	const ext = getNostrExtension();
 	if (!ext) throw new Error("No Nostr extension detected");
 	return ext.signEvent(buildAuthTemplate());
@@ -53,8 +62,10 @@ export async function signAuthWithExtension(): Promise<VerifiedEvent> {
 
 // Sign locally with a raw secret key (typically the bytes returned by
 // decodeNsec). The key is used once; callers should zero their copy
-// (best-effort) after use.
-export function signAuthWithSecretKey(secretKey: Uint8Array): VerifiedEvent {
+// (best-effort) after use. The underlying finalizeEvent returns a branded
+// VerifiedEvent which is assignable to Event — we widen to SignedAuthEvent
+// so both signing paths share one type at the call site.
+export function signAuthWithSecretKey(secretKey: Uint8Array): SignedAuthEvent {
 	return finalizeEvent(buildAuthTemplate(), secretKey);
 }
 

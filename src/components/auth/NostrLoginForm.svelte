@@ -1,10 +1,10 @@
 <script lang="ts">
-import type { VerifiedEvent } from "nostr-tools/pure";
 import { onMount } from "svelte";
 import { get } from "svelte/store";
 
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
+import type { SignedAuthEvent } from "$lib/nostr";
 import {
 	decodeNsec,
 	getNostrExtension,
@@ -37,7 +37,7 @@ onMount(() => {
 	return () => clearTimeout(t);
 });
 
-async function exchangeSignedEvent(signedEvent: VerifiedEvent) {
+async function exchangeSignedEvent(signedEvent: SignedAuthEvent) {
 	const res = await api.post("/api/session/nostr", {
 		signed_event: signedEvent,
 	});
@@ -90,7 +90,7 @@ async function loginWithNsec() {
 	let secretKey: Uint8Array | null = null;
 
 	// Phase 1: decode + sign (sync, only fails on malformed key).
-	let signed: VerifiedEvent;
+	let signed: SignedAuthEvent;
 	try {
 		secretKey = decodeNsec(nsec);
 		signed = signAuthWithSecretKey(secretKey);
