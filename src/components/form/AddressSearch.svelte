@@ -33,13 +33,17 @@ $: if (
 	query.trim() !== lastSearchedQuery &&
 	(results.length > 0 || errorState !== "none")
 ) {
-	results = [];
-	errorState = "none";
-	activeIndex = -1;
+	closeResults();
 }
 
 function emitSelect(r: GeocodeResult) {
 	dispatch("select", { lat: r.lat, lng: r.lon, displayName: r.displayName });
+}
+
+function closeResults() {
+	results = [];
+	activeIndex = -1;
+	errorState = "none";
 }
 
 function startCooldown() {
@@ -59,9 +63,7 @@ async function runSearch() {
 	const submitted = query.trim();
 	lastSearchedQuery = submitted;
 	loading = true;
-	errorState = "none";
-	results = [];
-	activeIndex = -1;
+	closeResults();
 	try {
 		const found = await searchAddress(submitted, locale);
 		// If the user edited the query while we were waiting, drop the result.
@@ -86,8 +88,7 @@ function selectResult(index: number) {
 	const r = results[index];
 	if (!r) return;
 	emitSelect(r);
-	results = [];
-	activeIndex = -1;
+	closeResults();
 }
 
 function handleKeydown(e: KeyboardEvent) {
@@ -107,8 +108,7 @@ function handleKeydown(e: KeyboardEvent) {
 		e.preventDefault();
 		selectResult(activeIndex);
 	} else if (e.key === "Escape") {
-		results = [];
-		activeIndex = -1;
+		closeResults();
 	}
 }
 
