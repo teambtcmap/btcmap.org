@@ -11,8 +11,13 @@ const MAX_BODY_BYTES = 4096;
 
 // POST /api/session/nostr
 // Exchanges a signed NIP-98 event (kind 27235) for a BTC Map Bearer token.
-// Proxies POST /v4/auth/nostr to avoid browser CORS preflight issues.
+// Proxies to POST /v4/auth/nostr to avoid browser CORS preflight issues.
 // If the npub is unknown, the API creates a new account linked to that pubkey.
+//
+// Browser-side contract is unchanged: the client posts {signed_event} as
+// JSON to this route. The hop to btcmap-api uses the canonical NIP-98
+// Authorization: Nostr <base64(event)> header (no body), per the spec and
+// what the API extractor expects.
 export const POST: RequestHandler = async ({ request }) => {
 	const contentLength = Number(request.headers.get("content-length"));
 	if (!Number.isFinite(contentLength) || contentLength > MAX_BODY_BYTES) {
@@ -26,14 +31,22 @@ export const POST: RequestHandler = async ({ request }) => {
 		error(400, "Missing or invalid signed_event");
 	}
 
-	const res = await api.post(NOSTR_AUTH_URL, { signed_event }).catch((err) => {
-		const status = err?.response?.status;
-		if (status === 401 || status === 403) {
-			error(401, "Invalid Nostr signature");
-		}
-		console.error("Failed to exchange Nostr event:", status);
-		error(502, "Failed to authenticate with Nostr");
-	});
+	const eventB64 = Buffer.from(JSON.stringify(signed_event), "utf-8").toString(
+		"base64",
+	);
+
+	const res = await api
+		.post(NOSTR_AUTH_URL, undefined, {
+			headers: { Authorization: `Nostr ${eventB64}` },
+		})
+		.catch((err) => {
+			const status = err?.response?.status;
+			if (status === 401 || status === 403) {
+				error(401, "Invalid Nostr signature");
+			}
+			console.error("Failed to exchange Nostr event:", status);
+			error(502, "Failed to authenticate with Nostr");
+		});
 
 	const token = res.data?.token;
 	const username = res.data?.username;
