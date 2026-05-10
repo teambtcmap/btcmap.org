@@ -154,6 +154,7 @@ async function initializeMap() {
 
 let name: HTMLInputElement;
 let address: HTMLInputElement;
+let addressFilledBySearch = false;
 let lat: number | undefined;
 let long: number | undefined;
 let selected = false;
@@ -203,8 +204,11 @@ function handleAddressSelect(
 ) {
 	const { lat, lng, displayName } = e.detail;
 	placeMarker(lat, lng, { fly: true, syncInputs: true });
-	if (address && address.value.trim() === "") {
+	// Fill the Address field if it's empty or was last filled by a previous
+	// search. If the user has typed their own address, leave it alone.
+	if (address && (address.value.trim() === "" || addressFilledBySearch)) {
 		address.value = displayName;
+		addressFilledBySearch = true;
 	}
 }
 
@@ -524,6 +528,7 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 						placeholder={$_('addLocation.addressPlaceholder')}
 						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 						bind:this={address}
+						on:input={() => (addressFilledBySearch = false)}
 					/>
 				</div>
 
