@@ -543,8 +543,6 @@
 	"addressSearch": {
 		"placeholder": "Search by address...",
 		"buttonSearch": "Search",
-		"buttonWait": "Wait {seconds}s…",
-		"rateHint": "To be polite to OpenStreetMap's free geocoder.",
 		"noResults": "No results found. Try a more specific address or click on the map to drop a pin.",
 		"networkError": "Address lookup failed. Try again, or click on the map to drop a pin."
 	},

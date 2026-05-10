@@ -1,5 +1,5 @@
 <script lang="ts">
-import { createEventDispatcher, onDestroy } from "svelte";
+import { createEventDispatcher } from "svelte";
 
 import LoadingSpinner from "$components/LoadingSpinner.svelte";
 import { type GeocodeResult, searchAddress } from "$lib/geocoding";
@@ -12,19 +12,14 @@ const dispatch = createEventDispatcher<{
 	select: { lat: number; lng: number; displayName: string };
 }>();
 
-const COOLDOWN_SECONDS = 3;
-
 let query = "";
 let loading = false;
-let cooldownRemaining = 0;
-let cooldownTimer: ReturnType<typeof setInterval> | undefined;
 let results: GeocodeResult[] = [];
 let errorState: "none" | "no-results" | "network" = "none";
 let activeIndex = -1;
 let lastSearchedQuery = "";
 
-$: canSubmit =
-	!disabled && !loading && cooldownRemaining === 0 && query.trim().length > 0;
+$: canSubmit = !disabled && !loading && query.trim().length > 0;
 
 // If the user edits the input after a search, the previously rendered
 // results / error message no longer match what's typed. Clear them so a
@@ -44,18 +39,6 @@ function closeResults() {
 	results = [];
 	activeIndex = -1;
 	errorState = "none";
-}
-
-function startCooldown() {
-	cooldownRemaining = COOLDOWN_SECONDS;
-	cooldownTimer = setInterval(() => {
-		cooldownRemaining -= 1;
-		if (cooldownRemaining <= 0) {
-			if (cooldownTimer) clearInterval(cooldownTimer);
-			cooldownTimer = undefined;
-			cooldownRemaining = 0;
-		}
-	}, 1000);
 }
 
 async function runSearch() {
@@ -80,7 +63,6 @@ async function runSearch() {
 		errorState = "network";
 	} finally {
 		loading = false;
-		startCooldown();
 	}
 }
 
@@ -111,10 +93,6 @@ function handleKeydown(e: KeyboardEvent) {
 		closeResults();
 	}
 }
-
-onDestroy(() => {
-	if (cooldownTimer) clearInterval(cooldownTimer);
-});
 </script>
 
 <div class="space-y-2">
@@ -144,17 +122,11 @@ onDestroy(() => {
 		>
 			{#if loading}
 				<LoadingSpinner />
-			{:else if cooldownRemaining > 0}
-				{$_('addressSearch.buttonWait', { values: { seconds: cooldownRemaining } })}
 			{:else}
 				{$_('addressSearch.buttonSearch')}
 			{/if}
 		</button>
 	</div>
-
-	<p class="text-xs text-primary/70 dark:text-white/60">
-		{$_('addressSearch.rateHint')}
-	</p>
 
 	{#if errorState === 'no-results'}
 		<p class="text-sm font-semibold text-error">
