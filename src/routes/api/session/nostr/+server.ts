@@ -8,6 +8,12 @@ import type { RequestHandler } from "./$types";
 // unusual tag sets while rejecting obvious junk bodies before we try to parse.
 const MAX_BODY_BYTES = 4096;
 
+// Cap the upstream call so a slow/unresponsive btcmap-api can't pin a
+// SvelteKit request handler indefinitely (and leave the user staring at
+// a "Signing…" spinner). 10s is generous: the API path here is a sync
+// DB lookup + token mint, no network.
+const UPSTREAM_TIMEOUT_MS = 10_000;
+
 // POST /api/session/nostr
 //
 // Browser sends a signed NIP-98 event (kind 27235) as JSON: {signed_event}.
@@ -52,8 +58,11 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 		res = await fetch(`${API_BASE}/v4/auth/nostr`, {
 			method: "POST",
 			headers: { Authorization: `Nostr ${eventB64}` },
+			signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
 		});
 	} catch (err) {
+		// AbortError (timeout) and any other fetch failure both surface as
+		// 502 Bad Gateway — the upstream is the failure source either way.
 		console.error("Failed to exchange Nostr event:", err);
 		error(502, "Failed to authenticate with Nostr");
 	}
