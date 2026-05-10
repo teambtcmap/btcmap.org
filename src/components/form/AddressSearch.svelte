@@ -47,6 +47,13 @@ async function runSearch() {
 		const found = await searchAddress(query.trim(), locale);
 		if (found.length === 0) {
 			errorState = "no-results";
+		} else if (found.length === 1) {
+			const r = found[0];
+			dispatch("select", {
+				lat: r.lat,
+				lng: r.lon,
+				displayName: r.displayName,
+			});
 		} else {
 			results = found;
 		}
