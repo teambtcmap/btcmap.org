@@ -81,4 +81,13 @@ describe("searchAddress", () => {
 
 		await expect(searchAddress("x", "en")).rejects.toThrow("network down");
 	});
+
+	it("sets a request timeout so a hung request can't stall the UI", async () => {
+		mockedAxios.get.mockResolvedValueOnce({ data: [] });
+
+		await searchAddress("x", "en");
+
+		const [, config] = mockedAxios.get.mock.calls[0];
+		expect(config?.timeout).toBe(8000);
+	});
 });

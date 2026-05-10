@@ -13,6 +13,7 @@ type NominatimResult = {
 };
 
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
+const REQUEST_TIMEOUT_MS = 8000;
 
 export const searchAddress = async (
 	query: string,
@@ -26,6 +27,7 @@ export const searchAddress = async (
 			addressdetails: 0,
 			"accept-language": locale,
 		},
+		timeout: REQUEST_TIMEOUT_MS,
 	});
 
 	const results: GeocodeResult[] = [];
