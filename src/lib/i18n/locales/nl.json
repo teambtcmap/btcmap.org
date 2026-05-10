@@ -82,7 +82,17 @@
 		"failed": "Ongeldige gebruikersnaam of wachtwoord.",
 		"error": "Oeps, er ging iets fout. Probeer het nog eens.",
 		"noAccount": "Nog geen account?",
-		"createAccount": "Maak er hier eentje aan"
+		"createAccount": "Maak er hier eentje aan",
+		"nostrExtension": "Sign in with Nostr extension",
+		"nostrSigning": "Signing&hellip;",
+		"nostrFailed": "Nostr signature was rejected",
+		"nostrError": "Could not complete Nostr login",
+		"nsecToggle": "Or paste your nsec",
+		"nsecLabel": "Nostr secret key",
+		"nsecWarning": "Your nsec is sent only to your browser to sign in once &mdash; it is never stored or transmitted.",
+		"nsecSubmit": "Sign in with nsec",
+		"nsecInvalid": "That does not look like a valid nsec",
+		"or": "or"
 	},
 	"backup": {
 		"title": "Back-up account",
@@ -966,25 +976,82 @@
 			}
 		},
 		"contribution": {
-			"hyperbitcoinisation": { "title": "Hyperbitcoinisatie", "desc": "21M" },
-			"pizzaTime": { "title": "Pizza-tijd", "desc": "10K" },
-			"godly": { "title": "Goddelijk", "desc": "7777" },
-			"shadow": { "title": "Schaduw", "desc": "5000" },
-			"whitepaper": { "title": "White Paper", "desc": "3110" },
-			"winston": { "title": "Winston", "desc": "1984" },
-			"whale": { "title": "Walvis", "desc": "1000" },
-			"infinity": { "title": "Oneindigheid", "desc": "821" },
-			"legend": { "title": "Legende", "desc": "500" },
-			"chancellor": { "title": "Kanselier", "desc": "301" },
-			"sha": { "title": "SHA", "desc": "256" },
-			"noBailouts": { "title": "Geen reddingsoperaties", "desc": "210" },
-			"supertagger": { "title": "Supertagger", "desc": "100" },
-			"ath": { "title": "ATH", "desc": "69" },
-			"longestChain": { "title": "Langste keten", "desc": "51" },
-			"satoshi": { "title": "Satoshi", "desc": "21" },
-			"heartbeat": { "title": "Hartslag", "desc": "10" },
-			"segwit": { "title": "Segwit", "desc": "4" },
-			"wholeTagger": { "title": "Hele Tagger", "desc": "1" }
+			"hyperbitcoinisation": {
+				"title": "Hyperbitcoinisatie",
+				"desc": "21M"
+			},
+			"pizzaTime": {
+				"title": "Pizza-tijd",
+				"desc": "10K"
+			},
+			"godly": {
+				"title": "Goddelijk",
+				"desc": "7777"
+			},
+			"shadow": {
+				"title": "Schaduw",
+				"desc": "5000"
+			},
+			"whitepaper": {
+				"title": "White Paper",
+				"desc": "3110"
+			},
+			"winston": {
+				"title": "Winston",
+				"desc": "1984"
+			},
+			"whale": {
+				"title": "Walvis",
+				"desc": "1000"
+			},
+			"infinity": {
+				"title": "Oneindigheid",
+				"desc": "821"
+			},
+			"legend": {
+				"title": "Legende",
+				"desc": "500"
+			},
+			"chancellor": {
+				"title": "Kanselier",
+				"desc": "301"
+			},
+			"sha": {
+				"title": "SHA",
+				"desc": "256"
+			},
+			"noBailouts": {
+				"title": "Geen reddingsoperaties",
+				"desc": "210"
+			},
+			"supertagger": {
+				"title": "Supertagger",
+				"desc": "100"
+			},
+			"ath": {
+				"title": "ATH",
+				"desc": "69"
+			},
+			"longestChain": {
+				"title": "Langste keten",
+				"desc": "51"
+			},
+			"satoshi": {
+				"title": "Satoshi",
+				"desc": "21"
+			},
+			"heartbeat": {
+				"title": "Hartslag",
+				"desc": "10"
+			},
+			"segwit": {
+				"title": "Segwit",
+				"desc": "4"
+			},
+			"wholeTagger": {
+				"title": "Hele Tagger",
+				"desc": "1"
+			}
 		}
 	},
 	"apps": {
@@ -1038,11 +1105,21 @@
 		"title": "Steun ons",
 		"hero": "Help Bitcoin op de kaart te zetten",
 		"tiers": {
-			"explorer": { "headline": "Houden van wat we doen" },
-			"wayfinder": { "headline": "Steunt de missie" },
-			"cartographer": { "headline": "Kernpartner van het ecosysteem" },
-			"navigator": { "headline": "Standvastige steunpilaren uit de sector" },
-			"pioneer": { "headline": "Onze meest toegewijde supporters" },
+			"explorer": {
+				"headline": "Houden van wat we doen"
+			},
+			"wayfinder": {
+				"headline": "Steunt de missie"
+			},
+			"cartographer": {
+				"headline": "Kernpartner van het ecosysteem"
+			},
+			"navigator": {
+				"headline": "Standvastige steunpilaren uit de sector"
+			},
+			"pioneer": {
+				"headline": "Onze meest toegewijde supporters"
+			},
 			"pleb": {
 				"headline": "Elke sat telt &mdash; gerangschikt op cumulatieve bijdragen"
 			}
