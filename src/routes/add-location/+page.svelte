@@ -6,13 +6,14 @@ import { onDestroy, onMount, tick } from "svelte";
 import { get } from "svelte/store";
 
 import FormSuccess from "$components/FormSuccess.svelte";
+import AddressSearch from "$components/form/AddressSearch.svelte";
 import FormSelect from "$components/form/FormSelect.svelte";
 import Icon from "$components/Icon.svelte";
 import InfoTooltip from "$components/InfoTooltip.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
-import { _ } from "$lib/i18n";
+import { _, locale } from "$lib/i18n";
 import { loadMapDependencies } from "$lib/map/imports";
 import {
 	attribution,
@@ -194,6 +195,16 @@ function placeMarker(
 		.addTo(map);
 	if (fly) {
 		map.flyTo([finalLat, finalLong], 17);
+	}
+}
+
+function handleAddressSelect(
+	e: CustomEvent<{ lat: number; lng: number; displayName: string }>,
+) {
+	const { lat, lng, displayName } = e.detail;
+	placeMarker(lat, lng, { fly: true, syncInputs: true });
+	if (address && address.value.trim() === "") {
+		address.value = displayName;
 	}
 }
 
@@ -424,6 +435,13 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 					{:else if noLocationSelected}
 						<span class="font-semibold text-error">{$_('addLocation.noLocationError')}</span>
 					{/if}
+						<div class="mb-3">
+							<AddressSearch
+								disabled={!captchaSecret || !mapLoaded}
+								locale={$locale ?? 'en'}
+								on:select={handleAddressSelect}
+							/>
+						</div>
 						<div class="relative mb-2">
 							<div
 								bind:this={mapElement}
