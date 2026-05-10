@@ -60,6 +60,11 @@ async function exchangeSignedEvent(signedEvent: VerifiedEvent) {
 }
 
 async function loginWithExtension() {
+	// Re-entry guard: the disabled prop on the button propagates async, so
+	// a second click (or Enter on a focused button) can fire this handler
+	// before disabled takes effect. Without the guard, the user would see
+	// two extension-signing popups for one click.
+	if (nostrLoading) return;
 	nostrLoading = true;
 	try {
 		const signed = await signAuthWithExtension();
@@ -75,6 +80,11 @@ async function loginWithExtension() {
 }
 
 async function loginWithNsec() {
+	// Re-entry guard: form's on:submit can fire via Enter or rapid double-
+	// click before the disabled state on the button takes effect, which
+	// would decode + sign the same nsec twice and double-fire the network
+	// exchange.
+	if (nsecLoading) return;
 	if (!nsec.trim()) return;
 	nsecLoading = true;
 	let secretKey: Uint8Array | null = null;
