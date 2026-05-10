@@ -194,7 +194,7 @@ function placeMarker(
 		.marker([finalLat, finalLong], { icon: locationIcon })
 		.addTo(map);
 	if (fly) {
-		map.flyTo([finalLat, finalLong], 17);
+		map.flyTo([finalLat, finalLong], 17, { duration: 0.8 });
 	}
 }
 
