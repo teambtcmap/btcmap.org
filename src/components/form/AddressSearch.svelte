@@ -1,3 +1,7 @@
+<script context="module" lang="ts">
+let instanceCounter = 0;
+</script>
+
 <script lang="ts">
 import { createEventDispatcher } from "svelte";
 
@@ -11,6 +15,13 @@ export let locale = "en";
 const dispatch = createEventDispatcher<{
 	select: { lat: number; lng: number; displayName: string };
 }>();
+
+// Per-instance ID prefix so multiple AddressSearch components on the
+// same page don't share IDs (which would break aria-controls /
+// aria-activedescendant and produce invalid HTML).
+const instanceId = `address-search-${++instanceCounter}`;
+const listboxId = `${instanceId}-results`;
+const optionId = (i: number) => `${instanceId}-result-${i}`;
 
 let query = "";
 let loading = false;
@@ -112,11 +123,9 @@ function handleKeydown(e: KeyboardEvent) {
 			role="combobox"
 			aria-haspopup="listbox"
 			aria-expanded={results.length > 0}
-			aria-controls="address-search-results"
+			aria-controls={listboxId}
 			aria-autocomplete="list"
-			aria-activedescendant={activeIndex >= 0
-				? `address-search-result-${activeIndex}`
-				: undefined}
+			aria-activedescendant={activeIndex >= 0 ? optionId(activeIndex) : undefined}
 			class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 		/>
 		<button
@@ -145,16 +154,12 @@ function handleKeydown(e: KeyboardEvent) {
 
 	{#if results.length > 0}
 		<ul
-			id="address-search-results"
+			id={listboxId}
 			role="listbox"
 			class="overflow-hidden rounded-2xl border-2 border-input dark:bg-white/[0.05]"
 		>
 			{#each results as result, i (result.displayName + i)}
-				<li
-					id="address-search-result-{i}"
-					role="option"
-					aria-selected={activeIndex === i}
-				>
+				<li id={optionId(i)} role="option" aria-selected={activeIndex === i}>
 					<button
 						type="button"
 						on:click={() => selectResult(i)}
