@@ -507,7 +507,7 @@
 		"latitude": "Latitude",
 		"longitude": "Longitude",
 		"advancedToggle": "Advanced — enter coordinates manually",
-		"advancedHint": "Useful if you already know the exact coordinates (e.g. from Google Maps). You can also click the map to update them.",
+		"advancedHint": "Useful if you already know the exact coordinates. You can also click the map or search above to update them.",
 		"latitudeInvalid": "Latitude must be a number between -90 and 90.",
 		"longitudeInvalid": "Longitude must be a number between -180 and 180.",
 		"addressLabel": "Address (Optional)",
