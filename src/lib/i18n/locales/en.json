@@ -542,6 +542,14 @@
 		"formSuccessType": "Location",
 		"formSuccessText": "We'll review your information and add it ASAP."
 	},
+	"addressSearch": {
+		"placeholder": "Search by address...",
+		"buttonSearch": "Search",
+		"buttonWait": "Wait {seconds}s…",
+		"rateHint": "To be polite to OpenStreetMap's free geocoder.",
+		"noResults": "No results found. Try a more specific address or click on the map to drop a pin.",
+		"networkError": "Address lookup failed. Try again, or click on the map to drop a pin."
+	},
 	"formSuccess": {
 		"submittedTitle": "{type} Submitted!",
 		"monitorProgress": "You may also monitor the progress of your submission here:",
