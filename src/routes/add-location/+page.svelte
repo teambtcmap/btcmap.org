@@ -434,9 +434,7 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 
 				<div>
 					<label for="location-picker" class="mb-2 block font-semibold">{$_('forms.selectLocation')}</label>
-					{#if selected}
-						<span class="font-semibold text-green-500">{$_('forms.locationSelected')}</span>
-					{:else if noLocationSelected}
+					{#if noLocationSelected}
 						<span class="font-semibold text-error">{$_('addLocation.noLocationError')}</span>
 					{/if}
 						<p class="mt-2 mb-1 text-sm font-semibold text-primary/80 dark:text-white/80">
