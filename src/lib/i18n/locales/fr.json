@@ -471,7 +471,8 @@
 		"verifyLabel": "Comment avez-vous vérifié cela ?",
 		"verifyPlaceholder": "Veuillez fournir des détails supplémentaires",
 		"successType": "Rapport",
-		"successMessage": "Merci d'avoir pris le temps de remplir ce rapport. Nous examinerons vos informations et les mettrons à jour dès que possible."
+		"successMessage": "Merci d'avoir pris le temps de remplir ce rapport. Nous examinerons vos informations et les mettrons à jour dès que possible.",
+		"submitReport": "Soumettre le rapport"
 	},
 	"dashboard": {
 		"hero": "Tableau de bord",

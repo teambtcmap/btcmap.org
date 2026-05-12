@@ -565,7 +565,8 @@
 		"verifyLabel": "Hoe heb je dit gecontroleerd?",
 		"verifyPlaceholder": "Geef hier aanvullende informatie op",
 		"successType": "Rapporteer",
-		"successMessage": "Bedankt voor het invullen van dit rapport! We gaan je gegevens bekijken en zo snel mogelijk bijwerken."
+		"successMessage": "Bedankt voor het invullen van dit rapport! We gaan je gegevens bekijken en zo snel mogelijk bijwerken.",
+		"submitReport": "Rapport indienen"
 	},
 	"dashboard": {
 		"hero": "Dashboard",

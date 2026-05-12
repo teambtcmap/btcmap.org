@@ -471,7 +471,8 @@
 		"verifyLabel": "¿Cómo lo verificaste?",
 		"verifyPlaceholder": "Por favor proporciona información adicional aquí",
 		"successType": "Reporte",
-		"successMessage": "Gracias por tomarte el tiempo de completar este reporte. Revisaremos tu información y la actualizaremos lo antes posible."
+		"successMessage": "Gracias por tomarte el tiempo de completar este reporte. Revisaremos tu información y la actualizaremos lo antes posible.",
+		"submitReport": "Enviar Reporte"
 	},
 	"dashboard": {
 		"hero": "Panel",

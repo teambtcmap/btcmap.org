@@ -471,7 +471,8 @@
 		"verifyLabel": "Wie hast du das verifiziert?",
 		"verifyPlaceholder": "Bitte gib hier zusätzliche Infos an",
 		"successType": "Bericht",
-		"successMessage": "Danke, dass du dir die Zeit genommen hast, diesen Bericht auszufüllen. Wir werden deine Informationen prüfen und so bald wie möglich aktualisieren."
+		"successMessage": "Danke, dass du dir die Zeit genommen hast, diesen Bericht auszufüllen. Wir werden deine Informationen prüfen und so bald wie möglich aktualisieren.",
+		"submitReport": "Bericht einreichen"
 	},
 	"dashboard": {
 		"hero": "Übersicht",

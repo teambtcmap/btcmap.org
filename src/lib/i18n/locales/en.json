@@ -573,7 +573,8 @@
 		"verifyLabel": "How did you verify this?",
 		"verifyPlaceholder": "Please provide additional info here",
 		"successType": "Report",
-		"successMessage": "Thanks for taking the time to fill out this report. We'll review your information and update it ASAP."
+		"successMessage": "Thanks for taking the time to fill out this report. We'll review your information and update it ASAP.",
+		"submitReport": "Submit Report"
 	},
 	"dashboard": {
 		"hero": "Dashboard",
