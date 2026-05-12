@@ -358,7 +358,6 @@
 		"submittingApplication": "Отправка заявки...",
 		"submitButton": "Отправить заявку",
 		"captchaPlaceholder": "Пожалуйста, введите текст с капчи.",
-		"honeyPlaceholder": "Горшочек мёда.",
 		"successType": "Заявка",
 		"successMessage": "Спасибо за интерес к становлению редактором! Мы рассмотрим вашу заявку, и наша команда свяжется с вами по указанному email. Напишите на hello@btcmap.org, если есть любые вопросы."
 	},
@@ -399,10 +398,8 @@
 		"submitLocation": "Отправить место",
 		"submitReport": "Отправить отчёт",
 		"selectLocation": "Выбрать местоположение",
-		"locationSelected": "Местоположение выбрано!",
 		"searchButton": "Поиск 🔍",
 		"address": "Адрес",
-		"honeyPlaceholder": "Горшочек мёда.",
 		"captchaPlaceholder": "Пожалуйста, введите текст с капчи."
 	},
 	"addLocation": {
@@ -591,7 +588,6 @@
 		"captchaLabel": "Защита от ботов",
 		"captchaCaseSensitive": "(с учётом регистра)",
 		"captchaPlaceholder": "Пожалуйста, введите текст с капчи.",
-		"honeyPlaceholder": "Горшочек мёда.",
 		"submitButton": "Отправить сообщество",
 		"successType": "Сообщество",
 		"successMessage": "Спасибо за инициативу создать биткоин сообщество. Мы проверим вашу информацию и свяжемся, если потребуются дополнительные детали.",
@@ -730,7 +726,6 @@
 		"botProtection": "Защита от ботов",
 		"caseSensitive": "(с учётом регистра)",
 		"captchaPlaceholder": "Пожалуйста, введите текст с капчи.",
-		"honeyPlaceholder": "Горшочек мёда.",
 		"submitReport": "Отправить отчёт",
 		"successType": "Отчёт",
 		"successMessage": "Спасибо за подтверждение информации о сообществе. Мы рассмотрим ваш отчёт и обновим его как можно скорее."

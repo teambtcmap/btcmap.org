@@ -110,7 +110,7 @@ const submitForm = (event: SubmitEvent) => {
 				type: "community",
 				captchaSecret,
 				captchaTest: captchaValue,
-				honey: honeyInput,
+				honey: honeyInput.value,
 				location,
 				name,
 				icon: icon ? icon : "",
@@ -416,9 +416,9 @@ onMount(async () => {
 			<input
 				type="text"
 				name="honey"
-				placeholder={$_('addCommunityForm.honeyPlaceholder')}
+				placeholder="A nice pot of honey."
 				class="hidden"
-				bind:value={honeyInput}
+				bind:this={honeyInput}
 			/>
 
 			<PrimaryButton

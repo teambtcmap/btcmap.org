@@ -358,7 +358,6 @@
 		"submittingApplication": "Bewerbung wird übermittelt...",
 		"submitButton": "Bewerbung absenden",
 		"captchaPlaceholder": "Bitte gib den Captcha-Text ein.",
-		"honeyPlaceholder": "Ein nettes Töpfchen Honig.",
 		"successType": "Bewerbung",
 		"successMessage": "Danke für dein Interesse, Tagger zu werden! Wir werden deine Bewerbung prüfen und einer aus dem Team wird sich über die von dir angegebene E-Mail melden. Kontaktiere hello@btcmap.org, wenn du nachhaken möchtest."
 	},
@@ -399,10 +398,8 @@
 		"submitLocation": "Standort melden",
 		"submitReport": "Bericht einreichen",
 		"selectLocation": "Standort auswählen",
-		"locationSelected": "Standort ausgewählt!",
 		"searchButton": "Suchen 🔍",
 		"address": "Adresse",
-		"honeyPlaceholder": "Ein nettes Töpfchen Honig.",
 		"captchaPlaceholder": "Bitte gib den Captcha-Text ein."
 	},
 	"addLocation": {
@@ -591,7 +588,6 @@
 		"captchaLabel": "Bot-Schutz",
 		"captchaCaseSensitive": "(groß-/kleinschreibung beachten)",
 		"captchaPlaceholder": "Bitte gib den Captcha-Text ein.",
-		"honeyPlaceholder": "Ein nettes Töpfchen Honig.",
 		"submitButton": "Community einreichen",
 		"successType": "Community",
 		"successMessage": "Danke für deine Initiative, eine Bitcoin-Community zu gründen. Wir werden deine Informationen prüfen und uns melden, wenn wir mehr Details benötigen.",
@@ -730,7 +726,6 @@
 		"botProtection": "Bot-Schutz",
 		"caseSensitive": "(groß-/kleinschreibung beachten)",
 		"captchaPlaceholder": "Bitte gib den Captcha-Text ein.",
-		"honeyPlaceholder": "Ein nettes Töpfchen Honig.",
 		"submitReport": "Bericht einreichen",
 		"successType": "Bericht",
 		"successMessage": "Danke für das Verifizieren der Communitysinformationen. Wir werden deinen Bericht prüfen und so bald wie möglich aktualisieren."

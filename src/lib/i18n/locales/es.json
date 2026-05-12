@@ -358,7 +358,6 @@
 		"submittingApplication": "Enviando tu solicitud...",
 		"submitButton": "Enviar Solicitud",
 		"captchaPlaceholder": "Por favor ingresa el texto del captcha.",
-		"honeyPlaceholder": "Una rica olla de miel.",
 		"successType": "Solicitud",
 		"successMessage": "¡Gracias por tu interés en convertirte en tagger! Revisaremos tu solicitud y alguien del equipo se pondrá en contacto a través del correo electrónico que proporcionaste. Contacta a hello@btcmap.org si necesitas dar seguimiento."
 	},
@@ -399,10 +398,8 @@
 		"submitLocation": "Enviar Ubicación",
 		"submitReport": "Enviar Reporte",
 		"selectLocation": "Seleccionar Ubicación",
-		"locationSelected": "¡Ubicación seleccionada!",
 		"searchButton": "Buscar 🔍",
 		"address": "Dirección",
-		"honeyPlaceholder": "Una rica olla de miel.",
 		"captchaPlaceholder": "Por favor ingresa el texto del captcha."
 	},
 	"addLocation": {
@@ -591,7 +588,6 @@
 		"captchaLabel": "Protección contra bots",
 		"captchaCaseSensitive": "(distingue mayúsculas)",
 		"captchaPlaceholder": "Por favor ingresa el texto del captcha.",
-		"honeyPlaceholder": "Una rica olla de miel.",
 		"submitButton": "Enviar Comunidad",
 		"successType": "Comunidad",
 		"successMessage": "Gracias por tu iniciativa de crear una comunidad bitcoin. Revisaremos tu información y nos pondremos en contacto si necesitamos más detalles.",
@@ -730,7 +726,6 @@
 		"botProtection": "Protección contra bots",
 		"caseSensitive": "(distingue mayúsculas)",
 		"captchaPlaceholder": "Por favor ingresa el texto del captcha.",
-		"honeyPlaceholder": "Una rica olla de miel.",
 		"submitReport": "Enviar Reporte",
 		"successType": "Reporte",
 		"successMessage": "Gracias por verificar la información de esta comunidad. Revisaremos tu reporte y lo actualizaremos lo antes posible."

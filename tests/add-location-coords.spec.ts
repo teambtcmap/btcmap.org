@@ -36,9 +36,7 @@ test.describe('Add Location — manual coordinate entry', () => {
 		);
 	});
 
-	test('typing valid coords drops a marker and shows "Location selected"', async ({
-		page
-	}) => {
+	test('typing valid coords drops a marker', async ({ page }) => {
 		await page
 			.getByRole('button', { name: /Advanced — enter coordinates manually/ })
 			.click();
@@ -47,7 +45,6 @@ test.describe('Add Location — manual coordinate entry', () => {
 		await page.getByLabel('Latitude').fill('52.5200');
 		await page.getByLabel('Longitude').fill('13.4050');
 
-		await expect(page.getByText('Location selected!')).toBeVisible();
 		await expect(page.locator('.leaflet-marker-icon')).toHaveCount(1);
 	});
 

@@ -6,13 +6,14 @@ import { onDestroy, onMount, tick } from "svelte";
 import { get } from "svelte/store";
 
 import FormSuccess from "$components/FormSuccess.svelte";
+import AddressSearch from "$components/form/AddressSearch.svelte";
 import FormSelect from "$components/form/FormSelect.svelte";
 import Icon from "$components/Icon.svelte";
 import InfoTooltip from "$components/InfoTooltip.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
-import { _ } from "$lib/i18n";
+import { _, locale } from "$lib/i18n";
 import { loadMapDependencies } from "$lib/map/imports";
 import {
 	attribution,
@@ -153,6 +154,7 @@ async function initializeMap() {
 
 let name: HTMLInputElement;
 let address: HTMLInputElement;
+let addressFilledBySearch = false;
 let lat: number | undefined;
 let long: number | undefined;
 let selected = false;
@@ -193,7 +195,20 @@ function placeMarker(
 		.marker([finalLat, finalLong], { icon: locationIcon })
 		.addTo(map);
 	if (fly) {
-		map.flyTo([finalLat, finalLong], 17);
+		map.flyTo([finalLat, finalLong], 17, { duration: 0.8 });
+	}
+}
+
+function handleAddressSelect(
+	e: CustomEvent<{ lat: number; lng: number; displayName: string }>,
+) {
+	const { lat, lng, displayName } = e.detail;
+	placeMarker(lat, lng, { fly: true, syncInputs: true });
+	// Fill the Address field if it's empty or was last filled by a previous
+	// search. If the user has typed their own address, leave it alone.
+	if (address && (address.value.trim() === "" || addressFilledBySearch)) {
+		address.value = displayName;
+		addressFilledBySearch = true;
 	}
 }
 
@@ -419,11 +434,22 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 
 				<div>
 					<label for="location-picker" class="mb-2 block font-semibold">{$_('forms.selectLocation')}</label>
-					{#if selected}
-						<span class="font-semibold text-green-500">{$_('forms.locationSelected')}</span>
-					{:else if noLocationSelected}
+					{#if noLocationSelected}
 						<span class="font-semibold text-error">{$_('addLocation.noLocationError')}</span>
 					{/if}
+						<p class="mt-2 mb-1 text-sm font-semibold text-primary/80 dark:text-white/80">
+							{$_('addLocation.searchByAddressLabel')}
+						</p>
+						<div class="mb-3">
+							<AddressSearch
+								disabled={!captchaSecret || !mapLoaded}
+								locale={$locale ?? 'en'}
+								on:select={handleAddressSelect}
+							/>
+						</div>
+						<p class="mt-2 mb-1 text-sm font-semibold text-primary/80 dark:text-white/80">
+							{$_('addLocation.orSelectOnMapLabel')}
+						</p>
 						<div class="relative mb-2">
 							<div
 								bind:this={mapElement}
@@ -506,6 +532,7 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 						placeholder={$_('addLocation.addressPlaceholder')}
 						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 						bind:this={address}
+						on:input={() => (addressFilledBySearch = false)}
 					/>
 				</div>
 
@@ -742,7 +769,7 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 					<input
 						type="text"
 						name="honey"
-						placeholder={$_('forms.honeyPlaceholder')}
+						placeholder="A nice pot of honey."
 						class="hidden"
 						bind:this={honeyInput}
 					/>

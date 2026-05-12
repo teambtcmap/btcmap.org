@@ -448,7 +448,6 @@
 		"submittingApplication": "Je aanvraag indienen...",
 		"submitButton": "Aanvraag indienen",
 		"captchaPlaceholder": "Voer de captcha-tekst in.",
-		"honeyPlaceholder": "Een lekkere pot honing.",
 		"successType": "Sollicitatie",
 		"successMessage": "Bedankt voor je interesse om tagger te worden! We zullen je aanmelding bekijken en iemand van het team zal contact met je opnemen via het door jou opgegeven e-mailadres. Neem contact op met hello@btcmap.org als je een follow-up nodig hebt."
 	},
@@ -489,10 +488,8 @@
 		"submitLocation": "Locatie indienen",
 		"submitReport": "Rapport indienen",
 		"selectLocation": "Selecteer locatie",
-		"locationSelected": "Locatie geselecteerd!",
 		"searchButton": "Zoek 🔍",
 		"address": "Adres",
-		"honeyPlaceholder": "Een lekkere pot honing.",
 		"captchaPlaceholder": "Voer de captcha-tekst in."
 	},
 	"addLocation": {
@@ -685,7 +682,6 @@
 		"captchaLabel": "Botbeveiliging",
 		"captchaCaseSensitive": "(hoofdlettergevoelig)",
 		"captchaPlaceholder": "Voer de captcha-tekst in.",
-		"honeyPlaceholder": "Een lekkere pot honing.",
 		"submitButton": "Community aanmelden",
 		"successType": "Community",
 		"successMessage": "Bedankt voor je initiatief om een Bitcoin-community te starten. We bekijken je informatie en nemen contact met je op als we nog vragen hebben.",
@@ -834,7 +830,6 @@
 		"botProtection": "Botbeveiliging",
 		"caseSensitive": "(hoofdlettergevoelig)",
 		"captchaPlaceholder": "Voer de captcha-tekst in.",
-		"honeyPlaceholder": "Een lekkere pot honing.",
 		"submitReport": "Rapport indienen",
 		"successType": "Rapporteer",
 		"successMessage": "Bedankt voor het controleren van de informatie van deze community. We bekijken je melding en passen deze zo snel mogelijk aan."
@@ -966,25 +961,82 @@
 			}
 		},
 		"contribution": {
-			"hyperbitcoinisation": { "title": "Hyperbitcoinisatie", "desc": "21M" },
-			"pizzaTime": { "title": "Pizza-tijd", "desc": "10K" },
-			"godly": { "title": "Goddelijk", "desc": "7777" },
-			"shadow": { "title": "Schaduw", "desc": "5000" },
-			"whitepaper": { "title": "White Paper", "desc": "3110" },
-			"winston": { "title": "Winston", "desc": "1984" },
-			"whale": { "title": "Walvis", "desc": "1000" },
-			"infinity": { "title": "Oneindigheid", "desc": "821" },
-			"legend": { "title": "Legende", "desc": "500" },
-			"chancellor": { "title": "Kanselier", "desc": "301" },
-			"sha": { "title": "SHA", "desc": "256" },
-			"noBailouts": { "title": "Geen reddingsoperaties", "desc": "210" },
-			"supertagger": { "title": "Supertagger", "desc": "100" },
-			"ath": { "title": "ATH", "desc": "69" },
-			"longestChain": { "title": "Langste keten", "desc": "51" },
-			"satoshi": { "title": "Satoshi", "desc": "21" },
-			"heartbeat": { "title": "Hartslag", "desc": "10" },
-			"segwit": { "title": "Segwit", "desc": "4" },
-			"wholeTagger": { "title": "Hele Tagger", "desc": "1" }
+			"hyperbitcoinisation": {
+				"title": "Hyperbitcoinisatie",
+				"desc": "21M"
+			},
+			"pizzaTime": {
+				"title": "Pizza-tijd",
+				"desc": "10K"
+			},
+			"godly": {
+				"title": "Goddelijk",
+				"desc": "7777"
+			},
+			"shadow": {
+				"title": "Schaduw",
+				"desc": "5000"
+			},
+			"whitepaper": {
+				"title": "White Paper",
+				"desc": "3110"
+			},
+			"winston": {
+				"title": "Winston",
+				"desc": "1984"
+			},
+			"whale": {
+				"title": "Walvis",
+				"desc": "1000"
+			},
+			"infinity": {
+				"title": "Oneindigheid",
+				"desc": "821"
+			},
+			"legend": {
+				"title": "Legende",
+				"desc": "500"
+			},
+			"chancellor": {
+				"title": "Kanselier",
+				"desc": "301"
+			},
+			"sha": {
+				"title": "SHA",
+				"desc": "256"
+			},
+			"noBailouts": {
+				"title": "Geen reddingsoperaties",
+				"desc": "210"
+			},
+			"supertagger": {
+				"title": "Supertagger",
+				"desc": "100"
+			},
+			"ath": {
+				"title": "ATH",
+				"desc": "69"
+			},
+			"longestChain": {
+				"title": "Langste keten",
+				"desc": "51"
+			},
+			"satoshi": {
+				"title": "Satoshi",
+				"desc": "21"
+			},
+			"heartbeat": {
+				"title": "Hartslag",
+				"desc": "10"
+			},
+			"segwit": {
+				"title": "Segwit",
+				"desc": "4"
+			},
+			"wholeTagger": {
+				"title": "Hele Tagger",
+				"desc": "1"
+			}
 		}
 	},
 	"apps": {
@@ -1038,11 +1090,21 @@
 		"title": "Steun ons",
 		"hero": "Help Bitcoin op de kaart te zetten",
 		"tiers": {
-			"explorer": { "headline": "Houden van wat we doen" },
-			"wayfinder": { "headline": "Steunt de missie" },
-			"cartographer": { "headline": "Kernpartner van het ecosysteem" },
-			"navigator": { "headline": "Standvastige steunpilaren uit de sector" },
-			"pioneer": { "headline": "Onze meest toegewijde supporters" },
+			"explorer": {
+				"headline": "Houden van wat we doen"
+			},
+			"wayfinder": {
+				"headline": "Steunt de missie"
+			},
+			"cartographer": {
+				"headline": "Kernpartner van het ecosysteem"
+			},
+			"navigator": {
+				"headline": "Standvastige steunpilaren uit de sector"
+			},
+			"pioneer": {
+				"headline": "Onze meest toegewijde supporters"
+			},
 			"pleb": {
 				"headline": "Elke sat telt &mdash; gerangschikt op cumulatieve bijdragen"
 			}
