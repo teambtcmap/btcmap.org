@@ -2,6 +2,7 @@
 import { _ } from "svelte-i18n";
 
 import IssueIcon from "$components/IssueIcon.svelte";
+import TextLink from "$components/TextLink.svelte";
 
 export let id: "icon" | "name" | "type" | "viewLink" | "editLink" | "helpLink";
 export let value: string;
@@ -14,30 +15,15 @@ export let value: string;
 {:else if id === 'type'}
 	{value}
 {:else if id === 'viewLink'}
-	<a
-		href="https://www.openstreetmap.org/{value}"
-		target="_blank"
-		rel="noreferrer"
-		class="text-link transition-colors hover:text-hover"
-	>
+	<TextLink link="https://www.openstreetmap.org/{value}" external>
 		{$_(`maintain.view`)}
-	</a>
+	</TextLink>
 {:else if id === 'editLink'}
-	<a
-		href="https://www.openstreetmap.org/edit?{value}"
-		target="_blank"
-		rel="noreferrer"
-		class="text-link transition-colors hover:text-hover"
-	>
+	<TextLink link="https://www.openstreetmap.org/edit?{value}" external>
 		{$_(`maintain.edit`)}
-	</a>
+	</TextLink>
 {:else if id === 'helpLink' && value}
-	<a
-		href={value}
-		target="_blank"
-		rel="noreferrer"
-		class="text-link transition-colors hover:text-hover"
-	>
+	<TextLink link={value} external>
 		{$_(`maintain.help`)}
-	</a>
+	</TextLink>
 {/if}

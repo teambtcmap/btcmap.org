@@ -4,6 +4,7 @@ import { onMount } from "svelte";
 import LatestTagger from "$components/LatestTagger.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
+import TextLink from "$components/TextLink.svelte";
 import TopButton from "$components/TopButton.svelte";
 import { API_BASE } from "$lib/api-base";
 import { _ } from "$lib/i18n";
@@ -132,9 +133,8 @@ $: latestTaggers = !!(supertaggers?.length && !elementsLoading);
 	</h2>
 
 	<p class="text-center text-xl text-primary lg:text-left dark:text-white">
-		{$_('activityPage.cta')} <a
-			href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers-"
-			class="text-link transition-colors hover:text-hover">{$_('activityPage.getTaggin')}</a
+		{$_('activityPage.cta')} <TextLink
+			link="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers-">{$_('activityPage.getTaggin')}</TextLink
 		>
 	</p>
 

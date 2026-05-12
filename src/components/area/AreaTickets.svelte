@@ -3,6 +3,7 @@ import { _ } from "svelte-i18n";
 
 import InfoTooltip from "$components/InfoTooltip.svelte";
 import OpenTicket from "$components/OpenTicket.svelte";
+import TextLink from "$components/TextLink.svelte";
 import { GITEA_LABELS } from "$lib/constants";
 import type { GiteaIssue, GiteaLabel } from "$lib/types";
 import type { Tickets } from "$lib/types.js";
@@ -155,11 +156,9 @@ $: totalTickets = add.length + verify.length + community.length;
 			<p
 				class="border-t border-gray-300 p-5 text-center text-body dark:border-white/95 dark:text-white"
 			>
-				{$_(`maintain.underMaintenance`)} <a
-					href="https://gitea.btcmap.org/teambtcmap/btcmap-data/issues"
-					target="_blank"
-					rel="noreferrer"
-					class="text-link transition-colors hover:text-hover">{$_(`maintain.viewOnGitea`)}</a
+				{$_(`maintain.underMaintenance`)} <TextLink
+					link="https://gitea.btcmap.org/teambtcmap/btcmap-data/issues"
+					external>{$_(`maintain.viewOnGitea`)}</TextLink
 				>
 			</p>
 		{:else if ticketError}

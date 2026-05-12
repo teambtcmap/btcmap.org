@@ -1,17 +1,13 @@
 <script lang="ts">
-import LoadingSpinner from "$components/LoadingSpinner.svelte";
-
-export let style: string;
+export let style: string = "";
 export let link: undefined | string = undefined;
 export let type: undefined | "button" | "submit" = undefined;
 export let external: undefined | boolean = undefined;
 export let disabled: undefined | boolean = undefined;
-export let loading: undefined | boolean = undefined;
 
-const baseStyles =
-	"block bg-link text-center font-semibold text-white hover:bg-hover transition-colors";
+const baseStyles = "text-link transition-colors hover:text-hover";
 
-$: combinedStyles = `${baseStyles} ${style}`;
+$: combinedStyles = style ? `${baseStyles} ${style}` : baseStyles;
 </script>
 
 {#if link}
@@ -19,6 +15,7 @@ $: combinedStyles = `${baseStyles} ${style}`;
 		href={link}
 		target={external ? '_blank' : undefined}
 		rel={external ? 'noreferrer' : undefined}
+		on:click
 		class={combinedStyles}
 		{...$$restProps}
 	>
@@ -26,10 +23,6 @@ $: combinedStyles = `${baseStyles} ${style}`;
 	</a>
 {:else}
 	<button on:click {type} {disabled} class={combinedStyles} {...$$restProps}>
-		{#if loading}
-			<LoadingSpinner />
-		{:else}
-			<slot />
-		{/if}
+		<slot />
 	</button>
 {/if}

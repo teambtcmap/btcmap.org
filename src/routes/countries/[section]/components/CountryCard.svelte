@@ -1,6 +1,7 @@
 <script lang="ts">
 import { locale } from "svelte-i18n";
 
+import TextLink from "$components/TextLink.svelte";
 import { getCountryName } from "$lib/countryNames";
 
 import { resolve } from "$app/paths";
@@ -28,9 +29,9 @@ $: {
 	class="rounded-3xl border border-gray-300 shadow transition-shadow hover:shadow-2xl dark:border-white/95 dark:bg-white/10"
 >
 	<div class="my-4 space-y-2 p-4">
-		<a
-			href={resolve(`/country/${id}`)}
-			class="space-y-2 text-link transition-colors hover:text-hover"
+		<TextLink
+			link={resolve(`/country/${id}`)}
+			style="space-y-2"
 		>
 			<img
 				src={`https://static.btcmap.org/images/countries/${id}.svg`}
@@ -46,6 +47,6 @@ $: {
 				class="block text-center text-lg font-semibold"
 				>{localizedName}</span
 			>
-		</a>
+		</TextLink>
 	</div>
 </div>

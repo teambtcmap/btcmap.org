@@ -1,4 +1,5 @@
 <script lang="ts">
+import TextLink from "$components/TextLink.svelte";
 import { _ } from "$lib/i18n";
 </script>
 
@@ -16,9 +17,9 @@ import { _ } from "$lib/i18n";
 		<br />
 		Copyright &#169; 2022-{new Date().getFullYear()} BTC Map
 		<br />
-		<a
-			href="mailto:hello@btcmap.org"
-			class="font-normal text-link transition-colors hover:text-hover">hello@btcmap.org</a
+		<TextLink
+			link="mailto:hello@btcmap.org"
+			style="font-normal">hello@btcmap.org</TextLink
 		>
 	</p>
 	<p>
@@ -42,9 +43,8 @@ import { _ } from "$lib/i18n";
 	</h1>
 
 	<p>
-		Copyright (C) 2007 Free Software Foundation, Inc. <a
-			href="https://fsf.org/"
-			class="text-link transition-colors hover:text-hover">https://fsf.org/</a
+		Copyright (C) 2007 Free Software Foundation, Inc. <TextLink
+			link="https://fsf.org/">https://fsf.org/</TextLink
 		>
 		Everyone is permitted to copy and distribute verbatim copies of this license document, but changing
 		it is not allowed.

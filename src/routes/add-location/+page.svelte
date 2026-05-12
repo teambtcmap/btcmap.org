@@ -13,6 +13,7 @@ import InfoTooltip from "$components/InfoTooltip.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import TextLink from "$components/TextLink.svelte";
 import { _, locale } from "$lib/i18n";
 import { loadMapDependencies } from "$lib/map/imports";
 import {
@@ -394,11 +395,9 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 	</p>
 
 	<p class="mt-10 text-center text-lg font-semibold text-primary md:text-xl dark:text-white">
-		{$_('addLocation.businessOwner')} <a
-			href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Merchant-Best-Practices"
-			target="_blank"
-			rel="noreferrer"
-				class="text-link transition-colors hover:text-hover">{$_('addLocation.bestPractices')}</a
+		{$_('addLocation.businessOwner')} <TextLink
+			link="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Merchant-Best-Practices"
+			external>{$_('addLocation.bestPractices')}</TextLink
 		> {$_('addLocation.guide')}
 	</p>
 

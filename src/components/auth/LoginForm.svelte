@@ -1,6 +1,8 @@
 <script lang="ts">
 import { get } from "svelte/store";
 
+import PrimaryButton from "$components/PrimaryButton.svelte";
+import TextLink from "$components/TextLink.svelte";
 import { trackEvent } from "$lib/analytics";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
@@ -91,26 +93,24 @@ async function handleSubmit() {
 		/>
 	</div>
 
-	<button
+	<PrimaryButton
 		type="submit"
 		disabled={loading || !username.trim() || !password}
-		class="w-full rounded-lg bg-link px-4 py-2 font-semibold text-white transition-colors hover:bg-hover disabled:opacity-50"
+		style="w-full rounded-lg px-4 py-2 disabled:opacity-50"
 	>
 		{loading ? $_("login.loggingIn") : $_("login.submit")}
-	</button>
+	</PrimaryButton>
 </form>
 
 {#if !compact}
 	<p class="mt-4 text-center text-sm text-body dark:text-white/70">
 		{$_("login.noAccount")}
-		<a
-			href="https://developer.btcmap.org"
-			target="_blank"
-			rel="noopener noreferrer"
+		<TextLink
+			link="https://developer.btcmap.org"
+			external
 			on:click={() => trackEvent("login_create_account_click")}
-			class="text-link transition-colors hover:text-hover"
 		>
 			{$_("login.createAccount")}
-		</a>
+		</TextLink>
 	</p>
 {/if}
