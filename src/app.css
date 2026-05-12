@@ -11,6 +11,7 @@
 	html {
 		font-family: Manrope, sans-serif;
 		@apply text-base;
+		scrollbar-gutter: stable;
 	}
 
 	::selection {

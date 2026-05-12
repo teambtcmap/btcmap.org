@@ -122,6 +122,10 @@ export let data;
 			content="Easily find places to spend sats anywhere on the planet."
 		/>
 	{/if}
+	{#if ['/map', '/communities/map'].includes(data.pathname)}
+		<!-- Fullscreen map routes have no scrollbar; skip the reserved gutter so the map fills the viewport -->
+		<style>html { scrollbar-gutter: auto; }</style>
+	{/if}
 	<meta
 		name="lightning"
 		content="lnurlp:LNURL1DP68GURN8GHJ7CM0WFJJUCN5VDKKZUPWDAEXWTMVDE6HYMRS9ARKXVN4W5EQPSYZ34"
