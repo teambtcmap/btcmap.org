@@ -2,6 +2,7 @@
 import OrgBadge from "$components/OrgBadge.svelte";
 import Socials from "$components/Socials.svelte";
 import SponsorBadge from "$components/SponsorBadge.svelte";
+import TextLink from "$components/TextLink.svelte";
 import Tip from "$components/Tip.svelte";
 import { getOrganizationDisplayName } from "$lib/organizationDisplayNames";
 import type { AreaTags } from "$lib/types";
@@ -71,9 +72,9 @@ $: tip =
 	class="rounded-3xl border border-gray-300 shadow transition-shadow hover:shadow-2xl dark:border-white/95 dark:bg-white/10"
 >
 	<div class="my-4 space-y-2 p-4">
-		<a
-			href={resolve(`/community/${encodeURIComponent(id)}`)}
-			class="space-y-2 text-link transition-colors hover:text-hover"
+		<TextLink
+			link={resolve(`/community/${encodeURIComponent(id)}`)}
+			style="space-y-2"
 		>
 			<img
 				loading="lazy"
@@ -86,7 +87,7 @@ $: tip =
 			/>
 
 			<span class="block text-center text-lg font-semibold">{tags.name}</span>
-		</a>
+		</TextLink>
 		{#if tags.organization}
 			<OrgBadge org={getOrganizationDisplayName(tags.organization)} />
 		{/if}

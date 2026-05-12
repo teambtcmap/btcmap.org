@@ -5,6 +5,7 @@ import AppDownloadModal from "$components/AppDownloadModal.svelte";
 import Footer from "$components/layout/Footer.svelte";
 import Header from "$components/layout/Header.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import PrimaryButton from "$components/PrimaryButton.svelte";
 import type { AppConfig } from "$lib/apps";
 import { appConfigs } from "$lib/apps";
 import IconApps from "$lib/icons/IconApps.svelte";
@@ -115,16 +116,16 @@ function openAppModal(app: AppConfig) {
 							class="mx-2 my-2 space-y-1 text-center font-semibold text-body md:my-0 dark:text-white"
 						>
 							<p>{label}</p>
-							<button
+							<PrimaryButton
 								type="button"
 								aria-label={platform === 'web'
 									? $_('home.openWebAppAria', { values: { type: label } })
 									: $_('home.downloadForAria', { values: { type: label } })}
-								class="mx-auto inline-flex cursor-pointer rounded-full bg-link p-3 text-white transition-colors hover:bg-hover"
+								style="mx-auto inline-flex cursor-pointer rounded-full p-3"
 								on:click={() => openAppModal(app)}
 							>
 								<IconApps w="32" h="32" {icon} />
-							</button>
+							</PrimaryButton>
 						</div>
 					{/if}
 				{/each}

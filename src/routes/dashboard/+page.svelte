@@ -9,6 +9,7 @@ import { onDestroy, onMount } from "svelte";
 import { get } from "svelte/store";
 
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import TextLink from "$components/TextLink.svelte";
 import { _ } from "$lib/i18n";
 import { theme } from "$lib/theme";
 import type { ChartHistory } from "$lib/types";
@@ -411,11 +412,9 @@ $: {
 	</section>
 
 	<p class="text-center text-sm text-body md:text-left dark:text-white">
-		{$_('dashboard.tagsNotePart1')} <a
-			href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#tagging-guidance"
-			target="_blank"
-			rel="noreferrer"
-			class="text-link transition-colors hover:text-hover">{$_('dashboard.tagsNoteLink')}</a
+		{$_('dashboard.tagsNotePart1')} <TextLink
+			link="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#tagging-guidance"
+			external>{$_('dashboard.tagsNoteLink')}</TextLink
 		>{$_('dashboard.tagsNotePart2')}
 	</p>
 </div>
