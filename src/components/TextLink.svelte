@@ -14,7 +14,7 @@ $: combinedStyles = style ? `${baseStyles} ${style}` : baseStyles;
 	<a
 		href={link}
 		target={external ? '_blank' : undefined}
-		rel={external ? 'noreferrer' : undefined}
+		rel={external ? 'noopener noreferrer' : undefined}
 		on:click
 		class={combinedStyles}
 		{...$$restProps}
