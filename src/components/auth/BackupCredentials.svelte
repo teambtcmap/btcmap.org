@@ -45,6 +45,7 @@ async function copyToClipboard(text: string, field: "username" | "password") {
 				on:click={() => copyToClipboard(username, "username")}
 				style="shrink-0"
 				title={$_("backup.copy")}
+				aria-label={$_("backup.copy")}
 			>
 				<Icon
 					type="material"
