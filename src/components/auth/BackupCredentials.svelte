@@ -77,6 +77,8 @@ async function copyToClipboard(text: string, field: "username" | "password") {
 				on:click={() => (showPassword = !showPassword)}
 				style="shrink-0"
 				title={showPassword ? $_("backup.hide") : $_("backup.show")}
+				aria-label={showPassword ? $_("backup.hide") : $_("backup.show")}
+				aria-pressed={showPassword}
 			>
 				<Icon
 					type="material"
