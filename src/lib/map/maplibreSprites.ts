@@ -29,6 +29,16 @@ export const PIN_FILL_BOOSTED = "#F7931A";
 export const spriteName = (icon: string, boosted: boolean): string =>
 	`pin-${boosted ? "b" : "r"}-${icon}`;
 
+// Render scale for composite pin sprites. The outer SVG is rasterized at
+// SCALE× its declared px dimensions (viewBox stays the same), then
+// registered with `pixelRatio: SCALE` so MapLibre displays at native size
+// but draws from the higher-density bitmap — same idea as a @2x asset.
+// Without this, the Material Icon inside the pin looks blurry on retina
+// displays. The Iconify fetch URL keeps width=20 height=20 because the
+// inner SVG is positioned in the outer's USER UNITS, so it scales with
+// the outer's rasterization resolution.
+export const PIN_RENDER_SCALE = 2;
+
 export const fetchIconifyByName = async (
 	iconifyName: string,
 ): Promise<string | null> => {
@@ -65,7 +75,13 @@ export const buildCompositeSvg = (
 	const fill = boosted ? PIN_FILL_BOOSTED : PIN_FILL_REGULAR;
 	// innerSvg is a complete <svg>...</svg> document; nesting an SVG inside an
 	// outer SVG is valid and rasterizes correctly through <img>.
-	return `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="43" viewBox="0 0 32 43"><path d="${PIN_PATH}" fill="${fill}"/><g transform="translate(6, 5.75)">${innerSvg}</g></svg>`;
+	// width/height are SCALE× the viewBox dims; nested vector content (pin
+	// path, inner SVG glyph) re-rasterizes at the higher resolution → crisp
+	// on retina. addImage in ensureSprite registers with pixelRatio: SCALE
+	// so MapLibre still displays at the logical 32×43 size.
+	const w = 32 * PIN_RENDER_SCALE;
+	const h = 43 * PIN_RENDER_SCALE;
+	return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 32 43"><path d="${PIN_PATH}" fill="${fill}"/><g transform="translate(6, 5.75)">${innerSvg}</g></svg>`;
 };
 
 export const loadSvgImage = (svg: string): Promise<HTMLImageElement> =>
@@ -109,7 +125,8 @@ export const ensureSprite = (
 		const inner = await fetchIconInnerSvg(icon);
 		const composite = buildCompositeSvg(inner, boosted);
 		const img = await loadSvgImage(composite);
-		if (!m.hasImage(name)) m.addImage(name, img, { pixelRatio: 1 });
+		if (!m.hasImage(name))
+			m.addImage(name, img, { pixelRatio: PIN_RENDER_SCALE });
 		m.triggerRepaint();
 	})();
 	cache.set(name, promise);
