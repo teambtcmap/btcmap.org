@@ -29,6 +29,7 @@ import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { merchantList } from "$lib/merchantListStore";
 import { savedPlaceIds } from "$lib/session";
 import { places } from "$lib/store";
+import { theme } from "$lib/theme";
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
 import { debounce, isBoosted } from "$lib/utils";
@@ -55,6 +56,23 @@ type PlaceFeatureCollection = {
 
 let mapContainer: HTMLDivElement;
 let map: MapLibreMap | undefined;
+let selectedBasemap: BasemapId = "osm"; // overridden in onMount once theme + storage are read
+
+const handleBasemapChange = () => {
+	if (!map) return;
+	for (const b of BASEMAPS) {
+		map.setLayoutProperty(
+			b.id,
+			"visibility",
+			b.id === selectedBasemap ? "visible" : "none",
+		);
+	}
+	try {
+		localStorage.setItem(BASEMAP_STORAGE_KEY, selectedBasemap);
+	} catch {
+		// localStorage unavailable; skip persistence
+	}
+};
 let spiderfier: Spiderfy | undefined;
 let styleLoaded = false;
 let lastPlacesLength = -1;
@@ -70,6 +88,32 @@ let latestHullClusterId: number | null = null;
 const EMPTY_HULL_COLLECTION: FeatureCollection<Polygon> = {
 	type: "FeatureCollection",
 	features: [],
+};
+
+// Raster basemap catalog. All three sources/layers are added to the
+// style at init; switching is just a visibility toggle, no setStyle.
+type BasemapId = "osm" | "carto-light" | "carto-dark";
+
+const BASEMAPS: { id: BasemapId; label: string }[] = [
+	{ id: "osm", label: "OpenStreetMap" },
+	{ id: "carto-light", label: "Carto Light" },
+	{ id: "carto-dark", label: "Carto Dark" },
+];
+
+const BASEMAP_STORAGE_KEY = "btcmap-next-basemap";
+
+const isBasemapId = (v: string): v is BasemapId =>
+	v === "osm" || v === "carto-light" || v === "carto-dark";
+
+const getStoredBasemap = (): BasemapId | null => {
+	if (typeof window === "undefined") return null;
+	try {
+		const v = localStorage.getItem(BASEMAP_STORAGE_KEY);
+		if (v && isBasemapId(v)) return v;
+	} catch {
+		// localStorage unavailable
+	}
+	return null;
 };
 
 const EMPTY_COLLECTION: PlaceFeatureCollection = {
@@ -422,10 +466,16 @@ $: if (map && styleLoaded && $places) {
 onMount(async () => {
 	const maplibre = await import("maplibre-gl");
 
+	// All available basemaps are raster tile sources, declared upfront so
+	// the basemap switcher only has to toggle layer visibility — no
+	// setStyle calls, which avoid the tile-compile cascade that broke the
+	// first attempt at this in Phase 4.
+	const initialBasemap: BasemapId =
+		getStoredBasemap() ?? (get(theme) === "dark" ? "carto-dark" : "osm");
+	selectedBasemap = initialBasemap;
+
 	const style: StyleSpecification = {
 		version: 8,
-		// Glyph server is required for symbol layers (cluster count text).
-		// Phase 4 swaps to vector basemaps that include their own glyphs.
 		glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
 		sources: {
 			osm: {
@@ -440,12 +490,55 @@ onMount(async () => {
 					'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
 				maxzoom: 19,
 			},
+			"carto-light": {
+				type: "raster",
+				tiles: [
+					"https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+					"https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+					"https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+					"https://d.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+				],
+				tileSize: 256,
+				attribution:
+					'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+				maxzoom: 19,
+			},
+			"carto-dark": {
+				type: "raster",
+				tiles: [
+					"https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+					"https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+					"https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+					"https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+				],
+				tileSize: 256,
+				attribution:
+					'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+				maxzoom: 19,
+			},
 		},
 		layers: [
 			{
 				id: "osm",
 				type: "raster",
 				source: "osm",
+				layout: { visibility: initialBasemap === "osm" ? "visible" : "none" },
+			},
+			{
+				id: "carto-light",
+				type: "raster",
+				source: "carto-light",
+				layout: {
+					visibility: initialBasemap === "carto-light" ? "visible" : "none",
+				},
+			},
+			{
+				id: "carto-dark",
+				type: "raster",
+				source: "carto-dark",
+				layout: {
+					visibility: initialBasemap === "carto-dark" ? "visible" : "none",
+				},
 			},
 		],
 	};
@@ -932,6 +1025,18 @@ onDestroy(() => {
 
 <div bind:this={mapContainer} class="map-container"></div>
 
+<div class="basemap-switcher">
+	<select
+		bind:value={selectedBasemap}
+		on:change={handleBasemapChange}
+		aria-label="Basemap"
+	>
+		{#each BASEMAPS as bm (bm.id)}
+			<option value={bm.id}>{bm.label}</option>
+		{/each}
+	</select>
+</div>
+
 <MerchantDrawerHash />
 
 <style>
@@ -940,5 +1045,21 @@ onDestroy(() => {
 		inset: 0;
 		width: 100%;
 		height: 100%;
+	}
+	.basemap-switcher {
+		position: absolute;
+		top: 110px;
+		right: 10px;
+		z-index: 1;
+		background: white;
+		border-radius: 4px;
+		padding: 2px 4px;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+	}
+	.basemap-switcher select {
+		background: transparent;
+		border: none;
+		font-size: 12px;
+		cursor: pointer;
 	}
 </style>
