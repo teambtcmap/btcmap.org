@@ -60,8 +60,8 @@ importers:
         specifier: ^1.0.2
         version: 1.0.2
       leaflet.locatecontrol:
-        specifier: ^0.89.0
-        version: 0.89.1(leaflet@1.9.4)
+        specifier: ^0.90.0
+        version: 0.90.0(leaflet@1.9.4)
       leaflet.markercluster:
         specifier: ^1.5.3
         version: 1.5.3(leaflet@1.9.4)
@@ -1849,8 +1849,8 @@ packages:
   leaflet.featuregroup.subgroup@1.0.2:
     resolution: {integrity: sha512-9nCVg8nUe686+BtPbUT7ALOe/IA+8Mum+rkA8pfPpCkH0WvKevRrH+JMcMTjAoNQKVI0uxrWrLV5w298SS3ESA==}
 
-  leaflet.locatecontrol@0.89.1:
-    resolution: {integrity: sha512-okZEUsGa8955vjoaeG/tkqALRxpaiRkpUOiuk+C99g8aK9kKjWMHWXREdepFzFQUR1KAKTZHCS36MferLAKUvA==}
+  leaflet.locatecontrol@0.90.0:
+    resolution: {integrity: sha512-yzgKyOXVRgALmo38ZhPf+2QgYE3pA/rrVSE0CyZhsSAzlnwPTZ1sfZLOFXTH20XLNNw1SX7AuMRLu0LZkWNakg==}
     peerDependencies:
       leaflet: ^1.9.0 || >=2.0.0-alpha.1
 
@@ -3938,7 +3938,7 @@ snapshots:
 
   leaflet.featuregroup.subgroup@1.0.2: {}
 
-  leaflet.locatecontrol@0.89.1(leaflet@1.9.4):
+  leaflet.locatecontrol@0.90.0(leaflet@1.9.4):
     dependencies:
       leaflet: 1.9.4
 
