@@ -1,6 +1,7 @@
 <script lang="ts">
 import "maplibre-gl/dist/maplibre-gl.css";
 
+import Spiderfy from "@nazka/map-gl-js-spiderfy";
 import type {
 	GeoJSONSource,
 	MapGeoJSONFeature,
@@ -42,6 +43,7 @@ type PlaceFeatureCollection = {
 
 let mapContainer: HTMLDivElement;
 let map: MapLibreMap | undefined;
+let spiderfier: Spiderfy | undefined;
 let styleLoaded = false;
 let lastPlacesLength = -1;
 let lastSavedIdsSize = -1;
@@ -117,6 +119,20 @@ const LINK_COLOR = "#0099AF";
 
 const buildSavedBadgeSvg = (bookmarkSvg: string): string =>
 	`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="#fff" stroke="${LINK_COLOR}" stroke-width="1"/><g transform="translate(3, 3)">${bookmarkSvg}</g></svg>`;
+
+// Near-invisible circular hit-target sprite used as the icon for the
+// symbol cluster layer that spiderfy hooks into. We render the visible
+// cluster discs as circle layers (not symbols), so this symbol layer
+// exists purely so the spiderfy library can register click handlers
+// targeting it. 1/255 alpha keeps pixels effectively invisible while
+// ensuring queryRenderedFeatures registers hits on the icon footprint.
+const loadClusterHitSprite = async (m: MapLibreMap): Promise<void> => {
+	if (m.hasImage("cluster-hit")) return;
+	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="rgba(0,0,0,0.004)"/></svg>`;
+	const img = await loadSvgImage(svg);
+	if (!m.hasImage("cluster-hit"))
+		m.addImage("cluster-hit", img, { pixelRatio: 1 });
+};
 
 const loadSavedBadgeSprite = async (m: MapLibreMap): Promise<void> => {
 	if (m.hasImage("saved-badge")) return;
@@ -285,6 +301,7 @@ onMount(async () => {
 			loadIconImage(map, "pin", "/icons/div-icon-pin.svg"),
 			loadIconImage(map, "pin-boosted", "/icons/boosted-icon-pin.svg"),
 			loadSavedBadgeSprite(map),
+			loadClusterHitSprite(map),
 		]);
 
 		map.addSource("places", {
@@ -444,28 +461,53 @@ onMount(async () => {
 			},
 		});
 
-		// Cluster click: zoom to the expansion zoom returned by the supercluster
-		// index. If the cluster won't break apart further (e.g. many places
-		// share the same lat/lon), spiderfy will pick it up in a later phase.
-		map.on("click", "clusters-outer", (e: MapLayerMouseEvent) => {
-			if (!map) return;
-			const feature = e.features?.[0] as MapGeoJSONFeature | undefined;
-			if (!feature) return;
-			const clusterId = feature.properties?.cluster_id as number | undefined;
-			if (clusterId === undefined) return;
-			const source = map.getSource("places") as GeoJSONSource | undefined;
-			if (!source) return;
-			source.getClusterExpansionZoom(clusterId).then((zoom) => {
-				if (!map) return;
-				const geometry = feature.geometry;
-				if (geometry.type !== "Point") return;
-				map.easeTo({
-					center: geometry.coordinates as [number, number],
-					zoom,
-					duration: 500,
-				});
-			});
+		// Symbol cluster layer used by spiderfy. Hit-testing on this layer's
+		// near-invisible icon picks up the cluster_id property and routes
+		// through the library, which auto-decides between zoom-on-click and
+		// spiderfying based on getClusterExpansionZoom vs maxZoom.
+		map.addLayer({
+			id: "clusters-hit",
+			type: "symbol",
+			source: "places",
+			filter: ["has", "point_count"],
+			layout: {
+				"icon-image": "cluster-hit",
+				"icon-size": 1,
+				"icon-allow-overlap": true,
+				"icon-ignore-placement": true,
+			},
 		});
+
+		// Spiderfy hooks the clusters-hit symbol layer. On click it checks
+		// supercluster's getClusterExpansionZoom — if zooming would still
+		// keep the cluster together (e.g. coincident points at the max
+		// cluster zoom), it spiderfies; otherwise it eases the camera in.
+		spiderfier = new Spiderfy(map, {
+			onLeafClick: (feature) => {
+				const placeId = feature.properties?.id;
+				if (typeof placeId === "number") {
+					merchantDrawer.open(placeId, "details");
+				}
+			},
+			closeOnLeafClick: true,
+			spiderLeavesLayout: {
+				"icon-image": [
+					"concat",
+					"pin-",
+					["case", ["get", "boosted"], "b", "r"],
+					"-",
+					["get", "icon"],
+				],
+				"icon-size": 1,
+				"icon-anchor": "bottom",
+				"icon-allow-overlap": true,
+				"icon-ignore-placement": true,
+				"icon-rotation-alignment": "viewport",
+				"icon-pitch-alignment": "viewport",
+			},
+			spiderLegsColor: "rgba(100, 100, 100, 0.6)",
+		});
+		spiderfier.applyTo("clusters-hit");
 
 		const setPointerCursor = () => {
 			if (map) map.getCanvas().style.cursor = "pointer";
@@ -496,6 +538,8 @@ onMount(async () => {
 });
 
 onDestroy(() => {
+	spiderfier?.unspiderfyAll();
+	spiderfier = undefined;
 	map?.remove();
 });
 </script>
