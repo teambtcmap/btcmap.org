@@ -75,6 +75,63 @@ const EMPTY_COLLECTION: PlaceFeatureCollection = {
 	features: [],
 };
 
+// URL hash format mirrors /map: `#zoom/lat/lng&merchant=123&view=…`.
+// We extend it with optional `/bearing/pitch` segments after lng, only
+// written when non-zero. Drawer params after `&` are preserved untouched.
+type HashCoords = {
+	zoom: number;
+	lat: number;
+	lng: number;
+	bearing: number;
+	pitch: number;
+};
+
+const parseHashCoords = (): HashCoords | null => {
+	if (typeof window === "undefined") return null;
+	const hash = window.location.hash.substring(1);
+	const ampIndex = hash.indexOf("&");
+	const coordsPart = ampIndex !== -1 ? hash.substring(0, ampIndex) : hash;
+	if (!coordsPart.includes("/")) return null;
+	const parts = coordsPart.split("/");
+	if (parts.length < 3) return null;
+	const zoom = Number.parseFloat(parts[0]);
+	const lat = Number.parseFloat(parts[1]);
+	const lng = Number.parseFloat(parts[2]);
+	if (Number.isNaN(zoom) || Number.isNaN(lat) || Number.isNaN(lng)) return null;
+	const bearing = parts[3] ? Number.parseFloat(parts[3]) : 0;
+	const pitch = parts[4] ? Number.parseFloat(parts[4]) : 0;
+	return {
+		zoom,
+		lat,
+		lng,
+		bearing: Number.isNaN(bearing) ? 0 : bearing,
+		pitch: Number.isNaN(pitch) ? 0 : pitch,
+	};
+};
+
+const writeHashCoords = (c: HashCoords) => {
+	if (typeof window === "undefined") return;
+	const currentHash = window.location.hash.substring(1);
+	const ampIndex = currentHash.indexOf("&");
+	let existingParams = "";
+	if (ampIndex !== -1 && currentHash.substring(0, ampIndex).includes("/")) {
+		existingParams = currentHash.substring(ampIndex);
+	} else if (!currentHash.includes("/") && currentHash.length > 0) {
+		existingParams = `&${currentHash}`;
+	}
+	let coordsPart = `${c.zoom.toFixed(2)}/${c.lat.toFixed(5)}/${c.lng.toFixed(5)}`;
+	if (c.bearing !== 0 || c.pitch !== 0) {
+		coordsPart += `/${c.bearing.toFixed(1)}`;
+	}
+	if (c.pitch !== 0) {
+		coordsPart += `/${c.pitch.toFixed(1)}`;
+	}
+	const newHash = `#${coordsPart}${existingParams}`;
+	const search = window.location.search || "";
+	const url = window.location.pathname + search + newHash;
+	history.replaceState(history.state, "", url);
+};
+
 const buildFeatureCollection = (list: Place[]): PlaceFeatureCollection => {
 	const saved = get(savedPlaceIds);
 	// Snapshot the enriched cache once per build — names arrive lazily as
@@ -355,12 +412,20 @@ onMount(async () => {
 		],
 	};
 
+	// If the URL hash already encodes a viewport, restore it; otherwise
+	// fall back to the project defaults.
+	const hashCoords = parseHashCoords();
+
 	map = new maplibre.Map({
 		container: mapContainer,
 		// Minimal inline raster style — OSM tiles. Vector basemaps come in Phase 4.
 		style,
-		center: [DEFAULT_MAP_LNG, DEFAULT_MAP_LAT],
-		zoom: DEFAULT_MAP_ZOOM,
+		center: hashCoords
+			? [hashCoords.lng, hashCoords.lat]
+			: [DEFAULT_MAP_LNG, DEFAULT_MAP_LAT],
+		zoom: hashCoords?.zoom ?? DEFAULT_MAP_ZOOM,
+		bearing: hashCoords?.bearing ?? 0,
+		pitch: hashCoords?.pitch ?? 0,
 		maxZoom: 19,
 		// Rotation + pitch enabled — the whole point of the migration
 		dragRotate: true,
@@ -771,6 +836,24 @@ onMount(async () => {
 		// once we're above LABEL_VISIBLE_ZOOM. Debounced so quick pans don't
 		// spam the API; the store internally aborts any stale request.
 		map.on("moveend", triggerEnrichmentIfNeeded);
+
+		// Persist viewport in the URL hash. Preserves any merchant=… params
+		// added by the drawer so shareable URLs round-trip.
+		const persistViewportToHash = () => {
+			if (!map) return;
+			const center = map.getCenter();
+			writeHashCoords({
+				zoom: map.getZoom(),
+				lat: center.lat,
+				lng: center.lng,
+				bearing: map.getBearing(),
+				pitch: map.getPitch(),
+			});
+		};
+		map.on("moveend", persistViewportToHash);
+
+		// If the URL also encoded a merchant=… param, open the drawer to it.
+		merchantDrawer.syncFromHash();
 
 		styleLoaded = true;
 		lastPlacesLength = -1;
