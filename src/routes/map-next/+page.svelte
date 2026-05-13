@@ -28,10 +28,84 @@ import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { merchantList } from "$lib/merchantListStore";
 import { savedPlaceIds } from "$lib/session";
 import { places } from "$lib/store";
+import { theme } from "$lib/theme";
 import type { Place } from "$lib/types";
 import { debounce, isBoosted } from "$lib/utils";
 
 import MerchantDrawerHash from "../map/components/MerchantDrawerHash.svelte";
+
+type BasemapId =
+	| "openfreemap-liberty"
+	| "openfreemap-dark"
+	| "carto-positron"
+	| "carto-dark-matter"
+	| "osm";
+
+type BasemapEntry = {
+	id: BasemapId;
+	label: string;
+	styleUrl: string | StyleSpecification;
+};
+
+const BASEMAPS: Record<BasemapId, BasemapEntry> = {
+	"openfreemap-liberty": {
+		id: "openfreemap-liberty",
+		label: "OpenFreeMap Liberty",
+		styleUrl: "https://tiles.openfreemap.org/styles/liberty",
+	},
+	"openfreemap-dark": {
+		id: "openfreemap-dark",
+		label: "OpenFreeMap Dark",
+		styleUrl: "https://static.btcmap.org/map-styles/dark.json",
+	},
+	"carto-positron": {
+		id: "carto-positron",
+		label: "Carto Positron",
+		styleUrl: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+	},
+	"carto-dark-matter": {
+		id: "carto-dark-matter",
+		label: "Carto Dark Matter",
+		styleUrl:
+			"https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+	},
+	osm: {
+		id: "osm",
+		label: "OpenStreetMap",
+		styleUrl: {
+			version: 8,
+			sources: {
+				osm: {
+					type: "raster",
+					tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+					tileSize: 256,
+					maxzoom: 19,
+					attribution:
+						'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+				},
+			},
+			glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+			layers: [{ id: "osm", type: "raster", source: "osm" }],
+		},
+	},
+};
+
+const BASEMAP_STORAGE_KEY = "btcmap-basemap";
+
+const getInitialBasemap = (): BasemapId => {
+	const fallback: BasemapId =
+		get(theme) === "dark" ? "openfreemap-dark" : "openfreemap-liberty";
+	if (typeof window === "undefined") return fallback;
+	try {
+		const stored = localStorage.getItem(
+			BASEMAP_STORAGE_KEY,
+		) as BasemapId | null;
+		if (stored && stored in BASEMAPS) return stored;
+	} catch {
+		// localStorage unavailable
+	}
+	return fallback;
+};
 
 type PlaceFeature = {
 	type: "Feature";
@@ -55,6 +129,7 @@ let mapContainer: HTMLDivElement;
 let map: MapLibreMap | undefined;
 let spiderfier: Spiderfy | undefined;
 let styleLoaded = false;
+let selectedBasemap: BasemapId = getInitialBasemap();
 let lastPlacesLength = -1;
 let lastSavedIdsSize = -1;
 let lastEnrichedCacheSize = -1;
@@ -323,41 +398,289 @@ $: if (map && styleLoaded && $places) {
 	}
 }
 
+// Re-runs on every style.load (each setStyle wipes sources & layers). Kept
+// idempotent in the sense that style.load happens after the new style is
+// fully applied, so all addSource/addLayer calls succeed against a clean slate.
+const addPlacesSourceAndLayers = (m: MapLibreMap) => {
+	m.addSource("places", {
+		type: "geojson",
+		data: EMPTY_COLLECTION,
+		cluster: true,
+		clusterRadius: 80,
+		// CLUSTERING_DISABLED_ZOOM is 17; clusterMaxZoom=16 means at z17+ all points unclustered.
+		clusterMaxZoom: CLUSTERING_DISABLED_ZOOM - 1,
+	});
+
+	// Hover hull: convex polygon enclosing all leaves of the cluster the
+	// cursor is over. Added before the visible cluster discs so the
+	// translucent fill sits under, not on top of, the cluster discs.
+	m.addSource("cluster-hull", {
+		type: "geojson",
+		data: EMPTY_HULL_COLLECTION,
+	});
+
+	m.addLayer({
+		id: "cluster-hull-fill",
+		type: "fill",
+		source: "cluster-hull",
+		paint: {
+			"fill-color": "rgba(110, 204, 57, 0.15)",
+		},
+	});
+
+	m.addLayer({
+		id: "cluster-hull-outline",
+		type: "line",
+		source: "cluster-hull",
+		paint: {
+			"line-color": "rgba(110, 204, 57, 0.6)",
+			"line-width": 1.5,
+		},
+	});
+
+	// Translucent outer ring — colors tiered by point_count to match
+	// stock leaflet.markercluster defaults (green/yellow/orange, 0.6 alpha).
+	m.addLayer({
+		id: "clusters-outer",
+		type: "circle",
+		source: "places",
+		filter: ["has", "point_count"],
+		paint: {
+			"circle-color": [
+				"step",
+				["get", "point_count"],
+				"rgba(181, 226, 140, 0.6)",
+				10,
+				"rgba(241, 211, 87, 0.6)",
+				100,
+				"rgba(253, 156, 115, 0.6)",
+			],
+			"circle-radius": 20,
+		},
+	});
+
+	m.addLayer({
+		id: "clusters-inner",
+		type: "circle",
+		source: "places",
+		filter: ["has", "point_count"],
+		paint: {
+			"circle-color": [
+				"step",
+				["get", "point_count"],
+				"rgba(110, 204, 57, 0.6)",
+				10,
+				"rgba(240, 194, 12, 0.6)",
+				100,
+				"rgba(241, 128, 23, 0.6)",
+			],
+			"circle-radius": 15,
+		},
+	});
+
+	m.addLayer({
+		id: "cluster-count",
+		type: "symbol",
+		source: "places",
+		filter: ["has", "point_count"],
+		layout: {
+			"text-field": ["get", "point_count_abbreviated"],
+			// Open Sans Semibold ships with demotiles glyphs but not always with
+			// vector basemaps (OpenFreeMap, Carto). Fall back to Noto Sans so the
+			// symbol still renders on basemaps that lack Open Sans.
+			"text-font": ["Open Sans Semibold", "Noto Sans Regular"],
+			"text-size": 12,
+			"text-allow-overlap": true,
+			"text-ignore-placement": true,
+			// Keep count upright when the map rotates.
+			"text-rotation-alignment": "viewport",
+			"text-pitch-alignment": "viewport",
+		},
+		paint: {
+			"text-color": "#000",
+		},
+	});
+
+	// Symbol layer for unclustered points; boosted places use the orange pin.
+	// Drawn last so pins sit on top of cluster discs at boundaries.
+	m.addLayer({
+		id: "unclustered-point",
+		type: "symbol",
+		source: "places",
+		filter: ["!", ["has", "point_count"]],
+		layout: {
+			// Look up composite sprite (pin shape + baked category icon). Until
+			// the icon's sprite finishes loading, MapLibre logs a warning and
+			// skips the symbol; pins appear as their composite sprites resolve.
+			"icon-image": [
+				"concat",
+				"pin-",
+				["case", ["get", "boosted"], "b", "r"],
+				"-",
+				["get", "icon"],
+			],
+			"icon-size": 1,
+			"icon-anchor": "bottom",
+			"icon-allow-overlap": true,
+			"icon-ignore-placement": true,
+			// Keep pins upright as the map rotates/pitches.
+			"icon-rotation-alignment": "viewport",
+			"icon-pitch-alignment": "viewport",
+		},
+	});
+
+	// Comment count badge — green disc on the pin's top-right corner.
+	// Comment count badge — fixed 16×16 green disc rendered as a
+	// dedicated icon symbol layer. Two layers (disc + text) instead of
+	// one composite symbol so positioning stays simple — both share the
+	// same offset from the pin anchor.
+	// Pin is 32×43, icon-anchor: bottom. Top-right of the pin head is
+	// ~(+10, -36) px from the geographic anchor.
+	m.addLayer({
+		id: "comment-badge",
+		type: "symbol",
+		source: "places",
+		filter: [
+			"all",
+			["!", ["has", "point_count"]],
+			[">", ["get", "comments"], 0],
+		],
+		layout: {
+			"icon-image": "comment-badge-bg",
+			"icon-size": 1,
+			"icon-allow-overlap": true,
+			"icon-ignore-placement": true,
+			"icon-rotation-alignment": "viewport",
+			"icon-pitch-alignment": "viewport",
+			"icon-offset": [10, -36],
+		},
+	});
+
+	m.addLayer({
+		id: "comment-badge-count",
+		type: "symbol",
+		source: "places",
+		filter: [
+			"all",
+			["!", ["has", "point_count"]],
+			[">", ["get", "comments"], 0],
+		],
+		layout: {
+			"text-field": ["to-string", ["get", "comments"]],
+			// Match cluster-count fontstack so behaviour is consistent across basemaps.
+			"text-font": ["Open Sans Semibold", "Noto Sans Regular"],
+			"text-size": 11,
+			"text-allow-overlap": true,
+			"text-ignore-placement": true,
+			"text-rotation-alignment": "viewport",
+			"text-pitch-alignment": "viewport",
+			// text-offset is in ems; mirror the disc's pixel offset above.
+			"text-offset": [10 / 11, -36 / 11],
+		},
+		paint: {
+			"text-color": "#fff",
+		},
+	});
+
+	// Saved badge — white disc with bookmark glyph on the pin's
+	// top-left corner. Filter only fires when the feature's `saved`
+	// flag is true (recomputed when $savedPlaceIds size changes).
+	m.addLayer({
+		id: "saved-badge",
+		type: "symbol",
+		source: "places",
+		filter: [
+			"all",
+			["!", ["has", "point_count"]],
+			["==", ["get", "saved"], true],
+		],
+		layout: {
+			"icon-image": "saved-badge",
+			"icon-size": 1,
+			"icon-anchor": "center",
+			// Top-left of the pin head, relative to the bottom-anchored pin.
+			"icon-offset": [-12, -38],
+			"icon-allow-overlap": true,
+			"icon-ignore-placement": true,
+			"icon-rotation-alignment": "viewport",
+			"icon-pitch-alignment": "viewport",
+		},
+	});
+
+	// Place name labels — visible at high zoom once the enriched-details
+	// fetch has populated each place's name. Drawn before clusters-hit so
+	// the spiderfy hit-target stays on top for click routing.
+	// Mirrors prod's `.marker-label` / `.marker-label-boosted` styling
+	// (src/app.css:264-310). Dark-mode color swap is Phase 6 polish.
+	m.addLayer({
+		id: "place-label",
+		type: "symbol",
+		source: "places",
+		minzoom: LABEL_VISIBLE_ZOOM,
+		filter: ["all", ["!", ["has", "point_count"]], ["!=", ["get", "name"], ""]],
+		layout: {
+			"text-field": ["get", "name"],
+			"text-font": ["Open Sans Semibold", "Noto Sans Regular"],
+			"text-size": 14,
+			"text-anchor": "left",
+			// text-offset is in ems. Pin's right edge sits at ~+16 px from
+			// the geographic anchor (icon-anchor: bottom). Start the label
+			// 6 px past that, vertically centered on the pin head (~ -25 px).
+			"text-offset": [22 / 14, -25 / 14],
+			"text-max-width": 12,
+			"text-rotation-alignment": "viewport",
+			"text-pitch-alignment": "viewport",
+		},
+		paint: {
+			"text-color": [
+				"case",
+				["get", "boosted"],
+				"#f97316", // orange-500 (boosted)
+				"#0e7490", // cyan-700 (regular)
+			],
+			"text-halo-color": "#fff",
+			"text-halo-width": 1.2,
+			"text-halo-blur": 0,
+		},
+	});
+
+	// Symbol cluster layer used by spiderfy. Hit-testing on this layer's
+	// near-invisible icon picks up the cluster_id property and routes
+	// through the library, which auto-decides between zoom-on-click and
+	// spiderfying based on getClusterExpansionZoom vs maxZoom.
+	m.addLayer({
+		id: "clusters-hit",
+		type: "symbol",
+		source: "places",
+		filter: ["has", "point_count"],
+		layout: {
+			"icon-image": "cluster-hit",
+			"icon-size": 1,
+			"icon-allow-overlap": true,
+			"icon-ignore-placement": true,
+		},
+	});
+};
+
+// Re-register all custom sprite images. setStyle wipes the per-style image
+// registry, so every basemap switch needs the full set re-added before
+// addPlacesSourceAndLayers runs.
+const loadAllSprites = (m: MapLibreMap) =>
+	Promise.all([
+		loadIconImage(m, "pin", "/icons/div-icon-pin.svg"),
+		loadIconImage(m, "pin-boosted", "/icons/boosted-icon-pin.svg"),
+		loadSavedBadgeSprite(m),
+		Promise.resolve(loadCommentBadgeSprite(m)),
+		loadClusterHitSprite(m),
+	]);
+
 onMount(async () => {
 	const maplibre = await import("maplibre-gl");
 
-	const style: StyleSpecification = {
-		version: 8,
-		// Glyph server is required for symbol layers (cluster count text).
-		// Phase 4 swaps to vector basemaps that include their own glyphs.
-		glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
-		sources: {
-			osm: {
-				type: "raster",
-				tiles: [
-					"https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
-					"https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
-					"https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
-				],
-				tileSize: 256,
-				attribution:
-					'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-				maxzoom: 19,
-			},
-		},
-		layers: [
-			{
-				id: "osm",
-				type: "raster",
-				source: "osm",
-			},
-		],
-	};
-
 	map = new maplibre.Map({
 		container: mapContainer,
-		// Minimal inline raster style — OSM tiles. Vector basemaps come in Phase 4.
-		style,
+		// Vector basemap (theme-aware default; user override persisted in localStorage).
+		style: BASEMAPS[selectedBasemap].styleUrl,
 		center: [DEFAULT_MAP_LNG, DEFAULT_MAP_LAT],
 		zoom: DEFAULT_MAP_ZOOM,
 		maxZoom: 19,
@@ -379,275 +702,8 @@ onMount(async () => {
 	map.on("load", async () => {
 		if (!map) return;
 
-		await Promise.all([
-			loadIconImage(map, "pin", "/icons/div-icon-pin.svg"),
-			loadIconImage(map, "pin-boosted", "/icons/boosted-icon-pin.svg"),
-			loadSavedBadgeSprite(map),
-			loadCommentBadgeSprite(map),
-			loadClusterHitSprite(map),
-		]);
-
-		map.addSource("places", {
-			type: "geojson",
-			data: EMPTY_COLLECTION,
-			cluster: true,
-			clusterRadius: 80,
-			// CLUSTERING_DISABLED_ZOOM is 17; clusterMaxZoom=16 means at z17+ all points unclustered.
-			clusterMaxZoom: CLUSTERING_DISABLED_ZOOM - 1,
-		});
-
-		// Hover hull: convex polygon enclosing all leaves of the cluster the
-		// cursor is over. Added before the visible cluster discs so the
-		// translucent fill sits under, not on top of, the cluster discs.
-		map.addSource("cluster-hull", {
-			type: "geojson",
-			data: EMPTY_HULL_COLLECTION,
-		});
-
-		map.addLayer({
-			id: "cluster-hull-fill",
-			type: "fill",
-			source: "cluster-hull",
-			paint: {
-				"fill-color": "rgba(110, 204, 57, 0.15)",
-			},
-		});
-
-		map.addLayer({
-			id: "cluster-hull-outline",
-			type: "line",
-			source: "cluster-hull",
-			paint: {
-				"line-color": "rgba(110, 204, 57, 0.6)",
-				"line-width": 1.5,
-			},
-		});
-
-		// Translucent outer ring — colors tiered by point_count to match
-		// stock leaflet.markercluster defaults (green/yellow/orange, 0.6 alpha).
-		map.addLayer({
-			id: "clusters-outer",
-			type: "circle",
-			source: "places",
-			filter: ["has", "point_count"],
-			paint: {
-				"circle-color": [
-					"step",
-					["get", "point_count"],
-					"rgba(181, 226, 140, 0.6)",
-					10,
-					"rgba(241, 211, 87, 0.6)",
-					100,
-					"rgba(253, 156, 115, 0.6)",
-				],
-				"circle-radius": 20,
-			},
-		});
-
-		map.addLayer({
-			id: "clusters-inner",
-			type: "circle",
-			source: "places",
-			filter: ["has", "point_count"],
-			paint: {
-				"circle-color": [
-					"step",
-					["get", "point_count"],
-					"rgba(110, 204, 57, 0.6)",
-					10,
-					"rgba(240, 194, 12, 0.6)",
-					100,
-					"rgba(241, 128, 23, 0.6)",
-				],
-				"circle-radius": 15,
-			},
-		});
-
-		map.addLayer({
-			id: "cluster-count",
-			type: "symbol",
-			source: "places",
-			filter: ["has", "point_count"],
-			layout: {
-				"text-field": ["get", "point_count_abbreviated"],
-				"text-font": ["Open Sans Semibold"],
-				"text-size": 12,
-				"text-allow-overlap": true,
-				"text-ignore-placement": true,
-				// Keep count upright when the map rotates.
-				"text-rotation-alignment": "viewport",
-				"text-pitch-alignment": "viewport",
-			},
-			paint: {
-				"text-color": "#000",
-			},
-		});
-
-		// Symbol layer for unclustered points; boosted places use the orange pin.
-		// Drawn last so pins sit on top of cluster discs at boundaries.
-		map.addLayer({
-			id: "unclustered-point",
-			type: "symbol",
-			source: "places",
-			filter: ["!", ["has", "point_count"]],
-			layout: {
-				// Look up composite sprite (pin shape + baked category icon). Until
-				// the icon's sprite finishes loading, MapLibre logs a warning and
-				// skips the symbol; pins appear as their composite sprites resolve.
-				"icon-image": [
-					"concat",
-					"pin-",
-					["case", ["get", "boosted"], "b", "r"],
-					"-",
-					["get", "icon"],
-				],
-				"icon-size": 1,
-				"icon-anchor": "bottom",
-				"icon-allow-overlap": true,
-				"icon-ignore-placement": true,
-				// Keep pins upright as the map rotates/pitches.
-				"icon-rotation-alignment": "viewport",
-				"icon-pitch-alignment": "viewport",
-			},
-		});
-
-		// Comment count badge — green disc on the pin's top-right corner.
-		// Comment count badge — fixed 16×16 green disc rendered as a
-		// dedicated icon symbol layer. Two layers (disc + text) instead of
-		// one composite symbol so positioning stays simple — both share the
-		// same offset from the pin anchor.
-		// Pin is 32×43, icon-anchor: bottom. Top-right of the pin head is
-		// ~(+10, -36) px from the geographic anchor.
-		map.addLayer({
-			id: "comment-badge",
-			type: "symbol",
-			source: "places",
-			filter: [
-				"all",
-				["!", ["has", "point_count"]],
-				[">", ["get", "comments"], 0],
-			],
-			layout: {
-				"icon-image": "comment-badge-bg",
-				"icon-size": 1,
-				"icon-allow-overlap": true,
-				"icon-ignore-placement": true,
-				"icon-rotation-alignment": "viewport",
-				"icon-pitch-alignment": "viewport",
-				"icon-offset": [10, -36],
-			},
-		});
-
-		map.addLayer({
-			id: "comment-badge-count",
-			type: "symbol",
-			source: "places",
-			filter: [
-				"all",
-				["!", ["has", "point_count"]],
-				[">", ["get", "comments"], 0],
-			],
-			layout: {
-				"text-field": ["to-string", ["get", "comments"]],
-				// Open Sans Semibold is the weight that ships with the demotiles
-				// glyph server. Phase 4 swaps to a vector basemap that includes
-				// proper bold variants for the cluster + comment-count layers.
-				"text-font": ["Open Sans Semibold"],
-				"text-size": 11,
-				"text-allow-overlap": true,
-				"text-ignore-placement": true,
-				"text-rotation-alignment": "viewport",
-				"text-pitch-alignment": "viewport",
-				// text-offset is in ems; mirror the disc's pixel offset above.
-				"text-offset": [10 / 11, -36 / 11],
-			},
-			paint: {
-				"text-color": "#fff",
-			},
-		});
-
-		// Saved badge — white disc with bookmark glyph on the pin's
-		// top-left corner. Filter only fires when the feature's `saved`
-		// flag is true (recomputed when $savedPlaceIds size changes).
-		map.addLayer({
-			id: "saved-badge",
-			type: "symbol",
-			source: "places",
-			filter: [
-				"all",
-				["!", ["has", "point_count"]],
-				["==", ["get", "saved"], true],
-			],
-			layout: {
-				"icon-image": "saved-badge",
-				"icon-size": 1,
-				"icon-anchor": "center",
-				// Top-left of the pin head, relative to the bottom-anchored pin.
-				"icon-offset": [-12, -38],
-				"icon-allow-overlap": true,
-				"icon-ignore-placement": true,
-				"icon-rotation-alignment": "viewport",
-				"icon-pitch-alignment": "viewport",
-			},
-		});
-
-		// Place name labels — visible at high zoom once the enriched-details
-		// fetch has populated each place's name. Drawn before clusters-hit so
-		// the spiderfy hit-target stays on top for click routing.
-		// Mirrors prod's `.marker-label` / `.marker-label-boosted` styling
-		// (src/app.css:264-310). Dark-mode color swap is Phase 6 polish.
-		map.addLayer({
-			id: "place-label",
-			type: "symbol",
-			source: "places",
-			minzoom: LABEL_VISIBLE_ZOOM,
-			filter: [
-				"all",
-				["!", ["has", "point_count"]],
-				["!=", ["get", "name"], ""],
-			],
-			layout: {
-				"text-field": ["get", "name"],
-				"text-font": ["Open Sans Semibold"],
-				"text-size": 14,
-				"text-anchor": "left",
-				// text-offset is in ems. Pin's right edge sits at ~+16 px from
-				// the geographic anchor (icon-anchor: bottom). Start the label
-				// 6 px past that, vertically centered on the pin head (~ -25 px).
-				"text-offset": [22 / 14, -25 / 14],
-				"text-max-width": 12,
-				"text-rotation-alignment": "viewport",
-				"text-pitch-alignment": "viewport",
-			},
-			paint: {
-				"text-color": [
-					"case",
-					["get", "boosted"],
-					"#f97316", // orange-500 (boosted)
-					"#0e7490", // cyan-700 (regular)
-				],
-				"text-halo-color": "#fff",
-				"text-halo-width": 1.2,
-				"text-halo-blur": 0,
-			},
-		});
-
-		// Symbol cluster layer used by spiderfy. Hit-testing on this layer's
-		// near-invisible icon picks up the cluster_id property and routes
-		// through the library, which auto-decides between zoom-on-click and
-		// spiderfying based on getClusterExpansionZoom vs maxZoom.
-		map.addLayer({
-			id: "clusters-hit",
-			type: "symbol",
-			source: "places",
-			filter: ["has", "point_count"],
-			layout: {
-				"icon-image": "cluster-hit",
-				"icon-size": 1,
-				"icon-allow-overlap": true,
-				"icon-ignore-placement": true,
-			},
-		});
+		await loadAllSprites(map);
+		addPlacesSourceAndLayers(map);
 
 		// Spiderfy hooks the clusters-hit symbol layer. The library's
 		// internal decision is: if expansionZoom > forceSpiderifyMinZoom OR
@@ -763,7 +819,38 @@ onMount(async () => {
 		// should appear without requiring a move.
 		triggerEnrichmentIfNeeded();
 	});
+
+	// Every basemap switch fires style.load after the new style is fully
+	// applied. setStyle wipes sources, layers, and the image registry, so we
+	// re-register sprites and re-build our source/layer stack. The composite
+	// per-icon sprite cache (spritePromises) also has to be cleared because
+	// its keys reference image names that no longer exist on the new style.
+	map.on("style.load", () => {
+		if (!map) return;
+		// First style.load fires immediately after the initial style downloads.
+		// The 'load' handler above does the heavy lifting in that case; skip
+		// here to avoid double-setup. styleLoaded flips true once that finishes.
+		if (!styleLoaded) return;
+
+		spritePromises.clear();
+		void loadAllSprites(map).then(() => {
+			if (!map) return;
+			addPlacesSourceAndLayers(map);
+			syncPlacesToSource($places);
+			ensureSpritesForPlaces(map, $places);
+		});
+	});
 });
+
+const handleBasemapChange = () => {
+	if (!map) return;
+	map.setStyle(BASEMAPS[selectedBasemap].styleUrl, { diff: false });
+	try {
+		localStorage.setItem(BASEMAP_STORAGE_KEY, selectedBasemap);
+	} catch {
+		// Storage unavailable — silent. Preference simply won't persist.
+	}
+};
 
 onDestroy(() => {
 	triggerEnrichmentIfNeeded.cancel();
@@ -779,6 +866,14 @@ onDestroy(() => {
 
 <div bind:this={mapContainer} class="map-container"></div>
 
+<div class="basemap-switcher">
+	<select bind:value={selectedBasemap} on:change={handleBasemapChange}>
+		{#each Object.values(BASEMAPS) as bm (bm.id)}
+			<option value={bm.id}>{bm.label}</option>
+		{/each}
+	</select>
+</div>
+
 <MerchantDrawerHash />
 
 <style>
@@ -787,5 +882,24 @@ onDestroy(() => {
 		inset: 0;
 		width: 100%;
 		height: 100%;
+	}
+
+	.basemap-switcher {
+		position: absolute;
+		/* Below the NavigationControl (zoom + compass) stack in top-right. */
+		top: 110px;
+		right: 10px;
+		z-index: 1;
+		background: white;
+		border-radius: 4px;
+		padding: 4px;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+	}
+
+	.basemap-switcher select {
+		background: transparent;
+		border: none;
+		font-size: 12px;
+		cursor: pointer;
 	}
 </style>
