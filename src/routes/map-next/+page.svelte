@@ -371,7 +371,10 @@ onMount(async () => {
 
 	const style: StyleSpecification = {
 		version: 8,
-		glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+		// OpenFreeMap's public glyph endpoint (Cloudflare R2, no key, production-OK).
+		// MapLibre's demotiles.maplibre.org is explicitly a demo server with no SLA —
+		// see https://github.com/maplibre/demotiles (README: "web, helloworld and CI tests").
+		glyphs: "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
 		sources: {
 			osm: {
 				type: "raster",
@@ -585,7 +588,7 @@ onMount(async () => {
 			filter: ["has", "point_count"],
 			layout: {
 				"text-field": ["get", "point_count_abbreviated"],
-				"text-font": ["Open Sans Semibold"],
+				"text-font": ["Noto Sans Bold"],
 				"text-size": 12,
 				"text-allow-overlap": true,
 				"text-ignore-placement": true,
@@ -664,10 +667,7 @@ onMount(async () => {
 			],
 			layout: {
 				"text-field": ["to-string", ["get", "comments"]],
-				// Open Sans Semibold is the weight that ships with the demotiles
-				// glyph server. Phase 4 swaps to a vector basemap that includes
-				// proper bold variants for the cluster + comment-count layers.
-				"text-font": ["Open Sans Semibold"],
+				"text-font": ["Noto Sans Bold"],
 				"text-size": 11,
 				"text-allow-overlap": true,
 				"text-ignore-placement": true,
@@ -723,7 +723,7 @@ onMount(async () => {
 			],
 			layout: {
 				"text-field": ["get", "name"],
-				"text-font": ["Open Sans Semibold"],
+				"text-font": ["Noto Sans Bold"],
 				"text-size": 14,
 				"text-anchor": "left",
 				// text-offset is in ems. Pin's right edge sits at ~+16 px from
