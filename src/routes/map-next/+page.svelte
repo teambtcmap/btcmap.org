@@ -71,6 +71,9 @@ onMount(async () => {
 
 	const style: StyleSpecification = {
 		version: 8,
+		// Glyph server is required for symbol layers (cluster count text).
+		// Phase 4 swaps to vector basemaps that include their own glyphs.
+		glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
 		sources: {
 			osm: {
 				type: "raster",
@@ -175,6 +178,7 @@ onMount(async () => {
 			filter: ["has", "point_count"],
 			layout: {
 				"text-field": ["get", "point_count_abbreviated"],
+				"text-font": ["Open Sans Semibold"],
 				"text-size": 12,
 				"text-allow-overlap": true,
 				"text-ignore-placement": true,

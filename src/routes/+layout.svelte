@@ -122,7 +122,7 @@ export let data;
 			content="Easily find places to spend sats anywhere on the planet."
 		/>
 	{/if}
-	{#if ['/map', '/communities/map'].includes(data.pathname)}
+	{#if ['/map', '/map-next', '/communities/map'].includes(data.pathname)}
 		<!-- Fullscreen map routes have no scrollbar; skip the reserved gutter so the map fills the viewport -->
 		<style>html { scrollbar-gutter: auto; }</style>
 	{/if}
@@ -145,7 +145,7 @@ export let data;
 {#if $isLoading}
 	<LoadingIndicator visible={$isLoading} status="Loading..." />
 {:else}
-	{#if !['/', '/map', '/communities/map', '/communities', '/countries'].includes(data.pathname)}
+	{#if !['/', '/map', '/map-next', '/communities/map', '/communities', '/countries'].includes(data.pathname)}
 		<div class="bg-teal dark:bg-dark">
 			<Header />
 			<main class="mx-auto w-10/12 xl:w-[1200px]">
