@@ -22,14 +22,14 @@ import {
 	DEFAULT_MAP_LNG,
 	DEFAULT_MAP_ZOOM,
 	LABEL_VISIBLE_ZOOM,
-	MAP_DEBOUNCE_DELAY,
 } from "$lib/constants";
 import { getDisplayLang, locale } from "$lib/i18n";
 import { ensureSpritesForPlaces, loadSvgImage } from "$lib/map/maplibreSprites";
+import { parseMerchantHash } from "$lib/merchantDrawerHash";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { merchantList } from "$lib/merchantListStore";
 import { savedPlaceIds } from "$lib/session";
-import { places } from "$lib/store";
+import { places, placesById } from "$lib/store";
 import { theme } from "$lib/theme";
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
@@ -86,6 +86,26 @@ let lastLocale: string | null | undefined;
 // pending leaf fetches; we only commit the hull whose cluster id is still
 // the one currently being hovered.
 let latestHullClusterId: number | null = null;
+// Deep-link pan: if the user lands on a URL with `merchant=…` but no
+// viewport coords, we wait for the place to appear in `$placesById`
+// then pan to it. Track the subscription + safety timer so onDestroy
+// can clean both up.
+let deepLinkPanUnsub: (() => void) | null = null;
+let deepLinkPanTimer: ReturnType<typeof setTimeout> | null = null;
+
+const panToPlace = (lat: number, lon: number) => {
+	if (!map) return;
+	map.easeTo({ center: [lon, lat], zoom: DEFAULT_MAP_ZOOM, duration: 300 });
+};
+
+// Browser back/forward / external hash mutation → re-sync the drawer.
+// Highlight-state on markers isn't a concept here (MapLibre paints from
+// feature properties, not marker references), so this is the only
+// behavior the legacy /map's handler does that we need.
+const handleHashChange = () => {
+	if (typeof window === "undefined") return;
+	merchantDrawer.syncFromHash();
+};
 
 const EMPTY_HULL_COLLECTION: FeatureCollection<Polygon> = {
 	type: "FeatureCollection",
@@ -218,24 +238,6 @@ const buildFeatureCollection = (list: Place[]): PlaceFeatureCollection => {
 	};
 };
 
-// Load an SVG/PNG into the map's image registry. MapLibre needs raster bitmaps
-// for sprites, so we route SVG through an <img> element first.
-const loadIconImage = (
-	m: MapLibreMap,
-	name: string,
-	url: string,
-): Promise<void> =>
-	new Promise((resolve, reject) => {
-		const img = new Image();
-		img.crossOrigin = "anonymous";
-		img.onload = () => {
-			if (!m.hasImage(name)) m.addImage(name, img);
-			resolve();
-		};
-		img.onerror = (err) => reject(err);
-		img.src = url;
-	});
-
 // Tailwind `text-link` color (tailwind.config.js → colors.link).
 const LINK_COLOR = "#0099AF";
 
@@ -318,6 +320,11 @@ const computeRadiusKmFromBounds = (b: LngLatBounds): number => {
 
 // Debounced enrichment trigger — fires on moveend when zoomed in enough
 // to show labels. The store handles aborting any in-flight stale request.
+// 500ms (vs MAP_DEBOUNCE_DELAY=300) matches /map's dedicated debounce for
+// the enriched-details API: API calls deserve a longer settle than
+// in-memory operations like marker reloads or cache writes.
+const ENRICHMENT_DEBOUNCE_DELAY = 500;
+
 const triggerEnrichmentIfNeeded = debounce(() => {
 	if (!map) return;
 	if (map.getZoom() < LABEL_VISIBLE_ZOOM) return;
@@ -327,7 +334,7 @@ const triggerEnrichmentIfNeeded = debounce(() => {
 		{ lat: center.lat, lon: center.lng },
 		radiusKm,
 	);
-}, MAP_DEBOUNCE_DELAY);
+}, ENRICHMENT_DEBOUNCE_DELAY);
 
 // Rebuild only when the count changes meaningfully (and always on first load),
 // to avoid jank on incremental store updates with ~50k places worldwide.
@@ -491,13 +498,14 @@ onMount(async () => {
 	map.on("load", async () => {
 		if (!map) return;
 
-		// Critical sprites (pins + cluster hit-target) must succeed; the
-		// saved-badge fetch goes to a third-party CDN and should NOT block
-		// the rest of map init if it fails. Wrap it with a catch so a
-		// transient Iconify outage just degrades the saved-state badge.
+		// Critical sprites must succeed; the saved-badge fetch goes to a
+		// third-party CDN and should NOT block the rest of map init if
+		// it fails. Wrap it with a catch so a transient Iconify outage
+		// just degrades the saved-state badge.
+		// The pin and pin-boosted plain sprites are NOT loaded here —
+		// every pin layer references the composite `pin-r-{icon}` /
+		// `pin-b-{icon}` names produced lazily by ensureSpritesForPlaces.
 		await Promise.all([
-			loadIconImage(map, "pin", "/icons/div-icon-pin.svg"),
-			loadIconImage(map, "pin-boosted", "/icons/boosted-icon-pin.svg"),
 			loadSavedBadgeSprite(map).catch((err) => {
 				console.warn("Saved-badge sprite failed to load:", err);
 			}),
@@ -824,11 +832,20 @@ onMount(async () => {
 		// drawer — matches /map's behavior. Layer-scoped click handlers
 		// fire alongside this generic one, so clicking a marker still
 		// reopens the drawer for the new feature net-net.
+		// The spiderfy lib adds its own symbol layers at applyTo() time
+		// with ids prefixed `spiderfy-leaf-…`. Without including them
+		// here, tapping a spidered leaf would open the drawer (via
+		// onLeafClick) and then immediately close it again because the
+		// generic handler sees no hit on the allowlisted layers.
 		map.on("click", (e: MapLayerMouseEvent) => {
 			if (!map) return;
 			if (!get(merchantDrawer).isOpen) return;
+			const spiderLeafLayerIds = map
+				.getStyle()
+				.layers.filter((l) => l.id.startsWith("spiderfy-leaf"))
+				.map((l) => l.id);
 			const hit = map.queryRenderedFeatures(e.point, {
-				layers: ["unclustered-point", "clusters-hit"],
+				layers: ["unclustered-point", "clusters-hit", ...spiderLeafLayerIds],
 			});
 			if (hit.length > 0) return;
 			merchantDrawer.close();
@@ -906,6 +923,38 @@ onMount(async () => {
 		// If the URL also encoded a merchant=… param, open the drawer to it.
 		merchantDrawer.syncFromHash();
 
+		// Browser back/forward (and any external code mutating the hash) must
+		// keep the drawer in sync. /map also wires this.
+		window.addEventListener("hashchange", handleHashChange);
+
+		// Deep link: URL had a merchant= param but the hash carried no
+		// viewport coords. Pan the camera to the merchant once it's in the
+		// places store. If places are still loading, subscribe and wait —
+		// 10s safety unsubscribe so we never leak.
+		if (!hashCoords) {
+			const { merchantId, isOpen } = parseMerchantHash();
+			if (isOpen && merchantId) {
+				const place = get(placesById).get(merchantId);
+				if (place) {
+					panToPlace(place.lat, place.lon);
+				} else {
+					deepLinkPanUnsub = placesById.subscribe(($byId) => {
+						const p = $byId.get(merchantId);
+						if (!p) return;
+						panToPlace(p.lat, p.lon);
+						if (deepLinkPanTimer) clearTimeout(deepLinkPanTimer);
+						deepLinkPanUnsub?.();
+						deepLinkPanUnsub = null;
+					});
+					deepLinkPanTimer = setTimeout(() => {
+						deepLinkPanUnsub?.();
+						deepLinkPanUnsub = null;
+						deepLinkPanTimer = null;
+					}, 10_000);
+				}
+			}
+		}
+
 		styleLoaded = true;
 		lastPlacesLength = -1;
 		lastSavedIdsSize = -1;
@@ -920,6 +969,12 @@ onMount(async () => {
 onDestroy(() => {
 	destroyed = true;
 	triggerEnrichmentIfNeeded.cancel();
+	if (typeof window !== "undefined") {
+		window.removeEventListener("hashchange", handleHashChange);
+	}
+	if (deepLinkPanTimer) clearTimeout(deepLinkPanTimer);
+	deepLinkPanUnsub?.();
+	deepLinkPanUnsub = null;
 	spiderfier?.unspiderfyAll();
 	spiderfier = undefined;
 	map?.remove();
