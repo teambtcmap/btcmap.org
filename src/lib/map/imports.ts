@@ -15,12 +15,15 @@ export async function loadMapDependencies() {
 		locateControlModule,
 		_markerCluster,
 		_subgroup,
+		_leafletRotate,
 	] = await Promise.all([
 		import("maplibre-gl"),
 		import("@maplibre/maplibre-gl-leaflet"),
 		import("leaflet.locatecontrol"),
 		import("leaflet.markercluster"),
 		import("leaflet.featuregroup.subgroup"),
+		// @ts-expect-error - leaflet-rotate ships no published types
+		import("leaflet-rotate"),
 	]);
 
 	const { LocateControl } = locateControlModule;
