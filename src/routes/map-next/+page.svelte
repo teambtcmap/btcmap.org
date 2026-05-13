@@ -29,6 +29,7 @@ import { merchantList } from "$lib/merchantListStore";
 import { savedPlaceIds } from "$lib/session";
 import { places } from "$lib/store";
 import type { Place } from "$lib/types";
+import { userLocation } from "$lib/userLocationStore";
 import { debounce, isBoosted } from "$lib/utils";
 
 import MerchantDrawerHash from "../map/components/MerchantDrawerHash.svelte";
@@ -375,6 +376,23 @@ onMount(async () => {
 		}),
 		"top-right",
 	);
+
+	// Geolocate control — replaces leaflet.locatecontrol. The pulse dot,
+	// accuracy circle, and heading arrow are built in. Heading uses the
+	// device's compass when available, falling back to GPS movement.
+	const geolocate = new maplibre.GeolocateControl({
+		positionOptions: { enableHighAccuracy: true },
+		trackUserLocation: true,
+		showUserLocation: true,
+		showAccuracyCircle: true,
+	});
+	map.addControl(geolocate, "top-right");
+
+	// Mirror /map's behavior: sync location into the userLocation store so
+	// the merchant list panel can compute distances without prompting again.
+	geolocate.on("geolocate", (e: GeolocationPosition) => {
+		userLocation.setLocation(e.coords.latitude, e.coords.longitude);
+	});
 
 	map.on("load", async () => {
 		if (!map) return;
