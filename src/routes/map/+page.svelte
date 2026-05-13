@@ -1173,7 +1173,14 @@ onMount(async () => {
 		const LocateControl = deps.LocateControl;
 
 		// add map and tiles
-		map = leaflet.map(mapElement, { maxZoom: 21, zoomControl: false });
+		map = leaflet.map(mapElement, {
+			maxZoom: 21,
+			zoomControl: false,
+			// leaflet-rotate options — runtime-only, no published TypeScript types
+			rotate: true,
+			touchRotate: true,
+			rotateControl: { closeOnZeroBearing: false, position: "topleft" },
+		} as Parameters<typeof leaflet.map>[1]);
 		leaflet.control.zoom({ position: "topright" }).addTo(map);
 
 		// Setup map in logical steps
