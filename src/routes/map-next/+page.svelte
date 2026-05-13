@@ -17,6 +17,7 @@ import {
 	DEFAULT_MAP_LNG,
 	DEFAULT_MAP_ZOOM,
 } from "$lib/constants";
+import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { savedPlaceIds } from "$lib/session";
 import { places } from "$lib/store";
 import type { Place } from "$lib/types";
@@ -476,6 +477,16 @@ onMount(async () => {
 		map.on("mouseleave", "clusters-outer", resetCursor);
 		map.on("mouseenter", "unclustered-point", setPointerCursor);
 		map.on("mouseleave", "unclustered-point", resetCursor);
+
+		// Unclustered marker click → open the global merchant drawer. The
+		// drawer component lives in the layout, so we only need to push state
+		// into the store.
+		map.on("click", "unclustered-point", (e: MapLayerMouseEvent) => {
+			const feature = e.features?.[0] as MapGeoJSONFeature | undefined;
+			const placeId = feature?.properties?.id;
+			if (typeof placeId !== "number") return;
+			merchantDrawer.open(placeId, "details");
+		});
 
 		styleLoaded = true;
 		lastPlacesLength = -1;
