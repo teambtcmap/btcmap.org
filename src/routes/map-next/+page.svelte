@@ -276,13 +276,33 @@ const spriteName = (icon: string, boosted: boolean): string =>
 // $places updates within the page session.
 const spritePromises = new Map<string, Promise<void>>();
 
-const fetchIconInnerSvg = async (icon: string): Promise<string> => {
-	const iconifyName = resolveIconifyName(icon);
+const fetchIconifyByName = async (
+	iconifyName: string,
+): Promise<string | null> => {
 	const path = iconifyName.replace(":", "/");
 	const url = `https://api.iconify.design/${path}.svg?color=white&width=20&height=20`;
 	const res = await fetch(url);
-	if (!res.ok) throw new Error(`Iconify fetch failed: ${res.status} ${url}`);
+	if (!res.ok) return null;
 	return await res.text();
+};
+
+// Cascading fallback for icon names that don't exist in `ic:outline`.
+// The btcmap dataset has ~6 such category values worldwide (e.g.
+// `potted_plant`, `footprint`); try material-symbols next, then fall
+// back to the Bitcoin glyph so every pin has at least a recognizable
+// shape.
+const fetchIconInnerSvg = async (icon: string): Promise<string> => {
+	const primary = resolveIconifyName(icon);
+	const primarySvg = await fetchIconifyByName(primary);
+	if (primarySvg) return primarySvg;
+	if (primary.startsWith("ic:outline-")) {
+		const stem = primary.slice("ic:outline-".length);
+		const fallback = await fetchIconifyByName(`material-symbols:${stem}`);
+		if (fallback) return fallback;
+	}
+	const bitcoin = await fetchIconifyByName("material-symbols:currency-bitcoin");
+	if (bitcoin) return bitcoin;
+	throw new Error(`No icon found for ${icon}`);
 };
 
 const buildCompositeSvg = (innerSvg: string, boosted: boolean): string => {
