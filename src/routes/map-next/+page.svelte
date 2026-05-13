@@ -7,6 +7,7 @@ import { featureCollection, point } from "@turf/helpers";
 import type { Feature, FeatureCollection, Point, Polygon } from "geojson";
 import type {
 	GeoJSONSource,
+	LngLatBounds,
 	MapGeoJSONFeature,
 	MapLayerMouseEvent,
 	Map as MapLibreMap,
@@ -20,12 +21,15 @@ import {
 	DEFAULT_MAP_LAT,
 	DEFAULT_MAP_LNG,
 	DEFAULT_MAP_ZOOM,
+	LABEL_VISIBLE_ZOOM,
+	MAP_DEBOUNCE_DELAY,
 } from "$lib/constants";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
+import { merchantList } from "$lib/merchantListStore";
 import { savedPlaceIds } from "$lib/session";
 import { places } from "$lib/store";
 import type { Place } from "$lib/types";
-import { isBoosted } from "$lib/utils";
+import { debounce, isBoosted } from "$lib/utils";
 
 import MerchantDrawerHash from "../map/components/MerchantDrawerHash.svelte";
 
@@ -38,6 +42,7 @@ type PlaceFeature = {
 		icon: string;
 		comments: number;
 		saved: boolean;
+		name: string;
 	};
 };
 
@@ -52,6 +57,7 @@ let spiderfier: Spiderfy | undefined;
 let styleLoaded = false;
 let lastPlacesLength = -1;
 let lastSavedIdsSize = -1;
+let lastEnrichedCacheSize = -1;
 // Latest-wins guard for the async getClusterLeaves callback. Mouseenter
 // fires per-feature, so a quick sweep across multiple clusters can stack
 // pending leaf fetches; we only commit the hull whose cluster id is still
@@ -70,6 +76,9 @@ const EMPTY_COLLECTION: PlaceFeatureCollection = {
 
 const buildFeatureCollection = (list: Place[]): PlaceFeatureCollection => {
 	const saved = get(savedPlaceIds);
+	// Snapshot the enriched cache once per build — names arrive lazily as
+	// the viewport-bound /v4/places/search fetch resolves.
+	const enrichedCache = get(merchantList).placeDetailsCache;
 	return {
 		type: "FeatureCollection",
 		features: list
@@ -83,6 +92,8 @@ const buildFeatureCollection = (list: Place[]): PlaceFeatureCollection => {
 					icon: p.icon ?? "question_mark",
 					comments: p.comments ?? 0,
 					saved: saved.has(p.id),
+					name:
+						enrichedCache.get(p.id)?.name ?? p.name ?? p["osm:amenity"] ?? "",
 				},
 			})),
 	};
@@ -260,18 +271,54 @@ const syncPlacesToSource = (list: Place[]) => {
 	ensureSpritesForPlaces(map, list);
 };
 
+// MapLibre-shaped haversine — `src/lib/map/viewport.ts` takes a Leaflet
+// LatLngBounds; reusing it would require a shim, so we inline the math.
+const computeRadiusKmFromBounds = (b: LngLatBounds): number => {
+	const center = b.getCenter();
+	const ne = b.getNorthEast();
+	const R = 6371; // km
+	const dLat = ((ne.lat - center.lat) * Math.PI) / 180;
+	const dLon = ((ne.lng - center.lng) * Math.PI) / 180;
+	const a =
+		Math.sin(dLat / 2) ** 2 +
+		Math.cos((center.lat * Math.PI) / 180) *
+			Math.cos((ne.lat * Math.PI) / 180) *
+			Math.sin(dLon / 2) ** 2;
+	return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
+// Debounced enrichment trigger — fires on moveend when zoomed in enough
+// to show labels. The store handles aborting any in-flight stale request.
+const triggerEnrichmentIfNeeded = debounce(() => {
+	if (!map) return;
+	if (map.getZoom() < LABEL_VISIBLE_ZOOM) return;
+	const center = map.getCenter();
+	const radiusKm = computeRadiusKmFromBounds(map.getBounds());
+	merchantList.fetchEnrichedDetails(
+		{ lat: center.lat, lon: center.lng },
+		radiusKm,
+	);
+}, MAP_DEBOUNCE_DELAY);
+
 // Rebuild only when the count changes meaningfully (and always on first load),
 // to avoid jank on incremental store updates with ~50k places worldwide.
 // Also rebuild when $savedPlaceIds size changes so the saved badge appears/
-// disappears as the user toggles saves. Tracking size catches add/remove
-// but misses the swap case (save A + unsave B with no net size change) —
-// accepted tradeoff for now.
+// disappears as the user toggles saves, and when the enriched details cache
+// grows so place-name labels appear as their data arrives. Tracking size
+// catches add/remove but misses the swap case (e.g. save A + unsave B with
+// no net size change) — accepted tradeoff for now.
 $: if (map && styleLoaded && $places) {
-	const len = $places.length;
+	const placesLen = $places.length;
 	const savedSize = $savedPlaceIds.size;
-	if (len !== lastPlacesLength || savedSize !== lastSavedIdsSize) {
-		lastPlacesLength = len;
+	const cacheSize = $merchantList.placeDetailsCache.size;
+	if (
+		placesLen !== lastPlacesLength ||
+		savedSize !== lastSavedIdsSize ||
+		cacheSize !== lastEnrichedCacheSize
+	) {
+		lastPlacesLength = placesLen;
 		lastSavedIdsSize = savedSize;
+		lastEnrichedCacheSize = cacheSize;
 		syncPlacesToSource($places);
 	}
 }
@@ -544,6 +591,47 @@ onMount(async () => {
 			},
 		});
 
+		// Place name labels — visible at high zoom once the enriched-details
+		// fetch has populated each place's name. Drawn before clusters-hit so
+		// the spiderfy hit-target stays on top for click routing.
+		// Mirrors prod's `.marker-label` / `.marker-label-boosted` styling
+		// (src/app.css:264-310). Dark-mode color swap is Phase 6 polish.
+		map.addLayer({
+			id: "place-label",
+			type: "symbol",
+			source: "places",
+			minzoom: LABEL_VISIBLE_ZOOM,
+			filter: [
+				"all",
+				["!", ["has", "point_count"]],
+				["!=", ["get", "name"], ""],
+			],
+			layout: {
+				"text-field": ["get", "name"],
+				"text-font": ["Open Sans Semibold"],
+				"text-size": 14,
+				"text-anchor": "left",
+				// text-offset is in ems. Pin's right edge sits at ~+16 px from
+				// the geographic anchor (icon-anchor: bottom). Start the label
+				// 6 px past that, vertically centered on the pin head (~ -25 px).
+				"text-offset": [22 / 14, -25 / 14],
+				"text-max-width": 12,
+				"text-rotation-alignment": "viewport",
+				"text-pitch-alignment": "viewport",
+			},
+			paint: {
+				"text-color": [
+					"case",
+					["get", "boosted"],
+					"#f97316", // orange-500 (boosted)
+					"#0e7490", // cyan-700 (regular)
+				],
+				"text-halo-color": "#fff",
+				"text-halo-width": 1.2,
+				"text-halo-blur": 0,
+			},
+		});
+
 		// Symbol cluster layer used by spiderfy. Hit-testing on this layer's
 		// near-invisible icon picks up the cluster_id property and routes
 		// through the library, which auto-decides between zoom-on-click and
@@ -661,14 +749,24 @@ onMount(async () => {
 			hullSource?.setData(EMPTY_HULL_COLLECTION);
 		});
 
+		// Refresh enriched details (and thus labels) on viewport changes
+		// once we're above LABEL_VISIBLE_ZOOM. Debounced so quick pans don't
+		// spam the API; the store internally aborts any stale request.
+		map.on("moveend", triggerEnrichmentIfNeeded);
+
 		styleLoaded = true;
 		lastPlacesLength = -1;
 		lastSavedIdsSize = -1;
+		lastEnrichedCacheSize = -1;
 		syncPlacesToSource($places);
+		// Kick once on load — if the user lands above the threshold, labels
+		// should appear without requiring a move.
+		triggerEnrichmentIfNeeded();
 	});
 });
 
 onDestroy(() => {
+	triggerEnrichmentIfNeeded.cancel();
 	spiderfier?.unspiderfyAll();
 	spiderfier = undefined;
 	map?.remove();
