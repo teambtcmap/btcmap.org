@@ -520,11 +520,15 @@ onMount(async () => {
 			},
 		});
 
-		// Spiderfy hooks the clusters-hit symbol layer. On click it checks
-		// supercluster's getClusterExpansionZoom — if zooming would still
-		// keep the cluster together (e.g. coincident points at the max
-		// cluster zoom), it spiderfies; otherwise it eases the camera in.
+		// Spiderfy hooks the clusters-hit symbol layer. The library's
+		// internal decision is: if expansionZoom > forceSpiderifyMinZoom OR
+		// expansionZoom > map.maxZoom → spiderfy; else easeTo to expansionZoom.
+		// The default forceSpiderifyMinZoom is null, which coerces to 0 and
+		// causes EVERY click to spiderfy. Set it to our clustering threshold
+		// so only genuinely un-zoomable clusters (coincident points whose
+		// expansionZoom exceeds the threshold) spider out.
 		spiderfier = new Spiderfy(map, {
+			forceSpiderifyMinZoom: CLUSTERING_DISABLED_ZOOM,
 			onLeafClick: (feature) => {
 				const placeId = feature.properties?.id;
 				if (typeof placeId === "number") {
