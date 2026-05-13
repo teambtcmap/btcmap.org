@@ -27,6 +27,8 @@ import { places } from "$lib/store";
 import type { Place } from "$lib/types";
 import { isBoosted } from "$lib/utils";
 
+import MerchantDrawerHash from "../map/components/MerchantDrawerHash.svelte";
+
 type PlaceFeature = {
 	type: "Feature";
 	geometry: { type: "Point"; coordinates: [number, number] };
@@ -633,6 +635,8 @@ onDestroy(() => {
 </svelte:head>
 
 <div bind:this={mapContainer} class="map-container"></div>
+
+<MerchantDrawerHash />
 
 <style>
 	.map-container {
