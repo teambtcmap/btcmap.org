@@ -22,6 +22,13 @@ const materialExceptions: Record<string, string> = {
 	my_location: "material-symbols:my-location-rounded",
 	bookmark_filled: "ic:baseline-bookmark-added",
 	account_circle_filled: "ic:baseline-account-circle",
+	// Missing from ic:outline — fall back to material-symbols
+	potted_plant: "material-symbols:potted-plant-outline",
+	footprint: "material-symbols:footprint-outline",
+	water_pump: "material-symbols:water-pump-outline",
+	adult_content: "material-symbols:explicit-outline",
+	raven: "material-symbols:raven-outline",
+	surgical: "material-symbols:surgical-outline",
 };
 
 const faBrandIcons = ["x-twitter", "instagram", "facebook", "twitter"];
