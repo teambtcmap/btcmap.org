@@ -826,6 +826,20 @@ onMount(async () => {
 			merchantDrawer.open(placeId, "details");
 		});
 
+		// Click on empty map (no marker or cluster hit) closes any open
+		// drawer — matches /map's behavior. Layer-scoped click handlers
+		// fire alongside this generic one, so clicking a marker still
+		// reopens the drawer for the new feature net-net.
+		map.on("click", (e: MapLayerMouseEvent) => {
+			if (!map) return;
+			if (!get(merchantDrawer).isOpen) return;
+			const hit = map.queryRenderedFeatures(e.point, {
+				layers: ["unclustered-point", "clusters-hit"],
+			});
+			if (hit.length > 0) return;
+			merchantDrawer.close();
+		});
+
 		// Cluster hover → draw a convex hull around its leaves. Capped at 500
 		// leaves to keep convex computation cheap on dense clusters.
 		map.on("mouseenter", "clusters-outer", (e: MapLayerMouseEvent) => {
