@@ -24,6 +24,7 @@ import {
 	LABEL_VISIBLE_ZOOM,
 	MAP_DEBOUNCE_DELAY,
 } from "$lib/constants";
+import { getDisplayLang, locale } from "$lib/i18n";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { merchantList } from "$lib/merchantListStore";
 import { savedPlaceIds } from "$lib/session";
@@ -59,6 +60,7 @@ let styleLoaded = false;
 let lastPlacesLength = -1;
 let lastSavedIdsSize = -1;
 let lastEnrichedCacheSize = -1;
+let lastLocale: string | null | undefined;
 // Latest-wins guard for the async getClusterLeaves callback. Mouseenter
 // fires per-feature, so a quick sweep across multiple clusters can stack
 // pending leaf fetches; we only commit the hull whose cluster id is still
@@ -137,6 +139,20 @@ const buildFeatureCollection = (list: Place[]): PlaceFeatureCollection => {
 	// Snapshot the enriched cache once per build — names arrive lazily as
 	// the viewport-bound /v4/places/search fetch resolves.
 	const enrichedCache = get(merchantList).placeDetailsCache;
+	const displayLang = getDisplayLang(get(locale));
+	const resolveName = (p: Place): string => {
+		const enriched = enrichedCache.get(p.id);
+		// Priority: enriched localized name → enriched plain name →
+		// $places localized name → $places plain name → OSM amenity fallback.
+		return (
+			enriched?.localized_name?.[displayLang] ??
+			enriched?.name ??
+			p.localized_name?.[displayLang] ??
+			p.name ??
+			p["osm:amenity"] ??
+			""
+		);
+	};
 	return {
 		type: "FeatureCollection",
 		features: list
@@ -150,8 +166,7 @@ const buildFeatureCollection = (list: Place[]): PlaceFeatureCollection => {
 					icon: p.icon ?? "question_mark",
 					comments: p.comments ?? 0,
 					saved: saved.has(p.id),
-					name:
-						enrichedCache.get(p.id)?.name ?? p.name ?? p["osm:amenity"] ?? "",
+					name: resolveName(p),
 				},
 			})),
 	};
@@ -369,14 +384,17 @@ $: if (map && styleLoaded && $places) {
 	const placesLen = $places.length;
 	const savedSize = $savedPlaceIds.size;
 	const cacheSize = $merchantList.placeDetailsCache.size;
+	const currentLocale = $locale;
 	if (
 		placesLen !== lastPlacesLength ||
 		savedSize !== lastSavedIdsSize ||
-		cacheSize !== lastEnrichedCacheSize
+		cacheSize !== lastEnrichedCacheSize ||
+		currentLocale !== lastLocale
 	) {
 		lastPlacesLength = placesLen;
 		lastSavedIdsSize = savedSize;
 		lastEnrichedCacheSize = cacheSize;
+		lastLocale = currentLocale;
 		syncPlacesToSource($places);
 	}
 }
