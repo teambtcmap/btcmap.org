@@ -612,9 +612,9 @@ onMount(async () => {
 				"icon-image": [
 					"concat",
 					"pin-",
-					["case", ["get", "boosted"], "b", "r"],
+					["case", ["coalesce", ["get", "boosted"], false], "b", "r"],
 					"-",
-					["get", "icon"],
+					["coalesce", ["get", "icon"], "question_mark"],
 				],
 				"icon-size": 1,
 				"icon-anchor": "bottom",
@@ -784,9 +784,9 @@ onMount(async () => {
 				"icon-image": [
 					"concat",
 					"pin-",
-					["case", ["get", "boosted"], "b", "r"],
+					["case", ["coalesce", ["get", "boosted"], false], "b", "r"],
 					"-",
-					["get", "icon"],
+					["coalesce", ["get", "icon"], "question_mark"],
 				],
 				"icon-size": 1,
 				"icon-anchor": "bottom",
