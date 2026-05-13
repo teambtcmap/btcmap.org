@@ -22,6 +22,10 @@ import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
 import ShowTags from "$components/ShowTags.svelte";
 import TaggingIssues from "$components/TaggingIssues.svelte";
 import { GradeTable } from "$lib/constants";
+import {
+	ensureSpritesForPlaces,
+	installPlaceholderHandler,
+} from "$lib/map/maplibreSprites";
 import { theme } from "$lib/theme";
 import type { Grade, Place } from "$lib/types";
 import { getGrade, isBoosted } from "$lib/utils";
@@ -89,94 +93,6 @@ let mapLoaded = false;
 let styleLoaded = false;
 let lastAppliedTheme: "light" | "dark" | undefined;
 
-// Mirrors Icon.svelte's material-symbol resolution. Keep in sync with /map-next.
-const materialExceptions: Record<string, string> = {
-	camping: "material-symbols:camping-rounded",
-	gate: "material-symbols:gate",
-	cooking: "material-symbols:cooking",
-	dentistry: "material-symbols:dentistry",
-	sauna: "material-symbols:sauna",
-	info_outline: "material-symbols:info-outline",
-	skull: "material-symbols:skull",
-	currency_bitcoin: "material-symbols:currency-bitcoin",
-};
-
-const resolveIconifyName = (icon: string): string => {
-	const key = icon === "question_mark" ? "currency_bitcoin" : icon;
-	return materialExceptions[key] ?? `ic:outline-${key.replace(/_/g, "-")}`;
-};
-
-const PIN_PATH =
-	"M0 16.0333C0 6.08 8.05161 0.131836 15.8361 0.131836C23.6205 0.131836 31.6721 6.08 31.6721 16.0333C31.6721 26.461 16.9494 41.3035 16.3229 41.9301C16.1941 42.0595 16.0185 42.1318 15.8361 42.1318C15.6536 42.1318 15.478 42.0595 15.3493 41.9301C14.7227 41.3035 0 26.461 0 16.0333Z";
-
-const PIN_FILL_REGULAR = "#0E95AF";
-const PIN_FILL_BOOSTED = "#F7931A";
-
-const spriteName = (icon: string, boosted: boolean): string =>
-	`pin-${boosted ? "b" : "r"}-${icon}`;
-
-// Per-instance cache so a setStyle() re-init can clear and regenerate cleanly.
-let spritePromises = new Map<string, Promise<void>>();
-
-const fetchIconInnerSvg = async (icon: string): Promise<string> => {
-	const iconifyName = resolveIconifyName(icon);
-	const path = iconifyName.replace(":", "/");
-	const url = `https://api.iconify.design/${path}.svg?color=white&width=20&height=20`;
-	const res = await fetch(url);
-	if (!res.ok) throw new Error(`Iconify fetch failed: ${res.status} ${url}`);
-	return await res.text();
-};
-
-const buildCompositeSvg = (innerSvg: string, boosted: boolean): string => {
-	const fill = boosted ? PIN_FILL_BOOSTED : PIN_FILL_REGULAR;
-	// innerSvg is a complete <svg>...</svg> document; nesting an SVG inside an
-	// outer SVG is valid and rasterizes correctly through <img>.
-	return `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="43" viewBox="0 0 32 43"><path d="${PIN_PATH}" fill="${fill}"/><g transform="translate(6, 5.75)">${innerSvg}</g></svg>`;
-};
-
-const loadSvgImage = (svg: string): Promise<HTMLImageElement> =>
-	new Promise((resolve, reject) => {
-		const img = new Image();
-		img.crossOrigin = "anonymous";
-		img.onload = () => resolve(img);
-		img.onerror = (err) => reject(err);
-		img.src = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
-	});
-
-const ensureSprite = (
-	m: MapLibreMap,
-	icon: string,
-	boosted: boolean,
-): Promise<void> => {
-	const key = spriteName(icon, boosted);
-	if (m.hasImage(key)) return Promise.resolve();
-	const existing = spritePromises.get(key);
-	if (existing) return existing;
-	const promise = (async () => {
-		const inner = await fetchIconInnerSvg(icon);
-		const composite = buildCompositeSvg(inner, boosted);
-		const img = await loadSvgImage(composite);
-		if (!m.hasImage(key)) m.addImage(key, img, { pixelRatio: 1 });
-		m.triggerRepaint();
-	})();
-	spritePromises.set(key, promise);
-	promise.catch(() => spritePromises.delete(key));
-	return promise;
-};
-
-const ensureSpritesForPlaces = (m: MapLibreMap, list: Place[]): void => {
-	const seen = new Set<string>();
-	for (const p of list) {
-		if (p.deleted_at) continue;
-		const icon = p.icon ?? "question_mark";
-		const boosted = Boolean(isBoosted(p));
-		const key = spriteName(icon, boosted);
-		if (seen.has(key)) continue;
-		seen.add(key);
-		ensureSprite(m, icon, boosted);
-	}
-};
-
 const loadCommentBadgeSprite = (m: MapLibreMap): void => {
 	if (m.hasImage("comment-badge-bg")) return;
 	const canvas = document.createElement("canvas");
@@ -191,21 +107,6 @@ const loadCommentBadgeSprite = (m: MapLibreMap): void => {
 	m.addImage("comment-badge-bg", ctx.getImageData(0, 0, 16, 16), {
 		pixelRatio: 1,
 	});
-};
-
-// 1×1 transparent placeholder so styleimagemissing doesn't spam warnings before
-// composite sprites resolve. Each missing icon name registers the same blank
-// bitmap; once the real sprite is added via addImage(), it replaces this stub.
-const transparentPixel = (): ImageData => {
-	const canvas = document.createElement("canvas");
-	canvas.width = 1;
-	canvas.height = 1;
-	const ctx = canvas.getContext("2d");
-	if (!ctx) {
-		// Fallback: synthesize empty ImageData manually if 2d context is unavailable.
-		return new ImageData(new Uint8ClampedArray([0, 0, 0, 0]), 1, 1);
-	}
-	return ctx.getImageData(0, 0, 1, 1);
 };
 
 const buildFeatureCollection = (list: Place[]): PlaceFeatureCollection => ({
@@ -493,12 +394,7 @@ const initializeMap = async () => {
 	// icon id that hasn't been registered yet. Composite pin sprites resolve
 	// async; registering a transparent stub for any missing id keeps the
 	// console quiet and prevents flicker until the real sprite lands.
-	map.on("styleimagemissing", (event) => {
-		if (!map) return;
-		const id = event.id;
-		if (!id || map.hasImage(id)) return;
-		map.addImage(id, transparentPixel(), { pixelRatio: 1 });
-	});
+	installPlaceholderHandler(map);
 
 	// First load — register everything and mark mapLoaded once stable.
 	map.on("load", () => {
@@ -519,15 +415,15 @@ const initializeMap = async () => {
 };
 
 // Theme reactivity — swap the basemap, then re-register area + places overlays
-// on the resulting style.load event. Sprite cache is cleared so every icon is
-// regenerated lazily on first render against the new style.
+// on the resulting style.load event. The shared sprite cache evicts resolved
+// promises on completion, so any sprites that didn't survive the style swap
+// regenerate lazily on first render against the new style.
 const applyTheme = (next: "light" | "dark" | undefined) => {
 	if (!map) return;
 	if (!styleLoaded) return;
 	if (next === lastAppliedTheme) return;
 	lastAppliedTheme = next;
 	styleLoaded = false;
-	spritePromises = new Map();
 	const onStyleLoad = () => {
 		if (!map) return;
 		initializeMapContents(map);

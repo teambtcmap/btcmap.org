@@ -25,6 +25,7 @@ import {
 	MAP_DEBOUNCE_DELAY,
 } from "$lib/constants";
 import { getDisplayLang, locale } from "$lib/i18n";
+import { ensureSpritesForPlaces, loadSvgImage } from "$lib/map/maplibreSprites";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { merchantList } from "$lib/merchantListStore";
 import { savedPlaceIds } from "$lib/session";
@@ -235,29 +236,6 @@ const loadIconImage = (
 		img.src = url;
 	});
 
-// Mirrors Icon.svelte's material-symbol resolution. Keep in sync.
-const materialExceptions: Record<string, string> = {
-	camping: "material-symbols:camping-rounded",
-	gate: "material-symbols:gate",
-	cooking: "material-symbols:cooking",
-	dentistry: "material-symbols:dentistry",
-	sauna: "material-symbols:sauna",
-	info_outline: "material-symbols:info-outline",
-	skull: "material-symbols:skull",
-	currency_bitcoin: "material-symbols:currency-bitcoin",
-};
-
-const resolveIconifyName = (icon: string): string => {
-	const key = icon === "question_mark" ? "currency_bitcoin" : icon;
-	return materialExceptions[key] ?? `ic:outline-${key.replace(/_/g, "-")}`;
-};
-
-const PIN_PATH =
-	"M0 16.0333C0 6.08 8.05161 0.131836 15.8361 0.131836C23.6205 0.131836 31.6721 6.08 31.6721 16.0333C31.6721 26.461 16.9494 41.3035 16.3229 41.9301C16.1941 42.0595 16.0185 42.1318 15.8361 42.1318C15.6536 42.1318 15.478 42.0595 15.3493 41.9301C14.7227 41.3035 0 26.461 0 16.0333Z";
-
-const PIN_FILL_REGULAR = "#0E95AF";
-const PIN_FILL_BOOSTED = "#F7931A";
-
 // Tailwind `text-link` color (tailwind.config.js → colors.link).
 const LINK_COLOR = "#0099AF";
 
@@ -312,93 +290,6 @@ const loadSavedBadgeSprite = async (m: MapLibreMap): Promise<void> => {
 	if (!m.hasImage("saved-badge"))
 		m.addImage("saved-badge", img, { pixelRatio: 1 });
 	m.triggerRepaint();
-};
-
-const spriteName = (icon: string, boosted: boolean): string =>
-	`pin-${boosted ? "b" : "r"}-${icon}`;
-
-// Module-scoped to dedupe in-flight + completed sprite generation across
-// $places updates within the page session.
-const spritePromises = new Map<string, Promise<void>>();
-
-const fetchIconifyByName = async (
-	iconifyName: string,
-): Promise<string | null> => {
-	const path = iconifyName.replace(":", "/");
-	const url = `https://api.iconify.design/${path}.svg?color=white&width=20&height=20`;
-	const res = await fetch(url);
-	if (!res.ok) return null;
-	return await res.text();
-};
-
-// Cascading fallback for icon names that don't exist in `ic:outline`.
-// The btcmap dataset has ~6 such category values worldwide (e.g.
-// `potted_plant`, `footprint`); try material-symbols next, then fall
-// back to the Bitcoin glyph so every pin has at least a recognizable
-// shape.
-const fetchIconInnerSvg = async (icon: string): Promise<string> => {
-	const primary = resolveIconifyName(icon);
-	const primarySvg = await fetchIconifyByName(primary);
-	if (primarySvg) return primarySvg;
-	if (primary.startsWith("ic:outline-")) {
-		const stem = primary.slice("ic:outline-".length);
-		const fallback = await fetchIconifyByName(`material-symbols:${stem}`);
-		if (fallback) return fallback;
-	}
-	const bitcoin = await fetchIconifyByName("material-symbols:currency-bitcoin");
-	if (bitcoin) return bitcoin;
-	throw new Error(`No icon found for ${icon}`);
-};
-
-const buildCompositeSvg = (innerSvg: string, boosted: boolean): string => {
-	const fill = boosted ? PIN_FILL_BOOSTED : PIN_FILL_REGULAR;
-	// innerSvg is a complete <svg>...</svg> document; nesting an SVG inside an
-	// outer SVG is valid and rasterizes correctly through <img>.
-	return `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="43" viewBox="0 0 32 43"><path d="${PIN_PATH}" fill="${fill}"/><g transform="translate(6, 5.75)">${innerSvg}</g></svg>`;
-};
-
-const loadSvgImage = (svg: string): Promise<HTMLImageElement> =>
-	new Promise((resolve, reject) => {
-		const img = new Image();
-		img.crossOrigin = "anonymous";
-		img.onload = () => resolve(img);
-		img.onerror = (err) => reject(err);
-		img.src = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
-	});
-
-const ensureSprite = (
-	m: MapLibreMap,
-	icon: string,
-	boosted: boolean,
-): Promise<void> => {
-	const name = spriteName(icon, boosted);
-	if (m.hasImage(name)) return Promise.resolve();
-	const existing = spritePromises.get(name);
-	if (existing) return existing;
-	const promise = (async () => {
-		const inner = await fetchIconInnerSvg(icon);
-		const composite = buildCompositeSvg(inner, boosted);
-		const img = await loadSvgImage(composite);
-		if (!m.hasImage(name)) m.addImage(name, img, { pixelRatio: 1 });
-		m.triggerRepaint();
-	})();
-	spritePromises.set(name, promise);
-	// Don't keep a rejected promise cached — allow retry on next $places tick.
-	promise.catch(() => spritePromises.delete(name));
-	return promise;
-};
-
-const ensureSpritesForPlaces = (m: MapLibreMap, list: Place[]): void => {
-	const seen = new Set<string>();
-	for (const p of list) {
-		if (p.deleted_at) continue;
-		const icon = p.icon ?? "question_mark";
-		const boosted = Boolean(isBoosted(p));
-		const key = spriteName(icon, boosted);
-		if (seen.has(key)) continue;
-		seen.add(key);
-		ensureSprite(m, icon, boosted);
-	}
 };
 
 const syncPlacesToSource = (list: Place[]) => {
