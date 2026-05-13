@@ -2,6 +2,9 @@
 import "maplibre-gl/dist/maplibre-gl.css";
 
 import Spiderfy from "@nazka/map-gl-js-spiderfy";
+import convex from "@turf/convex";
+import { featureCollection, point } from "@turf/helpers";
+import type { Feature, FeatureCollection, Point, Polygon } from "geojson";
 import type {
 	GeoJSONSource,
 	MapGeoJSONFeature,
@@ -47,6 +50,16 @@ let spiderfier: Spiderfy | undefined;
 let styleLoaded = false;
 let lastPlacesLength = -1;
 let lastSavedIdsSize = -1;
+// Latest-wins guard for the async getClusterLeaves callback. Mouseenter
+// fires per-feature, so a quick sweep across multiple clusters can stack
+// pending leaf fetches; we only commit the hull whose cluster id is still
+// the one currently being hovered.
+let latestHullClusterId: number | null = null;
+
+const EMPTY_HULL_COLLECTION: FeatureCollection<Polygon> = {
+	type: "FeatureCollection",
+	features: [],
+};
 
 const EMPTY_COLLECTION: PlaceFeatureCollection = {
 	type: "FeatureCollection",
@@ -313,6 +326,33 @@ onMount(async () => {
 			clusterMaxZoom: CLUSTERING_DISABLED_ZOOM - 1,
 		});
 
+		// Hover hull: convex polygon enclosing all leaves of the cluster the
+		// cursor is over. Added before the visible cluster discs so the
+		// translucent fill sits under, not on top of, the cluster discs.
+		map.addSource("cluster-hull", {
+			type: "geojson",
+			data: EMPTY_HULL_COLLECTION,
+		});
+
+		map.addLayer({
+			id: "cluster-hull-fill",
+			type: "fill",
+			source: "cluster-hull",
+			paint: {
+				"fill-color": "rgba(110, 204, 57, 0.15)",
+			},
+		});
+
+		map.addLayer({
+			id: "cluster-hull-outline",
+			type: "line",
+			source: "cluster-hull",
+			paint: {
+				"line-color": "rgba(110, 204, 57, 0.6)",
+				"line-width": 1.5,
+			},
+		});
+
 		// Translucent outer ring — colors tiered by point_count to match
 		// stock leaflet.markercluster defaults (green/yellow/orange, 0.6 alpha).
 		map.addLayer({
@@ -528,6 +568,50 @@ onMount(async () => {
 			const placeId = feature?.properties?.id;
 			if (typeof placeId !== "number") return;
 			merchantDrawer.open(placeId, "details");
+		});
+
+		// Cluster hover → draw a convex hull around its leaves. Capped at 500
+		// leaves to keep convex computation cheap on dense clusters.
+		map.on("mouseenter", "clusters-outer", (e: MapLayerMouseEvent) => {
+			if (!map) return;
+			const feature = e.features?.[0] as MapGeoJSONFeature | undefined;
+			if (!feature) return;
+			const clusterId = feature.properties?.cluster_id as number | undefined;
+			const pointCount = feature.properties?.point_count as number | undefined;
+			if (clusterId === undefined) return;
+			latestHullClusterId = clusterId;
+			const source = map.getSource("places") as GeoJSONSource | undefined;
+			const hullSource = map.getSource("cluster-hull") as
+				| GeoJSONSource
+				| undefined;
+			if (!source || !hullSource) return;
+			const limit = Math.min(pointCount ?? 500, 500);
+			source.getClusterLeaves(clusterId, limit, 0).then((leaves) => {
+				// Stale callback guard — bail if hover has moved to another cluster
+				// (or cleared entirely) by the time leaves resolve.
+				if (latestHullClusterId !== clusterId) return;
+				const points: Feature<Point>[] = [];
+				for (const leaf of leaves) {
+					if (leaf.geometry?.type !== "Point") continue;
+					const coords = leaf.geometry.coordinates as [number, number];
+					points.push(point(coords));
+				}
+				const hull = convex(featureCollection(points));
+				if (!hull) return;
+				hullSource.setData({
+					type: "FeatureCollection",
+					features: [hull],
+				});
+			});
+		});
+
+		map.on("mouseleave", "clusters-outer", () => {
+			if (!map) return;
+			latestHullClusterId = null;
+			const hullSource = map.getSource("cluster-hull") as
+				| GeoJSONSource
+				| undefined;
+			hullSource?.setData(EMPTY_HULL_COLLECTION);
 		});
 
 		styleLoaded = true;
