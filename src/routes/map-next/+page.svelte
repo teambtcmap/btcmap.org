@@ -3,6 +3,8 @@ import "maplibre-gl/dist/maplibre-gl.css";
 
 import type {
 	GeoJSONSource,
+	MapGeoJSONFeature,
+	MapLayerMouseEvent,
 	Map as MapLibreMap,
 	StyleSpecification,
 } from "maplibre-gl";
@@ -440,6 +442,40 @@ onMount(async () => {
 				"icon-pitch-alignment": "viewport",
 			},
 		});
+
+		// Cluster click: zoom to the expansion zoom returned by the supercluster
+		// index. If the cluster won't break apart further (e.g. many places
+		// share the same lat/lon), spiderfy will pick it up in a later phase.
+		map.on("click", "clusters-outer", (e: MapLayerMouseEvent) => {
+			if (!map) return;
+			const feature = e.features?.[0] as MapGeoJSONFeature | undefined;
+			if (!feature) return;
+			const clusterId = feature.properties?.cluster_id as number | undefined;
+			if (clusterId === undefined) return;
+			const source = map.getSource("places") as GeoJSONSource | undefined;
+			if (!source) return;
+			source.getClusterExpansionZoom(clusterId).then((zoom) => {
+				if (!map) return;
+				const geometry = feature.geometry;
+				if (geometry.type !== "Point") return;
+				map.easeTo({
+					center: geometry.coordinates as [number, number],
+					zoom,
+					duration: 500,
+				});
+			});
+		});
+
+		const setPointerCursor = () => {
+			if (map) map.getCanvas().style.cursor = "pointer";
+		};
+		const resetCursor = () => {
+			if (map) map.getCanvas().style.cursor = "";
+		};
+		map.on("mouseenter", "clusters-outer", setPointerCursor);
+		map.on("mouseleave", "clusters-outer", resetCursor);
+		map.on("mouseenter", "unclustered-point", setPointerCursor);
+		map.on("mouseleave", "unclustered-point", resetCursor);
 
 		styleLoaded = true;
 		lastPlacesLength = -1;
