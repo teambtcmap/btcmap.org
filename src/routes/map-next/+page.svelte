@@ -149,6 +149,26 @@ const loadClusterHitSprite = async (m: MapLibreMap): Promise<void> => {
 		m.addImage("cluster-hit", img, { pixelRatio: 1 });
 };
 
+// 16×16 green disc to back the comment count text. Matches /map's
+// Tailwind `bg-green-600 w-4 h-4 rounded-full` exactly. Drawn directly
+// on a canvas — simpler than the SVG → data-URL → <img> roundtrip for
+// a flat shape.
+const loadCommentBadgeSprite = (m: MapLibreMap): void => {
+	if (m.hasImage("comment-badge-bg")) return;
+	const canvas = document.createElement("canvas");
+	canvas.width = 16;
+	canvas.height = 16;
+	const ctx = canvas.getContext("2d");
+	if (!ctx) return;
+	ctx.fillStyle = "#16A34A";
+	ctx.beginPath();
+	ctx.arc(8, 8, 8, 0, Math.PI * 2);
+	ctx.fill();
+	m.addImage("comment-badge-bg", ctx.getImageData(0, 0, 16, 16), {
+		pixelRatio: 1,
+	});
+};
+
 const loadSavedBadgeSprite = async (m: MapLibreMap): Promise<void> => {
 	if (m.hasImage("saved-badge")) return;
 	const encodedColor = encodeURIComponent(LINK_COLOR);
@@ -316,6 +336,7 @@ onMount(async () => {
 			loadIconImage(map, "pin", "/icons/div-icon-pin.svg"),
 			loadIconImage(map, "pin-boosted", "/icons/boosted-icon-pin.svg"),
 			loadSavedBadgeSprite(map),
+			loadCommentBadgeSprite(map),
 			loadClusterHitSprite(map),
 		]);
 
@@ -444,9 +465,12 @@ onMount(async () => {
 		});
 
 		// Comment count badge — green disc on the pin's top-right corner.
-		// We use text-halo as the disc background: no extra sprite needed,
-		// and the halo grows proportionally with digit count (1 → 99 stays
-		// legible). Layered above the pin so it's never occluded.
+		// Comment count badge — fixed 16×16 green disc rendered as a
+		// dedicated icon symbol layer. Two layers (disc + text) instead of
+		// one composite symbol so positioning stays simple — both share the
+		// same offset from the pin anchor.
+		// Pin is 32×43, icon-anchor: bottom. Top-right of the pin head is
+		// ~(+10, -36) px from the geographic anchor.
 		map.addLayer({
 			id: "comment-badge",
 			type: "symbol",
@@ -457,24 +481,41 @@ onMount(async () => {
 				[">", ["get", "comments"], 0],
 			],
 			layout: {
+				"icon-image": "comment-badge-bg",
+				"icon-size": 1,
+				"icon-allow-overlap": true,
+				"icon-ignore-placement": true,
+				"icon-rotation-alignment": "viewport",
+				"icon-pitch-alignment": "viewport",
+				"icon-offset": [10, -36],
+			},
+		});
+
+		map.addLayer({
+			id: "comment-badge-count",
+			type: "symbol",
+			source: "places",
+			filter: [
+				"all",
+				["!", ["has", "point_count"]],
+				[">", ["get", "comments"], 0],
+			],
+			layout: {
 				"text-field": ["to-string", ["get", "comments"]],
+				// Open Sans Semibold is the weight that ships with the demotiles
+				// glyph server. Phase 4 swaps to a vector basemap that includes
+				// proper bold variants for the cluster + comment-count layers.
 				"text-font": ["Open Sans Semibold"],
-				"text-size": 9,
+				"text-size": 11,
 				"text-allow-overlap": true,
 				"text-ignore-placement": true,
 				"text-rotation-alignment": "viewport",
 				"text-pitch-alignment": "viewport",
-				// Pin is 32×43 with icon-anchor: bottom. Top-right of the pin
-				// head is roughly (+10, -36) px from the anchor. text-offset
-				// is in ems, so divide by text-size (9).
-				"text-offset": ["literal", [10 / 9, -36 / 9]],
+				// text-offset is in ems; mirror the disc's pixel offset above.
+				"text-offset": [10 / 11, -36 / 11],
 			},
 			paint: {
 				"text-color": "#fff",
-				// bg-green-600
-				"text-halo-color": "#16A34A",
-				"text-halo-width": 6,
-				"text-halo-blur": 0,
 			},
 		});
 
