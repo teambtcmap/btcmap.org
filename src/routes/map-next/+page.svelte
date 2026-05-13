@@ -56,6 +56,7 @@ type PlaceFeatureCollection = {
 
 let mapContainer: HTMLDivElement;
 let map: MapLibreMap | undefined;
+let destroyed = false;
 let selectedBasemap: BasemapId = "osm"; // overridden in onMount once theme + storage are read
 
 const handleBasemapChange = () => {
@@ -465,6 +466,9 @@ $: if (map && styleLoaded && $places) {
 
 onMount(async () => {
 	const maplibre = await import("maplibre-gl");
+	// User may have navigated away while the dynamic import was in flight;
+	// bail out before instantiating against an unmounted container.
+	if (destroyed) return;
 
 	// All available basemaps are raster tile sources, declared upfront so
 	// the basemap switcher only has to toggle layer visibility — no
@@ -593,10 +597,16 @@ onMount(async () => {
 	map.on("load", async () => {
 		if (!map) return;
 
+		// Critical sprites (pins + cluster hit-target) must succeed; the
+		// saved-badge fetch goes to a third-party CDN and should NOT block
+		// the rest of map init if it fails. Wrap it with a catch so a
+		// transient Iconify outage just degrades the saved-state badge.
 		await Promise.all([
 			loadIconImage(map, "pin", "/icons/div-icon-pin.svg"),
 			loadIconImage(map, "pin-boosted", "/icons/boosted-icon-pin.svg"),
-			loadSavedBadgeSprite(map),
+			loadSavedBadgeSprite(map).catch((err) => {
+				console.warn("Saved-badge sprite failed to load:", err);
+			}),
 			loadCommentBadgeSprite(map),
 			loadClusterHitSprite(map),
 		]);
@@ -960,7 +970,12 @@ onMount(async () => {
 					points.push(point(coords));
 				}
 				const hull = convex(featureCollection(points));
-				if (!hull) return;
+				if (!hull) {
+					// Degenerate cluster (≤ 2 unique points / collinear) — clear
+					// any stale hull from a previous hover instead of leaving it on.
+					hullSource.setData(EMPTY_HULL_COLLECTION);
+					return;
+				}
 				hullSource.setData({
 					type: "FeatureCollection",
 					features: [hull],
@@ -1012,6 +1027,7 @@ onMount(async () => {
 });
 
 onDestroy(() => {
+	destroyed = true;
 	triggerEnrichmentIfNeeded.cancel();
 	spiderfier?.unspiderfyAll();
 	spiderfier = undefined;

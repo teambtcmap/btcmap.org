@@ -279,7 +279,7 @@ const addAreaLayer = (m: MapLibreMap) => {
 	if (!m.getSource("area")) {
 		m.addSource("area", {
 			type: "geojson",
-			data: geoJSON as GeoJSON.GeoJSON,
+			data: geoJSON,
 		});
 	}
 	if (!m.getLayer("area-outline")) {
@@ -435,6 +435,7 @@ const styleUrlForTheme = (t: "light" | "dark" | undefined): string =>
 
 let initialRenderComplete = false;
 let dataInitialized = false;
+let destroyed = false;
 
 onMount(() => {
 	if (browser) {
@@ -443,6 +444,7 @@ onMount(() => {
 });
 
 onDestroy(() => {
+	destroyed = true;
 	map?.remove();
 	map = undefined;
 });
@@ -452,6 +454,11 @@ const initializeMap = async () => {
 	dataInitialized = true;
 
 	const maplibre = await import("maplibre-gl");
+	// Component may have been destroyed while the dynamic import was in
+	// flight (fast navigation away). Bail before binding to a stale
+	// container — otherwise we leak a Map instance that onDestroy can't
+	// clean up because it already ran with `map` undefined.
+	if (destroyed) return;
 
 	lastAppliedTheme = $theme;
 
