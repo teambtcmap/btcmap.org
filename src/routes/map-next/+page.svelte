@@ -7,6 +7,7 @@ import type {
 	StyleSpecification,
 } from "maplibre-gl";
 import { onDestroy, onMount } from "svelte";
+import { get } from "svelte/store";
 
 import {
 	CLUSTERING_DISABLED_ZOOM,
@@ -14,6 +15,7 @@ import {
 	DEFAULT_MAP_LNG,
 	DEFAULT_MAP_ZOOM,
 } from "$lib/constants";
+import { savedPlaceIds } from "$lib/session";
 import { places } from "$lib/store";
 import type { Place } from "$lib/types";
 import { isBoosted } from "$lib/utils";
@@ -21,7 +23,13 @@ import { isBoosted } from "$lib/utils";
 type PlaceFeature = {
 	type: "Feature";
 	geometry: { type: "Point"; coordinates: [number, number] };
-	properties: { id: number; boosted: boolean; icon: string };
+	properties: {
+		id: number;
+		boosted: boolean;
+		icon: string;
+		comments: number;
+		saved: boolean;
+	};
 };
 
 type PlaceFeatureCollection = {
@@ -33,26 +41,32 @@ let mapContainer: HTMLDivElement;
 let map: MapLibreMap | undefined;
 let styleLoaded = false;
 let lastPlacesLength = -1;
+let lastSavedIdsSize = -1;
 
 const EMPTY_COLLECTION: PlaceFeatureCollection = {
 	type: "FeatureCollection",
 	features: [],
 };
 
-const buildFeatureCollection = (list: Place[]): PlaceFeatureCollection => ({
-	type: "FeatureCollection",
-	features: list
-		.filter((p) => !p.deleted_at)
-		.map((p) => ({
-			type: "Feature",
-			geometry: { type: "Point", coordinates: [p.lon, p.lat] },
-			properties: {
-				id: p.id,
-				boosted: Boolean(isBoosted(p)),
-				icon: p.icon ?? "question_mark",
-			},
-		})),
-});
+const buildFeatureCollection = (list: Place[]): PlaceFeatureCollection => {
+	const saved = get(savedPlaceIds);
+	return {
+		type: "FeatureCollection",
+		features: list
+			.filter((p) => !p.deleted_at)
+			.map((p) => ({
+				type: "Feature",
+				geometry: { type: "Point", coordinates: [p.lon, p.lat] },
+				properties: {
+					id: p.id,
+					boosted: Boolean(isBoosted(p)),
+					icon: p.icon ?? "question_mark",
+					comments: p.comments ?? 0,
+					saved: saved.has(p.id),
+				},
+			})),
+	};
+};
 
 // Load an SVG/PNG into the map's image registry. MapLibre needs raster bitmaps
 // for sprites, so we route SVG through an <img> element first.
@@ -94,6 +108,28 @@ const PIN_PATH =
 
 const PIN_FILL_REGULAR = "#0E95AF";
 const PIN_FILL_BOOSTED = "#F7931A";
+
+// Tailwind `text-link` color (tailwind.config.js → colors.link).
+const LINK_COLOR = "#0099AF";
+
+const buildSavedBadgeSvg = (bookmarkSvg: string): string =>
+	`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="#fff" stroke="${LINK_COLOR}" stroke-width="1"/><g transform="translate(3, 3)">${bookmarkSvg}</g></svg>`;
+
+const loadSavedBadgeSprite = async (m: MapLibreMap): Promise<void> => {
+	if (m.hasImage("saved-badge")) return;
+	const encodedColor = encodeURIComponent(LINK_COLOR);
+	const url = `https://api.iconify.design/ic/baseline-bookmark-added.svg?color=${encodedColor}&width=10&height=10`;
+	const res = await fetch(url);
+	if (!res.ok) {
+		throw new Error(`saved-badge bookmark fetch failed: ${res.status} ${url}`);
+	}
+	const bookmarkSvg = await res.text();
+	const composite = buildSavedBadgeSvg(bookmarkSvg);
+	const img = await loadSvgImage(composite);
+	if (!m.hasImage("saved-badge"))
+		m.addImage("saved-badge", img, { pixelRatio: 1 });
+	m.triggerRepaint();
+};
 
 const spriteName = (icon: string, boosted: boolean): string =>
 	`pin-${boosted ? "b" : "r"}-${icon}`;
@@ -172,10 +208,16 @@ const syncPlacesToSource = (list: Place[]) => {
 
 // Rebuild only when the count changes meaningfully (and always on first load),
 // to avoid jank on incremental store updates with ~50k places worldwide.
+// Also rebuild when $savedPlaceIds size changes so the saved badge appears/
+// disappears as the user toggles saves. Tracking size catches add/remove
+// but misses the swap case (save A + unsave B with no net size change) —
+// accepted tradeoff for now.
 $: if (map && styleLoaded && $places) {
 	const len = $places.length;
-	if (len !== lastPlacesLength) {
+	const savedSize = $savedPlaceIds.size;
+	if (len !== lastPlacesLength || savedSize !== lastSavedIdsSize) {
 		lastPlacesLength = len;
+		lastSavedIdsSize = savedSize;
 		syncPlacesToSource($places);
 	}
 }
@@ -239,6 +281,7 @@ onMount(async () => {
 		await Promise.all([
 			loadIconImage(map, "pin", "/icons/div-icon-pin.svg"),
 			loadIconImage(map, "pin-boosted", "/icons/boosted-icon-pin.svg"),
+			loadSavedBadgeSprite(map),
 		]);
 
 		map.addSource("places", {
@@ -338,8 +381,69 @@ onMount(async () => {
 			},
 		});
 
+		// Comment count badge — green disc on the pin's top-right corner.
+		// We use text-halo as the disc background: no extra sprite needed,
+		// and the halo grows proportionally with digit count (1 → 99 stays
+		// legible). Layered above the pin so it's never occluded.
+		map.addLayer({
+			id: "comment-badge",
+			type: "symbol",
+			source: "places",
+			filter: [
+				"all",
+				["!", ["has", "point_count"]],
+				[">", ["get", "comments"], 0],
+			],
+			layout: {
+				"text-field": ["to-string", ["get", "comments"]],
+				"text-font": ["Open Sans Semibold"],
+				"text-size": 9,
+				"text-allow-overlap": true,
+				"text-ignore-placement": true,
+				"text-rotation-alignment": "viewport",
+				"text-pitch-alignment": "viewport",
+				// Pin is 32×43 with icon-anchor: bottom. Top-right of the pin
+				// head is roughly (+10, -36) px from the anchor. text-offset
+				// is in ems, so divide by text-size (9).
+				"text-offset": ["literal", [10 / 9, -36 / 9]],
+			},
+			paint: {
+				"text-color": "#fff",
+				// bg-green-600
+				"text-halo-color": "#16A34A",
+				"text-halo-width": 6,
+				"text-halo-blur": 0,
+			},
+		});
+
+		// Saved badge — white disc with bookmark glyph on the pin's
+		// top-left corner. Filter only fires when the feature's `saved`
+		// flag is true (recomputed when $savedPlaceIds size changes).
+		map.addLayer({
+			id: "saved-badge",
+			type: "symbol",
+			source: "places",
+			filter: [
+				"all",
+				["!", ["has", "point_count"]],
+				["==", ["get", "saved"], true],
+			],
+			layout: {
+				"icon-image": "saved-badge",
+				"icon-size": 1,
+				"icon-anchor": "center",
+				// Top-left of the pin head, relative to the bottom-anchored pin.
+				"icon-offset": [-12, -38],
+				"icon-allow-overlap": true,
+				"icon-ignore-placement": true,
+				"icon-rotation-alignment": "viewport",
+				"icon-pitch-alignment": "viewport",
+			},
+		});
+
 		styleLoaded = true;
 		lastPlacesLength = -1;
+		lastSavedIdsSize = -1;
 		syncPlacesToSource($places);
 	});
 });
