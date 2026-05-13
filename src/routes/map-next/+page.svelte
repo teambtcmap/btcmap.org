@@ -16,11 +16,12 @@ import {
 } from "$lib/constants";
 import { places } from "$lib/store";
 import type { Place } from "$lib/types";
+import { isBoosted } from "$lib/utils";
 
 type PlaceFeature = {
 	type: "Feature";
 	geometry: { type: "Point"; coordinates: [number, number] };
-	properties: { id: number };
+	properties: { id: number; boosted: boolean };
 };
 
 type PlaceFeatureCollection = {
@@ -45,9 +46,27 @@ const buildFeatureCollection = (list: Place[]): PlaceFeatureCollection => ({
 		.map((p) => ({
 			type: "Feature",
 			geometry: { type: "Point", coordinates: [p.lon, p.lat] },
-			properties: { id: p.id },
+			properties: { id: p.id, boosted: Boolean(isBoosted(p)) },
 		})),
 });
+
+// Load an SVG/PNG into the map's image registry. MapLibre needs raster bitmaps
+// for sprites, so we route SVG through an <img> element first.
+const loadIconImage = (
+	m: MapLibreMap,
+	name: string,
+	url: string,
+): Promise<void> =>
+	new Promise((resolve, reject) => {
+		const img = new Image();
+		img.crossOrigin = "anonymous";
+		img.onload = () => {
+			if (!m.hasImage(name)) m.addImage(name, img);
+			resolve();
+		};
+		img.onerror = (err) => reject(err);
+		img.src = url;
+	});
 
 const syncPlacesToSource = (list: Place[]) => {
 	if (!map || !styleLoaded) return;
@@ -119,8 +138,13 @@ onMount(async () => {
 		"top-right",
 	);
 
-	map.on("load", () => {
+	map.on("load", async () => {
 		if (!map) return;
+
+		await Promise.all([
+			loadIconImage(map, "pin", "/icons/div-icon-pin.svg"),
+			loadIconImage(map, "pin-boosted", "/icons/boosted-icon-pin.svg"),
+		]);
 
 		map.addSource("places", {
 			type: "geojson",
@@ -191,18 +215,22 @@ onMount(async () => {
 			},
 		});
 
-		// Placeholder circles for individual points; sprites replace these in Phase 2.
-		// Drawn last so they sit on top of cluster discs at boundaries.
+		// Symbol layer for unclustered points; boosted places use the orange pin.
+		// Drawn last so pins sit on top of cluster discs at boundaries.
 		map.addLayer({
 			id: "unclustered-point",
-			type: "circle",
+			type: "symbol",
 			source: "places",
 			filter: ["!", ["has", "point_count"]],
-			paint: {
-				"circle-color": "#F7931A",
-				"circle-radius": 6,
-				"circle-stroke-color": "#fff",
-				"circle-stroke-width": 1,
+			layout: {
+				"icon-image": ["case", ["get", "boosted"], "pin-boosted", "pin"],
+				"icon-size": 1,
+				"icon-anchor": "bottom",
+				"icon-allow-overlap": true,
+				"icon-ignore-placement": true,
+				// Keep pins upright as the map rotates/pitches.
+				"icon-rotation-alignment": "viewport",
+				"icon-pitch-alignment": "viewport",
 			},
 		});
 
