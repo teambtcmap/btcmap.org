@@ -54,6 +54,7 @@
 		"i18n-iso-countries": "^7.14.0",
 		"js-confetti": "^0.13.1",
 		"leaflet": "^1.9.4",
+		"leaflet-rotate": "0.2.8",
 		"leaflet.featuregroup.subgroup": "^1.0.2",
 		"leaflet.locatecontrol": "^0.90.0",
 		"leaflet.markercluster": "^1.5.3",

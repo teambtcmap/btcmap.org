@@ -56,6 +56,9 @@ importers:
       leaflet:
         specifier: ^1.9.4
         version: 1.9.4
+      leaflet-rotate:
+        specifier: 0.2.8
+        version: 0.2.8(leaflet@1.9.4)
       leaflet.featuregroup.subgroup:
         specifier: ^1.0.2
         version: 1.0.2
@@ -1838,6 +1841,11 @@ packages:
   kleur@4.1.5:
     resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
     engines: {node: '>=6'}
+
+  leaflet-rotate@0.2.8:
+    resolution: {integrity: sha512-BHtkn35DuJ377yBNn/7XVuV0oIfwJtmqv/wFQ0Lvh7QuVCAD2wfCK0/m9oA3k/LVOnJG8VEGyf3Duf/wTVzeKQ==}
+    peerDependencies:
+      leaflet: ^1.9.3
 
   leaflet.featuregroup.subgroup@1.0.2:
     resolution: {integrity: sha512-9nCVg8nUe686+BtPbUT7ALOe/IA+8Mum+rkA8pfPpCkH0WvKevRrH+JMcMTjAoNQKVI0uxrWrLV5w298SS3ESA==}
@@ -3932,6 +3940,10 @@ snapshots:
   kind-of@6.0.3: {}
 
   kleur@4.1.5: {}
+
+  leaflet-rotate@0.2.8(leaflet@1.9.4):
+    dependencies:
+      leaflet: 1.9.4
 
   leaflet.featuregroup.subgroup@1.0.2: {}
 
