@@ -133,7 +133,7 @@ function generateBody(
 	areasText: string,
 ): string {
 	const timestamp = new Date(Date.now()).toISOString();
-	const taggingInstructions = `If you are a new contributor please read our Tagging Instructions [here](https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants).`;
+	const taggingInstructions = `If you are a new contributor please read our Tagging Instructions [here](https://wiki.btcmap.org/Tagging-Merchants).`;
 
 	switch (type) {
 		case "add-location":

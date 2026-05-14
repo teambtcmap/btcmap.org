@@ -151,7 +151,7 @@ onMount(async () => {
 				external>{$_('verifyLocation.osmLinkText')}</TextLink
 			>{$_('verifyLocation.descriptionPart2')}
 			<TextLink
-				link="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers"
+				link="https://wiki.btcmap.org/Tagging-Merchants#shadowy-supertaggers"
 				external>{$_('verifyLocation.wikiLinkText')}</TextLink
 			>
 			{$_('verifyLocation.descriptionPart3')} <InfoTooltip

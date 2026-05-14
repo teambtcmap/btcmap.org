@@ -82,7 +82,7 @@ const isMaintenance = data.maintenance ?? false;
 
 	<p class="text-center text-xl text-primary lg:text-left dark:text-white">
 		{$_('maintain.taggingInstructionsIntro')} <TextLink
-			link="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers">{$_('maintain.taggingInstructionsLink')}</TextLink
+			link="https://wiki.btcmap.org/Tagging-Merchants#shadowy-supertaggers">{$_('maintain.taggingInstructionsLink')}</TextLink
 		>.
 	</p>
 
