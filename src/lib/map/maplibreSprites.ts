@@ -1,23 +1,15 @@
 import type { Map as MapLibreMap } from "maplibre-gl";
 
+import { resolveMaterialIcon } from "$lib/materialIcons";
 import type { Place } from "$lib/types";
 import { isBoosted } from "$lib/utils";
 
-// Mirrors Icon.svelte's material-symbol resolution. Keep in sync.
-export const materialExceptions: Record<string, string> = {
-	camping: "material-symbols:camping-rounded",
-	gate: "material-symbols:gate",
-	cooking: "material-symbols:cooking",
-	dentistry: "material-symbols:dentistry",
-	sauna: "material-symbols:sauna",
-	info_outline: "material-symbols:info-outline",
-	skull: "material-symbols:skull",
-	currency_bitcoin: "material-symbols:currency-bitcoin",
-};
-
 export const resolveIconifyName = (icon: string): string => {
+	// "question_mark" is the API's placeholder for an untagged place; the
+	// Bitcoin glyph is a friendlier stand-in. Icon.svelte applies the same
+	// substitution upstream of its own resolution.
 	const key = icon === "question_mark" ? "currency_bitcoin" : icon;
-	return materialExceptions[key] ?? `ic:outline-${key.replace(/_/g, "-")}`;
+	return resolveMaterialIcon(key);
 };
 
 export const PIN_PATH =
@@ -49,11 +41,11 @@ export const fetchIconifyByName = async (
 	return await res.text();
 };
 
-// Cascading fallback for icon names that don't exist in `ic:outline`.
-// The btcmap dataset has ~6 such category values worldwide (e.g.
-// `potted_plant`, `footprint`); try material-symbols next, then fall
-// back to the Bitcoin glyph so every pin has at least a recognizable
-// shape.
+// Cascading fallback for icon names whose resolved Iconify name 404s.
+// The known-missing names are in the materialExceptions table now, so
+// this is the safety net for any future tag value that resolves to a
+// nonexistent `ic:outline-*`: try material-symbols next, then fall back
+// to the Bitcoin glyph so every pin has at least a recognizable shape.
 export const fetchIconInnerSvg = async (icon: string): Promise<string> => {
 	const primary = resolveIconifyName(icon);
 	const primarySvg = await fetchIconifyByName(primary);
