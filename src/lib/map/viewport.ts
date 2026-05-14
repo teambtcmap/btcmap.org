@@ -1,4 +1,5 @@
 import type { LatLngBounds } from "leaflet";
+import type { LngLatBounds } from "maplibre-gl";
 
 import { MERCHANT_LIST_LOW_ZOOM, MERCHANT_LIST_MIN_ZOOM } from "$lib/constants";
 import type { Leaflet, Place } from "$lib/types";
@@ -29,6 +30,26 @@ export const calculateRadiusKm = (bounds: LatLngBounds): number => {
 			Math.sin(dLon / 2);
 	const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 	return R * c * 1.1; // Add 10% buffer
+};
+
+// MapLibre-shaped haversine — `calculateRadiusKm` above takes a Leaflet
+// `LatLngBounds`, so /map-next needs its own variant for MapLibre's
+// `LngLatBounds`. No 10% buffer here: the enrichment fetch it feeds wants
+// a tight radius matching the visible viewport.
+export const calculateRadiusKmFromLngLatBounds = (
+	bounds: LngLatBounds,
+): number => {
+	const center = bounds.getCenter();
+	const ne = bounds.getNorthEast();
+	const R = 6371; // Earth radius in km
+	const dLat = ((ne.lat - center.lat) * Math.PI) / 180;
+	const dLon = ((ne.lng - center.lng) * Math.PI) / 180;
+	const a =
+		Math.sin(dLat / 2) ** 2 +
+		Math.cos((center.lat * Math.PI) / 180) *
+			Math.cos((ne.lat * Math.PI) / 180) *
+			Math.sin(dLon / 2) ** 2;
+	return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
 // Get expanded bounds with buffer for preloading

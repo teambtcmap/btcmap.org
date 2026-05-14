@@ -7,7 +7,6 @@ import { featureCollection, point } from "@turf/helpers";
 import type { Feature, FeatureCollection, Point, Polygon } from "geojson";
 import type {
 	GeoJSONSource,
-	LngLatBounds,
 	MapGeoJSONFeature,
 	MapLayerMouseEvent,
 	Map as MapLibreMap,
@@ -24,7 +23,19 @@ import {
 	LABEL_VISIBLE_ZOOM,
 } from "$lib/constants";
 import { getDisplayLang, locale } from "$lib/i18n";
+import {
+	BASEMAP_STORAGE_KEY,
+	BASEMAPS,
+	type BasemapId,
+	getStoredBasemap,
+} from "$lib/map/basemaps";
+import {
+	type HashCoords,
+	parseHashCoords,
+	writeHashCoords,
+} from "$lib/map/mapHash";
 import { ensureSpritesForPlaces, loadSvgImage } from "$lib/map/maplibreSprites";
+import { calculateRadiusKmFromLngLatBounds } from "$lib/map/viewport";
 import { parseMerchantHash } from "$lib/merchantDrawerHash";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { merchantList } from "$lib/merchantListStore";
@@ -112,92 +123,9 @@ const EMPTY_HULL_COLLECTION: FeatureCollection<Polygon> = {
 	features: [],
 };
 
-// Raster basemap catalog. All three sources/layers are added to the
-// style at init; switching is just a visibility toggle, no setStyle.
-type BasemapId = "osm" | "carto-light" | "carto-dark";
-
-const BASEMAPS: { id: BasemapId; label: string }[] = [
-	{ id: "osm", label: "OpenStreetMap" },
-	{ id: "carto-light", label: "Carto Light" },
-	{ id: "carto-dark", label: "Carto Dark" },
-];
-
-const BASEMAP_STORAGE_KEY = "btcmap-next-basemap";
-
-const isBasemapId = (v: string): v is BasemapId =>
-	v === "osm" || v === "carto-light" || v === "carto-dark";
-
-const getStoredBasemap = (): BasemapId | null => {
-	if (typeof window === "undefined") return null;
-	try {
-		const v = localStorage.getItem(BASEMAP_STORAGE_KEY);
-		if (v && isBasemapId(v)) return v;
-	} catch {
-		// localStorage unavailable
-	}
-	return null;
-};
-
 const EMPTY_COLLECTION: PlaceFeatureCollection = {
 	type: "FeatureCollection",
 	features: [],
-};
-
-// URL hash format mirrors /map: `#zoom/lat/lng&merchant=123&view=…`.
-// We extend it with optional `/bearing/pitch` segments after lng, only
-// written when non-zero. Drawer params after `&` are preserved untouched.
-type HashCoords = {
-	zoom: number;
-	lat: number;
-	lng: number;
-	bearing: number;
-	pitch: number;
-};
-
-const parseHashCoords = (): HashCoords | null => {
-	if (typeof window === "undefined") return null;
-	const hash = window.location.hash.substring(1);
-	const ampIndex = hash.indexOf("&");
-	const coordsPart = ampIndex !== -1 ? hash.substring(0, ampIndex) : hash;
-	if (!coordsPart.includes("/")) return null;
-	const parts = coordsPart.split("/");
-	if (parts.length < 3) return null;
-	const zoom = Number.parseFloat(parts[0]);
-	const lat = Number.parseFloat(parts[1]);
-	const lng = Number.parseFloat(parts[2]);
-	if (Number.isNaN(zoom) || Number.isNaN(lat) || Number.isNaN(lng)) return null;
-	const bearing = parts[3] ? Number.parseFloat(parts[3]) : 0;
-	const pitch = parts[4] ? Number.parseFloat(parts[4]) : 0;
-	return {
-		zoom,
-		lat,
-		lng,
-		bearing: Number.isNaN(bearing) ? 0 : bearing,
-		pitch: Number.isNaN(pitch) ? 0 : pitch,
-	};
-};
-
-const writeHashCoords = (c: HashCoords) => {
-	if (typeof window === "undefined") return;
-	const currentHash = window.location.hash.substring(1);
-	const ampIndex = currentHash.indexOf("&");
-	let existingParams = "";
-	if (ampIndex !== -1 && currentHash.substring(0, ampIndex).includes("/")) {
-		existingParams = currentHash.substring(ampIndex);
-	} else if (!currentHash.includes("/") && currentHash.length > 0) {
-		existingParams = `&${currentHash}`;
-	}
-	let coordsPart = `${c.zoom.toFixed(2)}/${c.lat.toFixed(5)}/${c.lng.toFixed(5)}`;
-	if (c.bearing !== 0 || c.pitch !== 0) {
-		coordsPart += `/${c.bearing.toFixed(1)}`;
-	}
-	if (c.pitch !== 0) {
-		coordsPart += `/${c.pitch.toFixed(1)}`;
-	}
-	const newHash = `#${coordsPart}${existingParams}`;
-	const search = window.location.search || "";
-	const url = window.location.pathname + search + newHash;
-	history.replaceState(history.state, "", url);
 };
 
 const buildFeatureCollection = (list: Place[]): PlaceFeatureCollection => {
@@ -302,22 +230,6 @@ const syncPlacesToSource = (list: Place[]) => {
 	ensureSpritesForPlaces(map, list);
 };
 
-// MapLibre-shaped haversine — `src/lib/map/viewport.ts` takes a Leaflet
-// LatLngBounds; reusing it would require a shim, so we inline the math.
-const computeRadiusKmFromBounds = (b: LngLatBounds): number => {
-	const center = b.getCenter();
-	const ne = b.getNorthEast();
-	const R = 6371; // km
-	const dLat = ((ne.lat - center.lat) * Math.PI) / 180;
-	const dLon = ((ne.lng - center.lng) * Math.PI) / 180;
-	const a =
-		Math.sin(dLat / 2) ** 2 +
-		Math.cos((center.lat * Math.PI) / 180) *
-			Math.cos((ne.lat * Math.PI) / 180) *
-			Math.sin(dLon / 2) ** 2;
-	return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-};
-
 // Debounced enrichment trigger — fires on moveend when zoomed in enough
 // to show labels. The store handles aborting any in-flight stale request.
 // 500ms (vs MAP_DEBOUNCE_DELAY=300) matches /map's dedicated debounce for
@@ -329,7 +241,7 @@ const triggerEnrichmentIfNeeded = debounce(() => {
 	if (!map) return;
 	if (map.getZoom() < LABEL_VISIBLE_ZOOM) return;
 	const center = map.getCenter();
-	const radiusKm = computeRadiusKmFromBounds(map.getBounds());
+	const radiusKm = calculateRadiusKmFromLngLatBounds(map.getBounds());
 	merchantList.fetchEnrichedDetails(
 		{ lat: center.lat, lon: center.lng },
 		radiusKm,
