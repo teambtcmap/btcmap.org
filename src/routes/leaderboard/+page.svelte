@@ -331,7 +331,7 @@ const handlePeriodChange = async (event: Event) => {
 
 		<PrimaryButton
 			style="w-[207px] mx-auto py-3 rounded-xl"
-			link="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers-"
+			link="https://wiki.btcmap.org/Tagging-Merchants#shadowy-supertaggers-"
 			external
 		>
 			{$_('leaderboard.joinButton')}

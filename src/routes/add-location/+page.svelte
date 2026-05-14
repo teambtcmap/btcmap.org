@@ -396,7 +396,7 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 
 	<p class="mt-10 text-center text-lg font-semibold text-primary md:text-xl dark:text-white">
 		{$_('addLocation.businessOwner')} <TextLink
-			link="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Merchant-Best-Practices"
+			link="https://wiki.btcmap.org/Merchant-Best-Practices"
 			external>{$_('addLocation.bestPractices')}</TextLink
 		> {$_('addLocation.guide')}
 	</p>
@@ -801,7 +801,7 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 					/>
 					<PrimaryButton
 						style="w-full py-3 rounded-xl"
-						link="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers-"
+						link="https://wiki.btcmap.org/Tagging-Merchants#shadowy-supertaggers-"
 						external={true}
 					>
 						{$_('addLocation.supertaggerWikiButton')}

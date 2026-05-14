@@ -413,7 +413,7 @@ $: {
 
 	<p class="text-center text-sm text-body md:text-left dark:text-white">
 		{$_('dashboard.tagsNotePart1')} <TextLink
-			link="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#tagging-guidance"
+			link="https://wiki.btcmap.org/Tagging-Merchants#tagging-guidance"
 			external>{$_('dashboard.tagsNoteLink')}</TextLink
 		>{$_('dashboard.tagsNotePart2')}
 	</p>

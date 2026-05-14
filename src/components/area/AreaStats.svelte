@@ -401,7 +401,7 @@ onMount(async () => {
 
 <p class="text-center text-sm text-body md:text-left dark:text-white">
 	{$_(`areaStats.tagsInfo`)} <TextLink
-		link="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#tagging-guidance"
+		link="https://wiki.btcmap.org/Tagging-Merchants#tagging-guidance"
 		external>{$_(`areaStats.here`)}</TextLink
 	>.
 	<br />

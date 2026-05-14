@@ -38,7 +38,7 @@ let issues: RpcIssue[] = data.rpcResult.requested_issues;
 
 	<p class="text-center text-xl text-primary lg:text-left dark:text-white">
 		{$_("taggingIssues.descriptionPart1")}<TextLink
-			link="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants">{$_("taggingIssues.linkText")}</TextLink
+			link="https://wiki.btcmap.org/Tagging-Merchants">{$_("taggingIssues.linkText")}</TextLink
 		>{$_("taggingIssues.descriptionPart2")}
 	</p>
 	<IssuesTable title={$_("taggingIssues.tableTitle")} {issues} loading={false} initialPageSize={50} />
