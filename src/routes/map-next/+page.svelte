@@ -922,7 +922,9 @@ onDestroy(() => {
 	}
 	.basemap-switcher {
 		position: absolute;
-		top: 110px;
+		/* Sits below the top-right control stack (zoom + compass + geolocate,
+		   ~136px tall). 148px clears it with a small gap. */
+		top: 148px;
 		right: 10px;
 		z-index: 1;
 		background: white;
