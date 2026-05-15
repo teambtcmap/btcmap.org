@@ -56,6 +56,7 @@ import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
 import { debounce, errToast, isBoosted } from "$lib/utils";
 
+import MapSearchBar from "../map/components/MapSearchBar.svelte";
 import MerchantDrawerHash from "../map/components/MerchantDrawerHash.svelte";
 import MerchantListPanel from "../map/components/MerchantListPanel.svelte";
 
@@ -1181,6 +1182,33 @@ onDestroy(() => {
 </svelte:head>
 
 <div bind:this={mapContainer} class="map-container"></div>
+
+<!--
+	Floating search bar — desktop: top-left, mobile: bottom-center.
+	Hidden on mobile while the merchant drawer is open so the drawer
+	gets the full bottom area. The bar itself hides when the list panel
+	is open (the panel renders its own search input in the same slot).
+-->
+{#if styleLoaded}
+	<div
+		class="pointer-events-none z-[1000] max-md:fixed max-md:right-3 max-md:bottom-[calc(5rem+env(safe-area-inset-bottom))] max-md:left-3 md:absolute md:top-3 md:left-3
+			{$merchantDrawer.isOpen ? 'max-md:hidden' : ''}"
+	>
+		<MapSearchBar
+			onSearch={handlePanelSearch}
+			onFocus={() => {
+				merchantList.open();
+				updateMerchantList({ force: true });
+			}}
+			onNearbyClick={() => {
+				merchantList.open();
+				updateMerchantList({ force: true });
+			}}
+			nearbyCount={$merchantList.totalCount}
+			isLoadingCount={$merchantList.isLoadingList}
+		/>
+	</div>
+{/if}
 
 <div class="basemap-switcher">
 	<select
