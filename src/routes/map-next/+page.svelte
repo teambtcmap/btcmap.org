@@ -7,6 +7,7 @@ import { featureCollection, point } from "@turf/helpers";
 import type { Feature, FeatureCollection, Point, Polygon } from "geojson";
 import type {
 	GeoJSONSource,
+	LngLatBounds,
 	MapGeoJSONFeature,
 	MapLayerMouseEvent,
 	Map as MapLibreMap,
@@ -15,14 +16,19 @@ import type {
 import { onDestroy, onMount } from "svelte";
 import { get } from "svelte/store";
 
+import { trackEvent } from "$lib/analytics";
 import {
 	CLUSTERING_DISABLED_ZOOM,
 	DEFAULT_MAP_LAT,
 	DEFAULT_MAP_LNG,
 	DEFAULT_MAP_ZOOM,
 	LABEL_VISIBLE_ZOOM,
+	MAP_DEBOUNCE_DELAY,
+	MERCHANT_LIST_MAX_ITEMS,
+	MERCHANT_LIST_MIN_ZOOM,
+	NEARBY_RADIUS_MULTIPLIER,
 } from "$lib/constants";
-import { getDisplayLang, locale } from "$lib/i18n";
+import { _, getDisplayLang, locale } from "$lib/i18n";
 import {
 	BASEMAP_STORAGE_KEY,
 	BASEMAPS,
@@ -35,18 +41,23 @@ import {
 	writeHashCoords,
 } from "$lib/map/mapHash";
 import { ensureSpritesForPlaces, loadSvgImage } from "$lib/map/maplibreSprites";
-import { calculateRadiusKmFromLngLatBounds } from "$lib/map/viewport";
+import {
+	calculateRadiusKmFromLngLatBounds,
+	getZoomBehavior,
+} from "$lib/map/viewport";
 import { parseMerchantHash } from "$lib/merchantDrawerHash";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
+import type { MerchantListMode } from "$lib/merchantListStore";
 import { merchantList } from "$lib/merchantListStore";
 import { savedPlaceIds } from "$lib/session";
 import { places, placesById } from "$lib/store";
 import { theme } from "$lib/theme";
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
-import { debounce, isBoosted } from "$lib/utils";
+import { debounce, errToast, isBoosted } from "$lib/utils";
 
 import MerchantDrawerHash from "../map/components/MerchantDrawerHash.svelte";
+import MerchantListPanel from "../map/components/MerchantListPanel.svelte";
 
 type PlaceFeature = {
 	type: "Feature";
@@ -137,6 +148,220 @@ let deepLinkPanTimer: ReturnType<typeof setTimeout> | null = null;
 const panToPlace = (lat: number, lon: number) => {
 	if (!map) return;
 	map.easeTo({ center: [lon, lat], zoom: DEFAULT_MAP_ZOOM, duration: 300 });
+};
+
+// Reactive zoom level for the panel — drives the "zoom in" prompt and the
+// nearby-vs-low-zoom branching in updateMerchantList. Kept in sync via the
+// moveend handler. Until the map's first moveend fires it stays at the
+// default; that's fine because the panel itself is closed by default.
+let currentZoom = DEFAULT_MAP_ZOOM;
+
+// Latest in-flight search request; aborted when a new query supersedes
+// it or the component unmounts.
+let searchAbortController: AbortController | null = null;
+
+// Expand a MapLibre LngLatBounds by `bufferPercent` on each edge, mirroring
+// /map's `getBufferedBounds(0.25)` for the local-markers nearby filter.
+const getBufferedBoundsLngLat = (
+	bounds: LngLatBounds,
+	bufferPercent: number,
+): { south: number; west: number; north: number; east: number } => {
+	const south = bounds.getSouth();
+	const north = bounds.getNorth();
+	const west = bounds.getWest();
+	const east = bounds.getEast();
+	const latBuffer = (north - south) * bufferPercent;
+	const lngBuffer = (east - west) * bufferPercent;
+	return {
+		south: south - latBuffer,
+		west: west - lngBuffer,
+		north: north + latBuffer,
+		east: east + lngBuffer,
+	};
+};
+
+// Refresh the panel's nearby list based on the current viewport. Mirrors
+// /map's `updateMerchantList` minus the panel-offset bookkeeping (out of
+// scope for this commit per the parity plan).
+const updateMerchantList = (opts?: { force?: boolean }) => {
+	if (!map) return;
+
+	// Search mode is independent of the map viewport; skip refresh.
+	if (get(merchantList).mode === "search") return;
+
+	const bounds = map.getBounds();
+	const center = map.getCenter();
+	const behavior = getZoomBehavior(currentZoom);
+	const listOpen = get(merchantList).isOpen;
+	const allowHeavyFetch = opts?.force || listOpen;
+
+	switch (behavior) {
+		case "local-markers": {
+			// Zoom 15+: filter the already-loaded $places by an expanded
+			// viewport, then enrich with names when the panel is open or we're
+			// above the label threshold.
+			const buffered = getBufferedBoundsLngLat(bounds, 0.25);
+			const visible = get(places).filter(
+				(p) =>
+					!p.deleted_at &&
+					p.lat >= buffered.south &&
+					p.lat <= buffered.north &&
+					p.lon >= buffered.west &&
+					p.lon <= buffered.east,
+			);
+			merchantList.setMerchants(visible, center.lat, center.lng);
+			if (listOpen || currentZoom >= LABEL_VISIBLE_ZOOM) {
+				if (allowHeavyFetch || currentZoom >= LABEL_VISIBLE_ZOOM) {
+					const radiusKm =
+						calculateRadiusKmFromLngLatBounds(bounds) *
+						NEARBY_RADIUS_MULTIPLIER;
+					merchantList.fetchEnrichedDetails(
+						{ lat: center.lat, lon: center.lng },
+						radiusKm,
+					);
+				}
+			}
+			break;
+		}
+		case "api-with-limit": {
+			// Zoom 11-14: API search; count-only when panel is closed.
+			const radiusKm =
+				calculateRadiusKmFromLngLatBounds(bounds) * NEARBY_RADIUS_MULTIPLIER;
+			if (!listOpen || !allowHeavyFetch) {
+				merchantList.fetchCountOnly(
+					{ lat: center.lat, lon: center.lng },
+					radiusKm,
+				);
+			} else {
+				merchantList.fetchAndReplaceList(
+					{ lat: center.lat, lon: center.lng },
+					radiusKm,
+					{ hideIfExceeds: MERCHANT_LIST_MAX_ITEMS },
+				);
+			}
+			break;
+		}
+		default:
+			merchantList.setMerchants([], 0, 0);
+	}
+};
+
+const debouncedUpdateMerchantList = debounce(
+	updateMerchantList,
+	MAP_DEBOUNCE_DELAY,
+);
+
+// MerchantListPanel callbacks — see /map/+page.svelte for the prod
+// equivalents. Camera moves do NOT account for the panel width yet; for
+// the first cut the merchant gets centered in the full viewport and may
+// sit under the panel. Hover highlight is also deferred — MapLibre paints
+// from feature properties, so we'd need feature-state plumbing that
+// doesn't exist in /map-next yet.
+
+const panToNearbyMerchant = (place: Place) => {
+	if (!map) return;
+	map.easeTo({ center: [place.lon, place.lat], duration: 300 });
+};
+
+const zoomToSearchResult = (place: Place) => {
+	if (!map) return;
+	map.easeTo({
+		center: [place.lon, place.lat],
+		zoom: DEFAULT_MAP_ZOOM,
+		duration: 300,
+	});
+};
+
+const zoomToNearbyLevel = () => {
+	if (!map) return;
+	trackEvent("zoom_in_click");
+	map.zoomTo(MERCHANT_LIST_MIN_ZOOM, { duration: 300 });
+};
+
+const isValidCoord = (lat: number, lon: number): boolean =>
+	Number.isFinite(lat) &&
+	Number.isFinite(lon) &&
+	lat >= -90 &&
+	lat <= 90 &&
+	lon >= -180 &&
+	lon <= 180;
+
+const fitSearchResultBounds = () => {
+	if (!map) return;
+	const results = get(merchantList).searchResults.filter((p) =>
+		isValidCoord(p.lat, p.lon),
+	);
+	if (results.length === 0) return;
+	if (results.length === 1) {
+		map.easeTo({
+			center: [results[0].lon, results[0].lat],
+			zoom: DEFAULT_MAP_ZOOM,
+			duration: 300,
+		});
+		return;
+	}
+	let minLng = results[0].lon;
+	let maxLng = results[0].lon;
+	let minLat = results[0].lat;
+	let maxLat = results[0].lat;
+	for (const p of results) {
+		if (p.lon < minLng) minLng = p.lon;
+		if (p.lon > maxLng) maxLng = p.lon;
+		if (p.lat < minLat) minLat = p.lat;
+		if (p.lat > maxLat) maxLat = p.lat;
+	}
+	map.fitBounds(
+		[
+			[minLng, minLat],
+			[maxLng, maxLat],
+		],
+		{ padding: 60, duration: 300 },
+	);
+};
+
+// Mirrors /map's `executeSearch` — abort any prior request, fetch via the
+// SvelteKit endpoint, hand results to the store. Errors surface as toasts.
+const executeSearch = async (query: string) => {
+	searchAbortController?.abort();
+	if (query.length < 3) return;
+
+	trackEvent("search_query");
+	searchAbortController = new AbortController();
+
+	// Close any drawer so it doesn't sit on top of the result list.
+	merchantDrawer.close();
+	merchantList.openSearchMode(true);
+
+	try {
+		const response = await fetch(
+			`/api/search/places?name=${encodeURIComponent(query)}`,
+			{ signal: searchAbortController.signal },
+		);
+		if (!response.ok) throw new Error("Search API error");
+		const results: Place[] = await response.json();
+		merchantList.openWithSearchResults(query, results);
+	} catch (error) {
+		if (error instanceof Error && error.name === "AbortError") return;
+		console.error("Search error:", error);
+		errToast(get(_)("errors.searchUnavailable"));
+		merchantList.exitSearchMode();
+	}
+};
+
+const debouncedPanelSearch = debounce(
+	(query: string) => executeSearch(query),
+	300,
+);
+
+const handlePanelSearch = (query: string) => {
+	debouncedPanelSearch(query);
+};
+
+const handleModeChange = (mode: MerchantListMode) => {
+	if (mode === "nearby") {
+		searchAbortController?.abort();
+		updateMerchantList();
+	}
 };
 
 // Browser back/forward / external hash mutation → re-sync the drawer.
@@ -410,6 +635,10 @@ onMount(async () => {
 		touchZoomRotate: true,
 		pitchWithRotate: false,
 	});
+
+	// Seed currentZoom from the initial viewport so the merchant list panel
+	// reads the right value before the first moveend fires.
+	currentZoom = hashCoords?.zoom ?? DEFAULT_MAP_ZOOM;
 
 	map.addControl(
 		new maplibre.NavigationControl({
@@ -848,6 +1077,14 @@ onMount(async () => {
 		// spam the API; the store internally aborts any stale request.
 		map.on("moveend", triggerEnrichmentIfNeeded);
 
+		// Track current zoom + refresh the merchant list panel's nearby items
+		// based on the new viewport. Debounced to keep cost off the move path.
+		map.on("moveend", () => {
+			if (!map) return;
+			currentZoom = map.getZoom();
+			debouncedUpdateMerchantList();
+		});
+
 		// Persist viewport in the URL hash. Preserves any merchant=… params
 		// added by the drawer so shareable URLs round-trip.
 		const persistViewportToHash = () => {
@@ -923,6 +1160,10 @@ $: if (map && styleLoaded && $theme && $theme !== lastAppliedLabelTheme) {
 onDestroy(() => {
 	destroyed = true;
 	triggerEnrichmentIfNeeded.cancel();
+	debouncedUpdateMerchantList.cancel();
+	debouncedPanelSearch.cancel();
+	searchAbortController?.abort();
+	searchAbortController = null;
 	if (typeof window !== "undefined") {
 		window.removeEventListener("hashchange", handleHashChange);
 	}
@@ -952,6 +1193,24 @@ onDestroy(() => {
 		{/each}
 	</select>
 </div>
+
+<MerchantListPanel
+	onPanToNearbyMerchant={panToNearbyMerchant}
+	onZoomToSearchResult={zoomToSearchResult}
+	onZoomToNearbyLevel={zoomToNearbyLevel}
+	onFitSearchResultBounds={fitSearchResultBounds}
+	onHoverStart={() => {
+		// Hover highlight requires feature-state plumbing that doesn't
+		// exist in /map-next yet — deferred to a follow-up polish.
+	}}
+	onHoverEnd={() => {
+		// See onHoverStart above.
+	}}
+	onSearch={handlePanelSearch}
+	onModeChange={handleModeChange}
+	onRefresh={() => updateMerchantList({ force: true })}
+	{currentZoom}
+/>
 
 <MerchantDrawerHash />
 
