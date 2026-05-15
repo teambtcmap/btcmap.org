@@ -923,9 +923,10 @@ onDestroy(() => {
 	}
 	.basemap-switcher {
 		position: absolute;
-		/* Sits below the top-right control stack (zoom + compass + geolocate,
-		   ~136px tall). 148px clears it with a small gap. */
-		top: 148px;
+		/* Sits below the top-right control stack (zoom + compass + globe +
+		   geolocate, ~175px tall under maplibre-gl v5). 187px clears it
+		   with a small gap. Adjust if the stack changes. */
+		top: 187px;
 		right: 10px;
 		z-index: 1;
 		background: white;
