@@ -92,6 +92,36 @@ let lastPlacesLength = -1;
 let lastSavedIdsSize = -1;
 let lastEnrichedCacheSize = -1;
 let lastLocale: string | null | undefined;
+let lastAppliedLabelTheme: "light" | "dark" | undefined;
+
+// Place-label colors — mirror the same palette `app.css` already exposes
+// for the legacy Leaflet permanent tooltips (.marker-label /
+// .marker-label-boosted, src/app.css:196-214). MapLibre paint expressions
+// can't read CSS custom properties, so the values are duplicated here.
+const LABEL_PALETTE = {
+	light: {
+		regular: "#0e7490", // cyan-700
+		boosted: "#f97316", // orange-500
+		halo: "#ffffff",
+	},
+	dark: {
+		regular: "#22d3ee", // cyan-400 — brighter for dark backgrounds
+		boosted: "#fb923c", // orange-400
+		halo: "rgba(0, 0, 0, 0.95)",
+	},
+};
+
+const applyLabelPalette = (m: MapLibreMap, t: "light" | "dark" | undefined) => {
+	if (!m.getLayer("place-label")) return;
+	const palette = LABEL_PALETTE[t === "dark" ? "dark" : "light"];
+	m.setPaintProperty("place-label", "text-color", [
+		"case",
+		["get", "boosted"],
+		palette.boosted,
+		palette.regular,
+	]);
+	m.setPaintProperty("place-label", "text-halo-color", palette.halo);
+};
 // Latest-wins guard for the async getClusterLeaves callback. Mouseenter
 // fires per-feature, so a quick sweep across multiple clusters can stack
 // pending leaf fetches; we only commit the hull whose cluster id is still
@@ -872,12 +902,23 @@ onMount(async () => {
 		lastPlacesLength = -1;
 		lastSavedIdsSize = -1;
 		lastEnrichedCacheSize = -1;
+		// Apply theme-dependent label palette now that the layer exists.
+		applyLabelPalette(map, get(theme));
+		lastAppliedLabelTheme = get(theme);
 		syncPlacesToSource($places);
 		// Kick once on load — if the user lands above the threshold, labels
 		// should appear without requiring a move.
 		triggerEnrichmentIfNeeded();
 	});
 });
+
+// Theme toggle → re-color the place-label layer in place. setPaintProperty
+// is cheap and avoids rebuilding the source. Guarded by styleLoaded so we
+// don't fire before the layer exists.
+$: if (map && styleLoaded && $theme && $theme !== lastAppliedLabelTheme) {
+	lastAppliedLabelTheme = $theme;
+	applyLabelPalette(map, $theme);
+}
 
 onDestroy(() => {
 	destroyed = true;
