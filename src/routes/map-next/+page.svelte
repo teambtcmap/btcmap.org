@@ -29,12 +29,7 @@ import {
 	NEARBY_RADIUS_MULTIPLIER,
 } from "$lib/constants";
 import { _, getDisplayLang, locale } from "$lib/i18n";
-import {
-	BASEMAP_STORAGE_KEY,
-	BASEMAPS,
-	type BasemapId,
-	getStoredBasemap,
-} from "$lib/map/basemaps";
+import { BASEMAPS, type BasemapId, getStoredBasemap } from "$lib/map/basemaps";
 import {
 	type HashCoords,
 	parseHashCoords,
@@ -56,6 +51,7 @@ import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
 import { debounce, errToast, isBoosted } from "$lib/utils";
 
+import { BasemapsControl } from "./controls/BasemapsControl";
 import { BoostToggleControl } from "./controls/BoostToggleControl";
 import { DataRefreshControl } from "./controls/DataRefreshControl";
 import { NavButtonsControl } from "./controls/NavButtonsControl";
@@ -84,23 +80,6 @@ type PlaceFeatureCollection = {
 let mapContainer: HTMLDivElement;
 let map: MapLibreMap | undefined;
 let destroyed = false;
-let selectedBasemap: BasemapId = "osm"; // overridden in onMount once theme + storage are read
-
-const handleBasemapChange = () => {
-	if (!map) return;
-	for (const b of BASEMAPS) {
-		map.setLayoutProperty(
-			b.id,
-			"visibility",
-			b.id === selectedBasemap ? "visible" : "none",
-		);
-	}
-	try {
-		localStorage.setItem(BASEMAP_STORAGE_KEY, selectedBasemap);
-	} catch {
-		// localStorage unavailable; skip persistence
-	}
-};
 let spiderfier: Spiderfy | undefined;
 let styleLoaded = false;
 let lastPlacesLength = -1;
@@ -535,17 +514,20 @@ $: if (map && styleLoaded && $places) {
 
 onMount(async () => {
 	const maplibre = await import("maplibre-gl");
-	// User may have navigated away while the dynamic import was in flight;
-	// bail out before instantiating against an unmounted container.
+	// User may have navigated away while the dynamic import was in
+	// flight; bail before instantiating against an unmounted container.
 	if (destroyed) return;
 
 	// All available basemaps are raster tile sources, declared upfront so
-	// the basemap switcher only has to toggle layer visibility — no
-	// setStyle calls, which avoid the tile-compile cascade that broke the
-	// first attempt at this in Phase 4.
+	// the basemap picker only has to toggle layer visibility — no
+	// setStyle calls, which avoid the tile-compile cascade that broke
+	// the first attempt at this in Phase 4.
 	const initialBasemap: BasemapId =
 		getStoredBasemap() ?? (get(theme) === "dark" ? "carto-dark" : "osm");
-	selectedBasemap = initialBasemap;
+
+	const OSM_ATTR =
+		'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+	const CARTO_ATTR = `${OSM_ATTR} &copy; <a href="https://carto.com/attributions">CARTO</a>`;
 
 	const style: StyleSpecification = {
 		version: 8,
@@ -562,8 +544,7 @@ onMount(async () => {
 					"https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
 				],
 				tileSize: 256,
-				attribution:
-					'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+				attribution: OSM_ATTR,
 				maxzoom: 19,
 			},
 			"carto-light": {
@@ -575,8 +556,7 @@ onMount(async () => {
 					"https://d.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
 				],
 				tileSize: 256,
-				attribution:
-					'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+				attribution: CARTO_ATTR,
 				maxzoom: 19,
 			},
 			"carto-dark": {
@@ -588,8 +568,7 @@ onMount(async () => {
 					"https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
 				],
 				tileSize: 256,
-				attribution:
-					'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+				attribution: CARTO_ATTR,
 				maxzoom: 19,
 			},
 		},
@@ -671,6 +650,15 @@ onMount(async () => {
 	map.addControl(new NavButtonsControl(), "top-right");
 	map.addControl(new BoostToggleControl(), "top-right");
 	map.addControl(new DataRefreshControl(), "top-right");
+
+	// Basemap picker — layers-icon button that expands on hover/click,
+	// matching the L.control.layers shape prod uses. Owns its own
+	// localStorage persistence. The three basemap layers were declared in
+	// the initial style spec above; this control only toggles visibility.
+	map.addControl(
+		new BasemapsControl({ basemaps: BASEMAPS, initial: initialBasemap }),
+		"top-right",
+	);
 
 	// Mirror /map's behavior: sync location into the userLocation store so
 	// the merchant list panel can compute distances without prompting again.
@@ -1220,18 +1208,6 @@ onDestroy(() => {
 	</div>
 {/if}
 
-<div class="basemap-switcher">
-	<select
-		bind:value={selectedBasemap}
-		on:change={handleBasemapChange}
-		aria-label="Basemap"
-	>
-		{#each BASEMAPS as bm (bm.id)}
-			<option value={bm.id}>{bm.label}</option>
-		{/each}
-	</select>
-</div>
-
 <MerchantListPanel
 	onPanToNearbyMerchant={panToNearbyMerchant}
 	onZoomToSearchResult={zoomToSearchResult}
@@ -1259,37 +1235,43 @@ onDestroy(() => {
 		width: 100%;
 		height: 100%;
 	}
-	.basemap-switcher {
+	/* Basemap picker — IControl that owns its own container; the popup
+	   is absolutely positioned relative to it. Hover-or-click the icon
+	   to expand the radio list. */
+	:global(.maplibre-next-basemaps) {
+		position: relative;
+	}
+	:global(.maplibre-next-basemaps-popup) {
 		position: absolute;
-		/* Sits below the top-right control stack. With nav (87) + globe (29)
-		   + geolocate (29) + nav-buttons (116) + boost (29) + data-refresh
-		   (29) buttons and a 10px gap between each ctrl-group, plus the 10px
-		   top margin maplibre-gl applies to the first group, the stack tops
-		   out at ~379px when data-refresh is visible. 391px clears it with
-		   a small gap. Adjust if the stack changes. */
-		top: 391px;
-		right: 10px;
-		z-index: 1;
+		top: 0;
+		right: calc(100% + 6px);
 		background: white;
 		color: #111827; /* gray-900 */
 		border-radius: 4px;
-		padding: 2px 4px;
-		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+		padding: 4px 0;
+		min-width: 140px;
+		font-size: 13px;
 	}
-	/* Dark-mode follows the same `.dark` root class as the rest of the
-	   site (see src/app.css). Colors match the Leaflet dark-control
-	   palette so this switcher reads consistently with the rest of the
-	   chrome once we land on a dark basemap. */
-	:global(.dark) .basemap-switcher {
-		background: #1f2937; /* gray-800 — matches --leaflet-bg */
+	:global(.dark .maplibre-next-basemaps-popup) {
+		background: #1f2937; /* gray-800 — matches --leaflet-bg in app.css */
 		color: #f3f4f6; /* gray-100 */
 	}
-	.basemap-switcher select {
-		background: transparent;
-		border: none;
-		font-size: 12px;
+	:global(.maplibre-next-basemaps-option) {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		padding: 4px 10px;
 		cursor: pointer;
-		color: inherit;
+	}
+	:global(.maplibre-next-basemaps-option:hover) {
+		background: rgba(0, 0, 0, 0.05);
+	}
+	:global(.dark .maplibre-next-basemaps-option:hover) {
+		background: rgba(255, 255, 255, 0.08);
+	}
+	:global(.maplibre-next-basemaps-option input) {
+		margin: 0;
 	}
 
 	/* Anchor-based buttons inside the custom IControls (NavButtons / Boost /
