@@ -56,6 +56,9 @@ import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
 import { debounce, errToast, isBoosted } from "$lib/utils";
 
+import { BoostToggleControl } from "./controls/BoostToggleControl";
+import { DataRefreshControl } from "./controls/DataRefreshControl";
+import { NavButtonsControl } from "./controls/NavButtonsControl";
 import MapSearchBar from "../map/components/MapSearchBar.svelte";
 import MerchantDrawerHash from "../map/components/MerchantDrawerHash.svelte";
 import MerchantListPanel from "../map/components/MerchantListPanel.svelte";
@@ -662,6 +665,13 @@ onMount(async () => {
 	});
 	map.addControl(geolocate, "top-right");
 
+	// Right-side action buttons — mirror /map's stack order:
+	// nav links (home / add / community / account) → boost toggle →
+	// data-refresh (hidden until fresh sync arrives).
+	map.addControl(new NavButtonsControl(), "top-right");
+	map.addControl(new BoostToggleControl(), "top-right");
+	map.addControl(new DataRefreshControl(), "top-right");
+
 	// Mirror /map's behavior: sync location into the userLocation store so
 	// the merchant list panel can compute distances without prompting again.
 	geolocate.on("geolocate", (e: GeolocationPosition) => {
@@ -1251,10 +1261,13 @@ onDestroy(() => {
 	}
 	.basemap-switcher {
 		position: absolute;
-		/* Sits below the top-right control stack (zoom + compass + globe +
-		   geolocate, ~175px tall under maplibre-gl v5). 187px clears it
-		   with a small gap. Adjust if the stack changes. */
-		top: 187px;
+		/* Sits below the top-right control stack. With nav (87) + globe (29)
+		   + geolocate (29) + nav-buttons (116) + boost (29) + data-refresh
+		   (29) buttons and a 10px gap between each ctrl-group, plus the 10px
+		   top margin maplibre-gl applies to the first group, the stack tops
+		   out at ~379px when data-refresh is visible. 391px clears it with
+		   a small gap. Adjust if the stack changes. */
+		top: 391px;
 		right: 10px;
 		z-index: 1;
 		background: white;
@@ -1277,5 +1290,38 @@ onDestroy(() => {
 		font-size: 12px;
 		cursor: pointer;
 		color: inherit;
+	}
+
+	/* Anchor-based buttons inside the custom IControls (NavButtons / Boost /
+	   DataRefresh). MapLibre's default `.maplibregl-ctrl-group button` rules
+	   don't apply to <a> elements, so we replicate the dimensions, hover and
+	   focus states here. Kept :global because Svelte's scoped CSS would
+	   miss the anchors created at runtime by the IControl classes. */
+	:global(.maplibregl-ctrl-group a.maplibregl-ctrl-link) {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 29px;
+		height: 29px;
+		box-sizing: border-box;
+		background-color: transparent;
+		cursor: pointer;
+		text-decoration: none;
+	}
+	:global(.maplibregl-ctrl-group a.maplibregl-ctrl-link + a.maplibregl-ctrl-link),
+	:global(.maplibregl-ctrl-group button + a.maplibregl-ctrl-link),
+	:global(.maplibregl-ctrl-group a.maplibregl-ctrl-link + button) {
+		border-top: 1px solid #ddd;
+	}
+	:global(.maplibregl-ctrl-group a.maplibregl-ctrl-link:hover) {
+		background-color: rgba(0, 0, 0, 0.05);
+	}
+	:global(.maplibregl-ctrl-group a.maplibregl-ctrl-link:focus-visible) {
+		box-shadow: 0 0 2px 2px #0096ff;
+	}
+	:global(.maplibregl-ctrl-group a.maplibregl-ctrl-link img) {
+		display: block;
+		width: 16px;
+		height: 16px;
 	}
 </style>
