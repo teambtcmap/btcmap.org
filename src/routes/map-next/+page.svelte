@@ -389,6 +389,7 @@ onMount(async () => {
 		}),
 		"top-right",
 	);
+	map.addControl(new maplibre.GlobeControl(), "top-right");
 
 	// Geolocate control — replaces leaflet.locatecontrol. The pulse dot,
 	// accuracy circle, and heading arrow are built in. Heading uses the
