@@ -930,14 +930,24 @@ onDestroy(() => {
 		right: 10px;
 		z-index: 1;
 		background: white;
+		color: #111827; /* gray-900 */
 		border-radius: 4px;
 		padding: 2px 4px;
 		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+	}
+	/* Dark-mode follows the same `.dark` root class as the rest of the
+	   site (see src/app.css). Colors match the Leaflet dark-control
+	   palette so this switcher reads consistently with the rest of the
+	   chrome once we land on a dark basemap. */
+	:global(.dark) .basemap-switcher {
+		background: #1f2937; /* gray-800 — matches --leaflet-bg */
+		color: #f3f4f6; /* gray-100 */
 	}
 	.basemap-switcher select {
 		background: transparent;
 		border: none;
 		font-size: 12px;
 		cursor: pointer;
+		color: inherit;
 	}
 </style>
