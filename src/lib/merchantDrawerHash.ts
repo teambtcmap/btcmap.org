@@ -13,27 +13,15 @@ export function parseMerchantHash(): MerchantHashState {
 		return { merchantId: null, drawerView: "details", isOpen: false };
 	}
 
-	const hash = window.location.hash.substring(1);
-	const ampIndex = hash.indexOf("&");
-
-	// Extract the merchant parameters
-	// Check if there's a map part (contains '/') before the ampersand
-	// If yes: params are after the '&' (e.g., "#14/10.24/-67.58&merchant=123")
-	// If no: entire hash is params (e.g., "#merchant=123" or "#merchant=123&view=boost")
-	let paramsString: string;
-	if (ampIndex !== -1 && hash.substring(0, ampIndex).includes("/")) {
-		// Map coordinates present, params are after ampersand
-		paramsString = hash.substring(ampIndex + 1);
-	} else {
-		// No map coordinates, entire hash is params
-		paramsString = hash;
+	const search = window.location.search;
+	if (!search) {
+		return { merchantId: null, drawerView: "details", isOpen: false };
 	}
 
-	const params = new URLSearchParams(paramsString);
+	const params = new URLSearchParams(search);
 	const merchantParam = params.get("merchant");
 	const viewParam = params.get("view");
 
-	// Validate merchant ID: must be a positive integer
 	let merchantId: number | null = null;
 	if (merchantParam) {
 		const parsedId = Number(merchantParam);
@@ -42,7 +30,6 @@ export function parseMerchantHash(): MerchantHashState {
 		}
 	}
 
-	// Validate view parameter against allowed values
 	const validViews: DrawerView[] = ["details", "boost"];
 	const drawerView: DrawerView =
 		viewParam && validViews.includes(viewParam as DrawerView)
@@ -60,35 +47,20 @@ export function updateMerchantHash(
 ) {
 	if (typeof window === "undefined") return;
 
-	const hash = window.location.hash.substring(1);
-	const ampIndex = hash.indexOf("&");
-
-	// Extract map coordinates (if present) - check if it contains '/'
-	let mapPart = "";
-	if (ampIndex !== -1) {
-		// Has ampersand - check if part before it is map coords
-		const beforeAmp = hash.substring(0, ampIndex);
-		if (beforeAmp.includes("/")) {
-			mapPart = beforeAmp;
-		}
-	} else if (hash.includes("/")) {
-		// No ampersand, but hash contains '/' - it's just map coords
-		mapPart = hash;
-	}
+	const url = new URL(window.location.href);
+	url.hash = window.location.hash;
 
 	if (merchantId) {
-		const params = new URLSearchParams();
-		params.set("merchant", String(merchantId));
+		url.searchParams.set("merchant", String(merchantId));
 		if (view !== "details") {
-			params.set("view", view);
-		}
-
-		if (mapPart) {
-			window.location.hash = `${mapPart}&${params.toString()}`;
+			url.searchParams.set("view", view);
 		} else {
-			window.location.hash = params.toString();
+			url.searchParams.delete("view");
 		}
 	} else {
-		window.location.hash = mapPart || "";
+		url.searchParams.delete("merchant");
+		url.searchParams.delete("view");
 	}
+
+	history.pushState(null, "", url.toString());
 }
