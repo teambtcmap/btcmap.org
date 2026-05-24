@@ -17,6 +17,7 @@ import { onDestroy, onMount } from "svelte";
 import { get } from "svelte/store";
 
 import CommunityRailNext from "$components/CommunityRailNext.svelte";
+import MapLoadingMain from "$components/MapLoadingMain.svelte";
 import { trackEvent } from "$lib/analytics";
 import {
 	CLUSTERING_DISABLED_ZOOM,
@@ -46,7 +47,12 @@ import { merchantDrawer } from "$lib/merchantDrawerStore";
 import type { MerchantListMode } from "$lib/merchantListStore";
 import { merchantList } from "$lib/merchantListStore";
 import { savedPlaceIds } from "$lib/session";
-import { places, placesById } from "$lib/store";
+import {
+	places,
+	placesById,
+	placesLoadingProgress,
+	placesLoadingStatus,
+} from "$lib/store";
 import { theme } from "$lib/theme";
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
@@ -147,10 +153,37 @@ let currentLon: number | null = null;
 
 // Tile-loading indicator state. Same debounce pattern as /map: show
 // the spinner only if loading takes > 150ms, hide on `idle`, and a 5s
-// safety fallback in case `idle` never fires.
-let tilesLoading = false;
+// safety fallback in case `idle` never fires. Init `true` so the
+// indicator shows during the very first style/tile load; cleared on
+// the first `idle` once the map settles.
+let tilesLoading = true;
 let tilesLoadingTimer: ReturnType<typeof setTimeout> | null = null;
 let tilesLoadingFallback: ReturnType<typeof setTimeout> | null = null;
+
+// Centered initial-load modal (MapLoadingMain). Mirrors /map's priority
+// chain: places-sync progress → markers committing to the source →
+// first tile render. Each milestone advances/resets `mapLoading`; when
+// all three complete it returns to 0 and the modal fades out.
+let elementsLoaded = false;
+let mapTilesLoaded = false;
+let mapLoading = 1;
+let mapLoadingStatus = "";
+
+$: {
+	if ($placesLoadingProgress > 0 && $placesLoadingProgress < 100) {
+		mapLoading = $placesLoadingProgress;
+		mapLoadingStatus = $placesLoadingStatus;
+	} else if ($placesLoadingProgress === 100 && !elementsLoaded) {
+		mapLoading = 100;
+		mapLoadingStatus = $placesLoadingStatus;
+	} else if (elementsLoaded && !mapTilesLoaded) {
+		mapLoading = 100;
+		mapLoadingStatus = $_("status.preparing");
+	} else if (elementsLoaded && mapTilesLoaded) {
+		mapLoading = 0;
+		mapLoadingStatus = "";
+	}
+}
 
 // Latest in-flight search request; aborted when a new query supersedes
 // it or the component unmounts.
@@ -479,6 +512,7 @@ const syncPlacesToSource = (list: Place[]) => {
 	if (!source) return;
 	source.setData(buildFeatureCollection(list));
 	ensureSpritesForPlaces(map, list);
+	if (list.length > 0) elementsLoaded = true;
 };
 
 // Debounced enrichment trigger — fires on moveend when zoomed in enough
@@ -1125,6 +1159,7 @@ onMount(async () => {
 				tilesLoadingFallback = null;
 			}
 			tilesLoading = false;
+			mapTilesLoaded = true;
 		});
 
 		// Persist viewport in the URL hash. Preserves any merchant=… params
@@ -1225,6 +1260,8 @@ onDestroy(() => {
 </svelte:head>
 
 <div bind:this={mapContainer} class="map-container"></div>
+
+<MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
 
 <!--
 	Floating search bar — desktop: top-left, mobile: bottom-center.
