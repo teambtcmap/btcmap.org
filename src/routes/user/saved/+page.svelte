@@ -2,7 +2,7 @@
 import { onDestroy, onMount } from "svelte";
 
 import Icon from "$components/Icon.svelte";
-import MultiPlaceMap from "$components/MultiPlaceMap.svelte";
+import MultiPlaceMap from "$components/MultiPlaceMapNext.svelte";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
 import { removeSavedItem, setSavedList } from "$lib/savedItems";
