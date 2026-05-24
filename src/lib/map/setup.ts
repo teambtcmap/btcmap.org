@@ -3,13 +3,9 @@ import { get } from "svelte/store";
 
 import Icon from "$components/Icon.svelte";
 import { trackEvent } from "$lib/analytics";
-import { API_BASE } from "$lib/api-base";
-import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
-import api from "$lib/axios";
 import { _ } from "$lib/i18n";
 import en from "$lib/i18n/locales/en.json";
 import { session } from "$lib/session";
-import { selectedMerchant } from "$lib/store";
 import { theme } from "$lib/theme";
 import type { BaseMaps, DomEventType, Leaflet, Theme } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
@@ -143,121 +139,6 @@ const defaultMapControls: Required<MapControlsTranslations> = {
 	zoomOut: en.mapControls.zoomOut,
 	locate: en.mapControls.locate,
 };
-
-// Updates map control labels in the DOM when locale changes. Call from a locale subscription.
-export const applyMapControlTranslations = (t: (key: string) => string) => {
-	const labels = {
-		support: t("mapControls.support"),
-		supportWithSats: t("mapControls.supportWithSats"),
-		zoomIn: t("mapControls.zoomIn"),
-		zoomOut: t("mapControls.zoomOut"),
-		fullScreen: t("mapControls.fullScreen"),
-		fullScreenAlt: t("mapControls.fullScreenAlt"),
-		locate: t("mapControls.locate"),
-		locateAlt: t("mapControls.locateAlt"),
-		goToHome: t("mapControls.goToHome"),
-		goToHomeAlt: t("mapControls.goToHomeAlt"),
-		addLocation: t("mapControls.addLocation"),
-		addLocationAlt: t("mapControls.addLocationAlt"),
-		communityMap: t("mapControls.communityMap"),
-		communityMapAlt: t("mapControls.communityMapAlt"),
-		merchantMap: t("mapControls.merchantMap"),
-		merchantMapAlt: t("mapControls.merchantMapAlt"),
-		account: t("mapControls.account"),
-		accountAlt: t("mapControls.accountAlt"),
-		login: t("mapControls.login"),
-		loginAlt: t("mapControls.loginAlt"),
-		dataRefreshAvailable: t("mapControls.dataRefreshAvailable"),
-		dataRefreshAlt: t("mapControls.dataRefreshAlt"),
-		boostLocations: t("boost.locations"),
-		boostAlt: t("mapControls.boostAlt"),
-	};
-
-	const supportLink = document.querySelector(
-		".leaflet-control-attribution a[href='/supporters']",
-	) as HTMLAnchorElement | null;
-	if (supportLink) {
-		supportLink.title = labels.supportWithSats;
-		supportLink.textContent = labels.support;
-	}
-
-	const zoomIn = document.querySelector(".leaflet-control-zoom-in");
-	if (zoomIn) {
-		zoomIn.setAttribute("title", labels.zoomIn);
-		zoomIn.setAttribute("aria-label", labels.zoomIn);
-	}
-	const zoomOut = document.querySelector(".leaflet-control-zoom-out");
-	if (zoomOut) {
-		zoomOut.setAttribute("title", labels.zoomOut);
-		zoomOut.setAttribute("aria-label", labels.zoomOut);
-	}
-
-	const fullscreen = document.querySelector(".leaflet-control-full-screen");
-	if (fullscreen) {
-		fullscreen.setAttribute("title", labels.fullScreen);
-		fullscreen.setAttribute("aria-label", labels.fullScreen);
-		const fullscreenImg = fullscreen.querySelector("img");
-		if (fullscreenImg) fullscreenImg.setAttribute("alt", labels.fullScreenAlt);
-	}
-
-	const locateBtn = document.querySelector(
-		".leaflet-bar-part.leaflet-bar-part-single",
-	);
-	if (locateBtn) {
-		locateBtn.setAttribute("title", labels.locate);
-		locateBtn.setAttribute("aria-label", labels.locate);
-		const locateImg = locateBtn.querySelector("img");
-		if (locateImg) locateImg.setAttribute("alt", labels.locateAlt);
-	}
-
-	const homeBtn = document.querySelector(".leaflet-control-home");
-	if (homeBtn) {
-		homeBtn.setAttribute("title", labels.goToHome);
-		homeBtn.setAttribute("aria-label", labels.goToHome);
-		const homeImg = homeBtn.querySelector("img");
-		if (homeImg) homeImg.setAttribute("alt", labels.goToHomeAlt);
-	}
-	const addLocBtn = document.querySelector(".leaflet-control-add-location");
-	if (addLocBtn) {
-		addLocBtn.setAttribute("title", labels.addLocation);
-		addLocBtn.setAttribute("aria-label", labels.addLocation);
-		const addLocImg = addLocBtn.querySelector("img");
-		if (addLocImg) addLocImg.setAttribute("alt", labels.addLocationAlt);
-	}
-	const communityBtn = document.querySelector(".leaflet-control-community-map");
-	if (communityBtn) {
-		communityBtn.setAttribute("title", labels.communityMap);
-		communityBtn.setAttribute("aria-label", labels.communityMap);
-		const communityImg = communityBtn.querySelector("img");
-		if (communityImg) communityImg.setAttribute("alt", labels.communityMapAlt);
-	}
-	const merchantBtn = document.querySelector(".leaflet-control-merchant-map");
-	if (merchantBtn) {
-		merchantBtn.setAttribute("title", labels.merchantMap);
-		merchantBtn.setAttribute("aria-label", labels.merchantMap);
-		const merchantImg = merchantBtn.querySelector("img");
-		if (merchantImg) merchantImg.setAttribute("alt", labels.merchantMapAlt);
-	}
-
-	const dataRefreshBtn = document.querySelector(
-		".leaflet-control-data-refresh",
-	);
-	if (dataRefreshBtn) {
-		dataRefreshBtn.setAttribute("title", labels.dataRefreshAvailable);
-		dataRefreshBtn.setAttribute("aria-label", labels.dataRefreshAvailable);
-		const refreshImg = dataRefreshBtn.querySelector("img");
-		if (refreshImg) refreshImg.setAttribute("alt", labels.dataRefreshAlt);
-	}
-
-	const boostBtn = document.querySelector(".leaflet-control-boost-layer");
-	if (boostBtn) {
-		boostBtn.setAttribute("title", labels.boostLocations);
-		boostBtn.setAttribute("aria-label", labels.boostLocations);
-		const boostImg = boostBtn.querySelector("img");
-		if (boostImg) boostImg.setAttribute("alt", labels.boostAlt);
-	}
-};
-
 export const support = (t?: MapControlsTranslations) => {
 	const labels = { ...defaultMapControls, ...t };
 	const supportAttribution: HTMLDivElement | null = document.querySelector(
@@ -551,58 +432,6 @@ export const homeMarkerButtons = (
 	map.addControl(new customControls());
 	DomEvent.disableClickPropagation(addControlDiv);
 };
-
-export const dataRefresh = (
-	L: Leaflet,
-	map: LeafletMap,
-	DomEvent: DomEventType,
-	t?: MapControlsTranslations,
-) => {
-	const labels = { ...defaultMapControls, ...t };
-	const dataRefreshButton = L.DomUtil.create("a");
-
-	const customDataRefreshButton = L.Control.extend({
-		options: {
-			position: "topright",
-		},
-		onAdd: () => {
-			const dataRefreshDiv = L.DomUtil.create("div");
-			dataRefreshDiv.classList.add(
-				"leaflet-bar",
-				"leaflet-control",
-				"data-refresh-div",
-			);
-			dataRefreshDiv.style.display = "none";
-
-			dataRefreshButton.classList.add("leaflet-control-data-refresh");
-			dataRefreshButton.title = labels.dataRefreshAvailable;
-			dataRefreshButton.role = "button";
-			dataRefreshButton.ariaLabel = labels.dataRefreshAvailable;
-			dataRefreshButton.ariaDisabled = "false";
-			const refreshImg = L.DomUtil.create(
-				"img",
-				"",
-				dataRefreshButton,
-			) as HTMLImageElement;
-			refreshImg.src = "/icons/refresh.svg";
-			refreshImg.alt = get(_)("mapControls.dataRefreshAlt");
-			refreshImg.style.width = "16px";
-			refreshImg.style.height = "16px";
-			dataRefreshButton.onclick = () => {
-				trackEvent("data_refresh_click");
-				location.reload();
-			};
-
-			dataRefreshDiv.append(dataRefreshButton);
-
-			return dataRefreshDiv;
-		},
-	});
-
-	map.addControl(new customDataRefreshButton());
-	DomEvent.disableClickPropagation(dataRefreshButton);
-};
-
 export const generateLocationIcon = (L: Leaflet) => {
 	return L.divIcon({
 		className: "div-icon",
@@ -746,53 +575,4 @@ export const generateIcon = (
 	}) as DivIconWithInstances;
 	divIcon._iconInstances = instances;
 	return divIcon;
-};
-
-export const generateMarker = ({
-	lat,
-	long,
-	icon,
-	placeId,
-	// element,
-	// payment,
-	leaflet: L,
-	onMarkerClick,
-	// verifiedDate,
-	// verify,
-	// boosted
-	// issues
-}: {
-	lat: number;
-	long: number;
-	icon: DivIcon;
-	placeId: number | string;
-	leaflet: Leaflet;
-	onMarkerClick?: (placeId: number | string) => void;
-	// verifiedDate: number;
-	verify: boolean;
-	boosted?: boolean;
-	// issues?: Issue[];
-}) => {
-	const marker = L.marker([lat, long], { icon });
-	attachIconCleanup(marker, icon);
-
-	marker.on("click", async () => {
-		if (onMarkerClick) {
-			onMarkerClick(placeId);
-		} else {
-			// Fallback to old store-based behavior
-			try {
-				const response = await api.get(
-					`${API_BASE}/v4/places/${placeId}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`,
-				);
-				const placeDetails = response.data;
-				selectedMerchant.set(placeDetails);
-			} catch (error) {
-				console.error("Error fetching place details:", error);
-				errToast(get(_)("errors.merchantDetailsLoadError"));
-			}
-		}
-	});
-
-	return marker;
 };
