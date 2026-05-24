@@ -2,7 +2,7 @@ import type { GeoLocation } from "$lib/types";
 
 import type { PageServerLoad } from "./$types";
 
-export const load: PageServerLoad = async ({ request }) => {
+export const load: PageServerLoad = async ({ request, url }) => {
 	const geoHeader = request.headers.get("x-nf-geo");
 
 	const geo: GeoLocation = { lat: null, lng: null };
@@ -24,5 +24,19 @@ export const load: PageServerLoad = async ({ request }) => {
 		}
 	}
 
-	return { geo };
+	const merchantParam = url.searchParams.get("merchant");
+	let merchantOgImage: string | null = null;
+
+	if (merchantParam) {
+		const merchantId = Number(merchantParam);
+		if (
+			!Number.isNaN(merchantId) &&
+			merchantId > 0 &&
+			Number.isInteger(merchantId)
+		) {
+			merchantOgImage = `https://api.btcmap.org/og/element/${merchantId}`;
+		}
+	}
+
+	return { geo, merchantOgImage };
 };

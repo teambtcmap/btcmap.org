@@ -227,16 +227,16 @@ test.describe('Map Drawer', () => {
 		expect(trimmedCount).toMatch(/^\d+$/);
 	});
 
-	test('drawer opens from URL hash on initial page load (desktop)', async ({ page }) => {
-		// Navigate directly to map with merchant hash parameter
-		await page.goto('/map#15/53.55573/10.00825&merchant=6556', { waitUntil: 'load' });
+	test('drawer opens from URL query param on initial page load (desktop)', async ({ page }) => {
+		// Navigate directly to map with merchant query parameter
+		await page.goto('/map?merchant=6556#15/53.55573/10.00825', { waitUntil: 'load' });
 		await expect(page).toHaveTitle(/BTC Map/);
 
 		// Wait for map to load
 		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
 		await expect(zoomInButton).toBeVisible();
 
-		// Wait for markers to load before hash parameter can trigger drawer
+		// Wait for markers to load before query parameter can trigger drawer
 		await waitForMarkersToLoad(page);
 
 		// Wait for drawer to open automatically
@@ -263,19 +263,19 @@ test.describe('Map Drawer', () => {
 		expect(merchantHref).toContain('/merchant/6556');
 	});
 
-	test('drawer opens from URL hash on initial page load (mobile)', async ({ page }) => {
+	test('drawer opens from URL query param on initial page load (mobile)', async ({ page }) => {
 		// Set mobile viewport
 		await page.setViewportSize({ width: 375, height: 667 });
 
-		// Navigate directly to map with merchant hash parameter
-		await page.goto('/map#15/53.55573/10.00825&merchant=6556', { waitUntil: 'load' });
+		// Navigate directly to map with merchant query parameter
+		await page.goto('/map?merchant=6556#15/53.55573/10.00825', { waitUntil: 'load' });
 		await expect(page).toHaveTitle(/BTC Map/);
 
 		// Wait for map to load
 		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
 		await expect(zoomInButton).toBeVisible();
 
-		// Wait for markers to load before hash parameter can trigger drawer
+		// Wait for markers to load before query parameter can trigger drawer
 		await waitForMarkersToLoad(page);
 
 		// Wait for mobile drawer to open (appears at bottom)
@@ -298,16 +298,16 @@ test.describe('Map Drawer', () => {
 		await expect(drawerContent.first()).toBeVisible({ timeout: 10000 });
 	});
 
-	test('boost view opens from hash parameter', async ({ page }) => {
+	test('boost view opens from query parameter', async ({ page }) => {
 		// Navigate with boost view parameter
-		await page.goto('/map#15/53.55573/10.00825&merchant=6556&view=boost', { waitUntil: 'load' });
+		await page.goto('/map?merchant=6556&view=boost#15/53.55573/10.00825', { waitUntil: 'load' });
 		await expect(page).toHaveTitle(/BTC Map/);
 
 		// Wait for map to load
 		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
 		await expect(zoomInButton).toBeVisible();
 
-		// Wait for markers to load before hash parameter can trigger drawer
+		// Wait for markers to load before query parameter can trigger drawer
 		await waitForMarkersToLoad(page);
 
 		// Wait for drawer to open
@@ -364,7 +364,7 @@ test.describe('Map Drawer', () => {
 		});
 
 		// Open merchant 6556 (has comments)
-		await page.goto('/map#15/53.55573/10.00825&merchant=6556', { waitUntil: 'load' });
+		await page.goto('/map?merchant=6556#15/53.55573/10.00825', { waitUntil: 'load' });
 		await waitForMarkersToLoad(page);
 
 		const drawer = page.locator('[role="dialog"]');
@@ -377,7 +377,8 @@ test.describe('Map Drawer', () => {
 
 		// Switch to merchant 1 (no comments)
 		await page.evaluate(() => {
-			window.location.hash = '#15/53.55573/10.00825&merchant=1';
+			history.pushState(null, '', '/map?merchant=1#15/53.55573/10.00825');
+			window.dispatchEvent(new Event('merchant-url-change'));
 		});
 
 		// Wait for drawer to update — comments should be gone
@@ -385,7 +386,8 @@ test.describe('Map Drawer', () => {
 
 		// Switch back to merchant 6556
 		await page.evaluate(() => {
-			window.location.hash = '#15/53.55573/10.00825&merchant=6556';
+			history.pushState(null, '', '/map?merchant=6556#15/53.55573/10.00825');
+			window.dispatchEvent(new Event('merchant-url-change'));
 		});
 
 		// Comments must re-appear (this is the bug scenario)
@@ -399,14 +401,14 @@ test.describe('Map Drawer', () => {
 		// Set mobile viewport
 		await page.setViewportSize({ width: 375, height: 667 });
 
-		// Navigate with merchant hash to open drawer directly
-		await page.goto('/map#15/53.55573/10.00825&merchant=6556', { waitUntil: 'load' });
+		// Navigate with merchant query param to open drawer directly
+		await page.goto('/map?merchant=6556#15/53.55573/10.00825', { waitUntil: 'load' });
 
 		// Wait for map to load
 		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
 		await expect(zoomInButton).toBeVisible();
 
-		// Wait for markers to load before hash parameter can trigger drawer
+		// Wait for markers to load before query parameter can trigger drawer
 		await waitForMarkersToLoad(page);
 
 		// Wait for drawer to open
