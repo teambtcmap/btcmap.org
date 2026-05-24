@@ -16,7 +16,7 @@ import type {
 import { onDestroy, onMount } from "svelte";
 import { get } from "svelte/store";
 
-import CommunityRailNext from "$components/CommunityRailNext.svelte";
+import CommunityRail from "$components/CommunityRail.svelte";
 import MapLoadingMain from "$components/MapLoadingMain.svelte";
 import { trackEvent } from "$lib/analytics";
 import {
@@ -1314,7 +1314,7 @@ onDestroy(() => {
 />
 
 {#if styleLoaded}
-	<CommunityRailNext
+	<CommunityRail
 		lat={currentLat}
 		lon={currentLon}
 		zoom={currentZoom}

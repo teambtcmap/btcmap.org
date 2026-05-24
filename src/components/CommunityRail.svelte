@@ -127,7 +127,7 @@ function showPreview(community: Area) {
 		source.setData(gj);
 		previewCommunityId = community.id;
 	} catch (e) {
-		console.error("CommunityRailNext: failed to draw preview", e);
+		console.error("CommunityRail: failed to draw preview", e);
 	}
 }
 

@@ -13,7 +13,7 @@ import { geoContains } from "d3-geo";
 import { onMount } from "svelte";
 
 import AreaActivity from "$components/area/AreaActivity.svelte";
-import AreaMap from "$components/area/AreaMapNext.svelte";
+import AreaMap from "$components/area/AreaMap.svelte";
 import AreaMerchantHighlights from "$components/area/AreaMerchantHighlights.svelte";
 import AreaStats from "$components/area/AreaStats.svelte";
 import AreaTickets from "$components/area/AreaTickets.svelte";
