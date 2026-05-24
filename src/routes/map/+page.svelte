@@ -1442,12 +1442,12 @@ const setupMapFinalization = (
 		mapCenter = map.getCenter();
 	});
 
-	// Watch for hash changes to clear marker selection when drawer closes
+	// Watch for URL state changes (hashchange, merchant query param, back/forward) to keep drawer in sync
 	window.addEventListener("hashchange", handleHashChange);
 	window.addEventListener(MERCHANT_URL_CHANGE_EVENT, handleHashChange);
 	window.addEventListener("popstate", handleHashChange);
 
-	// Sync drawer state from URL hash on initial page load
+	// Sync drawer state from URL query params on initial page load
 	merchantDrawer.syncFromHash();
 
 	// If the URL had a merchant ID but no map coordinates, pan to the merchant
