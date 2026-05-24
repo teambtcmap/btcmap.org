@@ -59,6 +59,7 @@ import { NavButtonsControl } from "./controls/NavButtonsControl";
 import MapSearchBar from "../map/components/MapSearchBar.svelte";
 import MerchantDrawerHash from "../map/components/MerchantDrawerHash.svelte";
 import MerchantListPanel from "../map/components/MerchantListPanel.svelte";
+import TileLoadingIndicator from "../map/components/TileLoadingIndicator.svelte";
 
 type PlaceFeature = {
 	type: "Feature";
@@ -143,6 +144,13 @@ let currentZoom = DEFAULT_MAP_ZOOM;
 // same `moveend` handler that maintains `currentZoom`.
 let currentLat: number | null = null;
 let currentLon: number | null = null;
+
+// Tile-loading indicator state. Same debounce pattern as /map: show
+// the spinner only if loading takes > 150ms, hide on `idle`, and a 5s
+// safety fallback in case `idle` never fires.
+let tilesLoading = false;
+let tilesLoadingTimer: ReturnType<typeof setTimeout> | null = null;
+let tilesLoadingFallback: ReturnType<typeof setTimeout> | null = null;
 
 // Latest in-flight search request; aborted when a new query supersedes
 // it or the component unmounts.
@@ -1096,6 +1104,29 @@ onMount(async () => {
 			debouncedUpdateMerchantList();
 		});
 
+		// Tile-loading indicator — debounced to avoid flicker on quick pans.
+		map.on("movestart", () => {
+			if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
+			if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
+			tilesLoadingTimer = setTimeout(() => {
+				tilesLoading = true;
+			}, 150);
+			tilesLoadingFallback = setTimeout(() => {
+				tilesLoading = false;
+			}, 5000);
+		});
+		map.on("idle", () => {
+			if (tilesLoadingTimer) {
+				clearTimeout(tilesLoadingTimer);
+				tilesLoadingTimer = null;
+			}
+			if (tilesLoadingFallback) {
+				clearTimeout(tilesLoadingFallback);
+				tilesLoadingFallback = null;
+			}
+			tilesLoading = false;
+		});
+
 		// Persist viewport in the URL hash. Preserves any merchant=… params
 		// added by the drawer so shareable URLs round-trip.
 		const persistViewportToHash = () => {
@@ -1181,6 +1212,8 @@ onDestroy(() => {
 	if (deepLinkPanTimer) clearTimeout(deepLinkPanTimer);
 	deepLinkPanUnsub?.();
 	deepLinkPanUnsub = null;
+	if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
+	if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
 	spiderfier?.unspiderfyAll();
 	spiderfier = undefined;
 	map?.remove();
@@ -1246,6 +1279,8 @@ onDestroy(() => {
 		{map}
 	/>
 {/if}
+
+<TileLoadingIndicator visible={tilesLoading} />
 
 <MerchantDrawerHash />
 
