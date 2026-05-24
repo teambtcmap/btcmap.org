@@ -16,6 +16,7 @@ import type {
 import { onDestroy, onMount } from "svelte";
 import { get } from "svelte/store";
 
+import CommunityRailNext from "$components/CommunityRailNext.svelte";
 import { trackEvent } from "$lib/analytics";
 import {
 	CLUSTERING_DISABLED_ZOOM,
@@ -138,6 +139,10 @@ const panToPlace = (lat: number, lon: number) => {
 // moveend handler. Until the map's first moveend fires it stays at the
 // default; that's fine because the panel itself is closed by default.
 let currentZoom = DEFAULT_MAP_ZOOM;
+// Reactive map center for community-rail visibility. Updated in the
+// same `moveend` handler that maintains `currentZoom`.
+let currentLat: number | null = null;
+let currentLon: number | null = null;
 
 // Latest in-flight search request; aborted when a new query supersedes
 // it or the component unmounts.
@@ -619,9 +624,12 @@ onMount(async () => {
 		pitchWithRotate: false,
 	});
 
-	// Seed currentZoom from the initial viewport so the merchant list panel
-	// reads the right value before the first moveend fires.
+	// Seed reactive viewport state from the initial values so the merchant
+	// list panel and community rail read the right values before the
+	// first moveend fires.
 	currentZoom = hashCoords?.zoom ?? DEFAULT_MAP_ZOOM;
+	currentLat = hashCoords?.lat ?? DEFAULT_MAP_LAT;
+	currentLon = hashCoords?.lng ?? DEFAULT_MAP_LNG;
 
 	map.addControl(
 		new maplibre.NavigationControl({
@@ -1076,11 +1084,15 @@ onMount(async () => {
 		// spam the API; the store internally aborts any stale request.
 		map.on("moveend", triggerEnrichmentIfNeeded);
 
-		// Track current zoom + refresh the merchant list panel's nearby items
-		// based on the new viewport. Debounced to keep cost off the move path.
+		// Track current zoom + center + refresh the merchant list panel's
+		// nearby items based on the new viewport. Debounced to keep cost
+		// off the move path. Center drives the CommunityRail.
 		map.on("moveend", () => {
 			if (!map) return;
 			currentZoom = map.getZoom();
+			const c = map.getCenter();
+			currentLat = c.lat;
+			currentLon = c.lng;
 			debouncedUpdateMerchantList();
 		});
 
@@ -1225,6 +1237,15 @@ onDestroy(() => {
 	onRefresh={() => updateMerchantList({ force: true })}
 	{currentZoom}
 />
+
+{#if styleLoaded}
+	<CommunityRailNext
+		lat={currentLat}
+		lon={currentLon}
+		zoom={currentZoom}
+		{map}
+	/>
+{/if}
 
 <MerchantDrawerHash />
 
