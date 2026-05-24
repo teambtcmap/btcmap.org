@@ -86,7 +86,7 @@ export const loadSvgImage = (svg: string): Promise<HTMLImageElement> =>
 	});
 
 // Per-map sprite-promise cache. Keyed by MapLibreMap so multiple maps in the
-// same page session (e.g. /map-next + an AreaMapNext embed) don't cross-pollute
+// same page session (e.g. /map + an AreaMap embed) don't cross-pollute
 // — each map has its own image registry, so a cached "completed" promise from
 // one map shouldn't short-circuit registration on another.
 const spritePromisesByMap = new WeakMap<

@@ -1,6 +1,6 @@
-// URL hash viewport sync for /map-next.
+// URL hash viewport sync for /map.
 //
-// Format mirrors /map: `#zoom/lat/lng&merchant=123&view=…`. We extend it
+// Format: `#zoom/lat/lng&merchant=123&view=…`. We extend it
 // with optional `/bearing/pitch` segments after lng, written only when
 // non-zero. Drawer params after `&` are preserved untouched so a shared
 // URL combining a viewport + an open drawer round-trips.

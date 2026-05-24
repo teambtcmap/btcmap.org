@@ -1,70 +1,45 @@
 <script lang="ts">
+import "maplibre-gl/dist/maplibre-gl.css";
+
+import Spiderfy from "@nazka/map-gl-js-spiderfy";
+import convex from "@turf/convex";
+import { featureCollection, point } from "@turf/helpers";
+import type { Feature, FeatureCollection, Point, Polygon } from "geojson";
 import type {
-	Control,
-	FeatureGroup,
-	LatLng,
-	LatLngBounds,
-	Layer,
-	Map,
-	Marker,
-	MarkerClusterGroup,
-} from "leaflet";
-import localforage from "localforage";
+	GeoJSONSource,
+	LngLatBounds,
+	MapGeoJSONFeature,
+	MapLayerMouseEvent,
+	Map as MapLibreMap,
+	StyleSpecification,
+} from "maplibre-gl";
 import { onDestroy, onMount } from "svelte";
 import { get } from "svelte/store";
 
+import CommunityRailNext from "$components/CommunityRailNext.svelte";
 import MapLoadingMain from "$components/MapLoadingMain.svelte";
 import { trackEvent } from "$lib/analytics";
-import type { CategoryKey } from "$lib/categoryMapping";
-import { placeMatchesCategory } from "$lib/categoryMapping";
 import {
-	BOOSTED_CLUSTERING_MAX_ZOOM,
-	BREAKPOINTS,
 	CLUSTERING_DISABLED_ZOOM,
 	DEFAULT_MAP_LAT,
 	DEFAULT_MAP_LNG,
 	DEFAULT_MAP_ZOOM,
 	LABEL_VISIBLE_ZOOM,
 	MAP_DEBOUNCE_DELAY,
-	MAP_FIT_BOUNDS_PADDING,
-	MARKER_CLICK_THROTTLE,
-	MAX_LOADED_MARKERS,
-	MERCHANT_DRAWER_WIDTH,
-	MERCHANT_LIST_LOW_ZOOM,
 	MERCHANT_LIST_MAX_ITEMS,
 	MERCHANT_LIST_MIN_ZOOM,
-	MERCHANT_LIST_WIDTH,
 	NEARBY_RADIUS_MULTIPLIER,
-	VIEWPORT_BATCH_SIZE,
-	VIEWPORT_BUFFER_PERCENT,
 } from "$lib/constants";
-import { _ } from "$lib/i18n";
-import { processBatchOnMainThread } from "$lib/map/batch-processor";
-import { loadMapDependencies } from "$lib/map/imports";
-import { LabelUpdateTracker, updateMarkerLabels } from "$lib/map/labels";
-import { createMarkerWithLabel } from "$lib/map/marker-creation";
+import { _, getDisplayLang, locale } from "$lib/i18n";
+import { BASEMAPS, type BasemapId, getStoredBasemap } from "$lib/map/basemaps";
 import {
-	cleanupOutOfBoundsMarkers,
-	clearMarkerSelection,
-	highlightMarker,
-	type LoadedMarkers,
-} from "$lib/map/markers";
+	type HashCoords,
+	parseHashCoords,
+	writeHashCoords,
+} from "$lib/map/mapHash";
+import { ensureSpritesForPlaces, loadSvgImage } from "$lib/map/maplibreSprites";
 import {
-	applyMapControlTranslations,
-	attribution,
-	changeDefaultIcons,
-	disposeMarker,
-	generateIcon,
-	geolocate,
-	layers,
-	scaleBars,
-	support,
-	updateMapHash,
-} from "$lib/map/setup";
-import {
-	calculateRadiusKm,
-	getBufferedBounds,
-	getVisiblePlaces,
+	calculateRadiusKmFromLngLatBounds,
 	getZoomBehavior,
 } from "$lib/map/viewport";
 import { parseMerchantHash } from "$lib/merchantDrawerHash";
@@ -73,522 +48,266 @@ import type { MerchantListMode } from "$lib/merchantListStore";
 import { merchantList } from "$lib/merchantListStore";
 import { savedPlaceIds } from "$lib/session";
 import {
-	lastUpdatedPlaceId,
-	mapUpdates,
 	places,
 	placesById,
-	placesError,
 	placesLoadingProgress,
 	placesLoadingStatus,
-	placesSyncCount,
 } from "$lib/store";
 import { theme } from "$lib/theme";
-import type { Leaflet, Place } from "$lib/types";
+import type { Place } from "$lib/types";
+import { userLocation } from "$lib/userLocationStore";
 import { debounce, errToast, isBoosted } from "$lib/utils";
-import type { ProcessedPlace } from "$lib/workers/map-worker";
-import {
-	isSupported as isWorkerSupported,
-	processPlaces,
-	terminate as terminateWorker,
-} from "$lib/workers/worker-manager";
 
-import type { PageData } from "./$types";
-import CommunityRail from "./components/CommunityRail.svelte";
-import MapControls from "./components/MapControls.svelte";
 import MapSearchBar from "./components/MapSearchBar.svelte";
 import MerchantDrawerHash from "./components/MerchantDrawerHash.svelte";
 import MerchantListPanel from "./components/MerchantListPanel.svelte";
 import TileLoadingIndicator from "./components/TileLoadingIndicator.svelte";
-import { browser } from "$app/environment";
-import { page } from "$app/stores";
+import { BasemapsControl } from "./controls/BasemapsControl";
+import { BoostToggleControl } from "./controls/BoostToggleControl";
+import { DataRefreshControl } from "./controls/DataRefreshControl";
+import { NavButtonsControl } from "./controls/NavButtonsControl";
 
-export let data: PageData;
+type PlaceFeature = {
+	type: "Feature";
+	geometry: { type: "Point"; coordinates: [number, number] };
+	properties: {
+		id: number;
+		boosted: boolean;
+		icon: string;
+		comments: number;
+		saved: boolean;
+		name: string;
+	};
+};
 
+type PlaceFeatureCollection = {
+	type: "FeatureCollection";
+	features: PlaceFeature[];
+};
+
+let mapContainer: HTMLDivElement;
+let map: MapLibreMap | undefined;
+let destroyed = false;
+let spiderfier: Spiderfy | undefined;
+let styleLoaded = false;
+let lastPlacesLength = -1;
+let lastSavedIdsSize = -1;
+let lastEnrichedCacheSize = -1;
+let lastLocale: string | null | undefined;
+let lastAppliedLabelTheme: "light" | "dark" | undefined;
+
+// Place-label colors — mirror the same palette `app.css` already exposes
+// for the legacy Leaflet permanent tooltips (.marker-label /
+// .marker-label-boosted, src/app.css:196-214). MapLibre paint expressions
+// can't read CSS custom properties, so the values are duplicated here.
+const LABEL_PALETTE = {
+	light: {
+		regular: "#0e7490", // cyan-700
+		boosted: "#f97316", // orange-500
+		halo: "#ffffff",
+	},
+	dark: {
+		regular: "#22d3ee", // cyan-400 — brighter for dark backgrounds
+		boosted: "#fb923c", // orange-400
+		halo: "rgba(0, 0, 0, 0.95)",
+	},
+};
+
+const applyLabelPalette = (m: MapLibreMap, t: "light" | "dark" | undefined) => {
+	if (!m.getLayer("place-label")) return;
+	const palette = LABEL_PALETTE[t === "dark" ? "dark" : "light"];
+	m.setPaintProperty("place-label", "text-color", [
+		"case",
+		["get", "boosted"],
+		palette.boosted,
+		palette.regular,
+	]);
+	m.setPaintProperty("place-label", "text-halo-color", palette.halo);
+};
+// Latest-wins guard for the async getClusterLeaves callback. Mouseenter
+// fires per-feature, so a quick sweep across multiple clusters can stack
+// pending leaf fetches; we only commit the hull whose cluster id is still
+// the one currently being hovered.
+let latestHullClusterId: number | null = null;
+// Deep-link pan: if the user lands on a URL with `merchant=…` but no
+// viewport coords, we wait for the place to appear in `$placesById`
+// then pan to it. Track the subscription + safety timer so onDestroy
+// can clean both up.
+let deepLinkPanUnsub: (() => void) | null = null;
+let deepLinkPanTimer: ReturnType<typeof setTimeout> | null = null;
+
+const panToPlace = (lat: number, lon: number) => {
+	if (!map) return;
+	map.easeTo({ center: [lon, lat], zoom: DEFAULT_MAP_ZOOM, duration: 300 });
+};
+
+// Reactive zoom level for the panel — drives the "zoom in" prompt and the
+// nearby-vs-low-zoom branching in updateMerchantList. Kept in sync via the
+// moveend handler. Until the map's first moveend fires it stays at the
+// default; that's fine because the panel itself is closed by default.
+let currentZoom = DEFAULT_MAP_ZOOM;
+// Reactive map center for community-rail visibility. Updated in the
+// same `moveend` handler that maintains `currentZoom`.
+let currentLat: number | null = null;
+let currentLon: number | null = null;
+
+// Tile-loading indicator state. Same debounce pattern as /map: show
+// the spinner only if loading takes > 150ms, hide on `idle`, and a 5s
+// safety fallback in case `idle` never fires. Init `true` so the
+// indicator shows during the very first style/tile load; cleared on
+// the first `idle` once the map settles.
+let tilesLoading = true;
+let tilesLoadingTimer: ReturnType<typeof setTimeout> | null = null;
+let tilesLoadingFallback: ReturnType<typeof setTimeout> | null = null;
+
+// Centered initial-load modal (MapLoadingMain). Mirrors /map's priority
+// chain: places-sync progress → markers committing to the source →
+// first tile render. Each milestone advances/resets `mapLoading`; when
+// all three complete it returns to 0 and the modal fades out.
+let elementsLoaded = false;
+let mapTilesLoaded = false;
 let mapLoading = 1;
-let mapLoadingStatus = $_("status.loadingMap");
+let mapLoadingStatus = "";
 
-// Combine map loading progress with places loading progress
 $: {
-	// Priority 1: Places are actively loading (1-99%)
 	if ($placesLoadingProgress > 0 && $placesLoadingProgress < 100) {
 		mapLoading = $placesLoadingProgress;
 		mapLoadingStatus = $placesLoadingStatus;
-	}
-	// Priority 2: Places complete (100%), map ready, initializing markers
-	else if ($placesLoadingProgress === 100 && !elementsLoaded) {
+	} else if ($placesLoadingProgress === 100 && !elementsLoaded) {
 		mapLoading = 100;
 		mapLoadingStatus = $placesLoadingStatus;
-	}
-	// Priority 3: Loading initial markers (only during first load, not viewport updates)
-	else if (isLoadingMarkers && !elementsLoaded) {
-		mapLoading = 100;
-		mapLoadingStatus = $_("status.loadingPlaces");
-	}
-	// Priority 4: Waiting for map tiles to render
-	else if (elementsLoaded && !mapTilesLoaded) {
+	} else if (elementsLoaded && !mapTilesLoaded) {
 		mapLoading = 100;
 		mapLoadingStatus = $_("status.preparing");
-	}
-	// Reset when everything is done
-	else if (elementsLoaded && mapTilesLoaded) {
+	} else if (elementsLoaded && mapTilesLoaded) {
 		mapLoading = 0;
 		mapLoadingStatus = "";
 	}
 }
 
-let currentZoom = DEFAULT_MAP_ZOOM;
-let previousZoom = DEFAULT_MAP_ZOOM;
-
-// Throttled marker drawer opening to prevent freeze on rapid clicks
-let lastMarkerClickTime = 0;
-
-function openMerchantDrawer(id: number) {
-	// Skip if same marker already selected
-	if (selectedMarkerId === id) return;
-
-	// Throttle rapid clicks
-	const now = Date.now();
-	if (now - lastMarkerClickTime < MARKER_CLICK_THROTTLE) return;
-
-	// Batch DOM operations with requestAnimationFrame
-	requestAnimationFrame(() => {
-		if (selectedMarkerId) {
-			clearMarkerSelection(loadedMarkers, selectedMarkerId);
-		}
-		selectedMarkerId = id;
-		highlightMarker(loadedMarkers, id);
-	});
-
-	lastMarkerClickTime = now;
-	merchantDrawer.open(id, "details");
-}
-
-let leaflet: Leaflet;
-let DomEvent: typeof import("leaflet/src/dom/DomEvent");
-let controlLayers: Control.Layers;
-let currentLayerName: string | null = null;
-
-let mapElement: HTMLDivElement;
-let map: Map;
-let mapLoaded = false;
-let elementsLoaded = false;
-let mapTilesLoaded: boolean;
-let tilesLoading = true;
-let tilesLoadingTimer: ReturnType<typeof setTimeout> | null = null;
-let tilesLoadingFallback: ReturnType<typeof setTimeout> | null = null;
-let glMapPollingTimer: ReturnType<typeof setTimeout> | null = null;
-
-let markers: MarkerClusterGroup;
-let upToDateLayer: FeatureGroup.SubGroup;
-let boostedLayer: FeatureGroup;
-let loadedMarkers: LoadedMarkers = {};
-let boostedLayerMarkerIds: Set<string> = new Set();
-let selectedMarkerId: number | null = null;
-
-let isLoadingMarkers = false;
-let isZooming = false;
-
-let mapCenter: LatLng;
-
-// Track selected category for marker filtering
-let previousCategory: CategoryKey = "all";
-$: selectedCategory = $merchantList.selectedCategory;
-
-// Track mode transitions for search filtering
-let previousMode: MerchantListMode = "nearby";
-let searchResultsRevision = 0;
-let previousSearchResultsRevision = 0;
-$: currentMode = $merchantList.mode;
-
-// Set of search result IDs for efficient marker filtering (respects category filter)
-let searchResultIds: Set<number> = new Set();
-
-// Update search result IDs when search results or category filter changes
-$: {
-	if (
-		$merchantList.mode === "search" &&
-		$merchantList.searchResults.length > 0 &&
-		$merchantList.isOpen
-	) {
-		// Filter by category if one is selected
-		const filtered =
-			selectedCategory === "all"
-				? $merchantList.searchResults
-				: $merchantList.searchResults.filter((p) =>
-						placeMatchesCategory(p, selectedCategory),
-					);
-		searchResultIds = new Set(filtered.map((p) => p.id));
-		searchResultsRevision++;
-	} else {
-		// Reset filtering when: switching to nearby, clearing search, closing panel, or 0 results
-		searchResultIds = new Set();
-		searchResultsRevision++;
-	}
-}
-
-// Check if boosted markers should be clustered at current zoom level
-// At zoom 1-5: boosted markers cluster with regular markers
-// At zoom 6+: boosted markers are in separate non-clustered layer
-const shouldClusterBoostedMarkers = () =>
-	currentZoom <= BOOSTED_CLUSTERING_MAX_ZOOM;
-
-const handleHashChange = () => {
-	if (!browser) return;
-
-	// Sync store from hash - single source of truth
-	merchantDrawer.syncFromHash();
-
-	const { merchantId, isOpen } = parseMerchantHash();
-
-	if (!isOpen && selectedMarkerId) {
-		clearMarkerSelection(loadedMarkers, selectedMarkerId);
-		selectedMarkerId = null;
-	} else if (isOpen && merchantId) {
-		if (merchantId !== selectedMarkerId) {
-			if (selectedMarkerId) {
-				clearMarkerSelection(loadedMarkers, selectedMarkerId);
-			}
-			selectedMarkerId = merchantId;
-			highlightMarker(loadedMarkers, merchantId);
-		}
-	}
-};
-
-// Track current search request for cancellation
+// Latest in-flight search request; aborted when a new query supersedes
+// it or the component unmounts.
 let searchAbortController: AbortController | null = null;
-let unsubscribeLocale: (() => void) | null = null;
-let deepLinkPanUnsub: (() => void) | null = null;
-let deepLinkPanTimer: ReturnType<typeof setTimeout> | null = null;
 
-// Core search function
-const executeSearch = async (query: string) => {
-	// Cancel any in-flight search request
-	searchAbortController?.abort();
+// Expand a MapLibre LngLatBounds by `bufferPercent` on each edge, mirroring
+// /map's `getBufferedBounds(0.25)` for the local-markers nearby filter.
+const getBufferedBoundsLngLat = (
+	bounds: LngLatBounds,
+	bufferPercent: number,
+): { south: number; west: number; north: number; east: number } => {
+	const south = bounds.getSouth();
+	const north = bounds.getNorth();
+	const west = bounds.getWest();
+	const east = bounds.getEast();
+	const latBuffer = (north - south) * bufferPercent;
+	const lngBuffer = (east - west) * bufferPercent;
+	return {
+		south: south - latBuffer,
+		west: west - lngBuffer,
+		north: north + latBuffer,
+		east: east + lngBuffer,
+	};
+};
 
-	if (query.length < 3) {
-		return;
-	}
+// Refresh the panel's nearby list based on the current viewport. Mirrors
+// /map's `updateMerchantList` minus the panel-offset bookkeeping (out of
+// scope for this commit per the parity plan).
+const updateMerchantList = (opts?: { force?: boolean }) => {
+	if (!map) return;
 
-	trackEvent("search_query");
-	searchAbortController = new AbortController();
+	// Search mode is independent of the map viewport; skip refresh.
+	if (get(merchantList).mode === "search") return;
 
-	// Close any open merchant drawer so it doesn't cover the search results
-	merchantDrawer.close();
-	merchantList.openSearchMode(true);
+	const bounds = map.getBounds();
+	const center = map.getCenter();
+	const behavior = getZoomBehavior(currentZoom);
+	const listOpen = get(merchantList).isOpen;
+	const allowHeavyFetch = opts?.force || listOpen;
 
-	try {
-		const response = await fetch(
-			`/api/search/places?name=${encodeURIComponent(query)}`,
-			{
-				signal: searchAbortController.signal,
-			},
-		);
-
-		if (!response.ok) {
-			throw new Error("Search API error");
+	switch (behavior) {
+		case "local-markers": {
+			// Zoom 15+: filter the already-loaded $places by an expanded
+			// viewport, then enrich with names when the panel is open or we're
+			// above the label threshold.
+			const buffered = getBufferedBoundsLngLat(bounds, 0.25);
+			const visible = get(places).filter(
+				(p) =>
+					!p.deleted_at &&
+					p.lat >= buffered.south &&
+					p.lat <= buffered.north &&
+					p.lon >= buffered.west &&
+					p.lon <= buffered.east,
+			);
+			merchantList.setMerchants(visible, center.lat, center.lng);
+			if (listOpen || currentZoom >= LABEL_VISIBLE_ZOOM) {
+				if (allowHeavyFetch || currentZoom >= LABEL_VISIBLE_ZOOM) {
+					const radiusKm =
+						calculateRadiusKmFromLngLatBounds(bounds) *
+						NEARBY_RADIUS_MULTIPLIER;
+					merchantList.fetchEnrichedDetails(
+						{ lat: center.lat, lon: center.lng },
+						radiusKm,
+					);
+				}
+			}
+			break;
 		}
-
-		const places: Place[] = await response.json();
-		merchantList.openWithSearchResults(query, places);
-	} catch (error) {
-		// Ignore aborted requests (user typed new query)
-		if (error instanceof Error && error.name === "AbortError") {
-			return;
+		case "api-with-limit": {
+			// Zoom 11-14: API search; count-only when panel is closed.
+			const radiusKm =
+				calculateRadiusKmFromLngLatBounds(bounds) * NEARBY_RADIUS_MULTIPLIER;
+			if (!listOpen || !allowHeavyFetch) {
+				merchantList.fetchCountOnly(
+					{ lat: center.lat, lon: center.lng },
+					radiusKm,
+				);
+			} else {
+				merchantList.fetchAndReplaceList(
+					{ lat: center.lat, lon: center.lng },
+					radiusKm,
+					{ hideIfExceeds: MERCHANT_LIST_MAX_ITEMS },
+				);
+			}
+			break;
 		}
-		console.error("Search error:", error);
-		errToast(get(_)("errors.searchUnavailable"));
-		merchantList.exitSearchMode();
+		default:
+			merchantList.setMerchants([], 0, 0);
 	}
 };
 
-// Debounced search for panel input
-const debouncedPanelSearch = debounce(
-	(query: string) => executeSearch(query),
-	300,
+const debouncedUpdateMerchantList = debounce(
+	updateMerchantList,
+	MAP_DEBOUNCE_DELAY,
 );
 
-// Handler for panel search input
-const handlePanelSearch = (query: string) => {
-	debouncedPanelSearch(query);
+// MerchantListPanel callbacks — see /map/+page.svelte for the prod
+// equivalents. Camera moves do NOT account for the panel width yet; for
+// the first cut the merchant gets centered in the full viewport and may
+// sit under the panel. Hover highlight is also deferred — MapLibre paints
+// from feature properties, so we'd need feature-state plumbing that
+// isn't wired here yet.
+
+const panToNearbyMerchant = (place: Place) => {
+	if (!map) return;
+	map.easeTo({ center: [place.lon, place.lat], duration: 300 });
 };
 
-const handleModeChange = (mode: MerchantListMode) => {
-	// Panel already handled the mode change via exitSearchMode(), just update the list
-	if (mode === "nearby") {
-		searchAbortController?.abort();
-		updateMerchantList();
-	}
-};
-
-// allows for users to set initial view in a URL query
-const urlLat = $page.url.searchParams.getAll("lat");
-const urlLong = $page.url.searchParams.getAll("long");
-
-// allow to view map with only boosted locations
-
-// displays a button in controls if there is new data available
-const showDataRefresh = () => {
-	const refreshDiv: HTMLDivElement | null =
-		document.querySelector(".data-refresh-div");
-	if (!refreshDiv) return;
-	refreshDiv.style.display = "block";
-};
-
-$: map && mapLoaded && $mapUpdates && $placesSyncCount > 1 && showDataRefresh();
-
-// Reload markers and update merchant list when places sync completes after initial load
-$: if (
-	elementsLoaded &&
-	$places.length &&
-	currentZoom >= MERCHANT_LIST_LOW_ZOOM
-) {
-	debouncedLoadMarkers();
-	debouncedUpdateMerchantList();
-}
-
-// Filter map markers when category filter changes
-$: if (
-	elementsLoaded &&
-	upToDateLayer &&
-	selectedCategory !== previousCategory
-) {
-	clearNonMatchingMarkers(selectedCategory);
-	// Track previous category to prevent re-filtering
-
-	previousCategory = selectedCategory;
-	debouncedLoadMarkers();
-}
-
-// Consolidated reactive block for search mode transitions and result changes
-// Handles: entering search mode, exiting search mode, and search results changing
-$: if (elementsLoaded && upToDateLayer) {
-	const searchResultCount = searchResultIds.size;
-	const modeChanged = currentMode !== previousMode;
-	const resultsChanged =
-		searchResultsRevision !== previousSearchResultsRevision;
-
-	if (modeChanged) {
-		// Track previous mode to prevent re-triggering
-
-		previousMode = currentMode;
-		if (currentMode === "search" && searchResultCount > 0) {
-			// Entering search mode with results
-			clearNonSearchResultMarkers();
-			loadSearchResultMarkers();
-		} else if (currentMode === "nearby") {
-			// Exiting search mode: reload markers for current viewport
-			debouncedLoadMarkers();
-		}
-	} else if (
-		currentMode === "search" &&
-		resultsChanged &&
-		searchResultCount > 0
-	) {
-		// Already in search mode but results changed (new search or category filter)
-		clearNonSearchResultMarkers();
-		loadSearchResultMarkers();
-	}
-
-	// Track previous revision to prevent re-triggering
-
-	previousSearchResultsRevision = searchResultsRevision;
-}
-
-// alert for map errors
-$: $placesError && errToast($placesError);
-
-// Snapshot of the previous saved-place set, held in a ref object so mutating
-// .value does not invalidate the reactive block below. Svelte 4 tracks
-// top-level `let` reassignments but not property writes on a stable object
-// binding — a plain `let previousSavedPlaceIds` would retrigger this block
-// every time we updated it, costing a redundant no-op run per save toggle.
-const prevSavedSnapshot: { value: Set<number> } = { value: new Set() };
-
-// When the user saves/unsaves a place (typically from the drawer), update
-// the badge on any currently-loaded marker whose saved state flipped.
-// Markers not yet loaded will pick up the correct badge at creation time
-// via $savedPlaceIds in processBatchOnMainThread / createMarkerWithLabel.
-$: if (leaflet && loadedMarkers) {
-	const nextSaved = $savedPlaceIds;
-	const prevSaved = prevSavedSnapshot.value;
-	const changed: number[] = [];
-	for (const id of nextSaved) {
-		if (!prevSaved.has(id)) changed.push(id);
-	}
-	for (const id of prevSaved) {
-		if (!nextSaved.has(id)) changed.push(id);
-	}
-	prevSavedSnapshot.value = nextSaved;
-
-	for (const id of changed) {
-		const marker = loadedMarkers[id.toString()];
-		if (!marker) continue;
-		const place = $placesById.get(id);
-		if (!place) continue;
-		const commentsCount =
-			typeof place.comments === "number" ? place.comments : 0;
-		const placeIsBoosted = !!isBoosted(place);
-		const newIcon = generateIcon(
-			leaflet,
-			place.icon || "question_mark",
-			placeIsBoosted,
-			commentsCount,
-			nextSaved.has(id),
-		);
-		marker.setIcon(newIcon);
-	}
-}
-
-// Update marker icon when place is updated (boost or comment)
-$: if ($lastUpdatedPlaceId && leaflet && loadedMarkers) {
-	const placeIdStr = $lastUpdatedPlaceId.toString();
-	const marker = loadedMarkers[placeIdStr];
-
-	if (marker) {
-		// Find the updated place in the store
-		const updatedPlace = $placesById.get($lastUpdatedPlaceId);
-
-		if (updatedPlace) {
-			// Regenerate icon with fresh data
-			const commentsCount =
-				typeof updatedPlace.comments === "number" ? updatedPlace.comments : 0;
-			const placeIsBoosted = !!isBoosted(updatedPlace);
-			const markerInBoostedLayer = boostedLayerMarkerIds.has(placeIdStr);
-
-			const newIcon = generateIcon(
-				leaflet,
-				updatedPlace.icon || "question_mark",
-				placeIsBoosted,
-				commentsCount,
-				$savedPlaceIds.has($lastUpdatedPlaceId),
-			);
-
-			// Update the marker icon
-			marker.setIcon(newIcon);
-
-			// Handle layer transition if boost status changed
-			// At zoom 1-5, boosted markers stay clustered, so no layer change needed
-			if (
-				placeIsBoosted &&
-				!markerInBoostedLayer &&
-				!shouldClusterBoostedMarkers()
-			) {
-				// Place became boosted at zoom 6+ - move to non-clustered layer
-				upToDateLayer.removeLayer(marker);
-				markers.removeLayer(marker);
-				boostedLayer.addLayer(marker);
-				boostedLayerMarkerIds.add(placeIdStr);
-				console.info(`Moved marker ${placeIdStr} to boosted layer`);
-			} else if (!placeIsBoosted && markerInBoostedLayer) {
-				// Boost expired - move to clustered layer
-				boostedLayer.removeLayer(marker);
-				boostedLayerMarkerIds.delete(placeIdStr);
-				upToDateLayer.addLayer(marker);
-				console.info(`Moved marker ${placeIdStr} to clustered layer`);
-			} else {
-				console.info(`Updated marker icon for place ${$lastUpdatedPlaceId}`);
-			}
-		}
-	}
-
-	// Reset the signal
-	lastUpdatedPlaceId.set(undefined);
-}
-
-// Shared helper to remove markers by predicate
-const removeMarkersByPredicate = (
-	shouldRemove: (placeId: string) => boolean,
-): number => {
-	const markersToRemove: string[] = [];
-
-	Object.entries(loadedMarkers).forEach(([placeId, marker]) => {
-		if (shouldRemove(placeId)) {
-			upToDateLayer.removeLayer(marker);
-			markers.removeLayer(marker);
-			boostedLayer.removeLayer(marker);
-			boostedLayerMarkerIds.delete(placeId);
-			disposeMarker(marker);
-			markersToRemove.push(placeId);
-		}
-	});
-
-	markersToRemove.forEach((placeId) => {
-		delete loadedMarkers[placeId];
-	});
-
-	return markersToRemove.length;
-};
-
-// Remove markers that don't match the selected category filter
-const clearNonMatchingMarkers = (category: CategoryKey) => {
-	if (category === "all") return;
-
-	removeMarkersByPredicate((placeId) => {
-		const place = $placesById.get(Number(placeId));
-		return place ? !placeMatchesCategory(place, category) : false;
+const zoomToSearchResult = (place: Place) => {
+	if (!map) return;
+	map.easeTo({
+		center: [place.lon, place.lat],
+		zoom: DEFAULT_MAP_ZOOM,
+		duration: 300,
 	});
 };
 
-// Check if a place ID is in the current search results
-const placeInSearchResults = (placeId: number): boolean => {
-	return searchResultIds.has(placeId);
+const zoomToNearbyLevel = () => {
+	if (!map) return;
+	trackEvent("zoom_in_click");
+	map.zoomTo(MERCHANT_LIST_MIN_ZOOM, { duration: 300 });
 };
 
-// Apply search filter to places if in search mode
-const applySearchFilter = (places: Place[]): Place[] => {
-	return currentMode === "search" && searchResultIds.size > 0
-		? places.filter((place) => placeInSearchResults(place.id))
-		: places;
-};
-
-// Remove markers that are not in the search results
-const clearNonSearchResultMarkers = () => {
-	if (searchResultIds.size === 0) return;
-
-	removeMarkersByPredicate((placeId) => !placeInSearchResults(Number(placeId)));
-
-	console.debug(`[SEARCH] Filtered to ${searchResultIds.size} search results`);
-};
-
-// Load markers for search results matching the current category filter
-const loadSearchResultMarkers = () => {
-	if (searchResultIds.size === 0) return;
-
-	// Only load markers that are in the filtered search results and not already loaded
-	const placesToLoad = $merchantList.searchResults.filter(
-		(place) =>
-			searchResultIds.has(place.id) && !loadedMarkers[place.id.toString()],
-	);
-
-	placesToLoad.forEach((place: Place) => {
-		const { marker, boosted } = createMarkerWithLabel({
-			place,
-			leaflet,
-			currentZoom,
-			placeDetailsCache: $merchantList.placeDetailsCache,
-			placesById: $placesById,
-			savedPlaceIds: $savedPlaceIds,
-			onMarkerClick: openMerchantDrawer,
-		});
-
-		if (boosted && !shouldClusterBoostedMarkers()) {
-			boostedLayer.addLayer(marker);
-			boostedLayerMarkerIds.add(place.id.toString());
-		} else {
-			upToDateLayer.addLayer(marker);
-		}
-		loadedMarkers[place.id.toString()] = marker;
-
-		if (selectedMarkerId === place.id) {
-			highlightMarker(loadedMarkers, place.id);
-		}
-	});
-
-	console.debug(`[SEARCH] Loaded ${placesToLoad.length} search result markers`);
-};
-
-// Helper to validate coordinates
-const isValidCoordinate = (lat: number, lon: number): boolean =>
+const isValidCoord = (lat: number, lon: number): boolean =>
 	Number.isFinite(lat) &&
 	Number.isFinite(lon) &&
 	lat >= -90 &&
@@ -596,934 +315,943 @@ const isValidCoordinate = (lat: number, lon: number): boolean =>
 	lon >= -180 &&
 	lon <= 180;
 
-// Fit map bounds to show all search results (respects category filter)
-const fitBoundsToSearchResults = () => {
-	if (!map || $merchantList.searchResults.length === 0) return;
-
-	try {
-		// Filter by category if one is selected
-		const categoryFiltered =
-			selectedCategory === "all"
-				? $merchantList.searchResults
-				: $merchantList.searchResults.filter((p) =>
-						placeMatchesCategory(p, selectedCategory),
-					);
-
-		// Validate coordinates to prevent map errors
-		const results = categoryFiltered.filter((p) =>
-			isValidCoordinate(p.lat, p.lon),
-		);
-
-		if (results.length === 0) return;
-
-		// Single result: zoom to it
-		if (results.length === 1) {
-			map.setView([results[0].lat, results[0].lon], 17, { animate: true });
-			return;
-		}
-
-		// Multiple results: calculate bounds
-		const lats = results.map((p) => p.lat);
-		const lons = results.map((p) => p.lon);
-		const minLat = Math.min(...lats);
-		const maxLat = Math.max(...lats);
-		const minLon = Math.min(...lons);
-		const maxLon = Math.max(...lons);
-
-		const bounds = leaflet.latLngBounds([minLat, minLon], [maxLat, maxLon]);
-
-		// Account for panel width when open (desktop only)
-		const { panelWidth } = getPanelOffset();
-		const paddingRight = MAP_FIT_BOUNDS_PADDING + panelWidth;
-
-		map.fitBounds(bounds, {
-			paddingTopLeft: [MAP_FIT_BOUNDS_PADDING, MAP_FIT_BOUNDS_PADDING],
-			paddingBottomRight: [paddingRight, MAP_FIT_BOUNDS_PADDING],
-			animate: true,
-			maxZoom: 17,
+const fitSearchResultBounds = () => {
+	if (!map) return;
+	const results = get(merchantList).searchResults.filter((p) =>
+		isValidCoord(p.lat, p.lon),
+	);
+	if (results.length === 0) return;
+	if (results.length === 1) {
+		map.easeTo({
+			center: [results[0].lon, results[0].lat],
+			zoom: DEFAULT_MAP_ZOOM,
+			duration: 300,
 		});
-	} catch (error) {
-		console.debug("[SEARCH] Error fitting bounds to search results:", error);
-	}
-};
-
-// Move boosted markers between layers when zoom crosses the threshold
-const handleBoostedLayerTransition = (fromZoom: number, toZoom: number) => {
-	const crossedThreshold =
-		(fromZoom <= BOOSTED_CLUSTERING_MAX_ZOOM &&
-			toZoom > BOOSTED_CLUSTERING_MAX_ZOOM) ||
-		(fromZoom > BOOSTED_CLUSTERING_MAX_ZOOM &&
-			toZoom <= BOOSTED_CLUSTERING_MAX_ZOOM);
-
-	if (!crossedThreshold || !markers || !boostedLayer) return;
-
-	const shouldClusterBoosted = toZoom <= BOOSTED_CLUSTERING_MAX_ZOOM;
-
-	if (shouldClusterBoosted) {
-		// Moving from zoom 6+ to zoom 5-: move boosted markers to cluster layer
-		const markersToMove: Marker[] = [];
-		boostedLayerMarkerIds.forEach((placeId) => {
-			const marker = loadedMarkers[placeId];
-			if (marker) {
-				boostedLayer.removeLayer(marker);
-				markersToMove.push(marker);
-			}
-		});
-		if (markersToMove.length > 0) {
-			markers.addLayers(markersToMove);
-			boostedLayerMarkerIds.clear();
-			console.info(
-				`Moved ${markersToMove.length} boosted markers to clustered layer`,
-			);
-		}
-	} else {
-		// Moving from zoom 5- to zoom 6+: move boosted markers to non-clustered layer
-		const markersToMove: Array<{ marker: Marker; placeId: string }> = [];
-		Object.entries(loadedMarkers).forEach(([placeId, marker]) => {
-			const place = $placesById.get(Number(placeId));
-			if (place && isBoosted(place)) {
-				markersToMove.push({ marker, placeId });
-			}
-		});
-		markersToMove.forEach(({ marker, placeId }) => {
-			markers.removeLayer(marker);
-			upToDateLayer.removeLayer(marker);
-			boostedLayer.addLayer(marker);
-			boostedLayerMarkerIds.add(placeId);
-		});
-		if (markersToMove.length > 0) {
-			console.info(
-				`Moved ${markersToMove.length} boosted markers to non-clustered layer`,
-			);
-		}
-	}
-};
-
-// Load markers for places in current viewport using web workers
-const loadMarkersInViewport = async () => {
-	// Skip if zooming, not ready, or already loading
-	if (!map || !$places.length || isLoadingMarkers || isZooming) {
 		return;
 	}
-
-	isLoadingMarkers = true;
-
-	// Check if map has valid bounds (center and zoom are set)
-	let bounds;
-	try {
-		bounds = map.getBounds();
-		if (!bounds) {
-			isLoadingMarkers = false;
-			return;
-		}
-	} catch (error) {
-		console.warn("Error getting map bounds, map not ready yet:", error);
-		isLoadingMarkers = false;
-		return;
+	let minLng = results[0].lon;
+	let maxLng = results[0].lon;
+	let minLat = results[0].lat;
+	let maxLat = results[0].lat;
+	for (const p of results) {
+		if (p.lon < minLng) minLng = p.lon;
+		if (p.lon > maxLng) maxLng = p.lon;
+		if (p.lat < minLat) minLat = p.lat;
+		if (p.lat > maxLat) maxLat = p.lat;
 	}
+	map.fitBounds(
+		[
+			[minLng, minLat],
+			[maxLng, maxLat],
+		],
+		{ padding: 60, duration: 300 },
+	);
+};
+
+// Mirrors /map's `executeSearch` — abort any prior request, fetch via the
+// SvelteKit endpoint, hand results to the store. Errors surface as toasts.
+const executeSearch = async (query: string) => {
+	searchAbortController?.abort();
+	if (query.length < 3) return;
+
+	trackEvent("search_query");
+	searchAbortController = new AbortController();
+
+	// Close any drawer so it doesn't sit on top of the result list.
+	merchantDrawer.close();
+	merchantList.openSearchMode(true);
 
 	try {
-		// Get visible places (viewport + category filtering)
-		const visiblePlaces = getVisiblePlaces(
-			leaflet,
-			$places,
-			bounds,
-			VIEWPORT_BUFFER_PERCENT,
+		const response = await fetch(
+			`/api/search/places?name=${encodeURIComponent(query)}`,
+			{ signal: searchAbortController.signal },
 		);
-		const categoryFiltered =
-			selectedCategory === "all"
-				? visiblePlaces
-				: visiblePlaces.filter((place) =>
-						placeMatchesCategory(place, selectedCategory),
-					);
-
-		// Apply search filter if in search mode
-		const searchFiltered = applySearchFilter(categoryFiltered);
-
-		// Filter out places that already have markers loaded
-		const placesToLoad = searchFiltered.filter(
-			(place) => !loadedMarkers[place.id.toString()],
-		);
-
-		if (placesToLoad.length === 0) {
-			isLoadingMarkers = false;
-			return;
-		}
-
-		// Clean up markers outside viewport if we have many loaded
-		if (Object.keys(loadedMarkers).length > MAX_LOADED_MARKERS) {
-			cleanupOutOfBoundsMarkers({
-				loadedMarkers,
-				upToDateLayer,
-				boostedLayer,
-				boostedLayerMarkerIds,
-				bounds,
-			});
-		}
-
-		// Check if web workers are supported before trying to use them
-		if (isWorkerSupported()) {
-			// Process places using web worker
-			await processPlaces(
-				placesToLoad,
-				VIEWPORT_BATCH_SIZE,
-				(_progress: number, batch?: ProcessedPlace[]) => {
-					// Process batch on main thread (DOM operations)
-					if (batch) {
-						processBatchOnMainThread({
-							batch,
-							leaflet,
-							currentZoom,
-							placeDetailsCache: $merchantList.placeDetailsCache,
-							placesById: $placesById,
-							savedPlaceIds: $savedPlaceIds,
-							loadedMarkers,
-							boostedLayerMarkerIds,
-							shouldClusterBoostedMarkers,
-							markers,
-							boostedLayer,
-							selectedMarkerId,
-							onMarkerClick: openMerchantDrawer,
-						});
-					}
-				},
-			);
-		} else {
-			console.warn("Web workers not supported, using synchronous fallback");
-			// Fallback to synchronous processing
-			loadMarkersInViewportFallback(bounds);
-			return;
-		}
-
-		console.info(
-			`[VIEWPORT] Successfully loaded ${placesToLoad.length} markers`,
-		);
+		if (!response.ok) throw new Error("Search API error");
+		const results: Place[] = await response.json();
+		merchantList.openWithSearchResults(query, results);
 	} catch (error) {
-		console.error("[VIEWPORT] Error loading markers:", error);
-		// Fallback to synchronous processing for viewport
-		loadMarkersInViewportFallback(bounds);
-	} finally {
-		isLoadingMarkers = false;
+		if (error instanceof Error && error.name === "AbortError") return;
+		console.error("Search error:", error);
+		errToast(get(_)("errors.searchUnavailable"));
+		merchantList.exitSearchMode();
 	}
 };
 
-// Fallback synchronous loading for viewport (much smaller dataset)
-const loadMarkersInViewportFallback = (bounds: LatLngBounds) => {
-	const visiblePlaces = getVisiblePlaces(
-		leaflet,
-		$places,
-		bounds,
-		VIEWPORT_BUFFER_PERCENT,
-	);
-	const categoryFiltered =
-		selectedCategory === "all"
-			? visiblePlaces
-			: visiblePlaces.filter((place) =>
-					placeMatchesCategory(place, selectedCategory),
-				);
-	const searchFiltered = applySearchFilter(categoryFiltered);
-	const placesToLoad = searchFiltered.filter(
-		(place) => !loadedMarkers[place.id.toString()],
-	);
-
-	placesToLoad.forEach((place: Place) => {
-		const { marker, boosted } = createMarkerWithLabel({
-			place,
-			leaflet,
-			currentZoom,
-			placeDetailsCache: $merchantList.placeDetailsCache,
-			placesById: $placesById,
-			savedPlaceIds: $savedPlaceIds,
-			onMarkerClick: openMerchantDrawer,
-			onLabelUpdate: () => labelTracker.incrementVersion(),
-		});
-
-		// Route to appropriate layer based on boost status and zoom level
-		if (boosted && !shouldClusterBoostedMarkers()) {
-			boostedLayer.addLayer(marker);
-			boostedLayerMarkerIds.add(place.id.toString());
-		} else {
-			upToDateLayer.addLayer(marker);
-		}
-		loadedMarkers[place.id.toString()] = marker;
-
-		// Highlight if this is the selected marker (may be pending from search result click)
-		if (selectedMarkerId === place.id) {
-			highlightMarker(loadedMarkers, place.id);
-		}
-	});
-};
-
-// Debounced version to prevent excessive loading during rapid pan/zoom
-const debouncedLoadMarkers = debounce(
-	loadMarkersInViewport,
-	MAP_DEBOUNCE_DELAY,
+const debouncedPanelSearch = debounce(
+	(query: string) => executeSearch(query),
+	300,
 );
 
-// Debounced coords caching to prevent IndexedDB overflow during continuous movement
-const debouncedCacheCoords = debounce((coords: LatLngBounds) => {
-	localforage.setItem("coords", coords).catch((err) => {
-		console.error("Error caching coords:", err);
-	});
-}, 1000); // 1 second debounce for IndexedDB writes
-
-// Debounced enriched details fetch to prevent excessive API calls during zoom/pan
-const debouncedFetchEnrichedDetails = debounce(
-	(args: { coords: { lat: number; lon: number }; radiusKm: number }) => {
-		merchantList.fetchEnrichedDetails(args.coords, args.radiusKm);
-	},
-	500,
-); // 500ms debounce for API calls
-
-// Zoom 15+: Use locally loaded markers, optionally enrich with API data
-const updateListLocalMarkers = (
-	center: LatLng,
-	bounds: LatLngBounds,
-	allowHeavyFetch: boolean,
-) => {
-	// Expand bounds by 25% on each edge (equivalent to 1.5x radius for API calls)
-	const expandedBounds = getBufferedBounds(leaflet, bounds, 0.25);
-	const allVisiblePlaces = $places.filter((place) =>
-		expandedBounds.contains([place.lat, place.lon]),
-	);
-
-	merchantList.setMerchants(allVisiblePlaces, center.lat, center.lng);
-
-	// Fetch names if panel is open OR zoom is 15+ (for labels)
-	if ($merchantList.isOpen || currentZoom >= LABEL_VISIBLE_ZOOM) {
-		if (allowHeavyFetch || currentZoom >= LABEL_VISIBLE_ZOOM) {
-			const radiusKm = calculateRadiusKm(bounds) * NEARBY_RADIUS_MULTIPLIER;
-			debouncedFetchEnrichedDetails({
-				coords: { lat: center.lat, lon: center.lng },
-				radiusKm,
-			});
-		}
-	}
+const handlePanelSearch = (query: string) => {
+	debouncedPanelSearch(query);
 };
 
-// Zoom 11-14: Fetch from API with result limit (may show "zoom in" message)
-const updateListApiWithLimit = (
-	center: LatLng,
-	bounds: LatLngBounds,
-	allowHeavyFetch: boolean,
-) => {
-	const radiusKm = calculateRadiusKm(bounds) * NEARBY_RADIUS_MULTIPLIER;
-
-	if (!$merchantList.isOpen || !allowHeavyFetch) {
-		merchantList.fetchCountOnly({ lat: center.lat, lon: center.lng }, radiusKm);
-	} else {
-		merchantList.fetchAndReplaceList(
-			{ lat: center.lat, lon: center.lng },
-			radiusKm,
-			{
-				hideIfExceeds: MERCHANT_LIST_MAX_ITEMS,
-			},
-		);
-	}
-};
-
-// Update merchant list panel based on zoom level and visible places
-const updateMerchantList = (opts?: { force?: boolean }) => {
-	if (!browser || !map) return;
-
-	// Skip updates in search mode - search results are independent of map viewport
-	if ($merchantList.mode === "search") return;
-
-	const bounds = map.getBounds();
-	const center = map.getCenter();
-	const behavior = getZoomBehavior(currentZoom);
-
-	// Determine if we should fetch full data or just count
-	// - Force flag: explicit user action (e.g., button click)
-	// - List open: user is actively viewing the list (mobile or desktop)
-	const allowHeavyFetch = opts?.force || $merchantList.isOpen;
-
-	switch (behavior) {
-		case "local-markers":
-			updateListLocalMarkers(center, bounds, allowHeavyFetch);
-			break;
-		case "api-with-limit":
-			updateListApiWithLimit(center, bounds, allowHeavyFetch);
-			break;
-		default:
-			merchantList.setMerchants([], 0, 0);
-	}
-};
-
-// Debounced version to prevent excessive updates during pan/zoom
-const debouncedUpdateMerchantList = debounce(
-	updateMerchantList,
-	MAP_DEBOUNCE_DELAY,
-);
-
-// Calculate panel width for map offset (desktop only - mobile panels are at bottom)
-// Accounts for both MerchantListPanel (left) and MerchantDrawer (stacked to its right)
-const getPanelOffset = () => {
-	const mapSize = map!.getSize();
-	const isDesktop = mapSize.x >= BREAKPOINTS.md;
-	const listWidth = isDesktop && $merchantList.isOpen ? MERCHANT_LIST_WIDTH : 0;
-	const drawerWidth =
-		isDesktop && $merchantDrawer.isOpen ? MERCHANT_DRAWER_WIDTH : 0;
-	const panelWidth = listWidth + drawerWidth;
-	const visibleCenterX = (mapSize.x - panelWidth) / 2;
-	return { panelWidth, visibleCenterX, mapSize };
-};
-
-// Shared helper: navigate map to a place with drawer offset compensation
-const navigateToPlace = (
-	place: Place,
-	options: { targetZoom?: number; spiderfyCluster?: boolean } = {},
-) => {
-	if (!map || !browser) return;
-
-	const { visibleCenterX, mapSize } = getPanelOffset();
-	const { targetZoom, spiderfyCluster = false } = options;
-
-	if (targetZoom !== undefined) {
-		// Zoom to specific level: calculate offset at target zoom
-		const offsetX = mapSize.x / 2 - visibleCenterX;
-		const targetPoint = map.project([place.lat, place.lon], targetZoom);
-		const offsetPoint = leaflet.point(targetPoint.x + offsetX, targetPoint.y);
-		const offsetLatLng = map.unproject(offsetPoint, targetZoom);
-		map.setView(offsetLatLng, targetZoom, { animate: true, duration: 0.3 });
-	} else {
-		// Pan only: calculate offset at current zoom
-		const targetPoint = map.latLngToContainerPoint([place.lat, place.lon]);
-		const offsetX = targetPoint.x - visibleCenterX;
-		const offsetY = targetPoint.y - mapSize.y / 2;
-
-		const currentCenter = map.getCenter();
-		const currentCenterPoint = map.latLngToContainerPoint(currentCenter);
-		const newCenterPoint = leaflet.point(
-			currentCenterPoint.x + offsetX,
-			currentCenterPoint.y + offsetY,
-		);
-		const newCenter = map.containerPointToLatLng(newCenterPoint);
-		map.panTo(newCenter, { animate: true, duration: 0.3 });
-	}
-
-	// Optionally spiderfy cluster containing the marker
-	// Skip only if marker is in boosted layer (not clustered)
-	const isInBoostedLayer =
-		boostedLayerMarkerIds.has(place.id.toString()) &&
-		!shouldClusterBoostedMarkers();
-	if (spiderfyCluster && !isInBoostedLayer) {
-		const marker = loadedMarkers[place.id.toString()];
-		if (marker && markers) {
-			const cluster = markers.getVisibleParent(marker);
-			if (cluster && cluster !== marker && "spiderfy" in cluster) {
-				(cluster as { spiderfy: () => void }).spiderfy();
-			}
-		}
-	}
-};
-
-// Pan to a nearby merchant (user is already zoomed in, just center the marker)
-const panToNearbyMerchant = (place: Place) => {
-	navigateToPlace(place, { spiderfyCluster: true });
-};
-
-// Zoom to a search result (user may be far away, fly to the location)
-const zoomToSearchResult = (place: Place) => {
-	navigateToPlace(place, { targetZoom: 19 });
-};
-
-// Zoom to nearby level (when user clicks "zoom in" message)
-const zoomToNearbyLevel = () => {
-	if (!map || !browser) return;
-
-	trackEvent("zoom_in_click");
-
-	const currentCenter = map.getCenter();
-	const { visibleCenterX, mapSize } = getPanelOffset();
-
-	// Calculate offset at target zoom level
-	const offsetX = mapSize.x / 2 - visibleCenterX;
-	const targetPoint = map.project(
-		[currentCenter.lat, currentCenter.lng],
-		MERCHANT_LIST_MIN_ZOOM,
-	);
-	const offsetPoint = leaflet.point(targetPoint.x + offsetX, targetPoint.y);
-	const offsetLatLng = map.unproject(offsetPoint, MERCHANT_LIST_MIN_ZOOM);
-
-	map.setView(offsetLatLng, MERCHANT_LIST_MIN_ZOOM, {
-		animate: true,
-		duration: 0.3,
-	});
-};
-
-const initializeElements = async () => {
-	if (elementsLoaded) {
-		return;
-	}
-
-	mapLoadingStatus = $_("status.initializingMarkers");
-
-	// create marker cluster group and layers
-	// @ts-expect-error - L is global from Leaflet
-	markers = L.markerClusterGroup({
-		maxClusterRadius: 80,
-		disableClusteringAtZoom: CLUSTERING_DISABLED_ZOOM,
-		chunkedLoading: true,
-		chunkInterval: 50,
-		chunkDelay: 50,
-	});
-	upToDateLayer = leaflet.featureGroup.subGroup(markers);
-	boostedLayer = leaflet.featureGroup();
-
-	// Add layers to map immediately so batches can be added
-	map.addLayer(markers);
-	map.addLayer(upToDateLayer);
-	map.addLayer(boostedLayer); // Added last to render on top of clusters
-
-	// Set up zoom guard - prevent marker loading during zoom animation
-	map.on("zoomstart", () => {
-		isZooming = true;
-	});
-
-	// Consolidated map event listener - moveend fires after both pan and zoom
-	map.on("moveend", () => {
-		isZooming = false;
-		const coords = map.getBounds();
-		const newZoom = map.getZoom();
-
-		// Handle boosted marker layer transitions when crossing zoom threshold
-		handleBoostedLayerTransition(previousZoom, newZoom);
-
-		mapCenter = map.getCenter();
-		previousZoom = newZoom;
-		currentZoom = newZoom;
-
-		// Update hash if not using URL parameters
-		if (!urlLat.length && !urlLong.length) {
-			updateMapHash(currentZoom, mapCenter);
-		}
-
-		// Debounced operations
-		debouncedCacheCoords(coords);
-		debouncedLoadMarkers();
-		debouncedUpdateMerchantList();
-	});
-
-	mapLoadingStatus = $_("status.loadingPlacesInView");
-
-	// Initialize mapCenter and zoom for merchant list panel and marker layer decisions
-	const initialZoom = map.getZoom();
-	mapCenter = map.getCenter();
-	currentZoom = initialZoom;
-	previousZoom = initialZoom;
-
-	// Load initial markers for current viewport
-	// NOTE: Don't set isLoadingMarkers=true here, let loadMarkersInViewport handle it
-	await loadMarkersInViewport();
-
-	elementsLoaded = true;
-
-	if (browser) {
-		const { merchantId, isOpen } = parseMerchantHash();
-		if (isOpen && merchantId) {
-			selectedMarkerId = merchantId;
-			highlightMarker(loadedMarkers, merchantId);
-		}
-
-		// Initialize merchant list if already zoomed in
+const handleModeChange = (mode: MerchantListMode) => {
+	if (mode === "nearby") {
+		searchAbortController?.abort();
 		updateMerchantList();
 	}
 };
 
-// Process a batch of places on the main thread (DOM operations only)
+// Browser back/forward / external hash mutation → re-sync the drawer.
+// Highlight-state on markers isn't a concept here (MapLibre paints from
+// feature properties, not marker references), so this is the only
+// behavior the legacy /map's handler does that we need.
+const handleHashChange = () => {
+	if (typeof window === "undefined") return;
+	merchantDrawer.syncFromHash();
+};
 
-// Label update tracker - manages state changes and triggers updates
-let labelTracker = new LabelUpdateTracker(
-	currentZoom,
-	$merchantList.placeDetailsCache.size,
-	$merchantList.isEnrichingDetails,
-);
+const EMPTY_HULL_COLLECTION: FeatureCollection<Polygon> = {
+	type: "FeatureCollection",
+	features: [],
+};
 
-// Derived reactive state for label visibility
-$: labelsVisible = currentZoom >= LABEL_VISIBLE_ZOOM;
-$: cacheSize = $merchantList.placeDetailsCache.size;
-$: isEnriching = $merchantList.isEnrichingDetails;
+const EMPTY_COLLECTION: PlaceFeatureCollection = {
+	type: "FeatureCollection",
+	features: [],
+};
 
-// Update marker labels when relevant state changes
-$: if (mapLoaded && elementsLoaded && leaflet) {
-	labelTracker.shouldUpdate(labelsVisible, cacheSize, isEnriching, () => {
-		updateMarkerLabels(
-			loadedMarkers,
-			currentZoom,
-			$merchantList.placeDetailsCache,
-			$placesById,
-			boostedLayerMarkerIds,
-			leaflet,
+const buildFeatureCollection = (list: Place[]): PlaceFeatureCollection => {
+	const saved = get(savedPlaceIds);
+	// Snapshot the enriched cache once per build — names arrive lazily as
+	// the viewport-bound /v4/places/search fetch resolves.
+	const enrichedCache = get(merchantList).placeDetailsCache;
+	const displayLang = getDisplayLang(get(locale));
+	const resolveName = (p: Place): string => {
+		const enriched = enrichedCache.get(p.id);
+		// Priority: enriched localized name → enriched plain name →
+		// $places localized name → $places plain name → OSM amenity fallback.
+		return (
+			enriched?.localized_name?.[displayLang] ??
+			enriched?.name ??
+			p.localized_name?.[displayLang] ??
+			p.name ??
+			p["osm:amenity"] ??
+			""
 		);
-	});
-}
+	};
+	return {
+		type: "FeatureCollection",
+		features: list
+			.filter((p) => !p.deleted_at)
+			.map((p) => ({
+				type: "Feature",
+				geometry: { type: "Point", coordinates: [p.lon, p.lat] },
+				properties: {
+					id: p.id,
+					boosted: Boolean(isBoosted(p)),
+					icon: p.icon ?? "question_mark",
+					comments: p.comments ?? 0,
+					saved: saved.has(p.id),
+					name: resolveName(p),
+				},
+			})),
+	};
+};
 
-// Initialize elements when places data is ready and map is loaded
-// The guard inside initializeElements() prevents multiple calls
-$: if ($places?.length && mapLoaded && !elementsLoaded) {
-	initializeElements();
+// Tailwind `text-link` color (tailwind.config.js → colors.link).
+const LINK_COLOR = "#0099AF";
+
+const buildSavedBadgeSvg = (bookmarkSvg: string): string =>
+	`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="#fff" stroke="${LINK_COLOR}" stroke-width="1"/><g transform="translate(3, 3)">${bookmarkSvg}</g></svg>`;
+
+// Near-invisible circular hit-target sprite used as the icon for the
+// symbol cluster layer that spiderfy hooks into. We render the visible
+// cluster discs as circle layers (not symbols), so this symbol layer
+// exists purely so the spiderfy library can register click handlers
+// targeting it. 1/255 alpha keeps pixels effectively invisible while
+// ensuring queryRenderedFeatures registers hits on the icon footprint.
+const loadClusterHitSprite = async (m: MapLibreMap): Promise<void> => {
+	if (m.hasImage("cluster-hit")) return;
+	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="rgba(0,0,0,0.004)"/></svg>`;
+	const img = await loadSvgImage(svg);
+	if (!m.hasImage("cluster-hit"))
+		m.addImage("cluster-hit", img, { pixelRatio: 1 });
+};
+
+// 16×16 green disc to back the comment count text. Matches /map's
+// Tailwind `bg-green-600 w-4 h-4 rounded-full` exactly. Drawn directly
+// on a canvas — simpler than the SVG → data-URL → <img> roundtrip for
+// a flat shape.
+const loadCommentBadgeSprite = (m: MapLibreMap): void => {
+	if (m.hasImage("comment-badge-bg")) return;
+	const canvas = document.createElement("canvas");
+	canvas.width = 16;
+	canvas.height = 16;
+	const ctx = canvas.getContext("2d");
+	if (!ctx) return;
+	ctx.fillStyle = "#16A34A";
+	ctx.beginPath();
+	ctx.arc(8, 8, 8, 0, Math.PI * 2);
+	ctx.fill();
+	m.addImage("comment-badge-bg", ctx.getImageData(0, 0, 16, 16), {
+		pixelRatio: 1,
+	});
+};
+
+const loadSavedBadgeSprite = async (m: MapLibreMap): Promise<void> => {
+	if (m.hasImage("saved-badge")) return;
+	const encodedColor = encodeURIComponent(LINK_COLOR);
+	const url = `https://api.iconify.design/ic/baseline-bookmark-added.svg?color=${encodedColor}&width=10&height=10`;
+	const res = await fetch(url);
+	if (!res.ok) {
+		throw new Error(`saved-badge bookmark fetch failed: ${res.status} ${url}`);
+	}
+	const bookmarkSvg = await res.text();
+	const composite = buildSavedBadgeSvg(bookmarkSvg);
+	const img = await loadSvgImage(composite);
+	if (!m.hasImage("saved-badge"))
+		m.addImage("saved-badge", img, { pixelRatio: 1 });
+	m.triggerRepaint();
+};
+
+const syncPlacesToSource = (list: Place[]) => {
+	if (!map || !styleLoaded) return;
+	const source = map.getSource("places") as GeoJSONSource | undefined;
+	if (!source) return;
+	source.setData(buildFeatureCollection(list));
+	ensureSpritesForPlaces(map, list);
+	if (list.length > 0) elementsLoaded = true;
+};
+
+// Debounced enrichment trigger — fires on moveend when zoomed in enough
+// to show labels. The store handles aborting any in-flight stale request.
+// 500ms (vs MAP_DEBOUNCE_DELAY=300) matches /map's dedicated debounce for
+// the enriched-details API: API calls deserve a longer settle than
+// in-memory operations like marker reloads or cache writes.
+const ENRICHMENT_DEBOUNCE_DELAY = 500;
+
+const triggerEnrichmentIfNeeded = debounce(() => {
+	if (!map) return;
+	if (map.getZoom() < LABEL_VISIBLE_ZOOM) return;
+	const center = map.getCenter();
+	const radiusKm = calculateRadiusKmFromLngLatBounds(map.getBounds());
+	merchantList.fetchEnrichedDetails(
+		{ lat: center.lat, lon: center.lng },
+		radiusKm,
+	);
+}, ENRICHMENT_DEBOUNCE_DELAY);
+
+// Rebuild only when the count changes meaningfully (and always on first load),
+// to avoid jank on incremental store updates with ~50k places worldwide.
+// Also rebuild when $savedPlaceIds size changes so the saved badge appears/
+// disappears as the user toggles saves, and when the enriched details cache
+// grows so place-name labels appear as their data arrives. Tracking size
+// catches add/remove but misses the swap case (e.g. save A + unsave B with
+// no net size change) — accepted tradeoff for now.
+$: if (map && styleLoaded && $places) {
+	const placesLen = $places.length;
+	const savedSize = $savedPlaceIds.size;
+	const cacheSize = $merchantList.placeDetailsCache.size;
+	const currentLocale = $locale;
+	if (
+		placesLen !== lastPlacesLength ||
+		savedSize !== lastSavedIdsSize ||
+		cacheSize !== lastEnrichedCacheSize ||
+		currentLocale !== lastLocale
+	) {
+		lastPlacesLength = placesLen;
+		lastSavedIdsSize = savedSize;
+		lastEnrichedCacheSize = cacheSize;
+		lastLocale = currentLocale;
+		syncPlacesToSource($places);
+	}
 }
 
 onMount(async () => {
-	if (browser) {
-		const deps = await loadMapDependencies();
-		leaflet = deps.leaflet;
-		DomEvent = deps.DomEvent;
-		const LocateControl = deps.LocateControl;
+	const maplibre = await import("maplibre-gl");
+	// User may have navigated away while the dynamic import was in
+	// flight; bail before instantiating against an unmounted container.
+	if (destroyed) return;
 
-		// add map and tiles
-		map = leaflet.map(mapElement, { maxZoom: 21, zoomControl: false });
-		leaflet.control.zoom({ position: "topright" }).addTo(map);
+	// All available basemaps are raster tile sources, declared upfront so
+	// the basemap picker only has to toggle layer visibility — no
+	// setStyle calls, which avoid the tile-compile cascade that broke
+	// the first attempt at this in Phase 4.
+	const initialBasemap: BasemapId =
+		getStoredBasemap() ?? (get(theme) === "dark" ? "carto-dark" : "osm");
 
-		// Setup map in logical steps
-		const { baseMaps, activeLayer, hashHadCoords } =
-			await setupMapInitialView();
-		setupTileLayers(activeLayer);
-		setupTileLoadingIndicators();
-		setupMapClickHandlers();
-		setupMapControls(LocateControl, baseMaps, get(_));
-		setupMapFinalization(get(_), hashHadCoords);
+	const OSM_ATTR =
+		'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+	const CARTO_ATTR = `${OSM_ATTR} &copy; <a href="https://carto.com/attributions">CARTO</a>`;
 
-		unsubscribeLocale = _.subscribe(() => {
-			applyMapControlTranslations(get(_));
+	const style: StyleSpecification = {
+		version: 8,
+		// OpenFreeMap's public glyph endpoint (Cloudflare R2, no key, production-OK).
+		// MapLibre's demotiles.maplibre.org is explicitly a demo server with no SLA —
+		// see https://github.com/maplibre/demotiles (README: "web, helloworld and CI tests").
+		glyphs: "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
+		sources: {
+			osm: {
+				type: "raster",
+				tiles: [
+					"https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+					"https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+					"https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
+				],
+				tileSize: 256,
+				attribution: OSM_ATTR,
+				maxzoom: 19,
+			},
+			"carto-light": {
+				type: "raster",
+				tiles: [
+					"https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+					"https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+					"https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+					"https://d.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+				],
+				tileSize: 256,
+				attribution: CARTO_ATTR,
+				maxzoom: 19,
+			},
+			"carto-dark": {
+				type: "raster",
+				tiles: [
+					"https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+					"https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+					"https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+					"https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+				],
+				tileSize: 256,
+				attribution: CARTO_ATTR,
+				maxzoom: 19,
+			},
+		},
+		layers: [
+			{
+				id: "osm",
+				type: "raster",
+				source: "osm",
+				layout: { visibility: initialBasemap === "osm" ? "visible" : "none" },
+			},
+			{
+				id: "carto-light",
+				type: "raster",
+				source: "carto-light",
+				layout: {
+					visibility: initialBasemap === "carto-light" ? "visible" : "none",
+				},
+			},
+			{
+				id: "carto-dark",
+				type: "raster",
+				source: "carto-dark",
+				layout: {
+					visibility: initialBasemap === "carto-dark" ? "visible" : "none",
+				},
+			},
+		],
+	};
+
+	// If the URL hash already encodes a viewport, restore it; otherwise
+	// fall back to the project defaults.
+	const hashCoords = parseHashCoords();
+
+	map = new maplibre.Map({
+		container: mapContainer,
+		// Minimal inline raster style — OSM tiles. Vector basemaps come in Phase 4.
+		style,
+		center: hashCoords
+			? [hashCoords.lng, hashCoords.lat]
+			: [DEFAULT_MAP_LNG, DEFAULT_MAP_LAT],
+		zoom: hashCoords?.zoom ?? DEFAULT_MAP_ZOOM,
+		bearing: hashCoords?.bearing ?? 0,
+		pitch: hashCoords?.pitch ?? 0,
+		maxZoom: 19,
+		// Rotation + pitch enabled — the whole point of the migration
+		dragRotate: true,
+		touchZoomRotate: true,
+		pitchWithRotate: false,
+	});
+
+	// Seed reactive viewport state from the initial values so the merchant
+	// list panel and community rail read the right values before the
+	// first moveend fires.
+	currentZoom = hashCoords?.zoom ?? DEFAULT_MAP_ZOOM;
+	currentLat = hashCoords?.lat ?? DEFAULT_MAP_LAT;
+	currentLon = hashCoords?.lng ?? DEFAULT_MAP_LNG;
+
+	map.addControl(
+		new maplibre.NavigationControl({
+			showCompass: true,
+			showZoom: true,
+			visualizePitch: false,
+		}),
+		"top-right",
+	);
+	map.addControl(new maplibre.GlobeControl(), "top-right");
+
+	// Geolocate control — replaces leaflet.locatecontrol. The pulse dot,
+	// accuracy circle, and heading arrow are built in. Heading uses the
+	// device's compass when available, falling back to GPS movement.
+	const geolocate = new maplibre.GeolocateControl({
+		positionOptions: { enableHighAccuracy: true },
+		trackUserLocation: true,
+		showUserLocation: true,
+		showAccuracyCircle: true,
+	});
+	map.addControl(geolocate, "top-right");
+
+	// Right-side action buttons — mirror /map's stack order:
+	// nav links (home / add / community / account) → boost toggle →
+	// data-refresh (hidden until fresh sync arrives).
+	map.addControl(new NavButtonsControl(), "top-right");
+	map.addControl(new BoostToggleControl(), "top-right");
+	map.addControl(new DataRefreshControl(), "top-right");
+
+	// Basemap picker — layers-icon button that expands on hover/click,
+	// matching the L.control.layers shape prod uses. Owns its own
+	// localStorage persistence. The three basemap layers were declared in
+	// the initial style spec above; this control only toggles visibility.
+	map.addControl(
+		new BasemapsControl({ basemaps: BASEMAPS, initial: initialBasemap }),
+		"top-right",
+	);
+
+	// Mirror /map's behavior: sync location into the userLocation store so
+	// the merchant list panel can compute distances without prompting again.
+	geolocate.on("geolocate", (e: GeolocationPosition) => {
+		userLocation.setLocation(e.coords.latitude, e.coords.longitude);
+	});
+
+	map.on("load", async () => {
+		if (!map) return;
+
+		// Critical sprites must succeed; the saved-badge fetch goes to a
+		// third-party CDN and should NOT block the rest of map init if
+		// it fails. Wrap it with a catch so a transient Iconify outage
+		// just degrades the saved-state badge.
+		// The pin and pin-boosted plain sprites are NOT loaded here —
+		// every pin layer references the composite `pin-r-{icon}` /
+		// `pin-b-{icon}` names produced lazily by ensureSpritesForPlaces.
+		await Promise.all([
+			loadSavedBadgeSprite(map).catch((err) => {
+				console.warn("Saved-badge sprite failed to load:", err);
+			}),
+			loadCommentBadgeSprite(map),
+			loadClusterHitSprite(map),
+		]);
+
+		map.addSource("places", {
+			type: "geojson",
+			data: EMPTY_COLLECTION,
+			cluster: true,
+			clusterRadius: 80,
+			// CLUSTERING_DISABLED_ZOOM is 17; clusterMaxZoom=16 means at z17+ all points unclustered.
+			clusterMaxZoom: CLUSTERING_DISABLED_ZOOM - 1,
 		});
-	}
-});
 
-// Setup helper functions (defined after onMount for proximity to usage)
+		// Hover hull: convex polygon enclosing all leaves of the cluster the
+		// cursor is over. Added before the visible cluster discs so the
+		// translucent fill sits under, not on top of, the cluster discs.
+		map.addSource("cluster-hull", {
+			type: "geojson",
+			data: EMPTY_HULL_COLLECTION,
+		});
 
-const setupMapInitialView = async (): Promise<{
-	baseMaps: Record<string, Layer>;
-	activeLayer: unknown;
-	hashHadCoords: boolean;
-}> => {
-	// Helper function to set mapLoaded after view is set
-	const setMapViewAndMarkLoaded = () => {
-		mapLoaded = true;
-		mapCenter = map.getCenter();
-	};
+		map.addLayer({
+			id: "cluster-hull-fill",
+			type: "fill",
+			source: "cluster-hull",
+			paint: {
+				"fill-color": "rgba(110, 204, 57, 0.15)",
+			},
+		});
 
-	// use url hash if present
-	if (location.hash) {
-		// Extract only the map coordinates part (before any & parameters)
-		const hashPart = location.hash.split("&")[0];
-		const coords = hashPart.split("/");
-		// Valid map coords hash has format #zoom/lat/lon (3 parts, numeric)
-		const hasCoords =
-			coords.length === 3 &&
-			!Number.isNaN(Number(coords[0].slice(1))) &&
-			!Number.isNaN(Number(coords[1])) &&
-			!Number.isNaN(Number(coords[2]));
+		map.addLayer({
+			id: "cluster-hull-outline",
+			type: "line",
+			source: "cluster-hull",
+			paint: {
+				"line-color": "rgba(110, 204, 57, 0.6)",
+				"line-width": 1.5,
+			},
+		});
 
-		if (hasCoords) {
-			try {
-				map.setView(
-					[Number(coords[1]), Number(coords[2])],
-					Number(coords[0].slice(1)),
-				);
-				setMapViewAndMarkLoaded();
-			} catch (error) {
-				map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
-				setMapViewAndMarkLoaded();
-				errToast(get(_)("errors.mapView"));
-				console.error(error);
-			}
-			// add tiles and basemaps
-			const { baseMaps, activeLayer } = layers(leaflet, map);
-			currentLayerName =
-				theme.current === "dark" ? "Carto Dark Matter" : "OpenFreeMap Liberty";
-			return { baseMaps, activeLayer, hashHadCoords: true };
-		}
-		// Hash present but no coords (e.g. #merchant=123) — fall through to
-		// geolocation/default, and pan to merchant later in setupMapFinalization
-	}
+		// Translucent outer ring — colors tiered by point_count to match
+		// stock leaflet.markercluster defaults (green/yellow/orange, 0.6 alpha).
+		map.addLayer({
+			id: "clusters-outer",
+			type: "circle",
+			source: "places",
+			filter: ["has", "point_count"],
+			paint: {
+				"circle-color": [
+					"step",
+					["get", "point_count"],
+					"rgba(181, 226, 140, 0.6)",
+					10,
+					"rgba(241, 211, 87, 0.6)",
+					100,
+					"rgba(253, 156, 115, 0.6)",
+				],
+				"circle-radius": 20,
+			},
+		});
 
-	// set URL lat/long query view if it exists and is valid
-	else if (urlLat.length && urlLong.length) {
-		try {
-			if (urlLat.length > 1 && urlLong.length > 1) {
-				map.fitBounds([
-					[Number(urlLat[0]), Number(urlLong[0])],
-					[Number(urlLat[1]), Number(urlLong[1])],
-				]);
-				setMapViewAndMarkLoaded();
-			} else {
-				map.fitBounds([[Number(urlLat[0]), Number(urlLong[0])]]);
-				setMapViewAndMarkLoaded();
-			}
-		} catch (error) {
-			map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
-			setMapViewAndMarkLoaded();
-			errToast(get(_)("errors.mapView"));
-			console.error(error);
-		}
-	}
+		map.addLayer({
+			id: "clusters-inner",
+			type: "circle",
+			source: "places",
+			filter: ["has", "point_count"],
+			paint: {
+				"circle-color": [
+					"step",
+					["get", "point_count"],
+					"rgba(110, 204, 57, 0.6)",
+					10,
+					"rgba(240, 194, 12, 0.6)",
+					100,
+					"rgba(241, 128, 23, 0.6)",
+				],
+				"circle-radius": 15,
+			},
+		});
 
-	// set view to last location if it is present in the cache
-	else {
-		localforage
-			.getItem<LatLngBounds>("coords")
-			.then((value) => {
-				if (value) {
-					map.fitBounds([
-						// @ts-expect-error - LatLngBounds internal structure access
-						[value._northEast.lat, value._northEast.lng],
-						// @ts-expect-error - LatLngBounds internal structure access
-						[value._southWest.lat, value._southWest.lng],
-					]);
-				} else if (data.geo?.lat != null && data.geo?.lng != null) {
-					// Use IP-based geolocation for first-time visitors
-					map.setView([data.geo.lat, data.geo.lng], DEFAULT_MAP_ZOOM);
-				} else {
-					map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
+		map.addLayer({
+			id: "cluster-count",
+			type: "symbol",
+			source: "places",
+			filter: ["has", "point_count"],
+			layout: {
+				"text-field": ["get", "point_count_abbreviated"],
+				"text-font": ["Noto Sans Bold"],
+				"text-size": 12,
+				"text-allow-overlap": true,
+				"text-ignore-placement": true,
+				// Keep count upright when the map rotates.
+				"text-rotation-alignment": "viewport",
+				"text-pitch-alignment": "viewport",
+			},
+			paint: {
+				"text-color": "#000",
+			},
+		});
+
+		// Symbol layer for unclustered points; boosted places use the orange pin.
+		// Drawn last so pins sit on top of cluster discs at boundaries.
+		map.addLayer({
+			id: "unclustered-point",
+			type: "symbol",
+			source: "places",
+			filter: ["!", ["has", "point_count"]],
+			layout: {
+				// Look up composite sprite (pin shape + baked category icon). Until
+				// the icon's sprite finishes loading, MapLibre logs a warning and
+				// skips the symbol; pins appear as their composite sprites resolve.
+				"icon-image": [
+					"concat",
+					"pin-",
+					["case", ["coalesce", ["get", "boosted"], false], "b", "r"],
+					"-",
+					["coalesce", ["get", "icon"], "question_mark"],
+				],
+				"icon-size": 1,
+				"icon-anchor": "bottom",
+				"icon-allow-overlap": true,
+				"icon-ignore-placement": true,
+				// Keep pins upright as the map rotates/pitches.
+				"icon-rotation-alignment": "viewport",
+				"icon-pitch-alignment": "viewport",
+			},
+		});
+
+		// Comment count badge — green disc on the pin's top-right corner.
+		// Comment count badge — fixed 16×16 green disc rendered as a
+		// dedicated icon symbol layer. Two layers (disc + text) instead of
+		// one composite symbol so positioning stays simple — both share the
+		// same offset from the pin anchor.
+		// Pin is 32×43, icon-anchor: bottom. Top-right of the pin head is
+		// ~(+10, -36) px from the geographic anchor.
+		map.addLayer({
+			id: "comment-badge",
+			type: "symbol",
+			source: "places",
+			filter: [
+				"all",
+				["!", ["has", "point_count"]],
+				[">", ["get", "comments"], 0],
+			],
+			layout: {
+				"icon-image": "comment-badge-bg",
+				"icon-size": 1,
+				"icon-allow-overlap": true,
+				"icon-ignore-placement": true,
+				"icon-rotation-alignment": "viewport",
+				"icon-pitch-alignment": "viewport",
+				"icon-offset": [10, -36],
+			},
+		});
+
+		map.addLayer({
+			id: "comment-badge-count",
+			type: "symbol",
+			source: "places",
+			filter: [
+				"all",
+				["!", ["has", "point_count"]],
+				[">", ["get", "comments"], 0],
+			],
+			layout: {
+				"text-field": ["to-string", ["get", "comments"]],
+				"text-font": ["Noto Sans Bold"],
+				"text-size": 11,
+				"text-allow-overlap": true,
+				"text-ignore-placement": true,
+				"text-rotation-alignment": "viewport",
+				"text-pitch-alignment": "viewport",
+				// text-offset is in ems; mirror the disc's pixel offset above.
+				"text-offset": [10 / 11, -36 / 11],
+			},
+			paint: {
+				"text-color": "#fff",
+			},
+		});
+
+		// Saved badge — white disc with bookmark glyph on the pin's
+		// top-left corner. Filter only fires when the feature's `saved`
+		// flag is true (recomputed when $savedPlaceIds size changes).
+		map.addLayer({
+			id: "saved-badge",
+			type: "symbol",
+			source: "places",
+			filter: [
+				"all",
+				["!", ["has", "point_count"]],
+				["==", ["get", "saved"], true],
+			],
+			layout: {
+				"icon-image": "saved-badge",
+				"icon-size": 1,
+				"icon-anchor": "center",
+				// Top-left of the pin head, relative to the bottom-anchored pin.
+				"icon-offset": [-12, -38],
+				"icon-allow-overlap": true,
+				"icon-ignore-placement": true,
+				"icon-rotation-alignment": "viewport",
+				"icon-pitch-alignment": "viewport",
+			},
+		});
+
+		// Place name labels — visible at high zoom once the enriched-details
+		// fetch has populated each place's name. Drawn before clusters-hit so
+		// the spiderfy hit-target stays on top for click routing.
+		// Mirrors prod's `.marker-label` / `.marker-label-boosted` styling
+		// (src/app.css:264-310). Dark-mode color swap is Phase 6 polish.
+		map.addLayer({
+			id: "place-label",
+			type: "symbol",
+			source: "places",
+			minzoom: LABEL_VISIBLE_ZOOM,
+			filter: [
+				"all",
+				["!", ["has", "point_count"]],
+				["!=", ["get", "name"], ""],
+			],
+			layout: {
+				"text-field": ["get", "name"],
+				"text-font": ["Noto Sans Bold"],
+				"text-size": 14,
+				"text-anchor": "left",
+				// text-offset is in ems. Pin's right edge sits at ~+16 px from
+				// the geographic anchor (icon-anchor: bottom). Start the label
+				// 6 px past that, vertically centered on the pin head (~ -25 px).
+				"text-offset": [22 / 14, -25 / 14],
+				"text-max-width": 12,
+				"text-rotation-alignment": "viewport",
+				"text-pitch-alignment": "viewport",
+			},
+			paint: {
+				"text-color": [
+					"case",
+					["get", "boosted"],
+					"#f97316", // orange-500 (boosted)
+					"#0e7490", // cyan-700 (regular)
+				],
+				"text-halo-color": "#fff",
+				"text-halo-width": 1.2,
+				"text-halo-blur": 0,
+			},
+		});
+
+		// Symbol cluster layer used by spiderfy. Hit-testing on this layer's
+		// near-invisible icon picks up the cluster_id property and routes
+		// through the library, which auto-decides between zoom-on-click and
+		// spiderfying based on getClusterExpansionZoom vs maxZoom.
+		map.addLayer({
+			id: "clusters-hit",
+			type: "symbol",
+			source: "places",
+			filter: ["has", "point_count"],
+			layout: {
+				"icon-image": "cluster-hit",
+				"icon-size": 1,
+				"icon-allow-overlap": true,
+				"icon-ignore-placement": true,
+			},
+		});
+
+		// Spiderfy hooks the clusters-hit symbol layer. The library's
+		// internal decision is: if expansionZoom > forceSpiderifyMinZoom OR
+		// expansionZoom > map.maxZoom → spiderfy; else easeTo to expansionZoom.
+		// The default forceSpiderifyMinZoom is null, which coerces to 0 and
+		// causes EVERY click to spiderfy. Set it to our clustering threshold
+		// so only genuinely un-zoomable clusters (coincident points whose
+		// expansionZoom exceeds the threshold) spider out.
+		spiderfier = new Spiderfy(map, {
+			forceSpiderifyMinZoom: CLUSTERING_DISABLED_ZOOM,
+			onLeafClick: (feature) => {
+				const placeId = feature.properties?.id;
+				if (typeof placeId === "number") {
+					merchantDrawer.open(placeId, "details");
 				}
-				setMapViewAndMarkLoaded();
-			})
-			.catch((err) => {
-				if (data.geo?.lat != null && data.geo?.lng != null) {
-					map.setView([data.geo.lat, data.geo.lng], DEFAULT_MAP_ZOOM);
-				} else {
-					map.setView([DEFAULT_MAP_LAT, DEFAULT_MAP_LNG], DEFAULT_MAP_ZOOM);
-				}
-				setMapViewAndMarkLoaded();
-				errToast(get(_)("errors.mapViewCachedCoords"));
-				console.error(err);
-			});
-	}
+			},
+			closeOnLeafClick: true,
+			spiderLeavesLayout: {
+				"icon-image": [
+					"concat",
+					"pin-",
+					["case", ["coalesce", ["get", "boosted"], false], "b", "r"],
+					"-",
+					["coalesce", ["get", "icon"], "question_mark"],
+				],
+				"icon-size": 1,
+				"icon-anchor": "bottom",
+				"icon-allow-overlap": true,
+				"icon-ignore-placement": true,
+				"icon-rotation-alignment": "viewport",
+				"icon-pitch-alignment": "viewport",
+			},
+			spiderLegsColor: "rgba(100, 100, 100, 0.6)",
+		});
+		spiderfier.applyTo("clusters-hit");
 
-	// add tiles and basemaps
-	const { baseMaps, activeLayer } = layers(leaflet, map);
-
-	// Initialize current layer name for deduplication tracking
-	currentLayerName =
-		theme.current === "dark" ? "Carto Dark Matter" : "OpenFreeMap Liberty";
-
-	return { baseMaps, activeLayer, hashHadCoords: false };
-};
-
-const setupTileLayers = (activeLayer: unknown) => {
-	// Hook into MapLibre GL tile loading events
-	if (
-		activeLayer &&
-		typeof activeLayer === "object" &&
-		"getMaplibreMap" in activeLayer
-	) {
-		// MapLibre GL map might not be ready immediately, poll for it
-		const checkGlMap = () => {
-			const glMap = (
-				activeLayer as { getMaplibreMap: () => unknown }
-			).getMaplibreMap();
-			if (glMap && typeof glMap === "object" && "on" in glMap) {
-				// Clear polling timer now that GL map is ready
-				if (glMapPollingTimer) {
-					clearTimeout(glMapPollingTimer);
-					glMapPollingTimer = null;
-				}
-				(glMap as { on: (event: string, callback: () => void) => void }).on(
-					"idle",
-					() => {
-						if (tilesLoadingTimer) {
-							clearTimeout(tilesLoadingTimer);
-							tilesLoadingTimer = null;
-						}
-						if (tilesLoadingFallback) {
-							clearTimeout(tilesLoadingFallback);
-							tilesLoadingFallback = null;
-						}
-						mapTilesLoaded = true;
-						tilesLoading = false;
-					},
-				);
-			} else {
-				// GL map not ready yet, check again after a short delay
-				glMapPollingTimer = setTimeout(checkGlMap, 100);
-			}
+		const setPointerCursor = () => {
+			if (map) map.getCanvas().style.cursor = "pointer";
 		};
-		checkGlMap();
-	} else {
-		// Fallback: if not using MapLibre GL layer, mark tiles as loaded immediately
-		mapTilesLoaded = true;
-		tilesLoading = false;
-	}
-};
+		const resetCursor = () => {
+			if (map) map.getCanvas().style.cursor = "";
+		};
+		map.on("mouseenter", "clusters-outer", setPointerCursor);
+		map.on("mouseleave", "clusters-outer", resetCursor);
+		map.on("mouseenter", "unclustered-point", setPointerCursor);
+		map.on("mouseleave", "unclustered-point", resetCursor);
 
-const setupTileLoadingIndicators = () => {
-	// Show tile loading indicator on pan/zoom (debounced to prevent flickering)
-	map.on("movestart", () => {
-		if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
-		if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
+		// Unclustered marker click → open the global merchant drawer. The
+		// drawer component lives in the layout, so we only need to push state
+		// into the store.
+		map.on("click", "unclustered-point", (e: MapLayerMouseEvent) => {
+			const feature = e.features?.[0] as MapGeoJSONFeature | undefined;
+			const placeId = feature?.properties?.id;
+			if (typeof placeId !== "number") return;
+			merchantDrawer.open(placeId, "details");
+		});
 
-		// Only show indicator if loading takes > 150ms
-		tilesLoadingTimer = setTimeout(() => {
-			tilesLoading = true;
-		}, 150);
-
-		// Fallback: hide indicator after 5s if idle never fires
-		tilesLoadingFallback = setTimeout(() => {
-			tilesLoading = false;
-		}, 5000);
-	});
-};
-
-const setupMapClickHandlers = () => {
-	// Close drawer when clicking on map (not on markers)
-	map.on("click", () => {
-		if ($merchantDrawer.isOpen) {
-			if (selectedMarkerId) {
-				clearMarkerSelection(loadedMarkers, selectedMarkerId);
-				selectedMarkerId = null;
-			}
+		// Click on empty map (no marker or cluster hit) closes any open
+		// drawer — matches /map's behavior. Layer-scoped click handlers
+		// fire alongside this generic one, so clicking a marker still
+		// reopens the drawer for the new feature net-net.
+		// The spiderfy lib adds its own symbol layers at applyTo() time
+		// with ids prefixed `spiderfy-leaf-…`. Without including them
+		// here, tapping a spidered leaf would open the drawer (via
+		// onLeafClick) and then immediately close it again because the
+		// generic handler sees no hit on the allowlisted layers.
+		map.on("click", (e: MapLayerMouseEvent) => {
+			if (!map) return;
+			if (!get(merchantDrawer).isOpen) return;
+			const spiderLeafLayerIds = map
+				.getStyle()
+				.layers.filter((l) => l.id.startsWith("spiderfy-leaf"))
+				.map((l) => l.id);
+			const hit = map.queryRenderedFeatures(e.point, {
+				layers: ["unclustered-point", "clusters-hit", ...spiderLeafLayerIds],
+			});
+			if (hit.length > 0) return;
 			merchantDrawer.close();
-		}
-	});
-};
+		});
 
-const setupMapControls = (
-	LocateControl: typeof import("leaflet.locatecontrol").LocateControl,
-	baseMaps: Record<string, Layer>,
-	translate: (key: string) => string,
-) => {
-	const mapControlsT = {
-		support: translate("mapControls.support"),
-		supportWithSats: translate("mapControls.supportWithSats"),
-		locate: translate("mapControls.locate"),
-		fullScreen: translate("mapControls.fullScreen"),
-		zoomIn: translate("mapControls.zoomIn"),
-		zoomOut: translate("mapControls.zoomOut"),
-	};
-
-	// change broken marker image path in prod
-	leaflet.Icon.Default.prototype.options.imagePath = "/icons/";
-
-	// add support attribution
-	support(mapControlsT);
-
-	// add OSM attribution
-	attribution(leaflet, map);
-
-	// add scale
-	scaleBars(leaflet, map);
-
-	// add locate button to map
-	geolocate(leaflet, map, LocateControl, mapControlsT);
-
-	controlLayers = leaflet.control
-		.layers(baseMaps, undefined, { position: "topright" })
-		.addTo(map);
-
-	// track layer changes (with deduplication to avoid tracking same layer selection)
-	map.on("baselayerchange", (e: { name: string }) => {
-		if (e.name !== currentLayerName) {
-			trackEvent("layer_change", { layer: e.name });
-			currentLayerName = e.name;
-		}
-	});
-};
-
-const setupMapFinalization = (
-	translate: (key: string) => string,
-	hashHadCoords: boolean,
-) => {
-	const mapControlsT = {
-		fullScreen: translate("mapControls.fullScreen"),
-		zoomIn: translate("mapControls.zoomIn"),
-		zoomOut: translate("mapControls.zoomOut"),
-	};
-	// change default icons
-	changeDefaultIcons(true, leaflet, mapElement, DomEvent, mapControlsT);
-
-	// final map setup
-	map.on("load", () => {
-		mapLoaded = true;
-		mapCenter = map.getCenter();
-	});
-
-	// Watch for hash changes to clear marker selection when drawer closes
-	window.addEventListener("hashchange", handleHashChange);
-
-	// Sync drawer state from URL hash on initial page load
-	merchantDrawer.syncFromHash();
-
-	// If the URL had a merchant ID but no map coordinates, pan to the merchant
-	if (!hashHadCoords) {
-		const { merchantId, isOpen } = parseMerchantHash();
-		if (isOpen && merchantId) {
-			const place = get(placesById).get(merchantId);
-			if (place) {
-				navigateToPlace(place, {
-					targetZoom: DEFAULT_MAP_ZOOM,
-					spiderfyCluster: true,
+		// Cluster hover → draw a convex hull around its leaves. Capped at 500
+		// leaves to keep convex computation cheap on dense clusters.
+		map.on("mouseenter", "clusters-outer", (e: MapLayerMouseEvent) => {
+			if (!map) return;
+			const feature = e.features?.[0] as MapGeoJSONFeature | undefined;
+			if (!feature) return;
+			const clusterId = feature.properties?.cluster_id as number | undefined;
+			const pointCount = feature.properties?.point_count as number | undefined;
+			if (clusterId === undefined) return;
+			latestHullClusterId = clusterId;
+			const source = map.getSource("places") as GeoJSONSource | undefined;
+			const hullSource = map.getSource("cluster-hull") as
+				| GeoJSONSource
+				| undefined;
+			if (!source || !hullSource) return;
+			const limit = Math.min(pointCount ?? 500, 500);
+			source.getClusterLeaves(clusterId, limit, 0).then((leaves) => {
+				// Stale callback guard — bail if hover has moved to another cluster
+				// (or cleared entirely) by the time leaves resolve.
+				if (latestHullClusterId !== clusterId) return;
+				const points: Feature<Point>[] = [];
+				for (const leaf of leaves) {
+					if (leaf.geometry?.type !== "Point") continue;
+					const coords = leaf.geometry.coordinates as [number, number];
+					points.push(point(coords));
+				}
+				const hull = convex(featureCollection(points));
+				if (!hull) {
+					// Degenerate cluster (≤ 2 unique points / collinear) — clear
+					// any stale hull from a previous hover instead of leaving it on.
+					hullSource.setData(EMPTY_HULL_COLLECTION);
+					return;
+				}
+				hullSource.setData({
+					type: "FeatureCollection",
+					features: [hull],
 				});
-			} else {
-				// Places may still be loading — subscribe and pan once merchant appears
-				deepLinkPanUnsub = placesById.subscribe(($placesById) => {
-					const p = $placesById.get(merchantId);
-					if (p) {
-						navigateToPlace(p, {
-							targetZoom: DEFAULT_MAP_ZOOM,
-							spiderfyCluster: true,
-						});
+			});
+		});
+
+		map.on("mouseleave", "clusters-outer", () => {
+			if (!map) return;
+			latestHullClusterId = null;
+			const hullSource = map.getSource("cluster-hull") as
+				| GeoJSONSource
+				| undefined;
+			hullSource?.setData(EMPTY_HULL_COLLECTION);
+		});
+
+		// Refresh enriched details (and thus labels) on viewport changes
+		// once we're above LABEL_VISIBLE_ZOOM. Debounced so quick pans don't
+		// spam the API; the store internally aborts any stale request.
+		map.on("moveend", triggerEnrichmentIfNeeded);
+
+		// Track current zoom + center + refresh the merchant list panel's
+		// nearby items based on the new viewport. Debounced to keep cost
+		// off the move path. Center drives the CommunityRail.
+		map.on("moveend", () => {
+			if (!map) return;
+			currentZoom = map.getZoom();
+			const c = map.getCenter();
+			currentLat = c.lat;
+			currentLon = c.lng;
+			debouncedUpdateMerchantList();
+		});
+
+		// Tile-loading indicator — debounced to avoid flicker on quick pans.
+		map.on("movestart", () => {
+			if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
+			if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
+			tilesLoadingTimer = setTimeout(() => {
+				tilesLoading = true;
+			}, 150);
+			tilesLoadingFallback = setTimeout(() => {
+				tilesLoading = false;
+			}, 5000);
+		});
+		map.on("idle", () => {
+			if (tilesLoadingTimer) {
+				clearTimeout(tilesLoadingTimer);
+				tilesLoadingTimer = null;
+			}
+			if (tilesLoadingFallback) {
+				clearTimeout(tilesLoadingFallback);
+				tilesLoadingFallback = null;
+			}
+			tilesLoading = false;
+			mapTilesLoaded = true;
+		});
+
+		// Persist viewport in the URL hash. Preserves any merchant=… params
+		// added by the drawer so shareable URLs round-trip.
+		const persistViewportToHash = () => {
+			if (!map) return;
+			const center = map.getCenter();
+			writeHashCoords({
+				zoom: map.getZoom(),
+				lat: center.lat,
+				lng: center.lng,
+				bearing: map.getBearing(),
+				pitch: map.getPitch(),
+			});
+		};
+		map.on("moveend", persistViewportToHash);
+
+		// If the URL also encoded a merchant=… param, open the drawer to it.
+		merchantDrawer.syncFromHash();
+
+		// Browser back/forward (and any external code mutating the hash) must
+		// keep the drawer in sync. /map also wires this.
+		window.addEventListener("hashchange", handleHashChange);
+
+		// Deep link: URL had a merchant= param but the hash carried no
+		// viewport coords. Pan the camera to the merchant once it's in the
+		// places store. If places are still loading, subscribe and wait —
+		// 10s safety unsubscribe so we never leak.
+		if (!hashCoords) {
+			const { merchantId, isOpen } = parseMerchantHash();
+			if (isOpen && merchantId) {
+				const place = get(placesById).get(merchantId);
+				if (place) {
+					panToPlace(place.lat, place.lon);
+				} else {
+					deepLinkPanUnsub = placesById.subscribe(($byId) => {
+						const p = $byId.get(merchantId);
+						if (!p) return;
+						panToPlace(p.lat, p.lon);
 						if (deepLinkPanTimer) clearTimeout(deepLinkPanTimer);
 						deepLinkPanUnsub?.();
 						deepLinkPanUnsub = null;
-					}
-				});
-				// Safety fallback: unsubscribe after 10s if merchant never appears
-				deepLinkPanTimer = setTimeout(() => {
-					deepLinkPanUnsub?.();
-					deepLinkPanUnsub = null;
-					deepLinkPanTimer = null;
-				}, 10_000);
+					});
+					deepLinkPanTimer = setTimeout(() => {
+						deepLinkPanUnsub?.();
+						deepLinkPanUnsub = null;
+						deepLinkPanTimer = null;
+					}, 10_000);
+				}
 			}
 		}
-	}
-};
 
-onDestroy(async () => {
-	// Cancel pending debounced operations to prevent memory leaks
-	if (debouncedLoadMarkers?.cancel) debouncedLoadMarkers.cancel();
-	if (debouncedCacheCoords?.cancel) debouncedCacheCoords.cancel();
-	if (debouncedFetchEnrichedDetails?.cancel)
-		debouncedFetchEnrichedDetails.cancel();
-	if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
-	if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
-	if (glMapPollingTimer) clearTimeout(glMapPollingTimer);
-	if (debouncedUpdateMerchantList?.cancel) debouncedUpdateMerchantList.cancel();
-	if (debouncedPanelSearch?.cancel) debouncedPanelSearch.cancel();
+		styleLoaded = true;
+		lastPlacesLength = -1;
+		lastSavedIdsSize = -1;
+		lastEnrichedCacheSize = -1;
+		// Apply theme-dependent label palette now that the layer exists.
+		applyLabelPalette(map, get(theme));
+		lastAppliedLabelTheme = get(theme);
+		syncPlacesToSource($places);
+		// Kick once on load — if the user lands above the threshold, labels
+		// should appear without requiring a move.
+		triggerEnrichmentIfNeeded();
+	});
+});
+
+// Theme toggle → re-color the place-label layer in place. setPaintProperty
+// is cheap and avoids rebuilding the source. Guarded by styleLoaded so we
+// don't fire before the layer exists.
+$: if (map && styleLoaded && $theme && $theme !== lastAppliedLabelTheme) {
+	lastAppliedLabelTheme = $theme;
+	applyLabelPalette(map, $theme);
+}
+
+onDestroy(() => {
+	destroyed = true;
+	triggerEnrichmentIfNeeded.cancel();
+	debouncedUpdateMerchantList.cancel();
+	debouncedPanelSearch.cancel();
 	searchAbortController?.abort();
-
-	// Reset merchant list
-	merchantList.reset();
-
-	if (map) {
-		// Dispose Icon component instances on every still-live marker before
-		// tearing down the map; map.remove() drops the DOM but leaves the
-		// Svelte components alive.
-		for (const marker of Object.values(loadedMarkers)) {
-			disposeMarker(marker);
-		}
-		console.info("Unloading Leaflet map.");
-		map.remove();
-	}
-	// Clean up web worker
-	terminateWorker();
-
-	// Reset loading progress when leaving map page to avoid stale states
-	placesLoadingProgress.set(0);
-	placesLoadingStatus.set("");
-
-	// Remove hash change listener
-	if (browser) {
+	searchAbortController = null;
+	if (typeof window !== "undefined") {
 		window.removeEventListener("hashchange", handleHashChange);
 	}
-
-	unsubscribeLocale?.();
-
-	// Clean up deep-link pan subscription and timeout if still pending
 	if (deepLinkPanTimer) clearTimeout(deepLinkPanTimer);
 	deepLinkPanUnsub?.();
 	deepLinkPanUnsub = null;
+	if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
+	if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
+	spiderfier?.unspiderfyAll();
+	spiderfier = undefined;
+	map?.remove();
 });
 </script>
 
@@ -1534,69 +1262,146 @@ onDestroy(async () => {
 	<meta name="twitter:image" content="https://btcmap.org/images/og/map.png" />
 </svelte:head>
 
-<div class="relative h-screen w-full">
-	<h1 class="sr-only">{$_('map.bitcoinMerchantMapTitle')}</h1>
-	<MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
+<h1 class="sr-only">{$_('map.bitcoinMerchantMapTitle')}</h1>
 
-	<!-- Map takes full space -->
-	<div bind:this={mapElement} class="map-fullscreen absolute inset-0 !bg-teal dark:!bg-dark" />
+<div bind:this={mapContainer} class="map-container"></div>
 
-	<!-- Floating search bar - desktop: top-left, mobile: bottom-center (hidden on mobile when merchant drawer open) -->
-	{#if mapLoaded}
-		<div
-			class="pointer-events-none z-[1000] max-md:fixed max-md:right-3 max-md:bottom-[calc(5rem+env(safe-area-inset-bottom))] max-md:left-3 md:absolute md:top-3 md:left-3
-				{$merchantDrawer.isOpen ? 'max-md:hidden' : ''}"
-		>
-			<MapSearchBar
-				onSearch={handlePanelSearch}
-				onFocus={() => {
-					merchantList.open();
-					updateMerchantList({ force: true });
-				}}
-				onNearbyClick={() => {
-					merchantList.open();
-					updateMerchantList({ force: true });
-				}}
-				nearbyCount={$merchantList.totalCount}
-				isLoadingCount={$merchantList.isLoadingList}
-			/>
-		</div>
-	{/if}
+<MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
 
-	<!-- Merchant list panel (overlays map, search input at same position as floating bar) -->
-	<MerchantListPanel
-		onPanToNearbyMerchant={panToNearbyMerchant}
-		onZoomToSearchResult={zoomToSearchResult}
-		onZoomToNearbyLevel={zoomToNearbyLevel}
-		onFitSearchResultBounds={fitBoundsToSearchResults}
-		onHoverStart={(place) => highlightMarker(loadedMarkers, place.id)}
-		onHoverEnd={(place) => {
-			// Don't clear if this is the selected marker
-			if (selectedMarkerId !== place.id) {
-				clearMarkerSelection(loadedMarkers, place.id);
-			}
-		}}
-		onSearch={handlePanelSearch}
-		onModeChange={handleModeChange}
-		onRefresh={() => updateMerchantList({ force: true })}
-		{currentZoom}
-	/>
-
-	<MerchantDrawerHash />
-
-	{#if mapLoaded}
-		<CommunityRail
-			lat={mapCenter?.lat ?? null}
-			lon={mapCenter?.lng ?? null}
-			zoom={currentZoom}
-			{map}
-			{leaflet}
+<!--
+	Floating search bar — desktop: top-left, mobile: bottom-center.
+	Hidden on mobile while the merchant drawer is open so the drawer
+	gets the full bottom area. The bar itself hides when the list panel
+	is open (the panel renders its own search input in the same slot).
+-->
+{#if styleLoaded}
+	<div
+		class="pointer-events-none z-[1000] max-md:fixed max-md:right-3 max-md:bottom-[calc(5rem+env(safe-area-inset-bottom))] max-md:left-3 md:absolute md:top-3 md:left-3
+			{$merchantDrawer.isOpen ? 'max-md:hidden' : ''}"
+	>
+		<MapSearchBar
+			onSearch={handlePanelSearch}
+			onFocus={() => {
+				merchantList.open();
+				updateMerchantList({ force: true });
+			}}
+			onNearbyClick={() => {
+				merchantList.open();
+				updateMerchantList({ force: true });
+			}}
+			nearbyCount={$merchantList.totalCount}
+			isLoadingCount={$merchantList.isLoadingList}
 		/>
-	{/if}
+	</div>
+{/if}
 
-	{#if map && leaflet && DomEvent}
-		<MapControls {map} {leaflet} {DomEvent} />
-	{/if}
+<MerchantListPanel
+	onPanToNearbyMerchant={panToNearbyMerchant}
+	onZoomToSearchResult={zoomToSearchResult}
+	onZoomToNearbyLevel={zoomToNearbyLevel}
+	onFitSearchResultBounds={fitSearchResultBounds}
+	onHoverStart={() => {
+		// Hover highlight requires feature-state plumbing that isn't
+		// wired here yet — deferred to a follow-up polish.
+	}}
+	onHoverEnd={() => {
+		// See onHoverStart above.
+	}}
+	onSearch={handlePanelSearch}
+	onModeChange={handleModeChange}
+	onRefresh={() => updateMerchantList({ force: true })}
+	{currentZoom}
+/>
 
-	<TileLoadingIndicator visible={tilesLoading} />
-</div>
+{#if styleLoaded}
+	<CommunityRailNext
+		lat={currentLat}
+		lon={currentLon}
+		zoom={currentZoom}
+		{map}
+	/>
+{/if}
+
+<TileLoadingIndicator visible={tilesLoading} />
+
+<MerchantDrawerHash />
+
+<style>
+	.map-container {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+	}
+	/* Basemap picker — IControl that owns its own container; the popup
+	   is absolutely positioned relative to it. Hover-or-click the icon
+	   to expand the radio list. */
+	:global(.maplibre-next-basemaps) {
+		position: relative;
+	}
+	:global(.maplibre-next-basemaps-popup) {
+		position: absolute;
+		top: 0;
+		right: calc(100% + 6px);
+		background: white;
+		color: #111827; /* gray-900 */
+		border-radius: 4px;
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+		padding: 4px 0;
+		min-width: 140px;
+		font-size: 13px;
+	}
+	:global(.dark .maplibre-next-basemaps-popup) {
+		background: #1f2937; /* gray-800 — matches --leaflet-bg in app.css */
+		color: #f3f4f6; /* gray-100 */
+	}
+	:global(.maplibre-next-basemaps-option) {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		padding: 4px 10px;
+		cursor: pointer;
+	}
+	:global(.maplibre-next-basemaps-option:hover) {
+		background: rgba(0, 0, 0, 0.05);
+	}
+	:global(.dark .maplibre-next-basemaps-option:hover) {
+		background: rgba(255, 255, 255, 0.08);
+	}
+	:global(.maplibre-next-basemaps-option input) {
+		margin: 0;
+	}
+
+	/* Anchor-based buttons inside the custom IControls (NavButtons / Boost /
+	   DataRefresh). MapLibre's default `.maplibregl-ctrl-group button` rules
+	   don't apply to <a> elements, so we replicate the dimensions, hover and
+	   focus states here. Kept :global because Svelte's scoped CSS would
+	   miss the anchors created at runtime by the IControl classes. */
+	:global(.maplibregl-ctrl-group a.maplibregl-ctrl-link) {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 29px;
+		height: 29px;
+		box-sizing: border-box;
+		background-color: transparent;
+		cursor: pointer;
+		text-decoration: none;
+	}
+	:global(.maplibregl-ctrl-group a.maplibregl-ctrl-link + a.maplibregl-ctrl-link),
+	:global(.maplibregl-ctrl-group button + a.maplibregl-ctrl-link),
+	:global(.maplibregl-ctrl-group a.maplibregl-ctrl-link + button) {
+		border-top: 1px solid #ddd;
+	}
+	:global(.maplibregl-ctrl-group a.maplibregl-ctrl-link:hover) {
+		background-color: rgba(0, 0, 0, 0.05);
+	}
+	:global(.maplibregl-ctrl-group a.maplibregl-ctrl-link:focus-visible) {
+		box-shadow: 0 0 2px 2px #0096ff;
+	}
+	:global(.maplibregl-ctrl-group a.maplibregl-ctrl-link img) {
+		display: block;
+		width: 16px;
+		height: 16px;
+	}
+</style>

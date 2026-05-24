@@ -1,4 +1,4 @@
-// Raster basemap catalog for /map-next. All three sources/layers are added
+// Raster basemap catalog for /map. All three sources/layers are added
 // to the style at init; switching is just a layer-visibility toggle, no
 // setStyle — which avoids the tile-compile cascade that broke the first
 // basemap-switcher attempt.

@@ -212,7 +212,7 @@ const addPlacesLayers = (m: MapLibreMap) => {
 			layout: {
 				// Defensive coalesce — guards against any null icon value
 				// surfacing as the "Expected number, found null" tile-compile
-				// error we hit in /map-next when clustering met null props.
+				// error we previously hit when clustering met null props.
 				"icon-image": [
 					"concat",
 					"pin-",
