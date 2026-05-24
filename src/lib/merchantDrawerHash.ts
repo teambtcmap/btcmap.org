@@ -8,6 +8,8 @@ export interface MerchantHashState {
 	isOpen: boolean;
 }
 
+export const MERCHANT_URL_CHANGE_EVENT = "merchant-url-change";
+
 export function parseMerchantHash(): MerchantHashState {
 	if (!browser) {
 		return { merchantId: null, drawerView: "details", isOpen: false };
@@ -63,4 +65,5 @@ export function updateMerchantHash(
 	}
 
 	history.pushState(null, "", url.toString());
+	window.dispatchEvent(new Event(MERCHANT_URL_CHANGE_EVENT));
 }

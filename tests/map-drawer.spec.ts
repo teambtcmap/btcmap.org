@@ -229,7 +229,7 @@ test.describe('Map Drawer', () => {
 
 	test('drawer opens from URL hash on initial page load (desktop)', async ({ page }) => {
 		// Navigate directly to map with merchant hash parameter
-		await page.goto('/map#15/53.55573/10.00825?merchant=6556', { waitUntil: 'load' });
+		await page.goto('/map?merchant=6556#15/53.55573/10.00825', { waitUntil: 'load' });
 		await expect(page).toHaveTitle(/BTC Map/);
 
 		// Wait for map to load
@@ -268,7 +268,7 @@ test.describe('Map Drawer', () => {
 		await page.setViewportSize({ width: 375, height: 667 });
 
 		// Navigate directly to map with merchant hash parameter
-		await page.goto('/map#15/53.55573/10.00825?merchant=6556', { waitUntil: 'load' });
+		await page.goto('/map?merchant=6556#15/53.55573/10.00825', { waitUntil: 'load' });
 		await expect(page).toHaveTitle(/BTC Map/);
 
 		// Wait for map to load
@@ -300,7 +300,7 @@ test.describe('Map Drawer', () => {
 
 	test('boost view opens from hash parameter', async ({ page }) => {
 		// Navigate with boost view parameter
-		await page.goto('/map#15/53.55573/10.00825?merchant=6556&view=boost', { waitUntil: 'load' });
+		await page.goto('/map?merchant=6556&view=boost#15/53.55573/10.00825', { waitUntil: 'load' });
 		await expect(page).toHaveTitle(/BTC Map/);
 
 		// Wait for map to load
@@ -364,7 +364,7 @@ test.describe('Map Drawer', () => {
 		});
 
 		// Open merchant 6556 (has comments)
-		await page.goto('/map#15/53.55573/10.00825?merchant=6556', { waitUntil: 'load' });
+		await page.goto('/map?merchant=6556#15/53.55573/10.00825', { waitUntil: 'load' });
 		await waitForMarkersToLoad(page);
 
 		const drawer = page.locator('[role="dialog"]');
@@ -377,7 +377,8 @@ test.describe('Map Drawer', () => {
 
 		// Switch to merchant 1 (no comments)
 		await page.evaluate(() => {
-			window.location.hash = '#15/53.55573/10.00825?merchant=1';
+			history.pushState(null, '', '/map?merchant=1#15/53.55573/10.00825');
+			window.dispatchEvent(new Event('merchant-url-change'));
 		});
 
 		// Wait for drawer to update — comments should be gone
@@ -385,7 +386,8 @@ test.describe('Map Drawer', () => {
 
 		// Switch back to merchant 6556
 		await page.evaluate(() => {
-			window.location.hash = '#15/53.55573/10.00825?merchant=6556';
+			history.pushState(null, '', '/map?merchant=6556#15/53.55573/10.00825');
+			window.dispatchEvent(new Event('merchant-url-change'));
 		});
 
 		// Comments must re-appear (this is the bug scenario)
@@ -400,7 +402,7 @@ test.describe('Map Drawer', () => {
 		await page.setViewportSize({ width: 375, height: 667 });
 
 		// Navigate with merchant hash to open drawer directly
-		await page.goto('/map#15/53.55573/10.00825?merchant=6556', { waitUntil: 'load' });
+		await page.goto('/map?merchant=6556#15/53.55573/10.00825', { waitUntil: 'load' });
 
 		// Wait for map to load
 		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });

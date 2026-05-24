@@ -67,7 +67,10 @@ import {
 	getVisiblePlaces,
 	getZoomBehavior,
 } from "$lib/map/viewport";
-import { parseMerchantHash } from "$lib/merchantDrawerHash";
+import {
+	MERCHANT_URL_CHANGE_EVENT,
+	parseMerchantHash,
+} from "$lib/merchantDrawerHash";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import type { MerchantListMode } from "$lib/merchantListStore";
 import { merchantList } from "$lib/merchantListStore";
@@ -1441,6 +1444,8 @@ const setupMapFinalization = (
 
 	// Watch for hash changes to clear marker selection when drawer closes
 	window.addEventListener("hashchange", handleHashChange);
+	window.addEventListener(MERCHANT_URL_CHANGE_EVENT, handleHashChange);
+	window.addEventListener("popstate", handleHashChange);
 
 	// Sync drawer state from URL hash on initial page load
 	merchantDrawer.syncFromHash();
@@ -1516,6 +1521,8 @@ onDestroy(async () => {
 	// Remove hash change listener
 	if (browser) {
 		window.removeEventListener("hashchange", handleHashChange);
+		window.removeEventListener(MERCHANT_URL_CHANGE_EVENT, handleHashChange);
+		window.removeEventListener("popstate", handleHashChange);
 	}
 
 	unsubscribeLocale?.();
