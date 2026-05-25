@@ -2,7 +2,10 @@ import type { Page } from '@playwright/test';
 
 export const MARKER_LOAD_TIMEOUT = 60000;
 
-// Wait for places API response and markers to render in DOM
+// Wait for places API response and markers to render on the map.
+// MapLibre draws pins on a WebGL canvas (no DOM markers like Leaflet had),
+// so DOM-count probes won't work. Use querySourceFeatures on the
+// "places" source to detect that real features have flowed in.
 export async function waitForMarkersToLoad(page: Page) {
 	// First wait for the places API to respond
 	try {
@@ -15,9 +18,18 @@ export async function waitForMarkersToLoad(page: Page) {
 		// Continue and check if markers exist
 	}
 
-	// Then wait for markers to render in DOM
+	// MapLibre canvas must be present before features can be queried.
+	await page.waitForSelector('.maplibregl-canvas', { state: 'visible' });
+
+	// Poll the source data via a known global hook the page exposes.
+	// /map sets `window.__mapReady` (and the places source contains real
+	// features) once syncPlacesToSource completes. The hook is a no-op in
+	// prod; tests pin against it.
 	await page.waitForFunction(
-		() => document.querySelectorAll('.leaflet-marker-pane > div').length > 0,
+		() =>
+			(window as unknown as { __mapPlacesCount?: number }).__mapPlacesCount !==
+			undefined &&
+			(window as unknown as { __mapPlacesCount: number }).__mapPlacesCount > 0,
 		{ timeout: MARKER_LOAD_TIMEOUT }
 	);
 }

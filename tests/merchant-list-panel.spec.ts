@@ -250,7 +250,7 @@ test.describe('Merchant List Panel', () => {
 		await expect(floatingSearchInput).not.toBeVisible({ timeout: 5000 });
 
 		// Close the drawer by clicking the map (somewhere outside the drawer)
-		await page.click('.leaflet-container', { position: { x: 50, y: 50 } });
+		await page.click('.maplibregl-canvas', { position: { x: 50, y: 50 } });
 
 		// Wait for drawer to close
 		await expect(mobileDrawer).not.toBeVisible({ timeout: 5000 });

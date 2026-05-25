@@ -545,6 +545,13 @@ const syncPlacesToSource = (list: Place[]) => {
 	boostedSource.setData(buildFeatureCollectionFor(boosted, true));
 	ensureSpritesForPlaces(map, list);
 	if (list.length > 0) elementsLoaded = true;
+	// E2E test hook: Playwright can't probe WebGL canvas pins like it
+	// could probe Leaflet's DOM markers, so we expose the count for
+	// `waitForMarkersToLoad` to gate on. No-op outside tests.
+	if (typeof window !== "undefined") {
+		(window as unknown as { __mapPlacesCount?: number }).__mapPlacesCount =
+			list.length;
+	}
 };
 
 // Debounced enrichment trigger — fires on moveend when zoomed in enough

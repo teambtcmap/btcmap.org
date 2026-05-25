@@ -48,6 +48,6 @@ test.describe('Deleted Merchant Page', () => {
 		await page.goto(`/merchant/${DELETED_MERCHANT_ID}`);
 
 		// Map container should still render for deleted merchants
-		await expect(page.locator('.leaflet-container')).toBeVisible({ timeout: 15000 });
+		await expect(page.locator('.maplibregl-map')).toBeVisible({ timeout: 15000 });
 	});
 });
