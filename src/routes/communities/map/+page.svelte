@@ -175,65 +175,93 @@ const addCommunitiesLayers = (m: MapLibreMap) => {
 // instance (if any). Caller is responsible for $destroy()'ing the Svelte
 // instance on popup close — otherwise each polygon click leaks an extra
 // Socials with its theme/locale subscriptions still live.
+//
+// Built via DOM APIs instead of innerHTML interpolation: community.tags.*
+// (name, organization, …) come from the curated areas API but are still
+// untrusted strings; assembling with textContent keeps any `<script>` /
+// HTML in a tag from executing.
 const buildPopupHtml = (
 	community: Area,
-): { container: HTMLDivElement; socials: Socials | null } => {
+): { container: HTMLDivElement; socials: Socials } => {
+	const t = get(_);
 	const container = document.createElement("div");
-	container.innerHTML = `
-		<div class='text-center space-y-2'>
-			<img loading='lazy' src='${areaIconSrc(community.tags["icon:square"])}' alt='${get(_)("communityMap.avatarAlt")}' class='w-24 h-24 rounded-full mx-auto' title='${get(_)("communityMap.communityIconTitle")}' onerror="this.src='/images/bitcoin.svg'" />
+	const wrapper = document.createElement("div");
+	wrapper.className = "text-center space-y-2";
+	container.appendChild(wrapper);
 
-			<span class='text-primary dark:text-white font-semibold text-xl' title='${get(_)("communityMap.communityNameTitle")}'>${community.tags.name}</span>
+	const img = document.createElement("img");
+	img.loading = "lazy";
+	img.src = areaIconSrc(community.tags["icon:square"]);
+	img.alt = t("communityMap.avatarAlt");
+	img.className = "w-24 h-24 rounded-full mx-auto";
+	img.title = t("communityMap.communityIconTitle");
+	img.addEventListener("error", () => {
+		img.src = "/images/bitcoin.svg";
+	});
+	wrapper.appendChild(img);
 
-			${
-				community.tags.organization
-					? `<span class="mx-auto whitespace-nowrap w-fit block rounded-full bg-[#10B981] px-3.5 py-1 text-xs font-semibold uppercase text-white" title="${get(_)("communityMap.organization")}">${community.tags.organization}</span>`
-					: ""
-			}
+	const nameSpan = document.createElement("span");
+	nameSpan.className = "text-primary dark:text-white font-semibold text-xl";
+	nameSpan.title = t("communityMap.communityNameTitle");
+	nameSpan.textContent = community.tags.name;
+	wrapper.appendChild(nameSpan);
 
-			${
-				community.tags.sponsor
-					? `<span class="block gradient-bg w-32 mx-auto py-1 text-xs text-white font-semibold rounded-full" title="${get(_)("communityMap.supporter")}">${get(_)("communityMap.sponsor")}</span>`
-					: ""
-			}
-
-			<div id='socials'></div>
-
-			<a href="${resolve(`/community/${encodeURIComponent(community.id)}`)}" class='block bg-link hover:bg-hover !text-white text-center font-semibold py-3 rounded-xl transition-colors' title='${get(_)("communityMap.communityPageTitle")}'>${get(_)("communityMap.viewCommunity")}</a>
-		</div>
-	`;
-
-	const socialsMount = container.querySelector("#socials");
-	let socials: Socials | null = null;
-	if (socialsMount) {
-		socials = new Socials({
-			target: socialsMount,
-			props: {
-				website: community.tags["contact:website"],
-				email: community.tags["contact:email"],
-				phone: community.tags["contact:phone"],
-				nostr: community.tags["contact:nostr"],
-				twitter: community.tags["contact:twitter"],
-				meetup: community.tags["contact:meetup"],
-				telegram: community.tags["contact:telegram"],
-				discord: community.tags["contact:discord"],
-				youtube: community.tags["contact:youtube"],
-				github: community.tags["contact:github"],
-				matrix: community.tags["contact:matrix"],
-				geyser: community.tags["contact:geyser"],
-				satlantis: community.tags["contact:satlantis"],
-				eventbrite: community.tags["contact:eventbrite"],
-				reddit: community.tags["contact:reddit"],
-				simplex: community.tags["contact:simplex"],
-				instagram: community.tags["contact:instagram"],
-				whatsapp: community.tags["contact:whatsapp"],
-				facebook: community.tags["contact:facebook"],
-				linkedin: community.tags["contact:linkedin"],
-				rss: community.tags["contact:rss"],
-				signal: community.tags["contact:signal"],
-			},
-		});
+	if (community.tags.organization) {
+		const orgSpan = document.createElement("span");
+		orgSpan.className =
+			"mx-auto whitespace-nowrap w-fit block rounded-full bg-[#10B981] px-3.5 py-1 text-xs font-semibold uppercase text-white";
+		orgSpan.title = t("communityMap.organization");
+		orgSpan.textContent = community.tags.organization;
+		wrapper.appendChild(orgSpan);
 	}
+
+	if (community.tags.sponsor) {
+		const sponsorSpan = document.createElement("span");
+		sponsorSpan.className =
+			"block gradient-bg w-32 mx-auto py-1 text-xs text-white font-semibold rounded-full";
+		sponsorSpan.title = t("communityMap.supporter");
+		sponsorSpan.textContent = t("communityMap.sponsor");
+		wrapper.appendChild(sponsorSpan);
+	}
+
+	const socialsMount = document.createElement("div");
+	wrapper.appendChild(socialsMount);
+
+	const link = document.createElement("a");
+	link.href = resolve(`/community/${encodeURIComponent(community.id)}`);
+	link.className =
+		"block bg-link hover:bg-hover !text-white text-center font-semibold py-3 rounded-xl transition-colors";
+	link.title = t("communityMap.communityPageTitle");
+	link.textContent = t("communityMap.viewCommunity");
+	wrapper.appendChild(link);
+
+	const socials = new Socials({
+		target: socialsMount,
+		props: {
+			website: community.tags["contact:website"],
+			email: community.tags["contact:email"],
+			phone: community.tags["contact:phone"],
+			nostr: community.tags["contact:nostr"],
+			twitter: community.tags["contact:twitter"],
+			meetup: community.tags["contact:meetup"],
+			telegram: community.tags["contact:telegram"],
+			discord: community.tags["contact:discord"],
+			youtube: community.tags["contact:youtube"],
+			github: community.tags["contact:github"],
+			matrix: community.tags["contact:matrix"],
+			geyser: community.tags["contact:geyser"],
+			satlantis: community.tags["contact:satlantis"],
+			eventbrite: community.tags["contact:eventbrite"],
+			reddit: community.tags["contact:reddit"],
+			simplex: community.tags["contact:simplex"],
+			instagram: community.tags["contact:instagram"],
+			whatsapp: community.tags["contact:whatsapp"],
+			facebook: community.tags["contact:facebook"],
+			linkedin: community.tags["contact:linkedin"],
+			rss: community.tags["contact:rss"],
+			signal: community.tags["contact:signal"],
+		},
+	});
 
 	return { container, socials };
 };
@@ -432,13 +460,11 @@ const initializeMap = async () => {
 			.setLngLat(e.lngLat)
 			.setDOMContent(container)
 			.addTo(map);
-		if (socials) {
-			// Destroy the Socials Svelte instance when the popup goes away —
-			// MapLibre removes the DOM but the component's reactive
-			// subscriptions (theme, locale, etc.) would otherwise leak per
-			// click, accumulating with every polygon the user hovers.
-			popup.on("close", () => socials.$destroy());
-		}
+		// Destroy the Socials Svelte instance when the popup goes away —
+		// MapLibre removes the DOM but the component's reactive
+		// subscriptions (theme, locale, etc.) would otherwise leak per
+		// click, accumulating with every polygon the user hovers.
+		popup.on("close", () => socials.$destroy());
 	});
 
 	const setPointer = () => {
