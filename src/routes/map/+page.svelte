@@ -150,69 +150,39 @@ const waitForIdle = (m: MapLibreMap): Promise<void> =>
 		m.once("idle", () => resolve());
 	});
 
-// Wait until the specified layers actually have rendered features (or
-// timeout fires). Needed because revealMerchant can run in the load
-// handler BEFORE syncPlacesToSource has populated the places source —
-// at that point clusters-hit/unclustered-point have no features and a
-// queryRenderedFeatures returns empty. sourcedata + idle events fire
-// each time MapLibre rebuilds tiles; we re-check on each tick.
-const waitForLayerFeatures = (
-	m: MapLibreMap,
-	layerIds: string[],
-	timeoutMs = 5000,
-): Promise<void> =>
-	new Promise((resolve) => {
-		const hasFeatures = () =>
-			m.queryRenderedFeatures(undefined, { layers: layerIds }).length > 0;
-		if (hasFeatures()) {
-			resolve();
-			return;
-		}
-		const cleanup = () => {
-			clearTimeout(timer);
-			m.off("idle", check);
-			m.off("sourcedata", check);
-		};
-		const check = () => {
-			if (hasFeatures()) {
-				cleanup();
-				resolve();
-			}
-		};
-		const timer = setTimeout(() => {
-			cleanup();
-			resolve();
-		}, timeoutMs);
-		m.on("idle", check);
-		m.on("sourcedata", check);
-	});
-
 // After opening the drawer for a place — via deep-link, search-result, or
 // the nearby-list — check if its pin is actually visible. If MapLibre's
 // source-side clustering buried it inside a cluster at the current zoom,
 // programmatically spiderfy that cluster so the selected pin is reachable.
-const REVEAL_MAX_ITERATIONS = 4;
-
-// Find the cluster (if any) at the merchant's screen position that actually
-// contains the place. Returns the cluster's expansion zoom + lng/lat so the
-// caller can decide whether to zoom further or spider.
-const findContainingCluster = async (
-	m: MapLibreMap,
-	place: Place,
-): Promise<{ clusterId: number; lngLat: [number, number] } | null> => {
-	const projected = m.project([place.lon, place.lat]);
-	// Source-side clusterRadius is 80px; PAD a bit wider so a cluster whose
-	// icon is drawn near (but not exactly at) the merchant's pixel still
-	// gets picked up.
+const revealMerchant = async (place: Place): Promise<void> => {
+	if (!map || !spiderfier) return;
+	await waitForIdle(map);
+	if (!map) return;
+	const projected = map.project([place.lon, place.lat]);
+	// Cluster radius is 80px source-side; query a slightly wider bbox to
+	// catch a cluster whose icon is drawn near (but not exactly at) the
+	// merchant's projected pixel.
 	const PAD = 100;
 	const bbox: [[number, number], [number, number]] = [
 		[projected.x - PAD, projected.y - PAD],
 		[projected.x + PAD, projected.y + PAD],
 	];
-	const hits = m.queryRenderedFeatures(bbox, { layers: ["clusters-hit"] });
-	const source = m.getSource("places") as GeoJSONSource | undefined;
-	if (!source) return null;
-	for (const cluster of hits) {
+	const hits = map.queryRenderedFeatures(bbox, {
+		layers: ["unclustered-point", "clusters-hit"],
+	});
+	const alreadyVisible = hits.some(
+		(h) => h.layer.id === "unclustered-point" && h.properties?.id === place.id,
+	);
+	if (alreadyVisible) return;
+	const source = map.getSource("places") as GeoJSONSource | undefined;
+	if (!source) return;
+	// Walk clusters returned by the bbox query and find the one that
+	// actually contains our place — multiple clusters can sit within PAD,
+	// and we don't want to spiderfy a neighbor. getClusterLeaves is async;
+	// `Infinity` requests every leaf in the cluster, fine because cluster
+	// sizes here cap in the low thousands at most.
+	const clusterCandidates = hits.filter((h) => h.layer.id === "clusters-hit");
+	for (const cluster of clusterCandidates) {
 		const clusterId = cluster.properties?.cluster_id;
 		if (typeof clusterId !== "number") continue;
 		try {
@@ -222,81 +192,12 @@ const findContainingCluster = async (
 				0,
 			);
 			if (leaves.some((l) => l.properties?.id === place.id)) {
-				const geom = cluster.geometry as unknown as {
-					coordinates: [number, number];
-				};
-				return { clusterId, lngLat: geom.coordinates };
+				spiderfier.spiderfy("clusters-hit", clusterId);
+				return;
 			}
 		} catch (e) {
 			console.error("revealMerchant: getClusterLeaves failed", e);
 		}
-	}
-	return null;
-};
-
-const isMerchantVisible = (m: MapLibreMap, place: Place): boolean => {
-	const projected = m.project([place.lon, place.lat]);
-	const PAD = 24;
-	const bbox: [[number, number], [number, number]] = [
-		[projected.x - PAD, projected.y - PAD],
-		[projected.x + PAD, projected.y + PAD],
-	];
-	const hits = m.queryRenderedFeatures(bbox, {
-		layers: ["unclustered-point"],
-	});
-	return hits.some((h) => h.properties?.id === place.id);
-};
-
-// After opening the drawer for a place — via deep-link, search-result, or
-// the nearby-list — make sure its pin is actually visible. Source-side
-// clustering can bury the merchant inside a cluster at the current zoom;
-// iteratively zoom to each containing cluster's expansionZoom until the
-// merchant is unclustered, or until we hit forceSpiderifyMinZoom and fall
-// back to spiderfy for the coincident-points case.
-const revealMerchant = async (place: Place): Promise<void> => {
-	if (!map || !spiderfier) return;
-	await waitForIdle(map);
-	if (!map) return;
-	await waitForLayerFeatures(map, ["unclustered-point", "clusters-hit"]);
-	if (!map) return;
-
-	for (let i = 0; i < REVEAL_MAX_ITERATIONS; i++) {
-		if (!map) return;
-		if (isMerchantVisible(map, place)) return;
-		const containing = await findContainingCluster(map, place);
-		if (!map) return;
-		if (!containing) return; // nothing to do — pin is just off-screen or filtered out
-		const source = map.getSource("places") as GeoJSONSource | undefined;
-		if (!source) return;
-		let expansionZoom: number;
-		try {
-			expansionZoom = await source.getClusterExpansionZoom(
-				containing.clusterId,
-			);
-		} catch (e) {
-			console.error("revealMerchant: getClusterExpansionZoom failed", e);
-			return;
-		}
-		if (!map) return;
-		// At or beyond forceSpiderifyMinZoom (17) the cluster won't split
-		// further — points are coincident. Fall back to spiderfy.
-		if (expansionZoom >= CLUSTERING_DISABLED_ZOOM) {
-			spiderfier.spiderfy("clusters-hit", containing.clusterId);
-			return;
-		}
-		// Zoom into the cluster's centroid at the expansion threshold; clamp
-		// to MapLibre's maxZoom (19).
-		const targetZoom = Math.min(expansionZoom, 19);
-		map.easeTo({
-			center: containing.lngLat,
-			zoom: targetZoom,
-			duration: 300,
-		});
-		await new Promise<void>((resolve) => {
-			map!.once("idle", () => resolve());
-		});
-		if (!map) return;
-		await waitForLayerFeatures(map, ["unclustered-point", "clusters-hit"]);
 	}
 };
 
