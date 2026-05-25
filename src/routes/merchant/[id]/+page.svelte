@@ -1,7 +1,9 @@
 <script lang="ts">
 export let data: MerchantPageData;
 
-import type { Map, Marker } from "leaflet";
+import "maplibre-gl/dist/maplibre-gl.css";
+
+import type { GeoJSONSource, Map as MapLibreMap } from "maplibre-gl";
 import { onDestroy, onMount } from "svelte";
 import Time from "svelte-time";
 import tippy from "tippy.js";
@@ -20,23 +22,13 @@ import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
 import TaggingIssues from "$components/TaggingIssues.svelte";
 import TopButton from "$components/TopButton.svelte";
 import { _, getDisplayLang, locale } from "$lib/i18n";
-import { loadMapDependencies } from "$lib/map/imports";
 import {
-	applyThemeToBaseMaps,
-	attachIconCleanup,
-	attribution,
-	changeDefaultIcons,
-	disposeMarker,
-	generateIcon,
-	geolocate,
-	layers,
-} from "$lib/map/setup";
+	ensureSprite,
+	installPlaceholderHandler,
+} from "$lib/map/maplibreSprites";
 import { placesById, showTags, taggingIssues } from "$lib/store";
 import { theme } from "$lib/theme";
 import type {
-	BaseMaps,
-	DomEventType,
-	Leaflet,
 	MerchantActivityEvent,
 	MerchantArea,
 	MerchantPageData,
@@ -62,64 +54,239 @@ import { resolve } from "$app/paths";
 const SCROLL_INDICATOR_MIN_ITEMS = 5;
 const TOP_BUTTON_MIN_ITEMS = 10;
 
-let dataInitialized = false;
-let initialRenderComplete = false;
+const STYLE_LIGHT = "https://tiles.openfreemap.org/styles/liberty";
+const STYLE_DARK = "https://static.btcmap.org/map-styles/dark.json";
 
-let leaflet: Leaflet;
-let DomEvent: DomEventType;
-let LocateControl: typeof import("leaflet.locatecontrol").LocateControl;
+const styleUrlForTheme = (t: "light" | "dark" | undefined): string =>
+	t === "dark" ? STYLE_DARK : STYLE_LIGHT;
 
-const initializeData = () => {
-	if (dataInitialized) return;
-
-	const commentsCount = comments.length;
-
-	const setupMap = () => {
-		// add map
-		map = leaflet.map(mapElement, { attributionControl: false, maxZoom: 19 });
-
-		// add tiles and basemaps
-		const layersResult = layers(leaflet, map);
-		baseMaps = layersResult.baseMaps;
-
-		// change broken marker image path in prod
-		leaflet.Icon.Default.prototype.options.imagePath = "/icons/";
-
-		// add OSM attribution
-		attribution(leaflet, map);
-
-		leaflet.control.layers(baseMaps).addTo(map);
-
-		// add locate button to map
-		geolocate(leaflet, map, LocateControl);
-
-		// change default icons
-		changeDefaultIcons(true, leaflet, mapElement, DomEvent);
-
-		// add element to map
-		const divIcon = generateIcon(
-			leaflet,
-			data.placeData.deleted_at ? "skull" : icon || "question_mark",
-			!!boosted,
-			commentsCount,
-		);
-
-		if (typeof lat === "number" && typeof long === "number") {
-			merchantMarker = leaflet.marker([lat, long], { icon: divIcon });
-			attachIconCleanup(merchantMarker, divIcon);
-			map.addLayer(merchantMarker);
-			map.fitBounds([[lat, long]]);
-		}
-
-		mapLoaded = true;
-	};
-	setupMap();
-
-	dataInitialized = true;
+type MerchantFeatureProps = {
+	id: number;
+	icon: string;
+	boosted: boolean;
+	comments: number;
 };
 
-// Initialize data when component mounts
-$: initialRenderComplete && !dataInitialized && initializeData();
+type MerchantFeatureCollection = {
+	type: "FeatureCollection";
+	features: Array<{
+		type: "Feature";
+		geometry: { type: "Point"; coordinates: [number, number] };
+		properties: MerchantFeatureProps;
+	}>;
+};
+
+const EMPTY_COLLECTION: MerchantFeatureCollection = {
+	type: "FeatureCollection",
+	features: [],
+};
+
+let dataInitialized = false;
+let initialRenderComplete = false;
+let destroyed = false;
+let styleLoaded = false;
+let lastAppliedTheme: "light" | "dark" | undefined;
+
+const currentIcon = (): string =>
+	data.placeData.deleted_at
+		? "skull"
+		: icon && icon !== "question_mark"
+			? icon
+			: "currency_bitcoin";
+
+const buildFeatureCollection = (): MerchantFeatureCollection => {
+	if (typeof lat !== "number" || typeof long !== "number")
+		return EMPTY_COLLECTION;
+	return {
+		type: "FeatureCollection",
+		features: [
+			{
+				type: "Feature",
+				geometry: { type: "Point", coordinates: [long, lat] },
+				properties: {
+					id: Number(data.id),
+					icon: currentIcon(),
+					boosted: !!boosted,
+					comments: comments.length,
+				},
+			},
+		],
+	};
+};
+
+const loadCommentBadgeSprite = (m: MapLibreMap): void => {
+	if (m.hasImage("comment-badge-bg")) return;
+	const canvas = document.createElement("canvas");
+	canvas.width = 16;
+	canvas.height = 16;
+	const ctx = canvas.getContext("2d");
+	if (!ctx) return;
+	ctx.fillStyle = "#16A34A";
+	ctx.beginPath();
+	ctx.arc(8, 8, 8, 0, Math.PI * 2);
+	ctx.fill();
+	m.addImage("comment-badge-bg", ctx.getImageData(0, 0, 16, 16), {
+		pixelRatio: 1,
+	});
+};
+
+const addMerchantLayers = (m: MapLibreMap) => {
+	if (!m.getSource("merchant")) {
+		m.addSource("merchant", {
+			type: "geojson",
+			data: EMPTY_COLLECTION,
+		});
+	}
+
+	if (!m.getLayer("merchant-pin")) {
+		m.addLayer({
+			id: "merchant-pin",
+			type: "symbol",
+			source: "merchant",
+			layout: {
+				"icon-image": [
+					"concat",
+					"pin-",
+					["case", ["coalesce", ["get", "boosted"], false], "b", "r"],
+					"-",
+					["coalesce", ["get", "icon"], "currency_bitcoin"],
+				],
+				"icon-size": 1,
+				"icon-anchor": "bottom",
+				"icon-allow-overlap": true,
+				"icon-ignore-placement": true,
+				"icon-rotation-alignment": "viewport",
+				"icon-pitch-alignment": "viewport",
+			},
+		});
+	}
+
+	if (!m.getLayer("merchant-comment-badge")) {
+		m.addLayer({
+			id: "merchant-comment-badge",
+			type: "symbol",
+			source: "merchant",
+			filter: [">", ["coalesce", ["get", "comments"], 0], 0],
+			layout: {
+				"icon-image": "comment-badge-bg",
+				"icon-size": 1,
+				"icon-allow-overlap": true,
+				"icon-ignore-placement": true,
+				"icon-rotation-alignment": "viewport",
+				"icon-pitch-alignment": "viewport",
+				"icon-offset": [10, -36],
+			},
+		});
+	}
+
+	if (!m.getLayer("merchant-comment-badge-count")) {
+		m.addLayer({
+			id: "merchant-comment-badge-count",
+			type: "symbol",
+			source: "merchant",
+			filter: [">", ["coalesce", ["get", "comments"], 0], 0],
+			layout: {
+				"text-field": ["to-string", ["coalesce", ["get", "comments"], 0]],
+				"text-font": ["Noto Sans Bold"],
+				"text-size": 11,
+				"text-allow-overlap": true,
+				"text-ignore-placement": true,
+				"text-rotation-alignment": "viewport",
+				"text-pitch-alignment": "viewport",
+				"text-offset": [10 / 11, -36 / 11],
+			},
+			paint: {
+				"text-color": "#fff",
+			},
+		});
+	}
+};
+
+const syncMerchantSource = (m: MapLibreMap) => {
+	const source = m.getSource("merchant") as GeoJSONSource | undefined;
+	if (!source) return;
+	source.setData(buildFeatureCollection());
+	ensureSprite(m, currentIcon(), !!boosted);
+};
+
+const initializeMapContents = (m: MapLibreMap) => {
+	loadCommentBadgeSprite(m);
+	addMerchantLayers(m);
+	syncMerchantSource(m);
+	if (typeof lat === "number" && typeof long === "number") {
+		m.jumpTo({ center: [long, lat], zoom: 16 });
+	}
+};
+
+const applyTheme = (next: "light" | "dark" | undefined) => {
+	if (!map) return;
+	if (!styleLoaded) return;
+	if (next === lastAppliedTheme) return;
+	lastAppliedTheme = next;
+	styleLoaded = false;
+	const onStyleLoad = () => {
+		if (!map) return;
+		initializeMapContents(map);
+		styleLoaded = true;
+	};
+	map.once("style.load", onStyleLoad);
+	map.setStyle(styleUrlForTheme(next));
+};
+
+const initializeMap = async () => {
+	if (dataInitialized) return;
+	dataInitialized = true;
+
+	const maplibre = await import("maplibre-gl");
+	if (destroyed) return;
+
+	lastAppliedTheme = $theme;
+
+	map = new maplibre.Map({
+		container: mapElement,
+		style: styleUrlForTheme($theme),
+		maxZoom: 19,
+		dragRotate: true,
+		touchZoomRotate: true,
+		pitchWithRotate: false,
+		attributionControl: { compact: true },
+	});
+
+	map.addControl(
+		new maplibre.NavigationControl({
+			showCompass: true,
+			showZoom: true,
+			visualizePitch: false,
+		}),
+		"top-right",
+	);
+
+	const geolocateControl = new maplibre.GeolocateControl({
+		positionOptions: { enableHighAccuracy: true },
+		trackUserLocation: true,
+		showUserLocation: true,
+		showAccuracyCircle: true,
+	});
+	map.addControl(geolocateControl, "top-right");
+
+	installPlaceholderHandler(map);
+
+	map.on("load", () => {
+		if (!map) return;
+		initializeMapContents(map);
+		styleLoaded = true;
+		mapLoaded = true;
+	});
+};
+
+// Kick off map init once the component has mounted in the browser.
+$: if (initialRenderComplete && !dataInitialized) {
+	initializeMap();
+}
+
+$: if (map && styleLoaded) {
+	applyTheme($theme);
+}
 
 // merchant variable no longer needed - using server data directly
 
@@ -210,19 +377,11 @@ let eventCount = 50;
 $: eventsPaginated = merchantEvents.slice(0, eventCount);
 
 let mapElement: HTMLDivElement;
-let map: Map;
+let map: MapLibreMap | undefined;
 let mapLoaded = false;
-let merchantMarker: Marker | undefined; // Store marker reference for reactive updates
-
-let baseMaps: BaseMaps;
 
 onMount(async () => {
 	if (browser) {
-		const deps = await loadMapDependencies();
-		leaflet = deps.leaflet;
-		DomEvent = deps.DomEvent;
-		LocateControl = deps.LocateControl;
-
 		initialRenderComplete = true;
 
 		// Update localforage with fresh place data to sync comment counts, boosts, etc.
@@ -237,31 +396,16 @@ onMount(async () => {
 	}
 });
 
-$: $theme !== undefined &&
-	mapLoaded &&
-	applyThemeToBaseMaps($theme, baseMaps, map);
-
-// Update marker icon when boost or comment state changes
-$: if (merchantMarker && leaflet && mapLoaded && icon) {
-	const commentsCount = comments.length;
-	const displayIcon = data.placeData.deleted_at
-		? "skull"
-		: icon !== "question_mark"
-			? icon
-			: "currency_bitcoin";
-	const newIcon = generateIcon(leaflet, displayIcon, !!boosted, commentsCount);
-	merchantMarker.setIcon(newIcon);
+// Update marker source when boost / comment / icon state changes.
+$: if (map && styleLoaded && (icon || boosted || comments)) {
+	syncMerchantSource(map);
 }
 
-onDestroy(async () => {
+onDestroy(() => {
 	clearTimeout(shareTimeout);
-	if (map) {
-		if (merchantMarker) {
-			disposeMarker(merchantMarker);
-		}
-		console.info("Unloading Leaflet map.");
-		map.remove();
-	}
+	destroyed = true;
+	map?.remove();
+	map = undefined;
 });
 
 const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
