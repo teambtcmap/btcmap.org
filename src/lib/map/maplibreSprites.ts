@@ -103,13 +103,43 @@ const getSpritePromises = (m: MapLibreMap): Map<string, Promise<void>> => {
 	return cache;
 };
 
+// Track which sprite names we've registered with the *real* composite bitmap,
+// distinct from the 1×1 stubs the styleimagemissing handler may have inserted.
+// Without this, ensureSprite's hasImage() short-circuit returns true for a
+// stub and the real sprite never replaces it — pin renders transparent.
+const realSpritesByMap = new WeakMap<MapLibreMap, Set<string>>();
+
+// Maps that have a style.load listener attached to evict tracking on setStyle.
+const styleResetInstalledFor = new WeakSet<MapLibreMap>();
+
+const ensureStyleResetListener = (m: MapLibreMap): void => {
+	if (styleResetInstalledFor.has(m)) return;
+	styleResetInstalledFor.add(m);
+	m.on("style.load", () => {
+		realSpritesByMap.get(m)?.clear();
+	});
+};
+
+const hasRealSprite = (m: MapLibreMap, name: string): boolean =>
+	realSpritesByMap.get(m)?.has(name) ?? false;
+
+const markRealSprite = (m: MapLibreMap, name: string): void => {
+	let set = realSpritesByMap.get(m);
+	if (!set) {
+		set = new Set();
+		realSpritesByMap.set(m, set);
+	}
+	set.add(name);
+};
+
 export const ensureSprite = (
 	m: MapLibreMap,
 	icon: string,
 	boosted: boolean,
 ): Promise<void> => {
+	ensureStyleResetListener(m);
 	const name = spriteName(icon, boosted);
-	if (m.hasImage(name)) return Promise.resolve();
+	if (hasRealSprite(m, name)) return Promise.resolve();
 	const cache = getSpritePromises(m);
 	const existing = cache.get(name);
 	if (existing) return existing;
@@ -117,8 +147,13 @@ export const ensureSprite = (
 		const inner = await fetchIconInnerSvg(icon);
 		const composite = buildCompositeSvg(inner, boosted);
 		const img = await loadSvgImage(composite);
-		if (!m.hasImage(name))
-			m.addImage(name, img, { pixelRatio: PIN_RENDER_SCALE });
+		if (hasRealSprite(m, name)) return;
+		// Remove any stub the placeholder handler installed before we got here
+		// — addImage throws on a duplicate name, and updateImage drops the
+		// pixelRatio (so the pin would render at 1× instead of @2×).
+		if (m.hasImage(name)) m.removeImage(name);
+		m.addImage(name, img, { pixelRatio: PIN_RENDER_SCALE });
+		markRealSprite(m, name);
 		m.triggerRepaint();
 	})();
 	cache.set(name, promise);
