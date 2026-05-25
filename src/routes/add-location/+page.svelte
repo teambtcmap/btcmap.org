@@ -1,7 +1,12 @@
 <script lang="ts">
 import axios from "axios";
 import DOMPurify from "dompurify";
-import type { Map, MaplibreGL, Marker } from "leaflet";
+import type {
+	Map as MapLibreMap,
+	Marker as MapLibreMarker,
+	MapMouseEvent,
+} from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 import { onDestroy, onMount, tick } from "svelte";
 import { get } from "svelte/store";
 
@@ -15,18 +20,16 @@ import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
 import { _, locale } from "$lib/i18n";
-import { loadMapDependencies } from "$lib/map/imports";
-import {
-	attribution,
-	changeDefaultIcons,
-	generateLocationIcon,
-	geolocate,
-} from "$lib/map/setup";
 import { theme } from "$lib/theme";
-import type { Leaflet } from "$lib/types";
 import { errToast, isValidLatitude, isValidLongitude } from "$lib/utils";
 
 import { browser } from "$app/environment";
+
+const STYLE_LIGHT = "https://tiles.openfreemap.org/styles/liberty";
+const STYLE_DARK = "https://static.btcmap.org/map-styles/dark.json";
+
+const styleUrlForTheme = (t: "light" | "dark" | undefined): string =>
+	t === "dark" ? STYLE_DARK : STYLE_LIGHT;
 
 let captchaContent = "";
 let isCaptchaLoading = true;
@@ -92,65 +95,62 @@ function resetForm() {
 	});
 }
 
-/**
- * Initialize the map with all required settings and controls
- */
 async function initializeMap() {
-	const deps = await loadMapDependencies();
-	const leaflet = deps.leaflet;
-	leafletRef = leaflet;
-	const DomEvent = deps.DomEvent;
-	const LocateControl = deps.LocateControl;
-
-	// Create map instance
-	if (map) map.remove(); // Clean up any existing map
+	// Clean up any existing map (e.g. resetForm re-init).
+	if (map) {
+		map.remove();
+		map = undefined;
+	}
+	marker?.remove();
 	marker = undefined;
-	map = leaflet
-		.map(mapElement, { attributionControl: false, maxZoom: 19 })
-		.setView([0, 0], 2);
+	mapLoaded = false;
 
-	// Create map styles
-	openFreeMapLiberty = window.L.maplibreGL({
-		style: "https://tiles.openfreemap.org/styles/liberty",
+	const maplibre = await import("maplibre-gl");
+	maplibreRef = maplibre;
+	if (destroyed) return;
+
+	lastAppliedTheme = $theme;
+
+	map = new maplibre.Map({
+		container: mapElement,
+		style: styleUrlForTheme($theme),
+		center: [0, 0],
+		zoom: 2,
+		maxZoom: 19,
+		dragRotate: true,
+		touchZoomRotate: true,
+		pitchWithRotate: false,
+		attributionControl: { compact: true },
 	});
 
-	openFreeMapDark = window.L.maplibreGL({
-		style: "https://static.btcmap.org/map-styles/dark.json",
+	map.addControl(
+		new maplibre.NavigationControl({
+			showCompass: true,
+			showZoom: true,
+			visualizePitch: false,
+		}),
+		"top-right",
+	);
+
+	const geolocateControl = new maplibre.GeolocateControl({
+		positionOptions: { enableHighAccuracy: true },
+		trackUserLocation: true,
+		showUserLocation: true,
+		showAccuracyCircle: true,
+	});
+	map.addControl(geolocateControl, "top-right");
+
+	map.on("click", (e: MapMouseEvent) => {
+		if (!captchaSecret) return;
+		placeMarker(e.lngLat.lat, e.lngLat.lng, {
+			fly: false,
+			syncInputs: true,
+		});
 	});
 
-	// Apply appropriate theme
-	const currentTheme = theme.current;
-
-	if (currentTheme === "dark") {
-		openFreeMapDark.addTo(map);
-	} else {
-		openFreeMapLiberty.addTo(map);
-	}
-
-	map.on("click", (e) => {
-		if (captchaSecret) {
-			placeMarker(e.latlng.lat, e.latlng.lng, {
-				fly: false,
-				syncInputs: true,
-			});
-		}
+	map.on("load", () => {
+		mapLoaded = true;
 	});
-
-	// Add map controls and settings
-	try {
-		geolocate(leaflet, map, LocateControl);
-	} catch (e) {
-		console.error("Error adding locate control:", e);
-	}
-
-	changeDefaultIcons(false, leaflet, mapElement, DomEvent);
-	attribution(leaflet, map);
-
-	// Force a resize to ensure proper rendering
-	map.invalidateSize();
-
-	mapLoaded = true;
-	return leaflet; // Return leaflet for any additional setup
 }
 
 let name: HTMLInputElement;
@@ -164,8 +164,8 @@ let latInput = "";
 let longInput = "";
 let latError = "";
 let longError = "";
-let marker: Marker | undefined;
-let leafletRef: Leaflet | undefined;
+let marker: MapLibreMarker | undefined;
+let maplibreRef: typeof import("maplibre-gl") | undefined;
 
 function placeMarker(
 	newLat: number,
@@ -187,16 +187,16 @@ function placeMarker(
 	long = finalLong;
 	selected = true;
 	noLocationSelected = false;
-	if (!leafletRef || !map) return;
+	if (!maplibreRef || !map) return;
 	if (marker) {
-		map.removeLayer(marker);
+		marker.setLngLat([finalLong, finalLat]);
+	} else {
+		marker = new maplibreRef.Marker()
+			.setLngLat([finalLong, finalLat])
+			.addTo(map);
 	}
-	const locationIcon = generateLocationIcon(leafletRef);
-	marker = leafletRef
-		.marker([finalLat, finalLong], { icon: locationIcon })
-		.addTo(map);
 	if (fly) {
-		map.flyTo([finalLat, finalLong], 17, { duration: 0.8 });
+		map.flyTo({ center: [finalLong, finalLat], zoom: 17, duration: 800 });
 	}
 }
 
@@ -333,11 +333,10 @@ const submitForm = (event: SubmitEvent) => {
 
 // location picker map
 let mapElement: HTMLDivElement;
-let map: Map;
+let map: MapLibreMap | undefined;
 let mapLoaded = false;
-
-let openFreeMapLiberty: MaplibreGL;
-let openFreeMapDark: MaplibreGL;
+let destroyed = false;
+let lastAppliedTheme: "light" | "dark" | undefined;
 
 onMount(async () => {
 	if (browser) {
@@ -349,24 +348,27 @@ onMount(async () => {
 	}
 });
 
-onDestroy(async () => {
+onDestroy(() => {
+	destroyed = true;
 	if (map) {
-		console.info("Unloading Leaflet map.");
 		map.remove();
+		map = undefined;
 	}
 });
 
-const toggleTheme = () => {
-	if ($theme === "dark") {
-		openFreeMapLiberty.remove();
-		openFreeMapDark.addTo(map);
-	} else {
-		openFreeMapDark.remove();
-		openFreeMapLiberty.addTo(map);
-	}
+const applyTheme = (next: "light" | "dark" | undefined) => {
+	if (!map || !mapLoaded) return;
+	if (next === lastAppliedTheme) return;
+	lastAppliedTheme = next;
+	// setStyle preserves added markers (managed outside the style) but drops
+	// any source/layer overrides. We don't add custom layers here, so a plain
+	// setStyle() is sufficient.
+	map.setStyle(styleUrlForTheme(next));
 };
 
-$: $theme !== undefined && mapLoaded === true && toggleTheme();
+$: if (map && mapLoaded) {
+	applyTheme($theme);
+}
 </script>
 
 <svelte:head>
