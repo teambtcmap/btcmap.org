@@ -16,8 +16,7 @@
 ## Contribute a location
 
 - [Add a location](https://btcmap.org/add-location): Submit a new Bitcoin-accepting place for inclusion.
-- [Verify a location](https://btcmap.org/verify-location): Confirm an existing merchant still accepts Bitcoin (verifications expire after one year).
-- [Report outdated info](https://btcmap.org/report-outdated-info): Flag a place that has closed or no longer accepts Bitcoin.
+- [Verify or report a location](https://btcmap.org/verify-location): Confirm an existing merchant still accepts Bitcoin, or flag one that has closed or no longer accepts Bitcoin (verifications expire after one year).
 - [Tagger onboarding](https://btcmap.org/tagger-onboarding): About the volunteer tagging program and how to become a contributing tagger.
 - [Contributing to the code](https://github.com/teambtcmap/btcmap.org/blob/main/CONTRIBUTING.md): How to contribute to the BTC Map web app.
 
