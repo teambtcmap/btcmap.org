@@ -6,7 +6,7 @@ import type {
 import { get } from "svelte/store";
 
 import { trackEvent } from "$lib/analytics";
-import { _ } from "$lib/i18n";
+import { _, locale } from "$lib/i18n";
 import { mapUpdates, placesSyncCount } from "$lib/store";
 
 // Mirrors /map's `dataRefresh` (src/lib/map/setup.ts:555): a button that
@@ -29,20 +29,14 @@ export class DataRefreshControl implements IControl {
 		container.className = "maplibregl-ctrl maplibregl-ctrl-group";
 		container.style.display = "none";
 
-		const t = get(_);
-		const label = t("mapControls.dataRefreshAvailable");
-
 		const a = document.createElement("a");
 		a.className = "maplibregl-ctrl-icon maplibregl-ctrl-link";
 		a.href = "#";
-		a.title = label;
 		a.setAttribute("role", "button");
-		a.setAttribute("aria-label", label);
 		a.setAttribute("aria-disabled", "false");
 
 		const img = document.createElement("img");
 		img.src = "/icons/refresh.svg";
-		img.alt = t("mapControls.dataRefreshAlt");
 		img.width = 16;
 		img.height = 16;
 		a.appendChild(img);
@@ -60,10 +54,21 @@ export class DataRefreshControl implements IControl {
 			container.style.display = visible ? "block" : "none";
 		};
 
-		// Both subscribe() calls fire synchronously with the current value, so
-		// initial visibility is set immediately — no separate init path needed.
+		// Re-render tooltip/aria/alt on locale change.
+		const applyLabels = () => {
+			const t = get(_);
+			const label = t("mapControls.dataRefreshAvailable");
+			a.title = label;
+			a.setAttribute("aria-label", label);
+			img.alt = t("mapControls.dataRefreshAlt");
+		};
+
+		// All subscribe() calls fire synchronously with the current value, so
+		// initial visibility + labels are set immediately — no separate init
+		// path needed.
 		this.#unsubs.push(mapUpdates.subscribe(evaluateVisibility));
 		this.#unsubs.push(placesSyncCount.subscribe(evaluateVisibility));
+		this.#unsubs.push(locale.subscribe(applyLabels));
 
 		this.#container = container;
 		return container;

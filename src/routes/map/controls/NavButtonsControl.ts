@@ -13,14 +13,22 @@ import { session } from "$lib/session";
 // MapLibre custom IControl. Two variants:
 //  - "main": home → add-location → community map → account (used by /map)
 //  - "communities": home → merchant map → account (used by /communities/map)
-// The account button is session- and locale-reactive — subscribed in
-// onAdd, unsubscribed in onRemove.
+// All button tooltips/aria-labels re-translate on locale change so the
+// language toggle reflects across the entire UI without a page reload.
 export type NavButtonsVariant = "main" | "communities";
+
+type ButtonRefs = {
+	a: HTMLAnchorElement;
+	img: HTMLImageElement;
+	titleKey: string;
+	altKey: string;
+};
 
 export class NavButtonsControl implements IControl {
 	#variant: NavButtonsVariant;
 	#container: HTMLDivElement | undefined;
 	#unsubs: Array<() => void> = [];
+	#staticButtons: ButtonRefs[] = [];
 
 	constructor(variant: NavButtonsVariant = "main") {
 		this.#variant = variant;
@@ -34,52 +42,50 @@ export class NavButtonsControl implements IControl {
 		const container = document.createElement("div");
 		container.className = "maplibregl-ctrl maplibregl-ctrl-group";
 
-		const t = get(_);
-
-		// Home
-		const homeBtn = this.#createButton({
-			href: "/",
-			title: t("mapControls.goToHome"),
-			iconSrc: "/icons/home.svg",
-			iconAlt: t("mapControls.goToHomeAlt"),
-			onClick: () => trackEvent("home_button_click"),
-		});
-		container.appendChild(homeBtn);
+		// Home — always present in both variants
+		container.appendChild(
+			this.#createStaticButton({
+				href: "/",
+				titleKey: "mapControls.goToHome",
+				iconSrc: "/icons/home.svg",
+				altKey: "mapControls.goToHomeAlt",
+				onClick: () => trackEvent("home_button_click"),
+			}),
+		);
 
 		if (this.#variant === "main") {
-			// Add location
-			const addLocBtn = this.#createButton({
-				href: "/add-location",
-				title: t("mapControls.addLocation"),
-				iconSrc: "/icons/marker.svg",
-				iconAlt: t("mapControls.addLocationAlt"),
-				onClick: () => trackEvent("add_location_click"),
-			});
-			container.appendChild(addLocBtn);
-
-			// Community map
-			const commBtn = this.#createButton({
-				href: "/communities/map",
-				title: t("mapControls.communityMap"),
-				iconSrc: "/icons/group.svg",
-				iconAlt: t("mapControls.communityMapAlt"),
-				onClick: () => trackEvent("community_map_click"),
-			});
-			container.appendChild(commBtn);
+			container.appendChild(
+				this.#createStaticButton({
+					href: "/add-location",
+					titleKey: "mapControls.addLocation",
+					iconSrc: "/icons/marker.svg",
+					altKey: "mapControls.addLocationAlt",
+					onClick: () => trackEvent("add_location_click"),
+				}),
+			);
+			container.appendChild(
+				this.#createStaticButton({
+					href: "/communities/map",
+					titleKey: "mapControls.communityMap",
+					iconSrc: "/icons/group.svg",
+					altKey: "mapControls.communityMapAlt",
+					onClick: () => trackEvent("community_map_click"),
+				}),
+			);
 		} else {
-			// Merchant map (back to /map from the community map)
-			const merchantBtn = this.#createButton({
-				href: "/map",
-				title: t("mapControls.merchantMap"),
-				iconSrc: "/icons/shopping.svg",
-				iconAlt: t("mapControls.merchantMapAlt"),
-				onClick: () => {},
-			});
-			container.appendChild(merchantBtn);
+			container.appendChild(
+				this.#createStaticButton({
+					href: "/map",
+					titleKey: "mapControls.merchantMap",
+					iconSrc: "/icons/shopping.svg",
+					altKey: "mapControls.merchantMapAlt",
+					onClick: () => {},
+				}),
+			);
 		}
 
-		// Account / Log in — href + labels driven by session/locale subscriptions
-		// so the button stays correct after in-place auth flows (no reload).
+		// Account / Log in — href + labels driven by session subscription so
+		// the button stays correct after in-place auth flows (no reload).
 		const accountBtn = document.createElement("a");
 		accountBtn.className = "maplibregl-ctrl-icon maplibregl-ctrl-link";
 		accountBtn.setAttribute("role", "button");
@@ -107,10 +113,25 @@ export class NavButtonsControl implements IControl {
 				: tt("mapControls.loginAlt");
 		};
 
-		// subscribe() fires synchronously with the current value, so this
-		// also handles initial render — no separate init path needed.
+		const updateStaticButtons = () => {
+			const tt = get(_);
+			for (const b of this.#staticButtons) {
+				const title = tt(b.titleKey);
+				b.a.title = title;
+				b.a.setAttribute("aria-label", title);
+				b.img.alt = tt(b.altKey);
+			}
+		};
+
+		// subscribe() fires synchronously with the current value, so the
+		// initial render flows through these too — no separate init path.
 		this.#unsubs.push(session.subscribe(updateAccount));
-		this.#unsubs.push(locale.subscribe(updateAccount));
+		this.#unsubs.push(
+			locale.subscribe(() => {
+				updateAccount();
+				updateStaticButtons();
+			}),
+		);
 
 		this.#container = container;
 		return container;
@@ -119,30 +140,34 @@ export class NavButtonsControl implements IControl {
 	onRemove(): void {
 		for (const u of this.#unsubs) u();
 		this.#unsubs = [];
+		this.#staticButtons = [];
 		this.#container?.parentNode?.removeChild(this.#container);
 		this.#container = undefined;
 	}
 
-	#createButton(opts: {
+	#createStaticButton(opts: {
 		href: string;
-		title: string;
+		titleKey: string;
 		iconSrc: string;
-		iconAlt: string;
+		altKey: string;
 		onClick: () => void;
 	}): HTMLAnchorElement {
 		const a = document.createElement("a");
 		a.className = "maplibregl-ctrl-icon maplibregl-ctrl-link";
 		a.href = opts.href;
-		a.title = opts.title;
 		a.setAttribute("role", "button");
-		a.setAttribute("aria-label", opts.title);
 		const img = document.createElement("img");
 		img.src = opts.iconSrc;
-		img.alt = opts.iconAlt;
 		img.width = 16;
 		img.height = 16;
 		a.appendChild(img);
 		a.addEventListener("click", opts.onClick);
+		this.#staticButtons.push({
+			a,
+			img,
+			titleKey: opts.titleKey,
+			altKey: opts.altKey,
+		});
 		return a;
 	}
 }
