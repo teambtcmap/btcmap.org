@@ -209,10 +209,17 @@ const syncMerchantSource = (m: MapLibreMap) => {
 	ensureSprite(m, currentIcon(), !!boosted);
 };
 
+// Sources + layers + sprites — called both on initial load AND on
+// theme-driven style.load. Camera placement is intentionally NOT done
+// here so theme swaps preserve the user's pan/zoom; centerOnMerchant
+// is called from the initial-load path only.
 const initializeMapContents = (m: MapLibreMap) => {
 	loadCommentBadgeSprite(m);
 	addMerchantLayers(m);
 	syncMerchantSource(m);
+};
+
+const centerOnMerchant = (m: MapLibreMap) => {
 	if (typeof lat === "number" && typeof long === "number") {
 		m.jumpTo({ center: [long, lat], zoom: 16 });
 	}
@@ -275,6 +282,7 @@ const initializeMap = async () => {
 	map.on("load", () => {
 		if (!map) return;
 		initializeMapContents(map);
+		centerOnMerchant(map);
 		styleLoaded = true;
 		mapLoaded = true;
 	});

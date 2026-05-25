@@ -136,11 +136,15 @@ const syncPlacesSource = (m: MapLibreMap, list: SavedPlace[]) => {
 
 // Register sprites + sources + layers once per style. Called from both the
 // initial `load` event and from subsequent `style.load` events fired after
-// `setStyle()` on theme change.
+// `setStyle()` on theme change. Camera placement is intentionally NOT done
+// here — see fitToPlaces below; theme swaps must preserve the user's
+// pan/zoom.
 const initializeMapContents = (m: MapLibreMap) => {
 	addPlacesLayers(m);
 	syncPlacesSource(m, places);
+};
 
+const fitToPlaces = (m: MapLibreMap) => {
 	const bbox = computeBboxFromPlaces(places);
 	if (bbox) {
 		m.fitBounds(
@@ -251,6 +255,7 @@ const initializeMap = async () => {
 	map.on("load", () => {
 		if (!map) return;
 		initializeMapContents(map);
+		fitToPlaces(map);
 		attachInteractions(map);
 		styleLoaded = true;
 		mapLoaded = true;

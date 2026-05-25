@@ -290,23 +290,26 @@ const syncPlacesSource = (m: MapLibreMap, list: Place[]) => {
 
 // Register sprites + sources + layers + interaction handlers once per style.
 // Called from both the initial `load` event and from subsequent `style.load`
-// events fired after `setStyle()` on theme change.
+// events fired after `setStyle()` on theme change. Camera placement is
+// intentionally NOT done here — see fitToArea below; theme swaps must
+// preserve the user's pan/zoom.
 const initializeMapContents = (m: MapLibreMap) => {
 	loadCommentBadgeSprite(m);
 	addAreaLayer(m);
 	addPlacesLayers(m);
 	syncPlacesSource(m, filteredPlaces);
+};
 
+const fitToArea = (m: MapLibreMap, animate = false) => {
 	const bbox = computeBbox(geoJSON);
-	if (bbox) {
-		m.fitBounds(
-			[
-				[bbox[0], bbox[1]],
-				[bbox[2], bbox[3]],
-			],
-			{ padding: 40, animate: false },
-		);
-	}
+	if (!bbox) return;
+	m.fitBounds(
+		[
+			[bbox[0], bbox[1]],
+			[bbox[2], bbox[3]],
+		],
+		{ padding: 40, animate, duration: animate ? 300 : 0 },
+	);
 };
 
 const handleMarkerClick = (e: MapLayerMouseEvent) => {
@@ -411,6 +414,7 @@ const initializeMap = async () => {
 	map.on("load", () => {
 		if (!map) return;
 		initializeMapContents(map);
+		fitToArea(map);
 		attachInteractions(map);
 		styleLoaded = true;
 		mapLoaded = true;
@@ -476,16 +480,7 @@ $: if (
 	const areaSource = map.getSource("area") as GeoJSONSource | undefined;
 	areaSource?.setData(geoJSON);
 	syncPlacesSource(map, filteredPlaces);
-	const bbox = computeBbox(geoJSON);
-	if (bbox) {
-		map.fitBounds(
-			[
-				[bbox[0], bbox[1]],
-				[bbox[2], bbox[3]],
-			],
-			{ padding: 40, animate: true, duration: 300 },
-		);
-	}
+	fitToArea(map, true);
 	updateAreaGrade();
 }
 
