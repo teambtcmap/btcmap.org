@@ -1177,28 +1177,39 @@ onMount(async () => {
 				| undefined;
 			if (!source || !hullSource) return;
 			const limit = Math.min(pointCount ?? 500, 500);
-			source.getClusterLeaves(clusterId, limit, 0).then((leaves) => {
-				// Stale callback guard — bail if hover has moved to another cluster
-				// (or cleared entirely) by the time leaves resolve.
-				if (latestHullClusterId !== clusterId) return;
-				const points: Feature<Point>[] = [];
-				for (const leaf of leaves) {
-					if (leaf.geometry?.type !== "Point") continue;
-					const coords = leaf.geometry.coordinates as [number, number];
-					points.push(point(coords));
-				}
-				const hull = convex(featureCollection(points));
-				if (!hull) {
-					// Degenerate cluster (≤ 2 unique points / collinear) — clear
-					// any stale hull from a previous hover instead of leaving it on.
-					hullSource.setData(EMPTY_HULL_COLLECTION);
-					return;
-				}
-				hullSource.setData({
-					type: "FeatureCollection",
-					features: [hull],
+			source
+				.getClusterLeaves(clusterId, limit, 0)
+				.then((leaves) => {
+					// Stale callback guard — bail if hover has moved to another
+					// cluster (or cleared entirely) by the time leaves resolve.
+					if (latestHullClusterId !== clusterId) return;
+					const points: Feature<Point>[] = [];
+					for (const leaf of leaves) {
+						if (leaf.geometry?.type !== "Point") continue;
+						const coords = leaf.geometry.coordinates as [number, number];
+						points.push(point(coords));
+					}
+					const hull = convex(featureCollection(points));
+					if (!hull) {
+						// Degenerate cluster (≤ 2 unique points / collinear) — clear
+						// any stale hull from a previous hover instead of leaving it on.
+						hullSource.setData(EMPTY_HULL_COLLECTION);
+						return;
+					}
+					hullSource.setData({
+						type: "FeatureCollection",
+						features: [hull],
+					});
+				})
+				.catch((err) => {
+					// Cluster id can become invalid mid-flight when syncPlacesToSource
+					// replaces the source data and the cluster index regenerates.
+					// Swallow that — the hover will redraw on the next mouseenter.
+					if (latestHullClusterId === clusterId) {
+						latestHullClusterId = null;
+					}
+					console.debug("hover-hull getClusterLeaves rejected", err);
 				});
-			});
 		});
 
 		map.on("mouseleave", "clusters-outer", () => {
