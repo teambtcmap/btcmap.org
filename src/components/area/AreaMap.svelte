@@ -563,6 +563,15 @@ $: if (
 	const areaSource = map.getSource("area") as GeoJSONSource | undefined;
 	areaSource?.setData(geoJSON);
 	syncPlacesSource(map, filteredPlaces);
+	// Drawer pinned to a merchant that the new area doesn't contain →
+	// close it so the user isn't staring at details for a place that's
+	// no longer on the map. MultiPlaceMap has the same guard.
+	if (
+		selectedMerchantId !== null &&
+		!filteredPlaces.some((p) => p.id === selectedMerchantId)
+	) {
+		closeDrawer();
+	}
 	fitToArea(map, true);
 	updateAreaGrade();
 }
