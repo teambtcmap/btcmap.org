@@ -494,5 +494,10 @@ onDestroy(() => {
 
 	<MapLoadingMain progress={mapLoading} />
 
-	<div bind:this={mapElement} class="absolute h-[100%] w-full !bg-teal dark:!bg-dark" />
+	<!-- !absolute + inset-0 fills the viewport. MapLibre ships its own
+	     `.maplibregl-map { position: relative }` rule that wins against
+	     Tailwind's `absolute` class by source order; `!absolute` forces
+	     the override. Leaflet used to mask this entirely by sizing its
+	     own container; MapLibre respects the DOM box. -->
+	<div bind:this={mapElement} class="!absolute inset-0 !bg-teal dark:!bg-dark" />
 </div>
