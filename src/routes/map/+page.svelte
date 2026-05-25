@@ -683,12 +683,15 @@ onMount(async () => {
 
 	// Geolocate control: pulse dot, accuracy circle, and heading arrow are
 	// built in. Heading uses the device's compass when available, falling
-	// back to GPS movement.
+	// back to GPS movement. fitBoundsOptions.linear routes the camera move
+	// through easeTo instead of flyTo — skips the parabolic zoom-out/zoom-in
+	// arc that read as a long detour for short hops.
 	const geolocate = new maplibre.GeolocateControl({
 		positionOptions: { enableHighAccuracy: true },
 		trackUserLocation: true,
 		showUserLocation: true,
 		showAccuracyCircle: true,
+		fitBoundsOptions: { maxZoom: 15, linear: true },
 	});
 	map.addControl(geolocate, "top-right");
 

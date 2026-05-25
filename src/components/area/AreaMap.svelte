@@ -387,6 +387,7 @@ const initializeMap = async () => {
 		trackUserLocation: true,
 		showUserLocation: true,
 		showAccuracyCircle: true,
+		fitBoundsOptions: { maxZoom: 15, linear: true },
 	});
 	map.addControl(geolocate, "top-right");
 
