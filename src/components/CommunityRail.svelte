@@ -5,11 +5,7 @@ import type { GeoJSONSource, Map as MapLibreMap } from "maplibre-gl";
 import { onDestroy, onMount } from "svelte";
 import { fly } from "svelte/transition";
 
-import {
-	MAP_PANEL_MARGIN,
-	MERCHANT_DRAWER_WIDTH,
-	PANEL_DRAWER_GAP,
-} from "$lib/constants";
+import { MAP_PANEL_MARGIN } from "$lib/constants";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { merchantList } from "$lib/merchantListStore";
 import { areas } from "$lib/store";
@@ -49,10 +45,6 @@ $: allCommunities =
 
 $: mobileVisible = allCommunities.slice(0, MOBILE_VISIBLE_LIMIT);
 $: mobileOverflow = Math.max(0, allCommunities.length - MOBILE_VISIBLE_LIMIT);
-
-$: rightOffset = $merchantDrawer.isOpen
-	? MAP_PANEL_MARGIN + MERCHANT_DRAWER_WIDTH + PANEL_DRAWER_GAP
-	: MAP_PANEL_MARGIN;
 
 let previewCommunityId: string | null = null;
 let layersAdded = false;
@@ -146,10 +138,12 @@ onDestroy(() => {
 </script>
 
 {#if allCommunities.length > 0}
-	<!-- Desktop: bottom-right, above the attribution. Shifts left when drawer opens. -->
+	<!-- Desktop: bottom-right, above the attribution. The merchant drawer + list
+	     panel live on the left side of the map, so the rail's right offset is
+	     fixed. -->
 	<div
-		class="pointer-events-none absolute bottom-10 z-[1001] hidden flex-col-reverse gap-2 transition-[right] duration-200 md:flex"
-		style="right: {rightOffset}px"
+		class="pointer-events-none absolute bottom-10 z-[1001] hidden flex-col-reverse gap-2 md:flex"
+		style="right: {MAP_PANEL_MARGIN}px"
 	>
 		{#each allCommunities as community (community.id)}
 			<a
