@@ -131,6 +131,13 @@ const applyLabelPalette = (m: MapLibreMap, t: "light" | "dark" | undefined) => {
 		palette.regular,
 	]);
 	m.setPaintProperty("place-label", "text-halo-color", palette.halo);
+	// Mirror on the parallel boosted-source label layer (always boosted, so
+	// no case expression needed). Guarded separately in case this is called
+	// before that layer was added.
+	if (m.getLayer("boosted-place-label")) {
+		m.setPaintProperty("boosted-place-label", "text-color", palette.boosted);
+		m.setPaintProperty("boosted-place-label", "text-halo-color", palette.halo);
+	}
 };
 // Latest-wins guard for the async getClusterLeaves callback. Mouseenter
 // fires per-feature, so a quick sweep across multiple clusters can stack
@@ -1062,6 +1069,87 @@ onMount(async () => {
 					"#f97316", // orange-500 (boosted)
 					"#0e7490", // cyan-700 (regular)
 				],
+				"text-halo-color": "#fff",
+				"text-halo-width": 1.2,
+				"text-halo-blur": 0,
+			},
+		});
+
+		// Mirrors of comment-badge / comment-badge-count / saved-badge /
+		// place-label for the parallel `places-boosted` source. Without
+		// these a boosted merchant with comments / saved state / a
+		// resolved label rendered as a bare orange pin.
+		map.addLayer({
+			id: "boosted-comment-badge",
+			type: "symbol",
+			source: "places-boosted",
+			filter: [">", ["get", "comments"], 0],
+			layout: {
+				"icon-image": "comment-badge-bg",
+				"icon-size": 1,
+				"icon-allow-overlap": true,
+				"icon-ignore-placement": true,
+				"icon-rotation-alignment": "viewport",
+				"icon-pitch-alignment": "viewport",
+				"icon-offset": [10, -36],
+			},
+		});
+
+		map.addLayer({
+			id: "boosted-comment-badge-count",
+			type: "symbol",
+			source: "places-boosted",
+			filter: [">", ["get", "comments"], 0],
+			layout: {
+				"text-field": ["to-string", ["get", "comments"]],
+				"text-font": ["Noto Sans Bold"],
+				"text-size": 11,
+				"text-allow-overlap": true,
+				"text-ignore-placement": true,
+				"text-rotation-alignment": "viewport",
+				"text-pitch-alignment": "viewport",
+				"text-offset": [10 / 11, -36 / 11],
+			},
+			paint: {
+				"text-color": "#fff",
+			},
+		});
+
+		map.addLayer({
+			id: "boosted-saved-badge",
+			type: "symbol",
+			source: "places-boosted",
+			filter: ["==", ["get", "saved"], true],
+			layout: {
+				"icon-image": "saved-badge",
+				"icon-size": 1,
+				"icon-anchor": "center",
+				"icon-offset": [-12, -38],
+				"icon-allow-overlap": true,
+				"icon-ignore-placement": true,
+				"icon-rotation-alignment": "viewport",
+				"icon-pitch-alignment": "viewport",
+			},
+		});
+
+		map.addLayer({
+			id: "boosted-place-label",
+			type: "symbol",
+			source: "places-boosted",
+			minzoom: LABEL_VISIBLE_ZOOM,
+			filter: ["!=", ["get", "name"], ""],
+			layout: {
+				"text-field": ["get", "name"],
+				"text-font": ["Noto Sans Bold"],
+				"text-size": 14,
+				"text-anchor": "left",
+				"text-offset": [22 / 14, -25 / 14],
+				"text-max-width": 12,
+				"text-rotation-alignment": "viewport",
+				"text-pitch-alignment": "viewport",
+			},
+			paint: {
+				"text-color": "#f97316", // orange-500 (always boosted on this source)
 				"text-halo-color": "#fff",
 				"text-halo-width": 1.2,
 				"text-halo-blur": 0,
