@@ -96,10 +96,8 @@ let lastEnrichedCacheSize = -1;
 let lastLocale: string | null | undefined;
 let lastAppliedLabelTheme: "light" | "dark" | undefined;
 
-// Place-label colors — mirror the same palette `app.css` already exposes
-// for the legacy Leaflet permanent tooltips (.marker-label /
-// .marker-label-boosted, src/app.css:196-214). MapLibre paint expressions
-// can't read CSS custom properties, so the values are duplicated here.
+// Place-label colors. MapLibre paint expressions can't read CSS custom
+// properties, so the values are inlined here.
 const LABEL_PALETTE = {
 	light: {
 		regular: "#0e7490", // cyan-700
@@ -683,9 +681,9 @@ onMount(async () => {
 	);
 	map.addControl(new maplibre.GlobeControl(), "top-right");
 
-	// Geolocate control — replaces leaflet.locatecontrol. The pulse dot,
-	// accuracy circle, and heading arrow are built in. Heading uses the
-	// device's compass when available, falling back to GPS movement.
+	// Geolocate control: pulse dot, accuracy circle, and heading arrow are
+	// built in. Heading uses the device's compass when available, falling
+	// back to GPS movement.
 	const geolocate = new maplibre.GeolocateControl({
 		positionOptions: { enableHighAccuracy: true },
 		trackUserLocation: true,
@@ -770,8 +768,8 @@ onMount(async () => {
 			},
 		});
 
-		// Translucent outer ring — colors tiered by point_count to match
-		// stock leaflet.markercluster defaults (green/yellow/orange, 0.6 alpha).
+		// Translucent outer ring — green/yellow/orange tiers by point_count
+		// at 0.6 alpha.
 		map.addLayer({
 			id: "clusters-outer",
 			type: "circle",
@@ -938,8 +936,6 @@ onMount(async () => {
 		// Place name labels — visible at high zoom once the enriched-details
 		// fetch has populated each place's name. Drawn before clusters-hit so
 		// the spiderfy hit-target stays on top for click routing.
-		// Mirrors prod's `.marker-label` / `.marker-label-boosted` styling
-		// (src/app.css:264-310). Dark-mode color swap is Phase 6 polish.
 		map.addLayer({
 			id: "place-label",
 			type: "symbol",
@@ -1352,7 +1348,7 @@ onDestroy(() => {
 		font-size: 13px;
 	}
 	:global(.dark .maplibre-next-basemaps-popup) {
-		background: #1f2937; /* gray-800 — matches --leaflet-bg in app.css */
+		background: #1f2937; /* gray-800 */
 		color: #f3f4f6; /* gray-100 */
 	}
 	:global(.maplibre-next-basemaps-option) {

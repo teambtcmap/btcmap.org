@@ -264,8 +264,8 @@ $: if (showAdvanced) {
 }
 
 // If the user typed valid coords before the map finished loading,
-// placeMarker() returned early (no leafletRef/map). Once the map is
-// ready, drop the marker that's owed.
+// placeMarker() returned early (no map yet). Once the map is ready,
+// drop the marker that's owed.
 $: if (mapLoaded && lat !== undefined && long !== undefined && !marker) {
 	placeMarker(lat, long, { fly: true, syncInputs: false });
 }

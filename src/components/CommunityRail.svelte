@@ -15,11 +15,10 @@ import { areaIconSrc, getCommunitiesAtCoordinates } from "$lib/utils";
 
 import { resolve } from "$app/paths";
 
-// MapLibre-native port of /map's CommunityRail. Same desktop/mobile
-// layout + behavior; preview polygon now lives on a dedicated GeoJSON
-// source + fill/outline layers that we add once and reuse, rather than
-// the legacy approach of adding/removing a leaflet.geoJSON layer on
-// every hover.
+// Community rail rendered alongside /map. Preview polygon lives on a
+// dedicated GeoJSON source + fill/outline layers added once and reused
+// — re-using the layer beats re-adding it per hover when the user
+// rapid-fires the avatars.
 
 const DESKTOP_FLY = { duration: 280, y: 10 };
 const MOBILE_FLY = { duration: 280, y: -10 };
