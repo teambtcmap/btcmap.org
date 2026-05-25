@@ -21,10 +21,10 @@ export async function waitForMarkersToLoad(page: Page) {
 	// MapLibre canvas must be present before features can be queried.
 	await page.waitForSelector('.maplibregl-canvas', { state: 'visible' });
 
-	// Poll the source data via a known global hook the page exposes.
-	// /map sets `window.__mapReady` (and the places source contains real
-	// features) once syncPlacesToSource completes. The hook is a no-op in
-	// prod; tests pin against it.
+	// Poll a global hook /map exposes — `window.__mapPlacesCount` is set
+	// (with the rendered feature count) inside syncPlacesToSource each
+	// time the source is refreshed. The hook is a no-op in prod; tests
+	// pin against it.
 	await page.waitForFunction(
 		() =>
 			(window as unknown as { __mapPlacesCount?: number }).__mapPlacesCount !==
