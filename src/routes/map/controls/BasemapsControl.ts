@@ -12,6 +12,8 @@ import {
 	isBasemapId,
 } from "$lib/map/basemaps";
 
+import "./controls.css";
+
 type BasemapEntry = { id: BasemapId; label: string };
 
 type Options = {

@@ -8,6 +8,8 @@ import { get } from "svelte/store";
 import { trackEvent } from "$lib/analytics";
 import { _, locale } from "$lib/i18n";
 
+import "./controls.css";
+
 // Mirrors /map's BoostControl (MapControls.svelte:20-81): a single
 // ctrl-group with one anchor that toggles the `?boosts=true` URL param.
 // Click triggers a full page reload via `location.search = …`, matching

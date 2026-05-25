@@ -9,6 +9,8 @@ import { trackEvent } from "$lib/analytics";
 import { _, locale } from "$lib/i18n";
 import { session } from "$lib/session";
 
+import "./controls.css";
+
 // Mirrors /map's `homeMarkerButtons` (src/lib/map/setup.ts) as a
 // MapLibre custom IControl. Two variants:
 //  - "main": home → add-location → community map → account (used by /map)

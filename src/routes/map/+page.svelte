@@ -1554,75 +1554,7 @@ onDestroy(() => {
 		width: 100%;
 		height: 100%;
 	}
-	/* Basemap picker — IControl that owns its own container; the popup
-	   is absolutely positioned relative to it. Hover-or-click the icon
-	   to expand the radio list. */
-	:global(.maplibre-next-basemaps) {
-		position: relative;
-	}
-	:global(.maplibre-next-basemaps-popup) {
-		position: absolute;
-		top: 0;
-		right: calc(100% + 6px);
-		background: white;
-		color: #111827; /* gray-900 */
-		border-radius: 4px;
-		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-		padding: 4px 0;
-		min-width: 140px;
-		font-size: 13px;
-	}
-	:global(.dark .maplibre-next-basemaps-popup) {
-		background: #1f2937; /* gray-800 */
-		color: #f3f4f6; /* gray-100 */
-	}
-	:global(.maplibre-next-basemaps-option) {
-		display: flex;
-		align-items: center;
-		gap: 6px;
-		padding: 4px 10px;
-		cursor: pointer;
-	}
-	:global(.maplibre-next-basemaps-option:hover) {
-		background: rgba(0, 0, 0, 0.05);
-	}
-	:global(.dark .maplibre-next-basemaps-option:hover) {
-		background: rgba(255, 255, 255, 0.08);
-	}
-	:global(.maplibre-next-basemaps-option input) {
-		margin: 0;
-	}
-
-	/* Anchor-based buttons inside the custom IControls (NavButtons / Boost /
-	   DataRefresh). MapLibre's default `.maplibregl-ctrl-group button` rules
-	   don't apply to <a> elements, so we replicate the dimensions, hover and
-	   focus states here. Kept :global because Svelte's scoped CSS would
-	   miss the anchors created at runtime by the IControl classes. */
-	:global(.maplibregl-ctrl-group a.maplibregl-ctrl-link) {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 29px;
-		height: 29px;
-		box-sizing: border-box;
-		background-color: transparent;
-		cursor: pointer;
-		text-decoration: none;
-	}
-	:global(.maplibregl-ctrl-group a.maplibregl-ctrl-link + a.maplibregl-ctrl-link),
-	:global(.maplibregl-ctrl-group button + a.maplibregl-ctrl-link),
-	:global(.maplibregl-ctrl-group a.maplibregl-ctrl-link + button) {
-		border-top: 1px solid #ddd;
-	}
-	:global(.maplibregl-ctrl-group a.maplibregl-ctrl-link:hover) {
-		background-color: rgba(0, 0, 0, 0.05);
-	}
-	:global(.maplibregl-ctrl-group a.maplibregl-ctrl-link:focus-visible) {
-		box-shadow: 0 0 2px 2px #0096ff;
-	}
-	:global(.maplibregl-ctrl-group a.maplibregl-ctrl-link img) {
-		display: block;
-		width: 16px;
-		height: 16px;
-	}
+	/* IControl-related rules moved to ./controls/controls.css so any page
+	   that mounts these controls (currently /map and /communities/map)
+	   gets the popup positioning + anchor button styles. */
 </style>

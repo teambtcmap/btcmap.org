@@ -9,6 +9,8 @@ import { trackEvent } from "$lib/analytics";
 import { _, locale } from "$lib/i18n";
 import { mapUpdates, placesSyncCount } from "$lib/store";
 
+import "./controls.css";
+
 // Mirrors /map's `dataRefresh` (src/lib/map/setup.ts:555): a button that
 // stays hidden until a fresh sync arrives, then reveals itself and
 // reloads the page on click. The reveal condition matches /map's

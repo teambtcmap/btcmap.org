@@ -1,0 +1,82 @@
+/*
+ * Shared styles for the custom MapLibre IControls in this directory
+ * (BasemapsControl, NavButtonsControl, BoostToggleControl,
+ * DataRefreshControl). Imported by each control's TS module so any page
+ * that mounts the controls — currently /map and /communities/map — gets
+ * the popup positioning, dark-mode treatment, and anchor button styles.
+ *
+ * Lives outside any component's <style> block on purpose: Svelte's
+ * scoped CSS doesn't reach DOM nodes created at runtime by the IControl
+ * classes.
+ */
+
+/* Basemap picker — IControl that owns its own container; the popup is
+   absolutely positioned relative to it. Hover-or-click the icon to
+   expand the radio list. */
+.maplibre-next-basemaps {
+	position: relative;
+}
+.maplibre-next-basemaps-popup {
+	position: absolute;
+	top: 0;
+	right: calc(100% + 6px);
+	background: white;
+	color: #111827; /* gray-900 */
+	border-radius: 4px;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+	padding: 4px 0;
+	min-width: 140px;
+	font-size: 13px;
+}
+.dark .maplibre-next-basemaps-popup {
+	background: #1f2937; /* gray-800 */
+	color: #f3f4f6; /* gray-100 */
+}
+.maplibre-next-basemaps-option {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 10px;
+	cursor: pointer;
+}
+.maplibre-next-basemaps-option:hover {
+	background: rgba(0, 0, 0, 0.05);
+}
+.dark .maplibre-next-basemaps-option:hover {
+	background: rgba(255, 255, 255, 0.08);
+}
+.maplibre-next-basemaps-option input {
+	margin: 0;
+}
+
+/* Anchor-based buttons inside the custom IControls (NavButtons / Boost /
+   DataRefresh). MapLibre's default `.maplibregl-ctrl-group button` rules
+   don't apply to <a> elements, so we replicate the dimensions, hover and
+   focus states here. */
+.maplibregl-ctrl-group a.maplibregl-ctrl-link {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 29px;
+	height: 29px;
+	box-sizing: border-box;
+	background-color: transparent;
+	cursor: pointer;
+	text-decoration: none;
+}
+.maplibregl-ctrl-group a.maplibregl-ctrl-link + a.maplibregl-ctrl-link,
+.maplibregl-ctrl-group button + a.maplibregl-ctrl-link,
+.maplibregl-ctrl-group a.maplibregl-ctrl-link + button {
+	border-top: 1px solid #ddd;
+}
+.maplibregl-ctrl-group a.maplibregl-ctrl-link:hover {
+	background-color: rgba(0, 0, 0, 0.05);
+}
+.maplibregl-ctrl-group a.maplibregl-ctrl-link:focus-visible {
+	box-shadow: 0 0 2px 2px #0096ff;
+}
+.maplibregl-ctrl-group a.maplibregl-ctrl-link img {
+	display: block;
+	width: 16px;
+	height: 16px;
+}
