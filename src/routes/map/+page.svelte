@@ -417,7 +417,31 @@ const EMPTY_COLLECTION: PlaceFeatureCollection = {
 	features: [],
 };
 
-const buildFeatureCollection = (list: Place[]): PlaceFeatureCollection => {
+// Boosted places render via a separate non-clustered source so they stay
+// individually visible above cluster discs at every zoom — the legacy /map
+// did this via a dedicated boostedLayer + BOOSTED_CLUSTERING_MAX_ZOOM
+// constant; here we just route boosted features to a sibling source that
+// has cluster:false.
+const partitionPlacesForFeatures = (
+	list: Place[],
+): {
+	regular: Place[];
+	boosted: Place[];
+} => {
+	const regular: Place[] = [];
+	const boosted: Place[] = [];
+	for (const p of list) {
+		if (p.deleted_at) continue;
+		if (isBoosted(p)) boosted.push(p);
+		else regular.push(p);
+	}
+	return { regular, boosted };
+};
+
+const buildFeatureCollectionFor = (
+	list: Place[],
+	includeBoosted: boolean,
+): PlaceFeatureCollection => {
 	const saved = get(savedPlaceIds);
 	// Snapshot the enriched cache once per build — names arrive lazily as
 	// the viewport-bound /v4/places/search fetch resolves.
@@ -438,20 +462,18 @@ const buildFeatureCollection = (list: Place[]): PlaceFeatureCollection => {
 	};
 	return {
 		type: "FeatureCollection",
-		features: list
-			.filter((p) => !p.deleted_at)
-			.map((p) => ({
-				type: "Feature",
-				geometry: { type: "Point", coordinates: [p.lon, p.lat] },
-				properties: {
-					id: p.id,
-					boosted: Boolean(isBoosted(p)),
-					icon: p.icon ?? "question_mark",
-					comments: p.comments ?? 0,
-					saved: saved.has(p.id),
-					name: resolveName(p),
-				},
-			})),
+		features: list.map((p) => ({
+			type: "Feature",
+			geometry: { type: "Point", coordinates: [p.lon, p.lat] },
+			properties: {
+				id: p.id,
+				boosted: includeBoosted,
+				icon: p.icon ?? "question_mark",
+				comments: p.comments ?? 0,
+				saved: saved.has(p.id),
+				name: resolveName(p),
+			},
+		})),
 	};
 };
 
@@ -514,8 +536,13 @@ const loadSavedBadgeSprite = async (m: MapLibreMap): Promise<void> => {
 const syncPlacesToSource = (list: Place[]) => {
 	if (!map || !styleLoaded) return;
 	const source = map.getSource("places") as GeoJSONSource | undefined;
-	if (!source) return;
-	source.setData(buildFeatureCollection(list));
+	const boostedSource = map.getSource("places-boosted") as
+		| GeoJSONSource
+		| undefined;
+	if (!source || !boostedSource) return;
+	const { regular, boosted } = partitionPlacesForFeatures(list);
+	source.setData(buildFeatureCollectionFor(regular, false));
+	boostedSource.setData(buildFeatureCollectionFor(boosted, true));
 	ensureSpritesForPlaces(map, list);
 	if (list.length > 0) elementsLoaded = true;
 };
@@ -759,6 +786,15 @@ onMount(async () => {
 			clusterMaxZoom: CLUSTERING_DISABLED_ZOOM - 1,
 		});
 
+		// Separate non-clustered source for boosted places. Routing boosted
+		// features here keeps them visually prominent above cluster discs at
+		// every zoom — they never get absorbed into a cluster icon. Matches
+		// the legacy /map's dedicated boostedLayer behavior.
+		map.addSource("places-boosted", {
+			type: "geojson",
+			data: EMPTY_COLLECTION,
+		});
+
 		// Hover hull: convex polygon enclosing all leaves of the cluster the
 		// cursor is over. Added before the visible cluster discs so the
 		// translucent fill sits under, not on top of, the cluster discs.
@@ -869,6 +905,27 @@ onMount(async () => {
 				"icon-allow-overlap": true,
 				"icon-ignore-placement": true,
 				// Keep pins upright as the map rotates/pitches.
+				"icon-rotation-alignment": "viewport",
+				"icon-pitch-alignment": "viewport",
+			},
+		});
+
+		// Boosted pins — drawn from the separate non-clustered source on top
+		// of cluster discs so a paid boost is always visually prominent.
+		map.addLayer({
+			id: "boosted-point",
+			type: "symbol",
+			source: "places-boosted",
+			layout: {
+				"icon-image": [
+					"concat",
+					"pin-b-",
+					["coalesce", ["get", "icon"], "question_mark"],
+				],
+				"icon-size": 1,
+				"icon-anchor": "bottom",
+				"icon-allow-overlap": true,
+				"icon-ignore-placement": true,
 				"icon-rotation-alignment": "viewport",
 				"icon-pitch-alignment": "viewport",
 			},
@@ -1052,16 +1109,21 @@ onMount(async () => {
 		map.on("mouseleave", "clusters-outer", resetCursor);
 		map.on("mouseenter", "unclustered-point", setPointerCursor);
 		map.on("mouseleave", "unclustered-point", resetCursor);
+		map.on("mouseenter", "boosted-point", setPointerCursor);
+		map.on("mouseleave", "boosted-point", resetCursor);
 
 		// Unclustered marker click → open the global merchant drawer. The
 		// drawer component lives in the layout, so we only need to push state
-		// into the store.
-		map.on("click", "unclustered-point", (e: MapLayerMouseEvent) => {
+		// into the store. Both layers share the same handler since boosted
+		// pins live in their own source above the clustered one.
+		const onPinClick = (e: MapLayerMouseEvent) => {
 			const feature = e.features?.[0] as MapGeoJSONFeature | undefined;
 			const placeId = feature?.properties?.id;
 			if (typeof placeId !== "number") return;
 			merchantDrawer.open(placeId, "details");
-		});
+		};
+		map.on("click", "unclustered-point", onPinClick);
+		map.on("click", "boosted-point", onPinClick);
 
 		// Click on empty map (no marker or cluster hit) closes any open
 		// drawer — matches /map's behavior. Layer-scoped click handlers
@@ -1080,7 +1142,12 @@ onMount(async () => {
 				.layers.filter((l) => l.id.startsWith("spiderfy-leaf"))
 				.map((l) => l.id);
 			const hit = map.queryRenderedFeatures(e.point, {
-				layers: ["unclustered-point", "clusters-hit", ...spiderLeafLayerIds],
+				layers: [
+					"unclustered-point",
+					"boosted-point",
+					"clusters-hit",
+					...spiderLeafLayerIds,
+				],
 			});
 			if (hit.length > 0) return;
 			merchantDrawer.close();
