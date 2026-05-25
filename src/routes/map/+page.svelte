@@ -37,7 +37,11 @@ import {
 	parseHashCoords,
 	writeHashCoords,
 } from "$lib/map/mapHash";
-import { ensureSpritesForPlaces, loadSvgImage } from "$lib/map/maplibreSprites";
+import {
+	ensureSpritesForPlaces,
+	installPlaceholderHandler,
+	loadSvgImage,
+} from "$lib/map/maplibreSprites";
 import {
 	calculateRadiusKmFromLngLatBounds,
 	getZoomBehavior,
@@ -719,6 +723,14 @@ onMount(async () => {
 	geolocate.on("geolocate", (e: GeolocationPosition) => {
 		userLocation.setLocation(e.coords.latitude, e.coords.longitude);
 	});
+
+	// Composite pin sprites resolve async. Until each `pin-r-{icon}` /
+	// `pin-b-{icon}` lands, MapLibre logs `Image "…" could not be loaded`
+	// for every tile that wants to draw it — on a fresh load with dozens
+	// of unique icon names that's a flood of warnings. The placeholder
+	// handler registers a 1×1 transparent stub for any missing id; the
+	// real sprite replaces it on resolution (see maplibreSprites.ts).
+	installPlaceholderHandler(map);
 
 	map.on("load", async () => {
 		if (!map) return;
