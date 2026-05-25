@@ -177,7 +177,15 @@ export const ensureSpritesForPlaces = (m: MapLibreMap, list: Place[]): void => {
 		const key = spriteName(icon, boosted);
 		if (seen.has(key)) continue;
 		seen.add(key);
-		ensureSprite(m, icon, boosted);
+		// ensureSprite owns its own in-flight cache, so we don't need to
+		// hold the returned promise here — but we DO need to attach a
+		// .catch so a transient Iconify outage doesn't silently fail.
+		// Without this log, "pin renders as a transparent stub" was
+		// undebuggable because the rejection was swallowed by the cache
+		// cleanup handlers inside ensureSprite.
+		ensureSprite(m, icon, boosted).catch((err) => {
+			console.warn(`ensureSprite failed for ${key}:`, err);
+		});
 	}
 };
 
