@@ -9,14 +9,22 @@ import { trackEvent } from "$lib/analytics";
 import { _, locale } from "$lib/i18n";
 import { session } from "$lib/session";
 
-// Mirrors /map's `homeMarkerButtons` (src/lib/map/setup.ts:395) as a
-// MapLibre custom IControl: one ctrl-group container holding four
-// anchor buttons (home, add-location, community map, account/login).
+// Mirrors /map's `homeMarkerButtons` (src/lib/map/setup.ts) as a
+// MapLibre custom IControl. Two variants:
+//  - "main": home → add-location → community map → account (used by /map)
+//  - "communities": home → merchant map → account (used by /communities/map)
 // The account button is session- and locale-reactive — subscribed in
 // onAdd, unsubscribed in onRemove.
+export type NavButtonsVariant = "main" | "communities";
+
 export class NavButtonsControl implements IControl {
+	#variant: NavButtonsVariant;
 	#container: HTMLDivElement | undefined;
 	#unsubs: Array<() => void> = [];
+
+	constructor(variant: NavButtonsVariant = "main") {
+		this.#variant = variant;
+	}
 
 	getDefaultPosition(): ControlPosition {
 		return "top-right";
@@ -38,25 +46,37 @@ export class NavButtonsControl implements IControl {
 		});
 		container.appendChild(homeBtn);
 
-		// Add location
-		const addLocBtn = this.#createButton({
-			href: "/add-location",
-			title: t("mapControls.addLocation"),
-			iconSrc: "/icons/marker.svg",
-			iconAlt: t("mapControls.addLocationAlt"),
-			onClick: () => trackEvent("add_location_click"),
-		});
-		container.appendChild(addLocBtn);
+		if (this.#variant === "main") {
+			// Add location
+			const addLocBtn = this.#createButton({
+				href: "/add-location",
+				title: t("mapControls.addLocation"),
+				iconSrc: "/icons/marker.svg",
+				iconAlt: t("mapControls.addLocationAlt"),
+				onClick: () => trackEvent("add_location_click"),
+			});
+			container.appendChild(addLocBtn);
 
-		// Community map
-		const commBtn = this.#createButton({
-			href: "/communities/map",
-			title: t("mapControls.communityMap"),
-			iconSrc: "/icons/group.svg",
-			iconAlt: t("mapControls.communityMapAlt"),
-			onClick: () => trackEvent("community_map_click"),
-		});
-		container.appendChild(commBtn);
+			// Community map
+			const commBtn = this.#createButton({
+				href: "/communities/map",
+				title: t("mapControls.communityMap"),
+				iconSrc: "/icons/group.svg",
+				iconAlt: t("mapControls.communityMapAlt"),
+				onClick: () => trackEvent("community_map_click"),
+			});
+			container.appendChild(commBtn);
+		} else {
+			// Merchant map (back to /map from the community map)
+			const merchantBtn = this.#createButton({
+				href: "/map",
+				title: t("mapControls.merchantMap"),
+				iconSrc: "/icons/shopping.svg",
+				iconAlt: t("mapControls.merchantMapAlt"),
+				onClick: () => {},
+			});
+			container.appendChild(merchantBtn);
+		}
 
 		// Account / Log in — href + labels driven by session/locale subscriptions
 		// so the button stays correct after in-place auth flows (no reload).
