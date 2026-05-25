@@ -92,6 +92,10 @@ let map: MapLibreMap | undefined;
 let mapLoaded = false;
 let styleLoaded = false;
 let lastAppliedTheme: "light" | "dark" | undefined;
+// Track last-applied props by reference so the area-change reactive only
+// fires on genuine prop turnover, not on theme-swap styleLoaded toggles.
+let lastAppliedGeoJSON: GeoJSON | undefined;
+let lastAppliedFilteredPlaces: Place[] | undefined;
 
 const loadCommentBadgeSprite = (m: MapLibreMap): void => {
 	if (m.hasImage("comment-badge-bg")) return;
@@ -175,9 +179,15 @@ const computeBbox = (g: GeoJSON): [number, number, number, number] | null => {
 };
 
 // Register the area polygon source + outline layer. Re-runs on every style
-// reload so a theme swap doesn't strip the overlay.
+// reload so a theme swap doesn't strip the overlay. When the source already
+// exists, setData updates its geometry — this is the AreaPage navigation
+// path (e.g. /community/lugano → /community/zurich reuses this component,
+// see AreaPage.svelte:288-307).
 const addAreaLayer = (m: MapLibreMap) => {
-	if (!m.getSource("area")) {
+	const existing = m.getSource("area") as GeoJSONSource | undefined;
+	if (existing) {
+		existing.setData(geoJSON);
+	} else {
 		m.addSource("area", {
 			type: "geojson",
 			data: geoJSON,
@@ -404,15 +414,21 @@ const initializeMap = async () => {
 		attachInteractions(map);
 		styleLoaded = true;
 		mapLoaded = true;
+		lastAppliedGeoJSON = geoJSON;
+		lastAppliedFilteredPlaces = filteredPlaces;
 
-		// Compute area grade from the rendered place set. The legacy component
-		// treated every place in `filteredPlaces` as up-to-date (the parent
-		// AreaPage already filters by verification), so mirror that here.
-		total = filteredPlaces.length;
-		upToDate = filteredPlaces.length;
-		upToDatePercent = upToDate ? (upToDate / (total / 100)).toFixed(0) : "0";
-		grade = getGrade(Number(upToDatePercent));
+		updateAreaGrade();
 	});
+};
+
+// Compute area grade from the rendered place set. The legacy component
+// treated every place in `filteredPlaces` as up-to-date (the parent
+// AreaPage already filters by verification), so mirror that here.
+const updateAreaGrade = () => {
+	total = filteredPlaces.length;
+	upToDate = filteredPlaces.length;
+	upToDatePercent = upToDate ? (upToDate / (total / 100)).toFixed(0) : "0";
+	grade = getGrade(Number(upToDatePercent));
 };
 
 // Theme reactivity — swap the basemap, then re-register area + places overlays
@@ -436,6 +452,41 @@ const applyTheme = (next: "light" | "dark" | undefined) => {
 
 $: if (initialRenderComplete && geoJSON && filteredPlaces && !dataInitialized) {
 	initializeMap();
+}
+
+// AreaPage reuses this AreaMap instance across community-to-community
+// (and country-to-country) navigation. When the user clicks through to
+// another area, geoJSON and filteredPlaces change by reference but
+// `dataInitialized` stays true, so initializeMap doesn't re-run. Without
+// this reactive the previous area's outline + pins would persist over
+// the new area's coordinates.
+//
+// Compare references (not identity-equality) so that theme-swap-driven
+// styleLoaded toggles don't trigger spurious rebuilds — only true prop
+// changes do.
+$: if (
+	map &&
+	styleLoaded &&
+	dataInitialized &&
+	(geoJSON !== lastAppliedGeoJSON ||
+		filteredPlaces !== lastAppliedFilteredPlaces)
+) {
+	lastAppliedGeoJSON = geoJSON;
+	lastAppliedFilteredPlaces = filteredPlaces;
+	const areaSource = map.getSource("area") as GeoJSONSource | undefined;
+	areaSource?.setData(geoJSON);
+	syncPlacesSource(map, filteredPlaces);
+	const bbox = computeBbox(geoJSON);
+	if (bbox) {
+		map.fitBounds(
+			[
+				[bbox[0], bbox[1]],
+				[bbox[2], bbox[3]],
+			],
+			{ padding: 40, animate: true, duration: 300 },
+		);
+	}
+	updateAreaGrade();
 }
 
 $: if (map && styleLoaded) {
