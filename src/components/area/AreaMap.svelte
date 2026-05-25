@@ -21,7 +21,7 @@ import Icon from "$components/Icon.svelte";
 import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
 import ShowTags from "$components/ShowTags.svelte";
 import TaggingIssues from "$components/TaggingIssues.svelte";
-import { GradeTable } from "$lib/constants";
+import { CLUSTERING_DISABLED_ZOOM, GradeTable } from "$lib/constants";
 import {
 	ensureSpritesForPlaces,
 	installPlaceholderHandler,
@@ -211,6 +211,57 @@ const addPlacesLayers = (m: MapLibreMap) => {
 		m.addSource("places", {
 			type: "geojson",
 			data: EMPTY_COLLECTION,
+			// Source-side clustering. Dense communities (cities with hundreds
+			// of merchants) otherwise render every pin individually — both
+			// visually noisy at low zoom and a render-perf hit. clusterMaxZoom
+			// matches /map: above CLUSTERING_DISABLED_ZOOM (17) all points
+			// render unclustered.
+			cluster: true,
+			clusterRadius: 80,
+			clusterMaxZoom: CLUSTERING_DISABLED_ZOOM - 1,
+		});
+	}
+
+	if (!m.getLayer("cluster-discs")) {
+		m.addLayer({
+			id: "cluster-discs",
+			type: "circle",
+			source: "places",
+			filter: ["has", "point_count"],
+			paint: {
+				"circle-color": [
+					"step",
+					["get", "point_count"],
+					"#22c55e", // green-500 (small)
+					25,
+					"#eab308", // yellow-500
+					100,
+					"#f97316", // orange-500 (large)
+				],
+				"circle-radius": ["step", ["get", "point_count"], 16, 25, 22, 100, 28],
+				"circle-stroke-width": 2,
+				"circle-stroke-color": "rgba(255, 255, 255, 0.85)",
+				"circle-opacity": 0.85,
+			},
+		});
+	}
+
+	if (!m.getLayer("cluster-count")) {
+		m.addLayer({
+			id: "cluster-count",
+			type: "symbol",
+			source: "places",
+			filter: ["has", "point_count"],
+			layout: {
+				"text-field": ["get", "point_count_abbreviated"],
+				"text-font": ["Noto Sans Bold"],
+				"text-size": 12,
+				"text-allow-overlap": true,
+				"text-ignore-placement": true,
+			},
+			paint: {
+				"text-color": "#000",
+			},
 		});
 	}
 
@@ -219,6 +270,7 @@ const addPlacesLayers = (m: MapLibreMap) => {
 			id: "unclustered-point",
 			type: "symbol",
 			source: "places",
+			filter: ["!", ["has", "point_count"]],
 			layout: {
 				// Defensive coalesce — guards against any null icon value
 				// surfacing as the "Expected number, found null" tile-compile
@@ -245,7 +297,11 @@ const addPlacesLayers = (m: MapLibreMap) => {
 			id: "comment-badge",
 			type: "symbol",
 			source: "places",
-			filter: [">", ["coalesce", ["get", "comments"], 0], 0],
+			filter: [
+				"all",
+				["!", ["has", "point_count"]],
+				[">", ["coalesce", ["get", "comments"], 0], 0],
+			],
 			layout: {
 				"icon-image": "comment-badge-bg",
 				"icon-size": 1,
@@ -263,7 +319,11 @@ const addPlacesLayers = (m: MapLibreMap) => {
 			id: "comment-badge-count",
 			type: "symbol",
 			source: "places",
-			filter: [">", ["coalesce", ["get", "comments"], 0], 0],
+			filter: [
+				"all",
+				["!", ["has", "point_count"]],
+				[">", ["coalesce", ["get", "comments"], 0], 0],
+			],
 			layout: {
 				"text-field": ["to-string", ["coalesce", ["get", "comments"], 0]],
 				"text-font": ["Noto Sans Bold"],
@@ -333,11 +393,34 @@ const attachInteractions = (m: MapLibreMap) => {
 	m.on("mouseenter", "unclustered-point", setPointerCursor);
 	m.on("mouseleave", "unclustered-point", resetCursor);
 
+	// Cluster click → zoom into the cluster's expansionZoom (drills through
+	// the cluster tree until points unclumped).
+	m.on("click", "cluster-discs", async (e: MapLayerMouseEvent) => {
+		const feature = e.features?.[0];
+		if (!feature) return;
+		const clusterId = feature.properties?.cluster_id;
+		if (typeof clusterId !== "number") return;
+		const source = m.getSource("places") as GeoJSONSource | undefined;
+		if (!source) return;
+		try {
+			const zoom = await source.getClusterExpansionZoom(clusterId);
+			const geom = feature.geometry as unknown as {
+				coordinates: [number, number];
+			};
+			m.easeTo({ center: geom.coordinates, zoom, duration: 300 });
+		} catch (err) {
+			console.error("AreaMap cluster expansion failed", err);
+		}
+		e.originalEvent?.stopPropagation?.();
+	});
+	m.on("mouseenter", "cluster-discs", setPointerCursor);
+	m.on("mouseleave", "cluster-discs", resetCursor);
+
 	// Bare map click → close any open drawer (mirrors legacy Leaflet behavior).
 	m.on("click", (e: MapLayerMouseEvent) => {
 		if (!map) return;
 		const hits = map.queryRenderedFeatures(e.point, {
-			layers: ["unclustered-point"],
+			layers: ["unclustered-point", "cluster-discs"],
 		});
 		if (hits.length > 0) return;
 		if (selectedMerchantId !== null) closeDrawer();
