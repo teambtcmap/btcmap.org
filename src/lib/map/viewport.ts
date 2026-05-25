@@ -15,6 +15,11 @@ export function getZoomBehavior(zoom: number): ZoomBehavior {
 // MapLibre-shaped haversine for the enrichment fetch radius. No 10%
 // buffer: the enrichment fetch wants a tight radius matching the
 // visible viewport.
+//
+// `ne.lng - center.lng` is normalized to the shortest signed angular
+// distance — across the antimeridian (e.g. center near 179°, NE near
+// -179°) the raw difference would be ~-358° and `dLon` would represent
+// a circumnavigation, blowing the radius up to ~half the planet.
 export const calculateRadiusKmFromLngLatBounds = (
 	bounds: LngLatBounds,
 ): number => {
@@ -22,7 +27,8 @@ export const calculateRadiusKmFromLngLatBounds = (
 	const ne = bounds.getNorthEast();
 	const R = 6371; // Earth radius in km
 	const dLat = ((ne.lat - center.lat) * Math.PI) / 180;
-	const dLon = ((ne.lng - center.lng) * Math.PI) / 180;
+	const dLngDeg = ((ne.lng - center.lng + 540) % 360) - 180;
+	const dLon = (dLngDeg * Math.PI) / 180;
 	const a =
 		Math.sin(dLat / 2) ** 2 +
 		Math.cos((center.lat * Math.PI) / 180) *
