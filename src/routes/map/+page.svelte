@@ -139,6 +139,68 @@ const panToPlace = (lat: number, lon: number) => {
 	map.easeTo({ center: [lon, lat], zoom: DEFAULT_MAP_ZOOM, duration: 300 });
 };
 
+// Wait for the map to settle (move end + tiles loaded). Resolves immediately
+// when no movement is in flight so callers can `await` unconditionally.
+const waitForIdle = (m: MapLibreMap): Promise<void> =>
+	new Promise((resolve) => {
+		if (!m.isMoving() && m.areTilesLoaded()) {
+			resolve();
+			return;
+		}
+		m.once("idle", () => resolve());
+	});
+
+// After opening the drawer for a place — via deep-link, search-result, or
+// the nearby-list — check if its pin is actually visible. If MapLibre's
+// source-side clustering buried it inside a cluster at the current zoom,
+// programmatically spiderfy that cluster so the selected pin is reachable.
+const revealMerchant = async (place: Place): Promise<void> => {
+	if (!map || !spiderfier) return;
+	await waitForIdle(map);
+	if (!map) return;
+	const projected = map.project([place.lon, place.lat]);
+	// Cluster radius is 80px source-side; query a slightly wider bbox to
+	// catch a cluster whose icon is drawn near (but not exactly at) the
+	// merchant's projected pixel.
+	const PAD = 100;
+	const bbox: [[number, number], [number, number]] = [
+		[projected.x - PAD, projected.y - PAD],
+		[projected.x + PAD, projected.y + PAD],
+	];
+	const hits = map.queryRenderedFeatures(bbox, {
+		layers: ["unclustered-point", "clusters-hit"],
+	});
+	const alreadyVisible = hits.some(
+		(h) => h.layer.id === "unclustered-point" && h.properties?.id === place.id,
+	);
+	if (alreadyVisible) return;
+	const source = map.getSource("places") as GeoJSONSource | undefined;
+	if (!source) return;
+	// Walk clusters returned by the bbox query and find the one that
+	// actually contains our place — multiple clusters can sit within PAD,
+	// and we don't want to spiderfy a neighbor. getClusterLeaves is async;
+	// `Infinity` requests every leaf in the cluster, fine because cluster
+	// sizes here cap in the low thousands at most.
+	const clusterCandidates = hits.filter((h) => h.layer.id === "clusters-hit");
+	for (const cluster of clusterCandidates) {
+		const clusterId = cluster.properties?.cluster_id;
+		if (typeof clusterId !== "number") continue;
+		try {
+			const leaves = await source.getClusterLeaves(
+				clusterId,
+				Number.POSITIVE_INFINITY,
+				0,
+			);
+			if (leaves.some((l) => l.properties?.id === place.id)) {
+				spiderfier.spiderfy("clusters-hit", clusterId);
+				return;
+			}
+		} catch (e) {
+			console.error("revealMerchant: getClusterLeaves failed", e);
+		}
+	}
+};
+
 // Reactive zoom level for the panel — drives the "zoom in" prompt and the
 // nearby-vs-low-zoom branching in updateMerchantList. Kept in sync via the
 // moveend handler. Until the map's first moveend fires it stays at the
@@ -288,6 +350,7 @@ const debouncedUpdateMerchantList = debounce(
 const panToNearbyMerchant = (place: Place) => {
 	if (!map) return;
 	map.easeTo({ center: [place.lon, place.lat], duration: 300 });
+	revealMerchant(place);
 };
 
 const zoomToSearchResult = (place: Place) => {
@@ -297,6 +360,7 @@ const zoomToSearchResult = (place: Place) => {
 		zoom: DEFAULT_MAP_ZOOM,
 		duration: 300,
 	});
+	revealMerchant(place);
 };
 
 const zoomToNearbyLevel = () => {
@@ -1183,21 +1247,27 @@ onMount(async () => {
 		// keep the drawer in sync. /map also wires this.
 		window.addEventListener("hashchange", handleHashChange);
 
-		// Deep link: URL had a merchant= param but the hash carried no
-		// viewport coords. Pan the camera to the merchant once it's in the
+		// Deep link: URL had a merchant= param. If the hash carried no
+		// viewport coords, pan the camera to the merchant once it's in the
 		// places store. If places are still loading, subscribe and wait —
-		// 10s safety unsubscribe so we never leak.
-		if (!hashCoords) {
+		// 10s safety unsubscribe so we never leak. Either way, call
+		// revealMerchant so the cluster gets spiderfied if the pin would
+		// otherwise be hidden inside one at the resting zoom.
+		{
 			const { merchantId, isOpen } = parseMerchantHash();
 			if (isOpen && merchantId) {
+				const focus = (p: Place) => {
+					if (!hashCoords) panToPlace(p.lat, p.lon);
+					revealMerchant(p);
+				};
 				const place = get(placesById).get(merchantId);
 				if (place) {
-					panToPlace(place.lat, place.lon);
+					focus(place);
 				} else {
 					deepLinkPanUnsub = placesById.subscribe(($byId) => {
 						const p = $byId.get(merchantId);
 						if (!p) return;
-						panToPlace(p.lat, p.lon);
+						focus(p);
 						if (deepLinkPanTimer) clearTimeout(deepLinkPanTimer);
 						deepLinkPanUnsub?.();
 						deepLinkPanUnsub = null;
