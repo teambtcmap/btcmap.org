@@ -1372,7 +1372,15 @@ onDestroy(() => {
 	deepLinkPanUnsub = null;
 	if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
 	if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
-	spiderfier?.unspiderfyAll();
+	try {
+		// unspiderfyAll internally calls map.getLayer(...) on stored ids; if
+		// MapLibre has already begun tearing down its style by the time this
+		// runs (rapid client-side navigation), that throws a "getLayer of
+		// undefined" — race surfaced under headless Chromium in CI.
+		spiderfier?.unspiderfyAll();
+	} catch (err) {
+		console.debug("spiderfier teardown threw", err);
+	}
 	spiderfier = undefined;
 	map?.remove();
 	map = undefined;
