@@ -88,7 +88,7 @@
 		"jsdom": "^29.0.2",
 		"lint-staged": "^17.0.4",
 		"postcss": "^8.5.10",
-		"svelte": "^4.2.20",
+		"svelte": "^5.55.7",
 		"svelte-check": "^4.4.5",
 		"svelte-preprocess": "^6.0.3",
 		"tailwindcss": "^4.3.0",
