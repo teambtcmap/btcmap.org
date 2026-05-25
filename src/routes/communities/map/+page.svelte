@@ -74,18 +74,25 @@ const buildFeatureCollection = (
 			// rather than its complement. The legacy Leaflet impl also calls
 			// rewind() before adding each geo_json layer.
 			const gj = rewind(c.tags.geo_json, true) as Feature | FeatureCollection;
-			const geometry =
+			// A FeatureCollection community (multipart polygons split across
+			// features) must emit one Feature per geometry — otherwise the
+			// rendered fill shows only the first part while computeBbox
+			// still fits to the full shape, and the polygon-id click handler
+			// only fires for the visible part.
+			const geometries: (Geometry | undefined)[] =
 				gj.type === "Feature"
-					? gj.geometry
+					? [gj.geometry]
 					: gj.type === "FeatureCollection"
-						? gj.features[0]?.geometry
-						: (gj as unknown as Geometry);
-			if (!geometry) continue;
-			features.push({
-				type: "Feature",
-				geometry,
-				properties: { id: c.id, name: c.tags.name } satisfies CommunityProps,
-			});
+						? gj.features.map((f) => f.geometry)
+						: [gj as unknown as Geometry];
+			for (const geometry of geometries) {
+				if (!geometry) continue;
+				features.push({
+					type: "Feature",
+					geometry,
+					properties: { id: c.id, name: c.tags.name } satisfies CommunityProps,
+				});
+			}
 		} catch (e) {
 			console.error("Failed to rewind community geo_json", c.id, e);
 		}
