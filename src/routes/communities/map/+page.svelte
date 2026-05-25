@@ -171,7 +171,13 @@ const addCommunitiesLayers = (m: MapLibreMap) => {
 	}
 };
 
-const buildPopupHtml = (community: Area): HTMLDivElement => {
+// Build popup HTML for a community. Returns the container AND the Socials
+// instance (if any). Caller is responsible for $destroy()'ing the Svelte
+// instance on popup close — otherwise each polygon click leaks an extra
+// Socials with its theme/locale subscriptions still live.
+const buildPopupHtml = (
+	community: Area,
+): { container: HTMLDivElement; socials: Socials | null } => {
 	const container = document.createElement("div");
 	container.innerHTML = `
 		<div class='text-center space-y-2'>
@@ -198,8 +204,9 @@ const buildPopupHtml = (community: Area): HTMLDivElement => {
 	`;
 
 	const socialsMount = container.querySelector("#socials");
+	let socials: Socials | null = null;
 	if (socialsMount) {
-		new Socials({
+		socials = new Socials({
 			target: socialsMount,
 			props: {
 				website: community.tags["contact:website"],
@@ -228,7 +235,7 @@ const buildPopupHtml = (community: Area): HTMLDivElement => {
 		});
 	}
 
-	return container;
+	return { container, socials };
 };
 
 let popupsByCommunity = new Map<string, Area>();
@@ -428,11 +435,18 @@ const initializeMap = async () => {
 		if (!id) return;
 		const community = popupsByCommunity.get(id);
 		if (!community) return;
-		const html = buildPopupHtml(community);
-		new maplibre.Popup({ maxWidth: "320px", closeOnClick: true })
+		const { container, socials } = buildPopupHtml(community);
+		const popup = new maplibre.Popup({ maxWidth: "320px", closeOnClick: true })
 			.setLngLat(e.lngLat)
-			.setDOMContent(html)
+			.setDOMContent(container)
 			.addTo(map);
+		if (socials) {
+			// Destroy the Socials Svelte instance when the popup goes away —
+			// MapLibre removes the DOM but the component's reactive
+			// subscriptions (theme, locale, etc.) would otherwise leak per
+			// click, accumulating with every polygon the user hovers.
+			popup.on("close", () => socials.$destroy());
+		}
 	});
 
 	const setPointer = () => {
