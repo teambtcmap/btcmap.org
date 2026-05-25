@@ -1254,6 +1254,15 @@ onDestroy(() => {
 	spiderfier?.unspiderfyAll();
 	spiderfier = undefined;
 	map?.remove();
+	// merchantList is a module-level singleton. Without this reset the
+	// next visit to /map flashes the previous session's category filter /
+	// searchResults / isOpen before the first moveend rebuilds the panel.
+	merchantList.reset();
+	// Same singleton issue for the layout sync indicator: a stale
+	// percentage from a previous sync can flash before the next sync
+	// tick advances or clears it.
+	placesLoadingProgress.set(0);
+	placesLoadingStatus.set("");
 });
 </script>
 
