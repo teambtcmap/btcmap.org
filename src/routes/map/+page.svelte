@@ -46,7 +46,10 @@ import {
 	calculateRadiusKmFromLngLatBounds,
 	getZoomBehavior,
 } from "$lib/map/viewport";
-import { parseMerchantHash } from "$lib/merchantDrawerHash";
+import {
+	MERCHANT_URL_CHANGE_EVENT,
+	parseMerchantHash,
+} from "$lib/merchantDrawerHash";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import type { MerchantListMode } from "$lib/merchantListStore";
 import { merchantList } from "$lib/merchantListStore";
@@ -62,6 +65,7 @@ import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
 import { debounce, errToast, isBoosted } from "$lib/utils";
 
+import type { PageData } from "./$types";
 import MapSearchBar from "./components/MapSearchBar.svelte";
 import MerchantDrawerHash from "./components/MerchantDrawerHash.svelte";
 import MerchantListPanel from "./components/MerchantListPanel.svelte";
@@ -70,6 +74,8 @@ import { BasemapsControl } from "./controls/BasemapsControl";
 import { BoostToggleControl } from "./controls/BoostToggleControl";
 import { DataRefreshControl } from "./controls/DataRefreshControl";
 import { NavButtonsControl } from "./controls/NavButtonsControl";
+
+export let data: PageData;
 
 type PlaceFeature = {
 	type: "Feature";
@@ -1287,9 +1293,17 @@ onMount(async () => {
 		// If the URL also encoded a merchant=… param, open the drawer to it.
 		merchantDrawer.syncFromHash();
 
-		// Browser back/forward (and any external code mutating the hash) must
-		// keep the drawer in sync. /map also wires this.
+		// Keep the drawer in sync with every channel the merchant URL state
+		// can mutate through:
+		//   • hashchange — direct hash edits or `location.hash = ...`
+		//   • MERCHANT_URL_CHANGE_EVENT — updateMerchantHash() fires this
+		//     because the SvelteKit pushState/replaceState path doesn't
+		//     trigger native popstate/hashchange events.
+		//   • popstate — browser back/forward across history entries that
+		//     differ only in the ?merchant= query param.
 		window.addEventListener("hashchange", handleHashChange);
+		window.addEventListener(MERCHANT_URL_CHANGE_EVENT, handleHashChange);
+		window.addEventListener("popstate", handleHashChange);
 
 		// Deep link: URL had a merchant= param but the hash carried no
 		// viewport coords. Pan the camera to the merchant once it's in the
@@ -1350,6 +1364,8 @@ onDestroy(() => {
 	searchAbortController = null;
 	if (typeof window !== "undefined") {
 		window.removeEventListener("hashchange", handleHashChange);
+		window.removeEventListener(MERCHANT_URL_CHANGE_EVENT, handleHashChange);
+		window.removeEventListener("popstate", handleHashChange);
 	}
 	if (deepLinkPanTimer) clearTimeout(deepLinkPanTimer);
 	deepLinkPanUnsub?.();
@@ -1374,9 +1390,9 @@ onDestroy(() => {
 
 <svelte:head>
 	<title>BTC Map</title>
-	<meta property="og:image" content="https://btcmap.org/images/og/map.png" />
+	<meta property="og:image" content={data.merchantOgImage ?? "https://btcmap.org/images/og/map.png"} />
 	<meta name="twitter:title" content="BTC Map" />
-	<meta name="twitter:image" content="https://btcmap.org/images/og/map.png" />
+	<meta name="twitter:image" content={data.merchantOgImage ?? "https://btcmap.org/images/og/map.png"} />
 </svelte:head>
 
 <h1 class="sr-only">{$_('map.bitcoinMerchantMapTitle')}</h1>
