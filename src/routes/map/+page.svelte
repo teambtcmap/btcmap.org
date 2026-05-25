@@ -292,9 +292,12 @@ const panToNearbyMerchant = (place: Place) => {
 
 const zoomToSearchResult = (place: Place) => {
 	if (!map) return;
+	// Zoom past CLUSTERING_DISABLED_ZOOM (17) so the selected place renders
+	// as an unclustered pin rather than being absorbed into a cluster — the
+	// user picked it from the search results, they expect to see it.
 	map.easeTo({
 		center: [place.lon, place.lat],
-		zoom: DEFAULT_MAP_ZOOM,
+		zoom: 19,
 		duration: 300,
 	});
 };
