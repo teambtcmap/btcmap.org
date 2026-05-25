@@ -410,15 +410,7 @@ const handleModeChange = (mode: MerchantListMode) => {
 // behavior the legacy /map's handler does that we need.
 const handleHashChange = () => {
 	if (typeof window === "undefined") return;
-	// Defensive: this handler is wired to hashchange, popstate, and
-	// MERCHANT_URL_CHANGE_EVENT. During rapid SvelteKit nav between /map
-	// and another route any of these can fire mid-teardown with stores in
-	// an unexpected shape — don't crash the rest of the page.
-	try {
-		merchantDrawer.syncFromHash();
-	} catch (err) {
-		console.debug("handleHashChange threw", err);
-	}
+	merchantDrawer.syncFromHash();
 };
 
 const EMPTY_HULL_COLLECTION: FeatureCollection<Polygon> = {
@@ -1380,15 +1372,7 @@ onDestroy(() => {
 	deepLinkPanUnsub = null;
 	if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
 	if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
-	try {
-		// unspiderfyAll internally calls map.getLayer(...) on stored ids; if
-		// MapLibre has already begun tearing down its style by the time this
-		// runs (rapid client-side navigation), that throws a "getLayer of
-		// undefined" — race surfaced under headless Chromium in CI.
-		spiderfier?.unspiderfyAll();
-	} catch (err) {
-		console.debug("spiderfier teardown threw", err);
-	}
+	spiderfier?.unspiderfyAll();
 	spiderfier = undefined;
 	map?.remove();
 	map = undefined;

@@ -2,7 +2,7 @@
 import rewind from "@mapbox/geojson-rewind";
 import type { Feature, FeatureCollection } from "geojson";
 import type { GeoJSONSource, Map as MapLibreMap } from "maplibre-gl";
-import { onDestroy, onMount } from "svelte";
+import { onMount } from "svelte";
 import { fly } from "svelte/transition";
 
 import { MAP_PANEL_MARGIN } from "$lib/constants";
@@ -128,12 +128,14 @@ onMount(() => {
 	areasSync();
 });
 
-onDestroy(() => {
-	if (!map) return;
-	if (map.getLayer(OUTLINE_LAYER_ID)) map.removeLayer(OUTLINE_LAYER_ID);
-	if (map.getLayer(FILL_LAYER_ID)) map.removeLayer(FILL_LAYER_ID);
-	if (map.getSource(SOURCE_ID)) map.removeSource(SOURCE_ID);
-});
+// No onDestroy map cleanup: /map (the owner) calls map.remove() in its
+// own onDestroy, which runs before this child component's fragment is
+// torn down. By that point the MapLibre Map's internal `style` is
+// undefined, so any m.getLayer / m.getSource here threw
+//   Cannot read properties of undefined (reading 'getLayer')
+// even though `if (!map) return` passed — the JS object still exists,
+// the bare-method `m.getLayer` just deferences a now-undefined `m.style`.
+// map.remove() already disposes our sources and layers.
 </script>
 
 {#if allCommunities.length > 0}
