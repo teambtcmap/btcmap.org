@@ -760,7 +760,7 @@ onMount(async () => {
 	installPlaceholderHandler(map);
 
 	map.on("load", async () => {
-		if (!map) return;
+		if (!map || destroyed) return;
 
 		// Critical sprites must succeed; the saved-badge fetch goes to a
 		// third-party CDN and should NOT block the rest of map init if
@@ -776,6 +776,14 @@ onMount(async () => {
 			loadCommentBadgeSprite(map),
 			loadClusterHitSprite(map),
 		]);
+
+		// Component may have been destroyed while sprites were loading
+		// (user navigated away within ~1s of mount). Without this check
+		// every subsequent addSource/addLayer/new Spiderfy/addEventListener
+		// would run against a removed map and leak handlers. onDestroy's
+		// `map?.remove()` runs but leaves the variable bound to the
+		// destroyed instance, so a plain `!map` check doesn't catch this.
+		if (destroyed) return;
 
 		map.addSource("places", {
 			type: "geojson",
@@ -1333,6 +1341,7 @@ onDestroy(() => {
 	spiderfier?.unspiderfyAll();
 	spiderfier = undefined;
 	map?.remove();
+	map = undefined;
 	// merchantList is a module-level singleton. Without this reset the
 	// next visit to /map flashes the previous session's category filter /
 	// searchResults / isOpen before the first moveend rebuilds the panel.
