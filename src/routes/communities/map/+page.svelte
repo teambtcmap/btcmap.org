@@ -21,7 +21,7 @@ import { get } from "svelte/store";
 
 import MapLoadingMain from "$components/MapLoadingMain.svelte";
 import Socials from "$components/Socials.svelte";
-import { _, locale } from "$lib/i18n";
+import { _ } from "$lib/i18n";
 import { BASEMAPS, type BasemapId, getStoredBasemap } from "$lib/map/basemaps";
 import { parseHashCoords, writeHashCoords } from "$lib/map/mapHash";
 import { areaError, areas, reportError, reports } from "$lib/store";
@@ -419,14 +419,6 @@ const initializeMap = async () => {
 
 	map.addControl(new maplibre.ScaleControl({ unit: "metric" }), "bottom-left");
 
-	// Re-render popup HTML when locale changes so localized labels update
-	// without requiring a reload. Popup is opened on click so we only need to
-	// rebuild the open one if any.
-	const localeUnsub = locale.subscribe(() => {
-		// noop here — popup HTML is rebuilt on each click, no live popup state
-		// to update. Subscription kept for symmetry with /map.
-	});
-
 	map.on("click", FILL_LAYER_ID, (e: MapLayerMouseEvent) => {
 		if (!map) return;
 		const feature = e.features?.[0];
@@ -472,10 +464,6 @@ const initializeMap = async () => {
 	map.on("load", () => {
 		mapLoading = 40;
 		mapLoaded = true;
-	});
-
-	onDestroy(() => {
-		localeUnsub();
 	});
 };
 
