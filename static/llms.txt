@@ -1,0 +1,58 @@
+# BTC Map
+
+> BTC Map is a community-driven, open-source map of merchants, ATMs,
+> and other places that accept Bitcoin worldwide. The website, mobile
+> apps, public API, and tagging tools are maintained by the teambtcmap
+> collective on GitHub. Merchant data comes from OpenStreetMap and is
+> curated by volunteer "taggers" and local Bitcoin communities.
+
+## Main app
+
+- [BTC Map home](https://btcmap.org/): Landing page with app downloads and links into the project.
+- [Interactive map](https://btcmap.org/map): Browse Bitcoin-accepting merchants worldwide; filter by category and payment method (on-chain, Lightning, NFC).
+- [Dashboard](https://btcmap.org/dashboard): Project-wide statistics including total merchants, growth over time, and country/community breakdowns.
+- [Activity feed](https://btcmap.org/activity): Recent changes to merchant data across the project.
+
+## Contribute a location
+
+- [Add a location](https://btcmap.org/add-location): Submit a new Bitcoin-accepting place for inclusion.
+- [Verify a location](https://btcmap.org/verify-location): Confirm an existing merchant still accepts Bitcoin (verifications expire after one year).
+- [Report outdated info](https://btcmap.org/report-outdated-info): Flag a place that has closed or no longer accepts Bitcoin.
+- [Tagger onboarding](https://btcmap.org/tagger-onboarding): About the volunteer tagging program and how to become a contributing tagger.
+- [Contributing to the code](https://github.com/teambtcmap/btcmap.org/blob/main/CONTRIBUTING.md): How to contribute to the BTC Map web app.
+
+## Communities
+
+- [Communities directory](https://btcmap.org/communities): Browse local Bitcoin communities worldwide.
+- [Community map](https://btcmap.org/communities/map): Map view of registered communities.
+- [Community leaderboard](https://btcmap.org/communities/leaderboard): Most active communities by contributions.
+- [Add a community](https://btcmap.org/communities/add): Register a new local Bitcoin community.
+- [Country directories](https://btcmap.org/countries): Browse merchants by country.
+
+## API & data
+
+- [BTC Map API](https://api.btcmap.org/): Public API serving merchant, place, area, report, and user data. Versioned endpoints include `/v2/`, `/v3/`, `/v4/`, and a JSON-RPC endpoint at `/rpc`.
+- [API source & docs](https://github.com/teambtcmap/btcmap-api): Rust implementation; the README documents endpoints, request/response shapes, and example queries.
+- [Embedding the map](https://wiki.btcmap.org/Embedding): How to embed the BTC Map web map on your own site.
+- [Project wiki](https://wiki.btcmap.org/): Documentation hub for embedding, API conventions, tagging guidance, and community resources.
+- [Web app source code](https://github.com/teambtcmap/btcmap.org): SvelteKit frontend that powers btcmap.org.
+
+## Apps
+
+- [Apps directory](https://btcmap.org/apps): BTC Map's own Android, iOS, and web apps, plus the third-party "powered-by-BTC-Map" ecosystem (wallets and tools that consume BTC Map data).
+- [Tagger badges](https://btcmap.org/badges): Profile badges that contributors can earn.
+
+## Project info
+
+- [Contributor leaderboard](https://btcmap.org/leaderboard): Top contributors across the project.
+- [Supporters](https://btcmap.org/supporters): Organizations and individuals supporting BTC Map.
+- [Support BTC Map](https://btcmap.org/support-us): How to donate (Bitcoin / Lightning).
+- [Open tickets](https://btcmap.org/tickets): Outstanding add / verify / community requests submitted by the public.
+- [Tagging issues](https://btcmap.org/tagging-issues): Open data-quality issues that need attention.
+
+## Optional
+
+- [License](https://btcmap.org/license): Licensing information (the web app is AGPL-3.0).
+- [Privacy policy](https://btcmap.org/privacy-policy): Privacy practices.
+- [Security policy](https://github.com/teambtcmap/btcmap.org/blob/main/SECURITY.md): How to report a security vulnerability.
+- [teambtcmap on GitHub](https://github.com/teambtcmap): All BTC Map repositories — web, API, Android, and others.
