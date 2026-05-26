@@ -493,8 +493,16 @@ const buildFeatureCollectionFor = (
 // Tailwind `text-link` color (tailwind.config.js → colors.link).
 const LINK_COLOR = "#0099AF";
 
-const buildSavedBadgeSvg = (bookmarkSvg: string): string =>
-	`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="#fff" stroke="${LINK_COLOR}" stroke-width="1"/><g transform="translate(3, 3)">${bookmarkSvg}</g></svg>`;
+// Composite saved-badge SVG. Outer SVG is rasterized at 2× its declared
+// dimensions (viewBox stays the same) and registered with pixelRatio: 2
+// so it draws crisp at the same logical 16×16 — same trick as
+// PIN_RENDER_SCALE for the main pin sprite.
+const SAVED_BADGE_SCALE = 2;
+const buildSavedBadgeSvg = (bookmarkSvg: string): string => {
+	const w = 16 * SAVED_BADGE_SCALE;
+	const h = 16 * SAVED_BADGE_SCALE;
+	return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="#fff" stroke="${LINK_COLOR}" stroke-width="1"/><g transform="translate(3, 3)">${bookmarkSvg}</g></svg>`;
+};
 
 // Near-invisible circular hit-target sprite used as the icon for the
 // symbol cluster layer that spiderfy hooks into. We render the visible
@@ -556,7 +564,7 @@ const loadSavedBadgeSprite = async (m: MapLibreMap): Promise<void> => {
 	const composite = buildSavedBadgeSvg(bookmarkSvg);
 	const img = await loadSvgImage(composite);
 	if (!m.hasImage("saved-badge"))
-		m.addImage("saved-badge", img, { pixelRatio: 1 });
+		m.addImage("saved-badge", img, { pixelRatio: SAVED_BADGE_SCALE });
 	m.triggerRepaint();
 };
 
