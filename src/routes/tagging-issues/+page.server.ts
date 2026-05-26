@@ -4,37 +4,21 @@ import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ fetch }) => {
 	try {
-		const response = await fetch(`${API_BASE}/rpc`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				jsonrpc: "2.0",
-				id: 1,
-				method: "get_element_issues",
-				params: {
-					area_id: 662,
-					limit: 10_000,
-					offset: 0,
-				},
-			}),
-		});
+		const response = await fetch(
+			`${API_BASE}/v4/place-issues?area_id=662&limit=10000&offset=0`,
+		);
 
-		const data = await response.json();
-
-		if (data.error) {
-			const errorMessage = data.error.message || "RPC Error";
-			const errorDetails = data.error.data
-				? `: ${JSON.stringify(data.error.data)}`
-				: "";
+		if (!response.ok) {
 			return {
-				error: errorMessage + errorDetails,
+				error: `HTTP Error: ${response.status}`,
 				rpcResult: null,
 			};
 		}
+
+		const data = await response.json();
+
 		return {
-			rpcResult: data.result,
+			result: data,
 		};
 	} catch (err) {
 		return {
