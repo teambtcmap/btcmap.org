@@ -29,7 +29,12 @@ export const spriteName = (icon: string, boosted: boolean): string =>
 // displays. The Iconify fetch URL keeps width=20 height=20 because the
 // inner SVG is positioned in the outer's USER UNITS, so it scales with
 // the outer's rasterization resolution.
-export const PIN_RENDER_SCALE = 2;
+//
+// 3× targets phone-class DPRs (most modern phones report 3, some 4).
+// Higher = sharper on those screens but a larger sprite cache; 3 is a
+// reasonable ceiling — beyond that the perceptual gain stops mattering
+// against the memory cost.
+export const PIN_RENDER_SCALE = 3;
 
 export const fetchIconifyByName = async (
 	iconifyName: string,
