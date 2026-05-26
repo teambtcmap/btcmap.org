@@ -99,18 +99,30 @@ let lastAppliedFilteredPlaces: Place[] | undefined;
 
 const loadCommentBadgeSprite = (m: MapLibreMap): void => {
 	if (m.hasImage("comment-badge-bg")) return;
+	// 2× rasterization for crispness on retina/phone DPRs — see /map's
+	// equivalent for rationale.
+	const SIZE = 16;
+	const SCALE = 2;
 	const canvas = document.createElement("canvas");
-	canvas.width = 16;
-	canvas.height = 16;
+	canvas.width = SIZE * SCALE;
+	canvas.height = SIZE * SCALE;
 	const ctx = canvas.getContext("2d");
 	if (!ctx) return;
 	ctx.fillStyle = "#16A34A";
 	ctx.beginPath();
-	ctx.arc(8, 8, 8, 0, Math.PI * 2);
+	ctx.arc(
+		(SIZE * SCALE) / 2,
+		(SIZE * SCALE) / 2,
+		(SIZE * SCALE) / 2,
+		0,
+		Math.PI * 2,
+	);
 	ctx.fill();
-	m.addImage("comment-badge-bg", ctx.getImageData(0, 0, 16, 16), {
-		pixelRatio: 1,
-	});
+	m.addImage(
+		"comment-badge-bg",
+		ctx.getImageData(0, 0, SIZE * SCALE, SIZE * SCALE),
+		{ pixelRatio: SCALE },
+	);
 };
 
 const buildFeatureCollection = (list: Place[]): PlaceFeatureCollection => ({

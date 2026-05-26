@@ -516,18 +516,32 @@ const loadClusterHitSprite = async (m: MapLibreMap): Promise<void> => {
 // a flat shape.
 const loadCommentBadgeSprite = (m: MapLibreMap): void => {
 	if (m.hasImage("comment-badge-bg")) return;
+	// Draw at 2× the logical 16×16 (= 32×32 backing canvas) and register
+	// with pixelRatio: 2 so MapLibre displays at the same logical size
+	// but reads from a higher-density bitmap — keeps the green disc
+	// crisp on retina/phone DPRs instead of upscaling 16×16 bitmap pixels.
+	const SIZE = 16;
+	const SCALE = 2;
 	const canvas = document.createElement("canvas");
-	canvas.width = 16;
-	canvas.height = 16;
+	canvas.width = SIZE * SCALE;
+	canvas.height = SIZE * SCALE;
 	const ctx = canvas.getContext("2d");
 	if (!ctx) return;
 	ctx.fillStyle = "#16A34A";
 	ctx.beginPath();
-	ctx.arc(8, 8, 8, 0, Math.PI * 2);
+	ctx.arc(
+		(SIZE * SCALE) / 2,
+		(SIZE * SCALE) / 2,
+		(SIZE * SCALE) / 2,
+		0,
+		Math.PI * 2,
+	);
 	ctx.fill();
-	m.addImage("comment-badge-bg", ctx.getImageData(0, 0, 16, 16), {
-		pixelRatio: 1,
-	});
+	m.addImage(
+		"comment-badge-bg",
+		ctx.getImageData(0, 0, SIZE * SCALE, SIZE * SCALE),
+		{ pixelRatio: SCALE },
+	);
 };
 
 const loadSavedBadgeSprite = async (m: MapLibreMap): Promise<void> => {
