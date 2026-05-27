@@ -49,6 +49,7 @@ import {
 	calculateRadiusKmFromLngLatBounds,
 	getZoomBehavior,
 } from "$lib/map/viewport";
+import { loadCachedView, saveCachedView } from "$lib/map/viewportCache";
 import { hasWebGL } from "$lib/map/webgl";
 import {
 	MERCHANT_URL_CHANGE_EVENT,
@@ -780,11 +781,12 @@ onMount(async () => {
 		],
 	};
 
-	// Viewport resolution order: hash → ?lat&long query → IP-geo →
-	// defaults. The hash is what /map writes back on every move; the
-	// query form is preserved for legacy embeds; IP-geo (Netlify
-	// `x-nf-geo` header, populated in +page.server.ts) lands first-time
-	// visitors near their own country instead of the global default.
+	// Viewport resolution order: hash → ?lat&long query → cached last
+	// view → IP-geo → defaults. Hash is what /map writes back on every
+	// move; the query form is for legacy embeds; the localforage cache
+	// puts returning users back where they left off; IP-geo (Netlify
+	// `x-nf-geo` header from +page.server.ts) lands first-time visitors
+	// near their own country instead of the global default.
 	const hashCoords = parseHashCoords();
 	const searchParams = new URLSearchParams(window.location.search);
 	const queryView = hashCoords ? null : parseLatLongQuery(searchParams);
@@ -798,9 +800,13 @@ onMount(async () => {
 	) {
 		errToast(get(_)("errors.mapView"));
 	}
+	const cachedView = hashCoords || queryView ? null : await loadCachedView();
+	// User may have navigated away during the localforage round-trip.
+	if (destroyed) return;
 	const ipGeo =
 		!hashCoords &&
 		!queryView &&
+		!cachedView &&
 		typeof data.geo?.lat === "number" &&
 		typeof data.geo?.lng === "number"
 			? { lat: data.geo.lat, lng: data.geo.lng }
@@ -820,6 +826,9 @@ onMount(async () => {
 			(queryView.sw[0] + queryView.ne[0]) / 2,
 			(queryView.sw[1] + queryView.ne[1]) / 2,
 		];
+	} else if (cachedView) {
+		initialCenter = [cachedView.lng, cachedView.lat];
+		initialZoom = cachedView.zoom;
 	} else if (ipGeo) {
 		initialCenter = [ipGeo.lng, ipGeo.lat];
 	}
@@ -1522,6 +1531,20 @@ onMount(async () => {
 			});
 		};
 		map.on("moveend", persistViewportToHash);
+
+		// Persist viewport to localforage too, debounced so continuous
+		// pan/zoom doesn't hammer IndexedDB. Returning users land back
+		// where they left off when they revisit /map with no hash/query.
+		const persistViewportToCache = debounce(() => {
+			if (!map) return;
+			const center = map.getCenter();
+			saveCachedView({
+				lat: center.lat,
+				lng: center.lng,
+				zoom: map.getZoom(),
+			});
+		}, 1000);
+		map.on("moveend", persistViewportToCache);
 
 		// If the URL also encoded a merchant=… param, open the drawer to it.
 		merchantDrawer.syncFromHash();
