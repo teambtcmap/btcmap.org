@@ -39,8 +39,8 @@ importers:
         specifier: ^4.3.0
         version: 4.3.0
       dompurify:
-        specifier: ^3.4.0
-        version: 3.4.5
+        specifier: ^3.4.6
+        version: 3.4.6
       globals:
         specifier: ^17.4.0
         version: 17.6.0
@@ -161,7 +161,7 @@ importers:
         version: 4.4.8(picomatch@4.0.4)(svelte@4.2.20)(typescript@6.0.3)
       svelte-preprocess:
         specifier: ^6.0.3
-        version: 6.0.4(postcss@8.5.15)(svelte@4.2.20)(typescript@6.0.3)
+        version: 6.0.5(postcss@8.5.15)(svelte@4.2.20)(typescript@6.0.3)
       tailwindcss:
         specifier: ^4.3.0
         version: 4.3.0
@@ -1542,8 +1542,8 @@ packages:
   dijkstrajs@1.0.3:
     resolution: {integrity: sha512-qiSlmBq9+BCdCA/L46dw8Uy93mloxsPSbwnm5yrKn2vMPiy8KyAskTF6zuV/j5BMsmOGZDPs7KjU+mjb670kfA==}
 
-  dompurify@3.4.5:
-    resolution: {integrity: sha512-OrwIBKsdNSVEeubdJ1HBv/wNENRM9ytAVCv7YXt//A3vPdVMNuACRqK9mXCGCBW2ln7BT/A4X0jXHo2Gu89miA==}
+  dompurify@3.4.6:
+    resolution: {integrity: sha512-+7gzEI8trIIQkVCvQ3ucGtNfH3nOmDgVTzc62rAAOlMxLth78pwpPoZCPc7CyRzAQF89MqcfPdEWkDwnjgqktg==}
 
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
@@ -2265,8 +2265,8 @@ packages:
     peerDependencies:
       svelte: '>= 4.2.12'
 
-  svelte-preprocess@6.0.4:
-    resolution: {integrity: sha512-tevT2/vapolduA23Gp3pFr6qkKakh6TYtXKvWXNaZK67ho9sfV9OSRYb4xsZJsXX7QwtEdpiR63Vbae60rS1qg==}
+  svelte-preprocess@6.0.5:
+    resolution: {integrity: sha512-sgwew5yV/2eMeQobIWgAxCNarKwiTUDIc3siAUbq3sp0G6ONtzk0W+wJihMdqjbYb3iGU3ubpGv0usnnuXT3qg==}
     engines: {node: '>= 18.0.0'}
     peerDependencies:
       '@babel/core': ^7.10.2
@@ -3302,7 +3302,7 @@ snapshots:
 
   '@types/dompurify@3.2.0':
     dependencies:
-      dompurify: 3.4.5
+      dompurify: 3.4.6
 
   '@types/estree@1.0.8': {}
 
@@ -3572,7 +3572,7 @@ snapshots:
 
   dijkstrajs@1.0.3: {}
 
-  dompurify@3.4.5:
+  dompurify@3.4.6:
     optionalDependencies:
       '@types/trusted-types': 2.0.7
 
@@ -4382,7 +4382,7 @@ snapshots:
     dependencies:
       svelte: 4.2.20
 
-  svelte-preprocess@6.0.4(postcss@8.5.15)(svelte@4.2.20)(typescript@6.0.3):
+  svelte-preprocess@6.0.5(postcss@8.5.15)(svelte@4.2.20)(typescript@6.0.3):
     dependencies:
       svelte: 4.2.20
     optionalDependencies:
