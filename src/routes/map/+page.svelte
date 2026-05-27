@@ -42,6 +42,7 @@ import {
 	installPlaceholderHandler,
 	loadSvgImage,
 } from "$lib/map/maplibreSprites";
+import { parseLatLongQuery } from "$lib/map/queryViewport";
 import {
 	calculateRadiusKmFromLngLatBounds,
 	getZoomBehavior,
@@ -719,18 +720,37 @@ onMount(async () => {
 		],
 	};
 
-	// If the URL hash already encodes a viewport, restore it; otherwise
-	// fall back to the project defaults.
+	// Viewport resolution order: hash → ?lat&long query → defaults.
+	// The hash is what /map writes back on every move; the query form is
+	// preserved for legacy embeds that link with `?lat=X&long=Y` (single
+	// point) or two pairs (bounds).
 	const hashCoords = parseHashCoords();
+	const queryView = hashCoords
+		? null
+		: parseLatLongQuery(new URLSearchParams(window.location.search));
+
+	let initialCenter: [number, number] = [DEFAULT_MAP_LNG, DEFAULT_MAP_LAT];
+	let initialZoom: number = DEFAULT_MAP_ZOOM;
+	if (hashCoords) {
+		initialCenter = [hashCoords.lng, hashCoords.lat];
+		initialZoom = hashCoords.zoom;
+	} else if (queryView?.kind === "point") {
+		initialCenter = [queryView.lng, queryView.lat];
+	} else if (queryView?.kind === "bounds") {
+		// Seed at midpoint; fitBounds below sets the final zoom once the
+		// container is measured.
+		initialCenter = [
+			(queryView.sw[0] + queryView.ne[0]) / 2,
+			(queryView.sw[1] + queryView.ne[1]) / 2,
+		];
+	}
 
 	map = new maplibre.Map({
 		container: mapContainer,
 		// Minimal inline raster style — OSM tiles. Vector basemaps come in Phase 4.
 		style,
-		center: hashCoords
-			? [hashCoords.lng, hashCoords.lat]
-			: [DEFAULT_MAP_LNG, DEFAULT_MAP_LAT],
-		zoom: hashCoords?.zoom ?? DEFAULT_MAP_ZOOM,
+		center: initialCenter,
+		zoom: initialZoom,
 		bearing: hashCoords?.bearing ?? 0,
 		pitch: hashCoords?.pitch ?? 0,
 		maxZoom: 19,
@@ -740,12 +760,16 @@ onMount(async () => {
 		pitchWithRotate: false,
 	});
 
-	// Seed reactive viewport state from the initial values so the merchant
-	// list panel and community rail read the right values before the
-	// first moveend fires.
-	currentZoom = hashCoords?.zoom ?? DEFAULT_MAP_ZOOM;
-	currentLat = hashCoords?.lat ?? DEFAULT_MAP_LAT;
-	currentLon = hashCoords?.lng ?? DEFAULT_MAP_LNG;
+	if (queryView?.kind === "bounds") {
+		map.fitBounds([queryView.sw, queryView.ne], { animate: false });
+	}
+
+	// Seed reactive viewport state from the resolved initial values so the
+	// merchant list panel and community rail read the right values before
+	// the first moveend fires.
+	currentZoom = initialZoom;
+	currentLat = initialCenter[1];
+	currentLon = initialCenter[0];
 
 	map.addControl(
 		new maplibre.NavigationControl({
