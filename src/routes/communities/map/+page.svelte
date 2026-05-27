@@ -428,7 +428,7 @@ const initializeMap = async () => {
 		zoom: hashCoords?.zoom ?? 3,
 		bearing: hashCoords?.bearing ?? 0,
 		pitch: hashCoords?.pitch ?? 0,
-		maxZoom: 19,
+		maxZoom: 21,
 		dragRotate: true,
 		touchZoomRotate: true,
 		pitchWithRotate: false,

@@ -122,7 +122,7 @@ async function initializeMap() {
 		style: styleUrlForTheme($theme),
 		center: [0, 0],
 		zoom: 2,
-		maxZoom: 19,
+		maxZoom: 21,
 		dragRotate: true,
 		touchZoomRotate: true,
 		pitchWithRotate: false,
