@@ -150,7 +150,6 @@
 		"noMatches": "Geen resultaten in deze categorie"
 	},
 	"mapControls": {
-		"fullScreen": "Schermvullend",
 		"goToHome": "Ga naar de startpagina",
 		"addLocation": "Locatie toevoegen",
 		"communityMap": "Communitykaart",
@@ -158,14 +157,11 @@
 		"account": "Account",
 		"login": "Aanmelden",
 		"dataRefreshAvailable": "Nieuwe gegevens beschikbaar",
-		"support": "Support",
-		"supportWithSats": "Ondersteun met sats",
 		"zoomIn": "Inzoomen",
 		"zoomOut": "Uitzoomen",
 		"basemapTitle": "Achtergrondkaart",
 		"locate": "Laat me zien waar ik ben",
 		"boostAlt": "Boost",
-		"fullScreenAlt": "Schermvullend",
 		"locateAlt": "Laat me zien waar ik ben",
 		"goToHomeAlt": "Ga naar de startpagina",
 		"addLocationAlt": "Locatie toevoegen",
@@ -300,10 +296,7 @@
 	"status": {
 		"loading": "Laden...",
 		"loadingMap": "Kaart laden...",
-		"loadingPlaces": "Locaties laden...",
 		"initializing": "Initialiseren...",
-		"initializingMarkers": "Markeringen initialiseren...",
-		"loadingPlacesInView": "Zichtbare locaties worden geladen...",
 		"downloading": "Locatiegegevens downloaden...",
 		"processing": "Locatiegegevens verwerken...",
 		"complete": "Compleet!",
@@ -364,10 +357,8 @@
 		"formSubmission": "Het verzenden van het formulier is mislukt. Probeer het nog eens of neem contact op met BTC Map.",
 		"locationSearch": "Het zoeken naar locaties is mislukt. Probeer het opnieuw of neem contact op met BTC Map.",
 		"mapView": "Kan de kaartweergave niet instellen op de opgegeven co&ouml;rdinaten, probeer het opnieuw of neem contact op met BTC Map.",
-		"mapViewCachedCoords": "Kan de kaartweergave niet instellen op gecachte co&ouml;rdinaten, probeer het opnieuw of neem contact op met BTC Map.",
 		"merchantDetailsLoadError": "Fout bij het laden van de ondernemergegevens. Probeer het opnieuw.",
-		"boostLoadError": "Laden van boostinformatie mislukt. Probeer het opnieuw.",
-		"fullscreenError": "Fout bij het activeren van de schermvullende weergave: {message} ({name})"
+		"boostLoadError": "Laden van boostinformatie mislukt. Probeer het opnieuw."
 	},
 	"success": {
 		"locationSelected": "Locatie geselecteerd!",

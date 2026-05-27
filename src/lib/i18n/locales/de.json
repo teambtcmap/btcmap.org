@@ -75,20 +75,16 @@
 		"noMatches": "Keine Ergebnisse in dieser Kategorie"
 	},
 	"mapControls": {
-		"fullScreen": "Vollbild",
 		"goToHome": "Zur Startseite gehen",
 		"addLocation": "Ort hinzufügen",
 		"communityMap": "Communitykarte",
 		"merchantMap": "Händlerkarte",
 		"dataRefreshAvailable": "Datenaktualisierung verfügbar",
-		"support": "Unterstützung",
-		"supportWithSats": "Mit Sats unterstützen",
 		"zoomIn": "Vergrößern",
 		"zoomOut": "Verkleinern",
 		"basemapTitle": "Hintergrundkarte",
 		"locate": "Zeige mir meinen Standort",
 		"boostAlt": "Boost",
-		"fullScreenAlt": "Vollbild",
 		"locateAlt": "Zeige mir meinen Standort",
 		"goToHomeAlt": "Zur Startseite gehen",
 		"addLocationAlt": "Ort hinzufügen",
@@ -213,10 +209,7 @@
 	"status": {
 		"loading": "Laden...",
 		"loadingMap": "Karte laden...",
-		"loadingPlaces": "Orte laden...",
 		"initializing": "Initialisieren...",
-		"initializingMarkers": "Marker initialisieren...",
-		"loadingPlacesInView": "Orte im Bereich laden...",
 		"downloading": "Ortsdaten herunterladen...",
 		"processing": "Ortsdaten verarbeiten...",
 		"complete": "Fertig!",
@@ -276,10 +269,8 @@
 		"formSubmission": "Formularübermittlung fehlgeschlagen, bitte versuche es erneut oder kontaktiere BTC Map.",
 		"locationSearch": "Ortssuche fehlgeschlagen, bitte versuche es erneut oder kontaktiere BTC Map.",
 		"mapView": "Kartenansicht konnte nicht auf die angegebenen Koordinaten gesetzt werden, bitte versuche es erneut oder kontaktiere BTC Map.",
-		"mapViewCachedCoords": "Kartenansicht konnte nicht auf zwischengespeicherte Koordinaten gesetzt werden, bitte versuche es erneut oder kontaktiere BTC Map.",
 		"merchantDetailsLoadError": "Fehler beim Laden der Händlerdetails. Bitte versuche es erneut.",
-		"boostLoadError": "Boost-Informationen konnten nicht geladen werden. Bitte versuche es erneut.",
-		"fullscreenError": "Fehler beim Versuch, den Vollbildmodus zu aktivieren: {message} ({name})"
+		"boostLoadError": "Boost-Informationen konnten nicht geladen werden. Bitte versuche es erneut."
 	},
 	"success": {
 		"locationSelected": "Ort ausgewählt!",
