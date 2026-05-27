@@ -49,7 +49,6 @@
 .dark .communities-map-page .maplibregl-popup-content {
 	background-color: #06171c;
 	color: #f3f4f6; /* gray-100 */
-	border: 1px solid rgba(255, 255, 255, 0.08);
 }
 /* MapLibre builds the tip as a CSS triangle: three of the four borders
    are transparent and only the "facing" border is colored to make the
