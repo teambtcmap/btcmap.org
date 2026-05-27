@@ -10,11 +10,13 @@ import { onDestroy, onMount } from "svelte";
 
 import AreaMerchantDrawer from "$components/area/AreaMerchantDrawer.svelte";
 import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
+import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import { CLUSTERING_DISABLED_ZOOM } from "$lib/constants";
 import {
 	ensureSprite,
 	installPlaceholderHandler,
 } from "$lib/map/maplibreSprites";
+import { hasWebGL } from "$lib/map/webgl";
 import { theme } from "$lib/theme";
 import type { SavedPlace } from "$lib/types";
 
@@ -270,6 +272,7 @@ const styleUrlForTheme = (t: "light" | "dark" | undefined): string =>
 let initialRenderComplete = false;
 let dataInitialized = false;
 let destroyed = false;
+let webglUnsupported = false;
 
 onMount(() => {
 	if (browser) {
@@ -287,6 +290,10 @@ const initializeMap = async () => {
 	if (dataInitialized) return;
 	dataInitialized = true;
 
+	if (!hasWebGL()) {
+		webglUnsupported = true;
+		return;
+	}
 	const maplibre = await import("maplibre-gl");
 	// Component may have been destroyed while the dynamic import was in
 	// flight (fast navigation away). Bail before binding to a stale
@@ -381,7 +388,9 @@ $: if (map && styleLoaded) {
 				bind:this={mapContainer}
 				class="z-10 h-[300px] rounded-3xl border border-gray-300 !bg-teal text-left md:h-[500px] dark:border-white/95 dark:!bg-[#202f33]"
 			/>
-			{#if !mapLoaded}
+			{#if webglUnsupported}
+				<MapUnsupportedFallback />
+			{:else if !mapLoaded}
 				<MapLoadingEmbed
 					style="h-[300px] md:h-[500px] rounded-3xl border border-gray-300 dark:border-white/95"
 				/>

@@ -17,9 +17,11 @@ import Icon from "$components/Icon.svelte";
 import InfoTooltip from "$components/InfoTooltip.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
+import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
 import { _, locale } from "$lib/i18n";
+import { hasWebGL } from "$lib/map/webgl";
 import { theme } from "$lib/theme";
 import { errToast, isValidLatitude, isValidLongitude } from "$lib/utils";
 
@@ -105,6 +107,10 @@ async function initializeMap() {
 	marker = undefined;
 	mapLoaded = false;
 
+	if (!hasWebGL()) {
+		webglUnsupported = true;
+		return;
+	}
 	const maplibre = await import("maplibre-gl");
 	maplibreRef = maplibre;
 	if (destroyed) return;
@@ -336,6 +342,7 @@ const submitForm = (event: SubmitEvent) => {
 let mapElement: HTMLDivElement;
 let map: MapLibreMap | undefined;
 let mapLoaded = false;
+let webglUnsupported = false;
 let destroyed = false;
 let lastAppliedTheme: "light" | "dark" | undefined;
 
@@ -457,7 +464,9 @@ $: if (map && mapLoaded) {
 								bind:this={mapElement}
 								class="z-10 h-[300px] !cursor-crosshair rounded-2xl border-2 border-input !bg-teal md:h-[400px] dark:!bg-dark"
 							/>
-							{#if !mapLoaded}
+							{#if webglUnsupported}
+								<MapUnsupportedFallback />
+							{:else if !mapLoaded}
 								<MapLoadingEmbed style="h-[300px] md:h-[400px] border-2 border-input rounded-2xl" />
 							{/if}
 						</div>

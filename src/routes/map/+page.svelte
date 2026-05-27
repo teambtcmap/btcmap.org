@@ -18,6 +18,7 @@ import { get } from "svelte/store";
 
 import CommunityRail from "$components/CommunityRail.svelte";
 import MapLoadingMain from "$components/MapLoadingMain.svelte";
+import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import { trackEvent } from "$lib/analytics";
 import {
 	CLUSTERING_DISABLED_ZOOM,
@@ -47,6 +48,7 @@ import {
 	calculateRadiusKmFromLngLatBounds,
 	getZoomBehavior,
 } from "$lib/map/viewport";
+import { hasWebGL } from "$lib/map/webgl";
 import {
 	MERCHANT_URL_CHANGE_EVENT,
 	parseMerchantHash,
@@ -101,6 +103,7 @@ let map: MapLibreMap | undefined;
 let destroyed = false;
 let spiderfier: Spiderfy | undefined;
 let styleLoaded = false;
+let webglUnsupported = false;
 let lastPlacesLength = -1;
 let lastSavedIdsSize = -1;
 let lastEnrichedCacheSize = -1;
@@ -635,6 +638,13 @@ $: if (map && styleLoaded && $places) {
 }
 
 onMount(async () => {
+	// WebGL absence (older Android WebViews, hardened browsers, disabled
+	// GPU) would leave the map blank if we tried to instantiate MapLibre.
+	// Surface a static fallback instead.
+	if (!hasWebGL()) {
+		webglUnsupported = true;
+		return;
+	}
 	const maplibre = await import("maplibre-gl");
 	// User may have navigated away while the dynamic import was in
 	// flight; bail before instantiating against an unmounted container.
@@ -1533,6 +1543,10 @@ onDestroy(() => {
 
 <div bind:this={mapContainer} class="map-container"></div>
 
+{#if webglUnsupported}
+	<MapUnsupportedFallback />
+{/if}
+
 <MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
 
 <!--
@@ -1589,7 +1603,7 @@ onDestroy(() => {
 	/>
 {/if}
 
-<TileLoadingIndicator visible={tilesLoading} />
+<TileLoadingIndicator visible={tilesLoading && !webglUnsupported} />
 
 <MerchantDrawerHash />
 

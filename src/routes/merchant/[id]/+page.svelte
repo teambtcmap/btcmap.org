@@ -14,6 +14,7 @@ import Card from "$components/Card.svelte";
 import CompanionAppPill from "$components/CompanionAppPill.svelte";
 import Icon from "$components/Icon.svelte";
 import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
+import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import PaymentMethodPills from "$components/PaymentMethodPills.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import SaveButton from "$components/SaveButton.svelte";
@@ -26,6 +27,7 @@ import {
 	ensureSprite,
 	installPlaceholderHandler,
 } from "$lib/map/maplibreSprites";
+import { hasWebGL } from "$lib/map/webgl";
 import { placesById, showTags, taggingIssues } from "$lib/store";
 import { theme } from "$lib/theme";
 import type {
@@ -256,6 +258,10 @@ const initializeMap = async () => {
 	if (dataInitialized) return;
 	dataInitialized = true;
 
+	if (!hasWebGL()) {
+		webglUnsupported = true;
+		return;
+	}
 	const maplibre = await import("maplibre-gl");
 	if (destroyed) return;
 
@@ -400,6 +406,7 @@ $: eventsPaginated = merchantEvents.slice(0, eventCount);
 let mapElement: HTMLDivElement;
 let map: MapLibreMap | undefined;
 let mapLoaded = false;
+let webglUnsupported = false;
 
 onMount(async () => {
 	if (browser) {
@@ -821,7 +828,9 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 						bind:this={mapElement}
 						class="z-10 h-[300px] rounded-b-3xl !bg-teal text-left md:h-[600px] dark:!bg-[#202f33]"
 					/>
-					{#if !mapLoaded}
+					{#if webglUnsupported}
+						<MapUnsupportedFallback />
+					{:else if !mapLoaded}
 						<MapLoadingEmbed style="h-[300px] md:h-[600px]  rounded-b-3xl" />
 					{/if}
 				</div>

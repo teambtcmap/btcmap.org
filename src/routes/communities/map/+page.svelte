@@ -20,10 +20,12 @@ import { onDestroy, onMount } from "svelte";
 import { get } from "svelte/store";
 
 import MapLoadingMain from "$components/MapLoadingMain.svelte";
+import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import Socials from "$components/Socials.svelte";
 import { _ } from "$lib/i18n";
 import { BASEMAPS, type BasemapId, getStoredBasemap } from "$lib/map/basemaps";
 import { parseHashCoords, writeHashCoords } from "$lib/map/mapHash";
+import { hasWebGL } from "$lib/map/webgl";
 import { areaError, areas, reportError, reports } from "$lib/store";
 import { areasSync } from "$lib/sync/areas";
 import { batchSync } from "$lib/sync/batchSync";
@@ -43,6 +45,7 @@ let mapLoading = 0;
 let mapElement: HTMLDivElement;
 let map: MapLibreMap | undefined;
 let mapLoaded = false;
+let webglUnsupported = false;
 let communitiesLoaded = false;
 let destroyed = false;
 
@@ -336,6 +339,10 @@ $: if ($areas?.length && $reports?.length && mapLoaded && !communitiesLoaded) {
 }
 
 const initializeMap = async () => {
+	if (!hasWebGL()) {
+		webglUnsupported = true;
+		return;
+	}
 	const maplibre = await import("maplibre-gl");
 	if (destroyed) return;
 
@@ -535,4 +542,8 @@ onDestroy(() => {
 	     the override. Leaflet used to mask this entirely by sizing its
 	     own container; MapLibre respects the DOM box. -->
 	<div bind:this={mapElement} class="!absolute inset-0 !bg-teal dark:!bg-dark" />
+
+	{#if webglUnsupported}
+		<MapUnsupportedFallback />
+	{/if}
 </div>
