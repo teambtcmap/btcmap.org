@@ -665,8 +665,14 @@ onMount(async () => {
 	const initialBasemap: BasemapId =
 		getStoredBasemap() ?? (get(theme) === "dark" ? "carto-dark" : "osm");
 
-	const OSM_ATTR =
-		'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+	// Append the "Support BTC Map" link to every basemap's attribution
+	// string. Legacy /map injected this via DOM mutation; doing it
+	// inline in the style spec means MapLibre's default
+	// AttributionControl picks it up automatically without us touching
+	// the DOM after init.
+	const SUPPORT_ATTR =
+		'&copy; <a href="/supporters" title="Support BTC Map with sats">Support BTC Map</a>';
+	const OSM_ATTR = `&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors ${SUPPORT_ATTR}`;
 	const CARTO_ATTR = `${OSM_ATTR} &copy; <a href="https://carto.com/attributions">CARTO</a>`;
 
 	const style: StyleSpecification = {
