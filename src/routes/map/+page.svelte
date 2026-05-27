@@ -20,6 +20,7 @@ import CommunityRail from "$components/CommunityRail.svelte";
 import MapLoadingMain from "$components/MapLoadingMain.svelte";
 import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import { trackEvent } from "$lib/analytics";
+import { filterMerchantsByCategory } from "$lib/categoryMapping";
 import {
 	CLUSTERING_DISABLED_ZOOM,
 	DEFAULT_MAP_LAT,
@@ -635,14 +636,24 @@ const triggerEnrichmentIfNeeded = debounce(() => {
 $: if (map && styleLoaded && $places) {
 	const inSearch =
 		$merchantList.mode === "search" && $merchantList.searchResults.length > 0;
-	const effective = inSearch ? $merchantList.searchResults : $places;
+	const category = $merchantList.selectedCategory;
+	let effective: Place[];
+	if (inSearch) {
+		effective = $merchantList.searchResults;
+	} else if (category !== "all") {
+		effective = filterMerchantsByCategory($places, category);
+	} else {
+		effective = $places;
+	}
 	const placesLen = effective.length;
 	const savedSize = $savedPlaceIds.size;
 	const cacheSize = $merchantList.placeDetailsCache.size;
 	const currentLocale = $locale;
 	const searchSig = inSearch
 		? `s:${$merchantList.searchResults.map((p) => p.id).join(",")}`
-		: "n";
+		: category !== "all"
+			? `c:${category}`
+			: "n";
 	if (
 		placesLen !== lastPlacesLength ||
 		savedSize !== lastSavedIdsSize ||
