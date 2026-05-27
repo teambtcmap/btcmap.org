@@ -803,6 +803,11 @@ onMount(async () => {
 	);
 	map.addControl(new maplibre.GlobeControl(), "top-right");
 
+	// Bottom-left scale bar — present in legacy /map (Leaflet's
+	// L.control.scale). Metric units only; imperial is added by the
+	// browser locale via MapLibre's bilingual variant if needed later.
+	map.addControl(new maplibre.ScaleControl({ unit: "metric" }), "bottom-left");
+
 	// Geolocate control: pulse dot, accuracy circle, and heading arrow are
 	// built in. Heading uses the device's compass when available, falling
 	// back to GPS movement. fitBoundsOptions.linear routes the camera move
