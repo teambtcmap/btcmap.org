@@ -1,5 +1,6 @@
 <script lang="ts">
 import "maplibre-gl/dist/maplibre-gl.css";
+import "./communities-map.css";
 
 import rewind from "@mapbox/geojson-rewind";
 import { geoArea } from "d3-geo";
@@ -531,7 +532,7 @@ onDestroy(() => {
 	<meta name="twitter:image" content="https://btcmap.org/images/og/communities.png" />
 </svelte:head>
 
-<div>
+<div class="communities-map-page">
 	<h1 class="hidden">{$_('communityMap.pageTitle')}</h1>
 
 	<MapLoadingMain progress={mapLoading} />
