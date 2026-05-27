@@ -58,6 +58,7 @@ import type { MerchantListMode } from "$lib/merchantListStore";
 import { merchantList } from "$lib/merchantListStore";
 import { savedPlaceIds } from "$lib/session";
 import {
+	lastUpdatedPlaceId,
 	places,
 	placesById,
 	placesError,
@@ -643,6 +644,17 @@ $: if (map && styleLoaded && $places) {
 		lastLocale = currentLocale;
 		syncPlacesToSource($places);
 	}
+}
+
+// In-place mutations to a place (boost confirmation, new comment count)
+// don't change array length or any of the size counters above, so the
+// guard wouldn't repaint the pin. lastUpdatedPlaceId is set by
+// updateSinglePlace() in $lib/sync/places.ts — re-sync the source when
+// it fires, then clear so we don't re-sync next time anything else
+// triggers this reactive block.
+$: if (map && styleLoaded && $lastUpdatedPlaceId) {
+	syncPlacesToSource($places);
+	lastUpdatedPlaceId.set(undefined);
 }
 
 onMount(async () => {
