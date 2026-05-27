@@ -32,11 +32,6 @@
 			"biome check --write --no-errors-on-unmatched"
 		]
 	},
-	"pnpm": {
-		"onlyBuiltDependencies": [
-			"esbuild"
-		]
-	},
 	"dependencies": {
 		"@mapbox/geojson-rewind": "^0.5.2",
 		"@maplibre/maplibre-gl-leaflet": "^0.1.3",
