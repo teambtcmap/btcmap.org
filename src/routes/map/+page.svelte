@@ -60,6 +60,7 @@ import { savedPlaceIds } from "$lib/session";
 import {
 	places,
 	placesById,
+	placesError,
 	placesLoadingProgress,
 	placesLoadingStatus,
 } from "$lib/store";
@@ -203,6 +204,10 @@ $: {
 		mapLoadingStatus = "";
 	}
 }
+
+// Surface places-sync failures (network outage, parse error) so the user
+// doesn't stare at an empty map wondering what happened.
+$: if ($placesError) errToast($placesError);
 
 // Latest in-flight search request; aborted when a new query supersedes
 // it or the component unmounts.
