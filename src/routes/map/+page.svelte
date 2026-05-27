@@ -764,6 +764,10 @@ onMount(async () => {
 		bearing: hashCoords?.bearing ?? 0,
 		pitch: hashCoords?.pitch ?? 0,
 		maxZoom: 21,
+		// Match legacy Leaflet `noWrap: true` — stop the map from
+		// repeating horizontally when zoomed out, so the user can't pan
+		// past the antimeridian into a duplicate copy of the world.
+		renderWorldCopies: false,
 		// Rotation + pitch enabled — the whole point of the migration
 		dragRotate: true,
 		touchZoomRotate: true,
