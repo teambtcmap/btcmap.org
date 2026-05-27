@@ -5,6 +5,7 @@ import type {
 } from "maplibre-gl";
 import { get } from "svelte/store";
 
+import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import {
 	BASEMAP_STORAGE_KEY,
@@ -163,6 +164,7 @@ export class BasemapsControl implements IControl {
 		} catch {
 			// localStorage unavailable; skip persistence
 		}
+		trackEvent("layer_change", { layer: id });
 		this.#close();
 	}
 

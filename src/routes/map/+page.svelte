@@ -872,6 +872,17 @@ onMount(async () => {
 	});
 	map.addControl(geolocate, "top-right");
 
+	// Built-in MapLibre controls (zoom +/-, locate) expose their actions
+	// through native button clicks, not through event APIs we can subscribe
+	// to from JS. Wire the analytics events legacy /map had by attaching
+	// DOM listeners now that the buttons exist in the container.
+	mapContainer
+		.querySelector(".maplibregl-ctrl-zoom-out")
+		?.addEventListener("click", () => trackEvent("zoom_out_click"));
+	mapContainer
+		.querySelector(".maplibregl-ctrl-geolocate")
+		?.addEventListener("click", () => trackEvent("locate_click"));
+
 	// Right-side action buttons — mirror /map's stack order:
 	// nav links (home / add / community / account) → boost toggle →
 	// data-refresh (hidden until fresh sync arrives).
