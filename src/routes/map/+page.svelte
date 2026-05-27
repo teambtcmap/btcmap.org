@@ -738,14 +738,22 @@ onMount(async () => {
 		],
 	};
 
-	// Viewport resolution order: hash → ?lat&long query → defaults.
-	// The hash is what /map writes back on every move; the query form is
-	// preserved for legacy embeds that link with `?lat=X&long=Y` (single
-	// point) or two pairs (bounds).
+	// Viewport resolution order: hash → ?lat&long query → IP-geo →
+	// defaults. The hash is what /map writes back on every move; the
+	// query form is preserved for legacy embeds; IP-geo (Netlify
+	// `x-nf-geo` header, populated in +page.server.ts) lands first-time
+	// visitors near their own country instead of the global default.
 	const hashCoords = parseHashCoords();
 	const queryView = hashCoords
 		? null
 		: parseLatLongQuery(new URLSearchParams(window.location.search));
+	const ipGeo =
+		!hashCoords &&
+		!queryView &&
+		typeof data.geo?.lat === "number" &&
+		typeof data.geo?.lng === "number"
+			? { lat: data.geo.lat, lng: data.geo.lng }
+			: null;
 
 	let initialCenter: [number, number] = [DEFAULT_MAP_LNG, DEFAULT_MAP_LAT];
 	let initialZoom: number = DEFAULT_MAP_ZOOM;
@@ -761,6 +769,8 @@ onMount(async () => {
 			(queryView.sw[0] + queryView.ne[0]) / 2,
 			(queryView.sw[1] + queryView.ne[1]) / 2,
 		];
+	} else if (ipGeo) {
+		initialCenter = [ipGeo.lng, ipGeo.lat];
 	}
 
 	map = new maplibre.Map({
