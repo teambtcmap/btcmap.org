@@ -150,7 +150,6 @@
 		"noMatches": "No results in this category"
 	},
 	"mapControls": {
-		"fullScreen": "Full screen",
 		"goToHome": "Go to home page",
 		"addLocation": "Add location",
 		"communityMap": "Community map",
@@ -158,13 +157,11 @@
 		"account": "Account",
 		"login": "Log in",
 		"dataRefreshAvailable": "Data refresh available",
-		"support": "Support",
-		"supportWithSats": "Support with sats",
 		"zoomIn": "Zoom in",
 		"zoomOut": "Zoom out",
+		"basemapTitle": "Basemap",
 		"locate": "Show me where I am",
 		"boostAlt": "Boost",
-		"fullScreenAlt": "Full screen",
 		"locateAlt": "Show me where I am",
 		"goToHomeAlt": "Go to home page",
 		"addLocationAlt": "Add location",
@@ -299,10 +296,7 @@
 	"status": {
 		"loading": "Loading...",
 		"loadingMap": "Loading map...",
-		"loadingPlaces": "Loading places...",
 		"initializing": "Initializing...",
-		"initializingMarkers": "Initializing markers...",
-		"loadingPlacesInView": "Loading places in view...",
 		"downloading": "Downloading places data...",
 		"processing": "Processing places data...",
 		"complete": "Complete!",
@@ -363,10 +357,8 @@
 		"formSubmission": "Form submission failed, please try again or contact BTC Map.",
 		"locationSearch": "Could not search for locations, please try again or contact BTC Map.",
 		"mapView": "Could not set map view to provided coordinates, please try again or contact BTC Map.",
-		"mapViewCachedCoords": "Could not set map view to cached coords, please try again or contact BTC Map.",
 		"merchantDetailsLoadError": "Error loading merchant details. Please try again.",
-		"boostLoadError": "Failed to load boost information. Please try again.",
-		"fullscreenError": "Error attempting to enable fullscreen mode: {message} ({name})"
+		"boostLoadError": "Failed to load boost information. Please try again."
 	},
 	"success": {
 		"locationSelected": "Location selected!",

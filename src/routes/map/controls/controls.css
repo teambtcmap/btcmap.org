@@ -1,0 +1,114 @@
+/*
+ * Shared styles for the custom MapLibre IControls in this directory
+ * (BasemapsControl, NavButtonsControl, BoostToggleControl,
+ * DataRefreshControl). Imported by each control's TS module so any page
+ * that mounts the controls — currently /map and /communities/map — gets
+ * the popup positioning, dark-mode treatment, and anchor button styles.
+ *
+ * Lives outside any component's <style> block on purpose: Svelte's
+ * scoped CSS doesn't reach DOM nodes created at runtime by the IControl
+ * classes.
+ */
+
+/* Basemap picker — IControl that owns its own container; the popup is
+   absolutely positioned relative to it. Hover-or-click the icon to
+   expand the radio list. */
+.maplibre-next-basemaps {
+	position: relative;
+}
+.maplibre-next-basemaps-popup {
+	position: absolute;
+	top: 0;
+	right: calc(100% + 6px);
+	background: white;
+	color: #111827; /* gray-900 */
+	border-radius: 4px;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+	padding: 4px 0;
+	min-width: 140px;
+	font-size: 13px;
+}
+.dark .maplibre-next-basemaps-popup {
+	background: #1f2937; /* gray-800 */
+	color: #f3f4f6; /* gray-100 */
+}
+.maplibre-next-basemaps-option {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 10px;
+	cursor: pointer;
+}
+.maplibre-next-basemaps-option:hover {
+	background: rgba(0, 0, 0, 0.05);
+}
+.dark .maplibre-next-basemaps-option:hover {
+	background: rgba(255, 255, 255, 0.08);
+}
+.maplibre-next-basemaps-option input {
+	margin: 0;
+}
+
+/* Anchor-based buttons inside the custom IControls (NavButtons / Boost /
+   DataRefresh). MapLibre's default `.maplibregl-ctrl-group button` rules
+   don't apply to <a> elements, so we replicate the dimensions, hover and
+   focus states here. */
+.maplibregl-ctrl-group a.maplibregl-ctrl-link {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 29px;
+	height: 29px;
+	box-sizing: border-box;
+	background-color: transparent;
+	cursor: pointer;
+	text-decoration: none;
+}
+.maplibregl-ctrl-group a.maplibregl-ctrl-link + a.maplibregl-ctrl-link,
+.maplibregl-ctrl-group button + a.maplibregl-ctrl-link,
+.maplibregl-ctrl-group a.maplibregl-ctrl-link + button {
+	border-top: 1px solid #ddd;
+}
+.maplibregl-ctrl-group a.maplibregl-ctrl-link:hover {
+	background-color: rgba(0, 0, 0, 0.05);
+}
+.maplibregl-ctrl-group a.maplibregl-ctrl-link:focus-visible {
+	box-shadow: 0 0 2px 2px #0096ff;
+}
+.maplibregl-ctrl-group a.maplibregl-ctrl-link img {
+	display: block;
+	width: 16px;
+	height: 16px;
+}
+
+/* Dark-mode treatment for the rounded "pill" that holds zoom / locate /
+   nav / boost / data-refresh / basemap controls. MapLibre's stock CSS
+   hardcodes a white background, so against a dark basemap the controls
+   read as glaring white blocks. Invert the pill and its icons so the
+   buttons sit on a dark surface with light icons, matching the rest of
+   the app's dark mode. */
+.dark .maplibregl-ctrl-group {
+	background-color: #1f2937; /* gray-800, same as basemap popup */
+}
+.dark .maplibregl-ctrl-group button:not(:disabled):hover,
+.dark .maplibregl-ctrl-group a.maplibregl-ctrl-link:hover {
+	background-color: rgba(255, 255, 255, 0.08);
+}
+.dark .maplibregl-ctrl-group button + button,
+.dark .maplibregl-ctrl-group a.maplibregl-ctrl-link + a.maplibregl-ctrl-link,
+.dark .maplibregl-ctrl-group button + a.maplibregl-ctrl-link,
+.dark .maplibregl-ctrl-group a.maplibregl-ctrl-link + button {
+	border-top-color: rgba(255, 255, 255, 0.1);
+}
+/* MapLibre's built-in controls embed dark-gray SVG glyphs as
+   background-image on a child <span class="maplibregl-ctrl-icon">; our
+   NavButtons / Boost / DataRefresh controls render plain <img> icons;
+   the BasemapsControl renders an inline <svg stroke="currentColor">.
+   Invert all three — the icons are single-color silhouettes, so a
+   straight invert(1) reads as a clean light-on-dark version of the
+   same glyph. */
+.dark .maplibregl-ctrl-group button .maplibregl-ctrl-icon,
+.dark .maplibregl-ctrl-group a.maplibregl-ctrl-link img,
+.dark .maplibregl-ctrl-group a.maplibregl-ctrl-link svg {
+	filter: invert(1);
+}

@@ -1,13 +1,18 @@
+import type { LngLatBounds } from "maplibre-gl";
 import { describe, expect, it } from "vitest";
 
-import type { Place } from "$lib/types";
+import { calculateRadiusKmFromLngLatBounds, getZoomBehavior } from "./viewport";
 
-import {
-	calculateRadiusKm,
-	getBufferedBounds,
-	getVisiblePlaces,
-	getZoomBehavior,
-} from "./viewport";
+// Minimal stub matching the two methods calculateRadiusKmFromLngLatBounds
+// reads off LngLatBounds. Cheaper than instantiating MapLibre's real class.
+const stubBounds = (
+	center: { lat: number; lng: number },
+	ne: { lat: number; lng: number },
+) =>
+	({
+		getCenter: () => center,
+		getNorthEast: () => ne,
+	}) as unknown as LngLatBounds;
 
 describe("getZoomBehavior", () => {
 	it('returns "none" for zoom levels below 11', () => {
@@ -31,225 +36,33 @@ describe("getZoomBehavior", () => {
 	});
 });
 
-describe("calculateRadiusKm", () => {
-	// Mock LatLngBounds object
-	const createMockBounds = (
-		centerLat: number,
-		centerLng: number,
-		northEastLat: number,
-		northEastLng: number,
-	) => ({
-		getCenter: () => ({ lat: centerLat, lng: centerLng }),
-		getNorthEast: () => ({ lat: northEastLat, lng: northEastLng }),
-	});
-
-	it("calculates radius for a small area", () => {
-		// Small area around a point (approx 1km span)
-		const bounds = createMockBounds(51.5, -0.1, 51.505, -0.095);
-		const radius = calculateRadiusKm(
-			bounds as Parameters<typeof calculateRadiusKm>[0],
+describe("calculateRadiusKmFromLngLatBounds", () => {
+	it("returns a positive radius for a standard mid-latitude box", () => {
+		// NYC area: center 40°N -74°W, NE corner 41°N -73°W. The corner is
+		// roughly 140km from center; we assert in a wide band instead of
+		// pinning exact math.
+		const r = calculateRadiusKmFromLngLatBounds(
+			stubBounds({ lat: 40, lng: -74 }, { lat: 41, lng: -73 }),
 		);
-
-		// Should be a small radius (less than 1km)
-		expect(radius).toBeGreaterThan(0);
-		expect(radius).toBeLessThan(2);
+		expect(r).toBeGreaterThan(100);
+		expect(r).toBeLessThan(160);
 	});
 
-	it("calculates radius for a larger area", () => {
-		// Larger area (approx 10km span)
-		const bounds = createMockBounds(51.5, -0.1, 51.55, -0.05);
-		const radius = calculateRadiusKm(
-			bounds as Parameters<typeof calculateRadiusKm>[0],
+	it("returns near-zero for a degenerate bounds (center == ne)", () => {
+		const r = calculateRadiusKmFromLngLatBounds(
+			stubBounds({ lat: 0, lng: 0 }, { lat: 0, lng: 0 }),
 		);
-
-		// Should be a larger radius
-		expect(radius).toBeGreaterThan(3);
-		expect(radius).toBeLessThan(10);
+		expect(r).toBe(0);
 	});
 
-	it("includes 10% buffer in the calculation", () => {
-		// The function multiplies by 1.1 for a buffer
-		const bounds = createMockBounds(0, 0, 1, 1);
-		const radius = calculateRadiusKm(
-			bounds as Parameters<typeof calculateRadiusKm>[0],
+	it("handles antimeridian-crossing bounds without inflating radius", () => {
+		// Fiji-ish: center 179°E, NE corner -179°E. Naive `ne.lng - center.lng`
+		// is -358° → enormous radius. Normalized to +2°, the corner is ~220km
+		// away at the equator.
+		const r = calculateRadiusKmFromLngLatBounds(
+			stubBounds({ lat: 0, lng: 179 }, { lat: 1, lng: -179 }),
 		);
-
-		// Without buffer would be ~157km, with 10% buffer should be ~173km
-		expect(radius).toBeGreaterThan(170);
-		expect(radius).toBeLessThan(180);
-	});
-
-	it("handles equator coordinates", () => {
-		const bounds = createMockBounds(0, 0, 0.01, 0.01);
-		const radius = calculateRadiusKm(
-			bounds as Parameters<typeof calculateRadiusKm>[0],
-		);
-
-		// Should return a positive radius
-		expect(radius).toBeGreaterThan(0);
-	});
-
-	it("handles high latitude coordinates", () => {
-		// Near the poles (high latitude)
-		const bounds = createMockBounds(70, 10, 70.01, 10.01);
-		const radius = calculateRadiusKm(
-			bounds as Parameters<typeof calculateRadiusKm>[0],
-		);
-
-		// Should still return a positive radius
-		expect(radius).toBeGreaterThan(0);
-	});
-});
-
-describe("getBufferedBounds", () => {
-	// Mock leaflet with latLngBounds factory
-	const createMockLeaflet = () => ({
-		latLngBounds: (coords: [[number, number], [number, number]]) => ({
-			_southWest: { lat: coords[0][0], lng: coords[0][1] },
-			_northEast: { lat: coords[1][0], lng: coords[1][1] },
-			getSouth: () => coords[0][0],
-			getWest: () => coords[0][1],
-			getNorth: () => coords[1][0],
-			getEast: () => coords[1][1],
-			contains: (point: [number, number]) => {
-				const [lat, lng] = point;
-				return (
-					lat >= coords[0][0] &&
-					lat <= coords[1][0] &&
-					lng >= coords[0][1] &&
-					lng <= coords[1][1]
-				);
-			},
-		}),
-	});
-
-	const createMockBounds = (
-		south: number,
-		west: number,
-		north: number,
-		east: number,
-	) => ({
-		getSouth: () => south,
-		getWest: () => west,
-		getNorth: () => north,
-		getEast: () => east,
-	});
-
-	it("expands bounds by buffer percentage", () => {
-		const leaflet = createMockLeaflet();
-		const bounds = createMockBounds(10, 20, 12, 22); // 2x2 degree box
-
-		const buffered = getBufferedBounds(
-			leaflet as unknown as Parameters<typeof getBufferedBounds>[0],
-			bounds as unknown as Parameters<typeof getBufferedBounds>[1],
-			0.2, // 20% buffer
-		);
-
-		// Original span is 2 degrees, 20% buffer = 0.4 degrees on each side
-		expect(buffered.getSouth()).toBe(9.6); // 10 - 0.4
-		expect(buffered.getNorth()).toBe(12.4); // 12 + 0.4
-		expect(buffered.getWest()).toBe(19.6); // 20 - 0.4
-		expect(buffered.getEast()).toBe(22.4); // 22 + 0.4
-	});
-
-	it("handles zero buffer", () => {
-		const leaflet = createMockLeaflet();
-		const bounds = createMockBounds(10, 20, 12, 22);
-
-		const buffered = getBufferedBounds(
-			leaflet as unknown as Parameters<typeof getBufferedBounds>[0],
-			bounds as unknown as Parameters<typeof getBufferedBounds>[1],
-			0,
-		);
-
-		expect(buffered.getSouth()).toBe(10);
-		expect(buffered.getNorth()).toBe(12);
-	});
-});
-
-describe("getVisiblePlaces", () => {
-	const createMockLeaflet = () => ({
-		latLngBounds: (coords: [[number, number], [number, number]]) => ({
-			contains: (point: [number, number]) => {
-				const [lat, lng] = point;
-				return (
-					lat >= coords[0][0] &&
-					lat <= coords[1][0] &&
-					lng >= coords[0][1] &&
-					lng <= coords[1][1]
-				);
-			},
-		}),
-	});
-
-	const createMockBounds = (
-		south: number,
-		west: number,
-		north: number,
-		east: number,
-	) => ({
-		getSouth: () => south,
-		getWest: () => west,
-		getNorth: () => north,
-		getEast: () => east,
-	});
-
-	const createMockPlace = (id: number, lat: number, lon: number): Place =>
-		({
-			id,
-			lat,
-			lon,
-		}) as Place;
-
-	it("filters places within bounds", () => {
-		const leaflet = createMockLeaflet();
-		const bounds = createMockBounds(10, 20, 12, 22);
-		const places = [
-			createMockPlace(1, 11, 21), // inside
-			createMockPlace(2, 15, 25), // outside
-			createMockPlace(3, 10.5, 20.5), // inside
-		];
-
-		const visible = getVisiblePlaces(
-			leaflet as unknown as Parameters<typeof getVisiblePlaces>[0],
-			places,
-			bounds as unknown as Parameters<typeof getVisiblePlaces>[2],
-			0, // no buffer for simplicity
-		);
-
-		expect(visible).toHaveLength(2);
-		expect(visible.map((p) => p.id)).toEqual([1, 3]);
-	});
-
-	it("returns empty array for empty places", () => {
-		const leaflet = createMockLeaflet();
-		const bounds = createMockBounds(10, 20, 12, 22);
-
-		const visible = getVisiblePlaces(
-			leaflet as unknown as Parameters<typeof getVisiblePlaces>[0],
-			[],
-			bounds as unknown as Parameters<typeof getVisiblePlaces>[2],
-			0,
-		);
-
-		expect(visible).toHaveLength(0);
-	});
-
-	it("applies buffer to include places slightly outside viewport", () => {
-		const leaflet = createMockLeaflet();
-		const bounds = createMockBounds(10, 20, 12, 22); // 2x2 degree box
-		const places = [
-			createMockPlace(1, 11, 21), // inside original
-			createMockPlace(2, 9.8, 21), // outside original, inside with 20% buffer (0.4 deg)
-		];
-
-		const visible = getVisiblePlaces(
-			leaflet as unknown as Parameters<typeof getVisiblePlaces>[0],
-			places,
-			bounds as unknown as Parameters<typeof getVisiblePlaces>[2],
-			0.2, // 20% buffer
-		);
-
-		expect(visible).toHaveLength(2);
+		expect(r).toBeGreaterThan(150);
+		expect(r).toBeLessThan(300);
 	});
 });

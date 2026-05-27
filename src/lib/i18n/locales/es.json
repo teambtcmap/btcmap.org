@@ -75,19 +75,16 @@
 		"noMatches": "Sin resultados en esta categoría"
 	},
 	"mapControls": {
-		"fullScreen": "Pantalla completa",
 		"goToHome": "Ir a la página de inicio",
 		"addLocation": "Agregar ubicación",
 		"communityMap": "Mapa de comunidades",
 		"merchantMap": "Mapa de comercios",
 		"dataRefreshAvailable": "Actualización de datos disponible",
-		"support": "Apoyar",
-		"supportWithSats": "Apoyar con sats",
 		"zoomIn": "Acercar",
 		"zoomOut": "Alejar",
+		"basemapTitle": "Mapa base",
 		"locate": "Mostrar mi ubicación",
 		"boostAlt": "Impulsar",
-		"fullScreenAlt": "Pantalla completa",
 		"locateAlt": "Mostrar mi ubicación",
 		"goToHomeAlt": "Ir a la página de inicio",
 		"addLocationAlt": "Agregar ubicación",
@@ -212,10 +209,7 @@
 	"status": {
 		"loading": "Cargando...",
 		"loadingMap": "Cargando mapa...",
-		"loadingPlaces": "Cargando lugares...",
 		"initializing": "Inicializando...",
-		"initializingMarkers": "Inicializando marcadores...",
-		"loadingPlacesInView": "Cargando lugares en la vista...",
 		"downloading": "Descargando datos de lugares...",
 		"processing": "Procesando datos de lugares...",
 		"complete": "¡Completo!",
@@ -275,10 +269,8 @@
 		"formSubmission": "Error al enviar el formulario, por favor inténtalo de nuevo o contacta a BTC Map.",
 		"locationSearch": "No se pudo buscar ubicaciones, por favor inténtalo de nuevo o contacta a BTC Map.",
 		"mapView": "No se pudo establecer la vista del mapa en las coordenadas proporcionadas, por favor inténtalo de nuevo o contacta a BTC Map.",
-		"mapViewCachedCoords": "No se pudo establecer la vista del mapa en las coordenadas en caché, por favor inténtalo de nuevo o contacta a BTC Map.",
 		"merchantDetailsLoadError": "Error al cargar los detalles del comercio. Por favor, inténtalo de nuevo.",
-		"boostLoadError": "Error al cargar la información del impulso. Por favor, inténtalo de nuevo.",
-		"fullscreenError": "Error al intentar activar el modo de pantalla completa: {message} ({name})"
+		"boostLoadError": "Error al cargar la información del impulso. Por favor, inténtalo de nuevo."
 	},
 	"success": {
 		"locationSelected": "¡Ubicación seleccionada!",

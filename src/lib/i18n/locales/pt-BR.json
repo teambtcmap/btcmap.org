@@ -75,19 +75,16 @@
 		"noMatches": "Nenhum resultado nesta categoria"
 	},
 	"mapControls": {
-		"fullScreen": "Tela cheia",
 		"goToHome": "Ir para a página inicial",
 		"addLocation": "Adicionar local",
 		"communityMap": "Mapa da comunidade",
 		"merchantMap": "Mapa de comerciantes",
 		"dataRefreshAvailable": "Atualização de dados disponível",
-		"support": "Apoiar",
-		"supportWithSats": "Apoiar com sats",
 		"zoomIn": "Aumentar zoom",
 		"zoomOut": "Diminuir zoom",
+		"basemapTitle": "Mapa base",
 		"locate": "Mostrar onde estou",
 		"boostAlt": "Impulsionar",
-		"fullScreenAlt": "Tela cheia",
 		"locateAlt": "Mostrar onde estou",
 		"goToHomeAlt": "Ir para a página inicial",
 		"addLocationAlt": "Adicionar local",
@@ -208,10 +205,7 @@
 	"status": {
 		"loading": "Carregando...",
 		"loadingMap": "Carregando mapa...",
-		"loadingPlaces": "Carregando locais...",
 		"initializing": "Inicializando...",
-		"initializingMarkers": "Inicializando marcadores...",
-		"loadingPlacesInView": "Carregando locais na visualização...",
 		"downloading": "Baixando dados de locais...",
 		"processing": "Processando dados de locais...",
 		"complete": "Completo!",
@@ -270,10 +264,8 @@
 		"noPaymentMethod": "Por favor, selecione pelo menos um método de pagamento...",
 		"formSubmission": "Falha no envio do formulário. Tente novamente ou entre em contato com o BTC Map.",
 		"mapView": "Não foi possível definir a visualização do mapa para as coordenadas fornecidas. Tente novamente ou entre em contato com o BTC Map.",
-		"mapViewCachedCoords": "Não foi possível definir a visualização do mapa para as coordenadas em cache. Tente novamente ou entre em contato com o BTC Map.",
 		"merchantDetailsLoadError": "Erro ao carregar detalhes do comerciante. Tente novamente.",
-		"boostLoadError": "Falha ao carregar informações de boost. Tente novamente.",
-		"fullscreenError": "Erro ao tentar ativar o modo tela cheia: {message} ({name})"
+		"boostLoadError": "Falha ao carregar informações de boost. Tente novamente."
 	},
 	"aria": {
 		"logoAlt": "Logo do BTC Map",

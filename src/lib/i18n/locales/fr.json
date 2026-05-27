@@ -75,19 +75,16 @@
 		"noMatches": "Aucun résultat dans cette catégorie"
 	},
 	"mapControls": {
-		"fullScreen": "Plein écran",
 		"goToHome": "Aller à la page d'accueil",
 		"addLocation": "Ajouter un lieu",
 		"communityMap": "Carte des communautés",
 		"merchantMap": "Carte des commerces",
 		"dataRefreshAvailable": "Mise à jour des données disponible",
-		"support": "Soutenir",
-		"supportWithSats": "Soutenir avec des sats",
 		"zoomIn": "Zoomer",
 		"zoomOut": "Dézoomer",
+		"basemapTitle": "Fond de carte",
 		"locate": "Afficher ma position",
 		"boostAlt": "Boost",
-		"fullScreenAlt": "Plein écran",
 		"locateAlt": "Afficher ma position",
 		"goToHomeAlt": "Aller à la page d'accueil",
 		"addLocationAlt": "Ajouter un lieu",
@@ -212,10 +209,7 @@
 	"status": {
 		"loading": "Chargement...",
 		"loadingMap": "Chargement de la carte...",
-		"loadingPlaces": "Chargement des lieux...",
 		"initializing": "Initialisation...",
-		"initializingMarkers": "Initialisation des marqueurs...",
-		"loadingPlacesInView": "Chargement des lieux visibles...",
 		"downloading": "Téléchargement des données...",
 		"processing": "Traitement des données...",
 		"complete": "Terminé !",
@@ -275,10 +269,8 @@
 		"formSubmission": "Échec de l'envoi du formulaire, veuillez réessayer ou contacter BTC Map.",
 		"locationSearch": "Impossible de rechercher des lieux, veuillez réessayer ou contacter BTC Map.",
 		"mapView": "Impossible d'afficher la carte aux coordonnées indiquées, veuillez réessayer ou contacter BTC Map.",
-		"mapViewCachedCoords": "Impossible d'afficher la carte aux coordonnées en cache, veuillez réessayer ou contacter BTC Map.",
 		"merchantDetailsLoadError": "Erreur lors du chargement des détails du commerce. Veuillez réessayer.",
-		"boostLoadError": "Échec du chargement des informations de boost. Veuillez réessayer.",
-		"fullscreenError": "Erreur lors du passage en plein écran : {message} ({name})"
+		"boostLoadError": "Échec du chargement des informations de boost. Veuillez réessayer."
 	},
 	"success": {
 		"locationSelected": "Lieu sélectionné !",

@@ -1,34 +1,38 @@
 <script lang="ts">
 import rewind from "@mapbox/geojson-rewind";
-import type { GeoJSON as LeafletGeoJSON, Map as LeafletMap } from "leaflet";
-import { onDestroy, onMount } from "svelte";
+import type { Feature, FeatureCollection } from "geojson";
+import type { GeoJSONSource, Map as MapLibreMap } from "maplibre-gl";
+import { onMount } from "svelte";
 import { fly } from "svelte/transition";
 
-import {
-	MAP_PANEL_MARGIN,
-	MERCHANT_DRAWER_WIDTH,
-	PANEL_DRAWER_GAP,
-} from "$lib/constants";
+import { MAP_PANEL_MARGIN } from "$lib/constants";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { merchantList } from "$lib/merchantListStore";
 import { areas } from "$lib/store";
 import { areasSync } from "$lib/sync/areas";
-import type { Area, Leaflet } from "$lib/types";
+import type { Area } from "$lib/types";
 import { areaIconSrc, getCommunitiesAtCoordinates } from "$lib/utils";
 
 import { resolve } from "$app/paths";
 
-// Enter from 10px below (slides up), exit reverses. Y motion avoids the
-// horizontal scrollbar that X motion caused when the rail sat at the viewport edge.
+// Community rail rendered alongside /map. Preview polygon lives on a
+// dedicated GeoJSON source + fill/outline layers added once and reused
+// — re-using the layer beats re-adding it per hover when the user
+// rapid-fires the avatars.
+
 const DESKTOP_FLY = { duration: 280, y: 10 };
-// Mobile rail is anchored top-left, so enter from above sliding down.
 const MOBILE_FLY = { duration: 280, y: -10 };
+
+const SOURCE_ID = "community-preview";
+const FILL_LAYER_ID = "community-preview-fill";
+const OUTLINE_LAYER_ID = "community-preview-outline";
+
+const EMPTY_FC: FeatureCollection = { type: "FeatureCollection", features: [] };
 
 export let lat: number | null = null;
 export let lon: number | null = null;
 export let zoom: number | null = null;
-export let map: LeafletMap | undefined = undefined;
-export let leaflet: Leaflet | undefined = undefined;
+export let map: MapLibreMap | undefined = undefined;
 
 const MIN_ZOOM = 6;
 const MOBILE_VISIBLE_LIMIT = 4;
@@ -41,13 +45,11 @@ $: allCommunities =
 $: mobileVisible = allCommunities.slice(0, MOBILE_VISIBLE_LIMIT);
 $: mobileOverflow = Math.max(0, allCommunities.length - MOBILE_VISIBLE_LIMIT);
 
-$: rightOffset = $merchantDrawer.isOpen
-	? MAP_PANEL_MARGIN + MERCHANT_DRAWER_WIDTH + PANEL_DRAWER_GAP
-	: MAP_PANEL_MARGIN;
+let previewCommunityId: string | null = null;
+let layersAdded = false;
 
-// Clear hover preview if the previewed community is no longer visible.
-// This handles the case where the rail DOM is removed (pan / zoom-out)
-// before mouseleave or blur fires on the hovered anchor.
+// Clear hover preview if the previewed community is no longer visible
+// (rail removed by pan / zoom-out before mouseleave/blur fires).
 $: if (
 	previewCommunityId &&
 	!allCommunities.some((c) => c.id === previewCommunityId)
@@ -66,33 +68,54 @@ const handleImgError = (e: Event) => {
 	img.src = "/images/bitcoin.svg";
 };
 
-let previewLayer: LeafletGeoJSON | null = null;
-let previewCommunityId: string | null = null;
+const ensureLayers = (m: MapLibreMap) => {
+	if (layersAdded) return;
+	if (!m.getSource(SOURCE_ID)) {
+		m.addSource(SOURCE_ID, { type: "geojson", data: EMPTY_FC });
+	}
+	if (!m.getLayer(FILL_LAYER_ID)) {
+		m.addLayer({
+			id: FILL_LAYER_ID,
+			type: "fill",
+			source: SOURCE_ID,
+			paint: {
+				"fill-color": "#F7931A",
+				"fill-opacity": 0.3,
+			},
+		});
+	}
+	if (!m.getLayer(OUTLINE_LAYER_ID)) {
+		m.addLayer({
+			id: OUTLINE_LAYER_ID,
+			type: "line",
+			source: SOURCE_ID,
+			paint: {
+				"line-color": "#000000",
+				"line-width": 1,
+			},
+		});
+	}
+	layersAdded = true;
+};
 
 function clearPreview() {
-	if (previewLayer && map) {
-		map.removeLayer(previewLayer);
-	}
-	previewLayer = null;
 	previewCommunityId = null;
+	if (!map) return;
+	const source = map.getSource(SOURCE_ID) as GeoJSONSource | undefined;
+	source?.setData(EMPTY_FC);
 }
 
 function showPreview(community: Area) {
-	if (!map || !leaflet || !community.tags.geo_json) return;
-	clearPreview();
+	if (!map || !community.tags.geo_json) return;
+	ensureLayers(map);
+	const source = map.getSource(SOURCE_ID) as GeoJSONSource | undefined;
+	if (!source) return;
 	try {
-		const gj = rewind(community.tags.geo_json, true);
-		previewLayer = leaflet
-			.geoJSON(gj, {
-				style: {
-					color: "#000000",
-					weight: 1,
-					fillColor: "#F7931A",
-					fillOpacity: 0.3,
-				},
-				interactive: false,
-			})
-			.addTo(map);
+		// Right-hand-rule winding for fill rendering correctness.
+		const gj = rewind(community.tags.geo_json, true) as
+			| Feature
+			| FeatureCollection;
+		source.setData(gj);
 		previewCommunityId = community.id;
 	} catch (e) {
 		console.error("CommunityRail: failed to draw preview", e);
@@ -100,19 +123,28 @@ function showPreview(community: Area) {
 }
 
 onMount(() => {
-	// /map does not otherwise sync the areas store; trigger it here so the
-	// rail has data. areasSync has its own 5-min cache so repeat calls are cheap.
+	// /map doesn't otherwise sync the areas store; trigger it here so the
+	// rail has data. areasSync has its own 5-min cache.
 	areasSync();
 });
 
-onDestroy(clearPreview);
+// No onDestroy map cleanup: /map (the owner) calls map.remove() in its
+// own onDestroy, which runs before this child component's fragment is
+// torn down. By that point the MapLibre Map's internal `style` is
+// undefined, so any m.getLayer / m.getSource here threw
+//   Cannot read properties of undefined (reading 'getLayer')
+// even though `if (!map) return` passed — the JS object still exists,
+// the bare-method `m.getLayer` just deferences a now-undefined `m.style`.
+// map.remove() already disposes our sources and layers.
 </script>
 
 {#if allCommunities.length > 0}
-	<!-- Desktop: bottom-right, above Leaflet attribution. Shifts left when drawer opens. -->
+	<!-- Desktop: bottom-right, above the attribution. The merchant drawer + list
+	     panel live on the left side of the map, so the rail's right offset is
+	     fixed. -->
 	<div
-		class="pointer-events-none absolute bottom-10 z-[1001] hidden flex-col-reverse gap-2 transition-[right] duration-200 md:flex"
-		style="right: {rightOffset}px"
+		class="pointer-events-none absolute bottom-10 z-[1001] hidden flex-col-reverse gap-2 md:flex"
+		style="right: {MAP_PANEL_MARGIN}px"
 	>
 		{#each allCommunities as community (community.id)}
 			<a
@@ -137,7 +169,7 @@ onDestroy(clearPreview);
 		{/each}
 	</div>
 
-	<!-- Mobile: top-left. Hidden when the merchant drawer or the nearby/worldwide list is open so the active merchant context owns the screen. -->
+	<!-- Mobile: top-left. Hidden when drawer or list panel is open. -->
 	<div
 		class="pointer-events-none absolute top-3 left-3 z-[1001] flex flex-col gap-1.5 md:hidden"
 		class:hidden={$merchantDrawer.isOpen || $merchantList.isOpen}

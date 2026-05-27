@@ -1,5 +1,7 @@
 <script lang="ts">
 import { SvelteToast } from "@zerodevx/svelte-toast";
+import localforage from "localforage";
+import { onDestroy, onMount } from "svelte";
 
 import LoadingIndicator from "$components/LoadingIndicator.svelte";
 import Header from "$components/layout/Header.svelte";
@@ -15,12 +17,6 @@ import { elementsSync } from "$lib/sync/places";
 import { theme } from "$lib/theme";
 
 import { browser, dev } from "$app/environment";
-import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
-import "leaflet.markercluster/dist/MarkerCluster.Default.css";
-import "leaflet.markercluster/dist/MarkerCluster.css";
-import "leaflet/dist/leaflet.css";
-import localforage from "localforage";
-import { onDestroy, onMount } from "svelte";
 import "tippy.js/dist/tippy.css";
 import "../app.css";
 

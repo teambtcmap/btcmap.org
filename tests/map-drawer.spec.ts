@@ -15,125 +15,21 @@ test.describe('Map Drawer', () => {
 		checkForConsoleErrors(page);
 	});
 
-	test('drawer opens on marker click and navigates to merchant detail page', async ({ page }) => {
+	test('drawer opens via URL hash and "See full profile" navigates to merchant detail page', async ({
+		page
+	}) => {
 		test.setTimeout(180000);
-		await page.goto('/map#16/42.2762511/42.7024218', { waitUntil: 'load' });
+		// MapLibre draws pins on a WebGL canvas, so the test can't probe
+		// DOM markers the way the legacy Leaflet suite did. Use the URL
+		// drawer pathway instead — `?merchant=` opens the drawer the same
+		// way a marker click does.
+		await page.goto('/map?merchant=6556#15/53.55573/10.00825', { waitUntil: 'load' });
 		await expect(page).toHaveTitle(/BTC Map/);
 
 		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
 		await expect(zoomInButton).toBeVisible();
 
-		// Wait for API response and markers to render
 		await waitForMarkersToLoad(page);
-
-		const findAndClickMarker = async () => {
-			const markerClicked = await page.evaluate(() => {
-				const isInViewport = (element: Element) => {
-					const rect = element.getBoundingClientRect();
-					const viewport = {
-						width: window.innerWidth,
-						height: window.innerHeight
-					};
-					return (
-						rect.left >= 0 &&
-						rect.right <= viewport.width &&
-						rect.top >= 0 &&
-						rect.bottom <= viewport.height
-					);
-				};
-
-				const individualMarkers = document.querySelectorAll(
-					'.leaflet-marker-pane > div:not([class*="cluster"])'
-				);
-
-				if (individualMarkers.length > 0) {
-					const viewportMarker = Array.from(individualMarkers).find(isInViewport);
-					if (viewportMarker) {
-						(viewportMarker as HTMLElement).click();
-						return true;
-					}
-
-					(individualMarkers[0] as HTMLElement).click();
-					return true;
-				}
-
-				const clusterSelectors = [
-					'.leaflet-marker-cluster-small',
-					'.leaflet-marker-cluster-medium',
-					'.leaflet-marker-cluster-large'
-				];
-
-				for (const selector of clusterSelectors) {
-					const clusters = document.querySelectorAll(selector);
-					if (clusters.length > 0) {
-						const viewportCluster = Array.from(clusters).find(isInViewport);
-						const clusterToClick = viewportCluster || clusters[0];
-						(clusterToClick as HTMLElement).click();
-						return 'cluster-clicked';
-					}
-				}
-
-				return false;
-			});
-
-			if (markerClicked === 'cluster-clicked') {
-				// Wait for cluster to expand and individual markers to appear
-				await page.waitForFunction(
-					() => {
-						const expandedMarkers = document.querySelectorAll(
-							'.leaflet-marker-pane > div:not([class*="cluster"])'
-						);
-						return expandedMarkers.length > 0;
-					},
-					{ timeout: 5000 }
-				);
-
-				// Click the expanded marker
-				await page.evaluate(() => {
-					const isInViewport = (element: Element) => {
-						const rect = element.getBoundingClientRect();
-						const viewport = {
-							width: window.innerWidth,
-							height: window.innerHeight
-						};
-						return (
-							rect.left >= 0 &&
-							rect.right <= viewport.width &&
-							rect.top >= 0 &&
-							rect.bottom <= viewport.height
-						);
-					};
-
-					const expandedMarkers = document.querySelectorAll(
-						'.leaflet-marker-pane > div:not([class*="cluster"])'
-					);
-					if (expandedMarkers.length > 0) {
-						const expandedViewportMarker = Array.from(expandedMarkers).find(isInViewport);
-						const markerToClick = expandedViewportMarker || expandedMarkers[0];
-						(markerToClick as HTMLElement).click();
-					}
-				});
-			}
-
-			if (!markerClicked) {
-				const debugInfo = await page.evaluate(() => {
-					const individualMarkers = document.querySelectorAll(
-						'.leaflet-marker-pane > div:not([class*="cluster"])'
-					);
-					const clusters = document.querySelectorAll('.leaflet-marker-cluster');
-					return {
-						individualMarkersCount: individualMarkers.length,
-						clustersCount: clusters.length,
-						totalMarkers: document.querySelectorAll('.leaflet-marker-pane > div').length
-					};
-				});
-				throw new Error(`No clickable markers found. Debug info: ${JSON.stringify(debugInfo)}`);
-			}
-
-			return true;
-		};
-
-		await findAndClickMarker();
 
 		// Wait for drawer to open
 		const drawer = page.locator('[role="dialog"]');
@@ -144,7 +40,7 @@ test.describe('Map Drawer', () => {
 		await expect(viewDetailsButton).toBeVisible({ timeout: 10000 });
 
 		const merchantHref = await viewDetailsButton.getAttribute('href');
-		console.info('Found merchant link:', merchantHref);
+		expect(merchantHref).toContain('/merchant/6556');
 
 		await viewDetailsButton.click();
 
@@ -157,61 +53,15 @@ test.describe('Map Drawer', () => {
 	});
 
 	test('drawer shows Comments button with count', async ({ page }) => {
-		await page.goto('/map#15/13.6929/-89.2182', { waitUntil: 'load' });
+		// Use a merchant we know has comments — `?merchant=` opens the
+		// drawer without needing to click a WebGL-canvas pin.
+		await page.goto('/map?merchant=6556#15/53.55573/10.00825', { waitUntil: 'load' });
 		await expect(page).toHaveTitle(/BTC Map/);
 
 		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
 		await expect(zoomInButton).toBeVisible();
 
-		// Wait for API response and markers to render
 		await waitForMarkersToLoad(page);
-
-		const markerClicked = await page.evaluate(() => {
-			const markers = document.querySelectorAll(
-				'.leaflet-marker-pane > div:not([class*="cluster"])'
-			);
-			if (markers.length > 0) {
-				(markers[0] as HTMLElement).click();
-				return true;
-			}
-
-			const clusters = document.querySelectorAll('.leaflet-marker-cluster');
-			if (clusters.length > 0) {
-				(clusters[0] as HTMLElement).click();
-				return 'cluster';
-			}
-			return false;
-		});
-
-		if (markerClicked === 'cluster') {
-			// Wait for cluster to expand
-			await page.waitForFunction(
-				() => {
-					const expandedMarkers = document.querySelectorAll(
-						'.leaflet-marker-pane > div:not([class*="cluster"])'
-					);
-					return expandedMarkers.length > 0;
-				},
-				{ timeout: 5000 }
-			);
-
-			const expandedMarkerClicked = await page.evaluate(() => {
-				const expandedMarkers = document.querySelectorAll(
-					'.leaflet-marker-pane > div:not([class*="cluster"])'
-				);
-				if (expandedMarkers.length > 0) {
-					(expandedMarkers[0] as HTMLElement).click();
-					return true;
-				}
-				return false;
-			});
-
-			if (!expandedMarkerClicked) {
-				throw new Error('No individual markers found after expanding cluster');
-			}
-		} else if (!markerClicked) {
-			throw new Error('No markers found to click');
-		}
 
 		// Check drawer comments button
 		const commentsButton = page.locator('a[href*="#comments"]');
