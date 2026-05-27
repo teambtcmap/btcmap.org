@@ -102,10 +102,13 @@
 }
 /* MapLibre's built-in controls embed dark-gray SVG glyphs as
    background-image on a child <span class="maplibregl-ctrl-icon">; our
-   custom controls render plain <img> icons. Invert both — the icons are
-   single-color silhouettes, so a straight invert(1) reads as a clean
-   light-on-dark version of the same glyph. */
+   NavButtons / Boost / DataRefresh controls render plain <img> icons;
+   the BasemapsControl renders an inline <svg stroke="currentColor">.
+   Invert all three — the icons are single-color silhouettes, so a
+   straight invert(1) reads as a clean light-on-dark version of the
+   same glyph. */
 .dark .maplibregl-ctrl-group button .maplibregl-ctrl-icon,
-.dark .maplibregl-ctrl-group a.maplibregl-ctrl-link img {
+.dark .maplibregl-ctrl-group a.maplibregl-ctrl-link img,
+.dark .maplibregl-ctrl-group a.maplibregl-ctrl-link svg {
 	filter: invert(1);
 }
