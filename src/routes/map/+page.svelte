@@ -111,6 +111,11 @@ let lastSavedIdsSize = -1;
 let lastEnrichedCacheSize = -1;
 let lastLocale: string | null | undefined;
 let lastAppliedLabelTheme: "light" | "dark" | undefined;
+// Signature of the search-mode visible set. Empty string forces an
+// initial sync; "n" = nearby (all places); "s:<id>,<id>,…" = a specific
+// search-result list. Distinct from lastPlacesLength because a fresh
+// search may have the same result count as the previous one.
+let lastSearchModeSig = "";
 
 // Place-label colors. MapLibre paint expressions can't read CSS custom
 // properties, so the values are inlined here.
@@ -628,21 +633,29 @@ const triggerEnrichmentIfNeeded = debounce(() => {
 // catches add/remove but misses the swap case (e.g. save A + unsave B with
 // no net size change) — accepted tradeoff for now.
 $: if (map && styleLoaded && $places) {
-	const placesLen = $places.length;
+	const inSearch =
+		$merchantList.mode === "search" && $merchantList.searchResults.length > 0;
+	const effective = inSearch ? $merchantList.searchResults : $places;
+	const placesLen = effective.length;
 	const savedSize = $savedPlaceIds.size;
 	const cacheSize = $merchantList.placeDetailsCache.size;
 	const currentLocale = $locale;
+	const searchSig = inSearch
+		? `s:${$merchantList.searchResults.map((p) => p.id).join(",")}`
+		: "n";
 	if (
 		placesLen !== lastPlacesLength ||
 		savedSize !== lastSavedIdsSize ||
 		cacheSize !== lastEnrichedCacheSize ||
-		currentLocale !== lastLocale
+		currentLocale !== lastLocale ||
+		searchSig !== lastSearchModeSig
 	) {
 		lastPlacesLength = placesLen;
 		lastSavedIdsSize = savedSize;
 		lastEnrichedCacheSize = cacheSize;
 		lastLocale = currentLocale;
-		syncPlacesToSource($places);
+		lastSearchModeSig = searchSig;
+		syncPlacesToSource(effective);
 	}
 }
 
@@ -1535,6 +1548,7 @@ onMount(async () => {
 		lastPlacesLength = -1;
 		lastSavedIdsSize = -1;
 		lastEnrichedCacheSize = -1;
+		lastSearchModeSig = "";
 		// Apply theme-dependent label palette now that the layer exists.
 		applyLabelPalette(map, get(theme));
 		lastAppliedLabelTheme = get(theme);
