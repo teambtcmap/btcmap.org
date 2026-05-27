@@ -750,9 +750,18 @@ onMount(async () => {
 	// `x-nf-geo` header, populated in +page.server.ts) lands first-time
 	// visitors near their own country instead of the global default.
 	const hashCoords = parseHashCoords();
-	const queryView = hashCoords
-		? null
-		: parseLatLongQuery(new URLSearchParams(window.location.search));
+	const searchParams = new URLSearchParams(window.location.search);
+	const queryView = hashCoords ? null : parseLatLongQuery(searchParams);
+	// Distinguish "no ?lat/long" from "malformed ?lat/long" so an embed
+	// linking with bad coords gets a visible hint instead of silently
+	// falling through to defaults. Match legacy: errors.mapView toast.
+	if (
+		!hashCoords &&
+		!queryView &&
+		(searchParams.has("lat") || searchParams.has("long"))
+	) {
+		errToast(get(_)("errors.mapView"));
+	}
 	const ipGeo =
 		!hashCoords &&
 		!queryView &&
