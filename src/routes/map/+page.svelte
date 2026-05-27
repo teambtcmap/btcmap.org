@@ -349,9 +349,12 @@ const fitSearchResultBounds = () => {
 	);
 	if (results.length === 0) return;
 	if (results.length === 1) {
+		// Match legacy: zoom past CLUSTERING_DISABLED_ZOOM (17) so the
+		// single hit renders as an unclustered pin instead of being
+		// absorbed into whatever cluster sits at zoom 15.
 		map.easeTo({
 			center: [results[0].lon, results[0].lat],
-			zoom: DEFAULT_MAP_ZOOM,
+			zoom: 17,
 			duration: 300,
 		});
 		return;
