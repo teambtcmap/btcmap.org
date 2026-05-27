@@ -299,7 +299,7 @@ const initializeMap = async () => {
 	map = new maplibre.Map({
 		container: mapContainer,
 		style: styleUrlForTheme($theme),
-		maxZoom: 19,
+		maxZoom: 21,
 		dragRotate: true,
 		touchZoomRotate: true,
 		pitchWithRotate: false,

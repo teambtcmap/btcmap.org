@@ -753,7 +753,7 @@ onMount(async () => {
 		zoom: initialZoom,
 		bearing: hashCoords?.bearing ?? 0,
 		pitch: hashCoords?.pitch ?? 0,
-		maxZoom: 19,
+		maxZoom: 21,
 		// Rotation + pitch enabled — the whole point of the migration
 		dragRotate: true,
 		touchZoomRotate: true,
