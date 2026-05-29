@@ -16,42 +16,49 @@
 
 import type { StyleSpecification } from "maplibre-gl";
 
-export type BasemapId =
-	| "liberty"
-	| "ofm-dark"
-	| "carto-positron"
-	| "carto-dark-matter"
-	| "osm";
+// Single source of truth for the basemap catalog. Order here drives the picker
+// order. `style` is the vector style URL MapLibre fetches; the raster OSM
+// basemap has no URL (style: null) — its style is built inline by
+// buildRasterStyle(). Everything else (the BasemapId type, the BASEMAPS picker
+// list, the id validator, styleForBasemap) derives from this, so adding or
+// removing a basemap is a one-line change that can't drift out of sync.
+// Carto's GL styles are free and key-less; each style carries its own data
+// attribution (OSM / OpenFreeMap / Carto) via its sources.
+const BASEMAP_DEFS = [
+	{
+		id: "liberty",
+		label: "OpenFreeMap Liberty",
+		style: "https://tiles.openfreemap.org/styles/liberty",
+	},
+	{
+		// btcmap's tuned dark style (also used by the area/merchant/saved maps).
+		id: "ofm-dark",
+		label: "OpenFreeMap Dark",
+		style: "https://static.btcmap.org/map-styles/dark.json",
+	},
+	{
+		id: "carto-positron",
+		label: "Carto Positron",
+		style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+	},
+	{
+		id: "carto-dark-matter",
+		label: "Carto Dark Matter",
+		style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+	},
+	{ id: "osm", label: "OpenStreetMap", style: null },
+] as const;
 
-export const BASEMAPS: { id: BasemapId; label: string }[] = [
-	{ id: "liberty", label: "OpenFreeMap Liberty" },
-	{ id: "ofm-dark", label: "OpenFreeMap Dark" },
-	{ id: "carto-positron", label: "Carto Positron" },
-	{ id: "carto-dark-matter", label: "Carto Dark Matter" },
-	{ id: "osm", label: "OpenStreetMap" },
-];
+export type BasemapId = (typeof BASEMAP_DEFS)[number]["id"];
+
+export const BASEMAPS: { id: BasemapId; label: string }[] = BASEMAP_DEFS.map(
+	({ id, label }) => ({ id, label }),
+);
 
 export const BASEMAP_STORAGE_KEY = "btcmap-next-basemap";
 
-// The four vector style documents, fetched by MapLibre via URL. "ofm-dark" is
-// btcmap's tuned dark style (also used by the area/merchant/saved maps); the
-// Carto pair are Carto's free, key-less GL styles. Each carries its own data
-// attribution (OSM / OpenFreeMap / Carto) via its sources.
-const VECTOR_STYLE_URLS: Record<Exclude<BasemapId, "osm">, string> = {
-	liberty: "https://tiles.openfreemap.org/styles/liberty",
-	"ofm-dark": "https://static.btcmap.org/map-styles/dark.json",
-	"carto-positron":
-		"https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
-	"carto-dark-matter":
-		"https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
-};
-
 export const isBasemapId = (v: string): v is BasemapId =>
-	v === "liberty" ||
-	v === "ofm-dark" ||
-	v === "carto-positron" ||
-	v === "carto-dark-matter" ||
-	v === "osm";
+	BASEMAP_DEFS.some((b) => b.id === v);
 
 // First-visit default, matching the legacy maps: Liberty in light, Carto Dark
 // Matter in dark. Once the user picks from the basemap control that choice is
@@ -108,7 +115,7 @@ export const buildRasterStyle = (): StyleSpecification => ({
 	layers: [{ id: "osm", type: "raster", source: "osm" }],
 });
 
-// The style for a basemap selection: the vector style URL, or the inline
-// raster style for OSM.
+// The style for a basemap selection: the basemap's vector style URL, or the
+// inline raster style for the URL-less (OSM) basemap.
 export const styleForBasemap = (id: BasemapId): StyleSpecification | string =>
-	id === "osm" ? buildRasterStyle() : VECTOR_STYLE_URLS[id];
+	BASEMAP_DEFS.find((b) => b.id === id)?.style ?? buildRasterStyle();
