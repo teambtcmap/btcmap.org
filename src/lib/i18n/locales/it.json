@@ -689,7 +689,7 @@
 		"captchaFetchError": "Impossibile recuperare il captcha, riprova o contatta BTC Map.",
 		"formSubmitError": "Invio del modulo fallito, riprova o contatta BTC Map.",
 		"searchError": "Impossibile cercare le posizioni, riprova o contatta BTC Map.",
-		"noLocationsWarning": "Nessuna posizione trouvata, si prega di regolare la query.",
+		"noLocationsWarning": "Nessuna posizione trovata, si prega di regolare la query.",
 		"locationSelectedToast": "Posizione selezionata!",
 		"breadcrumbCommunities": "Community",
 		"breadcrumbAdd": "Aggiungi"
