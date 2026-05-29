@@ -11,7 +11,6 @@ import type {
 	MapGeoJSONFeature,
 	MapLayerMouseEvent,
 	Map as MapLibreMap,
-	StyleSpecification,
 } from "maplibre-gl";
 import { onDestroy, onMount } from "svelte";
 import { get } from "svelte/store";
@@ -33,7 +32,14 @@ import {
 	NEARBY_RADIUS_MULTIPLIER,
 } from "$lib/constants";
 import { _, getDisplayLang, locale } from "$lib/i18n";
-import { BASEMAPS, type BasemapId, getStoredBasemap } from "$lib/map/basemaps";
+import {
+	BASEMAPS,
+	type BasemapId,
+	defaultBasemap,
+	getStoredBasemap,
+	SUPPORT_ATTR,
+	styleForBasemap,
+} from "$lib/map/basemaps";
 import {
 	type HashCoords,
 	parseHashCoords,
@@ -681,6 +687,76 @@ $: if (map && styleLoaded && $lastUpdatedPlaceId) {
 	lastUpdatedPlaceId.set(undefined);
 }
 
+// The custom sources + layers we add on top of whatever basemap is
+// active. applyBasemap() carries these across a setStyle() so the pins,
+// clusters, and labels survive a basemap/theme swap untouched (MapLibre's
+// style differ leaves byte-identical layers in place — only the basemap
+// layers below them get swapped).
+const CUSTOM_SOURCE_IDS = ["places", "places-boosted", "cluster-hull"];
+const CUSTOM_LAYER_IDS = [
+	"cluster-hull-fill",
+	"cluster-hull-outline",
+	"clusters-outer",
+	"clusters-inner",
+	"cluster-count",
+	"unclustered-point",
+	"boosted-point",
+	"comment-badge",
+	"comment-badge-count",
+	"saved-badge",
+	"place-label",
+	"boosted-comment-badge",
+	"boosted-comment-badge-count",
+	"boosted-saved-badge",
+	"boosted-place-label",
+	"clusters-hit",
+];
+
+// Switch the basemap without tearing down our pin/cluster/label layers.
+// setStyle's transformStyle hook re-attaches the custom sources + layers
+// onto the incoming base style; because they're identical to what's already
+// mounted, the differ keeps the layers (and the carried GeoJSON data) live —
+// only the basemap layers below them swap.
+//
+// Two things do NOT survive setStyle on their own and are re-established in
+// the style.load handler below:
+//   • the spiderfier's click/zoom handlers — unspiderfyAll() detaches them
+//     (map.off) and only applyTo() re-binds them, so we must applyTo again;
+//   • the addImage sprites (cluster-hit, badges) IF MapLibre ever falls back
+//     from the diff to a full rebuild (fresh imageManager). The loaders are
+//     hasImage-guarded, so re-running them is a cheap no-op on the normal path.
+// The handler is registered BEFORE setStyle on purpose: for the inline raster
+// (object) style, setStyle fires style.load SYNCHRONOUSLY during the call, so
+// a handler added afterwards would miss it.
+const applyBasemap = (id: BasemapId) => {
+	if (!map) return;
+	// Collapse any open spider before the restyle. This also detaches the
+	// spiderfy library's map handlers (which is why we re-applyTo below).
+	spiderfier?.unspiderfyAll();
+	map.once("style.load", () => {
+		if (!map) return;
+		applyLabelPalette(map, get(theme));
+		loadClusterHitSprite(map).catch(() => {});
+		loadCommentBadgeSprite(map);
+		loadSavedBadgeSprite(map).catch(() => {});
+		ensureSpritesForPlaces(map, get(places));
+		spiderfier?.applyTo("clusters-hit");
+	});
+	map.setStyle(styleForBasemap(id), {
+		transformStyle: (previous, next) => {
+			if (!previous) return next;
+			const sources = { ...next.sources };
+			for (const sid of CUSTOM_SOURCE_IDS) {
+				if (previous.sources[sid]) sources[sid] = previous.sources[sid];
+			}
+			const carried = previous.layers.filter((l) =>
+				CUSTOM_LAYER_IDS.includes(l.id),
+			);
+			return { ...next, sources, layers: [...next.layers, ...carried] };
+		},
+	});
+};
+
 onMount(async () => {
 	// WebGL absence (older Android WebViews, hardened browsers, disabled
 	// GPU) would leave the map blank if we tried to instantiate MapLibre.
@@ -694,91 +770,15 @@ onMount(async () => {
 	// flight; bail before instantiating against an unmounted container.
 	if (destroyed) return;
 
-	// All available basemaps are raster tile sources, declared upfront so
-	// the basemap picker only has to toggle layer visibility — no
-	// setStyle calls, which avoid the tile-compile cascade that broke
-	// the first attempt at this in Phase 4.
+	// Five basemaps (legacy parity): four vector styles + the OSM raster
+	// style. A stored picker choice wins; otherwise the first-visit default
+	// is theme-aware (Liberty in light, Carto Dark Matter in dark). Each
+	// basemap is a FIXED style — the choice is sticky and a theme toggle does
+	// not swap it. Switching goes through applyBasemap() → setStyle({
+	// transformStyle }) so the custom pin/cluster/label layers ride along.
 	const initialBasemap: BasemapId =
-		getStoredBasemap() ?? (get(theme) === "dark" ? "carto-dark" : "osm");
-
-	// Append the "Support BTC Map" link to every basemap's attribution
-	// string. Legacy /map injected this via DOM mutation; doing it
-	// inline in the style spec means MapLibre's default
-	// AttributionControl picks it up automatically without us touching
-	// the DOM after init.
-	const SUPPORT_ATTR =
-		'&copy; <a href="/supporters" title="Support BTC Map with sats">Support BTC Map</a>';
-	const OSM_ATTR = `&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors ${SUPPORT_ATTR}`;
-	const CARTO_ATTR = `${OSM_ATTR} &copy; <a href="https://carto.com/attributions">CARTO</a>`;
-
-	const style: StyleSpecification = {
-		version: 8,
-		// OpenFreeMap's public glyph endpoint (Cloudflare R2, no key, production-OK).
-		// MapLibre's demotiles.maplibre.org is explicitly a demo server with no SLA —
-		// see https://github.com/maplibre/demotiles (README: "web, helloworld and CI tests").
-		glyphs: "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
-		sources: {
-			osm: {
-				type: "raster",
-				tiles: [
-					"https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
-					"https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
-					"https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
-				],
-				tileSize: 256,
-				attribution: OSM_ATTR,
-				maxzoom: 19,
-			},
-			"carto-light": {
-				type: "raster",
-				tiles: [
-					"https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-					"https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-					"https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-					"https://d.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-				],
-				tileSize: 256,
-				attribution: CARTO_ATTR,
-				maxzoom: 19,
-			},
-			"carto-dark": {
-				type: "raster",
-				tiles: [
-					"https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-					"https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-					"https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-					"https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-				],
-				tileSize: 256,
-				attribution: CARTO_ATTR,
-				maxzoom: 19,
-			},
-		},
-		layers: [
-			{
-				id: "osm",
-				type: "raster",
-				source: "osm",
-				layout: { visibility: initialBasemap === "osm" ? "visible" : "none" },
-			},
-			{
-				id: "carto-light",
-				type: "raster",
-				source: "carto-light",
-				layout: {
-					visibility: initialBasemap === "carto-light" ? "visible" : "none",
-				},
-			},
-			{
-				id: "carto-dark",
-				type: "raster",
-				source: "carto-dark",
-				layout: {
-					visibility: initialBasemap === "carto-dark" ? "visible" : "none",
-				},
-			},
-		],
-	};
+		getStoredBasemap() ?? defaultBasemap(get(theme));
+	const style = styleForBasemap(initialBasemap);
 
 	// Viewport resolution order: hash → ?lat&long query → cached last
 	// view → IP-geo → defaults. Hash is what /map writes back on every
@@ -834,8 +834,13 @@ onMount(async () => {
 
 	map = new maplibre.Map({
 		container: mapContainer,
-		// Minimal inline raster style — OSM tiles. Vector basemaps come in Phase 4.
+		// Resolved basemap style — a vector style URL, or the inline OSM raster
+		// style. Defaults to the theme-aware basemap unless the user picked one.
 		style,
+		// Show the "Support BTC Map" supporter link on every basemap (legacy
+		// /map guaranteed it regardless of basemap). Data-source credit
+		// (OSM / OpenFreeMap / Carto) comes from each style's own sources.
+		attributionControl: { customAttribution: SUPPORT_ATTR },
 		center: initialCenter,
 		zoom: initialZoom,
 		bearing: hashCoords?.bearing ?? 0,
@@ -908,10 +913,14 @@ onMount(async () => {
 
 	// Basemap picker — layers-icon button that expands on hover/click,
 	// matching the L.control.layers shape prod uses. Owns its own
-	// localStorage persistence. The three basemap layers were declared in
-	// the initial style spec above; this control only toggles visibility.
+	// localStorage persistence; the actual swap is delegated to
+	// applyBasemap so the custom pin/cluster/label layers survive it.
 	map.addControl(
-		new BasemapsControl({ basemaps: BASEMAPS, initial: initialBasemap }),
+		new BasemapsControl({
+			basemaps: BASEMAPS,
+			initial: initialBasemap,
+			onSelect: applyBasemap,
+		}),
 		"top-right",
 	);
 
@@ -1602,7 +1611,9 @@ onMount(async () => {
 
 // Theme toggle → re-color the place-label layer in place. setPaintProperty
 // is cheap and avoids rebuilding the source. Guarded by styleLoaded so we
-// don't fire before the layer exists.
+// don't fire before the layer exists. The basemap itself is NOT swapped on a
+// theme change — each basemap is a fixed style and the choice is sticky (the
+// first-visit default is theme-aware, but after that the user's pick stands).
 $: if (map && styleLoaded && $theme && $theme !== lastAppliedLabelTheme) {
 	lastAppliedLabelTheme = $theme;
 	applyLabelPalette(map, $theme);
