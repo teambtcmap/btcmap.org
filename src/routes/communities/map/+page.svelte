@@ -15,7 +15,6 @@ import type {
 	GeoJSONSource,
 	MapLayerMouseEvent,
 	Map as MapLibreMap,
-	StyleSpecification,
 } from "maplibre-gl";
 import { onDestroy, onMount } from "svelte";
 import { get } from "svelte/store";
@@ -24,7 +23,13 @@ import MapLoadingMain from "$components/MapLoadingMain.svelte";
 import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import Socials from "$components/Socials.svelte";
 import { _ } from "$lib/i18n";
-import { BASEMAPS, type BasemapId, getStoredBasemap } from "$lib/map/basemaps";
+import {
+	BASEMAPS,
+	type BasemapId,
+	defaultBasemap,
+	getStoredBasemap,
+	styleForBasemap,
+} from "$lib/map/basemaps";
 import { parseHashCoords, writeHashCoords } from "$lib/map/mapHash";
 import { hasWebGL } from "$lib/map/webgl";
 import { areaError, areas, reportError, reports } from "$lib/store";
@@ -152,6 +157,27 @@ const computeBbox = (g: GeoJSON): [number, number, number, number] | null => {
 	visit(g);
 	if (!found) return null;
 	return [minX, minY, maxX, maxY];
+};
+
+// Swap the basemap while keeping the community polygon source + layers live.
+// transformStyle re-attaches them onto the incoming base style; the differ
+// leaves the identical custom layers in place and only swaps the basemap
+// layers below them.
+const applyBasemap = (id: BasemapId) => {
+	if (!map) return;
+	map.setStyle(styleForBasemap(id), {
+		transformStyle: (previous, next) => {
+			if (!previous) return next;
+			const sources = { ...next.sources };
+			if (previous.sources[SOURCE_ID]) {
+				sources[SOURCE_ID] = previous.sources[SOURCE_ID];
+			}
+			const carried = previous.layers.filter(
+				(l) => l.id === FILL_LAYER_ID || l.id === OUTLINE_LAYER_ID,
+			);
+			return { ...next, sources, layers: [...next.layers, ...carried] };
+		},
+	});
 };
 
 const addCommunitiesLayers = (m: MapLibreMap) => {
@@ -347,78 +373,13 @@ const initializeMap = async () => {
 	const maplibre = await import("maplibre-gl");
 	if (destroyed) return;
 
+	// Five basemaps (legacy parity). A stored picker choice wins; otherwise
+	// the first-visit default is theme-aware (Liberty light, Carto Dark
+	// Matter dark). Each basemap is a fixed, sticky style; switches go through
+	// applyBasemap → setStyle({ transformStyle }) so the polygons ride along.
 	const initialBasemap: BasemapId =
-		getStoredBasemap() ?? (get(theme) === "dark" ? "carto-dark" : "osm");
-
-	const OSM_ATTR =
-		'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-	const CARTO_ATTR = `${OSM_ATTR} &copy; <a href="https://carto.com/attributions">CARTO</a>`;
-
-	const style: StyleSpecification = {
-		version: 8,
-		glyphs: "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
-		sources: {
-			osm: {
-				type: "raster",
-				tiles: [
-					"https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
-					"https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
-					"https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
-				],
-				tileSize: 256,
-				attribution: OSM_ATTR,
-				maxzoom: 19,
-			},
-			"carto-light": {
-				type: "raster",
-				tiles: [
-					"https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-					"https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-					"https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-					"https://d.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-				],
-				tileSize: 256,
-				attribution: CARTO_ATTR,
-				maxzoom: 19,
-			},
-			"carto-dark": {
-				type: "raster",
-				tiles: [
-					"https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-					"https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-					"https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-					"https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-				],
-				tileSize: 256,
-				attribution: CARTO_ATTR,
-				maxzoom: 19,
-			},
-		},
-		layers: [
-			{
-				id: "osm",
-				type: "raster",
-				source: "osm",
-				layout: { visibility: initialBasemap === "osm" ? "visible" : "none" },
-			},
-			{
-				id: "carto-light",
-				type: "raster",
-				source: "carto-light",
-				layout: {
-					visibility: initialBasemap === "carto-light" ? "visible" : "none",
-				},
-			},
-			{
-				id: "carto-dark",
-				type: "raster",
-				source: "carto-dark",
-				layout: {
-					visibility: initialBasemap === "carto-dark" ? "visible" : "none",
-				},
-			},
-		],
-	};
+		getStoredBasemap() ?? defaultBasemap(get(theme));
+	const style = styleForBasemap(initialBasemap);
 
 	const hashCoords = parseHashCoords();
 
@@ -456,7 +417,11 @@ const initializeMap = async () => {
 	map.addControl(new NavButtonsControl("communities"), "top-right");
 
 	map.addControl(
-		new BasemapsControl({ basemaps: BASEMAPS, initial: initialBasemap }),
+		new BasemapsControl({
+			basemaps: BASEMAPS,
+			initial: initialBasemap,
+			onSelect: applyBasemap,
+		}),
 		"top-right",
 	);
 

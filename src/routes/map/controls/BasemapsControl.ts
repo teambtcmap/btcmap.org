@@ -20,16 +20,19 @@ type BasemapEntry = { id: BasemapId; label: string };
 type Options = {
 	basemaps: BasemapEntry[];
 	initial: BasemapId;
+	// Apply the chosen basemap. The page owns the actual swap because it
+	// has to carry the custom pin/cluster/label layers across the
+	// setStyle (vector basemaps aren't a toggle-able layer — they're a
+	// whole style). This control only handles the UI + persistence.
+	onSelect: (id: BasemapId) => void;
 };
 
 // Layer-picker control with the same shape as Leaflet's L.control.layers
 // that prod /map uses: a single icon button that expands into a radio
-// list of basemap labels. The three basemap layers are declared in the
-// initial style spec; this control only toggles their `visibility` and
-// persists the active selection so it survives reloads.
+// list of basemap labels. Selecting one delegates to the page's
+// onSelect (which does the setStyle swap) and persists the choice.
 export class BasemapsControl implements IControl {
 	#options: Options;
-	#map: MapLibreMap | undefined;
 	#container: HTMLDivElement | undefined;
 	#button: HTMLAnchorElement | undefined;
 	#popup: HTMLDivElement | undefined;
@@ -46,9 +49,7 @@ export class BasemapsControl implements IControl {
 		return "top-right";
 	}
 
-	onAdd(map: MapLibreMap): HTMLElement {
-		this.#map = map;
-
+	onAdd(_map: MapLibreMap): HTMLElement {
 		const container = document.createElement("div");
 		container.className =
 			"maplibregl-ctrl maplibregl-ctrl-group maplibre-next-basemaps";
@@ -109,7 +110,6 @@ export class BasemapsControl implements IControl {
 		this.#container = undefined;
 		this.#button = undefined;
 		this.#popup = undefined;
-		this.#map = undefined;
 	}
 
 	#renderPopup(): void {
@@ -145,18 +145,9 @@ export class BasemapsControl implements IControl {
 	}
 
 	#select(id: BasemapId): void {
-		if (!this.#map) return;
 		if (id === this.#current) {
 			this.#close();
 			return;
-		}
-		// Toggle visibility on the pre-declared raster layers.
-		for (const bm of this.#options.basemaps) {
-			this.#map.setLayoutProperty(
-				bm.id,
-				"visibility",
-				bm.id === id ? "visible" : "none",
-			);
 		}
 		this.#current = id;
 		try {
@@ -164,6 +155,7 @@ export class BasemapsControl implements IControl {
 		} catch {
 			// localStorage unavailable; skip persistence
 		}
+		this.#options.onSelect(id);
 		trackEvent("layer_change", { layer: id });
 		this.#close();
 	}
