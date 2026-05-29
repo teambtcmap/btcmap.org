@@ -12,6 +12,7 @@ const languages = [
 	{ code: "nl", name: "Nederlands", short: "NL" },
 	{ code: "fr", name: "Français", short: "FR" },
 	{ code: "es", name: "Español", short: "ES" },
+	{ code: "it", name: "Italiano", short: "IT" },
 ];
 
 let show = false;

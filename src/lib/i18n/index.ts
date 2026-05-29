@@ -9,6 +9,7 @@ register("ru", () => import("./locales/ru.json"));
 register("nl", () => import("./locales/nl.json"));
 register("fr", () => import("./locales/fr.json"));
 register("es", () => import("./locales/es.json"));
+register("it", () => import("./locales/it.json"));
 
 export const SUPPORTED_LOCALES = [
 	"en",
@@ -19,6 +20,7 @@ export const SUPPORTED_LOCALES = [
 	"nl",
 	"fr",
 	"es",
+	"it",
 ] as const;
 
 export function isSupportedLocale(
@@ -35,6 +37,7 @@ const BROWSER_LOCALE_MAP: Record<string, string> = {
 	nl: "nl",
 	fr: "fr",
 	es: "es",
+	it: "it",
 };
 
 // Smart locale detection (mirrors theme detection pattern)
