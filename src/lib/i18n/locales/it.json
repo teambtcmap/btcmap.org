@@ -1,8 +1,8 @@
 {
 	"home": {
 		"hero": "Trova posti dove spendere sats ovunque tu sia",
-		"openMap": "Apri Mappa",
-		"addLocation": "Aggiungi Posizione",
+		"openMap": "Apri mappa",
+		"addLocation": "Aggiungi posizione",
 		"description": "Usiamo {osmLink} per taggare i posti che accettano bitcoin e mostriamo questi commercianti nelle nostre bellissime app.",
 		"openSource": "Le nostre app e i dati sottostanti sono gratuiti e open-source.",
 		"hashtag": "#SPEDN ✊",
@@ -21,30 +21,30 @@
 		"blog": "Blog",
 		"supporters": "Sostenitori",
 		"menu": "Menu",
-		"merchantMap": "Mappa Commercianti",
-		"communityMap": "Mappa Community",
+		"merchantMap": "Mappa dei commercianti",
+		"communityMap": "Mappa delle community",
 		"dashboard": "Dashboard",
-		"taggerLeaderboard": "Classifica Tagger",
-		"communityLeaderboard": "Classifica Community",
-		"countryLeaderboard": "Classifica Paesi",
-		"addLocation": "Aggiungi Posizione",
-		"addCommunity": "Aggiungi Community",
-		"becomeTagger": "Diventa un Tagger",
-		"openTickets": "Ticket Aperti",
-		"taggingActivity": "Attività di Tagging",
-		"taggingIssues": "Problemi di Tagging",
+		"taggerLeaderboard": "Classifica dei tagger",
+		"communityLeaderboard": "Classifica delle community",
+		"countryLeaderboard": "Classifica dei paesi",
+		"addLocation": "Aggiungi posizione",
+		"addCommunity": "Aggiungi community",
+		"becomeTagger": "Diventa un tagger",
+		"openTickets": "Ticket aperti",
+		"taggingActivity": "Attività di tagging",
+		"taggingIssues": "Problemi di tagging",
 		"communities": "Community",
 		"countries": "Paesi",
 		"saved": "Salvati",
-		"mySaved": "I Miei Salvati",
-		"myActivity": "La Mia Attività",
+		"mySaved": "I miei salvati",
+		"myActivity": "La mia attività",
 		"account": "Account",
-		"login": "Log in",
-		"logout": "Log out",
+		"login": "Accedi",
+		"logout": "Esci",
 		"backupAccount": "Backup dell'account"
 	},
 	"saved": {
-		"title": "I Miei Salvati",
+		"title": "I miei salvati",
 		"places": "Posti",
 		"areas": "Aree",
 		"empty": "Salva posti e aree per vederli qui.",
@@ -55,8 +55,8 @@
 		"removeFailed": "Rimozione fallita"
 	},
 	"userActivity": {
-		"title": "La Mia Attività",
-		"empty": "Non hai ancora salvato nessun posto o area. Salva alcuni elementi dalla mappa e torna qui per vedere l'attività su di essi.",
+		"title": "La mia attività",
+		"empty": "Non hai ancora salvato nessun posto o area. Salvane alcuni dalla mappa e torna qui per vedere l'attività su di essi.",
 		"filterLabel": "Filtra attività per elemento salvato",
 		"filterAll": "Tutti gli elementi salvati",
 		"filterPlaces": "Posti",
@@ -74,10 +74,10 @@
 		"newSinceLastVisit": "{count} nuovi dalla tua ultima visita"
 	},
 	"login": {
-		"title": "Log in",
+		"title": "Accedi",
 		"username": "Username",
 		"password": "Password",
-		"submit": "Log in",
+		"submit": "Accedi",
 		"loggingIn": "Accesso in corso...",
 		"failed": "Username o password non validi.",
 		"error": "Qualcosa è andato storto. Riprova.",
@@ -86,7 +86,7 @@
 	},
 	"backup": {
 		"title": "Backup dell'account",
-		"description": "Salva queste credenziali per effettuare il log in su un altro dispositivo.",
+		"description": "Salva queste credenziali per accedere su un altro dispositivo.",
 		"username": "Username",
 		"password": "Password",
 		"copy": "Copia",
@@ -103,10 +103,10 @@
 		"prompt": {
 			"titlePlace": "Salva questo posto",
 			"titleArea": "Salva questa area",
-			"descriptionPlace": "Effettua il log in nel tuo account esistente, o creane uno nuovo per mantenere i tuoi posti salvati.",
-			"descriptionArea": "Effettua il log in nel tuo account esistente, o creane uno nuovo per mantenere le tue aree salvate.",
+			"descriptionPlace": "Accedi al tuo account esistente, o creane uno nuovo per mantenere i tuoi posti salvati.",
+			"descriptionArea": "Accedi al tuo account esistente, o creane uno nuovo per mantenere le tue aree salvate.",
 			"createAccount": "Crea account",
-			"login": "Log in",
+			"login": "Accedi",
 			"back": "Indietro",
 			"done": "Fatto"
 		}
@@ -119,7 +119,7 @@
 		"noResultsFor": "Nessun risultato trovato per \"{query}\"",
 		"prompt": "Cerca commercianti per nome",
 		"resultsCount": "{count} risultati",
-		"showingNearest": "Mostra i {count} più vicini",
+		"showingNearest": "Mostrando i {count} più vicini",
 		"zoomIn": "Ingrandisci per vedere la lista",
 		"zoomInDetail": "La lista dei commercianti mostra le posizioni quando si esegue uno zoom più ravvicinato",
 		"showAll": "Mostra tutto",
@@ -132,7 +132,7 @@
 		"placeholder": "Cerca...",
 		"ariaLabel": "Cerca nella classifica",
 		"enablePreciseDistances": "Abilita distanze precise",
-		"dismissLocationPrompt": "Chiudi richiesta posizione",
+		"dismissLocationPrompt": "Ignora richiesta posizione",
 		"locationPermissionDenied": "Permesso di posizione negato. Abilitalo nelle impostazioni del browser.",
 		"locationUnavailable": "Impossibile determinare la tua posizione. Riprova.",
 		"locationEnabled": "Posizione abilitata. Lista ordinata per distanza."
@@ -145,7 +145,7 @@
 		"coffee": "Caffè",
 		"atms": "ATM",
 		"hotels": "Hotel",
-		"beauty": "Saloni di Bellezza",
+		"beauty": "Saloni di bellezza",
 		"filter": "Filtra per categoria",
 		"noMatches": "Nessun risultato in questa categoria"
 	},
@@ -155,7 +155,7 @@
 		"communityMap": "Mappa community",
 		"merchantMap": "Mappa commercianti",
 		"account": "Account",
-		"login": "Log in",
+		"login": "Accedi",
 		"dataRefreshAvailable": "Aggiornamento dati disponibile",
 		"zoomIn": "Ingrandisci",
 		"zoomOut": "Rimpicciolisci",
@@ -168,8 +168,8 @@
 		"communityMapAlt": "Mappa community",
 		"merchantMapAlt": "Mappa commercianti",
 		"accountAlt": "Account",
-		"loginAlt": "Log in",
-		"dataRefreshAlt": "Aggiornamento dati disponibile"
+		"loginAlt": "Accedi",
+		"dataRefreshAlt": " disponibile"
 	},
 	"merchant": {
 		"navigate": "Naviga",
@@ -182,14 +182,14 @@
 		"call": "Chiama",
 		"email": "Email",
 		"website": "Sito web",
-		"pay": "Paga Commerciante",
-		"showTags": "Mostra Tag",
-		"tagIssues": "Problemi di Tag",
+		"pay": "Paga commerciante",
+		"showTags": "Mostra tag",
+		"tagIssues": "Problemi di tagging",
 		"viewOSM": "Visualizza su OSM",
 		"socialX": "X",
 		"socialInstagram": "Instagram",
 		"socialFacebook": "Facebook",
-		"viewDetails": "Visualizza Dettagli Completi",
+		"viewDetails": "Visualizza dettagli completi",
 		"seeFullProfile": "Vedi profilo completo",
 		"comments": "Commenti",
 		"commentsCount": "Commenti ({count})",
@@ -210,20 +210,20 @@
 		"communities": "Community di {name}"
 	},
 	"verification": {
-		"lastSurveyed": "Ultimo Rilevamento",
+		"lastSurveyed": "Ultimo rilevamento",
 		"verified": "Verificato",
 		"outdated": "Obsoleto",
 		"notSurveyed": "Questa posizione deve essere verificata!",
-		"verifyLocation": "Verifica Posizione",
+		"verifyLocation": "Verifica posizione",
 		"verifiedTooltip": "Verificato nell'ultimo anno",
 		"outdatedTooltip": "Obsoleto, si prega di ri-verificare",
 		"helpImprove": "Aiuta a migliorare i dati per tutti",
 		"surveyedBy": "Completato dai membri della community di BTC Map"
 	},
 	"payment": {
-		"methods": "Metodi di Pagamento",
+		"methods": "Metodi di pagamento",
 		"accepts": "Accetta",
-		"accepted": "Pagamenti Accettati",
+		"accepted": "Pagamenti accettati",
 		"onchain": "On-chain",
 		"onchainAccepted": "On-chain accettato",
 		"onchainNotAccepted": "On-chain non accettato",
@@ -240,37 +240,37 @@
 		"boosted": "Boostato",
 		"boostAction": "Boost",
 		"extend": "Estendi",
-		"boosting": "Attivazione Boost...",
-		"expires": "Scadenza Boost",
+		"boosting": "Attivazione boost...",
+		"expires": "Scadenza boost",
 		"getVisibility": "Ottieni più visibilità",
 		"boostPromo": "Metti in evidenza questo annuncio per farlo apparire per primo nelle ricerche nelle vicinanze",
-		"boostThisPlace": "Applica Boost a questo posto",
-		"extendBoost": "Estendi Boost",
+		"boostThisPlace": "Boosta questo posto",
+		"extendBoost": "Estendi boost",
 		"isBoosted": "Questa posizione è in evidenza con il Boost!",
 		"improveVisibility": "Applica il Boost a questa posizione per migliorarne la visibilità sulla mappa.",
-		"locations": "Posizioni con Boost",
-		"boostLocation": "Boost Location",
-		"description": "Fai risaltare questo commerciante in arancione bitcoin sulla mappa, fallo brillare nei risultati di ricerca e fallo scoprire nella mappa esclusiva delle posizioni in evidenza!",
+		"locations": "Posizioni boostate",
+		"boostLocation": "Boosta questa posizione",
+		"description": "Fai risaltare questo commerciante in arancione bitcoin sulla mappa, fallo brillare nei risultati di ricerca e fallo scoprire nella mappa esclusiva delle posizioni boostate!",
 		"seeHowItLooks": "Guarda come appare",
 		"starAlt": "Stella",
-		"boostedPinAlt": "Pin con Boost",
-		"boostedMerchant": "Commerciante con Boost",
+		"boostedPinAlt": "Pin boostato",
+		"boostedMerchant": "Commerciante boostato",
 		"feeNote": "La commissione viene utilizzata per supportare il progetto open-source BTC Map e continuarne lo sviluppo.",
-		"boostFor1Month": "Boost per 1 mese",
-		"boostForNMonths": "Boost per {time} mesi",
+		"boostFor1Month": "Boosta per 1 mese",
+		"boostForNMonths": "Boosta per {time} mesi",
 		"duration1Month": "1 mese",
 		"durationNMonths": "{time} mesi",
 		"thankYou": "Grazie per aver supportato {name} e BTC Map!",
 		"thisLocation": "questa posizione",
-		"boostedUntil": "Questa posizione sarà in evidenza con il Boost fino al",
+		"boostedUntil": "Questa posizione sarà boostata fino al",
 		"shareOnTwitter": "Condividi su Twitter",
 		"shareEncourage": "Condividere il tuo supporto potrebbe incoraggiare altri a fare lo stesso 🥰",
-		"invoiceDescription1": "Attiva il Boost per questa posizione per <strong>1 mese <br /> {sats} sats</strong>",
-		"invoiceDescriptionN": "Attiva il Boost per questa posizione per <strong>{time} mesi <br /> {sats} sats</strong>",
+		"invoiceDescription1": "Attiva il boost per questa posizione per <strong>1 mese <br /> {sats} sats</strong>",
+		"invoiceDescriptionN": "Attiva il boost per questa posizione per <strong>{time} mesi <br /> {sats} sats</strong>",
 		"finalizeError": "Impossibile finalizzare il boost, si prega di contattare BTC Map.",
 		"invalidDuration": "Durata del boost non valida",
 		"invalidMerchantId": "ID commerciante non valido",
-		"twitterShareText": "Ho appena attivato il Boost per {name} su @btcmap. Dai un'occhiata!"
+		"twitterShareText": "Ho appena attivato il boost per {name} su @btcmap. Dai un'occhiata!"
 	},
 	"invoicePayment": {
 		"scanOrClick": "Scansiona o clicca per pagare con lightning",
@@ -302,7 +302,7 @@
 		"complete": "Completato!",
 		"preparing": "Preparazione della mappa...",
 		"finalizing": "Finalizzazione...",
-		"merging": "Unione degli aggiornamenti...",
+		"merging": "Unendo gli aggiornamenti...",
 		"checkingUpdates": "Verifica aggiornamenti...",
 		"loadingTiles": "Caricamento delle tile..."
 	},
@@ -318,13 +318,13 @@
 		"swipeDownToClose": "Scorri verso il basso per chiudere"
 	},
 	"map": {
-		"bitcoinMerchantMapTitle": "Mappa dei Commercianti Bitcoin"
+		"bitcoinMerchantMapTitle": "Mappa dei commercianti Bitcoin"
 	},
 	"info": {
 		"contact": "Contatto",
 		"hours": "Orari",
 		"noActivity": "Nessuna attività da mostrare.",
-		"loadMore": "Carica Altri",
+		"loadMore": "Carica altri",
 		"viewOnMainMap": "Visualizza sulla mappa principale",
 		"noCommunity": "Questa posizione non fa parte di una community, ma ne può essere {createLink} una per aiutare a mantenere quest'area locale.",
 		"created": "creato",
@@ -332,11 +332,11 @@
 	},
 	"comments": {
 		"title": "Commenti",
-		"add": "Aggiungi Commento",
+		"add": "Aggiungi commento",
 		"adding": "Invio commento...",
 		"none": "Ancora nessun commento.",
 		"beFirst": "Ancora nessun commento. Sii il primo a lasciare un commento!",
-		"view": "Visualizza Commenti",
+		"view": "Visualizza commenti",
 		"shareThoughts": "Fai sapere agli altri cosa pensi di questo commerciante."
 	},
 	"errorPage": {
@@ -348,7 +348,7 @@
 	"errors": {
 		"searchUnavailable": "Ricerca temporaneamente non disponibile",
 		"loadFailed": "Impossibile caricare i commercianti nelle vicinanze",
-		"notFound": "Commerciante Non Trovato",
+		"notFound": "Commerciante non trovato",
 		"loadError": "Impossibile caricare i posti dal CDN statico, riprova o contatta BTC Map.",
 		"updateError": "Impossibile aggiornare i posti dall'API, utilizzo dei dati memorizzati nella cache.",
 		"captchaFetch": "Impossibile recuperare il captcha, riprova o contatta BTC Map.",
@@ -365,7 +365,7 @@
 		"linkCopied": "Link copiato negli appunti!"
 	},
 	"warning": {
-		"noLocations": "Nessuna posizione trovata, si prega di regolare la query."
+		"noLocations": "Nessuna posizione trovata, si prega di modificare la query."
 	},
 	"aria": {
 		"logoAlt": "Logo di BTC Map",
@@ -401,30 +401,30 @@
 		"privacy": "Privacy",
 		"bitcoinForBusiness": "Bitcoin for Business",
 		"status": "Stato",
-		"analytics": "Analytics",
+		"analytics": "Statistiche",
 		"whitePaper": "White Paper",
 		"cypherpunks": "Cypherpunks"
 	},
 	"meta": {
 		"countries": "Paesi",
-		"countriesLeaderboard": "Classifica dei Paesi",
-		"addCommunity": "Aggiungi Community",
-		"communityMap": "Mappa delle Community",
+		"countriesLeaderboard": "Classifica dei paesi",
+		"addCommunity": "Aggiungi community",
+		"communityMap": "Mappa delle community",
 		"communities": "Community",
-		"communitiesLeaderboard": "Classifica delle Community",
+		"communitiesLeaderboard": "Classifica delle community",
 		"merchant": "Commerciante",
 		"country": "Paese",
 		"community": "Community",
 		"supertagger": "Supertagger",
-		"communityFallbackDescription": "Trova posti dove spendere bitcoin a {name}. Sfoglia i commercianti, guarda las statistiche della community e connettiti con i contatti locali.",
+		"communityFallbackDescription": "Trova posti dove spendere bitcoin a {name}. Sfoglia i commercianti, guarda le statistiche della community e connettiti con i contatti locali.",
 		"countryFallbackDescription": "Trova posti dove spendere bitcoin in {name}. Sfoglia i commercianti, guarda le statistiche del paese ed esplora le community locali."
 	},
 	"communityMap": {
-		"viewCommunity": "Visualizza Community",
-		"pageTitle": "Mappa delle Community",
+		"viewCommunity": "Visualizza community",
+		"pageTitle": "Mappa delle community",
 		"organization": "Organizzazione",
 		"sponsor": "Sponsor di BTC Map",
-		"supporter": "Supporter",
+		"supporter": "Sostenitore",
 		"avatarAlt": "Icona della community",
 		"communityIconTitle": "Icona della community",
 		"communityNameTitle": "Nome della community",
@@ -434,14 +434,14 @@
 		"nameLabel": "Nome",
 		"emailLabel": "Email",
 		"namePlaceholder": "Il tuo nome",
-		"emailPlaceholder": "la-tua@email.com",
-		"loadingForm": "Caricamento del modulo...",
+		"emailPlaceholder": "latua@email.com",
+		"loadingForm": "Caricamento del form...",
 		"refreshCaptcha": "Aggiorna captcha",
 		"submittingApplication": "Invio della candidatura in corso...",
-		"submitButton": "Invia Candidatura",
+		"submitButton": "Invia candidatura",
 		"captchaPlaceholder": "Inserisci il testo del captcha.",
 		"successType": "Candidatura",
-		"successMessage": "Grazie per l'interesse a diventare un tagger! Esamineremo la tua candidatura e un membro del team ti contatterà tramite l'e-mail fornita. Contatta hello@btcmap.org se hai bisogno di un riscontro."
+		"successMessage": "Grazie per l'interesse a diventare un tagger! Esamineremo la tua candidatura e un membro del team ti contatterà tramite l'email fornita. Contatta hello@btcmap.org se hai bisogno di un riscontro."
 	},
 	"profileActivity": {
 		"location": "Posizione",
@@ -452,15 +452,15 @@
 	},
 	"taggerProfile": {
 		"osmProfile": "Profilo OSM",
-		"totalTags": "Tag Totali",
+		"totalTags": "Tag totali",
 		"created": "Creati",
 		"updated": "Aggiornati",
 		"deleted": "Eliminati",
 		"chartCreated": "Creati",
 		"chartUpdated": "Aggiornati",
 		"chartDeleted": "Eliminati",
-		"chartLabel": "Tipi di Tag",
-		"mappingSince": "Mappatura da",
+		"chartLabel": "Tipi di tag",
+		"mappingSince": "Mappando da",
 		"defaultName": "BTC Map Supertagger"
 	},
 	"forms": {
@@ -477,18 +477,18 @@
 		"contact": "Contatto Pubblico",
 		"captcha": "Protezione bot",
 		"captchaCaseSensitive": "(case-sensitive)",
-		"submitLocation": "Invia Posizione",
-		"submitReport": "Invia Segnalazione",
-		"selectLocation": "Seleziona Posizione",
+		"submitLocation": "Invia posizione",
+		"submitReport": "Invia segnalazione",
+		"selectLocation": "Seleziona posizione",
 		"searchButton": "Cerca 🔍",
 		"address": "Indirizzo",
 		"captchaPlaceholder": "Inserisci il testo del captcha."
 	},
 	"addLocation": {
-		"title": "Aggiungi Posizione",
+		"title": "Aggiungi posizione",
 		"subheading": "Accetti bitcoin? Fatti trovare",
 		"businessOwner": "Se sei il proprietario di un'attività, leggi la nostra",
-		"bestPractices": "Guida alle Migliori Pratiche per i Commercianti",
+		"bestPractices": "Guida alle migliori pratiche per i commercianti",
 		"guide": ".",
 		"heading": "Fatto per te",
 		"description": "Compila il seguente modulo e uno dei membri volontari della nostra community aggiungerà la tua posizione alla mappa.",
@@ -500,7 +500,7 @@
 		"latitude": "Latitudine",
 		"longitude": "Longitudine",
 		"advancedToggle": "Avanzate — inserisci le coordinate manualmente",
-		"advancedHint": "Utile se conosci già las coordinate esatte. Puoi anche cliccare sulla mappa o cercare sopra per aggiornarle.",
+		"advancedHint": "Utile se conosci già le coordinate esatte. Puoi anche cliccare sulla mappa o cercare sopra per aggiornarle.",
 		"latitudeInvalid": "La latitudine deve essere un numero compreso tra -90 e 90.",
 		"longitudeInvalid": "La longitudine deve essere un numero compreso tra -180 e 180.",
 		"addressLabel": "Indirizzo (Opzionale)",
@@ -508,7 +508,7 @@
 		"addressPlaceholder": "2100 Freedom Drive...",
 		"categoryPlaceholder": "Ristorante ecc.",
 		"paymentMethodsLegend": "Seleziona i metodi di pagamento accettati",
-		"paymentMethodError": "Si prega di correggere questo errore...",
+		"paymentMethodError": "Si prega di correggere questo...",
 		"onchainLabel": "On-chain",
 		"lightningLabel": "Lightning",
 		"nfcLabel": "Contactless",
@@ -526,8 +526,8 @@
 		"contactDescription": "In caso di domande di approfondimento, ti contatteremo per aggiungere correttamente questa posizione. Per velocizzare il processo, controlla la cartella spam nel caso in cui la mail finisca lì.",
 		"contactPlaceholder": "hello@btcmap.org",
 		"captchaPlaceholder": "Inserisci il testo del captcha.",
-		"supertaggerHeading": "Shadowy Supertagger?",
-		"supertaggerDescription": "Contribuisci alle modifiche direttamente su OSM - come un 😎 boss. Chi ha bisogno dei moduli dopotutto.",
+		"supertaggerHeading": "Shadowy supertagger?",
+		"supertaggerDescription": "Contribuisci alle modifiche direttamente su OSM - come un boss 😎. Chi ha bisogno dei moduli, dopotutto.",
 		"supertaggerImageAlt": "shadowy supertagger",
 		"supertaggerWikiButton": "Vedi la Wiki per le istruzioni",
 		"formSuccessType": "Posizione",
@@ -540,23 +540,23 @@
 		"networkError": "Ricerca dell'indirizzo fallita. Riprova o clicca sulla mappa per inserire un pin."
 	},
 	"formSuccess": {
-		"submittedTitle": "{type} Inviato!",
+		"submittedTitle": "{type} inviato!",
 		"monitorProgress": "Puoi anche monitorare lo stato di avanzamento del tuo invio qui:",
 		"issueLink": "Issue #{issue}",
 		"submitAnother": "Invia un altro {type}"
 	},
 	"verifyLocation": {
 		"subheading": "Aiuta a migliorare i dati per tutti",
-		"title": "Verifica Posizione",
+		"title": "Verifica posizione",
 		"note": "(Assicurati che le informazioni siano ancora accurate e aggiornale in caso contrario.)",
 		"descriptionPart1": "Compila il seguente modulo e uno dei membri volontari della nostra community aggiornerà la tua posizione sulla mappa. Sapevi che puoi aggiornare tu stesso questi dati su",
 		"osmLinkText": "OpenStreetMap",
 		"descriptionPart2": "? Puoi controllare la nostra",
-		"wikiLinkText": "Wiki",
+		"wikiLinkText": "wiki",
 		"descriptionPart3": "per ulteriori istruzioni.",
-		"tooltip": "NOTA: A causa dell'accumulo di richieste e del fatto che gli aggiornamenti vengono completati grazie all'impegno di volontari, potrebbero essere necessarie diverse settimane per aggiornare questa posizione. Si consiglia di aggiornare la posizione direttamente su OpenStreetMap se si desidera vedere le modifiche apparire immediatamente sulla mappa.",
-		"loadingPlaceholder": "Caricamento Commerciante...",
-		"merchantNamePlaceholder": "Nome del Commerciante",
+		"tooltip": "NOTA: A causa dell'accumulo di richieste e che gli aggiornamenti vengono completati grazie all'impegno di volontari, potrebbero essere necessarie diverse settimane per aggiornare questa posizione. Si consiglia di aggiornare la posizione direttamente su OpenStreetMap se si desidera vedere le modifiche apparire immediatamente sulla mappa.",
+		"loadingPlaceholder": "Caricamento commerciante...",
+		"merchantNamePlaceholder": "Nome del commerciante",
 		"currentInfoLabel": "Le informazioni attuali sono corrette",
 		"currentInfoDescription": "Spunta questa casella se hai verificato che i dati esistenti siano aggiornati.",
 		"outdatedLabel": "Informazioni obsolete",
@@ -564,25 +564,25 @@
 		"outdatedPlaceholder": "Fornisci quali informazioni non sono corrette e le informazioni aggiornate su questa posizione",
 		"verifyLabel": "Come lo hai verificato?",
 		"verifyPlaceholder": "Si prega di fornire ulteriori informazioni qui",
-		"successType": "Segnalazione",
+		"successType": "Invia",
 		"successMessage": "Grazie per aver dedicato del tempo a compilare questa segnalazione. Esamineremo le tue informazioni e le aggiorneremo il prima possibile.",
-		"submitReport": "Invia Segnalazione"
+		"submitReport": "Invia segnalazione"
 	},
 	"dashboard": {
 		"hero": "Dashboard",
-		"totalMerchants": "Commercianti Totali",
+		"totalMerchants": "Commercianti totali",
 		"recentlyVerified": "Verificati di Recente (1 anno)",
-		"totalExchanges": "Exchange Totali",
-		"totalAreas": "Aree Totali",
+		"totalExchanges": "Scambi totali",
+		"totalAreas": "Aree totali",
 		"period7d": "7D",
 		"period1m": "1M",
 		"period3m": "3M",
 		"period6m": "6M",
 		"periodYtd": "YTD",
 		"period1y": "1Y",
-		"periodAll": "ALL",
-		"verifiedLabel": "Commercianti Verificati di Recente",
-		"totalLabel": "Commercianti Totali",
+		"periodAll": "TUTTO",
+		"verifiedLabel": "Commercianti verificati di recente",
+		"totalLabel": "Commercianti totali",
 		"merchantsNote": "*Commercianti che accettano qualsiasi metodo bitcoin.",
 		"verifiedNote": "*Commercianti con un tag survey:date, check_date, o check_date:currency:XBT risalente a meno di un anno fa.",
 		"tagsNotePart1": "*Ulteriori informazioni sui tag di mappatura bitcoin possono essere trovate",
@@ -590,8 +590,8 @@
 		"tagsNotePart2": "."
 	},
 	"leaderboard": {
-		"taggerHero": "Classifica Tagger",
-		"joinButton": "Unisciti a Loro",
+		"taggerHero": "Classifica tagger",
+		"joinButton": "Unisciti a loro",
 		"loadingData": "Caricamento dati della classifica",
 		"loadingPeriod": "Caricamento dati di {period}...",
 		"failedToLoad": "Impossibile caricare la classifica:",
@@ -601,7 +601,7 @@
 		"period3Months": "Ultimi 3 mesi",
 		"period6Months": "Ultimi 6 mesi",
 		"period12Months": "Ultimi 12 mesi",
-		"periodAllTime": "Di Sempre",
+		"periodAllTime": "Di sempre",
 		"noResults": "Nessun risultato trovato.",
 		"position": "Posizione",
 		"name": "Nome",
@@ -631,21 +631,21 @@
 		"of": "di"
 	},
 	"communities": {
-		"hero": "Unisciti alla community della mappa bitcoin",
+		"hero": "Unisciti alla community di bitcoin map",
 		"description": "Prendi il controllo dei dati di mappatura bitcoin locali e aiuta a guidare l'adozione. Le community Bitcoin sono la scintilla che accende il movimento. Unisciti ai tuoi amici, includi le attività commerciali e divertiti!",
-		"leaderboardHero": "Top Community",
+		"leaderboardHero": "Top community",
 		"leaderboardDescription": "Le community di mappatura Bitcoin mantengono i loro dataset locali e si sforzano di avere le informazioni più accurate. Aiutano anche a includere nuovi commercianti nella loro area!",
 		"directory": "Directory",
 		"addCommunity": "Aggiungi community",
 		"viewMap": "Visualizza la mappa delle community",
 		"leaderboard": "Classifica",
-		"byContinent": "Community per Continente",
-		"totalLocations": "Posizioni Totali",
-		"verifiedLocations": "Posizioni Verificate"
+		"byContinent": "Community per continente",
+		"totalLocations": "Posizioni totali",
+		"verifiedLocations": "Posizioni verificate"
 	},
 	"addCommunityForm": {
 		"hero": "Fai un impatto a livello locale!",
-		"heading": "Aggiungi Community",
+		"heading": "Aggiungi community",
 		"description": "Compila questo modulo per inviare una candidatura per la community. Questo è un ottimo modo per far crescere l'adozione di bitcoin nella tua zona, divertirti e magari fare anche nuove amicizie lungo il percorso.",
 		"tooltip": "NOTA: BTC Map è un progetto gratuito e open source gestito da volontari. Ogni candidatura della community viene esaminata manualmente per garantirene la qualità. Potrebbero essere necessarie alcune settimane per aggiungere la tua community.",
 		"criteriaHeading": "Criteri",
@@ -653,28 +653,28 @@
 		"criteria2": "deve essere un'area geografica, non un singolo punto",
 		"criteria3": "essere disposti a prendere il controllo dei dati di mappatura locali",
 		"criteria4": "provare a includere nuove attività commerciali nella tua zona",
-		"locationLabel": "Seleziona Posizione",
+		"locationLabel": "Seleziona posizione",
 		"locationHint": "Cerca un'area e seleziona un'opzione dai risultati.",
 		"locationSelected": "Posizione selezionata!",
 		"locationError": "Seleziona una posizione...",
 		"locationPlaceholder": "El Zonte, El Salvador",
-		"nameLabel": "Nome della Community",
+		"nameLabel": "Nome della community",
 		"namePlaceholder": "Bitcoin Island Philippines",
-		"iconLabel": "URL dell'Icona",
+		"iconLabel": "URL dell'icona",
 		"iconOptional": "(opzionale)",
 		"iconHint": "Utilizzeremo l'avatar del tuo link social o la bandiera del paese in cui si trova la tua community se non viene fornita un'icona.",
 		"iconPlaceholder": "https://static.btcmap.org/images/communities/iom.svg",
 		"lightningLabel": "Mance Lightning",
 		"lightningHint": "Se desideri la possibilità di ricevere sats puoi aggiungere un",
 		"lightningAddress": "Lightning Address",
-		"lightningOr": "o",
+		"lightningOr": "o una stringa",
 		"lightningLnurl": "LNURL-pay",
-		"lightningSuffix": "stringa.",
+		"lightningSuffix": ".",
 		"lightningPlaceholder": "btcmap@zbd.gg",
-		"socialsLabel": "Link Social",
+		"socialsLabel": "Link social",
 		"socialsHint": "Devi fornire almeno un metodo per consentire alle persone di unirsi alla tua community.",
-		"socialsPlaceholder": "Website, Nostr, Telegram, Meetup ecc.",
-		"contactLabel": "Contatto Pubblico",
+		"socialsPlaceholder": "Sito web, Nostr, Telegram, Meetup ecc.",
+		"contactLabel": "Contatto pubblico",
 		"contactHint": "Un modo per mettersi in contatto con il leader della community in caso di domande.",
 		"contactPlaceholder": "es. hello@btcmap.org",
 		"notesLabel": "Note",
@@ -683,7 +683,7 @@
 		"captchaLabel": "Protezione bot",
 		"captchaCaseSensitive": "(case-sensitive)",
 		"captchaPlaceholder": "Inserisci il testo del captcha.",
-		"submitButton": "Invia Community",
+		"submitButton": "Aggiungi community",
 		"successType": "Community",
 		"successMessage": "Grazie per la tua iniziativa di creare una community bitcoin. Esamineremo le tue informazioni e ti contatteremo se avremo bisogno di ulteriori dettagli.",
 		"captchaFetchError": "Impossibile recuperare il captcha, riprova o contatta BTC Map.",
@@ -707,13 +707,13 @@
 		"community": "Community",
 		"noAddTickets": "Nessun ticket di aggiunta aperto.",
 		"noVerifyTickets": "Nessun ticket di verifica aperto.",
-		"noCommunityTickets": "Nessun ticket della community aperto.",
+		"noCommunityTickets": "Nessun ticket community aperto.",
 		"ticketsTooltip": "Ticket disponibili dai nostri moduli per principianti! Chiunque può aiutare ad aggiungere o verificare gli invii su OpenStreetMap.",
 		"ticketsSubheading": "Ticket disponibili dai nostri moduli per principianti! Chiunque può aiutare ad aggiungere o verificare gli invii di posizioni e ad approvare le community.",
 		"taggingInstructionsIntro": "Ulteriori informazioni su come partecipare sono disponibili nelle nostre",
-		"taggingInstructionsLink": "Istruzioni per il Tagging dei Commercianti",
-		"underMaintenance": "I problemi sono attualmente in fase di manutenzione.",
-		"viewOnGitea": "Visualizza i problemi direttamente su Gitea.",
+		"taggingInstructionsLink": "Istruzioni per il tagging dei commercianti",
+		"underMaintenance": "Le issue sono attualmente in fase di manutenzione.",
+		"viewOnGitea": "Visualizza le issue direttamente su Gitea.",
 		"viewAllOnGitea": "Visualizza tutti i ticket aperti direttamente su",
 		"giteaLinkText": "Gitea",
 		"opened": "aperto",
@@ -722,8 +722,8 @@
 		"dataUpdatedNote": "*Dati aggiornati ogni 10 minuti.",
 		"errorFetching": "Errore nel recupero dei ticket. Riprova o contatta il supporto di BTC Map.",
 		"couldNotLoadTickets": "Impossibile caricare i ticket aperti, riprova o contatta BTC Map.",
-		"issueMissingIcon": "L'icona è mancante",
-		"issueNotVerified": "La data dell'ultima verifica è mancante",
+		"issueMissingIcon": "Icona mancante",
+		"issueNotVerified": "Data dell'ultima verifica mancante",
 		"issueOutdated": "Obsoleto, richiede una nuova verifica",
 		"issueOutdatedSoon": "Presto obsoleto, richiede una nuova verifica",
 		"issueInvalidTagValue": "Il valore del tag non è formattato correttamente ({code})",
@@ -733,14 +733,14 @@
 		"population": "Popolazione",
 		"asOf": "al",
 		"area": "Area",
-		"totalLocations": "Posizioni Totali",
-		"recentlyVerified": "Posizioni Verificate di Recente",
+		"totalLocations": "Posizioni totali",
+		"recentlyVerified": "Posizioni verificate di recente",
 		"recentlyVerifiedTooltip": "Posizioni che sono state verificate entro un anno.",
-		"recentlyVerifiedLabel": "Verificate di Recente",
+		"recentlyVerifiedLabel": "Verificate di recente",
 		"outdated": "Obsolete",
 		"locations": "Posizioni",
-		"recentlyVerifiedPercent": "Percentuale Verificate di Recente",
-		"totalLocationsLabel": "Posizioni Totali",
+		"recentlyVerifiedPercent": "Percentuale verificate di recente",
+		"totalLocationsLabel": "Posizioni totali",
 		"chartsTitle": "Grafici",
 		"defaultAreaName": "Area BTC Map",
 		"locationsNote": "*Posizioni che accettano qualsiasi metodo di pagamento bitcoin.",
@@ -751,14 +751,14 @@
 	},
 	"activityPage": {
 		"title": "Attività",
-		"subheading": "Gli Shadowy Supertagger non dormono mai. Stanno svegli tutta la notte a taggare. Il mondo che vogliamo è a un tag di distanza.",
+		"subheading": "Gli shadowy supertagger non dormono mai. Stanno svegli tutta la notte a taggare. Il mondo che vogliamo è a un tag di distanza.",
 		"cta": "Anche tu puoi diventare una leggenda dello shadowy supertagging! Cosa stai aspettando?",
 		"getTaggin": "Inizia a taggare!",
-		"latestSupertaggers": "Ultimi Supertagger"
+		"latestSupertaggers": "Ultimi supertagger"
 	},
 	"areaHighlights": {
-		"boostedMerchants": "Commercianti con Boost",
-		"noBoosted": "Nessun commerciante con boost in quest'area.",
+		"boostedMerchants": "Commercianti boostati",
+		"noBoosted": "Nessun commerciante boostato in quest'area.",
 		"latestAdded": "Ultimi Aggiunti",
 		"noLatest": "Nessun ultimo aggiunto in quest'area. Puoi",
 		"addNewMerchant": "aggiungere un nuovo commerciante",
@@ -766,7 +766,7 @@
 	},
 	"areaActivity": {
 		"supertaggers": "Supertagger",
-		"loadMore": "Carica Altri",
+		"loadMore": "Carica altri",
 		"noSupertaggers": "Nessun supertagger da mostrare.",
 		"supertaggersError": "Impossibile caricare i principali editori. Riprova più tardi.",
 		"activity": "Attività",
@@ -781,9 +781,9 @@
 		"boosted": "boostato",
 		"forDays": "per {days} giorni",
 		"commented": "—",
-		"atomFeeds": "Atom Feed",
-		"newPlaces": "Nuovi Posti",
-		"newComments": "Nuovi Commenti"
+		"atomFeeds": "Atom feed",
+		"newPlaces": "Nuovi posti",
+		"newComments": "Nuovi commenti"
 	},
 	"area": {
 		"sections": {
@@ -801,8 +801,8 @@
 		"errorLoadingData": "Errore durante il caricamento dei dati. Riprova più tardi.",
 		"loadingData": "Caricamento dati...",
 		"dataWithin24Hours": "I dati appariranno entro 24 ore.",
-		"taggingIssues": "Problemi di Tagging di {name}",
-		"openTickets": "Ticket Aperti di {name}"
+		"taggingIssues": "Problemi di tagging di {name}",
+		"openTickets": "Ticket aperti di {name}"
 	},
 	"areaTickets": {
 		"typeAdd": "Aggiungi",
@@ -811,16 +811,16 @@
 		"tooltip": "Ticket disponibili dai nostri moduli per principianti! Chiunque può aiutare ad aggiungere o verificare gli invii su OpenStreetMap.",
 		"noAddTickets": "Nessun ticket di aggiunta aperto.",
 		"noVerifyTickets": "Nessun ticket di verifica aperto.",
-		"noCommunityTickets": "Nessun ticket della community aperto.",
-		"maintenanceMessage": "I problemi sono attualmente in fase di manutenzione. ",
-		"viewOnGitea": "Visualizza i problemi direttamente su Gitea",
+		"noCommunityTickets": "Nessun ticket community aperto.",
+		"maintenanceMessage": "Le issue sono attualmente in fase di manutenzione. ",
+		"viewOnGitea": "Visualizza le issue direttamente su Gitea",
 		"errorMessage": "Errore nel recupero dei ticket. Riprova o contatta il supporto di BTC Map.",
 		"loadError": "Impossibile caricare i ticket aperti, riprova o contatta BTC Map."
 	},
 	"verifyCommunity": {
-		"title": "Verifica Informazioni della Community",
+		"title": "Verifica informazioni della community",
 		"description": "Aiutaci a mantenere accurati i dati della community verificando le informazioni sottostanti.",
-		"communityName": "Nome della Community",
+		"communityName": "Nome della community",
 		"accurateLabel": "Le informazioni attuali sono accurate",
 		"accurateHint": "Spunta questa casella se hai verificato che i dati esistenti siano aggiornati.",
 		"updatesLabel": "Aggiornamenti necessari",
@@ -831,20 +831,20 @@
 		"botProtection": "Protezione bot",
 		"caseSensitive": "(case-sensitive)",
 		"captchaPlaceholder": "Inserisci il testo del captcha.",
-		"submitReport": "Invia Segnalazione",
-		"successType": "Segnalazione",
+		"submitReport": "Invia segnalazione",
+		"successType": "Invia",
 		"successMessage": "Grazie per aver verificato le informazioni di questa community. Esamineremo la tua segnalazione e le aggiorneremo il prima possibile."
 	},
 	"areaLeaderboard": {
-		"communityLeaderboard": "Classifica delle Community",
-		"countryLeaderboard": "Classifica dei Paesi",
+		"communityLeaderboard": "Classifica delle community",
+		"countryLeaderboard": "Classifica dei paesi",
 		"noData": "Nessun dato disponibile",
 		"noResults": "Nessun risultato trovato.",
 		"position": "Posizione",
 		"name": "Nome",
 		"sortByPosition": "Ordina per posizione",
 		"total": "Totale",
-		"totalLocations": "Posizioni Totali",
+		"totalLocations": "Posizioni totali",
 		"sortByTotal": "Ordina per posizioni totali",
 		"verified": "Verificati",
 		"verifiedLocations": "Posizioni Verificate",
@@ -852,7 +852,7 @@
 		"grade": "Grado",
 		"sortByGrade": "Ordina per grado",
 		"positionCalc": "La posizione è calcolata come segue:",
-		"primaryCalc": "Primario: Posizioni totali meno 5 volte gli elementi obsoleti.",
+		"primaryCalc": "Primario: Posizioni totali meno 5x gli elementi obsoleti.",
 		"secondaryCalc": "Secondario: Numero totale di posizioni.",
 		"locationsNote": "Le posizioni includono gli ATM.",
 		"totalTooltip": "Tutte le posizioni inclusi gli ATM",
@@ -860,13 +860,13 @@
 		"tableAria": "Tabella della classifica",
 		"totalTooltipInfo": "Informazioni sulle posizioni totali",
 		"verifiedTooltipInfo": "Informazioni sulle posizioni verificate",
-		"gradeTooltipInfo": "Informazioni sulla metrica del Grado",
+		"gradeTooltipInfo": "Informazioni sulla metrica del grado",
 		"viewDetails": "Visualizza i dettagli di {name}",
 		"loadingAreaInfo": "Caricamento delle informazioni dell'area"
 	},
 	"issuesTable": {
 		"searchPlaceholder": "Cerca...",
-		"merchantName": "Nome del Commerciante",
+		"merchantName": "Nome del commerciante",
 		"description": "Descrizione",
 		"view": "Visualizza",
 		"edit": "Modifica",
@@ -876,27 +876,27 @@
 		"page": "Pagina",
 		"of": "di",
 		"showCount": "Mostra {count}",
-		"issueTypeMissingIcon": "L'icona è mancante",
-		"issueTypeNotVerified": "La data dell'ultima verifica è mancante",
+		"issueTypeMissingIcon": "Icona mancante",
+		"issueTypeNotVerified": "Data dell'ultima verifica mancante",
 		"issueTypeOutdated": "Obsoleto, richiede una nuova verifica",
 		"issueTypeOutdatedSoon": "Presto obsoleto, richiede una nuova verifica",
 		"issueTypeInvalidTag": "Il valore del tag non è formattato correttamente ({code})",
 		"issueTypeMisspelledTag": "Problema di ortografia nel nome del tag ({code})"
 	},
 	"taggingIssues": {
-		"title": "Problemi di Tagging",
-		"subheading": "Contribuisci a LA mappa risolvendo i problemi di tagging!",
-		"descriptionPart1": "Ulteriori informazioni su come partecipare sono disponibili nella nostra pagina Wiki sulle ",
-		"linkText": "Istruzioni per il Tagging",
+		"title": "Problemi di tagging",
+		"subheading": "Contribuisci alla mappa risolvendo i problemi di tagging!",
+		"descriptionPart1": "Ulteriori informazioni su come partecipare sono disponibili nella nostra pagina wiki sulle ",
+		"linkText": "istruzioni per il tagging",
 		"descriptionPart2": ".",
-		"tableTitle": "Problemi Globali"
+		"tableTitle": "Problemi globali"
 	},
 	"countries": {
 		"hero": "Adozione di bitcoin per paese",
 		"description": "Il tuo paese? La tua mappa!",
 		"viewLeaderboard": "Visualizza classifica",
 		"viewDirectory": "Visualizza directory",
-		"leaderboardHero": "Top Paesi",
+		"leaderboardHero": "Top paesi",
 		"leaderboardDescription": "Approfondimenti sull'adozione di bitcoin in tutto il mondo!",
 		"leaderboard": "Classifica",
 		"africa": "Africa",
@@ -1019,7 +1019,7 @@
 				"desc": "69"
 			},
 			"longestChain": {
-				"title": "Catena più lunga",
+				"title": "Longest Chain",
 				"desc": "51"
 			},
 			"satoshi": {
@@ -1027,7 +1027,7 @@
 				"desc": "21"
 			},
 			"heartbeat": {
-				"title": "Battito cardiaco",
+				"title": "Heartbeat",
 				"desc": "10"
 			},
 			"segwit": {
@@ -1035,7 +1035,7 @@
 				"desc": "4"
 			},
 			"wholeTagger": {
-				"title": "Tagger Intero",
+				"title": "Whole Tagger",
 				"desc": "1"
 			}
 		}
@@ -1044,7 +1044,7 @@
 		"hero": "Trova commercianti su qualsiasi piattaforma",
 		"subheading": "Ti copriamo su qualsiasi dispositivo e sistema operativo tu scelga.",
 		"btcmap": "App BTC Map",
-		"poweredBy": "Powered by BTC Map",
+		"poweredBy": "Supportate da BTC Map",
 		"comingSoon": "Prossimamente",
 		"sponsor": "Sponsor",
 		"downloadAria": "Scarica {name}",
@@ -1053,34 +1053,34 @@
 	"media": {
 		"title": "Media",
 		"intro": "Le risorse multimediali sono disponibili gratuitamente per scopi promozionali.",
-		"brandColors": "Colori del Brand",
-		"assets": "Risorse",
+		"brandColors": "Colori del brand",
+		"assets": "Asset",
 		"downloadAll": "Scarica Tutto",
 		"brand": "Brand",
 		"promotional": "Promozionale",
 		"team": "Team",
 		"assetNames": {
-			"appScreenshot": "Screenshot dell'App",
+			"appScreenshot": "Screenshot dell'app",
 			"btcmapLogo": "Logo di BTC Map",
 			"shadowySupertagger": "Shadowy Supertagger",
 			"shadowySupertaggerLeader": "Shadowy Supertagger - Leader",
 			"activityFeed": "Feed delle Attività",
-			"addCommunity": "Aggiungi Community",
-			"addLocation": "Aggiungi Posizione",
+			"addCommunity": "Aggiungi community",
+			"addLocation": "Aggiungi posizione",
 			"communities": "Community",
 			"countries": "Paesi",
-			"downloadApps": "Scarica le App",
-			"earnBadges": "Guadagna Badge",
+			"downloadApps": "Scarica le app",
+			"earnBadges": "Guadagna badge",
 			"main": "Principale",
 			"map": "Mappa",
 			"merchant": "Commerciante",
-			"statsDashboard": "Dashboard delle Statistiche",
-			"supertaggerLeaderboard": "Classifica dei Supertagger",
-			"supertaggerProfile": "Profilo dei Supertagger",
+			"statsDashboard": "Dashboard delle statistiche",
+			"supertaggerLeaderboard": "Classifica dei supertagger",
+			"supertaggerProfile": "Profilo dei supertagger",
 			"supporters": "Sostenitori",
-			"topCommunities": "Top Community",
-			"topCountries": "Top Paesi",
-			"verifyLocations": "Verifica Posizioni",
+			"topCommunities": "Top community",
+			"topCountries": "Top paesi",
+			"verifyLocations": "Verifica posizioni",
 			"igor": "Igor",
 			"karnage": "Karnage",
 			"nathanDay": "Nathan Day",
@@ -1089,7 +1089,7 @@
 	},
 	"supporters": {
 		"title": "Sostenitori",
-		"hero": "Aiuta a mettere bitcoin sulla mappa",
+		"hero": "Aiuta a piazzare bitcoin sulla mappa",
 		"tiers": {
 			"explorer": {
 				"headline": "Amiamo ciò che facciamo"
@@ -1101,7 +1101,7 @@
 				"headline": "Partner principale dell'ecosistema"
 			},
 			"navigator": {
-				"headline": "Sostenitori del settore ad alta convinzione"
+				"headline": "Sostenitori convinti del settore"
 			},
 			"pioneer": {
 				"headline": "I nostri sostenitori più impegnati"
@@ -1111,12 +1111,12 @@
 			}
 		},
 		"individual": {
-			"heading": "Sostenitori Individuali",
+			"heading": "Sostenitori individuali",
 			"description": "BTC Map è alimentato dalla community. I sostenitori individuali aiutano a mantenere il progetto indipendente, aperto e nelle mani delle persone che lo utilizzano.",
-			"cta": "Diventa un Sostenitore"
+			"cta": "Diventa un sostenitore"
 		},
 		"sponsors": {
-			"description": "BTC Map è riconosciuto come una parte importante della più ampia infrastruttura di Bitcoin. Ciascuno sponsor di seguito ci supporta nella nostra missione di rendere Bitcoin il denaro di tutti i giorni."
+			"description": "BTC Map è riconosciuto come una parte importante della più ampia infrastruttura Bitcoin. Ciascuno sponsor di seguito ci supporta nella nostra missione di rendere Bitcoin il denaro di tutti i giorni."
 		},
 		"donate": {
 			"scanOrClick": "Scansiona o clicca per donare",
@@ -1126,8 +1126,8 @@
 			"protocolAlt": "protocollo"
 		},
 		"supporters": {
-			"heading": "Sostenitori del Settore",
-			"becomeSponsor": "Diventa un Sostenitore"
+			"heading": "Sostenitori del settore",
+			"becomeSponsor": "Diventa un sostenitore"
 		},
 		"node": {
 			"heading": "Apri un canale lightning",
@@ -1138,7 +1138,7 @@
 		"qrLoadError": "Impossibile caricare il generatore di QR. Riprova."
 	},
 	"privacyPolicy": {
-		"title": "Informativa sulla Privacy",
+		"title": "Informativa sulla privacy",
 		"intro": "Non raccogliamo le tue informazioni personali.",
 		"readMore": "Si prega di leggere ulteriormente per maggiori dettagli.",
 		"forms": {
@@ -1155,23 +1155,23 @@
 			"xHandleAfter": "X."
 		},
 		"analytics": {
-			"heading": "Analytics",
+			"heading": "Statistiche",
 			"intro": "Utilizziamo strumenti di analisi che rispettano la privacy forniti da {netlifyLink} e un'istanza self-hosted di {umamiLink} al fine di tracciare le statistiche di utilizzo nel tempo e migliorare l'esperienza utente.",
 			"noCookies": "Questi strumenti di analisi non utilizzano cookie o tracker. Non è inclusa alcuna informazione di identificazione personale. Tutti i dati sono anonimi e conformi al {gdprLink}.",
 			"readMore": "Di seguito sono riportati alcuni link per saperne di più su Netlify Analytics:"
 		},
 		"cookies": {
 			"heading": "Cookie",
-			"intro": "Non utilizziamo i cookie."
+			"intro": "Non utilizziamo cookie."
 		},
 		"ipProtection": {
 			"heading": "Come proteggere il proprio IP online",
-			"intro": "È buona norma proteggere il proprio indirizzo IP pubblico quando si naviga sul web. I due metodi più comuni per farlo sono:",
+			"intro": "È buona pratica proteggere il proprio indirizzo IP pubblico quando si naviga sul web. I due metodi più comuni per farlo sono:",
 			"item1": "Utilizzare un servizio VPN come {mullvadLink}.",
 			"item2": "Utilizzare il browser {torLink}."
 		},
 		"changes": {
-			"heading": "Modifiche a questa Informativa sulla Privacy",
+			"heading": "Modifiche a questa informativa sulla privacy",
 			"lastUpdated": "Questa informativa sulla privacy è stata aggiornata l'ultima volta: 10 luglio 2023."
 		},
 		"contact": {
@@ -1179,12 +1179,12 @@
 			"intro": "In caso di domande o feedback sulla nostra informativa sulla privacy, contattaci all'indirizzo {contactLink} o su una qualsiasi delle nostre piattaforme social."
 		},
 		"links": {
-			"githubPrivacy": "Informativa sulla Privacy di GitHub",
-			"discordPrivacy": "Informativa sulla Privacy di Discord",
-			"osmPrivacy": "Informativa sulla Privacy di OpenStreetMap",
+			"githubPrivacy": "Informativa sulla privacy di GitHub",
+			"discordPrivacy": "Informativa sulla privacy di Discord",
+			"osmPrivacy": "Informativa sulla privacy di OpenStreetMap",
 			"netlifyAnalytics": "Netlify Analytics",
 			"netlifyDocsAnalytics": "Netlify Docs - Analytics",
-			"netlifyDocsHowAnalytics": "Netlify Docs - Come funzionano gli Analytics"
+			"netlifyDocsHowAnalytics": "Netlify Docs - Come funzionano le Analytics"
 		}
 	}
 }
