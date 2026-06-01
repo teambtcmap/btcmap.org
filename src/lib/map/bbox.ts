@@ -9,11 +9,12 @@
 // FeatureCollection first.
 //
 // Returns null when no finite coordinate is found (empty input, or geometry
-// whose positions are all non-numeric / NaN), so callers can branch to a
-// fallback camera (see MultiPlaceMap.fitToPlaces) or skip the fit (see
-// AreaMap.fitToArea). NaN coordinates are rejected as a whole position —
-// typeof NaN === "number" passes the original type guard, so an all-NaN input
-// would otherwise return degenerate infinite bounds instead of null.
+// whose positions are all non-numeric / non-finite), so callers can branch to
+// a fallback camera (see MultiPlaceMap.fitToPlaces) or skip the fit (see
+// AreaMap.fitToArea). NaN and ±Infinity are rejected as a whole position —
+// typeof NaN === "number" passes the original type guard, so without the
+// finiteness check a non-finite coordinate would survive into a degenerate
+// bbox and on into map.fitBounds instead of yielding null.
 
 import type {
 	Feature,
@@ -35,7 +36,7 @@ export const computeBbox = (g: GeoJSON): Bbox | null => {
 	const visitPosition = (pos: Position) => {
 		const [x, y] = pos;
 		if (typeof x !== "number" || typeof y !== "number") return;
-		if (Number.isNaN(x) || Number.isNaN(y)) return;
+		if (!Number.isFinite(x) || !Number.isFinite(y)) return;
 		if (x < minX) minX = x;
 		if (y < minY) minY = y;
 		if (x > maxX) maxX = x;

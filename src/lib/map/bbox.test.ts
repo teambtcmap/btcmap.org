@@ -147,6 +147,38 @@ describe("computeBbox", () => {
 		expect(computeBbox(point)).toBeNull();
 	});
 
+	it("rejects a non-finite (Infinity) coordinate as a whole position", () => {
+		const fc: FeatureCollection = {
+			type: "FeatureCollection",
+			features: [
+				{
+					type: "Feature",
+					properties: {},
+					geometry: {
+						type: "Point",
+						coordinates: [Number.POSITIVE_INFINITY, 0],
+					},
+				},
+				{
+					type: "Feature",
+					properties: {},
+					geometry: { type: "Point", coordinates: [5, 6] },
+				},
+			],
+		};
+		// The Infinity x rejects that whole position; only [5, 6] contributes,
+		// so the bbox never carries a non-finite value into fitBounds.
+		expect(computeBbox(fc)).toEqual([5, 6, 5, 6]);
+	});
+
+	it("returns null when every coordinate is non-finite", () => {
+		const point: GeoJSON = {
+			type: "Point",
+			coordinates: [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY],
+		};
+		expect(computeBbox(point)).toBeNull();
+	});
+
 	it("skips a NaN point but keeps valid ones in a FeatureCollection", () => {
 		const fc: FeatureCollection = {
 			type: "FeatureCollection",
