@@ -1,13 +1,7 @@
 <script lang="ts">
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import type {
-	Feature,
-	FeatureCollection,
-	GeoJSON,
-	Geometry,
-	Position,
-} from "geojson";
+import type { GeoJSON } from "geojson";
 import type {
 	GeoJSONSource,
 	MapLayerMouseEvent,
@@ -23,6 +17,7 @@ import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import ShowTags from "$components/ShowTags.svelte";
 import TaggingIssues from "$components/TaggingIssues.svelte";
 import { CLUSTERING_DISABLED_ZOOM, GradeTable } from "$lib/constants";
+import { computeBbox } from "$lib/map/bbox";
 import {
 	ensureSpritesForPlaces,
 	installPlaceholderHandler,
@@ -142,55 +137,6 @@ const buildFeatureCollection = (list: Place[]): PlaceFeatureCollection => ({
 			},
 		})),
 });
-
-// Walk every coordinate in any GeoJSON object and reduce to [minX, minY, maxX, maxY].
-// Inlined instead of pulling in @turf/bbox — the project doesn't ship it.
-const computeBbox = (g: GeoJSON): [number, number, number, number] | null => {
-	let minX = Number.POSITIVE_INFINITY;
-	let minY = Number.POSITIVE_INFINITY;
-	let maxX = Number.NEGATIVE_INFINITY;
-	let maxY = Number.NEGATIVE_INFINITY;
-	let found = false;
-	const visitPosition = (pos: Position) => {
-		const [x, y] = pos;
-		if (typeof x !== "number" || typeof y !== "number") return;
-		if (x < minX) minX = x;
-		if (y < minY) minY = y;
-		if (x > maxX) maxX = x;
-		if (y > maxY) maxY = y;
-		found = true;
-	};
-	const visitCoords = (coords: unknown) => {
-		if (!Array.isArray(coords)) return;
-		if (coords.length > 0 && typeof coords[0] === "number") {
-			visitPosition(coords as Position);
-			return;
-		}
-		for (const c of coords) visitCoords(c);
-	};
-	const visitGeometry = (geom: Geometry) => {
-		if (geom.type === "GeometryCollection") {
-			for (const sub of geom.geometries) visitGeometry(sub);
-		} else {
-			visitCoords((geom as { coordinates: unknown }).coordinates);
-		}
-	};
-	const visit = (input: GeoJSON) => {
-		if (input.type === "FeatureCollection") {
-			for (const f of (input as FeatureCollection).features) {
-				if (f.geometry) visitGeometry(f.geometry);
-			}
-		} else if (input.type === "Feature") {
-			const f = input as Feature;
-			if (f.geometry) visitGeometry(f.geometry);
-		} else {
-			visitGeometry(input as Geometry);
-		}
-	};
-	visit(g);
-	if (!found) return null;
-	return [minX, minY, maxX, maxY];
-};
 
 // Register the area polygon source + outline layer. Re-runs on every style
 // reload so a theme swap doesn't strip the overlay. When the source already

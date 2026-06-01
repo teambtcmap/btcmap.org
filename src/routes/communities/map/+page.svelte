@@ -4,13 +4,7 @@ import "./communities-map.css";
 
 import rewind from "@mapbox/geojson-rewind";
 import { geoArea } from "d3-geo";
-import type {
-	Feature,
-	FeatureCollection,
-	GeoJSON,
-	Geometry,
-	Position,
-} from "geojson";
+import type { Feature, FeatureCollection, Geometry } from "geojson";
 import type {
 	GeoJSONSource,
 	MapLayerMouseEvent,
@@ -30,6 +24,7 @@ import {
 	getStoredBasemap,
 	styleForBasemap,
 } from "$lib/map/basemaps";
+import { computeBbox } from "$lib/map/bbox";
 import { parseHashCoords, writeHashCoords } from "$lib/map/mapHash";
 import { hasWebGL } from "$lib/map/webgl";
 import { areaError, areas, reportError, reports } from "$lib/store";
@@ -107,56 +102,6 @@ const buildFeatureCollection = (
 		}
 	}
 	return { type: "FeatureCollection", features };
-};
-
-// Inlined to avoid pulling @turf/bbox into the bundle just for this. Shares
-// the same shape as AreaMap's bbox walker; lift to $lib if a third consumer
-// appears.
-const computeBbox = (g: GeoJSON): [number, number, number, number] | null => {
-	let minX = Number.POSITIVE_INFINITY;
-	let minY = Number.POSITIVE_INFINITY;
-	let maxX = Number.NEGATIVE_INFINITY;
-	let maxY = Number.NEGATIVE_INFINITY;
-	let found = false;
-	const visitPosition = (pos: Position) => {
-		const [x, y] = pos;
-		if (typeof x !== "number" || typeof y !== "number") return;
-		if (x < minX) minX = x;
-		if (y < minY) minY = y;
-		if (x > maxX) maxX = x;
-		if (y > maxY) maxY = y;
-		found = true;
-	};
-	const visitCoords = (coords: unknown) => {
-		if (!Array.isArray(coords)) return;
-		if (coords.length > 0 && typeof coords[0] === "number") {
-			visitPosition(coords as Position);
-			return;
-		}
-		for (const c of coords) visitCoords(c);
-	};
-	const visitGeometry = (geom: Geometry) => {
-		if (geom.type === "GeometryCollection") {
-			for (const sub of geom.geometries) visitGeometry(sub);
-		} else {
-			visitCoords((geom as { coordinates: unknown }).coordinates);
-		}
-	};
-	const visit = (input: GeoJSON) => {
-		if (input.type === "FeatureCollection") {
-			for (const f of (input as FeatureCollection).features) {
-				if (f.geometry) visitGeometry(f.geometry);
-			}
-		} else if (input.type === "Feature") {
-			const f = input as Feature;
-			if (f.geometry) visitGeometry(f.geometry);
-		} else {
-			visitGeometry(input as Geometry);
-		}
-	};
-	visit(g);
-	if (!found) return null;
-	return [minX, minY, maxX, maxY];
 };
 
 // Swap the basemap while keeping the community polygon source + layers live.
