@@ -49,7 +49,8 @@ test.describe('Map Drawer', () => {
 		const timeout = process.env.CI ? 30000 : 10000;
 		await expect(page.getByText('Verify Location')).toBeVisible({ timeout });
 		await expect(page.locator('#boost-button')).toBeVisible();
-		await expect(page.getByText('Comments').first()).toBeVisible();
+		// Desktop heading (the mobile tab bar's "Comments" button is lg:hidden).
+		await expect(page.getByRole('heading', { name: /Comments/ })).toBeVisible();
 	});
 
 	test('drawer shows Comments button with count', async ({ page }) => {
