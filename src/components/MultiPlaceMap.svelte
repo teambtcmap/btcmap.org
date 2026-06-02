@@ -12,6 +12,7 @@ import AreaMerchantDrawer from "$components/area/AreaMerchantDrawer.svelte";
 import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
 import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import { CLUSTERING_DISABLED_ZOOM } from "$lib/constants";
+import { computeBbox } from "$lib/map/bbox";
 import {
 	ensureSprite,
 	installPlaceholderHandler,
@@ -79,26 +80,6 @@ const buildFeatureCollection = (
 		},
 	})),
 });
-
-const computeBboxFromPlaces = (
-	list: SavedPlace[],
-): [number, number, number, number] | null => {
-	let minX = Number.POSITIVE_INFINITY;
-	let minY = Number.POSITIVE_INFINITY;
-	let maxX = Number.NEGATIVE_INFINITY;
-	let maxY = Number.NEGATIVE_INFINITY;
-	let found = false;
-	for (const p of list) {
-		if (typeof p.lat !== "number" || typeof p.lon !== "number") continue;
-		if (p.lon < minX) minX = p.lon;
-		if (p.lat < minY) minY = p.lat;
-		if (p.lon > maxX) maxX = p.lon;
-		if (p.lat > maxY) maxY = p.lat;
-		found = true;
-	}
-	if (!found) return null;
-	return [minX, minY, maxX, maxY];
-};
 
 const addPlacesLayers = (m: MapLibreMap) => {
 	if (!m.getSource("places")) {
@@ -198,7 +179,9 @@ const initializeMapContents = (m: MapLibreMap) => {
 };
 
 const fitToPlaces = (m: MapLibreMap) => {
-	const bbox = computeBboxFromPlaces(places);
+	// computeBbox walks the same Point FeatureCollection we feed the source,
+	// so an empty/invalid list yields null and we fall back to the world view.
+	const bbox = computeBbox(buildFeatureCollection(places));
 	if (bbox) {
 		m.fitBounds(
 			[
