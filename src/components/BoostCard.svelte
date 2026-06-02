@@ -46,6 +46,7 @@ export let onClick: () => void;
 		</div>
 	</div>
 	<button
+		id="boost-button"
 		type="button"
 		on:click={onClick}
 		disabled={loading}

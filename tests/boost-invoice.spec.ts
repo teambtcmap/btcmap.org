@@ -26,7 +26,7 @@ test.describe('Boost Invoice Generation', () => {
 
 		// Wait for merchant data to load completely
 		await expect(page.getByRole('heading', { name: 'Green Town', exact: true })).toBeVisible();
-		await expect(page.getByText('Last Surveyed')).toBeVisible();
+		await expect(page.getByText('Verify Location')).toBeVisible();
 
 		// Wait for boost button to be interactive
 		const boostButton = page.locator('#boost-button');

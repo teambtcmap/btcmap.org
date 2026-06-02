@@ -47,8 +47,8 @@ test.describe('Map Drawer', () => {
 		await expect(page).toHaveURL(/\/merchant\//);
 
 		const timeout = process.env.CI ? 30000 : 10000;
-		await expect(page.getByText('Last Surveyed')).toBeVisible({ timeout });
-		await expect(page.getByRole('heading', { name: 'Boost' })).toBeVisible();
+		await expect(page.getByText('Verify Location')).toBeVisible({ timeout });
+		await expect(page.locator('#boost-button')).toBeVisible();
 		await expect(page.getByText('Comments').first()).toBeVisible();
 	});
 
