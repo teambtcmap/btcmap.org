@@ -174,10 +174,10 @@
 	"merchant": {
 		"tagsNote": "Ulteriori informazioni sui tag di mappatura bitcoin possono essere trovate",
 		"tagsNoteHere": "qui",
-		"details": "Details",
-		"activityShort": "Activity",
-		"taggerTools": "Tagger tools",
-		"links": "Links",
+		"details": "Dettagli",
+		"activityShort": "Attività",
+		"taggerTools": "Strumenti tagger",
+		"links": "Link",
 		"navigate": "Naviga",
 		"edit": "Modifica",
 		"share": "Condividi",
@@ -211,12 +211,10 @@
 		"closed": "Chiuso",
 		"closesAt": "Chiude alle {time}",
 		"opensAt": "Apre alle {time}",
-		"location": "Posizione di {name}",
 		"activity": "Attività di {name}",
 		"communities": "Community di {name}"
 	},
 	"verification": {
-		"lastSurveyed": "Ultimo rilevamento",
 		"verified": "Verificato",
 		"outdated": "Obsoleto",
 		"notSurveyed": "Questa posizione deve essere verificata!",
@@ -242,7 +240,6 @@
 		"thirdPartyRequired": "Richiesta app di terze parti"
 	},
 	"boost": {
-		"title": "Boost",
 		"boosted": "Boostato",
 		"boostAction": "Boost",
 		"extend": "Estendi",
@@ -252,7 +249,6 @@
 		"boostPromo": "Metti in evidenza questo annuncio per farlo apparire per primo nelle ricerche nelle vicinanze",
 		"boostThisPlace": "Boosta questo posto",
 		"extendBoost": "Estendi boost",
-		"isBoosted": "Questa posizione è in evidenza con il Boost!",
 		"improveVisibility": "Applica il Boost a questa posizione per migliorarne la visibilità sulla mappa.",
 		"locations": "Posizioni boostate",
 		"boostLocation": "Boosta questa posizione",
@@ -332,18 +328,13 @@
 		"noActivity": "Nessuna attività da mostrare.",
 		"loadMore": "Carica altri",
 		"viewOnMainMap": "Visualizza sulla mappa principale",
-		"noCommunity": "Questa posizione non fa parte di una community, ma ne può essere {createLink} una per aiutare a mantenere quest'area locale.",
-		"created": "creato",
-		"loadingCommunities": "Caricamento delle community..."
+		"created": "creato"
 	},
 	"comments": {
 		"title": "Commenti",
 		"add": "Aggiungi commento",
 		"adding": "Invio commento...",
-		"none": "Ancora nessun commento.",
-		"beFirst": "Ancora nessun commento. Sii il primo a lasciare un commento!",
-		"view": "Visualizza commenti",
-		"shareThoughts": "Fai sapere agli altri cosa pensi di questo commerciante."
+		"none": "Ancora nessun commento."
 	},
 	"errorPage": {
 		"title": "BTC Map - Errore",

@@ -95,10 +95,10 @@
 	"merchant": {
 		"tagsNote": "Более подробная информация о метках доступна",
 		"tagsNoteHere": "здесь",
-		"details": "Details",
-		"activityShort": "Activity",
-		"taggerTools": "Tagger tools",
-		"links": "Links",
+		"details": "Подробности",
+		"activityShort": "Активность",
+		"taggerTools": "Инструменты тегера",
+		"links": "Ссылки",
 		"navigate": "Проложить маршрут",
 		"edit": "Редактировать",
 		"share": "Поделиться",
@@ -128,12 +128,10 @@
 		"closed": "Закрыто",
 		"closesAt": "Закроется в {time}",
 		"opensAt": "Откроется в {time}",
-		"location": "Местоположение {name}",
 		"activity": "Активность {name}",
 		"communities": "Сообщества {name}"
 	},
 	"verification": {
-		"lastSurveyed": "Последняя проверка",
 		"verified": "Подтверждено",
 		"outdated": "Устарело",
 		"notSurveyed": "Это место нужно проверить!",
@@ -159,13 +157,11 @@
 		"thirdPartyRequired": "Требуется стороннее приложение"
 	},
 	"boost": {
-		"title": "Буст",
 		"boosted": "Пробустовано",
 		"boostAction": "Бустнуть",
 		"extend": "Продлить",
 		"boosting": "Бустим...",
 		"expires": "Буст истекает",
-		"isBoosted": "Буст активен!",
 		"improveVisibility": "Бустните это место, чтобы сделать его более заметным на карте.",
 		"locations": "Места с активным бустом",
 		"boostLocation": "Бустнуть место",
@@ -245,17 +241,12 @@
 		"noActivity": "Нет активности для отображения.",
 		"loadMore": "Загрузить ещё",
 		"viewOnMainMap": "Посмотреть на основной карте",
-		"noCommunity": "Это место не является частью известных нам сообществ, но вы можете {createLink} свое или сообщить нам об уже существующих.",
-		"created": "создать",
-		"loadingCommunities": "Загрузка сообществ..."
+		"created": "создать"
 	},
 	"comments": {
 		"title": "Комментарии",
 		"add": "Добавить комментарий",
-		"none": "Пока нет комментариев.",
-		"beFirst": "Пока нет комментариев. Будьте первым!",
-		"view": "Посмотреть комментарии",
-		"shareThoughts": "Поделитесь своими мыслями об этом месте."
+		"none": "Пока нет комментариев."
 	},
 	"errorPage": {
 		"title": "BTC Map - Ошибка",

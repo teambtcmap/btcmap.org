@@ -175,8 +175,8 @@
 		"tagsNote": "Meer informatie over Bitcoin mapping tags vind je",
 		"tagsNoteHere": "hier",
 		"details": "Details",
-		"activityShort": "Activity",
-		"taggerTools": "Tagger tools",
+		"activityShort": "Activiteit",
+		"taggerTools": "Tagger-tools",
 		"links": "Links",
 		"navigate": "Navigeren",
 		"edit": "Bewerken",
@@ -211,12 +211,10 @@
 		"closed": "Gesloten",
 		"closesAt": "Sluit {time}",
 		"opensAt": "Opent {time}",
-		"location": "{name} Locatie",
 		"activity": "{name} Activiteit",
 		"communities": "{name}-community's"
 	},
 	"verification": {
-		"lastSurveyed": "Laatst gecontroleerd",
 		"verified": "Geverifieerd",
 		"outdated": "Verouderd",
 		"notSurveyed": "Deze locatie moet worden gecontroleerd!",
@@ -242,7 +240,6 @@
 		"thirdPartyRequired": "App van derden vereist"
 	},
 	"boost": {
-		"title": "Boost",
 		"boosted": "Geboost",
 		"boostAction": "Boost",
 		"extend": "Verlengen",
@@ -252,7 +249,6 @@
 		"boostPromo": "Boost deze vermelding om bovenaan te verschijnen bij lokale zoekopdrachten",
 		"boostThisPlace": "Boost deze locatie",
 		"extendBoost": "Boost verlengen",
-		"isBoosted": "Deze locatie is geboost!",
 		"improveVisibility": "Geef deze locatie een boost om de zichtbaarheid op de kaart te verbeteren.",
 		"locations": "Geboostte locaties",
 		"boostLocation": "Boost locatie",
@@ -332,18 +328,13 @@
 		"noActivity": "Geen activiteit om weer te geven.",
 		"loadMore": "Laad meer",
 		"viewOnMainMap": "Toon op hoofdkaart",
-		"noCommunity": "Deze locatie maakt geen deel uit van een community, maar er kan er een worden {createLink} om dit lokale gebied te helpen onderhouden.",
-		"created": "aangemaakt",
-		"loadingCommunities": "Community's laden..."
+		"created": "aangemaakt"
 	},
 	"comments": {
 		"title": "Reacties",
 		"add": "Reactie toevoegen",
 		"adding": "Bezig...",
-		"none": "Er zijn nog geen reacties.",
-		"beFirst": "Er zijn nog geen reacties. Laat als eerste een reactie achter!",
-		"view": "Reacties bekijken",
-		"shareThoughts": "Laat anderen weten wat je van deze ondernemer vindt."
+		"none": "Er zijn nog geen reacties."
 	},
 	"errorPage": {
 		"title": "BTC-kaart - Fout",

@@ -211,12 +211,10 @@
 		"closed": "Closed",
 		"closesAt": "Closes {time}",
 		"opensAt": "Opens {time}",
-		"location": "{name} Location",
 		"activity": "{name} Activity",
 		"communities": "{name} Communities"
 	},
 	"verification": {
-		"lastSurveyed": "Last Surveyed",
 		"verified": "Verified",
 		"outdated": "Outdated",
 		"notSurveyed": "This location needs to be surveyed!",
@@ -242,7 +240,6 @@
 		"thirdPartyRequired": "Third party app required"
 	},
 	"boost": {
-		"title": "Boost",
 		"boosted": "Boosted",
 		"boostAction": "Boost",
 		"extend": "Extend",
@@ -252,7 +249,6 @@
 		"boostPromo": "Boost this listing to appear first in nearby searches",
 		"boostThisPlace": "Boost this place",
 		"extendBoost": "Extend Boost",
-		"isBoosted": "This location is boosted!",
 		"improveVisibility": "Boost this location to improve its visibility on the map.",
 		"locations": "Boosted locations",
 		"boostLocation": "Boost Location",
@@ -332,18 +328,13 @@
 		"noActivity": "No activity to display.",
 		"loadMore": "Load More",
 		"viewOnMainMap": "View on main map",
-		"noCommunity": "This location is not part of a community, but one can be {createLink} to help maintain this local area.",
-		"created": "created",
-		"loadingCommunities": "Loading communities..."
+		"created": "created"
 	},
 	"comments": {
 		"title": "Comments",
 		"add": "Add Comment",
 		"adding": "Commenting...",
-		"none": "No comments yet.",
-		"beFirst": "No comments yet. Be the first to leave a comment!",
-		"view": "View Comments",
-		"shareThoughts": "Let others know your thoughts about this merchant."
+		"none": "No comments yet."
 	},
 	"errorPage": {
 		"title": "BTC Map - Error",
