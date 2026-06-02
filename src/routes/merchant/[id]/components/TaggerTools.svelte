@@ -29,13 +29,18 @@ const chip =
 
 	{#if open}
 		<div class="mt-3 flex flex-wrap gap-2">
-			<button type="button" class={chip} on:click={() => ($showTags = osmTags)}>
+			<button id="show-tags" type="button" class={chip} on:click={() => ($showTags = osmTags)}>
 				<Icon w="16" h="16" icon="sell" type="material" />
 				{$_('merchant.showTags')}
 			</button>
 
 			{#if issues.length}
-				<button type="button" class={chip} on:click={() => ($taggingIssues = issues)}>
+				<button
+					id="tagging-issues"
+					type="button"
+					class={chip}
+					on:click={() => ($taggingIssues = issues)}
+				>
 					<Icon w="16" h="16" icon="warning" type="material" />
 					{$_('merchant.tagIssues')}
 				</button>
