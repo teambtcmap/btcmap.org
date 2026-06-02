@@ -3,22 +3,18 @@ export let data: MerchantPageData;
 
 import { onMount } from "svelte";
 import Time from "svelte-time";
-import tippy from "tippy.js";
 
 import Boost from "$components/Boost.svelte";
 import BoostButton from "$components/BoostButton.svelte";
-import Card from "$components/Card.svelte";
 import CompanionAppPill from "$components/CompanionAppPill.svelte";
 import Icon from "$components/Icon.svelte";
 import PaymentMethodPills from "$components/PaymentMethodPills.svelte";
-import PrimaryButton from "$components/PrimaryButton.svelte";
 import ShowTags from "$components/ShowTags.svelte";
 import TaggingIssues from "$components/TaggingIssues.svelte";
 import { _, getDisplayLang, locale } from "$lib/i18n";
 import { placesById } from "$lib/store";
 import type { MerchantActivityEvent, MerchantPageData } from "$lib/types";
-import { formatVerifiedHuman, isBoosted } from "$lib/utils";
-import { isRecentlyVerified } from "$lib/verification";
+import { isBoosted } from "$lib/utils";
 
 import CommentAddButton from "./components/CommentAddButton.svelte";
 import MerchantActionChips from "./components/MerchantActionChips.svelte";
@@ -26,7 +22,9 @@ import MerchantComment from "./components/MerchantComment.svelte";
 import MerchantDetailsPanel from "./components/MerchantDetailsPanel.svelte";
 import MerchantEvent from "./components/MerchantEvent.svelte";
 import MerchantHero from "./components/MerchantHero.svelte";
+import MerchantOpenStatus from "./components/MerchantOpenStatus.svelte";
 import MerchantTabs from "./components/MerchantTabs.svelte";
+import MerchantVerifyRow from "./components/MerchantVerifyRow.svelte";
 import { browser } from "$app/environment";
 
 // Server data is consumed directly; only the fields the page itself renders
@@ -35,6 +33,7 @@ let icon: string | undefined;
 let address: string | undefined;
 let description: string | undefined;
 let phone: string | undefined;
+let hours: string | undefined;
 let paymentMethod: string | undefined;
 let lat: number;
 let long: number;
@@ -47,6 +46,7 @@ $: icon = data.icon;
 $: address = data.address;
 $: description = data.description;
 $: phone = data.phone;
+$: hours = data.hours;
 $: companionAppUrl =
 	data.osmTags?.["payment:lightning:companion_app_url"] ||
 	data.placeData.required_app_url;
@@ -80,19 +80,6 @@ $: {
 			? mergedPlace.boosted_until
 			: undefined;
 }
-
-let verifiedTooltip: HTMLSpanElement;
-let outdatedTooltip: HTMLSpanElement;
-
-$: verifiedTooltip &&
-	tippy([verifiedTooltip], {
-		content: $_("verification.verifiedTooltip"),
-	});
-
-$: outdatedTooltip &&
-	tippy([outdatedTooltip], {
-		content: $_("verification.outdatedTooltip"),
-	});
 
 let eventCount = 50;
 $: eventsPaginated = merchantEvents.slice(0, eventCount);
@@ -164,6 +151,10 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 				</div>
 			{/if}
 
+			{#if hours}
+				<div><MerchantOpenStatus {hours} {lat} {long} /></div>
+			{/if}
+
 			<MerchantActionChips
 				merchantId={data.id}
 				{lat}
@@ -177,32 +168,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 			{/if}
 
 			<!-- Last surveyed / verify -->
-			<Card headerAlign="center">
-				<h3 slot="header" class="text-2xl font-semibold">{$_('verification.lastSurveyed')}</h3>
-
-				<div slot="body" class="p-4">
-					{#if verifiedAt}
-						<div class="flex items-center justify-center dark:text-white">
-							{#if isRecentlyVerified(verifiedAt)}
-								<span bind:this={verifiedTooltip}>
-									<Icon w="30" h="30" class="mr-2 text-primary dark:text-white" icon="verified" type="material" />
-								</span>
-							{:else}
-								<span bind:this={outdatedTooltip}>
-									<Icon w="30" h="30" class="mr-2 text-primary dark:text-white" icon="error_outline" type="material" />
-								</span>
-							{/if}
-							<strong>{formatVerifiedHuman(verifiedAt)}</strong>
-						</div>
-					{:else}
-						<p class="font-semibold dark:text-white">{$_('verification.notSurveyed')}</p>
-					{/if}
-				</div>
-
-				<PrimaryButton slot="footer" link={`/verify-location?id=${data.id}`} style="rounded-xl p-3 w-40">
-					{$_('verification.verifyLocation')}
-				</PrimaryButton>
-			</Card>
+			<MerchantVerifyRow id={data.id} verifiedAt={verifiedAt} />
 
 			<!-- Boost -->
 			<div
