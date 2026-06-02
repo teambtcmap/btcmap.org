@@ -56,7 +56,7 @@ const headingClass =
 		{/each}
 	</div>
 
-	<section class="pt-5 lg:block" class:hidden={tab !== 'comments'}>
+	<section id="comments" class="pt-5 lg:block" class:hidden={tab !== 'comments'}>
 		<h3 class={headingClass}>
 			{$_('merchant.comments')}{#if commentsCount}&nbsp;({commentsCount}){/if}
 		</h3>
