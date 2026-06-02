@@ -9,14 +9,38 @@ import { resolve } from "$app/paths";
 
 export let data: MerchantPageData;
 
+// payment:uri comes from a free-form OSM tag, so it can contain anything
+// — including a javascript: / data: / vbscript: URL that would execute
+// on click. Only render it when the scheme is on a small allowlist of
+// payment-shaped URIs.
+const SAFE_PAYMENT_SCHEMES = new Set([
+	"http:",
+	"https:",
+	"lightning:",
+	"bitcoin:",
+	"mailto:",
+]);
+
+const safePaymentHref = (raw: string | undefined): string | undefined => {
+	if (!raw) return undefined;
+	try {
+		const parsed = new URL(raw);
+		return SAFE_PAYMENT_SCHEMES.has(parsed.protocol.toLowerCase())
+			? raw
+			: undefined;
+	} catch {
+		return undefined;
+	}
+};
+
 $: payHref =
 	data.payment?.type === "uri"
-		? data.payment.url || "#"
+		? safePaymentHref(data.payment.url)
 		: data.payment?.type === "pouch"
-			? `https://app.pouch.ph/${data.payment.username}`
+			? `https://app.pouch.ph/${encodeURIComponent(data.payment.username)}`
 			: data.payment?.type === "coinos"
-				? `https://coinos.io/${data.payment.username}`
-				: "#";
+				? `https://coinos.io/${encodeURIComponent(data.payment.username)}`
+				: undefined;
 
 $: hasLinks = !!(
 	data.website ||
@@ -24,7 +48,7 @@ $: hasLinks = !!(
 	data.facebook ||
 	data.twitter ||
 	data.email ||
-	data.payment
+	payHref
 );
 
 const labelClass =
