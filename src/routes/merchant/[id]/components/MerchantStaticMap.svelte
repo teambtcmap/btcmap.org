@@ -1,4 +1,6 @@
 <script lang="ts">
+import "maplibre-gl/dist/maplibre-gl.css";
+
 import type { Map as MapLibreMap } from "maplibre-gl";
 import { onDestroy, onMount } from "svelte";
 
@@ -10,7 +12,7 @@ import { browser } from "$app/environment";
 // Lightweight, NON-interactive map preview used as the merchant hero
 // backdrop. Deliberately has no controls, no sprites and no merchant
 // layers — it exists purely to give a sense of place behind the identity
-// overlay. The full interactive map still lives lower on the page.
+// overlay.
 export let lat: number;
 export let long: number;
 let className = "";
@@ -44,7 +46,7 @@ const init = async () => {
 		center: [long, lat],
 		zoom: 15,
 		interactive: false,
-		attributionControl: false,
+		attributionControl: { compact: true },
 	});
 	map.on("style.load", () => {
 		styleLoaded = true;
@@ -65,6 +67,12 @@ $: if (map && styleLoaded && $theme !== lastTheme) {
 		styleLoaded = true;
 	});
 	map.setStyle(styleUrlForTheme($theme));
+}
+
+// Follow the merchant when the coords change (e.g. param-only navigation),
+// since the component instance is reused across /merchant/[id] params.
+$: if (map && typeof lat === "number" && typeof long === "number") {
+	map.setCenter([long, lat]);
 }
 
 onDestroy(() => {
