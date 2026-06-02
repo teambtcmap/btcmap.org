@@ -551,6 +551,8 @@
 		"caseSensitive": "(различава главни/малки букви)"
 	},
 	"merchant": {
+		"tagsNote": "Повече информация за етикетите в",
+		"tagsNoteHere": "тук",
 		"details": "Details",
 		"activityShort": "Activity",
 		"taggerTools": "Tagger tools",

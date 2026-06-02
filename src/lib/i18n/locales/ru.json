@@ -93,6 +93,8 @@
 		"dataRefreshAlt": "Доступно обновление данных"
 	},
 	"merchant": {
+		"tagsNote": "Более подробная информация о метках доступна",
+		"tagsNoteHere": "здесь",
 		"details": "Details",
 		"activityShort": "Activity",
 		"taggerTools": "Tagger tools",

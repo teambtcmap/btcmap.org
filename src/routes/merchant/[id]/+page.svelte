@@ -301,15 +301,6 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 			</MerchantTabs>
 		</div>
 	</div>
-
-	<p class="mt-8 text-sm text-body md:text-left dark:text-white">
-		*More information on bitcoin mapping tags can be found <a
-			href="https://wiki.btcmap.org/Tagging-Merchants#tagging-guidance"
-			target="_blank"
-			rel="noreferrer"
-			class="text-link transition-colors hover:text-hover">here</a
-		>.
-	</p>
 </div>
 
 {#if browser}

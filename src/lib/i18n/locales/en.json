@@ -172,6 +172,8 @@
 		"dataRefreshAlt": "Data refresh available"
 	},
 	"merchant": {
+		"tagsNote": "More information on bitcoin mapping tags can be found",
+		"tagsNoteHere": "here",
 		"details": "Details",
 		"activityShort": "Activity",
 		"taggerTools": "Tagger tools",

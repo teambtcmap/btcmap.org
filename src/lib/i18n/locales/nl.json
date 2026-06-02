@@ -172,6 +172,8 @@
 		"dataRefreshAlt": "Nieuwe gegevens beschikbaar"
 	},
 	"merchant": {
+		"tagsNote": "Meer informatie over Bitcoin mapping tags vind je",
+		"tagsNoteHere": "hier",
 		"details": "Details",
 		"activityShort": "Activity",
 		"taggerTools": "Tagger tools",

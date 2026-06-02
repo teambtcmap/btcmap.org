@@ -172,6 +172,8 @@
 		"dataRefreshAlt": " disponibile"
 	},
 	"merchant": {
+		"tagsNote": "Ulteriori informazioni sui tag di mappatura bitcoin possono essere trovate",
+		"tagsNoteHere": "qui",
 		"details": "Details",
 		"activityShort": "Activity",
 		"taggerTools": "Tagger tools",

@@ -93,6 +93,8 @@
 		"dataRefreshAlt": "Atualização de dados disponível"
 	},
 	"merchant": {
+		"tagsNote": "Mais informações sobre tags de mapeamento bitcoin podem ser encontradas",
+		"tagsNoteHere": "aqui",
 		"details": "Details",
 		"activityShort": "Activity",
 		"taggerTools": "Tagger tools",

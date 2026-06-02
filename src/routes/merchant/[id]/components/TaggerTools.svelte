@@ -48,5 +48,15 @@ const chip =
 				</a>
 			{/if}
 		</div>
+
+		<p class="mt-3 text-xs text-body dark:text-white/60">
+			{$_('merchant.tagsNote')}
+			<a
+				href="https://wiki.btcmap.org/Tagging-Merchants#tagging-guidance"
+				target="_blank"
+				rel="noreferrer"
+				class="text-link transition-colors hover:text-hover">{$_('merchant.tagsNoteHere')}</a
+			>.
+		</p>
 	{/if}
 </div>
