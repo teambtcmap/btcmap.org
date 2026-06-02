@@ -36,9 +36,9 @@ const safePaymentHref = (raw: string | undefined): string | undefined => {
 $: payHref =
 	data.payment?.type === "uri"
 		? safePaymentHref(data.payment.url)
-		: data.payment?.type === "pouch"
+		: data.payment?.type === "pouch" && data.payment.username
 			? `https://app.pouch.ph/${encodeURIComponent(data.payment.username)}`
-			: data.payment?.type === "coinos"
+			: data.payment?.type === "coinos" && data.payment.username
 				? `https://coinos.io/${encodeURIComponent(data.payment.username)}`
 				: undefined;
 
