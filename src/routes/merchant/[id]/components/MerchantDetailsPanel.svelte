@@ -1,5 +1,4 @@
 <script lang="ts">
-import CompanionAppPill from "$components/CompanionAppPill.svelte";
 import Icon from "$components/Icon.svelte";
 import { _ } from "$lib/i18n";
 import type { MerchantPageData } from "$lib/types";
@@ -9,10 +8,6 @@ import TaggerTools from "./TaggerTools.svelte";
 import { resolve } from "$app/paths";
 
 export let data: MerchantPageData;
-
-$: companionAppUrl =
-	data.osmTags?.["payment:lightning:companion_app_url"] ||
-	data.placeData?.required_app_url;
 
 $: payHref =
 	data.payment?.type === "uri"
@@ -29,8 +24,7 @@ $: hasLinks = !!(
 	data.facebook ||
 	data.twitter ||
 	data.email ||
-	data.payment ||
-	companionAppUrl
+	data.payment
 );
 
 const labelClass =
@@ -113,9 +107,6 @@ const withProtocol = (value: string, base: string): string =>
 						{$_('merchant.pay')}
 					</a>
 				{/if}
-				{#if companionAppUrl}
-					<CompanionAppPill url={companionAppUrl} />
-				{/if}
 			</div>
 		</div>
 	{/if}
@@ -123,7 +114,7 @@ const withProtocol = (value: string, base: string): string =>
 	<!-- communities -->
 	{#if data.areas && data.areas.length}
 		<div class="space-y-3">
-			<h4 class={labelClass}>{$_('merchant.communities', { values: { name: '' } }).trim()}</h4>
+			<h4 class={labelClass}>{$_('nav.communities')}</h4>
 			<div class="flex flex-wrap gap-4">
 				{#each data.areas as community (community.id)}
 					<a
@@ -133,6 +124,7 @@ const withProtocol = (value: string, base: string): string =>
 						<img
 							src={areaIconSrc(community.tags['icon:square'])}
 							alt={$_('aria.logoAlt')}
+							loading="lazy"
 							class="h-16 w-16 rounded-full object-cover"
 							on:error={function () {
 								this.src = '/images/bitcoin.svg';
