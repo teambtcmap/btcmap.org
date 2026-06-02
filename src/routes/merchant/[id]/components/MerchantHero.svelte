@@ -4,10 +4,9 @@ import SaveButton from "$components/SaveButton.svelte";
 import { _ } from "$lib/i18n";
 
 import MerchantStaticMap from "./MerchantStaticMap.svelte";
-import { browser } from "$app/environment";
 
-// Compact identity hero: app bar (back · breadcrumb · Save) over a
-// non-interactive map preview with the name/address overlaid on a scrim.
+// Compact identity hero: a non-interactive map preview with Save +
+// "View on main map" overlaid on top and the name/address on a scrim below.
 export let id: string | number;
 export let name: string;
 export let address: string | undefined = undefined;
@@ -17,35 +16,10 @@ export let lat: number;
 export let long: number;
 export let boosted = false;
 export let deleted = false;
-
-const goBack = () => {
-	if (browser && window.history.length > 1) {
-		window.history.back();
-	}
-};
 </script>
 
 <section class="overflow-hidden rounded-3xl border border-gray-300 dark:border-white/95 dark:bg-white/5">
-	<!-- app bar -->
-	<div class="flex items-center gap-2 border-b border-gray-300 px-3 py-2 dark:border-white/20">
-		<button
-			type="button"
-			on:click={goBack}
-			aria-label={$_('aria.back')}
-			class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-primary transition-colors hover:border-link hover:text-link dark:border-white/20 dark:text-white"
-		>
-			<Icon w="18" h="18" icon="chevron_left" type="material" />
-		</button>
-		<span class="min-w-0 flex-1 truncate text-center text-xs text-body dark:text-white/60">
-			btcmap.org / {id}
-		</span>
-		{#if !deleted}
-			<SaveButton id={Number(id)} type="place" class="!mx-0 !w-auto shrink-0 px-3" />
-		{/if}
-	</div>
-
-	<!-- map preview + identity overlay -->
-	<div class="relative h-44">
+	<div class="relative h-52">
 		<MerchantStaticMap {lat} {long} />
 
 		<!-- location marker, centred on the merchant -->
@@ -62,6 +36,12 @@ const goBack = () => {
 				<circle cx="16" cy="15" r="5" fill="#fff" />
 			</svg>
 		</div>
+
+		{#if !deleted}
+			<div class="absolute top-3 left-3 z-10">
+				<SaveButton id={Number(id)} type="place" class="!mx-0 !w-auto shadow-md" />
+			</div>
+		{/if}
 
 		<a
 			href={`/map#18/${lat}/${long}&merchant=${id}`}

@@ -272,7 +272,6 @@
 		"boostLoadError": "Falha ao carregar informações de boost. Tente novamente."
 	},
 	"aria": {
-		"back": "Go back",
 		"logoAlt": "Logo do BTC Map",
 		"avatarAlt": "Avatar",
 		"close": "Fechar",
