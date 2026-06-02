@@ -48,6 +48,21 @@ const goBack = () => {
 	<div class="relative h-44">
 		<MerchantStaticMap {lat} {long} />
 
+		<!-- location marker, centred on the merchant -->
+		<div
+			class="pointer-events-none absolute top-1/2 left-1/2 z-[1] -translate-x-1/2 -translate-y-full drop-shadow-md"
+		>
+			<svg width="30" height="38" viewBox="0 0 32 40" class={deleted ? 'text-gray-500' : boosted ? 'text-bitcoin' : 'text-link'}>
+				<path
+					d="M16 1C8.27 1 2 7.27 2 15c0 9.5 14 24 14 24s14-14.5 14-24C30 7.27 23.73 1 16 1z"
+					fill="currentColor"
+					stroke="#fff"
+					stroke-width="1.5"
+				/>
+				<circle cx="16" cy="15" r="5" fill="#fff" />
+			</svg>
+		</div>
+
 		<a
 			href={`/map#18/${lat}/${long}&merchant=${id}`}
 			class="absolute top-3 right-3 z-10 inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white/90 px-2.5 py-1.5 text-xs font-semibold text-primary shadow-sm backdrop-blur transition-colors hover:text-link dark:border-white/20 dark:bg-black/40 dark:text-white"
