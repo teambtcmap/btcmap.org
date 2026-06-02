@@ -31,12 +31,13 @@ const headingClass =
 
 <div>
 	<!-- tab bar — mobile only -->
-	<div class="flex border-b border-gray-300 lg:hidden dark:border-white/20">
+	<div role="tablist" class="flex border-b border-gray-300 lg:hidden dark:border-white/20">
 		{#each tabs as t (t.key)}
 			<button
 				type="button"
+				role="tab"
 				on:click={() => (tab = t.key)}
-				aria-pressed={tab === t.key}
+				aria-selected={tab === t.key}
 				class="flex flex-1 items-center justify-center gap-1.5 border-b-2 py-3 text-sm font-semibold transition-colors {tab ===
 				t.key
 					? 'border-link text-primary dark:text-white'
