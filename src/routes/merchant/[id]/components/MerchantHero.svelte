@@ -18,7 +18,7 @@ export let boosted = false;
 export let deleted = false;
 </script>
 
-<section class="overflow-hidden rounded-3xl border border-gray-300 dark:border-white/95 dark:bg-white/5">
+<section class="overflow-hidden rounded-3xl border border-gray-300 dark:border-white/20 dark:bg-white/5">
 	<div class="relative h-52">
 		<MerchantStaticMap {lat} {long} />
 
