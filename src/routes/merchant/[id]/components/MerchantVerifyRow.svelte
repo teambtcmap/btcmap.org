@@ -4,6 +4,8 @@ import { _ } from "$lib/i18n";
 import { formatVerifiedHuman } from "$lib/utils";
 import { isRecentlyVerified } from "$lib/verification";
 
+import { resolve } from "$app/paths";
+
 // Survey-date + inline "Verify Location" link, matching the map drawer
 // (MerchantDetailsContent). Neutral styling — the verify link is always
 // present so a user can verify in any state.
@@ -11,7 +13,7 @@ export let id: string | number;
 export let verifiedAt: string | undefined | null = undefined;
 
 $: upToDate = isRecentlyVerified(verifiedAt);
-$: href = `/verify-location?id=${id}`;
+$: href = resolve(`/verify-location?id=${encodeURIComponent(String(id))}`);
 </script>
 
 <div class="flex items-center gap-2">
