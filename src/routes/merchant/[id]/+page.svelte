@@ -33,7 +33,6 @@ let address: string | undefined;
 let description: string | undefined;
 let phone: string | undefined;
 let hours: string | undefined;
-let paymentMethod: string | undefined;
 let lat: number;
 let long: number;
 let merchantEvents: MerchantActivityEvent[] = [];
@@ -49,7 +48,12 @@ $: hours = data.hours;
 $: companionAppUrl =
 	data.osmTags?.["payment:lightning:companion_app_url"] ||
 	data.placeData.required_app_url;
-$: paymentMethod = data.paymentMethod;
+// Only "yes" payment tags render a pill; gate the box on that (not on
+// getPaymentMethod() truthiness, which is also true for payment:*=no).
+$: hasPaymentPill =
+	data.osmTags?.["payment:onchain"] === "yes" ||
+	data.osmTags?.["payment:lightning"] === "yes" ||
+	data.osmTags?.["payment:lightning_contactless"] === "yes";
 $: lat = data.lat;
 $: long = data.lon;
 $: merchantEvents = data.activity;
@@ -149,10 +153,10 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 				deleted={!!deletedAt}
 			/>
 
-			{#if paymentMethod || companionAppUrl}
+			{#if hasPaymentPill || companionAppUrl}
 				<div class="rounded-2xl border border-gray-300 p-4 dark:border-white/20 dark:bg-white/5">
 					<div class="flex flex-wrap items-center gap-2">
-						{#if paymentMethod}
+						{#if hasPaymentPill}
 							<PaymentMethodPills
 								onchain={data.osmTags?.['payment:onchain']}
 								lightning={data.osmTags?.['payment:lightning']}
@@ -215,7 +219,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 				<svelte:fragment slot="activity">
 					{#if merchantEvents && merchantEvents.length}
 						<div class="divide-y divide-gray-200 dark:divide-white/10">
-							{#each eventsPaginated as event (event['created_at'])}
+							{#each eventsPaginated as event (event.id)}
 								<MerchantEvent
 									action={event.type}
 									user_id={event.user_id}
