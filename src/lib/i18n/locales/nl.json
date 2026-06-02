@@ -172,6 +172,10 @@
 		"dataRefreshAlt": "Nieuwe gegevens beschikbaar"
 	},
 	"merchant": {
+		"details": "Details",
+		"activityShort": "Activity",
+		"taggerTools": "Tagger tools",
+		"links": "Links",
 		"navigate": "Navigeren",
 		"edit": "Bewerken",
 		"share": "Delen",
@@ -368,6 +372,7 @@
 		"noLocations": "Geen locaties gevonden, pas de zoekopdracht aan."
 	},
 	"aria": {
+		"back": "Go back",
 		"logoAlt": "BTC Map logo",
 		"avatarAlt": "Avatar",
 		"close": "Sluiten",

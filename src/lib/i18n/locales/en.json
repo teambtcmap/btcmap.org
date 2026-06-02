@@ -172,6 +172,10 @@
 		"dataRefreshAlt": "Data refresh available"
 	},
 	"merchant": {
+		"details": "Details",
+		"activityShort": "Activity",
+		"taggerTools": "Tagger tools",
+		"links": "Links",
 		"navigate": "Navigate",
 		"edit": "Edit",
 		"share": "Share",
@@ -368,6 +372,7 @@
 		"noLocations": "No locations found, please adjust query."
 	},
 	"aria": {
+		"back": "Go back",
 		"logoAlt": "BTC Map logo",
 		"avatarAlt": "Avatar",
 		"close": "Close",

@@ -67,6 +67,7 @@
 		"dataRefreshAlt": "Налични нови данни"
 	},
 	"aria": {
+		"back": "Go back",
 		"logoAlt": "Лого на BTC Map",
 		"avatarAlt": "Аватар",
 		"clearSearch": "Изчисти търсенето",
@@ -551,6 +552,10 @@
 		"caseSensitive": "(различава главни/малки букви)"
 	},
 	"merchant": {
+		"details": "Details",
+		"activityShort": "Activity",
+		"taggerTools": "Tagger tools",
+		"links": "Links",
 		"activity": "Активност на {name}",
 		"address": "Адрес",
 		"call": "Обади се",

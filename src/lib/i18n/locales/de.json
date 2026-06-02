@@ -93,6 +93,10 @@
 		"dataRefreshAlt": "Datenaktualisierung verfügbar"
 	},
 	"merchant": {
+		"details": "Details",
+		"activityShort": "Activity",
+		"taggerTools": "Tagger tools",
+		"links": "Links",
 		"navigate": "Navigieren",
 		"edit": "Bearbeiten",
 		"share": "Teilen",
@@ -280,6 +284,7 @@
 		"noLocations": "Keine Orte gefunden, bitte passe die Suche an."
 	},
 	"aria": {
+		"back": "Go back",
 		"logoAlt": "BTC Map Logo",
 		"avatarAlt": "Avatar",
 		"close": "Schließen",

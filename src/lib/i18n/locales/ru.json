@@ -93,6 +93,10 @@
 		"dataRefreshAlt": "Доступно обновление данных"
 	},
 	"merchant": {
+		"details": "Details",
+		"activityShort": "Activity",
+		"taggerTools": "Tagger tools",
+		"links": "Links",
 		"navigate": "Проложить маршрут",
 		"edit": "Редактировать",
 		"share": "Поделиться",
@@ -280,6 +284,7 @@
 		"noLocations": "Местоположения не найдены, пожалуйста, измените запрос."
 	},
 	"aria": {
+		"back": "Go back",
 		"logoAlt": "Логотип BTC Map",
 		"avatarAlt": "Аватар",
 		"close": "Закрыть",
