@@ -4,8 +4,9 @@ import { onDestroy, onMount } from "svelte";
 import { _, locale } from "$lib/i18n";
 import { getOpenStatus } from "$lib/openingHoursStatus";
 
-// Live open/closed pill, matching the map drawer (MerchantDetailsContent).
-// Reuses the shared, timezone-aware getOpenStatus helper.
+// Shared live open/closed pill, used by the merchant detail page and the map
+// drawer (MerchantDetailsContent). Reuses the timezone-aware getOpenStatus
+// helper and refreshes every 60s so the badge stays accurate.
 export let hours: string | undefined = undefined;
 export let lat: number;
 export let long: number;
@@ -13,7 +14,6 @@ export let long: number;
 $: coords = { lat, lon: long };
 $: openStatus = getOpenStatus(hours, coords);
 
-// Keep the badge accurate without a reload (same cadence as the drawer).
 let timer: ReturnType<typeof setInterval>;
 onMount(() => {
 	timer = setInterval(() => {
@@ -31,7 +31,7 @@ const fmtTime = (d: Date) =>
 
 {#if openStatus}
 	<span
-		class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium {openStatus.isOpen
+		class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {openStatus.isOpen
 			? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
 			: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'}"
 	>

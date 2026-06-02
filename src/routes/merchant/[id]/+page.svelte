@@ -2,17 +2,17 @@
 export let data: MerchantPageData;
 
 import { onMount } from "svelte";
-import Time from "svelte-time";
 
 import Boost from "$components/Boost.svelte";
-import BoostButton from "$components/BoostButton.svelte";
+import BoostCard from "$components/BoostCard.svelte";
 import CompanionAppPill from "$components/CompanionAppPill.svelte";
 import Icon from "$components/Icon.svelte";
+import OpenStatusPill from "$components/OpenStatusPill.svelte";
 import PaymentMethodPills from "$components/PaymentMethodPills.svelte";
 import ShowTags from "$components/ShowTags.svelte";
 import TaggingIssues from "$components/TaggingIssues.svelte";
 import { _, getDisplayLang, locale } from "$lib/i18n";
-import { placesById } from "$lib/store";
+import { boost, placesById, resetBoost } from "$lib/store";
 import type { MerchantActivityEvent, MerchantPageData } from "$lib/types";
 import { isBoosted } from "$lib/utils";
 
@@ -22,7 +22,6 @@ import MerchantComment from "./components/MerchantComment.svelte";
 import MerchantDetailsPanel from "./components/MerchantDetailsPanel.svelte";
 import MerchantEvent from "./components/MerchantEvent.svelte";
 import MerchantHero from "./components/MerchantHero.svelte";
-import MerchantOpenStatus from "./components/MerchantOpenStatus.svelte";
 import MerchantTabs from "./components/MerchantTabs.svelte";
 import MerchantVerifyRow from "./components/MerchantVerifyRow.svelte";
 import { browser } from "$app/environment";
@@ -80,6 +79,22 @@ $: {
 			? mergedPlace.boosted_until
 			: undefined;
 }
+
+// Open the boost modal via the $boost store (same trigger BoostButton uses);
+// $resetBoost clears the loading state when the modal flow finishes.
+let boostLoading = false;
+const resetBoostLoading = () => {
+	boostLoading = false;
+};
+$: $resetBoost && resetBoostLoading();
+const handleBoost = () => {
+	boostLoading = true;
+	$boost = {
+		id: data.placeData.id,
+		name: data.placeData.name || "",
+		boost: boosted || "",
+	};
+};
 
 let eventCount = 50;
 $: eventsPaginated = merchantEvents.slice(0, eventCount);
@@ -152,7 +167,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 			{/if}
 
 			{#if hours}
-				<div><MerchantOpenStatus {hours} {lat} {long} /></div>
+				<div><OpenStatusPill {hours} {lat} {long} /></div>
 			{/if}
 
 			<MerchantActionChips
@@ -171,50 +186,12 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 			<MerchantVerifyRow id={data.id} verifiedAt={verifiedAt} />
 
 			<!-- Boost -->
-			<div
-				class="flex w-full flex-col rounded-3xl border border-amber-200 bg-amber-50/50 dark:border-amber-700/30 dark:bg-amber-900/10"
-			>
-				<div
-					class="flex items-center justify-center gap-2 border-b border-amber-200 p-5 dark:border-amber-700/30"
-				>
-					<Icon
-						w="20"
-						h="20"
-						class="text-amber-800 dark:text-amber-300"
-						icon={boosted ? 'auto_awesome' : 'rocket_launch'}
-						type="material"
-					/>
-					<h3 class="text-2xl font-semibold text-amber-800 dark:text-amber-300">
-						{$_('boost.title')}
-					</h3>
-				</div>
-
-				<div class="flex flex-1 flex-col justify-between gap-4">
-					<div class="flex flex-col items-center gap-4 p-4">
-						<p class="font-semibold text-amber-800 dark:text-amber-300">
-							{boosted ? $_('boost.isBoosted') : $_('boost.getVisibility')}
-						</p>
-						{#if !boosted}
-							<p class="text-sm text-amber-700 dark:text-amber-400/80">
-								{$_('boost.boostPromo')}
-							</p>
-						{/if}
-
-						{#if boosted}
-							<p class="text-amber-700 dark:text-amber-400/80">
-								{$_('boost.expires')}:
-								<span class="font-semibold">
-									<Time live={3000} relative={true} timestamp={boosted} />
-								</span>
-							</p>
-						{/if}
-					</div>
-
-					<div class="flex justify-center pb-4">
-						<BoostButton merchant={data.placeData} {boosted} />
-					</div>
-				</div>
-			</div>
+			<BoostCard
+				boosted={!!boosted}
+				boostedUntil={boosted}
+				loading={boostLoading}
+				onClick={handleBoost}
+			/>
 		</div>
 
 		<!-- content: comments / activity / details -->

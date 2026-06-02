@@ -1,11 +1,12 @@
 <script lang="ts">
 import axios from "axios";
-import { onDestroy, onMount } from "svelte";
-import Time from "svelte-time";
+import { onDestroy } from "svelte";
 
+import BoostCard from "$components/BoostCard.svelte";
 import CompanionAppPill from "$components/CompanionAppPill.svelte";
 import Icon from "$components/Icon.svelte";
 import MerchantComment from "$components/MerchantComment.svelte";
+import OpenStatusPill from "$components/OpenStatusPill.svelte";
 import PaymentMethodPills from "$components/PaymentMethodPills.svelte";
 import SaveButton from "$components/SaveButton.svelte";
 import { trackEvent } from "$lib/analytics";
@@ -15,7 +16,6 @@ import {
 	getIconColorWithFallback,
 } from "$lib/categoryMapping";
 import { _, getDisplayLang, locale } from "$lib/i18n";
-import { getOpenStatus } from "$lib/openingHoursStatus";
 import type { Place } from "$lib/types";
 import { formatVerifiedHuman, sanitizeUrl, shareMerchant } from "$lib/utils";
 
@@ -30,9 +30,6 @@ export let isLoading: boolean = false;
 
 $: displayName =
 	merchant.localized_name?.[getDisplayLang($locale)] || merchant.name;
-
-$: merchantCoords = { lat: merchant.lat, lon: merchant.lon };
-$: openStatus = getOpenStatus(merchant.opening_hours, merchantCoords);
 
 $: companionAppUrl =
 	merchant["osm:payment:lightning:companion_app_url"] ||
@@ -56,15 +53,7 @@ $: osmEditUrl =
 	merchant.osm_url ||
 	`https://www.openstreetmap.org/node/${merchant.id}`;
 
-// Refresh open/closed status every 60s so the badge stays accurate
-let openStatusInterval: ReturnType<typeof setInterval>;
-onMount(() => {
-	openStatusInterval = setInterval(() => {
-		openStatus = getOpenStatus(merchant.opening_hours, merchantCoords);
-	}, 60_000);
-});
 onDestroy(() => {
-	clearInterval(openStatusInterval);
 	clearTimeout(shareTimeout);
 });
 
@@ -172,35 +161,10 @@ async function fetchComments(placeId: number) {
 				<div class="mt-1 h-5 w-1/2 animate-pulse rounded bg-link/50"></div>
 			{/if}
 
-			{#if openStatus}
-				<span
-					class="mt-1 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {openStatus.isOpen
-						? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-						: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'}"
-				>
-					{openStatus.isOpen ? $_('merchant.openNow') : $_('merchant.closed')}
-					{#if openStatus.nextChange}
-						<span class="ml-1"
-							>· {openStatus.isOpen
-								? $_('merchant.closesAt', {
-										values: {
-											time: openStatus.nextChange.toLocaleTimeString($locale || undefined, {
-												hour: 'numeric',
-												minute: '2-digit',
-											}),
-										},
-									})
-								: $_('merchant.opensAt', {
-										values: {
-											time: openStatus.nextChange.toLocaleTimeString($locale || undefined, {
-												hour: 'numeric',
-												minute: '2-digit',
-											}),
-										},
-									})}</span
-						>
-					{/if}
-				</span>
+			{#if merchant.opening_hours}
+				<div class="mt-1">
+					<OpenStatusPill hours={merchant.opening_hours} lat={merchant.lat} long={merchant.lon} />
+				</div>
 			{/if}
 		</div>
 	</div>
@@ -371,80 +335,12 @@ async function fetchComments(placeId: number) {
 		</div>
 	</div>
 
-	<div
-		class="mt-2.5 rounded-xl border border-amber-200 bg-amber-50/50 p-4 dark:border-amber-700/30 dark:bg-amber-900/10"
-	>
-			{#if isBoosted && merchant.boosted_until}
-				<div class="flex items-start gap-3">
-					<div
-						class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30"
-					>
-						<Icon
-							w="20"
-							h="20"
-							class="text-amber-600 dark:text-amber-400"
-							icon="auto_awesome"
-							type="material"
-						/>
-					</div>
-					<div class="min-w-0 flex-1">
-						<p class="text-sm font-semibold text-amber-800 dark:text-amber-300">
-							{$_('boost.boosted')}
-						</p>
-						<p class="mt-0.5 text-xs text-amber-700 dark:text-amber-400/80">
-							{$_('boost.expires')}:
-							<Time live={3000} relative={true} timestamp={merchant.boosted_until} />
-						</p>
-					</div>
-				</div>
-				<button
-					on:click={onBoostClick}
-					disabled={boostLoading}
-					class="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-amber-300 px-3 py-2 text-sm font-medium text-amber-800 transition-colors hover:bg-amber-100 disabled:opacity-50 dark:border-amber-600/40 dark:text-amber-300 dark:hover:bg-amber-900/30"
-				>
-					{#if boostLoading}
-						{$_('boost.boosting')}
-					{:else}
-						<Icon w="16" h="16" class="shrink-0" icon="arrow_circle_up" type="material" />
-						{$_('boost.extendBoost')}
-					{/if}
-				</button>
-			{:else}
-				<div class="flex items-start gap-3">
-					<div
-						class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30"
-					>
-						<Icon
-							w="20"
-							h="20"
-							class="text-amber-600 dark:text-amber-400"
-							icon="rocket_launch"
-							type="material"
-						/>
-					</div>
-					<div class="min-w-0 flex-1">
-						<p class="text-sm font-semibold text-amber-800 dark:text-amber-300">
-							{$_('boost.getVisibility')}
-						</p>
-						<p class="mt-0.5 text-xs text-amber-700 dark:text-amber-400/80">
-							{$_('boost.boostPromo')}
-						</p>
-					</div>
-				</div>
-				<button
-					on:click={onBoostClick}
-					disabled={boostLoading}
-					class="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-amber-500 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-600 disabled:opacity-50 dark:bg-amber-600 dark:hover:bg-amber-500"
-				>
-					{#if boostLoading}
-						{$_('boost.boosting')}
-					{:else}
-						<Icon w="16" h="16" class="shrink-0" icon="rocket_launch" type="material" />
-						{$_('boost.boostThisPlace')}
-					{/if}
-				</button>
-			{/if}
-	</div>
+	<BoostCard
+		boosted={isBoosted}
+		boostedUntil={merchant.boosted_until}
+		loading={boostLoading}
+		onClick={onBoostClick}
+	/>
 
 	<!-- Comments Section -->
 	{#if commentsLoading}
