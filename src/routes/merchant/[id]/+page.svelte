@@ -222,7 +222,6 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 									user_name={event.user_name}
 									user_tip={event.user_tip}
 									time={event['created_at']}
-									latest={event === merchantEvents[0]}
 								/>
 							{/each}
 						</div>
