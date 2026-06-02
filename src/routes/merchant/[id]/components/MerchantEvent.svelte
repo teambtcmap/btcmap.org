@@ -13,7 +13,7 @@ export let user_tip: string | undefined;
 export let time: string;
 </script>
 
-<div class="p-3 text-left text-base">
+<div class="py-3 text-left text-base">
 	<div class="w-full flex-wrap items-center justify-between space-y-2 lg:flex lg:space-y-0">
 		<!-- event information -->
 		<div class="space-y-2 lg:space-y-0">
