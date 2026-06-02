@@ -240,8 +240,7 @@
 		"hours": "Horario",
 		"noActivity": "No hay actividad para mostrar.",
 		"loadMore": "Cargar Más",
-		"viewOnMainMap": "Ver en el mapa principal",
-		"created": "crear"
+		"viewOnMainMap": "Ver en el mapa principal"
 	},
 	"comments": {
 		"title": "Comentarios",
