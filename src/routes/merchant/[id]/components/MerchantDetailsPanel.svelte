@@ -101,7 +101,7 @@ const withProtocol = (value: string, base: string): string =>
 						{$_('merchant.email')}
 					</a>
 				{/if}
-				{#if data.payment}
+				{#if payHref}
 					<a href={payHref} target="_blank" rel="noopener noreferrer" class={chip}>
 						<Icon w="16" h="16" icon="bolt" type="material" />
 						{$_('merchant.pay')}
