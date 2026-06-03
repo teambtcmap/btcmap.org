@@ -82,7 +82,17 @@
 		"failed": "Username o password non validi.",
 		"error": "Qualcosa è andato storto. Riprova.",
 		"noAccount": "Non hai un account?",
-		"createAccount": "Crealo qui"
+		"createAccount": "Crealo qui",
+		"nostrExtension": "Sign in with Nostr extension",
+		"nostrSigning": "Signing…",
+		"nostrFailed": "Nostr signature was rejected",
+		"nostrError": "Could not complete Nostr login",
+		"nsecToggle": "Or paste your nsec",
+		"nsecLabel": "Nostr secret key",
+		"nsecWarning": "Your nsec is sent only to your browser to sign in once — it is never stored or transmitted.",
+		"nsecSubmit": "Sign in with nsec",
+		"nsecInvalid": "That does not look like a valid nsec",
+		"or": "or"
 	},
 	"backup": {
 		"title": "Backup dell'account",

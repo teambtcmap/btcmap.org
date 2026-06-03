@@ -2,6 +2,7 @@
 import { onMount } from "svelte";
 
 import LoginForm from "$components/auth/LoginForm.svelte";
+import NostrLoginForm from "$components/auth/NostrLoginForm.svelte";
 import { _ } from "$lib/i18n";
 import { hydrateSavedFromServer } from "$lib/savedItems";
 import type { Session } from "$lib/session";
@@ -28,6 +29,16 @@ async function handleSuccess(current: Session) {
 		<h1 class="text-center text-3xl font-semibold text-primary dark:text-white">
 			{$_("login.title")}
 		</h1>
+
+		<div class="space-y-3">
+			<NostrLoginForm onSuccess={handleSuccess} />
+		</div>
+
+		<div class="flex items-center gap-3">
+			<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
+			<span class="text-xs text-body dark:text-white/50">{$_("login.or")}</span>
+			<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
+		</div>
 
 		<LoginForm onSuccess={handleSuccess} />
 	</div>

@@ -1074,5 +1074,17 @@
 			"netlifyDocsAnalytics": "Documentation Netlify - Analytics",
 			"netlifyDocsHowAnalytics": "Documentation Netlify - Fonctionnement de l'analytique"
 		}
+	},
+	"login": {
+		"nostrExtension": "Sign in with Nostr extension",
+		"nostrSigning": "Signing…",
+		"nostrFailed": "Nostr signature was rejected",
+		"nostrError": "Could not complete Nostr login",
+		"nsecToggle": "Or paste your nsec",
+		"nsecLabel": "Nostr secret key",
+		"nsecWarning": "Your nsec is sent only to your browser to sign in once — it is never stored or transmitted.",
+		"nsecSubmit": "Sign in with nsec",
+		"nsecInvalid": "That does not look like a valid nsec",
+		"or": "or"
 	}
 }
